@@ -57,7 +57,7 @@ pub use getpath::getpath;
     target_os = "freebsd",
     target_os = "wasi",
 )))]
-pub use makedev::makedev;
+pub use makedev::{major, makedev, minor};
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
 pub use pv::{preadv, pwritev};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
