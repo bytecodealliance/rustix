@@ -1,0 +1,24 @@
+[package]
+name = "posish"
+version = "0.0.0"
+authors = [
+    "Dan Gohman <dev@sunfishcode.online>",
+    "Jakub Konka <kubkon@jakubkonka.com>",
+]
+description = "Safe Rust bindings to POSIX-ish libc APIs"
+documentation = "https://docs.rs/posish"
+license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
+repository = "https://github.com/sunfishcode/posish"
+edition = "2018"
+keywords = ["api", "file", "network"]
+categories = ["filesystem", "network-programming"]
+readme = "README.md"
+
+[dependencies]
+bitflags = "1.2.1"
+cfg-if = "0.1.10"
+errno = "0.2.6"
+libc = { version = "0.2.77", features = ["extra_traits"] }
+
+[badges]
+maintenance = { status = "actively-developed" }
