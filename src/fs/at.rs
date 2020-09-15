@@ -87,7 +87,7 @@ unsafe fn _readlinkat(dirfd: RawFd, path: &CStr) -> io::Result<OsString> {
     Ok(link.into())
 }
 
-/// Implemented `readlinkat` on platforms where we dyamically allocate the buffer instead.
+/// Implemented `readlinkat` on platforms where we dynamically allocate the buffer instead.
 #[cfg(target_os = "wasi")]
 unsafe fn _readlinkat(dirfd: RawFd, path: &CStr) -> io::Result<OsString> {
     // Start with a buffer big enough for the vast majority of paths.

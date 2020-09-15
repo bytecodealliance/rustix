@@ -28,7 +28,7 @@ pub trait Arg {
     /// Return a potentially-lossy rendering of this string as a `Cow<str>`.
     fn to_string_lossy(&self) -> Cow<str>;
 
-    /// Return a view of this string as a maybe-owend [`CStr`].
+    /// Return a view of this string as a maybe-owned [`CStr`].
     ///
     /// [`CStr`]: https://doc.rust-lang.org/std/ffi/struct.CStr.html
     #[cfg(not(windows))]
@@ -38,7 +38,7 @@ pub trait Arg {
     #[cfg(not(windows))]
     fn as_maybe_utf8_bytes(&self) -> &[u8];
 
-    /// Return a view of this string as a maybe-owend [`OsStr`].
+    /// Return a view of this string as a maybe-owned [`OsStr`].
     ///
     /// [`OsStr`]: https://doc.rust-lang.org/std/ffi/struct.OsStr.html
     #[cfg(windows)]
