@@ -243,3 +243,15 @@ bitflags! {
         const TMPFILE = libc::O_TMPFILE;
     }
 }
+
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+bitflags! {
+    /// `CLONE_*` constants.
+    pub struct CloneFlags: libc::c_int {
+        /// `CLONE_NOFOLLOW`
+        const NOFOLLOW = 1;
+
+        /// `CLONE_NOOWNERCOPY`
+        const NOOWNERCOPY = 2;
+    }
+}

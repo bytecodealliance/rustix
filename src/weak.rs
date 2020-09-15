@@ -34,6 +34,7 @@ use std::{
 
 macro_rules! weak {
     (fn $name:ident($($t:ty),*) -> $ret:ty) => (
+        #[allow(non_upper_case_globals)]
         static $name: crate::weak::Weak<unsafe extern fn($($t),*) -> $ret> =
             crate::weak::Weak::new(concat!(stringify!($name), '\0'));
     )
@@ -80,14 +81,12 @@ unsafe fn fetch(name: &str) -> usize {
 macro_rules! syscall {
     (fn $name:ident($($arg_name:ident: $t:ty),*) -> $ret:ty) => (
         unsafe fn $name($($arg_name: $t),*) -> $ret {
-            use super::os;
-
             weak! { fn $name($($t),*) -> $ret }
 
             if let Some(fun) = $name.get() {
                 fun($($arg_name),*)
             } else {
-                os::set_errno(libc::ENOSYS);
+                errno::set_errno(errno::Errno(libc::ENOSYS));
                 -1
             }
         }
@@ -106,6 +105,21 @@ macro_rules! syscall {
                 concat_idents!(SYS_, $name),
                 $($arg_name as c_long),*
             ) as $ret
+        }
+    )
+}
+
+macro_rules! weakcall {
+    (fn $name:ident($($arg_name:ident: $t:ty),*) -> $ret:ty) => (
+        unsafe fn $name($($arg_name: $t),*) -> $ret {
+            weak! { fn $name($($t),*) -> $ret }
+
+            if let Some(fun) = $name.get() {
+                fun($($arg_name),*)
+            } else {
+                errno::set_errno(errno::Errno(libc::ENOSYS));
+                -1
+            }
         }
     )
 }

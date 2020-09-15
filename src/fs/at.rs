@@ -1,5 +1,7 @@
 //! POSIX-style `*at` functions.
 
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+use crate::fs::CloneFlags;
 use crate::{
     fs::{Access, AtFlags, LibcStat, Mode, OFlags, PathArg},
     negone_err, zero_ok,
@@ -345,4 +347,38 @@ unsafe fn _chmodat(dirfd: RawFd, path: &CStr, mode: Mode) -> io::Result<()> {
         path.as_ptr(),
         mode.bits(),
     ))
+}
+
+/// `fclonefileat(src, dst_dir, dst, flags)`
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[inline]
+pub fn fclonefileat<Fd: AsRawFd, DstFd: AsRawFd, P: PathArg>(
+    src: &Fd,
+    dst_dir: &DstFd,
+    dst: P,
+    flags: CloneFlags,
+) -> io::Result<()> {
+    let srcfd = src.as_raw_fd();
+    let dst_dirfd = dst_dir.as_raw_fd();
+    let dst = dst.as_cstr()?;
+    unsafe { _fclonefileat(srcfd, dst_dirfd, &dst, flags) }
+}
+
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+unsafe fn _fclonefileat(
+    srcfd: libc::c_int,
+    dst_dirfd: libc::c_int,
+    dst: &CStr,
+    flags: CloneFlags,
+) -> io::Result<()> {
+    syscall! {
+        fn fclonefileat(
+            srcfd: libc::c_int,
+            dst_dirfd: libc::c_int,
+            dst: *const libc::c_char,
+            flags: libc::c_int
+        ) -> libc::c_int
+    }
+
+    zero_ok(fclonefileat(srcfd, dst_dirfd, dst.as_ptr(), flags.bits()))
 }

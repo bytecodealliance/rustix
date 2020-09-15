@@ -28,11 +28,15 @@ mod rdadvise;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 mod statx;
 
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+pub use at::fclonefileat;
 pub use at::{
     accessat, linkat, mkdirat, openat, readlinkat, renameat, statat, symlinkat, unlinkat, utimensat,
 };
 #[cfg(not(target_os = "wasi"))]
 pub use at::{chmodat, cwd};
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+pub use constants::CloneFlags;
 pub use constants::{Access, AtFlags, FdFlags, Mode, OFlags};
 pub use dir::{Dir, Entry, SeekLoc};
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "netbsd")))]

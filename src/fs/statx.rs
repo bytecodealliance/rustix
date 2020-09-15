@@ -72,29 +72,13 @@ pub fn statx<P: PathArg, Fd: AsRawFd>(
     unsafe { _statx(dirfd, &path, flags, mask) }
 }
 
-macro_rules! syscall {
-    (fn $name:ident($($arg_name:ident: $t:ty),*) -> $ret:ty) => (
-        unsafe fn $name($($arg_name: $t),*) -> $ret {
-            weak! { fn $name($($t),*) -> $ret }
-
-            if let Some(fun) = $name.get() {
-                fun($($arg_name),*)
-            } else {
-                errno::set_errno(errno::Errno(libc::ENOSYS));
-                -1
-            }
-        }
-    )
-}
-
-#[allow(non_upper_case_globals)]
 unsafe fn _statx(
     dirfd: RawFd,
     path: &CStr,
     flags: AtFlags,
     mask: StatxFlags,
 ) -> io::Result<LibcStatx> {
-    syscall! {
+    weakcall! {
         fn statx(
             dirfd: libc::c_int,
             path: *const libc::c_char,
