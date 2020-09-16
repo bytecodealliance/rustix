@@ -150,6 +150,7 @@ bitflags! {
                 if #[cfg(any(target_os = "android",
                              target_os = "emscripten",
                              target_os = "fuchsia",
+                             target_os = "illumos",
                              target_os = "ios",
                              target_os = "linux",
                              target_os = "macos",
