@@ -255,3 +255,41 @@ bitflags! {
         const NOOWNERCOPY = 2;
     }
 }
+
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+mod copyfile {
+    pub(super) const ACL: u32 = 1 << 0;
+    pub(super) const STAT: u32 = 1 << 1;
+    pub(super) const XATTR: u32 = 1 << 2;
+    pub(super) const DATA: u32 = 1 << 3;
+    pub(super) const SECURITY: u32 = STAT | ACL;
+    pub(super) const METADATA: u32 = SECURITY | XATTR;
+    pub(super) const ALL: u32 = METADATA | DATA;
+}
+
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+bitflags! {
+    /// `COPYFILE_*` constants.
+    pub struct CopyfileFlags: libc::c_uint {
+        /// `COPYFILE_ACL`
+        const ACL = copyfile::ACL;
+
+        /// `COPYFILE_STAT`
+        const STAT = copyfile::STAT;
+
+        /// `COPYFILE_XATTR`
+        const XATTR = copyfile::XATTR;
+
+        /// `COPYFILE_DATA`
+        const DATA = copyfile::DATA;
+
+        /// `COPYFILE_SECURITY`
+        const SECURITY = copyfile::SECURITY;
+
+        /// `COPYFILE_METADATA`
+        const METADATA = copyfile::METADATA;
+
+        /// `COPYFILE_ALL`
+        const ALL = copyfile::ALL;
+    }
+}

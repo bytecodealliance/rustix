@@ -84,9 +84,21 @@ fn negone_err<T: LibcResult>(t: T) -> std::io::Result<T> {
     }
 }
 
+/// Given a `libc` return value, translate a negative value into an `Err` with
+/// the error from `errno`, and any other value to an `Ok` containing the value.
+#[allow(dead_code)]
+fn negative_err<T: LibcResult>(t: T) -> std::io::Result<()> {
+    if t.is_negative() {
+        Err(std::io::Error::last_os_error())
+    } else {
+        Ok(())
+    }
+}
+
 trait LibcResult {
     fn is_zero(&self) -> bool;
     fn is_negone(&self) -> bool;
+    fn is_negative(&self) -> bool;
 }
 
 macro_rules! is_impls {
@@ -97,6 +109,10 @@ macro_rules! is_impls {
 
         fn is_negone(&self) -> bool {
             *self == -1
+        }
+
+        fn is_negative(&self) -> bool {
+            *self < 0
         }
     })*)
 }

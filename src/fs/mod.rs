@@ -8,6 +8,8 @@ mod dir;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "netbsd")))]
 mod fadvise;
 mod fcntl;
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+mod fcopyfile;
 mod fd;
 mod file_type;
 #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -34,13 +36,18 @@ pub use at::{
 };
 #[cfg(not(target_os = "wasi"))]
 pub use at::{chmodat, cwd};
-#[cfg(any(target_os = "macos", target_os = "ios"))]
-pub use constants::CloneFlags;
 pub use constants::{Access, AtFlags, FdFlags, Mode, OFlags};
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+pub use constants::{CloneFlags, CopyfileFlags};
 pub use dir::{Dir, Entry, SeekLoc};
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "netbsd")))]
 pub use fadvise::{fadvise, Advice};
 pub use fcntl::{getfd, getfl, setfd, setfl};
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+pub use fcopyfile::{
+    copyfile_state_alloc, copyfile_state_free, copyfile_state_get_copied, copyfile_state_t,
+    fcopyfile,
+};
 #[cfg(not(target_os = "wasi"))]
 pub use fd::fchmod;
 #[cfg(not(any(target_os = "netbsd", target_os = "wasi")))]
