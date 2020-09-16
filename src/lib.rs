@@ -60,6 +60,7 @@ pub mod fs;
 pub mod io;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't support `net` yet.
 pub mod net;
+pub mod path;
 pub mod process;
 pub mod time;
 

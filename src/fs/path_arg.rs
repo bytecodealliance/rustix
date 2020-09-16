@@ -1,3 +1,4 @@
+use crate::path::DecInt;
 #[cfg(target_os = "hermit")]
 use std::os::hermit::ext::ffi::OsStrExt;
 #[cfg(unix)]
@@ -433,6 +434,34 @@ impl PathArg for Vec<u8> {
     #[inline]
     fn as_utf8_bytes(&self) -> &[u8] {
         self
+    }
+
+    #[cfg(windows)]
+    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
+        self.as_ref()
+    }
+}
+
+impl PathArg for DecInt {
+    #[inline]
+    fn as_str(&self) -> io::Result<&str> {
+        self.as_os_str().to_str().ok_or_else(utf8_error)
+    }
+
+    fn to_string_lossy(&self) -> Cow<str> {
+        Path::to_string_lossy(self)
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+        Ok(Cow::Owned(CString::new(self.as_os_str().as_bytes())?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_utf8_bytes(&self) -> &[u8] {
+        self.as_os_str().as_bytes()
     }
 
     #[cfg(windows)]
