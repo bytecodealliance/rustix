@@ -3,8 +3,8 @@
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 use crate::fs::CloneFlags;
 use crate::{
-    fs::{Access, AtFlags, LibcStat, Mode, OFlags, PathArg},
-    negone_err, zero_ok,
+    fs::{Access, AtFlags, LibcStat, Mode, OFlags},
+    negone_err, path, zero_ok,
 };
 #[cfg(not(any(target_os = "linux", target_os = "emscripten", target_os = "l4re")))]
 use libc::{fstatat as libc_fstatat, openat as libc_openat};
@@ -40,7 +40,7 @@ pub fn cwd() -> ManuallyDrop<fs::File> {
 
 /// `openat(dirfd, path, oflags, mode)`
 #[inline]
-pub fn openat<P: PathArg, Fd: AsRawFd>(
+pub fn openat<P: path::Arg, Fd: AsRawFd>(
     dirfd: &Fd,
     path: P,
     oflags: OFlags,
@@ -65,7 +65,7 @@ unsafe fn _openat(dirfd: RawFd, path: &CStr, oflags: OFlags, mode: Mode) -> io::
 
 /// `readlinkat(fd, path)`
 #[inline]
-pub fn readlinkat<P: PathArg, Fd: AsRawFd>(dirfd: &Fd, path: P) -> io::Result<OsString> {
+pub fn readlinkat<P: path::Arg, Fd: AsRawFd>(dirfd: &Fd, path: P) -> io::Result<OsString> {
     let dirfd = dirfd.as_raw_fd();
     let path = path.as_cstr()?;
     unsafe { _readlinkat(dirfd, &path) }
@@ -116,7 +116,7 @@ unsafe fn _readlinkat(dirfd: RawFd, path: &CStr) -> io::Result<OsString> {
 
 /// `mkdirat(fd, path, mode)`
 #[inline]
-pub fn mkdirat<P: PathArg, Fd: AsRawFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
+pub fn mkdirat<P: path::Arg, Fd: AsRawFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
     let dirfd = dirfd.as_raw_fd();
     let path = path.as_cstr()?;
     unsafe { _mkdirat(dirfd, &path, mode) }
@@ -132,7 +132,7 @@ unsafe fn _mkdirat(dirfd: RawFd, path: &CStr, mode: Mode) -> io::Result<()> {
 
 /// `linkat(old_dirfd, old_path, new_dirfd, new_path, flags)`
 #[inline]
-pub fn linkat<P: PathArg, Q: PathArg, PFd: AsRawFd, QFd: AsRawFd>(
+pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsRawFd, QFd: AsRawFd>(
     old_dirfd: &PFd,
     old_path: P,
     new_dirfd: &QFd,
@@ -164,7 +164,7 @@ unsafe fn _linkat(
 
 /// `unlinkat(fd, path, flags)`
 #[inline]
-pub fn unlinkat<P: PathArg, Fd: AsRawFd>(dirfd: &Fd, path: P, flags: AtFlags) -> io::Result<()> {
+pub fn unlinkat<P: path::Arg, Fd: AsRawFd>(dirfd: &Fd, path: P, flags: AtFlags) -> io::Result<()> {
     let dirfd = dirfd.as_raw_fd();
     let path = path.as_cstr()?;
     unsafe { _unlinkat(dirfd, &path, flags) }
@@ -180,7 +180,7 @@ unsafe fn _unlinkat(dirfd: RawFd, path: &CStr, flags: AtFlags) -> io::Result<()>
 
 /// `renameat(old_dirfd, old_path, new_dirfd, new_path)`
 #[inline]
-pub fn renameat<P: PathArg, Q: PathArg, PFd: AsRawFd, QFd: AsRawFd>(
+pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsRawFd, QFd: AsRawFd>(
     old_dirfd: &PFd,
     old_path: P,
     new_dirfd: &QFd,
@@ -209,7 +209,7 @@ unsafe fn _renameat(
 
 /// `symlinkat(old_dirfd, old_path, new_dirfd, new_path)`
 #[inline]
-pub fn symlinkat<P: PathArg, Q: PathArg, Fd: AsRawFd>(
+pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsRawFd>(
     old_path: P,
     new_dirfd: &Fd,
     new_path: Q,
@@ -230,7 +230,7 @@ unsafe fn _symlinkat(old_path: &CStr, new_dirfd: RawFd, new_path: &CStr) -> io::
 
 /// `fstatat(dirfd, path, flags)`
 #[inline]
-pub fn statat<P: PathArg, Fd: AsRawFd>(
+pub fn statat<P: path::Arg, Fd: AsRawFd>(
     dirfd: &Fd,
     path: P,
     flags: AtFlags,
@@ -253,7 +253,7 @@ unsafe fn _statat(dirfd: RawFd, path: &CStr, flags: AtFlags) -> io::Result<LibcS
 
 /// `faccessat(dirfd, path, access, flags)`
 #[inline]
-pub fn accessat<P: PathArg, Fd: AsRawFd>(
+pub fn accessat<P: path::Arg, Fd: AsRawFd>(
     dirfd: &Fd,
     path: P,
     access: Access,
@@ -287,7 +287,7 @@ unsafe fn _accessat(
 }
 
 /// `utimensat(dirfd, path, times, flags)`
-pub fn utimensat<P: PathArg, Fd: AsRawFd>(
+pub fn utimensat<P: path::Arg, Fd: AsRawFd>(
     dirfd: &Fd,
     path: P,
     times: &[libc::timespec; 2],
@@ -322,7 +322,7 @@ unsafe fn _utimensat(
 /// Note that this implementation does not support `O_PATH` file descriptors,
 /// even on platforms where the host libc emulates it.
 #[cfg(not(target_os = "wasi"))]
-pub fn chmodat<P: PathArg, Fd: AsRawFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
+pub fn chmodat<P: path::Arg, Fd: AsRawFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
     let dirfd = dirfd.as_raw_fd();
     let path = path.as_cstr()?;
     unsafe { _chmodat(dirfd, &path, mode) }
@@ -352,7 +352,7 @@ unsafe fn _chmodat(dirfd: RawFd, path: &CStr, mode: Mode) -> io::Result<()> {
 /// `fclonefileat(src, dst_dir, dst, flags)`
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 #[inline]
-pub fn fclonefileat<Fd: AsRawFd, DstFd: AsRawFd, P: PathArg>(
+pub fn fclonefileat<Fd: AsRawFd, DstFd: AsRawFd, P: path::Arg>(
     src: &Fd,
     dst_dir: &DstFd,
     dst: P,

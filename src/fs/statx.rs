@@ -1,8 +1,8 @@
 //! Linux `statx`.
 
 use crate::{
-    fs::{AtFlags, LibcStatx, PathArg},
-    zero_ok,
+    fs::{AtFlags, LibcStatx},
+    path, zero_ok,
 };
 use bitflags::bitflags;
 #[cfg(unix)]
@@ -61,7 +61,7 @@ bitflags! {
 /// `statx(dirfd, path, flags, mask, statxbuf)`. Note that this isn't available
 /// on older Linux; returns `ENOSYS` in that case.
 #[inline]
-pub fn statx<P: PathArg, Fd: AsRawFd>(
+pub fn statx<P: path::Arg, Fd: AsRawFd>(
     dirfd: &Fd,
     path: P,
     flags: AtFlags,

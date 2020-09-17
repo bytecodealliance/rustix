@@ -22,7 +22,7 @@ use std::{
 ///
 /// [`AsRef`]: https://doc.rust-lang.org/std/convert/trait.AsRef.html
 /// [`Path`]: https://doc.rust-lang.org/std/path/struct.Path.html
-pub trait PathArg {
+pub trait Arg {
     /// Return a view of this string as a string slice.
     fn as_str(&self) -> io::Result<&str>;
 
@@ -46,7 +46,7 @@ pub trait PathArg {
     fn as_os_str(&self) -> io::Result<Cow<OsStr>>;
 }
 
-impl PathArg for &str {
+impl Arg for &str {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         Ok(self)
@@ -74,7 +74,7 @@ impl PathArg for &str {
     }
 }
 
-impl PathArg for String {
+impl Arg for String {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         Ok(self)
@@ -102,7 +102,7 @@ impl PathArg for String {
     }
 }
 
-impl PathArg for &OsStr {
+impl Arg for &OsStr {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.to_str().ok_or_else(utf8_error)
@@ -130,7 +130,7 @@ impl PathArg for &OsStr {
     }
 }
 
-impl PathArg for OsString {
+impl Arg for OsString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.as_os_str().to_str().ok_or_else(utf8_error)
@@ -158,7 +158,7 @@ impl PathArg for OsString {
     }
 }
 
-impl PathArg for &Path {
+impl Arg for &Path {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.as_os_str().to_str().ok_or_else(utf8_error)
@@ -186,7 +186,7 @@ impl PathArg for &Path {
     }
 }
 
-impl PathArg for PathBuf {
+impl Arg for PathBuf {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.as_os_str().to_str().ok_or_else(utf8_error)
@@ -214,7 +214,7 @@ impl PathArg for PathBuf {
     }
 }
 
-impl PathArg for &CStr {
+impl Arg for &CStr {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.to_str().map_err(|_| utf8_error())
@@ -242,7 +242,7 @@ impl PathArg for &CStr {
     }
 }
 
-impl PathArg for CString {
+impl Arg for CString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.as_c_str().to_str().map_err(|_| utf8_error())
@@ -270,7 +270,7 @@ impl PathArg for CString {
     }
 }
 
-impl<'a> PathArg for Cow<'a, OsStr> {
+impl<'a> Arg for Cow<'a, OsStr> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.deref().to_str().ok_or_else(utf8_error)
@@ -298,7 +298,7 @@ impl<'a> PathArg for Cow<'a, OsStr> {
     }
 }
 
-impl<'a> PathArg for Component<'a> {
+impl<'a> Arg for Component<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.as_os_str().to_str().ok_or_else(utf8_error)
@@ -326,7 +326,7 @@ impl<'a> PathArg for Component<'a> {
     }
 }
 
-impl<'a> PathArg for Components<'a> {
+impl<'a> Arg for Components<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.as_path().to_str().ok_or_else(utf8_error)
@@ -356,7 +356,7 @@ impl<'a> PathArg for Components<'a> {
     }
 }
 
-impl<'a> PathArg for Iter<'a> {
+impl<'a> Arg for Iter<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.as_path().to_str().ok_or_else(utf8_error)
@@ -386,7 +386,7 @@ impl<'a> PathArg for Iter<'a> {
     }
 }
 
-impl PathArg for &[u8] {
+impl Arg for &[u8] {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         str::from_utf8(self).map_err(|_| utf8_error())
@@ -414,7 +414,7 @@ impl PathArg for &[u8] {
     }
 }
 
-impl PathArg for Vec<u8> {
+impl Arg for Vec<u8> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         str::from_utf8(self).map_err(|_| utf8_error())
@@ -442,7 +442,7 @@ impl PathArg for Vec<u8> {
     }
 }
 
-impl PathArg for DecInt {
+impl Arg for DecInt {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.as_os_str().to_str().ok_or_else(utf8_error)

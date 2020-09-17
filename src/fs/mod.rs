@@ -19,7 +19,6 @@ mod getpath;
     target_os = "freebsd"
 )))]
 mod makedev;
-mod path_arg;
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
 // Most Modern OS's have `preadv`/`pwritev`.
 mod pv;
@@ -59,7 +58,6 @@ pub use getpath::getpath;
     target_os = "wasi",
 )))]
 pub use makedev::makedev;
-pub use path_arg::PathArg;
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
 pub use pv::{preadv, pwritev};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
