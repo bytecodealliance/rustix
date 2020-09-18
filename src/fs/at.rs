@@ -10,9 +10,11 @@ use crate::{
 use libc::{fstatat as libc_fstatat, openat as libc_openat};
 #[cfg(any(target_os = "linux", target_os = "emscripten", target_os = "l4re"))]
 use libc::{fstatat64 as libc_fstatat, openat64 as libc_openat};
+#[cfg(not(target_os = "wasi"))]
+use std::mem::ManuallyDrop;
 #[cfg(unix)]
 use std::os::unix::{
-    ffi::OsStrExt,
+    ffi::OsStringExt,
     io::{AsRawFd, FromRawFd, RawFd},
 };
 #[cfg(target_os = "wasi")]
@@ -26,8 +28,6 @@ use std::{
     fs, io,
     mem::MaybeUninit,
 };
-#[cfg(not(target_os = "wasi"))]
-use std::{ffi::OsStr, mem::ManuallyDrop};
 
 /// Return a "file" which holds a handle which refers to the process current
 /// directory (`AT_FDCWD`). It is a `ManuallyDrop`, however the caller should
@@ -64,52 +64,44 @@ unsafe fn _openat(dirfd: RawFd, path: &CStr, oflags: OFlags, mode: Mode) -> io::
 }
 
 /// `readlinkat(fd, path)`
+///
+/// If `reuse` is non-empty, reuse its buffer to store the result if possible.
 #[inline]
-pub fn readlinkat<P: path::Arg, Fd: AsRawFd>(dirfd: &Fd, path: P) -> io::Result<OsString> {
+pub fn readlinkat<P: path::Arg, Fd: AsRawFd>(
+    dirfd: &Fd,
+    path: P,
+    reuse: OsString,
+) -> io::Result<OsString> {
     let dirfd = dirfd.as_raw_fd();
     let path = path.as_c_str()?;
-    unsafe { _readlinkat(dirfd, &path) }
+    unsafe { _readlinkat(dirfd, &path, reuse) }
 }
 
-/// Implement `readlinkat` on platforms which have `PATH_MAX` that we can rely on.
-#[cfg(not(target_os = "wasi"))]
-unsafe fn _readlinkat(dirfd: RawFd, path: &CStr) -> io::Result<OsString> {
-    let buffer = &mut [0_u8; libc::PATH_MAX as usize + 1];
-    let nread = negone_err(libc::readlinkat(
-        dirfd,
-        path.as_ptr(),
-        buffer.as_mut_ptr() as *mut libc::c_char,
-        buffer.len(),
-    ))?;
+unsafe fn _readlinkat(dirfd: RawFd, path: &CStr, reuse: OsString) -> io::Result<OsString> {
+    let mut buffer = reuse.into_vec();
 
-    let nread = nread.try_into().unwrap();
-    let link = OsStr::from_bytes(&buffer[0..nread]);
-    Ok(link.into())
-}
-
-/// Implemented `readlinkat` on platforms where we dynamically allocate the buffer instead.
-#[cfg(target_os = "wasi")]
-unsafe fn _readlinkat(dirfd: RawFd, path: &CStr) -> io::Result<OsString> {
     // Start with a buffer big enough for the vast majority of paths.
-    let mut buffer = Vec::with_capacity(256);
+    // This and the `reserve` below would be a good candidate for `try_reserve`.
+    // https://github.com/rust-lang/rust/issues/48043
+    buffer.clear();
+    buffer.reserve(256);
+
     loop {
-        let nread = negone_err(unsafe {
-            libc::readlinkat(
-                dirfd as libc::c_int,
-                path.as_ptr(),
-                buffer.as_mut_ptr() as *mut libc::c_char,
-                buffer.capacity(),
-            )
-        })?;
+        let nread = negone_err(libc::readlinkat(
+            dirfd as libc::c_int,
+            path.as_ptr(),
+            buffer.as_mut_ptr() as *mut libc::c_char,
+            buffer.capacity(),
+        ))?;
 
         let nread = nread.try_into().unwrap();
+        assert!(nread <= buffer.capacity());
         buffer.set_len(nread);
         if nread < buffer.capacity() {
             return Ok(OsString::from_vec(buffer));
         }
 
-        // This would be a good candidate for `try_reserve`.
-        // https://github.com/rust-lang/rust/issues/48043
+        // Use `Vec`'s builtin capacity-doubling strategy.
         buffer.reserve(1);
     }
 }
