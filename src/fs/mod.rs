@@ -23,6 +23,8 @@ mod getpath;
     target_os = "freebsd"
 )))]
 mod makedev;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+mod openat2;
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
 // Most Modern OS's have `preadv`/`pwritev`.
 mod pv;
@@ -38,6 +40,8 @@ pub use at::{
 };
 #[cfg(not(target_os = "wasi"))]
 pub use at::{chmodat, cwd};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use constants::ResolveFlags;
 pub use constants::{Access, AtFlags, FdFlags, Mode, OFlags};
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub use constants::{CloneFlags, CopyfileFlags};
@@ -69,6 +73,8 @@ pub use getpath::getpath;
     target_os = "wasi",
 )))]
 pub use makedev::{major, makedev, minor};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use openat2::openat2;
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
 pub use pv::{preadv, pwritev};
 #[cfg(any(target_os = "ios", target_os = "macos"))]

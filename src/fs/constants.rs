@@ -293,3 +293,15 @@ bitflags! {
         const ALL = copyfile::ALL;
     }
 }
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    /// `RESOLVE_*` constants.
+    pub struct ResolveFlags: u64 {
+        /// `RESOLVE_NO_MAGICLINKS`
+        const NO_MAGICLINKS = 0x02;
+
+        /// `RESOLVE_BENEATH`
+        const BENEATH = 0x08;
+    }
+}
