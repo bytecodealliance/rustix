@@ -4,6 +4,8 @@
 mod android;
 mod at;
 mod constants;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+mod copy_file_range;
 mod dir;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "netbsd")))]
 mod fadvise;
@@ -39,6 +41,8 @@ pub use at::{chmodat, cwd};
 pub use constants::{Access, AtFlags, FdFlags, Mode, OFlags};
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub use constants::{CloneFlags, CopyfileFlags};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use copy_file_range::copy_file_range;
 pub use dir::{Dir, Entry, SeekLoc};
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "netbsd")))]
 pub use fadvise::{fadvise, Advice};
