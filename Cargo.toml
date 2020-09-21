@@ -11,7 +11,7 @@ license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 repository = "https://github.com/sunfishcode/posish"
 edition = "2018"
 keywords = ["api", "file", "network"]
-categories = ["filesystem", "network-programming"]
+categories = ["filesystem", "network-programming", "os::unix-apis"]
 readme = "README.md"
 
 [dependencies]
