@@ -33,7 +33,7 @@ pub fn openat2<Fd: AsRawFd, P: path::Arg>(
     resolve: ResolveFlags,
 ) -> io::Result<fs::File> {
     let dirfd = dirfd.as_raw_fd();
-    let path = path.as_cstr()?;
+    let path = path.as_c_str()?;
     unsafe { _openat2(dirfd, &path, oflags, mode, resolve) }
 }
 

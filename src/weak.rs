@@ -71,7 +71,7 @@ impl<F> Weak<F> {
 
 unsafe fn fetch(name: &str) -> usize {
     let name = match CStr::from_bytes_with_nul(name.as_bytes()) {
-        Ok(cstr) => cstr,
+        Ok(c_str) => c_str,
         Err(..) => return 0,
     };
     libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr()) as usize

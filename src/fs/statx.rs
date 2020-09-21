@@ -68,7 +68,7 @@ pub fn statx<P: path::Arg, Fd: AsRawFd>(
     mask: StatxFlags,
 ) -> io::Result<LibcStatx> {
     let dirfd = dirfd.as_raw_fd();
-    let path = path.as_cstr()?;
+    let path = path.as_c_str()?;
     unsafe { _statx(dirfd, &path, flags, mask) }
 }
 

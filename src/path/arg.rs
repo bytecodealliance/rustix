@@ -32,7 +32,7 @@ pub trait Arg {
     ///
     /// [`CStr`]: https://doc.rust-lang.org/std/ffi/struct.CStr.html
     #[cfg(not(windows))]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>>;
+    fn as_c_str(&self) -> io::Result<Cow<CStr>>;
 
     /// Return a view of this string as a byte slice.
     #[cfg(not(windows))]
@@ -57,7 +57,7 @@ impl Arg for &str {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(CString::new(self.as_bytes())?))
     }
 
@@ -85,7 +85,7 @@ impl Arg for String {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(CString::new(self.as_bytes())?))
     }
 
@@ -113,7 +113,7 @@ impl Arg for &OsStr {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(CString::new(self.as_maybe_utf8_bytes())?))
     }
 
@@ -141,7 +141,7 @@ impl Arg for OsString {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(CString::new(self.as_maybe_utf8_bytes())?))
     }
 
@@ -169,7 +169,7 @@ impl Arg for &Path {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(CString::new(self.as_os_str().as_bytes())?))
     }
 
@@ -197,7 +197,7 @@ impl Arg for PathBuf {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(CString::new(self.as_os_str().as_bytes())?))
     }
 
@@ -225,7 +225,7 @@ impl Arg for &CStr {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Borrowed(self))
     }
 
@@ -253,7 +253,7 @@ impl Arg for CString {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Borrowed(self.as_c_str()))
     }
 
@@ -281,7 +281,7 @@ impl<'a> Arg for Cow<'a, OsStr> {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(CString::new(self.as_bytes())?))
     }
 
@@ -309,7 +309,7 @@ impl<'a> Arg for Component<'a> {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(CString::new(self.as_os_str().as_bytes())?))
     }
 
@@ -337,7 +337,7 @@ impl<'a> Arg for Components<'a> {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(CString::new(
             self.as_path().as_os_str().as_bytes(),
         )?))
@@ -367,7 +367,7 @@ impl<'a> Arg for Iter<'a> {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(CString::new(
             self.as_path().as_os_str().as_bytes(),
         )?))
@@ -397,7 +397,7 @@ impl Arg for &[u8] {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(CString::new(*self)?))
     }
 
@@ -425,7 +425,7 @@ impl Arg for Vec<u8> {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(CString::new(self.clone())?))
     }
 
@@ -453,7 +453,7 @@ impl Arg for DecInt {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_cstr(&self) -> io::Result<Cow<CStr>> {
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(CString::new(self.as_os_str().as_bytes())?))
     }
 

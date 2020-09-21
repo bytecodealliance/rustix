@@ -47,7 +47,7 @@ pub fn openat<P: path::Arg, Fd: AsRawFd>(
     mode: Mode,
 ) -> io::Result<fs::File> {
     let dirfd = dirfd.as_raw_fd();
-    let path = path.as_cstr()?;
+    let path = path.as_c_str()?;
     unsafe { _openat(dirfd, &path, oflags, mode) }
 }
 
@@ -67,7 +67,7 @@ unsafe fn _openat(dirfd: RawFd, path: &CStr, oflags: OFlags, mode: Mode) -> io::
 #[inline]
 pub fn readlinkat<P: path::Arg, Fd: AsRawFd>(dirfd: &Fd, path: P) -> io::Result<OsString> {
     let dirfd = dirfd.as_raw_fd();
-    let path = path.as_cstr()?;
+    let path = path.as_c_str()?;
     unsafe { _readlinkat(dirfd, &path) }
 }
 
@@ -118,7 +118,7 @@ unsafe fn _readlinkat(dirfd: RawFd, path: &CStr) -> io::Result<OsString> {
 #[inline]
 pub fn mkdirat<P: path::Arg, Fd: AsRawFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
     let dirfd = dirfd.as_raw_fd();
-    let path = path.as_cstr()?;
+    let path = path.as_c_str()?;
     unsafe { _mkdirat(dirfd, &path, mode) }
 }
 
@@ -141,8 +141,8 @@ pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsRawFd, QFd: AsRawFd>(
 ) -> io::Result<()> {
     let old_dirfd = old_dirfd.as_raw_fd();
     let new_dirfd = new_dirfd.as_raw_fd();
-    let old_path = old_path.as_cstr()?;
-    let new_path = new_path.as_cstr()?;
+    let old_path = old_path.as_c_str()?;
+    let new_path = new_path.as_c_str()?;
     unsafe { _linkat(old_dirfd, &old_path, new_dirfd, &new_path, flags) }
 }
 
@@ -166,7 +166,7 @@ unsafe fn _linkat(
 #[inline]
 pub fn unlinkat<P: path::Arg, Fd: AsRawFd>(dirfd: &Fd, path: P, flags: AtFlags) -> io::Result<()> {
     let dirfd = dirfd.as_raw_fd();
-    let path = path.as_cstr()?;
+    let path = path.as_c_str()?;
     unsafe { _unlinkat(dirfd, &path, flags) }
 }
 
@@ -188,8 +188,8 @@ pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsRawFd, QFd: AsRawFd>(
 ) -> io::Result<()> {
     let old_dirfd = old_dirfd.as_raw_fd();
     let new_dirfd = new_dirfd.as_raw_fd();
-    let old_path = old_path.as_cstr()?;
-    let new_path = new_path.as_cstr()?;
+    let old_path = old_path.as_c_str()?;
+    let new_path = new_path.as_c_str()?;
     unsafe { _renameat(old_dirfd, &old_path, new_dirfd, &new_path) }
 }
 
@@ -215,8 +215,8 @@ pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsRawFd>(
     new_path: Q,
 ) -> io::Result<()> {
     let new_dirfd = new_dirfd.as_raw_fd();
-    let old_path = old_path.as_cstr()?;
-    let new_path = new_path.as_cstr()?;
+    let old_path = old_path.as_c_str()?;
+    let new_path = new_path.as_c_str()?;
     unsafe { _symlinkat(&old_path, new_dirfd, &new_path) }
 }
 
@@ -236,7 +236,7 @@ pub fn statat<P: path::Arg, Fd: AsRawFd>(
     flags: AtFlags,
 ) -> io::Result<LibcStat> {
     let dirfd = dirfd.as_raw_fd();
-    let path = path.as_cstr()?;
+    let path = path.as_c_str()?;
     unsafe { _statat(dirfd, &path, flags) }
 }
 
@@ -260,7 +260,7 @@ pub fn accessat<P: path::Arg, Fd: AsRawFd>(
     flags: AtFlags,
 ) -> io::Result<()> {
     let dirfd = dirfd.as_raw_fd();
-    let path = path.as_cstr()?;
+    let path = path.as_c_str()?;
     unsafe { _accessat(dirfd, &path, access, flags) }
 }
 
@@ -294,7 +294,7 @@ pub fn utimensat<P: path::Arg, Fd: AsRawFd>(
     flags: AtFlags,
 ) -> io::Result<()> {
     let dirfd = dirfd.as_raw_fd();
-    let path = path.as_cstr()?;
+    let path = path.as_c_str()?;
     unsafe { _utimensat(dirfd, &path, times, flags) }
 }
 
@@ -324,7 +324,7 @@ unsafe fn _utimensat(
 #[cfg(not(target_os = "wasi"))]
 pub fn chmodat<P: path::Arg, Fd: AsRawFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
     let dirfd = dirfd.as_raw_fd();
-    let path = path.as_cstr()?;
+    let path = path.as_c_str()?;
     unsafe { _chmodat(dirfd, &path, mode) }
 }
 
@@ -360,7 +360,7 @@ pub fn fclonefileat<Fd: AsRawFd, DstFd: AsRawFd, P: path::Arg>(
 ) -> io::Result<()> {
     let srcfd = src.as_raw_fd();
     let dst_dirfd = dst_dir.as_raw_fd();
-    let dst = dst.as_cstr()?;
+    let dst = dst.as_c_str()?;
     unsafe { _fclonefileat(srcfd, dst_dirfd, &dst, flags) }
 }
 
