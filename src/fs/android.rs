@@ -1,9 +1,8 @@
 //! Work around Bionic (Android's libc) lacking `telldir` and `seekdir`. See
+//! [xfstests-bld's telldir.c implementation] ([pinned version]) for details.
 //!
-//! https://kernel.googlesource.com/pub/scm/fs/ext2/xfstests-bld/+/HEAD/android-compat/telldir.c
-//! https://kernel.googlesource.com/pub/scm/fs/ext2/xfstests-bld/+/7ca4e52401a5e3376ee285cbb973f84559c12572/android-compat/telldir.c
-//!
-//! for details.
+//! [xfstests-bld's telldir.c implementation]: https://github.com/tytso/xfstests-bld/blob/master/android-compat/telldir.c
+//! [pinned version]: https://github.com/tytso/xfstests-bld/blob/7ca4e52401a5e3376ee285cbb973f84559c12572/android-compat/telldir.c
 
 use crate::zero_ok;
 

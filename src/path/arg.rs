@@ -11,7 +11,6 @@ use std::{
     borrow::Cow,
     ffi::{CStr, CString, OsStr, OsString},
     io,
-    ops::Deref,
     path::{Component, Components, Iter, Path, PathBuf},
     str,
 };
@@ -273,23 +272,23 @@ impl Arg for CString {
 impl<'a> Arg for Cow<'a, OsStr> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.deref().to_str().ok_or_else(utf8_error)
+        (**self).to_str().ok_or_else(utf8_error)
     }
 
     fn to_string_lossy(&self) -> Cow<str> {
-        self.deref().to_string_lossy()
+        (**self).to_string_lossy()
     }
 
     #[cfg(not(windows))]
     #[inline]
     fn as_cstr(&self) -> io::Result<Cow<CStr>> {
-        Ok(Cow::Owned(CString::new(self.deref().as_bytes())?))
+        Ok(Cow::Owned(CString::new(self.as_bytes())?))
     }
 
     #[cfg(not(windows))]
     #[inline]
     fn as_utf8_bytes(&self) -> &[u8] {
-        self.deref().as_bytes()
+        self.as_bytes()
     }
 
     #[cfg(windows)]

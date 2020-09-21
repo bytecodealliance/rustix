@@ -55,7 +55,8 @@ impl FileType {
             libc::DT_FIFO => Self::Fifo,
             libc::DT_CHR => Self::CharacterDevice,
             libc::DT_BLK => Self::BlockDevice,
-            /* libc::DT_UNKNOWN | */ _ => Self::Unknown,
+            // libc::DT_UNKNOWN |
+            _ => Self::Unknown,
         }
     }
 }

@@ -144,6 +144,7 @@ impl Entry {
     #[cfg(any(target_os = "freebsd", target_os = "netbsd"))]
     #[inline]
     pub fn ino(&self) -> u64 {
+        #[allow(clippy::useless_conversion)]
         self.dirent.d_fileno.into()
     }
 
@@ -175,8 +176,8 @@ impl SeekLoc {
     /// Return the location encoded as a `u64`. Note that this value is meant to
     /// be opaque, and applications shouldn't do anything with it except call
     /// `SeekLoc::from_raw`.
-    #[allow(clippy::useless_conversion)]
     #[inline]
+    #[allow(clippy::useless_conversion)]
     pub fn to_raw(&self) -> u64 {
         i64::from(self.0) as u64
     }

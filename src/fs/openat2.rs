@@ -59,5 +59,6 @@ unsafe fn _openat2(
         SIZEOF_OPEN_HOW,
     ))?;
 
+    #[allow(clippy::useless_conversion)]
     Ok(fs::File::from_raw_fd(fd.try_into().unwrap()))
 }

@@ -46,25 +46,25 @@ impl Deref for DecInt {
 impl AsRef<Path> for DecInt {
     #[inline]
     fn as_ref(&self) -> &Path {
-        self.deref()
+        &*self
     }
 }
 
 #[test]
 fn test_dec_int() {
-    assert_eq!(DecInt::new(0).deref().to_str().unwrap(), "0");
-    assert_eq!(DecInt::new(-1).deref().to_str().unwrap(), "-1");
-    assert_eq!(DecInt::new(789).deref().to_str().unwrap(), "789");
+    assert_eq!((*DecInt::new(0)).to_str().unwrap(), "0");
+    assert_eq!((*DecInt::new(-1)).to_str().unwrap(), "-1");
+    assert_eq!((*DecInt::new(789)).to_str().unwrap(), "789");
     assert_eq!(
-        DecInt::new(i64::MIN).deref().to_str().unwrap(),
+        (*DecInt::new(i64::MIN)).to_str().unwrap(),
         i64::MIN.to_string()
     );
     assert_eq!(
-        DecInt::new(i64::MAX).deref().to_str().unwrap(),
+        (*DecInt::new(i64::MAX)).to_str().unwrap(),
         i64::MAX.to_string()
     );
     assert_eq!(
-        DecInt::new(u64::MAX).deref().to_str().unwrap(),
+        (*DecInt::new(u64::MAX)).to_str().unwrap(),
         u64::MAX.to_string()
     );
 }
