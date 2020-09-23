@@ -2,7 +2,7 @@
   <h1><code>posish</code></h1>
 
   <p>
-    <strong>Safe Rust bindings to POSIX-ish libc APIs</strong>
+    <strong>Safe Rust bindings to POSIX-ish libc APIs and syscalls</strong>
   </p>
 
   <p>
@@ -12,19 +12,24 @@
   </p>
 </div>
 
-`posish` provides safe wrappers to POSIX-ish `libc` APIs.
+`posish` provides safe wrappers to POSIX-ish `libc` APIs and syscalls.
 
 `posish` is focused on functionality that isn't already provided by [`std`]
-or [`getrandom`]. It has a philosophy of considering raw file descriptors to be
-equivalent to pointers in terms of making APIs unsafe, in the spirit of
-[`std::os::unix::io::FromRawFd::from_raw_fd`] being unsafe.
+or other low-level crates such as [`getrandom`] and [`errno`]. It prioritizes
+safe interfaces, including considering raw file descriptors to be equivalent
+to pointers in terms of making APIs unsafe, in the spirit of
+[`std::os::unix::io::FromRawFd::from_raw_fd`] being unsafe and
+[`RawFd` not implementing `AsRawFd`/`IntoRawFd`].
 
 `posish` is relatively low-level and does not support Windows; for higher-level
-and portable APIs to this functionality, see the [`system-interface`] and
-[`cap-std`] crates.
+and portable APIs to this functionality, see the [`system-interface`],
+[`cap-std`], and [`fs-set-times`] crates.
 
 [`std`]: https://doc.rust-lang.org/std/
 [`getrandom`]: https://crates.io/crates/getrandom
+[`errno`]: https://crates.io/crates/errno
 [`std::os::unix::io::FromRawFd::from_raw_fd`]: https://doc.rust-lang.org/std/os/unix/io/trait.FromRawFd.html#tymethod.from_raw_fd
 [`system-interface`]: https://crates.io/crates/system-interface
+[`fs-set-times`]: https://crates.io/crates/fs-set-times
 [`cap-std`]: https://crates.io/crates/cap-std
+[`RawFd` not implementing `AsRawFd`/`IntoRawFd`]: https://github.com/rust-lang/rust/pull/41035
