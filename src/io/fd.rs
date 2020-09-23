@@ -1,19 +1,25 @@
 //! Functions which operate on file descriptors.
 
-use crate::zero_ok;
+use std::io;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
 #[cfg(target_os = "wasi")]
 use std::os::wasi::io::{AsRawFd, RawFd};
-use std::{convert::TryInto, io, mem::MaybeUninit};
+#[cfg(not(target_os = "redox"))]
+use {
+    crate::zero_ok,
+    std::{convert::TryInto, mem::MaybeUninit},
+};
 
 /// `ioctl(fd, FIONREAD)`.
+#[cfg(not(target_os = "redox"))]
 #[inline]
 pub fn fionread<Fd: AsRawFd>(fd: &Fd) -> io::Result<u64> {
     let fd = fd.as_raw_fd();
     unsafe { _fionread(fd) }
 }
 
+#[cfg(not(target_os = "redox"))]
 unsafe fn _fionread(fd: RawFd) -> io::Result<u64> {
     let mut nread = MaybeUninit::<libc::c_int>::uninit();
     zero_ok(libc::ioctl(

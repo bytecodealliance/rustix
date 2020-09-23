@@ -44,6 +44,7 @@ impl FileType {
     }
 
     /// Construct a `FileType` from the `d_type` field of a `libc::dirent`.
+    #[cfg(not(target_os = "redox"))]
     pub(crate) fn from_dirent_d_type(d_type: u8) -> Self {
         match d_type {
             libc::DT_REG => Self::RegularFile,

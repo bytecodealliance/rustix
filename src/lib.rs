@@ -58,7 +58,7 @@ mod weak;
 
 pub mod fs;
 pub mod io;
-#[cfg(not(target_os = "wasi"))] // WASI doesn't support `net` yet.
+#[cfg(not(any(target_os = "wasi", target_os = "redox")))] // WASI doesn't support `net` yet.
 pub mod net;
 pub mod path;
 pub mod process;

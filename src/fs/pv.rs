@@ -9,11 +9,12 @@ use libc::{preadv64 as libc_preadv, pwritev64 as libc_pwritev};
 use std::os::unix::io::{AsRawFd, RawFd};
 #[cfg(target_os = "wasi")]
 use std::os::wasi::io::{AsRawFd, RawFd};
+#[cfg(not(any(target_os = "redox", target_env = "newlib")))]
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{
     cmp,
     convert::TryInto,
     io::{self, IoSlice, IoSliceMut},
-    sync::atomic::{AtomicUsize, Ordering},
 };
 
 /// `preadv(fd, bufs.as_ptr(), bufs.len(), offset)`

@@ -8,6 +8,7 @@ use crate::{negone_err, zero_ok};
     target_os = "emscripten",
     target_os = "l4re",
     target_os = "netbsd",
+    target_os = "redox",
     target_os = "wasi"
 )))]
 use libc::fstatfs as libc_fstatfs;
@@ -41,7 +42,7 @@ use std::{
     convert::TryInto,
     io::{self, SeekFrom},
 };
-#[cfg(not(any(target_os = "netbsd", target_os = "wasi")))]
+#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
 use {crate::fs::LibcStatFs, std::mem::MaybeUninit};
 
@@ -108,14 +109,14 @@ unsafe fn _fchmod(fd: RawFd, mode: Mode) -> io::Result<()> {
 }
 
 /// `fstatfs(fd)`
-#[cfg(not(any(target_os = "netbsd", target_os = "wasi")))] // not implemented in libc for netbsd yet
+#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))] // not implemented in libc for netbsd yet
 #[inline]
 pub fn fstatfs<Fd: AsRawFd>(fd: &Fd) -> io::Result<LibcStatFs> {
     let fd = fd.as_raw_fd();
     unsafe { _fstatfs(fd) }
 }
 
-#[cfg(not(any(target_os = "netbsd", target_os = "wasi")))] // not implemented in libc for netbsd yet
+#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))] // not implemented in libc for netbsd yet
 unsafe fn _fstatfs(fd: RawFd) -> io::Result<LibcStatFs> {
     let mut statfs = MaybeUninit::<LibcStatFs>::uninit();
     zero_ok(libc_fstatfs(fd as libc::c_int, statfs.as_mut_ptr()))?;

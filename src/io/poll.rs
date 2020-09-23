@@ -11,9 +11,13 @@ bitflags! {
         const POLLIN = libc::POLLIN;
         const POLLPRI = libc::POLLPRI;
         const POLLOUT = libc::POLLOUT;
+        #[cfg(not(target_os = "redox"))]
         const POLLRDNORM = libc::POLLRDNORM;
+        #[cfg(not(target_os = "redox"))]
         const POLLWRNORM = libc::POLLWRNORM;
+        #[cfg(not(target_os = "redox"))]
         const POLLRDBAND = libc::POLLRDBAND;
+        #[cfg(not(target_os = "redox"))]
         const POLLWRBAND = libc::POLLWRBAND;
         const POLLERR = libc::POLLERR;
         const POLLHUP = libc::POLLHUP;

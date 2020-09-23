@@ -1,6 +1,7 @@
 //! Libc filesystem constants, translated into `bitflags` constants.
 
 use bitflags::bitflags;
+#[cfg(not(target_os = "redox"))]
 use cfg_if::cfg_if;
 
 bitflags! {
@@ -30,6 +31,7 @@ bitflags! {
     }
 }
 
+#[cfg(not(target_os = "redox"))]
 bitflags! {
     /// `AT_*` constants.
     pub struct AtFlags: libc::c_int {
@@ -142,6 +144,7 @@ bitflags! {
         const DIRECTORY = libc::O_DIRECTORY;
 
         /// `O_DSYNC`
+        #[cfg(not(target_os = "redox"))]
         const DSYNC = {
             cfg_if! {
                 if #[cfg(any(target_os = "android",
@@ -192,6 +195,7 @@ bitflags! {
         const RDWR = libc::O_RDWR;
 
         /// `O_NOCTTY`
+        #[cfg(not(target_os = "redox"))]
         const NOCTTY = libc::O_NOCTTY;
 
         /// `O_RSYNC`
@@ -204,6 +208,7 @@ bitflags! {
         const RSYNC = libc::O_RSYNC;
 
         /// `O_SYNC`
+        #[cfg(not(target_os = "redox"))]
         const SYNC = libc::O_SYNC;
 
         /// `O_TRUNC`

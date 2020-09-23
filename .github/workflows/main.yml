@@ -66,3 +66,26 @@ jobs:
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-musl
     - run: cargo check --workspace --release -vv --target=wasm32-unknown-emscripten
+
+  check_nightly:
+    name: Check on Rust nightly
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [nightly]
+        include:
+          - build: nightly
+            os: ubuntu-latest
+            rust: nightly
+
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: true
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: ${{ matrix.rust }}
+    - run: >
+        rustup target add
+        x86_64-unknown-redox
+    - run: cargo check --workspace --release -vv --target=x86_64-unknown-redox
