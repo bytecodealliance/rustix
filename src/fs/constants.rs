@@ -109,11 +109,13 @@ bitflags! {
     }
 }
 
+/// WASI doesn't have Unix-style mode flags.
 #[cfg(target_os = "wasi")]
 pub struct Mode {}
 
 #[cfg(target_os = "wasi")]
 impl Mode {
+    /// Return the bits, which, there being no defined flags, are always 0.
     pub fn bits(&self) -> u32 {
         0
     }

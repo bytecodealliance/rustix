@@ -9,15 +9,16 @@ use std::{convert::TryInto, io};
 bitflags! {
     pub struct PollFlags: libc::c_short {
         const POLLIN = libc::POLLIN;
+        #[cfg(not(target_os = "wasi"))]
         const POLLPRI = libc::POLLPRI;
         const POLLOUT = libc::POLLOUT;
         #[cfg(not(target_os = "redox"))]
         const POLLRDNORM = libc::POLLRDNORM;
         #[cfg(not(target_os = "redox"))]
         const POLLWRNORM = libc::POLLWRNORM;
-        #[cfg(not(target_os = "redox"))]
+        #[cfg(not(any(target_os = "wasi", target_os = "redox")))]
         const POLLRDBAND = libc::POLLRDBAND;
-        #[cfg(not(target_os = "redox"))]
+        #[cfg(not(any(target_os = "wasi", target_os = "redox")))]
         const POLLWRBAND = libc::POLLWRBAND;
         const POLLERR = libc::POLLERR;
         const POLLHUP = libc::POLLHUP;

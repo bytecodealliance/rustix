@@ -88,4 +88,6 @@ jobs:
     - run: >
         rustup target add
         x86_64-unknown-redox
+        wasm32-wasi
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-redox
+    - run: cargo check --workspace --release -vv --target=wasm32-wasi

@@ -22,9 +22,13 @@ use libc::{dirent64 as libc_dirent, readdir64 as libc_readdir};
 use libc::{seekdir as libc_seekdir, telldir as libc_telldir};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
-#[cfg(target_os = "wasi")]
-use std::os::wasi::io::{AsRawFd, IntoRawFd, RawFd};
 use std::{convert::TryInto, ffi::CStr, io, ptr};
+#[cfg(target_os = "wasi")]
+use std::{
+    ffi::CString,
+    mem::MaybeUninit,
+    os::wasi::io::{AsRawFd, IntoRawFd, RawFd},
+};
 
 /// `DIR*`
 pub struct Dir(ptr::NonNull<libc::DIR>);
@@ -81,8 +85,22 @@ impl Dir {
             }
         } else {
             // We successfully read an entry.
-            Some(Ok(Entry {
-                dirent: unsafe { *dirent },
+            Some(Ok(unsafe {
+                Entry {
+                    #[cfg(not(target_os = "wasi"))]
+                    dirent: *dirent,
+
+                    // TODO: When WASI gains a `d_loc` field, update `Entry::seek_loc`.
+                    #[cfg(target_os = "wasi")]
+                    dirent: libc_dirent {
+                        d_ino: (*dirent).d_ino,
+                        d_type: (*dirent).d_type,
+                        d_name: MaybeUninit::uninit().assume_init(),
+                    },
+
+                    #[cfg(target_os = "wasi")]
+                    name: CStr::from_ptr((*dirent).d_name.as_ptr()).to_owned(),
+                }
             }))
         }
     }
@@ -118,13 +136,22 @@ impl Iterator for Dir {
 #[derive(Debug)]
 pub struct Entry {
     dirent: libc_dirent,
+
+    #[cfg(target_os = "wasi")]
+    name: CString,
 }
 
 impl Entry {
     /// Returns the file name of this directory entry.
     #[inline]
     pub fn file_name(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.dirent.d_name.as_ptr()) }
+        #[cfg(not(target_os = "wasi"))]
+        unsafe {
+            CStr::from_ptr(self.dirent.d_name.as_ptr())
+        }
+
+        #[cfg(target_os = "wasi")]
+        &self.name
     }
 
     /// Returns the type of this directory entry.
@@ -151,6 +178,8 @@ impl Entry {
     /// Return a cookie indicating the location of this entry, for use with [`Dir::seek`].
     ///
     /// [`Dir::seek`]: struct.Dir.html#method.seek
+    ///
+    /// TODO: Use `d_loc` on WASI once we have libc support.
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
@@ -158,6 +187,7 @@ impl Entry {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "wasi",
     )))]
     #[inline]
     pub fn seek_loc(&self) -> io::Result<SeekLoc> {

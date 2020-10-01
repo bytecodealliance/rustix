@@ -53,6 +53,7 @@
 #![deny(missing_docs)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 
+#[cfg(not(target_os = "wasi"))]
 #[macro_use]
 mod weak;
 
