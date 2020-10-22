@@ -5,8 +5,10 @@
     <strong>Safe Rust bindings to POSIX-ish libc APIs and syscalls</strong>
   </p>
 
+  <strong>A <a href="https://bytecodealliance.org/">Bytecode Alliance</a> project</strong>
+
   <p>
-    <a href="https://github.com/sunfishcode/posish/actions?query=workflow%3ACI"><img src="https://github.com/sunfishcode/posish/workflows/CI/badge.svg" alt="Github Actions CI Status" /></a>
+    <a href="https://github.com/bytecodealliance/posish/actions?query=workflow%3ACI"><img src="https://github.com/bytecodealliance/posish/workflows/CI/badge.svg" alt="Github Actions CI Status" /></a>
     <a href="https://crates.io/crates/posish"><img src="https://img.shields.io/crates/v/posish.svg" alt="crates.io page" /></a>
     <a href="https://docs.rs/posish"><img src="https://docs.rs/posish/badge.svg" alt="docs.rs docs" /></a>
   </p>
