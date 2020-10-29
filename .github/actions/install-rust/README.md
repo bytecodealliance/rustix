@@ -1,7 +1,5 @@
 # install-rust
 
-Author: Alex Crichton <alex@alexcrichton.com>
-
 A small github action to install `rustup` and a Rust toolchain. This is
 generally expressed inline, but it was repeated enough in this repository it
 seemed worthwhile to extract.

@@ -1,4 +1,3 @@
-# Author: Alex Crichton <alex@alexcrichton.com>
 name: 'Install Rust toolchain'
 description: 'Install both `rustup` and a Rust toolchain'
 
