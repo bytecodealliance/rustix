@@ -167,27 +167,22 @@ unsafe fn _posix_fallocate(fd: RawFd, offset: u64, len: u64) -> io::Result<()> {
 
 #[cfg(any(target_os = "ios", target_os = "macos",))]
 unsafe fn _posix_fallocate(fd: RawFd, offset: u64, len: u64) -> io::Result<()> {
-    let offset = offset
+    let offset: i64 = offset
         .try_into()
         .map_err(|_| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
     let len = len
         .try_into()
         .map_err(|_| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
-    let fst_posmode = if offset == 0 {
-        libc::F_PEOFPOSMODE
-    } else {
-        libc::F_VOLPOSMODE
-    };
-    let mut store = libc::fstore_t {
-        fst_flags: libc::F_ALLOCATECONTIG,
-        fst_posmode,
-        fst_offset: offset,
-        fst_length: len,
-        fst_bytesalloc: 0,
-    };
     let new_len = offset.checked_add(len).ok_or_else(|| {
         io::Error::new(io::ErrorKind::Other, "overflow while allocating file space")
     })?;
+    let mut store = libc::fstore_t {
+        fst_flags: libc::F_ALLOCATECONTIG,
+        fst_posmode: libc::F_PEOFPOSMODE,
+        fst_offset: 0,
+        fst_length: new_len,
+        fst_bytesalloc: 0,
+    };
     let ret = libc::fcntl(fd as libc::c_int, libc::F_PREALLOCATE, &store);
     if ret == -1 {
         store.fst_flags = libc::F_ALLOCATEALL;
