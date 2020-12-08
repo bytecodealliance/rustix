@@ -133,3 +133,57 @@ pub fn futimens<Fd: AsRawFd>(fd: &Fd, times: &[libc::timespec; 2]) -> io::Result
 unsafe fn _futimens(fd: RawFd, times: &[libc::timespec; 2]) -> io::Result<()> {
     zero_ok(libc::futimens(fd as libc::c_int, times.as_ptr()))
 }
+
+/// `posix_fallocate(fd, offset, len)`
+#[cfg(not(any(target_os = "netbsd", target_os = "redox")))] // not implemented in libc for netbsd yet
+#[inline]
+pub fn posix_fallocate<Fd: AsRawFd>(fd: &Fd, offset: u64, len: u64) -> io::Result<()> {
+    let fd = fd.as_raw_fd();
+    unsafe { _posix_fallocate(fd, offset, len) }
+}
+
+#[cfg(not(any(
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "redox"
+)))]
+unsafe fn _posix_fallocate(fd: RawFd, offset: u64, len: u64) -> io::Result<()> {
+    let offset = offset
+        .try_into()
+        .map_err(|_| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+    let len = len
+        .try_into()
+        .map_err(|_| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+    let err = libc::posix_fallocate(fd as libc::c_int, offset, len);
+
+    // `posix_fallocate` returns its error status rather than using `errno`.
+    if err == 0 {
+        Ok(())
+    } else {
+        Err(std::io::Error::from_raw_os_error(err))
+    }
+}
+
+#[cfg(any(target_os = "ios", target_os = "macos",))]
+unsafe fn _posix_fallocate(fd: RawFd, offset: u64, len: u64) -> io::Result<()> {
+    let offset = offset
+        .try_into()
+        .map_err(|_| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+    let len = len
+        .try_into()
+        .map_err(|_| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+    let mut store = libc::fstore_t {
+        fst_flags: libc::F_ALLOCATECONTIG,
+        fst_posmode: libc::F_PEOFPOSMODE,
+        fst_offset: offset,
+        fst_length: len,
+        fst_bytesalloc: 0,
+    };
+    let ret = libc::fcntl(fd as libc::c_int, libc::F_PREALLOCATE, &store);
+    if ret == -1 {
+        store.fst_flags = libc::F_ALLOCATEALL;
+        negone_err(libc::fcntl(fd, libc::F_PREALLOCATE, &store))?;
+    }
+    zero_ok(libc::ftruncate(fd, len))
+}
