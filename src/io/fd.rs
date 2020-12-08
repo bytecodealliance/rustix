@@ -32,28 +32,28 @@ unsafe fn _fionread(fd: RawFd) -> io::Result<u64> {
 
 /// `isatty(fd)`
 #[inline]
-pub fn isatty<Fd: AsRawFd>(fd: &Fd) -> io::Result<bool> {
+pub fn isatty<Fd: AsRawFd>(fd: &Fd) -> bool {
     let fd = fd.as_raw_fd();
     unsafe { _isatty(fd) }
 }
 
-unsafe fn _isatty(fd: RawFd) -> io::Result<bool> {
+unsafe fn _isatty(fd: RawFd) -> bool {
     let res = libc::isatty(fd as libc::c_int);
     if res == 0 {
         let err = io::Error::last_os_error();
         match err.raw_os_error() {
             #[cfg(not(target_os = "linux"))]
-            Some(libc::ENOTTY) => Ok(false),
+            Some(libc::ENOTTY) => false,
 
             // Old Linux versions reportedly return `EINVAL`.
             // https://man7.org/linux/man-pages/man3/isatty.3.html#ERRORS
             #[cfg(target_os = "linux")]
-            Some(libc::ENOTTY) | Some(libc::EINVAL) => Ok(false),
+            Some(libc::ENOTTY) | Some(libc::EINVAL) => false,
 
-            _ => Err(err),
+            _ => panic!("unexpected error from isatty: {}", err),
         }
     } else {
-        Ok(true)
+        true
     }
 }
 
