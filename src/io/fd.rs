@@ -1,8 +1,10 @@
 //! Functions which operate on file descriptors.
 
+#[cfg(not(target_os = "wasi"))]
+use crate::negone_err;
 use std::io;
 #[cfg(unix)]
-use std::os::unix::io::{AsRawFd, RawFd};
+use std::os::unix::io::{AsRawFd, FromRawFd, RawFd};
 #[cfg(target_os = "wasi")]
 use std::os::wasi::io::{AsRawFd, RawFd};
 #[cfg(not(target_os = "redox"))]
@@ -81,4 +83,17 @@ pub fn is_read_write<Fd: AsRawFd>(fd: &Fd) -> io::Result<(bool, bool)> {
         crate::fs::OFlags::WRONLY => Ok((false, true)),
         _ => unreachable!(),
     }
+}
+
+/// `dup(fd)`
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn dup<Fd: AsRawFd + FromRawFd>(fd: &Fd) -> io::Result<Fd> {
+    let fd = fd.as_raw_fd();
+    unsafe { _dup(fd).map(|raw_fd| Fd::from_raw_fd(raw_fd)) }
+}
+
+#[cfg(not(target_os = "wasi"))]
+unsafe fn _dup(fd: RawFd) -> io::Result<RawFd> {
+    negone_err(libc::dup(fd as libc::c_int))
 }

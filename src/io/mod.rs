@@ -3,6 +3,8 @@
 mod fd;
 mod poll;
 
+#[cfg(not(target_os = "wasi"))]
+pub use fd::dup;
 #[cfg(not(target_os = "redox"))]
 pub use fd::fionread;
 pub use fd::{is_read_write, isatty};
