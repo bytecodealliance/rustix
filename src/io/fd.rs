@@ -2,7 +2,11 @@
 
 #[cfg(not(target_os = "wasi"))]
 use crate::negone_err;
+#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
+use std::ffi::OsString;
 use std::io;
+#[cfg(all(unix, not(any(target_os = "wasi", target_os = "fuchsia"))))]
+use std::os::unix::ffi::OsStringExt;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, RawFd};
 #[cfg(target_os = "wasi")]
@@ -96,4 +100,41 @@ pub fn dup<Fd: AsRawFd + FromRawFd>(fd: &Fd) -> io::Result<Fd> {
 #[cfg(not(target_os = "wasi"))]
 unsafe fn _dup(fd: RawFd) -> io::Result<RawFd> {
     negone_err(libc::dup(fd as libc::c_int))
+}
+
+/// `ttyname_r(fd)`
+///
+/// If `reuse` is non-empty, reuse its buffer to store the result if possible.
+#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
+#[inline]
+pub fn ttyname<Fd: AsRawFd>(dirfd: &Fd, reuse: OsString) -> io::Result<OsString> {
+    let dirfd = dirfd.as_raw_fd();
+    unsafe { _ttyname(dirfd, reuse) }
+}
+
+#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
+unsafe fn _ttyname(dirfd: RawFd, reuse: OsString) -> io::Result<OsString> {
+    let mut buffer = reuse.into_vec();
+
+    // Start with a buffer big enough for the vast majority of paths.
+    // This and the `reserve` below would be a good candidate for `try_reserve`.
+    // https://github.com/rust-lang/rust/issues/48043
+    buffer.clear();
+    buffer.reserve(256);
+
+    loop {
+        match libc::ttyname_r(
+            dirfd as libc::c_int,
+            buffer.as_mut_ptr() as *mut libc::c_char,
+            buffer.capacity(),
+        ) {
+            // Use `Vec`'s builtin capacity-doubling strategy.
+            libc::ERANGE => buffer.reserve(1),
+            0 => {
+                buffer.set_len(libc::strlen(buffer.as_ptr() as *const libc::c_char));
+                return Ok(OsString::from_vec(buffer));
+            }
+            errno => return Err(io::Error::from_raw_os_error(errno)),
+        }
+    }
 }
