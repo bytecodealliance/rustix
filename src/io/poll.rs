@@ -36,12 +36,14 @@ impl PollFd {
     ///
     /// `PollFd` does not take ownership of the file descriptors passed in here,
     /// and they need to live at least through the `PollFdVec::poll` call.
+    #[inline]
     pub unsafe fn new<Fd: AsRawFd>(fd: &Fd, events: PollFlags) -> Self {
         let fd = fd.as_raw_fd();
         Self::_new(fd, events)
     }
 
-    unsafe fn _new(fd: RawFd, events: PollFlags) -> Self {
+    #[inline]
+    const unsafe fn _new(fd: RawFd, events: PollFlags) -> Self {
         Self(libc::pollfd {
             fd: fd as libc::c_int,
             events: events.bits(),
@@ -50,6 +52,7 @@ impl PollFd {
     }
 
     /// Return the ready events.
+    #[inline]
     pub fn revents(self) -> PollFlags {
         PollFlags::from_bits(self.0.revents).unwrap()
     }

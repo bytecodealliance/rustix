@@ -26,6 +26,7 @@ pub enum SocketType {
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_TYPE)`
+#[inline]
 pub fn socket_type<Fd: AsRawFd>(fd: &Fd) -> io::Result<SocketType> {
     let fd = fd.as_raw_fd();
     unsafe { _socket_type(fd) }

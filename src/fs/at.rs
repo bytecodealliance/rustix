@@ -279,6 +279,7 @@ unsafe fn _accessat(
 }
 
 /// `utimensat(dirfd, path, times, flags)`
+#[inline]
 pub fn utimensat<P: path::Arg, Fd: AsRawFd>(
     dirfd: &Fd,
     path: P,
@@ -314,6 +315,7 @@ unsafe fn _utimensat(
 /// Note that this implementation does not support `O_PATH` file descriptors,
 /// even on platforms where the host libc emulates it.
 #[cfg(not(target_os = "wasi"))]
+#[inline]
 pub fn chmodat<P: path::Arg, Fd: AsRawFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
     let dirfd = dirfd.as_raw_fd();
     let path = path.as_c_str()?;

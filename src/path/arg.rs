@@ -51,6 +51,7 @@ impl Arg for &str {
         Ok(self)
     }
 
+    #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
         Cow::Borrowed(self)
     }
@@ -79,6 +80,7 @@ impl Arg for String {
         Ok(self)
     }
 
+    #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
         Cow::Borrowed(self)
     }
@@ -96,6 +98,7 @@ impl Arg for String {
     }
 
     #[cfg(windows)]
+    #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
@@ -107,6 +110,7 @@ impl Arg for &OsStr {
         self.to_str().ok_or_else(utf8_error)
     }
 
+    #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
         OsStr::to_string_lossy(self)
     }
@@ -124,6 +128,7 @@ impl Arg for &OsStr {
     }
 
     #[cfg(windows)]
+    #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
@@ -135,6 +140,7 @@ impl Arg for OsString {
         self.as_os_str().to_str().ok_or_else(utf8_error)
     }
 
+    #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
         self.as_os_str().to_string_lossy()
     }
@@ -152,6 +158,7 @@ impl Arg for OsString {
     }
 
     #[cfg(windows)]
+    #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
@@ -163,6 +170,7 @@ impl Arg for &Path {
         self.as_os_str().to_str().ok_or_else(utf8_error)
     }
 
+    #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
         Path::to_string_lossy(self)
     }
@@ -180,6 +188,7 @@ impl Arg for &Path {
     }
 
     #[cfg(windows)]
+    #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
@@ -191,6 +200,7 @@ impl Arg for PathBuf {
         self.as_os_str().to_str().ok_or_else(utf8_error)
     }
 
+    #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
         self.as_os_str().to_string_lossy()
     }
@@ -208,6 +218,7 @@ impl Arg for PathBuf {
     }
 
     #[cfg(windows)]
+    #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
@@ -236,6 +247,7 @@ impl Arg for &CStr {
     }
 
     #[cfg(windows)]
+    #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
@@ -264,6 +276,7 @@ impl Arg for CString {
     }
 
     #[cfg(windows)]
+    #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
@@ -275,6 +288,7 @@ impl<'a> Arg for Cow<'a, OsStr> {
         (**self).to_str().ok_or_else(utf8_error)
     }
 
+    #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
         (**self).to_string_lossy()
     }
@@ -292,6 +306,7 @@ impl<'a> Arg for Cow<'a, OsStr> {
     }
 
     #[cfg(windows)]
+    #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
@@ -303,6 +318,7 @@ impl<'a> Arg for Component<'a> {
         self.as_os_str().to_str().ok_or_else(utf8_error)
     }
 
+    #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
         self.as_os_str().to_string_lossy()
     }
@@ -320,6 +336,7 @@ impl<'a> Arg for Component<'a> {
     }
 
     #[cfg(windows)]
+    #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
@@ -331,6 +348,7 @@ impl<'a> Arg for Components<'a> {
         self.as_path().to_str().ok_or_else(utf8_error)
     }
 
+    #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
         self.as_path().to_string_lossy()
     }
@@ -350,6 +368,7 @@ impl<'a> Arg for Components<'a> {
     }
 
     #[cfg(windows)]
+    #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
@@ -361,6 +380,7 @@ impl<'a> Arg for Iter<'a> {
         self.as_path().to_str().ok_or_else(utf8_error)
     }
 
+    #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
         self.as_path().to_string_lossy()
     }
@@ -380,6 +400,7 @@ impl<'a> Arg for Iter<'a> {
     }
 
     #[cfg(windows)]
+    #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
@@ -408,6 +429,7 @@ impl Arg for &[u8] {
     }
 
     #[cfg(windows)]
+    #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
@@ -436,6 +458,7 @@ impl Arg for Vec<u8> {
     }
 
     #[cfg(windows)]
+    #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
@@ -447,6 +470,7 @@ impl Arg for DecInt {
         self.as_os_str().to_str().ok_or_else(utf8_error)
     }
 
+    #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
         Path::to_string_lossy(self)
     }
@@ -464,6 +488,7 @@ impl Arg for DecInt {
     }
 
     #[cfg(windows)]
+    #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
