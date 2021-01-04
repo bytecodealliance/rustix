@@ -220,9 +220,8 @@ impl SeekLoc {
     /// `SeekLoc::to_raw`.
     #[inline]
     pub unsafe fn from_raw(loc: u64) -> io::Result<Self> {
-        Ok(Self(
-            loc.try_into()
-                .map_err(|_| io::Error::from_raw_os_error(libc::EINVAL))?,
-        ))
+        Ok(Self(loc.try_into().map_err(|_convert_err| {
+            io::Error::from_raw_os_error(libc::EINVAL)
+        })?))
     }
 }

@@ -73,7 +73,7 @@ impl PollFdVec {
             .fds
             .len()
             .try_into()
-            .map_err(|_| io::Error::from_raw_os_error(libc::EINVAL))?;
+            .map_err(|_convert_err| io::Error::from_raw_os_error(libc::EINVAL))?;
 
         let nready = negone_err(unsafe { libc::poll(self.fds.as_mut_ptr(), nfds, timeout) })?;
 

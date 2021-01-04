@@ -34,7 +34,7 @@ unsafe fn _copy_file_range(
     let off_in_ptr = if let Some(off_in) = &off_in {
         off_in_val = (**off_in)
             .try_into()
-            .map_err(|_| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+            .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
         &mut off_in_val
     } else {
         ptr::null_mut()
@@ -42,7 +42,7 @@ unsafe fn _copy_file_range(
     let off_out_ptr = if let Some(off_out) = &off_out {
         off_out_val = (**off_out)
             .try_into()
-            .map_err(|_| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+            .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
         &mut off_out_val
     } else {
         ptr::null_mut()

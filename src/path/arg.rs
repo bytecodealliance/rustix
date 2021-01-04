@@ -227,9 +227,10 @@ impl Arg for PathBuf {
 impl Arg for &CStr {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.to_str().map_err(|_| utf8_error())
+        self.to_str().map_err(|_utf8_err| utf8_error())
     }
 
+    #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
         CStr::to_string_lossy(self)
     }
@@ -256,9 +257,10 @@ impl Arg for &CStr {
 impl Arg for CString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_c_str().to_str().map_err(|_| utf8_error())
+        self.as_c_str().to_str().map_err(|_utf8_err| utf8_error())
     }
 
+    #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
         self.as_c_str().to_string_lossy()
     }
@@ -409,9 +411,10 @@ impl<'a> Arg for Iter<'a> {
 impl Arg for &[u8] {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        str::from_utf8(self).map_err(|_| utf8_error())
+        str::from_utf8(self).map_err(|_utf8_err| utf8_error())
     }
 
+    #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
         String::from_utf8_lossy(self)
     }
@@ -438,9 +441,10 @@ impl Arg for &[u8] {
 impl Arg for Vec<u8> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        str::from_utf8(self).map_err(|_| utf8_error())
+        str::from_utf8(self).map_err(|_utf8_err| utf8_error())
     }
 
+    #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
         String::from_utf8_lossy(self)
     }

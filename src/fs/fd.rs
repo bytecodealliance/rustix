@@ -58,7 +58,7 @@ unsafe fn _seek(fd: RawFd, pos: SeekFrom) -> io::Result<u64> {
         SeekFrom::Start(pos) => (
             libc::SEEK_SET,
             pos.try_into()
-                .map_err(|_| io::Error::from_raw_os_error(libc::EOVERFLOW))?,
+                .map_err(|_convert_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?,
         ),
         SeekFrom::End(offset) => (libc::SEEK_END, offset),
         SeekFrom::Current(offset) => (libc::SEEK_CUR, offset),
@@ -151,10 +151,10 @@ pub fn posix_fallocate<Fd: AsRawFd>(fd: &Fd, offset: u64, len: u64) -> io::Resul
 unsafe fn _posix_fallocate(fd: RawFd, offset: u64, len: u64) -> io::Result<()> {
     let offset = offset
         .try_into()
-        .map_err(|_| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
     let len = len
         .try_into()
-        .map_err(|_| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
     let err = libc::posix_fallocate(fd as libc::c_int, offset, len);
 
     // `posix_fallocate` returns its error status rather than using `errno`.
@@ -169,10 +169,10 @@ unsafe fn _posix_fallocate(fd: RawFd, offset: u64, len: u64) -> io::Result<()> {
 unsafe fn _posix_fallocate(fd: RawFd, offset: u64, len: u64) -> io::Result<()> {
     let offset: i64 = offset
         .try_into()
-        .map_err(|_| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
     let len = len
         .try_into()
-        .map_err(|_| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
     let new_len = offset.checked_add(len).ok_or_else(|| {
         io::Error::new(io::ErrorKind::Other, "overflow while allocating file space")
     })?;

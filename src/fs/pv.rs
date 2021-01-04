@@ -27,7 +27,7 @@ pub fn preadv<Fd: AsRawFd>(fd: &Fd, bufs: &[IoSliceMut], offset: u64) -> io::Res
 unsafe fn _preadv(fd: RawFd, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
     let offset = offset
         .try_into()
-        .map_err(|_| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
     let nread = negone_err(libc_preadv(
         fd as libc::c_int,
         bufs.as_ptr() as *const libc::iovec,
@@ -47,7 +47,7 @@ pub fn pwritev<Fd: AsRawFd>(fd: &Fd, bufs: &[IoSlice], offset: u64) -> io::Resul
 unsafe fn _pwritev(fd: RawFd, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
     let offset = offset
         .try_into()
-        .map_err(|_| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
     let nwritten = negone_err(libc_pwritev(
         fd as libc::c_int,
         bufs.as_ptr() as *const libc::iovec,
