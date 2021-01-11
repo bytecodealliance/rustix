@@ -19,7 +19,7 @@ bitflags = "1.2.1"
 cfg-if = "1.0.0"
 errno = "0.2.7"
 itoa = "0.4.7"
-libc = { version = "0.2.81", features = ["extra_traits"] }
+libc = { version = "0.2.82", features = ["extra_traits"] }
 
 [badges]
 maintenance = { status = "actively-developed" }

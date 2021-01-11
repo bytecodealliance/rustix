@@ -202,7 +202,8 @@ bitflags! {
         const NOCTTY = libc::O_NOCTTY;
 
         /// `O_RSYNC`
-        #[cfg(any(target_os = "emscripten",
+        #[cfg(any(target_os = "android",
+                  target_os = "emscripten",
                   target_os = "linux",
                   target_os = "netbsd",
                   target_os = "openbsd",
