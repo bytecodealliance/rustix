@@ -2,6 +2,8 @@
 
 mod fd;
 mod poll;
+#[cfg(not(target_os = "wasi"))]
+mod socketpair;
 
 #[cfg(not(target_os = "wasi"))]
 pub use fd::dup;
@@ -11,3 +13,5 @@ pub use fd::fionread;
 pub use fd::ttyname;
 pub use fd::{is_read_write, isatty};
 pub use poll::{PollFd, PollFdVec};
+#[cfg(not(target_os = "wasi"))]
+pub use socketpair::socketpair_stream;
