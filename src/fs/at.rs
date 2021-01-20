@@ -6,9 +6,19 @@ use crate::{
     fs::{Access, AtFlags, LibcStat, Mode, OFlags},
     negone_err, path, zero_ok,
 };
-#[cfg(not(any(target_os = "linux", target_os = "emscripten", target_os = "l4re")))]
+#[cfg(not(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "emscripten",
+    target_os = "l4re"
+)))]
 use libc::{fstatat as libc_fstatat, openat as libc_openat};
-#[cfg(any(target_os = "linux", target_os = "emscripten", target_os = "l4re"))]
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "emscripten",
+    target_os = "l4re"
+))]
 use libc::{fstatat64 as libc_fstatat, openat64 as libc_openat};
 #[cfg(not(target_os = "wasi"))]
 use std::mem::ManuallyDrop;
@@ -322,7 +332,7 @@ pub fn chmodat<P: path::Arg, Fd: AsRawFd>(dirfd: &Fd, path: P, mode: Mode) -> io
     unsafe { _chmodat(dirfd, &path, mode) }
 }
 
-#[cfg(not(any(target_os = "linux", target_os = "wasi")))]
+#[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
 unsafe fn _chmodat(dirfd: RawFd, path: &CStr, mode: Mode) -> io::Result<()> {
     zero_ok(libc::fchmodat(
         dirfd as libc::c_int,
@@ -332,7 +342,7 @@ unsafe fn _chmodat(dirfd: RawFd, path: &CStr, mode: Mode) -> io::Result<()> {
     ))
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 unsafe fn _chmodat(dirfd: RawFd, path: &CStr, mode: Mode) -> io::Result<()> {
     // Note that Linux's `fchmodat` does not have a flags argument.
     zero_ok(libc::syscall(

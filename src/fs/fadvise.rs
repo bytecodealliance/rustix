@@ -1,7 +1,17 @@
 use crate::zero_ok;
-#[cfg(not(any(target_os = "linux", target_os = "emscripten", target_os = "l4re")))]
+#[cfg(not(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "emscripten",
+    target_os = "l4re"
+)))]
 use libc::posix_fadvise as libc_posix_fadvise;
-#[cfg(any(target_os = "linux", target_os = "emscripten", target_os = "l4re"))]
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "emscripten",
+    target_os = "l4re"
+))]
 use libc::posix_fadvise64 as libc_posix_fadvise;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};

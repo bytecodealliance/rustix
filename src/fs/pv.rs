@@ -1,9 +1,9 @@
 //! Positioned *and* vectored I/O: `preadv` and `pwritev`.
 
 use crate::negone_err;
-#[cfg(not(any(target_os = "linux", target_os = "android", target_os = "emscripten")))]
+#[cfg(not(any(target_os = "android", target_os = "linux", target_os = "emscripten")))]
 use libc::{preadv as libc_preadv, pwritev as libc_pwritev};
-#[cfg(any(target_os = "linux", target_os = "android", target_os = "emscripten"))]
+#[cfg(any(target_os = "android", target_os = "linux", target_os = "emscripten"))]
 use libc::{preadv64 as libc_preadv, pwritev64 as libc_pwritev};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};

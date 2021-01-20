@@ -104,11 +104,17 @@ pub use rdadvise::rdadvise;
 pub use statx::statx;
 
 /// Re-export `libc::stat` (or `libc::stat64` where applicable).
-#[cfg(not(any(target_os = "linux", target_os = "emscripten", target_os = "l4re")))]
+#[cfg(not(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "emscripten",
+    target_os = "l4re"
+)))]
 pub type LibcStat = libc::stat;
 
 /// Re-export `libc::statfs` (or `libc::statfs64` where applicable).
 #[cfg(not(any(
+    target_os = "android",
     target_os = "linux",
     target_os = "emscripten",
     target_os = "l4re",
@@ -120,11 +126,21 @@ pub type LibcStat = libc::stat;
 pub type LibcStatFs = libc::statfs;
 
 /// Re-export `libc::stat` (or `libc::stat64` where applicable).
-#[cfg(any(target_os = "linux", target_os = "emscripten", target_os = "l4re"))]
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "emscripten",
+    target_os = "l4re"
+))]
 pub type LibcStat = libc::stat64;
 
 /// Re-export `libc::statfs` (or `libc::statfs64` where applicable).
-#[cfg(any(target_os = "linux", target_os = "emscripten", target_os = "l4re"))]
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "emscripten",
+    target_os = "l4re"
+))]
 pub type LibcStatFs = libc::statfs64;
 
 /// Re-export `libc::statx`. Only available on Linux with GLIBC for now.

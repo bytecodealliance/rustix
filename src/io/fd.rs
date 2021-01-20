@@ -48,12 +48,12 @@ unsafe fn _isatty(fd: RawFd) -> bool {
     if res == 0 {
         let err = io::Error::last_os_error();
         match err.raw_os_error() {
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(any(target_os = "android", target_os = "linux")))]
             Some(libc::ENOTTY) => false,
 
             // Old Linux versions reportedly return `EINVAL`.
             // https://man7.org/linux/man-pages/man3/isatty.3.html#ERRORS
-            #[cfg(target_os = "linux")]
+            #[cfg(any(target_os = "android", target_os = "linux"))]
             Some(libc::ENOTTY) | Some(libc::EINVAL) => false,
 
             _ => panic!("unexpected error from isatty: {}", err),

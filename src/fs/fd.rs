@@ -4,6 +4,7 @@
 use crate::fs::Mode;
 use crate::{negone_err, zero_ok};
 #[cfg(not(any(
+    target_os = "android",
     target_os = "linux",
     target_os = "emscripten",
     target_os = "l4re",
@@ -12,7 +13,12 @@ use crate::{negone_err, zero_ok};
     target_os = "wasi"
 )))]
 use libc::fstatfs as libc_fstatfs;
-#[cfg(not(any(target_os = "linux", target_os = "emscripten", target_os = "l4re")))]
+#[cfg(not(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "emscripten",
+    target_os = "l4re"
+)))]
 use libc::lseek as libc_lseek;
 #[cfg(not(any(
     target_os = "ios",
@@ -32,7 +38,12 @@ use libc::off64_t as libc_off_t;
     target_os = "wasi",
 ))]
 use libc::off_t as libc_off_t;
-#[cfg(any(target_os = "linux", target_os = "emscripten", target_os = "l4re"))]
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "emscripten",
+    target_os = "l4re"
+))]
 use libc::{fstatfs64 as libc_fstatfs, lseek64 as libc_lseek};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
@@ -90,12 +101,12 @@ pub fn fchmod<Fd: AsRawFd>(fd: &Fd, mode: Mode) -> io::Result<()> {
     unsafe { _fchmod(fd, mode) }
 }
 
-#[cfg(not(any(target_os = "linux", target_os = "wasi")))]
+#[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
 unsafe fn _fchmod(fd: RawFd, mode: Mode) -> io::Result<()> {
     zero_ok(libc::fchmod(fd as libc::c_int, mode.bits()))
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 unsafe fn _fchmod(fd: RawFd, mode: Mode) -> io::Result<()> {
     // Use `libc::syscall` rather than `libc::fchmod` because some libc
     // implementations, such as musl, add extra logic to `fchmod` to emulate
