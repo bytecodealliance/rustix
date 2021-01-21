@@ -55,6 +55,10 @@ unsafe fn _isatty(fd: RawFd) -> bool {
             #[cfg(any(target_os = "android", target_os = "linux"))]
             Some(libc::ENOTTY) | Some(libc::EINVAL) => false,
 
+            // Darwin mysteriously returns `EOPNOTSUPP` sometimes.
+            #[cfg(any(target_os = "ios", target_os = "macos"))]
+            Some(libc::EOPNOTSUPP) => false,
+
             _ => panic!("unexpected error from isatty: {}", err),
         }
     } else {
