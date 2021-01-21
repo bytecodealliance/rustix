@@ -43,6 +43,10 @@ pub fn isatty<Fd: AsRawFd>(fd: &Fd) -> bool {
 }
 
 unsafe fn _isatty(fd: RawFd) -> bool {
+    // Darwin's `isatty` appears to not clear errno sometimes.
+    #[cfg(any(target_os = "ios", target_os = "macos",))]
+    errno::set_errno(errno::Errno(0));
+
     let res = libc::isatty(fd as libc::c_int);
     if res == 0 {
         let err = io::Error::last_os_error();
