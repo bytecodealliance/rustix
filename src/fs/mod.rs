@@ -81,7 +81,7 @@ pub use fd::fchmod;
 pub use fd::fstatfs;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox")))]
 pub use fd::posix_fallocate;
-pub use fd::{futimens, seek, tell};
+pub use fd::{futimens, is_file_read_write, seek, tell};
 pub use file_type::FileType;
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub use getpath::getpath;

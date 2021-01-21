@@ -201,3 +201,32 @@ unsafe fn _posix_fallocate(fd: RawFd, offset: u64, len: u64) -> io::Result<()> {
     }
     zero_ok(libc::ftruncate(fd, new_len))
 }
+
+/// `fcntl(fd, F_GETFL) & O_ACCMODE`. Returns a pair of booleans indicating
+/// whether the file descriptor is readable and/or writeable, respectively.
+/// This is only reliable on files; for example, it doesn't reflect whether
+/// sockets have been shut down; for general I/O handle support, use
+/// [`crate::io::is_read_write`].
+pub fn is_file_read_write<Fd: AsRawFd>(fd: &Fd) -> io::Result<(bool, bool)> {
+    let mode = crate::fs::getfl(fd)?;
+
+    // Check for `O_PATH`.
+    #[cfg(any(
+        target_os = "android",
+        target_os = "fuchsia",
+        target_os = "linux",
+        target_os = "emscripten"
+    ))]
+    if mode.contains(crate::fs::OFlags::PATH) {
+        return Ok((false, false));
+    }
+
+    // Use `RWMODE` rather than `ACCMODE` as `ACCMODE` may include `O_PATH`.
+    // We handled `O_PATH` above.
+    match mode & crate::fs::OFlags::RWMODE {
+        crate::fs::OFlags::RDONLY => Ok((true, false)),
+        crate::fs::OFlags::RDWR => Ok((true, true)),
+        crate::fs::OFlags::WRONLY => Ok((false, true)),
+        _ => unreachable!(),
+    }
+}

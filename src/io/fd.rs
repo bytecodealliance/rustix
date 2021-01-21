@@ -11,11 +11,10 @@ use std::os::unix::ffi::OsStringExt;
 use std::os::unix::io::{AsRawFd, FromRawFd, RawFd};
 #[cfg(target_os = "wasi")]
 use std::os::wasi::io::{AsRawFd, RawFd};
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+use std::ptr;
 #[cfg(not(target_os = "redox"))]
-use {
-    crate::zero_ok,
-    std::{convert::TryInto, mem::MaybeUninit},
-};
+use {crate::zero_ok, std::convert::TryInto, std::mem::MaybeUninit};
 
 /// `ioctl(fd, FIONREAD)`.
 #[cfg(not(target_os = "redox"))]
@@ -63,30 +62,66 @@ unsafe fn _isatty(fd: RawFd) -> bool {
     }
 }
 
-/// `fcntl(fd, F_GETFL) & O_ACCMODE`. Returns a pair of booleans indicating
-/// whether the file descriptor is readable and/or writeable, respectively.
+/// Returns a pair of booleans indicating whether the file descriptor is readable
+/// and/or writeable, respectively. Unlike [`is_file_read_write`], this correctly
+/// detects whether sockets have been shutdown, partially or completely.
+#[cfg(not(target_os = "redox"))]
+#[inline]
 pub fn is_read_write<Fd: AsRawFd>(fd: &Fd) -> io::Result<(bool, bool)> {
-    let mode = crate::fs::getfl(fd)?;
+    let fd = fd.as_raw_fd();
+    unsafe { _is_read_write(fd) }
+}
 
-    // Check for `O_PATH`.
-    #[cfg(any(
-        target_os = "android",
-        target_os = "fuchsia",
-        target_os = "linux",
-        target_os = "emscripten"
-    ))]
-    if mode.contains(crate::fs::OFlags::PATH) {
-        return Ok((false, false));
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+unsafe fn _is_read_write(fd: RawFd) -> io::Result<(bool, bool)> {
+    let (mut read, mut write) = crate::fs::is_file_read_write(&fd)?;
+    let mut not_socket = false;
+    if read {
+        // Do a `recv` with `PEEK` and `DONTWAIT` for 1 byte. A 0 indicates
+        // the read side is shut down; an `EWOULDBLOCK` indicates the read
+        // side is still open.
+        match dbg!(libc::recv(
+            fd,
+            MaybeUninit::<[u8; 1]>::uninit().as_mut_ptr() as *mut libc::c_void,
+            1,
+            libc::MSG_PEEK | libc::MSG_DONTWAIT,
+        )) {
+            0 => read = false,
+            -1 => {
+                let err = dbg!(io::Error::last_os_error());
+                #[allow(unreachable_patterns)] // EAGAIN may equal EWOULDBLOCK
+                match err.raw_os_error() {
+                    Some(libc::EAGAIN) | Some(libc::EWOULDBLOCK) => (),
+                    Some(libc::ENOTSOCK) => not_socket = true,
+                    _ => return Err(err),
+                }
+            }
+            _ => (),
+        }
     }
+    if write && !not_socket {
+        // Do a `send` with `DONTWAIT` for 0 bytes. An `EPIPE` indicates
+        // the write side is shut down.
+        match dbg!(libc::send(fd, ptr::null(), 0, libc::MSG_DONTWAIT)) {
+            -1 => {
+                let err = dbg!(io::Error::last_os_error());
+                #[allow(unreachable_patterns)] // EAGAIN may equal EWOULDBLOCK
+                match err.raw_os_error() {
+                    Some(libc::EAGAIN) | Some(libc::EWOULDBLOCK) => (),
+                    Some(libc::ENOTSOCK) => (),
+                    Some(libc::EPIPE) => write = false,
+                    _ => return Err(err),
+                }
+            }
+            _ => (),
+        }
+    }
+    Ok((read, write))
+}
 
-    // Use `RWMODE` rather than `ACCMODE` as `ACCMODE` may include `O_PATH`.
-    // We handled `O_PATH` above.
-    match mode & crate::fs::OFlags::RWMODE {
-        crate::fs::OFlags::RDONLY => Ok((true, false)),
-        crate::fs::OFlags::RDWR => Ok((true, true)),
-        crate::fs::OFlags::WRONLY => Ok((false, true)),
-        _ => unreachable!(),
-    }
+#[cfg(target_os = "wasi")]
+unsafe fn _is_read_write(_fd: RawFd) -> io::Result<(bool, bool)> {
+    todo!("Implement is_read_write in terms of fd_fdstat_get");
 }
 
 /// `dup(fd)`
