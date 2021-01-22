@@ -84,15 +84,15 @@ unsafe fn _is_read_write(fd: RawFd) -> io::Result<(bool, bool)> {
         // Do a `recv` with `PEEK` and `DONTWAIT` for 1 byte. A 0 indicates
         // the read side is shut down; an `EWOULDBLOCK` indicates the read
         // side is still open.
-        match dbg!(libc::recv(
+        match libc::recv(
             fd,
             MaybeUninit::<[u8; 1]>::uninit().as_mut_ptr() as *mut libc::c_void,
             1,
             libc::MSG_PEEK | libc::MSG_DONTWAIT,
-        )) {
+        ) {
             0 => read = false,
             -1 => {
-                let err = dbg!(io::Error::last_os_error());
+                let err = io::Error::last_os_error();
                 #[allow(unreachable_patterns)] // EAGAIN may equal EWOULDBLOCK
                 match err.raw_os_error() {
                     Some(libc::EAGAIN) | Some(libc::EWOULDBLOCK) => (),
@@ -108,7 +108,7 @@ unsafe fn _is_read_write(fd: RawFd) -> io::Result<(bool, bool)> {
         // the write side is shut down.
         match dbg!(libc::send(fd, ptr::null(), 0, libc::MSG_DONTWAIT)) {
             -1 => {
-                let err = dbg!(io::Error::last_os_error());
+                let err = io::Error::last_os_error();
                 #[allow(unreachable_patterns)] // EAGAIN may equal EWOULDBLOCK
                 match err.raw_os_error() {
                     Some(libc::EAGAIN) | Some(libc::EWOULDBLOCK) => (),
