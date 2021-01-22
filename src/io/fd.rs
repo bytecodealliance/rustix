@@ -11,8 +11,6 @@ use std::os::unix::ffi::OsStringExt;
 use std::os::unix::io::{AsRawFd, FromRawFd, RawFd};
 #[cfg(target_os = "wasi")]
 use std::os::wasi::io::{AsRawFd, RawFd};
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-use std::ptr;
 #[cfg(not(target_os = "redox"))]
 use {crate::zero_ok, std::convert::TryInto, std::mem::MaybeUninit};
 
@@ -106,7 +104,7 @@ unsafe fn _is_read_write(fd: RawFd) -> io::Result<(bool, bool)> {
     if write && !not_socket {
         // Do a `send` with `DONTWAIT` for 0 bytes. An `EPIPE` indicates
         // the write side is shut down.
-        match dbg!(libc::send(fd, ptr::null(), 0, libc::MSG_DONTWAIT)) {
+        match libc::send(fd, [].as_ptr(), 0, libc::MSG_DONTWAIT) {
             -1 => {
                 let err = io::Error::last_os_error();
                 #[allow(unreachable_patterns)] // EAGAIN may equal EWOULDBLOCK
