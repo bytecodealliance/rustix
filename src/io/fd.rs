@@ -84,7 +84,9 @@ unsafe fn _is_read_write(fd: RawFd) -> io::Result<(bool, bool)> {
         // side is still open.
         match libc::recv(
             fd,
-            MaybeUninit::<[u8; 1]>::uninit().as_mut_ptr() as *mut libc::c_void,
+            MaybeUninit::<[u8; 1]>::uninit()
+                .as_mut_ptr()
+                .cast::<libc::c_void>(),
             1,
             libc::MSG_PEEK | libc::MSG_DONTWAIT,
         ) {
@@ -162,13 +164,13 @@ unsafe fn _ttyname(dirfd: RawFd, reuse: OsString) -> io::Result<OsString> {
     loop {
         match libc::ttyname_r(
             dirfd as libc::c_int,
-            buffer.as_mut_ptr() as *mut libc::c_char,
+            buffer.as_mut_ptr().cast::<libc::c_char>(),
             buffer.capacity(),
         ) {
             // Use `Vec`'s builtin capacity-doubling strategy.
             libc::ERANGE => buffer.reserve(1),
             0 => {
-                buffer.set_len(libc::strlen(buffer.as_ptr() as *const libc::c_char));
+                buffer.set_len(libc::strlen(buffer.as_ptr().cast::<libc::c_char>()));
                 return Ok(OsString::from_vec(buffer));
             }
             errno => return Err(io::Error::from_raw_os_error(errno)),

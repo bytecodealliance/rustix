@@ -67,7 +67,7 @@ const COPYFILE_STATE_COPIED: u32 = 8;
 /// `copyfile_state_get(state, COPYFILE_STATE_COPIED)`
 pub fn copyfile_state_get_copied(state: copyfile_state_t) -> io::Result<u64> {
     let mut copied = MaybeUninit::<u64>::uninit();
-    unsafe { copyfile_state_get(state, COPYFILE_STATE_COPIED, copied.as_mut_ptr() as *mut _) }?;
+    unsafe { copyfile_state_get(state, COPYFILE_STATE_COPIED, copied.as_mut_ptr().cast()) }?;
     Ok(unsafe { copied.assume_init() })
 }
 

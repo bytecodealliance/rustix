@@ -100,7 +100,7 @@ unsafe fn _readlinkat(dirfd: RawFd, path: &CStr, reuse: OsString) -> io::Result<
         let nread = negone_err(libc::readlinkat(
             dirfd as libc::c_int,
             path.as_ptr(),
-            buffer.as_mut_ptr() as *mut libc::c_char,
+            buffer.as_mut_ptr().cast::<libc::c_char>(),
             buffer.capacity(),
         ))?;
 

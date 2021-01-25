@@ -39,7 +39,7 @@ unsafe fn _socket_type(fd: RawFd) -> io::Result<SocketType> {
         fd,
         libc::SOL_SOCKET,
         libc::SO_TYPE,
-        buffer.as_mut_ptr() as *mut libc::c_void,
+        buffer.as_mut_ptr().cast::<libc::c_void>(),
         &mut out_len,
     ))?;
     assert_eq!(

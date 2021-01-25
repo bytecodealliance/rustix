@@ -12,11 +12,11 @@ struct DIR_INTERNALS {
 }
 
 pub(crate) unsafe fn telldir(dir: *mut libc::DIR) -> libc::c_long {
-    let dir = &*(dir as *mut DIR_INTERNALS);
+    let dir = &*(dir.cast::<DIR_INTERNALS>());
     libc::lseek(dir.fd, 0, libc::SEEK_CUR)
 }
 
 pub(crate) unsafe fn seekdir(dir: *mut libc::DIR, loc: libc::c_long) {
-    let dir = &*(dir as *mut DIR_INTERNALS);
+    let dir = &*(dir.cast::<DIR_INTERNALS>());
     zero_ok(libc::lseek(dir.fd, loc, libc::SEEK_SET)).unwrap()
 }

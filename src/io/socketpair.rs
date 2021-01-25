@@ -13,7 +13,7 @@ pub fn socketpair_stream(domain: i32, protocol: i32) -> io::Result<(TcpStream, T
             domain.try_into().unwrap(),
             libc::SOCK_STREAM,
             protocol.try_into().unwrap(),
-            fds.as_mut_ptr() as *mut RawFd,
+            fds.as_mut_ptr().cast::<RawFd>(),
         ))?;
         let fds = fds.assume_init();
         Ok((

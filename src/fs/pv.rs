@@ -30,7 +30,7 @@ unsafe fn _preadv(fd: RawFd, bufs: &[IoSliceMut], offset: u64) -> io::Result<usi
         .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
     let nread = negone_err(libc_preadv(
         fd as libc::c_int,
-        bufs.as_ptr() as *const libc::iovec,
+        bufs.as_ptr().cast::<libc::iovec>(),
         cmp::min(bufs.len(), max_iov()).try_into().unwrap(),
         offset,
     ))?;
@@ -50,7 +50,7 @@ unsafe fn _pwritev(fd: RawFd, bufs: &[IoSlice], offset: u64) -> io::Result<usize
         .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
     let nwritten = negone_err(libc_pwritev(
         fd as libc::c_int,
-        bufs.as_ptr() as *const libc::iovec,
+        bufs.as_ptr().cast::<libc::iovec>(),
         cmp::min(bufs.len(), max_iov()).try_into().unwrap(),
         offset,
     ))?;
