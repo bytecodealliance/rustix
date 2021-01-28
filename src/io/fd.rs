@@ -67,6 +67,8 @@ unsafe fn _isatty(fd: RawFd) -> bool {
 /// Returns a pair of booleans indicating whether the file descriptor is readable
 /// and/or writeable, respectively. Unlike [`is_file_read_write`], this correctly
 /// detects whether sockets have been shutdown, partially or completely.
+///
+/// [`is_file_read_write`]: crate::fs::is_file_read_write
 #[cfg(not(target_os = "redox"))]
 #[inline]
 pub fn is_read_write<Fd: AsRawFd>(fd: &Fd) -> io::Result<(bool, bool)> {
