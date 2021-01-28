@@ -127,7 +127,7 @@ unsafe fn _is_read_write(fd: RawFd) -> io::Result<(bool, bool)> {
 
 #[cfg(target_os = "wasi")]
 unsafe fn _is_read_write(_fd: RawFd) -> io::Result<(bool, bool)> {
-    todo!("Implement is_read_write in terms of fd_fdstat_get");
+    todo!("Implement is_read_write for WASI in terms of fd_fdstat_get");
 }
 
 /// `dup(fd)`
