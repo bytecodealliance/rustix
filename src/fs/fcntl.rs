@@ -51,3 +51,30 @@ pub fn setfl<Fd: AsRawFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
 unsafe fn _setfl(fd: RawFd, flags: OFlags) -> io::Result<()> {
     zero_ok(libc::fcntl(fd as libc::c_int, libc::F_SETFL, flags.bits()))
 }
+
+/// `fcntl(fd, F_GET_SEALS)`
+#[cfg(not(any(
+    target_os = "freebsd",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "redox",
+    target_os = "wasi",
+)))]
+#[inline]
+pub fn get_seals<Fd: AsRawFd>(fd: &Fd) -> io::Result<i32> {
+    let fd = fd.as_raw_fd();
+    unsafe { _get_seals(fd) }
+}
+
+#[cfg(not(any(
+    target_os = "freebsd",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "redox",
+    target_os = "wasi",
+)))]
+unsafe fn _get_seals(fd: RawFd) -> io::Result<i32> {
+    negone_err(libc::fcntl(fd as libc::c_int, libc::F_GET_SEALS))
+}

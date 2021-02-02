@@ -68,6 +68,15 @@ pub use dir::{Dir, Entry, SeekLoc};
     target_os = "redox"
 )))]
 pub use fadvise::{fadvise, Advice};
+#[cfg(not(any(
+    target_os = "freebsd",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "redox",
+    target_os = "wasi",
+)))]
+pub use fcntl::get_seals;
 pub use fcntl::{getfd, getfl, setfd, setfl};
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub use fcopyfile::{
