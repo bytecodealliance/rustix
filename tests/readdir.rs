@@ -1,3 +1,5 @@
+#![cfg(not(target_os = "redox"))]
+
 use posish::fs::{Dir, Entry};
 use std::collections::HashMap;
 
