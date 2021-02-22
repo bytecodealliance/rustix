@@ -29,6 +29,7 @@ use std::{
     mem::MaybeUninit,
     os::wasi::io::{AsRawFd, IntoRawFd, RawFd},
 };
+use unsafe_io::{IntoUnsafeHandle, OwnsRaw};
 
 /// `DIR*`
 #[repr(transparent)]
@@ -37,9 +38,22 @@ pub struct Dir(ptr::NonNull<libc::DIR>);
 impl Dir {
     /// Construct a `Dir`, assuming ownership of the file descriptor.
     #[inline]
-    pub fn from<F: IntoRawFd>(fd: F) -> io::Result<Self> {
-        let fd = fd.into_raw_fd();
+    pub fn from<F: IntoUnsafeHandle>(fd: F) -> io::Result<Self> {
+        let fd = fd.into_unsafe_handle().into_raw_fd();
         unsafe { Self::_from(fd) }
+    }
+
+    /// Construct a `Dir`, assuming ownership of the file descriptor.
+    ///
+    /// # Safety
+    ///
+    /// This accepts any type that implements `IntoRawFd`, however `IntoRawFd`
+    /// itself doesn't guarantee that the handle is valid. Callers must ensure
+    /// that the handle is valid.
+    #[inline]
+    pub unsafe fn from_into_raw_fd<F: IntoRawFd>(fd: F) -> io::Result<Self> {
+        let fd = fd.into_raw_fd();
+        Self::_from(fd)
     }
 
     unsafe fn _from(fd: RawFd) -> io::Result<Self> {
@@ -116,6 +130,9 @@ impl AsRawFd for Dir {
         unsafe { libc::dirfd(self.0.as_ptr()) as RawFd }
     }
 }
+
+// Safety: `Dir` owns its handle.
+unsafe impl OwnsRaw for Dir {}
 
 impl Drop for Dir {
     #[inline]
