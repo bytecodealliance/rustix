@@ -43,6 +43,8 @@ pub enum ClockId {
 
 /// `clock_getres(id)`
 #[cfg(not(target_os = "wasi"))]
+#[inline]
+#[must_use]
 pub fn clock_getres(id: ClockId) -> timespec {
     let mut timespec = MaybeUninit::<timespec>::uninit();
     zero_ok(unsafe { libc::clock_getres(id as libc::clockid_t, timespec.as_mut_ptr()) }).unwrap();
@@ -51,6 +53,8 @@ pub fn clock_getres(id: ClockId) -> timespec {
 
 /// `clock_gettime(id)`
 #[cfg(not(target_os = "wasi"))]
+#[inline]
+#[must_use]
 pub fn clock_gettime(id: ClockId) -> timespec {
     let mut timespec = MaybeUninit::<timespec>::uninit();
     zero_ok(unsafe { libc::clock_gettime(id as libc::clockid_t, timespec.as_mut_ptr()) }).unwrap();

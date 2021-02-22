@@ -28,7 +28,7 @@ pub enum FileType {
 
 impl FileType {
     /// Construct a `FileType` from the `st_mode` field of a `LibcStat`.
-    pub fn from_libc_stat_st_mode(st_mode: libc::mode_t) -> Self {
+    pub const fn from_libc_stat_st_mode(st_mode: libc::mode_t) -> Self {
         match st_mode & libc::S_IFMT {
             libc::S_IFREG => Self::RegularFile,
             libc::S_IFDIR => Self::Directory,
@@ -45,7 +45,7 @@ impl FileType {
 
     /// Construct a `FileType` from the `d_type` field of a `libc::dirent`.
     #[cfg(not(target_os = "redox"))]
-    pub(crate) fn from_dirent_d_type(d_type: u8) -> Self {
+    pub(crate) const fn from_dirent_d_type(d_type: u8) -> Self {
         match d_type {
             libc::DT_REG => Self::RegularFile,
             libc::DT_DIR => Self::Directory,

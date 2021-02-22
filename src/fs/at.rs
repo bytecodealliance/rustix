@@ -44,6 +44,7 @@ use std::{
 /// not drop it explicitly, as it refers to an ambient authority rather than
 /// an open resource.
 #[cfg(not(target_os = "wasi"))]
+#[inline]
 pub fn cwd() -> ManuallyDrop<fs::File> {
     ManuallyDrop::new(unsafe { fs::File::from_raw_fd(libc::AT_FDCWD) })
 }
