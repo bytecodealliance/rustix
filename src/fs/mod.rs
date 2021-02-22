@@ -155,3 +155,11 @@ pub type LibcStatFs = libc::statfs64;
 /// Re-export `libc::statx`. Only available on Linux with GLIBC for now.
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 pub type LibcStatx = libc::statx;
+
+/// Re-export types common to Posix-ish platforms.
+#[cfg(unix)]
+pub use std::os::unix::fs::{DirEntryExt, FileExt, FileTypeExt, MetadataExt, OpenOptionsExt};
+
+/// Re-export types common to Posix-ish platforms.
+#[cfg(target_os = "wasi")]
+pub use std::os::wasi::fs::{DirEntryExt, FileExt, FileTypeExt, MetadataExt, OpenOptionsExt};
