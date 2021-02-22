@@ -65,8 +65,8 @@ pub mod path;
 pub mod process;
 pub mod time;
 
-/// Given a `libc` return value, translate `0` into `Ok(())` and any other value
-/// to an `Err` with the error from `errno`.
+/// Given a `libc` return value, translate `0` into `Ok(())` and any other
+/// value to an `Err` with the error from `errno`.
 fn zero_ok<T: LibcResult>(t: T) -> std::io::Result<()> {
     if t.is_zero() {
         Ok(())
@@ -86,7 +86,8 @@ fn negone_err<T: LibcResult>(t: T) -> std::io::Result<T> {
 }
 
 /// Given a `libc` return value, translate a negative value into an `Err` with
-/// the error from `errno`, and any other value to an `Ok` containing the value.
+/// the error from `errno`, and any other value to an `Ok` containing the
+/// value.
 #[allow(dead_code)]
 fn negative_err<T: LibcResult>(t: T) -> std::io::Result<()> {
     if t.is_negative() {
