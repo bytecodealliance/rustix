@@ -31,6 +31,7 @@ use std::{
 };
 
 /// `DIR*`
+#[repr(transparent)]
 pub struct Dir(ptr::NonNull<libc::DIR>);
 
 impl Dir {
@@ -200,6 +201,7 @@ impl Entry {
 ///
 /// [`Dir::seek`]: struct.Dir.html#method.seek
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+#[repr(transparent)]
 pub struct SeekLoc(libc::c_long);
 
 impl SeekLoc {
