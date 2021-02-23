@@ -7,26 +7,23 @@ use std::ffi::OsString;
 use std::io;
 #[cfg(all(unix, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 use std::os::unix::ffi::OsStringExt;
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, FromRawFd, RawFd};
-#[cfg(target_os = "wasi")]
-use std::os::wasi::io::{AsRawFd, RawFd};
+use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, FromUnsafeHandle, UnsafeHandle};
 #[cfg(not(target_os = "redox"))]
 use {crate::zero_ok, std::convert::TryInto, std::mem::MaybeUninit};
 
 /// `ioctl(fd, FIONREAD)`.
 #[cfg(not(target_os = "redox"))]
 #[inline]
-pub fn fionread<Fd: AsRawFd>(fd: &Fd) -> io::Result<u64> {
-    let fd = fd.as_raw_fd();
+pub fn fionread<Fd: AsUnsafeHandle>(fd: &Fd) -> io::Result<u64> {
+    let fd = fd.as_unsafe_handle();
     unsafe { _fionread(fd) }
 }
 
 #[cfg(not(target_os = "redox"))]
-unsafe fn _fionread(fd: RawFd) -> io::Result<u64> {
+unsafe fn _fionread(fd: UnsafeHandle) -> io::Result<u64> {
     let mut nread = MaybeUninit::<libc::c_int>::uninit();
     zero_ok(libc::ioctl(
-        fd as libc::c_int,
+        fd.as_raw_fd() as libc::c_int,
         libc::FIONREAD,
         nread.as_mut_ptr(),
     ))?;
@@ -35,13 +32,13 @@ unsafe fn _fionread(fd: RawFd) -> io::Result<u64> {
 
 /// `isatty(fd)`
 #[inline]
-pub fn isatty<Fd: AsRawFd>(fd: &Fd) -> bool {
-    let fd = fd.as_raw_fd();
+pub fn isatty<Fd: AsUnsafeHandle>(fd: &Fd) -> bool {
+    let fd = fd.as_unsafe_handle();
     unsafe { _isatty(fd) }
 }
 
-unsafe fn _isatty(fd: RawFd) -> bool {
-    let res = libc::isatty(fd as libc::c_int);
+unsafe fn _isatty(fd: UnsafeHandle) -> bool {
+    let res = libc::isatty(fd.as_raw_fd() as libc::c_int);
     if res == 0 {
         let err = io::Error::last_os_error();
         match err.raw_os_error() {
@@ -71,21 +68,21 @@ unsafe fn _isatty(fd: RawFd) -> bool {
 /// [`is_file_read_write`]: crate::fs::is_file_read_write
 #[cfg(not(target_os = "redox"))]
 #[inline]
-pub fn is_read_write<Fd: AsRawFd>(fd: &Fd) -> io::Result<(bool, bool)> {
-    let fd = fd.as_raw_fd();
+pub fn is_read_write<Fd: AsUnsafeHandle>(fd: &Fd) -> io::Result<(bool, bool)> {
+    let fd = fd.as_unsafe_handle();
     unsafe { _is_read_write(fd) }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-unsafe fn _is_read_write(fd: RawFd) -> io::Result<(bool, bool)> {
-    let (mut read, mut write) = crate::fs::is_file_read_write(&fd)?;
+unsafe fn _is_read_write(fd: UnsafeHandle) -> io::Result<(bool, bool)> {
+    let (mut read, mut write) = crate::fs::fd::_is_file_read_write(fd)?;
     let mut not_socket = false;
     if read {
         // Do a `recv` with `PEEK` and `DONTWAIT` for 1 byte. A 0 indicates
         // the read side is shut down; an `EWOULDBLOCK` indicates the read
         // side is still open.
         match libc::recv(
-            fd,
+            fd.as_raw_fd(),
             MaybeUninit::<[u8; 1]>::uninit()
                 .as_mut_ptr()
                 .cast::<libc::c_void>(),
@@ -108,7 +105,7 @@ unsafe fn _is_read_write(fd: RawFd) -> io::Result<(bool, bool)> {
     if write && !not_socket {
         // Do a `send` with `DONTWAIT` for 0 bytes. An `EPIPE` indicates
         // the write side is shut down.
-        match libc::send(fd, [].as_ptr(), 0, libc::MSG_DONTWAIT) {
+        match libc::send(fd.as_raw_fd(), [].as_ptr(), 0, libc::MSG_DONTWAIT) {
             -1 => {
                 let err = io::Error::last_os_error();
                 #[allow(unreachable_patterns)] // EAGAIN may equal EWOULDBLOCK
@@ -126,21 +123,21 @@ unsafe fn _is_read_write(fd: RawFd) -> io::Result<(bool, bool)> {
 }
 
 #[cfg(target_os = "wasi")]
-unsafe fn _is_read_write(_fd: RawFd) -> io::Result<(bool, bool)> {
+unsafe fn _is_read_write(_fd: UnsafeHandle) -> io::Result<(bool, bool)> {
     todo!("Implement is_read_write for WASI in terms of fd_fdstat_get");
 }
 
 /// `dup(fd)`
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn dup<Fd: AsRawFd + FromRawFd>(fd: &Fd) -> io::Result<Fd> {
-    let fd = fd.as_raw_fd();
-    unsafe { _dup(fd).map(|raw_fd| Fd::from_raw_fd(raw_fd)) }
+pub fn dup<Fd: AsUnsafeHandle + FromUnsafeHandle>(fd: &Fd) -> io::Result<Fd> {
+    let fd = fd.as_unsafe_handle();
+    unsafe { _dup(fd).map(|raw_fd| Fd::from_unsafe_handle(raw_fd)) }
 }
 
 #[cfg(not(target_os = "wasi"))]
-unsafe fn _dup(fd: RawFd) -> io::Result<RawFd> {
-    negone_err(libc::dup(fd as libc::c_int))
+unsafe fn _dup(fd: UnsafeHandle) -> io::Result<UnsafeHandle> {
+    negone_err(libc::dup(fd.as_raw_fd() as libc::c_int)).map(UnsafeHandle::from_raw_fd)
 }
 
 /// `ttyname_r(fd)`
@@ -148,13 +145,13 @@ unsafe fn _dup(fd: RawFd) -> io::Result<RawFd> {
 /// If `reuse` is non-empty, reuse its buffer to store the result if possible.
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 #[inline]
-pub fn ttyname<Fd: AsRawFd>(dirfd: &Fd, reuse: OsString) -> io::Result<OsString> {
-    let dirfd = dirfd.as_raw_fd();
+pub fn ttyname<Fd: AsUnsafeHandle>(dirfd: &Fd, reuse: OsString) -> io::Result<OsString> {
+    let dirfd = dirfd.as_unsafe_handle();
     unsafe { _ttyname(dirfd, reuse) }
 }
 
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
-unsafe fn _ttyname(dirfd: RawFd, reuse: OsString) -> io::Result<OsString> {
+unsafe fn _ttyname(dirfd: UnsafeHandle, reuse: OsString) -> io::Result<OsString> {
     let mut buffer = reuse.into_vec();
 
     // Start with a buffer big enough for the vast majority of paths.
@@ -165,7 +162,7 @@ unsafe fn _ttyname(dirfd: RawFd, reuse: OsString) -> io::Result<OsString> {
 
     loop {
         match libc::ttyname_r(
-            dirfd as libc::c_int,
+            dirfd.as_raw_fd() as libc::c_int,
             buffer.as_mut_ptr().cast::<libc::c_char>(),
             buffer.capacity(),
         ) {

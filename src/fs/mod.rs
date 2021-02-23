@@ -16,10 +16,10 @@ mod dir;
     target_os = "redox"
 )))]
 mod fadvise;
-mod fcntl;
+pub(crate) mod fcntl;
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 mod fcopyfile;
-mod fd;
+pub(crate) mod fd;
 mod file_type;
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 mod getpath;

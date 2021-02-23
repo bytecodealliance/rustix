@@ -23,20 +23,18 @@ use libc::{fstatat64 as libc_fstatat, openat64 as libc_openat};
 #[cfg(not(target_os = "wasi"))]
 use std::mem::ManuallyDrop;
 #[cfg(unix)]
-use std::os::unix::{
-    ffi::OsStringExt,
-    io::{AsRawFd, FromRawFd, RawFd},
-};
+use std::os::unix::ffi::OsStringExt;
 #[cfg(target_os = "wasi")]
-use std::os::wasi::{
-    ffi::OsStringExt,
-    io::{AsRawFd, FromRawFd, RawFd},
-};
+use std::os::wasi::ffi::OsStringExt;
 use std::{
     convert::TryInto,
     ffi::{CStr, OsString},
     fs, io,
     mem::MaybeUninit,
+};
+use unsafe_io::{
+    os::posish::{AsRawFd, FromRawFd, RawFd},
+    AsUnsafeHandle, FromUnsafeFile, UnsafeFile, UnsafeHandle,
 };
 
 /// Return a "file" which holds a handle which refers to the process current
@@ -51,44 +49,51 @@ pub fn cwd() -> ManuallyDrop<fs::File> {
 
 /// `openat(dirfd, path, oflags, mode)`
 #[inline]
-pub fn openat<P: path::Arg, Fd: AsRawFd>(
+pub fn openat<P: path::Arg, Fd: AsUnsafeHandle>(
     dirfd: &Fd,
     path: P,
     oflags: OFlags,
     mode: Mode,
 ) -> io::Result<fs::File> {
-    let dirfd = dirfd.as_raw_fd();
+    let dirfd = dirfd.as_unsafe_handle();
     let path = path.as_c_str()?;
     unsafe { _openat(dirfd, &path, oflags, mode) }
 }
 
-unsafe fn _openat(dirfd: RawFd, path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<fs::File> {
+unsafe fn _openat(
+    dirfd: UnsafeHandle,
+    path: &CStr,
+    oflags: OFlags,
+    mode: Mode,
+) -> io::Result<fs::File> {
     #[allow(clippy::useless_conversion)]
     let fd = negone_err(libc_openat(
-        dirfd as libc::c_int,
+        dirfd.as_raw_fd() as libc::c_int,
         path.as_ptr(),
         oflags.bits(),
         libc::c_uint::from(mode.bits()),
     ))?;
 
-    Ok(fs::File::from_raw_fd(fd as RawFd))
+    Ok(fs::File::from_unsafe_file(UnsafeFile::from_raw_fd(
+        fd as RawFd,
+    )))
 }
 
 /// `readlinkat(fd, path)`
 ///
 /// If `reuse` is non-empty, reuse its buffer to store the result if possible.
 #[inline]
-pub fn readlinkat<P: path::Arg, Fd: AsRawFd>(
+pub fn readlinkat<P: path::Arg, Fd: AsUnsafeHandle>(
     dirfd: &Fd,
     path: P,
     reuse: OsString,
 ) -> io::Result<OsString> {
-    let dirfd = dirfd.as_raw_fd();
+    let dirfd = dirfd.as_unsafe_handle();
     let path = path.as_c_str()?;
     unsafe { _readlinkat(dirfd, &path, reuse) }
 }
 
-unsafe fn _readlinkat(dirfd: RawFd, path: &CStr, reuse: OsString) -> io::Result<OsString> {
+unsafe fn _readlinkat(dirfd: UnsafeHandle, path: &CStr, reuse: OsString) -> io::Result<OsString> {
     let mut buffer = reuse.into_vec();
 
     // Start with a buffer big enough for the vast majority of paths.
@@ -99,7 +104,7 @@ unsafe fn _readlinkat(dirfd: RawFd, path: &CStr, reuse: OsString) -> io::Result<
 
     loop {
         let nread = negone_err(libc::readlinkat(
-            dirfd as libc::c_int,
+            dirfd.as_raw_fd() as libc::c_int,
             path.as_ptr(),
             buffer.as_mut_ptr().cast::<libc::c_char>(),
             buffer.capacity(),
@@ -119,15 +124,19 @@ unsafe fn _readlinkat(dirfd: RawFd, path: &CStr, reuse: OsString) -> io::Result<
 
 /// `mkdirat(fd, path, mode)`
 #[inline]
-pub fn mkdirat<P: path::Arg, Fd: AsRawFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
-    let dirfd = dirfd.as_raw_fd();
+pub fn mkdirat<P: path::Arg, Fd: AsUnsafeHandle>(
+    dirfd: &Fd,
+    path: P,
+    mode: Mode,
+) -> io::Result<()> {
+    let dirfd = dirfd.as_unsafe_handle();
     let path = path.as_c_str()?;
     unsafe { _mkdirat(dirfd, &path, mode) }
 }
 
-unsafe fn _mkdirat(dirfd: RawFd, path: &CStr, mode: Mode) -> io::Result<()> {
+unsafe fn _mkdirat(dirfd: UnsafeHandle, path: &CStr, mode: Mode) -> io::Result<()> {
     zero_ok(libc::mkdirat(
-        dirfd as libc::c_int,
+        dirfd.as_raw_fd() as libc::c_int,
         path.as_ptr(),
         mode.bits(),
     ))
@@ -135,31 +144,31 @@ unsafe fn _mkdirat(dirfd: RawFd, path: &CStr, mode: Mode) -> io::Result<()> {
 
 /// `linkat(old_dirfd, old_path, new_dirfd, new_path, flags)`
 #[inline]
-pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsRawFd, QFd: AsRawFd>(
+pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsUnsafeHandle, QFd: AsUnsafeHandle>(
     old_dirfd: &PFd,
     old_path: P,
     new_dirfd: &QFd,
     new_path: Q,
     flags: AtFlags,
 ) -> io::Result<()> {
-    let old_dirfd = old_dirfd.as_raw_fd();
-    let new_dirfd = new_dirfd.as_raw_fd();
+    let old_dirfd = old_dirfd.as_unsafe_handle();
+    let new_dirfd = new_dirfd.as_unsafe_handle();
     let old_path = old_path.as_c_str()?;
     let new_path = new_path.as_c_str()?;
     unsafe { _linkat(old_dirfd, &old_path, new_dirfd, &new_path, flags) }
 }
 
 unsafe fn _linkat(
-    old_dirfd: RawFd,
+    old_dirfd: UnsafeHandle,
     old_path: &CStr,
-    new_dirfd: RawFd,
+    new_dirfd: UnsafeHandle,
     new_path: &CStr,
     flags: AtFlags,
 ) -> io::Result<()> {
     zero_ok(libc::linkat(
-        old_dirfd as libc::c_int,
+        old_dirfd.as_raw_fd() as libc::c_int,
         old_path.as_ptr(),
-        new_dirfd as libc::c_int,
+        new_dirfd.as_raw_fd() as libc::c_int,
         new_path.as_ptr(),
         flags.bits(),
     ))
@@ -167,15 +176,19 @@ unsafe fn _linkat(
 
 /// `unlinkat(fd, path, flags)`
 #[inline]
-pub fn unlinkat<P: path::Arg, Fd: AsRawFd>(dirfd: &Fd, path: P, flags: AtFlags) -> io::Result<()> {
-    let dirfd = dirfd.as_raw_fd();
+pub fn unlinkat<P: path::Arg, Fd: AsUnsafeHandle>(
+    dirfd: &Fd,
+    path: P,
+    flags: AtFlags,
+) -> io::Result<()> {
+    let dirfd = dirfd.as_unsafe_handle();
     let path = path.as_c_str()?;
     unsafe { _unlinkat(dirfd, &path, flags) }
 }
 
-unsafe fn _unlinkat(dirfd: RawFd, path: &CStr, flags: AtFlags) -> io::Result<()> {
+unsafe fn _unlinkat(dirfd: UnsafeHandle, path: &CStr, flags: AtFlags) -> io::Result<()> {
     zero_ok(libc::unlinkat(
-        dirfd as libc::c_int,
+        dirfd.as_raw_fd() as libc::c_int,
         path.as_ptr(),
         flags.bits(),
     ))
@@ -183,70 +196,70 @@ unsafe fn _unlinkat(dirfd: RawFd, path: &CStr, flags: AtFlags) -> io::Result<()>
 
 /// `renameat(old_dirfd, old_path, new_dirfd, new_path)`
 #[inline]
-pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsRawFd, QFd: AsRawFd>(
+pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsUnsafeHandle, QFd: AsUnsafeHandle>(
     old_dirfd: &PFd,
     old_path: P,
     new_dirfd: &QFd,
     new_path: Q,
 ) -> io::Result<()> {
-    let old_dirfd = old_dirfd.as_raw_fd();
-    let new_dirfd = new_dirfd.as_raw_fd();
+    let old_dirfd = old_dirfd.as_unsafe_handle();
+    let new_dirfd = new_dirfd.as_unsafe_handle();
     let old_path = old_path.as_c_str()?;
     let new_path = new_path.as_c_str()?;
     unsafe { _renameat(old_dirfd, &old_path, new_dirfd, &new_path) }
 }
 
 unsafe fn _renameat(
-    old_dirfd: RawFd,
+    old_dirfd: UnsafeHandle,
     old_path: &CStr,
-    new_dirfd: RawFd,
+    new_dirfd: UnsafeHandle,
     new_path: &CStr,
 ) -> io::Result<()> {
     zero_ok(libc::renameat(
-        old_dirfd as libc::c_int,
+        old_dirfd.as_raw_fd() as libc::c_int,
         old_path.as_ptr(),
-        new_dirfd as libc::c_int,
+        new_dirfd.as_raw_fd() as libc::c_int,
         new_path.as_ptr(),
     ))
 }
 
 /// `symlinkat(old_dirfd, old_path, new_dirfd, new_path)`
 #[inline]
-pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsRawFd>(
+pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsUnsafeHandle>(
     old_path: P,
     new_dirfd: &Fd,
     new_path: Q,
 ) -> io::Result<()> {
-    let new_dirfd = new_dirfd.as_raw_fd();
+    let new_dirfd = new_dirfd.as_unsafe_handle();
     let old_path = old_path.as_c_str()?;
     let new_path = new_path.as_c_str()?;
     unsafe { _symlinkat(&old_path, new_dirfd, &new_path) }
 }
 
-unsafe fn _symlinkat(old_path: &CStr, new_dirfd: RawFd, new_path: &CStr) -> io::Result<()> {
+unsafe fn _symlinkat(old_path: &CStr, new_dirfd: UnsafeHandle, new_path: &CStr) -> io::Result<()> {
     zero_ok(libc::symlinkat(
         old_path.as_ptr(),
-        new_dirfd as libc::c_int,
+        new_dirfd.as_raw_fd() as libc::c_int,
         new_path.as_ptr(),
     ))
 }
 
 /// `fstatat(dirfd, path, flags)`
 #[inline]
-pub fn statat<P: path::Arg, Fd: AsRawFd>(
+pub fn statat<P: path::Arg, Fd: AsUnsafeHandle>(
     dirfd: &Fd,
     path: P,
     flags: AtFlags,
 ) -> io::Result<LibcStat> {
-    let dirfd = dirfd.as_raw_fd();
+    let dirfd = dirfd.as_unsafe_handle();
     let path = path.as_c_str()?;
     unsafe { _statat(dirfd, &path, flags) }
 }
 
-unsafe fn _statat(dirfd: RawFd, path: &CStr, flags: AtFlags) -> io::Result<LibcStat> {
+unsafe fn _statat(dirfd: UnsafeHandle, path: &CStr, flags: AtFlags) -> io::Result<LibcStat> {
     let mut stat = MaybeUninit::<LibcStat>::uninit();
     zero_ok(libc_fstatat(
-        dirfd as libc::c_int,
+        dirfd.as_raw_fd() as libc::c_int,
         path.as_ptr(),
         stat.as_mut_ptr(),
         flags.bits(),
@@ -256,21 +269,26 @@ unsafe fn _statat(dirfd: RawFd, path: &CStr, flags: AtFlags) -> io::Result<LibcS
 
 /// `faccessat(dirfd, path, access, flags)`
 #[inline]
-pub fn accessat<P: path::Arg, Fd: AsRawFd>(
+pub fn accessat<P: path::Arg, Fd: AsUnsafeHandle>(
     dirfd: &Fd,
     path: P,
     access: Access,
     flags: AtFlags,
 ) -> io::Result<()> {
-    let dirfd = dirfd.as_raw_fd();
+    let dirfd = dirfd.as_unsafe_handle();
     let path = path.as_c_str()?;
     unsafe { _accessat(dirfd, &path, access, flags) }
 }
 
 #[cfg(not(target_os = "emscripten"))]
-unsafe fn _accessat(dirfd: RawFd, path: &CStr, access: Access, flags: AtFlags) -> io::Result<()> {
+unsafe fn _accessat(
+    dirfd: UnsafeHandle,
+    path: &CStr,
+    access: Access,
+    flags: AtFlags,
+) -> io::Result<()> {
     zero_ok(libc::faccessat(
-        dirfd as libc::c_int,
+        dirfd.as_raw_fd() as libc::c_int,
         path.as_ptr(),
         access.bits(),
         flags.bits(),
@@ -281,7 +299,7 @@ unsafe fn _accessat(dirfd: RawFd, path: &CStr, access: Access, flags: AtFlags) -
 // is available.
 #[cfg(target_os = "emscripten")]
 unsafe fn _accessat(
-    _dirfd: RawFd,
+    _dirfd: UnsafeHandle,
     _path: &CStr,
     _access: Access,
     _flags: AtFlags,
@@ -291,25 +309,25 @@ unsafe fn _accessat(
 
 /// `utimensat(dirfd, path, times, flags)`
 #[inline]
-pub fn utimensat<P: path::Arg, Fd: AsRawFd>(
+pub fn utimensat<P: path::Arg, Fd: AsUnsafeHandle>(
     dirfd: &Fd,
     path: P,
     times: &[libc::timespec; 2],
     flags: AtFlags,
 ) -> io::Result<()> {
-    let dirfd = dirfd.as_raw_fd();
+    let dirfd = dirfd.as_unsafe_handle();
     let path = path.as_c_str()?;
     unsafe { _utimensat(dirfd, &path, times, flags) }
 }
 
 unsafe fn _utimensat(
-    dirfd: RawFd,
+    dirfd: UnsafeHandle,
     path: &CStr,
     times: &[libc::timespec; 2],
     flags: AtFlags,
 ) -> io::Result<()> {
     zero_ok(libc::utimensat(
-        dirfd as libc::c_int,
+        dirfd.as_raw_fd() as libc::c_int,
         path.as_ptr(),
         times.as_ptr(),
         flags.bits(),
@@ -327,16 +345,20 @@ unsafe fn _utimensat(
 /// even on platforms where the host libc emulates it.
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn chmodat<P: path::Arg, Fd: AsRawFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
-    let dirfd = dirfd.as_raw_fd();
+pub fn chmodat<P: path::Arg, Fd: AsUnsafeHandle>(
+    dirfd: &Fd,
+    path: P,
+    mode: Mode,
+) -> io::Result<()> {
+    let dirfd = dirfd.as_unsafe_handle();
     let path = path.as_c_str()?;
     unsafe { _chmodat(dirfd, &path, mode) }
 }
 
 #[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
-unsafe fn _chmodat(dirfd: RawFd, path: &CStr, mode: Mode) -> io::Result<()> {
+unsafe fn _chmodat(dirfd: UnsafeHandle, path: &CStr, mode: Mode) -> io::Result<()> {
     zero_ok(libc::fchmodat(
-        dirfd as libc::c_int,
+        dirfd.as_raw_fd() as libc::c_int,
         path.as_ptr(),
         mode.bits(),
         0,
@@ -344,11 +366,11 @@ unsafe fn _chmodat(dirfd: RawFd, path: &CStr, mode: Mode) -> io::Result<()> {
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
-unsafe fn _chmodat(dirfd: RawFd, path: &CStr, mode: Mode) -> io::Result<()> {
+unsafe fn _chmodat(dirfd: UnsafeHandle, path: &CStr, mode: Mode) -> io::Result<()> {
     // Note that Linux's `fchmodat` does not have a flags argument.
     zero_ok(libc::syscall(
         libc::SYS_fchmodat,
-        dirfd as libc::c_int,
+        dirfd.as_raw_fd() as libc::c_int,
         path.as_ptr(),
         mode.bits(),
     ))
@@ -357,16 +379,16 @@ unsafe fn _chmodat(dirfd: RawFd, path: &CStr, mode: Mode) -> io::Result<()> {
 /// `fclonefileat(src, dst_dir, dst, flags)`
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 #[inline]
-pub fn fclonefileat<Fd: AsRawFd, DstFd: AsRawFd, P: path::Arg>(
+pub fn fclonefileat<Fd: AsUnsafeHandle, DstFd: AsUnsafeHandle, P: path::Arg>(
     src: &Fd,
     dst_dir: &DstFd,
     dst: P,
     flags: CloneFlags,
 ) -> io::Result<()> {
-    let srcfd = src.as_raw_fd();
-    let dst_dirfd = dst_dir.as_raw_fd();
+    let srcfd = src.as_unsafe_handle();
+    let dst_dirfd = dst_dir.as_unsafe_handle();
     let dst = dst.as_c_str()?;
-    unsafe { _fclonefileat(srcfd, dst_dirfd, &dst, flags) }
+    unsafe { _fclonefileat(srcfd.as_raw_fd(), dst_dirfd.as_raw_fd(), &dst, flags) }
 }
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]

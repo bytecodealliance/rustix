@@ -3,53 +3,60 @@ use crate::{
     negone_err, zero_ok,
 };
 use std::io;
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, RawFd};
-#[cfg(target_os = "wasi")]
-use std::os::wasi::io::{AsRawFd, RawFd};
+use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
 
 /// `fcntl(fd, F_GETFD)`
 #[inline]
-pub fn getfd<Fd: AsRawFd>(fd: &Fd) -> io::Result<FdFlags> {
-    let fd = fd.as_raw_fd();
+pub fn getfd<Fd: AsUnsafeHandle>(fd: &Fd) -> io::Result<FdFlags> {
+    let fd = fd.as_unsafe_handle();
     unsafe { _getfd(fd) }
 }
 
-unsafe fn _getfd(fd: RawFd) -> io::Result<FdFlags> {
-    negone_err(libc::fcntl(fd as libc::c_int, libc::F_GETFD)).map(FdFlags::from_bits_truncate)
+unsafe fn _getfd(fd: UnsafeHandle) -> io::Result<FdFlags> {
+    negone_err(libc::fcntl(fd.as_raw_fd() as libc::c_int, libc::F_GETFD))
+        .map(FdFlags::from_bits_truncate)
 }
 
 /// `fcntl(fd, F_SETFD, flags)`
 #[inline]
-pub fn setfd<Fd: AsRawFd>(fd: &Fd, flags: FdFlags) -> io::Result<()> {
-    let fd = fd.as_raw_fd();
+pub fn setfd<Fd: AsUnsafeHandle>(fd: &Fd, flags: FdFlags) -> io::Result<()> {
+    let fd = fd.as_unsafe_handle();
     unsafe { _setfd(fd, flags) }
 }
 
-unsafe fn _setfd(fd: RawFd, flags: FdFlags) -> io::Result<()> {
-    zero_ok(libc::fcntl(fd as libc::c_int, libc::F_SETFD, flags.bits()))
+unsafe fn _setfd(fd: UnsafeHandle, flags: FdFlags) -> io::Result<()> {
+    zero_ok(libc::fcntl(
+        fd.as_raw_fd() as libc::c_int,
+        libc::F_SETFD,
+        flags.bits(),
+    ))
 }
 
 /// `fcntl(fd, F_GETFL)`
 #[inline]
-pub fn getfl<Fd: AsRawFd>(fd: &Fd) -> io::Result<OFlags> {
-    let fd = fd.as_raw_fd();
+pub fn getfl<Fd: AsUnsafeHandle>(fd: &Fd) -> io::Result<OFlags> {
+    let fd = fd.as_unsafe_handle();
     unsafe { _getfl(fd) }
 }
 
-unsafe fn _getfl(fd: RawFd) -> io::Result<OFlags> {
-    negone_err(libc::fcntl(fd as libc::c_int, libc::F_GETFL)).map(OFlags::from_bits_truncate)
+pub(crate) unsafe fn _getfl(fd: UnsafeHandle) -> io::Result<OFlags> {
+    negone_err(libc::fcntl(fd.as_raw_fd() as libc::c_int, libc::F_GETFL))
+        .map(OFlags::from_bits_truncate)
 }
 
 /// `fcntl(fd, F_SETFL, flags)`
 #[inline]
-pub fn setfl<Fd: AsRawFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
-    let fd = fd.as_raw_fd();
+pub fn setfl<Fd: AsUnsafeHandle>(fd: &Fd, flags: OFlags) -> io::Result<()> {
+    let fd = fd.as_unsafe_handle();
     unsafe { _setfl(fd, flags) }
 }
 
-unsafe fn _setfl(fd: RawFd, flags: OFlags) -> io::Result<()> {
-    zero_ok(libc::fcntl(fd as libc::c_int, libc::F_SETFL, flags.bits()))
+unsafe fn _setfl(fd: UnsafeHandle, flags: OFlags) -> io::Result<()> {
+    zero_ok(libc::fcntl(
+        fd.as_raw_fd() as libc::c_int,
+        libc::F_SETFL,
+        flags.bits(),
+    ))
 }
 
 /// `fcntl(fd, F_GET_SEALS)`
@@ -62,8 +69,8 @@ unsafe fn _setfl(fd: RawFd, flags: OFlags) -> io::Result<()> {
     target_os = "wasi",
 )))]
 #[inline]
-pub fn get_seals<Fd: AsRawFd>(fd: &Fd) -> io::Result<i32> {
-    let fd = fd.as_raw_fd();
+pub fn get_seals<Fd: AsUnsafeHandle>(fd: &Fd) -> io::Result<i32> {
+    let fd = fd.as_unsafe_handle();
     unsafe { _get_seals(fd) }
 }
 
@@ -75,6 +82,9 @@ pub fn get_seals<Fd: AsRawFd>(fd: &Fd) -> io::Result<i32> {
     target_os = "redox",
     target_os = "wasi",
 )))]
-unsafe fn _get_seals(fd: RawFd) -> io::Result<i32> {
-    negone_err(libc::fcntl(fd as libc::c_int, libc::F_GET_SEALS))
+unsafe fn _get_seals(fd: UnsafeHandle) -> io::Result<i32> {
+    negone_err(libc::fcntl(
+        fd.as_raw_fd() as libc::c_int,
+        libc::F_GET_SEALS,
+    ))
 }

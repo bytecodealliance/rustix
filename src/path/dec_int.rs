@@ -1,9 +1,10 @@
 use itoa::{write, Integer};
 #[cfg(unix)]
-use std::os::unix::{ffi::OsStrExt, io::AsRawFd};
+use std::os::unix::ffi::OsStrExt;
 #[cfg(target_os = "wasi")]
-use std::os::wasi::{ffi::OsStrExt, io::AsRawFd};
+use std::os::wasi::ffi::OsStrExt;
 use std::{ffi::OsStr, ops::Deref, path::Path};
+use unsafe_io::os::posish::AsRawFd;
 
 /// Format an integer into a decimal `Path` component, without constructing a
 /// temporary `PathBuf` or `String`. This is used for opening paths such

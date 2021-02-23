@@ -1,9 +1,6 @@
 use crate::zero_ok;
-#[cfg(unix)]
-use std::os::unix::io::{FromRawFd, RawFd};
-#[cfg(target_os = "wasi")]
-use std::os::wasi::io::{FromRawFd, RawFd};
 use std::{convert::TryInto, io, mem::MaybeUninit, net::TcpStream};
+use unsafe_io::os::posish::{FromRawFd, RawFd};
 
 /// `socketpair(domain, SOCK_STREAM | SOCK_CLOEXEC, protocol)`
 pub fn socketpair_stream(domain: i32, protocol: i32) -> io::Result<(TcpStream, TcpStream)> {

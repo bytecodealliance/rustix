@@ -13,11 +13,8 @@ use libc::posix_fadvise as libc_posix_fadvise;
     target_os = "l4re"
 ))]
 use libc::posix_fadvise64 as libc_posix_fadvise;
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, RawFd};
-#[cfg(target_os = "wasi")]
-use std::os::wasi::io::{AsRawFd, RawFd};
 use std::{convert::TryInto, io};
+use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
 
 /// `POSIX_FADV_*` constants.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -44,15 +41,20 @@ pub enum Advice {
 
 /// `posix_fadvise(fd, offset, len, advice)`
 #[inline]
-pub fn fadvise<Fd: AsRawFd>(fd: &Fd, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
-    let fd = fd.as_raw_fd();
+pub fn fadvise<Fd: AsUnsafeHandle>(
+    fd: &Fd,
+    offset: u64,
+    len: u64,
+    advice: Advice,
+) -> io::Result<()> {
+    let fd = fd.as_unsafe_handle();
     unsafe { _fadvise(fd, offset, len, advice) }
 }
 
-unsafe fn _fadvise(fd: RawFd, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
+unsafe fn _fadvise(fd: UnsafeHandle, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
     if let (Ok(offset), Ok(len)) = (offset.try_into(), len.try_into()) {
         zero_ok(libc_posix_fadvise(
-            fd as libc::c_int,
+            fd.as_raw_fd() as libc::c_int,
             offset,
             len,
             advice as libc::c_int,

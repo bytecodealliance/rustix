@@ -1,9 +1,6 @@
 use crate::{fs::CopyfileFlags, negative_err};
-use std::{
-    io,
-    mem::MaybeUninit,
-    os::unix::io::{AsRawFd, RawFd},
-};
+use std::{io, mem::MaybeUninit};
+use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
 
 /// `copyfile_state_t`
 #[allow(non_camel_case_types)]
@@ -15,20 +12,20 @@ type copyfile_flags_t = u32;
 
 /// `fcopyfile(from, to, state, flags)`
 #[inline]
-pub fn fcopyfile<FromFd: AsRawFd, ToFd: AsRawFd>(
+pub fn fcopyfile<FromFd: AsUnsafeHandle, ToFd: AsUnsafeHandle>(
     from: &FromFd,
     to: &ToFd,
     state: copyfile_state_t,
     flags: CopyfileFlags,
 ) -> io::Result<()> {
-    let from = from.as_raw_fd();
-    let to = to.as_raw_fd();
+    let from = from.as_unsafe_handle();
+    let to = to.as_unsafe_handle();
     unsafe { _fcopyfile(from, to, state, flags) }
 }
 
 unsafe fn _fcopyfile(
-    from: RawFd,
-    to: RawFd,
+    from: UnsafeHandle,
+    to: UnsafeHandle,
     state: copyfile_state_t,
     flags: CopyfileFlags,
 ) -> io::Result<()> {
@@ -41,7 +38,12 @@ unsafe fn _fcopyfile(
         ) -> libc::c_int;
     }
 
-    negative_err(fcopyfile(from, to, state, flags.bits()))
+    negative_err(fcopyfile(
+        from.as_raw_fd(),
+        to.as_raw_fd(),
+        state,
+        flags.bits(),
+    ))
 }
 
 /// `copyfile_state_alloc()`

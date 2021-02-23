@@ -20,16 +20,13 @@ use libc::{dirent as libc_dirent, readdir as libc_readdir};
 use libc::{dirent64 as libc_dirent, readdir64 as libc_readdir};
 #[cfg(not(target_os = "android"))]
 use libc::{seekdir as libc_seekdir, telldir as libc_telldir};
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 use std::{convert::TryInto, ffi::CStr, io, ptr};
 #[cfg(target_os = "wasi")]
-use std::{
-    ffi::CString,
-    mem::MaybeUninit,
-    os::wasi::io::{AsRawFd, IntoRawFd, RawFd},
+use std::{ffi::CString, mem::MaybeUninit};
+use unsafe_io::{
+    os::posish::{AsRawFd, IntoRawFd, RawFd},
+    IntoUnsafeHandle, OwnsRaw,
 };
-use unsafe_io::{IntoUnsafeHandle, OwnsRaw};
 
 /// `DIR*`
 #[repr(transparent)]

@@ -2,11 +2,10 @@ use crate::{
     fs::{Mode, OFlags, ResolveFlags},
     negone_err, path,
 };
-use std::{
-    convert::TryInto,
-    ffi::CStr,
-    fs, io,
-    os::unix::io::{AsRawFd, FromRawFd, RawFd},
+use std::{convert::TryInto, ffi::CStr, fs, io};
+use unsafe_io::{
+    os::posish::{AsRawFd, FromRawFd},
+    AsUnsafeHandle, UnsafeHandle,
 };
 
 #[cfg(target_pointer_width = "32")]
@@ -25,20 +24,20 @@ const SIZEOF_OPEN_HOW: usize = std::mem::size_of::<OpenHow>();
 
 /// `openat2(dirfd, path, OpenHow { oflags, mode, resolve }, sizeof(OpenHow))`
 #[inline]
-pub fn openat2<Fd: AsRawFd, P: path::Arg>(
+pub fn openat2<Fd: AsUnsafeHandle, P: path::Arg>(
     dirfd: &Fd,
     path: P,
     oflags: OFlags,
     mode: Mode,
     resolve: ResolveFlags,
 ) -> io::Result<fs::File> {
-    let dirfd = dirfd.as_raw_fd();
+    let dirfd = dirfd.as_unsafe_handle();
     let path = path.as_c_str()?;
     unsafe { _openat2(dirfd, &path, oflags, mode, resolve) }
 }
 
 unsafe fn _openat2(
-    dirfd: RawFd,
+    dirfd: UnsafeHandle,
     path: &CStr,
     oflags: OFlags,
     mode: Mode,
@@ -53,7 +52,7 @@ unsafe fn _openat2(
 
     let fd = negone_err(libc::syscall(
         SYS_OPENAT2,
-        dirfd,
+        dirfd.as_raw_fd(),
         path.as_ptr(),
         &open_how,
         SIZEOF_OPEN_HOW,

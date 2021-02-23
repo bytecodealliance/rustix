@@ -1,10 +1,7 @@
 use crate::negone_err;
 use bitflags::bitflags;
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, RawFd};
-#[cfg(target_os = "wasi")]
-use std::os::wasi::io::{AsRawFd, RawFd};
 use std::{convert::TryInto, io};
+use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
 
 bitflags! {
     pub struct PollFlags: libc::c_short {
@@ -37,15 +34,15 @@ impl PollFd {
     /// `PollFd` does not take ownership of the file descriptors passed in here,
     /// and they need to live at least through the `PollFdVec::poll` call.
     #[inline]
-    pub unsafe fn new<Fd: AsRawFd>(fd: &Fd, events: PollFlags) -> Self {
-        let fd = fd.as_raw_fd();
+    pub unsafe fn new<Fd: AsUnsafeHandle>(fd: &Fd, events: PollFlags) -> Self {
+        let fd = fd.as_unsafe_handle();
         Self::_new(fd, events)
     }
 
     #[inline]
-    const unsafe fn _new(fd: RawFd, events: PollFlags) -> Self {
+    unsafe fn _new(fd: UnsafeHandle, events: PollFlags) -> Self {
         Self(libc::pollfd {
-            fd: fd as libc::c_int,
+            fd: fd.as_raw_fd() as libc::c_int,
             events: events.bits(),
             revents: PollFlags::empty().bits(),
         })

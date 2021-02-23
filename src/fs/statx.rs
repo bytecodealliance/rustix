@@ -5,11 +5,8 @@ use crate::{
     path, zero_ok,
 };
 use bitflags::bitflags;
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, RawFd};
-#[cfg(target_os = "wasi")]
-use std::os::wasi::io::{AsRawFd, RawFd};
 use std::{ffi::CStr, io, mem::MaybeUninit};
+use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
 
 bitflags! {
     /// `STATX_*` constants.
@@ -61,19 +58,19 @@ bitflags! {
 /// `statx(dirfd, path, flags, mask, statxbuf)`. Note that this isn't available
 /// on older Linux; returns `ENOSYS` in that case.
 #[inline]
-pub fn statx<P: path::Arg, Fd: AsRawFd>(
+pub fn statx<P: path::Arg, Fd: AsUnsafeHandle>(
     dirfd: &Fd,
     path: P,
     flags: AtFlags,
     mask: StatxFlags,
 ) -> io::Result<LibcStatx> {
-    let dirfd = dirfd.as_raw_fd();
+    let dirfd = dirfd.as_unsafe_handle();
     let path = path.as_c_str()?;
     unsafe { _statx(dirfd, &path, flags, mask) }
 }
 
 unsafe fn _statx(
-    dirfd: RawFd,
+    dirfd: UnsafeHandle,
     path: &CStr,
     flags: AtFlags,
     mask: StatxFlags,
@@ -90,7 +87,7 @@ unsafe fn _statx(
 
     let mut statx_buf = MaybeUninit::<LibcStatx>::uninit();
     zero_ok(statx(
-        dirfd as libc::c_int,
+        dirfd.as_raw_fd() as libc::c_int,
         path.as_ptr(),
         flags.bits(),
         mask.bits(),

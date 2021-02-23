@@ -7,7 +7,7 @@
 //!  - Out-parameters are translated to return values.
 //!  - Path arguments can by any kind of string type.
 //!  - File descriptors are passed in through arguments implementing
-//!    [`AsRawFd`] instead of as bare integers and returned as
+//!    [`AsUnsafeHandle`] instead of as bare integers and returned as
 //!    [`std::fs::File`]s.
 //!  - Constants use `enum`s and [`bitflags`] types.
 //!  - Multiplexed functions (eg. `fcntl`, `ioctl`, etc.) are de-multiplexed.
@@ -36,7 +36,7 @@
 //! This library follows [`std`] in considering dynamic integer values that
 //! have no meaning outside of OS APIs to be similar to raw pointers, from a
 //! safety perspective. For example,
-//! [`std::os::unix::io::FromRawFd::from_raw_fd`] is unsafe since it takes a
+//! [`unsafe_io::FromUnsafeHandle::from_unsafe_handle`] is unsafe since it takes a
 //! raw file descriptor. In this library, raw file descriptors and raw
 //! directory seek locations are considered to be similar to raw pointers in
 //! terms of safety.
@@ -45,10 +45,10 @@
 //! [`system-interface`]: https://crates.io/crates/system-interface
 //! [`std`]: https://doc.rust-lang.org/std/
 //! [`getrandom`]: https://crates.io/crates/getrandom
-//! [`AsRawFd`]: https://doc.rust-lang.org/std/os/unix/io/trait.AsRawFd.html
+//! [`AsUnsafeHandle`]: https://docs.rs/unsafe-io/latest/unsafe_io/trait.AsUnsafeHandle.html
 //! [`std::fs::File`]: https://doc.rust-lang.org/std/fs/struct.File.html
 //! [`bitflags`]: https://crates.io/crates/bitflags
-//! [`std::os::unix::io::FromRawFd::from_raw_fd`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.from_raw_fd
+//! [`unsafe_io::FromUnsafeHandle::from_unsafe_handle`]: https://docs.rs/unsafe-io/latest/unsafe_io/trait.FromUnsafeHandle.html#tymethod.from_unsafe_handle
 
 #![deny(missing_docs)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]

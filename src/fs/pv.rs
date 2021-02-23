@@ -5,10 +5,6 @@ use crate::negone_err;
 use libc::{preadv as libc_preadv, pwritev as libc_pwritev};
 #[cfg(any(target_os = "android", target_os = "linux", target_os = "emscripten"))]
 use libc::{preadv64 as libc_preadv, pwritev64 as libc_pwritev};
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, RawFd};
-#[cfg(target_os = "wasi")]
-use std::os::wasi::io::{AsRawFd, RawFd};
 #[cfg(not(any(target_os = "redox", target_env = "newlib")))]
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{
@@ -16,20 +12,21 @@ use std::{
     convert::TryInto,
     io::{self, IoSlice, IoSliceMut},
 };
+use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
 
 /// `preadv(fd, bufs.as_ptr(), bufs.len(), offset)`
 #[inline]
-pub fn preadv<Fd: AsRawFd>(fd: &Fd, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
-    let fd = fd.as_raw_fd();
+pub fn preadv<Fd: AsUnsafeHandle>(fd: &Fd, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
+    let fd = fd.as_unsafe_handle();
     unsafe { _preadv(fd, bufs, offset) }
 }
 
-unsafe fn _preadv(fd: RawFd, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
+unsafe fn _preadv(fd: UnsafeHandle, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
     let offset = offset
         .try_into()
         .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
     let nread = negone_err(libc_preadv(
-        fd as libc::c_int,
+        fd.as_raw_fd() as libc::c_int,
         bufs.as_ptr().cast::<libc::iovec>(),
         cmp::min(bufs.len(), max_iov()).try_into().unwrap(),
         offset,
@@ -39,17 +36,17 @@ unsafe fn _preadv(fd: RawFd, bufs: &[IoSliceMut], offset: u64) -> io::Result<usi
 
 /// `pwritev(fd, bufs.as_ptr(), bufs.len(), offset)`
 #[inline]
-pub fn pwritev<Fd: AsRawFd>(fd: &Fd, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
-    let fd = fd.as_raw_fd();
+pub fn pwritev<Fd: AsUnsafeHandle>(fd: &Fd, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
+    let fd = fd.as_unsafe_handle();
     unsafe { _pwritev(fd, bufs, offset) }
 }
 
-unsafe fn _pwritev(fd: RawFd, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
+unsafe fn _pwritev(fd: UnsafeHandle, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
     let offset = offset
         .try_into()
         .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
     let nwritten = negone_err(libc_pwritev(
-        fd as libc::c_int,
+        fd.as_raw_fd() as libc::c_int,
         bufs.as_ptr().cast::<libc::iovec>(),
         cmp::min(bufs.len(), max_iov()).try_into().unwrap(),
         offset,
