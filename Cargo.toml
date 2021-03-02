@@ -1,6 +1,6 @@
 [package]
 name = "posish"
-version = "0.6.1"
+version = "0.6.2-alpha.0"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
     "Jakub Konka <kubkon@jakubkonka.com>",
