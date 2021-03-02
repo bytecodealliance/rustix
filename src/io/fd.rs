@@ -1,13 +1,13 @@
 //! Functions which operate on file descriptors.
 
-#[cfg(not(target_os = "wasi"))]
-use crate::negone_err;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use std::ffi::OsString;
 use std::io;
 #[cfg(all(unix, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 use std::os::unix::ffi::OsStringExt;
-use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, FromUnsafeHandle, UnsafeHandle};
+use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
+#[cfg(not(target_os = "wasi"))]
+use {crate::negone_err, unsafe_io::FromUnsafeHandle};
 #[cfg(not(target_os = "redox"))]
 use {crate::zero_ok, std::convert::TryInto, std::mem::MaybeUninit};
 

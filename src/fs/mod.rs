@@ -42,14 +42,15 @@ mod rdadvise;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 mod statx;
 
+#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+pub use at::chmodat;
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub use at::fclonefileat;
 #[cfg(not(target_os = "redox"))]
 pub use at::{
-    accessat, linkat, mkdirat, openat, readlinkat, renameat, statat, symlinkat, unlinkat, utimensat,
+    accessat, cwd, linkat, mkdirat, openat, readlinkat, renameat, statat, symlinkat, unlinkat,
+    utimensat,
 };
-#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
-pub use at::{chmodat, cwd};
 #[cfg(not(target_os = "redox"))]
 pub use constants::AtFlags;
 #[cfg(any(target_os = "android", target_os = "linux"))]

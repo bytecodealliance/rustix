@@ -20,8 +20,6 @@ use libc::{fstatat as libc_fstatat, openat as libc_openat};
     target_os = "l4re"
 ))]
 use libc::{fstatat64 as libc_fstatat, openat64 as libc_openat};
-#[cfg(not(target_os = "wasi"))]
-use std::mem::ManuallyDrop;
 #[cfg(unix)]
 use std::os::unix::ffi::OsStringExt;
 #[cfg(target_os = "wasi")]
@@ -30,7 +28,7 @@ use std::{
     convert::TryInto,
     ffi::{CStr, OsString},
     fs, io,
-    mem::MaybeUninit,
+    mem::{ManuallyDrop, MaybeUninit},
 };
 use unsafe_io::{
     os::posish::{AsRawFd, FromRawFd, RawFd},
@@ -41,10 +39,9 @@ use unsafe_io::{
 /// directory (`AT_FDCWD`). It is a `ManuallyDrop`, however the caller should
 /// not drop it explicitly, as it refers to an ambient authority rather than
 /// an open resource.
-#[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn cwd() -> ManuallyDrop<fs::File> {
-    ManuallyDrop::new(unsafe { fs::File::from_raw_fd(libc::AT_FDCWD) })
+    ManuallyDrop::new(unsafe { fs::File::from_raw_fd(libc::AT_FDCWD as RawFd) })
 }
 
 /// `openat(dirfd, path, oflags, mode)`
