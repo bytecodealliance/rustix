@@ -137,7 +137,7 @@ pub fn dup<Fd: AsUnsafeHandle + FromUnsafeHandle>(fd: &Fd) -> io::Result<Fd> {
 
 #[cfg(not(target_os = "wasi"))]
 unsafe fn _dup(fd: UnsafeHandle) -> io::Result<UnsafeHandle> {
-    negone_err(libc::dup(fd.as_raw_fd() as libc::c_int)).map(UnsafeHandle::from_raw_fd)
+    negone_err(libc::dup(fd.as_raw_fd() as libc::c_int)).map(UnsafeHandle::unowned_from_raw_fd)
 }
 
 /// `ttyname_r(fd)`
