@@ -12,7 +12,6 @@ repository = "https://github.com/bytecodealliance/posish"
 edition = "2018"
 keywords = ["api", "file", "network"]
 categories = ["filesystem", "network-programming", "os::unix-apis"]
-readme = "README.md"
 
 [dependencies]
 bitflags = "1.2.1"
