@@ -1,5 +1,15 @@
-#[cfg(not(target_os = "wasi"))]
-use {crate::zero_ok, std::mem::MaybeUninit};
+use crate::zero_ok;
+use std::mem::MaybeUninit;
+#[cfg(not(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "ios",
+    target_os = "redox",
+    target_os = "freebsd",
+    target_os = "emscripten",
+    target_os = "wasi",
+)))]
+use std::ptr;
 
 pub use libc::{timespec, UTIME_NOW, UTIME_OMIT};
 
@@ -59,4 +69,51 @@ pub fn clock_gettime(id: ClockId) -> timespec {
     let mut timespec = MaybeUninit::<timespec>::uninit();
     zero_ok(unsafe { libc::clock_gettime(id as libc::clockid_t, timespec.as_mut_ptr()) }).unwrap();
     unsafe { timespec.assume_init() }
+}
+
+/// `clock_nanosleep(id, 0, request, remain)`
+#[cfg(not(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "ios",
+    target_os = "redox",
+    target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
+    target_os = "emscripten",
+    target_os = "wasi",
+)))]
+#[inline]
+pub fn clock_nanosleep_relative(id: ClockId, request: &timespec) -> Result<(), timespec> {
+    let mut remain = MaybeUninit::<timespec>::uninit();
+    let flags = 0;
+    zero_ok(unsafe {
+        libc::clock_nanosleep(id as libc::clockid_t, flags, request, remain.as_mut_ptr())
+    })
+    .map_err(|_| unsafe { remain.assume_init() })
+}
+
+/// `clock_nanosleep(id, TIMER_ABSTIME, request, NULL)`
+#[cfg(not(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "ios",
+    target_os = "redox",
+    target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
+    target_os = "emscripten",
+    target_os = "wasi",
+)))]
+#[inline]
+pub fn clock_nanosleep_absolute(id: ClockId, request: &timespec) -> Result<(), ()> {
+    let flags = libc::TIMER_ABSTIME;
+    zero_ok(unsafe {
+        libc::clock_nanosleep(id as libc::clockid_t, flags, request, ptr::null_mut())
+    })
+    .map_err(|_| ())
+}
+
+/// `nanosleep(request, remain)`
+#[inline]
+pub fn nanosleep(request: &timespec) -> Result<(), timespec> {
+    let mut remain = MaybeUninit::<timespec>::uninit();
+    zero_ok(unsafe { libc::nanosleep(request, remain.as_mut_ptr()) })
+        .map_err(|_| unsafe { remain.assume_init() })
 }
