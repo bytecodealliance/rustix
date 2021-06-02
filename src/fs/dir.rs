@@ -4,6 +4,7 @@
 use crate::fs::android::{seekdir as libc_seekdir, telldir as libc_telldir};
 use crate::fs::FileType;
 use errno::{set_errno, Errno};
+use io_lifetimes::{IntoFd, OwnedFd};
 #[cfg(not(any(
     target_os = "android",
     target_os = "emscripten",
@@ -25,7 +26,7 @@ use std::{convert::TryInto, ffi::CStr, io, ptr};
 use std::{ffi::CString, mem::MaybeUninit};
 use unsafe_io::{
     os::posish::{AsRawFd, IntoRawFd, RawFd},
-    IntoUnsafeHandle, OwnsRaw,
+    OwnsRaw,
 };
 
 /// `DIR*`
@@ -35,8 +36,8 @@ pub struct Dir(ptr::NonNull<libc::DIR>);
 impl Dir {
     /// Construct a `Dir`, assuming ownership of the file descriptor.
     #[inline]
-    pub fn from<F: IntoUnsafeHandle>(fd: F) -> io::Result<Self> {
-        let fd = fd.into_unsafe_handle().into_raw_fd();
+    pub fn from<F: IntoFd>(fd: F) -> io::Result<Self> {
+        let fd = fd.into_fd();
         unsafe { Self::_from(fd) }
     }
 
@@ -48,18 +49,19 @@ impl Dir {
     /// itself doesn't guarantee that the handle is valid. Callers must ensure
     /// that the handle is valid.
     #[inline]
-    pub unsafe fn from_into_raw_fd<F: IntoRawFd>(fd: F) -> io::Result<Self> {
-        let fd = fd.into_raw_fd();
+    pub unsafe fn from_into_raw_fd<F: IntoFd>(fd: F) -> io::Result<Self> {
+        let fd = fd.into_fd();
         Self::_from(fd)
     }
 
-    unsafe fn _from(fd: RawFd) -> io::Result<Self> {
-        let d = libc::fdopendir(fd as libc::c_int);
+    unsafe fn _from(fd: OwnedFd) -> io::Result<Self> {
+        let raw = fd.into_raw_fd() as libc::c_int;
+        let d = libc::fdopendir(raw);
         if let Some(d) = ptr::NonNull::new(d) {
             Ok(Self(d))
         } else {
             let e = io::Error::last_os_error();
-            libc::close(fd as libc::c_int);
+            libc::close(raw);
             Err(e)
         }
     }

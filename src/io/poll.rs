@@ -1,7 +1,8 @@
 use crate::negone_err;
 use bitflags::bitflags;
+use io_lifetimes::{AsFd, BorrowedFd};
 use std::{convert::TryInto, io};
-use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
+use unsafe_io::os::posish::AsRawFd;
 
 bitflags! {
     pub struct PollFlags: libc::c_short {
@@ -35,13 +36,13 @@ impl PollFd {
     /// here, and they need to live at least through the `PollFdVec::poll`
     /// call.
     #[inline]
-    pub unsafe fn new<Fd: AsUnsafeHandle>(fd: &Fd, events: PollFlags) -> Self {
-        let fd = fd.as_unsafe_handle();
+    pub unsafe fn new<Fd: AsFd>(fd: &Fd, events: PollFlags) -> Self {
+        let fd = fd.as_fd();
         Self::_new(fd, events)
     }
 
     #[inline]
-    unsafe fn _new(fd: UnsafeHandle, events: PollFlags) -> Self {
+    unsafe fn _new(fd: BorrowedFd<'_>, events: PollFlags) -> Self {
         Self(libc::pollfd {
             fd: fd.as_raw_fd() as libc::c_int,
             events: events.bits(),

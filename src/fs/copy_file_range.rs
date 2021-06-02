@@ -1,25 +1,26 @@
 use crate::negone_err;
+use io_lifetimes::{AsFd, BorrowedFd};
 use std::{convert::TryInto, io, mem, ptr};
-use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
+use unsafe_io::os::posish::AsRawFd;
 
 /// `copy_file_range(fd_in, off_in, fd_out, off_out, len, 0)`
 #[inline]
-pub fn copy_file_range<InUnsafeHandle: AsUnsafeHandle, OutUnsafeHandle: AsUnsafeHandle>(
-    fd_in: &InUnsafeHandle,
+pub fn copy_file_range<InFd: AsFd, OutFd: AsFd>(
+    fd_in: &InFd,
     off_in: Option<&mut u64>,
-    fd_out: &OutUnsafeHandle,
+    fd_out: &OutFd,
     off_out: Option<&mut u64>,
     len: u64,
 ) -> io::Result<u64> {
-    let fd_in = fd_in.as_unsafe_handle();
-    let fd_out = fd_out.as_unsafe_handle();
+    let fd_in = fd_in.as_fd();
+    let fd_out = fd_out.as_fd();
     unsafe { _copy_file_range(fd_in, off_in, fd_out, off_out, len) }
 }
 
 unsafe fn _copy_file_range(
-    fd_in: UnsafeHandle,
+    fd_in: BorrowedFd<'_>,
     off_in: Option<&mut u64>,
-    fd_out: UnsafeHandle,
+    fd_out: BorrowedFd<'_>,
     off_out: Option<&mut u64>,
     len: u64,
 ) -> io::Result<u64> {

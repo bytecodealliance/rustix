@@ -1,16 +1,17 @@
 use crate::zero_ok;
+use io_lifetimes::{AsFd, BorrowedFd};
 use std::io;
 use std::os::unix::ffi::OsStringExt;
 use std::path::PathBuf;
 use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
 
 /// `fcntl(fd, F_GETPATH)`
-pub fn getpath<Fd: AsUnsafeHandle>(fd: &Fd) -> io::Result<PathBuf> {
-    let fd = fd.as_unsafe_handle();
-    unsafe { _getpath(fd) }
+pub fn getpath<Fd: AsFd>(fd: &Fd) -> io::Result<PathBuf> {
+    let fd = fd.as_fd();
+    _getpath(fd)
 }
 
-unsafe fn _getpath(fd: UnsafeHandle) -> io::Result<PathBuf> {
+fn _getpath(fd: BorrowedFd<'_>) -> io::Result<PathBuf> {
     // The use of PATH_MAX is generally not encouraged, but it
     // is inevitable in this case because macOS defines `fcntl` with
     // `F_GETPATH` in terms of `MAXPATHLEN`, and there are no

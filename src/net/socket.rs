@@ -1,9 +1,10 @@
 use crate::zero_ok;
+use io_lifetimes::{AsFd, BorrowedFd};
 use std::{
     io,
     mem::{size_of, MaybeUninit},
 };
-use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
+use unsafe_io::os::posish::AsRawFd;
 
 /// `SOCK_*` constants.
 #[derive(Debug, Clone, Copy)]
@@ -27,12 +28,12 @@ pub enum SocketType {
 
 /// `getsockopt(fd, SOL_SOCKET, SO_TYPE)`
 #[inline]
-pub fn socket_type<Fd: AsUnsafeHandle>(fd: &Fd) -> io::Result<SocketType> {
-    let fd = fd.as_unsafe_handle();
+pub fn socket_type<Fd: AsFd>(fd: &Fd) -> io::Result<SocketType> {
+    let fd = fd.as_fd();
     unsafe { _socket_type(fd) }
 }
 
-unsafe fn _socket_type(fd: UnsafeHandle) -> io::Result<SocketType> {
+unsafe fn _socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
     let mut buffer = MaybeUninit::<SocketType>::uninit();
     let mut out_len = size_of::<SocketType>() as libc::socklen_t;
     zero_ok(libc::getsockopt(

@@ -6,9 +6,8 @@
 //!  - Error values are translated to `Result`s.
 //!  - Out-parameters are translated to return values.
 //!  - Path arguments can by any kind of string type.
-//!  - File descriptors are passed in through arguments implementing
-//!    [`AsUnsafeHandle`] instead of as bare integers and returned as
-//!    [`std::fs::File`]s.
+//!  - File descriptors are passed in through arguments implementing [`AsFd`]
+//!    instead of as bare integers and returned as [`OwnedFd`]s.
 //!  - Constants use `enum`s and [`bitflags`] types.
 //!  - Multiplexed functions (eg. `fcntl`, `ioctl`, etc.) are de-multiplexed.
 //!  - Variadic functions (eg. `openat`, etc.) are presented as non-variadic.

@@ -3,6 +3,7 @@
 #[cfg(not(target_os = "wasi"))]
 use crate::fs::Mode;
 use crate::{negone_err, time::Timespec, zero_ok};
+use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(not(any(
     target_os = "android",
     target_os = "linux",
@@ -51,19 +52,19 @@ use std::{
     convert::TryInto,
     io::{self, SeekFrom},
 };
-use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
+use unsafe_io::os::posish::AsRawFd;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
 use {crate::fs::StatFs, std::mem::MaybeUninit};
 
 /// `lseek(fd, offset, whence)`
 #[inline]
-pub fn seek<Fd: AsUnsafeHandle>(fd: &Fd, pos: SeekFrom) -> io::Result<u64> {
-    let fd = fd.as_unsafe_handle();
+pub fn seek<Fd: AsFd>(fd: &Fd, pos: SeekFrom) -> io::Result<u64> {
+    let fd = fd.as_fd();
     unsafe { _seek(fd, pos) }
 }
 
-unsafe fn _seek(fd: UnsafeHandle, pos: SeekFrom) -> io::Result<u64> {
+unsafe fn _seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
     let (whence, offset): (libc::c_int, libc_off_t) = match pos {
         SeekFrom::Start(pos) => (
             libc::SEEK_SET,
@@ -79,12 +80,12 @@ unsafe fn _seek(fd: UnsafeHandle, pos: SeekFrom) -> io::Result<u64> {
 
 /// `lseek(fd, 0, SEEK_CUR)`
 #[inline]
-pub fn tell<Fd: AsUnsafeHandle>(fd: &Fd) -> io::Result<u64> {
-    let fd = fd.as_unsafe_handle();
+pub fn tell<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
+    let fd = fd.as_fd();
     unsafe { _tell(fd) }
 }
 
-unsafe fn _tell(fd: UnsafeHandle) -> io::Result<u64> {
+unsafe fn _tell(fd: BorrowedFd<'_>) -> io::Result<u64> {
     let offset = negone_err(libc_lseek(fd.as_raw_fd() as libc::c_int, 0, libc::SEEK_CUR))?;
     Ok(offset.try_into().unwrap())
 }
@@ -95,18 +96,18 @@ unsafe fn _tell(fd: UnsafeHandle) -> io::Result<u64> {
 /// even on platforms where the host libc emulates it.
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn fchmod<Fd: AsUnsafeHandle>(fd: &Fd, mode: Mode) -> io::Result<()> {
-    let fd = fd.as_unsafe_handle();
+pub fn fchmod<Fd: AsFd>(fd: &Fd, mode: Mode) -> io::Result<()> {
+    let fd = fd.as_fd();
     unsafe { _fchmod(fd, mode) }
 }
 
 #[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
-unsafe fn _fchmod(fd: UnsafeHandle, mode: Mode) -> io::Result<()> {
+unsafe fn _fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
     zero_ok(libc::fchmod(fd.as_raw_fd() as libc::c_int, mode.bits()))
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
-unsafe fn _fchmod(fd: UnsafeHandle, mode: Mode) -> io::Result<()> {
+unsafe fn _fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
     // Use `libc::syscall` rather than `libc::fchmod` because some libc
     // implementations, such as musl, add extra logic to `fchmod` to emulate
     // support for `O_PATH`, which uses `/proc` outside our control and
@@ -121,13 +122,13 @@ unsafe fn _fchmod(fd: UnsafeHandle, mode: Mode) -> io::Result<()> {
 /// `fstatfs(fd)`
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))] // not implemented in libc for netbsd yet
 #[inline]
-pub fn fstatfs<Fd: AsUnsafeHandle>(fd: &Fd) -> io::Result<StatFs> {
-    let fd = fd.as_unsafe_handle();
+pub fn fstatfs<Fd: AsFd>(fd: &Fd) -> io::Result<StatFs> {
+    let fd = fd.as_fd();
     unsafe { _fstatfs(fd) }
 }
 
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))] // not implemented in libc for netbsd yet
-unsafe fn _fstatfs(fd: UnsafeHandle) -> io::Result<StatFs> {
+unsafe fn _fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
     let mut statfs = MaybeUninit::<StatFs>::uninit();
     zero_ok(libc_fstatfs(
         fd.as_raw_fd() as libc::c_int,
@@ -138,12 +139,12 @@ unsafe fn _fstatfs(fd: UnsafeHandle) -> io::Result<StatFs> {
 
 /// `futimens(fd, times)`
 #[inline]
-pub fn futimens<Fd: AsUnsafeHandle>(fd: &Fd, times: &[Timespec; 2]) -> io::Result<()> {
-    let fd = fd.as_unsafe_handle();
+pub fn futimens<Fd: AsFd>(fd: &Fd, times: &[Timespec; 2]) -> io::Result<()> {
+    let fd = fd.as_fd();
     unsafe { _futimens(fd, times) }
 }
 
-unsafe fn _futimens(fd: UnsafeHandle, times: &[Timespec; 2]) -> io::Result<()> {
+unsafe fn _futimens(fd: BorrowedFd<'_>, times: &[Timespec; 2]) -> io::Result<()> {
     zero_ok(libc::futimens(
         fd.as_raw_fd() as libc::c_int,
         times.as_ptr(),
@@ -153,8 +154,8 @@ unsafe fn _futimens(fd: UnsafeHandle, times: &[Timespec; 2]) -> io::Result<()> {
 /// `posix_fallocate(fd, offset, len)`
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))] // not implemented in libc for netbsd yet
 #[inline]
-pub fn posix_fallocate<Fd: AsUnsafeHandle>(fd: &Fd, offset: u64, len: u64) -> io::Result<()> {
-    let fd = fd.as_unsafe_handle();
+pub fn posix_fallocate<Fd: AsFd>(fd: &Fd, offset: u64, len: u64) -> io::Result<()> {
+    let fd = fd.as_fd();
     unsafe { _posix_fallocate(fd, offset, len) }
 }
 
@@ -165,7 +166,7 @@ pub fn posix_fallocate<Fd: AsUnsafeHandle>(fd: &Fd, offset: u64, len: u64) -> io
     target_os = "openbsd",
     target_os = "redox"
 )))]
-unsafe fn _posix_fallocate(fd: UnsafeHandle, offset: u64, len: u64) -> io::Result<()> {
+unsafe fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
     let offset = offset
         .try_into()
         .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
@@ -183,7 +184,7 @@ unsafe fn _posix_fallocate(fd: UnsafeHandle, offset: u64, len: u64) -> io::Resul
 }
 
 #[cfg(any(target_os = "ios", target_os = "macos",))]
-unsafe fn _posix_fallocate(fd: UnsafeHandle, offset: u64, len: u64) -> io::Result<()> {
+unsafe fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
     let offset: i64 = offset
         .try_into()
         .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
@@ -213,12 +214,12 @@ unsafe fn _posix_fallocate(fd: UnsafeHandle, offset: u64, len: u64) -> io::Resul
 /// This is only reliable on files; for example, it doesn't reflect whether
 /// sockets have been shut down; for general I/O handle support, use
 /// [`crate::io::is_read_write`].
-pub fn is_file_read_write<Fd: AsUnsafeHandle>(fd: &Fd) -> io::Result<(bool, bool)> {
-    let fd = fd.as_unsafe_handle();
+pub fn is_file_read_write<Fd: AsFd>(fd: &Fd) -> io::Result<(bool, bool)> {
+    let fd = fd.as_fd();
     unsafe { _is_file_read_write(fd) }
 }
 
-pub(crate) unsafe fn _is_file_read_write(fd: UnsafeHandle) -> io::Result<(bool, bool)> {
+pub(crate) unsafe fn _is_file_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
     let mode = crate::fs::fcntl::_getfl(fd)?;
 
     // Check for `O_PATH`.
