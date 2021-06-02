@@ -1,14 +1,15 @@
 use crate::zero_ok;
+use io_lifetimes::{AsFd, BorrowedFd};
 use std::{convert::TryInto, io};
-use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
+use unsafe_io::os::posish::AsRawFd;
 
 /// `fcntl(fd, F_RDADVISE, radvisory { offset, len })`
-pub fn rdadvise<Fd: AsUnsafeHandle>(fd: &Fd, offset: u64, len: u64) -> io::Result<()> {
-    let fd = fd.as_unsafe_handle();
+pub fn rdadvise<Fd: AsFd>(fd: &Fd, offset: u64, len: u64) -> io::Result<()> {
+    let fd = fd.as_fd();
     unsafe { _rdadvise(fd, offset, len) }
 }
 
-unsafe fn _rdadvise(fd: UnsafeHandle, offset: u64, len: u64) -> io::Result<()> {
+unsafe fn _rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
     // From the macOS `fcntl` man page:
     // `F_RDADVISE` - Issue an advisory read async with no copy to user.
     //

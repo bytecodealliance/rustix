@@ -1,6 +1,7 @@
 //! Positioned *and* vectored I/O: `preadv` and `pwritev`.
 
 use crate::negone_err;
+use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(not(any(target_os = "android", target_os = "linux", target_os = "emscripten")))]
 use libc::{preadv as libc_preadv, pwritev as libc_pwritev};
 #[cfg(any(target_os = "android", target_os = "linux", target_os = "emscripten"))]
@@ -12,16 +13,16 @@ use std::{
     convert::TryInto,
     io::{self, IoSlice, IoSliceMut},
 };
-use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
+use unsafe_io::os::posish::AsRawFd;
 
 /// `preadv(fd, bufs.as_ptr(), bufs.len(), offset)`
 #[inline]
-pub fn preadv<Fd: AsUnsafeHandle>(fd: &Fd, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
-    let fd = fd.as_unsafe_handle();
+pub fn preadv<Fd: AsFd>(fd: &Fd, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
+    let fd = fd.as_fd();
     unsafe { _preadv(fd, bufs, offset) }
 }
 
-unsafe fn _preadv(fd: UnsafeHandle, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
+unsafe fn _preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
     let offset = offset
         .try_into()
         .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
@@ -36,12 +37,12 @@ unsafe fn _preadv(fd: UnsafeHandle, bufs: &[IoSliceMut], offset: u64) -> io::Res
 
 /// `pwritev(fd, bufs.as_ptr(), bufs.len(), offset)`
 #[inline]
-pub fn pwritev<Fd: AsUnsafeHandle>(fd: &Fd, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
-    let fd = fd.as_unsafe_handle();
+pub fn pwritev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
+    let fd = fd.as_fd();
     unsafe { _pwritev(fd, bufs, offset) }
 }
 
-unsafe fn _pwritev(fd: UnsafeHandle, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
+unsafe fn _pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
     let offset = offset
         .try_into()
         .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;

@@ -1,4 +1,5 @@
 use crate::zero_ok;
+use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(not(any(
     target_os = "android",
     target_os = "linux",
@@ -14,7 +15,7 @@ use libc::posix_fadvise as libc_posix_fadvise;
 ))]
 use libc::posix_fadvise64 as libc_posix_fadvise;
 use std::{convert::TryInto, io};
-use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
+use unsafe_io::os::posish::AsRawFd;
 
 /// `POSIX_FADV_*` constants.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -41,17 +42,12 @@ pub enum Advice {
 
 /// `posix_fadvise(fd, offset, len, advice)`
 #[inline]
-pub fn fadvise<Fd: AsUnsafeHandle>(
-    fd: &Fd,
-    offset: u64,
-    len: u64,
-    advice: Advice,
-) -> io::Result<()> {
-    let fd = fd.as_unsafe_handle();
+pub fn fadvise<Fd: AsFd>(fd: &Fd, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
+    let fd = fd.as_fd();
     unsafe { _fadvise(fd, offset, len, advice) }
 }
 
-unsafe fn _fadvise(fd: UnsafeHandle, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
+unsafe fn _fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
     if let (Ok(offset), Ok(len)) = (offset.try_into(), len.try_into()) {
         zero_ok(libc_posix_fadvise(
             fd.as_raw_fd() as libc::c_int,

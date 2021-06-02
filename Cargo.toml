@@ -21,6 +21,7 @@ errno = "0.2.7"
 itoa = "0.4.7"
 libc = { version = "0.2.87", features = ["extra_traits"] }
 unsafe-io = "0.6.0"
+io-lifetimes = "0.0.0"
 
 [dev-dependencies]
 atty = "0.2.14"

@@ -1,6 +1,7 @@
 use crate::{fs::CopyfileFlags, negative_err};
+use io_lifetimes::{AsFd, BorrowedFd};
 use std::{io, mem::MaybeUninit};
-use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
+use unsafe_io::os::posish::AsRawFd;
 
 /// `copyfile_state_t`
 #[allow(non_camel_case_types)]
@@ -12,20 +13,20 @@ type copyfile_flags_t = u32;
 
 /// `fcopyfile(from, to, state, flags)`
 #[inline]
-pub fn fcopyfile<FromFd: AsUnsafeHandle, ToFd: AsUnsafeHandle>(
+pub fn fcopyfile<FromFd: AsFd, ToFd: AsFd>(
     from: &FromFd,
     to: &ToFd,
     state: copyfile_state_t,
     flags: CopyfileFlags,
 ) -> io::Result<()> {
-    let from = from.as_unsafe_handle();
-    let to = to.as_unsafe_handle();
+    let from = from.as_fd();
+    let to = to.as_fd();
     unsafe { _fcopyfile(from, to, state, flags) }
 }
 
 unsafe fn _fcopyfile(
-    from: UnsafeHandle,
-    to: UnsafeHandle,
+    from: BorrowedFd<'_>,
+    to: BorrowedFd<'_>,
     state: copyfile_state_t,
     flags: CopyfileFlags,
 ) -> io::Result<()> {

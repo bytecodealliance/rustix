@@ -5,8 +5,8 @@ use crate::{
     path, zero_ok,
 };
 use bitflags::bitflags;
+use io_lifetimes::{AsFd, BorrowedFd};
 use std::{ffi::CStr, io, mem::MaybeUninit};
-use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
 
 bitflags! {
     /// `STATX_*` constants.
@@ -58,26 +58,26 @@ bitflags! {
 /// `statx(dirfd, path, flags, mask, statxbuf)`. Note that this isn't available
 /// on older Linux; returns `ENOSYS` in that case.
 #[inline]
-pub fn statx<P: path::Arg, Fd: AsUnsafeHandle>(
+pub fn statx<P: path::Arg, Fd: AsFd>(
     dirfd: &Fd,
     path: P,
     flags: AtFlags,
     mask: StatxFlags,
 ) -> io::Result<Statx> {
-    let dirfd = dirfd.as_unsafe_handle();
+    let dirfd = dirfd.as_fd();
     let path = path.as_c_str()?;
     unsafe { _statx(dirfd, &path, flags, mask) }
 }
 
 unsafe fn _statx(
-    dirfd: UnsafeHandle,
+    dirfd: BorrowedFd<'_>,
     path: &CStr,
     flags: AtFlags,
     mask: StatxFlags,
 ) -> io::Result<Statx> {
     weakcall! {
         fn statx(
-            dirfd: libc::c_int,
+            dirfd: BorrowedFd<'_>,
             path: *const libc::c_char,
             flags: libc::c_int,
             mask: libc::c_uint,
@@ -87,7 +87,7 @@ unsafe fn _statx(
 
     let mut statx_buf = MaybeUninit::<Statx>::uninit();
     zero_ok(statx(
-        dirfd.as_raw_fd() as libc::c_int,
+        dirfd,
         path.as_ptr(),
         flags.bits(),
         mask.bits(),
