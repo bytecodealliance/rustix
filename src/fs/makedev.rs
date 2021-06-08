@@ -1,12 +1,15 @@
 /// `makedev(maj, min)`
-#[cfg(not(any(target_os = "android", target_os = "emscripten", target_os = "wasi")))]
+#[cfg(all(
+    libc,
+    not(any(target_os = "android", target_os = "emscripten", target_os = "wasi"))
+))]
 #[inline]
 pub fn makedev(maj: u32, min: u32) -> u64 {
     unsafe { libc::makedev(maj, min) }
 }
 
 /// `makedev(maj, min)`
-#[cfg(target_os = "android")]
+#[cfg(all(libc, target_os = "android"))]
 #[inline]
 pub fn makedev(maj: u32, min: u32) -> u64 {
     // Android's `makedev` oddly has signed argument types.
@@ -21,15 +24,28 @@ pub fn makedev(maj: u32, min: u32) -> u64 {
     u64::from(unsafe { libc::makedev(maj, min) })
 }
 
+/// `makedev(maj, min)`
+#[cfg(linux_raw)]
+#[inline]
+pub fn makedev(maj: u32, min: u32) -> u64 {
+    ((u64::from(maj) & 0xfffff000_u64) << 32)
+        | ((u64::from(maj) & 0x00000fff_u64) << 8)
+        | ((u64::from(min) & 0xffffff00_u64) << 12)
+        | (u64::from(min) & 0x000000ff_u64)
+}
+
 /// `major(dev)`
-#[cfg(not(any(target_os = "android", target_os = "emscripten", target_os = "wasi")))]
+#[cfg(all(
+    libc,
+    not(any(target_os = "android", target_os = "emscripten", target_os = "wasi"))
+))]
 #[inline]
 pub fn major(dev: u64) -> u32 {
     unsafe { libc::major(dev) }
 }
 
 /// `major(dev)`
-#[cfg(target_os = "android")]
+#[cfg(all(libc, target_os = "android"))]
 #[inline]
 pub fn major(dev: u64) -> u32 {
     // Android's `major` oddly has signed return types.
@@ -44,15 +60,25 @@ pub fn major(dev: u64) -> u32 {
     unsafe { libc::major(dev as u32) }
 }
 
+/// `major(dev)`
+#[cfg(linux_raw)]
+#[inline]
+pub fn major(dev: u64) -> u32 {
+    (((dev >> 31 >> 1) & 0xfffff000) | ((dev >> 8) & 0x00000fff)) as u32
+}
+
 /// `minor(dev)`
-#[cfg(not(any(target_os = "android", target_os = "emscripten", target_os = "wasi")))]
+#[cfg(all(
+    libc,
+    not(any(target_os = "android", target_os = "emscripten", target_os = "wasi"))
+))]
 #[inline]
 pub fn minor(dev: u64) -> u32 {
     unsafe { libc::minor(dev) }
 }
 
 /// `minor(dev)`
-#[cfg(target_os = "android")]
+#[cfg(all(libc, target_os = "android"))]
 #[inline]
 pub fn minor(dev: u64) -> u32 {
     // Android's `minor` oddly has signed return types.
@@ -65,6 +91,13 @@ pub fn minor(dev: u64) -> u32 {
 pub fn minor(dev: u64) -> u32 {
     // Emscripten's `minor` has a 32-bit argument value.
     unsafe { libc::minor(dev as u32) }
+}
+
+/// `minor(dev)`
+#[cfg(linux_raw)]
+#[inline]
+pub fn minor(dev: u64) -> u32 {
+    (((dev >> 12) & 0xffffff00) | (dev & 0x000000ff)) as u32
 }
 
 #[test]

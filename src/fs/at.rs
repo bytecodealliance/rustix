@@ -4,23 +4,28 @@
 use crate::fs::CloneFlags;
 use crate::{
     fs::{Access, AtFlags, Mode, OFlags, Stat},
-    negone_err, path,
+    path,
     time::Timespec,
-    zero_ok,
 };
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
-#[cfg(not(any(
-    target_os = "android",
-    target_os = "linux",
-    target_os = "emscripten",
-    target_os = "l4re"
-)))]
+#[cfg(all(
+    libc,
+    not(any(
+        target_os = "android",
+        target_os = "linux",
+        target_os = "emscripten",
+        target_os = "l4re"
+    ))
+))]
 use libc::{fstatat as libc_fstatat, openat as libc_openat};
-#[cfg(any(
-    target_os = "android",
-    target_os = "linux",
-    target_os = "emscripten",
-    target_os = "l4re"
+#[cfg(all(
+    libc,
+    any(
+        target_os = "android",
+        target_os = "linux",
+        target_os = "emscripten",
+        target_os = "l4re"
+    )
 ))]
 use libc::{fstatat64 as libc_fstatat, openat64 as libc_openat};
 #[cfg(unix)]
@@ -31,9 +36,15 @@ use std::{
     convert::TryInto,
     ffi::{CStr, OsString},
     io,
-    mem::{ManuallyDrop, MaybeUninit},
+    mem::ManuallyDrop,
 };
-use unsafe_io::os::posish::{AsRawFd, FromRawFd, RawFd};
+use unsafe_io::os::posish::{FromRawFd, RawFd};
+#[cfg(libc)]
+use {
+    crate::{negone_err, zero_ok},
+    std::mem::MaybeUninit,
+    unsafe_io::os::posish::AsRawFd,
+};
 
 /// Return a "file" which holds a handle which refers to the process current
 /// directory (`AT_FDCWD`). It is a `ManuallyDrop`, however the caller should
@@ -41,7 +52,17 @@ use unsafe_io::os::posish::{AsRawFd, FromRawFd, RawFd};
 /// an open resource.
 #[inline]
 pub fn cwd() -> ManuallyDrop<OwnedFd> {
-    ManuallyDrop::new(unsafe { OwnedFd::from_raw_fd(libc::AT_FDCWD as RawFd) })
+    #[cfg(libc)]
+    {
+        ManuallyDrop::new(unsafe { OwnedFd::from_raw_fd(libc::AT_FDCWD as RawFd) })
+    }
+
+    #[cfg(linux_raw)]
+    {
+        ManuallyDrop::new(unsafe {
+            OwnedFd::from_raw_fd(linux_raw_sys::general::AT_FDCWD as RawFd)
+        })
+    }
 }
 
 /// `openat(dirfd, path, oflags, mode)`
@@ -54,24 +75,28 @@ pub fn openat<P: path::Arg, Fd: AsFd>(
 ) -> io::Result<OwnedFd> {
     let dirfd = dirfd.as_fd();
     let path = path.as_c_str()?;
-    unsafe { _openat(dirfd, &path, oflags, mode) }
+    _openat(dirfd, &path, oflags, mode)
 }
 
-unsafe fn _openat(
-    dirfd: BorrowedFd<'_>,
-    path: &CStr,
-    oflags: OFlags,
-    mode: Mode,
-) -> io::Result<OwnedFd> {
-    #[allow(clippy::useless_conversion)]
-    let fd = negone_err(libc_openat(
-        dirfd.as_raw_fd() as libc::c_int,
-        path.as_ptr(),
-        oflags.bits(),
-        libc::c_uint::from(mode.bits()),
-    ))?;
+#[cfg(libc)]
+fn _openat(dirfd: BorrowedFd<'_>, path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
+    unsafe {
+        #[allow(clippy::useless_conversion)]
+        let fd = negone_err(libc_openat(
+            dirfd.as_raw_fd() as libc::c_int,
+            path.as_ptr(),
+            oflags.bits(),
+            libc::c_uint::from(mode.bits()),
+        ))?;
 
-    Ok(OwnedFd::from_raw_fd(fd as RawFd))
+        Ok(OwnedFd::from_raw_fd(fd as RawFd))
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _openat(dirfd: BorrowedFd<'_>, path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
+    crate::linux_raw::openat(dirfd, path, oflags.bits(), mode.bits() as u16)
 }
 
 /// `readlinkat(fd, path)`
@@ -85,10 +110,43 @@ pub fn readlinkat<P: path::Arg, Fd: AsFd>(
 ) -> io::Result<OsString> {
     let dirfd = dirfd.as_fd();
     let path = path.as_c_str()?;
-    unsafe { _readlinkat(dirfd, &path, reuse) }
+    _readlinkat(dirfd, &path, reuse)
 }
 
-unsafe fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Result<OsString> {
+#[cfg(libc)]
+fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Result<OsString> {
+    let mut buffer = reuse.into_vec();
+
+    // Start with a buffer big enough for the vast majority of paths.
+    // This and the `reserve` below would be a good candidate for `try_reserve`.
+    // https://github.com/rust-lang/rust/issues/48043
+    buffer.clear();
+    buffer.reserve(256);
+
+    unsafe {
+        loop {
+            let nread = negone_err(libc::readlinkat(
+                dirfd.as_raw_fd() as libc::c_int,
+                path.as_ptr(),
+                buffer.as_mut_ptr().cast::<libc::c_char>(),
+                buffer.capacity(),
+            ))?;
+
+            let nread = nread.try_into().unwrap();
+            assert!(nread <= buffer.capacity());
+            buffer.set_len(nread);
+            if nread < buffer.capacity() {
+                return Ok(OsString::from_vec(buffer));
+            }
+
+            // Use `Vec`'s builtin capacity-doubling strategy.
+            buffer.reserve(1);
+        }
+    }
+}
+
+#[cfg(linux_raw)]
+fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Result<OsString> {
     let mut buffer = reuse.into_vec();
 
     // Start with a buffer big enough for the vast majority of paths.
@@ -98,16 +156,15 @@ unsafe fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io
     buffer.reserve(256);
 
     loop {
-        let nread = negone_err(libc::readlinkat(
-            dirfd.as_raw_fd() as libc::c_int,
-            path.as_ptr(),
-            buffer.as_mut_ptr().cast::<libc::c_char>(),
-            buffer.capacity(),
-        ))?;
+        let nread = crate::linux_raw::readlinkat(dirfd, path, unsafe {
+            std::slice::from_raw_parts_mut(buffer.as_mut_ptr(), buffer.capacity())
+        })?;
 
         let nread = nread.try_into().unwrap();
         assert!(nread <= buffer.capacity());
-        buffer.set_len(nread);
+        unsafe {
+            buffer.set_len(nread);
+        }
         if nread < buffer.capacity() {
             return Ok(OsString::from_vec(buffer));
         }
@@ -122,15 +179,24 @@ unsafe fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io
 pub fn mkdirat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
     let path = path.as_c_str()?;
-    unsafe { _mkdirat(dirfd, &path, mode) }
+    _mkdirat(dirfd, &path, mode)
 }
 
-unsafe fn _mkdirat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
-    zero_ok(libc::mkdirat(
-        dirfd.as_raw_fd() as libc::c_int,
-        path.as_ptr(),
-        mode.bits(),
-    ))
+#[cfg(libc)]
+fn _mkdirat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::mkdirat(
+            dirfd.as_raw_fd() as libc::c_int,
+            path.as_ptr(),
+            mode.bits(),
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _mkdirat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
+    crate::linux_raw::mkdirat(dirfd, path, mode.bits() as u16)
 }
 
 /// `linkat(old_dirfd, old_path, new_dirfd, new_path, flags)`
@@ -146,23 +212,38 @@ pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
     let new_dirfd = new_dirfd.as_fd();
     let old_path = old_path.as_c_str()?;
     let new_path = new_path.as_c_str()?;
-    unsafe { _linkat(old_dirfd, &old_path, new_dirfd, &new_path, flags) }
+    _linkat(old_dirfd, &old_path, new_dirfd, &new_path, flags)
 }
 
-unsafe fn _linkat(
+#[cfg(libc)]
+fn _linkat(
     old_dirfd: BorrowedFd<'_>,
     old_path: &CStr,
     new_dirfd: BorrowedFd<'_>,
     new_path: &CStr,
     flags: AtFlags,
 ) -> io::Result<()> {
-    zero_ok(libc::linkat(
-        old_dirfd.as_raw_fd() as libc::c_int,
-        old_path.as_ptr(),
-        new_dirfd.as_raw_fd() as libc::c_int,
-        new_path.as_ptr(),
-        flags.bits(),
-    ))
+    unsafe {
+        zero_ok(libc::linkat(
+            old_dirfd.as_raw_fd() as libc::c_int,
+            old_path.as_ptr(),
+            new_dirfd.as_raw_fd() as libc::c_int,
+            new_path.as_ptr(),
+            flags.bits(),
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _linkat(
+    old_dirfd: BorrowedFd<'_>,
+    old_path: &CStr,
+    new_dirfd: BorrowedFd<'_>,
+    new_path: &CStr,
+    flags: AtFlags,
+) -> io::Result<()> {
+    crate::linux_raw::linkat(old_dirfd, old_path, new_dirfd, new_path, flags.bits())
 }
 
 /// `unlinkat(fd, path, flags)`
@@ -170,15 +251,23 @@ unsafe fn _linkat(
 pub fn unlinkat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
     let path = path.as_c_str()?;
-    unsafe { _unlinkat(dirfd, &path, flags) }
+    _unlinkat(dirfd, &path, flags)
 }
 
-unsafe fn _unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<()> {
-    zero_ok(libc::unlinkat(
-        dirfd.as_raw_fd() as libc::c_int,
-        path.as_ptr(),
-        flags.bits(),
-    ))
+#[cfg(libc)]
+fn _unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::unlinkat(
+            dirfd.as_raw_fd() as libc::c_int,
+            path.as_ptr(),
+            flags.bits(),
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+fn _unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<()> {
+    crate::linux_raw::unlinkat(dirfd, path, flags.bits())
 }
 
 /// `renameat(old_dirfd, old_path, new_dirfd, new_path)`
@@ -193,21 +282,35 @@ pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
     let new_dirfd = new_dirfd.as_fd();
     let old_path = old_path.as_c_str()?;
     let new_path = new_path.as_c_str()?;
-    unsafe { _renameat(old_dirfd, &old_path, new_dirfd, &new_path) }
+    _renameat(old_dirfd, &old_path, new_dirfd, &new_path)
 }
 
-unsafe fn _renameat(
+#[cfg(libc)]
+fn _renameat(
     old_dirfd: BorrowedFd<'_>,
     old_path: &CStr,
     new_dirfd: BorrowedFd<'_>,
     new_path: &CStr,
 ) -> io::Result<()> {
-    zero_ok(libc::renameat(
-        old_dirfd.as_raw_fd() as libc::c_int,
-        old_path.as_ptr(),
-        new_dirfd.as_raw_fd() as libc::c_int,
-        new_path.as_ptr(),
-    ))
+    unsafe {
+        zero_ok(libc::renameat(
+            old_dirfd.as_raw_fd() as libc::c_int,
+            old_path.as_ptr(),
+            new_dirfd.as_raw_fd() as libc::c_int,
+            new_path.as_ptr(),
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _renameat(
+    old_dirfd: BorrowedFd<'_>,
+    old_path: &CStr,
+    new_dirfd: BorrowedFd<'_>,
+    new_path: &CStr,
+) -> io::Result<()> {
+    crate::linux_raw::renameat(old_dirfd, old_path, new_dirfd, new_path)
 }
 
 /// `symlinkat(old_dirfd, old_path, new_dirfd, new_path)`
@@ -220,19 +323,24 @@ pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsFd>(
     let new_dirfd = new_dirfd.as_fd();
     let old_path = old_path.as_c_str()?;
     let new_path = new_path.as_c_str()?;
-    unsafe { _symlinkat(&old_path, new_dirfd, &new_path) }
+    _symlinkat(&old_path, new_dirfd, &new_path)
 }
 
-unsafe fn _symlinkat(
-    old_path: &CStr,
-    new_dirfd: BorrowedFd<'_>,
-    new_path: &CStr,
-) -> io::Result<()> {
-    zero_ok(libc::symlinkat(
-        old_path.as_ptr(),
-        new_dirfd.as_raw_fd() as libc::c_int,
-        new_path.as_ptr(),
-    ))
+#[cfg(libc)]
+fn _symlinkat(old_path: &CStr, new_dirfd: BorrowedFd<'_>, new_path: &CStr) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::symlinkat(
+            old_path.as_ptr(),
+            new_dirfd.as_raw_fd() as libc::c_int,
+            new_path.as_ptr(),
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _symlinkat(old_path: &CStr, new_dirfd: BorrowedFd<'_>, new_path: &CStr) -> io::Result<()> {
+    crate::linux_raw::symlinkat(old_path, new_dirfd, new_path)
 }
 
 /// `fstatat(dirfd, path, flags)`
@@ -240,18 +348,27 @@ unsafe fn _symlinkat(
 pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags) -> io::Result<Stat> {
     let dirfd = dirfd.as_fd();
     let path = path.as_c_str()?;
-    unsafe { _statat(dirfd, &path, flags) }
+    _statat(dirfd, &path, flags)
 }
 
-unsafe fn _statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
+#[cfg(libc)]
+fn _statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
     let mut stat = MaybeUninit::<Stat>::uninit();
-    zero_ok(libc_fstatat(
-        dirfd.as_raw_fd() as libc::c_int,
-        path.as_ptr(),
-        stat.as_mut_ptr(),
-        flags.bits(),
-    ))?;
-    Ok(stat.assume_init())
+    unsafe {
+        zero_ok(libc_fstatat(
+            dirfd.as_raw_fd() as libc::c_int,
+            path.as_ptr(),
+            stat.as_mut_ptr(),
+            flags.bits(),
+        ))?;
+        Ok(stat.assume_init())
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
+    crate::linux_raw::fstatat(dirfd, path, flags.bits())
 }
 
 /// `faccessat(dirfd, path, access, flags)`
@@ -264,34 +381,54 @@ pub fn accessat<P: path::Arg, Fd: AsFd>(
 ) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
     let path = path.as_c_str()?;
-    unsafe { _accessat(dirfd, &path, access, flags) }
+    _accessat(dirfd, &path, access, flags)
 }
 
-#[cfg(not(target_os = "emscripten"))]
-unsafe fn _accessat(
-    dirfd: BorrowedFd<'_>,
-    path: &CStr,
-    access: Access,
-    flags: AtFlags,
-) -> io::Result<()> {
-    zero_ok(libc::faccessat(
-        dirfd.as_raw_fd() as libc::c_int,
-        path.as_ptr(),
-        access.bits(),
-        flags.bits(),
-    ))
+#[cfg(all(libc, not(target_os = "emscripten")))]
+fn _accessat(dirfd: BorrowedFd<'_>, path: &CStr, access: Access, flags: AtFlags) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::faccessat(
+            dirfd.as_raw_fd() as libc::c_int,
+            path.as_ptr(),
+            access.bits(),
+            flags.bits(),
+        ))
+    }
 }
 
 // Temporarily disable on Emscripten until https://github.com/rust-lang/libc/pull/1836
 // is available.
-#[cfg(target_os = "emscripten")]
-unsafe fn _accessat(
+#[cfg(all(libc, target_os = "emscripten"))]
+fn _accessat(
     _dirfd: BorrowedFd<'_>,
     _path: &CStr,
     _access: Access,
     _flags: AtFlags,
 ) -> io::Result<()> {
     Ok(())
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _accessat(dirfd: BorrowedFd<'_>, path: &CStr, access: Access, flags: AtFlags) -> io::Result<()> {
+    if flags.is_empty()
+        || (flags.bits() == linux_raw_sys::v5_11::general::AT_EACCESS
+            && crate::linux_raw::getuid() == crate::linux_raw::geteuid()
+            && crate::linux_raw::getgid() == crate::linux_raw::getegid())
+    {
+        return crate::linux_raw::faccessat(dirfd, path, access.bits());
+    }
+
+    if flags.bits() != linux_raw_sys::v5_11::general::AT_EACCESS {
+        return Err(io::Error::from_raw_os_error(
+            linux_raw_sys::errno::EINVAL as i32,
+        ));
+    }
+
+    // TODO: Use faccessat2 in newer Linux versions.
+    Err(io::Error::from_raw_os_error(
+        linux_raw_sys::errno::ENOSYS as i32,
+    ))
 }
 
 /// `utimensat(dirfd, path, times, flags)`
@@ -304,21 +441,35 @@ pub fn utimensat<P: path::Arg, Fd: AsFd>(
 ) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
     let path = path.as_c_str()?;
-    unsafe { _utimensat(dirfd, &path, times, flags) }
+    _utimensat(dirfd, &path, times, flags)
 }
 
-unsafe fn _utimensat(
+#[cfg(libc)]
+fn _utimensat(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
     times: &[Timespec; 2],
     flags: AtFlags,
 ) -> io::Result<()> {
-    zero_ok(libc::utimensat(
-        dirfd.as_raw_fd() as libc::c_int,
-        path.as_ptr(),
-        times.as_ptr(),
-        flags.bits(),
-    ))
+    unsafe {
+        zero_ok(libc::utimensat(
+            dirfd.as_raw_fd() as libc::c_int,
+            path.as_ptr(),
+            times.as_ptr(),
+            flags.bits(),
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _utimensat(
+    dirfd: BorrowedFd<'_>,
+    path: &CStr,
+    times: &[Timespec; 2],
+    flags: AtFlags,
+) -> io::Result<()> {
+    crate::linux_raw::utimensat(dirfd, Some(path), &times, flags.bits())
 }
 
 /// `fchmodat(dirfd, path, mode, 0)`
@@ -335,28 +486,42 @@ unsafe fn _utimensat(
 pub fn chmodat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
     let path = path.as_c_str()?;
-    unsafe { _chmodat(dirfd, &path, mode) }
+    _chmodat(dirfd, &path, mode)
 }
 
-#[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
-unsafe fn _chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
-    zero_ok(libc::fchmodat(
-        dirfd.as_raw_fd() as libc::c_int,
-        path.as_ptr(),
-        mode.bits(),
-        0,
-    ))
+#[cfg(all(
+    libc,
+    not(any(target_os = "android", target_os = "linux", target_os = "wasi"))
+))]
+fn _chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::fchmodat(
+            dirfd.as_raw_fd() as libc::c_int,
+            path.as_ptr(),
+            mode.bits(),
+            0,
+        ))
+    }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
-unsafe fn _chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
+#[cfg(all(libc, any(target_os = "android", target_os = "linux")))]
+fn _chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
     // Note that Linux's `fchmodat` does not have a flags argument.
-    zero_ok(libc::syscall(
-        libc::SYS_fchmodat,
-        dirfd.as_raw_fd() as libc::c_int,
-        path.as_ptr(),
-        mode.bits(),
-    ))
+    unsafe {
+        zero_ok(libc::syscall(
+            libc::SYS_fchmodat,
+            dirfd.as_raw_fd() as libc::c_int,
+            path.as_ptr(),
+            mode.bits(),
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
+    // Note that Linux's `fchmodat` does not have a flags argument.
+    crate::linux_raw::fchmodat(dirfd, path, mode.bits() as u16)
 }
 
 /// `fclonefileat(src, dst_dir, dst, flags)`
@@ -371,11 +536,11 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
     let srcfd = src.as_fd();
     let dst_dirfd = dst_dir.as_fd();
     let dst = dst.as_c_str()?;
-    unsafe { _fclonefileat(srcfd.as_raw_fd(), dst_dirfd.as_raw_fd(), &dst, flags) }
+    _fclonefileat(srcfd.as_fd(), dst_dirfd.as_fd(), &dst, flags)
 }
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
-unsafe fn _fclonefileat(
+fn _fclonefileat(
     srcfd: BorrowedFd<'_>,
     dst_dirfd: BorrowedFd<'_>,
     dst: &CStr,
@@ -390,5 +555,5 @@ unsafe fn _fclonefileat(
         ) -> libc::c_int
     }
 
-    zero_ok(fclonefileat(srcfd, dst_dirfd, dst.as_ptr(), flags.bits()))
+    unsafe { zero_ok(fclonefileat(srcfd, dst_dirfd, dst.as_ptr(), flags.bits())) }
 }

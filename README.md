@@ -27,6 +27,13 @@ to pointers in terms of making APIs unsafe, in the spirit of
 and portable APIs to this functionality, see the [`system-interface`],
 [`cap-std`], and [`fs-set-times`] crates.
 
+## Linux raw syscall support
+
+On Linux, `posish` can optionally be configured to target the raw
+Linux syscall ABI directly instead of calling through `libc`. To enable this,
+add `--cfg linux_raw` to the `RUSTFLAGS` environment variable, or otherwise
+pass `--cfg linux_raw` to rustc.
+
 [`std`]: https://doc.rust-lang.org/std/
 [`getrandom`]: https://crates.io/crates/getrandom
 [`errno`]: https://crates.io/crates/errno

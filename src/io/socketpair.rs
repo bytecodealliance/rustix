@@ -1,8 +1,15 @@
-use crate::zero_ok;
-use std::{convert::TryInto, io, mem::MaybeUninit, net::TcpStream};
-use unsafe_io::os::posish::{FromRawFd, RawFd};
+#[cfg(linux_raw)]
+use io_lifetimes::FromFd;
+use std::{convert::TryInto, io, net::TcpStream};
+#[cfg(libc)]
+use {
+    crate::zero_ok,
+    std::mem::MaybeUninit,
+    unsafe_io::os::posish::{FromRawFd, RawFd},
+};
 
 /// `socketpair(domain, SOCK_STREAM | SOCK_CLOEXEC, protocol)`
+#[cfg(libc)]
 pub fn socketpair_stream(domain: i32, protocol: i32) -> io::Result<(TcpStream, TcpStream)> {
     let mut fds = MaybeUninit::<[RawFd; 2]>::uninit();
     unsafe {
@@ -33,4 +40,15 @@ pub fn socketpair_stream(domain: i32, protocol: i32) -> io::Result<(TcpStream, T
             TcpStream::from_raw_fd(fds[1]),
         ))
     }
+}
+
+/// `socketpair(domain, SOCK_STREAM | SOCK_CLOEXEC, protocol)`
+#[cfg(linux_raw)]
+pub fn socketpair_stream(domain: i32, protocol: i32) -> io::Result<(TcpStream, TcpStream)> {
+    crate::linux_raw::socketpair(
+        domain.try_into().unwrap(),
+        linux_raw_sys::general::SOCK_STREAM | linux_raw_sys::general::SOCK_CLOEXEC,
+        protocol,
+    )
+    .map(|fds| (TcpStream::from_fd(fds.0), TcpStream::from_fd(fds.1)))
 }

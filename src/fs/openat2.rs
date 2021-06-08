@@ -1,16 +1,22 @@
 use crate::{
     fs::{Mode, OFlags, ResolveFlags},
-    negone_err, path,
+    path,
 };
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
-use std::{convert::TryInto, ffi::CStr, io};
-use unsafe_io::os::posish::{AsRawFd, FromRawFd};
+use std::{ffi::CStr, io};
+#[cfg(libc)]
+use {
+    crate::negone_err,
+    std::convert::TryInto,
+    unsafe_io::os::posish::{AsRawFd, FromRawFd},
+};
 
-#[cfg(target_pointer_width = "32")]
+#[cfg(all(libc, target_pointer_width = "32"))]
 const SYS_OPENAT2: i32 = 437;
-#[cfg(target_pointer_width = "64")]
+#[cfg(all(libc, target_pointer_width = "64"))]
 const SYS_OPENAT2: i64 = 437;
 
+#[cfg(libc)]
 #[repr(C)]
 #[derive(Debug)]
 struct OpenHow {
@@ -18,6 +24,7 @@ struct OpenHow {
     mode: u64,
     resolve: u64,
 }
+#[cfg(libc)]
 const SIZEOF_OPEN_HOW: usize = std::mem::size_of::<OpenHow>();
 
 /// `openat2(dirfd, path, OpenHow { oflags, mode, resolve }, sizeof(OpenHow))`
@@ -34,6 +41,7 @@ pub fn openat2<Fd: AsFd, P: path::Arg>(
     unsafe { _openat2(dirfd, &path, oflags, mode, resolve) }
 }
 
+#[cfg(libc)]
 unsafe fn _openat2(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
@@ -58,4 +66,21 @@ unsafe fn _openat2(
 
     #[allow(clippy::useless_conversion)]
     Ok(OwnedFd::from_raw_fd(fd.try_into().unwrap()))
+}
+
+#[cfg(linux_raw)]
+unsafe fn _openat2(
+    dirfd: BorrowedFd<'_>,
+    path: &CStr,
+    oflags: OFlags,
+    mode: Mode,
+    resolve: ResolveFlags,
+) -> io::Result<OwnedFd> {
+    crate::linux_raw::openat2(
+        dirfd,
+        path,
+        u64::from(oflags.bits()),
+        u64::from(mode.bits()),
+        u64::from(resolve.bits()),
+    )
 }

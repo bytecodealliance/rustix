@@ -7,14 +7,14 @@ use std::collections::HashMap;
 fn dir_entries() {
     let tmpdir = tempfile::tempdir().expect("construct tempdir");
     let dirfd = std::fs::File::open(tmpdir.path()).expect("open tempdir as file");
-    let dir = Dir::from(dirfd).expect("construct Dir from dirfd");
+    let mut dir = Dir::from(dirfd).expect("construct Dir from dirfd");
 
-    let entries = read_entries(&dir);
+    let entries = read_entries(&mut dir);
     assert_eq!(entries.len(), 0, "no files in directory");
 
     let _f1 = std::fs::File::create(tmpdir.path().join("file1")).expect("create file1");
 
-    let entries = read_entries(&dir);
+    let entries = read_entries(&mut dir);
     assert!(
         entries.get("file1").is_some(),
         "directory contains `file1`: {:?}",
@@ -23,7 +23,7 @@ fn dir_entries() {
     assert_eq!(entries.len(), 1);
 
     let _f2 = std::fs::File::create(tmpdir.path().join("file2")).expect("create file1");
-    let entries = read_entries(&dir);
+    let entries = read_entries(&mut dir);
     assert!(
         entries.get("file1").is_some(),
         "directory contains `file1`: {:?}",
@@ -37,7 +37,7 @@ fn dir_entries() {
     assert_eq!(entries.len(), 2);
 }
 
-fn read_entries(dir: &Dir) -> HashMap<String, Entry> {
+fn read_entries(dir: &mut Dir) -> HashMap<String, Entry> {
     dir.rewind();
     let mut out = HashMap::new();
     loop {

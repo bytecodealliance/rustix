@@ -1,23 +1,34 @@
-use crate::zero_ok;
-use std::mem::MaybeUninit;
-#[cfg(not(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "ios",
-    target_os = "redox",
-    target_os = "freebsd",
-    target_os = "openbsd",
-    target_os = "emscripten",
-    target_os = "wasi",
-)))]
+#[cfg(all(
+    libc,
+    not(any(
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "ios",
+        target_os = "redox",
+        target_os = "freebsd",
+        target_os = "openbsd",
+        target_os = "emscripten",
+        target_os = "wasi",
+    ))
+))]
 use std::ptr;
+#[cfg(libc)]
+use {crate::zero_ok, std::mem::MaybeUninit};
 
-pub use libc::{timespec, UTIME_NOW, UTIME_OMIT};
+#[cfg(libc)]
+pub use libc::timespec;
+
+#[cfg(linux_raw)]
+pub use linux_raw_sys::general::timespec;
 
 /// `clockid_t`
-#[cfg(not(any(target_os = "macos", target_os = "ios", target_os = "wasi")))]
+#[cfg(all(
+    libc,
+    not(any(target_os = "macos", target_os = "ios", target_os = "wasi"))
+))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(i32)]
+#[non_exhaustive]
 pub enum ClockId {
     /// `CLOCK_REALTIME`
     Realtime = libc::CLOCK_REALTIME,
@@ -35,7 +46,7 @@ pub enum ClockId {
 }
 
 /// `clockid_t`
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(all(libc, any(target_os = "macos", target_os = "ios")))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(u32)]
 pub enum ClockId {
@@ -52,8 +63,26 @@ pub enum ClockId {
     ThreadCPUTime = libc::CLOCK_THREAD_CPUTIME_ID,
 }
 
+/// `clockid_t`
+#[cfg(linux_raw)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[repr(u32)]
+pub enum ClockId {
+    /// `CLOCK_REALTIME`
+    Realtime = linux_raw_sys::general::CLOCK_REALTIME,
+
+    /// `CLOCK_MONOTONIC`
+    Monotonic = linux_raw_sys::general::CLOCK_MONOTONIC,
+
+    /// `CLOCK_PROCESS_CPUTIME_ID`
+    ProcessCPUTime = linux_raw_sys::general::CLOCK_PROCESS_CPUTIME_ID,
+
+    /// `CLOCK_THREAD_CPUTIME_ID`
+    ThreadCPUTime = linux_raw_sys::general::CLOCK_THREAD_CPUTIME_ID,
+}
+
 /// `clock_getres(id)`
-#[cfg(not(target_os = "wasi"))]
+#[cfg(all(libc, not(target_os = "wasi")))]
 #[inline]
 #[must_use]
 pub fn clock_getres(id: ClockId) -> timespec {
@@ -62,8 +91,16 @@ pub fn clock_getres(id: ClockId) -> timespec {
     unsafe { timespec.assume_init() }
 }
 
+/// `clock_getres(id)`
+#[cfg(linux_raw)]
+#[inline]
+#[must_use]
+pub fn clock_getres(id: ClockId) -> linux_raw_sys::general::timespec {
+    crate::linux_raw::clock_getres(id as i32)
+}
+
 /// `clock_gettime(id)`
-#[cfg(not(target_os = "wasi"))]
+#[cfg(all(libc, not(target_os = "wasi")))]
 #[inline]
 #[must_use]
 pub fn clock_gettime(id: ClockId) -> timespec {
@@ -72,8 +109,16 @@ pub fn clock_gettime(id: ClockId) -> timespec {
     unsafe { timespec.assume_init() }
 }
 
+/// `clock_gettime(id)`
+#[cfg(linux_raw)]
+#[inline]
+#[must_use]
+pub fn clock_gettime(id: ClockId) -> linux_raw_sys::general::timespec {
+    crate::linux_raw::clock_gettime(id as i32)
+}
+
 /// `clock_nanosleep(id, 0, request, remain)`
-#[cfg(not(any(
+#[cfg(all(libc, not(any(
     target_os = "macos",
     target_os = "ios",
     target_os = "ios",
@@ -82,7 +127,7 @@ pub fn clock_gettime(id: ClockId) -> timespec {
     target_os = "openbsd",
     target_os = "emscripten",
     target_os = "wasi",
-)))]
+))))]
 #[inline]
 pub fn clock_nanosleep_relative(id: ClockId, request: &timespec) -> Result<(), timespec> {
     let mut remain = MaybeUninit::<timespec>::uninit();
@@ -93,8 +138,18 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &timespec) -> Result<(), t
     .map_err(|_| unsafe { remain.assume_init() })
 }
 
+/// `clock_nanosleep(id, 0, request, remain)`
+#[cfg(linux_raw)]
+#[inline]
+pub fn clock_nanosleep_relative(
+    id: ClockId,
+    request: &linux_raw_sys::general::timespec,
+) -> Result<(), linux_raw_sys::general::timespec> {
+    crate::linux_raw::clock_nanosleep_relative(id as i32, request)
+}
+
 /// `clock_nanosleep(id, TIMER_ABSTIME, request, NULL)`
-#[cfg(not(any(
+#[cfg(all(libc, not(any(
     target_os = "macos",
     target_os = "ios",
     target_os = "ios",
@@ -103,7 +158,7 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &timespec) -> Result<(), t
     target_os = "openbsd",
     target_os = "emscripten",
     target_os = "wasi",
-)))]
+))))]
 #[inline]
 pub fn clock_nanosleep_absolute(id: ClockId, request: &timespec) -> Result<(), ()> {
     let flags = libc::TIMER_ABSTIME;
@@ -113,10 +168,30 @@ pub fn clock_nanosleep_absolute(id: ClockId, request: &timespec) -> Result<(), (
     .map_err(|_| ())
 }
 
+/// `clock_nanosleep(id, TIMER_ABSTIME, request, NULL)`
+#[cfg(linux_raw)]
+#[inline]
+pub fn clock_nanosleep_absolute(
+    id: ClockId,
+    request: &linux_raw_sys::general::timespec,
+) -> Result<(), ()> {
+    crate::linux_raw::clock_nanosleep_absolute(id as i32, request).map_err(|_err| ())
+}
+
 /// `nanosleep(request, remain)`
+#[cfg(libc)]
 #[inline]
 pub fn nanosleep(request: &timespec) -> Result<(), timespec> {
     let mut remain = MaybeUninit::<timespec>::uninit();
     zero_ok(unsafe { libc::nanosleep(request, remain.as_mut_ptr()) })
         .map_err(|_| unsafe { remain.assume_init() })
+}
+
+/// `nanosleep(request, remain)`
+#[cfg(linux_raw)]
+#[inline]
+pub fn nanosleep(
+    request: &linux_raw_sys::general::timespec,
+) -> Result<(), linux_raw_sys::general::timespec> {
+    crate::linux_raw::nanosleep(request)
 }
