@@ -23,4 +23,9 @@ pub use clock::{clock_getres, clock_gettime, ClockId};
 pub use clock::{clock_nanosleep_absolute, clock_nanosleep_relative};
 
 /// Re-export `timespec`.
+#[cfg(libc)]
 pub type Timespec = libc::timespec;
+
+/// Re-export `timespec`.
+#[cfg(linux_raw)]
+pub type Timespec = linux_raw_sys::general::timespec;

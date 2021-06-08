@@ -1,6 +1,6 @@
 //! Filesystem operations.
 
-#[cfg(target_os = "android")]
+#[cfg(all(libc, target_os = "android"))]
 mod android;
 #[cfg(not(target_os = "redox"))]
 mod at;
@@ -81,8 +81,8 @@ pub use fadvise::{fadvise, Advice};
     target_os = "redox",
     target_os = "wasi",
 )))]
-pub use fcntl::get_seals;
-pub use fcntl::{getfd, getfl, setfd, setfl};
+pub use fcntl::fcntl_get_seals;
+pub use fcntl::{fcntl_getfd, fcntl_getfl, fcntl_setfd, fcntl_setfl};
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub use fcopyfile::{
     copyfile_state_alloc, copyfile_state_free, copyfile_state_get_copied, copyfile_state_t,
@@ -118,59 +118,99 @@ pub use rdadvise::rdadvise;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 pub use statx::statx;
 
-/// Re-export `libc::stat` (or `libc::stat64` where applicable).
-#[cfg(not(any(
-    target_os = "android",
-    target_os = "linux",
-    target_os = "emscripten",
-    target_os = "l4re"
-)))]
+/// Re-export `stat` (or `stat64` where applicable).
+#[cfg(all(
+    libc,
+    not(any(
+        target_os = "android",
+        target_os = "linux",
+        target_os = "emscripten",
+        target_os = "l4re"
+    ))
+))]
 pub type Stat = libc::stat;
 
-/// Re-export `libc::statfs` (or `libc::statfs64` where applicable).
-#[cfg(not(any(
-    target_os = "android",
-    target_os = "linux",
-    target_os = "emscripten",
-    target_os = "l4re",
-    target_os = "netbsd",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
-#[allow(clippy::module_name_repetitions)]
-pub type StatFs = libc::statfs;
-
-/// Re-export `libc::stat` (or `libc::stat64` where applicable).
-#[cfg(any(
-    target_os = "android",
-    target_os = "linux",
-    target_os = "emscripten",
-    target_os = "l4re"
+/// Re-export `stat` (or `stat64` where applicable).
+#[cfg(all(
+    libc,
+    any(
+        target_os = "android",
+        target_os = "linux",
+        target_os = "emscripten",
+        target_os = "l4re"
+    )
 ))]
 pub type Stat = libc::stat64;
 
-/// Re-export `libc::statfs` (or `libc::statfs64` where applicable).
-#[cfg(any(
-    target_os = "android",
-    target_os = "linux",
-    target_os = "emscripten",
-    target_os = "l4re"
+/// Re-export `stat` (or `stat64` where applicable).
+#[cfg(all(linux_raw, target_pointer_width = "32"))]
+pub type Stat = linux_raw_sys::general::stat64;
+
+/// Re-export `stat` (or `stat64` where applicable).
+#[cfg(all(linux_raw, target_pointer_width = "64"))]
+pub type Stat = linux_raw_sys::general::stat;
+
+/// Re-export `statfs` (or `statfs64` where applicable).
+#[cfg(all(
+    libc,
+    not(any(
+        target_os = "android",
+        target_os = "linux",
+        target_os = "emscripten",
+        target_os = "l4re",
+        target_os = "netbsd",
+        target_os = "redox",
+        target_os = "wasi",
+    ))
+))]
+#[allow(clippy::module_name_repetitions)]
+pub type StatFs = libc::statfs;
+
+/// Re-export `stat` (or `stat64` where applicable).
+#[cfg(all(
+    libc,
+    any(
+        target_os = "android",
+        target_os = "linux",
+        target_os = "emscripten",
+        target_os = "l4re"
+    )
 ))]
 pub type StatFs = libc::statfs64;
 
-/// Re-export `libc::statx`. Only available on Linux with GLIBC for now.
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
+/// Re-export `statfs` (or `statfs64` where applicable).
+#[cfg(all(linux_raw, target_pointer_width = "32"))]
+#[allow(clippy::module_name_repetitions)]
+pub type StatFs = linux_raw_sys::general::statfs64;
+
+/// Re-export `statfs` (or `statfs64` where applicable).
+#[cfg(all(linux_raw, target_pointer_width = "64"))]
+#[allow(clippy::module_name_repetitions)]
+pub type StatFs = linux_raw_sys::general::statfs64;
+
+/// Re-export `statx`. Only available on Linux with GLIBC for now.
+#[cfg(all(libc, all(target_os = "linux", target_env = "gnu")))]
 pub type Statx = libc::statx;
 
+/// Re-export `statx`.
+#[cfg(linux_raw)]
+pub type Statx = linux_raw_sys::v5_4::general::statx;
+
 /// Re-export `UTIME_NOW` and `UTIME_OMIT`.
+#[cfg(all(libc, not(target_os = "redox")))]
 pub use libc::{UTIME_NOW, UTIME_OMIT};
 
+/// Re-export `UTIME_NOW` and `UTIME_OMIT`.
+#[cfg(linux_raw)]
+pub use linux_raw_sys::general::{UTIME_NOW, UTIME_OMIT};
+
 /// Re-export `__fsword_t`.
-#[cfg(all(target_os = "linux", not(target_env = "musl")))]
+#[cfg(all(libc, all(target_os = "linux", not(target_env = "musl"))))]
 pub type FsWord = libc::__fsword_t;
 
 /// Re-export `__fsword_t`.
 #[cfg(all(
+    libc,
     any(target_os = "android", all(target_os = "linux", target_env = "musl")),
     target_pointer_width = "32"
 ))]
@@ -178,17 +218,20 @@ pub type FsWord = u32;
 
 /// Re-export `__fsword_t`.
 #[cfg(all(
+    libc,
     any(target_os = "android", all(target_os = "linux", target_env = "musl")),
     target_pointer_width = "64"
 ))]
 pub type FsWord = u64;
 
-#[cfg(target_os = "linux")]
-pub type FsWord = libc::__fsword_t;
+/// Re-export `__fsword_t`.
+#[cfg(linux_raw)]
+pub type FsWord = linux_raw_sys::general::__fsword_t;
 
 /// The filesystem magic number for procfs.
 /// <https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION>
 #[cfg(all(
+    libc,
     any(target_os = "android", target_os = "linux"),
     not(target_env = "musl")
 ))]
@@ -196,20 +239,25 @@ pub const PROC_SUPER_MAGIC: FsWord = libc::PROC_SUPER_MAGIC as FsWord;
 
 /// The filesystem magic number for procfs.
 /// <https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION>
-#[cfg(all(any(target_os = "android", target_os = "linux"), target_env = "musl"))]
+#[cfg(all(
+    libc,
+    any(target_os = "android", target_os = "linux"),
+    target_env = "musl"
+))]
 pub const PROC_SUPER_MAGIC: FsWord = 0x0000_9fa0;
 
-/// Re-export `PROC_SUPER_MAGIC`.
-#[cfg(target_os = "linux")]
-pub use libc::PROC_SUPER_MAGIC;
+/// The filesystem magic number for procfs.
+/// <https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION>
+#[cfg(linux_raw)]
+pub const PROC_SUPER_MAGIC: FsWord = linux_raw_sys::general::PROC_SUPER_MAGIC;
 
 /// Re-export `mode_t`.
 #[cfg(libc)]
 pub type RawMode = libc::mode_t;
 
 /// Re-export `mode_t`.
-#[cfg(linux)]
-pub type RawMode = linux_headers_sys::stat::__kernel_mode_t;
+#[cfg(linux_raw)]
+pub type RawMode = linux_raw_sys::general::__kernel_mode_t;
 
 /// Re-export types common to Posix-ish platforms.
 #[cfg(unix)]

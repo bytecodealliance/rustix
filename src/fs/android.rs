@@ -4,6 +4,8 @@
 //! [xfstests-bld's telldir.c implementation]: https://github.com/tytso/xfstests-bld/blob/master/android-compat/telldir.c
 //! [pinned version]: https://github.com/tytso/xfstests-bld/blob/7ca4e52401a5e3376ee285cbb973f84559c12572/android-compat/telldir.c
 
+#![allow(dead_code)]
+
 use crate::zero_ok;
 
 #[repr(C)]

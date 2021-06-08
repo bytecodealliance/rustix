@@ -1,9 +1,10 @@
 //! Filesystem API constants, translated into `bitflags` constants.
 
 use bitflags::bitflags;
-#[cfg(not(target_os = "redox"))]
+#[cfg(all(libc, not(target_os = "redox")))]
 use cfg_if::cfg_if;
 
+#[cfg(libc)]
 bitflags! {
     /// `FD_*` constants.
     pub struct FdFlags: libc::c_int {
@@ -12,6 +13,16 @@ bitflags! {
     }
 }
 
+#[cfg(linux_raw)]
+bitflags! {
+    /// `FD_*` constants.
+    pub struct FdFlags: std::os::raw::c_uint {
+        /// `FD_CLOEXEC`
+        const CLOEXEC = linux_raw_sys::general::FD_CLOEXEC;
+    }
+}
+
+#[cfg(libc)]
 bitflags! {
     /// `*_OK` constants for use with [`accessat`].
     ///
@@ -31,7 +42,27 @@ bitflags! {
     }
 }
 
-#[cfg(not(target_os = "redox"))]
+#[cfg(linux_raw)]
+bitflags! {
+    /// `*_OK` constants for use with [`accessat`].
+    ///
+    /// [`accessat`]: fn.accessat.html
+    pub struct Access: std::os::raw::c_uint {
+        /// `R_OK`
+        const READ_OK = linux_raw_sys::general::R_OK;
+
+        /// `W_OK`
+        const WRITE_OK = linux_raw_sys::general::W_OK;
+
+        /// `X_OK`
+        const EXEC_OK = linux_raw_sys::general::X_OK;
+
+        /// `F_OK`
+        const EXISTS = linux_raw_sys::general::F_OK;
+    }
+}
+
+#[cfg(all(libc, not(target_os = "redox")))]
 bitflags! {
     /// `AT_*` constants.
     pub struct AtFlags: libc::c_int {
@@ -58,6 +89,28 @@ bitflags! {
     }
 }
 
+#[cfg(linux_raw)]
+bitflags! {
+    /// `AT_*` constants.
+    pub struct AtFlags: std::os::raw::c_uint {
+        /// `AT_REMOVEDIR`
+        const REMOVEDIR = linux_raw_sys::general::AT_REMOVEDIR;
+
+        /// `AT_SYMLINK_FOLLOW`
+        const SYMLINK_FOLLOW = linux_raw_sys::general::AT_SYMLINK_FOLLOW;
+
+        /// `AT_SYMLINK_NOFOLLOW`
+        const SYMLINK_NOFOLLOW = linux_raw_sys::general::AT_SYMLINK_NOFOLLOW;
+
+        /// `AT_EMPTY_PATH`
+        const EMPTY_PATH = linux_raw_sys::v5_4::general::AT_EMPTY_PATH;
+
+        /// `AT_EACCESS`
+        const EACCESS = linux_raw_sys::v5_11::general::AT_EACCESS;
+    }
+}
+
+#[cfg(libc)]
 bitflags! {
     /// `S_I*` constants.
     pub struct Mode: libc::mode_t {
@@ -146,6 +199,79 @@ bitflags! {
     }
 }
 
+#[cfg(linux_raw)]
+bitflags! {
+    /// `S_I*` constants.
+    pub struct Mode: linux_raw_sys::general::__kernel_mode_t {
+        /// `S_IRWXU`
+        const IRWXU = linux_raw_sys::general::S_IRWXU;
+
+        /// `S_IRUSR`
+        const IRUSR = linux_raw_sys::general::S_IRUSR;
+
+        /// `S_IWUSR`
+        const IWUSR = linux_raw_sys::general::S_IWUSR;
+
+        /// `S_IXUSR`
+        const IXUSR = linux_raw_sys::general::S_IXUSR;
+
+        /// `S_IRWXG`
+        const IRWXG = linux_raw_sys::general::S_IRWXG;
+
+        /// `S_IRGRP`
+        const IRGRP = linux_raw_sys::general::S_IRGRP;
+
+        /// `S_IWGRP`
+        const IWGRP = linux_raw_sys::general::S_IWGRP;
+
+        /// `S_IXGRP`
+        const IXGRP = linux_raw_sys::general::S_IXGRP;
+
+        /// `S_IRWXO`
+        const IRWXO = linux_raw_sys::general::S_IRWXO;
+
+        /// `S_IROTH`
+        const IROTH = linux_raw_sys::general::S_IROTH;
+
+        /// `S_IWOTH`
+        const IWOTH = linux_raw_sys::general::S_IWOTH;
+
+        /// `S_IXOTH`
+        const IXOTH = linux_raw_sys::general::S_IXOTH;
+
+        /// `S_ISUID`
+        const ISUID = linux_raw_sys::general::S_ISUID;
+
+        /// `S_ISGID`
+        const ISGID = linux_raw_sys::general::S_ISGID;
+
+        /// `S_ISVTX`
+        const ISVTX = linux_raw_sys::general::S_ISVTX;
+
+        /// `S_IFREG`
+        const IFREG = linux_raw_sys::general::S_IFREG;
+
+        /// `S_IFDIR`
+        const IFDIR = linux_raw_sys::general::S_IFDIR;
+
+        /// `S_IFLNK`
+        const IFLNK = linux_raw_sys::general::S_IFLNK;
+
+        /// `S_IFIFO`
+        const IFIFO = linux_raw_sys::general::S_IFIFO;
+
+        /// `S_IFSOCK`
+        const IFSOCK = linux_raw_sys::general::S_IFSOCK;
+
+        /// `S_IFCHR`
+        const IFCHR = linux_raw_sys::general::S_IFCHR;
+
+        /// `S_IFBLK`
+        const IFBLK = linux_raw_sys::general::S_IFBLK;
+    }
+}
+
+#[cfg(libc)]
 bitflags! {
     /// `O_*` constants.
     pub struct OFlags: libc::c_int {
@@ -155,7 +281,7 @@ bitflags! {
         /// Similar to `ACCMODE`, but just includes the read/write flags, and
         /// no other flags.
         ///
-        /// Some libc implementations include `O_PATH` in `O_ACCMODE`, which
+        /// Some implementations include `O_PATH` in `O_ACCMODE`, which
         /// sometimes we really just want the read/write bits. Caution is
         /// indicated, as the presence of `O_PATH` may mean that the read/write
         /// bits don't have their usual meaning.
@@ -278,6 +404,80 @@ bitflags! {
     }
 }
 
+#[cfg(linux_raw)]
+bitflags! {
+    /// `O_*` constants.
+    pub struct OFlags: std::os::raw::c_uint {
+        /// `O_ACCMODE`
+        const ACCMODE = linux_raw_sys::general::O_ACCMODE;
+
+        /// Similar to `ACCMODE`, but just includes the read/write flags, and
+        /// no other flags.
+        ///
+        /// Some implementations include `O_PATH` in `O_ACCMODE`, which
+        /// sometimes we really just want the read/write bits. Caution is
+        /// indicated, as the presence of `O_PATH` may mean that the read/write
+        /// bits don't have their usual meaning.
+        const RWMODE = linux_raw_sys::general::O_RDONLY |
+                       linux_raw_sys::general::O_WRONLY |
+                       linux_raw_sys::general::O_RDWR;
+
+        /// `O_APPEND`
+        const APPEND = linux_raw_sys::general::O_APPEND;
+
+        /// `O_CREAT`
+        const CREATE = linux_raw_sys::general::O_CREAT;
+
+        /// `O_DIRECTORY`
+        const DIRECTORY = linux_raw_sys::general::O_DIRECTORY;
+
+        /// `O_DSYNC`. Linux 2.6.32 only supports `O_SYNC`.
+        const DSYNC = linux_raw_sys::general::O_SYNC;
+
+        /// `O_EXCL`
+        const EXCL = linux_raw_sys::general::O_EXCL;
+
+        /// `O_FSYNC`. Linux 2.6.32 only supports `O_SYNC`.
+        const FSYNC = linux_raw_sys::general::O_SYNC;
+
+        /// `O_NOFOLLOW`
+        const NOFOLLOW = linux_raw_sys::general::O_NOFOLLOW;
+
+        /// `O_NONBLOCK`
+        const NONBLOCK = linux_raw_sys::general::O_NONBLOCK;
+
+        /// `O_RDONLY`
+        const RDONLY = linux_raw_sys::general::O_RDONLY;
+
+        /// `O_WRONLY`
+        const WRONLY = linux_raw_sys::general::O_WRONLY;
+
+        /// `O_RDWR`
+        const RDWR = linux_raw_sys::general::O_RDWR;
+
+        /// `O_NOCTTY`
+        const NOCTTY = linux_raw_sys::general::O_NOCTTY;
+
+        /// `O_RSYNC`. Linux 2.6.32 only supports `O_SYNC`.
+        const RSYNC = linux_raw_sys::general::O_SYNC;
+
+        /// `O_SYNC`
+        const SYNC = linux_raw_sys::general::O_SYNC;
+
+        /// `O_TRUNC`
+        const TRUNC = linux_raw_sys::general::O_TRUNC;
+
+        /// `O_PATH`
+        const PATH = linux_raw_sys::v5_4::general::O_PATH;
+
+        /// `O_CLOEXEC`
+        const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
+
+        /// `O_TMPFILE`
+        const TMPFILE = linux_raw_sys::v5_4::general::O_TMPFILE;
+    }
+}
+
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 bitflags! {
     /// `CLONE_*` constants.
@@ -328,7 +528,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(all(libc, any(target_os = "android", target_os = "linux")))]
 bitflags! {
     /// `RESOLVE_*` constants.
     pub struct ResolveFlags: u64 {
@@ -337,5 +537,17 @@ bitflags! {
 
         /// `RESOLVE_BENEATH`
         const BENEATH = 0x08;
+    }
+}
+
+#[cfg(linux_raw)]
+bitflags! {
+    /// `RESOLVE_*` constants.
+    pub struct ResolveFlags: u64 {
+        /// `RESOLVE_NO_MAGICLINKS`
+        const NO_MAGICLINKS = linux_raw_sys::v5_11::general::RESOLVE_NO_MAGICLINKS as u64;
+
+        /// `RESOLVE_BENEATH`
+        const BENEATH = linux_raw_sys::v5_11::general::RESOLVE_BENEATH as u64;
     }
 }

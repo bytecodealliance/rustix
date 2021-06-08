@@ -2,4 +2,4 @@
 
 mod socket;
 
-pub use socket::{socket_type, SocketType};
+pub use socket::{socket_type, AddressFamily, SocketType};

@@ -2,6 +2,8 @@
 //! on the functionality needed by [`cap-std`] and [`system-interface`] that
 //! isn't provided by [`std`] or [`getrandom`].
 //!
+//! TODO: Update the comments to mention direct syscall mode on Linux!
+//!
 //! The wrappers perform the following tasks:
 //!  - Error values are translated to `Result`s.
 //!  - Out-parameters are translated to return values.
@@ -32,27 +34,22 @@
 //!
 //! # Safety
 //!
-//! This library follows [`std`] in considering dynamic integer values that
-//! have no meaning outside of OS APIs to be similar to raw pointers, from a
-//! safety perspective. For example,
-//! [`unsafe_io::FromUnsafeHandle::from_unsafe_handle`] is unsafe since it
-//! takes a raw file descriptor. In this library, raw file descriptors and raw
-//! directory seek locations are considered to be similar to raw pointers in
-//! terms of safety.
+//! This library uses the [io-lifetimes crate] to manage all OS resource
+//! handles, ensuring I/O safety.
 //!
 //! [`cap-std`]: https://crates.io/crates/cap-std
 //! [`system-interface`]: https://crates.io/crates/system-interface
 //! [`std`]: https://doc.rust-lang.org/std/
 //! [`getrandom`]: https://crates.io/crates/getrandom
-//! [`AsUnsafeHandle`]: https://docs.rs/unsafe-io/latest/unsafe_io/trait.AsUnsafeHandle.html
 //! [`std::fs::File`]: https://doc.rust-lang.org/std/fs/struct.File.html
 //! [`bitflags`]: https://crates.io/crates/bitflags
-//! [`unsafe_io::FromUnsafeHandle::from_unsafe_handle`]: https://docs.rs/unsafe-io/latest/unsafe_io/trait.FromUnsafeHandle.html#tymethod.from_unsafe_handle
+//! [io-lifetimes crate]: https://crates.io/crates/io-lifetimes
 
 #![deny(missing_docs)]
+#![cfg_attr(linux_raw, feature(asm))]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(all(libc, not(target_os = "wasi")))]
 #[macro_use]
 mod weak;
 
@@ -64,8 +61,12 @@ pub mod path;
 pub mod process;
 pub mod time;
 
+#[cfg(linux_raw)]
+mod linux_raw;
+
 /// Given a `libc` return value, translate `0` into `Ok(())` and any other
 /// value to an `Err` with the error from `errno`.
+#[cfg(libc)]
 fn zero_ok<T: LibcResult>(t: T) -> std::io::Result<()> {
     if t.is_zero() {
         Ok(())
@@ -76,6 +77,7 @@ fn zero_ok<T: LibcResult>(t: T) -> std::io::Result<()> {
 
 /// Given a `libc` return value, translate `-1` into an `Err` with the error
 /// from `errno`, and any other value to an `Ok` containing the value.
+#[cfg(libc)]
 fn negone_err<T: LibcResult>(t: T) -> std::io::Result<T> {
     if t.is_negone() {
         Err(std::io::Error::last_os_error())
@@ -87,6 +89,7 @@ fn negone_err<T: LibcResult>(t: T) -> std::io::Result<T> {
 /// Given a `libc` return value, translate a negative value into an `Err` with
 /// the error from `errno`, and any other value to an `Ok` containing the
 /// value.
+#[cfg(libc)]
 #[allow(dead_code)]
 fn negative_err<T: LibcResult>(t: T) -> std::io::Result<()> {
     if t.is_negative() {
@@ -96,12 +99,14 @@ fn negative_err<T: LibcResult>(t: T) -> std::io::Result<()> {
     }
 }
 
+#[cfg(libc)]
 trait LibcResult {
     fn is_zero(&self) -> bool;
     fn is_negone(&self) -> bool;
     fn is_negative(&self) -> bool;
 }
 
+#[cfg(libc)]
 macro_rules! is_impls {
     ($($t:ident)*) => ($(impl LibcResult for $t {
         fn is_zero(&self) -> bool {
@@ -118,4 +123,5 @@ macro_rules! is_impls {
     })*)
 }
 
+#[cfg(libc)]
 is_impls! { i32 i64 isize }

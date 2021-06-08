@@ -2,12 +2,15 @@
 
 use crate::{
     fs::{AtFlags, Statx},
-    path, zero_ok,
+    path,
 };
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
-use std::{ffi::CStr, io, mem::MaybeUninit};
+use std::{ffi::CStr, io};
+#[cfg(libc)]
+use {crate::zero_ok, std::mem::MaybeUninit};
 
+#[cfg(libc)]
 bitflags! {
     /// `STATX_*` constants.
     pub struct StatxFlags: u32 {
@@ -55,6 +58,54 @@ bitflags! {
     }
 }
 
+#[cfg(linux_raw)]
+bitflags! {
+    /// `STATX_*` constants.
+    pub struct StatxFlags: u32 {
+        /// `STATX_TYPE`
+        const TYPE = linux_raw_sys::v5_4::general::STATX_TYPE;
+
+        /// `STATX_MODE`
+        const MODE = linux_raw_sys::v5_4::general::STATX_MODE;
+
+        /// `STATX_NLINK`
+        const NLINK = linux_raw_sys::v5_4::general::STATX_NLINK;
+
+        /// `STATX_UID`
+        const UID = linux_raw_sys::v5_4::general::STATX_UID;
+
+        /// `STATX_GID`
+        const GID = linux_raw_sys::v5_4::general::STATX_GID;
+
+        /// `STATX_ATIME`
+        const ATIME = linux_raw_sys::v5_4::general::STATX_ATIME;
+
+        /// `STATX_MTIME`
+        const MTIME = linux_raw_sys::v5_4::general::STATX_MTIME;
+
+        /// `STATX_CTIME`
+        const CTIME = linux_raw_sys::v5_4::general::STATX_CTIME;
+
+        /// `STATX_INO`
+        const INO = linux_raw_sys::v5_4::general::STATX_INO;
+
+        /// `STATX_SIZE`
+        const SIZE = linux_raw_sys::v5_4::general::STATX_SIZE;
+
+        /// `STATX_BLOCKS`
+        const BLOCKS = linux_raw_sys::v5_4::general::STATX_BLOCKS;
+
+        /// `STATX_BASIC_STATS`
+        const BASIC_STATS = linux_raw_sys::v5_4::general::STATX_BASIC_STATS;
+
+        /// `STATX_BTIME`
+        const BTIME = linux_raw_sys::v5_4::general::STATX_BTIME;
+
+        /// `STATX_ALL`
+        const ALL = linux_raw_sys::v5_4::general::STATX_ALL;
+    }
+}
+
 /// `statx(dirfd, path, flags, mask, statxbuf)`. Note that this isn't available
 /// on older Linux; returns `ENOSYS` in that case.
 #[inline]
@@ -66,10 +117,11 @@ pub fn statx<P: path::Arg, Fd: AsFd>(
 ) -> io::Result<Statx> {
     let dirfd = dirfd.as_fd();
     let path = path.as_c_str()?;
-    unsafe { _statx(dirfd, &path, flags, mask) }
+    _statx(dirfd, &path, flags, mask)
 }
 
-unsafe fn _statx(
+#[cfg(libc)]
+fn _statx(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
     flags: AtFlags,
@@ -86,12 +138,24 @@ unsafe fn _statx(
     }
 
     let mut statx_buf = MaybeUninit::<Statx>::uninit();
-    zero_ok(statx(
-        dirfd,
-        path.as_ptr(),
-        flags.bits(),
-        mask.bits(),
-        statx_buf.as_mut_ptr(),
-    ))?;
-    Ok(statx_buf.assume_init())
+    unsafe {
+        zero_ok(statx(
+            dirfd,
+            path.as_ptr(),
+            flags.bits(),
+            mask.bits(),
+            statx_buf.as_mut_ptr(),
+        ))?;
+        Ok(statx_buf.assume_init())
+    }
+}
+
+#[cfg(linux_raw)]
+fn _statx(
+    dirfd: BorrowedFd<'_>,
+    path: &CStr,
+    flags: AtFlags,
+    mask: StatxFlags,
+) -> io::Result<Statx> {
+    crate::linux_raw::statx(dirfd, path, flags.bits(), mask.bits())
 }
