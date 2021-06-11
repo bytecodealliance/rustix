@@ -58,66 +58,91 @@ bitflags! {
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
 bitflags! {
     /// `S_I*` constants.
     pub struct Mode: libc::mode_t {
         /// `S_IRWXU`
+        #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
         const IRWXU = libc::S_IRWXU;
 
         /// `S_IRUSR`
+        #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
         const IRUSR = libc::S_IRUSR;
 
         /// `S_IWUSR`
+        #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
         const IWUSR = libc::S_IWUSR;
 
         /// `S_IXUSR`
+        #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
         const IXUSR = libc::S_IXUSR;
 
         /// `S_IRWXG`
+        #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
         const IRWXG = libc::S_IRWXG;
 
         /// `S_IRGRP`
+        #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
         const IRGRP = libc::S_IRGRP;
 
         /// `S_IWGRP`
+        #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
         const IWGRP = libc::S_IWGRP;
 
         /// `S_IXGRP`
+        #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
         const IXGRP = libc::S_IXGRP;
 
         /// `S_IRWXO`
+        #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
         const IRWXO = libc::S_IRWXO;
 
         /// `S_IROTH`
+        #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
         const IROTH = libc::S_IROTH;
 
         /// `S_IWOTH`
+        #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
         const IWOTH = libc::S_IWOTH;
 
         /// `S_IXOTH`
+        #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
         const IXOTH = libc::S_IXOTH;
 
         /// `S_ISUID`
+        #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
         const ISUID = libc::S_ISUID as libc::mode_t;
 
         /// `S_ISGID`
+        #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
         const ISGID = libc::S_ISGID as libc::mode_t;
 
         /// `S_ISVTX`
+        #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
         const ISVTX = libc::S_ISVTX as libc::mode_t;
-    }
-}
 
-/// WASI doesn't have Unix-style mode flags.
-#[cfg(target_os = "wasi")]
-pub struct Mode {}
+        /// `S_IFREG`
+        const IFREG = libc::S_IFREG;
 
-#[cfg(target_os = "wasi")]
-impl Mode {
-    /// Return the bits, which, there being no defined flags, are always 0.
-    pub const fn bits(&self) -> u32 {
-        0
+        /// `S_IFDIR`
+        const IFDIR = libc::S_IFDIR;
+
+        /// `S_IFLNK`
+        const IFLNK = libc::S_IFLNK;
+
+        /// `S_IFIFO`
+        #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `S_IFIFO`.
+        const IFIFO = libc::S_IFIFO;
+
+        /// `S_IFSOCK`
+        #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `S_IFSOCK`.
+        const IFSOCK = libc::S_IFSOCK;
+
+        /// `S_IFCHR`
+        const IFCHR = libc::S_IFCHR;
+
+        /// `S_IFBLK`
+        const IFBLK = libc::S_IFBLK;
     }
 }
 
