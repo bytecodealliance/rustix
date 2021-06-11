@@ -1,10 +1,12 @@
 //! I/O operations.
 
+mod errno;
 mod fd;
 mod poll;
 #[cfg(not(target_os = "wasi"))]
 mod socketpair;
 
+pub use crate::io::errno::Errno;
 #[cfg(not(target_os = "wasi"))]
 pub use fd::dup;
 #[cfg(not(target_os = "redox"))]
