@@ -1,3 +1,5 @@
+use crate::fs::{Mode, RawMode};
+
 /// `S_IF*` constants.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FileType {
@@ -27,8 +29,8 @@ pub enum FileType {
 }
 
 impl FileType {
-    /// Construct a `FileType` from the `st_mode` field of a `LibcStat`.
-    pub const fn from_libc_stat_st_mode(st_mode: libc::mode_t) -> Self {
+    /// Construct a `FileType` from the `st_mode` field of a `Stat`.
+    pub const fn from_raw_mode(st_mode: RawMode) -> Self {
         match st_mode & libc::S_IFMT {
             libc::S_IFREG => Self::RegularFile,
             libc::S_IFDIR => Self::Directory,
@@ -41,6 +43,11 @@ impl FileType {
             libc::S_IFBLK => Self::BlockDevice,
             _ => Self::Unknown,
         }
+    }
+
+    /// Construct a `FileType` from the `st_mode` field of a `Stat`.
+    pub const fn from_mode(st_mode: Mode) -> Self {
+        Self::from_raw_mode(st_mode.bits())
     }
 
     /// Construct a `FileType` from the `d_type` field of a `libc::dirent`.

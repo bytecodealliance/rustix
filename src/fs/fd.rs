@@ -2,7 +2,7 @@
 
 #[cfg(not(target_os = "wasi"))]
 use crate::fs::Mode;
-use crate::{negone_err, zero_ok};
+use crate::{negone_err, time::Timespec, zero_ok};
 #[cfg(not(any(
     target_os = "android",
     target_os = "linux",
@@ -54,7 +54,7 @@ use std::{
 use unsafe_io::{os::posish::AsRawFd, AsUnsafeHandle, UnsafeHandle};
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
-use {crate::fs::LibcStatFs, std::mem::MaybeUninit};
+use {crate::fs::StatFs, std::mem::MaybeUninit};
 
 /// `lseek(fd, offset, whence)`
 #[inline]
@@ -121,14 +121,14 @@ unsafe fn _fchmod(fd: UnsafeHandle, mode: Mode) -> io::Result<()> {
 /// `fstatfs(fd)`
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))] // not implemented in libc for netbsd yet
 #[inline]
-pub fn fstatfs<Fd: AsUnsafeHandle>(fd: &Fd) -> io::Result<LibcStatFs> {
+pub fn fstatfs<Fd: AsUnsafeHandle>(fd: &Fd) -> io::Result<StatFs> {
     let fd = fd.as_unsafe_handle();
     unsafe { _fstatfs(fd) }
 }
 
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))] // not implemented in libc for netbsd yet
-unsafe fn _fstatfs(fd: UnsafeHandle) -> io::Result<LibcStatFs> {
-    let mut statfs = MaybeUninit::<LibcStatFs>::uninit();
+unsafe fn _fstatfs(fd: UnsafeHandle) -> io::Result<StatFs> {
+    let mut statfs = MaybeUninit::<StatFs>::uninit();
     zero_ok(libc_fstatfs(
         fd.as_raw_fd() as libc::c_int,
         statfs.as_mut_ptr(),
@@ -138,12 +138,12 @@ unsafe fn _fstatfs(fd: UnsafeHandle) -> io::Result<LibcStatFs> {
 
 /// `futimens(fd, times)`
 #[inline]
-pub fn futimens<Fd: AsUnsafeHandle>(fd: &Fd, times: &[libc::timespec; 2]) -> io::Result<()> {
+pub fn futimens<Fd: AsUnsafeHandle>(fd: &Fd, times: &[Timespec; 2]) -> io::Result<()> {
     let fd = fd.as_unsafe_handle();
     unsafe { _futimens(fd, times) }
 }
 
-unsafe fn _futimens(fd: UnsafeHandle, times: &[libc::timespec; 2]) -> io::Result<()> {
+unsafe fn _futimens(fd: UnsafeHandle, times: &[Timespec; 2]) -> io::Result<()> {
     zero_ok(libc::futimens(
         fd.as_raw_fd() as libc::c_int,
         times.as_ptr(),

@@ -3,8 +3,10 @@
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 use crate::fs::CloneFlags;
 use crate::{
-    fs::{Access, AtFlags, LibcStat, Mode, OFlags},
-    negone_err, path, zero_ok,
+    fs::{Access, AtFlags, Mode, OFlags, Stat},
+    negone_err, path,
+    time::Timespec,
+    zero_ok,
 };
 #[cfg(not(any(
     target_os = "android",
@@ -247,14 +249,14 @@ pub fn statat<P: path::Arg, Fd: AsUnsafeHandle>(
     dirfd: &Fd,
     path: P,
     flags: AtFlags,
-) -> io::Result<LibcStat> {
+) -> io::Result<Stat> {
     let dirfd = dirfd.as_unsafe_handle();
     let path = path.as_c_str()?;
     unsafe { _statat(dirfd, &path, flags) }
 }
 
-unsafe fn _statat(dirfd: UnsafeHandle, path: &CStr, flags: AtFlags) -> io::Result<LibcStat> {
-    let mut stat = MaybeUninit::<LibcStat>::uninit();
+unsafe fn _statat(dirfd: UnsafeHandle, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
+    let mut stat = MaybeUninit::<Stat>::uninit();
     zero_ok(libc_fstatat(
         dirfd.as_raw_fd() as libc::c_int,
         path.as_ptr(),
@@ -309,7 +311,7 @@ unsafe fn _accessat(
 pub fn utimensat<P: path::Arg, Fd: AsUnsafeHandle>(
     dirfd: &Fd,
     path: P,
-    times: &[libc::timespec; 2],
+    times: &[Timespec; 2],
     flags: AtFlags,
 ) -> io::Result<()> {
     let dirfd = dirfd.as_unsafe_handle();
@@ -320,7 +322,7 @@ pub fn utimensat<P: path::Arg, Fd: AsUnsafeHandle>(
 unsafe fn _utimensat(
     dirfd: UnsafeHandle,
     path: &CStr,
-    times: &[libc::timespec; 2],
+    times: &[Timespec; 2],
     flags: AtFlags,
 ) -> io::Result<()> {
     zero_ok(libc::utimensat(

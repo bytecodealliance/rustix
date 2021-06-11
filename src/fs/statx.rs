@@ -1,7 +1,7 @@
 //! Linux `statx`.
 
 use crate::{
-    fs::{AtFlags, LibcStatx},
+    fs::{AtFlags, Statx},
     path, zero_ok,
 };
 use bitflags::bitflags;
@@ -63,7 +63,7 @@ pub fn statx<P: path::Arg, Fd: AsUnsafeHandle>(
     path: P,
     flags: AtFlags,
     mask: StatxFlags,
-) -> io::Result<LibcStatx> {
+) -> io::Result<Statx> {
     let dirfd = dirfd.as_unsafe_handle();
     let path = path.as_c_str()?;
     unsafe { _statx(dirfd, &path, flags, mask) }
@@ -74,18 +74,18 @@ unsafe fn _statx(
     path: &CStr,
     flags: AtFlags,
     mask: StatxFlags,
-) -> io::Result<LibcStatx> {
+) -> io::Result<Statx> {
     weakcall! {
         fn statx(
             dirfd: libc::c_int,
             path: *const libc::c_char,
             flags: libc::c_int,
             mask: libc::c_uint,
-            buf: *mut LibcStatx
+            buf: *mut Statx
         ) -> libc::c_int
     }
 
-    let mut statx_buf = MaybeUninit::<LibcStatx>::uninit();
+    let mut statx_buf = MaybeUninit::<Statx>::uninit();
     zero_ok(statx(
         dirfd.as_raw_fd() as libc::c_int,
         path.as_ptr(),
