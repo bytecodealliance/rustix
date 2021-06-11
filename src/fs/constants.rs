@@ -116,7 +116,7 @@ pub struct Mode {}
 #[cfg(target_os = "wasi")]
 impl Mode {
     /// Return the bits, which, there being no defined flags, are always 0.
-    pub fn bits(&self) -> u32 {
+    pub const fn bits(&self) -> u32 {
         0
     }
 }
