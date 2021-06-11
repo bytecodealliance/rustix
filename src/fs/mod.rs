@@ -125,7 +125,7 @@ pub use statx::statx;
     target_os = "emscripten",
     target_os = "l4re"
 )))]
-pub type LibcStat = libc::stat;
+pub type Stat = libc::stat;
 
 /// Re-export `libc::statfs` (or `libc::statfs64` where applicable).
 #[cfg(not(any(
@@ -138,7 +138,7 @@ pub type LibcStat = libc::stat;
     target_os = "wasi",
 )))]
 #[allow(clippy::module_name_repetitions)]
-pub type LibcStatFs = libc::statfs;
+pub type StatFs = libc::statfs;
 
 /// Re-export `libc::stat` (or `libc::stat64` where applicable).
 #[cfg(any(
@@ -147,7 +147,7 @@ pub type LibcStatFs = libc::statfs;
     target_os = "emscripten",
     target_os = "l4re"
 ))]
-pub type LibcStat = libc::stat64;
+pub type Stat = libc::stat64;
 
 /// Re-export `libc::statfs` (or `libc::statfs64` where applicable).
 #[cfg(any(
@@ -156,11 +156,60 @@ pub type LibcStat = libc::stat64;
     target_os = "emscripten",
     target_os = "l4re"
 ))]
-pub type LibcStatFs = libc::statfs64;
+pub type StatFs = libc::statfs64;
 
 /// Re-export `libc::statx`. Only available on Linux with GLIBC for now.
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
-pub type LibcStatx = libc::statx;
+pub type Statx = libc::statx;
+
+/// Re-export `UTIME_NOW` and `UTIME_OMIT`.
+pub use libc::{UTIME_NOW, UTIME_OMIT};
+
+/// Re-export `__fsword_t`.
+#[cfg(all(target_os = "linux", not(target_env = "musl")))]
+pub type FsWord = libc::__fsword_t;
+
+/// Re-export `__fsword_t`.
+#[cfg(all(
+    any(target_os = "android", all(target_os = "linux", target_env = "musl")),
+    target_pointer_width = "32"
+))]
+pub type FsWord = u32;
+
+/// Re-export `__fsword_t`.
+#[cfg(all(
+    any(target_os = "android", all(target_os = "linux", target_env = "musl")),
+    target_pointer_width = "64"
+))]
+pub type FsWord = u64;
+
+#[cfg(target_os = "linux")]
+pub type FsWord = libc::__fsword_t;
+
+/// The filesystem magic number for procfs.
+/// <https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION>
+#[cfg(all(
+    any(target_os = "android", target_os = "linux"),
+    not(target_env = "musl")
+))]
+pub const PROC_SUPER_MAGIC: FsWord = libc::PROC_SUPER_MAGIC as FsWord;
+
+/// The filesystem magic number for procfs.
+/// <https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION>
+#[cfg(all(any(target_os = "android", target_os = "linux"), target_env = "musl"))]
+pub const PROC_SUPER_MAGIC: FsWord = 0x0000_9fa0;
+
+/// Re-export `PROC_SUPER_MAGIC`.
+#[cfg(target_os = "linux")]
+pub use libc::PROC_SUPER_MAGIC;
+
+/// Re-export `mode_t`.
+#[cfg(libc)]
+pub type RawMode = libc::mode_t;
+
+/// Re-export `mode_t`.
+#[cfg(linux)]
+pub type RawMode = linux_headers_sys::stat::__kernel_mode_t;
 
 /// Re-export types common to Posix-ish platforms.
 #[cfg(unix)]

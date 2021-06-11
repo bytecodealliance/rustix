@@ -1,4 +1,4 @@
-//! Libc filesystem constants, translated into `bitflags` constants.
+//! Filesystem API constants, translated into `bitflags` constants.
 
 use bitflags::bitflags;
 #[cfg(not(target_os = "redox"))]

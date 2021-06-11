@@ -22,5 +22,5 @@ pub use clock::{clock_getres, clock_gettime, ClockId};
 )))]
 pub use clock::{clock_nanosleep_absolute, clock_nanosleep_relative};
 
-#[cfg(not(target_os = "redox"))]
-pub use clock::{timespec, UTIME_NOW, UTIME_OMIT};
+/// Re-export `timespec`.
+pub type Timespec = libc::timespec;
