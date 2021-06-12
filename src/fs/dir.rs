@@ -253,10 +253,12 @@ impl Dir {
     }
 }
 
+/// `Dir` implements `Send` but not `Sync`, because we use `readdir` which is
+/// not guaranteed to be thread-safe. Users can wrap this in a `Mutex` if they
+/// need `Sync`, which is effectively what'd need to do to implement `Sync`
+/// ourselves.
 #[cfg(libc)]
 unsafe impl Send for Dir {}
-#[cfg(libc)]
-unsafe impl Sync for Dir {}
 
 #[cfg(libc)]
 impl AsRawFd for Dir {
