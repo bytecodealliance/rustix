@@ -1,5 +1,10 @@
 /// `makedev(maj, min)`
-#[cfg(not(any(target_os = "android", target_os = "emscripten", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "android",
+    target_os = "emscripten",
+    target_os = "wasi",
+    target_os = "openbsd"
+)))]
 #[inline]
 pub fn makedev(maj: u32, min: u32) -> u64 {
     unsafe { libc::makedev(maj, min) }
@@ -22,7 +27,12 @@ pub fn makedev(maj: u32, min: u32) -> u64 {
 }
 
 /// `major(dev)`
-#[cfg(not(any(target_os = "android", target_os = "emscripten", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "android",
+    target_os = "emscripten",
+    target_os = "wasi",
+    target_os = "openbsd"
+)))]
 #[inline]
 pub fn major(dev: u64) -> u32 {
     unsafe { libc::major(dev) }
@@ -45,7 +55,12 @@ pub fn major(dev: u64) -> u32 {
 }
 
 /// `minor(dev)`
-#[cfg(not(any(target_os = "android", target_os = "emscripten", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "android",
+    target_os = "emscripten",
+    target_os = "wasi",
+    target_os = "openbsd"
+)))]
 #[inline]
 pub fn minor(dev: u64) -> u32 {
     unsafe { libc::minor(dev) }
@@ -68,6 +83,12 @@ pub fn minor(dev: u64) -> u32 {
 }
 
 #[test]
+#[cfg(not(any(
+    target_os = "android",
+    target_os = "emscripten",
+    target_os = "wasi",
+    target_os = "openbsd"
+)))]
 fn makedev_roundtrip() {
     let maj = 0x2324_2526;
     let min = 0x6564_6361;

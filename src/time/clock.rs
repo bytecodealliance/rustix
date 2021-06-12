@@ -6,6 +6,7 @@ use std::mem::MaybeUninit;
     target_os = "ios",
     target_os = "redox",
     target_os = "freebsd",
+    target_os = "openbsd",
     target_os = "emscripten",
     target_os = "wasi",
 )))]
@@ -25,11 +26,11 @@ pub enum ClockId {
     Monotonic = libc::CLOCK_MONOTONIC,
 
     /// `CLOCK_PROCESS_CPUTIME_ID`
-    #[cfg(not(target_os = "netbsd"))]
+    #[cfg(not(any(target_os = "netbsd", target_os = "openbsd")))]
     ProcessCPUTime = libc::CLOCK_PROCESS_CPUTIME_ID,
 
     /// `CLOCK_THREAD_CPUTIME_ID`
-    #[cfg(not(target_os = "netbsd"))]
+    #[cfg(not(any(target_os = "netbsd", target_os = "openbsd")))]
     ThreadCPUTime = libc::CLOCK_THREAD_CPUTIME_ID,
 }
 
@@ -78,6 +79,7 @@ pub fn clock_gettime(id: ClockId) -> timespec {
     target_os = "ios",
     target_os = "redox",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
+    target_os = "openbsd",
     target_os = "emscripten",
     target_os = "wasi",
 )))]
@@ -98,6 +100,7 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &timespec) -> Result<(), t
     target_os = "ios",
     target_os = "redox",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
+    target_os = "openbsd",
     target_os = "emscripten",
     target_os = "wasi",
 )))]

@@ -65,6 +65,7 @@ unsafe fn _setfl(fd: UnsafeHandle, flags: OFlags) -> io::Result<()> {
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
+    target_os = "openbsd",
     target_os = "redox",
     target_os = "wasi",
 )))]
@@ -79,6 +80,7 @@ pub fn get_seals<Fd: AsUnsafeHandle>(fd: &Fd) -> io::Result<i32> {
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
+    target_os = "openbsd",
     target_os = "redox",
     target_os = "wasi",
 )))]

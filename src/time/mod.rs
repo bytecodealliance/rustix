@@ -16,6 +16,7 @@ pub use clock::{clock_getres, clock_gettime, ClockId};
     target_os = "ios",
     target_os = "redox",
     target_os = "freebsd",
+    target_os = "openbsd",
     target_os = "emscripten",
     target_os = "wasi",
 )))]

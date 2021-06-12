@@ -176,14 +176,14 @@ impl Entry {
     }
 
     /// Return the inode number of this directory entry.
-    #[cfg(not(any(target_os = "freebsd", target_os = "netbsd")))]
+    #[cfg(not(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd")))]
     #[inline]
     pub fn ino(&self) -> u64 {
         self.dirent.d_ino
     }
 
     /// Return the inode number of this directory entry.
-    #[cfg(any(target_os = "freebsd", target_os = "netbsd"))]
+    #[cfg(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))]
     #[inline]
     pub fn ino(&self) -> u64 {
         #[allow(clippy::useless_conversion)]
