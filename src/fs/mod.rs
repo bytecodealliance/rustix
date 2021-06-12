@@ -13,6 +13,7 @@ mod dir;
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
+    target_os = "openbsd",
     target_os = "redox"
 )))]
 mod fadvise;
@@ -27,6 +28,7 @@ mod getpath;
     target_os = "ios",
     target_os = "freebsd",
     target_os = "netbsd",
+    target_os = "openbsd",
     target_os = "macos",
     target_os = "redox",
     target_os = "wasi"
@@ -66,6 +68,7 @@ pub use dir::{Dir, Entry, SeekLoc};
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
+    target_os = "openbsd",
     target_os = "redox"
 )))]
 pub use fadvise::{fadvise, Advice};
@@ -74,6 +77,7 @@ pub use fadvise::{fadvise, Advice};
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
+    target_os = "openbsd",
     target_os = "redox",
     target_os = "wasi",
 )))]
@@ -89,7 +93,7 @@ pub use fd::fchmod;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
 pub use fd::fstatfs;
-#[cfg(not(any(target_os = "netbsd", target_os = "redox")))]
+#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))]
 pub use fd::posix_fallocate;
 pub use fd::{futimens, is_file_read_write, seek, tell};
 pub use file_type::FileType;
@@ -99,6 +103,7 @@ pub use getpath::getpath;
     target_os = "ios",
     target_os = "freebsd",
     target_os = "netbsd",
+    target_os = "openbsd",
     target_os = "macos",
     target_os = "redox",
     target_os = "wasi"

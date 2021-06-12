@@ -25,6 +25,7 @@ use libc::lseek as libc_lseek;
     target_os = "freebsd",
     target_os = "macos",
     target_os = "netbsd",
+    target_os = "openbsd",
     target_os = "redox",
     target_os = "wasi",
 )))]
@@ -34,6 +35,7 @@ use libc::off64_t as libc_off_t;
     target_os = "freebsd",
     target_os = "macos",
     target_os = "netbsd",
+    target_os = "openbsd",
     target_os = "redox",
     target_os = "wasi",
 ))]
@@ -149,7 +151,7 @@ unsafe fn _futimens(fd: UnsafeHandle, times: &[libc::timespec; 2]) -> io::Result
 }
 
 /// `posix_fallocate(fd, offset, len)`
-#[cfg(not(any(target_os = "netbsd", target_os = "redox")))] // not implemented in libc for netbsd yet
+#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))] // not implemented in libc for netbsd yet
 #[inline]
 pub fn posix_fallocate<Fd: AsUnsafeHandle>(fd: &Fd, offset: u64, len: u64) -> io::Result<()> {
     let fd = fd.as_unsafe_handle();
@@ -160,6 +162,7 @@ pub fn posix_fallocate<Fd: AsUnsafeHandle>(fd: &Fd, offset: u64, len: u64) -> io
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
+    target_os = "openbsd",
     target_os = "redox"
 )))]
 unsafe fn _posix_fallocate(fd: UnsafeHandle, offset: u64, len: u64) -> io::Result<()> {
