@@ -18,7 +18,7 @@ use {crate::zero_ok, std::convert::TryInto};
 /// `ioctl(fd, FIONREAD)`.
 #[cfg(not(target_os = "redox"))]
 #[inline]
-pub fn ioctl_fionread<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
+pub fn ioctl_fionread<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<u64> {
     let fd = fd.as_fd();
     _ioctl_fionread(fd)
 }
@@ -44,7 +44,7 @@ fn _ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
 
 /// `isatty(fd)`
 #[inline]
-pub fn isatty<Fd: AsFd>(fd: &Fd) -> bool {
+pub fn isatty<'f, Fd: AsFd<'f>>(fd: Fd) -> bool {
     let fd = fd.as_fd();
     _isatty(fd)
 }
@@ -104,7 +104,7 @@ fn _isatty(fd: BorrowedFd<'_>) -> bool {
 /// [`is_file_read_write`]: crate::fs::is_file_read_write
 #[cfg(not(target_os = "redox"))]
 #[inline]
-pub fn is_read_write<Fd: AsFd>(fd: &Fd) -> io::Result<(bool, bool)> {
+pub fn is_read_write<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<(bool, bool)> {
     let fd = fd.as_fd();
     _is_read_write(fd)
 }
@@ -216,7 +216,7 @@ fn _is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
 /// `dup(fd)`
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
+pub fn dup<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<OwnedFd> {
     let fd = fd.as_fd();
     _dup(fd)
 }
@@ -239,7 +239,7 @@ fn _dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 /// If `reuse` is non-empty, reuse its buffer to store the result if possible.
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 #[inline]
-pub fn ttyname<Fd: AsFd>(dirfd: &Fd, reuse: OsString) -> io::Result<OsString> {
+pub fn ttyname<'f, Fd: AsFd<'f>>(dirfd: Fd, reuse: OsString) -> io::Result<OsString> {
     let dirfd = dirfd.as_fd();
     _ttyname(dirfd, reuse)
 }

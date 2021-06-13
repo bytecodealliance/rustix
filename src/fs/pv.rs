@@ -22,7 +22,7 @@ use {crate::negone_err, std::cmp, unsafe_io::os::posish::AsRawFd};
 
 /// `preadv(fd, bufs.as_ptr(), bufs.len(), offset)`
 #[inline]
-pub fn preadv<Fd: AsFd>(fd: &Fd, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
+pub fn preadv<'f, Fd: AsFd<'f>>(fd: Fd, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
     let fd = fd.as_fd();
     _preadv(fd, bufs, offset)
 }
@@ -54,7 +54,7 @@ fn _preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io::Result<u
 
 /// `pwritev(fd, bufs.as_ptr(), bufs.len(), offset)`
 #[inline]
-pub fn pwritev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
+pub fn pwritev<'f, Fd: AsFd<'f>>(fd: Fd, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
     let fd = fd.as_fd();
     _pwritev(fd, bufs, offset)
 }

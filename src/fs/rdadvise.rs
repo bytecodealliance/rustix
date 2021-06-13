@@ -4,7 +4,7 @@ use std::{convert::TryInto, io};
 use unsafe_io::os::posish::AsRawFd;
 
 /// `fcntl(fd, F_RDADVISE, radvisory { offset, len })`
-pub fn rdadvise<Fd: AsFd>(fd: &Fd, offset: u64, len: u64) -> io::Result<()> {
+pub fn rdadvise<'f, Fd: AsFd<'f>>(fd: Fd, offset: u64, len: u64) -> io::Result<()> {
     let fd = fd.as_fd();
     unsafe { _rdadvise(fd, offset, len) }
 }
