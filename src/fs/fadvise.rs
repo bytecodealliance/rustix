@@ -73,7 +73,7 @@ pub enum Advice {
 
 /// `posix_fadvise(fd, offset, len, advice)`
 #[inline]
-pub fn fadvise<Fd: AsFd>(fd: &Fd, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
+pub fn fadvise<'f, Fd: AsFd<'f>>(fd: Fd, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
     let fd = fd.as_fd();
     _fadvise(fd, offset, len, advice)
 }

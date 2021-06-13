@@ -109,8 +109,8 @@ bitflags! {
 /// `statx(dirfd, path, flags, mask, statxbuf)`. Note that this isn't available
 /// on older Linux; returns `ENOSYS` in that case.
 #[inline]
-pub fn statx<P: path::Arg, Fd: AsFd>(
-    dirfd: &Fd,
+pub fn statx<'f, P: path::Arg, Fd: AsFd<'f>>(
+    dirfd: Fd,
     path: P,
     flags: AtFlags,
     mask: StatxFlags,

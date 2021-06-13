@@ -96,7 +96,7 @@ pub enum AddressFamily {
 
 /// `getsockopt(fd, SOL_SOCKET, SO_TYPE)`
 #[inline]
-pub fn socket_type<Fd: AsFd>(fd: &Fd) -> io::Result<SocketType> {
+pub fn socket_type<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<SocketType> {
     let fd = fd.as_fd();
     _socket_type(fd)
 }

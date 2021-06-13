@@ -1,3 +1,4 @@
+use io_lifetimes::AsFd;
 use itoa::{write, Integer};
 #[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
@@ -28,8 +29,8 @@ impl DecInt {
 
     /// Construct a new path component from a file descriptor.
     #[inline]
-    pub fn from_fd<Fd: AsRawFd>(fd: &Fd) -> Self {
-        Self::new(fd.as_raw_fd())
+    pub fn from_fd<'f, Fd: AsFd<'f>>(fd: Fd) -> Self {
+        Self::new(fd.as_fd().as_raw_fd())
     }
 }
 

@@ -66,9 +66,8 @@ impl<'fd> PollFd<'fd> {
     /// here, and they need to live at least through the `PollFdVec::poll`
     /// call.
     #[inline]
-    pub unsafe fn new<Fd: AsFd>(fd: &'fd Fd, events: PollFlags) -> Self {
-        let fd = fd.as_fd();
-        Self::_new(fd, events)
+    pub unsafe fn new<Fd: AsFd<'fd>>(fd: Fd, events: PollFlags) -> Self {
+        Self::_new(fd.as_fd(), events)
     }
 
     #[cfg(libc)]
