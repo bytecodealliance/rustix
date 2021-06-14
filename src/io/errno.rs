@@ -18,6 +18,15 @@ impl Errno {
     pub const AFNOSUPPORT: Self = Self(libc::EAFNOSUPPORT);
     pub const AGAIN: Self = Self(libc::EAGAIN);
     pub const ALREADY: Self = Self(libc::EALREADY);
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "netbsd",
+        target_os = "dragonfly",
+        target_os = "openbsd"
+    ))]
+    pub const AUTH: Self = Self(libc::EAUTH);
     #[cfg(not(target_os = "netbsd"))]
     #[cfg(not(target_os = "freebsd"))]
     #[cfg(not(any(target_os = "ios", target_os = "macos")))]
@@ -35,6 +44,15 @@ impl Errno {
     #[cfg(not(any(target_os = "ios", target_os = "macos")))]
     #[cfg(not(target_os = "wasi"))]
     pub const BADR: Self = Self(libc::EBADR);
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "netbsd",
+        target_os = "dragonfly",
+        target_os = "openbsd"
+    ))]
+    pub const BADRPC: Self = Self(libc::EBADRPC);
     #[cfg(not(target_os = "netbsd"))]
     #[cfg(not(target_os = "freebsd"))]
     #[cfg(not(any(target_os = "ios", target_os = "macos")))]
@@ -52,6 +70,8 @@ impl Errno {
     pub const BFONT: Self = Self(libc::EBFONT);
     pub const BUSY: Self = Self(libc::EBUSY);
     pub const CANCELED: Self = Self(libc::ECANCELED);
+    #[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
+    pub const CAPMODE: Self = Self(libc::ECAPMODE);
     pub const CHILD: Self = Self(libc::ECHILD);
     #[cfg(not(target_os = "netbsd"))]
     #[cfg(not(target_os = "freebsd"))]
@@ -75,6 +95,8 @@ impl Errno {
     pub const DEADLOCK: Self = Self(libc::EDEADLOCK);
     pub const DESTADDRREQ: Self = Self(libc::EDESTADDRREQ);
     pub const DOM: Self = Self(libc::EDOM);
+    #[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
+    pub const DOOFUS: Self = Self(libc::EDOOFUS);
     #[cfg(not(target_os = "netbsd"))]
     #[cfg(not(target_os = "freebsd"))]
     #[cfg(not(any(target_os = "ios", target_os = "macos")))]
@@ -84,6 +106,16 @@ impl Errno {
     pub const EXIST: Self = Self(libc::EEXIST);
     pub const FAULT: Self = Self(libc::EFAULT);
     pub const FBIG: Self = Self(libc::EFBIG);
+    #[cfg(any(
+        target_env = "newlib",
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "netbsd",
+        target_os = "dragonfly",
+        target_os = "openbsd"
+    ))]
+    pub const FTYPE: Self = Self(libc::EFTYPE);
     #[cfg(not(target_os = "wasi"))]
     pub const HOSTDOWN: Self = Self(libc::EHOSTDOWN);
     pub const HOSTUNREACH: Self = Self(libc::EHOSTUNREACH);
@@ -189,6 +221,15 @@ impl Errno {
     #[cfg(not(any(target_os = "ios", target_os = "macos")))]
     #[cfg(not(target_os = "wasi"))]
     pub const NAVAIL: Self = Self(libc::ENAVAIL);
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "netbsd",
+        target_os = "dragonfly",
+        target_os = "openbsd"
+    ))]
+    pub const NEEDAUTH: Self = Self(libc::ENEEDAUTH);
     pub const NETDOWN: Self = Self(libc::ENETDOWN);
     pub const NETRESET: Self = Self(libc::ENETRESET);
     pub const NETUNREACH: Self = Self(libc::ENETUNREACH);
@@ -198,6 +239,15 @@ impl Errno {
     #[cfg(not(any(target_os = "ios", target_os = "macos")))]
     #[cfg(not(target_os = "wasi"))]
     pub const NOANO: Self = Self(libc::ENOANO);
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "netbsd",
+        target_os = "dragonfly",
+        target_os = "openbsd"
+    ))]
+    pub const NOATTR: Self = Self(libc::ENOATTR);
     pub const NOBUFS: Self = Self(libc::ENOBUFS);
     #[cfg(not(target_os = "netbsd"))]
     #[cfg(not(target_os = "freebsd"))]
@@ -245,6 +295,8 @@ impl Errno {
     pub const NOSYS: Self = Self(libc::ENOSYS);
     #[cfg(not(target_os = "wasi"))]
     pub const NOTBLK: Self = Self(libc::ENOTBLK);
+    #[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
+    pub const NOTCAPABLE: Self = Self(libc::ENOTCAPABLE);
     pub const NOTCONN: Self = Self(libc::ENOTCONN);
     pub const NOTDIR: Self = Self(libc::ENOTDIR);
     pub const NOTEMPTY: Self = Self(libc::ENOTEMPTY);
@@ -273,6 +325,42 @@ impl Errno {
     #[cfg(not(target_os = "wasi"))]
     pub const PFNOSUPPORT: Self = Self(libc::EPFNOSUPPORT);
     pub const PIPE: Self = Self(libc::EPIPE);
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "netbsd",
+        target_os = "dragonfly",
+        target_os = "openbsd"
+    ))]
+    pub const PROCLIM: Self = Self(libc::EPROCLIM);
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "netbsd",
+        target_os = "dragonfly",
+        target_os = "openbsd"
+    ))]
+    pub const PROCUNAVAIL: Self = Self(libc::EPROCUNAVAIL);
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "netbsd",
+        target_os = "dragonfly",
+        target_os = "openbsd"
+    ))]
+    pub const PROGMISMATCH: Self = Self(libc::EPROGMISMATCH);
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "netbsd",
+        target_os = "dragonfly",
+        target_os = "openbsd"
+    ))]
+    pub const PROGUNAVAIL: Self = Self(libc::EPROGUNAVAIL);
     pub const PROTO: Self = Self(libc::EPROTO);
     pub const PROTONOSUPPORT: Self = Self(libc::EPROTONOSUPPORT);
     pub const PROTOTYPE: Self = Self(libc::EPROTOTYPE);
@@ -302,6 +390,15 @@ impl Errno {
     #[cfg(not(target_os = "redox"))]
     pub const RFKILL: Self = Self(libc::ERFKILL);
     pub const ROFS: Self = Self(libc::EROFS);
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "netbsd",
+        target_os = "dragonfly",
+        target_os = "openbsd"
+    ))]
+    pub const RPCMISMATCH: Self = Self(libc::ERPCMISMATCH);
     #[cfg(not(target_os = "wasi"))]
     pub const SHUTDOWN: Self = Self(libc::ESHUTDOWN);
     #[cfg(not(target_os = "wasi"))]
