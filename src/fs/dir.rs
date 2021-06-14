@@ -1,10 +1,8 @@
 //! `Dir`, `Entry`, and `SeekLoc`.
 
-#[cfg(all(libc, target_os = "android"))]
-use crate::fs::android::seekdir as libc_seekdir;
 use crate::fs::FileType;
 use io_lifetimes::{IntoFd, OwnedFd};
-#[cfg(all(libc, not(target_os = "android")))]
+#[cfg(libc)]
 use libc::seekdir as libc_seekdir;
 #[cfg(not(any(
     target_os = "android",

@@ -1,7 +1,5 @@
 //! Filesystem operations.
 
-#[cfg(all(libc, target_os = "android"))]
-mod android;
 #[cfg(not(target_os = "redox"))]
 mod at;
 mod constants;
