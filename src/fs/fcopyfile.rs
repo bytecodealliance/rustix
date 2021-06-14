@@ -5,7 +5,8 @@ use unsafe_io::os::posish::AsRawFd;
 
 /// `copyfile_state_t`
 #[allow(non_camel_case_types)]
-pub type copyfile_state_t = *mut libc::c_void;
+#[repr(transparent)]
+pub struct copyfile_state_t(*mut libc::c_void);
 
 /// `copyfile_flags_t`
 #[allow(non_camel_case_types)]
@@ -13,7 +14,7 @@ type copyfile_flags_t = u32;
 
 /// `fcopyfile(from, to, state, flags)`
 #[inline]
-pub fn fcopyfile<'from_f, 'to_f, FromFd: AsFd<'from_f>, ToFd: AsFd<'to_f>>(
+pub unsafe fn fcopyfile<'from_f, 'to_f, FromFd: AsFd<'from_f>, ToFd: AsFd<'to_f>>(
     from: FromFd,
     to: ToFd,
     state: copyfile_state_t,
@@ -21,7 +22,7 @@ pub fn fcopyfile<'from_f, 'to_f, FromFd: AsFd<'from_f>, ToFd: AsFd<'to_f>>(
 ) -> io::Result<()> {
     let from = from.as_fd();
     let to = to.as_fd();
-    unsafe { _fcopyfile(from, to, state, flags) }
+    _fcopyfile(from, to, state, flags)
 }
 
 unsafe fn _fcopyfile(
@@ -57,21 +58,21 @@ pub fn copyfile_state_alloc() -> copyfile_state_t {
 }
 
 /// `copyfile_state_free(state)`
-pub fn copyfile_state_free(state: copyfile_state_t) -> io::Result<()> {
+pub unsafe fn copyfile_state_free(state: copyfile_state_t) -> io::Result<()> {
     extern "C" {
         fn copyfile_state_free(state: copyfile_state_t) -> libc::c_int;
     }
 
-    negative_err(unsafe { copyfile_state_free(state) })
+    negative_err(copyfile_state_free(state))
 }
 
 const COPYFILE_STATE_COPIED: u32 = 8;
 
 /// `copyfile_state_get(state, COPYFILE_STATE_COPIED)`
-pub fn copyfile_state_get_copied(state: copyfile_state_t) -> io::Result<u64> {
+pub unsafe fn copyfile_state_get_copied(state: copyfile_state_t) -> io::Result<u64> {
     let mut copied = MaybeUninit::<u64>::uninit();
-    unsafe { copyfile_state_get(state, COPYFILE_STATE_COPIED, copied.as_mut_ptr().cast()) }?;
-    Ok(unsafe { copied.assume_init() })
+    copyfile_state_get(state, COPYFILE_STATE_COPIED, copied.as_mut_ptr().cast())?;
+    Ok(copied.assume_init())
 }
 
 /// `copyfile_state_get(state, flags, dst)`
