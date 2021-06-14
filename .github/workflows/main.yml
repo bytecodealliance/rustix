@@ -119,3 +119,32 @@ jobs:
         toolchain: ${{ matrix.rust }}
     - run: >
         cargo test
+
+  test_linux_raw:
+    name: Test linux-raw support
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [ubuntu, ubuntu-16.04, ubuntu-18.04]
+        include:
+          - build: ubuntu
+            os: ubuntu-latest
+            rust: nightly
+          - build: ubuntu-16.04
+            os: ubuntu-16.04
+            rust: nightly
+          - build: ubuntu-18.04
+            os: ubuntu-18.04
+            rust: nightly
+
+    env:
+      RUSTFLAGS: --cfg linux_raw
+      RUSTDOCFLAGS: --cfg linux_raw
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: ${{ matrix.rust }}
+    - run: cargo test --all-features --workspace
