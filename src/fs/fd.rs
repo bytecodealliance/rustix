@@ -311,6 +311,7 @@ fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()>
 /// This is only reliable on files; for example, it doesn't reflect whether
 /// sockets have been shut down; for general I/O handle support, use
 /// [`crate::io::is_read_write`].
+#[inline]
 pub fn is_file_read_write<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<(bool, bool)> {
     let fd = fd.as_fd();
     _is_file_read_write(fd)
