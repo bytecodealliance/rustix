@@ -1,43 +1,65 @@
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
-use std::{io, marker::PhantomData};
+use std::{io, marker::PhantomData, vec::IntoIter};
 #[cfg(libc)]
 use {crate::negone_err, std::convert::TryInto, unsafe_io::os::posish::AsRawFd};
 
 #[cfg(libc)]
 bitflags! {
+    /// `POLL*`
     pub struct PollFlags: libc::c_short {
-        const POLLIN = libc::POLLIN;
+        /// `POLLIN`
+        const IN = libc::POLLIN;
+        /// `POLLPRI`
         #[cfg(not(target_os = "wasi"))]
-        const POLLPRI = libc::POLLPRI;
-        const POLLOUT = libc::POLLOUT;
+        const PRI = libc::POLLPRI;
+        /// `POLLOUT`
+        const OUT = libc::POLLOUT;
+        /// `POLLRDNORM`
         #[cfg(not(target_os = "redox"))]
-        const POLLRDNORM = libc::POLLRDNORM;
+        const RDNORM = libc::POLLRDNORM;
+        /// `POLLWRNORM`
         #[cfg(not(target_os = "redox"))]
-        const POLLWRNORM = libc::POLLWRNORM;
+        const WRNORM = libc::POLLWRNORM;
+        /// `POLLRDBAND`
         #[cfg(not(any(target_os = "wasi", target_os = "redox")))]
-        const POLLRDBAND = libc::POLLRDBAND;
+        const RDBAND = libc::POLLRDBAND;
+        /// `POLLWRBAND`
         #[cfg(not(any(target_os = "wasi", target_os = "redox")))]
-        const POLLWRBAND = libc::POLLWRBAND;
-        const POLLERR = libc::POLLERR;
-        const POLLHUP = libc::POLLHUP;
-        const POLLNVAL = libc::POLLNVAL;
+        const WRBAND = libc::POLLWRBAND;
+        /// `POLLERR`
+        const ERR = libc::POLLERR;
+        /// `POLLHUP`
+        const HUP = libc::POLLHUP;
+        /// `POLLNVAL`
+        const NVAL = libc::POLLNVAL;
     }
 }
 
 #[cfg(linux_raw)]
 bitflags! {
+    /// `POLL*`
     pub struct PollFlags: u16 {
-        const POLLIN = linux_raw_sys::general::POLLIN as u16;
-        const POLLPRI = linux_raw_sys::general::POLLPRI as u16;
-        const POLLOUT = linux_raw_sys::general::POLLOUT as u16;
-        const POLLRDNORM = linux_raw_sys::general::POLLRDNORM as u16;
-        const POLLWRNORM = linux_raw_sys::general::POLLWRNORM as u16;
-        const POLLRDBAND = linux_raw_sys::general::POLLRDBAND as u16;
-        const POLLWRBAND = linux_raw_sys::general::POLLWRBAND as u16;
-        const POLLERR = linux_raw_sys::general::POLLERR as u16;
-        const POLLHUP = linux_raw_sys::general::POLLHUP as u16;
-        const POLLNVAL = linux_raw_sys::general::POLLNVAL as u16;
+        /// `POLLIN`
+        const IN = linux_raw_sys::general::POLLIN as u16;
+        /// `POLLPRI`
+        const PRI = linux_raw_sys::general::POLLPRI as u16;
+        /// `POLLOUT`
+        const OUT = linux_raw_sys::general::POLLOUT as u16;
+        /// `POLLNORM`
+        const RDNORM = linux_raw_sys::general::POLLRDNORM as u16;
+        /// `POLLNORM`
+        const WRNORM = linux_raw_sys::general::POLLWRNORM as u16;
+        /// `POLLRDBAND`
+        const RDBAND = linux_raw_sys::general::POLLRDBAND as u16;
+        /// `POLLWRBAND`
+        const WRBAND = linux_raw_sys::general::POLLWRBAND as u16;
+        /// `POLLERR`
+        const ERR = linux_raw_sys::general::POLLERR as u16;
+        /// `POLLHUP`
+        const HUP = linux_raw_sys::general::POLLHUP as u16;
+        /// `POLLNVAL`
+        const NVAL = linux_raw_sys::general::POLLNVAL as u16;
     }
 }
 
@@ -109,6 +131,26 @@ impl<'fd> PollFd<'fd> {
 #[derive(Clone, Debug)]
 pub struct PollFdVec<'fd> {
     fds: Vec<PollFd<'fd>>,
+}
+
+impl<'fd> PollFdVec<'fd> {
+    /// Construct a new empty `PollFdVec`.
+    #[inline]
+    pub fn new() -> Self {
+        Self { fds: Vec::new() }
+    }
+
+    /// Append a fd.
+    #[inline]
+    pub fn push(&mut self, fd: PollFd<'fd>) {
+        self.fds.push(fd)
+    }
+
+    /// Consume self and return an iterator over the fds.
+    #[inline]
+    pub fn into_iter(self) -> IntoIter<PollFd<'fd>> {
+        self.fds.into_iter()
+    }
 }
 
 #[cfg(libc)]

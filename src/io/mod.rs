@@ -21,7 +21,7 @@ pub use fd::ttyname;
 pub use ioctl::ioctl_fioclex;
 #[cfg(not(target_os = "wasi"))]
 pub use ioctl::ioctl_tcgets;
-pub use poll::{PollFd, PollFdVec};
+pub use poll::{PollFd, PollFdVec, PollFlags};
 #[cfg(not(target_os = "wasi"))]
 pub use socketpair::socketpair_stream;
 
