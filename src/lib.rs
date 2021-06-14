@@ -36,8 +36,8 @@
 //! This library follows [`std`] in considering dynamic integer values that
 //! have no meaning outside of OS APIs to be similar to raw pointers, from a
 //! safety perspective. For example,
-//! [`unsafe_io::FromUnsafeHandle::from_unsafe_handle`] is unsafe since it takes a
-//! raw file descriptor. In this library, raw file descriptors and raw
+//! [`unsafe_io::FromUnsafeHandle::from_unsafe_handle`] is unsafe since it
+//! takes a raw file descriptor. In this library, raw file descriptors and raw
 //! directory seek locations are considered to be similar to raw pointers in
 //! terms of safety.
 //!

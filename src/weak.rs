@@ -12,9 +12,9 @@
 //! One option to use here is weak linkage, but that is unfortunately only
 //! really workable on Linux. Hence, use dlsym to get the symbol value at
 //! runtime. This is also done for compatibility with older versions of glibc,
-//! and to avoid creating dependencies on `GLIBC_PRIVATE` symbols. It assumes that
-//! we've been dynamically linked to the library the symbol comes from, but that
-//! is currently always the case for things like libpthread/libc.
+//! and to avoid creating dependencies on `GLIBC_PRIVATE` symbols. It assumes
+//! that we've been dynamically linked to the library the symbol comes from,
+//! but that is currently always the case for things like libpthread/libc.
 //!
 //! A long time ago this used weak linkage for the `__pthread_get_minstack`
 //! symbol, but that caused Debian to detect an unnecessarily strict versioned

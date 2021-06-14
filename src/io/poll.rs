@@ -31,8 +31,9 @@ pub struct PollFd(libc::pollfd);
 impl PollFd {
     /// # Safety
     ///
-    /// `PollFd` does not take ownership of the file descriptors passed in here,
-    /// and they need to live at least through the `PollFdVec::poll` call.
+    /// `PollFd` does not take ownership of the file descriptors passed in
+    /// here, and they need to live at least through the `PollFdVec::poll`
+    /// call.
     #[inline]
     pub unsafe fn new<Fd: AsUnsafeHandle>(fd: &Fd, events: PollFlags) -> Self {
         let fd = fd.as_unsafe_handle();

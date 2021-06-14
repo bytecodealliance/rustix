@@ -12,8 +12,8 @@ unsafe fn _rdadvise(fd: UnsafeHandle, offset: u64, len: u64) -> io::Result<()> {
     // From the macOS `fcntl` man page:
     // `F_RDADVISE` - Issue an advisory read async with no copy to user.
     //
-    // The `F_RDADVISE` command operates on the following structure which holds information passed
-    // from the user to the system:
+    // The `F_RDADVISE` command operates on the following structure which holds
+    // information passed from the user to the system:
     //
     // ```
     // struct radvisory {
