@@ -6,10 +6,10 @@ use unsafe_io::os::posish::AsRawFd;
 /// `fcntl(fd, F_RDADVISE, radvisory { offset, len })`
 pub fn rdadvise<'f, Fd: AsFd<'f>>(fd: Fd, offset: u64, len: u64) -> io::Result<()> {
     let fd = fd.as_fd();
-    unsafe { _rdadvise(fd, offset, len) }
+    _rdadvise(fd, offset, len)
 }
 
-unsafe fn _rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
+fn _rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
     // From the macOS `fcntl` man page:
     // `F_RDADVISE` - Issue an advisory read async with no copy to user.
     //
@@ -36,9 +36,11 @@ unsafe fn _rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()>
         // hint which is unlikely to improve performance.
         Err(_) => return Ok(()),
     };
-    let radvisory = libc::radvisory {
-        ra_offset,
-        ra_count,
-    };
-    zero_ok(libc::fcntl(fd.as_raw_fd(), libc::F_RDADVISE, &radvisory))
+    unsafe {
+        let radvisory = libc::radvisory {
+            ra_offset,
+            ra_count,
+        };
+        zero_ok(libc::fcntl(fd.as_raw_fd(), libc::F_RDADVISE, &radvisory))
+    }
 }

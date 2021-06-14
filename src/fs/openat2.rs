@@ -38,11 +38,11 @@ pub fn openat2<'f, Fd: AsFd<'f>, P: path::Arg>(
 ) -> io::Result<OwnedFd> {
     let dirfd = dirfd.as_fd();
     let path = path.as_c_str()?;
-    unsafe { _openat2(dirfd, &path, oflags, mode, resolve) }
+    _openat2(dirfd, &path, oflags, mode, resolve)
 }
 
 #[cfg(libc)]
-unsafe fn _openat2(
+fn _openat2(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
     oflags: OFlags,
@@ -56,20 +56,22 @@ unsafe fn _openat2(
         resolve: resolve.bits(),
     };
 
-    let fd = negone_err(libc::syscall(
-        SYS_OPENAT2,
-        dirfd.as_raw_fd(),
-        path.as_ptr(),
-        &open_how,
-        SIZEOF_OPEN_HOW,
-    ))?;
+    unsafe {
+        let fd = negone_err(libc::syscall(
+            SYS_OPENAT2,
+            dirfd.as_raw_fd(),
+            path.as_ptr(),
+            &open_how,
+            SIZEOF_OPEN_HOW,
+        ))?;
 
-    #[allow(clippy::useless_conversion)]
-    Ok(OwnedFd::from_raw_fd(fd.try_into().unwrap()))
+        #[allow(clippy::useless_conversion)]
+        Ok(OwnedFd::from_raw_fd(fd.try_into().unwrap()))
+    }
 }
 
 #[cfg(linux_raw)]
-unsafe fn _openat2(
+fn _openat2(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
     oflags: OFlags,
