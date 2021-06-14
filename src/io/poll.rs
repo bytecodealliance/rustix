@@ -82,19 +82,15 @@ pub struct PollFd<'fd> {
 }
 
 impl<'fd> PollFd<'fd> {
-    /// # Safety
-    ///
-    /// `PollFd` does not take ownership of the file descriptors passed in
-    /// here, and they need to live at least through the `PollFdVec::poll`
-    /// call.
+    /// Construct a new `PollFd` holding `fd` and `events`.
     #[inline]
-    pub unsafe fn new<Fd: AsFd<'fd>>(fd: Fd, events: PollFlags) -> Self {
+    pub fn new<Fd: AsFd<'fd>>(fd: Fd, events: PollFlags) -> Self {
         Self::_new(fd.as_fd(), events)
     }
 
     #[cfg(libc)]
     #[inline]
-    unsafe fn _new(fd: BorrowedFd<'fd>, events: PollFlags) -> Self {
+    fn _new(fd: BorrowedFd<'fd>, events: PollFlags) -> Self {
         Self {
             pollfd: libc::pollfd {
                 fd: fd.as_raw_fd() as libc::c_int,
@@ -107,7 +103,7 @@ impl<'fd> PollFd<'fd> {
 
     #[cfg(linux_raw)]
     #[inline]
-    unsafe fn _new(fd: BorrowedFd<'fd>, events: PollFlags) -> Self {
+    fn _new(fd: BorrowedFd<'fd>, events: PollFlags) -> Self {
         Self {
             pollfd: crate::linux_raw::PollFd {
                 fd,
