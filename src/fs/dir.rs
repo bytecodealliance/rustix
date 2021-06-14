@@ -190,7 +190,8 @@ impl Entry {
         self.dirent.d_fileno.into()
     }
 
-    /// Return a cookie indicating the location of this entry, for use with [`Dir::seek`].
+    /// Return a cookie indicating the location of this entry, for use with
+    /// [`Dir::seek`].
     ///
     /// [`Dir::seek`]: struct.Dir.html#method.seek
     ///
@@ -219,9 +220,9 @@ impl Entry {
 pub struct SeekLoc(libc::c_long);
 
 impl SeekLoc {
-    /// Return the location encoded as a `u64`. Note that this value is meant to
-    /// be opaque, and applications shouldn't do anything with it except call
-    /// `SeekLoc::from_raw`.
+    /// Return the location encoded as a `u64`. Note that this value is meant
+    /// to be opaque, and applications shouldn't do anything with it except
+    /// call `SeekLoc::from_raw`.
     #[inline]
     #[allow(clippy::useless_conversion)]
     pub fn to_raw(&self) -> u64 {

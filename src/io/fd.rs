@@ -61,9 +61,10 @@ unsafe fn _isatty(fd: UnsafeHandle) -> bool {
     }
 }
 
-/// Returns a pair of booleans indicating whether the file descriptor is readable
-/// and/or writeable, respectively. Unlike [`is_file_read_write`], this correctly
-/// detects whether sockets have been shutdown, partially or completely.
+/// Returns a pair of booleans indicating whether the file descriptor is
+/// readable and/or writeable, respectively. Unlike [`is_file_read_write`],
+/// this correctly detects whether sockets have been shutdown, partially or
+/// completely.
 ///
 /// [`is_file_read_write`]: crate::fs::is_file_read_write
 #[cfg(not(target_os = "redox"))]

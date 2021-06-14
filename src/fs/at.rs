@@ -333,8 +333,8 @@ unsafe fn _utimensat(
 
 /// `fchmodat(dirfd, path, mode, 0)`
 ///
-/// The flags argument is fixed to 0, so `AT_SYMLINK_NOFOLLOW` is not supported.
-/// <details>
+/// The flags argument is fixed to 0, so `AT_SYMLINK_NOFOLLOW` is not
+/// supported. <details>
 /// Platform support for this flag varies widely.
 /// </details>
 ///
