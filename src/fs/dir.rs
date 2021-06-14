@@ -68,14 +68,8 @@ impl Dir {
     }
 
     /// Construct a `Dir`, assuming ownership of the file descriptor.
-    ///
-    /// # Safety
-    ///
-    /// This accepts any type that implements `IntoRawFd`, however `IntoRawFd`
-    /// itself doesn't guarantee that the handle is valid. Callers must ensure
-    /// that the handle is valid.
     #[inline]
-    pub fn from_into_raw_fd<F: IntoFd>(fd: F) -> io::Result<Self> {
+    pub fn from_into_fd<F: IntoFd>(fd: F) -> io::Result<Self> {
         let fd = fd.into_fd();
         Self::_from(fd)
     }

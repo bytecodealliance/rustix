@@ -33,7 +33,7 @@
 //! # Safety
 //!
 //! This library uses the [io-lifetimes crate] to manage all OS resource
-//! handles, ensuring I/O safety.
+//! handles, automatically ensuring I/O safety.
 //!
 //! [`cap-std`]: https://crates.io/crates/cap-std
 //! [`system-interface`]: https://crates.io/crates/system-interface
