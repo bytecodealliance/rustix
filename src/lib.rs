@@ -2,8 +2,6 @@
 //! on the functionality needed by [`cap-std`] and [`system-interface`] that
 //! isn't provided by [`std`] or [`getrandom`].
 //!
-//! TODO: Update the comments to mention direct syscall mode on Linux!
-//!
 //! The wrappers perform the following tasks:
 //!  - Error values are translated to `Result`s.
 //!  - Out-parameters are translated to return values.
