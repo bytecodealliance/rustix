@@ -5,8 +5,11 @@ use std::io;
 #[cfg(libc)]
 use {crate::zero_ok, std::mem::MaybeUninit, unsafe_io::os::posish::AsRawFd};
 
+/// ioctl(fd, TCGETS)
+///
 /// Also known as `tcgetattr`.
 #[cfg(not(target_os = "wasi"))]
+#[doc(alias = "tcgetattr")]
 #[inline]
 pub fn ioctl_tcgets<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<Termios> {
     let fd = fd.as_fd();
