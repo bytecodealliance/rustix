@@ -14,11 +14,12 @@ use libc::{preadv64 as libc_preadv, pwritev64 as libc_pwritev};
 #[cfg(all(libc, not(any(target_os = "redox", target_env = "newlib"))))]
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{
+    cmp::min,
     convert::TryInto,
     io::{self, IoSlice, IoSliceMut},
 };
 #[cfg(libc)]
-use {crate::negone_err, std::cmp, unsafe_io::os::posish::AsRawFd};
+use {crate::negone_err, unsafe_io::os::posish::AsRawFd};
 
 /// `preadv(fd, bufs.as_ptr(), bufs.len(), offset)`
 #[inline]
@@ -36,7 +37,7 @@ fn _preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io::Result<u
         negone_err(libc_preadv(
             fd.as_raw_fd() as libc::c_int,
             bufs.as_ptr().cast::<libc::iovec>(),
-            cmp::min(bufs.len(), max_iov()).try_into().unwrap(),
+            min(bufs.len(), max_iov()).try_into().unwrap(),
             offset,
         ))?
     };
@@ -49,7 +50,7 @@ fn _preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io::Result<u
     let offset = offset.try_into().map_err(|_overflow_err| {
         io::Error::from_raw_os_error(linux_raw_sys::errno::EOVERFLOW as i32)
     })?;
-    crate::linux_raw::preadv(fd, &bufs[..max_iov()], offset)
+    crate::linux_raw::preadv(fd, &bufs[..min(bufs.len(), max_iov())], offset)
 }
 
 /// `pwritev(fd, bufs.as_ptr(), bufs.len(), offset)`
@@ -68,7 +69,7 @@ fn _pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usi
         negone_err(libc_pwritev(
             fd.as_raw_fd() as libc::c_int,
             bufs.as_ptr().cast::<libc::iovec>(),
-            cmp::min(bufs.len(), max_iov()).try_into().unwrap(),
+            min(bufs.len(), max_iov()).try_into().unwrap(),
             offset,
         ))?
     };
@@ -81,7 +82,7 @@ fn _pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usi
     let offset = offset.try_into().map_err(|_overflow_err| {
         io::Error::from_raw_os_error(linux_raw_sys::errno::EOVERFLOW as i32)
     })?;
-    crate::linux_raw::pwritev(fd, &bufs[..max_iov()], offset)
+    crate::linux_raw::pwritev(fd, &bufs[..min(bufs.len(), max_iov())], offset)
 }
 
 // These functions are derived from Rust's library/std/src/sys/unix/fd.rs at
