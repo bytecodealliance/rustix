@@ -4,6 +4,11 @@ mod errno;
 mod fd;
 mod ioctl;
 mod poll;
+#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
+// Most Modern OS's have `preadv`/`pwritev`.
+mod pv;
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+mod rdadvise;
 #[cfg(not(target_os = "wasi"))]
 mod socketpair;
 
@@ -22,6 +27,10 @@ pub use ioctl::ioctl_fioclex;
 #[cfg(not(target_os = "wasi"))]
 pub use ioctl::ioctl_tcgets;
 pub use poll::{PollFd, PollFdVec, PollFlags};
+#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
+pub use pv::{preadv, pwritev};
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+pub use rdadvise::rdadvise;
 #[cfg(not(target_os = "wasi"))]
 pub use socketpair::socketpair_stream;
 

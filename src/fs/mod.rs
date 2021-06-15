@@ -36,11 +36,6 @@ mod makedev;
 mod memfd_create;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod openat2;
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
-// Most Modern OS's have `preadv`/`pwritev`.
-mod pv;
-#[cfg(any(target_os = "macos", target_os = "ios"))]
-mod rdadvise;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 mod statx;
 
@@ -113,10 +108,6 @@ pub use makedev::{major, makedev, minor};
 pub use memfd_create::{memfd_create, MemfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use openat2::openat2;
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
-pub use pv::{preadv, pwritev};
-#[cfg(any(target_os = "ios", target_os = "macos"))]
-pub use rdadvise::rdadvise;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 pub use statx::statx;
 
