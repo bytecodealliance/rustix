@@ -17,7 +17,6 @@ use conv::{
 };
 use io_lifetimes::{BorrowedFd, OwnedFd};
 use linux_raw_sys::{
-    general::__kernel_sockaddr_storage,
     general::{
         __NR_accept, __NR_accept4, __NR_bind, __NR_chdir, __NR_clock_getres, __NR_clock_gettime,
         __NR_clock_nanosleep, __NR_close, __NR_connect, __NR_dup, __NR_exit_group, __NR_faccessat,
@@ -32,15 +31,14 @@ use linux_raw_sys::{
         __NR_unlinkat, __NR_utimensat, __NR_write,
     },
     general::{
-        __kernel_clockid_t, __kernel_gid_t, __kernel_loff_t, __kernel_pid_t, __kernel_uid_t,
-        umode_t,
+        __kernel_clockid_t, __kernel_gid_t, __kernel_loff_t, __kernel_pid_t,
+        __kernel_sockaddr_storage, __kernel_uid_t, socklen_t, stat, statfs64, termios, timespec,
+        umode_t, winsize,
     },
-    general::{socklen_t, stat, statfs64, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW},
-    general::{termios, winsize, FIONREAD, TCGETS, TIOCGWINSZ},
-    general::{timespec, TIMER_ABSTIME},
     general::{
-        F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD,
-        F_SETFL,
+        AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD,
+        F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL, TCGETS, TIMER_ABSTIME,
+        TIOCGWINSZ,
     },
     v5_11::{general::__NR_openat2, general::open_how},
     v5_4::{
