@@ -56,7 +56,7 @@ pub fn copyfile_state_alloc() -> io::Result<copyfile_state_t> {
 
     let result = unsafe { copyfile_state_alloc() };
     if result.0.is_null() {
-        Err(io::Error::from_raw_os_error(libc::ENOMEM))
+        Err(io::Error::last_os_error())
     } else {
         Ok(result)
     }
