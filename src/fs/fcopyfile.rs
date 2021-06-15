@@ -49,12 +49,17 @@ unsafe fn _fcopyfile(
 }
 
 /// `copyfile_state_alloc()`
-pub fn copyfile_state_alloc() -> copyfile_state_t {
+pub fn copyfile_state_alloc() -> io::Result<copyfile_state_t> {
     extern "C" {
         fn copyfile_state_alloc() -> copyfile_state_t;
     }
 
-    unsafe { copyfile_state_alloc() }
+    let result = unsafe { copyfile_state_alloc() };
+    if result.0.is_null() {
+        Err(io::Error::from_raw_os_error(libc::ENOMEM))
+    } else {
+        Ok(result)
+    }
 }
 
 /// `copyfile_state_free(state)`
