@@ -6,6 +6,7 @@ use unsafe_io::os::posish::AsRawFd;
 /// `copyfile_state_t`
 #[allow(non_camel_case_types)]
 #[repr(transparent)]
+#[derive(Copy, Clone)]
 pub struct copyfile_state_t(*mut libc::c_void);
 
 /// `copyfile_flags_t`
