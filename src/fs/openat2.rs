@@ -36,7 +36,7 @@ pub fn openat2<'f, Fd: AsFd<'f>, P: path::Arg>(
     resolve: ResolveFlags,
 ) -> io::Result<OwnedFd> {
     let dirfd = dirfd.as_fd();
-    let path = path.as_c_str()?;
+    let path = path.into_c_str()?;
     _openat2(dirfd, &path, oflags, mode, resolve)
 }
 

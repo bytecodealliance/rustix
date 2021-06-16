@@ -1,12 +1,12 @@
 use crate::path::DecInt;
 #[cfg(target_os = "hermit")]
-use std::os::hermit::ext::ffi::OsStrExt;
+use std::os::hermit::ext::ffi::{OsStrExt, OsStringExt};
 #[cfg(unix)]
-use std::os::unix::ffi::OsStrExt;
+use std::os::unix::ffi::{OsStrExt, OsStringExt};
 #[cfg(target_os = "vxworks")]
-use std::os::vxworks::ext::ffi::OsStrExt;
+use std::os::vxworks::ext::ffi::{OsStrExt, OsStringExt};
 #[cfg(target_os = "wasi")]
-use std::os::wasi::ffi::OsStrExt;
+use std::os::wasi::ffi::{OsStrExt, OsStringExt};
 use std::{
     borrow::Cow,
     ffi::{CStr, CString, OsStr, OsString},
@@ -34,6 +34,15 @@ pub trait Arg {
     #[cfg(not(windows))]
     fn as_c_str(&self) -> io::Result<Cow<CStr>>;
 
+    /// Consume `self` and teturn a view of this string as a maybe-owned
+    /// [`CStr`].
+    ///
+    /// [`CStr`]: https://doc.rust-lang.org/std/ffi/struct.CStr.html
+    #[cfg(not(windows))]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b;
+
     /// Return a view of this string as a byte slice.
     #[cfg(not(windows))]
     fn as_maybe_utf8_bytes(&self) -> &[u8];
@@ -60,6 +69,15 @@ impl Arg for &str {
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(CString::new(self.as_bytes())?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(Cow::Owned(CString::new(self)?))
     }
 
     #[cfg(not(windows))]
@@ -93,6 +111,15 @@ impl Arg for String {
 
     #[cfg(not(windows))]
     #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(Cow::Owned(CString::new(self)?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_bytes()
     }
@@ -118,7 +145,16 @@ impl Arg for &OsStr {
     #[cfg(not(windows))]
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
-        Ok(Cow::Owned(CString::new(self.as_maybe_utf8_bytes())?))
+        Ok(Cow::Owned(CString::new(self.as_bytes())?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(Cow::Owned(CString::new(self.as_bytes())?))
     }
 
     #[cfg(not(windows))]
@@ -148,7 +184,16 @@ impl Arg for OsString {
     #[cfg(not(windows))]
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
-        Ok(Cow::Owned(CString::new(self.as_maybe_utf8_bytes())?))
+        Ok(Cow::Owned(CString::new(self.as_bytes())?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(Cow::Owned(CString::new(self.into_vec())?))
     }
 
     #[cfg(not(windows))]
@@ -178,6 +223,15 @@ impl Arg for &Path {
     #[cfg(not(windows))]
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+        Ok(Cow::Owned(CString::new(self.as_os_str().as_bytes())?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
         Ok(Cow::Owned(CString::new(self.as_os_str().as_bytes())?))
     }
 
@@ -213,6 +267,15 @@ impl Arg for PathBuf {
 
     #[cfg(not(windows))]
     #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(Cow::Owned(CString::new(self.into_os_string().into_vec())?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_os_str().as_bytes()
     }
@@ -243,6 +306,15 @@ impl Arg for &CStr {
 
     #[cfg(not(windows))]
     #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(Cow::Borrowed(self))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.to_bytes()
     }
@@ -257,7 +329,7 @@ impl Arg for &CStr {
 impl Arg for CString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_c_str().to_str().map_err(|_utf8_err| utf8_error())
+        self.to_str().map_err(|_utf8_err| utf8_error())
     }
 
     #[inline]
@@ -268,7 +340,16 @@ impl Arg for CString {
     #[cfg(not(windows))]
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
-        Ok(Cow::Borrowed(self.as_c_str()))
+        Ok(Cow::Borrowed(self))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(Cow::Owned(self))
     }
 
     #[cfg(not(windows))]
@@ -303,6 +384,18 @@ impl<'a> Arg for Cow<'a, OsStr> {
 
     #[cfg(not(windows))]
     #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(Cow::Owned(match self {
+            Cow::Owned(os) => CString::new(os.into_vec()),
+            Cow::Borrowed(os) => CString::new(os.as_bytes()),
+        }?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_bytes()
     }
@@ -333,6 +426,15 @@ impl<'a> Arg for Component<'a> {
 
     #[cfg(not(windows))]
     #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(Cow::Owned(CString::new(self.as_os_str().as_bytes())?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_os_str().as_bytes()
     }
@@ -358,6 +460,17 @@ impl<'a> Arg for Components<'a> {
     #[cfg(not(windows))]
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+        Ok(Cow::Owned(CString::new(
+            self.as_path().as_os_str().as_bytes(),
+        )?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
         Ok(Cow::Owned(CString::new(
             self.as_path().as_os_str().as_bytes(),
         )?))
@@ -397,6 +510,17 @@ impl<'a> Arg for Iter<'a> {
 
     #[cfg(not(windows))]
     #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(Cow::Owned(CString::new(
+            self.as_path().as_os_str().as_bytes(),
+        )?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_path().as_os_str().as_bytes()
     }
@@ -427,6 +551,15 @@ impl Arg for &[u8] {
 
     #[cfg(not(windows))]
     #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(Cow::Owned(CString::new(self)?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self
     }
@@ -452,7 +585,16 @@ impl Arg for Vec<u8> {
     #[cfg(not(windows))]
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
-        Ok(Cow::Owned(CString::new(self.clone())?))
+        Ok(Cow::Owned(CString::new(self.as_slice())?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(Cow::Owned(CString::new(self)?))
     }
 
     #[cfg(not(windows))]
@@ -482,6 +624,15 @@ impl Arg for DecInt {
     #[cfg(not(windows))]
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+        Ok(Cow::Owned(CString::new(self.as_os_str().as_bytes())?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
         Ok(Cow::Owned(CString::new(self.as_os_str().as_bytes())?))
     }
 
