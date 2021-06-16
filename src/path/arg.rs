@@ -365,6 +365,48 @@ impl Arg for CString {
     }
 }
 
+impl<'a> Arg for Cow<'a, str> {
+    #[inline]
+    fn as_str(&self) -> io::Result<&str> {
+        Ok(self)
+    }
+
+    #[inline]
+    fn to_string_lossy(&self) -> Cow<str> {
+        Cow::Borrowed(self)
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+        Ok(Cow::Owned(CString::new(self.as_ref())?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(Cow::Owned(match self {
+            Cow::Owned(s) => CString::new(s),
+            Cow::Borrowed(s) => CString::new(s),
+        }?))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_maybe_utf8_bytes(&self) -> &[u8] {
+        self.as_bytes()
+    }
+
+    #[cfg(windows)]
+    #[inline]
+    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
+        self.as_ref()
+    }
+}
+
 impl<'a> Arg for Cow<'a, OsStr> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
