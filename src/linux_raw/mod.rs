@@ -45,7 +45,7 @@ use linux_raw_sys::{
         general::statx,
         general::{
             __NR_copy_file_range, __NR_getrandom, __NR_memfd_create, __NR_preadv2, __NR_pwritev2,
-            __NR_statx,
+            __NR_statx, __NR_userfaultfd,
         },
         general::{F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ},
     },
@@ -1666,6 +1666,11 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c_int) -> io::Result<usize> 
 #[inline]
 pub(crate) fn memfd_create(name: &CStr, flags: c_uint) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(syscall2(__NR_memfd_create, c_str(name), c_uint(flags))) }
+}
+
+#[inline]
+pub(crate) fn userfaultfd(flags: c_uint) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(syscall1(__NR_userfaultfd, c_uint(flags))) }
 }
 
 #[inline]

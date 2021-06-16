@@ -9,6 +9,8 @@ mod rdadvise;
 mod read_write;
 #[cfg(not(target_os = "wasi"))]
 mod socketpair;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+mod userfaultfd;
 
 pub use crate::io::errno::Errno;
 #[cfg(not(target_os = "wasi"))]
@@ -34,6 +36,8 @@ pub use read_write::{preadv, pwritev};
 pub use read_write::{preadv2, pwritev2};
 #[cfg(not(target_os = "wasi"))]
 pub use socketpair::socketpair_stream;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use userfaultfd::{userfaultfd, UserFaultFdFlags};
 
 /// Re-export `termios`.
 #[cfg(all(libc, not(target_os = "wasi")))]
