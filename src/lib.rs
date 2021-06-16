@@ -28,7 +28,8 @@
 //!    sandboxing.
 //!
 //! See [`cap-std`] and [`system-interface`] for libraries which do hide
-//! ambient authorities and perform sandboxing.
+//! ambient authorities, perform sandboxing, and hide significant differences
+//! between platforms.
 //!
 //! # Safety
 //!
