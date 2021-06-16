@@ -1,3 +1,7 @@
+//! Compilers should really have intrinsics for making system calls. They're
+//! much like regular calls, with custom calling conventions, and calling
+//! conventions are otherwise the compiler's job. But for now, use inline asm.
+
 #![allow(dead_code)]
 
 #[cfg(target_arch = "aarch64")]
