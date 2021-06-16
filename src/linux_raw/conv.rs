@@ -2,10 +2,7 @@
 //! provides functions for converting into and out of `usize` values.
 
 use io_lifetimes::{BorrowedFd, OwnedFd};
-use linux_raw_sys::{
-    general::socklen_t,
-    general::{__kernel_clockid_t, __kernel_loff_t, umode_t},
-};
+use linux_raw_sys::general::{__kernel_clockid_t, __kernel_loff_t, socklen_t, umode_t};
 use std::{
     ffi::CStr,
     io,
