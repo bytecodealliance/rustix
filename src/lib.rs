@@ -20,16 +20,15 @@
 //!    are used.
 //!
 //! Things they don't do include:
-//!  - Emulating functions that aren't natively supported on a platform.
 //!  - Detecting whether functions are supported at runtime.
 //!  - Hiding significant differences between platforms.
-//!  - Hiding ambient authorities.
+//!  - Restricting ambient authorities.
 //!  - Imposing sandboxing features such as filesystem path or network address
 //!    sandboxing.
 //!
-//! See [`cap-std`] and [`system-interface`] for libraries which do hide
-//! ambient authorities, perform sandboxing, and hide significant differences
-//! between platforms.
+//! See [`cap-std`], [`system-interface`], and [`io-streams`] for libraries
+//! which do hide significant differences between platforms, and [`cap-std`]
+//! which does perform sandboxing and restricts ambient authorities.
 //!
 //! # Safety
 //!
@@ -38,6 +37,7 @@
 //!
 //! [`cap-std`]: https://crates.io/crates/cap-std
 //! [`system-interface`]: https://crates.io/crates/system-interface
+//! [`io-streams`]: https://crates.io/crates/io-streams
 //! [`std`]: https://doc.rust-lang.org/std/
 //! [`getrandom`]: https://crates.io/crates/getrandom
 //! [`std::fs::File`]: https://doc.rust-lang.org/std/fs/struct.File.html
@@ -60,6 +60,7 @@ pub mod io;
 pub mod net;
 pub mod path;
 pub mod process;
+pub mod rand;
 pub mod time;
 
 #[cfg(linux_raw)]

@@ -14,11 +14,8 @@
   </p>
 </div>
 
-`posish` provides safe wrappers to POSIX-ish `libc` APIs and syscalls.
-
-`posish` is focused on functionality that isn't already provided by [`std`]
-or other low-level crates such as [`getrandom`] and [`errno`]. It prioritizes
-memory safety and [I/O safety].
+`posish` provides memory-safe and I/O-safe wrappers to POSIX-ish `libc` APIs
+and syscalls.
 
 `posish` is relatively low-level and does not support Windows; for higher-level
 and portable APIs to this functionality, see the [`system-interface`],
