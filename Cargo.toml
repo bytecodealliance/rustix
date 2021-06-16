@@ -26,7 +26,7 @@ errno = "0.2.7"
 libc = { version = "0.2.87", features = ["extra_traits"] }
 
 [target.'cfg(linux_raw)'.dependencies]
-linux-raw-sys = { version = "0.0.2", features = ["v5_4", "v5_11"] }
+linux-raw-sys = { version = "0.0.5", features = ["v5_4", "v5_11"] }
 
 [dev-dependencies]
 atty = "0.2.14"

@@ -26,9 +26,9 @@ use linux_raw_sys::{
         __NR_getsockname, __NR_getsockopt, __NR_getuid, __NR_ioctl, __NR_linkat, __NR_listen,
         __NR_lseek, __NR_mkdirat, __NR_mmap, __NR_nanosleep, __NR_newfstatat, __NR_openat,
         __NR_pipe, __NR_pipe2, __NR_poll, __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev,
-        __NR_read, __NR_readlinkat, __NR_recvfrom, __NR_renameat, __NR_sched_yield, __NR_sendto,
-        __NR_setsockopt, __NR_shutdown, __NR_socket, __NR_socketpair, __NR_symlinkat,
-        __NR_unlinkat, __NR_utimensat, __NR_write,
+        __NR_read, __NR_readlinkat, __NR_readv, __NR_recvfrom, __NR_renameat, __NR_sched_yield,
+        __NR_sendto, __NR_setsockopt, __NR_shutdown, __NR_socket, __NR_socketpair, __NR_symlinkat,
+        __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
     },
     general::{
         __kernel_clockid_t, __kernel_gid_t, __kernel_loff_t, __kernel_pid_t,
@@ -43,7 +43,10 @@ use linux_raw_sys::{
     v5_11::{general::__NR_openat2, general::open_how},
     v5_4::{
         general::statx,
-        general::{__NR_copy_file_range, __NR_getrandom, __NR_memfd_create, __NR_statx},
+        general::{
+            __NR_copy_file_range, __NR_getrandom, __NR_memfd_create, __NR_preadv2, __NR_pwritev2,
+            __NR_statx,
+        },
         general::{F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ},
     },
 };
@@ -157,20 +160,7 @@ pub(crate) fn read(fd: BorrowedFd<'_>, buffer: &mut [u8]) -> io::Result<usize> {
 
 #[inline]
 pub(crate) fn pread(fd: BorrowedFd<'_>, buffer: &[u8], pos: u64) -> io::Result<usize> {
-    #[cfg(all(target_pointer_width = "32", not(target_arch = "x86")))]
-    unsafe {
-        ret_usize(syscall6(
-            __NR_pread64,
-            borrowed_fd(fd),
-            slice_addr(buffer),
-            buffer.len(),
-            0,
-            hi(pos),
-            lo(pos),
-        ))
-    }
-
-    #[cfg(target_arch = "x86")]
+    #[cfg(target_pointer_width = "32")]
     unsafe {
         ret_usize(syscall6(
             __NR_pread64,
@@ -181,7 +171,6 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buffer: &[u8], pos: u64) -> io::Result<u
             lo(pos),
         ))
     }
-
     #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_usize(syscall4(
@@ -194,20 +183,29 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buffer: &[u8], pos: u64) -> io::Result<u
     }
 }
 
-pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], pos: u64) -> io::Result<usize> {
-    #[cfg(all(target_pointer_width = "32", not(target_arch = "x86")))]
+pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut]) -> io::Result<usize> {
+    #[cfg(target_pointer_width = "32")]
     unsafe {
-        ret_usize(syscall6(
-            __NR_preadv,
+        ret_usize(syscall3(
+            __NR_readv,
             borrowed_fd(fd),
             slice_addr(bufs),
             bufs.len(),
-            0,
-            hi(pos),
-            lo(pos),
         ))
     }
-    #[cfg(target_arch = "x86")]
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret_usize(syscall3(
+            __NR_readv,
+            borrowed_fd(fd),
+            slice_addr(bufs),
+            bufs.len(),
+        ))
+    }
+}
+
+pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], pos: u64) -> io::Result<usize> {
+    #[cfg(target_pointer_width = "32")]
     unsafe {
         ret_usize(syscall6(
             __NR_preadv,
@@ -226,6 +224,37 @@ pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], pos: u64) -> io::R
             slice_addr(bufs),
             bufs.len(),
             loff_t_from_u64(pos),
+        ))
+    }
+}
+
+pub(crate) fn preadv2(
+    fd: BorrowedFd<'_>,
+    bufs: &[IoSliceMut],
+    pos: u64,
+    flags: c_uint,
+) -> io::Result<usize> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_usize(syscall6(
+            __NR_preadv2,
+            borrowed_fd(fd),
+            slice_addr(bufs),
+            bufs.len(),
+            hi(pos),
+            lo(pos),
+            c_uint(flags),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret_usize(syscall5(
+            __NR_preadv2,
+            borrowed_fd(fd),
+            slice_addr(bufs),
+            bufs.len(),
+            loff_t_from_u64(pos),
+            c_uint(flags),
         ))
     }
 }
@@ -244,19 +273,7 @@ pub(crate) fn write(fd: BorrowedFd<'_>, buffer: &[u8]) -> io::Result<usize> {
 
 #[inline]
 pub(crate) fn pwrite(fd: BorrowedFd<'_>, buffer: &[u8], pos: u64) -> io::Result<usize> {
-    #[cfg(all(target_pointer_width = "32", not(target_arch = "x86")))]
-    unsafe {
-        ret_usize(syscall6_readonly(
-            __NR_pwrite64,
-            borrowed_fd(fd),
-            slice_addr(buffer),
-            buffer.len(),
-            0,
-            hi(pos),
-            lo(pos),
-        ))
-    }
-    #[cfg(target_arch = "x86")]
+    #[cfg(target_pointer_width = "32")]
     unsafe {
         ret_usize(syscall6_readonly(
             __NR_pwrite64,
@@ -280,20 +297,30 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buffer: &[u8], pos: u64) -> io::Result<
 }
 
 #[inline]
-pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], pos: u64) -> io::Result<usize> {
-    #[cfg(all(target_pointer_width = "32", not(target_arch = "x86")))]
+pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> {
+    #[cfg(target_pointer_width = "32")]
     unsafe {
         ret_usize(syscall6_readonly(
-            __NR_pwritev,
+            __NR_writev,
             borrowed_fd(fd),
             slice_addr(bufs),
             bufs.len(),
-            0,
-            hi(pos),
-            lo(pos),
         ))
     }
-    #[cfg(target_arch = "x86")]
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret_usize(syscall3_readonly(
+            __NR_writev,
+            borrowed_fd(fd),
+            slice_addr(bufs),
+            bufs.len(),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], pos: u64) -> io::Result<usize> {
+    #[cfg(target_pointer_width = "32")]
     unsafe {
         ret_usize(syscall6_readonly(
             __NR_pwritev,
@@ -312,6 +339,38 @@ pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], pos: u64) -> io::Res
             slice_addr(bufs),
             bufs.len(),
             loff_t_from_u64(pos),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn pwritev2(
+    fd: BorrowedFd<'_>,
+    bufs: &[IoSlice],
+    pos: u64,
+    flags: c_uint,
+) -> io::Result<usize> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_usize(syscall6_readonly(
+            __NR_pwritev2,
+            borrowed_fd(fd),
+            slice_addr(bufs),
+            bufs.len(),
+            hi(pos),
+            lo(pos),
+            c_uint(flags),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret_usize(syscall5_readonly(
+            __NR_pwritev2,
+            borrowed_fd(fd),
+            slice_addr(bufs),
+            bufs.len(),
+            loff_t_from_u64(pos),
+            c_uint(flags),
         ))
     }
 }
@@ -319,12 +378,11 @@ pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], pos: u64) -> io::Res
 #[inline]
 pub(crate) fn chmod(filename: &CStr, mode: umode_t) -> io::Result<()> {
     unsafe {
-        ret(syscall4_readonly(
+        ret(syscall3_readonly(
             __NR_fchmodat,
             c_int(AT_FDCWD),
             c_str(filename),
             umode_t(mode),
-            0,
         ))
     }
 }
@@ -380,17 +438,7 @@ pub(crate) fn lseek(fd: BorrowedFd<'_>, offset: i64, whence: c_uint) -> io::Resu
 
 #[inline]
 pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
-    #[cfg(all(target_pointer_width = "32", not(target_arch = "x86")))]
-    unsafe {
-        ret(syscall4_readonly(
-            __NR_ftruncate64,
-            borrowed_fd(fd),
-            0,
-            hi(length),
-            lo(length),
-        ))
-    }
-    #[cfg(target_arch = "x86")]
+    #[cfg(target_pointer_width = "32")]
     unsafe {
         ret(syscall3_readonly(
             __NR_ftruncate64,
@@ -470,7 +518,7 @@ pub(crate) fn stat(filename: &CStr) -> io::Result<stat> {
             c_int(AT_FDCWD),
             c_str(filename),
             out(&mut result),
-            0,
+            c_uint(0),
         ))
         .map(|()| result.assume_init())
     }
@@ -482,7 +530,7 @@ pub(crate) fn stat(filename: &CStr) -> io::Result<stat> {
             c_int(AT_FDCWD),
             c_str(filename),
             out(&mut result),
-            0,
+            c_uint(0),
         ))
         .map(|()| result.assume_init())
     }
@@ -794,7 +842,7 @@ pub(crate) fn unlink(pathname: &CStr) -> io::Result<()> {
             __NR_unlinkat,
             c_int(AT_FDCWD),
             c_str(pathname),
-            0,
+            c_uint(0),
         ))
     }
 }
@@ -832,7 +880,7 @@ pub(crate) fn link(oldname: &CStr, newname: &CStr) -> io::Result<()> {
             c_str(oldname),
             c_int(AT_FDCWD),
             c_str(newname),
-            0,
+            c_uint(0),
         ))
     }
 }
