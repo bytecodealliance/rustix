@@ -41,6 +41,7 @@
 //! [`getrandom`]: https://crates.io/crates/getrandom
 //! [`std::fs::File`]: https://doc.rust-lang.org/std/fs/struct.File.html
 //! [`bitflags`]: https://crates.io/crates/bitflags
+//! [`AsFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.AsFd.html
 //! [io-lifetimes crate]: https://crates.io/crates/io-lifetimes
 
 #![deny(missing_docs)]
