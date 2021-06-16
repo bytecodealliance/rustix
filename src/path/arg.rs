@@ -691,12 +691,7 @@ impl Arg for DecInt {
     }
 }
 
-#[cfg(libc)]
+#[cold]
 fn utf8_error() -> io::Error {
-    io::Error::from_raw_os_error(libc::EILSEQ)
-}
-
-#[cfg(linux_raw)]
-fn utf8_error() -> io::Error {
-    io::Error::from_raw_os_error(linux_raw_sys::errno::EILSEQ as i32)
+    crate::io::Errno::ILSEQ.io_error()
 }
