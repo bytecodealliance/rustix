@@ -7,8 +7,7 @@ use std::{ffi::CStr, io};
 #[cfg(libc)]
 use {
     crate::negone_err,
-    std::convert::TryInto,
-    unsafe_io::os::posish::{AsRawFd, FromRawFd},
+    unsafe_io::os::posish::{AsRawFd, FromRawFd, RawFd},
 };
 
 #[cfg(all(libc, target_pointer_width = "32"))]
@@ -66,7 +65,7 @@ fn _openat2(
         ))?;
 
         #[allow(clippy::useless_conversion)]
-        Ok(OwnedFd::from_raw_fd(fd.try_into().unwrap()))
+        Ok(OwnedFd::from_raw_fd(fd as RawFd))
     }
 }
 

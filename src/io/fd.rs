@@ -2,6 +2,8 @@
 
 #[cfg(all(libc, not(target_os = "wasi")))]
 use crate::negone_err;
+#[cfg(all(libc, not(target_os = "redox")))]
+use crate::zero_ok;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 use std::ffi::OsString;
@@ -12,8 +14,6 @@ use std::mem::MaybeUninit;
 use std::os::unix::ffi::OsStringExt;
 #[cfg(libc)]
 use unsafe_io::os::posish::{AsRawFd, FromRawFd};
-#[cfg(all(libc, not(target_os = "redox")))]
-use {crate::zero_ok, std::convert::TryInto};
 
 /// `ioctl(fd, FIONREAD)`.
 #[cfg(not(target_os = "redox"))]
@@ -32,7 +32,10 @@ fn _ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
             libc::FIONREAD,
             nread.as_mut_ptr(),
         ))?;
-        Ok(nread.assume_init().try_into().unwrap())
+        // `FIONREAD` returns the number of bytes silently casted to a `c_int`,
+        // even when this is lossy. The best we can do is convert it back to a
+        // `u64` without sign-extending it back first.
+        Ok(nread.assume_init() as libc::c_uint as u64)
     }
 }
 

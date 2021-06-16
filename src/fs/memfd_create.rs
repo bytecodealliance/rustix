@@ -3,7 +3,10 @@ use bitflags::bitflags;
 use io_lifetimes::OwnedFd;
 use std::{ffi::CStr, io};
 #[cfg(libc)]
-use {crate::negone_err, std::convert::TryInto, unsafe_io::os::posish::FromRawFd};
+use {
+    crate::negone_err,
+    unsafe_io::os::posish::{FromRawFd, RawFd},
+};
 
 #[cfg(libc)]
 bitflags! {
@@ -46,7 +49,7 @@ fn _memfd_create(path: &CStr, flags: MemfdFlags) -> io::Result<OwnedFd> {
         ))?;
 
         #[allow(clippy::useless_conversion)]
-        Ok(OwnedFd::from_raw_fd(fd.try_into().unwrap()))
+        Ok(OwnedFd::from_raw_fd(fd as RawFd))
     }
 }
 

@@ -5,7 +5,7 @@ use io_lifetimes::{AsFd, BorrowedFd};
 use std::io;
 #[cfg(libc)]
 use {
-    crate::negone_err, libc::recv as libc_recv, libc::send as libc_send, std::convert::TryInto,
+    crate::negone_err, libc::recv as libc_recv, libc::send as libc_send,
     unsafe_io::os::posish::AsRawFd,
 };
 
@@ -115,7 +115,7 @@ fn _recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usi
             flags.bits(),
         ))?
     };
-    Ok(nrecv.try_into().unwrap())
+    Ok(nrecv as usize)
 }
 
 #[cfg(linux_raw)]
@@ -141,7 +141,7 @@ fn _send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Result<usize> 
             flags.bits(),
         ))?
     };
-    Ok(nwritten.try_into().unwrap())
+    Ok(nwritten as usize)
 }
 
 #[cfg(linux_raw)]

@@ -95,7 +95,7 @@ impl<'fd> PollFd<'fd> {
             pollfd: libc::pollfd {
                 fd: fd.as_raw_fd() as libc::c_int,
                 events: events.bits(),
-                revents: PollFlags::empty().bits(),
+                revents: 0,
             },
             _phantom: PhantomData,
         }
@@ -117,6 +117,8 @@ impl<'fd> PollFd<'fd> {
     /// Return the ready events.
     #[inline]
     pub fn revents(self) -> PollFlags {
+        // Use `unwrap()` here because in theory we know we know all the bits
+        // the OS might set here, but OS's have added extensions in the past.
         PollFlags::from_bits(self.pollfd.revents).unwrap()
     }
 }
@@ -162,7 +164,7 @@ impl<'fd> PollFdVec<'fd> {
         let nready =
             negone_err(unsafe { libc::poll(self.fds.as_mut_ptr() as *mut _, nfds, timeout) })?;
 
-        Ok(nready.try_into().unwrap())
+        Ok(nready as usize)
     }
 }
 

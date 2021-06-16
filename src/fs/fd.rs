@@ -101,7 +101,7 @@ fn _seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         SeekFrom::Current(offset) => (libc::SEEK_CUR, offset),
     };
     let offset = unsafe { negone_err(libc_lseek(fd.as_raw_fd() as libc::c_int, offset, whence))? };
-    Ok(offset.try_into().unwrap())
+    Ok(offset as u64)
 }
 
 #[cfg(linux_raw)]
@@ -131,7 +131,7 @@ pub fn tell<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<u64> {
 fn _tell(fd: BorrowedFd<'_>) -> io::Result<u64> {
     let offset =
         unsafe { negone_err(libc_lseek(fd.as_raw_fd() as libc::c_int, 0, libc::SEEK_CUR))? };
-    Ok(offset.try_into().unwrap())
+    Ok(offset as u64)
 }
 
 #[cfg(linux_raw)]

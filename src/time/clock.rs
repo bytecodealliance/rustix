@@ -87,8 +87,10 @@ pub enum ClockId {
 #[must_use]
 pub fn clock_getres(id: ClockId) -> timespec {
     let mut timespec = MaybeUninit::<timespec>::uninit();
-    zero_ok(unsafe { libc::clock_getres(id as libc::clockid_t, timespec.as_mut_ptr()) }).unwrap();
-    unsafe { timespec.assume_init() }
+    unsafe {
+        let _ = libc::clock_getres(id as libc::clockid_t, timespec.as_mut_ptr());
+        timespec.assume_init()
+    }
 }
 
 /// `clock_getres(id)`
@@ -105,8 +107,18 @@ pub fn clock_getres(id: ClockId) -> linux_raw_sys::general::timespec {
 #[must_use]
 pub fn clock_gettime(id: ClockId) -> timespec {
     let mut timespec = MaybeUninit::<timespec>::uninit();
-    zero_ok(unsafe { libc::clock_gettime(id as libc::clockid_t, timespec.as_mut_ptr()) }).unwrap();
-    unsafe { timespec.assume_init() }
+    // Use `unwrap()` here because `clock_getres` can fail if the clock itself
+    // overflows a number of seconds, but if that happens, the monotonic clocks
+    // can't maintain their invariants, or the realtime clocks aren't properly
+    // configured.
+    unsafe {
+        zero_ok(libc::clock_gettime(
+            id as libc::clockid_t,
+            timespec.as_mut_ptr(),
+        ))
+        .unwrap();
+        timespec.assume_init()
+    }
 }
 
 /// `clock_gettime(id)`
@@ -132,10 +144,15 @@ pub fn clock_gettime(id: ClockId) -> linux_raw_sys::general::timespec {
 pub fn clock_nanosleep_relative(id: ClockId, request: &timespec) -> Result<(), timespec> {
     let mut remain = MaybeUninit::<timespec>::uninit();
     let flags = 0;
-    zero_ok(unsafe {
-        libc::clock_nanosleep(id as libc::clockid_t, flags, request, remain.as_mut_ptr())
-    })
-    .map_err(|_| unsafe { remain.assume_init() })
+    unsafe {
+        zero_ok(libc::clock_nanosleep(
+            id as libc::clockid_t,
+            flags,
+            request,
+            remain.as_mut_ptr(),
+        ))
+        .map_err(|_| remain.assume_init())
+    }
 }
 
 /// `clock_nanosleep(id, 0, request, remain)`
@@ -183,8 +200,9 @@ pub fn clock_nanosleep_absolute(
 #[inline]
 pub fn nanosleep(request: &timespec) -> Result<(), timespec> {
     let mut remain = MaybeUninit::<timespec>::uninit();
-    zero_ok(unsafe { libc::nanosleep(request, remain.as_mut_ptr()) })
-        .map_err(|_| unsafe { remain.assume_init() })
+    unsafe {
+        zero_ok(libc::nanosleep(request, remain.as_mut_ptr())).map_err(|_| remain.assume_init())
+    }
 }
 
 /// `nanosleep(request, remain)`

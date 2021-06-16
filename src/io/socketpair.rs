@@ -1,6 +1,6 @@
 #[cfg(linux_raw)]
 use io_lifetimes::FromFd;
-use std::{convert::TryInto, io, net::TcpStream};
+use std::{io, net::TcpStream};
 #[cfg(libc)]
 use {
     crate::zero_ok,
@@ -21,9 +21,9 @@ pub fn socketpair_stream(domain: i32, protocol: i32) -> io::Result<(TcpStream, T
         let flags = 0;
 
         zero_ok(libc::socketpair(
-            domain.try_into().unwrap(),
+            domain,
             libc::SOCK_STREAM | flags,
-            protocol.try_into().unwrap(),
+            protocol,
             fds.as_mut_ptr().cast::<RawFd>(),
         ))?;
 
@@ -46,7 +46,7 @@ pub fn socketpair_stream(domain: i32, protocol: i32) -> io::Result<(TcpStream, T
 #[cfg(linux_raw)]
 pub fn socketpair_stream(domain: i32, protocol: i32) -> io::Result<(TcpStream, TcpStream)> {
     crate::linux_raw::socketpair(
-        domain.try_into().unwrap(),
+        domain,
         linux_raw_sys::general::SOCK_STREAM | linux_raw_sys::general::SOCK_CLOEXEC,
         protocol,
     )

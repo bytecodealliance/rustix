@@ -38,7 +38,7 @@ use std::{
     io::{self, IoSlice, IoSliceMut},
 };
 #[cfg(libc)]
-use {crate::negone_err, unsafe_io::os::posish::AsRawFd};
+use {crate::negone_err, std::os::raw::c_int, unsafe_io::os::posish::AsRawFd};
 
 #[cfg(all(libc, target_os = "linux", target_env = "gnu"))]
 bitflags! {
@@ -90,7 +90,7 @@ fn _read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
             buf.len(),
         ))?
     };
-    Ok(nread.try_into().unwrap())
+    Ok(nread as usize)
 }
 
 #[cfg(linux_raw)]
@@ -115,7 +115,7 @@ fn _write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
             buf.len(),
         ))?
     };
-    Ok(nwritten.try_into().unwrap())
+    Ok(nwritten as usize)
 }
 
 #[cfg(linux_raw)]
@@ -144,7 +144,7 @@ fn _pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Result<usize> 
             offset,
         ))?
     };
-    Ok(nread.try_into().unwrap())
+    Ok(nread as usize)
 }
 
 #[cfg(linux_raw)]
@@ -173,7 +173,7 @@ fn _pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<usize> {
             offset,
         ))?
     };
-    Ok(nwritten.try_into().unwrap())
+    Ok(nwritten as usize)
 }
 
 #[cfg(linux_raw)]
@@ -195,10 +195,10 @@ fn _readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut]) -> io::Result<usize> {
         negone_err(libc_readv(
             fd.as_raw_fd() as libc::c_int,
             bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()).try_into().unwrap(),
+            min(bufs.len(), max_iov()) as c_int,
         ))?
     };
-    Ok(nread.try_into().unwrap())
+    Ok(nread as usize)
 }
 
 #[cfg(linux_raw)]
@@ -220,10 +220,10 @@ fn _writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> {
         negone_err(libc_writev(
             fd.as_raw_fd() as libc::c_int,
             bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()).try_into().unwrap(),
+            min(bufs.len(), max_iov()) as c_int,
         ))?
     };
-    Ok(nwritten.try_into().unwrap())
+    Ok(nwritten as usize)
 }
 
 #[cfg(linux_raw)]
@@ -249,11 +249,11 @@ fn _preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io::Result<u
         negone_err(libc_preadv(
             fd.as_raw_fd() as libc::c_int,
             bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()).try_into().unwrap(),
+            min(bufs.len(), max_iov()) as c_int,
             offset,
         ))?
     };
-    Ok(nread.try_into().unwrap())
+    Ok(nread as usize)
 }
 
 #[cfg(linux_raw)]
@@ -282,11 +282,11 @@ fn _pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usi
         negone_err(libc_pwritev(
             fd.as_raw_fd() as libc::c_int,
             bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()).try_into().unwrap(),
+            min(bufs.len(), max_iov()) as c_int,
             offset,
         ))?
     };
-    Ok(nwritten.try_into().unwrap())
+    Ok(nwritten as usize)
 }
 
 #[cfg(linux_raw)]
@@ -325,12 +325,12 @@ fn _preadv2(
         negone_err(libc_preadv2(
             fd.as_raw_fd() as libc::c_int,
             bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()).try_into().unwrap(),
+            min(bufs.len(), max_iov()) as c_int,
             offset,
             flags.bits(),
         ))?
     };
-    Ok(nread.try_into().unwrap())
+    Ok(nread as usize)
 }
 
 #[cfg(linux_raw)]
@@ -379,12 +379,12 @@ fn _pwritev2(
         negone_err(libc_pwritev2(
             fd.as_raw_fd() as libc::c_int,
             bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()).try_into().unwrap(),
+            min(bufs.len(), max_iov()) as c_int,
             offset,
             flags.bits(),
         ))?
     };
-    Ok(nwritten.try_into().unwrap())
+    Ok(nwritten as usize)
 }
 
 #[cfg(linux_raw)]
@@ -410,22 +410,31 @@ fn _pwritev2(
 // revision 108e90ca78f052c0c1c49c42a22c85620be19712.
 
 #[cfg(all(libc, not(any(target_os = "redox", target_env = "newlib"))))]
-fn max_iov() -> usize {
-    static LIM: AtomicUsize = AtomicUsize::new(0);
+static LIM: AtomicUsize = AtomicUsize::new(0);
 
+#[cfg(all(libc, not(any(target_os = "redox", target_env = "newlib"))))]
+#[inline]
+fn max_iov() -> usize {
     let mut lim = LIM.load(Ordering::Relaxed);
     if lim == 0 {
-        let ret = unsafe { libc::sysconf(libc::_SC_IOV_MAX) };
-
-        // 16 is the minimum value required by POSIX.
-        lim = if ret > 0 { ret as usize } else { 16 };
-        LIM.store(lim, Ordering::Relaxed);
+        lim = query_max_iov()
     }
 
     lim
 }
 
+#[cfg(all(libc, not(any(target_os = "redox", target_env = "newlib"))))]
+fn query_max_iov() -> usize {
+    let ret = unsafe { libc::sysconf(libc::_SC_IOV_MAX) };
+
+    // 16 is the minimum value required by POSIX.
+    let lim = if ret > 0 { ret as usize } else { 16 };
+    LIM.store(lim, Ordering::Relaxed);
+    lim
+}
+
 #[cfg(all(libc, any(target_os = "redox", target_env = "newlib")))]
+#[inline]
 fn max_iov() -> usize {
     16 // The minimum value required by POSIX.
 }

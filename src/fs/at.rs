@@ -33,7 +33,6 @@ use std::os::unix::ffi::OsStringExt;
 #[cfg(target_os = "wasi")]
 use std::os::wasi::ffi::OsStringExt;
 use std::{
-    convert::TryInto,
     ffi::{CStr, OsString},
     io,
     mem::ManuallyDrop,
@@ -132,7 +131,7 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Resul
                 buffer.capacity(),
             ))?;
 
-            let nread = nread.try_into().unwrap();
+            let nread = nread as usize;
             assert!(nread <= buffer.capacity());
             buffer.set_len(nread);
             if nread < buffer.capacity() {
@@ -160,7 +159,7 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Resul
             std::slice::from_raw_parts_mut(buffer.as_mut_ptr(), buffer.capacity())
         })?;
 
-        let nread = nread.try_into().unwrap();
+        let nread = nread as usize;
         assert!(nread <= buffer.capacity());
         unsafe {
             buffer.set_len(nread);

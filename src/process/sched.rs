@@ -1,11 +1,10 @@
-#[cfg(libc)]
-use crate::zero_ok;
-
 /// `sched_yield()`
 #[cfg(libc)]
 #[inline]
 pub fn sched_yield() {
-    zero_ok(unsafe { libc::sched_yield() }).unwrap()
+    unsafe {
+        let _ = libc::sched_yield();
+    }
 }
 
 /// `sched_yield()`

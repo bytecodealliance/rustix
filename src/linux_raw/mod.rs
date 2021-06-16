@@ -69,7 +69,9 @@ pub(crate) fn exit_group(code: c_int) -> ! {
 
 #[inline]
 pub(crate) fn close(fd: OwnedFd) {
-    let _ = unsafe { syscall1_readonly(__NR_close, owned_fd(fd)) };
+    unsafe {
+        let _ = syscall1_readonly(__NR_close, owned_fd(fd));
+    }
 }
 
 #[inline]
@@ -1413,7 +1415,7 @@ pub(crate) fn listen(fd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
 #[inline]
 pub(crate) fn sched_yield() {
     unsafe {
-        syscall0_readonly(__NR_sched_yield);
+        let _ = syscall0_readonly(__NR_sched_yield);
     }
 }
 
