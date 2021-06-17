@@ -369,6 +369,75 @@ fn _bind_in6(sockfd: BorrowedFd<'_>, addr: &SockaddrIn6) -> io::Result<()> {
     crate::linux_raw::bind_in6(sockfd, addr)
 }
 
+/// `connect(sockfd, addr, sizeof(struct sockaddr_un))`
+#[inline]
+pub fn connect_un<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SockaddrUn) -> io::Result<()> {
+    let sockfd = sockfd.as_fd();
+    _connect_un(sockfd, addr)
+}
+
+#[cfg(libc)]
+fn _connect_un(sockfd: BorrowedFd<'_>, addr: &SockaddrUn) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::connect(
+            sockfd.as_raw_fd(),
+            addr as *const _ as *const _,
+            size_of::<SockaddrUn>() as socklen_t,
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+fn _connect_un(sockfd: BorrowedFd<'_>, addr: &SockaddrUn) -> io::Result<()> {
+    crate::linux_raw::connect_un(sockfd, addr)
+}
+
+/// `connect(sockfd, addr, sizeof(struct sockaddr_in))`
+#[inline]
+pub fn connect_in<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SockaddrIn) -> io::Result<()> {
+    let sockfd = sockfd.as_fd();
+    _connect_in(sockfd, addr)
+}
+
+#[cfg(libc)]
+fn _connect_in(sockfd: BorrowedFd<'_>, addr: &SockaddrIn) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::connect(
+            sockfd.as_raw_fd(),
+            addr as *const _ as *const _,
+            size_of::<SockaddrIn>() as socklen_t,
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+fn _connect_in(sockfd: BorrowedFd<'_>, addr: &SockaddrIn) -> io::Result<()> {
+    crate::linux_raw::connect_in(sockfd, addr)
+}
+
+/// `connect(sockfd, addr, sizeof(struct sockaddr_in6))`
+#[inline]
+pub fn connect_in6<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SockaddrIn6) -> io::Result<()> {
+    let sockfd = sockfd.as_fd();
+    _connect_in6(sockfd, addr)
+}
+
+#[cfg(libc)]
+fn _connect_in6(sockfd: BorrowedFd<'_>, addr: &SockaddrIn6) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::connect(
+            sockfd.as_raw_fd(),
+            addr as *const _ as *const _,
+            size_of::<SockaddrIn6>() as socklen_t,
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+fn _connect_in6(sockfd: BorrowedFd<'_>, addr: &SockaddrIn6) -> io::Result<()> {
+    crate::linux_raw::connect_in6(sockfd, addr)
+}
+
 /// `listen(fd, backlog)`
 #[inline]
 pub fn listen<'f, Fd: AsFd<'f>>(sockfd: Fd, backlog: c_int) -> io::Result<()> {
