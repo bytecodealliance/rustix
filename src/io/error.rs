@@ -4,13 +4,22 @@ use std::{error, fmt, result};
 #[cfg(libc)]
 use {errno::errno, std::os::raw::c_int};
 
+/// A specialized `Result` type for posish APIs.
 pub type Result<T> = result::Result<T, Error>;
 
+/// The error type for posish APIs.
+///
+/// This is similar to `std::io::Error`, but only holds an OS error code,
+/// and no extra error value.
 #[cfg(libc)]
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Hash, Copy, Clone)]
 pub struct Error(pub(crate) c_int);
 
+/// The error type for posish APIs.
+///
+/// This is similar to `std::io::Error`, but only holds an OS error code,
+/// and no extra error value.
 #[cfg(linux_raw)]
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Hash, Copy, Clone)]
