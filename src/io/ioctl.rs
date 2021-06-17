@@ -59,7 +59,7 @@ fn _ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     crate::linux_raw::ioctl_tcgets(fd)
 }
 
-/// Also known as `fcntl(fildes, F_SETFD, FD_CLOEXEC)`.
+/// Also known as `fcntl(fd, F_SETFD, FD_CLOEXEC)`.
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 #[inline]
 pub fn ioctl_fioclex<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<()> {
