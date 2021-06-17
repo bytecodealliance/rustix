@@ -28,14 +28,11 @@ use libc::{fstatat as libc_fstatat, openat as libc_openat};
     )
 ))]
 use libc::{fstatat64 as libc_fstatat, openat64 as libc_openat};
+use std::ffi::{CStr, OsString};
 #[cfg(unix)]
 use std::os::unix::ffi::OsStringExt;
 #[cfg(target_os = "wasi")]
 use std::os::wasi::ffi::OsStringExt;
-use std::{
-    ffi::{CStr, OsString},
-    mem::ManuallyDrop,
-};
 use unsafe_io::os::posish::{FromRawFd, RawFd};
 #[cfg(libc)]
 use {
@@ -45,21 +42,17 @@ use {
 };
 
 /// Return a "file" which holds a handle which refers to the process current
-/// directory (`AT_FDCWD`). It is a `ManuallyDrop`, however the caller should
-/// not drop it explicitly, as it refers to an ambient authority rather than
-/// an open resource.
+/// directory (`AT_FDCWD`).
 #[inline]
-pub fn cwd() -> ManuallyDrop<OwnedFd> {
+pub fn cwd() -> BorrowedFd<'static> {
     #[cfg(libc)]
     {
-        ManuallyDrop::new(unsafe { OwnedFd::from_raw_fd(libc::AT_FDCWD as RawFd) })
+        unsafe { BorrowedFd::<'static>::borrow_raw_fd(libc::AT_FDCWD as RawFd) }
     }
 
     #[cfg(linux_raw)]
     {
-        ManuallyDrop::new(unsafe {
-            OwnedFd::from_raw_fd(linux_raw_sys::general::AT_FDCWD as RawFd)
-        })
+        unsafe { BorrowedFd::<'static>::borrow_raw_fd(linux_raw_sys::general::AT_FDCWD as RawFd) }
     }
 }
 
