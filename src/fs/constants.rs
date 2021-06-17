@@ -1,8 +1,6 @@
 //! Filesystem API constants, translated into `bitflags` constants.
 
 use bitflags::bitflags;
-#[cfg(all(libc, not(target_os = "redox")))]
-use cfg_if::cfg_if;
 
 #[cfg(libc)]
 bitflags! {
@@ -297,28 +295,8 @@ bitflags! {
         const DIRECTORY = libc::O_DIRECTORY;
 
         /// `O_DSYNC`
-        #[cfg(not(target_os = "redox"))]
-        const DSYNC = {
-            cfg_if! {
-                if #[cfg(any(target_os = "android",
-                             target_os = "emscripten",
-                             target_os = "fuchsia",
-                             target_os = "illumos",
-                             target_os = "ios",
-                             target_os = "linux",
-                             target_os = "macos",
-                             target_os = "netbsd",
-                             target_os = "openbsd",
-                             target_os = "wasi"))] {
-                    libc::O_DSYNC
-                } else if #[cfg(target_os = "freebsd")] {
-                    // FreeBSD lacks `O_DSYNC`; emulate it with `O_SYNC`, which
-                    // is correct, though conservative.
-                    // https://reviews.freebsd.org/D19407#inline-118670
-                    libc::O_SYNC
-                }
-            }
-        };
+        #[cfg(not(any(target_os = "freebsd", target_os = "redox")))]
+        const DSYNC = libc::O_DSYNC;
 
         /// `O_EXCL`
         const EXCL = libc::O_EXCL;
