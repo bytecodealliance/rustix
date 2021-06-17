@@ -180,7 +180,7 @@ impl<'fd> PollFdVec<'fd> {
 impl<'fd> PollFdVec<'fd> {
     /// `poll(self.fds.as_mut_ptr(), self.fds.len(), timeout)`
     pub fn poll(&mut self, timeout: std::os::raw::c_int) -> io::Result<usize> {
-        // `Pollfd` is `repr(transparent)` so we can transmute slices of it.
+        // `PollFd` is `repr(transparent)` so we can transmute slices of it.
         crate::linux_raw::poll(
             unsafe { std::mem::transmute(self.fds.as_mut_slice()) },
             timeout,
