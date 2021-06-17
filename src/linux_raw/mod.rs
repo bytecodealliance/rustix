@@ -685,6 +685,15 @@ pub(crate) fn fcntl_dupfd(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 
 #[inline]
 pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_owned_fd(syscall2_readonly(
+            __NR_fcntl64,
+            borrowed_fd(fd),
+            c_uint(F_DUPFD_CLOEXEC),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_owned_fd(syscall2_readonly(
             __NR_fcntl,
@@ -696,6 +705,15 @@ pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 
 #[inline]
 pub(crate) fn fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<c_uint> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_c_uint(syscall2_readonly(
+            __NR_fcntl64,
+            borrowed_fd(fd),
+            c_uint(F_GETFD),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_c_uint(syscall2_readonly(
             __NR_fcntl,
@@ -707,6 +725,16 @@ pub(crate) fn fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<c_uint> {
 
 #[inline]
 pub(crate) fn fcntl_setfd(fd: BorrowedFd<'_>, flags: c_uint) -> io::Result<()> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret(syscall3_readonly(
+            __NR_fcntl64,
+            borrowed_fd(fd),
+            c_uint(F_SETFD),
+            c_uint(flags),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret(syscall3_readonly(
             __NR_fcntl,
@@ -719,6 +747,15 @@ pub(crate) fn fcntl_setfd(fd: BorrowedFd<'_>, flags: c_uint) -> io::Result<()> {
 
 #[inline]
 pub(crate) fn fcntl_getfl(fd: BorrowedFd<'_>) -> io::Result<c_uint> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_c_uint(syscall2_readonly(
+            __NR_fcntl64,
+            borrowed_fd(fd),
+            c_uint(F_GETFL),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_c_uint(syscall2_readonly(
             __NR_fcntl,
@@ -730,6 +767,16 @@ pub(crate) fn fcntl_getfl(fd: BorrowedFd<'_>) -> io::Result<c_uint> {
 
 #[inline]
 pub(crate) fn fcntl_setfl(fd: BorrowedFd<'_>, flags: c_uint) -> io::Result<()> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret(syscall3_readonly(
+            __NR_fcntl64,
+            borrowed_fd(fd),
+            c_uint(F_SETFL),
+            c_uint(flags),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret(syscall3_readonly(
             __NR_fcntl,
@@ -742,6 +789,15 @@ pub(crate) fn fcntl_setfl(fd: BorrowedFd<'_>, flags: c_uint) -> io::Result<()> {
 
 #[inline]
 pub(crate) fn fcntl_getlease(fd: BorrowedFd<'_>) -> io::Result<c_int> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_c_int(syscall2_readonly(
+            __NR_fcntl64,
+            borrowed_fd(fd),
+            c_uint(F_GETLEASE),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_c_int(syscall2_readonly(
             __NR_fcntl,
@@ -753,6 +809,15 @@ pub(crate) fn fcntl_getlease(fd: BorrowedFd<'_>) -> io::Result<c_int> {
 
 #[inline]
 pub(crate) fn fcntl_getown(fd: BorrowedFd<'_>) -> io::Result<c_int> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_c_int(syscall2_readonly(
+            __NR_fcntl64,
+            borrowed_fd(fd),
+            c_uint(F_GETOWN),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_c_int(syscall2_readonly(
             __NR_fcntl,
@@ -764,6 +829,15 @@ pub(crate) fn fcntl_getown(fd: BorrowedFd<'_>) -> io::Result<c_int> {
 
 #[inline]
 pub(crate) fn fcntl_getsig(fd: BorrowedFd<'_>) -> io::Result<c_int> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_c_int(syscall2_readonly(
+            __NR_fcntl64,
+            borrowed_fd(fd),
+            c_uint(F_GETSIG),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_c_int(syscall2_readonly(
             __NR_fcntl,
@@ -775,6 +849,15 @@ pub(crate) fn fcntl_getsig(fd: BorrowedFd<'_>) -> io::Result<c_int> {
 
 #[inline]
 pub(crate) fn fcntl_getpipe_sz(fd: BorrowedFd<'_>) -> io::Result<usize> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_usize(syscall2_readonly(
+            __NR_fcntl64,
+            borrowed_fd(fd),
+            c_uint(F_GETPIPE_SZ),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_usize(syscall2_readonly(
             __NR_fcntl,
@@ -786,6 +869,16 @@ pub(crate) fn fcntl_getpipe_sz(fd: BorrowedFd<'_>) -> io::Result<usize> {
 
 #[inline]
 pub(crate) fn fcntl_setpipe_sz(fd: BorrowedFd<'_>, size: c_int) -> io::Result<usize> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_usize(syscall3_readonly(
+            __NR_fcntl64,
+            borrowed_fd(fd),
+            c_uint(F_SETPIPE_SZ),
+            c_int(size),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_usize(syscall3_readonly(
             __NR_fcntl,
@@ -798,6 +891,15 @@ pub(crate) fn fcntl_setpipe_sz(fd: BorrowedFd<'_>, size: c_int) -> io::Result<us
 
 #[inline]
 pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<c_int> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_c_int(syscall2_readonly(
+            __NR_fcntl64,
+            borrowed_fd(fd),
+            c_uint(F_GET_SEALS),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_c_int(syscall2_readonly(
             __NR_fcntl,
