@@ -1104,14 +1104,14 @@ pub(crate) fn getrandom(buf: &mut [u8], flags: c_uint) -> io::Result<usize> {
 }
 
 #[inline]
-pub(crate) fn socket(family: c_int, typ: c_int, protocol: c_int) -> io::Result<OwnedFd> {
+pub(crate) fn socket(family: c_uint, typ: c_uint, protocol: c_uint) -> io::Result<OwnedFd> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         ret_owned_fd(syscall3_readonly(
             __NR_socket,
-            c_int(family),
-            c_int(typ),
-            c_int(protocol),
+            c_uint(family),
+            c_uint(typ),
+            c_uint(protocol),
         ))
     }
     #[cfg(target_arch = "x86")]
@@ -1119,7 +1119,7 @@ pub(crate) fn socket(family: c_int, typ: c_int, protocol: c_int) -> io::Result<O
         ret_owned_fd(syscall2_readonly(
             __NR_socketcall,
             SYS_SOCKET,
-            slice_addr(&[c_int(family), c_int(typ), c_int(protocol), 0, 0, 0]),
+            slice_addr(&[c_uint(family), c_uint(typ), c_uint(protocol), 0, 0, 0]),
         ))
     }
 }
