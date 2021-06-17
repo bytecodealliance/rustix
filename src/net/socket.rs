@@ -1,14 +1,11 @@
 use crate::io;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 use std::mem::{size_of, MaybeUninit};
+#[cfg(libc)]
+use {crate::{zero_ok, negone_err}, unsafe_io::os::posish::{AsRawFd, FromRawFd}};
 #[cfg(linux_raw)]
 use std::os::raw::c_uint;
-#[cfg(libc)]
-use {
-    crate::{negone_err, zero_ok},
-    std::os::raw::c_int,
-    unsafe_io::os::posish::{AsRawFd, FromRawFd},
-};
+use std::os::raw::c_int;
 
 /// `SOCK_*` constants.
 #[cfg(libc)]
@@ -245,6 +242,34 @@ pub enum Protocol {
     Mptcp = linux_raw_sys::v5_11::general::IPPROTO_MPTCP as u32,
 }
 
+/// `SHUT_*`
+#[cfg(libc)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[repr(i32)]
+#[non_exhaustive]
+pub enum Shutdown {
+    /// `SHUT_RD`
+    Read = libc::SHUT_RD,
+    /// `SHUT_WR`
+    Write = libc::SHUT_WR,
+    /// `SHUT_RDWR`
+    ReadWrite = libc::SHUT_RDWR,
+}
+
+/// `SHUT_*`
+#[cfg(linux_raw)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[repr(u32)]
+#[non_exhaustive]
+pub enum Shutdown {
+    /// `SHUT_RD`
+    Read = linux_raw_sys::general::SHUT_RD,
+    /// `SHUT_WR`
+    Write = linux_raw_sys::general::SHUT_WR,
+    /// `SHUT_RDWR`
+    ReadWrite = linux_raw_sys::general::SHUT_RDWR,
+}
+
 /// `socket(domain, type_, protocol)`
 #[inline]
 pub fn socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::Result<OwnedFd> {
@@ -266,6 +291,46 @@ fn _socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::
 #[cfg(linux_raw)]
 fn _socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::Result<OwnedFd> {
     crate::linux_raw::socket(domain as c_uint, type_ as c_uint, protocol as c_uint)
+}
+
+/// `listen(fd, backlog)`
+#[inline]
+pub fn listen<'f, Fd: AsFd<'f>>(sockfd: Fd, backlog: c_int) -> io::Result<()> {
+    let sockfd = sockfd.as_fd();
+    _listen(sockfd, backlog)
+}
+
+#[cfg(libc)]
+fn _listen(sockfd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::listen(sockfd.as_raw_fd(), backlog))
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _listen(sockfd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
+    crate::linux_raw::listen(sockfd, backlog)
+}
+
+/// `shutdown(fd, how)`
+#[inline]
+pub fn shutdown<'f, Fd: AsFd<'f>>(sockfd: Fd, how: Shutdown) -> io::Result<()> {
+    let sockfd = sockfd.as_fd();
+    _shutdown(sockfd, how)
+}
+
+#[cfg(libc)]
+fn _shutdown(sockfd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::shutdown(sockfd.as_raw_fd(), how as c_int))
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _shutdown(sockfd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> {
+    crate::linux_raw::shutdown(sockfd, how as c_uint)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_TYPE)`

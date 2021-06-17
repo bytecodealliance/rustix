@@ -1245,17 +1245,17 @@ pub(crate) fn connect(
 }
 
 #[inline]
-pub(crate) fn shutdown(fd: BorrowedFd<'_>, how: c_int) -> io::Result<()> {
+pub(crate) fn shutdown(fd: BorrowedFd<'_>, how: c_uint) -> io::Result<()> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
-        ret(syscall2(__NR_shutdown, borrowed_fd(fd), c_int(how)))
+        ret(syscall2(__NR_shutdown, borrowed_fd(fd), c_uint(how)))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
         ret(syscall2_readonly(
             __NR_socketcall,
             SYS_SHUTDOWN,
-            &[borrwed_fd(fd), c_int(how), 0, 0, 0, 0],
+            &[borrwed_fd(fd), c_uint(how), 0, 0, 0, 0],
         ))
     }
 }
