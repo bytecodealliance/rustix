@@ -33,16 +33,17 @@ use std::ffi::{CStr, OsString};
 use std::os::unix::ffi::OsStringExt;
 #[cfg(target_os = "wasi")]
 use std::os::wasi::ffi::OsStringExt;
-use unsafe_io::os::posish::{FromRawFd, RawFd};
+use unsafe_io::os::posish::RawFd;
 #[cfg(libc)]
 use {
     crate::{negone_err, zero_ok},
     std::mem::MaybeUninit,
-    unsafe_io::os::posish::AsRawFd,
+    unsafe_io::os::posish::{AsRawFd, FromRawFd},
 };
 
 /// Return a "file" which holds a handle which refers to the process current
 /// directory (`AT_FDCWD`).
+#[allow(unsafe_code)]
 #[inline]
 pub fn cwd() -> BorrowedFd<'static> {
     #[cfg(libc)]
