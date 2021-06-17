@@ -281,7 +281,7 @@ bitflags! {
         /// Similar to `ACCMODE`, but just includes the read/write flags, and
         /// no other flags.
         ///
-        /// Some implementations include `O_PATH` in `O_ACCMODE`, which
+        /// Some implementations include `O_PATH` in `O_ACCMODE`, when
         /// sometimes we really just want the read/write bits. Caution is
         /// indicated, as the presence of `O_PATH` may mean that the read/write
         /// bits don't have their usual meaning.
@@ -414,7 +414,7 @@ bitflags! {
         /// Similar to `ACCMODE`, but just includes the read/write flags, and
         /// no other flags.
         ///
-        /// Some implementations include `O_PATH` in `O_ACCMODE`, which
+        /// Some implementations include `O_PATH` in `O_ACCMODE`, when
         /// sometimes we really just want the read/write bits. Caution is
         /// indicated, as the presence of `O_PATH` may mean that the read/write
         /// bits don't have their usual meaning.
