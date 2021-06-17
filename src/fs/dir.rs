@@ -170,7 +170,7 @@ impl Dir {
     #[cfg(linux_raw)]
     pub fn read(&mut self) -> Option<io::Result<Entry>> {
         if let Some(next) = self.next.take() {
-            match crate::linux_raw::lseek(
+            match crate::linux_raw::seek(
                 self.fd.as_fd(),
                 next as i64,
                 linux_raw_sys::general::SEEK_SET,

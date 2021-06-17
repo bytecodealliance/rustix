@@ -414,7 +414,7 @@ pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: umode_t) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn lseek(fd: BorrowedFd<'_>, offset: i64, whence: c_uint) -> io::Result<u64> {
+pub(crate) fn seek(fd: BorrowedFd<'_>, offset: i64, whence: c_uint) -> io::Result<u64> {
     #[cfg(target_pointer_width = "32")]
     {
         let mut result = MaybeUninit::uninit();

@@ -111,7 +111,7 @@ fn _seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         SeekFrom::End(offset) => (linux_raw_sys::general::SEEK_END, offset),
         SeekFrom::Current(offset) => (linux_raw_sys::general::SEEK_CUR, offset),
     };
-    crate::linux_raw::lseek(fd, offset, whence)
+    crate::linux_raw::seek(fd, offset, whence)
 }
 
 /// `lseek(fd, 0, SEEK_CUR)`
@@ -131,7 +131,7 @@ fn _tell(fd: BorrowedFd<'_>) -> io::Result<u64> {
 #[cfg(linux_raw)]
 #[inline]
 fn _tell(fd: BorrowedFd<'_>) -> io::Result<u64> {
-    crate::linux_raw::lseek(fd, 0, linux_raw_sys::general::SEEK_CUR).map(|x| x as u64)
+    crate::linux_raw::seek(fd, 0, linux_raw_sys::general::SEEK_CUR).map(|x| x as u64)
 }
 
 /// `fchmod(fd)`.
