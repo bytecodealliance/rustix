@@ -14,7 +14,7 @@
   </p>
 </div>
 
-`posish` provides efficient memory-safe and I/O-safe wrappers to "POSIX-ish"
+`posish` provides efficient memory-safe and [I/O-safe] wrappers to "POSIX-ish"
 `libc` APIs and syscalls.
 
 `posish` is relatively low-level and does not support Windows; for higher-level
@@ -23,20 +23,21 @@ and portable APIs to this functionality, see the [`system-interface`],
 
 ### Linux raw syscall support
 
-On Linux, `posish` can optionally be configured to target the raw
-Linux syscall ABI directly instead of calling through `libc`. To enable this,
-set the `RUSTFLAGS` environment variable to `--cfg linux_raw`, or otherwise
-pass `--cfg linux_raw` to rustc. This mode is new, and so far only supports
-x86-64 and aarch64, but a fair amount of code has been successfully adapted to
-use it, and ports to other architectures should be straightforward.
+On Linux, `posish` can optionally be configured to use the raw Linux syscall
+ABI directly instead of `libc`. To enable this, set the `RUSTFLAGS` environment
+variable to `--cfg linux_raw`, or otherwise pass `--cfg linux_raw` to rustc.
+This mode is new, and so far only supports x86-64 and aarch64, but a fair
+amount of code has been successfully adapted to use it, and ports to most other
+architectures should be straightforward.
 
 This feature is fun in two ways:
- - By being implemented in Rust, avoiding `libc`, `errno`, and
-   `std::io::Error`, most functions compile down to very simple code and can
-   even be fully inlined into user code.
+ - By being implemented entirely in Rust, avoiding `libc`, `errno`, and
+   pthread cancellation, and using type layout optimizations and an optimized
+   error type, most functions compile down to very simple code and can even be
+   fully inlined into user code.
  - Memory buffers are kept in Rust slices, out parameters are returned as
    regular values, and file descriptors are kept in [`io-lifetimes`] types,
-   so most functions preserve memory safety and [I/O safety] all the way down
+   so most functions preserve memory safety and I/O safety all the way down
    to the syscalls.
 
 [`std`]: https://doc.rust-lang.org/std/
@@ -46,4 +47,4 @@ This feature is fun in two ways:
 [`fs-set-times`]: https://crates.io/crates/fs-set-times
 [`io-lifetimes`]: https://crates.io/crates/io-lifetimes
 [`cap-std`]: https://crates.io/crates/cap-std
-[I/O safety]: https://github.com/sunfishcode/io-lifetimes
+[I/O safe]: https://github.com/rust-lang/rfcs/pull/3128

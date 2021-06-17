@@ -1,4 +1,4 @@
-//! `posish` provides efficient memory-safe and I/O-safe wrappers to
+//! `posish` provides efficient memory-safe and [I/O-safe] wrappers to
 //! "POSIX-ish" `libc` APIs and syscalls.
 //!
 //! The wrappers perform the following tasks:
@@ -7,7 +7,7 @@
 //!  - Out-parameters are presented as return values.
 //!  - Path arguments use `AsRef<`[`Arg`]`>`, so they accept any string type.
 //!  - File descriptors are passed and returned via [`AsFd`] and [`OwnedFd`]
-//!    instead of bare integers, ensuring [I/O safety].
+//!    instead of bare integers, ensuring I/O safety.
 //!  - Constants use `enum`s and [`bitflags`] types.
 //!  - Multiplexed functions (eg. `fcntl`, `ioctl`, etc.) are de-multiplexed.
 //!  - Variadic functions (eg. `openat`, etc.) are presented as non-variadic.
@@ -39,7 +39,7 @@
 //! [`AsFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.AsFd.html
 //! [`OwnedFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/struct.OwnedFd.html
 //! [io-lifetimes crate]: https://crates.io/crates/io-lifetimes
-//! [I/O safety]: https://github.com/sunfishcode/io-lifetimes
+//! [I/O safe]: https://github.com/rust-lang/rfcs/pull/3128
 //! [`Result`]: https://docs.rs/posish/latest/posish/io/type.Result.html
 //! [`Arg`]: https://docs.rs/posish/latest/posish/path/trait.Arg.html
 
