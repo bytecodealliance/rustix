@@ -399,3 +399,22 @@ fn _fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
 fn _fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
     crate::linux_raw::fdatasync(fd)
 }
+
+/// `ftruncate(fd, length)`
+#[inline]
+pub fn ftruncate<'f, Fd: AsFd<'f>>(fd: Fd, length: u64) -> io::Result<()> {
+    let fd = fd.as_fd();
+    _ftruncate(fd, length)
+}
+
+#[cfg(libc)]
+fn _ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
+    let length = length.try_into().map_err(|_overflow_err| io::Error::FBIG)?;
+    unsafe { zero_ok(libc::ftruncate(fd.as_raw_fd() as libc::c_int, length)) }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
+    crate::linux_raw::ftruncate(fd, length)
+}
