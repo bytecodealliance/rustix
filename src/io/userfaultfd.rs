@@ -1,6 +1,6 @@
+use crate::io;
 use bitflags::bitflags;
 use io_lifetimes::OwnedFd;
-use std::io;
 #[cfg(libc)]
 use {
     crate::negone_err,

@@ -1,8 +1,8 @@
 //! `recv` and `send`, and variants
 
+use crate::io;
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
-use std::io;
 #[cfg(libc)]
 use {
     crate::negone_err, libc::recv as libc_recv, libc::send as libc_send,

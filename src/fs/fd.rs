@@ -5,7 +5,7 @@ use crate::fs::Mode;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
 use crate::fs::StatFs;
-use crate::time::Timespec;
+use crate::{io, time::Timespec};
 use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(all(
     libc,
@@ -72,10 +72,7 @@ use libc::{fstatfs64 as libc_fstatfs, lseek64 as libc_lseek};
 ))]
 // not implemented in libc for netbsd yet
 use std::mem::MaybeUninit;
-use std::{
-    convert::TryInto,
-    io::{self, SeekFrom},
-};
+use std::{convert::TryInto, io::SeekFrom};
 #[cfg(libc)]
 use {
     crate::{negone_err, zero_ok},
@@ -94,8 +91,7 @@ fn _seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
     let (whence, offset): (libc::c_int, libc_off_t) = match pos {
         SeekFrom::Start(pos) => (
             libc::SEEK_SET,
-            pos.try_into()
-                .map_err(|_convert_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?,
+            pos.try_into().map_err(|_convert_err| io::Error::OVERFLOW)?,
         ),
         SeekFrom::End(offset) => (libc::SEEK_END, offset),
         SeekFrom::Current(offset) => (libc::SEEK_CUR, offset),
@@ -110,9 +106,7 @@ fn _seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
     let (whence, offset) = match pos {
         SeekFrom::Start(pos) => (
             linux_raw_sys::general::SEEK_SET,
-            pos.try_into().map_err(|_convert_err| {
-                io::Error::from_raw_os_error(linux_raw_sys::errno::EOVERFLOW as i32)
-            })?,
+            pos.try_into().map_err(|_convert_err| io::Error::OVERFLOW)?,
         ),
         SeekFrom::End(offset) => (linux_raw_sys::general::SEEK_END, offset),
         SeekFrom::Current(offset) => (linux_raw_sys::general::SEEK_CUR, offset),
@@ -252,17 +246,17 @@ pub fn posix_fallocate<'f, Fd: AsFd<'f>>(fd: Fd, offset: u64, len: u64) -> io::R
 fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
     let offset = offset
         .try_into()
-        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     let len = len
         .try_into()
-        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     let err = unsafe { libc::posix_fallocate(fd.as_raw_fd() as libc::c_int, offset, len) };
 
     // `posix_fallocate` returns its error status rather than using `errno`.
     if err == 0 {
         Ok(())
     } else {
-        Err(io::Error::from_raw_os_error(err))
+        Err(io::Error(err))
     }
 }
 
@@ -270,13 +264,11 @@ fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()>
 fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
     let offset: i64 = offset
         .try_into()
-        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     let len = len
         .try_into()
-        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
-    let new_len = offset.checked_add(len).ok_or_else(|| {
-        io::Error::new(io::ErrorKind::Other, "overflow while allocating file space")
-    })?;
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
+    let new_len = offset.checked_add(len).ok_or_else(|| io::Error::FBIG)?;
     let mut store = libc::fstore_t {
         fst_flags: libc::F_ALLOCATECONTIG,
         fst_posmode: libc::F_PEOFPOSMODE,
@@ -297,12 +289,12 @@ fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()>
 #[cfg(linux_raw)]
 #[inline]
 fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
-    let offset = offset.try_into().map_err(|_overflow_err| {
-        io::Error::from_raw_os_error(linux_raw_sys::errno::EOVERFLOW as i32)
-    })?;
-    let len = len.try_into().map_err(|_overflow_err| {
-        io::Error::from_raw_os_error(linux_raw_sys::errno::EOVERFLOW as i32)
-    })?;
+    let offset = offset
+        .try_into()
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
+    let len = len
+        .try_into()
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     crate::linux_raw::fallocate(fd, 0, offset, len)
 }
 
@@ -310,7 +302,7 @@ fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()>
 /// whether the file descriptor is readable and/or writeable, respectively.
 /// This is only reliable on files; for example, it doesn't reflect whether
 /// sockets have been shut down; for general I/O handle support, use
-/// [`crate::io::is_read_write`].
+/// [`io::is_read_write`].
 #[inline]
 pub fn is_file_read_write<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<(bool, bool)> {
     let fd = fd.as_fd();

@@ -1,6 +1,6 @@
 //! I/O operations.
 
-mod errno;
+mod error;
 mod fd;
 mod ioctl;
 mod poll;
@@ -12,7 +12,7 @@ mod socketpair;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod userfaultfd;
 
-pub use crate::io::errno::Errno;
+pub use error::{Error, Result};
 #[cfg(not(target_os = "wasi"))]
 pub use fd::dup;
 #[cfg(not(target_os = "redox"))]

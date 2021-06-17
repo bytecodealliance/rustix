@@ -1,6 +1,8 @@
-use crate::fs::{FdFlags, OFlags};
+use crate::{
+    fs::{FdFlags, OFlags},
+    io,
+};
 use io_lifetimes::{AsFd, BorrowedFd};
-use std::io;
 #[cfg(libc)]
 use {
     crate::{negone_err, zero_ok},

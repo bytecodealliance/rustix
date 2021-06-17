@@ -4,7 +4,7 @@
 use crate::fs::CloneFlags;
 use crate::{
     fs::{Access, AtFlags, Mode, OFlags, Stat},
-    path,
+    io, path,
     time::Timespec,
 };
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
@@ -34,7 +34,6 @@ use std::os::unix::ffi::OsStringExt;
 use std::os::wasi::ffi::OsStringExt;
 use std::{
     ffi::{CStr, OsString},
-    io,
     mem::ManuallyDrop,
 };
 use unsafe_io::os::posish::{FromRawFd, RawFd};
@@ -427,15 +426,11 @@ fn _accessat(dirfd: BorrowedFd<'_>, path: &CStr, access: Access, flags: AtFlags)
     }
 
     if flags.bits() != linux_raw_sys::v5_11::general::AT_EACCESS {
-        return Err(io::Error::from_raw_os_error(
-            linux_raw_sys::errno::EINVAL as i32,
-        ));
+        return Err(io::Error::INVAL);
     }
 
     // TODO: Use faccessat2 in newer Linux versions.
-    Err(io::Error::from_raw_os_error(
-        linux_raw_sys::errno::ENOSYS as i32,
-    ))
+    Err(io::Error::NOSYS)
 }
 
 /// `utimensat(dirfd, path, times, flags)`

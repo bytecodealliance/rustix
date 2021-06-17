@@ -2,11 +2,11 @@
 
 use crate::{
     fs::{AtFlags, Statx},
-    path,
+    io, path,
 };
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
-use std::{ffi::CStr, io};
+use std::ffi::CStr;
 #[cfg(libc)]
 use {crate::zero_ok, std::mem::MaybeUninit};
 

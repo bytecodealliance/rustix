@@ -1,7 +1,7 @@
+use crate::io;
 #[cfg(all(libc, target_os = "linux"))]
 use crate::negone_err;
 use bitflags::bitflags;
-use std::io;
 
 #[cfg(libc)]
 bitflags! {

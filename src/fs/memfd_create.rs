@@ -1,7 +1,7 @@
-use crate::path;
+use crate::{io, path};
 use bitflags::bitflags;
 use io_lifetimes::OwnedFd;
-use std::{ffi::CStr, io};
+use std::ffi::CStr;
 #[cfg(libc)]
 use {
     crate::negone_err,

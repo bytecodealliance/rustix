@@ -1,6 +1,6 @@
 //! `Dir`, `Entry`, and `SeekLoc`.
 
-use crate::fs::FileType;
+use crate::{fs::FileType, io};
 use io_lifetimes::{IntoFd, OwnedFd};
 #[cfg(libc)]
 use libc::seekdir as libc_seekdir;
@@ -21,7 +21,7 @@ use libc::{dirent as libc_dirent, readdir as libc_readdir};
     )
 ))]
 use libc::{dirent64 as libc_dirent, readdir64 as libc_readdir};
-use std::{ffi::CStr, io, ptr};
+use std::{ffi::CStr, ptr};
 #[cfg(target_os = "wasi")]
 use std::{ffi::CString, mem::MaybeUninit};
 use unsafe_io::{
@@ -30,13 +30,13 @@ use unsafe_io::{
 };
 #[cfg(libc)]
 use {
-    errno::{set_errno, Errno},
+    errno::{errno, set_errno, Errno},
     std::convert::TryInto,
     unsafe_io::os::posish::IntoRawFd,
 };
 #[cfg(linux_raw)]
 use {
-    io_lifetimes::{AsFd, AsFilelike},
+    io_lifetimes::AsFd,
     linux_raw_sys::general::linux_dirent64,
     std::ffi::CString,
     std::mem::size_of,
@@ -81,7 +81,7 @@ impl Dir {
                 Ok(Self(d))
             } else {
                 let e = io::Error::last_os_error();
-                libc::close(raw);
+                let _ = libc::close(raw);
                 Err(e)
             }
         }
@@ -136,13 +136,13 @@ impl Dir {
         set_errno(Errno(0));
         let dirent = unsafe { libc_readdir(self.0.as_ptr()) };
         if dirent.is_null() {
-            let curr_errno = io::Error::last_os_error();
-            if curr_errno.raw_os_error() == Some(0) {
+            let curr_errno = errno().0;
+            if curr_errno == 0 {
                 // We successfully reached the end of the stream.
                 None
             } else {
                 // `errno` is unknown or non-zero, so an error occurred.
-                Some(Err(curr_errno))
+                Some(Err(io::Error(curr_errno)))
             }
         } else {
             // We successfully read an entry.
@@ -170,9 +170,10 @@ impl Dir {
     #[cfg(linux_raw)]
     pub fn read(&mut self) -> Option<io::Result<Entry>> {
         if let Some(next) = self.next.take() {
-            match std::io::Seek::seek(
-                &mut *self.fd.as_filelike_view::<std::fs::File>(),
-                std::io::SeekFrom::Start(next),
+            match crate::linux_raw::lseek(
+                self.fd.as_fd(),
+                next as i64,
+                linux_raw_sys::general::SEEK_SET,
             ) {
                 Ok(_) => (),
                 Err(err) => return Some(Err(err)),
@@ -430,9 +431,9 @@ impl SeekLoc {
     /// `SeekLoc::to_raw`.
     #[inline]
     pub unsafe fn from_raw(loc: u64) -> io::Result<Self> {
-        Ok(Self(loc.try_into().map_err(|_convert_err| {
-            io::Error::from_raw_os_error(libc::EINVAL)
-        })?))
+        Ok(Self(
+            loc.try_into().map_err(|_convert_err| io::Error::INVAL)?,
+        ))
     }
 }
 

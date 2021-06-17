@@ -1,3 +1,4 @@
+use crate::io;
 use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(all(
     libc,
@@ -19,7 +20,7 @@ use libc::posix_fadvise as libc_posix_fadvise;
     )
 ))]
 use libc::posix_fadvise64 as libc_posix_fadvise;
-use std::{convert::TryInto, io};
+use std::convert::TryInto;
 #[cfg(libc)]
 use {crate::zero_ok, unsafe_io::os::posish::AsRawFd};
 

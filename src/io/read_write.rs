@@ -1,5 +1,6 @@
 //! `read` and `write`, optionally positioned, optionally vectored
 
+use crate::io;
 #[cfg(any(linux_raw, all(libc, target_os = "linux", target_env = "gnu")))]
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
@@ -35,7 +36,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{
     cmp::min,
     convert::TryInto,
-    io::{self, IoSlice, IoSliceMut},
+    io::{IoSlice, IoSliceMut},
 };
 #[cfg(libc)]
 use {crate::negone_err, std::os::raw::c_int, unsafe_io::os::posish::AsRawFd};
@@ -135,7 +136,7 @@ pub fn pread<'f, Fd: AsFd<'f>>(fd: Fd, buf: &mut [u8], offset: u64) -> io::Resul
 fn _pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Result<usize> {
     let offset = offset
         .try_into()
-        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     let nread = unsafe {
         negone_err(libc_pread(
             fd.as_raw_fd() as libc::c_int,
@@ -164,7 +165,7 @@ pub fn pwrite<'f, Fd: AsFd<'f>>(fd: Fd, buf: &[u8], offset: u64) -> io::Result<u
 fn _pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<usize> {
     let offset = offset
         .try_into()
-        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     let nwritten = unsafe {
         negone_err(libc_pwrite(
             fd.as_raw_fd() as libc::c_int,
@@ -244,7 +245,7 @@ pub fn preadv<'f, Fd: AsFd<'f>>(fd: Fd, bufs: &[IoSliceMut], offset: u64) -> io:
 fn _preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
     let offset = offset
         .try_into()
-        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     let nread = unsafe {
         negone_err(libc_preadv(
             fd.as_raw_fd() as libc::c_int,
@@ -259,9 +260,9 @@ fn _preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io::Result<u
 #[cfg(linux_raw)]
 #[inline]
 fn _preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
-    let offset = offset.try_into().map_err(|_overflow_err| {
-        io::Error::from_raw_os_error(linux_raw_sys::errno::EOVERFLOW as i32)
-    })?;
+    let offset = offset
+        .try_into()
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     crate::linux_raw::preadv(fd, &bufs[..min(bufs.len(), max_iov())], offset)
 }
 
@@ -277,7 +278,7 @@ pub fn pwritev<'f, Fd: AsFd<'f>>(fd: Fd, bufs: &[IoSlice], offset: u64) -> io::R
 fn _pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
     let offset = offset
         .try_into()
-        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     let nwritten = unsafe {
         negone_err(libc_pwritev(
             fd.as_raw_fd() as libc::c_int,
@@ -292,9 +293,9 @@ fn _pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usi
 #[cfg(linux_raw)]
 #[inline]
 fn _pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
-    let offset = offset.try_into().map_err(|_overflow_err| {
-        io::Error::from_raw_os_error(linux_raw_sys::errno::EOVERFLOW as i32)
-    })?;
+    let offset = offset
+        .try_into()
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     crate::linux_raw::pwritev(fd, &bufs[..min(bufs.len(), max_iov())], offset)
 }
 
@@ -320,7 +321,7 @@ fn _preadv2(
 ) -> io::Result<usize> {
     let offset = offset
         .try_into()
-        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     let nread = unsafe {
         negone_err(libc_preadv2(
             fd.as_raw_fd() as libc::c_int,
@@ -341,9 +342,9 @@ fn _preadv2(
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    let offset = offset.try_into().map_err(|_overflow_err| {
-        io::Error::from_raw_os_error(linux_raw_sys::errno::EOVERFLOW as i32)
-    })?;
+    let offset = offset
+        .try_into()
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     crate::linux_raw::preadv2(
         fd,
         &bufs[..min(bufs.len(), max_iov())],
@@ -374,7 +375,7 @@ fn _pwritev2(
 ) -> io::Result<usize> {
     let offset = offset
         .try_into()
-        .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     let nwritten = unsafe {
         negone_err(libc_pwritev2(
             fd.as_raw_fd() as libc::c_int,
@@ -395,9 +396,9 @@ fn _pwritev2(
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    let offset = offset.try_into().map_err(|_overflow_err| {
-        io::Error::from_raw_os_error(linux_raw_sys::errno::EOVERFLOW as i32)
-    })?;
+    let offset = offset
+        .try_into()
+        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     crate::linux_raw::pwritev2(
         fd,
         &bufs[..min(bufs.len(), max_iov())],

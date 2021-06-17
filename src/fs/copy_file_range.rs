@@ -1,5 +1,6 @@
+use crate::io;
 use io_lifetimes::{AsFd, BorrowedFd};
-use std::{convert::TryInto, io, mem};
+use std::{convert::TryInto, mem};
 #[cfg(libc)]
 use {crate::negone_err, std::ptr, unsafe_io::os::posish::AsRawFd};
 
@@ -32,7 +33,7 @@ fn _copy_file_range(
     let off_in_ptr = if let Some(off_in) = &off_in {
         off_in_val = (**off_in)
             .try_into()
-            .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+            .map_err(|_overflow_err| io::Error::OVERFLOW)?;
         &mut off_in_val
     } else {
         ptr::null_mut()
@@ -40,7 +41,7 @@ fn _copy_file_range(
     let off_out_ptr = if let Some(off_out) = &off_out {
         off_out_val = (**off_out)
             .try_into()
-            .map_err(|_overflow_err| io::Error::from_raw_os_error(libc::EOVERFLOW))?;
+            .map_err(|_overflow_err| io::Error::OVERFLOW)?;
         &mut off_out_val
     } else {
         ptr::null_mut()

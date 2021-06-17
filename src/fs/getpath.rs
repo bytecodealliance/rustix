@@ -1,6 +1,6 @@
-use crate::zero_ok;
+use crate::{io, zero_ok};
 use io_lifetimes::{AsFd, BorrowedFd};
-use std::{io, os::unix::ffi::OsStringExt, path::PathBuf};
+use std::{os::unix::ffi::OsStringExt, path::PathBuf};
 use unsafe_io::os::posish::AsRawFd;
 
 /// `fcntl(fd, F_GETPATH)`

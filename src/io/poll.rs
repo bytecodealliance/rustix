@@ -1,6 +1,7 @@
+use crate::io;
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
-use std::{io, marker::PhantomData, vec::IntoIter};
+use std::{marker::PhantomData, vec::IntoIter};
 #[cfg(libc)]
 use {crate::negone_err, std::convert::TryInto, unsafe_io::os::posish::AsRawFd};
 
@@ -166,7 +167,7 @@ impl<'fd> PollFdVec<'fd> {
             .fds
             .len()
             .try_into()
-            .map_err(|_convert_err| io::Error::from_raw_os_error(libc::EINVAL))?;
+            .map_err(|_convert_err| io::Error::INVAL)?;
 
         let nready =
             negone_err(unsafe { libc::poll(self.fds.as_mut_ptr() as *mut _, nfds, timeout) })?;

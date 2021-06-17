@@ -3,6 +3,7 @@
 mod arch;
 mod conv;
 
+use crate::io;
 #[cfg(target_pointer_width = "64")]
 use crate::linux_raw::conv::ret_u64;
 use arch::{
@@ -52,7 +53,7 @@ use linux_raw_sys::{
 };
 use std::{
     ffi::CStr,
-    io::{self, IoSlice, IoSliceMut},
+    io::{IoSlice, IoSliceMut},
     mem::{size_of, MaybeUninit},
     os::raw::{c_char, c_int, c_uint, c_void},
 };

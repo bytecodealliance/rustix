@@ -69,20 +69,20 @@ mod linux_raw;
 /// Given a `libc` return value, translate `0` into `Ok(())` and any other
 /// value to an `Err` with the error from `errno`.
 #[cfg(libc)]
-fn zero_ok<T: LibcResult>(t: T) -> std::io::Result<()> {
+fn zero_ok<T: LibcResult>(t: T) -> crate::io::Result<()> {
     if t.is_zero() {
         Ok(())
     } else {
-        Err(std::io::Error::last_os_error())
+        Err(crate::io::Error::last_os_error())
     }
 }
 
 /// Given a `libc` return value, translate `-1` into an `Err` with the error
 /// from `errno`, and any other value to an `Ok` containing the value.
 #[cfg(libc)]
-fn negone_err<T: LibcResult>(t: T) -> std::io::Result<T> {
+fn negone_err<T: LibcResult>(t: T) -> crate::io::Result<T> {
     if t.is_negone() {
-        Err(std::io::Error::last_os_error())
+        Err(crate::io::Error::last_os_error())
     } else {
         Ok(t)
     }
@@ -93,9 +93,9 @@ fn negone_err<T: LibcResult>(t: T) -> std::io::Result<T> {
 /// value.
 #[cfg(libc)]
 #[allow(dead_code)]
-fn negative_err<T: LibcResult>(t: T) -> std::io::Result<()> {
+fn negative_err<T: LibcResult>(t: T) -> crate::io::Result<()> {
     if t.is_negative() {
-        Err(std::io::Error::last_os_error())
+        Err(crate::io::Error::last_os_error())
     } else {
         Ok(())
     }

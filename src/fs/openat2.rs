@@ -1,9 +1,9 @@
 use crate::{
     fs::{Mode, OFlags, ResolveFlags},
-    path,
+    io, path,
 };
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
-use std::{ffi::CStr, io};
+use std::ffi::CStr;
 #[cfg(libc)]
 use {
     crate::negone_err,

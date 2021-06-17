@@ -1,6 +1,6 @@
-use crate::zero_ok;
+use crate::{io, zero_ok};
 use io_lifetimes::{AsFd, BorrowedFd};
-use std::{convert::TryInto, io};
+use std::convert::TryInto;
 use unsafe_io::os::posish::AsRawFd;
 
 /// `fcntl(fd, F_RDADVISE, radvisory { offset, len })`

@@ -1,8 +1,6 @@
+use crate::io;
 use io_lifetimes::{AsFd, BorrowedFd};
-use std::{
-    io,
-    mem::{size_of, MaybeUninit},
-};
+use std::mem::{size_of, MaybeUninit};
 #[cfg(libc)]
 use {crate::zero_ok, unsafe_io::os::posish::AsRawFd};
 

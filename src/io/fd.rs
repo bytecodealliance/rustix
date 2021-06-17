@@ -1,5 +1,6 @@
 //! Functions which operate on file descriptors.
 
+use crate::io;
 #[cfg(all(libc, not(target_os = "wasi")))]
 use crate::negone_err;
 #[cfg(all(libc, not(target_os = "redox")))]
@@ -7,13 +8,15 @@ use crate::zero_ok;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 use std::ffi::OsString;
-use std::io;
 #[cfg(not(target_os = "redox"))]
 use std::mem::MaybeUninit;
 #[cfg(all(libc, unix, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 use std::os::unix::ffi::OsStringExt;
 #[cfg(libc)]
-use unsafe_io::os::posish::{AsRawFd, FromRawFd};
+use {
+    errno::errno,
+    unsafe_io::os::posish::{AsRawFd, FromRawFd},
+};
 
 /// `ioctl(fd, FIONREAD)`.
 #[cfg(not(target_os = "redox"))]
@@ -56,21 +59,20 @@ pub fn isatty<'f, Fd: AsFd<'f>>(fd: Fd) -> bool {
 fn _isatty(fd: BorrowedFd<'_>) -> bool {
     let res = unsafe { libc::isatty(fd.as_raw_fd() as libc::c_int) };
     if res == 0 {
-        let err = io::Error::last_os_error();
-        match err.raw_os_error() {
+        match errno().0 {
             #[cfg(not(any(target_os = "android", target_os = "linux")))]
-            Some(libc::ENOTTY) => false,
+            libc::ENOTTY => false,
 
             // Old Linux versions reportedly return `EINVAL`.
             // https://man7.org/linux/man-pages/man3/isatty.3.html#ERRORS
             #[cfg(any(target_os = "android", target_os = "linux"))]
-            Some(libc::ENOTTY) | Some(libc::EINVAL) => false,
+            libc::ENOTTY | libc::EINVAL => false,
 
             // Darwin mysteriously returns `EOPNOTSUPP` sometimes.
             #[cfg(any(target_os = "ios", target_os = "macos"))]
-            Some(libc::EOPNOTSUPP) => false,
+            libc::EOPNOTSUPP => false,
 
-            _ => panic!("unexpected error from isatty: {:?}", err),
+            err => panic!("unexpected error from isatty: {:?}", err),
         }
     } else {
         true
@@ -81,18 +83,18 @@ fn _isatty(fd: BorrowedFd<'_>) -> bool {
 fn _isatty(fd: BorrowedFd<'_>) -> bool {
     match crate::linux_raw::ioctl_tiocgwinsz(fd) {
         Ok(_) => true,
-        Err(err) => match err.raw_os_error().map(|errno| errno as u32) {
+        Err(err) => match err {
             #[cfg(not(any(target_os = "android", target_os = "linux")))]
-            Some(linux_raw_sys::errno::ENOTTY) => false,
+            io::Error::NOTTY => false,
 
             // Old Linux versions reportedly return `EINVAL`.
             // https://man7.org/linux/man-pages/man3/isatty.3.html#ERRORS
             #[cfg(any(target_os = "android", target_os = "linux"))]
-            Some(linux_raw_sys::errno::ENOTTY) | Some(linux_raw_sys::errno::EINVAL) => false,
+            io::Error::NOTTY | io::Error::INVAL => false,
 
             // Darwin mysteriously returns `EOPNOTSUPP` sometimes.
             #[cfg(any(target_os = "ios", target_os = "macos"))]
-            Some(linux_raw_sys::errno::EOPNOTSUPP) => false,
+            io::Error::OPNOTSUPP => false,
 
             _ => panic!("unexpected error from isatty: {:?}", err),
         },
@@ -132,12 +134,11 @@ fn _is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         } {
             0 => read = false,
             -1 => {
-                let err = io::Error::last_os_error();
                 #[allow(unreachable_patterns)] // EAGAIN may equal EWOULDBLOCK
-                match err.raw_os_error() {
-                    Some(libc::EAGAIN) | Some(libc::EWOULDBLOCK) => (),
-                    Some(libc::ENOTSOCK) => not_socket = true,
-                    _ => return Err(err),
+                match errno().0 {
+                    libc::EAGAIN | libc::EWOULDBLOCK => (),
+                    libc::ENOTSOCK => not_socket = true,
+                    err => return Err(io::Error(err)),
                 }
             }
             _ => (),
@@ -148,13 +149,12 @@ fn _is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // the write side is shut down.
         match unsafe { libc::send(fd.as_raw_fd(), [].as_ptr(), 0, libc::MSG_DONTWAIT) } {
             -1 => {
-                let err = io::Error::last_os_error();
                 #[allow(unreachable_patterns)] // EAGAIN may equal EWOULDBLOCK
-                match err.raw_os_error() {
-                    Some(libc::EAGAIN) | Some(libc::EWOULDBLOCK) => (),
-                    Some(libc::ENOTSOCK) => (),
-                    Some(libc::EPIPE) => write = false,
-                    _ => return Err(err),
+                match errno().0 {
+                    libc::EAGAIN | libc::EWOULDBLOCK => (),
+                    libc::ENOTSOCK => (),
+                    libc::EPIPE => write = false,
+                    err => return Err(io::Error(err)),
                 }
             }
             _ => (),
@@ -186,10 +186,9 @@ fn _is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
             Ok(0) => read = false,
             Err(err) => {
                 #[allow(unreachable_patterns)] // EAGAIN may equal EWOULDBLOCK
-                match err.raw_os_error().map(|errno| errno as u32) {
-                    Some(linux_raw_sys::errno::EAGAIN)
-                    | Some(linux_raw_sys::errno::EWOULDBLOCK) => (),
-                    Some(linux_raw_sys::errno::ENOTSOCK) => not_socket = true,
+                match err {
+                    io::Error::AGAIN | io::Error::WOULDBLOCK => (),
+                    io::Error::NOTSOCK => not_socket = true,
                     _ => return Err(err),
                 }
             }
@@ -202,11 +201,10 @@ fn _is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         match crate::linux_raw::send(fd, &[], linux_raw_sys::general::MSG_DONTWAIT) {
             Err(err) => {
                 #[allow(unreachable_patterns)] // EAGAIN equals EWOULDBLOCK
-                match err.raw_os_error().map(|errno| errno as u32) {
-                    Some(linux_raw_sys::errno::EAGAIN)
-                    | Some(linux_raw_sys::errno::EWOULDBLOCK) => (),
-                    Some(linux_raw_sys::errno::ENOTSOCK) => (),
-                    Some(linux_raw_sys::errno::EPIPE) => write = false,
+                match err {
+                    io::Error::AGAIN | io::Error::WOULDBLOCK => (),
+                    io::Error::NOTSOCK => (),
+                    io::Error::PIPE => write = false,
                     _ => return Err(err),
                 }
             }
@@ -270,7 +268,7 @@ fn _ttyname(dirfd: BorrowedFd<'_>, reuse: OsString) -> io::Result<OsString> {
                     buffer.set_len(libc::strlen(buffer.as_ptr().cast::<libc::c_char>()));
                     return Ok(OsString::from_vec(buffer));
                 }
-                errno => return Err(io::Error::from_raw_os_error(errno)),
+                errno => return Err(io::Error(errno)),
             }
         }
     }

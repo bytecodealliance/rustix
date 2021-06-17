@@ -1,12 +1,24 @@
 #![allow(missing_docs)]
 
-use std::{io, os::raw::c_int};
+use std::{error, fmt, result};
+#[cfg(libc)]
+use {errno::errno, std::os::raw::c_int};
 
-#[derive(Eq, PartialEq, Hash, Copy, Clone)]
-pub struct Errno(c_int);
+pub type Result<T> = result::Result<T, Error>;
 
 #[cfg(libc)]
-impl Errno {
+#[repr(transparent)]
+#[derive(Eq, PartialEq, Hash, Copy, Clone)]
+pub struct Error(pub(crate) c_int);
+
+#[cfg(linux_raw)]
+#[repr(transparent)]
+#[derive(Eq, PartialEq, Hash, Copy, Clone)]
+// Linux errno codes are in 0..4096, which is 12 bits.
+pub struct Error(pub(crate) u16);
+
+#[cfg(libc)]
+impl Error {
     pub const ACCES: Self = Self(libc::EACCES);
     pub const ADDRINUSE: Self = Self(libc::EADDRINUSE);
     pub const ADDRNOTAVAIL: Self = Self(libc::EADDRNOTAVAIL);
@@ -685,155 +697,176 @@ impl Errno {
     pub const XFULL: Self = Self(libc::EXFULL);
 }
 
+// These have type `u32` in the bindgen bindings; cast them to `u16` as
+// knowledge that the platform errno type is signed is widespread.
 #[cfg(linux_raw)]
-impl Errno {
-    pub const ACCES: Self = Self(linux_raw_sys::errno::EACCES as c_int);
-    pub const ADDRINUSE: Self = Self(linux_raw_sys::errno::EADDRINUSE as c_int);
-    pub const ADDRNOTAVAIL: Self = Self(linux_raw_sys::errno::EADDRNOTAVAIL as c_int);
-    pub const ADV: Self = Self(linux_raw_sys::errno::EADV as c_int);
-    pub const AFNOSUPPORT: Self = Self(linux_raw_sys::errno::EAFNOSUPPORT as c_int);
-    pub const AGAIN: Self = Self(linux_raw_sys::errno::EAGAIN as c_int);
-    pub const ALREADY: Self = Self(linux_raw_sys::errno::EALREADY as c_int);
-    pub const BADE: Self = Self(linux_raw_sys::errno::EBADE as c_int);
-    pub const BADF: Self = Self(linux_raw_sys::errno::EBADF as c_int);
-    pub const BADFD: Self = Self(linux_raw_sys::errno::EBADFD as c_int);
-    pub const BADMSG: Self = Self(linux_raw_sys::errno::EBADMSG as c_int);
-    pub const BADR: Self = Self(linux_raw_sys::errno::EBADR as c_int);
-    pub const BADRQC: Self = Self(linux_raw_sys::errno::EBADRQC as c_int);
-    pub const BADSLT: Self = Self(linux_raw_sys::errno::EBADSLT as c_int);
-    pub const BFONT: Self = Self(linux_raw_sys::errno::EBFONT as c_int);
-    pub const BUSY: Self = Self(linux_raw_sys::errno::EBUSY as c_int);
-    pub const CANCELED: Self = Self(linux_raw_sys::errno::ECANCELED as c_int);
-    pub const CHILD: Self = Self(linux_raw_sys::errno::ECHILD as c_int);
-    pub const CHRNG: Self = Self(linux_raw_sys::errno::ECHRNG as c_int);
-    pub const COMM: Self = Self(linux_raw_sys::errno::ECOMM as c_int);
-    pub const CONNABORTED: Self = Self(linux_raw_sys::errno::ECONNABORTED as c_int);
-    pub const CONNREFUSED: Self = Self(linux_raw_sys::errno::ECONNREFUSED as c_int);
-    pub const CONNRESET: Self = Self(linux_raw_sys::errno::ECONNRESET as c_int);
-    pub const DEADLK: Self = Self(linux_raw_sys::errno::EDEADLK as c_int);
-    pub const DEADLOCK: Self = Self(linux_raw_sys::errno::EDEADLOCK as c_int);
-    pub const DESTADDRREQ: Self = Self(linux_raw_sys::errno::EDESTADDRREQ as c_int);
-    pub const DOM: Self = Self(linux_raw_sys::errno::EDOM as c_int);
-    pub const DOTDOT: Self = Self(linux_raw_sys::errno::EDOTDOT as c_int);
-    pub const DQUOT: Self = Self(linux_raw_sys::errno::EDQUOT as c_int);
-    pub const EXIST: Self = Self(linux_raw_sys::errno::EEXIST as c_int);
-    pub const FAULT: Self = Self(linux_raw_sys::errno::EFAULT as c_int);
-    pub const FBIG: Self = Self(linux_raw_sys::errno::EFBIG as c_int);
-    pub const HOSTDOWN: Self = Self(linux_raw_sys::errno::EHOSTDOWN as c_int);
-    pub const HOSTUNREACH: Self = Self(linux_raw_sys::errno::EHOSTUNREACH as c_int);
-    pub const HWPOISON: Self = Self(linux_raw_sys::v5_4::errno::EHWPOISON as c_int);
-    pub const IDRM: Self = Self(linux_raw_sys::errno::EIDRM as c_int);
-    pub const ILSEQ: Self = Self(linux_raw_sys::errno::EILSEQ as c_int);
-    pub const INPROGRESS: Self = Self(linux_raw_sys::errno::EINPROGRESS as c_int);
-    pub const INTR: Self = Self(linux_raw_sys::errno::EINTR as c_int);
-    pub const INVAL: Self = Self(linux_raw_sys::errno::EINVAL as c_int);
-    pub const IO: Self = Self(linux_raw_sys::errno::EIO as c_int);
-    pub const ISCONN: Self = Self(linux_raw_sys::errno::EISCONN as c_int);
-    pub const ISDIR: Self = Self(linux_raw_sys::errno::EISDIR as c_int);
-    pub const ISNAM: Self = Self(linux_raw_sys::errno::EISNAM as c_int);
-    pub const KEYEXPIRED: Self = Self(linux_raw_sys::errno::EKEYEXPIRED as c_int);
-    pub const KEYREJECTED: Self = Self(linux_raw_sys::errno::EKEYREJECTED as c_int);
-    pub const KEYREVOKED: Self = Self(linux_raw_sys::errno::EKEYREVOKED as c_int);
-    pub const L2HLT: Self = Self(linux_raw_sys::errno::EL2HLT as c_int);
-    pub const L2NSYNC: Self = Self(linux_raw_sys::errno::EL2NSYNC as c_int);
-    pub const L3HLT: Self = Self(linux_raw_sys::errno::EL3HLT as c_int);
-    pub const L3RST: Self = Self(linux_raw_sys::errno::EL3RST as c_int);
-    pub const LIBACC: Self = Self(linux_raw_sys::errno::ELIBACC as c_int);
-    pub const LIBBAD: Self = Self(linux_raw_sys::errno::ELIBBAD as c_int);
-    pub const LIBEXEC: Self = Self(linux_raw_sys::errno::ELIBEXEC as c_int);
-    pub const LIBMAX: Self = Self(linux_raw_sys::errno::ELIBMAX as c_int);
-    pub const LIBSCN: Self = Self(linux_raw_sys::errno::ELIBSCN as c_int);
-    pub const LNRNG: Self = Self(linux_raw_sys::errno::ELNRNG as c_int);
-    pub const LOOP: Self = Self(linux_raw_sys::errno::ELOOP as c_int);
-    pub const MEDIUMTYPE: Self = Self(linux_raw_sys::errno::EMEDIUMTYPE as c_int);
-    pub const MFILE: Self = Self(linux_raw_sys::errno::EMFILE as c_int);
-    pub const MLINK: Self = Self(linux_raw_sys::errno::EMLINK as c_int);
-    pub const MSGSIZE: Self = Self(linux_raw_sys::errno::EMSGSIZE as c_int);
-    pub const MULTIHOP: Self = Self(linux_raw_sys::errno::EMULTIHOP as c_int);
-    pub const NAMETOOLONG: Self = Self(linux_raw_sys::errno::ENAMETOOLONG as c_int);
-    pub const NAVAIL: Self = Self(linux_raw_sys::errno::ENAVAIL as c_int);
-    pub const NETDOWN: Self = Self(linux_raw_sys::errno::ENETDOWN as c_int);
-    pub const NETRESET: Self = Self(linux_raw_sys::errno::ENETRESET as c_int);
-    pub const NETUNREACH: Self = Self(linux_raw_sys::errno::ENETUNREACH as c_int);
-    pub const NFILE: Self = Self(linux_raw_sys::errno::ENFILE as c_int);
-    pub const NOANO: Self = Self(linux_raw_sys::errno::ENOANO as c_int);
-    pub const NOBUFS: Self = Self(linux_raw_sys::errno::ENOBUFS as c_int);
-    pub const NOCSI: Self = Self(linux_raw_sys::errno::ENOCSI as c_int);
-    pub const NODATA: Self = Self(linux_raw_sys::errno::ENODATA as c_int);
-    pub const NODEV: Self = Self(linux_raw_sys::errno::ENODEV as c_int);
-    pub const NOENT: Self = Self(linux_raw_sys::errno::ENOENT as c_int);
-    pub const NOEXEC: Self = Self(linux_raw_sys::errno::ENOEXEC as c_int);
-    pub const NOKEY: Self = Self(linux_raw_sys::errno::ENOKEY as c_int);
-    pub const NOLCK: Self = Self(linux_raw_sys::errno::ENOLCK as c_int);
-    pub const NOLINK: Self = Self(linux_raw_sys::errno::ENOLINK as c_int);
-    pub const NOMEDIUM: Self = Self(linux_raw_sys::errno::ENOMEDIUM as c_int);
-    pub const NOMEM: Self = Self(linux_raw_sys::errno::ENOMEM as c_int);
-    pub const NOMSG: Self = Self(linux_raw_sys::errno::ENOMSG as c_int);
-    pub const NONET: Self = Self(linux_raw_sys::errno::ENONET as c_int);
-    pub const NOPKG: Self = Self(linux_raw_sys::errno::ENOPKG as c_int);
-    pub const NOPROTOOPT: Self = Self(linux_raw_sys::errno::ENOPROTOOPT as c_int);
-    pub const NOSPC: Self = Self(linux_raw_sys::errno::ENOSPC as c_int);
-    pub const NOSR: Self = Self(linux_raw_sys::errno::ENOSR as c_int);
-    pub const NOSTR: Self = Self(linux_raw_sys::errno::ENOSTR as c_int);
-    pub const NOSYS: Self = Self(linux_raw_sys::errno::ENOSYS as c_int);
-    pub const NOTBLK: Self = Self(linux_raw_sys::errno::ENOTBLK as c_int);
-    pub const NOTCONN: Self = Self(linux_raw_sys::errno::ENOTCONN as c_int);
-    pub const NOTDIR: Self = Self(linux_raw_sys::errno::ENOTDIR as c_int);
-    pub const NOTEMPTY: Self = Self(linux_raw_sys::errno::ENOTEMPTY as c_int);
-    pub const NOTNAM: Self = Self(linux_raw_sys::errno::ENOTNAM as c_int);
-    pub const NOTRECOVERABLE: Self = Self(linux_raw_sys::errno::ENOTRECOVERABLE as c_int);
-    pub const NOTSOCK: Self = Self(linux_raw_sys::errno::ENOTSOCK as c_int);
+impl Error {
+    pub const ACCES: Self = Self(linux_raw_sys::errno::EACCES as u16);
+    pub const ADDRINUSE: Self = Self(linux_raw_sys::errno::EADDRINUSE as u16);
+    pub const ADDRNOTAVAIL: Self = Self(linux_raw_sys::errno::EADDRNOTAVAIL as u16);
+    pub const ADV: Self = Self(linux_raw_sys::errno::EADV as u16);
+    pub const AFNOSUPPORT: Self = Self(linux_raw_sys::errno::EAFNOSUPPORT as u16);
+    pub const AGAIN: Self = Self(linux_raw_sys::errno::EAGAIN as u16);
+    pub const ALREADY: Self = Self(linux_raw_sys::errno::EALREADY as u16);
+    pub const BADE: Self = Self(linux_raw_sys::errno::EBADE as u16);
+    pub const BADF: Self = Self(linux_raw_sys::errno::EBADF as u16);
+    pub const BADFD: Self = Self(linux_raw_sys::errno::EBADFD as u16);
+    pub const BADMSG: Self = Self(linux_raw_sys::errno::EBADMSG as u16);
+    pub const BADR: Self = Self(linux_raw_sys::errno::EBADR as u16);
+    pub const BADRQC: Self = Self(linux_raw_sys::errno::EBADRQC as u16);
+    pub const BADSLT: Self = Self(linux_raw_sys::errno::EBADSLT as u16);
+    pub const BFONT: Self = Self(linux_raw_sys::errno::EBFONT as u16);
+    pub const BUSY: Self = Self(linux_raw_sys::errno::EBUSY as u16);
+    pub const CANCELED: Self = Self(linux_raw_sys::errno::ECANCELED as u16);
+    pub const CHILD: Self = Self(linux_raw_sys::errno::ECHILD as u16);
+    pub const CHRNG: Self = Self(linux_raw_sys::errno::ECHRNG as u16);
+    pub const COMM: Self = Self(linux_raw_sys::errno::ECOMM as u16);
+    pub const CONNABORTED: Self = Self(linux_raw_sys::errno::ECONNABORTED as u16);
+    pub const CONNREFUSED: Self = Self(linux_raw_sys::errno::ECONNREFUSED as u16);
+    pub const CONNRESET: Self = Self(linux_raw_sys::errno::ECONNRESET as u16);
+    pub const DEADLK: Self = Self(linux_raw_sys::errno::EDEADLK as u16);
+    pub const DEADLOCK: Self = Self(linux_raw_sys::errno::EDEADLOCK as u16);
+    pub const DESTADDRREQ: Self = Self(linux_raw_sys::errno::EDESTADDRREQ as u16);
+    pub const DOM: Self = Self(linux_raw_sys::errno::EDOM as u16);
+    pub const DOTDOT: Self = Self(linux_raw_sys::errno::EDOTDOT as u16);
+    pub const DQUOT: Self = Self(linux_raw_sys::errno::EDQUOT as u16);
+    pub const EXIST: Self = Self(linux_raw_sys::errno::EEXIST as u16);
+    pub const FAULT: Self = Self(linux_raw_sys::errno::EFAULT as u16);
+    pub const FBIG: Self = Self(linux_raw_sys::errno::EFBIG as u16);
+    pub const HOSTDOWN: Self = Self(linux_raw_sys::errno::EHOSTDOWN as u16);
+    pub const HOSTUNREACH: Self = Self(linux_raw_sys::errno::EHOSTUNREACH as u16);
+    pub const HWPOISON: Self = Self(linux_raw_sys::v5_4::errno::EHWPOISON as u16);
+    pub const IDRM: Self = Self(linux_raw_sys::errno::EIDRM as u16);
+    pub const ILSEQ: Self = Self(linux_raw_sys::errno::EILSEQ as u16);
+    pub const INPROGRESS: Self = Self(linux_raw_sys::errno::EINPROGRESS as u16);
+    pub const INTR: Self = Self(linux_raw_sys::errno::EINTR as u16);
+    pub const INVAL: Self = Self(linux_raw_sys::errno::EINVAL as u16);
+    pub const IO: Self = Self(linux_raw_sys::errno::EIO as u16);
+    pub const ISCONN: Self = Self(linux_raw_sys::errno::EISCONN as u16);
+    pub const ISDIR: Self = Self(linux_raw_sys::errno::EISDIR as u16);
+    pub const ISNAM: Self = Self(linux_raw_sys::errno::EISNAM as u16);
+    pub const KEYEXPIRED: Self = Self(linux_raw_sys::errno::EKEYEXPIRED as u16);
+    pub const KEYREJECTED: Self = Self(linux_raw_sys::errno::EKEYREJECTED as u16);
+    pub const KEYREVOKED: Self = Self(linux_raw_sys::errno::EKEYREVOKED as u16);
+    pub const L2HLT: Self = Self(linux_raw_sys::errno::EL2HLT as u16);
+    pub const L2NSYNC: Self = Self(linux_raw_sys::errno::EL2NSYNC as u16);
+    pub const L3HLT: Self = Self(linux_raw_sys::errno::EL3HLT as u16);
+    pub const L3RST: Self = Self(linux_raw_sys::errno::EL3RST as u16);
+    pub const LIBACC: Self = Self(linux_raw_sys::errno::ELIBACC as u16);
+    pub const LIBBAD: Self = Self(linux_raw_sys::errno::ELIBBAD as u16);
+    pub const LIBEXEC: Self = Self(linux_raw_sys::errno::ELIBEXEC as u16);
+    pub const LIBMAX: Self = Self(linux_raw_sys::errno::ELIBMAX as u16);
+    pub const LIBSCN: Self = Self(linux_raw_sys::errno::ELIBSCN as u16);
+    pub const LNRNG: Self = Self(linux_raw_sys::errno::ELNRNG as u16);
+    pub const LOOP: Self = Self(linux_raw_sys::errno::ELOOP as u16);
+    pub const MEDIUMTYPE: Self = Self(linux_raw_sys::errno::EMEDIUMTYPE as u16);
+    pub const MFILE: Self = Self(linux_raw_sys::errno::EMFILE as u16);
+    pub const MLINK: Self = Self(linux_raw_sys::errno::EMLINK as u16);
+    pub const MSGSIZE: Self = Self(linux_raw_sys::errno::EMSGSIZE as u16);
+    pub const MULTIHOP: Self = Self(linux_raw_sys::errno::EMULTIHOP as u16);
+    pub const NAMETOOLONG: Self = Self(linux_raw_sys::errno::ENAMETOOLONG as u16);
+    pub const NAVAIL: Self = Self(linux_raw_sys::errno::ENAVAIL as u16);
+    pub const NETDOWN: Self = Self(linux_raw_sys::errno::ENETDOWN as u16);
+    pub const NETRESET: Self = Self(linux_raw_sys::errno::ENETRESET as u16);
+    pub const NETUNREACH: Self = Self(linux_raw_sys::errno::ENETUNREACH as u16);
+    pub const NFILE: Self = Self(linux_raw_sys::errno::ENFILE as u16);
+    pub const NOANO: Self = Self(linux_raw_sys::errno::ENOANO as u16);
+    pub const NOBUFS: Self = Self(linux_raw_sys::errno::ENOBUFS as u16);
+    pub const NOCSI: Self = Self(linux_raw_sys::errno::ENOCSI as u16);
+    pub const NODATA: Self = Self(linux_raw_sys::errno::ENODATA as u16);
+    pub const NODEV: Self = Self(linux_raw_sys::errno::ENODEV as u16);
+    pub const NOENT: Self = Self(linux_raw_sys::errno::ENOENT as u16);
+    pub const NOEXEC: Self = Self(linux_raw_sys::errno::ENOEXEC as u16);
+    pub const NOKEY: Self = Self(linux_raw_sys::errno::ENOKEY as u16);
+    pub const NOLCK: Self = Self(linux_raw_sys::errno::ENOLCK as u16);
+    pub const NOLINK: Self = Self(linux_raw_sys::errno::ENOLINK as u16);
+    pub const NOMEDIUM: Self = Self(linux_raw_sys::errno::ENOMEDIUM as u16);
+    pub const NOMEM: Self = Self(linux_raw_sys::errno::ENOMEM as u16);
+    pub const NOMSG: Self = Self(linux_raw_sys::errno::ENOMSG as u16);
+    pub const NONET: Self = Self(linux_raw_sys::errno::ENONET as u16);
+    pub const NOPKG: Self = Self(linux_raw_sys::errno::ENOPKG as u16);
+    pub const NOPROTOOPT: Self = Self(linux_raw_sys::errno::ENOPROTOOPT as u16);
+    pub const NOSPC: Self = Self(linux_raw_sys::errno::ENOSPC as u16);
+    pub const NOSR: Self = Self(linux_raw_sys::errno::ENOSR as u16);
+    pub const NOSTR: Self = Self(linux_raw_sys::errno::ENOSTR as u16);
+    pub const NOSYS: Self = Self(linux_raw_sys::errno::ENOSYS as u16);
+    pub const NOTBLK: Self = Self(linux_raw_sys::errno::ENOTBLK as u16);
+    pub const NOTCONN: Self = Self(linux_raw_sys::errno::ENOTCONN as u16);
+    pub const NOTDIR: Self = Self(linux_raw_sys::errno::ENOTDIR as u16);
+    pub const NOTEMPTY: Self = Self(linux_raw_sys::errno::ENOTEMPTY as u16);
+    pub const NOTNAM: Self = Self(linux_raw_sys::errno::ENOTNAM as u16);
+    pub const NOTRECOVERABLE: Self = Self(linux_raw_sys::errno::ENOTRECOVERABLE as u16);
+    pub const NOTSOCK: Self = Self(linux_raw_sys::errno::ENOTSOCK as u16);
     // On Linux, `ENOTSUP` has the same value as `EOPNOTSUPP`.
-    pub const NOTSUP: Self = Self(linux_raw_sys::errno::EOPNOTSUPP as c_int);
-    pub const NOTTY: Self = Self(linux_raw_sys::errno::ENOTTY as c_int);
-    pub const NOTUNIQ: Self = Self(linux_raw_sys::errno::ENOTUNIQ as c_int);
-    pub const NXIO: Self = Self(linux_raw_sys::errno::ENXIO as c_int);
-    pub const OPNOTSUPP: Self = Self(linux_raw_sys::errno::EOPNOTSUPP as c_int);
-    pub const OVERFLOW: Self = Self(linux_raw_sys::errno::EOVERFLOW as c_int);
-    pub const OWNERDEAD: Self = Self(linux_raw_sys::errno::EOWNERDEAD as c_int);
-    // These have type `u32` in the bindgen bindings; cast them to `c_int` as
-    // knowledge that the platform errno type is signed is widespread.
-    pub const PERM: Self = Self(linux_raw_sys::errno::EPERM as c_int);
-    pub const PFNOSUPPORT: Self = Self(linux_raw_sys::errno::EPFNOSUPPORT as c_int);
-    pub const PIPE: Self = Self(linux_raw_sys::errno::EPIPE as c_int);
-    pub const PROTO: Self = Self(linux_raw_sys::errno::EPROTO as c_int);
-    pub const PROTONOSUPPORT: Self = Self(linux_raw_sys::errno::EPROTONOSUPPORT as c_int);
-    pub const PROTOTYPE: Self = Self(linux_raw_sys::errno::EPROTOTYPE as c_int);
-    pub const RANGE: Self = Self(linux_raw_sys::errno::ERANGE as c_int);
-    pub const REMCHG: Self = Self(linux_raw_sys::errno::EREMCHG as c_int);
-    pub const REMOTE: Self = Self(linux_raw_sys::errno::EREMOTE as c_int);
-    pub const REMOTEIO: Self = Self(linux_raw_sys::errno::EREMOTEIO as c_int);
-    pub const RESTART: Self = Self(linux_raw_sys::errno::ERESTART as c_int);
-    pub const RFKILL: Self = Self(linux_raw_sys::errno::ERFKILL as c_int);
-    pub const ROFS: Self = Self(linux_raw_sys::errno::EROFS as c_int);
-    pub const SHUTDOWN: Self = Self(linux_raw_sys::errno::ESHUTDOWN as c_int);
-    pub const SOCKTNOSUPPORT: Self = Self(linux_raw_sys::errno::ESOCKTNOSUPPORT as c_int);
-    pub const SPIPE: Self = Self(linux_raw_sys::errno::ESPIPE as c_int);
-    pub const SRCH: Self = Self(linux_raw_sys::errno::ESRCH as c_int);
-    pub const SRMNT: Self = Self(linux_raw_sys::errno::ESRMNT as c_int);
-    pub const STALE: Self = Self(linux_raw_sys::errno::ESTALE as c_int);
-    pub const STRPIPE: Self = Self(linux_raw_sys::errno::ESTRPIPE as c_int);
-    pub const TIME: Self = Self(linux_raw_sys::errno::ETIME as c_int);
-    pub const TIMEDOUT: Self = Self(linux_raw_sys::errno::ETIMEDOUT as c_int);
-    pub const TOOBIG: Self = Self(linux_raw_sys::errno::E2BIG as c_int);
-    pub const TOOMANYREFS: Self = Self(linux_raw_sys::errno::ETOOMANYREFS as c_int);
-    pub const TXTBSY: Self = Self(linux_raw_sys::errno::ETXTBSY as c_int);
-    pub const UCLEAN: Self = Self(linux_raw_sys::errno::EUCLEAN as c_int);
-    pub const UNATCH: Self = Self(linux_raw_sys::errno::EUNATCH as c_int);
-    pub const USERS: Self = Self(linux_raw_sys::errno::EUSERS as c_int);
-    pub const WOULDBLOCK: Self = Self(linux_raw_sys::errno::EWOULDBLOCK as c_int);
-    pub const XDEV: Self = Self(linux_raw_sys::errno::EXDEV as c_int);
-    pub const XFULL: Self = Self(linux_raw_sys::errno::EXFULL as c_int);
+    pub const NOTSUP: Self = Self(linux_raw_sys::errno::EOPNOTSUPP as u16);
+    pub const NOTTY: Self = Self(linux_raw_sys::errno::ENOTTY as u16);
+    pub const NOTUNIQ: Self = Self(linux_raw_sys::errno::ENOTUNIQ as u16);
+    pub const NXIO: Self = Self(linux_raw_sys::errno::ENXIO as u16);
+    pub const OPNOTSUPP: Self = Self(linux_raw_sys::errno::EOPNOTSUPP as u16);
+    pub const OVERFLOW: Self = Self(linux_raw_sys::errno::EOVERFLOW as u16);
+    pub const OWNERDEAD: Self = Self(linux_raw_sys::errno::EOWNERDEAD as u16);
+    pub const PERM: Self = Self(linux_raw_sys::errno::EPERM as u16);
+    pub const PFNOSUPPORT: Self = Self(linux_raw_sys::errno::EPFNOSUPPORT as u16);
+    pub const PIPE: Self = Self(linux_raw_sys::errno::EPIPE as u16);
+    pub const PROTO: Self = Self(linux_raw_sys::errno::EPROTO as u16);
+    pub const PROTONOSUPPORT: Self = Self(linux_raw_sys::errno::EPROTONOSUPPORT as u16);
+    pub const PROTOTYPE: Self = Self(linux_raw_sys::errno::EPROTOTYPE as u16);
+    pub const RANGE: Self = Self(linux_raw_sys::errno::ERANGE as u16);
+    pub const REMCHG: Self = Self(linux_raw_sys::errno::EREMCHG as u16);
+    pub const REMOTE: Self = Self(linux_raw_sys::errno::EREMOTE as u16);
+    pub const REMOTEIO: Self = Self(linux_raw_sys::errno::EREMOTEIO as u16);
+    pub const RESTART: Self = Self(linux_raw_sys::errno::ERESTART as u16);
+    pub const RFKILL: Self = Self(linux_raw_sys::errno::ERFKILL as u16);
+    pub const ROFS: Self = Self(linux_raw_sys::errno::EROFS as u16);
+    pub const SHUTDOWN: Self = Self(linux_raw_sys::errno::ESHUTDOWN as u16);
+    pub const SOCKTNOSUPPORT: Self = Self(linux_raw_sys::errno::ESOCKTNOSUPPORT as u16);
+    pub const SPIPE: Self = Self(linux_raw_sys::errno::ESPIPE as u16);
+    pub const SRCH: Self = Self(linux_raw_sys::errno::ESRCH as u16);
+    pub const SRMNT: Self = Self(linux_raw_sys::errno::ESRMNT as u16);
+    pub const STALE: Self = Self(linux_raw_sys::errno::ESTALE as u16);
+    pub const STRPIPE: Self = Self(linux_raw_sys::errno::ESTRPIPE as u16);
+    pub const TIME: Self = Self(linux_raw_sys::errno::ETIME as u16);
+    pub const TIMEDOUT: Self = Self(linux_raw_sys::errno::ETIMEDOUT as u16);
+    pub const TOOBIG: Self = Self(linux_raw_sys::errno::E2BIG as u16);
+    pub const TOOMANYREFS: Self = Self(linux_raw_sys::errno::ETOOMANYREFS as u16);
+    pub const TXTBSY: Self = Self(linux_raw_sys::errno::ETXTBSY as u16);
+    pub const UCLEAN: Self = Self(linux_raw_sys::errno::EUCLEAN as u16);
+    pub const UNATCH: Self = Self(linux_raw_sys::errno::EUNATCH as u16);
+    pub const USERS: Self = Self(linux_raw_sys::errno::EUSERS as u16);
+    pub const WOULDBLOCK: Self = Self(linux_raw_sys::errno::EWOULDBLOCK as u16);
+    pub const XDEV: Self = Self(linux_raw_sys::errno::EXDEV as u16);
+    pub const XFULL: Self = Self(linux_raw_sys::errno::EXFULL as u16);
 }
 
-impl Errno {
+impl Error {
     #[inline]
-    pub fn io_error(&self) -> io::Error {
-        io::Error::from_raw_os_error(self.0)
+    pub fn kind(self) -> std::io::ErrorKind {
+        std::io::Error::from(self).kind()
     }
 
+    #[cfg(libc)]
+    pub(crate) fn last_os_error() -> Self {
+        Self(errno().0)
+    }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        std::io::Error::from(*self).fmt(fmt)
+    }
+}
+
+impl fmt::Debug for Error {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        std::io::Error::from(*self).fmt(fmt)
+    }
+}
+
+impl error::Error for Error {}
+
+impl From<Error> for std::io::Error {
     #[inline]
-    pub fn from_io_error(err: &io::Error) -> Option<Self> {
-        err.raw_os_error().map(Self)
+    fn from(err: Error) -> Self {
+        Self::from_raw_os_error(err.0 as _)
     }
 }

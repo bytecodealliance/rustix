@@ -1,6 +1,6 @@
-use crate::{fs::CopyfileFlags, negative_err};
+use crate::{fs::CopyfileFlags, io, negative_err};
 use io_lifetimes::{AsFd, BorrowedFd};
-use std::{io, mem::MaybeUninit};
+use std::mem::MaybeUninit;
 use unsafe_io::os::posish::AsRawFd;
 
 /// `copyfile_state_t`

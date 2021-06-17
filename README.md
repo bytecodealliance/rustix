@@ -14,8 +14,8 @@
   </p>
 </div>
 
-`posish` provides memory-safe and I/O-safe wrappers to POSIX-ish `libc` APIs
-and syscalls.
+`posish` provides efficient memory-safe and I/O-safe wrappers to POSIX-ish
+`libc` APIs and syscalls.
 
 `posish` is relatively low-level and does not support Windows; for higher-level
 and portable APIs to this functionality, see the [`system-interface`],
@@ -26,12 +26,23 @@ and portable APIs to this functionality, see the [`system-interface`],
 On Linux, `posish` can optionally be configured to target the raw
 Linux syscall ABI directly instead of calling through `libc`. To enable this,
 add `--cfg linux_raw` to the `RUSTFLAGS` environment variable, or otherwise
-pass `--cfg linux_raw` to rustc.
+pass `--cfg linux_raw` to rustc. This mode is new, and so far only tested on
+x86-64, but a fair amount of code has been successfully adapted to use it,
+and ports to other architectures should be straightforward.
+
+This feature has two fun properties:
+ - By being implemented in Rust, avoiding `libc`, `errno`, and
+   `std::io::Error`, most functions compile down to very simple code and can
+   even be fully inlined into user code.
+ - Memory buffers are kept in Rust slices, and file descriptors are kept in
+   [`io-lifetimes`] types, so most functions preserve memory safety and
+   [I/O safety] all the way down to the syscall.
 
 [`std`]: https://doc.rust-lang.org/std/
 [`getrandom`]: https://crates.io/crates/getrandom
 [`errno`]: https://crates.io/crates/errno
 [`system-interface`]: https://crates.io/crates/system-interface
 [`fs-set-times`]: https://crates.io/crates/fs-set-times
+[`io-lifetimes`]: https://crates.io/crates/io-lifetimes
 [`cap-std`]: https://crates.io/crates/cap-std
 [I/O safety]: https://github.com/sunfishcode/io-lifetimes

@@ -1,11 +1,11 @@
 //! System call arguments and return values are all `usize`. This module
 //! provides functions for converting into and out of `usize` values.
 
+use crate::io;
 use io_lifetimes::{BorrowedFd, OwnedFd};
 use linux_raw_sys::general::{__kernel_clockid_t, __kernel_loff_t, socklen_t, umode_t};
 use std::{
     ffi::CStr,
-    io,
     mem::{transmute, MaybeUninit},
     os::raw::{c_int, c_uint, c_void},
     ptr::null,
@@ -56,12 +56,15 @@ pub(super) fn opt_c_str(t: Option<&CStr>) -> usize {
 
 #[inline]
 pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> usize {
-    fd.as_raw_fd() as usize
+    // File descriptors are never negative on Linux, so use zero-extension
+    // rather than sign-extension because it's a smaller instruction.
+    fd.as_raw_fd() as c_uint as usize
 }
 
 #[inline]
 pub(super) fn owned_fd(fd: OwnedFd) -> usize {
-    fd.into_raw_fd() as usize
+    // As above, use zero-extension rather than sign-extension.
+    fd.into_raw_fd() as c_uint as usize
 }
 
 #[inline]
@@ -137,7 +140,7 @@ pub(super) fn out<T: Sized>(t: &mut MaybeUninit<T>) -> usize {
 #[inline]
 fn check_error(raw: usize) -> io::Result<()> {
     if (-4095..0).contains(&(raw as isize)) {
-        Err(io::Error::from_raw_os_error(-(raw as i32)))
+        Err(io::Error(-(raw as i16) as u16))
     } else {
         Ok(())
     }
