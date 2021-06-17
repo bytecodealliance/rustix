@@ -110,7 +110,7 @@ fn _recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usi
     let nrecv = unsafe {
         negone_err(libc_recv(
             fd.as_raw_fd() as libc::c_int,
-            buf.as_mut_ptr() as *mut _,
+            buf.as_mut_ptr().cast::<_>(),
             buf.len(),
             flags.bits(),
         ))?
@@ -136,7 +136,7 @@ fn _send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Result<usize> 
     let nwritten = unsafe {
         negone_err(libc_send(
             fd.as_raw_fd() as libc::c_int,
-            buf.as_ptr() as *mut _,
+            buf.as_ptr().cast::<_>(),
             buf.len(),
             flags.bits(),
         ))?

@@ -128,3 +128,17 @@ macro_rules! is_impls {
 
 #[cfg(libc)]
 is_impls! { i32 i64 isize }
+
+/// Convert a `&T` into a `*const T` without using an `as`.
+#[inline]
+#[allow(dead_code)]
+const fn as_ptr<T>(t: &T) -> *const T {
+    t
+}
+
+/// Convert a `&mut T` into a `*mut T` without using an `as`.
+#[inline]
+#[allow(dead_code)]
+fn as_mut_ptr<T>(t: &mut T) -> *mut T {
+    t
+}

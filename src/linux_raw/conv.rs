@@ -1,7 +1,7 @@
 //! System call arguments and return values are all `usize`. This module
 //! provides functions for converting into and out of `usize` values.
 
-use crate::io;
+use crate::{as_mut_ptr, as_ptr, io};
 use io_lifetimes::{BorrowedFd, OwnedFd};
 use linux_raw_sys::general::{__kernel_clockid_t, __kernel_loff_t, socklen_t, umode_t};
 use std::{
@@ -79,12 +79,12 @@ pub(super) fn slice_as_mut_ptr<T: Sized>(v: &mut [T]) -> usize {
 
 #[inline]
 pub(super) fn by_ref<T: Sized>(t: &T) -> usize {
-    t as *const T as usize
+    as_ptr(t) as usize
 }
 
 #[inline]
 pub(super) fn by_mut<T: Sized>(t: &mut T) -> usize {
-    t as *mut T as usize
+    as_mut_ptr(t) as usize
 }
 
 #[inline]

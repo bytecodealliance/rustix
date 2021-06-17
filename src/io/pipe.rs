@@ -52,7 +52,7 @@ pub fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
 pub fn _pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
-        zero_ok(libc::pipe(result.as_mut_ptr() as *mut i32))?;
+        zero_ok(libc::pipe(result.as_mut_ptr().cast::<i32>()))?;
         let [p0, p1] = result.assume_init();
         Ok((p0, p1))
     }
@@ -72,7 +72,7 @@ pub fn pipe2(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
 pub fn _pipe2(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
-        zero_ok(libc::pipe2(result.as_mut_ptr() as *mut i32, flags.bits()))?;
+        zero_ok(libc::pipe2(result.as_mut_ptr().cast::<i32>(), flags.bits()))?;
         let [p0, p1] = result.assume_init();
         Ok((p0, p1))
     }

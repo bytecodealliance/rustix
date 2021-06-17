@@ -28,19 +28,20 @@ use unsafe_io::{
     os::posish::{AsRawFd, RawFd},
     OwnsRaw,
 };
-#[cfg(libc)]
-use {
-    errno::{errno, set_errno, Errno},
-    std::convert::TryInto,
-    unsafe_io::os::posish::IntoRawFd,
-};
 #[cfg(linux_raw)]
 use {
+    crate::as_ptr,
     io_lifetimes::AsFd,
     linux_raw_sys::general::linux_dirent64,
     std::ffi::CString,
     std::mem::size_of,
     std::os::raw::{c_char, c_ulong, c_ushort},
+};
+#[cfg(libc)]
+use {
+    errno::{errno, set_errno, Errno},
+    std::convert::TryInto,
+    unsafe_io::os::posish::IntoRawFd,
 };
 
 /// `DIR*`
@@ -188,12 +189,12 @@ impl Dir {
             d_reclen: 0,
             d_name: Default::default(),
         };
-        let base = &z as *const _ as usize;
-        let offsetof_d_reclen = (&z.d_reclen as *const _ as usize) - base;
-        let offsetof_d_name = (&z.d_name as *const _ as usize) - base;
-        let offsetof_d_off = (&z.d_off as *const _ as usize) - base;
-        let offsetof_d_ino = (&z.d_ino as *const _ as usize) - base;
-        let offsetof_d_type = (&z.d_type as *const _ as usize) - base;
+        let base = as_ptr(&z) as usize;
+        let offsetof_d_reclen = (as_ptr(&z.d_reclen) as usize) - base;
+        let offsetof_d_name = (as_ptr(&z.d_name) as usize) - base;
+        let offsetof_d_off = (as_ptr(&z.d_off) as usize) - base;
+        let offsetof_d_ino = (as_ptr(&z.d_ino) as usize) - base;
+        let offsetof_d_type = (as_ptr(&z.d_type) as usize) - base;
 
         // Test if we need more entries, and if so, read more.
         if self.buf.len() - self.pos < size_of::<linux_dirent64>() {
@@ -209,16 +210,16 @@ impl Dir {
         let name_start = pos + offsetof_d_name;
         unsafe {
             let reclen =
-                ptr::read_unaligned(dirent.add(offsetof_d_reclen) as *const c_ushort) as usize;
+                ptr::read_unaligned(dirent.add(offsetof_d_reclen).cast::<c_ushort>()) as usize;
             assert!(self.buf.len() - pos >= reclen);
             self.pos += reclen;
 
-            let name = CStr::from_ptr(self.buf[name_start..].as_ptr() as *const c_char);
+            let name = CStr::from_ptr(self.buf[name_start..].as_ptr().cast::<c_char>());
             let name = name.to_owned();
             assert!(name.as_bytes().len() <= self.buf.len() - name_start);
 
-            let d_ino = ptr::read_unaligned(dirent.add(offsetof_d_ino) as *const c_ulong) as u64;
-            let d_off = ptr::read_unaligned(dirent.add(offsetof_d_off) as *const c_ulong) as u64;
+            let d_ino = ptr::read_unaligned(dirent.add(offsetof_d_ino).cast::<c_ulong>()) as u64;
+            let d_off = ptr::read_unaligned(dirent.add(offsetof_d_off).cast::<c_ulong>()) as u64;
             let d_type = ptr::read_unaligned(dirent.add(offsetof_d_type));
             Some(Ok(Entry {
                 d_ino,

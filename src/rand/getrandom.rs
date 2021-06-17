@@ -35,7 +35,7 @@ pub fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
 pub fn _getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
     let nread = unsafe {
         negone_err(libc::getrandom(
-            buf.as_mut_ptr() as *mut _,
+            buf.as_mut_ptr().cast::<_>(),
             buf.len(),
             flags.bits(),
         ))?

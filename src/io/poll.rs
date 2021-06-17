@@ -170,7 +170,7 @@ impl<'fd> PollFdVec<'fd> {
             .map_err(|_convert_err| io::Error::INVAL)?;
 
         let nready =
-            negone_err(unsafe { libc::poll(self.fds.as_mut_ptr() as *mut _, nfds, timeout) })?;
+            negone_err(unsafe { libc::poll(self.fds.as_mut_ptr().cast::<_>(), nfds, timeout) })?;
 
         Ok(nready as usize)
     }

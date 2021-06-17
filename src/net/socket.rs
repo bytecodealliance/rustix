@@ -1,13 +1,16 @@
 use crate::{
-    io,
+    as_ptr, io,
     net::{SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6},
 };
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
-use std::mem::{size_of, MaybeUninit};
 use std::os::raw::c_int;
 #[cfg(linux_raw)]
 use std::os::raw::c_uint;
+use std::{
+    mem::{size_of, MaybeUninit},
+    ptr,
+};
 #[cfg(libc)]
 use {
     crate::{negone_err, zero_ok},
@@ -338,7 +341,7 @@ fn _bind_un(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
     unsafe {
         zero_ok(libc::bind(
             sockfd.as_raw_fd(),
-            addr as *const _ as *const _,
+            as_ptr(addr).cast::<_>(),
             size_of::<SocketAddrUnix>() as socklen_t,
         ))
     }
@@ -361,7 +364,7 @@ fn _bind_in(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     unsafe {
         zero_ok(libc::bind(
             sockfd.as_raw_fd(),
-            addr as *const _ as *const _,
+            as_ptr(addr).cast::<_>(),
             size_of::<SocketAddrV4>() as socklen_t,
         ))
     }
@@ -384,7 +387,7 @@ fn _bind_in6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     unsafe {
         zero_ok(libc::bind(
             sockfd.as_raw_fd(),
-            addr as *const _ as *const _,
+            as_ptr(addr).cast::<_>(),
             size_of::<SocketAddrV6>() as socklen_t,
         ))
     }
@@ -407,7 +410,7 @@ fn _connect_un(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> 
     unsafe {
         zero_ok(libc::connect(
             sockfd.as_raw_fd(),
-            addr as *const _ as *const _,
+            as_ptr(addr).cast::<_>(),
             size_of::<SocketAddrUnix>() as socklen_t,
         ))
     }
@@ -430,7 +433,7 @@ fn _connect_in(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     unsafe {
         zero_ok(libc::connect(
             sockfd.as_raw_fd(),
-            addr as *const _ as *const _,
+            as_ptr(addr).cast::<_>(),
             size_of::<SocketAddrV4>() as socklen_t,
         ))
     }
@@ -453,7 +456,7 @@ fn _connect_in6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     unsafe {
         zero_ok(libc::connect(
             sockfd.as_raw_fd(),
-            addr as *const _ as *const _,
+            as_ptr(addr).cast::<_>(),
             size_of::<SocketAddrV6>() as socklen_t,
         ))
     }
@@ -500,7 +503,7 @@ fn _accept(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, S
         let mut len = size_of::<sockaddr_storage>() as socklen_t;
         let raw_fd = negone_err(libc::accept4(
             sockfd.as_raw_fd(),
-            storage.as_mut_ptr() as *mut _,
+            storage.as_mut_ptr().cast::<_>(),
             &mut len,
             flags.bits(),
         ))?;
@@ -509,15 +512,15 @@ fn _accept(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, S
         let addr = match i32::from(storage.ss_family) {
             libc::AF_INET => {
                 assert!(len as usize >= size_of::<SocketAddrV4>());
-                SocketAddr::V4((*(&storage as *const _ as *const SocketAddrV4)).clone())
+                SocketAddr::V4(ptr::read(as_ptr(&storage).cast::<_>()))
             }
             libc::AF_INET6 => {
                 assert!(len as usize >= size_of::<SocketAddrV6>());
-                SocketAddr::V6((*(&storage as *const _ as *const SocketAddrV6)).clone())
+                SocketAddr::V6(ptr::read(as_ptr(&storage).cast::<_>()))
             }
             libc::AF_LOCAL => {
                 assert!(len as usize >= size_of::<SocketAddrUnix>());
-                SocketAddr::Unix((*(&storage as *const _ as *const SocketAddrUnix)).clone())
+                SocketAddr::Unix(ptr::read(as_ptr(&storage).cast::<_>()))
             }
             _ => panic!(),
         };
@@ -534,7 +537,7 @@ fn _accept(sockfd: BorrowedFd<'_>, _flags: AcceptFlags) -> io::Result<(OwnedFd, 
         let mut len = size_of::<sockaddr_storage>() as socklen_t;
         let raw_fd = negone_err(libc::accept(
             sockfd.as_raw_fd(),
-            storage.as_mut_ptr() as *mut _,
+            storage.as_mut_ptr().cast::<_>(),
             &mut len,
         ))?;
         let owned_fd = OwnedFd::from_raw_fd(raw_fd);
@@ -542,15 +545,15 @@ fn _accept(sockfd: BorrowedFd<'_>, _flags: AcceptFlags) -> io::Result<(OwnedFd, 
         let addr = match i32::from(storage.ss_family) {
             libc::AF_INET => {
                 assert!(len as usize >= size_of::<SocketAddrV4>());
-                SocketAddr::V4((*(&storage as *const _ as *const SocketAddrV4)).clone())
+                SocketAddr::V4(ptr::read(as_ptr(&storage).cast::<_>()))
             }
             libc::AF_INET6 => {
                 assert!(len as usize >= size_of::<SocketAddrV6>());
-                SocketAddr::V6((*(&storage as *const _ as *const SocketAddrV6)).clone())
+                SocketAddr::V6(ptr::read(as_ptr(&storage).cast::<_>()))
             }
             libc::AF_LOCAL => {
                 assert!(len as usize >= size_of::<SocketAddrUnix>());
-                SocketAddr::Unix((*(&storage as *const _ as *const SocketAddrUnix)).clone())
+                SocketAddr::Unix(ptr::read(as_ptr(&storage).cast::<_>()))
             }
             _ => panic!(),
         };
@@ -566,15 +569,15 @@ fn _accept(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, S
         match u32::from(storage.ss_family) {
             linux_raw_sys::general::AF_INET => {
                 assert!(len as usize >= size_of::<SocketAddrV4>());
-                SocketAddr::V4((*(&storage as *const _ as *const SocketAddrV4)).clone())
+                SocketAddr::V4(ptr::read(as_ptr(&storage).cast::<_>()))
             }
             linux_raw_sys::general::AF_INET6 => {
                 assert!(len as usize >= size_of::<SocketAddrV6>());
-                SocketAddr::V6((*(&storage as *const _ as *const SocketAddrV6)).clone())
+                SocketAddr::V6(ptr::read(as_ptr(&storage).cast::<_>()))
             }
             linux_raw_sys::general::AF_LOCAL => {
                 assert!(len as usize >= size_of::<SocketAddrUnix>());
-                SocketAddr::Unix((*(&storage as *const _ as *const SocketAddrUnix)).clone())
+                SocketAddr::Unix(ptr::read(as_ptr(&storage).cast::<_>()))
             }
             _ => panic!(),
         }
@@ -633,8 +636,10 @@ fn _socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
     unsafe {
         let mut buffer = MaybeUninit::<SocketType>::uninit();
         let mut out_len = size_of::<SocketType>() as linux_raw_sys::general::socklen_t;
-        let slice =
-            std::slice::from_raw_parts_mut(buffer.as_mut_ptr() as *mut u8, size_of::<SocketType>());
+        let slice = std::slice::from_raw_parts_mut(
+            buffer.as_mut_ptr().cast::<u8>(),
+            size_of::<SocketType>(),
+        );
         crate::linux_raw::getsockopt(
             fd,
             linux_raw_sys::general::SOL_SOCKET as i32,

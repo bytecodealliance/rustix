@@ -87,7 +87,7 @@ fn _read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     let nread = unsafe {
         negone_err(libc_read(
             fd.as_raw_fd() as libc::c_int,
-            buf.as_mut_ptr() as *mut _,
+            buf.as_mut_ptr().cast::<_>(),
             buf.len(),
         ))?
     };
@@ -112,7 +112,7 @@ fn _write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     let nwritten = unsafe {
         negone_err(libc_write(
             fd.as_raw_fd() as libc::c_int,
-            buf.as_ptr() as *mut _,
+            buf.as_ptr().cast::<_>(),
             buf.len(),
         ))?
     };
@@ -140,7 +140,7 @@ fn _pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Result<usize> 
     let nread = unsafe {
         negone_err(libc_pread(
             fd.as_raw_fd() as libc::c_int,
-            buf.as_ptr() as *mut _,
+            buf.as_mut_ptr().cast::<_>(),
             buf.len(),
             offset,
         ))?
@@ -169,7 +169,7 @@ fn _pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<usize> {
     let nwritten = unsafe {
         negone_err(libc_pwrite(
             fd.as_raw_fd() as libc::c_int,
-            buf.as_ptr() as *mut _,
+            buf.as_ptr().cast::<_>(),
             buf.len(),
             offset,
         ))?
