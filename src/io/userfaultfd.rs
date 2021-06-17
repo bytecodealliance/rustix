@@ -29,6 +29,8 @@ bitflags! {
     }
 }
 
+/// `userfaultfd(flags)`
+///
 /// # Safety
 ///
 /// The call itself is safe, but the returned file descriptor lets users
