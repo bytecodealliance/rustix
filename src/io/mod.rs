@@ -3,6 +3,7 @@
 mod error;
 mod fd;
 mod ioctl;
+mod pipe;
 mod poll;
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 mod rdadvise;
@@ -26,6 +27,10 @@ pub use fd::ttyname;
 pub use ioctl::ioctl_fioclex;
 #[cfg(not(target_os = "wasi"))]
 pub use ioctl::{ioctl_tcgets, ioctl_tiocgwinsz};
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+pub use pipe::pipe;
+#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
+pub use pipe::{pipe2, PipeFlags};
 pub use poll::{PollFd, PollFdVec, PollFlags};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use rdadvise::rdadvise;

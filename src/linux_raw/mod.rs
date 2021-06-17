@@ -1071,15 +1071,25 @@ pub(crate) fn getdents(fd: BorrowedFd<'_>, dirent: &mut [u8]) -> io::Result<usiz
 }
 
 #[inline]
-pub(crate) fn pipe2(filedes: &mut [OwnedFd; 2], flags: c_int) -> io::Result<()> {
-    unsafe { ret(syscall2(__NR_pipe2, slice_addr(filedes), c_int(flags))) }
+pub(crate) fn pipe2(flags: c_uint) -> io::Result<(OwnedFd, OwnedFd)> {
+    #[cfg(any(target_arch = "mips", target_arch = "mips64"))]
+    {
+        todo!("On MIPS pipe returns multiple values")
+    }
+    #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
+    unsafe {
+        let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
+        ret(syscall2(__NR_pipe2, out(&mut result), c_uint(flags)))?;
+        let [p0, p1] = result.assume_init();
+        Ok((p0, p1))
+    }
 }
 
 #[inline]
-pub(crate) fn pipe(filedes: &mut [OwnedFd; 2]) -> io::Result<()> {
+pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     #[cfg(target_arch = "aarch64")]
     {
-        pipe2(filedes, 0)
+        pipe2(fd, 0)
     }
     #[cfg(any(target_arch = "mips", target_arch = "mips64"))]
     {
@@ -1087,7 +1097,10 @@ pub(crate) fn pipe(filedes: &mut [OwnedFd; 2]) -> io::Result<()> {
     }
     #[cfg(not(any(target_arch = "aarch64", target_arch = "mips", target_arch = "mips64")))]
     unsafe {
-        ret(syscall1(__NR_pipe, slice_addr(filedes)))
+        let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
+        ret(syscall1(__NR_pipe, out(&mut result)))?;
+        let [p0, p1] = result.assume_init();
+        Ok((p0, p1))
     }
 }
 
