@@ -2,11 +2,22 @@
 
 #[cfg(not(target_os = "wasi"))]
 use crate::fs::Mode;
+use crate::fs::Stat;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
 use crate::fs::StatFs;
 use crate::{io, time::Timespec};
 use io_lifetimes::{AsFd, BorrowedFd};
+#[cfg(all(
+    libc,
+    not(any(
+        target_os = "android",
+        target_os = "linux",
+        target_os = "emscripten",
+        target_os = "l4re",
+    ))
+))]
+use libc::fstat as libc_fstat;
 #[cfg(all(
     libc,
     not(any(
@@ -65,17 +76,12 @@ use libc::off_t as libc_off_t;
         target_os = "l4re"
     )
 ))]
-use libc::{fstatfs64 as libc_fstatfs, lseek64 as libc_lseek};
-#[cfg(all(
-    libc,
-    not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi"))
-))]
-// not implemented in libc for netbsd yet
-use std::mem::MaybeUninit;
+use libc::{fstat64 as libc_fstat, fstatfs64 as libc_fstatfs, lseek64 as libc_lseek};
 use std::{convert::TryInto, io::SeekFrom};
 #[cfg(libc)]
 use {
     crate::{negone_err, zero_ok},
+    std::mem::MaybeUninit,
     unsafe_io::os::posish::AsRawFd,
 };
 
@@ -172,6 +178,27 @@ fn _fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
 #[inline]
 fn _fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
     crate::linux_raw::fchmod(fd, mode.bits() as u16)
+}
+
+/// `fstat(fd)`
+#[inline]
+pub fn fstat<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<Stat> {
+    let fd = fd.as_fd();
+    _fstat(fd)
+}
+
+#[cfg(libc)]
+fn _fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
+    let mut stat = MaybeUninit::<Stat>::uninit();
+    unsafe {
+        zero_ok(libc_fstat(fd.as_raw_fd() as libc::c_int, stat.as_mut_ptr()))?;
+        Ok(stat.assume_init())
+    }
+}
+
+#[cfg(linux_raw)]
+fn _fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
+    crate::linux_raw::fstat(fd)
 }
 
 /// `fstatfs(fd)`
