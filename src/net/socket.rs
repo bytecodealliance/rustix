@@ -1,7 +1,9 @@
 use crate::{
     io,
-    net::{SockaddrIn, SockaddrIn6, SockaddrUn},
+    net::{SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6},
 };
+#[cfg(any(linux_raw, all(libc, not(any(target_os = "ios", target_os = "macos")))))]
+use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 use std::mem::{size_of, MaybeUninit};
 use std::os::raw::c_int;
@@ -10,11 +12,11 @@ use std::os::raw::c_uint;
 #[cfg(libc)]
 use {
     crate::{negone_err, zero_ok},
-    libc::socklen_t,
+    libc::{sockaddr_storage, socklen_t},
     unsafe_io::os::posish::{AsRawFd, FromRawFd},
 };
 
-/// `SOCK_*` constants.
+/// `SOCK_*` constants for `socket`.
 #[cfg(libc)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(u32)]
@@ -36,7 +38,7 @@ pub enum SocketType {
     Rdm = libc::SOCK_RDM as u32,
 }
 
-/// `SOCK_*` constants.
+/// `SOCK_*` constants for `socket`.
 #[cfg(linux_raw)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(u32)]
@@ -253,7 +255,6 @@ pub enum Protocol {
 #[cfg(libc)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(i32)]
-#[non_exhaustive]
 pub enum Shutdown {
     /// `SHUT_RD`
     Read = libc::SHUT_RD,
@@ -267,7 +268,6 @@ pub enum Shutdown {
 #[cfg(linux_raw)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(u32)]
-#[non_exhaustive]
 pub enum Shutdown {
     /// `SHUT_RD`
     Read = linux_raw_sys::general::SHUT_RD,
@@ -275,6 +275,28 @@ pub enum Shutdown {
     Write = linux_raw_sys::general::SHUT_WR,
     /// `SHUT_RDWR`
     ReadWrite = linux_raw_sys::general::SHUT_RDWR,
+}
+
+#[cfg(all(libc, not(any(target_os = "ios", target_os = "macos"))))]
+bitflags! {
+    /// `SOCK_*` constants for `accept`.
+    pub struct AcceptFlags: c_int {
+        /// `SOCK_NONBLOCK`
+        const NONBLOCK = libc::SOCK_NONBLOCK;
+        /// `SOCK_CLOEXEC`
+        const CLOEXEC = libc::SOCK_CLOEXEC;
+    }
+}
+
+#[cfg(linux_raw)]
+bitflags! {
+    /// `SOCK_*` constants for `accept`.
+    pub struct AcceptFlags: c_uint {
+        /// `SOCK_NONBLOCK`
+        const NONBLOCK = linux_raw_sys::general::O_NONBLOCK;
+        /// `SOCK_CLOEXEC`
+        const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
+    }
 }
 
 /// `socket(domain, type_, protocol)`
@@ -302,139 +324,139 @@ fn _socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_un))`
 #[inline]
-pub fn bind_un<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SockaddrUn) -> io::Result<()> {
+pub fn bind_un<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     _bind_un(sockfd, addr)
 }
 
 #[cfg(libc)]
-fn _bind_un(sockfd: BorrowedFd<'_>, addr: &SockaddrUn) -> io::Result<()> {
+fn _bind_un(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
     unsafe {
         zero_ok(libc::bind(
             sockfd.as_raw_fd(),
             addr as *const _ as *const _,
-            size_of::<SockaddrUn>() as socklen_t,
+            size_of::<SocketAddrUnix>() as socklen_t,
         ))
     }
 }
 
 #[cfg(linux_raw)]
-fn _bind_un(sockfd: BorrowedFd<'_>, addr: &SockaddrUn) -> io::Result<()> {
+fn _bind_un(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
     crate::linux_raw::bind_un(sockfd, addr)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in))`
 #[inline]
-pub fn bind_in<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SockaddrIn) -> io::Result<()> {
+pub fn bind_in<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     _bind_in(sockfd, addr)
 }
 
 #[cfg(libc)]
-fn _bind_in(sockfd: BorrowedFd<'_>, addr: &SockaddrIn) -> io::Result<()> {
+fn _bind_in(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     unsafe {
         zero_ok(libc::bind(
             sockfd.as_raw_fd(),
             addr as *const _ as *const _,
-            size_of::<SockaddrIn>() as socklen_t,
+            size_of::<SocketAddrV4>() as socklen_t,
         ))
     }
 }
 
 #[cfg(linux_raw)]
-fn _bind_in(sockfd: BorrowedFd<'_>, addr: &SockaddrIn) -> io::Result<()> {
+fn _bind_in(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     crate::linux_raw::bind_in(sockfd, addr)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in6))`
 #[inline]
-pub fn bind_in6<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SockaddrIn6) -> io::Result<()> {
+pub fn bind_in6<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     _bind_in6(sockfd, addr)
 }
 
 #[cfg(libc)]
-fn _bind_in6(sockfd: BorrowedFd<'_>, addr: &SockaddrIn6) -> io::Result<()> {
+fn _bind_in6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     unsafe {
         zero_ok(libc::bind(
             sockfd.as_raw_fd(),
             addr as *const _ as *const _,
-            size_of::<SockaddrIn6>() as socklen_t,
+            size_of::<SocketAddrV6>() as socklen_t,
         ))
     }
 }
 
 #[cfg(linux_raw)]
-fn _bind_in6(sockfd: BorrowedFd<'_>, addr: &SockaddrIn6) -> io::Result<()> {
+fn _bind_in6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     crate::linux_raw::bind_in6(sockfd, addr)
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_un))`
 #[inline]
-pub fn connect_un<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SockaddrUn) -> io::Result<()> {
+pub fn connect_un<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     _connect_un(sockfd, addr)
 }
 
 #[cfg(libc)]
-fn _connect_un(sockfd: BorrowedFd<'_>, addr: &SockaddrUn) -> io::Result<()> {
+fn _connect_un(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
     unsafe {
         zero_ok(libc::connect(
             sockfd.as_raw_fd(),
             addr as *const _ as *const _,
-            size_of::<SockaddrUn>() as socklen_t,
+            size_of::<SocketAddrUnix>() as socklen_t,
         ))
     }
 }
 
 #[cfg(linux_raw)]
-fn _connect_un(sockfd: BorrowedFd<'_>, addr: &SockaddrUn) -> io::Result<()> {
+fn _connect_un(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
     crate::linux_raw::connect_un(sockfd, addr)
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_in))`
 #[inline]
-pub fn connect_in<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SockaddrIn) -> io::Result<()> {
+pub fn connect_in<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     _connect_in(sockfd, addr)
 }
 
 #[cfg(libc)]
-fn _connect_in(sockfd: BorrowedFd<'_>, addr: &SockaddrIn) -> io::Result<()> {
+fn _connect_in(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     unsafe {
         zero_ok(libc::connect(
             sockfd.as_raw_fd(),
             addr as *const _ as *const _,
-            size_of::<SockaddrIn>() as socklen_t,
+            size_of::<SocketAddrV4>() as socklen_t,
         ))
     }
 }
 
 #[cfg(linux_raw)]
-fn _connect_in(sockfd: BorrowedFd<'_>, addr: &SockaddrIn) -> io::Result<()> {
+fn _connect_in(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     crate::linux_raw::connect_in(sockfd, addr)
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_in6))`
 #[inline]
-pub fn connect_in6<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SockaddrIn6) -> io::Result<()> {
+pub fn connect_in6<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     _connect_in6(sockfd, addr)
 }
 
 #[cfg(libc)]
-fn _connect_in6(sockfd: BorrowedFd<'_>, addr: &SockaddrIn6) -> io::Result<()> {
+fn _connect_in6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     unsafe {
         zero_ok(libc::connect(
             sockfd.as_raw_fd(),
             addr as *const _ as *const _,
-            size_of::<SockaddrIn6>() as socklen_t,
+            size_of::<SocketAddrV6>() as socklen_t,
         ))
     }
 }
 
 #[cfg(linux_raw)]
-fn _connect_in6(sockfd: BorrowedFd<'_>, addr: &SockaddrIn6) -> io::Result<()> {
+fn _connect_in6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     crate::linux_raw::connect_in6(sockfd, addr)
 }
 
@@ -454,6 +476,112 @@ fn _listen(sockfd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
 #[inline]
 fn _listen(sockfd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
     crate::linux_raw::listen(sockfd, backlog)
+}
+
+/// `accept(fd, addr, len)`
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[inline]
+pub fn accept<'f, Fd: AsFd<'f>>(sockfd: Fd) -> io::Result<(OwnedFd, SocketAddr)> {
+    let sockfd = sockfd.as_fd();
+    _accept(sockfd)
+}
+
+#[cfg(all(libc, any(target_os = "ios", target_os = "macos")))]
+fn _accept(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddr)> {
+    unsafe {
+        let mut storage = MaybeUninit::<sockaddr_storage>::uninit();
+        let mut len = size_of::<sockaddr_storage>() as socklen_t;
+        let raw_fd = negone_err(libc::accept(
+            sockfd.as_raw_fd(),
+            storage.as_mut_ptr() as *mut _,
+            &mut len,
+        ))?;
+        let owned_fd = OwnedFd::from_raw_fd(raw_fd);
+        let storage = storage.assume_init();
+        let addr = match i32::from(storage.ss_family) {
+            libc::AF_INET => {
+                assert!(len as usize >= size_of::<SocketAddrV4>());
+                SocketAddr::V4((*(&storage as *const _ as *const SocketAddrV4)).clone())
+            }
+            libc::AF_INET6 => {
+                assert!(len as usize >= size_of::<SocketAddrV6>());
+                SocketAddr::V6((*(&storage as *const _ as *const SocketAddrV6)).clone())
+            }
+            libc::AF_LOCAL => {
+                assert!(len as usize >= size_of::<SocketAddrUnix>());
+                SocketAddr::Unix((*(&storage as *const _ as *const SocketAddrUnix)).clone())
+            }
+            _ => panic!(),
+        };
+        Ok((owned_fd, addr))
+    }
+}
+
+/// `accept4(fd, addr, len, flags)`
+#[cfg(not(any(target_os = "ios", target_os = "macos")))]
+#[inline]
+pub fn accept4<'f, Fd: AsFd<'f>>(
+    sockfd: Fd,
+    flags: AcceptFlags,
+) -> io::Result<(OwnedFd, SocketAddr)> {
+    let sockfd = sockfd.as_fd();
+    _accept4(sockfd, flags)
+}
+
+#[cfg(all(libc, not(any(target_os = "ios", target_os = "macos"))))]
+fn _accept4(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, SocketAddr)> {
+    unsafe {
+        let mut storage = MaybeUninit::<sockaddr_storage>::uninit();
+        let mut len = size_of::<sockaddr_storage>() as socklen_t;
+        let raw_fd = negone_err(libc::accept4(
+            sockfd.as_raw_fd(),
+            storage.as_mut_ptr() as *mut _,
+            &mut len,
+            flags.bits(),
+        ))?;
+        let owned_fd = OwnedFd::from_raw_fd(raw_fd);
+        let storage = storage.assume_init();
+        let addr = match i32::from(storage.ss_family) {
+            libc::AF_INET => {
+                assert!(len as usize >= size_of::<SocketAddrV4>());
+                SocketAddr::V4((*(&storage as *const _ as *const SocketAddrV4)).clone())
+            }
+            libc::AF_INET6 => {
+                assert!(len as usize >= size_of::<SocketAddrV6>());
+                SocketAddr::V6((*(&storage as *const _ as *const SocketAddrV6)).clone())
+            }
+            libc::AF_LOCAL => {
+                assert!(len as usize >= size_of::<SocketAddrUnix>());
+                SocketAddr::Unix((*(&storage as *const _ as *const SocketAddrUnix)).clone())
+            }
+            _ => panic!(),
+        };
+        Ok((owned_fd, addr))
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _accept4(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, SocketAddr)> {
+    let (owned_fd, storage, len) = crate::linux_raw::accept4(sockfd, flags.bits())?;
+    let addr = unsafe {
+        match u32::from(storage.ss_family) {
+            linux_raw_sys::general::AF_INET => {
+                assert!(len as usize >= size_of::<SocketAddrV4>());
+                SocketAddr::V4((*(&storage as *const _ as *const SocketAddrV4)).clone())
+            }
+            linux_raw_sys::general::AF_INET6 => {
+                assert!(len as usize >= size_of::<SocketAddrV6>());
+                SocketAddr::V6((*(&storage as *const _ as *const SocketAddrV6)).clone())
+            }
+            linux_raw_sys::general::AF_LOCAL => {
+                assert!(len as usize >= size_of::<SocketAddrUnix>());
+                SocketAddr::Unix((*(&storage as *const _ as *const SocketAddrUnix)).clone())
+            }
+            _ => panic!(),
+        }
+    };
+    Ok((owned_fd, addr))
 }
 
 /// `shutdown(fd, how)`

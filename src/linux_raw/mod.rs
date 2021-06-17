@@ -1170,52 +1170,74 @@ pub(crate) fn socketpair(
 #[inline]
 pub(crate) fn accept(
     fd: BorrowedFd<'_>,
-    addr: &mut __kernel_sockaddr_storage,
-    addrlen: &mut socklen_t,
-) -> io::Result<OwnedFd> {
+) -> io::Result<(OwnedFd, __kernel_sockaddr_storage, socklen_t)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
-        ret_owned_fd(syscall3(
+        let mut addrlen = 0;
+        let mut storage = MaybeUninit::uninit();
+        let fd = ret_owned_fd(syscall3(
             __NR_accept,
             borrowed_fd(fd),
-            by_mut(addr),
-            by_mut(addrlen),
-        ))
+            out(&mut storage),
+            by_mut(&mut addrlen),
+        ))?;
+        Ok((fd, storage.assume_init(), addrlen))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
-        ret_owned_fd(syscall2(
+        let mut addrlen = 0;
+        let mut storage = MaybeUninit::uninit();
+        let fd = ret_owned_fd(syscall2(
             __NR_socketcall,
             SYS_ACCEPT,
-            slice_addr(&[borrwed_fd(fd), by_mut(addr), by_mut(addrlen), 0, 0, 0]),
-        ))
+            slice_addr(&[
+                borrwed_fd(fd),
+                out(&mut storage),
+                by_mut(&mut addrlen),
+                0,
+                0,
+                0,
+            ]),
+        ))?;
+        Ok((fd, storage.assume_init(), addrlen))
     }
 }
 
 #[inline]
 pub(crate) fn accept4(
     fd: BorrowedFd<'_>,
-    addr: &mut __kernel_sockaddr_storage,
-    addrlen: &mut socklen_t,
-    flags: c_int,
-) -> io::Result<OwnedFd> {
+    flags: c_uint,
+) -> io::Result<(OwnedFd, __kernel_sockaddr_storage, socklen_t)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
-        ret_owned_fd(syscall4(
+        let mut addrlen = 0;
+        let mut storage = MaybeUninit::uninit();
+        let fd = ret_owned_fd(syscall4(
             __NR_accept4,
             borrowed_fd(fd),
-            by_ref(addr),
-            by_mut(addrlen),
-            c_int(flags),
-        ))
+            out(&mut storage),
+            by_mut(&mut addrlen),
+            c_uint(flags),
+        ))?;
+        Ok((fd, storage.assume_init(), addrlen))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
-        ret_owned_fd(syscall2(
+        let mut addrlen = 0;
+        let mut storage = MaybeUninit::uninit();
+        let fd = ret_owned_fd(syscall2(
             __NR_socketcall,
             SYS_ACCEPT4,
-            slice_addr(&[borrwed_fd(fd), by_mut(addr), by_mut(addrlen), flags, 0, 0]),
-        ))
+            slice_addr(&[
+                borrwed_fd(fd),
+                out(&mut storage),
+                by_mut(&mut addrlen),
+                c_uint(flags),
+                0,
+                0,
+            ]),
+        ));
+        Ok((fd, storage.assume_init(), addrlen))
     }
 }
 
