@@ -3,19 +3,19 @@
 //! isn't provided by [`std`] or [`getrandom`].
 //!
 //! The wrappers perform the following tasks:
-//!  - Error values are translated to `Result`s.
+//!  - Error values are translated to [`Result`]s.
+//!  - Buffers are translated to Rust slices.
 //!  - Out-parameters are translated to return values.
-//!  - Path arguments can by any kind of string type.
-//!  - File descriptors are passed in through arguments implementing [`AsFd`]
-//!    instead of as bare integers and returned as [`OwnedFd`]s.
+//!  - Path arguments use `AsRef<`[`Arg`]`>`, so they accept any string type.
+//!  - File descriptors are passed and returned via [`AsFd`] and [`OwnedFd`]
+//!    instead of bare integers, ensuring [I/O safety].
 //!  - Constants use `enum`s and [`bitflags`] types.
 //!  - Multiplexed functions (eg. `fcntl`, `ioctl`, etc.) are de-multiplexed.
 //!  - Variadic functions (eg. `openat`, etc.) are presented as non-variadic.
-//!  - Functions and types which need `64` suffixes to enable large-file
-//!    support are used automatically.
+//!  - Functions and types which need `l` prefixes or `64` suffixes to enable
+//!    large-file support are used automatically, and file sizes and offsets
+//!    are presented as `i64` and `u64`.
 //!  - Behaviors that depend on the sizes of C types like `long` are hidden.
-//!  - File offsets and sizes are presented as `i64` and `u64` rather than
-//!    `off_t`.
 //!  - In some places, more human-friendly and less historical-accident names
 //!    are used.
 //!
@@ -30,11 +30,6 @@
 //! which do hide significant differences between platforms, and [`cap-std`]
 //! which does perform sandboxing and restricts ambient authorities.
 //!
-//! # Safety
-//!
-//! This library uses the [io-lifetimes crate] to manage all OS resource
-//! handles, automatically ensuring I/O safety.
-//!
 //! [`cap-std`]: https://crates.io/crates/cap-std
 //! [`system-interface`]: https://crates.io/crates/system-interface
 //! [`io-streams`]: https://crates.io/crates/io-streams
@@ -45,6 +40,9 @@
 //! [`AsFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.AsFd.html
 //! [`OwnedFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/struct.OwnedFd.html
 //! [io-lifetimes crate]: https://crates.io/crates/io-lifetimes
+//! [I/O safety]: https://github.com/sunfishcode/io-lifetimes
+//! [`Result`]: https://docs.rs/posish/latest/posish/io/type.Result.html
+//! [`Arg`]: https://docs.rs/posish/latest/posish/path/trait.Arg.html
 
 #![deny(missing_docs)]
 #![cfg_attr(linux_raw, feature(asm))]
