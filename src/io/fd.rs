@@ -80,25 +80,13 @@ fn _isatty(fd: BorrowedFd<'_>) -> bool {
 }
 
 #[cfg(linux_raw)]
+#[inline]
 fn _isatty(fd: BorrowedFd<'_>) -> bool {
-    match crate::linux_raw::ioctl_tiocgwinsz(fd) {
-        Ok(_) => true,
-        Err(err) => match err {
-            #[cfg(not(any(target_os = "android", target_os = "linux")))]
-            io::Error::NOTTY => false,
-
-            // Old Linux versions reportedly return `EINVAL`.
-            // https://man7.org/linux/man-pages/man3/isatty.3.html#ERRORS
-            #[cfg(any(target_os = "android", target_os = "linux"))]
-            io::Error::NOTTY | io::Error::INVAL => false,
-
-            // Darwin mysteriously returns `EOPNOTSUPP` sometimes.
-            #[cfg(any(target_os = "ios", target_os = "macos"))]
-            io::Error::OPNOTSUPP => false,
-
-            _ => panic!("unexpected error from isatty: {:?}", err),
-        },
-    }
+    // On error, Linux will return either `EINVAL` (2.6.32) or `ENOTTY`
+    // (otherwise), because we assume we're never passing an invalid
+    // file descriptor (which would get `EBADF`). Either way, an error
+    // means we don't have a tty.
+    crate::linux_raw::ioctl_tiocgwinsz(fd).is_ok()
 }
 
 /// Returns a pair of booleans indicating whether the file descriptor is
