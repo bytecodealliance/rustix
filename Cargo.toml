@@ -31,6 +31,7 @@ linux-raw-sys = { version = "0.0.6", features = ["v5_4", "v5_11"] }
 [dev-dependencies]
 atty = "0.2.14"
 tempfile = "3.2.0"
+cstr = "0.2.8"
 
 [badges]
 maintenance = { status = "actively-developed" }

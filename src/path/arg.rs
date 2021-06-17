@@ -482,6 +482,46 @@ impl<'a> Arg for Cow<'a, OsStr> {
     }
 }
 
+impl<'a> Arg for Cow<'a, CStr> {
+    #[inline]
+    fn as_str(&self) -> io::Result<&str> {
+        self.to_str().map_err(|_utf8_err| io::Error::ILSEQ)
+    }
+
+    #[inline]
+    fn to_string_lossy(&self) -> Cow<str> {
+        let borrow: &CStr = std::borrow::Borrow::borrow(self);
+        borrow.to_string_lossy()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+        Ok(Cow::Borrowed(&self))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(self)
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_maybe_utf8_bytes(&self) -> &[u8] {
+        self.to_bytes()
+    }
+
+    #[cfg(windows)]
+    #[inline]
+    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
+        self.as_ref()
+    }
+}
+
 impl<'a> Arg for Component<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -742,4 +782,352 @@ impl Arg for DecInt {
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
+}
+
+#[test]
+fn test_arg() {
+    use cstr::cstr;
+    use std::borrow::Borrow;
+
+    let t: &str = "hello";
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: String = "hello".to_owned();
+    assert_eq!("hello", Arg::as_str(&t).unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::borrow(&t.clone().into_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: &OsStr = OsStr::new("hello");
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: OsString = OsString::from("hello".to_owned());
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::borrow(&t.clone().into_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: &Path = Path::new("hello");
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: PathBuf = PathBuf::from("hello".to_owned());
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::borrow(&t.clone().into_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: &CStr = cstr!("hello");
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: CString = cstr!("hello").to_owned();
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&Arg::as_c_str(&t).unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::borrow(&t.clone().into_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: Components = Path::new("hello").components();
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::borrow(&t.clone().into_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: Component = Path::new("hello").components().next().unwrap();
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: Iter = Path::new("hello").iter();
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::borrow(&t.clone().into_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: Cow<str> = Cow::Borrowed("hello");
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::borrow(&t.clone().into_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: Cow<str> = Cow::Owned("hello".to_owned());
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::borrow(&t.clone().into_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: Cow<OsStr> = Cow::Borrowed(OsStr::new("hello"));
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::borrow(&t.clone().into_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: Cow<OsStr> = Cow::Owned(OsString::from("hello".to_owned()));
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::borrow(&t.clone().into_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: Cow<CStr> = Cow::Borrowed(cstr!("hello"));
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::borrow(&t.clone().into_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: Cow<CStr> = Cow::Owned(cstr!("hello").to_owned());
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::borrow(&t.clone().into_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: &[u8] = b"hello";
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: Vec<u8> = b"hello".to_vec();
+    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::borrow(&t.clone().into_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(b"hello", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _],
+        t.as_os_str()
+    );
+
+    let t: DecInt = DecInt::new(43110);
+    assert_eq!("43110", t.as_str().unwrap());
+    assert_eq!("43110".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(cstr!("43110"), Borrow::borrow(&t.as_c_str().unwrap()));
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!("43110"),
+        Borrow::borrow(&t.clone().into_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(b"43110", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &['4' as u16, '3' as _, '1' as _, '1' as _, 'o' as _],
+        t.as_os_str()
+    );
 }

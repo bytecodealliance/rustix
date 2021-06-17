@@ -10,6 +10,7 @@ use unsafe_io::os::posish::AsRawFd;
 /// Format an integer into a decimal `Path` component, without constructing a
 /// temporary `PathBuf` or `String`. This is used for opening paths such
 /// as `/proc/self/fd/<fd>` on Linux.
+#[derive(Clone)]
 pub struct DecInt {
     buf: [u8; 20],
     len: usize,
