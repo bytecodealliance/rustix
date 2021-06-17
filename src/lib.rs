@@ -39,7 +39,7 @@
 //! [`AsFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.AsFd.html
 //! [`OwnedFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/struct.OwnedFd.html
 //! [io-lifetimes crate]: https://crates.io/crates/io-lifetimes
-//! [I/O safe]: https://github.com/rust-lang/rfcs/pull/3128
+//! [I/O-safe]: https://github.com/rust-lang/rfcs/pull/3128
 //! [`Result`]: https://docs.rs/posish/latest/posish/io/type.Result.html
 //! [`Arg`]: https://docs.rs/posish/latest/posish/path/trait.Arg.html
 

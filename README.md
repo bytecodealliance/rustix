@@ -47,4 +47,4 @@ This feature is fun in two ways:
 [`fs-set-times`]: https://crates.io/crates/fs-set-times
 [`io-lifetimes`]: https://crates.io/crates/io-lifetimes
 [`cap-std`]: https://crates.io/crates/cap-std
-[I/O safe]: https://github.com/rust-lang/rfcs/pull/3128
+[I/O-safe]: https://github.com/rust-lang/rfcs/pull/3128
