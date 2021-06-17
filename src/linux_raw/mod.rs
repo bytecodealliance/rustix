@@ -33,8 +33,8 @@ use linux_raw_sys::{
     },
     general::{
         __kernel_clockid_t, __kernel_gid_t, __kernel_loff_t, __kernel_pid_t,
-        __kernel_sockaddr_storage, __kernel_uid_t, socklen_t, stat, statfs64, termios, timespec,
-        umode_t, winsize,
+        __kernel_sockaddr_storage, __kernel_uid_t, sockaddr_in, sockaddr_in6, sockaddr_un,
+        socklen_t, stat, statfs64, termios, timespec, umode_t, winsize,
     },
     general::{
         AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD,
@@ -1471,18 +1471,14 @@ pub(crate) fn getsockname(
 }
 
 #[inline]
-pub(crate) fn bind(
-    fd: BorrowedFd<'_>,
-    addr: &__kernel_sockaddr_storage,
-    addrlen: socklen_t,
-) -> io::Result<()> {
+pub(crate) fn bind_un(fd: BorrowedFd<'_>, addr: &sockaddr_un) -> io::Result<()> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         ret(syscall3_readonly(
             __NR_bind,
             borrowed_fd(fd),
             by_ref(addr),
-            socklen_t(addrlen),
+            size_of::<sockaddr_un>(),
         ))
     }
     #[cfg(target_arch = "x86")]
@@ -1490,7 +1486,70 @@ pub(crate) fn bind(
         ret(syscall2_readonly(
             __NR_socketcall,
             SYS_BIND,
-            slice_addr(&[borrwed_fd(fd), by_ref(addr), socklen_t(addrlen), 0, 0, 0]),
+            slice_addr(&[
+                borrwed_fd(fd),
+                by_ref(addr),
+                size_of::<sockaddr_un>(),
+                0,
+                0,
+                0,
+            ]),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn bind_in(fd: BorrowedFd<'_>, addr: &sockaddr_in) -> io::Result<()> {
+    #[cfg(not(target_arch = "x86"))]
+    unsafe {
+        ret(syscall3_readonly(
+            __NR_bind,
+            borrowed_fd(fd),
+            by_ref(addr),
+            size_of::<sockaddr_in>(),
+        ))
+    }
+    #[cfg(target_arch = "x86")]
+    unsafe {
+        ret(syscall2_readonly(
+            __NR_socketcall,
+            SYS_BIND,
+            slice_addr(&[
+                borrwed_fd(fd),
+                by_ref(addr),
+                size_of::<sockaddr_in>(),
+                0,
+                0,
+                0,
+            ]),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn bind_in6(fd: BorrowedFd<'_>, addr: &sockaddr_in6) -> io::Result<()> {
+    #[cfg(not(target_arch = "x86"))]
+    unsafe {
+        ret(syscall3_readonly(
+            __NR_bind,
+            borrowed_fd(fd),
+            by_ref(addr),
+            size_of::<sockaddr_in6>(),
+        ))
+    }
+    #[cfg(target_arch = "x86")]
+    unsafe {
+        ret(syscall2_readonly(
+            __NR_socketcall,
+            SYS_BIND,
+            slice_addr(&[
+                borrwed_fd(fd),
+                by_ref(addr),
+                size_of::<sockaddr_in6>(),
+                0,
+                0,
+                0,
+            ]),
         ))
     }
 }

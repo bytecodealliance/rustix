@@ -1,11 +1,18 @@
-use crate::io;
+use crate::{
+    io,
+    net::{SockaddrIn, SockaddrIn6, SockaddrUn},
+};
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 use std::mem::{size_of, MaybeUninit};
-#[cfg(libc)]
-use {crate::{zero_ok, negone_err}, unsafe_io::os::posish::{AsRawFd, FromRawFd}};
+use std::os::raw::c_int;
 #[cfg(linux_raw)]
 use std::os::raw::c_uint;
-use std::os::raw::c_int;
+#[cfg(libc)]
+use {
+    crate::{negone_err, zero_ok},
+    libc::socklen_t,
+    unsafe_io::os::posish::{AsRawFd, FromRawFd},
+};
 
 /// `SOCK_*` constants.
 #[cfg(libc)]
@@ -293,6 +300,75 @@ fn _socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::
     crate::linux_raw::socket(domain as c_uint, type_ as c_uint, protocol as c_uint)
 }
 
+/// `bind(sockfd, addr, sizeof(struct sockaddr_un))`
+#[inline]
+pub fn bind_un<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SockaddrUn) -> io::Result<()> {
+    let sockfd = sockfd.as_fd();
+    _bind_un(sockfd, addr)
+}
+
+#[cfg(libc)]
+fn _bind_un(sockfd: BorrowedFd<'_>, addr: &SockaddrUn) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::bind(
+            sockfd.as_raw_fd(),
+            addr as *const _ as *const _,
+            size_of::<SockaddrUn>() as socklen_t,
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+fn _bind_un(sockfd: BorrowedFd<'_>, addr: &SockaddrUn) -> io::Result<()> {
+    crate::linux_raw::bind_un(sockfd, addr)
+}
+
+/// `bind(sockfd, addr, sizeof(struct sockaddr_in))`
+#[inline]
+pub fn bind_in<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SockaddrIn) -> io::Result<()> {
+    let sockfd = sockfd.as_fd();
+    _bind_in(sockfd, addr)
+}
+
+#[cfg(libc)]
+fn _bind_in(sockfd: BorrowedFd<'_>, addr: &SockaddrIn) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::bind(
+            sockfd.as_raw_fd(),
+            addr as *const _ as *const _,
+            size_of::<SockaddrIn>() as socklen_t,
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+fn _bind_in(sockfd: BorrowedFd<'_>, addr: &SockaddrIn) -> io::Result<()> {
+    crate::linux_raw::bind_in(sockfd, addr)
+}
+
+/// `bind(sockfd, addr, sizeof(struct sockaddr_in6))`
+#[inline]
+pub fn bind_in6<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SockaddrIn6) -> io::Result<()> {
+    let sockfd = sockfd.as_fd();
+    _bind_in6(sockfd, addr)
+}
+
+#[cfg(libc)]
+fn _bind_in6(sockfd: BorrowedFd<'_>, addr: &SockaddrIn6) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::bind(
+            sockfd.as_raw_fd(),
+            addr as *const _ as *const _,
+            size_of::<SockaddrIn6>() as socklen_t,
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+fn _bind_in6(sockfd: BorrowedFd<'_>, addr: &SockaddrIn6) -> io::Result<()> {
+    crate::linux_raw::bind_in6(sockfd, addr)
+}
+
 /// `listen(fd, backlog)`
 #[inline]
 pub fn listen<'f, Fd: AsFd<'f>>(sockfd: Fd, backlog: c_int) -> io::Result<()> {
@@ -302,9 +378,7 @@ pub fn listen<'f, Fd: AsFd<'f>>(sockfd: Fd, backlog: c_int) -> io::Result<()> {
 
 #[cfg(libc)]
 fn _listen(sockfd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
-    unsafe {
-        zero_ok(libc::listen(sockfd.as_raw_fd(), backlog))
-    }
+    unsafe { zero_ok(libc::listen(sockfd.as_raw_fd(), backlog)) }
 }
 
 #[cfg(linux_raw)]
@@ -322,9 +396,7 @@ pub fn shutdown<'f, Fd: AsFd<'f>>(sockfd: Fd, how: Shutdown) -> io::Result<()> {
 
 #[cfg(libc)]
 fn _shutdown(sockfd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> {
-    unsafe {
-        zero_ok(libc::shutdown(sockfd.as_raw_fd(), how as c_int))
-    }
+    unsafe { zero_ok(libc::shutdown(sockfd.as_raw_fd(), how as c_int)) }
 }
 
 #[cfg(linux_raw)]
@@ -343,7 +415,7 @@ pub fn socket_type<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<SocketType> {
 #[cfg(libc)]
 fn _socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
     let mut buffer = MaybeUninit::<SocketType>::uninit();
-    let mut out_len = size_of::<SocketType>() as libc::socklen_t;
+    let mut out_len = size_of::<SocketType>() as socklen_t;
     unsafe {
         zero_ok(libc::getsockopt(
             fd.as_raw_fd(),
