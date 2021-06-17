@@ -260,7 +260,7 @@ fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()>
     }
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos",))]
+#[cfg(any(target_os = "ios", target_os = "macos"))]
 fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
     let offset: i64 = offset
         .try_into()
