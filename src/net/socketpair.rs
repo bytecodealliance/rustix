@@ -1,50 +1,52 @@
 use crate::io;
+use crate::net::{AcceptFlags, AddressFamily, Protocol, SocketType};
 use io_lifetimes::OwnedFd;
 #[cfg(libc)]
-use {
-    crate::zero_ok,
-    std::mem::MaybeUninit,
-    unsafe_io::os::posish::{FromRawFd, RawFd},
-};
+use {crate::zero_ok, std::mem::MaybeUninit, std::os::raw::c_int};
 
-/// `socketpair(domain, SOCK_STREAM | SOCK_CLOEXEC, protocol)`
+/// `socketpair(domain, type_ | accept_flags, protocol)`
+#[inline]
+pub fn socketpair(
+    domain: AddressFamily,
+    type_: SocketType,
+    accept_flags: AcceptFlags,
+    protocol: Protocol,
+) -> io::Result<(OwnedFd, OwnedFd)> {
+    _socketpair(domain, type_, accept_flags, protocol)
+}
+
 #[cfg(libc)]
-pub fn socketpair_stream(domain: i32, protocol: i32) -> io::Result<(OwnedFd, OwnedFd)> {
-    let mut fds = MaybeUninit::<[RawFd; 2]>::uninit();
+fn _socketpair(
+    domain: AddressFamily,
+    type_: SocketType,
+    accept_flags: AcceptFlags,
+    protocol: Protocol,
+) -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
-        #[cfg(not(any(target_os = "ios", target_os = "macos")))]
-        let flags = libc::SOCK_CLOEXEC;
-
-        // Darwin lacks `SOCK_CLOEXEC`.
-        #[cfg(any(target_os = "ios", target_os = "macos"))]
-        let flags = 0;
-
+        let mut fds = MaybeUninit::<[OwnedFd; 2]>::uninit();
         zero_ok(libc::socketpair(
-            domain,
-            libc::SOCK_STREAM | flags,
-            protocol,
-            fds.as_mut_ptr().cast::<RawFd>(),
+            domain as c_int,
+            type_ as c_int | accept_flags.bits(),
+            protocol as c_int,
+            fds.as_mut_ptr().cast::<c_int>(),
         ))?;
 
-        let fds = fds.assume_init();
-
-        // Darwin lacks `SOCK_CLOEXEC`, so set it manually.
-        #[cfg(any(target_os = "ios", target_os = "macos"))]
-        for fd in &fds {
-            zero_ok(libc::ioctl(*fd, libc::FIOCLEX))?;
-        }
-
-        Ok((OwnedFd::from_raw_fd(fds[0]), OwnedFd::from_raw_fd(fds[1])))
+        let [fd0, fd1] = fds.assume_init();
+        Ok((fd0, fd1))
     }
 }
 
-/// `socketpair(domain, SOCK_STREAM | SOCK_CLOEXEC, protocol)`
 #[cfg(linux_raw)]
-pub fn socketpair_stream(domain: i32, protocol: i32) -> io::Result<(OwnedFd, OwnedFd)> {
+#[inline]
+fn _socketpair(
+    domain: AddressFamily,
+    type_: SocketType,
+    accept_flags: AcceptFlags,
+    protocol: Protocol,
+) -> io::Result<(OwnedFd, OwnedFd)> {
     crate::linux_raw::socketpair(
-        domain,
-        linux_raw_sys::general::SOCK_STREAM | linux_raw_sys::general::SOCK_CLOEXEC,
-        protocol,
+        domain as u32,
+        type_ as u32 | accept_flags.bits(),
+        protocol as u32,
     )
-    .map(|fds| (fds.0, fds.1))
 }

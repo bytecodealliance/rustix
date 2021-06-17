@@ -2,17 +2,17 @@
 
 mod send_recv;
 mod socket;
+#[cfg(not(target_os = "wasi"))]
+mod socketpair;
 
 pub use send_recv::{recv, send};
+pub use socket::accept;
 pub use socket::{
     bind_in, bind_in6, bind_un, connect_in, connect_in6, connect_un, listen, shutdown, socket,
-    socket_type, AddressFamily, Protocol, SocketType,
+    socket_type, AcceptFlags, AddressFamily, Protocol, SocketType,
 };
-
-#[cfg(any(target_os = "ios", target_os = "macos"))]
-pub use socket::accept;
-#[cfg(not(any(target_os = "ios", target_os = "macos")))]
-pub use socket::{accept4, AcceptFlags};
+#[cfg(not(target_os = "wasi"))]
+pub use socketpair::socketpair;
 
 #[cfg(libc)]
 pub use libc::sockaddr_un as SocketAddrUnix;

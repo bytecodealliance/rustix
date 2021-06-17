@@ -2,7 +2,6 @@ use crate::{
     io,
     net::{SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6},
 };
-#[cfg(any(linux_raw, all(libc, not(any(target_os = "ios", target_os = "macos")))))]
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 use std::mem::{size_of, MaybeUninit};
@@ -279,13 +278,16 @@ pub enum Shutdown {
     ReadWrite = linux_raw_sys::general::SHUT_RDWR,
 }
 
-#[cfg(all(libc, not(any(target_os = "ios", target_os = "macos"))))]
+#[cfg(libc)]
 bitflags! {
     /// `SOCK_*` constants for `accept`.
     pub struct AcceptFlags: c_int {
         /// `SOCK_NONBLOCK`
+        #[cfg(not(any(target_os = "ios", target_os = "macos")))]
         const NONBLOCK = libc::SOCK_NONBLOCK;
+
         /// `SOCK_CLOEXEC`
+        #[cfg(not(any(target_os = "ios", target_os = "macos")))]
         const CLOEXEC = libc::SOCK_CLOEXEC;
     }
 }
@@ -480,58 +482,19 @@ fn _listen(sockfd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
     crate::linux_raw::listen(sockfd, backlog)
 }
 
-/// `accept(fd, addr, len)`
-#[cfg(any(target_os = "ios", target_os = "macos"))]
-#[inline]
-pub fn accept<'f, Fd: AsFd<'f>>(sockfd: Fd) -> io::Result<(OwnedFd, SocketAddr)> {
-    let sockfd = sockfd.as_fd();
-    _accept(sockfd)
-}
-
-#[cfg(all(libc, any(target_os = "ios", target_os = "macos")))]
-fn _accept(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddr)> {
-    unsafe {
-        let mut storage = MaybeUninit::<sockaddr_storage>::uninit();
-        let mut len = size_of::<sockaddr_storage>() as socklen_t;
-        let raw_fd = negone_err(libc::accept(
-            sockfd.as_raw_fd(),
-            storage.as_mut_ptr() as *mut _,
-            &mut len,
-        ))?;
-        let owned_fd = OwnedFd::from_raw_fd(raw_fd);
-        let storage = storage.assume_init();
-        let addr = match i32::from(storage.ss_family) {
-            libc::AF_INET => {
-                assert!(len as usize >= size_of::<SocketAddrV4>());
-                SocketAddr::V4((*(&storage as *const _ as *const SocketAddrV4)).clone())
-            }
-            libc::AF_INET6 => {
-                assert!(len as usize >= size_of::<SocketAddrV6>());
-                SocketAddr::V6((*(&storage as *const _ as *const SocketAddrV6)).clone())
-            }
-            libc::AF_LOCAL => {
-                assert!(len as usize >= size_of::<SocketAddrUnix>());
-                SocketAddr::Unix((*(&storage as *const _ as *const SocketAddrUnix)).clone())
-            }
-            _ => panic!(),
-        };
-        Ok((owned_fd, addr))
-    }
-}
-
 /// `accept4(fd, addr, len, flags)`
-#[cfg(not(any(target_os = "ios", target_os = "macos")))]
 #[inline]
-pub fn accept4<'f, Fd: AsFd<'f>>(
+#[doc(alias = "accept4")]
+pub fn accept<'f, Fd: AsFd<'f>>(
     sockfd: Fd,
     flags: AcceptFlags,
 ) -> io::Result<(OwnedFd, SocketAddr)> {
     let sockfd = sockfd.as_fd();
-    _accept4(sockfd, flags)
+    _accept(sockfd, flags)
 }
 
 #[cfg(all(libc, not(any(target_os = "ios", target_os = "macos"))))]
-fn _accept4(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, SocketAddr)> {
+fn _accept(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, SocketAddr)> {
     unsafe {
         let mut storage = MaybeUninit::<sockaddr_storage>::uninit();
         let mut len = size_of::<sockaddr_storage>() as socklen_t;
@@ -562,10 +525,43 @@ fn _accept4(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, 
     }
 }
 
+/// Darwin lacks `accept4`, but does have `accept`. We define
+/// `AcceptFlags` to have no flags, so we can discard it here.
+#[cfg(all(libc, any(target_os = "ios", target_os = "macos")))]
+fn _accept(sockfd: BorrowedFd<'_>, _flags: AcceptFlags) -> io::Result<(OwnedFd, SocketAddr)> {
+    unsafe {
+        let mut storage = MaybeUninit::<sockaddr_storage>::uninit();
+        let mut len = size_of::<sockaddr_storage>() as socklen_t;
+        let raw_fd = negone_err(libc::accept(
+            sockfd.as_raw_fd(),
+            storage.as_mut_ptr() as *mut _,
+            &mut len,
+        ))?;
+        let owned_fd = OwnedFd::from_raw_fd(raw_fd);
+        let storage = storage.assume_init();
+        let addr = match i32::from(storage.ss_family) {
+            libc::AF_INET => {
+                assert!(len as usize >= size_of::<SocketAddrV4>());
+                SocketAddr::V4((*(&storage as *const _ as *const SocketAddrV4)).clone())
+            }
+            libc::AF_INET6 => {
+                assert!(len as usize >= size_of::<SocketAddrV6>());
+                SocketAddr::V6((*(&storage as *const _ as *const SocketAddrV6)).clone())
+            }
+            libc::AF_LOCAL => {
+                assert!(len as usize >= size_of::<SocketAddrUnix>());
+                SocketAddr::Unix((*(&storage as *const _ as *const SocketAddrUnix)).clone())
+            }
+            _ => panic!(),
+        };
+        Ok((owned_fd, addr))
+    }
+}
+
 #[cfg(linux_raw)]
 #[inline]
-fn _accept4(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, SocketAddr)> {
-    let (owned_fd, storage, len) = crate::linux_raw::accept4(sockfd, flags.bits())?;
+fn _accept(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, SocketAddr)> {
+    let (owned_fd, storage, len) = crate::linux_raw::accept(sockfd, flags.bits())?;
     let addr = unsafe {
         match u32::from(storage.ss_family) {
             linux_raw_sys::general::AF_INET => {

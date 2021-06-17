@@ -19,7 +19,7 @@ use conv::{
 use io_lifetimes::{BorrowedFd, OwnedFd};
 use linux_raw_sys::{
     general::{
-        __NR_accept, __NR_accept4, __NR_bind, __NR_chdir, __NR_clock_getres, __NR_clock_gettime,
+        __NR_accept4, __NR_bind, __NR_chdir, __NR_clock_getres, __NR_clock_gettime,
         __NR_clock_nanosleep, __NR_close, __NR_connect, __NR_dup, __NR_exit_group, __NR_faccessat,
         __NR_fadvise64, __NR_fallocate, __NR_fchmod, __NR_fchmodat, __NR_fcntl, __NR_fdatasync,
         __NR_fstat, __NR_fstatfs, __NR_fsync, __NR_ftruncate, __NR_getcwd, __NR_getdents64,
@@ -1139,18 +1139,18 @@ pub(crate) fn socket(family: c_uint, typ: c_uint, protocol: c_uint) -> io::Resul
 
 #[inline]
 pub(crate) fn socketpair(
-    family: c_int,
+    family: c_uint,
     typ: c_uint,
-    protocol: c_int,
+    protocol: c_uint,
 ) -> io::Result<(OwnedFd, OwnedFd)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
         ret(syscall4(
             __NR_socketpair,
-            c_int(family),
+            c_uint(family),
             c_uint(typ),
-            c_int(protocol),
+            c_uint(protocol),
             out(&mut result),
         ))
         .map(|()| {
@@ -1165,9 +1165,9 @@ pub(crate) fn socketpair(
             __NR_socketcall,
             SYS_SOCKETPAIR,
             slice_addr(&[
-                c_int(family),
+                c_uint(family),
                 c_uint(typ),
-                c_int(protocol),
+                c_uint(protocol),
                 out(&mut result),
                 0,
                 0,
@@ -1182,42 +1182,6 @@ pub(crate) fn socketpair(
 
 #[inline]
 pub(crate) fn accept(
-    fd: BorrowedFd<'_>,
-) -> io::Result<(OwnedFd, __kernel_sockaddr_storage, socklen_t)> {
-    #[cfg(not(target_arch = "x86"))]
-    unsafe {
-        let mut addrlen = 0;
-        let mut storage = MaybeUninit::uninit();
-        let fd = ret_owned_fd(syscall3(
-            __NR_accept,
-            borrowed_fd(fd),
-            out(&mut storage),
-            by_mut(&mut addrlen),
-        ))?;
-        Ok((fd, storage.assume_init(), addrlen))
-    }
-    #[cfg(target_arch = "x86")]
-    unsafe {
-        let mut addrlen = 0;
-        let mut storage = MaybeUninit::uninit();
-        let fd = ret_owned_fd(syscall2(
-            __NR_socketcall,
-            SYS_ACCEPT,
-            slice_addr(&[
-                borrwed_fd(fd),
-                out(&mut storage),
-                by_mut(&mut addrlen),
-                0,
-                0,
-                0,
-            ]),
-        ))?;
-        Ok((fd, storage.assume_init(), addrlen))
-    }
-}
-
-#[inline]
-pub(crate) fn accept4(
     fd: BorrowedFd<'_>,
     flags: c_uint,
 ) -> io::Result<(OwnedFd, __kernel_sockaddr_storage, socklen_t)> {
