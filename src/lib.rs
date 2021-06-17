@@ -1,11 +1,10 @@
-//! `posish` provides safe wrappers to `libc` functions. The current focus is
-//! on the functionality needed by [`cap-std`] and [`system-interface`] that
-//! isn't provided by [`std`] or [`getrandom`].
+//! `posish` provides efficient memory-safe and I/O-safe wrappers to
+//! "POSIX-ish" `libc` APIs and syscalls.
 //!
 //! The wrappers perform the following tasks:
 //!  - Error values are translated to [`Result`]s.
-//!  - Buffers are translated to Rust slices.
-//!  - Out-parameters are translated to return values.
+//!  - Buffers are passed as Rust slices.
+//!  - Out-parameters are presented as return values.
 //!  - Path arguments use `AsRef<`[`Arg`]`>`, so they accept any string type.
 //!  - File descriptors are passed and returned via [`AsFd`] and [`OwnedFd`]
 //!    instead of bare integers, ensuring [I/O safety].

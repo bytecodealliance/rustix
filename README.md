@@ -14,7 +14,7 @@
   </p>
 </div>
 
-`posish` provides efficient memory-safe and I/O-safe wrappers to POSIX-ish
+`posish` provides efficient memory-safe and I/O-safe wrappers to "POSIX-ish"
 `libc` APIs and syscalls.
 
 `posish` is relatively low-level and does not support Windows; for higher-level
@@ -25,7 +25,7 @@ and portable APIs to this functionality, see the [`system-interface`],
 
 On Linux, `posish` can optionally be configured to target the raw
 Linux syscall ABI directly instead of calling through `libc`. To enable this,
-add `--cfg linux_raw` to the `RUSTFLAGS` environment variable, or otherwise
+set the `RUSTFLAGS` environment variable to `--cfg linux_raw`, or otherwise
 pass `--cfg linux_raw` to rustc. This mode is new, and so far only supports
 x86-64 and aarch64, but a fair amount of code has been successfully adapted to
 use it, and ports to other architectures should be straightforward.
