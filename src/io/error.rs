@@ -1,3 +1,9 @@
+//! The `Error` type, which is a minimal wrapper around an errno value.
+//!
+//! We define the errno constants as invididual `const`s instead of an
+//! enum because we may not know about all of the host's errno values
+//! and we don't want unrecognized values to create UB.
+
 #![allow(missing_docs)]
 
 use std::{error, fmt, result};
@@ -23,7 +29,7 @@ pub struct Error(pub(crate) c_int);
 #[cfg(linux_raw)]
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Hash, Copy, Clone)]
-// Linux errno codes are in 0..4096, which is 12 bits.
+// Linux errno codes are in 1..4096, which is 12 bits.
 pub struct Error(pub(crate) u16);
 
 #[cfg(libc)]
@@ -852,6 +858,14 @@ impl Error {
     #[inline]
     pub fn kind(self) -> std::io::ErrorKind {
         std::io::Error::from(self).kind()
+    }
+
+    /// Extract the raw OS error number from this error.
+    #[inline]
+    pub const fn raw_os_error(self) -> i32 {
+        // This should be `i32::from` but that isn't a `const fn`.
+        // Fortunately, we know `as i32` won't overflow.
+        self.0 as i32
     }
 
     #[cfg(libc)]
