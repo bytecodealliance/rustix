@@ -1670,8 +1670,8 @@ pub(crate) fn memfd_create(name: &CStr, flags: c_uint) -> io::Result<OwnedFd> {
 }
 
 #[inline]
-pub(crate) fn userfaultfd(flags: c_uint) -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(syscall1(__NR_userfaultfd, c_uint(flags))) }
+pub(crate) unsafe fn userfaultfd(flags: c_uint) -> io::Result<OwnedFd> {
+    ret_owned_fd(syscall1(__NR_userfaultfd, c_uint(flags)))
 }
 
 #[inline]
