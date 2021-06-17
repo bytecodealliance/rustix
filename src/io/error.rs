@@ -848,6 +848,7 @@ impl Error {
 }
 
 impl Error {
+    /// Shorthand for `std::io::Error::from(self).kind()`.
     #[inline]
     pub fn kind(self) -> std::io::ErrorKind {
         std::io::Error::from(self).kind()
