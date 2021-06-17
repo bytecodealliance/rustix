@@ -1,7 +1,7 @@
 #[cfg(not(target_os = "redox"))]
 #[test]
 fn test_file() {
-    use io_lifetimes::AsFd;
+    use posish::io_lifetimes::AsFd;
 
     posish::fs::accessat(
         posish::fs::cwd(),

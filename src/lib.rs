@@ -47,6 +47,10 @@
 #![cfg_attr(linux_raw, feature(asm))]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 
+/// Re-export `io_lifetimes` since we use its types in our public API, so
+/// that our users don't need to do anything special to use the same version.
+pub use io_lifetimes;
+
 #[cfg(all(libc, not(target_os = "wasi")))]
 #[macro_use]
 mod weak;
