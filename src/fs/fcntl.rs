@@ -2,11 +2,11 @@ use crate::{
     fs::{FdFlags, OFlags},
     io,
 };
-use io_lifetimes::{AsFd, BorrowedFd};
+use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(libc)]
 use {
     crate::{negone_err, zero_ok},
-    unsafe_io::os::posish::AsRawFd,
+    unsafe_io::os::posish::{AsRawFd, FromRawFd, RawFd},
 };
 
 /// `fcntl(fd, F_GETFD)`
@@ -141,4 +141,29 @@ fn _fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<u32> {
 #[inline]
 fn _fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<u32> {
     crate::linux_raw::fcntl_get_seals(fd).map(|seals| seals as u32)
+}
+
+/// `fcntl(fd, F_DUPFD_CLOEXEC)`
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn fcntl_dupfd_cloexec<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<OwnedFd> {
+    let fd = fd.as_fd();
+    _fcntl_dupfd_cloexec(fd)
+}
+
+#[cfg(all(libc, not(target_os = "wasi")))]
+fn _fcntl_dupfd_cloexec(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
+    unsafe {
+        let raw_fd = negone_err(libc::fcntl(
+            fd.as_raw_fd() as libc::c_int,
+            libc::F_DUPFD_CLOEXEC,
+        ))?;
+        Ok(OwnedFd::from_raw_fd(raw_fd as RawFd))
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _fcntl_dupfd_cloexec(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
+    crate::linux_raw::fcntl_dupfd_cloexec(fd)
 }

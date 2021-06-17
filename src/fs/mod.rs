@@ -67,6 +67,8 @@ pub use dir::{Dir, Entry, SeekLoc};
     target_os = "redox"
 )))]
 pub use fadvise::{fadvise, Advice};
+#[cfg(not(target_os = "wasi"))]
+pub use fcntl::fcntl_dupfd_cloexec;
 #[cfg(not(any(
     target_os = "freebsd",
     target_os = "ios",
