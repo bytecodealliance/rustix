@@ -67,6 +67,7 @@ pub enum SocketType {
 #[non_exhaustive]
 pub enum AddressFamily {
     /// `AF_LOCAL`, aka `AF_UNIX`
+    #[doc(alias = "Unix")]
     Local = libc::AF_LOCAL as u32,
 
     /// `AF_INET`
@@ -92,6 +93,7 @@ pub enum AddressFamily {
 #[non_exhaustive]
 pub enum AddressFamily {
     /// `AF_LOCAL`, aka `AF_UNIX`
+    #[doc(alias = "Unix")]
     Local = linux_raw_sys::general::AF_LOCAL,
 
     /// `AF_INET`

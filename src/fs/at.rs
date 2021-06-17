@@ -341,6 +341,7 @@ fn _symlinkat(old_path: &CStr, new_dirfd: BorrowedFd<'_>, new_path: &CStr) -> io
 
 /// `fstatat(dirfd, path, flags)`
 #[inline]
+#[doc(alias = "fstatat")]
 pub fn statat<'f, P: path::Arg, Fd: AsFd<'f>>(
     dirfd: Fd,
     path: P,
@@ -373,6 +374,7 @@ fn _statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Sta
 
 /// `faccessat(dirfd, path, access, flags)`
 #[inline]
+#[doc(alias = "faccessat")]
 pub fn accessat<'f, P: path::Arg, Fd: AsFd<'f>>(
     dirfd: Fd,
     path: P,
@@ -479,6 +481,7 @@ fn _utimensat(
 /// even on platforms where the host libc emulates it.
 #[cfg(not(target_os = "wasi"))]
 #[inline]
+#[doc(alias = "fchmodat")]
 pub fn chmodat<'f, P: path::Arg, Fd: AsFd<'f>>(dirfd: Fd, path: P, mode: Mode) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
     let path = path.into_c_str()?;
