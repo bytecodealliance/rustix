@@ -332,3 +332,43 @@ pub(crate) fn _is_file_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)
         _ => unreachable!(),
     }
 }
+
+/// `fsync(fd)`
+#[inline]
+pub fn fsync<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<()> {
+    let fd = fd.as_fd();
+    _fsync(fd)
+}
+
+#[cfg(libc)]
+fn _fsync(fd: BorrowedFd<'_>) -> io::Result<()> {
+    unsafe { zero_ok(libc::fsync(fd.as_raw_fd() as libc::c_int)) }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _fsync(fd: BorrowedFd<'_>) -> io::Result<()> {
+    crate::linux_raw::fsync(fd)
+}
+
+/// `fdatasync(fd)`
+#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
+#[inline]
+pub fn fdatasync<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<()> {
+    let fd = fd.as_fd();
+    _fdatasync(fd)
+}
+
+#[cfg(all(
+    libc,
+    not(any(target_os = "ios", target_os = "macos", target_os = "redox"))
+))]
+fn _fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
+    unsafe { zero_ok(libc::fdatasync(fd.as_raw_fd() as libc::c_int)) }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
+    crate::linux_raw::fdatasync(fd)
+}
