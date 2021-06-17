@@ -21,7 +21,7 @@
 and portable APIs to this functionality, see the [`system-interface`],
 [`cap-std`], and [`fs-set-times`] crates.
 
-## Linux raw syscall support
+### Linux raw syscall support
 
 On Linux, `posish` can optionally be configured to target the raw
 Linux syscall ABI directly instead of calling through `libc`. To enable this,
@@ -30,13 +30,14 @@ pass `--cfg linux_raw` to rustc. This mode is new, and so far only supports
 x86-64 and aarch64, but a fair amount of code has been successfully adapted to
 use it, and ports to other architectures should be straightforward.
 
-This feature has two fun properties:
+This feature is fun in two ways:
  - By being implemented in Rust, avoiding `libc`, `errno`, and
    `std::io::Error`, most functions compile down to very simple code and can
    even be fully inlined into user code.
- - Memory buffers are kept in Rust slices, and file descriptors are kept in
-   [`io-lifetimes`] types, so most functions preserve memory safety and
-   [I/O safety] all the way down to the syscall.
+ - Memory buffers are kept in Rust slices, out parameters are returned as
+   regular values, and file descriptors are kept in [`io-lifetimes`] types,
+   so most functions preserve memory safety and [I/O safety] all the way down
+   to the syscalls.
 
 [`std`]: https://doc.rust-lang.org/std/
 [`getrandom`]: https://crates.io/crates/getrandom
