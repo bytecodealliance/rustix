@@ -24,11 +24,11 @@ and portable APIs to this functionality, see the [`system-interface`],
 ### Linux raw syscall support
 
 On Linux, `posish` can optionally be configured to use the raw Linux syscall
-ABI directly instead of `libc`. To enable this, set the `RUSTFLAGS` environment
-variable to `--cfg linux_raw`, or otherwise pass `--cfg linux_raw` to rustc.
-This mode is new, and so far only supports x86-64 and aarch64, but a fair
-amount of code has been successfully adapted to use it, and ports to most other
-architectures should be straightforward.
+ABI directly instead of `libc`. To enable this, use Rust nightly, and set the
+`RUSTFLAGS` environment variable to `--cfg linux_raw`, or otherwise pass
+`--cfg linux_raw` to rustc. This mode is new, and so far only supports x86-64
+and aarch64, but a fair amount of code has been successfully adapted to use it,
+and ports to most other architectures should be straightforward.
 
 This feature is fun in two ways:
  - By being implemented entirely in Rust, avoiding `libc`, `errno`, and
