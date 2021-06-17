@@ -1,5 +1,5 @@
 #[cfg(not(target_os = "wasi"))]
-use crate::io::{self, Termios};
+use crate::io::{self, Termios, Winsize};
 use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(libc)]
 use {crate::zero_ok, std::mem::MaybeUninit, unsafe_io::os::posish::AsRawFd};
@@ -70,4 +70,31 @@ pub fn ioctl_fioclex<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<()> {
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 fn _ioctl_fioclex(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { zero_ok(libc::ioctl(fd.as_raw_fd(), libc::FIOCLEX)) }
+}
+
+/// `ioctl(fd, TIOCGWINSZ)`.
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
+    let fd = fd.as_fd();
+    _ioctl_tiocgwinsz(fd)
+}
+
+#[cfg(all(libc, not(target_os = "wasi")))]
+fn _ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
+    unsafe {
+        let mut buf = MaybeUninit::uninit();
+        zero_ok(libc::ioctl(
+            fd.as_raw_fd(),
+            libc::TIOCGWINSZ.into(),
+            buf.as_mut_ptr(),
+        ))?;
+        Ok(buf.assume_init())
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
+    crate::linux_raw::ioctl_tiocgwinsz(fd)
 }

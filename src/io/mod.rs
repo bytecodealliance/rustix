@@ -25,7 +25,7 @@ pub use fd::ttyname;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use ioctl::ioctl_fioclex;
 #[cfg(not(target_os = "wasi"))]
-pub use ioctl::ioctl_tcgets;
+pub use ioctl::{ioctl_tcgets, ioctl_tiocgwinsz};
 pub use poll::{PollFd, PollFdVec, PollFlags};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use rdadvise::rdadvise;
@@ -46,6 +46,14 @@ pub type Termios = libc::termios;
 /// Re-export `termios`.
 #[cfg(linux_raw)]
 pub type Termios = linux_raw_sys::general::termios;
+
+/// Re-export `winsize`.
+#[cfg(all(libc, not(target_os = "wasi")))]
+pub type Winsize = libc::winsize;
+
+/// Re-export `winsize`.
+#[cfg(linux_raw)]
+pub type Winsize = linux_raw_sys::general::winsize;
 
 /// Re-export `ICANON`.
 #[cfg(all(libc, not(target_os = "wasi")))]
