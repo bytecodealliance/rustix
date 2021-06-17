@@ -142,7 +142,7 @@ pub struct PollFdVec<'fd> {
 impl<'fd> PollFdVec<'fd> {
     /// Construct a new empty `PollFdVec`.
     #[inline]
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self { fds: Vec::new() }
     }
 

@@ -47,6 +47,7 @@ impl FileType {
     }
 
     /// Construct a `FileType` from the `st_mode` field of a `Stat`.
+    #[inline]
     pub const fn from_mode(st_mode: Mode) -> Self {
         Self::from_raw_mode(st_mode.bits())
     }
