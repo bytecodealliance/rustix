@@ -17,6 +17,14 @@ use conv::{
     ret_usize, ret_void_star, slice_addr, slice_as_mut_ptr, socklen_t, umode_t, void_star,
 };
 use io_lifetimes::{BorrowedFd, OwnedFd};
+#[cfg(target_pointer_width = "64")]
+use linux_raw_sys::general::stat;
+#[cfg(target_arch = "x86")]
+use linux_raw_sys::general::{
+    __NR_mmap2, __NR_socketcall, SYS_ACCEPT4, SYS_BIND, SYS_CONNECT, SYS_GETPEERNAME,
+    SYS_GETSOCKNAME, SYS_GETSOCKOPT, SYS_LISTEN, SYS_RECVFROM, SYS_SENDTO, SYS_SETSOCKOPT,
+    SYS_SHUTDOWN, SYS_SOCKET, SYS_SOCKETPAIR,
+};
 use linux_raw_sys::{
     general::{
         __NR_accept4, __NR_bind, __NR_chdir, __NR_clock_getres, __NR_clock_gettime,
@@ -34,7 +42,7 @@ use linux_raw_sys::{
     general::{
         __kernel_clockid_t, __kernel_gid_t, __kernel_loff_t, __kernel_pid_t,
         __kernel_sockaddr_storage, __kernel_uid_t, sockaddr_in, sockaddr_in6, sockaddr_un,
-        socklen_t, stat, statfs64, termios, timespec, umode_t, winsize,
+        socklen_t, statfs64, termios, umode_t, winsize,
     },
     general::{
         AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD,
@@ -43,11 +51,11 @@ use linux_raw_sys::{
     },
     v5_11::{general::__NR_openat2, general::open_how},
     v5_4::{
-        general::statx,
         general::{
             __NR_copy_file_range, __NR_getrandom, __NR_memfd_create, __NR_preadv2, __NR_pwritev2,
             __NR_statx, __NR_userfaultfd,
         },
+        general::{__kernel_timespec, statx},
         general::{F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ},
     },
 };
@@ -59,8 +67,22 @@ use std::{
 };
 #[cfg(target_pointer_width = "32")]
 use {
-    crate::linux_raw::conv::{hi, lo},
-    linux_raw_sys::{errno::EINVAL, unistd::__NR_clock_nanosleep_time64},
+    crate::linux_raw::conv::{hi, i64_hi, i64_lo, lo},
+    linux_raw_sys::{
+        errno::EINVAL,
+        general::stat64 as stat,
+        general::timespec as __kernel_old_timespec,
+        general::CLOCK_REALTIME,
+        general::{
+            __NR__llseek, __NR_fcntl64, __NR_fstat64, __NR_fstatat64, __NR_fstatfs64,
+            __NR_ftruncate64,
+        },
+        v5_4::general::{
+            __NR_clock_getres_time64, __NR_clock_gettime64, __NR_clock_nanosleep_time64,
+            __NR_utimensat_time64,
+        },
+    },
+    std::convert::TryInto,
 };
 
 #[inline]
@@ -130,10 +152,44 @@ pub(crate) fn openat2(
 }
 
 #[inline]
-pub(crate) fn clock_gettime(which_clock: __kernel_clockid_t) -> timespec {
+pub(crate) fn clock_gettime(which_clock: __kernel_clockid_t) -> __kernel_timespec {
+    // TODO: Linux makes clock_gettime available through the vDSO, which is
+    // faster, but more complex to locate and parse before we can call it.
+    #[cfg(target_pointer_width = "32")]
     unsafe {
-        // TODO: Linux makes clock_gettime available through the vDSO, which is
-        // faster, but more complex to locate and parse before we can call it.
+        let mut result = MaybeUninit::uninit();
+        let _ = ret(syscall2(
+            __NR_clock_gettime64,
+            clockid_t(which_clock),
+            out(&mut result),
+        ))
+        .or_else(|err| {
+            // Ordinarily posish doesn't like to emulate system calls, but in
+            // the case of time APIs, it's specific to Linux, specific to
+            // 32-bit architectures *and* specific to old kernel versions, and
+            // it's not that hard to fix up here, so that no other code needs
+            // to worry about this.
+            if err == io::Error::NOSYS {
+                let mut old_result = MaybeUninit::<__kernel_old_timespec>::uninit();
+                let res = ret(syscall2(
+                    __NR_clock_gettime,
+                    clockid_t(which_clock),
+                    out(&mut old_result),
+                ));
+                let old_result = *old_result.as_ptr();
+                *result.as_mut_ptr() = __kernel_timespec {
+                    tv_sec: old_result.tv_sec.into(),
+                    tv_nsec: old_result.tv_nsec.into(),
+                };
+                res
+            } else {
+                Err(err)
+            }
+        });
+        result.assume_init()
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
         let mut result = MaybeUninit::uninit();
         syscall2(__NR_clock_gettime, clockid_t(which_clock), out(&mut result));
         result.assume_init()
@@ -141,7 +197,37 @@ pub(crate) fn clock_gettime(which_clock: __kernel_clockid_t) -> timespec {
 }
 
 #[inline]
-pub(crate) fn clock_getres(which_clock: __kernel_clockid_t) -> timespec {
+pub(crate) fn clock_getres(which_clock: __kernel_clockid_t) -> __kernel_timespec {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        let mut result = MaybeUninit::uninit();
+        let _ = ret(syscall2(
+            __NR_clock_getres_time64,
+            clockid_t(which_clock),
+            out(&mut result),
+        ))
+        .or_else(|err| {
+            // See the comments in `clock_gettime` about emulation.
+            if err == io::Error::NOSYS {
+                let mut old_result = MaybeUninit::<__kernel_old_timespec>::uninit();
+                let res = ret(syscall2(
+                    __NR_clock_getres,
+                    clockid_t(which_clock),
+                    out(&mut old_result),
+                ));
+                let old_result = *old_result.as_ptr();
+                *result.as_mut_ptr() = __kernel_timespec {
+                    tv_sec: old_result.tv_sec.into(),
+                    tv_nsec: old_result.tv_nsec.into(),
+                };
+                res
+            } else {
+                Err(err)
+            }
+        });
+        result.assume_init()
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         let mut result = MaybeUninit::uninit();
         syscall2(__NR_clock_getres, clockid_t(which_clock), out(&mut result));
@@ -165,7 +251,7 @@ pub(crate) fn read(fd: BorrowedFd<'_>, buffer: &mut [u8]) -> io::Result<usize> {
 pub(crate) fn pread(fd: BorrowedFd<'_>, buffer: &[u8], pos: u64) -> io::Result<usize> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
-        ret_usize(syscall6(
+        ret_usize(syscall5(
             __NR_pread64,
             borrowed_fd(fd),
             slice_addr(buffer),
@@ -187,16 +273,6 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buffer: &[u8], pos: u64) -> io::Result<u
 }
 
 pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut]) -> io::Result<usize> {
-    #[cfg(target_pointer_width = "32")]
-    unsafe {
-        ret_usize(syscall3(
-            __NR_readv,
-            borrowed_fd(fd),
-            slice_addr(bufs),
-            bufs.len(),
-        ))
-    }
-    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_usize(syscall3(
             __NR_readv,
@@ -210,7 +286,7 @@ pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut]) -> io::Result<usize
 pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], pos: u64) -> io::Result<usize> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
-        ret_usize(syscall6(
+        ret_usize(syscall5(
             __NR_preadv,
             borrowed_fd(fd),
             slice_addr(bufs),
@@ -278,7 +354,7 @@ pub(crate) fn write(fd: BorrowedFd<'_>, buffer: &[u8]) -> io::Result<usize> {
 pub(crate) fn pwrite(fd: BorrowedFd<'_>, buffer: &[u8], pos: u64) -> io::Result<usize> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
-        ret_usize(syscall6_readonly(
+        ret_usize(syscall5_readonly(
             __NR_pwrite64,
             borrowed_fd(fd),
             slice_addr(buffer),
@@ -301,16 +377,6 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buffer: &[u8], pos: u64) -> io::Result<
 
 #[inline]
 pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> {
-    #[cfg(target_pointer_width = "32")]
-    unsafe {
-        ret_usize(syscall6_readonly(
-            __NR_writev,
-            borrowed_fd(fd),
-            slice_addr(bufs),
-            bufs.len(),
-        ))
-    }
-    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_usize(syscall3_readonly(
             __NR_writev,
@@ -325,7 +391,7 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> 
 pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], pos: u64) -> io::Result<usize> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
-        ret_usize(syscall6_readonly(
+        ret_usize(syscall5_readonly(
             __NR_pwritev,
             borrowed_fd(fd),
             slice_addr(bufs),
@@ -421,8 +487,8 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, offset: i64, whence: c_uint) -> io::Resul
         ret(syscall5(
             __NR__llseek,
             borrowed_fd(fd),
-            hi(offset),
-            lo(offset),
+            i64_hi(offset),
+            i64_lo(offset),
             out(&mut result),
             c_uint(whence),
         ))
@@ -624,7 +690,7 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<statfs64> {
         ret(syscall2(
             __NR_fstatfs64,
             borrowed_fd(fd),
-            size_of::<statfs>(),
+            size_of::<statfs64>(),
             out(&mut result),
         ))
         .map(|()| result.assume_init())
@@ -1206,14 +1272,14 @@ pub(crate) fn accept(
             __NR_socketcall,
             SYS_ACCEPT4,
             slice_addr(&[
-                borrwed_fd(fd),
+                borrowed_fd(fd),
                 out(&mut storage),
                 by_mut(&mut addrlen),
                 c_uint(flags),
                 0,
                 0,
             ]),
-        ));
+        ))?;
         Ok((fd, storage.assume_init(), addrlen))
     }
 }
@@ -1229,7 +1295,7 @@ pub(crate) fn shutdown(fd: BorrowedFd<'_>, how: c_uint) -> io::Result<()> {
         ret(syscall2_readonly(
             __NR_socketcall,
             SYS_SHUTDOWN,
-            &[borrwed_fd(fd), c_uint(how), 0, 0, 0, 0],
+            &[borrowed_fd(fd), c_uint(how), 0, 0, 0, 0],
         ))
     }
 }
@@ -1261,7 +1327,7 @@ pub(crate) fn setsockopt(
             __NR_socketcall,
             SYS_SETSOCKOPT,
             slice_addr(&[
-                borrwed_fd(fd),
+                borrowed_fd(fd),
                 c_int(level),
                 c_int(name),
                 slice_addr(value),
@@ -1299,7 +1365,7 @@ pub(crate) fn getsockopt(
             __NR_socketcall,
             SYS_GETSOCKOPT,
             &[
-                borrwed_fd(fd),
+                borrowed_fd(fd),
                 c_int(level),
                 c_int(name),
                 slice_addr(value),
@@ -1341,7 +1407,7 @@ pub(crate) fn sendto(
             __NR_socketcall,
             SYS_SENDTO,
             slice_addr(&[
-                borrwed_fd(fd),
+                borrowed_fd(fd),
                 slice_addr(buf),
                 buf.len(),
                 c_uint(flags),
@@ -1383,7 +1449,7 @@ pub(crate) fn recvfrom(
             __NR_socketcall,
             SYS_RECVFROM,
             slice_addr(&[
-                borrwed_fd(fd),
+                borrowed_fd(fd),
                 slice_as_mut_ptr(buf),
                 buf.len(),
                 c_uint(flags),
@@ -1414,7 +1480,7 @@ pub(crate) fn getpeername(
         ret(syscall2(
             __NR_socketcall,
             SYS_GETPEERNAME,
-            slice_addr(&[borrwed_fd(fd), by_mut(addr), by_mut(addrlen), 0, 0, 0]),
+            slice_addr(&[borrowed_fd(fd), by_mut(addr), by_mut(addrlen), 0, 0, 0]),
         ))
     }
 }
@@ -1461,7 +1527,7 @@ pub(crate) fn bind_un(fd: BorrowedFd<'_>, addr: &sockaddr_un) -> io::Result<()> 
             __NR_socketcall,
             SYS_BIND,
             slice_addr(&[
-                borrwed_fd(fd),
+                borrowed_fd(fd),
                 by_ref(addr),
                 size_of::<sockaddr_un>(),
                 0,
@@ -1489,7 +1555,7 @@ pub(crate) fn bind_in(fd: BorrowedFd<'_>, addr: &sockaddr_in) -> io::Result<()> 
             __NR_socketcall,
             SYS_BIND,
             slice_addr(&[
-                borrwed_fd(fd),
+                borrowed_fd(fd),
                 by_ref(addr),
                 size_of::<sockaddr_in>(),
                 0,
@@ -1517,7 +1583,7 @@ pub(crate) fn bind_in6(fd: BorrowedFd<'_>, addr: &sockaddr_in6) -> io::Result<()
             __NR_socketcall,
             SYS_BIND,
             slice_addr(&[
-                borrwed_fd(fd),
+                borrowed_fd(fd),
                 by_ref(addr),
                 size_of::<sockaddr_in6>(),
                 0,
@@ -1545,7 +1611,7 @@ pub(crate) fn connect_un(fd: BorrowedFd<'_>, addr: &sockaddr_un) -> io::Result<(
             __NR_socketcall,
             SYS_CONNECT,
             slice_addr(&[
-                borrwed_fd(fd),
+                borrowed_fd(fd),
                 by_ref(addr),
                 size_of::<sockaddr_un>(),
                 0,
@@ -1573,7 +1639,7 @@ pub(crate) fn connect_in(fd: BorrowedFd<'_>, addr: &sockaddr_in) -> io::Result<(
             __NR_socketcall,
             SYS_CONNECT,
             slice_addr(&[
-                borrwed_fd(fd),
+                borrowed_fd(fd),
                 by_ref(addr),
                 size_of::<sockaddr_in>(),
                 0,
@@ -1601,7 +1667,7 @@ pub(crate) fn connect_in6(fd: BorrowedFd<'_>, addr: &sockaddr_in6) -> io::Result
             __NR_socketcall,
             SYS_CONNECT,
             slice_addr(&[
-                borrwed_fd(fd),
+                borrowed_fd(fd),
                 by_ref(addr),
                 size_of::<sockaddr_in6>(),
                 0,
@@ -1627,7 +1693,7 @@ pub(crate) fn listen(fd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
         ret(syscall2_readonly(
             __NR_socketcall,
             SYS_LISTEN,
-            slice_addr(&[borrwed_fd(fd), c_int(backlog), 0, 0, 0, 0]),
+            slice_addr(&[borrowed_fd(fd), c_int(backlog), 0, 0, 0, 0]),
         ))
     }
 }
@@ -1663,7 +1729,7 @@ pub(crate) unsafe fn mmap(
             borrowed_fd(fd),
             (offset / 4096)
                 .try_into()
-                .map_err(|_| io::Error::from_raw_os_error(EINVAL))?,
+                .map_err(|_| io::Error(EINVAL as _))?,
         ))
     }
     #[cfg(target_pointer_width = "64")]
@@ -1684,7 +1750,7 @@ pub(crate) unsafe fn mmap(
 pub(crate) fn utimensat(
     dirfd: BorrowedFd<'_>,
     pathname: Option<&CStr>,
-    utimes: &[timespec; 2],
+    utimes: &[__kernel_timespec; 2],
     flags: c_uint,
 ) -> io::Result<()> {
     #[cfg(target_pointer_width = "32")]
@@ -1696,6 +1762,36 @@ pub(crate) fn utimensat(
             slice_addr(utimes),
             c_uint(flags),
         ))
+        .or_else(|err| {
+            // See the comments in `clock_gettime` about emulation.
+            if err == io::Error::NOSYS {
+                let mut old_utimes = [
+                    __kernel_old_timespec {
+                        tv_sec: utimes[0]
+                            .tv_sec
+                            .try_into()
+                            .map_err(|_| io::Error(EINVAL as _))?,
+                        tv_nsec: utimes[0].tv_nsec as _,
+                    },
+                    __kernel_old_timespec {
+                        tv_sec: utimes[1]
+                            .tv_sec
+                            .try_into()
+                            .map_err(|_| io::Error(EINVAL as _))?,
+                        tv_nsec: utimes[1].tv_nsec as _,
+                    },
+                ];
+                ret(syscall4_readonly(
+                    __NR_utimensat,
+                    borrowed_fd(dirfd),
+                    opt_c_str(pathname),
+                    slice_addr(&old_utimes),
+                    c_uint(flags),
+                ))
+            } else {
+                Err(err)
+            }
+        })
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
@@ -1710,7 +1806,43 @@ pub(crate) fn utimensat(
 }
 
 #[inline]
-pub(crate) fn nanosleep(req: &timespec) -> Result<(), timespec> {
+pub(crate) fn nanosleep(req: &__kernel_timespec) -> Result<(), __kernel_timespec> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        let mut rem = MaybeUninit::<__kernel_timespec>::uninit();
+        ret(syscall4(
+            __NR_clock_nanosleep_time64,
+            clockid_t(CLOCK_REALTIME as _),
+            c_int(0),
+            by_ref(req),
+            out(&mut rem),
+        ))
+        .or_else(|err| {
+            // See the comments in `clock_gettime` about emulation.
+            if err == io::Error::NOSYS {
+                let old_req = __kernel_old_timespec {
+                    tv_sec: req.tv_sec.try_into().map_err(|_| io::Error(EINVAL as _))?,
+                    tv_nsec: req.tv_nsec as _,
+                };
+                let mut old_rem = MaybeUninit::<__kernel_old_timespec>::uninit();
+                let res = ret(syscall2(
+                    __NR_nanosleep,
+                    by_ref(&old_req),
+                    out(&mut old_rem),
+                ));
+                let old_rem = *old_rem.as_ptr();
+                *rem.as_mut_ptr() = __kernel_timespec {
+                    tv_sec: old_rem.tv_sec.into(),
+                    tv_nsec: old_rem.tv_nsec.into(),
+                };
+                res
+            } else {
+                Err(err)
+            }
+        })
+        .map_err(|_err| rem.assume_init())
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         let mut rem = MaybeUninit::uninit();
         ret(syscall2(__NR_nanosleep, by_ref(req), out(&mut rem))).map_err(|_err| rem.assume_init())
@@ -1720,8 +1852,8 @@ pub(crate) fn nanosleep(req: &timespec) -> Result<(), timespec> {
 #[inline]
 pub(crate) fn clock_nanosleep_relative(
     id: __kernel_clockid_t,
-    req: &timespec,
-) -> Result<(), timespec> {
+    req: &__kernel_timespec,
+) -> Result<(), __kernel_timespec> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         let mut rem = MaybeUninit::uninit();
@@ -1732,7 +1864,32 @@ pub(crate) fn clock_nanosleep_relative(
             by_ref(req),
             out(&mut rem),
         ))
-        .map_err(|_err| rmpt.assume_init())
+        .or_else(|err| {
+            // See the comments in `clock_gettime` about emulation.
+            if err == io::Error::NOSYS {
+                let old_req = __kernel_old_timespec {
+                    tv_sec: req.tv_sec.try_into().map_err(|_| io::Error(EINVAL as _))?,
+                    tv_nsec: req.tv_nsec as _,
+                };
+                let mut old_rem = MaybeUninit::<__kernel_old_timespec>::uninit();
+                let res = ret(syscall4(
+                    __NR_clock_nanosleep,
+                    clockid_t(id),
+                    c_int(0),
+                    by_ref(&old_req),
+                    out(&mut old_rem),
+                ));
+                let old_rem = *old_rem.as_ptr();
+                *rem.as_mut_ptr() = __kernel_timespec {
+                    tv_sec: old_rem.tv_sec.into(),
+                    tv_nsec: old_rem.tv_nsec.into(),
+                };
+                res
+            } else {
+                Err(err)
+            }
+        })
+        .map_err(|_err| rem.assume_init())
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
@@ -1749,7 +1906,10 @@ pub(crate) fn clock_nanosleep_relative(
 }
 
 #[inline]
-pub(crate) fn clock_nanosleep_absolute(id: __kernel_clockid_t, req: &timespec) -> io::Result<()> {
+pub(crate) fn clock_nanosleep_absolute(
+    id: __kernel_clockid_t,
+    req: &__kernel_timespec,
+) -> io::Result<()> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         ret(syscall4_readonly(
@@ -1759,6 +1919,24 @@ pub(crate) fn clock_nanosleep_absolute(id: __kernel_clockid_t, req: &timespec) -
             by_ref(req),
             0usize,
         ))
+        .or_else(|err| {
+            // See the comments in `clock_gettime` about emulation.
+            if err == io::Error::NOSYS {
+                let old_req = __kernel_old_timespec {
+                    tv_sec: req.tv_sec.try_into().map_err(|_| io::Error(EINVAL as _))?,
+                    tv_nsec: req.tv_nsec as _,
+                };
+                ret(syscall4_readonly(
+                    __NR_clock_nanosleep,
+                    clockid_t(id),
+                    c_int(0),
+                    by_ref(&old_req),
+                    0usize,
+                ))
+            } else {
+                Err(err)
+            }
+        })
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {

@@ -1,3 +1,4 @@
+use crate::time::Timespec;
 #[cfg(all(
     libc,
     not(any(
@@ -14,12 +15,6 @@
 use std::ptr;
 #[cfg(libc)]
 use {crate::zero_ok, std::mem::MaybeUninit};
-
-#[cfg(libc)]
-pub use libc::timespec;
-
-#[cfg(linux_raw)]
-pub use linux_raw_sys::general::timespec;
 
 /// `clockid_t`
 #[cfg(all(
@@ -85,8 +80,8 @@ pub enum ClockId {
 #[cfg(all(libc, not(target_os = "wasi")))]
 #[inline]
 #[must_use]
-pub fn clock_getres(id: ClockId) -> timespec {
-    let mut timespec = MaybeUninit::<timespec>::uninit();
+pub fn clock_getres(id: ClockId) -> Timespec {
+    let mut timespec = MaybeUninit::<Timespec>::uninit();
     unsafe {
         let _ = libc::clock_getres(id as libc::clockid_t, timespec.as_mut_ptr());
         timespec.assume_init()
@@ -97,7 +92,7 @@ pub fn clock_getres(id: ClockId) -> timespec {
 #[cfg(linux_raw)]
 #[inline]
 #[must_use]
-pub fn clock_getres(id: ClockId) -> linux_raw_sys::general::timespec {
+pub fn clock_getres(id: ClockId) -> Timespec {
     crate::linux_raw::clock_getres(id as i32)
 }
 
@@ -105,8 +100,8 @@ pub fn clock_getres(id: ClockId) -> linux_raw_sys::general::timespec {
 #[cfg(all(libc, not(target_os = "wasi")))]
 #[inline]
 #[must_use]
-pub fn clock_gettime(id: ClockId) -> timespec {
-    let mut timespec = MaybeUninit::<timespec>::uninit();
+pub fn clock_gettime(id: ClockId) -> Timespec {
+    let mut timespec = MaybeUninit::<Timespec>::uninit();
     // Use `unwrap()` here because `clock_getres` can fail if the clock itself
     // overflows a number of seconds, but if that happens, the monotonic clocks
     // can't maintain their invariants, or the realtime clocks aren't properly
@@ -125,7 +120,7 @@ pub fn clock_gettime(id: ClockId) -> timespec {
 #[cfg(linux_raw)]
 #[inline]
 #[must_use]
-pub fn clock_gettime(id: ClockId) -> linux_raw_sys::general::timespec {
+pub fn clock_gettime(id: ClockId) -> Timespec {
     crate::linux_raw::clock_gettime(id as i32)
 }
 
@@ -141,8 +136,8 @@ pub fn clock_gettime(id: ClockId) -> linux_raw_sys::general::timespec {
     target_os = "wasi",
 ))))]
 #[inline]
-pub fn clock_nanosleep_relative(id: ClockId, request: &timespec) -> Result<(), timespec> {
-    let mut remain = MaybeUninit::<timespec>::uninit();
+pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Result<(), Timespec> {
+    let mut remain = MaybeUninit::<Timespec>::uninit();
     let flags = 0;
     unsafe {
         zero_ok(libc::clock_nanosleep(
@@ -158,10 +153,7 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &timespec) -> Result<(), t
 /// `clock_nanosleep(id, 0, request, remain)`
 #[cfg(linux_raw)]
 #[inline]
-pub fn clock_nanosleep_relative(
-    id: ClockId,
-    request: &linux_raw_sys::general::timespec,
-) -> Result<(), linux_raw_sys::general::timespec> {
+pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Result<(), Timespec> {
     crate::linux_raw::clock_nanosleep_relative(id as i32, request)
 }
 
@@ -177,7 +169,7 @@ pub fn clock_nanosleep_relative(
     target_os = "wasi",
 ))))]
 #[inline]
-pub fn clock_nanosleep_absolute(id: ClockId, request: &timespec) -> Result<(), ()> {
+pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> Result<(), ()> {
     let flags = libc::TIMER_ABSTIME;
     zero_ok(unsafe {
         libc::clock_nanosleep(id as libc::clockid_t, flags, request, ptr::null_mut())
@@ -188,18 +180,15 @@ pub fn clock_nanosleep_absolute(id: ClockId, request: &timespec) -> Result<(), (
 /// `clock_nanosleep(id, TIMER_ABSTIME, request, NULL)`
 #[cfg(linux_raw)]
 #[inline]
-pub fn clock_nanosleep_absolute(
-    id: ClockId,
-    request: &linux_raw_sys::general::timespec,
-) -> Result<(), ()> {
+pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> Result<(), ()> {
     crate::linux_raw::clock_nanosleep_absolute(id as i32, request).map_err(|_err| ())
 }
 
 /// `nanosleep(request, remain)`
 #[cfg(libc)]
 #[inline]
-pub fn nanosleep(request: &timespec) -> Result<(), timespec> {
-    let mut remain = MaybeUninit::<timespec>::uninit();
+pub fn nanosleep(request: &Timespec) -> Result<(), Timespec> {
+    let mut remain = MaybeUninit::<Timespec>::uninit();
     unsafe {
         zero_ok(libc::nanosleep(request, remain.as_mut_ptr())).map_err(|_| remain.assume_init())
     }
@@ -208,8 +197,6 @@ pub fn nanosleep(request: &timespec) -> Result<(), timespec> {
 /// `nanosleep(request, remain)`
 #[cfg(linux_raw)]
 #[inline]
-pub fn nanosleep(
-    request: &linux_raw_sys::general::timespec,
-) -> Result<(), linux_raw_sys::general::timespec> {
+pub fn nanosleep(request: &Timespec) -> Result<(), Timespec> {
     crate::linux_raw::nanosleep(request)
 }
