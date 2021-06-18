@@ -21,9 +21,9 @@ use libc::{dirent as libc_dirent, readdir as libc_readdir};
     )
 ))]
 use libc::{dirent64 as libc_dirent, readdir64 as libc_readdir};
-use std::{ffi::CStr, ptr};
 #[cfg(target_os = "wasi")]
-use std::{ffi::CString, mem::MaybeUninit};
+use std::ffi::CString;
+use std::{ffi::CStr, ptr};
 use unsafe_io::{
     os::posish::{AsRawFd, RawFd},
     OwnsRaw,
@@ -41,6 +41,7 @@ use {
 use {
     errno::{errno, set_errno, Errno},
     std::convert::TryInto,
+    std::mem::MaybeUninit,
     unsafe_io::os::posish::IntoRawFd,
 };
 
@@ -135,8 +136,8 @@ impl Dir {
     #[cfg(libc)]
     pub fn read(&mut self) -> Option<io::Result<Entry>> {
         set_errno(Errno(0));
-        let dirent = unsafe { libc_readdir(self.0.as_ptr()) };
-        if dirent.is_null() {
+        let dirent_ptr = unsafe { libc_readdir(self.0.as_ptr()) };
+        if dirent_ptr.is_null() {
             let curr_errno = errno().0;
             if curr_errno == 0 {
                 // We successfully reached the end of the stream.
@@ -147,23 +148,17 @@ impl Dir {
             }
         } else {
             // We successfully read an entry.
-            Some(Ok(unsafe {
-                Entry {
-                    #[cfg(not(target_os = "wasi"))]
-                    dirent: *dirent,
+            unsafe {
+                let result = Entry {
+                    dirent: read_dirent(dirent_ptr),
 
                     // TODO: When WASI gains a `d_loc` field, update `Entry::seek_loc`.
                     #[cfg(target_os = "wasi")]
-                    dirent: libc_dirent {
-                        d_ino: (*dirent).d_ino,
-                        d_type: (*dirent).d_type,
-                        d_name: MaybeUninit::uninit().assume_init(),
-                    },
+                    name: CStr::from_ptr((*dirent_ptr).d_name.as_ptr()).to_owned(),
+                };
 
-                    #[cfg(target_os = "wasi")]
-                    name: CStr::from_ptr((*dirent).d_name.as_ptr()).to_owned(),
-                }
-            }))
+                Some(Ok(result))
+            }
         }
     }
 
@@ -245,6 +240,98 @@ impl Dir {
             Some(Ok(()))
         }
     }
+}
+
+// A `dirent` pointer returned from `readdir` may not point to a full `dirent`
+// struct, as the name is NUL-terminated and memory may not be allocated for
+// the full extent of the struct. Copy the fields one at a time.
+#[cfg(libc)]
+unsafe fn read_dirent(dirent_ptr: *const libc_dirent) -> libc_dirent {
+    let d_type = (*dirent_ptr).d_type;
+
+    #[cfg(not(any(
+        target_os = "dragonfly",
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+        target_os = "wasi",
+    )))]
+    let d_off = (*dirent_ptr).d_off;
+
+    #[cfg(not(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd")))]
+    let d_ino = (*dirent_ptr).d_ino;
+
+    #[cfg(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))]
+    let d_fileno = (*dirent_ptr).d_fileno;
+
+    #[cfg(not(target_os = "wasi"))]
+    let d_reclen = (*dirent_ptr).d_reclen;
+
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "netbsd",
+        target_os = "openbsd",
+        target_os = "ios",
+        target_os = "macos"
+    ))]
+    let d_namlen = (*dirent_ptr).d_namlen;
+
+    #[cfg(any(target_os = "ios", target_os = "macos"))]
+    let d_seekoff = (*dirent_ptr).d_seekoff;
+
+    // Construct the dirent. Rust will give us an error if any OS has a dirent
+    // with a field that we missed here. And we can avoid blindly copying the
+    // whole `d_name` field, which may not be entirely allocated.
+    #[cfg_attr(target_os = "wasi", allow(unused_mut))]
+    let mut dirent = libc_dirent {
+        d_type,
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "wasi",
+        )))]
+        d_off,
+        #[cfg(not(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd")))]
+        d_ino,
+        #[cfg(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))]
+        d_fileno,
+        #[cfg(not(target_os = "wasi"))]
+        d_reclen,
+        #[cfg(any(
+            target_os = "freebsd",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "ios",
+            target_os = "macos"
+        ))]
+        d_namlen,
+        #[cfg(any(target_os = "ios", target_os = "macos"))]
+        d_seekoff,
+        // The `d_name` field is NUL-terminated, and we need to be
+        // careful not to read bytes past the NUL, even though
+        // they're within the nominal extent of the
+        // `struct dirent`, because they may not be allocated. So
+        // leave it uninitialized here and copy it below.
+        d_name: MaybeUninit::uninit().assume_init(),
+    };
+
+    // Copy from d_name, reading up to and including the first NUL.
+    #[cfg(not(target_os = "wasi"))]
+    {
+        let name_len = CStr::from_ptr((*dirent_ptr).d_name.as_ptr())
+            .to_bytes()
+            .len()
+            + 1;
+        dirent.d_name[..name_len].copy_from_slice(&(*dirent_ptr).d_name[..name_len]);
+    }
+
+    dirent
 }
 
 /// `Dir` implements `Send` but not `Sync`, because we use `readdir` which is
