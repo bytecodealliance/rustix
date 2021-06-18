@@ -1,4 +1,5 @@
 fn main() {
-    #[cfg(not(linux_raw))]
-    println!("cargo:rustc-cfg=libc");
+    if std::env::var("CARGO_CFG_LINUX_RAW").is_err() {
+        println!("cargo:rustc-cfg=libc");
+    }
 }
