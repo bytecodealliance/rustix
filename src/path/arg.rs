@@ -68,7 +68,7 @@ impl Arg for &str {
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -79,7 +79,7 @@ impl Arg for &str {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -110,7 +110,7 @@ impl Arg for String {
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -121,7 +121,7 @@ impl Arg for String {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -141,7 +141,7 @@ impl Arg for String {
 impl Arg for &OsStr {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.to_str().ok_or(io::Error::ILSEQ)
+        self.to_str().ok_or(io::Error::INVAL)
     }
 
     #[inline]
@@ -153,7 +153,7 @@ impl Arg for &OsStr {
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -164,7 +164,7 @@ impl Arg for &OsStr {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -184,7 +184,7 @@ impl Arg for &OsStr {
 impl Arg for OsString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_os_str().to_str().ok_or(io::Error::ILSEQ)
+        self.as_os_str().to_str().ok_or(io::Error::INVAL)
     }
 
     #[inline]
@@ -196,7 +196,7 @@ impl Arg for OsString {
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -207,7 +207,7 @@ impl Arg for OsString {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self.into_vec()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.into_vec()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -227,7 +227,7 @@ impl Arg for OsString {
 impl Arg for &Path {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_os_str().to_str().ok_or(io::Error::ILSEQ)
+        self.as_os_str().to_str().ok_or(io::Error::INVAL)
     }
 
     #[inline]
@@ -239,7 +239,7 @@ impl Arg for &Path {
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -250,7 +250,7 @@ impl Arg for &Path {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -270,7 +270,7 @@ impl Arg for &Path {
 impl Arg for PathBuf {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_os_str().to_str().ok_or(io::Error::ILSEQ)
+        self.as_os_str().to_str().ok_or(io::Error::INVAL)
     }
 
     #[inline]
@@ -282,7 +282,7 @@ impl Arg for PathBuf {
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -293,7 +293,7 @@ impl Arg for PathBuf {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self.into_os_string().into_vec()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.into_os_string().into_vec()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -313,7 +313,7 @@ impl Arg for PathBuf {
 impl Arg for &CStr {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.to_str().map_err(|_utf8_err| io::Error::ILSEQ)
+        self.to_str().map_err(|_utf8_err| io::Error::INVAL)
     }
 
     #[inline]
@@ -352,7 +352,7 @@ impl Arg for &CStr {
 impl Arg for CString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.to_str().map_err(|_utf8_err| io::Error::ILSEQ)
+        self.to_str().map_err(|_utf8_err| io::Error::INVAL)
     }
 
     #[inline]
@@ -403,7 +403,7 @@ impl<'a> Arg for Cow<'a, str> {
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_ref()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.as_ref()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -418,7 +418,7 @@ impl<'a> Arg for Cow<'a, str> {
                 Cow::Owned(s) => CString::new(s),
                 Cow::Borrowed(s) => CString::new(s),
             }
-            .map_err(|_cstr_err| io::Error::ILSEQ)?,
+            .map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -438,7 +438,7 @@ impl<'a> Arg for Cow<'a, str> {
 impl<'a> Arg for Cow<'a, OsStr> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        (**self).to_str().ok_or(io::Error::ILSEQ)
+        (**self).to_str().ok_or(io::Error::INVAL)
     }
 
     #[inline]
@@ -450,7 +450,7 @@ impl<'a> Arg for Cow<'a, OsStr> {
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -465,7 +465,7 @@ impl<'a> Arg for Cow<'a, OsStr> {
                 Cow::Owned(os) => CString::new(os.into_vec()),
                 Cow::Borrowed(os) => CString::new(os.as_bytes()),
             }
-            .map_err(|_cstr_err| io::Error::ILSEQ)?,
+            .map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -485,7 +485,7 @@ impl<'a> Arg for Cow<'a, OsStr> {
 impl<'a> Arg for Cow<'a, CStr> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.to_str().map_err(|_utf8_err| io::Error::ILSEQ)
+        self.to_str().map_err(|_utf8_err| io::Error::INVAL)
     }
 
     #[inline]
@@ -525,7 +525,7 @@ impl<'a> Arg for Cow<'a, CStr> {
 impl<'a> Arg for Component<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_os_str().to_str().ok_or(io::Error::ILSEQ)
+        self.as_os_str().to_str().ok_or(io::Error::INVAL)
     }
 
     #[inline]
@@ -537,7 +537,7 @@ impl<'a> Arg for Component<'a> {
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -548,7 +548,7 @@ impl<'a> Arg for Component<'a> {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -568,7 +568,7 @@ impl<'a> Arg for Component<'a> {
 impl<'a> Arg for Components<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_path().to_str().ok_or(io::Error::ILSEQ)
+        self.as_path().to_str().ok_or(io::Error::INVAL)
     }
 
     #[inline]
@@ -581,7 +581,7 @@ impl<'a> Arg for Components<'a> {
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_path().as_os_str().as_bytes())
-                .map_err(|_cstr_err| io::Error::ILSEQ)?,
+                .map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -593,7 +593,7 @@ impl<'a> Arg for Components<'a> {
     {
         Ok(Cow::Owned(
             CString::new(self.as_path().as_os_str().as_bytes())
-                .map_err(|_cstr_err| io::Error::ILSEQ)?,
+                .map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -613,7 +613,7 @@ impl<'a> Arg for Components<'a> {
 impl<'a> Arg for Iter<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_path().to_str().ok_or(io::Error::ILSEQ)
+        self.as_path().to_str().ok_or(io::Error::INVAL)
     }
 
     #[inline]
@@ -626,7 +626,7 @@ impl<'a> Arg for Iter<'a> {
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_path().as_os_str().as_bytes())
-                .map_err(|_cstr_err| io::Error::ILSEQ)?,
+                .map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -638,7 +638,7 @@ impl<'a> Arg for Iter<'a> {
     {
         Ok(Cow::Owned(
             CString::new(self.as_path().as_os_str().as_bytes())
-                .map_err(|_cstr_err| io::Error::ILSEQ)?,
+                .map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -658,7 +658,7 @@ impl<'a> Arg for Iter<'a> {
 impl Arg for &[u8] {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        str::from_utf8(self).map_err(|_utf8_err| io::Error::ILSEQ)
+        str::from_utf8(self).map_err(|_utf8_err| io::Error::INVAL)
     }
 
     #[inline]
@@ -670,7 +670,7 @@ impl Arg for &[u8] {
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
-            CString::new(*self).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(*self).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -681,7 +681,7 @@ impl Arg for &[u8] {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -701,7 +701,7 @@ impl Arg for &[u8] {
 impl Arg for Vec<u8> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        str::from_utf8(self).map_err(|_utf8_err| io::Error::ILSEQ)
+        str::from_utf8(self).map_err(|_utf8_err| io::Error::INVAL)
     }
 
     #[inline]
@@ -713,7 +713,7 @@ impl Arg for Vec<u8> {
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_slice()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.as_slice()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -724,7 +724,7 @@ impl Arg for Vec<u8> {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -744,7 +744,7 @@ impl Arg for Vec<u8> {
 impl Arg for DecInt {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_os_str().to_str().ok_or(io::Error::ILSEQ)
+        self.as_os_str().to_str().ok_or(io::Error::INVAL)
     }
 
     #[inline]
@@ -756,7 +756,7 @@ impl Arg for DecInt {
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -767,7 +767,7 @@ impl Arg for DecInt {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::ILSEQ)?,
+            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -1128,6 +1128,57 @@ fn test_arg() {
     #[cfg(windows)]
     assert_eq!(
         &['4' as u16, '3' as _, '1' as _, '1' as _, 'o' as _],
+        t.as_os_str()
+    );
+}
+
+#[test]
+fn test_invalid() {
+    use cstr::cstr;
+    use std::borrow::Borrow;
+
+    let t: &[u8] = b"hello\xc0world";
+    assert_eq!(t.as_str().unwrap_err(), io::Error::INVAL);
+    assert_eq!("hello\u{fffd}world".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!(b"hello\xc0world"),
+        Borrow::borrow(&t.as_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(
+        cstr!(b"hello\xc0world"),
+        Borrow::borrow(&t.clone().into_c_str().unwrap())
+    );
+    #[cfg(not(windows))]
+    assert_eq!(b"hello\xc0world", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &[
+            'h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _, 0xc0, 'w' as _, 'o' as _, 'r' as _,
+            'l' as _, 'd' as _
+        ],
+        t.as_os_str()
+    );
+}
+
+#[test]
+fn test_embedded_nul() {
+    let t: &[u8] = b"hello\0world";
+    assert_eq!("hello\0world", t.as_str().unwrap());
+    assert_eq!("hello\0world".to_owned(), Arg::to_string_lossy(&t));
+    #[cfg(not(windows))]
+    assert_eq!(t.as_c_str().unwrap_err(), io::Error::INVAL);
+    #[cfg(not(windows))]
+    assert_eq!(t.clone().into_c_str().unwrap_err(), io::Error::INVAL);
+    #[cfg(not(windows))]
+    assert_eq!(b"hello\0world", t.as_maybe_utf8_bytes());
+    #[cfg(windows)]
+    assert_eq!(
+        &[
+            'h' as u16, 'e' as _, 'l' as _, 'l' as _, 'o' as _, 0, 'w' as _, 'o' as _, 'r' as _,
+            'l' as _, 'd' as _
+        ],
         t.as_os_str()
     );
 }
