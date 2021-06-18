@@ -12,9 +12,9 @@ use arch::{
     syscall6, syscall6_readonly,
 };
 use conv::{
-    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, loff_t_from_u64, opt_c_str,
-    opt_mut, opt_ref, out, owned_fd, ret, ret_c_int, ret_c_uint, ret_owned_fd, ret_usize,
-    ret_void_star, slice_addr, slice_as_mut_ptr, socklen_t, umode_t, void_star,
+    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, opt_c_str, opt_mut, opt_ref, out,
+    owned_fd, ret, ret_c_int, ret_c_uint, ret_owned_fd, ret_usize, ret_void_star, slice_addr,
+    slice_as_mut_ptr, socklen_t, umode_t, void_star,
 };
 use io_lifetimes::{BorrowedFd, OwnedFd};
 #[cfg(not(target_arch = "x86"))]
@@ -90,7 +90,7 @@ use {
 };
 #[cfg(target_pointer_width = "64")]
 use {
-    conv::loff_t,
+    conv::{loff_t, loff_t_from_u64},
     linux_raw_sys::{
         general::stat,
         general::{
@@ -543,6 +543,19 @@ pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
 
 #[inline]
 pub(crate) fn fallocate(fd: BorrowedFd, mode: c_int, offset: u64, len: u64) -> io::Result<()> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret(syscall6_readonly(
+            __NR_fallocate,
+            borrowed_fd(fd),
+            c_int(mode),
+            hi(offset),
+            lo(offset),
+            hi(len),
+            lo(len),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret(syscall4_readonly(
             __NR_fallocate,
@@ -556,6 +569,36 @@ pub(crate) fn fallocate(fd: BorrowedFd, mode: c_int, offset: u64, len: u64) -> i
 
 #[inline]
 pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: c_int) -> io::Result<()> {
+    // On arm and powerpc, the system calls are reordered so that the len and
+    // pos argument pairs are aligned.
+    #[cfg(any(target_arch = "arm", target_arch = "powerpc"))]
+    unsafe {
+        ret(syscall6_readonly(
+            __NR_fadvise64,
+            borrowed_fd(fd),
+            c_int(advice),
+            hi(pos),
+            lo(pos),
+            hi(len),
+            lo(len),
+        ))
+    }
+    #[cfg(all(
+        target_pointer_width = "32",
+        not(any(target_arch = "arm", target_arch = "powerpc"))
+    ))]
+    unsafe {
+        ret(syscall6_readonly(
+            __NR_fadvise64,
+            borrowed_fd(fd),
+            hi(pos),
+            lo(pos),
+            hi(len),
+            lo(len),
+            c_int(advice),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret(syscall4_readonly(
             __NR_fadvise64,
