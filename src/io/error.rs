@@ -861,6 +861,36 @@ impl Error {
     }
 
     /// Extract the raw OS error number from this error.
+    ///
+    /// This isn't a `From` conversion because it's expected to be relatively
+    /// uncommon.
+    #[inline]
+    #[cfg(libc)]
+    pub fn from_io_error(io_err: &std::io::Error) -> Option<Self> {
+        io_err
+            .raw_os_error()
+            .and_then(|raw| if raw != 0 { Some(Self(raw)) } else { None })
+    }
+
+    /// Extract the raw OS error number from this error.
+    ///
+    /// This isn't a `From` conversion because it's expected to be relatively
+    /// uncommon.
+    #[inline]
+    #[cfg(linux_raw)]
+    pub fn from_io_error(io_err: &std::io::Error) -> Option<Self> {
+        io_err.raw_os_error().and_then(|raw| {
+            // Maintain the invariant that we only hold error codes in Linux's
+            // range.
+            if (1..4096).contains(&raw) {
+                Some(Self(raw as u16))
+            } else {
+                None
+            }
+        })
+    }
+
+    /// Extract the raw OS error number from this error.
     #[inline]
     pub const fn raw_os_error(self) -> i32 {
         // This should be `i32::from` but that isn't a `const fn`.
