@@ -12,6 +12,12 @@ use std::{
 };
 use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 
+/// Convert `SYS_*` constants for socketcall.
+#[cfg(target_arch = "x86")]
+pub(super) fn x86_sys(sys: u32) -> usize {
+    sys as usize
+}
+
 #[cfg(all(target_endian = "little", target_pointer_width = "32"))]
 #[inline]
 pub(super) fn lo(x: u64) -> usize {

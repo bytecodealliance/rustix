@@ -136,25 +136,34 @@ pub fn clock_gettime(id: ClockId) -> Timespec {
     target_os = "wasi",
 ))))]
 #[inline]
-pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Result<(), Timespec> {
+pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRelativeResult {
     let mut remain = MaybeUninit::<Timespec>::uninit();
     let flags = 0;
     unsafe {
-        zero_ok(libc::clock_nanosleep(
+        match zero_ok(libc::clock_nanosleep(
             id as libc::clockid_t,
             flags,
             request,
             remain.as_mut_ptr(),
-        ))
-        .map_err(|_| remain.assume_init())
+        )) {
+            Ok(()) => NanosleepRelativeResult::Ok,
+            Err(crate::io::Error::INTR) => {
+                NanosleepRelativeResult::Interrupted(remain.assume_init())
+            }
+            Err(err) => NanosleepRelativeResult::Err(err),
+        }
     }
 }
 
 /// `clock_nanosleep(id, 0, request, remain)`
 #[cfg(linux_raw)]
 #[inline]
-pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Result<(), Timespec> {
-    crate::linux_raw::clock_nanosleep_relative(id as i32, request)
+pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRelativeResult {
+    match crate::linux_raw::clock_nanosleep_relative(id as i32, request) {
+        Ok(None) => NanosleepRelativeResult::Ok,
+        Ok(Some(remaining)) => NanosleepRelativeResult::Interrupted(remaining),
+        Err(err) => NanosleepRelativeResult::Err(err),
+    }
 }
 
 /// `clock_nanosleep(id, TIMER_ABSTIME, request, NULL)`
@@ -187,16 +196,36 @@ pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> Result<(), (
 /// `nanosleep(request, remain)`
 #[cfg(libc)]
 #[inline]
-pub fn nanosleep(request: &Timespec) -> Result<(), Timespec> {
+pub fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
     let mut remain = MaybeUninit::<Timespec>::uninit();
     unsafe {
-        zero_ok(libc::nanosleep(request, remain.as_mut_ptr())).map_err(|_| remain.assume_init())
+        match zero_ok(libc::nanosleep(request, remain.as_mut_ptr())) {
+            Ok(()) => NanosleepRelativeResult::Ok,
+            Err(crate::io::Error::INTR) => {
+                NanosleepRelativeResult::Interrupted(remain.assume_init())
+            }
+            Err(err) => NanosleepRelativeResult::Err(err),
+        }
     }
 }
 
 /// `nanosleep(request, remain)`
 #[cfg(linux_raw)]
 #[inline]
-pub fn nanosleep(request: &Timespec) -> Result<(), Timespec> {
-    crate::linux_raw::nanosleep(request)
+pub fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
+    match crate::linux_raw::nanosleep(request) {
+        Ok(None) => NanosleepRelativeResult::Ok,
+        Ok(Some(remaining)) => NanosleepRelativeResult::Interrupted(remaining),
+        Err(err) => NanosleepRelativeResult::Err(err),
+    }
+}
+
+/// A return type for `nanosleep` and `clock_nanosleep_relative`.
+pub enum NanosleepRelativeResult {
+    /// The sleep completed normally.
+    Ok,
+    /// The sleep was interrupted, the remaining time is returned.
+    Interrupted(Timespec),
+    /// An invalid time value was provided.
+    Err(crate::io::Error),
 }

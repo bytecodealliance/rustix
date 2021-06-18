@@ -75,7 +75,7 @@ impl FileType {
 impl FileType {
     /// Construct a `FileType` from the `st_mode` field of a `Stat`.
     pub const fn from_raw_mode(st_mode: RawMode) -> Self {
-        match st_mode & linux_raw_sys::general::S_IFMT {
+        match st_mode as u32 & linux_raw_sys::general::S_IFMT {
             linux_raw_sys::general::S_IFREG => Self::RegularFile,
             linux_raw_sys::general::S_IFDIR => Self::Directory,
             linux_raw_sys::general::S_IFLNK => Self::Symlink,

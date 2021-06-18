@@ -1,6 +1,8 @@
 //! Filesystem API constants, translated into `bitflags` constants.
 
 use bitflags::bitflags;
+#[cfg(linux_raw)]
+use linux_raw_sys::general::__kernel_mode_t;
 
 #[cfg(libc)]
 bitflags! {
@@ -200,72 +202,72 @@ bitflags! {
 #[cfg(linux_raw)]
 bitflags! {
     /// `S_I*` constants.
-    pub struct Mode: linux_raw_sys::general::__kernel_mode_t {
+    pub struct Mode: __kernel_mode_t {
         /// `S_IRWXU`
-        const IRWXU = linux_raw_sys::general::S_IRWXU;
+        const IRWXU = linux_raw_sys::general::S_IRWXU as __kernel_mode_t;
 
         /// `S_IRUSR`
-        const IRUSR = linux_raw_sys::general::S_IRUSR;
+        const IRUSR = linux_raw_sys::general::S_IRUSR as __kernel_mode_t;
 
         /// `S_IWUSR`
-        const IWUSR = linux_raw_sys::general::S_IWUSR;
+        const IWUSR = linux_raw_sys::general::S_IWUSR as __kernel_mode_t;
 
         /// `S_IXUSR`
-        const IXUSR = linux_raw_sys::general::S_IXUSR;
+        const IXUSR = linux_raw_sys::general::S_IXUSR as __kernel_mode_t;
 
         /// `S_IRWXG`
-        const IRWXG = linux_raw_sys::general::S_IRWXG;
+        const IRWXG = linux_raw_sys::general::S_IRWXG as __kernel_mode_t;
 
         /// `S_IRGRP`
-        const IRGRP = linux_raw_sys::general::S_IRGRP;
+        const IRGRP = linux_raw_sys::general::S_IRGRP as __kernel_mode_t;
 
         /// `S_IWGRP`
-        const IWGRP = linux_raw_sys::general::S_IWGRP;
+        const IWGRP = linux_raw_sys::general::S_IWGRP as __kernel_mode_t;
 
         /// `S_IXGRP`
-        const IXGRP = linux_raw_sys::general::S_IXGRP;
+        const IXGRP = linux_raw_sys::general::S_IXGRP as __kernel_mode_t;
 
         /// `S_IRWXO`
-        const IRWXO = linux_raw_sys::general::S_IRWXO;
+        const IRWXO = linux_raw_sys::general::S_IRWXO as __kernel_mode_t;
 
         /// `S_IROTH`
-        const IROTH = linux_raw_sys::general::S_IROTH;
+        const IROTH = linux_raw_sys::general::S_IROTH as __kernel_mode_t;
 
         /// `S_IWOTH`
-        const IWOTH = linux_raw_sys::general::S_IWOTH;
+        const IWOTH = linux_raw_sys::general::S_IWOTH as __kernel_mode_t;
 
         /// `S_IXOTH`
-        const IXOTH = linux_raw_sys::general::S_IXOTH;
+        const IXOTH = linux_raw_sys::general::S_IXOTH as __kernel_mode_t;
 
         /// `S_ISUID`
-        const ISUID = linux_raw_sys::general::S_ISUID;
+        const ISUID = linux_raw_sys::general::S_ISUID as __kernel_mode_t;
 
         /// `S_ISGID`
-        const ISGID = linux_raw_sys::general::S_ISGID;
+        const ISGID = linux_raw_sys::general::S_ISGID as __kernel_mode_t;
 
         /// `S_ISVTX`
-        const ISVTX = linux_raw_sys::general::S_ISVTX;
+        const ISVTX = linux_raw_sys::general::S_ISVTX as __kernel_mode_t;
 
         /// `S_IFREG`
-        const IFREG = linux_raw_sys::general::S_IFREG;
+        const IFREG = linux_raw_sys::general::S_IFREG as __kernel_mode_t;
 
         /// `S_IFDIR`
-        const IFDIR = linux_raw_sys::general::S_IFDIR;
+        const IFDIR = linux_raw_sys::general::S_IFDIR as __kernel_mode_t;
 
         /// `S_IFLNK`
-        const IFLNK = linux_raw_sys::general::S_IFLNK;
+        const IFLNK = linux_raw_sys::general::S_IFLNK as __kernel_mode_t;
 
         /// `S_IFIFO`
-        const IFIFO = linux_raw_sys::general::S_IFIFO;
+        const IFIFO = linux_raw_sys::general::S_IFIFO as __kernel_mode_t;
 
         /// `S_IFSOCK`
-        const IFSOCK = linux_raw_sys::general::S_IFSOCK;
+        const IFSOCK = linux_raw_sys::general::S_IFSOCK as __kernel_mode_t;
 
         /// `S_IFCHR`
-        const IFCHR = linux_raw_sys::general::S_IFCHR;
+        const IFCHR = linux_raw_sys::general::S_IFCHR as __kernel_mode_t;
 
         /// `S_IFBLK`
-        const IFBLK = linux_raw_sys::general::S_IFBLK;
+        const IFBLK = linux_raw_sys::general::S_IFBLK as __kernel_mode_t;
     }
 }
 
