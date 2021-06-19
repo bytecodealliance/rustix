@@ -246,7 +246,7 @@ pub const PROC_SUPER_MAGIC: FsWord = 0x0000_9fa0;
 /// The filesystem magic number for procfs.
 /// <https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION>
 #[cfg(linux_raw)]
-pub const PROC_SUPER_MAGIC: FsWord = linux_raw_sys::general::PROC_SUPER_MAGIC;
+pub const PROC_SUPER_MAGIC: FsWord = linux_raw_sys::general::PROC_SUPER_MAGIC as FsWord;
 
 /// Re-export `mode_t`.
 #[cfg(libc)]
