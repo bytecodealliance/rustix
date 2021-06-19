@@ -23,16 +23,19 @@ use linux_raw_sys::general::{
     __NR_listen, __NR_recvfrom, __NR_sendto, __NR_setsockopt, __NR_shutdown, __NR_socket,
     __NR_socketpair,
 };
+#[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
+use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getuid};
+#[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
+use linux_raw_sys::general::{__NR_getegid32, __NR_geteuid32, __NR_getgid32, __NR_getuid32};
 use linux_raw_sys::{
     general::{
         __NR_chdir, __NR_clock_getres, __NR_clock_gettime, __NR_clock_nanosleep, __NR_close,
-        __NR_dup, __NR_exit_group, __NR_faccessat, __NR_fadvise64, __NR_fallocate, __NR_fchmod,
-        __NR_fchmodat, __NR_fdatasync, __NR_fsync, __NR_getcwd, __NR_getdents64, __NR_getegid,
-        __NR_geteuid, __NR_getgid, __NR_getpid, __NR_getppid, __NR_getuid, __NR_ioctl, __NR_linkat,
-        __NR_mkdirat, __NR_nanosleep, __NR_openat, __NR_pipe, __NR_pipe2, __NR_poll, __NR_pread64,
-        __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv,
-        __NR_renameat, __NR_sched_yield, __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write,
-        __NR_writev,
+        __NR_dup, __NR_exit_group, __NR_faccessat, __NR_fallocate, __NR_fchmod, __NR_fchmodat,
+        __NR_fdatasync, __NR_fsync, __NR_getcwd, __NR_getdents64, __NR_getpid, __NR_getppid,
+        __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_nanosleep, __NR_openat, __NR_pipe, __NR_pipe2,
+        __NR_poll, __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read,
+        __NR_readlinkat, __NR_readv, __NR_renameat, __NR_sched_yield, __NR_symlinkat,
+        __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
     },
     general::{
         __kernel_clockid_t, __kernel_gid_t, __kernel_loff_t, __kernel_pid_t,
@@ -78,8 +81,8 @@ use {
         general::timespec as __kernel_old_timespec,
         general::CLOCK_REALTIME,
         general::{
-            __NR__llseek, __NR_fcntl64, __NR_fstat64, __NR_fstatat64, __NR_fstatfs64,
-            __NR_ftruncate64,
+            __NR__llseek, __NR_fadvise64_64, __NR_fcntl64, __NR_fstat64, __NR_fstatat64,
+            __NR_fstatfs64, __NR_ftruncate64,
         },
         v5_4::general::{
             __NR_clock_getres_time64, __NR_clock_gettime64, __NR_clock_nanosleep_time64,
@@ -94,8 +97,8 @@ use {
     linux_raw_sys::{
         general::stat,
         general::{
-            __NR_fcntl, __NR_fstat, __NR_fstatfs, __NR_ftruncate, __NR_lseek, __NR_mmap,
-            __NR_newfstatat,
+            __NR_fadvise64, __NR_fcntl, __NR_fstat, __NR_fstatfs, __NR_ftruncate, __NR_lseek,
+            __NR_mmap, __NR_newfstatat,
         },
     },
 };
@@ -574,7 +577,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: c_int) -> 
     #[cfg(any(target_arch = "arm", target_arch = "powerpc"))]
     unsafe {
         ret(syscall6_readonly(
-            __NR_fadvise64,
+            __NR_fadvise64_64,
             borrowed_fd(fd),
             c_int(advice),
             hi(pos),
@@ -589,7 +592,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: c_int) -> 
     ))]
     unsafe {
         ret(syscall6_readonly(
-            __NR_fadvise64,
+            __NR_fadvise64_64,
             borrowed_fd(fd),
             hi(pos),
             lo(pos),
@@ -2154,20 +2157,48 @@ pub(crate) fn getppid() -> __kernel_pid_t {
 
 #[inline]
 pub(crate) fn getgid() -> __kernel_gid_t {
-    unsafe { syscall0_readonly(__NR_getgid) as __kernel_gid_t }
+    #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
+    unsafe {
+        syscall0_readonly(__NR_getgid32) as __kernel_gid_t
+    }
+    #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
+    unsafe {
+        syscall0_readonly(__NR_getgid) as __kernel_gid_t
+    }
 }
 
 #[inline]
 pub(crate) fn getegid() -> __kernel_gid_t {
-    unsafe { syscall0_readonly(__NR_getegid) as __kernel_gid_t }
+    #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
+    unsafe {
+        syscall0_readonly(__NR_getegid32) as __kernel_gid_t
+    }
+    #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
+    unsafe {
+        syscall0_readonly(__NR_getegid) as __kernel_gid_t
+    }
 }
 
 #[inline]
 pub(crate) fn getuid() -> __kernel_uid_t {
-    unsafe { syscall0_readonly(__NR_getuid) as __kernel_uid_t }
+    #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
+    unsafe {
+        syscall0_readonly(__NR_getuid32) as __kernel_uid_t
+    }
+    #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
+    unsafe {
+        syscall0_readonly(__NR_getuid) as __kernel_uid_t
+    }
 }
 
 #[inline]
 pub(crate) fn geteuid() -> __kernel_uid_t {
-    unsafe { syscall0_readonly(__NR_geteuid) as __kernel_uid_t }
+    #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
+    unsafe {
+        syscall0_readonly(__NR_geteuid32) as __kernel_uid_t
+    }
+    #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
+    unsafe {
+        syscall0_readonly(__NR_geteuid) as __kernel_uid_t
+    }
 }
