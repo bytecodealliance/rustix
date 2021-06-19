@@ -35,7 +35,7 @@ use {
     linux_raw_sys::general::linux_dirent64,
     std::ffi::CString,
     std::mem::size_of,
-    std::os::raw::{c_char, c_ulong, c_ushort},
+    std::os::raw::{c_char, c_ushort},
 };
 #[cfg(libc)]
 use {
@@ -152,7 +152,6 @@ impl Dir {
                 let result = Entry {
                     dirent: read_dirent(dirent_ptr),
 
-                    // TODO: When WASI gains a `d_loc` field, update `Entry::seek_loc`.
                     #[cfg(target_os = "wasi")]
                     name: CStr::from_ptr((*dirent_ptr).d_name.as_ptr()).to_owned(),
                 };
@@ -178,16 +177,15 @@ impl Dir {
 
         // Compute linux_dirent64 field offsets.
         let z = linux_dirent64 {
-            d_ino: 0,
-            d_off: 0,
-            d_type: 0,
-            d_reclen: 0,
+            d_ino: 0_u64,
+            d_off: 0_i64,
+            d_type: 0_u8,
+            d_reclen: 0_u16,
             d_name: Default::default(),
         };
         let base = as_ptr(&z) as usize;
         let offsetof_d_reclen = (as_ptr(&z.d_reclen) as usize) - base;
         let offsetof_d_name = (as_ptr(&z.d_name) as usize) - base;
-        let offsetof_d_off = (as_ptr(&z.d_off) as usize) - base;
         let offsetof_d_ino = (as_ptr(&z.d_ino) as usize) - base;
         let offsetof_d_type = (as_ptr(&z.d_type) as usize) - base;
 
@@ -213,12 +211,10 @@ impl Dir {
             let name = name.to_owned();
             assert!(name.as_bytes().len() <= self.buf.len() - name_start);
 
-            let d_ino = ptr::read_unaligned(dirent.add(offsetof_d_ino).cast::<c_ulong>()) as u64;
-            let d_off = ptr::read_unaligned(dirent.add(offsetof_d_off).cast::<c_ulong>()) as u64;
+            let d_ino = ptr::read_unaligned(dirent.add(offsetof_d_ino).cast::<u64>());
             let d_type = ptr::read_unaligned(dirent.add(offsetof_d_type));
             Some(Ok(Entry {
                 d_ino,
-                d_off: d_off - (reclen as u64),
                 d_type,
                 name: name.to_owned(),
             }))
@@ -392,7 +388,6 @@ pub struct Entry {
 #[derive(Debug)]
 pub struct Entry {
     d_ino: u64,
-    d_off: u64,
     d_type: u8,
     name: CString,
 }
@@ -431,27 +426,6 @@ impl Entry {
         #[allow(clippy::useless_conversion)]
         self.dirent.d_fileno.into()
     }
-
-    /// Return a cookie indicating the location of this entry, for use with
-    /// [`Dir::seek`].
-    ///
-    /// [`Dir::seek`]: struct.Dir.html#method.seek
-    ///
-    /// TODO: Use `d_loc` on WASI once we have libc support.
-    #[cfg(not(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "wasi",
-    )))]
-    #[inline]
-    pub fn seek_loc(&self) -> io::Result<SeekLoc> {
-        let off_i64: i64 = self.dirent.d_off;
-        unsafe { SeekLoc::from_raw(off_i64 as u64) }
-    }
 }
 
 #[cfg(linux_raw)]
@@ -472,15 +446,6 @@ impl Entry {
     #[inline]
     pub fn ino(&self) -> u64 {
         self.d_ino
-    }
-
-    /// Return a cookie indicating the location of this entry, for use with
-    /// [`Dir::seek`].
-    ///
-    /// [`Dir::seek`]: struct.Dir.html#method.seek
-    #[inline]
-    pub fn seek_loc(&self) -> io::Result<SeekLoc> {
-        unsafe { SeekLoc::from_raw(self.d_off) }
     }
 }
 
