@@ -40,8 +40,7 @@ use {
 #[cfg(libc)]
 use {
     errno::{errno, set_errno, Errno},
-    std::convert::TryInto,
-    std::mem::MaybeUninit,
+    std::{convert::TryInto, mem::zeroed},
     unsafe_io::os::posish::IntoRawFd,
 };
 
@@ -309,12 +308,16 @@ unsafe fn read_dirent(dirent_ptr: *const libc_dirent) -> libc_dirent {
         d_namlen,
         #[cfg(any(target_os = "ios", target_os = "macos"))]
         d_seekoff,
-        // The `d_name` field is NUL-terminated, and we need to be
-        // careful not to read bytes past the NUL, even though
-        // they're within the nominal extent of the
-        // `struct dirent`, because they may not be allocated. So
-        // leave it uninitialized here and copy it below.
-        d_name: MaybeUninit::uninit().assume_init(),
+        // The `d_name` field is NUL-terminated, and we need to be careful not
+        // to read bytes past the NUL, even though they're within the nominal
+        // extent of the `struct dirent`, because they may not be allocated. So
+        // don't read it from `dirent_ptr`.
+        //
+        // In theory this could use `MaybeUninit::uninit().assume_init()`, but
+        // that [invokes undefined behavior].
+        //
+        // [invokes undefined behavior]: https://doc.rust-lang.org/stable/core/mem/union.MaybeUninit.html#initialization-invariant
+        d_name: zeroed(),
     };
 
     // Copy from d_name, reading up to and including the first NUL.
