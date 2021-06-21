@@ -28,4 +28,4 @@ pub type Timespec = libc::timespec;
 
 /// Re-export `timespec`.
 #[cfg(linux_raw)]
-pub type Timespec = linux_raw_sys::v5_4::general::__kernel_timespec;
+pub type Timespec = linux_raw_sys::general::__kernel_timespec;

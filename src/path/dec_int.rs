@@ -33,6 +33,12 @@ impl DecInt {
     pub fn from_fd<'f, Fd: AsFd<'f>>(fd: Fd) -> Self {
         Self::new(fd.as_fd().as_raw_fd())
     }
+
+    /// Return the raw byte buffer.
+    #[inline]
+    pub fn as_bytes(&self) -> &[u8] {
+        &self.buf[..self.len]
+    }
 }
 
 impl Deref for DecInt {

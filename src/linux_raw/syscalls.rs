@@ -50,8 +50,9 @@ use linux_raw_sys::{
         __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
     },
     general::{
-        __kernel_clockid_t, __kernel_gid_t, __kernel_pid_t, __kernel_uid_t, sockaddr_in,
-        sockaddr_in6, sockaddr_un, socklen_t, statfs64, termios, umode_t, winsize,
+        __kernel_clockid_t, __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t,
+        sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, statfs64, termios, umode_t,
+        winsize,
     },
     general::{
         AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD,
@@ -60,11 +61,11 @@ use linux_raw_sys::{
     },
     v5_11::{general::__NR_openat2, general::open_how},
     v5_4::{
+        general::statx,
         general::{
             __NR_copy_file_range, __NR_getrandom, __NR_memfd_create, __NR_preadv2, __NR_pwritev2,
             __NR_statx, __NR_userfaultfd,
         },
-        general::{__kernel_timespec, statx},
         general::{F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ},
     },
 };
@@ -1322,7 +1323,7 @@ pub(crate) fn socketpair(
 pub(crate) fn accept(fd: BorrowedFd<'_>, flags: c_uint) -> io::Result<(OwnedFd, SocketAddr)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
-        let mut addrlen = 0;
+        let mut addrlen = size_of::<sockaddr>() as socklen_t;
         let mut storage = MaybeUninit::uninit();
         let fd = ret_owned_fd(syscall4(
             __NR_accept4,
@@ -1331,11 +1332,11 @@ pub(crate) fn accept(fd: BorrowedFd<'_>, flags: c_uint) -> io::Result<(OwnedFd, 
             by_mut(&mut addrlen),
             c_uint(flags),
         ))?;
-        Ok((fd, decode_sockaddr(storage.as_ptr())))
+        Ok((fd, decode_sockaddr(storage.as_ptr(), addrlen)))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
-        let mut addrlen = 0;
+        let mut addrlen = size_of::<sockaddr>() as socklen_t;
         let mut storage = MaybeUninit::uninit();
         let fd = ret_owned_fd(syscall2(
             __NR_socketcall,
@@ -1349,7 +1350,7 @@ pub(crate) fn accept(fd: BorrowedFd<'_>, flags: c_uint) -> io::Result<(OwnedFd, 
                 0,
             ]),
         ))?;
-        Ok((fd, decode_sockaddr(storage.as_ptr())))
+        Ok((fd, decode_sockaddr(storage.as_ptr(), addrlen)))
     }
 }
 
@@ -1621,7 +1622,7 @@ pub(crate) fn recvfrom(
 ) -> io::Result<(usize, SocketAddr)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
-        let mut addrlen = 0;
+        let mut addrlen = size_of::<sockaddr>() as socklen_t;
         let mut storage = MaybeUninit::uninit();
         let nread = ret_usize(syscall6(
             __NR_recvfrom,
@@ -1632,11 +1633,11 @@ pub(crate) fn recvfrom(
             out(&mut storage),
             by_mut(&mut addrlen),
         ))?;
-        Ok((nread, decode_sockaddr(storage.as_ptr())))
+        Ok((nread, decode_sockaddr(storage.as_ptr(), addrlen)))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
-        let mut addrlen = 0;
+        let mut addrlen = size_of::<sockaddr>() as socklen_t;
         let mut storage = MaybeUninit::uninit();
         let nread = ret_usize(syscall2(
             __NR_socketcall,
@@ -1650,7 +1651,7 @@ pub(crate) fn recvfrom(
                 by_mut(&mut addrlen),
             ]),
         ))?;
-        Ok((nread, decode_sockaddr(storage.as_ptr())))
+        Ok((nread, decode_sockaddr(storage.as_ptr(), addrlen)))
     }
 }
 
@@ -1658,7 +1659,7 @@ pub(crate) fn recvfrom(
 pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
-        let mut addrlen = 0;
+        let mut addrlen = size_of::<sockaddr>() as socklen_t;
         let mut storage = MaybeUninit::uninit();
         ret(syscall3(
             __NR_getpeername,
@@ -1666,11 +1667,11 @@ pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
             out(&mut storage),
             by_mut(&mut addrlen),
         ))?;
-        Ok(decode_sockaddr(storage.as_ptr()))
+        Ok(decode_sockaddr(storage.as_ptr(), addrlen))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
-        let mut addrlen = 0;
+        let mut addrlen = size_of::<sockaddr>() as socklen_t;
         let mut storage = MaybeUninit::uninit();
         ret(syscall2(
             __NR_socketcall,
@@ -1684,7 +1685,7 @@ pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
                 0,
             ]),
         ))?;
-        Ok(decode_sockaddr(storage.as_ptr()))
+        Ok(decode_sockaddr(storage.as_ptr(), addrlen))
     }
 }
 
@@ -1692,7 +1693,7 @@ pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
 pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
-        let mut addrlen = 0;
+        let mut addrlen = size_of::<sockaddr>() as socklen_t;
         let mut storage = MaybeUninit::uninit();
         ret(syscall3(
             __NR_getsockname,
@@ -1700,11 +1701,11 @@ pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
             out(&mut storage),
             by_mut(&mut addrlen),
         ))?;
-        Ok(decode_sockaddr(storage.as_ptr()))
+        Ok(decode_sockaddr(storage.as_ptr(), addrlen))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
-        let mut addrlen = 0;
+        let mut addrlen = size_of::<sockaddr>() as socklen_t;
         let mut storage = MaybeUninit::uninit();
         ret(syscall2(
             __NR_socketcall,
@@ -1718,7 +1719,7 @@ pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
                 0,
             ]),
         ))?;
-        Ok(decode_sockaddr(storage.as_ptr()))
+        Ok(decode_sockaddr(storage.as_ptr(), addrlen))
     }
 }
 

@@ -184,7 +184,7 @@ fn _recvfrom(
             storage.as_mut_ptr().cast::<_>(),
             &mut len,
         ))?;
-        Ok((nread as usize, decode_sockaddr(storage.as_ptr())))
+        Ok((nread as usize, decode_sockaddr(storage.as_ptr(), len)))
     }
 }
 

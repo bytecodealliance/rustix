@@ -22,7 +22,7 @@ use {
 #[repr(transparent)]
 pub struct SocketType(pub(crate) u32);
 
-#[cfg(cfg)]
+#[cfg(libc)]
 impl SocketType {
     /// `SOCK_STREAM`.
     pub const STREAM: Self = Self(libc::SOCK_STREAM as u32);
@@ -74,8 +74,7 @@ pub struct AddressFamily(pub(crate) libc::sa_family_t);
 #[cfg(linux_raw)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(transparent)]
-// Older Linux versions didn't export this typedef.
-pub struct AddressFamily(pub(crate) linux_raw_sys::v5_4::general::__kernel_sa_family_t);
+pub struct AddressFamily(pub(crate) linux_raw_sys::general::__kernel_sa_family_t);
 
 #[cfg(libc)]
 impl AddressFamily {
@@ -106,7 +105,7 @@ impl AddressFamily {
     pub const NETLINK: Self = Self(linux_raw_sys::general::AF_NETLINK as _);
     /// `AF_UNIX`, aka `AF_LOCAL`
     #[doc(alias = "Local")]
-    pub const UNIX: Self = Self(linux_raw_sys::general::AF_LOCAL as _);
+    pub const UNIX: Self = Self(linux_raw_sys::general::AF_UNIX as _);
 }
 
 /// `IPPROTO_*`
@@ -256,6 +255,12 @@ pub enum Protocol {
     Mptcp = linux_raw_sys::v5_11::general::IPPROTO_MPTCP as u32,
 }
 
+impl Default for Protocol {
+    fn default() -> Self {
+        Protocol::Ip
+    }
+}
+
 /// `SHUT_*`
 #[cfg(libc)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
@@ -343,8 +348,8 @@ fn _bind_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     unsafe {
         zero_ok(libc::bind(
             sockfd.as_raw_fd(),
-            as_ptr(addr).cast::<_>(),
-            size_of::<SocketAddrV4>() as socklen_t,
+            as_ptr(&addr.encode()).cast::<_>(),
+            size_of::<libc::sockaddr_in>() as socklen_t,
         ))
     }
 }
@@ -367,8 +372,8 @@ fn _bind_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     unsafe {
         zero_ok(libc::bind(
             sockfd.as_raw_fd(),
-            as_ptr(addr).cast::<_>(),
-            size_of::<SocketAddrV6>() as socklen_t,
+            as_ptr(&addr.encode()).cast::<_>(),
+            size_of::<libc::sockaddr_in6>() as socklen_t,
         ))
     }
 }
@@ -391,8 +396,8 @@ fn _bind_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
     unsafe {
         zero_ok(libc::bind(
             sockfd.as_raw_fd(),
-            as_ptr(addr).cast::<_>(),
-            size_of::<SocketAddrUnix>() as socklen_t,
+            as_ptr(&addr.encode()).cast::<_>(),
+            size_of::<libc::sockaddr_un>() as socklen_t,
         ))
     }
 }
@@ -415,8 +420,8 @@ fn _connect_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     unsafe {
         zero_ok(libc::connect(
             sockfd.as_raw_fd(),
-            as_ptr(addr).cast::<_>(),
-            size_of::<SocketAddrV4>() as socklen_t,
+            as_ptr(&addr.encode()).cast::<_>(),
+            size_of::<libc::sockaddr_in>() as socklen_t,
         ))
     }
 }
@@ -439,8 +444,8 @@ fn _connect_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     unsafe {
         zero_ok(libc::connect(
             sockfd.as_raw_fd(),
-            as_ptr(addr).cast::<_>(),
-            size_of::<SocketAddrV6>() as socklen_t,
+            as_ptr(&addr.encode()).cast::<_>(),
+            size_of::<libc::sockaddr_in6>() as socklen_t,
         ))
     }
 }
@@ -463,8 +468,8 @@ fn _connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()
     unsafe {
         zero_ok(libc::connect(
             sockfd.as_raw_fd(),
-            as_ptr(addr).cast::<_>(),
-            size_of::<SocketAddrUnix>() as socklen_t,
+            as_ptr(&addr.encode()).cast::<_>(),
+            size_of::<libc::sockaddr_un>() as socklen_t,
         ))
     }
 }
@@ -515,7 +520,7 @@ fn _accept(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, S
             flags.bits(),
         ))?;
         let owned_fd = OwnedFd::from_raw_fd(raw_fd);
-        Ok((owned_fd, decode_sockaddr(storage.as_ptr())))
+        Ok((owned_fd, decode_sockaddr(storage.as_ptr(), len)))
     }
 }
 
@@ -532,7 +537,7 @@ fn _accept(sockfd: BorrowedFd<'_>, _flags: AcceptFlags) -> io::Result<(OwnedFd, 
             &mut len,
         ))?;
         let owned_fd = OwnedFd::from_raw_fd(raw_fd);
-        Ok((owned_fd, decode_sockaddr(storage.as_ptr())))
+        Ok((owned_fd, decode_sockaddr(storage.as_ptr(), len)))
     }
 }
 
@@ -610,7 +615,7 @@ fn _getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
             storage.as_mut_ptr().cast::<_>(),
             &mut len,
         ))?;
-        Ok(decode_sockaddr(storage.as_ptr()))
+        Ok(decode_sockaddr(storage.as_ptr(), len))
     }
 }
 
@@ -637,7 +642,7 @@ fn _getpeername(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
             storage.as_mut_ptr().cast::<_>(),
             &mut len,
         ))?;
-        Ok(decode_sockaddr(storage.as_ptr()))
+        Ok(decode_sockaddr(storage.as_ptr(), len))
     }
 }
 

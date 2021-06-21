@@ -67,6 +67,11 @@ impl SocketAddrV4 {
             __pad: [0; 8_usize],
         }
     }
+
+    /// Return the port of this address.
+    pub const fn port(&self) -> u16 {
+        self.port
+    }
 }
 
 /// `struct sockaddr_in6`
@@ -103,6 +108,11 @@ impl SocketAddrV6 {
             sin6_scope_id: self.scope_id,
         }
     }
+
+    /// Return the port of this address.
+    pub const fn port(&self) -> u16 {
+        self.port
+    }
 }
 
 /// `struct sockaddr_un`
@@ -123,25 +133,30 @@ impl SocketAddrUnix {
 
     #[inline]
     fn _new(path: CString) -> io::Result<Self> {
+        let bytes = path.as_bytes();
+        let z = linux_raw_sys::general::sockaddr_un {
+            sun_family: 0,
+            sun_path: [0; 108_usize],
+        };
+        if bytes.len() + 1 > z.sun_path.len() {
+            return Err(io::Error::NAMETOOLONG);
+        }
         Ok(Self { path })
     }
 
     /// Encoding this socket address in the host format.
     #[inline]
-    pub fn encode(&self) -> io::Result<linux_raw_sys::general::sockaddr_un> {
+    pub fn encode(&self) -> linux_raw_sys::general::sockaddr_un {
         let mut encoded = linux_raw_sys::general::sockaddr_un {
-            sun_family: linux_raw_sys::general::AF_LOCAL as _,
+            sun_family: linux_raw_sys::general::AF_UNIX as _,
             sun_path: [0; 108_usize],
         };
         let bytes = self.path.as_bytes();
-        if bytes.len() + 1 > encoded.sun_path.len() {
-            return Err(io::Error::NAMETOOLONG);
-        }
         for (i, b) in bytes.iter().enumerate() {
             encoded.sun_path[i] = *b as std::os::raw::c_char;
         }
         encoded.sun_path[bytes.len()] = b'\0' as std::os::raw::c_char;
-        Ok(encoded)
+        encoded
     }
 }
 
