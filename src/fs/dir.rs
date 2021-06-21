@@ -187,8 +187,12 @@ impl Dir {
         // `unsafe`, we need to scan for the NUL twice: once to obtain a size
         // for the slice, and then once within `CStr::from_bytes_with_nul`.
         let name_start = pos + offsetof_d_name;
-        let name_end = self.buf[name_start..].iter().position(|x| *x == b'\0').unwrap();
-        let name = CStr::from_bytes_with_nul(&self.buf[name_start..name_end + 1]).unwrap();
+        let name_len = self.buf[name_start..]
+            .iter()
+            .position(|x| *x == b'\0')
+            .unwrap();
+        let name =
+            CStr::from_bytes_with_nul(&self.buf[name_start..name_start + name_len + 1]).unwrap();
         let name = name.to_owned();
         assert!(name.as_bytes().len() <= self.buf.len() - name_start);
 

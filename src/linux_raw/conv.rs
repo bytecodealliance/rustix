@@ -9,6 +9,8 @@
 
 use crate::{as_mut_ptr, as_ptr, io};
 use io_lifetimes::{BorrowedFd, OwnedFd};
+#[cfg(target_pointer_width = "64")]
+use linux_raw_sys::general::__kernel_loff_t;
 use linux_raw_sys::general::{__kernel_clockid_t, socklen_t, umode_t};
 use std::{
     ffi::CStr,
@@ -17,8 +19,6 @@ use std::{
     ptr::null,
 };
 use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-#[cfg(target_pointer_width = "64")]
-use linux_raw_sys::general::__kernel_loff_t;
 
 /// Convert `SYS_*` constants for socketcall.
 #[cfg(target_arch = "x86")]
@@ -113,7 +113,8 @@ pub(super) fn by_mut<T: Sized>(t: &mut T) -> usize {
     as_mut_ptr(t) as usize
 }
 
-/// Convert an optional mutable reference into a `usize` for passing to a syscall.
+/// Convert an optional mutable reference into a `usize` for passing to a
+/// syscall.
 ///
 /// # Safety
 ///

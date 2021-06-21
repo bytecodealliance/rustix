@@ -2,7 +2,11 @@ use crate::io;
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::convert::TryInto;
 #[cfg(libc)]
-use {crate::negone_err, std::{ptr, mem::size_of}, unsafe_io::os::posish::AsRawFd};
+use {
+    crate::negone_err,
+    std::{mem::size_of, ptr},
+    unsafe_io::os::posish::AsRawFd,
+};
 
 /// `copy_file_range(fd_in, off_in, fd_out, off_out, len, 0)`
 #[inline]

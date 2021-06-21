@@ -323,12 +323,13 @@ fn _ttyname(dirfd: BorrowedFd<'_>, reuse: OsString) -> io::Result<OsString> {
     buffer.resize(256, 0u8);
 
     loop {
-        match unsafe { libc::ttyname_r(
-            dirfd.as_raw_fd() as libc::c_int,
-            buffer.as_mut_ptr().cast::<libc::c_char>(),
-            buffer.capacity(),
-        ) } {
-            // Use `Vec`'s builtin capacity-doubling strategy.
+        match unsafe {
+            libc::ttyname_r(
+                dirfd.as_raw_fd() as libc::c_int,
+                buffer.as_mut_ptr().cast::<libc::c_char>(),
+                buffer.len(),
+            )
+        } {
             libc::ERANGE => buffer.resize(buffer.len() * 2, 0u8),
             0 => {
                 let len = buffer.iter().position(|x| *x == b'\0').unwrap();

@@ -8,6 +8,7 @@ use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(libc)]
 use {
+    super::sockaddr_header::decode_sockaddr,
     crate::{as_ptr, negone_err},
     libc::{sockaddr_storage, socklen_t},
     std::mem::{size_of, MaybeUninit},
@@ -183,8 +184,7 @@ fn _recvfrom(
             storage.as_mut_ptr().cast::<_>(),
             &mut len,
         ))?;
-        let storage = storage.assume_init();
-        Ok((nread as usize, SocketAddr(storage)))
+        Ok((nread as usize, decode_sockaddr(storage.as_ptr())))
     }
 }
 
@@ -195,8 +195,7 @@ fn _recvfrom(
     buf: &mut [u8],
     flags: RecvFlags,
 ) -> io::Result<(usize, SocketAddr)> {
-    let (nread, storage) = crate::linux_raw::recvfrom(fd, buf, flags.bits())?;
-    Ok((nread, SocketAddr(storage)))
+    crate::linux_raw::recvfrom(fd, buf, flags.bits())
 }
 
 /// `sendto(fd, buf.ptr(), buf.len(), flags, addr, sizeof(struct sockaddr_in))`
@@ -225,7 +224,7 @@ fn _sendto_v4(
             buf.as_ptr().cast::<_>(),
             buf.len(),
             flags.bits(),
-            as_ptr(&addr.0).cast::<_>(),
+            as_ptr(&addr.encode()).cast::<libc::sockaddr>(),
             size_of::<SocketAddrV4>() as u32,
         ))?
     };
@@ -240,7 +239,7 @@ fn _sendto_v4(
     flags: SendFlags,
     addr: &SocketAddrV4,
 ) -> io::Result<usize> {
-    crate::linux_raw::sendto_in(fd, buf, flags.bits(), &addr.0)
+    crate::linux_raw::sendto_in(fd, buf, flags.bits(), addr)
 }
 
 /// `sendto(fd, buf.ptr(), buf.len(), flags, addr, sizeof(struct sockaddr_in6))`
@@ -269,7 +268,7 @@ fn _sendto_v6(
             buf.as_ptr().cast::<_>(),
             buf.len(),
             flags.bits(),
-            as_ptr(&addr.0).cast::<_>(),
+            as_ptr(&addr.encode()).cast::<libc::sockaddr>(),
             size_of::<SocketAddrV6>() as u32,
         ))?
     };
@@ -284,7 +283,7 @@ fn _sendto_v6(
     flags: SendFlags,
     addr: &SocketAddrV6,
 ) -> io::Result<usize> {
-    crate::linux_raw::sendto_in6(fd, buf, flags.bits(), &addr.0)
+    crate::linux_raw::sendto_in6(fd, buf, flags.bits(), addr)
 }
 
 /// `sendto(fd, buf.ptr(), buf.len(), flags, addr, sizeof(struct sockaddr_un))`
@@ -313,7 +312,7 @@ fn _sendto_unix(
             buf.as_ptr().cast::<_>(),
             buf.len(),
             flags.bits(),
-            as_ptr(&addr.0).cast::<_>(),
+            as_ptr(&addr.encode()).cast::<libc::sockaddr>(),
             size_of::<SocketAddrUnix>() as u32,
         ))?
     };
@@ -328,7 +327,7 @@ fn _sendto_unix(
     flags: SendFlags,
     addr: &SocketAddrUnix,
 ) -> io::Result<usize> {
-    crate::linux_raw::sendto_un(fd, buf, flags.bits(), &addr.0)
+    crate::linux_raw::sendto_un(fd, buf, flags.bits(), addr)
 }
 
 // TODO: `recvmsg`, `sendmsg`

@@ -9,6 +9,7 @@ use std::os::raw::c_int;
 use std::os::raw::c_uint;
 #[cfg(libc)]
 use {
+    super::sockaddr_header::decode_sockaddr,
     crate::{as_ptr, negone_err, zero_ok},
     libc::{sockaddr_storage, socklen_t},
     std::mem::{size_of, MaybeUninit},
@@ -350,7 +351,7 @@ fn _bind_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
 
 #[cfg(linux_raw)]
 fn _bind_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
-    crate::linux_raw::bind_in(sockfd, &addr.0)
+    crate::linux_raw::bind_in(sockfd, addr)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in6))`
@@ -374,7 +375,7 @@ fn _bind_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
 
 #[cfg(linux_raw)]
 fn _bind_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
-    crate::linux_raw::bind_in6(sockfd, &addr.0)
+    crate::linux_raw::bind_in6(sockfd, addr)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_un))`
@@ -398,7 +399,7 @@ fn _bind_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
 
 #[cfg(linux_raw)]
 fn _bind_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
-    crate::linux_raw::bind_un(sockfd, &addr.0)
+    crate::linux_raw::bind_un(sockfd, addr)
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_in))`
@@ -422,7 +423,7 @@ fn _connect_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
 
 #[cfg(linux_raw)]
 fn _connect_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
-    crate::linux_raw::connect_in(sockfd, &addr.0)
+    crate::linux_raw::connect_in(sockfd, addr)
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_in6))`
@@ -446,7 +447,7 @@ fn _connect_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
 
 #[cfg(linux_raw)]
 fn _connect_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
-    crate::linux_raw::connect_in6(sockfd, &addr.0)
+    crate::linux_raw::connect_in6(sockfd, addr)
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_un))`
@@ -470,7 +471,7 @@ fn _connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()
 
 #[cfg(linux_raw)]
 fn _connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
-    crate::linux_raw::connect_un(sockfd, &addr.0)
+    crate::linux_raw::connect_un(sockfd, addr)
 }
 
 /// `listen(fd, backlog)`
@@ -514,8 +515,7 @@ fn _accept(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, S
             flags.bits(),
         ))?;
         let owned_fd = OwnedFd::from_raw_fd(raw_fd);
-        let storage = storage.assume_init();
-        Ok((owned_fd, SocketAddr(storage)))
+        Ok((owned_fd, decode_sockaddr(storage.as_ptr())))
     }
 }
 
@@ -532,16 +532,14 @@ fn _accept(sockfd: BorrowedFd<'_>, _flags: AcceptFlags) -> io::Result<(OwnedFd, 
             &mut len,
         ))?;
         let owned_fd = OwnedFd::from_raw_fd(raw_fd);
-        let storage = storage.assume_init();
-        Ok((owned_fd, SocketAddr(storage)))
+        Ok((owned_fd, decode_sockaddr(storage.as_ptr())))
     }
 }
 
 #[cfg(linux_raw)]
 #[inline]
 fn _accept(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, SocketAddr)> {
-    let (owned_fd, storage) = crate::linux_raw::accept(sockfd, flags.bits())?;
-    Ok((owned_fd, SocketAddr(storage)))
+    crate::linux_raw::accept(sockfd, flags.bits())
 }
 
 /// `shutdown(fd, how)`
@@ -612,15 +610,14 @@ fn _getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
             storage.as_mut_ptr().cast::<_>(),
             &mut len,
         ))?;
-        let storage = storage.assume_init();
-        Ok(SocketAddr(storage))
+        Ok(decode_sockaddr(storage.as_ptr()))
     }
 }
 
 #[cfg(linux_raw)]
 #[inline]
 fn _getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
-    crate::linux_raw::getsockname(sockfd).map(SocketAddr)
+    crate::linux_raw::getsockname(sockfd)
 }
 
 /// `getpeername(fd, addr, len)`
@@ -640,13 +637,12 @@ fn _getpeername(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
             storage.as_mut_ptr().cast::<_>(),
             &mut len,
         ))?;
-        let storage = storage.assume_init();
-        Ok(SocketAddr(storage))
+        Ok(decode_sockaddr(storage.as_ptr()))
     }
 }
 
 #[cfg(linux_raw)]
 #[inline]
 fn _getpeername(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
-    crate::linux_raw::getpeername(sockfd).map(SocketAddr)
+    crate::linux_raw::getpeername(sockfd)
 }

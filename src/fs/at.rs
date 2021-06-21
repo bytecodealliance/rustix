@@ -96,22 +96,24 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Resul
     buffer.clear();
     buffer.resize(256, 0u8);
 
-        loop {
-            let nread = unsafe { negone_err(libc::readlinkat(
+    loop {
+        let nread = unsafe {
+            negone_err(libc::readlinkat(
                 dirfd.as_raw_fd() as libc::c_int,
                 path.as_ptr(),
                 buffer.as_mut_ptr().cast::<libc::c_char>(),
-                buffer.capacity(),
-            ))? };
+                buffer.len(),
+            ))?
+        };
 
-            let nread = nread as usize;
-            assert!(nread <= buffer.capacity());
-            if nread < buffer.len() {
-                buffer.resize(nread, 0u8);
-                return Ok(OsString::from_vec(buffer));
-            }
-            buffer.resize(buffer.len() * 2, 0u8);
+        let nread = nread as usize;
+        assert!(nread <= buffer.len());
+        if nread < buffer.len() {
+            buffer.resize(nread, 0u8);
+            return Ok(OsString::from_vec(buffer));
         }
+        buffer.resize(buffer.len() * 2, 0u8);
+    }
 }
 
 #[cfg(linux_raw)]

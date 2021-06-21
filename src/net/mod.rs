@@ -1,12 +1,14 @@
 //! Network-related operations.
 
-mod addr;
 mod send_recv;
+#[cfg(libc)]
+mod sockaddr;
+#[cfg(libc)]
+mod sockaddr_header;
 mod socket;
 #[cfg(not(target_os = "wasi"))]
 mod socketpair;
 
-pub use addr::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 pub use send_recv::{
     recv, recvfrom, send, sendto_unix, sendto_v4, sendto_v6, RecvFlags, SendFlags,
 };
@@ -17,3 +19,10 @@ pub use socket::{
 };
 #[cfg(not(target_os = "wasi"))]
 pub use socketpair::socketpair;
+
+#[cfg(linux_raw)]
+pub use crate::linux_raw::{
+    Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6,
+};
+#[cfg(libc)]
+pub use sockaddr::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};

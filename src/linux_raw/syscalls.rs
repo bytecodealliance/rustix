@@ -12,20 +12,22 @@
 #![allow(unsafe_code)]
 #![allow(dead_code)]
 
-use super::poll_fd::PollFd;
-use crate::io;
-#[cfg(target_pointer_width = "64")]
-use crate::linux_raw::conv::ret_u64;
 use super::arch::{
     syscall0_readonly, syscall1, syscall1_noreturn, syscall1_readonly, syscall2, syscall2_readonly,
     syscall3, syscall3_readonly, syscall4, syscall4_readonly, syscall5, syscall5_readonly,
     syscall6, syscall6_readonly,
 };
+#[cfg(target_pointer_width = "64")]
+use super::conv::ret_u64;
 use super::conv::{
     borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, opt_c_str, opt_mut, out,
     owned_fd, ret, ret_c_int, ret_c_uint, ret_owned_fd, ret_usize, ret_void_star, slice_addr,
     slice_as_mut_ptr, socklen_t, umode_t, void_star,
 };
+use super::poll_fd::PollFd;
+use super::sockaddr::{SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
+use super::sockaddr_header::decode_sockaddr;
+use crate::io;
 use io_lifetimes::{BorrowedFd, OwnedFd};
 #[cfg(not(target_arch = "x86"))]
 use linux_raw_sys::general::{
@@ -48,7 +50,7 @@ use linux_raw_sys::{
         __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
     },
     general::{
-        __kernel_clockid_t, __kernel_gid_t, __kernel_pid_t, __kernel_uid_t, sockaddr, sockaddr_in,
+        __kernel_clockid_t, __kernel_gid_t, __kernel_pid_t, __kernel_uid_t, sockaddr_in,
         sockaddr_in6, sockaddr_un, socklen_t, statfs64, termios, umode_t, winsize,
     },
     general::{
@@ -74,7 +76,7 @@ use std::{
 };
 #[cfg(target_arch = "x86")]
 use {
-    crate::linux_raw::conv::x86_sys,
+    super::conv::x86_sys,
     linux_raw_sys::general::{
         __NR_mmap2, __NR_socketcall, SYS_ACCEPT4, SYS_BIND, SYS_CONNECT, SYS_GETPEERNAME,
         SYS_GETSOCKNAME, SYS_GETSOCKOPT, SYS_LISTEN, SYS_RECVFROM, SYS_SENDTO, SYS_SETSOCKOPT,
@@ -83,7 +85,7 @@ use {
 };
 #[cfg(target_pointer_width = "32")]
 use {
-    crate::linux_raw::conv::{hi, i64_hi, i64_lo, lo},
+    super::conv::{hi, i64_hi, i64_lo, lo},
     linux_raw_sys::{
         errno::EINVAL,
         general::stat64 as stat,
@@ -1317,7 +1319,7 @@ pub(crate) fn socketpair(
 }
 
 #[inline]
-pub(crate) fn accept(fd: BorrowedFd<'_>, flags: c_uint) -> io::Result<(OwnedFd, sockaddr)> {
+pub(crate) fn accept(fd: BorrowedFd<'_>, flags: c_uint) -> io::Result<(OwnedFd, SocketAddr)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         let mut addrlen = 0;
@@ -1329,7 +1331,7 @@ pub(crate) fn accept(fd: BorrowedFd<'_>, flags: c_uint) -> io::Result<(OwnedFd, 
             by_mut(&mut addrlen),
             c_uint(flags),
         ))?;
-        Ok((fd, storage.assume_init()))
+        Ok((fd, decode_sockaddr(storage.as_ptr())))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
@@ -1347,7 +1349,7 @@ pub(crate) fn accept(fd: BorrowedFd<'_>, flags: c_uint) -> io::Result<(OwnedFd, 
                 0,
             ]),
         ))?;
-        Ok((fd, storage.assume_init()))
+        Ok((fd, decode_sockaddr(storage.as_ptr())))
     }
 }
 
@@ -1477,7 +1479,7 @@ pub(crate) fn sendto_in(
     fd: BorrowedFd<'_>,
     buf: &[u8],
     flags: c_uint,
-    addr: &sockaddr_in,
+    addr: &SocketAddrV4,
 ) -> io::Result<usize> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
@@ -1487,7 +1489,7 @@ pub(crate) fn sendto_in(
             slice_addr(buf),
             buf.len(),
             c_uint(flags),
-            by_ref(addr),
+            by_ref(&addr.encode()),
             size_of::<sockaddr_in>(),
         ))
     }
@@ -1501,7 +1503,7 @@ pub(crate) fn sendto_in(
                 slice_addr(buf),
                 buf.len(),
                 c_uint(flags),
-                by_ref(addr),
+                by_ref(&addr.encode()),
                 size_of::<sockaddr_in>(),
             ]),
         ))
@@ -1513,7 +1515,7 @@ pub(crate) fn sendto_in6(
     fd: BorrowedFd<'_>,
     buf: &[u8],
     flags: c_uint,
-    addr: &sockaddr_in6,
+    addr: &SocketAddrV6,
 ) -> io::Result<usize> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
@@ -1523,7 +1525,7 @@ pub(crate) fn sendto_in6(
             slice_addr(buf),
             buf.len(),
             c_uint(flags),
-            by_ref(addr),
+            by_ref(&addr.encode()),
             size_of::<sockaddr_in6>(),
         ))
     }
@@ -1537,7 +1539,7 @@ pub(crate) fn sendto_in6(
                 slice_addr(buf),
                 buf.len(),
                 c_uint(flags),
-                by_ref(addr),
+                by_ref(&addr.encode()),
                 size_of::<sockaddr_in6>(),
             ]),
         ))
@@ -1549,7 +1551,7 @@ pub(crate) fn sendto_un(
     fd: BorrowedFd<'_>,
     buf: &[u8],
     flags: c_uint,
-    addr: &sockaddr_un,
+    addr: &SocketAddrUnix,
 ) -> io::Result<usize> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
@@ -1559,7 +1561,7 @@ pub(crate) fn sendto_un(
             slice_addr(buf),
             buf.len(),
             c_uint(flags),
-            by_ref(addr),
+            by_ref(&addr.encode()),
             size_of::<sockaddr_un>(),
         ))
     }
@@ -1573,7 +1575,7 @@ pub(crate) fn sendto_un(
                 slice_addr(buf),
                 buf.len(),
                 c_uint(flags),
-                by_ref(addr),
+                by_ref(&addr.encode()),
                 size_of::<sockaddr_un>(),
             ]),
         ))
@@ -1616,7 +1618,7 @@ pub(crate) fn recvfrom(
     fd: BorrowedFd<'_>,
     buf: &mut [u8],
     flags: c_uint,
-) -> io::Result<(usize, sockaddr)> {
+) -> io::Result<(usize, SocketAddr)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         let mut addrlen = 0;
@@ -1630,7 +1632,7 @@ pub(crate) fn recvfrom(
             out(&mut storage),
             by_mut(&mut addrlen),
         ))?;
-        Ok((nread, storage.assume_init()))
+        Ok((nread, decode_sockaddr(storage.as_ptr())))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
@@ -1648,12 +1650,12 @@ pub(crate) fn recvfrom(
                 by_mut(&mut addrlen),
             ]),
         ))?;
-        Ok((nread, storage.assume_init()))
+        Ok((nread, decode_sockaddr(storage.as_ptr())))
     }
 }
 
 #[inline]
-pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<sockaddr> {
+pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         let mut addrlen = 0;
@@ -1664,7 +1666,7 @@ pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<sockaddr> {
             out(&mut storage),
             by_mut(&mut addrlen),
         ))?;
-        Ok(storage.assume_init())
+        Ok(decode_sockaddr(storage.as_ptr()))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
@@ -1682,12 +1684,12 @@ pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<sockaddr> {
                 0,
             ]),
         ))?;
-        Ok(storage.assume_init())
+        Ok(decode_sockaddr(storage.as_ptr()))
     }
 }
 
 #[inline]
-pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<sockaddr> {
+pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         let mut addrlen = 0;
@@ -1698,7 +1700,7 @@ pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<sockaddr> {
             out(&mut storage),
             by_mut(&mut addrlen),
         ))?;
-        Ok(storage.assume_init())
+        Ok(decode_sockaddr(storage.as_ptr()))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
@@ -1716,46 +1718,18 @@ pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<sockaddr> {
                 0,
             ]),
         ))?;
-        Ok(storage.assume_init())
+        Ok(decode_sockaddr(storage.as_ptr()))
     }
 }
 
 #[inline]
-pub(crate) fn bind_un(fd: BorrowedFd<'_>, addr: &sockaddr_un) -> io::Result<()> {
+pub(crate) fn bind_in(fd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         ret(syscall3_readonly(
             __NR_bind,
             borrowed_fd(fd),
-            by_ref(addr),
-            size_of::<sockaddr_un>(),
-        ))
-    }
-    #[cfg(target_arch = "x86")]
-    unsafe {
-        ret(syscall2_readonly(
-            __NR_socketcall,
-            x86_sys(SYS_BIND),
-            slice_addr(&[
-                borrowed_fd(fd),
-                by_ref(addr),
-                size_of::<sockaddr_un>(),
-                0,
-                0,
-                0,
-            ]),
-        ))
-    }
-}
-
-#[inline]
-pub(crate) fn bind_in(fd: BorrowedFd<'_>, addr: &sockaddr_in) -> io::Result<()> {
-    #[cfg(not(target_arch = "x86"))]
-    unsafe {
-        ret(syscall3_readonly(
-            __NR_bind,
-            borrowed_fd(fd),
-            by_ref(addr),
+            by_ref(&addr.encode()),
             size_of::<sockaddr_in>(),
         ))
     }
@@ -1766,7 +1740,7 @@ pub(crate) fn bind_in(fd: BorrowedFd<'_>, addr: &sockaddr_in) -> io::Result<()> 
             x86_sys(SYS_BIND),
             slice_addr(&[
                 borrowed_fd(fd),
-                by_ref(addr),
+                by_ref(&addr.encode()),
                 size_of::<sockaddr_in>(),
                 0,
                 0,
@@ -1777,13 +1751,13 @@ pub(crate) fn bind_in(fd: BorrowedFd<'_>, addr: &sockaddr_in) -> io::Result<()> 
 }
 
 #[inline]
-pub(crate) fn bind_in6(fd: BorrowedFd<'_>, addr: &sockaddr_in6) -> io::Result<()> {
+pub(crate) fn bind_in6(fd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         ret(syscall3_readonly(
             __NR_bind,
             borrowed_fd(fd),
-            by_ref(addr),
+            by_ref(&addr.encode()),
             size_of::<sockaddr_in6>(),
         ))
     }
@@ -1794,7 +1768,7 @@ pub(crate) fn bind_in6(fd: BorrowedFd<'_>, addr: &sockaddr_in6) -> io::Result<()
             x86_sys(SYS_BIND),
             slice_addr(&[
                 borrowed_fd(fd),
-                by_ref(addr),
+                by_ref(&addr.encode()),
                 size_of::<sockaddr_in6>(),
                 0,
                 0,
@@ -1805,13 +1779,13 @@ pub(crate) fn bind_in6(fd: BorrowedFd<'_>, addr: &sockaddr_in6) -> io::Result<()
 }
 
 #[inline]
-pub(crate) fn connect_un(fd: BorrowedFd<'_>, addr: &sockaddr_un) -> io::Result<()> {
+pub(crate) fn bind_un(fd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         ret(syscall3_readonly(
-            __NR_connect,
+            __NR_bind,
             borrowed_fd(fd),
-            by_ref(addr),
+            by_ref(&addr.encode()),
             size_of::<sockaddr_un>(),
         ))
     }
@@ -1819,10 +1793,10 @@ pub(crate) fn connect_un(fd: BorrowedFd<'_>, addr: &sockaddr_un) -> io::Result<(
     unsafe {
         ret(syscall2_readonly(
             __NR_socketcall,
-            x86_sys(SYS_CONNECT),
+            x86_sys(SYS_BIND),
             slice_addr(&[
                 borrowed_fd(fd),
-                by_ref(addr),
+                by_ref(&addr.encode()),
                 size_of::<sockaddr_un>(),
                 0,
                 0,
@@ -1833,13 +1807,13 @@ pub(crate) fn connect_un(fd: BorrowedFd<'_>, addr: &sockaddr_un) -> io::Result<(
 }
 
 #[inline]
-pub(crate) fn connect_in(fd: BorrowedFd<'_>, addr: &sockaddr_in) -> io::Result<()> {
+pub(crate) fn connect_in(fd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         ret(syscall3_readonly(
             __NR_connect,
             borrowed_fd(fd),
-            by_ref(addr),
+            by_ref(&addr.encode()),
             size_of::<sockaddr_in>(),
         ))
     }
@@ -1850,7 +1824,7 @@ pub(crate) fn connect_in(fd: BorrowedFd<'_>, addr: &sockaddr_in) -> io::Result<(
             x86_sys(SYS_CONNECT),
             slice_addr(&[
                 borrowed_fd(fd),
-                by_ref(addr),
+                by_ref(&addr.encode()),
                 size_of::<sockaddr_in>(),
                 0,
                 0,
@@ -1861,13 +1835,13 @@ pub(crate) fn connect_in(fd: BorrowedFd<'_>, addr: &sockaddr_in) -> io::Result<(
 }
 
 #[inline]
-pub(crate) fn connect_in6(fd: BorrowedFd<'_>, addr: &sockaddr_in6) -> io::Result<()> {
+pub(crate) fn connect_in6(fd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         ret(syscall3_readonly(
             __NR_connect,
             borrowed_fd(fd),
-            by_ref(addr),
+            by_ref(&addr.encode()),
             size_of::<sockaddr_in6>(),
         ))
     }
@@ -1878,8 +1852,36 @@ pub(crate) fn connect_in6(fd: BorrowedFd<'_>, addr: &sockaddr_in6) -> io::Result
             x86_sys(SYS_CONNECT),
             slice_addr(&[
                 borrowed_fd(fd),
-                by_ref(addr),
+                by_ref(&addr.encode()),
                 size_of::<sockaddr_in6>(),
+                0,
+                0,
+                0,
+            ]),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn connect_un(fd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
+    #[cfg(not(target_arch = "x86"))]
+    unsafe {
+        ret(syscall3_readonly(
+            __NR_connect,
+            borrowed_fd(fd),
+            by_ref(&addr.encode()),
+            size_of::<sockaddr_un>(),
+        ))
+    }
+    #[cfg(target_arch = "x86")]
+    unsafe {
+        ret(syscall2_readonly(
+            __NR_socketcall,
+            x86_sys(SYS_CONNECT),
+            slice_addr(&[
+                borrowed_fd(fd),
+                by_ref(&addr.encode()),
+                size_of::<sockaddr_un>(),
                 0,
                 0,
                 0,
