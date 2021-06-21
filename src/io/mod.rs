@@ -10,6 +10,7 @@ mod poll_fd;
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 mod rdadvise;
 mod read_write;
+mod stdio;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod userfaultfd;
 
@@ -39,6 +40,7 @@ pub use read_write::{pread, pwrite, read, readv, write, writev};
 pub use read_write::{preadv, pwritev};
 #[cfg(any(linux_raw, all(libc, target_os = "linux", target_env = "gnu")))]
 pub use read_write::{preadv2, pwritev2};
+pub use stdio::{stderr, stdin, stdout};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use userfaultfd::{userfaultfd, UserFaultFdFlags};
 
