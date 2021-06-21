@@ -30,7 +30,7 @@ ABI directly instead of `libc`. To enable this, use Rust nightly, and set the
 x86, and aarch64, but a fair amount of code has been successfully adapted to
 use it, and ports to most other architectures should be straightforward.
 
-This feature is fun in two ways:
+This feature is fun in three ways:
  - By being implemented entirely in Rust, avoiding `libc`, `errno`, and
    pthread cancellation, and using type layout optimizations and an optimized
    error type, most functions compile down to very simple code and can even be
@@ -39,6 +39,9 @@ This feature is fun in two ways:
    regular values, and file descriptors are kept in [`io-lifetimes`] types,
    so most functions preserve memory safety and I/O safety all the way down
    to the syscalls.
+ - It uses a crate-level `deny(unsafe_code)`. While there are a few places that
+   use `allow(unsafe_code)` locally to override this in places where `unsafe`
+   is unavoidable, most of the code is safe.
 
 [`std`]: https://doc.rust-lang.org/std/
 [`getrandom`]: https://crates.io/crates/getrandom

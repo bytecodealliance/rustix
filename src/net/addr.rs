@@ -1,3 +1,10 @@
+// # Safety
+//
+// This file performs casts between various pointers to various `sockaddr_*`
+// types in a manner similar to what C code does when working with sockets
+// APIs. It uses `assert`s to check assumptions where feasible.
+#![allow(unsafe_code)]
+
 use crate::{as_ptr, io, net::AddressFamily};
 #[cfg(all(
     libc,

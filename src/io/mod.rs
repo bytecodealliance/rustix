@@ -5,6 +5,8 @@ mod fd;
 mod ioctl;
 mod pipe;
 mod poll;
+#[cfg(libc)]
+mod poll_fd;
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 mod rdadvise;
 mod read_write;

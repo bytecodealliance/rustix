@@ -1,9 +1,15 @@
 //! System call arguments and return values are all `usize`. This module
 //! provides functions for converting into and out of `usize` values.
+//!
+//! # Safety
+//!
+//! Some of these functions are `unsafe` because they `transmute` `Option`
+//! types knowing their layouts, or construct owned file descriptors.
+#![allow(unsafe_code)]
 
 use crate::{as_mut_ptr, as_ptr, io};
 use io_lifetimes::{BorrowedFd, OwnedFd};
-use linux_raw_sys::general::{__kernel_clockid_t, __kernel_loff_t, socklen_t, umode_t};
+use linux_raw_sys::general::{__kernel_clockid_t, socklen_t, umode_t};
 use std::{
     ffi::CStr,
     mem::{transmute, MaybeUninit},
@@ -11,6 +17,8 @@ use std::{
     ptr::null,
 };
 use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+#[cfg(target_pointer_width = "64")]
+use linux_raw_sys::general::__kernel_loff_t;
 
 /// Convert `SYS_*` constants for socketcall.
 #[cfg(target_arch = "x86")]
@@ -105,11 +113,13 @@ pub(super) fn by_mut<T: Sized>(t: &mut T) -> usize {
     as_mut_ptr(t) as usize
 }
 
-#[inline]
-pub(super) unsafe fn opt_ref<T: Sized>(t: Option<&T>) -> usize {
-    transmute(t)
-}
-
+/// Convert an optional mutable reference into a `usize` for passing to a syscall.
+///
+/// # Safety
+///
+/// `Option<&mut T>` is represented as a nullable pointer to `T`, which is the
+/// same size as a `usize`, so we can directly transmute it and pass the result
+/// to syscalls expecting nullable pointers.
 #[inline]
 pub(super) unsafe fn opt_mut<T: Sized>(t: Option<&mut T>) -> usize {
     transmute(t)
@@ -125,11 +135,13 @@ pub(super) fn c_uint(i: c_uint) -> usize {
     i as usize
 }
 
+#[cfg(target_pointer_width = "64")]
 #[inline]
 pub(super) fn loff_t(i: __kernel_loff_t) -> usize {
     i as usize
 }
 
+#[cfg(target_pointer_width = "64")]
 #[inline]
 pub(super) fn loff_t_from_u64(i: u64) -> usize {
     i as usize
@@ -194,10 +206,16 @@ pub(super) fn ret_usize(raw: usize) -> io::Result<usize> {
     Ok(raw)
 }
 
+/// Convert a usize returned from a syscall to an `OwnedFd`, if valid.
+///
+/// # Safety
+///
+/// The caller must ensure that this is the return value of a syscall which
+/// returns an owned file descriptor.
 #[inline]
-pub(super) fn ret_owned_fd(raw: usize) -> io::Result<OwnedFd> {
+pub(super) unsafe fn ret_owned_fd(raw: usize) -> io::Result<OwnedFd> {
     check_error(raw)?;
-    Ok(unsafe { OwnedFd::from_raw_fd(raw as RawFd) })
+    Ok(OwnedFd::from_raw_fd(raw as RawFd))
 }
 
 #[inline]

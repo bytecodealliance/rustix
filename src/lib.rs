@@ -44,6 +44,7 @@
 //! [`Arg`]: https://docs.rs/posish/latest/posish/path/trait.Arg.html
 
 #![deny(missing_docs)]
+#![cfg_attr(linux_raw, deny(unsafe_code))]
 #![cfg_attr(linux_raw, feature(asm))]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 

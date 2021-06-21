@@ -316,29 +316,26 @@ pub fn ttyname<'f, Fd: AsFd<'f>>(dirfd: Fd, reuse: OsString) -> io::Result<OsStr
 
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 fn _ttyname(dirfd: BorrowedFd<'_>, reuse: OsString) -> io::Result<OsString> {
+    // This code would benefit from having a better way to read into
+    // uninitialized memory, but that requires `unsafe`.
     let mut buffer = reuse.into_vec();
-
-    // Start with a buffer big enough for the vast majority of paths.
-    // This and the `reserve` below would be a good candidate for `try_reserve`.
-    // https://github.com/rust-lang/rust/issues/48043
     buffer.clear();
-    buffer.reserve(256);
+    buffer.resize(256, 0u8);
 
-    unsafe {
-        loop {
-            match libc::ttyname_r(
-                dirfd.as_raw_fd() as libc::c_int,
-                buffer.as_mut_ptr().cast::<libc::c_char>(),
-                buffer.capacity(),
-            ) {
-                // Use `Vec`'s builtin capacity-doubling strategy.
-                libc::ERANGE => buffer.reserve(1),
-                0 => {
-                    buffer.set_len(libc::strlen(buffer.as_ptr().cast::<libc::c_char>()));
-                    return Ok(OsString::from_vec(buffer));
-                }
-                errno => return Err(io::Error(errno)),
+    loop {
+        match unsafe { libc::ttyname_r(
+            dirfd.as_raw_fd() as libc::c_int,
+            buffer.as_mut_ptr().cast::<libc::c_char>(),
+            buffer.capacity(),
+        ) } {
+            // Use `Vec`'s builtin capacity-doubling strategy.
+            libc::ERANGE => buffer.resize(buffer.len() * 2, 0u8),
+            0 => {
+                let len = buffer.iter().position(|x| *x == b'\0').unwrap();
+                buffer.resize(len, 0u8);
+                return Ok(OsString::from_vec(buffer));
             }
+            errno => return Err(io::Error(errno)),
         }
     }
 }

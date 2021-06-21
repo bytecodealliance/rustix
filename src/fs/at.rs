@@ -33,29 +33,12 @@ use std::ffi::{CStr, OsString};
 use std::os::unix::ffi::OsStringExt;
 #[cfg(target_os = "wasi")]
 use std::os::wasi::ffi::OsStringExt;
-use unsafe_io::os::posish::RawFd;
 #[cfg(libc)]
 use {
     crate::{negone_err, zero_ok},
     std::mem::MaybeUninit,
-    unsafe_io::os::posish::{AsRawFd, FromRawFd},
+    unsafe_io::os::posish::{AsRawFd, FromRawFd, RawFd},
 };
-
-/// Return a "file" which holds a handle which refers to the process current
-/// directory (`AT_FDCWD`).
-#[allow(unsafe_code)]
-#[inline]
-pub fn cwd() -> BorrowedFd<'static> {
-    #[cfg(libc)]
-    {
-        unsafe { BorrowedFd::<'static>::borrow_raw_fd(libc::AT_FDCWD as RawFd) }
-    }
-
-    #[cfg(linux_raw)]
-    {
-        unsafe { BorrowedFd::<'static>::borrow_raw_fd(linux_raw_sys::general::AT_FDCWD as RawFd) }
-    }
-}
 
 /// `openat(dirfd, path, oflags, mode)`
 #[inline]
@@ -107,40 +90,34 @@ pub fn readlinkat<'f, P: path::Arg, Fd: AsFd<'f>>(
 
 #[cfg(libc)]
 fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Result<OsString> {
+    // This code would benefit from having a better way to read into
+    // uninitialized memory, but that requires `unsafe`.
     let mut buffer = reuse.into_vec();
-
-    // Start with a buffer big enough for the vast majority of paths.
-    // This and the `reserve` below would be a good candidate for `try_reserve`.
-    // https://github.com/rust-lang/rust/issues/48043
     buffer.clear();
-    buffer.reserve(256);
+    buffer.resize(256, 0u8);
 
-    unsafe {
         loop {
-            let nread = negone_err(libc::readlinkat(
+            let nread = unsafe { negone_err(libc::readlinkat(
                 dirfd.as_raw_fd() as libc::c_int,
                 path.as_ptr(),
                 buffer.as_mut_ptr().cast::<libc::c_char>(),
                 buffer.capacity(),
-            ))?;
+            ))? };
 
             let nread = nread as usize;
             assert!(nread <= buffer.capacity());
-            buffer.set_len(nread);
-            if nread < buffer.capacity() {
+            if nread < buffer.len() {
+                buffer.resize(nread, 0u8);
                 return Ok(OsString::from_vec(buffer));
             }
-
-            // Use `Vec`'s builtin capacity-doubling strategy.
-            buffer.reserve(1);
+            buffer.resize(buffer.len() * 2, 0u8);
         }
-    }
 }
 
 #[cfg(linux_raw)]
 fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Result<OsString> {
-    // TODO: This code would benefit from having a better way to read into
-    // uninitialized memory.
+    // This code would benefit from having a better way to read into
+    // uninitialized memory, but that requires `unsafe`.
     let mut buffer = reuse.into_vec();
     buffer.clear();
     buffer.resize(256, 0u8);

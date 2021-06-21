@@ -1,3 +1,11 @@
+//! The Linux `userfaultfd` API.
+//!
+//! # Safety
+//!
+//! Calling `userfaultfd` is safe, but the returned file descriptor lets users
+//! observe and manipulate process memory in magical ways.
+#![allow(unsafe_code)]
+
 use crate::io;
 use bitflags::bitflags;
 use io_lifetimes::OwnedFd;

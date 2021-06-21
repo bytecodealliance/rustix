@@ -1,6 +1,8 @@
 //! Filesystem operations.
 
 #[cfg(not(target_os = "redox"))]
+mod cwd;
+#[cfg(not(target_os = "redox"))]
 mod at;
 mod constants;
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -41,13 +43,15 @@ mod sendfile;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 mod statx;
 
+#[cfg(not(target_os = "redox"))]
+pub use cwd::cwd;
 #[cfg(not(any(target_os = "wasi", target_os = "redox")))]
 pub use at::chmodat;
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub use at::fclonefileat;
 #[cfg(not(target_os = "redox"))]
 pub use at::{
-    accessat, cwd, linkat, mkdirat, openat, readlinkat, renameat, statat, symlinkat, unlinkat,
+    accessat, linkat, mkdirat, openat, readlinkat, renameat, statat, symlinkat, unlinkat,
     utimensat,
 };
 #[cfg(not(target_os = "redox"))]
@@ -60,7 +64,7 @@ pub use constants::{CloneFlags, CopyfileFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use copy_file_range::copy_file_range;
 #[cfg(not(target_os = "redox"))]
-pub use dir::{Dir, Entry, SeekLoc};
+pub use dir::{Dir, Entry};
 #[cfg(not(any(
     target_os = "ios",
     target_os = "macos",

@@ -1,9 +1,7 @@
-//! `Dir`, `Entry`, and `SeekLoc`.
+//! `Dir` and `Entry`.
 
 use crate::{fs::FileType, io};
 use io_lifetimes::{IntoFd, OwnedFd};
-#[cfg(libc)]
-use libc::seekdir as libc_seekdir;
 #[cfg(not(any(
     target_os = "android",
     target_os = "emscripten",
@@ -21,33 +19,26 @@ use libc::{dirent as libc_dirent, readdir as libc_readdir};
     )
 ))]
 use libc::{dirent64 as libc_dirent, readdir64 as libc_readdir};
+use std::ffi::CStr;
 #[cfg(target_os = "wasi")]
 use std::ffi::CString;
-use std::{ffi::CStr, ptr};
-use unsafe_io::{
-    os::posish::{AsRawFd, RawFd},
-    OwnsRaw,
-};
+use unsafe_io::os::posish::{AsRawFd, RawFd};
 #[cfg(linux_raw)]
 use {
-    crate::as_ptr,
-    io_lifetimes::AsFd,
-    linux_raw_sys::general::linux_dirent64,
-    std::ffi::CString,
+    crate::as_ptr, io_lifetimes::AsFd, linux_raw_sys::general::linux_dirent64, std::ffi::CString,
     std::mem::size_of,
-    std::os::raw::{c_char, c_ushort},
 };
 #[cfg(libc)]
 use {
     errno::{errno, set_errno, Errno},
-    std::{convert::TryInto, mem::zeroed},
-    unsafe_io::os::posish::IntoRawFd,
+    std::{mem::zeroed, ptr::NonNull},
+    unsafe_io::{os::posish::IntoRawFd, OwnsRaw},
 };
 
 /// `DIR*`
 #[cfg(libc)]
 #[repr(transparent)]
-pub struct Dir(ptr::NonNull<libc::DIR>);
+pub struct Dir(NonNull<libc::DIR>);
 
 /// `DIR*`
 #[cfg(linux_raw)]
@@ -78,7 +69,7 @@ impl Dir {
         let raw = fd.into_raw_fd() as libc::c_int;
         unsafe {
             let d = libc::fdopendir(raw);
-            if let Some(d) = ptr::NonNull::new(d) {
+            if let Some(d) = NonNull::new(d) {
                 Ok(Self(d))
             } else {
                 let e = io::Error::last_os_error();
@@ -99,21 +90,6 @@ impl Dir {
             pos,
             next: None,
         })
-    }
-
-    /// `seekdir(self, loc)`
-    #[cfg(libc)]
-    #[inline]
-    pub fn seek(&mut self, loc: SeekLoc) {
-        unsafe { libc_seekdir(self.0.as_ptr(), loc.0) }
-    }
-
-    /// `seekdir(self, loc)`
-    #[cfg(linux_raw)]
-    #[inline]
-    pub fn seek(&mut self, loc: SeekLoc) {
-        self.pos = self.buf.len();
-        self.next = Some(loc.to_raw());
     }
 
     /// `rewinddir(self)`
@@ -198,26 +174,52 @@ impl Dir {
 
         // We successfully read an entry. Extract the fields.
         let pos = self.pos;
-        let dirent = self.buf[pos..].as_ptr();
+
+        // Do an unaligned u16 load.
+        let d_reclen = u16::from_ne_bytes([
+            self.buf[pos + offsetof_d_reclen + 0],
+            self.buf[pos + offsetof_d_reclen + 1],
+        ]);
+        assert!(self.buf.len() - pos >= d_reclen as usize);
+        self.pos += d_reclen as usize;
+
+        // Read the NUL-terminated name from the `d_name` field. Without
+        // `unsafe`, we need to scan for the NUL twice: once to obtain a size
+        // for the slice, and then once within `CStr::from_bytes_with_nul`.
         let name_start = pos + offsetof_d_name;
-        unsafe {
-            let reclen =
-                ptr::read_unaligned(dirent.add(offsetof_d_reclen).cast::<c_ushort>()) as usize;
-            assert!(self.buf.len() - pos >= reclen);
-            self.pos += reclen;
+        let name_end = self.buf[name_start..].iter().position(|x| *x == b'\0').unwrap();
+        let name = CStr::from_bytes_with_nul(&self.buf[name_start..name_end + 1]).unwrap();
+        let name = name.to_owned();
+        assert!(name.as_bytes().len() <= self.buf.len() - name_start);
 
-            let name = CStr::from_ptr(self.buf[name_start..].as_ptr().cast::<c_char>());
-            let name = name.to_owned();
-            assert!(name.as_bytes().len() <= self.buf.len() - name_start);
+        // Do an unaligned u64 load.
+        let d_ino = u64::from_ne_bytes([
+            self.buf[pos + offsetof_d_ino + 0],
+            self.buf[pos + offsetof_d_ino + 1],
+            self.buf[pos + offsetof_d_ino + 2],
+            self.buf[pos + offsetof_d_ino + 3],
+            self.buf[pos + offsetof_d_ino + 4],
+            self.buf[pos + offsetof_d_ino + 5],
+            self.buf[pos + offsetof_d_ino + 6],
+            self.buf[pos + offsetof_d_ino + 7],
+        ]);
 
-            let d_ino = ptr::read_unaligned(dirent.add(offsetof_d_ino).cast::<u64>());
-            let d_type = ptr::read_unaligned(dirent.add(offsetof_d_type));
-            Some(Ok(Entry {
-                d_ino,
-                d_type,
-                name: name.to_owned(),
-            }))
-        }
+        let d_type = self.buf[pos + offsetof_d_type];
+
+        // Check that our types correspond to the `linux_dirent64` types.
+        let _ = linux_dirent64 {
+            d_ino,
+            d_off: 0,
+            d_type,
+            d_reclen,
+            d_name: Default::default(),
+        };
+
+        Some(Ok(Entry {
+            d_ino,
+            d_type,
+            name: name.to_owned(),
+        }))
     }
 
     #[cfg(linux_raw)]
@@ -357,6 +359,7 @@ impl AsRawFd for Dir {
 }
 
 // Safety: `Dir` owns its handle.
+#[cfg(libc)]
 unsafe impl OwnsRaw for Dir {}
 
 #[cfg(libc)]
@@ -449,68 +452,5 @@ impl Entry {
     #[inline]
     pub fn ino(&self) -> u64 {
         self.d_ino
-    }
-}
-
-/// A location for use with [`Dir::seek`].
-///
-/// [`Dir::seek`]: struct.Dir.html#method.seek
-#[cfg(libc)]
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
-#[repr(transparent)]
-pub struct SeekLoc(std::os::raw::c_long);
-
-/// A location for use with [`Dir::seek`].
-///
-/// [`Dir::seek`]: struct.Dir.html#method.seek
-#[cfg(linux_raw)]
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
-#[repr(transparent)]
-pub struct SeekLoc(u64);
-
-#[cfg(libc)]
-impl SeekLoc {
-    /// Return the location encoded as a `u64`. Note that this value is meant
-    /// to be opaque, and applications shouldn't do anything with it except
-    /// call `SeekLoc::from_raw`.
-    #[inline]
-    #[allow(clippy::useless_conversion)]
-    pub fn to_raw(&self) -> u64 {
-        i64::from(self.0) as u64
-    }
-
-    /// Construct a new `SeekLoc` from a value returned by `SeekLoc::to_raw`.
-    ///
-    /// # Safety
-    ///
-    /// The passed-in `loc` value must be a value returned from
-    /// `SeekLoc::to_raw`.
-    #[inline]
-    pub unsafe fn from_raw(loc: u64) -> io::Result<Self> {
-        Ok(Self(
-            loc.try_into().map_err(|_convert_err| io::Error::INVAL)?,
-        ))
-    }
-}
-
-#[cfg(linux_raw)]
-impl SeekLoc {
-    /// Return the location encoded as a `u64`. Note that this value is meant
-    /// to be opaque, and applications shouldn't do anything with it except
-    /// call `SeekLoc::from_raw`.
-    #[inline]
-    pub fn to_raw(&self) -> u64 {
-        self.0
-    }
-
-    /// Construct a new `SeekLoc` from a value returned by `SeekLoc::to_raw`.
-    ///
-    /// # Safety
-    ///
-    /// The passed-in `loc` value must be a value returned from
-    /// `SeekLoc::to_raw`.
-    #[inline]
-    pub unsafe fn from_raw(loc: u64) -> io::Result<Self> {
-        Ok(Self(loc))
     }
 }

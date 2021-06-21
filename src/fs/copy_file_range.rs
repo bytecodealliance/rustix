@@ -1,8 +1,8 @@
 use crate::io;
 use io_lifetimes::{AsFd, BorrowedFd};
-use std::{convert::TryInto, mem};
+use std::convert::TryInto;
 #[cfg(libc)]
-use {crate::negone_err, std::ptr, unsafe_io::os::posish::AsRawFd};
+use {crate::negone_err, std::{ptr, mem::size_of}, unsafe_io::os::posish::AsRawFd};
 
 /// `copy_file_range(fd_in, off_in, fd_out, off_out, len, 0)`
 #[inline]
@@ -26,7 +26,7 @@ fn _copy_file_range(
     off_out: Option<&mut u64>,
     len: u64,
 ) -> io::Result<u64> {
-    assert_eq!(mem::size_of::<libc::loff_t>(), mem::size_of::<u64>());
+    assert_eq!(size_of::<libc::loff_t>(), size_of::<u64>());
 
     let mut off_in_val: libc::loff_t = 0;
     let mut off_out_val: libc::loff_t = 0;
@@ -77,7 +77,6 @@ fn _copy_file_range(
     len: u64,
 ) -> io::Result<u64> {
     let len: usize = len.try_into().unwrap_or(usize::MAX);
-    let (off_in, off_out) = unsafe { (mem::transmute(off_in), mem::transmute(off_out)) };
     crate::linux_raw::copy_file_range(fd_in, off_in, fd_out, off_out, len, 0)
         .map(|result| result as u64)
 }
