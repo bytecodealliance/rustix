@@ -1,7 +1,7 @@
 use crate::io;
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
-use std::{marker::PhantomData, vec::IntoIter};
+use std::{iter::IntoIterator, marker::PhantomData, vec::IntoIter};
 #[cfg(libc)]
 use {crate::negone_err, std::convert::TryInto, unsafe_io::os::posish::AsRawFd};
 
@@ -151,10 +151,14 @@ impl<'fd> PollFdVec<'fd> {
     pub fn push(&mut self, fd: PollFd<'fd>) {
         self.fds.push(fd)
     }
+}
 
-    /// Consume self and return an iterator over the fds.
+impl<'fd> IntoIterator for PollFdVec<'fd> {
+    type IntoIter = IntoIter<PollFd<'fd>>;
+    type Item = PollFd<'fd>;
+
     #[inline]
-    pub fn into_iter(self) -> IntoIter<PollFd<'fd>> {
+    fn into_iter(self) -> IntoIter<PollFd<'fd>> {
         self.fds.into_iter()
     }
 }
