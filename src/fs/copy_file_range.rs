@@ -4,7 +4,7 @@ use std::convert::TryInto;
 #[cfg(libc)]
 use {
     crate::negone_err,
-    std::{mem::size_of, ptr},
+    std::{mem::size_of, ptr::null_mut},
     unsafe_io::os::posish::AsRawFd,
 };
 
@@ -40,7 +40,7 @@ fn _copy_file_range(
             .map_err(|_overflow_err| io::Error::OVERFLOW)?;
         &mut off_in_val
     } else {
-        ptr::null_mut()
+        null_mut()
     };
     let off_out_ptr = if let Some(off_out) = &off_out {
         off_out_val = (**off_out)
@@ -48,7 +48,7 @@ fn _copy_file_range(
             .map_err(|_overflow_err| io::Error::OVERFLOW)?;
         &mut off_out_val
     } else {
-        ptr::null_mut()
+        null_mut()
     };
     let len: usize = len.try_into().unwrap_or(usize::MAX);
     let copied = unsafe {
