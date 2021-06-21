@@ -1,4 +1,15 @@
-use crate::{io, time::Timespec};
+#[cfg(not(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "ios",
+    target_os = "redox",
+    target_os = "freebsd",
+    target_os = "openbsd",
+    target_os = "emscripten",
+    target_os = "wasi",
+)))]
+use crate::io;
+use crate::time::Timespec;
 #[cfg(all(
     libc,
     not(any(
@@ -12,7 +23,7 @@ use crate::{io, time::Timespec};
         target_os = "wasi",
     ))
 ))]
-use std::ptr;
+use std::ptr::null_mut;
 #[cfg(libc)]
 use {crate::zero_ok, std::mem::MaybeUninit};
 
@@ -180,9 +191,7 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRel
 #[inline]
 pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::Result<()> {
     let flags = libc::TIMER_ABSTIME;
-    zero_ok(unsafe {
-        libc::clock_nanosleep(id as libc::clockid_t, flags, request, ptr::null_mut())
-    })
+    zero_ok(unsafe { libc::clock_nanosleep(id as libc::clockid_t, flags, request, null_mut()) })
 }
 
 /// `clock_nanosleep(id, TIMER_ABSTIME, request, NULL)`
@@ -220,6 +229,7 @@ pub fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
 }
 
 /// A return type for `nanosleep` and `clock_nanosleep_relative`.
+#[derive(Debug, Clone)]
 pub enum NanosleepRelativeResult {
     /// The sleep completed normally.
     Ok,

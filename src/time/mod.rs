@@ -5,10 +5,10 @@ mod clock;
 
 // TODO: Convert WASI'S clock APIs to use handles rather than ambient
 // clock identifiers, update `wasi-libc`, and then add support in `posish`.
-#[cfg(not(target_os = "redox"))]
-pub use clock::nanosleep;
 #[cfg(not(any(target_os = "wasi", target_os = "redox")))]
 pub use clock::{clock_getres, clock_gettime, ClockId};
+#[cfg(not(target_os = "redox"))]
+pub use clock::{nanosleep, NanosleepRelativeResult};
 
 #[cfg(not(any(
     target_os = "macos",
