@@ -4,61 +4,63 @@ use crate::{
 };
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
+use std::os::raw::c_int;
 #[cfg(linux_raw)]
 use std::os::raw::c_uint;
-use std::{
-    mem::{size_of, MaybeUninit},
-    os::raw::c_int,
-};
 #[cfg(libc)]
 use {
     crate::{as_ptr, negone_err, zero_ok},
     libc::{sockaddr_storage, socklen_t},
+    std::mem::{size_of, MaybeUninit},
     unsafe_io::os::posish::{AsRawFd, FromRawFd},
 };
 
 /// `SOCK_*` constants for `socket`.
 #[cfg(libc)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-#[repr(u32)]
-#[non_exhaustive]
-pub enum SocketType {
+#[repr(transparent)]
+pub struct SocketType(pub(crate) u32);
+
+#[cfg(cfg)]
+impl SocketType {
     /// `SOCK_STREAM`.
-    Stream = libc::SOCK_STREAM as u32,
+    pub const STREAM: Self = Self(libc::SOCK_STREAM as u32);
 
     /// `SOCK_DGRAM`.
-    Datagram = libc::SOCK_DGRAM as u32,
+    pub const DGRAM: Self = Self(libc::SOCK_DGRAM as u32);
 
     /// `SOCK_SEQPACKET`.
-    SeqPacket = libc::SOCK_SEQPACKET as u32,
+    pub const SEQPACKET: Self = Self(libc::SOCK_SEQPACKET as u32);
 
     /// `SOCK_RAW`.
-    Raw = libc::SOCK_RAW as u32,
+    pub const RAW: Self = Self(libc::SOCK_RAW as u32);
 
     /// `SOCK_RDM`.
-    Rdm = libc::SOCK_RDM as u32,
+    pub const RDM: Self = Self(libc::SOCK_RDM as u32);
 }
 
 /// `SOCK_*` constants for `socket`.
 #[cfg(linux_raw)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-#[repr(u32)]
-#[non_exhaustive]
-pub enum SocketType {
+#[repr(transparent)]
+pub struct SocketType(pub(crate) u32);
+
+#[cfg(linux_raw)]
+impl SocketType {
     /// `SOCK_STREAM`.
-    Stream = linux_raw_sys::general::SOCK_STREAM,
+    pub const STREAM: Self = Self(linux_raw_sys::general::SOCK_STREAM);
 
     /// `SOCK_DGRAM`.
-    Datagram = linux_raw_sys::general::SOCK_DGRAM,
+    pub const DGRAM: Self = Self(linux_raw_sys::general::SOCK_DGRAM);
 
     /// `SOCK_SEQPACKET`.
-    SeqPacket = linux_raw_sys::general::SOCK_SEQPACKET,
+    pub const SEQPACKET: Self = Self(linux_raw_sys::general::SOCK_SEQPACKET);
 
     /// `SOCK_RAW`.
-    Raw = linux_raw_sys::general::SOCK_RAW,
+    pub const RAW: Self = Self(linux_raw_sys::general::SOCK_RAW);
 
     /// `SOCK_RDM`.
-    Rdm = linux_raw_sys::general::SOCK_RDM,
+    pub const RDM: Self = Self(linux_raw_sys::general::SOCK_RDM);
 }
 
 /// `AF_*` constants.
@@ -315,7 +317,7 @@ fn _socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::
     unsafe {
         let raw_fd = negone_err(libc::socket(
             domain.0 as c_int,
-            type_ as c_int,
+            type_.0 as c_int,
             protocol as c_int,
         ))?;
         Ok(OwnedFd::from_raw_fd(raw_fd))
@@ -324,7 +326,7 @@ fn _socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::
 
 #[cfg(linux_raw)]
 fn _socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::Result<OwnedFd> {
-    crate::linux_raw::socket(domain.0.into(), type_ as c_uint, protocol as c_uint)
+    crate::linux_raw::socket(domain.0.into(), type_.0, protocol as c_uint)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in))`
@@ -562,13 +564,13 @@ fn _shutdown(sockfd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> {
 
 /// `getsockopt(fd, SOL_SOCKET, SO_TYPE)`
 #[inline]
-pub fn socket_type<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<SocketType> {
+pub fn getsockopt_socket_type<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<SocketType> {
     let fd = fd.as_fd();
-    _socket_type(fd)
+    _getsockopt_socket_type(fd)
 }
 
 #[cfg(libc)]
-fn _socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
+fn _getsockopt_socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
     let mut buffer = MaybeUninit::<SocketType>::uninit();
     let mut out_len = size_of::<SocketType>() as socklen_t;
     unsafe {
@@ -589,28 +591,8 @@ fn _socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
 }
 
 #[cfg(linux_raw)]
-fn _socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
-    unsafe {
-        let mut buffer = MaybeUninit::<SocketType>::uninit();
-        let mut out_len = size_of::<SocketType>() as linux_raw_sys::general::socklen_t;
-        let slice = std::slice::from_raw_parts_mut(
-            buffer.as_mut_ptr().cast::<u8>(),
-            size_of::<SocketType>(),
-        );
-        crate::linux_raw::getsockopt(
-            fd,
-            linux_raw_sys::general::SOL_SOCKET as i32,
-            linux_raw_sys::general::SO_TYPE as i32,
-            slice,
-            &mut out_len,
-        )?;
-        assert_eq!(
-            out_len as usize,
-            size_of::<SocketType>(),
-            "unexpected SocketType size"
-        );
-        Ok(buffer.assume_init())
-    }
+fn _getsockopt_socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
+    crate::linux_raw::getsockopt_socket_type(fd).map(SocketType)
 }
 
 /// `getsockname(fd, addr, len)`

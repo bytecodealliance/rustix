@@ -28,7 +28,7 @@ fn _socketpair(
         let mut fds = MaybeUninit::<[OwnedFd; 2]>::uninit();
         zero_ok(libc::socketpair(
             domain.0 as c_int,
-            type_ as c_int | accept_flags.bits(),
+            type_.0 as c_int | accept_flags.bits(),
             protocol as c_int,
             fds.as_mut_ptr().cast::<c_int>(),
         ))?;
@@ -48,7 +48,7 @@ fn _socketpair(
 ) -> io::Result<(OwnedFd, OwnedFd)> {
     crate::linux_raw::socketpair(
         u32::from(domain.0),
-        type_ as u32 | accept_flags.bits(),
+        type_.0 | accept_flags.bits(),
         protocol as u32,
     )
 }

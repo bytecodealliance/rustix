@@ -1397,40 +1397,38 @@ pub(crate) fn setsockopt(
 }
 
 #[inline]
-pub(crate) fn getsockopt(
-    fd: BorrowedFd<'_>,
-    level: c_int,
-    name: c_int,
-    value: &mut [u8],
-    optlen: &mut socklen_t,
-) -> io::Result<c_int> {
-    assert!((*optlen as usize) <= value.len());
-
+pub(crate) fn getsockopt_socket_type(fd: BorrowedFd<'_>) -> io::Result<u32> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
-        ret_c_int(syscall5(
+        let mut type_ = MaybeUninit::uninit();
+        let mut optlen = size_of::<u32>();
+        ret(syscall5(
             __NR_getsockopt,
             borrowed_fd(fd),
-            c_int(level),
-            c_int(name),
-            slice_addr(value),
-            by_mut(optlen),
-        ))
+            c_uint(linux_raw_sys::general::SOL_SOCKET),
+            c_uint(linux_raw_sys::general::SO_TYPE),
+            out(&mut type_),
+            by_mut(&mut optlen),
+        ))?;
+        Ok(type_.assume_init())
     }
     #[cfg(target_arch = "x86")]
     unsafe {
-        ret_c_int(syscall2(
+        let mut type_ = MaybeUninit::uninit();
+        let mut optlen = size_of::<u32>();
+        ret(syscall2(
             __NR_socketcall,
             x86_sys(SYS_GETSOCKOPT),
             slice_addr(&[
                 borrowed_fd(fd),
-                c_int(level),
-                c_int(name),
-                slice_addr(value),
-                by_mut(optlen),
+                c_uint(linux_raw_sys::general::SOL_SOCKET),
+                c_uint(linux_raw_sys::general::SO_TYPE),
+                out(&mut type_),
+                by_mut(&mut optlen),
                 0,
             ]),
-        ))
+        ))?;
+        Ok(type_.assume_init())
     }
 }
 

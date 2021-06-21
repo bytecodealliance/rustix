@@ -12,8 +12,8 @@ pub use send_recv::{
 };
 pub use socket::{
     accept, bind_unix, bind_v4, bind_v6, connect_unix, connect_v4, connect_v6, getpeername,
-    getsockname, listen, shutdown, socket, socket_type, AcceptFlags, AddressFamily, Protocol,
-    SocketType,
+    getsockname, getsockopt_socket_type, listen, shutdown, socket, AcceptFlags, AddressFamily,
+    Protocol, SocketType,
 };
 #[cfg(not(target_os = "wasi"))]
 pub use socketpair::socketpair;
