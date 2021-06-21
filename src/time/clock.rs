@@ -151,17 +151,12 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRel
     let mut remain = MaybeUninit::<Timespec>::uninit();
     let flags = 0;
     unsafe {
-        match zero_ok(libc::clock_nanosleep(
-            id as libc::clockid_t,
-            flags,
-            request,
-            remain.as_mut_ptr(),
-        )) {
-            Ok(()) => NanosleepRelativeResult::Ok,
-            Err(crate::io::Error::INTR) => {
+        match libc::clock_nanosleep(id as libc::clockid_t, flags, request, remain.as_mut_ptr()) {
+            0 => NanosleepRelativeResult::Ok,
+            err if err == crate::io::Error::INTR.0 => {
                 NanosleepRelativeResult::Interrupted(remain.assume_init())
             }
-            Err(err) => NanosleepRelativeResult::Err(err),
+            err => NanosleepRelativeResult::Err(io::Error(err)),
         }
     }
 }
@@ -191,7 +186,10 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRel
 #[inline]
 pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::Result<()> {
     let flags = libc::TIMER_ABSTIME;
-    zero_ok(unsafe { libc::clock_nanosleep(id as libc::clockid_t, flags, request, null_mut()) })
+    match unsafe { libc::clock_nanosleep(id as libc::clockid_t, flags, request, null_mut()) } {
+        0 => Ok(()),
+        err => Err(io::Error(err)),
+    }
 }
 
 /// `clock_nanosleep(id, TIMER_ABSTIME, request, NULL)`

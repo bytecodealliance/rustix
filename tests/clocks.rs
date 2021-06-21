@@ -101,3 +101,63 @@ fn test_invalid_nanosleep_relative() {
         otherwise => panic!("unexpected resut: {:?}", otherwise),
     }
 }
+
+#[cfg(not(target_os = "redox"))]
+#[test]
+fn test_zero_nanosleep() {
+    match nanosleep(&Timespec {
+        tv_sec: 0,
+        tv_nsec: 0,
+    }) {
+        NanosleepRelativeResult::Ok => (),
+        otherwise => panic!("unexpected resut: {:?}", otherwise),
+    }
+}
+
+#[cfg(not(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "ios",
+    target_os = "redox",
+    target_os = "freebsd",
+    target_os = "openbsd",
+    target_os = "emscripten",
+    target_os = "wasi",
+)))]
+#[test]
+fn test_zero_nanosleep_absolute() {
+    match clock_nanosleep_absolute(
+        ClockId::Monotonic,
+        &Timespec {
+            tv_sec: 0,
+            tv_nsec: 0,
+        },
+    ) {
+        Ok(()) => (),
+        otherwise => panic!("unexpected resut: {:?}", otherwise),
+    }
+}
+
+#[cfg(not(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "ios",
+    target_os = "redox",
+    target_os = "freebsd",
+    target_os = "openbsd",
+    target_os = "emscripten",
+    target_os = "wasi",
+)))]
+#[test]
+fn test_zero_nanosleep_relative() {
+    match clock_nanosleep_relative(
+        ClockId::Monotonic,
+        &Timespec {
+            tv_sec: 0,
+            tv_nsec: 0,
+        },
+    ) {
+        NanosleepRelativeResult::Ok => (),
+        otherwise => panic!("unexpected resut: {:?}", otherwise),
+    }
+}
