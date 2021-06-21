@@ -655,3 +655,127 @@ fn _socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
         Ok(buffer.assume_init())
     }
 }
+
+/// `getsockname(fd, addr, len)`
+#[inline]
+#[doc(alias = "accept4")]
+pub fn getsockname<'f, Fd: AsFd<'f>>(sockfd: Fd) -> io::Result<SocketAddr> {
+    let sockfd = sockfd.as_fd();
+    _getsockname(sockfd)
+}
+
+#[cfg(libc)]
+fn _getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
+    unsafe {
+        let mut storage = MaybeUninit::<sockaddr_storage>::uninit();
+        let mut len = size_of::<sockaddr_storage>() as socklen_t;
+        zero_ok(libc::getsockname(
+            sockfd.as_raw_fd(),
+            storage.as_mut_ptr().cast::<_>(),
+            &mut len,
+        ))?;
+        let storage = storage.assume_init();
+        let addr = match i32::from(storage.ss_family) {
+            libc::AF_INET => {
+                assert!(len as usize >= size_of::<SocketAddrV4>());
+                SocketAddr::V4(ptr::read(as_ptr(&storage).cast::<_>()))
+            }
+            libc::AF_INET6 => {
+                assert!(len as usize >= size_of::<SocketAddrV6>());
+                SocketAddr::V6(ptr::read(as_ptr(&storage).cast::<_>()))
+            }
+            libc::AF_LOCAL => {
+                assert!(len as usize >= size_of::<SocketAddrUnix>());
+                SocketAddr::Unix(ptr::read(as_ptr(&storage).cast::<_>()))
+            }
+            _ => panic!(),
+        };
+        Ok(addr)
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
+    let (storage, len) = crate::linux_raw::getsockname(sockfd)?;
+    let addr = unsafe {
+        match u32::from(storage.ss_family) {
+            linux_raw_sys::general::AF_INET => {
+                assert!(len as usize >= size_of::<SocketAddrV4>());
+                SocketAddr::V4(ptr::read(as_ptr(&storage).cast::<_>()))
+            }
+            linux_raw_sys::general::AF_INET6 => {
+                assert!(len as usize >= size_of::<SocketAddrV6>());
+                SocketAddr::V6(ptr::read(as_ptr(&storage).cast::<_>()))
+            }
+            linux_raw_sys::general::AF_LOCAL => {
+                assert!(len as usize >= size_of::<SocketAddrUnix>());
+                SocketAddr::Unix(ptr::read(as_ptr(&storage).cast::<_>()))
+            }
+            _ => panic!(),
+        }
+    };
+    Ok(addr)
+}
+
+/// `getpeername(fd, addr, len)`
+#[inline]
+#[doc(alias = "accept4")]
+pub fn getpeername<'f, Fd: AsFd<'f>>(sockfd: Fd) -> io::Result<SocketAddr> {
+    let sockfd = sockfd.as_fd();
+    _getpeername(sockfd)
+}
+
+#[cfg(libc)]
+fn _getpeername(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
+    unsafe {
+        let mut storage = MaybeUninit::<sockaddr_storage>::uninit();
+        let mut len = size_of::<sockaddr_storage>() as socklen_t;
+        zero_ok(libc::getpeername(
+            sockfd.as_raw_fd(),
+            storage.as_mut_ptr().cast::<_>(),
+            &mut len,
+        ))?;
+        let storage = storage.assume_init();
+        let addr = match i32::from(storage.ss_family) {
+            libc::AF_INET => {
+                assert!(len as usize >= size_of::<SocketAddrV4>());
+                SocketAddr::V4(ptr::read(as_ptr(&storage).cast::<_>()))
+            }
+            libc::AF_INET6 => {
+                assert!(len as usize >= size_of::<SocketAddrV6>());
+                SocketAddr::V6(ptr::read(as_ptr(&storage).cast::<_>()))
+            }
+            libc::AF_LOCAL => {
+                assert!(len as usize >= size_of::<SocketAddrUnix>());
+                SocketAddr::Unix(ptr::read(as_ptr(&storage).cast::<_>()))
+            }
+            _ => panic!(),
+        };
+        Ok(addr)
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _getpeername(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
+    let (storage, len) = crate::linux_raw::getpeername(sockfd)?;
+    let addr = unsafe {
+        match u32::from(storage.ss_family) {
+            linux_raw_sys::general::AF_INET => {
+                assert!(len as usize >= size_of::<SocketAddrV4>());
+                SocketAddr::V4(ptr::read(as_ptr(&storage).cast::<_>()))
+            }
+            linux_raw_sys::general::AF_INET6 => {
+                assert!(len as usize >= size_of::<SocketAddrV6>());
+                SocketAddr::V6(ptr::read(as_ptr(&storage).cast::<_>()))
+            }
+            linux_raw_sys::general::AF_LOCAL => {
+                assert!(len as usize >= size_of::<SocketAddrUnix>());
+                SocketAddr::Unix(ptr::read(as_ptr(&storage).cast::<_>()))
+            }
+            _ => panic!(),
+        }
+    };
+    Ok(addr)
+}

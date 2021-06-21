@@ -8,8 +8,8 @@ mod socketpair;
 pub use send_recv::{recv, send};
 pub use socket::accept;
 pub use socket::{
-    bind_in, bind_in6, bind_un, connect_in, connect_in6, connect_un, listen, shutdown, socket,
-    socket_type, AcceptFlags, AddressFamily, Protocol, SocketType,
+    bind_in, bind_in6, bind_un, connect_in, connect_in6, connect_un, getpeername, getsockname,
+    listen, shutdown, socket, socket_type, AcceptFlags, AddressFamily, Protocol, SocketType,
 };
 #[cfg(not(target_os = "wasi"))]
 pub use socketpair::socketpair;

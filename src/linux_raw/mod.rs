@@ -1524,50 +1524,72 @@ pub(crate) fn recvfrom(
 #[inline]
 pub(crate) fn getpeername(
     fd: BorrowedFd<'_>,
-    addr: &mut __kernel_sockaddr_storage,
-    addrlen: &mut socklen_t,
-) -> io::Result<()> {
+) -> io::Result<(__kernel_sockaddr_storage, socklen_t)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
+        let mut addrlen = 0;
+        let mut storage = MaybeUninit::uninit();
         ret(syscall3(
             __NR_getpeername,
             borrowed_fd(fd),
-            by_mut(addr),
-            by_mut(addrlen),
-        ))
+            out(&mut storage),
+            by_mut(&mut addrlen),
+        ))?;
+        Ok((storage.assume_init(), addrlen))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
+        let mut addrlen = 0;
+        let mut storage = MaybeUninit::uninit();
         ret(syscall2(
             __NR_socketcall,
             x86_sys(SYS_GETPEERNAME),
-            slice_addr(&[borrowed_fd(fd), by_mut(addr), by_mut(addrlen), 0, 0, 0]),
-        ))
+            slice_addr(&[
+                borrowed_fd(fd),
+                out(&mut storage),
+                by_mut(&mut addrlen),
+                0,
+                0,
+                0,
+            ]),
+        ))?;
+        Ok((storage.assume_init(), addrlen))
     }
 }
 
 #[inline]
 pub(crate) fn getsockname(
     fd: BorrowedFd<'_>,
-    addr: &mut __kernel_sockaddr_storage,
-    addrlen: &mut socklen_t,
-) -> io::Result<()> {
+) -> io::Result<(__kernel_sockaddr_storage, socklen_t)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
+        let mut addrlen = 0;
+        let mut storage = MaybeUninit::uninit();
         ret(syscall3(
             __NR_getsockname,
             borrowed_fd(fd),
-            by_ref(addr),
-            by_mut(addrlen),
-        ))
+            out(&mut storage),
+            by_mut(&mut addrlen),
+        ))?;
+        Ok((storage.assume_init(), addrlen))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
+        let mut addrlen = 0;
+        let mut storage = MaybeUninit::uninit();
         ret(syscall2(
             __NR_socketcall,
             x86_sys(SYS_GETSOCKNAME),
-            slice_addr(&[borrowed_fd(fd), by_mut(addr), by_mut(addrlen), 0, 0, 0]),
-        ))
+            slice_addr(&[
+                borrowed_fd(fd),
+                out(&mut storage),
+                by_mut(&mut addrlen),
+                0,
+                0,
+                0,
+            ]),
+        ))?;
+        Ok((storage.assume_init(), addrlen))
     }
 }
 
