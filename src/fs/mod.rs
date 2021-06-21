@@ -36,6 +36,8 @@ mod makedev;
 mod memfd_create;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod openat2;
+#[cfg(target_os = "linux")]
+mod sendfile;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 mod statx;
 
@@ -112,6 +114,8 @@ pub use makedev::{major, makedev, minor};
 pub use memfd_create::{memfd_create, MemfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use openat2::openat2;
+#[cfg(target_os = "linux")]
+pub use sendfile::sendfile;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 pub use statx::statx;
 

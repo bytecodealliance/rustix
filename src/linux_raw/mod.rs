@@ -82,7 +82,7 @@ use {
         general::CLOCK_REALTIME,
         general::{
             __NR__llseek, __NR_fadvise64_64, __NR_fcntl64, __NR_fstat64, __NR_fstatat64,
-            __NR_fstatfs64, __NR_ftruncate64,
+            __NR_fstatfs64, __NR_ftruncate64, __NR_sendfile64,
         },
         v5_4::general::{
             __NR_clock_getres_time64, __NR_clock_gettime64, __NR_clock_nanosleep_time64,
@@ -98,7 +98,7 @@ use {
         general::stat,
         general::{
             __NR_fadvise64, __NR_fcntl, __NR_fstat, __NR_fstatfs, __NR_ftruncate, __NR_lseek,
-            __NR_mmap, __NR_newfstatat,
+            __NR_mmap, __NR_newfstatat, __NR_sendfile,
         },
     },
 };
@@ -2150,6 +2150,35 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c_int) -> io::Result<usize> 
 #[inline]
 pub(crate) fn memfd_create(name: &CStr, flags: c_uint) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(syscall2(__NR_memfd_create, c_str(name), c_uint(flags))) }
+}
+
+#[inline]
+pub(crate) fn sendfile(
+    out_fd: BorrowedFd<'_>,
+    in_fd: BorrowedFd<'_>,
+    offset: Option<&mut u64>,
+    count: usize,
+) -> io::Result<usize> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_usize(syscall4(
+            __NR_sendfile64,
+            borrowed_fd(out_fd),
+            borrowed_fd(in_fd),
+            opt_mut(offset),
+            count,
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret_usize(syscall4(
+            __NR_sendfile,
+            borrowed_fd(out_fd),
+            borrowed_fd(in_fd),
+            opt_mut(offset),
+            count,
+        ))
+    }
 }
 
 #[inline]
