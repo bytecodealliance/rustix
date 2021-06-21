@@ -1,19 +1,18 @@
 use crate::{
-    as_ptr, io,
+    io,
     net::{SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6},
 };
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
-use std::os::raw::c_int;
 #[cfg(linux_raw)]
 use std::os::raw::c_uint;
 use std::{
     mem::{size_of, MaybeUninit},
-    ptr,
+    os::raw::c_int,
 };
 #[cfg(libc)]
 use {
-    crate::{negone_err, zero_ok},
+    crate::{as_ptr, negone_err, zero_ok},
     libc::{sockaddr_storage, socklen_t},
     unsafe_io::os::posish::{AsRawFd, FromRawFd},
 };
@@ -65,19 +64,22 @@ pub enum SocketType {
 /// `AF_*` constants.
 #[cfg(libc)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-#[repr(u32)]
-#[non_exhaustive]
-pub enum AddressFamily {
-    /// `AF_LOCAL`, aka `AF_UNIX`
-    #[doc(alias = "Unix")]
-    Local = libc::AF_LOCAL as u32,
+#[repr(transparent)]
+pub struct AddressFamily(pub(crate) libc::sa_family_t);
 
+/// `AF_*` constants.
+#[cfg(linux_raw)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[repr(transparent)]
+// Older Linux versions didn't export this typedef.
+pub struct AddressFamily(pub(crate) linux_raw_sys::v5_4::general::__kernel_sa_family_t);
+
+#[cfg(libc)]
+impl AddressFamily {
     /// `AF_INET`
-    Inet = libc::AF_INET as u32,
-
+    pub const INET: Self = Self(libc::AF_INET as _);
     /// `AF_INET6`
-    Inet6 = libc::AF_INET6 as u32,
-
+    pub const INET6: Self = Self(libc::AF_INET6 as _);
     /// `AF_NETLINK`
     #[cfg(not(any(
         target_os = "freebsd",
@@ -85,27 +87,23 @@ pub enum AddressFamily {
         target_os = "macos",
         target_os = "netbsd"
     )))]
-    Netlink = libc::AF_NETLINK as u32,
+    pub const NETLINK: Self = Self(libc::AF_NETLINK as _);
+    /// `AF_UNIX`, aka `AF_LOCAL`
+    #[doc(alias = "Local")]
+    pub const UNIX: Self = Self(libc::AF_UNIX as _);
 }
 
-/// `AF_*` constants.
 #[cfg(linux_raw)]
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-#[repr(u32)]
-#[non_exhaustive]
-pub enum AddressFamily {
-    /// `AF_LOCAL`, aka `AF_UNIX`
-    #[doc(alias = "Unix")]
-    Local = linux_raw_sys::general::AF_LOCAL,
-
+impl AddressFamily {
     /// `AF_INET`
-    Inet = linux_raw_sys::general::AF_INET,
-
+    pub const INET: Self = Self(linux_raw_sys::general::AF_INET as _);
     /// `AF_INET6`
-    Inet6 = linux_raw_sys::general::AF_INET6,
-
+    pub const INET6: Self = Self(linux_raw_sys::general::AF_INET6 as _);
     /// `AF_NETLINK`
-    Netlink = linux_raw_sys::general::AF_NETLINK,
+    pub const NETLINK: Self = Self(linux_raw_sys::general::AF_NETLINK as _);
+    /// `AF_UNIX`, aka `AF_LOCAL`
+    #[doc(alias = "Local")]
+    pub const UNIX: Self = Self(linux_raw_sys::general::AF_LOCAL as _);
 }
 
 /// `IPPROTO_*`
@@ -316,7 +314,7 @@ pub fn socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> i
 fn _socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::Result<OwnedFd> {
     unsafe {
         let raw_fd = negone_err(libc::socket(
-            domain as c_int,
+            domain.0 as c_int,
             type_ as c_int,
             protocol as c_int,
         ))?;
@@ -326,41 +324,19 @@ fn _socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::
 
 #[cfg(linux_raw)]
 fn _socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::Result<OwnedFd> {
-    crate::linux_raw::socket(domain as c_uint, type_ as c_uint, protocol as c_uint)
-}
-
-/// `bind(sockfd, addr, sizeof(struct sockaddr_un))`
-#[inline]
-pub fn bind_un<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
-    let sockfd = sockfd.as_fd();
-    _bind_un(sockfd, addr)
-}
-
-#[cfg(libc)]
-fn _bind_un(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
-    unsafe {
-        zero_ok(libc::bind(
-            sockfd.as_raw_fd(),
-            as_ptr(addr).cast::<_>(),
-            size_of::<SocketAddrUnix>() as socklen_t,
-        ))
-    }
-}
-
-#[cfg(linux_raw)]
-fn _bind_un(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
-    crate::linux_raw::bind_un(sockfd, addr)
+    crate::linux_raw::socket(domain.0.into(), type_ as c_uint, protocol as c_uint)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in))`
 #[inline]
-pub fn bind_in<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
+#[doc(alias("bind"))]
+pub fn bind_v4<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
-    _bind_in(sockfd, addr)
+    _bind_v4(sockfd, addr)
 }
 
 #[cfg(libc)]
-fn _bind_in(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
+fn _bind_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     unsafe {
         zero_ok(libc::bind(
             sockfd.as_raw_fd(),
@@ -371,19 +347,20 @@ fn _bind_in(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
 }
 
 #[cfg(linux_raw)]
-fn _bind_in(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
-    crate::linux_raw::bind_in(sockfd, addr)
+fn _bind_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
+    crate::linux_raw::bind_in(sockfd, &addr.0)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in6))`
 #[inline]
-pub fn bind_in6<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
+#[doc(alias("bind"))]
+pub fn bind_v6<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
-    _bind_in6(sockfd, addr)
+    _bind_v6(sockfd, addr)
 }
 
 #[cfg(libc)]
-fn _bind_in6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
+fn _bind_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     unsafe {
         zero_ok(libc::bind(
             sockfd.as_raw_fd(),
@@ -394,19 +371,92 @@ fn _bind_in6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
 }
 
 #[cfg(linux_raw)]
-fn _bind_in6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
-    crate::linux_raw::bind_in6(sockfd, addr)
+fn _bind_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
+    crate::linux_raw::bind_in6(sockfd, &addr.0)
 }
 
-/// `connect(sockfd, addr, sizeof(struct sockaddr_un))`
+/// `bind(sockfd, addr, sizeof(struct sockaddr_un))`
 #[inline]
-pub fn connect_un<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
+#[doc(alias("bind"))]
+pub fn bind_unix<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
-    _connect_un(sockfd, addr)
+    _bind_unix(sockfd, addr)
 }
 
 #[cfg(libc)]
-fn _connect_un(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
+fn _bind_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::bind(
+            sockfd.as_raw_fd(),
+            as_ptr(addr).cast::<_>(),
+            size_of::<SocketAddrUnix>() as socklen_t,
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+fn _bind_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
+    crate::linux_raw::bind_un(sockfd, &addr.0)
+}
+
+/// `connect(sockfd, addr, sizeof(struct sockaddr_in))`
+#[inline]
+#[doc(alias("connect"))]
+pub fn connect_v4<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
+    let sockfd = sockfd.as_fd();
+    _connect_v4(sockfd, addr)
+}
+
+#[cfg(libc)]
+fn _connect_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::connect(
+            sockfd.as_raw_fd(),
+            as_ptr(addr).cast::<_>(),
+            size_of::<SocketAddrV4>() as socklen_t,
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+fn _connect_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
+    crate::linux_raw::connect_in(sockfd, &addr.0)
+}
+
+/// `connect(sockfd, addr, sizeof(struct sockaddr_in6))`
+#[inline]
+#[doc(alias("connect"))]
+pub fn connect_v6<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
+    let sockfd = sockfd.as_fd();
+    _connect_v6(sockfd, addr)
+}
+
+#[cfg(libc)]
+fn _connect_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::connect(
+            sockfd.as_raw_fd(),
+            as_ptr(addr).cast::<_>(),
+            size_of::<SocketAddrV6>() as socklen_t,
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+fn _connect_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
+    crate::linux_raw::connect_in6(sockfd, &addr.0)
+}
+
+/// `connect(sockfd, addr, sizeof(struct sockaddr_un))`
+#[doc(alias("connect"))]
+#[inline]
+pub fn connect_unix<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
+    let sockfd = sockfd.as_fd();
+    _connect_unix(sockfd, addr)
+}
+
+#[cfg(libc)]
+fn _connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
     unsafe {
         zero_ok(libc::connect(
             sockfd.as_raw_fd(),
@@ -417,54 +467,8 @@ fn _connect_un(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> 
 }
 
 #[cfg(linux_raw)]
-fn _connect_un(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
-    crate::linux_raw::connect_un(sockfd, addr)
-}
-
-/// `connect(sockfd, addr, sizeof(struct sockaddr_in))`
-#[inline]
-pub fn connect_in<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
-    let sockfd = sockfd.as_fd();
-    _connect_in(sockfd, addr)
-}
-
-#[cfg(libc)]
-fn _connect_in(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
-    unsafe {
-        zero_ok(libc::connect(
-            sockfd.as_raw_fd(),
-            as_ptr(addr).cast::<_>(),
-            size_of::<SocketAddrV4>() as socklen_t,
-        ))
-    }
-}
-
-#[cfg(linux_raw)]
-fn _connect_in(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
-    crate::linux_raw::connect_in(sockfd, addr)
-}
-
-/// `connect(sockfd, addr, sizeof(struct sockaddr_in6))`
-#[inline]
-pub fn connect_in6<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
-    let sockfd = sockfd.as_fd();
-    _connect_in6(sockfd, addr)
-}
-
-#[cfg(libc)]
-fn _connect_in6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
-    unsafe {
-        zero_ok(libc::connect(
-            sockfd.as_raw_fd(),
-            as_ptr(addr).cast::<_>(),
-            size_of::<SocketAddrV6>() as socklen_t,
-        ))
-    }
-}
-
-#[cfg(linux_raw)]
-fn _connect_in6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
-    crate::linux_raw::connect_in6(sockfd, addr)
+fn _connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
+    crate::linux_raw::connect_un(sockfd, &addr.0)
 }
 
 /// `listen(fd, backlog)`
@@ -509,22 +513,7 @@ fn _accept(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, S
         ))?;
         let owned_fd = OwnedFd::from_raw_fd(raw_fd);
         let storage = storage.assume_init();
-        let addr = match i32::from(storage.ss_family) {
-            libc::AF_INET => {
-                assert!(len as usize >= size_of::<SocketAddrV4>());
-                SocketAddr::V4(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            libc::AF_INET6 => {
-                assert!(len as usize >= size_of::<SocketAddrV6>());
-                SocketAddr::V6(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            libc::AF_LOCAL => {
-                assert!(len as usize >= size_of::<SocketAddrUnix>());
-                SocketAddr::Unix(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            _ => panic!(),
-        };
-        Ok((owned_fd, addr))
+        Ok((owned_fd, SocketAddr(storage)))
     }
 }
 
@@ -542,47 +531,15 @@ fn _accept(sockfd: BorrowedFd<'_>, _flags: AcceptFlags) -> io::Result<(OwnedFd, 
         ))?;
         let owned_fd = OwnedFd::from_raw_fd(raw_fd);
         let storage = storage.assume_init();
-        let addr = match i32::from(storage.ss_family) {
-            libc::AF_INET => {
-                assert!(len as usize >= size_of::<SocketAddrV4>());
-                SocketAddr::V4(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            libc::AF_INET6 => {
-                assert!(len as usize >= size_of::<SocketAddrV6>());
-                SocketAddr::V6(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            libc::AF_LOCAL => {
-                assert!(len as usize >= size_of::<SocketAddrUnix>());
-                SocketAddr::Unix(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            _ => panic!(),
-        };
-        Ok((owned_fd, addr))
+        Ok((owned_fd, SocketAddr(storage)))
     }
 }
 
 #[cfg(linux_raw)]
 #[inline]
 fn _accept(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, SocketAddr)> {
-    let (owned_fd, storage, len) = crate::linux_raw::accept(sockfd, flags.bits())?;
-    let addr = unsafe {
-        match u32::from(storage.ss_family) {
-            linux_raw_sys::general::AF_INET => {
-                assert!(len as usize >= size_of::<SocketAddrV4>());
-                SocketAddr::V4(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            linux_raw_sys::general::AF_INET6 => {
-                assert!(len as usize >= size_of::<SocketAddrV6>());
-                SocketAddr::V6(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            linux_raw_sys::general::AF_LOCAL => {
-                assert!(len as usize >= size_of::<SocketAddrUnix>());
-                SocketAddr::Unix(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            _ => panic!(),
-        }
-    };
-    Ok((owned_fd, addr))
+    let (owned_fd, storage) = crate::linux_raw::accept(sockfd, flags.bits())?;
+    Ok((owned_fd, SocketAddr(storage)))
 }
 
 /// `shutdown(fd, how)`
@@ -658,7 +615,6 @@ fn _socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
 
 /// `getsockname(fd, addr, len)`
 #[inline]
-#[doc(alias = "accept4")]
 pub fn getsockname<'f, Fd: AsFd<'f>>(sockfd: Fd) -> io::Result<SocketAddr> {
     let sockfd = sockfd.as_fd();
     _getsockname(sockfd)
@@ -675,52 +631,18 @@ fn _getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
             &mut len,
         ))?;
         let storage = storage.assume_init();
-        let addr = match i32::from(storage.ss_family) {
-            libc::AF_INET => {
-                assert!(len as usize >= size_of::<SocketAddrV4>());
-                SocketAddr::V4(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            libc::AF_INET6 => {
-                assert!(len as usize >= size_of::<SocketAddrV6>());
-                SocketAddr::V6(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            libc::AF_LOCAL => {
-                assert!(len as usize >= size_of::<SocketAddrUnix>());
-                SocketAddr::Unix(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            _ => panic!(),
-        };
-        Ok(addr)
+        Ok(SocketAddr(storage))
     }
 }
 
 #[cfg(linux_raw)]
 #[inline]
 fn _getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
-    let (storage, len) = crate::linux_raw::getsockname(sockfd)?;
-    let addr = unsafe {
-        match u32::from(storage.ss_family) {
-            linux_raw_sys::general::AF_INET => {
-                assert!(len as usize >= size_of::<SocketAddrV4>());
-                SocketAddr::V4(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            linux_raw_sys::general::AF_INET6 => {
-                assert!(len as usize >= size_of::<SocketAddrV6>());
-                SocketAddr::V6(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            linux_raw_sys::general::AF_LOCAL => {
-                assert!(len as usize >= size_of::<SocketAddrUnix>());
-                SocketAddr::Unix(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            _ => panic!(),
-        }
-    };
-    Ok(addr)
+    crate::linux_raw::getsockname(sockfd).map(SocketAddr)
 }
 
 /// `getpeername(fd, addr, len)`
 #[inline]
-#[doc(alias = "accept4")]
 pub fn getpeername<'f, Fd: AsFd<'f>>(sockfd: Fd) -> io::Result<SocketAddr> {
     let sockfd = sockfd.as_fd();
     _getpeername(sockfd)
@@ -737,45 +659,12 @@ fn _getpeername(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
             &mut len,
         ))?;
         let storage = storage.assume_init();
-        let addr = match i32::from(storage.ss_family) {
-            libc::AF_INET => {
-                assert!(len as usize >= size_of::<SocketAddrV4>());
-                SocketAddr::V4(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            libc::AF_INET6 => {
-                assert!(len as usize >= size_of::<SocketAddrV6>());
-                SocketAddr::V6(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            libc::AF_LOCAL => {
-                assert!(len as usize >= size_of::<SocketAddrUnix>());
-                SocketAddr::Unix(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            _ => panic!(),
-        };
-        Ok(addr)
+        Ok(SocketAddr(storage))
     }
 }
 
 #[cfg(linux_raw)]
 #[inline]
 fn _getpeername(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
-    let (storage, len) = crate::linux_raw::getpeername(sockfd)?;
-    let addr = unsafe {
-        match u32::from(storage.ss_family) {
-            linux_raw_sys::general::AF_INET => {
-                assert!(len as usize >= size_of::<SocketAddrV4>());
-                SocketAddr::V4(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            linux_raw_sys::general::AF_INET6 => {
-                assert!(len as usize >= size_of::<SocketAddrV6>());
-                SocketAddr::V6(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            linux_raw_sys::general::AF_LOCAL => {
-                assert!(len as usize >= size_of::<SocketAddrUnix>());
-                SocketAddr::Unix(ptr::read(as_ptr(&storage).cast::<_>()))
-            }
-            _ => panic!(),
-        }
-    };
-    Ok(addr)
+    crate::linux_raw::getpeername(sockfd).map(SocketAddr)
 }

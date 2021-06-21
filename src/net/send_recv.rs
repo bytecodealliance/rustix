@@ -1,11 +1,16 @@
 //! `recv` and `send`, and variants
 
-use crate::io;
+use crate::{
+    io,
+    net::{SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6},
+};
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(libc)]
 use {
-    crate::negone_err, libc::recv as libc_recv, libc::send as libc_send,
+    crate::{as_ptr, negone_err},
+    libc::{sockaddr_storage, socklen_t},
+    std::mem::{size_of, MaybeUninit},
     unsafe_io::os::posish::AsRawFd,
 };
 
@@ -108,7 +113,7 @@ pub fn recv<'f, Fd: AsFd<'f>>(fd: Fd, buf: &mut [u8], flags: RecvFlags) -> io::R
 #[cfg(libc)]
 fn _recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
     let nrecv = unsafe {
-        negone_err(libc_recv(
+        negone_err(libc::recv(
             fd.as_raw_fd() as libc::c_int,
             buf.as_mut_ptr().cast::<_>(),
             buf.len(),
@@ -134,7 +139,7 @@ pub fn send<'f, Fd: AsFd<'f>>(fd: Fd, buf: &[u8], flags: SendFlags) -> io::Resul
 #[cfg(libc)]
 fn _send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Result<usize> {
     let nwritten = unsafe {
-        negone_err(libc_send(
+        negone_err(libc::send(
             fd.as_raw_fd() as libc::c_int,
             buf.as_ptr().cast::<_>(),
             buf.len(),
@@ -150,4 +155,180 @@ fn _send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Result<usize> 
     crate::linux_raw::send(fd, buf, flags.bits())
 }
 
-// TODO; `sendto`, `recvfrom`, `recvmsg`, `sendmsg`
+/// `recvfrom(fd, buf, len, flags, addr, len)`
+#[inline]
+pub fn recvfrom<'f, Fd: AsFd<'f>>(
+    fd: Fd,
+    buf: &mut [u8],
+    flags: RecvFlags,
+) -> io::Result<(usize, SocketAddr)> {
+    let fd = fd.as_fd();
+    _recvfrom(fd, buf, flags)
+}
+
+#[cfg(libc)]
+fn _recvfrom(
+    fd: BorrowedFd<'_>,
+    buf: &mut [u8],
+    flags: RecvFlags,
+) -> io::Result<(usize, SocketAddr)> {
+    unsafe {
+        let mut storage = MaybeUninit::<sockaddr_storage>::uninit();
+        let mut len = size_of::<sockaddr_storage>() as socklen_t;
+        let nread = negone_err(libc::recvfrom(
+            fd.as_raw_fd(),
+            buf.as_mut_ptr().cast::<_>(),
+            buf.len(),
+            flags.bits(),
+            storage.as_mut_ptr().cast::<_>(),
+            &mut len,
+        ))?;
+        let storage = storage.assume_init();
+        Ok((nread as usize, SocketAddr(storage)))
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _recvfrom(
+    fd: BorrowedFd<'_>,
+    buf: &mut [u8],
+    flags: RecvFlags,
+) -> io::Result<(usize, SocketAddr)> {
+    let (nread, storage) = crate::linux_raw::recvfrom(fd, buf, flags.bits())?;
+    Ok((nread, SocketAddr(storage)))
+}
+
+/// `sendto(fd, buf.ptr(), buf.len(), flags, addr, sizeof(struct sockaddr_in))`
+#[inline]
+#[doc(alias("sendto"))]
+pub fn sendto_v4<'f, Fd: AsFd<'f>>(
+    fd: Fd,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddrV4,
+) -> io::Result<usize> {
+    let fd = fd.as_fd();
+    _sendto_v4(fd, buf, flags, addr)
+}
+
+#[cfg(libc)]
+fn _sendto_v4(
+    fd: BorrowedFd<'_>,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddrV4,
+) -> io::Result<usize> {
+    let nwritten = unsafe {
+        negone_err(libc::sendto(
+            fd.as_raw_fd() as libc::c_int,
+            buf.as_ptr().cast::<_>(),
+            buf.len(),
+            flags.bits(),
+            as_ptr(&addr.0).cast::<_>(),
+            size_of::<SocketAddrV4>() as u32,
+        ))?
+    };
+    Ok(nwritten as usize)
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _sendto_v4(
+    fd: BorrowedFd<'_>,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddrV4,
+) -> io::Result<usize> {
+    crate::linux_raw::sendto_in(fd, buf, flags.bits(), &addr.0)
+}
+
+/// `sendto(fd, buf.ptr(), buf.len(), flags, addr, sizeof(struct sockaddr_in6))`
+#[inline]
+#[doc(alias("sendto"))]
+pub fn sendto_v6<'f, Fd: AsFd<'f>>(
+    fd: Fd,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddrV6,
+) -> io::Result<usize> {
+    let fd = fd.as_fd();
+    _sendto_v6(fd, buf, flags, addr)
+}
+
+#[cfg(libc)]
+fn _sendto_v6(
+    fd: BorrowedFd<'_>,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddrV6,
+) -> io::Result<usize> {
+    let nwritten = unsafe {
+        negone_err(libc::sendto(
+            fd.as_raw_fd() as libc::c_int,
+            buf.as_ptr().cast::<_>(),
+            buf.len(),
+            flags.bits(),
+            as_ptr(&addr.0).cast::<_>(),
+            size_of::<SocketAddrV6>() as u32,
+        ))?
+    };
+    Ok(nwritten as usize)
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _sendto_v6(
+    fd: BorrowedFd<'_>,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddrV6,
+) -> io::Result<usize> {
+    crate::linux_raw::sendto_in6(fd, buf, flags.bits(), &addr.0)
+}
+
+/// `sendto(fd, buf.ptr(), buf.len(), flags, addr, sizeof(struct sockaddr_un))`
+#[inline]
+#[doc(alias("sendto"))]
+pub fn sendto_unix<'f, Fd: AsFd<'f>>(
+    fd: Fd,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddrUnix,
+) -> io::Result<usize> {
+    let fd = fd.as_fd();
+    _sendto_unix(fd, buf, flags, addr)
+}
+
+#[cfg(libc)]
+fn _sendto_unix(
+    fd: BorrowedFd<'_>,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddrUnix,
+) -> io::Result<usize> {
+    let nwritten = unsafe {
+        negone_err(libc::sendto(
+            fd.as_raw_fd() as libc::c_int,
+            buf.as_ptr().cast::<_>(),
+            buf.len(),
+            flags.bits(),
+            as_ptr(&addr.0).cast::<_>(),
+            size_of::<SocketAddrUnix>() as u32,
+        ))?
+    };
+    Ok(nwritten as usize)
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _sendto_unix(
+    fd: BorrowedFd<'_>,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddrUnix,
+) -> io::Result<usize> {
+    crate::linux_raw::sendto_un(fd, buf, flags.bits(), &addr.0)
+}
+
+// TODO: `recvmsg`, `sendmsg`
