@@ -2,11 +2,10 @@
 
 #[cfg(not(target_os = "wasi"))]
 use crate::fs::Mode;
-use crate::fs::Stat;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
 use crate::fs::StatFs;
-use crate::{io, time::Timespec};
+use crate::{fs::Stat, io, time::Timespec};
 use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(all(
     libc,
