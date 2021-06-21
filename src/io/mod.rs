@@ -12,8 +12,6 @@ mod read_write;
 mod userfaultfd;
 
 pub use error::{Error, Result};
-#[cfg(not(target_os = "wasi"))]
-pub use fd::dup;
 #[cfg(not(target_os = "redox"))]
 pub use fd::ioctl_fionread;
 #[cfg(not(target_os = "redox"))]
@@ -21,6 +19,8 @@ pub use fd::is_read_write;
 pub use fd::isatty;
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 pub use fd::ttyname;
+#[cfg(not(target_os = "wasi"))]
+pub use fd::{dup, dup2, DupFlags};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use ioctl::ioctl_fioclex;
 #[cfg(not(target_os = "wasi"))]

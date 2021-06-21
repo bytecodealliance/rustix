@@ -5,7 +5,8 @@ use crate::io;
 use crate::negone_err;
 #[cfg(all(libc, not(target_os = "redox")))]
 use crate::zero_ok;
-use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
+use bitflags::bitflags;
+use io_lifetimes::{AsFd, BorrowedFd, IntoFd, OwnedFd};
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 use std::ffi::OsString;
 #[cfg(not(target_os = "redox"))]
@@ -15,8 +16,27 @@ use std::os::unix::ffi::OsStringExt;
 #[cfg(libc)]
 use {
     errno::errno,
-    unsafe_io::os::posish::{AsRawFd, FromRawFd},
+    unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd},
 };
+
+#[cfg(libc)]
+bitflags! {
+    /// `O_*` constants for use with `dup2`.
+    pub struct DupFlags: std::os::raw::c_int {
+        /// `O_CLOEXEC`
+        #[cfg(not(any(target_os = "android", target_os = "macos", target_os = "ios", target_os = "redox")))] // Android 5.0 has dup3, but libc doesn't have bindings
+        const CLOEXEC = libc::O_CLOEXEC;
+    }
+}
+
+#[cfg(linux_raw)]
+bitflags! {
+    /// `O_*` constants for use with `dup2`.
+    pub struct DupFlags: std::os::raw::c_uint {
+        /// `O_CLOEXEC`
+        const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
+    }
+}
 
 /// `ioctl(fd, FIONREAD)`.
 #[cfg(not(target_os = "redox"))]
@@ -203,6 +223,11 @@ fn _is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
 }
 
 /// `dup(fd)`
+///
+/// Note that this does not set the `O_CLOEXEC` flag. To do a dup that does
+/// set `O_CLOEXEC, use [`fcntl_dupfd_cloexec`].
+///
+/// [`fcntl_dupfd_cloexec`]: posish::fs::fcntl_dupfd_cloexec
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn dup<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<OwnedFd> {
@@ -221,6 +246,60 @@ fn _dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 #[inline]
 fn _dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     crate::linux_raw::dup(fd)
+}
+
+/// `dup3(fd, new, flags)`
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+#[doc(alias = "dup3")]
+pub fn dup2<'f, Fd: AsFd<'f>, NewFd: IntoFd>(
+    fd: Fd,
+    new: NewFd,
+    flags: DupFlags,
+) -> io::Result<OwnedFd> {
+    let fd = fd.as_fd();
+    let new = new.into_fd();
+    _dup2(fd, new, flags)
+}
+
+#[cfg(all(
+    libc,
+    not(any(
+        target_os = "android",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "redox",
+        target_os = "wasi"
+    ))
+))]
+fn _dup2(fd: BorrowedFd<'_>, new: OwnedFd, flags: DupFlags) -> io::Result<OwnedFd> {
+    unsafe {
+        let new_fd = negone_err(libc::dup3(fd.as_raw_fd(), new.into_raw_fd(), flags.bits()))?;
+        Ok(OwnedFd::from_raw_fd(new_fd))
+    }
+}
+
+#[cfg(all(
+    libc,
+    any(
+        target_os = "android",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "redox"
+    )
+))]
+fn _dup2(fd: BorrowedFd<'_>, new: OwnedFd, _flags: DupFlags) -> io::Result<OwnedFd> {
+    unsafe {
+        // Android 5.0 has dup3, but libc doesn't have bindings
+        let new_fd = negone_err(libc::dup2(fd.as_raw_fd(), new.into_raw_fd()))?;
+        Ok(OwnedFd::from_raw_fd(new_fd))
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _dup2(fd: BorrowedFd<'_>, new: OwnedFd, flags: DupFlags) -> io::Result<OwnedFd> {
+    crate::linux_raw::dup3(fd, new, flags.bits())
 }
 
 /// `ttyname_r(fd)`

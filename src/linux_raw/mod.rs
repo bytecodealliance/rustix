@@ -30,11 +30,11 @@ use linux_raw_sys::general::{__NR_getegid32, __NR_geteuid32, __NR_getgid32, __NR
 use linux_raw_sys::{
     general::{
         __NR_chdir, __NR_clock_getres, __NR_clock_gettime, __NR_clock_nanosleep, __NR_close,
-        __NR_dup, __NR_exit_group, __NR_faccessat, __NR_fallocate, __NR_fchmod, __NR_fchmodat,
-        __NR_fdatasync, __NR_fsync, __NR_getcwd, __NR_getdents64, __NR_getpid, __NR_getppid,
-        __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_nanosleep, __NR_openat, __NR_pipe, __NR_pipe2,
-        __NR_poll, __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read,
-        __NR_readlinkat, __NR_readv, __NR_renameat, __NR_sched_yield, __NR_symlinkat,
+        __NR_dup, __NR_dup3, __NR_exit_group, __NR_faccessat, __NR_fallocate, __NR_fchmod,
+        __NR_fchmodat, __NR_fdatasync, __NR_fsync, __NR_getcwd, __NR_getdents64, __NR_getpid,
+        __NR_getppid, __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_nanosleep, __NR_openat,
+        __NR_pipe, __NR_pipe2, __NR_poll, __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev,
+        __NR_read, __NR_readlinkat, __NR_readv, __NR_renameat, __NR_sched_yield, __NR_symlinkat,
         __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
     },
     general::{
@@ -2079,6 +2079,18 @@ pub(crate) fn ioctl_tcgets(fd: BorrowedFd) -> io::Result<termios> {
 #[inline]
 pub(crate) fn dup(fd: BorrowedFd) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(syscall1_readonly(__NR_dup, borrowed_fd(fd))) }
+}
+
+#[inline]
+pub(crate) fn dup3(fd: BorrowedFd, new: OwnedFd, flags: c_uint) -> io::Result<OwnedFd> {
+    unsafe {
+        ret_owned_fd(syscall3_readonly(
+            __NR_dup3,
+            borrowed_fd(fd),
+            owned_fd(new),
+            c_uint(flags),
+        ))
+    }
 }
 
 #[inline]
