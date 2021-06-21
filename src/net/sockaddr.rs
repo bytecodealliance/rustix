@@ -31,7 +31,7 @@ impl Ipv4Addr {
 pub struct Ipv6Addr(pub(crate) libc::in6_addr);
 
 impl Ipv6Addr {
-    /// Construct a new IPv address from eight 16-bit segments.
+    /// Construct a new IPv6 address from eight 16-bit segments.
     pub const fn new(a: u16, b: u16, c: u16, d: u16, e: u16, f: u16, g: u16, h: u16) -> Self {
         Self(libc::in6_addr {
             s6_addr: [

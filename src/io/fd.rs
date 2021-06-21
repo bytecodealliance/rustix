@@ -227,7 +227,7 @@ fn _is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
 /// `dup(fd)`
 ///
 /// Note that this does not set the `O_CLOEXEC` flag. To do a dup that does
-/// set `O_CLOEXEC, use [`fcntl_dupfd_cloexec`].
+/// set `O_CLOEXEC`, use [`fcntl_dupfd_cloexec`].
 ///
 /// [`fcntl_dupfd_cloexec`]: posish::fs::fcntl_dupfd_cloexec
 #[cfg(not(target_os = "wasi"))]
