@@ -438,7 +438,7 @@ fn _utimensat(
     times: &[Timespec; 2],
     flags: AtFlags,
 ) -> io::Result<()> {
-    crate::linux_raw::utimensat(dirfd, Some(path), &times, flags.bits())
+    crate::linux_raw::utimensat(dirfd, Some(path), times, flags.bits())
 }
 
 /// `fchmodat(dirfd, path, mode, 0)`
