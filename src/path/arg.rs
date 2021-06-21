@@ -497,7 +497,7 @@ impl<'a> Arg for Cow<'a, CStr> {
     #[cfg(not(windows))]
     #[inline]
     fn as_c_str(&self) -> io::Result<Cow<CStr>> {
-        Ok(Cow::Borrowed(&self))
+        Ok(Cow::Borrowed(self))
     }
 
     #[cfg(not(windows))]
