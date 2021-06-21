@@ -222,7 +222,7 @@ impl Dir {
         Some(Ok(Entry {
             d_ino,
             d_type,
-            name: name.to_owned(),
+            name,
         }))
     }
 
