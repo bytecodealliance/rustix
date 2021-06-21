@@ -1983,14 +1983,20 @@ pub(crate) fn utimensat(
                             .tv_sec
                             .try_into()
                             .map_err(|_| io::Error(EINVAL as _))?,
-                        tv_nsec: utimes[0].tv_nsec as _,
+                        tv_nsec: utimes[0]
+                            .tv_nsec
+                            .try_into()
+                            .map_err(|_| io::Error(EINVAL as _))?,
                     },
                     __kernel_old_timespec {
                         tv_sec: utimes[1]
                             .tv_sec
                             .try_into()
                             .map_err(|_| io::Error(EINVAL as _))?,
-                        tv_nsec: utimes[1].tv_nsec as _,
+                        tv_nsec: utimes[1]
+                            .tv_nsec
+                            .try_into()
+                            .map_err(|_| io::Error(EINVAL as _))?,
                     },
                 ];
                 ret(syscall4_readonly(
@@ -2034,7 +2040,7 @@ pub(crate) fn nanosleep(req: &__kernel_timespec) -> io::Result<Option<__kernel_t
             if err == io::Error::NOSYS {
                 let old_req = __kernel_old_timespec {
                     tv_sec: req.tv_sec.try_into().map_err(|_| io::Error(EINVAL as _))?,
-                    tv_nsec: req.tv_nsec as _,
+                    tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Error(EINVAL as _))?,
                 };
                 let mut old_rem = MaybeUninit::<__kernel_old_timespec>::uninit();
                 let res = ret(syscall2(
@@ -2088,7 +2094,7 @@ pub(crate) fn clock_nanosleep_relative(
             if err == io::Error::NOSYS {
                 let old_req = __kernel_old_timespec {
                     tv_sec: req.tv_sec.try_into().map_err(|_| io::Error(EINVAL as _))?,
-                    tv_nsec: req.tv_nsec as _,
+                    tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Error(EINVAL as _))?,
                 };
                 let mut old_rem = MaybeUninit::<__kernel_old_timespec>::uninit();
                 let res = ret(syscall4(
@@ -2149,7 +2155,7 @@ pub(crate) fn clock_nanosleep_absolute(
             if err == io::Error::NOSYS {
                 let old_req = __kernel_old_timespec {
                     tv_sec: req.tv_sec.try_into().map_err(|_| io::Error(EINVAL as _))?,
-                    tv_nsec: req.tv_nsec as _,
+                    tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Error(EINVAL as _))?,
                 };
                 ret(syscall4_readonly(
                     __NR_clock_nanosleep,

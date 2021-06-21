@@ -1,4 +1,4 @@
-use crate::time::Timespec;
+use crate::{io, time::Timespec};
 #[cfg(all(
     libc,
     not(any(
@@ -178,19 +178,18 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRel
     target_os = "wasi",
 ))))]
 #[inline]
-pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> Result<(), ()> {
+pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::Result<()> {
     let flags = libc::TIMER_ABSTIME;
     zero_ok(unsafe {
         libc::clock_nanosleep(id as libc::clockid_t, flags, request, ptr::null_mut())
     })
-    .map_err(|_| ())
 }
 
 /// `clock_nanosleep(id, TIMER_ABSTIME, request, NULL)`
 #[cfg(linux_raw)]
 #[inline]
-pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> Result<(), ()> {
-    crate::linux_raw::clock_nanosleep_absolute(id as i32, request).map_err(|_err| ())
+pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::Result<()> {
+    crate::linux_raw::clock_nanosleep_absolute(id as i32, request)
 }
 
 /// `nanosleep(request, remain)`
