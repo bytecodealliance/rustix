@@ -139,30 +139,22 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Resul
 
 #[cfg(linux_raw)]
 fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Result<OsString> {
+    // TODO: This code would benefit from having a better way to read into
+    // uninitialized memory.
     let mut buffer = reuse.into_vec();
-
-    // Start with a buffer big enough for the vast majority of paths.
-    // This and the `reserve` below would be a good candidate for `try_reserve`.
-    // https://github.com/rust-lang/rust/issues/48043
     buffer.clear();
-    buffer.reserve(256);
+    buffer.resize(256, 0u8);
 
     loop {
-        let nread = crate::linux_raw::readlinkat(dirfd, path, unsafe {
-            std::slice::from_raw_parts_mut(buffer.as_mut_ptr(), buffer.capacity())
-        })?;
+        let nread = crate::linux_raw::readlinkat(dirfd, path, &mut buffer)?;
 
         let nread = nread as usize;
-        assert!(nread <= buffer.capacity());
-        unsafe {
-            buffer.set_len(nread);
-        }
-        if nread < buffer.capacity() {
+        assert!(nread <= buffer.len());
+        if nread < buffer.len() {
+            buffer.resize(nread, 0u8);
             return Ok(OsString::from_vec(buffer));
         }
-
-        // Use `Vec`'s builtin capacity-doubling strategy.
-        buffer.reserve(1);
+        buffer.resize(buffer.len() * 2, 0u8);
     }
 }
 

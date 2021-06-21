@@ -9,7 +9,7 @@ use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd, IntoFd, OwnedFd};
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 use std::ffi::OsString;
-#[cfg(not(target_os = "redox"))]
+#[cfg(all(libc, not(target_os = "redox")))]
 use std::mem::MaybeUninit;
 #[cfg(all(libc, unix, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 use std::os::unix::ffi::OsStringExt;
@@ -184,11 +184,13 @@ fn _is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // Do a `recv` with `PEEK` and `DONTWAIT` for 1 byte. A 0 indicates
         // the read side is shut down; an `EWOULDBLOCK` indicates the read
         // side is still open.
-        let mut buf = MaybeUninit::<u8>::uninit();
-        let mut view = unsafe { std::slice::from_raw_parts_mut(buf.as_mut_ptr(), 1) };
+        //
+        // TODO: This code would benefit from having a better way to read into
+        // uninitialized memory.
+        let mut buf = [0];
         match crate::linux_raw::recv(
             fd,
-            &mut view,
+            &mut buf,
             linux_raw_sys::general::MSG_PEEK | linux_raw_sys::general::MSG_DONTWAIT,
         ) {
             Ok(0) => read = false,
