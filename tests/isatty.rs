@@ -22,3 +22,23 @@ fn stdout_stderr_terminals() {
     assert_eq!(isatty(&std::io::stdout()), atty::is(atty::Stream::Stdout));
     assert_eq!(isatty(&std::io::stderr()), atty::is(atty::Stream::Stderr));
 }
+
+#[test]
+fn stdio_descriptors() {
+    use unsafe_io::os::posish::AsRawFd;
+
+    unsafe {
+        assert_eq!(
+            posish::io::stdin().as_raw_fd(),
+            std::io::stdin().as_raw_fd()
+        );
+        assert_eq!(
+            posish::io::stdout().as_raw_fd(),
+            std::io::stdout().as_raw_fd()
+        );
+        assert_eq!(
+            posish::io::stderr().as_raw_fd(),
+            std::io::stderr().as_raw_fd()
+        );
+    }
+}
