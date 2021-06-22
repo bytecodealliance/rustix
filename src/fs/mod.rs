@@ -233,7 +233,10 @@ pub type FsWord = u64;
 pub type FsWord = linux_raw_sys::general::__fsword_t;
 
 /// The filesystem magic number for procfs.
-/// <https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION>
+///
+/// See [the `fstatfs` man page] for more information.
+///
+/// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
 #[cfg(all(
     libc,
     any(target_os = "android", target_os = "linux"),
@@ -242,7 +245,10 @@ pub type FsWord = linux_raw_sys::general::__fsword_t;
 pub const PROC_SUPER_MAGIC: FsWord = libc::PROC_SUPER_MAGIC as FsWord;
 
 /// The filesystem magic number for procfs.
-/// <https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION>
+///
+/// See [the `fstatfs` man page] for more information.
+///
+/// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
 #[cfg(all(
     libc,
     any(target_os = "android", target_os = "linux"),
@@ -251,7 +257,10 @@ pub const PROC_SUPER_MAGIC: FsWord = libc::PROC_SUPER_MAGIC as FsWord;
 pub const PROC_SUPER_MAGIC: FsWord = 0x0000_9fa0;
 
 /// The filesystem magic number for procfs.
-/// <https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION>
+///
+/// See [the `fstatfs` man page] for more information.
+///
+/// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
 #[cfg(linux_raw)]
 pub const PROC_SUPER_MAGIC: FsWord = linux_raw_sys::general::PROC_SUPER_MAGIC as FsWord;
 
