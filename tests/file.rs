@@ -59,4 +59,11 @@ fn test_file() {
 
     let statfs = posish::fs::fstatfs(file.as_fd()).unwrap();
     assert!(statfs.f_blocks > 0);
+
+    assert_eq!(
+        posish::io::is_read_write(file.as_fd()).unwrap(),
+        (true, false)
+    );
+
+    assert_ne!(posish::io::ioctl_fionread(file.as_fd()).unwrap(), 0);
 }
