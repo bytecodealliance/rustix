@@ -56,4 +56,7 @@ fn test_file() {
     let stat = posish::fs::fstat(file.as_fd()).unwrap();
     assert!(stat.st_size > 0);
     assert!(stat.st_blocks > 0);
+
+    let statfs = posish::fs::fstatfs(file.as_fd()).unwrap();
+    assert!(statfs.f_blocks > 0);
 }
