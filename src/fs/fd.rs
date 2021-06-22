@@ -324,11 +324,12 @@ fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()>
     crate::linux_raw::fallocate(fd, 0, offset, len)
 }
 
-/// `fcntl(fd, F_GETFL) & O_ACCMODE`. Returns a pair of booleans indicating
-/// whether the file descriptor is readable and/or writeable, respectively.
-/// This is only reliable on files; for example, it doesn't reflect whether
-/// sockets have been shut down; for general I/O handle support, use
-/// [`io::is_read_write`].
+/// `fcntl(fd, F_GETFL) & O_ACCMODE`.
+///
+/// Returns a pair of booleans indicating whether the file descriptor is
+/// readable and/or writeable, respectively. This is only reliable on files;
+/// for example, it doesn't reflect whether sockets have been shut down; for
+/// general I/O handle support, use [`io::is_read_write`].
 #[inline]
 pub fn is_file_read_write<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<(bool, bool)> {
     let fd = fd.as_fd();

@@ -16,7 +16,9 @@ use {
     unsafe_io::os::posish::{AsRawFd, FromRawFd},
 };
 
-/// `SOCK_*` constants for `socket`.
+/// `SOCK_*` constants for [`socket`].
+///
+/// [`socket`]: crate::net::socket
 #[cfg(libc)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(transparent)]
@@ -40,7 +42,9 @@ impl SocketType {
     pub const RDM: Self = Self(libc::SOCK_RDM as u32);
 }
 
-/// `SOCK_*` constants for `socket`.
+/// `SOCK_*` constants for [`socket`].
+///
+/// [`socket`]: crate::net::socket
 #[cfg(linux_raw)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(transparent)]
@@ -289,7 +293,9 @@ pub enum Shutdown {
 
 #[cfg(libc)]
 bitflags! {
-    /// `SOCK_*` constants for `accept`.
+    /// `SOCK_*` constants for [`accept`].
+    ///
+    /// [`accept`]: crate::net::accept
     pub struct AcceptFlags: c_int {
         /// `SOCK_NONBLOCK`
         #[cfg(not(any(target_os = "ios", target_os = "macos")))]
@@ -303,7 +309,9 @@ bitflags! {
 
 #[cfg(linux_raw)]
 bitflags! {
-    /// `SOCK_*` constants for `accept`.
+    /// `SOCK_*` constants for [`accept`].
+    ///
+    /// [`accept`]: crate::net::accept
     pub struct AcceptFlags: c_uint {
         /// `SOCK_NONBLOCK`
         const NONBLOCK = linux_raw_sys::general::O_NONBLOCK;

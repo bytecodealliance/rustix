@@ -31,10 +31,9 @@ x86, and aarch64, but a fair amount of code has been successfully adapted to
 use it, and ports to most other architectures should be straightforward.
 
 This feature is fun in three ways:
- - By being implemented entirely in Rust, avoiding `libc`, `errno`, and
-   pthread cancellation, and using type layout optimizations and an optimized
-   error type, most functions compile down to very simple code and can even be
-   fully inlined into user code.
+ - By being implemented entirely in Rust, avoiding `libc`, `errno`, and pthread
+   cancellation, and using type layout optimizations, most functions compile
+   down to very simple code and can even be fully inlined into user code.
  - Memory buffers are kept in Rust slices, out parameters are returned as
    regular values, and file descriptors are kept in [`io-lifetimes`] types,
    so most functions preserve memory safety and I/O safety all the way down

@@ -22,10 +22,10 @@ pub use clock::{nanosleep, NanosleepRelativeResult};
 )))]
 pub use clock::{clock_nanosleep_absolute, clock_nanosleep_relative};
 
-/// Re-export `timespec`.
+/// `struct timespec`
 #[cfg(libc)]
 pub type Timespec = libc::timespec;
 
-/// Re-export `timespec`.
+/// `struct timespec`.
 #[cfg(linux_raw)]
 pub type Timespec = linux_raw_sys::general::__kernel_timespec;

@@ -8,8 +8,17 @@ use std::{ffi::OsStr, ops::Deref, path::Path};
 use unsafe_io::os::posish::AsRawFd;
 
 /// Format an integer into a decimal `Path` component, without constructing a
-/// temporary `PathBuf` or `String`. This is used for opening paths such
-/// as `/proc/self/fd/<fd>` on Linux.
+/// temporary `PathBuf` or `String`.
+///
+/// This is used for opening paths such as `/proc/self/fd/<fd>` on Linux.
+///
+/// # Example
+///
+/// ```rust
+/// use posish::path::DecInt;
+///
+/// assert_eq!(format!("hello {}", DecInt::new(9876).display()), "hello 9876");
+/// ```
 #[derive(Clone)]
 pub struct DecInt {
     buf: [u8; 20],

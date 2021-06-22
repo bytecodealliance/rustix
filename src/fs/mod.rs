@@ -122,7 +122,10 @@ pub use sendfile::sendfile;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 pub use statx::statx;
 
-/// Re-export `stat` (or `stat64` where applicable).
+/// `struct stat` for use with [`statat`] and [`fstat`].
+///
+/// [`statat`]: crate::fs::statat
+/// [`fstat`]: crate::fs::fstat
 #[cfg(all(
     libc,
     not(any(
@@ -134,7 +137,10 @@ pub use statx::statx;
 ))]
 pub type Stat = libc::stat;
 
-/// Re-export `stat` (or `stat64` where applicable).
+/// `struct stat` for use with [`statat`] and [`fstat`].
+///
+/// [`statat`]: crate::fs::statat
+/// [`fstat`]: crate::fs::fstat
 #[cfg(all(
     libc,
     any(
@@ -146,15 +152,23 @@ pub type Stat = libc::stat;
 ))]
 pub type Stat = libc::stat64;
 
-/// Re-export `stat` (or `stat64` where applicable).
+/// `struct stat` for use with [`statat`] and [`fstat`].
+///
+/// [`statat`]: crate::fs::statat
+/// [`fstat`]: crate::fs::fstat
 #[cfg(all(linux_raw, target_pointer_width = "32"))]
 pub type Stat = linux_raw_sys::general::stat64;
 
-/// Re-export `stat` (or `stat64` where applicable).
+/// `struct stat` for use with [`statat`] and [`fstat`].
+///
+/// [`statat`]: crate::fs::statat
+/// [`fstat`]: crate::fs::fstat
 #[cfg(all(linux_raw, target_pointer_width = "64"))]
 pub type Stat = linux_raw_sys::general::stat;
 
-/// Re-export `statfs` (or `statfs64` where applicable).
+/// `struct statfs` for use with [`fstatfs`].
+///
+/// [`fstatfs`]: crate::fs::fstatfs
 #[cfg(all(
     libc,
     not(any(
@@ -170,7 +184,9 @@ pub type Stat = linux_raw_sys::general::stat;
 #[allow(clippy::module_name_repetitions)]
 pub type StatFs = libc::statfs;
 
-/// Re-export `stat` (or `stat64` where applicable).
+/// `struct statfs` for use with [`fstatfs`].
+///
+/// [`fstatfs`]: crate::fs::fstatfs
 #[cfg(all(
     libc,
     any(
@@ -182,37 +198,63 @@ pub type StatFs = libc::statfs;
 ))]
 pub type StatFs = libc::statfs64;
 
-/// Re-export `statfs` (or `statfs64` where applicable).
+/// `struct statfs` for use with [`fstatfs`].
+///
+/// [`fstatfs`]: crate::fs::fstatfs
 #[cfg(all(linux_raw, target_pointer_width = "32"))]
 #[allow(clippy::module_name_repetitions)]
 pub type StatFs = linux_raw_sys::general::statfs64;
 
-/// Re-export `statfs` (or `statfs64` where applicable).
+/// `struct statfs` for use with [`fstatfs`].
+///
+/// [`fstatfs`]: crate::fs::fstatfs
 #[cfg(all(linux_raw, target_pointer_width = "64"))]
 #[allow(clippy::module_name_repetitions)]
 pub type StatFs = linux_raw_sys::general::statfs64;
 
-/// Re-export `statx`. Only available on Linux with GLIBC for now.
+/// `struct statx` for use with [`statx`].
+///
+/// Only available on Linux with GLIBC for now.
+///
+/// [`statx`]: crate::fs::statx
 #[cfg(all(libc, all(target_os = "linux", target_env = "gnu")))]
 pub type Statx = libc::statx;
 
-/// Re-export `statx`.
+/// `struct statx` for use with [`statx`].
+///
+/// [`statx`]: crate::fs::statx
 #[cfg(linux_raw)]
 pub type Statx = linux_raw_sys::v5_4::general::statx;
 
-/// Re-export `UTIME_NOW` and `UTIME_OMIT`.
+/// `UTIME_NOW` for use with [`utimensat`].
+///
+/// [`utimensat`]: crate::fs::utimensat
 #[cfg(all(libc, not(target_os = "redox")))]
-pub use libc::{UTIME_NOW, UTIME_OMIT};
+pub use libc::UTIME_NOW;
 
-/// Re-export `UTIME_NOW` and `UTIME_OMIT`.
+/// `UTIME_OMIT` for use with [`utimensat`].
+///
+/// [`utimensat`]: crate::fs::utimensat
+#[cfg(all(libc, not(target_os = "redox")))]
+pub use libc::UTIME_OMIT;
+
+/// `UTIME_NOW` for use with [`utimensat`].
+///
+/// [`utimensat`]: crate::fs::utimensat
 #[cfg(linux_raw)]
-pub use linux_raw_sys::general::{UTIME_NOW, UTIME_OMIT};
+pub use linux_raw_sys::general::UTIME_NOW;
 
-/// Re-export `__fsword_t`.
+/// `UTIME_OMIT` for use with [`utimensat`].
+///
+/// [`utimensat`]: crate::fs::utimensat
+#[cfg(linux_raw)]
+pub use linux_raw_sys::general::UTIME_OMIT;
+
+/// `__fsword_t`.
 #[cfg(all(libc, all(target_os = "linux", not(target_env = "musl"))))]
 pub type FsWord = libc::__fsword_t;
 
-/// Re-export `__fsword_t`.
+/// `__fsword_t`.
 #[cfg(all(
     libc,
     any(target_os = "android", all(target_os = "linux", target_env = "musl")),
@@ -220,7 +262,7 @@ pub type FsWord = libc::__fsword_t;
 ))]
 pub type FsWord = u32;
 
-/// Re-export `__fsword_t`.
+/// `__fsword_t`.
 #[cfg(all(
     libc,
     any(target_os = "android", all(target_os = "linux", target_env = "musl")),
@@ -228,7 +270,7 @@ pub type FsWord = u32;
 ))]
 pub type FsWord = u64;
 
-/// Re-export `__fsword_t`.
+/// `__fsword_t`.
 #[cfg(linux_raw)]
 pub type FsWord = linux_raw_sys::general::__fsword_t;
 
@@ -264,11 +306,11 @@ pub const PROC_SUPER_MAGIC: FsWord = 0x0000_9fa0;
 #[cfg(linux_raw)]
 pub const PROC_SUPER_MAGIC: FsWord = linux_raw_sys::general::PROC_SUPER_MAGIC as FsWord;
 
-/// Re-export `mode_t`.
+/// `mode_t`.
 #[cfg(libc)]
 pub type RawMode = libc::mode_t;
 
-/// Re-export `mode_t`.
+/// `mode_t`.
 #[cfg(linux_raw)]
 pub type RawMode = linux_raw_sys::general::__kernel_mode_t;
 

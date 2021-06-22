@@ -106,8 +106,10 @@ bitflags! {
     }
 }
 
-/// `statx(dirfd, path, flags, mask, statxbuf)`. Note that this isn't available
-/// on older Linux; returns `ENOSYS` in that case.
+/// `statx(dirfd, path, flags, mask, statxbuf)`
+///
+/// Note that this isn't available on Linux before 4.11; returns `ENOSYS` in
+/// that case.
 #[inline]
 pub fn statx<'f, P: path::Arg, Fd: AsFd<'f>>(
     dirfd: Fd,

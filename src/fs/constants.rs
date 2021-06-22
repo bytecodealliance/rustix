@@ -6,7 +6,10 @@ use linux_raw_sys::general::__kernel_mode_t;
 
 #[cfg(libc)]
 bitflags! {
-    /// `FD_*` constants.
+    /// `FD_*` constants for use with [`fcntl_getfd`] and [`fcntl_setfd`].
+    ///
+    /// [`fcntl_getfd`]: crate::fs::fcntl_getfd
+    /// [`fcntl_setfd`]: crate::fs::fcntl_setfd
     pub struct FdFlags: libc::c_int {
         /// `FD_CLOEXEC`
         const CLOEXEC = libc::FD_CLOEXEC;
@@ -15,7 +18,10 @@ bitflags! {
 
 #[cfg(linux_raw)]
 bitflags! {
-    /// `FD_*` constants.
+    /// `FD_*` constants for use with [`fcntl_getfd`] and [`fcntl_setfd`].
+    ///
+    /// [`fcntl_getfd`]: crate::fs::fcntl_getfd
+    /// [`fcntl_setfd`]: crate::fs::fcntl_setfd
     pub struct FdFlags: std::os::raw::c_uint {
         /// `FD_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::FD_CLOEXEC;
@@ -64,7 +70,11 @@ bitflags! {
 
 #[cfg(all(libc, not(target_os = "redox")))]
 bitflags! {
-    /// `AT_*` constants.
+    /// `AT_*` constants for use with [`openat`], [`statat`], and other `*at`
+    /// functions.
+    ///
+    /// [`openat`]: crate::fs::openat
+    /// [`statat`]: crate::fs::statat
     pub struct AtFlags: libc::c_int {
         /// `AT_REMOVEDIR`
         const REMOVEDIR = libc::AT_REMOVEDIR;
@@ -91,7 +101,11 @@ bitflags! {
 
 #[cfg(linux_raw)]
 bitflags! {
-    /// `AT_*` constants.
+    /// `AT_*` constants for use with [`openat`], [`statat`], and other `*at`
+    /// functions.
+    ///
+    /// [`openat`]: crate::fs::openat
+    /// [`statat`]: crate::fs::statat
     pub struct AtFlags: std::os::raw::c_uint {
         /// `AT_REMOVEDIR`
         const REMOVEDIR = linux_raw_sys::general::AT_REMOVEDIR;
@@ -112,7 +126,9 @@ bitflags! {
 
 #[cfg(libc)]
 bitflags! {
-    /// `S_I*` constants.
+    /// `S_I*` constants for use with [`openat`].
+    ///
+    /// [`openat`]: crate::fs::openat
     pub struct Mode: libc::mode_t {
         /// `S_IRWXU`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
@@ -201,7 +217,9 @@ bitflags! {
 
 #[cfg(linux_raw)]
 bitflags! {
-    /// `S_I*` constants.
+    /// `S_I*` constants for use with [`openat`].
+    ///
+    /// [`openat`]: crate::fs::openat
     pub struct Mode: __kernel_mode_t {
         /// `S_IRWXU`
         const IRWXU = linux_raw_sys::general::S_IRWXU as __kernel_mode_t;
@@ -273,7 +291,9 @@ bitflags! {
 
 #[cfg(libc)]
 bitflags! {
-    /// `O_*` constants.
+    /// `O_*` constants for use with [`openat`].
+    ///
+    /// [`openat`]: crate::fs::openat
     pub struct OFlags: libc::c_int {
         /// `O_ACCMODE`
         const ACCMODE = libc::O_ACCMODE;
@@ -386,7 +406,9 @@ bitflags! {
 
 #[cfg(linux_raw)]
 bitflags! {
-    /// `O_*` constants.
+    /// `O_*` constants for use with [`openat`].
+    ///
+    /// [`openat`]: crate::fs::openat
     pub struct OFlags: std::os::raw::c_uint {
         /// `O_ACCMODE`
         const ACCMODE = linux_raw_sys::general::O_ACCMODE;
@@ -460,7 +482,9 @@ bitflags! {
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 bitflags! {
-    /// `CLONE_*` constants.
+    /// `CLONE_*` constants for use with [`fclonefileat`].
+    ///
+    /// [`fclonefileat`]: crate::fs::fclonefileat
     pub struct CloneFlags: libc::c_int {
         /// `CLONE_NOFOLLOW`
         const NOFOLLOW = 1;
@@ -510,7 +534,9 @@ bitflags! {
 
 #[cfg(all(libc, any(target_os = "android", target_os = "linux")))]
 bitflags! {
-    /// `RESOLVE_*` constants.
+    /// `RESOLVE_*` constants for use with [`openat2`].
+    ///
+    /// [`openat2`]: crate::fs::openat2
     pub struct ResolveFlags: u64 {
         /// `RESOLVE_NO_MAGICLINKS`
         const NO_MAGICLINKS = 0x02;
@@ -522,7 +548,9 @@ bitflags! {
 
 #[cfg(linux_raw)]
 bitflags! {
-    /// `RESOLVE_*` constants.
+    /// `RESOLVE_*` constants for use with [`openat2`].
+    ///
+    /// [`openat2`]: crate::fs::openat2
     pub struct ResolveFlags: u64 {
         /// `RESOLVE_NO_MAGICLINKS`
         const NO_MAGICLINKS = linux_raw_sys::v5_11::general::RESOLVE_NO_MAGICLINKS as u64;

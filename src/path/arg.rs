@@ -14,9 +14,31 @@ use std::{
     str,
 };
 
-/// A trait for passing path arguments. This is similar to
-/// [`AsRef`]`<`[`Path`]`>`, but is implemented for more kinds of strings and
-/// can convert into more kinds of strings.
+/// A trait for passing path arguments.
+///
+/// This is similar to [`AsRef`]`<`[`Path`]`>`, but is implemented for more
+/// kinds of strings and can convert into more kinds of strings.
+///
+/// # Example
+///
+/// ```rust
+/// use std::ffi::CStr;
+/// use posish::path::Arg;
+/// use posish::io;
+///
+/// pub fn touch<P: Arg>(path: P) -> io::Result<()> {
+///     let path = path.into_c_str()?;
+///     _touch(&path)
+/// }
+///
+/// fn _touch(path: &CStr) -> io::Result<()> {
+///     // implementation goes here
+///     Ok(())
+/// }
+/// ```
+///
+/// Users can then call `touch("foo")`, `touch(cstr!("foo"))`,
+/// `touch(Path::new("foo"))`, or many other things.
 ///
 /// [`AsRef`]: https://doc.rust-lang.org/std/convert/trait.AsRef.html
 /// [`Path`]: https://doc.rust-lang.org/std/path/struct.Path.html

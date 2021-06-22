@@ -24,7 +24,9 @@ use std::convert::TryInto;
 #[cfg(libc)]
 use {crate::zero_ok, unsafe_io::os::posish::AsRawFd};
 
-/// `POSIX_FADV_*` constants.
+/// `POSIX_FADV_*` constants for use with [`fadvise`].
+///
+/// [`fadvise`]: crate::fs::fadvise
 #[cfg(libc)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
@@ -48,7 +50,9 @@ pub enum Advice {
     DontNeed = libc::POSIX_FADV_DONTNEED as libc::c_uint,
 }
 
-/// `POSIX_FADV_*` constants.
+/// `POSIX_FADV_*` constants for use with [`fadvise`].
+///
+/// [`fadvise`]: crate::fs::fadvise
 #[cfg(linux_raw)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
@@ -74,6 +78,7 @@ pub enum Advice {
 
 /// `posix_fadvise(fd, offset, len, advice)`
 #[inline]
+#[doc(alias = "posix_fadvise")]
 pub fn fadvise<'f, Fd: AsFd<'f>>(fd: Fd, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
     let fd = fd.as_fd();
     _fadvise(fd, offset, len, advice)

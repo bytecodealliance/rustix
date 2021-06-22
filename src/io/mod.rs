@@ -44,34 +44,34 @@ pub use stdio::{stderr, stdin, stdout};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use userfaultfd::{userfaultfd, UserFaultFdFlags};
 
-/// Re-export `termios`.
+/// `struct termios`
 #[cfg(all(libc, not(target_os = "wasi")))]
 pub type Termios = libc::termios;
 
-/// Re-export `termios`.
+/// `struct termios`
 #[cfg(linux_raw)]
 pub type Termios = linux_raw_sys::general::termios;
 
-/// Re-export `winsize`.
+/// `struct winsize`
 #[cfg(all(libc, not(target_os = "wasi")))]
 pub type Winsize = libc::winsize;
 
-/// Re-export `winsize`.
+/// `struct winsize`
 #[cfg(linux_raw)]
 pub type Winsize = linux_raw_sys::general::winsize;
 
-/// Re-export `ICANON`.
+/// `ICANON`
 #[cfg(all(libc, not(target_os = "wasi")))]
 pub const ICANON: libc::tcflag_t = libc::ICANON;
 
-/// Re-export `ICANON`.
+/// `ICANON`
 #[cfg(linux_raw)]
 pub const ICANON: std::os::raw::c_uint = linux_raw_sys::general::ICANON;
 
-/// Re-export `PIPE_BUF`.
+/// `PIPE_BUF`
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "redox"))))]
 pub const PIPE_BUF: usize = libc::PIPE_BUF;
 
-/// Re-export `PIPE_BUF`.
+/// `PIPE_BUF`
 #[cfg(linux_raw)]
 pub const PIPE_BUF: usize = linux_raw_sys::general::PIPE_BUF as usize;

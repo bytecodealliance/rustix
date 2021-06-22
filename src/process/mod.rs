@@ -8,18 +8,26 @@ mod sched;
 pub use id::{getegid, geteuid, getgid, getpid, getppid, getuid};
 pub use sched::sched_yield;
 
-/// Re-export `EXIT_SUCCESS`.
+/// `EXIT_SUCCESS` for use with [`exit`].
+///
+/// [`exit`]: std::process::exit
 #[cfg(libc)]
 pub use libc::EXIT_SUCCESS;
 
-/// Re-export `EXIT_SUCCESS`.
+/// `EXIT_SUCCESS` for use with [`exit`].
+///
+/// [`exit`]: std::process::exit
 #[cfg(linux_raw)]
 pub const EXIT_SUCCESS: std::os::raw::c_int = 0;
 
-/// Re-export `EXIT_FAILURE`.
+/// `EXIT_FAILURE` for use with [`exit`].
+///
+/// [`exit`]: std::process::exit
 #[cfg(libc)]
 pub use libc::EXIT_FAILURE;
 
-/// Re-export `EXIT_FAILURE`.
+/// `EXIT_FAILURE` for use with [`exit`].
+///
+/// [`exit`]: std::process::exit
 #[cfg(linux_raw)]
 pub const EXIT_FAILURE: std::os::raw::c_int = 1;
