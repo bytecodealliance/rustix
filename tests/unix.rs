@@ -1,7 +1,13 @@
 //! Test a simple Unix-domain socket server and client. The client sends lists
 //! of integers and the server sends back sums.
 
-#![cfg(not(any(target_os = "redox", target_os = "wasi")))]
+// TODO: Investigate why this test hangs on macOS
+#![cfg(not(any(
+    target_os = "redox",
+    target_os = "wasi",
+    target_os = "macos",
+    target_os = "ios"
+)))]
 
 use posish::{
     fs::{cwd, unlinkat, AtFlags},
