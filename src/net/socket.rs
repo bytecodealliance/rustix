@@ -339,6 +339,7 @@ fn _socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::
 }
 
 #[cfg(linux_raw)]
+#[inline]
 fn _socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::Result<OwnedFd> {
     crate::linux_raw::socket(domain.0.into(), type_.0, protocol as c_uint)
 }
@@ -363,6 +364,7 @@ fn _bind_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
 }
 
 #[cfg(linux_raw)]
+#[inline]
 fn _bind_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     crate::linux_raw::bind_in(sockfd, addr)
 }
@@ -387,6 +389,7 @@ fn _bind_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
 }
 
 #[cfg(linux_raw)]
+#[inline]
 fn _bind_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     crate::linux_raw::bind_in6(sockfd, addr)
 }
@@ -411,6 +414,7 @@ fn _bind_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
 }
 
 #[cfg(linux_raw)]
+#[inline]
 fn _bind_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
     crate::linux_raw::bind_un(sockfd, addr)
 }
@@ -435,6 +439,7 @@ fn _connect_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
 }
 
 #[cfg(linux_raw)]
+#[inline]
 fn _connect_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     crate::linux_raw::connect_in(sockfd, addr)
 }
@@ -459,6 +464,7 @@ fn _connect_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
 }
 
 #[cfg(linux_raw)]
+#[inline]
 fn _connect_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     crate::linux_raw::connect_in6(sockfd, addr)
 }
@@ -483,6 +489,7 @@ fn _connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()
 }
 
 #[cfg(linux_raw)]
+#[inline]
 fn _connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
     crate::linux_raw::connect_un(sockfd, addr)
 }
@@ -602,6 +609,7 @@ fn _getsockopt_socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
 }
 
 #[cfg(linux_raw)]
+#[inline]
 fn _getsockopt_socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
     crate::linux_raw::getsockopt_socket_type(fd).map(SocketType)
 }

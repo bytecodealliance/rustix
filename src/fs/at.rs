@@ -233,6 +233,7 @@ fn _unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<(
 }
 
 #[cfg(linux_raw)]
+#[inline]
 fn _unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<()> {
     crate::linux_raw::unlinkat(dirfd, path, flags.bits())
 }

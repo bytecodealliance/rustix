@@ -70,6 +70,7 @@ fn _openat2(
 }
 
 #[cfg(linux_raw)]
+#[inline]
 fn _openat2(
     dirfd: BorrowedFd<'_>,
     path: &CStr,

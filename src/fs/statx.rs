@@ -153,6 +153,7 @@ fn _statx(
 }
 
 #[cfg(linux_raw)]
+#[inline]
 fn _statx(
     dirfd: BorrowedFd<'_>,
     path: &CStr,

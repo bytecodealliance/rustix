@@ -196,6 +196,7 @@ fn _fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 }
 
 #[cfg(linux_raw)]
+#[inline]
 fn _fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     crate::linux_raw::fstat(fd)
 }
@@ -224,6 +225,7 @@ fn _fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
 }
 
 #[cfg(linux_raw)]
+#[inline]
 fn _fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
     crate::linux_raw::fstatfs(fd)
 }

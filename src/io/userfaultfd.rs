@@ -55,6 +55,7 @@ unsafe fn _userfaultfd(flags: UserFaultFdFlags) -> io::Result<OwnedFd> {
 }
 
 #[cfg(linux_raw)]
+#[inline]
 unsafe fn _userfaultfd(flags: UserFaultFdFlags) -> io::Result<OwnedFd> {
     crate::linux_raw::userfaultfd(flags.bits())
 }
