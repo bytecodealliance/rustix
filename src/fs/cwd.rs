@@ -1,8 +1,13 @@
 use io_lifetimes::BorrowedFd;
 use unsafe_io::os::posish::RawFd;
 
-/// Return a "file" which holds a handle which refers to the process current
-/// directory (`AT_FDCWD`).
+/// `AT_FDCWD`
+///
+/// This returns a file descriptor which refers to the process current
+/// directory which can be used as the directory argument in `*at`
+/// functions such as [`openat`].
+///
+/// [`openat`]: crate::fs::openat
 #[inline]
 pub fn cwd() -> BorrowedFd<'static> {
     #[cfg(libc)]

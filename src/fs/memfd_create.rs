@@ -10,7 +10,7 @@ use {
 
 #[cfg(libc)]
 bitflags! {
-    /// `MFD_*` constants.
+    /// `MFD_*` constants for use with [`memfd_create`].
     pub struct MemfdFlags: std::os::raw::c_uint {
         /// `MFD_CLOEXEC`
         const CLOEXEC = libc::MFD_CLOEXEC;
@@ -22,7 +22,7 @@ bitflags! {
 
 #[cfg(linux_raw)]
 bitflags! {
-    /// `MFD_*` constants.
+    /// `MFD_*` constants for use with [`memfd_create`].
     pub struct MemfdFlags: std::os::raw::c_uint {
         /// `MFD_CLOEXEC`
         const CLOEXEC = linux_raw_sys::v5_4::general::MFD_CLOEXEC;
