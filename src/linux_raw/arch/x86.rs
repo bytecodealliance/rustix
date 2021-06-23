@@ -1,5 +1,5 @@
 //! 32-bit x86 Linux system calls. These use `int $0x80`, which works but
-//! is slow. Ideally we should locate the vSDO, parse it, and use its
+//! is slow. Ideally we should locate the vDSO, parse it, and use its
 //! functions to make system calls instead.
 
 #![allow(dead_code)]
