@@ -57,8 +57,11 @@ fn test_file() {
     assert!(stat.st_size > 0);
     assert!(stat.st_blocks > 0);
 
-    let statfs = posish::fs::fstatfs(file.as_fd()).unwrap();
-    assert!(statfs.f_blocks > 0);
+    #[cfg(not(any(target_os = "netbsd", target_os = "wasi")))] // not implemented in libc for netbsd yet
+    {
+        let statfs = posish::fs::fstatfs(file.as_fd()).unwrap();
+        assert!(statfs.f_blocks > 0);
+    }
 
     assert_eq!(
         posish::io::is_read_write(file.as_fd()).unwrap(),
