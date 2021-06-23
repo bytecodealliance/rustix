@@ -69,11 +69,13 @@ impl SocketAddrV4 {
     }
 
     /// Return the IPv4 address of this socket address.
+    #[inline]
     pub const fn address(&self) -> &Ipv4Addr {
         &self.addr
     }
 
     /// Return the port of this address.
+    #[inline]
     pub const fn port(&self) -> u16 {
         self.port
     }
@@ -115,21 +117,25 @@ impl SocketAddrV6 {
     }
 
     /// Return the IPv6 address of this socket address.
+    #[inline]
     pub const fn address(&self) -> &Ipv6Addr {
         &self.addr
     }
 
     /// Return the port of this address.
+    #[inline]
     pub const fn port(&self) -> u16 {
         self.port
     }
 
     /// Return the flowinfo of this address.
+    #[inline]
     pub const fn flowinfo(&self) -> u32 {
         self.flowinfo
     }
 
     /// Return the scope_id of this address.
+    #[inline]
     pub const fn scope_id(&self) -> u32 {
         self.scope_id
     }
