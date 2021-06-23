@@ -612,7 +612,7 @@ pub(crate) fn fallocate(fd: BorrowedFd, mode: c_int, offset: u64, len: u64) -> i
 }
 
 #[inline]
-pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: c_int) -> io::Result<()> {
+pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: c_uint) -> io::Result<()> {
     // On arm and powerpc, the system calls are reordered so that the len and
     // pos argument pairs are aligned.
     #[cfg(any(target_arch = "arm", target_arch = "powerpc"))]
@@ -620,7 +620,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: c_int) -> 
         ret(syscall6_readonly(
             __NR_fadvise64_64,
             borrowed_fd(fd),
-            c_int(advice),
+            c_uint(advice),
             hi(pos),
             lo(pos),
             hi(len),
@@ -639,7 +639,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: c_int) -> 
             lo(pos),
             hi(len),
             lo(len),
-            c_int(advice),
+            c_uint(advice),
         ))
     }
     #[cfg(target_pointer_width = "64")]
@@ -649,7 +649,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: c_int) -> 
             borrowed_fd(fd),
             loff_t_from_u64(pos),
             loff_t_from_u64(len),
-            c_int(advice),
+            c_uint(advice),
         ))
     }
 }

@@ -106,7 +106,7 @@ fn _fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice) -> io::Re
 #[inline]
 fn _fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
     if let (Ok(offset), Ok(len)) = (offset.try_into(), len.try_into()) {
-        crate::linux_raw::fadvise(fd, offset, len, advice as i32)?;
+        crate::linux_raw::fadvise(fd, offset, len, advice as u32)?;
     }
 
     // If the offset or length can't be converted, ignore the advice, as it

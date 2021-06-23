@@ -32,7 +32,7 @@ pub fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
 }
 
 #[cfg(libc)]
-pub fn _getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
+fn _getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
     let nread = unsafe {
         negone_err(libc::getrandom(
             buf.as_mut_ptr().cast::<_>(),
@@ -45,6 +45,6 @@ pub fn _getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
 
 #[cfg(linux_raw)]
 #[inline]
-pub fn _getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
+fn _getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
     crate::linux_raw::getrandom(buf, flags.bits())
 }

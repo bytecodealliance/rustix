@@ -49,13 +49,19 @@ pub fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
 }
 
 #[cfg(all(libc, any(target_os = "ios", target_os = "macos")))]
-pub fn _pipe() -> io::Result<(OwnedFd, OwnedFd)> {
+fn _pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
         zero_ok(libc::pipe(result.as_mut_ptr().cast::<i32>()))?;
         let [p0, p1] = result.assume_init();
         Ok((p0, p1))
     }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _pipe() -> io::Result<(OwnedFd, OwnedFd)> {
+    crate::linux_raw::pipe()
 }
 
 /// `pipe2(flags)`
@@ -69,7 +75,7 @@ pub fn pipe2(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     libc,
     not(any(target_os = "ios", target_os = "macos", target_os = "wasi"))
 ))]
-pub fn _pipe2(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
+fn _pipe2(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
         zero_ok(libc::pipe2(result.as_mut_ptr().cast::<i32>(), flags.bits()))?;
@@ -80,6 +86,6 @@ pub fn _pipe2(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
 
 #[cfg(linux_raw)]
 #[inline]
-pub fn _pipe2(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
+fn _pipe2(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     crate::linux_raw::pipe2(flags.bits())
 }
