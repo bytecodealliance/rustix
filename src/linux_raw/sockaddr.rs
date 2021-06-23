@@ -57,15 +57,20 @@ impl SocketAddrV4 {
         Self { addr, port }
     }
 
-    /// Encoding this socket address in the host format.
+    /// Encode this socket address in the host format.
     #[inline]
-    pub const fn encode(&self) -> linux_raw_sys::general::sockaddr_in {
+    pub(crate) const fn encode(&self) -> linux_raw_sys::general::sockaddr_in {
         linux_raw_sys::general::sockaddr_in {
             sin_family: linux_raw_sys::general::AF_INET as _,
             sin_addr: self.addr.0,
             sin_port: self.port.to_be(),
             __pad: [0; 8_usize],
         }
+    }
+
+    /// Return the IPv4 address of this socket address.
+    pub const fn address(&self) -> &Ipv4Addr {
+        &self.addr
     }
 
     /// Return the port of this address.
@@ -97,9 +102,9 @@ impl SocketAddrV6 {
         }
     }
 
-    /// Encoding this socket address in the host format.
+    /// Encode this socket address in the host format.
     #[inline]
-    pub const fn encode(&self) -> linux_raw_sys::general::sockaddr_in6 {
+    pub(crate) const fn encode(&self) -> linux_raw_sys::general::sockaddr_in6 {
         linux_raw_sys::general::sockaddr_in6 {
             sin6_family: linux_raw_sys::general::AF_INET6 as _,
             sin6_addr: self.addr.0,
@@ -109,9 +114,24 @@ impl SocketAddrV6 {
         }
     }
 
+    /// Return the IPv6 address of this socket address.
+    pub const fn address(&self) -> &Ipv6Addr {
+        &self.addr
+    }
+
     /// Return the port of this address.
     pub const fn port(&self) -> u16 {
         self.port
+    }
+
+    /// Return the flowinfo of this address.
+    pub const fn flowinfo(&self) -> u32 {
+        self.flowinfo
+    }
+
+    /// Return the scope_id of this address.
+    pub const fn scope_id(&self) -> u32 {
+        self.scope_id
     }
 }
 
@@ -144,9 +164,9 @@ impl SocketAddrUnix {
         Ok(Self { path })
     }
 
-    /// Encoding this socket address in the host format.
+    /// Encode this socket address in the host format.
     #[inline]
-    pub fn encode(&self) -> linux_raw_sys::general::sockaddr_un {
+    pub(crate) fn encode(&self) -> linux_raw_sys::general::sockaddr_un {
         let mut encoded = linux_raw_sys::general::sockaddr_un {
             sun_family: linux_raw_sys::general::AF_UNIX as _,
             sun_path: [0; 108_usize],

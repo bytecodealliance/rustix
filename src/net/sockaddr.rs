@@ -71,9 +71,9 @@ impl SocketAddrV4 {
         Self { addr, port }
     }
 
-    /// Encoding this socket address in the host format.
+    /// Encode this socket address in the host format.
     #[inline]
-    pub const fn encode(&self) -> libc::sockaddr_in {
+    pub(crate) const fn encode(&self) -> libc::sockaddr_in {
         libc::sockaddr_in {
             #[cfg(any(
                 target_os = "netbsd",
@@ -88,6 +88,11 @@ impl SocketAddrV4 {
             sin_port: self.port.to_be(),
             sin_zero: [0; 8_usize],
         }
+    }
+
+    /// Return the IPv4 address of this socket address.
+    pub const fn address(&self) -> &Ipv4Addr {
+        &self.addr
     }
 
     /// Return the port of this address.
@@ -119,9 +124,9 @@ impl SocketAddrV6 {
         }
     }
 
-    /// Encoding this socket address in the host format.
+    /// Encode this socket address in the host format.
     #[inline]
-    pub const fn encode(&self) -> libc::sockaddr_in6 {
+    pub(crate) const fn encode(&self) -> libc::sockaddr_in6 {
         libc::sockaddr_in6 {
             #[cfg(any(
                 target_os = "netbsd",
@@ -139,9 +144,24 @@ impl SocketAddrV6 {
         }
     }
 
+    /// Return the IPv6 address of this socket address.
+    pub const fn address(&self) -> &Ipv6Addr {
+        &self.addr
+    }
+
     /// Return the port of this address.
     pub const fn port(&self) -> u16 {
         self.port
+    }
+
+    /// Return the flowinfo of this address.
+    pub const fn flowinfo(&self) -> u32 {
+        self.flowinfo
+    }
+
+    /// Return the scope_id of this address.
+    pub const fn scope_id(&self) -> u32 {
+        self.scope_id
     }
 }
 
@@ -198,9 +218,9 @@ impl SocketAddrUnix {
         Ok(Self { path })
     }
 
-    /// Encoding this socket address in the host format.
+    /// Encode this socket address in the host format.
     #[inline]
-    pub fn encode(&self) -> libc::sockaddr_un {
+    pub(crate) fn encode(&self) -> libc::sockaddr_un {
         let mut encoded = libc::sockaddr_un {
             #[cfg(any(
                 target_os = "netbsd",
