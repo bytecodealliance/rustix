@@ -3,6 +3,8 @@
 mod error;
 mod fd;
 mod ioctl;
+#[cfg(not(target_os = "wasi"))]
+mod mmap;
 mod pipe;
 mod poll;
 #[cfg(libc)]
@@ -28,6 +30,8 @@ pub use fd::{dup, dup2, DupFlags};
 pub use ioctl::ioctl_fioclex;
 #[cfg(not(target_os = "wasi"))]
 pub use ioctl::{ioctl_tcgets, ioctl_tiocgwinsz};
+#[cfg(not(target_os = "wasi"))]
+pub use mmap::{mmap, munmap, MapFlags, ProtFlags};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use pipe::pipe;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]

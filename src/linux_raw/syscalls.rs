@@ -44,10 +44,10 @@ use linux_raw_sys::{
         __NR_chdir, __NR_clock_getres, __NR_clock_gettime, __NR_clock_nanosleep, __NR_close,
         __NR_dup, __NR_dup3, __NR_exit_group, __NR_faccessat, __NR_fallocate, __NR_fchmod,
         __NR_fchmodat, __NR_fdatasync, __NR_fsync, __NR_getcwd, __NR_getdents64, __NR_getpid,
-        __NR_getppid, __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_mknodat, __NR_nanosleep,
-        __NR_openat, __NR_pipe, __NR_pipe2, __NR_poll, __NR_pread64, __NR_preadv, __NR_pwrite64,
-        __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv, __NR_renameat, __NR_sched_yield,
-        __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
+        __NR_getppid, __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_mknodat, __NR_munmap,
+        __NR_nanosleep, __NR_openat, __NR_pipe, __NR_pipe2, __NR_poll, __NR_pread64, __NR_preadv,
+        __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv, __NR_renameat,
+        __NR_sched_yield, __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
     },
     general::{
         __kernel_clockid_t, __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t,
@@ -1955,8 +1955,8 @@ pub(crate) fn sched_yield() {
 pub(crate) unsafe fn mmap(
     addr: *mut c_void,
     length: usize,
-    prot: c_int,
-    flags: c_int,
+    prot: c_uint,
+    flags: c_uint,
     fd: BorrowedFd<'_>,
     offset: u64,
 ) -> io::Result<*mut c_void> {
@@ -1966,8 +1966,8 @@ pub(crate) unsafe fn mmap(
             __NR_mmap2,
             void_star(addr),
             length,
-            c_int(prot),
-            c_int(flags),
+            c_uint(prot),
+            c_uint(flags),
             borrowed_fd(fd),
             (offset / 4096)
                 .try_into()
@@ -1980,12 +1980,21 @@ pub(crate) unsafe fn mmap(
             __NR_mmap,
             void_star(addr),
             length,
-            c_int(prot),
-            c_int(flags),
+            c_uint(prot),
+            c_uint(flags),
             borrowed_fd(fd),
             loff_t_from_u64(offset),
         ))
     }
+}
+
+/// # Safety
+///
+/// `munmap` is primarily unsafe due to the `addr` parameter, as anything working
+/// with memory pointed to by raw pointers is unsafe.
+#[inline]
+pub(crate) unsafe fn munmap(addr: *mut c_void, length: usize) -> io::Result<()> {
+    ret(syscall2(__NR_munmap, void_star(addr), length))
 }
 
 #[inline]
