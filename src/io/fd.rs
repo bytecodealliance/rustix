@@ -110,9 +110,10 @@ fn _isatty(fd: BorrowedFd<'_>) -> bool {
 }
 
 /// Returns a pair of booleans indicating whether the file descriptor is
-/// readable and/or writeable, respectively. Unlike [`is_file_read_write`],
-/// this correctly detects whether sockets have been shutdown, partially or
-/// completely.
+/// readable and/or writeable, respectively.
+///
+/// Unlike [`is_file_read_write`], this correctly detects whether sockets
+/// have been shutdown, partially or completely.
 ///
 /// [`is_file_read_write`]: crate::fs::is_file_read_write
 #[cfg(not(target_os = "redox"))]
