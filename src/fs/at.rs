@@ -2,6 +2,13 @@
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 use crate::fs::CloneFlags;
+#[cfg(not(any(
+    target_os = "redox",
+    target_os = "wasi",
+    target_os = "macos",
+    target_os = "ios"
+)))]
+use crate::fs::Dev;
 use crate::{
     fs::{Access, AtFlags, Mode, OFlags, Stat},
     io, path,
@@ -527,4 +534,49 @@ fn _fclonefileat(
     }
 
     unsafe { zero_ok(fclonefileat(srcfd, dst_dirfd, dst.as_ptr(), flags.bits())) }
+}
+
+/// `mknodat(dirfd, path, mode, dev)`
+#[cfg(not(any(
+    target_os = "redox",
+    target_os = "wasi",
+    target_os = "macos",
+    target_os = "ios"
+)))]
+#[inline]
+pub fn mknodat<'f, P: path::Arg, Fd: AsFd<'f>>(
+    dirfd: Fd,
+    path: P,
+    mode: Mode,
+    dev: Dev,
+) -> io::Result<()> {
+    let dirfd = dirfd.as_fd();
+    let path = path.into_c_str()?;
+    _mknodat(dirfd, &path, mode, dev)
+}
+
+#[cfg(all(
+    libc,
+    not(any(
+        target_os = "redox",
+        target_os = "wasi",
+        target_os = "macos",
+        target_os = "ios"
+    ))
+))]
+fn _mknodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode, dev: Dev) -> io::Result<()> {
+    unsafe {
+        zero_ok(libc::mknodat(
+            dirfd.as_raw_fd() as libc::c_int,
+            path.as_ptr(),
+            mode.bits(),
+            dev,
+        ))
+    }
+}
+
+#[cfg(linux_raw)]
+#[inline]
+fn _mknodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode, dev: Dev) -> io::Result<()> {
+    crate::linux_raw::mknodat(dirfd, path, mode.bits() as u16, dev)
 }

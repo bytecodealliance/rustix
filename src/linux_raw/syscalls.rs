@@ -20,7 +20,7 @@ use super::arch::{
 #[cfg(target_pointer_width = "64")]
 use super::conv::ret_u64;
 use super::conv::{
-    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, opt_c_str, opt_mut, out,
+    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, dev_t, opt_c_str, opt_mut, out,
     owned_fd, ret, ret_c_int, ret_c_uint, ret_owned_fd, ret_usize, ret_void_star, slice_addr,
     slice_as_mut_ptr, socklen_t, umode_t, void_star,
 };
@@ -44,10 +44,10 @@ use linux_raw_sys::{
         __NR_chdir, __NR_clock_getres, __NR_clock_gettime, __NR_clock_nanosleep, __NR_close,
         __NR_dup, __NR_dup3, __NR_exit_group, __NR_faccessat, __NR_fallocate, __NR_fchmod,
         __NR_fchmodat, __NR_fdatasync, __NR_fsync, __NR_getcwd, __NR_getdents64, __NR_getpid,
-        __NR_getppid, __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_nanosleep, __NR_openat,
-        __NR_pipe, __NR_pipe2, __NR_poll, __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev,
-        __NR_read, __NR_readlinkat, __NR_readv, __NR_renameat, __NR_sched_yield, __NR_symlinkat,
-        __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
+        __NR_getppid, __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_mknodat, __NR_nanosleep,
+        __NR_openat, __NR_pipe, __NR_pipe2, __NR_poll, __NR_pread64, __NR_preadv, __NR_pwrite64,
+        __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv, __NR_renameat, __NR_sched_yield,
+        __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
     },
     general::{
         __kernel_clockid_t, __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t,
@@ -505,6 +505,35 @@ pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: umode_t) -> io::Result<()> {
             __NR_fchmod,
             borrowed_fd(fd),
             umode_t(mode),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn mknodat(
+    dirfd: BorrowedFd<'_>,
+    filename: &CStr,
+    mode: umode_t,
+    dev: u64,
+) -> io::Result<()> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret(syscall4_readonly(
+            __NR_mknodat,
+            borrowed_fd(dirfd),
+            c_str(filename),
+            umode_t(mode),
+            dev_t(dev)?,
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret(syscall4_readonly(
+            __NR_mknodat,
+            borrowed_fd(dirfd),
+            c_str(filename),
+            umode_t(mode),
+            dev_t(dev),
         ))
     }
 }

@@ -163,6 +163,19 @@ pub(super) fn umode_t(mode: umode_t) -> usize {
     mode as usize
 }
 
+#[cfg(target_pointer_width = "64")]
+#[inline]
+pub(super) fn dev_t(dev: u64) -> usize {
+    dev as usize
+}
+
+#[cfg(target_pointer_width = "32")]
+#[inline]
+pub(super) fn dev_t(dev: u64) -> io::Result<usize> {
+    use std::convert::TryInto;
+    dev.try_into().map_err(|_err| io::Error::INVAL)
+}
+
 #[inline]
 pub(super) fn out<T: Sized>(t: &mut MaybeUninit<T>) -> usize {
     t.as_mut_ptr() as usize

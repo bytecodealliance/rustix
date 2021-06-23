@@ -47,6 +47,13 @@ mod statx;
 pub use at::chmodat;
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub use at::fclonefileat;
+#[cfg(not(any(
+    target_os = "wasi",
+    target_os = "redox",
+    target_os = "macos",
+    target_os = "ios"
+)))]
+pub use at::mknodat;
 #[cfg(not(target_os = "redox"))]
 pub use at::{
     accessat, linkat, mkdirat, openat, readlinkat, renameat, statat, symlinkat, unlinkat, utimensat,
@@ -311,8 +318,38 @@ pub const PROC_SUPER_MAGIC: FsWord = linux_raw_sys::general::PROC_SUPER_MAGIC as
 pub type RawMode = libc::mode_t;
 
 /// `mode_t`.
-#[cfg(linux_raw)]
+#[cfg(all(
+    linux_raw,
+    not(any(
+        target_arch = "x86",
+        target_arch = "sparc",
+        target_arch = "avr",
+        target_arch = "arm"
+    ))
+))]
 pub type RawMode = linux_raw_sys::general::__kernel_mode_t;
+
+/// `mode_t`.
+#[cfg(all(
+    linux_raw,
+    any(
+        target_arch = "x86",
+        target_arch = "sparc",
+        target_arch = "avr",
+        target_arch = "arm"
+    )
+))]
+// Don't use `__kernel_mode_t` since it's `u16` which differs from `st_size`.
+pub type RawMode = std::os::raw::c_uint;
+
+/// `dev_t`.
+#[cfg(libc)]
+pub type Dev = libc::dev_t;
+
+/// `dev_t`.
+#[cfg(linux_raw)]
+// Within the kernel the dev_t is 32-bit, but userspace uses a 64-bit field.
+pub type Dev = u64;
 
 /// Re-export types common to Posix-ish platforms.
 #[cfg(unix)]
