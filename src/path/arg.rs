@@ -22,9 +22,9 @@ use std::{
 /// # Example
 ///
 /// ```rust
-/// use std::ffi::CStr;
-/// use posish::path::Arg;
 /// use posish::io;
+/// use posish::path::Arg;
+/// use std::ffi::CStr;
 ///
 /// pub fn touch<P: Arg>(path: P) -> io::Result<()> {
 ///     let path = path.into_c_str()?;

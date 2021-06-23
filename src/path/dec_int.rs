@@ -17,7 +17,10 @@ use unsafe_io::os::posish::AsRawFd;
 /// ```rust
 /// use posish::path::DecInt;
 ///
-/// assert_eq!(format!("hello {}", DecInt::new(9876).display()), "hello 9876");
+/// assert_eq!(
+///     format!("hello {}", DecInt::new(9876).display()),
+///     "hello 9876"
+/// );
 /// ```
 #[derive(Clone)]
 pub struct DecInt {
