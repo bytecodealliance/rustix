@@ -5,7 +5,7 @@
 //!  - Error values are translated to [`Result`]s.
 //!  - Buffers are passed as Rust slices.
 //!  - Out-parameters are presented as return values.
-//!  - Path arguments use `AsRef<`[`Arg`]`>`, so they accept any string type.
+//!  - Path arguments use [`Arg`], so they accept any string type.
 //!  - File descriptors are passed and returned via [`AsFd`] and [`OwnedFd`]
 //!    instead of bare integers, ensuring I/O safety.
 //!  - Constants use `enum`s and [`bitflags`] types.
