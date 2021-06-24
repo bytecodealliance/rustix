@@ -5,6 +5,8 @@ use crate::fs::Mode;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
 use crate::fs::StatFs;
+#[cfg(all(libc, any(target_os = "android", target_os = "linux")))]
+use crate::libc::conv::syscall_ret;
 use crate::{fs::Stat, io, time::Timespec};
 use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(all(
@@ -64,8 +66,8 @@ use libc::{
 use std::io::SeekFrom;
 #[cfg(libc)]
 use {
-    crate::libc::conv::borrowed_fd,
-    crate::{negone_err, zero_ok},
+    crate::libc::conv::{borrowed_fd, ret},
+    crate::negone_err,
     std::{convert::TryInto, mem::MaybeUninit},
 };
 
@@ -141,7 +143,7 @@ pub fn fchmod<Fd: AsFd>(fd: &Fd, mode: Mode) -> io::Result<()> {
     not(any(target_os = "android", target_os = "linux", target_os = "wasi"))
 ))]
 fn _fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
-    unsafe { zero_ok(libc::fchmod(borrowed_fd(fd), mode.bits())) }
+    unsafe { ret(libc::fchmod(borrowed_fd(fd), mode.bits())) }
 }
 
 #[cfg(all(libc, any(target_os = "android", target_os = "linux")))]
@@ -151,7 +153,7 @@ fn _fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
     // support for `O_PATH`, which uses `/proc` outside our control and
     // interferes with our own use of `O_PATH`.
     unsafe {
-        zero_ok(libc::syscall(
+        syscall_ret(libc::syscall(
             libc::SYS_fchmod,
             borrowed_fd(fd),
             mode.bits(),
@@ -176,7 +178,7 @@ pub fn fstat<Fd: AsFd>(fd: &Fd) -> io::Result<Stat> {
 fn _fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     let mut stat = MaybeUninit::<Stat>::uninit();
     unsafe {
-        zero_ok(libc_fstat(borrowed_fd(fd), stat.as_mut_ptr()))?;
+        ret(libc_fstat(borrowed_fd(fd), stat.as_mut_ptr()))?;
         Ok(stat.assume_init())
     }
 }
@@ -202,7 +204,7 @@ pub fn fstatfs<Fd: AsFd>(fd: &Fd) -> io::Result<StatFs> {
 fn _fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
     let mut statfs = MaybeUninit::<StatFs>::uninit();
     unsafe {
-        zero_ok(libc_fstatfs(borrowed_fd(fd), statfs.as_mut_ptr()))?;
+        ret(libc_fstatfs(borrowed_fd(fd), statfs.as_mut_ptr()))?;
         Ok(statfs.assume_init())
     }
 }
@@ -222,7 +224,7 @@ pub fn futimens<Fd: AsFd>(fd: &Fd, times: &[Timespec; 2]) -> io::Result<()> {
 
 #[cfg(libc)]
 fn _futimens(fd: BorrowedFd<'_>, times: &[Timespec; 2]) -> io::Result<()> {
-    unsafe { zero_ok(libc::futimens(borrowed_fd(fd), times.as_ptr())) }
+    unsafe { ret(libc::futimens(borrowed_fd(fd), times.as_ptr())) }
 }
 
 #[cfg(linux_raw)]
@@ -279,12 +281,11 @@ fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()>
         fst_bytesalloc: 0,
     };
     unsafe {
-        let ret = libc::fcntl(borrowed_fd(fd), libc::F_PREALLOCATE, &store);
-        if ret == -1 {
+        if libc::fcntl(borrowed_fd(fd), libc::F_PREALLOCATE, &store) == -1 {
             store.fst_flags = libc::F_ALLOCATEALL;
             negone_err(libc::fcntl(borrowed_fd(fd), libc::F_PREALLOCATE, &store))?;
         }
-        zero_ok(libc::ftruncate(borrowed_fd(fd), new_len))
+        ret(libc::ftruncate(borrowed_fd(fd), new_len))
     }
 }
 
@@ -339,7 +340,7 @@ pub fn fsync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 
 #[cfg(libc)]
 fn _fsync(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { zero_ok(libc::fsync(borrowed_fd(fd))) }
+    unsafe { ret(libc::fsync(borrowed_fd(fd))) }
 }
 
 #[cfg(linux_raw)]
@@ -361,7 +362,7 @@ pub fn fdatasync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     not(any(target_os = "ios", target_os = "macos", target_os = "redox"))
 ))]
 fn _fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { zero_ok(libc::fdatasync(borrowed_fd(fd))) }
+    unsafe { ret(libc::fdatasync(borrowed_fd(fd))) }
 }
 
 #[cfg(linux_raw)]
@@ -380,7 +381,7 @@ pub fn ftruncate<Fd: AsFd>(fd: &Fd, length: u64) -> io::Result<()> {
 #[cfg(libc)]
 fn _ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
     let length = length.try_into().map_err(|_overflow_err| io::Error::FBIG)?;
-    unsafe { zero_ok(libc::ftruncate(borrowed_fd(fd), length)) }
+    unsafe { ret(libc::ftruncate(borrowed_fd(fd), length)) }
 }
 
 #[cfg(linux_raw)]

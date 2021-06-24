@@ -4,7 +4,7 @@ use crate::{
 };
 use io_lifetimes::OwnedFd;
 #[cfg(libc)]
-use {crate::zero_ok, std::mem::MaybeUninit, std::os::raw::c_int};
+use {crate::libc::conv::ret, std::mem::MaybeUninit, std::os::raw::c_int};
 
 /// `socketpair(domain, type_ | accept_flags, protocol)`
 #[inline]
@@ -26,7 +26,7 @@ fn _socketpair(
 ) -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut fds = MaybeUninit::<[OwnedFd; 2]>::uninit();
-        zero_ok(libc::socketpair(
+        ret(libc::socketpair(
             domain.0 as c_int,
             type_.0 as c_int | accept_flags.bits(),
             protocol as c_int,

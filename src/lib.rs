@@ -70,17 +70,6 @@ mod libc;
 #[cfg(linux_raw)]
 mod linux_raw;
 
-/// Given a `libc` return value, translate `0` into `Ok(())` and any other
-/// value to an `Err` with the error from `errno`.
-#[cfg(libc)]
-fn zero_ok<T: LibcResult>(t: T) -> crate::io::Result<()> {
-    if t.is_zero() {
-        Ok(())
-    } else {
-        Err(crate::io::Error::last_os_error())
-    }
-}
-
 /// Given a `libc` return value, translate `-1` into an `Err` with the error
 /// from `errno`, and any other value to an `Ok` containing the value.
 #[cfg(libc)]
@@ -107,7 +96,6 @@ fn negative_err<T: LibcResult>(t: T) -> crate::io::Result<()> {
 
 #[cfg(libc)]
 trait LibcResult {
-    fn is_zero(&self) -> bool;
     fn is_negone(&self) -> bool;
     fn is_negative(&self) -> bool;
 }
@@ -115,10 +103,6 @@ trait LibcResult {
 #[cfg(libc)]
 macro_rules! is_impls {
     ($($t:ident)*) => ($(impl LibcResult for $t {
-        fn is_zero(&self) -> bool {
-            *self == 0
-        }
-
         fn is_negone(&self) -> bool {
             *self == -1
         }

@@ -2,7 +2,10 @@
 use crate::io::{self, Termios, Winsize};
 use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(libc)]
-use {crate::libc::conv::borrowed_fd, crate::zero_ok, std::mem::MaybeUninit};
+use {
+    crate::libc::conv::{borrowed_fd, ret},
+    std::mem::MaybeUninit,
+};
 
 /// `ioctl(fd, TCGETS)`
 ///
@@ -28,7 +31,7 @@ pub fn ioctl_tcgets<Fd: AsFd>(fd: &Fd) -> io::Result<Termios> {
 fn _ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     let mut result = MaybeUninit::<Termios>::uninit();
     unsafe {
-        zero_ok(libc::ioctl(
+        ret(libc::ioctl(
             borrowed_fd(fd),
             libc::TCGETS,
             result.as_mut_ptr(),
@@ -49,8 +52,7 @@ fn _ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
 fn _ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     let mut result = MaybeUninit::<Termios>::uninit();
     unsafe {
-        zero_ok(libc::tcgetattr(borrowed_fd(fd), result.as_mut_ptr()))
-            .map(|()| result.assume_init())
+        ret(libc::tcgetattr(borrowed_fd(fd), result.as_mut_ptr())).map(|()| result.assume_init())
     }
 }
 
@@ -72,7 +74,7 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 fn _ioctl_fioclex(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { zero_ok(libc::ioctl(borrowed_fd(fd), libc::FIOCLEX)) }
+    unsafe { ret(libc::ioctl(borrowed_fd(fd), libc::FIOCLEX)) }
 }
 
 /// `ioctl(fd, TIOCGWINSZ)`.
@@ -87,7 +89,7 @@ pub fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
 fn _ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
     unsafe {
         let mut buf = MaybeUninit::uninit();
-        zero_ok(libc::ioctl(
+        ret(libc::ioctl(
             borrowed_fd(fd),
             libc::TIOCGWINSZ.into(),
             buf.as_mut_ptr(),

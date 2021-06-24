@@ -1,4 +1,6 @@
 use crate::io;
+#[cfg(libc)]
+use crate::libc::conv::{borrowed_fd, ret};
 use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(all(
     libc,
@@ -21,8 +23,6 @@ use libc::posix_fadvise as libc_posix_fadvise;
 ))]
 use libc::posix_fadvise64 as libc_posix_fadvise;
 use std::convert::TryInto;
-#[cfg(libc)]
-use {crate::libc::conv::borrowed_fd, crate::zero_ok};
 
 /// `POSIX_FADV_*` constants for use with [`fadvise`].
 ///
@@ -88,7 +88,7 @@ pub fn fadvise<Fd: AsFd>(fd: &Fd, offset: u64, len: u64, advice: Advice) -> io::
 fn _fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
     if let (Ok(offset), Ok(len)) = (offset.try_into(), len.try_into()) {
         unsafe {
-            zero_ok(libc_posix_fadvise(
+            ret(libc_posix_fadvise(
                 borrowed_fd(fd),
                 offset,
                 len,

@@ -2,7 +2,7 @@
 
 use crate::io;
 #[cfg(all(libc, not(target_os = "redox")))]
-use crate::zero_ok;
+use crate::libc::conv::ret;
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd, IntoFd, OwnedFd};
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
@@ -48,7 +48,7 @@ pub fn ioctl_fionread<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
 fn _ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
     let mut nread = MaybeUninit::<libc::c_int>::uninit();
     unsafe {
-        zero_ok(libc::ioctl(
+        ret(libc::ioctl(
             borrowed_fd(fd),
             libc::FIONREAD,
             nread.as_mut_ptr(),

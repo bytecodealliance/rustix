@@ -25,7 +25,7 @@ use crate::time::Timespec;
 ))]
 use std::ptr::null_mut;
 #[cfg(libc)]
-use {crate::zero_ok, std::mem::MaybeUninit};
+use {crate::libc::conv::ret, std::mem::MaybeUninit};
 
 /// `clockid_t`
 #[cfg(all(
@@ -118,7 +118,7 @@ pub fn clock_gettime(id: ClockId) -> Timespec {
     // can't maintain their invariants, or the realtime clocks aren't properly
     // configured.
     unsafe {
-        zero_ok(libc::clock_gettime(
+        ret(libc::clock_gettime(
             id as libc::clockid_t,
             timespec.as_mut_ptr(),
         ))
@@ -205,7 +205,7 @@ pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::Result<(
 pub fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
     let mut remain = MaybeUninit::<Timespec>::uninit();
     unsafe {
-        match zero_ok(libc::nanosleep(request, remain.as_mut_ptr())) {
+        match ret(libc::nanosleep(request, remain.as_mut_ptr())) {
             Ok(()) => NanosleepRelativeResult::Ok,
             Err(crate::io::Error::INTR) => {
                 NanosleepRelativeResult::Interrupted(remain.assume_init())

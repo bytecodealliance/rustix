@@ -25,6 +25,24 @@ pub(crate) fn owned_fd(fd: OwnedFd) -> c_int {
     fd.into_raw_fd() as c_int
 }
 
+#[inline]
+pub(crate) unsafe fn ret(raw: c_int) -> io::Result<()> {
+    if raw == 0 {
+        Ok(())
+    } else {
+        Err(crate::io::Error::last_os_error())
+    }
+}
+
+#[inline]
+pub(crate) unsafe fn syscall_ret(raw: c_long) -> io::Result<()> {
+    if raw == 0 {
+        Ok(())
+    } else {
+        Err(crate::io::Error::last_os_error())
+    }
+}
+
 /// Convert a c_int returned from a libc function to an `OwnedFd`, if valid.
 ///
 /// # Safety

@@ -5,8 +5,8 @@ use crate::{
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(libc)]
 use {
-    crate::libc::conv::{borrowed_fd, ret_owned_fd},
-    crate::{negone_err, zero_ok},
+    crate::libc::conv::{borrowed_fd, ret, ret_owned_fd},
+    crate::negone_err,
 };
 
 /// `fcntl(fd, F_GETFD)`
@@ -38,7 +38,7 @@ pub fn fcntl_setfd<Fd: AsFd>(fd: &Fd, flags: FdFlags) -> io::Result<()> {
 
 #[cfg(libc)]
 fn _fcntl_setfd(fd: BorrowedFd<'_>, flags: FdFlags) -> io::Result<()> {
-    unsafe { zero_ok(libc::fcntl(borrowed_fd(fd), libc::F_SETFD, flags.bits())) }
+    unsafe { ret(libc::fcntl(borrowed_fd(fd), libc::F_SETFD, flags.bits())) }
 }
 
 #[cfg(linux_raw)]
@@ -76,7 +76,7 @@ pub fn fcntl_setfl<Fd: AsFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
 
 #[cfg(libc)]
 fn _fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
-    unsafe { zero_ok(libc::fcntl(borrowed_fd(fd), libc::F_SETFL, flags.bits())) }
+    unsafe { ret(libc::fcntl(borrowed_fd(fd), libc::F_SETFL, flags.bits())) }
 }
 
 #[cfg(linux_raw)]

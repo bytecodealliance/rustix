@@ -8,7 +8,10 @@ use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::ffi::CStr;
 #[cfg(libc)]
-use {crate::libc::conv::c_str, crate::zero_ok, std::mem::MaybeUninit};
+use {
+    crate::libc::conv::{c_str, ret},
+    std::mem::MaybeUninit,
+};
 
 #[cfg(libc)]
 bitflags! {
@@ -141,7 +144,7 @@ fn _statx(
 
     let mut statx_buf = MaybeUninit::<Statx>::uninit();
     unsafe {
-        zero_ok(statx(
+        ret(statx(
             dirfd,
             c_str(path),
             flags.bits(),

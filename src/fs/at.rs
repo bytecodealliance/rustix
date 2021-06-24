@@ -9,6 +9,8 @@ use crate::fs::CloneFlags;
     target_os = "ios"
 )))]
 use crate::fs::Dev;
+#[cfg(all(libc, any(target_os = "android", target_os = "linux")))]
+use crate::libc::conv::syscall_ret;
 use crate::{
     fs::{Access, AtFlags, Mode, OFlags, Stat},
     io, path,
@@ -42,8 +44,8 @@ use std::os::unix::ffi::OsStringExt;
 use std::os::wasi::ffi::OsStringExt;
 #[cfg(libc)]
 use {
-    crate::libc::conv::{borrowed_fd, c_str, ret_owned_fd},
-    crate::{negone_err, zero_ok},
+    crate::libc::conv::{borrowed_fd, c_str, ret, ret_owned_fd},
+    crate::negone_err,
     std::mem::MaybeUninit,
 };
 
@@ -151,7 +153,7 @@ pub fn mkdirat<'f, P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> i
 
 #[cfg(libc)]
 fn _mkdirat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
-    unsafe { zero_ok(libc::mkdirat(borrowed_fd(dirfd), c_str(path), mode.bits())) }
+    unsafe { ret(libc::mkdirat(borrowed_fd(dirfd), c_str(path), mode.bits())) }
 }
 
 #[cfg(linux_raw)]
@@ -185,7 +187,7 @@ fn _linkat(
     flags: AtFlags,
 ) -> io::Result<()> {
     unsafe {
-        zero_ok(libc::linkat(
+        ret(libc::linkat(
             borrowed_fd(old_dirfd),
             c_str(old_path),
             borrowed_fd(new_dirfd),
@@ -218,7 +220,7 @@ pub fn unlinkat<'f, P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags)
 #[cfg(libc)]
 fn _unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<()> {
     unsafe {
-        zero_ok(libc::unlinkat(
+        ret(libc::unlinkat(
             borrowed_fd(dirfd),
             c_str(path),
             flags.bits(),
@@ -255,7 +257,7 @@ fn _renameat(
     new_path: &CStr,
 ) -> io::Result<()> {
     unsafe {
-        zero_ok(libc::renameat(
+        ret(libc::renameat(
             borrowed_fd(old_dirfd),
             c_str(old_path),
             borrowed_fd(new_dirfd),
@@ -291,7 +293,7 @@ pub fn symlinkat<'f, P: path::Arg, Q: path::Arg, Fd: AsFd>(
 #[cfg(libc)]
 fn _symlinkat(old_path: &CStr, new_dirfd: BorrowedFd<'_>, new_path: &CStr) -> io::Result<()> {
     unsafe {
-        zero_ok(libc::symlinkat(
+        ret(libc::symlinkat(
             c_str(old_path),
             borrowed_fd(new_dirfd),
             c_str(new_path),
@@ -318,7 +320,7 @@ pub fn statat<'f, P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags) -
 fn _statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
     let mut stat = MaybeUninit::<Stat>::uninit();
     unsafe {
-        zero_ok(libc_fstatat(
+        ret(libc_fstatat(
             borrowed_fd(dirfd),
             c_str(path),
             stat.as_mut_ptr(),
@@ -351,7 +353,7 @@ pub fn accessat<'f, P: path::Arg, Fd: AsFd>(
 #[cfg(all(libc, not(target_os = "emscripten")))]
 fn _accessat(dirfd: BorrowedFd<'_>, path: &CStr, access: Access, flags: AtFlags) -> io::Result<()> {
     unsafe {
-        zero_ok(libc::faccessat(
+        ret(libc::faccessat(
             borrowed_fd(dirfd),
             c_str(path),
             access.bits(),
@@ -412,7 +414,7 @@ fn _utimensat(
     flags: AtFlags,
 ) -> io::Result<()> {
     unsafe {
-        zero_ok(libc::utimensat(
+        ret(libc::utimensat(
             borrowed_fd(dirfd),
             c_str(path),
             times.as_ptr(),
@@ -456,7 +458,7 @@ pub fn chmodat<'f, P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> i
 ))]
 fn _chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
     unsafe {
-        zero_ok(libc::fchmodat(
+        ret(libc::fchmodat(
             borrowed_fd(dirfd),
             c_str(path),
             mode.bits(),
@@ -469,7 +471,7 @@ fn _chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
 fn _chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
     // Note that Linux's `fchmodat` does not have a flags argument.
     unsafe {
-        zero_ok(libc::syscall(
+        syscall_ret(libc::syscall(
             libc::SYS_fchmodat,
             borrowed_fd(dirfd),
             c_str(path),
@@ -516,7 +518,7 @@ fn _fclonefileat(
         ) -> libc::c_int
     }
 
-    unsafe { zero_ok(fclonefileat(srcfd, dst_dirfd, c_str(dst), flags.bits())) }
+    unsafe { ret(fclonefileat(srcfd, dst_dirfd, c_str(dst), flags.bits())) }
 }
 
 /// `mknodat(dirfd, path, mode, dev)`
@@ -549,7 +551,7 @@ pub fn mknodat<'f, P: path::Arg, Fd: AsFd>(
 ))]
 fn _mknodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode, dev: Dev) -> io::Result<()> {
     unsafe {
-        zero_ok(libc::mknodat(
+        ret(libc::mknodat(
             borrowed_fd(dirfd),
             c_str(path),
             mode.bits(),

@@ -31,7 +31,10 @@ use libc::mmap as libc_mmap;
 use libc::mmap64 as libc_mmap;
 use std::os::raw::c_void;
 #[cfg(libc)]
-use {crate::libc::conv::borrowed_fd, crate::zero_ok, std::os::raw::c_int};
+use {
+    crate::libc::conv::{borrowed_fd, ret},
+    std::os::raw::c_int,
+};
 
 #[cfg(libc)]
 bitflags! {
@@ -220,7 +223,7 @@ pub unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
 
 #[cfg(libc)]
 unsafe fn _munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
-    zero_ok(libc::munmap(ptr, len))
+    ret(libc::munmap(ptr, len))
 }
 
 #[cfg(linux_raw)]

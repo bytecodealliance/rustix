@@ -9,7 +9,7 @@ use crate::io;
 use bitflags::bitflags;
 use io_lifetimes::OwnedFd;
 #[cfg(libc)]
-use {crate::zero_ok, std::mem::MaybeUninit};
+use {crate::libc::conv::ret, std::mem::MaybeUninit};
 
 #[cfg(all(
     libc,
@@ -52,7 +52,7 @@ pub fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
 fn _pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
-        zero_ok(libc::pipe(result.as_mut_ptr().cast::<i32>()))?;
+        ret(libc::pipe(result.as_mut_ptr().cast::<i32>()))?;
         let [p0, p1] = result.assume_init();
         Ok((p0, p1))
     }
@@ -78,7 +78,7 @@ pub fn pipe2(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
 fn _pipe2(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
-        zero_ok(libc::pipe2(result.as_mut_ptr().cast::<i32>(), flags.bits()))?;
+        ret(libc::pipe2(result.as_mut_ptr().cast::<i32>(), flags.bits()))?;
         let [p0, p1] = result.assume_init();
         Ok((p0, p1))
     }
