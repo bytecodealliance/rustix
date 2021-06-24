@@ -1,10 +1,6 @@
 //! Network-related operations.
 
 mod send_recv;
-#[cfg(libc)]
-mod sockaddr;
-#[cfg(libc)]
-mod sockaddr_header;
 mod socket;
 #[cfg(not(target_os = "wasi"))]
 mod socketpair;
@@ -20,9 +16,9 @@ pub use socket::{
 #[cfg(not(target_os = "wasi"))]
 pub use socketpair::socketpair;
 
+#[cfg(libc)]
+pub use crate::libc::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 #[cfg(linux_raw)]
 pub use crate::linux_raw::{
     Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6,
 };
-#[cfg(libc)]
-pub use sockaddr::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};

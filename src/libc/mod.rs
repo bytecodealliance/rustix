@@ -1,4 +1,6 @@
 pub(crate) mod conv;
+pub(crate) mod sockaddr;
+pub(crate) mod sockaddr_header;
 
 #[cfg(all(
     libc,
@@ -20,3 +22,5 @@ pub(crate) use libc::off64_t as libc_off_t;
     ))
 ))]
 pub(crate) use libc::off_t as libc_off_t;
+
+pub use sockaddr::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};

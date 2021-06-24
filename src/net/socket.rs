@@ -9,9 +9,9 @@ use std::os::raw::c_int;
 use std::os::raw::c_uint;
 #[cfg(libc)]
 use {
-    super::sockaddr_header::decode_sockaddr,
     crate::as_ptr,
     crate::libc::conv::{borrowed_fd, ret, ret_owned_fd},
+    crate::libc::sockaddr_header::decode_sockaddr,
     libc::{sockaddr_storage, socklen_t},
     std::mem::{size_of, MaybeUninit},
 };

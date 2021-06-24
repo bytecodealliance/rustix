@@ -8,9 +8,9 @@ use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(libc)]
 use {
-    super::sockaddr_header::decode_sockaddr,
     crate::as_ptr,
     crate::libc::conv::{borrowed_fd, ret_ssize_t},
+    crate::libc::sockaddr_header::decode_sockaddr,
     libc::{sockaddr_storage, socklen_t},
     std::mem::{size_of, MaybeUninit},
 };
