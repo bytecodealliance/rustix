@@ -88,7 +88,7 @@ pub fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
 #[cfg(all(libc, not(target_os = "wasi")))]
 fn _ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
     unsafe {
-        let mut buf = MaybeUninit::uninit();
+        let mut buf = MaybeUninit::<Winsize>::uninit();
         ret(libc::ioctl(
             borrowed_fd(fd),
             libc::TIOCGWINSZ.into(),
