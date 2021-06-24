@@ -50,18 +50,6 @@ pub(super) fn hi(x: u64) -> usize {
     (x >> 32) as usize
 }
 
-#[cfg(target_pointer_width = "32")]
-#[inline]
-pub(super) fn i64_hi(x: i64) -> usize {
-    hi(x as u64)
-}
-
-#[cfg(target_pointer_width = "32")]
-#[inline]
-pub(super) fn i64_lo(x: i64) -> usize {
-    lo(x as u64)
-}
-
 #[inline]
 pub(super) fn void_star(c: *mut c_void) -> usize {
     c as usize

@@ -86,7 +86,7 @@ use {
 };
 #[cfg(target_pointer_width = "32")]
 use {
-    super::conv::{hi, i64_hi, i64_lo, lo},
+    super::conv::{hi, lo},
     linux_raw_sys::{
         errno::EINVAL,
         general::stat64 as stat,
@@ -546,8 +546,10 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, offset: i64, whence: c_uint) -> io::Resul
         ret(syscall5(
             __NR__llseek,
             borrowed_fd(fd),
-            i64_hi(offset),
-            i64_lo(offset),
+            // Don't use the hi/lo functions here because Linux's llseek
+            // takes its 64-bit argument differently from everything else.
+            (offset >> 32) as usize,
+            offset as usize,
             out(&mut result),
             c_uint(whence),
         ))
