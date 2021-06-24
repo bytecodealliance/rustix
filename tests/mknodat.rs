@@ -9,7 +9,7 @@ fn test_mknodat() {
     use posish::fs::{cwd, mknodat, openat, statat, unlinkat, AtFlags, FileType, Mode, OFlags};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     mknodat(&dir, "foo", Mode::IFREG, 0).unwrap();
     let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();

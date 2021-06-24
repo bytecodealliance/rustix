@@ -17,8 +17,8 @@ exclude = ["/.github"]
 [dependencies]
 bitflags = "1.2.1"
 itoa = "0.4.7"
-unsafe-io = "0.6.0"
-io-lifetimes = "0.1.1"
+unsafe-io = "0.7.0"
+io-lifetimes = "0.2.0"
 
 [target.'cfg(not(linux_raw))'.dependencies]
 errno = "0.2.7"

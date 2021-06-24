@@ -10,10 +10,10 @@ use {
 
 /// `copy_file_range(fd_in, off_in, fd_out, off_out, len, 0)`
 #[inline]
-pub fn copy_file_range<'in_f, 'out_f, InFd: AsFd<'in_f>, OutFd: AsFd<'out_f>>(
-    fd_in: InFd,
+pub fn copy_file_range<InFd: AsFd, OutFd: AsFd>(
+    fd_in: &InFd,
     off_in: Option<&mut u64>,
-    fd_out: OutFd,
+    fd_out: &OutFd,
     off_out: Option<&mut u64>,
     len: u64,
 ) -> io::Result<u64> {

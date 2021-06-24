@@ -50,7 +50,7 @@ pub struct PollFd<'fd> {
 impl<'fd> PollFd<'fd> {
     /// Construct a new `PollFd` holding `fd` and `events`.
     #[inline]
-    pub fn new<Fd: AsFd<'fd>>(fd: Fd, events: PollFlags) -> Self {
+    pub fn new<Fd: AsFd>(fd: &'fd Fd, events: PollFlags) -> Self {
         Self::_new(fd.as_fd(), events)
     }
 

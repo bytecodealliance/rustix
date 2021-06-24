@@ -9,7 +9,7 @@ fn test_mmap() {
     use std::{ptr::null_mut, slice};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     let file = openat(
         &dir,

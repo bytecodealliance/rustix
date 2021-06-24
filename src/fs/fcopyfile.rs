@@ -15,9 +15,9 @@ type copyfile_flags_t = u32;
 
 /// `fcopyfile(from, to, state, flags)`
 #[inline]
-pub unsafe fn fcopyfile<'from_f, 'to_f, FromFd: AsFd<'from_f>, ToFd: AsFd<'to_f>>(
-    from: FromFd,
-    to: ToFd,
+pub unsafe fn fcopyfile<FromFd: AsFd, ToFd: AsFd>(
+    from: &FromFd,
+    to: &ToFd,
     state: copyfile_state_t,
     flags: CopyfileFlags,
 ) -> io::Result<()> {

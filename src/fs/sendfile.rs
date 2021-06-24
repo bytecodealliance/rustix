@@ -6,9 +6,9 @@ use {crate::negone_err, std::mem::transmute, unsafe_io::os::posish::AsRawFd};
 /// `sendfile(out_fd, in_fd, offset, count)`
 #[cfg(any(linux_raw, target_os = "linux"))]
 #[inline]
-pub fn sendfile<'o, 'i, OutFd: AsFd<'o>, InFd: AsFd<'i>>(
-    out_fd: OutFd,
-    in_fd: InFd,
+pub fn sendfile<OutFd: AsFd, InFd: AsFd>(
+    out_fd: &OutFd,
+    in_fd: &InFd,
     offset: Option<&mut u64>,
     count: usize,
 ) -> io::Result<usize> {

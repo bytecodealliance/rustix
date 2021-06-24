@@ -106,7 +106,7 @@ bitflags! {
 
 /// `recv(fd, buf.as_ptr(), buf.len(), flags)`
 #[inline]
-pub fn recv<'f, Fd: AsFd<'f>>(fd: Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
+pub fn recv<Fd: AsFd>(fd: &Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
     let fd = fd.as_fd();
     _recv(fd, buf, flags)
 }
@@ -132,7 +132,7 @@ fn _recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usi
 
 /// `send(fd, buf.ptr(), buf.len(), flags)`
 #[inline]
-pub fn send<'f, Fd: AsFd<'f>>(fd: Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize> {
+pub fn send<Fd: AsFd>(fd: &Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize> {
     let fd = fd.as_fd();
     _send(fd, buf, flags)
 }
@@ -158,8 +158,8 @@ fn _send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Result<usize> 
 
 /// `recvfrom(fd, buf, len, flags, addr, len)`
 #[inline]
-pub fn recvfrom<'f, Fd: AsFd<'f>>(
-    fd: Fd,
+pub fn recvfrom<Fd: AsFd>(
+    fd: &Fd,
     buf: &mut [u8],
     flags: RecvFlags,
 ) -> io::Result<(usize, SocketAddr)> {
@@ -201,8 +201,8 @@ fn _recvfrom(
 /// `sendto(fd, buf.ptr(), buf.len(), flags, addr, sizeof(struct sockaddr_in))`
 #[inline]
 #[doc(alias("sendto"))]
-pub fn sendto_v4<'f, Fd: AsFd<'f>>(
-    fd: Fd,
+pub fn sendto_v4<Fd: AsFd>(
+    fd: &Fd,
     buf: &[u8],
     flags: SendFlags,
     addr: &SocketAddrV4,
@@ -245,8 +245,8 @@ fn _sendto_v4(
 /// `sendto(fd, buf.ptr(), buf.len(), flags, addr, sizeof(struct sockaddr_in6))`
 #[inline]
 #[doc(alias("sendto"))]
-pub fn sendto_v6<'f, Fd: AsFd<'f>>(
-    fd: Fd,
+pub fn sendto_v6<Fd: AsFd>(
+    fd: &Fd,
     buf: &[u8],
     flags: SendFlags,
     addr: &SocketAddrV6,
@@ -289,8 +289,8 @@ fn _sendto_v6(
 /// `sendto(fd, buf.ptr(), buf.len(), flags, addr, sizeof(struct sockaddr_un))`
 #[inline]
 #[doc(alias("sendto"))]
-pub fn sendto_unix<'f, Fd: AsFd<'f>>(
-    fd: Fd,
+pub fn sendto_unix<Fd: AsFd>(
+    fd: &Fd,
     buf: &[u8],
     flags: SendFlags,
     addr: &SocketAddrUnix,

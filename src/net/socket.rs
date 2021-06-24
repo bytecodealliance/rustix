@@ -347,7 +347,7 @@ fn _socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in))`
 #[inline]
 #[doc(alias("bind"))]
-pub fn bind_v4<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
+pub fn bind_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     _bind_v4(sockfd, addr)
 }
@@ -372,7 +372,7 @@ fn _bind_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in6))`
 #[inline]
 #[doc(alias("bind"))]
-pub fn bind_v6<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
+pub fn bind_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     _bind_v6(sockfd, addr)
 }
@@ -397,7 +397,7 @@ fn _bind_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
 /// `bind(sockfd, addr, sizeof(struct sockaddr_un))`
 #[inline]
 #[doc(alias("bind"))]
-pub fn bind_unix<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
+pub fn bind_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     _bind_unix(sockfd, addr)
 }
@@ -422,7 +422,7 @@ fn _bind_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
 /// `connect(sockfd, addr, sizeof(struct sockaddr_in))`
 #[inline]
 #[doc(alias("connect"))]
-pub fn connect_v4<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
+pub fn connect_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     _connect_v4(sockfd, addr)
 }
@@ -447,7 +447,7 @@ fn _connect_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
 /// `connect(sockfd, addr, sizeof(struct sockaddr_in6))`
 #[inline]
 #[doc(alias("connect"))]
-pub fn connect_v6<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
+pub fn connect_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     _connect_v6(sockfd, addr)
 }
@@ -472,7 +472,7 @@ fn _connect_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
 /// `connect(sockfd, addr, sizeof(struct sockaddr_un))`
 #[doc(alias("connect"))]
 #[inline]
-pub fn connect_unix<'f, Fd: AsFd<'f>>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
+pub fn connect_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     _connect_unix(sockfd, addr)
 }
@@ -496,7 +496,7 @@ fn _connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()
 
 /// `listen(fd, backlog)`
 #[inline]
-pub fn listen<'f, Fd: AsFd<'f>>(sockfd: Fd, backlog: c_int) -> io::Result<()> {
+pub fn listen<Fd: AsFd>(sockfd: &Fd, backlog: c_int) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     _listen(sockfd, backlog)
 }
@@ -515,10 +515,7 @@ fn _listen(sockfd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
 /// `accept4(fd, addr, len, flags)`
 #[inline]
 #[doc(alias = "accept4")]
-pub fn accept<'f, Fd: AsFd<'f>>(
-    sockfd: Fd,
-    flags: AcceptFlags,
-) -> io::Result<(OwnedFd, SocketAddr)> {
+pub fn accept<Fd: AsFd>(sockfd: &Fd, flags: AcceptFlags) -> io::Result<(OwnedFd, SocketAddr)> {
     let sockfd = sockfd.as_fd();
     _accept(sockfd, flags)
 }
@@ -564,7 +561,7 @@ fn _accept(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, S
 
 /// `shutdown(fd, how)`
 #[inline]
-pub fn shutdown<'f, Fd: AsFd<'f>>(sockfd: Fd, how: Shutdown) -> io::Result<()> {
+pub fn shutdown<Fd: AsFd>(sockfd: &Fd, how: Shutdown) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     _shutdown(sockfd, how)
 }
@@ -582,7 +579,7 @@ fn _shutdown(sockfd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> {
 
 /// `getsockopt(fd, SOL_SOCKET, SO_TYPE)`
 #[inline]
-pub fn getsockopt_socket_type<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<SocketType> {
+pub fn getsockopt_socket_type<Fd: AsFd>(fd: &Fd) -> io::Result<SocketType> {
     let fd = fd.as_fd();
     _getsockopt_socket_type(fd)
 }
@@ -616,7 +613,7 @@ fn _getsockopt_socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
 
 /// `getsockname(fd, addr, len)`
 #[inline]
-pub fn getsockname<'f, Fd: AsFd<'f>>(sockfd: Fd) -> io::Result<SocketAddr> {
+pub fn getsockname<Fd: AsFd>(sockfd: &Fd) -> io::Result<SocketAddr> {
     let sockfd = sockfd.as_fd();
     _getsockname(sockfd)
 }
@@ -643,7 +640,7 @@ fn _getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
 
 /// `getpeername(fd, addr, len)`
 #[inline]
-pub fn getpeername<'f, Fd: AsFd<'f>>(sockfd: Fd) -> io::Result<SocketAddr> {
+pub fn getpeername<Fd: AsFd>(sockfd: &Fd) -> io::Result<SocketAddr> {
     let sockfd = sockfd.as_fd();
     _getpeername(sockfd)
 }

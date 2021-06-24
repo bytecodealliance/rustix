@@ -77,7 +77,7 @@ bitflags! {
 
 /// `read(fd, buf.as_ptr(), buf.len())`
 #[inline]
-pub fn read<'f, Fd: AsFd<'f>>(fd: Fd, buf: &mut [u8]) -> io::Result<usize> {
+pub fn read<Fd: AsFd>(fd: &Fd, buf: &mut [u8]) -> io::Result<usize> {
     let fd = fd.as_fd();
     _read(fd, buf)
 }
@@ -102,7 +102,7 @@ fn _read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
 
 /// `write(fd, buf.ptr(), buf.len())`
 #[inline]
-pub fn write<'f, Fd: AsFd<'f>>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
+pub fn write<Fd: AsFd>(fd: &Fd, buf: &[u8]) -> io::Result<usize> {
     let fd = fd.as_fd();
     _write(fd, buf)
 }
@@ -127,7 +127,7 @@ fn _write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
 
 /// `pread(fd, buf.as_ptr(), bufs.len(), offset)`
 #[inline]
-pub fn pread<'f, Fd: AsFd<'f>>(fd: Fd, buf: &mut [u8], offset: u64) -> io::Result<usize> {
+pub fn pread<Fd: AsFd>(fd: &Fd, buf: &mut [u8], offset: u64) -> io::Result<usize> {
     let fd = fd.as_fd();
     _pread(fd, buf, offset)
 }
@@ -156,7 +156,7 @@ fn _pread(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<usize> {
 
 /// `pwrite(fd, bufs.as_ptr(), bufs.len())`
 #[inline]
-pub fn pwrite<'f, Fd: AsFd<'f>>(fd: Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
+pub fn pwrite<Fd: AsFd>(fd: &Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
     let fd = fd.as_fd();
     _pwrite(fd, buf, offset)
 }
@@ -185,7 +185,7 @@ fn _pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<usize> {
 
 /// `readv(fd, bufs.as_ptr(), bufs.len())`
 #[inline]
-pub fn readv<'f, Fd: AsFd<'f>>(fd: Fd, bufs: &[IoSliceMut]) -> io::Result<usize> {
+pub fn readv<Fd: AsFd>(fd: &Fd, bufs: &[IoSliceMut]) -> io::Result<usize> {
     let fd = fd.as_fd();
     _readv(fd, bufs)
 }
@@ -210,7 +210,7 @@ fn _readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut]) -> io::Result<usize> {
 
 /// `writev(fd, bufs.as_ptr(), bufs.len())`
 #[inline]
-pub fn writev<'f, Fd: AsFd<'f>>(fd: Fd, bufs: &[IoSlice]) -> io::Result<usize> {
+pub fn writev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice]) -> io::Result<usize> {
     let fd = fd.as_fd();
     _writev(fd, bufs)
 }
@@ -236,7 +236,7 @@ fn _writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> {
 /// `preadv(fd, bufs.as_ptr(), bufs.len(), offset)`
 #[inline]
 #[cfg(not(target_os = "redox"))]
-pub fn preadv<'f, Fd: AsFd<'f>>(fd: Fd, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
+pub fn preadv<Fd: AsFd>(fd: &Fd, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
     let fd = fd.as_fd();
     _preadv(fd, bufs, offset)
 }
@@ -269,7 +269,7 @@ fn _preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io::Result<u
 /// `pwritev(fd, bufs.as_ptr(), bufs.len(), offset)`
 #[cfg(not(target_os = "redox"))]
 #[inline]
-pub fn pwritev<'f, Fd: AsFd<'f>>(fd: Fd, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
+pub fn pwritev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
     let fd = fd.as_fd();
     _pwritev(fd, bufs, offset)
 }
@@ -302,8 +302,8 @@ fn _pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usi
 /// `preadv2(fd, bufs.as_ptr(), bufs.len(), offset, flags)`
 #[cfg(any(linux_raw, all(libc, target_os = "linux", target_env = "gnu")))]
 #[inline]
-pub fn preadv2<'f, Fd: AsFd<'f>>(
-    fd: Fd,
+pub fn preadv2<Fd: AsFd>(
+    fd: &Fd,
     bufs: &[IoSliceMut],
     offset: u64,
     flags: ReadWriteFlags,
@@ -356,8 +356,8 @@ fn _preadv2(
 /// `pwritev2(fd, bufs.as_ptr(), bufs.len(), offset, flags)`
 #[cfg(any(linux_raw, all(libc, target_os = "linux", target_env = "gnu")))]
 #[inline]
-pub fn pwritev2<'f, Fd: AsFd<'f>>(
-    fd: Fd,
+pub fn pwritev2<Fd: AsFd>(
+    fd: &Fd,
     bufs: &[IoSlice],
     offset: u64,
     flags: ReadWriteFlags,

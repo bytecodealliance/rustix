@@ -10,7 +10,7 @@ use {crate::zero_ok, std::mem::MaybeUninit, unsafe_io::os::posish::AsRawFd};
 #[cfg(not(target_os = "wasi"))]
 #[doc(alias = "tcgetattr")]
 #[inline]
-pub fn ioctl_tcgets<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<Termios> {
+pub fn ioctl_tcgets<Fd: AsFd>(fd: &Fd) -> io::Result<Termios> {
     let fd = fd.as_fd();
     _ioctl_tcgets(fd)
 }
@@ -62,7 +62,7 @@ fn _ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
 /// Also known as `fcntl(fd, F_SETFD, FD_CLOEXEC)`.
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 #[inline]
-pub fn ioctl_fioclex<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<()> {
+pub fn ioctl_fioclex<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     let fd = fd.as_fd();
     _ioctl_fioclex(fd)
 }

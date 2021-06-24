@@ -11,7 +11,7 @@ use {
 
 /// `fcntl(fd, F_GETFD)`
 #[inline]
-pub fn fcntl_getfd<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<FdFlags> {
+pub fn fcntl_getfd<Fd: AsFd>(fd: &Fd) -> io::Result<FdFlags> {
     let fd = fd.as_fd();
     _fcntl_getfd(fd)
 }
@@ -32,7 +32,7 @@ fn _fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<FdFlags> {
 
 /// `fcntl(fd, F_SETFD, flags)`
 #[inline]
-pub fn fcntl_setfd<'f, Fd: AsFd<'f>>(fd: Fd, flags: FdFlags) -> io::Result<()> {
+pub fn fcntl_setfd<Fd: AsFd>(fd: &Fd, flags: FdFlags) -> io::Result<()> {
     let fd = fd.as_fd();
     _fcntl_setfd(fd, flags)
 }
@@ -56,7 +56,7 @@ fn _fcntl_setfd(fd: BorrowedFd<'_>, flags: FdFlags) -> io::Result<()> {
 
 /// `fcntl(fd, F_GETFL)`
 #[inline]
-pub fn fcntl_getfl<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<OFlags> {
+pub fn fcntl_getfl<Fd: AsFd>(fd: &Fd) -> io::Result<OFlags> {
     let fd = fd.as_fd();
     _fcntl_getfl(fd)
 }
@@ -77,7 +77,7 @@ pub(crate) fn _fcntl_getfl(fd: BorrowedFd<'_>) -> io::Result<OFlags> {
 
 /// `fcntl(fd, F_SETFL, flags)`
 #[inline]
-pub fn fcntl_setfl<'f, Fd: AsFd<'f>>(fd: Fd, flags: OFlags) -> io::Result<()> {
+pub fn fcntl_setfl<Fd: AsFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
     let fd = fd.as_fd();
     _fcntl_setfl(fd, flags)
 }
@@ -110,7 +110,7 @@ fn _fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
     target_os = "wasi",
 )))]
 #[inline]
-pub fn fcntl_get_seals<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<u32> {
+pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
     let fd = fd.as_fd();
     _fcntl_get_seals(fd)
 }
@@ -146,7 +146,7 @@ fn _fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<u32> {
 /// `fcntl(fd, F_DUPFD_CLOEXEC)`
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn fcntl_dupfd_cloexec<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<OwnedFd> {
+pub fn fcntl_dupfd_cloexec<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
     let fd = fd.as_fd();
     _fcntl_dupfd_cloexec(fd)
 }

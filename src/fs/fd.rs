@@ -86,7 +86,7 @@ use {
 
 /// `lseek(fd, offset, whence)`
 #[inline]
-pub fn seek<'f, Fd: AsFd<'f>>(fd: Fd, pos: SeekFrom) -> io::Result<u64> {
+pub fn seek<Fd: AsFd>(fd: &Fd, pos: SeekFrom) -> io::Result<u64> {
     let fd = fd.as_fd();
     _seek(fd, pos)
 }
@@ -121,7 +121,7 @@ fn _seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
 
 /// `lseek(fd, 0, SEEK_CUR)`
 #[inline]
-pub fn tell<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<u64> {
+pub fn tell<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
     let fd = fd.as_fd();
     _tell(fd)
 }
@@ -145,7 +145,7 @@ fn _tell(fd: BorrowedFd<'_>) -> io::Result<u64> {
 /// even on platforms where the host libc emulates it.
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn fchmod<'f, Fd: AsFd<'f>>(fd: Fd, mode: Mode) -> io::Result<()> {
+pub fn fchmod<Fd: AsFd>(fd: &Fd, mode: Mode) -> io::Result<()> {
     let fd = fd.as_fd();
     _fchmod(fd, mode)
 }
@@ -181,7 +181,7 @@ fn _fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
 
 /// `fstat(fd)`
 #[inline]
-pub fn fstat<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<Stat> {
+pub fn fstat<Fd: AsFd>(fd: &Fd) -> io::Result<Stat> {
     let fd = fd.as_fd();
     _fstat(fd)
 }
@@ -204,7 +204,7 @@ fn _fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 /// `fstatfs(fd)`
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))] // not implemented in libc for netbsd yet
 #[inline]
-pub fn fstatfs<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<StatFs> {
+pub fn fstatfs<Fd: AsFd>(fd: &Fd) -> io::Result<StatFs> {
     let fd = fd.as_fd();
     _fstatfs(fd)
 }
@@ -232,7 +232,7 @@ fn _fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
 
 /// `futimens(fd, times)`
 #[inline]
-pub fn futimens<'f, Fd: AsFd<'f>>(fd: Fd, times: &[Timespec; 2]) -> io::Result<()> {
+pub fn futimens<Fd: AsFd>(fd: &Fd, times: &[Timespec; 2]) -> io::Result<()> {
     let fd = fd.as_fd();
     _futimens(fd, times)
 }
@@ -256,7 +256,7 @@ fn _futimens(fd: BorrowedFd<'_>, times: &[Timespec; 2]) -> io::Result<()> {
 /// `posix_fallocate(fd, offset, len)`
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))] // not implemented in libc for netbsd yet
 #[inline]
-pub fn posix_fallocate<'f, Fd: AsFd<'f>>(fd: Fd, offset: u64, len: u64) -> io::Result<()> {
+pub fn posix_fallocate<Fd: AsFd>(fd: &Fd, offset: u64, len: u64) -> io::Result<()> {
     let fd = fd.as_fd();
     _posix_fallocate(fd, offset, len)
 }
@@ -333,7 +333,7 @@ fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()>
 /// for example, it doesn't reflect whether sockets have been shut down; for
 /// general I/O handle support, use [`io::is_read_write`].
 #[inline]
-pub fn is_file_read_write<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<(bool, bool)> {
+pub fn is_file_read_write<Fd: AsFd>(fd: &Fd) -> io::Result<(bool, bool)> {
     let fd = fd.as_fd();
     _is_file_read_write(fd)
 }
@@ -364,7 +364,7 @@ pub(crate) fn _is_file_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)
 
 /// `fsync(fd)`
 #[inline]
-pub fn fsync<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<()> {
+pub fn fsync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     let fd = fd.as_fd();
     _fsync(fd)
 }
@@ -383,7 +383,7 @@ fn _fsync(fd: BorrowedFd<'_>) -> io::Result<()> {
 /// `fdatasync(fd)`
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
 #[inline]
-pub fn fdatasync<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<()> {
+pub fn fdatasync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     let fd = fd.as_fd();
     _fdatasync(fd)
 }
@@ -404,7 +404,7 @@ fn _fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
 
 /// `ftruncate(fd, length)`
 #[inline]
-pub fn ftruncate<'f, Fd: AsFd<'f>>(fd: Fd, length: u64) -> io::Result<()> {
+pub fn ftruncate<Fd: AsFd>(fd: &Fd, length: u64) -> io::Result<()> {
     let fd = fd.as_fd();
     _ftruncate(fd, length)
 }

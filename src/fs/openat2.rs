@@ -28,8 +28,8 @@ const SIZEOF_OPEN_HOW: usize = std::mem::size_of::<OpenHow>();
 
 /// `openat2(dirfd, path, OpenHow { oflags, mode, resolve }, sizeof(OpenHow))`
 #[inline]
-pub fn openat2<'f, Fd: AsFd<'f>, P: path::Arg>(
-    dirfd: Fd,
+pub fn openat2<Fd: AsFd, P: path::Arg>(
+    dirfd: &Fd,
     path: P,
     oflags: OFlags,
     mode: Mode,

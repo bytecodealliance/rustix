@@ -160,12 +160,12 @@ bitflags! {
 ///
 /// Raw pointers and lots of special semantics.
 #[inline]
-pub unsafe fn mmap<'f, Fd: AsFd<'f>>(
+pub unsafe fn mmap<Fd: AsFd>(
     ptr: *mut c_void,
     len: usize,
     prot: ProtFlags,
     flags: MapFlags,
-    fd: Fd,
+    fd: &Fd,
     offset: u64,
 ) -> io::Result<*mut c_void> {
     let fd = fd.as_fd();

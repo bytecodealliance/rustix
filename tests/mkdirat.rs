@@ -4,7 +4,7 @@ fn test_mkdirat() {
     use posish::fs::{cwd, mkdirat, openat, statat, unlinkat, AtFlags, FileType, Mode, OFlags};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     mkdirat(&dir, "foo", Mode::IRWXU).unwrap();
     let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();

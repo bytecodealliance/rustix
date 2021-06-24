@@ -66,7 +66,7 @@ fn server(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path) {
         write(&data_socket, DecInt::new(sum).as_bytes()).unwrap();
     }
 
-    unlinkat(cwd(), path, AtFlags::empty()).unwrap();
+    unlinkat(&cwd(), path, AtFlags::empty()).unwrap();
 }
 
 fn client(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path, runs: &[(&[&str], i32)]) {

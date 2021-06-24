@@ -4,7 +4,7 @@ use std::{os::unix::ffi::OsStringExt, path::PathBuf};
 use unsafe_io::os::posish::AsRawFd;
 
 /// `fcntl(fd, F_GETPATH)`
-pub fn getpath<'f, Fd: AsFd<'f>>(fd: Fd) -> io::Result<PathBuf> {
+pub fn getpath<Fd: AsFd>(fd: &Fd) -> io::Result<PathBuf> {
     let fd = fd.as_fd();
     _getpath(fd)
 }
