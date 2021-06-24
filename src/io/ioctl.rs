@@ -4,7 +4,7 @@ use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(libc)]
 use {crate::zero_ok, std::mem::MaybeUninit, unsafe_io::os::posish::AsRawFd};
 
-/// ioctl(fd, TCGETS)
+/// `ioctl(fd, TCGETS)`
 ///
 /// Also known as `tcgetattr`.
 #[cfg(not(target_os = "wasi"))]
@@ -59,6 +59,8 @@ fn _ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     crate::linux_raw::ioctl_tcgets(fd)
 }
 
+/// `ioctl(fd, FIOCLEX)`
+///
 /// Also known as `fcntl(fd, F_SETFD, FD_CLOEXEC)`.
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 #[inline]
