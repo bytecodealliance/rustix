@@ -147,6 +147,7 @@ pub fn clock_gettime(id: ClockId) -> Timespec {
     target_os = "wasi",
 ))))]
 #[inline]
+#[must_use]
 pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRelativeResult {
     let mut remain = MaybeUninit::<Timespec>::uninit();
     let flags = 0;
@@ -164,6 +165,7 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRel
 /// `clock_nanosleep(id, 0, request, remain)`
 #[cfg(linux_raw)]
 #[inline]
+#[must_use]
 pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRelativeResult {
     match crate::linux_raw::clock_nanosleep_relative(id as i32, request) {
         Ok(None) => NanosleepRelativeResult::Ok,
@@ -202,6 +204,7 @@ pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::Result<(
 /// `nanosleep(request, remain)`
 #[cfg(libc)]
 #[inline]
+#[must_use]
 pub fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
     let mut remain = MaybeUninit::<Timespec>::uninit();
     unsafe {
@@ -218,6 +221,7 @@ pub fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
 /// `nanosleep(request, remain)`
 #[cfg(linux_raw)]
 #[inline]
+#[must_use]
 pub fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
     match crate::linux_raw::nanosleep(request) {
         Ok(None) => NanosleepRelativeResult::Ok,
