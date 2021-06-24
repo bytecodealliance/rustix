@@ -1,6 +1,9 @@
 //! Posix-ish interfaces tend to use signed integers for file offsets, while
 //! Rust APIs tend to use `u64`. Test that exreme `u64` values in APIs that
 //! take file offsets are properly diagnosed.
+//!
+//! These tests are disabled on ios/macos since those platforms kill the
+//! process with SIGXFSZ instead of returning an error.
 
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]
 
@@ -27,7 +30,12 @@ fn invalid_offset_seek() {
     seek(&file, SeekFrom::Current(i64::MIN)).unwrap_err();
 }
 
-#[cfg(not(any(target_os = "netbsd", target_os = "openbsd")))]
+#[cfg(not(any(
+    target_os = "netbsd",
+    target_os = "openbsd",
+    target_os = "ios",
+    target_os = "macos"
+)))]
 #[test]
 fn invalid_offset_posix_fallocate() {
     use posish::fs::{cwd, openat, posix_fallocate, Mode, OFlags};
@@ -70,6 +78,7 @@ fn invalid_offset_pread() {
     pread(&file, &mut buf, i64::MAX as u64 + 1).unwrap_err();
 }
 
+#[cfg(not(any(target_os = "ios", target_os = "macos")))]
 #[test]
 fn invalid_offset_pwrite() {
     use posish::{
