@@ -1,7 +1,7 @@
 //! `Dir` and `Entry`.
 
 use crate::{fs::FileType, io};
-use io_lifetimes::{IntoFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd, IntoFd, OwnedFd};
 #[cfg(not(any(
     target_os = "android",
     target_os = "emscripten",
@@ -24,10 +24,7 @@ use std::ffi::CStr;
 use std::ffi::CString;
 use unsafe_io::os::posish::{AsRawFd, RawFd};
 #[cfg(linux_raw)]
-use {
-    crate::as_ptr, io_lifetimes::AsFd, linux_raw_sys::general::linux_dirent64, std::ffi::CString,
-    std::mem::size_of,
-};
+use {crate::as_ptr, linux_raw_sys::general::linux_dirent64, std::ffi::CString, std::mem::size_of};
 #[cfg(libc)]
 use {
     crate::libc::conv::owned_fd,
@@ -366,6 +363,22 @@ impl AsRawFd for Dir {
 // Safety: `Dir` owns its handle.
 #[cfg(libc)]
 unsafe impl OwnsRaw for Dir {}
+
+#[cfg(libc)]
+impl AsFd for Dir {
+    #[inline]
+    fn as_fd(&self) -> BorrowedFd<'_> {
+        unsafe { BorrowedFd::borrow_raw_fd(self.as_raw_fd()) }
+    }
+}
+
+#[cfg(linux_raw)]
+impl AsFd for Dir {
+    #[inline]
+    fn as_fd(&self) -> BorrowedFd<'_> {
+        self.fd.as_fd()
+    }
+}
 
 #[cfg(libc)]
 impl Drop for Dir {
