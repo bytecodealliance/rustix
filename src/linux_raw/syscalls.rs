@@ -91,11 +91,11 @@ use {
         errno::EINVAL,
         general::stat64 as stat,
         general::timespec as __kernel_old_timespec,
-        general::CLOCK_REALTIME,
         general::{
             __NR__llseek, __NR_fadvise64_64, __NR_fcntl64, __NR_fstat64, __NR_fstatat64,
             __NR_fstatfs64, __NR_ftruncate64, __NR_sendfile64,
         },
+        general::{CLOCK_REALTIME, O_LARGEFILE},
         v5_4::general::{
             __NR_clock_getres_time64, __NR_clock_gettime64, __NR_clock_nanosleep_time64,
             __NR_utimensat_time64,
@@ -128,13 +128,24 @@ pub(crate) fn close(fd: OwnedFd) {
 }
 
 #[inline]
-pub(crate) fn open(filename: &CStr, flags: c_int, mode: umode_t) -> io::Result<OwnedFd> {
+pub(crate) fn open(filename: &CStr, flags: c_uint, mode: umode_t) -> io::Result<OwnedFd> {
+    #[cfg(target_pointer_width = "32")]
     unsafe {
         ret_owned_fd(syscall4_readonly(
             __NR_openat,
             c_int(AT_FDCWD),
             c_str(filename),
-            c_int(flags),
+            c_uint(flags | O_LARGEFILE as c_uint),
+            umode_t(mode),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret_owned_fd(syscall4_readonly(
+            __NR_openat,
+            c_int(AT_FDCWD),
+            c_str(filename),
+            c_uint(flags),
             umode_t(mode),
         ))
     }
@@ -147,6 +158,17 @@ pub(crate) fn openat(
     flags: c_uint,
     mode: umode_t,
 ) -> io::Result<OwnedFd> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_owned_fd(syscall4_readonly(
+            __NR_openat,
+            borrowed_fd(dirfd),
+            c_str(filename),
+            c_uint(flags | O_LARGEFILE as c_uint),
+            umode_t(mode),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_owned_fd(syscall4_readonly(
             __NR_openat,
@@ -166,6 +188,21 @@ pub(crate) fn openat2(
     mode: u64,
     resolve: u64,
 ) -> io::Result<OwnedFd> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_owned_fd(syscall4_readonly(
+            __NR_openat2,
+            borrowed_fd(dirfd),
+            c_str(pathname),
+            by_ref(&open_how {
+                flags: flags | O_LARGEFILE as u64,
+                mode,
+                resolve,
+            }),
+            size_of::<open_how>(),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_owned_fd(syscall4_readonly(
             __NR_openat2,
