@@ -42,9 +42,9 @@ use std::os::unix::ffi::OsStringExt;
 use std::os::wasi::ffi::OsStringExt;
 #[cfg(libc)]
 use {
+    crate::libc::conv::{borrowed_fd, c_str, ret_owned_fd},
     crate::{negone_err, zero_ok},
     std::mem::MaybeUninit,
-    unsafe_io::os::posish::{AsRawFd, FromRawFd, RawFd},
 };
 
 /// `openat(dirfd, path, oflags, mode)`
@@ -63,15 +63,12 @@ pub fn openat<'f, P: path::Arg, Fd: AsFd>(
 #[cfg(libc)]
 fn _openat(dirfd: BorrowedFd<'_>, path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
     unsafe {
-        #[allow(clippy::useless_conversion)]
-        let fd = negone_err(libc_openat(
-            dirfd.as_raw_fd() as libc::c_int,
-            path.as_ptr(),
+        ret_owned_fd(libc_openat(
+            borrowed_fd(dirfd),
+            c_str(path),
             oflags.bits(),
             libc::c_uint::from(mode.bits()),
-        ))?;
-
-        Ok(OwnedFd::from_raw_fd(fd as RawFd))
+        ))
     }
 }
 
@@ -106,8 +103,8 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Resul
     loop {
         let nread = unsafe {
             negone_err(libc::readlinkat(
-                dirfd.as_raw_fd() as libc::c_int,
-                path.as_ptr(),
+                borrowed_fd(dirfd),
+                c_str(path),
                 buffer.as_mut_ptr().cast::<libc::c_char>(),
                 buffer.len(),
             ))?
@@ -154,13 +151,7 @@ pub fn mkdirat<'f, P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> i
 
 #[cfg(libc)]
 fn _mkdirat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
-    unsafe {
-        zero_ok(libc::mkdirat(
-            dirfd.as_raw_fd() as libc::c_int,
-            path.as_ptr(),
-            mode.bits(),
-        ))
-    }
+    unsafe { zero_ok(libc::mkdirat(borrowed_fd(dirfd), c_str(path), mode.bits())) }
 }
 
 #[cfg(linux_raw)]
@@ -195,10 +186,10 @@ fn _linkat(
 ) -> io::Result<()> {
     unsafe {
         zero_ok(libc::linkat(
-            old_dirfd.as_raw_fd() as libc::c_int,
-            old_path.as_ptr(),
-            new_dirfd.as_raw_fd() as libc::c_int,
-            new_path.as_ptr(),
+            borrowed_fd(old_dirfd),
+            c_str(old_path),
+            borrowed_fd(new_dirfd),
+            c_str(new_path),
             flags.bits(),
         ))
     }
@@ -228,8 +219,8 @@ pub fn unlinkat<'f, P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags)
 fn _unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<()> {
     unsafe {
         zero_ok(libc::unlinkat(
-            dirfd.as_raw_fd() as libc::c_int,
-            path.as_ptr(),
+            borrowed_fd(dirfd),
+            c_str(path),
             flags.bits(),
         ))
     }
@@ -265,10 +256,10 @@ fn _renameat(
 ) -> io::Result<()> {
     unsafe {
         zero_ok(libc::renameat(
-            old_dirfd.as_raw_fd() as libc::c_int,
-            old_path.as_ptr(),
-            new_dirfd.as_raw_fd() as libc::c_int,
-            new_path.as_ptr(),
+            borrowed_fd(old_dirfd),
+            c_str(old_path),
+            borrowed_fd(new_dirfd),
+            c_str(new_path),
         ))
     }
 }
@@ -301,9 +292,9 @@ pub fn symlinkat<'f, P: path::Arg, Q: path::Arg, Fd: AsFd>(
 fn _symlinkat(old_path: &CStr, new_dirfd: BorrowedFd<'_>, new_path: &CStr) -> io::Result<()> {
     unsafe {
         zero_ok(libc::symlinkat(
-            old_path.as_ptr(),
-            new_dirfd.as_raw_fd() as libc::c_int,
-            new_path.as_ptr(),
+            c_str(old_path),
+            borrowed_fd(new_dirfd),
+            c_str(new_path),
         ))
     }
 }
@@ -328,8 +319,8 @@ fn _statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Sta
     let mut stat = MaybeUninit::<Stat>::uninit();
     unsafe {
         zero_ok(libc_fstatat(
-            dirfd.as_raw_fd() as libc::c_int,
-            path.as_ptr(),
+            borrowed_fd(dirfd),
+            c_str(path),
             stat.as_mut_ptr(),
             flags.bits(),
         ))?;
@@ -361,8 +352,8 @@ pub fn accessat<'f, P: path::Arg, Fd: AsFd>(
 fn _accessat(dirfd: BorrowedFd<'_>, path: &CStr, access: Access, flags: AtFlags) -> io::Result<()> {
     unsafe {
         zero_ok(libc::faccessat(
-            dirfd.as_raw_fd() as libc::c_int,
-            path.as_ptr(),
+            borrowed_fd(dirfd),
+            c_str(path),
             access.bits(),
             flags.bits(),
         ))
@@ -422,8 +413,8 @@ fn _utimensat(
 ) -> io::Result<()> {
     unsafe {
         zero_ok(libc::utimensat(
-            dirfd.as_raw_fd() as libc::c_int,
-            path.as_ptr(),
+            borrowed_fd(dirfd),
+            c_str(path),
             times.as_ptr(),
             flags.bits(),
         ))
@@ -466,8 +457,8 @@ pub fn chmodat<'f, P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> i
 fn _chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
     unsafe {
         zero_ok(libc::fchmodat(
-            dirfd.as_raw_fd() as libc::c_int,
-            path.as_ptr(),
+            borrowed_fd(dirfd),
+            c_str(path),
             mode.bits(),
             0,
         ))
@@ -480,8 +471,8 @@ fn _chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
     unsafe {
         zero_ok(libc::syscall(
             libc::SYS_fchmodat,
-            dirfd.as_raw_fd() as libc::c_int,
-            path.as_ptr(),
+            borrowed_fd(dirfd),
+            c_str(path),
             mode.bits(),
         ))
     }
@@ -525,7 +516,7 @@ fn _fclonefileat(
         ) -> libc::c_int
     }
 
-    unsafe { zero_ok(fclonefileat(srcfd, dst_dirfd, dst.as_ptr(), flags.bits())) }
+    unsafe { zero_ok(fclonefileat(srcfd, dst_dirfd, c_str(dst), flags.bits())) }
 }
 
 /// `mknodat(dirfd, path, mode, dev)`
@@ -559,8 +550,8 @@ pub fn mknodat<'f, P: path::Arg, Fd: AsFd>(
 fn _mknodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode, dev: Dev) -> io::Result<()> {
     unsafe {
         zero_ok(libc::mknodat(
-            dirfd.as_raw_fd() as libc::c_int,
-            path.as_ptr(),
+            borrowed_fd(dirfd),
+            c_str(path),
             mode.bits(),
             dev,
         ))

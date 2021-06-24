@@ -2,6 +2,8 @@
 //! Rust APIs tend to use `u64`. Test that exreme `u64` values in APIs that
 //! take file offsets are properly diagnosed.
 
+#![cfg(not(any(target_os = "redox", target_os = "wasi")))]
+
 use std::io::SeekFrom;
 
 #[test]
@@ -25,6 +27,7 @@ fn invalid_offset_seek() {
     seek(&file, SeekFrom::Current(i64::MIN)).unwrap_err();
 }
 
+#[cfg(not(any(target_os = "netbsd", target_os = "openbsd")))]
 #[test]
 fn invalid_offset_posix_fallocate() {
     use posish::fs::{cwd, openat, posix_fallocate, Mode, OFlags};

@@ -27,7 +27,14 @@ use libc::{
     ))
 ))]
 use libc::{preadv as libc_preadv, pwritev as libc_pwritev};
-#[cfg(all(libc, target_os = "linux", target_env = "gnu"))]
+// `preadv64v2`/`pwritev64v2` submitted upstream here:
+// <https://github.com/rust-lang/libc/pull/2257>
+#[cfg(all(
+    libc,
+    target_pointer_width = "64",
+    target_os = "linux",
+    target_env = "gnu"
+))]
 use libc::{preadv2 as libc_preadv2, pwritev2 as libc_pwritev2};
 #[cfg(libc)]
 use libc::{read as libc_read, readv as libc_readv, write as libc_write, writev as libc_writev};
@@ -38,11 +45,7 @@ use std::{
     io::{IoSlice, IoSliceMut},
 };
 #[cfg(libc)]
-use {
-    crate::negone_err,
-    std::os::raw::c_int,
-    unsafe_io::os::posish::AsRawFd,
-};
+use {crate::libc::conv::borrowed_fd, crate::negone_err, std::os::raw::c_int};
 
 #[cfg(all(libc, target_os = "linux", target_env = "gnu"))]
 bitflags! {
@@ -89,7 +92,7 @@ pub fn read<Fd: AsFd>(fd: &Fd, buf: &mut [u8]) -> io::Result<usize> {
 fn _read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     let nread = unsafe {
         negone_err(libc_read(
-            fd.as_raw_fd() as libc::c_int,
+            borrowed_fd(fd),
             buf.as_mut_ptr().cast::<_>(),
             buf.len(),
         ))?
@@ -114,7 +117,7 @@ pub fn write<Fd: AsFd>(fd: &Fd, buf: &[u8]) -> io::Result<usize> {
 fn _write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     let nwritten = unsafe {
         negone_err(libc_write(
-            fd.as_raw_fd() as libc::c_int,
+            borrowed_fd(fd),
             buf.as_ptr().cast::<_>(),
             buf.len(),
         ))?
@@ -141,7 +144,7 @@ fn _pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Result<usize> 
     let offset = offset as i64;
     let nread = unsafe {
         negone_err(libc_pread(
-            fd.as_raw_fd() as libc::c_int,
+            borrowed_fd(fd),
             buf.as_mut_ptr().cast::<_>(),
             buf.len(),
             offset,
@@ -169,7 +172,7 @@ fn _pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<usize> {
     let offset = offset as i64;
     let nwritten = unsafe {
         negone_err(libc_pwrite(
-            fd.as_raw_fd() as libc::c_int,
+            borrowed_fd(fd),
             buf.as_ptr().cast::<_>(),
             buf.len(),
             offset,
@@ -195,7 +198,7 @@ pub fn readv<Fd: AsFd>(fd: &Fd, bufs: &[IoSliceMut]) -> io::Result<usize> {
 fn _readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut]) -> io::Result<usize> {
     let nread = unsafe {
         negone_err(libc_readv(
-            fd.as_raw_fd() as libc::c_int,
+            borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
             min(bufs.len(), max_iov()) as c_int,
         ))?
@@ -220,7 +223,7 @@ pub fn writev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice]) -> io::Result<usize> {
 fn _writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> {
     let nwritten = unsafe {
         negone_err(libc_writev(
-            fd.as_raw_fd() as libc::c_int,
+            borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
             min(bufs.len(), max_iov()) as c_int,
         ))?
@@ -248,7 +251,7 @@ fn _preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io::Result<u
     let offset = offset as i64;
     let nread = unsafe {
         negone_err(libc_preadv(
-            fd.as_raw_fd() as libc::c_int,
+            borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
             min(bufs.len(), max_iov()) as c_int,
             offset,
@@ -277,7 +280,7 @@ fn _pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usi
     let offset = offset as i64;
     let nwritten = unsafe {
         negone_err(libc_pwritev(
-            fd.as_raw_fd() as libc::c_int,
+            borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
             min(bufs.len(), max_iov()) as c_int,
             offset,
@@ -293,7 +296,15 @@ fn _pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usi
 }
 
 /// `preadv2(fd, bufs.as_ptr(), bufs.len(), offset, flags)`
-#[cfg(any(linux_raw, all(libc, target_os = "linux", target_env = "gnu")))]
+#[cfg(any(
+    linux_raw,
+    all(
+        libc,
+        target_pointer_width = "64",
+        target_os = "linux",
+        target_env = "gnu"
+    )
+))]
 #[inline]
 pub fn preadv2<Fd: AsFd>(
     fd: &Fd,
@@ -305,7 +316,12 @@ pub fn preadv2<Fd: AsFd>(
     _preadv2(fd, bufs, offset, flags)
 }
 
-#[cfg(all(libc, target_os = "linux", target_env = "gnu"))]
+#[cfg(all(
+    libc,
+    target_pointer_width = "64",
+    target_os = "linux",
+    target_env = "gnu"
+))]
 fn _preadv2(
     fd: BorrowedFd<'_>,
     bufs: &[IoSliceMut],
@@ -316,7 +332,7 @@ fn _preadv2(
     let offset = offset as i64;
     let nread = unsafe {
         negone_err(libc_preadv2(
-            fd.as_raw_fd() as libc::c_int,
+            borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
             min(bufs.len(), max_iov()) as c_int,
             offset,
@@ -343,7 +359,15 @@ fn _preadv2(
 }
 
 /// `pwritev2(fd, bufs.as_ptr(), bufs.len(), offset, flags)`
-#[cfg(any(linux_raw, all(libc, target_os = "linux", target_env = "gnu")))]
+#[cfg(any(
+    linux_raw,
+    all(
+        libc,
+        target_pointer_width = "64",
+        target_os = "linux",
+        target_env = "gnu"
+    )
+))]
 #[inline]
 pub fn pwritev2<Fd: AsFd>(
     fd: &Fd,
@@ -355,7 +379,12 @@ pub fn pwritev2<Fd: AsFd>(
     _pwritev2(fd, bufs, offset, flags)
 }
 
-#[cfg(all(libc, target_os = "linux", target_env = "gnu"))]
+#[cfg(all(
+    libc,
+    target_pointer_width = "64",
+    target_os = "linux",
+    target_env = "gnu"
+))]
 fn _pwritev2(
     fd: BorrowedFd<'_>,
     bufs: &[IoSlice],
@@ -366,7 +395,7 @@ fn _pwritev2(
     let offset = offset as i64;
     let nwritten = unsafe {
         negone_err(libc_pwritev2(
-            fd.as_raw_fd() as libc::c_int,
+            borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
             min(bufs.len(), max_iov()) as c_int,
             offset,

@@ -8,7 +8,7 @@ use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::ffi::CStr;
 #[cfg(libc)]
-use {crate::zero_ok, std::mem::MaybeUninit};
+use {crate::libc::conv::c_str, crate::zero_ok, std::mem::MaybeUninit};
 
 #[cfg(libc)]
 bitflags! {
@@ -143,7 +143,7 @@ fn _statx(
     unsafe {
         zero_ok(statx(
             dirfd,
-            path.as_ptr(),
+            c_str(path),
             flags.bits(),
             mask.bits(),
             statx_buf.as_mut_ptr(),

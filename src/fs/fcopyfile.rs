@@ -1,7 +1,7 @@
+use crate::libc::conv::borrowed_fd;
 use crate::{fs::CopyfileFlags, io, negative_err};
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::mem::MaybeUninit;
-use unsafe_io::os::posish::AsRawFd;
 
 /// `copyfile_state_t`
 #[allow(non_camel_case_types)]
@@ -42,8 +42,8 @@ unsafe fn _fcopyfile(
     }
 
     negative_err(fcopyfile(
-        from.as_raw_fd(),
-        to.as_raw_fd(),
+        borrowed_fd(from),
+        borrowed_fd(to),
         state,
         flags.bits(),
     ))

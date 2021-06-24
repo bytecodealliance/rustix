@@ -1,7 +1,8 @@
+#[cfg(libc)]
+use crate::libc::conv::borrowed_fd;
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::marker::PhantomData;
-use unsafe_io::os::posish::AsRawFd;
 
 bitflags! {
     /// `POLL*`
@@ -58,7 +59,7 @@ impl<'fd> PollFd<'fd> {
     fn _new(fd: BorrowedFd<'fd>, events: PollFlags) -> Self {
         Self {
             pollfd: libc::pollfd {
-                fd: fd.as_raw_fd() as libc::c_int,
+                fd: borrowed_fd(fd),
                 events: events.bits(),
                 revents: 0,
             },

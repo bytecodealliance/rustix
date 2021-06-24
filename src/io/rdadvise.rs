@@ -1,7 +1,8 @@
+#[cfg(libc)]
+use crate::libc::conv::borrowed_fd;
 use crate::{io, zero_ok};
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::convert::TryInto;
-use unsafe_io::os::posish::AsRawFd;
 
 /// `fcntl(fd, F_RDADVISE, radvisory { offset, len })`
 #[inline]
@@ -42,6 +43,6 @@ fn _rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
             ra_offset,
             ra_count,
         };
-        zero_ok(libc::fcntl(fd.as_raw_fd(), libc::F_RDADVISE, &radvisory))
+        zero_ok(libc::fcntl(borrowed_fd(fd), libc::F_RDADVISE, &radvisory))
     }
 }

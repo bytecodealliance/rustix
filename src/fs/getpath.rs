@@ -1,7 +1,8 @@
+#[cfg(libc)]
+use crate::libc::conv::borrowed_fd;
 use crate::{io, zero_ok};
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::{os::unix::ffi::OsStringExt, path::PathBuf};
-use unsafe_io::os::posish::AsRawFd;
 
 /// `fcntl(fd, F_GETPATH)`
 pub fn getpath<Fd: AsFd>(fd: &Fd) -> io::Result<PathBuf> {
@@ -24,7 +25,7 @@ fn _getpath(fd: BorrowedFd<'_>) -> io::Result<PathBuf> {
     // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
     unsafe {
         zero_ok(libc::fcntl(
-            fd.as_raw_fd(),
+            borrowed_fd(fd),
             libc::F_GETPATH,
             buf.as_mut_ptr(),
         ))?;

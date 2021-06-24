@@ -1,12 +1,9 @@
+#[cfg(libc)]
+use crate::libc::conv::{c_str, syscall_ret_owned_fd};
 use crate::{io, path};
 use bitflags::bitflags;
 use io_lifetimes::OwnedFd;
 use std::ffi::CStr;
-#[cfg(libc)]
-use {
-    crate::negone_err,
-    unsafe_io::os::posish::{FromRawFd, RawFd},
-};
 
 #[cfg(libc)]
 bitflags! {
@@ -42,14 +39,11 @@ pub fn memfd_create<P: path::Arg>(path: P, flags: MemfdFlags) -> io::Result<Owne
 #[cfg(libc)]
 fn _memfd_create(path: &CStr, flags: MemfdFlags) -> io::Result<OwnedFd> {
     unsafe {
-        let fd = negone_err(libc::syscall(
+        syscall_ret_owned_fd(libc::syscall(
             libc::SYS_memfd_create,
-            path.as_ptr(),
+            c_str(path),
             flags.bits(),
-        ))?;
-
-        #[allow(clippy::useless_conversion)]
-        Ok(OwnedFd::from_raw_fd(fd as RawFd))
+        ))
     }
 }
 

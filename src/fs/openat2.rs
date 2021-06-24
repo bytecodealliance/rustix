@@ -1,14 +1,11 @@
+#[cfg(libc)]
+use crate::libc::conv::{borrowed_fd, c_str, syscall_ret_owned_fd};
 use crate::{
     fs::{Mode, OFlags, ResolveFlags},
     io, path,
 };
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 use std::ffi::CStr;
-#[cfg(libc)]
-use {
-    crate::negone_err,
-    unsafe_io::os::posish::{AsRawFd, FromRawFd, RawFd},
-};
 
 #[cfg(all(libc, target_pointer_width = "32"))]
 const SYS_OPENAT2: i32 = 437;
@@ -56,16 +53,13 @@ fn _openat2(
     };
 
     unsafe {
-        let fd = negone_err(libc::syscall(
+        syscall_ret_owned_fd(libc::syscall(
             SYS_OPENAT2,
-            dirfd.as_raw_fd(),
-            path.as_ptr(),
+            borrowed_fd(dirfd),
+            c_str(path),
             &open_how,
             SIZEOF_OPEN_HOW,
-        ))?;
-
-        #[allow(clippy::useless_conversion)]
-        Ok(OwnedFd::from_raw_fd(fd as RawFd))
+        ))
     }
 }
 

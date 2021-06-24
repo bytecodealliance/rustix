@@ -1,8 +1,6 @@
 //! Functions which operate on file descriptors.
 
 use crate::io;
-#[cfg(all(libc, not(target_os = "wasi")))]
-use crate::negone_err;
 #[cfg(all(libc, not(target_os = "redox")))]
 use crate::zero_ok;
 use bitflags::bitflags;
@@ -15,8 +13,8 @@ use std::mem::MaybeUninit;
 use std::os::unix::ffi::OsStringExt;
 #[cfg(libc)]
 use {
+    crate::libc::conv::{borrowed_fd, owned_fd, ret_owned_fd},
     errno::errno,
-    unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd},
 };
 
 #[cfg(libc)]
@@ -51,7 +49,7 @@ fn _ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
     let mut nread = MaybeUninit::<libc::c_int>::uninit();
     unsafe {
         zero_ok(libc::ioctl(
-            fd.as_raw_fd() as libc::c_int,
+            borrowed_fd(fd),
             libc::FIONREAD,
             nread.as_mut_ptr(),
         ))?;
@@ -77,7 +75,7 @@ pub fn isatty<Fd: AsFd>(fd: &Fd) -> bool {
 
 #[cfg(libc)]
 fn _isatty(fd: BorrowedFd<'_>) -> bool {
-    let res = unsafe { libc::isatty(fd.as_raw_fd() as libc::c_int) };
+    let res = unsafe { libc::isatty(borrowed_fd(fd)) };
     if res == 0 {
         match errno().0 {
             #[cfg(not(any(target_os = "android", target_os = "linux")))]
@@ -133,7 +131,7 @@ fn _is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // side is still open.
         match unsafe {
             libc::recv(
-                fd.as_raw_fd(),
+                borrowed_fd(fd),
                 MaybeUninit::<[u8; 1]>::uninit()
                     .as_mut_ptr()
                     .cast::<libc::c_void>(),
@@ -156,7 +154,7 @@ fn _is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
     if write && !not_socket {
         // Do a `send` with `DONTWAIT` for 0 bytes. An `EPIPE` indicates
         // the write side is shut down.
-        match unsafe { libc::send(fd.as_raw_fd(), [].as_ptr(), 0, libc::MSG_DONTWAIT) } {
+        match unsafe { libc::send(borrowed_fd(fd), [].as_ptr(), 0, libc::MSG_DONTWAIT) } {
             -1 => {
                 #[allow(unreachable_patterns)] // EAGAIN may equal EWOULDBLOCK
                 match errno().0 {
@@ -240,9 +238,7 @@ pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
 
 #[cfg(all(libc, not(target_os = "wasi")))]
 fn _dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
-    unsafe {
-        negone_err(libc::dup(fd.as_raw_fd() as libc::c_int)).map(|raw| OwnedFd::from_raw_fd(raw))
-    }
+    unsafe { ret_owned_fd(libc::dup(borrowed_fd(fd))) }
 }
 
 #[cfg(linux_raw)]
@@ -272,10 +268,7 @@ pub fn dup2<Fd: AsFd, NewFd: IntoFd>(fd: &Fd, new: NewFd, flags: DupFlags) -> io
     ))
 ))]
 fn _dup2(fd: BorrowedFd<'_>, new: OwnedFd, flags: DupFlags) -> io::Result<OwnedFd> {
-    unsafe {
-        let new_fd = negone_err(libc::dup3(fd.as_raw_fd(), new.into_raw_fd(), flags.bits()))?;
-        Ok(OwnedFd::from_raw_fd(new_fd))
-    }
+    unsafe { ret_owned_fd(libc::dup3(borrowed_fd(fd), owned_fd(new), flags.bits())) }
 }
 
 #[cfg(all(
@@ -290,8 +283,7 @@ fn _dup2(fd: BorrowedFd<'_>, new: OwnedFd, flags: DupFlags) -> io::Result<OwnedF
 fn _dup2(fd: BorrowedFd<'_>, new: OwnedFd, _flags: DupFlags) -> io::Result<OwnedFd> {
     unsafe {
         // Android 5.0 has dup3, but libc doesn't have bindings
-        let new_fd = negone_err(libc::dup2(fd.as_raw_fd(), new.into_raw_fd()))?;
-        Ok(OwnedFd::from_raw_fd(new_fd))
+        ret_owned_fd(libc::dup2(borrowed_fd(fd), owned_fd(new)))
     }
 }
 
@@ -322,7 +314,7 @@ fn _ttyname(dirfd: BorrowedFd<'_>, reuse: OsString) -> io::Result<OsString> {
     loop {
         match unsafe {
             libc::ttyname_r(
-                dirfd.as_raw_fd() as libc::c_int,
+                borrowed_fd(dirfd),
                 buffer.as_mut_ptr().cast::<libc::c_char>(),
                 buffer.len(),
             )

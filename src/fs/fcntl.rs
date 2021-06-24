@@ -5,8 +5,8 @@ use crate::{
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(libc)]
 use {
+    crate::libc::conv::{borrowed_fd, ret_owned_fd},
     crate::{negone_err, zero_ok},
-    unsafe_io::os::posish::{AsRawFd, FromRawFd, RawFd},
 };
 
 /// `fcntl(fd, F_GETFD)`
@@ -19,8 +19,7 @@ pub fn fcntl_getfd<Fd: AsFd>(fd: &Fd) -> io::Result<FdFlags> {
 #[cfg(libc)]
 fn _fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<FdFlags> {
     unsafe {
-        negone_err(libc::fcntl(fd.as_raw_fd() as libc::c_int, libc::F_GETFD))
-            .map(FdFlags::from_bits_truncate)
+        negone_err(libc::fcntl(borrowed_fd(fd), libc::F_GETFD)).map(FdFlags::from_bits_truncate)
     }
 }
 
@@ -39,13 +38,7 @@ pub fn fcntl_setfd<Fd: AsFd>(fd: &Fd, flags: FdFlags) -> io::Result<()> {
 
 #[cfg(libc)]
 fn _fcntl_setfd(fd: BorrowedFd<'_>, flags: FdFlags) -> io::Result<()> {
-    unsafe {
-        zero_ok(libc::fcntl(
-            fd.as_raw_fd() as libc::c_int,
-            libc::F_SETFD,
-            flags.bits(),
-        ))
-    }
+    unsafe { zero_ok(libc::fcntl(borrowed_fd(fd), libc::F_SETFD, flags.bits())) }
 }
 
 #[cfg(linux_raw)]
@@ -64,8 +57,7 @@ pub fn fcntl_getfl<Fd: AsFd>(fd: &Fd) -> io::Result<OFlags> {
 #[cfg(libc)]
 pub(crate) fn _fcntl_getfl(fd: BorrowedFd<'_>) -> io::Result<OFlags> {
     unsafe {
-        negone_err(libc::fcntl(fd.as_raw_fd() as libc::c_int, libc::F_GETFL))
-            .map(OFlags::from_bits_truncate)
+        negone_err(libc::fcntl(borrowed_fd(fd), libc::F_GETFL)).map(OFlags::from_bits_truncate)
     }
 }
 
@@ -84,13 +76,7 @@ pub fn fcntl_setfl<Fd: AsFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
 
 #[cfg(libc)]
 fn _fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
-    unsafe {
-        zero_ok(libc::fcntl(
-            fd.as_raw_fd() as libc::c_int,
-            libc::F_SETFL,
-            flags.bits(),
-        ))
-    }
+    unsafe { zero_ok(libc::fcntl(borrowed_fd(fd), libc::F_SETFL, flags.bits())) }
 }
 
 #[cfg(linux_raw)]
@@ -129,11 +115,7 @@ pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
 ))]
 fn _fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<u32> {
     unsafe {
-        negone_err(libc::fcntl(
-            fd.as_raw_fd() as libc::c_int,
-            libc::F_GET_SEALS,
-        ))
-        .map(|s32: i32| s32 as u32)
+        negone_err(libc::fcntl(borrowed_fd(fd), libc::F_GET_SEALS)).map(|s32: i32| s32 as u32)
     }
 }
 
@@ -153,13 +135,7 @@ pub fn fcntl_dupfd_cloexec<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
 
 #[cfg(all(libc, not(target_os = "wasi")))]
 fn _fcntl_dupfd_cloexec(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
-    unsafe {
-        let raw_fd = negone_err(libc::fcntl(
-            fd.as_raw_fd() as libc::c_int,
-            libc::F_DUPFD_CLOEXEC,
-        ))?;
-        Ok(OwnedFd::from_raw_fd(raw_fd as RawFd))
-    }
+    unsafe { ret_owned_fd(libc::fcntl(borrowed_fd(fd), libc::F_DUPFD_CLOEXEC)) }
 }
 
 #[cfg(linux_raw)]

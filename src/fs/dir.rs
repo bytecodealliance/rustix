@@ -30,9 +30,10 @@ use {
 };
 #[cfg(libc)]
 use {
+    crate::libc::conv::owned_fd,
     errno::{errno, set_errno, Errno},
     std::{mem::zeroed, ptr::NonNull},
-    unsafe_io::{os::posish::IntoRawFd, OwnsRaw},
+    unsafe_io::OwnsRaw,
 };
 
 /// `DIR*`
@@ -66,7 +67,7 @@ impl Dir {
 
     #[cfg(libc)]
     fn _from(fd: OwnedFd) -> io::Result<Self> {
-        let raw = fd.into_raw_fd() as libc::c_int;
+        let raw = owned_fd(fd);
         unsafe {
             let d = libc::fdopendir(raw);
             if let Some(d) = NonNull::new(d) {

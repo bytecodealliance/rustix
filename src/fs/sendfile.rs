@@ -1,7 +1,7 @@
 use crate::io;
 use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(libc)]
-use {crate::negone_err, std::mem::transmute, unsafe_io::os::posish::AsRawFd};
+use {crate::libc::conv::borrowed_fd, crate::negone_err, std::mem::transmute};
 
 /// `sendfile(out_fd, in_fd, offset, count)`
 #[cfg(any(linux_raw, target_os = "linux"))]
@@ -26,8 +26,8 @@ fn _sendfile(
 ) -> io::Result<usize> {
     unsafe {
         let nsent = negone_err(libc::sendfile64(
-            out_fd.as_raw_fd(),
-            in_fd.as_raw_fd(),
+            borrowed_fd(out_fd),
+            borrowed_fd(in_fd),
             transmute(offset),
             count,
         ))?;

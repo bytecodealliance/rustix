@@ -14,16 +14,6 @@ use io_lifetimes::{AsFd, BorrowedFd};
         target_os = "linux",
         target_os = "emscripten",
         target_os = "l4re",
-    ))
-))]
-use libc::fstat as libc_fstat;
-#[cfg(all(
-    libc,
-    not(any(
-        target_os = "android",
-        target_os = "linux",
-        target_os = "emscripten",
-        target_os = "l4re",
         target_os = "netbsd",
         target_os = "redox",
         target_os = "wasi"
@@ -35,53 +25,48 @@ use libc::fstatfs as libc_fstatfs;
     not(any(
         target_os = "android",
         target_os = "linux",
-        target_os = "emscripten",
-        target_os = "l4re"
+        target_os = "l4re",
+        target_os = "netbsd",
+        target_os = "openbsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "redox",
     ))
 ))]
-use libc::lseek as libc_lseek;
+use libc::posix_fallocate as libc_posix_fallocate;
+#[cfg(all(
+    libc,
+    any(target_os = "android", target_os = "linux", target_os = "l4re",)
+))]
+use libc::posix_fallocate64 as libc_posix_fallocate;
 #[cfg(all(
     libc,
     not(any(
-        target_os = "ios",
-        target_os = "freebsd",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "redox",
-        target_os = "wasi",
+        target_os = "android",
+        target_os = "linux",
+        target_os = "emscripten",
+        target_os = "l4re",
     ))
 ))]
-use libc::off64_t as libc_off_t;
-#[cfg(all(
-    libc,
-    any(
-        target_os = "ios",
-        target_os = "freebsd",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "redox",
-        target_os = "wasi",
-    )
-))]
-use libc::off_t as libc_off_t;
+use libc::{fstat as libc_fstat, lseek as libc_lseek, off_t as libc_off_t};
 #[cfg(all(
     libc,
     any(
         target_os = "android",
         target_os = "linux",
         target_os = "emscripten",
-        target_os = "l4re"
+        target_os = "l4re",
     )
 ))]
-use libc::{fstat64 as libc_fstat, fstatfs64 as libc_fstatfs, lseek64 as libc_lseek};
+use libc::{
+    fstat64 as libc_fstat, fstatfs64 as libc_fstatfs, lseek64 as libc_lseek, off64_t as libc_off_t,
+};
 use std::io::SeekFrom;
 #[cfg(libc)]
 use {
+    crate::libc::conv::borrowed_fd,
     crate::{negone_err, zero_ok},
     std::{convert::TryInto, mem::MaybeUninit},
-    unsafe_io::os::posish::AsRawFd,
 };
 
 /// `lseek(fd, offset, whence)`
@@ -102,7 +87,7 @@ fn _seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         SeekFrom::End(offset) => (libc::SEEK_END, offset),
         SeekFrom::Current(offset) => (libc::SEEK_CUR, offset),
     };
-    let offset = unsafe { negone_err(libc_lseek(fd.as_raw_fd() as libc::c_int, offset, whence))? };
+    let offset = unsafe { negone_err(libc_lseek(borrowed_fd(fd), offset, whence))? };
     Ok(offset as u64)
 }
 
@@ -130,8 +115,7 @@ pub fn tell<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
 
 #[cfg(libc)]
 fn _tell(fd: BorrowedFd<'_>) -> io::Result<u64> {
-    let offset =
-        unsafe { negone_err(libc_lseek(fd.as_raw_fd() as libc::c_int, 0, libc::SEEK_CUR))? };
+    let offset = unsafe { negone_err(libc_lseek(borrowed_fd(fd), 0, libc::SEEK_CUR))? };
     Ok(offset as u64)
 }
 
@@ -157,7 +141,7 @@ pub fn fchmod<Fd: AsFd>(fd: &Fd, mode: Mode) -> io::Result<()> {
     not(any(target_os = "android", target_os = "linux", target_os = "wasi"))
 ))]
 fn _fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
-    unsafe { zero_ok(libc::fchmod(fd.as_raw_fd() as libc::c_int, mode.bits())) }
+    unsafe { zero_ok(libc::fchmod(borrowed_fd(fd), mode.bits())) }
 }
 
 #[cfg(all(libc, any(target_os = "android", target_os = "linux")))]
@@ -169,7 +153,7 @@ fn _fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
     unsafe {
         zero_ok(libc::syscall(
             libc::SYS_fchmod,
-            fd.as_raw_fd() as libc::c_int,
+            borrowed_fd(fd),
             mode.bits(),
         ))
     }
@@ -192,7 +176,7 @@ pub fn fstat<Fd: AsFd>(fd: &Fd) -> io::Result<Stat> {
 fn _fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     let mut stat = MaybeUninit::<Stat>::uninit();
     unsafe {
-        zero_ok(libc_fstat(fd.as_raw_fd() as libc::c_int, stat.as_mut_ptr()))?;
+        zero_ok(libc_fstat(borrowed_fd(fd), stat.as_mut_ptr()))?;
         Ok(stat.assume_init())
     }
 }
@@ -218,10 +202,7 @@ pub fn fstatfs<Fd: AsFd>(fd: &Fd) -> io::Result<StatFs> {
 fn _fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
     let mut statfs = MaybeUninit::<StatFs>::uninit();
     unsafe {
-        zero_ok(libc_fstatfs(
-            fd.as_raw_fd() as libc::c_int,
-            statfs.as_mut_ptr(),
-        ))?;
+        zero_ok(libc_fstatfs(borrowed_fd(fd), statfs.as_mut_ptr()))?;
         Ok(statfs.assume_init())
     }
 }
@@ -241,12 +222,7 @@ pub fn futimens<Fd: AsFd>(fd: &Fd, times: &[Timespec; 2]) -> io::Result<()> {
 
 #[cfg(libc)]
 fn _futimens(fd: BorrowedFd<'_>, times: &[Timespec; 2]) -> io::Result<()> {
-    unsafe {
-        zero_ok(libc::futimens(
-            fd.as_raw_fd() as libc::c_int,
-            times.as_ptr(),
-        ))
-    }
+    unsafe { zero_ok(libc::futimens(borrowed_fd(fd), times.as_ptr())) }
 }
 
 #[cfg(linux_raw)]
@@ -278,7 +254,7 @@ fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()>
     let offset = offset as i64;
     let len = len as i64;
 
-    let err = unsafe { libc::posix_fallocate(fd.as_raw_fd() as libc::c_int, offset, len) };
+    let err = unsafe { libc_posix_fallocate(borrowed_fd(fd), offset, len) };
 
     // `posix_fallocate` returns its error status rather than using `errno`.
     if err == 0 {
@@ -303,12 +279,12 @@ fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()>
         fst_bytesalloc: 0,
     };
     unsafe {
-        let ret = libc::fcntl(fd.as_raw_fd() as libc::c_int, libc::F_PREALLOCATE, &store);
+        let ret = libc::fcntl(borrowed_fd(fd), libc::F_PREALLOCATE, &store);
         if ret == -1 {
             store.fst_flags = libc::F_ALLOCATEALL;
-            negone_err(libc::fcntl(fd.as_raw_fd(), libc::F_PREALLOCATE, &store))?;
+            negone_err(libc::fcntl(borrowed_fd(fd), libc::F_PREALLOCATE, &store))?;
         }
-        zero_ok(libc::ftruncate(fd.as_raw_fd(), new_len))
+        zero_ok(libc::ftruncate(borrowed_fd(fd), new_len))
     }
 }
 
@@ -363,7 +339,7 @@ pub fn fsync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 
 #[cfg(libc)]
 fn _fsync(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { zero_ok(libc::fsync(fd.as_raw_fd() as libc::c_int)) }
+    unsafe { zero_ok(libc::fsync(borrowed_fd(fd))) }
 }
 
 #[cfg(linux_raw)]
@@ -385,7 +361,7 @@ pub fn fdatasync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     not(any(target_os = "ios", target_os = "macos", target_os = "redox"))
 ))]
 fn _fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { zero_ok(libc::fdatasync(fd.as_raw_fd() as libc::c_int)) }
+    unsafe { zero_ok(libc::fdatasync(borrowed_fd(fd))) }
 }
 
 #[cfg(linux_raw)]
@@ -404,7 +380,7 @@ pub fn ftruncate<Fd: AsFd>(fd: &Fd, length: u64) -> io::Result<()> {
 #[cfg(libc)]
 fn _ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
     let length = length.try_into().map_err(|_overflow_err| io::Error::FBIG)?;
-    unsafe { zero_ok(libc::ftruncate(fd.as_raw_fd() as libc::c_int, length)) }
+    unsafe { zero_ok(libc::ftruncate(borrowed_fd(fd), length)) }
 }
 
 #[cfg(linux_raw)]

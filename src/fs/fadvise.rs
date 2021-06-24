@@ -22,7 +22,7 @@ use libc::posix_fadvise as libc_posix_fadvise;
 use libc::posix_fadvise64 as libc_posix_fadvise;
 use std::convert::TryInto;
 #[cfg(libc)]
-use {crate::zero_ok, unsafe_io::os::posish::AsRawFd};
+use {crate::libc::conv::borrowed_fd, crate::zero_ok};
 
 /// `POSIX_FADV_*` constants for use with [`fadvise`].
 ///
@@ -89,7 +89,7 @@ fn _fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice) -> io::Re
     if let (Ok(offset), Ok(len)) = (offset.try_into(), len.try_into()) {
         unsafe {
             zero_ok(libc_posix_fadvise(
-                fd.as_raw_fd() as libc::c_int,
+                borrowed_fd(fd),
                 offset,
                 len,
                 advice as libc::c_int,

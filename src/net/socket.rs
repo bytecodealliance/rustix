@@ -10,10 +10,10 @@ use std::os::raw::c_uint;
 #[cfg(libc)]
 use {
     super::sockaddr_header::decode_sockaddr,
-    crate::{as_ptr, negone_err, zero_ok},
+    crate::libc::conv::{borrowed_fd, ret_owned_fd},
+    crate::{as_ptr, zero_ok},
     libc::{sockaddr_storage, socklen_t},
     std::mem::{size_of, MaybeUninit},
-    unsafe_io::os::posish::{AsRawFd, FromRawFd},
 };
 
 /// `SOCK_*` constants for [`socket`].
@@ -329,12 +329,11 @@ pub fn socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> i
 #[cfg(libc)]
 fn _socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::Result<OwnedFd> {
     unsafe {
-        let raw_fd = negone_err(libc::socket(
+        ret_owned_fd(libc::socket(
             domain.0 as c_int,
             type_.0 as c_int,
             protocol as c_int,
-        ))?;
-        Ok(OwnedFd::from_raw_fd(raw_fd))
+        ))
     }
 }
 
@@ -356,7 +355,7 @@ pub fn bind_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> {
 fn _bind_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     unsafe {
         zero_ok(libc::bind(
-            sockfd.as_raw_fd(),
+            borrowed_fd(sockfd),
             as_ptr(&addr.encode()).cast::<_>(),
             size_of::<libc::sockaddr_in>() as socklen_t,
         ))
@@ -381,7 +380,7 @@ pub fn bind_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
 fn _bind_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     unsafe {
         zero_ok(libc::bind(
-            sockfd.as_raw_fd(),
+            borrowed_fd(sockfd),
             as_ptr(&addr.encode()).cast::<_>(),
             size_of::<libc::sockaddr_in6>() as socklen_t,
         ))
@@ -406,7 +405,7 @@ pub fn bind_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()>
 fn _bind_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
     unsafe {
         zero_ok(libc::bind(
-            sockfd.as_raw_fd(),
+            borrowed_fd(sockfd),
             as_ptr(&addr.encode()).cast::<_>(),
             size_of::<libc::sockaddr_un>() as socklen_t,
         ))
@@ -431,7 +430,7 @@ pub fn connect_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> 
 fn _connect_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     unsafe {
         zero_ok(libc::connect(
-            sockfd.as_raw_fd(),
+            borrowed_fd(sockfd),
             as_ptr(&addr.encode()).cast::<_>(),
             size_of::<libc::sockaddr_in>() as socklen_t,
         ))
@@ -456,7 +455,7 @@ pub fn connect_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> 
 fn _connect_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     unsafe {
         zero_ok(libc::connect(
-            sockfd.as_raw_fd(),
+            borrowed_fd(sockfd),
             as_ptr(&addr.encode()).cast::<_>(),
             size_of::<libc::sockaddr_in6>() as socklen_t,
         ))
@@ -481,7 +480,7 @@ pub fn connect_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<
 fn _connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
     unsafe {
         zero_ok(libc::connect(
-            sockfd.as_raw_fd(),
+            borrowed_fd(sockfd),
             as_ptr(&addr.encode()).cast::<_>(),
             size_of::<libc::sockaddr_un>() as socklen_t,
         ))
@@ -503,7 +502,7 @@ pub fn listen<Fd: AsFd>(sockfd: &Fd, backlog: c_int) -> io::Result<()> {
 
 #[cfg(libc)]
 fn _listen(sockfd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
-    unsafe { zero_ok(libc::listen(sockfd.as_raw_fd(), backlog)) }
+    unsafe { zero_ok(libc::listen(borrowed_fd(sockfd), backlog)) }
 }
 
 #[cfg(linux_raw)]
@@ -525,13 +524,12 @@ fn _accept(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, S
     unsafe {
         let mut storage = MaybeUninit::<sockaddr_storage>::uninit();
         let mut len = size_of::<sockaddr_storage>() as socklen_t;
-        let raw_fd = negone_err(libc::accept4(
-            sockfd.as_raw_fd(),
+        let owned_fd = ret_owned_fd(libc::accept4(
+            borrowed_fd(sockfd),
             storage.as_mut_ptr().cast::<_>(),
             &mut len,
             flags.bits(),
         ))?;
-        let owned_fd = OwnedFd::from_raw_fd(raw_fd);
         Ok((owned_fd, decode_sockaddr(storage.as_ptr(), len)))
     }
 }
@@ -543,12 +541,11 @@ fn _accept(sockfd: BorrowedFd<'_>, _flags: AcceptFlags) -> io::Result<(OwnedFd, 
     unsafe {
         let mut storage = MaybeUninit::<sockaddr_storage>::uninit();
         let mut len = size_of::<sockaddr_storage>() as socklen_t;
-        let raw_fd = negone_err(libc::accept(
-            sockfd.as_raw_fd(),
+        let owned_fd = ret_owned_fd(libc::accept(
+            borrowed_fd(sockfd),
             storage.as_mut_ptr().cast::<_>(),
             &mut len,
         ))?;
-        let owned_fd = OwnedFd::from_raw_fd(raw_fd);
         Ok((owned_fd, decode_sockaddr(storage.as_ptr(), len)))
     }
 }
@@ -568,7 +565,7 @@ pub fn shutdown<Fd: AsFd>(sockfd: &Fd, how: Shutdown) -> io::Result<()> {
 
 #[cfg(libc)]
 fn _shutdown(sockfd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> {
-    unsafe { zero_ok(libc::shutdown(sockfd.as_raw_fd(), how as c_int)) }
+    unsafe { zero_ok(libc::shutdown(borrowed_fd(sockfd), how as c_int)) }
 }
 
 #[cfg(linux_raw)]
@@ -590,7 +587,7 @@ fn _getsockopt_socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
     let mut out_len = size_of::<SocketType>() as socklen_t;
     unsafe {
         zero_ok(libc::getsockopt(
-            fd.as_raw_fd(),
+            borrowed_fd(fd),
             libc::SOL_SOCKET,
             libc::SO_TYPE,
             buffer.as_mut_ptr().cast::<libc::c_void>(),
@@ -624,7 +621,7 @@ fn _getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
         let mut storage = MaybeUninit::<sockaddr_storage>::uninit();
         let mut len = size_of::<sockaddr_storage>() as socklen_t;
         zero_ok(libc::getsockname(
-            sockfd.as_raw_fd(),
+            borrowed_fd(sockfd),
             storage.as_mut_ptr().cast::<_>(),
             &mut len,
         ))?;
@@ -651,7 +648,7 @@ fn _getpeername(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
         let mut storage = MaybeUninit::<sockaddr_storage>::uninit();
         let mut len = size_of::<sockaddr_storage>() as socklen_t;
         zero_ok(libc::getpeername(
-            sockfd.as_raw_fd(),
+            borrowed_fd(sockfd),
             storage.as_mut_ptr().cast::<_>(),
             &mut len,
         ))?;

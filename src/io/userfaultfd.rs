@@ -7,13 +7,10 @@
 #![allow(unsafe_code)]
 
 use crate::io;
+#[cfg(libc)]
+use crate::libc::conv::syscall_ret_owned_fd;
 use bitflags::bitflags;
 use io_lifetimes::OwnedFd;
-#[cfg(libc)]
-use {
-    crate::negone_err,
-    unsafe_io::os::posish::{FromRawFd, RawFd},
-};
 
 #[cfg(libc)]
 bitflags! {
@@ -50,8 +47,7 @@ pub unsafe fn userfaultfd(flags: UserFaultFdFlags) -> io::Result<OwnedFd> {
 
 #[cfg(libc)]
 unsafe fn _userfaultfd(flags: UserFaultFdFlags) -> io::Result<OwnedFd> {
-    let fd = negone_err(libc::syscall(libc::SYS_userfaultfd, flags.bits()))?;
-    Ok(OwnedFd::from_raw_fd(fd as RawFd))
+    syscall_ret_owned_fd(libc::syscall(libc::SYS_userfaultfd, flags.bits()))
 }
 
 #[cfg(linux_raw)]

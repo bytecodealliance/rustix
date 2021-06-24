@@ -42,7 +42,15 @@ pub use rdadvise::rdadvise;
 pub use read_write::{pread, pwrite, read, readv, write, writev};
 #[cfg(not(target_os = "redox"))]
 pub use read_write::{preadv, pwritev};
-#[cfg(any(linux_raw, all(libc, target_os = "linux", target_env = "gnu")))]
+#[cfg(any(
+    linux_raw,
+    all(
+        libc,
+        target_pointer_width = "64",
+        target_os = "linux",
+        target_env = "gnu"
+    )
+))]
 pub use read_write::{preadv2, pwritev2};
 pub use stdio::{stderr, stdin, stdout};
 #[cfg(any(target_os = "android", target_os = "linux"))]

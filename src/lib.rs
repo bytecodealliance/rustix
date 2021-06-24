@@ -65,6 +65,8 @@ pub mod process;
 pub mod rand;
 pub mod time;
 
+#[cfg(libc)]
+mod libc;
 #[cfg(linux_raw)]
 mod linux_raw;
 

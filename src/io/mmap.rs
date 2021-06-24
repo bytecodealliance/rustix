@@ -31,7 +31,7 @@ use libc::mmap as libc_mmap;
 use libc::mmap64 as libc_mmap;
 use std::os::raw::c_void;
 #[cfg(libc)]
-use {crate::zero_ok, std::os::raw::c_int, unsafe_io::os::posish::AsRawFd};
+use {crate::libc::conv::borrowed_fd, crate::zero_ok, std::os::raw::c_int};
 
 #[cfg(libc)]
 bitflags! {
@@ -186,7 +186,7 @@ unsafe fn _mmap(
         len,
         prot.bits(),
         flags.bits(),
-        fd.as_raw_fd(),
+        borrowed_fd(fd),
         offset as i64,
     );
     if res == libc::MAP_FAILED {

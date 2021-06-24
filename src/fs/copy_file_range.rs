@@ -3,9 +3,9 @@ use io_lifetimes::{AsFd, BorrowedFd};
 use std::convert::TryInto;
 #[cfg(libc)]
 use {
+    crate::libc::conv::borrowed_fd,
     crate::negone_err,
     std::{mem::size_of, ptr::null_mut},
-    unsafe_io::os::posish::AsRawFd,
 };
 
 /// `copy_file_range(fd_in, off_in, fd_out, off_out, len, 0)`
@@ -51,9 +51,9 @@ fn _copy_file_range(
     let copied = unsafe {
         negone_err(libc::syscall(
             libc::SYS_copy_file_range,
-            fd_in.as_raw_fd(),
+            borrowed_fd(fd_in),
             off_in_ptr,
-            fd_out.as_raw_fd(),
+            borrowed_fd(fd_out),
             off_out_ptr,
             len,
             0, // no flags are defined yet
