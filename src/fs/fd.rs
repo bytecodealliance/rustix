@@ -76,11 +76,11 @@ use libc::off_t as libc_off_t;
     )
 ))]
 use libc::{fstat64 as libc_fstat, fstatfs64 as libc_fstatfs, lseek64 as libc_lseek};
-use std::{convert::TryInto, io::SeekFrom};
+use std::io::SeekFrom;
 #[cfg(libc)]
 use {
     crate::{negone_err, zero_ok},
-    std::mem::MaybeUninit,
+    std::{convert::TryInto, mem::MaybeUninit},
     unsafe_io::os::posish::AsRawFd,
 };
 
@@ -94,10 +94,11 @@ pub fn seek<Fd: AsFd>(fd: &Fd, pos: SeekFrom) -> io::Result<u64> {
 #[cfg(libc)]
 fn _seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
     let (whence, offset): (libc::c_int, libc_off_t) = match pos {
-        SeekFrom::Start(pos) => (
-            libc::SEEK_SET,
-            pos.try_into().map_err(|_convert_err| io::Error::OVERFLOW)?,
-        ),
+        SeekFrom::Start(pos) => {
+            let pos: u64 = pos;
+            // Silently cast; we'll get `EINVAL` if the value is negative.
+            (libc::SEEK_SET, pos as i64)
+        }
         SeekFrom::End(offset) => (libc::SEEK_END, offset),
         SeekFrom::Current(offset) => (libc::SEEK_CUR, offset),
     };
@@ -109,10 +110,11 @@ fn _seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
 #[inline]
 fn _seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
     let (whence, offset) = match pos {
-        SeekFrom::Start(pos) => (
-            linux_raw_sys::general::SEEK_SET,
-            pos.try_into().map_err(|_convert_err| io::Error::OVERFLOW)?,
-        ),
+        SeekFrom::Start(pos) => {
+            let pos: u64 = pos;
+            // Silently cast; we'll get `EINVAL` if the value is negative.
+            (linux_raw_sys::general::SEEK_SET, pos as i64)
+        }
         SeekFrom::End(offset) => (linux_raw_sys::general::SEEK_END, offset),
         SeekFrom::Current(offset) => (linux_raw_sys::general::SEEK_CUR, offset),
     };
@@ -272,12 +274,10 @@ pub fn posix_fallocate<Fd: AsFd>(fd: &Fd, offset: u64, len: u64) -> io::Result<(
     ))
 ))]
 fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
-    let offset = offset
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
-    let len = len
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
+    // Silently cast; we'll get `EINVAL` if the value is negative.
+    let offset = offset as i64;
+    let len = len as i64;
+
     let err = unsafe { libc::posix_fallocate(fd.as_raw_fd() as libc::c_int, offset, len) };
 
     // `posix_fallocate` returns its error status rather than using `errno`.
@@ -290,12 +290,10 @@ fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()>
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
-    let offset: i64 = offset
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
-    let len = len
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
+    // Silently cast; we'll get `EINVAL` if the value is negative.
+    let offset = offset as i64;
+    let len = len as i64;
+
     let new_len = offset.checked_add(len).ok_or_else(|| io::Error::FBIG)?;
     let mut store = libc::fstore_t {
         fst_flags: libc::F_ALLOCATECONTIG,
@@ -317,12 +315,6 @@ fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()>
 #[cfg(linux_raw)]
 #[inline]
 fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
-    let offset = offset
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
-    let len = len
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     crate::linux_raw::fallocate(fd, 0, offset, len)
 }
 

@@ -145,6 +145,8 @@ pub(super) fn loff_t(i: __kernel_loff_t) -> usize {
 #[cfg(target_pointer_width = "64")]
 #[inline]
 pub(super) fn loff_t_from_u64(i: u64) -> usize {
+    // `loff_t` is signed, but syscalls which expect `loff_t` return `EINVAL`
+    // if it's outside the signed `i64` range, so we can silently cast.
     i as usize
 }
 

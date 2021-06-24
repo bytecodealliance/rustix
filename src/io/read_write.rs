@@ -35,11 +35,14 @@ use libc::{read as libc_read, readv as libc_readv, write as libc_write, writev a
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{
     cmp::min,
-    convert::TryInto,
     io::{IoSlice, IoSliceMut},
 };
 #[cfg(libc)]
-use {crate::negone_err, std::os::raw::c_int, unsafe_io::os::posish::AsRawFd};
+use {
+    crate::negone_err,
+    std::os::raw::c_int,
+    unsafe_io::os::posish::AsRawFd,
+};
 
 #[cfg(all(libc, target_os = "linux", target_env = "gnu"))]
 bitflags! {
@@ -134,9 +137,8 @@ pub fn pread<Fd: AsFd>(fd: &Fd, buf: &mut [u8], offset: u64) -> io::Result<usize
 
 #[cfg(libc)]
 fn _pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Result<usize> {
-    let offset = offset
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
+    // Silently cast; we'll get `EINVAL` if the value is negative.
+    let offset = offset as i64;
     let nread = unsafe {
         negone_err(libc_pread(
             fd.as_raw_fd() as libc::c_int,
@@ -163,9 +165,8 @@ pub fn pwrite<Fd: AsFd>(fd: &Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
 
 #[cfg(libc)]
 fn _pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<usize> {
-    let offset = offset
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
+    // Silently cast; we'll get `EINVAL` if the value is negative.
+    let offset = offset as i64;
     let nwritten = unsafe {
         negone_err(libc_pwrite(
             fd.as_raw_fd() as libc::c_int,
@@ -243,9 +244,8 @@ pub fn preadv<Fd: AsFd>(fd: &Fd, bufs: &[IoSliceMut], offset: u64) -> io::Result
 
 #[cfg(all(libc, not(target_os = "redox")))]
 fn _preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
-    let offset = offset
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
+    // Silently cast; we'll get `EINVAL` if the value is negative.
+    let offset = offset as i64;
     let nread = unsafe {
         negone_err(libc_preadv(
             fd.as_raw_fd() as libc::c_int,
@@ -260,9 +260,6 @@ fn _preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io::Result<u
 #[cfg(linux_raw)]
 #[inline]
 fn _preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
-    let offset = offset
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     crate::linux_raw::preadv(fd, &bufs[..min(bufs.len(), max_iov())], offset)
 }
 
@@ -276,9 +273,8 @@ pub fn pwritev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice], offset: u64) -> io::Result<u
 
 #[cfg(all(libc, not(target_os = "redox")))]
 fn _pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
-    let offset = offset
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
+    // Silently cast; we'll get `EINVAL` if the value is negative.
+    let offset = offset as i64;
     let nwritten = unsafe {
         negone_err(libc_pwritev(
             fd.as_raw_fd() as libc::c_int,
@@ -293,9 +289,6 @@ fn _pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usi
 #[cfg(linux_raw)]
 #[inline]
 fn _pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
-    let offset = offset
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     crate::linux_raw::pwritev(fd, &bufs[..min(bufs.len(), max_iov())], offset)
 }
 
@@ -319,9 +312,8 @@ fn _preadv2(
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    let offset = offset
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
+    // Silently cast; we'll get `EINVAL` if the value is negative.
+    let offset = offset as i64;
     let nread = unsafe {
         negone_err(libc_preadv2(
             fd.as_raw_fd() as libc::c_int,
@@ -342,9 +334,6 @@ fn _preadv2(
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    let offset = offset
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     crate::linux_raw::preadv2(
         fd,
         &bufs[..min(bufs.len(), max_iov())],
@@ -373,9 +362,8 @@ fn _pwritev2(
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    let offset = offset
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
+    // Silently cast; we'll get `EINVAL` if the value is negative.
+    let offset = offset as i64;
     let nwritten = unsafe {
         negone_err(libc_pwritev2(
             fd.as_raw_fd() as libc::c_int,
@@ -396,9 +384,6 @@ fn _pwritev2(
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    let offset = offset
-        .try_into()
-        .map_err(|_overflow_err| io::Error::OVERFLOW)?;
     crate::linux_raw::pwritev2(
         fd,
         &bufs[..min(bufs.len(), max_iov())],

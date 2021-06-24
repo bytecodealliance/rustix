@@ -34,18 +34,15 @@ fn _copy_file_range(
 
     let mut off_in_val: libc::loff_t = 0;
     let mut off_out_val: libc::loff_t = 0;
+    // Silently cast; we'll get `EINVAL` if the value is negative.
     let off_in_ptr = if let Some(off_in) = &off_in {
-        off_in_val = (**off_in)
-            .try_into()
-            .map_err(|_overflow_err| io::Error::OVERFLOW)?;
+        off_in_val = (**off_in) as i64;
         &mut off_in_val
     } else {
         null_mut()
     };
     let off_out_ptr = if let Some(off_out) = &off_out {
-        off_out_val = (**off_out)
-            .try_into()
-            .map_err(|_overflow_err| io::Error::OVERFLOW)?;
+        off_out_val = (**off_out) as i64;
         &mut off_out_val
     } else {
         null_mut()
