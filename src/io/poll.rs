@@ -1,7 +1,9 @@
 use crate::io;
-use std::vec::IntoIter;
 #[cfg(libc)]
-use {crate::negone_err, std::convert::TryInto};
+use crate::libc::conv::ret_c_int;
+#[cfg(libc)]
+use std::convert::TryInto;
+use std::vec::IntoIter;
 
 #[cfg(libc)]
 pub use super::poll_fd::PollFlags;
@@ -58,7 +60,7 @@ impl<'fd> PollFdVec<'fd> {
             .map_err(|_convert_err| io::Error::INVAL)?;
 
         let nready =
-            negone_err(unsafe { libc::poll(self.fds.as_mut_ptr().cast::<_>(), nfds, timeout) })?;
+            ret_c_int(unsafe { libc::poll(self.fds.as_mut_ptr().cast::<_>(), nfds, timeout) })?;
 
         Ok(nready as usize)
     }

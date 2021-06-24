@@ -9,8 +9,8 @@ use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(libc)]
 use {
     super::sockaddr_header::decode_sockaddr,
-    crate::libc::conv::borrowed_fd,
-    crate::{as_ptr, negone_err},
+    crate::as_ptr,
+    crate::libc::conv::{borrowed_fd, ret_ssize_t},
     libc::{sockaddr_storage, socklen_t},
     std::mem::{size_of, MaybeUninit},
 };
@@ -114,7 +114,7 @@ pub fn recv<Fd: AsFd>(fd: &Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<u
 #[cfg(libc)]
 fn _recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
     let nrecv = unsafe {
-        negone_err(libc::recv(
+        ret_ssize_t(libc::recv(
             borrowed_fd(fd),
             buf.as_mut_ptr().cast::<_>(),
             buf.len(),
@@ -140,7 +140,7 @@ pub fn send<Fd: AsFd>(fd: &Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize
 #[cfg(libc)]
 fn _send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Result<usize> {
     let nwritten = unsafe {
-        negone_err(libc::send(
+        ret_ssize_t(libc::send(
             borrowed_fd(fd),
             buf.as_ptr().cast::<_>(),
             buf.len(),
@@ -176,7 +176,7 @@ fn _recvfrom(
     unsafe {
         let mut storage = MaybeUninit::<sockaddr_storage>::uninit();
         let mut len = size_of::<sockaddr_storage>() as socklen_t;
-        let nread = negone_err(libc::recvfrom(
+        let nread = ret_ssize_t(libc::recvfrom(
             borrowed_fd(fd),
             buf.as_mut_ptr().cast::<_>(),
             buf.len(),
@@ -219,7 +219,7 @@ fn _sendto_v4(
     addr: &SocketAddrV4,
 ) -> io::Result<usize> {
     let nwritten = unsafe {
-        negone_err(libc::sendto(
+        ret_ssize_t(libc::sendto(
             borrowed_fd(fd),
             buf.as_ptr().cast::<_>(),
             buf.len(),
@@ -263,7 +263,7 @@ fn _sendto_v6(
     addr: &SocketAddrV6,
 ) -> io::Result<usize> {
     let nwritten = unsafe {
-        negone_err(libc::sendto(
+        ret_ssize_t(libc::sendto(
             borrowed_fd(fd),
             buf.as_ptr().cast::<_>(),
             buf.len(),
@@ -307,7 +307,7 @@ fn _sendto_unix(
     addr: &SocketAddrUnix,
 ) -> io::Result<usize> {
     let nwritten = unsafe {
-        negone_err(libc::sendto(
+        ret_ssize_t(libc::sendto(
             borrowed_fd(fd),
             buf.as_ptr().cast::<_>(),
             buf.len(),

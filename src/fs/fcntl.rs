@@ -1,13 +1,23 @@
+#[cfg(libc)]
+use crate::libc::conv::{borrowed_fd, ret, ret_c_int, ret_owned_fd};
 use crate::{
     fs::{FdFlags, OFlags},
     io,
 };
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
-#[cfg(libc)]
-use {
-    crate::libc::conv::{borrowed_fd, ret, ret_owned_fd},
-    crate::negone_err,
-};
+#[cfg(all(
+    libc,
+    not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+        target_os = "redox",
+        target_os = "wasi",
+    ))
+))]
+use crate::libc::conv::ret_u32;
 
 /// `fcntl(fd, F_GETFD)`
 #[inline]
@@ -19,7 +29,7 @@ pub fn fcntl_getfd<Fd: AsFd>(fd: &Fd) -> io::Result<FdFlags> {
 #[cfg(libc)]
 fn _fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<FdFlags> {
     unsafe {
-        negone_err(libc::fcntl(borrowed_fd(fd), libc::F_GETFD)).map(FdFlags::from_bits_truncate)
+        ret_c_int(libc::fcntl(borrowed_fd(fd), libc::F_GETFD)).map(FdFlags::from_bits_truncate)
     }
 }
 
@@ -57,7 +67,7 @@ pub fn fcntl_getfl<Fd: AsFd>(fd: &Fd) -> io::Result<OFlags> {
 #[cfg(libc)]
 pub(crate) fn _fcntl_getfl(fd: BorrowedFd<'_>) -> io::Result<OFlags> {
     unsafe {
-        negone_err(libc::fcntl(borrowed_fd(fd), libc::F_GETFL)).map(OFlags::from_bits_truncate)
+        ret_c_int(libc::fcntl(borrowed_fd(fd), libc::F_GETFL)).map(OFlags::from_bits_truncate)
     }
 }
 
@@ -114,9 +124,7 @@ pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
     ))
 ))]
 fn _fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<u32> {
-    unsafe {
-        negone_err(libc::fcntl(borrowed_fd(fd), libc::F_GET_SEALS)).map(|s32: i32| s32 as u32)
-    }
+    unsafe { ret_u32(libc::fcntl(borrowed_fd(fd), libc::F_GET_SEALS)) }
 }
 
 #[cfg(linux_raw)]

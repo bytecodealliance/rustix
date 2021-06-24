@@ -44,8 +44,7 @@ use std::os::unix::ffi::OsStringExt;
 use std::os::wasi::ffi::OsStringExt;
 #[cfg(libc)]
 use {
-    crate::libc::conv::{borrowed_fd, c_str, ret, ret_owned_fd},
-    crate::negone_err,
+    crate::libc::conv::{borrowed_fd, c_str, ret, ret_owned_fd, ret_ssize_t},
     std::mem::MaybeUninit,
 };
 
@@ -104,7 +103,7 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Resul
 
     loop {
         let nread = unsafe {
-            negone_err(libc::readlinkat(
+            ret_ssize_t(libc::readlinkat(
                 borrowed_fd(dirfd),
                 c_str(path),
                 buffer.as_mut_ptr().cast::<libc::c_char>(),

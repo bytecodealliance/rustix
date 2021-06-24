@@ -3,8 +3,7 @@ use io_lifetimes::{AsFd, BorrowedFd};
 use std::convert::TryInto;
 #[cfg(libc)]
 use {
-    crate::libc::conv::borrowed_fd,
-    crate::negone_err,
+    crate::libc::conv::{borrowed_fd, syscall_ret_ssize_t},
     std::{mem::size_of, ptr::null_mut},
 };
 
@@ -49,7 +48,7 @@ fn _copy_file_range(
     };
     let len: usize = len.try_into().unwrap_or(usize::MAX);
     let copied = unsafe {
-        negone_err(libc::syscall(
+        syscall_ret_ssize_t(libc::syscall(
             libc::SYS_copy_file_range,
             borrowed_fd(fd_in),
             off_in_ptr,

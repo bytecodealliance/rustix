@@ -1,6 +1,6 @@
 use crate::io;
 #[cfg(all(libc, target_os = "linux"))]
-use crate::negone_err;
+use crate::libc::conv::ret_ssize_t;
 use bitflags::bitflags;
 
 #[cfg(libc)]
@@ -34,7 +34,7 @@ pub fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
 #[cfg(libc)]
 fn _getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
     let nread = unsafe {
-        negone_err(libc::getrandom(
+        ret_ssize_t(libc::getrandom(
             buf.as_mut_ptr().cast::<_>(),
             buf.len(),
             flags.bits(),

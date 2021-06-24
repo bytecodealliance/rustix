@@ -1,5 +1,5 @@
-use crate::libc::conv::borrowed_fd;
-use crate::{fs::CopyfileFlags, io, negative_err};
+use crate::libc::conv::{nonnegative_ret, borrowed_fd};
+use crate::{fs::CopyfileFlags, io};
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::mem::MaybeUninit;
 
@@ -41,7 +41,7 @@ unsafe fn _fcopyfile(
         ) -> libc::c_int;
     }
 
-    negative_err(fcopyfile(
+    nonnegative_ret(fcopyfile(
         borrowed_fd(from),
         borrowed_fd(to),
         state,
@@ -69,7 +69,7 @@ pub unsafe fn copyfile_state_free(state: copyfile_state_t) -> io::Result<()> {
         fn copyfile_state_free(state: copyfile_state_t) -> libc::c_int;
     }
 
-    negative_err(copyfile_state_free(state))
+    nonnegative_ret(copyfile_state_free(state))
 }
 
 const COPYFILE_STATE_COPIED: u32 = 8;
@@ -95,5 +95,5 @@ unsafe fn copyfile_state_get(
         ) -> libc::c_int;
     }
 
-    negative_err(copyfile_state_get(state, flag, dst))
+    nonnegative_ret(copyfile_state_get(state, flag, dst))
 }

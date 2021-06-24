@@ -70,52 +70,6 @@ mod libc;
 #[cfg(linux_raw)]
 mod linux_raw;
 
-/// Given a `libc` return value, translate `-1` into an `Err` with the error
-/// from `errno`, and any other value to an `Ok` containing the value.
-#[cfg(libc)]
-fn negone_err<T: LibcResult>(t: T) -> crate::io::Result<T> {
-    if t.is_negone() {
-        Err(crate::io::Error::last_os_error())
-    } else {
-        Ok(t)
-    }
-}
-
-/// Given a `libc` return value, translate a negative value into an `Err` with
-/// the error from `errno`, and any other value to an `Ok` containing the
-/// value.
-#[cfg(libc)]
-#[allow(dead_code)]
-fn negative_err<T: LibcResult>(t: T) -> crate::io::Result<()> {
-    if t.is_negative() {
-        Err(crate::io::Error::last_os_error())
-    } else {
-        Ok(())
-    }
-}
-
-#[cfg(libc)]
-trait LibcResult {
-    fn is_negone(&self) -> bool;
-    fn is_negative(&self) -> bool;
-}
-
-#[cfg(libc)]
-macro_rules! is_impls {
-    ($($t:ident)*) => ($(impl LibcResult for $t {
-        fn is_negone(&self) -> bool {
-            *self == -1
-        }
-
-        fn is_negative(&self) -> bool {
-            *self < 0
-        }
-    })*)
-}
-
-#[cfg(libc)]
-is_impls! { i32 i64 isize }
-
 /// Convert a `&T` into a `*const T` without using an `as`.
 #[inline]
 #[allow(dead_code)]

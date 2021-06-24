@@ -50,7 +50,7 @@ use libc::posix_fallocate64 as libc_posix_fallocate;
         target_os = "l4re",
     ))
 ))]
-use libc::{fstat as libc_fstat, lseek as libc_lseek, off_t as libc_off_t};
+use libc::{fstat as libc_fstat, lseek as libc_lseek};
 #[cfg(all(
     libc,
     any(
@@ -60,16 +60,16 @@ use libc::{fstat as libc_fstat, lseek as libc_lseek, off_t as libc_off_t};
         target_os = "l4re",
     )
 ))]
-use libc::{
-    fstat64 as libc_fstat, fstatfs64 as libc_fstatfs, lseek64 as libc_lseek, off64_t as libc_off_t,
-};
+use libc::{fstat64 as libc_fstat, fstatfs64 as libc_fstatfs, lseek64 as libc_lseek};
 use std::io::SeekFrom;
 #[cfg(libc)]
 use {
-    crate::libc::conv::{borrowed_fd, ret},
-    crate::negone_err,
+    crate::libc::conv::{borrowed_fd, ret, ret_off_t},
     std::{convert::TryInto, mem::MaybeUninit},
+crate::libc::libc_off_t,
 };
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+use crate::libc::conv::ret_c_int;
 
 /// `lseek(fd, offset, whence)`
 #[inline]
@@ -89,7 +89,7 @@ fn _seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         SeekFrom::End(offset) => (libc::SEEK_END, offset),
         SeekFrom::Current(offset) => (libc::SEEK_CUR, offset),
     };
-    let offset = unsafe { negone_err(libc_lseek(borrowed_fd(fd), offset, whence))? };
+    let offset = unsafe { ret_off_t(libc_lseek(borrowed_fd(fd), offset, whence))? };
     Ok(offset as u64)
 }
 
@@ -117,7 +117,7 @@ pub fn tell<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
 
 #[cfg(libc)]
 fn _tell(fd: BorrowedFd<'_>) -> io::Result<u64> {
-    let offset = unsafe { negone_err(libc_lseek(borrowed_fd(fd), 0, libc::SEEK_CUR))? };
+    let offset = unsafe { ret_off_t(libc_lseek(borrowed_fd(fd), 0, libc::SEEK_CUR))? };
     Ok(offset as u64)
 }
 
@@ -283,7 +283,7 @@ fn _posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()>
     unsafe {
         if libc::fcntl(borrowed_fd(fd), libc::F_PREALLOCATE, &store) == -1 {
             store.fst_flags = libc::F_ALLOCATEALL;
-            negone_err(libc::fcntl(borrowed_fd(fd), libc::F_PREALLOCATE, &store))?;
+            let _ = ret_c_int(libc::fcntl(borrowed_fd(fd), libc::F_PREALLOCATE, &store))?;
         }
         ret(libc::ftruncate(borrowed_fd(fd), new_len))
     }

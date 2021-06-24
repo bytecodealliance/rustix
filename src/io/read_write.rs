@@ -45,7 +45,10 @@ use std::{
     io::{IoSlice, IoSliceMut},
 };
 #[cfg(libc)]
-use {crate::libc::conv::borrowed_fd, crate::negone_err, std::os::raw::c_int};
+use {
+    crate::libc::conv::{borrowed_fd, ret_ssize_t},
+    std::os::raw::c_int,
+};
 
 #[cfg(all(libc, target_os = "linux", target_env = "gnu"))]
 bitflags! {
@@ -91,7 +94,7 @@ pub fn read<Fd: AsFd>(fd: &Fd, buf: &mut [u8]) -> io::Result<usize> {
 #[cfg(libc)]
 fn _read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     let nread = unsafe {
-        negone_err(libc_read(
+        ret_ssize_t(libc_read(
             borrowed_fd(fd),
             buf.as_mut_ptr().cast::<_>(),
             buf.len(),
@@ -116,7 +119,7 @@ pub fn write<Fd: AsFd>(fd: &Fd, buf: &[u8]) -> io::Result<usize> {
 #[cfg(libc)]
 fn _write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     let nwritten = unsafe {
-        negone_err(libc_write(
+        ret_ssize_t(libc_write(
             borrowed_fd(fd),
             buf.as_ptr().cast::<_>(),
             buf.len(),
@@ -143,7 +146,7 @@ fn _pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Result<usize> 
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     let nread = unsafe {
-        negone_err(libc_pread(
+        ret_ssize_t(libc_pread(
             borrowed_fd(fd),
             buf.as_mut_ptr().cast::<_>(),
             buf.len(),
@@ -171,7 +174,7 @@ fn _pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<usize> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     let nwritten = unsafe {
-        negone_err(libc_pwrite(
+        ret_ssize_t(libc_pwrite(
             borrowed_fd(fd),
             buf.as_ptr().cast::<_>(),
             buf.len(),
@@ -197,7 +200,7 @@ pub fn readv<Fd: AsFd>(fd: &Fd, bufs: &[IoSliceMut]) -> io::Result<usize> {
 #[cfg(libc)]
 fn _readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut]) -> io::Result<usize> {
     let nread = unsafe {
-        negone_err(libc_readv(
+        ret_ssize_t(libc_readv(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
             min(bufs.len(), max_iov()) as c_int,
@@ -222,7 +225,7 @@ pub fn writev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice]) -> io::Result<usize> {
 #[cfg(libc)]
 fn _writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> {
     let nwritten = unsafe {
-        negone_err(libc_writev(
+        ret_ssize_t(libc_writev(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
             min(bufs.len(), max_iov()) as c_int,
@@ -250,7 +253,7 @@ fn _preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io::Result<u
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     let nread = unsafe {
-        negone_err(libc_preadv(
+        ret_ssize_t(libc_preadv(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
             min(bufs.len(), max_iov()) as c_int,
@@ -279,7 +282,7 @@ fn _pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usi
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     let nwritten = unsafe {
-        negone_err(libc_pwritev(
+        ret_ssize_t(libc_pwritev(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
             min(bufs.len(), max_iov()) as c_int,
@@ -331,7 +334,7 @@ fn _preadv2(
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     let nread = unsafe {
-        negone_err(libc_preadv2(
+        ret_ssize_t(libc_preadv2(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
             min(bufs.len(), max_iov()) as c_int,
@@ -394,7 +397,7 @@ fn _pwritev2(
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     let nwritten = unsafe {
-        negone_err(libc_pwritev2(
+        ret_ssize_t(libc_pwritev2(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
             min(bufs.len(), max_iov()) as c_int,
