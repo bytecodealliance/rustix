@@ -361,8 +361,6 @@ fn _accessat(dirfd: BorrowedFd<'_>, path: &CStr, access: Access, flags: AtFlags)
     }
 }
 
-// Temporarily disable on Emscripten until https://github.com/rust-lang/libc/pull/1836
-// is available.
 #[cfg(all(libc, target_os = "emscripten"))]
 fn _accessat(
     _dirfd: BorrowedFd<'_>,

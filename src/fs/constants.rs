@@ -91,8 +91,6 @@ bitflags! {
         const EMPTY_PATH = libc::AT_EMPTY_PATH;
 
         /// `AT_EACCESS`
-        // Temporarily disable on Emscripten until https://github.com/rust-lang/libc/pull/1836
-        // is available.
         #[cfg(not(any(target_os = "emscripten", target_os = "android")))]
         const EACCESS = libc::AT_EACCESS;
     }
