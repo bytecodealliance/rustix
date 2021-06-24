@@ -50,7 +50,6 @@ fn invalid_offset_posix_fallocate() {
     .unwrap();
 
     posix_fallocate(&file, u64::MAX, 1).unwrap_err();
-    posix_fallocate(&file, i64::MAX as u64, 1).unwrap_err();
     posix_fallocate(&file, i64::MAX as u64 + 1, 1).unwrap_err();
     posix_fallocate(&file, 0, u64::MAX).unwrap_err();
     posix_fallocate(&file, 0, i64::MAX as u64 + 1).unwrap_err();
@@ -74,7 +73,6 @@ fn invalid_offset_pread() {
 
     let mut buf = [0_u8; 1_usize];
     pread(&file, &mut buf, u64::MAX).unwrap_err();
-    pread(&file, &mut buf, i64::MAX as u64).unwrap_err();
     pread(&file, &mut buf, i64::MAX as u64 + 1).unwrap_err();
 }
 
@@ -97,7 +95,6 @@ fn invalid_offset_pwrite() {
 
     let buf = [0_u8; 1_usize];
     pwrite(&file, &buf, u64::MAX).unwrap_err();
-    pwrite(&file, &buf, i64::MAX as u64).unwrap_err();
     pwrite(&file, &buf, i64::MAX as u64 + 1).unwrap_err();
 }
 
