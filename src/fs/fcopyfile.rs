@@ -1,5 +1,8 @@
-use crate::libc::conv::{nonnegative_ret, borrowed_fd};
-use crate::{fs::CopyfileFlags, io};
+use crate::{
+    fs::CopyfileFlags,
+    io,
+    libc::conv::{borrowed_fd, nonnegative_ret},
+};
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::mem::MaybeUninit;
 

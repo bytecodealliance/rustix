@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 
-use crate::io;
-use crate::libc::libc_off_t;
+use crate::{io, libc::libc_off_t};
 use io_lifetimes::{BorrowedFd, OwnedFd};
 use libc::{c_char, c_int, c_long, ssize_t};
 use std::ffi::CStr;

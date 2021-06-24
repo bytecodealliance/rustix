@@ -5,6 +5,8 @@ use crate::fs::Mode;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
 use crate::fs::StatFs;
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+use crate::libc::conv::ret_c_int;
 #[cfg(all(libc, any(target_os = "android", target_os = "linux")))]
 use crate::libc::conv::syscall_ret;
 use crate::{fs::Stat, io, time::Timespec};
@@ -65,11 +67,9 @@ use std::io::SeekFrom;
 #[cfg(libc)]
 use {
     crate::libc::conv::{borrowed_fd, ret, ret_off_t},
+    crate::libc::libc_off_t,
     std::{convert::TryInto, mem::MaybeUninit},
-crate::libc::libc_off_t,
 };
-#[cfg(any(target_os = "ios", target_os = "macos"))]
-use crate::libc::conv::ret_c_int;
 
 /// `lseek(fd, offset, whence)`
 #[inline]

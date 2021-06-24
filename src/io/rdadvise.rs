@@ -1,5 +1,7 @@
-use crate::io;
-use crate::libc::conv::{borrowed_fd, ret};
+use crate::{
+    io,
+    libc::conv::{borrowed_fd, ret},
+};
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::convert::TryInto;
 

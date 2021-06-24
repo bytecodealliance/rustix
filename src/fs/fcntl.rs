@@ -1,10 +1,3 @@
-#[cfg(libc)]
-use crate::libc::conv::{borrowed_fd, ret, ret_c_int, ret_owned_fd};
-use crate::{
-    fs::{FdFlags, OFlags},
-    io,
-};
-use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(all(
     libc,
     not(any(
@@ -18,6 +11,13 @@ use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
     ))
 ))]
 use crate::libc::conv::ret_u32;
+#[cfg(libc)]
+use crate::libc::conv::{borrowed_fd, ret, ret_c_int, ret_owned_fd};
+use crate::{
+    fs::{FdFlags, OFlags},
+    io,
+};
+use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 
 /// `fcntl(fd, F_GETFD)`
 #[inline]
