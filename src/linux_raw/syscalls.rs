@@ -39,15 +39,18 @@ use linux_raw_sys::general::{
 use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getuid};
 #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
 use linux_raw_sys::general::{__NR_getegid32, __NR_geteuid32, __NR_getgid32, __NR_getuid32};
+#[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
+use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::{
     general::{
         __NR_chdir, __NR_clock_getres, __NR_clock_gettime, __NR_clock_nanosleep, __NR_close,
         __NR_dup, __NR_dup3, __NR_exit_group, __NR_faccessat, __NR_fallocate, __NR_fchmod,
         __NR_fchmodat, __NR_fdatasync, __NR_fsync, __NR_getcwd, __NR_getdents64, __NR_getpid,
         __NR_getppid, __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_mknodat, __NR_munmap,
-        __NR_nanosleep, __NR_openat, __NR_pipe, __NR_pipe2, __NR_poll, __NR_pread64, __NR_preadv,
-        __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv, __NR_renameat,
-        __NR_sched_yield, __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
+        __NR_nanosleep, __NR_open, __NR_openat, __NR_pipe, __NR_pipe2, __NR_poll, __NR_pread64,
+        __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv,
+        __NR_renameat, __NR_sched_yield, __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write,
+        __NR_writev,
     },
     general::{
         __kernel_clockid_t, __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t,
@@ -80,8 +83,8 @@ use {
     super::conv::x86_sys,
     linux_raw_sys::general::{
         __NR_mmap2, __NR_socketcall, SYS_ACCEPT4, SYS_BIND, SYS_CONNECT, SYS_GETPEERNAME,
-        SYS_GETSOCKNAME, SYS_GETSOCKOPT, SYS_LISTEN, SYS_RECVFROM, SYS_SENDTO, SYS_SETSOCKOPT,
-        SYS_SHUTDOWN, SYS_SOCKET, SYS_SOCKETPAIR,
+        SYS_GETSOCKNAME, SYS_GETSOCKOPT, SYS_LISTEN, SYS_RECV, SYS_RECVFROM, SYS_SEND, SYS_SENDTO,
+        SYS_SETSOCKOPT, SYS_SHUTDOWN, SYS_SOCKET, SYS_SOCKETPAIR,
     },
 };
 #[cfg(target_pointer_width = "32")]
@@ -131,9 +134,8 @@ pub(crate) fn close(fd: OwnedFd) {
 pub(crate) fn open(filename: &CStr, flags: c_uint, mode: umode_t) -> io::Result<OwnedFd> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
-        ret_owned_fd(syscall4_readonly(
-            __NR_openat,
-            c_int(AT_FDCWD),
+        ret_owned_fd(syscall3_readonly(
+            __NR_open,
             c_str(filename),
             c_uint(flags | O_LARGEFILE as c_uint),
             umode_t(mode),
@@ -141,9 +143,8 @@ pub(crate) fn open(filename: &CStr, flags: c_uint, mode: umode_t) -> io::Result<
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
-        ret_owned_fd(syscall4_readonly(
-            __NR_openat,
-            c_int(AT_FDCWD),
+        ret_owned_fd(syscall3_readonly(
+            __NR_open,
             c_str(filename),
             c_uint(flags),
             umode_t(mode),
@@ -1514,7 +1515,17 @@ pub(crate) fn getsockopt_socket_type(fd: BorrowedFd<'_>) -> io::Result<u32> {
 
 #[inline]
 pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: c_uint) -> io::Result<usize> {
-    #[cfg(not(target_arch = "x86"))]
+    #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
+    unsafe {
+        ret_usize(syscall4_readonly(
+            __NR_send,
+            borrowed_fd(fd),
+            slice_addr(buf),
+            buf.len(),
+            c_uint(flags),
+        ))
+    }
+    #[cfg(target_arch = "x86_64")]
     unsafe {
         ret_usize(syscall6_readonly(
             __NR_sendto,
@@ -1530,7 +1541,7 @@ pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: c_uint) -> io::Result<
     unsafe {
         ret_usize(syscall2_readonly(
             __NR_socketcall,
-            x86_sys(SYS_SENDTO),
+            x86_sys(SYS_SEND),
             slice_addr(&[
                 borrowed_fd(fd),
                 slice_addr(buf),
@@ -1653,7 +1664,17 @@ pub(crate) fn sendto_un(
 
 #[inline]
 pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: c_uint) -> io::Result<usize> {
-    #[cfg(not(target_arch = "x86"))]
+    #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
+    unsafe {
+        ret_usize(syscall4(
+            __NR_recv,
+            borrowed_fd(fd),
+            slice_as_mut_ptr(buf),
+            buf.len(),
+            c_uint(flags),
+        ))
+    }
+    #[cfg(target_arch = "x86_64")]
     unsafe {
         ret_usize(syscall6(
             __NR_recvfrom,
@@ -1669,7 +1690,7 @@ pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: c_uint) -> io::Res
     unsafe {
         ret_usize(syscall2(
             __NR_socketcall,
-            x86_sys(SYS_RECVFROM),
+            x86_sys(SYS_RECV),
             slice_addr(&[
                 borrowed_fd(fd),
                 slice_as_mut_ptr(buf),
