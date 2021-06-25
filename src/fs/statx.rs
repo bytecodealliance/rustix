@@ -121,8 +121,7 @@ pub fn statx<P: path::Arg, Fd: AsFd>(
     mask: StatxFlags,
 ) -> io::Result<Statx> {
     let dirfd = dirfd.as_fd();
-    let path = path.into_c_str()?;
-    _statx(dirfd, &path, flags, mask)
+    path.into_with_c_str(|path| _statx(dirfd, &path, flags, mask))
 }
 
 #[cfg(libc)]

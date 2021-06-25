@@ -63,10 +63,15 @@ pub trait Arg {
     fn as_maybe_utf8_bytes(&self) -> &[u8];
 
     /// Return a view of this string as a maybe-owned [`OsStr`].
-    ///
-    /// [`OsStr`]: https://doc.rust-lang.org/std/ffi/struct.OsStr.html
     #[cfg(windows)]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>>;
+
+    /// Run a closure with `self` passed in as a `&CStr`.
+    #[cfg(not(windows))]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>;
 }
 
 impl Arg for &str {
@@ -106,8 +111,70 @@ impl Arg for &str {
     }
 
     #[cfg(windows)]
+    #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        with_c_str(self.as_bytes(), f)
+    }
+}
+
+impl Arg for &String {
+    #[inline]
+    fn as_str(&self) -> io::Result<&str> {
+        Ok(self)
+    }
+
+    #[inline]
+    fn to_string_lossy(&self) -> Cow<str> {
+        Cow::Borrowed(self)
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+        Ok(Cow::Owned(
+            CString::new(String::as_str(self).as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
+        ))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        self.as_str().into_c_str()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_maybe_utf8_bytes(&self) -> &[u8] {
+        self.as_bytes()
+    }
+
+    #[cfg(windows)]
+    #[inline]
+    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
+        self.as_ref()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        with_c_str(self.as_bytes(), f)
     }
 }
 
@@ -152,6 +219,16 @@ impl Arg for String {
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        f(&CString::new(self).map_err(|_cstr_err| io::Error::INVAL)?)
+    }
 }
 
 impl Arg for &OsStr {
@@ -194,6 +271,68 @@ impl Arg for &OsStr {
     #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        with_c_str(self.as_bytes(), f)
+    }
+}
+
+impl Arg for &OsString {
+    #[inline]
+    fn as_str(&self) -> io::Result<&str> {
+        OsString::as_os_str(self).to_str().ok_or(io::Error::INVAL)
+    }
+
+    #[inline]
+    fn to_string_lossy(&self) -> Cow<str> {
+        self.as_os_str().to_string_lossy()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+        Ok(Cow::Owned(
+            CString::new(OsString::as_os_str(self).as_bytes())
+                .map_err(|_cstr_err| io::Error::INVAL)?,
+        ))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        self.as_os_str().into_c_str()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_maybe_utf8_bytes(&self) -> &[u8] {
+        self.as_bytes()
+    }
+
+    #[cfg(windows)]
+    #[inline]
+    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
+        self.as_ref()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        with_c_str(self.as_bytes(), f)
     }
 }
 
@@ -238,6 +377,16 @@ impl Arg for OsString {
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        f(&CString::new(self.into_vec()).map_err(|_cstr_err| io::Error::INVAL)?)
+    }
 }
 
 impl Arg for &Path {
@@ -280,6 +429,71 @@ impl Arg for &Path {
     #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        with_c_str(self.as_os_str().as_bytes(), f)
+    }
+}
+
+impl Arg for &PathBuf {
+    #[inline]
+    fn as_str(&self) -> io::Result<&str> {
+        PathBuf::as_path(self)
+            .as_os_str()
+            .to_str()
+            .ok_or(io::Error::INVAL)
+    }
+
+    #[inline]
+    fn to_string_lossy(&self) -> Cow<str> {
+        self.as_path().to_string_lossy()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+        Ok(Cow::Owned(
+            CString::new(PathBuf::as_path(self).as_os_str().as_bytes())
+                .map_err(|_cstr_err| io::Error::INVAL)?,
+        ))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        self.as_path().into_c_str()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_maybe_utf8_bytes(&self) -> &[u8] {
+        PathBuf::as_path(self).as_os_str().as_bytes()
+    }
+
+    #[cfg(windows)]
+    #[inline]
+    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
+        self.as_ref()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        with_c_str(self.as_os_str().as_bytes(), f)
     }
 }
 
@@ -324,6 +538,19 @@ impl Arg for PathBuf {
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        f(
+            &CString::new(self.into_os_string().into_vec())
+                .map_err(|_cstr_err| io::Error::INVAL)?,
+        )
+    }
 }
 
 impl Arg for &CStr {
@@ -363,6 +590,65 @@ impl Arg for &CStr {
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
+
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        f(self)
+    }
+}
+
+impl Arg for &CString {
+    #[inline]
+    fn as_str(&self) -> io::Result<&str> {
+        CString::as_c_str(self)
+            .to_str()
+            .map_err(|_utf8_err| io::Error::INVAL)
+    }
+
+    #[inline]
+    fn to_string_lossy(&self) -> Cow<str> {
+        CString::as_c_str(self).to_string_lossy()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+        Ok(Cow::Borrowed(CString::as_c_str(self)))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(Cow::Borrowed(self))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_maybe_utf8_bytes(&self) -> &[u8] {
+        self.to_bytes()
+    }
+
+    #[cfg(windows)]
+    #[inline]
+    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
+        self.as_ref()
+    }
+
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        f(self)
+    }
 }
 
 impl Arg for CString {
@@ -401,6 +687,15 @@ impl Arg for CString {
     #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
+    }
+
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        f(&self)
     }
 }
 
@@ -449,6 +744,15 @@ impl<'a> Arg for Cow<'a, str> {
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
+
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        with_c_str(self.as_bytes(), f)
+    }
 }
 
 impl<'a> Arg for Cow<'a, OsStr> {
@@ -496,6 +800,15 @@ impl<'a> Arg for Cow<'a, OsStr> {
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
+
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        with_c_str(self.as_bytes(), f)
+    }
 }
 
 impl<'a> Arg for Cow<'a, CStr> {
@@ -535,6 +848,15 @@ impl<'a> Arg for Cow<'a, CStr> {
     #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
+    }
+
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        f(&self)
     }
 }
 
@@ -578,6 +900,16 @@ impl<'a> Arg for Component<'a> {
     #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        with_c_str(self.as_os_str().as_bytes(), f)
     }
 }
 
@@ -624,6 +956,16 @@ impl<'a> Arg for Components<'a> {
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        with_c_str(self.as_path().as_os_str().as_bytes(), f)
+    }
 }
 
 impl<'a> Arg for Iter<'a> {
@@ -669,6 +1011,16 @@ impl<'a> Arg for Iter<'a> {
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        with_c_str(self.as_path().as_os_str().as_bytes(), f)
+    }
 }
 
 impl Arg for &[u8] {
@@ -711,6 +1063,69 @@ impl Arg for &[u8] {
     #[inline]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        with_c_str(self, f)
+    }
+}
+
+impl Arg for &Vec<u8> {
+    #[inline]
+    fn as_str(&self) -> io::Result<&str> {
+        str::from_utf8(self).map_err(|_utf8_err| io::Error::INVAL)
+    }
+
+    #[inline]
+    fn to_string_lossy(&self) -> Cow<str> {
+        String::from_utf8_lossy(self)
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+        Ok(Cow::Owned(
+            CString::new(self.as_slice()).map_err(|_cstr_err| io::Error::INVAL)?,
+        ))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
+    where
+        Self: 'b,
+    {
+        Ok(Cow::Owned(
+            CString::new(self.as_slice()).map_err(|_cstr_err| io::Error::INVAL)?,
+        ))
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn as_maybe_utf8_bytes(&self) -> &[u8] {
+        self
+    }
+
+    #[cfg(windows)]
+    #[inline]
+    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
+        self.as_ref()
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        with_c_str(self, f)
     }
 }
 
@@ -755,6 +1170,16 @@ impl Arg for Vec<u8> {
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        f(&CString::new(self).map_err(|_cstr_err| io::Error::INVAL)?)
+    }
 }
 
 impl Arg for DecInt {
@@ -798,6 +1223,48 @@ impl Arg for DecInt {
     fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
         self.as_ref()
     }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
+    where
+        Self: Sized,
+        F: FnOnce(&CStr) -> io::Result<T>,
+    {
+        with_c_str(self.as_os_str().as_bytes(), f)
+    }
+}
+
+/// Run a closure with `bytes` passed in as a `&CStr`.
+#[inline]
+fn with_c_str<T, F>(bytes: &[u8], f: F) -> io::Result<T>
+where
+    F: FnOnce(&CStr) -> io::Result<T>,
+{
+    // Most paths are less than this long. The rest can go through the dynamic
+    // allocation path. If you're opening many files in a directory with a long
+    // path, consider opening the directory and using openat to open the files
+    // under it, which will avoid this, and is often faster in the OS as well.
+    const SIZE: usize = 256;
+    // Test with >= so that we have room for the trailing NUL.
+    if bytes.len() >= SIZE {
+        return with_c_str_slow_path(bytes, f);
+    }
+    let mut buffer: [u8; SIZE] = [0u8; SIZE];
+    // Copy the bytes in; the buffer already has zeros for the trailing NUL.
+    buffer[..bytes.len()].copy_from_slice(bytes);
+    f(CStr::from_bytes_with_nul(&buffer[..bytes.len() + 1])
+        .map_err(|_cstr_err| io::Error::INVAL)?)
+}
+
+/// The slow path which handles any length. In theory OS's only support up
+/// to `PATH_MAX`, but we let the OS enforce that.
+#[cold]
+fn with_c_str_slow_path<T, F>(bytes: &[u8], f: F) -> io::Result<T>
+where
+    F: FnOnce(&CStr) -> io::Result<T>,
+{
+    f(&CString::new(bytes).map_err(|_cstr_err| io::Error::INVAL)?)
 }
 
 #[test]

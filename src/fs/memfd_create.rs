@@ -32,8 +32,7 @@ bitflags! {
 /// `memfd_create(path, flags)`
 #[inline]
 pub fn memfd_create<P: path::Arg>(path: P, flags: MemfdFlags) -> io::Result<OwnedFd> {
-    let path = path.into_c_str()?;
-    _memfd_create(&path, flags)
+    path.into_with_c_str(|path| _memfd_create(&path, flags))
 }
 
 #[cfg(libc)]
