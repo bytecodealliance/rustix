@@ -1,5 +1,9 @@
 //! I/O operations.
 
+use crate::imp;
+#[cfg(not(target_os = "wasi"))]
+use imp::io::Tcflag;
+
 mod error;
 mod fd;
 mod ioctl;
@@ -7,8 +11,6 @@ mod ioctl;
 mod mmap;
 mod pipe;
 mod poll;
-#[cfg(libc)]
-mod poll_fd;
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 mod rdadvise;
 mod read_write;
@@ -53,37 +55,22 @@ pub use read_write::{preadv, pwritev};
 ))]
 pub use read_write::{preadv2, pwritev2};
 pub use stdio::{stderr, stdin, stdout};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use userfaultfd::{userfaultfd, UserFaultFdFlags};
 
-/// `struct termios`
-#[cfg(all(libc, not(target_os = "wasi")))]
-pub type Termios = libc::termios;
+#[cfg(any(linux_raw, not(target_os = "wasi")))]
+pub use imp::io::Termios;
 
-/// `struct termios`
-#[cfg(linux_raw)]
-pub type Termios = linux_raw_sys::general::termios;
-
-/// `struct winsize`
-#[cfg(all(libc, not(target_os = "wasi")))]
-pub type Winsize = libc::winsize;
-
-/// `struct winsize`
-#[cfg(linux_raw)]
-pub type Winsize = linux_raw_sys::general::winsize;
+#[cfg(any(linux_raw, all(libc, not(target_os = "wasi"))))]
+pub use imp::io::Winsize;
 
 /// `ICANON`
-#[cfg(all(libc, not(target_os = "wasi")))]
-pub const ICANON: libc::tcflag_t = libc::ICANON;
-
-/// `ICANON`
-#[cfg(linux_raw)]
-pub const ICANON: std::os::raw::c_uint = linux_raw_sys::general::ICANON;
+#[cfg(any(linux_raw, all(libc, not(target_os = "wasi"))))]
+pub const ICANON: Tcflag = imp::io::ICANON;
 
 /// `PIPE_BUF`
-#[cfg(all(libc, not(any(target_os = "wasi", target_os = "redox"))))]
-pub const PIPE_BUF: usize = libc::PIPE_BUF;
-
-/// `PIPE_BUF`
-#[cfg(linux_raw)]
-pub const PIPE_BUF: usize = linux_raw_sys::general::PIPE_BUF as usize;
+#[cfg(any(
+    linux_raw,
+    all(libc, not(any(target_os = "wasi", target_os = "redox")))
+))]
+pub const PIPE_BUF: usize = imp::io::PIPE_BUF;

@@ -1,4 +1,4 @@
-use super::sockaddr::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
+use super::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use crate::as_ptr;
 use libc::sockaddr_storage;
 use std::mem::size_of;

@@ -1,5 +1,8 @@
 //! Filesystem operations.
 
+use crate::imp;
+use imp::time::Nsecs;
+
 #[cfg(not(target_os = "redox"))]
 mod at;
 mod constants;
@@ -60,17 +63,20 @@ pub use at::{
 };
 #[cfg(not(target_os = "redox"))]
 pub use constants::AtFlags;
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+pub use constants::CloneFlags;
+/// `copyfile_flags_t`
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+pub use constants::CopyfileFlags;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use constants::ResolveFlags;
 pub use constants::{Access, FdFlags, Mode, OFlags};
-#[cfg(any(target_os = "macos", target_os = "ios"))]
-pub use constants::{CloneFlags, CopyfileFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use copy_file_range::copy_file_range;
 #[cfg(not(target_os = "redox"))]
 pub use cwd::cwd;
 #[cfg(not(target_os = "redox"))]
-pub use dir::{Dir, Entry};
+pub use dir::{Dir, DirEntry};
 #[cfg(not(any(
     target_os = "ios",
     target_os = "macos",
@@ -94,8 +100,8 @@ pub use fcntl::fcntl_get_seals;
 pub use fcntl::{fcntl_getfd, fcntl_getfl, fcntl_setfd, fcntl_setfl};
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub use fcopyfile::{
-    copyfile_state_alloc, copyfile_state_free, copyfile_state_get_copied, copyfile_state_t,
-    fcopyfile,
+    copyfile_state_alloc, copyfile_state_free, copyfile_state_get, copyfile_state_get_copied,
+    copyfile_state_t, fcopyfile,
 };
 #[cfg(not(target_os = "wasi"))]
 pub use fd::fchmod;
@@ -129,227 +135,40 @@ pub use sendfile::sendfile;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 pub use statx::statx;
 
-/// `struct stat` for use with [`statat`] and [`fstat`].
-///
-/// [`statat`]: crate::fs::statat
-/// [`fstat`]: crate::fs::fstat
-#[cfg(all(
-    libc,
-    not(any(
-        target_os = "android",
-        target_os = "linux",
-        target_os = "emscripten",
-        target_os = "l4re"
-    ))
-))]
-pub type Stat = libc::stat;
+pub use imp::fs::Stat;
 
-/// `struct stat` for use with [`statat`] and [`fstat`].
-///
-/// [`statat`]: crate::fs::statat
-/// [`fstat`]: crate::fs::fstat
-#[cfg(all(
-    libc,
-    any(
-        target_os = "android",
-        target_os = "linux",
-        target_os = "emscripten",
-        target_os = "l4re"
-    )
-))]
-pub type Stat = libc::stat64;
+#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
+pub use imp::fs::StatFs;
 
-/// `struct stat` for use with [`statat`] and [`fstat`].
-///
-/// [`statat`]: crate::fs::statat
-/// [`fstat`]: crate::fs::fstat
-#[cfg(all(linux_raw, target_pointer_width = "32"))]
-pub type Stat = linux_raw_sys::general::stat64;
-
-/// `struct stat` for use with [`statat`] and [`fstat`].
-///
-/// [`statat`]: crate::fs::statat
-/// [`fstat`]: crate::fs::fstat
-#[cfg(all(linux_raw, target_pointer_width = "64"))]
-pub type Stat = linux_raw_sys::general::stat;
-
-/// `struct statfs` for use with [`fstatfs`].
-///
-/// [`fstatfs`]: crate::fs::fstatfs
-#[cfg(all(
-    libc,
-    not(any(
-        target_os = "android",
-        target_os = "linux",
-        target_os = "emscripten",
-        target_os = "l4re",
-        target_os = "netbsd",
-        target_os = "redox",
-        target_os = "wasi",
-    ))
-))]
-#[allow(clippy::module_name_repetitions)]
-pub type StatFs = libc::statfs;
-
-/// `struct statfs` for use with [`fstatfs`].
-///
-/// [`fstatfs`]: crate::fs::fstatfs
-#[cfg(all(
-    libc,
-    any(
-        target_os = "android",
-        target_os = "linux",
-        target_os = "emscripten",
-        target_os = "l4re"
-    )
-))]
-pub type StatFs = libc::statfs64;
-
-/// `struct statfs` for use with [`fstatfs`].
-///
-/// [`fstatfs`]: crate::fs::fstatfs
-#[cfg(all(linux_raw, target_pointer_width = "32"))]
-#[allow(clippy::module_name_repetitions)]
-pub type StatFs = linux_raw_sys::general::statfs64;
-
-/// `struct statfs` for use with [`fstatfs`].
-///
-/// [`fstatfs`]: crate::fs::fstatfs
-#[cfg(all(linux_raw, target_pointer_width = "64"))]
-#[allow(clippy::module_name_repetitions)]
-pub type StatFs = linux_raw_sys::general::statfs64;
-
-/// `struct statx` for use with [`statx`].
-///
-/// Only available on Linux with GLIBC for now.
-///
-/// [`statx`]: crate::fs::statx
-#[cfg(all(libc, all(target_os = "linux", target_env = "gnu")))]
-pub type Statx = libc::statx;
-
-/// `struct statx` for use with [`statx`].
-///
-/// [`statx`]: crate::fs::statx
-#[cfg(linux_raw)]
-pub type Statx = linux_raw_sys::v5_4::general::statx;
+#[cfg(any(linux_raw, all(libc, all(target_os = "linux", target_env = "gnu"))))]
+pub use imp::fs::Statx;
 
 /// `UTIME_NOW` for use with [`utimensat`].
 ///
 /// [`utimensat`]: crate::fs::utimensat
-#[cfg(all(libc, not(target_os = "redox")))]
-pub use libc::UTIME_NOW;
+#[cfg(any(linux_raw, all(libc, not(target_os = "redox"))))]
+pub const UTIME_NOW: Nsecs = imp::fs::UTIME_NOW as Nsecs;
 
 /// `UTIME_OMIT` for use with [`utimensat`].
 ///
 /// [`utimensat`]: crate::fs::utimensat
-#[cfg(all(libc, not(target_os = "redox")))]
-pub use libc::UTIME_OMIT;
+#[cfg(any(linux_raw, all(libc, not(target_os = "redox"))))]
+pub const UTIME_OMIT: Nsecs = imp::fs::UTIME_OMIT as Nsecs;
 
-/// `UTIME_NOW` for use with [`utimensat`].
-///
-/// [`utimensat`]: crate::fs::utimensat
-#[cfg(linux_raw)]
-pub use linux_raw_sys::general::UTIME_NOW;
-
-/// `UTIME_OMIT` for use with [`utimensat`].
-///
-/// [`utimensat`]: crate::fs::utimensat
-#[cfg(linux_raw)]
-pub use linux_raw_sys::general::UTIME_OMIT;
-
-/// `__fsword_t`.
-#[cfg(all(libc, all(target_os = "linux", not(target_env = "musl"))))]
-pub type FsWord = libc::__fsword_t;
-
-/// `__fsword_t`.
-#[cfg(all(
-    libc,
-    any(target_os = "android", all(target_os = "linux", target_env = "musl")),
-    target_pointer_width = "32"
-))]
-pub type FsWord = u32;
-
-/// `__fsword_t`.
-#[cfg(all(
-    libc,
-    any(target_os = "android", all(target_os = "linux", target_env = "musl")),
-    target_pointer_width = "64"
-))]
-pub type FsWord = u64;
-
-/// `__fsword_t`.
-#[cfg(linux_raw)]
-pub type FsWord = linux_raw_sys::general::__fsword_t;
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+pub use imp::fs::FsWord;
 
 /// The filesystem magic number for procfs.
 ///
 /// See [the `fstatfs` man page] for more information.
 ///
 /// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
-#[cfg(all(
-    libc,
-    any(target_os = "android", target_os = "linux"),
-    not(target_env = "musl")
-))]
-pub const PROC_SUPER_MAGIC: FsWord = libc::PROC_SUPER_MAGIC as FsWord;
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+pub const PROC_SUPER_MAGIC: FsWord = imp::fs::PROC_SUPER_MAGIC;
 
-/// The filesystem magic number for procfs.
-///
-/// See [the `fstatfs` man page] for more information.
-///
-/// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
-#[cfg(all(
-    libc,
-    any(target_os = "android", target_os = "linux"),
-    target_env = "musl"
-))]
-pub const PROC_SUPER_MAGIC: FsWord = 0x0000_9fa0;
+pub use imp::fs::RawMode;
 
-/// The filesystem magic number for procfs.
-///
-/// See [the `fstatfs` man page] for more information.
-///
-/// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
-#[cfg(linux_raw)]
-pub const PROC_SUPER_MAGIC: FsWord = linux_raw_sys::general::PROC_SUPER_MAGIC as FsWord;
-
-/// `mode_t`.
-#[cfg(libc)]
-pub type RawMode = libc::mode_t;
-
-/// `mode_t`.
-#[cfg(all(
-    linux_raw,
-    not(any(
-        target_arch = "x86",
-        target_arch = "sparc",
-        target_arch = "avr",
-        target_arch = "arm"
-    ))
-))]
-pub type RawMode = linux_raw_sys::general::__kernel_mode_t;
-
-/// `mode_t`.
-#[cfg(all(
-    linux_raw,
-    any(
-        target_arch = "x86",
-        target_arch = "sparc",
-        target_arch = "avr",
-        target_arch = "arm"
-    )
-))]
-// Don't use `__kernel_mode_t` since it's `u16` which differs from `st_size`.
-pub type RawMode = std::os::raw::c_uint;
-
-/// `dev_t`.
-#[cfg(libc)]
-pub type Dev = libc::dev_t;
-
-/// `dev_t`.
-#[cfg(linux_raw)]
-// Within the kernel the dev_t is 32-bit, but userspace uses a 64-bit field.
-pub type Dev = u64;
+pub use imp::fs::Dev;
 
 /// Re-export types common to Posix-ish platforms.
 #[cfg(unix)]

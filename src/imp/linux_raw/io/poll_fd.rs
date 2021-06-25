@@ -1,7 +1,6 @@
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
 
-#[cfg(linux_raw)]
 bitflags! {
     /// `POLL*`
     pub struct PollFlags: u16 {

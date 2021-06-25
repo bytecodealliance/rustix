@@ -1,21 +1,7 @@
-use crate::io;
-#[cfg(libc)]
-use crate::libc::conv::ret_c_int;
-#[cfg(libc)]
-use std::convert::TryInto;
-use std::vec::IntoIter;
+use crate::{imp, io};
+use std::{os::raw::c_int, vec::IntoIter};
 
-#[cfg(libc)]
-pub use super::poll_fd::PollFlags;
-
-#[cfg(linux_raw)]
-pub use crate::linux_raw::PollFlags;
-
-#[cfg(libc)]
-pub use super::poll_fd::PollFd;
-
-#[cfg(linux_raw)]
-pub use crate::linux_raw::PollFd;
+pub use imp::io::{PollFd, PollFlags};
 
 /// A [`Vec`] of `pollfd`.
 ///
@@ -49,28 +35,9 @@ impl<'fd> IntoIterator for PollFdVec<'fd> {
     }
 }
 
-#[cfg(libc)]
 impl<'fd> PollFdVec<'fd> {
     /// `poll(self.fds.as_mut_ptr(), self.fds.len(), timeout)`
-    pub fn poll(&mut self, timeout: libc::c_int) -> io::Result<usize> {
-        let nfds = self
-            .fds
-            .len()
-            .try_into()
-            .map_err(|_convert_err| io::Error::INVAL)?;
-
-        let nready =
-            ret_c_int(unsafe { libc::poll(self.fds.as_mut_ptr().cast::<_>(), nfds, timeout) })?;
-
-        Ok(nready as usize)
-    }
-}
-
-#[cfg(linux_raw)]
-impl<'fd> PollFdVec<'fd> {
-    /// `poll(self.fds.as_mut_ptr(), self.fds.len(), timeout)`
-    pub fn poll(&mut self, timeout: std::os::raw::c_int) -> io::Result<usize> {
-        // `PollFd` is `repr(transparent)` so we can transmute slices of it.
-        crate::linux_raw::poll(&mut self.fds, timeout)
+    pub fn poll(&mut self, timeout: c_int) -> io::Result<usize> {
+        imp::syscalls::poll(&mut self.fds, timeout)
     }
 }

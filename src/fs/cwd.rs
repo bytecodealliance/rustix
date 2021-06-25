@@ -1,3 +1,4 @@
+use crate::imp;
 use io_lifetimes::BorrowedFd;
 use unsafe_io::os::posish::RawFd;
 
@@ -10,11 +11,7 @@ use unsafe_io::os::posish::RawFd;
 /// [`openat`]: crate::fs::openat
 #[inline]
 pub fn cwd() -> BorrowedFd<'static> {
-    #[cfg(libc)]
-    let at_fdcwd = libc::AT_FDCWD as RawFd;
-
-    #[cfg(linux_raw)]
-    let at_fdcwd = linux_raw_sys::general::AT_FDCWD as RawFd;
+    let at_fdcwd = imp::io::AT_FDCWD as RawFd;
 
     // # Safety
     //

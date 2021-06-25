@@ -8,6 +8,7 @@
 //! stdio streams.
 #![allow(unsafe_code)]
 
+use crate::imp;
 use io_lifetimes::BorrowedFd;
 use unsafe_io::os::posish::RawFd;
 
@@ -21,15 +22,7 @@ use unsafe_io::os::posish::RawFd;
 /// vicinity, where one knows there aren't any other threads yet and nothing
 /// else has closed stdin.
 pub unsafe fn stdin() -> BorrowedFd<'static> {
-    #[cfg(libc)]
-    {
-        BorrowedFd::borrow_raw_fd(libc::STDIN_FILENO as RawFd)
-    }
-
-    #[cfg(linux_raw)]
-    {
-        BorrowedFd::borrow_raw_fd(linux_raw_sys::general::STDIN_FILENO as RawFd)
-    }
+    BorrowedFd::borrow_raw_fd(imp::io::STDIN_FILENO as RawFd)
 }
 
 /// `STDOUT_FILENO`
@@ -42,15 +35,7 @@ pub unsafe fn stdin() -> BorrowedFd<'static> {
 /// vicinity, where one knows there aren't any other threads yet and nothing
 /// else has closed stdout.
 pub unsafe fn stdout() -> BorrowedFd<'static> {
-    #[cfg(libc)]
-    {
-        BorrowedFd::borrow_raw_fd(libc::STDOUT_FILENO as RawFd)
-    }
-
-    #[cfg(linux_raw)]
-    {
-        BorrowedFd::borrow_raw_fd(linux_raw_sys::general::STDOUT_FILENO as RawFd)
-    }
+    BorrowedFd::borrow_raw_fd(imp::io::STDOUT_FILENO as RawFd)
 }
 
 /// `STDERR_FILENO`
@@ -63,13 +48,5 @@ pub unsafe fn stdout() -> BorrowedFd<'static> {
 /// vicinity, where one knows there aren't any other threads yet and nothing
 /// else has closed stderr.
 pub unsafe fn stderr() -> BorrowedFd<'static> {
-    #[cfg(libc)]
-    {
-        BorrowedFd::borrow_raw_fd(libc::STDERR_FILENO as RawFd)
-    }
-
-    #[cfg(linux_raw)]
-    {
-        BorrowedFd::borrow_raw_fd(linux_raw_sys::general::STDERR_FILENO as RawFd)
-    }
+    BorrowedFd::borrow_raw_fd(imp::io::STDERR_FILENO as RawFd)
 }

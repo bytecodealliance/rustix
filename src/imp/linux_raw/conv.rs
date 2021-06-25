@@ -7,11 +7,12 @@
 //! types knowing their layouts, or construct owned file descriptors.
 #![allow(unsafe_code)]
 
+use super::{fs::Mode, time::ClockId};
 use crate::{as_mut_ptr, as_ptr, io};
 use io_lifetimes::{BorrowedFd, OwnedFd};
 #[cfg(target_pointer_width = "64")]
 use linux_raw_sys::general::__kernel_loff_t;
-use linux_raw_sys::general::{__kernel_clockid_t, socklen_t, umode_t};
+use linux_raw_sys::general::{__kernel_clockid_t, socklen_t};
 use std::{
     ffi::CStr,
     mem::{transmute, MaybeUninit},
@@ -139,8 +140,8 @@ pub(super) fn loff_t_from_u64(i: u64) -> usize {
 }
 
 #[inline]
-pub(super) fn clockid_t(i: __kernel_clockid_t) -> usize {
-    i as usize
+pub(super) fn clockid_t(i: ClockId) -> usize {
+    i as __kernel_clockid_t as usize
 }
 
 #[inline]
@@ -149,8 +150,8 @@ pub(super) fn socklen_t(i: socklen_t) -> usize {
 }
 
 #[inline]
-pub(super) fn umode_t(mode: umode_t) -> usize {
-    mode as usize
+pub(super) fn mode_as(mode: Mode) -> usize {
+    mode.bits() as usize
 }
 
 #[cfg(target_pointer_width = "64")]

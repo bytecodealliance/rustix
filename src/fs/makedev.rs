@@ -1,4 +1,5 @@
-use crate::fs::Dev;
+use crate::imp;
+use imp::fs::Dev;
 
 /// `makedev(maj, min)`
 #[cfg(all(

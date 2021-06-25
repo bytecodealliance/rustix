@@ -1,5 +1,7 @@
 //! Network-related operations.
 
+use crate::imp;
+
 mod send_recv;
 mod socket;
 #[cfg(not(target_os = "wasi"))]
@@ -17,8 +19,6 @@ pub use socket::{
 pub use socketpair::socketpair;
 
 #[cfg(libc)]
-pub use crate::libc::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
+pub use imp::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 #[cfg(linux_raw)]
-pub use crate::linux_raw::{
-    Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6,
-};
+pub use imp::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};

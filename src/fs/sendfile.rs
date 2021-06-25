@@ -1,10 +1,5 @@
-use crate::io;
-use io_lifetimes::{AsFd, BorrowedFd};
-#[cfg(libc)]
-use {
-    crate::libc::conv::{borrowed_fd, ret_ssize_t},
-    std::mem::transmute,
-};
+use crate::{imp, io};
+use io_lifetimes::AsFd;
 
 /// `sendfile(out_fd, in_fd, offset, count)`
 #[cfg(any(linux_raw, target_os = "linux"))]
@@ -17,34 +12,5 @@ pub fn sendfile<OutFd: AsFd, InFd: AsFd>(
 ) -> io::Result<usize> {
     let out_fd = out_fd.as_fd();
     let in_fd = in_fd.as_fd();
-    _sendfile(out_fd, in_fd, offset, count)
-}
-
-#[cfg(all(libc, any(target_os = "linux")))]
-fn _sendfile(
-    out_fd: BorrowedFd<'_>,
-    in_fd: BorrowedFd<'_>,
-    offset: Option<&mut u64>,
-    count: usize,
-) -> io::Result<usize> {
-    unsafe {
-        let nsent = ret_ssize_t(libc::sendfile64(
-            borrowed_fd(out_fd),
-            borrowed_fd(in_fd),
-            transmute(offset),
-            count,
-        ))?;
-        Ok(nsent as usize)
-    }
-}
-
-#[cfg(linux_raw)]
-#[inline]
-fn _sendfile(
-    out_fd: BorrowedFd<'_>,
-    in_fd: BorrowedFd<'_>,
-    offset: Option<&mut u64>,
-    count: usize,
-) -> io::Result<usize> {
-    crate::linux_raw::sendfile(out_fd, in_fd, offset, count)
+    imp::syscalls::sendfile(out_fd, in_fd, offset, count)
 }

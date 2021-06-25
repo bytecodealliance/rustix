@@ -1,5 +1,7 @@
 //! Time-related operations.
 
+use crate::imp;
+
 #[cfg(not(target_os = "redox"))]
 mod clock;
 
@@ -22,10 +24,4 @@ pub use clock::{nanosleep, NanosleepRelativeResult};
 )))]
 pub use clock::{clock_nanosleep_absolute, clock_nanosleep_relative};
 
-/// `struct timespec`
-#[cfg(libc)]
-pub type Timespec = libc::timespec;
-
-/// `struct timespec`.
-#[cfg(linux_raw)]
-pub type Timespec = linux_raw_sys::general::__kernel_timespec;
+pub use imp::time::{Nsecs, Secs, Timespec};

@@ -54,6 +54,7 @@ pub use io_lifetimes;
 #[cfg(all(libc, not(target_os = "wasi")))]
 #[macro_use]
 mod weak;
+mod imp;
 
 pub mod fs;
 pub mod io;
@@ -63,11 +64,6 @@ pub mod path;
 pub mod process;
 pub mod rand;
 pub mod time;
-
-#[cfg(libc)]
-mod libc;
-#[cfg(linux_raw)]
-mod linux_raw;
 
 /// Convert a `&T` into a `*const T` without using an `as`.
 #[inline]

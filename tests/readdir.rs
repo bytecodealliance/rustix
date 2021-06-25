@@ -1,6 +1,6 @@
 #![cfg(not(target_os = "redox"))]
 
-use posish::fs::{Dir, Entry};
+use posish::fs::{Dir, DirEntry};
 use std::collections::HashMap;
 
 #[test]
@@ -37,7 +37,7 @@ fn dir_entries() {
     assert_eq!(entries.len(), 2);
 }
 
-fn read_entries(dir: &mut Dir) -> HashMap<String, Entry> {
+fn read_entries(dir: &mut Dir) -> HashMap<String, DirEntry> {
     dir.rewind();
     let mut out = HashMap::new();
     loop {

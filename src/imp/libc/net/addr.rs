@@ -1,16 +1,25 @@
-use crate::{io, net::AddressFamily, path};
+use super::AddressFamily;
+use crate::{io, path};
 use std::ffi::CString;
+#[cfg(any(
+    target_os = "netbsd",
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "freebsd",
+    target_os = "openbsd"
+))]
+use std::mem::size_of;
 
 /// `struct in_addr`
 #[repr(transparent)]
 #[derive(Clone)]
 #[doc(alias("in_addr"))]
-pub struct Ipv4Addr(pub(crate) linux_raw_sys::general::in_addr);
+pub struct Ipv4Addr(pub(crate) libc::in_addr);
 
 impl Ipv4Addr {
     /// Construct a new IPv4 address from 4 octets.
     pub const fn new(a: u8, b: u8, c: u8, d: u8) -> Self {
-        Self(linux_raw_sys::general::in_addr {
+        Self(libc::in_addr {
             s_addr: u32::from_ne_bytes([a, b, c, d]),
         })
     }
@@ -20,24 +29,30 @@ impl Ipv4Addr {
 #[repr(transparent)]
 #[derive(Clone)]
 #[doc(alias("in6_addr"))]
-pub struct Ipv6Addr(pub(crate) linux_raw_sys::general::in6_addr);
+pub struct Ipv6Addr(pub(crate) libc::in6_addr);
 
 impl Ipv6Addr {
     /// Construct a new IPv6 address from eight 16-bit segments.
     pub const fn new(a: u16, b: u16, c: u16, d: u16, e: u16, f: u16, g: u16, h: u16) -> Self {
-        Self(linux_raw_sys::general::in6_addr {
-            in6_u: linux_raw_sys::general::in6_addr__bindgen_ty_1 {
-                u6_addr16: [
-                    a.to_be(),
-                    b.to_be(),
-                    c.to_be(),
-                    d.to_be(),
-                    e.to_be(),
-                    f.to_be(),
-                    g.to_be(),
-                    h.to_be(),
-                ],
-            },
+        Self(libc::in6_addr {
+            s6_addr: [
+                (a >> 8) as u8,
+                (a & 0xff) as u8,
+                (b >> 8) as u8,
+                (b & 0xff) as u8,
+                (c >> 8) as u8,
+                (c & 0xff) as u8,
+                (d >> 8) as u8,
+                (d & 0xff) as u8,
+                (e >> 8) as u8,
+                (e & 0xff) as u8,
+                (f >> 8) as u8,
+                (f & 0xff) as u8,
+                (g >> 8) as u8,
+                (g & 0xff) as u8,
+                (h >> 8) as u8,
+                (h & 0xff) as u8,
+            ],
         })
     }
 }
@@ -59,12 +74,20 @@ impl SocketAddrV4 {
 
     /// Encode this socket address in the host format.
     #[inline]
-    pub(crate) const fn encode(&self) -> linux_raw_sys::general::sockaddr_in {
-        linux_raw_sys::general::sockaddr_in {
-            sin_family: linux_raw_sys::general::AF_INET as _,
+    pub(crate) const fn encode(&self) -> libc::sockaddr_in {
+        libc::sockaddr_in {
+            #[cfg(any(
+                target_os = "netbsd",
+                target_os = "macos",
+                target_os = "ios",
+                target_os = "freebsd",
+                target_os = "openbsd"
+            ))]
+            sin_len: size_of::<libc::sockaddr_in>() as _,
+            sin_family: libc::AF_INET as _,
             sin_addr: self.addr.0,
             sin_port: self.port.to_be(),
-            __pad: [0; 8_usize],
+            sin_zero: [0; 8_usize],
         }
     }
 
@@ -106,9 +129,17 @@ impl SocketAddrV6 {
 
     /// Encode this socket address in the host format.
     #[inline]
-    pub(crate) const fn encode(&self) -> linux_raw_sys::general::sockaddr_in6 {
-        linux_raw_sys::general::sockaddr_in6 {
-            sin6_family: linux_raw_sys::general::AF_INET6 as _,
+    pub(crate) const fn encode(&self) -> libc::sockaddr_in6 {
+        libc::sockaddr_in6 {
+            #[cfg(any(
+                target_os = "netbsd",
+                target_os = "macos",
+                target_os = "ios",
+                target_os = "freebsd",
+                target_os = "openbsd"
+            ))]
+            sin6_len: size_of::<libc::sockaddr_in6>() as _,
+            sin6_family: libc::AF_INET6 as _,
             sin6_addr: self.addr.0,
             sin6_port: self.port.to_be(),
             sin6_flowinfo: self.flowinfo,
@@ -160,9 +191,33 @@ impl SocketAddrUnix {
     #[inline]
     fn _new(path: CString) -> io::Result<Self> {
         let bytes = path.as_bytes();
-        let z = linux_raw_sys::general::sockaddr_un {
+
+        let z = libc::sockaddr_un {
+            #[cfg(any(
+                target_os = "netbsd",
+                target_os = "macos",
+                target_os = "ios",
+                target_os = "freebsd",
+                target_os = "openbsd"
+            ))]
+            sun_len: 0,
             sun_family: 0,
-            sun_path: [0; 108_usize],
+            #[cfg(any(
+                target_os = "netbsd",
+                target_os = "macos",
+                target_os = "ios",
+                target_os = "freebsd",
+                target_os = "openbsd"
+            ))]
+            sun_path: [0; 104],
+            #[cfg(not(any(
+                target_os = "netbsd",
+                target_os = "macos",
+                target_os = "ios",
+                target_os = "freebsd",
+                target_os = "openbsd"
+            )))]
+            sun_path: [0; 108],
         };
         if bytes.len() + 1 > z.sun_path.len() {
             return Err(io::Error::NAMETOOLONG);
@@ -172,10 +227,33 @@ impl SocketAddrUnix {
 
     /// Encode this socket address in the host format.
     #[inline]
-    pub(crate) fn encode(&self) -> linux_raw_sys::general::sockaddr_un {
-        let mut encoded = linux_raw_sys::general::sockaddr_un {
-            sun_family: linux_raw_sys::general::AF_UNIX as _,
-            sun_path: [0; 108_usize],
+    pub(crate) fn encode(&self) -> libc::sockaddr_un {
+        let mut encoded = libc::sockaddr_un {
+            #[cfg(any(
+                target_os = "netbsd",
+                target_os = "macos",
+                target_os = "ios",
+                target_os = "freebsd",
+                target_os = "openbsd"
+            ))]
+            sun_len: size_of::<libc::sockaddr_un>() as _,
+            sun_family: libc::AF_UNIX as _,
+            #[cfg(any(
+                target_os = "netbsd",
+                target_os = "macos",
+                target_os = "ios",
+                target_os = "freebsd",
+                target_os = "openbsd"
+            ))]
+            sun_path: [0; 104],
+            #[cfg(not(any(
+                target_os = "netbsd",
+                target_os = "macos",
+                target_os = "ios",
+                target_os = "freebsd",
+                target_os = "openbsd"
+            )))]
+            sun_path: [0; 108],
         };
         let bytes = self.path.as_bytes();
         for (i, b) in bytes.iter().enumerate() {
