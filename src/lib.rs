@@ -34,7 +34,6 @@
 //! [`io-streams`]: https://crates.io/crates/io-streams
 //! [`std`]: https://doc.rust-lang.org/std/
 //! [`getrandom`]: https://crates.io/crates/getrandom
-//! [`std::fs::File`]: https://doc.rust-lang.org/std/fs/struct.File.html
 //! [`bitflags`]: https://crates.io/crates/bitflags
 //! [`AsFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.AsFd.html
 //! [`OwnedFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/struct.OwnedFd.html

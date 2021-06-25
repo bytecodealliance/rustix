@@ -19,7 +19,7 @@ pub use crate::linux_raw::PollFd;
 
 /// A [`Vec`] of `pollfd`.
 ///
-/// [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
+/// [`Vec`]: std::vec::Vec
 #[derive(Clone, Debug)]
 pub struct PollFdVec<'fd> {
     fds: Vec<PollFd<'fd>>,

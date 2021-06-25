@@ -39,8 +39,7 @@ use std::{
 /// Users can then call `touch("foo")`, `touch(cstr!("foo"))`,
 /// `touch(Path::new("foo"))`, or many other things.
 ///
-/// [`AsRef`]: https://doc.rust-lang.org/std/convert/trait.AsRef.html
-/// [`Path`]: https://doc.rust-lang.org/std/path/struct.Path.html
+/// [`AsRef`]: std::convert::AsRef
 pub trait Arg {
     /// Return a view of this string as a string slice.
     fn as_str(&self) -> io::Result<&str>;
@@ -49,15 +48,11 @@ pub trait Arg {
     fn to_string_lossy(&self) -> Cow<str>;
 
     /// Return a view of this string as a maybe-owned [`CStr`].
-    ///
-    /// [`CStr`]: https://doc.rust-lang.org/std/ffi/struct.CStr.html
     #[cfg(not(windows))]
     fn as_c_str(&self) -> io::Result<Cow<CStr>>;
 
-    /// Consume `self` and teturn a view of this string as a maybe-owned
+    /// Consume `self` and return a view of this string as a maybe-owned
     /// [`CStr`].
-    ///
-    /// [`CStr`]: https://doc.rust-lang.org/std/ffi/struct.CStr.html
     #[cfg(not(windows))]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
