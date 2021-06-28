@@ -2034,8 +2034,8 @@ pub(crate) unsafe fn mmap(
 
 /// # Safety
 ///
-/// `munmap` is primarily unsafe due to the `addr` parameter, as anything working
-/// with memory pointed to by raw pointers is unsafe.
+/// `munmap` is primarily unsafe due to the `addr` parameter, as anything
+/// working with memory pointed to by raw pointers is unsafe.
 #[inline]
 pub(crate) unsafe fn munmap(addr: *mut c_void, length: usize) -> io::Result<()> {
     ret(syscall2(__NR_munmap, void_star(addr), length))
