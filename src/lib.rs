@@ -46,6 +46,7 @@
 #![cfg_attr(linux_raw, deny(unsafe_code))]
 #![cfg_attr(linux_raw, feature(asm))]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
+#![cfg_attr(all(linux_raw, target_arch = "x86"), feature(naked_functions))]
 
 /// Re-export `io_lifetimes` since we use its types in our public API, so
 /// that our users don't need to do anything special to use the same version.

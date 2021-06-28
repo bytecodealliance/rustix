@@ -1,20 +1,22 @@
-// # Safety
-//
-// This file performs raw system calls, and sometimes passes them uninitialized
-// memory buffers. The signatures in this file are currently manually
-// maintained and must correspond with the signatures of the actual Linux
-// syscalls.
-//
-// Some of this could be auto-generated from the Linux header file
-// <linux/syscalls.h>, but we often need more information than it provides,
-// such as which pointers are array slices, out parameters, or in-out
-// parameters, which integers are owned or borrowed file descriptors, etc.
+//! Safe (where possible) wrappers around system calls.
+//!
+//! # Safety
+//!
+//! This file performs raw system calls, and sometimes passes them
+//! uninitialized memory buffers. The signatures in this file are currently
+//! manually maintained and must correspond with the signatures of the actual
+//! Linux syscalls.
+//!
+//! Some of this could be auto-generated from the Linux header file
+//! <linux/syscalls.h>, but we often need more information than it provides,
+//! such as which pointers are array slices, out parameters, or in-out
+//! parameters, which integers are owned or borrowed file descriptors, etc.
 #![allow(unsafe_code)]
 #![allow(dead_code)]
 
 //! Functions which operate on file descriptors.
 
-use super::arch::{
+use super::arch::choose::{
     syscall0_readonly, syscall1, syscall1_noreturn, syscall1_readonly, syscall2, syscall2_readonly,
     syscall3, syscall3_readonly, syscall4, syscall4_readonly, syscall5, syscall5_readonly,
     syscall6, syscall6_readonly,
@@ -58,14 +60,13 @@ use linux_raw_sys::general::{__NR_getegid32, __NR_geteuid32, __NR_getgid32, __NR
 use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::{
     general::{
-        __NR_chdir, __NR_clock_getres, __NR_clock_gettime, __NR_clock_nanosleep, __NR_close,
-        __NR_dup, __NR_dup3, __NR_exit_group, __NR_faccessat, __NR_fallocate, __NR_fchmod,
-        __NR_fchmodat, __NR_fdatasync, __NR_fsync, __NR_getcwd, __NR_getdents64, __NR_getpid,
-        __NR_getppid, __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_mknodat, __NR_munmap,
-        __NR_nanosleep, __NR_open, __NR_openat, __NR_pipe, __NR_pipe2, __NR_poll, __NR_pread64,
-        __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv,
-        __NR_renameat, __NR_sched_yield, __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write,
-        __NR_writev,
+        __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
+        __NR_exit_group, __NR_faccessat, __NR_fallocate, __NR_fchmod, __NR_fchmodat,
+        __NR_fdatasync, __NR_fsync, __NR_getcwd, __NR_getdents64, __NR_getpid, __NR_getppid,
+        __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_mknodat, __NR_munmap, __NR_nanosleep,
+        __NR_open, __NR_openat, __NR_pipe, __NR_pipe2, __NR_poll, __NR_pread64, __NR_preadv,
+        __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv, __NR_renameat,
+        __NR_sched_yield, __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
     },
     general::{
         __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t, sockaddr, sockaddr_in,
@@ -115,8 +116,7 @@ use {
             __NR_fstatfs64, __NR_ftruncate64, __NR_sendfile64,
         },
         v5_4::general::{
-            __NR_clock_getres_time64, __NR_clock_gettime64, __NR_clock_nanosleep_time64,
-            __NR_utimensat_time64,
+            __NR_clock_getres_time64, __NR_clock_nanosleep_time64, __NR_utimensat_time64,
         },
     },
 };
@@ -128,6 +128,9 @@ use {
         __NR_mmap, __NR_newfstatat, __NR_sendfile,
     },
 };
+
+// `clock_gettime` has special optimizations via the vDSO.
+pub(crate) use super::vdso_wrappers::clock_gettime;
 
 #[inline]
 pub(crate) fn exit_group(code: c_int) -> ! {
@@ -227,51 +230,6 @@ pub(crate) fn openat2(
             }),
             size_of::<open_how>(),
         ))
-    }
-}
-
-#[inline]
-pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
-    // TODO: Linux makes clock_gettime available through the vDSO, which is
-    // faster, but more complex to locate and parse before we can call it.
-    #[cfg(target_pointer_width = "32")]
-    unsafe {
-        let mut result = MaybeUninit::<__kernel_timespec>::uninit();
-        let _ = ret(syscall2(
-            __NR_clock_gettime64,
-            clockid_t(which_clock),
-            out(&mut result),
-        ))
-        .or_else(|err| {
-            // Ordinarily posish doesn't like to emulate system calls, but in
-            // the case of time APIs, it's specific to Linux, specific to
-            // 32-bit architectures *and* specific to old kernel versions, and
-            // it's not that hard to fix up here, so that no other code needs
-            // to worry about this.
-            if err == io::Error::NOSYS {
-                let mut old_result = MaybeUninit::<__kernel_old_timespec>::uninit();
-                let res = ret(syscall2(
-                    __NR_clock_gettime,
-                    clockid_t(which_clock),
-                    out(&mut old_result),
-                ));
-                let old_result = old_result.assume_init();
-                *result.as_mut_ptr() = __kernel_timespec {
-                    tv_sec: old_result.tv_sec.into(),
-                    tv_nsec: old_result.tv_nsec.into(),
-                };
-                res
-            } else {
-                Err(err)
-            }
-        });
-        result.assume_init()
-    }
-    #[cfg(target_pointer_width = "64")]
-    unsafe {
-        let mut result = MaybeUninit::<__kernel_timespec>::uninit();
-        syscall2(__NR_clock_gettime, clockid_t(which_clock), out(&mut result));
-        result.assume_init()
     }
 }
 
