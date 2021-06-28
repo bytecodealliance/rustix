@@ -255,7 +255,7 @@ pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
                     clockid_t(which_clock),
                     out(&mut old_result),
                 ));
-                let old_result = *old_result.as_ptr();
+                let old_result = old_result.assume_init();
                 *result.as_mut_ptr() = __kernel_timespec {
                     tv_sec: old_result.tv_sec.into(),
                     tv_nsec: old_result.tv_nsec.into(),
@@ -294,7 +294,7 @@ pub(crate) fn clock_getres(which_clock: ClockId) -> __kernel_timespec {
                     clockid_t(which_clock),
                     out(&mut old_result),
                 ));
-                let old_result = *old_result.as_ptr();
+                let old_result = old_result.assume_init();
                 *result.as_mut_ptr() = __kernel_timespec {
                     tv_sec: old_result.tv_sec.into(),
                     tv_nsec: old_result.tv_nsec.into(),
@@ -1463,7 +1463,7 @@ pub(crate) fn accept(fd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(Owne
             by_mut(&mut addrlen),
             c_uint(flags.bits()),
         ))?;
-        Ok((fd, decode_sockaddr(storage.as_ptr(), addrlen)))
+        Ok((fd, decode_sockaddr(&storage.assume_init(), addrlen)))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
@@ -1479,7 +1479,7 @@ pub(crate) fn accept(fd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(Owne
                 c_uint(flags.bits()),
             ]),
         ))?;
-        Ok((fd, decode_sockaddr(storage.as_ptr(), addrlen)))
+        Ok((fd, decode_sockaddr(&storage.assume_init(), addrlen)))
     }
 }
 
@@ -1780,7 +1780,7 @@ pub(crate) fn recvfrom(
             out(&mut storage),
             by_mut(&mut addrlen),
         ))?;
-        Ok((nread, decode_sockaddr(storage.as_ptr(), addrlen)))
+        Ok((nread, decode_sockaddr(&storage.assume_init(), addrlen)))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
@@ -1798,7 +1798,7 @@ pub(crate) fn recvfrom(
                 by_mut(&mut addrlen),
             ]),
         ))?;
-        Ok((nread, decode_sockaddr(storage.as_ptr(), addrlen)))
+        Ok((nread, decode_sockaddr(&storage.assume_init(), addrlen)))
     }
 }
 
@@ -1814,7 +1814,7 @@ pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
             out(&mut storage),
             by_mut(&mut addrlen),
         ))?;
-        Ok(decode_sockaddr(storage.as_ptr(), addrlen))
+        Ok(decode_sockaddr(&storage.assume_init(), addrlen))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
@@ -1825,7 +1825,7 @@ pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
             x86_sys(SYS_GETPEERNAME),
             slice_addr(&[borrowed_fd(fd), out(&mut storage), by_mut(&mut addrlen)]),
         ))?;
-        Ok(decode_sockaddr(storage.as_ptr(), addrlen))
+        Ok(decode_sockaddr(&storage.assume_init(), addrlen))
     }
 }
 
@@ -1841,7 +1841,7 @@ pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
             out(&mut storage),
             by_mut(&mut addrlen),
         ))?;
-        Ok(decode_sockaddr(storage.as_ptr(), addrlen))
+        Ok(decode_sockaddr(&storage.assume_init(), addrlen))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
@@ -1852,7 +1852,7 @@ pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
             x86_sys(SYS_GETSOCKNAME),
             slice_addr(&[borrowed_fd(fd), out(&mut storage), by_mut(&mut addrlen)]),
         ))?;
-        Ok(decode_sockaddr(storage.as_ptr(), addrlen))
+        Ok(decode_sockaddr(&storage.assume_init(), addrlen))
     }
 }
 
@@ -2188,7 +2188,7 @@ pub(crate) fn nanosleep(req: &__kernel_timespec) -> NanosleepRelativeResult {
                     by_ref(&old_req),
                     out(&mut old_rem),
                 ));
-                let old_rem = *old_rem.as_ptr();
+                let old_rem = old_rem.assume_init();
                 *rem.as_mut_ptr() = __kernel_timespec {
                     tv_sec: old_rem.tv_sec.into(),
                     tv_nsec: old_rem.tv_nsec.into(),
@@ -2244,7 +2244,7 @@ pub(crate) fn clock_nanosleep_relative(
                     by_ref(&old_req),
                     out(&mut old_rem),
                 ));
-                let old_rem = *old_rem.as_ptr();
+                let old_rem = old_rem.assume_init();
                 *rem.as_mut_ptr() = __kernel_timespec {
                     tv_sec: old_rem.tv_sec.into(),
                     tv_nsec: old_rem.tv_nsec.into(),
