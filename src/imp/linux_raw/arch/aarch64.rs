@@ -30,7 +30,7 @@ pub(crate) unsafe fn syscall1(nr: u32, a0: usize) -> usize {
     asm!(
         "svc 0",
         in("x8") nr as usize,
-        inout("x0") a0 => r0,
+        inlateout("x0") a0 => r0,
         options(nostack, preserves_flags)
     );
     r0
@@ -42,7 +42,7 @@ pub(crate) unsafe fn syscall1_readonly(nr: u32, a0: usize) -> usize {
     asm!(
         "svc 0",
         in("x8") nr as usize,
-        inout("x0") a0 => r0,
+        inlateout("x0") a0 => r0,
         options(nostack, preserves_flags, readonly)
     );
     r0
@@ -64,7 +64,7 @@ pub(crate) unsafe fn syscall2(nr: u32, a0: usize, a1: usize) -> usize {
     asm!(
         "svc 0",
         in("x8") nr as usize,
-        inout("x0") a0 => r0,
+        inlateout("x0") a0 => r0,
         in("x1") a1,
         options(nostack, preserves_flags)
     );
@@ -77,7 +77,7 @@ pub(crate) unsafe fn syscall2_readonly(nr: u32, a0: usize, a1: usize) -> usize {
     asm!(
         "svc 0",
         in("x8") nr as usize,
-        inout("x0") a0 => r0,
+        inlateout("x0") a0 => r0,
         in("x1") a1,
         options(nostack, preserves_flags, readonly)
     );
@@ -90,7 +90,7 @@ pub(crate) unsafe fn syscall3(nr: u32, a0: usize, a1: usize, a2: usize) -> usize
     asm!(
         "svc 0",
         in("x8") nr as usize,
-        inout("x0") a0 => r0,
+        inlateout("x0") a0 => r0,
         in("x1") a1,
         in("x2") a2,
         options(nostack, preserves_flags)
@@ -104,7 +104,7 @@ pub(crate) unsafe fn syscall3_readonly(nr: u32, a0: usize, a1: usize, a2: usize)
     asm!(
         "svc 0",
         in("x8") nr as usize,
-        inout("x0") a0 => r0,
+        inlateout("x0") a0 => r0,
         in("x1") a1,
         in("x2") a2,
         options(nostack, preserves_flags, readonly)
@@ -118,7 +118,7 @@ pub(crate) unsafe fn syscall4(nr: u32, a0: usize, a1: usize, a2: usize, a3: usiz
     asm!(
         "svc 0",
         in("x8") nr as usize,
-        inout("x0") a0 => r0,
+        inlateout("x0") a0 => r0,
         in("x1") a1,
         in("x2") a2,
         in("x3") a3,
@@ -139,7 +139,7 @@ pub(crate) unsafe fn syscall4_readonly(
     asm!(
         "svc 0",
         in("x8") nr as usize,
-        inout("x0") a0 => r0,
+        inlateout("x0") a0 => r0,
         in("x1") a1,
         in("x2") a2,
         in("x3") a3,
@@ -161,7 +161,7 @@ pub(crate) unsafe fn syscall5(
     asm!(
         "svc 0",
         in("x8") nr as usize,
-        inout("x0") a0 => r0,
+        inlateout("x0") a0 => r0,
         in("x1") a1,
         in("x2") a2,
         in("x3") a3,
@@ -184,7 +184,7 @@ pub(crate) unsafe fn syscall5_readonly(
     asm!(
         "svc 0",
         in("x8") nr as usize,
-        inout("x0") a0 => r0,
+        inlateout("x0") a0 => r0,
         in("x1") a1,
         in("x2") a2,
         in("x3") a3,
@@ -208,7 +208,7 @@ pub(crate) unsafe fn syscall6(
     asm!(
         "svc 0",
         in("x8") nr as usize,
-        inout("x0") a0 => r0,
+        inlateout("x0") a0 => r0,
         in("x1") a1,
         in("x2") a2,
         in("x3") a3,
@@ -233,7 +233,7 @@ pub(crate) unsafe fn syscall6_readonly(
     asm!(
         "svc 0",
         in("x8") nr as usize,
-        inout("x0") a0 => r0,
+        inlateout("x0") a0 => r0,
         in("x1") a1,
         in("x2") a2,
         in("x3") a3,
