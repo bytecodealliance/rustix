@@ -1,5 +1,7 @@
 mod arch;
 mod conv;
+mod vdso;
+mod vdso_wrappers;
 
 pub(crate) mod fs;
 pub(crate) mod io;
