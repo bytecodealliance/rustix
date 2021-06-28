@@ -1,5 +1,8 @@
 #![allow(dead_code)]
 
+#[cfg(target_pointer_width = "32")]
+compile_error!("x32 is not yet supported");
+
 #[inline]
 pub(crate) unsafe fn syscall0(nr: u32) -> usize {
     let r0;
