@@ -1253,8 +1253,7 @@ where
     let mut buffer: [u8; SIZE] = [0u8; SIZE];
     // Copy the bytes in; the buffer already has zeros for the trailing NUL.
     buffer[..bytes.len()].copy_from_slice(bytes);
-    f(CStr::from_bytes_with_nul(&buffer[..bytes.len() + 1])
-        .map_err(|_cstr_err| io::Error::INVAL)?)
+    f(CStr::from_bytes_with_nul(&buffer[..=bytes.len()]).map_err(|_cstr_err| io::Error::INVAL)?)
 }
 
 /// The slow path which handles any length. In theory OS's only support up

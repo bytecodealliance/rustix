@@ -9,7 +9,7 @@ pub use imp::net::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketType};
 
 impl Default for Protocol {
     fn default() -> Self {
-        Protocol::Ip
+        Self::Ip
     }
 }
 
