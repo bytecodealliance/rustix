@@ -30,7 +30,7 @@ pub fn openat<P: path::Arg, Fd: AsFd>(
     mode: Mode,
 ) -> io::Result<OwnedFd> {
     let dirfd = dirfd.as_fd();
-    path.into_with_c_str(|path| imp::syscalls::openat(dirfd, &path, oflags, mode))
+    path.into_with_c_str(|path| imp::syscalls::openat(dirfd, path, oflags, mode))
 }
 
 /// `readlinkat(fd, path)`
@@ -43,7 +43,7 @@ pub fn readlinkat<P: path::Arg, Fd: AsFd>(
     reuse: OsString,
 ) -> io::Result<OsString> {
     let dirfd = dirfd.as_fd();
-    path.into_with_c_str(|path| _readlinkat(dirfd, &path, reuse))
+    path.into_with_c_str(|path| _readlinkat(dirfd, path, reuse))
 }
 
 fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Result<OsString> {
@@ -70,7 +70,7 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Resul
 #[inline]
 pub fn mkdirat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
-    path.into_with_c_str(|path| imp::syscalls::mkdirat(dirfd, &path, mode))
+    path.into_with_c_str(|path| imp::syscalls::mkdirat(dirfd, path, mode))
 }
 
 /// `linkat(old_dirfd, old_path, new_dirfd, new_path, flags)`
@@ -86,7 +86,7 @@ pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
     let new_dirfd = new_dirfd.as_fd();
     old_path.into_with_c_str(|old_path| {
         new_path.into_with_c_str(|new_path| {
-            imp::syscalls::linkat(old_dirfd, &old_path, new_dirfd, &new_path, flags)
+            imp::syscalls::linkat(old_dirfd, old_path, new_dirfd, new_path, flags)
         })
     })
 }
@@ -95,7 +95,7 @@ pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
 #[inline]
 pub fn unlinkat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
-    path.into_with_c_str(|path| imp::syscalls::unlinkat(dirfd, &path, flags))
+    path.into_with_c_str(|path| imp::syscalls::unlinkat(dirfd, path, flags))
 }
 
 /// `renameat(old_dirfd, old_path, new_dirfd, new_path)`
@@ -110,7 +110,7 @@ pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
     let new_dirfd = new_dirfd.as_fd();
     old_path.into_with_c_str(|old_path| {
         new_path.into_with_c_str(|new_path| {
-            imp::syscalls::renameat(old_dirfd, &old_path, new_dirfd, &new_path)
+            imp::syscalls::renameat(old_dirfd, old_path, new_dirfd, new_path)
         })
     })
 }
@@ -124,8 +124,7 @@ pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsFd>(
 ) -> io::Result<()> {
     let new_dirfd = new_dirfd.as_fd();
     old_path.into_with_c_str(|old_path| {
-        new_path
-            .into_with_c_str(|new_path| imp::syscalls::symlinkat(&old_path, new_dirfd, &new_path))
+        new_path.into_with_c_str(|new_path| imp::syscalls::symlinkat(old_path, new_dirfd, new_path))
     })
 }
 
@@ -134,7 +133,7 @@ pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsFd>(
 #[doc(alias = "fstatat")]
 pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags) -> io::Result<Stat> {
     let dirfd = dirfd.as_fd();
-    path.into_with_c_str(|path| imp::syscalls::statat(dirfd, &path, flags))
+    path.into_with_c_str(|path| imp::syscalls::statat(dirfd, path, flags))
 }
 
 /// `faccessat(dirfd, path, access, flags)`
@@ -147,7 +146,7 @@ pub fn accessat<P: path::Arg, Fd: AsFd>(
     flags: AtFlags,
 ) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
-    path.into_with_c_str(|path| imp::syscalls::accessat(dirfd, &path, access, flags))
+    path.into_with_c_str(|path| imp::syscalls::accessat(dirfd, path, access, flags))
 }
 
 /// `utimensat(dirfd, path, times, flags)`
@@ -159,7 +158,7 @@ pub fn utimensat<P: path::Arg, Fd: AsFd>(
     flags: AtFlags,
 ) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
-    path.into_with_c_str(|path| imp::syscalls::utimensat(dirfd, &path, times, flags))
+    path.into_with_c_str(|path| imp::syscalls::utimensat(dirfd, path, times, flags))
 }
 
 /// `fchmodat(dirfd, path, mode, 0)`
@@ -176,7 +175,7 @@ pub fn utimensat<P: path::Arg, Fd: AsFd>(
 #[doc(alias = "fchmodat")]
 pub fn chmodat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
-    path.into_with_c_str(|path| imp::syscalls::chmodat(dirfd, &path, mode))
+    path.into_with_c_str(|path| imp::syscalls::chmodat(dirfd, path, mode))
 }
 
 /// `fclonefileat(src, dst_dir, dst, flags)`
@@ -210,5 +209,5 @@ pub fn mknodat<P: path::Arg, Fd: AsFd>(
     dev: Dev,
 ) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
-    path.into_with_c_str(|path| imp::syscalls::mknodat(dirfd, &path, mode, dev))
+    path.into_with_c_str(|path| imp::syscalls::mknodat(dirfd, path, mode, dev))
 }

@@ -19,5 +19,5 @@ pub fn statx<P: path::Arg, Fd: AsFd>(
     mask: StatxFlags,
 ) -> io::Result<Statx> {
     let dirfd = dirfd.as_fd();
-    path.into_with_c_str(|path| imp::syscalls::statx(dirfd, &path, flags, mask))
+    path.into_with_c_str(|path| imp::syscalls::statx(dirfd, path, flags, mask))
 }

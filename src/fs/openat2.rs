@@ -12,5 +12,5 @@ pub fn openat2<Fd: AsFd, P: path::Arg>(
     resolve: ResolveFlags,
 ) -> io::Result<OwnedFd> {
     let dirfd = dirfd.as_fd();
-    path.into_with_c_str(|path| imp::syscalls::openat2(dirfd, &path, oflags, mode, resolve))
+    path.into_with_c_str(|path| imp::syscalls::openat2(dirfd, path, oflags, mode, resolve))
 }
