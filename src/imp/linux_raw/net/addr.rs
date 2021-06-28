@@ -25,6 +25,7 @@ pub struct Ipv6Addr(pub(crate) linux_raw_sys::general::in6_addr);
 
 impl Ipv6Addr {
     /// Construct a new IPv6 address from eight 16-bit segments.
+    #[allow(clippy::many_single_char_names, clippy::too_many_arguments)]
     pub const fn new(a: u16, b: u16, c: u16, d: u16, e: u16, f: u16, g: u16, h: u16) -> Self {
         Self(linux_raw_sys::general::in6_addr {
             in6_u: linux_raw_sys::general::in6_addr__bindgen_ty_1 {
