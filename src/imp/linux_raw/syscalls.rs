@@ -24,9 +24,9 @@ use super::arch::choose::{
 #[cfg(target_pointer_width = "64")]
 use super::conv::ret_u64;
 use super::conv::{
-    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, dev_t, mode_as, opt_c_str,
-    opt_mut, out, owned_fd, ret, ret_c_int, ret_c_uint, ret_owned_fd, ret_usize, ret_void_star,
-    slice_addr, slice_as_mut_ptr, socklen_t, void_star,
+    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, dev_t, mode_as, oflags,
+    opt_c_str, opt_mut, out, owned_fd, ret, ret_c_int, ret_c_uint, ret_owned_fd, ret_usize,
+    ret_void_star, slice_addr, slice_as_mut_ptr, socklen_t, void_star,
 };
 use super::fs::{
     Access, Advice, AtFlags, FdFlags, MemfdFlags, Mode, OFlags, ResolveFlags, StatFs, StatxFlags,
@@ -110,7 +110,6 @@ use {
     linux_raw_sys::{
         errno::EINVAL,
         general::timespec as __kernel_old_timespec,
-        general::O_LARGEFILE,
         general::{
             __NR__llseek, __NR_fadvise64_64, __NR_fcntl64, __NR_fstat64, __NR_fstatat64,
             __NR_fstatfs64, __NR_ftruncate64, __NR_sendfile64,
@@ -151,7 +150,7 @@ pub(crate) fn open(filename: &CStr, flags: OFlags, mode: Mode) -> io::Result<Own
         ret_owned_fd(syscall3_readonly(
             __NR_open,
             c_str(filename),
-            c_uint(flags.bits() | O_LARGEFILE as c_uint),
+            oflags(flags),
             mode_as(mode),
         ))
     }
@@ -160,7 +159,7 @@ pub(crate) fn open(filename: &CStr, flags: OFlags, mode: Mode) -> io::Result<Own
         ret_owned_fd(syscall3_readonly(
             __NR_open,
             c_str(filename),
-            c_uint(flags.bits()),
+            oflags(flags),
             mode_as(mode),
         ))
     }
@@ -179,7 +178,7 @@ pub(crate) fn openat(
             __NR_openat,
             borrowed_fd(dirfd),
             c_str(filename),
-            c_uint(flags.bits() | O_LARGEFILE as c_uint),
+            oflags(flags),
             mode_as(mode),
         ))
     }
@@ -189,7 +188,7 @@ pub(crate) fn openat(
             __NR_openat,
             borrowed_fd(dirfd),
             c_str(filename),
-            c_uint(flags.bits()),
+            oflags(flags),
             mode_as(mode),
         ))
     }
@@ -199,7 +198,7 @@ pub(crate) fn openat(
 pub(crate) fn openat2(
     dirfd: BorrowedFd<'_>,
     pathname: &CStr,
-    oflags: OFlags,
+    flags: OFlags,
     mode: Mode,
     resolve: ResolveFlags,
 ) -> io::Result<OwnedFd> {
@@ -210,7 +209,7 @@ pub(crate) fn openat2(
             borrowed_fd(dirfd),
             c_str(pathname),
             by_ref(&open_how {
-                flags: u64::from(oflags.bits()) | O_LARGEFILE as u64,
+                flags: oflags(flags) as u64,
                 mode: u64::from(mode.bits()),
                 resolve: resolve.bits(),
             }),
@@ -224,7 +223,7 @@ pub(crate) fn openat2(
             borrowed_fd(dirfd),
             c_str(pathname),
             by_ref(&open_how {
-                flags: u64::from(oflags.bits()),
+                flags: oflags(flags) as u64,
                 mode: u64::from(mode.bits()),
                 resolve: resolve.bits(),
             }),
@@ -989,7 +988,7 @@ pub(crate) fn fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
             __NR_fcntl64,
             borrowed_fd(fd),
             c_uint(F_SETFL),
-            c_uint(flags.bits()),
+            oflags(flags),
         ))
     }
     #[cfg(target_pointer_width = "64")]
@@ -998,7 +997,7 @@ pub(crate) fn fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
             __NR_fcntl,
             borrowed_fd(fd),
             c_uint(F_SETFL),
-            c_uint(flags.bits()),
+            oflags(flags),
         ))
     }
 }

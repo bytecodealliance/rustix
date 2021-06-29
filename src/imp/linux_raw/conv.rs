@@ -7,11 +7,16 @@
 //! types knowing their layouts, or construct owned file descriptors.
 #![allow(unsafe_code)]
 
-use super::{fs::Mode, time::ClockId};
+use super::{
+    fs::{Mode, OFlags},
+    time::ClockId,
+};
 use crate::{as_mut_ptr, as_ptr, io};
 use io_lifetimes::{BorrowedFd, OwnedFd};
 #[cfg(target_pointer_width = "64")]
 use linux_raw_sys::general::__kernel_loff_t;
+#[cfg(target_pointer_width = "32")]
+use linux_raw_sys::general::O_LARGEFILE;
 use linux_raw_sys::general::{__kernel_clockid_t, socklen_t};
 use std::{
     ffi::CStr,
@@ -165,6 +170,22 @@ pub(super) fn dev_t(dev: u64) -> usize {
 pub(super) fn dev_t(dev: u64) -> io::Result<usize> {
     use std::convert::TryInto;
     dev.try_into().map_err(|_err| io::Error::INVAL)
+}
+
+#[cfg(target_pointer_width = "32")]
+pub(super) fn oflags(oflags: OFlags) -> usize {
+    let mut bits = oflags.bits();
+    // Add `O_LARGEFILE`, unless `O_PATH` is set, as Linux returns `EINVAL`
+    // when both are set.
+    if !oflags.contains(OFlags::PATH) {
+        bits |= O_LARGEFILE;
+    }
+    bits as usize
+}
+
+#[cfg(target_pointer_width = "64")]
+pub(super) fn oflags(oflags: OFlags) -> usize {
+    oflags.bits() as usize
 }
 
 #[inline]

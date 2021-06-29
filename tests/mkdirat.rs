@@ -11,3 +11,23 @@ fn test_mkdirat() {
     assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::Directory);
     unlinkat(&dir, "foo", AtFlags::REMOVEDIR).unwrap();
 }
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[test]
+fn test_mkdirat_with_o_path() {
+    use posish::fs::{cwd, mkdirat, openat, statat, unlinkat, AtFlags, FileType, Mode, OFlags};
+
+    let tmp = tempfile::tempdir().unwrap();
+    let dir = openat(
+        &cwd(),
+        tmp.path(),
+        OFlags::RDONLY | OFlags::PATH,
+        Mode::empty(),
+    )
+    .unwrap();
+
+    mkdirat(&dir, "foo", Mode::IRWXU).unwrap();
+    let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
+    assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::Directory);
+    unlinkat(&dir, "foo", AtFlags::REMOVEDIR).unwrap();
+}
