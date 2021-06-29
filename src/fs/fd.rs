@@ -1,6 +1,8 @@
 //! Functions which operate on file descriptors.
 
 use crate::{imp, io};
+#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))]
+use imp::fs::FallocateFlags;
 #[cfg(not(target_os = "wasi"))]
 use imp::fs::Mode;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
@@ -57,12 +59,18 @@ pub fn futimens<Fd: AsFd>(fd: &Fd, times: &[Timespec; 2]) -> io::Result<()> {
     imp::syscalls::futimens(fd, times)
 }
 
-/// `posix_fallocate(fd, offset, len)`
+/// `fallocate(fd, mode, offset, len)`
+///
+/// This is a more general form of `posix_fallocate`, adding a `mode` argument
+/// which modifies the behavior. On platforms which only support
+/// `posix_fallocate` and not the more general form, no `FallocateFlags` values
+/// are defined so it will always be empty.
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))] // not implemented in libc for netbsd yet
 #[inline]
-pub fn posix_fallocate<Fd: AsFd>(fd: &Fd, offset: u64, len: u64) -> io::Result<()> {
+#[doc(alias = "posix_fallocate")]
+pub fn fallocate<Fd: AsFd>(fd: &Fd, mode: FallocateFlags, offset: u64, len: u64) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::posix_fallocate(fd, offset, len)
+    imp::syscalls::fallocate(fd, mode, offset, len)
 }
 
 /// `fcntl(fd, F_GETFL) & O_ACCMODE`.

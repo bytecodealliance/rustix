@@ -366,6 +366,28 @@ bitflags! {
     }
 }
 
+bitflags! {
+    /// `FALLOC_FL_*` constants for use with [`fallocate`].
+    ///
+    /// [`fallocate`]: crate::fs::fallocate
+    pub struct FallocateFlags: u32 {
+        /// `FALLOC_FL_KEEP_SIZE`
+        const KEEP_SIZE = linux_raw_sys::general::FALLOC_FL_KEEP_SIZE;
+        /// `FALLOC_FL_PUNCH_HOLE`
+        const PUNCH_HOLE = linux_raw_sys::v5_4::general::FALLOC_FL_PUNCH_HOLE;
+        /// `FALLOC_FL_NO_HIDE_STALE`
+        const NO_HIDE_STALE = linux_raw_sys::v5_4::general::FALLOC_FL_NO_HIDE_STALE;
+        /// `FALLOC_FL_COLLAPSE_RANGE`
+        const COLLAPSE_RANGE = linux_raw_sys::v5_4::general::FALLOC_FL_COLLAPSE_RANGE;
+        /// `FALLOC_FL_ZERO_RANGE`
+        const ZERO_RANGE = linux_raw_sys::v5_4::general::FALLOC_FL_ZERO_RANGE;
+        /// `FALLOC_FL_INSERT_RANGE`
+        const INSERT_RANGE = linux_raw_sys::v5_4::general::FALLOC_FL_INSERT_RANGE;
+        /// `FALLOC_FL_UNSHARE_RANGE`
+        const UNSHARE_RANGE = linux_raw_sys::v5_4::general::FALLOC_FL_UNSHARE_RANGE;
+    }
+}
+
 /// `struct statfs` for use with [`fstatfs`].
 ///
 /// [`fstatfs`]: crate::fs::fstatfs

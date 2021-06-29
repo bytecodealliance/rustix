@@ -29,7 +29,8 @@ use super::conv::{
     ret_void_star, slice_addr, slice_as_mut_ptr, socklen_t, void_star,
 };
 use super::fs::{
-    Access, Advice, AtFlags, FdFlags, MemfdFlags, Mode, OFlags, ResolveFlags, StatFs, StatxFlags,
+    Access, Advice, AtFlags, FallocateFlags, FdFlags, MemfdFlags, Mode, OFlags, ResolveFlags,
+    StatFs, StatxFlags,
 };
 use super::io::{
     DupFlags, MapFlags, PipeFlags, PollFd, ProtFlags, ReadWriteFlags, UserFaultFdFlags,
@@ -613,13 +614,18 @@ pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn fallocate(fd: BorrowedFd, mode: c_int, offset: u64, len: u64) -> io::Result<()> {
+pub(crate) fn fallocate(
+    fd: BorrowedFd,
+    mode: FallocateFlags,
+    offset: u64,
+    len: u64,
+) -> io::Result<()> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         ret(syscall6_readonly(
             __NR_fallocate,
             borrowed_fd(fd),
-            c_int(mode),
+            c_uint(mode.bits()),
             hi(offset),
             lo(offset),
             hi(len),
@@ -631,16 +637,11 @@ pub(crate) fn fallocate(fd: BorrowedFd, mode: c_int, offset: u64, len: u64) -> i
         ret(syscall4_readonly(
             __NR_fallocate,
             borrowed_fd(fd),
-            c_int(mode),
+            c_uint(mode.bits()),
             loff_t_from_u64(offset),
             loff_t_from_u64(len),
         ))
     }
-}
-
-#[inline]
-pub(crate) fn posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
-    fallocate(fd, 0, offset, len)
 }
 
 #[inline]
