@@ -55,6 +55,37 @@ fn invalid_offset_posix_fallocate() {
     posix_fallocate(&file, 0, i64::MAX as u64 + 1).unwrap_err();
 }
 
+#[cfg(not(any(
+    target_os = "netbsd",
+    target_os = "openbsd",
+    target_os = "ios",
+    target_os = "macos",
+)))]
+#[test]
+fn invalid_offset_fadvise() {
+    use posish::fs::{cwd, fadvise, openat, Advice, Mode, OFlags};
+    let tmp = tempfile::tempdir().unwrap();
+    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let file = openat(
+        &dir,
+        "foo",
+        OFlags::WRONLY | OFlags::TRUNC | OFlags::CREATE,
+        Mode::IRUSR | Mode::IWUSR,
+    )
+    .unwrap();
+
+    // `fadvise` never fails on invalid offsets.
+    fadvise(&file, i64::MAX as u64, i64::MAX as u64, Advice::Normal).unwrap();
+    fadvise(&file, u64::MAX, 0, Advice::Normal).unwrap();
+    // `fadvise` fails on invalid lengths.
+    fadvise(&file, u64::MAX, u64::MAX, Advice::Normal).unwrap_err();
+    fadvise(&file, i64::MAX as u64, u64::MAX, Advice::Normal).unwrap_err();
+    fadvise(&file, 0, u64::MAX, Advice::Normal).unwrap_err();
+    fadvise(&file, u64::MAX, i64::MAX as u64 + 1, Advice::Normal).unwrap_err();
+    fadvise(&file, i64::MAX as u64, i64::MAX as u64 + 1, Advice::Normal).unwrap_err();
+    fadvise(&file, 0, i64::MAX as u64 + 1, Advice::Normal).unwrap_err();
+}
+
 #[test]
 fn invalid_offset_pread() {
     use posish::{
