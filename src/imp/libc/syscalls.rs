@@ -574,14 +574,19 @@ pub(crate) fn copy_file_range(
 )))]
 pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
     if let (Ok(offset), Ok(len)) = (offset.try_into(), len.try_into()) {
-        unsafe {
-            ret(libc_posix_fadvise(
-                borrowed_fd(fd),
-                offset,
-                len,
-                advice as libc::c_int,
-            ))?;
-        }
+        let err =
+            unsafe { libc_posix_fadvise(borrowed_fd(fd), offset, len, advice as libc::c_int) };
+
+        // `posix_fadvise` returns its error status rather than using `errno`.
+        return if err == 0 {
+            Ok(())
+        } else {
+            Err(io::Error(err))
+        };
+    }
+
+    if (len as i64) < 0 {
+        return Err(io::Error::INVAL);
     }
 
     // If the offset or length can't be converted, ignore the advice, as it
