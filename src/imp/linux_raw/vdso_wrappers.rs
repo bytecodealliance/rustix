@@ -193,7 +193,7 @@ unsafe extern "C" fn clock_gettime_via_syscall(clockid: c_int, res: *mut Timespe
     syscall2(__NR_clock_gettime, clockid as usize, res as usize) as c_int
 }
 
-#[cfg(target_arch = "x86")]
+#[cfg(all(linux_raw_inline_asm, target_arch = "x86"))]
 #[naked]
 unsafe extern "C" fn int_0x80(
     _nr: u32,
@@ -205,6 +205,19 @@ unsafe extern "C" fn int_0x80(
     _a5: usize,
 ) -> usize {
     asm!("int $$0x80", "ret", options(noreturn))
+}
+
+#[cfg(all(not(linux_raw_inline_asm), target_arch = "x86"))]
+extern "C" {
+    fn int_0x80(
+        _nr: u32,
+        _a0: usize,
+        _a1: usize,
+        _a2: usize,
+        _a3: usize,
+        _a4: usize,
+        _a5: usize,
+    ) -> usize;
 }
 
 unsafe fn init() {
