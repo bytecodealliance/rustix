@@ -18,9 +18,11 @@ child_process.execFileSync('rustup', ['default', toolchain]);
 
 // Deny warnings on CI to keep our code warning-free as it lands in-tree. Don't
 // do this on nightly though since there's a fair amount of warning churn there.
-if (!toolchain.startsWith('nightly')) {
-  set_env("RUSTFLAGS", "-D warnings");
-}
+// POSISH: Disable this so that it doesn't overwrite RUSTTFLAGS for setting
+// "--cfg linux_raw". We'll re-add it manually in the workflow.
+//if (!toolchain.startsWith('nightly')) {
+//  set_env("RUSTFLAGS", "-D warnings");
+//}
 
 // Save disk space by avoiding incremental compilation, and also we don't use
 // any caching so incremental wouldn't help anyway.

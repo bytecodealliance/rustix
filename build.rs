@@ -2,13 +2,11 @@ use cc::Build;
 use std::env::var;
 
 fn main() {
-    // Redundantly check both the cfg and the environment variable, which
-    // may make this more reliable.
-    if cfg!(not(linux_raw)) && var("CARGO_CFG_LINUX_RAW").is_err() {
+    // Some CI scripts override RUSTFLAGS for various purposes, so support a
+    // few different ways to configure the implementation.
+    if var("CARGO_CFG_LINUX_RAW").is_err() {
         println!("cargo:rustc-cfg=libc");
     } else {
-        println!("cargo:rustc-cfg=linux_raw");
-
         if let rustc_version::Channel::Nightly = rustc_version::version_meta()
             .expect("query rustc release channel")
             .channel
