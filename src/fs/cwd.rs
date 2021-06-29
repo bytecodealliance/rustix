@@ -10,6 +10,7 @@ use unsafe_io::os::posish::RawFd;
 ///
 /// [`openat`]: crate::fs::openat
 #[inline]
+#[doc(alias = "AT_FDCWD")]
 pub fn cwd() -> BorrowedFd<'static> {
     let at_fdcwd = imp::io::AT_FDCWD as RawFd;
 
