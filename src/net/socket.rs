@@ -21,7 +21,7 @@ pub fn socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> i
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in))`
 #[inline]
-#[doc(alias("bind"))]
+#[doc(alias = "bind")]
 pub fn bind_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     imp::syscalls::bind_v4(sockfd, addr)
@@ -29,7 +29,7 @@ pub fn bind_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> {
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in6))`
 #[inline]
-#[doc(alias("bind"))]
+#[doc(alias = "bind")]
 pub fn bind_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     imp::syscalls::bind_v6(sockfd, addr)
@@ -37,7 +37,7 @@ pub fn bind_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_un))`
 #[inline]
-#[doc(alias("bind"))]
+#[doc(alias = "bind")]
 pub fn bind_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     imp::syscalls::bind_unix(sockfd, addr)
@@ -45,7 +45,7 @@ pub fn bind_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()>
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_in))`
 #[inline]
-#[doc(alias("connect"))]
+#[doc(alias = "connect")]
 pub fn connect_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     imp::syscalls::connect_v4(sockfd, addr)
@@ -53,14 +53,14 @@ pub fn connect_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> 
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_in6))`
 #[inline]
-#[doc(alias("connect"))]
+#[doc(alias = "connect")]
 pub fn connect_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     imp::syscalls::connect_v6(sockfd, addr)
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_un))`
-#[doc(alias("connect"))]
+#[doc(alias = "connect")]
 #[inline]
 pub fn connect_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     let sockfd = sockfd.as_fd();

@@ -5,7 +5,7 @@ use std::ffi::CString;
 /// `struct in_addr`
 #[repr(transparent)]
 #[derive(Clone)]
-#[doc(alias("in_addr"))]
+#[doc(alias = "in_addr")]
 pub struct Ipv4Addr(pub(crate) linux_raw_sys::general::in_addr);
 
 impl Ipv4Addr {
@@ -20,7 +20,7 @@ impl Ipv4Addr {
 /// `struct in6_addr`
 #[repr(transparent)]
 #[derive(Clone)]
-#[doc(alias("in6_addr"))]
+#[doc(alias = "in6_addr")]
 pub struct Ipv6Addr(pub(crate) linux_raw_sys::general::in6_addr);
 
 impl Ipv6Addr {
@@ -46,7 +46,7 @@ impl Ipv6Addr {
 
 /// `struct sockaddr_in`
 #[derive(Clone)]
-#[doc(alias("sockaddr_in"))]
+#[doc(alias = "sockaddr_in")]
 pub struct SocketAddrV4 {
     pub(crate) addr: Ipv4Addr,
     pub(crate) port: u16,
@@ -85,7 +85,7 @@ impl SocketAddrV4 {
 
 /// `struct sockaddr_in6`
 #[derive(Clone)]
-#[doc(alias("sockaddr_in6"))]
+#[doc(alias = "sockaddr_in6")]
 pub struct SocketAddrV6 {
     pub(crate) addr: Ipv6Addr,
     pub(crate) port: u16,
@@ -145,7 +145,7 @@ impl SocketAddrV6 {
 
 /// `struct sockaddr_un`
 #[derive(Clone)]
-#[doc(alias("sockaddr_un"))]
+#[doc(alias = "sockaddr_un")]
 pub struct SocketAddrUnix {
     path: CString,
 }
@@ -190,7 +190,7 @@ impl SocketAddrUnix {
 
 /// `struct sockaddr_storage`
 #[derive(Clone)]
-#[doc(alias("sockaddr"))]
+#[doc(alias = "sockaddr")]
 #[non_exhaustive]
 pub enum SocketAddr {
     /// `struct sockaddr_in`

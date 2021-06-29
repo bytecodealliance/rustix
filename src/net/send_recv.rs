@@ -35,7 +35,7 @@ pub fn recvfrom<Fd: AsFd>(
 
 /// `sendto(fd, buf.ptr(), buf.len(), flags, addr, sizeof(struct sockaddr_in))`
 #[inline]
-#[doc(alias("sendto"))]
+#[doc(alias = "sendto")]
 pub fn sendto_v4<Fd: AsFd>(
     fd: &Fd,
     buf: &[u8],
@@ -48,7 +48,7 @@ pub fn sendto_v4<Fd: AsFd>(
 
 /// `sendto(fd, buf.ptr(), buf.len(), flags, addr, sizeof(struct sockaddr_in6))`
 #[inline]
-#[doc(alias("sendto"))]
+#[doc(alias = "sendto")]
 pub fn sendto_v6<Fd: AsFd>(
     fd: &Fd,
     buf: &[u8],
@@ -61,7 +61,7 @@ pub fn sendto_v6<Fd: AsFd>(
 
 /// `sendto(fd, buf.ptr(), buf.len(), flags, addr, sizeof(struct sockaddr_un))`
 #[inline]
-#[doc(alias("sendto"))]
+#[doc(alias = "sendto")]
 pub fn sendto_unix<Fd: AsFd>(
     fd: &Fd,
     buf: &[u8],
