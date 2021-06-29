@@ -120,6 +120,20 @@ pub(super) unsafe fn opt_mut<T: Sized>(t: Option<&mut T>) -> usize {
     transmute(t)
 }
 
+/// Convert an optional immutable reference into a `usize` for passing to a
+/// syscall.
+///
+/// # Safety
+///
+/// `Option<&T>` is represented as a nullable pointer to `T`, which is the
+/// same size as a `usize`, so we can directly transmute it and pass the result
+/// to syscalls expecting nullable pointers.
+#[cfg(target_arch = "aarch64")]
+#[inline]
+pub(super) unsafe fn opt_ref<T: Sized>(t: Option<&T>) -> usize {
+    transmute(t)
+}
+
 #[inline]
 pub(super) fn c_int(i: c_int) -> usize {
     i as usize
