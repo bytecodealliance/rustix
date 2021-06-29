@@ -36,6 +36,9 @@ jobs:
             os: ubuntu-latest
             rust: nightly
 
+    env:
+      # -D warnings is commented out in our install-rust action; re-add it here.
+      RUSTFLAGS: -D warnings
     steps:
     - uses: actions/checkout@v2
       with:
@@ -170,8 +173,10 @@ jobs:
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
     env:
-      RUSTFLAGS: --cfg linux_raw
+      # -D warnings is commented out in our install-rust action; re-add it here.
+      RUSTFLAGS: --cfg linux_raw -D warnings
       RUSTDOCFLAGS: --cfg linux_raw
+      CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg linux_raw
       CARGO_TARGET_I686_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg linux_raw
       CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg linux_raw
     steps:
