@@ -27,6 +27,8 @@ use super::fs::Advice;
     target_os = "ios"
 )))]
 use super::fs::Dev;
+#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))]
+use super::fs::FallocateFlags;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::fs::ResolveFlags;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
@@ -41,6 +43,8 @@ use super::net::{
     decode_sockaddr, AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown,
     SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6, SocketType,
 };
+#[cfg(any(target_os = "linux", target_os = "android", target_os = "fuchsia"))]
+use super::offset::libc_fallocate;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 use super::offset::libc_fstatfs;
 #[cfg(not(target_os = "wasi"))]
@@ -50,9 +54,20 @@ use super::offset::libc_mmap;
     target_os = "openbsd",
     target_os = "ios",
     target_os = "macos",
-    target_os = "redox"
+    target_os = "redox",
 )))]
-use super::offset::{libc_posix_fadvise, libc_posix_fallocate};
+use super::offset::libc_posix_fadvise;
+#[cfg(not(any(
+    target_os = "netbsd",
+    target_os = "openbsd",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "redox",
+    target_os = "linux",
+    target_os = "android",
+    target_os = "fuchsia",
+)))]
+use super::offset::libc_posix_fallocate;
 #[cfg(target_os = "linux")]
 use super::rand::GetRandomFlags;
 use super::{
@@ -699,26 +714,47 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &[Timespec; 2]) -> io::Result<
     target_os = "openbsd",
     target_os = "redox"
 )))]
-pub(crate) fn posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
+pub(crate) fn fallocate(
+    fd: BorrowedFd<'_>,
+    mode: FallocateFlags,
+    offset: u64,
+    len: u64,
+) -> io::Result<()> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     let len = len as i64;
 
-    let err = unsafe { libc_posix_fallocate(borrowed_fd(fd), offset, len) };
+    #[cfg(any(target_os = "linux", target_os = "android", target_os = "fuchsia"))]
+    unsafe {
+        ret(libc_fallocate(borrowed_fd(fd), mode.bits(), offset, len))
+    }
 
-    // `posix_fallocate` returns its error status rather than using `errno`.
-    if err == 0 {
-        Ok(())
-    } else {
-        Err(io::Error(err))
+    #[cfg(not(any(target_os = "linux", target_os = "android", target_os = "fuchsia")))]
+    {
+        assert!(mode.is_empty());
+        let err = unsafe { libc_posix_fallocate(borrowed_fd(fd), offset, len) };
+
+        // `posix_fallocate` returns its error status rather than using `errno`.
+        if err == 0 {
+            Ok(())
+        } else {
+            Err(io::Error(err))
+        }
     }
 }
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
-pub(crate) fn posix_fallocate(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
+pub(crate) fn fallocate(
+    fd: BorrowedFd<'_>,
+    mode: FallocateFlags,
+    offset: u64,
+    len: u64,
+) -> io::Result<()> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     let len = len as i64;
+
+    assert!(mode.is_empty());
 
     let new_len = offset.checked_add(len).ok_or_else(|| io::Error::FBIG)?;
     let mut store = libc::fstore_t {

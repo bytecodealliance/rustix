@@ -37,8 +37,8 @@ fn invalid_offset_seek() {
     target_os = "macos"
 )))]
 #[test]
-fn invalid_offset_posix_fallocate() {
-    use posish::fs::{cwd, openat, posix_fallocate, Mode, OFlags};
+fn invalid_offset_fallocate() {
+    use posish::fs::{cwd, fallocate, openat, FallocateFlags, Mode, OFlags};
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
@@ -49,10 +49,10 @@ fn invalid_offset_posix_fallocate() {
     )
     .unwrap();
 
-    posix_fallocate(&file, u64::MAX, 1).unwrap_err();
-    posix_fallocate(&file, i64::MAX as u64 + 1, 1).unwrap_err();
-    posix_fallocate(&file, 0, u64::MAX).unwrap_err();
-    posix_fallocate(&file, 0, i64::MAX as u64 + 1).unwrap_err();
+    fallocate(&file, FallocateFlags::empty(), u64::MAX, 1).unwrap_err();
+    fallocate(&file, FallocateFlags::empty(), i64::MAX as u64 + 1, 1).unwrap_err();
+    fallocate(&file, FallocateFlags::empty(), 0, u64::MAX).unwrap_err();
+    fallocate(&file, FallocateFlags::empty(), 0, i64::MAX as u64 + 1).unwrap_err();
 }
 
 #[cfg(not(any(

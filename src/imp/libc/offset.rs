@@ -53,6 +53,10 @@ pub(super) use libc::openat as libc_openat;
 ))]
 pub(super) use libc::openat64 as libc_openat;
 
+#[cfg(target_os = "fuchsia")]
+pub(super) use libc::fallocate as libc_fallocate;
+#[cfg(any(target_os = "android", target_os = "linux",))]
+pub(super) use libc::fallocate64 as libc_fallocate;
 #[cfg(not(any(
     target_os = "android",
     target_os = "linux",
@@ -106,6 +110,7 @@ pub(super) use libc::fstatfs as libc_fstatfs;
     target_os = "android",
     target_os = "linux",
     target_os = "l4re",
+    target_os = "fuchsia",
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "ios",
@@ -113,7 +118,7 @@ pub(super) use libc::fstatfs as libc_fstatfs;
     target_os = "redox",
 )))]
 pub(super) use libc::posix_fallocate as libc_posix_fallocate;
-#[cfg(any(target_os = "android", target_os = "linux", target_os = "l4re",))]
+#[cfg(any(target_os = "l4re",))]
 pub(super) use libc::posix_fallocate64 as libc_posix_fallocate;
 
 #[cfg(any(

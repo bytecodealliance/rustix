@@ -12,6 +12,8 @@ pub use dir::{Dir, DirEntry};
     target_os = "redox"
 )))]
 pub use types::Advice;
+#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))]
+pub use types::FallocateFlags;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 pub use types::StatFs;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
