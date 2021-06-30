@@ -589,6 +589,17 @@ pub(crate) fn copy_file_range(
 )))]
 pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
     if let (Ok(offset), Ok(len)) = (offset.try_into(), len.try_into()) {
+        let offset: i64 = offset;
+        let len: i64 = len;
+
+        // FreeBSD returns `EINVAL` on overflow; emulate the POSIX behavior.
+        #[cfg(target_os = "freebsd")]
+        let len = if offset.checked_add(len).is_none() {
+            i64::MAX - offset
+        } else {
+            len
+        };
+
         let err =
             unsafe { libc_posix_fadvise(borrowed_fd(fd), offset, len, advice as libc::c_int) };
 
