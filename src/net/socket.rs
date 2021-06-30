@@ -74,12 +74,24 @@ pub fn listen<Fd: AsFd>(sockfd: &Fd, backlog: c_int) -> io::Result<()> {
     imp::syscalls::listen(sockfd, backlog)
 }
 
-/// `accept4(fd, addr, len, flags)`
+/// `accept4(fd, NULL, NULL, flags)`
+///
+/// Use [`acceptfrom`] to retrieve the peer address.
 #[inline]
 #[doc(alias = "accept4")]
-pub fn accept<Fd: AsFd>(sockfd: &Fd, flags: AcceptFlags) -> io::Result<(OwnedFd, SocketAddr)> {
+pub fn accept<Fd: AsFd>(sockfd: &Fd, flags: AcceptFlags) -> io::Result<OwnedFd> {
     let sockfd = sockfd.as_fd();
     imp::syscalls::accept(sockfd, flags)
+}
+
+/// `accept4(fd, &addr, &len, flags)`
+///
+/// Use [`accept`] if the peer address isn't needed.
+#[inline]
+#[doc(alias = "accept4")]
+pub fn acceptfrom<Fd: AsFd>(sockfd: &Fd, flags: AcceptFlags) -> io::Result<(OwnedFd, SocketAddr)> {
+    let sockfd = sockfd.as_fd();
+    imp::syscalls::acceptfrom(sockfd, flags)
 }
 
 /// `shutdown(fd, how)`

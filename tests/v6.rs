@@ -43,7 +43,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     }
 
     let mut buffer = vec![0; BUFFER_SIZE];
-    let (data_socket, _who) = accept(&connection_socket, AcceptFlags::empty()).unwrap();
+    let data_socket = accept(&connection_socket, AcceptFlags::empty()).unwrap();
     let nread = read(&data_socket, &mut buffer).unwrap();
     assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "hello, world");
 

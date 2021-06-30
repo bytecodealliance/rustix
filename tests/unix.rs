@@ -48,7 +48,7 @@ fn server(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path) {
 
     let mut buffer = vec![0; BUFFER_SIZE];
     'exit: loop {
-        let (data_socket, _who) = accept(&connection_socket, AcceptFlags::empty()).unwrap();
+        let data_socket = accept(&connection_socket, AcceptFlags::empty()).unwrap();
         let mut sum = 0;
         loop {
             let nread = read(&data_socket, &mut buffer).unwrap();

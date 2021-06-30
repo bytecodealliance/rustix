@@ -93,16 +93,7 @@ use std::mem::transmute;
 use std::os::unix::ffi::OsStringExt;
 #[cfg(target_os = "wasi")]
 use std::os::wasi::ffi::OsStringExt;
-#[cfg(not(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "ios",
-    target_os = "redox",
-    target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
-    target_os = "openbsd",
-    target_os = "emscripten",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(target_os = "redox", target_os = "wasi",)))]
 use std::ptr::null_mut;
 #[cfg(not(any(target_os = "redox", target_env = "newlib")))]
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -1367,7 +1358,25 @@ pub(crate) fn listen(sockfd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
     target_os = "redox",
     target_os = "wasi"
 )))]
-pub(crate) fn accept(
+pub(crate) fn accept(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<OwnedFd> {
+    unsafe {
+        let owned_fd = ret_owned_fd(libc::accept4(
+            borrowed_fd(sockfd),
+            null_mut(),
+            null_mut(),
+            flags.bits(),
+        ))?;
+        Ok(owned_fd)
+    }
+}
+
+#[cfg(not(any(
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
+pub(crate) fn acceptfrom(
     sockfd: BorrowedFd<'_>,
     flags: AcceptFlags,
 ) -> io::Result<(OwnedFd, SocketAddr)> {
@@ -1387,7 +1396,17 @@ pub(crate) fn accept(
 /// Darwin lacks `accept4`, but does have `accept`. We define
 /// `AcceptFlags` to have no flags, so we can discard it here.
 #[cfg(any(target_os = "ios", target_os = "macos"))]
-pub(crate) fn accept(
+pub(crate) fn accept(sockfd: BorrowedFd<'_>, _flags: AcceptFlags) -> io::Result<OwnedFd> {
+    unsafe {
+        let owned_fd = ret_owned_fd(libc::accept(borrowed_fd(sockfd), null_mut(), null_mut()))?;
+        Ok(owned_fd)
+    }
+}
+
+/// Darwin lacks `accept4`, but does have `accept`. We define
+/// `AcceptFlags` to have no flags, so we can discard it here.
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+pub(crate) fn acceptfrom(
     sockfd: BorrowedFd<'_>,
     _flags: AcceptFlags,
 ) -> io::Result<(OwnedFd, SocketAddr)> {

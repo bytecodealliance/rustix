@@ -1422,7 +1422,34 @@ pub(crate) fn socketpair(
 }
 
 #[inline]
-pub(crate) fn accept(fd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<(OwnedFd, SocketAddr)> {
+pub(crate) fn accept(fd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<OwnedFd> {
+    #[cfg(not(target_arch = "x86"))]
+    unsafe {
+        let fd = ret_owned_fd(syscall4(
+            __NR_accept4,
+            borrowed_fd(fd),
+            0,
+            0,
+            c_uint(flags.bits()),
+        ))?;
+        Ok(fd)
+    }
+    #[cfg(target_arch = "x86")]
+    unsafe {
+        let fd = ret_owned_fd(syscall2(
+            __NR_socketcall,
+            x86_sys(SYS_ACCEPT4),
+            slice_addr(&[borrowed_fd(fd), 0, 0, c_uint(flags.bits())]),
+        ))?;
+        Ok(fd)
+    }
+}
+
+#[inline]
+pub(crate) fn acceptfrom(
+    fd: BorrowedFd<'_>,
+    flags: AcceptFlags,
+) -> io::Result<(OwnedFd, SocketAddr)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         let mut addrlen = size_of::<sockaddr>() as socklen_t;
