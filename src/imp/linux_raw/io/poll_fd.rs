@@ -42,11 +42,16 @@ impl<'fd> PollFd<'fd> {
     /// Construct a new `PollFd` holding `fd` and `events`.
     #[inline]
     pub fn new<Fd: AsFd>(fd: &'fd Fd, events: PollFlags) -> Self {
-        Self::_new(fd.as_fd(), events)
+        Self::from_borrowed_fd(fd.as_fd(), events)
     }
 
+    /// Construct a new `PollFd` holding `fd` and `events`.
+    ///
+    /// This is the same as `new`, but can be used to avoid borrowing the
+    /// `BorrowedFd`, which can be tricky in situations where the `BorrowedFd`
+    /// is a temporary.
     #[inline]
-    fn _new(fd: BorrowedFd<'fd>, events: PollFlags) -> Self {
+    pub fn from_borrowed_fd(fd: BorrowedFd<'fd>, events: PollFlags) -> Self {
         Self {
             fd,
             events: events.bits(),
