@@ -1705,7 +1705,7 @@ pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<PathBuf> {
 }
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
-pub(crate) fn rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
+pub(crate) fn fcntl_rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
     // From the macOS `fcntl` man page:
     // `F_RDADVISE` - Issue an advisory read async with no copy to user.
     //

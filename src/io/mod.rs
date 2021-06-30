@@ -13,8 +13,6 @@ mod pipe;
 mod poll;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod procfs;
-#[cfg(any(target_os = "macos", target_os = "ios"))]
-mod rdadvise;
 mod read_write;
 mod stdio;
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -43,8 +41,6 @@ pub use pipe::{pipe2, PipeFlags};
 pub use poll::{PollFd, PollFdVec, PollFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use procfs::{proc, proc_self, proc_self_fd};
-#[cfg(any(target_os = "ios", target_os = "macos"))]
-pub use rdadvise::rdadvise;
 pub use read_write::{pread, pwrite, read, readv, write, writev};
 #[cfg(not(target_os = "redox"))]
 pub use read_write::{preadv, pwritev};
