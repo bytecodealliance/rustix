@@ -141,14 +141,17 @@ pub(crate) unsafe fn decode_sockaddr(storage: *const sockaddr_storage, len: u32)
                     decode.sun_path[len as usize - 1 - offsetof_sun_path],
                     b'\0' as std::os::raw::c_char
                 );
+                let path_bytes = &decode.sun_path[..len as usize - 1 - offsetof_sun_path];
+
+                // FreeBSD sometimes sets the length to longer than the length
+                // of the NUL-terminated string. Find the NUL and truncate the
+                // string accordingly.
+                #[cfg(target_os = "freebsd")]
+                let path_bytes = &path_bytes[..path_bytes.iter().position(|b| *b == 0).unwrap()];
+
                 SocketAddr::Unix(
-                    SocketAddrUnix::new(
-                        decode.sun_path[..len as usize - 1 - offsetof_sun_path]
-                            .iter()
-                            .map(|c| *c as u8)
-                            .collect::<Vec<u8>>(),
-                    )
-                    .unwrap(),
+                    SocketAddrUnix::new(path_bytes.iter().map(|c| *c as u8).collect::<Vec<u8>>())
+                        .unwrap(),
                 )
             }
         }
