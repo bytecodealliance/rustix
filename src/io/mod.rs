@@ -4,6 +4,11 @@ use crate::imp;
 #[cfg(not(target_os = "wasi"))]
 use imp::io::Tcflag;
 
+#[cfg(unix)]
+pub(crate) use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+#[cfg(target_os = "wasi")]
+pub(crate) use std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+
 mod error;
 mod fd;
 mod ioctl;

@@ -8,7 +8,6 @@ use std::{
     ffi::{CStr, CString},
     mem::size_of,
 };
-use unsafe_io::os::posish::{AsRawFd, RawFd};
 
 /// `DIR*`
 pub struct Dir {
@@ -154,13 +153,6 @@ impl Dir {
         } else {
             Some(Ok(()))
         }
-    }
-}
-
-impl AsRawFd for Dir {
-    #[inline]
-    fn as_raw_fd(&self) -> RawFd {
-        self.fd.as_raw_fd()
     }
 }
 

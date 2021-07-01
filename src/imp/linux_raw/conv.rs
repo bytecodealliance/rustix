@@ -11,7 +11,10 @@ use super::{
     fs::{Mode, OFlags},
     time::ClockId,
 };
-use crate::{as_mut_ptr, as_ptr, io};
+use crate::{
+    as_mut_ptr, as_ptr, io,
+    io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
+};
 use io_lifetimes::{BorrowedFd, OwnedFd};
 #[cfg(target_pointer_width = "64")]
 use linux_raw_sys::general::__kernel_loff_t;
@@ -24,7 +27,6 @@ use std::{
     os::raw::{c_int, c_uint, c_void},
     ptr::null,
 };
-use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 
 /// Convert `SYS_*` constants for socketcall.
 #[cfg(target_arch = "x86")]

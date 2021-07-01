@@ -25,7 +25,10 @@ fn stdout_stderr_terminals() {
 
 #[test]
 fn stdio_descriptors() {
-    use unsafe_io::os::posish::AsRawFd;
+    #[cfg(unix)]
+    use std::os::unix::io::AsRawFd;
+    #[cfg(target_os = "wasi")]
+    use std::os::wasi::io::AsRawFd;
 
     unsafe {
         assert_eq!(

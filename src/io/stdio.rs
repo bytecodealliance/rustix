@@ -8,9 +8,8 @@
 //! stdio streams.
 #![allow(unsafe_code)]
 
-use crate::imp;
+use crate::{imp, io::RawFd};
 use io_lifetimes::BorrowedFd;
-use unsafe_io::os::posish::RawFd;
 
 /// `STDIN_FILENO`
 ///

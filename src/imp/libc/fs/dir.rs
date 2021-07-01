@@ -1,5 +1,5 @@
 use super::{super::conv::owned_fd, FileType};
-use crate::io;
+use crate::io::{self, RawFd};
 use errno::{errno, set_errno, Errno};
 use io_lifetimes::{AsFd, BorrowedFd, IntoFd, OwnedFd};
 #[cfg(not(any(
@@ -19,10 +19,6 @@ use libc::{dirent64 as libc_dirent, readdir64 as libc_readdir};
 #[cfg(target_os = "wasi")]
 use std::ffi::CString;
 use std::{ffi::CStr, mem::zeroed, ptr::NonNull};
-use unsafe_io::{
-    os::posish::{AsRawFd, RawFd},
-    OwnsRaw,
-};
 
 /// `DIR*`
 #[repr(transparent)]
@@ -193,20 +189,10 @@ unsafe fn read_dirent(dirent_ptr: *const libc_dirent) -> libc_dirent {
 /// ourselves.
 unsafe impl Send for Dir {}
 
-impl AsRawFd for Dir {
-    #[inline]
-    fn as_raw_fd(&self) -> RawFd {
-        unsafe { libc::dirfd(self.0.as_ptr()) as RawFd }
-    }
-}
-
-// Safety: `Dir` owns its handle.
-unsafe impl OwnsRaw for Dir {}
-
 impl AsFd for Dir {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
-        unsafe { BorrowedFd::borrow_raw_fd(self.as_raw_fd()) }
+        unsafe { BorrowedFd::borrow_raw_fd(libc::dirfd(self.0.as_ptr()) as RawFd) }
     }
 }
 
