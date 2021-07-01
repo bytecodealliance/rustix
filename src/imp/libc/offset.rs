@@ -96,8 +96,21 @@ pub(super) use libc::{preadv as libc_preadv, pwritev as libc_pwritev};
 // macOS added preadv and pwritev in version 11.0
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 mod readwrite_pv {
-    weakcall! { pub(in super::super) fn preadv(fd: libc::c_int, iov: *const libc::iovec, iovcnt: libc::c_int, offset: libc::off_t) -> libc::ssize_t }
-    weakcall! { pub(in super::super) fn pwritev(fd: libc::c_int, iov: *const libc::iovec, iovcnt: libc::c_int, offset: libc::off_t) -> libc::ssize_t }
+    weakcall! {
+        pub(in super::super) fn preadv(
+            fd: libc::c_int,
+            iov: *const libc::iovec,
+            iovcnt: libc::c_int,
+            offset: libc::off_t
+        ) -> libc::ssize_t
+    }
+    weakcall! {
+        pub(in super::super) fn pwritev(
+            fd: libc::c_int,
+            iov: *const libc::iovec,
+            iovcnt: libc::c_int, offset: libc::off_t
+        ) -> libc::ssize_t
+    }
 }
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};

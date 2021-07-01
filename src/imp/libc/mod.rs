@@ -1,3 +1,7 @@
+#[cfg(not(target_os = "wasi"))]
+#[macro_use]
+mod weak;
+
 mod conv;
 mod offset;
 

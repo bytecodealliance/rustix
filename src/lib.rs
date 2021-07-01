@@ -55,9 +55,6 @@
 /// that our users don't need to do anything special to use the same version.
 pub use io_lifetimes;
 
-#[cfg(all(libc, not(target_os = "wasi")))]
-#[macro_use]
-mod weak;
 mod imp;
 
 pub mod fs;
