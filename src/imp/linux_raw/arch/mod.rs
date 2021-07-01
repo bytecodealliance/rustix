@@ -30,10 +30,15 @@ pub(crate) mod outline;
 pub(crate) use self::outline as asm;
 
 // On aarch64 and x86_64, the architecture syscall instruction is fast, so
-// use it directly. On x86, use vDSO wrappers.
+// use it directly.
 #[cfg(target_arch = "aarch64")]
 pub(crate) use self::asm as choose;
 #[cfg(target_arch = "x86_64")]
 pub(crate) use self::asm as choose;
+
+// On x86, use vDSO wrappers. We could use the architecture syscall
+// instruction, but the vDSO kernel_vsyscall mechanism is much faster.
 #[cfg(target_arch = "x86")]
 pub(crate) use super::vdso_wrappers::x86_via_vdso as choose;
+//#[cfg(target_arch = "x86")]
+//pub(crate) use self::asm as choose;

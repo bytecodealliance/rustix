@@ -1,153 +1,146 @@
+// aarch64 syscall argument register ordering is the same as the aarch64
+// userspace argument register ordering except that the syscall number
+// (nr) is passed in w8.
+//
+// outline.rs takes care of reordering the nr argument to the end for us,
+// so we only need to move nr into w8.
+
+    .section    .text.reordered_syscall0,"ax",@progbits
     .p2align    2
-syscall0:
+reordered_syscall0:
     .cfi_startproc
     mov    w8, w0
     svc    #0
     ret
     .cfi_endproc
-    .size syscall0, .-syscall0
+    .size reordered_syscall0, .-reordered_syscall0
 
+    .section    .text.reordered_syscall1,"ax",@progbits
     .p2align    2
-syscall1:
+reordered_syscall1:
     .cfi_startproc
-    mov    w8, w0
-    mov    x0, x1
+    mov    w8, w1
     svc    #0
     ret
     .cfi_endproc
-    .size syscall1, .-syscall1
+    .size reordered_syscall1, .-reordered_syscall1
 
+    .section    .text.reordered_syscall1_noreturn,"ax",@progbits
     .p2align    2
-syscall1_noreturn:
+reordered_syscall1_noreturn:
     .cfi_startproc
-    mov    w8, w0
-    mov    x0, x1
+    mov    w8, w1
     svc    #0
     brk    #0x1
     .cfi_endproc
-    .size syscall1_noreturn, .-syscall1_noreturn
+    .size reordered_syscall1_noreturn, .-reordered_syscall1_noreturn
 
+    .section    .text.reordered_syscall2,"ax",@progbits
     .p2align    2
-syscall2:
+reordered_syscall2:
     .cfi_startproc
-    mov    w8, w0
-    mov    x0, x1
-    mov    x1, x2
+    mov    w8, w2
     svc    #0
     ret
     .cfi_endproc
-    .size syscall2, .-syscall2
+    .size reordered_syscall2, .-reordered_syscall2
 
+    .section    .text.reordered_syscall3,"ax",@progbits
     .p2align    2
-syscall3:
+reordered_syscall3:
     .cfi_startproc
-    mov    w8, w0
-    mov    x0, x1
-    mov    x1, x2
-    mov    x2, x3
+    mov    w8, w3
     svc    #0
     ret
     .cfi_endproc
-    .size syscall3, .-syscall3
+    .size reordered_syscall3, .-reordered_syscall3
 
+    .section    .text.reordered_syscall4,"ax",@progbits
     .p2align    2
-syscall4:
+reordered_syscall4:
     .cfi_startproc
-    mov    w8, w0
-    mov    x0, x1
-    mov    x1, x2
-    mov    x2, x3
-    mov    x3, x4
+    mov    w8, w4
     svc    #0
     ret
     .cfi_endproc
-    .size syscall4, .-syscall4
+    .size reordered_syscall4, .-reordered_syscall4
 
+    .section    .text.reordered_syscall5,"ax",@progbits
     .p2align    2
-syscall5:
+reordered_syscall5:
     .cfi_startproc
-    mov    w8, w0
-    mov    x0, x1
-    mov    x1, x2
-    mov    x2, x3
-    mov    x3, x4
-    mov    x4, x5
+    mov    w8, w5
     svc    #0
     ret
     .cfi_endproc
-    .size syscall5, .-syscall5
+    .size reordered_syscall5, .-reordered_syscall5
 
+    .section    .text.reordered_syscall6,"ax",@progbits
     .p2align    2
-syscall6:
+reordered_syscall6:
     .cfi_startproc
-    mov    w8, w0
-    mov    x0, x1
-    mov    x1, x2
-    mov    x2, x3
-    mov    x3, x4
-    mov    x4, x5
-    mov    x5, x6
+    mov    w8, w6
     svc    #0
     ret
     .cfi_endproc
-    .size syscall6, .-syscall6
+    .size reordered_syscall6, .-reordered_syscall6
 
-    .globl   syscall0
-    .globl   syscall0
-    .globl   syscall1
-    .globl   syscall1_noreturn
-    .globl   syscall2
-    .globl   syscall3
-    .globl   syscall4
-    .globl   syscall5
-    .globl   syscall6
+    .globl   reordered_syscall0
+    .globl   reordered_syscall0
+    .globl   reordered_syscall1
+    .globl   reordered_syscall1_noreturn
+    .globl   reordered_syscall2
+    .globl   reordered_syscall3
+    .globl   reordered_syscall4
+    .globl   reordered_syscall5
+    .globl   reordered_syscall6
 
-    .hidden  syscall0
-    .hidden  syscall0
-    .hidden  syscall1
-    .hidden  syscall1_noreturn
-    .hidden  syscall2
-    .hidden  syscall3
-    .hidden  syscall4
-    .hidden  syscall5
-    .hidden  syscall6
+    .hidden  reordered_syscall0
+    .hidden  reordered_syscall0
+    .hidden  reordered_syscall1
+    .hidden  reordered_syscall1_noreturn
+    .hidden  reordered_syscall2
+    .hidden  reordered_syscall3
+    .hidden  reordered_syscall4
+    .hidden  reordered_syscall5
+    .hidden  reordered_syscall6
 
-    .type    syscall0, @function
-    .type    syscall0, @function
-    .type    syscall1, @function
-    .type    syscall1_noreturn, @function
-    .type    syscall2, @function
-    .type    syscall3, @function
-    .type    syscall4, @function
-    .type    syscall5, @function
-    .type    syscall6, @function
+    .type    reordered_syscall0, @function
+    .type    reordered_syscall0, @function
+    .type    reordered_syscall1, @function
+    .type    reordered_syscall1_noreturn, @function
+    .type    reordered_syscall2, @function
+    .type    reordered_syscall3, @function
+    .type    reordered_syscall4, @function
+    .type    reordered_syscall5, @function
+    .type    reordered_syscall6, @function
 
-    # We can't describe calls to external asm as readonly, so just alias
-    # these to their non-readonly counterparts.
-    .set     syscall0_readonly, syscall0
-    .set     syscall1_readonly, syscall1
-    .set     syscall2_readonly, syscall2
-    .set     syscall3_readonly, syscall3
-    .set     syscall4_readonly, syscall4
-    .set     syscall5_readonly, syscall5
-    .set     syscall6_readonly, syscall6
+    // We can't describe calls to external asm as readonly, so just alias
+    // these to their non-readonly counterparts.
+    .set     reordered_syscall0_readonly, reordered_syscall0
+    .set     reordered_syscall1_readonly, reordered_syscall1
+    .set     reordered_syscall2_readonly, reordered_syscall2
+    .set     reordered_syscall3_readonly, reordered_syscall3
+    .set     reordered_syscall4_readonly, reordered_syscall4
+    .set     reordered_syscall5_readonly, reordered_syscall5
+    .set     reordered_syscall6_readonly, reordered_syscall6
 
-    .globl   syscall0_readonly
-    .globl   syscall0_readonly
-    .globl   syscall1_readonly
-    .globl   syscall2_readonly
-    .globl   syscall3_readonly
-    .globl   syscall4_readonly
-    .globl   syscall5_readonly
-    .globl   syscall6_readonly
+    .globl   reordered_syscall0_readonly
+    .globl   reordered_syscall0_readonly
+    .globl   reordered_syscall1_readonly
+    .globl   reordered_syscall2_readonly
+    .globl   reordered_syscall3_readonly
+    .globl   reordered_syscall4_readonly
+    .globl   reordered_syscall5_readonly
+    .globl   reordered_syscall6_readonly
 
-    .hidden  syscall0_readonly
-    .hidden  syscall0_readonly
-    .hidden  syscall1_readonly
-    .hidden  syscall2_readonly
-    .hidden  syscall3_readonly
-    .hidden  syscall4_readonly
-    .hidden  syscall5_readonly
-    .hidden  syscall6_readonly
+    .hidden  reordered_syscall0_readonly
+    .hidden  reordered_syscall0_readonly
+    .hidden  reordered_syscall1_readonly
+    .hidden  reordered_syscall2_readonly
+    .hidden  reordered_syscall3_readonly
+    .hidden  reordered_syscall4_readonly
+    .hidden  reordered_syscall5_readonly
+    .hidden  reordered_syscall6_readonly
 
     .section .note.GNU-stack,"",@progbits
