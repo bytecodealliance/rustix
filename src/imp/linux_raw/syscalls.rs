@@ -37,6 +37,8 @@ use super::fs::{
 use super::io::{
     DupFlags, MapFlags, PipeFlags, PollFd, ProtFlags, ReadWriteFlags, UserFaultFdFlags,
 };
+#[cfg(not(target_os = "wasi"))]
+use super::io::{Termios, Winsize};
 use super::net::{
     decode_sockaddr, AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown,
     SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6, SocketType,
@@ -45,8 +47,6 @@ use super::rand::GetRandomFlags;
 use super::time::ClockId;
 use super::{fs::Stat, time::Timespec};
 use crate::io;
-#[cfg(not(target_os = "wasi"))]
-use crate::io::{Termios, Winsize};
 use crate::time::NanosleepRelativeResult;
 use io_lifetimes::{BorrowedFd, OwnedFd};
 #[cfg(target_arch = "aarch64")]

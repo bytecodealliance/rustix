@@ -12,18 +12,19 @@ use super::{
     time::{ClockId, Timespec},
     vdso,
 };
-#[cfg(target_pointer_width = "32")]
-use crate::io;
 use cstr::cstr;
-#[cfg(target_pointer_width = "32")]
-use linux_raw_sys::general::timespec as __kernel_old_timespec;
 use linux_raw_sys::general::{__NR_clock_gettime, __kernel_timespec};
-#[cfg(target_pointer_width = "32")]
-use linux_raw_sys::v5_4::general::__NR_clock_gettime64;
 use std::{
     mem::{transmute, MaybeUninit},
     os::raw::c_int,
     sync::atomic::{AtomicUsize, Ordering::Relaxed},
+};
+#[cfg(target_pointer_width = "32")]
+use {
+    crate::io,
+    linux_raw_sys::{
+        general::timespec as __kernel_old_timespec, v5_4::general::__NR_clock_gettime64,
+    },
 };
 
 #[inline]
