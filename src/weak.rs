@@ -110,8 +110,8 @@ macro_rules! syscall {
 }
 
 macro_rules! weakcall {
-    (fn $name:ident($($arg_name:ident: $t:ty),*) -> $ret:ty) => (
-        unsafe fn $name($($arg_name: $t),*) -> $ret {
+    ($vis:vis fn $name:ident($($arg_name:ident: $t:ty),*) -> $ret:ty) => (
+        $vis unsafe fn $name($($arg_name: $t),*) -> $ret {
             weak! { fn $name($($t),*) -> $ret }
 
             if let Some(fun) = $name.get() {

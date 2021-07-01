@@ -112,7 +112,7 @@ use {
     super::offset::{libc_openat, libc_preadv, libc_pwritev},
     crate::time::NanosleepRelativeResult,
 };
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(target_os = "ios", target_os = "macos"))]
 use {
     super::conv::nonnegative_ret,
     super::fs::{copyfile_state_t, CloneFlags, CopyfileFlags},

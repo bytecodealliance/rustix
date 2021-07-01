@@ -88,9 +88,19 @@ pub(super) use libc::{
     target_os = "android",
     target_os = "linux",
     target_os = "emscripten",
-    target_os = "redox"
+    target_os = "redox",
+    target_os = "ios",
+    target_os = "macos",
 )))]
 pub(super) use libc::{preadv as libc_preadv, pwritev as libc_pwritev};
+// macOS added preadv and pwritev in version 11.0
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+mod readwrite_pv {
+    weakcall! { pub(in super::super) fn preadv(fd: libc::c_int, iov: *const libc::iovec, iovcnt: libc::c_int, offset: libc::off_t) -> libc::ssize_t }
+    weakcall! { pub(in super::super) fn pwritev(fd: libc::c_int, iov: *const libc::iovec, iovcnt: libc::c_int, offset: libc::off_t) -> libc::ssize_t }
+}
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
 // `preadv64v2`/`pwritev64v2` submitted upstream here:
 // <https://github.com/rust-lang/libc/pull/2257>
 #[cfg(all(target_pointer_width = "64", target_os = "linux", target_env = "gnu"))]
