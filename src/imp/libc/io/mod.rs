@@ -1,6 +1,8 @@
+mod error;
 mod poll_fd;
 mod types;
 
+pub use error::Error;
 pub use poll_fd::{PollFd, PollFlags};
 #[cfg(any(
     linux_raw,
