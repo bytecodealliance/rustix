@@ -1,23 +1,6 @@
 use super::FileType;
 use crate::{as_ptr, io};
 use io_lifetimes::{AsFd, BorrowedFd, IntoFd, OwnedFd};
-#[cfg(not(any(
-    target_os = "android",
-    target_os = "emscripten",
-    target_os = "l4re",
-    target_os = "linux"
-)))]
-use libc::{dirent as libc_dirent, readdir as libc_readdir};
-#[cfg(all(
-    libc,
-    any(
-        target_os = "android",
-        target_os = "emscripten",
-        target_os = "l4re",
-        target_os = "linux"
-    )
-))]
-use libc::{dirent64 as libc_dirent, readdir64 as libc_readdir};
 use linux_raw_sys::general::linux_dirent64;
 #[cfg(target_os = "wasi")]
 use std::ffi::CString;
