@@ -37,12 +37,6 @@ cstr = "0.2.8"
 atty = "0.2.14"
 tempfile = "3.2.0"
 cstr = "0.2.8"
-libc = "0.2.87"
-criterion = "0.3"
 
 [badges]
 maintenance = { status = "actively-developed" }
-
-[[bench]]
-name = "mod"
-harness = false
