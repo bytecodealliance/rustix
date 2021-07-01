@@ -1,5 +1,3 @@
-#![cfg_attr(target_os = "wasi", feature(wasi_ext))]
-
 use posish::io::isatty;
 use tempfile::{tempdir, TempDir};
 
