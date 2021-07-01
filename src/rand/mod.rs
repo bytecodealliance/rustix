@@ -4,4 +4,4 @@
 mod getrandom;
 
 #[cfg(any(linux_raw, all(libc, target_os = "linux")))]
-pub use getrandom::getrandom;
+pub use getrandom::{getrandom, GetRandomFlags};
