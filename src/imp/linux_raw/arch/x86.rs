@@ -96,6 +96,10 @@ pub(crate) unsafe fn indirect_syscall4(
     let r0;
     // a3 should go in esi, but asm! won't let us use it as an operand.
     // temporarily swap it into place, and then swap it back afterward.
+    //
+    // Note that we hard-code the callee operand to use edi instead of
+    // `in(reg)` because even though we can't name esi as an operand,
+    // the compiler can use esi to satisfy `in(reg)`.
     asm!(
         "xchg esi, {a3}",
         "call edi",
