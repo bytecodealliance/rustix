@@ -98,10 +98,10 @@ pub(crate) unsafe fn indirect_syscall4(
     // temporarily swap it into place, and then swap it back afterward.
     asm!(
         "xchg esi, {a3}",
-        "call edi",
+        "call {callee}",
         "xchg esi, {a3}",
         a3 = in(reg) a3,
-        in("edi") callee,
+        callee = in(reg) callee,
         inlateout("eax") nr as usize => r0,
         in("ebx") a0,
         in("ecx") a1,
