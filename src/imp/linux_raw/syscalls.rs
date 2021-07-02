@@ -23,8 +23,6 @@ use super::arch::choose::{
 };
 #[cfg(target_arch = "aarch64")]
 use super::conv::opt_ref;
-#[cfg(target_pointer_width = "64")]
-use super::conv::ret_u64;
 use super::conv::{
     borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, dev_t, mode_as, oflags,
     opt_c_str, opt_mut, out, owned_fd, ret, ret_c_int, ret_c_uint, ret_owned_fd, ret_usize,
@@ -49,10 +47,6 @@ use super::{fs::Stat, time::Timespec};
 use crate::io;
 use crate::time::NanosleepRelativeResult;
 use io_lifetimes::{BorrowedFd, OwnedFd};
-#[cfg(target_arch = "aarch64")]
-use linux_raw_sys::general::__NR_ppoll;
-#[cfg(target_arch = "aarch64")]
-use linux_raw_sys::general::sigset_t;
 #[cfg(not(target_arch = "x86"))]
 use linux_raw_sys::general::{
     __NR_accept4, __NR_bind, __NR_connect, __NR_getpeername, __NR_getsockname, __NR_getsockopt,
@@ -65,6 +59,8 @@ use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getui
 use linux_raw_sys::general::{__NR_getegid32, __NR_geteuid32, __NR_getgid32, __NR_getuid32};
 #[cfg(not(target_arch = "aarch64"))]
 use linux_raw_sys::general::{__NR_open, __NR_pipe, __NR_poll};
+#[cfg(target_arch = "aarch64")]
+use linux_raw_sys::general::{__NR_ppoll, sigset_t};
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")))]
 use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::{
@@ -96,11 +92,10 @@ use linux_raw_sys::{
         general::{F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ},
     },
 };
-use std::convert::TryInto;
-use std::io::SeekFrom;
 use std::{
+    convert::TryInto,
     ffi::CStr,
-    io::{IoSlice, IoSliceMut},
+    io::{IoSlice, IoSliceMut, SeekFrom},
     mem::{size_of, MaybeUninit},
     os::raw::{c_char, c_int, c_uint, c_void},
 };
@@ -130,7 +125,7 @@ use {
 };
 #[cfg(target_pointer_width = "64")]
 use {
-    super::conv::{loff_t, loff_t_from_u64},
+    super::conv::{loff_t, loff_t_from_u64, ret_u64},
     linux_raw_sys::general::{
         __NR_fadvise64, __NR_fcntl, __NR_fstat, __NR_fstatfs, __NR_ftruncate, __NR_lseek,
         __NR_mmap, __NR_newfstatat, __NR_sendfile,
