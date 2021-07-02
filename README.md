@@ -26,7 +26,7 @@ and several other efficient conveniences.
 portable APIs built on this functionality, see the [`system-interface`],
 [`cap-std`], and [`fs-set-times`] crates, for example.
 
-Posish currently has two backends are available: `libc` and `linux_raw`.
+Posish currently has two backends available: `libc` and `linux_raw`.
 
 The `libc` backend is enabled by default and uses the widely-used [`libc`]
 crate which provides bindings to native `libc` libraries and is portable to
