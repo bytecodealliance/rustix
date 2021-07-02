@@ -87,26 +87,9 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
     }
     // Verify that the `e_machine` matches the architecture we're running as.
     // This helps catch cases where we're running under qemu.
-    match dbg!(hdr.e_machine) {
-        EM_386 => {
-            if !cfg!(target_arch = "x86") {
-                return None; // Wrong machine type
-            }
-        }
-        EM_X86_64 => {
-            if !cfg!(target_arch = "x86_64") {
-                return None; // Wrong machine type
-            }
-        }
-        EM_AARCH64 => {
-            if !cfg!(target_arch = "aarch64") {
-                return None; // Wrong machine type
-            }
-        }
-        _ => {
-            return None; // Unrecognized machine type
-        }
-    };
+    if hdr.e_machine != EM_CURRENT {
+        return None; // Wrong machine type
+    }
 
     // If ELF is extended, we'll need to adjust.
     if hdr.e_ident[EI_VERSION] != EV_CURRENT
@@ -352,9 +335,12 @@ const STN_UNDEF: u32 = 0;
 const VER_FLG_BASE: u16 = 0x1;
 const VER_DEF_CURRENT: u16 = 1;
 const STV_DEFAULT: u8 = 0;
-const EM_386: u16 = 3;
-const EM_X86_64: u16 = 62;
-const EM_AARCH64: u16 = 183;
+#[cfg(target_arch = "x86")]
+const EM_CURRENT: u16 = 3; // EM_386
+#[cfg(target_arch = "x86_64")]
+const EM_CURRENT: u16 = 62; // EM_X86_64
+#[cfg(target_arch = "aarch64")]
+const EM_CURRENT: u16 = 183; // EM_AARCH64
 
 #[inline]
 fn ELF_ST_VISIBILITY(o: u8) -> u8 {
