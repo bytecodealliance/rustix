@@ -9,6 +9,11 @@ use std::ffi::OsString;
 pub use imp::io::DupFlags;
 
 /// `ioctl(fd, FIONREAD)`.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/ioctl_tty.2.html
 #[cfg(not(target_os = "redox"))]
 #[inline]
 pub fn ioctl_fionread<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
@@ -17,6 +22,13 @@ pub fn ioctl_fionread<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
 }
 
 /// `isatty(fd)`
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/isatty.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/isatty.3.html
 #[inline]
 pub fn isatty<Fd: AsFd>(fd: &Fd) -> bool {
     let fd = fd.as_fd();
@@ -42,7 +54,13 @@ pub fn is_read_write<Fd: AsFd>(fd: &Fd) -> io::Result<(bool, bool)> {
 /// Note that this does not set the `O_CLOEXEC` flag. To do a dup that does
 /// set `O_CLOEXEC`, use [`fcntl_dupfd_cloexec`].
 ///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
 /// [`fcntl_dupfd_cloexec`]: crate::fs::fcntl_dupfd_cloexec
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/dup.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/dup.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
@@ -51,6 +69,13 @@ pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
 }
 
 /// `dup3(fd, new, flags)`
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/dup2.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/dup2.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[doc(alias = "dup3")]
@@ -63,6 +88,13 @@ pub fn dup2<Fd: AsFd, NewFd: IntoFd>(fd: &Fd, new: NewFd, flags: DupFlags) -> io
 /// `ttyname_r(fd)`
 ///
 /// If `reuse` is non-empty, reuse its buffer to store the result if possible.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/ttyname.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/ttyname.3.html
 // TODO: Implement ttyname for linux_raw
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 #[inline]

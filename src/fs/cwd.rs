@@ -7,7 +7,11 @@ use io_lifetimes::BorrowedFd;
 /// directory which can be used as the directory argument in `*at`
 /// functions such as [`openat`].
 ///
+/// # References
+///  - [POSIX]
+///
 /// [`openat`]: crate::fs::openat
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/fcntl.h.html
 #[inline]
 #[doc(alias = "AT_FDCWD")]
 pub fn cwd() -> BorrowedFd<'static> {

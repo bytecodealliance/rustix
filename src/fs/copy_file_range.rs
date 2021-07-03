@@ -2,6 +2,11 @@ use crate::{imp, io};
 use io_lifetimes::AsFd;
 
 /// `copy_file_range(fd_in, off_in, fd_out, off_out, len, 0)`
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/copy_file_range.2.html
 #[inline]
 pub fn copy_file_range<InFd: AsFd, OutFd: AsFd>(
     fd_in: &InFd,

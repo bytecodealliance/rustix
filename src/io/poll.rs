@@ -36,7 +36,14 @@ impl<'fd> IntoIterator for PollFdVec<'fd> {
 }
 
 impl<'fd> PollFdVec<'fd> {
-    /// `poll(self.fds.as_mut_ptr(), self.fds.len(), timeout)`
+    /// `poll(self.fds, timeout)`
+    ///
+    /// # References
+    ///  - [POSIX]
+    ///  - [Linux]
+    ///
+    /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/poll.html
+    /// [Linux]: https://man7.org/linux/man-pages/man2/poll.2.html
     pub fn poll(&mut self, timeout: c_int) -> io::Result<usize> {
         imp::syscalls::poll(&mut self.fds, timeout)
     }

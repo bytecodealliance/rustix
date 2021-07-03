@@ -17,6 +17,13 @@ pub use imp::io::{MapFlags, ProtFlags};
 /// # Safety
 ///
 /// Raw pointers and lots of special semantics.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mmap.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/mmap.2.html
 #[inline]
 pub unsafe fn mmap<Fd: AsFd>(
     ptr: *mut c_void,
@@ -35,6 +42,13 @@ pub unsafe fn mmap<Fd: AsFd>(
 /// # Safety
 ///
 /// Raw pointers and lots of special semantics.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/munmap.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/munmap.2.html
 #[inline]
 pub unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
     imp::syscalls::munmap(ptr, len)

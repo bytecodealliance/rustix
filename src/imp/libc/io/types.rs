@@ -3,6 +3,10 @@ use std::os::raw::c_int;
 
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 bitflags! {
+    /// `RWF_*` constants for use with [`preadv2`] and [`pwritev2`].
+    ///
+    /// [`preadv2`]: crate::io::preadv2
+    /// [`pwritev2`]: crate::io::pwritev
     pub struct ReadWriteFlags: c_int {
         /// `RWF_DSYNC`
         const DSYNC = libc::RWF_DSYNC;
@@ -19,7 +23,9 @@ bitflags! {
 
 #[cfg(not(target_os = "wasi"))]
 bitflags! {
-    /// `O_*` constants for use with `dup2`.
+    /// `O_*` constants for use with [`dup2`].
+    ///
+    /// [`dup2`]: crate::io::dup2
     pub struct DupFlags: c_int {
         /// `O_CLOEXEC`
         #[cfg(not(any(target_os = "android", target_os = "macos", target_os = "ios", target_os = "redox")))] // Android 5.0 has dup3, but libc doesn't have bindings
@@ -29,7 +35,9 @@ bitflags! {
 
 #[cfg(not(target_os = "wasi"))]
 bitflags! {
-    /// `PROT_*` flags for use with `mmap`.
+    /// `PROT_*` flags for use with [`mmap`].
+    ///
+    /// [`mmap`]: crate::io::mmap
     pub struct ProtFlags: c_int {
         /// `PROT_READ`
         const READ = libc::PROT_READ;
@@ -44,7 +52,9 @@ bitflags! {
 
 #[cfg(not(target_os = "wasi"))]
 bitflags! {
-    /// `MAP_*` flags for use with `mmap`.
+    /// `MAP_*` flags for use with [`mmap`].
+    ///
+    /// [`mmap`]: crate::io::mmap
     pub struct MapFlags: c_int {
         /// `MAP_SHARED`
         const SHARED = libc::MAP_SHARED;
@@ -96,7 +106,9 @@ bitflags! {
 
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 bitflags! {
-    /// `O_*` constants for use with `pipe2`.
+    /// `O_*` constants for use with [`pipe2`].
+    ///
+    /// [`pipe2`]: crate::io::pipe2
     pub struct PipeFlags: libc::c_int {
         /// `O_CLOEXEC`
         const CLOEXEC = libc::O_CLOEXEC;
@@ -110,7 +122,9 @@ bitflags! {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
-    /// The `O_*` flags accepted by `userfaultfd`.
+    /// The `O_*` flags accepted by [`userfaultfd`].
+    ///
+    /// [`userfaultfd`]: crate::io::userfaultfd
     pub struct UserFaultFdFlags: c_int {
         /// `O_CLOEXEC`
         const CLOEXEC = libc::O_CLOEXEC;
@@ -119,7 +133,9 @@ bitflags! {
     }
 }
 
-/// `struct termios`
+/// `struct termios`, for use with [`ioctl_tcgets`].
+///
+/// [`ioctl_tcgets`]: crate::io::ioctl_tcgets
 #[cfg(not(target_os = "wasi"))]
 pub type Termios = libc::termios;
 

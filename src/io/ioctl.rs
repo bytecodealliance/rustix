@@ -6,6 +6,13 @@ use io_lifetimes::{AsFd, BorrowedFd};
 /// `ioctl(fd, TCGETS)`
 ///
 /// Also known as `tcgetattr`.
+///
+/// # References
+///  - [Linux `ioctl_tty`]
+///  - [Linux `termios`]
+///
+/// [Linux `ioctl_tty`]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
+/// [Linux `termios`]: https://man7.org/linux/man-pages/man3/termios.3.html
 #[cfg(not(target_os = "wasi"))]
 #[doc(alias = "tcgetattr")]
 #[inline]
@@ -25,6 +32,11 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 }
 
 /// `ioctl(fd, TIOCGWINSZ)`.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {

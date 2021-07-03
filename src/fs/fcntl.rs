@@ -3,6 +3,13 @@ use imp::fs::{FdFlags, OFlags};
 use io_lifetimes::{AsFd, OwnedFd};
 
 /// `fcntl(fd, F_GETFD)`
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[inline]
 pub fn fcntl_getfd<Fd: AsFd>(fd: &Fd) -> io::Result<FdFlags> {
     let fd = fd.as_fd();
@@ -10,6 +17,13 @@ pub fn fcntl_getfd<Fd: AsFd>(fd: &Fd) -> io::Result<FdFlags> {
 }
 
 /// `fcntl(fd, F_SETFD, flags)`
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[inline]
 pub fn fcntl_setfd<Fd: AsFd>(fd: &Fd, flags: FdFlags) -> io::Result<()> {
     let fd = fd.as_fd();
@@ -17,6 +31,13 @@ pub fn fcntl_setfd<Fd: AsFd>(fd: &Fd, flags: FdFlags) -> io::Result<()> {
 }
 
 /// `fcntl(fd, F_GETFL)`
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[inline]
 pub fn fcntl_getfl<Fd: AsFd>(fd: &Fd) -> io::Result<OFlags> {
     let fd = fd.as_fd();
@@ -24,6 +45,13 @@ pub fn fcntl_getfl<Fd: AsFd>(fd: &Fd) -> io::Result<OFlags> {
 }
 
 /// `fcntl(fd, F_SETFL, flags)`
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[inline]
 pub fn fcntl_setfl<Fd: AsFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
     let fd = fd.as_fd();
@@ -31,6 +59,11 @@ pub fn fcntl_setfl<Fd: AsFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
 }
 
 /// `fcntl(fd, F_GET_SEALS)`
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[cfg(any(
     linux_raw,
     all(
@@ -53,6 +86,13 @@ pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
 }
 
 /// `fcntl(fd, F_DUPFD_CLOEXEC)`
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn fcntl_dupfd_cloexec<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {

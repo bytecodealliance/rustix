@@ -11,6 +11,11 @@ pub use imp::fs::StatxFlags;
 ///
 /// Note that this isn't available on Linux before 4.11; returns `ENOSYS` in
 /// that case.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/statx.2.html
 #[inline]
 pub fn statx<P: path::Arg, Fd: AsFd>(
     dirfd: &Fd,

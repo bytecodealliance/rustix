@@ -1,6 +1,10 @@
 use bitflags::bitflags;
 
 bitflags! {
+    /// `RWF_*` constants for use with [`preadv2`] and [`pwritev2`].
+    ///
+    /// [`preadv2`]: crate::io::preadv2
+    /// [`pwritev2`]: crate::io::pwritev
     pub struct ReadWriteFlags: std::os::raw::c_uint {
         /// `RWF_DSYNC`
         const DSYNC = linux_raw_sys::general::RWF_DSYNC;
@@ -16,7 +20,9 @@ bitflags! {
 }
 
 bitflags! {
-    /// `O_*` constants for use with `dup2`.
+    /// `O_*` constants for use with [`dup2`].
+    ///
+    /// [`dup2`]: crate::io::dup2
     pub struct DupFlags: std::os::raw::c_uint {
         /// `O_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
@@ -24,7 +30,9 @@ bitflags! {
 }
 
 bitflags! {
-    /// `PROT_*` flags for use with `mmap`.
+    /// `PROT_*` flags for use with [`mmap`].
+    ///
+    /// [`mmap`]: crate::io::mmap
     pub struct ProtFlags: u32 {
         /// `PROT_READ`
         const READ = linux_raw_sys::general::PROT_READ;
@@ -38,7 +46,9 @@ bitflags! {
 }
 
 bitflags! {
-    /// `MAP_*` flags for use with `mmap`.
+    /// `MAP_*` flags for use with [`mmap`].
+    ///
+    /// [`mmap`]: crate::io::mmap
     pub struct MapFlags: u32 {
         /// `MAP_SHARED`
         const SHARED = linux_raw_sys::general::MAP_SHARED;
@@ -76,7 +86,9 @@ bitflags! {
 }
 
 bitflags! {
-    /// `O_*` constants for use with `pipe2`.
+    /// `O_*` constants for use with [`pipe2`].
+    ///
+    /// [`pipe2`]: crate::io::pipe2
     pub struct PipeFlags: std::os::raw::c_uint {
         /// `O_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
@@ -89,6 +101,8 @@ bitflags! {
 
 bitflags! {
     /// The `O_*` flags accepted by `userfaultfd`.
+    ///
+    /// [`userfaultfd`]: crate::io::userfaultfd
     pub struct UserFaultFdFlags: std::os::raw::c_uint {
         /// `O_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
@@ -97,7 +111,9 @@ bitflags! {
     }
 }
 
-/// `struct termios`
+/// `struct termios`, for use with [`ioctl_tcgets`].
+///
+/// [`ioctl_tcgets`]: crate::io::ioctl_tcgets
 pub type Termios = linux_raw_sys::general::termios;
 
 /// `struct winsize`

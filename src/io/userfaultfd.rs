@@ -17,6 +17,11 @@ pub use imp::io::UserFaultFdFlags;
 ///
 /// The call itself is safe, but the returned file descriptor lets users
 /// observe and manipuate process memory in magical ways.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/userfaultfd.2.html
 #[inline]
 pub unsafe fn userfaultfd(flags: UserFaultFdFlags) -> io::Result<OwnedFd> {
     imp::syscalls::userfaultfd(flags)

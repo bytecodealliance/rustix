@@ -6,6 +6,11 @@ use io_lifetimes::AsFd;
 pub use imp::fs::copyfile_state_t;
 
 /// `fcopyfile(from, to, state, flags)`
+///
+/// # References
+///  - [Apple]
+///
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/fcopyfile.3.html
 #[inline]
 pub unsafe fn fcopyfile<FromFd: AsFd, ToFd: AsFd>(
     from: &FromFd,
@@ -19,24 +24,44 @@ pub unsafe fn fcopyfile<FromFd: AsFd, ToFd: AsFd>(
 }
 
 /// `copyfile_state_alloc()`
+///
+/// # References
+///  - [Apple]
+///
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/fcopyfile.3.html
 #[inline]
 pub fn copyfile_state_alloc() -> io::Result<copyfile_state_t> {
     imp::syscalls::copyfile_state_alloc()
 }
 
 /// `copyfile_state_free(state)`
+///
+/// # References
+///  - [Apple]
+///
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/fcopyfile.3.html
 #[inline]
 pub unsafe fn copyfile_state_free(state: copyfile_state_t) -> io::Result<()> {
     imp::syscalls::copyfile_state_free(state)
 }
 
 /// `copyfile_state_get(state, COPYFILE_STATE_COPIED)`
+///
+/// # References
+///  - [Apple]
+///
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/fcopyfile.3.html
 #[inline]
 pub unsafe fn copyfile_state_get_copied(state: copyfile_state_t) -> io::Result<u64> {
     imp::syscalls::copyfile_state_get_copied(state)
 }
 
 /// `copyfile_state_get(state, flags, dst)`
+///
+/// # References
+///  - [Apple]
+///
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/fcopyfile.3.html
 #[inline]
 pub unsafe fn copyfile_state_get(
     state: copyfile_state_t,

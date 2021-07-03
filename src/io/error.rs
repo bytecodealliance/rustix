@@ -12,10 +12,17 @@ use std::{error, fmt, result};
 /// A specialized `Result` type for posish APIs.
 pub type Result<T> = result::Result<T, Error>;
 
-/// The error type for posish APIs.
+/// `errno`
 ///
-/// This is similar to `std::io::Error`, but only holds an OS error code,
-/// and no extra error value.
+/// The error type for posish APIs. This is similar to `std::io::Error`, but
+/// only holds an OS error code, and no extra error value.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/errno.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/errno.3.html
 pub use imp::io::Error;
 
 impl Error {

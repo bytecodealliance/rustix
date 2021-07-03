@@ -58,7 +58,7 @@ pub use read_write::{preadv, pwritev};
         target_env = "gnu"
     )
 ))]
-pub use read_write::{preadv2, pwritev2};
+pub use read_write::{preadv2, pwritev2, ReadWriteFlags};
 pub use stdio::{stderr, stdin, stdout};
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use userfaultfd::{userfaultfd, UserFaultFdFlags};

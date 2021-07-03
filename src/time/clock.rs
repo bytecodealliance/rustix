@@ -5,6 +5,13 @@ use crate::{imp, io, time::Timespec};
 pub use imp::time::ClockId;
 
 /// `clock_getres(id)`
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_getres.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/clock_getres.2.html
 #[cfg(any(linux_raw, all(libc, not(target_os = "wasi"))))]
 #[inline]
 #[must_use]
@@ -13,6 +20,13 @@ pub fn clock_getres(id: ClockId) -> Timespec {
 }
 
 /// `clock_gettime(id)`
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_gettime.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/clock_gettime.2.html
 #[cfg(any(linux_raw, all(libc, not(target_os = "wasi"))))]
 #[inline]
 #[must_use]
@@ -21,6 +35,16 @@ pub fn clock_gettime(id: ClockId) -> Timespec {
 }
 
 /// `clock_nanosleep(id, 0, request, remain)`
+///
+/// This is `clock_nanosleep` specialized for the case of a relative sleep
+/// interval. See [`clock_nanosleep_absolute`] for absolute intervals.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_nanosleep.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/clock_nanosleep.2.html
 #[cfg(any(linux_raw, all(libc, not(any(
     target_os = "macos",
     target_os = "ios",
@@ -38,6 +62,16 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRel
 }
 
 /// `clock_nanosleep(id, TIMER_ABSTIME, request, NULL)`
+///
+/// This is `clock_nanosleep` specialized for the case of an absolute sleep
+/// interval. See [`clock_nanosleep_relative`] for relative intervals.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_nanosleep.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/clock_nanosleep.2.html
 #[cfg(any(linux_raw, all(libc, not(any(
     target_os = "macos",
     target_os = "ios",
@@ -54,6 +88,13 @@ pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::Result<(
 }
 
 /// `nanosleep(request, remain)`
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/nanosleep.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/nanosleep.2.html
 #[inline]
 #[must_use]
 pub fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {

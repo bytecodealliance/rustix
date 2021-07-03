@@ -133,6 +133,11 @@ fn is_mountpoint(file: BorrowedFd<'_>) -> io::Result<bool> {
 /// This ensures that `procfs` is mounted on `/proc`, that nothing is
 /// mounted on top of it, and that it looks normal. It also returns the
 /// `Stat` of `/proc`.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 pub fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     #[allow(clippy::useless_conversion)]
     static PROC: Lazy<io::Result<(OwnedFd, Stat)>> = Lazy::new(|| {
@@ -154,6 +159,11 @@ pub fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 /// This ensures that `procfs` is mounted on `/proc/self`, that nothing is
 /// mounted on top of it, and that it looks normal. It also returns the
 /// `Stat` of `/proc/self`.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 pub fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     #[allow(clippy::useless_conversion)]
     static PROC_SELF: Lazy<io::Result<(OwnedFd, Stat)>> = Lazy::new(|| {
@@ -183,6 +193,11 @@ pub fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 /// This ensures that `procfs` is mounted on `/proc/self/fd`, that nothing is
 /// mounted on top of it, and that it looks normal. It also returns the
 /// `Stat` of `/proc/self/fd`.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 pub fn proc_self_fd() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     #[allow(clippy::useless_conversion)]
     static PROC_SELF_FD: Lazy<io::Result<(OwnedFd, Stat)>> = Lazy::new(|| {
