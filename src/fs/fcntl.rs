@@ -87,6 +87,10 @@ pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
 
 /// `fcntl(fd, F_DUPFD_CLOEXEC)`
 ///
+/// Even though POSIX guarantees that this will use the lowest unused file
+/// descriptor, it is not safe in general to rely on this, as file descriptors
+/// may be unexpectedly allocated on other threads or in libraries.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
