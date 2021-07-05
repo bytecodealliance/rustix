@@ -74,6 +74,10 @@ pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
 
 /// `dup3(fd, new, flags)`
 ///
+/// `dup3` in platforms that support it is the same as `dup2` but adds an
+/// additional flags operand. `posish` unifies these, with the `DupFlags` enum
+/// having no defined flags on platforms which don't support `dup3`.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]

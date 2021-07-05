@@ -100,7 +100,7 @@ bitflags! {
 }
 
 bitflags! {
-    /// The `O_*` flags accepted by `userfaultfd`.
+    /// The `O_*` flags accepted by [`userfaultfd`].
     ///
     /// [`userfaultfd`]: crate::io::userfaultfd
     pub struct UserFaultFdFlags: std::os::raw::c_uint {

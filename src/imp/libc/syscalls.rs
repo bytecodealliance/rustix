@@ -1091,6 +1091,10 @@ pub(crate) fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
     }
 }
 
+/// # Safety
+///
+/// `mmap` is primarily unsafe due to the `addr` parameter, as anything working
+/// with memory pointed to by raw pointers is unsafe.
 #[cfg(not(target_os = "wasi"))]
 pub(crate) unsafe fn mmap(
     ptr: *mut c_void,
