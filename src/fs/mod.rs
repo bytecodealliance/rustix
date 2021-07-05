@@ -177,10 +177,10 @@ pub use imp::fs::RawMode;
 
 pub use imp::fs::Dev;
 
-/// Re-export types common to Posix-ish platforms.
+/// Re-export types common to POSIX-ish platforms.
 #[cfg(unix)]
 pub use std::os::unix::fs::{DirEntryExt, FileExt, FileTypeExt, MetadataExt, OpenOptionsExt};
 
-/// Re-export types common to Posix-ish platforms.
+/// Re-export types common to POSIX-ish platforms.
 #[cfg(target_os = "wasi")]
 pub use std::os::wasi::fs::{DirEntryExt, FileExt, FileTypeExt, MetadataExt, OpenOptionsExt};

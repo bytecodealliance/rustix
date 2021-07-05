@@ -1,4 +1,4 @@
-//! Posix-ish interfaces tend to use signed integers for file offsets, while
+//! POSIX-ish interfaces tend to use signed integers for file offsets, while
 //! Rust APIs tend to use `u64`. Test that exreme `u64` values in APIs that
 //! take file offsets are properly diagnosed.
 //!
