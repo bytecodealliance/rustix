@@ -579,36 +579,33 @@ pub(crate) fn copy_file_range(
     target_os = "redox"
 )))]
 pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
-    if let (Ok(offset), Ok(len)) = (offset.try_into(), len.try_into()) {
-        let offset: i64 = offset;
-        let len: i64 = len;
+    let offset = offset as i64;
+    let len = len as i64;
 
-        // FreeBSD returns `EINVAL` on overflow; emulate the POSIX behavior.
-        #[cfg(target_os = "freebsd")]
-        let len = if offset.checked_add(len).is_none() {
-            i64::MAX - offset
-        } else {
-            len
-        };
+    // FreeBSD returns `EINVAL` on invalid offsets; emulate the POSIX behavior.
+    #[cfg(target_os = "freebsd")]
+    let offset = if (offset as i64) < 0 {
+        i64::MAX
+    } else {
+        offset
+    };
 
-        let err =
-            unsafe { libc_posix_fadvise(borrowed_fd(fd), offset, len, advice as libc::c_int) };
+    // FreeBSD returns `EINVAL` on overflow; emulate the POSIX behavior.
+    #[cfg(target_os = "freebsd")]
+    let len = if len > 0 && offset.checked_add(len).is_none() {
+        i64::MAX - offset
+    } else {
+        len
+    };
 
-        // `posix_fadvise` returns its error status rather than using `errno`.
-        return if err == 0 {
-            Ok(())
-        } else {
-            Err(io::Error(err))
-        };
-    }
+    let err = unsafe { libc_posix_fadvise(borrowed_fd(fd), offset, len, advice as libc::c_int) };
 
-    if (len as i64) < 0 {
-        return Err(io::Error::INVAL);
-    }
-
-    // If the offset or length can't be converted, ignore the advice, as it
-    // isn't likely to be useful in that case.
-    Ok(())
+    // `posix_fadvise` returns its error status rather than using `errno`.
+    return if err == 0 {
+        Ok(())
+    } else {
+        Err(io::Error(err))
+    };
 }
 
 pub(crate) fn fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<FdFlags> {

@@ -653,18 +653,7 @@ pub(crate) fn fallocate(
 }
 
 #[inline]
-pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
-    if let (Ok(offset), Ok(len)) = (offset.try_into(), len.try_into()) {
-        _fadvise(fd, offset, len, advice as u32)?;
-    }
-
-    // If the offset or length can't be converted, ignore the advice, as it
-    // isn't likely to be useful in that case.
-    Ok(())
-}
-
-#[inline]
-fn _fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: c_uint) -> io::Result<()> {
+pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) -> io::Result<()> {
     // On arm and powerpc, the system calls are reordered so that the len and
     // pos argument pairs are aligned.
     #[cfg(any(target_arch = "arm", target_arch = "powerpc"))]
@@ -672,7 +661,7 @@ fn _fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: c_uint) -> io::Resul
         ret(syscall6_readonly(
             __NR_fadvise64_64,
             borrowed_fd(fd),
-            c_uint(advice),
+            c_uint(advice as c_uint),
             hi(pos),
             lo(pos),
             hi(len),
@@ -691,7 +680,7 @@ fn _fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: c_uint) -> io::Resul
             lo(pos),
             hi(len),
             lo(len),
-            c_uint(advice),
+            c_uint(advice as c_uint),
         ))
     }
     #[cfg(target_pointer_width = "64")]
@@ -701,7 +690,7 @@ fn _fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: c_uint) -> io::Resul
             borrowed_fd(fd),
             loff_t_from_u64(pos),
             loff_t_from_u64(len),
-            c_uint(advice),
+            c_uint(advice as c_uint),
         ))
     }
 }
