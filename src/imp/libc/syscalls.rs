@@ -123,7 +123,7 @@ use {super::fs::MemfdFlags, super::io::UserFaultFdFlags};
 #[cfg(not(target_os = "wasi"))]
 use {
     super::io::{DupFlags, MapFlags, ProtFlags, Termios, Winsize},
-    super::time::ClockId,
+    super::time::{ClockId, DynamicClockId},
 };
 
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
@@ -1520,7 +1520,6 @@ pub(crate) fn clock_getres(id: ClockId) -> Timespec {
     }
 }
 
-/// `clock_gettime(id)`
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
@@ -1540,7 +1539,50 @@ pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
     }
 }
 
-/// `clock_nanosleep(id, 0, request, remain)`
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+#[must_use]
+pub(crate) fn clock_gettime_dynamic(id: DynamicClockId) -> io::Result<Timespec> {
+    let mut timespec = MaybeUninit::<Timespec>::uninit();
+    unsafe {
+        let id: libc::clockid_t = match id {
+            DynamicClockId::Known(id) => id as libc::clockid_t,
+
+            #[cfg(any(target_os = "android", target_os = "linux"))]
+            DynamicClockId::Dynamic(fd) => {
+                use crate::io::AsRawFd;
+                const CLOCKFD: i32 = 3;
+                (!fd.as_raw_fd() << 3) | CLOCKFD
+            }
+
+            #[cfg(not(any(target_os = "android", target_os = "linux")))]
+            DynamicClockId::Dynamic(_fd) => {
+                // Dynamic clocks are not supported on this platform.
+                return Err(io::Error::INVAL);
+            }
+
+            #[cfg(any(target_os = "android", target_os = "linux"))]
+            DynamicClockId::RealtimeAlarm => libc::CLOCK_REALTIME_ALARM,
+
+            #[cfg(any(target_os = "android", target_os = "linux"))]
+            DynamicClockId::Tai => libc::CLOCK_TAI,
+
+            #[cfg(any(target_os = "android", target_os = "linux"))]
+            DynamicClockId::Boottime => libc::CLOCK_BOOTTIME,
+
+            #[cfg(any(target_os = "android", target_os = "linux"))]
+            DynamicClockId::BoottimeAlarm => libc::CLOCK_BOOTTIME_ALARM,
+        };
+
+        ret(libc::clock_gettime(
+            id as libc::clockid_t,
+            timespec.as_mut_ptr(),
+        ))?;
+
+        Ok(timespec.assume_init())
+    }
+}
+
 #[cfg(not(any(
     target_os = "macos",
     target_os = "ios",
@@ -1567,7 +1609,6 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
     }
 }
 
-/// `clock_nanosleep(id, TIMER_ABSTIME, request, NULL)`
 #[cfg(not(any(
     target_os = "macos",
     target_os = "ios",
@@ -1587,7 +1628,6 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
     }
 }
 
-/// `nanosleep(request, remain)`
 #[cfg(not(target_os = "redox"))]
 #[inline]
 #[must_use]

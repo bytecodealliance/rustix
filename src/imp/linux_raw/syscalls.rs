@@ -133,7 +133,7 @@ use {
 };
 
 // `clock_gettime` has special optimizations via the vDSO.
-pub(crate) use super::vdso_wrappers::clock_gettime;
+pub(crate) use super::vdso_wrappers::{clock_gettime, clock_gettime_dynamic};
 
 #[inline]
 pub(crate) fn exit_group(code: c_int) -> ! {

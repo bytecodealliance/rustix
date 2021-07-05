@@ -9,22 +9,21 @@
 
 use super::{
     arch::asm::syscall2,
-    time::{ClockId, Timespec},
+    conv::ret,
+    time::{ClockId, DynamicClockId, Timespec},
     vdso,
 };
+use crate::io;
 use cstr::cstr;
-use linux_raw_sys::general::{__NR_clock_gettime, __kernel_timespec};
+use linux_raw_sys::general::{__NR_clock_gettime, __kernel_clockid_t, __kernel_timespec};
+#[cfg(target_pointer_width = "32")]
+use linux_raw_sys::{
+    general::timespec as __kernel_old_timespec, v5_4::general::__NR_clock_gettime64,
+};
 use std::{
     mem::{transmute, MaybeUninit},
     os::raw::c_int,
     sync::atomic::{AtomicUsize, Ordering::Relaxed},
-};
-#[cfg(target_pointer_width = "32")]
-use {
-    crate::io,
-    linux_raw_sys::{
-        general::timespec as __kernel_old_timespec, v5_4::general::__NR_clock_gettime64,
-    },
 };
 
 #[inline]
@@ -38,6 +37,41 @@ pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
         let r0 = callee(which_clock as _, result.as_mut_ptr());
         assert_eq!(r0, 0);
         result.assume_init()
+    }
+}
+
+#[inline]
+pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId) -> io::Result<Timespec> {
+    unsafe {
+        let mut timespec = MaybeUninit::<Timespec>::uninit();
+        let id = match which_clock {
+            DynamicClockId::Known(id) => id as __kernel_clockid_t,
+
+            DynamicClockId::Dynamic(fd) => {
+                // See `FD_TO_CLOCKID` in Linux's `clock_gettime` documentation.
+                use crate::io::AsRawFd;
+                const CLOCKFD: i32 = 3;
+                ((!fd.as_raw_fd() << 3) | CLOCKFD) as __kernel_clockid_t
+            }
+
+            DynamicClockId::RealtimeAlarm => {
+                linux_raw_sys::v5_4::general::CLOCK_REALTIME_ALARM as __kernel_clockid_t
+            }
+            DynamicClockId::Tai => linux_raw_sys::v5_4::general::CLOCK_TAI as __kernel_clockid_t,
+            DynamicClockId::Boottime => {
+                linux_raw_sys::v5_4::general::CLOCK_BOOTTIME as __kernel_clockid_t
+            }
+            DynamicClockId::BoottimeAlarm => {
+                linux_raw_sys::v5_4::general::CLOCK_BOOTTIME_ALARM as __kernel_clockid_t
+            }
+        };
+
+        let callee = match transmute(CLOCK_GETTIME.load(Relaxed)) {
+            Some(callee) => callee,
+            None => init_clock_gettime(),
+        };
+        ret(callee(id, timespec.as_mut_ptr()) as isize as usize)?;
+        Ok(timespec.assume_init())
     }
 }
 

@@ -2,7 +2,7 @@ use crate::{imp, io, time::Timespec};
 
 /// `clockid_t`
 #[cfg(any(linux_raw, all(libc, not(target_os = "wasi"))))]
-pub use imp::time::ClockId;
+pub use imp::time::{ClockId, DynamicClockId};
 
 /// `clock_getres(id)`
 ///
@@ -21,6 +21,11 @@ pub fn clock_getres(id: ClockId) -> Timespec {
 
 /// `clock_gettime(id)`
 ///
+/// This function uses `ClockId` which only contains clocks which are known to
+/// always be supported at runtime, allowing this function to be infallible.
+/// For a greater set of clocks and dynamic clock support, see
+/// [`clock_gettime_dynamic`].
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
@@ -32,6 +37,21 @@ pub fn clock_getres(id: ClockId) -> Timespec {
 #[must_use]
 pub fn clock_gettime(id: ClockId) -> Timespec {
     imp::syscalls::clock_gettime(id)
+}
+
+/// Like [`clock_gettime`] but with support for dynamic clocks.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_gettime.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/clock_gettime.2.html
+#[cfg(any(linux_raw, all(libc, not(target_os = "wasi"))))]
+#[inline]
+#[must_use]
+pub fn clock_gettime_dynamic(id: DynamicClockId) -> io::Result<Timespec> {
+    imp::syscalls::clock_gettime_dynamic(id)
 }
 
 /// `clock_nanosleep(id, 0, request, remain)`
