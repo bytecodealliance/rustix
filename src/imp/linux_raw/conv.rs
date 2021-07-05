@@ -212,7 +212,7 @@ pub(super) fn out<T: Sized>(t: &mut MaybeUninit<T>) -> usize {
 #[inline]
 fn check_error(raw: usize) -> io::Result<()> {
     if (-4095..0).contains(&(raw as isize)) {
-        Err(io::Error(-(raw as i16) as u16))
+        Err(io::Error((raw as u16).wrapping_neg()))
     } else {
         Ok(())
     }
@@ -220,7 +220,14 @@ fn check_error(raw: usize) -> io::Result<()> {
 
 #[inline]
 pub(super) fn ret(raw: usize) -> io::Result<()> {
-    check_error(raw)
+    // Instead of using `check_error` here, we just check for zero, since
+    // this function is only used for system calls which have no other
+    // return value, and this produces smaller code.
+    if raw != 0 {
+        Err(io::Error((raw as u16).wrapping_neg()))
+    } else {
+        Ok(())
+    }
 }
 
 #[inline]
