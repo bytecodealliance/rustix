@@ -82,6 +82,12 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
     if hdr.e_ident[EI_DATA] != ELFDATA {
         return None; // Wrong ELF data
     }
+    if !matches!(hdr.e_ident[EI_OSABI], ELFOSABI_SYSV | ELFOSABI_LINUX) {
+        return None; // Unrecognized ELF OS ABI
+    }
+    if hdr.e_ident[EI_ABIVERSION] != ELFABIVERSION {
+        return None; // Unrecognized ELF ABI version
+    }
     if hdr.e_type != ET_DYN {
         return None; // Wrong ELF type
     }
@@ -285,6 +291,7 @@ fn init_from_proc_self_auxv() -> Option<Vdso> {
         Mode::empty(),
     )
     .ok()?;
+
     let mut auxv_bytes = Vec::new();
     auxv.as_filelike_view::<File>()
         .read_to_end(&mut auxv_bytes)
@@ -303,6 +310,8 @@ const ELFMAG: [u8; SELFMAG] = [0x7f, b'E', b'L', b'F'];
 const EI_CLASS: usize = 4;
 const EI_DATA: usize = 5;
 const EI_VERSION: usize = 6;
+const EI_OSABI: usize = 7;
+const EI_ABIVERSION: usize = 8;
 const EV_CURRENT: u8 = 1;
 #[cfg(target_pointer_width = "32")]
 const ELFCLASS: u8 = 1;
@@ -312,6 +321,10 @@ const ELFCLASS: u8 = 2;
 const ELFDATA: u8 = 1;
 #[cfg(target_endian = "big")]
 const ELFDATA: u8 = 2;
+const ELFOSABI_SYSV: u8 = 0;
+const ELFOSABI_LINUX: u8 = 3;
+// At present all of our supported platforms use 0.
+const ELFABIVERSION: u8 = 0;
 const ET_DYN: u16 = 3;
 const EI_NIDENT: usize = 16;
 const SHN_UNDEF: u16 = 0;
