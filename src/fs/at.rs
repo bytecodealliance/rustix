@@ -23,9 +23,9 @@ use std::os::wasi::ffi::OsStringExt;
 
 /// `openat(dirfd, path, oflags, mode)`—Open a file.
 ///
-/// Even though POSIX guarantees that this will use the lowest unused file
-/// descriptor, it is not safe in general to rely on this, as file descriptors
-/// may be unexpectedly allocated on other threads or in libraries.
+/// POSIX guarantees that `openat` will use the lowest unused file descriptor,
+/// however it is not safe in general to rely on this, as file descriptors may
+/// be unexpectedly allocated on other threads or in libraries.
 ///
 /// # References
 ///  - [POSIX]

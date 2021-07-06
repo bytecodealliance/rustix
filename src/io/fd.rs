@@ -52,12 +52,12 @@ pub fn is_read_write<Fd: AsFd>(fd: &Fd) -> io::Result<(bool, bool)> {
 /// `dup(fd)`—Creates a new `OwnedFd` instance that shares the same
 /// underlying [file description] as `fd`.
 ///
-/// Note that this function does not set the `O_CLOEXEC` flag. To do a dup that
-/// does set `O_CLOEXEC`, use [`fcntl_dupfd_cloexec`].
+/// Note that this function does not set the `O_CLOEXEC` flag. For a dup that
+/// does set `O_CLOEXEC`, see [`fcntl_dupfd_cloexec`].
 ///
-/// Even though POSIX guarantees that this will use the lowest unused file
-/// descriptor, it is not safe in general to rely on this, as file descriptors
-/// may be unexpectedly allocated on other threads or in libraries.
+/// POSIX guarantees that `dup` will use the lowest unused file descriptor,
+/// however it is not safe in general to rely on this, as file descriptors may
+/// be unexpectedly allocated on other threads or in libraries.
 ///
 /// # References
 ///  - [POSIX]

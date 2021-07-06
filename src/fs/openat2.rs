@@ -4,10 +4,6 @@ use io_lifetimes::{AsFd, OwnedFd};
 
 /// `openat2(dirfd, path, OpenHow { oflags, mode, resolve }, sizeof(OpenHow))`
 ///
-/// Even though POSIX guarantees that this will use the lowest unused file
-/// descriptor, it is not safe in general to rely on this, as file descriptors
-/// may be unexpectedly allocated on other threads or in libraries.
-///
 /// # References
 ///  - [Linux]
 ///
