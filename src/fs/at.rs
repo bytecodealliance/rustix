@@ -21,7 +21,7 @@ use std::os::unix::ffi::OsStringExt;
 #[cfg(target_os = "wasi")]
 use std::os::wasi::ffi::OsStringExt;
 
-/// `openat(dirfd, path, oflags, mode)`—Open a file.
+/// `openat(dirfd, path, oflags, mode)`—Opens a file.
 ///
 /// POSIX guarantees that `openat` will use the lowest unused file descriptor,
 /// however it is not safe in general to rely on this, as file descriptors may
@@ -44,7 +44,7 @@ pub fn openat<P: path::Arg, Fd: AsFd>(
     path.into_with_c_str(|path| imp::syscalls::openat(dirfd, path, oflags, mode))
 }
 
-/// `readlinkat(fd, path)`—Read the contents of a symlink.
+/// `readlinkat(fd, path)`—Reads the contents of a symlink.
 ///
 /// If `reuse` is non-empty, reuse its buffer to store the result if possible.
 ///
@@ -84,7 +84,7 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Resul
     }
 }
 
-/// `mkdirat(fd, path, mode)`—Create a directory.
+/// `mkdirat(fd, path, mode)`—Creates a directory.
 ///
 /// # References
 ///  - [POSIX]
@@ -98,7 +98,7 @@ pub fn mkdirat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> io::R
     path.into_with_c_str(|path| imp::syscalls::mkdirat(dirfd, path, mode))
 }
 
-/// `linkat(old_dirfd, old_path, new_dirfd, new_path, flags)`—Create a hard link.
+/// `linkat(old_dirfd, old_path, new_dirfd, new_path, flags)`—Creates a hard link.
 ///
 /// # References
 ///  - [POSIX]
@@ -123,7 +123,7 @@ pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
     })
 }
 
-/// `unlinkat(fd, path, flags)`—Unlink a file or remove a directory.
+/// `unlinkat(fd, path, flags)`—Unlinks a file or remove a directory.
 ///
 /// # References
 ///  - [POSIX]
@@ -137,7 +137,7 @@ pub fn unlinkat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags) -> 
     path.into_with_c_str(|path| imp::syscalls::unlinkat(dirfd, path, flags))
 }
 
-/// `renameat(old_dirfd, old_path, new_dirfd, new_path)`—Rename a file or directory.
+/// `renameat(old_dirfd, old_path, new_dirfd, new_path)`—Renames a file or directory.
 ///
 /// # References
 ///  - [POSIX]
@@ -161,7 +161,7 @@ pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
     })
 }
 
-/// `symlinkat(old_dirfd, old_path, new_dirfd, new_path)`—Create a symlink.
+/// `symlinkat(old_dirfd, old_path, new_dirfd, new_path)`—Creates a symlink.
 ///
 /// # References
 ///  - [POSIX]
@@ -181,7 +181,7 @@ pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsFd>(
     })
 }
 
-/// `fstatat(dirfd, path, flags)`—Query metadata for a file or directory.
+/// `fstatat(dirfd, path, flags)`—Queries metadata for a file or directory.
 ///
 /// # References
 ///  - [POSIX]
@@ -196,7 +196,7 @@ pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags) -> io
     path.into_with_c_str(|path| imp::syscalls::statat(dirfd, path, flags))
 }
 
-/// `faccessat(dirfd, path, access, flags)`—Test permissions for a file or
+/// `faccessat(dirfd, path, access, flags)`—Tests permissions for a file or
 /// directory.
 ///
 /// # References
@@ -217,7 +217,7 @@ pub fn accessat<P: path::Arg, Fd: AsFd>(
     path.into_with_c_str(|path| imp::syscalls::accessat(dirfd, path, access, flags))
 }
 
-/// `utimensat(dirfd, path, times, flags)`—Set file or directory timestamps.
+/// `utimensat(dirfd, path, times, flags)`—Sets file or directory timestamps.
 ///
 /// # References
 ///  - [POSIX]
@@ -236,7 +236,7 @@ pub fn utimensat<P: path::Arg, Fd: AsFd>(
     path.into_with_c_str(|path| imp::syscalls::utimensat(dirfd, path, times, flags))
 }
 
-/// `fchmodat(dirfd, path, mode, 0)`—Set file or directory permissions.
+/// `fchmodat(dirfd, path, mode, 0)`—Sets file or directory permissions.
 ///
 /// The flags argument is fixed to 0, so `AT_SYMLINK_NOFOLLOW` is not
 /// supported. <details>Platform support for this flag varies widely.</details>
@@ -258,7 +258,7 @@ pub fn chmodat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> io::R
     path.into_with_c_str(|path| imp::syscalls::chmodat(dirfd, path, mode))
 }
 
-/// `fclonefileat(src, dst_dir, dst, flags)`—Efficiently copy between files.
+/// `fclonefileat(src, dst_dir, dst, flags)`—Efficiently copies between files.
 ///
 /// # References
 ///  - [Apple]
@@ -279,7 +279,7 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
     })
 }
 
-/// `mknodat(dirfd, path, mode, dev)`—Create special or normal files.
+/// `mknodat(dirfd, path, mode, dev)`—Creates special or normal files.
 ///
 /// # References
 ///  - [POSIX]

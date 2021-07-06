@@ -2,7 +2,7 @@ use crate::{imp, io};
 use imp::fs::{FdFlags, OFlags};
 use io_lifetimes::{AsFd, OwnedFd};
 
-/// `fcntl(fd, F_GETFD)`
+/// `fcntl(fd, F_GETFD)`—Returns a file descriptor's flags.
 ///
 /// # References
 ///  - [POSIX]
@@ -16,7 +16,7 @@ pub fn fcntl_getfd<Fd: AsFd>(fd: &Fd) -> io::Result<FdFlags> {
     imp::syscalls::fcntl_getfd(fd)
 }
 
-/// `fcntl(fd, F_SETFD, flags)`
+/// `fcntl(fd, F_SETFD, flags)`—Sets a file descriptor's flags.
 ///
 /// # References
 ///  - [POSIX]
@@ -30,7 +30,7 @@ pub fn fcntl_setfd<Fd: AsFd>(fd: &Fd, flags: FdFlags) -> io::Result<()> {
     imp::syscalls::fcntl_setfd(fd, flags)
 }
 
-/// `fcntl(fd, F_GETFL)`
+/// `fcntl(fd, F_GETFL)`—Returns a file descriptor's access mode and status.
 ///
 /// # References
 ///  - [POSIX]
@@ -44,7 +44,7 @@ pub fn fcntl_getfl<Fd: AsFd>(fd: &Fd) -> io::Result<OFlags> {
     imp::syscalls::fcntl_getfl(fd)
 }
 
-/// `fcntl(fd, F_SETFL, flags)`
+/// `fcntl(fd, F_SETFL, flags)`—Sets a file descriptor's status.
 ///
 /// # References
 ///  - [POSIX]
@@ -85,7 +85,9 @@ pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
     imp::syscalls::fcntl_get_seals(fd)
 }
 
-/// `fcntl(fd, F_DUPFD_CLOEXEC)`
+/// `fcntl(fd, F_DUPFD_CLOEXEC)`—Creates a new `OwnedFd` instance that has
+/// `O_CLOEXEC` set and that shares the same underlying [file description] as
+/// `fd`.
 ///
 /// POSIX guarantees that `F_DUPFD_CLOEXEC` will use the lowest unused file
 /// descriptor, however it is not safe in general to rely on this, as file

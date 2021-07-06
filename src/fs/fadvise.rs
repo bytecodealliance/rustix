@@ -3,7 +3,8 @@ use io_lifetimes::AsFd;
 
 pub use imp::fs::Advice;
 
-/// `posix_fadvise(fd, offset, len, advice)`
+/// `posix_fadvise(fd, offset, len, advice)`—Provides optimization hints about
+/// file access patterns.
 ///
 /// # References
 ///  - [POSIX]

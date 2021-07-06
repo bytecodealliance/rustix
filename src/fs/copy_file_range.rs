@@ -1,7 +1,8 @@
 use crate::{imp, io};
 use io_lifetimes::AsFd;
 
-/// `copy_file_range(fd_in, off_in, fd_out, off_out, len, 0)`
+/// `copy_file_range(fd_in, off_in, fd_out, off_out, len, 0)`—Copies data
+/// from one file to another.
 ///
 /// # References
 ///  - [Linux]

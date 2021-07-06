@@ -11,7 +11,7 @@
 use crate::{imp, io::RawFd};
 use io_lifetimes::BorrowedFd;
 
-/// `STDIN_FILENO`
+/// `STDIN_FILENO`—Standard input.
 ///
 /// # Safety
 ///
@@ -31,7 +31,7 @@ pub unsafe fn stdin() -> BorrowedFd<'static> {
     BorrowedFd::borrow_raw_fd(imp::io::STDIN_FILENO as RawFd)
 }
 
-/// `STDOUT_FILENO`
+/// `STDOUT_FILENO`—Standard output.
 ///
 /// # Safety
 ///
@@ -51,7 +51,7 @@ pub unsafe fn stdout() -> BorrowedFd<'static> {
     BorrowedFd::borrow_raw_fd(imp::io::STDOUT_FILENO as RawFd)
 }
 
-/// `STDERR_FILENO`
+/// `STDERR_FILENO`—Standard error.
 ///
 /// # Safety
 ///

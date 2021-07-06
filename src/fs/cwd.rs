@@ -1,7 +1,7 @@
 use crate::{imp, io::RawFd};
 use io_lifetimes::BorrowedFd;
 
-/// `AT_FDCWD`
+/// `AT_FDCWD`—Returns a handle representing the current working directory.
 ///
 /// This returns a file descriptor which refers to the process current
 /// directory which can be used as the directory argument in `*at`
