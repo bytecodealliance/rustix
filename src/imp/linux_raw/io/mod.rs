@@ -1,3 +1,4 @@
+pub mod epoll;
 mod error;
 mod poll_fd;
 mod types;

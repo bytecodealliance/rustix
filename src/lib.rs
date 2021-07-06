@@ -45,6 +45,7 @@
 #![deny(missing_docs)]
 #![cfg_attr(linux_raw, deny(unsafe_code))]
 #![cfg_attr(linux_raw_inline_asm, feature(asm))]
+#![cfg_attr(const_fn_union, feature(const_fn_union))]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 #![cfg_attr(
     all(linux_raw_inline_asm, target_arch = "x86"),

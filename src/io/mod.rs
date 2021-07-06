@@ -43,8 +43,11 @@ pub use fd::ttyname;
 pub use fd::{close, isatty};
 #[cfg(not(target_os = "wasi"))]
 pub use fd::{dup, dup2, dup2_with, DupFlags};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use imp::io::epoll;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use ioctl::ioctl_fioclex;
+pub use ioctl::ioctl_fionbio;
 #[cfg(not(target_os = "wasi"))]
 pub use ioctl::{ioctl_tcgets, ioctl_tiocgwinsz};
 #[cfg(not(target_os = "wasi"))]

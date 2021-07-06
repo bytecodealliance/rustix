@@ -2,6 +2,7 @@
 
 mod io {
     mod dup2_to_replace_stdio;
+    mod epoll;
     mod eventfd;
     mod isatty;
     mod mmap;

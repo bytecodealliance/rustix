@@ -1,6 +1,7 @@
 use crate::imp;
+use crate::io;
 #[cfg(not(target_os = "wasi"))]
-use crate::io::{self, Termios, Winsize};
+use crate::io::{Termios, Winsize};
 use io_lifetimes::{AsFd, BorrowedFd};
 
 /// `ioctl(fd, TCGETS)`
@@ -42,4 +43,11 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 pub fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
     let fd = fd.as_fd();
     imp::syscalls::ioctl_tiocgwinsz(fd)
+}
+
+/// `ioctl(fd, FIONBIO, &value)`—Enables or disables non-blocking mode.
+#[inline]
+pub fn ioctl_fionbio<Fd: AsFd>(fd: &Fd, value: bool) -> io::Result<()> {
+    let fd = fd.as_fd();
+    imp::syscalls::ioctl_fionbio(fd, value)
 }

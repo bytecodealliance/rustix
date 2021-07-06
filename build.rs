@@ -26,6 +26,7 @@ fn main() {
             .channel
         {
             println!("cargo:rustc-cfg=linux_raw_inline_asm");
+            println!("cargo:rustc-cfg=const_fn_union");
         } else {
             Build::new().file(&asm_name).compile("asm");
             println!("cargo:rerun-if-changed={}", asm_name);
