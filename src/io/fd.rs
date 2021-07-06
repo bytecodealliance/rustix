@@ -49,7 +49,8 @@ pub fn is_read_write<Fd: AsFd>(fd: &Fd) -> io::Result<(bool, bool)> {
     imp::syscalls::is_read_write(fd)
 }
 
-/// `dup(fd)`
+/// `dup(fd)`—Creates a new `OwnedFd` instance that shares the same
+/// underlying [file description] as `fd`.
 ///
 /// Note that this function does not set the `O_CLOEXEC` flag. To do a dup that
 /// does set `O_CLOEXEC`, use [`fcntl_dupfd_cloexec`].
@@ -62,6 +63,7 @@ pub fn is_read_write<Fd: AsFd>(fd: &Fd) -> io::Result<(bool, bool)> {
 ///  - [POSIX]
 ///  - [Linux]
 ///
+/// [file description]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_258
 /// [`fcntl_dupfd_cloexec`]: crate::fs::fcntl_dupfd_cloexec
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/dup.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup.2.html
@@ -72,7 +74,9 @@ pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
     imp::syscalls::dup(fd)
 }
 
-/// `dup3(fd, new, flags)`
+/// `dup3(fd, new, flags)`—Creates a new `OwnedFd` instance that shares the
+/// same underlying [file description] as the existing `OwnedFd` instance,
+/// closing `new` and reusing its file descriptor.
 ///
 /// `dup3` in platforms that support it is the same as `dup2` but adds an
 /// additional flags operand. `posish` unifies these, with the `DupFlags` enum
@@ -82,6 +86,7 @@ pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
 ///  - [POSIX]
 ///  - [Linux]
 ///
+/// [file description]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_258
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/dup2.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup2.2.html
 #[cfg(not(target_os = "wasi"))]
