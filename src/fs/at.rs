@@ -38,10 +38,10 @@ pub fn openat<P: path::Arg, Fd: AsFd>(
     dirfd: &Fd,
     path: P,
     oflags: OFlags,
-    mode: Mode,
+    create_mode: Mode,
 ) -> io::Result<OwnedFd> {
     let dirfd = dirfd.as_fd();
-    path.into_with_c_str(|path| imp::syscalls::openat(dirfd, path, oflags, mode))
+    path.into_with_c_str(|path| imp::syscalls::openat(dirfd, path, oflags, create_mode))
 }
 
 /// `readlinkat(fd, path)`—Reads the contents of a symlink.
