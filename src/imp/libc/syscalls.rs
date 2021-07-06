@@ -1827,7 +1827,7 @@ pub(crate) fn getppid() -> u32 {
 }
 
 #[inline]
-pub fn sched_yield() {
+pub(crate) fn sched_yield() {
     unsafe {
         let _ = libc::sched_yield();
     }
