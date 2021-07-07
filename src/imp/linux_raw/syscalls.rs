@@ -49,9 +49,9 @@ use crate::time::NanosleepRelativeResult;
 use io_lifetimes::{BorrowedFd, OwnedFd};
 #[cfg(not(target_arch = "x86"))]
 use linux_raw_sys::general::{
-    __NR_accept4, __NR_bind, __NR_connect, __NR_getpeername, __NR_getsockname, __NR_getsockopt,
-    __NR_listen, __NR_recvfrom, __NR_sendto, __NR_setsockopt, __NR_shutdown, __NR_socket,
-    __NR_socketpair,
+    __NR_accept, __NR_accept4, __NR_bind, __NR_connect, __NR_getpeername, __NR_getsockname,
+    __NR_getsockopt, __NR_listen, __NR_recvfrom, __NR_sendto, __NR_setsockopt, __NR_shutdown,
+    __NR_socket, __NR_socketpair,
 };
 #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
 use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getuid};
@@ -1406,7 +1406,25 @@ pub(crate) fn socketpair(
 }
 
 #[inline]
-pub(crate) fn accept(fd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<OwnedFd> {
+pub(crate) fn accept(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
+    #[cfg(not(target_arch = "x86"))]
+    unsafe {
+        let fd = ret_owned_fd(syscall3(__NR_accept, borrowed_fd(fd), 0, 0))?;
+        Ok(fd)
+    }
+    #[cfg(target_arch = "x86")]
+    unsafe {
+        let fd = ret_owned_fd(syscall2(
+            __NR_socketcall,
+            x86_sys(SYS_ACCEPT),
+            slice_addr(&[borrowed_fd(fd), 0, 0]),
+        ))?;
+        Ok(fd)
+    }
+}
+
+#[inline]
+pub(crate) fn accept_with(fd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<OwnedFd> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         let fd = ret_owned_fd(syscall4(
@@ -1430,7 +1448,34 @@ pub(crate) fn accept(fd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<Owned
 }
 
 #[inline]
-pub(crate) fn acceptfrom(
+pub(crate) fn acceptfrom(fd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddr)> {
+    #[cfg(not(target_arch = "x86"))]
+    unsafe {
+        let mut addrlen = size_of::<sockaddr>() as socklen_t;
+        let mut storage = MaybeUninit::<sockaddr>::uninit();
+        let fd = ret_owned_fd(syscall3(
+            __NR_accept,
+            borrowed_fd(fd),
+            out(&mut storage),
+            by_mut(&mut addrlen),
+        ))?;
+        Ok((fd, decode_sockaddr(&storage.assume_init(), addrlen)))
+    }
+    #[cfg(target_arch = "x86")]
+    unsafe {
+        let mut addrlen = size_of::<sockaddr>() as socklen_t;
+        let mut storage = MaybeUninit::<sockaddr>::uninit();
+        let fd = ret_owned_fd(syscall2(
+            __NR_socketcall,
+            x86_sys(SYS_ACCEPT),
+            slice_addr(&[borrowed_fd(fd), out(&mut storage), by_mut(&mut addrlen)]),
+        ))?;
+        Ok((fd, decode_sockaddr(&storage.assume_init(), addrlen)))
+    }
+}
+
+#[inline]
+pub(crate) fn acceptfrom_with(
     fd: BorrowedFd<'_>,
     flags: AcceptFlags,
 ) -> io::Result<(OwnedFd, SocketAddr)> {

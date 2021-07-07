@@ -6,7 +6,7 @@
 use posish::{
     io::{read, write},
     net::{
-        accept, bind_v4, connect_v4, getsockname, listen, socket, AcceptFlags, AddressFamily,
+        accept, bind_v4, connect_v4, getsockname, listen, socket, AddressFamily,
         Ipv4Addr, Protocol, SocketAddr, SocketAddrV4, SocketType,
     },
 };
@@ -39,7 +39,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     }
 
     let mut buffer = vec![0; BUFFER_SIZE];
-    let data_socket = accept(&connection_socket, AcceptFlags::empty()).unwrap();
+    let data_socket = accept(&connection_socket).unwrap();
     let nread = read(&data_socket, &mut buffer).unwrap();
     assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "hello, world");
 

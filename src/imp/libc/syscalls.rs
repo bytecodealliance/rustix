@@ -1356,13 +1356,21 @@ pub(crate) fn listen(sockfd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
     unsafe { ret(libc::listen(borrowed_fd(sockfd), backlog)) }
 }
 
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub(crate) fn accept(sockfd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
+    unsafe {
+        let owned_fd = ret_owned_fd(libc::accept(borrowed_fd(sockfd), null_mut(), null_mut()))?;
+        Ok(owned_fd)
+    }
+}
+
 #[cfg(not(any(
     target_os = "ios",
     target_os = "macos",
     target_os = "redox",
     target_os = "wasi"
 )))]
-pub(crate) fn accept(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<OwnedFd> {
+pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<OwnedFd> {
     unsafe {
         let owned_fd = ret_owned_fd(libc::accept4(
             borrowed_fd(sockfd),
@@ -1374,13 +1382,27 @@ pub(crate) fn accept(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<O
     }
 }
 
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddr)> {
+    unsafe {
+        let mut storage = MaybeUninit::<libc::sockaddr_storage>::uninit();
+        let mut len = size_of::<libc::sockaddr_storage>() as libc::socklen_t;
+        let owned_fd = ret_owned_fd(libc::accept(
+            borrowed_fd(sockfd),
+            storage.as_mut_ptr().cast::<_>(),
+            &mut len,
+        ))?;
+        Ok((owned_fd, decode_sockaddr(storage.as_ptr(), len)))
+    }
+}
+
 #[cfg(not(any(
     target_os = "ios",
     target_os = "macos",
     target_os = "redox",
     target_os = "wasi"
 )))]
-pub(crate) fn acceptfrom(
+pub(crate) fn acceptfrom_with(
     sockfd: BorrowedFd<'_>,
     flags: AcceptFlags,
 ) -> io::Result<(OwnedFd, SocketAddr)> {
@@ -1400,30 +1422,18 @@ pub(crate) fn acceptfrom(
 /// Darwin lacks `accept4`, but does have `accept`. We define
 /// `AcceptFlags` to have no flags, so we can discard it here.
 #[cfg(any(target_os = "ios", target_os = "macos"))]
-pub(crate) fn accept(sockfd: BorrowedFd<'_>, _flags: AcceptFlags) -> io::Result<OwnedFd> {
-    unsafe {
-        let owned_fd = ret_owned_fd(libc::accept(borrowed_fd(sockfd), null_mut(), null_mut()))?;
-        Ok(owned_fd)
-    }
+pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, _flags: AcceptFlags) -> io::Result<OwnedFd> {
+    accept(sockfd)
 }
 
 /// Darwin lacks `accept4`, but does have `accept`. We define
 /// `AcceptFlags` to have no flags, so we can discard it here.
 #[cfg(any(target_os = "ios", target_os = "macos"))]
-pub(crate) fn acceptfrom(
+pub(crate) fn acceptfrom_with(
     sockfd: BorrowedFd<'_>,
     _flags: AcceptFlags,
 ) -> io::Result<(OwnedFd, SocketAddr)> {
-    unsafe {
-        let mut storage = MaybeUninit::<libc::sockaddr_storage>::uninit();
-        let mut len = size_of::<libc::sockaddr_storage>() as libc::socklen_t;
-        let owned_fd = ret_owned_fd(libc::accept(
-            borrowed_fd(sockfd),
-            storage.as_mut_ptr().cast::<_>(),
-            &mut len,
-        ))?;
-        Ok((owned_fd, decode_sockaddr(storage.as_ptr(), len)))
-    }
+    acceptfrom(sockfd)
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]

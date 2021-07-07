@@ -134,7 +134,7 @@ pub fn listen<Fd: AsFd>(sockfd: &Fd, backlog: c_int) -> io::Result<()> {
     imp::syscalls::listen(sockfd, backlog)
 }
 
-/// `accept4(fd, NULL, NULL, flags)`
+/// `accept(fd, NULL, NULL)`
 ///
 /// Use [`acceptfrom`] to retrieve the peer address.
 ///
@@ -150,12 +150,35 @@ pub fn listen<Fd: AsFd>(sockfd: &Fd, backlog: c_int) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/accept.2.html
 #[inline]
 #[doc(alias = "accept4")]
-pub fn accept<Fd: AsFd>(sockfd: &Fd, flags: AcceptFlags) -> io::Result<OwnedFd> {
+pub fn accept<Fd: AsFd>(sockfd: &Fd) -> io::Result<OwnedFd> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::accept(sockfd, flags)
+    imp::syscalls::accept(sockfd)
 }
 
-/// `accept4(fd, &addr, &len, flags)`
+/// `accept4(fd, NULL, NULL, flags)`
+///
+/// Use [`acceptfrom_with`] to retrieve the peer address.
+///
+/// Even though POSIX guarantees that this will use the lowest unused file
+/// descriptor, it is not safe in general to rely on this, as file descriptors
+/// may be unexpectedly allocated on other threads or in libraries.
+///
+/// `accept_with` is the same as `accept` but adds an additional flags operand.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/accept.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/accept4.2.html
+#[inline]
+#[doc(alias = "accept4")]
+pub fn accept_with<Fd: AsFd>(sockfd: &Fd, flags: AcceptFlags) -> io::Result<OwnedFd> {
+    let sockfd = sockfd.as_fd();
+    imp::syscalls::accept_with(sockfd, flags)
+}
+
+/// `accept(fd, &addr, &len)`
 ///
 /// Use [`accept`] if the peer address isn't needed.
 ///
@@ -167,9 +190,32 @@ pub fn accept<Fd: AsFd>(sockfd: &Fd, flags: AcceptFlags) -> io::Result<OwnedFd> 
 /// [Linux]: https://man7.org/linux/man-pages/man2/accept.2.html
 #[inline]
 #[doc(alias = "accept4")]
-pub fn acceptfrom<Fd: AsFd>(sockfd: &Fd, flags: AcceptFlags) -> io::Result<(OwnedFd, SocketAddr)> {
+pub fn acceptfrom<Fd: AsFd>(sockfd: &Fd) -> io::Result<(OwnedFd, SocketAddr)> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::acceptfrom(sockfd, flags)
+    imp::syscalls::acceptfrom(sockfd)
+}
+
+/// `accept4(fd, &addr, &len, flags)`
+///
+/// Use [`accept_with`] if the peer address isn't needed.
+///
+/// `acceptfrom_with` is the same as `acceptfrom` but adds an additional flags
+/// operand.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/accept.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/accept4.2.html
+#[inline]
+#[doc(alias = "accept4")]
+pub fn acceptfrom_with<Fd: AsFd>(
+    sockfd: &Fd,
+    flags: AcceptFlags,
+) -> io::Result<(OwnedFd, SocketAddr)> {
+    let sockfd = sockfd.as_fd();
+    imp::syscalls::acceptfrom_with(sockfd, flags)
 }
 
 /// `shutdown(fd, how)`
