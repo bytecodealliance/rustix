@@ -32,7 +32,7 @@ pub use fd::isatty;
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 pub use fd::ttyname;
 #[cfg(not(target_os = "wasi"))]
-pub use fd::{dup, dup2, DupFlags};
+pub use fd::{dup, dup2, dup2_with, DupFlags};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use ioctl::ioctl_fioclex;
 #[cfg(not(target_os = "wasi"))]

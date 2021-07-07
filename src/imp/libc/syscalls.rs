@@ -990,6 +990,11 @@ pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(libc::dup(borrowed_fd(fd))) }
 }
 
+#[cfg(not(target_os = "wasi"))]
+pub(crate) fn dup2(fd: BorrowedFd<'_>, new: OwnedFd) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(libc::dup2(borrowed_fd(fd), owned_fd(new))) }
+}
+
 #[cfg(not(any(
     target_os = "android",
     target_os = "macos",
@@ -997,7 +1002,7 @@ pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     target_os = "redox",
     target_os = "wasi"
 )))]
-pub(crate) fn dup2(fd: BorrowedFd<'_>, new: OwnedFd, flags: DupFlags) -> io::Result<OwnedFd> {
+pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: OwnedFd, flags: DupFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(libc::dup3(borrowed_fd(fd), owned_fd(new), flags.bits())) }
 }
 
@@ -1007,11 +1012,9 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: OwnedFd, flags: DupFlags) -> io::Res
     target_os = "ios",
     target_os = "redox"
 ))]
-pub(crate) fn dup2(fd: BorrowedFd<'_>, new: OwnedFd, _flags: DupFlags) -> io::Result<OwnedFd> {
-    unsafe {
-        // Android 5.0 has dup3, but libc doesn't have bindings
-        ret_owned_fd(libc::dup2(borrowed_fd(fd), owned_fd(new)))
-    }
+pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: OwnedFd, _flags: DupFlags) -> io::Result<OwnedFd> {
+    // Android 5.0 has dup3, but libc doesn't have bindings
+    dup2(fd, new)
 }
 
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]

@@ -65,8 +65,8 @@ use linux_raw_sys::general::{__NR_ppoll, sigset_t};
 use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::{
     general::{
-        __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
-        __NR_exit_group, __NR_faccessat, __NR_fallocate, __NR_fchmod, __NR_fchmodat,
+        __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup2,
+        __NR_dup3, __NR_exit_group, __NR_faccessat, __NR_fallocate, __NR_fchmod, __NR_fchmodat,
         __NR_fdatasync, __NR_fsync, __NR_getcwd, __NR_getdents64, __NR_getpid, __NR_getppid,
         __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_mknodat, __NR_munmap, __NR_nanosleep,
         __NR_openat, __NR_pipe2, __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read,
@@ -2358,7 +2358,12 @@ pub(crate) fn dup(fd: BorrowedFd) -> io::Result<OwnedFd> {
 }
 
 #[inline]
-pub(crate) fn dup2(fd: BorrowedFd, new: OwnedFd, flags: DupFlags) -> io::Result<OwnedFd> {
+pub(crate) fn dup2(fd: BorrowedFd, new: OwnedFd) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(syscall2_readonly(__NR_dup2, borrowed_fd(fd), owned_fd(new))) }
+}
+
+#[inline]
+pub(crate) fn dup2_with(fd: BorrowedFd, new: OwnedFd, flags: DupFlags) -> io::Result<OwnedFd> {
     unsafe {
         ret_owned_fd(syscall3_readonly(
             __NR_dup3,

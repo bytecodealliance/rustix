@@ -52,8 +52,8 @@ pub fn is_read_write<Fd: AsFd>(fd: &Fd) -> io::Result<(bool, bool)> {
 /// `dup(fd)`—Creates a new `OwnedFd` instance that shares the same
 /// underlying [file description] as `fd`.
 ///
-/// Note that this function does not set the `O_CLOEXEC` flag. For a dup that
-/// does set `O_CLOEXEC`, see [`fcntl_dupfd_cloexec`].
+/// Note that this function does not set the `O_CLOEXEC` flag. To do a `dup`
+/// that does set `O_CLOEXEC`, use [`fcntl_dupfd_cloexec`].
 ///
 /// POSIX guarantees that `dup` will use the lowest unused file descriptor,
 /// however it is not safe in general to rely on this, as file descriptors may
@@ -74,13 +74,34 @@ pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
     imp::syscalls::dup(fd)
 }
 
-/// `dup3(fd, new, flags)`—Creates a new `OwnedFd` instance that shares the
+/// `dup2(fd, new)`—Creates a new `OwnedFd` instance that shares the
 /// same underlying [file description] as the existing `OwnedFd` instance,
 /// closing `new` and reusing its file descriptor.
 ///
-/// `dup3` in platforms that support it is the same as `dup2` but adds an
-/// additional flags operand. `posish` unifies these, with the `DupFlags` enum
-/// having no defined flags on platforms which don't support `dup3`.
+/// Note that this function does not set the `O_CLOEXEC` flag. To do a `dup2`
+/// that does set `O_CLOEXEC`, use [`dup2_with`] with [`DupFlags::CLOEXEC`] on
+/// platforms which support it.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [file description]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_258
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/dup2.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/dup2.2.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn dup2<Fd: AsFd, NewFd: IntoFd>(fd: &Fd, new: NewFd) -> io::Result<OwnedFd> {
+    let fd = fd.as_fd();
+    let new = new.into_fd();
+    imp::syscalls::dup2(fd, new)
+}
+
+/// `dup3(fd, new, flags)`—Creates a new `OwnedFd` instance that shares the
+/// same underlying [file description] as the existing `OwnedFd` instance,
+/// closing `new` and reusing its file descriptor, with flags.
+///
+/// `dup2_with` is the same as `dup2` but adds an additional flags operand.
 ///
 /// # References
 ///  - [POSIX]
@@ -92,10 +113,14 @@ pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[doc(alias = "dup3")]
-pub fn dup2<Fd: AsFd, NewFd: IntoFd>(fd: &Fd, new: NewFd, flags: DupFlags) -> io::Result<OwnedFd> {
+pub fn dup2_with<Fd: AsFd, NewFd: IntoFd>(
+    fd: &Fd,
+    new: NewFd,
+    flags: DupFlags,
+) -> io::Result<OwnedFd> {
     let fd = fd.as_fd();
     let new = new.into_fd();
-    imp::syscalls::dup2(fd, new, flags)
+    imp::syscalls::dup2_with(fd, new, flags)
 }
 
 /// `ttyname_r(fd)`
