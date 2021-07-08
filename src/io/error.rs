@@ -1,6 +1,6 @@
 //! The `Error` type, which is a minimal wrapper around an errno value.
 //!
-//! We define the errno constants as invididual `const`s instead of an
+//! We define the errno constants as individual `const`s instead of an
 //! enum because we may not know about all of the host's errno values
 //! and we don't want unrecognized values to create UB.
 
