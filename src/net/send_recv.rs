@@ -8,7 +8,7 @@ use io_lifetimes::AsFd;
 
 pub use imp::net::{RecvFlags, SendFlags};
 
-/// `recv(fd, buf, flags)`
+/// `recv(fd, buf, flags)`—Reads data from a socket.
 ///
 /// # References
 ///  - [POSIX]
@@ -22,7 +22,7 @@ pub fn recv<Fd: AsFd>(fd: &Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<u
     imp::syscalls::recv(fd, buf, flags)
 }
 
-/// `send(fd, buf, flags)`
+/// `send(fd, buf, flags)`—Writes data to a socket.
 ///
 /// # References
 ///  - [POSIX]
@@ -36,7 +36,8 @@ pub fn send<Fd: AsFd>(fd: &Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize
     imp::syscalls::send(fd, buf, flags)
 }
 
-/// `recvfrom(fd, buf, flags, addr, len)`
+/// `recvfrom(fd, buf, flags, addr, len)`—Reads data from a socket and
+/// returns the sender address.
 ///
 /// # References
 ///  - [POSIX]
@@ -54,7 +55,8 @@ pub fn recvfrom<Fd: AsFd>(
     imp::syscalls::recvfrom(fd, buf, flags)
 }
 
-/// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_in))`
+/// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_in))`—Writes data to
+/// a socket to a specific IPv4 address.
 ///
 /// # References
 ///  - [POSIX]
@@ -74,7 +76,8 @@ pub fn sendto_v4<Fd: AsFd>(
     imp::syscalls::sendto_v4(fd, buf, flags, addr)
 }
 
-/// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_in6))`
+/// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_in6))`—Writes data
+/// to a socket to a specific IPv6 address.
 ///
 /// # References
 ///  - [POSIX]
@@ -94,7 +97,8 @@ pub fn sendto_v6<Fd: AsFd>(
     imp::syscalls::sendto_v6(fd, buf, flags, addr)
 }
 
-/// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_un))`
+/// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_un))`—Writes data to
+/// a socket to a specific Unix-domain socket address.
 ///
 /// # References
 ///  - [POSIX]

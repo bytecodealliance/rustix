@@ -128,7 +128,7 @@ fn is_mountpoint(file: BorrowedFd<'_>) -> io::Result<bool> {
     }
 }
 
-/// Return a handle to Linux's `/proc` directory.
+/// Returns a handle to Linux's `/proc` directory.
 ///
 /// This ensures that `procfs` is mounted on `/proc`, that nothing is
 /// mounted on top of it, and that it looks normal. It also returns the
@@ -154,7 +154,7 @@ pub fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
         .map_err(|_err| io::Error::NOTSUP)
 }
 
-/// Return a handle to Linux's `/proc/self` directory.
+/// Returns a handle to Linux's `/proc/self` directory.
 ///
 /// This ensures that `procfs` is mounted on `/proc/self`, that nothing is
 /// mounted on top of it, and that it looks normal. It also returns the
@@ -188,7 +188,7 @@ pub fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
         .map_err(|_err| io::Error::NOTSUP)
 }
 
-/// Return a handle to Linux's `/proc/self/fd` directory.
+/// Returns a handle to Linux's `/proc/self/fd` directory.
 ///
 /// This ensures that `procfs` is mounted on `/proc/self/fd`, that nothing is
 /// mounted on top of it, and that it looks normal. It also returns the

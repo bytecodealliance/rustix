@@ -31,7 +31,7 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     imp::syscalls::ioctl_fioclex(fd)
 }
 
-/// `ioctl(fd, TIOCGWINSZ)`.
+/// `ioctl(fd, TIOCGWINSZ)`
 ///
 /// # References
 ///  - [Linux]

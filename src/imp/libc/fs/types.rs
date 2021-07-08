@@ -632,24 +632,24 @@ pub type StatFs = libc::statfs64;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 pub type Statx = libc::statx;
 
-/// `mode_t`.
+/// `mode_t`
 pub type RawMode = libc::mode_t;
 
-/// `dev_t`.
+/// `dev_t`
 pub type Dev = libc::dev_t;
 
-/// `__fsword_t`.
+/// `__fsword_t`
 #[cfg(all(target_os = "linux", not(target_env = "musl")))]
 pub type FsWord = libc::__fsword_t;
 
-/// `__fsword_t`.
+/// `__fsword_t`
 #[cfg(all(
     any(target_os = "android", all(target_os = "linux", target_env = "musl")),
     target_pointer_width = "32"
 ))]
 pub type FsWord = u32;
 
-/// `__fsword_t`.
+/// `__fsword_t`
 #[cfg(all(
     any(target_os = "android", all(target_os = "linux", target_env = "musl")),
     target_pointer_width = "64"

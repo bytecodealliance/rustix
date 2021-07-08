@@ -12,7 +12,7 @@ use imp::{fs::Stat, time::Timespec};
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::io::SeekFrom;
 
-/// `lseek(fd, offset, whence)`
+/// `lseek(fd, offset, whence)`—Repositions a file descriptor within a file.
 ///
 /// # References
 ///  - [POSIX]
@@ -26,7 +26,7 @@ pub fn seek<Fd: AsFd>(fd: &Fd, pos: SeekFrom) -> io::Result<u64> {
     imp::syscalls::seek(fd, pos)
 }
 
-/// `lseek(fd, 0, SEEK_CUR)`
+/// `lseek(fd, 0, SEEK_CUR)`—Returns the current position within a file.
 ///
 /// Return the current position of the file descriptor. This is a subset of
 /// the functionality of `seek`, but this interface makes it easier for users
@@ -44,7 +44,7 @@ pub fn tell<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
     imp::syscalls::tell(fd)
 }
 
-/// `fchmod(fd)`.
+/// `fchmod(fd)`—Sets open file or directory permissions.
 ///
 /// Note that this implementation does not support `O_PATH` file descriptors,
 /// even on platforms where the host libc emulates it.
@@ -62,7 +62,7 @@ pub fn fchmod<Fd: AsFd>(fd: &Fd, mode: Mode) -> io::Result<()> {
     imp::syscalls::fchmod(fd, mode)
 }
 
-/// `fstat(fd)`
+/// `fstat(fd)`—Queries metadata for an open file or directory.
 ///
 /// # References
 ///  - [POSIX]
@@ -76,7 +76,7 @@ pub fn fstat<Fd: AsFd>(fd: &Fd) -> io::Result<Stat> {
     imp::syscalls::fstat(fd)
 }
 
-/// `fstatfs(fd)`
+/// `fstatfs(fd)`—Queries filesystem statistics for an open file or directory.
 ///
 /// # References
 ///  - [Linux]
@@ -89,7 +89,7 @@ pub fn fstatfs<Fd: AsFd>(fd: &Fd) -> io::Result<StatFs> {
     imp::syscalls::fstatfs(fd)
 }
 
-/// `futimens(fd, times)`
+/// `futimens(fd, times)`—Sets timestamps for an open file or directory.
 ///
 /// # References
 ///  - [POSIX]
@@ -103,7 +103,7 @@ pub fn futimens<Fd: AsFd>(fd: &Fd, times: &[Timespec; 2]) -> io::Result<()> {
     imp::syscalls::futimens(fd, times)
 }
 
-/// `fallocate(fd, mode, offset, len)`
+/// `fallocate(fd, mode, offset, len)`—Adjusts file allocation.
 ///
 /// This is a more general form of `posix_fallocate`, adding a `mode` argument
 /// which modifies the behavior. On platforms which only support
@@ -126,7 +126,7 @@ pub fn fallocate<Fd: AsFd>(fd: &Fd, mode: FallocateFlags, offset: u64, len: u64)
     imp::syscalls::fallocate(fd, mode, offset, len)
 }
 
-/// `fcntl(fd, F_GETFL) & O_ACCMODE`.
+/// `fcntl(fd, F_GETFL) & O_ACCMODE`
 ///
 /// Returns a pair of booleans indicating whether the file descriptor is
 /// readable and/or writeable, respectively. This is only reliable on files;
@@ -162,7 +162,8 @@ pub(crate) fn _is_file_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)
     }
 }
 
-/// `fsync(fd)`
+/// `fsync(fd)`—Ensures that file data and metadata is written to the
+/// underlying storage device.
 ///
 /// # References
 ///  - [POSIX]
@@ -176,7 +177,8 @@ pub fn fsync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     imp::syscalls::fsync(fd)
 }
 
-/// `fdatasync(fd)`
+/// `fdatasync(fd)`—Ensures that file data is written to the underlying
+/// storage device.
 ///
 /// # References
 ///  - [POSIX]
@@ -191,7 +193,7 @@ pub fn fdatasync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     imp::syscalls::fdatasync(fd)
 }
 
-/// `ftruncate(fd, length)`
+/// `ftruncate(fd, length)`—Sets the length of a file.
 ///
 /// # References
 ///  - [POSIX]

@@ -9,19 +9,19 @@ use std::os::raw::c_int;
 pub struct SocketType(pub(crate) u32);
 
 impl SocketType {
-    /// `SOCK_STREAM`.
+    /// `SOCK_STREAM`
     pub const STREAM: Self = Self(libc::SOCK_STREAM as u32);
 
-    /// `SOCK_DGRAM`.
+    /// `SOCK_DGRAM`
     pub const DGRAM: Self = Self(libc::SOCK_DGRAM as u32);
 
-    /// `SOCK_SEQPACKET`.
+    /// `SOCK_SEQPACKET`
     pub const SEQPACKET: Self = Self(libc::SOCK_SEQPACKET as u32);
 
-    /// `SOCK_RAW`.
+    /// `SOCK_RAW`
     pub const RAW: Self = Self(libc::SOCK_RAW as u32);
 
-    /// `SOCK_RDM`.
+    /// `SOCK_RDM`
     pub const RDM: Self = Self(libc::SOCK_RDM as u32);
 }
 

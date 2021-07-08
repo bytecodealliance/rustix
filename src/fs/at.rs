@@ -98,7 +98,8 @@ pub fn mkdirat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> io::R
     path.into_with_c_str(|path| imp::syscalls::mkdirat(dirfd, path, mode))
 }
 
-/// `linkat(old_dirfd, old_path, new_dirfd, new_path, flags)`—Creates a hard link.
+/// `linkat(old_dirfd, old_path, new_dirfd, new_path, flags)`—Creates a hard
+/// link.
 ///
 /// # References
 ///  - [POSIX]
@@ -137,7 +138,8 @@ pub fn unlinkat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags) -> 
     path.into_with_c_str(|path| imp::syscalls::unlinkat(dirfd, path, flags))
 }
 
-/// `renameat(old_dirfd, old_path, new_dirfd, new_path)`—Renames a file or directory.
+/// `renameat(old_dirfd, old_path, new_dirfd, new_path)`—Renames a file or
+/// directory.
 ///
 /// # References
 ///  - [POSIX]

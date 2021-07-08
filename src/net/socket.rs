@@ -13,7 +13,7 @@ impl Default for Protocol {
     }
 }
 
-/// `socket(domain, type_, protocol)`
+/// `socket(domain, type_, protocol)`—Creates a socket.
 ///
 /// POSIX guarantees that `socket` will use the lowest unused file descriptor,
 /// however it is not safe in general to rely on this, as file descriptors
@@ -30,7 +30,8 @@ pub fn socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> i
     imp::syscalls::socket(domain, type_, protocol)
 }
 
-/// `bind(sockfd, addr, sizeof(struct sockaddr_in))`
+/// `bind(sockfd, addr, sizeof(struct sockaddr_in))`—Binds a socket to an
+/// address.
 ///
 /// # References
 ///  - [POSIX]
@@ -45,7 +46,8 @@ pub fn bind_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> {
     imp::syscalls::bind_v4(sockfd, addr)
 }
 
-/// `bind(sockfd, addr, sizeof(struct sockaddr_in6))`
+/// `bind(sockfd, addr, sizeof(struct sockaddr_in6))`—Binds a socket to an
+/// address.
 ///
 /// # References
 ///  - [POSIX]
@@ -60,7 +62,8 @@ pub fn bind_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
     imp::syscalls::bind_v6(sockfd, addr)
 }
 
-/// `bind(sockfd, addr, sizeof(struct sockaddr_un))`
+/// `bind(sockfd, addr, sizeof(struct sockaddr_un))`—Binds a socket to an
+/// address.
 ///
 /// # References
 ///  - [POSIX]
@@ -75,7 +78,8 @@ pub fn bind_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()>
     imp::syscalls::bind_unix(sockfd, addr)
 }
 
-/// `connect(sockfd, addr, sizeof(struct sockaddr_in))`
+/// `connect(sockfd, addr, sizeof(struct sockaddr_in))`—Initiates a
+/// connection.
 ///
 /// # References
 ///  - [POSIX]
@@ -90,7 +94,8 @@ pub fn connect_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> 
     imp::syscalls::connect_v4(sockfd, addr)
 }
 
-/// `connect(sockfd, addr, sizeof(struct sockaddr_in6))`
+/// `connect(sockfd, addr, sizeof(struct sockaddr_in6))`—Initiates a
+/// connection.
 ///
 /// # References
 ///  - [POSIX]
@@ -105,7 +110,8 @@ pub fn connect_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> 
     imp::syscalls::connect_v6(sockfd, addr)
 }
 
-/// `connect(sockfd, addr, sizeof(struct sockaddr_un))`
+/// `connect(sockfd, addr, sizeof(struct sockaddr_un))`—Initiates a
+/// connection.
 ///
 /// # References
 ///  - [POSIX]
@@ -120,7 +126,7 @@ pub fn connect_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<
     imp::syscalls::connect_unix(sockfd, addr)
 }
 
-/// `listen(fd, backlog)`
+/// `listen(fd, backlog)`—Enables listening for incoming connections.
 ///
 /// # References
 ///  - [POSIX]
@@ -134,7 +140,7 @@ pub fn listen<Fd: AsFd>(sockfd: &Fd, backlog: c_int) -> io::Result<()> {
     imp::syscalls::listen(sockfd, backlog)
 }
 
-/// `accept(fd, NULL, NULL)`
+/// `accept(fd, NULL, NULL)`—Accepts an incoming connection.
 ///
 /// Use [`acceptfrom`] to retrieve the peer address.
 ///
@@ -155,7 +161,8 @@ pub fn accept<Fd: AsFd>(sockfd: &Fd) -> io::Result<OwnedFd> {
     imp::syscalls::accept(sockfd)
 }
 
-/// `accept4(fd, NULL, NULL, flags)`
+/// `accept4(fd, NULL, NULL, flags)`—Accepts an incoming connection, with
+/// flags.
 ///
 /// Use [`acceptfrom_with`] to retrieve the peer address.
 ///
@@ -178,7 +185,8 @@ pub fn accept_with<Fd: AsFd>(sockfd: &Fd, flags: AcceptFlags) -> io::Result<Owne
     imp::syscalls::accept_with(sockfd, flags)
 }
 
-/// `accept(fd, &addr, &len)`
+/// `accept(fd, &addr, &len)`—Accepts an incoming connection and returns the
+/// peer address.
 ///
 /// Use [`accept`] if the peer address isn't needed.
 ///
@@ -195,7 +203,8 @@ pub fn acceptfrom<Fd: AsFd>(sockfd: &Fd) -> io::Result<(OwnedFd, SocketAddr)> {
     imp::syscalls::acceptfrom(sockfd)
 }
 
-/// `accept4(fd, &addr, &len, flags)`
+/// `accept4(fd, &addr, &len, flags)—Accepts an incoming connection and
+/// returns the peer address, with flags.
 ///
 /// Use [`accept_with`] if the peer address isn't needed.
 ///
@@ -218,7 +227,7 @@ pub fn acceptfrom_with<Fd: AsFd>(
     imp::syscalls::acceptfrom_with(sockfd, flags)
 }
 
-/// `shutdown(fd, how)`
+/// `shutdown(fd, how)`—Closes the read and/or write sides of a stream.
 ///
 /// # References
 ///  - [POSIX]
@@ -232,7 +241,7 @@ pub fn shutdown<Fd: AsFd>(sockfd: &Fd, how: Shutdown) -> io::Result<()> {
     imp::syscalls::shutdown(sockfd, how)
 }
 
-/// `getsockopt(fd, SOL_SOCKET, SO_TYPE)`
+/// `getsockopt(fd, SOL_SOCKET, SO_TYPE)`—Returns the type of a socket.
 ///
 /// # References
 ///  - [POSIX]
@@ -246,7 +255,7 @@ pub fn getsockopt_socket_type<Fd: AsFd>(fd: &Fd) -> io::Result<SocketType> {
     imp::syscalls::getsockopt_socket_type(fd)
 }
 
-/// `getsockname(fd, addr, len)`
+/// `getsockname(fd, addr, len)`—Returns the address a socket is bound to.
 ///
 /// # References
 ///  - [POSIX]
@@ -260,7 +269,8 @@ pub fn getsockname<Fd: AsFd>(sockfd: &Fd) -> io::Result<SocketAddr> {
     imp::syscalls::getsockname(sockfd)
 }
 
-/// `getpeername(fd, addr, len)`
+/// `getpeername(fd, addr, len)`—Returns the address a socket is connected
+/// to.
 ///
 /// # References
 ///  - [POSIX]

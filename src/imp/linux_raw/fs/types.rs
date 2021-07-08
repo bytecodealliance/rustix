@@ -421,7 +421,7 @@ pub type StatFs = linux_raw_sys::general::statfs64;
 /// [`statx`]: crate::fs::statx
 pub type Statx = linux_raw_sys::v5_4::general::statx;
 
-/// `mode_t`.
+/// `mode_t`
 #[cfg(not(any(
     target_arch = "x86",
     target_arch = "sparc",
@@ -430,7 +430,7 @@ pub type Statx = linux_raw_sys::v5_4::general::statx;
 )))]
 pub type RawMode = linux_raw_sys::general::__kernel_mode_t;
 
-/// `mode_t`.
+/// `mode_t
 #[cfg(any(
     target_arch = "x86",
     target_arch = "sparc",
@@ -440,11 +440,11 @@ pub type RawMode = linux_raw_sys::general::__kernel_mode_t;
 // Don't use `__kernel_mode_t` since it's `u16` which differs from `st_size`.
 pub type RawMode = std::os::raw::c_uint;
 
-/// `dev_t`.
+/// `dev_t`
 // Within the kernel the dev_t is 32-bit, but userspace uses a 64-bit field.
 pub type Dev = u64;
 
-/// `__fsword_t`.
+/// `__fsword_t`
 pub type FsWord = linux_raw_sys::general::__fsword_t;
 
 pub use linux_raw_sys::general::{UTIME_NOW, UTIME_OMIT};

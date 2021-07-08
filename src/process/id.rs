@@ -1,6 +1,6 @@
 use crate::imp;
 
-/// `getuid()`
+/// `getuid()`—Returns the process' real user ID.
 ///
 /// # References
 ///  - [POSIX]
@@ -14,7 +14,7 @@ pub fn getuid() -> u32 {
     imp::syscalls::getuid()
 }
 
-/// `geteuid()`
+/// `geteuid()`—Returns the process' effective user ID.
 ///
 /// # References
 ///  - [POSIX]
@@ -28,7 +28,7 @@ pub fn geteuid() -> u32 {
     imp::syscalls::geteuid()
 }
 
-/// `getgid()`
+/// `getgid()`—Returns the process' real group ID.
 ///
 /// # References
 ///  - [POSIX]
@@ -42,7 +42,7 @@ pub fn getgid() -> u32 {
     imp::syscalls::getgid()
 }
 
-/// `getegid()`
+/// `getegid()`—Returns the process' effective group ID.
 ///
 /// # References
 ///  - [POSIX]
@@ -56,7 +56,7 @@ pub fn getegid() -> u32 {
     imp::syscalls::getegid()
 }
 
-/// `getpid()`
+/// `getpid()`—Returns the process' ID.
 ///
 /// # References
 ///  - [POSIX]
@@ -70,7 +70,7 @@ pub fn getpid() -> u32 {
     imp::syscalls::getpid()
 }
 
-/// `getppid()`
+/// `getppid()`—Returns the parent process' ID.
 ///
 /// # References
 ///  - [POSIX]

@@ -4,11 +4,11 @@ use crate::{imp, io};
 use io_lifetimes::AsFd;
 use std::io::{IoSlice, IoSliceMut};
 
-/// `RWF_*` constants.
+/// `RWF_*` constants for use with [`preadv2`] and [`pwritev2`].
 #[cfg(any(linux_raw, all(libc, target_os = "linux", target_env = "gnu")))]
 pub use imp::io::ReadWriteFlags;
 
-/// `read(fd, buf)`—Reads data via a file descriptor into `buf`.
+/// `read(fd, buf)`—Reads from a stream.
 ///
 /// # References
 ///  - [POSIX]
@@ -22,7 +22,7 @@ pub fn read<Fd: AsFd>(fd: &Fd, buf: &mut [u8]) -> io::Result<usize> {
     imp::syscalls::read(fd, buf)
 }
 
-/// `write(fd, buf)`—Writes data via a file descriptor from `buf`.
+/// `write(fd, buf)`—Writes to a stream.
 ///
 /// # References
 ///  - [POSIX]
@@ -36,8 +36,7 @@ pub fn write<Fd: AsFd>(fd: &Fd, buf: &[u8]) -> io::Result<usize> {
     imp::syscalls::write(fd, buf)
 }
 
-/// `pread(fd, buf, offset)`—Reads data via a file descriptor at `offset`,
-/// into `buf`
+/// `pread(fd, buf, offset)`—Reads from a file at a given position.
 ///
 /// # References
 ///  - [POSIX]
@@ -51,8 +50,7 @@ pub fn pread<Fd: AsFd>(fd: &Fd, buf: &mut [u8], offset: u64) -> io::Result<usize
     imp::syscalls::pread(fd, buf, offset)
 }
 
-/// `pwrite(fd, bufs)`—Writes data via a file descriptor at `offset`, from
-/// `buf`.
+/// `pwrite(fd, bufs)`—Writes to a file at a given position.
 ///
 /// # References
 ///  - [POSIX]
@@ -66,7 +64,7 @@ pub fn pwrite<Fd: AsFd>(fd: &Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
     imp::syscalls::pwrite(fd, buf, offset)
 }
 
-/// `readv(fd, bufs)`—Reads data via a file descriptor into `bufs`.
+/// `readv(fd, bufs)`—Reads from a stream into multiple buffers.
 ///
 /// # References
 ///  - [POSIX]
@@ -80,7 +78,7 @@ pub fn readv<Fd: AsFd>(fd: &Fd, bufs: &[IoSliceMut]) -> io::Result<usize> {
     imp::syscalls::readv(fd, bufs)
 }
 
-/// `writev(fd, bufs)`—Writes data via a file descriptor from `bufs`.
+/// `writev(fd, bufs)`—Writes to a stream from multiple buffers.
 ///
 /// # References
 ///  - [POSIX]
@@ -94,8 +92,8 @@ pub fn writev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice]) -> io::Result<usize> {
     imp::syscalls::writev(fd, bufs)
 }
 
-/// `preadv(fd, bufs, offset)`—Reads data via a file descriptor at `offset`,
-/// into `bufs`.
+/// `preadv(fd, bufs, offset)`—Reads from a file at a given position into
+/// multiple buffers.
 ///
 /// # References
 ///  - [Linux]
@@ -108,8 +106,8 @@ pub fn preadv<Fd: AsFd>(fd: &Fd, bufs: &[IoSliceMut], offset: u64) -> io::Result
     imp::syscalls::preadv(fd, bufs, offset)
 }
 
-/// `pwritev(fd, bufs, offset)`—Writes data via a file descriptor at
-/// `offset`, from `bufs`.
+/// `pwritev(fd, bufs, offset)`—Writes to a file at a given position from
+/// multiple buffers.
 ///
 /// # References
 ///  - [Linux]
@@ -122,8 +120,7 @@ pub fn pwritev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice], offset: u64) -> io::Result<u
     imp::syscalls::pwritev(fd, bufs, offset)
 }
 
-/// `preadv2(fd, bufs, offset, flags)`—Reads data via a file descriptor with
-/// several options.
+/// `preadv2(fd, bufs, offset, flags)`—Reads data, with several options.
 ///
 /// # References
 ///  - [Linux]
@@ -149,8 +146,7 @@ pub fn preadv2<Fd: AsFd>(
     imp::syscalls::preadv2(fd, bufs, offset, flags)
 }
 
-/// `pwritev2(fd, bufs, offset, flags)`—Writes data via a file descriptor
-/// with several options.
+/// `pwritev2(fd, bufs, offset, flags)`—Writes data, with several options.
 ///
 /// # References
 ///  - [Linux]

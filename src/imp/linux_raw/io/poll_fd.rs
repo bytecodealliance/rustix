@@ -39,13 +39,13 @@ pub struct PollFd<'fd> {
 }
 
 impl<'fd> PollFd<'fd> {
-    /// Construct a new `PollFd` holding `fd` and `events`.
+    /// Constructs a new `PollFd` holding `fd` and `events`.
     #[inline]
     pub fn new<Fd: AsFd>(fd: &'fd Fd, events: PollFlags) -> Self {
         Self::from_borrowed_fd(fd.as_fd(), events)
     }
 
-    /// Construct a new `PollFd` holding `fd` and `events`.
+    /// Constructs a new `PollFd` holding `fd` and `events`.
     ///
     /// This is the same as `new`, but can be used to avoid borrowing the
     /// `BorrowedFd`, which can be tricky in situations where the `BorrowedFd`
@@ -59,7 +59,7 @@ impl<'fd> PollFd<'fd> {
         }
     }
 
-    /// Return the ready events.
+    /// Returns the ready events.
     #[inline]
     pub fn revents(self) -> PollFlags {
         // Use `unwrap()` here because in theory we know we know all the bits

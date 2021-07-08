@@ -41,32 +41,32 @@ use std::{
 ///
 /// [`AsRef`]: std::convert::AsRef
 pub trait Arg {
-    /// Return a view of this string as a string slice.
+    /// Returns a view of this string as a string slice.
     fn as_str(&self) -> io::Result<&str>;
 
-    /// Return a potentially-lossy rendering of this string as a `Cow<str>`.
+    /// Returns a potentially-lossy rendering of this string as a `Cow<str>`.
     fn to_string_lossy(&self) -> Cow<str>;
 
-    /// Return a view of this string as a maybe-owned [`CStr`].
+    /// Returns a view of this string as a maybe-owned [`CStr`].
     #[cfg(not(windows))]
     fn as_c_str(&self) -> io::Result<Cow<CStr>>;
 
-    /// Consume `self` and return a view of this string as a maybe-owned
+    /// Consumes `self` and returns a view of this string as a maybe-owned
     /// [`CStr`].
     #[cfg(not(windows))]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
         Self: 'b;
 
-    /// Return a view of this string as a byte slice.
+    /// Returns a view of this string as a byte slice.
     #[cfg(not(windows))]
     fn as_maybe_utf8_bytes(&self) -> &[u8];
 
-    /// Return a view of this string as a maybe-owned [`OsStr`].
+    /// Returns a view of this string as a maybe-owned [`OsStr`].
     #[cfg(windows)]
     fn as_os_str(&self) -> io::Result<Cow<OsStr>>;
 
-    /// Run a closure with `self` passed in as a `&CStr`.
+    /// Runs a closure with `self` passed in as a `&CStr`.
     #[cfg(not(windows))]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -1235,7 +1235,7 @@ impl Arg for DecInt {
     }
 }
 
-/// Run a closure with `bytes` passed in as a `&CStr`.
+/// Runs a closure with `bytes` passed in as a `&CStr`.
 #[inline]
 fn with_c_str<T, F>(bytes: &[u8], f: F) -> io::Result<T>
 where

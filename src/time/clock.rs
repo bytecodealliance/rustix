@@ -4,7 +4,7 @@ use crate::{imp, io, time::Timespec};
 #[cfg(any(linux_raw, all(libc, not(target_os = "wasi"))))]
 pub use imp::time::{ClockId, DynamicClockId};
 
-/// `clock_getres(id)`
+/// `clock_getres(id)`—Returns the resolution of a clock.
 ///
 /// # References
 ///  - [POSIX]
@@ -19,7 +19,7 @@ pub fn clock_getres(id: ClockId) -> Timespec {
     imp::syscalls::clock_getres(id)
 }
 
-/// `clock_gettime(id)`
+/// `clock_gettime(id)`—Returns the current value of a clock.
 ///
 /// This function uses `ClockId` which only contains clocks which are known to
 /// always be supported at runtime, allowing this function to be infallible.
@@ -54,7 +54,8 @@ pub fn clock_gettime_dynamic(id: DynamicClockId) -> io::Result<Timespec> {
     imp::syscalls::clock_gettime_dynamic(id)
 }
 
-/// `clock_nanosleep(id, 0, request, remain)`
+/// `clock_nanosleep(id, 0, request, remain)`—Sleeps for a duration on a
+/// given clock.
 ///
 /// This is `clock_nanosleep` specialized for the case of a relative sleep
 /// interval. See [`clock_nanosleep_absolute`] for absolute intervals.
@@ -81,7 +82,8 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRel
     imp::syscalls::clock_nanosleep_relative(id, request)
 }
 
-/// `clock_nanosleep(id, TIMER_ABSTIME, request, NULL)`
+/// `clock_nanosleep(id, TIMER_ABSTIME, request, NULL)`—Sleeps until an
+/// absolute time on a given clock.
 ///
 /// This is `clock_nanosleep` specialized for the case of an absolute sleep
 /// interval. See [`clock_nanosleep_relative`] for relative intervals.
@@ -107,7 +109,9 @@ pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::Result<(
     imp::syscalls::clock_nanosleep_absolute(id, request)
 }
 
-/// `nanosleep(request, remain)`
+/// `nanosleep(request, remain)`—Sleeps for a duration.
+///
+/// This effectively uses the system monotonic clock.
 ///
 /// # References
 ///  - [POSIX]
