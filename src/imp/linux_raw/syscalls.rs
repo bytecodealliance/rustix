@@ -1286,7 +1286,7 @@ pub(crate) fn getdents(fd: BorrowedFd<'_>, dirent: &mut [u8]) -> io::Result<usiz
 }
 
 #[inline]
-pub(crate) fn pipe2(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
+pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     #[cfg(any(target_arch = "mips", target_arch = "mips64"))]
     {
         todo!("On MIPS pipe returns multiple values")
@@ -1304,7 +1304,7 @@ pub(crate) fn pipe2(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
 pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     #[cfg(target_arch = "aarch64")]
     {
-        pipe2(PipeFlags::empty())
+        pipe_with(PipeFlags::empty())
     }
     #[cfg(any(target_arch = "mips", target_arch = "mips64"))]
     {

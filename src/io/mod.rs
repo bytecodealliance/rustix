@@ -42,7 +42,7 @@ pub use mmap::{mmap, munmap, MapFlags, ProtFlags};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use pipe::pipe;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
-pub use pipe::{pipe2, PipeFlags};
+pub use pipe::{pipe_with, PipeFlags};
 pub use poll::{PollFd, PollFdVec, PollFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use procfs::{proc, proc_self, proc_self_fd};

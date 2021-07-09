@@ -106,9 +106,9 @@ bitflags! {
 
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 bitflags! {
-    /// `O_*` constants for use with [`pipe2`].
+    /// `O_*` constants for use with [`pipe_with`].
     ///
-    /// [`pipe2`]: crate::io::pipe2
+    /// [`pipe_with`]: crate::io::pipe_with
     pub struct PipeFlags: libc::c_int {
         /// `O_CLOEXEC`
         const CLOEXEC = libc::O_CLOEXEC;

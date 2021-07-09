@@ -1138,7 +1138,7 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
 }
 
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
-pub(crate) fn pipe2(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
+pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
         ret(libc::pipe2(result.as_mut_ptr().cast::<i32>(), flags.bits()))?;

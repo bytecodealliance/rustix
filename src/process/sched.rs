@@ -1,6 +1,6 @@
 use crate::imp;
 
-/// `sched_yield()`
+/// `sched_yield()`—Hints to the OS that other processes should run.
 ///
 /// # References
 ///  - [POSIX]
