@@ -117,7 +117,10 @@ use {
     std::path::PathBuf,
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use {super::fs::MemfdFlags, super::io::UserFaultFdFlags};
+use {
+    super::fs::MemfdFlags,
+    super::io::{EventfdFlags, UserfaultfdFlags},
+};
 #[cfg(not(target_os = "wasi"))]
 use {
     super::io::{DupFlags, MapFlags, ProtFlags, Termios, Winsize},
@@ -796,6 +799,11 @@ pub(crate) fn memfd_create(path: &CStr, flags: MemfdFlags) -> io::Result<OwnedFd
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
+    unsafe { syscall_ret_owned_fd(libc::syscall(libc::SYS_eventfd2, initval, flags.bits())) }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn openat2(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
@@ -1163,7 +1171,7 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c_int) -> io::Result<usize> 
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub(crate) unsafe fn userfaultfd(flags: UserFaultFdFlags) -> io::Result<OwnedFd> {
+pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
     syscall_ret_owned_fd(libc::syscall(libc::SYS_userfaultfd, flags.bits()))
 }
 

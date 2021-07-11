@@ -2,6 +2,7 @@
 
 mod io {
     mod dup2_to_replace_stdio;
+    mod eventfd;
     mod isatty;
     mod mmap;
     #[cfg(not(target_os = "redox"))] // redox doesn't have cwd/openat
