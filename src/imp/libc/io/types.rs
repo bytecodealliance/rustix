@@ -125,11 +125,26 @@ bitflags! {
     /// The `O_*` flags accepted by [`userfaultfd`].
     ///
     /// [`userfaultfd`]: crate::io::userfaultfd
-    pub struct UserFaultFdFlags: c_int {
+    pub struct UserfaultfdFlags: c_int {
         /// `O_CLOEXEC`
         const CLOEXEC = libc::O_CLOEXEC;
         /// `O_NONBLOCK`
         const NONBLOCK = libc::O_NONBLOCK;
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    /// The `EFD_*` flags accepted by [`eventfd`].
+    ///
+    /// [`eventfd`]: crate::io::eventfd
+    pub struct EventfdFlags: std::os::raw::c_int {
+        /// `EFD_CLOEXEC`
+        const CLOEXEC = libc::EFD_CLOEXEC;
+        /// `EFD_NONBLOCK`
+        const NONBLOCK = libc::EFD_NONBLOCK;
+        /// `EFD_SEMAPHORE`
+        const SEMAPHORE = libc::EFD_SEMAPHORE;
     }
 }
 

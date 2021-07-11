@@ -103,11 +103,25 @@ bitflags! {
     /// The `O_*` flags accepted by [`userfaultfd`].
     ///
     /// [`userfaultfd`]: crate::io::userfaultfd
-    pub struct UserFaultFdFlags: std::os::raw::c_uint {
+    pub struct UserfaultfdFlags: std::os::raw::c_uint {
         /// `O_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
         /// `O_NONBLOCK`
         const NONBLOCK = linux_raw_sys::general::O_NONBLOCK;
+    }
+}
+
+bitflags! {
+    /// The `EFD_*` flags accepted by [`eventfd`].
+    ///
+    /// [`eventfd`]: crate::io::eventfd
+    pub struct EventfdFlags: std::os::raw::c_uint {
+        /// `EFD_CLOEXEC`
+        const CLOEXEC = linux_raw_sys::general::EFD_CLOEXEC;
+        /// `EFD_NONBLOCK`
+        const NONBLOCK = linux_raw_sys::general::EFD_NONBLOCK;
+        /// `EFD_SEMAPHORE`
+        const SEMAPHORE = linux_raw_sys::general::EFD_SEMAPHORE;
     }
 }
 

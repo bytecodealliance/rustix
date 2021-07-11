@@ -5,8 +5,8 @@ mod types;
 pub use error::Error;
 pub use poll_fd::{PollFd, PollFlags};
 pub use types::{
-    DupFlags, MapFlags, PipeFlags, ProtFlags, ReadWriteFlags, Tcflag, Termios, UserFaultFdFlags,
-    Winsize, ICANON, PIPE_BUF,
+    DupFlags, EventfdFlags, MapFlags, PipeFlags, ProtFlags, ReadWriteFlags, Tcflag, Termios,
+    UserfaultfdFlags, Winsize, ICANON, PIPE_BUF,
 };
 
 use std::os::raw::{c_int, c_uint};

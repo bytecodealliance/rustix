@@ -9,7 +9,7 @@
 use crate::{imp, io};
 use io_lifetimes::OwnedFd;
 
-pub use imp::io::UserFaultFdFlags;
+pub use imp::io::UserfaultfdFlags;
 
 /// `userfaultfd(flags)`
 ///
@@ -23,6 +23,6 @@ pub use imp::io::UserFaultFdFlags;
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/userfaultfd.2.html
 #[inline]
-pub unsafe fn userfaultfd(flags: UserFaultFdFlags) -> io::Result<OwnedFd> {
+pub unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
     imp::syscalls::userfaultfd(flags)
 }

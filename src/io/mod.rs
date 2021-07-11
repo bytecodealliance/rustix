@@ -10,6 +10,8 @@ pub(crate) use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 pub(crate) use std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 
 mod error;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+mod eventfd;
 mod fd;
 mod ioctl;
 #[cfg(not(target_os = "wasi"))]
@@ -25,6 +27,8 @@ mod stdio;
 mod userfaultfd;
 
 pub use error::{Error, Result};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use eventfd::{eventfd, EventfdFlags};
 #[cfg(not(target_os = "redox"))]
 pub use fd::ioctl_fionread;
 #[cfg(not(target_os = "redox"))]
@@ -62,7 +66,7 @@ pub use read_write::{preadv, pwritev};
 pub use read_write::{preadv2, pwritev2, ReadWriteFlags};
 pub use stdio::{stderr, stdin, stdout, take_stderr, take_stdin, take_stdout};
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
-pub use userfaultfd::{userfaultfd, UserFaultFdFlags};
+pub use userfaultfd::{userfaultfd, UserfaultfdFlags};
 
 #[cfg(any(linux_raw, not(target_os = "wasi")))]
 pub use imp::io::Termios;

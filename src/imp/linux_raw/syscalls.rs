@@ -33,7 +33,8 @@ use super::fs::{
     StatFs, StatxFlags,
 };
 use super::io::{
-    DupFlags, MapFlags, PipeFlags, PollFd, ProtFlags, ReadWriteFlags, UserFaultFdFlags,
+    DupFlags, EventfdFlags, MapFlags, PipeFlags, PollFd, ProtFlags, ReadWriteFlags,
+    UserfaultfdFlags,
 };
 #[cfg(not(target_os = "wasi"))]
 use super::io::{Termios, Winsize};
@@ -95,8 +96,8 @@ use linux_raw_sys::{
     v5_4::{
         general::statx,
         general::{
-            __NR_copy_file_range, __NR_getrandom, __NR_memfd_create, __NR_preadv2, __NR_pwritev2,
-            __NR_statx, __NR_userfaultfd,
+            __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_memfd_create, __NR_preadv2,
+            __NR_pwritev2, __NR_statx, __NR_userfaultfd,
         },
         general::{F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ},
     },
@@ -2604,6 +2605,17 @@ pub(crate) fn memfd_create(name: &CStr, flags: MemfdFlags) -> io::Result<OwnedFd
 }
 
 #[inline]
+pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
+    unsafe {
+        ret_owned_fd(syscall2(
+            __NR_eventfd2,
+            c_uint(initval),
+            c_uint(flags.bits()),
+        ))
+    }
+}
+
+#[inline]
 pub(crate) fn sendfile(
     out_fd: BorrowedFd<'_>,
     in_fd: BorrowedFd<'_>,
@@ -2633,7 +2645,7 @@ pub(crate) fn sendfile(
 }
 
 #[inline]
-pub(crate) unsafe fn userfaultfd(flags: UserFaultFdFlags) -> io::Result<OwnedFd> {
+pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
     ret_owned_fd(syscall1(__NR_userfaultfd, c_uint(flags.bits())))
 }
 
