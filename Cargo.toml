@@ -42,6 +42,8 @@ criterion = "0.3"
 [badges]
 maintenance = { status = "actively-developed" }
 
+# Add Criterion configuration, as described here:
+# <https://bheisler.github.io/criterion.rs/book/getting_started.html#step-1---add-dependency-to-cargotoml>
 [[bench]]
 name = "mod"
 harness = false
