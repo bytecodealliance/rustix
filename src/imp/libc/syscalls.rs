@@ -9,9 +9,7 @@
 )))]
 use super::conv::ret_u32;
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use super::conv::syscall_ret;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use super::conv::{syscall_ret_owned_fd, syscall_ret_ssize_t};
+use super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t};
 #[cfg(not(any(
     target_os = "ios",
     target_os = "macos",
