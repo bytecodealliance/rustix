@@ -53,20 +53,20 @@ use linux_raw_sys::general::{
     __NR_getsockopt, __NR_listen, __NR_recvfrom, __NR_sendto, __NR_setsockopt, __NR_shutdown,
     __NR_socket, __NR_socketpair,
 };
+#[cfg(not(target_arch = "aarch64"))]
+use linux_raw_sys::general::{__NR_dup2, __NR_open, __NR_pipe, __NR_poll};
 #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
 use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getuid};
 #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
 use linux_raw_sys::general::{__NR_getegid32, __NR_geteuid32, __NR_getgid32, __NR_getuid32};
-#[cfg(not(target_arch = "aarch64"))]
-use linux_raw_sys::general::{__NR_open, __NR_pipe, __NR_poll};
 #[cfg(target_arch = "aarch64")]
 use linux_raw_sys::general::{__NR_ppoll, sigset_t};
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")))]
 use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::{
     general::{
-        __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup2,
-        __NR_dup3, __NR_exit_group, __NR_faccessat, __NR_fallocate, __NR_fchmod, __NR_fchmodat,
+        __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
+        __NR_exit_group, __NR_faccessat, __NR_fallocate, __NR_fchmod, __NR_fchmodat,
         __NR_fdatasync, __NR_fsync, __NR_getcwd, __NR_getdents64, __NR_getpid, __NR_getppid,
         __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_mknodat, __NR_munmap, __NR_nanosleep,
         __NR_openat, __NR_pipe2, __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read,
@@ -2404,7 +2404,15 @@ pub(crate) fn dup(fd: BorrowedFd) -> io::Result<OwnedFd> {
 
 #[inline]
 pub(crate) fn dup2(fd: BorrowedFd, new: OwnedFd) -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(syscall2_readonly(__NR_dup2, borrowed_fd(fd), owned_fd(new))) }
+    #[cfg(target_arch = "aarch64")]
+    {
+        dup2_with(fd, new, DupFlags::empty())
+    }
+
+    #[cfg(not(target_arch = "aarch64"))]
+    unsafe {
+        ret_owned_fd(syscall2_readonly(__NR_dup2, borrowed_fd(fd), owned_fd(new)))
+    }
 }
 
 #[inline]
