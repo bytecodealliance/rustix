@@ -1,4 +1,4 @@
-#![cfg(not(arget_os = "wasi"))]
+#![cfg(not(any(target_os = "wasi", target_os = "redox")))]
 
 use io_lifetimes::AsFd;
 use posish::time::{clock_gettime_dynamic, DynamicClockId, ClockId};

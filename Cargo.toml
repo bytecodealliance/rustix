@@ -37,6 +37,8 @@ atty = "0.2.14"
 tempfile = "3.2.0"
 cstr = "0.2.8"
 libc = "0.2.87"
+
+[target.'cfg(not(target_os = "emscripten"))'.dev-dependencies]
 criterion = "0.3"
 
 [badges]
