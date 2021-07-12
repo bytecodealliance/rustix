@@ -28,22 +28,22 @@ portable APIs built on this functionality, see the [`system-interface`],
 
 Posish currently has two backends available: `libc` and `linux_raw`.
 
-The `libc` backend is enabled by default and uses the widely-used [`libc`]
-crate which provides bindings to native `libc` libraries and is portable to
-many OS's.
-
-The `linux_raw` backend can be enabled by setting the `RUSTFLAGS` environment
-variable to `--cfg linux_raw`, and uses raw Linux system calls and vDSO calls.
-This only supports Linux, currently on x86-64, x86, and aarch64. It supports
-stable as well as nightly Rust.
+The `linux_raw` backend is enabled by default on Linux on x86-64, x86, and
+aarch64, and uses raw Linux system calls and vDSO calls. It supports stable as
+well as nightly Rust.
  - By being implemented entirely in Rust, avoiding `libc`, `errno`, and pthread
    cancellation, and employing some specialized optimizations, most functions
-   in `linux_raw` compile down to very efficient code. On nightly Rust, they
-   can often be fully inlined into user code.
+   compile down to very efficient code. On nightly Rust, they can often be
+   fully inlined into user code.
  - Most functions in `linux_raw` preserve memory and I/O safety all the way
    down to the syscalls.
  - `linux_raw` uses a 64-bit `time_t` type on all platforms, avoiding the
    [y2038 bug].
+
+The `libc` backend is enabled by default on all other platforms, and can be
+explicitly for any target by setting `RUSTFLAGS` to `--cfg posish_use_libc`.
+It uses the [`libc`] crate which provides bindings to native `libc` libraries
+and is portable to many OS's.
 
 [`system-interface`]: https://crates.io/crates/system-interface
 [`fs-set-times`]: https://crates.io/crates/fs-set-times

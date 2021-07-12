@@ -19,7 +19,7 @@ child_process.execFileSync('rustup', ['default', toolchain]);
 // Deny warnings on CI to keep our code warning-free as it lands in-tree. Don't
 // do this on nightly though since there's a fair amount of warning churn there.
 // POSISH: Disable this so that it doesn't overwrite RUSTFLAGS for setting
-// "--cfg linux_raw". We re-add it manually in the workflow.
+// "--cfg posish_use_libc". We re-add it manually in the workflow.
 //if (!toolchain.startsWith('nightly')) {
 //  set_env("RUSTFLAGS", "-D warnings");
 //}
