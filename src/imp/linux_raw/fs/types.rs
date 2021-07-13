@@ -248,6 +248,7 @@ pub enum FileType {
 
 impl FileType {
     /// Construct a `FileType` from the `st_mode` field of a `Stat`.
+    #[inline]
     pub const fn from_raw_mode(st_mode: RawMode) -> Self {
         match st_mode & linux_raw_sys::general::S_IFMT {
             linux_raw_sys::general::S_IFREG => Self::RegularFile,
@@ -262,11 +263,13 @@ impl FileType {
     }
 
     /// Construct a `FileType` from the `st_mode` field of a `Stat`.
+    #[inline]
     pub const fn from_mode(st_mode: Mode) -> Self {
         Self::from_raw_mode(st_mode.bits())
     }
 
     /// Construct a `FileType` from the `d_type` field of a `dirent`.
+    #[inline]
     pub(crate) const fn from_dirent_d_type(d_type: u8) -> Self {
         match d_type as u32 {
             linux_raw_sys::general::DT_REG => Self::RegularFile,

@@ -44,6 +44,7 @@ impl<'fd> PollFdVec<'fd> {
     ///
     /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/poll.html
     /// [Linux]: https://man7.org/linux/man-pages/man2/poll.2.html
+    #[inline]
     pub fn poll(&mut self, timeout: c_int) -> io::Result<usize> {
         imp::syscalls::poll(&mut self.fds, timeout)
     }

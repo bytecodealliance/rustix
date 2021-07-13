@@ -8,6 +8,7 @@ use std::os::raw::c_int;
 pub use imp::net::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketType};
 
 impl Default for Protocol {
+    #[inline]
     fn default() -> Self {
         Self::Ip
     }

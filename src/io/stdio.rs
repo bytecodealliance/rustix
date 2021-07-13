@@ -27,6 +27,7 @@ use io_lifetimes::BorrowedFd;
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
+#[inline]
 pub unsafe fn stdin() -> BorrowedFd<'static> {
     BorrowedFd::borrow_raw_fd(imp::io::STDIN_FILENO as RawFd)
 }
@@ -47,6 +48,7 @@ pub unsafe fn stdin() -> BorrowedFd<'static> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
+#[inline]
 pub unsafe fn stdout() -> BorrowedFd<'static> {
     BorrowedFd::borrow_raw_fd(imp::io::STDOUT_FILENO as RawFd)
 }
@@ -67,6 +69,7 @@ pub unsafe fn stdout() -> BorrowedFd<'static> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
+#[inline]
 pub unsafe fn stderr() -> BorrowedFd<'static> {
     BorrowedFd::borrow_raw_fd(imp::io::STDERR_FILENO as RawFd)
 }
