@@ -46,6 +46,13 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
+
+    - name: Install musl-tools
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get install -y musl-tools
+
     - run: >
         rustup target add
         x86_64-unknown-linux-musl
