@@ -25,8 +25,8 @@ use super::arch::choose::{
 use super::conv::opt_ref;
 use super::conv::{
     borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, dev_t, mode_as, oflags,
-    opt_c_str, opt_mut, out, owned_fd, ret, ret_c_int, ret_c_uint, ret_owned_fd, ret_usize,
-    ret_void_star, slice_addr, slice_as_mut_ptr, socklen_t, void_star,
+    opt_c_str, opt_mut, out, owned_fd, ret, ret_c_int, ret_c_uint, ret_owned_fd, ret_redundant_fd,
+    ret_usize, ret_void_star, slice_addr, slice_as_mut_ptr, socklen_t, void_star,
 };
 use super::fs::{
     Access, Advice, AtFlags, FallocateFlags, FdFlags, MemfdFlags, Mode, OFlags, ResolveFlags,
@@ -2403,7 +2403,7 @@ pub(crate) fn dup(fd: BorrowedFd) -> io::Result<OwnedFd> {
 }
 
 #[inline]
-pub(crate) fn dup2(fd: BorrowedFd, new: OwnedFd) -> io::Result<OwnedFd> {
+pub(crate) fn dup2(fd: BorrowedFd, new: BorrowedFd<'_>) -> io::Result<()> {
     #[cfg(target_arch = "aarch64")]
     {
         dup2_with(fd, new, DupFlags::empty())
@@ -2411,17 +2411,25 @@ pub(crate) fn dup2(fd: BorrowedFd, new: OwnedFd) -> io::Result<OwnedFd> {
 
     #[cfg(not(target_arch = "aarch64"))]
     unsafe {
-        ret_owned_fd(syscall2_readonly(__NR_dup2, borrowed_fd(fd), owned_fd(new)))
+        ret_redundant_fd(syscall2_readonly(
+            __NR_dup2,
+            borrowed_fd(fd),
+            borrowed_fd(new),
+        ))
     }
 }
 
 #[inline]
-pub(crate) fn dup2_with(fd: BorrowedFd, new: OwnedFd, flags: DupFlags) -> io::Result<OwnedFd> {
+pub(crate) fn dup2_with(
+    fd: BorrowedFd<'_>,
+    new: BorrowedFd<'_>,
+    flags: DupFlags,
+) -> io::Result<()> {
     unsafe {
-        ret_owned_fd(syscall3_readonly(
+        ret_redundant_fd(syscall3_readonly(
             __NR_dup3,
             borrowed_fd(fd),
-            owned_fd(new),
+            borrowed_fd(new),
             c_uint(flags.bits()),
         ))
     }

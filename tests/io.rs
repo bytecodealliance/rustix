@@ -1,6 +1,7 @@
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 
 mod io {
+    mod dup2_to_replace_stdio;
     mod isatty;
     mod mmap;
     #[cfg(not(target_os = "redox"))] // redox doesn't have cwd/openat

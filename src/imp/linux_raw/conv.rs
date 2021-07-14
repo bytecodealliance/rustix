@@ -289,6 +289,18 @@ pub(super) unsafe fn ret_owned_fd(raw: usize) -> io::Result<OwnedFd> {
     }
 }
 
+/// Convert a c_int returns from a syscall into a file descriptor and discard
+/// it. This is used by `dup2` where the file descriptor is redundant with one
+/// of the arguments.
+#[inline]
+pub(crate) fn ret_redundant_fd(raw: usize) -> io::Result<()> {
+    if (raw as isize) < 0 {
+        Err(io::Error((raw as u16).wrapping_neg()))
+    } else {
+        Ok(())
+    }
+}
+
 #[inline]
 pub(super) fn ret_void_star(raw: usize) -> io::Result<*mut c_void> {
     check_error(raw)?;

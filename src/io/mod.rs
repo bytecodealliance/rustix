@@ -14,6 +14,7 @@ mod fd;
 mod ioctl;
 #[cfg(not(target_os = "wasi"))]
 mod mmap;
+#[cfg(not(target_os = "wasi"))]
 mod pipe;
 mod poll;
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -39,7 +40,7 @@ pub use ioctl::ioctl_fioclex;
 pub use ioctl::{ioctl_tcgets, ioctl_tiocgwinsz};
 #[cfg(not(target_os = "wasi"))]
 pub use mmap::{mmap, munmap, MapFlags, ProtFlags};
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(not(target_os = "wasi"))]
 pub use pipe::pipe;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 pub use pipe::{pipe_with, PipeFlags};

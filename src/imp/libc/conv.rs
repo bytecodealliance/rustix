@@ -125,3 +125,15 @@ pub(crate) unsafe fn syscall_ret_owned_fd(raw: c_long) -> io::Result<OwnedFd> {
         Ok(OwnedFd::from_raw_fd(raw as RawFd))
     }
 }
+
+/// Convert a c_int returns from `syscall` into a file descriptor and discard
+/// it. This is used by `dup2` where the file descriptor is redundant with one
+/// of the arguments.
+#[inline]
+pub(crate) fn ret_redundant_fd(raw: c_int) -> io::Result<()> {
+    if raw == -1 {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(())
+    }
+}

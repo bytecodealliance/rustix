@@ -1,7 +1,7 @@
 //! Functions which operate on file descriptors.
 
 use crate::{imp, io};
-use io_lifetimes::{AsFd, IntoFd, OwnedFd};
+use io_lifetimes::{AsFd, OwnedFd};
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 use std::ffi::OsString;
 
@@ -77,9 +77,8 @@ pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
     imp::syscalls::dup(fd)
 }
 
-/// `dup2(fd, new)`—Creates a new `OwnedFd` instance that shares the
-/// same underlying [file description] as the existing `OwnedFd` instance,
-/// closing `new` and reusing its file descriptor.
+/// `dup2(fd, new)`—Closes `new` and atomically replaces it with a new file
+/// descriptor that shares the same underlying [file description] as `fd`.
 ///
 /// Note that this function does not set the `O_CLOEXEC` flag. To do a `dup2`
 /// that does set `O_CLOEXEC`, use [`dup2_with`] with [`DupFlags::CLOEXEC`] on
@@ -94,15 +93,14 @@ pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup2.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn dup2<Fd: AsFd, NewFd: IntoFd>(fd: &Fd, new: NewFd) -> io::Result<OwnedFd> {
+pub fn dup2<Fd: AsFd, NewFd: AsFd>(fd: &Fd, new: &NewFd) -> io::Result<()> {
     let fd = fd.as_fd();
-    let new = new.into_fd();
+    let new = new.as_fd();
     imp::syscalls::dup2(fd, new)
 }
 
-/// `dup3(fd, new, flags)`—Creates a new `OwnedFd` instance that shares the
-/// same underlying [file description] as the existing `OwnedFd` instance,
-/// closing `new` and reusing its file descriptor, with flags.
+/// `dup3(fd, new, flags)`—Closes `new` and atomically replaces it with a new
+/// file descriptor that shares the same underlying [file description] as `fd`.
 ///
 /// `dup2_with` is the same as `dup2` but adds an additional flags operand.
 ///
@@ -116,13 +114,9 @@ pub fn dup2<Fd: AsFd, NewFd: IntoFd>(fd: &Fd, new: NewFd) -> io::Result<OwnedFd>
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[doc(alias = "dup3")]
-pub fn dup2_with<Fd: AsFd, NewFd: IntoFd>(
-    fd: &Fd,
-    new: NewFd,
-    flags: DupFlags,
-) -> io::Result<OwnedFd> {
+pub fn dup2_with<Fd: AsFd, NewFd: AsFd>(fd: &Fd, new: &NewFd, flags: DupFlags) -> io::Result<()> {
     let fd = fd.as_fd();
-    let new = new.into_fd();
+    let new = new.as_fd();
     imp::syscalls::dup2_with(fd, new, flags)
 }
 

@@ -69,7 +69,7 @@ use super::offset::libc_posix_fallocate;
 #[cfg(target_os = "linux")]
 use super::rand::GetRandomFlags;
 use super::{
-    conv::{borrowed_fd, owned_fd, ret, ret_c_int, ret_off_t, ret_owned_fd, ret_ssize_t},
+    conv::{borrowed_fd, ret, ret_c_int, ret_off_t, ret_owned_fd, ret_redundant_fd, ret_ssize_t},
     fs::{Access, FdFlags, Mode, OFlags, Stat},
     io::PollFd,
     offset::{libc_fstat, libc_fstatat, libc_lseek, libc_off_t, libc_pread, libc_pwrite},
@@ -989,8 +989,8 @@ pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 }
 
 #[cfg(not(target_os = "wasi"))]
-pub(crate) fn dup2(fd: BorrowedFd<'_>, new: OwnedFd) -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(libc::dup2(borrowed_fd(fd), owned_fd(new))) }
+pub(crate) fn dup2(fd: BorrowedFd<'_>, new: BorrowedFd<'_>) -> io::Result<()> {
+    unsafe { ret_redundant_fd(libc::dup2(borrowed_fd(fd), borrowed_fd(new))) }
 }
 
 #[cfg(not(any(
@@ -1000,8 +1000,12 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: OwnedFd) -> io::Result<OwnedFd> {
     target_os = "redox",
     target_os = "wasi"
 )))]
-pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: OwnedFd, flags: DupFlags) -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(libc::dup3(borrowed_fd(fd), owned_fd(new), flags.bits())) }
+pub(crate) fn dup2_with(
+    fd: BorrowedFd<'_>,
+    new: BorrowedFd<'_>,
+    flags: DupFlags,
+) -> io::Result<()> {
+    unsafe { ret_redundant_fd(libc::dup3(borrowed_fd(fd), borrowed_fd(new), flags.bits())) }
 }
 
 #[cfg(any(
@@ -1010,7 +1014,11 @@ pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: OwnedFd, flags: DupFlags) -> io
     target_os = "ios",
     target_os = "redox"
 ))]
-pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: OwnedFd, _flags: DupFlags) -> io::Result<OwnedFd> {
+pub(crate) fn dup2_with(
+    fd: BorrowedFd<'_>,
+    new: BorrowedFd<'_>,
+    _flags: DupFlags,
+) -> io::Result<()> {
     // Android 5.0 has dup3, but libc doesn't have bindings
     dup2(fd, new)
 }
@@ -1125,7 +1133,7 @@ pub(crate) unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
     ret(libc::munmap(ptr, len))
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(not(target_os = "wasi"))]
 pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
