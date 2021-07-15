@@ -17,8 +17,8 @@ pub(crate) mod outline;
 #[cfg(not(linux_raw_inline_asm))]
 pub(crate) use self::outline as asm;
 
-// On aarch64, x86_64, and riscv64, the architecture syscall instruction is
-// fast, so use it directly.
+// On most architectures, the architecture syscall instruction is fast, so use
+// it directly.
 #[cfg(target_arch = "aarch64")]
 pub(crate) use self::asm as choose;
 #[cfg(target_arch = "x86_64")]
