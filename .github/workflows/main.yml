@@ -252,14 +252,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
-          - build: risvc64-linux
+          - build: riscv64-linux
             os: ubuntu-latest
             rust: stable
-            target: risvc64-unknown-linux-gnu
-            gcc_package: gcc-risvc64-linux-gnu
-            gcc: risvc64-linux-gnu-gcc
-            qemu: qemu-risvc64gc -L /usr/risvc64-linux-gnu
-            qemu_target: risvc64-linux-user
+            target: riscv64-unknown-linux-gnu
+            gcc_package: gcc-riscv64-linux-gnu
+            gcc: riscv64-linux-gnu-gcc
+            qemu: qemu-riscv64gc -L /usr/riscv64-linux-gnu
+            qemu_target: riscv64-linux-user
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
       RUSTFLAGS: --cfg posish_use_libc -D warnings
