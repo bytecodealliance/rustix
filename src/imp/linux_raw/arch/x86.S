@@ -325,7 +325,6 @@ int_0x80:
     .size int_0x80, .-int_0x80
 
     .globl   reordered_syscall0
-    .globl   reordered_syscall0
     .globl   reordered_syscall1
     .globl   reordered_syscall1_noreturn
     .globl   reordered_syscall2
@@ -334,7 +333,6 @@ int_0x80:
     .globl   reordered_syscall5
     .globl   reordered_syscall6
 
-    .hidden  reordered_syscall0
     .hidden  reordered_syscall0
     .hidden  reordered_syscall1
     .hidden  reordered_syscall1_noreturn
@@ -345,7 +343,6 @@ int_0x80:
     .hidden  reordered_syscall6
 
     .type    reordered_syscall0, @function
-    .type    reordered_syscall0, @function
     .type    reordered_syscall1, @function
     .type    reordered_syscall1_noreturn, @function
     .type    reordered_syscall2, @function
@@ -354,7 +351,6 @@ int_0x80:
     .type    reordered_syscall5, @function
     .type    reordered_syscall6, @function
 
-    .globl   reordered_indirect_syscall0
     .globl   reordered_indirect_syscall0
     .globl   reordered_indirect_syscall1
     .globl   reordered_indirect_syscall1_noreturn
@@ -365,7 +361,6 @@ int_0x80:
     .globl   reordered_indirect_syscall6
 
     .hidden  reordered_indirect_syscall0
-    .hidden  reordered_indirect_syscall0
     .hidden  reordered_indirect_syscall1
     .hidden  reordered_indirect_syscall1_noreturn
     .hidden  reordered_indirect_syscall2
@@ -374,7 +369,6 @@ int_0x80:
     .hidden  reordered_indirect_syscall5
     .hidden  reordered_indirect_syscall6
 
-    .type    reordered_indirect_syscall0, @function
     .type    reordered_indirect_syscall0, @function
     .type    reordered_indirect_syscall1, @function
     .type    reordered_indirect_syscall1_noreturn, @function
@@ -395,7 +389,6 @@ int_0x80:
     .set     reordered_syscall6_readonly, reordered_syscall6
 
     .globl   reordered_syscall0_readonly
-    .globl   reordered_syscall0_readonly
     .globl   reordered_syscall1_readonly
     .globl   reordered_syscall2_readonly
     .globl   reordered_syscall3_readonly
@@ -403,7 +396,6 @@ int_0x80:
     .globl   reordered_syscall5_readonly
     .globl   reordered_syscall6_readonly
 
-    .hidden  reordered_syscall0_readonly
     .hidden  reordered_syscall0_readonly
     .hidden  reordered_syscall1_readonly
     .hidden  reordered_syscall2_readonly

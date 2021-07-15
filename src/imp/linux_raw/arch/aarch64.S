@@ -86,7 +86,6 @@ reordered_syscall6:
     .size reordered_syscall6, .-reordered_syscall6
 
     .globl   reordered_syscall0
-    .globl   reordered_syscall0
     .globl   reordered_syscall1
     .globl   reordered_syscall1_noreturn
     .globl   reordered_syscall2
@@ -96,7 +95,6 @@ reordered_syscall6:
     .globl   reordered_syscall6
 
     .hidden  reordered_syscall0
-    .hidden  reordered_syscall0
     .hidden  reordered_syscall1
     .hidden  reordered_syscall1_noreturn
     .hidden  reordered_syscall2
@@ -105,7 +103,6 @@ reordered_syscall6:
     .hidden  reordered_syscall5
     .hidden  reordered_syscall6
 
-    .type    reordered_syscall0, @function
     .type    reordered_syscall0, @function
     .type    reordered_syscall1, @function
     .type    reordered_syscall1_noreturn, @function
@@ -126,7 +123,6 @@ reordered_syscall6:
     .set     reordered_syscall6_readonly, reordered_syscall6
 
     .globl   reordered_syscall0_readonly
-    .globl   reordered_syscall0_readonly
     .globl   reordered_syscall1_readonly
     .globl   reordered_syscall2_readonly
     .globl   reordered_syscall3_readonly
@@ -134,7 +130,6 @@ reordered_syscall6:
     .globl   reordered_syscall5_readonly
     .globl   reordered_syscall6_readonly
 
-    .hidden  reordered_syscall0_readonly
     .hidden  reordered_syscall0_readonly
     .hidden  reordered_syscall1_readonly
     .hidden  reordered_syscall2_readonly
