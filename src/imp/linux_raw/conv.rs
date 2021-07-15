@@ -290,6 +290,18 @@ pub(super) unsafe fn ret_owned_fd(raw: usize) -> io::Result<OwnedFd> {
 }
 
 #[inline]
+pub(super) fn ret_discarded_fd(raw: usize) -> io::Result<()> {
+    if (raw as isize) < 0 {
+        // As above, discourage the optimizer from speculating the `Err`.
+        let raw = suppress_optimization(raw);
+
+        Err(io::Error((raw as u16).wrapping_neg()))
+    } else {
+        Ok(())
+    }
+}
+
+#[inline]
 pub(super) fn ret_void_star(raw: usize) -> io::Result<*mut c_void> {
     check_error(raw)?;
     Ok(raw as *mut c_void)

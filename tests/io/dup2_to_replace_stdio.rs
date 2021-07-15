@@ -7,11 +7,11 @@ fn dup2_to_replace_stdio() {
     use std::mem::forget;
 
     let (reader, writer) = pipe().unwrap();
-
-    unsafe {
-        forget(dup2(&reader, posish::io::take_stdin()).unwrap());
-        forget(dup2(&writer, posish::io::take_stdout()).unwrap());
-    }
+    let (stdin, stdout) = unsafe { (posish::io::take_stdin(), posish::io::take_stdout()) };
+    dup2(&reader, &stdin).unwrap();
+    dup2(&writer, &stdout).unwrap();
+    forget(stdin);
+    forget(stdout);
 
     drop(reader);
     drop(writer);

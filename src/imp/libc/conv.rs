@@ -111,6 +111,15 @@ pub(crate) unsafe fn ret_owned_fd(raw: c_int) -> io::Result<OwnedFd> {
     }
 }
 
+#[inline]
+pub(crate) fn ret_discarded_fd(raw: c_int) -> io::Result<()> {
+    if raw == -1 {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(())
+    }
+}
+
 /// Convert a c_long returned from `syscall` to an `OwnedFd`, if valid.
 ///
 /// # Safety
