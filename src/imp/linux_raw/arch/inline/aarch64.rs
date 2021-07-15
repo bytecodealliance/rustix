@@ -1,17 +1,3 @@
-#![allow(dead_code)]
-
-#[inline]
-pub(crate) unsafe fn syscall0(nr: u32) -> usize {
-    let r0;
-    asm!(
-        "svc 0",
-        in("x8") nr as usize,
-        out("x0") r0,
-        options(nostack, preserves_flags)
-    );
-    r0
-}
-
 #[inline]
 pub(crate) unsafe fn syscall0_readonly(nr: u32) -> usize {
     let r0;

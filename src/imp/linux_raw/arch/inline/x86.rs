@@ -6,7 +6,7 @@
 
 #![allow(dead_code)]
 
-use super::super::vdso_wrappers::SyscallType;
+use super::super::super::vdso_wrappers::SyscallType;
 
 #[inline]
 pub(crate) unsafe fn indirect_syscall0(callee: SyscallType, nr: u32) -> usize {
@@ -187,17 +187,6 @@ pub(crate) unsafe fn indirect_syscall6(
         in("edx") a2,
         in("edi") a4,
         options(preserves_flags)
-    );
-    r0
-}
-
-#[inline]
-pub(crate) unsafe fn syscall0(nr: u32) -> usize {
-    let r0;
-    asm!(
-        "int $$0x80",
-        inlateout("eax") nr as usize => r0,
-        options(nostack, preserves_flags)
     );
     r0
 }

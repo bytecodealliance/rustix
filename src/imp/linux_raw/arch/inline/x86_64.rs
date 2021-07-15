@@ -1,24 +1,14 @@
-#![allow(dead_code)]
-
-#[inline]
-pub(crate) unsafe fn syscall0(nr: u32) -> usize {
-    let r0;
-    asm!(
-        "ecall",
-        in("a7") nr as usize,
-        out("a0") r0,
-        options(nostack, preserves_flags)
-    );
-    r0
-}
+#[cfg(target_pointer_width = "32")]
+compile_error!("x32 is not yet supported");
 
 #[inline]
 pub(crate) unsafe fn syscall0_readonly(nr: u32) -> usize {
     let r0;
     asm!(
-        "ecall",
-        in("a7") nr as usize,
-        out("a0") r0,
+        "syscall",
+        inlateout("rax") nr as usize => r0,
+        out("rcx") _,
+        out("r11") _,
         options(nostack, preserves_flags, readonly)
     );
     r0
@@ -28,9 +18,11 @@ pub(crate) unsafe fn syscall0_readonly(nr: u32) -> usize {
 pub(crate) unsafe fn syscall1(nr: u32, a0: usize) -> usize {
     let r0;
     asm!(
-        "ecall",
-        in("a7") nr as usize,
-        inlateout("a0") a0 => r0,
+        "syscall",
+        inlateout("rax") nr as usize => r0,
+        in("rdi") a0,
+        out("rcx") _,
+        out("r11") _,
         options(nostack, preserves_flags)
     );
     r0
@@ -40,9 +32,11 @@ pub(crate) unsafe fn syscall1(nr: u32, a0: usize) -> usize {
 pub(crate) unsafe fn syscall1_readonly(nr: u32, a0: usize) -> usize {
     let r0;
     asm!(
-        "ecall",
-        in("a7") nr as usize,
-        inlateout("a0") a0 => r0,
+        "syscall",
+        inlateout("rax") nr as usize => r0,
+        in("rdi") a0,
+        out("rcx") _,
+        out("r11") _,
         options(nostack, preserves_flags, readonly)
     );
     r0
@@ -51,21 +45,23 @@ pub(crate) unsafe fn syscall1_readonly(nr: u32, a0: usize) -> usize {
 #[inline]
 pub(crate) unsafe fn syscall1_noreturn(nr: u32, a0: usize) -> ! {
     asm!(
-        "ecall",
-        in("a7") nr as usize,
-        in("a0") a0,
+        "syscall",
+        in("rax") nr,
+        in("rdi") a0,
         options(noreturn)
-    );
+    )
 }
 
 #[inline]
 pub(crate) unsafe fn syscall2(nr: u32, a0: usize, a1: usize) -> usize {
     let r0;
     asm!(
-        "ecall",
-        in("a7") nr as usize,
-        inlateout("a0") a0 => r0,
-        in("a1") a1,
+        "syscall",
+        inlateout("rax") nr as usize => r0,
+        in("rdi") a0,
+        in("rsi") a1,
+        out("rcx") _,
+        out("r11") _,
         options(nostack, preserves_flags)
     );
     r0
@@ -75,10 +71,12 @@ pub(crate) unsafe fn syscall2(nr: u32, a0: usize, a1: usize) -> usize {
 pub(crate) unsafe fn syscall2_readonly(nr: u32, a0: usize, a1: usize) -> usize {
     let r0;
     asm!(
-        "ecall",
-        in("a7") nr as usize,
-        inlateout("a0") a0 => r0,
-        in("a1") a1,
+        "syscall",
+        inlateout("rax") nr as usize => r0,
+        in("rdi") a0,
+        in("rsi") a1,
+        out("rcx") _,
+        out("r11") _,
         options(nostack, preserves_flags, readonly)
     );
     r0
@@ -88,11 +86,13 @@ pub(crate) unsafe fn syscall2_readonly(nr: u32, a0: usize, a1: usize) -> usize {
 pub(crate) unsafe fn syscall3(nr: u32, a0: usize, a1: usize, a2: usize) -> usize {
     let r0;
     asm!(
-        "ecall",
-        in("a7") nr as usize,
-        inlateout("a0") a0 => r0,
-        in("a1") a1,
-        in("a2") a2,
+        "syscall",
+        inlateout("rax") nr as usize => r0,
+        in("rdi") a0,
+        in("rsi") a1,
+        in("rdx") a2,
+        out("rcx") _,
+        out("r11") _,
         options(nostack, preserves_flags)
     );
     r0
@@ -102,11 +102,13 @@ pub(crate) unsafe fn syscall3(nr: u32, a0: usize, a1: usize, a2: usize) -> usize
 pub(crate) unsafe fn syscall3_readonly(nr: u32, a0: usize, a1: usize, a2: usize) -> usize {
     let r0;
     asm!(
-        "ecall",
-        in("a7") nr as usize,
-        inlateout("a0") a0 => r0,
-        in("a1") a1,
-        in("a2") a2,
+        "syscall",
+        inlateout("rax") nr as usize => r0,
+        in("rdi") a0,
+        in("rsi") a1,
+        in("rdx") a2,
+        out("rcx") _,
+        out("r11") _,
         options(nostack, preserves_flags, readonly)
     );
     r0
@@ -116,12 +118,14 @@ pub(crate) unsafe fn syscall3_readonly(nr: u32, a0: usize, a1: usize, a2: usize)
 pub(crate) unsafe fn syscall4(nr: u32, a0: usize, a1: usize, a2: usize, a3: usize) -> usize {
     let r0;
     asm!(
-        "ecall",
-        in("a7") nr as usize,
-        inlateout("a0") a0 => r0,
-        in("a1") a1,
-        in("a2") a2,
-        in("a3") a3,
+        "syscall",
+        inlateout("rax") nr as usize => r0,
+        in("rdi") a0,
+        in("rsi") a1,
+        in("rdx") a2,
+        in("r10") a3,
+        out("rcx") _,
+        out("r11") _,
         options(nostack, preserves_flags)
     );
     r0
@@ -137,12 +141,14 @@ pub(crate) unsafe fn syscall4_readonly(
 ) -> usize {
     let r0;
     asm!(
-        "ecall",
-        in("a7") nr as usize,
-        inlateout("a0") a0 => r0,
-        in("a1") a1,
-        in("a2") a2,
-        in("a3") a3,
+        "syscall",
+        inlateout("rax") nr as usize => r0,
+        in("rdi") a0,
+        in("rsi") a1,
+        in("rdx") a2,
+        in("r10") a3,
+        out("rcx") _,
+        out("r11") _,
         options(nostack, preserves_flags, readonly)
     );
     r0
@@ -159,13 +165,15 @@ pub(crate) unsafe fn syscall5(
 ) -> usize {
     let r0;
     asm!(
-        "ecall",
-        in("a7") nr as usize,
-        inlateout("a0") a0 => r0,
-        in("a1") a1,
-        in("a2") a2,
-        in("a3") a3,
-        in("a4") a4,
+        "syscall",
+        inlateout("rax") nr as usize => r0,
+        in("rdi") a0,
+        in("rsi") a1,
+        in("rdx") a2,
+        in("r10") a3,
+        in("r8") a4,
+        out("rcx") _,
+        out("r11") _,
         options(nostack, preserves_flags)
     );
     r0
@@ -182,13 +190,15 @@ pub(crate) unsafe fn syscall5_readonly(
 ) -> usize {
     let r0;
     asm!(
-        "ecall",
-        in("a7") nr as usize,
-        inlateout("a0") a0 => r0,
-        in("a1") a1,
-        in("a2") a2,
-        in("a3") a3,
-        in("a4") a4,
+        "syscall",
+        inlateout("rax") nr as usize => r0,
+        in("rdi") a0,
+        in("rsi") a1,
+        in("rdx") a2,
+        in("r10") a3,
+        in("r8") a4,
+        out("rcx") _,
+        out("r11") _,
         options(nostack, preserves_flags, readonly)
     );
     r0
@@ -206,14 +216,16 @@ pub(crate) unsafe fn syscall6(
 ) -> usize {
     let r0;
     asm!(
-        "ecall",
-        in("a7") nr as usize,
-        inlateout("a0") a0 => r0,
-        in("a1") a1,
-        in("a2") a2,
-        in("a3") a3,
-        in("a4") a4,
-        in("a5") a5,
+        "syscall",
+        inlateout("rax") nr as usize => r0,
+        in("rdi") a0,
+        in("rsi") a1,
+        in("rdx") a2,
+        in("r10") a3,
+        in("r8") a4,
+        in("r9") a5,
+        out("rcx") _,
+        out("r11") _,
         options(nostack, preserves_flags)
     );
     r0
@@ -231,14 +243,16 @@ pub(crate) unsafe fn syscall6_readonly(
 ) -> usize {
     let r0;
     asm!(
-        "ecall",
-        in("a7") nr as usize,
-        inlateout("a0") a0 => r0,
-        in("a1") a1,
-        in("a2") a2,
-        in("a3") a3,
-        in("a4") a4,
-        in("a5") a5,
+        "syscall",
+        inlateout("rax") nr as usize => r0,
+        in("rdi") a0,
+        in("rsi") a1,
+        in("rdx") a2,
+        in("r10") a3,
+        in("r8") a4,
+        in("r9") a5,
+        out("rcx") _,
+        out("r11") _,
         options(nostack, preserves_flags, readonly)
     );
     r0
