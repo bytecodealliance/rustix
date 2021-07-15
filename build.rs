@@ -3,7 +3,7 @@ use std::env::var;
 
 fn main() {
     let asm_name = format!(
-        "src/imp/linux_raw/arch/{}.S",
+        "src/imp/linux_raw/arch/outline/{}.S",
         var("CARGO_CFG_TARGET_ARCH").unwrap()
     );
     let os_name = var("CARGO_CFG_TARGET_OS").unwrap();
