@@ -482,7 +482,7 @@ mod reorder {
     }
 }
 
-#[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+#[cfg(target_arch = "riscv64")]
 pub(crate) use reorder::*;
 
 // x86 (using fastcall) prefers to pass a1 and a2 first, before a0, because
