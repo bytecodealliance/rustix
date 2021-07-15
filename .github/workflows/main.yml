@@ -67,11 +67,6 @@ jobs:
         wasm32-unknown-emscripten
         riscv64gc-unknown-linux-gnu
         aarch64-unknown-linux-gnu
-    - name: Install cross-compilation tools
-      run: |
-        set -ex
-        sudo apt-get update
-        sudo apt-get install -y gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64gc-linux-gnu
     - run: cargo check --workspace --release -vv
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-gnux32
