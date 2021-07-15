@@ -6,8 +6,8 @@
 use posish::{
     io::{read, write},
     net::{
-        accept, bind_v6, connect_v6, getsockname, listen, socket, AddressFamily,
-        Ipv6Addr, Protocol, SocketAddr, SocketAddrV6, SocketType,
+        accept, bind_v6, connect_v6, getsockname, listen, socket, AddressFamily, Ipv6Addr,
+        Protocol, SocketAddr, SocketAddrV6, SocketType,
     },
 };
 use std::{

@@ -13,8 +13,8 @@ use posish::{
     fs::{cwd, unlinkat, AtFlags},
     io::{read, write},
     net::{
-        accept, bind_unix, connect_unix, listen, socket, AddressFamily, Protocol,
-        SocketAddrUnix, SocketType,
+        accept, bind_unix, connect_unix, listen, socket, AddressFamily, Protocol, SocketAddrUnix,
+        SocketType,
     },
     path::DecInt,
 };
