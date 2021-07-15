@@ -10,22 +10,22 @@ use libc::{c_char, c_int, c_long, ssize_t};
 use std::ffi::CStr;
 
 #[inline]
-pub(crate) fn c_str(c: &CStr) -> *const c_char {
+pub(super) fn c_str(c: &CStr) -> *const c_char {
     c.as_ptr().cast::<c_char>()
 }
 
 #[inline]
-pub(crate) fn borrowed_fd(fd: BorrowedFd<'_>) -> c_int {
+pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> c_int {
     fd.as_raw_fd() as c_int
 }
 
 #[inline]
-pub(crate) fn owned_fd(fd: OwnedFd) -> c_int {
+pub(super) fn owned_fd(fd: OwnedFd) -> c_int {
     fd.into_raw_fd() as c_int
 }
 
 #[inline]
-pub(crate) fn ret(raw: c_int) -> io::Result<()> {
+pub(super) fn ret(raw: c_int) -> io::Result<()> {
     if raw == 0 {
         Ok(())
     } else {
@@ -34,7 +34,7 @@ pub(crate) fn ret(raw: c_int) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn syscall_ret(raw: c_long) -> io::Result<()> {
+pub(super) fn syscall_ret(raw: c_long) -> io::Result<()> {
     if raw == 0 {
         Ok(())
     } else {
@@ -43,7 +43,7 @@ pub(crate) fn syscall_ret(raw: c_long) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn nonnegative_ret(raw: c_int) -> io::Result<()> {
+pub(super) fn nonnegative_ret(raw: c_int) -> io::Result<()> {
     if raw >= 0 {
         Ok(())
     } else {
@@ -52,7 +52,7 @@ pub(crate) fn nonnegative_ret(raw: c_int) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn ret_c_int(raw: c_int) -> io::Result<c_int> {
+pub(super) fn ret_c_int(raw: c_int) -> io::Result<c_int> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
@@ -61,7 +61,7 @@ pub(crate) fn ret_c_int(raw: c_int) -> io::Result<c_int> {
 }
 
 #[inline]
-pub(crate) fn ret_u32(raw: c_int) -> io::Result<u32> {
+pub(super) fn ret_u32(raw: c_int) -> io::Result<u32> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
@@ -70,7 +70,7 @@ pub(crate) fn ret_u32(raw: c_int) -> io::Result<u32> {
 }
 
 #[inline]
-pub(crate) fn ret_ssize_t(raw: ssize_t) -> io::Result<ssize_t> {
+pub(super) fn ret_ssize_t(raw: ssize_t) -> io::Result<ssize_t> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
@@ -79,7 +79,7 @@ pub(crate) fn ret_ssize_t(raw: ssize_t) -> io::Result<ssize_t> {
 }
 
 #[inline]
-pub(crate) fn syscall_ret_ssize_t(raw: c_long) -> io::Result<ssize_t> {
+pub(super) fn syscall_ret_ssize_t(raw: c_long) -> io::Result<ssize_t> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
@@ -88,7 +88,7 @@ pub(crate) fn syscall_ret_ssize_t(raw: c_long) -> io::Result<ssize_t> {
 }
 
 #[inline]
-pub(crate) fn ret_off_t(raw: libc_off_t) -> io::Result<libc_off_t> {
+pub(super) fn ret_off_t(raw: libc_off_t) -> io::Result<libc_off_t> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
@@ -103,7 +103,7 @@ pub(crate) fn ret_off_t(raw: libc_off_t) -> io::Result<libc_off_t> {
 /// The caller must ensure that this is the return value of a libc function
 /// which returns an owned file descriptor.
 #[inline]
-pub(crate) unsafe fn ret_owned_fd(raw: c_int) -> io::Result<OwnedFd> {
+pub(super) unsafe fn ret_owned_fd(raw: c_int) -> io::Result<OwnedFd> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
@@ -118,7 +118,7 @@ pub(crate) unsafe fn ret_owned_fd(raw: c_int) -> io::Result<OwnedFd> {
 /// The caller must ensure that this is the return value of a `syscall` call
 /// which returns an owned file descriptor.
 #[inline]
-pub(crate) unsafe fn syscall_ret_owned_fd(raw: c_long) -> io::Result<OwnedFd> {
+pub(super) unsafe fn syscall_ret_owned_fd(raw: c_long) -> io::Result<OwnedFd> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
