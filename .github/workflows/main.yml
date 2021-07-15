@@ -272,6 +272,7 @@ jobs:
       CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg posish_use_libc
       CARGO_TARGET_I686_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg posish_use_libc
       CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg posish_use_libc
+      CARGO_TARGET_RISCV64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg posish_use_libc
     steps:
     - uses: actions/checkout@v2
       with:
