@@ -1125,7 +1125,7 @@ pub(crate) unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
     ret(libc::munmap(ptr, len))
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(not(target_os = "wasi"))]
 pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
