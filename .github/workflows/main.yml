@@ -65,7 +65,7 @@ jobs:
         i686-unknown-linux-gnu
         i686-unknown-linux-musl
         wasm32-unknown-emscripten
-        riscv64-unknown-linux-gnu
+        riscv64gc-unknown-linux-gnu
         aarch64-unknown-linux-gnu
     - run: cargo check --workspace --release -vv
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl
@@ -78,7 +78,7 @@ jobs:
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-musl
     - run: cargo check --workspace --release -vv --target=wasm32-unknown-emscripten
-    - run: cargo check --workspace --release -vv --target=riscv64-unknown-linux-gnu
+    - run: cargo check --workspace --release -vv --target=riscv64gc-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-gnu
 
   check_nightly:
