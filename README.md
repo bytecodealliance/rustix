@@ -28,9 +28,9 @@ portable APIs built on this functionality, see the [`system-interface`],
 
 Posish currently has two backends available: `libc` and `linux_raw`.
 
-The `linux_raw` backend is enabled by default on Linux on x86-64, x86, and
-aarch64, and uses raw Linux system calls and vDSO calls. It supports stable as
-well as nightly Rust.
+The `linux_raw` backend is enabled by default on Linux on x86-64, x86, aarch64,
+and riscv64gc, and uses raw Linux system calls and vDSO calls. It supports
+stable as well as nightly Rust.
  - By being implemented entirely in Rust, avoiding `libc`, `errno`, and pthread
    cancellation, and employing some specialized optimizations, most functions
    compile down to very efficient code. On nightly Rust, they can often be

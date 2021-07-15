@@ -285,6 +285,11 @@ unsafe fn init() {
             let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime64"));
             CLOCK_GETTIME.store(ptr as usize, Relaxed);
         }
+        #[cfg(target_arch = "riscv64")]
+        {
+            let ptr = vdso.sym(cstr!("LINUX_4.15"), cstr!("__kernel_clock_gettime"));
+            CLOCK_GETTIME.store(ptr as usize, Relaxed);
+        }
         assert!(CLOCK_GETTIME.load(Relaxed) != 0);
 
         #[cfg(target_arch = "x86")]

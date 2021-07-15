@@ -21,7 +21,7 @@ use super::arch::choose::{
     syscall3, syscall3_readonly, syscall4, syscall4_readonly, syscall5, syscall5_readonly,
     syscall6, syscall6_readonly,
 };
-#[cfg(target_arch = "aarch64")]
+#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use super::conv::opt_ref;
 use super::conv::{
     borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, dev_t, mode_as, oflags,
@@ -47,21 +47,30 @@ use super::{fs::Stat, time::Timespec};
 use crate::io;
 use crate::time::NanosleepRelativeResult;
 use io_lifetimes::{BorrowedFd, OwnedFd};
+#[cfg(not(any(target_arch = "riscv64")))]
+use linux_raw_sys::general::__NR_renameat;
+#[cfg(any(target_arch = "riscv64"))]
+use linux_raw_sys::general::__NR_renameat2;
 #[cfg(not(target_arch = "x86"))]
 use linux_raw_sys::general::{
     __NR_accept, __NR_accept4, __NR_bind, __NR_connect, __NR_getpeername, __NR_getsockname,
     __NR_getsockopt, __NR_listen, __NR_recvfrom, __NR_sendto, __NR_setsockopt, __NR_shutdown,
     __NR_socket, __NR_socketpair,
 };
-#[cfg(not(target_arch = "aarch64"))]
+#[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use linux_raw_sys::general::{__NR_dup2, __NR_open, __NR_pipe, __NR_poll};
 #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
 use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getuid};
 #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
 use linux_raw_sys::general::{__NR_getegid32, __NR_geteuid32, __NR_getgid32, __NR_getuid32};
-#[cfg(target_arch = "aarch64")]
+#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use linux_raw_sys::general::{__NR_ppoll, sigset_t};
-#[cfg(not(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")))]
+#[cfg(not(any(
+    target_arch = "x86",
+    target_arch = "x86_64",
+    target_arch = "aarch64",
+    target_arch = "riscv64"
+)))]
 use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::{
     general::{
@@ -70,8 +79,8 @@ use linux_raw_sys::{
         __NR_fdatasync, __NR_fsync, __NR_getcwd, __NR_getdents64, __NR_getpid, __NR_getppid,
         __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_mknodat, __NR_munmap, __NR_nanosleep,
         __NR_openat, __NR_pipe2, __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read,
-        __NR_readlinkat, __NR_readv, __NR_renameat, __NR_sched_yield, __NR_symlinkat,
-        __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
+        __NR_readlinkat, __NR_readv, __NR_sched_yield, __NR_symlinkat, __NR_unlinkat,
+        __NR_utimensat, __NR_write, __NR_writev,
     },
     general::{
         __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t, sockaddr, sockaddr_in,
@@ -149,12 +158,15 @@ pub(crate) fn close(fd: OwnedFd) {
 
 #[inline]
 pub(crate) fn open(filename: &CStr, flags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
-    #[cfg(target_arch = "aarch64")]
+    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     {
         use io_lifetimes::AsFd;
         openat(crate::fs::cwd().as_fd(), filename, flags, mode)
     }
-    #[cfg(all(target_pointer_width = "32", not(target_arch = "aarch64")))]
+    #[cfg(all(
+        target_pointer_width = "32",
+        not(any(target_arch = "aarch64", target_arch = "riscv64"))
+    ))]
     unsafe {
         ret_owned_fd(syscall3_readonly(
             __NR_open,
@@ -163,7 +175,10 @@ pub(crate) fn open(filename: &CStr, flags: OFlags, mode: Mode) -> io::Result<Own
             mode_as(mode),
         ))
     }
-    #[cfg(all(target_pointer_width = "64", not(target_arch = "aarch64")))]
+    #[cfg(all(
+        target_pointer_width = "64",
+        not(any(target_arch = "aarch64", target_arch = "riscv64"))
+    ))]
     unsafe {
         ret_owned_fd(syscall3_readonly(
             __NR_open,
@@ -1126,6 +1141,18 @@ pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<u32> {
 
 #[inline]
 pub(crate) fn rename(oldname: &CStr, newname: &CStr) -> io::Result<()> {
+    #[cfg(target_arch = "riscv64")]
+    unsafe {
+        ret(syscall5_readonly(
+            __NR_renameat2,
+            c_int(AT_FDCWD),
+            c_str(oldname),
+            c_int(AT_FDCWD),
+            c_str(newname),
+            c_uint(0),
+        ))
+    }
+    #[cfg(not(target_arch = "riscv64"))]
     unsafe {
         ret(syscall4_readonly(
             __NR_renameat,
@@ -1144,6 +1171,18 @@ pub(crate) fn renameat(
     new_dirfd: BorrowedFd<'_>,
     newname: &CStr,
 ) -> io::Result<()> {
+    #[cfg(target_arch = "riscv64")]
+    unsafe {
+        ret(syscall5_readonly(
+            __NR_renameat2,
+            borrowed_fd(old_dirfd),
+            c_str(oldname),
+            borrowed_fd(new_dirfd),
+            c_str(newname),
+            c_uint(0),
+        ))
+    }
+    #[cfg(not(target_arch = "riscv64"))]
     unsafe {
         ret(syscall4_readonly(
             __NR_renameat,
@@ -1302,7 +1341,7 @@ pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
 
 #[inline]
 pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
-    #[cfg(target_arch = "aarch64")]
+    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     {
         pipe_with(PipeFlags::empty())
     }
@@ -1310,7 +1349,12 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     {
         todo!("On MIPS pipe returns multiple values")
     }
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "mips", target_arch = "mips64")))]
+    #[cfg(not(any(
+        target_arch = "aarch64",
+        target_arch = "mips",
+        target_arch = "mips64",
+        target_arch = "riscv64"
+    )))]
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
         ret(syscall1(__NR_pipe, out(&mut result)))?;
@@ -1604,7 +1648,12 @@ pub(crate) fn getsockopt_socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketTyp
 
 #[inline]
 pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Result<usize> {
-    #[cfg(not(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")))]
+    #[cfg(not(any(
+        target_arch = "x86",
+        target_arch = "x86_64",
+        target_arch = "aarch64",
+        target_arch = "riscv64"
+    )))]
     unsafe {
         ret_usize(syscall4_readonly(
             __NR_send,
@@ -1614,7 +1663,11 @@ pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Resu
             c_uint(flags.bits()),
         ))
     }
-    #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
+    #[cfg(any(
+        target_arch = "x86_64",
+        target_arch = "aarch64",
+        target_arch = "riscv64"
+    ))]
     unsafe {
         ret_usize(syscall6_readonly(
             __NR_sendto,
@@ -1751,7 +1804,12 @@ pub(crate) fn sendto_unix(
 
 #[inline]
 pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
-    #[cfg(not(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")))]
+    #[cfg(not(any(
+        target_arch = "x86",
+        target_arch = "x86_64",
+        target_arch = "aarch64",
+        target_arch = "riscv64"
+    )))]
     unsafe {
         ret_usize(syscall4(
             __NR_recv,
@@ -1761,7 +1819,11 @@ pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::
             c_uint(flags.bits()),
         ))
     }
-    #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
+    #[cfg(any(
+        target_arch = "x86_64",
+        target_arch = "aarch64",
+        target_arch = "riscv64"
+    ))]
     unsafe {
         ret_usize(syscall6(
             __NR_recvfrom,
@@ -2404,12 +2466,12 @@ pub(crate) fn dup(fd: BorrowedFd) -> io::Result<OwnedFd> {
 
 #[inline]
 pub(crate) fn dup2(fd: BorrowedFd, new: OwnedFd) -> io::Result<OwnedFd> {
-    #[cfg(target_arch = "aarch64")]
+    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     {
         dup2_with(fd, new, DupFlags::empty())
     }
 
-    #[cfg(not(target_arch = "aarch64"))]
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
     unsafe {
         ret_owned_fd(syscall2_readonly(__NR_dup2, borrowed_fd(fd), owned_fd(new)))
     }
@@ -2497,7 +2559,7 @@ fn _copy_file_range(
 
 #[inline]
 pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c_int) -> io::Result<usize> {
-    #[cfg(target_arch = "aarch64")]
+    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     unsafe {
         let timeout = if timeout >= 0 {
             Some(Timespec {
@@ -2516,7 +2578,7 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c_int) -> io::Result<usize> 
             size_of::<sigset_t>(),
         ))
     }
-    #[cfg(not(target_arch = "aarch64"))]
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
     unsafe {
         ret_usize(syscall3(
             __NR_poll,
