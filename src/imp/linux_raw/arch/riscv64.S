@@ -28,7 +28,7 @@ reordered_syscall1_noreturn:
     ecall
     unimp
     .cfi_endproc
-    .size reordered_syscall_noreturn, .-reordered_syscall_noreturn
+    .size reordered_syscall1_noreturn, .-reordered_syscall1_noreturn
 
     .globl   reordered_syscall0
     .globl   reordered_syscall1

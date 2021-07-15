@@ -143,7 +143,7 @@ jobs:
             target: riscv64gc-unknown-linux-gnu
             gcc_package: gcc-riscv64-linux-gnu
             gcc: riscv64-linux-gnu-gcc
-            qemu: qemu-riscv64gc -L /usr/riscv64-linux-gnu
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
           - build: ubuntu-stable
             os: ubuntu-latest
@@ -169,7 +169,7 @@ jobs:
             target: riscv64gc-unknown-linux-gnu
             gcc_package: gcc-riscv64-linux-gnu
             gcc: riscv64-linux-gnu-gcc
-            qemu: qemu-riscv64gc -L /usr/riscv64-linux-gnu
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
           - build: macos
             os: macos-latest
@@ -258,7 +258,7 @@ jobs:
             target: riscv64gc-unknown-linux-gnu
             gcc_package: gcc-riscv64-linux-gnu
             gcc: riscv64-linux-gnu-gcc
-            qemu: qemu-riscv64gc -L /usr/riscv64-linux-gnu
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
