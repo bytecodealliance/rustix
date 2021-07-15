@@ -71,7 +71,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y gcc-i686-linux-gnu gcc-aarch64-linux-gnu
+        sudo apt-get install -y gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64gc-linux-gnu
     - run: cargo check --workspace --release -vv
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-gnux32
@@ -116,7 +116,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, ubuntu-16.04, ubuntu-18.04, i686-linux, aarch64-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, macos]
+        build: [ubuntu, ubuntu-16.04, ubuntu-18.04, i686-linux, aarch64-linux, riscv64gc-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64gc-linux-stable, macos]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -142,6 +142,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: riscv64gc-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: riscv64gc-unknown-linux-gnu
+            gcc_package: gcc-riscv64gc-linux-gnu
+            gcc: riscv64gc-linux-gnu-gcc
+            qemu: qemu-riscv64gc -L /usr/riscv64gc-linux-gnu
+            qemu_target: riscv64gc-linux-user
           - build: ubuntu-stable
             os: ubuntu-latest
             rust: stable
@@ -160,6 +168,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: riscv64gc-linux-stable
+            os: ubuntu-latest
+            rust: stable
+            target: riscv64gc-unknown-linux-gnu
+            gcc_package: gcc-riscv64gc-linux-gnu
+            gcc: riscv64gc-linux-gnu-gcc
+            qemu: qemu-riscv64gc -L /usr/riscv64gc-linux-gnu
+            qemu_target: riscv64gc-linux-user
           - build: macos
             os: macos-latest
             rust: stable
@@ -221,7 +237,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, riscv64gc-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -241,6 +257,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: risvc64gc-linux
+            os: ubuntu-latest
+            rust: stable
+            target: risvc64gc-unknown-linux-gnu
+            gcc_package: gcc-risvc64gc-linux-gnu
+            gcc: risvc64gc-linux-gnu-gcc
+            qemu: qemu-risvc64gc -L /usr/risvc64gc-linux-gnu
+            qemu_target: risvc64gc-linux-user
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
       RUSTFLAGS: --cfg posish_use_libc -D warnings

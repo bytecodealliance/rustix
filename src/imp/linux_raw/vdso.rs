@@ -354,6 +354,8 @@ const EM_CURRENT: u16 = 3; // EM_386
 const EM_CURRENT: u16 = 62; // EM_X86_64
 #[cfg(target_arch = "aarch64")]
 const EM_CURRENT: u16 = 183; // EM_AARCH64
+#[cfg(target_arch = "riscv64")]
+const EM_CURRENT: u16 = 243; // EM_RISCV
 
 #[inline]
 fn ELF_ST_VISIBILITY(o: u8) -> u8 {
