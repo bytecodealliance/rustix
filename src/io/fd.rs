@@ -1,7 +1,7 @@
 //! Functions which operate on file descriptors.
 
 use crate::{imp, io};
-use io_lifetimes::{AsFd, IntoFd, OwnedFd};
+use io_lifetimes::{AsFd, OwnedFd};
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 use std::ffi::OsString;
 
@@ -94,9 +94,8 @@ pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup2.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn dup2<Fd: AsFd, NewFd: IntoFd>(fd: &Fd, new: NewFd) -> io::Result<OwnedFd> {
+pub fn dup2<Fd: AsFd>(fd: &Fd, new: &OwnedFd) -> io::Result<()> {
     let fd = fd.as_fd();
-    let new = new.into_fd();
     imp::syscalls::dup2(fd, new)
 }
 
@@ -116,13 +115,8 @@ pub fn dup2<Fd: AsFd, NewFd: IntoFd>(fd: &Fd, new: NewFd) -> io::Result<OwnedFd>
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[doc(alias = "dup3")]
-pub fn dup2_with<Fd: AsFd, NewFd: IntoFd>(
-    fd: &Fd,
-    new: NewFd,
-    flags: DupFlags,
-) -> io::Result<OwnedFd> {
+pub fn dup2_with<Fd: AsFd>(fd: &Fd, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
     let fd = fd.as_fd();
-    let new = new.into_fd();
     imp::syscalls::dup2_with(fd, new, flags)
 }
 

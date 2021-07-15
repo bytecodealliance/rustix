@@ -25,8 +25,8 @@ use super::arch::choose::{
 use super::conv::opt_ref;
 use super::conv::{
     borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, dev_t, mode_as, oflags,
-    opt_c_str, opt_mut, out, owned_fd, ret, ret_c_int, ret_c_uint, ret_owned_fd, ret_usize,
-    ret_void_star, slice_addr, slice_as_mut_ptr, socklen_t, void_star,
+    opt_c_str, opt_mut, out, owned_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd,
+    ret_usize, ret_void_star, slice_addr, slice_as_mut_ptr, socklen_t, void_star,
 };
 use super::fs::{
     Access, Advice, AtFlags, FallocateFlags, FdFlags, MemfdFlags, Mode, OFlags, ResolveFlags,
@@ -46,7 +46,7 @@ use super::time::ClockId;
 use super::{fs::Stat, time::Timespec};
 use crate::io;
 use crate::time::NanosleepRelativeResult;
-use io_lifetimes::{BorrowedFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(not(any(target_arch = "riscv64")))]
 use linux_raw_sys::general::__NR_renameat;
 #[cfg(any(target_arch = "riscv64"))]
@@ -160,7 +160,6 @@ pub(crate) fn close(fd: OwnedFd) {
 pub(crate) fn open(filename: &CStr, flags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     {
-        use io_lifetimes::AsFd;
         openat(crate::fs::cwd().as_fd(), filename, flags, mode)
     }
     #[cfg(all(
@@ -2465,7 +2464,7 @@ pub(crate) fn dup(fd: BorrowedFd) -> io::Result<OwnedFd> {
 }
 
 #[inline]
-pub(crate) fn dup2(fd: BorrowedFd, new: OwnedFd) -> io::Result<OwnedFd> {
+pub(crate) fn dup2(fd: BorrowedFd, new: &OwnedFd) -> io::Result<()> {
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     {
         dup2_with(fd, new, DupFlags::empty())
@@ -2473,17 +2472,21 @@ pub(crate) fn dup2(fd: BorrowedFd, new: OwnedFd) -> io::Result<OwnedFd> {
 
     #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
     unsafe {
-        ret_owned_fd(syscall2_readonly(__NR_dup2, borrowed_fd(fd), owned_fd(new)))
+        ret_discarded_fd(syscall2_readonly(
+            __NR_dup2,
+            borrowed_fd(fd),
+            borrowed_fd(new.as_fd()),
+        ))
     }
 }
 
 #[inline]
-pub(crate) fn dup2_with(fd: BorrowedFd, new: OwnedFd, flags: DupFlags) -> io::Result<OwnedFd> {
+pub(crate) fn dup2_with(fd: BorrowedFd, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
     unsafe {
-        ret_owned_fd(syscall3_readonly(
+        ret_discarded_fd(syscall3_readonly(
             __NR_dup3,
             borrowed_fd(fd),
-            owned_fd(new),
+            borrowed_fd(new.as_fd()),
             c_uint(flags.bits()),
         ))
     }
