@@ -1,5 +1,7 @@
 //! Implement syscalls using the vDSO.
 //!
+//! <https://man7.org/linux/man-pages/man7/vdso.7.html>
+//!
 //! # Safety
 //!
 //! Similar to syscalls.rs, this file performs raw system calls, and sometimes
@@ -271,30 +273,21 @@ unsafe fn init() {
 
     if let Some(vdso) = vdso::Vdso::new() {
         #[cfg(target_arch = "x86_64")]
-        {
-            let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime"));
-            CLOCK_GETTIME.store(ptr as usize, Relaxed);
-        }
+        let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime"));
         #[cfg(target_arch = "aarch64")]
-        {
-            let ptr = vdso.sym(cstr!("LINUX_2.6.39)"), cstr!("__kernel_clock_gettime"));
-            CLOCK_GETTIME.store(ptr as usize, Relaxed);
-        }
+        let ptr = vdso.sym(cstr!("LINUX_2.6.39"), cstr!("__kernel_clock_gettime"));
         #[cfg(target_arch = "x86")]
-        {
-            let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime64"));
-            CLOCK_GETTIME.store(ptr as usize, Relaxed);
-        }
+        let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime64"));
         #[cfg(target_arch = "riscv64")]
-        {
-            let ptr = vdso.sym(cstr!("LINUX_4.15"), cstr!("__kernel_clock_gettime"));
-            CLOCK_GETTIME.store(ptr as usize, Relaxed);
-        }
-        assert!(CLOCK_GETTIME.load(Relaxed) != 0);
+        let ptr = vdso.sym(cstr!("LINUX_4.15"), cstr!("__kernel_clock_gettime"));
+
+        assert!(!ptr.is_null());
+        CLOCK_GETTIME.store(ptr as usize, Relaxed);
 
         #[cfg(target_arch = "x86")]
         {
             let ptr = vdso.sym(cstr!("LINUX_2.5"), cstr!("__kernel_vsyscall"));
+            assert!(!ptr.is_null());
             SYSCALL.store(ptr as usize, Relaxed);
         }
     }
