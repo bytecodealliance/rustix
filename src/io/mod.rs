@@ -60,7 +60,7 @@ pub use read_write::{preadv, pwritev};
     )
 ))]
 pub use read_write::{preadv2, pwritev2, ReadWriteFlags};
-pub use stdio::{stderr, stdin, stdout};
+pub use stdio::{stderr, stdin, stdout, take_stderr, take_stdin, take_stdout};
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use userfaultfd::{userfaultfd, UserFaultFdFlags};
 

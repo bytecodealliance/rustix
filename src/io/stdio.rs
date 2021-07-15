@@ -8,10 +8,13 @@
 //! stdio streams.
 #![allow(unsafe_code)]
 
-use crate::{imp, io::RawFd};
-use io_lifetimes::BorrowedFd;
+use crate::{
+    imp,
+    io::{FromRawFd, RawFd},
+};
+use io_lifetimes::{BorrowedFd, OwnedFd};
 
-/// `STDIN_FILENO`—Standard input.
+/// `STDIN_FILENO`—Standard input, borrowed.
 ///
 /// # Safety
 ///
@@ -32,7 +35,27 @@ pub unsafe fn stdin() -> BorrowedFd<'static> {
     BorrowedFd::borrow_raw_fd(imp::io::STDIN_FILENO as RawFd)
 }
 
-/// `STDOUT_FILENO`—Standard output.
+/// `STDIN_FILENO`—Standard input, owned.
+///
+/// # Safety
+///
+/// This acquires ownership of the stdin file descriptor. If it's dropped,
+/// subsequent newly created file descriptors may reuse the stdin file
+/// descriptor number, confusing code that assumes that the stdin file
+/// descriptor number is only used by stdin.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
+#[inline]
+pub unsafe fn take_stdin() -> OwnedFd {
+    OwnedFd::from_raw_fd(imp::io::STDIN_FILENO as RawFd)
+}
+
+/// `STDOUT_FILENO`—Standard output, borrowed.
 ///
 /// # Safety
 ///
@@ -53,7 +76,27 @@ pub unsafe fn stdout() -> BorrowedFd<'static> {
     BorrowedFd::borrow_raw_fd(imp::io::STDOUT_FILENO as RawFd)
 }
 
-/// `STDERR_FILENO`—Standard error.
+/// `STDOUT_FILENO`—Standard output, owned.
+///
+/// # Safety
+///
+/// This acquires ownership of the stdout file descriptor. If it's dropped,
+/// subsequent newly created file descriptors may reuse the stdout file
+/// descriptor number, confusing code that assumes that the stdout file
+/// descriptor number is only used by stdout.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
+#[inline]
+pub unsafe fn take_stdout() -> OwnedFd {
+    OwnedFd::from_raw_fd(imp::io::STDOUT_FILENO as RawFd)
+}
+
+/// `STDERR_FILENO`—Standard error, borrowed.
 ///
 /// # Safety
 ///
@@ -72,4 +115,24 @@ pub unsafe fn stdout() -> BorrowedFd<'static> {
 #[inline]
 pub unsafe fn stderr() -> BorrowedFd<'static> {
     BorrowedFd::borrow_raw_fd(imp::io::STDERR_FILENO as RawFd)
+}
+
+/// `STDERR_FILENO`—Standard error, owned.
+///
+/// # Safety
+///
+/// This acquires ownership of the stderr file descriptor. If it's dropped,
+/// subsequent newly created file descriptors may reuse the stderr file
+/// descriptor number, confusing code that assumes that the stderr file
+/// descriptor number is only used by stderr.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
+#[inline]
+pub unsafe fn take_stderr() -> OwnedFd {
+    OwnedFd::from_raw_fd(imp::io::STDERR_FILENO as RawFd)
 }
