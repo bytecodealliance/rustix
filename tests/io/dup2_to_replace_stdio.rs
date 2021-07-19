@@ -1,3 +1,5 @@
+#![cfg(not(target_os = "wasi"))]
+
 /// Use `dup2` to replace the stdin and stdout file descriptors.
 #[test]
 fn dup2_to_replace_stdio() {
