@@ -228,7 +228,7 @@ jobs:
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
-        cargo test --all-features --release --workspace
+        cargo test --verbose --all-features --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: 1
 
@@ -322,6 +322,6 @@ jobs:
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
-        cargo test --all-features --release --workspace
+        cargo test --verbose --all-features --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: 1
