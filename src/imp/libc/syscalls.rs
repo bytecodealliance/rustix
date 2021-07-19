@@ -75,7 +75,7 @@ use super::{
     offset::{libc_fstat, libc_fstatat, libc_lseek, libc_off_t, libc_pread, libc_pwrite},
     time::Timespec,
 };
-#[cfg(all(target_pointer_width = "64", target_os = "linux", target_env = "gnu"))]
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::{
     io::ReadWriteFlags,
     offset::{libc_preadv2, libc_pwritev2},
@@ -232,7 +232,7 @@ pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::
     Ok(nwritten as usize)
 }
 
-#[cfg(all(target_pointer_width = "64", target_os = "linux", target_env = "gnu"))]
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
 pub(crate) fn preadv2(
     fd: BorrowedFd<'_>,
     bufs: &[IoSliceMut],
@@ -253,7 +253,7 @@ pub(crate) fn preadv2(
     Ok(nread as usize)
 }
 
-#[cfg(all(target_pointer_width = "64", target_os = "linux", target_env = "gnu"))]
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
 pub(crate) fn pwritev2(
     fd: BorrowedFd<'_>,
     bufs: &[IoSlice],

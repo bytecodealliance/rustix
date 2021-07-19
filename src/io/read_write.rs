@@ -126,15 +126,7 @@ pub fn pwritev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice], offset: u64) -> io::Result<u
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/preadv2.2.html
-#[cfg(any(
-    linux_raw,
-    all(
-        libc,
-        target_pointer_width = "64",
-        target_os = "linux",
-        target_env = "gnu"
-    )
-))]
+#[cfg(any(linux_raw, all(libc, target_os = "linux", target_env = "gnu")))]
 #[inline]
 pub fn preadv2<Fd: AsFd>(
     fd: &Fd,
@@ -152,15 +144,7 @@ pub fn preadv2<Fd: AsFd>(
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/pwritev2.2.html
-#[cfg(any(
-    linux_raw,
-    all(
-        libc,
-        target_pointer_width = "64",
-        target_os = "linux",
-        target_env = "gnu"
-    )
-))]
+#[cfg(any(linux_raw, all(libc, target_os = "linux", target_env = "gnu")))]
 #[inline]
 pub fn pwritev2<Fd: AsFd>(
     fd: &Fd,

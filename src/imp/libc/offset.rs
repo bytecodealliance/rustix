@@ -112,12 +112,10 @@ mod readwrite_pv {
         ) -> libc::ssize_t
     }
 }
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
+pub(super) use libc::{preadv64v2 as libc_preadv2, pwritev64v2 as libc_pwritev2};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
-// `preadv64v2`/`pwritev64v2` submitted upstream here:
-// <https://github.com/rust-lang/libc/pull/2257>
-#[cfg(all(target_pointer_width = "64", target_os = "linux", target_env = "gnu"))]
-pub(super) use libc::{preadv2 as libc_preadv2, pwritev2 as libc_pwritev2};
 
 #[cfg(not(any(
     target_os = "android",
