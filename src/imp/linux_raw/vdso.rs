@@ -320,13 +320,13 @@ const EI_OSABI: usize = 7;
 const EI_ABIVERSION: usize = 8;
 const EV_CURRENT: u8 = 1;
 #[cfg(target_pointer_width = "32")]
-const ELFCLASS: u8 = 1;
+const ELFCLASS: u8 = 1; // ELFCLASS32
 #[cfg(target_pointer_width = "64")]
-const ELFCLASS: u8 = 2;
+const ELFCLASS: u8 = 2; // ELFCLASS64
 #[cfg(target_endian = "little")]
-const ELFDATA: u8 = 1;
+const ELFDATA: u8 = 1; // ELFDATA2LSB
 #[cfg(target_endian = "big")]
-const ELFDATA: u8 = 2;
+const ELFDATA: u8 = 2; // ELFDATA2MSB
 const ELFOSABI_SYSV: u8 = 0;
 const ELFOSABI_LINUX: u8 = 3;
 // At present all of our supported platforms use 0.
