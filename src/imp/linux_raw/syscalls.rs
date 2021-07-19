@@ -49,9 +49,9 @@ use crate::io;
 use crate::io::RawFd;
 use crate::time::NanosleepRelativeResult;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
-#[cfg(target_arch = "riscv64")]
+#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use linux_raw_sys::general::__NR_epoll_pwait;
-#[cfg(not(target_arch = "riscv64"))]
+#[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use linux_raw_sys::general::__NR_epoll_wait;
 #[cfg(not(any(target_arch = "riscv64")))]
 use linux_raw_sys::general::__NR_renameat;
@@ -2832,7 +2832,7 @@ pub(crate) fn epoll_wait(
     num_events: usize,
     timeout: c_int,
 ) -> io::Result<usize> {
-    #[cfg(not(target_arch = "riscv64"))]
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
     unsafe {
         ret_usize(syscall4(
             __NR_epoll_wait,
@@ -2842,7 +2842,7 @@ pub(crate) fn epoll_wait(
             c_int(timeout),
         ))
     }
-    #[cfg(target_arch = "riscv64")]
+    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     unsafe {
         ret_usize(syscall5(
             __NR_epoll_pwait,
