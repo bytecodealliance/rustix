@@ -25,8 +25,8 @@ use super::arch::choose::{
 use super::conv::opt_ref;
 use super::conv::{
     borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, dev_t, mode_as, oflags,
-    opt_c_str, opt_mut, out, owned_fd, raw_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd,
-    ret_owned_fd, ret_usize, ret_void_star, slice_addr, slice_as_mut_ptr, socklen_t, void_star,
+    opt_c_str, opt_mut, out, raw_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd,
+    ret_usize, ret_void_star, slice_addr, slice_as_mut_ptr, socklen_t, void_star,
 };
 use super::fs::{
     Access, Advice, AtFlags, FallocateFlags, FdFlags, MemfdFlags, Mode, OFlags, ResolveFlags,

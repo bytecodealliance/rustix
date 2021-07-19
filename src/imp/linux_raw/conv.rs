@@ -84,12 +84,6 @@ pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> usize {
 }
 
 #[inline]
-pub(super) fn owned_fd(fd: OwnedFd) -> usize {
-    // As above, use zero-extension rather than sign-extension.
-    fd.into_raw_fd() as c_uint as usize
-}
-
-#[inline]
 pub(super) fn raw_fd(fd: c_int) -> usize {
     // As above, use zero-extension rather than sign-extension.
     fd as c_uint as usize
