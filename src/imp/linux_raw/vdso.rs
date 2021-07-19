@@ -19,6 +19,7 @@ use crate::{
     fs::openat,
     io::{proc_self, OwnedFd},
 };
+use cstr::cstr;
 use io_lifetimes::AsFilelike;
 use std::{
     ffi::CStr,
@@ -289,7 +290,7 @@ unsafe fn init_from_auxv(auxv: *const u8) -> Option<Vdso> {
 fn init_from_proc_self_auxv() -> Option<Vdso> {
     let auxv: OwnedFd = match openat(
         &proc_self().ok()?.0,
-        "auxv",
+        cstr!("auxv"),
         OFlags::RDONLY | OFlags::CLOEXEC | OFlags::NOFOLLOW | OFlags::NOCTTY,
         Mode::empty(),
     ) {

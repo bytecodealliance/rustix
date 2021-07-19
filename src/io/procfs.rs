@@ -12,9 +12,9 @@ use crate::{
     path::DecInt,
     process::{getgid, getpid, getuid},
 };
+use cstr::cstr;
 use io_lifetimes::{AsFd, BorrowedFd};
 use once_cell::sync::Lazy;
-use std::path::Path;
 
 /// Linux's procfs always uses inode 1 for its root directory.
 const PROC_ROOT_INO: u64 = 1;
@@ -120,7 +120,7 @@ fn check_procfs(file: BorrowedFd<'_>) -> io::Result<()> {
 /// `rename` call that would otherwise fail, but which fails with `EXDEV`
 /// first if it would cross a mount point.
 fn is_mountpoint(file: BorrowedFd<'_>) -> io::Result<bool> {
-    let err = renameat(&file, "../.", &file, ".").unwrap_err();
+    let err = renameat(&file, cstr!("../."), &file, cstr!(".")).unwrap_err();
     match err {
         io::Error::XDEV => Ok(true), // the rename failed due to crossing a mount point
         io::Error::BUSY => Ok(false), // the rename failed normally
@@ -143,7 +143,7 @@ pub fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     static PROC: Lazy<io::Result<(OwnedFd, Stat)>> = Lazy::new(|| {
         let oflags =
             OFlags::NOFOLLOW | OFlags::PATH | OFlags::DIRECTORY | OFlags::CLOEXEC | OFlags::NOCTTY;
-        let proc: OwnedFd = openat(&cwd(), "/proc", oflags, Mode::empty())?.into();
+        let proc: OwnedFd = openat(&cwd(), cstr!("/proc"), oflags, Mode::empty())?.into();
         let proc_stat = check_proc_dir(Subdir::Proc, proc.as_fd(), None, 0, 0)?;
 
         Ok((proc, proc_stat))
@@ -208,8 +208,7 @@ pub fn proc_self_fd() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
             OFlags::NOFOLLOW | OFlags::PATH | OFlags::DIRECTORY | OFlags::CLOEXEC | OFlags::NOCTTY;
 
         // Open "/proc/self/fd".
-        let proc_self_fd: OwnedFd =
-            openat(&proc_self, Path::new("fd"), oflags, Mode::empty())?.into();
+        let proc_self_fd: OwnedFd = openat(&proc_self, cstr!("fd"), oflags, Mode::empty())?.into();
         let proc_self_fd_stat = check_proc_dir(
             Subdir::Fd,
             proc_self_fd.as_fd(),
