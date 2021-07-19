@@ -89,7 +89,7 @@ impl Dir {
 
         // Do an unaligned u16 load.
         let d_reclen = u16::from_ne_bytes([
-            self.buf[pos + offsetof_d_reclen + 0],
+            self.buf[pos + offsetof_d_reclen],
             self.buf[pos + offsetof_d_reclen + 1],
         ]);
         assert!(self.buf.len() - pos >= d_reclen as usize);
@@ -110,7 +110,7 @@ impl Dir {
 
         // Do an unaligned u64 load.
         let d_ino = u64::from_ne_bytes([
-            self.buf[pos + offsetof_d_ino + 0],
+            self.buf[pos + offsetof_d_ino],
             self.buf[pos + offsetof_d_ino + 1],
             self.buf[pos + offsetof_d_ino + 2],
             self.buf[pos + offsetof_d_ino + 3],

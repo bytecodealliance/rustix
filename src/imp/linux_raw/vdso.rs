@@ -41,7 +41,7 @@ pub(super) struct Vdso {
     bucket: *const u32,
     chain: *const u32,
     nbucket: u32,
-    _nchain: u32,
+    //nchain: u32,
 
     // Version table
     versym: *const u16,
@@ -71,7 +71,7 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
         bucket: null(),
         chain: null(),
         nbucket: 0,
-        _nchain: 0,
+        //nchain: 0,
         versym: null(),
         verdef: null(),
     };
@@ -176,7 +176,7 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
 
     // Parse the hash table header.
     vdso.nbucket = *hash.add(0);
-    vdso._nchain = *hash.add(1);
+    //vdso.nchain = *hash.add(1);
     vdso.bucket = hash.add(2);
     vdso.chain = hash.add(vdso.nbucket as usize + 2);
 
@@ -364,17 +364,17 @@ const EM_CURRENT: u16 = 183; // EM_AARCH64
 const EM_CURRENT: u16 = 243; // EM_RISCV
 
 #[inline]
-fn ELF_ST_VISIBILITY(o: u8) -> u8 {
+const fn ELF_ST_VISIBILITY(o: u8) -> u8 {
     o & 0x03
 }
 
 #[inline]
-fn ELF_ST_BIND(val: u8) -> u8 {
+const fn ELF_ST_BIND(val: u8) -> u8 {
     val >> 4
 }
 
 #[inline]
-fn ELF_ST_TYPE(val: u8) -> u8 {
+const fn ELF_ST_TYPE(val: u8) -> u8 {
     val & 0xf
 }
 

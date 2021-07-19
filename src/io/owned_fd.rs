@@ -33,12 +33,14 @@ impl FromFd for OwnedFd {
 }
 
 impl From<io_lifetimes::OwnedFd> for OwnedFd {
+    #[inline]
     fn from(fd: io_lifetimes::OwnedFd) -> Self {
         Self::from_fd(fd)
     }
 }
 
 impl From<OwnedFd> for io_lifetimes::OwnedFd {
+    #[inline]
     fn from(fd: OwnedFd) -> Self {
         fd.into_fd()
     }

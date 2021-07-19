@@ -164,6 +164,7 @@ pub struct Owning<'context, T: IntoFd + FromFd> {
 
 impl<'context, T: IntoFd + FromFd> Owning<'context, T> {
     /// Creates a new empty `Owning`.
+    #[allow(clippy::new_without_default)] // This is a specialized type that doesn't need to be generically constructible.
     #[inline]
     pub fn new() -> Self {
         Self {
@@ -317,7 +318,7 @@ impl<Context: self::Context> Epoll<Context> {
             event_list.events.set_len(0);
             let nfds = epoll_wait(
                 self.epoll_fd.as_fd(),
-                event_list.events[..].as_mut_ptr() as *mut _,
+                event_list.events[..].as_mut_ptr().cast::<_>(),
                 event_list.events.capacity(),
                 timeout,
             )?;

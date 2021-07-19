@@ -13,7 +13,7 @@ fn main() {
     // If posish_use_libc is set, or if we're on an architecture/OS that doesn't
     // have raw syscall support, use libc.
     if var("CARGO_CFG_POSISH_USE_LIBC").is_ok()
-        || !(os_name == "linux")
+        || os_name != "linux"
         || std::fs::metadata(&asm_name).is_err()
         || is_x32
     {

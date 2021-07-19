@@ -1,7 +1,6 @@
-use crate::imp;
-use crate::io;
 #[cfg(not(target_os = "wasi"))]
 use crate::io::{Termios, Winsize};
+use crate::{imp, io};
 use io_lifetimes::{AsFd, BorrowedFd};
 
 /// `ioctl(fd, TCGETS)`

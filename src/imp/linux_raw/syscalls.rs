@@ -2763,16 +2763,12 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
     if write && !not_socket {
         // Do a `send` with `DONTWAIT` for 0 bytes. An `EPIPE` indicates
         // the write side is shut down.
+        #[allow(unreachable_patterns)] // EAGAIN equals EWOULDBLOCK
         match send(fd, &[], SendFlags::DONTWAIT) {
-            Err(err) => {
-                #[allow(unreachable_patterns)] // EAGAIN equals EWOULDBLOCK
-                match err {
-                    io::Error::AGAIN | io::Error::WOULDBLOCK => (),
-                    io::Error::NOTSOCK => (),
-                    io::Error::PIPE => write = false,
-                    _ => return Err(err),
-                }
-            }
+            Err(io::Error::AGAIN | io::Error::WOULDBLOCK) => (),
+            Err(io::Error::NOTSOCK) => (),
+            Err(io::Error::PIPE) => write = false,
+            Err(err) => return Err(err),
             Ok(_) => (),
         }
     }
