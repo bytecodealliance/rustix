@@ -200,7 +200,7 @@ static mut CLOCK_GETTIME: AtomicUsize = AtomicUsize::new(0);
 static mut SYSCALL: AtomicUsize = AtomicUsize::new(0);
 
 #[cfg(target_pointer_width = "32")]
-unsafe extern "C" fn clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) -> c_int {
+unsafe extern "C" fn posish_clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) -> c_int {
     let mut r0 = syscall2(__NR_clock_gettime64, clockid as usize, res as usize);
     if r0 == -io::Error::NOSYS.raw_os_error() as usize {
         // Ordinarily posish doesn't like to emulate system calls, but in
@@ -226,13 +226,13 @@ unsafe extern "C" fn clock_gettime_via_syscall(clockid: c_int, res: *mut Timespe
 }
 
 #[cfg(target_pointer_width = "64")]
-unsafe extern "C" fn clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) -> c_int {
+unsafe extern "C" fn posish_clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) -> c_int {
     syscall2(__NR_clock_gettime, clockid as usize, res as usize) as c_int
 }
 
 #[cfg(all(linux_raw_inline_asm, target_arch = "x86"))]
 #[naked]
-unsafe extern "C" fn int_0x80(
+unsafe extern "C" fn posish_int_0x80(
     _nr: u32,
     _a0: usize,
     _a1: usize,
@@ -246,7 +246,7 @@ unsafe extern "C" fn int_0x80(
 
 #[cfg(all(not(linux_raw_inline_asm), target_arch = "x86"))]
 extern "C" {
-    fn int_0x80(
+    fn posish_int_0x80(
         _nr: u32,
         _a0: usize,
         _a1: usize,
@@ -261,14 +261,19 @@ unsafe fn init() {
     CLOCK_GETTIME
         .compare_exchange(
             0,
-            clock_gettime_via_syscall as ClockGettimeType as usize,
+            posish_clock_gettime_via_syscall as ClockGettimeType as usize,
             Relaxed,
             Relaxed,
         )
         .ok();
     #[cfg(target_arch = "x86")]
     SYSCALL
-        .compare_exchange(0, transmute(int_0x80 as SyscallType), Relaxed, Relaxed)
+        .compare_exchange(
+            0,
+            transmute(posish_int_0x80 as SyscallType),
+            Relaxed,
+            Relaxed,
+        )
         .ok();
 
     if let Some(vdso) = vdso::Vdso::new() {

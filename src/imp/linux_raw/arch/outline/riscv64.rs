@@ -3,7 +3,7 @@
 // First we declare the actual assembly routines with `reordered_*` names and
 // reorgered arguments.
 extern "C" {
-    fn reordered_syscall0_readonly(
+    fn posish_reordered_syscall0_readonly(
         u0: usize,
         u1: usize,
         u2: usize,
@@ -13,7 +13,7 @@ extern "C" {
         u6: usize,
         nr: u32,
     ) -> usize;
-    fn reordered_syscall1(
+    fn posish_reordered_syscall1(
         a0: usize,
         u1: usize,
         u2: usize,
@@ -23,7 +23,7 @@ extern "C" {
         u6: usize,
         nr: u32,
     ) -> usize;
-    fn reordered_syscall1_readonly(
+    fn posish_reordered_syscall1_readonly(
         a0: usize,
         u1: usize,
         u2: usize,
@@ -33,7 +33,7 @@ extern "C" {
         u6: usize,
         nr: u32,
     ) -> usize;
-    fn reordered_syscall1_noreturn(
+    fn posish_reordered_syscall1_noreturn(
         a0: usize,
         u1: usize,
         u2: usize,
@@ -43,7 +43,7 @@ extern "C" {
         u6: usize,
         nr: u32,
     ) -> !;
-    fn reordered_syscall2(
+    fn posish_reordered_syscall2(
         a0: usize,
         a1: usize,
         u2: usize,
@@ -53,7 +53,7 @@ extern "C" {
         u6: usize,
         nr: u32,
     ) -> usize;
-    fn reordered_syscall2_readonly(
+    fn posish_reordered_syscall2_readonly(
         a0: usize,
         a1: usize,
         u2: usize,
@@ -63,7 +63,7 @@ extern "C" {
         u6: usize,
         nr: u32,
     ) -> usize;
-    fn reordered_syscall3(
+    fn posish_reordered_syscall3(
         a0: usize,
         a1: usize,
         a2: usize,
@@ -73,7 +73,7 @@ extern "C" {
         u6: usize,
         nr: u32,
     ) -> usize;
-    fn reordered_syscall3_readonly(
+    fn posish_reordered_syscall3_readonly(
         a0: usize,
         a1: usize,
         a2: usize,
@@ -83,7 +83,7 @@ extern "C" {
         u6: usize,
         nr: u32,
     ) -> usize;
-    fn reordered_syscall4(
+    fn posish_reordered_syscall4(
         a0: usize,
         a1: usize,
         a2: usize,
@@ -93,7 +93,7 @@ extern "C" {
         u6: usize,
         nr: u32,
     ) -> usize;
-    fn reordered_syscall4_readonly(
+    fn posish_reordered_syscall4_readonly(
         a0: usize,
         a1: usize,
         a2: usize,
@@ -103,7 +103,7 @@ extern "C" {
         u6: usize,
         nr: u32,
     ) -> usize;
-    fn reordered_syscall5(
+    fn posish_reordered_syscall5(
         a0: usize,
         a1: usize,
         a2: usize,
@@ -113,7 +113,7 @@ extern "C" {
         u6: usize,
         nr: u32,
     ) -> usize;
-    fn reordered_syscall5_readonly(
+    fn posish_reordered_syscall5_readonly(
         a0: usize,
         a1: usize,
         a2: usize,
@@ -123,7 +123,7 @@ extern "C" {
         u6: usize,
         nr: u32,
     ) -> usize;
-    fn reordered_syscall6(
+    fn posish_reordered_syscall6(
         a0: usize,
         a1: usize,
         a2: usize,
@@ -133,7 +133,7 @@ extern "C" {
         u6: usize,
         nr: u32,
     ) -> usize;
-    fn reordered_syscall6_readonly(
+    fn posish_reordered_syscall6_readonly(
         a0: usize,
         a1: usize,
         a2: usize,
@@ -152,47 +152,47 @@ mod reorder {
     #[inline]
     pub(crate) unsafe fn syscall0_readonly(nr: u32) -> usize {
         let u = std::mem::MaybeUninit::uninit().assume_init();
-        reordered_syscall0_readonly(u, u, u, u, u, u, u, nr)
+        posish_reordered_syscall0_readonly(u, u, u, u, u, u, u, nr)
     }
     #[inline]
     pub(crate) unsafe fn syscall1(nr: u32, a0: usize) -> usize {
         let u = std::mem::MaybeUninit::uninit().assume_init();
-        reordered_syscall1(a0, u, u, u, u, u, u, nr)
+        posish_reordered_syscall1(a0, u, u, u, u, u, u, nr)
     }
     #[inline]
     pub(crate) unsafe fn syscall1_readonly(nr: u32, a0: usize) -> usize {
         let u = std::mem::MaybeUninit::uninit().assume_init();
-        reordered_syscall1_readonly(a0, u, u, u, u, u, u, nr)
+        posish_reordered_syscall1_readonly(a0, u, u, u, u, u, u, nr)
     }
     #[inline]
     pub(crate) unsafe fn syscall1_noreturn(nr: u32, a0: usize) -> ! {
         let u = std::mem::MaybeUninit::uninit().assume_init();
-        reordered_syscall1_noreturn(a0, u, u, u, u, u, u, nr)
+        posish_reordered_syscall1_noreturn(a0, u, u, u, u, u, u, nr)
     }
     #[inline]
     pub(crate) unsafe fn syscall2(nr: u32, a0: usize, a1: usize) -> usize {
         let u = std::mem::MaybeUninit::uninit().assume_init();
-        reordered_syscall2(a0, a1, u, u, u, u, u, nr)
+        posish_reordered_syscall2(a0, a1, u, u, u, u, u, nr)
     }
     #[inline]
     pub(crate) unsafe fn syscall2_readonly(nr: u32, a0: usize, a1: usize) -> usize {
         let u = std::mem::MaybeUninit::uninit().assume_init();
-        reordered_syscall2_readonly(a0, a1, u, u, u, u, u, nr)
+        posish_reordered_syscall2_readonly(a0, a1, u, u, u, u, u, nr)
     }
     #[inline]
     pub(crate) unsafe fn syscall3(nr: u32, a0: usize, a1: usize, a2: usize) -> usize {
         let u = std::mem::MaybeUninit::uninit().assume_init();
-        reordered_syscall3(a0, a1, a2, u, u, u, u, nr)
+        posish_reordered_syscall3(a0, a1, a2, u, u, u, u, nr)
     }
     #[inline]
     pub(crate) unsafe fn syscall3_readonly(nr: u32, a0: usize, a1: usize, a2: usize) -> usize {
         let u = std::mem::MaybeUninit::uninit().assume_init();
-        reordered_syscall3_readonly(a0, a1, a2, u, u, u, u, nr)
+        posish_reordered_syscall3_readonly(a0, a1, a2, u, u, u, u, nr)
     }
     #[inline]
     pub(crate) unsafe fn syscall4(nr: u32, a0: usize, a1: usize, a2: usize, a3: usize) -> usize {
         let u = std::mem::MaybeUninit::uninit().assume_init();
-        reordered_syscall4(a0, a1, a2, a3, u, u, u, nr)
+        posish_reordered_syscall4(a0, a1, a2, a3, u, u, u, nr)
     }
     #[inline]
     pub(crate) unsafe fn syscall4_readonly(
@@ -203,7 +203,7 @@ mod reorder {
         a3: usize,
     ) -> usize {
         let u = std::mem::MaybeUninit::uninit().assume_init();
-        reordered_syscall4_readonly(a0, a1, a2, a3, u, u, u, nr)
+        posish_reordered_syscall4_readonly(a0, a1, a2, a3, u, u, u, nr)
     }
     #[inline]
     pub(crate) unsafe fn syscall5(
@@ -215,7 +215,7 @@ mod reorder {
         a4: usize,
     ) -> usize {
         let u = std::mem::MaybeUninit::uninit().assume_init();
-        reordered_syscall5(a0, a1, a2, a3, a4, u, u, nr)
+        posish_reordered_syscall5(a0, a1, a2, a3, a4, u, u, nr)
     }
     #[inline]
     pub(crate) unsafe fn syscall5_readonly(
@@ -227,7 +227,7 @@ mod reorder {
         a4: usize,
     ) -> usize {
         let u = std::mem::MaybeUninit::uninit().assume_init();
-        reordered_syscall5_readonly(a0, a1, a2, a3, a4, u, u, nr)
+        posish_reordered_syscall5_readonly(a0, a1, a2, a3, a4, u, u, nr)
     }
     #[inline]
     pub(crate) unsafe fn syscall6(
@@ -240,7 +240,7 @@ mod reorder {
         a5: usize,
     ) -> usize {
         let u = std::mem::MaybeUninit::uninit().assume_init();
-        reordered_syscall6(a0, a1, a2, a3, a4, a5, u, nr)
+        posish_reordered_syscall6(a0, a1, a2, a3, a4, a5, u, nr)
     }
     #[inline]
     pub(crate) unsafe fn syscall6_readonly(
@@ -253,7 +253,7 @@ mod reorder {
         a5: usize,
     ) -> usize {
         let u = std::mem::MaybeUninit::uninit().assume_init();
-        reordered_syscall6_readonly(a0, a1, a2, a3, a4, a5, u, nr)
+        posish_reordered_syscall6_readonly(a0, a1, a2, a3, a4, a5, u, nr)
     }
 }
 

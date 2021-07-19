@@ -9,19 +9,19 @@
 
     .intel_syntax noprefix
 
-    .section    .text.reordered_indirect_syscall0,"ax",@progbits
+    .section    .text.posish_reordered_indirect_syscall0,"ax",@progbits
     .p2align    4
-reordered_indirect_syscall0:
+posish_reordered_indirect_syscall0:
     .cfi_startproc
     mov    eax,ecx
     call   edx
     ret
     .cfi_endproc
-    .size reordered_indirect_syscall0, .-reordered_indirect_syscall0
+    .size posish_reordered_indirect_syscall0, .-posish_reordered_indirect_syscall0
 
-    .section    .text.reordered_indirect_syscall1,"ax",@progbits
+    .section    .text.posish_reordered_indirect_syscall1,"ax",@progbits
     .p2align    4
-reordered_indirect_syscall1:
+posish_reordered_indirect_syscall1:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -33,22 +33,22 @@ reordered_indirect_syscall1:
     .cfi_def_cfa_offset 4
     ret    0x4
     .cfi_endproc
-    .size reordered_indirect_syscall1, .-reordered_indirect_syscall1
+    .size posish_reordered_indirect_syscall1, .-posish_reordered_indirect_syscall1
 
-    .section    .text.reordered_indirect_syscall1_noreturn,"ax",@progbits
+    .section    .text.posish_reordered_indirect_syscall1_noreturn,"ax",@progbits
     .p2align    4
-reordered_indirect_syscall1_noreturn:
+posish_reordered_indirect_syscall1_noreturn:
     .cfi_startproc
     mov    ebx,ecx
     mov    eax,edx
     call   DWORD PTR [esp+0x4]
     ud2
     .cfi_endproc
-    .size reordered_indirect_syscall1_noreturn, .-reordered_indirect_syscall1_noreturn
+    .size posish_reordered_indirect_syscall1_noreturn, .-posish_reordered_indirect_syscall1_noreturn
 
-    .section    .text.reordered_indirect_syscall2,"ax",@progbits
+    .section    .text.posish_reordered_indirect_syscall2,"ax",@progbits
     .p2align    4
-reordered_indirect_syscall2:
+posish_reordered_indirect_syscall2:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -60,11 +60,11 @@ reordered_indirect_syscall2:
     .cfi_def_cfa_offset 4
     ret    0x8
     .cfi_endproc
-    .size reordered_indirect_syscall2, .-reordered_indirect_syscall2
+    .size posish_reordered_indirect_syscall2, .-posish_reordered_indirect_syscall2
 
-    .section    .text.reordered_indirect_syscall3,"ax",@progbits
+    .section    .text.posish_reordered_indirect_syscall3,"ax",@progbits
     .p2align    4
-reordered_indirect_syscall3:
+posish_reordered_indirect_syscall3:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -76,11 +76,11 @@ reordered_indirect_syscall3:
     .cfi_def_cfa_offset 4
     ret    0xc
     .cfi_endproc
-    .size reordered_indirect_syscall3, .-reordered_indirect_syscall3
+    .size posish_reordered_indirect_syscall3, .-posish_reordered_indirect_syscall3
 
-    .section    .text.reordered_indirect_syscall4,"ax",@progbits
+    .section    .text.posish_reordered_indirect_syscall4,"ax",@progbits
     .p2align    4
-reordered_indirect_syscall4:
+posish_reordered_indirect_syscall4:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -98,11 +98,11 @@ reordered_indirect_syscall4:
     .cfi_def_cfa_offset 4
     ret    0x10
     .cfi_endproc
-    .size reordered_indirect_syscall4, .-reordered_indirect_syscall4
+    .size posish_reordered_indirect_syscall4, .-posish_reordered_indirect_syscall4
 
-    .section    .text.reordered_indirect_syscall5,"ax",@progbits
+    .section    .text.posish_reordered_indirect_syscall5,"ax",@progbits
     .p2align    4
-reordered_indirect_syscall5:
+posish_reordered_indirect_syscall5:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -126,11 +126,11 @@ reordered_indirect_syscall5:
     .cfi_def_cfa_offset 4
     ret    0x14
     .cfi_endproc
-    .size reordered_indirect_syscall5, .-reordered_indirect_syscall5
+    .size posish_reordered_indirect_syscall5, .-posish_reordered_indirect_syscall5
 
-    .section    .text.reordered_indirect_syscall6,"ax",@progbits
+    .section    .text.posish_reordered_indirect_syscall6,"ax",@progbits
     .p2align    4
-reordered_indirect_syscall6:
+posish_reordered_indirect_syscall6:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -160,21 +160,21 @@ reordered_indirect_syscall6:
     .cfi_def_cfa_offset 4
     ret    0x18
     .cfi_endproc
-    .size reordered_indirect_syscall6, .-reordered_indirect_syscall6
+    .size posish_reordered_indirect_syscall6, .-posish_reordered_indirect_syscall6
 
-    .section    .text.reordered_syscall0,"ax",@progbits
+    .section    .text.posish_reordered_syscall0,"ax",@progbits
     .p2align    4
-reordered_syscall0:
+posish_reordered_syscall0:
     .cfi_startproc
     mov    eax,ecx
     int    0x80
     ret
     .cfi_endproc
-    .size reordered_syscall0, .-reordered_syscall0
+    .size posish_reordered_syscall0, .-posish_reordered_syscall0
 
-    .section    .text.reordered_syscall1,"ax",@progbits
+    .section    .text.posish_reordered_syscall1,"ax",@progbits
     .p2align    4
-reordered_syscall1:
+posish_reordered_syscall1:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -186,22 +186,22 @@ reordered_syscall1:
     .cfi_def_cfa_offset 4
     ret
     .cfi_endproc
-    .size reordered_syscall1, .-reordered_syscall1
+    .size posish_reordered_syscall1, .-posish_reordered_syscall1
 
-    .section    .text.reordered_syscall1_noreturn,"ax",@progbits
+    .section    .text.posish_reordered_syscall1_noreturn,"ax",@progbits
     .p2align    4
-reordered_syscall1_noreturn:
+posish_reordered_syscall1_noreturn:
     .cfi_startproc
     mov    eax,edx
     mov    ebx,ecx
     int    0x80
     ud2
     .cfi_endproc
-    .size reordered_syscall1_noreturn, .-reordered_syscall1_noreturn
+    .size posish_reordered_syscall1_noreturn, .-posish_reordered_syscall1_noreturn
 
-    .section    .text.reordered_syscall2,"ax",@progbits
+    .section    .text.posish_reordered_syscall2,"ax",@progbits
     .p2align    4
-reordered_syscall2:
+posish_reordered_syscall2:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -213,11 +213,11 @@ reordered_syscall2:
     .cfi_def_cfa_offset 4
     ret    0x4
     .cfi_endproc
-    .size reordered_syscall2, .-reordered_syscall2
+    .size posish_reordered_syscall2, .-posish_reordered_syscall2
 
-    .section    .text.reordered_syscall3,"ax",@progbits
+    .section    .text.posish_reordered_syscall3,"ax",@progbits
     .p2align    4
-reordered_syscall3:
+posish_reordered_syscall3:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -229,11 +229,11 @@ reordered_syscall3:
     .cfi_def_cfa_offset 4
     ret    0x8
     .cfi_endproc
-    .size reordered_syscall3, .-reordered_syscall3
+    .size posish_reordered_syscall3, .-posish_reordered_syscall3
 
-    .section    .text.reordered_syscall4,"ax",@progbits
+    .section    .text.posish_reordered_syscall4,"ax",@progbits
     .p2align    4
-reordered_syscall4:
+posish_reordered_syscall4:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -251,11 +251,11 @@ reordered_syscall4:
     .cfi_def_cfa_offset 4
     ret    0xc
     .cfi_endproc
-    .size reordered_syscall4, .-reordered_syscall4
+    .size posish_reordered_syscall4, .-posish_reordered_syscall4
 
-    .section    .text.reordered_syscall5,"ax",@progbits
+    .section    .text.posish_reordered_syscall5,"ax",@progbits
     .p2align    4
-reordered_syscall5:
+posish_reordered_syscall5:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -279,11 +279,11 @@ reordered_syscall5:
     .cfi_def_cfa_offset 4
     ret    0x10
     .cfi_endproc
-    .size reordered_syscall5, .-reordered_syscall5
+    .size posish_reordered_syscall5, .-posish_reordered_syscall5
 
-    .section    .text.reordered_syscall6,"ax",@progbits
+    .section    .text.posish_reordered_syscall6,"ax",@progbits
     .p2align    4
-reordered_syscall6:
+posish_reordered_syscall6:
     .cfi_startproc
     push   ebp
     .cfi_def_cfa_offset 8
@@ -313,101 +313,101 @@ reordered_syscall6:
     .cfi_def_cfa_offset 4
     ret    0x14
     .cfi_endproc
-    .size reordered_syscall6, .-reordered_syscall6
+    .size posish_reordered_syscall6, .-posish_reordered_syscall6
 
-    .section    .text.int_0x80,"ax",@progbits
+    .section    .text.posish_int_0x80,"ax",@progbits
     .p2align    4
-int_0x80:
+posish_int_0x80:
     .cfi_startproc
     int    0x80
     ret
     .cfi_endproc
-    .size int_0x80, .-int_0x80
+    .size posish_int_0x80, .-posish_int_0x80
 
-    .globl   reordered_syscall0
-    .globl   reordered_syscall1
-    .globl   reordered_syscall1_noreturn
-    .globl   reordered_syscall2
-    .globl   reordered_syscall3
-    .globl   reordered_syscall4
-    .globl   reordered_syscall5
-    .globl   reordered_syscall6
+    .globl   posish_reordered_syscall0
+    .globl   posish_reordered_syscall1
+    .globl   posish_reordered_syscall1_noreturn
+    .globl   posish_reordered_syscall2
+    .globl   posish_reordered_syscall3
+    .globl   posish_reordered_syscall4
+    .globl   posish_reordered_syscall5
+    .globl   posish_reordered_syscall6
 
-    .hidden  reordered_syscall0
-    .hidden  reordered_syscall1
-    .hidden  reordered_syscall1_noreturn
-    .hidden  reordered_syscall2
-    .hidden  reordered_syscall3
-    .hidden  reordered_syscall4
-    .hidden  reordered_syscall5
-    .hidden  reordered_syscall6
+    .hidden  posish_reordered_syscall0
+    .hidden  posish_reordered_syscall1
+    .hidden  posish_reordered_syscall1_noreturn
+    .hidden  posish_reordered_syscall2
+    .hidden  posish_reordered_syscall3
+    .hidden  posish_reordered_syscall4
+    .hidden  posish_reordered_syscall5
+    .hidden  posish_reordered_syscall6
 
-    .type    reordered_syscall0, @function
-    .type    reordered_syscall1, @function
-    .type    reordered_syscall1_noreturn, @function
-    .type    reordered_syscall2, @function
-    .type    reordered_syscall3, @function
-    .type    reordered_syscall4, @function
-    .type    reordered_syscall5, @function
-    .type    reordered_syscall6, @function
+    .type    posish_reordered_syscall0, @function
+    .type    posish_reordered_syscall1, @function
+    .type    posish_reordered_syscall1_noreturn, @function
+    .type    posish_reordered_syscall2, @function
+    .type    posish_reordered_syscall3, @function
+    .type    posish_reordered_syscall4, @function
+    .type    posish_reordered_syscall5, @function
+    .type    posish_reordered_syscall6, @function
 
-    .globl   reordered_indirect_syscall0
-    .globl   reordered_indirect_syscall1
-    .globl   reordered_indirect_syscall1_noreturn
-    .globl   reordered_indirect_syscall2
-    .globl   reordered_indirect_syscall3
-    .globl   reordered_indirect_syscall4
-    .globl   reordered_indirect_syscall5
-    .globl   reordered_indirect_syscall6
+    .globl   posish_reordered_indirect_syscall0
+    .globl   posish_reordered_indirect_syscall1
+    .globl   posish_reordered_indirect_syscall1_noreturn
+    .globl   posish_reordered_indirect_syscall2
+    .globl   posish_reordered_indirect_syscall3
+    .globl   posish_reordered_indirect_syscall4
+    .globl   posish_reordered_indirect_syscall5
+    .globl   posish_reordered_indirect_syscall6
 
-    .hidden  reordered_indirect_syscall0
-    .hidden  reordered_indirect_syscall1
-    .hidden  reordered_indirect_syscall1_noreturn
-    .hidden  reordered_indirect_syscall2
-    .hidden  reordered_indirect_syscall3
-    .hidden  reordered_indirect_syscall4
-    .hidden  reordered_indirect_syscall5
-    .hidden  reordered_indirect_syscall6
+    .hidden  posish_reordered_indirect_syscall0
+    .hidden  posish_reordered_indirect_syscall1
+    .hidden  posish_reordered_indirect_syscall1_noreturn
+    .hidden  posish_reordered_indirect_syscall2
+    .hidden  posish_reordered_indirect_syscall3
+    .hidden  posish_reordered_indirect_syscall4
+    .hidden  posish_reordered_indirect_syscall5
+    .hidden  posish_reordered_indirect_syscall6
 
-    .type    reordered_indirect_syscall0, @function
-    .type    reordered_indirect_syscall1, @function
-    .type    reordered_indirect_syscall1_noreturn, @function
-    .type    reordered_indirect_syscall2, @function
-    .type    reordered_indirect_syscall3, @function
-    .type    reordered_indirect_syscall4, @function
-    .type    reordered_indirect_syscall5, @function
-    .type    reordered_indirect_syscall6, @function
+    .type    posish_reordered_indirect_syscall0, @function
+    .type    posish_reordered_indirect_syscall1, @function
+    .type    posish_reordered_indirect_syscall1_noreturn, @function
+    .type    posish_reordered_indirect_syscall2, @function
+    .type    posish_reordered_indirect_syscall3, @function
+    .type    posish_reordered_indirect_syscall4, @function
+    .type    posish_reordered_indirect_syscall5, @function
+    .type    posish_reordered_indirect_syscall6, @function
 
     // We can't describe calls to external asm as readonly, so just alias
     // these to their non-readonly counterparts.
-    .set     reordered_syscall0_readonly, reordered_syscall0
-    .set     reordered_syscall1_readonly, reordered_syscall1
-    .set     reordered_syscall2_readonly, reordered_syscall2
-    .set     reordered_syscall3_readonly, reordered_syscall3
-    .set     reordered_syscall4_readonly, reordered_syscall4
-    .set     reordered_syscall5_readonly, reordered_syscall5
-    .set     reordered_syscall6_readonly, reordered_syscall6
+    .set     posish_reordered_syscall0_readonly, posish_reordered_syscall0
+    .set     posish_reordered_syscall1_readonly, posish_reordered_syscall1
+    .set     posish_reordered_syscall2_readonly, posish_reordered_syscall2
+    .set     posish_reordered_syscall3_readonly, posish_reordered_syscall3
+    .set     posish_reordered_syscall4_readonly, posish_reordered_syscall4
+    .set     posish_reordered_syscall5_readonly, posish_reordered_syscall5
+    .set     posish_reordered_syscall6_readonly, posish_reordered_syscall6
 
-    .globl   reordered_syscall0_readonly
-    .globl   reordered_syscall1_readonly
-    .globl   reordered_syscall2_readonly
-    .globl   reordered_syscall3_readonly
-    .globl   reordered_syscall4_readonly
-    .globl   reordered_syscall5_readonly
-    .globl   reordered_syscall6_readonly
+    .globl   posish_reordered_syscall0_readonly
+    .globl   posish_reordered_syscall1_readonly
+    .globl   posish_reordered_syscall2_readonly
+    .globl   posish_reordered_syscall3_readonly
+    .globl   posish_reordered_syscall4_readonly
+    .globl   posish_reordered_syscall5_readonly
+    .globl   posish_reordered_syscall6_readonly
 
-    .hidden  reordered_syscall0_readonly
-    .hidden  reordered_syscall1_readonly
-    .hidden  reordered_syscall2_readonly
-    .hidden  reordered_syscall3_readonly
-    .hidden  reordered_syscall4_readonly
-    .hidden  reordered_syscall5_readonly
-    .hidden  reordered_syscall6_readonly
+    .hidden  posish_reordered_syscall0_readonly
+    .hidden  posish_reordered_syscall1_readonly
+    .hidden  posish_reordered_syscall2_readonly
+    .hidden  posish_reordered_syscall3_readonly
+    .hidden  posish_reordered_syscall4_readonly
+    .hidden  posish_reordered_syscall5_readonly
+    .hidden  posish_reordered_syscall6_readonly
 
-    .globl   int_0x80
+    .globl   posish_int_0x80
 
-    .hidden  int_0x80
+    .hidden  posish_int_0x80
 
-    .type    int_0x80, @function
+    .type    posish_int_0x80, @function
 
     .section .note.GNU-stack,"",@progbits
