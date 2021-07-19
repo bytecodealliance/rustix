@@ -8,11 +8,11 @@
 
 use crate::{
     fs::{cwd, fstat, fstatfs, major, openat, renameat, Mode, OFlags, Stat, PROC_SUPER_MAGIC},
-    io,
+    io::{self, OwnedFd},
     path::DecInt,
     process::{getgid, getpid, getuid},
 };
-use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd};
 use once_cell::sync::Lazy;
 use std::path::Path;
 
@@ -143,7 +143,7 @@ pub fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     static PROC: Lazy<io::Result<(OwnedFd, Stat)>> = Lazy::new(|| {
         let oflags =
             OFlags::NOFOLLOW | OFlags::PATH | OFlags::DIRECTORY | OFlags::CLOEXEC | OFlags::NOCTTY;
-        let proc = openat(&cwd(), "/proc", oflags, Mode::empty())?;
+        let proc: OwnedFd = openat(&cwd(), "/proc", oflags, Mode::empty())?.into();
         let proc_stat = check_proc_dir(Subdir::Proc, proc.as_fd(), None, 0, 0)?;
 
         Ok((proc, proc_stat))
@@ -175,7 +175,7 @@ pub fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 
         // Open "/proc/self". Use our pid to compute the name rather than literally
         // using "self", as "self" is a symlink.
-        let proc_self = openat(&proc, DecInt::new(pid), oflags, Mode::empty())?;
+        let proc_self: OwnedFd = openat(&proc, DecInt::new(pid), oflags, Mode::empty())?.into();
         let proc_self_stat =
             check_proc_dir(Subdir::Pid, proc_self.as_fd(), Some(proc_stat), uid, gid)?;
 
@@ -208,7 +208,8 @@ pub fn proc_self_fd() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
             OFlags::NOFOLLOW | OFlags::PATH | OFlags::DIRECTORY | OFlags::CLOEXEC | OFlags::NOCTTY;
 
         // Open "/proc/self/fd".
-        let proc_self_fd = openat(&proc_self, Path::new("fd"), oflags, Mode::empty())?;
+        let proc_self_fd: OwnedFd =
+            openat(&proc_self, Path::new("fd"), oflags, Mode::empty())?.into();
         let proc_self_fd_stat = check_proc_dir(
             Subdir::Fd,
             proc_self_fd.as_fd(),

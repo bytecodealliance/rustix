@@ -13,7 +13,7 @@ use super::{
 };
 use crate::{
     as_mut_ptr, as_ptr, io,
-    io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
+    io::{AsRawFd, FromRawFd, RawFd},
 };
 use io_lifetimes::{BorrowedFd, OwnedFd};
 #[cfg(target_pointer_width = "64")]
@@ -81,12 +81,6 @@ pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> usize {
     // File descriptors are never negative on Linux, so use zero-extension
     // rather than sign-extension because it's a smaller instruction.
     fd.as_raw_fd() as c_uint as usize
-}
-
-#[inline]
-pub(super) fn owned_fd(fd: OwnedFd) -> usize {
-    // As above, use zero-extension rather than sign-extension.
-    fd.into_raw_fd() as c_uint as usize
 }
 
 #[inline]

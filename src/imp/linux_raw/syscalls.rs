@@ -25,8 +25,8 @@ use super::arch::choose::{
 use super::conv::opt_ref;
 use super::conv::{
     borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, dev_t, mode_as, oflags,
-    opt_c_str, opt_mut, out, owned_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd,
-    ret_usize, ret_void_star, slice_addr, slice_as_mut_ptr, socklen_t, void_star,
+    opt_c_str, opt_mut, out, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd, ret_usize,
+    ret_void_star, slice_addr, slice_as_mut_ptr, socklen_t, void_star,
 };
 use super::fs::{
     Access, Advice, AtFlags, FallocateFlags, FdFlags, MemfdFlags, Mode, OFlags, ResolveFlags,
@@ -46,6 +46,7 @@ use super::rand::GetRandomFlags;
 use super::time::ClockId;
 use super::{fs::Stat, time::Timespec};
 use crate::io;
+use crate::io::RawFd;
 use crate::time::NanosleepRelativeResult;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(not(any(target_arch = "riscv64")))]
@@ -151,10 +152,8 @@ pub(crate) fn exit_group(code: c_int) -> ! {
 }
 
 #[inline]
-pub(crate) fn close(fd: OwnedFd) {
-    unsafe {
-        let _ = syscall1_readonly(__NR_close, owned_fd(fd));
-    }
+pub(crate) unsafe fn close(raw_fd: RawFd) {
+    let _ = syscall1_readonly(__NR_close, raw_fd as isize as usize);
 }
 
 #[inline]
