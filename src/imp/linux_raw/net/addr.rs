@@ -1,6 +1,13 @@
+//! IPv4, IPv6, and Socket addresses.
+//!
+//! # Safety
+//!
+//! Linux's IPv6 type contains a union.
+#![allow(unsafe_code)]
+
 use super::AddressFamily;
 use crate::{io, path};
-use std::ffi::CString;
+use std::{ffi::CString, fmt};
 
 /// `struct in_addr`
 #[repr(transparent)]
@@ -9,12 +16,98 @@ use std::ffi::CString;
 pub struct Ipv4Addr(pub(crate) linux_raw_sys::general::in_addr);
 
 impl Ipv4Addr {
+    pub const BROADCAST: Self = Self::from_std(std::net::Ipv4Addr::BROADCAST);
+    pub const LOCALHOST: Self = Self::from_std(std::net::Ipv4Addr::LOCALHOST);
+    pub const UNSPECIFIED: Self = Self::from_std(std::net::Ipv4Addr::UNSPECIFIED);
+
     /// Construct a new IPv4 address from 4 octets.
     #[inline]
     pub const fn new(a: u8, b: u8, c: u8, d: u8) -> Self {
         Self(linux_raw_sys::general::in_addr {
             s_addr: u32::from_ne_bytes([a, b, c, d]),
         })
+    }
+
+    #[inline]
+    pub const fn from_std(std: std::net::Ipv4Addr) -> Self {
+        let raw: u32 = u32::from_be_bytes(std.octets());
+        Self(linux_raw_sys::general::in_addr {
+            s_addr: raw.to_be(),
+        })
+    }
+
+    #[inline]
+    pub const fn into_std(self) -> std::net::Ipv4Addr {
+        let octets = self.0.s_addr.to_ne_bytes();
+        std::net::Ipv4Addr::new(octets[0], octets[1], octets[2], octets[3])
+    }
+
+    #[inline]
+    pub const fn is_unspecified(&self) -> bool {
+        self.const_clone().into_std().is_unspecified()
+    }
+
+    #[inline]
+    pub const fn is_loopback(&self) -> bool {
+        self.const_clone().into_std().is_loopback()
+    }
+
+    #[inline]
+    pub const fn is_private(&self) -> bool {
+        self.const_clone().into_std().is_private()
+    }
+
+    #[inline]
+    pub const fn is_link_local(&self) -> bool {
+        self.const_clone().into_std().is_link_local()
+    }
+
+    #[inline]
+    pub const fn is_multicast(&self) -> bool {
+        self.const_clone().into_std().is_multicast()
+    }
+
+    #[inline]
+    pub const fn is_broadcast(&self) -> bool {
+        self.const_clone().into_std().is_broadcast()
+    }
+
+    #[inline]
+    pub const fn is_documentation(&self) -> bool {
+        self.const_clone().into_std().is_documentation()
+    }
+
+    #[inline]
+    pub const fn to_ipv6_compatible(&self) -> Ipv6Addr {
+        Ipv6Addr::from_std(self.const_clone().into_std().to_ipv6_compatible())
+    }
+
+    #[inline]
+    pub const fn to_ipv6_mapped(&self) -> Ipv6Addr {
+        Ipv6Addr::from_std(self.const_clone().into_std().to_ipv6_mapped())
+    }
+
+    #[inline]
+    pub const fn octets(&self) -> [u8; 4] {
+        // `s_addr` is already in big-endian format.
+        self.0.s_addr.to_ne_bytes()
+    }
+
+    #[inline]
+    const fn const_clone(&self) -> Self {
+        Self(self.0)
+    }
+}
+
+impl fmt::Display for Ipv4Addr {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.const_clone().into_std().fmt(fmt)
+    }
+}
+
+impl fmt::Debug for Ipv4Addr {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(self, fmt)
     }
 }
 
@@ -25,6 +118,9 @@ impl Ipv4Addr {
 pub struct Ipv6Addr(pub(crate) linux_raw_sys::general::in6_addr);
 
 impl Ipv6Addr {
+    pub const LOCALHOST: Self = Self::from_std(std::net::Ipv6Addr::LOCALHOST);
+    pub const UNSPECIFIED: Self = Self::from_std(std::net::Ipv6Addr::UNSPECIFIED);
+
     /// Construct a new IPv6 address from eight 16-bit segments.
     #[allow(clippy::many_single_char_names, clippy::too_many_arguments)]
     #[inline]
@@ -43,6 +139,130 @@ impl Ipv6Addr {
                 ],
             },
         })
+    }
+
+    #[inline]
+    pub const fn from_std(std: std::net::Ipv6Addr) -> Self {
+        Self(linux_raw_sys::general::in6_addr {
+            in6_u: linux_raw_sys::general::in6_addr__bindgen_ty_1 {
+                u6_addr8: std.octets(),
+            },
+        })
+    }
+
+    #[cfg(const_fn_union)]
+    #[inline]
+    pub const fn into_std(self) -> std::net::Ipv6Addr {
+        let segments = self.segments();
+        std::net::Ipv6Addr::new(
+            segments[0],
+            segments[1],
+            segments[2],
+            segments[3],
+            segments[4],
+            segments[5],
+            segments[6],
+            segments[7],
+        )
+    }
+
+    #[cfg(not(const_fn_union))]
+    #[inline]
+    pub fn into_std(self) -> std::net::Ipv6Addr {
+        let segments = self.segments();
+        std::net::Ipv6Addr::new(
+            segments[0],
+            segments[1],
+            segments[2],
+            segments[3],
+            segments[4],
+            segments[5],
+            segments[6],
+            segments[7],
+        )
+    }
+
+    #[cfg(const_fn_union)]
+    #[inline]
+    pub const fn is_unspecified(&self) -> bool {
+        self.const_clone().into_std().is_unspecified()
+    }
+
+    #[cfg(not(const_fn_union))]
+    #[inline]
+    pub fn is_unspecified(&self) -> bool {
+        self.const_clone().into_std().is_unspecified()
+    }
+
+    #[cfg(const_fn_union)]
+    #[inline]
+    pub const fn is_loopback(&self) -> bool {
+        self.const_clone().into_std().is_loopback()
+    }
+
+    #[cfg(not(const_fn_union))]
+    #[inline]
+    pub fn is_loopback(&self) -> bool {
+        self.const_clone().into_std().is_loopback()
+    }
+
+    #[cfg(const_fn_union)]
+    #[inline]
+    pub const fn to_ipv4(&self) -> Option<Ipv4Addr> {
+        match self.const_clone().into_std().to_ipv4() {
+            None => None,
+            Some(ipv4) => Some(Ipv4Addr::from_std(ipv4)),
+        }
+    }
+
+    #[cfg(not(const_fn_union))]
+    #[inline]
+    pub fn to_ipv4(&self) -> Option<Ipv4Addr> {
+        match self.const_clone().into_std().to_ipv4() {
+            None => None,
+            Some(ipv4) => Some(Ipv4Addr::from_std(ipv4)),
+        }
+    }
+
+    #[cfg(const_fn_union)]
+    #[inline]
+    pub const fn octets(&self) -> [u8; 16] {
+        unsafe { self.0.in6_u.u6_addr8 }
+    }
+
+    #[cfg(not(const_fn_union))]
+    #[inline]
+    pub fn octets(&self) -> [u8; 16] {
+        unsafe { self.0.in6_u.u6_addr8 }
+    }
+
+    #[cfg(const_fn_union)]
+    #[inline]
+    pub const fn segments(&self) -> [u16; 8] {
+        unsafe { self.0.in6_u.u6_addr16 }
+    }
+
+    #[cfg(not(const_fn_union))]
+    #[inline]
+    pub fn segments(&self) -> [u16; 8] {
+        unsafe { self.0.in6_u.u6_addr16 }
+    }
+
+    #[inline]
+    const fn const_clone(&self) -> Self {
+        Self(self.0)
+    }
+}
+
+impl fmt::Display for Ipv6Addr {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.const_clone().into_std().fmt(fmt)
+    }
+}
+
+impl fmt::Debug for Ipv6Addr {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(self, fmt)
     }
 }
 
@@ -82,6 +302,18 @@ impl SocketAddrV4 {
     #[inline]
     pub const fn port(&self) -> u16 {
         self.port
+    }
+}
+
+impl fmt::Display for SocketAddrV4 {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        std::net::SocketAddrV4::new(self.address().const_clone().into_std(), self.port()).fmt(fmt)
+    }
+}
+
+impl fmt::Debug for SocketAddrV4 {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(self, fmt)
     }
 }
 
@@ -145,6 +377,24 @@ impl SocketAddrV6 {
     }
 }
 
+impl fmt::Display for SocketAddrV6 {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        std::net::SocketAddrV6::new(
+            self.address().const_clone().into_std(),
+            self.port(),
+            self.flowinfo(),
+            self.scope_id(),
+        )
+        .fmt(fmt)
+    }
+}
+
+impl fmt::Debug for SocketAddrV6 {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(self, fmt)
+    }
+}
+
 /// `struct sockaddr_un`
 #[derive(Clone)]
 #[doc(alias = "sockaddr_un")]
@@ -190,6 +440,12 @@ impl SocketAddrUnix {
     }
 }
 
+impl fmt::Debug for SocketAddrUnix {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.path.fmt(fmt)
+    }
+}
+
 /// `struct sockaddr_storage`
 #[derive(Clone)]
 #[doc(alias = "sockaddr")]
@@ -211,6 +467,16 @@ impl SocketAddr {
             SocketAddr::V4(_) => AddressFamily::INET,
             SocketAddr::V6(_) => AddressFamily::INET6,
             SocketAddr::Unix(_) => AddressFamily::UNIX,
+        }
+    }
+}
+
+impl fmt::Debug for SocketAddr {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            SocketAddr::V4(v4) => v4.fmt(fmt),
+            SocketAddr::V6(v6) => v6.fmt(fmt),
+            SocketAddr::Unix(unix) => unix.fmt(fmt),
         }
     }
 }

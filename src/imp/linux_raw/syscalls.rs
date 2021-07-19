@@ -25,15 +25,15 @@ use super::arch::choose::{
 use super::conv::opt_ref;
 use super::conv::{
     borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, dev_t, mode_as, oflags,
-    opt_c_str, opt_mut, out, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd, ret_usize,
-    ret_void_star, slice_addr, slice_as_mut_ptr, socklen_t, void_star,
+    opt_c_str, opt_mut, out, raw_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd,
+    ret_usize, ret_void_star, slice_addr, slice_as_mut_ptr, socklen_t, void_star,
 };
 use super::fs::{
     Access, Advice, AtFlags, FallocateFlags, FdFlags, MemfdFlags, Mode, OFlags, ResolveFlags,
     StatFs, StatxFlags,
 };
 use super::io::{
-    DupFlags, EventfdFlags, MapFlags, PipeFlags, PollFd, ProtFlags, ReadWriteFlags,
+    epoll, DupFlags, EventfdFlags, MapFlags, PipeFlags, PollFd, ProtFlags, ReadWriteFlags,
     UserfaultfdFlags,
 };
 #[cfg(not(target_os = "wasi"))]
@@ -49,6 +49,10 @@ use crate::io;
 use crate::io::RawFd;
 use crate::time::NanosleepRelativeResult;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
+#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+use linux_raw_sys::general::__NR_epoll_pwait;
+#[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+use linux_raw_sys::general::__NR_epoll_wait;
 #[cfg(not(any(target_arch = "riscv64")))]
 use linux_raw_sys::general::__NR_renameat;
 #[cfg(any(target_arch = "riscv64"))]
@@ -77,21 +81,21 @@ use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::{
     general::{
         __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
-        __NR_exit_group, __NR_faccessat, __NR_fallocate, __NR_fchmod, __NR_fchmodat,
-        __NR_fdatasync, __NR_fsync, __NR_getcwd, __NR_getdents64, __NR_getpid, __NR_getppid,
-        __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_mknodat, __NR_munmap, __NR_nanosleep,
-        __NR_openat, __NR_pipe2, __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read,
-        __NR_readlinkat, __NR_readv, __NR_sched_yield, __NR_symlinkat, __NR_unlinkat,
-        __NR_utimensat, __NR_write, __NR_writev,
+        __NR_epoll_create1, __NR_epoll_ctl, __NR_exit_group, __NR_faccessat, __NR_fallocate,
+        __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_fsync, __NR_getcwd, __NR_getdents64,
+        __NR_getpid, __NR_getppid, __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_mknodat,
+        __NR_munmap, __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_pread64, __NR_preadv,
+        __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv, __NR_sched_yield,
+        __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
     },
     general::{
-        __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t, sockaddr, sockaddr_in,
-        sockaddr_in6, sockaddr_un, socklen_t,
+        __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event, sockaddr,
+        sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t,
     },
     general::{
-        AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD,
-        F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL, TCGETS, TIMER_ABSTIME,
-        TIOCGWINSZ,
+        AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD,
+        FIONBIO, FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN,
+        F_GETSIG, F_SETFD, F_SETFL, TCGETS, TIMER_ABSTIME, TIOCGWINSZ,
     },
     v5_11::{general::__NR_openat2, general::open_how},
     v5_4::{
@@ -2431,6 +2435,19 @@ pub(crate) fn ioctl_fionread(fd: BorrowedFd) -> io::Result<u64> {
 }
 
 #[inline]
+pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    unsafe {
+        let data = value as c_int;
+        ret(syscall3(
+            __NR_ioctl,
+            borrowed_fd(fd),
+            c_uint(FIONBIO),
+            by_ref(&data),
+        ))
+    }
+}
+
+#[inline]
 pub(crate) fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
     unsafe {
         let mut result = MaybeUninit::<Winsize>::uninit();
@@ -2760,4 +2777,80 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         }
     }
     Ok((read, write))
+}
+
+#[inline]
+pub(crate) fn epoll_create(flags: epoll::CreateFlags) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(syscall1(__NR_epoll_create1, c_uint(flags.bits()))) }
+}
+
+#[inline]
+pub(crate) unsafe fn epoll_add(
+    epfd: BorrowedFd<'_>,
+    fd: c_int,
+    event: &epoll_event,
+) -> io::Result<()> {
+    ret(syscall4(
+        __NR_epoll_ctl,
+        borrowed_fd(epfd),
+        c_uint(EPOLL_CTL_ADD),
+        raw_fd(fd),
+        by_ref(event),
+    ))
+}
+
+#[inline]
+pub(crate) unsafe fn epoll_mod(
+    epfd: BorrowedFd<'_>,
+    fd: c_int,
+    event: &epoll_event,
+) -> io::Result<()> {
+    ret(syscall4(
+        __NR_epoll_ctl,
+        borrowed_fd(epfd),
+        c_uint(EPOLL_CTL_MOD),
+        raw_fd(fd),
+        by_ref(event),
+    ))
+}
+
+#[inline]
+pub(crate) unsafe fn epoll_del(epfd: BorrowedFd<'_>, fd: c_int) -> io::Result<()> {
+    ret(syscall4(
+        __NR_epoll_ctl,
+        borrowed_fd(epfd),
+        c_uint(EPOLL_CTL_DEL),
+        raw_fd(fd),
+        0,
+    ))
+}
+
+#[inline]
+pub(crate) fn epoll_wait(
+    epfd: BorrowedFd<'_>,
+    events: *mut epoll_event,
+    num_events: usize,
+    timeout: c_int,
+) -> io::Result<usize> {
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+    unsafe {
+        ret_usize(syscall4(
+            __NR_epoll_wait,
+            borrowed_fd(epfd),
+            events as usize,
+            num_events,
+            c_int(timeout),
+        ))
+    }
+    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+    unsafe {
+        ret_usize(syscall5(
+            __NR_epoll_pwait,
+            borrowed_fd(epfd),
+            events as usize,
+            num_events,
+            c_int(timeout),
+            0,
+        ))
+    }
 }

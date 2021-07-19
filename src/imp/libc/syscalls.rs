@@ -921,6 +921,13 @@ pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
     }
 }
 
+pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    unsafe {
+        let data = value as c_int;
+        ret(libc::ioctl(borrowed_fd(fd), libc::FIONBIO, &data))
+    }
+}
+
 pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
     let res = unsafe { libc::isatty(borrowed_fd(fd)) };
     if res == 0 {

@@ -1,0 +1,443 @@
+//! epoll support.
+//!
+//! This is an experiment, and it isn't yet clear whether epoll is the right
+//! level of abstraction at which to introduce safety.
+
+use super::super::conv::{ret, ret_owned_fd, ret_u32};
+use crate::{
+    io,
+    io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
+};
+use bitflags::bitflags;
+use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+use std::{
+    convert::TryInto,
+    fmt,
+    marker::PhantomData,
+    ops::Deref,
+    os::raw::c_int,
+    ptr::{null, null_mut},
+};
+
+bitflags! {
+    /// `EPOLL_*` for use with [`Epoll::new`].
+    pub struct CreateFlags: c_int {
+        /// `EPOLL_CLOEXEC`
+        const CLOEXEC = libc::EPOLL_CLOEXEC;
+    }
+}
+
+bitflags! {
+    /// `EPOLL*` for use with [`Epoll::add`].
+    #[derive(Default)]
+    pub struct EventFlags: u32 {
+        /// `EPOLLIN`
+        const IN = libc::EPOLLIN as u32;
+
+        /// `EPOLLOUT`
+        const OUT = libc::EPOLLOUT as u32;
+
+        /// `EPOLLPRI`
+        const PRI = libc::EPOLLPRI as u32;
+
+        /// `EPOLLERR`
+        const ERR = libc::EPOLLERR as u32;
+
+        /// `EPOLLHUP`
+        const HUP = libc::EPOLLHUP as u32;
+
+        /// `EPOLLET`
+        const ET = libc::EPOLLET as u32;
+
+        /// `EPOLLONESHOT`
+        const ONESHOT = libc::EPOLLONESHOT as u32;
+
+        /// `EPOLLWAKEUP`
+        const WAKEUP = libc::EPOLLWAKEUP as u32;
+
+        /// `EPOLLEXCLUSIVE`
+        #[cfg(not(target_os = "android"))]
+        const EXCLUSIVE = libc::EPOLLEXCLUSIVE as u32;
+    }
+}
+
+/// A reference to a `T`.
+pub struct Ref<'a, T> {
+    t: T,
+    _phantom: PhantomData<&'a T>,
+}
+
+impl<'a, T> Ref<'a, T> {
+    #[inline]
+    fn new(t: T) -> Self {
+        Self {
+            t,
+            _phantom: PhantomData,
+        }
+    }
+
+    #[inline]
+    fn consume(self) -> T {
+        self.t
+    }
+}
+
+impl<'a, T> Deref for Ref<'a, T> {
+    type Target = T;
+
+    #[inline]
+    fn deref(&self) -> &T {
+        &self.t
+    }
+}
+
+impl<'a, T: fmt::Debug> fmt::Debug for Ref<'a, T> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.t.fmt(fmt)
+    }
+}
+
+/// A trait for data stored within an [`Epoll`] instance.
+pub trait Context {
+    /// The type of an element owned by this context.
+    type Data;
+
+    /// The type of a value used to refer to an element owned by this context.
+    type Target: AsFd;
+
+    /// Assume ownership of `data`, and returning a `Target`.
+    fn acquire<'call>(&self, data: Self::Data) -> Ref<'call, Self::Target>;
+
+    /// Encode `target` as a `u64`. The only requirement on this value is that
+    /// it be decodable by `decode`.
+    fn encode(&self, target: Ref<'_, Self::Target>) -> u64;
+
+    /// Decode `raw`, which is a value encoded by `encode`, into a `Target`.
+    ///
+    /// # Safety
+    ///
+    /// `raw` must be a `u64` value returned from `encode`, from the same
+    /// context, and within the context's lifetime.
+    unsafe fn decode<'call>(&self, raw: u64) -> Ref<'call, Self::Target>;
+
+    /// Release ownership of the value refered to by `target` and return it.
+    fn release(&self, target: Ref<'_, Self::Target>) -> Self::Data;
+}
+
+/// A type implementing [`Context`] where the `Data` type is `BorrowedFd<'a>`.
+pub struct Borrowing<'a> {
+    _phantom: PhantomData<BorrowedFd<'a>>,
+}
+
+impl<'a> Context for Borrowing<'a> {
+    type Data = BorrowedFd<'a>;
+    type Target = BorrowedFd<'a>;
+
+    #[inline]
+    fn acquire<'call>(&self, data: Self::Data) -> Ref<'call, Self::Target> {
+        Ref::new(data)
+    }
+
+    #[inline]
+    fn encode(&self, target: Ref<'_, Self::Target>) -> u64 {
+        target.as_raw_fd() as u64
+    }
+
+    #[inline]
+    unsafe fn decode<'call>(&self, raw: u64) -> Ref<'call, Self::Target> {
+        Ref::new(BorrowedFd::<'a>::borrow_raw_fd(raw as RawFd))
+    }
+
+    #[inline]
+    fn release(&self, target: Ref<'_, Self::Target>) -> Self::Data {
+        target.consume()
+    }
+}
+
+/// A type implementing [`Context`] where the `Data` type is `T`, a type
+/// implementing `IntoFd` and `FromFd`.
+///
+/// This may be used with [`OwnedFd`], or higher-level types like
+/// [`std::fs::File`] or [`std::net::TcpStream`].
+pub struct Owning<'context, T: IntoFd + FromFd> {
+    _phantom: PhantomData<&'context T>,
+}
+
+impl<'context, T: IntoFd + FromFd> Owning<'context, T> {
+    /// Creates a new empty `Owning`.
+    #[inline]
+    pub fn new() -> Self {
+        Self {
+            _phantom: PhantomData,
+        }
+    }
+}
+
+impl<'context, T: AsFd + IntoFd + FromFd> Context for Owning<'context, T> {
+    type Data = T;
+    type Target = BorrowedFd<'context>;
+
+    #[inline]
+    fn acquire<'call>(&self, data: Self::Data) -> Ref<'call, Self::Target> {
+        let raw_fd = data.into_fd().into_raw_fd();
+        // Safety: `epoll` will assign ownership of the file descriptor to the
+        // kernel epoll object. We use `IntoFd`+`IntoRawFd` to consume the
+        // `Data` and extract the raw file descriptor and then "borrow" it
+        // with `borrow_raw_fd` knowing that the borrow won't outlive the
+        // kernel epoll object.
+        unsafe { Ref::new(BorrowedFd::<'context>::borrow_raw_fd(raw_fd)) }
+    }
+
+    #[inline]
+    fn encode(&self, target: Ref<'_, Self::Target>) -> u64 {
+        target.as_fd().as_raw_fd() as u64
+    }
+
+    #[inline]
+    unsafe fn decode<'call>(&self, raw: u64) -> Ref<'call, Self::Target> {
+        Ref::new(BorrowedFd::<'context>::borrow_raw_fd(raw as RawFd))
+    }
+
+    #[inline]
+    fn release(&self, target: Ref<'_, Self::Target>) -> Self::Data {
+        // The file descriptor was held by the kernel epoll object and is now
+        // being released, so we can create a new `OwnedFd` that assumes
+        // ownership.
+        let raw_fd = target.consume().as_raw_fd();
+        unsafe { T::from_fd(OwnedFd::from_raw_fd(raw_fd)) }
+    }
+}
+
+/// An "epoll", an interface to an OS object allowing one to repeatedly wait
+/// for events from a set of file descriptors efficiently.
+pub struct Epoll<Context: self::Context> {
+    epoll_fd: OwnedFd,
+    context: Context,
+}
+
+impl<Context: self::Context> Epoll<Context> {
+    /// `epoll_create1(flags)`—Creates a new `Epoll`.
+    ///
+    /// Use the [`CreateFlags::CLOEXEC`] flag to prevent the resulting file
+    /// descriptor from being implicity passed across `exec` boundaries.
+    #[inline]
+    #[doc(alias = "epoll_create1")]
+    pub fn new(flags: CreateFlags, context: Context) -> io::Result<Self> {
+        // Safety: We're calling `epoll_create1` via FFI and we know how it
+        // behaves.
+        unsafe {
+            Ok(Self {
+                epoll_fd: ret_owned_fd(libc::epoll_create1(flags.bits()))?,
+                context,
+            })
+        }
+    }
+
+    /// `epoll_ctl(self, EPOLL_CTL_ADD, fd, event)`—Adds an element to an
+    /// `Epoll`.
+    ///
+    /// This registers interest in any of the events set in `events` occuring
+    /// on the file descriptor associated with `data`.
+    #[doc(alias = "epoll_ctl")]
+    pub fn add<'call>(
+        &'call self,
+        data: Context::Data,
+        event_flags: EventFlags,
+    ) -> io::Result<Ref<'call, Context::Target>> {
+        // Safety: We're calling `epoll_ctl` via FFI and we know how it
+        // behaves.
+        unsafe {
+            let target = self.context.acquire(data);
+            let raw_fd = target.as_fd().as_raw_fd();
+            let encoded = self.context.encode(target);
+            ret(libc::epoll_ctl(
+                self.epoll_fd.as_raw_fd(),
+                libc::EPOLL_CTL_ADD,
+                raw_fd,
+                &mut libc::epoll_event {
+                    events: event_flags.bits(),
+                    r#u64: encoded,
+                },
+            ))?;
+            Ok(self.context.decode(encoded))
+        }
+    }
+
+    /// `epoll_ctl(self, EPOLL_CTL_MOD, fd, event)`—Modifies an element in
+    /// this `Epoll`.
+    ///
+    /// This sets the events of interest with `target` to `events`.
+    #[doc(alias = "epoll_ctl")]
+    pub fn mod_(
+        &self,
+        target: Ref<'_, Context::Target>,
+        event_flags: EventFlags,
+    ) -> io::Result<()> {
+        let raw_fd = target.as_fd().as_raw_fd();
+        let encoded = self.context.encode(target);
+        // Safety: We're calling `epoll_ctl` via FFI and we know how it
+        // behaves.
+        unsafe {
+            ret(libc::epoll_ctl(
+                self.epoll_fd.as_raw_fd(),
+                libc::EPOLL_CTL_MOD,
+                raw_fd,
+                &mut libc::epoll_event {
+                    events: event_flags.bits(),
+                    r#u64: encoded,
+                },
+            ))
+        }
+    }
+
+    /// `epoll_ctl(self, EPOLL_CTL_DEL, fd, NULL)`—Removes an element in
+    /// this `Epoll`.
+    ///
+    /// This also returns the owning `Data`.
+    #[doc(alias = "epoll_ctl")]
+    pub fn del(&self, target: Ref<'_, Context::Target>) -> io::Result<Context::Data> {
+        // Safety: We're calling `epoll_ctl` via FFI and we know how it
+        // behaves.
+        unsafe {
+            let raw_fd = target.as_fd().as_raw_fd();
+            ret(libc::epoll_ctl(
+                self.epoll_fd.as_raw_fd(),
+                libc::EPOLL_CTL_DEL,
+                raw_fd,
+                null_mut(),
+            ))?;
+        }
+        Ok(self.context.release(target))
+    }
+
+    /// `epoll_wait(self, events, timeout)`—Waits for registered events of
+    /// interest.
+    ///
+    /// For each event of interest, an element is written to `events`. On
+    /// success, this returns the number of written elements.
+    #[doc(alias = "epoll_wait")]
+    pub fn wait<'context>(
+        &'context self,
+        event_list: &mut EventVec<'context, Context>,
+        timeout: c_int,
+    ) -> io::Result<()> {
+        // Safety: We're calling `epoll_wait` via FFI and we know how it
+        // behaves.
+        unsafe {
+            event_list.events.set_len(0);
+            let nfds = ret_u32(libc::epoll_wait(
+                self.epoll_fd.as_raw_fd(),
+                event_list.events.as_mut_ptr().cast::<libc::epoll_event>(),
+                event_list.events.capacity().try_into().unwrap_or(i32::MAX),
+                timeout,
+            ))?;
+            event_list.events.set_len(nfds as usize);
+            event_list.context = &self.context;
+        }
+
+        Ok(())
+    }
+}
+
+pub struct Iter<'context, Context: self::Context> {
+    iter: std::slice::Iter<'context, Event>,
+    context: *const Context,
+    _phantom: PhantomData<&'context Context>,
+}
+
+impl<'context, Context: self::Context> Iterator for Iter<'context, Context> {
+    type Item = (EventFlags, Ref<'context, Context::Target>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // Safety: `self.context` is guaranteed to be valid because we hold
+        // `'context` for it. And we know this event is associated with this
+        // context because `wait` sets both.
+        self.iter.next().map(|event| {
+            (event.event_flags, unsafe {
+                (*self.context).decode(event.encoded)
+            })
+        })
+    }
+}
+
+/// A record of an event that occurred.
+#[repr(C)]
+#[cfg_attr(
+    any(
+        all(
+            target_arch = "x86",
+            not(target_env = "musl"),
+            not(target_os = "android")
+        ),
+        target_arch = "x86_64"
+    ),
+    repr(packed)
+)]
+struct Event {
+    // Match the layout of `libc::epoll_event`. We just use a `u64` instead of
+    // the full union; `Context` implementations will simply need to deal with
+    // casting the value into and out of the `u64` themselves.
+    event_flags: EventFlags,
+    encoded: u64,
+}
+
+pub struct EventVec<'context, Context: self::Context> {
+    events: Vec<Event>,
+    context: *const Context,
+    _phantom: PhantomData<&'context Context>,
+}
+
+impl<'context, Context: self::Context> EventVec<'context, Context> {
+    #[inline]
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            events: Vec::with_capacity(capacity),
+            context: null(),
+            _phantom: PhantomData,
+        }
+    }
+
+    #[inline]
+    pub fn capacity(&self) -> usize {
+        self.events.capacity()
+    }
+
+    #[inline]
+    pub fn reserve(&mut self, additional: usize) {
+        self.events.reserve(additional);
+    }
+
+    #[inline]
+    pub fn reserve_exact(&mut self, additional: usize) {
+        self.events.reserve_exact(additional);
+    }
+
+    #[inline]
+    pub fn clear(&mut self) {
+        self.events.clear();
+    }
+
+    #[inline]
+    pub fn shrink_to_fit(&mut self) {
+        self.events.shrink_to_fit();
+    }
+
+    #[inline]
+    pub fn iter(&self) -> Iter<'_, Context> {
+        Iter {
+            iter: self.events.iter(),
+            context: self.context,
+            _phantom: PhantomData,
+        }
+    }
+}
+
+impl<'context, Context: self::Context> IntoIterator for &'context EventVec<'context, Context> {
+    type IntoIter = Iter<'context, Context>;
+    type Item = (EventFlags, Ref<'context, Context::Target>);
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
