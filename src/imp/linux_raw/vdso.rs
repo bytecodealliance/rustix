@@ -292,7 +292,7 @@ fn init_from_proc_self_auxv() -> Option<Vdso> {
     )
     .ok()?;
 
-    let mut auxv_bytes = Vec::new();
+    let mut auxv_bytes = Vec::with_capacity(40 * size_of::<usize>());
     auxv.as_filelike_view::<File>()
         .read_to_end(&mut auxv_bytes)
         .ok()?;
