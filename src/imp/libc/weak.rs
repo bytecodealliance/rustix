@@ -1,6 +1,6 @@
 // Implementation derived from `weak` in Rust's
 // library/std/src/sys/unix/weak.rs at revision
-// 108e90ca78f052c0c1c49c42a22c85620be19712.
+// fd0cb0cdc21dd9c06025277d772108f8d42cb25f.
 
 //! Support for "weak linkage" to symbols on Unix
 //!
@@ -29,7 +29,7 @@
 use std::{
     ffi::CStr,
     marker, mem,
-    sync::atomic::{AtomicUsize, Ordering},
+    sync::atomic::{self, AtomicUsize, Ordering},
 };
 
 macro_rules! weak {
@@ -58,13 +58,47 @@ impl<F> Weak<F> {
     pub(crate) fn get(&self) -> Option<F> {
         assert_eq!(mem::size_of::<F>(), mem::size_of::<usize>());
         unsafe {
-            if self.addr.load(Ordering::SeqCst) == 1 {
-                self.addr.store(fetch(self.name), Ordering::SeqCst);
-            }
-            match self.addr.load(Ordering::SeqCst) {
+            // Relaxed is fine here because we fence before reading through the
+            // pointer (see the comment below).
+            match self.addr.load(Ordering::Relaxed) {
+                1 => self.initialize(),
                 0 => None,
-                addr => Some(mem::transmute_copy::<usize, F>(&addr)),
+                addr => {
+                    let func = mem::transmute_copy::<usize, F>(&addr);
+                    // The caller is presumably going to read through this value
+                    // (by calling the function we've dlsymed). This means we'd
+                    // need to have loaded it with at least C11's consume
+                    // ordering in order to be guaranteed that the data we read
+                    // from the pointer isn't from before the pointer was
+                    // stored. Rust has no equivalent to memory_order_consume,
+                    // so we use an acquire fence (sorry, ARM).
+                    //
+                    // Now, in practice this likely isn't needed even on CPUs
+                    // where relaxed and consume mean different things. The
+                    // symbols we're loading are probably present (or not) at
+                    // init, and even if they aren't the runtime dynamic loader
+                    // is extremely likely have sufficient barriers internally
+                    // (possibly implicitly, for example the ones provided by
+                    // invoking `mprotect`).
+                    //
+                    // That said, none of that's *guaranteed*, and so we fence.
+                    atomic::fence(Ordering::Acquire);
+                    Some(func)
+                }
             }
+        }
+    }
+
+    // Cold because it should only happen during first-time initalization.
+    #[cold]
+    unsafe fn initialize(&self) -> Option<F> {
+        let val = fetch(self.name);
+        // This synchronizes with the acquire fence in `get`.
+        self.addr.store(val, Ordering::Release);
+
+        match val {
+            0 => None,
+            addr => Some(mem::transmute_copy::<usize, F>(&addr)),
         }
     }
 }
@@ -114,6 +148,8 @@ macro_rules! weakcall {
         $vis unsafe fn $name($($arg_name: $t),*) -> $ret {
             weak! { fn $name($($t),*) -> $ret }
 
+            // Use a weak symbol from libc when possible, allowing `LD_PRELOAD`
+            // interposition, but if it's not found just fail.
             if let Some(fun) = $name.get() {
                 fun($($arg_name),*)
             } else {
