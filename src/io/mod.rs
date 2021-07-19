@@ -1,11 +1,15 @@
 //! I/O operations.
 
+#![allow(unsafe_code)]
+
 use crate::imp;
 #[cfg(not(target_os = "wasi"))]
 use imp::io::Tcflag;
 
+#[allow(unused_imports)]
 #[cfg(unix)]
 pub(crate) use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+#[allow(unused_imports)]
 #[cfg(target_os = "wasi")]
 pub(crate) use std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 
@@ -16,6 +20,7 @@ mod fd;
 mod ioctl;
 #[cfg(not(target_os = "wasi"))]
 mod mmap;
+mod owned_fd;
 #[cfg(not(target_os = "wasi"))]
 mod pipe;
 mod poll;
@@ -33,9 +38,9 @@ pub use eventfd::{eventfd, EventfdFlags};
 pub use fd::ioctl_fionread;
 #[cfg(not(target_os = "redox"))]
 pub use fd::is_read_write;
-pub use fd::isatty;
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 pub use fd::ttyname;
+pub use fd::{close, isatty};
 #[cfg(not(target_os = "wasi"))]
 pub use fd::{dup, dup2, dup2_with, DupFlags};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
@@ -44,6 +49,7 @@ pub use ioctl::ioctl_fioclex;
 pub use ioctl::{ioctl_tcgets, ioctl_tiocgwinsz};
 #[cfg(not(target_os = "wasi"))]
 pub use mmap::{mmap, munmap, MapFlags, ProtFlags};
+pub use owned_fd::OwnedFd;
 #[cfg(not(target_os = "wasi"))]
 pub use pipe::pipe;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]

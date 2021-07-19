@@ -80,7 +80,10 @@ use super::{
     io::ReadWriteFlags,
     offset::{libc_preadv2, libc_pwritev2},
 };
-use crate::{as_ptr, io};
+use crate::{
+    as_ptr,
+    io::{self, RawFd},
+};
 use errno::errno;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
@@ -302,6 +305,10 @@ fn query_max_iov() -> usize {
 #[inline]
 fn max_iov() -> usize {
     16 // The minimum value required by POSIX.
+}
+
+pub(crate) unsafe fn close(raw_fd: RawFd) {
+    let _ = libc::close(raw_fd as c_int);
 }
 
 #[cfg(not(target_os = "redox"))]

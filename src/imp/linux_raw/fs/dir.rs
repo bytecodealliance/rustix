@@ -32,14 +32,12 @@ impl Dir {
         Self::_from(fd)
     }
 
+    #[inline]
     fn _from(fd: OwnedFd) -> io::Result<Self> {
-        // Buffer size chosen by wild guess.
-        let buf = vec![0; 1024];
-        let pos = buf.len();
         Ok(Self {
             fd,
-            buf,
-            pos,
+            buf: Vec::new(),
+            pos: 0,
             next: None,
         })
     }
@@ -141,7 +139,9 @@ impl Dir {
     }
 
     fn read_more(&mut self) -> Option<io::Result<()>> {
-        self.buf.resize(self.buf.capacity() + 1, 0);
+        // Capacity increment currently chosen by wild guess.
+        self.buf
+            .resize(self.buf.capacity() + 32 * size_of::<linux_dirent64>(), 0);
         self.pos = 0;
         let nread = match super::super::syscalls::getdents(self.fd.as_fd(), &mut self.buf) {
             Ok(nread) => nread,

@@ -15,7 +15,10 @@
 #![allow(non_upper_case_globals)]
 
 use super::fs::{Mode, OFlags};
-use crate::{fs::openat, io::proc_self};
+use crate::{
+    fs::openat,
+    io::{proc_self, OwnedFd},
+};
 use io_lifetimes::AsFilelike;
 use std::{
     ffi::CStr,
@@ -284,13 +287,15 @@ unsafe fn init_from_auxv(auxv: *const u8) -> Option<Vdso> {
 }
 
 fn init_from_proc_self_auxv() -> Option<Vdso> {
-    let auxv = openat(
+    let auxv: OwnedFd = match openat(
         &proc_self().ok()?.0,
         "auxv",
         OFlags::RDONLY | OFlags::CLOEXEC | OFlags::NOFOLLOW | OFlags::NOCTTY,
         Mode::empty(),
-    )
-    .ok()?;
+    ) {
+        Ok(file) => file.into(),
+        Err(_err) => return None,
+    };
 
     let mut auxv_bytes = Vec::with_capacity(40 * size_of::<usize>());
     auxv.as_filelike_view::<File>()
