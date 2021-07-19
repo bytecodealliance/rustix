@@ -49,7 +49,6 @@ pub fn clock_gettime(id: ClockId) -> Timespec {
 /// [Linux]: https://man7.org/linux/man-pages/man2/clock_gettime.2.html
 #[cfg(any(linux_raw, all(libc, not(target_os = "wasi"))))]
 #[inline]
-#[must_use]
 pub fn clock_gettime_dynamic(id: DynamicClockId) -> io::Result<Timespec> {
     imp::syscalls::clock_gettime_dynamic(id)
 }
@@ -77,7 +76,6 @@ pub fn clock_gettime_dynamic(id: DynamicClockId) -> io::Result<Timespec> {
     target_os = "wasi",
 )))))]
 #[inline]
-#[must_use]
 pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRelativeResult {
     imp::syscalls::clock_nanosleep_relative(id, request)
 }
@@ -120,13 +118,13 @@ pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::Result<(
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/nanosleep.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/nanosleep.2.html
 #[inline]
-#[must_use]
 pub fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
     imp::syscalls::nanosleep(request)
 }
 
 /// A return type for `nanosleep` and `clock_nanosleep_relative`.
 #[derive(Debug, Clone)]
+#[must_use]
 pub enum NanosleepRelativeResult {
     /// The sleep completed normally.
     Ok,
