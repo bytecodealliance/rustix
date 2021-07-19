@@ -49,6 +49,10 @@ use crate::io;
 use crate::io::RawFd;
 use crate::time::NanosleepRelativeResult;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
+#[cfg(target_arch = "riscv64")]
+use linux_raw_sys::general::__NR_epoll_pwait;
+#[cfg(not(target_arch = "riscv64"))]
+use linux_raw_sys::general::__NR_epoll_wait;
 #[cfg(not(any(target_arch = "riscv64")))]
 use linux_raw_sys::general::__NR_renameat;
 #[cfg(any(target_arch = "riscv64"))]
@@ -77,12 +81,12 @@ use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::{
     general::{
         __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
-        __NR_epoll_create1, __NR_epoll_ctl, __NR_epoll_wait, __NR_exit_group, __NR_faccessat,
-        __NR_fallocate, __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_fsync, __NR_getcwd,
-        __NR_getdents64, __NR_getpid, __NR_getppid, __NR_ioctl, __NR_linkat, __NR_mkdirat,
-        __NR_mknodat, __NR_munmap, __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_pread64,
-        __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv,
-        __NR_sched_yield, __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
+        __NR_epoll_create1, __NR_epoll_ctl, __NR_exit_group, __NR_faccessat, __NR_fallocate,
+        __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_fsync, __NR_getcwd, __NR_getdents64,
+        __NR_getpid, __NR_getppid, __NR_ioctl, __NR_linkat, __NR_mkdirat, __NR_mknodat,
+        __NR_munmap, __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_pread64, __NR_preadv,
+        __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv, __NR_sched_yield,
+        __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
     },
     general::{
         __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event, sockaddr,
@@ -2828,6 +2832,7 @@ pub(crate) fn epoll_wait(
     num_events: usize,
     timeout: c_int,
 ) -> io::Result<usize> {
+    #[cfg(not(target_arch = "riscv64"))]
     unsafe {
         ret_usize(syscall4(
             __NR_epoll_wait,
@@ -2835,6 +2840,17 @@ pub(crate) fn epoll_wait(
             events as usize,
             num_events,
             c_int(timeout),
+        ))
+    }
+    #[cfg(target_arch = "riscv64")]
+    unsafe {
+        ret_usize(syscall5(
+            __NR_epoll_pwait,
+            borrowed_fd(epfd),
+            events as usize,
+            num_events,
+            c_int(timeout),
+            0,
         ))
     }
 }
