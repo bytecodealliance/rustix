@@ -291,7 +291,7 @@ fn init_from_proc_self_auxv() -> Option<Vdso> {
     let auxv: OwnedFd = match openat(
         &proc_self().ok()?.0,
         cstr!("auxv"),
-        OFlags::RDONLY | OFlags::CLOEXEC | OFlags::NOFOLLOW | OFlags::NOCTTY,
+        OFlags::RDONLY | OFlags::CLOEXEC | OFlags::NOFOLLOW | OFlags::NOCTTY | OFlags::NOATIME,
         Mode::empty(),
     ) {
         Ok(file) => file.into(),

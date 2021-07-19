@@ -263,6 +263,12 @@ bitflags! {
                   target_os = "fuchsia",
                   target_os = "linux"))]
         const TMPFILE = libc::O_TMPFILE;
+
+        /// `O_NOATIME`
+        #[cfg(any(target_os = "android",
+                  target_os = "fuchsia",
+                  target_os = "linux"))]
+        const NOATIME = libc::O_NOATIME;
     }
 }
 

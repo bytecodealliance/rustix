@@ -141,8 +141,12 @@ fn is_mountpoint(file: BorrowedFd<'_>) -> io::Result<bool> {
 pub fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     #[allow(clippy::useless_conversion)]
     static PROC: Lazy<io::Result<(OwnedFd, Stat)>> = Lazy::new(|| {
-        let oflags =
-            OFlags::NOFOLLOW | OFlags::PATH | OFlags::DIRECTORY | OFlags::CLOEXEC | OFlags::NOCTTY;
+        let oflags = OFlags::NOFOLLOW
+            | OFlags::PATH
+            | OFlags::DIRECTORY
+            | OFlags::CLOEXEC
+            | OFlags::NOCTTY
+            | OFlags::NOATIME;
         let proc: OwnedFd = openat(&cwd(), cstr!("/proc"), oflags, Mode::empty())?.into();
         let proc_stat = check_proc_dir(Subdir::Proc, proc.as_fd(), None, 0, 0)?;
 
@@ -170,8 +174,12 @@ pub fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
         let (proc, proc_stat) = proc()?;
 
         let (uid, gid, pid) = (getuid(), getgid(), getpid());
-        let oflags =
-            OFlags::NOFOLLOW | OFlags::PATH | OFlags::DIRECTORY | OFlags::CLOEXEC | OFlags::NOCTTY;
+        let oflags = OFlags::NOFOLLOW
+            | OFlags::PATH
+            | OFlags::DIRECTORY
+            | OFlags::CLOEXEC
+            | OFlags::NOCTTY
+            | OFlags::NOATIME;
 
         // Open "/proc/self". Use our pid to compute the name rather than literally
         // using "self", as "self" is a symlink.
@@ -204,8 +212,12 @@ pub fn proc_self_fd() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
         let (_, proc_stat) = proc()?;
 
         let (proc_self, proc_self_stat) = proc_self()?;
-        let oflags =
-            OFlags::NOFOLLOW | OFlags::PATH | OFlags::DIRECTORY | OFlags::CLOEXEC | OFlags::NOCTTY;
+        let oflags = OFlags::NOFOLLOW
+            | OFlags::PATH
+            | OFlags::DIRECTORY
+            | OFlags::CLOEXEC
+            | OFlags::NOCTTY
+            | OFlags::NOATIME;
 
         // Open "/proc/self/fd".
         let proc_self_fd: OwnedFd = openat(&proc_self, cstr!("fd"), oflags, Mode::empty())?.into();

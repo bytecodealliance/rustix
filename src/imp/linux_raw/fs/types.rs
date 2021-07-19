@@ -202,6 +202,9 @@ bitflags! {
 
         /// `O_TMPFILE`
         const TMPFILE = linux_raw_sys::v5_4::general::O_TMPFILE;
+
+        /// `O_NOATIME`
+        const NOATIME = linux_raw_sys::general::O_NOATIME;
     }
 }
 
