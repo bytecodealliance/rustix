@@ -17,17 +17,15 @@
 use super::fs::{Mode, OFlags};
 use crate::{
     fs::openat,
-    io::{proc_self, OwnedFd},
+    io::{self, pread, proc_self, OwnedFd},
 };
 use cstr::cstr;
-use io_lifetimes::AsFilelike;
 use std::{
     ffi::CStr,
-    fs::File,
-    io::Read,
-    mem::size_of,
+    mem::{align_of, size_of},
     os::raw::{c_char, c_void},
     ptr::null,
+    slice,
 };
 
 pub(super) struct Vdso {
@@ -76,6 +74,9 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
         verdef: null(),
     };
 
+    if base == 0 || base % align_of::<Elf_Ehdr>() != 0 {
+        return None; // Invalid base pointer
+    }
     let hdr = &*(base as *const Elf_Ehdr);
     if hdr.e_ident[..SELFMAG] != ELFMAG {
         return None; // Wrong ELF magic
@@ -274,8 +275,11 @@ impl Vdso {
     }
 }
 
-unsafe fn init_from_auxv(auxv: *const u8) -> Option<Vdso> {
-    let elf_auxv = auxv.cast::<Elf_auxv_t>();
+// Find the `AT_SYSINFO_EHDR` in auxv records in memory. We don't currently
+// have direct access to the auxv records in memory, so we use /proc/self/auxv
+// instead.
+/*
+unsafe fn init_from_auxv(elf_auxv: *const Elf_auxv_t) -> Option<Vdso> {
     let mut i = 0;
     while (*elf_auxv.add(i)).a_type != AT_NULL {
         if (*elf_auxv.add(i)).a_type == AT_SYSINFO_EHDR {
@@ -286,7 +290,9 @@ unsafe fn init_from_auxv(auxv: *const u8) -> Option<Vdso> {
 
     None
 }
+*/
 
+// Find the `AT_SYSINFO_EHDR` in auxv records in /proc/self/auxv.
 fn init_from_proc_self_auxv() -> Option<Vdso> {
     let auxv: OwnedFd = match openat(
         &proc_self().ok()?.0,
@@ -298,15 +304,62 @@ fn init_from_proc_self_auxv() -> Option<Vdso> {
         Err(_err) => return None,
     };
 
-    let mut auxv_bytes = Vec::with_capacity(40 * size_of::<usize>());
-    auxv.as_filelike_view::<File>()
-        .read_to_end(&mut auxv_bytes)
-        .ok()?;
-    if auxv_bytes.len() % (size_of::<Elf_auxv_t>()) != 0 {
-        return None;
-    }
+    // A buffer for `Elf_auxv_t` records. We only need a few because the
+    // `AT_SYSINFO_EHDR` record is usually close to the front.
+    let mut buffer = [
+        Elf_auxv_t {
+            a_type: 0,
+            a_val: 0,
+        },
+        Elf_auxv_t {
+            a_type: 0,
+            a_val: 0,
+        },
+        Elf_auxv_t {
+            a_type: 0,
+            a_val: 0,
+        },
+        Elf_auxv_t {
+            a_type: 0,
+            a_val: 0,
+        },
+    ];
 
-    unsafe { init_from_auxv(auxv_bytes.as_ptr()) }
+    // Safety: Use `slice::from_raw_parts` to get a byte-slice view of `buffer`.
+    let byte_slice = unsafe {
+        slice::from_raw_parts_mut(
+            (&mut buffer as *mut Elf_auxv_t).cast::<u8>(),
+            buffer.len() * size_of::<Elf_auxv_t>(),
+        )
+    };
+
+    let mut offset = 0;
+    loop {
+        match pread(&auxv, byte_slice, offset) {
+            Ok(0) => return None,
+            Ok(n) => {
+                let elf_auxv_slice = &buffer[..n / size_of::<Elf_auxv_t>()];
+                for elf_auxv in elf_auxv_slice {
+                    match elf_auxv.a_type {
+                        AT_SYSINFO_EHDR => {
+                            // Safety: We were careful to ensure that we're
+                            // reading from actual procfs, and now we trust
+                            // that the `AT_SYSINFO_EHDR` record contains a
+                            // valid pointer value.
+                            unsafe {
+                                return init_from_sysinfo_ehdr(elf_auxv.a_val);
+                            }
+                        }
+                        AT_NULL => return None,
+                        _ => continue,
+                    }
+                }
+                offset += (elf_auxv_slice.len() * size_of::<Elf_auxv_t>()) as u64;
+            }
+            Err(io::Error::INTR) => continue,
+            Err(_err) => return None,
+        }
+    }
 }
 
 // ELF ABI
