@@ -1,7 +1,61 @@
 //! epoll support.
 //!
 //! This is an experiment, and it isn't yet clear whether epoll is the right
-//! level of abstraction at which to introduce safety.
+//! level of abstraction at which to introduce safety. But it works fairly well
+//! in simple examples 🙂.
+//!
+//! # Examples
+//!
+//! ```rust,no_run
+//! # fn main() -> std::io::Result<()> {
+//! use posish::io::{
+//!     epoll::{self, Epoll},
+//!     ioctl_fionbio, read, write,
+//! };
+//! use posish::net::{
+//!     accept, bind_v4, listen, socket, AddressFamily, Ipv4Addr, Protocol, SocketAddr,
+//!     SocketAddrV4, SocketType,
+//! };
+//! use std::os::unix::io::AsRawFd;
+//!
+//! // Create a socket and listen on it.
+//! let listen_sock = socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
+//! bind_v4(&listen_sock, &SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0))?;
+//! listen(&listen_sock, 1)?;
+//!
+//! // Create an epoll object. Using `Owning` here means the epoll object will
+//! // take ownership of the file descriptors registered with it.
+//! let epoll = Epoll::new(epoll::CreateFlags::CLOEXEC, epoll::Owning::new())?;
+//!
+//! // Remember the socket raw fd, which we use for comparisons only.
+//! let raw_listen_sock = listen_sock.as_raw_fd();
+//!
+//! // Register the socket with the epoll object.
+//! epoll.add(listen_sock, epoll::EventFlags::IN)?;
+//!
+//! // Process events.
+//! let mut event_list = epoll::EventVec::with_capacity(4);
+//! loop {
+//!     epoll.wait(&mut event_list, -1)?;
+//!     for (_event_flags, target) in &event_list {
+//!         if target.as_raw_fd() == raw_listen_sock {
+//!             // Accept a new connection, set it to non-blocking, and
+//!             // register to be notified when it's ready to write to.
+//!             let conn_sock = accept(&*target)?;
+//!             ioctl_fionbio(&conn_sock, true)?;
+//!             epoll
+//!                 .add(conn_sock, epoll::EventFlags::OUT | epoll::EventFlags::ET)
+//!                 ?;
+//!         } else {
+//!             // Write a message to the stream and then unregister it.
+//!             write(&*target, b"hello\n")?;
+//!             let _ = epoll.del(target)?;
+//!         }
+//!     }
+//! }
+//! # }
+//! ```
+
 #![allow(unsafe_code)]
 
 use super::super::syscalls::{epoll_add, epoll_create, epoll_del, epoll_mod, epoll_wait};
@@ -231,7 +285,7 @@ impl<Context: self::Context> Epoll<Context> {
         })
     }
 
-    /// `epoll_ctl(self, EPOLL_CTL_ADD, fd, event)`—Adds an element to an
+    /// `epoll_ctl(self, EPOLL_CTL_ADD, data, event)`—Adds an element to an
     /// `Epoll`.
     ///
     /// This registers interest in any of the events set in `events` occuring
@@ -260,7 +314,7 @@ impl<Context: self::Context> Epoll<Context> {
         }
     }
 
-    /// `epoll_ctl(self, EPOLL_CTL_MOD, fd, event)`—Modifies an element in
+    /// `epoll_ctl(self, EPOLL_CTL_MOD, target, event)`—Modifies an element in
     /// this `Epoll`.
     ///
     /// This sets the events of interest with `target` to `events`.
@@ -286,7 +340,7 @@ impl<Context: self::Context> Epoll<Context> {
         }
     }
 
-    /// `epoll_ctl(self, EPOLL_CTL_DEL, fd, NULL)`—Removes an element in
+    /// `epoll_ctl(self, EPOLL_CTL_DEL, target, NULL)`—Removes an element in
     /// this `Epoll`.
     ///
     /// This also returns the owning `Data`.
