@@ -593,6 +593,12 @@ pub enum FlockOperation {
     LockExclusive = libc::LOCK_EX,
     /// `LOCK_UN`
     Unlock = libc::LOCK_UN,
+    /// `LOCK_SH | LOCK_NB`
+    NonBlockingLockShared = libc::LOCK_SH | libc::LOCK_NB,
+    /// `LOCK_EX | LOCK_NB`
+    NonBlockingLockExclusive = libc::LOCK_EX | libc::LOCK_NB,
+    /// `LOCK_UN | LOCK_NB`
+    NonBlockingUnlock = libc::LOCK_UN | libc::LOCK_NB,
 }
 
 /// `struct stat` for use with [`statat`] and [`fstat`].

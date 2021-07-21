@@ -406,6 +406,12 @@ pub enum FlockOperation {
     LockExclusive = linux_raw_sys::general::LOCK_EX,
     /// `LOCK_UN`
     Unlock = linux_raw_sys::general::LOCK_UN,
+    /// `LOCK_SH | LOCK_NB`
+    NonBlockingLockShared = linux_raw_sys::general::LOCK_SH | linux_raw_sys::general::LOCK_NB,
+    /// `LOCK_EX | LOCK_NB`
+    NonBlockingLockExclusive = linux_raw_sys::general::LOCK_EX | linux_raw_sys::general::LOCK_NB,
+    /// `LOCK_UN | LOCK_NB`
+    NonBlockingUnlock = linux_raw_sys::general::LOCK_UN | linux_raw_sys::general::LOCK_NB,
 }
 
 /// `struct statfs` for use with [`fstatfs`].
