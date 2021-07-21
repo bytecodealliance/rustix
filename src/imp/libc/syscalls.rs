@@ -27,6 +27,8 @@ use super::fs::Advice;
 use super::fs::Dev;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))]
 use super::fs::FallocateFlags;
+#[cfg(not(target_os = "wasi"))]
+use super::fs::FlockOperation;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::fs::ResolveFlags;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
@@ -691,6 +693,11 @@ pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
             mode.bits(),
         ))
     }
+}
+
+#[cfg(not(target_os = "wasi"))]
+pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result<()> {
+    unsafe { ret(libc::flock(borrowed_fd(fd), operation as c_int)) }
 }
 
 pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {

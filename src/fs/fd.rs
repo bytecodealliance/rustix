@@ -3,11 +3,11 @@
 use crate::{imp, io};
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))]
 use imp::fs::FallocateFlags;
-#[cfg(not(target_os = "wasi"))]
-use imp::fs::Mode;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
 use imp::fs::StatFs;
+#[cfg(not(target_os = "wasi"))]
+use imp::fs::{FlockOperation, Mode};
 use imp::{fs::Stat, time::Timespec};
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::io::SeekFrom;
@@ -205,4 +205,17 @@ pub fn fdatasync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 pub fn ftruncate<Fd: AsFd>(fd: &Fd, length: u64) -> io::Result<()> {
     let fd = fd.as_fd();
     imp::syscalls::ftruncate(fd, length)
+}
+
+/// `flock(fd, operation)`—Acquire or release an advisory lock on an open file.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/flock.2.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn flock<Fd: AsFd>(fd: &Fd, operation: FlockOperation) -> io::Result<()> {
+    let fd = fd.as_fd();
+    imp::syscalls::flock(fd, operation)
 }

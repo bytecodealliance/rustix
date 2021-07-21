@@ -394,6 +394,20 @@ bitflags! {
     }
 }
 
+/// `LOCK_*` constants for use with [`flock`]
+///
+/// [`flock`]: crate::fs::flock
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[repr(u32)]
+pub enum FlockOperation {
+    /// `LOCK_SH`
+    LockShared = linux_raw_sys::general::LOCK_SH,
+    /// `LOCK_EX`
+    LockExclusive = linux_raw_sys::general::LOCK_EX,
+    /// `LOCK_UN`
+    Unlock = linux_raw_sys::general::LOCK_UN,
+}
+
 /// `struct statfs` for use with [`fstatfs`].
 ///
 /// [`fstatfs`]: crate::fs::fstatfs

@@ -580,6 +580,21 @@ bitflags! {
     }
 }
 
+/// `LOCK_*` constants for use with [`flock`]
+///
+/// [`flock`]: crate::fs::flock
+#[cfg(not(target_os = "wasi"))]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[repr(i32)]
+pub enum FlockOperation {
+    /// `LOCK_SH`
+    LockShared = libc::LOCK_SH,
+    /// `LOCK_EX`
+    LockExclusive = libc::LOCK_EX,
+    /// `LOCK_UN`
+    Unlock = libc::LOCK_UN,
+}
+
 /// `struct stat` for use with [`statat`] and [`fstat`].
 ///
 /// [`statat`]: crate::fs::statat

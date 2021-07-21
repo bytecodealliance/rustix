@@ -2,6 +2,8 @@
 
 mod fs {
     mod file;
+    #[cfg(not(target_os = "wasi"))]
+    mod flock;
     mod invalid_offset;
     mod long_paths;
     #[cfg(not(any(

@@ -109,13 +109,13 @@ pub use fcopyfile::{
 };
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))]
 pub use fd::fallocate;
-#[cfg(not(target_os = "wasi"))]
-pub use fd::fchmod;
 #[cfg(not(any(target_os = "macos", target_os = "ios", target_os = "redox")))]
 pub use fd::fdatasync;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
 pub use fd::fstatfs;
+#[cfg(not(target_os = "wasi"))]
+pub use fd::{fchmod, flock};
 pub use fd::{fstat, fsync, ftruncate, futimens, is_file_read_write, seek, tell};
 pub use file_type::FileType;
 #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -173,9 +173,9 @@ pub use imp::fs::FsWord;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub const PROC_SUPER_MAGIC: FsWord = imp::fs::PROC_SUPER_MAGIC;
 
-pub use imp::fs::RawMode;
-
-pub use imp::fs::Dev;
+#[cfg(not(target_os = "wasi"))]
+pub use imp::fs::FlockOperation;
+pub use imp::fs::{Dev, RawMode};
 
 /// Re-export types common to POSIX-ish platforms.
 #[cfg(unix)]
