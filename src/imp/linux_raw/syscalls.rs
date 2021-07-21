@@ -270,7 +270,8 @@ pub(crate) fn clock_getres(which_clock: ClockId) -> __kernel_timespec {
             out(&mut result),
         ))
         .or_else(|err| {
-            // See the comments in `clock_gettime` about emulation.
+            // See the comments in `posish_clock_gettime_via_syscall` about
+            // emulation.
             if err == io::Error::NOSYS {
                 let mut old_result = MaybeUninit::<__kernel_old_timespec>::uninit();
                 let res = ret(syscall2(
@@ -2202,7 +2203,8 @@ fn _utimensat(
             c_uint(flags.bits()),
         ))
         .or_else(|err| {
-            // See the comments in `clock_gettime` about emulation.
+            // See the comments in `posish_clock_gettime_via_syscall` about
+            // emulation.
             if err == io::Error::NOSYS {
                 let old_utimes = [
                     __kernel_old_timespec {
@@ -2268,7 +2270,8 @@ pub(crate) fn nanosleep(req: &__kernel_timespec) -> NanosleepRelativeResult {
             out(&mut rem),
         ))
         .or_else(|err| {
-            // See the comments in `clock_gettime` about emulation.
+            // See the comments in `posish_clock_gettime_via_syscall` about
+            // emulation.
             if err == io::Error::NOSYS {
                 let old_req = __kernel_old_timespec {
                     tv_sec: req.tv_sec.try_into().map_err(|_| io::Error(EINVAL as _))?,
@@ -2322,7 +2325,8 @@ pub(crate) fn clock_nanosleep_relative(
             out(&mut rem),
         ))
         .or_else(|err| {
-            // See the comments in `clock_gettime` about emulation.
+            // See the comments in `posish_clock_gettime_via_syscall` about
+            // emulation.
             if err == io::Error::NOSYS {
                 let old_req = __kernel_old_timespec {
                     tv_sec: req.tv_sec.try_into().map_err(|_| io::Error(EINVAL as _))?,
@@ -2380,7 +2384,8 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, req: &__kernel_timespec) -> 
             0usize,
         ))
         .or_else(|err| {
-            // See the comments in `clock_gettime` about emulation.
+            // See the comments in `posish_clock_gettime_via_syscall` about
+            // emulation.
             if err == io::Error::NOSYS {
                 let old_req = __kernel_old_timespec {
                     tv_sec: req.tv_sec.try_into().map_err(|_| io::Error(EINVAL as _))?,
