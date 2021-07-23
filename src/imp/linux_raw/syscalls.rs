@@ -1584,7 +1584,7 @@ pub(crate) fn shutdown(fd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> {
         ret(syscall2_readonly(
             __NR_socketcall,
             x86_sys(SYS_SHUTDOWN),
-            slice_addr(&[borrowed_fd(fd), c_uint(how as c_uint), 0, 0, 0, 0]),
+            slice_addr(&[borrowed_fd(fd), c_uint(how as c_uint)]),
         ))
     }
 }
@@ -2125,7 +2125,7 @@ pub(crate) fn listen(fd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
         ret(syscall2_readonly(
             __NR_socketcall,
             x86_sys(SYS_LISTEN),
-            slice_addr(&[borrowed_fd(fd), c_int(backlog), 0, 0, 0, 0]),
+            slice_addr(&[borrowed_fd(fd), c_int(backlog)]),
         ))
     }
 }
