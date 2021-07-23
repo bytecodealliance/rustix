@@ -2,6 +2,8 @@
 
 use super::AddressFamily;
 use crate::{io, path};
+use std::ffi::CString;
+use std::fmt;
 #[cfg(any(
     target_os = "netbsd",
     target_os = "macos",
@@ -10,7 +12,6 @@ use crate::{io, path};
     target_os = "openbsd"
 ))]
 use std::mem::size_of;
-use std::{ffi::CString, fmt};
 
 /// `struct in_addr`
 #[repr(transparent)]

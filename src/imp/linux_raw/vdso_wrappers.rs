@@ -9,12 +9,10 @@
 //! functions.
 #![allow(unsafe_code)]
 
-use super::{
-    arch::asm::syscall2,
-    conv::ret,
-    time::{ClockId, DynamicClockId, Timespec},
-    vdso,
-};
+use super::arch::asm::syscall2;
+use super::conv::ret;
+use super::time::{ClockId, DynamicClockId, Timespec};
+use super::vdso;
 use crate::io;
 use cstr::cstr;
 use linux_raw_sys::general::{__NR_clock_gettime, __kernel_clockid_t, __kernel_timespec};
@@ -22,11 +20,10 @@ use linux_raw_sys::general::{__NR_clock_gettime, __kernel_clockid_t, __kernel_ti
 use linux_raw_sys::{
     general::timespec as __kernel_old_timespec, v5_4::general::__NR_clock_gettime64,
 };
-use std::{
-    mem::{transmute, MaybeUninit},
-    os::raw::c_int,
-    sync::atomic::{AtomicUsize, Ordering::Relaxed},
-};
+use std::mem::{transmute, MaybeUninit};
+use std::os::raw::c_int;
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering::Relaxed;
 
 #[inline]
 pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
@@ -79,7 +76,8 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId) -> io::Result<T
 
 #[cfg(target_arch = "x86")]
 pub(crate) mod x86_via_vdso {
-    use super::{super::arch::asm, transmute, Relaxed};
+    use super::super::arch::asm;
+    use super::{transmute, Relaxed};
 
     #[inline]
     #[must_use]
@@ -177,13 +175,12 @@ pub(crate) mod x86_via_vdso {
 
     // With the indirect call, it isn't meaningful to do a separate
     // `_readonly` optimization.
-    pub(crate) use syscall0 as syscall0_readonly;
-    pub(crate) use syscall1 as syscall1_readonly;
-    pub(crate) use syscall2 as syscall2_readonly;
-    pub(crate) use syscall3 as syscall3_readonly;
-    pub(crate) use syscall4 as syscall4_readonly;
-    pub(crate) use syscall5 as syscall5_readonly;
-    pub(crate) use syscall6 as syscall6_readonly;
+    pub(crate) use {
+        syscall0 as syscall0_readonly, syscall1 as syscall1_readonly,
+        syscall2 as syscall2_readonly, syscall3 as syscall3_readonly,
+        syscall4 as syscall4_readonly, syscall5 as syscall5_readonly,
+        syscall6 as syscall6_readonly,
+    };
 }
 
 type ClockGettimeType = unsafe extern "C" fn(c_int, *mut Timespec) -> c_int;

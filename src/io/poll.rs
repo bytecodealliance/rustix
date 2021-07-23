@@ -1,5 +1,6 @@
 use crate::{imp, io};
-use std::{os::raw::c_int, vec::IntoIter};
+use std::os::raw::c_int;
+use std::vec::IntoIter;
 
 pub use imp::io::{PollFd, PollFlags};
 

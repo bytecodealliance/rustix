@@ -2,11 +2,10 @@
 
 #[test]
 fn test_mmap() {
-    use posish::{
-        fs::{cwd, openat, Mode, OFlags},
-        io::{mmap, munmap, write, MapFlags, ProtFlags},
-    };
-    use std::{ptr::null_mut, slice};
+    use posish::fs::{cwd, openat, Mode, OFlags};
+    use posish::io::{mmap, munmap, write, MapFlags, ProtFlags};
+    use std::ptr::null_mut;
+    use std::slice;
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();

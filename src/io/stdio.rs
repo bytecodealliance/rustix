@@ -8,10 +8,8 @@
 //! stdio streams.
 #![allow(unsafe_code)]
 
-use crate::{
-    imp,
-    io::{FromRawFd, RawFd},
-};
+use crate::imp;
+use crate::io::{FromRawFd, RawFd};
 use io_lifetimes::{BorrowedFd, OwnedFd};
 
 /// `STDIN_FILENO`—Standard input, borrowed.

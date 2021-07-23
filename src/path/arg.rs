@@ -1,4 +1,7 @@
-use crate::{io, path::DecInt};
+use crate::io;
+use crate::path::DecInt;
+use std::borrow::Cow;
+use std::ffi::{CStr, CString, OsStr, OsString};
 #[cfg(target_os = "hermit")]
 use std::os::hermit::ext::ffi::{OsStrExt, OsStringExt};
 #[cfg(unix)]
@@ -7,12 +10,8 @@ use std::os::unix::ffi::{OsStrExt, OsStringExt};
 use std::os::vxworks::ext::ffi::{OsStrExt, OsStringExt};
 #[cfg(target_os = "wasi")]
 use std::os::wasi::ffi::{OsStrExt, OsStringExt};
-use std::{
-    borrow::Cow,
-    ffi::{CStr, CString, OsStr, OsString},
-    path::{Component, Components, Iter, Path, PathBuf},
-    str,
-};
+use std::path::{Component, Components, Iter, Path, PathBuf};
+use std::str;
 
 /// A trait for passing path arguments.
 ///
@@ -22,7 +21,8 @@ use std::{
 /// # Example
 ///
 /// ```rust
-/// use posish::{io, path::Arg};
+/// use posish::io;
+/// use posish::path::Arg;
 /// use std::ffi::CStr;
 ///
 /// pub fn touch<P: Arg>(path: P) -> io::Result<()> {

@@ -57,20 +57,16 @@
 //! ```
 
 use super::super::conv::{ret, ret_owned_fd, ret_u32};
-use crate::{
-    io,
-    io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
-};
+use crate::io;
+use crate::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
-use std::{
-    convert::TryInto,
-    fmt,
-    marker::PhantomData,
-    ops::Deref,
-    os::raw::c_int,
-    ptr::{null, null_mut},
-};
+use std::convert::TryInto;
+use std::fmt;
+use std::marker::PhantomData;
+use std::ops::Deref;
+use std::os::raw::c_int;
+use std::ptr::{null, null_mut};
 
 bitflags! {
     /// `EPOLL_*` for use with [`Epoll::new`].

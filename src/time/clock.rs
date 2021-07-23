@@ -1,4 +1,5 @@
-use crate::{imp, io, time::Timespec};
+use crate::time::Timespec;
+use crate::{imp, io};
 
 /// `clockid_t`
 #[cfg(any(linux_raw, all(libc, not(target_os = "wasi"))))]

@@ -1,11 +1,13 @@
 use crate::io::AsRawFd;
 use io_lifetimes::AsFd;
 use itoa::{write, Integer};
+use std::ffi::OsStr;
+use std::ops::Deref;
 #[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
 #[cfg(target_os = "wasi")]
 use std::os::wasi::ffi::OsStrExt;
-use std::{ffi::OsStr, ops::Deref, path::Path};
+use std::path::Path;
 
 /// Format an integer into a decimal `Path` component, without constructing a
 /// temporary `PathBuf` or `String`.

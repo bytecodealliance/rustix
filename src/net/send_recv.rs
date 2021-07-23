@@ -1,9 +1,7 @@
 //! `recv` and `send`, and variants
 
-use crate::{
-    imp, io,
-    net::{SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6},
-};
+use crate::net::{SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
+use crate::{imp, io};
 use io_lifetimes::AsFd;
 
 pub use imp::net::{RecvFlags, SendFlags};

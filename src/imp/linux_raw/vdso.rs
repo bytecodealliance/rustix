@@ -13,13 +13,11 @@
 #![allow(non_snake_case)]
 
 use crate::io::{self, pread, proc_self_auxv};
-use std::{
-    ffi::CStr,
-    mem::{align_of, size_of},
-    os::raw::{c_char, c_void},
-    ptr::null,
-    slice,
-};
+use std::ffi::CStr;
+use std::mem::{align_of, size_of};
+use std::os::raw::{c_char, c_void};
+use std::ptr::null;
+use std::slice;
 
 pub(super) struct Vdso {
     // Load information

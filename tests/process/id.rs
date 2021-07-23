@@ -1,5 +1,6 @@
 use posish::process;
-use std::{env::var, str::FromStr};
+use std::env::var;
+use std::str::FromStr;
 
 #[test]
 fn test_getuid() {

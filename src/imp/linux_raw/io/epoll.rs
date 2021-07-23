@@ -59,19 +59,15 @@
 #![allow(unsafe_code)]
 
 use super::super::syscalls::{epoll_add, epoll_create, epoll_del, epoll_mod, epoll_wait};
-use crate::{
-    io,
-    io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
-};
+use crate::io;
+use crate::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
-use std::{
-    fmt,
-    marker::PhantomData,
-    ops::Deref,
-    os::raw::{c_int, c_uint},
-    ptr::null,
-};
+use std::fmt;
+use std::marker::PhantomData;
+use std::ops::Deref;
+use std::os::raw::{c_int, c_uint};
+use std::ptr::null;
 
 bitflags! {
     /// `EPOLL_*` for use with [`Epoll::new`].

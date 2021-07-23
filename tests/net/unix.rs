@@ -9,21 +9,17 @@
     target_os = "wasi",
 )))]
 
-use posish::{
-    fs::{cwd, unlinkat, AtFlags},
-    io::{read, write},
-    net::{
-        accept, bind_unix, connect_unix, listen, socket, AddressFamily, Protocol, SocketAddrUnix,
-        SocketType,
-    },
-    path::DecInt,
+use posish::fs::{cwd, unlinkat, AtFlags};
+use posish::io::{read, write};
+use posish::net::{
+    accept, bind_unix, connect_unix, listen, socket, AddressFamily, Protocol, SocketAddrUnix,
+    SocketType,
 };
-use std::{
-    path::Path,
-    str::FromStr,
-    sync::{Arc, Condvar, Mutex},
-    thread,
-};
+use posish::path::DecInt;
+use std::path::Path;
+use std::str::FromStr;
+use std::sync::{Arc, Condvar, Mutex};
+use std::thread;
 
 const BUFFER_SIZE: usize = 20;
 

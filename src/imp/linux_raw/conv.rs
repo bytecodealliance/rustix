@@ -7,27 +7,21 @@
 //! types knowing their layouts, or construct owned file descriptors.
 #![allow(unsafe_code)]
 
-use super::{
-    fs::{Mode, OFlags},
-    io::{check_fd, check_result, check_void},
-    time::ClockId,
-};
-use crate::{
-    as_mut_ptr, as_ptr, io,
-    io::{AsRawFd, FromRawFd},
-};
+use super::fs::{Mode, OFlags};
+use super::io::{check_fd, check_result, check_void};
+use super::time::ClockId;
+use crate::io::{AsRawFd, FromRawFd};
+use crate::{as_mut_ptr, as_ptr, io};
 use io_lifetimes::{BorrowedFd, OwnedFd};
 #[cfg(target_pointer_width = "64")]
 use linux_raw_sys::general::__kernel_loff_t;
 #[cfg(target_pointer_width = "32")]
 use linux_raw_sys::general::O_LARGEFILE;
 use linux_raw_sys::general::{__kernel_clockid_t, socklen_t};
-use std::{
-    ffi::CStr,
-    mem::{transmute, MaybeUninit},
-    os::raw::{c_int, c_uint, c_void},
-    ptr::null,
-};
+use std::ffi::CStr;
+use std::mem::{transmute, MaybeUninit};
+use std::os::raw::{c_int, c_uint, c_void};
+use std::ptr::null;
 
 /// Convert `SYS_*` constants for socketcall.
 #[cfg(target_arch = "x86")]

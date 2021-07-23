@@ -1,12 +1,8 @@
-use posish::{
-    io,
-    path::{Arg, DecInt},
-};
-use std::{
-    borrow::Cow,
-    ffi::{CStr, CString, OsStr, OsString},
-    path::{Component, Components, Iter, Path, PathBuf},
-};
+use posish::io;
+use posish::path::{Arg, DecInt};
+use std::borrow::Cow;
+use std::ffi::{CStr, CString, OsStr, OsString};
+use std::path::{Component, Components, Iter, Path, PathBuf};
 
 #[test]
 fn test_arg() {

@@ -94,10 +94,8 @@ fn invalid_offset_fadvise() {
 
 #[test]
 fn invalid_offset_pread() {
-    use posish::{
-        fs::{cwd, openat, Mode, OFlags},
-        io::pread,
-    };
+    use posish::fs::{cwd, openat, Mode, OFlags};
+    use posish::io::pread;
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
@@ -116,10 +114,8 @@ fn invalid_offset_pread() {
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
 #[test]
 fn invalid_offset_pwrite() {
-    use posish::{
-        fs::{cwd, openat, Mode, OFlags},
-        io::pwrite,
-    };
+    use posish::fs::{cwd, openat, Mode, OFlags};
+    use posish::io::pwrite;
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
@@ -138,10 +134,8 @@ fn invalid_offset_pwrite() {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn invalid_offset_copy_file_range() {
-    use posish::{
-        fs::{copy_file_range, cwd, openat, Mode, OFlags},
-        io::write,
-    };
+    use posish::fs::{copy_file_range, cwd, openat, Mode, OFlags};
+    use posish::io::write;
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let foo = openat(

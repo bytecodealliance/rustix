@@ -30,7 +30,7 @@ use super::conv::{
 };
 use super::fs::{
     Access, Advice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode, OFlags,
-    ResolveFlags, StatFs, StatxFlags,
+    ResolveFlags, Stat, StatFs, StatxFlags,
 };
 use super::io::{
     epoll, DupFlags, EventfdFlags, MapFlags, PipeFlags, PollFd, ProtFlags, ReadWriteFlags,
@@ -43,8 +43,7 @@ use super::net::{
     SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6, SocketType,
 };
 use super::rand::GetRandomFlags;
-use super::time::ClockId;
-use super::{fs::Stat, time::Timespec};
+use super::time::{ClockId, Timespec};
 use crate::io;
 use crate::io::RawFd;
 use crate::time::NanosleepRelativeResult;
@@ -63,6 +62,20 @@ use linux_raw_sys::general::{
     __NR_getsockopt, __NR_listen, __NR_recvfrom, __NR_sendto, __NR_setsockopt, __NR_shutdown,
     __NR_socket, __NR_socketpair,
 };
+use linux_raw_sys::general::{
+    __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
+    __NR_epoll_create1, __NR_epoll_ctl, __NR_exit_group, __NR_faccessat, __NR_fallocate,
+    __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_flock, __NR_fsync, __NR_getcwd,
+    __NR_getdents64, __NR_getpid, __NR_getppid, __NR_ioctl, __NR_linkat, __NR_mkdirat,
+    __NR_mknodat, __NR_munmap, __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_pread64, __NR_preadv,
+    __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv, __NR_sched_yield,
+    __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev, __kernel_gid_t,
+    __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event, sockaddr, sockaddr_in,
+    sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW,
+    EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC,
+    F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL, TCGETS, TIMER_ABSTIME,
+    TIOCGWINSZ,
+};
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use linux_raw_sys::general::{__NR_dup2, __NR_open, __NR_pipe, __NR_poll};
 #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
@@ -78,42 +91,16 @@ use linux_raw_sys::general::{__NR_ppoll, sigset_t};
     target_arch = "riscv64"
 )))]
 use linux_raw_sys::general::{__NR_recv, __NR_send};
-use linux_raw_sys::{
-    general::{
-        __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
-        __NR_epoll_create1, __NR_epoll_ctl, __NR_exit_group, __NR_faccessat, __NR_fallocate,
-        __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_flock, __NR_fsync, __NR_getcwd,
-        __NR_getdents64, __NR_getpid, __NR_getppid, __NR_ioctl, __NR_linkat, __NR_mkdirat,
-        __NR_mknodat, __NR_munmap, __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_pread64,
-        __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv,
-        __NR_sched_yield, __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
-    },
-    general::{
-        __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event, sockaddr,
-        sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t,
-    },
-    general::{
-        AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD,
-        FIONBIO, FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN,
-        F_GETSIG, F_SETFD, F_SETFL, TCGETS, TIMER_ABSTIME, TIOCGWINSZ,
-    },
-    v5_11::{general::__NR_openat2, general::open_how},
-    v5_4::{
-        general::statx,
-        general::{
-            __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_memfd_create, __NR_preadv2,
-            __NR_pwritev2, __NR_statx, __NR_userfaultfd,
-        },
-        general::{F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ},
-    },
+use linux_raw_sys::v5_11::general::{__NR_openat2, open_how};
+use linux_raw_sys::v5_4::general::{
+    __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_memfd_create, __NR_preadv2,
+    __NR_pwritev2, __NR_statx, __NR_userfaultfd, statx, F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ,
 };
-use std::{
-    convert::TryInto,
-    ffi::CStr,
-    io::{IoSlice, IoSliceMut, SeekFrom},
-    mem::{size_of, MaybeUninit},
-    os::raw::{c_char, c_int, c_uint, c_void},
-};
+use std::convert::TryInto;
+use std::ffi::CStr;
+use std::io::{IoSlice, IoSliceMut, SeekFrom};
+use std::mem::{size_of, MaybeUninit};
+use std::os::raw::{c_char, c_int, c_uint, c_void};
 #[cfg(target_arch = "x86")]
 use {
     super::conv::x86_sys,

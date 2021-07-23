@@ -8,7 +8,8 @@
 
 use crate::io::{close, AsRawFd, FromRawFd};
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd};
-use std::{fmt, mem::ManuallyDrop};
+use std::fmt;
+use std::mem::ManuallyDrop;
 
 /// A wrapper around `io_lifetimes::OwnedFd` which closes the file descriptor
 /// using posish's own `close` rather than libc's `close`.

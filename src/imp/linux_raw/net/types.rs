@@ -8,6 +8,7 @@ use std::os::raw::c_uint;
 #[repr(transparent)]
 pub struct SocketType(pub(crate) u32);
 
+#[rustfmt::skip]
 impl SocketType {
     /// `SOCK_STREAM`
     pub const STREAM: Self = Self(linux_raw_sys::general::SOCK_STREAM);

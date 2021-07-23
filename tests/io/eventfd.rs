@@ -1,14 +1,14 @@
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn test_eventfd() {
-    use posish::io::{write, read, eventfd, EventfdFlags};
+    use posish::io::{eventfd, read, write, EventfdFlags};
     use std::mem::size_of;
     use std::thread;
 
     let efd = eventfd(0, EventfdFlags::CLOEXEC).unwrap();
 
     let child = thread::spawn(move || {
-        for u in [1_u64,3,6,11,5000] {
+        for u in [1_u64, 3, 6, 11, 5000] {
             assert_eq!(write(&efd, &u.to_ne_bytes()).unwrap(), size_of::<u64>());
         }
         efd

@@ -6,12 +6,12 @@
 //! is mounted, with actual `procfs`, and without any additional mount points
 //! on top of the paths we open.
 
-use crate::{
-    fs::{cwd, fstat, fstatfs, major, openat, renameat, Mode, OFlags, Stat, PROC_SUPER_MAGIC},
-    io::{self, OwnedFd},
-    path::DecInt,
-    process::{getgid, getpid, getuid},
+use crate::fs::{
+    cwd, fstat, fstatfs, major, openat, renameat, Mode, OFlags, Stat, PROC_SUPER_MAGIC,
 };
+use crate::io::{self, OwnedFd};
+use crate::path::DecInt;
+use crate::process::{getgid, getpid, getuid};
 use cstr::cstr;
 use io_lifetimes::{AsFd, BorrowedFd};
 use once_cell::sync::Lazy;

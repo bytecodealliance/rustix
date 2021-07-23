@@ -3,17 +3,13 @@
 
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]
 
-use posish::{
-    io::{read, write},
-    net::{
-        accept, bind_v4, connect_v4, getsockname, listen, socket, AddressFamily, Ipv4Addr,
-        Protocol, SocketAddr, SocketAddrV4, SocketType,
-    },
+use posish::io::{read, write};
+use posish::net::{
+    accept, bind_v4, connect_v4, getsockname, listen, socket, AddressFamily, Ipv4Addr, Protocol,
+    SocketAddr, SocketAddrV4, SocketType,
 };
-use std::{
-    sync::{Arc, Condvar, Mutex},
-    thread,
-};
+use std::sync::{Arc, Condvar, Mutex};
+use std::thread;
 
 const BUFFER_SIZE: usize = 20;
 

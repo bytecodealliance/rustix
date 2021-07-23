@@ -8,6 +8,9 @@
     target_os = "wasi",
 )))]
 use super::conv::ret_u32;
+use super::conv::{
+    borrowed_fd, ret, ret_c_int, ret_discarded_fd, ret_off_t, ret_owned_fd, ret_ssize_t,
+};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t};
 #[cfg(not(any(
@@ -34,10 +37,12 @@ use super::fs::ResolveFlags;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
 use super::fs::StatFs;
+use super::fs::{Access, FdFlags, Mode, OFlags, Stat};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::fs::{Statx, StatxFlags};
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 use super::io::PipeFlags;
+use super::io::PollFd;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::net::{
     decode_sockaddr, AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown,
@@ -68,30 +73,29 @@ use super::offset::libc_posix_fadvise;
     target_os = "redox",
 )))]
 use super::offset::libc_posix_fallocate;
+use super::offset::{libc_fstat, libc_fstatat, libc_lseek, libc_off_t, libc_pread, libc_pwrite};
 #[cfg(target_os = "linux")]
 use super::rand::GetRandomFlags;
-use super::{
-    conv::{borrowed_fd, ret, ret_c_int, ret_discarded_fd, ret_off_t, ret_owned_fd, ret_ssize_t},
-    fs::{Access, FdFlags, Mode, OFlags, Stat},
-    io::PollFd,
-    offset::{libc_fstat, libc_fstatat, libc_lseek, libc_off_t, libc_pread, libc_pwrite},
-    time::Timespec,
-};
+use super::time::Timespec;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::{
     io::ReadWriteFlags,
     offset::{libc_preadv2, libc_pwritev2},
 };
-use crate::{
-    as_ptr,
-    io::{self, RawFd},
-};
+use crate::as_ptr;
+use crate::io::{self, RawFd};
 use errno::errno;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
+use std::cmp::min;
+use std::convert::TryInto;
+use std::ffi::CStr;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use std::ffi::OsString;
+use std::io::{IoSlice, IoSliceMut, SeekFrom};
 #[cfg(target_os = "linux")]
 use std::mem::transmute;
+use std::mem::{size_of, MaybeUninit};
+use std::os::raw::{c_int, c_void};
 #[cfg(all(unix, not(target_os = "fuchsia")))]
 use std::os::unix::ffi::OsStringExt;
 #[cfg(target_os = "wasi")]
@@ -100,14 +104,6 @@ use std::os::wasi::ffi::OsStringExt;
 use std::ptr::null_mut;
 #[cfg(not(any(target_os = "redox", target_env = "newlib")))]
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::{
-    cmp::min,
-    convert::TryInto,
-    ffi::CStr,
-    io::{IoSlice, IoSliceMut, SeekFrom},
-    mem::{size_of, MaybeUninit},
-    os::raw::{c_int, c_void},
-};
 #[cfg(not(target_os = "redox"))]
 use {
     super::conv::c_str,

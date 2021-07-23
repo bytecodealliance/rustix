@@ -3,12 +3,13 @@
 use crate::{imp, io};
 #[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
 use imp::fs::FallocateFlags;
+use imp::fs::Stat;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
 use imp::fs::StatFs;
 #[cfg(not(target_os = "wasi"))]
 use imp::fs::{FlockOperation, Mode};
-use imp::{fs::Stat, time::Timespec};
+use imp::time::Timespec;
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::io::SeekFrom;
 

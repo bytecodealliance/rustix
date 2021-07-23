@@ -10,10 +10,8 @@ use crate::{imp, io, path};
     target_os = "wasi",
 )))]
 use imp::fs::Dev;
-use imp::{
-    fs::{Access, AtFlags, Mode, OFlags, Stat},
-    time::Timespec,
-};
+use imp::fs::{Access, AtFlags, Mode, OFlags, Stat};
+use imp::time::Timespec;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 use std::ffi::{CStr, OsString};
 #[cfg(unix)]

@@ -1,4 +1,5 @@
-use crate::{imp, io::RawFd};
+use crate::imp;
+use crate::io::RawFd;
 use io_lifetimes::BorrowedFd;
 
 /// `AT_FDCWD`—Returns a handle representing the current working directory.

@@ -1,7 +1,8 @@
 //! The unsafe `close` for raw file descriptors.
 #![allow(unsafe_code)]
 
-use crate::{imp, io::RawFd};
+use crate::imp;
+use crate::io::RawFd;
 
 /// `close(raw_fd)`—Closes a `RawFd` directly.
 ///

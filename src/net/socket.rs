@@ -1,7 +1,5 @@
-use crate::{
-    imp, io,
-    net::{SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6},
-};
+use crate::net::{SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
+use crate::{imp, io};
 use io_lifetimes::{AsFd, OwnedFd};
 use std::os::raw::c_int;
 

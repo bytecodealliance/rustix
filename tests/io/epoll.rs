@@ -1,18 +1,14 @@
 #![cfg(any(target_os = "android", target_os = "linux"))]
 
-use posish::io::{
-    epoll::{self, Epoll},
-    ioctl_fionbio, read, write,
-};
+use posish::io::epoll::{self, Epoll};
+use posish::io::{ioctl_fionbio, read, write};
 use posish::net::{
     accept, bind_v4, connect_v4, getsockname, listen, socket, AddressFamily, Ipv4Addr, Protocol,
     SocketAddr, SocketAddrV4, SocketType,
 };
 use std::os::unix::io::AsRawFd;
-use std::{
-    sync::{Arc, Condvar, Mutex},
-    thread,
-};
+use std::sync::{Arc, Condvar, Mutex};
+use std::thread;
 
 const BUFFER_SIZE: usize = 20;
 

@@ -7,7 +7,8 @@
 
 use super::AddressFamily;
 use crate::{io, path};
-use std::{ffi::CString, fmt};
+use std::ffi::CString;
+use std::fmt;
 
 /// `struct in_addr`
 #[repr(transparent)]

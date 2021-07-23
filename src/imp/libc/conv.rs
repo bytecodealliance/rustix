@@ -1,10 +1,8 @@
 #![allow(dead_code)]
 
 use super::offset::libc_off_t;
-use crate::{
-    io,
-    io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
-};
+use crate::io;
+use crate::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use io_lifetimes::{BorrowedFd, OwnedFd};
 use libc::{c_char, c_int, c_long, ssize_t};
 use std::ffi::CStr;

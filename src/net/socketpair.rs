@@ -1,7 +1,5 @@
-use crate::{
-    imp, io,
-    net::{AcceptFlags, AddressFamily, Protocol, SocketType},
-};
+use crate::net::{AcceptFlags, AddressFamily, Protocol, SocketType};
+use crate::{imp, io};
 use io_lifetimes::OwnedFd;
 
 /// `socketpair(domain, type_ | accept_flags, protocol)`

@@ -4,10 +4,8 @@ use io_lifetimes::{AsFd, BorrowedFd, IntoFd, OwnedFd};
 use linux_raw_sys::general::linux_dirent64;
 #[cfg(target_os = "wasi")]
 use std::ffi::CString;
-use std::{
-    ffi::{CStr, CString},
-    mem::size_of,
-};
+use std::ffi::{CStr, CString};
+use std::mem::size_of;
 
 /// `DIR*`
 pub struct Dir {
