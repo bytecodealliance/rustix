@@ -4,8 +4,6 @@
 //! enum because we may not know about all of the host's error values
 //! and we don't want unrecognized values to create UB.
 
-#![allow(missing_docs)]
-
 use crate::imp;
 use std::{error, fmt, result};
 
