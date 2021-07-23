@@ -294,7 +294,7 @@ pub(crate) fn clock_getres(which_clock: ClockId) -> __kernel_timespec {
     #[cfg(target_pointer_width = "64")]
     unsafe {
         let mut result = MaybeUninit::<__kernel_timespec>::uninit();
-        syscall2(__NR_clock_getres, clockid_t(which_clock), out(&mut result));
+        let _ = syscall2(__NR_clock_getres, clockid_t(which_clock), out(&mut result));
         result.assume_init()
     }
 }

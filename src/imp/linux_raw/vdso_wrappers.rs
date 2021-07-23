@@ -82,6 +82,7 @@ pub(crate) mod x86_via_vdso {
     use super::{super::arch::asm, transmute, Relaxed};
 
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall0(nr: u32) -> usize {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -91,6 +92,7 @@ pub(crate) mod x86_via_vdso {
     }
 
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall1(nr: u32, a0: usize) -> usize {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -100,6 +102,7 @@ pub(crate) mod x86_via_vdso {
     }
 
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall1_noreturn(nr: u32, a0: usize) -> ! {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -109,6 +112,7 @@ pub(crate) mod x86_via_vdso {
     }
 
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall2(nr: u32, a0: usize, a1: usize) -> usize {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -118,6 +122,7 @@ pub(crate) mod x86_via_vdso {
     }
 
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall3(nr: u32, a0: usize, a1: usize, a2: usize) -> usize {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -127,6 +132,7 @@ pub(crate) mod x86_via_vdso {
     }
 
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall4(nr: u32, a0: usize, a1: usize, a2: usize, a3: usize) -> usize {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -136,6 +142,7 @@ pub(crate) mod x86_via_vdso {
     }
 
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall5(
         nr: u32,
         a0: usize,
@@ -152,6 +159,7 @@ pub(crate) mod x86_via_vdso {
     }
 
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall6(
         nr: u32,
         a0: usize,

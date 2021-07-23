@@ -9,6 +9,7 @@
 use super::super::super::vdso_wrappers::SyscallType;
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn indirect_syscall0(callee: SyscallType, nr: u32) -> usize {
     let r0;
     asm!(
@@ -21,6 +22,7 @@ pub(crate) unsafe fn indirect_syscall0(callee: SyscallType, nr: u32) -> usize {
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn indirect_syscall1(callee: SyscallType, nr: u32, a0: usize) -> usize {
     let r0;
     asm!(
@@ -34,6 +36,7 @@ pub(crate) unsafe fn indirect_syscall1(callee: SyscallType, nr: u32, a0: usize) 
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn indirect_syscall1_noreturn(callee: SyscallType, nr: u32, a0: usize) -> ! {
     asm!(
         "call {callee}",
@@ -45,6 +48,7 @@ pub(crate) unsafe fn indirect_syscall1_noreturn(callee: SyscallType, nr: u32, a0
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn indirect_syscall2(
     callee: SyscallType,
     nr: u32,
@@ -64,6 +68,7 @@ pub(crate) unsafe fn indirect_syscall2(
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn indirect_syscall3(
     callee: SyscallType,
     nr: u32,
@@ -85,6 +90,7 @@ pub(crate) unsafe fn indirect_syscall3(
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn indirect_syscall4(
     callee: SyscallType,
     nr: u32,
@@ -116,6 +122,7 @@ pub(crate) unsafe fn indirect_syscall4(
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn indirect_syscall5(
     callee: SyscallType,
     nr: u32,
@@ -192,6 +199,7 @@ pub(crate) unsafe fn indirect_syscall6(
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn syscall0_readonly(nr: u32) -> usize {
     let r0;
     asm!(
@@ -203,6 +211,7 @@ pub(crate) unsafe fn syscall0_readonly(nr: u32) -> usize {
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn syscall1(nr: u32, a0: usize) -> usize {
     let r0;
     asm!(
@@ -215,6 +224,7 @@ pub(crate) unsafe fn syscall1(nr: u32, a0: usize) -> usize {
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn syscall1_readonly(nr: u32, a0: usize) -> usize {
     let r0;
     asm!(
@@ -227,6 +237,7 @@ pub(crate) unsafe fn syscall1_readonly(nr: u32, a0: usize) -> usize {
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn syscall1_noreturn(nr: u32, a0: usize) -> ! {
     asm!(
         "int $$0x80",
@@ -237,6 +248,7 @@ pub(crate) unsafe fn syscall1_noreturn(nr: u32, a0: usize) -> ! {
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn syscall2(nr: u32, a0: usize, a1: usize) -> usize {
     let r0;
     asm!(
@@ -250,6 +262,7 @@ pub(crate) unsafe fn syscall2(nr: u32, a0: usize, a1: usize) -> usize {
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn syscall2_readonly(nr: u32, a0: usize, a1: usize) -> usize {
     let r0;
     asm!(
@@ -263,6 +276,7 @@ pub(crate) unsafe fn syscall2_readonly(nr: u32, a0: usize, a1: usize) -> usize {
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn syscall3(nr: u32, a0: usize, a1: usize, a2: usize) -> usize {
     let r0;
     asm!(
@@ -277,6 +291,7 @@ pub(crate) unsafe fn syscall3(nr: u32, a0: usize, a1: usize, a2: usize) -> usize
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn syscall3_readonly(nr: u32, a0: usize, a1: usize, a2: usize) -> usize {
     let r0;
     asm!(
@@ -291,6 +306,7 @@ pub(crate) unsafe fn syscall3_readonly(nr: u32, a0: usize, a1: usize, a2: usize)
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn syscall4(nr: u32, a0: usize, a1: usize, a2: usize, a3: usize) -> usize {
     let r0;
     // a3 should go in esi, but asm! won't let us use it as an operand.
@@ -310,6 +326,7 @@ pub(crate) unsafe fn syscall4(nr: u32, a0: usize, a1: usize, a2: usize, a3: usiz
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn syscall4_readonly(
     nr: u32,
     a0: usize,
@@ -333,6 +350,7 @@ pub(crate) unsafe fn syscall4_readonly(
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn syscall5(
     nr: u32,
     a0: usize,
@@ -360,6 +378,7 @@ pub(crate) unsafe fn syscall5(
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn syscall5_readonly(
     nr: u32,
     a0: usize,
@@ -385,6 +404,7 @@ pub(crate) unsafe fn syscall5_readonly(
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn syscall6(
     nr: u32,
     a0: usize,
@@ -423,6 +443,7 @@ pub(crate) unsafe fn syscall6(
 }
 
 #[inline]
+#[must_use]
 pub(crate) unsafe fn syscall6_readonly(
     nr: u32,
     a0: usize,

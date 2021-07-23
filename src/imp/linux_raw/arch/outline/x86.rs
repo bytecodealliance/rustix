@@ -66,42 +66,52 @@ mod reorder {
     use super::*;
 
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall0_readonly(nr: u32) -> usize {
         posish_reordered_syscall0_readonly(nr)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall1(nr: u32, a0: usize) -> usize {
         posish_reordered_syscall1(a0, nr)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall1_readonly(nr: u32, a0: usize) -> usize {
         posish_reordered_syscall1_readonly(a0, nr)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall1_noreturn(nr: u32, a0: usize) -> ! {
         posish_reordered_syscall1_noreturn(a0, nr)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall2(nr: u32, a0: usize, a1: usize) -> usize {
         posish_reordered_syscall2(a1, a0, nr)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall2_readonly(nr: u32, a0: usize, a1: usize) -> usize {
         posish_reordered_syscall2_readonly(a1, a0, nr)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall3(nr: u32, a0: usize, a1: usize, a2: usize) -> usize {
         posish_reordered_syscall3(a1, a2, a0, nr)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall3_readonly(nr: u32, a0: usize, a1: usize, a2: usize) -> usize {
         posish_reordered_syscall3_readonly(a1, a2, a0, nr)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall4(nr: u32, a0: usize, a1: usize, a2: usize, a3: usize) -> usize {
         posish_reordered_syscall4(a1, a2, a0, a3, nr)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall4_readonly(
         nr: u32,
         a0: usize,
@@ -112,6 +122,7 @@ mod reorder {
         posish_reordered_syscall4_readonly(a1, a2, a0, a3, nr)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall5(
         nr: u32,
         a0: usize,
@@ -123,6 +134,7 @@ mod reorder {
         posish_reordered_syscall5(a1, a2, a0, a3, a4, nr)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall5_readonly(
         nr: u32,
         a0: usize,
@@ -134,6 +146,7 @@ mod reorder {
         posish_reordered_syscall5_readonly(a1, a2, a0, a3, a4, nr)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall6(
         nr: u32,
         a0: usize,
@@ -146,6 +159,7 @@ mod reorder {
         posish_reordered_syscall6(a1, a2, a0, a3, a4, a5, nr)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn syscall6_readonly(
         nr: u32,
         a0: usize,
@@ -217,18 +231,22 @@ mod reorder_indirect {
     use super::*;
 
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn indirect_syscall0(callee: SyscallType, nr: u32) -> usize {
         posish_reordered_indirect_syscall0(nr, callee)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn indirect_syscall1(callee: SyscallType, nr: u32, a0: usize) -> usize {
         posish_reordered_indirect_syscall1(a0, nr, callee)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn indirect_syscall1_noreturn(callee: SyscallType, nr: u32, a0: usize) -> ! {
         posish_reordered_indirect_syscall1_noreturn(a0, nr, callee)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn indirect_syscall2(
         callee: SyscallType,
         nr: u32,
@@ -238,6 +256,7 @@ mod reorder_indirect {
         posish_reordered_indirect_syscall2(a1, a0, nr, callee)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn indirect_syscall3(
         callee: SyscallType,
         nr: u32,
@@ -248,6 +267,7 @@ mod reorder_indirect {
         posish_reordered_indirect_syscall3(a1, a2, a0, nr, callee)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn indirect_syscall4(
         callee: SyscallType,
         nr: u32,
@@ -259,6 +279,7 @@ mod reorder_indirect {
         posish_reordered_indirect_syscall4(a1, a2, a0, a3, nr, callee)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn indirect_syscall5(
         callee: SyscallType,
         nr: u32,
@@ -271,6 +292,7 @@ mod reorder_indirect {
         posish_reordered_indirect_syscall5(a1, a2, a0, a3, a4, nr, callee)
     }
     #[inline]
+    #[must_use]
     pub(crate) unsafe fn indirect_syscall6(
         callee: SyscallType,
         nr: u32,
