@@ -9,11 +9,12 @@
 
 use super::{
     fs::{Mode, OFlags},
+    io::{check_fd, check_result, check_void},
     time::ClockId,
 };
 use crate::{
     as_mut_ptr, as_ptr, io,
-    io::{AsRawFd, FromRawFd, RawFd},
+    io::{AsRawFd, FromRawFd},
 };
 use io_lifetimes::{BorrowedFd, OwnedFd};
 #[cfg(target_pointer_width = "64")]
@@ -209,69 +210,55 @@ pub(super) fn out<T: Sized>(t: &mut MaybeUninit<T>) -> usize {
     t.as_mut_ptr() as usize
 }
 
+/// Convert a `usize` returned from a syscall that effectively returns `()` on
+/// success.
+///
+/// # Safety
+///
+/// The caller must ensure that this is the return value of a syscall which
+/// just returns 0 on success.
 #[inline]
-fn check_error(raw: usize) -> io::Result<()> {
-    if (-4095..0).contains(&(raw as isize)) {
-        // Discourage the optimizer from speculating the compuation of the
-        // `Err` above the `if`. The discriminant of the `Result` is often
-        // branched on, so if the optimizer speculates here and replaces the
-        // `if` with a conditional move, it appears to struggle to undo this
-        // once it realizes there's another branch on the same condition.
-        //
-        // It ends up doing a conditional move to produce a Result value
-        // with either the encoded Err or Ok value, and then a branch on the
-        // same condition, where both destinations of the branch have to unpack
-        // the Result. What we want is to do is just branch, and skip encoding
-        // and decoding the Result.
-        let raw = suppress_optimization(raw);
-
-        Err(io::Error((raw as u16).wrapping_neg()))
-    } else {
-        Ok(())
-    }
+pub(super) unsafe fn ret(raw: usize) -> io::Result<()> {
+    check_void(raw)
 }
 
-#[inline]
-pub(super) fn ret(raw: usize) -> io::Result<()> {
-    // Instead of using `check_error` here, we just check for zero, since
-    // this function is only used for system calls which have no other
-    // return value, and this produces smaller code.
-    if raw != 0 {
-        // As above, discourage the optimizer from speculating the `Err`.
-        let raw = suppress_optimization(raw);
-
-        Err(io::Error((raw as u16).wrapping_neg()))
-    } else {
-        Ok(())
-    }
-}
-
+/// Convert a `usize` returned from a syscall that effectively returns a
+/// `c_int` on success.
 #[inline]
 pub(super) fn ret_c_int(raw: usize) -> io::Result<c_int> {
-    check_error(raw)?;
+    check_result(raw)?;
+    debug_assert_eq!(raw as c_int as usize, raw);
     Ok(raw as c_int)
 }
 
+/// Convert a `usize` returned from a syscall that effectively returns a
+/// `c_uint` on success.
 #[inline]
 pub(super) fn ret_c_uint(raw: usize) -> io::Result<c_uint> {
-    check_error(raw)?;
+    check_result(raw)?;
+    debug_assert_eq!(raw as c_uint as usize, raw);
     Ok(raw as c_uint)
 }
 
+/// Convert a `usize` returned from a syscall that effectively returns a `u64`
+/// on success.
 #[cfg(target_pointer_width = "64")]
 #[inline]
 pub(super) fn ret_u64(raw: usize) -> io::Result<u64> {
-    check_error(raw)?;
+    check_result(raw)?;
     Ok(raw as u64)
 }
 
+/// Convert a `usize` returned from a syscall that effectively returns a
+/// `usize` on success.
 #[inline]
 pub(super) fn ret_usize(raw: usize) -> io::Result<usize> {
-    check_error(raw)?;
+    check_result(raw)?;
     Ok(raw)
 }
 
-/// Convert a usize returned from a syscall to an `OwnedFd`, if valid.
+/// Convert a `usize` returned from a syscall that effectively returns an
+/// `OwnedFd` on success.
 ///
 /// # Safety
 ///
@@ -279,47 +266,29 @@ pub(super) fn ret_usize(raw: usize) -> io::Result<usize> {
 /// returns an owned file descriptor.
 #[inline]
 pub(super) unsafe fn ret_owned_fd(raw: usize) -> io::Result<OwnedFd> {
-    if (raw as isize) < 0 {
-        // As above, discourage the optimizer from speculating the `Err`.
-        let raw = suppress_optimization(raw);
-
-        Err(io::Error((raw as u16).wrapping_neg()))
-    } else {
-        Ok(OwnedFd::from_raw_fd(raw as RawFd))
-    }
+    let raw_fd = check_fd(raw)?;
+    Ok(OwnedFd::from_raw_fd(raw_fd))
 }
 
+/// Convert the return value of `dup2` and `dup3`.
+///
+/// When these functions succeed, they return the same value as their second
+/// argument, so we don't construct a new `OwnedFd`.
+///
+/// # Safety
+///
+/// The caller must ensure that this is the return value of a syscall which
+/// returns a file descriptor.
 #[inline]
-pub(super) fn ret_discarded_fd(raw: usize) -> io::Result<()> {
-    if (raw as isize) < 0 {
-        // As above, discourage the optimizer from speculating the `Err`.
-        let raw = suppress_optimization(raw);
-
-        Err(io::Error((raw as u16).wrapping_neg()))
-    } else {
-        Ok(())
-    }
+pub(super) unsafe fn ret_discarded_fd(raw: usize) -> io::Result<()> {
+    let _raw_fd = check_fd(raw)?;
+    Ok(())
 }
 
+/// Convert a `usize` returned from a syscall that effectively returns a
+/// `*mut c_void` on success.
 #[inline]
 pub(super) fn ret_void_star(raw: usize) -> io::Result<*mut c_void> {
-    check_error(raw)?;
+    check_result(raw)?;
     Ok(raw as *mut c_void)
-}
-
-#[cfg(linux_raw_inline_asm)]
-#[inline(always)]
-fn suppress_optimization(mut t: usize) -> usize {
-    // Safety: This asm block has no semantic effect.
-    unsafe {
-        asm!("/*{0}*/", inlateout(reg) t, options(pure, nomem, preserves_flags));
-    }
-    t
-}
-
-#[cfg(not(linux_raw_inline_asm))]
-#[inline(never)]
-fn suppress_optimization(t: usize) -> usize {
-    // Without inline asm, we can put this in an inline-never function.
-    t
 }
