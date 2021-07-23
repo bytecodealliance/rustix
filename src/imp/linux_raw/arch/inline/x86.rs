@@ -36,7 +36,6 @@ pub(crate) unsafe fn indirect_syscall1(callee: SyscallType, nr: u32, a0: usize) 
 }
 
 #[inline]
-#[must_use]
 pub(crate) unsafe fn indirect_syscall1_noreturn(callee: SyscallType, nr: u32, a0: usize) -> ! {
     asm!(
         "call {callee}",
@@ -237,7 +236,6 @@ pub(crate) unsafe fn syscall1_readonly(nr: u32, a0: usize) -> usize {
 }
 
 #[inline]
-#[must_use]
 pub(crate) unsafe fn syscall1_noreturn(nr: u32, a0: usize) -> ! {
     asm!(
         "int $$0x80",

@@ -102,7 +102,6 @@ pub(crate) mod x86_via_vdso {
     }
 
     #[inline]
-    #[must_use]
     pub(crate) unsafe fn syscall1_noreturn(nr: u32, a0: usize) -> ! {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
