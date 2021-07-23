@@ -5,7 +5,7 @@
 //!
 //! # Safety
 //!
-//! Linux uses error codes in -4095..0; we use rustc attributes to describe
+//! Linux uses error codes in `-4095..0`; we use rustc attributes to describe
 //! this restricted range of values.
 #![allow(unsafe_code)]
 #![cfg_attr(not(rustc_attrs), allow(unused_unsafe))]
@@ -21,7 +21,7 @@ use linux_raw_sys::{errno, v5_4};
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Hash, Copy, Clone)]
 // Linux returns negated error codes, and we leave them in negated form, so
-// error codes are in -4095..0.
+// error codes are in `-4095..0`.
 #[cfg_attr(rustc_attrs, rustc_layout_scalar_valid_range_start(0xf001))]
 #[cfg_attr(rustc_attrs, rustc_layout_scalar_valid_range_end(0xffff))]
 pub struct Error(pub(crate) u16);
@@ -54,7 +54,8 @@ impl Error {
         // TODO: Use `assert!`, once that's stable for use in const fn.
         cfn_assert!(encoded >= 0xf001);
 
-        // Safety: Linux syscalls return negated error values in the range -4095..0.
+        // Safety: Linux syscalls return negated error values in the range
+        // `-4095..0`, which we just asserted.
         unsafe { Self(encoded) }
     }
 }
@@ -64,7 +65,7 @@ impl Error {
 #[inline]
 pub(crate) fn check_result(raw: usize) -> io::Result<()> {
     if (-4095..0).contains(&(raw as isize)) {
-        // Safety: `raw` must be in -4095..0, and we just checked that raw is
+        // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
         return Err(unsafe { io::Error(raw as u16) });
     }
@@ -85,17 +86,19 @@ pub(crate) unsafe fn check_fd(raw: usize) -> io::Result<RawFd> {
     // this function is only used for system calls which return file
     // descriptors, and this produces smaller code.
     if (raw as isize) < 0 {
-        // `raw` must be in -4095..0. Linux always returns errors in
-        // -4095..0, and we double-check it here.
+        // `raw` must be in `-4095..0`. Linux always returns errors in
+        // `-4095..0`, and we double-check it here.
         debug_assert!((-4095..0).contains(&(raw as isize)));
 
         return Err(io::Error(raw as u16));
     }
 
-    // `raw` should contain a fd, and not something else.
-    debug_assert_eq!(raw as RawFd as usize, raw);
+    let raw_fd = raw as RawFd;
 
-    Ok(raw as RawFd)
+    // Converting `raw` to `RawFd` should be lossless.
+    debug_assert_eq!(raw_fd as usize, raw);
+
+    Ok(raw_fd)
 }
 
 /// Check for an error from the result of a syscall which encodes no value on
@@ -106,12 +109,12 @@ pub(crate) unsafe fn check_fd(raw: usize) -> io::Result<RawFd> {
 /// This must only be used with syscalls which return no value on success.
 #[inline]
 pub(crate) unsafe fn check_void(raw: usize) -> io::Result<()> {
-    // Instead of using `check_result` here, we just check for zero, since
-    // this function is only used for system calls which have no other
-    // return value, and this produces smaller code.
+    // Instead of using `check_result` here, we just check for zero, since this
+    // function is only used for system calls which have no other return value,
+    // and this produces smaller code.
     if raw != 0 {
-        // `raw` must be in -4095..0. Linux always returns errors in
-        // -4095..0, and we double-check it here.
+        // `raw` must be in `-4095..0`. Linux always returns errors in
+        // `-4095..0`, and we double-check it here.
         debug_assert!((-4095..0).contains(&(raw as isize)));
 
         return Err(io::Error(raw as u16));
