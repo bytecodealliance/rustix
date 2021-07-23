@@ -12,6 +12,7 @@ use crate::{imp, io::RawFd};
 ///
 /// This function takes a `RawFd`, which must be valid before the call, and is
 /// not valid after the call.
+#[inline]
 pub unsafe fn close(raw_fd: RawFd) {
     imp::syscalls::close(raw_fd)
 }

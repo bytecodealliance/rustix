@@ -191,7 +191,6 @@ fn is_mountpoint(file: BorrowedFd<'_>) -> io::Result<bool> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 pub fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
-    #[allow(clippy::useless_conversion)]
     static PROC: Lazy<io::Result<(OwnedFd, Stat)>> = Lazy::new(|| {
         let oflags = OFlags::NOFOLLOW
             | OFlags::PATH
@@ -220,7 +219,6 @@ pub fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 pub fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
-    #[allow(clippy::useless_conversion)]
     static PROC_SELF: Lazy<io::Result<(OwnedFd, Stat)>> = Lazy::new(|| {
         let (proc, proc_stat) = proc()?;
 
@@ -258,7 +256,6 @@ pub fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 pub fn proc_self_fd() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
-    #[allow(clippy::useless_conversion)]
     static PROC_SELF_FD: Lazy<io::Result<(OwnedFd, Stat)>> = Lazy::new(|| {
         let (_, proc_stat) = proc()?;
 

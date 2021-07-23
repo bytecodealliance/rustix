@@ -156,6 +156,7 @@ pub(crate) unsafe fn indirect_syscall5(
     r0
 }
 
+#[allow(clippy::too_many_arguments)]
 #[inline]
 pub(crate) unsafe fn indirect_syscall6(
     callee: SyscallType,

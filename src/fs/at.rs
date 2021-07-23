@@ -69,7 +69,7 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Resul
     // uninitialized memory, but that requires `unsafe`.
     let mut buffer = reuse.into_vec();
     buffer.clear();
-    buffer.resize(256, 0u8);
+    buffer.resize(256, 0_u8);
 
     loop {
         let nread = imp::syscalls::readlinkat(dirfd, path, &mut buffer)?;
@@ -77,10 +77,10 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Resul
         let nread = nread as usize;
         assert!(nread <= buffer.len());
         if nread < buffer.len() {
-            buffer.resize(nread, 0u8);
+            buffer.resize(nread, 0_u8);
             return Ok(OsString::from_vec(buffer));
         }
-        buffer.resize(buffer.len() * 2, 0u8);
+        buffer.resize(buffer.len() * 2, 0_u8);
     }
 }
 

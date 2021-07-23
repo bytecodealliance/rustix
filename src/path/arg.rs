@@ -1250,7 +1250,7 @@ where
     if bytes.len() >= SIZE {
         return with_c_str_slow_path(bytes, f);
     }
-    let mut buffer: [u8; SIZE] = [0u8; SIZE];
+    let mut buffer: [u8; SIZE] = [0_u8; SIZE];
     // Copy the bytes in; the buffer already has zeros for the trailing NUL.
     buffer[..bytes.len()].copy_from_slice(bytes);
     f(CStr::from_bytes_with_nul(&buffer[..=bytes.len()]).map_err(|_cstr_err| io::Error::INVAL)?)

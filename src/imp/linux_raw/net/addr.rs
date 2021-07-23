@@ -374,7 +374,7 @@ impl SocketAddrV6 {
         self.flowinfo
     }
 
-    /// Return the scope_id of this address.
+    /// Return the scope id of this address.
     #[inline]
     pub const fn scope_id(&self) -> u32 {
         self.scope_id

@@ -2392,7 +2392,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, req: &__kernel_timespec) -> 
             clockid_t(id),
             c_uint(TIMER_ABSTIME),
             by_ref(req),
-            0usize,
+            0_usize,
         ))
         .or_else(|err| {
             // See the comments in `posish_clock_gettime_via_syscall` about
@@ -2407,7 +2407,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, req: &__kernel_timespec) -> 
                     clockid_t(id),
                     c_int(0),
                     by_ref(&old_req),
-                    0usize,
+                    0_usize,
                 ))
             } else {
                 Err(err)
@@ -2421,7 +2421,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, req: &__kernel_timespec) -> 
             clockid_t(id),
             c_uint(TIMER_ABSTIME),
             by_ref(req),
-            0usize,
+            0_usize,
         ))
     }
 }

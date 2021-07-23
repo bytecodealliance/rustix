@@ -284,12 +284,7 @@ fn init() {
             .ok();
         #[cfg(target_arch = "x86")]
         SYSCALL
-            .compare_exchange(
-                0,
-                transmute(posish_int_0x80 as SyscallType),
-                Relaxed,
-                Relaxed,
-            )
+            .compare_exchange(0, posish_int_0x80 as SyscallType as usize, Relaxed, Relaxed)
             .ok();
     }
 

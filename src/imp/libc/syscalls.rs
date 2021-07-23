@@ -1056,7 +1056,7 @@ pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, reuse: OsString) -> io::Result<OsSt
     // uninitialized memory, but that requires `unsafe`.
     let mut buffer = reuse.into_vec();
     buffer.clear();
-    buffer.resize(256, 0u8);
+    buffer.resize(256, 0_u8);
 
     loop {
         match unsafe {
@@ -1066,10 +1066,10 @@ pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, reuse: OsString) -> io::Result<OsSt
                 buffer.len(),
             )
         } {
-            libc::ERANGE => buffer.resize(buffer.len() * 2, 0u8),
+            libc::ERANGE => buffer.resize(buffer.len() * 2, 0_u8),
             0 => {
                 let len = buffer.iter().position(|x| *x == b'\0').unwrap();
-                buffer.resize(len, 0u8);
+                buffer.resize(len, 0_u8);
                 return Ok(OsString::from_vec(buffer));
             }
             errno => return Err(io::Error(errno)),

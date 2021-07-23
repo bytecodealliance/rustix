@@ -10,9 +10,7 @@
 //! Parsing the vDSO involves a lot of raw pointer manipulation. This
 //! implementation follows Linux's reference implementation.
 #![allow(unsafe_code)]
-#![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
-#![allow(non_upper_case_globals)]
 
 use crate::io::{self, pread, proc_self_auxv};
 use std::{
@@ -46,7 +44,7 @@ fn elf_hash(name: &CStr) -> u32 {
     let mut h: u32 = 0;
     for b in name.to_bytes() {
         h = (h << 4) + u32::from(*b);
-        let g = h & 0xf0000000;
+        let g = h & 0xf000_0000;
         if g != 0 {
             h ^= g >> 24;
         }
@@ -407,8 +405,8 @@ const DT_HASH: i32 = 4;
 const DT_STRTAB: i32 = 5;
 const DT_SYMTAB: i32 = 6;
 const DT_SYMENT: i32 = 11;
-const DT_VERSYM: i32 = 0x6ffffff0;
-const DT_VERDEF: i32 = 0x6ffffffc;
+const DT_VERSYM: i32 = 0x6fff_fff0;
+const DT_VERDEF: i32 = 0x6fff_fffc;
 const STB_WEAK: u8 = 2;
 const STB_GLOBAL: u8 = 1;
 const STT_FUNC: u8 = 2;
