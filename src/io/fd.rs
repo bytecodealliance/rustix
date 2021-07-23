@@ -1,9 +1,6 @@
 //! Functions which operate on file descriptors.
 
-use crate::{
-    imp,
-    io::{self, RawFd},
-};
+use crate::{imp, io};
 use io_lifetimes::{AsFd, OwnedFd};
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 use std::ffi::OsString;
@@ -139,17 +136,4 @@ pub fn dup2_with<Fd: AsFd>(fd: &Fd, new: &OwnedFd, flags: DupFlags) -> io::Resul
 pub fn ttyname<Fd: AsFd>(dirfd: &Fd, reuse: OsString) -> io::Result<OsString> {
     let dirfd = dirfd.as_fd();
     imp::syscalls::ttyname(dirfd, reuse)
-}
-
-/// `close(raw_fd)`—Closes a `RawFd` directly.
-///
-/// Most users won't need to use this, as `OwnedFd` automatically closes its
-/// file descriptor on `Drop`.
-///
-/// # Safety
-///
-/// This function takes a `RawFd`, which must be valid before the call, and is
-/// not valid after the call.
-pub unsafe fn close(raw_fd: RawFd) {
-    imp::syscalls::close(raw_fd)
 }

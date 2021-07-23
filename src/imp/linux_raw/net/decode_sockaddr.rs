@@ -13,6 +13,11 @@ struct sockaddr_header {
     ss_family: u16,
 }
 
+/// Read the `ss_family` field from a socket address returned from the OS.
+///
+/// # Safety
+///
+/// `storage` must point to a valid socket address returned from the OS.
 #[inline]
 unsafe fn read_ss_family(storage: *const sockaddr) -> u16 {
     // Assert that we know the layout of `sockaddr`.
@@ -26,6 +31,11 @@ unsafe fn read_ss_family(storage: *const sockaddr) -> u16 {
     (*storage.cast::<sockaddr_header>()).ss_family
 }
 
+/// Decode a socket address returned from the OS.
+///
+/// # Safety
+///
+/// `storage` must point to a valid socket address returned from the OS.
 pub(crate) unsafe fn decode_sockaddr(storage: *const sockaddr, len: u32) -> SocketAddr {
     let z = linux_raw_sys::general::sockaddr_un {
         sun_family: 0_u16,

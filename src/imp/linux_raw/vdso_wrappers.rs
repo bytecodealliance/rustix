@@ -44,30 +44,30 @@ pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
 
 #[inline]
 pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId) -> io::Result<Timespec> {
+    let id = match which_clock {
+        DynamicClockId::Known(id) => id as __kernel_clockid_t,
+
+        DynamicClockId::Dynamic(fd) => {
+            // See `FD_TO_CLOCKID` in Linux's `clock_gettime` documentation.
+            use crate::io::AsRawFd;
+            const CLOCKFD: i32 = 3;
+            ((!fd.as_raw_fd() << 3) | CLOCKFD) as __kernel_clockid_t
+        }
+
+        DynamicClockId::RealtimeAlarm => {
+            linux_raw_sys::v5_4::general::CLOCK_REALTIME_ALARM as __kernel_clockid_t
+        }
+        DynamicClockId::Tai => linux_raw_sys::v5_4::general::CLOCK_TAI as __kernel_clockid_t,
+        DynamicClockId::Boottime => {
+            linux_raw_sys::v5_4::general::CLOCK_BOOTTIME as __kernel_clockid_t
+        }
+        DynamicClockId::BoottimeAlarm => {
+            linux_raw_sys::v5_4::general::CLOCK_BOOTTIME_ALARM as __kernel_clockid_t
+        }
+    };
+
     unsafe {
         let mut timespec = MaybeUninit::<Timespec>::uninit();
-        let id = match which_clock {
-            DynamicClockId::Known(id) => id as __kernel_clockid_t,
-
-            DynamicClockId::Dynamic(fd) => {
-                // See `FD_TO_CLOCKID` in Linux's `clock_gettime` documentation.
-                use crate::io::AsRawFd;
-                const CLOCKFD: i32 = 3;
-                ((!fd.as_raw_fd() << 3) | CLOCKFD) as __kernel_clockid_t
-            }
-
-            DynamicClockId::RealtimeAlarm => {
-                linux_raw_sys::v5_4::general::CLOCK_REALTIME_ALARM as __kernel_clockid_t
-            }
-            DynamicClockId::Tai => linux_raw_sys::v5_4::general::CLOCK_TAI as __kernel_clockid_t,
-            DynamicClockId::Boottime => {
-                linux_raw_sys::v5_4::general::CLOCK_BOOTTIME as __kernel_clockid_t
-            }
-            DynamicClockId::BoottimeAlarm => {
-                linux_raw_sys::v5_4::general::CLOCK_BOOTTIME_ALARM as __kernel_clockid_t
-            }
-        };
-
         let callee = match transmute(CLOCK_GETTIME.load(Relaxed)) {
             Some(callee) => callee,
             None => init_clock_gettime(),
@@ -192,15 +192,19 @@ type ClockGettimeType = unsafe extern "C" fn(c_int, *mut Timespec) -> c_int;
 pub(super) type SyscallType =
     unsafe extern "C" fn(u32, usize, usize, usize, usize, usize, usize) -> usize;
 
-unsafe fn init_clock_gettime() -> ClockGettimeType {
+fn init_clock_gettime() -> ClockGettimeType {
     init();
-    transmute(CLOCK_GETTIME.load(Relaxed))
+    // Safety: Load the function address from static storage that we
+    // just initialized.
+    unsafe { transmute(CLOCK_GETTIME.load(Relaxed)) }
 }
 
 #[cfg(target_arch = "x86")]
-unsafe fn init_syscall() -> SyscallType {
+fn init_syscall() -> SyscallType {
     init();
-    transmute(SYSCALL.load(Relaxed))
+    // Safety: Load the function address from static storage that we
+    // just initialized.
+    unsafe { transmute(SYSCALL.load(Relaxed)) }
 }
 
 static mut CLOCK_GETTIME: AtomicUsize = AtomicUsize::new(0);
@@ -265,24 +269,30 @@ extern "C" {
     ) -> usize;
 }
 
-unsafe fn init() {
-    CLOCK_GETTIME
-        .compare_exchange(
-            0,
-            posish_clock_gettime_via_syscall as ClockGettimeType as usize,
-            Relaxed,
-            Relaxed,
-        )
-        .ok();
-    #[cfg(target_arch = "x86")]
-    SYSCALL
-        .compare_exchange(
-            0,
-            transmute(posish_int_0x80 as SyscallType),
-            Relaxed,
-            Relaxed,
-        )
-        .ok();
+fn init() {
+    // Safety: Store default function addresses in static storage so that if we
+    // end up making any system calls while we read the vDSO, they'll work.
+    // If the memory happens to already be initialized, this is redundant, but
+    // not harmful.
+    unsafe {
+        CLOCK_GETTIME
+            .compare_exchange(
+                0,
+                posish_clock_gettime_via_syscall as ClockGettimeType as usize,
+                Relaxed,
+                Relaxed,
+            )
+            .ok();
+        #[cfg(target_arch = "x86")]
+        SYSCALL
+            .compare_exchange(
+                0,
+                transmute(posish_int_0x80 as SyscallType),
+                Relaxed,
+                Relaxed,
+            )
+            .ok();
+    }
 
     if let Some(vdso) = vdso::Vdso::new() {
         #[cfg(target_arch = "x86_64")]
@@ -295,13 +305,19 @@ unsafe fn init() {
         let ptr = vdso.sym(cstr!("LINUX_4.15"), cstr!("__kernel_clock_gettime"));
 
         assert!(!ptr.is_null());
-        CLOCK_GETTIME.store(ptr as usize, Relaxed);
 
-        #[cfg(target_arch = "x86")]
-        {
-            let ptr = vdso.sym(cstr!("LINUX_2.5"), cstr!("__kernel_vsyscall"));
-            assert!(!ptr.is_null());
-            SYSCALL.store(ptr as usize, Relaxed);
+        // Safety: Store the computed function addresses in static storage
+        // so that we don't need to compute it again (but if we do, it doesn't
+        // hurt anything).
+        unsafe {
+            CLOCK_GETTIME.store(ptr as usize, Relaxed);
+
+            #[cfg(target_arch = "x86")]
+            {
+                let ptr = vdso.sym(cstr!("LINUX_2.5"), cstr!("__kernel_vsyscall"));
+                assert!(!ptr.is_null());
+                SYSCALL.store(ptr as usize, Relaxed);
+            }
         }
     }
 }

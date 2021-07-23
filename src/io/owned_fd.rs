@@ -1,3 +1,11 @@
+//! A wrapper around `io_lifetimes::OwnedFd`.
+//!
+//! # Safety
+//!
+//! We wrap an `OwnedFd` in a `ManuallyDrop` so that we can extract the
+//! file descriptor and close it ourselves.
+#![allow(unsafe_code)]
+
 use crate::io::{close, AsRawFd, FromRawFd};
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd};
 use std::{fmt, mem::ManuallyDrop};
@@ -19,6 +27,9 @@ impl AsFd for OwnedFd {
 impl IntoFd for OwnedFd {
     #[inline]
     fn into_fd(self) -> io_lifetimes::OwnedFd {
+        // Safety: We use `as_fd().as_raw_fd()` to extract the raw file
+        // descriptor from `self.inner`. `self.inner` is wrapped with
+        // `ManuallyDrop` so dropping it doesn't invalid them.
         unsafe { io_lifetimes::OwnedFd::from_raw_fd(self.inner.as_fd().as_raw_fd()) }
     }
 }
@@ -49,6 +60,9 @@ impl From<OwnedFd> for io_lifetimes::OwnedFd {
 impl Drop for OwnedFd {
     #[inline]
     fn drop(&mut self) {
+        // Safety: We use `as_fd().as_raw_fd()` to extract the raw file
+        // descriptor from `self.inner`. `self.inner` is wrapped with
+        // `ManuallyDrop` so dropping it doesn't invalid them.
         unsafe {
             close(self.as_fd().as_raw_fd());
         }

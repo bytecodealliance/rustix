@@ -227,24 +227,28 @@ impl Ipv6Addr {
     #[cfg(const_fn_union)]
     #[inline]
     pub const fn octets(&self) -> [u8; 16] {
+        // Safety: self.0.in6_u is a union of plain data.
         unsafe { self.0.in6_u.u6_addr8 }
     }
 
     #[cfg(not(const_fn_union))]
     #[inline]
     pub fn octets(&self) -> [u8; 16] {
+        // Safety: self.0.in6_u is a union of plain data.
         unsafe { self.0.in6_u.u6_addr8 }
     }
 
     #[cfg(const_fn_union)]
     #[inline]
     pub const fn segments(&self) -> [u16; 8] {
+        // Safety: self.0.in6_u is a union of plain data.
         unsafe { self.0.in6_u.u6_addr16 }
     }
 
     #[cfg(not(const_fn_union))]
     #[inline]
     pub fn segments(&self) -> [u16; 8] {
+        // Safety: self.0.in6_u is a union of plain data.
         unsafe { self.0.in6_u.u6_addr16 }
     }
 

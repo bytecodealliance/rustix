@@ -254,8 +254,8 @@ impl<'context, T: AsFd + IntoFd + FromFd> Context for Owning<'context, T> {
 
     #[inline]
     fn release(&self, target: Ref<'_, Self::Target>) -> Self::Data {
-        // The file descriptor was held by the kernel epoll object and is now
-        // being released, so we can create a new `OwnedFd` that assumes
+        // Safety: The file descriptor was held by the kernel epoll object and
+        // is now being released, so we can create a new `OwnedFd` that assumes
         // ownership.
         let raw_fd = target.consume().as_raw_fd();
         unsafe { T::from_fd(OwnedFd::from_raw_fd(raw_fd)) }

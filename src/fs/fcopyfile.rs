@@ -7,6 +7,11 @@ pub use imp::fs::copyfile_state_t;
 
 /// `fcopyfile(from, to, state, flags)`
 ///
+/// # Safety
+///
+/// The `state` operand must be allocated with `copyfile_state_alloc` and not
+/// yet freed with `copyfile_state_free`.
+///
 /// # References
 ///  - [Apple]
 ///
@@ -36,6 +41,11 @@ pub fn copyfile_state_alloc() -> io::Result<copyfile_state_t> {
 
 /// `copyfile_state_free(state)`
 ///
+/// # Safety
+///
+/// The `state` operand must be allocated with `copyfile_state_alloc` and not
+/// yet freed with `copyfile_state_free`.
+///
 /// # References
 ///  - [Apple]
 ///
@@ -47,6 +57,11 @@ pub unsafe fn copyfile_state_free(state: copyfile_state_t) -> io::Result<()> {
 
 /// `copyfile_state_get(state, COPYFILE_STATE_COPIED)`
 ///
+/// # Safety
+///
+/// The `state` operand must be allocated with `copyfile_state_alloc` and not
+/// yet freed with `copyfile_state_free`.
+///
 /// # References
 ///  - [Apple]
 ///
@@ -57,6 +72,11 @@ pub unsafe fn copyfile_state_get_copied(state: copyfile_state_t) -> io::Result<u
 }
 
 /// `copyfile_state_get(state, flags, dst)`
+///
+/// # Safety
+///
+/// The `state` operand must be allocated with `copyfile_state_alloc` and not
+/// yet freed with `copyfile_state_free`.
 ///
 /// # References
 ///  - [Apple]

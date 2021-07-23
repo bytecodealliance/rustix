@@ -1,7 +1,5 @@
 //! I/O operations.
 
-#![allow(unsafe_code)]
-
 use crate::imp;
 #[cfg(not(target_os = "wasi"))]
 use imp::io::Tcflag;
@@ -13,6 +11,7 @@ pub(crate) use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(target_os = "wasi")]
 pub(crate) use std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 
+mod close;
 mod error;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod eventfd;
@@ -31,6 +30,7 @@ mod stdio;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod userfaultfd;
 
+pub use close::close;
 pub use error::{Error, Result};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use eventfd::{eventfd, EventfdFlags};
@@ -38,9 +38,9 @@ pub use eventfd::{eventfd, EventfdFlags};
 pub use fd::ioctl_fionread;
 #[cfg(not(target_os = "redox"))]
 pub use fd::is_read_write;
+pub use fd::isatty;
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 pub use fd::ttyname;
-pub use fd::{close, isatty};
 #[cfg(not(target_os = "wasi"))]
 pub use fd::{dup, dup2, dup2_with, DupFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]

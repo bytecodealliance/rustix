@@ -55,6 +55,11 @@ fn elf_hash(name: &CStr) -> u32 {
     h
 }
 
+/// Create a `Vdso` value by parsing the vDSO at the given address.
+///
+/// # Safety
+///
+/// `base` must be a valid pointer to an ELF image in memory.
 unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
     let mut vdso = Vdso {
         load_addr: base,
@@ -190,6 +195,11 @@ impl Vdso {
         init_from_proc_self_auxv()
     }
 
+    /// Check the version for a symbol.
+    ///
+    /// # Safety
+    ///
+    /// The raw pointers inside `self` must be valid.
     unsafe fn match_version(&self, mut ver: u16, name: &CStr, hash: u32) -> bool {
         // This is a helper function to check if the version indexed by
         // ver matches name (which hashes to hash).
@@ -239,6 +249,7 @@ impl Vdso {
         let ver_hash = elf_hash(version);
         let name_hash = elf_hash(name);
 
+        // Safety: The pointers in `self` must be valid.
         unsafe {
             let mut chain = *self.bucket.add((name_hash % self.nbucket) as usize);
 
@@ -273,6 +284,11 @@ impl Vdso {
 // Find the `AT_SYSINFO_EHDR` in auxv records in memory. We don't currently
 // have direct access to the auxv records in memory, so we use /proc/self/auxv
 // instead.
+//
+// # Safety
+//
+// `elf_auxv` must point to a valid array of AUXV records terminated by an
+// `AT_NULL` record.
 /*
 unsafe fn init_from_auxv(elf_auxv: *const Elf_auxv_t) -> Option<Vdso> {
     let mut i = 0;
