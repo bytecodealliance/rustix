@@ -1,13 +1,8 @@
 use rsix::process;
-use std::env::var;
-use std::str::FromStr;
 
 #[test]
 fn test_getuid() {
     assert_eq!(process::getuid(), process::getuid());
-    if let Ok(uid) = var("UID") {
-        assert_eq!(u32::from_str(&uid).unwrap(), process::getuid());
-    }
 }
 
 #[test]
@@ -18,9 +13,6 @@ fn test_getgid() {
 #[test]
 fn test_geteuid() {
     assert_eq!(process::geteuid(), process::geteuid());
-    if let Ok(euid) = var("EUID") {
-        assert_eq!(u32::from_str(&euid).unwrap(), process::geteuid());
-    }
 }
 
 #[test]
