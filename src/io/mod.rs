@@ -39,7 +39,7 @@ pub use fd::ioctl_fionread;
 #[cfg(not(target_os = "redox"))]
 pub use fd::is_read_write;
 pub use fd::isatty;
-#[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
+#[cfg(all(libc, not(any(target_os = "fuchsia", target_os = "wasi"))))]
 pub use fd::ttyname;
 #[cfg(not(target_os = "wasi"))]
 pub use fd::{dup, dup2, dup2_with, DupFlags};
@@ -85,6 +85,6 @@ pub const ICANON: Tcflag = imp::io::ICANON;
 /// `PIPE_BUF`
 #[cfg(any(
     linux_raw,
-    all(libc, not(any(target_os = "wasi", target_os = "redox")))
+    all(libc, not(any(target_os = "redox", target_os = "wasi")))
 ))]
 pub const PIPE_BUF: usize = imp::io::PIPE_BUF;

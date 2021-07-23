@@ -21,20 +21,20 @@ mod dir;
 )))]
 mod fadvise;
 pub(crate) mod fcntl;
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(target_os = "ios", target_os = "macos"))]
 mod fcntl_rdadvise;
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(target_os = "ios", target_os = "macos"))]
 mod fcopyfile;
 pub(crate) mod fd;
 mod file_type;
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(target_os = "ios", target_os = "macos"))]
 mod getpath;
 #[cfg(not(any(
     target_os = "ios",
     target_os = "freebsd",
+    target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "macos",
     target_os = "redox",
     target_os = "wasi"
 )))]
@@ -48,15 +48,15 @@ mod sendfile;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 mod statx;
 
-#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub use at::chmodat;
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use at::fclonefileat;
 #[cfg(not(any(
-    target_os = "wasi",
-    target_os = "redox",
+    target_os = "ios",
     target_os = "macos",
-    target_os = "ios"
+    target_os = "redox",
+    target_os = "wasi",
 )))]
 pub use at::mknodat;
 #[cfg(not(target_os = "redox"))]
@@ -65,10 +65,10 @@ pub use at::{
 };
 #[cfg(not(target_os = "redox"))]
 pub use constants::AtFlags;
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use constants::CloneFlags;
 /// `copyfile_flags_t`
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use constants::CopyfileFlags;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use constants::ResolveFlags;
@@ -102,14 +102,14 @@ pub use fcntl::fcntl_get_seals;
 pub use fcntl::{fcntl_getfd, fcntl_getfl, fcntl_setfd, fcntl_setfl};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use fcntl_rdadvise::fcntl_rdadvise;
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use fcopyfile::{
     copyfile_state_alloc, copyfile_state_free, copyfile_state_get, copyfile_state_get_copied,
     copyfile_state_t, fcopyfile,
 };
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))]
+#[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
 pub use fd::fallocate;
-#[cfg(not(any(target_os = "macos", target_os = "ios", target_os = "redox")))]
+#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
 pub use fd::fdatasync;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
@@ -118,14 +118,14 @@ pub use fd::fstatfs;
 pub use fd::{fchmod, flock};
 pub use fd::{fstat, fsync, ftruncate, futimens, is_file_read_write, seek, tell};
 pub use file_type::FileType;
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use getpath::getpath;
 #[cfg(not(any(
     target_os = "ios",
     target_os = "freebsd",
+    target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "macos",
     target_os = "redox",
     target_os = "wasi"
 )))]
@@ -147,7 +147,7 @@ pub use imp::fs::StatFs;
 #[cfg(any(linux_raw, all(libc, all(target_os = "linux", target_env = "gnu"))))]
 pub use imp::fs::Statx;
 
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))]
+#[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
 pub use imp::fs::FallocateFlags;
 
 /// `UTIME_NOW` for use with [`utimensat`].

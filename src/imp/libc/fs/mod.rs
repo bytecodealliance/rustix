@@ -3,9 +3,9 @@ mod dir;
 #[cfg(not(any(
     target_os = "ios",
     target_os = "freebsd",
+    target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "macos",
     target_os = "redox",
     target_os = "wasi"
 )))]
@@ -17,9 +17,9 @@ pub use dir::{Dir, DirEntry};
 #[cfg(not(any(
     target_os = "ios",
     target_os = "freebsd",
+    target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "macos",
     target_os = "redox",
     target_os = "wasi"
 )))]
@@ -32,7 +32,7 @@ pub use makedev::{major, makedev, minor};
     target_os = "redox"
 )))]
 pub use types::Advice;
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))]
+#[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
 pub use types::FallocateFlags;
 #[cfg(not(target_os = "wasi"))]
 pub use types::FlockOperation;

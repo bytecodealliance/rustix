@@ -66,13 +66,12 @@ pub fn clock_gettime_dynamic(id: DynamicClockId) -> io::Result<Timespec> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_nanosleep.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/clock_nanosleep.2.html
 #[cfg(any(linux_raw, all(libc, not(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "ios",
-    target_os = "redox",
-    target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
-    target_os = "openbsd",
     target_os = "emscripten",
+    target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "redox",
+    target_os = "openbsd",
     target_os = "wasi",
 )))))]
 #[inline]
@@ -93,13 +92,12 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRel
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_nanosleep.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/clock_nanosleep.2.html
 #[cfg(any(linux_raw, all(libc, not(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "ios",
-    target_os = "redox",
-    target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
-    target_os = "openbsd",
     target_os = "emscripten",
+    target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "openbsd",
+    target_os = "redox",
     target_os = "wasi",
 )))))]
 #[inline]

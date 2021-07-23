@@ -1,13 +1,13 @@
 //! POSIX-style `*at` functions.
 
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(target_os = "ios", target_os = "macos"))]
 use crate::fs::CloneFlags;
 use crate::{imp, io, path};
 #[cfg(not(any(
+    target_os = "ios",
+    target_os = "macos",
     target_os = "redox",
     target_os = "wasi",
-    target_os = "macos",
-    target_os = "ios"
 )))]
 use imp::fs::Dev;
 use imp::{
@@ -266,7 +266,7 @@ pub fn chmodat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> io::R
 ///  - [Apple]
 ///
 /// [Apple]: https://opensource.apple.com/source/xnu/xnu-3789.21.4/bsd/man/man2/clonefile.2.auto.html
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(target_os = "ios", target_os = "macos"))]
 #[inline]
 pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
     src: &Fd,
@@ -290,10 +290,10 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mknodat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mknodat.2.html
 #[cfg(not(any(
+    target_os = "ios",
+    target_os = "macos",
     target_os = "redox",
     target_os = "wasi",
-    target_os = "macos",
-    target_os = "ios"
 )))]
 #[inline]
 pub fn mknodat<P: path::Arg, Fd: AsFd>(

@@ -20,10 +20,10 @@ bitflags! {
         #[cfg(not(target_os = "redox"))]
         const WRNORM = libc::POLLWRNORM;
         /// `POLLRDBAND`
-        #[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+        #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
         const RDBAND = libc::POLLRDBAND;
         /// `POLLWRBAND`
-        #[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+        #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
         const WRBAND = libc::POLLWRBAND;
         /// `POLLERR`
         const ERR = libc::POLLERR;

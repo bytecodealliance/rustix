@@ -15,17 +15,17 @@ use super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t};
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 use super::fs::Advice;
 #[cfg(not(any(
+    target_os = "ios",
+    target_os = "macos",
     target_os = "redox",
     target_os = "wasi",
-    target_os = "macos",
-    target_os = "ios"
 )))]
 use super::fs::Dev;
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))]
+#[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
 use super::fs::FallocateFlags;
 #[cfg(not(target_os = "wasi"))]
 use super::fs::FlockOperation;
@@ -38,34 +38,34 @@ use super::fs::StatFs;
 use super::fs::{Statx, StatxFlags};
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 use super::io::PipeFlags;
-#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::net::{
     decode_sockaddr, AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown,
     SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6, SocketType,
 };
-#[cfg(any(target_os = "linux", target_os = "android", target_os = "fuchsia"))]
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 use super::offset::libc_fallocate;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 use super::offset::libc_fstatfs;
 #[cfg(not(target_os = "wasi"))]
 use super::offset::libc_mmap;
 #[cfg(not(any(
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "ios",
     target_os = "macos",
+    target_os = "netbsd",
+    target_os = "openbsd",
     target_os = "redox",
 )))]
 use super::offset::libc_posix_fadvise;
 #[cfg(not(any(
-    target_os = "netbsd",
-    target_os = "openbsd",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "redox",
-    target_os = "linux",
     target_os = "android",
     target_os = "fuchsia",
+    target_os = "ios",
+    target_os = "linux",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "openbsd",
+    target_os = "redox",
 )))]
 use super::offset::libc_posix_fallocate;
 #[cfg(target_os = "linux")]
@@ -88,7 +88,7 @@ use crate::{
 };
 use errno::errno;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
-#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use std::ffi::OsString;
 #[cfg(target_os = "linux")]
 use std::mem::transmute;
@@ -472,8 +472,8 @@ pub(crate) fn utimensat(
 #[cfg(not(any(
     target_os = "android",
     target_os = "linux",
+    target_os = "redox",
     target_os = "wasi",
-    target_os = "redox"
 )))]
 pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
     unsafe {
@@ -499,7 +499,7 @@ pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Res
     }
 }
 
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(target_os = "ios", target_os = "macos"))]
 pub(crate) fn fclonefileat(
     srcfd: BorrowedFd<'_>,
     dst_dirfd: BorrowedFd<'_>,
@@ -519,10 +519,10 @@ pub(crate) fn fclonefileat(
 }
 
 #[cfg(not(any(
+    target_os = "ios",
+    target_os = "macos",
     target_os = "redox",
     target_os = "wasi",
-    target_os = "macos",
-    target_os = "ios"
 )))]
 pub(crate) fn mknodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode, dev: Dev) -> io::Result<()> {
     unsafe {
@@ -738,12 +738,12 @@ pub(crate) fn fallocate(
     let offset = offset as i64;
     let len = len as i64;
 
-    #[cfg(any(target_os = "linux", target_os = "android", target_os = "fuchsia"))]
+    #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
     unsafe {
         ret(libc_fallocate(borrowed_fd(fd), mode.bits(), offset, len))
     }
 
-    #[cfg(not(any(target_os = "linux", target_os = "android", target_os = "fuchsia")))]
+    #[cfg(not(any(target_os = "android", target_os = "fuchsia", target_os = "linux")))]
     {
         assert!(mode.is_empty());
         let err = unsafe { libc_posix_fallocate(borrowed_fd(fd), offset, len) };
@@ -1050,7 +1050,7 @@ pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, _flags: DupFlags) -> 
     dup2(fd, new)
 }
 
-#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, reuse: OsString) -> io::Result<OsString> {
     // This code would benefit from having a better way to read into
     // uninitialized memory, but that requires `unsafe`.
@@ -1556,7 +1556,7 @@ pub(crate) fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usi
     Ok(nread as usize)
 }
 
-#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[inline]
 #[must_use]
 pub(crate) fn clock_getres(id: ClockId) -> Timespec {
@@ -1631,13 +1631,12 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId) -> io::Result<Timespec> 
 }
 
 #[cfg(not(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "ios",
-    target_os = "redox",
-    target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
-    target_os = "openbsd",
     target_os = "emscripten",
+    target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "openbsd",
+    target_os = "redox",
     target_os = "wasi",
 )))]
 #[inline]
@@ -1657,13 +1656,12 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
 }
 
 #[cfg(not(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "ios",
-    target_os = "redox",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
-    target_os = "openbsd",
     target_os = "emscripten",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "openbsd",
+    target_os = "redox",
     target_os = "wasi",
 )))]
 #[inline]

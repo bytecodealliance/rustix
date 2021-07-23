@@ -1,4 +1,4 @@
-#[cfg(any(target_os = "linux", target_os = "android"))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn test_statx() {
     use posish::fs::{FsWord, StatFs, PROC_SUPER_MAGIC};

@@ -501,7 +501,7 @@ bitflags! {
     }
 }
 
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "openbsd")))]
+#[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
 bitflags! {
     /// `FALLOC_FL_*` constants for use with [`fallocate`].
     ///

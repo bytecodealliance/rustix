@@ -3,7 +3,7 @@
 mod time {
     mod clocks;
     mod dynamic_clocks;
-    #[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+    #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
     mod monotonic;
     mod timespec;
     mod y2038;

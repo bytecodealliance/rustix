@@ -59,20 +59,20 @@ pub(super) use libc::fallocate as libc_fallocate;
 pub(super) use libc::fallocate64 as libc_fallocate;
 #[cfg(not(any(
     target_os = "android",
-    target_os = "linux",
     target_os = "emscripten",
+    target_os = "ios",
+    target_os = "linux",
     target_os = "l4re",
+    target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "ios",
-    target_os = "macos",
     target_os = "redox",
 )))]
 pub(super) use libc::posix_fadvise as libc_posix_fadvise;
 #[cfg(any(
     target_os = "android",
-    target_os = "linux",
     target_os = "emscripten",
+    target_os = "linux",
     target_os = "l4re",
 ))]
 pub(super) use libc::posix_fadvise64 as libc_posix_fadvise;
@@ -86,11 +86,11 @@ pub(super) use libc::{
 };
 #[cfg(not(any(
     target_os = "android",
-    target_os = "linux",
     target_os = "emscripten",
-    target_os = "redox",
     target_os = "ios",
+    target_os = "linux",
     target_os = "macos",
+    target_os = "redox",
 )))]
 pub(super) use libc::{preadv as libc_preadv, pwritev as libc_pwritev};
 // macOS added preadv and pwritev in version 11.0
@@ -124,18 +124,18 @@ pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
     target_os = "l4re",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 pub(super) use libc::fstatfs as libc_fstatfs;
 #[cfg(not(any(
     target_os = "android",
+    target_os = "fuchsia",
+    target_os = "ios",
     target_os = "linux",
     target_os = "l4re",
-    target_os = "fuchsia",
+    target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "ios",
-    target_os = "macos",
     target_os = "redox",
 )))]
 pub(super) use libc::posix_fallocate as libc_posix_fallocate;

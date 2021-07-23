@@ -19,7 +19,7 @@ pub type Nsecs = std::os::raw::c_long;
 /// all of them are always support
 ///
 /// [`clock_gettime`]: crate::time::clock_gettime
-#[cfg(not(any(target_os = "macos", target_os = "ios", target_os = "wasi")))]
+#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(i32)]
 #[non_exhaustive]
@@ -57,7 +57,7 @@ pub enum ClockId {
 /// has to fail with `INVAL` due to an unsupported clock. See
 /// [`DynamicClockId`] for a greater set of clocks, with the caveat that not
 /// all of them are always support
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(target_os = "ios", target_os = "macos"))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(u32)]
 #[non_exhaustive]

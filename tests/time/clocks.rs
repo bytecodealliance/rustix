@@ -1,11 +1,10 @@
 #[cfg(not(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "ios",
-    target_os = "redox",
-    target_os = "freebsd",
-    target_os = "openbsd",
     target_os = "emscripten",
+    target_os = "freebsd",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "openbsd",
+    target_os = "redox",
     target_os = "wasi",
 )))]
 use posish::time::{clock_nanosleep_absolute, clock_nanosleep_relative, ClockId};
@@ -35,13 +34,12 @@ fn test_invalid_nanosleep() {
 }
 
 #[cfg(not(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "ios",
-    target_os = "redox",
-    target_os = "freebsd",
-    target_os = "openbsd",
     target_os = "emscripten",
+    target_os = "freebsd",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "openbsd",
+    target_os = "redox",
     target_os = "wasi",
 )))]
 #[test]
@@ -69,13 +67,12 @@ fn test_invalid_nanosleep_absolute() {
 }
 
 #[cfg(not(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "ios",
-    target_os = "redox",
-    target_os = "freebsd",
-    target_os = "openbsd",
     target_os = "emscripten",
+    target_os = "freebsd",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "openbsd",
+    target_os = "redox",
     target_os = "wasi",
 )))]
 #[test]
@@ -115,13 +112,12 @@ fn test_zero_nanosleep() {
 }
 
 #[cfg(not(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "ios",
-    target_os = "redox",
-    target_os = "freebsd",
-    target_os = "openbsd",
     target_os = "emscripten",
+    target_os = "freebsd",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "openbsd",
+    target_os = "redox",
     target_os = "wasi",
 )))]
 #[test]
@@ -139,13 +135,12 @@ fn test_zero_nanosleep_absolute() {
 }
 
 #[cfg(not(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "ios",
-    target_os = "redox",
-    target_os = "freebsd",
-    target_os = "openbsd",
     target_os = "emscripten",
+    target_os = "freebsd",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "openbsd",
+    target_os = "redox",
     target_os = "wasi",
 )))]
 #[test]

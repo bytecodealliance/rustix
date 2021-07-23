@@ -1,8 +1,8 @@
 #[cfg(not(any(
-    target_os = "wasi",
-    target_os = "redox",
+    target_os = "ios",
     target_os = "macos",
-    target_os = "ios"
+    target_os = "redox",
+    target_os = "wasi",
 )))]
 #[test]
 fn test_mknodat() {

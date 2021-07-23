@@ -9,9 +9,9 @@ mod fs {
     #[cfg(not(any(
         target_os = "ios",
         target_os = "freebsd",
+        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "macos",
         target_os = "redox",
         target_os = "wasi"
     )))]

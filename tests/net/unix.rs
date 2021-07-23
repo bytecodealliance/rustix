@@ -3,10 +3,10 @@
 
 // This test uses AF_UNIX with SOCK_SEQPACKET which is unsupported on macOS.
 #![cfg(not(any(
+    target_os = "ios",
+    target_os = "macos",
     target_os = "redox",
     target_os = "wasi",
-    target_os = "macos",
-    target_os = "ios"
 )))]
 
 use posish::{

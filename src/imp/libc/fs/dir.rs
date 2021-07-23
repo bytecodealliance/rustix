@@ -150,10 +150,10 @@ unsafe fn read_dirent(dirent_ptr: *const libc_dirent) -> libc_dirent {
         d_reclen,
         #[cfg(any(
             target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
-            target_os = "ios",
-            target_os = "macos"
         ))]
         d_namlen,
         #[cfg(any(target_os = "ios", target_os = "macos"))]
