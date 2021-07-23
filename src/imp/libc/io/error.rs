@@ -1,3 +1,8 @@
+//! The posish `Error` type.
+//!
+//! This type holds an OS error code, which conceptually corresponds to an
+//! `errno` value.
+
 use errno::errno;
 use std::os::raw::c_int;
 
