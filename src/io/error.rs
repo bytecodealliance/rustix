@@ -1,7 +1,7 @@
-//! The `Error` type, which is a minimal wrapper around an errno value.
+//! The `Error` type, which is a minimal wrapper around an error code.
 //!
-//! We define the errno constants as individual `const`s instead of an
-//! enum because we may not know about all of the host's errno values
+//! We define the error constants as individual `const`s instead of an
+//! enum because we may not know about all of the host's error values
 //! and we don't want unrecognized values to create UB.
 
 #![allow(missing_docs)]
@@ -12,7 +12,7 @@ use std::{error, fmt, result};
 /// A specialized `Result` type for posish APIs.
 pub type Result<T> = result::Result<T, Error>;
 
-/// `errno`
+/// `errno`—An error code.
 ///
 /// The error type for posish APIs. This is similar to `std::io::Error`, but
 /// only holds an OS error code, and no extra error value.
