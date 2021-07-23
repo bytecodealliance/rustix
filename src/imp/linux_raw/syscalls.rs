@@ -68,7 +68,7 @@ use linux_raw_sys::general::{
     __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
     __NR_epoll_create1, __NR_epoll_ctl, __NR_exit_group, __NR_faccessat, __NR_fallocate,
     __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_flock, __NR_fsync, __NR_getcwd,
-    __NR_getdents64, __NR_getpid, __NR_getppid, __NR_ioctl, __NR_linkat, __NR_madvise,
+    __NR_getdents64, __NR_getpid, __NR_getppid, __NR_gettid, __NR_ioctl, __NR_linkat, __NR_madvise,
     __NR_mkdirat, __NR_mknodat, __NR_munmap, __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_pread64,
     __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv,
     __NR_sched_yield, __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
@@ -2787,9 +2787,9 @@ pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd>
 
 #[inline]
 pub(crate) fn getpid() -> u32 {
-    let gid: i32 =
+    let pid: i32 =
         unsafe { ret_usize_infallible(syscall0_readonly(nr(__NR_getpid))) as __kernel_pid_t };
-    gid as u32
+    pid as u32
 }
 
 #[inline]
@@ -2847,6 +2847,13 @@ pub(crate) fn geteuid() -> u32 {
     unsafe {
         ret_usize_infallible(syscall0_readonly(nr(__NR_geteuid))) as __kernel_uid_t
     }
+}
+
+#[inline]
+pub(crate) fn gettid() -> u32 {
+    let tid: i32 =
+        unsafe { ret_usize_infallible(syscall0_readonly(nr(__NR_gettid))) as __kernel_pid_t };
+    tid as u32
 }
 
 #[inline]

@@ -72,6 +72,7 @@ pub mod net;
 pub mod path;
 pub mod process;
 pub mod rand;
+pub mod thread;
 pub mod time;
 
 /// Convert a `&T` into a `*const T` without using an `as`.

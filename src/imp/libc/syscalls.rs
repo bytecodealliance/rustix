@@ -1973,6 +1973,14 @@ pub(crate) fn getppid() -> u32 {
     pid as u32
 }
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+#[must_use]
+pub(crate) fn gettid() -> u32 {
+    let tid: i32 = unsafe { libc::gettid() };
+    tid as u32
+}
+
 #[inline]
 pub(crate) fn sched_yield() {
     unsafe {
