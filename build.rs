@@ -26,12 +26,14 @@ fn main() {
             .channel
         {
             println!("cargo:rustc-cfg=linux_raw_inline_asm");
-            println!("cargo:rustc-cfg=const_fn_union");
             println!("cargo:rustc-cfg=rustc_attrs");
         } else {
             Build::new().file(&asm_name).compile("asm");
             println!("cargo:rerun-if-changed={}", asm_name);
             println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_ARCH");
+        }
+        if rustc_version::version().unwrap() >= rustc_version::Version::parse("1.56.0").unwrap() {
+            println!("cargo:rustc-cfg=const_fn_union");
         }
     }
     println!("cargo:rerun-if-env-changed=CARGO_CFG_POSISH_USE_LIBC");
