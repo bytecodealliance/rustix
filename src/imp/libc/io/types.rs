@@ -1,7 +1,7 @@
 use bitflags::bitflags;
 use std::os::raw::c_int;
 
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
     /// `RWF_*` constants for use with [`preadv2`] and [`pwritev2`].
     ///
@@ -9,14 +9,19 @@ bitflags! {
     /// [`pwritev2`]: crate::io::pwritev
     pub struct ReadWriteFlags: c_int {
         /// `RWF_DSYNC`
+        #[cfg(all(target_os = "linux", target_env = "gnu"))]
         const DSYNC = libc::RWF_DSYNC;
         /// `RWF_HIPRI`
+        #[cfg(all(target_os = "linux", target_env = "gnu"))]
         const HIPRI = libc::RWF_HIPRI;
         /// `RWF_SYNC`
+        #[cfg(all(target_os = "linux", target_env = "gnu"))]
         const SYNC = libc::RWF_SYNC;
         /// `RWF_NOWAIT`
+        #[cfg(all(target_os = "linux", target_env = "gnu"))]
         const NOWAIT = libc::RWF_NOWAIT;
         /// `RWF_APPEND`
+        #[cfg(all(target_os = "linux", target_env = "gnu"))]
         const APPEND = libc::RWF_APPEND;
     }
 }

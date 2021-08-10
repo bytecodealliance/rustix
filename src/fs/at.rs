@@ -2,6 +2,8 @@
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use crate::fs::CloneFlags;
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+use crate::fs::RenameFlags;
 use crate::{imp, io, path};
 #[cfg(not(any(
     target_os = "ios",
@@ -157,6 +159,32 @@ pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
     old_path.into_with_c_str(|old_path| {
         new_path.into_with_c_str(|new_path| {
             imp::syscalls::renameat(old_dirfd, old_path, new_dirfd, new_path)
+        })
+    })
+}
+
+/// `renameat2(old_dirfd, old_path, new_dirfd, new_path, flags)`—Renames a
+/// file or directory.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/renameat2.2.html
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[inline]
+#[doc(alias = "renameat2")]
+pub fn renameat_with<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
+    old_dirfd: &PFd,
+    old_path: P,
+    new_dirfd: &QFd,
+    new_path: Q,
+    flags: RenameFlags,
+) -> io::Result<()> {
+    let old_dirfd = old_dirfd.as_fd();
+    let new_dirfd = new_dirfd.as_fd();
+    old_path.into_with_c_str(|old_path| {
+        new_path.into_with_c_str(|new_path| {
+            imp::syscalls::renameat2(old_dirfd, old_path, new_dirfd, new_path, flags)
         })
     })
 }

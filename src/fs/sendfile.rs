@@ -7,7 +7,7 @@ use io_lifetimes::AsFd;
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendfile.2.html
-#[cfg(any(linux_raw, target_os = "linux"))]
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 #[inline]
 pub fn sendfile<OutFd: AsFd, InFd: AsFd>(
     out_fd: &OutFd,

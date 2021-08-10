@@ -32,17 +32,19 @@ use super::fs::Dev;
 use super::fs::FallocateFlags;
 #[cfg(not(target_os = "wasi"))]
 use super::fs::FlockOperation;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use super::fs::ResolveFlags;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
 use super::fs::StatFs;
 use super::fs::{Access, FdFlags, Mode, OFlags, Stat};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use super::fs::{RenameFlags, ResolveFlags};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::fs::{Statx, StatxFlags};
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 use super::io::PipeFlags;
 use super::io::PollFd;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use super::io::ReadWriteFlags;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::net::{
     decode_sockaddr, AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown,
@@ -74,14 +76,11 @@ use super::offset::libc_posix_fadvise;
 )))]
 use super::offset::libc_posix_fallocate;
 use super::offset::{libc_fstat, libc_fstatat, libc_lseek, libc_off_t, libc_pread, libc_pwrite};
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
+use super::offset::{libc_preadv2, libc_pwritev2};
 #[cfg(target_os = "linux")]
 use super::rand::GetRandomFlags;
 use super::time::Timespec;
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
-use super::{
-    io::ReadWriteFlags,
-    offset::{libc_preadv2, libc_pwritev2},
-};
 use crate::as_ptr;
 use crate::io::{self, RawFd};
 use errno::errno;
@@ -251,6 +250,23 @@ pub(crate) fn preadv2(
     Ok(nread as usize)
 }
 
+/// At present, `libc` only has `preadv2` defined for glibc. On other
+/// ABIs, `ReadWriteFlags` has no flags defined, and we use plain `preadv`.
+#[cfg(any(
+    target_os = "android",
+    all(target_os = "linux", not(target_env = "gnu"))
+))]
+#[inline]
+pub(crate) fn preadv2(
+    fd: BorrowedFd<'_>,
+    bufs: &[IoSliceMut],
+    offset: u64,
+    flags: ReadWriteFlags,
+) -> io::Result<usize> {
+    assert!(flags.is_empty());
+    preadv(fd, bufs, offset)
+}
+
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 pub(crate) fn pwritev2(
     fd: BorrowedFd<'_>,
@@ -270,6 +286,23 @@ pub(crate) fn pwritev2(
         ))?
     };
     Ok(nwritten as usize)
+}
+
+/// At present, `libc` only has `pwritev2` defined for glibc. On other
+/// ABIs, `ReadWriteFlags` has no flags defined, and we use plain `pwritev`.
+#[cfg(any(
+    target_os = "android",
+    all(target_os = "linux", not(target_env = "gnu"))
+))]
+#[inline]
+pub(crate) fn pwritev2(
+    fd: BorrowedFd<'_>,
+    bufs: &[IoSlice],
+    offset: u64,
+    flags: ReadWriteFlags,
+) -> io::Result<usize> {
+    assert!(flags.is_empty());
+    pwritev(fd, bufs, offset)
 }
 
 // These functions are derived from Rust's library/std/src/sys/unix/fd.rs at
@@ -390,6 +423,43 @@ pub(crate) fn renameat(
             c_str(new_path),
         ))
     }
+}
+
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
+pub(crate) fn renameat2(
+    old_dirfd: BorrowedFd<'_>,
+    old_path: &CStr,
+    new_dirfd: BorrowedFd<'_>,
+    new_path: &CStr,
+    flags: RenameFlags,
+) -> io::Result<()> {
+    unsafe {
+        ret(libc::renameat2(
+            borrowed_fd(old_dirfd),
+            c_str(old_path),
+            borrowed_fd(new_dirfd),
+            c_str(new_path),
+            flags.bits(),
+        ))
+    }
+}
+
+/// At present, `libc` only has `renameat2` defined for glibc. On other
+/// ABIs, `RenameFlags` has no flags defined, and we use plain `renameat`.
+#[cfg(any(
+    target_os = "android",
+    all(target_os = "linux", not(target_env = "gnu"))
+))]
+#[inline]
+pub(crate) fn renameat2(
+    old_dirfd: BorrowedFd<'_>,
+    old_path: &CStr,
+    new_dirfd: BorrowedFd<'_>,
+    new_path: &CStr,
+    flags: RenameFlags,
+) -> io::Result<()> {
+    assert!(flags.is_empty());
+    renameat(old_dirfd, old_path, new_dirfd, new_path)
 }
 
 #[cfg(not(target_os = "redox"))]

@@ -14,14 +14,12 @@ pub use poll_fd::{PollFd, PollFlags};
     )
 ))]
 pub use types::PipeFlags;
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
-pub use types::ReadWriteFlags;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub use types::PIPE_BUF;
 #[cfg(not(target_os = "wasi"))]
 pub use types::{DupFlags, MapFlags, ProtFlags, Tcflag, Termios, Winsize, ICANON};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use types::{EventfdFlags, UserfaultfdFlags};
+pub use types::{EventfdFlags, ReadWriteFlags, UserfaultfdFlags};
 
 use std::os::raw::c_int;
 

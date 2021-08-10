@@ -59,6 +59,8 @@ pub use at::fclonefileat;
     target_os = "wasi",
 )))]
 pub use at::mknodat;
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+pub use at::renameat_with;
 #[cfg(not(target_os = "redox"))]
 pub use at::{
     accessat, linkat, mkdirat, openat, readlinkat, renameat, statat, symlinkat, unlinkat, utimensat,
@@ -70,6 +72,8 @@ pub use constants::CloneFlags;
 /// `copyfile_flags_t`
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use constants::CopyfileFlags;
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+pub use constants::RenameFlags;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use constants::ResolveFlags;
 pub use constants::{Access, FdFlags, Mode, OFlags};
@@ -144,7 +148,7 @@ pub use imp::fs::Stat;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 pub use imp::fs::StatFs;
 
-#[cfg(any(linux_raw, all(libc, all(target_os = "linux", target_env = "gnu"))))]
+#[cfg(any(linux_raw, all(libc, target_os = "linux", target_env = "gnu")))]
 pub use imp::fs::Statx;
 
 #[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]

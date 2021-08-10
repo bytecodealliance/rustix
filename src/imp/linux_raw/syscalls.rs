@@ -30,7 +30,7 @@ use super::conv::{
 };
 use super::fs::{
     Access, Advice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode, OFlags,
-    ResolveFlags, Stat, StatFs, StatxFlags,
+    RenameFlags, ResolveFlags, Stat, StatFs, StatxFlags,
 };
 use super::io::{
     epoll, DupFlags, EventfdFlags, MapFlags, PipeFlags, PollFd, ProtFlags, ReadWriteFlags,
@@ -54,8 +54,6 @@ use linux_raw_sys::general::__NR_epoll_pwait;
 use linux_raw_sys::general::__NR_epoll_wait;
 #[cfg(not(any(target_arch = "riscv64")))]
 use linux_raw_sys::general::__NR_renameat;
-#[cfg(any(target_arch = "riscv64"))]
-use linux_raw_sys::general::__NR_renameat2;
 #[cfg(not(target_arch = "x86"))]
 use linux_raw_sys::general::{
     __NR_accept, __NR_accept4, __NR_bind, __NR_connect, __NR_getpeername, __NR_getsockname,
@@ -94,7 +92,8 @@ use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::v5_11::general::{__NR_openat2, open_how};
 use linux_raw_sys::v5_4::general::{
     __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_memfd_create, __NR_preadv2,
-    __NR_pwritev2, __NR_statx, __NR_userfaultfd, statx, F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ,
+    __NR_pwritev2, __NR_renameat2, __NR_statx, __NR_userfaultfd, statx, F_GETPIPE_SZ, F_GET_SEALS,
+    F_SETPIPE_SZ,
 };
 use std::convert::TryInto;
 use std::ffi::CStr;
@@ -1192,6 +1191,26 @@ pub(crate) fn renameat(
             c_str(oldname),
             borrowed_fd(new_dirfd),
             c_str(newname),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn renameat2(
+    old_dirfd: BorrowedFd<'_>,
+    oldname: &CStr,
+    new_dirfd: BorrowedFd<'_>,
+    newname: &CStr,
+    flags: RenameFlags,
+) -> io::Result<()> {
+    unsafe {
+        ret(syscall5_readonly(
+            __NR_renameat2,
+            borrowed_fd(old_dirfd),
+            c_str(oldname),
+            borrowed_fd(new_dirfd),
+            c_str(newname),
+            c_uint(flags.bits()),
         ))
     }
 }

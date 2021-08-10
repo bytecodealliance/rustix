@@ -21,3 +21,6 @@ pub use imp::fs::CopyfileFlags;
 
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use imp::fs::ResolveFlags;
+
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+pub use imp::fs::RenameFlags;

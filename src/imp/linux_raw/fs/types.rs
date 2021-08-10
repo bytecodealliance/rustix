@@ -221,6 +221,22 @@ bitflags! {
     }
 }
 
+bitflags! {
+    /// `RENAME_*` constants for use with [`renameat_with`].
+    ///
+    /// [`renameat_with`]: crate::fs::renameat_with
+    pub struct RenameFlags: std::os::raw::c_uint {
+        /// `RENAME_EXCHANGE`
+        const EXCHANGE = linux_raw_sys::v5_4::general::RENAME_EXCHANGE;
+
+        /// `RENAME_NOREPLACE`
+        const NOREPLACE = linux_raw_sys::v5_4::general::RENAME_NOREPLACE;
+
+        /// `RENAME_WHITEOUT`
+        const WHITEOUT = linux_raw_sys::v5_4::general::RENAME_WHITEOUT;
+    }
+}
+
 /// `S_IF*` constants.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FileType {

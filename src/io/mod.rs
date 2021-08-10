@@ -63,7 +63,7 @@ pub use procfs::{proc, proc_self, proc_self_fd};
 pub use read_write::{pread, pwrite, read, readv, write, writev};
 #[cfg(not(target_os = "redox"))]
 pub use read_write::{preadv, pwritev};
-#[cfg(any(linux_raw, all(libc, target_os = "linux", target_env = "gnu")))]
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use read_write::{preadv2, pwritev2, ReadWriteFlags};
 pub use stdio::{stderr, stdin, stdout, take_stderr, take_stdin, take_stdout};
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]

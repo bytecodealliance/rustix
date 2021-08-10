@@ -18,4 +18,5 @@ mod makedev;
 mod mkdirat;
 mod mknodat;
 mod readdir;
+mod renameat;
 mod statfs;

@@ -338,6 +338,26 @@ bitflags! {
     }
 }
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    /// `RENAME_*` constants for use with [`renameat_with`].
+    ///
+    /// [`renameat_with`]: crate::fs::renameat_with
+    pub struct RenameFlags: libc::c_uint {
+        /// `RENAME_EXCHANGE`
+        #[cfg(all(target_os = "linux", target_env = "gnu"))]
+        const EXCHANGE = libc::RENAME_EXCHANGE;
+
+        /// `RENAME_NOREPLACE`
+        #[cfg(all(target_os = "linux", target_env = "gnu"))]
+        const NOREPLACE = libc::RENAME_NOREPLACE;
+
+        /// `RENAME_WHITEOUT`
+        #[cfg(all(target_os = "linux", target_env = "gnu"))]
+        const WHITEOUT = libc::RENAME_WHITEOUT;
+    }
+}
+
 /// `S_IF*` constants.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FileType {
