@@ -29,14 +29,6 @@ impl Error {
     pub fn kind(self) -> std::io::ErrorKind {
         std::io::Error::from(self).kind()
     }
-
-    /// Extract the raw OS error number from this error.
-    #[inline]
-    pub const fn raw_os_error(self) -> i32 {
-        // This should be `i32::from` but that isn't a `const fn`.
-        // Fortunately, we know `as i32` won't overflow.
-        self.0 as i32
-    }
 }
 
 impl fmt::Display for Error {
@@ -56,6 +48,6 @@ impl error::Error for Error {}
 impl From<Error> for std::io::Error {
     #[inline]
     fn from(err: Error) -> Self {
-        Self::from_raw_os_error(err.0 as _)
+        Self::from_raw_os_error(err.raw_os_error() as _)
     }
 }

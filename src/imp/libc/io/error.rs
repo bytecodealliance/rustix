@@ -705,6 +705,12 @@ impl Error {
             .and_then(|raw| if raw != 0 { Some(Self(raw)) } else { None })
     }
 
+    /// Extract the raw OS error number from this error.
+    #[inline]
+    pub const fn raw_os_error(self) -> i32 {
+        self.0
+    }
+
     pub(crate) fn last_os_error() -> Self {
         Self(errno().0)
     }
