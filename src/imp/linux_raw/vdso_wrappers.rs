@@ -14,7 +14,6 @@ use super::conv::ret;
 use super::time::{ClockId, DynamicClockId, Timespec};
 use super::vdso;
 use crate::io;
-use cstr::cstr;
 use linux_raw_sys::general::{__NR_clock_gettime, __kernel_clockid_t, __kernel_timespec};
 #[cfg(target_pointer_width = "32")]
 use linux_raw_sys::{

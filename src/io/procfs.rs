@@ -12,7 +12,6 @@ use crate::fs::{
 use crate::io::{self, OwnedFd};
 use crate::path::DecInt;
 use crate::process::{getgid, getpid, getuid};
-use cstr::cstr;
 use io_lifetimes::{AsFd, BorrowedFd};
 use once_cell::sync::Lazy;
 

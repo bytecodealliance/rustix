@@ -57,6 +57,9 @@
 /// that our users don't need to do anything special to use the same version.
 pub use io_lifetimes;
 
+#[macro_use]
+pub(crate) mod cstr;
+
 mod imp;
 
 pub mod fs;
