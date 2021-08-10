@@ -21,7 +21,7 @@ rustc_version = "0.4.0"
 [dependencies]
 bitflags = "1.2.1"
 itoa = "0.4.7"
-io-lifetimes = "0.2.0"
+io-lifetimes = "0.2.2"
 once_cell = "1.5.2"
 cstr = "0.2.8"
 const_fn_assert = "0.1.2"
@@ -40,6 +40,17 @@ libc = "0.2.98"
 
 [target.'cfg(not(target_os = "emscripten"))'.dev-dependencies]
 criterion = "0.3"
+
+[features]
+default = []
+
+# Expose io-lifetimes' features for third-party crate impls.
+async-std = ["io-lifetimes/async-std"]
+tokio = ["io-lifetimes/tokio"]
+os_pipe = ["io-lifetimes/os_pipe"]
+socket2 = ["io-lifetimes/socket2"]
+mio = ["io-lifetimes/mio"]
+fs-err = ["io-lifetimes/fs-err"]
 
 [badges]
 maintenance = { status = "actively-developed" }
