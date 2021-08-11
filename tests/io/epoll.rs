@@ -81,11 +81,17 @@ fn test_epoll() {
     let ready = Arc::new((Mutex::new(0_u16), Condvar::new()));
     let ready_clone = Arc::clone(&ready);
 
-    let _server = thread::spawn(move || {
-        server(ready);
-    });
-    let client = thread::spawn(move || {
-        client(ready_clone);
-    });
+    let _server = thread::Builder::new()
+        .name("server".to_string())
+        .spawn(move || {
+            server(ready);
+        })
+        .unwrap();
+    let client = thread::Builder::new()
+        .name("client".to_string())
+        .spawn(move || {
+            client(ready_clone);
+        })
+        .unwrap();
     client.join().unwrap();
 }

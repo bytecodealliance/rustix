@@ -78,12 +78,18 @@ fn test_v6() {
     let ready = Arc::new((Mutex::new(0_u16), Condvar::new()));
     let ready_clone = Arc::clone(&ready);
 
-    let server = thread::spawn(move || {
-        server(ready);
-    });
-    let client = thread::spawn(move || {
-        client(ready_clone);
-    });
+    let server = thread::Builder::new()
+        .name("server".to_string())
+        .spawn(move || {
+            server(ready);
+        })
+        .unwrap();
+    let client = thread::Builder::new()
+        .name("client".to_string())
+        .spawn(move || {
+            client(ready_clone);
+        })
+        .unwrap();
     client.join().unwrap();
     server.join().unwrap();
 }

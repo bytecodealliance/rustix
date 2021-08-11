@@ -116,22 +116,28 @@ fn test_unix() {
     let tmp = tempfile::tempdir().unwrap();
     let path = tmp.path().join("soccer");
     let send_path = path.to_owned();
-    let server = thread::spawn(move || {
-        server(ready, &send_path);
-    });
+    let server = thread::Builder::new()
+        .name("server".to_string())
+        .spawn(move || {
+            server(ready, &send_path);
+        })
+        .unwrap();
     let send_path = path.to_owned();
-    let client = thread::spawn(move || {
-        client(
-            ready_clone,
-            &send_path,
-            &[
-                (&["1", "2"], 3),
-                (&["4", "77", "103"], 184),
-                (&["5", "78", "104"], 187),
-                (&[], 0),
-            ],
-        );
-    });
+    let client = thread::Builder::new()
+        .name("client".to_string())
+        .spawn(move || {
+            client(
+                ready_clone,
+                &send_path,
+                &[
+                    (&["1", "2"], 3),
+                    (&["4", "77", "103"], 184),
+                    (&["5", "78", "104"], 187),
+                    (&[], 0),
+                ],
+            );
+        })
+        .unwrap();
     client.join().unwrap();
     server.join().unwrap();
 }
