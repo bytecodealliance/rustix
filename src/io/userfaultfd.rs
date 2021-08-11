@@ -6,8 +6,8 @@
 //! observe and manipulate process memory in magical ways.
 #![allow(unsafe_code)]
 
-use crate::{imp, io};
-use io_lifetimes::OwnedFd;
+use crate::imp;
+use crate::io::{self, OwnedFd};
 
 pub use imp::io::UserfaultfdFlags;
 

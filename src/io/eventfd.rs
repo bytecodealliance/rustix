@@ -1,5 +1,5 @@
-use crate::{imp, io};
-use io_lifetimes::OwnedFd;
+use crate::imp;
+use crate::io::{self, OwnedFd};
 
 pub use imp::io::EventfdFlags;
 

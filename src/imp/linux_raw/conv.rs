@@ -10,9 +10,9 @@
 use super::fs::{Mode, OFlags};
 use super::io::{check_fd, check_result, check_void};
 use super::time::ClockId;
-use crate::io::{AsRawFd, FromRawFd};
-use crate::{as_mut_ptr, as_ptr, io};
-use io_lifetimes::{BorrowedFd, OwnedFd};
+use crate::io::{self, AsRawFd, FromRawFd, OwnedFd};
+use crate::{as_mut_ptr, as_ptr};
+use io_lifetimes::BorrowedFd;
 #[cfg(target_pointer_width = "64")]
 use linux_raw_sys::general::__kernel_loff_t;
 #[cfg(target_pointer_width = "32")]
@@ -261,7 +261,7 @@ pub(super) fn ret_usize(raw: usize) -> io::Result<usize> {
 #[inline]
 pub(super) unsafe fn ret_owned_fd(raw: usize) -> io::Result<OwnedFd> {
     let raw_fd = check_fd(raw)?;
-    Ok(OwnedFd::from_raw_fd(raw_fd))
+    Ok(OwnedFd::from(io_lifetimes::OwnedFd::from_raw_fd(raw_fd)))
 }
 
 /// Convert the return value of `dup2` and `dup3`.

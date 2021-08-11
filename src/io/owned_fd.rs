@@ -9,7 +9,7 @@
 use crate::io::{close, AsRawFd, FromRawFd};
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd};
 use std::fmt;
-use std::mem::ManuallyDrop;
+use std::mem::{forget, ManuallyDrop};
 
 /// A wrapper around `io_lifetimes::OwnedFd` which closes the file descriptor
 /// using posish's own `close` rather than libc's `close`.
@@ -29,9 +29,11 @@ impl IntoFd for OwnedFd {
     #[inline]
     fn into_fd(self) -> io_lifetimes::OwnedFd {
         // Safety: We use `as_fd().as_raw_fd()` to extract the raw file
-        // descriptor from `self.inner`. `self.inner` is wrapped with
-        // `ManuallyDrop` so dropping it doesn't invalid them.
-        unsafe { io_lifetimes::OwnedFd::from_raw_fd(self.inner.as_fd().as_raw_fd()) }
+        // descriptor from `self.inner`, and then `forget` `self` so
+        // that they remain valid until the new `OwnedFd` acquires them.
+        let raw_fd = self.inner.as_fd().as_raw_fd();
+        forget(self);
+        unsafe { io_lifetimes::OwnedFd::from_raw_fd(raw_fd) }
     }
 }
 

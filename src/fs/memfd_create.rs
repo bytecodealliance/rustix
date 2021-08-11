@@ -1,5 +1,5 @@
-use crate::{imp, io, path};
-use io_lifetimes::OwnedFd;
+use crate::io::{self, OwnedFd};
+use crate::{imp, path};
 
 pub use imp::fs::MemfdFlags;
 

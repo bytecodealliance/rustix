@@ -4,7 +4,8 @@
 use crate::fs::CloneFlags;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 use crate::fs::RenameFlags;
-use crate::{imp, io, path};
+use crate::io::{self, OwnedFd};
+use crate::{imp, path};
 #[cfg(not(any(
     target_os = "ios",
     target_os = "macos",
@@ -14,7 +15,7 @@ use crate::{imp, io, path};
 use imp::fs::Dev;
 use imp::fs::{Access, AtFlags, Mode, OFlags, Stat};
 use imp::time::Timespec;
-use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd};
 use std::ffi::{CStr, OsString};
 #[cfg(unix)]
 use std::os::unix::ffi::OsStringExt;

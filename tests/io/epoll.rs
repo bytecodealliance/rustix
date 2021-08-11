@@ -1,5 +1,6 @@
 #![cfg(any(target_os = "android", target_os = "linux"))]
 
+use io_lifetimes::AsFd;
 use posish::io::epoll::{self, Epoll};
 use posish::io::{ioctl_fionbio, read, write};
 use posish::net::{
@@ -31,7 +32,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
 
     let epoll = Epoll::new(epoll::CreateFlags::CLOEXEC, epoll::Owning::new()).unwrap();
 
-    let raw_listen_sock = listen_sock.as_raw_fd();
+    let raw_listen_sock = listen_sock.as_fd().as_raw_fd();
     epoll.add(listen_sock, epoll::EventFlags::IN).unwrap();
 
     let mut event_list = epoll::EventVec::with_capacity(4);

@@ -1,7 +1,8 @@
 //! Functions which operate on file descriptors.
 
-use crate::{imp, io};
-use io_lifetimes::{AsFd, OwnedFd};
+use crate::imp;
+use crate::io::{self, OwnedFd};
+use io_lifetimes::AsFd;
 #[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
 use std::ffi::OsString;
 

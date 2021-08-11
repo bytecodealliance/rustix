@@ -1,8 +1,8 @@
 use super::super::conv::owned_fd;
 use super::FileType;
-use crate::io::{self, RawFd};
+use crate::io::{self, OwnedFd, RawFd};
 use errno::{errno, set_errno, Errno};
-use io_lifetimes::{AsFd, BorrowedFd, IntoFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd, IntoFd};
 #[cfg(not(any(
     target_os = "android",
     target_os = "emscripten",
@@ -32,14 +32,14 @@ impl Dir {
     #[inline]
     pub fn from<F: IntoFd>(fd: F) -> io::Result<Self> {
         let fd = fd.into_fd();
-        Self::_from(fd)
+        Self::_from(fd.into())
     }
 
     /// Construct a `Dir`, assuming ownership of the file descriptor.
     #[inline]
     pub fn from_into_fd<F: IntoFd>(fd: F) -> io::Result<Self> {
         let fd = fd.into_fd();
-        Self::_from(fd)
+        Self::_from(fd.into())
     }
 
     fn _from(fd: OwnedFd) -> io::Result<Self> {

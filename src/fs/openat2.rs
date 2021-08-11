@@ -1,6 +1,7 @@
-use crate::{imp, io, path};
+use crate::io::{self, OwnedFd};
+use crate::{imp, path};
 use imp::fs::{Mode, OFlags, ResolveFlags};
-use io_lifetimes::{AsFd, OwnedFd};
+use io_lifetimes::AsFd;
 
 /// `openat2(dirfd, path, OpenHow { oflags, mode, resolve }, sizeof(OpenHow))`
 ///

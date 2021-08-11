@@ -45,9 +45,9 @@ use super::net::{
 use super::rand::GetRandomFlags;
 use super::time::{ClockId, Timespec};
 use crate::io;
-use crate::io::RawFd;
+use crate::io::{OwnedFd, RawFd};
 use crate::time::NanosleepRelativeResult;
-use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use linux_raw_sys::general::__NR_epoll_pwait;
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]

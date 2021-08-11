@@ -2,8 +2,8 @@
 
 use super::offset::libc_off_t;
 use crate::io;
-use crate::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-use io_lifetimes::{BorrowedFd, OwnedFd};
+use crate::io::{AsRawFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
+use io_lifetimes::{BorrowedFd, FromFd, IntoFd};
 use libc::{c_char, c_int, c_long, ssize_t};
 use std::ffi::CStr;
 
@@ -19,7 +19,7 @@ pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> c_int {
 
 #[inline]
 pub(super) fn owned_fd(fd: OwnedFd) -> c_int {
-    fd.into_raw_fd() as c_int
+    fd.into_fd().into_raw_fd() as c_int
 }
 
 #[inline]
@@ -105,7 +105,9 @@ pub(super) unsafe fn ret_owned_fd(raw: c_int) -> io::Result<OwnedFd> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
-        Ok(OwnedFd::from_raw_fd(raw as RawFd))
+        Ok(OwnedFd::from_fd(io_lifetimes::OwnedFd::from_raw_fd(
+            raw as RawFd,
+        )))
     }
 }
 
@@ -129,6 +131,8 @@ pub(super) unsafe fn syscall_ret_owned_fd(raw: c_long) -> io::Result<OwnedFd> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
-        Ok(OwnedFd::from_raw_fd(raw as RawFd))
+        Ok(OwnedFd::from_fd(io_lifetimes::OwnedFd::from_raw_fd(
+            raw as RawFd,
+        )))
     }
 }

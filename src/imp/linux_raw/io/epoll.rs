@@ -17,6 +17,7 @@
 //!     SocketAddrV4, SocketType,
 //! };
 //! use std::os::unix::io::AsRawFd;
+//! use io_lifetimes::AsFd;
 //!
 //! // Create a socket and listen on it.
 //! let listen_sock = socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
@@ -28,7 +29,7 @@
 //! let epoll = Epoll::new(epoll::CreateFlags::CLOEXEC, epoll::Owning::new())?;
 //!
 //! // Remember the socket raw fd, which we use for comparisons only.
-//! let raw_listen_sock = listen_sock.as_raw_fd();
+//! let raw_listen_sock = listen_sock.as_fd().as_raw_fd();
 //!
 //! // Register the socket with the epoll object.
 //! epoll.add(listen_sock, epoll::EventFlags::IN)?;
@@ -60,9 +61,9 @@
 
 use super::super::syscalls::{epoll_add, epoll_create, epoll_del, epoll_mod, epoll_wait};
 use crate::io;
-use crate::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+use crate::io::{AsRawFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
 use bitflags::bitflags;
-use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd};
 use std::fmt;
 use std::marker::PhantomData;
 use std::ops::Deref;
@@ -254,7 +255,7 @@ impl<'context, T: AsFd + IntoFd + FromFd> Context for Owning<'context, T> {
         // is now being released, so we can create a new `OwnedFd` that assumes
         // ownership.
         let raw_fd = target.consume().as_raw_fd();
-        unsafe { T::from_fd(OwnedFd::from_raw_fd(raw_fd)) }
+        unsafe { T::from_fd(io_lifetimes::OwnedFd::from_raw_fd(raw_fd)) }
     }
 }
 
