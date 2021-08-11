@@ -59,6 +59,8 @@ pub use io_lifetimes;
 
 #[macro_use]
 pub(crate) mod cstr;
+#[macro_use]
+pub(crate) mod const_assert;
 
 mod imp;
 

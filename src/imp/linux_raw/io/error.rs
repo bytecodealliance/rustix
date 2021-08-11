@@ -11,7 +11,6 @@
 #![cfg_attr(not(rustc_attrs), allow(unused_unsafe))]
 
 use crate::io::{self, RawFd};
-use const_fn_assert::cfn_assert;
 use linux_raw_sys::{errno, v5_4};
 
 /// The error type for posish APIs.
@@ -58,7 +57,7 @@ impl Error {
 
         // TODO: Use Range::contains, once that's `const`.
         // TODO: Use `assert!`, once that's stable for use in const fn.
-        cfn_assert!(encoded >= 0xf001);
+        const_assert!(encoded >= 0xf001);
 
         // Safety: Linux syscalls return negated error values in the range
         // `-4095..0`, which we just asserted.

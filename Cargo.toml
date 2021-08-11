@@ -31,7 +31,6 @@ errno = "0.2.7"
 libc = { version = "0.2.98", features = ["extra_traits"] }
 
 [target.'cfg(all(not(posish_use_libc), any(target_os = "linux"), any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "aarch64", target_arch = "riscv64")))'.dependencies]
-const_fn_assert = "0.1.2"
 linux-raw-sys = { version = "0.0.17", features = ["v5_4", "v5_11"] }
 
 [dev-dependencies]
