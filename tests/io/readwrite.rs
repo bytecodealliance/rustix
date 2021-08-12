@@ -2,8 +2,8 @@ use std::io::{IoSlice, IoSliceMut};
 
 #[test]
 fn test_readwrite_pv() {
-    use posish::fs::{cwd, openat, Mode, OFlags};
-    use posish::io::{preadv, pwritev};
+    use rsix::fs::{cwd, openat, Mode, OFlags};
+    use rsix::io::{preadv, pwritev};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -25,7 +25,7 @@ fn test_readwrite_pv() {
     {
         match pwritev(&foo, &[IoSlice::new(b"hello")], 200) {
             Ok(_) => (),
-            Err(posish::io::Error::NOSYS) => return,
+            Err(rsix::io::Error::NOSYS) => return,
             Err(err) => Err(err).unwrap(),
         }
     }
@@ -39,8 +39,8 @@ fn test_readwrite_pv() {
 
 #[test]
 fn test_readwrite_p() {
-    use posish::fs::{cwd, openat, Mode, OFlags};
-    use posish::io::{pread, pwrite};
+    use rsix::fs::{cwd, openat, Mode, OFlags};
+    use rsix::io::{pread, pwrite};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -63,8 +63,8 @@ fn test_readwrite_p() {
 
 #[test]
 fn test_readwrite_v() {
-    use posish::fs::{cwd, openat, seek, Mode, OFlags};
-    use posish::io::{readv, writev};
+    use rsix::fs::{cwd, openat, seek, Mode, OFlags};
+    use rsix::io::{readv, writev};
     use std::io::SeekFrom;
 
     let tmp = tempfile::tempdir().unwrap();
@@ -89,8 +89,8 @@ fn test_readwrite_v() {
 
 #[test]
 fn test_readwrite() {
-    use posish::fs::{cwd, openat, seek, Mode, OFlags};
-    use posish::io::{read, write};
+    use rsix::fs::{cwd, openat, seek, Mode, OFlags};
+    use rsix::io::{read, write};
     use std::io::SeekFrom;
 
     let tmp = tempfile::tempdir().unwrap();

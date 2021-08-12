@@ -1,4 +1,4 @@
-use posish::path::DecInt;
+use rsix::path::DecInt;
 
 #[test]
 fn test_dec_int() {

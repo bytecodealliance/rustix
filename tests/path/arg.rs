@@ -1,5 +1,5 @@
-use posish::io;
-use posish::path::{Arg, DecInt};
+use rsix::io;
+use rsix::path::{Arg, DecInt};
 use std::borrow::Cow;
 use std::ffi::{CStr, CString, OsStr, OsString};
 use std::path::{Component, Components, Iter, Path, PathBuf};

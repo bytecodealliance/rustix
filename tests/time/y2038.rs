@@ -3,7 +3,7 @@
 #[cfg(not(libc))] // The libc crate does not support a 64-bit time_t.
 #[test]
 fn test_y2038() {
-    use posish::time::{Secs, Timespec};
+    use rsix::time::{Secs, Timespec};
 
     let tv_sec: i64 = 0;
     let _ = Timespec { tv_sec, tv_nsec: 0 };

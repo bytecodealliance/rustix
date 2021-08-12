@@ -1,7 +1,7 @@
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_mkdirat() {
-    use posish::fs::{cwd, mkdirat, openat, statat, unlinkat, AtFlags, FileType, Mode, OFlags};
+    use rsix::fs::{cwd, mkdirat, openat, statat, unlinkat, AtFlags, FileType, Mode, OFlags};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -15,7 +15,7 @@ fn test_mkdirat() {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn test_mkdirat_with_o_path() {
-    use posish::fs::{cwd, mkdirat, openat, statat, unlinkat, AtFlags, FileType, Mode, OFlags};
+    use rsix::fs::{cwd, mkdirat, openat, statat, unlinkat, AtFlags, FileType, Mode, OFlags};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(

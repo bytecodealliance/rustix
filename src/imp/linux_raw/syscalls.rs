@@ -256,7 +256,7 @@ pub(crate) fn clock_getres(which_clock: ClockId) -> __kernel_timespec {
             out(&mut result),
         ))
         .or_else(|err| {
-            // See the comments in `posish_clock_gettime_via_syscall` about
+            // See the comments in `rsix_clock_gettime_via_syscall` about
             // emulation.
             if err == io::Error::NOSYS {
                 let mut old_result = MaybeUninit::<__kernel_old_timespec>::uninit();
@@ -2220,7 +2220,7 @@ fn _utimensat(
             c_uint(flags.bits()),
         ))
         .or_else(|err| {
-            // See the comments in `posish_clock_gettime_via_syscall` about
+            // See the comments in `rsix_clock_gettime_via_syscall` about
             // emulation.
             if err == io::Error::NOSYS {
                 let old_utimes = [
@@ -2287,7 +2287,7 @@ pub(crate) fn nanosleep(req: &__kernel_timespec) -> NanosleepRelativeResult {
             out(&mut rem),
         ))
         .or_else(|err| {
-            // See the comments in `posish_clock_gettime_via_syscall` about
+            // See the comments in `rsix_clock_gettime_via_syscall` about
             // emulation.
             if err == io::Error::NOSYS {
                 let old_req = __kernel_old_timespec {
@@ -2342,7 +2342,7 @@ pub(crate) fn clock_nanosleep_relative(
             out(&mut rem),
         ))
         .or_else(|err| {
-            // See the comments in `posish_clock_gettime_via_syscall` about
+            // See the comments in `rsix_clock_gettime_via_syscall` about
             // emulation.
             if err == io::Error::NOSYS {
                 let old_req = __kernel_old_timespec {
@@ -2401,7 +2401,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, req: &__kernel_timespec) -> 
             0_usize,
         ))
         .or_else(|err| {
-            // See the comments in `posish_clock_gettime_via_syscall` about
+            // See the comments in `rsix_clock_gettime_via_syscall` about
             // emulation.
             if err == io::Error::NOSYS {
                 let old_req = __kernel_old_timespec {

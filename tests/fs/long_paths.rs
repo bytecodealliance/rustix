@@ -1,7 +1,7 @@
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_long_paths() {
-    use posish::fs::{cwd, mkdirat, openat, Mode, OFlags};
+    use rsix::fs::{cwd, mkdirat, openat, Mode, OFlags};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();

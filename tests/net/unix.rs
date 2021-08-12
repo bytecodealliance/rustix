@@ -9,13 +9,13 @@
     target_os = "wasi",
 )))]
 
-use posish::fs::{cwd, unlinkat, AtFlags};
-use posish::io::{read, write};
-use posish::net::{
+use rsix::fs::{cwd, unlinkat, AtFlags};
+use rsix::io::{read, write};
+use rsix::net::{
     accept, bind_unix, connect_unix, listen, socket, AddressFamily, Protocol, SocketAddrUnix,
     SocketType,
 };
-use posish::path::DecInt;
+use rsix::path::DecInt;
 use std::path::Path;
 use std::str::FromStr;
 use std::sync::{Arc, Condvar, Mutex};

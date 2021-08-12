@@ -1,5 +1,5 @@
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use posish::fs::Stat;
+use rsix::fs::Stat;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 fn same(a: &Stat, b: &Stat) -> bool {
@@ -9,7 +9,7 @@ fn same(a: &Stat, b: &Stat) -> bool {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn test_renameat() {
-    use posish::fs::{cwd, openat, renameat, statat, AtFlags, Mode, OFlags};
+    use rsix::fs::{cwd, openat, renameat, statat, AtFlags, Mode, OFlags};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
@@ -30,7 +30,7 @@ fn test_renameat() {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn test_renameat_with() {
-    use posish::fs::{cwd, openat, renameat_with, statat, AtFlags, Mode, OFlags, RenameFlags};
+    use rsix::fs::{cwd, openat, renameat_with, statat, AtFlags, Mode, OFlags, RenameFlags};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
@@ -46,7 +46,7 @@ fn test_renameat_with() {
 
     match renameat_with(&dir, "foo", &dir, "red", RenameFlags::empty()) {
         Ok(()) => (),
-        Err(e) if e == posish::io::Error::NOSYS => return,
+        Err(e) if e == rsix::io::Error::NOSYS => return,
         Err(e) => unreachable!("unexpected error from renameat_with: {:?}", e),
     }
 

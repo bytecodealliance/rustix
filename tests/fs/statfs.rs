@@ -1,7 +1,7 @@
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn test_statx() {
-    use posish::fs::{FsWord, StatFs, PROC_SUPER_MAGIC};
+    use rsix::fs::{FsWord, StatFs, PROC_SUPER_MAGIC};
 
     // Ensure these all have consistent types.
     let t: StatFs = unsafe { std::mem::zeroed() };

@@ -7,12 +7,12 @@
 use crate::imp;
 use std::{error, fmt, result};
 
-/// A specialized `Result` type for posish APIs.
+/// A specialized `Result` type for rsix APIs.
 pub type Result<T> = result::Result<T, Error>;
 
 /// `errno`—An error code.
 ///
-/// The error type for posish APIs. This is similar to `std::io::Error`, but
+/// The error type for rsix APIs. This is similar to `std::io::Error`, but
 /// only holds an OS error code, and no extra error value.
 ///
 /// # References

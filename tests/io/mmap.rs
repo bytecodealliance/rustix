@@ -2,8 +2,8 @@
 
 #[test]
 fn test_mmap() {
-    use posish::fs::{cwd, openat, Mode, OFlags};
-    use posish::io::{mmap, munmap, write, MapFlags, ProtFlags};
+    use rsix::fs::{cwd, openat, Mode, OFlags};
+    use rsix::io::{mmap, munmap, write, MapFlags, ProtFlags};
     use std::ptr::null_mut;
     use std::slice;
 

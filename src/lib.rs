@@ -1,5 +1,5 @@
-//! `posish` provides efficient memory-safe and [I/O-safe] wrappers to
-//! "POSIX-ish" syscalls.
+//! `rsix` provides efficient memory-safe and [I/O-safe] wrappers to
+//! POSIX-like, Unix-like, and Linux syscalls.
 //!
 //! The wrappers perform the following tasks:
 //!  - Error values are translated to [`Result`]s.
@@ -39,8 +39,8 @@
 //! [`OwnedFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/struct.OwnedFd.html
 //! [io-lifetimes crate]: https://crates.io/crates/io-lifetimes
 //! [I/O-safe]: https://github.com/rust-lang/rfcs/pull/3128
-//! [`Result`]: https://docs.rs/posish/latest/posish/io/type.Result.html
-//! [`Arg`]: https://docs.rs/posish/latest/posish/path/trait.Arg.html
+//! [`Result`]: https://docs.rs/rsix/latest/rsix/io/type.Result.html
+//! [`Arg`]: https://docs.rs/rsix/latest/rsix/path/trait.Arg.html
 
 #![deny(missing_docs)]
 #![cfg_attr(linux_raw, deny(unsafe_code))]

@@ -1,4 +1,4 @@
-use posish::time::{clock_gettime, ClockId};
+use rsix::time::{clock_gettime, ClockId};
 
 #[test]
 fn test_monotonic_clock() {

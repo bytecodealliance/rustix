@@ -1,4 +1,4 @@
-//! The posish `Error` type.
+//! The rsix `Error` type.
 //!
 //! This type holds an OS error code, which conceptually corresponds to an
 //! `errno` value.
@@ -6,7 +6,7 @@
 use errno::errno;
 use std::os::raw::c_int;
 
-/// The error type for posish APIs.
+/// The error type for rsix APIs.
 ///
 /// This is similar to `std::io::Error`, but only holds an OS error code,
 /// and no extra error value.

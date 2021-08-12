@@ -1,19 +1,19 @@
 Short version for non-lawyers:
 
-`posish` is triple-licensed under Apache 2.0 with the LLVM Exception,
+`rsix` is triple-licensed under Apache 2.0 with the LLVM Exception,
 Apache 2.0, and MIT terms.
 
 
 Longer version:
 
-Copyrights in the `posish` project are retained by their contributors.
-No copyright assignment is required to contribute to the `posish`
+Copyrights in the `rsix` project are retained by their contributors.
+No copyright assignment is required to contribute to the `rsix`
 project.
 
 Some files include code derived from Rust's `libstd`; see the comments in
 the code for details.
 
-Except as otherwise noted (below and/or in individual files), `posish`
+Except as otherwise noted (below and/or in individual files), `rsix`
 is licensed under:
 
  - the Apache License, Version 2.0, with the LLVM Exception

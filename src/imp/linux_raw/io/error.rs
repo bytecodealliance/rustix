@@ -1,4 +1,4 @@
-//! The posish `Error` type.
+//! The rsix `Error` type.
 //!
 //! This type holds an OS error code, which conceptually corresponds to an
 //! `errno` value.
@@ -13,7 +13,7 @@
 use crate::io::{self, RawFd};
 use linux_raw_sys::{errno, v5_4};
 
-/// The error type for posish APIs.
+/// The error type for rsix APIs.
 ///
 /// This is similar to `std::io::Error`, but only holds an OS error code,
 /// and no extra error value.

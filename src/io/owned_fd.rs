@@ -12,7 +12,7 @@ use std::fmt;
 use std::mem::{forget, ManuallyDrop};
 
 /// A wrapper around `io_lifetimes::OwnedFd` which closes the file descriptor
-/// using posish's own `close` rather than libc's `close`.
+/// using rsix's own `close` rather than libc's `close`.
 #[repr(transparent)]
 pub struct OwnedFd {
     inner: ManuallyDrop<io_lifetimes::OwnedFd>,

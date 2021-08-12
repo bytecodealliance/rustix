@@ -21,8 +21,8 @@ use std::str;
 /// # Example
 ///
 /// ```rust
-/// use posish::io;
-/// use posish::path::Arg;
+/// use rsix::io;
+/// use rsix::path::Arg;
 /// use std::ffi::CStr;
 ///
 /// pub fn touch<P: Arg>(path: P) -> io::Result<()> {

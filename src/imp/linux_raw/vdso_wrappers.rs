@@ -207,10 +207,10 @@ static mut CLOCK_GETTIME: AtomicUsize = AtomicUsize::new(0);
 static mut SYSCALL: AtomicUsize = AtomicUsize::new(0);
 
 #[cfg(target_pointer_width = "32")]
-unsafe extern "C" fn posish_clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) -> c_int {
+unsafe extern "C" fn rsix_clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) -> c_int {
     let mut r0 = syscall2(__NR_clock_gettime64, clockid as usize, res as usize);
     if r0 == -io::Error::NOSYS.raw_os_error() as usize {
-        // Ordinarily posish doesn't like to emulate system calls, but in
+        // Ordinarily rsix doesn't like to emulate system calls, but in
         // the case of time APIs, it's specific to Linux, specific to
         // 32-bit architectures *and* specific to old kernel versions, and
         // it's not that hard to fix up here, so that no other code needs
@@ -233,13 +233,13 @@ unsafe extern "C" fn posish_clock_gettime_via_syscall(clockid: c_int, res: *mut 
 }
 
 #[cfg(target_pointer_width = "64")]
-unsafe extern "C" fn posish_clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) -> c_int {
+unsafe extern "C" fn rsix_clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) -> c_int {
     syscall2(__NR_clock_gettime, clockid as usize, res as usize) as c_int
 }
 
 #[cfg(all(linux_raw_inline_asm, target_arch = "x86"))]
 #[naked]
-unsafe extern "C" fn posish_int_0x80(
+unsafe extern "C" fn rsix_int_0x80(
     _nr: u32,
     _a0: usize,
     _a1: usize,
@@ -253,7 +253,7 @@ unsafe extern "C" fn posish_int_0x80(
 
 #[cfg(all(not(linux_raw_inline_asm), target_arch = "x86"))]
 extern "C" {
-    fn posish_int_0x80(
+    fn rsix_int_0x80(
         _nr: u32,
         _a0: usize,
         _a1: usize,
@@ -273,14 +273,14 @@ fn init() {
         CLOCK_GETTIME
             .compare_exchange(
                 0,
-                posish_clock_gettime_via_syscall as ClockGettimeType as usize,
+                rsix_clock_gettime_via_syscall as ClockGettimeType as usize,
                 Relaxed,
                 Relaxed,
             )
             .ok();
         #[cfg(target_arch = "x86")]
         SYSCALL
-            .compare_exchange(0, posish_int_0x80 as SyscallType as usize, Relaxed, Relaxed)
+            .compare_exchange(0, rsix_int_0x80 as SyscallType as usize, Relaxed, Relaxed)
             .ok();
     }
 

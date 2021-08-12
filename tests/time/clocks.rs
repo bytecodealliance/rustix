@@ -7,11 +7,11 @@
     target_os = "redox",
     target_os = "wasi",
 )))]
-use posish::time::{clock_nanosleep_absolute, clock_nanosleep_relative, ClockId};
+use rsix::time::{clock_nanosleep_absolute, clock_nanosleep_relative, ClockId};
 #[cfg(not(target_os = "redox"))]
 use {
-    posish::time::{nanosleep, NanosleepRelativeResult},
-    posish::{io, time::Timespec},
+    rsix::time::{nanosleep, NanosleepRelativeResult},
+    rsix::{io, time::Timespec},
 };
 
 #[cfg(not(target_os = "redox"))]

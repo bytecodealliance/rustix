@@ -1,4 +1,4 @@
-use posish::process;
+use rsix::process;
 use std::env::var;
 use std::str::FromStr;
 

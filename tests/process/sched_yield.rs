@@ -1,4 +1,4 @@
-use posish::process::sched_yield;
+use rsix::process::sched_yield;
 
 #[test]
 fn test_sched_yield() {

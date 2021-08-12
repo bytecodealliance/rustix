@@ -6,7 +6,7 @@
 )))]
 #[test]
 fn test_mknodat() {
-    use posish::fs::{cwd, mknodat, openat, statat, unlinkat, AtFlags, FileType, Mode, OFlags};
+    use rsix::fs::{cwd, mknodat, openat, statat, unlinkat, AtFlags, FileType, Mode, OFlags};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();

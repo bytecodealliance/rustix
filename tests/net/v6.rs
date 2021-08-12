@@ -3,8 +3,8 @@
 
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]
 
-use posish::io::{read, write};
-use posish::net::{
+use rsix::io::{read, write};
+use rsix::net::{
     accept, bind_v6, connect_v6, getsockname, listen, socket, AddressFamily, Ipv6Addr, Protocol,
     SocketAddr, SocketAddrV6, SocketType,
 };

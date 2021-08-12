@@ -1,4 +1,4 @@
-use posish::rand::{getrandom, GetRandomFlags};
+use rsix::rand::{getrandom, GetRandomFlags};
 
 #[test]
 fn test_getrandom() {

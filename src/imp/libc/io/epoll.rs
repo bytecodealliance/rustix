@@ -8,11 +8,11 @@
 //!
 //! ```rust,no_run
 //! # fn main() -> std::io::Result<()> {
-//! use posish::io::{
+//! use rsix::io::{
 //!     epoll::{self, Epoll},
 //!     ioctl_fionbio, read, write,
 //! };
-//! use posish::net::{
+//! use rsix::net::{
 //!     accept, bind_v4, listen, socket, AddressFamily, Ipv4Addr, Protocol, SocketAddr,
 //!     SocketAddrV4, SocketType,
 //! };

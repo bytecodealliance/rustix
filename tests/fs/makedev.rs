@@ -1,4 +1,4 @@
-use posish::fs::{major, makedev, minor};
+use rsix::fs::{major, makedev, minor};
 
 #[test]
 fn makedev_roundtrip() {

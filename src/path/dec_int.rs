@@ -17,7 +17,7 @@ use std::path::Path;
 /// # Example
 ///
 /// ```rust
-/// use posish::path::DecInt;
+/// use rsix::path::DecInt;
 ///
 /// assert_eq!(
 ///     format!("hello {}", DecInt::new(9876).display()),

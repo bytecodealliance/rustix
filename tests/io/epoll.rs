@@ -1,9 +1,9 @@
 #![cfg(any(target_os = "android", target_os = "linux"))]
 
 use io_lifetimes::AsFd;
-use posish::io::epoll::{self, Epoll};
-use posish::io::{ioctl_fionbio, read, write};
-use posish::net::{
+use rsix::io::epoll::{self, Epoll};
+use rsix::io::{ioctl_fionbio, read, write};
+use rsix::net::{
     accept, bind_v4, connect_v4, getsockname, listen, socket, AddressFamily, Ipv4Addr, Protocol,
     SocketAddr, SocketAddrV4, SocketType,
 };
