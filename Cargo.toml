@@ -5,7 +5,7 @@ authors = [
     "Dan Gohman <dev@sunfishcode.online>",
     "Jakub Konka <kubkon@jakubkonka.com>",
 ]
-description = "Safe Rust bindings to POSIX-ish libc APIs and syscalls"
+description = "Safe Rust bindings to POSIX-ish syscalls"
 documentation = "https://docs.rs/posish"
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 repository = "https://github.com/bytecodealliance/posish"

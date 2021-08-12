@@ -2,7 +2,7 @@
   <h1><code>posish</code></h1>
 
   <p>
-    <strong>Safe Rust bindings to POSIX-ish libc APIs and syscalls</strong>
+    <strong>Safe Rust bindings to POSIX-ish syscalls</strong>
   </p>
 
   <strong>A <a href="https://bytecodealliance.org/">Bytecode Alliance</a> project</strong>
@@ -15,18 +15,18 @@
 </div>
 
 `posish` provides efficient memory-safe and [I/O-safe] wrappers to "POSIX-ish"
-`libc` APIs and syscalls, with configurable backends. It uses Rust references,
-slices, and return values instead of raw pointers, and [`io-lifetimes`] instead
-of raw file descriptors, providing memory safety and [I/O safety]. It uses
-`Result`s for reporting errors, [`bitflags`] instead of bare integer flags,
-an [`Arg`] trait with optimizations to efficiently accept any Rust string type,
-and several other efficient conveniences.
+syscalls, with configurable backends. It uses Rust references, slices, and
+return values instead of raw pointers, and [`io-lifetimes`] instead of raw file
+descriptors, providing memory safety and [I/O safety]. It uses `Result`s for
+reporting errors, [`bitflags`] instead of bare integer flags, an [`Arg`] trait
+with optimizations to efficiently accept any Rust string type, and several
+other efficient conveniences.
 
 `posish` is low-level and does not support Windows; for higher-level and more
 portable APIs built on this functionality, see the [`system-interface`],
 [`cap-std`], and [`fs-set-times`] crates, for example.
 
-Posish currently has two backends available: `libc` and `linux_raw`.
+Posish currently has two backends available: `linux_raw` and `libc`.
 
 The `linux_raw` backend is enabled by default on Linux on x86-64, x86, aarch64,
 and riscv64gc, and uses raw Linux system calls and vDSO calls. It supports

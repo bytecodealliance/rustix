@@ -1,5 +1,5 @@
 //! `posish` provides efficient memory-safe and [I/O-safe] wrappers to
-//! "POSIX-ish" `libc` APIs and syscalls.
+//! "POSIX-ish" syscalls.
 //!
 //! The wrappers perform the following tasks:
 //!  - Error values are translated to [`Result`]s.
