@@ -2,7 +2,6 @@ use crate::imp;
 use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use io_lifetimes::AsFd;
-use std::os::raw::c_int;
 
 pub use imp::net::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketType};
 
@@ -135,7 +134,7 @@ pub fn connect_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/listen.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/listen.2.html
 #[inline]
-pub fn listen<Fd: AsFd>(sockfd: &Fd, backlog: c_int) -> io::Result<()> {
+pub fn listen<Fd: AsFd>(sockfd: &Fd, backlog: i32) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     imp::syscalls::listen(sockfd, backlog)
 }

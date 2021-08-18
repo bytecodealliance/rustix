@@ -1,5 +1,4 @@
 use crate::{imp, io};
-use std::os::raw::c_int;
 use std::vec::IntoIter;
 
 pub use imp::io::{PollFd, PollFlags};
@@ -46,7 +45,7 @@ impl<'fd> PollFdVec<'fd> {
     /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/poll.html
     /// [Linux]: https://man7.org/linux/man-pages/man2/poll.2.html
     #[inline]
-    pub fn poll(&mut self, timeout: c_int) -> io::Result<usize> {
+    pub fn poll(&mut self, timeout: i32) -> io::Result<usize> {
         imp::syscalls::poll(&mut self.fds, timeout)
     }
 }

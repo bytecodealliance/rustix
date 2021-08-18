@@ -8,7 +8,7 @@
 
 use crate::{imp, io};
 use io_lifetimes::AsFd;
-use std::os::raw::c_void;
+use std::ffi::c_void;
 
 pub use imp::io::{MapFlags, ProtFlags};
 
