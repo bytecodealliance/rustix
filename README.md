@@ -72,6 +72,11 @@ Nightly Rust. `rsix`'s syscalls report errors using an optimized `Error` type,
 and `rsix` supports Linux's vDSO mechanism to optimize Linux `clock_gettime` on
 all architectures, and all Linux system calls on x86.
 
+`rsix`'s `*at` functions are similar to the [`openat`] crate, but `rsix`
+provides them as free functions rather than associated functions of a `Dir`
+type. `rsix`'s `cwd()` function exposes the special `AT_FDCWD` value in a safe
+way, so users don't need to open `.` to git a current-directory handle.
+
 [`nix`]: https://crates.io/crates/nix
 [`unix`]: https://crates.io/crates/unix
 [`nc`]: https://crates.io/crates/nc
@@ -81,12 +86,13 @@ all architectures, and all Linux system calls on x86.
 [`sc`]: https://crates.io/crates/sc
 [`scall`]: https://crates.io/crates/scall
 [`system-interface`]: https://crates.io/crates/system-interface
+[`openat`]: https://crates.io/crates/openat
 [`fs-set-times`]: https://crates.io/crates/fs-set-times
 [`io-lifetimes`]: https://crates.io/crates/io-lifetimes
 [`libc`]: https://crates.io/crates/libc
 [`cap-std`]: https://crates.io/crates/cap-std
 [`bitflags`]: https://crates.io/crates/bitflags
-[`Arg`]: https://docs.rs/rsix/0.14.1/rsix/path/trait.Arg.html
+[`Arg`]: https://docs.rs/rsix/latest/rsix/path/trait.Arg.html
 [I/O-safe]: https://github.com/rust-lang/rfcs/pull/3128
 [I/O safety]: https://github.com/rust-lang/rfcs/pull/3128
 [y2038 bug]: https://en.wikipedia.org/wiki/Year_2038_problem
