@@ -46,6 +46,40 @@ explicitly for any target by setting `RUSTFLAGS` to `--cfg rsix_use_libc`.
 It uses the [`libc`] crate which provides bindings to native `libc` libraries
 and is portable to many OS's.
 
+## Similar crates
+
+`rsix` is similar to [`nix`], [`simple_libc`], [`unix`], and [`nc`]. `rsix` is
+a relatively new project with less overall coverage, architected for
+[I/O safety] with most APIs using [`OwnedFd`] and [`AsFd`] to manipulate file
+descriptors rather than `File` or even `c_int`, and supporting multiple
+backends so that it can use direct syscalls while still being usable on all
+platforms `libc` supports. Like `nix`, `rsix` has an optimized and flexible
+filename argument mechanism that allows users to use a variety of string types,
+including non-UTF-8 string types.
+
+[`relibc`] is a similar project which aims to be a full "libc", including
+C-compatible interfaces and higher-level C/POSIX standard-library
+functionality; `rsix` just aims to provide safe and idiomatic Rust interfaces
+to low-level syscalls. `relibc` also doesn't tend to support features not
+supported on Redox, such as `*at` functions like `openat`, which are
+important features for `rsix`.
+
+`rsix` has its own code for making direct syscalls, similar to the [`sc`]
+and [`scall`] crates, though `rsix` currently only supports direct syscalls on
+Linux on x86\_64, x86, aarch64, and riscv64. `rsix` can use either the unstable
+Rust `asm!` macro or out-of-line `.s` files so it supports both Stable and
+Nightly Rust. `rsix`'s syscalls report errors using an optimized `Error` type,
+and `rsix` supports Linux's vDSO mechanism to optimize Linux `clock_gettime` on
+all architectures, and all Linux system calls on x86.
+
+[`nix`]: https://crates.io/crates/nix
+[`unix`]: https://crates.io/crates/unix
+[`nc`]: https://crates.io/crates/nc
+[`simple_libc`]: https://crates.io/crates/simple_libc
+[`relibc`]: https://github.com/redox-os/relibc
+[`syscall`]: https://crates.io/crates/syscall
+[`sc`]: https://crates.io/crates/sc
+[`scall`]: https://crates.io/crates/scall
 [`system-interface`]: https://crates.io/crates/system-interface
 [`fs-set-times`]: https://crates.io/crates/fs-set-times
 [`io-lifetimes`]: https://crates.io/crates/io-lifetimes
@@ -56,3 +90,5 @@ and is portable to many OS's.
 [I/O-safe]: https://github.com/rust-lang/rfcs/pull/3128
 [I/O safety]: https://github.com/rust-lang/rfcs/pull/3128
 [y2038 bug]: https://en.wikipedia.org/wiki/Year_2038_problem
+[`OwnedFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/struct.OwnedFd.html
+[`AsFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.AsFd.html
