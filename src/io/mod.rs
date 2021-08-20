@@ -50,6 +50,11 @@ pub use ioctl::ioctl_fioclex;
 pub use ioctl::ioctl_fionbio;
 #[cfg(not(target_os = "wasi"))]
 pub use ioctl::{ioctl_tcgets, ioctl_tiocgwinsz};
+#[cfg(any(
+    linux_raw,
+    all(libc, not(any(target_os = "redox", target_os = "wasi")))
+))]
+pub use ioctl::{ioctl_tiocexcl, ioctl_tiocnxcl};
 #[cfg(not(target_os = "wasi"))]
 pub use mmap::{mmap, munmap, MapFlags, ProtFlags};
 pub use owned_fd::OwnedFd;

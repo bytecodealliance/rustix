@@ -50,3 +50,35 @@ pub fn ioctl_fionbio<Fd: AsFd>(fd: &Fd, value: bool) -> io::Result<()> {
     let fd = fd.as_fd();
     imp::syscalls::ioctl_fionbio(fd, value)
 }
+
+/// `ioctl(fd, TIOCEXCL)`—Enables exclusive mode on a terminal.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
+#[cfg(any(
+    linux_raw,
+    all(libc, not(any(target_os = "redox", target_os = "wasi")))
+))]
+#[inline]
+pub fn ioctl_tiocexcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
+    let fd = fd.as_fd();
+    imp::syscalls::ioctl_tiocexcl(fd)
+}
+
+/// `ioctl(fd, TIOCNXCL)`—Disables exclusive mode on a terminal.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
+#[cfg(any(
+    linux_raw,
+    all(libc, not(any(target_os = "redox", target_os = "wasi")))
+))]
+#[inline]
+pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
+    let fd = fd.as_fd();
+    imp::syscalls::ioctl_tiocnxcl(fd)
+}

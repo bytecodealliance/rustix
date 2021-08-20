@@ -1193,6 +1193,16 @@ pub(crate) fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
     }
 }
 
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd) -> io::Result<()> {
+    unsafe { ret(libc::ioctl(borrowed_fd(fd), libc::TIOCEXCL as _)) }
+}
+
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
+    unsafe { ret(libc::ioctl(borrowed_fd(fd), libc::TIOCNXCL as _)) }
+}
+
 /// # Safety
 ///
 /// `mmap` is primarily unsafe due to the `addr` parameter, as anything working

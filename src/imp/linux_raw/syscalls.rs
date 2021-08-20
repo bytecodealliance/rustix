@@ -72,7 +72,7 @@ use linux_raw_sys::general::{
     sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW,
     EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC,
     F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL, TCGETS, TIMER_ABSTIME,
-    TIOCGWINSZ,
+    TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
 };
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use linux_raw_sys::general::{__NR_dup2, __NR_open, __NR_pipe, __NR_poll};
@@ -2481,6 +2481,16 @@ pub(crate) fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
         ))
         .map(|()| result.assume_init())
     }
+}
+
+#[inline]
+pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd) -> io::Result<()> {
+    unsafe { ret(syscall2(__NR_ioctl, borrowed_fd(fd), c_uint(TIOCEXCL))) }
+}
+
+#[inline]
+pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
+    unsafe { ret(syscall2(__NR_ioctl, borrowed_fd(fd), c_uint(TIOCNXCL))) }
 }
 
 #[inline]
