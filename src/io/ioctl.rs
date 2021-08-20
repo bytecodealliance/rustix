@@ -3,7 +3,7 @@ use crate::io::{Termios, Winsize};
 use crate::{imp, io};
 use io_lifetimes::{AsFd, BorrowedFd};
 
-/// `ioctl(fd, TCGETS)`
+/// `ioctl(fd, TCGETS)`—Get terminal attributes.
 ///
 /// Also known as `tcgetattr`.
 ///
@@ -21,7 +21,7 @@ pub fn ioctl_tcgets<Fd: AsFd>(fd: &Fd) -> io::Result<Termios> {
     imp::syscalls::ioctl_tcgets(fd)
 }
 
-/// `ioctl(fd, FIOCLEX)`
+/// `ioctl(fd, FIOCLEX)`—Set the close-on-exec flag.
 ///
 /// Also known as `fcntl(fd, F_SETFD, FD_CLOEXEC)`.
 #[cfg(any(target_os = "ios", target_os = "macos"))]
@@ -31,7 +31,7 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     imp::syscalls::ioctl_fioclex(fd)
 }
 
-/// `ioctl(fd, TIOCGWINSZ)`
+/// `ioctl(fd, TIOCGWINSZ)`—Get the current terminal window size.
 ///
 /// # References
 ///  - [Linux]
