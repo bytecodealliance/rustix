@@ -1,4 +1,4 @@
-use super::super::conv::borrowed_fd;
+use crate::imp::libc::conv::borrowed_fd;
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::marker::PhantomData;

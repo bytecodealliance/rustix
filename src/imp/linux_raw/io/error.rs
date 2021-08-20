@@ -10,8 +10,11 @@
 #![allow(unsafe_code)]
 #![cfg_attr(not(rustc_attrs), allow(unused_unsafe))]
 
+use crate::imp::linux_raw::reg::{RetNumber, RetReg};
 use crate::io::{self, RawFd};
 use linux_raw_sys::{errno, v5_4};
+use std::ffi::c_void;
+use std::os::raw::{c_int, c_uint};
 
 /// The error type for rsix APIs.
 ///
@@ -23,7 +26,7 @@ use linux_raw_sys::{errno, v5_4};
 // error codes are in `-4095..0`.
 #[cfg_attr(rustc_attrs, rustc_layout_scalar_valid_range_start(0xf001))]
 #[cfg_attr(rustc_attrs, rustc_layout_scalar_valid_range_end(0xffff))]
-pub struct Error(pub(crate) u16);
+pub struct Error(u16);
 
 impl Error {
     /// Extract the raw OS error number from this error.
@@ -65,17 +68,80 @@ impl Error {
     }
 }
 
-/// Check for an error from the result of a syscall which encodes an integer on
+/// Check for an error from the result of a syscall which encodes a `c_int` on
 /// success.
 #[inline]
-pub(crate) fn check_result(raw: usize) -> io::Result<()> {
-    if (-4095..0).contains(&(raw as isize)) {
+pub(in crate::imp::linux_raw) fn try_decode_c_int<Num: RetNumber>(
+    raw: RetReg<Num>,
+) -> io::Result<c_int> {
+    if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
-        return Err(unsafe { io::Error(raw as u16) });
+        return Err(unsafe { Error(raw.decode_error_code()) });
     }
 
-    Ok(())
+    Ok(raw.decode_c_int())
+}
+
+/// Check for an error from the result of a syscall which encodes a `c_uint` on
+/// success.
+#[inline]
+pub(in crate::imp::linux_raw) fn try_decode_c_uint<Num: RetNumber>(
+    raw: RetReg<Num>,
+) -> io::Result<c_uint> {
+    if raw.is_in_range(-4095..0) {
+        // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
+        // in that range.
+        return Err(unsafe { Error(raw.decode_error_code()) });
+    }
+
+    Ok(raw.decode_c_uint())
+}
+
+/// Check for an error from the result of a syscall which encodes a `usize` on
+/// success.
+#[inline]
+pub(in crate::imp::linux_raw) fn try_decode_usize<Num: RetNumber>(
+    raw: RetReg<Num>,
+) -> io::Result<usize> {
+    if raw.is_in_range(-4095..0) {
+        // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
+        // in that range.
+        return Err(unsafe { Error(raw.decode_error_code()) });
+    }
+
+    Ok(raw.decode_usize())
+}
+
+/// Check for an error from the result of a syscall which encodes a
+/// `*mut c_void` on success.
+#[inline]
+pub(in crate::imp::linux_raw) fn try_decode_void_star<Num: RetNumber>(
+    raw: RetReg<Num>,
+) -> io::Result<*mut c_void> {
+    if raw.is_in_range(-4095..0) {
+        // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
+        // in that range.
+        return Err(unsafe { Error(raw.decode_error_code()) });
+    }
+
+    Ok(raw.decode_void_star())
+}
+
+/// Check for an error from the result of a syscall which encodes a
+/// `u64` on success.
+#[cfg(target_pointer_width = "64")]
+#[inline]
+pub(in crate::imp::linux_raw) fn try_decode_u64<Num: RetNumber>(
+    raw: RetReg<Num>,
+) -> io::Result<u64> {
+    if raw.is_in_range(-4095..0) {
+        // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
+        // in that range.
+        return Err(unsafe { Error(raw.decode_error_code()) });
+    }
+
+    Ok(raw.decode_u64())
 }
 
 /// Check for an error from the result of a syscall which encodes a file
@@ -86,46 +152,48 @@ pub(crate) fn check_result(raw: usize) -> io::Result<()> {
 /// This must only be used with syscalls which return file descriptors on
 /// success.
 #[inline]
-pub(crate) unsafe fn check_fd(raw: usize) -> io::Result<RawFd> {
+pub(in crate::imp::linux_raw) unsafe fn try_decode_raw_fd<Num: RetNumber>(
+    raw: RetReg<Num>,
+) -> io::Result<RawFd> {
     // Instead of using `check_result` here, we just check for negative, since
     // this function is only used for system calls which return file
     // descriptors, and this produces smaller code.
-    if (raw as isize) < 0 {
-        // `raw` must be in `-4095..0`. Linux always returns errors in
-        // `-4095..0`, and we double-check it here.
-        debug_assert!((-4095..0).contains(&(raw as isize)));
-
-        return Err(io::Error(raw as u16));
+    if raw.is_negative() {
+        return Err(Error(raw.decode_error_code()));
     }
 
-    let raw_fd = raw as RawFd;
-
-    // Converting `raw` to `RawFd` should be lossless.
-    debug_assert_eq!(raw_fd as usize, raw);
-
-    Ok(raw_fd)
+    Ok(raw.decode_raw_fd())
 }
 
 /// Check for an error from the result of a syscall which encodes no value on
-/// success.
+/// success. On success, return the unconsumed `raw` value.
 ///
 /// # Safety
 ///
 /// This must only be used with syscalls which return no value on success.
 #[inline]
-pub(crate) unsafe fn check_void(raw: usize) -> io::Result<()> {
+pub(in crate::imp::linux_raw) unsafe fn try_decode_void<Num: RetNumber>(
+    raw: RetReg<Num>,
+) -> io::Result<()> {
     // Instead of using `check_result` here, we just check for zero, since this
     // function is only used for system calls which have no other return value,
     // and this produces smaller code.
-    if raw != 0 {
-        // `raw` must be in `-4095..0`. Linux always returns errors in
-        // `-4095..0`, and we double-check it here.
-        debug_assert!((-4095..0).contains(&(raw as isize)));
-
-        return Err(io::Error(raw as u16));
+    if raw.is_nonzero() {
+        return Err(Error(raw.decode_error_code()));
     }
 
+    raw.decode_void();
+
     Ok(())
+}
+
+/// Return the contained `usize` value.
+#[cfg(not(debug_assertions))]
+#[inline]
+pub(in crate::imp::linux_raw) fn decode_usize_infallible<Num: RetNumber>(
+    raw: RetReg<Num>,
+) -> usize {
+    raw.decode_usize()
 }
 
 impl Error {

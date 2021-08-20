@@ -36,4 +36,21 @@ fn test_mmap() {
 
         munmap(addr, 8192).unwrap();
     }
+
+    let file = openat(&dir, "foo", OFlags::RDONLY, Mode::empty()).unwrap();
+    unsafe {
+        assert_eq!(
+            mmap(
+                null_mut(),
+                8192,
+                ProtFlags::READ,
+                MapFlags::PRIVATE,
+                &file,
+                u64::MAX,
+            )
+            .unwrap_err()
+            .raw_os_error(),
+            libc::EINVAL
+        );
+    }
 }

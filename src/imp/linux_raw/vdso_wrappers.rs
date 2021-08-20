@@ -10,19 +10,26 @@
 #![allow(unsafe_code)]
 
 use super::arch::asm::syscall2;
-use super::conv::ret;
+use super::conv::{pass_usize, ret, void_star};
+use super::reg::nr;
+#[cfg(target_arch = "x86")]
+use super::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
 use super::time::{ClockId, DynamicClockId, Timespec};
 use super::vdso;
 use crate::io;
 use linux_raw_sys::general::{__NR_clock_gettime, __kernel_clockid_t, __kernel_timespec};
-#[cfg(target_pointer_width = "32")]
-use linux_raw_sys::{
-    general::timespec as __kernel_old_timespec, v5_4::general::__NR_clock_gettime64,
-};
+use std::ffi::c_void;
 use std::mem::{transmute, MaybeUninit};
 use std::os::raw::c_int;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::Relaxed;
+#[cfg(target_pointer_width = "32")]
+use {
+    super::conv::out,
+    linux_raw_sys::{
+        general::timespec as __kernel_old_timespec, v5_4::general::__NR_clock_gettime64,
+    },
+};
 
 #[inline]
 pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
@@ -63,24 +70,29 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId) -> io::Result<T
     };
 
     unsafe {
+        const EINVAL: c_int = -(linux_raw_sys::errno::EINVAL as c_int);
         let mut timespec = MaybeUninit::<Timespec>::uninit();
         let callee = match transmute(CLOCK_GETTIME.load(Relaxed)) {
             Some(callee) => callee,
             None => init_clock_gettime(),
         };
-        ret(callee(id, timespec.as_mut_ptr()) as isize as usize)?;
+        match callee(id, timespec.as_mut_ptr()) {
+            0 => (),
+            EINVAL => return Err(io::Error::INVAL),
+            _ => _rsix_clock_gettime_via_syscall(id, timespec.as_mut_ptr())?,
+        }
         Ok(timespec.assume_init())
     }
 }
 
 #[cfg(target_arch = "x86")]
-pub(crate) mod x86_via_vdso {
-    use super::super::arch::asm;
-    use super::{transmute, Relaxed};
+pub(super) mod x86_via_vdso {
+    use super::{transmute, ArgReg, Relaxed, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
+    use crate::imp::linux_raw::arch::asm;
 
     #[inline]
     #[must_use]
-    pub(crate) unsafe fn syscall0(nr: u32) -> usize {
+    pub(in crate::imp::linux_raw) unsafe fn syscall0(nr: SyscallNumber) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
@@ -90,7 +102,10 @@ pub(crate) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(crate) unsafe fn syscall1(nr: u32, a0: usize) -> usize {
+    pub(in crate::imp::linux_raw) unsafe fn syscall1(
+        nr: SyscallNumber,
+        a0: ArgReg<A0>,
+    ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
@@ -99,7 +114,10 @@ pub(crate) mod x86_via_vdso {
     }
 
     #[inline]
-    pub(crate) unsafe fn syscall1_noreturn(nr: u32, a0: usize) -> ! {
+    pub(in crate::imp::linux_raw) unsafe fn syscall1_noreturn(
+        nr: SyscallNumber,
+        a0: ArgReg<A0>,
+    ) -> ! {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
@@ -109,7 +127,11 @@ pub(crate) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(crate) unsafe fn syscall2(nr: u32, a0: usize, a1: usize) -> usize {
+    pub(in crate::imp::linux_raw) unsafe fn syscall2(
+        nr: SyscallNumber,
+        a0: ArgReg<A0>,
+        a1: ArgReg<A1>,
+    ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
@@ -119,7 +141,12 @@ pub(crate) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(crate) unsafe fn syscall3(nr: u32, a0: usize, a1: usize, a2: usize) -> usize {
+    pub(in crate::imp::linux_raw) unsafe fn syscall3(
+        nr: SyscallNumber,
+        a0: ArgReg<A0>,
+        a1: ArgReg<A1>,
+        a2: ArgReg<A2>,
+    ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
@@ -129,7 +156,13 @@ pub(crate) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(crate) unsafe fn syscall4(nr: u32, a0: usize, a1: usize, a2: usize, a3: usize) -> usize {
+    pub(in crate::imp::linux_raw) unsafe fn syscall4(
+        nr: SyscallNumber,
+        a0: ArgReg<A0>,
+        a1: ArgReg<A1>,
+        a2: ArgReg<A2>,
+        a3: ArgReg<A3>,
+    ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
@@ -139,14 +172,14 @@ pub(crate) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(crate) unsafe fn syscall5(
-        nr: u32,
-        a0: usize,
-        a1: usize,
-        a2: usize,
-        a3: usize,
-        a4: usize,
-    ) -> usize {
+    pub(in crate::imp::linux_raw) unsafe fn syscall5(
+        nr: SyscallNumber,
+        a0: ArgReg<A0>,
+        a1: ArgReg<A1>,
+        a2: ArgReg<A2>,
+        a3: ArgReg<A3>,
+        a4: ArgReg<A4>,
+    ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
@@ -156,15 +189,15 @@ pub(crate) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(crate) unsafe fn syscall6(
-        nr: u32,
-        a0: usize,
-        a1: usize,
-        a2: usize,
-        a3: usize,
-        a4: usize,
-        a5: usize,
-    ) -> usize {
+    pub(in crate::imp::linux_raw) unsafe fn syscall6(
+        nr: SyscallNumber,
+        a0: ArgReg<A0>,
+        a1: ArgReg<A1>,
+        a2: ArgReg<A2>,
+        a3: ArgReg<A3>,
+        a4: ArgReg<A4>,
+        a5: ArgReg<A5>,
+    ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
@@ -174,7 +207,7 @@ pub(crate) mod x86_via_vdso {
 
     // With the indirect call, it isn't meaningful to do a separate
     // `_readonly` optimization.
-    pub(crate) use {
+    pub(in crate::imp::linux_raw) use {
         syscall0 as syscall0_readonly, syscall1 as syscall1_readonly,
         syscall2 as syscall2_readonly, syscall3 as syscall3_readonly,
         syscall4 as syscall4_readonly, syscall5 as syscall5_readonly,
@@ -184,8 +217,15 @@ pub(crate) mod x86_via_vdso {
 
 type ClockGettimeType = unsafe extern "C" fn(c_int, *mut Timespec) -> c_int;
 #[cfg(target_arch = "x86")]
-pub(super) type SyscallType =
-    unsafe extern "C" fn(u32, usize, usize, usize, usize, usize, usize) -> usize;
+pub(super) type SyscallType = unsafe extern "C" fn(
+    SyscallNumber,
+    ArgReg<A0>,
+    ArgReg<A1>,
+    ArgReg<A2>,
+    ArgReg<A3>,
+    ArgReg<A4>,
+    ArgReg<A5>,
+) -> RetReg<R0>;
 
 fn init_clock_gettime() -> ClockGettimeType {
     init();
@@ -206,62 +246,83 @@ static mut CLOCK_GETTIME: AtomicUsize = AtomicUsize::new(0);
 #[cfg(target_arch = "x86")]
 static mut SYSCALL: AtomicUsize = AtomicUsize::new(0);
 
-#[cfg(target_pointer_width = "32")]
 unsafe extern "C" fn rsix_clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) -> c_int {
-    let mut r0 = syscall2(__NR_clock_gettime64, clockid as usize, res as usize);
-    if r0 == -io::Error::NOSYS.raw_os_error() as usize {
-        // Ordinarily rsix doesn't like to emulate system calls, but in
-        // the case of time APIs, it's specific to Linux, specific to
-        // 32-bit architectures *and* specific to old kernel versions, and
-        // it's not that hard to fix up here, so that no other code needs
-        // to worry about this.
-        let mut old_result = MaybeUninit::<__kernel_old_timespec>::uninit();
-        r0 = syscall2(
-            __NR_clock_gettime,
-            clockid as usize,
-            old_result.as_mut_ptr() as usize,
-        );
-        if r0 == 0 {
-            let old_result = old_result.assume_init();
-            *res = Timespec {
-                tv_sec: old_result.tv_sec.into(),
-                tv_nsec: old_result.tv_nsec.into(),
-            };
-        }
+    match _rsix_clock_gettime_via_syscall(clockid, res) {
+        Ok(()) => 0,
+        Err(e) => e.raw_os_error().wrapping_neg(),
     }
-    r0 as c_int
+}
+
+#[cfg(target_pointer_width = "32")]
+unsafe fn _rsix_clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) -> io::Result<()> {
+    let r0 = syscall2(
+        nr(__NR_clock_gettime64),
+        pass_usize(clockid as usize),
+        void_star(res.cast::<c_void>()),
+    );
+    match ret(r0) {
+        Err(io::Error::NOSYS) => {
+            // Ordinarily rsix doesn't like to emulate system calls, but in
+            // the case of time APIs, it's specific to Linux, specific to
+            // 32-bit architectures *and* specific to old kernel versions, and
+            // it's not that hard to fix up here, so that no other code needs
+            // to worry about this.
+            let mut old_result = MaybeUninit::<__kernel_old_timespec>::uninit();
+            let r0 = syscall2(
+                nr(__NR_clock_gettime),
+                pass_usize(clockid as usize),
+                out(&mut old_result),
+            );
+            match ret(r0) {
+                Ok(()) => {
+                    let old_result = old_result.assume_init();
+                    *res = Timespec {
+                        tv_sec: old_result.tv_sec.into(),
+                        tv_nsec: old_result.tv_nsec.into(),
+                    };
+                    Ok(())
+                }
+                otherwise => otherwise,
+            }
+        }
+        otherwise => otherwise,
+    }
 }
 
 #[cfg(target_pointer_width = "64")]
-unsafe extern "C" fn rsix_clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) -> c_int {
-    syscall2(__NR_clock_gettime, clockid as usize, res as usize) as c_int
+unsafe fn _rsix_clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) -> io::Result<()> {
+    ret(syscall2(
+        nr(__NR_clock_gettime),
+        pass_usize(clockid as usize),
+        void_star(res.cast::<c_void>()),
+    ))
 }
 
 #[cfg(all(linux_raw_inline_asm, target_arch = "x86"))]
 #[naked]
 unsafe extern "C" fn rsix_int_0x80(
-    _nr: u32,
-    _a0: usize,
-    _a1: usize,
-    _a2: usize,
-    _a3: usize,
-    _a4: usize,
-    _a5: usize,
-) -> usize {
+    _nr: SyscallNumber,
+    _a0: ArgReg<A0>,
+    _a1: ArgReg<A1>,
+    _a2: ArgReg<A2>,
+    _a3: ArgReg<A3>,
+    _a4: ArgReg<A4>,
+    _a5: ArgReg<A5>,
+) -> RetReg<R0> {
     asm!("int $$0x80", "ret", options(noreturn))
 }
 
 #[cfg(all(not(linux_raw_inline_asm), target_arch = "x86"))]
 extern "C" {
     fn rsix_int_0x80(
-        _nr: u32,
-        _a0: usize,
-        _a1: usize,
-        _a2: usize,
-        _a3: usize,
-        _a4: usize,
-        _a5: usize,
-    ) -> usize;
+        _nr: SyscallNumber,
+        _a0: ArgReg<A0>,
+        _a1: ArgReg<A1>,
+        _a2: ArgReg<A2>,
+        _a3: ArgReg<A3>,
+        _a4: ArgReg<A4>,
+        _a5: ArgReg<A5>,
+    ) -> RetReg<R0>;
 }
 
 fn init() {

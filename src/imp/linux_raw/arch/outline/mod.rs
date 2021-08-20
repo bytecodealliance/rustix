@@ -14,8 +14,8 @@ mod x86;
 mod nr_last;
 
 #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
-pub(crate) use nr_last::*;
+pub(in crate::imp::linux_raw) use nr_last::*;
 #[cfg(target_arch = "riscv64")]
-pub(crate) use riscv64::*;
+pub(in crate::imp::linux_raw) use riscv64::*;
 #[cfg(target_arch = "x86")]
-pub(crate) use x86::*;
+pub(in crate::imp::linux_raw) use x86::*;

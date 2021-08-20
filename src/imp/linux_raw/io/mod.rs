@@ -1,5 +1,5 @@
 pub mod epoll;
-mod error;
+pub(super) mod error;
 mod poll_fd;
 mod types;
 
@@ -12,7 +12,6 @@ pub use types::{
 
 use std::os::raw::{c_int, c_uint};
 
-pub(crate) use error::{check_fd, check_result, check_void};
 pub(crate) const AT_FDCWD: c_int = linux_raw_sys::general::AT_FDCWD;
 pub(crate) const STDIN_FILENO: c_uint = linux_raw_sys::general::STDIN_FILENO;
 pub(crate) const STDOUT_FILENO: c_uint = linux_raw_sys::general::STDOUT_FILENO;

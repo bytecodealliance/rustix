@@ -6,98 +6,112 @@
 
 #![allow(dead_code)]
 
-use super::super::super::vdso_wrappers::SyscallType;
+use crate::imp::linux_raw::reg::{
+    ArgReg, FromAsm, RetReg, SyscallNumber, ToAsm, A0, A1, A2, A3, A4, A5, R0,
+};
+use crate::imp::linux_raw::vdso_wrappers::SyscallType;
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn indirect_syscall0(callee: SyscallType, nr: u32) -> usize {
+pub(in crate::imp::linux_raw) unsafe fn indirect_syscall0(
+    callee: SyscallType,
+    nr: SyscallNumber,
+) -> RetReg<R0> {
     let r0;
     asm!(
         "call {callee}",
         callee = in(reg) callee,
-        inlateout("eax") nr as usize => r0,
+        inlateout("eax") nr.to_asm() => r0,
         options(nostack, preserves_flags)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn indirect_syscall1(callee: SyscallType, nr: u32, a0: usize) -> usize {
+pub(in crate::imp::linux_raw) unsafe fn indirect_syscall1(
+    callee: SyscallType,
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+) -> RetReg<R0> {
     let r0;
     asm!(
         "call {callee}",
         callee = in(reg) callee,
-        inlateout("eax") nr as usize => r0,
-        in("ebx") a0,
+        inlateout("eax") nr.to_asm() => r0,
+        in("ebx") a0.to_asm(),
         options(nostack, preserves_flags)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
-pub(crate) unsafe fn indirect_syscall1_noreturn(callee: SyscallType, nr: u32, a0: usize) -> ! {
+pub(in crate::imp::linux_raw) unsafe fn indirect_syscall1_noreturn(
+    callee: SyscallType,
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+) -> ! {
     asm!(
         "call {callee}",
         callee = in(reg) callee,
-        in("eax") nr as usize,
-        in("ebx") a0,
+        in("eax") nr.to_asm(),
+        in("ebx") a0.to_asm(),
         options(noreturn)
     )
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn indirect_syscall2(
+pub(in crate::imp::linux_raw) unsafe fn indirect_syscall2(
     callee: SyscallType,
-    nr: u32,
-    a0: usize,
-    a1: usize,
-) -> usize {
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+    a1: ArgReg<A1>,
+) -> RetReg<R0> {
     let r0;
     asm!(
         "call {callee}",
         callee = in(reg) callee,
-        inlateout("eax") nr as usize => r0,
-        in("ebx") a0,
-        in("ecx") a1,
+        inlateout("eax") nr.to_asm() => r0,
+        in("ebx") a0.to_asm(),
+        in("ecx") a1.to_asm(),
         options(nostack, preserves_flags)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn indirect_syscall3(
+pub(in crate::imp::linux_raw) unsafe fn indirect_syscall3(
     callee: SyscallType,
-    nr: u32,
-    a0: usize,
-    a1: usize,
-    a2: usize,
-) -> usize {
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+    a1: ArgReg<A1>,
+    a2: ArgReg<A2>,
+) -> RetReg<R0> {
     let r0;
     asm!(
         "call {callee}",
         callee = in(reg) callee,
-        inlateout("eax") nr as usize => r0,
-        in("ebx") a0,
-        in("ecx") a1,
-        in("edx") a2,
+        inlateout("eax") nr.to_asm() => r0,
+        in("ebx") a0.to_asm(),
+        in("ecx") a1.to_asm(),
+        in("edx") a2.to_asm(),
         options(nostack, preserves_flags)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn indirect_syscall4(
+pub(in crate::imp::linux_raw) unsafe fn indirect_syscall4(
     callee: SyscallType,
-    nr: u32,
-    a0: usize,
-    a1: usize,
-    a2: usize,
-    a3: usize,
-) -> usize {
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+    a1: ArgReg<A1>,
+    a2: ArgReg<A2>,
+    a3: ArgReg<A3>,
+) -> RetReg<R0> {
     let r0;
     // a3 should go in esi, but asm! won't let us use it as an operand.
     // temporarily swap it into place, and then swap it back afterward.
@@ -109,28 +123,28 @@ pub(crate) unsafe fn indirect_syscall4(
         "xchg esi, {a3}",
         "call edi",
         "xchg esi, {a3}",
-        a3 = in(reg) a3,
+        a3 = in(reg) a3.to_asm(),
         in("edi") callee,
-        inlateout("eax") nr as usize => r0,
-        in("ebx") a0,
-        in("ecx") a1,
-        in("edx") a2,
+        inlateout("eax") nr.to_asm() => r0,
+        in("ebx") a0.to_asm(),
+        in("ecx") a1.to_asm(),
+        in("edx") a2.to_asm(),
         options(nostack, preserves_flags)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn indirect_syscall5(
+pub(in crate::imp::linux_raw) unsafe fn indirect_syscall5(
     callee: SyscallType,
-    nr: u32,
-    a0: usize,
-    a1: usize,
-    a2: usize,
-    a3: usize,
-    a4: usize,
-) -> usize {
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+    a1: ArgReg<A1>,
+    a2: ArgReg<A2>,
+    a3: ArgReg<A3>,
+    a4: ArgReg<A4>,
+) -> RetReg<R0> {
     let r0;
     // Oof. a3 should go in esi, and asm! won't let us use that register as
     // an operand. And we can't request stack slots. And there are no other
@@ -146,28 +160,28 @@ pub(crate) unsafe fn indirect_syscall5(
         "pop esi",
         "pop esi",
         "pop ebp",
-        inout("eax") &[callee as usize, a3, nr as usize] => r0,
-        in("ebx") a0,
-        in("ecx") a1,
-        in("edx") a2,
-        in("edi") a4,
+        inout("eax") &[callee as usize, a3.to_asm(), nr.to_asm()] => r0,
+        in("ebx") a0.to_asm(),
+        in("ecx") a1.to_asm(),
+        in("edx") a2.to_asm(),
+        in("edi") a4.to_asm(),
         options(preserves_flags)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[allow(clippy::too_many_arguments)]
 #[inline]
-pub(crate) unsafe fn indirect_syscall6(
+pub(in crate::imp::linux_raw) unsafe fn indirect_syscall6(
     callee: SyscallType,
-    nr: u32,
-    a0: usize,
-    a1: usize,
-    a2: usize,
-    a3: usize,
-    a4: usize,
-    a5: usize,
-) -> usize {
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+    a1: ArgReg<A1>,
+    a2: ArgReg<A2>,
+    a3: ArgReg<A3>,
+    a4: ArgReg<A4>,
+    a5: ArgReg<A5>,
+) -> RetReg<R0> {
     let r0;
     // Oof again. a3 should go in esi, and a5 should go in ebp, and asm! won't
     // let us use either of those registers as operands. And we can't request
@@ -188,125 +202,152 @@ pub(crate) unsafe fn indirect_syscall6(
         "pop esi",
         "pop esi",
         "pop ebp",
-        inout("eax") &[callee as usize, a3, a5, nr as usize] => r0,
-        in("ebx") a0,
-        in("ecx") a1,
-        in("edx") a2,
-        in("edi") a4,
+        inout("eax") &[callee as usize, a3.to_asm(), a5.to_asm(), nr.to_asm()] => r0,
+        in("ebx") a0.to_asm(),
+        in("ecx") a1.to_asm(),
+        in("edx") a2.to_asm(),
+        in("edi") a4.to_asm(),
         options(preserves_flags)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn syscall0_readonly(nr: u32) -> usize {
+pub(in crate::imp::linux_raw) unsafe fn syscall0_readonly(nr: SyscallNumber) -> RetReg<R0> {
     let r0;
     asm!(
         "int $$0x80",
-        inlateout("eax") nr as usize => r0,
+        inlateout("eax") nr.to_asm() => r0,
         options(nostack, preserves_flags, readonly)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn syscall1(nr: u32, a0: usize) -> usize {
+pub(in crate::imp::linux_raw) unsafe fn syscall1(nr: SyscallNumber, a0: ArgReg<A0>) -> RetReg<R0> {
     let r0;
     asm!(
         "int $$0x80",
-        inlateout("eax") nr as usize => r0,
-        in("ebx") a0,
+        inlateout("eax") nr.to_asm() => r0,
+        in("ebx") a0.to_asm(),
         options(nostack, preserves_flags)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn syscall1_readonly(nr: u32, a0: usize) -> usize {
+pub(in crate::imp::linux_raw) unsafe fn syscall1_readonly(
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+) -> RetReg<R0> {
     let r0;
     asm!(
         "int $$0x80",
-        inlateout("eax") nr as usize => r0,
-        in("ebx") a0,
+        inlateout("eax") nr.to_asm() => r0,
+        in("ebx") a0.to_asm(),
         options(nostack, preserves_flags, readonly)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
-pub(crate) unsafe fn syscall1_noreturn(nr: u32, a0: usize) -> ! {
+pub(in crate::imp::linux_raw) unsafe fn syscall1_noreturn(nr: SyscallNumber, a0: ArgReg<A0>) -> ! {
     asm!(
         "int $$0x80",
-        in("eax") nr as usize,
-        in("ebx") a0,
+        in("eax") nr.to_asm(),
+        in("ebx") a0.to_asm(),
         options(noreturn)
     )
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn syscall2(nr: u32, a0: usize, a1: usize) -> usize {
+pub(in crate::imp::linux_raw) unsafe fn syscall2(
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+    a1: ArgReg<A1>,
+) -> RetReg<R0> {
     let r0;
     asm!(
         "int $$0x80",
-        inlateout("eax") nr as usize => r0,
-        in("ebx") a0,
-        in("ecx") a1,
+        inlateout("eax") nr.to_asm() => r0,
+        in("ebx") a0.to_asm(),
+        in("ecx") a1.to_asm(),
         options(nostack, preserves_flags)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn syscall2_readonly(nr: u32, a0: usize, a1: usize) -> usize {
+pub(in crate::imp::linux_raw) unsafe fn syscall2_readonly(
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+    a1: ArgReg<A1>,
+) -> RetReg<R0> {
     let r0;
     asm!(
         "int $$0x80",
-        inlateout("eax") nr as usize => r0,
-        in("ebx") a0,
-        in("ecx") a1,
+        inlateout("eax") nr.to_asm() => r0,
+        in("ebx") a0.to_asm(),
+        in("ecx") a1.to_asm(),
         options(nostack, preserves_flags, readonly)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn syscall3(nr: u32, a0: usize, a1: usize, a2: usize) -> usize {
+pub(in crate::imp::linux_raw) unsafe fn syscall3(
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+    a1: ArgReg<A1>,
+    a2: ArgReg<A2>,
+) -> RetReg<R0> {
     let r0;
     asm!(
         "int $$0x80",
-        inlateout("eax") nr as usize => r0,
-        in("ebx") a0,
-        in("ecx") a1,
-        in("edx") a2,
+        inlateout("eax") nr.to_asm() => r0,
+        in("ebx") a0.to_asm(),
+        in("ecx") a1.to_asm(),
+        in("edx") a2.to_asm(),
         options(nostack, preserves_flags)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn syscall3_readonly(nr: u32, a0: usize, a1: usize, a2: usize) -> usize {
+pub(in crate::imp::linux_raw) unsafe fn syscall3_readonly(
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+    a1: ArgReg<A1>,
+    a2: ArgReg<A2>,
+) -> RetReg<R0> {
     let r0;
     asm!(
         "int $$0x80",
-        inlateout("eax") nr as usize => r0,
-        in("ebx") a0,
-        in("ecx") a1,
-        in("edx") a2,
+        inlateout("eax") nr.to_asm() => r0,
+        in("ebx") a0.to_asm(),
+        in("ecx") a1.to_asm(),
+        in("edx") a2.to_asm(),
         options(nostack, preserves_flags, readonly)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn syscall4(nr: u32, a0: usize, a1: usize, a2: usize, a3: usize) -> usize {
+pub(in crate::imp::linux_raw) unsafe fn syscall4(
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+    a1: ArgReg<A1>,
+    a2: ArgReg<A2>,
+    a3: ArgReg<A3>,
+) -> RetReg<R0> {
     let r0;
     // a3 should go in esi, but asm! won't let us use it as an operand.
     // Temporarily swap it into place, and then swap it back afterward.
@@ -314,50 +355,50 @@ pub(crate) unsafe fn syscall4(nr: u32, a0: usize, a1: usize, a2: usize, a3: usiz
         "xchg esi, {a3}",
         "int $$0x80",
         "xchg esi, {a3}",
-        a3 = in(reg) a3,
-        inlateout("eax") nr as usize => r0,
-        in("ebx") a0,
-        in("ecx") a1,
-        in("edx") a2,
+        a3 = in(reg) a3.to_asm(),
+        inlateout("eax") nr.to_asm() => r0,
+        in("ebx") a0.to_asm(),
+        in("ecx") a1.to_asm(),
+        in("edx") a2.to_asm(),
         options(nostack, preserves_flags)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn syscall4_readonly(
-    nr: u32,
-    a0: usize,
-    a1: usize,
-    a2: usize,
-    a3: usize,
-) -> usize {
+pub(in crate::imp::linux_raw) unsafe fn syscall4_readonly(
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+    a1: ArgReg<A1>,
+    a2: ArgReg<A2>,
+    a3: ArgReg<A3>,
+) -> RetReg<R0> {
     let r0;
     asm!(
         "xchg esi, {a3}",
         "int $$0x80",
         "xchg esi, {a3}",
-        a3 = in(reg) a3,
-        inlateout("eax") nr as usize => r0,
-        in("ebx") a0,
-        in("ecx") a1,
-        in("edx") a2,
+        a3 = in(reg) a3.to_asm(),
+        inlateout("eax") nr.to_asm() => r0,
+        in("ebx") a0.to_asm(),
+        in("ecx") a1.to_asm(),
+        in("edx") a2.to_asm(),
         options(nostack, preserves_flags, readonly)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn syscall5(
-    nr: u32,
-    a0: usize,
-    a1: usize,
-    a2: usize,
-    a3: usize,
-    a4: usize,
-) -> usize {
+pub(in crate::imp::linux_raw) unsafe fn syscall5(
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+    a1: ArgReg<A1>,
+    a2: ArgReg<A2>,
+    a3: ArgReg<A3>,
+    a4: ArgReg<A4>,
+) -> RetReg<R0> {
     let r0;
     // As in syscall 4, use xchg to handle a3. a4 should go in edi, and
     // we can use that register as an operand.
@@ -365,54 +406,54 @@ pub(crate) unsafe fn syscall5(
         "xchg esi, {a3}",
         "int $$0x80",
         "xchg esi, {a3}",
-        a3 = in(reg) a3,
-        inlateout("eax") nr as usize => r0,
-        in("ebx") a0,
-        in("ecx") a1,
-        in("edx") a2,
-        in("edi") a4,
+        a3 = in(reg) a3.to_asm(),
+        inlateout("eax") nr.to_asm() => r0,
+        in("ebx") a0.to_asm(),
+        in("ecx") a1.to_asm(),
+        in("edx") a2.to_asm(),
+        in("edi") a4.to_asm(),
         options(nostack, preserves_flags)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn syscall5_readonly(
-    nr: u32,
-    a0: usize,
-    a1: usize,
-    a2: usize,
-    a3: usize,
-    a4: usize,
-) -> usize {
+pub(in crate::imp::linux_raw) unsafe fn syscall5_readonly(
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+    a1: ArgReg<A1>,
+    a2: ArgReg<A2>,
+    a3: ArgReg<A3>,
+    a4: ArgReg<A4>,
+) -> RetReg<R0> {
     let r0;
     asm!(
         "xchg esi, {a3}",
         "int $$0x80",
         "xchg esi, {a3}",
-        a3 = in(reg) a3,
-        inlateout("eax") nr as usize => r0,
-        in("ebx") a0,
-        in("ecx") a1,
-        in("edx") a2,
-        in("edi") a4,
+        a3 = in(reg) a3.to_asm(),
+        inlateout("eax") nr.to_asm() => r0,
+        in("ebx") a0.to_asm(),
+        in("ecx") a1.to_asm(),
+        in("edx") a2.to_asm(),
+        in("edi") a4.to_asm(),
         options(nostack, preserves_flags, readonly)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn syscall6(
-    nr: u32,
-    a0: usize,
-    a1: usize,
-    a2: usize,
-    a3: usize,
-    a4: usize,
-    a5: usize,
-) -> usize {
+pub(in crate::imp::linux_raw) unsafe fn syscall6(
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+    a1: ArgReg<A1>,
+    a2: ArgReg<A2>,
+    a3: ArgReg<A3>,
+    a4: ArgReg<A4>,
+    a5: ArgReg<A5>,
+) -> RetReg<R0> {
     let r0;
     // Oof. a3 should go in esi, and a5 should go in ebp, and asm! won't
     // let us use either of those registers as operands. And we can't request
@@ -431,27 +472,27 @@ pub(crate) unsafe fn syscall6(
         "int $$0x80",
         "pop esi",
         "pop ebp",
-        inout("eax") &[a3, a5, nr as usize] => r0,
-        in("ebx") a0,
-        in("ecx") a1,
-        in("edx") a2,
-        in("edi") a4,
+        inout("eax") &[a3.to_asm(), a5.to_asm(), nr.to_asm()] => r0,
+        in("ebx") a0.to_asm(),
+        in("ecx") a1.to_asm(),
+        in("edx") a2.to_asm(),
+        in("edi") a4.to_asm(),
         options(preserves_flags)
     );
-    r0
+    FromAsm::from_asm(r0)
 }
 
 #[inline]
 #[must_use]
-pub(crate) unsafe fn syscall6_readonly(
-    nr: u32,
-    a0: usize,
-    a1: usize,
-    a2: usize,
-    a3: usize,
-    a4: usize,
-    a5: usize,
-) -> usize {
+pub(in crate::imp::linux_raw) unsafe fn syscall6_readonly(
+    nr: SyscallNumber,
+    a0: ArgReg<A0>,
+    a1: ArgReg<A1>,
+    a2: ArgReg<A2>,
+    a3: ArgReg<A3>,
+    a4: ArgReg<A4>,
+    a5: ArgReg<A5>,
+) -> RetReg<R0> {
     let r0;
     asm!(
         "push ebp",
@@ -462,12 +503,12 @@ pub(crate) unsafe fn syscall6_readonly(
         "int $$0x80",
         "pop esi",
         "pop ebp",
-        inout("eax") &[a3, a5, nr as usize] => r0,
-        in("ebx") a0,
-        in("ecx") a1,
-        in("edx") a2,
-        in("edi") a4,
+        inout("eax") &[a3.to_asm(), a5.to_asm(), nr.to_asm()] => r0,
+        in("ebx") a0.to_asm(),
+        in("ecx") a1.to_asm(),
+        in("edx") a2.to_asm(),
+        in("edi") a4.to_asm(),
         options(preserves_flags, readonly)
     );
-    r0
+    FromAsm::from_asm(r0)
 }

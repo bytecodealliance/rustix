@@ -6,12 +6,9 @@ mod types;
 pub mod epoll;
 pub use error::Error;
 pub use poll_fd::{PollFd, PollFlags};
-#[cfg(any(
-    linux_raw,
-    all(
-        libc,
-        not(any(target_os = "ios", target_os = "macos", target_os = "wasi"))
-    )
+#[cfg(all(
+    libc,
+    not(any(target_os = "ios", target_os = "macos", target_os = "wasi"))
 ))]
 pub use types::PipeFlags;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]

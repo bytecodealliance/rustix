@@ -8,7 +8,15 @@
 #![allow(unsafe_code)]
 
 use super::fs::{Mode, OFlags};
-use super::io::{check_fd, check_result, check_void};
+#[cfg(not(debug_assertions))]
+use super::io::error::decode_usize_infallible;
+#[cfg(target_pointer_width = "64")]
+use super::io::error::try_decode_u64;
+use super::io::error::{
+    try_decode_c_int, try_decode_c_uint, try_decode_raw_fd, try_decode_usize, try_decode_void,
+    try_decode_void_star,
+};
+use super::reg::{raw_arg, ArgNumber, ArgReg, RetReg, R0};
 use super::time::ClockId;
 use crate::io::{self, AsRawFd, FromRawFd, OwnedFd};
 use crate::{as_mut_ptr, as_ptr};
@@ -25,83 +33,112 @@ use std::ptr::null;
 
 /// Convert `SYS_*` constants for socketcall.
 #[cfg(target_arch = "x86")]
-pub(super) fn x86_sys(sys: u32) -> usize {
-    sys as usize
+pub(super) fn x86_sys<'a, Num: ArgNumber>(sys: u32) -> ArgReg<'a, Num> {
+    raw_arg(sys as usize)
 }
 
 #[cfg(all(target_endian = "little", target_pointer_width = "32"))]
 #[inline]
-pub(super) fn lo(x: u64) -> usize {
-    (x >> 32) as usize
+pub(super) fn lo<'a, Num: ArgNumber>(x: u64) -> ArgReg<'a, Num> {
+    raw_arg((x >> 32) as usize)
 }
 
 #[cfg(all(target_endian = "little", target_pointer_width = "32"))]
 #[inline]
-pub(super) fn hi(x: u64) -> usize {
-    (x & 0xffff_ffff) as usize
+pub(super) fn hi<'a, Num: ArgNumber>(x: u64) -> ArgReg<'a, Num> {
+    raw_arg((x & 0xffff_ffff) as usize)
 }
 
 #[cfg(all(target_endian = "big", target_pointer_width = "32"))]
 #[inline]
-pub(super) fn lo(x: u64) -> usize {
-    (x & 0xffff_ffff) as usize
+pub(super) fn lo<'a, Num: ArgNumber>(x: u64) -> ArgReg<'a, Num> {
+    raw_arg((x & 0xffff_ffff) as usize)
 }
 
 #[cfg(all(target_endian = "big", target_pointer_width = "32"))]
 #[inline]
-pub(super) fn hi(x: u64) -> usize {
-    (x >> 32) as usize
+pub(super) fn hi<'a, Num: ArgNumber>(x: u64) -> ArgReg<'a, Num> {
+    raw_arg((x >> 32) as usize)
 }
 
 #[inline]
-pub(super) fn void_star(c: *mut c_void) -> usize {
-    c as usize
+pub(super) fn zero<'a, Num: ArgNumber>() -> ArgReg<'a, Num> {
+    raw_arg(0)
 }
 
 #[inline]
-pub(super) fn c_str(c: &CStr) -> usize {
-    c.as_ptr() as usize
+pub(super) fn size_of<'a, T: Sized, Num: ArgNumber>() -> ArgReg<'a, Num> {
+    raw_arg(std::mem::size_of::<T>())
 }
 
 #[inline]
-pub(super) fn opt_c_str(t: Option<&CStr>) -> usize {
-    (match t {
-        Some(s) => s.as_ptr(),
-        None => null(),
-    }) as usize
+pub(super) fn pass_usize<'a, Num: ArgNumber>(t: usize) -> ArgReg<'a, Num> {
+    raw_arg(t)
 }
 
 #[inline]
-pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> usize {
-    // File descriptors are never negative on Linux, so use zero-extension
-    // rather than sign-extension because it's a smaller instruction.
-    fd.as_raw_fd() as c_uint as usize
+pub(super) fn void_star<'a, Num: ArgNumber>(c: *mut c_void) -> ArgReg<'a, Num> {
+    raw_arg(c as usize)
 }
 
 #[inline]
-pub(super) fn raw_fd(fd: c_int) -> usize {
+pub(super) fn c_str<'a, Num: ArgNumber>(c: &'a CStr) -> ArgReg<'a, Num> {
+    raw_arg(c.as_ptr() as usize)
+}
+
+#[inline]
+pub(super) fn opt_c_str<'a, Num: ArgNumber>(t: Option<&'a CStr>) -> ArgReg<'a, Num> {
+    raw_arg(
+        (match t {
+            Some(s) => s.as_ptr(),
+            None => null(),
+        }) as usize,
+    )
+}
+
+#[inline]
+pub(super) fn borrowed_fd<'a, Num: ArgNumber>(fd: BorrowedFd<'a>) -> ArgReg<'a, Num> {
+    // Linux doesn't look at the high bits beyond the `c_int`, so use
+    // zero-extension rather than sign-extension because it's a smaller
+    // instruction.
+    debug_assert!(fd.as_raw_fd() == crate::fs::cwd().as_raw_fd() || fd.as_raw_fd() >= 0);
+    raw_arg(fd.as_raw_fd() as c_uint as usize)
+}
+
+#[inline]
+pub(super) fn raw_fd<'a, Num: ArgNumber>(fd: c_int) -> ArgReg<'a, Num> {
     // As above, use zero-extension rather than sign-extension.
-    fd as c_uint as usize
+    debug_assert!(fd.as_raw_fd() == crate::fs::cwd().as_raw_fd() || fd.as_raw_fd() >= 0);
+    raw_arg(fd as c_uint as usize)
 }
 
 #[inline]
-pub(super) fn slice_addr<T: Sized>(v: &[T]) -> usize {
-    v.as_ptr() as usize
+pub(super) fn slice_just_addr<'a, T: Sized, Num: ArgNumber>(v: &'a [T]) -> ArgReg<'a, Num> {
+    raw_arg(v.as_ptr() as usize)
 }
 
 #[inline]
-pub(super) fn slice_as_mut_ptr<T: Sized>(v: &mut [T]) -> usize {
-    v.as_mut_ptr() as usize
+pub(super) fn slice<'a, T: Sized, Num0: ArgNumber, Num1: ArgNumber>(
+    v: &'a [T],
+) -> (ArgReg<'a, Num0>, ArgReg<'a, Num1>) {
+    (raw_arg(v.as_ptr() as usize), raw_arg(v.len()))
 }
 
 #[inline]
-pub(super) fn by_ref<T: Sized>(t: &T) -> usize {
-    as_ptr(t) as usize
+pub(super) fn slice_mut<'a, T: Sized, Num0: ArgNumber, Num1: ArgNumber>(
+    v: &mut [T],
+) -> (ArgReg<'a, Num0>, ArgReg<'a, Num1>) {
+    (raw_arg(v.as_mut_ptr() as usize), raw_arg(v.len()))
 }
 
 #[inline]
-pub(super) fn by_mut<T: Sized>(t: &mut T) -> usize {
-    as_mut_ptr(t) as usize
+pub(super) fn by_ref<'a, T: Sized, Num: ArgNumber>(t: &'a T) -> ArgReg<'a, Num> {
+    raw_arg(as_ptr(t) as usize)
+}
+
+#[inline]
+pub(super) fn by_mut<'a, T: Sized, Num: ArgNumber>(t: &'a mut T) -> ArgReg<'a, Num> {
+    raw_arg(as_mut_ptr(t) as usize)
 }
 
 /// Convert an optional mutable reference into a `usize` for passing to a
@@ -113,7 +150,9 @@ pub(super) fn by_mut<T: Sized>(t: &mut T) -> usize {
 /// same size as a `usize`, so we can directly transmute it and pass the result
 /// to syscalls expecting nullable pointers.
 #[inline]
-pub(super) unsafe fn opt_mut<T: Sized>(t: Option<&mut T>) -> usize {
+pub(super) unsafe fn opt_mut<'a, T: Sized, Num: ArgNumber>(
+    t: Option<&'a mut T>,
+) -> ArgReg<'a, Num> {
     transmute(t)
 }
 
@@ -127,81 +166,89 @@ pub(super) unsafe fn opt_mut<T: Sized>(t: Option<&mut T>) -> usize {
 /// to syscalls expecting nullable pointers.
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 #[inline]
-pub(super) unsafe fn opt_ref<T: Sized>(t: Option<&T>) -> usize {
+pub(super) unsafe fn opt_ref<'a, T: Sized, Num: ArgNumber>(t: Option<&'a T>) -> ArgReg<'a, Num> {
     transmute(t)
 }
 
 #[inline]
-pub(super) fn c_int(i: c_int) -> usize {
-    i as usize
+pub(super) fn c_int<'a, Num: ArgNumber>(i: c_int) -> ArgReg<'a, Num> {
+    raw_arg(i as usize)
 }
 
 #[inline]
-pub(super) fn c_uint(i: c_uint) -> usize {
-    i as usize
-}
-
-#[cfg(target_pointer_width = "64")]
-#[inline]
-pub(super) fn loff_t(i: __kernel_loff_t) -> usize {
-    i as usize
+pub(super) fn c_uint<'a, Num: ArgNumber>(i: c_uint) -> ArgReg<'a, Num> {
+    raw_arg(i as usize)
 }
 
 #[cfg(target_pointer_width = "64")]
 #[inline]
-pub(super) fn loff_t_from_u64(i: u64) -> usize {
+pub(super) fn loff_t<'a, Num: ArgNumber>(i: __kernel_loff_t) -> ArgReg<'a, Num> {
+    raw_arg(i as usize)
+}
+
+#[cfg(target_pointer_width = "64")]
+#[inline]
+pub(super) fn loff_t_from_u64<'a, Num: ArgNumber>(i: u64) -> ArgReg<'a, Num> {
     // `loff_t` is signed, but syscalls which expect `loff_t` return `EINVAL`
     // if it's outside the signed `i64` range, so we can silently cast.
-    i as usize
+    raw_arg(i as usize)
 }
 
 #[inline]
-pub(super) fn clockid_t(i: ClockId) -> usize {
-    i as __kernel_clockid_t as usize
+pub(super) fn clockid_t<'a, Num: ArgNumber>(i: ClockId) -> ArgReg<'a, Num> {
+    raw_arg(i as __kernel_clockid_t as usize)
 }
 
 #[inline]
-pub(super) fn socklen_t(i: socklen_t) -> usize {
-    i as usize
+pub(super) fn socklen_t<'a, Num: ArgNumber>(i: socklen_t) -> ArgReg<'a, Num> {
+    raw_arg(i as usize)
 }
 
 #[inline]
-pub(super) fn mode_as(mode: Mode) -> usize {
-    mode.bits() as usize
+pub(super) fn mode_as<'a, Num: ArgNumber>(mode: Mode) -> ArgReg<'a, Num> {
+    raw_arg(mode.bits() as usize)
 }
 
 #[cfg(target_pointer_width = "64")]
 #[inline]
-pub(super) fn dev_t(dev: u64) -> usize {
-    dev as usize
+pub(super) fn dev_t<'a, Num: ArgNumber>(dev: u64) -> ArgReg<'a, Num> {
+    raw_arg(dev as usize)
 }
 
 #[cfg(target_pointer_width = "32")]
 #[inline]
-pub(super) fn dev_t(dev: u64) -> io::Result<usize> {
+pub(super) fn dev_t<'a, Num: ArgNumber>(dev: u64) -> io::Result<ArgReg<'a, Num>> {
     use std::convert::TryInto;
-    dev.try_into().map_err(|_err| io::Error::INVAL)
+    dev.try_into().map(raw_arg).map_err(|_err| io::Error::INVAL)
 }
 
 #[cfg(target_pointer_width = "32")]
-pub(super) fn oflags(oflags: OFlags) -> usize {
+fn oflags_bits(oflags: OFlags) -> c_uint {
     let mut bits = oflags.bits();
     // Add `O_LARGEFILE`, unless `O_PATH` is set, as Linux returns `EINVAL`
     // when both are set.
     if !oflags.contains(OFlags::PATH) {
         bits |= O_LARGEFILE;
     }
-    bits as usize
+    bits
 }
 
 #[cfg(target_pointer_width = "64")]
-pub(super) fn oflags(oflags: OFlags) -> usize {
-    oflags.bits() as usize
+fn oflags_bits(oflags: OFlags) -> c_uint {
+    oflags.bits()
+}
+
+pub(super) fn oflags<'a, Num: ArgNumber>(oflags: OFlags) -> ArgReg<'a, Num> {
+    raw_arg(oflags_bits(oflags) as usize)
+}
+
+pub(super) fn oflags_for_open_how(oflags: OFlags) -> u64 {
+    oflags_bits(oflags) as u64
 }
 
 #[inline]
-pub(super) fn out<T: Sized>(t: &mut MaybeUninit<T>) -> usize {
-    t.as_mut_ptr() as usize
+pub(super) fn out<'a, T: Sized, Num: ArgNumber>(t: &'a mut MaybeUninit<T>) -> ArgReg<'a, Num> {
+    raw_arg(t.as_mut_ptr() as usize)
 }
 
 /// Convert a `usize` returned from a syscall that effectively returns `()` on
@@ -212,43 +259,56 @@ pub(super) fn out<T: Sized>(t: &mut MaybeUninit<T>) -> usize {
 /// The caller must ensure that this is the return value of a syscall which
 /// just returns 0 on success.
 #[inline]
-pub(super) unsafe fn ret(raw: usize) -> io::Result<()> {
-    check_void(raw)
+pub(super) unsafe fn ret(raw: RetReg<R0>) -> io::Result<()> {
+    try_decode_void(raw)
 }
 
 /// Convert a `usize` returned from a syscall that effectively returns a
 /// `c_int` on success.
 #[inline]
-pub(super) fn ret_c_int(raw: usize) -> io::Result<c_int> {
-    check_result(raw)?;
-    debug_assert_eq!(raw as c_int as usize, raw);
-    Ok(raw as c_int)
+pub(super) fn ret_c_int(raw: RetReg<R0>) -> io::Result<c_int> {
+    try_decode_c_int(raw)
 }
 
 /// Convert a `usize` returned from a syscall that effectively returns a
 /// `c_uint` on success.
 #[inline]
-pub(super) fn ret_c_uint(raw: usize) -> io::Result<c_uint> {
-    check_result(raw)?;
-    debug_assert_eq!(raw as c_uint as usize, raw);
-    Ok(raw as c_uint)
+pub(super) fn ret_c_uint(raw: RetReg<R0>) -> io::Result<c_uint> {
+    try_decode_c_uint(raw)
 }
 
 /// Convert a `usize` returned from a syscall that effectively returns a `u64`
 /// on success.
 #[cfg(target_pointer_width = "64")]
 #[inline]
-pub(super) fn ret_u64(raw: usize) -> io::Result<u64> {
-    check_result(raw)?;
-    Ok(raw as u64)
+pub(super) fn ret_u64(raw: RetReg<R0>) -> io::Result<u64> {
+    try_decode_u64(raw)
 }
 
 /// Convert a `usize` returned from a syscall that effectively returns a
 /// `usize` on success.
 #[inline]
-pub(super) fn ret_usize(raw: usize) -> io::Result<usize> {
-    check_result(raw)?;
-    Ok(raw)
+pub(super) fn ret_usize(raw: RetReg<R0>) -> io::Result<usize> {
+    try_decode_usize(raw)
+}
+
+/// Convert a `usize` returned from a syscall that effectively always
+/// returns a `usize`.
+///
+/// # Safety
+///
+/// This function must only be used with return values from infallible
+/// syscalls.
+#[inline]
+pub(super) unsafe fn ret_usize_infallible(raw: RetReg<R0>) -> usize {
+    #[cfg(debug_assertions)]
+    {
+        try_decode_usize(raw).unwrap()
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        decode_usize_infallible(raw)
+    }
 }
 
 /// Convert a `usize` returned from a syscall that effectively returns an
@@ -259,8 +319,8 @@ pub(super) fn ret_usize(raw: usize) -> io::Result<usize> {
 /// The caller must ensure that this is the return value of a syscall which
 /// returns an owned file descriptor.
 #[inline]
-pub(super) unsafe fn ret_owned_fd(raw: usize) -> io::Result<OwnedFd> {
-    let raw_fd = check_fd(raw)?;
+pub(super) unsafe fn ret_owned_fd(raw: RetReg<R0>) -> io::Result<OwnedFd> {
+    let raw_fd = try_decode_raw_fd(raw)?;
     Ok(OwnedFd::from(io_lifetimes::OwnedFd::from_raw_fd(raw_fd)))
 }
 
@@ -274,15 +334,14 @@ pub(super) unsafe fn ret_owned_fd(raw: usize) -> io::Result<OwnedFd> {
 /// The caller must ensure that this is the return value of a syscall which
 /// returns a file descriptor.
 #[inline]
-pub(super) unsafe fn ret_discarded_fd(raw: usize) -> io::Result<()> {
-    let _raw_fd = check_fd(raw)?;
+pub(super) unsafe fn ret_discarded_fd(raw: RetReg<R0>) -> io::Result<()> {
+    let _raw_fd = try_decode_raw_fd(raw)?;
     Ok(())
 }
 
 /// Convert a `usize` returned from a syscall that effectively returns a
 /// `*mut c_void` on success.
 #[inline]
-pub(super) fn ret_void_star(raw: usize) -> io::Result<*mut c_void> {
-    check_result(raw)?;
-    Ok(raw as *mut c_void)
+pub(super) fn ret_void_star(raw: RetReg<R0>) -> io::Result<*mut c_void> {
+    try_decode_void_star(raw)
 }
