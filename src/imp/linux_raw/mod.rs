@@ -1,5 +1,6 @@
 mod arch;
 mod conv;
+mod reg;
 mod vdso;
 mod vdso_wrappers;
 

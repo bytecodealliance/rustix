@@ -1,5 +1,5 @@
-use super::super::conv::owned_fd;
 use super::FileType;
+use crate::imp::libc::conv::owned_fd;
 use crate::io::{self, OwnedFd, RawFd};
 use errno::{errno, set_errno, Errno};
 use io_lifetimes::{AsFd, BorrowedFd, IntoFd};

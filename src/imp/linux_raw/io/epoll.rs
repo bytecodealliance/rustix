@@ -60,7 +60,7 @@
 
 #![allow(unsafe_code)]
 
-use super::super::syscalls::{epoll_add, epoll_create, epoll_del, epoll_mod, epoll_wait};
+use crate::imp::linux_raw::syscalls::{epoll_add, epoll_create, epoll_del, epoll_mod, epoll_wait};
 use crate::io;
 use crate::io::{AsRawFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
 use bitflags::bitflags;

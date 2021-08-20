@@ -58,7 +58,7 @@
 //! # }
 //! ```
 
-use super::super::conv::{ret, ret_owned_fd, ret_u32};
+use crate::imp::libc::conv::{ret, ret_owned_fd, ret_u32};
 use crate::io;
 use crate::io::{AsRawFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
 use bitflags::bitflags;
