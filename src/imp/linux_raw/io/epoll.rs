@@ -7,6 +7,7 @@
 //! # Examples
 //!
 //! ```rust,no_run
+//! # #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 //! # fn main() -> std::io::Result<()> {
 //! use rsix::io::{
 //!     epoll::{self, Epoll},
