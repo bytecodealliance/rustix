@@ -21,7 +21,7 @@ rustc_version = "0.4.0"
 [dependencies]
 bitflags = "1.2.1"
 itoa = "0.4.7"
-io-lifetimes = { version = "0.2.3", default-features = false }
+io-lifetimes = { version = "0.3.0", default-features = false }
 
 [target.'cfg(any(target_os = "android", target_os = "linux"))'.dependencies]
 once_cell = "1.5.2"
