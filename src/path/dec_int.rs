@@ -34,12 +34,12 @@ impl DecInt {
     /// Construct a new path component from an integer.
     #[inline]
     pub fn new<Int: Integer>(i: Int) -> Self {
-        let mut me = Self {
+        let mut me = DecIntWriter(Self {
             buf: [0; 20],
             len: 0,
-        };
+        });
         fmt(&mut me, i).unwrap();
-        me
+        me.0
     }
 
     /// Construct a new path component from a file descriptor.
@@ -55,14 +55,19 @@ impl DecInt {
     }
 }
 
-impl core::fmt::Write for DecInt {
+struct DecIntWriter(DecInt);
+
+impl core::fmt::Write for DecIntWriter {
+    #[inline]
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
-        if self.len + s.len() > 20 {
-            return Err(core::fmt::Error);
+        match self.0.buf.get_mut(self.0.len..self.0.len + s.len()) {
+            Some(slice) => {
+                slice.copy_from_slice(s.as_bytes());
+                self.0.len += s.len();
+                Ok(())
+            }
+            None => Err(core::fmt::Error),
         }
-        self.buf[self.len..self.len + s.len()].copy_from_slice(s.as_bytes());
-        self.len += s.len();
-        Ok(())
     }
 }
 
