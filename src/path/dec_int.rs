@@ -1,6 +1,6 @@
 use crate::io::AsRawFd;
 use io_lifetimes::AsFd;
-use itoa::{write, Integer};
+use itoa::{fmt, Integer};
 use std::ffi::OsStr;
 use std::ops::Deref;
 #[cfg(unix)]
@@ -38,7 +38,7 @@ impl DecInt {
             buf: [0; 20],
             len: 0,
         };
-        me.len = write(&mut me.buf[..], i).unwrap();
+        fmt(&mut me, i).unwrap();
         me
     }
 
@@ -52,6 +52,17 @@ impl DecInt {
     #[inline]
     pub fn as_bytes(&self) -> &[u8] {
         &self.buf[..self.len]
+    }
+}
+
+impl core::fmt::Write for DecInt {
+    fn write_str(&mut self, s: &str) -> core::fmt::Result {
+        if self.len + s.len() > 20 {
+            return Err(core::fmt::Error);
+        }
+        self.buf[self.len..self.len + s.len()].copy_from_slice(s.as_bytes());
+        self.len += s.len();
+        Ok(())
     }
 }
 
