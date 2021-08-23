@@ -13,7 +13,7 @@ use crate::io::{self, OwnedFd};
 use crate::path::DecInt;
 use crate::process::{getgid, getpid, getuid};
 use io_lifetimes::{AsFd, BorrowedFd};
-use once_cell::sync::Lazy;
+use once_cell::sync::OnceCell;
 
 /// Linux's procfs always uses inode 1 for its root directory.
 const PROC_ROOT_INO: u64 = 1;
@@ -190,22 +190,25 @@ fn is_mountpoint(file: BorrowedFd<'_>) -> bool {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 pub fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
-    static PROC: Lazy<io::Result<(OwnedFd, Stat)>> = Lazy::new(|| {
+    static PROC: OnceCell<(OwnedFd, Stat)> = OnceCell::new();
+
+    PROC.get_or_try_init(|| {
         let oflags = OFlags::NOFOLLOW
             | OFlags::PATH
             | OFlags::DIRECTORY
             | OFlags::CLOEXEC
             | OFlags::NOCTTY
             | OFlags::NOATIME;
-        let proc = openat(&cwd(), cstr!("/proc"), oflags, Mode::empty())?;
-        let proc_stat = check_proc_entry(Kind::Proc, proc.as_fd(), None, 0, 0)?;
+
+        // Open "/proc".
+        let proc = openat(&cwd(), cstr!("/proc"), oflags, Mode::empty())
+            .map_err(|_err| io::Error::NOTSUP)?;
+        let proc_stat = check_proc_entry(Kind::Proc, proc.as_fd(), None, 0, 0)
+            .map_err(|_err| io::Error::NOTSUP)?;
 
         Ok((proc, proc_stat))
-    });
-
-    PROC.as_ref()
-        .map(|(fd, stat)| (fd.as_fd(), stat))
-        .map_err(|_err| io::Error::NOTSUP)
+    })
+    .map(|(fd, stat)| (fd.as_fd(), stat))
 }
 
 /// Returns a handle to Linux's `/proc/self` directory.
@@ -218,30 +221,31 @@ pub fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 pub fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
-    static PROC_SELF: Lazy<io::Result<(OwnedFd, Stat)>> = Lazy::new(|| {
-        let (proc, proc_stat) = proc()?;
-
-        let (uid, gid, pid) = (getuid(), getgid(), getpid());
-        let oflags = OFlags::NOFOLLOW
-            | OFlags::PATH
-            | OFlags::DIRECTORY
-            | OFlags::CLOEXEC
-            | OFlags::NOCTTY
-            | OFlags::NOATIME;
-
-        // Open "/proc/self". Use our pid to compute the name rather than literally
-        // using "self", as "self" is a symlink.
-        let proc_self = openat(&proc, DecInt::new(pid), oflags, Mode::empty())?;
-        let proc_self_stat =
-            check_proc_entry(Kind::Pid, proc_self.as_fd(), Some(proc_stat), uid, gid)?;
-
-        Ok((proc_self, proc_self_stat))
-    });
+    static PROC_SELF: OnceCell<(OwnedFd, Stat)> = OnceCell::new();
 
     PROC_SELF
-        .as_ref()
+        .get_or_try_init(|| {
+            let (proc, proc_stat) = proc()?;
+
+            let (uid, gid, pid) = (getuid(), getgid(), getpid());
+            let oflags = OFlags::NOFOLLOW
+                | OFlags::PATH
+                | OFlags::DIRECTORY
+                | OFlags::CLOEXEC
+                | OFlags::NOCTTY
+                | OFlags::NOATIME;
+
+            // Open "/proc/self". Use our pid to compute the name rather than literally
+            // using "self", as "self" is a symlink.
+            let proc_self = openat(&proc, DecInt::new(pid), oflags, Mode::empty())
+                .map_err(|_err| io::Error::NOTSUP)?;
+            let proc_self_stat =
+                check_proc_entry(Kind::Pid, proc_self.as_fd(), Some(proc_stat), uid, gid)
+                    .map_err(|_err| io::Error::NOTSUP)?;
+
+            Ok((proc_self, proc_self_stat))
+        })
         .map(|(owned, stat)| (owned.as_fd(), stat))
-        .map_err(|_err| io::Error::NOTSUP)
 }
 
 /// Returns a handle to Linux's `/proc/self/fd` directory.
@@ -255,34 +259,35 @@ pub fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 pub fn proc_self_fd() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
-    static PROC_SELF_FD: Lazy<io::Result<(OwnedFd, Stat)>> = Lazy::new(|| {
-        let (_, proc_stat) = proc()?;
-
-        let (proc_self, proc_self_stat) = proc_self()?;
-        let oflags = OFlags::NOFOLLOW
-            | OFlags::PATH
-            | OFlags::DIRECTORY
-            | OFlags::CLOEXEC
-            | OFlags::NOCTTY
-            | OFlags::NOATIME;
-
-        // Open "/proc/self/fd".
-        let proc_self_fd = openat(&proc_self, cstr!("fd"), oflags, Mode::empty())?;
-        let proc_self_fd_stat = check_proc_entry(
-            Kind::Fd,
-            proc_self_fd.as_fd(),
-            Some(proc_stat),
-            proc_self_stat.st_uid,
-            proc_self_stat.st_gid,
-        )?;
-
-        Ok((proc_self_fd, proc_self_fd_stat))
-    });
+    static PROC_SELF_FD: OnceCell<(OwnedFd, Stat)> = OnceCell::new();
 
     PROC_SELF_FD
-        .as_ref()
+        .get_or_try_init(|| {
+            let (_, proc_stat) = proc()?;
+
+            let (proc_self, proc_self_stat) = proc_self()?;
+            let oflags = OFlags::NOFOLLOW
+                | OFlags::PATH
+                | OFlags::DIRECTORY
+                | OFlags::CLOEXEC
+                | OFlags::NOCTTY
+                | OFlags::NOATIME;
+
+            // Open "/proc/self/fd".
+            let proc_self_fd = openat(&proc_self, cstr!("fd"), oflags, Mode::empty())
+                .map_err(|_err| io::Error::NOTSUP)?;
+            let proc_self_fd_stat = check_proc_entry(
+                Kind::Fd,
+                proc_self_fd.as_fd(),
+                Some(proc_stat),
+                proc_self_stat.st_uid,
+                proc_self_stat.st_gid,
+            )
+            .map_err(|_err| io::Error::NOTSUP)?;
+
+            Ok((proc_self_fd, proc_self_fd_stat))
+        })
         .map(|(owned, stat)| (owned.as_fd(), stat))
-        .map_err(|_err| io::Error::NOTSUP)
 }
 
 /// Returns a handle to Linux's `/proc/self/auxv` file.
