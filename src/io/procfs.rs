@@ -197,7 +197,7 @@ pub fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
             | OFlags::CLOEXEC
             | OFlags::NOCTTY
             | OFlags::NOATIME;
-        let proc: OwnedFd = openat(&cwd(), cstr!("/proc"), oflags, Mode::empty())?.into();
+        let proc = openat(&cwd(), cstr!("/proc"), oflags, Mode::empty())?;
         let proc_stat = check_proc_entry(Kind::Proc, proc.as_fd(), None, 0, 0)?;
 
         Ok((proc, proc_stat))
@@ -231,7 +231,7 @@ pub fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 
         // Open "/proc/self". Use our pid to compute the name rather than literally
         // using "self", as "self" is a symlink.
-        let proc_self: OwnedFd = openat(&proc, DecInt::new(pid), oflags, Mode::empty())?.into();
+        let proc_self = openat(&proc, DecInt::new(pid), oflags, Mode::empty())?;
         let proc_self_stat =
             check_proc_entry(Kind::Pid, proc_self.as_fd(), Some(proc_stat), uid, gid)?;
 
@@ -267,7 +267,7 @@ pub fn proc_self_fd() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
             | OFlags::NOATIME;
 
         // Open "/proc/self/fd".
-        let proc_self_fd: OwnedFd = openat(&proc_self, cstr!("fd"), oflags, Mode::empty())?.into();
+        let proc_self_fd = openat(&proc_self, cstr!("fd"), oflags, Mode::empty())?;
         let proc_self_fd_stat = check_proc_entry(
             Kind::Fd,
             proc_self_fd.as_fd(),
@@ -301,7 +301,7 @@ pub(crate) fn proc_self_auxv() -> io::Result<OwnedFd> {
 
     let oflags =
         OFlags::RDONLY | OFlags::CLOEXEC | OFlags::NOFOLLOW | OFlags::NOCTTY | OFlags::NOATIME;
-    let auxv: OwnedFd = openat(&proc_self, cstr!("auxv"), oflags, Mode::empty())?.into();
+    let auxv = openat(&proc_self, cstr!("auxv"), oflags, Mode::empty())?;
 
     let _ = check_proc_entry(
         Kind::File,
