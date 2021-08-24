@@ -219,10 +219,10 @@ impl Ipv6Addr {
     #[cfg(not(const_fn_union))]
     #[inline]
     pub fn to_ipv4(&self) -> Option<Ipv4Addr> {
-        match self.const_clone().into_std().to_ipv4() {
-            None => None,
-            Some(ipv4) => Some(Ipv4Addr::from_std(ipv4)),
-        }
+        self.const_clone()
+            .into_std()
+            .to_ipv4()
+            .map(Ipv4Addr::from_std)
     }
 
     #[cfg(const_fn_union)]
