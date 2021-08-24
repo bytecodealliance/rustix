@@ -6,6 +6,8 @@ mod types;
 pub mod epoll;
 pub use error::Error;
 pub use poll_fd::{PollFd, PollFlags};
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub use types::Advice;
 #[cfg(all(
     libc,
     not(any(target_os = "ios", target_os = "macos", target_os = "wasi"))

@@ -17,6 +17,8 @@ mod error;
 mod eventfd;
 mod fd;
 mod ioctl;
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+mod madvise;
 #[cfg(not(target_os = "wasi"))]
 mod mmap;
 mod owned_fd;
@@ -55,6 +57,8 @@ pub use ioctl::{ioctl_tcgets, ioctl_tiocgwinsz};
     all(libc, not(any(target_os = "redox", target_os = "wasi")))
 ))]
 pub use ioctl::{ioctl_tiocexcl, ioctl_tiocnxcl};
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub use madvise::{madvise, Advice};
 #[cfg(not(target_os = "wasi"))]
 pub use mmap::{mmap, munmap, MapFlags, ProtFlags};
 pub use owned_fd::OwnedFd;
