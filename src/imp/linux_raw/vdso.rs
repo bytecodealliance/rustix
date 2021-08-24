@@ -41,7 +41,7 @@ pub(super) struct Vdso {
 fn elf_hash(name: &CStr) -> u32 {
     let mut h: u32 = 0;
     for b in name.to_bytes() {
-        h = (h << 4) + u32::from(*b);
+        h = (h << 4).wrapping_add(u32::from(*b));
         let g = h & 0xf000_0000;
         if g != 0 {
             h ^= g >> 24;
