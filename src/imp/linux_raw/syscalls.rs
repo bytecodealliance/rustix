@@ -30,12 +30,12 @@ use super::conv::{
     slice_just_addr, slice_mut, socklen_t, void_star, zero,
 };
 use super::fs::{
-    Access, Advice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode, OFlags,
-    RenameFlags, ResolveFlags, Stat, StatFs, StatxFlags,
+    Access, Advice as FsAdvice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode,
+    OFlags, RenameFlags, ResolveFlags, Stat, StatFs, StatxFlags,
 };
 use super::io::{
-    epoll, DupFlags, EventfdFlags, MapFlags, PipeFlags, PollFd, ProtFlags, ReadWriteFlags,
-    UserfaultfdFlags,
+    epoll, Advice as IoAdvice, DupFlags, EventfdFlags, MapFlags, PipeFlags, PollFd, ProtFlags,
+    ReadWriteFlags, UserfaultfdFlags,
 };
 #[cfg(not(target_os = "wasi"))]
 use super::io::{Termios, Winsize};
@@ -68,12 +68,12 @@ use linux_raw_sys::general::{
     __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
     __NR_epoll_create1, __NR_epoll_ctl, __NR_exit_group, __NR_faccessat, __NR_fallocate,
     __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_flock, __NR_fsync, __NR_getcwd,
-    __NR_getdents64, __NR_getpid, __NR_getppid, __NR_ioctl, __NR_linkat, __NR_mkdirat,
-    __NR_mknodat, __NR_munmap, __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_pread64, __NR_preadv,
-    __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv, __NR_sched_yield,
-    __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev, __kernel_gid_t,
-    __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event, sockaddr, sockaddr_in,
-    sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW,
+    __NR_getdents64, __NR_getpid, __NR_getppid, __NR_ioctl, __NR_linkat, __NR_madvise,
+    __NR_mkdirat, __NR_mknodat, __NR_munmap, __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_pread64,
+    __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv,
+    __NR_sched_yield, __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
+    __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event, sockaddr,
+    sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW,
     EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC,
     F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL, TCGETS, TIMER_ABSTIME,
     TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
@@ -685,7 +685,7 @@ pub(crate) fn fallocate(
 }
 
 #[inline]
-pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) -> io::Result<()> {
+pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: FsAdvice) -> io::Result<()> {
     // On arm and powerpc, the system calls are reordered so that the len and
     // pos argument pairs are aligned.
     #[cfg(any(target_arch = "arm", target_arch = "powerpc"))]
@@ -722,6 +722,18 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) ->
             borrowed_fd(fd),
             loff_t_from_u64(pos),
             loff_t_from_u64(len),
+            c_uint(advice as c_uint),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn madvise(addr: *mut c_void, len: usize, advice: IoAdvice) -> io::Result<()> {
+    unsafe {
+        ret(syscall3(
+            nr(__NR_madvise),
+            void_star(addr),
+            pass_usize(len),
             c_uint(advice as c_uint),
         ))
     }

@@ -125,6 +125,71 @@ bitflags! {
     }
 }
 
+/// `POSIX_MADV_*` constants for use with [`madvise`].
+///
+/// [`madvise`]: crate::io::madvise
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[repr(u32)]
+pub enum Advice {
+    /// `POSIX_MADV_NORMAL`
+    Normal = linux_raw_sys::general::MADV_NORMAL,
+
+    /// `POSIX_MADV_SEQUENTIAL`
+    Sequential = linux_raw_sys::general::MADV_SEQUENTIAL,
+
+    /// `POSIX_MADV_RANDOM`
+    Random = linux_raw_sys::general::MADV_RANDOM,
+
+    /// `POSIX_MADV_WILLNEED`
+    WillNeed = linux_raw_sys::general::MADV_WILLNEED,
+
+    /// `MADV_DONTNEED`
+    LinuxDontNeed = linux_raw_sys::general::MADV_DONTNEED,
+
+    /// `MADV_FREE`
+    LinuxFree = linux_raw_sys::v5_4::general::MADV_FREE,
+    /// `MADV_REMOVE`
+    LinuxRemove = linux_raw_sys::general::MADV_REMOVE,
+    /// `MADV_DONTFORK`
+    LinuxDontFork = linux_raw_sys::general::MADV_DONTFORK,
+    /// `MADV_DOFORK`
+    LinuxDoFork = linux_raw_sys::v5_4::general::MADV_DOFORK,
+    /// `MADV_HWPOISON`
+    LinuxHwPoison = linux_raw_sys::general::MADV_HWPOISON,
+    /// `MADV_SOFT_OFFLINE`
+    LinuxSoftOffline = linux_raw_sys::v5_4::general::MADV_SOFT_OFFLINE,
+    /// `MADV_MERGEABLE`
+    LinuxMergeable = linux_raw_sys::general::MADV_MERGEABLE,
+    /// `MADV_UNMERGEABLE`
+    LinuxUnmergeable = linux_raw_sys::general::MADV_UNMERGEABLE,
+    /// `MADV_HUGEPAGE`
+    LinuxHugepage = linux_raw_sys::v5_4::general::MADV_HUGEPAGE,
+    /// `MADV_NOHUGEPAGE`
+    LinuxNoHugepage = linux_raw_sys::v5_4::general::MADV_NOHUGEPAGE,
+    /// `MADV_DONTDUMP`
+    LinuxDontDump = linux_raw_sys::v5_4::general::MADV_DONTDUMP,
+    /// `MADV_DODUMP`
+    LinuxDoDump = linux_raw_sys::v5_4::general::MADV_DODUMP,
+    /// `MADV_WIPEONFORK`
+    LinuxWipeOnFork = linux_raw_sys::v5_4::general::MADV_WIPEONFORK,
+    /// `MADV_KEEPONFORK`
+    LinuxKeepOnFork = linux_raw_sys::v5_4::general::MADV_KEEPONFORK,
+    /// `MADV_COLD`
+    LinuxCold = linux_raw_sys::v5_4::general::MADV_COLD,
+    /// `MADV_PAGEOUT`
+    LinuxPageOut = linux_raw_sys::v5_4::general::MADV_PAGEOUT,
+}
+
+impl Advice {
+    /// `POSIX_MADV_DONTNEED`
+    ///
+    /// On Linux, this is mapped to `POSIX_MADV_NORMAL` because
+    /// Linux's `MADV_DONTNEED` differs from `POSIX_MADV_DONTNEED`. See
+    /// `LinuxDontNeed` for the Linux behavior.
+    #[allow(non_upper_case_globals)]
+    pub const DontNeed: Self = Self::Normal;
+}
+
 /// `struct termios`, for use with [`ioctl_tcgets`].
 ///
 /// [`ioctl_tcgets`]: crate::io::ioctl_tcgets

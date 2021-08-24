@@ -20,7 +20,7 @@ use super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t};
     target_os = "openbsd",
     target_os = "redox",
 )))]
-use super::fs::Advice;
+use super::fs::Advice as FsAdvice;
 #[cfg(not(any(
     target_os = "ios",
     target_os = "macos",
@@ -40,6 +40,8 @@ use super::fs::{Access, FdFlags, Mode, OFlags, Stat};
 use super::fs::{RenameFlags, ResolveFlags};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::fs::{Statx, StatxFlags};
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+use super::io::Advice as IoAdvice;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 use super::io::PipeFlags;
 use super::io::PollFd;
@@ -654,7 +656,12 @@ pub(crate) fn copy_file_range(
     target_os = "openbsd",
     target_os = "redox"
 )))]
-pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
+pub(crate) fn fadvise(
+    fd: BorrowedFd<'_>,
+    offset: u64,
+    len: u64,
+    advice: FsAdvice,
+) -> io::Result<()> {
     let offset = offset as i64;
     let len = len as i64;
 
@@ -682,6 +689,26 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice)
     } else {
         Err(io::Error(err))
     };
+}
+
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub(crate) fn madvise(addr: *mut c_void, len: usize, advice: IoAdvice) -> io::Result<()> {
+    #[cfg(not(target_os = "android"))]
+    {
+        let err = unsafe { libc::posix_madvise(addr, len, advice as libc::c_int) };
+
+        // `posix_madvise` returns its error status rather than using `errno`.
+        if err == 0 {
+            Ok(())
+        } else {
+            Err(io::Error(err))
+        }
+    }
+
+    #[cfg(target_os = "android")]
+    {
+        unsafe { ret(libc::madvise(addr, len, advice as libc::c_int)) }
+    }
 }
 
 pub(crate) fn fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<FdFlags> {

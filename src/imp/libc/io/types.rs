@@ -153,6 +153,101 @@ bitflags! {
     }
 }
 
+/// `POSIX_MADV_*` constants for use with [`madvise`].
+///
+/// Note that there is no `LinuxDontNeed` in the libc configuration because
+/// `libc` implementations don't provide a way to access it.
+///
+/// [`madvise`]: crate::io::madvise
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[repr(i32)]
+pub enum Advice {
+    /// `POSIX_MADV_NORMAL`
+    #[cfg(not(target_os = "android"))]
+    Normal = libc::POSIX_MADV_NORMAL,
+
+    /// `POSIX_MADV_NORMAL`
+    #[cfg(target_os = "android")]
+    Normal = libc::MADV_NORMAL,
+
+    /// `POSIX_MADV_SEQUENTIAL`
+    #[cfg(not(target_os = "android"))]
+    Sequential = libc::POSIX_MADV_SEQUENTIAL,
+
+    /// `POSIX_MADV_SEQUENTIAL`
+    #[cfg(target_os = "android")]
+    Sequential = libc::MADV_SEQUENTIAL,
+
+    /// `POSIX_MADV_RANDOM`
+    #[cfg(not(target_os = "android"))]
+    Random = libc::POSIX_MADV_RANDOM,
+
+    /// `POSIX_MADV_RANDOM`
+    #[cfg(target_os = "android")]
+    Random = libc::MADV_RANDOM,
+
+    /// `POSIX_MADV_WILLNEED`
+    #[cfg(not(target_os = "android"))]
+    WillNeed = libc::POSIX_MADV_WILLNEED,
+
+    /// `POSIX_MADV_WILLNEED`
+    #[cfg(target_os = "android")]
+    WillNeed = libc::MADV_WILLNEED,
+
+    /// `POSIX_MADV_DONTNEED`
+    #[cfg(not(any(target_os = "android", target_os = "emscripten")))]
+    DontNeed = libc::POSIX_MADV_DONTNEED,
+
+    /// `POSIX_MADV_DONTNEED`
+    #[cfg(target_os = "android")]
+    DontNeed = libc::MADV_DONTNEED,
+
+    /// `MADV_FREE`
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxFree = libc::MADV_FREE,
+    /// `MADV_REMOVE`
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxRemove = libc::MADV_REMOVE,
+    /// `MADV_DONTFORK`
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxDontFork = libc::MADV_DONTFORK,
+    /// `MADV_DOFORK`
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxDoFork = libc::MADV_DOFORK,
+    /// `MADV_HWPOISON`
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxHwPoison = libc::MADV_HWPOISON,
+    /// `MADV_SOFT_OFFLINE`
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxSoftOffline = libc::MADV_SOFT_OFFLINE,
+    /// `MADV_MERGEABLE`
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxMergeable = libc::MADV_MERGEABLE,
+    /// `MADV_UNMERGEABLE`
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxUnmergeable = libc::MADV_UNMERGEABLE,
+    /// `MADV_HUGEPAGE`
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxHugepage = libc::MADV_HUGEPAGE,
+    /// `MADV_NOHUGEPAGE`
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxNoHugepage = libc::MADV_NOHUGEPAGE,
+    /// `MADV_DONTDUMP`
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxDontDump = libc::MADV_DONTDUMP,
+    /// `MADV_DODUMP`
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxDoDump = libc::MADV_DODUMP,
+}
+
+#[cfg(target_os = "emscripten")]
+impl Advice {
+    /// `POSIX_MADV_DONTNEED`
+    #[allow(non_upper_case_globals)]
+    pub const DontNeed: Self = Self::Normal;
+}
+
 /// `struct termios`, for use with [`ioctl_tcgets`].
 ///
 /// [`ioctl_tcgets`]: crate::io::ioctl_tcgets
