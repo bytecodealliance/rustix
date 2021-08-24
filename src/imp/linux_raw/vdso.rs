@@ -140,13 +140,24 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
 
     let pt = make_pointer::<Elf_Phdr>(vdso.load_addr.checked_add(hdr.e_phoff)?)?;
     let mut dyn_: *const Elf_Dyn = null();
+    let mut num_dyn = 0;
 
     // We need two things from the segment table: the load offset
     // and the dynamic table.
     let mut found_vaddr = false;
     for i in 0..hdr.e_phnum {
         let phdr = &*pt.add(i as usize);
+        if phdr.p_flags & PF_W != 0 {
+            // Don't trust any vDSO that claims to be loading writeable
+            // segments into memory.
+            return None;
+        }
         if phdr.p_type == PT_LOAD && !found_vaddr {
+            // The segment should be readable and executable, because it
+            // contains the symbol table and the function bodies.
+            if phdr.p_flags & (PF_R | PF_X) != (PF_R | PF_X) {
+                return None;
+            }
             found_vaddr = true;
             vdso.load_offset = base.checked_add(phdr.p_offset.checked_sub(phdr.p_vaddr)?)?;
         } else if phdr.p_type == PT_DYNAMIC {
@@ -158,6 +169,15 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
             }
 
             dyn_ = make_pointer::<Elf_Dyn>(base.checked_add(phdr.p_offset)?)?;
+            num_dyn = phdr.p_memsz / size_of::<Elf_Dyn>();
+        } else if phdr.p_type == PT_INTERP {
+            // Don't trust any ELF image that has an "interpreter", which is
+            // likely to be a user ELF image rather than the kernel vDSO.
+            return None;
+        } else if phdr.p_type == PT_GNU_RELRO {
+            // Don't trust any ELF image that uses GNU RELRO, which is likely
+            // to be a user ELF image rather than the kernel vDSO.
+            return None;
         }
     }
 
@@ -173,6 +193,9 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
     vdso.verdef = null();
     let mut i = 0;
     loop {
+        if i == num_dyn {
+            return None;
+        }
         match (*dyn_.add(i)).d_tag {
             DT_STRTAB => {
                 vdso.symstrings =
@@ -442,6 +465,11 @@ const AT_SYSINFO_EHDR: usize = 33;
 const PN_XNUM: u16 = 0xffff;
 const PT_LOAD: u32 = 1;
 const PT_DYNAMIC: u32 = 2;
+const PT_INTERP: u32 = 3;
+const PT_GNU_RELRO: u32 = 0x6474_e552;
+const PF_X: u32 = 1;
+const PF_W: u32 = 2;
+const PF_R: u32 = 4;
 const DT_NULL: i32 = 0;
 const DT_HASH: i32 = 4;
 const DT_STRTAB: i32 = 5;
