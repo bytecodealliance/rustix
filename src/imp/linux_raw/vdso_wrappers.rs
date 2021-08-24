@@ -362,11 +362,17 @@ fn init() {
         // hurt anything).
         unsafe {
             CLOCK_GETTIME.store(ptr as usize, Relaxed);
+        }
 
-            #[cfg(target_arch = "x86")]
-            {
-                let ptr = vdso.sym(cstr!("LINUX_2.5"), cstr!("__kernel_vsyscall"));
-                assert!(!ptr.is_null());
+        // On x86, also look up the vsyscall entry point.
+        #[cfg(target_arch = "x86")]
+        {
+            let ptr = vdso.sym(cstr!("LINUX_2.5"), cstr!("__kernel_vsyscall"));
+            assert!(!ptr.is_null());
+
+            // Safety: As above, store the computed function addresses in
+            // static storage.
+            unsafe {
                 SYSCALL.store(ptr as usize, Relaxed);
             }
         }
