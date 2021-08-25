@@ -8,7 +8,8 @@
 //! # Safety
 //!
 //! Parsing the vDSO involves a lot of raw pointer manipulation. This
-//! implementation follows Linux's reference implementation.
+//! implementation follows Linux's reference implementation, and adds several
+//! additional safety checks.
 #![allow(unsafe_code)]
 #![allow(non_snake_case)]
 
@@ -22,6 +23,7 @@ use std::slice;
 pub(super) struct Vdso {
     // Load information
     load_addr: usize,
+    load_end: usize,    // the end of the `PT_LOAD` segment
     load_offset: usize, // load_addr - recorded vaddr
 
     // Symbol table
@@ -68,6 +70,7 @@ fn make_pointer<T>(value: usize) -> Option<*const T> {
 unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
     let mut vdso = Vdso {
         load_addr: base,
+        load_end: base,
         load_offset: 0,
         symtab: null(),
         symstrings: null(),
@@ -138,7 +141,29 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
         return None;
     }
 
-    let pt = make_pointer::<Elf_Phdr>(vdso.load_addr.checked_add(hdr.e_phoff)?)?;
+    // Check that the vDSO is not writable, since that would indicate that this
+    // isn't the kernel vDSO. Here we're just using `clock_getres` just as an
+    // arbitrary system call which writes to a buffer and fails with `EFAULT`
+    // if the buffer is not writeable.
+    {
+        use super::arch::choose::syscall2;
+        use super::conv::{clockid_t, ret, void_star};
+        use super::reg::nr;
+        use crate::time::ClockId;
+        use linux_raw_sys::general::__NR_clock_getres;
+        if ret(syscall2(
+            nr(__NR_clock_getres),
+            clockid_t(ClockId::Monotonic),
+            void_star(base as *mut c_void),
+        )) != Err(io::Error::FAULT)
+        {
+            // We can't gracefully fail here because we would seem to have just
+            // mutated some unknown memory.
+            std::process::abort();
+        }
+    }
+
+    let pt = make_pointer::<Elf_Phdr>(base.checked_add(hdr.e_phoff)?)?;
     let mut dyn_: *const Elf_Dyn = null();
     let mut num_dyn = 0;
 
@@ -159,7 +184,8 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
                 return None;
             }
             found_vaddr = true;
-            vdso.load_offset = base.checked_add(phdr.p_offset.checked_sub(phdr.p_vaddr)?)?;
+            vdso.load_end = base.checked_add(phdr.p_offset.checked_add(phdr.p_memsz)?)?;
+            vdso.load_offset = base.wrapping_add(phdr.p_offset.wrapping_sub(phdr.p_vaddr));
         } else if phdr.p_type == PT_DYNAMIC {
             // If `p_offset` is zero, it's more likely that we're looking at memory
             // that has been zeroed than that the kernel has somehow aliased the
@@ -196,29 +222,25 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
         if i == num_dyn {
             return None;
         }
-        match (*dyn_.add(i)).d_tag {
+        let d = &*dyn_.add(i);
+        match d.d_tag {
             DT_STRTAB => {
-                vdso.symstrings =
-                    make_pointer::<c_char>((*dyn_.add(i)).d_val.checked_add(vdso.load_offset)?)?;
+                vdso.symstrings = make_pointer::<c_char>(d.d_val.checked_add(vdso.load_offset)?)?;
             }
             DT_SYMTAB => {
-                vdso.symtab =
-                    make_pointer::<Elf_Sym>((*dyn_.add(i)).d_val.checked_add(vdso.load_offset)?)?;
+                vdso.symtab = make_pointer::<Elf_Sym>(d.d_val.checked_add(vdso.load_offset)?)?;
             }
             DT_HASH => {
-                hash = make_pointer::<u32>((*dyn_.add(i)).d_val.checked_add(vdso.load_offset)?)?;
+                hash = make_pointer::<u32>(d.d_val.checked_add(vdso.load_offset)?)?;
             }
             DT_VERSYM => {
-                vdso.versym =
-                    make_pointer::<u16>((*dyn_.add(i)).d_val.checked_add(vdso.load_offset)?)?;
+                vdso.versym = make_pointer::<u16>(d.d_val.checked_add(vdso.load_offset)?)?;
             }
             DT_VERDEF => {
-                vdso.verdef = make_pointer::<Elf_Verdef>(
-                    (*dyn_.add(i)).d_val.checked_add(vdso.load_offset)?,
-                )?;
+                vdso.verdef = make_pointer::<Elf_Verdef>(d.d_val.checked_add(vdso.load_offset)?)?;
             }
             DT_SYMENT => {
-                if (*dyn_.add(i)).d_val != size_of::<Elf_Sym>() {
+                if d.d_val != size_of::<Elf_Sym>() {
                     return None; // Failed
                 }
             }
@@ -333,10 +355,9 @@ impl Vdso {
                     continue;
                 }
 
-                return match self.load_offset.checked_add(sym.st_value) {
-                    Some(sum) => sum as *const c_void,
-                    None => null(),
-                };
+                let sum = self.load_offset.checked_add(sym.st_value).unwrap();
+                assert!(sum >= self.load_addr && sum <= self.load_end);
+                return sum as *const c_void;
             }
         }
 
