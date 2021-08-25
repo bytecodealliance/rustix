@@ -108,7 +108,7 @@ pub(super) fn borrowed_fd<'a, Num: ArgNumber>(fd: BorrowedFd<'a>) -> ArgReg<'a, 
 #[inline]
 pub(super) fn raw_fd<'a, Num: ArgNumber>(fd: c_int) -> ArgReg<'a, Num> {
     // As above, use zero-extension rather than sign-extension.
-    debug_assert!(fd.as_raw_fd() == crate::fs::cwd().as_raw_fd() || fd.as_raw_fd() >= 0);
+    debug_assert!(fd == crate::fs::cwd().as_raw_fd() || fd >= 0);
     raw_arg(fd as c_uint as usize)
 }
 
