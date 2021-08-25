@@ -105,7 +105,7 @@ fn check_proc_root(entry: BorrowedFd<'_>, stat: &Stat) -> io::Result<()> {
     }
 
     // Check that "/proc" is a mountpoint.
-    if !is_mountpoint(entry)? {
+    if !is_mountpoint(entry) {
         return Err(io::Error::NOTSUP);
     }
 
@@ -124,7 +124,7 @@ fn check_proc_subdir(
     check_proc_nonroot(stat, proc_stat)?;
 
     // Check that subdirectories of "/proc" are not mount points.
-    if is_mountpoint(entry)? {
+    if is_mountpoint(entry) {
         return Err(io::Error::NOTSUP);
     }
 
@@ -169,13 +169,13 @@ fn check_procfs(file: BorrowedFd<'_>) -> io::Result<()> {
 }
 
 /// Check whether the given directory handle is a mount point. We use a
-/// `rename` call that would otherwise fail, but which fails with `EXDEV`
+/// `renameat` call that would otherwise fail, but which fails with `EXDEV`
 /// first if it would cross a mount point.
-fn is_mountpoint(file: BorrowedFd<'_>) -> io::Result<bool> {
+fn is_mountpoint(file: BorrowedFd<'_>) -> bool {
     let err = renameat(&file, cstr!("../."), &file, cstr!(".")).unwrap_err();
     match err {
-        io::Error::XDEV => Ok(true), // the rename failed due to crossing a mount point
-        io::Error::BUSY => Ok(false), // the rename failed normally
+        io::Error::XDEV => true,  // the rename failed due to crossing a mount point
+        io::Error::BUSY => false, // the rename failed normally
         _ => panic!("Unexpected error from `renameat`: {:?}", err),
     }
 }
