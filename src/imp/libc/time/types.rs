@@ -1,6 +1,8 @@
 use super::super::c;
 #[cfg(not(target_os = "wasi"))]
 use crate::fd::BorrowedFd;
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+use bitflags::bitflags;
 
 /// `struct timespec`
 pub type Timespec = c::timespec;
@@ -124,4 +126,80 @@ pub enum DynamicClockId<'a> {
     /// `CLOCK_BOOTTIME_ALARM`, available on Linux >= 2.6.39
     #[cfg(any(target_os = "android", target_os = "linux"))]
     BoottimeAlarm,
+}
+
+/// `struct itimerspec`
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+pub type Itimerspec = libc::itimerspec;
+
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+bitflags! {
+    /// `TFD_*` flags for use with [`timerfd_create`].
+    pub struct TimerfdFlags: libc::c_int {
+        /// `TFD_NONBLOCK`
+        const NONBLOCK = libc::TFD_NONBLOCK;
+
+        /// `TFD_CLOEXEC`
+        const CLOEXEC = libc::TFD_CLOEXEC;
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+bitflags! {
+    /// `TFD_TIMER_*` flags for use with [`timerfd_settime`].
+    pub struct TimerfdTimerFlags: libc::c_int {
+        /// `TFD_TIMER_ABSTIME`
+        const ABSTIME = libc::TFD_TIMER_ABSTIME;
+
+        /// `TFD_TIMER_CANCEL_ON_SET`
+        #[cfg(any(target_os = "android", target_os = "linux"))]
+        const CANCEL_ON_SET = 2; // TODO: upstream TFD_TIMER_CANCEL_ON_SET
+    }
+}
+
+/// `CLOCK_*` constants for use with [`timerfd_create`].
+///
+/// [`timerfd_create`]: crate::time::timerfd_create
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[repr(i32)]
+#[non_exhaustive]
+pub enum TimerfdClockId {
+    /// `CLOCK_REALTIME`—A clock that tells the "real" time.
+    ///
+    /// This is a clock that tells the amount of time elapsed since the
+    /// Unix epoch, 1970-01-01T00:00:00Z. The clock is externally settable, so
+    /// it is not monotonica. Successive reads may see decreasing times, so it
+    /// isn't reliable for measuring durations.
+    Realtime = c::CLOCK_REALTIME,
+
+    /// `CLOCK_MONOTONIC`—A clock that tells an abstract time.
+    ///
+    /// Unlike `Realtime`, this clock is not based on a fixed known epoch, so
+    /// individual times aren't meaningful. However, since it isn't settable,
+    /// it is reliable for measuring durations.
+    ///
+    /// This clock does not advance while the system is suspended; see
+    /// `Boottime` for a clock that does.
+    Monotonic = c::CLOCK_MONOTONIC,
+
+    /// `CLOCK_BOOTTIME`—Like `Monotonic`, but advances while suspended.
+    ///
+    /// This clock is similar to `Monotonic`, but does advance while the system
+    /// is suspended.
+    Boottime = c::CLOCK_BOOTTIME,
+
+    /// `CLOCK_REALTIME_ALARM`—Like `Realtime`, but wakes a suspended system.
+    ///
+    /// This clock is like `Realtime`, but can wake up a suspended system.
+    ///
+    /// Use of this clock requires the `CAP_WAKE_ALARM` Linux capability.
+    RealtimeAlarm = c::CLOCK_REALTIME_ALARM,
+
+    /// `CLOCK_BOOTTIME_ALARM`—Like `Boottime`, but wakes a suspended system.
+    ///
+    /// This clock is like `Boottime`, but can wake up a suspended system.
+    ///
+    /// Use of this clock requires the `CAP_WAKE_ALARM` Linux capability.
+    BoottimeAlarm = c::CLOCK_BOOTTIME_ALARM,
 }

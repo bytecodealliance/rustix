@@ -7,6 +7,13 @@ use super::Timespec;
 use super::{ClockId, DynamicClockId};
 use crate::io;
 use core::mem::MaybeUninit;
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+use {
+    super::super::conv::{borrowed_fd, ret_owned_fd},
+    crate::fd::BorrowedFd,
+    crate::io::OwnedFd,
+    crate::time::{Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags},
+};
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[inline]
@@ -71,5 +78,37 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
         ret(c::clock_gettime(id as c::clockid_t, timespec.as_mut_ptr()))?;
 
         Ok(timespec.assume_init())
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+pub(crate) fn timerfd_create(id: TimerfdClockId, flags: TimerfdFlags) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(libc::timerfd_create(id as c::clockid_t, flags.bits())) }
+}
+
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+pub(crate) fn timerfd_settime(
+    fd: BorrowedFd<'_>,
+    flags: TimerfdTimerFlags,
+    new_value: &Itimerspec,
+) -> io::Result<Itimerspec> {
+    let mut result = MaybeUninit::<Itimerspec>::uninit();
+    unsafe {
+        ret(libc::timerfd_settime(
+            borrowed_fd(fd),
+            flags.bits(),
+            new_value,
+            result.as_mut_ptr(),
+        ))
+        .map(|()| result.assume_init())
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
+    let mut result = MaybeUninit::<Itimerspec>::uninit();
+    unsafe {
+        ret(libc::timerfd_gettime(borrowed_fd(fd), result.as_mut_ptr()))
+            .map(|()| result.assume_init())
     }
 }

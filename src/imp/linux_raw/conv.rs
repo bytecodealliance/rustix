@@ -19,7 +19,7 @@ use super::io::error::{
     try_decode_void, try_decode_void_star,
 };
 use super::reg::{raw_arg, ArgNumber, ArgReg, RetReg, R0};
-use super::time::ClockId;
+use super::time::{ClockId, TimerfdClockId};
 use crate::ffi::ZStr;
 use crate::io::{self, OwnedFd};
 use crate::process::{Pid, Resource, Signal};
@@ -234,6 +234,11 @@ pub(super) fn loff_t_from_u64<'a, Num: ArgNumber>(i: u64) -> ArgReg<'a, Num> {
 
 #[inline]
 pub(super) fn clockid_t<'a, Num: ArgNumber>(i: ClockId) -> ArgReg<'a, Num> {
+    pass_usize(i as __kernel_clockid_t as usize)
+}
+
+#[inline]
+pub(super) fn timerfd_clockid_t<'a, Num: ArgNumber>(i: TimerfdClockId) -> ArgReg<'a, Num> {
     pass_usize(i as __kernel_clockid_t as usize)
 }
 
