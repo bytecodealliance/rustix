@@ -41,7 +41,8 @@ impl AddressFamily {
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
-        target_os = "netbsd"
+        target_os = "netbsd",
+        target_os = "openbsd",
     )))]
     pub const NETLINK: Self = Self(libc::AF_NETLINK as _);
     /// `AF_UNIX`, aka `AF_LOCAL`
@@ -75,7 +76,7 @@ pub enum Protocol {
     /// `IPPROTO_TP`
     Tp = libc::IPPROTO_TP,
     /// `IPPROTO_DCCP`
-    #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+    #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
     Dccp = libc::IPPROTO_DCCP,
     /// `IPPROTO_IPV6`
     Ipv6 = libc::IPPROTO_IPV6,
@@ -88,14 +89,15 @@ pub enum Protocol {
     /// `IPPROTO_AH`
     Ah = libc::IPPROTO_AH,
     /// `IPPROTO_MTP`
-    #[cfg(not(target_os = "netbsd"))]
+    #[cfg(not(any(target_os = "netbsd", target_os = "openbsd")))]
     Mtp = libc::IPPROTO_MTP,
     /// `IPPROTO_BEETPH`
     #[cfg(not(any(
+        target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "freebsd"
+        target_os = "openbsd",
     )))]
     Beetph = libc::IPPROTO_BEETPH,
     /// `IPPROTO_ENCAP`
@@ -104,16 +106,23 @@ pub enum Protocol {
     Pim = libc::IPPROTO_PIM,
     /// `IPPROTO_COMP`
     #[cfg(not(any(
+        target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "freebsd"
+        target_os = "openbsd",
     )))]
     Comp = libc::IPPROTO_COMP,
     /// `IPPROTO_SCTP`
+    #[cfg(not(target_os = "openbsd"))]
     Sctp = libc::IPPROTO_SCTP,
     /// `IPPROTO_UDPLITE`
-    #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "netbsd")))]
+    #[cfg(not(any(
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd"
+    )))]
     Udplite = libc::IPPROTO_UDPLITE,
     /// `IPPROTO_MPLS`
     #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "netbsd")))]
@@ -123,12 +132,13 @@ pub enum Protocol {
     /// `IPPROTO_MPTCP`
     #[cfg(not(any(
         target_os = "android",
-        target_os = "netbsd",
+        target_os = "emscripten",
+        target_os = "freebsd",
+        target_os = "fuchsia",
         target_os = "ios",
         target_os = "macos",
-        target_os = "freebsd",
-        target_os = "emscripten",
-        target_os = "fuchsia"
+        target_os = "netbsd",
+        target_os = "openbsd",
     )))]
     Mptcp = libc::IPPROTO_MPTCP,
 }

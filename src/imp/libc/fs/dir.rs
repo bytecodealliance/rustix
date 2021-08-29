@@ -141,7 +141,6 @@ unsafe fn read_dirent(dirent_ptr: *const libc_dirent) -> libc_dirent {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "wasi",
         )))]
         d_off,
@@ -171,6 +170,8 @@ unsafe fn read_dirent(dirent_ptr: *const libc_dirent) -> libc_dirent {
         //
         // [invokes undefined behavior]: https://doc.rust-lang.org/stable/core/mem/union.MaybeUninit.html#initialization-invariant
         d_name: zeroed(),
+        #[cfg(target_os = "openbsd")]
+        __d_padding: zeroed(),
     };
 
     // Copy from d_name, reading up to and including the first NUL.

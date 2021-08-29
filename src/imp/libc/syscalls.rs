@@ -1175,6 +1175,7 @@ pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, reuse: OsString) -> io::Result<OsSt
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
+    target_os = "openbsd",
     target_os = "wasi"
 )))]
 pub(crate) fn ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
@@ -1193,7 +1194,8 @@ pub(crate) fn ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     target_os = "freebsd",
     target_os = "ios",
     target_os = "macos",
-    target_os = "netbsd"
+    target_os = "netbsd",
+    target_os = "openbsd",
 ))]
 pub(crate) fn ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     let mut result = MaybeUninit::<Termios>::uninit();

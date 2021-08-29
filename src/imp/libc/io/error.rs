@@ -356,6 +356,7 @@ impl Error {
     pub const MFILE: Self = Self(libc::EMFILE);
     pub const MLINK: Self = Self(libc::EMLINK);
     pub const MSGSIZE: Self = Self(libc::EMSGSIZE);
+    #[cfg(not(target_os = "openbsd"))]
     pub const MULTIHOP: Self = Self(libc::EMULTIHOP);
     pub const NAMETOOLONG: Self = Self(libc::ENAMETOOLONG);
     #[cfg(not(any(
@@ -432,6 +433,7 @@ impl Error {
     )))]
     pub const NOKEY: Self = Self(libc::ENOKEY);
     pub const NOLCK: Self = Self(libc::ENOLCK);
+    #[cfg(not(target_os = "openbsd"))]
     pub const NOLINK: Self = Self(libc::ENOLINK);
     #[cfg(not(any(
         target_os = "dragonfly",
