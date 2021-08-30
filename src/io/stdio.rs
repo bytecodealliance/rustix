@@ -27,8 +27,8 @@ use io_lifetimes::BorrowedFd;
 /// # Other hazards
 ///
 /// Stdin could be redirected from arbitrary input sources, and unless one
-/// knows how the process' standard input is being used, one could consume bytes
-/// that are expected to be consumed by other parts of the process.
+/// knows how the process' standard input is being used, one could consume
+/// bytes that are expected to be consumed by other parts of the process.
 ///
 /// # References
 ///  - [POSIX]
@@ -87,8 +87,9 @@ pub unsafe fn take_stdin() -> OwnedFd {
 /// # Other hazards
 ///
 /// Stdout could be redirected to arbitrary output sinks, and unless one
-/// knows how the process' standard output is being used, one could unexpectedly
-/// inject bytes into a stream being written by another part of the process.
+/// knows how the process' standard output is being used, one could
+/// unexpectedly inject bytes into a stream being written by another part of
+/// the process.
 ///
 /// # References
 ///  - [POSIX]
