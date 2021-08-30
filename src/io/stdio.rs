@@ -16,11 +16,19 @@ use io_lifetimes::BorrowedFd;
 ///
 /// # Safety
 ///
-/// The stdin file descriptor can be closed in which case the file descriptor
-/// index value could be dynamically reused, potentially on a different thread.
-/// Typically, it is only safe to call this from within `main` or in the
-/// vicinity, where one knows there aren't any other threads yet and nothing
-/// else has closed stdin.
+/// This function must be called from code which knows how the process'
+/// standard input is being used. Often, this will be the `main` function or
+/// code that knows its relationship with the `main` function.
+///
+/// The stdin file descriptor can be closed, potentially on other threads, in
+/// which case the file descriptor index value could be dynamically reused for
+/// other purposes, potentially on different threads.
+///
+/// # Other hazards
+///
+/// Stdin could be redirected from arbitrary input sources, and unless one
+/// knows how the process' standard input is being used, one could consume bytes
+/// that are expected to be consumed by other parts of the process.
 ///
 /// # References
 ///  - [POSIX]
@@ -35,12 +43,21 @@ pub unsafe fn stdin() -> BorrowedFd<'static> {
 
 /// `STDIN_FILENO`—Standard input, owned.
 ///
+/// This is similar to [`stdin`], however it returns an `OwnedFd` which closes
+/// standard input when it is dropped.
+///
 /// # Safety
 ///
-/// This acquires ownership of the stdin file descriptor. If it's dropped,
-/// subsequent newly created file descriptors may reuse the stdin file
-/// descriptor number, confusing code that assumes that the stdin file
-/// descriptor number is only used by stdin.
+/// This is unsafe for the same reasons as [`stdin`].
+///
+/// # Other hazards
+///
+/// This has the same hazards as [`stdin`].
+///
+/// And, when the `OwnedFd` is dropped, subsequent newly created file
+/// descriptors may unknowingly reuse the stdin file descriptor number, which
+/// may break common assumptions, so it should typically only be dropped at the
+/// end of a program when no more file descriptors will be created.
 ///
 /// # References
 ///  - [POSIX]
@@ -59,11 +76,19 @@ pub unsafe fn take_stdin() -> OwnedFd {
 ///
 /// # Safety
 ///
-/// The stdout file descriptor can be closed in which case the file descriptor
-/// index value could be dynamically reused, potentially on a different thread.
-/// Typically, it is only safe to call this from within `main` or in the
-/// vicinity, where one knows there aren't any other threads yet and nothing
-/// else has closed stdout.
+/// This function must be called from code which knows how the process'
+/// standard output is being used. Often, this will be the `main` function or
+/// code that knows its relationship with the `main` function.
+///
+/// The stdout file descriptor can be closed, potentially on other threads, in
+/// which case the file descriptor index value could be dynamically reused for
+/// other purposes, potentially on different threads.
+///
+/// # Other hazards
+///
+/// Stdout could be redirected to arbitrary output sinks, and unless one
+/// knows how the process' standard output is being used, one could unexpectedly
+/// inject bytes into a stream being written by another part of the process.
 ///
 /// # References
 ///  - [POSIX]
@@ -78,12 +103,21 @@ pub unsafe fn stdout() -> BorrowedFd<'static> {
 
 /// `STDOUT_FILENO`—Standard output, owned.
 ///
+/// This is similar to [`stdout`], however it returns an `OwnedFd` which closes
+/// standard output when it is dropped.
+///
 /// # Safety
 ///
-/// This acquires ownership of the stdout file descriptor. If it's dropped,
-/// subsequent newly created file descriptors may reuse the stdout file
-/// descriptor number, confusing code that assumes that the stdout file
-/// descriptor number is only used by stdout.
+/// This is unsafe for the same reasons as [`stdout`].
+///
+/// # Other hazards
+///
+/// This has the same hazards as [`stdout`].
+///
+/// And, when the `OwnedFd` is dropped, subsequent newly created file
+/// descriptors may unknowingly reuse the stdout file descriptor number, which
+/// may break common assumptions, so it should typically only be dropped at the
+/// end of a program when no more file descriptors will be created.
 ///
 /// # References
 ///  - [POSIX]
@@ -102,11 +136,19 @@ pub unsafe fn take_stdout() -> OwnedFd {
 ///
 /// # Safety
 ///
-/// The stderr file descriptor can be closed in which case the file descriptor
-/// index value could be dynamically reused, potentially on a different thread.
-/// Typically, it is only safe to call this from within `main` or in the
-/// vicinity, where one knows there aren't any other threads yet and nothing
-/// else has closed stderr.
+/// This function must be called from code which knows how the process'
+/// standard error is being used. Often, this will be the `main` function or
+/// code that knows its relationship with the `main` function.
+///
+/// The stderr file descriptor can be closed, potentially on other threads, in
+/// which case the file descriptor index value could be dynamically reused for
+/// other purposes, potentially on different threads.
+///
+/// # Other hazards
+///
+/// Stderr could be redirected to arbitrary output sinks, and unless one
+/// knows how the process' standard error is being used, one could unexpectedly
+/// inject bytes into a stream being written by another part of the process.
 ///
 /// # References
 ///  - [POSIX]
@@ -121,12 +163,21 @@ pub unsafe fn stderr() -> BorrowedFd<'static> {
 
 /// `STDERR_FILENO`—Standard error, owned.
 ///
+/// This is similar to [`stdout`], however it returns an `OwnedFd` which closes
+/// standard output when it is dropped.
+///
 /// # Safety
 ///
-/// This acquires ownership of the stderr file descriptor. If it's dropped,
-/// subsequent newly created file descriptors may reuse the stderr file
-/// descriptor number, confusing code that assumes that the stderr file
-/// descriptor number is only used by stderr.
+/// This is unsafe for the same reasons as [`stderr`].
+///
+/// # Other hazards
+///
+/// This has the same hazards as [`stderr`].
+///
+/// And, when the `OwnedFd` is dropped, subsequent newly created file
+/// descriptors may unknowingly reuse the stderr file descriptor number, which
+/// may break common assumptions, so it should typically only be dropped at the
+/// end of a program when no more file descriptors will be created.
 ///
 /// # References
 ///  - [POSIX]
