@@ -330,11 +330,20 @@ bitflags! {
     ///
     /// [`openat2`]: crate::fs::openat2
     pub struct ResolveFlags: u64 {
+        /// `RESOLVE_NO_XDEV`
+        const NO_XDEV = 0x01;
+
         /// `RESOLVE_NO_MAGICLINKS`
         const NO_MAGICLINKS = 0x02;
 
+        /// `RESOLVE_NO_SYMLINKS`
+        const NO_SYMLINKS = 0x04;
+
         /// `RESOLVE_BENEATH`
         const BENEATH = 0x08;
+
+        /// `RESOLVE_IN_ROOT`
+        const IN_ROOT = 0x10;
     }
 }
 

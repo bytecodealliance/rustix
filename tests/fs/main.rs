@@ -18,6 +18,8 @@ mod long_paths;
 mod makedev;
 mod mkdirat;
 mod mknodat;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+mod openat2;
 mod readdir;
 mod renameat;
 mod statfs;

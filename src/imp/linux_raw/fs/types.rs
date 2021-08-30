@@ -213,11 +213,20 @@ bitflags! {
     ///
     /// [`openat2`]: crate::fs::openat2
     pub struct ResolveFlags: u64 {
+        /// `RESOLVE_NO_XDEV`
+        const NO_XDEV = linux_raw_sys::v5_11::general::RESOLVE_NO_XDEV as u64;
+
         /// `RESOLVE_NO_MAGICLINKS`
         const NO_MAGICLINKS = linux_raw_sys::v5_11::general::RESOLVE_NO_MAGICLINKS as u64;
 
+        /// `RESOLVE_NO_SYMLINKS`
+        const NO_SYMLINKS = linux_raw_sys::v5_11::general::RESOLVE_NO_SYMLINKS as u64;
+
         /// `RESOLVE_BENEATH`
         const BENEATH = linux_raw_sys::v5_11::general::RESOLVE_BENEATH as u64;
+
+        /// `RESOLVE_IN_ROOT`
+        const IN_ROOT = linux_raw_sys::v5_11::general::RESOLVE_IN_ROOT as u64;
     }
 }
 
