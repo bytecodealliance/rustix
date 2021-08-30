@@ -9,6 +9,8 @@
 use crate::fs::{
     cwd, fstat, fstatfs, major, openat, renameat, Mode, OFlags, Stat, PROC_SUPER_MAGIC,
 };
+#[cfg(linux_raw)]
+use crate::fs::{Dir, FileType};
 use crate::io::{self, OwnedFd};
 use crate::path::DecInt;
 use crate::process::{getgid, getpid, getuid};
@@ -36,20 +38,31 @@ fn check_proc_entry(
     uid: u32,
     gid: u32,
 ) -> io::Result<Stat> {
+    let entry_stat = fstat(&entry)?;
+    check_proc_entry_with_stat(kind, entry, entry_stat, proc_stat, uid, gid)
+}
+
+/// Check a subdirectory of "/proc" for anomalies, using the provided `Stat`.
+fn check_proc_entry_with_stat(
+    kind: Kind,
+    entry: BorrowedFd<'_>,
+    entry_stat: Stat,
+    proc_stat: Option<&Stat>,
+    uid: u32,
+    gid: u32,
+) -> io::Result<Stat> {
     // Check the filesystem magic.
     check_procfs(entry)?;
 
-    let stat = fstat(&entry)?;
-
     match kind {
-        Kind::Proc => check_proc_root(entry, &stat)?,
-        Kind::Pid | Kind::Fd => check_proc_subdir(entry, &stat, proc_stat)?,
+        Kind::Proc => check_proc_root(entry, &entry_stat)?,
+        Kind::Pid | Kind::Fd => check_proc_subdir(entry, &entry_stat, proc_stat)?,
         #[cfg(linux_raw)]
-        Kind::File => check_proc_file(&stat, proc_stat)?,
+        Kind::File => check_proc_file(&entry_stat, proc_stat)?,
     }
 
     // Check the ownership of the directory.
-    if (stat.st_uid, stat.st_gid) != (uid, gid) {
+    if (entry_stat.st_uid, entry_stat.st_gid) != (uid, gid) {
         return Err(io::Error::NOTSUP);
     }
 
@@ -57,7 +70,7 @@ fn check_proc_entry(
     // "/proc/self/fd" is r-x------. Allow them to have fewer permissions, but
     // not more.
     let expected_mode = if let Kind::Fd = kind { 0o500 } else { 0o555 };
-    if stat.st_mode & 0o777 & !expected_mode != 0 {
+    if entry_stat.st_mode & 0o777 & !expected_mode != 0 {
         return Err(io::Error::NOTSUP);
     }
 
@@ -65,13 +78,13 @@ fn check_proc_entry(
         Kind::Fd => {
             // Check that the "/proc/self/fd" directory doesn't have any extraneous
             // links into it (which might include unexpected subdirectories).
-            if stat.st_nlink != 2 {
+            if entry_stat.st_nlink != 2 {
                 return Err(io::Error::NOTSUP);
             }
         }
         Kind::Pid | Kind::Proc => {
             // Check that the "/proc" and "/proc/self" directories aren't empty.
-            if stat.st_nlink <= 2 {
+            if entry_stat.st_nlink <= 2 {
                 return Err(io::Error::NOTSUP);
             }
         }
@@ -79,13 +92,13 @@ fn check_proc_entry(
         Kind::File => {
             // Check that files in procfs don't have extraneous hard links to
             // them (which might indicate hard links to other things).
-            if stat.st_nlink != 1 {
+            if entry_stat.st_nlink != 1 {
                 return Err(io::Error::NOTSUP);
             }
         }
     }
 
-    Ok(stat)
+    Ok(entry_stat)
 }
 
 fn check_proc_root(entry: BorrowedFd<'_>, stat: &Stat) -> io::Result<()> {
@@ -306,15 +319,55 @@ pub(crate) fn proc_self_auxv() -> io::Result<OwnedFd> {
 
     let oflags =
         OFlags::RDONLY | OFlags::CLOEXEC | OFlags::NOFOLLOW | OFlags::NOCTTY | OFlags::NOATIME;
-    let auxv = openat(&proc_self, cstr!("auxv"), oflags, Mode::empty())?;
+    let auxv = openat(&proc_self, cstr!("auxv"), oflags, Mode::empty())
+        .map_err(|_err| io::Error::NOTSUP)?;
+    let auxv_stat = fstat(&auxv)?;
 
-    let _ = check_proc_entry(
-        Kind::File,
-        auxv.as_fd(),
-        Some(proc_stat),
-        proc_self_stat.st_uid,
-        proc_self_stat.st_gid,
-    )?;
+    // Open a copy of the `proc_self` handle so that we can read from it
+    // without modifying the current position of the original handle.
+    let dot = openat(
+        &proc_self,
+        cstr!("."),
+        oflags | OFlags::DIRECTORY,
+        Mode::empty(),
+    )
+    .map_err(|_err| io::Error::NOTSUP)?;
 
-    Ok(auxv)
+    // Confirm that we got the same inode.
+    let dot_stat = fstat(&dot).map_err(|_err| io::Error::NOTSUP)?;
+    if (dot_stat.st_dev, dot_stat.st_ino) != (proc_self_stat.st_dev, proc_self_stat.st_ino) {
+        return Err(io::Error::NOTSUP);
+    }
+
+    // `is_mountpoint` only works on directory mount points, not file mount
+    // points. To detect file mount points, scan the parent directory to see
+    // if we can find a file with an inode that matches the file we just
+    // opened. If we can't find it, there could be a file mount on top of
+    // "auxv".
+    let dir = Dir::from_into_fd(dot).map_err(|_err| io::Error::NOTSUP)?;
+    for entry in dir {
+        let entry = entry.map_err(|_err| io::Error::NOTSUP)?;
+        if entry.ino() == auxv_stat.st_ino {
+            if entry.file_type() != FileType::RegularFile {
+                return Err(io::Error::NOTSUP);
+            }
+            if entry.file_name() != cstr!("auxv") {
+                return Err(io::Error::NOTSUP);
+            }
+
+            // Ok, we found it. Proceed to check the "auxv" handle and succeed.
+            let _ = check_proc_entry_with_stat(
+                Kind::File,
+                auxv.as_fd(),
+                auxv_stat,
+                Some(proc_stat),
+                proc_self_stat.st_uid,
+                proc_self_stat.st_gid,
+            )?;
+
+            return Ok(auxv);
+        }
+    }
+
+    Err(io::Error::NOTSUP)
 }
