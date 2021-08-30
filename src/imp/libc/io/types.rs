@@ -104,7 +104,14 @@ bitflags! {
         )))]
         const FIXED_NOREPLACE = libc::MAP_FIXED_NOREPLACE;
         /// `MAP_GROWSDOWN`
-        #[cfg(not(any(target_os = "netbsd", target_os = "ios", target_os = "macos", target_os = "freebsd", target_os = "redox")))]
+        #[cfg(not(any(
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "netbsd",
+            target_os = "macos",
+            target_os = "openbsd",
+            target_os = "redox"
+        )))]
         const GROWSDOWN = libc::MAP_GROWSDOWN;
         /// `MAP_HUGETLB`
         #[cfg(not(any(

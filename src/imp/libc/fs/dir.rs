@@ -7,7 +7,8 @@ use io_lifetimes::{AsFd, BorrowedFd, IntoFd};
     target_os = "android",
     target_os = "emscripten",
     target_os = "l4re",
-    target_os = "linux"
+    target_os = "linux",
+    target_os = "openbsd",
 )))]
 use libc::{dirent as libc_dirent, readdir as libc_readdir};
 #[cfg(any(
@@ -78,8 +79,13 @@ impl Dir {
         } else {
             // We successfully read an entry.
             unsafe {
+                // We have our own copy of OpenBSD's dirent; check that the
+                // layout minimally matches libc's.
+                #[cfg(target_os = "openbsd")]
+                check_dirent_layout(&*dirent_ptr);
+
                 let result = DirEntry {
-                    dirent: read_dirent(dirent_ptr),
+                    dirent: read_dirent(&*dirent_ptr),
 
                     #[cfg(target_os = "wasi")]
                     name: CStr::from_ptr((*dirent_ptr).d_name.as_ptr()).to_owned(),
@@ -94,8 +100,8 @@ impl Dir {
 // A `dirent` pointer returned from `readdir` may not point to a full `dirent`
 // struct, as the name is NUL-terminated and memory may not be allocated for
 // the full extent of the struct. Copy the fields one at a time.
-unsafe fn read_dirent(dirent_ptr: *const libc_dirent) -> libc_dirent {
-    let d_type = (*dirent_ptr).d_type;
+unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
+    let d_type = input.d_type;
 
     #[cfg(not(any(
         target_os = "dragonfly",
@@ -103,19 +109,18 @@ unsafe fn read_dirent(dirent_ptr: *const libc_dirent) -> libc_dirent {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd",
         target_os = "wasi",
     )))]
-    let d_off = (*dirent_ptr).d_off;
+    let d_off = input.d_off;
 
     #[cfg(not(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd")))]
-    let d_ino = (*dirent_ptr).d_ino;
+    let d_ino = input.d_ino;
 
     #[cfg(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))]
-    let d_fileno = (*dirent_ptr).d_fileno;
+    let d_fileno = input.d_fileno;
 
     #[cfg(not(target_os = "wasi"))]
-    let d_reclen = (*dirent_ptr).d_reclen;
+    let d_reclen = input.d_reclen;
 
     #[cfg(any(
         target_os = "freebsd",
@@ -124,12 +129,12 @@ unsafe fn read_dirent(dirent_ptr: *const libc_dirent) -> libc_dirent {
         target_os = "ios",
         target_os = "macos"
     ))]
-    let d_namlen = (*dirent_ptr).d_namlen;
+    let d_namlen = input.d_namlen;
 
     #[cfg(any(target_os = "ios", target_os = "macos"))]
-    let d_seekoff = (*dirent_ptr).d_seekoff;
+    let d_seekoff = input.d_seekoff;
 
-    // Construct the dirent. Rust will give us an error if any OS has a dirent
+    // Construct the input. Rust will give us an error if any OS has a input
     // with a field that we missed here. And we can avoid blindly copying the
     // whole `d_name` field, which may not be entirely allocated.
     #[cfg_attr(target_os = "wasi", allow(unused_mut))]
@@ -177,11 +182,8 @@ unsafe fn read_dirent(dirent_ptr: *const libc_dirent) -> libc_dirent {
     // Copy from d_name, reading up to and including the first NUL.
     #[cfg(not(target_os = "wasi"))]
     {
-        let name_len = CStr::from_ptr((*dirent_ptr).d_name.as_ptr())
-            .to_bytes()
-            .len()
-            + 1;
-        dirent.d_name[..name_len].copy_from_slice(&(*dirent_ptr).d_name[..name_len]);
+        let name_len = CStr::from_ptr(input.d_name.as_ptr()).to_bytes().len() + 1;
+        dirent.d_name[..name_len].copy_from_slice(&input.d_name[..name_len]);
     }
 
     dirent
@@ -258,4 +260,68 @@ impl DirEntry {
         #[allow(clippy::useless_conversion)]
         self.dirent.d_fileno.into()
     }
+}
+
+/// libc's OpenBSD `dirent` has a private field so we can't construct it
+/// directly, so we declare it ourselves to make all fields accessible.
+#[cfg(target_os = "openbsd")]
+#[repr(C)]
+struct libc_dirent {
+    d_fileno: ::ino_t,
+    d_off: ::off_t,
+    d_reclen: u16,
+    d_type: u8,
+    d_namlen: u8,
+    __d_padding: [u8; 4],
+    d_name: [::c_char; 256],
+}
+
+/// We have our own copy of OpenBSD's dirent; check that the layout
+/// minimally matches libc's.
+#[cfg(target_os = "openbsd")]
+fn check_dirent_layout(dirent: &libc_dirent) {
+    use crate::as_ptr;
+    use std::mem::{align_of, size_of};
+
+    // Check that the basic layouts match.
+    assert_eq!(size_of::<libc_dirent>(), size_of::<libc::dirent>());
+    assert_eq!(align_of::<libc_dirent>(), align_of::<libc::dirent>());
+
+    // Check that the field offsets match.
+    assert_eq!(
+        {
+            let z = libc_dirent {
+                d_fileno: 0_u64,
+                d_off: 0_i64,
+                d_reclen: 0_u16,
+                d_type: 0_u8,
+                d_namlen: 0_u8,
+                __d_padding: [0_u8; 4],
+                d_name: [0 as libc::c_char; 256],
+            };
+            let base = as_ptr(&z) as usize;
+            (
+                (as_ptr(&z.d_fileno) as usize) - base,
+                (as_ptr(&z.d_off) as usize) - base,
+                (as_ptr(&z.d_reclen) as usize) - base,
+                (as_ptr(&z.d_type) as usize) - base,
+                (as_ptr(&z.d_namlen) as usize) - base,
+                (as_ptr(&z.__d_padding) as usize) - base,
+                (as_ptr(&z.d_name) as usize) - base,
+            )
+        },
+        {
+            let z = dirent;
+            let base = as_ptr(&z) as usize;
+            (
+                (as_ptr(&z.d_fileno) as usize) - base,
+                (as_ptr(&z.d_off) as usize) - base,
+                (as_ptr(&z.d_reclen) as usize) - base,
+                (as_ptr(&z.d_type) as usize) - base,
+                (as_ptr(&z.d_namlen) as usize) - base,
+                (as_ptr(&z.__d_padding) as usize) - base,
+                (as_ptr(&z.d_name) as usize) - base,
+            )
+        }
+    );
 }
