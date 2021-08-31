@@ -13,6 +13,11 @@ pub(super) fn c_str(c: &CStr) -> *const c_char {
 }
 
 #[inline]
+pub(super) fn raw_fd(fd: RawFd) -> c_int {
+    fd as c_int
+}
+
+#[inline]
 pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> c_int {
     fd.as_raw_fd() as c_int
 }

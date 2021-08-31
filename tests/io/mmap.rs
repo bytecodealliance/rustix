@@ -54,3 +54,19 @@ fn test_mmap() {
         );
     }
 }
+
+#[test]
+fn test_mmap_anonymous() {
+    use rsix::fs::{cwd, openat, Mode, OFlags};
+    use rsix::io::{mmap, munmap, write, MapFlags, ProtFlags};
+    use std::ptr::null_mut;
+    use std::slice;
+
+    unsafe {
+        let addr = mmap_anonymous(null_mut(), 8192, ProtFlags::READ, MapFlags::PRIVATE).unwrap();
+        let slice = slice::from_raw_parts(addr.cast::<u8>(), 8192);
+        assert_eq!(slice, &[b'\0'; 8192]);
+
+        munmap(addr, 8192).unwrap();
+    }
+}

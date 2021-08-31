@@ -48,7 +48,10 @@ bitflags! {
 bitflags! {
     /// `MAP_*` flags for use with [`mmap`].
     ///
+    /// For `MAP_ANONYMOUS` (aka `MAP_ANON`), see [`mmap_anonymous`].
+    ///
     /// [`mmap`]: crate::io::mmap
+    /// [`mmap_anonymous`]: crates::io::mmap_anonymous
     pub struct MapFlags: u32 {
         /// `MAP_SHARED`
         const SHARED = linux_raw_sys::general::MAP_SHARED;
@@ -56,8 +59,6 @@ bitflags! {
         const SHARED_VALIDATE = linux_raw_sys::v5_4::general::MAP_SHARED_VALIDATE;
         /// `MAP_PRIVATE`
         const PRIVATE = linux_raw_sys::general::MAP_PRIVATE;
-        /// `MAP_ANONYMOUS`, aka `MAP_ANON`
-        const ANONYMOUS = linux_raw_sys::general::MAP_ANONYMOUS;
         /// `MAP_DENYWRITE`
         const DENYWRITE = linux_raw_sys::general::MAP_DENYWRITE;
         /// `MAP_FIXED`

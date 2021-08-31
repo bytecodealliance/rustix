@@ -9,7 +9,7 @@
 )))]
 use super::conv::ret_u32;
 use super::conv::{
-    borrowed_fd, ret, ret_c_int, ret_discarded_fd, ret_off_t, ret_owned_fd, ret_ssize_t,
+    borrowed_fd, raw_fd, ret, ret_c_int, ret_discarded_fd, ret_off_t, ret_owned_fd, ret_ssize_t,
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t};
@@ -1252,6 +1252,32 @@ pub(crate) unsafe fn mmap(
         flags.bits(),
         borrowed_fd(fd),
         offset as i64,
+    );
+    if res == libc::MAP_FAILED {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(res)
+    }
+}
+
+/// # Safety
+///
+/// `mmap` is primarily unsafe due to the `addr` parameter, as anything working
+/// with memory pointed to by raw pointers is unsafe.
+#[cfg(not(target_os = "wasi"))]
+pub(crate) unsafe fn mmap_anonymous(
+    ptr: *mut c_void,
+    len: usize,
+    prot: ProtFlags,
+    flags: MapFlags,
+) -> io::Result<*mut c_void> {
+    let res = libc_mmap(
+        ptr,
+        len,
+        prot.bits(),
+        flags.bits() | libc::MAP_ANONYMOUS,
+        raw_fd(-1),
+        0,
     );
     if res == libc::MAP_FAILED {
         Err(io::Error::last_os_error())
