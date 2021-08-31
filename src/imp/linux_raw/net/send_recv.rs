@@ -20,7 +20,6 @@ bitflags! {
     }
 }
 
-#[cfg(linux_raw)]
 bitflags! {
     /// `MSG_*`
     pub struct RecvFlags: u32 {
