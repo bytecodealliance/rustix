@@ -2273,6 +2273,43 @@ pub(crate) unsafe fn mmap(
 
 /// # Safety
 ///
+/// `mmap` is primarily unsafe due to the `addr` parameter, as anything working
+/// with memory pointed to by raw pointers is unsafe.
+#[inline]
+pub(crate) unsafe fn mmap_anonymous(
+    addr: *mut c_void,
+    length: usize,
+    prot: ProtFlags,
+    flags: MapFlags,
+) -> io::Result<*mut c_void> {
+    #[cfg(target_pointer_width = "32")]
+    {
+        ret_void_star(syscall6(
+            nr(__NR_mmap2),
+            void_star(addr),
+            pass_usize(length),
+            c_uint(prot.bits()),
+            c_uint(flags.bits() | linux_raw_sys::general::MAP_ANONYMOUS),
+            raw_fd(-1),
+            pass_usize(0),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
+    {
+        ret_void_star(syscall6(
+            nr(__NR_mmap),
+            void_star(addr),
+            pass_usize(length),
+            c_uint(prot.bits()),
+            c_uint(flags.bits() | linux_raw_sys::general::MAP_ANONYMOUS),
+            raw_fd(-1),
+            loff_t_from_u64(0),
+        ))
+    }
+}
+
+/// # Safety
+///
 /// `munmap` is primarily unsafe due to the `addr` parameter, as anything
 /// working with memory pointed to by raw pointers is unsafe.
 #[inline]

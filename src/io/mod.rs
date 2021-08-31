@@ -60,7 +60,7 @@ pub use ioctl::{ioctl_tiocexcl, ioctl_tiocnxcl};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub use madvise::{madvise, Advice};
 #[cfg(not(target_os = "wasi"))]
-pub use mmap::{mmap, munmap, MapFlags, ProtFlags};
+pub use mmap::{mmap, mmap_anonymous, munmap, MapFlags, ProtFlags};
 pub use owned_fd::OwnedFd;
 #[cfg(not(target_os = "wasi"))]
 pub use pipe::pipe;
