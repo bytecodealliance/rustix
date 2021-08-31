@@ -126,6 +126,7 @@ jobs:
       env:
         # See the comments in the libc crate
         RUSTFLAGS: -A improper_ctypes_definitions
+    - run: rustup component add rust-src
     - run: cargo check -Z build-std=core,alloc,std --target x86_64-unknown-openbsd
 
   test:
