@@ -58,9 +58,11 @@ bitflags! {
         const PRIVATE = linux_raw_sys::general::MAP_PRIVATE;
         /// `MAP_ANONYMOUS`, aka `MAP_ANON`
         const ANONYMOUS = linux_raw_sys::general::MAP_ANONYMOUS;
-        /// `MAP_DENYWRITE`, aka `MAP_DENYWRITE`
+        /// `MAP_DENYWRITE`
         const DENYWRITE = linux_raw_sys::general::MAP_DENYWRITE;
-        /// `MAP_FIXED`, aka `MAP_FIXED`
+        /// `MAP_FIXED`
+        const FIXED = linux_raw_sys::v5_4::general::MAP_FIXED;
+        /// `MAP_FIXED_NOREPLACE`
         const FIXED_NOREPLACE = linux_raw_sys::v5_4::general::MAP_FIXED_NOREPLACE;
         /// `MAP_GROWSDOWN`
         const GROWSDOWN = linux_raw_sys::general::MAP_GROWSDOWN;

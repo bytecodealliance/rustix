@@ -102,6 +102,19 @@ bitflags! {
             target_os = "openbsd",
             target_os = "redox",
         )))]
+        const FIXED = libc::MAP_FIXED;
+        /// `MAP_FIXED_NOREPLACE`
+        #[cfg(not(any(
+            target_os = "android",
+            target_os = "emscripten",
+            target_os = "freebsd",
+            target_os = "fuchsia",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "redox",
+        )))]
         const FIXED_NOREPLACE = libc::MAP_FIXED_NOREPLACE;
         /// `MAP_GROWSDOWN`
         #[cfg(not(any(
