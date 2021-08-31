@@ -10,7 +10,14 @@ use io_lifetimes::{AsFd, BorrowedFd, IntoFd};
     target_os = "linux",
     target_os = "openbsd",
 )))]
-use libc::{dirent as libc_dirent, readdir as libc_readdir};
+use libc::dirent as libc_dirent;
+#[cfg(not(any(
+    target_os = "android",
+    target_os = "emscripten",
+    target_os = "l4re",
+    target_os = "linux",
+)))]
+use libc::readdir as libc_readdir;
 #[cfg(any(
     target_os = "android",
     target_os = "emscripten",
@@ -85,7 +92,7 @@ impl Dir {
                 check_dirent_layout(&*dirent_ptr);
 
                 let result = DirEntry {
-                    dirent: read_dirent(&*dirent_ptr),
+                    dirent: read_dirent(std::mem::transmute(&*dirent_ptr)),
 
                     #[cfg(target_os = "wasi")]
                     name: CStr::from_ptr((*dirent_ptr).d_name.as_ptr()).to_owned(),
@@ -266,20 +273,21 @@ impl DirEntry {
 /// directly, so we declare it ourselves to make all fields accessible.
 #[cfg(target_os = "openbsd")]
 #[repr(C)]
+#[derive(Debug)]
 struct libc_dirent {
-    d_fileno: ::ino_t,
-    d_off: ::off_t,
+    d_fileno: libc::ino_t,
+    d_off: libc::off_t,
     d_reclen: u16,
     d_type: u8,
     d_namlen: u8,
     __d_padding: [u8; 4],
-    d_name: [::c_char; 256],
+    d_name: [libc::c_char; 256],
 }
 
 /// We have our own copy of OpenBSD's dirent; check that the layout
 /// minimally matches libc's.
 #[cfg(target_os = "openbsd")]
-fn check_dirent_layout(dirent: &libc_dirent) {
+fn check_dirent_layout(dirent: &libc::dirent) {
     use crate::as_ptr;
     use std::mem::{align_of, size_of};
 
@@ -306,20 +314,18 @@ fn check_dirent_layout(dirent: &libc_dirent) {
                 (as_ptr(&z.d_reclen) as usize) - base,
                 (as_ptr(&z.d_type) as usize) - base,
                 (as_ptr(&z.d_namlen) as usize) - base,
-                (as_ptr(&z.__d_padding) as usize) - base,
                 (as_ptr(&z.d_name) as usize) - base,
             )
         },
         {
             let z = dirent;
-            let base = as_ptr(&z) as usize;
+            let base = as_ptr(z) as usize;
             (
                 (as_ptr(&z.d_fileno) as usize) - base,
                 (as_ptr(&z.d_off) as usize) - base,
                 (as_ptr(&z.d_reclen) as usize) - base,
                 (as_ptr(&z.d_type) as usize) - base,
                 (as_ptr(&z.d_namlen) as usize) - base,
-                (as_ptr(&z.__d_padding) as usize) - base,
                 (as_ptr(&z.d_name) as usize) - base,
             )
         }
