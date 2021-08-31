@@ -105,6 +105,29 @@ jobs:
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-redox
     - run: cargo check --workspace --release -vv --target=wasm32-wasi
 
+  check_tier3:
+    name: Check selected Tier 3 platforms
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [nightly]
+        include:
+          - build: nightly
+            os: ubuntu-latest
+            rust: nightly
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: ${{ matrix.rust }}
+      env:
+        # See the comments in the libc crate
+        RUSTFLAGS: -A improper_ctypes_definitions
+    - run: cargo check -Z build-std=core,alloc,std --target x86_64-unknown-openbsd
+
   test:
     name: Test
     runs-on: ${{ matrix.os }}
