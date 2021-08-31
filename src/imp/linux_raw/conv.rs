@@ -113,6 +113,11 @@ pub(super) fn raw_fd<'a, Num: ArgNumber>(fd: c_int) -> ArgReg<'a, Num> {
 }
 
 #[inline]
+pub(super) fn no_fd<'a, Num: ArgNumber>() -> ArgReg<'a, Num> {
+    raw_arg(-1_isize as usize)
+}
+
+#[inline]
 pub(super) fn slice_just_addr<'a, T: Sized, Num: ArgNumber>(v: &'a [T]) -> ArgReg<'a, Num> {
     raw_arg(v.as_ptr() as usize)
 }

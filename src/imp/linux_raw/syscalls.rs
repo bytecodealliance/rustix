@@ -24,7 +24,7 @@ use super::arch::choose::{
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use super::conv::opt_ref;
 use super::conv::{
-    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, dev_t, mode_as, oflags,
+    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, dev_t, mode_as, no_fd, oflags,
     oflags_for_open_how, opt_c_str, opt_mut, out, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint,
     ret_discarded_fd, ret_owned_fd, ret_usize, ret_usize_infallible, ret_void_star, size_of, slice,
     slice_just_addr, slice_mut, socklen_t, void_star, zero,
@@ -2290,7 +2290,7 @@ pub(crate) unsafe fn mmap_anonymous(
             pass_usize(length),
             c_uint(prot.bits()),
             c_uint(flags.bits() | linux_raw_sys::general::MAP_ANONYMOUS),
-            raw_fd(-1),
+            no_fd(),
             pass_usize(0),
         ))
     }
@@ -2302,7 +2302,7 @@ pub(crate) unsafe fn mmap_anonymous(
             pass_usize(length),
             c_uint(prot.bits()),
             c_uint(flags.bits() | linux_raw_sys::general::MAP_ANONYMOUS),
-            raw_fd(-1),
+            no_fd(),
             loff_t_from_u64(0),
         ))
     }
