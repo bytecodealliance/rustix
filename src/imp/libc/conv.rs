@@ -13,8 +13,8 @@ pub(super) fn c_str(c: &CStr) -> *const c_char {
 }
 
 #[inline]
-pub(super) fn raw_fd(fd: RawFd) -> c_int {
-    fd as c_int
+pub(super) fn no_fd() -> c_int {
+    -1
 }
 
 #[inline]

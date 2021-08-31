@@ -9,7 +9,7 @@
 )))]
 use super::conv::ret_u32;
 use super::conv::{
-    borrowed_fd, raw_fd, ret, ret_c_int, ret_discarded_fd, ret_off_t, ret_owned_fd, ret_ssize_t,
+    borrowed_fd, no_fd, ret, ret_c_int, ret_discarded_fd, ret_off_t, ret_owned_fd, ret_ssize_t,
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t};
@@ -1276,7 +1276,7 @@ pub(crate) unsafe fn mmap_anonymous(
         len,
         prot.bits(),
         flags.bits() | libc::MAP_ANONYMOUS,
-        raw_fd(-1),
+        no_fd(),
         0,
     );
     if res == libc::MAP_FAILED {
