@@ -1,5 +1,4 @@
 #![cfg(not(target_os = "wasi"))]
-
 // This test interacts with `cargo test` in ways which causes failures on
 // darwin; disable it until we have a better option.
 #![cfg(not((target_os = "ios", target_os = "macos")))]
