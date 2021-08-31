@@ -5,7 +5,7 @@
 fn dup2_to_replace_stdio() {
     use io_lifetimes::AsFilelike;
     use rsix::io::{dup2, pipe};
-    use std::io::Write;
+    use std::io::{BufRead, BufReader, Write};
     use std::mem::forget;
 
     // This test is flaky under qemu.
@@ -25,13 +25,17 @@ fn dup2_to_replace_stdio() {
     drop(writer);
 
     // Don't use std::io::stdout() because in tests it's captured.
-    writeln!(
-        unsafe { rsix::io::stdout() }.as_filelike_view::<std::fs::File>(),
-        "hello, world!"
-    )
-    .unwrap();
+    unsafe {
+        writeln!(
+            rsix::io::stdout().as_filelike_view::<std::fs::File>(),
+            "hello, world!"
+        )
+        .unwrap();
 
-    let mut s = String::new();
-    std::io::stdin().read_line(&mut s).unwrap();
-    assert_eq!(s, "hello, world!\n");
+        let mut s = String::new();
+        BufReader::new(&*rsix::io::stdin().as_filelike_view::<std::fs::File>())
+            .read_line(&mut s)
+            .unwrap();
+        assert_eq!(s, "hello, world!\n");
+    }
 }
