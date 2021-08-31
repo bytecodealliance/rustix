@@ -39,7 +39,7 @@ impl AddressFamily {
     /// `AF_NETLINK`
     pub const NETLINK: Self = Self(linux_raw_sys::general::AF_NETLINK as _);
     /// `AF_UNIX`, aka `AF_LOCAL`
-    #[doc(alias = "Local")]
+    #[doc(alias = "LOCAL")]
     pub const UNIX: Self = Self(linux_raw_sys::general::AF_UNIX as _);
 }
 

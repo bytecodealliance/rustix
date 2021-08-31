@@ -46,7 +46,7 @@ impl AddressFamily {
     )))]
     pub const NETLINK: Self = Self(libc::AF_NETLINK as _);
     /// `AF_UNIX`, aka `AF_LOCAL`
-    #[doc(alias = "Local")]
+    #[doc(alias = "LOCAL")]
     pub const UNIX: Self = Self(libc::AF_UNIX as _);
 }
 
