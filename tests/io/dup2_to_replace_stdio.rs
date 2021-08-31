@@ -8,6 +8,12 @@ fn dup2_to_replace_stdio() {
     use std::io::Write;
     use std::mem::forget;
 
+    // This test is flaky under qemu.
+    if std::env::vars().any(|var| var.0.starts_with("CARGO_TARGET_") && var.0.ends_with("_RUNNER"))
+    {
+        return;
+    }
+
     let (reader, writer) = pipe().unwrap();
     let (stdin, stdout) = unsafe { (rsix::io::take_stdin(), rsix::io::take_stdout()) };
     dup2(&reader, &stdin).unwrap();

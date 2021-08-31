@@ -19,6 +19,11 @@ fn std_file_is_not_terminal() {
 
 #[test]
 fn stdout_stderr_terminals() {
+    // This test is flaky under qemu.
+    if std::env::vars().any(|var| var.0.starts_with("CARGO_TARGET_") && var.0.ends_with("_RUNNER"))
+    {
+        return;
+    }
     assert_eq!(isatty(&std::io::stdout()), atty::is(atty::Stream::Stdout));
     assert_eq!(isatty(&std::io::stderr()), atty::is(atty::Stream::Stderr));
 }
