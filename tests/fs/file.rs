@@ -39,7 +39,12 @@ fn test_file() {
         rsix::io::Error::NOTDIR
     );
 
-    #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "netbsd")))]
+    #[cfg(not(any(
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd"
+    )))]
     rsix::fs::fadvise(&file, 0, 10, rsix::fs::Advice::Normal).unwrap();
 
     assert_eq!(
