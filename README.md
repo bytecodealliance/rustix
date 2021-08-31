@@ -75,7 +75,7 @@ all architectures, and all Linux system calls on x86.
 `rsix`'s `*at` functions are similar to the [`openat`] crate, but `rsix`
 provides them as free functions rather than associated functions of a `Dir`
 type. `rsix`'s `cwd()` function exposes the special `AT_FDCWD` value in a safe
-way, so users don't need to open `.` to git a current-directory handle.
+way, so users don't need to open `.` to get a current-directory handle.
 
 `rsix`'s `openat2` function is similar to the [`openat2`] crate, but uses
 I/O safety types rather than `RawFd`. `rsix` does not provide dynamic feature
