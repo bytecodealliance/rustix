@@ -57,8 +57,7 @@ fn test_mmap() {
 
 #[test]
 fn test_mmap_anonymous() {
-    use rsix::fs::{cwd, openat, Mode, OFlags};
-    use rsix::io::{mmap, munmap, write, MapFlags, ProtFlags};
+    use rsix::io::{mmap_anonymous, munmap, MapFlags, ProtFlags};
     use std::ptr::null_mut;
     use std::slice;
 
