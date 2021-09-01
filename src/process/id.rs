@@ -1,4 +1,104 @@
+//! Unix user, group, and process identiiers.
+//!
+//! # Safety
+//!
+//! The `Uid`, `Gid`, and `Uid` types can be constructed from raw integers,
+//! which is marked safe for similar reasons as [`FromRawFd::from_raw_fd`].
+//!
+//! [`FromRawFd::from_raw_fd`]: https://doc.rust-lang.org/std/os/unix/io/trait.FromRawFd.html#tymethod.from_raw_fd
+#![allow(unsafe_code)]
+
 use crate::imp;
+
+/// The raw integer value of a Unix user ID.
+pub use imp::process::RawUid;
+
+/// The raw integer value of a Unix group ID.
+pub use imp::process::RawGid;
+
+/// The raw integer value of a Unix process ID.
+pub use imp::process::RawPid;
+
+/// `uid_t`—A Unix user ID.
+#[repr(transparent)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
+pub struct Uid(RawUid);
+
+/// `gid_t`—A Unix group ID.
+#[repr(transparent)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
+pub struct Gid(RawGid);
+
+/// `pid_t`—A Unix process ID.
+#[repr(transparent)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
+pub struct Pid(RawPid);
+
+impl Uid {
+    /// Converts a `RawUid` into a `Uid`.
+    ///
+    /// # Safety
+    ///
+    /// `raw` must be the value of a valid Unix user ID.
+    #[inline]
+    pub const unsafe fn from_raw(raw: RawUid) -> Self {
+        Self(raw)
+    }
+
+    /// Converts a `Uid` into a `RawUid`.
+    #[inline]
+    pub const fn as_raw(self) -> RawUid {
+        self.0
+    }
+
+    /// A `Uid` corresponding to the root user (uid 0).
+    pub const ROOT: Self = Self(0);
+}
+
+impl Gid {
+    /// Converts a `RawGid` into a `Gid`.
+    ///
+    /// # Safety
+    ///
+    /// `raw` must be the value of a valid Unix group ID.
+    #[inline]
+    pub const unsafe fn from_raw(raw: RawGid) -> Self {
+        Self(raw)
+    }
+
+    /// Converts a `Gid` into a `RawGid`.
+    #[inline]
+    pub const fn as_raw(self) -> RawGid {
+        self.0
+    }
+
+    /// A `Gid` corresponding to the root group (gid 0).
+    pub const ROOT: Self = Self(0);
+}
+
+impl Pid {
+    /// Converts a `RawPid` into a `Pid`.
+    ///
+    /// # Safety
+    ///
+    /// `raw` must be the value of a valid Unix process ID.
+    #[inline]
+    pub const unsafe fn from_raw(raw: RawPid) -> Self {
+        Self(raw)
+    }
+
+    /// Converts a `Pid` into a `RawPid`.
+    #[inline]
+    pub const fn as_raw(self) -> RawPid {
+        self.0
+    }
+
+    /// A `Pid` corresponding to no process (pid 0).
+    pub const NONE: Self = Self(0);
+
+    /// A `Pid` corresponding to the init process (pid 1).
+    pub const INIT: Self = Self(1);
+}
 
 /// `getuid()`—Returns the process' real user ID.
 ///
@@ -10,7 +110,7 @@ use crate::imp;
 /// [Linux]: https://man7.org/linux/man-pages/man2/getuid.2.html
 #[inline]
 #[must_use]
-pub fn getuid() -> u32 {
+pub fn getuid() -> Uid {
     imp::syscalls::getuid()
 }
 
@@ -24,7 +124,7 @@ pub fn getuid() -> u32 {
 /// [Linux]: https://man7.org/linux/man-pages/man2/geteuid.2.html
 #[inline]
 #[must_use]
-pub fn geteuid() -> u32 {
+pub fn geteuid() -> Uid {
     imp::syscalls::geteuid()
 }
 
@@ -38,7 +138,7 @@ pub fn geteuid() -> u32 {
 /// [Linux]: https://man7.org/linux/man-pages/man2/getgid.2.html
 #[inline]
 #[must_use]
-pub fn getgid() -> u32 {
+pub fn getgid() -> Gid {
     imp::syscalls::getgid()
 }
 
@@ -52,7 +152,7 @@ pub fn getgid() -> u32 {
 /// [Linux]: https://man7.org/linux/man-pages/man2/getegid.2.html
 #[inline]
 #[must_use]
-pub fn getegid() -> u32 {
+pub fn getegid() -> Gid {
     imp::syscalls::getegid()
 }
 
@@ -66,7 +166,7 @@ pub fn getegid() -> u32 {
 /// [Linux]: https://man7.org/linux/man-pages/man2/getpid.2.html
 #[inline]
 #[must_use]
-pub fn getpid() -> u32 {
+pub fn getpid() -> Pid {
     imp::syscalls::getpid()
 }
 
@@ -80,6 +180,6 @@ pub fn getpid() -> u32 {
 /// [Linux]: https://man7.org/linux/man-pages/man2/getppid.2.html
 #[inline]
 #[must_use]
-pub fn getppid() -> u32 {
+pub fn getppid() -> Pid {
     imp::syscalls::getppid()
 }

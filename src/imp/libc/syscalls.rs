@@ -85,6 +85,8 @@ use super::rand::GetRandomFlags;
 use super::time::Timespec;
 use crate::as_ptr;
 use crate::io::{self, OwnedFd, RawFd};
+#[cfg(not(target_os = "wasi"))]
+use crate::process::{Gid, Pid, Uid};
 use errno::errno;
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::cmp::min;
@@ -1969,53 +1971,71 @@ pub(crate) fn fcntl_rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::R
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
-pub(crate) fn getuid() -> u32 {
-    unsafe { libc::getuid() }
+pub(crate) fn getuid() -> Uid {
+    unsafe {
+        let uid = libc::getuid();
+        Uid::from_raw(uid)
+    }
 }
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
-pub(crate) fn geteuid() -> u32 {
-    unsafe { libc::geteuid() }
+pub(crate) fn geteuid() -> Uid {
+    unsafe {
+        let uid = libc::geteuid();
+        Uid::from_raw(uid)
+    }
 }
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
-pub(crate) fn getgid() -> u32 {
-    unsafe { libc::getgid() }
+pub(crate) fn getgid() -> Gid {
+    unsafe {
+        let gid = libc::getgid();
+        Gid::from_raw(gid)
+    }
 }
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
-pub(crate) fn getegid() -> u32 {
-    unsafe { libc::getegid() }
+pub(crate) fn getegid() -> Gid {
+    unsafe {
+        let gid = libc::getegid();
+        Gid::from_raw(gid)
+    }
 }
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
-pub(crate) fn getpid() -> u32 {
-    let pid: i32 = unsafe { libc::getpid() };
-    pid as u32
+pub(crate) fn getpid() -> Pid {
+    unsafe {
+        let pid = libc::getpid();
+        Pid::from_raw(pid)
+    }
 }
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
-pub(crate) fn getppid() -> u32 {
-    let pid: i32 = unsafe { libc::getppid() };
-    pid as u32
+pub(crate) fn getppid() -> Pid {
+    unsafe {
+        let pid: i32 = libc::getppid();
+        Pid::from_raw(pid)
+    }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 #[must_use]
-pub(crate) fn gettid() -> u32 {
-    let tid: i32 = unsafe { libc::gettid() };
-    tid as u32
+pub(crate) fn gettid() -> Pid {
+    unsafe {
+        let tid: i32 = libc::gettid();
+        Pid::from_raw(tid)
+    }
 }
 
 #[inline]

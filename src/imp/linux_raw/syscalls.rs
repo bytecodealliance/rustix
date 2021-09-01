@@ -50,6 +50,7 @@ use super::reg::{ArgReg, SocketArg};
 use super::time::{ClockId, Timespec};
 use crate::io;
 use crate::io::{OwnedFd, RawFd};
+use crate::process::{Gid, Pid, Uid};
 use crate::time::NanosleepRelativeResult;
 use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
@@ -2837,74 +2838,87 @@ pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd>
 }
 
 #[inline]
-pub(crate) fn getpid() -> u32 {
-    let pid: i32 =
-        unsafe { ret_usize_infallible(syscall0_readonly(nr(__NR_getpid))) as __kernel_pid_t };
-    pid as u32
+pub(crate) fn getpid() -> Pid {
+    unsafe {
+        let pid: i32 = ret_usize_infallible(syscall0_readonly(nr(__NR_getpid))) as __kernel_pid_t;
+        Pid::from_raw(pid as u32)
+    }
 }
 
 #[inline]
-pub(crate) fn getppid() -> u32 {
-    let ppid: i32 =
-        unsafe { ret_usize_infallible(syscall0_readonly(nr(__NR_getppid))) as __kernel_pid_t };
-    ppid as u32
+pub(crate) fn getppid() -> Pid {
+    unsafe {
+        let ppid: i32 = ret_usize_infallible(syscall0_readonly(nr(__NR_getppid))) as __kernel_pid_t;
+        Pid::from_raw(ppid as u32)
+    }
 }
 
 #[inline]
-pub(crate) fn getgid() -> u32 {
+pub(crate) fn getgid() -> Gid {
     #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
     unsafe {
-        (ret_usize_infallible(syscall0_readonly(nr(__NR_getgid32))) as __kernel_gid_t).into()
+        let gid: i32 =
+            (ret_usize_infallible(syscall0_readonly(nr(__NR_getgid32))) as __kernel_gid_t).into();
+        Gid::from_raw(gid as u32)
     }
     #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
     unsafe {
-        ret_usize_infallible(syscall0_readonly(nr(__NR_getgid))) as __kernel_gid_t
+        let gid = ret_usize_infallible(syscall0_readonly(nr(__NR_getgid))) as __kernel_gid_t;
+        Gid::from_raw(gid)
     }
 }
 
 #[inline]
-pub(crate) fn getegid() -> u32 {
+pub(crate) fn getegid() -> Gid {
     #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
     unsafe {
-        (ret_usize_infallible(syscall0_readonly(nr(__NR_getegid32))) as __kernel_gid_t).into()
+        let gid: i32 =
+            (ret_usize_infallible(syscall0_readonly(nr(__NR_getegid32))) as __kernel_gid_t).into();
+        Gid::from_raw(gid as u32)
     }
     #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
     unsafe {
-        ret_usize_infallible(syscall0_readonly(nr(__NR_getegid))) as __kernel_gid_t
+        let gid = ret_usize_infallible(syscall0_readonly(nr(__NR_getegid))) as __kernel_gid_t;
+        Gid::from_raw(gid)
     }
 }
 
 #[inline]
-pub(crate) fn getuid() -> u32 {
+pub(crate) fn getuid() -> Uid {
     #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
     unsafe {
-        let uid = ret_usize_infallible(syscall0_readonly(nr(__NR_getuid32))) as __kernel_uid_t;
-        uid as u32
+        let uid =
+            (ret_usize_infallible(syscall0_readonly(nr(__NR_getuid32))) as __kernel_uid_t).into();
+        Uid::from_raw(uid)
     }
     #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
     unsafe {
         let uid = ret_usize_infallible(syscall0_readonly(nr(__NR_getuid))) as __kernel_uid_t;
-        uid as u32
+        Uid::from_raw(uid)
     }
 }
 
 #[inline]
-pub(crate) fn geteuid() -> u32 {
+pub(crate) fn geteuid() -> Uid {
     #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
     unsafe {
-        (ret_usize_infallible(syscall0_readonly(nr(__NR_geteuid32))) as __kernel_uid_t).into()
+        let uid: i32 =
+            (ret_usize_infallible(syscall0_readonly(nr(__NR_geteuid32))) as __kernel_uid_t).into();
+        Uid::from_raw(uid as u32)
     }
     #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
     unsafe {
-        ret_usize_infallible(syscall0_readonly(nr(__NR_geteuid))) as __kernel_uid_t
+        let uid = ret_usize_infallible(syscall0_readonly(nr(__NR_geteuid))) as __kernel_uid_t;
+        Uid::from_raw(uid)
     }
 }
 
 #[inline]
-pub(crate) fn gettid() -> u32 {
-    let tid: i32 =
-        unsafe { ret_usize_infallible(syscall0_readonly(nr(__NR_gettid))) as __kernel_pid_t };
-    tid as u32
+pub(crate) fn gettid() -> Pid {
+    unsafe {
+        let tid: i32 = ret_usize_infallible(syscall0_readonly(nr(__NR_gettid))) as __kernel_pid_t;
+        Pid::from_raw(tid as u32)
+    }
 }
 
 #[inline]
