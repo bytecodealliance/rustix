@@ -43,6 +43,7 @@ use super::net::{
     decode_sockaddr, AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown,
     SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6, SocketType,
 };
+use super::process::RawUname;
 use super::rand::GetRandomFlags;
 use super::reg::nr;
 #[cfg(target_arch = "x86")]
@@ -72,12 +73,12 @@ use linux_raw_sys::general::{
     __NR_getdents64, __NR_getpid, __NR_getppid, __NR_gettid, __NR_ioctl, __NR_linkat, __NR_madvise,
     __NR_mkdirat, __NR_mknodat, __NR_mprotect, __NR_munmap, __NR_nanosleep, __NR_openat,
     __NR_pipe2, __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat,
-    __NR_readv, __NR_sched_yield, __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __NR_write,
-    __NR_writev, __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event,
-    sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD, AT_REMOVEDIR,
-    AT_SYMLINK_NOFOLLOW, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, F_DUPFD,
-    F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL, TCGETS,
-    TIMER_ABSTIME, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
+    __NR_readv, __NR_sched_yield, __NR_symlinkat, __NR_uname, __NR_unlinkat, __NR_utimensat,
+    __NR_write, __NR_writev, __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t,
+    epoll_event, sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD,
+    AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO,
+    FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD,
+    F_SETFL, TCGETS, TIMER_ABSTIME, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
 };
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use linux_raw_sys::general::{__NR_dup2, __NR_open, __NR_pipe, __NR_poll};
@@ -3042,5 +3043,14 @@ pub(crate) fn epoll_wait(
             c_int(timeout),
             zero(),
         ))
+    }
+}
+
+#[inline]
+pub(crate) fn uname() -> RawUname {
+    let mut uname = MaybeUninit::<RawUname>::uninit();
+    unsafe {
+        ret(syscall1(nr(__NR_uname), out(&mut uname))).unwrap();
+        uname.assume_init()
     }
 }

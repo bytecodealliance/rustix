@@ -7,3 +7,5 @@ pub const EXIT_SIGNALED_SIGABRT: c_int = 128 + linux_raw_sys::general::SIGABRT a
 pub type RawPid = u32;
 pub type RawGid = u32;
 pub type RawUid = u32;
+
+pub type RawUname = linux_raw_sys::general::new_utsname;

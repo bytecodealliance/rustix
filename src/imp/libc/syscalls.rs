@@ -80,6 +80,8 @@ use super::offset::libc_posix_fallocate;
 use super::offset::{libc_fstat, libc_fstatat, libc_lseek, libc_off_t, libc_pread, libc_pwrite};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::offset::{libc_preadv2, libc_pwritev2};
+#[cfg(not(target_os = "wasi"))]
+use super::process::RawUname;
 #[cfg(target_os = "linux")]
 use super::rand::GetRandomFlags;
 use super::time::Timespec;
@@ -2042,5 +2044,15 @@ pub(crate) fn gettid() -> Pid {
 pub(crate) fn sched_yield() {
     unsafe {
         let _ = libc::sched_yield();
+    }
+}
+
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub(crate) fn uname() -> RawUname {
+    let mut uname = MaybeUninit::<RawUname>::uninit();
+    unsafe {
+        ret(libc::uname(uname.as_mut_ptr())).unwrap();
+        uname.assume_init()
     }
 }
