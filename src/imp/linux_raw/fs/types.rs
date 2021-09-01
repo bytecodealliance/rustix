@@ -439,15 +439,15 @@ pub enum FlockOperation {
     NonBlockingUnlock = linux_raw_sys::general::LOCK_UN | linux_raw_sys::general::LOCK_NB,
 }
 
-/// `struct statfs` for use with [`fstatfs`].
+/// `struct stat` for use with [`statat`] and [`fstat`].
 ///
-/// [`fstatfs`]: crate::fs::fstatfs
+/// [`fstat`]: crate::fs::fstat
 #[cfg(target_pointer_width = "32")]
 pub type Stat = linux_raw_sys::general::stat64;
 
-/// `struct statfs` for use with [`fstatfs`].
+/// `struct stat` for use with [`statat`] and [`fstat`].
 ///
-/// [`fstatfs`]: crate::fs::fstatfs
+/// [`fstat`]: crate::fs::fstat
 #[cfg(target_pointer_width = "64")]
 pub type Stat = linux_raw_sys::general::stat;
 
