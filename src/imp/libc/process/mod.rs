@@ -1,3 +1,5 @@
 mod types;
 
-pub use types::{EXIT_FAILURE, EXIT_SIGNALED_SIGABRT, EXIT_SUCCESS};
+#[cfg(not(target_os = "wasi"))]
+pub use types::EXIT_SIGNALED_SIGABRT;
+pub use types::{EXIT_FAILURE, EXIT_SUCCESS};

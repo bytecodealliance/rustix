@@ -40,4 +40,5 @@ pub const EXIT_FAILURE: i32 = imp::process::EXIT_FAILURE;
 ///  - [Linux]
 ///
 /// [Linux]: https://tldp.org/LDP/abs/html/exitcodes.html
+#[cfg(not(target_os = "wasi"))]
 pub const EXIT_SIGNALED_SIGABRT: i32 = imp::process::EXIT_SIGNALED_SIGABRT;
