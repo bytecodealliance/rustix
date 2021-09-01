@@ -10,7 +10,7 @@ use crate::{imp, io};
 use io_lifetimes::AsFd;
 use std::ffi::c_void;
 
-pub use imp::io::{MapFlags, ProtFlags};
+pub use imp::io::{MapFlags, MprotectFlags, ProtFlags};
 
 /// `mmap(ptr, len, prot, flags, fd, offset)`—Create a file-backed memory mapping.
 ///
@@ -78,4 +78,21 @@ pub unsafe fn mmap_anonymous(
 #[inline]
 pub unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
     imp::syscalls::munmap(ptr, len)
+}
+
+/// `mprotect(ptr, len, flags)`
+///
+/// # Safety
+///
+/// Raw pointers and lots of special semantics.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mprotect.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/mprotect.2.html
+#[inline]
+pub unsafe fn mprotect(ptr: *mut c_void, len: usize, flags: MprotectFlags) -> io::Result<()> {
+    imp::syscalls::mprotect(ptr, len, flags)
 }

@@ -46,6 +46,26 @@ bitflags! {
 }
 
 bitflags! {
+    /// `PROT_*` flags for use with [`mprotect`].
+    ///
+    /// [`mprotect`]: crate::io::mprotect
+    pub struct MprotectFlags: u32 {
+        /// `PROT_READ`
+        const READ = linux_raw_sys::general::PROT_READ;
+        /// `PROT_WRITE`
+        const WRITE = linux_raw_sys::general::PROT_WRITE;
+        /// `PROT_EXEC`
+        const EXEC = linux_raw_sys::general::PROT_EXEC;
+        /// `PROT_NONE`
+        const NONE = linux_raw_sys::general::PROT_NONE;
+        /// `PROT_GROWSUP`
+        const GROWSUP = linux_raw_sys::general::PROT_GROWSUP;
+        /// `PROT_GROWSDOWN`
+        const GROWSDOWN = linux_raw_sys::general::PROT_GROWSDOWN;
+    }
+}
+
+bitflags! {
     /// `MAP_*` flags for use with [`mmap`].
     ///
     /// For `MAP_ANONYMOUS` (aka `MAP_ANON`), see [`mmap_anonymous`].

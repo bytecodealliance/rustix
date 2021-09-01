@@ -16,7 +16,7 @@ pub use types::PipeFlags;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub use types::PIPE_BUF;
 #[cfg(not(target_os = "wasi"))]
-pub use types::{DupFlags, MapFlags, ProtFlags, Tcflag, Termios, Winsize, ICANON};
+pub use types::{DupFlags, MapFlags, MprotectFlags, ProtFlags, Tcflag, Termios, Winsize, ICANON};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use types::{EventfdFlags, ReadWriteFlags, UserfaultfdFlags};
 
