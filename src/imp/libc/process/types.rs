@@ -11,3 +11,6 @@ pub type RawPid = libc::pid_t;
 pub type RawGid = libc::gid_t;
 #[cfg(not(target_os = "wasi"))]
 pub type RawUid = libc::uid_t;
+
+#[cfg(not(target_os = "wasi"))]
+pub type RawUname = libc::utsname;

@@ -5,12 +5,16 @@ use crate::imp;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;
 mod sched;
+#[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.
+mod uname;
 
 #[cfg(not(target_os = "wasi"))]
 pub use id::{
     getegid, geteuid, getgid, getpid, getppid, getuid, Gid, Pid, RawGid, RawPid, RawUid, Uid,
 };
 pub use sched::sched_yield;
+#[cfg(not(target_os = "wasi"))]
+pub use uname::{uname, Uname};
 
 /// `EXIT_SUCCESS` for use with [`exit`].
 ///
