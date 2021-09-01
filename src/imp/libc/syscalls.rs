@@ -125,7 +125,7 @@ use {
 };
 #[cfg(not(target_os = "wasi"))]
 use {
-    super::io::{DupFlags, MapFlags, ProtFlags, Termios, Winsize},
+    super::io::{DupFlags, MapFlags, MprotectFlags, ProtFlags, Termios, Winsize},
     super::time::{ClockId, DynamicClockId},
 };
 
@@ -1284,6 +1284,15 @@ pub(crate) unsafe fn mmap_anonymous(
     } else {
         Ok(res)
     }
+}
+
+#[cfg(not(target_os = "wasi"))]
+pub(crate) unsafe fn mprotect(
+    ptr: *mut c_void,
+    len: usize,
+    flags: MprotectFlags,
+) -> io::Result<()> {
+    ret(libc::mprotect(ptr, len, flags.bits()))
 }
 
 #[cfg(not(target_os = "wasi"))]

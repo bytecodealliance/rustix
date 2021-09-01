@@ -69,3 +69,22 @@ fn test_mmap_anonymous() {
         munmap(addr, 8192).unwrap();
     }
 }
+
+#[test]
+fn test_mprotect() {
+    use rsix::io::{mmap_anonymous, mprotect, munmap, MapFlags, MprotectFlags, ProtFlags};
+    use std::ptr::null_mut;
+    use std::slice;
+
+    unsafe {
+        let addr = mmap_anonymous(null_mut(), 8192, ProtFlags::READ, MapFlags::PRIVATE).unwrap();
+
+        mprotect(addr, 8192, MprotectFlags::NONE).unwrap();
+        mprotect(addr, 8192, MprotectFlags::READ).unwrap();
+
+        let slice = slice::from_raw_parts(addr.cast::<u8>(), 8192);
+        assert_eq!(slice, &[b'\0'; 8192]);
+
+        munmap(addr, 8192).unwrap();
+    }
+}

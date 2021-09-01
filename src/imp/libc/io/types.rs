@@ -57,6 +57,29 @@ bitflags! {
 
 #[cfg(not(target_os = "wasi"))]
 bitflags! {
+    /// `PROT_*` flags for use with [`mprotect`].
+    ///
+    /// [`mprotect`]: crate::io::mprotect
+    pub struct MprotectFlags: c_int {
+        /// `PROT_READ`
+        const READ = libc::PROT_READ;
+        /// `PROT_WRITE`
+        const WRITE = libc::PROT_WRITE;
+        /// `PROT_EXEC`
+        const EXEC = libc::PROT_EXEC;
+        /// `PROT_NONE`
+        const NONE = libc::PROT_NONE;
+        /// `PROT_GROWSUP`
+        #[cfg(any(target_os = "android", target_os = "linux"))]
+        const GROWSUP = libc::PROT_GROWSUP;
+        /// `PROT_GROWSDOWN`
+        #[cfg(any(target_os = "android", target_os = "linux"))]
+        const GROWSDOWN = libc::PROT_GROWSDOWN;
+    }
+}
+
+#[cfg(not(target_os = "wasi"))]
+bitflags! {
     /// `MAP_*` flags for use with [`mmap`].
     ///
     /// For `MAP_ANONYMOUS` (aka `MAP_ANON`), see [`mmap_anonymous`].
