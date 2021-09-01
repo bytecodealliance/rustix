@@ -1,3 +1,3 @@
 mod types;
 
-pub use types::{EXIT_FAILURE, EXIT_SUCCESS};
+pub use types::{EXIT_FAILURE, EXIT_SIGNALED_SIGABRT, EXIT_SUCCESS};
