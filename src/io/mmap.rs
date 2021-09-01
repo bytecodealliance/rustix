@@ -12,7 +12,8 @@ use std::ffi::c_void;
 
 pub use imp::io::{MapFlags, MprotectFlags, ProtFlags};
 
-/// `mmap(ptr, len, prot, flags, fd, offset)`—Create a file-backed memory mapping.
+/// `mmap(ptr, len, prot, flags, fd, offset)`—Create a file-backed memory
+/// mapping.
 ///
 /// For anonymous mappings, see [`mmap_anonymous`].
 ///
@@ -39,7 +40,8 @@ pub unsafe fn mmap<Fd: AsFd>(
     imp::syscalls::mmap(ptr, len, prot, flags, fd, offset)
 }
 
-/// `mmap(ptr, len, prot, MAP_ANONYMOUS | flags, -1, 0)`—Create an anonymous memory mapping.
+/// `mmap(ptr, len, prot, MAP_ANONYMOUS | flags, -1, 0)`—Create an anonymous
+/// memory mapping.
 ///
 /// For file-backed mappings, see [`mmap`].
 ///

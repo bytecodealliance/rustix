@@ -35,6 +35,9 @@ pub struct Gid(RawGid);
 pub struct Pid(RawPid);
 
 impl Uid {
+    /// A `Uid` corresponding to the root user (uid 0).
+    pub const ROOT: Self = Self(0);
+
     /// Converts a `RawUid` into a `Uid`.
     ///
     /// # Safety
@@ -50,12 +53,12 @@ impl Uid {
     pub const fn as_raw(self) -> RawUid {
         self.0
     }
-
-    /// A `Uid` corresponding to the root user (uid 0).
-    pub const ROOT: Self = Self(0);
 }
 
 impl Gid {
+    /// A `Gid` corresponding to the root group (gid 0).
+    pub const ROOT: Self = Self(0);
+
     /// Converts a `RawGid` into a `Gid`.
     ///
     /// # Safety
@@ -71,12 +74,14 @@ impl Gid {
     pub const fn as_raw(self) -> RawGid {
         self.0
     }
-
-    /// A `Gid` corresponding to the root group (gid 0).
-    pub const ROOT: Self = Self(0);
 }
 
 impl Pid {
+    /// A `Pid` corresponding to the init process (pid 1).
+    pub const INIT: Self = Self(1);
+    /// A `Pid` corresponding to no process (pid 0).
+    pub const NONE: Self = Self(0);
+
     /// Converts a `RawPid` into a `Pid`.
     ///
     /// # Safety
@@ -92,12 +97,6 @@ impl Pid {
     pub const fn as_raw(self) -> RawPid {
         self.0
     }
-
-    /// A `Pid` corresponding to no process (pid 0).
-    pub const NONE: Self = Self(0);
-
-    /// A `Pid` corresponding to the init process (pid 1).
-    pub const INIT: Self = Self(1);
 }
 
 /// `getuid()`—Returns the process' real user ID.
