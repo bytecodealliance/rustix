@@ -242,6 +242,16 @@ fn init_syscall() -> SyscallType {
     unsafe { transmute(SYSCALL.load(Relaxed)) }
 }
 
+/// Initialization to perform before we attempt to open /proc/self/auxv.
+#[inline]
+pub(super) fn init_before_auxv() {
+    // On x86, we need to ensure that `SYSCALL` is minimally initialized before
+    // entering the code for /proc/self/auxv, because otherwise opening
+    // /proc/self/auxv will attempt to reenter the initialization of `SYSCALL`.
+    #[cfg(target_arch = "x86")]
+    minimal_init();
+}
+
 static mut CLOCK_GETTIME: AtomicUsize = AtomicUsize::new(0);
 #[cfg(target_arch = "x86")]
 static mut SYSCALL: AtomicUsize = AtomicUsize::new(0);
@@ -325,7 +335,7 @@ extern "C" {
     ) -> RetReg<R0>;
 }
 
-fn init() {
+fn minimal_init() {
     // Safety: Store default function addresses in static storage so that if we
     // end up making any system calls while we read the vDSO, they'll work.
     // If the memory happens to already be initialized, this is redundant, but
@@ -344,6 +354,10 @@ fn init() {
             .compare_exchange(0, rsix_int_0x80 as SyscallType as usize, Relaxed, Relaxed)
             .ok();
     }
+}
+
+fn init() {
+    minimal_init();
 
     if let Some(vdso) = vdso::Vdso::new() {
         #[cfg(target_arch = "x86_64")]

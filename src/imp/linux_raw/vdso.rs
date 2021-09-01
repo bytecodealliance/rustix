@@ -13,12 +13,11 @@
 #![allow(unsafe_code)]
 #![allow(non_snake_case)]
 
-use crate::io::{self, madvise, pread, proc_self_auxv, Advice};
+use crate::io::{self, madvise, Advice};
 use std::ffi::CStr;
 use std::mem::{align_of, size_of};
 use std::os::raw::{c_char, c_void};
 use std::ptr::null;
-use std::slice;
 
 pub(super) struct Vdso {
     // Load information
@@ -389,70 +388,9 @@ unsafe fn init_from_auxv(elf_auxv: *const Elf_auxv_t) -> Option<Vdso> {
 
 // Find the `AT_SYSINFO_EHDR` in auxv records in /proc/self/auxv.
 fn init_from_proc_self_auxv() -> Option<Vdso> {
-    // Open /proc/self/auxv and check that it's what we think it is.
-    let auxv = match proc_self_auxv() {
-        Ok(file) => file,
-        Err(_err) => return None,
-    };
-
-    // A buffer for `Elf_auxv_t` records. We only need a few because the
-    // `AT_SYSINFO_EHDR` record is usually close to the front.
-    let mut buffer = [
-        Elf_auxv_t {
-            a_type: 0,
-            a_val: 0,
-        },
-        Elf_auxv_t {
-            a_type: 0,
-            a_val: 0,
-        },
-        Elf_auxv_t {
-            a_type: 0,
-            a_val: 0,
-        },
-        Elf_auxv_t {
-            a_type: 0,
-            a_val: 0,
-        },
-    ];
-
-    // Safety: Use `slice::from_raw_parts` to get a byte-slice view of `buffer`.
-    let byte_slice = unsafe {
-        slice::from_raw_parts_mut(
-            (&mut buffer as *mut Elf_auxv_t).cast::<u8>(),
-            buffer.len() * size_of::<Elf_auxv_t>(),
-        )
-    };
-
-    // Iterate over the auxv records until we find AT_SYSINFO_EHDR, which
-    // points to the vDSO ELF header.
-    let mut offset = 0;
-    loop {
-        match pread(&auxv, byte_slice, offset) {
-            Ok(0) => return None,
-            Ok(n) => {
-                let elf_auxv_slice = &buffer[..n / size_of::<Elf_auxv_t>()];
-                for elf_auxv in elf_auxv_slice {
-                    match elf_auxv.a_type {
-                        AT_SYSINFO_EHDR => {
-                            // Safety: We were careful to ensure that we're
-                            // reading from actual procfs, and now we trust
-                            // that the `AT_SYSINFO_EHDR` record contains a
-                            // valid pointer value.
-                            unsafe {
-                                return init_from_sysinfo_ehdr(elf_auxv.a_val);
-                            }
-                        }
-                        AT_NULL => return None,
-                        _ => continue,
-                    }
-                }
-                offset += (elf_auxv_slice.len() * size_of::<Elf_auxv_t>()) as u64;
-            }
-            Err(io::Error::INTR) => continue,
-            Err(_err) => return None,
-        }
-    }
+    // Safety: `sysinfo_ehdr` does extensive checks to ensure that the value
+    // we get really is an `AT_SYSINFO_EHDR` value from the kernel.
+    unsafe { init_from_sysinfo_ehdr(super::process::sysinfo_ehdr()) }
 }
 
 // ELF ABI
@@ -481,8 +419,6 @@ const ET_DYN: u16 = 3;
 const EI_NIDENT: usize = 16;
 const SHN_UNDEF: u16 = 0;
 const SHN_ABS: u16 = 0xfff1;
-const AT_NULL: usize = 0;
-const AT_SYSINFO_EHDR: usize = 33;
 const PN_XNUM: u16 = 0xffff;
 const PT_LOAD: u32 = 1;
 const PT_DYNAMIC: u32 = 2;
@@ -599,12 +535,6 @@ struct Elf_Sym {
 struct Elf_Dyn {
     d_tag: i32,
     d_val: usize,
-}
-
-#[repr(C)]
-struct Elf_auxv_t {
-    a_type: usize,
-    a_val: usize,
 }
 
 #[repr(C)]
