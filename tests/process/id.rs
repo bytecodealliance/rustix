@@ -22,7 +22,7 @@ fn test_getegid() {
 
 #[test]
 fn test_getpid() {
-    assert_ne!(process::getpid(), 0);
+    assert_ne!(process::getpid(), process::Pid::NONE);
     assert_eq!(process::getpid(), process::getpid());
 }
 

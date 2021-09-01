@@ -7,7 +7,9 @@ mod id;
 mod sched;
 
 #[cfg(not(target_os = "wasi"))]
-pub use id::{getegid, geteuid, getgid, getpid, getppid, getuid};
+pub use id::{
+    getegid, geteuid, getgid, getpid, getppid, getuid, Gid, Pid, RawGid, RawPid, RawUid, Uid,
+};
 pub use sched::sched_yield;
 
 /// `EXIT_SUCCESS` for use with [`exit`].

@@ -13,7 +13,7 @@ use crate::fs::{
 use crate::fs::{Dir, FileType};
 use crate::io::{self, OwnedFd};
 use crate::path::DecInt;
-use crate::process::{getgid, getpid, getuid};
+use crate::process::{getgid, getpid, getuid, Gid, RawGid, RawUid, Uid};
 use io_lifetimes::{AsFd, BorrowedFd};
 use once_cell::sync::OnceCell;
 
@@ -35,8 +35,8 @@ fn check_proc_entry(
     kind: Kind,
     entry: BorrowedFd<'_>,
     proc_stat: Option<&Stat>,
-    uid: u32,
-    gid: u32,
+    uid: RawUid,
+    gid: RawGid,
 ) -> io::Result<Stat> {
     let entry_stat = fstat(&entry)?;
     check_proc_entry_with_stat(kind, entry, entry_stat, proc_stat, uid, gid)
@@ -48,8 +48,8 @@ fn check_proc_entry_with_stat(
     entry: BorrowedFd<'_>,
     entry_stat: Stat,
     proc_stat: Option<&Stat>,
-    uid: u32,
-    gid: u32,
+    uid: RawUid,
+    gid: RawGid,
 ) -> io::Result<Stat> {
     // Check the filesystem magic.
     check_procfs(entry)?;
@@ -216,8 +216,14 @@ pub fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
         // Open "/proc".
         let proc = openat(&cwd(), cstr!("/proc"), oflags, Mode::empty())
             .map_err(|_err| io::Error::NOTSUP)?;
-        let proc_stat = check_proc_entry(Kind::Proc, proc.as_fd(), None, 0, 0)
-            .map_err(|_err| io::Error::NOTSUP)?;
+        let proc_stat = check_proc_entry(
+            Kind::Proc,
+            proc.as_fd(),
+            None,
+            Uid::ROOT.as_raw(),
+            Gid::ROOT.as_raw(),
+        )
+        .map_err(|_err| io::Error::NOTSUP)?;
 
         Ok((proc, proc_stat))
     })
@@ -250,11 +256,16 @@ pub fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 
             // Open "/proc/self". Use our pid to compute the name rather than literally
             // using "self", as "self" is a symlink.
-            let proc_self = openat(&proc, DecInt::new(pid), oflags, Mode::empty())
+            let proc_self = openat(&proc, DecInt::new(pid.as_raw()), oflags, Mode::empty())
                 .map_err(|_err| io::Error::NOTSUP)?;
-            let proc_self_stat =
-                check_proc_entry(Kind::Pid, proc_self.as_fd(), Some(proc_stat), uid, gid)
-                    .map_err(|_err| io::Error::NOTSUP)?;
+            let proc_self_stat = check_proc_entry(
+                Kind::Pid,
+                proc_self.as_fd(),
+                Some(proc_stat),
+                uid.as_raw(),
+                gid.as_raw(),
+            )
+            .map_err(|_err| io::Error::NOTSUP)?;
 
             Ok((proc_self, proc_self_stat))
         })
