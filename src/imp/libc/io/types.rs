@@ -236,6 +236,18 @@ bitflags! {
     }
 }
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    /// `MLOCK_*` flags for use with [`mlock_with`].
+    ///
+    /// [`mlock_with`]: crate::io::mlock_with
+    pub struct MlockFlags: i32 {
+        // libc doesn't define `MLOCK_ONFAULT` yet.
+        // /// `MLOCK_ONFAULT`
+        // const ONFAULT = libc::MLOCK_ONFAULT;
+    }
+}
+
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 bitflags! {
     /// `O_*` constants for use with [`pipe_with`].

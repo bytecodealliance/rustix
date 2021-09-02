@@ -88,3 +88,39 @@ fn test_mprotect() {
         munmap(addr, 8192).unwrap();
     }
 }
+
+#[test]
+fn test_mlock() {
+    use rsix::io::{mlock, mmap_anonymous, munlock, munmap, MapFlags, ProtFlags};
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    use rsix::io::{mlock_with, MlockFlags};
+    use std::ptr::null_mut;
+
+    unsafe {
+        let addr = mmap_anonymous(null_mut(), 8192, ProtFlags::READ, MapFlags::PRIVATE).unwrap();
+
+        mlock(addr, 8192).unwrap();
+        munlock(addr, 8192).unwrap();
+
+        #[cfg(any(target_os = "android", target_os = "linux"))]
+        {
+            match mlock_with(addr, 8192, MlockFlags::empty()) {
+                Err(rsix::io::Error::NOSYS) => (),
+                Err(err) => Err(err).unwrap(),
+                Ok(()) => munlock(addr, 8192).unwrap(),
+            }
+
+            #[cfg(linux_raw)] // libc doesn't expose `MLOCK_UNFAULT` yet.
+            {
+                match mlock_with(addr, 8192, MlockFlags::ONFAULT) {
+                    Err(rsix::io::Error::NOSYS) => (),
+                    Err(err) => Err(err).unwrap(),
+                    Ok(()) => munlock(addr, 8192).unwrap(),
+                }
+                munlock(addr, 8192).unwrap();
+            }
+        }
+
+        munmap(addr, 8192).unwrap();
+    }
+}

@@ -34,8 +34,8 @@ use super::fs::{
     OFlags, RenameFlags, ResolveFlags, Stat, StatFs, StatxFlags,
 };
 use super::io::{
-    epoll, Advice as IoAdvice, DupFlags, EventfdFlags, MapFlags, MprotectFlags, PipeFlags, PollFd,
-    ProtFlags, ReadWriteFlags, UserfaultfdFlags,
+    epoll, Advice as IoAdvice, DupFlags, EventfdFlags, MapFlags, MlockFlags, MprotectFlags,
+    PipeFlags, PollFd, ProtFlags, ReadWriteFlags, UserfaultfdFlags,
 };
 #[cfg(not(target_os = "wasi"))]
 use super::io::{Termios, Winsize};
@@ -71,14 +71,15 @@ use linux_raw_sys::general::{
     __NR_epoll_create1, __NR_epoll_ctl, __NR_exit_group, __NR_faccessat, __NR_fallocate,
     __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_flock, __NR_fsync, __NR_getcwd,
     __NR_getdents64, __NR_getpid, __NR_getppid, __NR_gettid, __NR_ioctl, __NR_linkat, __NR_madvise,
-    __NR_mkdirat, __NR_mknodat, __NR_mprotect, __NR_munmap, __NR_nanosleep, __NR_openat,
-    __NR_pipe2, __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat,
-    __NR_readv, __NR_sched_yield, __NR_symlinkat, __NR_uname, __NR_unlinkat, __NR_utimensat,
-    __NR_write, __NR_writev, __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t,
-    epoll_event, sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD,
-    AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO,
-    FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD,
-    F_SETFL, TCGETS, TIMER_ABSTIME, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
+    __NR_mkdirat, __NR_mknodat, __NR_mlock, __NR_mprotect, __NR_munlock, __NR_munmap,
+    __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_pread64, __NR_preadv, __NR_pwrite64,
+    __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv, __NR_sched_yield, __NR_symlinkat,
+    __NR_uname, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev, __kernel_gid_t,
+    __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event, sockaddr, sockaddr_in,
+    sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW,
+    EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC,
+    F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL, TCGETS, TIMER_ABSTIME,
+    TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
 };
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use linux_raw_sys::general::{__NR_dup2, __NR_open, __NR_pipe, __NR_poll};
@@ -97,9 +98,9 @@ use linux_raw_sys::general::{__NR_ppoll, sigset_t};
 use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::v5_11::general::{__NR_openat2, open_how};
 use linux_raw_sys::v5_4::general::{
-    __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_memfd_create, __NR_preadv2,
-    __NR_pwritev2, __NR_renameat2, __NR_statx, __NR_userfaultfd, statx, F_GETPIPE_SZ, F_GET_SEALS,
-    F_SETPIPE_SZ,
+    __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_memfd_create, __NR_mlock2,
+    __NR_preadv2, __NR_pwritev2, __NR_renameat2, __NR_statx, __NR_userfaultfd, statx, F_GETPIPE_SZ,
+    F_GET_SEALS, F_SETPIPE_SZ,
 };
 use std::convert::TryInto;
 use std::ffi::CStr;
@@ -2332,6 +2333,50 @@ pub(crate) unsafe fn mprotect(
 pub(crate) unsafe fn munmap(addr: *mut c_void, length: usize) -> io::Result<()> {
     ret(syscall2(
         nr(__NR_munmap),
+        void_star(addr),
+        pass_usize(length),
+    ))
+}
+
+/// # Safety
+///
+/// `mlock` operates on raw pointers and may round out to the nearest page
+/// boundaries.
+#[inline]
+pub(crate) unsafe fn mlock(addr: *mut c_void, length: usize) -> io::Result<()> {
+    ret(syscall2(
+        nr(__NR_mlock),
+        void_star(addr),
+        pass_usize(length),
+    ))
+}
+
+/// # Safety
+///
+/// `mlock_with` operates on raw pointers and may round out to the nearest page
+/// boundaries.
+#[inline]
+pub(crate) unsafe fn mlock_with(
+    addr: *mut c_void,
+    length: usize,
+    flags: MlockFlags,
+) -> io::Result<()> {
+    ret(syscall3(
+        nr(__NR_mlock2),
+        void_star(addr),
+        pass_usize(length),
+        c_uint(flags.bits()),
+    ))
+}
+
+/// # Safety
+///
+/// `munlock` operates on raw pointers and may round out to the nearest page
+/// boundaries.
+#[inline]
+pub(crate) unsafe fn munlock(addr: *mut c_void, length: usize) -> io::Result<()> {
+    ret(syscall2(
+        nr(__NR_munlock),
         void_star(addr),
         pass_usize(length),
     ))

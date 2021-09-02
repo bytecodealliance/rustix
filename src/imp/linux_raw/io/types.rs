@@ -109,6 +109,16 @@ bitflags! {
 }
 
 bitflags! {
+    /// `MLOCK_*` flags for use with [`mlock_with`].
+    ///
+    /// [`mlock_with`]: crate::io::mlock_with
+    pub struct MlockFlags: u32 {
+        /// `MLOCK_ONFAULT`
+        const ONFAULT = linux_raw_sys::v5_4::general::MLOCK_ONFAULT;
+    }
+}
+
+bitflags! {
     /// `O_*` constants for use with [`pipe_with`].
     ///
     /// [`pipe_with`]: crate::io::pipe_with

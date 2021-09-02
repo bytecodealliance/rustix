@@ -42,6 +42,8 @@ use super::fs::{RenameFlags, ResolveFlags};
 use super::fs::{Statx, StatxFlags};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::io::Advice as IoAdvice;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use super::io::MlockFlags;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 use super::io::PipeFlags;
 use super::io::PollFd;
@@ -1302,6 +1304,41 @@ pub(crate) unsafe fn mprotect(
 #[cfg(not(target_os = "wasi"))]
 pub(crate) unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
     ret(libc::munmap(ptr, len))
+}
+
+/// # Safety
+///
+/// `mlock` operates on raw pointers and may round out to the nearest page
+/// boundaries.
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub(crate) unsafe fn mlock(addr: *mut c_void, length: usize) -> io::Result<()> {
+    ret(libc::mlock(addr, length))
+}
+
+/// # Safety
+///
+/// `mlock_with` operates on raw pointers and may round out to the nearest page
+/// boundaries.
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub(crate) unsafe fn mlock_with(
+    addr: *mut c_void,
+    length: usize,
+    flags: MlockFlags,
+) -> io::Result<()> {
+    assert_eq!(flags.bits(), 0, "libc doesn't define `MLOCK_*` yet");
+    ret(libc::mlock(addr, length))
+}
+
+/// # Safety
+///
+/// `munlock` operates on raw pointers and may round out to the nearest page
+/// boundaries.
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub(crate) unsafe fn munlock(addr: *mut c_void, length: usize) -> io::Result<()> {
+    ret(libc::munlock(addr, length))
 }
 
 #[cfg(not(target_os = "wasi"))]

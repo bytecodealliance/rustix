@@ -10,6 +10,8 @@ use crate::{imp, io};
 use io_lifetimes::AsFd;
 use std::ffi::c_void;
 
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+pub use imp::io::MlockFlags;
 pub use imp::io::{MapFlags, MprotectFlags, ProtFlags};
 
 /// `mmap(ptr, len, prot, flags, fd, offset)`—Create a file-backed memory
@@ -97,4 +99,78 @@ pub unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
 #[inline]
 pub unsafe fn mprotect(ptr: *mut c_void, len: usize, flags: MprotectFlags) -> io::Result<()> {
     imp::syscalls::mprotect(ptr, len, flags)
+}
+
+/// `mlock(ptr, len)`—Lock memory into RAM.
+///
+/// # Safety
+///
+/// This function operates on raw pointers, but it should only be used on
+/// memory which the caller owns. Technically, locking memory shouldn't violate
+/// any invariants, but since unlocking it can violate invariants, this
+/// function is also unsafe for symmetry.
+///
+/// Some implementations implicitly round the memory region out to the nearest
+/// page boundaries, so this function may lock more memory than explicitly
+/// requested if the memory isn't page-aligned.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mlock.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/mlock.2.html
+#[inline]
+pub unsafe fn mlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
+    imp::syscalls::mlock(ptr, len)
+}
+
+/// `mlock2(ptr, len, flags)`—Lock memory into RAM, with
+/// flags.
+///
+/// `mlock_with` is the same as `mlock` but adds an additional flags operand.
+///
+/// # Safety
+///
+/// This function operates on raw pointers, but it should only be used on
+/// memory which the caller owns. Technically, locking memory shouldn't violate
+/// any invariants, but since unlocking it can violate invariants, this
+/// function is also unsafe for symmetry.
+///
+/// Some implementations implicitly round the memory region out to the nearest
+/// page boundaries, so this function may lock more memory than explicitly
+/// requested if the memory isn't page-aligned.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/mlock2.2.html
+#[inline]
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[doc(alias = "mlock2")]
+pub unsafe fn mlock_with(ptr: *mut c_void, len: usize, flags: MlockFlags) -> io::Result<()> {
+    imp::syscalls::mlock_with(ptr, len, flags)
+}
+
+/// `munlock(ptr, len)`—Unlock memory.
+///
+/// # Safety
+///
+/// This function operates on raw pointers, but it should only be used on
+/// memory which the caller owns, to avoid compromising the `mlock` invariants
+/// of other unrelated code in the process.
+///
+/// Some implementations implicitly round the memory region out to the nearest
+/// page boundaries, so this function may unlock more memory than explicitly
+/// requested if the memory isn't page-aligned.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/munlock.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/munlock.2.html
+#[inline]
+pub unsafe fn munlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
+    imp::syscalls::munlock(ptr, len)
 }
