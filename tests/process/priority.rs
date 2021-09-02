@@ -2,6 +2,7 @@ use rsix::process::nice;
 #[cfg(not(target_os = "redox"))]
 use rsix::process::{getpriority_process, setpriority_process, Pid};
 
+#[cfg(not(target_os = "freebsd"))] // FreeBSD's nice(3) doesn't return the old value.
 #[test]
 fn test_priorities() {
     let old = nice(0).unwrap();
@@ -35,4 +36,37 @@ fn test_priorities() {
             assert_eq!(now, again);
         }
     }
+}
+
+/// FreeBSD's `nice` doesn't return the new nice value, so use a specialized
+/// test.
+#[cfg(target_os = "freebsd")]
+#[test]
+fn test_priorities() {
+    let start = getpriority_process(Pid::NONE).unwrap();
+
+    let _ = nice(0).unwrap();
+
+    let now = getpriority_process(Pid::NONE).unwrap();
+    assert_eq!(start, now);
+
+    let _ = nice(1).unwrap();
+
+    let now = getpriority_process(Pid::NONE).unwrap();
+    assert_eq!(start + 1, now);
+
+    setpriority_process(Pid::NONE, start + 2).unwrap();
+
+    let now = getpriority_process(Pid::NONE).unwrap();
+    assert_eq!(start + 2, now);
+
+    setpriority_process(Pid::NONE, 10000).unwrap();
+
+    let now = getpriority_process(Pid::NONE).unwrap();
+    assert_eq!(now, 20);
+
+    let _ = nice(1).unwrap();
+
+    let now = getpriority_process(Pid::NONE).unwrap();
+    assert_eq!(now, 20);
 }
