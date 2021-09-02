@@ -2093,3 +2093,87 @@ pub(crate) fn uname() -> RawUname {
         uname.assume_init()
     }
 }
+
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+#[inline]
+pub(crate) fn nice(inc: i32) -> io::Result<i32> {
+    errno::set_errno(errno::Errno(0));
+    let r = unsafe { libc::nice(inc) };
+    if errno::errno().0 != 0 {
+        ret_c_int(r)
+    } else {
+        Ok(r)
+    }
+}
+
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[inline]
+pub(crate) fn getpriority_user(uid: Uid) -> io::Result<i32> {
+    errno::set_errno(errno::Errno(0));
+    let r = unsafe { libc::getpriority(libc::PRIO_USER, uid.as_raw() as _) };
+    if errno::errno().0 != 0 {
+        ret_c_int(r)
+    } else {
+        Ok(r)
+    }
+}
+
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[inline]
+pub(crate) fn getpriority_pgrp(pgid: Pid) -> io::Result<i32> {
+    errno::set_errno(errno::Errno(0));
+    let r = unsafe { libc::getpriority(libc::PRIO_PGRP, pgid.as_raw() as _) };
+    if errno::errno().0 != 0 {
+        ret_c_int(r)
+    } else {
+        Ok(r)
+    }
+}
+
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[inline]
+pub(crate) fn getpriority_process(pid: Pid) -> io::Result<i32> {
+    errno::set_errno(errno::Errno(0));
+    let r = unsafe { libc::getpriority(libc::PRIO_PROCESS, pid.as_raw() as _) };
+    if errno::errno().0 != 0 {
+        ret_c_int(r)
+    } else {
+        Ok(r)
+    }
+}
+
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[inline]
+pub(crate) fn setpriority_user(uid: Uid, priority: i32) -> io::Result<()> {
+    unsafe {
+        ret(libc::setpriority(
+            libc::PRIO_USER,
+            uid.as_raw() as _,
+            priority,
+        ))
+    }
+}
+
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[inline]
+pub(crate) fn setpriority_pgrp(pgid: Pid, priority: i32) -> io::Result<()> {
+    unsafe {
+        ret(libc::setpriority(
+            libc::PRIO_PGRP,
+            pgid.as_raw() as _,
+            priority,
+        ))
+    }
+}
+
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[inline]
+pub(crate) fn setpriority_process(pid: Pid, priority: i32) -> io::Result<()> {
+    unsafe {
+        ret(libc::setpriority(
+            libc::PRIO_PROCESS,
+            pid.as_raw() as _,
+            priority,
+        ))
+    }
+}

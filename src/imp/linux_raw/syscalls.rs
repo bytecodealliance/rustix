@@ -70,13 +70,13 @@ use linux_raw_sys::general::{
     __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
     __NR_epoll_create1, __NR_epoll_ctl, __NR_exit_group, __NR_faccessat, __NR_fallocate,
     __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_flock, __NR_fsync, __NR_getcwd,
-    __NR_getdents64, __NR_getpid, __NR_getppid, __NR_gettid, __NR_ioctl, __NR_linkat, __NR_madvise,
-    __NR_mkdirat, __NR_mknodat, __NR_mlock, __NR_mprotect, __NR_munlock, __NR_munmap,
-    __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_pread64, __NR_preadv, __NR_pwrite64,
-    __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv, __NR_sched_yield, __NR_symlinkat,
-    __NR_uname, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev, __kernel_gid_t,
-    __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event, sockaddr, sockaddr_in,
-    sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW,
+    __NR_getdents64, __NR_getpid, __NR_getppid, __NR_getpriority, __NR_gettid, __NR_ioctl,
+    __NR_linkat, __NR_madvise, __NR_mkdirat, __NR_mknodat, __NR_mlock, __NR_mprotect, __NR_munlock,
+    __NR_munmap, __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_pread64, __NR_preadv, __NR_pwrite64,
+    __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv, __NR_sched_yield, __NR_setpriority,
+    __NR_symlinkat, __NR_uname, __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev,
+    __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event, sockaddr,
+    sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW,
     EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC,
     F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL, TCGETS, TIMER_ABSTIME,
     TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
@@ -3097,5 +3097,89 @@ pub(crate) fn uname() -> RawUname {
     unsafe {
         ret(syscall1(nr(__NR_uname), out(&mut uname))).unwrap();
         uname.assume_init()
+    }
+}
+
+#[inline]
+pub(crate) fn nice(inc: i32) -> io::Result<i32> {
+    let priority = if inc > -40 && inc < 40 {
+        inc + getpriority_process(Pid::NONE)?
+    } else {
+        inc
+    }
+    .clamp(-20, 19);
+    setpriority_process(Pid::NONE, priority)?;
+    Ok(priority)
+}
+
+#[inline]
+pub(crate) fn getpriority_user(uid: Uid) -> io::Result<i32> {
+    unsafe {
+        Ok(20
+            - ret_c_int(syscall2(
+                nr(__NR_getpriority),
+                c_uint(linux_raw_sys::general::PRIO_USER),
+                c_uint(uid.as_raw()),
+            ))?)
+    }
+}
+
+#[inline]
+pub(crate) fn getpriority_pgrp(pgid: Pid) -> io::Result<i32> {
+    unsafe {
+        Ok(20
+            - ret_c_int(syscall2(
+                nr(__NR_getpriority),
+                c_uint(linux_raw_sys::general::PRIO_PGRP),
+                c_uint(pgid.as_raw()),
+            ))?)
+    }
+}
+
+#[inline]
+pub(crate) fn getpriority_process(pid: Pid) -> io::Result<i32> {
+    unsafe {
+        Ok(20
+            - ret_c_int(syscall2(
+                nr(__NR_getpriority),
+                c_uint(linux_raw_sys::general::PRIO_PROCESS),
+                c_uint(pid.as_raw()),
+            ))?)
+    }
+}
+
+#[inline]
+pub(crate) fn setpriority_user(uid: Uid, priority: i32) -> io::Result<()> {
+    unsafe {
+        ret(syscall3(
+            nr(__NR_setpriority),
+            c_uint(linux_raw_sys::general::PRIO_USER),
+            c_uint(uid.as_raw()),
+            c_int(priority),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn setpriority_pgrp(pgid: Pid, priority: i32) -> io::Result<()> {
+    unsafe {
+        ret(syscall3(
+            nr(__NR_setpriority),
+            c_uint(linux_raw_sys::general::PRIO_PGRP),
+            c_uint(pgid.as_raw()),
+            c_int(priority),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn setpriority_process(pid: Pid, priority: i32) -> io::Result<()> {
+    unsafe {
+        ret(syscall3(
+            nr(__NR_setpriority),
+            c_uint(linux_raw_sys::general::PRIO_PROCESS),
+            c_uint(pid.as_raw()),
+            c_int(priority),
+        ))
     }
 }

@@ -5,6 +5,8 @@ use crate::imp;
 mod auxv;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))] // WASI doesn't have [gs]etpriority.
+mod priority;
 mod sched;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.
 mod uname;
@@ -15,6 +17,13 @@ pub use auxv::page_size;
 #[cfg(not(target_os = "wasi"))]
 pub use id::{
     getegid, geteuid, getgid, getpid, getppid, getuid, Gid, Pid, RawGid, RawPid, RawUid, Uid,
+};
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+pub use priority::nice;
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+pub use priority::{
+    getpriority_pgrp, getpriority_process, getpriority_user, setpriority_pgrp, setpriority_process,
+    setpriority_user,
 };
 pub use sched::sched_yield;
 #[cfg(not(target_os = "wasi"))]
