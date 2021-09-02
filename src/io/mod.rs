@@ -13,7 +13,7 @@ pub(crate) use std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 
 mod close;
 mod error;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 mod eventfd;
 mod fd;
 mod ioctl;
@@ -29,12 +29,12 @@ mod poll;
 mod procfs;
 mod read_write;
 mod stdio;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 mod userfaultfd;
 
 pub use close::close;
 pub use error::{Error, Result};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use eventfd::{eventfd, EventfdFlags};
 #[cfg(not(target_os = "redox"))]
 pub use fd::ioctl_fionread;
@@ -45,7 +45,7 @@ pub use fd::isatty;
 pub use fd::ttyname;
 #[cfg(not(target_os = "wasi"))]
 pub use fd::{dup, dup2, dup2_with, DupFlags};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use imp::io::epoll;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use ioctl::ioctl_fioclex;
@@ -60,7 +60,11 @@ pub use ioctl::{ioctl_tiocexcl, ioctl_tiocnxcl};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub use madvise::{madvise, Advice};
 #[cfg(not(target_os = "wasi"))]
-pub use mmap::{mmap, mmap_anonymous, mprotect, munmap, MapFlags, MprotectFlags, ProtFlags};
+pub use mmap::{
+    mlock, mmap, mmap_anonymous, mprotect, munlock, munmap, MapFlags, MprotectFlags, ProtFlags,
+};
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+pub use mmap::{mlock_with, MlockFlags};
 pub use owned_fd::OwnedFd;
 #[cfg(not(target_os = "wasi"))]
 pub use pipe::pipe;

@@ -18,7 +18,7 @@ pub use types::PIPE_BUF;
 #[cfg(not(target_os = "wasi"))]
 pub use types::{DupFlags, MapFlags, MprotectFlags, ProtFlags, Tcflag, Termios, Winsize, ICANON};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use types::{EventfdFlags, ReadWriteFlags, UserfaultfdFlags};
+pub use types::{EventfdFlags, MlockFlags, ReadWriteFlags, UserfaultfdFlags};
 
 use std::os::raw::c_int;
 
