@@ -699,6 +699,14 @@ pub(crate) fn fadvise(
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn madvise(addr: *mut c_void, len: usize, advice: IoAdvice) -> io::Result<()> {
+    // On Linux platforms, `MADV_DONTNEED` has the same value as
+    // `POSIX_MADV_DONTNEED` but different behavior. We remap it to a different
+    // value, and check for it here.
+    #[cfg(target_os = "linux")]
+    if let IoAdvice::LinuxDontNeed = advice {
+        return unsafe { ret(libc::madvise(addr, len, libc::MADV_DONTNEED)) };
+    }
+
     #[cfg(not(target_os = "android"))]
     {
         let err = unsafe { libc::posix_madvise(addr, len, advice as libc::c_int) };
@@ -713,7 +721,13 @@ pub(crate) fn madvise(addr: *mut c_void, len: usize, advice: IoAdvice) -> io::Re
 
     #[cfg(target_os = "android")]
     {
-        unsafe { ret(libc::madvise(addr, len, advice as libc::c_int)) }
+        if let IoAdvice::DontNeed = advice {
+            // Do nothing. Linux's `MADV_DONTNEED` isn't the same as
+            // `POSIX_MADV_DONTNEED`, so just discard `MADV_DONTNEED`.
+            Ok(())
+        } else {
+            unsafe { ret(libc::madvise(addr, len, advice as libc::c_int)) }
+        }
     }
 }
 

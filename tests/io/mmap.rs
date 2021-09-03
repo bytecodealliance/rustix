@@ -124,3 +124,21 @@ fn test_mlock() {
         munmap(addr, 8192).unwrap();
     }
 }
+
+#[test]
+fn test_madvise() {
+    use rsix::io::{madvise, mmap_anonymous, munmap, Advice, MapFlags, ProtFlags};
+    use std::ptr::null_mut;
+
+    unsafe {
+        let addr = mmap_anonymous(null_mut(), 8192, ProtFlags::READ, MapFlags::PRIVATE).unwrap();
+
+        madvise(addr, 8192, Advice::Normal).unwrap();
+        madvise(addr, 8192, Advice::DontNeed).unwrap();
+
+        #[cfg(any(target_os = "android", target_os = "linux"))]
+        madvise(addr, 8192, Advice::LinuxDontNeed).unwrap();
+
+        munmap(addr, 8192).unwrap();
+    }
+}

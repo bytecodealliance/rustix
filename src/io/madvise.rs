@@ -11,8 +11,8 @@ use std::ffi::c_void;
 
 pub use imp::io::Advice;
 
-/// `posix_madvise(addr, len, advice)`—Declares an expected access
-/// pattern for a memory-mapped file.
+/// `posix_madvise(addr, len, advice)`—Declares an expected access pattern
+/// for a memory-mapped file.
 ///
 /// # Safety
 ///

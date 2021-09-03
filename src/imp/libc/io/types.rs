@@ -294,9 +294,6 @@ bitflags! {
 
 /// `POSIX_MADV_*` constants for use with [`madvise`].
 ///
-/// Note that there is no `LinuxDontNeed` in the libc configuration because
-/// `libc` implementations don't provide a way to access it.
-///
 /// [`madvise`]: crate::io::madvise
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -340,8 +337,18 @@ pub enum Advice {
 
     /// `POSIX_MADV_DONTNEED`
     #[cfg(target_os = "android")]
-    DontNeed = libc::MADV_DONTNEED,
+    DontNeed = i32::MAX - 1,
 
+    /// `MADV_DONTNEED`
+    // `MADV_DONTNEED` has the same value as `POSIX_MADV_DONTNEED`. We don't
+    // have a separate `posix_madvise` from `madvise`, so we expose a special
+    // value which we special-case.
+    #[cfg(target_os = "linux")]
+    LinuxDontNeed = i32::MAX,
+
+    /// `MADV_DONTNEED`
+    #[cfg(target_os = "android")]
+    LinuxDontNeed = libc::MADV_DONTNEED,
     /// `MADV_FREE`
     #[cfg(any(target_os = "android", target_os = "linux"))]
     LinuxFree = libc::MADV_FREE,
