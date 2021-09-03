@@ -12,7 +12,7 @@ fn openat2_more<Fd: AsFd, P: path::Arg>(
     mode: Mode,
     resolve: ResolveFlags,
 ) -> io::Result<OwnedFd> {
-    let path = path.as_c_str().unwrap().into_owned();
+    let path = path.as_cow_c_str().unwrap().into_owned();
     loop {
         match openat2(dirfd, &path, oflags, mode, resolve) {
             Ok(file) => return Ok(file),

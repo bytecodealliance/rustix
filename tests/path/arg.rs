@@ -13,7 +13,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
     #[cfg(not(windows))]
@@ -28,7 +28,7 @@ fn test_arg() {
     assert_eq!("hello", Arg::as_str(&t).unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(
         cstr!("hello"),
@@ -46,7 +46,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
     #[cfg(not(windows))]
@@ -61,7 +61,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(
         cstr!("hello"),
@@ -79,7 +79,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
     #[cfg(not(windows))]
@@ -94,7 +94,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(
         cstr!("hello"),
@@ -112,7 +112,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
     #[cfg(not(windows))]
@@ -127,7 +127,10 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&Arg::as_c_str(&t).unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::borrow(&Arg::as_cow_c_str(&t).unwrap())
+    );
     #[cfg(not(windows))]
     assert_eq!(
         cstr!("hello"),
@@ -145,7 +148,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(
         cstr!("hello"),
@@ -163,7 +166,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
     #[cfg(not(windows))]
@@ -178,7 +181,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(
         cstr!("hello"),
@@ -196,7 +199,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(
         cstr!("hello"),
@@ -214,7 +217,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(
         cstr!("hello"),
@@ -232,7 +235,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(
         cstr!("hello"),
@@ -250,7 +253,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(
         cstr!("hello"),
@@ -268,7 +271,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(
         cstr!("hello"),
@@ -286,7 +289,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(
         cstr!("hello"),
@@ -304,7 +307,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
     #[cfg(not(windows))]
@@ -319,7 +322,7 @@ fn test_arg() {
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     #[cfg(not(windows))]
     assert_eq!(
         cstr!("hello"),
@@ -337,7 +340,8 @@ fn test_arg() {
     assert_eq!("43110", t.as_str().unwrap());
     assert_eq!("43110".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(cstr!("43110"), Borrow::borrow(&t.as_c_str().unwrap()));
+    assert_eq!(cstr!("43110"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
+    assert_eq!(cstr!("43110"), t.as_c_str());
     #[cfg(not(windows))]
     assert_eq!(
         cstr!("43110"),
@@ -363,7 +367,7 @@ fn test_invalid() {
     #[cfg(not(windows))]
     assert_eq!(
         cstr!(b"hello\xc0world"),
-        Borrow::borrow(&t.as_c_str().unwrap())
+        Borrow::borrow(&t.as_cow_c_str().unwrap())
     );
     #[cfg(not(windows))]
     assert_eq!(
@@ -388,7 +392,7 @@ fn test_embedded_nul() {
     assert_eq!("hello\0world", t.as_str().unwrap());
     assert_eq!("hello\0world".to_owned(), Arg::to_string_lossy(&t));
     #[cfg(not(windows))]
-    assert_eq!(t.as_c_str().unwrap_err(), io::Error::INVAL);
+    assert_eq!(t.as_cow_c_str().unwrap_err(), io::Error::INVAL);
     #[cfg(not(windows))]
     assert_eq!(t.clone().into_c_str().unwrap_err(), io::Error::INVAL);
     #[cfg(not(windows))]

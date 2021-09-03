@@ -1,7 +1,13 @@
+//! # Safety
+//!
+//! This uses `CStr::from_bytes_with_nul_unchecked` on the buffer that
+//! it filled itself.
+#![allow(unsafe_code)]
+
 use crate::io::AsRawFd;
 use io_lifetimes::AsFd;
 use itoa::{fmt, Integer};
-use std::ffi::OsStr;
+use std::ffi::{CStr, OsStr};
 use std::ops::Deref;
 #[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
@@ -26,7 +32,9 @@ use std::path::Path;
 /// ```
 #[derive(Clone)]
 pub struct DecInt {
-    buf: [u8; 20],
+    // 20 `u8`s is enough to hold the decimal ASCII representation of any
+    // `u64`, and we add one for a NUL terminator for `as_c_str`.
+    buf: [u8; 20 + 1],
     len: usize,
 }
 
@@ -35,7 +43,7 @@ impl DecInt {
     #[inline]
     pub fn new<Int: Integer>(i: Int) -> Self {
         let mut me = DecIntWriter(Self {
-            buf: [0; 20],
+            buf: [0; 20 + 1],
             len: 0,
         });
         fmt(&mut me, i).unwrap();
@@ -52,6 +60,16 @@ impl DecInt {
     #[inline]
     pub fn as_bytes(&self) -> &[u8] {
         &self.buf[..self.len]
+    }
+
+    /// Return the raw byte buffer.
+    #[inline]
+    pub fn as_c_str(&self) -> &CStr {
+        let bytes_with_nul = &self.buf[..self.len + 1];
+        debug_assert!(CStr::from_bytes_with_nul(bytes_with_nul).is_ok());
+        // Safety: `self.buf` holds a single decimal ASCII representation and
+        // at least one extra NUL byte.
+        unsafe { CStr::from_bytes_with_nul_unchecked(bytes_with_nul) }
     }
 }
 

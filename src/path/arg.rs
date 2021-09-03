@@ -49,7 +49,7 @@ pub trait Arg {
 
     /// Returns a view of this string as a maybe-owned [`CStr`].
     #[cfg(not(windows))]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>>;
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>>;
 
     /// Consumes `self` and returns a view of this string as a maybe-owned
     /// [`CStr`].
@@ -87,7 +87,7 @@ impl Arg for &str {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -140,7 +140,7 @@ impl Arg for &String {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(String::as_str(self).as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -191,7 +191,7 @@ impl Arg for String {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -244,7 +244,7 @@ impl Arg for &OsStr {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -297,7 +297,7 @@ impl Arg for &OsString {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(OsString::as_os_str(self).as_bytes())
                 .map_err(|_cstr_err| io::Error::INVAL)?,
@@ -349,7 +349,7 @@ impl Arg for OsString {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -402,7 +402,7 @@ impl Arg for &Path {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -458,7 +458,7 @@ impl Arg for &PathBuf {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(PathBuf::as_path(self).as_os_str().as_bytes())
                 .map_err(|_cstr_err| io::Error::INVAL)?,
@@ -510,7 +510,7 @@ impl Arg for PathBuf {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -566,7 +566,7 @@ impl Arg for &CStr {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Borrowed(self))
     }
 
@@ -616,7 +616,7 @@ impl Arg for &CString {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Borrowed(CString::as_c_str(self)))
     }
 
@@ -664,7 +664,7 @@ impl Arg for CString {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Borrowed(self))
     }
 
@@ -712,7 +712,7 @@ impl<'a> Arg for Cow<'a, str> {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_ref()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -768,7 +768,7 @@ impl<'a> Arg for Cow<'a, OsStr> {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -825,7 +825,7 @@ impl<'a> Arg for Cow<'a, CStr> {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Borrowed(self))
     }
 
@@ -873,7 +873,7 @@ impl<'a> Arg for Component<'a> {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -926,7 +926,7 @@ impl<'a> Arg for Components<'a> {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_path().as_os_str().as_bytes())
                 .map_err(|_cstr_err| io::Error::INVAL)?,
@@ -981,7 +981,7 @@ impl<'a> Arg for Iter<'a> {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_path().as_os_str().as_bytes())
                 .map_err(|_cstr_err| io::Error::INVAL)?,
@@ -1036,7 +1036,7 @@ impl Arg for &[u8] {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(*self).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -1089,7 +1089,7 @@ impl Arg for &Vec<u8> {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_slice()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -1142,7 +1142,7 @@ impl Arg for Vec<u8> {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_slice()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -1195,7 +1195,7 @@ impl Arg for DecInt {
 
     #[cfg(not(windows))]
     #[inline]
-    fn as_c_str(&self) -> io::Result<Cow<CStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
             CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -1231,7 +1231,7 @@ impl Arg for DecInt {
         Self: Sized,
         F: FnOnce(&CStr) -> io::Result<T>,
     {
-        with_c_str(self.as_os_str().as_bytes(), f)
+        f(self.as_c_str())
     }
 }
 
