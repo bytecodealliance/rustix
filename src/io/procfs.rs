@@ -9,8 +9,6 @@
 use crate::fs::{
     cwd, fstat, fstatfs, major, openat, renameat, Mode, OFlags, Stat, PROC_SUPER_MAGIC,
 };
-#[cfg(linux_raw)]
-use crate::fs::{Dir, FileType};
 use crate::io::{self, OwnedFd};
 use crate::path::DecInt;
 use crate::process::{getgid, getpid, getuid, Gid, RawGid, RawUid, Uid};
@@ -26,8 +24,6 @@ enum Kind {
     Proc,
     Pid,
     Fd,
-    #[cfg(linux_raw)]
-    File,
 }
 
 /// Check a subdirectory of "/proc" for anomalies.
@@ -57,8 +53,6 @@ fn check_proc_entry_with_stat(
     match kind {
         Kind::Proc => check_proc_root(entry, &entry_stat)?,
         Kind::Pid | Kind::Fd => check_proc_subdir(entry, &entry_stat, proc_stat)?,
-        #[cfg(linux_raw)]
-        Kind::File => check_proc_file(&entry_stat, proc_stat)?,
     }
 
     // Check the ownership of the directory.
@@ -85,14 +79,6 @@ fn check_proc_entry_with_stat(
         Kind::Pid | Kind::Proc => {
             // Check that the "/proc" and "/proc/self" directories aren't empty.
             if entry_stat.st_nlink <= 2 {
-                return Err(io::Error::NOTSUP);
-            }
-        }
-        #[cfg(linux_raw)]
-        Kind::File => {
-            // Check that files in procfs don't have extraneous hard links to
-            // them (which might indicate hard links to other things).
-            if entry_stat.st_nlink != 1 {
                 return Err(io::Error::NOTSUP);
             }
         }
@@ -144,18 +130,6 @@ fn check_proc_subdir(
     Ok(())
 }
 
-#[cfg(linux_raw)]
-fn check_proc_file(stat: &Stat, proc_stat: Option<&Stat>) -> io::Result<()> {
-    // Check that we have a regular file.
-    if stat.st_mode & Mode::IFMT.bits() != Mode::IFREG.bits() {
-        return Err(io::Error::NOTSUP);
-    }
-
-    check_proc_nonroot(stat, proc_stat)?;
-
-    Ok(())
-}
-
 fn check_proc_nonroot(stat: &Stat, proc_stat: Option<&Stat>) -> io::Result<()> {
     // Check that we haven't been linked back to the root of "/proc".
     if stat.st_ino == PROC_ROOT_INO {
@@ -202,7 +176,7 @@ fn is_mountpoint(file: BorrowedFd<'_>) -> bool {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
-pub fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
+fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     static PROC: OnceCell<(OwnedFd, Stat)> = OnceCell::new();
 
     PROC.get_or_try_init(|| {
@@ -239,7 +213,7 @@ pub fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
-pub fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
+fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     static PROC_SELF: OnceCell<(OwnedFd, Stat)> = OnceCell::new();
 
     PROC_SELF
@@ -275,15 +249,14 @@ pub fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 /// Returns a handle to Linux's `/proc/self/fd` directory.
 ///
 /// This ensures that `/proc/self/fd` is `procfs`, that nothing is mounted on
-/// top of it, and that it looks normal. It also returns the `Stat` of
-/// `/proc/self/fd`.
+/// top of it, and that it looks normal.
 ///
 /// # References
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
-pub fn proc_self_fd() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
-    static PROC_SELF_FD: OnceCell<(OwnedFd, Stat)> = OnceCell::new();
+pub fn proc_self_fd() -> io::Result<BorrowedFd<'static>> {
+    static PROC_SELF_FD: OnceCell<OwnedFd> = OnceCell::new();
 
     PROC_SELF_FD
         .get_or_try_init(|| {
@@ -300,7 +273,7 @@ pub fn proc_self_fd() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
             // Open "/proc/self/fd".
             let proc_self_fd = openat(&proc_self, cstr!("fd"), oflags, Mode::empty())
                 .map_err(|_err| io::Error::NOTSUP)?;
-            let proc_self_fd_stat = check_proc_entry(
+            let _proc_self_fd_stat = check_proc_entry(
                 Kind::Fd,
                 proc_self_fd.as_fd(),
                 Some(proc_stat),
@@ -309,76 +282,7 @@ pub fn proc_self_fd() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
             )
             .map_err(|_err| io::Error::NOTSUP)?;
 
-            Ok((proc_self_fd, proc_self_fd_stat))
+            Ok(proc_self_fd)
         })
-        .map(|(owned, stat)| (owned.as_fd(), stat))
-}
-
-/// Returns a handle to Linux's `/proc/self/auxv` file.
-///
-/// This ensures that `/proc/self/auxv` is `procfs`, that nothing is mounted on
-/// top of it, and that it looks normal.
-///
-/// # References
-///  - [Linux]
-///
-/// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
-#[cfg(linux_raw)]
-pub(crate) fn proc_self_auxv() -> io::Result<OwnedFd> {
-    let (_, proc_stat) = proc()?;
-    let (proc_self, proc_self_stat) = proc_self()?;
-
-    let oflags =
-        OFlags::RDONLY | OFlags::CLOEXEC | OFlags::NOFOLLOW | OFlags::NOCTTY | OFlags::NOATIME;
-    let auxv = openat(&proc_self, cstr!("auxv"), oflags, Mode::empty())
-        .map_err(|_err| io::Error::NOTSUP)?;
-    let auxv_stat = fstat(&auxv)?;
-
-    // Open a copy of the `proc_self` handle so that we can read from it
-    // without modifying the current position of the original handle.
-    let dot = openat(
-        &proc_self,
-        cstr!("."),
-        oflags | OFlags::DIRECTORY,
-        Mode::empty(),
-    )
-    .map_err(|_err| io::Error::NOTSUP)?;
-
-    // Confirm that we got the same inode.
-    let dot_stat = fstat(&dot).map_err(|_err| io::Error::NOTSUP)?;
-    if (dot_stat.st_dev, dot_stat.st_ino) != (proc_self_stat.st_dev, proc_self_stat.st_ino) {
-        return Err(io::Error::NOTSUP);
-    }
-
-    // `is_mountpoint` only works on directory mount points, not file mount
-    // points. To detect file mount points, scan the parent directory to see
-    // if we can find a file with an inode that matches the file we just
-    // opened. If we can't find it, there could be a file mount on top of
-    // "auxv".
-    let dir = Dir::from_into_fd(dot).map_err(|_err| io::Error::NOTSUP)?;
-    for entry in dir {
-        let entry = entry.map_err(|_err| io::Error::NOTSUP)?;
-        if entry.ino() == auxv_stat.st_ino {
-            if entry.file_type() != FileType::RegularFile {
-                return Err(io::Error::NOTSUP);
-            }
-            if entry.file_name() != cstr!("auxv") {
-                return Err(io::Error::NOTSUP);
-            }
-
-            // Ok, we found it. Proceed to check the "auxv" handle and succeed.
-            let _ = check_proc_entry_with_stat(
-                Kind::File,
-                auxv.as_fd(),
-                auxv_stat,
-                Some(proc_stat),
-                proc_self_stat.st_uid,
-                proc_self_stat.st_gid,
-            )?;
-
-            return Ok(auxv);
-        }
-    }
-
-    Err(io::Error::NOTSUP)
+        .map(OwnedFd::as_fd)
 }

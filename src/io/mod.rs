@@ -72,7 +72,7 @@ pub use pipe::pipe;
 pub use pipe::{pipe_with, PipeFlags};
 pub use poll::{PollFd, PollFdVec, PollFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use procfs::{proc, proc_self, proc_self_fd};
+pub use procfs::proc_self_fd;
 pub use read_write::{pread, pwrite, read, readv, write, writev};
 #[cfg(not(target_os = "redox"))]
 pub use read_write::{preadv, pwritev};
@@ -81,9 +81,6 @@ pub use read_write::{preadv2, pwritev2, ReadWriteFlags};
 pub use stdio::{stderr, stdin, stdout, take_stderr, take_stdin, take_stdout};
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use userfaultfd::{userfaultfd, UserfaultfdFlags};
-
-#[cfg(all(linux_raw, any(target_os = "android", target_os = "linux")))]
-pub(crate) use procfs::proc_self_auxv;
 
 #[cfg(any(linux_raw, not(target_os = "wasi")))]
 pub use imp::io::Termios;
