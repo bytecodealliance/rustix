@@ -44,6 +44,7 @@ use super::fs::{Statx, StatxFlags};
 use super::io::Advice as IoAdvice;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::io::MlockFlags;
+use super::io::MlockallFlags;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 use super::io::PipeFlags;
 use super::io::PollFd;
@@ -1333,12 +1334,29 @@ pub(crate) unsafe fn mlock_with(
 
 /// # Safety
 ///
+/// MT-Safe | AS-Safe | AC-Safe 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub(crate) unsafe fn mlockall(
+    flags: MlockallFlags,
+) -> io::Result<()> {
+    ret(libc::mlockall(flags.bits()))
+}
+
+/// # Safety
+///
 /// `munlock` operates on raw pointers and may round out to the nearest page
 /// boundaries.
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) unsafe fn munlock(addr: *mut c_void, length: usize) -> io::Result<()> {
     ret(libc::munlock(addr, length))
+}
+
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub(crate) unsafe fn munlockall() -> io::Result<()> {
+    ret(libc::munlockall())
 }
 
 #[cfg(not(target_os = "wasi"))]

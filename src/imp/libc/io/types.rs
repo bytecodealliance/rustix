@@ -248,6 +248,26 @@ bitflags! {
     }
 }
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    /// `MCL_*` flags for use with [`mlockall`].
+    ///
+    /// [`mlockall`]: crate::io::mlockall
+    pub struct MlockallFlags: i32 {
+        // libc doesn't define `MCL_ONFAULT` yet.
+        // const ONFAULT = libc::MCL_ONFAULT;
+        /// Lock all pages which will become mapped into the address
+        /// space of the process in the future.  These could be, for
+        /// instance, new pages required by a growing heap and stack
+        /// as well as new memory-mapped files or shared memory
+        /// regions.
+        const FUTURE = libc::MCL_FUTURE;
+        /// Lock all pages which are currently mapped into the address
+        /// space of the process.
+        const CURRENT = libc::MCL_CURRENT;
+    }
+}
+
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 bitflags! {
     /// `O_*` constants for use with [`pipe_with`].
