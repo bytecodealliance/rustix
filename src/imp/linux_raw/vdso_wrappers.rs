@@ -242,16 +242,6 @@ fn init_syscall() -> SyscallType {
     unsafe { transmute(SYSCALL.load(Relaxed)) }
 }
 
-/// Initialization to perform before we attempt to open /proc/self/auxv.
-#[inline]
-pub(super) fn init_before_auxv() {
-    // On x86, we need to ensure that `SYSCALL` is minimally initialized before
-    // entering the code for /proc/self/auxv, because otherwise opening
-    // /proc/self/auxv will attempt to reenter the initialization of `SYSCALL`.
-    #[cfg(target_arch = "x86")]
-    minimal_init();
-}
-
 static mut CLOCK_GETTIME: AtomicUsize = AtomicUsize::new(0);
 #[cfg(target_arch = "x86")]
 static mut SYSCALL: AtomicUsize = AtomicUsize::new(0);
