@@ -139,7 +139,7 @@ pub(crate) unsafe fn decode_sockaddr(storage: *const sockaddr_storage, len: u32)
                 let decode = *storage.cast::<libc::sockaddr_un>();
                 assert_eq!(
                     decode.sun_path[len as usize - 1 - offsetof_sun_path],
-                    b'\0' as std::os::raw::c_char
+                    b'\0' as libc::c_char
                 );
                 let path_bytes = &decode.sun_path[..len as usize - 1 - offsetof_sun_path];
 

@@ -63,11 +63,11 @@ use crate::io;
 use crate::io::{AsRawFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd};
+use libc::c_int;
 use std::convert::TryInto;
 use std::fmt;
 use std::marker::PhantomData;
 use std::ops::Deref;
-use std::os::raw::c_int;
 use std::ptr::{null, null_mut};
 
 bitflags! {

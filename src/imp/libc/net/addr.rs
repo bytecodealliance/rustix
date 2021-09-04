@@ -457,9 +457,9 @@ impl SocketAddrUnix {
         };
         let bytes = self.path.as_bytes();
         for (i, b) in bytes.iter().enumerate() {
-            encoded.sun_path[i] = *b as std::os::raw::c_char;
+            encoded.sun_path[i] = *b as libc::c_char;
         }
-        encoded.sun_path[bytes.len()] = b'\0' as std::os::raw::c_char;
+        encoded.sun_path[bytes.len()] = b'\0' as libc::c_char;
         encoded
     }
 }

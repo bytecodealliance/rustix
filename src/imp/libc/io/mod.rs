@@ -20,7 +20,7 @@ pub use types::{DupFlags, MapFlags, MprotectFlags, ProtFlags, Tcflag, Termios, W
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use types::{EventfdFlags, MlockFlags, ReadWriteFlags, UserfaultfdFlags};
 
-use std::os::raw::c_int;
+use libc::c_int;
 
 #[cfg(not(target_os = "redox"))]
 pub(crate) const AT_FDCWD: c_int = libc::AT_FDCWD;

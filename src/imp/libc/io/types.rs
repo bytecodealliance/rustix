@@ -1,5 +1,5 @@
 use bitflags::bitflags;
-use std::os::raw::c_int;
+use libc::c_int;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
@@ -282,7 +282,7 @@ bitflags! {
     /// The `EFD_*` flags accepted by [`eventfd`].
     ///
     /// [`eventfd`]: crate::io::eventfd
-    pub struct EventfdFlags: std::os::raw::c_int {
+    pub struct EventfdFlags: libc::c_int {
         /// `EFD_CLOEXEC`
         const CLOEXEC = libc::EFD_CLOEXEC;
         /// `EFD_NONBLOCK`

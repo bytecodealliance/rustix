@@ -4,7 +4,7 @@
 //! `errno` value.
 
 use errno::errno;
-use std::os::raw::c_int;
+use libc::c_int;
 
 /// The error type for rsix APIs.
 ///
