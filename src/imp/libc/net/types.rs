@@ -1,5 +1,5 @@
 use bitflags::bitflags;
-use std::os::raw::c_int;
+use libc::c_int;
 
 /// `SOCK_*` constants for [`socket`].
 ///

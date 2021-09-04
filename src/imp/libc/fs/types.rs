@@ -474,7 +474,7 @@ bitflags! {
     /// `MFD_*` constants for use with [`memfd_create`].
     ///
     /// [`memfd_create`]: crate::fs::memfd_create
-    pub struct MemfdFlags: std::os::raw::c_uint {
+    pub struct MemfdFlags: libc::c_uint {
         /// `MFD_CLOEXEC`
         const CLOEXEC = libc::MFD_CLOEXEC;
 

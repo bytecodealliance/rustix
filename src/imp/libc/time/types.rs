@@ -9,7 +9,7 @@ pub type Secs = libc::time_t;
 #[cfg(all(target_arch = "x86_64", target_pointer_width = "32"))]
 pub type Nsecs = i64;
 #[cfg(not(all(target_arch = "x86_64", target_pointer_width = "32")))]
-pub type Nsecs = std::os::raw::c_long;
+pub type Nsecs = libc::c_long;
 
 /// `CLOCK_*` constants for use with [`clock_gettime`].
 ///
