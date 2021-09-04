@@ -248,7 +248,7 @@ pub(super) fn oflags<'a, Num: ArgNumber>(oflags: OFlags) -> ArgReg<'a, Num> {
 }
 
 pub(super) fn oflags_for_open_how(oflags: OFlags) -> u64 {
-    oflags_bits(oflags) as u64
+    u64::from(oflags_bits(oflags))
 }
 
 #[inline]

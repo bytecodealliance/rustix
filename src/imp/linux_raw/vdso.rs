@@ -195,13 +195,10 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
 
             dyn_ = make_pointer::<Elf_Dyn>(base.checked_add(phdr.p_offset)?)?;
             num_dyn = phdr.p_memsz / size_of::<Elf_Dyn>();
-        } else if phdr.p_type == PT_INTERP {
-            // Don't trust any ELF image that has an "interpreter", which is
-            // likely to be a user ELF image rather than the kernel vDSO.
-            return None;
-        } else if phdr.p_type == PT_GNU_RELRO {
-            // Don't trust any ELF image that uses GNU RELRO, which is likely
-            // to be a user ELF image rather than the kernel vDSO.
+        } else if phdr.p_type == PT_INTERP || phdr.p_type == PT_GNU_RELRO {
+            // Don't trust any ELF image that has an "interpreter" or that uses
+            // RELRO, which is likely to be a user ELF image rather and not the
+            // kernel vDSO.
             return None;
         }
     }
