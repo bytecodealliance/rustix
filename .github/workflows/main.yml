@@ -250,8 +250,8 @@ jobs:
       env:
         RUST_BACKTRACE: 1
 
-  test_posih_use_libc:
-    name: Test posish_use_libc
+  test_rsix_use_libc:
+    name: Test rsix_use_libc
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -285,12 +285,12 @@ jobs:
             qemu_target: riscv64-linux-user
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
-      RUSTFLAGS: --cfg posish_use_libc -D warnings
-      RUSTDOCFLAGS: --cfg posish_use_libc
-      CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg posish_use_libc
-      CARGO_TARGET_I686_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg posish_use_libc
-      CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg posish_use_libc
-      CARGO_TARGET_RISCV64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg posish_use_libc
+      RUSTFLAGS: --cfg rsix_use_libc -D warnings
+      RUSTDOCFLAGS: --cfg rsix_use_libc
+      CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rsix_use_libc
+      CARGO_TARGET_I686_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rsix_use_libc
+      CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rsix_use_libc
+      CARGO_TARGET_RISCV64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rsix_use_libc
     steps:
     - uses: actions/checkout@v2
       with:
