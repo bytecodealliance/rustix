@@ -346,6 +346,12 @@ fn max_iov() -> usize {
     16 // The minimum value required by POSIX.
 }
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub(crate) fn exit_group(code: c_int) -> ! {
+    unsafe { libc::_exit(code) }
+}
+
 pub(crate) unsafe fn close(raw_fd: RawFd) {
     let _ = libc::close(raw_fd as c_int);
 }
