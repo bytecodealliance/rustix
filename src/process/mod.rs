@@ -3,6 +3,7 @@
 use crate::imp;
 
 mod auxv;
+mod exit;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))] // WASI doesn't have [gs]etpriority.
@@ -14,6 +15,8 @@ mod uname;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use auxv::linux_hwcap;
 pub use auxv::page_size;
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+pub use exit::exit_group;
 #[cfg(not(target_os = "wasi"))]
 pub use id::{
     getegid, geteuid, getgid, getpid, getppid, getuid, Gid, Pid, RawGid, RawPid, RawUid, Uid,
