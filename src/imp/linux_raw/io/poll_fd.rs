@@ -67,3 +67,10 @@ impl<'fd> PollFd<'fd> {
         PollFlags::from_bits(self.revents).unwrap()
     }
 }
+
+impl<'fd> AsFd for PollFd<'fd> {
+    #[inline]
+    fn as_fd(&self) -> BorrowedFd<'_> {
+        self.fd.as_fd()
+    }
+}

@@ -70,7 +70,7 @@ pub use owned_fd::OwnedFd;
 pub use pipe::pipe;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 pub use pipe::{pipe_with, PipeFlags};
-pub use poll::{PollFd, PollFdVec, PollFlags};
+pub use poll::{poll, PollFd, PollFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use procfs::proc_self_fd;
 pub use read_write::{pread, pwrite, read, readv, write, writev};
