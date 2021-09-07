@@ -141,7 +141,7 @@ pub use openat2::openat2;
 #[cfg(target_os = "linux")]
 pub use sendfile::sendfile;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
-pub use statx::statx;
+pub use statx::{statx, StatxFlags};
 
 pub use imp::fs::Stat;
 
