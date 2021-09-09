@@ -43,7 +43,7 @@ stable as well as nightly Rust.
    [y2038 bug].
 
 The `libc` backend is enabled by default on all other platforms, and can be
-explicitly for any target by setting `RUSTFLAGS` to `--cfg rsix_use_libc`.
+set explicitly for any target by setting `RUSTFLAGS` to `--cfg rsix_use_libc`.
 It uses the [`libc`] crate which provides bindings to native `libc` libraries
 and is portable to many OS's.
 
