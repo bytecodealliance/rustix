@@ -69,6 +69,8 @@ static INIT_ARRAY: unsafe extern "C" fn(c_int, *mut *mut c_char, *mut *mut c_cha
 /// original environment from the kernel, so we can find the auxv array in
 /// memory after it. Use priority 99 so that we run before any normal
 /// user-defined constructor functions.
+///
+/// <https://refspecs.linuxbase.org/LSB_5.0.0/LSB-Core-generic/LSB-Core-generic/baselib---environ.html>
 #[cfg(not(target_env = "gnu"))]
 #[used]
 #[link_section = ".init_array.00099"]
