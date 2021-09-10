@@ -3,6 +3,7 @@
 
 mod dup2_to_replace_stdio;
 mod epoll;
+mod error;
 mod eventfd;
 mod isatty;
 mod mmap;

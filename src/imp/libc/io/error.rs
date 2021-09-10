@@ -713,6 +713,12 @@ impl Error {
         self.0
     }
 
+    /// Construct an `Error` from a raw OS error number.
+    #[inline]
+    pub const fn from_raw_os_error(raw: i32) -> Self {
+        Self(raw)
+    }
+
     pub(crate) fn last_os_error() -> Self {
         Self(errno().0)
     }

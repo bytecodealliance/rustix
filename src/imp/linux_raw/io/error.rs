@@ -52,6 +52,12 @@ impl Error {
         (self.0 as i16 as i32).wrapping_neg()
     }
 
+    /// Construct an `Error` from a raw OS error number.
+    #[inline]
+    pub const fn from_raw_os_error(raw: i32) -> Self {
+        Self::from_errno(raw as u32)
+    }
+
     /// Convert from a C errno value (which is positive) to an `Error`.
     const fn from_errno(raw: u32) -> Self {
         // We store error values in negated form, so that we don't have to negate
