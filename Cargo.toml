@@ -1,6 +1,6 @@
 [package]
 name = "rsix"
-version = "0.22.2"
+version = "0.22.3-alpha.0"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
     "Jakub Konka <kubkon@jakubkonka.com>",
