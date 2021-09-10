@@ -98,9 +98,10 @@ impl AsRawFd for OwnedFd {
 
 impl IntoRawFd for OwnedFd {
     #[inline]
-    fn into_raw_fd(mut self) -> RawFd {
-        // Safety: We're consume `self`, so we'll never use it again.
-        unsafe { ManuallyDrop::take(&mut self.inner) }.into_raw_fd()
+    fn into_raw_fd(self) -> RawFd {
+        let raw_fd = self.inner.as_fd().as_raw_fd();
+        forget(self);
+        raw_fd
     }
 }
 
