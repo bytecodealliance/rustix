@@ -202,7 +202,7 @@ pub fn acceptfrom<Fd: AsFd>(sockfd: &Fd) -> io::Result<(OwnedFd, SocketAddr)> {
     imp::syscalls::acceptfrom(sockfd)
 }
 
-/// `accept4(fd, &addr, &len, flags)—Accepts an incoming connection and
+/// `accept4(fd, &addr, &len, flags)`—Accepts an incoming connection and
 /// returns the peer address, with flags.
 ///
 /// Use [`accept_with`] if the peer address isn't needed.
