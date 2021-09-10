@@ -6,7 +6,7 @@
 //! file descriptor and close it ourselves.
 #![allow(unsafe_code)]
 
-use crate::io::{close, AsRawFd, FromRawFd};
+use crate::io::{close, AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(not(io_lifetimes_use_std))]
 use io_lifetimes::{FromFd, IntoFd};
@@ -86,6 +86,30 @@ impl From<OwnedFd> for io_lifetimes::OwnedFd {
     #[inline]
     fn from(fd: OwnedFd) -> Self {
         fd.into_fd()
+    }
+}
+
+impl AsRawFd for OwnedFd {
+    #[inline]
+    fn as_raw_fd(&self) -> RawFd {
+        self.inner.as_raw_fd()
+    }
+}
+
+impl IntoRawFd for OwnedFd {
+    #[inline]
+    fn into_raw_fd(mut self) -> RawFd {
+        // Safety: We're consume `self`, so we'll never use it again.
+        unsafe { ManuallyDrop::take(&mut self.inner) }.into_raw_fd()
+    }
+}
+
+impl FromRawFd for OwnedFd {
+    #[inline]
+    unsafe fn from_raw_fd(raw_fd: RawFd) -> Self {
+        Self {
+            inner: ManuallyDrop::new(io_lifetimes::OwnedFd::from_raw_fd(raw_fd)),
+        }
     }
 }
 
