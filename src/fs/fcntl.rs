@@ -1,5 +1,5 @@
 use crate::imp;
-use crate::io::{self, OwnedFd};
+use crate::io::{self, OwnedFd, RawFd};
 use imp::fs::{FdFlags, OFlags};
 use io_lifetimes::AsFd;
 
@@ -86,13 +86,14 @@ pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
     imp::syscalls::fcntl_get_seals(fd)
 }
 
-/// `fcntl(fd, F_DUPFD_CLOEXEC)`—Creates a new `OwnedFd` instance that has
-/// `O_CLOEXEC` set and that shares the same underlying [file description] as
-/// `fd`.
+/// `fcntl(fd, F_DUPFD_CLOEXEC)`—Creates a new `OwnedFd` instance, with value
+/// at least `min`, that has `O_CLOEXEC` set and that shares the same underlying
+/// [file description] as `fd`.
 ///
 /// POSIX guarantees that `F_DUPFD_CLOEXEC` will use the lowest unused file
-/// descriptor, however it is not safe in general to rely on this, as file
-/// descriptors may be unexpectedly allocated on other threads or in libraries.
+/// descriptor which is at least `min`, however it is not safe in general to rely
+/// on this, as file descriptors may be unexpectedly allocated on other threads or
+/// in libraries.
 ///
 /// # References
 ///  - [POSIX]
@@ -102,7 +103,7 @@ pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn fcntl_dupfd_cloexec<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
+pub fn fcntl_dupfd_cloexec<Fd: AsFd>(fd: &Fd, min: RawFd) -> io::Result<OwnedFd> {
     let fd = fd.as_fd();
-    imp::syscalls::fcntl_dupfd_cloexec(fd)
+    imp::syscalls::fcntl_dupfd_cloexec(fd, min)
 }
