@@ -942,41 +942,45 @@ pub(crate) fn readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, buf: &mut [u8]) -> 
 }
 
 #[inline]
-pub(crate) fn fcntl_dupfd(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
+pub(crate) fn fcntl_dupfd(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
-        ret_owned_fd(syscall2_readonly(
+        ret_owned_fd(syscall3_readonly(
             nr(__NR_fcntl64),
             borrowed_fd(fd),
             c_uint(F_DUPFD),
+            raw_fd(min),
         ))
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
-        ret_owned_fd(syscall2_readonly(
+        ret_owned_fd(syscall3_readonly(
             nr(__NR_fcntl),
             borrowed_fd(fd),
             c_uint(F_DUPFD),
+            raw_fd(min),
         ))
     }
 }
 
 #[inline]
-pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
+pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
-        ret_owned_fd(syscall2_readonly(
+        ret_owned_fd(syscall3_readonly(
             nr(__NR_fcntl64),
             borrowed_fd(fd),
             c_uint(F_DUPFD_CLOEXEC),
+            raw_fd(min),
         ))
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
-        ret_owned_fd(syscall2_readonly(
+        ret_owned_fd(syscall3_readonly(
             nr(__NR_fcntl),
             borrowed_fd(fd),
             c_uint(F_DUPFD_CLOEXEC),
+            raw_fd(min),
         ))
     }
 }

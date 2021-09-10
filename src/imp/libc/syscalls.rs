@@ -771,8 +771,8 @@ pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<u32> {
 }
 
 #[cfg(not(target_os = "wasi"))]
-pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(libc::fcntl(borrowed_fd(fd), libc::F_DUPFD_CLOEXEC)) }
+pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(libc::fcntl(borrowed_fd(fd), libc::F_DUPFD_CLOEXEC, min)) }
 }
 
 pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
