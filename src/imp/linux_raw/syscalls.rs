@@ -58,6 +58,8 @@ use io_lifetimes::{AsFd, BorrowedFd};
 use linux_raw_sys::general::__NR_epoll_pwait;
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use linux_raw_sys::general::__NR_epoll_wait;
+#[cfg(all(target_pointer_width = "32", not(target_arch = "arm")))]
+use linux_raw_sys::general::__NR_fadvise64_64;
 #[cfg(not(any(target_arch = "riscv64")))]
 use linux_raw_sys::general::__NR_renameat;
 #[cfg(not(target_arch = "x86"))]
@@ -66,6 +68,8 @@ use linux_raw_sys::general::{
     __NR_getsockopt, __NR_listen, __NR_recvfrom, __NR_sendto, __NR_setsockopt, __NR_shutdown,
     __NR_socket, __NR_socketpair,
 };
+#[cfg(target_arch = "arm")]
+use linux_raw_sys::general::{__NR_arm_fadvise64_64 as __NR_fadvise64_64, __NR_mmap2};
 use linux_raw_sys::general::{
     __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
     __NR_epoll_create1, __NR_epoll_ctl, __NR_exit_group, __NR_faccessat, __NR_fallocate,
@@ -122,8 +126,8 @@ use {
     linux_raw_sys::{
         general::timespec as __kernel_old_timespec,
         general::{
-            __NR__llseek, __NR_fadvise64_64, __NR_fcntl64, __NR_fstat64, __NR_fstatat64,
-            __NR_fstatfs64, __NR_ftruncate64, __NR_sendfile64,
+            __NR__llseek, __NR_fcntl64, __NR_fstat64, __NR_fstatat64, __NR_fstatfs64,
+            __NR_ftruncate64, __NR_sendfile64,
         },
         v5_4::general::{
             __NR_clock_getres_time64, __NR_clock_nanosleep_time64, __NR_utimensat_time64,
