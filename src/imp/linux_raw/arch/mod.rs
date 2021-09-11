@@ -19,6 +19,8 @@ pub(in crate::imp::linux_raw) use self::outline as asm;
 
 // On most architectures, the architecture syscall instruction is fast, so use
 // it directly.
+#[cfg(target_arch = "arm")]
+pub(in crate::imp::linux_raw) use self::asm as choose;
 #[cfg(target_arch = "aarch64")]
 pub(in crate::imp::linux_raw) use self::asm as choose;
 #[cfg(target_arch = "x86_64")]
