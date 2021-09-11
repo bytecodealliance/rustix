@@ -228,6 +228,8 @@ bitflags! {
             target_os = "netbsd",
             target_os = "openbsd",
             target_os = "redox",
+            // TODO: Enable s390x once <https://github.com/rust-lang/libc/pull/2395> lands.
+            target_arch = "s390x",
         )))]
         const SYNC = libc::MAP_SYNC;
         /// `MAP_UNINITIALIZED`

@@ -695,7 +695,11 @@ pub type RawMode = libc::mode_t;
 pub type Dev = libc::dev_t;
 
 /// `__fsword_t`
-#[cfg(all(target_os = "linux", not(target_env = "musl")))]
+#[cfg(all(
+    target_os = "linux",
+    not(target_env = "musl"),
+    not(target_arch = "s390x")
+))]
 pub type FsWord = libc::__fsword_t;
 
 /// `__fsword_t`
@@ -708,9 +712,14 @@ pub type FsWord = u32;
 /// `__fsword_t`
 #[cfg(all(
     any(target_os = "android", all(target_os = "linux", target_env = "musl")),
+    not(target_arch = "s390x"),
     target_pointer_width = "64"
 ))]
 pub type FsWord = u64;
+
+// s390x uses u32 for statfs entries, even though __fsword_t is u64.
+#[cfg(all(target_os = "linux", target_arch = "s390x"))]
+pub type FsWord = u32;
 
 #[cfg(not(target_os = "redox"))]
 pub use libc::{UTIME_NOW, UTIME_OMIT};
