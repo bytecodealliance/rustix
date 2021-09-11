@@ -87,13 +87,13 @@ pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
 }
 
 /// `fcntl(fd, F_DUPFD_CLOEXEC)`—Creates a new `OwnedFd` instance, with value
-/// at least `min`, that has `O_CLOEXEC` set and that shares the same underlying
-/// [file description] as `fd`.
+/// at least `min`, that has `O_CLOEXEC` set and that shares the same
+/// underlying [file description] as `fd`.
 ///
 /// POSIX guarantees that `F_DUPFD_CLOEXEC` will use the lowest unused file
-/// descriptor which is at least `min`, however it is not safe in general to rely
-/// on this, as file descriptors may be unexpectedly allocated on other threads or
-/// in libraries.
+/// descriptor which is at least `min`, however it is not safe in general to
+/// rely on this, as file descriptors may be unexpectedly allocated on other
+/// threads or in libraries.
 ///
 /// # References
 ///  - [POSIX]
