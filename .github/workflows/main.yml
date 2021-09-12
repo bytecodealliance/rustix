@@ -61,12 +61,12 @@ jobs:
         wasm32-unknown-emscripten
         riscv64gc-unknown-linux-gnu
         aarch64-unknown-linux-gnu
-        armv7-unknown-linux-gnueabihf
+        armv5te-unknown-linux-gnueabi
     - name: Install cross-compilation tools
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu gcc-arm-linux-gnueabihf musl-tools
+        sudo apt-get install -y gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu gcc-arm-linux-gnueabi musl-tools
     - run: cargo check --workspace --release -vv
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-gnux32
@@ -80,7 +80,7 @@ jobs:
     - run: cargo check --workspace --release -vv --target=wasm32-unknown-emscripten
     - run: cargo check --workspace --release -vv --target=riscv64gc-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-gnu
-    - run: cargo check --workspace --release -vv --target=armv7-unknown-linux-gnueabihf
+    - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi
 
   check_nightly:
     name: Check on Rust nightly
@@ -173,10 +173,10 @@ jobs:
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
-            target: armv7-unknown-linux-gnueabihf
-            gcc_package: gcc-arm-linux-gnueabihf
-            gcc: arm-linux-gnueabihf-gcc
-            qemu: qemu-arm -L /usr/arm-linux-gnueabihf
+            target: armv5te-unknown-linux-gnueabi
+            gcc_package: gcc-arm-linux-gnueabi
+            gcc: arm-linux-gnueabi-gcc
+            qemu: qemu-arm -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
           - build: ubuntu-stable
             os: ubuntu-latest
@@ -207,10 +207,10 @@ jobs:
           - build: arm-linux-stable
             os: ubuntu-latest
             rust: stable
-            target: armv7-unknown-linux-gnueabihf
-            gcc_package: gcc-arm-linux-gnueabihf
-            gcc: arm-linux-gnueabihf-gcc
-            qemu: qemu-arm -L /usr/arm-linux-gnueabihf
+            target: armv5te-unknown-linux-gnueabi
+            gcc_package: gcc-arm-linux-gnueabi
+            gcc: arm-linux-gnueabi-gcc
+            qemu: qemu-arm -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
           - build: macos
             os: macos-latest
