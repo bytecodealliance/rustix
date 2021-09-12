@@ -317,7 +317,20 @@ pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
 pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], pos: u64) -> io::Result<usize> {
     let (buf_addr_mut, buf_len) = slice_mut(buf);
 
-    #[cfg(target_pointer_width = "32")]
+    // https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L75
+    #[cfg(all(target_pointer_width = "32", target_arch = "arm"))]
+    unsafe {
+        ret_usize(syscall6(
+            nr(__NR_pread64),
+            borrowed_fd(fd),
+            buf_addr_mut,
+            buf_len,
+            zero(),
+            hi(pos),
+            lo(pos),
+        ))
+    }
+    #[cfg(all(target_pointer_width = "32", not(target_arch = "arm")))]
     unsafe {
         ret_usize(syscall5(
             nr(__NR_pread64),
@@ -430,7 +443,20 @@ pub(crate) fn write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
 pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], pos: u64) -> io::Result<usize> {
     let (buf_addr, buf_len) = slice(buf);
 
-    #[cfg(target_pointer_width = "32")]
+    // https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L81-L83
+    #[cfg(all(target_pointer_width = "32", target_arch = "arm"))]
+    unsafe {
+        ret_usize(syscall6_readonly(
+            nr(__NR_pwrite64),
+            borrowed_fd(fd),
+            buf_addr,
+            buf_len,
+            zero(),
+            hi(pos),
+            lo(pos),
+        ))
+    }
+    #[cfg(all(target_pointer_width = "32", not(target_arch = "arm")))]
     unsafe {
         ret_usize(syscall5_readonly(
             nr(__NR_pwrite64),
@@ -641,7 +667,18 @@ pub(crate) fn tell(fd: BorrowedFd<'_>) -> io::Result<u64> {
 
 #[inline]
 pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
-    #[cfg(target_pointer_width = "32")]
+    // https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L81-L83
+    #[cfg(all(target_pointer_width = "32", target_arch = "arm"))]
+    unsafe {
+        ret(syscall4_readonly(
+            nr(__NR_ftruncate64),
+            borrowed_fd(fd),
+            zero(),
+            hi(length),
+            lo(length),
+        ))
+    }
+    #[cfg(all(target_pointer_width = "32", not(target_arch = "arm")))]
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_ftruncate64),
