@@ -24,3 +24,5 @@ mod openat2;
 mod readdir;
 mod renameat;
 mod statfs;
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+mod working_directory;
