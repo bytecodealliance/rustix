@@ -73,7 +73,7 @@ use linux_raw_sys::general::{__NR_arm_fadvise64_64 as __NR_fadvise64_64, __NR_mm
 use linux_raw_sys::general::{
     __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
     __NR_epoll_create1, __NR_epoll_ctl, __NR_exit_group, __NR_faccessat, __NR_fallocate,
-    __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_flock, __NR_fsync, __NR_getcwd,
+    __NR_fchdir, __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_flock, __NR_fsync, __NR_getcwd,
     __NR_getdents64, __NR_getpid, __NR_getppid, __NR_getpriority, __NR_gettid, __NR_ioctl,
     __NR_linkat, __NR_madvise, __NR_mkdirat, __NR_mknodat, __NR_mlock, __NR_mprotect, __NR_munlock,
     __NR_munmap, __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_pread64, __NR_preadv, __NR_pwrite64,
@@ -110,7 +110,8 @@ use std::convert::TryInto;
 use std::ffi::CStr;
 use std::io::{IoSlice, IoSliceMut, SeekFrom};
 use std::mem::MaybeUninit;
-use std::os::raw::{c_char, c_int, c_uint, c_void};
+use std::os::raw::{c_int, c_uint, c_void};
+use std::os::unix::prelude::AsRawFd;
 #[cfg(target_arch = "x86")]
 use {
     super::conv::x86_sys,
@@ -2668,6 +2669,11 @@ pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<usize> {
 #[inline]
 pub(crate) fn chdir(filename: &CStr) -> io::Result<()> {
     unsafe { ret(syscall1_readonly(nr(__NR_chdir), c_str(filename))) }
+}
+
+#[inline]
+pub(crate) fn fchdir(fd: BorrowedFd) -> io::Result<()> {
+    unsafe { ret(syscall1_readonly(nr(__NR_fchdir), borrowed_fd(fd))) }
 }
 
 #[inline]

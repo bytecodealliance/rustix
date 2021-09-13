@@ -41,7 +41,7 @@ pub use fd::ioctl_fionread;
 #[cfg(not(target_os = "redox"))]
 pub use fd::is_read_write;
 pub use fd::isatty;
-#[cfg(all(libc, not(any(target_os = "fuchsia", target_os = "wasi"))))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 pub use fd::ttyname;
 #[cfg(not(target_os = "wasi"))]
 pub use fd::{dup, dup2, dup2_with, DupFlags};

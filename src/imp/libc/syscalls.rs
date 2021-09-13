@@ -1,3 +1,4 @@
+use super::conv::c_str;
 #[cfg(not(any(
     target_os = "freebsd",
     target_os = "ios",
@@ -98,32 +99,27 @@ use libc::{c_int, c_void};
 use std::cmp::min;
 use std::convert::TryInto;
 use std::ffi::CStr;
-#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
-use std::ffi::OsString;
 use std::io::{IoSlice, IoSliceMut, SeekFrom};
 #[cfg(target_os = "linux")]
 use std::mem::transmute;
 use std::mem::{size_of, MaybeUninit};
-#[cfg(all(unix, not(target_os = "fuchsia")))]
+#[cfg(any(target_os = "ios", target_os = "macos"))]
 use std::os::unix::ffi::OsStringExt;
-#[cfg(target_os = "wasi")]
-use std::os::wasi::ffi::OsStringExt;
 #[cfg(not(any(target_os = "redox", target_os = "wasi",)))]
 use std::ptr::null_mut;
 #[cfg(not(any(target_os = "redox", target_env = "newlib")))]
 use std::sync::atomic::{AtomicUsize, Ordering};
-#[cfg(not(target_os = "redox"))]
-use {
-    super::conv::c_str,
-    super::fs::AtFlags,
-    super::offset::{libc_openat, libc_preadv, libc_pwritev},
-    crate::time::NanosleepRelativeResult,
-};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use {
     super::conv::nonnegative_ret,
     super::fs::{copyfile_state_t, CloneFlags, CopyfileFlags},
     std::path::PathBuf,
+};
+#[cfg(not(target_os = "redox"))]
+use {
+    super::fs::AtFlags,
+    super::offset::{libc_openat, libc_preadv, libc_pwritev},
+    crate::time::NanosleepRelativeResult,
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use {
@@ -548,6 +544,16 @@ pub(crate) fn utimensat(
             flags.bits(),
         ))
     }
+}
+
+#[cfg(not(target_os = "wasi"))]
+pub(crate) fn chdir(path: &CStr) -> io::Result<()> {
+    unsafe { ret(libc::chdir(c_str(path))) }
+}
+
+#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
+pub(crate) fn fchdir(dirfd: BorrowedFd<'_>) -> io::Result<()> {
+    unsafe { ret(libc::fchdir(borrowed_fd(dirfd))) }
 }
 
 #[cfg(not(any(
