@@ -17,7 +17,8 @@ pub use imp::io::{MapFlags, MprotectFlags, ProtFlags};
 /// `mmap(ptr, len, prot, flags, fd, offset)`—Create a file-backed memory
 /// mapping.
 ///
-/// For anonymous mappings, see [`mmap_anonymous`].
+/// For anonymous mappings (`MAP_ANON`/`MAP_ANONYMOUS`), see
+/// [`mmap_anonymous`].
 ///
 /// # Safety
 ///
