@@ -15,25 +15,27 @@ rsix_reordered_syscall3:
 rsix_reordered_syscall4:
 rsix_reordered_syscall5:
 rsix_reordered_syscall6:
-    .cfi_startproc
+    .fnstart
+    .cantunwind
     push    {r4, r5, r7, lr}
     ldr     r7, [sp, #28]
     ldr     r4, [sp, #16]
     ldr     r5, [sp, #20]
     svc     #0
     pop     {r4, r5, r7, pc}
-    .cfi_endproc
+    .fnend
     .size rsix_reordered_syscall, .-rsix_reordered_syscall
 
     .section    .text.rsix_reordered_syscall1_noreturn,"ax",%progbits
     .p2align    4
 rsix_reordered_syscall1_noreturn:
-    .cfi_startproc
+    .fnstart
+    .cantunwind
     push    {r7, lr}
     ldr     r7, [sp, #28]
     svc     #0
-    .inst   0xe7ffdefe
-    .cfi_endproc
+    .inst   0xe7f001f0 // Trap instruction
+    .fnend
     .size rsix_reordered_syscall1_noreturn, .-rsix_reordered_syscall1_noreturn
 
     .globl   rsix_reordered_syscall0

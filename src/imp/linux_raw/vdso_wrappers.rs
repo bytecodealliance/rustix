@@ -353,7 +353,7 @@ fn init() {
         #[cfg(target_arch = "x86_64")]
         let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime"));
         #[cfg(target_arch = "arm")]
-        let ptr = vdso.sym(cstr!("LINUX_2.6.39"), cstr!("__vdso_clock_gettime"));
+        let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime"));
         #[cfg(target_arch = "aarch64")]
         let ptr = vdso.sym(cstr!("LINUX_2.6.39"), cstr!("__kernel_clock_gettime"));
         #[cfg(target_arch = "x86")]
