@@ -9,7 +9,8 @@
 )))]
 use super::conv::ret_u32;
 use super::conv::{
-    borrowed_fd, no_fd, ret, ret_c_int, ret_discarded_fd, ret_off_t, ret_owned_fd, ret_ssize_t,
+    borrowed_fd, no_fd, ret, ret_c_int, ret_discarded_char_ptr, ret_discarded_fd, ret_off_t,
+    ret_owned_fd, ret_ssize_t,
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t};
@@ -1167,6 +1168,11 @@ pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> i
 pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, _flags: DupFlags) -> io::Result<()> {
     // Android 5.0 has dup3, but libc doesn't have bindings
     dup2(fd, new)
+}
+
+#[cfg(not(target_os = "wasi"))]
+pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<()> {
+    unsafe { ret_discarded_char_ptr(libc::getcwd(buf.as_mut_ptr().cast::<_>(), buf.len())) }
 }
 
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]

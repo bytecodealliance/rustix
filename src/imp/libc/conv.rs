@@ -125,6 +125,15 @@ pub(super) fn ret_discarded_fd(raw: c_int) -> io::Result<()> {
     }
 }
 
+#[inline]
+pub(super) fn ret_discarded_char_ptr(raw: *mut c_char) -> io::Result<()> {
+    if raw.is_null() {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(())
+    }
+}
+
 /// Convert a c_long returned from `syscall` to an `OwnedFd`, if valid.
 ///
 /// # Safety
