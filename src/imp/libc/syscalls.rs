@@ -1176,29 +1176,13 @@ pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<()> {
 }
 
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
-pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, reuse: OsString) -> io::Result<OsString> {
-    // This code would benefit from having a better way to read into
-    // uninitialized memory, but that requires `unsafe`.
-    let mut buffer = reuse.into_vec();
-    buffer.clear();
-    buffer.resize(256, 0_u8);
-
-    loop {
-        match unsafe {
-            libc::ttyname_r(
-                borrowed_fd(dirfd),
-                buffer.as_mut_ptr().cast::<libc::c_char>(),
-                buffer.len(),
-            )
-        } {
-            libc::ERANGE => buffer.resize(buffer.len() * 2, 0_u8),
-            0 => {
-                let len = buffer.iter().position(|x| *x == b'\0').unwrap();
-                buffer.resize(len, 0_u8);
-                return Ok(OsString::from_vec(buffer));
-            }
-            errno => return Err(io::Error(errno)),
-        }
+pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<()> {
+    unsafe {
+        ret(libc::ttyname_r(
+            borrowed_fd(dirfd),
+            buf.as_mut_ptr().cast::<_>(),
+            buf.len(),
+        ))
     }
 }
 

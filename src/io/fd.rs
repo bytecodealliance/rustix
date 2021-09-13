@@ -3,7 +3,7 @@
 use crate::imp;
 use crate::io::{self, OwnedFd};
 use io_lifetimes::AsFd;
-#[cfg(all(libc, not(any(target_os = "wasi", target_os = "fuchsia"))))]
+#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use std::ffi::OsString;
 
 #[cfg(not(target_os = "wasi"))]
@@ -131,10 +131,26 @@ pub fn dup2_with<Fd: AsFd>(fd: &Fd, new: &OwnedFd, flags: DupFlags) -> io::Resul
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/ttyname.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/ttyname.3.html
-// TODO: Implement ttyname for linux_raw
-#[cfg(all(libc, not(any(target_os = "fuchsia", target_os = "wasi"))))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 #[inline]
 pub fn ttyname<Fd: AsFd>(dirfd: &Fd, reuse: OsString) -> io::Result<OsString> {
-    let dirfd = dirfd.as_fd();
-    imp::syscalls::ttyname(dirfd, reuse)
+    use std::os::unix::prelude::OsStringExt;
+
+    // This code would benefit from having a better way to read into
+    // uninitialized memory, but that requires `unsafe`.
+    let mut buffer = reuse.into_vec();
+    buffer.clear();
+    buffer.resize(256, 0_u8);
+
+    loop {
+        match imp::syscalls::ttyname(dirfd.as_fd(), &mut buffer) {
+            Err(imp::io::Error::RANGE) => buffer.resize(buffer.len() * 2, 0_u8),
+            Ok(_) => {
+                let len = buffer.iter().position(|x| *x == b'\0').unwrap();
+                buffer.resize(len, 0_u8);
+                return Ok(OsString::from_vec(buffer));
+            }
+            Err(errno) => return Err(errno),
+        }
+    }
 }
