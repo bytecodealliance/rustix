@@ -136,13 +136,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, ubuntu-16.04, ubuntu-18.04, i686-linux, aarch64-linux, riscv64-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, arm-linux-stable, macos]
+        build: [ubuntu, ubuntu-18.04, i686-linux, aarch64-linux, riscv64-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, arm-linux-stable, macos]
         include:
           - build: ubuntu
             os: ubuntu-latest
-            rust: nightly
-          - build: ubuntu-16.04
-            os: ubuntu-16.04
             rust: nightly
           - build: ubuntu-18.04
             os: ubuntu-18.04
