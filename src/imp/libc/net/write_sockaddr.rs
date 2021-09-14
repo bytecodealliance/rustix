@@ -16,6 +16,14 @@ pub(crate) unsafe fn write_sockaddr(addr: &SocketAddr, storage: *mut SocketAddrS
 
 pub(crate) unsafe fn encode_sockaddr_v4(v4: &SocketAddrV4) -> libc::sockaddr_in {
     libc::sockaddr_in {
+        #[cfg(any(
+            target_os = "netbsd",
+            target_os = "macos",
+            target_os = "ios",
+            target_os = "freebsd",
+            target_os = "openbsd"
+        ))]
+        sin_len: size_of::<libc::sockaddr_in>() as _,
         sin_family: libc::AF_INET as _,
         sin_port: u16::to_be(v4.port()),
         sin_addr: libc::in_addr {
@@ -33,6 +41,14 @@ unsafe fn write_sockaddr_v4(v4: &SocketAddrV4, storage: *mut SocketAddrStorage) 
 
 pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> libc::sockaddr_in6 {
     libc::sockaddr_in6 {
+        #[cfg(any(
+            target_os = "netbsd",
+            target_os = "macos",
+            target_os = "ios",
+            target_os = "freebsd",
+            target_os = "openbsd"
+        ))]
+        sin6_len: size_of::<libc::sockaddr_in6>() as _,
         sin6_family: libc::AF_INET6 as _,
         sin6_port: u16::to_be(v6.port()),
         sin6_flowinfo: u32::to_be(v6.flowinfo()),
