@@ -65,7 +65,7 @@ impl DecInt {
     /// Return the raw byte buffer.
     #[inline]
     pub fn as_c_str(&self) -> &CStr {
-        let bytes_with_nul = &self.buf[..self.len + 1];
+        let bytes_with_nul = &self.buf[..=self.len];
         debug_assert!(CStr::from_bytes_with_nul(bytes_with_nul).is_ok());
         // Safety: `self.buf` holds a single decimal ASCII representation and
         // at least one extra NUL byte.
