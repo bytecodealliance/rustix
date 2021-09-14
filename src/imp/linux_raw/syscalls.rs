@@ -3028,17 +3028,16 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<()> {
     // Gatter the ttyname by reading the 'fd' file inside 'proc_self_fd'
     let r = readlinkat(proc_self_fd, DecInt::from_fd(&fd).as_c_str(), buf)?;
 
-    // Make if possible the string nul terminated
-    if r == buf.len() {
+    // If the number of bytes is equal to the buffer length, truncation may
+    // have occurred. And we need one extra byte for a NUL terminator.
+    if buf.len() - r <= 1 {
         return Err(crate::io::Error::RANGE);
     }
     buf[r] = 0;
 
     // Gatter the stat for the original fd and the newly gatter name
-    let st1 = stat(
-        // SATEFY: The buf is always a nul terminated string
-        unsafe { CStr::from_bytes_with_nul_unchecked(buf) },
-    )?;
+    let path = CStr::from_bytes_with_nul(&buf[..=r]).unwrap();
+    let st1 = stat(path)?;
     let st2 = fstat(fd)?;
 
     // Finally check that the two stat(s) are equal
