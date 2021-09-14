@@ -1,6 +1,7 @@
 use super::{SocketAddr, SocketAddrUnix};
 use crate::{as_ptr, io};
 use libc::sockaddr_storage;
+use std::ffi::CStr;
 use std::mem::size_of;
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
 
@@ -107,16 +108,25 @@ pub(crate) unsafe fn read_sockaddr(
                 Ok(SocketAddr::Unix(SocketAddrUnix::new(&[][..]).unwrap()))
             } else {
                 let decode = *storage.cast::<libc::sockaddr_un>();
-                if decode.sun_path[len - 1 - offsetof_sun_path] != b'\0' as libc::c_char {
-                    return Err(io::Error::INVAL);
-                }
-                let path_bytes = &decode.sun_path[..len - 1 - offsetof_sun_path];
 
-                // FreeBSD sometimes sets the length to longer than the length
-                // of the NUL-terminated string. Find the NUL and truncate the
-                // string accordingly.
-                #[cfg(target_os = "freebsd")]
-                let path_bytes = &path_bytes[..path_bytes.iter().position(|b| *b == 0).unwrap()];
+                // Trim off unused bytes from the end of `path_bytes`.
+                let path_bytes = if cfg!(target_os = "freebsd") {
+                    // FreeBSD sometimes sets the length to longer than the length
+                    // of the NUL-terminated string. Find the NUL and truncate the
+                    // string accordingly.
+                    &decode.sun_path[..decode.sun_path.iter().position(|b| *b == 0).unwrap()]
+                } else {
+                    // Otherwise, use the provided length.
+                    let provided_len = len - 1 - offsetof_sun_path;
+                    if decode.sun_path[provided_len] != b'\0' as libc::c_char {
+                        return Err(io::Error::INVAL);
+                    }
+                    debug_assert_eq!(
+                        CStr::from_ptr(decode.sun_path.as_ptr()).to_bytes().len(),
+                        provided_len
+                    );
+                    &decode.sun_path[..provided_len]
+                };
 
                 Ok(SocketAddr::Unix(
                     SocketAddrUnix::new(path_bytes.iter().map(|c| *c as u8).collect::<Vec<u8>>())
