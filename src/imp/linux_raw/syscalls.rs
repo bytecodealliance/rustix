@@ -51,6 +51,7 @@ use super::reg::{ArgReg, SocketArg};
 use super::time::{ClockId, Timespec};
 use crate::io;
 use crate::io::{OwnedFd, RawFd};
+use crate::path::DecInt;
 use crate::process::{Gid, Pid, Uid};
 use crate::time::NanosleepRelativeResult;
 use io_lifetimes::{AsFd, BorrowedFd};
@@ -111,7 +112,6 @@ use std::ffi::CStr;
 use std::io::{IoSlice, IoSliceMut, SeekFrom};
 use std::mem::MaybeUninit;
 use std::os::raw::{c_int, c_uint, c_void};
-use std::os::unix::prelude::AsRawFd;
 #[cfg(target_arch = "x86")]
 use {
     super::conv::x86_sys,
@@ -3017,52 +3017,34 @@ pub(crate) fn gettid() -> Pid {
     }
 }
 
-/// https://github.com/ifduyue/musl/blob/cfdfd5ea3ce14c6abf7fb22a531f3d99518b5a1b/src/internal/procfdname.c
-fn procfdname(mut fd: i32) -> [u8; 24] {
-    let mut buf = [0; 24];
-    let mut i = 0;
-
-    for c in "/proc/self/fd/".as_bytes() {
-        buf[i] = *c;
-        i += 1;
-    }
-
-    if fd == 0 {
-        buf[i] = '0' as u8;
-        buf[i + 1] = 0;
-    } else {
-        let mut j = fd;
-        while j != 0 {
-            j /= 10;
-            i += 1;
-        }
-
-        buf[i] = 0;
-
-        while fd != 0 {
-            i -= 1;
-            buf[i] = '0' as u8 + (fd % 10) as u8;
-            fd /= 10;
-        }
-    }
-
-    buf
-}
-
 #[inline]
 pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<()> {
     // Check that the fd is really a tty
     ioctl_tiocgwinsz(fd)?;
 
-    // Get the proc path of the tty
-    let procname = procfdname(fd.as_raw_fd());
+    // Get fd to '/proc/self/fd'
+    let proc_self_fd = crate::io::proc_self_fd()?;
 
-    // And finaly gatter the ttyname by reading the proc path
-    readlink(
-        // SATEFY: procfdname always return a nul terminated string
-        unsafe { CStr::from_bytes_with_nul_unchecked(&procname) },
-        buf,
+    // Gatter the ttyname by reading the 'fd' file inside 'proc_self_fd'
+    let r = readlinkat(proc_self_fd, DecInt::from_fd(&fd).as_c_str(), buf)?;
+
+    // Make if possible the string nul terminated
+    if r == buf.len() {
+        return Err(crate::io::Error::RANGE);
+    }
+    buf[r] = 0;
+
+    // Gatter the stat for the original fd and the newly gatter name
+    let st1 = stat(
+        // SATEFY: The buf is always a nul terminated string
+        unsafe { CStr::from_bytes_with_nul_unchecked(buf) },
     )?;
+    let st2 = fstat(fd)?;
+
+    // Finally check that the two stat(s) are equal
+    if st1.st_dev != st2.st_dev || st1.st_ino != st2.st_ino {
+        return Err(crate::io::Error::NODEV);
+    }
 
     Ok(())
 }
