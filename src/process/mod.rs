@@ -21,6 +21,8 @@ pub use auxv::page_size;
 pub use chdir::chdir;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 pub use chdir::fchdir;
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub use chdir::getcwd;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use exit::exit_group;
 #[cfg(not(target_os = "wasi"))]
