@@ -3029,8 +3029,9 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<()> {
     let r = readlinkat(proc_self_fd, DecInt::from_fd(&fd).as_c_str(), buf)?;
 
     // If the number of bytes is equal to the buffer length, truncation may
-    // have occurred. And we need one extra byte for a NUL terminator.
-    if buf.len() - r <= 1 {
+    // have occurred. This check also ensures that we have enough space for
+    // adding a NUL terminator.
+    if r == buf.len() {
         return Err(crate::io::Error::RANGE);
     }
     buf[r] = 0;
