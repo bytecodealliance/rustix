@@ -30,7 +30,7 @@ pub fn cwd() -> BorrowedFd<'static> {
     }
 }
 
-/// `getcwd(reuse)`
+/// `getcwd()`
 ///
 /// If `reuse` is non-empty, reuse its buffer to store the result if possible.
 ///
