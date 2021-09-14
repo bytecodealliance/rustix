@@ -40,8 +40,9 @@ use super::io::{
 #[cfg(not(target_os = "wasi"))]
 use super::io::{Termios, Winsize};
 use super::net::{
-    decode_sockaddr, AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown,
-    SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6, SocketType,
+    encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags,
+    AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketAddr, SocketAddrUnix,
+    SocketType,
 };
 use super::process::RawUname;
 use super::rand::GetRandomFlags;
@@ -111,6 +112,7 @@ use std::convert::TryInto;
 use std::ffi::CStr;
 use std::io::{IoSlice, IoSliceMut, SeekFrom};
 use std::mem::MaybeUninit;
+use std::net::{SocketAddrV4, SocketAddrV6};
 use std::os::raw::{c_int, c_uint, c_void};
 #[cfg(target_arch = "x86")]
 use {
@@ -1632,7 +1634,10 @@ pub(crate) fn acceptfrom(fd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddr)
             out(&mut storage),
             by_mut(&mut addrlen),
         ))?;
-        Ok((fd, decode_sockaddr(&storage.assume_init(), addrlen)))
+        Ok((
+            fd,
+            read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
+        ))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
@@ -1647,7 +1652,10 @@ pub(crate) fn acceptfrom(fd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddr)
                 by_mut(&mut addrlen),
             ]),
         ))?;
-        Ok((fd, decode_sockaddr(&storage.assume_init(), addrlen)))
+        Ok((
+            fd,
+            read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
+        ))
     }
 }
 
@@ -1667,7 +1675,10 @@ pub(crate) fn acceptfrom_with(
             by_mut(&mut addrlen),
             c_uint(flags.bits()),
         ))?;
-        Ok((fd, decode_sockaddr(&storage.assume_init(), addrlen)))
+        Ok((
+            fd,
+            read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
+        ))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
@@ -1683,7 +1694,10 @@ pub(crate) fn acceptfrom_with(
                 c_uint(flags.bits()),
             ]),
         ))?;
-        Ok((fd, decode_sockaddr(&storage.assume_init(), addrlen)))
+        Ok((
+            fd,
+            read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
+        ))
     }
 }
 
@@ -1849,7 +1863,7 @@ pub(crate) fn sendto_v4(
             buf_addr,
             buf_len,
             c_uint(flags.bits()),
-            by_ref(&addr.encode()),
+            by_ref(&encode_sockaddr_v4(addr)),
             size_of::<sockaddr_in, _>(),
         ))
     }
@@ -1863,7 +1877,7 @@ pub(crate) fn sendto_v4(
                 buf_addr,
                 buf_len,
                 c_uint(flags.bits()),
-                by_ref(&addr.encode()),
+                by_ref(&encode_sockaddr_v4(addr)),
                 size_of::<sockaddr_in, _>(),
             ]),
         ))
@@ -1887,7 +1901,7 @@ pub(crate) fn sendto_v6(
             buf_addr,
             buf_len,
             c_uint(flags.bits()),
-            by_ref(&addr.encode()),
+            by_ref(&encode_sockaddr_v6(addr)),
             size_of::<sockaddr_in6, _>(),
         ))
     }
@@ -1901,7 +1915,7 @@ pub(crate) fn sendto_v6(
                 buf_addr,
                 buf_len,
                 c_uint(flags.bits()),
-                by_ref(&addr.encode()),
+                by_ref(&encode_sockaddr_v6(addr)),
                 size_of::<sockaddr_in6, _>(),
             ]),
         ))
@@ -1925,7 +1939,7 @@ pub(crate) fn sendto_unix(
             buf_addr,
             buf_len,
             c_uint(flags.bits()),
-            by_ref(&addr.encode()),
+            by_ref(&encode_sockaddr_unix(addr)),
             size_of::<sockaddr_un, _>(),
         ))
     }
@@ -1939,7 +1953,7 @@ pub(crate) fn sendto_unix(
                 buf_addr,
                 buf_len,
                 c_uint(flags.bits()),
-                by_ref(&addr.encode()),
+                by_ref(&encode_sockaddr_unix(addr)),
                 size_of::<sockaddr_un, _>(),
             ]),
         ))
@@ -2017,7 +2031,10 @@ pub(crate) fn recvfrom(
             out(&mut storage),
             by_mut(&mut addrlen),
         ))?;
-        Ok((nread, decode_sockaddr(&storage.assume_init(), addrlen)))
+        Ok((
+            nread,
+            read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
+        ))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
@@ -2035,7 +2052,10 @@ pub(crate) fn recvfrom(
                 by_mut(&mut addrlen),
             ]),
         ))?;
-        Ok((nread, decode_sockaddr(&storage.assume_init(), addrlen)))
+        Ok((
+            nread,
+            read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
+        ))
     }
 }
 
@@ -2051,7 +2071,10 @@ pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
             out(&mut storage),
             by_mut(&mut addrlen),
         ))?;
-        Ok(decode_sockaddr(&storage.assume_init(), addrlen))
+        Ok(read_sockaddr_os(
+            &storage.assume_init(),
+            addrlen.try_into().unwrap(),
+        ))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
@@ -2066,7 +2089,10 @@ pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
                 by_mut(&mut addrlen),
             ]),
         ))?;
-        Ok(decode_sockaddr(&storage.assume_init(), addrlen))
+        Ok(read_sockaddr_os(
+            &storage.assume_init(),
+            addrlen.try_into().unwrap(),
+        ))
     }
 }
 
@@ -2082,7 +2108,10 @@ pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
             out(&mut storage),
             by_mut(&mut addrlen),
         ))?;
-        Ok(decode_sockaddr(&storage.assume_init(), addrlen))
+        Ok(read_sockaddr_os(
+            &storage.assume_init(),
+            addrlen.try_into().unwrap(),
+        ))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
@@ -2097,7 +2126,10 @@ pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
                 by_mut(&mut addrlen),
             ]),
         ))?;
-        Ok(decode_sockaddr(&storage.assume_init(), addrlen))
+        Ok(read_sockaddr_os(
+            &storage.assume_init(),
+            addrlen.try_into().unwrap(),
+        ))
     }
 }
 
@@ -2108,7 +2140,7 @@ pub(crate) fn bind_v4(fd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()>
         ret(syscall3_readonly(
             nr(__NR_bind),
             borrowed_fd(fd),
-            by_ref(&addr.encode()),
+            by_ref(&encode_sockaddr_v4(addr)),
             size_of::<sockaddr_in, _>(),
         ))
     }
@@ -2119,7 +2151,7 @@ pub(crate) fn bind_v4(fd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()>
             x86_sys(SYS_BIND),
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 borrowed_fd(fd),
-                by_ref(&addr.encode()),
+                by_ref(&encode_sockaddr_v4(addr)),
                 size_of::<sockaddr_in, _>(),
             ]),
         ))
@@ -2133,7 +2165,7 @@ pub(crate) fn bind_v6(fd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()>
         ret(syscall3_readonly(
             nr(__NR_bind),
             borrowed_fd(fd),
-            by_ref(&addr.encode()),
+            by_ref(&encode_sockaddr_v6(addr)),
             size_of::<sockaddr_in6, _>(),
         ))
     }
@@ -2144,7 +2176,7 @@ pub(crate) fn bind_v6(fd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()>
             x86_sys(SYS_BIND),
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 borrowed_fd(fd),
-                by_ref(&addr.encode()),
+                by_ref(&encode_sockaddr_v6(addr)),
                 size_of::<sockaddr_in6, _>(),
             ]),
         ))
@@ -2158,7 +2190,7 @@ pub(crate) fn bind_unix(fd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result
         ret(syscall3_readonly(
             nr(__NR_bind),
             borrowed_fd(fd),
-            by_ref(&addr.encode()),
+            by_ref(&encode_sockaddr_unix(addr)),
             size_of::<sockaddr_un, _>(),
         ))
     }
@@ -2169,7 +2201,7 @@ pub(crate) fn bind_unix(fd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result
             x86_sys(SYS_BIND),
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 borrowed_fd(fd),
-                by_ref(&addr.encode()),
+                by_ref(&encode_sockaddr_unix(addr)),
                 size_of::<sockaddr_un, _>(),
             ]),
         ))
@@ -2183,7 +2215,7 @@ pub(crate) fn connect_v4(fd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<
         ret(syscall3_readonly(
             nr(__NR_connect),
             borrowed_fd(fd),
-            by_ref(&addr.encode()),
+            by_ref(&encode_sockaddr_v4(addr)),
             size_of::<sockaddr_in, _>(),
         ))
     }
@@ -2194,7 +2226,7 @@ pub(crate) fn connect_v4(fd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<
             x86_sys(SYS_CONNECT),
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 borrowed_fd(fd),
-                by_ref(&addr.encode()),
+                by_ref(&encode_sockaddr_v4(addr)),
                 size_of::<sockaddr_in, _>(),
             ]),
         ))
@@ -2208,7 +2240,7 @@ pub(crate) fn connect_v6(fd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<
         ret(syscall3_readonly(
             nr(__NR_connect),
             borrowed_fd(fd),
-            by_ref(&addr.encode()),
+            by_ref(&encode_sockaddr_v6(addr)),
             size_of::<sockaddr_in6, _>(),
         ))
     }
@@ -2219,7 +2251,7 @@ pub(crate) fn connect_v6(fd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<
             x86_sys(SYS_CONNECT),
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 borrowed_fd(fd),
-                by_ref(&addr.encode()),
+                by_ref(&encode_sockaddr_v6(addr)),
                 size_of::<sockaddr_in6, _>(),
             ]),
         ))
@@ -2233,7 +2265,7 @@ pub(crate) fn connect_unix(fd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Res
         ret(syscall3_readonly(
             nr(__NR_connect),
             borrowed_fd(fd),
-            by_ref(&addr.encode()),
+            by_ref(&encode_sockaddr_unix(addr)),
             size_of::<sockaddr_un, _>(),
         ))
     }
@@ -2244,7 +2276,7 @@ pub(crate) fn connect_unix(fd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Res
             x86_sys(SYS_CONNECT),
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 borrowed_fd(fd),
-                by_ref(&addr.encode()),
+                by_ref(&encode_sockaddr_unix(addr)),
                 size_of::<sockaddr_un, _>(),
             ]),
         ))

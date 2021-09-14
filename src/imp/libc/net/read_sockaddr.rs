@@ -1,7 +1,8 @@
-use super::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
-use crate::as_ptr;
+use super::{SocketAddr, SocketAddrUnix};
+use crate::{as_ptr, io};
 use libc::sockaddr_storage;
 use std::mem::size_of;
+use std::net::{Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
 
 // This must match the header of `sockaddr`.
 #[repr(C)]
@@ -66,7 +67,68 @@ unsafe fn read_ss_family(storage: *const sockaddr_storage) -> u16 {
     (*storage.cast::<sockaddr_header>()).ss_family.into()
 }
 
-pub(crate) unsafe fn decode_sockaddr(storage: *const sockaddr_storage, len: u32) -> SocketAddr {
+pub(crate) unsafe fn read_sockaddr(
+    storage: *const sockaddr_storage,
+    len: usize,
+) -> io::Result<SocketAddr> {
+    let offsetof_sun_path = super::offsetof_sun_path();
+
+    if len < size_of::<libc::sa_family_t>() {
+        return Err(io::Error::INVAL);
+    }
+    match read_ss_family(storage).into() {
+        libc::AF_INET => {
+            if len < size_of::<libc::sockaddr_in>() {
+                return Err(io::Error::INVAL);
+            }
+            let decode = *storage.cast::<libc::sockaddr_in>();
+            Ok(SocketAddr::V4(SocketAddrV4::new(
+                Ipv4Addr::from(u32::from_be(decode.sin_addr.s_addr)),
+                u16::from_be(decode.sin_port),
+            )))
+        }
+        libc::AF_INET6 => {
+            if len < size_of::<libc::sockaddr_in6>() {
+                return Err(io::Error::INVAL);
+            }
+            let decode = *storage.cast::<libc::sockaddr_in6>();
+            Ok(SocketAddr::V6(SocketAddrV6::new(
+                Ipv6Addr::from(decode.sin6_addr.s6_addr),
+                u16::from_be(decode.sin6_port),
+                u32::from_be(decode.sin6_flowinfo),
+                decode.sin6_scope_id,
+            )))
+        }
+        libc::AF_UNIX => {
+            if len < offsetof_sun_path {
+                return Err(io::Error::INVAL);
+            }
+            if len == offsetof_sun_path {
+                Ok(SocketAddr::Unix(SocketAddrUnix::new(&[][..]).unwrap()))
+            } else {
+                let decode = *storage.cast::<libc::sockaddr_un>();
+                if decode.sun_path[len - 1 - offsetof_sun_path] != b'\0' as libc::c_char {
+                    return Err(io::Error::INVAL);
+                }
+                let path_bytes = &decode.sun_path[..len - 1 - offsetof_sun_path];
+
+                // FreeBSD sometimes sets the length to longer than the length
+                // of the NUL-terminated string. Find the NUL and truncate the
+                // string accordingly.
+                #[cfg(target_os = "freebsd")]
+                let path_bytes = &path_bytes[..path_bytes.iter().position(|b| *b == 0).unwrap()];
+
+                Ok(SocketAddr::Unix(
+                    SocketAddrUnix::new(path_bytes.iter().map(|c| *c as u8).collect::<Vec<u8>>())
+                        .unwrap(),
+                ))
+            }
+        }
+        _ => Err(io::Error::INVAL),
+    }
+}
+
+pub(crate) unsafe fn read_sockaddr_os(storage: *const sockaddr_storage, len: usize) -> SocketAddr {
     let z = libc::sockaddr_un {
         #[cfg(any(
             target_os = "netbsd",
@@ -111,37 +173,37 @@ pub(crate) unsafe fn decode_sockaddr(storage: *const sockaddr_storage, len: u32)
     };
     let offsetof_sun_path = (as_ptr(&z.sun_path) as usize) - (as_ptr(&z) as usize);
 
-    assert!(len as usize >= size_of::<libc::sa_family_t>());
+    assert!(len >= size_of::<libc::sa_family_t>());
     match read_ss_family(storage).into() {
         libc::AF_INET => {
-            assert!(len as usize >= size_of::<libc::sockaddr_in>());
+            assert!(len >= size_of::<libc::sockaddr_in>());
             let decode = *storage.cast::<libc::sockaddr_in>();
             SocketAddr::V4(SocketAddrV4::new(
-                Ipv4Addr(decode.sin_addr),
+                Ipv4Addr::from(u32::from_be(decode.sin_addr.s_addr)),
                 u16::from_be(decode.sin_port),
             ))
         }
         libc::AF_INET6 => {
-            assert!(len as usize >= size_of::<libc::sockaddr_in6>());
+            assert!(len >= size_of::<libc::sockaddr_in6>());
             let decode = *storage.cast::<libc::sockaddr_in6>();
             SocketAddr::V6(SocketAddrV6::new(
-                Ipv6Addr(decode.sin6_addr),
+                Ipv6Addr::from(decode.sin6_addr.s6_addr),
                 u16::from_be(decode.sin6_port),
-                decode.sin6_flowinfo,
+                u32::from_be(decode.sin6_flowinfo),
                 decode.sin6_scope_id,
             ))
         }
         libc::AF_UNIX => {
-            assert!(len as usize >= offsetof_sun_path);
-            if len as usize == offsetof_sun_path {
+            assert!(len >= offsetof_sun_path);
+            if len == offsetof_sun_path {
                 SocketAddr::Unix(SocketAddrUnix::new(&[][..]).unwrap())
             } else {
                 let decode = *storage.cast::<libc::sockaddr_un>();
                 assert_eq!(
-                    decode.sun_path[len as usize - 1 - offsetof_sun_path],
+                    decode.sun_path[len - 1 - offsetof_sun_path],
                     b'\0' as libc::c_char
                 );
-                let path_bytes = &decode.sun_path[..len as usize - 1 - offsetof_sun_path];
+                let path_bytes = &decode.sun_path[..len - 1 - offsetof_sun_path];
 
                 // FreeBSD sometimes sets the length to longer than the length
                 // of the NUL-terminated string. Find the NUL and truncate the

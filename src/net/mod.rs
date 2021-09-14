@@ -18,7 +18,5 @@ pub use socket::{
 #[cfg(not(target_os = "wasi"))]
 pub use socketpair::socketpair;
 
-#[cfg(libc)]
-pub use imp::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
-#[cfg(linux_raw)]
-pub use imp::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
+pub use imp::net::{SocketAddr, SocketAddrStorage, SocketAddrUnix};
+pub use std::net::{Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
