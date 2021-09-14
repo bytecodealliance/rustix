@@ -99,12 +99,22 @@ impl SocketAddr {
     /// Writes a platform-specific encoding of this socket address to
     /// the memory pointed to by `storage`, and returns the number of
     /// bytes used.
+    ///
+    /// # Safety
+    ///
+    /// `storage` must point to valid memory for encoding the socket
+    /// address.
     pub unsafe fn write(&self, storage: *mut SocketAddrStorage) -> usize {
         write_sockaddr(self, storage)
     }
 
     /// Reads a platform-specific encoding of a socket address from
     /// the memory pointed to by `storage`, which uses `len` bytes.
+    ///
+    /// # Safety
+    ///
+    /// `storage` must point to valid memory for decoding a socket
+    /// address.
     pub unsafe fn read(storage: *const SocketAddrStorage, len: usize) -> io::Result<Self> {
         read_sockaddr(storage, len)
     }
