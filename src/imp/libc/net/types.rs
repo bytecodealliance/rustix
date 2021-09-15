@@ -141,6 +141,14 @@ pub enum Protocol {
         target_os = "openbsd",
     )))]
     Mptcp = libc::IPPROTO_MPTCP,
+    /// `IPPROTO_FRAGMENT`
+    Fragment = libc::IPPROTO_FRAGMENT,
+    /// `IPPROTO_ICMPV6`
+    Icmpv6 = libc::IPPROTO_ICMPV6,
+    /// `IPPROTO_MH`
+    Mh = libc::IPPROTO_MH,
+    /// `IPPROTO_ROUTING`
+    Routing = libc::IPPROTO_ROUTING,
 }
 
 /// `SHUT_*` constants for [`shutdown`].
