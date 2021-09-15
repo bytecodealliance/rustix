@@ -1,12 +1,16 @@
 use bitflags::bitflags;
 use std::os::raw::c_uint;
 
+/// A type for holding raw integer socket types.
+#[doc(hidden)]
+pub type RawSocketType = u32;
+
 /// `SOCK_*` constants for [`socket`].
 ///
 /// [`socket`]: crate::net::socket
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(transparent)]
-pub struct SocketType(pub(crate) u32);
+pub struct SocketType(pub(crate) RawSocketType);
 
 #[rustfmt::skip]
 impl SocketType {
@@ -24,12 +28,28 @@ impl SocketType {
 
     /// `SOCK_RDM`
     pub const RDM: Self = Self(linux_raw_sys::general::SOCK_RDM);
+
+    /// Constructs a `SocketType` from a raw integer.
+    #[inline]
+    pub fn from_raw(raw: RawSocketType) -> Self {
+        Self(raw)
+    }
+
+    /// Returns the raw integer for this `SocketType`.
+    #[inline]
+    pub fn as_raw(self) -> RawSocketType {
+        self.0
+    }
 }
+
+/// A type for holding raw integer address families.
+#[doc(hidden)]
+pub type RawAddressFamily = linux_raw_sys::general::__kernel_sa_family_t;
 
 /// `AF_*` constants.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(transparent)]
-pub struct AddressFamily(pub(crate) linux_raw_sys::general::__kernel_sa_family_t);
+pub struct AddressFamily(pub(crate) RawAddressFamily);
 
 impl AddressFamily {
     /// `AF_INET`
@@ -41,12 +61,28 @@ impl AddressFamily {
     /// `AF_UNIX`, aka `AF_LOCAL`
     #[doc(alias = "LOCAL")]
     pub const UNIX: Self = Self(linux_raw_sys::general::AF_UNIX as _);
+
+    /// Constructs a `AddressFamily` from a raw integer.
+    #[inline]
+    pub fn from_raw(raw: RawAddressFamily) -> Self {
+        Self(raw)
+    }
+
+    /// Returns the raw integer for this `AddressFamily`.
+    #[inline]
+    pub fn as_raw(self) -> RawAddressFamily {
+        self.0
+    }
 }
+
+/// A type for holding raw integer protocols.
+#[doc(hidden)]
+pub type RawProtocol = u32;
 
 /// `IPPROTO_*`
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(transparent)]
-pub struct Protocol(pub(crate) u32);
+pub struct Protocol(pub(crate) RawProtocol);
 
 impl Protocol {
     /// `IPPROTO_IP`
@@ -111,6 +147,18 @@ impl Protocol {
     pub const MH: Self = Self(linux_raw_sys::general::IPPROTO_MH as _);
     /// `IPPROTO_ROUTING`
     pub const ROUTING: Self = Self(linux_raw_sys::general::IPPROTO_ROUTING as _);
+
+    /// Constructs a `Protocol` from a raw integer.
+    #[inline]
+    pub fn from_raw(raw: RawProtocol) -> Self {
+        Self(raw)
+    }
+
+    /// Returns the raw integer for this `Protocol`.
+    #[inline]
+    pub fn as_raw(self) -> RawProtocol {
+        self.0
+    }
 }
 
 /// `SHUT_*` constants for [`shutdown`].
