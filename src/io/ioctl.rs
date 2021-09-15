@@ -1,7 +1,7 @@
 #[cfg(not(target_os = "wasi"))]
 use crate::io::{Termios, Winsize};
 use crate::{imp, io};
-use io_lifetimes::{AsFd, BorrowedFd};
+use io_lifetimes::AsFd;
 
 /// `ioctl(fd, TCGETS)`—Get terminal attributes.
 ///
@@ -39,7 +39,7 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
+pub fn ioctl_tiocgwinsz<Fd: AsFd>(fd: &Fd) -> io::Result<Winsize> {
     let fd = fd.as_fd();
     imp::syscalls::ioctl_tiocgwinsz(fd)
 }
