@@ -156,10 +156,26 @@ pub enum Shutdown {
 }
 
 bitflags! {
-    /// `SOCK_*` constants for [`accept`].
+    /// `SOCK_*` constants for [`accept_with`] and [`acceptfrom_with`].
     ///
-    /// [`accept`]: crate::net::accept
+    /// [`accept_with`]: crate::net::accept_with
+    /// [`acceptfrom_with`]: crate::net::acceptfrom_with
     pub struct AcceptFlags: c_int {
+        /// `SOCK_NONBLOCK`
+        #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+        const NONBLOCK = libc::SOCK_NONBLOCK;
+
+        /// `SOCK_CLOEXEC`
+        #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+        const CLOEXEC = libc::SOCK_CLOEXEC;
+    }
+}
+
+bitflags! {
+    /// `SOCK_*` constants for [`socket`].
+    ///
+    /// [`socket`]: crate::net::socket
+    pub struct SocketFlags: c_int {
         /// `SOCK_NONBLOCK`
         #[cfg(not(any(target_os = "ios", target_os = "macos")))]
         const NONBLOCK = libc::SOCK_NONBLOCK;

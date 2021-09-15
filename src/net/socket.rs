@@ -3,7 +3,7 @@ use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use io_lifetimes::AsFd;
 
-pub use imp::net::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketType};
+pub use imp::net::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 
 impl Default for Protocol {
     #[inline]
@@ -27,6 +27,31 @@ impl Default for Protocol {
 #[inline]
 pub fn socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::Result<OwnedFd> {
     imp::syscalls::socket(domain, type_, protocol)
+}
+
+/// `socket_with(domain, type_ | flags, protocol)`—Creates a socket, with
+/// flags.
+///
+/// POSIX guarantees that `socket` will use the lowest unused file descriptor,
+/// however it is not safe in general to rely on this, as file descriptors
+/// may be unexpectedly allocated on other threads or in libraries.
+///
+/// `socket_with` is the same as `socket` but adds an additional flags operand.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/socket.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/socket.2.html
+#[inline]
+pub fn socket_with(
+    domain: AddressFamily,
+    type_: SocketType,
+    flags: SocketFlags,
+    protocol: Protocol,
+) -> io::Result<OwnedFd> {
+    imp::syscalls::socket_with(domain, type_, flags, protocol)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in))`—Binds a socket to an

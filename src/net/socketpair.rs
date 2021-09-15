@@ -1,6 +1,6 @@
 use crate::imp;
 use crate::io::{self, OwnedFd};
-use crate::net::{AcceptFlags, AddressFamily, Protocol, SocketType};
+use crate::net::{AddressFamily, Protocol, SocketFlags, SocketType};
 
 /// `socketpair(domain, type_ | accept_flags, protocol)`
 ///
@@ -14,8 +14,8 @@ use crate::net::{AcceptFlags, AddressFamily, Protocol, SocketType};
 pub fn socketpair(
     domain: AddressFamily,
     type_: SocketType,
-    accept_flags: AcceptFlags,
+    flags: SocketFlags,
     protocol: Protocol,
 ) -> io::Result<(OwnedFd, OwnedFd)> {
-    imp::syscalls::socketpair(domain, type_, accept_flags, protocol)
+    imp::syscalls::socketpair(domain, type_, flags, protocol)
 }
