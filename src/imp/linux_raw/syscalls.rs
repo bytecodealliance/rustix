@@ -1516,7 +1516,7 @@ pub(crate) fn socket(
             nr(__NR_socket),
             c_uint(family.0.into()),
             c_uint(type_.0),
-            c_uint(protocol as u32),
+            c_uint(protocol.0),
         ))
     }
     #[cfg(target_arch = "x86")]
@@ -1527,7 +1527,7 @@ pub(crate) fn socket(
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 c_uint(family.0.into()),
                 c_uint(type_.0),
-                c_uint(protocol as u32),
+                c_uint(protocol.0),
             ]),
         ))
     }
@@ -1546,7 +1546,7 @@ pub(crate) fn socket_with(
             nr(__NR_socket),
             c_uint(family.0.into()),
             c_uint(type_.0 | flags.bits()),
-            c_uint(protocol as u32),
+            c_uint(protocol.0),
         ))
     }
     #[cfg(target_arch = "x86")]
@@ -1557,7 +1557,7 @@ pub(crate) fn socket_with(
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 c_uint(family.0.into()),
                 c_uint(type_.0 | flags.bits()),
-                c_uint(protocol as u32),
+                c_uint(protocol.0),
             ]),
         ))
     }
@@ -1577,7 +1577,7 @@ pub(crate) fn socketpair(
             nr(__NR_socketpair),
             c_uint(family.0.into()),
             c_uint(type_.0 | flags.bits()),
-            c_uint(protocol as c_uint),
+            c_uint(protocol.0),
             out(&mut result),
         ))
         .map(|()| {
@@ -1594,7 +1594,7 @@ pub(crate) fn socketpair(
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 c_uint(family.0.into()),
                 c_uint(type_.0 | flags.bits()),
-                c_uint(protocol as u32),
+                c_uint(protocol.0),
                 out(&mut result),
             ]),
         ))
