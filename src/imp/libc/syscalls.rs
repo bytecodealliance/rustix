@@ -1514,7 +1514,7 @@ pub(crate) fn socket(
         ret_owned_fd(libc::socket(
             domain.0 as c_int,
             type_.0 as c_int,
-            protocol as c_int,
+            protocol.0,
         ))
     }
 }
@@ -1530,7 +1530,7 @@ pub(crate) fn socket_with(
         ret_owned_fd(libc::socket(
             domain.0 as c_int,
             type_.0 as c_int | flags.bits(),
-            protocol as c_int,
+            protocol.0,
         ))
     }
 }
@@ -1758,7 +1758,7 @@ pub(crate) fn socketpair(
         ret(libc::socketpair(
             domain.0 as c_int,
             type_.0 as c_int | flags.bits(),
-            protocol as c_int,
+            protocol.0,
             fds.as_mut_ptr().cast::<c_int>(),
         ))?;
 

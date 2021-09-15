@@ -45,71 +45,72 @@ impl AddressFamily {
 
 /// `IPPROTO_*`
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-#[repr(u32)]
-#[non_exhaustive]
-pub enum Protocol {
+#[repr(transparent)]
+pub struct Protocol(pub(crate) u32);
+
+impl Protocol {
     /// `IPPROTO_IP`
-    Ip = linux_raw_sys::general::IPPROTO_IP as u32,
+    pub const IP: Self = Self(linux_raw_sys::general::IPPROTO_IP as _);
     /// `IPPROTO_ICMP`
-    Icmp = linux_raw_sys::general::IPPROTO_ICMP as u32,
+    pub const ICMP: Self = Self(linux_raw_sys::general::IPPROTO_ICMP as _);
     /// `IPPROTO_IGMP`
-    Igmp = linux_raw_sys::general::IPPROTO_IGMP as u32,
+    pub const IGMP: Self = Self(linux_raw_sys::general::IPPROTO_IGMP as _);
     /// `IPPROTO_IPIP`
-    Ipip = linux_raw_sys::general::IPPROTO_IPIP as u32,
+    pub const IPIP: Self = Self(linux_raw_sys::general::IPPROTO_IPIP as _);
     /// `IPPROTO_TCP`
-    Tcp = linux_raw_sys::general::IPPROTO_TCP as u32,
+    pub const TCP: Self = Self(linux_raw_sys::general::IPPROTO_TCP as _);
     /// `IPPROTO_EGP`
-    Egp = linux_raw_sys::general::IPPROTO_EGP as u32,
+    pub const EGP: Self = Self(linux_raw_sys::general::IPPROTO_EGP as _);
     /// `IPPROTO_PUP`
-    Pup = linux_raw_sys::general::IPPROTO_PUP as u32,
+    pub const PUP: Self = Self(linux_raw_sys::general::IPPROTO_PUP as _);
     /// `IPPROTO_UDP`
-    Udp = linux_raw_sys::general::IPPROTO_UDP as u32,
+    pub const UDP: Self = Self(linux_raw_sys::general::IPPROTO_UDP as _);
     /// `IPPROTO_IDP`
-    Idp = linux_raw_sys::general::IPPROTO_IDP as u32,
+    pub const IDP: Self = Self(linux_raw_sys::general::IPPROTO_IDP as _);
     /// `IPPROTO_TP`
-    Tp = linux_raw_sys::v5_4::general::IPPROTO_TP as u32,
+    pub const TP: Self = Self(linux_raw_sys::v5_4::general::IPPROTO_TP as _);
     /// `IPPROTO_DCCP`
-    Dccp = linux_raw_sys::general::IPPROTO_DCCP as u32,
+    pub const DCCP: Self = Self(linux_raw_sys::general::IPPROTO_DCCP as _);
     /// `IPPROTO_IPV6`
-    Ipv6 = linux_raw_sys::general::IPPROTO_IPV6 as u32,
+    pub const IPV6: Self = Self(linux_raw_sys::general::IPPROTO_IPV6 as _);
     /// `IPPROTO_RSVP`
-    Rsvp = linux_raw_sys::general::IPPROTO_RSVP as u32,
+    pub const RSVP: Self = Self(linux_raw_sys::general::IPPROTO_RSVP as _);
     /// `IPPROTO_GRE`
-    Gre = linux_raw_sys::general::IPPROTO_GRE as u32,
+    pub const GRE: Self = Self(linux_raw_sys::general::IPPROTO_GRE as _);
     /// `IPPROTO_ESP`
-    Esp = linux_raw_sys::general::IPPROTO_ESP as u32,
+    pub const ESP: Self = Self(linux_raw_sys::general::IPPROTO_ESP as _);
     /// `IPPROTO_AH`
-    Ah = linux_raw_sys::general::IPPROTO_AH as u32,
+    pub const AH: Self = Self(linux_raw_sys::general::IPPROTO_AH as _);
     /// `IPPROTO_MTP`
-    Mtp = linux_raw_sys::v5_4::general::IPPROTO_MTP as u32,
+    pub const MTP: Self = Self(linux_raw_sys::v5_4::general::IPPROTO_MTP as _);
     /// `IPPROTO_BEETPH`
-    Beetph = linux_raw_sys::general::IPPROTO_BEETPH as u32,
+    pub const BEETPH: Self = Self(linux_raw_sys::general::IPPROTO_BEETPH as _);
     /// `IPPROTO_ENCAP`
-    Encap = linux_raw_sys::v5_4::general::IPPROTO_ENCAP as u32,
+    pub const ENCAP: Self = Self(linux_raw_sys::v5_4::general::IPPROTO_ENCAP as _);
     /// `IPPROTO_PIM`
-    Pim = linux_raw_sys::general::IPPROTO_PIM as u32,
+    pub const PIM: Self = Self(linux_raw_sys::general::IPPROTO_PIM as _);
     /// `IPPROTO_COMP`
-    Comp = linux_raw_sys::general::IPPROTO_COMP as u32,
+    pub const COMP: Self = Self(linux_raw_sys::general::IPPROTO_COMP as _);
     /// `IPPROTO_SCTP`
-    Sctp = linux_raw_sys::general::IPPROTO_SCTP as u32,
+    pub const SCTP: Self = Self(linux_raw_sys::general::IPPROTO_SCTP as _);
     /// `IPPROTO_UDPLITE`
-    Udplite = linux_raw_sys::general::IPPROTO_UDPLITE as u32,
+    pub const UDPLITE: Self = Self(linux_raw_sys::general::IPPROTO_UDPLITE as _);
     /// `IPPROTO_MPLS`
-    Mpls = linux_raw_sys::v5_4::general::IPPROTO_MPLS as u32,
+    pub const MPLS: Self = Self(linux_raw_sys::v5_4::general::IPPROTO_MPLS as _);
     /// `IPPROTO_ETHERNET`
-    Ethernet = linux_raw_sys::v5_11::general::IPPROTO_ETHERNET as u32,
+    pub const ETHERNET: Self = Self(linux_raw_sys::v5_11::general::IPPROTO_ETHERNET as _);
     /// `IPPROTO_RAW`
-    Raw = linux_raw_sys::general::IPPROTO_RAW as u32,
+    pub const RAW: Self = Self(linux_raw_sys::general::IPPROTO_RAW as _);
     /// `IPPROTO_MPTCP`
-    Mptcp = linux_raw_sys::v5_11::general::IPPROTO_MPTCP as u32,
+    pub const MPTCP: Self = Self(linux_raw_sys::v5_11::general::IPPROTO_MPTCP as _);
     /// `IPPROTO_FRAGMENT`
-    Fragment = linux_raw_sys::general::IPPROTO_FRAGMENT as u32,
+    pub const FRAGMENT: Self = Self(linux_raw_sys::general::IPPROTO_FRAGMENT as _);
     /// `IPPROTO_ICMPV6`
-    Icmpv6 = linux_raw_sys::general::IPPROTO_ICMPV6 as u32,
+    pub const ICMPV6: Self = Self(linux_raw_sys::general::IPPROTO_ICMPV6 as _);
     /// `IPPROTO_MH`
-    Mh = linux_raw_sys::general::IPPROTO_MH as u32,
+    pub const MH: Self = Self(linux_raw_sys::general::IPPROTO_MH as _);
     /// `IPPROTO_ROUTING`
-    Routing = linux_raw_sys::general::IPPROTO_ROUTING as u32,
+    pub const ROUTING: Self = Self(linux_raw_sys::general::IPPROTO_ROUTING as _);
 }
 
 /// `SHUT_*` constants for [`shutdown`].

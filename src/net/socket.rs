@@ -8,7 +8,7 @@ pub use imp::net::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, 
 impl Default for Protocol {
     #[inline]
     fn default() -> Self {
-        Self::Ip
+        Self::IP
     }
 }
 

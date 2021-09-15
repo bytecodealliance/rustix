@@ -52,45 +52,46 @@ impl AddressFamily {
 
 /// `IPPROTO_*`
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-#[repr(i32)]
-#[non_exhaustive]
-pub enum Protocol {
+#[repr(transparent)]
+pub struct Protocol(pub(crate) i32);
+
+impl Protocol {
     /// `IPPROTO_IP`
-    Ip = libc::IPPROTO_IP,
+    pub const IP: Self = Self(libc::IPPROTO_IP as _);
     /// `IPPROTO_ICMP`
-    Icmp = libc::IPPROTO_ICMP,
+    pub const ICMP: Self = Self(libc::IPPROTO_ICMP as _);
     /// `IPPROTO_IGMP`
-    Igmp = libc::IPPROTO_IGMP,
+    pub const IGMP: Self = Self(libc::IPPROTO_IGMP as _);
     /// `IPPROTO_IPIP`
-    Ipip = libc::IPPROTO_IPIP,
+    pub const IPIP: Self = Self(libc::IPPROTO_IPIP as _);
     /// `IPPROTO_TCP`
-    Tcp = libc::IPPROTO_TCP,
+    pub const TCP: Self = Self(libc::IPPROTO_TCP as _);
     /// `IPPROTO_EGP`
-    Egp = libc::IPPROTO_EGP,
+    pub const EGP: Self = Self(libc::IPPROTO_EGP as _);
     /// `IPPROTO_PUP`
-    Pup = libc::IPPROTO_PUP,
+    pub const PUP: Self = Self(libc::IPPROTO_PUP as _);
     /// `IPPROTO_UDP`
-    Udp = libc::IPPROTO_UDP,
+    pub const UDP: Self = Self(libc::IPPROTO_UDP as _);
     /// `IPPROTO_IDP`
-    Idp = libc::IPPROTO_IDP,
+    pub const IDP: Self = Self(libc::IPPROTO_IDP as _);
     /// `IPPROTO_TP`
-    Tp = libc::IPPROTO_TP,
+    pub const TP: Self = Self(libc::IPPROTO_TP as _);
     /// `IPPROTO_DCCP`
     #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
-    Dccp = libc::IPPROTO_DCCP,
+    pub const DCCP: Self = Self(libc::IPPROTO_DCCP as _);
     /// `IPPROTO_IPV6`
-    Ipv6 = libc::IPPROTO_IPV6,
+    pub const IPV6: Self = Self(libc::IPPROTO_IPV6 as _);
     /// `IPPROTO_RSVP`
-    Rsvp = libc::IPPROTO_RSVP,
+    pub const RSVP: Self = Self(libc::IPPROTO_RSVP as _);
     /// `IPPROTO_GRE`
-    Gre = libc::IPPROTO_GRE,
+    pub const GRE: Self = Self(libc::IPPROTO_GRE as _);
     /// `IPPROTO_ESP`
-    Esp = libc::IPPROTO_ESP,
+    pub const ESP: Self = Self(libc::IPPROTO_ESP as _);
     /// `IPPROTO_AH`
-    Ah = libc::IPPROTO_AH,
+    pub const AH: Self = Self(libc::IPPROTO_AH as _);
     /// `IPPROTO_MTP`
     #[cfg(not(any(target_os = "netbsd", target_os = "openbsd")))]
-    Mtp = libc::IPPROTO_MTP,
+    pub const MTP: Self = Self(libc::IPPROTO_MTP as _);
     /// `IPPROTO_BEETPH`
     #[cfg(not(any(
         target_os = "freebsd",
@@ -99,11 +100,11 @@ pub enum Protocol {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    Beetph = libc::IPPROTO_BEETPH,
+    pub const BEETPH: Self = Self(libc::IPPROTO_BEETPH as _);
     /// `IPPROTO_ENCAP`
-    Encap = libc::IPPROTO_ENCAP,
+    pub const ENCAP: Self = Self(libc::IPPROTO_ENCAP as _);
     /// `IPPROTO_PIM`
-    Pim = libc::IPPROTO_PIM,
+    pub const PIM: Self = Self(libc::IPPROTO_PIM as _);
     /// `IPPROTO_COMP`
     #[cfg(not(any(
         target_os = "freebsd",
@@ -112,10 +113,10 @@ pub enum Protocol {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    Comp = libc::IPPROTO_COMP,
+    pub const COMP: Self = Self(libc::IPPROTO_COMP as _);
     /// `IPPROTO_SCTP`
     #[cfg(not(target_os = "openbsd"))]
-    Sctp = libc::IPPROTO_SCTP,
+    pub const SCTP: Self = Self(libc::IPPROTO_SCTP as _);
     /// `IPPROTO_UDPLITE`
     #[cfg(not(any(
         target_os = "ios",
@@ -123,12 +124,12 @@ pub enum Protocol {
         target_os = "netbsd",
         target_os = "openbsd"
     )))]
-    Udplite = libc::IPPROTO_UDPLITE,
+    pub const UDPLITE: Self = Self(libc::IPPROTO_UDPLITE as _);
     /// `IPPROTO_MPLS`
     #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "netbsd")))]
-    Mpls = libc::IPPROTO_MPLS,
+    pub const MPLS: Self = Self(libc::IPPROTO_MPLS as _);
     /// `IPPROTO_RAW`
-    Raw = libc::IPPROTO_RAW,
+    pub const RAW: Self = Self(libc::IPPROTO_RAW as _);
     /// `IPPROTO_MPTCP`
     #[cfg(not(any(
         target_os = "android",
@@ -140,15 +141,15 @@ pub enum Protocol {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    Mptcp = libc::IPPROTO_MPTCP,
+    pub const MPTCP: Self = Self(libc::IPPROTO_MPTCP as _);
     /// `IPPROTO_FRAGMENT`
-    Fragment = libc::IPPROTO_FRAGMENT,
+    pub const FRAGMENT: Self = Self(libc::IPPROTO_FRAGMENT as _);
     /// `IPPROTO_ICMPV6`
-    Icmpv6 = libc::IPPROTO_ICMPV6,
+    pub const ICMPV6: Self = Self(libc::IPPROTO_ICMPV6 as _);
     /// `IPPROTO_MH`
-    Mh = libc::IPPROTO_MH,
+    pub const MH: Self = Self(libc::IPPROTO_MH as _);
     /// `IPPROTO_ROUTING`
-    Routing = libc::IPPROTO_ROUTING,
+    pub const ROUTING: Self = Self(libc::IPPROTO_ROUTING as _);
 }
 
 /// `SHUT_*` constants for [`shutdown`].
