@@ -230,7 +230,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.gcc_package }}
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
         upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
         echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
       if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'
@@ -249,8 +249,8 @@ jobs:
         # way faster at arm emulation than the current version github actions'
         # ubuntu image uses. Disable as much as we can to get it to build
         # quickly.
-        curl https://download.qemu.org/qemu-5.1.0.tar.xz | tar xJf -
-        cd qemu-5.1.0
+        curl https://download.qemu.org/qemu-6.1.0.tar.xz | tar xJf -
+        cd qemu-6.1.0
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=$HOME/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         make -j$(nproc) install
 
@@ -333,7 +333,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.gcc_package }}
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
         upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
         echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
       if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'
@@ -352,8 +352,8 @@ jobs:
         # way faster at arm emulation than the current version github actions'
         # ubuntu image uses. Disable as much as we can to get it to build
         # quickly.
-        curl https://download.qemu.org/qemu-5.1.0.tar.xz | tar xJf -
-        cd qemu-5.1.0
+        curl https://download.qemu.org/qemu-6.1.0.tar.xz | tar xJf -
+        cd qemu-6.1.0
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=$HOME/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         make -j$(nproc) install
 
