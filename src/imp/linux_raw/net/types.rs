@@ -102,6 +102,14 @@ pub enum Protocol {
     Raw = linux_raw_sys::general::IPPROTO_RAW as u32,
     /// `IPPROTO_MPTCP`
     Mptcp = linux_raw_sys::v5_11::general::IPPROTO_MPTCP as u32,
+    /// `IPPROTO_FRAGMENT`
+    Fragment = linux_raw_sys::general::IPPROTO_FRAGMENT as u32,
+    /// `IPPROTO_ICMPV6`
+    Icmpv6 = linux_raw_sys::general::IPPROTO_ICMPV6 as u32,
+    /// `IPPROTO_MH`
+    Mh = linux_raw_sys::general::IPPROTO_MH as u32,
+    /// `IPPROTO_ROUTING`
+    Routing = linux_raw_sys::general::IPPROTO_ROUTING as u32,
 }
 
 /// `SHUT_*` constants for [`shutdown`].
