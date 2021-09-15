@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use rsix::fs::{Mode, OFlags};
 use tempfile::{tempdir, TempDir};
 
