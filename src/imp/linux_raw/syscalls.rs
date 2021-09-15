@@ -42,7 +42,7 @@ use super::io::{Termios, Winsize};
 use super::net::{
     encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags,
     AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketAddr, SocketAddrUnix,
-    SocketType,
+    SocketFlags, SocketType,
 };
 use super::process::RawUname;
 use super::rand::GetRandomFlags;
@@ -1534,10 +1534,40 @@ pub(crate) fn socket(
 }
 
 #[inline]
+pub(crate) fn socket_with(
+    family: AddressFamily,
+    type_: SocketType,
+    flags: SocketFlags,
+    protocol: Protocol,
+) -> io::Result<OwnedFd> {
+    #[cfg(not(target_arch = "x86"))]
+    unsafe {
+        ret_owned_fd(syscall3_readonly(
+            nr(__NR_socket),
+            c_uint(family.0.into()),
+            c_uint(type_.0 | flags.bits()),
+            c_uint(protocol as u32),
+        ))
+    }
+    #[cfg(target_arch = "x86")]
+    unsafe {
+        ret_owned_fd(syscall2_readonly(
+            nr(__NR_socketcall),
+            x86_sys(SYS_SOCKET),
+            slice_just_addr::<ArgReg<SocketArg>, _>(&[
+                c_uint(family.0.into()),
+                c_uint(type_.0 | flags.bits()),
+                c_uint(protocol as u32),
+            ]),
+        ))
+    }
+}
+
+#[inline]
 pub(crate) fn socketpair(
     family: AddressFamily,
     type_: SocketType,
-    accept_flags: AcceptFlags,
+    flags: SocketFlags,
     protocol: Protocol,
 ) -> io::Result<(OwnedFd, OwnedFd)> {
     #[cfg(not(target_arch = "x86"))]
@@ -1546,7 +1576,7 @@ pub(crate) fn socketpair(
         ret(syscall4(
             nr(__NR_socketpair),
             c_uint(family.0.into()),
-            c_uint(type_.0 | accept_flags.bits()),
+            c_uint(type_.0 | flags.bits()),
             c_uint(protocol as c_uint),
             out(&mut result),
         ))
@@ -1563,7 +1593,7 @@ pub(crate) fn socketpair(
             x86_sys(SYS_SOCKETPAIR),
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 c_uint(family.0.into()),
-                c_uint(type_.0 | accept_flags.bits()),
+                c_uint(type_.0 | flags.bits()),
                 c_uint(protocol as u32),
                 out(&mut result),
             ]),

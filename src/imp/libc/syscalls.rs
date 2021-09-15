@@ -55,7 +55,7 @@ use super::io::ReadWriteFlags;
 use super::net::{
     encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags,
     AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketAddr, SocketAddrUnix,
-    SocketType,
+    SocketFlags, SocketType,
 };
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 use super::offset::libc_fallocate;
@@ -1521,6 +1521,22 @@ pub(crate) fn socket(
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub(crate) fn socket_with(
+    domain: AddressFamily,
+    type_: SocketType,
+    flags: SocketFlags,
+    protocol: Protocol,
+) -> io::Result<OwnedFd> {
+    unsafe {
+        ret_owned_fd(libc::socket(
+            domain.0 as c_int,
+            type_.0 as c_int | flags.bits(),
+            protocol as c_int,
+        ))
+    }
+}
+
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn bind_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     unsafe {
         ret(libc::bind(
@@ -1735,14 +1751,14 @@ pub(crate) fn getpeername(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
 pub(crate) fn socketpair(
     domain: AddressFamily,
     type_: SocketType,
-    accept_flags: AcceptFlags,
+    flags: SocketFlags,
     protocol: Protocol,
 ) -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut fds = MaybeUninit::<[OwnedFd; 2]>::uninit();
         ret(libc::socketpair(
             domain.0 as c_int,
-            type_.0 as c_int | accept_flags.bits(),
+            type_.0 as c_int | flags.bits(),
             protocol as c_int,
             fds.as_mut_ptr().cast::<c_int>(),
         ))?;
