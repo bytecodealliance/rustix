@@ -2,33 +2,88 @@
 // userspace argument register ordering except that the syscall number
 // (nr) is passed in a7.
 //
-// outline.rs takes care of reordering the nr argument to the end for us,
-// so we only need to move nr into eax and move rcx into r10 as needed.
+// nr_last.rs takes care of reordering the nr argument to the end for us,
+// so we only need to move nr into a7.
 
-    .section    .text.rsix_reordered_syscall,"ax",@progbits
+    .section    .text.rsix_reordered_syscall0,"ax",@progbits
     .p2align    4
-rsix_reordered_syscall:
 rsix_reordered_syscall0:
-rsix_reordered_syscall1:
-rsix_reordered_syscall2:
-rsix_reordered_syscall3:
-rsix_reordered_syscall4:
-rsix_reordered_syscall5:
-rsix_reordered_syscall6:
     .cfi_startproc
+    mv      a7, a0
     ecall
     ret
     .cfi_endproc
-    .size rsix_reordered_syscall, .-rsix_reordered_syscall
+    .size rsix_reordered_syscall0, .-rsix_reordered_syscall0
+
+    .section    .text.rsix_reordered_syscall1,"ax",@progbits
+    .p2align    4
+rsix_reordered_syscall1:
+    .cfi_startproc
+    mv      a7, a1
+    ecall
+    ret
+    .cfi_endproc
+    .size rsix_reordered_syscall1, .-rsix_reordered_syscall1
 
     .section    .text.rsix_reordered_syscall1_noreturn,"ax",@progbits
     .p2align    4
 rsix_reordered_syscall1_noreturn:
     .cfi_startproc
+    mv      a7, a1
     ecall
     unimp
     .cfi_endproc
     .size rsix_reordered_syscall1_noreturn, .-rsix_reordered_syscall1_noreturn
+
+    .section    .text.rsix_reordered_syscall2,"ax",@progbits
+    .p2align    4
+rsix_reordered_syscall2:
+    .cfi_startproc
+    mv      a7, a2
+    ecall
+    ret
+    .cfi_endproc
+    .size rsix_reordered_syscall2, .-rsix_reordered_syscall2
+
+    .section    .text.rsix_reordered_syscall3,"ax",@progbits
+    .p2align    4
+rsix_reordered_syscall3:
+    .cfi_startproc
+    mv      a7, a3
+    ecall
+    ret
+    .cfi_endproc
+    .size rsix_reordered_syscall3, .-rsix_reordered_syscall3
+
+    .section    .text.rsix_reordered_syscall4,"ax",@progbits
+    .p2align    4
+rsix_reordered_syscall4:
+    .cfi_startproc
+    mv      a7, a4
+    ecall
+    ret
+    .cfi_endproc
+    .size rsix_reordered_syscall4, .-rsix_reordered_syscall4
+
+    .section    .text.rsix_reordered_syscall5,"ax",@progbits
+    .p2align    4
+rsix_reordered_syscall5:
+    .cfi_startproc
+    mv      a7, a5
+    ecall
+    ret
+    .cfi_endproc
+    .size rsix_reordered_syscall5, .-rsix_reordered_syscall5
+
+    .section    .text.rsix_reordered_syscall6,"ax",@progbits
+    .p2align    4
+rsix_reordered_syscall6:
+    .cfi_startproc
+    mv      a7, a6
+    ecall
+    ret
+    .cfi_endproc
+    .size rsix_reordered_syscall6, .-rsix_reordered_syscall6
 
     .globl   rsix_reordered_syscall0
     .globl   rsix_reordered_syscall1
