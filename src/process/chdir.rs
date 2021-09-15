@@ -1,5 +1,4 @@
-use crate::io;
-use crate::{imp, path};
+use crate::{imp, io, path};
 #[cfg(not(target_os = "fuchsia"))]
 use io_lifetimes::AsFd;
 #[cfg(not(target_os = "wasi"))]
@@ -42,7 +41,7 @@ pub fn fchdir<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn getcwd(reuse: OsString) -> io::Result<OsString> {
-    use std::os::unix::prelude::OsStringExt;
+    use std::os::unix::ffi::OsStringExt;
 
     // This code would benefit from having a better way to read into
     // uninitialized memory, but that requires `unsafe`.

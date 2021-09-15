@@ -1,4 +1,3 @@
-use super::conv::c_str;
 #[cfg(not(any(
     target_os = "freebsd",
     target_os = "ios",
@@ -10,7 +9,7 @@ use super::conv::c_str;
 )))]
 use super::conv::ret_u32;
 use super::conv::{
-    borrowed_fd, no_fd, ret, ret_c_int, ret_discarded_char_ptr, ret_discarded_fd, ret_off_t,
+    borrowed_fd, c_str, no_fd, ret, ret_c_int, ret_discarded_char_ptr, ret_discarded_fd, ret_off_t,
     ret_owned_fd, ret_ssize_t,
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
