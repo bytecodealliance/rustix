@@ -52,6 +52,8 @@ pub type RawAddressFamily = libc::sa_family_t;
 pub struct AddressFamily(pub(crate) RawAddressFamily);
 
 impl AddressFamily {
+    /// `AF_UNSPEC`
+    pub const UNSPEC: Self = Self(libc::AF_UNSPEC as _);
     /// `AF_INET`
     pub const INET: Self = Self(libc::AF_INET as _);
     /// `AF_INET6`
@@ -68,6 +70,236 @@ impl AddressFamily {
     /// `AF_UNIX`, aka `AF_LOCAL`
     #[doc(alias = "LOCAL")]
     pub const UNIX: Self = Self(libc::AF_UNIX as _);
+    /// `AF_AX25`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const AX25: Self = Self(libc::AF_AX25 as _);
+    /// `AF_IPX`
+    pub const IPX: Self = Self(libc::AF_IPX as _);
+    /// `AF_APPLETALK`
+    pub const APPLETALK: Self = Self(libc::AF_APPLETALK as _);
+    /// `AF_NETROM`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const NETROM: Self = Self(libc::AF_NETROM as _);
+    /// `AF_BRIDGE`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const BRIDGE: Self = Self(libc::AF_BRIDGE as _);
+    /// `AF_ATMPVC`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const ATMPVC: Self = Self(libc::AF_ATMPVC as _);
+    /// `AF_X25`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const X25: Self = Self(libc::AF_X25 as _);
+    /// `AF_ROSE`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const ROSE: Self = Self(libc::AF_ROSE as _);
+    /// `AF_DECnet`
+    #[allow(non_upper_case_globals)]
+    pub const DECnet: Self = Self(libc::AF_DECnet as _);
+    /// `AF_NETBEUI`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const NETBEUI: Self = Self(libc::AF_NETBEUI as _);
+    /// `AF_SECURITY`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const SECURITY: Self = Self(libc::AF_SECURITY as _);
+    /// `AF_KEY`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const KEY: Self = Self(libc::AF_KEY as _);
+    /// `AF_PACKET`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const PACKET: Self = Self(libc::AF_PACKET as _);
+    /// `AF_ASH`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const ASH: Self = Self(libc::AF_ASH as _);
+    /// `AF_ECONET`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const ECONET: Self = Self(libc::AF_ECONET as _);
+    /// `AF_ATMSVC`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const ATMSVC: Self = Self(libc::AF_ATMSVC as _);
+    /// `AF_RDS`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const RDS: Self = Self(libc::AF_RDS as _);
+    /// `AF_SNA`
+    pub const SNA: Self = Self(libc::AF_SNA as _);
+    /// `AF_IRDA`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const IRDA: Self = Self(libc::AF_IRDA as _);
+    /// `AF_PPPOX`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const PPPOX: Self = Self(libc::AF_PPPOX as _);
+    /// `AF_WANPIPE`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const WANPIPE: Self = Self(libc::AF_WANPIPE as _);
+    /// `AF_LLC`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const LLC: Self = Self(libc::AF_LLC as _);
+    /// `AF_CAN`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const CAN: Self = Self(libc::AF_CAN as _);
+    /// `AF_TIPC`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const TIPC: Self = Self(libc::AF_TIPC as _);
+    /// `AF_BLUETOOTH`
+    #[cfg(not(any(target_os = "ios", target_os = "macos",)))]
+    pub const BLUETOOTH: Self = Self(libc::AF_BLUETOOTH as _);
+    /// `AF_IUCV`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const IUCV: Self = Self(libc::AF_IUCV as _);
+    /// `AF_RXRPC`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const RXRPC: Self = Self(libc::AF_RXRPC as _);
+    /// `AF_ISDN`
+    pub const ISDN: Self = Self(libc::AF_ISDN as _);
+    /// `AF_PHONET`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const PHONET: Self = Self(libc::AF_PHONET as _);
+    /// `AF_IEEE802154`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    pub const IEEE802154: Self = Self(libc::AF_IEEE802154 as _);
 
     /// Constructs a `AddressFamily` from a raw integer.
     #[inline]

@@ -52,6 +52,8 @@ pub type RawAddressFamily = linux_raw_sys::general::__kernel_sa_family_t;
 pub struct AddressFamily(pub(crate) RawAddressFamily);
 
 impl AddressFamily {
+    /// `AF_UNSPEC`
+    pub const UNSPEC: Self = Self(linux_raw_sys::general::AF_UNSPEC as _);
     /// `AF_INET`
     pub const INET: Self = Self(linux_raw_sys::general::AF_INET as _);
     /// `AF_INET6`
@@ -61,6 +63,67 @@ impl AddressFamily {
     /// `AF_UNIX`, aka `AF_LOCAL`
     #[doc(alias = "LOCAL")]
     pub const UNIX: Self = Self(linux_raw_sys::general::AF_UNIX as _);
+    /// `AF_AX25`
+    pub const AX25: Self = Self(linux_raw_sys::general::AF_AX25 as _);
+    /// `AF_IPX`
+    pub const IPX: Self = Self(linux_raw_sys::general::AF_IPX as _);
+    /// `AF_APPLETALK`
+    pub const APPLETALK: Self = Self(linux_raw_sys::general::AF_APPLETALK as _);
+    /// `AF_NETROM`
+    pub const NETROM: Self = Self(linux_raw_sys::general::AF_NETROM as _);
+    /// `AF_BRIDGE`
+    pub const BRIDGE: Self = Self(linux_raw_sys::general::AF_BRIDGE as _);
+    /// `AF_ATMPVC`
+    pub const ATMPVC: Self = Self(linux_raw_sys::general::AF_ATMPVC as _);
+    /// `AF_X25`
+    pub const X25: Self = Self(linux_raw_sys::general::AF_X25 as _);
+    /// `AF_ROSE`
+    pub const ROSE: Self = Self(linux_raw_sys::general::AF_ROSE as _);
+    /// `AF_DECnet`
+    #[allow(non_upper_case_globals)]
+    pub const DECnet: Self = Self(linux_raw_sys::general::AF_DECnet as _);
+    /// `AF_NETBEUI`
+    pub const NETBEUI: Self = Self(linux_raw_sys::general::AF_NETBEUI as _);
+    /// `AF_SECURITY`
+    pub const SECURITY: Self = Self(linux_raw_sys::general::AF_SECURITY as _);
+    /// `AF_KEY`
+    pub const KEY: Self = Self(linux_raw_sys::general::AF_KEY as _);
+    /// `AF_PACKET`
+    pub const PACKET: Self = Self(linux_raw_sys::general::AF_PACKET as _);
+    /// `AF_ASH`
+    pub const ASH: Self = Self(linux_raw_sys::general::AF_ASH as _);
+    /// `AF_ECONET`
+    pub const ECONET: Self = Self(linux_raw_sys::general::AF_ECONET as _);
+    /// `AF_ATMSVC`
+    pub const ATMSVC: Self = Self(linux_raw_sys::general::AF_ATMSVC as _);
+    /// `AF_RDS`
+    pub const RDS: Self = Self(linux_raw_sys::general::AF_RDS as _);
+    /// `AF_SNA`
+    pub const SNA: Self = Self(linux_raw_sys::general::AF_SNA as _);
+    /// `AF_IRDA`
+    pub const IRDA: Self = Self(linux_raw_sys::general::AF_IRDA as _);
+    /// `AF_PPPOX`
+    pub const PPPOX: Self = Self(linux_raw_sys::general::AF_PPPOX as _);
+    /// `AF_WANPIPE`
+    pub const WANPIPE: Self = Self(linux_raw_sys::general::AF_WANPIPE as _);
+    /// `AF_LLC`
+    pub const LLC: Self = Self(linux_raw_sys::general::AF_LLC as _);
+    /// `AF_CAN`
+    pub const CAN: Self = Self(linux_raw_sys::general::AF_CAN as _);
+    /// `AF_TIPC`
+    pub const TIPC: Self = Self(linux_raw_sys::general::AF_TIPC as _);
+    /// `AF_BLUETOOTH`
+    pub const BLUETOOTH: Self = Self(linux_raw_sys::general::AF_BLUETOOTH as _);
+    /// `AF_IUCV`
+    pub const IUCV: Self = Self(linux_raw_sys::general::AF_IUCV as _);
+    /// `AF_RXRPC`
+    pub const RXRPC: Self = Self(linux_raw_sys::general::AF_RXRPC as _);
+    /// `AF_ISDN`
+    pub const ISDN: Self = Self(linux_raw_sys::general::AF_ISDN as _);
+    /// `AF_PHONET`
+    pub const PHONET: Self = Self(linux_raw_sys::general::AF_PHONET as _);
+    /// `AF_IEEE802154`
+    pub const IEEE802154: Self = Self(linux_raw_sys::general::AF_IEEE802154 as _);
 
     /// Constructs a `AddressFamily` from a raw integer.
     #[inline]
