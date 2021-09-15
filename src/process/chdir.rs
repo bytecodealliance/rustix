@@ -7,8 +7,10 @@ use std::ffi::OsString;
 /// `chdir(path)`—Change the working directory.
 ///
 /// # References
+///  - [POSIX]
 ///  - [Linux]
 ///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/chdir.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/chdir.2.html
 #[inline]
 pub fn chdir<P: path::Arg>(path: P) -> io::Result<()> {
@@ -18,8 +20,10 @@ pub fn chdir<P: path::Arg>(path: P) -> io::Result<()> {
 /// `fchdir(fd)`—Change the working directory.
 ///
 /// # References
+///  - [POSIX]
 ///  - [Linux]
 ///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fchdir.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fchdir.2.html
 #[cfg(not(target_os = "fuchsia"))]
 #[inline]
