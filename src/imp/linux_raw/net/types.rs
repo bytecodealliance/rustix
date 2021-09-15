@@ -51,6 +51,7 @@ pub type RawAddressFamily = linux_raw_sys::general::__kernel_sa_family_t;
 #[repr(transparent)]
 pub struct AddressFamily(pub(crate) RawAddressFamily);
 
+#[rustfmt::skip]
 impl AddressFamily {
     /// `AF_UNSPEC`
     pub const UNSPEC: Self = Self(linux_raw_sys::general::AF_UNSPEC as _);
@@ -147,6 +148,7 @@ pub type RawProtocol = u32;
 #[repr(transparent)]
 pub struct Protocol(pub(crate) RawProtocol);
 
+#[rustfmt::skip]
 impl Protocol {
     /// `IPPROTO_IP`
     pub const IP: Self = Self(linux_raw_sys::general::IPPROTO_IP as _);

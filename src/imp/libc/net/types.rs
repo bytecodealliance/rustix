@@ -51,6 +51,7 @@ pub type RawAddressFamily = libc::sa_family_t;
 #[repr(transparent)]
 pub struct AddressFamily(pub(crate) RawAddressFamily);
 
+#[rustfmt::skip]
 impl AddressFamily {
     /// `AF_UNSPEC`
     pub const UNSPEC: Self = Self(libc::AF_UNSPEC as _);
@@ -323,6 +324,7 @@ pub type RawProtocol = i32;
 #[repr(transparent)]
 pub struct Protocol(pub(crate) RawProtocol);
 
+#[rustfmt::skip]
 impl Protocol {
     /// `IPPROTO_IP`
     pub const IP: Self = Self(libc::IPPROTO_IP as _);
