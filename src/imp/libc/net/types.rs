@@ -147,6 +147,12 @@ impl Protocol {
     /// `IPPROTO_ICMPV6`
     pub const ICMPV6: Self = Self(libc::IPPROTO_ICMPV6 as _);
     /// `IPPROTO_MH`
+    #[cfg(not(any(
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
     pub const MH: Self = Self(libc::IPPROTO_MH as _);
     /// `IPPROTO_ROUTING`
     pub const ROUTING: Self = Self(libc::IPPROTO_ROUTING as _);
