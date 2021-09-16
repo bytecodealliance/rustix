@@ -9,6 +9,7 @@
 #![allow(unsafe_code)]
 
 use crate::imp;
+use imp::process::RawCpuid;
 
 /// The raw integer value of a Unix user ID.
 pub use imp::process::RawUid;
@@ -33,6 +34,12 @@ pub struct Gid(RawGid);
 #[repr(transparent)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 pub struct Pid(RawPid);
+
+/// A Linux CPU ID.
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[repr(transparent)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
+pub struct Cpuid(RawCpuid);
 
 impl Uid {
     /// A `Uid` corresponding to the root user (uid 0).
@@ -95,6 +102,25 @@ impl Pid {
     /// Converts a `Pid` into a `RawPid`.
     #[inline]
     pub const fn as_raw(self) -> RawPid {
+        self.0
+    }
+}
+
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+impl Cpuid {
+    /// Converts a `RawCpuid` into a `Cpuid`.
+    ///
+    /// # Safety
+    ///
+    /// `raw` must be the value of a valid Linux CPU ID.
+    #[inline]
+    pub const unsafe fn from_raw(raw: RawCpuid) -> Self {
+        Self(raw)
+    }
+
+    /// Converts a `Cpuid` into a `RawCpuid`.
+    #[inline]
+    pub const fn as_raw(self) -> RawCpuid {
         self.0
     }
 }

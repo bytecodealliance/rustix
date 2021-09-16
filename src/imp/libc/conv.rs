@@ -91,6 +91,20 @@ pub(super) fn syscall_ret_ssize_t(raw: c_long) -> io::Result<ssize_t> {
 }
 
 #[inline]
+pub(super) fn syscall_ret_u32(raw: c_long) -> io::Result<u32> {
+    if raw == -1 {
+        Err(io::Error::last_os_error())
+    } else {
+        let r32 = raw as u32;
+
+        // Converting `raw` to `u32` should be lossless.
+        debug_assert_eq!(r32 as c_long, raw);
+
+        Ok(r32)
+    }
+}
+
+#[inline]
 pub(super) fn ret_off_t(raw: libc_off_t) -> io::Result<libc_off_t> {
     if raw == -1 {
         Err(io::Error::last_os_error())

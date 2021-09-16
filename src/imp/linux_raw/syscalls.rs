@@ -53,7 +53,7 @@ use super::time::{ClockId, Timespec};
 use crate::io;
 use crate::io::{OwnedFd, RawFd};
 use crate::path::DecInt;
-use crate::process::{Gid, Pid, Uid};
+use crate::process::{Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, Uid};
 use crate::time::NanosleepRelativeResult;
 use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
@@ -104,9 +104,9 @@ use linux_raw_sys::general::{__NR_ppoll, sigset_t};
 use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::v5_11::general::{__NR_openat2, open_how};
 use linux_raw_sys::v5_4::general::{
-    __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_memfd_create, __NR_mlock2,
-    __NR_preadv2, __NR_pwritev2, __NR_renameat2, __NR_statx, __NR_userfaultfd, statx, F_GETPIPE_SZ,
-    F_GET_SEALS, F_SETPIPE_SZ,
+    __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_membarrier, __NR_memfd_create,
+    __NR_mlock2, __NR_preadv2, __NR_pwritev2, __NR_renameat2, __NR_statx, __NR_userfaultfd, statx,
+    F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ,
 };
 use std::convert::TryInto;
 use std::ffi::CStr;
@@ -2488,6 +2488,50 @@ pub(crate) unsafe fn munlock(addr: *mut c_void, length: usize) -> io::Result<()>
         void_star(addr),
         pass_usize(length),
     ))
+}
+
+pub(crate) fn membarrier_query() -> MembarrierQuery {
+    unsafe {
+        match ret_c_uint(syscall2(
+            nr(__NR_membarrier),
+            c_int(linux_raw_sys::v5_4::general::membarrier_cmd::MEMBARRIER_CMD_QUERY as _),
+            c_uint(0),
+        )) {
+            Ok(query) => {
+                // Safety: The safety of `from_bits_unchecked` is discussed
+                // [here]. Our "source of truth" is Linux, and here, the
+                // `query` value is coming from Linux, so we know it only
+                // contains "source of truth" valid bits.
+                //
+                // [here]: https://github.com/bitflags/bitflags/pull/207#issuecomment-671668662
+                MembarrierQuery::from_bits_unchecked(query)
+            }
+            Err(_) => MembarrierQuery::empty(),
+        }
+    }
+}
+
+pub(crate) fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
+    unsafe {
+        ret(syscall2(
+            nr(__NR_membarrier),
+            c_int(cmd as c_int),
+            c_uint(0),
+        ))
+    }
+}
+
+pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<()> {
+    unsafe {
+        ret(syscall3(
+            nr(__NR_membarrier),
+            c_int(cmd as c_int),
+            c_uint(
+                linux_raw_sys::v5_11::general::membarrier_cmd_flag::MEMBARRIER_CMD_FLAG_CPU as _,
+            ),
+            c_uint(cpu.as_raw()),
+        ))
+    }
 }
 
 #[inline]

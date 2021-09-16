@@ -8,6 +8,8 @@ mod chdir;
 mod exit;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+mod membarrier;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))] // WASI doesn't have [gs]etpriority.
 mod priority;
 mod sched;
@@ -25,9 +27,15 @@ pub use chdir::fchdir;
 pub use chdir::getcwd;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use exit::exit_group;
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+pub use id::Cpuid;
 #[cfg(not(target_os = "wasi"))]
 pub use id::{
     getegid, geteuid, getgid, getpid, getppid, getuid, Gid, Pid, RawGid, RawPid, RawUid, Uid,
+};
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+pub use membarrier::{
+    membarrier, membarrier_cpu, membarrier_query, MembarrierCommand, MembarrierQuery,
 };
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 pub use priority::nice;
