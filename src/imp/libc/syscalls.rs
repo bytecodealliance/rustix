@@ -13,7 +13,7 @@ use super::conv::{
     ret_owned_fd, ret_ssize_t,
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t};
+use super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t, syscall_ret_u32};
 #[cfg(not(any(
     target_os = "ios",
     target_os = "macos",
@@ -91,6 +91,8 @@ use super::rand::GetRandomFlags;
 use super::time::Timespec;
 use crate::as_ptr;
 use crate::io::{self, OwnedFd, RawFd};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Pid, Uid};
 use errno::errno;
@@ -1356,6 +1358,32 @@ pub(crate) unsafe fn mlock_with(
 #[inline]
 pub(crate) unsafe fn munlock(addr: *mut c_void, length: usize) -> io::Result<()> {
     ret(libc::munlock(addr, length))
+}
+
+pub(crate) fn membarrier_query() -> MembarrierQuery {
+    const MEMBARRIER_CMD_QUERY: u32 = 0;
+    unsafe {
+        match syscall_ret_u32(libc::syscall(libc::SYS_membarrier, MEMBARRIER_CMD_QUERY, 0)) {
+            Ok(query) => MembarrierQuery::from_bits_unchecked(query),
+            Err(_) => MembarrierQuery::empty(),
+        }
+    }
+}
+
+pub(crate) fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
+    unsafe { syscall_ret(libc::syscall(libc::SYS_membarrier, cmd as u32, 0)) }
+}
+
+pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<()> {
+    const MEMBARRIER_CMD_FLAG_CPU: u32 = 1;
+    unsafe {
+        syscall_ret(libc::syscall(
+            libc::SYS_membarrier,
+            cmd as u32,
+            MEMBARRIER_CMD_FLAG_CPU,
+            cpu.as_raw(),
+        ))
+    }
 }
 
 #[cfg(not(target_os = "wasi"))]

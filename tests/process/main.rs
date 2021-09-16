@@ -4,6 +4,8 @@
 mod auxv;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+mod membarrier;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))] // WASI doesn't have [gs]etpriority.
 mod priority;
 mod sched_yield;
