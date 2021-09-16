@@ -120,9 +120,6 @@ bitflags! {
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
             target_os = "openbsd",
             target_os = "redox",
         )))]
