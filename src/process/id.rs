@@ -9,6 +9,7 @@
 #![allow(unsafe_code)]
 
 use crate::imp;
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 use imp::process::RawCpuid;
 
 /// The raw integer value of a Unix user ID.
