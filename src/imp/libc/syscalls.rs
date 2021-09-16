@@ -1360,6 +1360,7 @@ pub(crate) unsafe fn munlock(addr: *mut c_void, length: usize) -> io::Result<()>
     ret(libc::munlock(addr, length))
 }
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn membarrier_query() -> MembarrierQuery {
     const MEMBARRIER_CMD_QUERY: u32 = 0;
     unsafe {
@@ -1370,10 +1371,12 @@ pub(crate) fn membarrier_query() -> MembarrierQuery {
     }
 }
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
     unsafe { syscall_ret(libc::syscall(libc::SYS_membarrier, cmd as u32, 0)) }
 }
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<()> {
     const MEMBARRIER_CMD_FLAG_CPU: u32 = 1;
     unsafe {
