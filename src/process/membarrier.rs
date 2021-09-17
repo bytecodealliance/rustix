@@ -17,8 +17,6 @@ bitflags::bitflags! {
     ///
     /// These flags correspond to values of [`MembarrierCommand`] which are
     /// supported in the OS.
-    ///
-    /// [`membarrier_query`] crate::process::membarrier_query
     pub struct MembarrierQuery: u32 {
        /// `MEMBARRIER_CMD_GLOBAL`
        #[doc(alias = "SHARED")]
