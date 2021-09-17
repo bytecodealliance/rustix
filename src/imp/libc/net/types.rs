@@ -31,13 +31,13 @@ impl SocketType {
 
     /// Constructs a `SocketType` from a raw integer.
     #[inline]
-    pub fn from_raw(raw: RawSocketType) -> Self {
+    pub const fn from_raw(raw: RawSocketType) -> Self {
         Self(raw)
     }
 
     /// Returns the raw integer for this `SocketType`.
     #[inline]
-    pub fn as_raw(self) -> RawSocketType {
+    pub const fn as_raw(self) -> RawSocketType {
         self.0
     }
 }
@@ -304,13 +304,13 @@ impl AddressFamily {
 
     /// Constructs a `AddressFamily` from a raw integer.
     #[inline]
-    pub fn from_raw(raw: RawAddressFamily) -> Self {
+    pub const fn from_raw(raw: RawAddressFamily) -> Self {
         Self(raw)
     }
 
     /// Returns the raw integer for this `AddressFamily`.
     #[inline]
-    pub fn as_raw(self) -> RawAddressFamily {
+    pub const fn as_raw(self) -> RawAddressFamily {
         self.0
     }
 }
@@ -429,13 +429,13 @@ impl Protocol {
 
     /// Constructs a `Protocol` from a raw integer.
     #[inline]
-    pub fn from_raw(raw: RawProtocol) -> Self {
+    pub const fn from_raw(raw: RawProtocol) -> Self {
         Self(raw)
     }
 
     /// Returns the raw integer for this `Protocol`.
     #[inline]
-    pub fn as_raw(self) -> RawProtocol {
+    pub const fn as_raw(self) -> RawProtocol {
         self.0
     }
 }
