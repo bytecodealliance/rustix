@@ -6,9 +6,8 @@
 //! set of values and are kept in sync.
 #![allow(unsafe_code)]
 
-use crate::imp;
-use crate::io;
 use crate::process::Cpuid;
+use crate::{imp, io};
 
 pub use imp::process::MembarrierCommand;
 
