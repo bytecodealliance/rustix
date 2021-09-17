@@ -447,6 +447,7 @@ pub type Stat = linux_raw_sys::general::stat64;
 
 /// `struct stat` for use with [`statat`] and [`fstat`].
 ///
+/// [`statat`]: crate::fs::statat
 /// [`fstat`]: crate::fs::fstat
 #[cfg(target_pointer_width = "64")]
 pub type Stat = linux_raw_sys::general::stat;

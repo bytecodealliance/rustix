@@ -441,6 +441,8 @@ impl Protocol {
 }
 
 /// `SHUT_*` constants for [`shutdown`].
+///
+/// [`shutdown`]: crate::net::shutdown
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(i32)]
 pub enum Shutdown {

@@ -4,8 +4,8 @@ use libc::c_int;
 ///
 /// For `MEMBARRIER_CMD_QUERY`, see [`membarrier_query`].
 ///
-/// [`membarrier`] crate::process::membarrier
-/// [`membarrier_cpu`] crate::process::membarrier_cpu
+/// [`membarrier`]: crate::process::membarrier
+/// [`membarrier_cpu`]: crate::process::membarrier_cpu
 /// [`membarrier_query`]: crate::process::membarrier_query
 // TODO: These are not yet exposed through libc, so we define the
 // constants ourselves.
