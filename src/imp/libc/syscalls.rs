@@ -706,11 +706,11 @@ pub(crate) fn fadvise(
     let err = unsafe { libc_posix_fadvise(borrowed_fd(fd), offset, len, advice as libc::c_int) };
 
     // `posix_fadvise` returns its error status rather than using `errno`.
-    return if err == 0 {
+    if err == 0 {
         Ok(())
     } else {
         Err(io::Error(err))
-    };
+    }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
