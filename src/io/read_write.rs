@@ -99,8 +99,8 @@ pub fn writev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice]) -> io::Result<usize> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/preadv.2.html
-#[inline]
 #[cfg(not(target_os = "redox"))]
+#[inline]
 pub fn preadv<Fd: AsFd>(fd: &Fd, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
     let fd = fd.as_fd();
     imp::syscalls::preadv(fd, bufs, offset)

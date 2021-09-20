@@ -14,8 +14,8 @@ use io_lifetimes::AsFd;
 /// [Linux `ioctl_tty`]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
 /// [Linux `termios`]: https://man7.org/linux/man-pages/man3/termios.3.html
 #[cfg(not(target_os = "wasi"))]
-#[doc(alias = "tcgetattr")]
 #[inline]
+#[doc(alias = "tcgetattr")]
 pub fn ioctl_tcgets<Fd: AsFd>(fd: &Fd) -> io::Result<Termios> {
     let fd = fd.as_fd();
     imp::syscalls::ioctl_tcgets(fd)

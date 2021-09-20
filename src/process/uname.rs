@@ -62,8 +62,8 @@ impl Uname {
     }
 
     /// `domainname`—NIS or YP domain identifer
-    #[inline]
     #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+    #[inline]
     pub fn domainname(&self) -> &OsStr {
         Self::to_os_str(self.0.domainname.as_ptr())
     }
