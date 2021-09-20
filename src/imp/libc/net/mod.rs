@@ -11,7 +11,7 @@ pub(crate) use write_sockaddr::{
 
 pub use addr::{SocketAddr, SocketAddrStorage, SocketAddrUnix};
 pub use send_recv::{RecvFlags, SendFlags};
-pub use types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
+pub use types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType, Timeout};
 
 /// Return the offset of the `sun_path` field of `sockaddr_un`.
 #[inline]

@@ -265,20 +265,6 @@ pub fn shutdown<Fd: AsFd>(sockfd: &Fd, how: Shutdown) -> io::Result<()> {
     imp::syscalls::shutdown(sockfd, how)
 }
 
-/// `getsockopt(fd, SOL_SOCKET, SO_TYPE)`—Returns the type of a socket.
-///
-/// # References
-///  - [POSIX]
-///  - [Linux]
-///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
-/// [Linux]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
-#[inline]
-pub fn getsockopt_socket_type<Fd: AsFd>(fd: &Fd) -> io::Result<SocketType> {
-    let fd = fd.as_fd();
-    imp::syscalls::getsockopt_socket_type(fd)
-}
-
 /// `getsockname(fd, addr, len)`—Returns the address a socket is bound to.
 ///
 /// # References
