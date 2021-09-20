@@ -1752,81 +1752,6 @@ pub(crate) fn shutdown(fd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn setsockopt(
-    fd: BorrowedFd<'_>,
-    level: c_int,
-    name: c_int,
-    value: &[u8],
-    optlen: socklen_t,
-) -> io::Result<c_int> {
-    assert!((optlen as usize) <= value.len());
-
-    // The length is not passed to the syscall; we checked the buffer size above.
-    let value_addr = slice_just_addr(value);
-
-    #[cfg(not(target_arch = "x86"))]
-    unsafe {
-        ret_c_int(syscall5_readonly(
-            nr(__NR_setsockopt),
-            borrowed_fd(fd),
-            c_int(level),
-            c_int(name),
-            value_addr,
-            socklen_t(optlen),
-        ))
-    }
-    #[cfg(target_arch = "x86")]
-    unsafe {
-        ret_c_int(syscall2_readonly(
-            nr(__NR_socketcall),
-            x86_sys(SYS_SETSOCKOPT),
-            slice_just_addr::<ArgReg<SocketArg>, _>(&[
-                borrowed_fd(fd),
-                c_int(level),
-                c_int(name),
-                value_addr,
-                socklen_t(optlen),
-            ]),
-        ))
-    }
-}
-
-#[inline]
-pub(crate) fn getsockopt_socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
-    #[cfg(not(target_arch = "x86"))]
-    unsafe {
-        let mut type_ = MaybeUninit::<u32>::uninit();
-        let mut optlen = std::mem::size_of::<u32>();
-        ret(syscall5(
-            nr(__NR_getsockopt),
-            borrowed_fd(fd),
-            c_uint(linux_raw_sys::general::SOL_SOCKET),
-            c_uint(linux_raw_sys::general::SO_TYPE),
-            out(&mut type_),
-            by_mut(&mut optlen),
-        ))?;
-        Ok(SocketType(type_.assume_init()))
-    }
-    #[cfg(target_arch = "x86")]
-    unsafe {
-        let mut type_ = MaybeUninit::<u32>::uninit();
-        let mut optlen = std::mem::size_of::<u32>();
-        ret(syscall2(
-            nr(__NR_socketcall),
-            x86_sys(SYS_GETSOCKOPT),
-            slice_just_addr::<ArgReg<SocketArg>, _>(&[
-                borrowed_fd(fd),
-                c_uint(linux_raw_sys::general::SOL_SOCKET),
-                c_uint(linux_raw_sys::general::SO_TYPE),
-                out(&mut type_),
-                by_mut(&mut optlen),
-            ]),
-        ))?;
-        Ok(SocketType(type_.assume_init()))
-    }
-}
-
-#[inline]
 pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Result<usize> {
     let (buf_addr, buf_len) = slice(buf);
 
@@ -3369,5 +3294,456 @@ pub(crate) fn setpriority_process(pid: Pid, priority: i32) -> io::Result<()> {
             c_uint(pid.as_raw()),
             c_int(priority),
         ))
+    }
+}
+
+pub(crate) mod sockopt {
+    use crate::io;
+    use crate::net::sockopt::Timeout;
+    use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
+    use io_lifetimes::BorrowedFd;
+    use std::convert::TryInto;
+    use std::os::raw::{c_int, c_uint};
+    use std::time::Duration;
+
+    #[inline]
+    fn getsockopt<T>(fd: BorrowedFd<'_>, level: u32, optname: u32) -> io::Result<T> {
+        use super::*;
+        #[cfg(not(target_arch = "x86"))]
+        unsafe {
+            let mut value = MaybeUninit::<T>::uninit();
+            let mut optlen = std::mem::size_of::<T>();
+            ret(syscall5(
+                nr(__NR_getsockopt),
+                borrowed_fd(fd),
+                c_uint(level),
+                c_uint(optname),
+                out(&mut value),
+                by_mut(&mut optlen),
+            ))?;
+            assert_eq!(
+                optlen as usize,
+                std::mem::size_of::<T>(),
+                "unexpected getsockopt size"
+            );
+            Ok(value.assume_init())
+        }
+        #[cfg(target_arch = "x86")]
+        unsafe {
+            let mut value = MaybeUninit::<T>::uninit();
+            let mut optlen = std::mem::size_of::<T>();
+            ret(syscall2(
+                nr(__NR_socketcall),
+                x86_sys(SYS_GETSOCKOPT),
+                slice_just_addr::<ArgReg<SocketArg>, _>(&[
+                    borrowed_fd(fd),
+                    c_uint(level),
+                    c_uint(optname),
+                    out(&mut value),
+                    by_mut(&mut optlen),
+                ]),
+            ))?;
+            assert_eq!(
+                optlen as usize,
+                std::mem::size_of::<T>(),
+                "unexpected getsockopt size"
+            );
+            Ok(value.assume_init())
+        }
+    }
+
+    #[inline]
+    fn setsockopt<T>(fd: BorrowedFd<'_>, level: u32, optname: u32, value: T) -> io::Result<()> {
+        use super::*;
+        #[cfg(not(target_arch = "x86"))]
+        unsafe {
+            let optlen = std::mem::size_of::<T>().try_into().unwrap();
+            ret(syscall5_readonly(
+                nr(__NR_setsockopt),
+                borrowed_fd(fd),
+                c_uint(level),
+                c_uint(optname),
+                by_ref(&value),
+                socklen_t(optlen),
+            ))
+        }
+        #[cfg(target_arch = "x86")]
+        unsafe {
+            let optlen = std::mem::size_of::<T>().try_into().unwrap();
+            ret(syscall2_readonly(
+                nr(__NR_socketcall),
+                x86_sys(SYS_SETSOCKOPT),
+                slice_just_addr::<ArgReg<SocketArg>, _>(&[
+                    borrowed_fd(fd),
+                    c_uint(level),
+                    c_uint(optname),
+                    by_ref(&value),
+                    socklen_t(optlen),
+                ]),
+            ))
+        }
+    }
+
+    #[inline]
+    pub(crate) fn get_socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
+        getsockopt(
+            fd,
+            linux_raw_sys::general::SOL_SOCKET as _,
+            linux_raw_sys::general::SO_TYPE,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn set_socket_reuseaddr(fd: BorrowedFd<'_>, reuseaddr: bool) -> io::Result<()> {
+        setsockopt(
+            fd,
+            linux_raw_sys::general::SOL_SOCKET as _,
+            linux_raw_sys::general::SO_REUSEADDR,
+            from_bool(reuseaddr),
+        )
+    }
+
+    #[inline]
+    pub(crate) fn set_socket_broadcast(fd: BorrowedFd<'_>, broadcast: bool) -> io::Result<()> {
+        setsockopt(
+            fd,
+            linux_raw_sys::general::SOL_SOCKET as _,
+            linux_raw_sys::general::SO_BROADCAST,
+            from_bool(broadcast),
+        )
+    }
+
+    #[inline]
+    pub(crate) fn get_socket_broadcast(fd: BorrowedFd<'_>) -> io::Result<bool> {
+        getsockopt(
+            fd,
+            linux_raw_sys::general::SOL_SOCKET as _,
+            linux_raw_sys::general::SO_BROADCAST,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn set_socket_linger(
+        fd: BorrowedFd<'_>,
+        linger: Option<Duration>,
+    ) -> io::Result<()> {
+        let linger = linux_raw_sys::general::linger {
+            l_onoff: linger.is_some() as c_int,
+            l_linger: linger.unwrap_or_default().as_secs() as c_int,
+        };
+        setsockopt(
+            fd,
+            linux_raw_sys::general::SOL_SOCKET as _,
+            linux_raw_sys::general::SO_LINGER,
+            linger,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn get_socket_linger(fd: BorrowedFd<'_>) -> io::Result<Option<Duration>> {
+        let linger: linux_raw_sys::general::linger = getsockopt(
+            fd,
+            linux_raw_sys::general::SOL_SOCKET as _,
+            linux_raw_sys::general::SO_LINGER,
+        )?;
+        Ok((linger.l_onoff != 0).then(|| Duration::from_secs(linger.l_linger as u64)))
+    }
+
+    #[inline]
+    pub(crate) fn set_socket_passcred(fd: BorrowedFd<'_>, passcred: bool) -> io::Result<()> {
+        setsockopt(
+            fd,
+            linux_raw_sys::general::SOL_SOCKET as _,
+            linux_raw_sys::general::SO_PASSCRED,
+            from_bool(passcred),
+        )
+    }
+
+    #[inline]
+    pub(crate) fn get_socket_passcred(fd: BorrowedFd<'_>) -> io::Result<bool> {
+        getsockopt(
+            fd,
+            linux_raw_sys::general::SOL_SOCKET as _,
+            linux_raw_sys::general::SO_PASSCRED,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn set_socket_timeout(
+        fd: BorrowedFd<'_>,
+        id: Timeout,
+        timeout: Option<Duration>,
+    ) -> io::Result<()> {
+        let timeout = match timeout {
+            Some(timeout) => {
+                if timeout == Duration::ZERO {
+                    return Err(io::Error::INVAL);
+                }
+
+                let mut timeout = linux_raw_sys::general::timeval {
+                    tv_sec: timeout
+                        .as_secs()
+                        .try_into()
+                        .unwrap_or(std::os::raw::c_long::MAX),
+                    tv_usec: timeout.subsec_micros() as _,
+                };
+                if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
+                    timeout.tv_usec = 1;
+                }
+                timeout
+            }
+            None => linux_raw_sys::general::timeval {
+                tv_sec: 0,
+                tv_usec: 0,
+            },
+        };
+        let optname = match id {
+            Timeout::Recv => linux_raw_sys::general::SO_RCVTIMEO,
+            Timeout::Send => linux_raw_sys::general::SO_SNDTIMEO,
+        };
+        setsockopt(fd, linux_raw_sys::general::SOL_SOCKET, optname, timeout)
+    }
+
+    #[inline]
+    pub(crate) fn get_socket_timeout(
+        fd: BorrowedFd<'_>,
+        id: Timeout,
+    ) -> io::Result<Option<Duration>> {
+        let optname = match id {
+            Timeout::Recv => linux_raw_sys::general::SO_RCVTIMEO,
+            Timeout::Send => linux_raw_sys::general::SO_SNDTIMEO,
+        };
+        let timeout: linux_raw_sys::general::timeval =
+            getsockopt(fd, linux_raw_sys::general::SOL_SOCKET, optname)?;
+        if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
+            Ok(None)
+        } else {
+            Ok(Some(
+                Duration::from_secs(timeout.tv_sec as u64)
+                    + Duration::from_micros(timeout.tv_usec as u64),
+            ))
+        }
+    }
+
+    #[inline]
+    pub(crate) fn set_ip_ttl(fd: BorrowedFd<'_>, ttl: u32) -> io::Result<()> {
+        setsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_IP as _,
+            linux_raw_sys::general::IP_TTL,
+            ttl,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn get_ip_ttl(fd: BorrowedFd<'_>) -> io::Result<u32> {
+        getsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_IP as _,
+            linux_raw_sys::general::IP_TTL,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn set_ipv6_v6only(fd: BorrowedFd<'_>, only_v6: bool) -> io::Result<()> {
+        setsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_IPV6 as _,
+            linux_raw_sys::general::IPV6_V6ONLY,
+            from_bool(only_v6),
+        )
+    }
+
+    #[inline]
+    pub(crate) fn get_ipv6_v6only(fd: BorrowedFd<'_>) -> io::Result<bool> {
+        getsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_IPV6 as _,
+            linux_raw_sys::general::IPV6_V6ONLY,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn set_ip_multicast_loop(
+        fd: BorrowedFd<'_>,
+        multicast_loop: bool,
+    ) -> io::Result<()> {
+        setsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_IP as _,
+            linux_raw_sys::general::IP_MULTICAST_LOOP,
+            from_bool(multicast_loop),
+        )
+    }
+
+    #[inline]
+    pub(crate) fn get_ip_multicast_loop(fd: BorrowedFd<'_>) -> io::Result<bool> {
+        getsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_IP as _,
+            linux_raw_sys::general::IP_MULTICAST_LOOP,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn set_ip_multicast_ttl(fd: BorrowedFd<'_>, multicast_ttl: u32) -> io::Result<()> {
+        setsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_IP as _,
+            linux_raw_sys::general::IP_MULTICAST_TTL,
+            multicast_ttl,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn get_ip_multicast_ttl(fd: BorrowedFd<'_>) -> io::Result<u32> {
+        getsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_IP as _,
+            linux_raw_sys::general::IP_MULTICAST_TTL,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn set_ipv6_multicast_loop(
+        fd: BorrowedFd<'_>,
+        multicast_loop: bool,
+    ) -> io::Result<()> {
+        setsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_IPV6 as _,
+            linux_raw_sys::general::IPV6_MULTICAST_LOOP,
+            from_bool(multicast_loop),
+        )
+    }
+
+    #[inline]
+    pub(crate) fn get_ipv6_multicast_loop(fd: BorrowedFd<'_>) -> io::Result<bool> {
+        getsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_IPV6 as _,
+            linux_raw_sys::general::IPV6_MULTICAST_LOOP,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn set_ip_add_membership(
+        fd: BorrowedFd<'_>,
+        multiaddr: &Ipv4Addr,
+        interface: &Ipv4Addr,
+    ) -> io::Result<()> {
+        let mreq = to_imr(multiaddr, interface);
+        setsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_IP as _,
+            linux_raw_sys::general::IP_ADD_MEMBERSHIP,
+            mreq,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn set_ipv6_join_group(
+        fd: BorrowedFd<'_>,
+        multiaddr: &Ipv6Addr,
+        interface: u32,
+    ) -> io::Result<()> {
+        let mreq = to_ipv6mr(multiaddr, interface);
+        setsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_IPV6 as _,
+            linux_raw_sys::general::IPV6_ADD_MEMBERSHIP,
+            mreq,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn set_ip_drop_membership(
+        fd: BorrowedFd<'_>,
+        multiaddr: &Ipv4Addr,
+        interface: &Ipv4Addr,
+    ) -> io::Result<()> {
+        let mreq = to_imr(multiaddr, interface);
+        setsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_IP as _,
+            linux_raw_sys::general::IP_DROP_MEMBERSHIP,
+            mreq,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn set_ipv6_leave_group(
+        fd: BorrowedFd<'_>,
+        multiaddr: &Ipv6Addr,
+        interface: u32,
+    ) -> io::Result<()> {
+        let mreq = to_ipv6mr(multiaddr, interface);
+        setsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_IPV6 as _,
+            linux_raw_sys::general::IPV6_DROP_MEMBERSHIP,
+            mreq,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn set_tcp_nodelay(fd: BorrowedFd<'_>, nodelay: bool) -> io::Result<()> {
+        setsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_TCP as _,
+            linux_raw_sys::general::TCP_NODELAY,
+            from_bool(nodelay),
+        )
+    }
+
+    #[inline]
+    pub(crate) fn get_tcp_nodelay(fd: BorrowedFd<'_>) -> io::Result<bool> {
+        getsockopt(
+            fd,
+            linux_raw_sys::general::IPPROTO_TCP as _,
+            linux_raw_sys::general::TCP_NODELAY,
+        )
+    }
+
+    #[inline]
+    fn to_imr(multiaddr: &Ipv4Addr, interface: &Ipv4Addr) -> linux_raw_sys::general::ip_mreq {
+        linux_raw_sys::general::ip_mreq {
+            imr_multiaddr: to_imr_addr(multiaddr),
+            imr_interface: to_imr_addr(interface),
+        }
+    }
+
+    #[inline]
+    fn to_imr_addr(addr: &Ipv4Addr) -> linux_raw_sys::general::in_addr {
+        linux_raw_sys::general::in_addr {
+            s_addr: u32::from_ne_bytes(addr.octets()),
+        }
+    }
+
+    #[inline]
+    fn to_ipv6mr(multiaddr: &Ipv6Addr, interface: u32) -> linux_raw_sys::general::ipv6_mreq {
+        linux_raw_sys::general::ipv6_mreq {
+            ipv6mr_multiaddr: to_ipv6mr_multiaddr(multiaddr),
+            ipv6mr_ifindex: to_ipv6mr_interface(interface),
+        }
+    }
+
+    #[inline]
+    fn to_ipv6mr_multiaddr(multiaddr: &Ipv6Addr) -> linux_raw_sys::general::in6_addr {
+        linux_raw_sys::general::in6_addr {
+            in6_u: linux_raw_sys::general::in6_addr__bindgen_ty_1 {
+                u6_addr8: multiaddr.octets(),
+            },
+        }
+    }
+
+    #[inline]
+    fn to_ipv6mr_interface(interface: u32) -> c_int {
+        interface as c_int
+    }
+
+    #[inline]
+    fn from_bool(value: bool) -> c_uint {
+        value as c_uint
     }
 }

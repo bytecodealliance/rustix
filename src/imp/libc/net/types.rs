@@ -484,3 +484,17 @@ bitflags! {
         const CLOEXEC = libc::SOCK_CLOEXEC;
     }
 }
+
+/// Timeout identifier for use with [`set_socket_timeout`] and
+/// [`get_socket_timeout`].
+///
+/// [`set_socket_timeout`]: crate::net::sockopt::set_socket_timeout.
+/// [`get_socket_timeout`]: crate::net::sockopt::get_socket_timeout.
+#[repr(i32)]
+pub enum Timeout {
+    /// `SO_RCVTIMEO`—Timeout for receiving.
+    Recv = libc::SO_RCVTIMEO,
+
+    /// `SO_SNDTIMEO`—Timeout for sending.
+    Send = libc::SO_SNDTIMEO,
+}

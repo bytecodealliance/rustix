@@ -267,3 +267,17 @@ bitflags! {
         const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
     }
 }
+
+/// Timeout identifier for use with [`set_socket_timeout`] and
+/// [`get_socket_timeout`].
+///
+/// [`set_socket_timeout`]: crate::net::sockopt::set_socket_timeout.
+/// [`get_socket_timeout`]: crate::net::sockopt::get_socket_timeout.
+#[repr(u32)]
+pub enum Timeout {
+    /// `SO_RCVTIMEO`—Timeout for receiving.
+    Recv = linux_raw_sys::general::SO_RCVTIMEO,
+
+    /// `SO_SNDTIMEO`—Timeout for sending.
+    Send = linux_raw_sys::general::SO_SNDTIMEO,
+}
