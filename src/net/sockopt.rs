@@ -433,7 +433,8 @@ pub fn set_ip_add_membership<Fd: AsFd>(
     target_os = "freebsd",
     target_os = "ios",
     target_os = "macos",
-    target_os = "netbsd"
+    target_os = "netbsd",
+    target_os = "openbsd",
 )))]
 #[inline]
 #[doc(alias = "IPV6_JOIN_GROUP")]
@@ -492,7 +493,8 @@ pub fn set_ip_drop_membership<Fd: AsFd>(
     target_os = "freebsd",
     target_os = "ios",
     target_os = "macos",
-    target_os = "netbsd"
+    target_os = "netbsd",
+    target_os = "openbsd",
 )))]
 #[inline]
 #[doc(alias = "IPV6_LEAVE_GROUP")]
