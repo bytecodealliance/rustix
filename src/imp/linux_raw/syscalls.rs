@@ -16,7 +16,6 @@
 
 //! Functions which operate on file descriptors.
 
-use super::thread::{FutexOperation, FutexFlags};
 use super::arch::choose::{
     syscall0_readonly, syscall1, syscall1_noreturn, syscall1_readonly, syscall2, syscall2_readonly,
     syscall3, syscall3_readonly, syscall4, syscall4_readonly, syscall5, syscall5_readonly,
@@ -52,6 +51,7 @@ use super::rand::GetRandomFlags;
 use super::reg::nr;
 #[cfg(target_arch = "x86")]
 use super::reg::{ArgReg, SocketArg};
+use super::thread::{FutexFlags, FutexOperation};
 use super::time::{ClockId, Timespec};
 use crate::io;
 use crate::io::{OwnedFd, RawFd};
