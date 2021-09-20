@@ -2495,7 +2495,8 @@ pub(crate) mod sockopt {
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
-        target_os = "netbsd"
+        target_os = "netbsd",
+        target_os = "openbsd"
     )))]
     #[inline]
     pub(crate) fn set_ipv6_join_group(
@@ -2527,7 +2528,8 @@ pub(crate) mod sockopt {
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
-        target_os = "netbsd"
+        target_os = "netbsd",
+        target_os = "openbsd",
     )))]
     #[inline]
     pub(crate) fn set_ipv6_leave_group(
