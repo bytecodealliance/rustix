@@ -19,4 +19,4 @@ pub use socket::{
 pub use socketpair::socketpair;
 
 pub use imp::net::{SocketAddr, SocketAddrStorage, SocketAddrUnix};
-pub use std::net::{Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
+pub use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
