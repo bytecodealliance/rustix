@@ -1,8 +1,8 @@
-//! Implementation details for thread-local storage.
+//! Implementation details for thread-local storage (TLS).
 //!
 //! # Safety
 //!
-//! Don't use this module unless you are implementing `libpthread` yourself.
+//! This module is intended to be used for implementing `libpthread`.
 
 #![allow(unsafe_code)]
 
@@ -27,6 +27,17 @@ pub unsafe fn set_fs(data: *mut std::ffi::c_void) {
     imp::syscalls::tls::set_fs(data)
 }
 
+/// `prctl(PR_SET_NAME, name)`
+///
+/// # References
+///  - [Linux]: https://man7.org/linux/man-pages/man2/prctl.2.html
+///
+/// # Safety
+///
+/// This is a very low-level feature for implementing threading libraries.
+/// See the references links above.
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub unsafe fn set_thread_name(name: &CStr) -> io::Result<()> {
     imp::syscalls::tls::set_thread_name(name)

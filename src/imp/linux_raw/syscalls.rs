@@ -16,6 +16,7 @@
 
 //! Functions which operate on file descriptors.
 
+use super::thread::{FutexOperation, FutexFlags};
 use super::arch::choose::{
     syscall0_readonly, syscall1, syscall1_noreturn, syscall1_readonly, syscall2, syscall2_readonly,
     syscall3, syscall3_readonly, syscall4, syscall4_readonly, syscall5, syscall5_readonly,
@@ -26,10 +27,10 @@ use super::conv::opt_ref;
 #[cfg(target_arch = "x86_64")]
 use super::conv::ret_infallible;
 use super::conv::{
-    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, dev_t, mode_as, no_fd, oflags,
-    oflags_for_open_how, opt_c_str, opt_mut, out, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint,
-    ret_discarded_fd, ret_owned_fd, ret_usize, ret_usize_infallible, ret_void_star, size_of, slice,
-    slice_just_addr, slice_mut, socklen_t, void_star, zero,
+    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, const_void_star, dev_t, mode_as,
+    no_fd, oflags, oflags_for_open_how, opt_c_str, opt_mut, out, pass_usize, raw_fd, ret,
+    ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd, ret_usize, ret_usize_infallible,
+    ret_void_star, size_of, slice, slice_just_addr, slice_mut, socklen_t, void_star, zero,
 };
 use super::fs::{
     Access, Advice as FsAdvice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode,
@@ -81,17 +82,17 @@ use linux_raw_sys::general::{__NR_arch_prctl, ARCH_SET_FS};
 use linux_raw_sys::general::{
     __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
     __NR_epoll_create1, __NR_epoll_ctl, __NR_exit_group, __NR_faccessat, __NR_fallocate,
-    __NR_fchdir, __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_flock, __NR_fsync, __NR_getcwd,
-    __NR_getdents64, __NR_getpid, __NR_getppid, __NR_getpriority, __NR_gettid, __NR_ioctl,
-    __NR_linkat, __NR_madvise, __NR_mkdirat, __NR_mknodat, __NR_mlock, __NR_mprotect, __NR_munlock,
-    __NR_munmap, __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_prctl, __NR_pread64, __NR_preadv,
-    __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv, __NR_sched_yield,
-    __NR_setpriority, __NR_symlinkat, __NR_uname, __NR_unlinkat, __NR_utimensat, __NR_write,
-    __NR_writev, __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event,
-    sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD, AT_REMOVEDIR,
-    AT_SYMLINK_NOFOLLOW, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, F_DUPFD,
-    F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL,
-    PR_SET_NAME, TCGETS, TIMER_ABSTIME, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
+    __NR_fchdir, __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_flock, __NR_fsync, __NR_futex,
+    __NR_getcwd, __NR_getdents64, __NR_getpid, __NR_getppid, __NR_getpriority, __NR_gettid,
+    __NR_ioctl, __NR_linkat, __NR_madvise, __NR_mkdirat, __NR_mknodat, __NR_mlock, __NR_mprotect,
+    __NR_munlock, __NR_munmap, __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_prctl, __NR_pread64,
+    __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv,
+    __NR_sched_yield, __NR_setpriority, __NR_symlinkat, __NR_uname, __NR_unlinkat, __NR_utimensat,
+    __NR_write, __NR_writev, __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t,
+    epoll_event, sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD,
+    AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO,
+    FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD,
+    F_SETFL, PR_SET_NAME, TCGETS, TIMER_ABSTIME, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
 };
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use linux_raw_sys::general::{__NR_dup2, __NR_open, __NR_pipe, __NR_poll};
@@ -3304,6 +3305,28 @@ pub(crate) fn setpriority_process(pid: Pid, priority: i32) -> io::Result<()> {
     }
 }
 
+// TODO: This could be de-multiplexed.
+#[inline]
+pub unsafe fn futex(
+    uaddr: *mut u32,
+    op: FutexOperation,
+    flags: FutexFlags,
+    val: u32,
+    utime: *const Timespec,
+    uaddr2: *mut u32,
+    val3: u32,
+) -> io::Result<usize> {
+    ret_usize(syscall6(
+        nr(__NR_futex),
+        void_star(uaddr.cast()),
+        c_uint(op as c_uint | flags.bits()),
+        c_uint(val),
+        const_void_star(utime.cast()),
+        void_star(uaddr2.cast()),
+        c_uint(val3),
+    ))
+}
+
 pub(crate) mod sockopt {
     use crate::io;
     use crate::net::sockopt::Timeout;
@@ -3759,16 +3782,19 @@ pub(crate) mod tls {
     use super::*;
 
     #[cfg(target_arch = "x86")]
+    #[inline]
     pub(crate) unsafe fn set_thread_area(u_info: &mut UserDesc) -> io::Result<()> {
         ret(syscall1(nr(__NR_set_thread_area), by_mut(u_info)))
     }
 
     #[cfg(target_arch = "arm")]
+    #[inline]
     pub(crate) unsafe fn arm_set_tls(data: *mut c_void) -> io::Result<()> {
         ret(syscall1(nr(__ARM_NR_set_tls), void_star(data)))
     }
 
     #[cfg(target_arch = "x86_64")]
+    #[inline]
     pub(crate) unsafe fn set_fs(data: *mut c_void) {
         ret_infallible(syscall2(
             nr(__NR_arch_prctl),
@@ -3777,6 +3803,7 @@ pub(crate) mod tls {
         ))
     }
 
+    #[inline]
     pub(crate) unsafe fn set_thread_name(name: &CStr) -> io::Result<()> {
         ret(syscall2(nr(__NR_prctl), c_uint(PR_SET_NAME), c_str(name)))
     }
