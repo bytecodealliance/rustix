@@ -82,6 +82,11 @@ pub(super) fn void_star<'a, Num: ArgNumber>(c: *mut c_void) -> ArgReg<'a, Num> {
 }
 
 #[inline]
+pub(super) fn const_void_star<'a, Num: ArgNumber>(c: *const c_void) -> ArgReg<'a, Num> {
+    raw_arg(c as usize)
+}
+
+#[inline]
 pub(super) fn c_str<'a, Num: ArgNumber>(c: &'a CStr) -> ArgReg<'a, Num> {
     raw_arg(c.as_ptr() as usize)
 }
