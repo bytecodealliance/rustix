@@ -31,7 +31,7 @@ errno = "0.2.7"
 libc = { version = "0.2.98", features = ["extra_traits"] }
 
 [target.'cfg(all(not(rsix_use_libc), any(target_os = "linux"), any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "riscv64")))'.dependencies]
-linux-raw-sys = { version = "0.0.26", features = ["v5_4", "v5_11"] }
+linux-raw-sys = { version = "0.0.28", features = ["v5_4", "v5_11"] }
 
 [dev-dependencies]
 atty = "0.2.14"

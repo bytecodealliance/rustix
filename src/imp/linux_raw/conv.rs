@@ -268,6 +268,22 @@ pub(super) unsafe fn ret(raw: RetReg<R0>) -> io::Result<()> {
     try_decode_void(raw)
 }
 
+/// Convert a `usize` returned from a syscall that effectively always returns
+/// `()`.
+///
+/// # Safety
+///
+/// The caller must ensure that this is the return value of a syscall which
+/// always returns `()`.
+#[cfg(target_arch = "x86_64")]
+#[inline]
+pub(super) unsafe fn ret_infallible(_raw: RetReg<R0>) {
+    #[cfg(debug_assertions)]
+    {
+        try_decode_void(_raw).unwrap()
+    }
+}
+
 /// Convert a `usize` returned from a syscall that effectively returns a
 /// `c_int` on success.
 #[inline]
