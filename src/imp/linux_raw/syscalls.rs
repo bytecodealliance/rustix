@@ -3304,7 +3304,7 @@ pub(crate) fn nice(inc: i32) -> io::Result<i32> {
 pub(crate) fn getpriority_user(uid: Uid) -> io::Result<i32> {
     unsafe {
         Ok(20
-            - ret_c_int(syscall2(
+            - ret_c_int(syscall2_readonly(
                 nr(__NR_getpriority),
                 c_uint(linux_raw_sys::general::PRIO_USER),
                 c_uint(uid.as_raw()),
@@ -3316,7 +3316,7 @@ pub(crate) fn getpriority_user(uid: Uid) -> io::Result<i32> {
 pub(crate) fn getpriority_pgrp(pgid: Pid) -> io::Result<i32> {
     unsafe {
         Ok(20
-            - ret_c_int(syscall2(
+            - ret_c_int(syscall2_readonly(
                 nr(__NR_getpriority),
                 c_uint(linux_raw_sys::general::PRIO_PGRP),
                 c_uint(pgid.as_raw()),
@@ -3328,7 +3328,7 @@ pub(crate) fn getpriority_pgrp(pgid: Pid) -> io::Result<i32> {
 pub(crate) fn getpriority_process(pid: Pid) -> io::Result<i32> {
     unsafe {
         Ok(20
-            - ret_c_int(syscall2(
+            - ret_c_int(syscall2_readonly(
                 nr(__NR_getpriority),
                 c_uint(linux_raw_sys::general::PRIO_PROCESS),
                 c_uint(pid.as_raw()),
@@ -3339,7 +3339,7 @@ pub(crate) fn getpriority_process(pid: Pid) -> io::Result<i32> {
 #[inline]
 pub(crate) fn setpriority_user(uid: Uid, priority: i32) -> io::Result<()> {
     unsafe {
-        ret(syscall3(
+        ret(syscall3_readonly(
             nr(__NR_setpriority),
             c_uint(linux_raw_sys::general::PRIO_USER),
             c_uint(uid.as_raw()),
@@ -3351,7 +3351,7 @@ pub(crate) fn setpriority_user(uid: Uid, priority: i32) -> io::Result<()> {
 #[inline]
 pub(crate) fn setpriority_pgrp(pgid: Pid, priority: i32) -> io::Result<()> {
     unsafe {
-        ret(syscall3(
+        ret(syscall3_readonly(
             nr(__NR_setpriority),
             c_uint(linux_raw_sys::general::PRIO_PGRP),
             c_uint(pgid.as_raw()),
@@ -3363,7 +3363,7 @@ pub(crate) fn setpriority_pgrp(pgid: Pid, priority: i32) -> io::Result<()> {
 #[inline]
 pub(crate) fn setpriority_process(pid: Pid, priority: i32) -> io::Result<()> {
     unsafe {
-        ret(syscall3(
+        ret(syscall3_readonly(
             nr(__NR_setpriority),
             c_uint(linux_raw_sys::general::PRIO_PROCESS),
             c_uint(pid.as_raw()),
