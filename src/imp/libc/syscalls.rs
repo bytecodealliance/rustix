@@ -1842,7 +1842,6 @@ pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-#[must_use]
 pub(crate) fn clock_gettime_dynamic(id: DynamicClockId) -> io::Result<Timespec> {
     let mut timespec = MaybeUninit::<Timespec>::uninit();
     unsafe {
@@ -1894,7 +1893,6 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId) -> io::Result<Timespec> 
     target_os = "wasi",
 )))]
 #[inline]
-#[must_use]
 pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRelativeResult {
     let mut remain = MaybeUninit::<Timespec>::uninit();
     let flags = 0;
@@ -1929,7 +1927,6 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
 
 #[cfg(not(target_os = "redox"))]
 #[inline]
-#[must_use]
 pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
     let mut remain = MaybeUninit::<Timespec>::uninit();
     unsafe {
