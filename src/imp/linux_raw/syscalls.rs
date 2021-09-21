@@ -3126,7 +3126,9 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // the write side is shut down.
         #[allow(unreachable_patterns)] // EAGAIN equals EWOULDBLOCK
         match send(fd, &[], SendFlags::DONTWAIT) {
-            Err(io::Error::AGAIN | io::Error::WOULDBLOCK) => (),
+            // TODO or-patterns when we don't need 1.51
+            Err(io::Error::AGAIN) => (),
+            Err(io::Error::WOULDBLOCK) => (),
             Err(io::Error::NOTSOCK) => (),
             Err(io::Error::PIPE) => write = false,
             Err(err) => return Err(err),
@@ -3336,6 +3338,9 @@ pub(crate) mod sockopt {
     use std::os::raw::{c_int, c_uint};
     use std::time::Duration;
 
+    // TODO use Duration::ZERO when we don't need 1.51 support
+    const DURATION_ZERO: Duration = Duration::from_secs(0);
+
     #[inline]
     fn getsockopt<T>(fd: BorrowedFd<'_>, level: u32, optname: u32) -> io::Result<T> {
         use super::*;
@@ -3506,7 +3511,7 @@ pub(crate) mod sockopt {
     ) -> io::Result<()> {
         let timeout = match timeout {
             Some(timeout) => {
-                if timeout == Duration::ZERO {
+                if timeout == DURATION_ZERO {
                     return Err(io::Error::INVAL);
                 }
 
