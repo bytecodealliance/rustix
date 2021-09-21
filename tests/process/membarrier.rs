@@ -10,7 +10,10 @@ fn test_membarrier() {
         MembarrierCommand::RegisterPrivateExpedited,
         MembarrierCommand::RegisterPrivateExpeditedSyncCore,
         MembarrierCommand::RegisterPrivateExpeditedRseq,
-    ] {
+    ]
+    .iter()
+    .copied()
+    {
         if query.contains_command(cmd) {
             membarrier(cmd).unwrap();
         }
@@ -24,7 +27,10 @@ fn test_membarrier() {
         MembarrierCommand::PrivateExpedited,
         MembarrierCommand::PrivateExpeditedSyncCore,
         MembarrierCommand::PrivateExpeditedRseq,
-    ] {
+    ]
+    .iter()
+    .copied()
+    {
         if query.contains_command(cmd) {
             membarrier(cmd).unwrap();
         } else {
