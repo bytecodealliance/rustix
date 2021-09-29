@@ -6,13 +6,14 @@
 #![allow(unsafe_code)]
 
 use super::super::elf::Elf_Phdr;
-use linux_raw_sys::general::{AT_HWCAP, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM};
+use linux_raw_sys::general::{AT_HWCAP, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM, AT_EXECFN};
 use linux_raw_sys::v5_4::general::{AT_HWCAP2, AT_SYSINFO_EHDR};
 use std::mem::size_of;
 use std::os::raw::c_char;
 #[cfg(target_env = "gnu")]
 use std::os::raw::c_int;
 use std::slice;
+use std::ffi::CStr;
 
 #[inline]
 pub(crate) fn page_size() -> usize {
@@ -23,6 +24,11 @@ pub(crate) fn page_size() -> usize {
 pub(crate) fn linux_hwcap() -> (usize, usize) {
     let auxv = auxv();
     (auxv.hwcap, auxv.hwcap2)
+}
+
+#[inline]
+pub(crate) fn linux_execfn() -> &'static CStr {
+    unsafe { CStr::from_ptr(auxv().execfn as *const c_char) }
 }
 
 #[inline]
@@ -50,6 +56,7 @@ struct Auxv {
     sysinfo_ehdr: usize,
     phdr: usize,
     phnum: usize,
+    execfn: usize,
 }
 
 /// Data obtained from the kernel-provided auxv array. This is initialized at
@@ -61,6 +68,7 @@ static mut AUXV: Auxv = Auxv {
     sysinfo_ehdr: 0,
     phdr: 0,
     phnum: 0,
+    execfn: 0,
 };
 
 /// GLIBC passes argc, argv, and envp to functions in .init_array, as a
@@ -121,6 +129,7 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) {
             AT_PHDR => AUXV.phdr = a_val,
             AT_PHNUM => AUXV.phnum = a_val,
             AT_PHENT => assert_eq!(a_val, size_of::<Elf_Phdr>()),
+            AT_EXECFN => AUXV.execfn = a_val,
             AT_NULL => break,
             _ => (),
         }

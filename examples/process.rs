@@ -80,5 +80,7 @@ fn main() -> io::Result<()> {
         target_os = "openbsd",
     )))]
     println!("Rttime Limit: {:?}", getrlimit(Resource::Rttime));
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    println!("Execfn: {:?}", linux_execfn());
     Ok(())
 }
