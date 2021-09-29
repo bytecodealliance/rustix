@@ -18,6 +18,7 @@ pub(super) use libc::{
 ))]
 pub(super) use libc::{
     fstat64 as libc_fstat, fstatat64 as libc_fstatat, lseek64 as libc_lseek, off64_t as libc_off_t,
+    rlimit64 as libc_rlimit,
 };
 
 #[cfg(not(any(
@@ -29,13 +30,43 @@ pub(super) use libc::{
 )))]
 pub(super) use libc::mmap as libc_mmap;
 
+#[cfg(not(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "emscripten",
+    target_os = "fuchsia",
+    target_os = "l4re",
+    target_os = "redox",
+    target_os = "wasi",
+)))]
+pub(super) use libc::{rlimit as libc_rlimit, RLIM_INFINITY as LIBC_RLIM_INFINITY};
+
+#[cfg(not(any(
+    target_os = "android",
+    target_os = "fuchsia",
+    target_os = "emscripten",
+    target_os = "l4re",
+    target_os = "linux",
+    target_os = "wasi",
+)))]
+pub(super) use libc::getrlimit as libc_getrlimit;
+
+// TODO: Add `RLIM64_INFINITY` to upstream libc.
 #[cfg(any(
     target_os = "android",
     target_os = "linux",
     target_os = "emscripten",
     target_os = "l4re",
 ))]
-pub(super) use libc::mmap64 as libc_mmap;
+pub(super) const LIBC_RLIM_INFINITY: u64 = !0u64;
+
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "emscripten",
+    target_os = "l4re",
+))]
+pub(super) use libc::{getrlimit64 as libc_getrlimit, mmap64 as libc_mmap};
 
 #[cfg(not(any(
     target_os = "android",

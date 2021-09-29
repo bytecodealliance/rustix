@@ -55,6 +55,11 @@ pub(super) fn nonnegative_ret(raw: c_int) -> io::Result<()> {
 }
 
 #[inline]
+pub(super) unsafe fn ret_infallible(raw: c_int) {
+    debug_assert_eq!(raw, 0);
+}
+
+#[inline]
 pub(super) fn ret_c_int(raw: c_int) -> io::Result<c_int> {
     if raw == -1 {
         Err(io::Error::last_os_error())

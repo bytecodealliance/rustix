@@ -19,5 +19,66 @@ fn main() -> io::Result<()> {
         "Current working directory: {}",
         getcwd(Default::default())?.to_string_lossy()
     );
+    println!("Cpu Limit: {:?}", getrlimit(Resource::Cpu));
+    println!("Fsize Limit: {:?}", getrlimit(Resource::Fsize));
+    println!("Data Limit: {:?}", getrlimit(Resource::Data));
+    println!("Stack Limit: {:?}", getrlimit(Resource::Stack));
+    println!("Core Limit: {:?}", getrlimit(Resource::Core));
+    println!("Rss Limit: {:?}", getrlimit(Resource::Rss));
+    println!("Nproc Limit: {:?}", getrlimit(Resource::Nproc));
+    println!("Nofile Limit: {:?}", getrlimit(Resource::Nofile));
+    println!("Memlock Limit: {:?}", getrlimit(Resource::Memlock));
+    #[cfg(not(target_os = "openbsd"))]
+    println!("As Limit: {:?}", getrlimit(Resource::As));
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    println!("Locks Limit: {:?}", getrlimit(Resource::Locks));
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    println!("Sigpending Limit: {:?}", getrlimit(Resource::Sigpending));
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    println!("Msgqueue Limit: {:?}", getrlimit(Resource::Msgqueue));
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    println!("Nice Limit: {:?}", getrlimit(Resource::Nice));
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    println!("Rtprio Limit: {:?}", getrlimit(Resource::Rtprio));
+    #[cfg(not(any(
+        target_os = "emscripten",
+        target_os = "freebsd",
+        target_os = "android",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    println!("Rttime Limit: {:?}", getrlimit(Resource::Rttime));
     Ok(())
 }

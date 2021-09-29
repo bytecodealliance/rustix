@@ -35,6 +35,100 @@ pub enum MembarrierCommand {
     RegisterPrivateExpeditedRseq = 256,
 }
 
+/// A resource value for use with [`getrlimit`].
+///
+/// [`getrlimit`]: crate::process::getrlimit
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[repr(i32)]
+pub enum Resource {
+    /// `RLIMIT_CPU`
+    Cpu = libc::RLIMIT_CPU as c_int,
+    /// `RLIMIT_FSIZE`
+    Fsize = libc::RLIMIT_FSIZE as c_int,
+    /// `RLIMIT_DATA`
+    Data = libc::RLIMIT_DATA as c_int,
+    /// `RLIMIT_STACK`
+    Stack = libc::RLIMIT_STACK as c_int,
+    /// `RLIMIT_CORE`
+    Core = libc::RLIMIT_CORE as c_int,
+    /// `RLIMIT_RSS`
+    #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+    Rss = libc::RLIMIT_RSS as c_int,
+    /// `RLIMIT_NPROC`
+    Nproc = libc::RLIMIT_NPROC as c_int,
+    /// `RLIMIT_NOFILE`
+    Nofile = libc::RLIMIT_NOFILE as c_int,
+    /// `RLIMIT_MEMLOCK`
+    Memlock = libc::RLIMIT_MEMLOCK as c_int,
+    /// `RLIMIT_AS`
+    #[cfg(not(target_os = "openbsd"))]
+    As = libc::RLIMIT_AS as c_int,
+    /// `RLIMIT_LOCKS`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    Locks = libc::RLIMIT_LOCKS as c_int,
+    /// `RLIMIT_SIGPENDING`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    Sigpending = libc::RLIMIT_SIGPENDING as c_int,
+    /// `RLIMIT_MSGQUEUE`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    Msgqueue = libc::RLIMIT_MSGQUEUE as c_int,
+    /// `RLIMIT_NICE`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    Nice = libc::RLIMIT_NICE as c_int,
+    /// `RLIMIT_RTPRIO`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    Rtprio = libc::RLIMIT_RTPRIO as c_int,
+    /// `RLIMIT_RTTIME`
+    #[cfg(not(any(
+        target_os = "emscripten",
+        target_os = "freebsd",
+        target_os = "android",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
+    Rttime = libc::RLIMIT_RTTIME as c_int,
+}
+
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+impl Resource {
+    /// `RLIMIT_RSS`
+    #[allow(non_upper_case_globals)]
+    pub const Rss: Self = Self::As;
+}
+
 pub const EXIT_SUCCESS: c_int = libc::EXIT_SUCCESS;
 pub const EXIT_FAILURE: c_int = libc::EXIT_FAILURE;
 #[cfg(not(target_os = "wasi"))]

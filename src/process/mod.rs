@@ -12,6 +12,8 @@ mod id;
 mod membarrier;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))] // WASI doesn't have [gs]etpriority.
 mod priority;
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+mod rlimit;
 mod sched;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.
 mod uname;
@@ -44,6 +46,8 @@ pub use priority::{
     getpriority_pgrp, getpriority_process, getpriority_user, setpriority_pgrp, setpriority_process,
     setpriority_user,
 };
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+pub use rlimit::{getrlimit, Resource, Rlimit};
 pub use sched::sched_yield;
 #[cfg(not(target_os = "wasi"))]
 pub use uname::{uname, Uname};
