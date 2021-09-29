@@ -79,7 +79,7 @@ fn test_mprotect() {
     unsafe {
         let addr = mmap_anonymous(null_mut(), 8192, ProtFlags::READ, MapFlags::PRIVATE).unwrap();
 
-        mprotect(addr, 8192, MprotectFlags::NONE).unwrap();
+        mprotect(addr, 8192, MprotectFlags::empty()).unwrap();
         mprotect(addr, 8192, MprotectFlags::READ).unwrap();
 
         let slice = slice::from_raw_parts(addr.cast::<u8>(), 8192);

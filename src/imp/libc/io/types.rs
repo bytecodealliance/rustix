@@ -42,6 +42,8 @@ bitflags! {
 bitflags! {
     /// `PROT_*` flags for use with [`mmap`].
     ///
+    /// For `PROT_NONE`, use `ProtFlags::empty()`.
+    ///
     /// [`mmap`]: crate::io::mmap
     pub struct ProtFlags: c_int {
         /// `PROT_READ`
@@ -50,14 +52,14 @@ bitflags! {
         const WRITE = libc::PROT_WRITE;
         /// `PROT_EXEC`
         const EXEC = libc::PROT_EXEC;
-        /// `PROT_NONE`
-        const NONE = libc::PROT_NONE;
     }
 }
 
 #[cfg(not(target_os = "wasi"))]
 bitflags! {
     /// `PROT_*` flags for use with [`mprotect`].
+    ///
+    /// For `PROT_NONE`, use `MprotectFlags::empty()`.
     ///
     /// [`mprotect`]: crate::io::mprotect
     pub struct MprotectFlags: c_int {
@@ -67,8 +69,6 @@ bitflags! {
         const WRITE = libc::PROT_WRITE;
         /// `PROT_EXEC`
         const EXEC = libc::PROT_EXEC;
-        /// `PROT_NONE`
-        const NONE = libc::PROT_NONE;
         /// `PROT_GROWSUP`
         #[cfg(any(target_os = "android", target_os = "linux"))]
         const GROWSUP = libc::PROT_GROWSUP;

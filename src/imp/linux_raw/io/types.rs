@@ -32,6 +32,8 @@ bitflags! {
 bitflags! {
     /// `PROT_*` flags for use with [`mmap`].
     ///
+    /// For `PROT_NONE`, use `ProtFlags::empty()`.
+    ///
     /// [`mmap`]: crate::io::mmap
     pub struct ProtFlags: u32 {
         /// `PROT_READ`
@@ -40,13 +42,13 @@ bitflags! {
         const WRITE = linux_raw_sys::general::PROT_WRITE;
         /// `PROT_EXEC`
         const EXEC = linux_raw_sys::general::PROT_EXEC;
-        /// `PROT_NONE`
-        const NONE = linux_raw_sys::general::PROT_NONE;
     }
 }
 
 bitflags! {
     /// `PROT_*` flags for use with [`mprotect`].
+    ///
+    /// For `PROT_NONE`, use `MprotectFlags::empty()`.
     ///
     /// [`mprotect`]: crate::io::mprotect
     pub struct MprotectFlags: u32 {
@@ -56,8 +58,6 @@ bitflags! {
         const WRITE = linux_raw_sys::general::PROT_WRITE;
         /// `PROT_EXEC`
         const EXEC = linux_raw_sys::general::PROT_EXEC;
-        /// `PROT_NONE`
-        const NONE = linux_raw_sys::general::PROT_NONE;
         /// `PROT_GROWSUP`
         const GROWSUP = linux_raw_sys::general::PROT_GROWSUP;
         /// `PROT_GROWSDOWN`
