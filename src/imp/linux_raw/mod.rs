@@ -4,6 +4,7 @@ mod reg;
 mod vdso;
 mod vdso_wrappers;
 
+pub(crate) mod elf;
 pub(crate) mod fs;
 pub(crate) mod io;
 pub(crate) mod net;
