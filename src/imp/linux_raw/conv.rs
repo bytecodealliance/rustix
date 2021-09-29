@@ -280,7 +280,6 @@ pub(super) unsafe fn ret(raw: RetReg<R0>) -> io::Result<()> {
 ///
 /// The caller must ensure that this is the return value of a syscall which
 /// always returns `()`.
-#[cfg(target_arch = "x86_64")]
 #[inline]
 pub(super) unsafe fn ret_infallible(_raw: RetReg<R0>) {
     #[cfg(debug_assertions)]

@@ -1,3 +1,5 @@
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+use super::conv::ret_infallible;
 #[cfg(not(any(
     target_os = "freebsd",
     target_os = "ios",
@@ -60,6 +62,8 @@ use super::net::{
 use super::offset::libc_fallocate;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 use super::offset::libc_fstatfs;
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+use super::offset::libc_getrlimit;
 #[cfg(not(target_os = "wasi"))]
 use super::offset::libc_mmap;
 #[cfg(not(any(
@@ -84,13 +88,19 @@ use super::offset::libc_posix_fallocate;
 use super::offset::{libc_fstat, libc_fstatat, libc_lseek, libc_off_t, libc_pread, libc_pwrite};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::offset::{libc_preadv2, libc_pwritev2};
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+use super::offset::{libc_rlimit, LIBC_RLIM_INFINITY};
 #[cfg(not(target_os = "wasi"))]
 use super::process::RawUname;
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+use super::process::Resource;
 #[cfg(target_os = "linux")]
 use super::rand::GetRandomFlags;
 use super::time::Timespec;
 use crate::as_ptr;
 use crate::io::{self, OwnedFd, RawFd};
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+use crate::process::Rlimit;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "wasi"))]
@@ -2224,6 +2234,27 @@ pub(crate) fn setpriority_process(pid: Pid, priority: i32) -> io::Result<()> {
             pid.as_raw() as _,
             priority,
         ))
+    }
+}
+
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[inline]
+pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
+    let mut result = MaybeUninit::<libc_rlimit>::uninit();
+    unsafe {
+        ret_infallible(libc_getrlimit(limit as _, result.as_mut_ptr()));
+        let result = result.assume_init();
+        let current = if result.rlim_cur == LIBC_RLIM_INFINITY {
+            None
+        } else {
+            result.rlim_cur.try_into().ok()
+        };
+        let maximum = if result.rlim_max == LIBC_RLIM_INFINITY {
+            None
+        } else {
+            result.rlim_max.try_into().ok()
+        };
+        Rlimit { current, maximum }
     }
 }
 

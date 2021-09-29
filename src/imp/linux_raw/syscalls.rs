@@ -23,13 +23,12 @@ use super::arch::choose::{
 };
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use super::conv::opt_ref;
-#[cfg(target_arch = "x86_64")]
-use super::conv::ret_infallible;
 use super::conv::{
     borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, const_void_star, dev_t, mode_as,
     no_fd, oflags, oflags_for_open_how, opt_c_str, opt_mut, out, pass_usize, raw_fd, ret,
-    ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd, ret_usize, ret_usize_infallible,
-    ret_void_star, size_of, slice, slice_just_addr, slice_mut, socklen_t, void_star, zero,
+    ret_c_int, ret_c_uint, ret_discarded_fd, ret_infallible, ret_owned_fd, ret_usize,
+    ret_usize_infallible, ret_void_star, size_of, slice, slice_just_addr, slice_mut, socklen_t,
+    void_star, zero,
 };
 use super::fs::{
     Access, Advice as FsAdvice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode,
@@ -46,7 +45,7 @@ use super::net::{
     AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketAddr, SocketAddrUnix,
     SocketFlags, SocketType,
 };
-use super::process::RawUname;
+use super::process::{RawUname, Resource};
 use super::rand::GetRandomFlags;
 use super::reg::nr;
 #[cfg(target_arch = "x86")]
@@ -56,7 +55,7 @@ use super::time::{ClockId, Timespec};
 use crate::io;
 use crate::io::{OwnedFd, RawFd};
 use crate::path::DecInt;
-use crate::process::{Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, Uid};
+use crate::process::{Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, Rlimit, Uid};
 use crate::time::NanosleepRelativeResult;
 use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
@@ -112,8 +111,8 @@ use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::v5_11::general::{__NR_openat2, open_how};
 use linux_raw_sys::v5_4::general::{
     __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_membarrier, __NR_memfd_create,
-    __NR_mlock2, __NR_preadv2, __NR_pwritev2, __NR_renameat2, __NR_statx, __NR_userfaultfd, statx,
-    F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ,
+    __NR_mlock2, __NR_preadv2, __NR_prlimit64, __NR_pwritev2, __NR_renameat2, __NR_statx,
+    __NR_userfaultfd, statx, F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ,
 };
 use std::convert::TryInto;
 use std::ffi::CStr;
@@ -138,7 +137,7 @@ use {
         general::timespec as __kernel_old_timespec,
         general::{
             __NR__llseek, __NR_fcntl64, __NR_fstat64, __NR_fstatat64, __NR_fstatfs64,
-            __NR_ftruncate64, __NR_sendfile64,
+            __NR_ftruncate64, __NR_getrlimit, __NR_sendfile64,
         },
         v5_4::general::{
             __NR_clock_getres_time64, __NR_clock_nanosleep_time64, __NR_futex_time64,
@@ -3362,6 +3361,81 @@ pub unsafe fn futex(
         void_star(uaddr2.cast()),
         c_uint(val3),
     ))
+}
+
+#[inline]
+pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
+    let mut result = MaybeUninit::<linux_raw_sys::v5_4::general::rlimit64>::uninit();
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        match ret(syscall4(
+            nr(__NR_prlimit64),
+            c_uint(0),
+            c_uint(limit as c_uint),
+            void_star(std::ptr::null_mut()),
+            out(&mut result),
+        )) {
+            Ok(()) => {
+                let result = result.assume_init();
+                let current =
+                    if result.rlim_cur == linux_raw_sys::v5_4::general::RLIM64_INFINITY as _ {
+                        None
+                    } else {
+                        Some(result.rlim_cur)
+                    };
+                let maximum =
+                    if result.rlim_max == linux_raw_sys::v5_4::general::RLIM64_INFINITY as _ {
+                        None
+                    } else {
+                        Some(result.rlim_max)
+                    };
+                Rlimit { current, maximum }
+            }
+            Err(e) => {
+                debug_assert_eq!(e, io::Error::NOSYS);
+                let mut result = MaybeUninit::<linux_raw_sys::general::rlimit>::uninit();
+                ret_infallible(syscall2(
+                    nr(__NR_getrlimit),
+                    c_uint(limit as c_uint),
+                    out(&mut result),
+                ));
+                let result = result.assume_init();
+                let current = if result.rlim_cur == linux_raw_sys::general::RLIM_INFINITY as _ {
+                    None
+                } else {
+                    result.rlim_cur.try_into().ok()
+                };
+                let maximum = if result.rlim_max == linux_raw_sys::general::RLIM_INFINITY as _ {
+                    None
+                } else {
+                    result.rlim_cur.try_into().ok()
+                };
+                Rlimit { current, maximum }
+            }
+        }
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret_infallible(syscall4(
+            nr(__NR_prlimit64),
+            c_uint(0),
+            c_uint(limit as c_uint),
+            void_star(std::ptr::null_mut()),
+            out(&mut result),
+        ));
+        let result = result.assume_init();
+        let current = if result.rlim_cur == linux_raw_sys::general::RLIM_INFINITY as _ {
+            None
+        } else {
+            Some(result.rlim_cur)
+        };
+        let maximum = if result.rlim_max == linux_raw_sys::general::RLIM_INFINITY as _ {
+            None
+        } else {
+            Some(result.rlim_max)
+        };
+        Rlimit { current, maximum }
+    }
 }
 
 pub(crate) mod sockopt {
