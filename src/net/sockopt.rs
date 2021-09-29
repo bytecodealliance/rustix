@@ -4,7 +4,8 @@
     target_os = "freebsd",
     target_os = "ios",
     target_os = "macos",
-    target_os = "netbsd"
+    target_os = "netbsd",
+    target_os = "openbsd",
 )))]
 use crate::net::Ipv6Addr;
 use crate::net::{Ipv4Addr, SocketType};
