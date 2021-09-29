@@ -122,6 +122,8 @@ pub fn pwritev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice], offset: u64) -> io::Result<u
 
 /// `preadv2(fd, bufs, offset, flags)`—Reads data, with several options.
 ///
+/// An `offset` of `u64::MAX` means to use and update the current file offset.
+///
 /// # References
 ///  - [Linux]
 ///
@@ -139,6 +141,8 @@ pub fn preadv2<Fd: AsFd>(
 }
 
 /// `pwritev2(fd, bufs, offset, flags)`—Writes data, with several options.
+///
+/// An `offset` of `u64::MAX` means to use and update the current file offset.
 ///
 /// # References
 ///  - [Linux]
