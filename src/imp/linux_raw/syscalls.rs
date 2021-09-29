@@ -141,7 +141,8 @@ use {
             __NR_ftruncate64, __NR_sendfile64,
         },
         v5_4::general::{
-            __NR_clock_getres_time64, __NR_clock_nanosleep_time64, __NR_utimensat_time64,
+            __NR_clock_getres_time64, __NR_clock_nanosleep_time64, __NR_futex_time64,
+            __NR_utimensat_time64,
         },
     },
 };
@@ -3318,6 +3319,40 @@ pub unsafe fn futex(
     uaddr2: *mut u32,
     val3: u32,
 ) -> io::Result<usize> {
+    #[cfg(target_pointer_width = "32")]
+    {
+        ret_usize(syscall6(
+            nr(__NR_futex_time64),
+            void_star(uaddr.cast()),
+            c_uint(op as c_uint | flags.bits()),
+            c_uint(val),
+            const_void_star(utime.cast()),
+            void_star(uaddr2.cast()),
+            c_uint(val3),
+        ))
+        .or_else(|err| {
+            // See the comments in `rsix_clock_gettime_via_syscall` about
+            // emulation.
+            if err == io::Error::NOSYS {
+                let old_utime = __kernel_old_timespec {
+                    tv_sec: (*utime).tv_sec.try_into().map_err(|_| io::Error::INVAL)?,
+                    tv_nsec: (*utime).tv_nsec.try_into().map_err(|_| io::Error::INVAL)?,
+                };
+                ret_usize(syscall6(
+                    nr(__NR_futex),
+                    void_star(uaddr.cast()),
+                    c_uint(op as c_uint | flags.bits()),
+                    c_uint(val),
+                    by_ref(&old_utime),
+                    void_star(uaddr2.cast()),
+                    c_uint(val3),
+                ))
+            } else {
+                Err(err)
+            }
+        })
+    }
+    #[cfg(target_pointer_width = "64")]
     ret_usize(syscall6(
         nr(__NR_futex),
         void_star(uaddr.cast()),
