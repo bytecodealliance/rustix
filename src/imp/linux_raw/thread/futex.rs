@@ -4,7 +4,7 @@ bitflags::bitflags! {
     /// [`futex`]: std::thread::futex
     pub struct FutexFlags: u32 {
         /// `FUTEX_PRIVATE_FLAG`
-        const PRIVATE_FLAG = linux_raw_sys::general::FUTEX_PRIVATE_FLAG;
+        const PRIVATE = linux_raw_sys::general::FUTEX_PRIVATE_FLAG;
         /// `FUTEX_CLOCK_REALTIME`
         const CLOCK_REALTIME = linux_raw_sys::general::FUTEX_CLOCK_REALTIME;
     }
@@ -13,6 +13,7 @@ bitflags::bitflags! {
 /// Operations for use with [`futex`].
 ///
 /// [`futex`]: std::thread::futex
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
 pub enum FutexOperation {
     /// `FUTEX_WAIT`

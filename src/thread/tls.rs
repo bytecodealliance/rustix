@@ -2,7 +2,9 @@
 //!
 //! # Safety
 //!
-//! This module is intended to be used for implementing `libpthread`.
+//! This module is intended to be used for implementing `libpthread`. Use
+//! of these features for any other purpose is likely to conflict with
+//! `libpthread`.
 
 #![allow(unsafe_code)]
 
@@ -44,4 +46,23 @@ pub unsafe fn set_thread_name(name: &CStr) -> io::Result<()> {
 }
 
 #[cfg(target_arch = "x86")]
-pub use imp::syscalls::tls::UserDesc;
+pub use imp::thread::tls::UserDesc;
+
+/// `syscall(SYS_exit, status)`—Exit the current thread.
+///
+/// # Safety
+///
+/// This is a very low-level feature for implementing threading libraries.
+#[inline]
+pub unsafe fn exit_thread(status: i32) -> ! {
+    imp::syscalls::tls::exit_thread(status)
+}
+
+/// Return fields from the main executable segment headers ("phdrs") relevant
+/// to initializing TLS provided to the program at startup.
+#[inline]
+pub fn startup_tls_info() -> StartupTlsInfo {
+    imp::thread::tls::startup_tls_info()
+}
+
+pub use imp::thread::tls::StartupTlsInfo;

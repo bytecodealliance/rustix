@@ -4,13 +4,15 @@
 //!
 //! This uses raw pointers to locate and read the kernel-provided auxv array.
 #![allow(unsafe_code)]
-#![allow(non_snake_case)]
 
-use linux_raw_sys::general::{AT_HWCAP, AT_NULL, AT_PAGESZ};
+use super::super::elf::Elf_Phdr;
+use linux_raw_sys::general::{AT_HWCAP, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM};
 use linux_raw_sys::v5_4::general::{AT_HWCAP2, AT_SYSINFO_EHDR};
+use std::mem::size_of;
 use std::os::raw::c_char;
 #[cfg(target_env = "gnu")]
 use std::os::raw::c_int;
+use std::slice;
 
 #[inline]
 pub(crate) fn page_size() -> usize {
@@ -21,6 +23,11 @@ pub(crate) fn page_size() -> usize {
 pub(crate) fn linux_hwcap() -> (usize, usize) {
     let auxv = auxv();
     (auxv.hwcap, auxv.hwcap2)
+}
+
+#[inline]
+pub(in super::super) fn exe_phdrs() -> &'static [Elf_Phdr] {
+    unsafe { slice::from_raw_parts(AUXV.phdr as *const Elf_Phdr, AUXV.phnum) }
 }
 
 #[inline]
@@ -41,6 +48,8 @@ struct Auxv {
     hwcap: usize,
     hwcap2: usize,
     sysinfo_ehdr: usize,
+    phdr: usize,
+    phnum: usize,
 }
 
 /// Data obtained from the kernel-provided auxv array. This is initialized at
@@ -50,6 +59,8 @@ static mut AUXV: Auxv = Auxv {
     hwcap: 0,
     hwcap2: 0,
     sysinfo_ehdr: 0,
+    phdr: 0,
+    phnum: 0,
 };
 
 /// GLIBC passes argc, argv, and envp to functions in .init_array, as a
@@ -107,6 +118,9 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) {
             AT_HWCAP => AUXV.hwcap = a_val,
             AT_HWCAP2 => AUXV.hwcap2 = a_val,
             AT_SYSINFO_EHDR => AUXV.sysinfo_ehdr = a_val,
+            AT_PHDR => AUXV.phdr = a_val,
+            AT_PHNUM => AUXV.phnum = a_val,
+            AT_PHENT => assert_eq!(a_val, size_of::<Elf_Phdr>()),
             AT_NULL => break,
             _ => (),
         }

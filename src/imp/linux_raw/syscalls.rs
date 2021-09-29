@@ -81,7 +81,7 @@ use linux_raw_sys::general::{
 use linux_raw_sys::general::{__NR_arch_prctl, ARCH_SET_FS};
 use linux_raw_sys::general::{
     __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
-    __NR_epoll_create1, __NR_epoll_ctl, __NR_exit_group, __NR_faccessat, __NR_fallocate,
+    __NR_epoll_create1, __NR_epoll_ctl, __NR_exit, __NR_exit_group, __NR_faccessat, __NR_fallocate,
     __NR_fchdir, __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_flock, __NR_fsync, __NR_futex,
     __NR_getcwd, __NR_getdents64, __NR_getpid, __NR_getppid, __NR_getpriority, __NR_gettid,
     __NR_ioctl, __NR_linkat, __NR_madvise, __NR_mkdirat, __NR_mknodat, __NR_mlock, __NR_mprotect,
@@ -3819,6 +3819,8 @@ pub(crate) mod sockopt {
 }
 
 pub(crate) mod tls {
+    #[cfg(target_arch = "x86")]
+    use super::super::thread::tls::UserDesc;
     use super::*;
 
     #[cfg(target_arch = "x86")]
@@ -3848,7 +3850,8 @@ pub(crate) mod tls {
         ret(syscall2(nr(__NR_prctl), c_uint(PR_SET_NAME), c_str(name)))
     }
 
-    /// For use with `set_thread_area`.
-    #[cfg(target_arch = "x86")]
-    pub type UserDesc = linux_raw_sys::general::user_desc;
+    #[inline]
+    pub(crate) fn exit_thread(code: c_int) -> ! {
+        unsafe { syscall1_noreturn(nr(__NR_exit), c_int(code)) }
+    }
 }
