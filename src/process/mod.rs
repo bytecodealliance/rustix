@@ -19,7 +19,7 @@ mod sched;
 mod uname;
 
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
-pub use auxv::linux_hwcap;
+pub use auxv::{linux_hwcap, linux_execfn};
 pub use auxv::page_size;
 #[cfg(not(target_os = "wasi"))]
 pub use chdir::chdir;

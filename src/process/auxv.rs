@@ -1,4 +1,6 @@
 use crate::imp;
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+use std::ffi::CStr;
 
 /// `getpagesize()`—Returns the process' page size.
 #[inline]
@@ -21,4 +23,19 @@ pub fn page_size() -> usize {
 #[inline]
 pub fn linux_hwcap() -> (usize, usize) {
     imp::process::linux_hwcap()
+}
+
+/// `getauxval(AT_EXECFN)`—Returns the Linux "execfn" string.
+///
+/// Return the string that Linux has recorded as the filesystem path to the
+/// executable.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man3/getauxval.3.html
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[inline]
+pub fn linux_execfn() -> &'static CStr {
+    imp::process::linux_execfn()
 }
