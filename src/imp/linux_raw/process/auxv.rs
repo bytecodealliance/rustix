@@ -6,14 +6,16 @@
 #![allow(unsafe_code)]
 
 use super::super::elf::Elf_Phdr;
-use linux_raw_sys::general::{AT_HWCAP, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM, AT_EXECFN};
+use linux_raw_sys::general::{
+    AT_EXECFN, AT_HWCAP, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM,
+};
 use linux_raw_sys::v5_4::general::{AT_HWCAP2, AT_SYSINFO_EHDR};
+use std::ffi::CStr;
 use std::mem::size_of;
 use std::os::raw::c_char;
-#[cfg(target_env = "gnu")]
+#[cfg(all(target_env = "gnu", not(target_vendor = "mustang")))]
 use std::os::raw::c_int;
 use std::slice;
-use std::ffi::CStr;
 
 #[inline]
 pub(crate) fn page_size() -> usize {
@@ -74,7 +76,7 @@ static mut AUXV: Auxv = Auxv {
 /// GLIBC passes argc, argv, and envp to functions in .init_array, as a
 /// non-standard extension. Use priority 99 so that we run before any
 /// normal user-defined constructor functions.
-#[cfg(target_env = "gnu")]
+#[cfg(all(target_env = "gnu", not(target_vendor = "mustang")))]
 #[used]
 #[link_section = ".init_array.00099"]
 static INIT_ARRAY: unsafe extern "C" fn(c_int, *mut *mut c_char, *mut *mut c_char) = {
@@ -90,7 +92,7 @@ static INIT_ARRAY: unsafe extern "C" fn(c_int, *mut *mut c_char, *mut *mut c_cha
 /// user-defined constructor functions.
 ///
 /// <https://refspecs.linuxbase.org/LSB_5.0.0/LSB-Core-generic/LSB-Core-generic/baselib---environ.html>
-#[cfg(not(target_env = "gnu"))]
+#[cfg(not(any(target_env = "gnu", target_vendor = "mustang")))]
 #[used]
 #[link_section = ".init_array.00099"]
 static INIT_ARRAY: unsafe extern "C" fn() = {
@@ -103,6 +105,13 @@ static INIT_ARRAY: unsafe extern "C" fn() = {
     }
     function
 };
+
+/// On mustang, we export a function to be called during initialization.
+#[cfg(target_vendor = "mustang")]
+#[inline]
+pub(crate) unsafe fn init(envp: *mut *mut c_char) {
+    init_from_envp(envp);
+}
 
 /// # Safety
 ///

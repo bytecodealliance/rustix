@@ -18,9 +18,11 @@ mod sched;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.
 mod uname;
 
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
-pub use auxv::{linux_hwcap, linux_execfn};
+#[cfg(target_vendor = "mustang")]
+pub use auxv::init;
 pub use auxv::page_size;
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+pub use auxv::{linux_execfn, linux_hwcap};
 #[cfg(not(target_os = "wasi"))]
 pub use chdir::chdir;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
