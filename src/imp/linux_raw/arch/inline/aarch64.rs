@@ -9,7 +9,7 @@ pub(in crate::imp::linux_raw) unsafe fn syscall0_readonly(nr: SyscallNumber) -> 
     asm!(
         "svc 0",
         in("x8") nr.to_asm(),
-        out("x0") r0,
+        lateout("x0") r0,
         options(nostack, preserves_flags, readonly)
     );
     FromAsm::from_asm(r0)

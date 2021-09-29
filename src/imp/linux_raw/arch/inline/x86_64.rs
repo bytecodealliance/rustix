@@ -12,8 +12,8 @@ pub(in crate::imp::linux_raw) unsafe fn syscall0_readonly(nr: SyscallNumber) -> 
     asm!(
         "syscall",
         inlateout("rax") nr.to_asm() => r0,
-        out("rcx") _,
-        out("r11") _,
+        lateout("rcx") _,
+        lateout("r11") _,
         options(nostack, preserves_flags, readonly)
     );
     FromAsm::from_asm(r0)
@@ -27,8 +27,8 @@ pub(in crate::imp::linux_raw) unsafe fn syscall1(nr: SyscallNumber, a0: ArgReg<A
         "syscall",
         inlateout("rax") nr.to_asm() => r0,
         in("rdi") a0.to_asm(),
-        out("rcx") _,
-        out("r11") _,
+        lateout("rcx") _,
+        lateout("r11") _,
         options(nostack, preserves_flags)
     );
     FromAsm::from_asm(r0)
@@ -45,8 +45,8 @@ pub(in crate::imp::linux_raw) unsafe fn syscall1_readonly(
         "syscall",
         inlateout("rax") nr.to_asm() => r0,
         in("rdi") a0.to_asm(),
-        out("rcx") _,
-        out("r11") _,
+        lateout("rcx") _,
+        lateout("r11") _,
         options(nostack, preserves_flags, readonly)
     );
     FromAsm::from_asm(r0)
@@ -75,8 +75,8 @@ pub(in crate::imp::linux_raw) unsafe fn syscall2(
         inlateout("rax") nr.to_asm() => r0,
         in("rdi") a0.to_asm(),
         in("rsi") a1.to_asm(),
-        out("rcx") _,
-        out("r11") _,
+        lateout("rcx") _,
+        lateout("r11") _,
         options(nostack, preserves_flags)
     );
     FromAsm::from_asm(r0)
@@ -95,8 +95,8 @@ pub(in crate::imp::linux_raw) unsafe fn syscall2_readonly(
         inlateout("rax") nr.to_asm() => r0,
         in("rdi") a0.to_asm(),
         in("rsi") a1.to_asm(),
-        out("rcx") _,
-        out("r11") _,
+        lateout("rcx") _,
+        lateout("r11") _,
         options(nostack, preserves_flags, readonly)
     );
     FromAsm::from_asm(r0)
@@ -117,8 +117,8 @@ pub(in crate::imp::linux_raw) unsafe fn syscall3(
         in("rdi") a0.to_asm(),
         in("rsi") a1.to_asm(),
         in("rdx") a2.to_asm(),
-        out("rcx") _,
-        out("r11") _,
+        lateout("rcx") _,
+        lateout("r11") _,
         options(nostack, preserves_flags)
     );
     FromAsm::from_asm(r0)
@@ -139,8 +139,8 @@ pub(in crate::imp::linux_raw) unsafe fn syscall3_readonly(
         in("rdi") a0.to_asm(),
         in("rsi") a1.to_asm(),
         in("rdx") a2.to_asm(),
-        out("rcx") _,
-        out("r11") _,
+        lateout("rcx") _,
+        lateout("r11") _,
         options(nostack, preserves_flags, readonly)
     );
     FromAsm::from_asm(r0)
@@ -163,8 +163,8 @@ pub(in crate::imp::linux_raw) unsafe fn syscall4(
         in("rsi") a1.to_asm(),
         in("rdx") a2.to_asm(),
         in("r10") a3.to_asm(),
-        out("rcx") _,
-        out("r11") _,
+        lateout("rcx") _,
+        lateout("r11") _,
         options(nostack, preserves_flags)
     );
     FromAsm::from_asm(r0)
@@ -187,8 +187,8 @@ pub(in crate::imp::linux_raw) unsafe fn syscall4_readonly(
         in("rsi") a1.to_asm(),
         in("rdx") a2.to_asm(),
         in("r10") a3.to_asm(),
-        out("rcx") _,
-        out("r11") _,
+        lateout("rcx") _,
+        lateout("r11") _,
         options(nostack, preserves_flags, readonly)
     );
     FromAsm::from_asm(r0)
@@ -213,8 +213,8 @@ pub(in crate::imp::linux_raw) unsafe fn syscall5(
         in("rdx") a2.to_asm(),
         in("r10") a3.to_asm(),
         in("r8") a4.to_asm(),
-        out("rcx") _,
-        out("r11") _,
+        lateout("rcx") _,
+        lateout("r11") _,
         options(nostack, preserves_flags)
     );
     FromAsm::from_asm(r0)
@@ -239,8 +239,8 @@ pub(in crate::imp::linux_raw) unsafe fn syscall5_readonly(
         in("rdx") a2.to_asm(),
         in("r10") a3.to_asm(),
         in("r8") a4.to_asm(),
-        out("rcx") _,
-        out("r11") _,
+        lateout("rcx") _,
+        lateout("r11") _,
         options(nostack, preserves_flags, readonly)
     );
     FromAsm::from_asm(r0)
@@ -267,8 +267,8 @@ pub(in crate::imp::linux_raw) unsafe fn syscall6(
         in("r10") a3.to_asm(),
         in("r8") a4.to_asm(),
         in("r9") a5.to_asm(),
-        out("rcx") _,
-        out("r11") _,
+        lateout("rcx") _,
+        lateout("r11") _,
         options(nostack, preserves_flags)
     );
     FromAsm::from_asm(r0)
@@ -295,8 +295,8 @@ pub(in crate::imp::linux_raw) unsafe fn syscall6_readonly(
         in("r10") a3.to_asm(),
         in("r8") a4.to_asm(),
         in("r9") a5.to_asm(),
-        out("rcx") _,
-        out("r11") _,
+        lateout("rcx") _,
+        lateout("r11") _,
         options(nostack, preserves_flags, readonly)
     );
     FromAsm::from_asm(r0)
