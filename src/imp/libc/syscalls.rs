@@ -49,9 +49,9 @@ use super::io::Advice as IoAdvice;
 use super::io::PipeFlags;
 use super::io::PollFd;
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use super::io::ReadWriteFlags;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use super::io::{MlockFlags, MremapFlags};
+use super::io::{ReadWriteFlags, MlockFlags};
+#[cfg(target_os = "linux")]
+use super::io::MremapFlags;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::net::{
     encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags,
