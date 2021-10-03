@@ -10,9 +10,11 @@ use crate::{imp, io};
 use io_lifetimes::AsFd;
 use std::ffi::c_void;
 
-pub use imp::io::{MapFlags, MprotectFlags, ProtFlags};
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
-pub use imp::io::{MlockFlags, MremapFlags};
+pub use imp::io::MlockFlags;
+#[cfg(any(linux_raw, all(libc, target_os = "linux")))]
+pub use imp::io::MremapFlags;
+pub use imp::io::{MapFlags, MprotectFlags, ProtFlags};
 
 /// `mmap(ptr, len, prot, flags, fd, offset)`—Create a file-backed memory
 /// mapping.
@@ -100,7 +102,7 @@ pub unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mremap.2.html
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(linux_raw, all(libc, target_os = "linux")))]
 #[inline]
 pub unsafe fn mremap(
     old_address: *mut c_void,
@@ -125,7 +127,7 @@ pub unsafe fn mremap(
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mremap.2.html
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(linux_raw, all(libc, target_os = "linux")))]
 #[inline]
 #[doc(alias = "mremap")]
 pub unsafe fn mremap_fixed(

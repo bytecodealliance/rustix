@@ -64,7 +64,9 @@ pub use mmap::{
     mlock, mmap, mmap_anonymous, mprotect, munlock, munmap, MapFlags, MprotectFlags, ProtFlags,
 };
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
-pub use mmap::{mlock_with, mremap, mremap_fixed, MlockFlags};
+pub use mmap::{mlock_with, MlockFlags};
+#[cfg(any(linux_raw, all(libc, target_os = "linux")))]
+pub use mmap::{mremap, mremap_fixed, MremapFlags};
 pub use owned_fd::OwnedFd;
 #[cfg(not(target_os = "wasi"))]
 pub use pipe::pipe;

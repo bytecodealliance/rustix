@@ -235,7 +235,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(target_os = "linux")]
 bitflags! {
     /// `MREMAP_*` flags for use with [`mremap`].
     ///
