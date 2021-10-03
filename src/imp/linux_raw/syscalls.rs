@@ -86,12 +86,13 @@ use linux_raw_sys::general::{
     __NR_ioctl, __NR_linkat, __NR_madvise, __NR_mkdirat, __NR_mknodat, __NR_mlock, __NR_mprotect,
     __NR_munlock, __NR_munmap, __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_prctl, __NR_pread64,
     __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv,
-    __NR_sched_yield, __NR_setpriority, __NR_symlinkat, __NR_uname, __NR_unlinkat, __NR_utimensat,
-    __NR_write, __NR_writev, __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t,
-    epoll_event, sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD,
-    AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO,
-    FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD,
-    F_SETFL, PR_SET_NAME, TCGETS, TIMER_ABSTIME, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
+    __NR_sched_yield, __NR_set_tid_address, __NR_setpriority, __NR_symlinkat, __NR_uname,
+    __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev, __kernel_gid_t, __kernel_pid_t,
+    __kernel_timespec, __kernel_uid_t, epoll_event, sockaddr, sockaddr_in, sockaddr_in6,
+    sockaddr_un, socklen_t, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, EPOLL_CTL_ADD,
+    EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL,
+    F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL, PR_SET_NAME, TCGETS, TIMER_ABSTIME, TIOCEXCL,
+    TIOCGWINSZ, TIOCNXCL,
 };
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use linux_raw_sys::general::{__NR_dup2, __NR_open, __NR_pipe, __NR_poll};
@@ -3917,6 +3918,13 @@ pub(crate) mod tls {
             c_uint(ARCH_SET_FS),
             void_star(data),
         ))
+    }
+
+    #[inline]
+    pub(crate) unsafe fn set_tid_address(data: *mut c_void) -> Pid {
+        let tid: i32 = ret_usize_infallible(syscall1(nr(__NR_set_tid_address), void_star(data)))
+            as __kernel_pid_t;
+        Pid::from_raw(tid as u32)
     }
 
     #[inline]
