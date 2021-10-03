@@ -45,13 +45,13 @@ use super::fs::{RenameFlags, ResolveFlags};
 use super::fs::{Statx, StatxFlags};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::io::Advice as IoAdvice;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use super::io::MlockFlags;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 use super::io::PipeFlags;
 use super::io::PollFd;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::io::ReadWriteFlags;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use super::io::{MlockFlags, MremapFlags};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::net::{
     encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags,
@@ -1333,6 +1333,52 @@ pub(crate) unsafe fn mprotect(
 #[cfg(not(target_os = "wasi"))]
 pub(crate) unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
     ret(libc::munmap(ptr, len))
+}
+
+/// # Safety
+///
+/// `mremap` is primarily unsafe due to the `old_address` parameter, as anything
+/// working with memory pointed to by raw pointers is unsafe.
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) unsafe fn mremap(
+    old_address: *mut c_void,
+    old_size: usize,
+    new_size: usize,
+    flags: MremapFlags,
+) -> io::Result<*mut c_void> {
+    let res = libc::mremap(old_address, old_size, new_size, flags.bits());
+    if res == libc::MAP_FAILED {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(res)
+    }
+}
+
+/// # Safety
+///
+/// `mremap_fixed` is primarily unsafe due to the `old_address` and
+/// `new_address` parameters, as anything working with memory pointed to by raw
+/// pointers is unsafe.
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) unsafe fn mremap_fixed(
+    old_address: *mut c_void,
+    old_size: usize,
+    new_size: usize,
+    flags: MremapFlags,
+    new_address: *mut c_void,
+) -> io::Result<*mut c_void> {
+    let res = libc::mremap(
+        old_address,
+        old_size,
+        new_size,
+        flags.bits() | libc::MAP_FIXED,
+        new_address,
+    );
+    if res == libc::MAP_FAILED {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(res)
+    }
 }
 
 /// # Safety

@@ -237,6 +237,22 @@ bitflags! {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
+    /// `MREMAP_*` flags for use with [`mremap`].
+    ///
+    /// For `MREMAP_FIXED`, see [`mremap_fixed`].
+    ///
+    /// [`mremap`]: crate::io::mremap
+    /// [`mremap_fixed`]: crate::io::mremap_fixed
+    pub struct MremapFlags: i32 {
+        /// `MREMAP_MAYMOVE`
+        const MAYMOVE = libc::MREMAP_MAYMOVE;
+        /// `MREMAP_DONTUNMAP`
+        const DONTUNMAP = libc::MREMAP_DONTUNMAP;
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
     /// `MLOCK_*` flags for use with [`mlock_with`].
     ///
     /// [`mlock_with`]: crate::io::mlock_with
