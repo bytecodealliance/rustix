@@ -12,6 +12,8 @@ use std::ffi::c_void;
 
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use imp::io::MlockFlags;
+#[cfg(any(linux_raw, all(libc, target_os = "linux")))]
+pub use imp::io::MremapFlags;
 pub use imp::io::{MapFlags, MprotectFlags, ProtFlags};
 
 /// `mmap(ptr, len, prot, flags, fd, offset)`—Create a file-backed memory
@@ -59,6 +61,7 @@ pub unsafe fn mmap<Fd: AsFd>(
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mmap.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mmap.2.html
 #[inline]
+#[doc(alias = "mmap")]
 pub unsafe fn mmap_anonymous(
     ptr: *mut c_void,
     len: usize,
@@ -83,6 +86,58 @@ pub unsafe fn mmap_anonymous(
 #[inline]
 pub unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
     imp::syscalls::munmap(ptr, len)
+}
+
+/// `mremap(old_address, old_size, new_size, flags)`—Resize, modify,
+/// and/or move a memory mapping.
+///
+/// For moving a mapping to a fixed address (`MREMAP_FIXED`), see
+/// [`mremap_fixed`].
+///
+/// # Safety
+///
+/// Raw pointers and lots of special semantics.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/mremap.2.html
+#[cfg(any(linux_raw, all(libc, target_os = "linux")))]
+#[inline]
+pub unsafe fn mremap(
+    old_address: *mut c_void,
+    old_size: usize,
+    new_size: usize,
+    flags: MremapFlags,
+) -> io::Result<*mut c_void> {
+    imp::syscalls::mremap(old_address, old_size, new_size, flags)
+}
+
+/// `mremap(old_address, old_size, new_size, MREMAP_FIXED | flags)`—Resize,
+/// modify, and/or move a memory mapping to a specific address.
+///
+/// For `mremap` without moving to a specific address, see [`mremap`].
+/// [`mremap_fixed`].
+///
+/// # Safety
+///
+/// Raw pointers and lots of special semantics.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/mremap.2.html
+#[cfg(any(linux_raw, all(libc, target_os = "linux")))]
+#[inline]
+#[doc(alias = "mremap")]
+pub unsafe fn mremap_fixed(
+    old_address: *mut c_void,
+    old_size: usize,
+    new_size: usize,
+    flags: MremapFlags,
+    new_address: *mut c_void,
+) -> io::Result<*mut c_void> {
+    imp::syscalls::mremap_fixed(old_address, old_size, new_size, flags, new_address)
 }
 
 /// `mprotect(ptr, len, flags)`

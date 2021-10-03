@@ -109,6 +109,21 @@ bitflags! {
 }
 
 bitflags! {
+    /// `MREMAP_*` flags for use with [`mremap`].
+    ///
+    /// For `MREMAP_FIXED`, see [`mremap_fixed`].
+    ///
+    /// [`mremap`]: crate::io::mremap
+    /// [`mremap_fixed`]: crate::io::mremap_fixed
+    pub struct MremapFlags: u32 {
+        /// `MREMAP_MAYMOVE`
+        const MAYMOVE = linux_raw_sys::general::MREMAP_MAYMOVE;
+        /// `MREMAP_DONTUNMAP` (since Linux 5.7)
+        const DONTUNMAP = linux_raw_sys::v5_11::general::MREMAP_DONTUNMAP;
+    }
+}
+
+bitflags! {
     /// `MLOCK_*` flags for use with [`mlock_with`].
     ///
     /// [`mlock_with`]: crate::io::mlock_with

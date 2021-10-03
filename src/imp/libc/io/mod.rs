@@ -8,6 +8,8 @@ pub use error::Error;
 pub use poll_fd::{PollFd, PollFlags};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub use types::Advice;
+#[cfg(target_os = "linux")]
+pub use types::MremapFlags;
 #[cfg(all(
     libc,
     not(any(target_os = "ios", target_os = "macos", target_os = "wasi"))

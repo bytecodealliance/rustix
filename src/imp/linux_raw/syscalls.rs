@@ -36,7 +36,7 @@ use super::fs::{
 };
 use super::io::{
     epoll, Advice as IoAdvice, DupFlags, EventfdFlags, MapFlags, MlockFlags, MprotectFlags,
-    PipeFlags, PollFd, ProtFlags, ReadWriteFlags, UserfaultfdFlags,
+    MremapFlags, PipeFlags, PollFd, ProtFlags, ReadWriteFlags, UserfaultfdFlags,
 };
 #[cfg(not(target_os = "wasi"))]
 use super::io::{Termios, Winsize};
@@ -109,7 +109,7 @@ use linux_raw_sys::general::{__NR_ppoll, sigset_t};
     target_arch = "riscv64"
 )))]
 use linux_raw_sys::general::{__NR_recv, __NR_send};
-use linux_raw_sys::v5_11::general::{__NR_openat2, open_how};
+use linux_raw_sys::v5_11::general::{__NR_mremap, __NR_openat2, open_how};
 use linux_raw_sys::v5_4::general::{
     __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_membarrier, __NR_memfd_create,
     __NR_mlock2, __NR_preadv2, __NR_prlimit64, __NR_pwritev2, __NR_renameat2, __NR_statx,
@@ -2377,6 +2377,49 @@ pub(crate) unsafe fn munmap(addr: *mut c_void, length: usize) -> io::Result<()> 
         nr(__NR_munmap),
         void_star(addr),
         pass_usize(length),
+    ))
+}
+
+/// # Safety
+///
+/// `mremap` is primarily unsafe due to the `old_address` parameter, as anything
+/// working with memory pointed to by raw pointers is unsafe.
+#[inline]
+pub(crate) unsafe fn mremap(
+    old_address: *mut c_void,
+    old_size: usize,
+    new_size: usize,
+    flags: MremapFlags,
+) -> io::Result<*mut c_void> {
+    ret_void_star(syscall4(
+        nr(__NR_mremap),
+        void_star(old_address),
+        pass_usize(old_size),
+        pass_usize(new_size),
+        c_uint(flags.bits()),
+    ))
+}
+
+/// # Safety
+///
+/// `mremap_fixed` is primarily unsafe due to the `old_address` and
+/// `new_address` parameters, as anything working with memory pointed to by raw
+/// pointers is unsafe.
+#[inline]
+pub(crate) unsafe fn mremap_fixed(
+    old_address: *mut c_void,
+    old_size: usize,
+    new_size: usize,
+    flags: MremapFlags,
+    new_address: *mut c_void,
+) -> io::Result<*mut c_void> {
+    ret_void_star(syscall5(
+        nr(__NR_mremap),
+        void_star(old_address),
+        pass_usize(old_size),
+        pass_usize(new_size),
+        c_uint(flags.bits()),
+        void_star(new_address),
     ))
 }
 
