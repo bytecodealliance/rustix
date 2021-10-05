@@ -1,10 +1,19 @@
-//! Implementation details for thread-local storage (TLS).
+//! Low-level implementation details for libc-like runtime libraries.
+//!
+//! These functions are for implementing thread-local storage (TLS),
+//! managing threads, loaded libraries, and other process-wide resources.
+//! Most of rsix doesn't care about what other libraries are linked into
+//! the program or what they're doing, but the features in this module
+//! generally can only be used by one entity within a process.
+//!
+//! The API for these functions is not stable, and this module is
+//! `doc(hidden)`.
 //!
 //! # Safety
 //!
-//! This module is intended to be used for implementing `libpthread`. Use
-//! of these features for any other purpose is likely to conflict with
-//! `libpthread`.
+//! This module is intended to be used for implementing a runtime library
+//! such as libc. Use of these features for any other purpose is likely
+//! to create serious problems.
 
 #![allow(unsafe_code)]
 
