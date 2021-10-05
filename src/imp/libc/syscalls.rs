@@ -1337,8 +1337,8 @@ pub(crate) unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
 
 /// # Safety
 ///
-/// `mremap` is primarily unsafe due to the `old_address` parameter, as anything
-/// working with memory pointed to by raw pointers is unsafe.
+/// `mremap` is primarily unsafe due to the `old_address` parameter, as
+/// anything working with memory pointed to by raw pointers is unsafe.
 #[cfg(target_os = "linux")]
 pub(crate) unsafe fn mremap(
     old_address: *mut c_void,

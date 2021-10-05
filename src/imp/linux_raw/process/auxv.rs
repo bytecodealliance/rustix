@@ -10,8 +10,7 @@ use linux_raw_sys::general::{
     AT_EXECFN, AT_HWCAP, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM,
 };
 use linux_raw_sys::v5_4::general::{AT_HWCAP2, AT_SYSINFO_EHDR};
-use std::ffi::c_void;
-use std::ffi::CStr;
+use std::ffi::{c_void, CStr};
 use std::mem::size_of;
 use std::os::raw::c_char;
 #[cfg(all(target_env = "gnu", not(target_vendor = "mustang")))]
