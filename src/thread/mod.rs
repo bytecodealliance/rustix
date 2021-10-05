@@ -4,10 +4,6 @@
 mod id;
 
 #[cfg(linux_raw)]
-#[doc(hidden)]
-pub mod tls;
-
-#[cfg(linux_raw)]
 mod futex;
 
 #[cfg(linux_raw)]
