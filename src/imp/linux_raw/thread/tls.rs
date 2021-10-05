@@ -1,7 +1,7 @@
 #![allow(unsafe_code)]
 
 use super::super::elf::*;
-use super::super::process::exe_phdrs;
+use super::super::process::exe_phdrs_slice;
 use std::ffi::c_void;
 use std::ptr::null;
 
@@ -15,7 +15,7 @@ pub(crate) fn startup_tls_info() -> StartupTlsInfo {
     let mut stack_size = 0;
 
     unsafe {
-        let phdrs = exe_phdrs();
+        let phdrs = exe_phdrs_slice();
         for phdr in phdrs {
             match (*phdr).p_type {
                 PT_PHDR => {
