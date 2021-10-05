@@ -71,4 +71,17 @@ pub fn startup_tls_info() -> StartupTlsInfo {
     imp::thread::tls::startup_tls_info()
 }
 
+/// `(getauxval(AT_PHDR), getauxval(AT_PHNUM))`—Returns the address and
+/// number of ELF segment headers for the main executable.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man3/getauxval.3.html
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[inline]
+pub fn exe_phdrs() -> (*const c_void, usize) {
+    imp::process::exe_phdrs()
+}
+
 pub use imp::thread::tls::StartupTlsInfo;

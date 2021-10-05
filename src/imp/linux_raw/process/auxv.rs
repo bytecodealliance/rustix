@@ -10,6 +10,7 @@ use linux_raw_sys::general::{
     AT_EXECFN, AT_HWCAP, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM,
 };
 use linux_raw_sys::v5_4::general::{AT_HWCAP2, AT_SYSINFO_EHDR};
+use std::ffi::c_void;
 use std::ffi::CStr;
 use std::mem::size_of;
 use std::os::raw::c_char;
@@ -34,8 +35,15 @@ pub(crate) fn linux_execfn() -> &'static CStr {
 }
 
 #[inline]
-pub(in super::super) fn exe_phdrs() -> &'static [Elf_Phdr] {
-    unsafe { slice::from_raw_parts(AUXV.phdr as *const Elf_Phdr, AUXV.phnum) }
+pub(crate) fn exe_phdrs() -> (*const c_void, usize) {
+    let auxv = auxv();
+    (auxv.phdr as *const c_void, auxv.phnum)
+}
+
+#[inline]
+pub(in super::super) fn exe_phdrs_slice() -> &'static [Elf_Phdr] {
+    let (ptr, len) = exe_phdrs();
+    unsafe { slice::from_raw_parts(ptr as *const Elf_Phdr, len) }
 }
 
 #[inline]
