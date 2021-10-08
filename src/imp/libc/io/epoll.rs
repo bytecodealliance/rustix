@@ -391,6 +391,48 @@ impl<Context: self::Context> Epoll<Context> {
     }
 }
 
+impl<'context, T: AsFd + IntoFd + FromFd> AsRawFd for Epoll<Owning<'context, T>> {
+    fn as_raw_fd(&self) -> RawFd {
+        self.epoll_fd.as_raw_fd()
+    }
+}
+
+impl<'context, T: AsFd + IntoFd + FromFd> IntoRawFd for Epoll<Owning<'context, T>> {
+    fn into_raw_fd(self) -> RawFd {
+        self.epoll_fd.into_raw_fd()
+    }
+}
+
+impl<'context, T: AsFd + IntoFd + FromFd> FromRawFd for Epoll<Owning<'context, T>> {
+    unsafe fn from_raw_fd(fd: RawFd) -> Self {
+        Self {
+            epoll_fd: OwnedFd::from_raw_fd(fd),
+            context: Owning::new(),
+        }
+    }
+}
+
+impl<'context, T: AsFd + IntoFd + FromFd> AsFd for Epoll<Owning<'context, T>> {
+    fn as_fd(&self) -> BorrowedFd<'_> {
+        self.epoll_fd.as_fd()
+    }
+}
+
+impl<'context, T: AsFd + IntoFd + FromFd> From<Epoll<Owning<'context, T>>> for OwnedFd {
+    fn from(epoll: Epoll<Owning<'context, T>>) -> OwnedFd {
+        epoll.epoll_fd
+    }
+}
+
+impl<'context, T: AsFd + IntoFd + FromFd> From<OwnedFd> for Epoll<Owning<'context, T>> {
+    fn from(fd: OwnedFd) -> Self {
+        Self {
+            epoll_fd: fd,
+            context: Owning::new(),
+        }
+    }
+}
+
 pub struct Iter<'context, Context: self::Context> {
     iter: std::slice::Iter<'context, Event>,
     context: *const Context,

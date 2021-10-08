@@ -2,12 +2,12 @@
 
 use io_lifetimes::AsFd;
 use rsix::io::epoll::{self, Epoll};
-use rsix::io::{ioctl_fionbio, read, write};
+use rsix::io::{ioctl_fionbio, read, write, OwnedFd};
 use rsix::net::{
     accept, bind_v4, connect_v4, getsockname, listen, socket, AddressFamily, Ipv4Addr, Protocol,
     SocketAddr, SocketAddrV4, SocketType,
 };
-use std::os::unix::io::AsRawFd;
+use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 
@@ -30,7 +30,13 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
         cvar.notify_all();
     }
 
-    let epoll = Epoll::new(epoll::CreateFlags::CLOEXEC, epoll::Owning::new()).unwrap();
+    let epoll = Epoll::new(epoll::CreateFlags::CLOEXEC, epoll::Owning::<OwnedFd>::new()).unwrap();
+
+    // Test into conversions.
+    let fd: OwnedFd = epoll.into();
+    let epoll: Epoll<epoll::Owning<OwnedFd>> = fd.into();
+    let fd: RawFd = epoll.into_raw_fd();
+    let epoll = unsafe { Epoll::<epoll::Owning<OwnedFd>>::from_raw_fd(fd) };
 
     let raw_listen_sock = listen_sock.as_fd().as_raw_fd();
     epoll.add(listen_sock, epoll::EventFlags::IN).unwrap();
