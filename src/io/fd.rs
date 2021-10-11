@@ -161,8 +161,7 @@ fn _ttyname(dirfd: BorrowedFd<'_>, reuse: OsString) -> io::Result<OsString> {
     loop {
         match imp::syscalls::ttyname(dirfd, &mut buffer) {
             Err(imp::io::Error::RANGE) => buffer.resize(buffer.len() * 2, 0_u8),
-            Ok(_) => {
-                let len = buffer.iter().position(|x| *x == b'\0').unwrap();
+            Ok(len) => {
                 buffer.resize(len, 0_u8);
                 return Ok(OsString::from_vec(buffer));
             }

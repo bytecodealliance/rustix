@@ -3103,8 +3103,15 @@ pub(crate) fn gettid() -> Pid {
 
 #[cfg(feature = "procfs")]
 #[inline]
-pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<()> {
-    // Check that the fd is really a tty
+pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
+    let fd_stat = fstat(fd)?;
+
+    // Quick check: if `fd` isn't a character device, it's not a tty.
+    if (fd_stat.st_mode & Mode::IFMT.bits()) != Mode::IFCHR.bits() {
+        return Err(crate::io::Error::NOTTY);
+    }
+
+    // Check that `fd` is really a tty.
     ioctl_tiocgwinsz(fd)?;
 
     // Get fd to '/proc/self/fd'
@@ -3121,17 +3128,15 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<()> {
     }
     buf[r] = 0;
 
-    // Gatter the stat for the original fd and the newly gatter name
+    // Check that the path we read refers to the same file as `fd`.
     let path = CStr::from_bytes_with_nul(&buf[..=r]).unwrap();
-    let st1 = stat(path)?;
-    let st2 = fstat(fd)?;
 
-    // Finally check that the two stat(s) are equal
-    if st1.st_dev != st2.st_dev || st1.st_ino != st2.st_ino {
-        return Err(io::Error::NODEV);
+    let path_stat = stat(path)?;
+    if path_stat.st_dev != fd_stat.st_dev || path_stat.st_ino != fd_stat.st_ino {
+        return Err(crate::io::Error::NODEV);
     }
 
-    Ok(())
+    Ok(r)
 }
 
 #[inline]
