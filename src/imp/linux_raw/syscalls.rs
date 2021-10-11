@@ -3114,10 +3114,10 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     // Check that `fd` is really a tty.
     ioctl_tiocgwinsz(fd)?;
 
-    // Get fd to '/proc/self/fd'
+    // Get a fd to '/proc/self/fd'.
     let proc_self_fd = io::proc_self_fd()?;
 
-    // Gatter the ttyname by reading the 'fd' file inside 'proc_self_fd'
+    // Gather the ttyname by reading the 'fd' file inside 'proc_self_fd'.
     let r = readlinkat(proc_self_fd, DecInt::from_fd(&fd).as_c_str(), buf)?;
 
     // If the number of bytes is equal to the buffer length, truncation may
