@@ -1,5 +1,6 @@
 /// A simple macro for `CStr` literals that doesn't depend on `proc_macro2` or
-/// `syn` or anything else.
+/// `syn` or anything else. Embedded NULs are not diagnosed at compile time,
+/// but are diagnosed at runtime in `debug_assertions` builds.
 #[cfg(debug_assertions)]
 #[allow(unused_macros)]
 macro_rules! cstr {
