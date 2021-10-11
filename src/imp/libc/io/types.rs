@@ -246,8 +246,6 @@ bitflags! {
     pub struct MremapFlags: i32 {
         /// `MREMAP_MAYMOVE`
         const MAYMOVE = libc::MREMAP_MAYMOVE;
-        /// `MREMAP_DONTUNMAP`
-        const DONTUNMAP = libc::MREMAP_DONTUNMAP;
     }
 }
 
