@@ -3106,7 +3106,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<()> {
     ioctl_tiocgwinsz(fd)?;
 
     // Get fd to '/proc/self/fd'
-    let proc_self_fd = crate::io::proc_self_fd()?;
+    let proc_self_fd = io::proc_self_fd()?;
 
     // Gatter the ttyname by reading the 'fd' file inside 'proc_self_fd'
     let r = readlinkat(proc_self_fd, DecInt::from_fd(&fd).as_c_str(), buf)?;
@@ -3115,7 +3115,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<()> {
     // have occurred. This check also ensures that we have enough space for
     // adding a NUL terminator.
     if r == buf.len() {
-        return Err(crate::io::Error::RANGE);
+        return Err(io::Error::RANGE);
     }
     buf[r] = 0;
 
@@ -3126,7 +3126,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<()> {
 
     // Finally check that the two stat(s) are equal
     if st1.st_dev != st2.st_dev || st1.st_ino != st2.st_ino {
-        return Err(crate::io::Error::NODEV);
+        return Err(io::Error::NODEV);
     }
 
     Ok(())

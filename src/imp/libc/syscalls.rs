@@ -1885,7 +1885,7 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId) -> io::Result<Timespec> 
 
             #[cfg(any(target_os = "android", target_os = "linux"))]
             DynamicClockId::Dynamic(fd) => {
-                use crate::io::AsRawFd;
+                use io::AsRawFd;
                 const CLOCKFD: i32 = 3;
                 (!fd.as_raw_fd() << 3) | CLOCKFD
             }
