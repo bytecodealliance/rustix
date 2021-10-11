@@ -42,7 +42,7 @@ pub(crate) fn startup_tls_info() -> StartupTlsInfo {
 
 /// The values returned from [`startup_tls_info`].
 ///
-/// [`startup_tls_info`]: crate::thread::tls::startup_tls_info
+/// [`startup_tls_info`]: crate::runtime::startup_tls_info
 pub struct StartupTlsInfo {
     /// The base address of the TLS segment.
     pub addr: *const c_void,
