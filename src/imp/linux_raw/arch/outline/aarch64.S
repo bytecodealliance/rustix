@@ -6,6 +6,7 @@
 // so we only need to move nr into w8.
 
     .file       "aarch64.S"
+    .arch       armv8-a
 
     .section    .text.rsix_reordered_syscall0,"ax",@progbits
     .p2align    2
