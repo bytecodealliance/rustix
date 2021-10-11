@@ -41,14 +41,15 @@ fn main() {
 
 fn link_in_librsix_outline(arch: &str, asm_name: &str) {
     let name = format!("rsix_outline_{}", arch);
-    let to = format!("{}/lib{}.a", OUTLINE_PATH, name);
+    let profile = var("PROFILE").unwrap();
+    let to = format!("{}/{}/lib{}.a", OUTLINE_PATH, profile, name);
     println!("cargo:rerun-if-changed={}", to);
 
     // If "cc" is not enabled, use a pre-built library.
     #[cfg(not(feature = "cc"))]
     {
         let _ = asm_name;
-        println!("cargo:rustc-link-search={}", OUTLINE_PATH);
+        println!("cargo:rustc-link-search={}/{}", OUTLINE_PATH, profile);
         println!("cargo:rustc-link-lib=static={}", name);
     }
 
