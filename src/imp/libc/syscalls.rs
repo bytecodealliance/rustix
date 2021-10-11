@@ -1195,13 +1195,14 @@ pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<()> {
 }
 
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
-pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<()> {
+pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     unsafe {
         ret(libc::ttyname_r(
             borrowed_fd(dirfd),
             buf.as_mut_ptr().cast::<_>(),
             buf.len(),
-        ))
+        ))?;
+        Ok(CStr::from_ptr(buf.as_ptr().cast::<_>()).to_bytes().len())
     }
 }
 
