@@ -121,30 +121,4 @@ rsix_reordered_syscall6:
     .type    rsix_reordered_syscall5, @function
     .type    rsix_reordered_syscall6, @function
 
-    // We can't describe calls to external asm as readonly, so just alias
-    // these to their non-readonly counterparts.
-    .set     rsix_reordered_syscall0_readonly, rsix_reordered_syscall0
-    .set     rsix_reordered_syscall1_readonly, rsix_reordered_syscall1
-    .set     rsix_reordered_syscall2_readonly, rsix_reordered_syscall2
-    .set     rsix_reordered_syscall3_readonly, rsix_reordered_syscall3
-    .set     rsix_reordered_syscall4_readonly, rsix_reordered_syscall4
-    .set     rsix_reordered_syscall5_readonly, rsix_reordered_syscall5
-    .set     rsix_reordered_syscall6_readonly, rsix_reordered_syscall6
-
-    .globl   rsix_reordered_syscall0_readonly
-    .globl   rsix_reordered_syscall1_readonly
-    .globl   rsix_reordered_syscall2_readonly
-    .globl   rsix_reordered_syscall3_readonly
-    .globl   rsix_reordered_syscall4_readonly
-    .globl   rsix_reordered_syscall5_readonly
-    .globl   rsix_reordered_syscall6_readonly
-
-    .hidden  rsix_reordered_syscall0_readonly
-    .hidden  rsix_reordered_syscall1_readonly
-    .hidden  rsix_reordered_syscall2_readonly
-    .hidden  rsix_reordered_syscall3_readonly
-    .hidden  rsix_reordered_syscall4_readonly
-    .hidden  rsix_reordered_syscall5_readonly
-    .hidden  rsix_reordered_syscall6_readonly
-
     .section .note.GNU-stack,"",@progbits
