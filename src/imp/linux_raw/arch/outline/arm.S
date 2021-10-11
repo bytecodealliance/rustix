@@ -45,7 +45,7 @@ rsix_reordered_syscall1:
 rsix_reordered_syscall1_noreturn:
     .fnstart
     .cantunwind
-    push    {r7, lr}
+    // Don't save r7 and lr; this is noreturn, so we'll never restore them.
     mov     r7, r1
     svc     #0
     udf     #16 // Trap instruction
