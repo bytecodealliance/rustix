@@ -9,6 +9,7 @@
 // outline.rs takes care of reordering the nr argument to the end for us,
 // so we only need to move nr into eax and move rcx into r10 as needed.
 
+    .file       "x86_64.S"
     .intel_syntax noprefix
 
     .section    .text.rsix_reordered_syscall0,"ax",@progbits
