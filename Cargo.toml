@@ -53,9 +53,6 @@ socket2 = ["io-lifetimes/socket2"]
 mio = ["io-lifetimes/mio"]
 fs-err = ["io-lifetimes/fs-err"]
 
-[badges]
-maintenance = { status = "actively-developed" }
-
 # Add Criterion configuration, as described here:
 # <https://bheisler.github.io/criterion.rs/book/getting_started.html#step-1---add-dependency-to-cargotoml>
 [[bench]]
