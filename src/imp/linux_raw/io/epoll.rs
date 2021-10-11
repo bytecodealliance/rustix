@@ -506,6 +506,11 @@ impl<'context, Context: self::Context> EventVec<'context, Context> {
             _phantom: PhantomData,
         }
     }
+
+    #[inline]
+    pub fn len(&mut self) -> usize {
+        self.events.len()
+    }
 }
 
 impl<'context, Context: self::Context> IntoIterator for &'context EventVec<'context, Context> {
