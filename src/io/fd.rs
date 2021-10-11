@@ -134,6 +134,11 @@ pub fn dup2_with<Fd: AsFd>(fd: &Fd, new: &OwnedFd, flags: DupFlags) -> io::Resul
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 #[inline]
 pub fn ttyname<Fd: AsFd>(dirfd: &Fd, reuse: OsString) -> io::Result<OsString> {
+    let dirfd = dirfd.as_fd();
+    _ttyname(dirfd, reuse)
+}
+
+fn _ttyname(dirfd: BorrowedFd<'_>, reuse: OsString) -> io::Result<OsString> {
     use std::os::unix::ffi::OsStringExt;
 
     // This code would benefit from having a better way to read into
@@ -143,7 +148,7 @@ pub fn ttyname<Fd: AsFd>(dirfd: &Fd, reuse: OsString) -> io::Result<OsString> {
     buffer.resize(256, 0_u8);
 
     loop {
-        match imp::syscalls::ttyname(dirfd.as_fd(), &mut buffer) {
+        match imp::syscalls::ttyname(dirfd, &mut buffer) {
             Err(imp::io::Error::RANGE) => buffer.resize(buffer.len() * 2, 0_u8),
             Ok(_) => {
                 let len = buffer.iter().position(|x| *x == b'\0').unwrap();
