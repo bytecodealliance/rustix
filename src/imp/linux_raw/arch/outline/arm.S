@@ -6,6 +6,7 @@
 // so we only need to move nr into r7 and take care of r4 and r5 if needed.
 
     .file       "arm.S"
+    .arch       armv5t
 
     .section    .text.rsix_reordered_syscall0,"ax",%progbits
     .p2align    4
