@@ -3,8 +3,11 @@
 use crate::imp;
 use crate::io::{self, OwnedFd};
 use io_lifetimes::AsFd;
-#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
-use std::ffi::OsString;
+#[cfg(any(
+    all(linux_raw, feature = "procfs"),
+    all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
+))]
+use {io_lifetimes::BorrowedFd, std::ffi::OsString};
 
 #[cfg(not(target_os = "wasi"))]
 pub use imp::io::DupFlags;
@@ -131,13 +134,21 @@ pub fn dup2_with<Fd: AsFd>(fd: &Fd, new: &OwnedFd, flags: DupFlags) -> io::Resul
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/ttyname.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/ttyname.3.html
-#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+#[cfg(any(
+    all(linux_raw, feature = "procfs"),
+    all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
+))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 #[inline]
 pub fn ttyname<Fd: AsFd>(dirfd: &Fd, reuse: OsString) -> io::Result<OsString> {
     let dirfd = dirfd.as_fd();
     _ttyname(dirfd, reuse)
 }
 
+#[cfg(any(
+    all(linux_raw, feature = "procfs"),
+    all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
+))]
 fn _ttyname(dirfd: BorrowedFd<'_>, reuse: OsString) -> io::Result<OsString> {
     use std::os::unix::ffi::OsStringExt;
 
