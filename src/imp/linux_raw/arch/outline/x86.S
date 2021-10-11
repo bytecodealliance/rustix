@@ -7,6 +7,7 @@
 // `ret imm` instructions to clean up the stack. We don't need callee
 // cleanup per se, it just comes along with using "fastcall".
 
+    .file       "x86.S"
     .intel_syntax noprefix
 
     .section    .text.rsix_reordered_indirect_syscall0,"ax",@progbits

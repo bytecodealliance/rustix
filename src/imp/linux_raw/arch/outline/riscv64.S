@@ -5,6 +5,8 @@
 // nr_last.rs takes care of reordering the nr argument to the end for us,
 // so we only need to move nr into a7.
 
+    .file       "riscv64.S"
+
     .section    .text.rsix_reordered_syscall0,"ax",@progbits
     .p2align    4
     .globl      rsix_reordered_syscall0
