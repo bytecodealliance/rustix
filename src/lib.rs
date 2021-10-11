@@ -46,6 +46,7 @@
 #![cfg_attr(linux_raw, deny(unsafe_code))]
 #![cfg_attr(linux_raw_inline_asm, feature(asm))]
 #![cfg_attr(rustc_attrs, feature(rustc_attrs))]
+#![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 #![cfg_attr(
     all(linux_raw_inline_asm, target_arch = "x86"),

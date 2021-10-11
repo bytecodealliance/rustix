@@ -25,7 +25,7 @@ mod owned_fd;
 #[cfg(not(target_os = "wasi"))]
 mod pipe;
 mod poll;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
 mod procfs;
 mod read_write;
 mod stdio;
@@ -41,7 +41,10 @@ pub use fd::ioctl_fionread;
 #[cfg(not(target_os = "redox"))]
 pub use fd::is_read_write;
 pub use fd::isatty;
-#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+#[cfg(any(
+    all(linux_raw, feature = "procfs"),
+    all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
+))]
 pub use fd::ttyname;
 #[cfg(not(target_os = "wasi"))]
 pub use fd::{dup, dup2, dup2_with, DupFlags};
@@ -73,7 +76,7 @@ pub use pipe::pipe;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 pub use pipe::{pipe_with, PipeFlags};
 pub use poll::{poll, PollFd, PollFlags};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
 pub use procfs::proc_self_fd;
 pub use read_write::{pread, pwrite, read, readv, write, writev};
 #[cfg(not(target_os = "redox"))]

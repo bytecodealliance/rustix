@@ -54,6 +54,7 @@ use super::thread::{FutexFlags, FutexOperation};
 use super::time::{ClockId, Timespec};
 use crate::io;
 use crate::io::{OwnedFd, RawFd};
+#[cfg(feature = "procfs")]
 use crate::path::DecInt;
 use crate::process::{Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, Rlimit, Uid};
 use crate::time::NanosleepRelativeResult;
@@ -3100,6 +3101,7 @@ pub(crate) fn gettid() -> Pid {
     }
 }
 
+#[cfg(feature = "procfs")]
 #[inline]
 pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<()> {
     // Check that the fd is really a tty

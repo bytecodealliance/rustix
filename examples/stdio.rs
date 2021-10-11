@@ -1,6 +1,7 @@
-use rsix::io::{self, isatty, stderr, stdin, stdout, ttyname};
+use rsix::io::{self, isatty, stderr, stdin, stdout};
 use rsix::io_lifetimes::AsFd;
-use std::ffi::OsString;
+#[cfg(any(all(linux_raw, feature = "procfs"), libc))]
+use {rsix::io::ttyname, std::ffi::OsString};
 
 fn main() -> io::Result<()> {
     let (stdin, stdout, stderr) = unsafe { (stdin(), stdout(), stderr()) };
@@ -19,6 +20,7 @@ fn main() -> io::Result<()> {
 
 fn show<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     if isatty(fd) {
+        #[cfg(any(all(linux_raw, feature = "procfs"), libc))]
         println!(
             " - ttyname: {}",
             ttyname(fd, OsString::new())?.to_string_lossy()
