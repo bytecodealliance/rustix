@@ -7,8 +7,8 @@ fn tmpdir() -> TempDir {
     tempdir().expect("expected to be able to create a temporary directory")
 }
 
-// Disable this test on macos because GHA as a weird system folder structure
-// that makes this test fail
+// Disable this test on macos because GHA has a weird system folder structure
+// that makes this test fail.
 #[cfg(not(target_os = "macos"))]
 #[test]
 fn test_changing_working_directory() {
@@ -38,6 +38,6 @@ fn test_changing_working_directory() {
 
     assert_eq!(
         orig_cwd, ch2_cwd,
-        "The cwd wasn't changed back to the it's original position"
+        "The cwd wasn't changed back to the its original position"
     );
 }
