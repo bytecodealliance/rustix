@@ -48,7 +48,7 @@ rsix_reordered_syscall1_noreturn:
     push    {r7, lr}
     mov     r7, r1
     svc     #0
-    .inst   0xe7f001f0 // Trap instruction
+    udf     #16 // Trap instruction
     .fnend
     .size rsix_reordered_syscall1_noreturn, .-rsix_reordered_syscall1_noreturn
 
