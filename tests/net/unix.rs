@@ -8,6 +8,8 @@
     target_os = "redox",
     target_os = "wasi",
 )))]
+// This test uses `DecInt`.
+#![cfg(feature = "itoa")]
 
 use rsix::fs::{cwd, unlinkat, AtFlags};
 use rsix::io::{read, write};
