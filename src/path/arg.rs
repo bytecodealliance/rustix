@@ -1,4 +1,5 @@
 use crate::io;
+#[cfg(feature = "itoa")]
 use crate::path::DecInt;
 use std::borrow::Cow;
 use std::ffi::{CStr, CString, OsStr, OsString};
@@ -1182,6 +1183,7 @@ impl Arg for Vec<u8> {
     }
 }
 
+#[cfg(feature = "itoa")]
 impl Arg for DecInt {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {

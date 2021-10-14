@@ -1,5 +1,7 @@
 use rsix::io;
-use rsix::path::{Arg, DecInt};
+use rsix::path::Arg;
+#[cfg(feature = "itoa")]
+use rsix::path::DecInt;
 use std::borrow::Cow;
 use std::ffi::{CStr, CString, OsStr, OsString};
 use std::path::{Component, Components, Iter, Path, PathBuf};
@@ -336,24 +338,27 @@ fn test_arg() {
         t.as_os_str()
     );
 
-    let t: DecInt = DecInt::new(43110);
-    assert_eq!("43110", t.as_str().unwrap());
-    assert_eq!("43110".to_owned(), Arg::to_string_lossy(&t));
-    #[cfg(not(windows))]
-    assert_eq!(cstr!("43110"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("43110"), t.as_c_str());
-    #[cfg(not(windows))]
-    assert_eq!(
-        cstr!("43110"),
-        Borrow::borrow(&t.clone().into_c_str().unwrap())
-    );
-    #[cfg(not(windows))]
-    assert_eq!(b"43110", t.as_maybe_utf8_bytes());
-    #[cfg(windows)]
-    assert_eq!(
-        &['4' as u16, '3' as _, '1' as _, '1' as _, 'o' as _],
-        t.as_os_str()
-    );
+    #[cfg(feature = "itoa")]
+    {
+        let t: DecInt = DecInt::new(43110);
+        assert_eq!("43110", t.as_str().unwrap());
+        assert_eq!("43110".to_owned(), Arg::to_string_lossy(&t));
+        #[cfg(not(windows))]
+        assert_eq!(cstr!("43110"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
+        assert_eq!(cstr!("43110"), t.as_c_str());
+        #[cfg(not(windows))]
+        assert_eq!(
+            cstr!("43110"),
+            Borrow::borrow(&t.clone().into_c_str().unwrap())
+        );
+        #[cfg(not(windows))]
+        assert_eq!(b"43110", t.as_maybe_utf8_bytes());
+        #[cfg(windows)]
+        assert_eq!(
+            &['4' as u16, '3' as _, '1' as _, '1' as _, 'o' as _],
+            t.as_os_str()
+        );
+    }
 }
 
 #[test]
