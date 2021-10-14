@@ -27,8 +27,8 @@ use super::conv::{
     borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, const_void_star, dev_t, mode_as,
     no_fd, oflags, oflags_for_open_how, opt_c_str, opt_mut, out, pass_usize, raw_fd, ret,
     ret_c_int, ret_c_uint, ret_discarded_fd, ret_infallible, ret_owned_fd, ret_usize,
-    ret_usize_infallible, ret_void_star, size_of, slice, slice_just_addr, slice_mut, socklen_t,
-    void_star, zero,
+    ret_usize_infallible, ret_void_star, size_of, slice, slice_just_addr, slice_mut,
+    slice_mut_just_addr, socklen_t, void_star, zero,
 };
 use super::fs::{
     Access, Advice as FsAdvice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode,
@@ -45,7 +45,7 @@ use super::net::{
     AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketAddr, SocketAddrUnix,
     SocketFlags, SocketType,
 };
-use super::process::{RawUname, Resource};
+use super::process::{RawCpuSet, RawUname, Resource};
 use super::rand::GetRandomFlags;
 use super::reg::nr;
 #[cfg(target_arch = "x86")]
@@ -87,13 +87,13 @@ use linux_raw_sys::general::{
     __NR_ioctl, __NR_linkat, __NR_madvise, __NR_mkdirat, __NR_mknodat, __NR_mlock, __NR_mprotect,
     __NR_munlock, __NR_munmap, __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_prctl, __NR_pread64,
     __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv,
-    __NR_sched_yield, __NR_set_tid_address, __NR_setpriority, __NR_symlinkat, __NR_uname,
-    __NR_unlinkat, __NR_utimensat, __NR_write, __NR_writev, __kernel_gid_t, __kernel_pid_t,
-    __kernel_timespec, __kernel_uid_t, epoll_event, sockaddr, sockaddr_in, sockaddr_in6,
-    sockaddr_un, socklen_t, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, EPOLL_CTL_ADD,
-    EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL,
-    F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL, PR_SET_NAME, TCGETS, TIMER_ABSTIME, TIOCEXCL,
-    TIOCGWINSZ, TIOCNXCL,
+    __NR_sched_getaffinity, __NR_sched_setaffinity, __NR_sched_yield, __NR_set_tid_address,
+    __NR_setpriority, __NR_symlinkat, __NR_uname, __NR_unlinkat, __NR_utimensat, __NR_write,
+    __NR_writev, __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event,
+    sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD, AT_REMOVEDIR,
+    AT_SYMLINK_NOFOLLOW, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, F_DUPFD,
+    F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL,
+    PR_SET_NAME, TCGETS, TIMER_ABSTIME, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
 };
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use linux_raw_sys::general::{__NR_dup2, __NR_open, __NR_pipe, __NR_poll};
@@ -119,7 +119,7 @@ use linux_raw_sys::v5_4::general::{
 use std::convert::TryInto;
 use std::ffi::CStr;
 use std::io::{IoSlice, IoSliceMut, SeekFrom};
-use std::mem::MaybeUninit;
+use std::mem::{size_of_val, MaybeUninit};
 use std::net::{SocketAddrV4, SocketAddrV6};
 use std::os::raw::{c_int, c_uint, c_void};
 #[cfg(target_arch = "x86")]
@@ -2264,6 +2264,82 @@ pub(crate) fn listen(fd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
             nr(__NR_socketcall),
             x86_sys(SYS_LISTEN),
             slice_just_addr::<ArgReg<SocketArg>, _>(&[borrowed_fd(fd), c_int(backlog)]),
+        ))
+    }
+}
+
+#[allow(non_snake_case)]
+#[inline]
+pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) -> () {
+    let size_in_bits = 8 * size_of_val(&cpuset.bits[0]); // 32, 64 etc
+    let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
+    cpuset.bits[idx] |= 1 << offset;
+    ()
+}
+
+#[allow(non_snake_case)]
+#[inline]
+pub(crate) fn CPU_ZERO(cpuset: &mut RawCpuSet) -> () {
+    for slot in cpuset.bits.iter_mut() {
+        *slot = 0;
+    }
+    ()
+}
+
+#[allow(non_snake_case)]
+#[inline]
+pub(crate) fn CPU_CLR(cpu: usize, cpuset: &mut RawCpuSet) -> () {
+    let size_in_bits = 8 * size_of_val(&cpuset.bits[0]); // 32, 64 etc
+    let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
+    cpuset.bits[idx] &= !(1 << offset);
+    ()
+}
+
+#[allow(non_snake_case)]
+#[inline]
+pub(crate) fn CPU_ISSET(cpu: usize, cpuset: &RawCpuSet) -> bool {
+    let size_in_bits = 8 * size_of_val(&cpuset.bits[0]);
+    let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
+    0 != (cpuset.bits[idx] & (1 << offset))
+}
+
+#[allow(non_snake_case)]
+#[inline]
+pub fn CPU_COUNT_S(size: usize, cpuset: &RawCpuSet) -> u32 {
+    let mut s: u32 = 0;
+    let size_of_mask = size_of_val(&cpuset.bits[0]);
+    for i in cpuset.bits[..(size / size_of_mask)].iter() {
+        s += i.count_ones();
+    }
+    s
+}
+
+#[allow(non_snake_case)]
+#[inline]
+pub fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
+    CPU_COUNT_S(std::mem::size_of::<RawCpuSet>(), cpuset)
+}
+
+#[inline]
+pub(crate) fn sched_getaffinity(pid: Pid, cpuset: &mut RawCpuSet) -> io::Result<()> {
+    unsafe {
+        ret(syscall3(
+            nr(__NR_sched_getaffinity),
+            c_uint(pid.as_raw()),
+            size_of::<RawCpuSet, _>(),
+            slice_mut_just_addr(&mut cpuset.bits),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn sched_setaffinity(pid: Pid, cpuset: &RawCpuSet) -> io::Result<()> {
+    unsafe {
+        ret(syscall3(
+            nr(__NR_sched_setaffinity),
+            c_uint(pid.as_raw()),
+            size_of::<RawCpuSet, _>(),
+            slice_just_addr(&cpuset.bits),
         ))
     }
 }

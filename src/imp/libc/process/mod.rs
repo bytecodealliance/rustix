@@ -4,6 +4,13 @@ mod types;
 pub(crate) use auxv::page_size;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) use auxv::{linux_execfn, linux_hwcap};
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "fuchsia",
+    target_os = "dragonfly"
+))]
+pub use types::RawCpuSet;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 pub use types::Resource;
 #[cfg(any(target_os = "android", target_os = "linux"))]

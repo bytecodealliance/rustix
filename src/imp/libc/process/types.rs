@@ -145,3 +145,11 @@ pub type RawCpuid = u32;
 
 #[cfg(not(target_os = "wasi"))]
 pub type RawUname = libc::utsname;
+
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "fuchsia",
+    target_os = "dragonfly"
+))]
+pub type RawCpuSet = libc::cpu_set_t;
