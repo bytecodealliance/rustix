@@ -153,3 +153,11 @@ pub type RawUname = libc::utsname;
     target_os = "dragonfly"
 ))]
 pub type RawCpuSet = libc::cpu_set_t;
+
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "fuchsia",
+    target_os = "dragonfly"
+))]
+pub const CPU_SETSIZE: usize = libc::CPU_SETSIZE as usize;

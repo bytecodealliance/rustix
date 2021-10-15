@@ -4,8 +4,13 @@ use crate::io::Error;
 use crate::process::Pid;
 
 /// CpuSet represent a bit-mask of CPUs.
-/// CpuSets are used by sched_setaffinity and
-/// sched_getaffinity for example.
+/// CpuSets are used by `sched_setaffinity` and
+/// `sched_getaffinity` for example.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man3/CPU_SET.3.html
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct CpuSet {
@@ -63,30 +68,38 @@ impl CpuSet {
     }
 
     /// Return the maximum number of CPU in CpuSet
-    pub const MAX_CPU: usize = { 8 * std::mem::size_of::<imp::process::RawCpuSet>() };
+    pub const MAX_CPU: usize = imp::process::CPU_SETSIZE;
 }
 
 /// `sched_setaffinity` set a thread's CPU affinity mask
-/// ([`sched_setaffinity(2)`](https://man7.org/linux/man-pages/man2/sched_setaffinity.2.html))
 ///
 /// `pid` is the thread ID to update.
-/// If pid is zero, then the calling thread is updated.
+/// If pid is `Pid::NONE`, then the calling thread is updated.
 ///
-/// The `cpuset` argument specifies the set of CPUs on which the thread
+/// The `CpuSet` argument specifies the set of CPUs on which the thread
 /// will be eligible to run.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/sched_setaffinity.2.html
 #[inline]
 pub fn sched_setaffinity(pid: Pid, cpuset: &CpuSet) -> io::Result<()> {
     imp::syscalls::sched_setaffinity(pid, &cpuset.cpu_set)
 }
 
 /// `sched_getaffinity` get a thread's CPU affinity mask
-/// ([`sched_getaffinity(2)`](https://man7.org/linux/man-pages/man2/sched_getaffinity.2.html))
 ///
 /// `pid` is the thread ID to check.
-/// If pid is zero, then the calling thread is checked.
+/// If pid is `Pid::NONE`, then the calling thread is checked.
 ///
-/// Returned `cpuset` is the set of CPUs on which the thread
+/// Returned `CpuSet` is the set of CPUs on which the thread
 /// is eligible to run.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/sched_getaffinity.2.html
 #[inline]
 pub fn sched_getaffinity(pid: Pid) -> io::Result<CpuSet> {
     let mut cpuset = CpuSet::new();

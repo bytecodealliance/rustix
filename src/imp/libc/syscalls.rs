@@ -2198,7 +2198,7 @@ pub(crate) fn gettid() -> Pid {
 ))]
 #[allow(non_snake_case)]
 #[inline]
-pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) -> () {
+pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) {
     unsafe { libc::CPU_SET(cpu, cpuset) }
 }
 
@@ -2210,7 +2210,7 @@ pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) -> () {
 ))]
 #[allow(non_snake_case)]
 #[inline]
-pub(crate) fn CPU_ZERO(cpuset: &mut RawCpuSet) -> () {
+pub(crate) fn CPU_ZERO(cpuset: &mut RawCpuSet) {
     unsafe { libc::CPU_ZERO(cpuset) }
 }
 
@@ -2222,7 +2222,7 @@ pub(crate) fn CPU_ZERO(cpuset: &mut RawCpuSet) -> () {
 ))]
 #[allow(non_snake_case)]
 #[inline]
-pub(crate) fn CPU_CLR(cpu: usize, cpuset: &mut RawCpuSet) -> () {
+pub(crate) fn CPU_CLR(cpu: usize, cpuset: &mut RawCpuSet) {
     unsafe { libc::CPU_CLR(cpu, cpuset) }
 }
 

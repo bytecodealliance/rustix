@@ -93,3 +93,5 @@ pub struct RawCpuSet {
     #[cfg(not(all(target_pointer_width = "32", not(target_arch = "x86_64"))))]
     pub(crate) bits: [u64; 16],
 }
+
+pub const CPU_SETSIZE: usize = 8 * std::mem::size_of::<RawCpuSet>();

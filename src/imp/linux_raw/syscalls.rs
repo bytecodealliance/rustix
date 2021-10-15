@@ -27,8 +27,8 @@ use super::conv::{
     borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, const_void_star, dev_t, mode_as,
     no_fd, oflags, oflags_for_open_how, opt_c_str, opt_mut, out, pass_usize, raw_fd, ret,
     ret_c_int, ret_c_uint, ret_discarded_fd, ret_infallible, ret_owned_fd, ret_usize,
-    ret_usize_infallible, ret_void_star, size_of, slice, slice_just_addr, slice_mut,
-    slice_mut_just_addr, socklen_t, void_star, zero,
+    ret_usize_infallible, ret_void_star, size_of, slice, slice_just_addr, slice_mut, socklen_t,
+    void_star, zero,
 };
 use super::fs::{
     Access, Advice as FsAdvice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode,
@@ -2270,29 +2270,24 @@ pub(crate) fn listen(fd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
 
 #[allow(non_snake_case)]
 #[inline]
-pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) -> () {
+pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) {
     let size_in_bits = 8 * size_of_val(&cpuset.bits[0]); // 32, 64 etc
     let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
     cpuset.bits[idx] |= 1 << offset;
-    ()
 }
 
 #[allow(non_snake_case)]
 #[inline]
-pub(crate) fn CPU_ZERO(cpuset: &mut RawCpuSet) -> () {
-    for slot in cpuset.bits.iter_mut() {
-        *slot = 0;
-    }
-    ()
+pub(crate) fn CPU_ZERO(cpuset: &mut RawCpuSet) {
+    cpuset.bits.fill(0)
 }
 
 #[allow(non_snake_case)]
 #[inline]
-pub(crate) fn CPU_CLR(cpu: usize, cpuset: &mut RawCpuSet) -> () {
+pub(crate) fn CPU_CLR(cpu: usize, cpuset: &mut RawCpuSet) {
     let size_in_bits = 8 * size_of_val(&cpuset.bits[0]); // 32, 64 etc
     let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
     cpuset.bits[idx] &= !(1 << offset);
-    ()
 }
 
 #[allow(non_snake_case)]
@@ -2327,7 +2322,7 @@ pub(crate) fn sched_getaffinity(pid: Pid, cpuset: &mut RawCpuSet) -> io::Result<
             nr(__NR_sched_getaffinity),
             c_uint(pid.as_raw()),
             size_of::<RawCpuSet, _>(),
-            slice_mut_just_addr(&mut cpuset.bits),
+            by_mut(&mut cpuset.bits),
         ))
     }
 }

@@ -142,11 +142,6 @@ pub(super) fn slice_mut<'a, T: Sized, Num0: ArgNumber, Num1: ArgNumber>(
 }
 
 #[inline]
-pub(super) fn slice_mut_just_addr<'a, T: Sized, Num: ArgNumber>(v: &'a mut [T]) -> ArgReg<'a, Num> {
-    raw_arg(v.as_mut_ptr() as usize)
-}
-
-#[inline]
 pub(super) fn by_ref<'a, T: Sized, Num: ArgNumber>(t: &'a T) -> ArgReg<'a, Num> {
     raw_arg(as_ptr(t) as usize)
 }
