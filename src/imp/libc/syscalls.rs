@@ -90,17 +90,17 @@ use super::offset::{libc_fstat, libc_fstatat, libc_lseek, libc_off_t, libc_pread
 use super::offset::{libc_preadv2, libc_pwritev2};
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use super::offset::{libc_rlimit, LIBC_RLIM_INFINITY};
+#[cfg(not(target_os = "wasi"))]
+use super::process::RawUname;
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+use super::process::Resource;
 #[cfg(any(
     target_os = "linux",
     target_os = "android",
     target_os = "fuchsia",
     target_os = "dragonfly"
 ))]
-use super::process::RawCpuSet;
-#[cfg(not(target_os = "wasi"))]
-use super::process::RawUname;
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-use super::process::Resource;
+use super::process::{RawCpuSet, CPU_SETSIZE};
 #[cfg(target_os = "linux")]
 use super::rand::GetRandomFlags;
 use super::time::Timespec;
@@ -2199,11 +2199,10 @@ pub(crate) fn gettid() -> Pid {
 #[allow(non_snake_case)]
 #[inline]
 pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) {
-    if cpu >= libc::CPU_SETSIZE {
+    if cpu >= CPU_SETSIZE {
         panic!(
             "cpu out of bounds: the cpu max is {} but the cpu is {}",
-            libc::CPU_SETSIZE,
-            cpu
+            CPU_SETSIZE, cpu
         )
     }
     unsafe { libc::CPU_SET(cpu, cpuset) }
@@ -2230,11 +2229,10 @@ pub(crate) fn CPU_ZERO(cpuset: &mut RawCpuSet) {
 #[allow(non_snake_case)]
 #[inline]
 pub(crate) fn CPU_CLR(cpu: usize, cpuset: &mut RawCpuSet) {
-    if cpu >= libc::CPU_SETSIZE {
+    if cpu >= CPU_SETSIZE {
         panic!(
             "cpu out of bounds: the cpu max is {} but the cpu is {}",
-            libc::CPU_SETSIZE,
-            cpu
+            CPU_SETSIZE, cpu
         )
     }
     unsafe { libc::CPU_CLR(cpu, cpuset) }
@@ -2249,11 +2247,10 @@ pub(crate) fn CPU_CLR(cpu: usize, cpuset: &mut RawCpuSet) {
 #[allow(non_snake_case)]
 #[inline]
 pub(crate) fn CPU_ISSET(cpu: usize, cpuset: &RawCpuSet) -> bool {
-    if cpu >= libc::CPU_SETSIZE {
+    if cpu >= CPU_SETSIZE {
         panic!(
             "cpu out of bounds: the cpu max is {} but the cpu is {}",
-            libc::CPU_SETSIZE,
-            cpu
+            CPU_SETSIZE, cpu
         )
     }
     unsafe { libc::CPU_ISSET(cpu, cpuset) }
