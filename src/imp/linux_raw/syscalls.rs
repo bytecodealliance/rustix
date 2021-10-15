@@ -45,7 +45,7 @@ use super::net::{
     AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketAddr, SocketAddrUnix,
     SocketFlags, SocketType,
 };
-use super::process::{RawCpuSet, RawUname, Resource};
+use super::process::{RawCpuSet, RawUname, Resource, CPU_SETSIZE};
 use super::rand::GetRandomFlags;
 use super::reg::nr;
 #[cfg(target_arch = "x86")]
@@ -2273,7 +2273,12 @@ pub(crate) fn listen(fd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
 pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) {
     let size_in_bits = 8 * size_of_val(&cpuset.bits[0]); // 32, 64 etc
     let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
-    cpuset.bits[idx] |= 1 << offset;
+    *cpuset.bits.get_mut(idx).unwrap_or_else(|| {
+        panic!(
+            "cpu out of bounds: the cpu max is {} but the cpu is {}",
+            CPU_SETSIZE, cpu
+        )
+    }) |= 1 << offset;
 }
 
 #[allow(non_snake_case)]
@@ -2287,7 +2292,12 @@ pub(crate) fn CPU_ZERO(cpuset: &mut RawCpuSet) {
 pub(crate) fn CPU_CLR(cpu: usize, cpuset: &mut RawCpuSet) {
     let size_in_bits = 8 * size_of_val(&cpuset.bits[0]); // 32, 64 etc
     let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
-    cpuset.bits[idx] &= !(1 << offset);
+    *cpuset.bits.get_mut(idx).unwrap_or_else(|| {
+        panic!(
+            "cpu out of bounds: the cpu max is {} but the cpu is {}",
+            CPU_SETSIZE, cpu
+        )
+    }) &= !(1 << offset);
 }
 
 #[allow(non_snake_case)]
@@ -2295,7 +2305,12 @@ pub(crate) fn CPU_CLR(cpu: usize, cpuset: &mut RawCpuSet) {
 pub(crate) fn CPU_ISSET(cpu: usize, cpuset: &RawCpuSet) -> bool {
     let size_in_bits = 8 * size_of_val(&cpuset.bits[0]);
     let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
-    0 != (cpuset.bits[idx] & (1 << offset))
+    0 != (cpuset.bits.get(idx).unwrap_or_else(|| {
+        panic!(
+            "cpu out of bounds: the cpu max is {} but the cpu is {}",
+            CPU_SETSIZE, cpu
+        )
+    }) & (1 << offset))
 }
 
 #[allow(non_snake_case)]

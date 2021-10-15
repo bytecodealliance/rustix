@@ -1,6 +1,5 @@
 use crate::imp;
 use crate::io;
-use crate::io::Error;
 use crate::process::Pid;
 
 /// CpuSet represent a bit-mask of CPUs.
@@ -21,6 +20,11 @@ impl CpuSet {
     /// Create a new and empty CpuSet.
     pub fn new() -> CpuSet {
         CpuSet {
+            // This is a bit akward because idealy we would create
+            // an unitilized `RawCpuSet` and call `CPU_ZERO` on it.
+            // But this is impossible in Rust as all variable must
+            // be initilized before use. So instead we do this in
+            // one step by calling `mem::zeroed()`.
             #[allow(unsafe_code)]
             cpu_set: unsafe { std::mem::zeroed() },
         }
@@ -28,32 +32,20 @@ impl CpuSet {
 
     /// Test to see if a CPU is in the CpuSet.
     /// `field` is the CPU id to test
-    pub fn is_set(&self, field: usize) -> io::Result<bool> {
-        if field >= CpuSet::MAX_CPU {
-            Err(Error::INVAL)
-        } else {
-            Ok(imp::syscalls::CPU_ISSET(field, &self.cpu_set))
-        }
+    pub fn is_set(&self, field: usize) -> bool {
+        imp::syscalls::CPU_ISSET(field, &self.cpu_set)
     }
 
     /// Add a CPU to CpuSet.
     /// `field` is the CPU id to add
-    pub fn set(&mut self, field: usize) -> io::Result<()> {
-        if field >= CpuSet::MAX_CPU {
-            Err(Error::INVAL)
-        } else {
-            Ok(imp::syscalls::CPU_SET(field, &mut self.cpu_set))
-        }
+    pub fn set(&mut self, field: usize) {
+        imp::syscalls::CPU_SET(field, &mut self.cpu_set)
     }
 
     /// Remove a CPU from CpuSet.
     /// `field` is the CPU id to remove
-    pub fn unset(&mut self, field: usize) -> io::Result<()> {
-        if field >= CpuSet::MAX_CPU {
-            Err(Error::INVAL)
-        } else {
-            Ok(imp::syscalls::CPU_CLR(field, &mut self.cpu_set))
-        }
+    pub fn unset(&mut self, field: usize) {
+        imp::syscalls::CPU_CLR(field, &mut self.cpu_set)
     }
 
     /// Count the number of CPUs set in the CpuSet

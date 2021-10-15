@@ -2199,6 +2199,13 @@ pub(crate) fn gettid() -> Pid {
 #[allow(non_snake_case)]
 #[inline]
 pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) {
+    if cpu >= libc::CPU_SETSIZE {
+        panic!(
+            "cpu out of bounds: the cpu max is {} but the cpu is {}",
+            libc::CPU_SETSIZE,
+            cpu
+        )
+    }
     unsafe { libc::CPU_SET(cpu, cpuset) }
 }
 
@@ -2223,6 +2230,13 @@ pub(crate) fn CPU_ZERO(cpuset: &mut RawCpuSet) {
 #[allow(non_snake_case)]
 #[inline]
 pub(crate) fn CPU_CLR(cpu: usize, cpuset: &mut RawCpuSet) {
+    if cpu >= libc::CPU_SETSIZE {
+        panic!(
+            "cpu out of bounds: the cpu max is {} but the cpu is {}",
+            libc::CPU_SETSIZE,
+            cpu
+        )
+    }
     unsafe { libc::CPU_CLR(cpu, cpuset) }
 }
 
@@ -2235,6 +2249,13 @@ pub(crate) fn CPU_CLR(cpu: usize, cpuset: &mut RawCpuSet) {
 #[allow(non_snake_case)]
 #[inline]
 pub(crate) fn CPU_ISSET(cpu: usize, cpuset: &RawCpuSet) -> bool {
+    if cpu >= libc::CPU_SETSIZE {
+        panic!(
+            "cpu out of bounds: the cpu max is {} but the cpu is {}",
+            libc::CPU_SETSIZE,
+            cpu
+        )
+    }
     unsafe { libc::CPU_ISSET(cpu, cpuset) }
 }
 
