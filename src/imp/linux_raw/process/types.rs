@@ -84,3 +84,14 @@ pub type RawUid = u32;
 pub type RawCpuid = u32;
 
 pub type RawUname = linux_raw_sys::general::new_utsname;
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct RawCpuSet {
+    #[cfg(all(target_pointer_width = "32", not(target_arch = "x86_64")))]
+    pub(crate) bits: [u32; 32],
+    #[cfg(not(all(target_pointer_width = "32", not(target_arch = "x86_64"))))]
+    pub(crate) bits: [u64; 16],
+}
+
+pub const CPU_SETSIZE: usize = 8 * std::mem::size_of::<RawCpuSet>();

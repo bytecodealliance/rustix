@@ -94,6 +94,13 @@ use super::offset::{libc_rlimit, LIBC_RLIM_INFINITY};
 use super::process::RawUname;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use super::process::Resource;
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "fuchsia",
+    target_os = "dragonfly"
+))]
+use super::process::{RawCpuSet, CPU_SETSIZE};
 #[cfg(target_os = "linux")]
 use super::rand::GetRandomFlags;
 use super::time::Timespec;
@@ -2180,6 +2187,113 @@ pub(crate) fn gettid() -> Pid {
     unsafe {
         let tid: i32 = libc::gettid();
         Pid::from_raw(tid)
+    }
+}
+
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "fuchsia",
+    target_os = "dragonfly"
+))]
+#[allow(non_snake_case)]
+#[inline]
+pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) {
+    if cpu >= CPU_SETSIZE {
+        panic!(
+            "cpu out of bounds: the cpu max is {} but the cpu is {}",
+            CPU_SETSIZE, cpu
+        )
+    }
+    unsafe { libc::CPU_SET(cpu, cpuset) }
+}
+
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "fuchsia",
+    target_os = "dragonfly"
+))]
+#[allow(non_snake_case)]
+#[inline]
+pub(crate) fn CPU_ZERO(cpuset: &mut RawCpuSet) {
+    unsafe { libc::CPU_ZERO(cpuset) }
+}
+
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "fuchsia",
+    target_os = "dragonfly"
+))]
+#[allow(non_snake_case)]
+#[inline]
+pub(crate) fn CPU_CLR(cpu: usize, cpuset: &mut RawCpuSet) {
+    if cpu >= CPU_SETSIZE {
+        panic!(
+            "cpu out of bounds: the cpu max is {} but the cpu is {}",
+            CPU_SETSIZE, cpu
+        )
+    }
+    unsafe { libc::CPU_CLR(cpu, cpuset) }
+}
+
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "fuchsia",
+    target_os = "dragonfly"
+))]
+#[allow(non_snake_case)]
+#[inline]
+pub(crate) fn CPU_ISSET(cpu: usize, cpuset: &RawCpuSet) -> bool {
+    if cpu >= CPU_SETSIZE {
+        panic!(
+            "cpu out of bounds: the cpu max is {} but the cpu is {}",
+            CPU_SETSIZE, cpu
+        )
+    }
+    unsafe { libc::CPU_ISSET(cpu, cpuset) }
+}
+
+#[cfg(any(target_os = "linux"))]
+#[allow(non_snake_case)]
+#[inline]
+pub fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
+    unsafe { libc::CPU_COUNT(cpuset).try_into().unwrap() }
+}
+
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "fuchsia",
+    target_os = "dragonfly"
+))]
+#[inline]
+pub(crate) fn sched_getaffinity(pid: Pid, cpuset: &mut RawCpuSet) -> io::Result<()> {
+    unsafe {
+        ret(libc::sched_getaffinity(
+            pid.as_raw() as _,
+            std::mem::size_of::<RawCpuSet>(),
+            cpuset,
+        ))
+    }
+}
+
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "fuchsia",
+    target_os = "dragonfly"
+))]
+#[inline]
+pub(crate) fn sched_setaffinity(pid: Pid, cpuset: &RawCpuSet) -> io::Result<()> {
+    unsafe {
+        ret(libc::sched_setaffinity(
+            pid.as_raw() as _,
+            std::mem::size_of::<RawCpuSet>(),
+            cpuset,
+        ))
     }
 }
 
