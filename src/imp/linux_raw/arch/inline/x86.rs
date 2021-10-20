@@ -121,10 +121,10 @@ pub(in crate::imp::linux_raw) unsafe fn indirect_syscall4(
     // the compiler can use esi to satisfy `in(reg)`.
     asm!(
         "xchg esi, {a3}",
-        "call edi",
+        "call {callee}",
         "xchg esi, {a3}",
         a3 = in(reg) a3.to_asm(),
-        in("edi") callee,
+        callee = in(reg) callee,
         inlateout("eax") nr.to_asm() => r0,
         in("ebx") a0.to_asm(),
         in("ecx") a1.to_asm(),
