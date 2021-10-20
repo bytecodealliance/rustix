@@ -112,9 +112,9 @@ use linux_raw_sys::general::{__NR_ppoll, sigset_t};
 use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::v5_11::general::{__NR_mremap, __NR_openat2, open_how};
 use linux_raw_sys::v5_4::general::{
-    __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_membarrier, __NR_memfd_create,
-    __NR_mlock2, __NR_preadv2, __NR_prlimit64, __NR_pwritev2, __NR_renameat2, __NR_statx,
-    __NR_userfaultfd, statx, F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ,
+    __NR_clone, __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_membarrier,
+    __NR_memfd_create, __NR_mlock2, __NR_preadv2, __NR_prlimit64, __NR_pwritev2, __NR_renameat2,
+    __NR_statx, __NR_userfaultfd, statx, F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ,
 };
 use std::convert::TryInto;
 use std::ffi::CStr;
@@ -3572,6 +3572,21 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
             Some(result.rlim_max)
         };
         Rlimit { current, maximum }
+    }
+}
+
+#[inline]
+pub(crate) fn fork() -> io::Result<Pid> {
+    unsafe {
+        let pid = ret_c_uint(syscall5_readonly(
+            nr(__NR_clone),
+            zero(),
+            zero(),
+            zero(),
+            zero(),
+            zero(),
+        ))?;
+        Ok(Pid::from_raw(pid))
     }
 }
 
