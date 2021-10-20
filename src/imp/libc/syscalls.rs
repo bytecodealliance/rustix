@@ -2419,6 +2419,15 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub(crate) fn fork() -> io::Result<Pid> {
+    unsafe {
+        let pid = ret_c_int(libc::fork())?;
+        Ok(Pid::from_raw(pid))
+    }
+}
+
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) mod sockopt {
     use crate::net::sockopt::Timeout;

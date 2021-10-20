@@ -112,9 +112,9 @@ use linux_raw_sys::general::{__NR_ppoll, sigset_t};
 use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::v5_11::general::{__NR_mremap, __NR_openat2, open_how};
 use linux_raw_sys::v5_4::general::{
-    __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_membarrier, __NR_memfd_create,
-    __NR_mlock2, __NR_preadv2, __NR_prlimit64, __NR_pwritev2, __NR_renameat2, __NR_statx,
-    __NR_userfaultfd, statx, F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ,
+    __NR_clone3, __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_membarrier,
+    __NR_memfd_create, __NR_mlock2, __NR_preadv2, __NR_prlimit64, __NR_pwritev2, __NR_renameat2,
+    __NR_statx, __NR_userfaultfd, clone_args, statx, F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ,
 };
 use std::convert::TryInto;
 use std::ffi::CStr;
@@ -3573,6 +3573,29 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
         };
         Rlimit { current, maximum }
     }
+}
+
+#[inline]
+fn _clone3(args: &mut clone_args, size: usize) -> io::Result<Pid> {
+    unsafe {
+        let pid = ret_c_uint(syscall2(nr(__NR_clone3), by_mut(args), pass_usize(size)))?;
+        Ok(Pid::from_raw(pid))
+    }
+}
+
+#[inline]
+pub(crate) fn fork() -> io::Result<Pid> {
+    let mut args = clone_args {
+        flags: 0,
+        pidfd: 0,
+        child_tid: 0,
+        parent_tid: 0,
+        exit_signal: 0,
+        stack: 0,
+        stack_size: 0,
+        tls: 0,
+    };
+    _clone3(&mut args, std::mem::size_of::<clone_args>())
 }
 
 pub(crate) mod sockopt {
