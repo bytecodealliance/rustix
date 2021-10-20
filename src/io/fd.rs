@@ -7,7 +7,7 @@ use io_lifetimes::AsFd;
     all(linux_raw, feature = "procfs"),
     all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
 ))]
-use {io_lifetimes::BorrowedFd, std::ffi::OsString};
+use {io_lifetimes::BorrowedFd, std::ffi::CString};
 
 #[cfg(not(target_os = "wasi"))]
 pub use imp::io::DupFlags;
@@ -140,21 +140,18 @@ pub fn dup2_with<Fd: AsFd>(fd: &Fd, new: &OwnedFd, flags: DupFlags) -> io::Resul
 ))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 #[inline]
-pub fn ttyname<Fd: AsFd>(dirfd: &Fd, reuse: OsString) -> io::Result<OsString> {
+pub fn ttyname<Fd: AsFd, B: Into<Vec<u8>>>(dirfd: &Fd, reuse: B) -> io::Result<CString> {
     let dirfd = dirfd.as_fd();
-    _ttyname(dirfd, reuse)
+    _ttyname(dirfd, reuse.into())
 }
 
 #[cfg(any(
     all(linux_raw, feature = "procfs"),
     all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
 ))]
-fn _ttyname(dirfd: BorrowedFd<'_>, reuse: OsString) -> io::Result<OsString> {
-    use std::os::unix::ffi::OsStringExt;
-
+fn _ttyname(dirfd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<CString> {
     // This code would benefit from having a better way to read into
     // uninitialized memory, but that requires `unsafe`.
-    let mut buffer = reuse.into_vec();
     buffer.clear();
     buffer.resize(256, 0_u8);
 
@@ -162,8 +159,8 @@ fn _ttyname(dirfd: BorrowedFd<'_>, reuse: OsString) -> io::Result<OsString> {
         match imp::syscalls::ttyname(dirfd, &mut buffer) {
             Err(imp::io::Error::RANGE) => buffer.resize(buffer.len() * 2, 0_u8),
             Ok(len) => {
-                buffer.resize(len, 0_u8);
-                return Ok(OsString::from_vec(buffer));
+                buffer.resize(len, 0);
+                return Ok(CString::new(buffer).unwrap());
             }
             Err(errno) => return Err(errno),
         }
