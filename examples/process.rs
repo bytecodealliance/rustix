@@ -82,5 +82,17 @@ fn main() -> io::Result<()> {
     println!("Rttime Limit: {:?}", getrlimit(Resource::Rttime));
     #[cfg(any(target_os = "android", target_os = "linux"))]
     println!("Execfn: {:?}", linux_execfn());
+    println!("Forking Process");
+    match fork()? {
+        Pid::NONE => {
+            println!("CHILD: pid is {}", getpid().as_raw());
+            std::process::exit(0);
+        }
+        child_pid => println!(
+            "PARENT: pid is {}, child pid is {}",
+            getpid().as_raw(),
+            child_pid.as_raw()
+        ),
+    }
     Ok(())
 }
