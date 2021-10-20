@@ -49,26 +49,18 @@ pub trait Arg {
     fn to_string_lossy(&self) -> Cow<str>;
 
     /// Returns a view of this string as a maybe-owned [`CStr`].
-    #[cfg(not(windows))]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>>;
 
     /// Consumes `self` and returns a view of this string as a maybe-owned
     /// [`CStr`].
-    #[cfg(not(windows))]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
         Self: 'b;
 
     /// Returns a view of this string as a byte slice.
-    #[cfg(not(windows))]
     fn as_maybe_utf8_bytes(&self) -> &[u8];
 
-    /// Returns a view of this string as a maybe-owned [`OsStr`].
-    #[cfg(windows)]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>>;
-
     /// Runs a closure with `self` passed in as a `&CStr`.
-    #[cfg(not(windows))]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
         Self: Sized,
@@ -86,7 +78,6 @@ impl Arg for &str {
         Cow::Borrowed(self)
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -94,7 +85,6 @@ impl Arg for &str {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -105,19 +95,11 @@ impl Arg for &str {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_bytes()
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -139,7 +121,6 @@ impl Arg for &String {
         Cow::Borrowed(self)
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -147,7 +128,6 @@ impl Arg for &String {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -156,19 +136,11 @@ impl Arg for &String {
         self.as_str().into_c_str()
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_bytes()
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -190,7 +162,6 @@ impl Arg for String {
         Cow::Borrowed(self)
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -198,7 +169,6 @@ impl Arg for String {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -209,19 +179,11 @@ impl Arg for String {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_bytes()
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -243,7 +205,6 @@ impl Arg for &OsStr {
         OsStr::to_string_lossy(self)
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -251,7 +212,6 @@ impl Arg for &OsStr {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -262,19 +222,11 @@ impl Arg for &OsStr {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_bytes()
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -296,7 +248,6 @@ impl Arg for &OsString {
         self.as_os_str().to_string_lossy()
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -305,7 +256,6 @@ impl Arg for &OsString {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -314,19 +264,11 @@ impl Arg for &OsString {
         self.as_os_str().into_c_str()
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_bytes()
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -348,7 +290,6 @@ impl Arg for OsString {
         self.as_os_str().to_string_lossy()
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -356,7 +297,6 @@ impl Arg for OsString {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -367,19 +307,11 @@ impl Arg for OsString {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_bytes()
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -401,7 +333,6 @@ impl Arg for &Path {
         Path::to_string_lossy(self)
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -409,7 +340,6 @@ impl Arg for &Path {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -420,19 +350,11 @@ impl Arg for &Path {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_os_str().as_bytes()
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -457,7 +379,6 @@ impl Arg for &PathBuf {
         self.as_path().to_string_lossy()
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -466,7 +387,6 @@ impl Arg for &PathBuf {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -475,19 +395,11 @@ impl Arg for &PathBuf {
         self.as_path().into_c_str()
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         PathBuf::as_path(self).as_os_str().as_bytes()
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -509,7 +421,6 @@ impl Arg for PathBuf {
         self.as_os_str().to_string_lossy()
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -517,7 +428,6 @@ impl Arg for PathBuf {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -528,19 +438,11 @@ impl Arg for PathBuf {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_os_str().as_bytes()
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -565,13 +467,11 @@ impl Arg for &CStr {
         CStr::to_string_lossy(self)
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Borrowed(self))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -580,16 +480,9 @@ impl Arg for &CStr {
         Ok(Cow::Borrowed(self))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.to_bytes()
-    }
-
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
     }
 
     #[inline]
@@ -615,13 +508,11 @@ impl Arg for &CString {
         CString::as_c_str(self).to_string_lossy()
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Borrowed(CString::as_c_str(self)))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -630,16 +521,9 @@ impl Arg for &CString {
         Ok(Cow::Borrowed(self))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.to_bytes()
-    }
-
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
     }
 
     #[inline]
@@ -663,13 +547,11 @@ impl Arg for CString {
         self.as_c_str().to_string_lossy()
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Borrowed(self))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -678,16 +560,9 @@ impl Arg for CString {
         Ok(Cow::Owned(self))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_bytes()
-    }
-
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
     }
 
     #[inline]
@@ -711,7 +586,6 @@ impl<'a> Arg for Cow<'a, str> {
         Cow::Borrowed(self)
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -719,7 +593,6 @@ impl<'a> Arg for Cow<'a, str> {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -734,16 +607,9 @@ impl<'a> Arg for Cow<'a, str> {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_bytes()
-    }
-
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
     }
 
     #[inline]
@@ -767,7 +633,6 @@ impl<'a> Arg for Cow<'a, OsStr> {
         (**self).to_string_lossy()
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -775,7 +640,6 @@ impl<'a> Arg for Cow<'a, OsStr> {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -790,16 +654,9 @@ impl<'a> Arg for Cow<'a, OsStr> {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_bytes()
-    }
-
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
     }
 
     #[inline]
@@ -824,13 +681,11 @@ impl<'a> Arg for Cow<'a, CStr> {
         borrow.to_string_lossy()
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Borrowed(self))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -839,16 +694,9 @@ impl<'a> Arg for Cow<'a, CStr> {
         Ok(self)
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.to_bytes()
-    }
-
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
     }
 
     #[inline]
@@ -872,7 +720,6 @@ impl<'a> Arg for Component<'a> {
         self.as_os_str().to_string_lossy()
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -880,7 +727,6 @@ impl<'a> Arg for Component<'a> {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -891,19 +737,11 @@ impl<'a> Arg for Component<'a> {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_os_str().as_bytes()
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -925,7 +763,6 @@ impl<'a> Arg for Components<'a> {
         self.as_path().to_string_lossy()
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -934,7 +771,6 @@ impl<'a> Arg for Components<'a> {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -946,19 +782,11 @@ impl<'a> Arg for Components<'a> {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_path().as_os_str().as_bytes()
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -980,7 +808,6 @@ impl<'a> Arg for Iter<'a> {
         self.as_path().to_string_lossy()
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -989,7 +816,6 @@ impl<'a> Arg for Iter<'a> {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -1001,19 +827,11 @@ impl<'a> Arg for Iter<'a> {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_path().as_os_str().as_bytes()
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -1035,7 +853,6 @@ impl Arg for &[u8] {
         String::from_utf8_lossy(self)
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -1043,7 +860,6 @@ impl Arg for &[u8] {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -1054,19 +870,11 @@ impl Arg for &[u8] {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -1088,7 +896,6 @@ impl Arg for &Vec<u8> {
         String::from_utf8_lossy(self)
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -1096,7 +903,6 @@ impl Arg for &Vec<u8> {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -1107,19 +913,11 @@ impl Arg for &Vec<u8> {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -1141,7 +939,6 @@ impl Arg for Vec<u8> {
         String::from_utf8_lossy(self)
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -1149,7 +946,6 @@ impl Arg for Vec<u8> {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -1160,19 +956,11 @@ impl Arg for Vec<u8> {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -1195,7 +983,6 @@ impl Arg for DecInt {
         Path::to_string_lossy(self)
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
@@ -1203,7 +990,6 @@ impl Arg for DecInt {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -1214,19 +1000,11 @@ impl Arg for DecInt {
         ))
     }
 
-    #[cfg(not(windows))]
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
         self.as_os_str().as_bytes()
     }
 
-    #[cfg(windows)]
-    #[inline]
-    fn as_os_str(&self) -> io::Result<Cow<OsStr>> {
-        self.as_ref()
-    }
-
-    #[cfg(not(windows))]
     #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
