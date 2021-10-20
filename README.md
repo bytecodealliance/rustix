@@ -49,14 +49,13 @@ and is portable to many OS's.
 
 ## Similar crates
 
-`rsix` is similar to [`nix`], [`simple_libc`], [`unix`], and [`nc`]. `rsix` is
-a relatively new project with less overall coverage, architected for
-[I/O safety] with most APIs using [`OwnedFd`] and [`AsFd`] to manipulate file
-descriptors rather than `File` or even `c_int`, and supporting multiple
-backends so that it can use direct syscalls while still being usable on all
-platforms `libc` supports. Like `nix`, `rsix` has an optimized and flexible
-filename argument mechanism that allows users to use a variety of string types,
-including non-UTF-8 string types.
+`rsix` is similar to [`nix`], [`simple_libc`], [`unix`], [`nc`], and [`uapi`].
+`rsix` is architected for [I/O safety] with most APIs using [`OwnedFd`] and
+[`AsFd`] to manipulate file descriptors rather than `File` or even `c_int`, and
+supporting multiple backends so that it can use direct syscalls while still
+being usable on all platforms `libc` supports. Like `nix`, `rsix` has an
+optimized and flexible filename argument mechanism that allows users to use a
+variety of string types, including non-UTF-8 string types.
 
 [`relibc`] is a similar project which aims to be a full "libc", including
 C-compatible interfaces and higher-level C/POSIX standard-library
@@ -67,11 +66,11 @@ important features for `rsix`.
 
 `rsix` has its own code for making direct syscalls, similar to the [`sc`]
 and [`scall`] crates, though `rsix` currently only supports direct syscalls on
-Linux on x86\_64, x86, aarch64, and riscv64. `rsix` can use either the unstable
-Rust `asm!` macro or out-of-line `.s` files so it supports both Stable and
-Nightly Rust. `rsix`'s syscalls report errors using an optimized `Error` type,
-and `rsix` supports Linux's vDSO mechanism to optimize Linux `clock_gettime` on
-all architectures, and all Linux system calls on x86.
+Linux on x86\_64, x86, aarch64, riscv64, and arm. `rsix` can use either the
+unstable Rust `asm!` macro or out-of-line `.s` files so it supports both Stable
+and Nightly Rust. `rsix`'s syscalls report errors using an optimized `Error`
+type, and `rsix` supports Linux's vDSO mechanism to optimize Linux
+`clock_gettime` on all architectures, and all Linux system calls on x86.
 
 `rsix`'s `*at` functions are similar to the [`openat`] crate, but `rsix`
 provides them as free functions rather than associated functions of a `Dir`
@@ -86,6 +85,7 @@ detection, so users must handle `NOSYS` themselves.
 [`unix`]: https://crates.io/crates/unix
 [`nc`]: https://crates.io/crates/nc
 [`simple_libc`]: https://crates.io/crates/simple_libc
+[`uapi`]: https://crates.io/crates/uapi
 [`relibc`]: https://github.com/redox-os/relibc
 [`syscall`]: https://crates.io/crates/syscall
 [`sc`]: https://crates.io/crates/sc
