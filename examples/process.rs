@@ -17,7 +17,7 @@ fn main() -> io::Result<()> {
     println!("User priority: {}", getpriority_user(Uid::ROOT)?);
     println!(
         "Current working directory: {}",
-        getcwd(Default::default())?.to_string_lossy()
+        getcwd(Vec::new())?.to_string_lossy()
     );
     println!("Cpu Limit: {:?}", getrlimit(Resource::Cpu));
     println!("Fsize Limit: {:?}", getrlimit(Resource::Fsize));
