@@ -16,11 +16,7 @@ use imp::fs::Dev;
 use imp::fs::{Access, AtFlags, Mode, OFlags, Stat};
 use imp::time::Timespec;
 use io_lifetimes::{AsFd, BorrowedFd};
-use std::ffi::{CStr, OsString};
-#[cfg(unix)]
-use std::os::unix::ffi::OsStringExt;
-#[cfg(target_os = "wasi")]
-use std::os::wasi::ffi::OsStringExt;
+use std::ffi::{CStr, CString};
 
 /// `openat(dirfd, path, oflags, mode)`—Opens a file.
 ///
@@ -56,19 +52,18 @@ pub fn openat<P: path::Arg, Fd: AsFd>(
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/readlinkat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/readlinkat.2.html
 #[inline]
-pub fn readlinkat<P: path::Arg, Fd: AsFd>(
+pub fn readlinkat<P: path::Arg, Fd: AsFd, B: Into<Vec<u8>>>(
     dirfd: &Fd,
     path: P,
-    reuse: OsString,
-) -> io::Result<OsString> {
+    reuse: B,
+) -> io::Result<CString> {
     let dirfd = dirfd.as_fd();
-    path.into_with_c_str(|path| _readlinkat(dirfd, path, reuse))
+    path.into_with_c_str(|path| _readlinkat(dirfd, path, reuse.into()))
 }
 
-fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Result<OsString> {
+fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::Result<CString> {
     // This code would benefit from having a better way to read into
     // uninitialized memory, but that requires `unsafe`.
-    let mut buffer = reuse.into_vec();
     buffer.clear();
     buffer.resize(256, 0_u8);
 
@@ -79,7 +74,7 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, reuse: OsString) -> io::Resul
         assert!(nread <= buffer.len());
         if nread < buffer.len() {
             buffer.resize(nread, 0_u8);
-            return Ok(OsString::from_vec(buffer));
+            return Ok(CString::new(buffer).unwrap());
         }
         buffer.resize(buffer.len() * 2, 0_u8);
     }
