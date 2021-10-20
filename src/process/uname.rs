@@ -7,13 +7,9 @@
 #![allow(unsafe_code)]
 
 use crate::imp;
-use std::ffi::{CStr, OsStr};
+use std::ffi::CStr;
 use std::fmt;
 use std::os::raw::c_char;
-#[cfg(unix)]
-use std::os::unix::ffi::OsStrExt;
-#[cfg(target_os = "wasi")]
-use std::os::wasi::ffi::OsStrExt;
 
 /// `uname()`—Returns high-level information about the runtime OS and
 /// hardware.
@@ -29,8 +25,8 @@ pub struct Uname(imp::process::RawUname);
 impl Uname {
     /// `sysname`—Operating system release name
     #[inline]
-    pub fn sysname(&self) -> &OsStr {
-        Self::to_os_str(self.0.sysname.as_ptr())
+    pub fn sysname(&self) -> &CStr {
+        Self::to_cstr(self.0.sysname.as_ptr())
     }
 
     /// `nodename`—Name with vague meaning
@@ -39,39 +35,39 @@ impl Uname {
     /// information about hosts that have multiple names, or any information
     /// about where the names are visible.
     #[inline]
-    pub fn nodename(&self) -> &OsStr {
-        Self::to_os_str(self.0.nodename.as_ptr())
+    pub fn nodename(&self) -> &CStr {
+        Self::to_cstr(self.0.nodename.as_ptr())
     }
 
     /// `release`—Operating system release version string
     #[inline]
-    pub fn release(&self) -> &OsStr {
-        Self::to_os_str(self.0.release.as_ptr())
+    pub fn release(&self) -> &CStr {
+        Self::to_cstr(self.0.release.as_ptr())
     }
 
     /// `version`—Operating system build identifiers
     #[inline]
-    pub fn version(&self) -> &OsStr {
-        Self::to_os_str(self.0.version.as_ptr())
+    pub fn version(&self) -> &CStr {
+        Self::to_cstr(self.0.version.as_ptr())
     }
 
     /// `machine`—Hardware architecture identifier
     #[inline]
-    pub fn machine(&self) -> &OsStr {
-        Self::to_os_str(self.0.machine.as_ptr())
+    pub fn machine(&self) -> &CStr {
+        Self::to_cstr(self.0.machine.as_ptr())
     }
 
     /// `domainname`—NIS or YP domain identifer
     #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
     #[inline]
-    pub fn domainname(&self) -> &OsStr {
-        Self::to_os_str(self.0.domainname.as_ptr())
+    pub fn domainname(&self) -> &CStr {
+        Self::to_cstr(self.0.domainname.as_ptr())
     }
 
     #[inline]
-    fn to_os_str<'a>(ptr: *const c_char) -> &'a OsStr {
+    fn to_cstr<'a>(ptr: *const c_char) -> &'a CStr {
         // Safety: Strings returned from the kernel are always NUL-terminated.
-        OsStr::from_bytes(unsafe { CStr::from_ptr(ptr) }.to_bytes())
+        unsafe { CStr::from_ptr(ptr) }
     }
 }
 
