@@ -58,7 +58,8 @@ pub fn readlinkat<P: path::Arg, Fd: AsFd, B: Into<Vec<u8>>>(
     reuse: B,
 ) -> io::Result<CString> {
     let dirfd = dirfd.as_fd();
-    path.into_with_c_str(|path| _readlinkat(dirfd, path, reuse.into()))
+    let reuse = reuse.into();
+    path.into_with_c_str(|path| _readlinkat(dirfd, path, reuse))
 }
 
 fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::Result<CString> {
