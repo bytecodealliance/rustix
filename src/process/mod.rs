@@ -1,7 +1,6 @@
 //! Process-associated operations.
 
 use crate::imp;
-use crate::io;
 
 mod auxv;
 #[cfg(not(target_os = "wasi"))]
@@ -111,21 +110,4 @@ pub const EXIT_SIGNALED_SIGABRT: i32 = imp::process::EXIT_SIGNALED_SIGABRT;
 #[inline]
 pub fn sched_yield() {
     imp::syscalls::sched_yield()
-}
-
-/// `fork()` — Creates a new process by duplicating the calling process.
-///
-/// # Safety
-/// if the parent has multiple threads, fork creates a child process containing a copy of all the memory of all the threads,
-/// but with only one actual thread, so objects in memory such as mutexes may be in unusable states.
-///
-/// # References
-///  - [POSIX]
-///  - [Linux]
-///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fork.html
-/// [Linux]: https://man7.org/linux/man-pages/man2/fork.2.html
-#[cfg(not(target_os = "wasi"))]
-pub unsafe fn fork() -> io::Result<Pid> {
-    imp::syscalls::fork()
 }

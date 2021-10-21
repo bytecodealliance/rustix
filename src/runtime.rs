@@ -94,3 +94,22 @@ pub fn exe_phdrs() -> (*const c_void, usize) {
 }
 
 pub use imp::thread::tls::StartupTlsInfo;
+
+/// `fork()` — Creates a new process by duplicating the calling process.
+///
+/// This is function is more low-level than its libc counter part,
+/// which also calls handlers registered with [`pthread_atfork`],
+/// and initializes the `pthread` data structures in the child process.
+///
+/// # Safety
+/// If the parent has multiple threads, fork creates a child process containing a copy of all the memory of all the threads,
+/// but with only one actual thread, so objects in memory such as mutexes may be in unusable states.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/fork.2.html
+/// [`pthread_atfork`]: https://man7.org/linux/man-pages/man3/pthread_atfork.3.html
+pub unsafe fn fork() -> io::Result<Pid> {
+    imp::syscalls::fork()
+}
