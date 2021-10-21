@@ -3576,18 +3576,16 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
 }
 
 #[inline]
-pub(crate) fn fork() -> io::Result<Pid> {
-    unsafe {
-        let pid = ret_c_uint(syscall5_readonly(
-            nr(__NR_clone),
-            zero(),
-            zero(),
-            zero(),
-            zero(),
-            zero(),
-        ))?;
-        Ok(Pid::from_raw(pid))
-    }
+pub(crate) unsafe fn fork() -> io::Result<Pid> {
+    let pid = ret_c_uint(syscall5_readonly(
+        nr(__NR_clone),
+        zero(),
+        zero(),
+        zero(),
+        zero(),
+        zero(),
+    ))?;
+    Ok(Pid::from_raw(pid))
 }
 
 pub(crate) mod sockopt {
