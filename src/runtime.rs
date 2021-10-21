@@ -97,9 +97,9 @@ pub use imp::thread::tls::StartupTlsInfo;
 
 /// `fork()` — Creates a new process by duplicating the calling process.
 ///
-/// This is function is more low-level than its libc counter part,
-/// which also calls handlers registered with [`pthread_atfork`],
-/// and initializes the `pthread` data structures in the child process.
+/// Unlike its libc counterpart,
+/// this function does not call handlers registered with [`pthread_atfork`],
+/// and does not initializes the `pthread` data structures in the child process.
 ///
 /// # Safety
 /// If the parent has multiple threads, fork creates a child process containing a copy of all the memory of all the threads,
