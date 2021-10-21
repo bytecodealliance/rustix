@@ -93,7 +93,7 @@ use linux_raw_sys::general::{
     sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD, AT_REMOVEDIR,
     AT_SYMLINK_NOFOLLOW, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, F_DUPFD,
     F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL,
-    PR_SET_NAME, TCGETS, TIMER_ABSTIME, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
+    PR_SET_NAME, SIGCHLD, TCGETS, TIMER_ABSTIME, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
 };
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use linux_raw_sys::general::{__NR_dup2, __NR_open, __NR_pipe, __NR_poll};
@@ -112,9 +112,9 @@ use linux_raw_sys::general::{__NR_ppoll, sigset_t};
 use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::v5_11::general::{__NR_mremap, __NR_openat2, open_how};
 use linux_raw_sys::v5_4::general::{
-    __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_membarrier, __NR_memfd_create,
-    __NR_mlock2, __NR_preadv2, __NR_prlimit64, __NR_pwritev2, __NR_renameat2, __NR_statx,
-    __NR_userfaultfd, statx, F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ,
+    __NR_clone, __NR_copy_file_range, __NR_eventfd2, __NR_getrandom, __NR_membarrier,
+    __NR_memfd_create, __NR_mlock2, __NR_preadv2, __NR_prlimit64, __NR_pwritev2, __NR_renameat2,
+    __NR_statx, __NR_userfaultfd, statx, F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ,
 };
 use std::convert::TryInto;
 use std::ffi::CStr;
@@ -3573,6 +3573,19 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
         };
         Rlimit { current, maximum }
     }
+}
+
+#[inline]
+pub(crate) unsafe fn fork() -> io::Result<Pid> {
+    let pid = ret_c_uint(syscall5_readonly(
+        nr(__NR_clone),
+        c_uint(SIGCHLD),
+        zero(),
+        zero(),
+        zero(),
+        zero(),
+    ))?;
+    Ok(Pid::from_raw(pid))
 }
 
 pub(crate) mod sockopt {
