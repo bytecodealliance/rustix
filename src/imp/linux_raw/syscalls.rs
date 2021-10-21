@@ -93,7 +93,7 @@ use linux_raw_sys::general::{
     sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD, AT_REMOVEDIR,
     AT_SYMLINK_NOFOLLOW, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, F_DUPFD,
     F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL,
-    PR_SET_NAME, TCGETS, TIMER_ABSTIME, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
+    PR_SET_NAME, SIGCHLD, TCGETS, TIMER_ABSTIME, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
 };
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use linux_raw_sys::general::{__NR_dup2, __NR_open, __NR_pipe, __NR_poll};
@@ -3579,7 +3579,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
 pub(crate) unsafe fn fork() -> io::Result<Pid> {
     let pid = ret_c_uint(syscall5_readonly(
         nr(__NR_clone),
-        zero(),
+        c_uint(SIGCHLD),
         zero(),
         zero(),
         zero(),
