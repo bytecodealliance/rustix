@@ -1,6 +1,6 @@
 //! Process-associated operations.
 
-use crate::imp;
+use crate::{imp, io};
 
 mod auxv;
 #[cfg(not(target_os = "wasi"))]
@@ -23,6 +23,8 @@ mod rlimit;
 mod sched;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.
 mod uname;
+#[cfg(not(target_os = "wasi"))]
+mod wait;
 
 #[cfg(target_vendor = "mustang")]
 pub use auxv::init;
@@ -65,6 +67,8 @@ pub use rlimit::{getrlimit, Resource, Rlimit};
 pub use sched::{sched_getaffinity, sched_setaffinity, CpuSet};
 #[cfg(not(target_os = "wasi"))]
 pub use uname::{uname, Uname};
+#[cfg(not(target_os = "wasi"))]
+pub use wait::{WaitOptions, WaitStatus};
 
 /// `EXIT_SUCCESS` for use with [`exit`].
 ///
@@ -110,4 +114,46 @@ pub const EXIT_SIGNALED_SIGABRT: i32 = imp::process::EXIT_SIGNALED_SIGABRT;
 #[inline]
 pub fn sched_yield() {
     imp::syscalls::sched_yield()
+}
+
+/// `waitpid` — Wait for a specific process to change state.
+///
+/// If the selected PID is `Pid::NONE`, the call will wait for the child process,
+/// whose PID matches that of the calling process.
+///
+/// On Success, returns the status of the selected process.
+///
+/// If `NOHANG` was specified in the options,
+/// and the selected child process didn't change state, returns `None`.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/wait.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/waitpid.2.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn waitpid(pid: Pid, waitopts: WaitOptions) -> io::Result<Option<WaitStatus>> {
+    Ok(imp::syscalls::waitpid(pid.as_raw() as _, waitopts)?.map(|(_, status)| status))
+}
+
+/// `wait` — Wait for any of the childern of calling process to change state.
+///
+/// On success, returns the pid of the child process whose state changed,
+/// and the status of said process.
+///
+/// If `NOHANG` was specified in the options,
+/// and no child process changed state, returns `None`.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/wait.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/waitpid.2.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+    imp::syscalls::waitpid(-1, waitopts)
 }

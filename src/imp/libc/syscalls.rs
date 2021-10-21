@@ -111,7 +111,7 @@ use crate::process::Rlimit;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "wasi"))]
-use crate::process::{Gid, Pid, Uid};
+use crate::process::{Gid, Pid, Uid, WaitOptions, WaitStatus};
 use errno::errno;
 use io_lifetimes::{AsFd, BorrowedFd};
 use libc::{c_int, c_void};
@@ -2416,6 +2416,20 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
             result.rlim_max.try_into().ok()
         };
         Rlimit { current, maximum }
+    }
+}
+
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn waitpid(pid: i32, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+    unsafe {
+        let mut status: c_int = 0;
+        let pid = ret_c_int(libc::waitpid(pid as _, &mut status, waitopts.bits() as _))?;
+        if pid == 0 {
+            Ok(None)
+        } else {
+            Ok(Some((Pid::from_raw(pid), WaitStatus(status as _))))
+        }
     }
 }
 
