@@ -2428,7 +2428,7 @@ pub fn waitpid(pid: i32, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitS
         if pid == 0 {
             Ok(None)
         } else {
-            Ok(Some((Pid::from_raw(pid), WaitStatus(status as _))))
+            Ok(Some((Pid::from_raw(pid), WaitStatus::new(status as _))))
         }
     }
 }

@@ -15,9 +15,21 @@ bitflags! {
 
 /// the status of the child processes the caller waited on
 #[derive(Debug, Clone, Copy)]
-pub struct WaitStatus(pub u32);
+pub struct WaitStatus(u32);
 
 impl WaitStatus {
+    /// create a `WaitStatus` out of an integer.
+    #[inline]
+    pub(crate) fn new(status: u32) -> Self {
+        WaitStatus(status)
+    }
+
+    /// Converts a `WaitStatus` into its raw representation as an integer.
+    #[inline]
+    pub const fn as_raw(self) -> u32 {
+        self.0
+    }
+
     /// Returns whether the process is currently stopped.
     #[inline]
     pub fn stopped(self) -> bool {
