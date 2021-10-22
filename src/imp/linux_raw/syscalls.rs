@@ -45,7 +45,7 @@ use super::net::{
     AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketAddr, SocketAddrUnix,
     SocketFlags, SocketType,
 };
-use super::process::{RawCpuSet, RawUname, Resource, CPU_SETSIZE};
+use super::process::{RawCpuSet, RawPid, RawUname, Resource, CPU_SETSIZE};
 use super::rand::GetRandomFlags;
 use super::reg::nr;
 #[cfg(target_arch = "x86")]
@@ -3591,12 +3591,12 @@ pub(crate) unsafe fn fork() -> io::Result<Pid> {
 }
 
 #[inline]
-pub fn waitpid(pid: i32, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+pub fn waitpid(pid: RawPid, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
     unsafe {
         let mut status: u32 = 0;
         let pid = ret_c_uint(syscall4(
             nr(__NR_wait4),
-            c_int(pid),
+            c_int(pid as _),
             by_mut(&mut status),
             c_int(waitopts.bits() as _),
             zero(),

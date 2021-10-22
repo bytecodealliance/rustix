@@ -135,7 +135,7 @@ pub fn sched_yield() {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn waitpid(pid: Pid, waitopts: WaitOptions) -> io::Result<Option<WaitStatus>> {
-    Ok(imp::syscalls::waitpid(pid.as_raw() as _, waitopts)?.map(|(_, status)| status))
+    Ok(imp::syscalls::waitpid(pid.as_raw(), waitopts)?.map(|(_, status)| status))
 }
 
 /// `wait` — Wait for any of the childern of calling process to change state.
@@ -155,5 +155,5 @@ pub fn waitpid(pid: Pid, waitopts: WaitOptions) -> io::Result<Option<WaitStatus>
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
-    imp::syscalls::waitpid(-1, waitopts)
+    imp::syscalls::waitpid(-1 as _, waitopts)
 }
