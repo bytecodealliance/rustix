@@ -54,7 +54,7 @@ impl WaitStatus {
     }
 
     /// Returns the exit status number returned by the process,
-    /// if it exited notmally.
+    /// if it exited normally.
     #[inline]
     pub fn exit_status(self) -> Option<u32> {
         if imp::process::WIFEXITED(self.0 as _) {
