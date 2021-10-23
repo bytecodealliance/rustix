@@ -90,8 +90,6 @@ use super::offset::{libc_fstat, libc_fstatat, libc_lseek, libc_off_t, libc_pread
 use super::offset::{libc_preadv2, libc_pwritev2};
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use super::offset::{libc_rlimit, LIBC_RLIM_INFINITY};
-#[cfg(not(target_os = "wasi"))]
-use super::process::RawUname;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use super::process::Resource;
 #[cfg(any(
@@ -101,6 +99,8 @@ use super::process::Resource;
     target_os = "dragonfly"
 ))]
 use super::process::{RawCpuSet, CPU_SETSIZE};
+#[cfg(not(target_os = "wasi"))]
+use super::process::{RawPid, RawUname};
 #[cfg(target_os = "linux")]
 use super::rand::GetRandomFlags;
 use super::time::Timespec;
@@ -111,7 +111,7 @@ use crate::process::Rlimit;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "wasi"))]
-use crate::process::{Gid, Pid, Uid};
+use crate::process::{Gid, Pid, Uid, WaitOptions, WaitStatus};
 use errno::errno;
 use io_lifetimes::{AsFd, BorrowedFd};
 use libc::{c_int, c_void};
@@ -2415,6 +2415,20 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
             result.rlim_max.try_into().ok()
         };
         Rlimit { current, maximum }
+    }
+}
+
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn waitpid(pid: RawPid, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+    unsafe {
+        let mut status: c_int = 0;
+        let pid = ret_c_int(libc::waitpid(pid as _, &mut status, waitopts.bits() as _))?;
+        if pid == 0 {
+            Ok(None)
+        } else {
+            Ok(Some((Pid::from_raw(pid), WaitStatus::new(status as _))))
+        }
     }
 }
 
