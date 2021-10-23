@@ -118,13 +118,13 @@ use libc::{c_int, c_void};
 use std::cmp::min;
 use std::convert::TryInto;
 use std::ffi::CStr;
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+use std::ffi::CString;
 use std::io::{IoSlice, IoSliceMut, SeekFrom};
 #[cfg(target_os = "linux")]
 use std::mem::transmute;
 use std::mem::{size_of, MaybeUninit};
 use std::net::{SocketAddrV4, SocketAddrV6};
-#[cfg(any(target_os = "ios", target_os = "macos"))]
-use std::os::unix::ffi::OsStringExt;
 #[cfg(not(any(target_os = "redox", target_os = "wasi",)))]
 use std::ptr::null_mut;
 #[cfg(not(any(target_os = "redox", target_env = "newlib")))]
@@ -133,7 +133,6 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use {
     super::conv::nonnegative_ret,
     super::fs::{copyfile_state_t, CloneFlags, CopyfileFlags},
-    std::path::PathBuf,
 };
 #[cfg(not(target_os = "redox"))]
 use {
@@ -2056,7 +2055,7 @@ pub(crate) unsafe fn copyfile_state_get(
 }
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
-pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<PathBuf> {
+pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<CString> {
     // The use of PATH_MAX is generally not encouraged, but it
     // is inevitable in this case because macOS defines `fcntl` with
     // `F_GETPATH` in terms of `MAXPATHLEN`, and there are no
@@ -2079,8 +2078,7 @@ pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<PathBuf> {
 
     let l = buf.iter().position(|&c| c == 0).unwrap();
     buf.truncate(l as usize);
-    buf.shrink_to_fit();
-    Ok(PathBuf::from(std::ffi::OsString::from_vec(buf)))
+    Ok(CString::new(buf).unwrap())
 }
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
