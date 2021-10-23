@@ -2077,7 +2077,8 @@ pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<CString> {
     }
 
     let l = buf.iter().position(|&c| c == 0).unwrap();
-    buf.truncate(l as usize);
+    buf.truncate(l);
+    buf.shrink_to(l + 1);
     Ok(CString::new(buf).unwrap())
 }
 
