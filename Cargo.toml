@@ -38,6 +38,7 @@ atty = "0.2.14"
 cstr = "0.2.8"
 tempfile = "3.2.0"
 libc = "0.2.98"
+serial_test = "0.5"
 
 [target.'cfg(not(target_os = "emscripten"))'.dev-dependencies]
 criterion = "0.3"
