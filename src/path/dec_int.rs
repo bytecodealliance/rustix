@@ -8,7 +8,6 @@ use crate::io::AsRawFd;
 use io_lifetimes::AsFd;
 use itoa::{fmt, Integer};
 use std::ffi::{CStr, OsStr};
-use std::ops::Deref;
 #[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
 #[cfg(target_os = "wasi")]
@@ -26,7 +25,7 @@ use std::path::Path;
 /// use rsix::path::DecInt;
 ///
 /// assert_eq!(
-///     format!("hello {}", DecInt::new(9876).display()),
+///     format!("hello {}", DecInt::new(9876).as_ref().display()),
 ///     "hello 9876"
 /// );
 /// ```
@@ -89,19 +88,10 @@ impl core::fmt::Write for DecIntWriter {
     }
 }
 
-impl Deref for DecInt {
-    type Target = Path;
-
-    #[inline]
-    fn deref(&self) -> &Self::Target {
-        let as_os_str: &OsStr = OsStrExt::from_bytes(&self.buf[..self.len]);
-        Path::new(as_os_str)
-    }
-}
-
 impl AsRef<Path> for DecInt {
     #[inline]
     fn as_ref(&self) -> &Path {
-        &*self
+        let as_os_str: &OsStr = OsStrExt::from_bytes(&self.buf[..self.len]);
+        Path::new(as_os_str)
     }
 }

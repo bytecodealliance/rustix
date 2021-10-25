@@ -975,18 +975,19 @@ impl Arg for Vec<u8> {
 impl Arg for DecInt {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_os_str().to_str().ok_or(io::Error::INVAL)
+        self.as_ref().as_os_str().to_str().ok_or(io::Error::INVAL)
     }
 
     #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
-        Path::to_string_lossy(self)
+        Path::to_string_lossy(self.as_ref())
     }
 
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
+            CString::new(self.as_ref().as_os_str().as_bytes())
+                .map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -996,13 +997,14 @@ impl Arg for DecInt {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
+            CString::new(self.as_ref().as_os_str().as_bytes())
+                .map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
     #[inline]
     fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_os_str().as_bytes()
+        self.as_ref().as_os_str().as_bytes()
     }
 
     #[inline]
