@@ -119,6 +119,7 @@ use linux_raw_sys::v5_4::general::{
     __NR_memfd_create, __NR_mlock2, __NR_preadv2, __NR_prlimit64, __NR_pwritev2, __NR_renameat2,
     __NR_statx, __NR_userfaultfd, statx, F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ,
 };
+use std::borrow::Cow;
 use std::convert::TryInto;
 use std::ffi::CStr;
 use std::io::{IoSlice, IoSliceMut, SeekFrom};
@@ -3591,22 +3592,14 @@ pub(crate) unsafe fn fork() -> io::Result<Pid> {
     Ok(Pid::from_raw(pid))
 }
 
-pub fn execv<S: AsRef<CStr>>(path: &CStr, args: &[S]) -> io::Result<()> {
-    let mut argv: Vec<_> = args
-        .into_iter()
-        .map(AsRef::as_ref)
-        .map(CStr::as_ptr)
-        .collect();
+pub fn execv(path: &CStr, args: &[Cow<'_, CStr>]) -> io::Result<()> {
+    let mut argv: Vec<_> = args.into_iter().map(|cstr| CStr::as_ptr(cstr)).collect();
     argv.push(std::ptr::null());
-    _execv(path, &argv)
-}
-
-fn _execv(path: &CStr, args: &[*const c_char]) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_execve),
             c_str(path),
-            slice_just_addr(args),
+            slice_just_addr(&args),
             slice_just_addr(&[std::ptr::null::<c_char>()]),
         ))
     }
