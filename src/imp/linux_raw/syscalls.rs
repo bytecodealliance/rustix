@@ -125,7 +125,7 @@ use std::ffi::CStr;
 use std::io::{IoSlice, IoSliceMut, SeekFrom};
 use std::mem::{size_of_val, MaybeUninit};
 use std::net::{SocketAddrV4, SocketAddrV6};
-use std::os::raw::{c_char, c_int, c_uint, c_void};
+use std::os::raw::{c_int, c_uint, c_void};
 #[cfg(target_arch = "x86")]
 use {
     super::conv::x86_sys,
@@ -3592,15 +3592,20 @@ pub(crate) unsafe fn fork() -> io::Result<Pid> {
     Ok(Pid::from_raw(pid))
 }
 
-pub fn execv(path: &CStr, args: &[Cow<'_, CStr>]) -> io::Result<()> {
+pub fn execve(path: &CStr, args: &[Cow<'_, CStr>], env_vars: &[Cow<'_, CStr>]) -> io::Result<()> {
     let mut argv: Vec<_> = args.into_iter().map(|cstr| CStr::as_ptr(cstr)).collect();
+    let mut envs: Vec<_> = env_vars
+        .into_iter()
+        .map(|cstr| CStr::as_ptr(cstr))
+        .collect();
     argv.push(std::ptr::null());
+    envs.push(std::ptr::null());
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_execve),
             c_str(path),
-            slice_just_addr(&args),
-            slice_just_addr(&[std::ptr::null::<c_char>()]),
+            slice_just_addr(&argv),
+            slice_just_addr(&envs),
         ))
     }
 }

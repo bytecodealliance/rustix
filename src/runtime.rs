@@ -120,14 +120,19 @@ pub unsafe fn fork() -> io::Result<Pid> {
     imp::syscalls::fork()
 }
 
-/// Executes the program pointed to by `path`, with the arguments `args`.
+/// Executes the program pointed to by `path`, with the arguments `args`,
+/// and the environment variables `env_vars`.
 ///
 /// The first argument, by convention,
 /// should be the filename associated with the file being executed.
-pub fn execv<P: Arg>(path: P, args: &[P]) -> io::Result<()> {
+pub fn execve<P: Arg>(path: P, args: &[P], env_vars: &[P]) -> io::Result<()> {
     let arg_vec: Vec<Cow<'_, CStr>> = args
         .into_iter()
         .map(Arg::as_cow_c_str)
         .collect::<io::Result<_>>()?;
-    path.into_with_c_str(|path_cstr| imp::syscalls::execv(path_cstr, &arg_vec))
+    let env_vec: Vec<Cow<'_, CStr>> = env_vars
+        .into_iter()
+        .map(Arg::as_cow_c_str)
+        .collect::<io::Result<_>>()?;
+    path.into_with_c_str(|path_cstr| imp::syscalls::execve(path_cstr, &arg_vec, &env_vec))
 }
