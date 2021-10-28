@@ -17,8 +17,10 @@
 
 #![allow(unsafe_code)]
 
+use crate::path::Arg;
 use crate::process::Pid;
 use crate::{imp, io};
+use std::borrow::Cow;
 use std::ffi::{c_void, CStr};
 
 #[cfg(target_arch = "x86")]
@@ -116,4 +118,16 @@ pub use imp::thread::tls::StartupTlsInfo;
 /// [`pthread_atfork`]: https://man7.org/linux/man-pages/man3/pthread_atfork.3.html
 pub unsafe fn fork() -> io::Result<Pid> {
     imp::syscalls::fork()
+}
+
+/// Executes the program pointed to by `path`, with the arguments `args`.
+///
+/// The first argument, by convention,
+/// should be the filename associated with the file being executed.
+pub fn execv<P: Arg>(path: P, args: &[P]) -> io::Result<()> {
+    let arg_vec: Vec<Cow<'_, CStr>> = args
+        .into_iter()
+        .map(Arg::as_cow_c_str)
+        .collect::<io::Result<_>>()?;
+    path.into_with_c_str(|path_cstr| imp::syscalls::execv(path_cstr, &arg_vec))
 }

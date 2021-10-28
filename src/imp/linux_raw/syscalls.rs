@@ -83,19 +83,20 @@ use linux_raw_sys::general::{
 use linux_raw_sys::general::{__NR_arch_prctl, ARCH_SET_FS};
 use linux_raw_sys::general::{
     __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
-    __NR_epoll_create1, __NR_epoll_ctl, __NR_exit, __NR_exit_group, __NR_faccessat, __NR_fallocate,
-    __NR_fchdir, __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_flock, __NR_fsync, __NR_futex,
-    __NR_getcwd, __NR_getdents64, __NR_getpid, __NR_getppid, __NR_getpriority, __NR_gettid,
-    __NR_ioctl, __NR_linkat, __NR_madvise, __NR_mkdirat, __NR_mknodat, __NR_mlock, __NR_mprotect,
-    __NR_munlock, __NR_munmap, __NR_nanosleep, __NR_openat, __NR_pipe2, __NR_prctl, __NR_pread64,
-    __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readlinkat, __NR_readv,
-    __NR_sched_getaffinity, __NR_sched_setaffinity, __NR_sched_yield, __NR_set_tid_address,
-    __NR_setpriority, __NR_symlinkat, __NR_uname, __NR_unlinkat, __NR_utimensat, __NR_wait4,
-    __NR_write, __NR_writev, __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t,
-    epoll_event, sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD,
-    AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO,
-    FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD,
-    F_SETFL, PR_SET_NAME, SIGCHLD, TCGETS, TIMER_ABSTIME, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
+    __NR_epoll_create1, __NR_epoll_ctl, __NR_execve, __NR_exit, __NR_exit_group, __NR_faccessat,
+    __NR_fallocate, __NR_fchdir, __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_flock,
+    __NR_fsync, __NR_futex, __NR_getcwd, __NR_getdents64, __NR_getpid, __NR_getppid,
+    __NR_getpriority, __NR_gettid, __NR_ioctl, __NR_linkat, __NR_madvise, __NR_mkdirat,
+    __NR_mknodat, __NR_mlock, __NR_mprotect, __NR_munlock, __NR_munmap, __NR_nanosleep,
+    __NR_openat, __NR_pipe2, __NR_prctl, __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev,
+    __NR_read, __NR_readlinkat, __NR_readv, __NR_sched_getaffinity, __NR_sched_setaffinity,
+    __NR_sched_yield, __NR_set_tid_address, __NR_setpriority, __NR_symlinkat, __NR_uname,
+    __NR_unlinkat, __NR_utimensat, __NR_wait4, __NR_write, __NR_writev, __kernel_gid_t,
+    __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event, sockaddr, sockaddr_in,
+    sockaddr_in6, sockaddr_un, socklen_t, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW,
+    EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, F_DUPFD, F_DUPFD_CLOEXEC,
+    F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL, PR_SET_NAME, SIGCHLD,
+    TCGETS, TIMER_ABSTIME, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
 };
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use linux_raw_sys::general::{__NR_dup2, __NR_open, __NR_pipe, __NR_poll};
@@ -123,7 +124,7 @@ use std::ffi::CStr;
 use std::io::{IoSlice, IoSliceMut, SeekFrom};
 use std::mem::{size_of_val, MaybeUninit};
 use std::net::{SocketAddrV4, SocketAddrV6};
-use std::os::raw::{c_int, c_uint, c_void};
+use std::os::raw::{c_char, c_int, c_uint, c_void};
 #[cfg(target_arch = "x86")]
 use {
     super::conv::x86_sys,
@@ -3588,6 +3589,27 @@ pub(crate) unsafe fn fork() -> io::Result<Pid> {
         zero(),
     ))?;
     Ok(Pid::from_raw(pid))
+}
+
+pub fn execv<S: AsRef<CStr>>(path: &CStr, args: &[S]) -> io::Result<()> {
+    let mut argv: Vec<_> = args
+        .into_iter()
+        .map(AsRef::as_ref)
+        .map(CStr::as_ptr)
+        .collect();
+    argv.push(std::ptr::null());
+    _execv(path, &argv)
+}
+
+fn _execv(path: &CStr, args: &[*const c_char]) -> io::Result<()> {
+    unsafe {
+        ret(syscall3_readonly(
+            nr(__NR_execve),
+            c_str(path),
+            slice_just_addr(args),
+            slice_just_addr(&[std::ptr::null::<c_char>()]),
+        ))
+    }
 }
 
 #[inline]
