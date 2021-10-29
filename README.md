@@ -15,7 +15,7 @@
   </p>
 </div>
 
-`rsix` (formerly known as `posish`) provides efficient memory-safe and
+`rsix` (pronounced like "r-6") provides efficient memory-safe and
 [I/O-safe] wrappers to POSIX-like, Unix-like, and Linux syscall APIs, with
 configurable backends. It uses Rust references, slices, and return values
 instead of raw pointers, and [`io-lifetimes`] instead of raw file descriptors,
