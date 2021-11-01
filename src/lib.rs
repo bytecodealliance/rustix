@@ -58,23 +58,32 @@
 /// that our users don't need to do anything special to use the same version.
 pub use io_lifetimes;
 
+#[cfg(not(windows))]
 #[macro_use]
 pub(crate) mod cstr;
+#[cfg(not(windows))]
 #[macro_use]
 pub(crate) mod const_assert;
 
 mod imp;
 
+#[cfg(not(windows))]
 pub mod fs;
 pub mod io;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))] // WASI doesn't support `net` yet.
 pub mod net;
+#[cfg(not(windows))]
 pub mod path;
+#[cfg(not(windows))]
 pub mod process;
+#[cfg(not(windows))]
 pub mod rand;
+#[cfg(not(windows))]
 pub mod thread;
+#[cfg(not(windows))]
 pub mod time;
 
+#[cfg(not(windows))]
 #[cfg(linux_raw)]
 #[doc(hidden)]
 pub mod runtime;

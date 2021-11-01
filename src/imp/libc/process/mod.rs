@@ -1,6 +1,7 @@
 mod auxv;
 mod types;
 
+#[cfg(not(windows))]
 pub(crate) mod syscalls;
 pub(crate) use auxv::page_size;
 #[cfg(any(target_os = "android", target_os = "linux"))]

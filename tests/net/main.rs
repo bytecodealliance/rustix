@@ -3,6 +3,7 @@
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 
 mod addr;
+#[cfg(not(windows))]
 mod unix;
 mod v4;
 mod v6;

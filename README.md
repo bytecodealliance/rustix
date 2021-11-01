@@ -16,17 +16,18 @@
 </div>
 
 `rsix` (pronounced like "r-6") provides efficient memory-safe and
-[I/O-safe] wrappers to POSIX-like, Unix-like, and Linux syscall APIs, with
-configurable backends. It uses Rust references, slices, and return values
-instead of raw pointers, and [`io-lifetimes`] instead of raw file descriptors,
-providing memory safety and [I/O safety]. It uses `Result`s for reporting
-errors, [`bitflags`] instead of bare integer flags, an [`Arg`] trait with
-optimizations to efficiently accept any Rust string type, and several other
-efficient conveniences.
+[I/O-safe] wrappers to POSIX-like, Unix-like, Linux, and Winsock syscall-like
+APIs, with configurable backends. It uses Rust references, slices, and return
+values instead of raw pointers, and [`io-lifetimes`] instead of raw file
+descriptors, providing memory safety and [I/O safety]. It uses `Result`s for
+reporting errors, [`bitflags`] instead of bare integer flags, an [`Arg`] trait
+with optimizations to efficiently accept any Rust string type, and several
+other efficient conveniences.
 
-`rsix` is low-level and does not support Windows; for higher-level and more
-portable APIs built on this functionality, see the [`system-interface`],
-[`cap-std`], and [`fs-set-times`] crates, for example.
+`rsix` is low-level and, and while the `net` API supports Winsock on Windows,
+the rest of the APIs do not support Windows; for higher-level and more portable
+APIs built on this functionality, see the [`system-interface`], [`cap-std`],
+and [`fs-set-times`] crates, for example.
 
 `rsix` currently has two backends available: `linux_raw` and `libc`.
 

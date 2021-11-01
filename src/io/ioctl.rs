@@ -1,7 +1,9 @@
-#[cfg(not(target_os = "wasi"))]
+use crate::io::AsFd;
+#[cfg(windows)]
+use crate::io::AsSocketAsFd;
+#[cfg(not(any(windows, target_os = "wasi")))]
 use crate::io::{Termios, Winsize};
 use crate::{imp, io};
-use io_lifetimes::AsFd;
 
 /// `ioctl(fd, TCGETS)`—Get terminal attributes.
 ///
@@ -13,7 +15,7 @@ use io_lifetimes::AsFd;
 ///
 /// [Linux `ioctl_tty`]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
 /// [Linux `termios`]: https://man7.org/linux/man-pages/man3/termios.3.html
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(windows, target_os = "wasi")))]
 #[inline]
 #[doc(alias = "tcgetattr")]
 pub fn ioctl_tcgets<Fd: AsFd>(fd: &Fd) -> io::Result<Termios> {
@@ -37,7 +39,7 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(windows, target_os = "wasi")))]
 #[inline]
 pub fn ioctl_tiocgwinsz<Fd: AsFd>(fd: &Fd) -> io::Result<Winsize> {
     let fd = fd.as_fd();
@@ -59,7 +61,7 @@ pub fn ioctl_fionbio<Fd: AsFd>(fd: &Fd, value: bool) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
 #[cfg(any(
     linux_raw,
-    all(libc, not(any(target_os = "redox", target_os = "wasi")))
+    all(libc, not(any(windows, target_os = "redox", target_os = "wasi")))
 ))]
 #[inline]
 pub fn ioctl_tiocexcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
@@ -75,7 +77,7 @@ pub fn ioctl_tiocexcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
 #[cfg(any(
     linux_raw,
-    all(libc, not(any(target_os = "redox", target_os = "wasi")))
+    all(libc, not(any(windows, target_os = "redox", target_os = "wasi")))
 ))]
 #[inline]
 pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {

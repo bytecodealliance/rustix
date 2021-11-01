@@ -2,7 +2,12 @@
 //! we can interpret the rest of a `sockaddr` produced by the kernel.
 #![allow(unsafe_code)]
 
-use super::{SocketAddr, SocketAddrStorage, SocketAddrUnix};
+use super::ext::{Ipv4AddrExt, Ipv6AddrExt, SocketAddrV6Ext};
+#[cfg(windows)]
+use super::libc;
+#[cfg(not(windows))]
+use super::SocketAddrUnix;
+use super::{SocketAddr, SocketAddrStorage};
 use std::mem::size_of;
 use std::net::{SocketAddrV4, SocketAddrV6};
 
@@ -10,6 +15,7 @@ pub(crate) unsafe fn write_sockaddr(addr: &SocketAddr, storage: *mut SocketAddrS
     match addr {
         SocketAddr::V4(v4) => write_sockaddr_v4(v4, storage),
         SocketAddr::V6(v6) => write_sockaddr_v6(v6, storage),
+        #[cfg(not(windows))]
         SocketAddr::Unix(unix) => write_sockaddr_unix(unix, storage),
     }
 }
@@ -26,9 +32,7 @@ pub(crate) unsafe fn encode_sockaddr_v4(v4: &SocketAddrV4) -> libc::sockaddr_in 
         sin_len: size_of::<libc::sockaddr_in>() as _,
         sin_family: libc::AF_INET as _,
         sin_port: u16::to_be(v4.port()),
-        sin_addr: libc::in_addr {
-            s_addr: u32::from_ne_bytes(v4.ip().octets()),
-        },
+        sin_addr: libc::in_addr::new(u32::from_ne_bytes(v4.ip().octets())),
         sin_zero: [0; 8usize],
     }
 }
@@ -40,22 +44,38 @@ unsafe fn write_sockaddr_v4(v4: &SocketAddrV4, storage: *mut SocketAddrStorage) 
 }
 
 pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> libc::sockaddr_in6 {
-    libc::sockaddr_in6 {
-        #[cfg(any(
-            target_os = "netbsd",
-            target_os = "macos",
-            target_os = "ios",
-            target_os = "freebsd",
-            target_os = "openbsd"
-        ))]
-        sin6_len: size_of::<libc::sockaddr_in6>() as _,
-        sin6_family: libc::AF_INET6 as _,
-        sin6_port: u16::to_be(v6.port()),
-        sin6_flowinfo: u32::to_be(v6.flowinfo()),
-        sin6_addr: libc::in6_addr {
-            s6_addr: v6.ip().octets(),
-        },
-        sin6_scope_id: v6.scope_id(),
+    #[cfg(any(
+        target_os = "netbsd",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "freebsd",
+        target_os = "openbsd"
+    ))]
+    {
+        libc::sockaddr_in6::new(
+            size_of::<libc::sockaddr_in6>() as _,
+            libc::AF_INET6 as _,
+            u16::to_be(v6.port()),
+            u32::to_be(v6.flowinfo()),
+            libc::in6_addr::new(v6.ip().octets()),
+            v6.scope_id(),
+        )
+    }
+    #[cfg(not(any(
+        target_os = "netbsd",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "freebsd",
+        target_os = "openbsd"
+    )))]
+    {
+        libc::sockaddr_in6::new(
+            libc::AF_INET6 as _,
+            u16::to_be(v6.port()),
+            u32::to_be(v6.flowinfo()),
+            libc::in6_addr::new(v6.ip().octets()),
+            v6.scope_id(),
+        )
     }
 }
 
@@ -65,6 +85,7 @@ unsafe fn write_sockaddr_v6(v6: &SocketAddrV6, storage: *mut SocketAddrStorage) 
     size_of::<libc::sockaddr_in6>()
 }
 
+#[cfg(not(windows))]
 pub(crate) unsafe fn encode_sockaddr_unix(unix: &SocketAddrUnix) -> libc::sockaddr_un {
     let mut encoded = libc::sockaddr_un {
         #[cfg(any(
@@ -101,6 +122,7 @@ pub(crate) unsafe fn encode_sockaddr_unix(unix: &SocketAddrUnix) -> libc::sockad
     encoded
 }
 
+#[cfg(not(windows))]
 unsafe fn write_sockaddr_unix(unix: &SocketAddrUnix, storage: *mut SocketAddrStorage) -> usize {
     let encoded = encode_sockaddr_unix(unix);
     std::ptr::write(storage.cast::<_>(), encoded);

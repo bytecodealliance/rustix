@@ -136,7 +136,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, ubuntu-18.04, i686-linux, aarch64-linux, riscv64-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, arm-linux-stable, macos]
+        build: [ubuntu, ubuntu-18.04, i686-linux, aarch64-linux, riscv64-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, arm-linux-stable, macos, windows]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -212,6 +212,9 @@ jobs:
           - build: macos
             os: macos-latest
             rust: stable
+          - build: windows
+            os: windows-latest
+            rust: nightly
     steps:
     - uses: actions/checkout@v2
       with:

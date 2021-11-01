@@ -1,8 +1,11 @@
-#[cfg(any(all(linux_raw, feature = "procfs"), libc))]
+#[cfg(any(all(linux_raw, feature = "procfs"), all(not(windows), libc)))]
 use rsix::io::ttyname;
+#[cfg(not(windows))]
 use rsix::io::{self, isatty, stderr, stdin, stdout};
+#[cfg(not(windows))]
 use rsix::io_lifetimes::AsFd;
 
+#[cfg(not(windows))]
 fn main() -> io::Result<()> {
     let (stdin, stdout, stderr) = unsafe { (stdin(), stdout(), stderr()) };
 
@@ -18,6 +21,7 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
+#[cfg(not(windows))]
 fn show<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     if isatty(fd) {
         #[cfg(any(all(linux_raw, feature = "procfs"), libc))]
@@ -29,4 +33,9 @@ fn show<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
         println!("Stderr is not a tty");
     }
     Ok(())
+}
+
+#[cfg(windows)]
+fn main() {
+    unimplemented!()
 }

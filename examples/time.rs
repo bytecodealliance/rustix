@@ -1,3 +1,4 @@
+#[cfg(not(windows))]
 fn main() {
     println!(
         "Raeal time: {:?}",
@@ -7,4 +8,9 @@ fn main() {
         "Monotonic time: {:?}",
         rsix::time::clock_gettime(rsix::time::ClockId::Monotonic)
     );
+}
+
+#[cfg(windows)]
+fn main() {
+    unimplemented!()
 }

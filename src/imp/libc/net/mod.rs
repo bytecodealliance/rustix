@@ -1,20 +1,27 @@
 mod addr;
+pub(crate) mod ext;
+#[cfg(windows)]
+pub(crate) mod io_lifetimes;
+#[cfg(windows)]
+pub(crate) mod libc;
 mod read_sockaddr;
 mod send_recv;
 mod types;
 mod write_sockaddr;
 
 pub(crate) mod syscalls;
+#[cfg(not(windows))]
+pub use addr::SocketAddrUnix;
+pub use addr::{SocketAddr, SocketAddrStorage};
 pub(crate) use read_sockaddr::{read_sockaddr, read_sockaddr_os};
-pub(crate) use write_sockaddr::{
-    encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, write_sockaddr,
-};
-
-pub use addr::{SocketAddr, SocketAddrStorage, SocketAddrUnix};
 pub use send_recv::{RecvFlags, SendFlags};
 pub use types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType, Timeout};
+#[cfg(not(windows))]
+pub(crate) use write_sockaddr::encode_sockaddr_unix;
+pub(crate) use write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6, write_sockaddr};
 
 /// Return the offset of the `sun_path` field of `sockaddr_un`.
+#[cfg(not(windows))]
 #[inline]
 pub(crate) fn offsetof_sun_path() -> usize {
     let z = libc::sockaddr_un {

@@ -1,5 +1,8 @@
 //! `getsockopt` and `setsockopt` functions.
 
+use crate::io::AsFd;
+#[cfg(windows)]
+use crate::io::AsSocketAsFd;
 #[cfg(not(any(
     target_os = "freebsd",
     target_os = "ios",
@@ -10,7 +13,6 @@
 use crate::net::Ipv6Addr;
 use crate::net::{Ipv4Addr, SocketType};
 use crate::{imp, io};
-use io_lifetimes::AsFd;
 use std::time::Duration;
 
 pub use imp::net::Timeout;

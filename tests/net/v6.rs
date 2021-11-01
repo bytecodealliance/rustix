@@ -3,10 +3,9 @@
 
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]
 
-use rsix::io::{read, write};
 use rsix::net::{
-    accept, bind_v6, connect_v6, getsockname, listen, socket, AddressFamily, Ipv6Addr, Protocol,
-    SocketAddr, SocketAddrV6, SocketType,
+    accept, bind_v6, connect_v6, getsockname, listen, recv, send, socket, AddressFamily, Ipv6Addr,
+    Protocol, RecvFlags, SendFlags, SocketAddr, SocketAddrV6, SocketType,
 };
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
@@ -40,10 +39,10 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
 
     let mut buffer = vec![0; BUFFER_SIZE];
     let data_socket = accept(&connection_socket).unwrap();
-    let nread = read(&data_socket, &mut buffer).unwrap();
+    let nread = recv(&data_socket, &mut buffer, RecvFlags::empty()).unwrap();
     assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "hello, world");
 
-    write(&data_socket, b"goodnight, moon").unwrap();
+    send(&data_socket, b"goodnight, moon", SendFlags::empty()).unwrap();
 }
 
 fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
@@ -67,14 +66,17 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     .unwrap();
     connect_v6(&data_socket, &addr).unwrap();
 
-    write(&data_socket, b"hello, world").unwrap();
+    send(&data_socket, b"hello, world", SendFlags::empty()).unwrap();
 
-    let nread = read(&data_socket, &mut buffer).unwrap();
+    let nread = recv(&data_socket, &mut buffer, RecvFlags::empty()).unwrap();
     assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "goodnight, moon");
 }
 
 #[test]
 fn test_v6() {
+    #[cfg(windows)]
+    rsix::net::wsa_startup().unwrap();
+
     let ready = Arc::new((Mutex::new(0_u16), Condvar::new()));
     let ready_clone = Arc::clone(&ready);
 
@@ -92,4 +94,7 @@ fn test_v6() {
         .unwrap();
     client.join().unwrap();
     server.join().unwrap();
+
+    #[cfg(windows)]
+    rsix::net::wsa_cleanup().unwrap();
 }

@@ -1,6 +1,9 @@
+#[cfg(not(windows))]
 use rsix::io;
+#[cfg(not(windows))]
 use rsix::process::*;
 
+#[cfg(not(windows))]
 fn main() -> io::Result<()> {
     println!("Pid: {}", getpid().as_raw());
     println!("Uid: {}", getuid().as_raw());
@@ -83,4 +86,9 @@ fn main() -> io::Result<()> {
     #[cfg(any(target_os = "android", target_os = "linux"))]
     println!("Execfn: {:?}", linux_execfn());
     Ok(())
+}
+
+#[cfg(windows)]
+fn main() {
+    unimplemented!()
 }

@@ -1,21 +1,30 @@
 // There are a lot of filesystem and network system calls, so they're split
 // out into separate files.
+#[cfg(not(windows))]
 pub(crate) use super::fs::syscalls::*;
+#[cfg(not(windows))]
 pub(crate) use super::io::syscalls::*;
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) use super::net::syscalls::*;
+#[cfg(not(windows))]
 pub(crate) use super::process::syscalls::*;
+#[cfg(not(windows))]
 pub(crate) use super::time::syscalls::*;
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
-use super::conv::nonnegative_ret;
+#[cfg(target_os = "linux")]
 use super::conv::ret_ssize_t;
+#[cfg(windows)]
+use super::conv::{borrowed_fd, ret};
+#[cfg(windows)]
+use super::net::libc;
 #[cfg(target_os = "linux")]
 use super::rand::GetRandomFlags;
+#[cfg(any(windows, target_os = "linux"))]
 use crate::io;
-#[cfg(not(target_os = "wasi"))]
+#[cfg(windows)]
+use crate::io::BorrowedFd;
+#[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::process::Pid;
-#[cfg(any(target_os = "ios", target_os = "macos"))]
-use std::ffi::CString;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
@@ -42,5 +51,13 @@ pub(crate) fn gettid() -> Pid {
     unsafe {
         let tid: i32 = libc::gettid();
         Pid::from_raw(tid)
+    }
+}
+
+#[cfg(windows)]
+pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    unsafe {
+        let mut data = value as libc::c_uint;
+        ret(libc::ioctl(borrowed_fd(fd), libc::FIONBIO, &mut data))
     }
 }

@@ -1,6 +1,7 @@
 //! Automatically enable "large file" support features.
 
 #[cfg(not(any(
+    windows,
     target_os = "android",
     target_os = "linux",
     target_os = "emscripten",
@@ -22,6 +23,7 @@ pub(super) use libc::{
 };
 
 #[cfg(not(any(
+    windows,
     target_os = "android",
     target_os = "linux",
     target_os = "emscripten",
@@ -31,6 +33,7 @@ pub(super) use libc::{
 pub(super) use libc::mmap as libc_mmap;
 
 #[cfg(not(any(
+    windows,
     target_os = "android",
     target_os = "linux",
     target_os = "emscripten",
@@ -42,6 +45,7 @@ pub(super) use libc::mmap as libc_mmap;
 pub(super) use libc::{rlimit as libc_rlimit, RLIM_INFINITY as LIBC_RLIM_INFINITY};
 
 #[cfg(not(any(
+    windows,
     target_os = "android",
     target_os = "fuchsia",
     target_os = "emscripten",
@@ -69,6 +73,7 @@ pub(super) const LIBC_RLIM_INFINITY: u64 = !0u64;
 pub(super) use libc::{getrlimit64 as libc_getrlimit, mmap64 as libc_mmap};
 
 #[cfg(not(any(
+    windows,
     target_os = "android",
     target_os = "linux",
     target_os = "emscripten",
@@ -89,6 +94,7 @@ pub(super) use libc::fallocate as libc_fallocate;
 #[cfg(any(target_os = "android", target_os = "linux",))]
 pub(super) use libc::fallocate64 as libc_fallocate;
 #[cfg(not(any(
+    windows,
     target_os = "android",
     target_os = "emscripten",
     target_os = "ios",
@@ -108,7 +114,12 @@ pub(super) use libc::posix_fadvise as libc_posix_fadvise;
 ))]
 pub(super) use libc::posix_fadvise64 as libc_posix_fadvise;
 
-#[cfg(all(not(any(target_os = "android", target_os = "linux", target_os = "emscripten"))))]
+#[cfg(all(not(any(
+    windows,
+    target_os = "android",
+    target_os = "linux",
+    target_os = "emscripten"
+))))]
 pub(super) use libc::{pread as libc_pread, pwrite as libc_pwrite};
 #[cfg(any(target_os = "android", target_os = "linux", target_os = "emscripten"))]
 pub(super) use libc::{
@@ -116,6 +127,7 @@ pub(super) use libc::{
     pwritev64 as libc_pwritev,
 };
 #[cfg(not(any(
+    windows,
     target_os = "android",
     target_os = "emscripten",
     target_os = "ios",
@@ -149,6 +161,7 @@ pub(super) use libc::{preadv64v2 as libc_preadv2, pwritev64v2 as libc_pwritev2};
 pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
 
 #[cfg(not(any(
+    windows,
     target_os = "android",
     target_os = "linux",
     target_os = "emscripten",
@@ -159,6 +172,7 @@ pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
 )))]
 pub(super) use libc::fstatfs as libc_fstatfs;
 #[cfg(not(any(
+    windows,
     target_os = "android",
     target_os = "fuchsia",
     target_os = "ios",
