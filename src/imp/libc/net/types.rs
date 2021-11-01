@@ -1,5 +1,4 @@
 use bitflags::bitflags;
-use libc::c_int;
 
 /// A type for holding raw integer socket types.
 #[doc(hidden)]
@@ -459,7 +458,7 @@ bitflags! {
     ///
     /// [`accept_with`]: crate::net::accept_with
     /// [`acceptfrom_with`]: crate::net::acceptfrom_with
-    pub struct AcceptFlags: c_int {
+    pub struct AcceptFlags: libc::c_int {
         /// `SOCK_NONBLOCK`
         #[cfg(not(any(target_os = "ios", target_os = "macos")))]
         const NONBLOCK = libc::SOCK_NONBLOCK;
@@ -474,7 +473,7 @@ bitflags! {
     /// `SOCK_*` constants for [`socket`].
     ///
     /// [`socket`]: crate::net::socket
-    pub struct SocketFlags: c_int {
+    pub struct SocketFlags: libc::c_int {
         /// `SOCK_NONBLOCK`
         #[cfg(not(any(target_os = "ios", target_os = "macos")))]
         const NONBLOCK = libc::SOCK_NONBLOCK;

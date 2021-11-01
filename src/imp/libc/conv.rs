@@ -4,31 +4,30 @@ use super::offset::libc_off_t;
 use crate::io;
 use crate::io::{AsRawFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
 use io_lifetimes::{BorrowedFd, FromFd, IntoFd};
-use libc::{c_char, c_int, c_long, ssize_t};
 use std::ffi::CStr;
 
 #[inline]
-pub(super) fn c_str(c: &CStr) -> *const c_char {
-    c.as_ptr().cast::<c_char>()
+pub(super) fn c_str(c: &CStr) -> *const libc::c_char {
+    c.as_ptr().cast::<libc::c_char>()
 }
 
 #[inline]
-pub(super) fn no_fd() -> c_int {
+pub(super) fn no_fd() -> libc::c_int {
     -1
 }
 
 #[inline]
-pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> c_int {
-    fd.as_raw_fd() as c_int
+pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> libc::c_int {
+    fd.as_raw_fd() as libc::c_int
 }
 
 #[inline]
-pub(super) fn owned_fd(fd: OwnedFd) -> c_int {
-    fd.into_fd().into_raw_fd() as c_int
+pub(super) fn owned_fd(fd: OwnedFd) -> libc::c_int {
+    fd.into_fd().into_raw_fd() as libc::c_int
 }
 
 #[inline]
-pub(super) fn ret(raw: c_int) -> io::Result<()> {
+pub(super) fn ret(raw: libc::c_int) -> io::Result<()> {
     if raw == 0 {
         Ok(())
     } else {
@@ -37,7 +36,7 @@ pub(super) fn ret(raw: c_int) -> io::Result<()> {
 }
 
 #[inline]
-pub(super) fn syscall_ret(raw: c_long) -> io::Result<()> {
+pub(super) fn syscall_ret(raw: libc::c_long) -> io::Result<()> {
     if raw == 0 {
         Ok(())
     } else {
@@ -46,7 +45,7 @@ pub(super) fn syscall_ret(raw: c_long) -> io::Result<()> {
 }
 
 #[inline]
-pub(super) fn nonnegative_ret(raw: c_int) -> io::Result<()> {
+pub(super) fn nonnegative_ret(raw: libc::c_int) -> io::Result<()> {
     if raw >= 0 {
         Ok(())
     } else {
@@ -55,12 +54,12 @@ pub(super) fn nonnegative_ret(raw: c_int) -> io::Result<()> {
 }
 
 #[inline]
-pub(super) unsafe fn ret_infallible(raw: c_int) {
+pub(super) unsafe fn ret_infallible(raw: libc::c_int) {
     debug_assert_eq!(raw, 0);
 }
 
 #[inline]
-pub(super) fn ret_c_int(raw: c_int) -> io::Result<c_int> {
+pub(super) fn ret_c_int(raw: libc::c_int) -> io::Result<libc::c_int> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
@@ -69,7 +68,7 @@ pub(super) fn ret_c_int(raw: c_int) -> io::Result<c_int> {
 }
 
 #[inline]
-pub(super) fn ret_u32(raw: c_int) -> io::Result<u32> {
+pub(super) fn ret_u32(raw: libc::c_int) -> io::Result<u32> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
@@ -78,7 +77,7 @@ pub(super) fn ret_u32(raw: c_int) -> io::Result<u32> {
 }
 
 #[inline]
-pub(super) fn ret_ssize_t(raw: ssize_t) -> io::Result<ssize_t> {
+pub(super) fn ret_ssize_t(raw: libc::ssize_t) -> io::Result<libc::ssize_t> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
@@ -87,24 +86,24 @@ pub(super) fn ret_ssize_t(raw: ssize_t) -> io::Result<ssize_t> {
 }
 
 #[inline]
-pub(super) fn syscall_ret_ssize_t(raw: c_long) -> io::Result<ssize_t> {
+pub(super) fn syscall_ret_ssize_t(raw: libc::c_long) -> io::Result<libc::ssize_t> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
-        Ok(raw as ssize_t)
+        Ok(raw as libc::ssize_t)
     }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
-pub(super) fn syscall_ret_u32(raw: c_long) -> io::Result<u32> {
+pub(super) fn syscall_ret_u32(raw: libc::c_long) -> io::Result<u32> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
         let r32 = raw as u32;
 
         // Converting `raw` to `u32` should be lossless.
-        debug_assert_eq!(r32 as c_long, raw);
+        debug_assert_eq!(r32 as libc::c_long, raw);
 
         Ok(r32)
     }
@@ -126,7 +125,7 @@ pub(super) fn ret_off_t(raw: libc_off_t) -> io::Result<libc_off_t> {
 /// The caller must ensure that this is the return value of a libc function
 /// which returns an owned file descriptor.
 #[inline]
-pub(super) unsafe fn ret_owned_fd(raw: c_int) -> io::Result<OwnedFd> {
+pub(super) unsafe fn ret_owned_fd(raw: libc::c_int) -> io::Result<OwnedFd> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
@@ -137,7 +136,7 @@ pub(super) unsafe fn ret_owned_fd(raw: c_int) -> io::Result<OwnedFd> {
 }
 
 #[inline]
-pub(super) fn ret_discarded_fd(raw: c_int) -> io::Result<()> {
+pub(super) fn ret_discarded_fd(raw: libc::c_int) -> io::Result<()> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
@@ -146,7 +145,7 @@ pub(super) fn ret_discarded_fd(raw: c_int) -> io::Result<()> {
 }
 
 #[inline]
-pub(super) fn ret_discarded_char_ptr(raw: *mut c_char) -> io::Result<()> {
+pub(super) fn ret_discarded_char_ptr(raw: *mut libc::c_char) -> io::Result<()> {
     if raw.is_null() {
         Err(io::Error::last_os_error())
     } else {
@@ -161,7 +160,7 @@ pub(super) fn ret_discarded_char_ptr(raw: *mut c_char) -> io::Result<()> {
 /// The caller must ensure that this is the return value of a `syscall` call
 /// which returns an owned file descriptor.
 #[inline]
-pub(super) unsafe fn syscall_ret_owned_fd(raw: c_long) -> io::Result<OwnedFd> {
+pub(super) unsafe fn syscall_ret_owned_fd(raw: libc::c_long) -> io::Result<OwnedFd> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {

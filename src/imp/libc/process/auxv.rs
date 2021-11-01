@@ -1,6 +1,4 @@
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use libc::c_char;
-#[cfg(any(target_os = "android", target_os = "linux"))]
 use std::ffi::CStr;
 
 #[inline]
@@ -21,5 +19,5 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub(crate) fn linux_execfn() -> &'static CStr {
-    unsafe { CStr::from_ptr(libc::getauxval(libc::AT_EXECFN) as *const c_char) }
+    unsafe { CStr::from_ptr(libc::getauxval(libc::AT_EXECFN) as *const libc::c_char) }
 }

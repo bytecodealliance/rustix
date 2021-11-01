@@ -1,5 +1,4 @@
 use bitflags::bitflags;
-use libc::c_int;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
@@ -7,7 +6,7 @@ bitflags! {
     ///
     /// [`preadv2`]: crate::io::preadv2
     /// [`pwritev2`]: crate::io::pwritev
-    pub struct ReadWriteFlags: c_int {
+    pub struct ReadWriteFlags: libc::c_int {
         /// `RWF_DSYNC`
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
         const DSYNC = libc::RWF_DSYNC;
@@ -31,7 +30,7 @@ bitflags! {
     /// `O_*` constants for use with [`dup2`].
     ///
     /// [`dup2`]: crate::io::dup2
-    pub struct DupFlags: c_int {
+    pub struct DupFlags: libc::c_int {
         /// `O_CLOEXEC`
         #[cfg(not(any(target_os = "android", target_os = "ios", target_os = "macos", target_os = "redox")))] // Android 5.0 has dup3, but libc doesn't have bindings
         const CLOEXEC = libc::O_CLOEXEC;
@@ -45,7 +44,7 @@ bitflags! {
     /// For `PROT_NONE`, use `ProtFlags::empty()`.
     ///
     /// [`mmap`]: crate::io::mmap
-    pub struct ProtFlags: c_int {
+    pub struct ProtFlags: libc::c_int {
         /// `PROT_READ`
         const READ = libc::PROT_READ;
         /// `PROT_WRITE`
@@ -62,7 +61,7 @@ bitflags! {
     /// For `PROT_NONE`, use `MprotectFlags::empty()`.
     ///
     /// [`mprotect`]: crate::io::mprotect
-    pub struct MprotectFlags: c_int {
+    pub struct MprotectFlags: libc::c_int {
         /// `PROT_READ`
         const READ = libc::PROT_READ;
         /// `PROT_WRITE`
@@ -86,7 +85,7 @@ bitflags! {
     ///
     /// [`mmap`]: crate::io::mmap
     /// [`mmap_anonymous`]: crates::io::mmap_anonymous
-    pub struct MapFlags: c_int {
+    pub struct MapFlags: libc::c_int {
         /// `MAP_SHARED`
         const SHARED = libc::MAP_SHARED;
         /// `MAP_SHARED_VALIDATE`
@@ -282,7 +281,7 @@ bitflags! {
     /// The `O_*` flags accepted by [`userfaultfd`].
     ///
     /// [`userfaultfd`]: crate::io::userfaultfd
-    pub struct UserfaultfdFlags: c_int {
+    pub struct UserfaultfdFlags: libc::c_int {
         /// `O_CLOEXEC`
         const CLOEXEC = libc::O_CLOEXEC;
         /// `O_NONBLOCK`

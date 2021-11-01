@@ -1,6 +1,5 @@
 use super::{SocketAddr, SocketAddrUnix};
 use crate::{as_ptr, io};
-use libc::sockaddr_storage;
 use std::ffi::CStr;
 use std::mem::size_of;
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
@@ -35,7 +34,7 @@ struct sockaddr_header {
 }
 
 #[inline]
-unsafe fn read_ss_family(storage: *const sockaddr_storage) -> u16 {
+unsafe fn read_ss_family(storage: *const libc::sockaddr_storage) -> u16 {
     // Assert that we know the layout of `sockaddr`.
     let _ = libc::sockaddr {
         #[cfg(any(
@@ -69,7 +68,7 @@ unsafe fn read_ss_family(storage: *const sockaddr_storage) -> u16 {
 }
 
 pub(crate) unsafe fn read_sockaddr(
-    storage: *const sockaddr_storage,
+    storage: *const libc::sockaddr_storage,
     len: usize,
 ) -> io::Result<SocketAddr> {
     let offsetof_sun_path = super::offsetof_sun_path();
@@ -138,7 +137,10 @@ pub(crate) unsafe fn read_sockaddr(
     }
 }
 
-pub(crate) unsafe fn read_sockaddr_os(storage: *const sockaddr_storage, len: usize) -> SocketAddr {
+pub(crate) unsafe fn read_sockaddr_os(
+    storage: *const libc::sockaddr_storage,
+    len: usize,
+) -> SocketAddr {
     let z = libc::sockaddr_un {
         #[cfg(any(
             target_os = "netbsd",

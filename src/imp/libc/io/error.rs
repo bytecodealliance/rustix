@@ -4,7 +4,6 @@
 //! `errno` value.
 
 use errno::errno;
-use libc::c_int;
 
 /// The error type for rsix APIs.
 ///
@@ -12,7 +11,7 @@ use libc::c_int;
 /// and no extra error value.
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Hash, Copy, Clone)]
-pub struct Error(pub(crate) c_int);
+pub struct Error(pub(crate) libc::c_int);
 
 impl Error {
     pub const ACCES: Self = Self(libc::EACCES);
