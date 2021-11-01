@@ -1,12 +1,27 @@
-#[cfg(any(target_os = "emscripten", target_os = "redox", target_os = "wasi"))]
+#[cfg(any(
+    windows,
+    target_os = "emscripten",
+    target_os = "redox",
+    target_os = "wasi"
+))]
 fn main() {
     unimplemented!()
 }
 
-#[cfg(not(any(target_os = "emscripten", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    windows,
+    target_os = "emscripten",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 use criterion::{criterion_group, criterion_main};
 
-#[cfg(not(any(target_os = "emscripten", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    windows,
+    target_os = "emscripten",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 mod suite {
     use criterion::Criterion;
 
@@ -116,7 +131,12 @@ mod suite {
     }
 }
 
-#[cfg(not(any(target_os = "emscripten", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    windows,
+    target_os = "emscripten",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 criterion_group!(
     benches,
     suite::simple_statat,
@@ -128,5 +148,10 @@ criterion_group!(
     suite::simple_getpid,
     suite::simple_getpid_libc
 );
-#[cfg(not(any(target_os = "emscripten", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    windows,
+    target_os = "emscripten",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 criterion_main!(benches);

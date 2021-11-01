@@ -1,9 +1,15 @@
 #![allow(dead_code)]
 
+#[cfg(windows)]
+use super::net::io_lifetimes;
+#[cfg(not(windows))]
 use super::offset::libc_off_t;
 use crate::io;
-use crate::io::{AsRawFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
-use io_lifetimes::{BorrowedFd, FromFd, IntoFd};
+use crate::io::{
+    AsRawFd, BorrowedFd, FromFd, FromRawFd, IntoFd, IntoRawFd, LibcFd, OwnedFd, RawFd,
+};
+#[cfg(windows)]
+use std::convert::TryInto;
 use std::ffi::CStr;
 
 #[inline]
@@ -11,19 +17,20 @@ pub(super) fn c_str(c: &CStr) -> *const libc::c_char {
     c.as_ptr().cast::<libc::c_char>()
 }
 
+#[cfg(not(windows))]
 #[inline]
-pub(super) fn no_fd() -> libc::c_int {
+pub(super) fn no_fd() -> LibcFd {
     -1
 }
 
 #[inline]
-pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> libc::c_int {
-    fd.as_raw_fd() as libc::c_int
+pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> LibcFd {
+    fd.as_raw_fd() as LibcFd
 }
 
 #[inline]
-pub(super) fn owned_fd(fd: OwnedFd) -> libc::c_int {
-    fd.into_fd().into_raw_fd() as libc::c_int
+pub(super) fn owned_fd(fd: OwnedFd) -> LibcFd {
+    fd.into_fd().into_raw_fd() as LibcFd
 }
 
 #[inline]
@@ -109,6 +116,7 @@ pub(super) fn syscall_ret_u32(raw: libc::c_long) -> io::Result<u32> {
     }
 }
 
+#[cfg(not(windows))]
 #[inline]
 pub(super) fn ret_off_t(raw: libc_off_t) -> io::Result<libc_off_t> {
     if raw == -1 {
@@ -125,8 +133,8 @@ pub(super) fn ret_off_t(raw: libc_off_t) -> io::Result<libc_off_t> {
 /// The caller must ensure that this is the return value of a libc function
 /// which returns an owned file descriptor.
 #[inline]
-pub(super) unsafe fn ret_owned_fd(raw: libc::c_int) -> io::Result<OwnedFd> {
-    if raw == -1 {
+pub(super) unsafe fn ret_owned_fd(raw: LibcFd) -> io::Result<OwnedFd> {
+    if raw == !0 {
         Err(io::Error::last_os_error())
     } else {
         Ok(OwnedFd::from_fd(io_lifetimes::OwnedFd::from_raw_fd(
@@ -136,8 +144,8 @@ pub(super) unsafe fn ret_owned_fd(raw: libc::c_int) -> io::Result<OwnedFd> {
 }
 
 #[inline]
-pub(super) fn ret_discarded_fd(raw: libc::c_int) -> io::Result<()> {
-    if raw == -1 {
+pub(super) fn ret_discarded_fd(raw: LibcFd) -> io::Result<()> {
+    if raw == !0 {
         Err(io::Error::last_os_error())
     } else {
         Ok(())
@@ -159,6 +167,7 @@ pub(super) fn ret_discarded_char_ptr(raw: *mut libc::c_char) -> io::Result<()> {
 ///
 /// The caller must ensure that this is the return value of a `syscall` call
 /// which returns an owned file descriptor.
+#[cfg(not(windows))]
 #[inline]
 pub(super) unsafe fn syscall_ret_owned_fd(raw: libc::c_long) -> io::Result<OwnedFd> {
     if raw == -1 {
@@ -168,4 +177,35 @@ pub(super) unsafe fn syscall_ret_owned_fd(raw: libc::c_long) -> io::Result<Owned
             raw as RawFd,
         )))
     }
+}
+
+/// Convert the buffer-length argument value of a `send` or `recv` call.
+#[cfg(not(windows))]
+#[inline]
+pub(super) fn send_recv_len(len: usize) -> usize {
+    len
+}
+
+/// Convert the buffer-length argument value of a `send` or `recv` call.
+#[cfg(windows)]
+#[inline]
+pub(super) fn send_recv_len(len: usize) -> i32 {
+    // On Windows, the length argument has type `i32`; saturate the length,
+    // since `send` and `recv` are allowed to send and recv less data than
+    // requested.
+    len.try_into().unwrap_or(i32::MAX)
+}
+
+/// Convert the return value of a `send` or `recv` call.
+#[cfg(not(windows))]
+#[inline]
+pub(super) fn ret_send_recv(len: isize) -> io::Result<libc::ssize_t> {
+    ret_ssize_t(len)
+}
+
+/// Convert the return value of a `send` or `recv` call.
+#[cfg(windows)]
+#[inline]
+pub(super) fn ret_send_recv(len: i32) -> io::Result<libc::ssize_t> {
+    ret_ssize_t(len as isize)
 }

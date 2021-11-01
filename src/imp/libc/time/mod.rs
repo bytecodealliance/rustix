@@ -1,5 +1,6 @@
 mod types;
 
+#[cfg(not(windows))]
 pub(crate) mod syscalls;
 
 #[cfg(not(target_os = "wasi"))]

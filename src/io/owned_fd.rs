@@ -6,10 +6,9 @@
 //! file descriptor and close it ourselves.
 #![allow(unsafe_code)]
 
-use crate::io::{close, AsRawFd, FromRawFd, IntoRawFd, RawFd};
-use io_lifetimes::{AsFd, BorrowedFd};
+use crate::io::{close, AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(not(io_lifetimes_use_std))]
-use io_lifetimes::{FromFd, IntoFd};
+use crate::io::{FromFd, IntoFd};
 use std::fmt;
 use std::mem::{forget, ManuallyDrop};
 

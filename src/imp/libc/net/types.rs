@@ -1,3 +1,5 @@
+#[cfg(windows)]
+use super::libc;
 use bitflags::bitflags;
 
 /// A type for holding raw integer socket types.
@@ -60,6 +62,7 @@ impl AddressFamily {
     pub const INET6: Self = Self(libc::AF_INET6 as _);
     /// `AF_NETLINK`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -72,6 +75,7 @@ impl AddressFamily {
     pub const UNIX: Self = Self(libc::AF_UNIX as _);
     /// `AF_AX25`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -85,6 +89,7 @@ impl AddressFamily {
     pub const APPLETALK: Self = Self(libc::AF_APPLETALK as _);
     /// `AF_NETROM`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -94,6 +99,7 @@ impl AddressFamily {
     pub const NETROM: Self = Self(libc::AF_NETROM as _);
     /// `AF_BRIDGE`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -103,6 +109,7 @@ impl AddressFamily {
     pub const BRIDGE: Self = Self(libc::AF_BRIDGE as _);
     /// `AF_ATMPVC`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -112,6 +119,7 @@ impl AddressFamily {
     pub const ATMPVC: Self = Self(libc::AF_ATMPVC as _);
     /// `AF_X25`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -121,6 +129,7 @@ impl AddressFamily {
     pub const X25: Self = Self(libc::AF_X25 as _);
     /// `AF_ROSE`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -133,6 +142,7 @@ impl AddressFamily {
     pub const DECnet: Self = Self(libc::AF_DECnet as _);
     /// `AF_NETBEUI`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -142,6 +152,7 @@ impl AddressFamily {
     pub const NETBEUI: Self = Self(libc::AF_NETBEUI as _);
     /// `AF_SECURITY`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -151,6 +162,7 @@ impl AddressFamily {
     pub const SECURITY: Self = Self(libc::AF_SECURITY as _);
     /// `AF_KEY`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -160,6 +172,7 @@ impl AddressFamily {
     pub const KEY: Self = Self(libc::AF_KEY as _);
     /// `AF_PACKET`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -169,6 +182,7 @@ impl AddressFamily {
     pub const PACKET: Self = Self(libc::AF_PACKET as _);
     /// `AF_ASH`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -178,6 +192,7 @@ impl AddressFamily {
     pub const ASH: Self = Self(libc::AF_ASH as _);
     /// `AF_ECONET`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -187,6 +202,7 @@ impl AddressFamily {
     pub const ECONET: Self = Self(libc::AF_ECONET as _);
     /// `AF_ATMSVC`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -196,6 +212,7 @@ impl AddressFamily {
     pub const ATMSVC: Self = Self(libc::AF_ATMSVC as _);
     /// `AF_RDS`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -216,6 +233,7 @@ impl AddressFamily {
     pub const IRDA: Self = Self(libc::AF_IRDA as _);
     /// `AF_PPPOX`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -225,6 +243,7 @@ impl AddressFamily {
     pub const PPPOX: Self = Self(libc::AF_PPPOX as _);
     /// `AF_WANPIPE`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -234,6 +253,7 @@ impl AddressFamily {
     pub const WANPIPE: Self = Self(libc::AF_WANPIPE as _);
     /// `AF_LLC`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -243,6 +263,7 @@ impl AddressFamily {
     pub const LLC: Self = Self(libc::AF_LLC as _);
     /// `AF_CAN`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -252,6 +273,7 @@ impl AddressFamily {
     pub const CAN: Self = Self(libc::AF_CAN as _);
     /// `AF_TIPC`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -260,10 +282,11 @@ impl AddressFamily {
     )))]
     pub const TIPC: Self = Self(libc::AF_TIPC as _);
     /// `AF_BLUETOOTH`
-    #[cfg(not(any(target_os = "ios", target_os = "macos",)))]
+    #[cfg(not(any(windows, target_os = "ios", target_os = "macos",)))]
     pub const BLUETOOTH: Self = Self(libc::AF_BLUETOOTH as _);
     /// `AF_IUCV`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -273,6 +296,7 @@ impl AddressFamily {
     pub const IUCV: Self = Self(libc::AF_IUCV as _);
     /// `AF_RXRPC`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -281,9 +305,11 @@ impl AddressFamily {
     )))]
     pub const RXRPC: Self = Self(libc::AF_RXRPC as _);
     /// `AF_ISDN`
+    #[cfg(not(windows))]
     pub const ISDN: Self = Self(libc::AF_ISDN as _);
     /// `AF_PHONET`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -293,6 +319,7 @@ impl AddressFamily {
     pub const PHONET: Self = Self(libc::AF_PHONET as _);
     /// `AF_IEEE802154`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -332,6 +359,7 @@ impl Protocol {
     /// `IPPROTO_IGMP`
     pub const IGMP: Self = Self(libc::IPPROTO_IGMP as _);
     /// `IPPROTO_IPIP`
+    #[cfg(not(windows))]
     pub const IPIP: Self = Self(libc::IPPROTO_IPIP as _);
     /// `IPPROTO_TCP`
     pub const TCP: Self = Self(libc::IPPROTO_TCP as _);
@@ -344,25 +372,29 @@ impl Protocol {
     /// `IPPROTO_IDP`
     pub const IDP: Self = Self(libc::IPPROTO_IDP as _);
     /// `IPPROTO_TP`
+    #[cfg(not(windows))]
     pub const TP: Self = Self(libc::IPPROTO_TP as _);
     /// `IPPROTO_DCCP`
-    #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
+    #[cfg(not(any(windows, target_os = "ios", target_os = "macos", target_os = "openbsd")))]
     pub const DCCP: Self = Self(libc::IPPROTO_DCCP as _);
     /// `IPPROTO_IPV6`
     pub const IPV6: Self = Self(libc::IPPROTO_IPV6 as _);
     /// `IPPROTO_RSVP`
+    #[cfg(not(windows))]
     pub const RSVP: Self = Self(libc::IPPROTO_RSVP as _);
     /// `IPPROTO_GRE`
+    #[cfg(not(windows))]
     pub const GRE: Self = Self(libc::IPPROTO_GRE as _);
     /// `IPPROTO_ESP`
     pub const ESP: Self = Self(libc::IPPROTO_ESP as _);
     /// `IPPROTO_AH`
     pub const AH: Self = Self(libc::IPPROTO_AH as _);
     /// `IPPROTO_MTP`
-    #[cfg(not(any(target_os = "netbsd", target_os = "openbsd")))]
+    #[cfg(not(any(windows, target_os = "netbsd", target_os = "openbsd")))]
     pub const MTP: Self = Self(libc::IPPROTO_MTP as _);
     /// `IPPROTO_BEETPH`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -371,11 +403,13 @@ impl Protocol {
     )))]
     pub const BEETPH: Self = Self(libc::IPPROTO_BEETPH as _);
     /// `IPPROTO_ENCAP`
+    #[cfg(not(windows))]
     pub const ENCAP: Self = Self(libc::IPPROTO_ENCAP as _);
     /// `IPPROTO_PIM`
     pub const PIM: Self = Self(libc::IPPROTO_PIM as _);
     /// `IPPROTO_COMP`
     #[cfg(not(any(
+        windows,
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -388,6 +422,7 @@ impl Protocol {
     pub const SCTP: Self = Self(libc::IPPROTO_SCTP as _);
     /// `IPPROTO_UDPLITE`
     #[cfg(not(any(
+        windows,
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -395,12 +430,13 @@ impl Protocol {
     )))]
     pub const UDPLITE: Self = Self(libc::IPPROTO_UDPLITE as _);
     /// `IPPROTO_MPLS`
-    #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "netbsd")))]
+    #[cfg(not(any(windows, target_os = "ios", target_os = "macos", target_os = "netbsd")))]
     pub const MPLS: Self = Self(libc::IPPROTO_MPLS as _);
     /// `IPPROTO_RAW`
     pub const RAW: Self = Self(libc::IPPROTO_RAW as _);
     /// `IPPROTO_MPTCP`
     #[cfg(not(any(
+        windows,
         target_os = "android",
         target_os = "emscripten",
         target_os = "freebsd",
@@ -417,6 +453,7 @@ impl Protocol {
     pub const ICMPV6: Self = Self(libc::IPPROTO_ICMPV6 as _);
     /// `IPPROTO_MH`
     #[cfg(not(any(
+        windows,
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -460,11 +497,11 @@ bitflags! {
     /// [`acceptfrom_with`]: crate::net::acceptfrom_with
     pub struct AcceptFlags: libc::c_int {
         /// `SOCK_NONBLOCK`
-        #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+        #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
         const NONBLOCK = libc::SOCK_NONBLOCK;
 
         /// `SOCK_CLOEXEC`
-        #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+        #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
         const CLOEXEC = libc::SOCK_CLOEXEC;
     }
 }
@@ -475,11 +512,11 @@ bitflags! {
     /// [`socket`]: crate::net::socket
     pub struct SocketFlags: libc::c_int {
         /// `SOCK_NONBLOCK`
-        #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+        #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
         const NONBLOCK = libc::SOCK_NONBLOCK;
 
         /// `SOCK_CLOEXEC`
-        #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+        #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
         const CLOEXEC = libc::SOCK_CLOEXEC;
     }
 }

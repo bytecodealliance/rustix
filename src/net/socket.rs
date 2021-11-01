@@ -1,7 +1,10 @@
 use crate::imp;
-use crate::io::{self, OwnedFd};
-use crate::net::{SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
-use io_lifetimes::AsFd;
+#[cfg(windows)]
+use crate::io::AsSocketAsFd;
+use crate::io::{self, AsFd, OwnedFd};
+#[cfg(not(windows))]
+use crate::net::SocketAddrUnix;
+use crate::net::{SocketAddr, SocketAddrV4, SocketAddrV6};
 
 pub use imp::net::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 
@@ -97,6 +100,7 @@ pub fn bind_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
 #[inline]
 #[doc(alias = "bind")]
+#[cfg(not(windows))]
 pub fn bind_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     imp::syscalls::bind_unix(sockfd, addr)
@@ -145,6 +149,7 @@ pub fn connect_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> 
 /// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
 #[inline]
 #[doc(alias = "connect")]
+#[cfg(not(windows))]
 pub fn connect_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
     imp::syscalls::connect_unix(sockfd, addr)

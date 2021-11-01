@@ -1,18 +1,25 @@
 //! IPv4, IPv6, and Socket addresses.
 
+#[cfg(windows)]
+use super::libc;
 use super::{read_sockaddr, write_sockaddr, AddressFamily};
-use crate::{io, path};
+use crate::io;
+#[cfg(not(windows))]
+use crate::path;
+#[cfg(not(windows))]
 use std::ffi::{CStr, CString};
 use std::fmt;
 use std::net::{SocketAddrV4, SocketAddrV6};
 
 /// `struct sockaddr_un`
+#[cfg(not(windows))]
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[doc(alias = "sockaddr_un")]
 pub struct SocketAddrUnix {
     path: CString,
 }
 
+#[cfg(not(windows))]
 impl SocketAddrUnix {
     /// Construct a new Unix-domain address from a byte slice.
     /// filesystem path.
@@ -66,6 +73,7 @@ impl SocketAddrUnix {
     }
 }
 
+#[cfg(not(windows))]
 impl fmt::Debug for SocketAddrUnix {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.path.fmt(fmt)
@@ -82,6 +90,7 @@ pub enum SocketAddr {
     /// `struct sockaddr_in6`
     V6(SocketAddrV6),
     /// `struct sockaddr_un`
+    #[cfg(not(windows))]
     Unix(SocketAddrUnix),
 }
 
@@ -92,6 +101,7 @@ impl SocketAddr {
         match self {
             SocketAddr::V4(_) => AddressFamily::INET,
             SocketAddr::V6(_) => AddressFamily::INET6,
+            #[cfg(not(windows))]
             SocketAddr::Unix(_) => AddressFamily::UNIX,
         }
     }
@@ -125,6 +135,7 @@ impl fmt::Debug for SocketAddr {
         match self {
             SocketAddr::V4(v4) => v4.fmt(fmt),
             SocketAddr::V6(v6) => v6.fmt(fmt),
+            #[cfg(not(windows))]
             SocketAddr::Unix(unix) => unix.fmt(fmt),
         }
     }

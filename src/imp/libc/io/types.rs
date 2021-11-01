@@ -1,3 +1,4 @@
+#[cfg(not(target_os = "wasi"))]
 use bitflags::bitflags;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]

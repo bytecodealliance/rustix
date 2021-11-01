@@ -1,8 +1,12 @@
 //! `recv` and `send`, and variants
 
-use crate::net::{SocketAddr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
+use crate::io::AsFd;
+#[cfg(windows)]
+use crate::io::AsSocketAsFd;
+#[cfg(not(windows))]
+use crate::net::SocketAddrUnix;
+use crate::net::{SocketAddr, SocketAddrV4, SocketAddrV6};
 use crate::{imp, io};
-use io_lifetimes::AsFd;
 
 pub use imp::net::{RecvFlags, SendFlags};
 
@@ -106,6 +110,7 @@ pub fn sendto_v6<Fd: AsFd>(
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
 #[inline]
 #[doc(alias = "sendto")]
+#[cfg(not(windows))]
 pub fn sendto_unix<Fd: AsFd>(
     fd: &Fd,
     buf: &[u8],
