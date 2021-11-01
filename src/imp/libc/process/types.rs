@@ -1,5 +1,3 @@
-use libc::c_int;
-
 /// A command for use with [`membarrier`] and [`membarrier_cpu`].
 ///
 /// For `MEMBARRIER_CMD_QUERY`, see [`membarrier_query`].
@@ -43,27 +41,27 @@ pub enum MembarrierCommand {
 #[repr(i32)]
 pub enum Resource {
     /// `RLIMIT_CPU`
-    Cpu = libc::RLIMIT_CPU as c_int,
+    Cpu = libc::RLIMIT_CPU as libc::c_int,
     /// `RLIMIT_FSIZE`
-    Fsize = libc::RLIMIT_FSIZE as c_int,
+    Fsize = libc::RLIMIT_FSIZE as libc::c_int,
     /// `RLIMIT_DATA`
-    Data = libc::RLIMIT_DATA as c_int,
+    Data = libc::RLIMIT_DATA as libc::c_int,
     /// `RLIMIT_STACK`
-    Stack = libc::RLIMIT_STACK as c_int,
+    Stack = libc::RLIMIT_STACK as libc::c_int,
     /// `RLIMIT_CORE`
-    Core = libc::RLIMIT_CORE as c_int,
+    Core = libc::RLIMIT_CORE as libc::c_int,
     /// `RLIMIT_RSS`
     #[cfg(not(any(target_os = "ios", target_os = "macos")))]
-    Rss = libc::RLIMIT_RSS as c_int,
+    Rss = libc::RLIMIT_RSS as libc::c_int,
     /// `RLIMIT_NPROC`
-    Nproc = libc::RLIMIT_NPROC as c_int,
+    Nproc = libc::RLIMIT_NPROC as libc::c_int,
     /// `RLIMIT_NOFILE`
-    Nofile = libc::RLIMIT_NOFILE as c_int,
+    Nofile = libc::RLIMIT_NOFILE as libc::c_int,
     /// `RLIMIT_MEMLOCK`
-    Memlock = libc::RLIMIT_MEMLOCK as c_int,
+    Memlock = libc::RLIMIT_MEMLOCK as libc::c_int,
     /// `RLIMIT_AS`
     #[cfg(not(target_os = "openbsd"))]
-    As = libc::RLIMIT_AS as c_int,
+    As = libc::RLIMIT_AS as libc::c_int,
     /// `RLIMIT_LOCKS`
     #[cfg(not(any(
         target_os = "freebsd",
@@ -72,7 +70,7 @@ pub enum Resource {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    Locks = libc::RLIMIT_LOCKS as c_int,
+    Locks = libc::RLIMIT_LOCKS as libc::c_int,
     /// `RLIMIT_SIGPENDING`
     #[cfg(not(any(
         target_os = "freebsd",
@@ -81,7 +79,7 @@ pub enum Resource {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    Sigpending = libc::RLIMIT_SIGPENDING as c_int,
+    Sigpending = libc::RLIMIT_SIGPENDING as libc::c_int,
     /// `RLIMIT_MSGQUEUE`
     #[cfg(not(any(
         target_os = "freebsd",
@@ -90,7 +88,7 @@ pub enum Resource {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    Msgqueue = libc::RLIMIT_MSGQUEUE as c_int,
+    Msgqueue = libc::RLIMIT_MSGQUEUE as libc::c_int,
     /// `RLIMIT_NICE`
     #[cfg(not(any(
         target_os = "freebsd",
@@ -99,7 +97,7 @@ pub enum Resource {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    Nice = libc::RLIMIT_NICE as c_int,
+    Nice = libc::RLIMIT_NICE as libc::c_int,
     /// `RLIMIT_RTPRIO`
     #[cfg(not(any(
         target_os = "freebsd",
@@ -108,7 +106,7 @@ pub enum Resource {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    Rtprio = libc::RLIMIT_RTPRIO as c_int,
+    Rtprio = libc::RLIMIT_RTPRIO as libc::c_int,
     /// `RLIMIT_RTTIME`
     #[cfg(not(any(
         target_os = "emscripten",
@@ -119,7 +117,7 @@ pub enum Resource {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    Rttime = libc::RLIMIT_RTTIME as c_int,
+    Rttime = libc::RLIMIT_RTTIME as libc::c_int,
 }
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
@@ -129,10 +127,10 @@ impl Resource {
     pub const Rss: Self = Self::As;
 }
 
-pub const EXIT_SUCCESS: c_int = libc::EXIT_SUCCESS;
-pub const EXIT_FAILURE: c_int = libc::EXIT_FAILURE;
+pub const EXIT_SUCCESS: libc::c_int = libc::EXIT_SUCCESS;
+pub const EXIT_FAILURE: libc::c_int = libc::EXIT_FAILURE;
 #[cfg(not(target_os = "wasi"))]
-pub const EXIT_SIGNALED_SIGABRT: c_int = 128 + libc::SIGABRT;
+pub const EXIT_SIGNALED_SIGABRT: libc::c_int = 128 + libc::SIGABRT;
 
 #[cfg(not(target_os = "wasi"))]
 pub type RawPid = libc::pid_t;

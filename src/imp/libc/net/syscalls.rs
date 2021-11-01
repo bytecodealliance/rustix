@@ -10,7 +10,6 @@ use super::{
 use crate::as_ptr;
 use crate::io::{self, OwnedFd};
 use io_lifetimes::BorrowedFd;
-use libc::c_int;
 use std::convert::TryInto;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use std::ffi::CString;
@@ -137,8 +136,8 @@ pub(crate) fn socket(
 ) -> io::Result<OwnedFd> {
     unsafe {
         ret_owned_fd(libc::socket(
-            domain.0 as c_int,
-            type_.0 as c_int,
+            domain.0 as libc::c_int,
+            type_.0 as libc::c_int,
             protocol.0,
         ))
     }
@@ -153,8 +152,8 @@ pub(crate) fn socket_with(
 ) -> io::Result<OwnedFd> {
     unsafe {
         ret_owned_fd(libc::socket(
-            domain.0 as c_int,
-            type_.0 as c_int | flags.bits(),
+            domain.0 as libc::c_int,
+            type_.0 as libc::c_int | flags.bits(),
             protocol.0,
         ))
     }
@@ -227,7 +226,7 @@ pub(crate) fn connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io:
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn listen(sockfd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
+pub(crate) fn listen(sockfd: BorrowedFd<'_>, backlog: libc::c_int) -> io::Result<()> {
     unsafe { ret(libc::listen(borrowed_fd(sockfd), backlog)) }
 }
 
@@ -319,7 +318,7 @@ pub(crate) fn acceptfrom_with(
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn shutdown(sockfd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> {
-    unsafe { ret(libc::shutdown(borrowed_fd(sockfd), how as c_int)) }
+    unsafe { ret(libc::shutdown(borrowed_fd(sockfd), how as libc::c_int)) }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
@@ -360,10 +359,10 @@ pub(crate) fn socketpair(
     unsafe {
         let mut fds = MaybeUninit::<[OwnedFd; 2]>::uninit();
         ret(libc::socketpair(
-            domain.0 as c_int,
-            type_.0 as c_int | flags.bits(),
+            domain.0 as libc::c_int,
+            type_.0 as libc::c_int | flags.bits(),
             protocol.0,
-            fds.as_mut_ptr().cast::<c_int>(),
+            fds.as_mut_ptr().cast::<libc::c_int>(),
         ))?;
 
         let [fd0, fd1] = fds.assume_init();
@@ -385,7 +384,6 @@ pub(crate) mod sockopt {
     use crate::{as_mut_ptr, io};
     use io_lifetimes::BorrowedFd;
     use std::convert::TryInto;
-    use std::os::raw::{c_int, c_uint};
     use std::time::Duration;
 
     #[inline]
@@ -461,8 +459,8 @@ pub(crate) mod sockopt {
         linger: Option<Duration>,
     ) -> io::Result<()> {
         let linger = libc::linger {
-            l_onoff: linger.is_some() as c_int,
-            l_linger: linger.unwrap_or_default().as_secs() as c_int,
+            l_onoff: linger.is_some() as libc::c_int,
+            l_linger: linger.unwrap_or_default().as_secs() as libc::c_int,
         };
         setsockopt(fd, libc::SOL_SOCKET as _, libc::SO_LINGER, linger)
     }
@@ -749,8 +747,8 @@ pub(crate) mod sockopt {
 
     #[cfg(target_os = "android")]
     #[inline]
-    fn to_ipv6mr_interface(interface: u32) -> c_int {
-        interface as c_int
+    fn to_ipv6mr_interface(interface: u32) -> libc::c_int {
+        interface as libc::c_int
     }
 
     #[cfg(not(any(
@@ -761,12 +759,12 @@ pub(crate) mod sockopt {
         target_os = "netbsd"
     )))]
     #[inline]
-    fn to_ipv6mr_interface(interface: u32) -> c_uint {
-        interface as c_uint
+    fn to_ipv6mr_interface(interface: u32) -> libc::c_uint {
+        interface as libc::c_uint
     }
 
     #[inline]
-    fn from_bool(value: bool) -> c_uint {
-        value as c_uint
+    fn from_bool(value: bool) -> libc::c_uint {
+        value as libc::c_uint
     }
 }

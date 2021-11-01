@@ -71,7 +71,6 @@ use super::{Statx, StatxFlags};
 use crate::io::RawFd;
 use crate::io::{self, OwnedFd};
 use io_lifetimes::BorrowedFd;
-use libc::c_int;
 use std::convert::TryInto;
 use std::ffi::CStr;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
@@ -518,7 +517,7 @@ pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result<()> {
-    unsafe { ret(libc::flock(borrowed_fd(fd), operation as c_int)) }
+    unsafe { ret(libc::flock(borrowed_fd(fd), operation as libc::c_int)) }
 }
 
 pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {

@@ -14,13 +14,12 @@ use super::rand::GetRandomFlags;
 use crate::io;
 #[cfg(not(target_os = "wasi"))]
 use crate::process::Pid;
-use libc::c_int;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use std::ffi::CString;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
-pub(crate) fn exit_group(code: c_int) -> ! {
+pub(crate) fn exit_group(code: libc::c_int) -> ! {
     unsafe { libc::_exit(code) }
 }
 

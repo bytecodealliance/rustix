@@ -63,7 +63,6 @@ use crate::io;
 use crate::io::{AsRawFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd};
-use libc::c_int;
 use std::convert::TryInto;
 use std::fmt;
 use std::marker::PhantomData;
@@ -72,7 +71,7 @@ use std::ptr::{null, null_mut};
 
 bitflags! {
     /// `EPOLL_*` for use with [`Epoll::new`].
-    pub struct CreateFlags: c_int {
+    pub struct CreateFlags: libc::c_int {
         /// `EPOLL_CLOEXEC`
         const CLOEXEC = libc::EPOLL_CLOEXEC;
     }
@@ -371,7 +370,7 @@ impl<Context: self::Context> Epoll<Context> {
     pub fn wait<'context>(
         &'context self,
         event_list: &mut EventVec<'context, Context>,
-        timeout: c_int,
+        timeout: libc::c_int,
     ) -> io::Result<()> {
         // Safety: We're calling `epoll_wait` via FFI and we know how it
         // behaves.
