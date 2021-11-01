@@ -2,6 +2,8 @@ mod error;
 mod poll_fd;
 mod types;
 
+pub(crate) mod syscalls;
+
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub mod epoll;
 pub use error::Error;
