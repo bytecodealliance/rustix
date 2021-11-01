@@ -2,17 +2,15 @@
 // out into separate files.
 pub(crate) use super::fs::syscalls::*;
 pub(crate) use super::net::syscalls::*;
+pub(crate) use super::process::syscalls::*;
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use super::conv::nonnegative_ret;
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-use super::conv::ret_infallible;
-use super::conv::{
-    borrowed_fd, c_str, no_fd, ret, ret_c_int, ret_discarded_char_ptr, ret_discarded_fd,
-    ret_owned_fd, ret_ssize_t,
-};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_u32};
+use super::conv::syscall_ret_owned_fd;
+use super::conv::{
+    borrowed_fd, no_fd, ret, ret_c_int, ret_discarded_fd, ret_owned_fd, ret_ssize_t,
+};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::io::Advice as IoAdvice;
 #[cfg(target_os = "linux")]
@@ -24,36 +22,17 @@ use super::io::PollFd;
 use super::io::{EventfdFlags, UserfaultfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::io::{MlockFlags, ReadWriteFlags};
-#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
-use super::offset::libc_getrlimit;
 #[cfg(not(target_os = "wasi"))]
 use super::offset::libc_mmap;
 use super::offset::{libc_pread, libc_pwrite};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::offset::{libc_preadv2, libc_pwritev2};
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-use super::offset::{libc_rlimit, LIBC_RLIM_INFINITY};
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-use super::process::Resource;
-#[cfg(any(
-    target_os = "linux",
-    target_os = "android",
-    target_os = "fuchsia",
-    target_os = "dragonfly"
-))]
-use super::process::{RawCpuSet, CPU_SETSIZE};
-#[cfg(not(target_os = "wasi"))]
-use super::process::{RawPid, RawUname};
 #[cfg(target_os = "linux")]
 use super::rand::GetRandomFlags;
 use super::time::Timespec;
 use crate::io::{self, OwnedFd, RawFd};
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-use crate::process::Rlimit;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "wasi"))]
-use crate::process::{Gid, Pid, Uid, WaitOptions, WaitStatus};
+use crate::process::Pid;
 use errno::errno;
 use io_lifetimes::{AsFd, BorrowedFd};
 use libc::{c_int, c_void};
@@ -300,16 +279,6 @@ pub(crate) unsafe fn close(raw_fd: RawFd) {
     let _ = libc::close(raw_fd as c_int);
 }
 
-#[cfg(not(target_os = "wasi"))]
-pub(crate) fn chdir(path: &CStr) -> io::Result<()> {
-    unsafe { ret(libc::chdir(c_str(path))) }
-}
-
-#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
-pub(crate) fn fchdir(dirfd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { ret(libc::fchdir(borrowed_fd(dirfd))) }
-}
-
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn madvise(addr: *mut c_void, len: usize, advice: IoAdvice) -> io::Result<()> {
     // On Linux platforms, `MADV_DONTNEED` has the same value as
@@ -485,11 +454,6 @@ pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> i
 pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, _flags: DupFlags) -> io::Result<()> {
     // Android 5.0 has dup3, but libc doesn't have bindings
     dup2(fd, new)
-}
-
-#[cfg(not(target_os = "wasi"))]
-pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<()> {
-    unsafe { ret_discarded_char_ptr(libc::getcwd(buf.as_mut_ptr().cast::<_>(), buf.len())) }
 }
 
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
@@ -715,35 +679,6 @@ pub(crate) unsafe fn munlock(addr: *mut c_void, length: usize) -> io::Result<()>
     ret(libc::munlock(addr, length))
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
-pub(crate) fn membarrier_query() -> MembarrierQuery {
-    const MEMBARRIER_CMD_QUERY: u32 = 0;
-    unsafe {
-        match syscall_ret_u32(libc::syscall(libc::SYS_membarrier, MEMBARRIER_CMD_QUERY, 0)) {
-            Ok(query) => MembarrierQuery::from_bits_unchecked(query),
-            Err(_) => MembarrierQuery::empty(),
-        }
-    }
-}
-
-#[cfg(any(target_os = "android", target_os = "linux"))]
-pub(crate) fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
-    unsafe { syscall_ret(libc::syscall(libc::SYS_membarrier, cmd as u32, 0)) }
-}
-
-#[cfg(any(target_os = "android", target_os = "linux"))]
-pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<()> {
-    const MEMBARRIER_CMD_FLAG_CPU: u32 = 1;
-    unsafe {
-        syscall_ret(libc::syscall(
-            libc::SYS_membarrier,
-            cmd as u32,
-            MEMBARRIER_CMD_FLAG_CPU,
-            cpu.as_raw(),
-        ))
-    }
-}
-
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
@@ -920,66 +855,6 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-#[must_use]
-pub(crate) fn getuid() -> Uid {
-    unsafe {
-        let uid = libc::getuid();
-        Uid::from_raw(uid)
-    }
-}
-
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-#[must_use]
-pub(crate) fn geteuid() -> Uid {
-    unsafe {
-        let uid = libc::geteuid();
-        Uid::from_raw(uid)
-    }
-}
-
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-#[must_use]
-pub(crate) fn getgid() -> Gid {
-    unsafe {
-        let gid = libc::getgid();
-        Gid::from_raw(gid)
-    }
-}
-
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-#[must_use]
-pub(crate) fn getegid() -> Gid {
-    unsafe {
-        let gid = libc::getegid();
-        Gid::from_raw(gid)
-    }
-}
-
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-#[must_use]
-pub(crate) fn getpid() -> Pid {
-    unsafe {
-        let pid = libc::getpid();
-        Pid::from_raw(pid)
-    }
-}
-
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-#[must_use]
-pub(crate) fn getppid() -> Pid {
-    unsafe {
-        let pid: i32 = libc::getppid();
-        Pid::from_raw(pid)
-    }
-}
-
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 #[must_use]
@@ -987,248 +862,5 @@ pub(crate) fn gettid() -> Pid {
     unsafe {
         let tid: i32 = libc::gettid();
         Pid::from_raw(tid)
-    }
-}
-
-#[cfg(any(
-    target_os = "linux",
-    target_os = "android",
-    target_os = "fuchsia",
-    target_os = "dragonfly"
-))]
-#[allow(non_snake_case)]
-#[inline]
-pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) {
-    if cpu >= CPU_SETSIZE {
-        panic!(
-            "cpu out of bounds: the cpu max is {} but the cpu is {}",
-            CPU_SETSIZE, cpu
-        )
-    }
-    unsafe { libc::CPU_SET(cpu, cpuset) }
-}
-
-#[cfg(any(
-    target_os = "linux",
-    target_os = "android",
-    target_os = "fuchsia",
-    target_os = "dragonfly"
-))]
-#[allow(non_snake_case)]
-#[inline]
-pub(crate) fn CPU_ZERO(cpuset: &mut RawCpuSet) {
-    unsafe { libc::CPU_ZERO(cpuset) }
-}
-
-#[cfg(any(
-    target_os = "linux",
-    target_os = "android",
-    target_os = "fuchsia",
-    target_os = "dragonfly"
-))]
-#[allow(non_snake_case)]
-#[inline]
-pub(crate) fn CPU_CLR(cpu: usize, cpuset: &mut RawCpuSet) {
-    if cpu >= CPU_SETSIZE {
-        panic!(
-            "cpu out of bounds: the cpu max is {} but the cpu is {}",
-            CPU_SETSIZE, cpu
-        )
-    }
-    unsafe { libc::CPU_CLR(cpu, cpuset) }
-}
-
-#[cfg(any(
-    target_os = "linux",
-    target_os = "android",
-    target_os = "fuchsia",
-    target_os = "dragonfly"
-))]
-#[allow(non_snake_case)]
-#[inline]
-pub(crate) fn CPU_ISSET(cpu: usize, cpuset: &RawCpuSet) -> bool {
-    if cpu >= CPU_SETSIZE {
-        panic!(
-            "cpu out of bounds: the cpu max is {} but the cpu is {}",
-            CPU_SETSIZE, cpu
-        )
-    }
-    unsafe { libc::CPU_ISSET(cpu, cpuset) }
-}
-
-#[cfg(any(target_os = "linux"))]
-#[allow(non_snake_case)]
-#[inline]
-pub fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
-    unsafe { libc::CPU_COUNT(cpuset).try_into().unwrap() }
-}
-
-#[cfg(any(
-    target_os = "linux",
-    target_os = "android",
-    target_os = "fuchsia",
-    target_os = "dragonfly"
-))]
-#[inline]
-pub(crate) fn sched_getaffinity(pid: Pid, cpuset: &mut RawCpuSet) -> io::Result<()> {
-    unsafe {
-        ret(libc::sched_getaffinity(
-            pid.as_raw() as _,
-            std::mem::size_of::<RawCpuSet>(),
-            cpuset,
-        ))
-    }
-}
-
-#[cfg(any(
-    target_os = "linux",
-    target_os = "android",
-    target_os = "fuchsia",
-    target_os = "dragonfly"
-))]
-#[inline]
-pub(crate) fn sched_setaffinity(pid: Pid, cpuset: &RawCpuSet) -> io::Result<()> {
-    unsafe {
-        ret(libc::sched_setaffinity(
-            pid.as_raw() as _,
-            std::mem::size_of::<RawCpuSet>(),
-            cpuset,
-        ))
-    }
-}
-
-#[inline]
-pub(crate) fn sched_yield() {
-    unsafe {
-        let _ = libc::sched_yield();
-    }
-}
-
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-pub(crate) fn uname() -> RawUname {
-    let mut uname = MaybeUninit::<RawUname>::uninit();
-    unsafe {
-        ret(libc::uname(uname.as_mut_ptr())).unwrap();
-        uname.assume_init()
-    }
-}
-
-#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
-#[inline]
-pub(crate) fn nice(inc: i32) -> io::Result<i32> {
-    errno::set_errno(errno::Errno(0));
-    let r = unsafe { libc::nice(inc) };
-    if errno::errno().0 != 0 {
-        ret_c_int(r)
-    } else {
-        Ok(r)
-    }
-}
-
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-#[inline]
-pub(crate) fn getpriority_user(uid: Uid) -> io::Result<i32> {
-    errno::set_errno(errno::Errno(0));
-    let r = unsafe { libc::getpriority(libc::PRIO_USER, uid.as_raw() as _) };
-    if errno::errno().0 != 0 {
-        ret_c_int(r)
-    } else {
-        Ok(r)
-    }
-}
-
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-#[inline]
-pub(crate) fn getpriority_pgrp(pgid: Pid) -> io::Result<i32> {
-    errno::set_errno(errno::Errno(0));
-    let r = unsafe { libc::getpriority(libc::PRIO_PGRP, pgid.as_raw() as _) };
-    if errno::errno().0 != 0 {
-        ret_c_int(r)
-    } else {
-        Ok(r)
-    }
-}
-
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-#[inline]
-pub(crate) fn getpriority_process(pid: Pid) -> io::Result<i32> {
-    errno::set_errno(errno::Errno(0));
-    let r = unsafe { libc::getpriority(libc::PRIO_PROCESS, pid.as_raw() as _) };
-    if errno::errno().0 != 0 {
-        ret_c_int(r)
-    } else {
-        Ok(r)
-    }
-}
-
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-#[inline]
-pub(crate) fn setpriority_user(uid: Uid, priority: i32) -> io::Result<()> {
-    unsafe {
-        ret(libc::setpriority(
-            libc::PRIO_USER,
-            uid.as_raw() as _,
-            priority,
-        ))
-    }
-}
-
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-#[inline]
-pub(crate) fn setpriority_pgrp(pgid: Pid, priority: i32) -> io::Result<()> {
-    unsafe {
-        ret(libc::setpriority(
-            libc::PRIO_PGRP,
-            pgid.as_raw() as _,
-            priority,
-        ))
-    }
-}
-
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-#[inline]
-pub(crate) fn setpriority_process(pid: Pid, priority: i32) -> io::Result<()> {
-    unsafe {
-        ret(libc::setpriority(
-            libc::PRIO_PROCESS,
-            pid.as_raw() as _,
-            priority,
-        ))
-    }
-}
-
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-#[inline]
-pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
-    let mut result = MaybeUninit::<libc_rlimit>::uninit();
-    unsafe {
-        ret_infallible(libc_getrlimit(limit as _, result.as_mut_ptr()));
-        let result = result.assume_init();
-        let current = if result.rlim_cur == LIBC_RLIM_INFINITY {
-            None
-        } else {
-            result.rlim_cur.try_into().ok()
-        };
-        let maximum = if result.rlim_max == LIBC_RLIM_INFINITY {
-            None
-        } else {
-            result.rlim_max.try_into().ok()
-        };
-        Rlimit { current, maximum }
-    }
-}
-
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-pub fn waitpid(pid: RawPid, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
-    unsafe {
-        let mut status: c_int = 0;
-        let pid = ret_c_int(libc::waitpid(pid as _, &mut status, waitopts.bits() as _))?;
-        if pid == 0 {
-            Ok(None)
-        } else {
-            Ok(Some((Pid::from_raw(pid), WaitStatus::new(status as _))))
-        }
     }
 }
