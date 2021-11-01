@@ -2,6 +2,8 @@ mod dir;
 mod makedev;
 mod types;
 
+pub(crate) mod syscalls;
+
 pub use dir::{Dir, DirEntry};
 pub use makedev::{major, makedev, minor};
 pub use types::{
