@@ -1,3 +1,5 @@
+pub(crate) mod syscalls;
+
 #[cfg(not(target_os = "redox"))]
 mod dir;
 #[cfg(not(any(
