@@ -4,6 +4,7 @@ mod send_recv;
 mod types;
 mod write_sockaddr;
 
+pub(crate) mod syscalls;
 pub(crate) use read_sockaddr::{read_sockaddr, read_sockaddr_os};
 pub(crate) use write_sockaddr::{
     encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, write_sockaddr,
