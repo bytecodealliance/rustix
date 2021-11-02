@@ -84,3 +84,19 @@ pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     let fd = fd.as_fd();
     imp::syscalls::ioctl_tiocnxcl(fd)
 }
+
+/// `ioctl(fd, FIONREAD)`—Returns the number of bytes ready to be read.
+///
+/// The result of this function gets silently coerced into a C `int`
+/// by the OS, so it may contain a wrapped value.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/ioctl_tty.2.html
+#[cfg(not(any(windows, target_os = "redox")))]
+#[inline]
+pub fn ioctl_fionread<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
+    let fd = fd.as_fd();
+    imp::syscalls::ioctl_fionread(fd)
+}

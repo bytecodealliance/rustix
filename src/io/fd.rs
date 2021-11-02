@@ -12,22 +12,6 @@ use {io_lifetimes::BorrowedFd, std::ffi::CString};
 #[cfg(not(target_os = "wasi"))]
 pub use imp::io::DupFlags;
 
-/// `ioctl(fd, FIONREAD)`—Returns the number of bytes ready to be read.
-///
-/// The result of this function gets silently coerced into a C `int`
-/// by the OS, so it may contain a wrapped value.
-///
-/// # References
-///  - [Linux]
-///
-/// [Linux]: https://man7.org/linux/man-pages/man2/ioctl_tty.2.html
-#[cfg(not(target_os = "redox"))]
-#[inline]
-pub fn ioctl_fionread<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
-    let fd = fd.as_fd();
-    imp::syscalls::ioctl_fionread(fd)
-}
-
 /// `isatty(fd)`—Tests whether a file descriptor refers to a terminal.
 ///
 /// # References
