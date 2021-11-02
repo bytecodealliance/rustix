@@ -61,8 +61,6 @@ pub use error::{Error, Result};
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use eventfd::{eventfd, EventfdFlags};
 #[cfg(not(any(windows, target_os = "redox")))]
-pub use fd::ioctl_fionread;
-#[cfg(not(any(windows, target_os = "redox")))]
 pub use fd::is_read_write;
 #[cfg(not(windows))]
 pub use fd::isatty;
@@ -78,6 +76,8 @@ pub use imp::io::epoll;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use ioctl::ioctl_fioclex;
 pub use ioctl::ioctl_fionbio;
+#[cfg(not(any(windows, target_os = "redox")))]
+pub use ioctl::ioctl_fionread;
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use ioctl::{ioctl_tcgets, ioctl_tiocgwinsz};
 #[cfg(any(
