@@ -30,12 +30,14 @@ pub(crate) use {
 
 #[cfg(not(windows))]
 mod close;
+#[cfg(not(windows))]
+mod dup;
 mod error;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 mod eventfd;
-#[cfg(not(windows))]
-mod fd;
 mod ioctl;
+#[cfg(not(any(windows, target_os = "redox")))]
+mod is_read_write;
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 mod madvise;
 #[cfg(not(any(windows, target_os = "wasi")))]
@@ -52,25 +54,18 @@ mod procfs;
 mod read_write;
 #[cfg(not(windows))]
 mod stdio;
+#[cfg(not(windows))]
+mod tty;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 mod userfaultfd;
 
 #[cfg(not(windows))]
 pub use close::close;
+#[cfg(not(any(windows, target_os = "wasi")))]
+pub use dup::{dup, dup2, dup2_with, DupFlags};
 pub use error::{Error, Result};
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use eventfd::{eventfd, EventfdFlags};
-#[cfg(not(any(windows, target_os = "redox")))]
-pub use fd::is_read_write;
-#[cfg(not(windows))]
-pub use fd::isatty;
-#[cfg(any(
-    all(linux_raw, feature = "procfs"),
-    all(libc, not(any(windows, target_os = "fuchsia", target_os = "wasi")))
-))]
-pub use fd::ttyname;
-#[cfg(not(any(windows, target_os = "wasi")))]
-pub use fd::{dup, dup2, dup2_with, DupFlags};
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use imp::io::epoll;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
@@ -85,6 +80,8 @@ pub use ioctl::{ioctl_tcgets, ioctl_tiocgwinsz};
     all(libc, not(any(windows, target_os = "redox", target_os = "wasi")))
 ))]
 pub use ioctl::{ioctl_tiocexcl, ioctl_tiocnxcl};
+#[cfg(not(any(windows, target_os = "redox")))]
+pub use is_read_write::is_read_write;
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub use madvise::{madvise, Advice};
 #[cfg(not(any(windows, target_os = "wasi")))]
@@ -113,6 +110,13 @@ pub use read_write::{preadv, pwritev};
 pub use read_write::{preadv2, pwritev2, ReadWriteFlags};
 #[cfg(not(windows))]
 pub use stdio::{stderr, stdin, stdout, take_stderr, take_stdin, take_stdout};
+#[cfg(not(windows))]
+pub use tty::isatty;
+#[cfg(any(
+    all(linux_raw, feature = "procfs"),
+    all(libc, not(any(windows, target_os = "fuchsia", target_os = "wasi")))
+))]
+pub use tty::ttyname;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use userfaultfd::{userfaultfd, UserfaultfdFlags};
 
