@@ -1,3 +1,5 @@
+//! The "imp"-lementation module. This selects the backend to use.
+
 #![allow(missing_docs)]
 
 #[cfg(libc)]
