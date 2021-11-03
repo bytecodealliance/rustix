@@ -370,35 +370,3 @@ jobs:
         cargo test --verbose --features=all-impls,procfs --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: 1
-
-  test_rustc_dep_of_std:
-    name: Test rustc_dep_of_std
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        build: [ubuntu, macos, windows]
-        include:
-          - build: ubuntu
-            os: ubuntu-latest
-            rust: nightly
-          - build: macos
-            os: macos-latest
-            rust: nightly
-          - build: windows
-            os: windows-latest
-            rust: nightly
-    env:
-      # -D warnings is commented out in our install-rust action; re-add it here.
-      RUSTFLAGS: -D warnings
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-    - uses: ./.github/actions/install-rust
-      with:
-        toolchain: ${{ matrix.rust }}
-
-    - run: |
-        cargo +nightly check --verbose --no-default-features --features rustc-dep-of-std --release --workspace
-      env:
-        RUST_BACKTRACE: 1
