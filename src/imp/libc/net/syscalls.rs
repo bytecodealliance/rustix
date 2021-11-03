@@ -12,9 +12,9 @@ use crate::as_ptr;
 use crate::io;
 use crate::io::BorrowedFd;
 use crate::io::OwnedFd;
+use crate::net::{SocketAddrV4, SocketAddrV6};
 use std::convert::TryInto;
 use std::mem::{size_of, MaybeUninit};
-use std::net::{SocketAddrV4, SocketAddrV6};
 #[cfg(not(any(target_os = "redox", target_os = "wasi",)))]
 use std::ptr::null_mut;
 

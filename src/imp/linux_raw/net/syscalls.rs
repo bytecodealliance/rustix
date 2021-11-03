@@ -37,11 +37,11 @@ use super::super::reg::nr;
 use super::super::reg::{ArgReg, SocketArg};
 use super::{
     encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags,
-    AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketAddr, SocketAddrUnix,
-    SocketFlags, SocketType,
+    AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
 };
 use crate::io;
 use crate::io::OwnedFd;
+use crate::net::{SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use io_lifetimes::BorrowedFd;
 #[cfg(not(target_arch = "x86"))]
 use linux_raw_sys::general::{
@@ -59,7 +59,6 @@ use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::general::{sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t};
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
-use std::net::{SocketAddrV4, SocketAddrV6};
 use std::os::raw::{c_int, c_uint};
 #[cfg(target_arch = "x86")]
 use {
@@ -220,7 +219,7 @@ pub(crate) fn accept_with(fd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<
 }
 
 #[inline]
-pub(crate) fn acceptfrom(fd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddr)> {
+pub(crate) fn acceptfrom(fd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddrAny)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         let mut addrlen = std::mem::size_of::<sockaddr>() as socklen_t;
@@ -260,7 +259,7 @@ pub(crate) fn acceptfrom(fd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddr)
 pub(crate) fn acceptfrom_with(
     fd: BorrowedFd<'_>,
     flags: AcceptFlags,
-) -> io::Result<(OwnedFd, SocketAddr)> {
+) -> io::Result<(OwnedFd, SocketAddrAny)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         let mut addrlen = std::mem::size_of::<sockaddr>() as socklen_t;
@@ -537,7 +536,7 @@ pub(crate) fn recvfrom(
     fd: BorrowedFd<'_>,
     buf: &mut [u8],
     flags: RecvFlags,
-) -> io::Result<(usize, SocketAddr)> {
+) -> io::Result<(usize, SocketAddrAny)> {
     let (buf_addr_mut, buf_len) = slice_mut(buf);
 
     #[cfg(not(target_arch = "x86"))]
@@ -582,7 +581,7 @@ pub(crate) fn recvfrom(
 }
 
 #[inline]
-pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
+pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         let mut addrlen = std::mem::size_of::<sockaddr>() as socklen_t;
@@ -619,7 +618,7 @@ pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
 }
 
 #[inline]
-pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
+pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         let mut addrlen = std::mem::size_of::<sockaddr>() as socklen_t;

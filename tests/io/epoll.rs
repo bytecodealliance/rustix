@@ -5,7 +5,7 @@ use rsix::io::epoll::{self, Epoll};
 use rsix::io::{ioctl_fionbio, read, write, OwnedFd};
 use rsix::net::{
     accept, bind_v4, connect_v4, getsockname, listen, socket, AddressFamily, Ipv4Addr, Protocol,
-    SocketAddr, SocketAddrV4, SocketType,
+    SocketAddrAny, SocketAddrV4, SocketType,
 };
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use std::sync::{Arc, Condvar, Mutex};
@@ -19,7 +19,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     listen(&listen_sock, 1).unwrap();
 
     let who = match getsockname(&listen_sock).unwrap() {
-        SocketAddr::V4(addr) => addr,
+        SocketAddrAny::V4(addr) => addr,
         _ => panic!(),
     };
 

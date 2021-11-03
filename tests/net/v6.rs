@@ -5,7 +5,7 @@
 
 use rsix::net::{
     accept, bind_v6, connect_v6, getsockname, listen, recv, send, socket, AddressFamily, Ipv6Addr,
-    Protocol, RecvFlags, SendFlags, SocketAddr, SocketAddrV6, SocketType,
+    Protocol, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV6, SocketType,
 };
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
@@ -24,7 +24,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     bind_v6(&connection_socket, &name).unwrap();
 
     let who = match getsockname(&connection_socket).unwrap() {
-        SocketAddr::V6(addr) => addr,
+        SocketAddrAny::V6(addr) => addr,
         _ => panic!(),
     };
 

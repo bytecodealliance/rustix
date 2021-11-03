@@ -5,7 +5,7 @@ use crate::io::AsFd;
 use crate::io::AsSocketAsFd;
 #[cfg(not(windows))]
 use crate::net::SocketAddrUnix;
-use crate::net::{SocketAddr, SocketAddrV4, SocketAddrV6};
+use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::{imp, io};
 
 pub use imp::net::{RecvFlags, SendFlags};
@@ -52,7 +52,7 @@ pub fn recvfrom<Fd: AsFd>(
     fd: &Fd,
     buf: &mut [u8],
     flags: RecvFlags,
-) -> io::Result<(usize, SocketAddr)> {
+) -> io::Result<(usize, SocketAddrAny)> {
     let fd = fd.as_fd();
     imp::syscalls::recvfrom(fd, buf, flags)
 }

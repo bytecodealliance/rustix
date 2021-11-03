@@ -5,7 +5,7 @@
 
 use rsix::net::{
     accept, bind_v4, connect_v4, getsockname, listen, recv, send, socket, AddressFamily, Ipv4Addr,
-    Protocol, RecvFlags, SendFlags, SocketAddr, SocketAddrV4, SocketType,
+    Protocol, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketType,
 };
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
@@ -20,7 +20,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     bind_v4(&connection_socket, &name).unwrap();
 
     let who = match getsockname(&connection_socket).unwrap() {
-        SocketAddr::V4(addr) => addr,
+        SocketAddrAny::V4(addr) => addr,
         _ => panic!(),
     };
 

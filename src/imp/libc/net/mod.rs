@@ -1,9 +1,11 @@
 mod addr;
-pub(crate) mod ext;
+mod ext;
 #[cfg(windows)]
 pub(crate) mod io_lifetimes;
 #[cfg(windows)]
 pub(crate) mod libc;
+#[cfg(not(windows))]
+pub(crate) use libc;
 mod read_sockaddr;
 mod send_recv;
 mod types;
