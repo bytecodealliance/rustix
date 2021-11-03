@@ -8,12 +8,12 @@
 use super::super::c;
 use super::super::elf::Elf_Phdr;
 use crate::ffi::ZStr;
+use core::mem::size_of;
+use core::slice;
 use linux_raw_sys::general::{
     AT_EXECFN, AT_HWCAP, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM,
 };
 use linux_raw_sys::v5_4::general::{AT_HWCAP2, AT_SYSINFO_EHDR};
-use std::mem::size_of;
-use std::slice;
 
 #[inline]
 pub(crate) fn page_size() -> usize {
@@ -84,12 +84,8 @@ static mut AUXV: Auxv = Auxv {
 #[cfg(all(target_env = "gnu", not(target_vendor = "mustang")))]
 #[used]
 #[link_section = ".init_array.00099"]
-static INIT_ARRAY: unsafe extern "C" fn(c::c_int, *mut *mut c::c_char, *mut *mut c::c_char) = {
-    unsafe extern "C" fn function(
-        _argc: c::c_int,
-        _argv: *mut *mut c::c_char,
-        envp: *mut *mut c::c_char,
-    ) {
+static INIT_ARRAY: unsafe extern "C" fn(c::c_int, *mut *mut u8, *mut *mut u8) = {
+    unsafe extern "C" fn function(_argc: c::c_int, _argv: *mut *mut u8, envp: *mut *mut u8) {
         init_from_envp(envp);
     }
     function
@@ -107,7 +103,7 @@ static INIT_ARRAY: unsafe extern "C" fn(c::c_int, *mut *mut c::c_char, *mut *mut
 static INIT_ARRAY: unsafe extern "C" fn() = {
     unsafe extern "C" fn function() {
         extern "C" {
-            static __environ: *mut *mut c::c_char;
+            static __environ: *mut *mut u8;
         }
 
         init_from_envp(__environ)
@@ -118,7 +114,7 @@ static INIT_ARRAY: unsafe extern "C" fn() = {
 /// On mustang, we export a function to be called during initialization.
 #[cfg(target_vendor = "mustang")]
 #[inline]
-pub(crate) unsafe fn init(envp: *mut *mut c::c_char) {
+pub(crate) unsafe fn init(envp: *mut *mut u8) {
     init_from_envp(envp);
 }
 
@@ -126,7 +122,7 @@ pub(crate) unsafe fn init(envp: *mut *mut c::c_char) {
 ///
 /// This must be passed a pointer to the environment variable buffer
 /// provided by the kernel, which is followed in memory by the auxv array.
-unsafe fn init_from_envp(mut envp: *mut *mut c::c_char) {
+unsafe fn init_from_envp(mut envp: *mut *mut u8) {
     while !(*envp).is_null() {
         envp = envp.add(1);
     }

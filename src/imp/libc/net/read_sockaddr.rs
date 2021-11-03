@@ -8,7 +8,9 @@ use crate::as_ptr;
 use crate::ffi::ZStr;
 use crate::io;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
-use std::mem::size_of;
+#[cfg(not(windows))]
+use alloc::vec::Vec;
+use core::mem::size_of;
 
 // This must match the header of `sockaddr`.
 #[repr(C)]
@@ -137,7 +139,9 @@ pub(crate) unsafe fn read_sockaddr(
                         return Err(io::Error::INVAL);
                     }
                     debug_assert_eq!(
-                        ZStr::from_ptr(decode.sun_path.as_ptr()).to_bytes().len(),
+                        ZStr::from_ptr(decode.sun_path.as_ptr().cast())
+                            .to_bytes()
+                            .len(),
                         provided_len
                     );
                     &decode.sun_path[..provided_len]

@@ -33,6 +33,7 @@ impl Error {
     ///
     /// This isn't a `From` conversion because it's expected to be relatively
     /// uncommon.
+    #[cfg(feature = "std")]
     #[inline]
     pub fn from_io_error(io_err: &std::io::Error) -> Option<Self> {
         io_err.raw_os_error().and_then(|raw| {

@@ -8,7 +8,7 @@ use crate::io;
 #[cfg(not(windows))]
 use crate::path;
 #[cfg(not(windows))]
-use std::fmt;
+use core::fmt;
 
 /// `struct sockaddr_un`
 #[cfg(not(windows))]

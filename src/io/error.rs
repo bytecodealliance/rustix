@@ -5,7 +5,9 @@
 //! and we don't want unrecognized values to create UB.
 
 use crate::imp;
-use std::{error, fmt, result};
+use core::{fmt, result};
+#[cfg(feature = "std")]
+use std::error;
 
 /// A specialized `Result` type for rsix APIs.
 pub type Result<T> = result::Result<T, Error>;
@@ -25,6 +27,7 @@ pub use imp::io::Error;
 
 impl Error {
     /// Shorthand for `std::io::Error::from(self).kind()`.
+    #[cfg(feature = "std")]
     #[inline]
     pub fn kind(self) -> std::io::ErrorKind {
         std::io::Error::from(self).kind()
@@ -33,18 +36,34 @@ impl Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        std::io::Error::from(*self).fmt(fmt)
+        #[cfg(feature = "std")]
+        {
+            std::io::Error::from(*self).fmt(fmt)
+        }
+        #[cfg(feature = "rustc-dep-of-std")]
+        {
+            write!(fmt, "os error {}", self.raw_os_error())
+        }
     }
 }
 
 impl fmt::Debug for Error {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        std::io::Error::from(*self).fmt(fmt)
+        #[cfg(feature = "std")]
+        {
+            std::io::Error::from(*self).fmt(fmt)
+        }
+        #[cfg(feature = "rustc-dep-of-std")]
+        {
+            write!(fmt, "os error {}", self.raw_os_error())
+        }
     }
 }
 
+#[cfg(feature = "std")]
 impl error::Error for Error {}
 
+#[cfg(feature = "std")]
 impl From<Error> for std::io::Error {
     #[inline]
     fn from(err: Error) -> Self {

@@ -9,7 +9,10 @@ mod offset;
 mod io_lifetimes;
 #[cfg(not(windows))]
 #[cfg(feature = "rustc-dep-of-std")]
-pub(crate) use crate::io::fd;
+pub(crate) mod fd {
+    pub(crate) use super::c::c_int as LibcFd;
+    pub use crate::io::fd::*;
+}
 #[cfg(windows)]
 pub(crate) mod fd {
     pub use super::io_lifetimes::*;

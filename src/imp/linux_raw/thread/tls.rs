@@ -3,7 +3,7 @@
 use super::super::c;
 use super::super::elf::*;
 use super::super::process::exe_phdrs_slice;
-use std::ptr::null;
+use core::ptr::null;
 
 /// For use with `set_thread_area`.
 #[cfg(target_arch = "x86")]

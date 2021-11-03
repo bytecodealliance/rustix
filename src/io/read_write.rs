@@ -1,8 +1,8 @@
 //! `read` and `write`, optionally positioned, optionally vectored
 
+use crate::io::{IoSlice, IoSliceMut};
 use crate::{imp, io};
 use imp::fd::AsFd;
-use std::io::{IoSlice, IoSliceMut};
 
 /// `RWF_*` constants for use with [`preadv2`] and [`pwritev2`].
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]

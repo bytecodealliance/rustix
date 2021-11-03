@@ -28,7 +28,7 @@ impl CpuSet {
             // be initilized before use. So instead we do this in
             // one step by calling `mem::zeroed()`.
             #[allow(unsafe_code)]
-            cpu_set: unsafe { std::mem::zeroed() },
+            cpu_set: unsafe { core::mem::zeroed() },
         }
     }
 

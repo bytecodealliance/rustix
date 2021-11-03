@@ -27,8 +27,8 @@
 #![allow(clippy::doc_markdown)]
 
 use crate::ffi::ZStr;
-use std::sync::atomic::{self, AtomicUsize, Ordering};
-use std::{marker, mem};
+use core::sync::atomic::{self, AtomicUsize, Ordering};
+use core::{marker, mem};
 
 macro_rules! weak {
     (fn $name:ident($($t:ty),*) -> $ret:ty) => (
@@ -106,7 +106,7 @@ unsafe fn fetch(name: &str) -> usize {
         Ok(c_str) => c_str,
         Err(..) => return 0,
     };
-    libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr()) as usize
+    libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr().cast()) as usize
 }
 
 #[cfg(not(any(target_os = "android", target_os = "linux")))]

@@ -14,7 +14,7 @@ use crate::net::SocketAddrUnix;
 use crate::net::{AddressFamily, SocketAddrStorage, SocketAddrV4, SocketAddrV6};
 use crate::{imp, io};
 #[cfg(not(feature = "rustc-dep-of-std"))]
-use std::fmt;
+use core::fmt;
 
 /// `struct sockaddr_storage` as a Rust enum.
 #[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]

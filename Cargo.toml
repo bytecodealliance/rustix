@@ -21,7 +21,10 @@ rustc_version = "0.4.0"
 [dependencies]
 bitflags = "1.3.2"
 itoa = { version = "0.4.7", default-features = false, optional = true }
-io-lifetimes = { version = "0.3.0", default-features = false }
+io-lifetimes = { version = "0.3.2", default-features = false, optional = true }
+core = { version = "1.0.0", optional = true, package = "rustc-std-workspace-core" }
+alloc = { version = "1.0.0", optional = true, package = "rustc-std-workspace-alloc" }
+compiler_builtins = { version = '0.1.49', optional = true }
 
 [target.'cfg(any(target_os = "android", target_os = "linux"))'.dependencies]
 once_cell = { version = "1.5.2", optional = true }
@@ -31,12 +34,10 @@ errno = { version = "0.2.8", default-features = false }
 libc = { version = "0.2.98", features = ["extra_traits"] }
 
 [target.'cfg(all(not(rsix_use_libc), any(target_os = "linux"), any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "riscv64")))'.dependencies]
-linux-raw-sys = { version = "0.0.30", features = ["v5_4", "v5_11"] }
+linux-raw-sys = { version = "0.0.33", default-features = false, features = ["general", "errno", "v5_4", "v5_11"] }
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.9", features = ["ws2ipdef", "ws2tcpip", "impl-default"] }
-
-rustc-std-workspace-core = { version = "1.0.0", optional = true }
 
 [dev-dependencies]
 atty = "0.2.14"
@@ -49,7 +50,15 @@ serial_test = "0.5"
 criterion = "0.3"
 
 [features]
-default = []
+default = ["std"]
+std = ["io-lifetimes", "once_cell/std", "linux-raw-sys/std"]
+rustc-dep-of-std = [
+    "core",
+    "alloc",
+    "compiler_builtins",
+    "linux-raw-sys/rustc-dep-of-std",
+    "bitflags/rustc-dep-of-std",
+]
 
 # Enable this to enable `proc_self_fd` (on Linux) and `ttyname`.
 procfs = ["once_cell", "itoa"]
@@ -61,8 +70,6 @@ os_pipe = ["io-lifetimes/os_pipe"]
 socket2 = ["io-lifetimes/socket2"]
 mio = ["io-lifetimes/mio"]
 fs-err = ["io-lifetimes/fs-err"]
-
-rustc-dep-of-std = ['rustc-std-workspace-core']
 
 # Add Criterion configuration, as described here:
 # <https://bheisler.github.io/criterion.rs/book/getting_started.html#step-1---add-dependency-to-cargotoml>

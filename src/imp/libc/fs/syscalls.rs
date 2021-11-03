@@ -14,6 +14,7 @@ use super::super::conv::{
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t};
+use super::super::fd::BorrowedFd;
 #[cfg(not(target_os = "wasi"))]
 use super::super::fd::RawFd;
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
@@ -74,15 +75,14 @@ use crate::ffi::ZStr;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use crate::ffi::ZString;
 use crate::io::{self, OwnedFd, SeekFrom};
-use io_lifetimes::BorrowedFd;
-use std::convert::TryInto;
+use core::convert::TryInto;
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use std::mem::size_of;
+use core::mem::size_of;
 #[cfg(target_os = "linux")]
-use std::mem::transmute;
-use std::mem::MaybeUninit;
+use core::mem::transmute;
+use core::mem::MaybeUninit;
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use std::ptr::null_mut;
+use core::ptr::null_mut;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use {
     super::super::conv::nonnegative_ret,

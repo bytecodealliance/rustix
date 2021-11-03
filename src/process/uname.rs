@@ -8,7 +8,7 @@
 
 use crate::ffi::ZStr;
 use crate::imp;
-use std::fmt;
+use core::fmt;
 
 /// `uname()`—Returns high-level information about the runtime OS and
 /// hardware.

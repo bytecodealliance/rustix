@@ -5,8 +5,9 @@
 use super::super::c;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use crate::{as_ptr, io};
+use alloc::vec::Vec;
+use core::mem::size_of;
 use linux_raw_sys::general::{__kernel_sockaddr_storage, sockaddr};
-use std::mem::size_of;
 
 // This must match the header of `sockaddr`.
 #[repr(C)]

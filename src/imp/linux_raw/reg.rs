@@ -15,7 +15,7 @@
 
 use super::c;
 use super::fd::RawFd;
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
 pub(super) trait ToAsm: private::Sealed {
     /// Convert `self` to a `usize` ready to be passed to a syscall
@@ -182,7 +182,7 @@ impl<Num: RetNumber> RetReg<Num> {
     }
 
     #[inline]
-    pub(super) fn is_in_range(&self, range: std::ops::Range<isize>) -> bool {
+    pub(super) fn is_in_range(&self, range: core::ops::Range<isize>) -> bool {
         range.contains(&(self.bits as isize))
     }
 }

@@ -19,6 +19,14 @@ macro_rules! zstr {
     }};
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
+#[allow(unused_macros)]
+macro_rules! cstr {
+    ($str:literal) => {{
+        zstr!($str)
+    }};
+}
+
 #[test]
 fn test_zstr() {
     use crate::ffi::ZString;

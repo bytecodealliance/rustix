@@ -27,14 +27,13 @@ use super::{EventfdFlags, UserfaultfdFlags};
 use super::{MlockFlags, ReadWriteFlags};
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use crate::ffi::ZStr;
-use crate::io::{self, OwnedFd};
-use errno::errno;
-use std::cmp::min;
-use std::convert::TryInto;
-use std::io::{IoSlice, IoSliceMut};
-use std::mem::MaybeUninit;
+use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
+use core::cmp::min;
+use core::convert::TryInto;
+use core::mem::MaybeUninit;
 #[cfg(not(any(target_os = "redox", target_env = "newlib")))]
-use std::sync::atomic::{AtomicUsize, Ordering};
+use core::sync::atomic::{AtomicUsize, Ordering};
+use errno::errno;
 
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     let nread = unsafe {

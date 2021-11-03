@@ -1,6 +1,8 @@
 use super::super::c;
 use super::super::conv::owned_fd;
-use super::super::fd::{AsFd, BorrowedFd, IntoFd, RawFd};
+#[cfg(not(any(io_lifetimes_use_std, feature = "rustc-dep-of-std")))]
+use super::super::fd::IntoFd;
+use super::super::fd::{AsFd, BorrowedFd, RawFd};
 use super::FileType;
 use crate::ffi::ZStr;
 #[cfg(target_os = "wasi")]
@@ -28,9 +30,9 @@ use c::readdir as libc_readdir;
     target_os = "linux"
 ))]
 use c::{dirent64 as libc_dirent, readdir64 as libc_readdir};
+use core::mem::zeroed;
+use core::ptr::NonNull;
 use errno::{errno, set_errno, Errno};
-use std::mem::zeroed;
-use std::ptr::NonNull;
 
 /// `DIR*`
 #[repr(transparent)]
@@ -38,6 +40,7 @@ pub struct Dir(NonNull<c::DIR>);
 
 impl Dir {
     /// Construct a `Dir`, assuming ownership of the file descriptor.
+    #[cfg(not(any(io_lifetimes_use_std, feature = "rustc-dep-of-std")))]
     #[inline]
     pub fn from<F: IntoFd>(fd: F) -> io::Result<Self> {
         let fd = fd.into_fd();
@@ -45,10 +48,11 @@ impl Dir {
     }
 
     /// Construct a `Dir`, assuming ownership of the file descriptor.
+    #[cfg(any(io_lifetimes_use_std, feature = "rustc-dep-of-std"))]
     #[inline]
-    pub fn from_into_fd<F: IntoFd>(fd: F) -> io::Result<Self> {
-        let fd = fd.into_fd();
-        Self::_from(fd.into())
+    pub fn from<F: Into<OwnedFd>>(fd: F) -> io::Result<Self> {
+        let fd = fd.into();
+        Self::_from(fd)
     }
 
     fn _from(fd: OwnedFd) -> io::Result<Self> {
@@ -93,7 +97,7 @@ impl Dir {
                 check_dirent_layout(&*dirent_ptr);
 
                 let result = DirEntry {
-                    dirent: read_dirent(std::mem::transmute(&*dirent_ptr)),
+                    dirent: read_dirent(core::mem::transmute(&*dirent_ptr)),
 
                     #[cfg(target_os = "wasi")]
                     name: ZStr::from_ptr((*dirent_ptr).d_name.as_ptr()).to_owned(),
@@ -190,7 +194,10 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     // Copy from d_name, reading up to and including the first NUL.
     #[cfg(not(target_os = "wasi"))]
     {
-        let name_len = ZStr::from_ptr(input.d_name.as_ptr()).to_bytes().len() + 1;
+        let name_len = ZStr::from_ptr(input.d_name.as_ptr().cast())
+            .to_bytes()
+            .len()
+            + 1;
         dirent.d_name[..name_len].copy_from_slice(&input.d_name[..name_len]);
     }
 
@@ -241,7 +248,7 @@ impl DirEntry {
     pub fn file_name(&self) -> &ZStr {
         #[cfg(not(target_os = "wasi"))]
         unsafe {
-            ZStr::from_ptr(self.dirent.d_name.as_ptr())
+            ZStr::from_ptr(self.dirent.d_name.as_ptr().cast())
         }
 
         #[cfg(target_os = "wasi")]
@@ -290,7 +297,7 @@ struct libc_dirent {
 #[cfg(target_os = "openbsd")]
 fn check_dirent_layout(dirent: &c::dirent) {
     use crate::as_ptr;
-    use std::mem::{align_of, size_of};
+    use core::mem::{align_of, size_of};
 
     // Check that the basic layouts match.
     assert_eq!(size_of::<libc_dirent>(), size_of::<c::dirent>());

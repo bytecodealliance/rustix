@@ -6,7 +6,7 @@ use super::{ClockId, DynamicClockId};
 use crate::io;
 #[cfg(not(target_os = "redox"))]
 use crate::time::NanosleepRelativeResult;
-use std::mem::MaybeUninit;
+use core::mem::MaybeUninit;
 #[cfg(not(any(
     target_os = "freebsd",
     target_os = "emscripten",
@@ -16,7 +16,7 @@ use std::mem::MaybeUninit;
     target_os = "redox",
     target_os = "wasi",
 )))]
-use std::ptr::null_mut;
+use core::ptr::null_mut;
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[inline]

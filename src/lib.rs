@@ -57,13 +57,11 @@
 #![cfg_attr(feature = "rustc-dep-of-std", feature(specialization))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(toowned_clone_into))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(vec_into_raw_parts))]
-#![cfg_attr(feature = "rustc-dep-of-std", feature(const_ipv4))]
-#![cfg_attr(feature = "rustc-dep-of-std", feature(const_ipv6))]
-#![cfg_attr(feature = "rustc-dep-of-std", feature(const_socketaddr))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(const_raw_ptr_deref))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(slice_internals))]
+#![cfg_attr(feature = "rustc-dep-of-std", feature(core_intrinsics))]
+#![cfg_attr(not(feature = "std"), no_std)]
 
-#[cfg(feature = "rustc-dep-of-std")]
 extern crate alloc;
 
 /// Re-export `io_lifetimes` since we use its types in our public API, so

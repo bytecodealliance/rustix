@@ -51,13 +51,18 @@ use super::reg::nr;
 use super::thread::{FutexFlags, FutexOperation};
 use super::time::{ClockId, Timespec};
 use crate::ffi::ZStr;
-use crate::io::{self, OwnedFd};
+use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
 #[cfg(feature = "procfs")]
 use crate::path::DecInt;
 use crate::process::{
     Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, Rlimit, Uid, WaitOptions, WaitStatus,
 };
 use crate::time::NanosleepRelativeResult;
+use alloc::borrow::Cow;
+use alloc::vec::Vec;
+#[cfg(target_pointer_width = "32")]
+use core::convert::TryInto;
+use core::mem::{size_of_val, MaybeUninit};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use linux_raw_sys::general::__NR_epoll_pwait;
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
@@ -93,11 +98,6 @@ use linux_raw_sys::v5_4::general::{
     __NR_clone, __NR_eventfd2, __NR_getrandom, __NR_membarrier, __NR_mlock2, __NR_preadv2,
     __NR_prlimit64, __NR_pwritev2, __NR_userfaultfd,
 };
-use std::borrow::Cow;
-#[cfg(target_pointer_width = "32")]
-use std::convert::TryInto;
-use std::io::{IoSlice, IoSliceMut};
-use std::mem::{size_of_val, MaybeUninit};
 #[cfg(target_pointer_width = "64")]
 use {super::conv::loff_t_from_u64, linux_raw_sys::general::__NR_mmap};
 #[cfg(target_pointer_width = "32")]
@@ -549,7 +549,7 @@ pub fn CPU_COUNT_S(size: usize, cpuset: &RawCpuSet) -> u32 {
 #[allow(non_snake_case)]
 #[inline]
 pub fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
-    CPU_COUNT_S(std::mem::size_of::<RawCpuSet>(), cpuset)
+    CPU_COUNT_S(core::mem::size_of::<RawCpuSet>(), cpuset)
 }
 
 #[inline]
@@ -1549,7 +1549,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
             nr(__NR_prlimit64),
             c_uint(0),
             c_uint(limit as c::c_uint),
-            void_star(std::ptr::null_mut()),
+            void_star(core::ptr::null_mut()),
             out(&mut result),
         )) {
             Ok(()) => {
@@ -1597,7 +1597,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
             nr(__NR_prlimit64),
             c_uint(0),
             c_uint(limit as c::c_uint),
-            void_star(std::ptr::null_mut()),
+            void_star(core::ptr::null_mut()),
             out(&mut result),
         ));
         let result = result.assume_init();
@@ -1634,8 +1634,8 @@ pub fn execve(path: &ZStr, args: &[Cow<'_, ZStr>], env_vars: &[Cow<'_, ZStr>]) -
         .into_iter()
         .map(|cstr| ZStr::as_ptr(cstr))
         .collect();
-    argv.push(std::ptr::null());
-    envs.push(std::ptr::null());
+    argv.push(core::ptr::null());
+    envs.push(core::ptr::null());
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_execve),

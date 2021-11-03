@@ -32,8 +32,8 @@ use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Pid, Uid, WaitOptions, WaitStatus};
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-use std::convert::TryInto;
-use std::mem::MaybeUninit;
+use core::convert::TryInto;
+use core::mem::MaybeUninit;
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn chdir(path: &ZStr) -> io::Result<()> {
@@ -223,7 +223,7 @@ pub(crate) fn sched_getaffinity(pid: Pid, cpuset: &mut RawCpuSet) -> io::Result<
     unsafe {
         ret(c::sched_getaffinity(
             pid.as_raw() as _,
-            std::mem::size_of::<RawCpuSet>(),
+            core::mem::size_of::<RawCpuSet>(),
             cpuset,
         ))
     }
@@ -240,7 +240,7 @@ pub(crate) fn sched_setaffinity(pid: Pid, cpuset: &RawCpuSet) -> io::Result<()> 
     unsafe {
         ret(c::sched_setaffinity(
             pid.as_raw() as _,
-            std::mem::size_of::<RawCpuSet>(),
+            core::mem::size_of::<RawCpuSet>(),
             cpuset,
         ))
     }

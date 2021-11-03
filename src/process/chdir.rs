@@ -1,5 +1,6 @@
 use crate::ffi::ZString;
 use crate::{imp, io, path};
+use alloc::vec::Vec;
 #[cfg(not(target_os = "fuchsia"))]
 use imp::fd::AsFd;
 
