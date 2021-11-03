@@ -62,7 +62,12 @@
 #![cfg_attr(feature = "rustc-dep-of-std", feature(core_intrinsics))]
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
+#[cfg(feature = "rustc-dep-of-std")]
+extern crate rustc_std_workspace_alloc as alloc;
+#[cfg(feature = "rustc-dep-of-std")]
+extern crate rustc_std_workspace_core as core;
 
 /// Re-export `io_lifetimes` since we use its types in our public API, so
 /// that our users don't need to do anything special to use the same version.
