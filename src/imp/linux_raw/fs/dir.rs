@@ -7,8 +7,10 @@ use crate::ffi::{ZStr, ZString};
 use crate::imp::fd::IntoFd;
 use crate::imp::fd::{AsFd, BorrowedFd};
 use crate::io::{self, OwnedFd};
+use alloc::borrow::ToOwned;
+use alloc::vec::Vec;
+use core::mem::size_of;
 use linux_raw_sys::general::linux_dirent64;
-use std::mem::size_of;
 
 /// `DIR*`
 pub struct Dir {
@@ -20,7 +22,7 @@ pub struct Dir {
 
 impl Dir {
     /// Construct a `Dir`, assuming ownership of the file descriptor.
-    #[cfg(not(feature = "rustc-dep-of-std"))]
+    #[cfg(not(any(io_lifetimes_use_std, feature = "rustc-dep-of-std")))]
     #[inline]
     pub fn from<F: IntoFd>(fd: F) -> io::Result<Self> {
         let fd = fd.into_fd();
@@ -28,11 +30,11 @@ impl Dir {
     }
 
     /// Construct a `Dir`, assuming ownership of the file descriptor.
-    #[cfg(not(feature = "rustc-dep-of-std"))]
+    #[cfg(any(io_lifetimes_use_std, feature = "rustc-dep-of-std"))]
     #[inline]
-    pub fn from_into_fd<F: IntoFd>(fd: F) -> io::Result<Self> {
-        let fd = fd.into_fd();
-        Self::_from(fd.into())
+    pub fn from<F: Into<OwnedFd>>(fd: F) -> io::Result<Self> {
+        let fd = fd.into();
+        Self::_from(fd)
     }
 
     #[cfg(not(feature = "rustc-dep-of-std"))]

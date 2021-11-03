@@ -23,7 +23,7 @@ pub(crate) const fn in_addr_s_addr(addr: c::in_addr) -> u32 {
 #[inline]
 pub(crate) const fn in_addr_s_addr(addr: c::in_addr) -> u32 {
     // This should be `*addr.S_un.S_addr()`, except that isn't a `const fn`.
-    unsafe { std::mem::transmute(addr) }
+    unsafe { core::mem::transmute(addr) }
 }
 
 #[cfg(not(windows))]
@@ -35,7 +35,7 @@ pub(crate) const fn in_addr_new(s_addr: u32) -> c::in_addr {
 #[cfg(windows)]
 #[inline]
 pub(crate) const fn in_addr_new(s_addr: u32) -> c::in_addr {
-    unsafe { std::mem::transmute(s_addr) }
+    unsafe { core::mem::transmute(s_addr) }
 }
 
 #[cfg(not(windows))]
@@ -47,7 +47,7 @@ pub(crate) const fn in6_addr_s6_addr(addr: c::in6_addr) -> [u8; 16] {
 #[cfg(windows)]
 #[inline]
 pub(crate) const fn in6_addr_s6_addr(addr: c::in6_addr) -> [u8; 16] {
-    unsafe { std::mem::transmute(addr) }
+    unsafe { core::mem::transmute(addr) }
 }
 
 #[cfg(not(windows))]
@@ -59,7 +59,7 @@ pub(crate) const fn in6_addr_new(s6_addr: [u8; 16]) -> c::in6_addr {
 #[cfg(windows)]
 #[inline]
 pub(crate) const fn in6_addr_new(s6_addr: [u8; 16]) -> c::in6_addr {
-    unsafe { std::mem::transmute(s6_addr) }
+    unsafe { core::mem::transmute(s6_addr) }
 }
 
 #[cfg(not(windows))]
@@ -71,7 +71,7 @@ pub(crate) const fn sockaddr_in6_sin6_scope_id(addr: c::sockaddr_in6) -> u32 {
 #[cfg(windows)]
 #[inline]
 pub(crate) const fn sockaddr_in6_sin6_scope_id(addr: c::sockaddr_in6) -> u32 {
-    let addr: sockaddr_in6 = unsafe { std::mem::transmute(addr) };
+    let addr: sockaddr_in6 = unsafe { core::mem::transmute(addr) };
     addr.sin6_scope_id
 }
 
@@ -86,7 +86,7 @@ pub(crate) fn sockaddr_in6_sin6_scope_id_mut(addr: &mut c::sockaddr_in6) -> &mut
 #[cfg(windows)]
 #[inline]
 pub(crate) fn sockaddr_in6_sin6_scope_id_mut(addr: &mut c::sockaddr_in6) -> &mut u32 {
-    let addr: &mut sockaddr_in6 = unsafe { std::mem::transmute(addr) };
+    let addr: &mut sockaddr_in6 = unsafe { core::mem::transmute(addr) };
     &mut addr.sin6_scope_id
 }
 
@@ -140,5 +140,5 @@ pub(crate) const fn sockaddr_in6_new(
         sin6_addr,
         sin6_scope_id,
     };
-    unsafe { std::mem::transmute(addr) }
+    unsafe { core::mem::transmute(addr) }
 }

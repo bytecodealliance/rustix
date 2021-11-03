@@ -16,8 +16,8 @@ use super::c;
 use super::elf::*;
 use crate::ffi::ZStr;
 use crate::io::{self, madvise, Advice};
-use std::mem::{align_of, size_of};
-use std::ptr::null;
+use core::mem::{align_of, size_of};
+use core::ptr::null;
 
 pub(super) struct Vdso {
     // Load information
@@ -164,7 +164,14 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
         {
             // We can't gracefully fail here because we would seem to have just
             // mutated some unknown memory.
-            std::process::abort();
+            #[cfg(feature = "std")]
+            {
+                std::process::abort();
+            }
+            #[cfg(feature = "rustc-dep-of-std")]
+            {
+                core::intrinsics::abort();
+            }
         }
     }
 

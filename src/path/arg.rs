@@ -2,18 +2,26 @@ use crate::ffi::{ZStr, ZString};
 use crate::io;
 #[cfg(feature = "itoa")]
 use crate::path::DecInt;
-use std::borrow::Cow;
+use alloc::borrow::Cow;
+use alloc::string::String;
+use alloc::vec::Vec;
+use core::str;
+#[cfg(not(feature = "rustc-dep-of-std"))]
 use std::ffi::{OsStr, OsString};
+#[cfg(not(feature = "rustc-dep-of-std"))]
 #[cfg(target_os = "hermit")]
 use std::os::hermit::ext::ffi::{OsStrExt, OsStringExt};
+#[cfg(not(feature = "rustc-dep-of-std"))]
 #[cfg(unix)]
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
+#[cfg(not(feature = "rustc-dep-of-std"))]
 #[cfg(target_os = "vxworks")]
 use std::os::vxworks::ext::ffi::{OsStrExt, OsStringExt};
+#[cfg(not(feature = "rustc-dep-of-std"))]
 #[cfg(target_os = "wasi")]
 use std::os::wasi::ffi::{OsStrExt, OsStringExt};
+#[cfg(not(feature = "rustc-dep-of-std"))]
 use std::path::{Component, Components, Iter, Path, PathBuf};
-use std::str;
 
 /// A trait for passing path arguments.
 ///
@@ -178,6 +186,7 @@ impl Arg for &String {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl Arg for String {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -221,6 +230,7 @@ impl Arg for String {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl Arg for &OsStr {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -264,6 +274,7 @@ impl Arg for &OsStr {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl Arg for &OsString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -306,6 +317,7 @@ impl Arg for &OsString {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl Arg for OsString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -349,6 +361,7 @@ impl Arg for OsString {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl Arg for &Path {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -392,6 +405,7 @@ impl Arg for &Path {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl Arg for &PathBuf {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -437,6 +451,7 @@ impl Arg for &PathBuf {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl Arg for PathBuf {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -647,6 +662,7 @@ impl<'a> Arg for Cow<'a, str> {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'a> Arg for Cow<'a, OsStr> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -702,7 +718,7 @@ impl<'a> Arg for Cow<'a, ZStr> {
 
     #[inline]
     fn to_string_lossy(&self) -> Cow<str> {
-        let borrow: &ZStr = std::borrow::Borrow::borrow(self);
+        let borrow: &ZStr = core::borrow::Borrow::borrow(self);
         borrow.to_string_lossy()
     }
 
@@ -734,6 +750,7 @@ impl<'a> Arg for Cow<'a, ZStr> {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'a> Arg for Component<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -777,6 +794,7 @@ impl<'a> Arg for Component<'a> {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'a> Arg for Components<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -822,6 +840,7 @@ impl<'a> Arg for Components<'a> {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'a> Arg for Iter<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {

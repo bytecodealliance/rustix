@@ -13,6 +13,9 @@ use crate::imp::fd::{AsFd, BorrowedFd};
 use crate::io::{self, OwnedFd};
 use crate::path::DecInt;
 use crate::process::{getgid, getpid, getuid, Gid, RawGid, RawUid, Uid};
+#[cfg(features = "rustc-dep-of-std")]
+use core::lazy::OnceCell;
+#[cfg(not(features = "rustc-dep-of-std"))]
 use once_cell::sync::OnceCell;
 
 /// Linux's procfs always uses inode 1 for its root directory.
@@ -177,8 +180,11 @@ fn is_mountpoint(file: BorrowedFd<'_>) -> bool {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
-    static PROC: OnceCell<(OwnedFd, Stat)> = OnceCell::new();
+    static PROC: StaticFd = StaticFd::new();
 
+    // `OnceBox` is "racey" in that the initialization function may run
+    // multiple times. We're ok with that, since the initialization function
+    // has no side effects.
     PROC.get_or_try_init(|| {
         let oflags = OFlags::NOFOLLOW
             | OFlags::PATH
@@ -199,7 +205,7 @@ fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
         )
         .map_err(|_err| io::Error::NOTSUP)?;
 
-        Ok((proc, proc_stat))
+        Ok(new_static_fd(proc, proc_stat))
     })
     .map(|(fd, stat)| (fd.as_fd(), stat))
 }
@@ -214,8 +220,9 @@ fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
-    static PROC_SELF: OnceCell<(OwnedFd, Stat)> = OnceCell::new();
+    static PROC_SELF: StaticFd = StaticFd::new();
 
+    // The init function here may run multiple times; see above.
     PROC_SELF
         .get_or_try_init(|| {
             let (proc, proc_stat) = proc()?;
@@ -241,7 +248,7 @@ fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
             )
             .map_err(|_err| io::Error::NOTSUP)?;
 
-            Ok((proc_self, proc_self_stat))
+            Ok(new_static_fd(proc_self, proc_self_stat))
         })
         .map(|(owned, stat)| (owned.as_fd(), stat))
 }
@@ -256,8 +263,9 @@ fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 pub fn proc_self_fd() -> io::Result<BorrowedFd<'static>> {
-    static PROC_SELF_FD: OnceCell<OwnedFd> = OnceCell::new();
+    static PROC_SELF_FD: StaticFd = StaticFd::new();
 
+    // The init function here may run multiple times; see above.
     PROC_SELF_FD
         .get_or_try_init(|| {
             let (_, proc_stat) = proc()?;
@@ -273,7 +281,7 @@ pub fn proc_self_fd() -> io::Result<BorrowedFd<'static>> {
             // Open "/proc/self/fd".
             let proc_self_fd = openat(&proc_self, cstr!("fd"), oflags, Mode::empty())
                 .map_err(|_err| io::Error::NOTSUP)?;
-            let _proc_self_fd_stat = check_proc_entry(
+            let proc_self_fd_stat = check_proc_entry(
                 Kind::Fd,
                 proc_self_fd.as_fd(),
                 Some(proc_stat),
@@ -282,7 +290,14 @@ pub fn proc_self_fd() -> io::Result<BorrowedFd<'static>> {
             )
             .map_err(|_err| io::Error::NOTSUP)?;
 
-            Ok(proc_self_fd)
+            Ok(new_static_fd(proc_self_fd, proc_self_fd_stat))
         })
-        .map(OwnedFd::as_fd)
+        .map(|(owned, _stat)| owned.as_fd())
+}
+
+type StaticFd = OnceCell<(OwnedFd, Stat)>;
+
+#[inline]
+fn new_static_fd(fd: OwnedFd, stat: Stat) -> (OwnedFd, Stat) {
+    (fd, stat)
 }

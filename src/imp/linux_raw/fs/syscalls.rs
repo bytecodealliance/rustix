@@ -39,6 +39,8 @@ use super::{
 };
 use crate::ffi::ZStr;
 use crate::io::{self, OwnedFd, SeekFrom};
+use core::convert::TryInto;
+use core::mem::MaybeUninit;
 #[cfg(target_arch = "arm")]
 use linux_raw_sys::general::__NR_arm_fadvise64_64 as __NR_fadvise64_64;
 #[cfg(all(target_pointer_width = "32", not(target_arch = "arm")))]
@@ -59,8 +61,6 @@ use linux_raw_sys::v5_4::general::{
     __NR_copy_file_range, __NR_memfd_create, __NR_renameat2, __NR_statx, statx, F_GETPIPE_SZ,
     F_GET_SEALS, F_SETPIPE_SZ,
 };
-use std::convert::TryInto;
-use std::mem::MaybeUninit;
 #[cfg(target_pointer_width = "32")]
 use {
     super::super::conv::{hi, lo},

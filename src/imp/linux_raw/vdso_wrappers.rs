@@ -17,10 +17,10 @@ use super::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
 use super::time::{ClockId, DynamicClockId, Timespec};
 use super::{c, vdso};
 use crate::io;
+use core::mem::{transmute, MaybeUninit};
+use core::sync::atomic::AtomicUsize;
+use core::sync::atomic::Ordering::Relaxed;
 use linux_raw_sys::general::{__NR_clock_gettime, __kernel_clockid_t, __kernel_timespec};
-use std::mem::{transmute, MaybeUninit};
-use std::sync::atomic::AtomicUsize;
-use std::sync::atomic::Ordering::Relaxed;
 #[cfg(target_pointer_width = "32")]
 use {
     super::conv::out,

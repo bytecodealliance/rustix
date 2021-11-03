@@ -7,6 +7,7 @@ use crate::fs::CloneFlags;
 use crate::fs::RenameFlags;
 use crate::io::{self, OwnedFd};
 use crate::{imp, path};
+use alloc::vec::Vec;
 use imp::fd::{AsFd, BorrowedFd};
 #[cfg(not(any(
     target_os = "ios",

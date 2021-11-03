@@ -86,7 +86,7 @@ pub unsafe fn copyfile_state_get_copied(state: copyfile_state_t) -> io::Result<u
 pub unsafe fn copyfile_state_get(
     state: copyfile_state_t,
     flag: u32,
-    dst: *mut std::ffi::c_void,
+    dst: *mut core::ffi::c_void,
 ) -> io::Result<()> {
     imp::syscalls::copyfile_state_get(state, flag, dst)
 }

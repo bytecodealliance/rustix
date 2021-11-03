@@ -12,7 +12,7 @@ use imp::fd::AsFd;
     all(linux_raw, feature = "procfs"),
     all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
 ))]
-use {crate::ffi::ZString, imp::fd::BorrowedFd};
+use {crate::ffi::ZString, alloc::vec::Vec, imp::fd::BorrowedFd};
 
 /// `isatty(fd)`—Tests whether a file descriptor refers to a terminal.
 ///

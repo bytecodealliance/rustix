@@ -7,7 +7,7 @@
 
 use crate::ffi::{ZStr, ZString};
 use crate::{io, path};
-use std::fmt;
+use core::fmt;
 
 /// `struct sockaddr_un`
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]

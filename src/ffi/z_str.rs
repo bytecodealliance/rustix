@@ -7,10 +7,14 @@
 
 use super::strlen;
 use crate::io;
-use alloc::borrow::{Borrow, Cow};
+use alloc::borrow::{Cow, ToOwned};
+use alloc::boxed::Box;
 use alloc::rc::Rc;
+use alloc::string::String;
 use alloc::sync::Arc;
+use alloc::vec::Vec;
 use core::ascii;
+use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::fmt::{self, Write};
 use core::mem;

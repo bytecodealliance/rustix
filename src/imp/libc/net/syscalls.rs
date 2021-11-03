@@ -19,10 +19,10 @@ use super::{
 use crate::as_ptr;
 use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
-use std::convert::TryInto;
-use std::mem::{size_of, MaybeUninit};
+use core::convert::TryInto;
+use core::mem::{size_of, MaybeUninit};
 #[cfg(not(any(target_os = "redox", target_os = "wasi",)))]
-use std::ptr::null_mut;
+use core::ptr::null_mut;
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
@@ -398,15 +398,15 @@ pub(crate) mod sockopt {
     use crate::net::Ipv6Addr;
     use crate::net::{Ipv4Addr, SocketType};
     use crate::{as_mut_ptr, io};
-    use std::convert::TryInto;
-    use std::time::Duration;
+    use core::convert::TryInto;
+    use core::time::Duration;
 
     #[inline]
     fn getsockopt<T>(fd: BorrowedFd<'_>, level: i32, optname: i32) -> io::Result<T> {
         use super::*;
         unsafe {
             let mut value = MaybeUninit::<T>::uninit();
-            let mut optlen = std::mem::size_of::<T>().try_into().unwrap();
+            let mut optlen = core::mem::size_of::<T>().try_into().unwrap();
             ret(c::getsockopt(
                 borrowed_fd(fd),
                 level,
@@ -427,7 +427,7 @@ pub(crate) mod sockopt {
     fn setsockopt<T>(fd: BorrowedFd<'_>, level: i32, optname: i32, value: T) -> io::Result<()> {
         use super::*;
         unsafe {
-            let optlen = std::mem::size_of::<T>().try_into().unwrap();
+            let optlen = core::mem::size_of::<T>().try_into().unwrap();
             ret(c::setsockopt(
                 borrowed_fd(fd),
                 level,

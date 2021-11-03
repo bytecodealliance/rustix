@@ -4,13 +4,18 @@
 //! it filled itself.
 #![allow(unsafe_code)]
 
+use crate::ffi::ZStr;
 use crate::imp::fd::{AsFd, AsRawFd};
 use itoa::{fmt, Integer};
+#[cfg(not(feature = "rustc-dep-of-std"))]
 use std::ffi::{CStr, OsStr};
+#[cfg(not(feature = "rustc-dep-of-std"))]
 #[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
+#[cfg(not(feature = "rustc-dep-of-std"))]
 #[cfg(target_os = "wasi")]
 use std::os::wasi::ffi::OsStrExt;
+#[cfg(not(feature = "rustc-dep-of-std"))]
 use std::path::Path;
 
 /// Format an integer into a decimal `Path` component, without constructing a
@@ -62,6 +67,17 @@ impl DecInt {
 
     /// Return the raw byte buffer.
     #[inline]
+    pub fn as_z_str(&self) -> &ZStr {
+        let bytes_with_nul = &self.buf[..=self.len];
+        debug_assert!(ZStr::from_bytes_with_nul(bytes_with_nul).is_ok());
+        // Safety: `self.buf` holds a single decimal ASCII representation and
+        // at least one extra NUL byte.
+        unsafe { ZStr::from_bytes_with_nul_unchecked(bytes_with_nul) }
+    }
+
+    /// Return the raw byte buffer.
+    #[cfg(not(feature = "rustc-dep-of-std"))]
+    #[inline]
     pub fn as_c_str(&self) -> &CStr {
         let bytes_with_nul = &self.buf[..=self.len];
         debug_assert!(CStr::from_bytes_with_nul(bytes_with_nul).is_ok());
@@ -87,6 +103,7 @@ impl core::fmt::Write for DecIntWriter {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl AsRef<Path> for DecInt {
     #[inline]
     fn as_ref(&self) -> &Path {

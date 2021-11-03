@@ -56,15 +56,17 @@
 
 use super::super::c;
 use super::super::conv::{ret, ret_owned_fd, ret_u32};
-use super::super::fd::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+use super::super::fd::{AsFd, AsRawFd, BorrowedFd, RawFd};
+#[cfg(not(feature = "rustc-dep-of-std"))]
+use super::super::fd::{FromFd, FromRawFd, IntoFd, IntoRawFd};
 use crate::io::{self, OwnedFd};
+use alloc::vec::Vec;
 use bitflags::bitflags;
-use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd};
-use std::convert::TryInto;
-use std::fmt;
-use std::marker::PhantomData;
-use std::ops::Deref;
-use std::ptr::{null, null_mut};
+use core::convert::TryInto;
+use core::fmt;
+use core::marker::PhantomData;
+use core::ops::Deref;
+use core::ptr::{null, null_mut};
 
 bitflags! {
     /// `EPOLL_*` for use with [`Epoll::new`].
@@ -206,10 +208,12 @@ impl<'a> Context for Borrowing<'a> {
 ///
 /// This may be used with [`OwnedFd`], or higher-level types like
 /// [`std::fs::File`] or [`std::net::TcpStream`].
+#[cfg(not(feature = "rustc-dep-of-std"))]
 pub struct Owning<'context, T: IntoFd + FromFd> {
     _phantom: PhantomData<&'context T>,
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: IntoFd + FromFd> Owning<'context, T> {
     /// Creates a new empty `Owning`.
     #[allow(clippy::new_without_default)] // This is a specialized type that doesn't need to be generically constructible.
@@ -221,6 +225,7 @@ impl<'context, T: IntoFd + FromFd> Owning<'context, T> {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: AsFd + IntoFd + FromFd> Context for Owning<'context, T> {
     type Data = T;
     type Target = BorrowedFd<'context>;
@@ -387,18 +392,21 @@ impl<Context: self::Context> Epoll<Context> {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: AsFd + IntoFd + FromFd> AsRawFd for Epoll<Owning<'context, T>> {
     fn as_raw_fd(&self) -> RawFd {
         self.epoll_fd.as_raw_fd()
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: AsFd + IntoFd + FromFd> IntoRawFd for Epoll<Owning<'context, T>> {
     fn into_raw_fd(self) -> RawFd {
         self.epoll_fd.into_raw_fd()
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: AsFd + IntoFd + FromFd> FromRawFd for Epoll<Owning<'context, T>> {
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
         Self {
@@ -408,18 +416,21 @@ impl<'context, T: AsFd + IntoFd + FromFd> FromRawFd for Epoll<Owning<'context, T
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: AsFd + IntoFd + FromFd> AsFd for Epoll<Owning<'context, T>> {
     fn as_fd(&self) -> BorrowedFd<'_> {
         self.epoll_fd.as_fd()
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: AsFd + IntoFd + FromFd> From<Epoll<Owning<'context, T>>> for OwnedFd {
     fn from(epoll: Epoll<Owning<'context, T>>) -> OwnedFd {
         epoll.epoll_fd
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: AsFd + IntoFd + FromFd> From<OwnedFd> for Epoll<Owning<'context, T>> {
     fn from(fd: OwnedFd) -> Self {
         Self {
@@ -430,7 +441,7 @@ impl<'context, T: AsFd + IntoFd + FromFd> From<OwnedFd> for Epoll<Owning<'contex
 }
 
 pub struct Iter<'context, Context: self::Context> {
-    iter: std::slice::Iter<'context, Event>,
+    iter: core::slice::Iter<'context, Event>,
     context: *const Context,
     _phantom: PhantomData<&'context Context>,
 }

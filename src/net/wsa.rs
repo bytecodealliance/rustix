@@ -1,5 +1,5 @@
 use crate::io;
-use std::mem::MaybeUninit;
+use core::mem::MaybeUninit;
 use winapi::um::winsock2::{WSACleanup, WSAGetLastError, WSAStartup, WSADATA};
 
 /// `WSAStartup()`—Initialize process-wide Windows support for sockets.

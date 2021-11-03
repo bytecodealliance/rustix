@@ -12,8 +12,8 @@ use crate::imp::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(all(not(io_lifetimes_use_std), not(feature = "rustc-dep-of-std")))]
 use crate::imp::fd::{FromFd, IntoFd};
 use crate::io::close;
-use std::fmt;
-use std::mem::{forget, ManuallyDrop};
+use core::fmt;
+use core::mem::{forget, ManuallyDrop};
 
 /// A wrapper around `io_lifetimes::OwnedFd` which closes the file descriptor
 /// using rsix's own `close` rather than libc's `close`.

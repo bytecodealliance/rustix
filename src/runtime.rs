@@ -21,8 +21,9 @@ use crate::ffi::ZStr;
 use crate::path::Arg;
 use crate::process::Pid;
 use crate::{imp, io};
+use alloc::borrow::Cow;
+use alloc::vec::Vec;
 use core::ffi::c_void;
-use std::borrow::Cow;
 
 #[cfg(target_arch = "x86")]
 #[inline]

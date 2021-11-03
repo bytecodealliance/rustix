@@ -62,11 +62,12 @@ use crate::imp::fd::{AsFd, AsRawFd, BorrowedFd, RawFd};
 use crate::imp::fd::{FromFd, FromRawFd, IntoFd, IntoRawFd};
 use crate::imp::linux_raw::syscalls::{epoll_add, epoll_create, epoll_del, epoll_mod, epoll_wait};
 use crate::io::{self, OwnedFd};
+use alloc::vec::Vec;
 use bitflags::bitflags;
-use std::fmt;
-use std::marker::PhantomData;
-use std::ops::Deref;
-use std::ptr::null;
+use core::fmt;
+use core::marker::PhantomData;
+use core::ops::Deref;
+use core::ptr::null;
 
 bitflags! {
     /// `EPOLL_*` for use with [`Epoll::new`].
@@ -431,7 +432,7 @@ impl<'context, T: AsFd + IntoFd + FromFd> From<OwnedFd> for Epoll<Owning<'contex
 }
 
 pub struct Iter<'context, Context: self::Context> {
-    iter: std::slice::Iter<'context, Event>,
+    iter: core::slice::Iter<'context, Event>,
     context: *const Context,
     _phantom: PhantomData<&'context Context>,
 }

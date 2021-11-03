@@ -20,5 +20,5 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub(crate) fn linux_execfn() -> &'static ZStr {
-    unsafe { ZStr::from_ptr(c::getauxval(c::AT_EXECFN) as *const c::c_char) }
+    unsafe { ZStr::from_ptr(c::getauxval(c::AT_EXECFN) as *const _) }
 }

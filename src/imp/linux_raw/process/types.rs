@@ -94,4 +94,4 @@ pub struct RawCpuSet {
     pub(crate) bits: [u64; 16],
 }
 
-pub const CPU_SETSIZE: usize = 8 * std::mem::size_of::<RawCpuSet>();
+pub const CPU_SETSIZE: usize = 8 * core::mem::size_of::<RawCpuSet>();
