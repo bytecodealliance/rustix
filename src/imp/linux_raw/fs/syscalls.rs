@@ -37,6 +37,7 @@ use super::{
     Access, Advice as FsAdvice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode,
     OFlags, RenameFlags, ResolveFlags, Stat, StatFs, StatxFlags,
 };
+use crate::io::SeekFrom;
 use crate::io::{self, OwnedFd};
 #[cfg(target_arch = "arm")]
 use linux_raw_sys::general::__NR_arm_fadvise64_64 as __NR_fadvise64_64;
@@ -60,7 +61,6 @@ use linux_raw_sys::v5_4::general::{
 };
 use std::convert::TryInto;
 use std::ffi::CStr;
-use std::io::SeekFrom;
 use std::mem::MaybeUninit;
 #[cfg(target_pointer_width = "32")]
 use {

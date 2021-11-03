@@ -1,5 +1,6 @@
 //! Functions which operate on file descriptors.
 
+use crate::io::SeekFrom;
 use crate::{imp, io};
 use imp::fd::{AsFd, BorrowedFd};
 #[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
@@ -11,7 +12,6 @@ use imp::fs::StatFs;
 #[cfg(not(target_os = "wasi"))]
 use imp::fs::{FlockOperation, Mode};
 use imp::time::Timespec;
-use std::io::SeekFrom;
 
 /// `lseek(fd, offset, whence)`—Repositions a file descriptor within a file.
 ///
