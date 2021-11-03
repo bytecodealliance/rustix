@@ -4,8 +4,8 @@
 
 #![allow(unsafe_code)]
 
-use crate::imp::net::ext::in6_addr_s6_addr;
 use crate::imp::libc as c;
+use crate::imp::net::ext::in6_addr_s6_addr;
 use crate::net::ip::{IpAddr, Ipv4Addr, Ipv6Addr};
 use core::cmp::Ordering;
 use core::hash;
@@ -146,7 +146,10 @@ impl SocketAddr {
     /// ```
     #[must_use]
     #[cfg_attr(staged_api, stable(feature = "ip_addr", since = "1.7.0"))]
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_socketaddr", issue = "82485"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
+    )]
     pub const fn ip(&self) -> IpAddr {
         match *self {
             SocketAddr::V4(ref a) => IpAddr::V4(*a.ip()),
@@ -187,7 +190,10 @@ impl SocketAddr {
     /// ```
     #[must_use]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_socketaddr", issue = "82485"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
+    )]
     pub const fn port(&self) -> u16 {
         match *self {
             SocketAddr::V4(ref a) => a.port(),
@@ -231,7 +237,10 @@ impl SocketAddr {
     /// ```
     #[must_use]
     #[cfg_attr(staged_api, stable(feature = "sockaddr_checker", since = "1.16.0"))]
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_socketaddr", issue = "82485"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
+    )]
     pub const fn is_ipv4(&self) -> bool {
         matches!(*self, SocketAddr::V4(_))
     }
@@ -253,7 +262,10 @@ impl SocketAddr {
     /// ```
     #[must_use]
     #[cfg_attr(staged_api, stable(feature = "sockaddr_checker", since = "1.16.0"))]
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_socketaddr", issue = "82485"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
+    )]
     pub const fn is_ipv6(&self) -> bool {
         matches!(*self, SocketAddr::V6(_))
     }
@@ -296,7 +308,10 @@ impl SocketAddrV4 {
     /// ```
     #[must_use]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_socketaddr", issue = "82485"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
+    )]
     pub const fn ip(&self) -> &Ipv4Addr {
         // SAFETY: `Ipv4Addr` is `#[repr(C)] struct { _: in_addr; }`.
         // It is safe to cast from `&in_addr` to `&Ipv4Addr`.
@@ -331,7 +346,10 @@ impl SocketAddrV4 {
     /// ```
     #[must_use]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_socketaddr", issue = "82485"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
+    )]
     pub const fn port(&self) -> u16 {
         u16::from_be(self.inner.sin_port)
     }
@@ -397,7 +415,10 @@ impl SocketAddrV6 {
     /// ```
     #[must_use]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_socketaddr", issue = "82485"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
+    )]
     pub const fn ip(&self) -> &Ipv6Addr {
         unsafe { &*(&self.inner.sin6_addr as *const c::in6_addr as *const Ipv6Addr) }
     }
@@ -430,7 +451,10 @@ impl SocketAddrV6 {
     /// ```
     #[must_use]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_socketaddr", issue = "82485"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
+    )]
     pub const fn port(&self) -> u16 {
         u16::from_be(self.inner.sin6_port)
     }
@@ -473,7 +497,10 @@ impl SocketAddrV6 {
     /// ```
     #[must_use]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_socketaddr", issue = "82485"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
+    )]
     pub const fn flowinfo(&self) -> u32 {
         self.inner.sin6_flowinfo
     }
@@ -513,7 +540,10 @@ impl SocketAddrV6 {
     /// ```
     #[must_use]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_socketaddr", issue = "82485"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
+    )]
     pub const fn scope_id(&self) -> u32 {
         self.inner.sin6_scope_id
     }

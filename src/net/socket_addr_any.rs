@@ -9,9 +9,10 @@
 //! OS-specific socket address representations in memory.
 #![allow(unsafe_code)]
 
-use crate::imp;
-use crate::io;
-use crate::net::{AddressFamily, SocketAddrStorage, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
+#[cfg(not(windows))]
+use crate::net::SocketAddrUnix;
+use crate::net::{AddressFamily, SocketAddrStorage, SocketAddrV4, SocketAddrV6};
+use crate::{imp, io};
 #[cfg(not(feature = "rustc-dep-of-std"))]
 use std::fmt;
 

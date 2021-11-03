@@ -1,6 +1,6 @@
 use crate::{imp, io};
+use imp::fd::AsFd;
 use imp::fs::CopyfileFlags;
-use io_lifetimes::AsFd;
 
 /// `copyfile_state_t`
 pub use imp::fs::copyfile_state_t;

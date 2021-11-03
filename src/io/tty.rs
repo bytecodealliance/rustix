@@ -7,12 +7,12 @@ use crate::imp;
 ))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 use crate::io;
-use io_lifetimes::AsFd;
+use imp::fd::AsFd;
 #[cfg(any(
     all(linux_raw, feature = "procfs"),
     all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
 ))]
-use {io_lifetimes::BorrowedFd, std::ffi::CString};
+use {imp::fd::BorrowedFd, std::ffi::CString};
 
 /// `isatty(fd)`—Tests whether a file descriptor refers to a terminal.
 ///

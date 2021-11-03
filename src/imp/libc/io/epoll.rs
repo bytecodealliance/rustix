@@ -9,16 +9,14 @@
 //! ```rust,no_run
 //! # #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 //! # fn main() -> std::io::Result<()> {
-//! use rsix::io::{
-//!     epoll::{self, Epoll},
-//!     ioctl_fionbio, read, write,
-//! };
+//! use io_lifetimes::AsFd;
+//! use rsix::io::epoll::{self, Epoll};
+//! use rsix::io::{ioctl_fionbio, read, write};
 //! use rsix::net::{
-//!     accept, bind_v4, listen, socket, AddressFamily, Ipv4Addr, Protocol, SocketAddr,
-//!     SocketAddrV4, SocketType,
+//!     accept, bind_v4, listen, socket, AddressFamily, Ipv4Addr, Protocol, SocketAddrV4,
+//!     SocketType,
 //! };
 //! use std::os::unix::io::AsRawFd;
-//! use io_lifetimes::AsFd;
 //!
 //! // Create a socket and listen on it.
 //! let listen_sock = socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
@@ -45,9 +43,7 @@
 //!             // register to be notified when it's ready to write to.
 //!             let conn_sock = accept(&*target)?;
 //!             ioctl_fionbio(&conn_sock, true)?;
-//!             epoll
-//!                 .add(conn_sock, epoll::EventFlags::OUT | epoll::EventFlags::ET)
-//!                 ?;
+//!             epoll.add(conn_sock, epoll::EventFlags::OUT | epoll::EventFlags::ET)?;
 //!         } else {
 //!             // Write a message to the stream and then unregister it.
 //!             write(&*target, b"hello\n")?;
@@ -58,9 +54,9 @@
 //! # }
 //! ```
 
+use super::super::fd::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use crate::imp::libc::conv::{ret, ret_owned_fd, ret_u32};
-use crate::io;
-use crate::io::{AsRawFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
+use crate::io::{self, OwnedFd};
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd};
 use std::convert::TryInto;

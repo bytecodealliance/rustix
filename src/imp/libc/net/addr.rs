@@ -2,13 +2,13 @@
 
 #[cfg(windows)]
 use super::super::libc;
-use super::{read_sockaddr, write_sockaddr, AddressFamily};
+#[cfg(not(windows))]
 use crate::io;
-use crate::net::{SocketAddrV4, SocketAddrV6};
 #[cfg(not(windows))]
 use crate::path;
 #[cfg(not(windows))]
 use std::ffi::{CStr, CString};
+#[cfg(not(windows))]
 use std::fmt;
 
 /// `struct sockaddr_un`

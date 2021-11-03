@@ -9,10 +9,10 @@
 use crate::fs::{
     cwd, fstat, fstatfs, major, openat, renameat, Mode, OFlags, Stat, PROC_SUPER_MAGIC,
 };
+use crate::imp::fd::{AsFd, BorrowedFd};
 use crate::io::{self, OwnedFd};
 use crate::path::DecInt;
 use crate::process::{getgid, getpid, getuid, Gid, RawGid, RawUid, Uid};
-use io_lifetimes::{AsFd, BorrowedFd};
 use once_cell::sync::OnceCell;
 
 /// Linux's procfs always uses inode 1 for its root directory.

@@ -1,8 +1,8 @@
 //! Linux `statx`.
 
 use crate::{imp, io, path};
+use imp::fd::AsFd;
 use imp::fs::{AtFlags, Statx};
-use io_lifetimes::AsFd;
 
 /// `STATX_*` constants.
 pub use imp::fs::StatxFlags;

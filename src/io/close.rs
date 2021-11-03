@@ -2,7 +2,7 @@
 #![allow(unsafe_code)]
 
 use crate::imp;
-use crate::io::RawFd;
+use imp::fd::RawFd;
 
 /// `close(raw_fd)`—Closes a `RawFd` directly.
 ///

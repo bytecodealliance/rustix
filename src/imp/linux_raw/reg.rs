@@ -13,7 +13,7 @@
 
 #![allow(unsafe_code)]
 
-use crate::io::RawFd;
+use super::fd::RawFd;
 use std::ffi::c_void;
 use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uint};

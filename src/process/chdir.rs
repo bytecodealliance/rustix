@@ -1,6 +1,6 @@
 use crate::{imp, io, path};
 #[cfg(not(target_os = "fuchsia"))]
-use io_lifetimes::AsFd;
+use imp::fd::AsFd;
 use std::ffi::CString;
 
 /// `chdir(path)`—Change the working directory.

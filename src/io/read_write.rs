@@ -1,7 +1,7 @@
 //! `read` and `write`, optionally positioned, optionally vectored
 
 use crate::{imp, io};
-use io_lifetimes::AsFd;
+use imp::fd::AsFd;
 use std::io::{IoSlice, IoSliceMut};
 
 /// `RWF_*` constants for use with [`preadv2`] and [`pwritev2`].

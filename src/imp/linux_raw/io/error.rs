@@ -10,8 +10,9 @@
 #![allow(unsafe_code)]
 #![cfg_attr(not(rustc_attrs), allow(unused_unsafe))]
 
+use crate::imp::fd::RawFd;
 use crate::imp::linux_raw::reg::{RetNumber, RetReg};
-use crate::io::{self, RawFd};
+use crate::io;
 use linux_raw_sys::{errno, v5_4};
 use std::ffi::c_void;
 use std::os::raw::{c_int, c_uint};

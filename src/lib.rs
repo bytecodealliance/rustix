@@ -68,7 +68,6 @@ pub use io_lifetimes;
 #[cfg(not(windows))]
 #[macro_use]
 pub(crate) mod cstr;
-#[cfg(not(windows))]
 #[macro_use]
 pub(crate) mod const_assert;
 

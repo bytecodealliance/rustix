@@ -1,18 +1,25 @@
 use super::super::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
+use super::super::fd::BorrowedFd;
 #[cfg(windows)]
 use super::super::libc;
+#[cfg(not(any(
+    target_os = "freebsd",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "netbsd"
+)))]
+use super::ext::in6_addr_new;
+use super::ext::in_addr_new;
 #[cfg(not(windows))]
 use super::{encode_sockaddr_unix, SocketAddrUnix};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::{
     encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags, AddressFamily, Protocol,
-    RecvFlags, SendFlags, Shutdown, SocketAddr, SocketFlags, SocketType,
+    RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
 };
 use crate::as_ptr;
-use crate::io;
-use crate::io::BorrowedFd;
-use crate::io::OwnedFd;
-use crate::net::{SocketAddrV4, SocketAddrV6};
+use crate::io::{self, OwnedFd};
+use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use std::convert::TryInto;
 use std::mem::{size_of, MaybeUninit};
 #[cfg(not(any(target_os = "redox", target_os = "wasi",)))]
@@ -49,7 +56,7 @@ pub(crate) fn recvfrom(
     fd: BorrowedFd<'_>,
     buf: &mut [u8],
     flags: RecvFlags,
-) -> io::Result<(usize, SocketAddr)> {
+) -> io::Result<(usize, SocketAddrAny)> {
     unsafe {
         let mut storage = MaybeUninit::<libc::sockaddr_storage>::uninit();
         let mut len = size_of::<libc::sockaddr_storage>() as libc::socklen_t;
@@ -258,7 +265,7 @@ pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Res
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddr)> {
+pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddrAny)> {
     unsafe {
         let mut storage = MaybeUninit::<libc::sockaddr_storage>::uninit();
         let mut len = size_of::<libc::sockaddr_storage>() as libc::socklen_t;
@@ -284,7 +291,7 @@ pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketA
 pub(crate) fn acceptfrom_with(
     sockfd: BorrowedFd<'_>,
     flags: AcceptFlags,
-) -> io::Result<(OwnedFd, SocketAddr)> {
+) -> io::Result<(OwnedFd, SocketAddrAny)> {
     unsafe {
         let mut storage = MaybeUninit::<libc::sockaddr_storage>::uninit();
         let mut len = size_of::<libc::sockaddr_storage>() as libc::socklen_t;
@@ -314,7 +321,7 @@ pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, _flags: AcceptFlags) -> io::Re
 pub(crate) fn acceptfrom_with(
     sockfd: BorrowedFd<'_>,
     _flags: AcceptFlags,
-) -> io::Result<(OwnedFd, SocketAddr)> {
+) -> io::Result<(OwnedFd, SocketAddrAny)> {
     acceptfrom(sockfd)
 }
 
@@ -324,7 +331,7 @@ pub(crate) fn shutdown(sockfd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> 
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
+pub(crate) fn getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
     unsafe {
         let mut storage = MaybeUninit::<libc::sockaddr_storage>::uninit();
         let mut len = size_of::<libc::sockaddr_storage>() as libc::socklen_t;
@@ -338,7 +345,7 @@ pub(crate) fn getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn getpeername(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddr> {
+pub(crate) fn getpeername(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
     unsafe {
         let mut storage = MaybeUninit::<libc::sockaddr_storage>::uninit();
         let mut len = size_of::<libc::sockaddr_storage>() as libc::socklen_t;
@@ -374,17 +381,16 @@ pub(crate) fn socketpair(
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) mod sockopt {
-    use super::super::ext::Ipv4AddrExt;
     #[cfg(not(any(
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd"
     )))]
-    use super::super::ext::Ipv6AddrExt;
+    use super::in6_addr_new;
     #[cfg(windows)]
     use super::libc;
-    use crate::io::BorrowedFd;
+    use super::{in_addr_new, BorrowedFd};
     use crate::net::sockopt::Timeout;
     #[cfg(not(any(
         target_os = "freebsd",
@@ -729,7 +735,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     fn to_imr_addr(addr: &Ipv4Addr) -> libc::in_addr {
-        libc::in_addr::new(u32::from_ne_bytes(addr.octets()))
+        in_addr_new(u32::from_ne_bytes(addr.octets()))
     }
 
     #[cfg(not(any(
@@ -754,7 +760,7 @@ pub(crate) mod sockopt {
     )))]
     #[inline]
     fn to_ipv6mr_multiaddr(multiaddr: &Ipv6Addr) -> libc::in6_addr {
-        libc::in6_addr::new(multiaddr.octets())
+        in6_addr_new(multiaddr.octets())
     }
 
     #[cfg(target_os = "android")]

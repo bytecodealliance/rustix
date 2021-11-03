@@ -34,6 +34,7 @@ use super::conv::{
     ret_usize, ret_usize_infallible, ret_void_star, size_of, slice, slice_just_addr, slice_mut,
     void_star, zero,
 };
+use super::fd::{AsFd, BorrowedFd, RawFd};
 #[cfg(feature = "procfs")]
 use super::fs::Mode;
 use super::io::{
@@ -48,15 +49,13 @@ use super::rand::GetRandomFlags;
 use super::reg::nr;
 use super::thread::{FutexFlags, FutexOperation};
 use super::time::{ClockId, Timespec};
-use crate::io;
-use crate::io::{OwnedFd, RawFd};
+use crate::io::{self, OwnedFd};
 #[cfg(feature = "procfs")]
 use crate::path::DecInt;
 use crate::process::{
     Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, Rlimit, Uid, WaitOptions, WaitStatus,
 };
 use crate::time::NanosleepRelativeResult;
-use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use linux_raw_sys::general::__NR_epoll_pwait;
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]

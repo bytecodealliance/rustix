@@ -1,13 +1,11 @@
 #![allow(dead_code)]
 
+use super::fd::{AsRawFd, BorrowedFd, FromFd, FromRawFd, IntoFd, IntoRawFd, LibcFd, RawFd};
 #[cfg(windows)]
 use super::io_lifetimes;
 #[cfg(not(windows))]
 use super::offset::libc_off_t;
-use crate::io;
-use crate::io::{
-    AsRawFd, BorrowedFd, FromFd, FromRawFd, IntoFd, IntoRawFd, LibcFd, OwnedFd, RawFd,
-};
+use crate::io::{self, OwnedFd};
 #[cfg(windows)]
 use std::convert::TryInto;
 use std::ffi::CStr;

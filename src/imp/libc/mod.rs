@@ -6,13 +6,33 @@ mod conv;
 mod offset;
 
 #[cfg(windows)]
-pub(crate) mod io_lifetimes;
+mod io_lifetimes;
 #[cfg(not(windows))]
-pub(crate) use io_lifetimes;
+#[cfg(feature = "rustc-dep-of-std")]
+pub(crate) use crate::io::fd;
+#[cfg(windows)]
+pub(crate) mod fd {
+    pub(crate) use super::io_lifetimes::*;
+}
+#[cfg(not(windows))]
+#[cfg(not(feature = "rustc-dep-of-std"))]
+pub(crate) mod fd {
+    pub(crate) use io_lifetimes::*;
+
+    #[allow(unused_imports)]
+    #[cfg(unix)]
+    pub(crate) use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd, RawFd as LibcFd};
+    #[allow(unused_imports)]
+    #[cfg(target_os = "wasi")]
+    pub(crate) use {
+        libc::c_int as LibcFd,
+        std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
+    };
+}
 
 #[cfg(windows)]
-pub(crate) mod libc;
-#[cfg(not(windows))]
+mod libc;
+#[cfg(feature = "rustc-dep-of-std")]
 pub(crate) use libc;
 
 #[cfg(not(windows))]

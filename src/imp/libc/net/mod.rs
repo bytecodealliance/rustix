@@ -6,9 +6,9 @@ mod types;
 mod write_sockaddr;
 
 pub(crate) mod syscalls;
+pub use addr::SocketAddrStorage;
 #[cfg(not(windows))]
 pub use addr::SocketAddrUnix;
-pub use addr::{SocketAddr, SocketAddrStorage};
 pub(crate) use read_sockaddr::{read_sockaddr, read_sockaddr_os};
 pub use send_recv::{RecvFlags, SendFlags};
 pub use types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType, Timeout};

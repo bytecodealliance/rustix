@@ -1,6 +1,5 @@
-use crate::imp;
-use crate::io;
 use crate::process::Pid;
+use crate::{imp, io};
 
 /// CpuSet represent a bit-mask of CPUs.
 /// CpuSets are used by `sched_setaffinity` and
@@ -17,6 +16,9 @@ pub struct CpuSet {
 }
 
 impl CpuSet {
+    /// Return the maximum number of CPU in CpuSet
+    pub const MAX_CPU: usize = imp::process::CPU_SETSIZE;
+
     /// Create a new and empty CpuSet.
     pub fn new() -> CpuSet {
         CpuSet {
@@ -58,9 +60,6 @@ impl CpuSet {
     pub fn clear(&mut self) {
         imp::syscalls::CPU_ZERO(&mut self.cpu_set)
     }
-
-    /// Return the maximum number of CPU in CpuSet
-    pub const MAX_CPU: usize = imp::process::CPU_SETSIZE;
 }
 
 /// `sched_setaffinity` set a thread's CPU affinity mask

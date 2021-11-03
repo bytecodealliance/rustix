@@ -16,13 +16,13 @@ use super::conv::ret_ssize_t;
 #[cfg(windows)]
 use super::conv::{borrowed_fd, ret};
 #[cfg(windows)]
+use super::fd::{BorrowedFd, LibcFd, RawFd};
+#[cfg(windows)]
 use super::libc;
 #[cfg(target_os = "linux")]
 use super::rand::GetRandomFlags;
 #[cfg(any(windows, target_os = "linux"))]
 use crate::io;
-#[cfg(windows)]
-use crate::io::BorrowedFd;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::process::Pid;
 
@@ -60,4 +60,9 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
         let mut data = value as libc::c_uint;
         ret(libc::ioctl(borrowed_fd(fd), libc::FIONBIO, &mut data))
     }
+}
+
+#[cfg(windows)]
+pub(crate) unsafe fn close(raw_fd: RawFd) {
+    let _ = libc::close(raw_fd as LibcFd);
 }

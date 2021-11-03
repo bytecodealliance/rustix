@@ -3,6 +3,7 @@ use super::super::conv::syscall_ret_owned_fd;
 use super::super::conv::{
     borrowed_fd, no_fd, ret, ret_c_int, ret_discarded_fd, ret_owned_fd, ret_ssize_t,
 };
+use super::super::fd::{AsFd, BorrowedFd, RawFd};
 #[cfg(not(target_os = "wasi"))]
 use super::super::offset::libc_mmap;
 use super::super::offset::{libc_pread, libc_pwrite};
@@ -23,9 +24,8 @@ use super::{DupFlags, MapFlags, MprotectFlags, ProtFlags, Termios, Winsize};
 use super::{EventfdFlags, UserfaultfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::{MlockFlags, ReadWriteFlags};
-use crate::io::{self, OwnedFd, RawFd};
+use crate::io::{self, OwnedFd};
 use errno::errno;
-use io_lifetimes::{AsFd, BorrowedFd};
 use libc::{c_int, c_void};
 use std::cmp::min;
 use std::convert::TryInto;

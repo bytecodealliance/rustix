@@ -1,7 +1,9 @@
 use super::FileType;
 use crate::as_ptr;
+#[cfg(not(feature = "rustc-dep-of-std"))]
+use crate::imp::fd::IntoFd;
+use crate::imp::fd::{AsFd, BorrowedFd};
 use crate::io::{self, OwnedFd};
-use io_lifetimes::{AsFd, BorrowedFd, IntoFd};
 use linux_raw_sys::general::linux_dirent64;
 #[cfg(target_os = "wasi")]
 use std::ffi::CString;
@@ -18,6 +20,7 @@ pub struct Dir {
 
 impl Dir {
     /// Construct a `Dir`, assuming ownership of the file descriptor.
+    #[cfg(not(feature = "rustc-dep-of-std"))]
     #[inline]
     pub fn from<F: IntoFd>(fd: F) -> io::Result<Self> {
         let fd = fd.into_fd();
@@ -25,12 +28,14 @@ impl Dir {
     }
 
     /// Construct a `Dir`, assuming ownership of the file descriptor.
+    #[cfg(not(feature = "rustc-dep-of-std"))]
     #[inline]
     pub fn from_into_fd<F: IntoFd>(fd: F) -> io::Result<Self> {
         let fd = fd.into_fd();
         Self::_from(fd.into())
     }
 
+    #[cfg(not(feature = "rustc-dep-of-std"))]
     #[inline]
     fn _from(fd: OwnedFd) -> io::Result<Self> {
         Ok(Self {

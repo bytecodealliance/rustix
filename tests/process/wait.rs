@@ -1,8 +1,7 @@
 use libc::{kill, SIGSTOP};
 use rsix::process;
 use serial_test::serial;
-use std::process::Command;
-use std::process::Stdio;
+use std::process::{Command, Stdio};
 
 // these tests must execute serially to prevent race condition,
 // where `test_wait` waits for the child process spawned in `test_waitpid`,

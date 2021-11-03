@@ -6,6 +6,7 @@ use crate::fs::CloneFlags;
 use crate::fs::RenameFlags;
 use crate::io::{self, OwnedFd};
 use crate::{imp, path};
+use imp::fd::{AsFd, BorrowedFd};
 #[cfg(not(any(
     target_os = "ios",
     target_os = "macos",
@@ -15,7 +16,6 @@ use crate::{imp, path};
 use imp::fs::Dev;
 use imp::fs::{Access, AtFlags, Mode, OFlags, Stat};
 use imp::time::Timespec;
-use io_lifetimes::{AsFd, BorrowedFd};
 use std::ffi::{CStr, CString};
 
 /// `openat(dirfd, path, oflags, mode)`—Opens a file.

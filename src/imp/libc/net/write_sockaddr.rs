@@ -2,13 +2,13 @@
 //! we can interpret the rest of a `sockaddr` produced by the kernel.
 #![allow(unsafe_code)]
 
-use super::ext::{Ipv4AddrExt, Ipv6AddrExt, SocketAddrV6Ext};
 #[cfg(windows)]
 use super::super::libc;
+use super::ext::{in6_addr_new, in_addr_new, sockaddr_in6_new};
+use super::SocketAddrStorage;
 #[cfg(not(windows))]
 use super::SocketAddrUnix;
-use super::{SocketAddr, SocketAddrStorage};
-use crate::net::{SocketAddrV4, SocketAddrV6};
+use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use std::mem::size_of;
 
 pub(crate) unsafe fn write_sockaddr(
@@ -35,7 +35,7 @@ pub(crate) unsafe fn encode_sockaddr_v4(v4: &SocketAddrV4) -> libc::sockaddr_in 
         sin_len: size_of::<libc::sockaddr_in>() as _,
         sin_family: libc::AF_INET as _,
         sin_port: u16::to_be(v4.port()),
-        sin_addr: libc::in_addr::new(u32::from_ne_bytes(v4.ip().octets())),
+        sin_addr: in_addr_new(u32::from_ne_bytes(v4.ip().octets())),
         sin_zero: [0; 8usize],
     }
 }
@@ -55,12 +55,12 @@ pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> libc::sockaddr_in6
         target_os = "openbsd"
     ))]
     {
-        libc::sockaddr_in6::new(
+        sockaddr_in6_new(
             size_of::<libc::sockaddr_in6>() as _,
             libc::AF_INET6 as _,
             u16::to_be(v6.port()),
             u32::to_be(v6.flowinfo()),
-            libc::in6_addr::new(v6.ip().octets()),
+            in6_addr_new(v6.ip().octets()),
             v6.scope_id(),
         )
     }
@@ -72,11 +72,11 @@ pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> libc::sockaddr_in6
         target_os = "openbsd"
     )))]
     {
-        libc::sockaddr_in6::new(
+        sockaddr_in6_new(
             libc::AF_INET6 as _,
             u16::to_be(v6.port()),
             u32::to_be(v6.flowinfo()),
-            libc::in6_addr::new(v6.ip().octets()),
+            in6_addr_new(v6.ip().octets()),
             v6.scope_id(),
         )
     }

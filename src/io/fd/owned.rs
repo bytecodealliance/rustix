@@ -1,3 +1,7 @@
+//! The following is derived from Rust's
+//! library/std/src/os/fd/owned.rs at revision
+//! dca3f1b786efd27be3b325ed1e01e247aa589c3b.
+//!
 //! Owned and borrowed Unix-like file descriptors.
 
 #![cfg_attr(staged_api, unstable(feature = "io_safety", issue = "87074"))]
@@ -5,10 +9,10 @@
 #![allow(unsafe_code)]
 
 use super::raw::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+use crate::io::close;
 use core::fmt;
 use core::marker::PhantomData;
 use core::mem::forget;
-use crate::io::close;
 
 /// A borrowed file descriptor.
 ///
@@ -63,7 +67,12 @@ impl BorrowedFd<'_> {
     pub unsafe fn borrow_raw_fd(fd: RawFd) -> Self {
         assert_ne!(fd, u32::MAX as RawFd);
         // SAFETY: we just asserted that the value is in the valid range and isn't `-1` (the only value bigger than `0xFF_FF_FF_FE` unsigned)
-        unsafe { Self { fd, _phantom: PhantomData } }
+        unsafe {
+            Self {
+                fd,
+                _phantom: PhantomData,
+            }
+        }
     }
 }
 

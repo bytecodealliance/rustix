@@ -118,8 +118,8 @@ pub fn sched_yield() {
 
 /// `waitpid`—Wait for a specific process to change state.
 ///
-/// If the selected PID is `Pid::NONE`, the call will wait for the child process,
-/// whose PID matches that of the calling process.
+/// If the selected PID is `Pid::NONE`, the call will wait for the child
+/// process, whose PID matches that of the calling process.
 ///
 /// On Success, returns the status of the selected process.
 ///

@@ -4,8 +4,7 @@
 //! it filled itself.
 #![allow(unsafe_code)]
 
-use crate::io::AsRawFd;
-use io_lifetimes::AsFd;
+use crate::imp::fd::{AsFd, AsRawFd};
 use itoa::{fmt, Integer};
 use std::ffi::{CStr, OsStr};
 #[cfg(unix)]
