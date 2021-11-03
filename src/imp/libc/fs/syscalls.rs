@@ -70,13 +70,13 @@ use super::{Access, FdFlags, Mode, OFlags, Stat};
 use super::{RenameFlags, ResolveFlags};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::{Statx, StatxFlags};
+use crate::io::SeekFrom;
 use crate::io::{self, OwnedFd};
 use io_lifetimes::BorrowedFd;
 use std::convert::TryInto;
 use std::ffi::CStr;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use std::ffi::CString;
-use std::io::SeekFrom;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use std::mem::size_of;
 #[cfg(target_os = "linux")]

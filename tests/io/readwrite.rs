@@ -64,8 +64,7 @@ fn test_readwrite_p() {
 #[test]
 fn test_readwrite_v() {
     use rsix::fs::{cwd, openat, seek, Mode, OFlags};
-    use rsix::io::{readv, writev};
-    use std::io::SeekFrom;
+    use rsix::io::{readv, writev, SeekFrom};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();

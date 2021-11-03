@@ -7,7 +7,7 @@
 
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]
 
-use std::io::SeekFrom;
+use rsix::io::SeekFrom;
 
 #[test]
 fn invalid_offset_seek() {
