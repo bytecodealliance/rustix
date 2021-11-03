@@ -1,6 +1,6 @@
+use crate::ffi::ZString;
 use crate::{imp, io};
 use imp::fd::AsFd;
-use std::ffi::CString;
 
 /// `fcntl(fd, F_GETPATH)`
 ///
@@ -9,7 +9,7 @@ use std::ffi::CString;
 ///
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
 #[inline]
-pub fn getpath<Fd: AsFd>(fd: &Fd) -> io::Result<CString> {
+pub fn getpath<Fd: AsFd>(fd: &Fd) -> io::Result<ZString> {
     let fd = fd.as_fd();
     imp::syscalls::getpath(fd)
 }

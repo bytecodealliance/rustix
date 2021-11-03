@@ -1,6 +1,6 @@
 use super::super::c;
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use std::ffi::CStr;
+use crate::ffi::ZStr;
 
 #[inline]
 pub(crate) fn page_size() -> usize {
@@ -19,6 +19,6 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
-pub(crate) fn linux_execfn() -> &'static CStr {
-    unsafe { CStr::from_ptr(c::getauxval(c::AT_EXECFN) as *const c::c_char) }
+pub(crate) fn linux_execfn() -> &'static ZStr {
+    unsafe { ZStr::from_ptr(c::getauxval(c::AT_EXECFN) as *const c::c_char) }
 }

@@ -5,7 +5,7 @@
 #![allow(unsafe_code)]
 
 use crate::imp::c;
-use crate::imp::net::ext::{in6_addr_new, in6_addr_s6_addr};
+use crate::imp::net::ext::{in6_addr_new, in6_addr_s6_addr, in_addr_new, in_addr_s_addr};
 use core::cmp::Ordering;
 use core::hash;
 use core::mem::transmute;
@@ -474,9 +474,7 @@ impl Ipv4Addr {
         // `s_addr` is stored as BE on all machine and the array is in BE order.
         // So the native endian conversion method is used so that it's never swapped.
         Ipv4Addr {
-            inner: c::in_addr {
-                s_addr: u32::from_ne_bytes([a, b, c, d]),
-            },
+            inner: in_addr_new(u32::from_ne_bytes([a, b, c, d])),
         }
     }
 
@@ -541,7 +539,7 @@ impl Ipv4Addr {
     #[inline]
     pub const fn octets(&self) -> [u8; 4] {
         // This returns the order we want because s_addr is stored in big-endian.
-        self.inner.s_addr.to_ne_bytes()
+        in_addr_s_addr(self.inner).to_ne_bytes()
     }
 
     /// Returns [`true`] for the special 'unspecified' address (`0.0.0.0`).
@@ -567,7 +565,7 @@ impl Ipv4Addr {
     #[must_use]
     #[inline]
     pub const fn is_unspecified(&self) -> bool {
-        self.inner.s_addr == 0
+        in_addr_s_addr(self.inner) == 0
     }
 
     /// Returns [`true`] if this is a loopback address (`127.0.0.0/8`).
@@ -1060,7 +1058,7 @@ impl Clone for Ipv4Addr {
 impl PartialEq for Ipv4Addr {
     #[inline]
     fn eq(&self, other: &Ipv4Addr) -> bool {
-        self.inner.s_addr == other.inner.s_addr
+        in_addr_s_addr(self.inner) == in_addr_s_addr(other.inner)
     }
 }
 
@@ -1097,7 +1095,7 @@ impl hash::Hash for Ipv4Addr {
         // * hash in big endian order
         // * in netbsd, `in_addr` has `repr(packed)`, we need to
         //   copy `s_addr` to avoid unsafe borrowing
-        { self.inner.s_addr }.hash(s)
+        { in_addr_s_addr(self.inner) }.hash(s)
     }
 }
 
@@ -1136,7 +1134,7 @@ impl Ord for Ipv4Addr {
     #[inline]
     fn cmp(&self, other: &Ipv4Addr) -> Ordering {
         // Compare as native endian
-        u32::from_be(self.inner.s_addr).cmp(&u32::from_be(other.inner.s_addr))
+        u32::from_be(in_addr_s_addr(self.inner)).cmp(&u32::from_be(in_addr_s_addr(other.inner)))
     }
 }
 

@@ -6,8 +6,8 @@
 //! kernel into `&str` references, which assumes that they're NUL-terminated.
 #![allow(unsafe_code)]
 
+use crate::ffi::ZStr;
 use crate::imp;
-use std::ffi::CStr;
 use std::fmt;
 
 /// `uname()`—Returns high-level information about the runtime OS and
@@ -24,7 +24,7 @@ pub struct Uname(imp::process::RawUname);
 impl Uname {
     /// `sysname`—Operating system release name
     #[inline]
-    pub fn sysname(&self) -> &CStr {
+    pub fn sysname(&self) -> &ZStr {
         Self::to_cstr(self.0.sysname.as_ptr().cast())
     }
 
@@ -34,39 +34,39 @@ impl Uname {
     /// information about hosts that have multiple names, or any information
     /// about where the names are visible.
     #[inline]
-    pub fn nodename(&self) -> &CStr {
+    pub fn nodename(&self) -> &ZStr {
         Self::to_cstr(self.0.nodename.as_ptr().cast())
     }
 
     /// `release`—Operating system release version string
     #[inline]
-    pub fn release(&self) -> &CStr {
+    pub fn release(&self) -> &ZStr {
         Self::to_cstr(self.0.release.as_ptr().cast())
     }
 
     /// `version`—Operating system build identifiers
     #[inline]
-    pub fn version(&self) -> &CStr {
+    pub fn version(&self) -> &ZStr {
         Self::to_cstr(self.0.version.as_ptr().cast())
     }
 
     /// `machine`—Hardware architecture identifier
     #[inline]
-    pub fn machine(&self) -> &CStr {
+    pub fn machine(&self) -> &ZStr {
         Self::to_cstr(self.0.machine.as_ptr().cast())
     }
 
     /// `domainname`—NIS or YP domain identifer
     #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
     #[inline]
-    pub fn domainname(&self) -> &CStr {
+    pub fn domainname(&self) -> &ZStr {
         Self::to_cstr(self.0.domainname.as_ptr().cast())
     }
 
     #[inline]
-    fn to_cstr<'a>(ptr: *const u8) -> &'a CStr {
+    fn to_cstr<'a>(ptr: *const u8) -> &'a ZStr {
         // Safety: Strings returned from the kernel are always NUL-terminated.
-        unsafe { CStr::from_ptr(ptr.cast()) }
+        unsafe { ZStr::from_ptr(ptr.cast()) }
     }
 }
 

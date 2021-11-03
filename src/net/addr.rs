@@ -5,7 +5,10 @@
 #![allow(unsafe_code)]
 
 use crate::imp::c;
-use crate::imp::net::ext::in6_addr_s6_addr;
+use crate::imp::net::ext::{
+    in6_addr_s6_addr, in_addr_s_addr, sockaddr_in6_new, sockaddr_in6_sin6_scope_id,
+    sockaddr_in6_sin6_scope_id_mut,
+};
 use crate::net::ip::{IpAddr, Ipv4Addr, Ipv6Addr};
 use core::cmp::Ordering;
 use core::hash;
@@ -392,14 +395,13 @@ impl SocketAddrV6 {
     #[must_use]
     pub fn new(ip: Ipv6Addr, port: u16, flowinfo: u32, scope_id: u32) -> SocketAddrV6 {
         SocketAddrV6 {
-            inner: c::sockaddr_in6 {
-                sin6_family: c::AF_INET6 as c::sa_family_t,
-                sin6_port: port.to_be(),
-                sin6_addr: ip.inner,
-                sin6_flowinfo: flowinfo,
-                sin6_scope_id: scope_id,
-                ..unsafe { mem::zeroed() }
-            },
+            inner: sockaddr_in6_new(
+                c::AF_INET6 as c::sa_family_t,
+                port.to_be(),
+                flowinfo,
+                ip.inner,
+                scope_id,
+            ),
         }
     }
 
@@ -545,7 +547,7 @@ impl SocketAddrV6 {
         rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
     )]
     pub const fn scope_id(&self) -> u32 {
-        self.inner.sin6_scope_id
+        sockaddr_in6_sin6_scope_id(self.inner)
     }
 
     /// Changes the scope ID associated with this socket address.
@@ -563,7 +565,7 @@ impl SocketAddrV6 {
     /// ```
     #[cfg_attr(staged_api, stable(feature = "sockaddr_setters", since = "1.9.0"))]
     pub fn set_scope_id(&mut self, new_scope_id: u32) {
-        self.inner.sin6_scope_id = new_scope_id;
+        *sockaddr_in6_sin6_scope_id_mut(&mut self.inner) = new_scope_id;
     }
 }
 
@@ -613,7 +615,7 @@ impl Clone for SocketAddrV6 {
 impl PartialEq for SocketAddrV4 {
     fn eq(&self, other: &SocketAddrV4) -> bool {
         self.inner.sin_port == other.inner.sin_port
-            && self.inner.sin_addr.s_addr == other.inner.sin_addr.s_addr
+            && in_addr_s_addr(self.inner.sin_addr) == in_addr_s_addr(other.inner.sin_addr)
     }
 }
 #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
@@ -622,7 +624,7 @@ impl PartialEq for SocketAddrV6 {
         self.inner.sin6_port == other.inner.sin6_port
             && in6_addr_s6_addr(self.inner.sin6_addr) == in6_addr_s6_addr(self.inner.sin6_addr)
             && self.inner.sin6_flowinfo == other.inner.sin6_flowinfo
-            && self.inner.sin6_scope_id == other.inner.sin6_scope_id
+            && sockaddr_in6_sin6_scope_id(self.inner) == sockaddr_in6_sin6_scope_id(other.inner)
     }
 }
 #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
@@ -665,7 +667,7 @@ impl Ord for SocketAddrV6 {
 #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
 impl hash::Hash for SocketAddrV4 {
     fn hash<H: hash::Hasher>(&self, s: &mut H) {
-        (self.inner.sin_port, self.inner.sin_addr.s_addr).hash(s)
+        (self.inner.sin_port, in_addr_s_addr(self.inner.sin_addr)).hash(s)
     }
 }
 #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
@@ -675,7 +677,7 @@ impl hash::Hash for SocketAddrV6 {
             self.inner.sin6_port,
             &in6_addr_s6_addr(self.inner.sin6_addr),
             self.inner.sin6_flowinfo,
-            self.inner.sin6_scope_id,
+            sockaddr_in6_sin6_scope_id(self.inner),
         )
             .hash(s)
     }

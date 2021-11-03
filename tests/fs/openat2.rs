@@ -1,6 +1,6 @@
-use io_lifetimes::AsFd;
 use rsix::fs::{cwd, mkdirat, openat, openat2, symlinkat, Mode, OFlags, ResolveFlags};
 use rsix::io::OwnedFd;
+use rsix::io_lifetimes::AsFd;
 use rsix::{io, path};
 use std::os::unix::io::AsRawFd;
 
@@ -12,7 +12,7 @@ fn openat2_more<Fd: AsFd, P: path::Arg>(
     mode: Mode,
     resolve: ResolveFlags,
 ) -> io::Result<OwnedFd> {
-    let path = path.as_cow_c_str().unwrap().into_owned();
+    let path = path.as_cow_z_str().unwrap().into_owned();
     loop {
         match openat2(dirfd, &path, oflags, mode, resolve) {
             Ok(file) => return Ok(file),

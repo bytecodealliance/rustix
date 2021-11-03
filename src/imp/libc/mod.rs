@@ -12,7 +12,7 @@ mod io_lifetimes;
 pub(crate) use crate::io::fd;
 #[cfg(windows)]
 pub(crate) mod fd {
-    pub(crate) use super::io_lifetimes::*;
+    pub use super::io_lifetimes::*;
 }
 #[cfg(not(windows))]
 #[cfg(not(feature = "rustc-dep-of-std"))]

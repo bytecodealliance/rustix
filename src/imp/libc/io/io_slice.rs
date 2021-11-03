@@ -2,7 +2,7 @@
 //! library/std/src/sys/unix/io.rs
 //! dca3f1b786efd27be3b325ed1e01e247aa589c3b.
 
-use super::c;
+use super::super::c;
 use core::marker::PhantomData;
 use core::slice;
 

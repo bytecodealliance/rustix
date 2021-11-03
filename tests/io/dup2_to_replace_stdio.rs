@@ -6,8 +6,8 @@
 /// Use `dup2` to replace the stdin and stdout file descriptors.
 #[test]
 fn dup2_to_replace_stdio() {
-    use io_lifetimes::AsFilelike;
     use rsix::io::{dup2, pipe};
+    use rsix::io_lifetimes::AsFilelike;
     use std::io::{BufRead, BufReader, Write};
     use std::mem::forget;
 

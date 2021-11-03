@@ -23,6 +23,7 @@ pub(crate) use winapi::shared::in6addr::in6_addr;
 pub(crate) use winapi::shared::inaddr::in_addr;
 
 pub(crate) use winapi::ctypes::*;
+pub(crate) use winapi::shared::basetsd::SSIZE_T as ssize_t;
 
 pub(crate) use winapi::um::winsock2::{
     closesocket as close, ioctlsocket as ioctl, linger, SOL_SOCKET, SO_BROADCAST, SO_LINGER,

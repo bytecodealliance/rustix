@@ -1,13 +1,13 @@
 use super::FileType;
 use crate::as_ptr;
+#[cfg(target_os = "wasi")]
+use crate::ffi::ZString;
+use crate::ffi::{ZStr, ZString};
 #[cfg(not(feature = "rustc-dep-of-std"))]
 use crate::imp::fd::IntoFd;
 use crate::imp::fd::{AsFd, BorrowedFd};
 use crate::io::{self, OwnedFd};
 use linux_raw_sys::general::linux_dirent64;
-#[cfg(target_os = "wasi")]
-use std::ffi::CString;
-use std::ffi::{CStr, CString};
 use std::mem::size_of;
 
 /// `DIR*`
@@ -101,14 +101,14 @@ impl Dir {
 
         // Read the NUL-terminated name from the `d_name` field. Without
         // `unsafe`, we need to scan for the NUL twice: once to obtain a size
-        // for the slice, and then once within `CStr::from_bytes_with_nul`.
+        // for the slice, and then once within `ZStr::from_bytes_with_nul`.
         let name_start = pos + offsetof_d_name;
         let name_len = self.buf[name_start..]
             .iter()
             .position(|x| *x == b'\0')
             .unwrap();
         let name =
-            CStr::from_bytes_with_nul(&self.buf[name_start..name_start + name_len + 1]).unwrap();
+            ZStr::from_bytes_with_nul(&self.buf[name_start..name_start + name_len + 1]).unwrap();
         let name = name.to_owned();
         assert!(name.as_bytes().len() <= self.buf.len() - name_start);
 
@@ -182,13 +182,13 @@ impl Iterator for Dir {
 pub struct DirEntry {
     d_ino: u64,
     d_type: u8,
-    name: CString,
+    name: ZString,
 }
 
 impl DirEntry {
     /// Returns the file name of this directory entry.
     #[inline]
-    pub fn file_name(&self) -> &CStr {
+    pub fn file_name(&self) -> &ZStr {
         &self.name
     }
 

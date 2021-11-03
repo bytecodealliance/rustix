@@ -11,5 +11,5 @@ pub use imp::fs::MemfdFlags;
 /// [Linux]: https://man7.org/linux/man-pages/man2/memfd_create.2.html
 #[inline]
 pub fn memfd_create<P: path::Arg>(path: P, flags: MemfdFlags) -> io::Result<OwnedFd> {
-    path.into_with_c_str(|path| imp::syscalls::memfd_create(path, flags))
+    path.into_with_z_str(|path| imp::syscalls::memfd_create(path, flags))
 }

@@ -108,8 +108,10 @@ pub use imp::io::Termios;
 #[cfg(any(linux_raw, all(libc, not(any(windows, target_os = "wasi")))))]
 pub use imp::io::Winsize;
 
+#[cfg(not(windows))]
 #[cfg(feature = "rustc-dep-of-std")]
 pub use imp::io::{IoSlice, IoSliceMut};
+#[cfg(not(windows))]
 #[cfg(not(feature = "rustc-dep-of-std"))]
 pub use std::io::{IoSlice, IoSliceMut};
 

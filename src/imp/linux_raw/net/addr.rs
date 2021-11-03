@@ -5,15 +5,15 @@
 //! Linux's IPv6 type contains a union.
 #![allow(unsafe_code)]
 
+use crate::ffi::{ZStr, ZString};
 use crate::{io, path};
-use std::ffi::{CStr, CString};
 use std::fmt;
 
 /// `struct sockaddr_un`
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[doc(alias = "sockaddr_un")]
 pub struct SocketAddrUnix {
-    path: CString,
+    path: ZString,
 }
 
 impl SocketAddrUnix {
@@ -21,12 +21,12 @@ impl SocketAddrUnix {
     /// filesystem path.
     #[inline]
     pub fn new<P: path::Arg>(path: P) -> io::Result<Self> {
-        let path = path.into_c_str()?.into_owned();
+        let path = path.into_z_str()?.into_owned();
         Self::_new(path)
     }
 
     #[inline]
-    fn _new(path: CString) -> io::Result<Self> {
+    fn _new(path: ZString) -> io::Result<Self> {
         let bytes = path.as_bytes();
         let z = linux_raw_sys::general::sockaddr_un {
             sun_family: 0,
@@ -40,7 +40,7 @@ impl SocketAddrUnix {
 
     /// Returns a reference to the contained path.
     #[inline]
-    pub fn path(&self) -> &CStr {
+    pub fn path(&self) -> &ZStr {
         &self.path
     }
 }

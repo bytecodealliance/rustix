@@ -26,7 +26,7 @@
 #![allow(dead_code, unused_macros)]
 #![allow(clippy::doc_markdown)]
 
-use std::ffi::CStr;
+use crate::ffi::ZStr;
 use std::sync::atomic::{self, AtomicUsize, Ordering};
 use std::{marker, mem};
 
@@ -102,7 +102,7 @@ impl<F> Weak<F> {
 }
 
 unsafe fn fetch(name: &str) -> usize {
-    let name = match CStr::from_bytes_with_nul(name.as_bytes()) {
+    let name = match ZStr::from_bytes_with_nul(name.as_bytes()) {
         Ok(c_str) => c_str,
         Err(..) => return 0,
     };
