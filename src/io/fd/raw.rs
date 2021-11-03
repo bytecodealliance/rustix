@@ -1,3 +1,7 @@
+//! The following is derived from Rust's
+//! library/std/src/os/fd/raw.rs at revision
+//! dca3f1b786efd27be3b325ed1e01e247aa589c3b.
+//!
 //! Raw Unix-like file descriptors.
 
 #![cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
@@ -111,21 +115,30 @@ pub trait IntoRawFd {
     fn into_raw_fd(self) -> RawFd;
 }
 
-#[cfg_attr(staged_api, stable(feature = "raw_fd_reflexive_traits", since = "1.48.0"))]
+#[cfg_attr(
+    staged_api,
+    stable(feature = "raw_fd_reflexive_traits", since = "1.48.0")
+)]
 impl AsRawFd for RawFd {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
         *self
     }
 }
-#[cfg_attr(staged_api, stable(feature = "raw_fd_reflexive_traits", since = "1.48.0"))]
+#[cfg_attr(
+    staged_api,
+    stable(feature = "raw_fd_reflexive_traits", since = "1.48.0")
+)]
 impl IntoRawFd for RawFd {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
         self
     }
 }
-#[cfg_attr(staged_api, stable(feature = "raw_fd_reflexive_traits", since = "1.48.0"))]
+#[cfg_attr(
+    staged_api,
+    stable(feature = "raw_fd_reflexive_traits", since = "1.48.0")
+)]
 impl FromRawFd for RawFd {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> RawFd {

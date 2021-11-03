@@ -1,8 +1,8 @@
+use super::super::fd::{AsFd, BorrowedFd, IntoFd, RawFd};
 use super::FileType;
 use crate::imp::libc::conv::owned_fd;
-use crate::io::{self, OwnedFd, RawFd};
+use crate::io::{self, OwnedFd};
 use errno::{errno, set_errno, Errno};
-use io_lifetimes::{AsFd, BorrowedFd, IntoFd};
 #[cfg(not(any(
     target_os = "android",
     target_os = "emscripten",

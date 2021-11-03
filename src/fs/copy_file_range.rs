@@ -1,5 +1,5 @@
 use crate::{imp, io};
-use io_lifetimes::AsFd;
+use imp::fd::AsFd;
 
 /// `copy_file_range(fd_in, off_in, fd_out, off_out, len, 0)`—Copies data
 /// from one file to another.

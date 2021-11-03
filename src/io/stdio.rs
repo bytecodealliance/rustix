@@ -9,8 +9,8 @@
 #![allow(unsafe_code)]
 
 use crate::imp;
-use crate::io::{FromRawFd, OwnedFd, RawFd};
-use io_lifetimes::BorrowedFd;
+use crate::io::OwnedFd;
+use imp::fd::{BorrowedFd, FromRawFd, RawFd};
 
 /// `STDIN_FILENO`—Standard input, borrowed.
 ///
@@ -67,7 +67,7 @@ pub unsafe fn stdin() -> BorrowedFd<'static> {
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
 #[inline]
 pub unsafe fn take_stdin() -> OwnedFd {
-    OwnedFd::from(io_lifetimes::OwnedFd::from_raw_fd(
+    OwnedFd::from(imp::fd::OwnedFd::from_raw_fd(
         imp::io::STDIN_FILENO as RawFd,
     ))
 }
@@ -128,7 +128,7 @@ pub unsafe fn stdout() -> BorrowedFd<'static> {
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
 #[inline]
 pub unsafe fn take_stdout() -> OwnedFd {
-    OwnedFd::from(io_lifetimes::OwnedFd::from_raw_fd(
+    OwnedFd::from(imp::fd::OwnedFd::from_raw_fd(
         imp::io::STDOUT_FILENO as RawFd,
     ))
 }
@@ -188,7 +188,7 @@ pub unsafe fn stderr() -> BorrowedFd<'static> {
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
 #[inline]
 pub unsafe fn take_stderr() -> OwnedFd {
-    OwnedFd::from(io_lifetimes::OwnedFd::from_raw_fd(
+    OwnedFd::from(imp::fd::OwnedFd::from_raw_fd(
         imp::io::STDERR_FILENO as RawFd,
     ))
 }

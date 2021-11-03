@@ -7,6 +7,7 @@
 //! types knowing their layouts, or construct owned file descriptors.
 #![allow(unsafe_code)]
 
+use super::fd::{AsRawFd, BorrowedFd, FromRawFd};
 use super::fs::{Mode, OFlags};
 #[cfg(not(debug_assertions))]
 use super::io::error::decode_usize_infallible;
@@ -18,9 +19,8 @@ use super::io::error::{
 };
 use super::reg::{raw_arg, ArgNumber, ArgReg, RetReg, R0};
 use super::time::ClockId;
-use crate::io::{self, AsRawFd, FromRawFd, OwnedFd};
+use crate::io::{self, OwnedFd};
 use crate::{as_mut_ptr, as_ptr};
-use io_lifetimes::BorrowedFd;
 #[cfg(target_pointer_width = "64")]
 use linux_raw_sys::general::__kernel_loff_t;
 #[cfg(target_pointer_width = "32")]
@@ -28,7 +28,7 @@ use linux_raw_sys::general::O_LARGEFILE;
 use linux_raw_sys::general::{__kernel_clockid_t, socklen_t};
 use std::ffi::CStr;
 use std::mem::{transmute, MaybeUninit};
-use std::os::raw::{c_int, c_uint, c_void};
+use super::libc::{c_int, c_uint, c_void};
 use std::ptr::null;
 
 /// Convert `SYS_*` constants for socketcall.
@@ -346,7 +346,7 @@ pub(super) unsafe fn ret_usize_infallible(raw: RetReg<R0>) -> usize {
 #[inline]
 pub(super) unsafe fn ret_owned_fd(raw: RetReg<R0>) -> io::Result<OwnedFd> {
     let raw_fd = try_decode_raw_fd(raw)?;
-    Ok(OwnedFd::from(io_lifetimes::OwnedFd::from_raw_fd(raw_fd)))
+    Ok(OwnedFd::from(crate::imp::fd::OwnedFd::from_raw_fd(raw_fd)))
 }
 
 /// Convert the return value of `dup2` and `dup3`.

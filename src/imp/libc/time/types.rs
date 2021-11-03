@@ -1,5 +1,5 @@
 #[cfg(not(target_os = "wasi"))]
-use io_lifetimes::BorrowedFd;
+use super::super::fd::BorrowedFd;
 
 /// `struct timespec`
 pub type Timespec = libc::timespec;

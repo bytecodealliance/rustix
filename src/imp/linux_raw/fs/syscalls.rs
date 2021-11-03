@@ -27,17 +27,16 @@ use super::super::conv::{
     opt_c_str, opt_mut, out, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint, ret_owned_fd,
     ret_usize, size_of, slice_just_addr, slice_mut,
 };
+#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+use super::super::fd::AsFd;
+use super::super::fd::{BorrowedFd, RawFd};
 use super::super::reg::nr;
 use super::super::time::Timespec;
 use super::{
     Access, Advice as FsAdvice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode,
     OFlags, RenameFlags, ResolveFlags, Stat, StatFs, StatxFlags,
 };
-use crate::io;
-use crate::io::{OwnedFd, RawFd};
-#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
-use io_lifetimes::AsFd;
-use io_lifetimes::BorrowedFd;
+use crate::io::{self, OwnedFd};
 #[cfg(target_arch = "arm")]
 use linux_raw_sys::general::__NR_arm_fadvise64_64 as __NR_fadvise64_64;
 #[cfg(all(target_pointer_width = "32", not(target_arch = "arm")))]

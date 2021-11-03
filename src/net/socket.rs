@@ -1,10 +1,11 @@
 use crate::imp;
-#[cfg(windows)]
-use crate::io::AsSocketAsFd;
-use crate::io::{self, AsFd, OwnedFd};
+use crate::io::{self, OwnedFd};
 #[cfg(not(windows))]
 use crate::net::SocketAddrUnix;
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
+use imp::fd::AsFd;
+#[cfg(windows)]
+use imp::fd::AsSocketAsFd;
 
 pub use imp::net::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 

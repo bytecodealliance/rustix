@@ -1,42 +1,19 @@
 //! I/O operations.
 
+#[cfg(not(windows))]
 use crate::imp;
 #[cfg(not(windows))]
 #[cfg(not(target_os = "wasi"))]
 use imp::io::Tcflag;
 
-#[cfg(windows)]
-pub(crate) use imp::io_lifetimes::{AsFd, AsSocketAsFd, BorrowedFd};
-#[allow(unused_imports)]
-#[cfg(windows)]
-pub(crate) use imp::io_lifetimes::{AsRawFd, FromRawFd, IntoRawFd, LibcFd, OwnedFd, RawFd};
-#[cfg(windows)]
-#[cfg(not(io_lifetimes_use_std))]
-pub(crate) use imp::io_lifetimes::{FromFd, IntoFd};
-#[cfg(not(windows))]
-pub(crate) use io_lifetimes::{AsFd, BorrowedFd};
-#[cfg(not(windows))]
-#[cfg(not(io_lifetimes_use_std))]
-pub(crate) use io_lifetimes::{FromFd, IntoFd};
-#[allow(unused_imports)]
-#[cfg(unix)]
-pub(crate) use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd, RawFd as LibcFd};
-#[allow(unused_imports)]
-#[cfg(target_os = "wasi")]
-pub(crate) use {
-    libc::c_int as LibcFd,
-    std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
-};
-
-#[cfg(feature = "rustc-dep-of-std")]
-mod fd;
-#[cfg(not(windows))]
 mod close;
 #[cfg(not(windows))]
 mod dup;
 mod error;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 mod eventfd;
+#[cfg(feature = "rustc-dep-of-std")]
+pub(crate) mod fd;
 mod ioctl;
 #[cfg(not(any(windows, target_os = "redox")))]
 mod is_read_write;
@@ -44,7 +21,6 @@ mod is_read_write;
 mod madvise;
 #[cfg(not(any(windows, target_os = "wasi")))]
 mod mmap;
-#[cfg(not(windows))]
 mod owned_fd;
 #[cfg(not(any(windows, target_os = "wasi")))]
 mod pipe;
@@ -61,7 +37,6 @@ mod tty;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 mod userfaultfd;
 
-#[cfg(not(windows))]
 pub use close::close;
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use dup::{dup, dup2, dup2_with, DupFlags};
@@ -94,7 +69,6 @@ pub use mmap::{
 pub use mmap::{mlock_with, MlockFlags};
 #[cfg(any(linux_raw, all(libc, target_os = "linux")))]
 pub use mmap::{mremap, mremap_fixed, MremapFlags};
-#[cfg(not(windows))]
 pub use owned_fd::OwnedFd;
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use pipe::pipe;

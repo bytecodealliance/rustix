@@ -4,8 +4,8 @@
 
 #![allow(unsafe_code)]
 
-use crate::imp::net::ext::{in6_addr_s6_addr, in6_addr_new};
 use crate::imp::libc as c;
+use crate::imp::net::ext::{in6_addr_new, in6_addr_s6_addr};
 use core::cmp::Ordering;
 use core::hash;
 use core::mem::transmute;
@@ -285,7 +285,10 @@ impl IpAddr {
     /// assert_eq!(IpAddr::V4(Ipv4Addr::new(80, 9, 12, 3)).is_global(), true);
     /// assert_eq!(IpAddr::V6(Ipv6Addr::new(0, 0, 0x1c9, 0, 0, 0xafc8, 0, 0x1)).is_global(), true);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ip", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ip", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     #[must_use]
     #[inline]
@@ -338,7 +341,10 @@ impl IpAddr {
     ///     true
     /// );
     /// ```
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ip", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ip", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     #[must_use]
     #[inline]
@@ -432,7 +438,10 @@ impl IpAddr {
     #[inline]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ip", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ip", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     pub const fn to_canonical(&self) -> IpAddr {
         match self {
@@ -454,7 +463,10 @@ impl Ipv4Addr {
     ///
     /// let addr = Ipv4Addr::new(127, 0, 0, 1);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv4", since = "1.32.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv4", since = "1.32.0")
+    )]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[must_use]
     #[inline]
@@ -520,7 +532,10 @@ impl Ipv4Addr {
     /// let addr = Ipv4Addr::new(127, 0, 0, 1);
     /// assert_eq!(addr.octets(), [127, 0, 0, 1]);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv4", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[must_use]
     #[inline]
@@ -544,7 +559,10 @@ impl Ipv4Addr {
     /// assert_eq!(Ipv4Addr::new(0, 0, 0, 0).is_unspecified(), true);
     /// assert_eq!(Ipv4Addr::new(45, 22, 13, 197).is_unspecified(), false);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv4", since = "1.32.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv4", since = "1.32.0")
+    )]
     #[cfg_attr(staged_api, stable(feature = "ip_shared", since = "1.12.0"))]
     #[must_use]
     #[inline]
@@ -566,7 +584,10 @@ impl Ipv4Addr {
     /// assert_eq!(Ipv4Addr::new(127, 0, 0, 1).is_loopback(), true);
     /// assert_eq!(Ipv4Addr::new(45, 22, 13, 197).is_loopback(), false);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv4", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
     #[inline]
@@ -597,7 +618,10 @@ impl Ipv4Addr {
     /// assert_eq!(Ipv4Addr::new(192, 168, 0, 2).is_private(), true);
     /// assert_eq!(Ipv4Addr::new(192, 169, 0, 2).is_private(), false);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv4", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
     #[inline]
@@ -625,7 +649,10 @@ impl Ipv4Addr {
     /// assert_eq!(Ipv4Addr::new(169, 254, 10, 65).is_link_local(), true);
     /// assert_eq!(Ipv4Addr::new(16, 89, 10, 65).is_link_local(), false);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv4", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
     #[inline]
@@ -701,7 +728,10 @@ impl Ipv4Addr {
     /// assert_eq!(Ipv4Addr::new(1, 1, 1, 1).is_global(), true);
     /// assert_eq!(Ipv4Addr::new(80, 9, 12, 3).is_global(), true);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ipv4", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ipv4", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     #[must_use]
     #[inline]
@@ -742,7 +772,10 @@ impl Ipv4Addr {
     /// assert_eq!(Ipv4Addr::new(100, 127, 255, 255).is_shared(), true);
     /// assert_eq!(Ipv4Addr::new(100, 128, 0, 0).is_shared(), false);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ipv4", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ipv4", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     #[must_use]
     #[inline]
@@ -768,7 +801,10 @@ impl Ipv4Addr {
     /// assert_eq!(Ipv4Addr::new(198, 19, 255, 255).is_benchmarking(), true);
     /// assert_eq!(Ipv4Addr::new(198, 20, 0, 0).is_benchmarking(), false);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ipv4", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ipv4", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     #[must_use]
     #[inline]
@@ -803,7 +839,10 @@ impl Ipv4Addr {
     /// // The broadcast address is not considered as reserved for future use by this implementation
     /// assert_eq!(Ipv4Addr::new(255, 255, 255, 255).is_reserved(), false);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ipv4", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ipv4", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     #[must_use]
     #[inline]
@@ -827,7 +866,10 @@ impl Ipv4Addr {
     /// assert_eq!(Ipv4Addr::new(236, 168, 10, 65).is_multicast(), true);
     /// assert_eq!(Ipv4Addr::new(172, 16, 10, 65).is_multicast(), false);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv4", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
     #[inline]
@@ -849,7 +891,10 @@ impl Ipv4Addr {
     /// assert_eq!(Ipv4Addr::new(255, 255, 255, 255).is_broadcast(), true);
     /// assert_eq!(Ipv4Addr::new(236, 168, 10, 65).is_broadcast(), false);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv4", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
     #[inline]
@@ -877,7 +922,10 @@ impl Ipv4Addr {
     /// assert_eq!(Ipv4Addr::new(203, 0, 113, 6).is_documentation(), true);
     /// assert_eq!(Ipv4Addr::new(193, 34, 17, 19).is_documentation(), false);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv4", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
     #[inline]
@@ -910,14 +958,19 @@ impl Ipv4Addr {
     ///     Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0xc000, 0x2ff)
     /// );
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv4", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
     pub const fn to_ipv6_compatible(&self) -> Ipv6Addr {
         let [a, b, c, d] = self.octets();
-        Ipv6Addr { inner: in6_addr_new([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, a, b, c, d]) }
+        Ipv6Addr {
+            inner: in6_addr_new([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, a, b, c, d]),
+        }
     }
 
     /// Converts this address to an [IPv4-mapped] [`IPv6` address].
@@ -935,14 +988,19 @@ impl Ipv4Addr {
     /// assert_eq!(Ipv4Addr::new(192, 0, 2, 255).to_ipv6_mapped(),
     ///            Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc000, 0x2ff));
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv4", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
     pub const fn to_ipv6_mapped(&self) -> Ipv6Addr {
         let [a, b, c, d] = self.octets();
-        Ipv6Addr { inner: in6_addr_new([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, a, b, c, d]) }
+        Ipv6Addr {
+            inner: in6_addr_new([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, a, b, c, d]),
+        }
     }
 }
 
@@ -1167,7 +1225,10 @@ impl Ipv6Addr {
     ///
     /// let addr = Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv6", since = "1.32.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv6", since = "1.32.0")
+    )]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[must_use]
     #[inline]
@@ -1227,7 +1288,10 @@ impl Ipv6Addr {
     /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff).segments(),
     ///            [0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff]);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv6", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv6", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[must_use]
     #[inline]
@@ -1265,7 +1329,10 @@ impl Ipv6Addr {
     /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff).is_unspecified(), false);
     /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0).is_unspecified(), true);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv6", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv6", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
     #[inline]
@@ -1289,7 +1356,10 @@ impl Ipv6Addr {
     /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff).is_loopback(), false);
     /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0x1).is_loopback(), true);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv6", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv6", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
     #[inline]
@@ -1316,7 +1386,10 @@ impl Ipv6Addr {
     /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0x1).is_global(), false);
     /// assert_eq!(Ipv6Addr::new(0, 0, 0x1c9, 0, 0, 0xafc8, 0, 0x1).is_global(), true);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ipv6", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ipv6", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     #[must_use]
     #[inline]
@@ -1344,7 +1417,10 @@ impl Ipv6Addr {
     /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff).is_unique_local(), false);
     /// assert_eq!(Ipv6Addr::new(0xfc02, 0, 0, 0, 0, 0, 0, 0).is_unique_local(), true);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ipv6", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ipv6", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     #[must_use]
     #[inline]
@@ -1373,7 +1449,10 @@ impl Ipv6Addr {
     /// assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0).is_unicast(), true);
     /// assert_eq!(Ipv6Addr::new(0xff00, 0, 0, 0, 0, 0, 0, 0).is_unicast(), false);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ipv6", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ipv6", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     #[must_use]
     #[inline]
@@ -1425,7 +1504,10 @@ impl Ipv6Addr {
     /// assert_eq!(Ipv6Addr::new(0xfe80, 0, 0, 1, 0, 0, 0, 0).is_unicast_link_local(), true);
     /// assert_eq!(Ipv6Addr::new(0xfe81, 0, 0, 0, 0, 0, 0, 0).is_unicast_link_local(), true);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ipv6", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ipv6", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     #[must_use]
     #[inline]
@@ -1450,7 +1532,10 @@ impl Ipv6Addr {
     /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff).is_documentation(), false);
     /// assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0).is_documentation(), true);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ipv6", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ipv6", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     #[must_use]
     #[inline]
@@ -1511,7 +1596,10 @@ impl Ipv6Addr {
     /// assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0).is_unicast_global(), false);
     /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff).is_unicast_global(), true);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ipv6", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ipv6", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     #[must_use]
     #[inline]
@@ -1539,7 +1627,10 @@ impl Ipv6Addr {
     /// );
     /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff).multicast_scope(), None);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ipv6", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ipv6", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     #[must_use]
     #[inline]
@@ -1574,7 +1665,10 @@ impl Ipv6Addr {
     /// assert_eq!(Ipv6Addr::new(0xff00, 0, 0, 0, 0, 0, 0, 0).is_multicast(), true);
     /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff).is_multicast(), false);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv6", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv6", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
     #[inline]
@@ -1604,7 +1698,10 @@ impl Ipv6Addr {
     ///            Some(Ipv4Addr::new(192, 10, 2, 255)));
     /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1).to_ipv4_mapped(), None);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ipv6", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ipv6", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
@@ -1643,7 +1740,10 @@ impl Ipv6Addr {
     /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1).to_ipv4(),
     ///            Some(Ipv4Addr::new(0, 0, 0, 1)));
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv6", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv6", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
@@ -1670,7 +1770,10 @@ impl Ipv6Addr {
     /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0x7f00, 0x1).is_loopback(), false);
     /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0x7f00, 0x1).to_canonical().is_loopback(), true);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_unstable(feature = "const_ipv6", issue = "76205"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_ipv6", issue = "76205")
+    )]
     #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
@@ -1690,7 +1793,10 @@ impl Ipv6Addr {
     /// assert_eq!(Ipv6Addr::new(0xff00, 0, 0, 0, 0, 0, 0, 0).octets(),
     ///            [255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ipv6", since = "1.32.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ipv6", since = "1.32.0")
+    )]
     #[cfg_attr(staged_api, stable(feature = "ipv6_to_octets", since = "1.12.0"))]
     #[must_use]
     #[inline]

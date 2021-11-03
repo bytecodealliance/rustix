@@ -167,6 +167,8 @@ impl Error {
     )))]
     pub const DEADLOCK: Self = Self(libc::EDEADLOCK);
     pub const DESTADDRREQ: Self = Self(libc::EDESTADDRREQ);
+    #[cfg(windows)]
+    pub const DISCON: Self = Self(libc::EDISCON);
     #[cfg(not(windows))]
     pub const DOM: Self = Self(libc::EDOM);
     #[cfg(any(target_os = "dragonfly", target_os = "freebsd"))]
@@ -221,6 +223,10 @@ impl Error {
     pub const INPROGRESS: Self = Self(libc::EINPROGRESS);
     pub const INTR: Self = Self(libc::EINTR);
     pub const INVAL: Self = Self(libc::EINVAL);
+    #[cfg(windows)]
+    pub const INVALIDPROCTABLE: Self = Self(libc::EINVALIDPROCTABLE);
+    #[cfg(windows)]
+    pub const INVALIDPROVIDER: Self = Self(libc::EINVALIDPROVIDER);
     #[cfg(not(windows))]
     pub const IO: Self = Self(libc::EIO);
     pub const ISCONN: Self = Self(libc::EISCONN);
@@ -498,6 +504,8 @@ impl Error {
     pub const NOMEDIUM: Self = Self(libc::ENOMEDIUM);
     #[cfg(not(windows))]
     pub const NOMEM: Self = Self(libc::ENOMEM);
+    #[cfg(windows)]
+    pub const NOMORE: Self = Self(libc::ENOMORE);
     #[cfg(not(windows))]
     pub const NOMSG: Self = Self(libc::ENOMSG);
     #[cfg(not(any(
@@ -633,8 +641,12 @@ impl Error {
     pub const PROTO: Self = Self(libc::EPROTO);
     pub const PROTONOSUPPORT: Self = Self(libc::EPROTONOSUPPORT);
     pub const PROTOTYPE: Self = Self(libc::EPROTOTYPE);
+    #[cfg(windows)]
+    pub const PROVIDERFAILEDINIT: Self = Self(libc::EPROVIDERFAILEDINIT);
     #[cfg(not(windows))]
     pub const RANGE: Self = Self(libc::ERANGE);
+    #[cfg(windows)]
+    pub const REFUSED: Self = Self(libc::EREFUSED);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -778,18 +790,6 @@ impl Error {
         target_os = "wasi",
     )))]
     pub const XFULL: Self = Self(libc::EXFULL);
-    #[cfg(windows)]
-    pub const DISCON: Self = Self(libc::EDISCON);
-    #[cfg(windows)]
-    pub const INVALIDPROCTABLE: Self = Self(libc::EINVALIDPROCTABLE);
-    #[cfg(windows)]
-    pub const INVALIDPROVIDER: Self = Self(libc::EINVALIDPROVIDER);
-    #[cfg(windows)]
-    pub const NOMORE: Self = Self(libc::ENOMORE);
-    #[cfg(windows)]
-    pub const PROVIDERFAILEDINIT: Self = Self(libc::EPROVIDERFAILEDINIT);
-    #[cfg(windows)]
-    pub const REFUSED: Self = Self(libc::EREFUSED);
 }
 
 impl Error {

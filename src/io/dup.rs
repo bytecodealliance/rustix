@@ -2,7 +2,7 @@
 
 use crate::imp;
 use crate::io::{self, OwnedFd};
-use io_lifetimes::AsFd;
+use imp::fd::AsFd;
 
 #[cfg(not(target_os = "wasi"))]
 pub use imp::io::DupFlags;

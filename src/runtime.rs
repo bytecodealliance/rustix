@@ -104,12 +104,14 @@ pub use imp::thread::tls::StartupTlsInfo;
 ///
 /// Unlike its libc counterpart,
 /// this function does not call handlers registered with [`pthread_atfork`],
-/// and does not initializes the `pthread` data structures in the child process.
+/// and does not initializes the `pthread` data structures in the child
+/// process.
 ///
 /// # Safety
 ///
-/// If the parent has multiple threads, fork creates a child process containing a copy of all the memory of all the threads,
-/// but with only one actual thread, so objects in memory such as mutexes may be in unusable states.
+/// If the parent has multiple threads, fork creates a child process containing
+/// a copy of all the memory of all the threads, but with only one actual
+/// thread, so objects in memory such as mutexes may be in unusable states.
 ///
 /// # References
 ///  - [Linux]

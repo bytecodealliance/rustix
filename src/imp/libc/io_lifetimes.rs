@@ -1,5 +1,8 @@
-pub(crate) use io_lifetimes::BorrowedSocket as BorrowedFd;
-pub(crate) use io_lifetimes::OwnedSocket as OwnedFd;
+//! io_lifetimes types for Windows assuming that Fd is Socket.
+//!
+//! We can make this assumption since rsix supports only std::net on Windows.
+
+pub(crate) use io_lifetimes::{BorrowedSocket as BorrowedFd, OwnedSocket as OwnedFd};
 pub(crate) use std::os::windows::io::RawSocket as RawFd;
 pub(crate) use winapi::um::winsock2::SOCKET as LibcFd;
 
@@ -35,6 +38,9 @@ impl<T: std::os::windows::io::FromRawSocket> FromRawFd for T {
 
 pub(crate) use io_lifetimes::AsSocket as AsFd;
 
+/// We define `AsFd` as an alias for `AsSocket`, but that doesn't provide
+/// an `as_fd` function. This trait adapts an `AsSocket` implementation to
+/// provide `as_fd` using a blanket implementation.
 pub(crate) trait AsSocketAsFd {
     fn as_fd(&self) -> BorrowedFd;
 }

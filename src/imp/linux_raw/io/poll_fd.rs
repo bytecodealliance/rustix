@@ -1,5 +1,5 @@
+use super::super::fd::{AsFd, BorrowedFd};
 use bitflags::bitflags;
-use io_lifetimes::{AsFd, BorrowedFd};
 
 bitflags! {
     /// `POLL*`

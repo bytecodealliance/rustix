@@ -1,4 +1,4 @@
-use io_lifetimes::BorrowedFd;
+use super::super::fd::BorrowedFd;
 
 /// `struct timespec`
 pub type Timespec = linux_raw_sys::general::__kernel_timespec;

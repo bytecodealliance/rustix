@@ -1,13 +1,12 @@
-use super::ext::{Ipv4AddrExt, Ipv6AddrExt, SocketAddrV6Ext};
 #[cfg(windows)]
 use super::super::libc;
-use super::SocketAddr;
+use super::ext::{in6_addr_s6_addr, in_addr_s_addr, sockaddr_in6_sin6_scope_id};
 #[cfg(not(windows))]
 use super::SocketAddrUnix;
 #[cfg(not(windows))]
 use crate::as_ptr;
 use crate::io;
-use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
+use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 #[cfg(not(windows))]
 use std::ffi::CStr;
 use std::mem::size_of;
@@ -78,7 +77,7 @@ unsafe fn read_ss_family(storage: *const libc::sockaddr_storage) -> u16 {
 pub(crate) unsafe fn read_sockaddr(
     storage: *const libc::sockaddr_storage,
     len: usize,
-) -> io::Result<SocketAddr> {
+) -> io::Result<SocketAddrAny> {
     #[cfg(not(windows))]
     let offsetof_sun_path = super::offsetof_sun_path();
 
@@ -92,7 +91,7 @@ pub(crate) unsafe fn read_sockaddr(
             }
             let decode = *storage.cast::<libc::sockaddr_in>();
             Ok(SocketAddrAny::V4(SocketAddrV4::new(
-                Ipv4Addr::from(u32::from_be(decode.sin_addr.s_addr())),
+                Ipv4Addr::from(u32::from_be(in_addr_s_addr(decode.sin_addr))),
                 u16::from_be(decode.sin_port),
             )))
         }
@@ -158,7 +157,7 @@ pub(crate) unsafe fn read_sockaddr(
 pub(crate) unsafe fn read_sockaddr_os(
     storage: *const libc::sockaddr_storage,
     len: usize,
-) -> SocketAddr {
+) -> SocketAddrAny {
     #[cfg(not(windows))]
     let z = libc::sockaddr_un {
         #[cfg(any(
@@ -211,7 +210,7 @@ pub(crate) unsafe fn read_sockaddr_os(
             assert!(len >= size_of::<libc::sockaddr_in>());
             let decode = *storage.cast::<libc::sockaddr_in>();
             SocketAddrAny::V4(SocketAddrV4::new(
-                Ipv4Addr::from(u32::from_be(decode.sin_addr.s_addr())),
+                Ipv4Addr::from(u32::from_be(in_addr_s_addr(decode.sin_addr))),
                 u16::from_be(decode.sin_port),
             ))
         }
@@ -219,10 +218,10 @@ pub(crate) unsafe fn read_sockaddr_os(
             assert!(len >= size_of::<libc::sockaddr_in6>());
             let decode = *storage.cast::<libc::sockaddr_in6>();
             SocketAddrAny::V6(SocketAddrV6::new(
-                Ipv6Addr::from(decode.sin6_addr.s6_addr()),
+                Ipv6Addr::from(in6_addr_s6_addr(decode.sin6_addr)),
                 u16::from_be(decode.sin6_port),
                 u32::from_be(decode.sin6_flowinfo),
-                decode.sin6_scope_id(),
+                sockaddr_in6_sin6_scope_id(decode),
             ))
         }
         #[cfg(not(windows))]

@@ -7,7 +7,7 @@
 #![allow(unsafe_code)]
 
 use crate::{imp, io};
-use io_lifetimes::AsFd;
+use imp::fd::AsFd;
 use std::ffi::c_void;
 
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]

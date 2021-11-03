@@ -1,7 +1,7 @@
 use crate::imp;
-use crate::io::{self, OwnedFd, RawFd};
+use crate::io::{self, OwnedFd};
+use imp::fd::{AsFd, RawFd};
 use imp::fs::{FdFlags, OFlags};
-use io_lifetimes::AsFd;
 
 /// `fcntl(fd, F_GETFD)`—Returns a file descriptor's flags.
 ///

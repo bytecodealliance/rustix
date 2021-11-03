@@ -1,12 +1,12 @@
 //! `recv` and `send`, and variants
 
-use crate::io::AsFd;
-#[cfg(windows)]
-use crate::io::AsSocketAsFd;
 #[cfg(not(windows))]
 use crate::net::SocketAddrUnix;
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::{imp, io};
+use imp::fd::AsFd;
+#[cfg(windows)]
+use imp::fd::AsSocketAsFd;
 
 pub use imp::net::{RecvFlags, SendFlags};
 

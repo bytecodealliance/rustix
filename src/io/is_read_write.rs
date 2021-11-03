@@ -1,8 +1,7 @@
 //! Functions which operate on file descriptors.
 
-use crate::imp;
-use crate::io;
-use io_lifetimes::AsFd;
+use crate::{imp, io};
+use imp::fd::AsFd;
 
 /// Returns a pair of booleans indicating whether the file descriptor is
 /// readable and/or writeable, respectively.

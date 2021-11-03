@@ -5,6 +5,8 @@ use super::super::conv::ret_infallible;
 use super::super::conv::{c_str, ret, ret_c_int, ret_discarded_char_ptr};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::{syscall_ret, syscall_ret_u32};
+#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
+use super::super::fd::BorrowedFd;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use super::super::offset::libc_getrlimit;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
@@ -27,8 +29,6 @@ use crate::process::Rlimit;
 use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Pid, Uid, WaitOptions, WaitStatus};
-#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
-use io_lifetimes::BorrowedFd;
 use libc::c_int;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use std::convert::TryInto;

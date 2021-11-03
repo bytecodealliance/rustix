@@ -13,6 +13,8 @@ use super::super::conv::{
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t};
+#[cfg(not(target_os = "wasi"))]
+use super::super::fd::RawFd;
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 use super::super::offset::libc_fallocate;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
@@ -67,8 +69,6 @@ use super::{Access, FdFlags, Mode, OFlags, Stat};
 use super::{RenameFlags, ResolveFlags};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::{Statx, StatxFlags};
-#[cfg(not(target_os = "wasi"))]
-use crate::io::RawFd;
 use crate::io::{self, OwnedFd};
 use io_lifetimes::BorrowedFd;
 use std::convert::TryInto;

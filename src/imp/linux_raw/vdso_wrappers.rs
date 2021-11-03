@@ -52,7 +52,7 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId) -> io::Result<T
 
         DynamicClockId::Dynamic(fd) => {
             // See `FD_TO_CLOCKID` in Linux's `clock_gettime` documentation.
-            use io::AsRawFd;
+            use crate::imp::fd::AsRawFd;
             const CLOCKFD: i32 = 3;
             ((!fd.as_raw_fd() << 3) | CLOCKFD) as __kernel_clockid_t
         }

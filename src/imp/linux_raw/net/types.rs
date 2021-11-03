@@ -1,5 +1,5 @@
 use bitflags::bitflags;
-use std::os::raw::c_uint;
+use super::super::libc;
 
 /// A type for holding raw integer socket types.
 #[doc(hidden)]
@@ -245,7 +245,7 @@ bitflags! {
     ///
     /// [`accept_with`]: crate::net::accept_with
     /// [`acceptfrom_with`]: crate::net::acceptfrom_with
-    pub struct AcceptFlags: c_uint {
+    pub struct AcceptFlags: libc::c_uint {
         /// `SOCK_NONBLOCK`
         const NONBLOCK = linux_raw_sys::general::O_NONBLOCK;
         /// `SOCK_CLOEXEC`
@@ -257,7 +257,7 @@ bitflags! {
     /// `SOCK_*` constants for [`socket`].
     ///
     /// [`socket`]: crate::net::socket
-    pub struct SocketFlags: c_uint {
+    pub struct SocketFlags: libc::c_uint {
         /// `SOCK_NONBLOCK`
         #[cfg(not(any(target_os = "ios", target_os = "macos")))]
         const NONBLOCK = linux_raw_sys::general::O_NONBLOCK;

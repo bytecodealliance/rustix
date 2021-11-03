@@ -9,16 +9,14 @@
 //! ```rust,no_run
 //! # #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 //! # fn main() -> std::io::Result<()> {
-//! use rsix::io::{
-//!     epoll::{self, Epoll},
-//!     ioctl_fionbio, read, write,
-//! };
+//! use io_lifetimes::AsFd;
+//! use rsix::io::epoll::{self, Epoll};
+//! use rsix::io::{ioctl_fionbio, read, write};
 //! use rsix::net::{
-//!     accept, bind_v4, listen, socket, AddressFamily, Ipv4Addr, Protocol, SocketAddr,
-//!     SocketAddrV4, SocketType,
+//!     accept, bind_v4, listen, socket, AddressFamily, Ipv4Addr, Protocol, SocketAddrV4,
+//!     SocketType,
 //! };
 //! use std::os::unix::io::AsRawFd;
-//! use io_lifetimes::AsFd;
 //!
 //! // Create a socket and listen on it.
 //! let listen_sock = socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
@@ -45,9 +43,7 @@
 //!             // register to be notified when it's ready to write to.
 //!             let conn_sock = accept(&*target)?;
 //!             ioctl_fionbio(&conn_sock, true)?;
-//!             epoll
-//!                 .add(conn_sock, epoll::EventFlags::OUT | epoll::EventFlags::ET)
-//!                 ?;
+//!             epoll.add(conn_sock, epoll::EventFlags::OUT | epoll::EventFlags::ET)?;
 //!         } else {
 //!             // Write a message to the stream and then unregister it.
 //!             write(&*target, b"hello\n")?;
@@ -60,11 +56,12 @@
 
 #![allow(unsafe_code)]
 
+use crate::imp::fd::{AsFd, AsRawFd, BorrowedFd, RawFd};
+#[cfg(not(feature = "rustc-dep-of-std"))]
+use crate::imp::fd::{FromFd, FromRawFd, IntoFd, IntoRawFd};
 use crate::imp::linux_raw::syscalls::{epoll_add, epoll_create, epoll_del, epoll_mod, epoll_wait};
-use crate::io;
-use crate::io::{AsRawFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
+use crate::io::{self, OwnedFd};
 use bitflags::bitflags;
-use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd};
 use std::fmt;
 use std::marker::PhantomData;
 use std::ops::Deref;
@@ -210,10 +207,12 @@ impl<'a> Context for Borrowing<'a> {
 ///
 /// This may be used with [`OwnedFd`], or higher-level types like
 /// [`std::fs::File`] or [`std::net::TcpStream`].
+#[cfg(not(feature = "rustc-dep-of-std"))]
 pub struct Owning<'context, T: IntoFd + FromFd> {
     _phantom: PhantomData<&'context T>,
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: IntoFd + FromFd> Owning<'context, T> {
     /// Creates a new empty `Owning`.
     #[allow(clippy::new_without_default)] // This is a specialized type that doesn't need to be generically constructible.
@@ -225,6 +224,7 @@ impl<'context, T: IntoFd + FromFd> Owning<'context, T> {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: AsFd + IntoFd + FromFd> Context for Owning<'context, T> {
     type Data = T;
     type Target = BorrowedFd<'context>;
@@ -382,18 +382,21 @@ impl<Context: self::Context> Epoll<Context> {
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: AsFd + IntoFd + FromFd> AsRawFd for Epoll<Owning<'context, T>> {
     fn as_raw_fd(&self) -> RawFd {
         self.epoll_fd.as_raw_fd()
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: AsFd + IntoFd + FromFd> IntoRawFd for Epoll<Owning<'context, T>> {
     fn into_raw_fd(self) -> RawFd {
         self.epoll_fd.into_raw_fd()
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: AsFd + IntoFd + FromFd> FromRawFd for Epoll<Owning<'context, T>> {
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
         Self {
@@ -403,18 +406,21 @@ impl<'context, T: AsFd + IntoFd + FromFd> FromRawFd for Epoll<Owning<'context, T
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: AsFd + IntoFd + FromFd> AsFd for Epoll<Owning<'context, T>> {
     fn as_fd(&self) -> BorrowedFd<'_> {
         self.epoll_fd.as_fd()
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: AsFd + IntoFd + FromFd> From<Epoll<Owning<'context, T>>> for OwnedFd {
     fn from(epoll: Epoll<Owning<'context, T>>) -> OwnedFd {
         epoll.epoll_fd
     }
 }
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: AsFd + IntoFd + FromFd> From<OwnedFd> for Epoll<Owning<'context, T>> {
     fn from(fd: OwnedFd) -> Self {
         Self {
