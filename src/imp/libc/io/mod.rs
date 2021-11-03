@@ -1,4 +1,6 @@
 mod error;
+#[cfg(feature = "rustc-dep-of-std")]
+mod io_slice;
 #[cfg(not(windows))]
 mod poll_fd;
 #[cfg(not(windows))]
@@ -7,6 +9,8 @@ mod types;
 #[cfg(not(windows))]
 pub(crate) mod syscalls;
 
+#[cfg(feature = "rustc-dep-of-std")]
+pub use io_slice::{IoSlice, IoSliceMut};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub mod epoll;
 pub use error::Error;

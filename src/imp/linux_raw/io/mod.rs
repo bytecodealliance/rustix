@@ -1,9 +1,13 @@
 pub mod epoll;
 pub(super) mod error;
+#[cfg(feature = "rustc-dep-of-std")]
+mod io_slice;
 mod poll_fd;
 mod types;
 
 pub use error::Error;
+#[cfg(feature = "rustc-dep-of-std")]
+pub use io_slice::{IoSlice, IoSliceMut};
 pub use poll_fd::{PollFd, PollFlags};
 pub use types::{
     Advice, DupFlags, EventfdFlags, MapFlags, MlockFlags, MprotectFlags, MremapFlags, PipeFlags,
