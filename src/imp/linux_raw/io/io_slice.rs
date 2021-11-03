@@ -21,7 +21,7 @@ impl<'a> IoSlice<'a> {
         IoSlice {
             vec: c::iovec {
                 iov_base: buf.as_ptr() as *mut u8 as *mut c::c_void,
-                iov_len: buf.len(),
+                iov_len: buf.len() as u64,
             },
             _p: PhantomData,
         }
@@ -29,19 +29,19 @@ impl<'a> IoSlice<'a> {
 
     #[inline]
     pub fn advance(&mut self, n: usize) {
-        if self.vec.iov_len < n {
+        if self.vec.iov_len < n as u64 {
             panic!("advancing IoSlice beyond its length");
         }
 
         unsafe {
-            self.vec.iov_len -= n;
+            self.vec.iov_len -= n as u64;
             self.vec.iov_base = self.vec.iov_base.add(n);
         }
     }
 
     #[inline]
     pub fn as_slice(&self) -> &[u8] {
-        unsafe { slice::from_raw_parts(self.vec.iov_base as *mut u8, self.vec.iov_len) }
+        unsafe { slice::from_raw_parts(self.vec.iov_base as *mut u8, self.vec.iov_len as usize) }
     }
 }
 
@@ -57,7 +57,7 @@ impl<'a> IoSliceMut<'a> {
         IoSliceMut {
             vec: c::iovec {
                 iov_base: buf.as_mut_ptr() as *mut c::c_void,
-                iov_len: buf.len(),
+                iov_len: buf.len() as u64,
             },
             _p: PhantomData,
         }
@@ -65,23 +65,25 @@ impl<'a> IoSliceMut<'a> {
 
     #[inline]
     pub fn advance(&mut self, n: usize) {
-        if self.vec.iov_len < n {
+        if self.vec.iov_len < n as u64 {
             panic!("advancing IoSliceMut beyond its length");
         }
 
         unsafe {
-            self.vec.iov_len -= n;
+            self.vec.iov_len -= n as u64;
             self.vec.iov_base = self.vec.iov_base.add(n);
         }
     }
 
     #[inline]
     pub fn as_slice(&self) -> &[u8] {
-        unsafe { slice::from_raw_parts(self.vec.iov_base as *mut u8, self.vec.iov_len) }
+        unsafe { slice::from_raw_parts(self.vec.iov_base as *mut u8, self.vec.iov_len as usize) }
     }
 
     #[inline]
     pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        unsafe { slice::from_raw_parts_mut(self.vec.iov_base as *mut u8, self.vec.iov_len) }
+        unsafe {
+            slice::from_raw_parts_mut(self.vec.iov_base as *mut u8, self.vec.iov_len as usize)
+        }
     }
 }

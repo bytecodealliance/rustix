@@ -2,6 +2,9 @@ use super::super::c;
 use super::super::conv::owned_fd;
 use super::super::fd::{AsFd, BorrowedFd, IntoFd, RawFd};
 use super::FileType;
+use crate::ffi::ZStr;
+#[cfg(target_os = "wasi")]
+use crate::ffi::ZString;
 use crate::io::{self, OwnedFd};
 #[cfg(not(any(
     target_os = "android",
@@ -26,9 +29,6 @@ use c::readdir as libc_readdir;
 ))]
 use c::{dirent64 as libc_dirent, readdir64 as libc_readdir};
 use errno::{errno, set_errno, Errno};
-use std::ffi::CStr;
-#[cfg(target_os = "wasi")]
-use std::ffi::CString;
 use std::mem::zeroed;
 use std::ptr::NonNull;
 
@@ -96,7 +96,7 @@ impl Dir {
                     dirent: read_dirent(std::mem::transmute(&*dirent_ptr)),
 
                     #[cfg(target_os = "wasi")]
-                    name: CStr::from_ptr((*dirent_ptr).d_name.as_ptr()).to_owned(),
+                    name: ZStr::from_ptr((*dirent_ptr).d_name.as_ptr()).to_owned(),
                 };
 
                 Some(Ok(result))
@@ -190,7 +190,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     // Copy from d_name, reading up to and including the first NUL.
     #[cfg(not(target_os = "wasi"))]
     {
-        let name_len = CStr::from_ptr(input.d_name.as_ptr()).to_bytes().len() + 1;
+        let name_len = ZStr::from_ptr(input.d_name.as_ptr()).to_bytes().len() + 1;
         dirent.d_name[..name_len].copy_from_slice(&input.d_name[..name_len]);
     }
 
@@ -232,16 +232,16 @@ pub struct DirEntry {
     dirent: libc_dirent,
 
     #[cfg(target_os = "wasi")]
-    name: CString,
+    name: ZString,
 }
 
 impl DirEntry {
     /// Returns the file name of this directory entry.
     #[inline]
-    pub fn file_name(&self) -> &CStr {
+    pub fn file_name(&self) -> &ZStr {
         #[cfg(not(target_os = "wasi"))]
         unsafe {
-            CStr::from_ptr(self.dirent.d_name.as_ptr())
+            ZStr::from_ptr(self.dirent.d_name.as_ptr())
         }
 
         #[cfg(target_os = "wasi")]

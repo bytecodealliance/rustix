@@ -1,7 +1,7 @@
 #[cfg(not(target_os = "redox"))]
 #[test]
 fn test_owned() {
-    use io_lifetimes::AsFd;
+    use rsix::io_lifetimes::AsFd;
     #[cfg(unix)]
     use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd};
     #[cfg(target_os = "wasi")]

@@ -50,6 +50,7 @@ use super::rand::GetRandomFlags;
 use super::reg::nr;
 use super::thread::{FutexFlags, FutexOperation};
 use super::time::{ClockId, Timespec};
+use crate::ffi::ZStr;
 use crate::io::{self, OwnedFd};
 #[cfg(feature = "procfs")]
 use crate::path::DecInt;
@@ -95,7 +96,6 @@ use linux_raw_sys::v5_4::general::{
 use std::borrow::Cow;
 #[cfg(target_pointer_width = "32")]
 use std::convert::TryInto;
-use std::ffi::CStr;
 use std::io::{IoSlice, IoSliceMut};
 use std::mem::{size_of_val, MaybeUninit};
 #[cfg(target_pointer_width = "64")]
@@ -985,7 +985,7 @@ pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<usize> {
 }
 
 #[inline]
-pub(crate) fn chdir(filename: &CStr) -> io::Result<()> {
+pub(crate) fn chdir(filename: &ZStr) -> io::Result<()> {
     unsafe { ret(syscall1_readonly(nr(__NR_chdir), c_str(filename))) }
 }
 
@@ -1255,7 +1255,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     buf[r] = 0;
 
     // Check that the path we read refers to the same file as `fd`.
-    let path = CStr::from_bytes_with_nul(&buf[..=r]).unwrap();
+    let path = ZStr::from_bytes_with_nul(&buf[..=r]).unwrap();
 
     let path_stat = stat(path)?;
     if path_stat.st_dev != fd_stat.st_dev || path_stat.st_ino != fd_stat.st_ino {
@@ -1628,11 +1628,11 @@ pub(crate) unsafe fn fork() -> io::Result<Pid> {
     Ok(Pid::from_raw(pid))
 }
 
-pub fn execve(path: &CStr, args: &[Cow<'_, CStr>], env_vars: &[Cow<'_, CStr>]) -> io::Result<()> {
-    let mut argv: Vec<_> = args.into_iter().map(|cstr| CStr::as_ptr(cstr)).collect();
+pub fn execve(path: &ZStr, args: &[Cow<'_, ZStr>], env_vars: &[Cow<'_, ZStr>]) -> io::Result<()> {
+    let mut argv: Vec<_> = args.into_iter().map(|cstr| ZStr::as_ptr(cstr)).collect();
     let mut envs: Vec<_> = env_vars
         .into_iter()
-        .map(|cstr| CStr::as_ptr(cstr))
+        .map(|cstr| ZStr::as_ptr(cstr))
         .collect();
     argv.push(std::ptr::null());
     envs.push(std::ptr::null());
@@ -1700,7 +1700,7 @@ pub(crate) mod tls {
     }
 
     #[inline]
-    pub(crate) unsafe fn set_thread_name(name: &CStr) -> io::Result<()> {
+    pub(crate) unsafe fn set_thread_name(name: &ZStr) -> io::Result<()> {
         ret(syscall2(nr(__NR_prctl), c_uint(PR_SET_NAME), c_str(name)))
     }
 

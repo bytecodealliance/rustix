@@ -1,18 +1,18 @@
 #![allow(dead_code)]
 
 use super::c;
-use super::fd::{AsRawFd, BorrowedFd, FromFd, FromRawFd, IntoFd, IntoRawFd, LibcFd, RawFd};
-#[cfg(windows)]
-use super::io_lifetimes;
+use super::fd::{AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, LibcFd, RawFd};
 #[cfg(not(windows))]
 use super::offset::libc_off_t;
+#[cfg(not(windows))]
+use crate::ffi::ZStr;
 use crate::io::{self, OwnedFd};
 #[cfg(windows)]
 use std::convert::TryInto;
-use std::ffi::CStr;
 
+#[cfg(not(windows))]
 #[inline]
-pub(super) fn c_str(c: &CStr) -> *const c::c_char {
+pub(super) fn c_str(c: &ZStr) -> *const c::c_char {
     c.as_ptr().cast::<c::c_char>()
 }
 
@@ -29,7 +29,7 @@ pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> LibcFd {
 
 #[inline]
 pub(super) fn owned_fd(fd: OwnedFd) -> LibcFd {
-    fd.into_fd().into_raw_fd() as LibcFd
+    fd.into_raw_fd() as LibcFd
 }
 
 #[inline]
@@ -136,9 +136,7 @@ pub(super) unsafe fn ret_owned_fd(raw: LibcFd) -> io::Result<OwnedFd> {
     if raw == !0 {
         Err(io::Error::last_os_error())
     } else {
-        Ok(OwnedFd::from_fd(io_lifetimes::OwnedFd::from_raw_fd(
-            raw as RawFd,
-        )))
+        Ok(OwnedFd::from_raw_fd(raw as RawFd))
     }
 }
 
@@ -172,9 +170,7 @@ pub(super) unsafe fn syscall_ret_owned_fd(raw: c::c_long) -> io::Result<OwnedFd>
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
-        Ok(OwnedFd::from_fd(io_lifetimes::OwnedFd::from_raw_fd(
-            raw as RawFd,
-        )))
+        Ok(OwnedFd::from_raw_fd(raw as RawFd))
     }
 }
 

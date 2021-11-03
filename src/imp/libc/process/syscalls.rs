@@ -23,6 +23,7 @@ use super::Resource;
 use super::{RawCpuSet, CPU_SETSIZE};
 #[cfg(not(target_os = "wasi"))]
 use super::{RawPid, RawUname};
+use crate::ffi::ZStr;
 use crate::io;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use crate::process::Rlimit;
@@ -32,11 +33,10 @@ use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 use crate::process::{Gid, Pid, Uid, WaitOptions, WaitStatus};
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use std::convert::TryInto;
-use std::ffi::CStr;
 use std::mem::MaybeUninit;
 
 #[cfg(not(target_os = "wasi"))]
-pub(crate) fn chdir(path: &CStr) -> io::Result<()> {
+pub(crate) fn chdir(path: &ZStr) -> io::Result<()> {
     unsafe { ret(c::chdir(c_str(path))) }
 }
 

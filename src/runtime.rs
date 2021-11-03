@@ -17,11 +17,12 @@
 
 #![allow(unsafe_code)]
 
+use crate::ffi::ZStr;
 use crate::path::Arg;
 use crate::process::Pid;
 use crate::{imp, io};
+use core::ffi::c_void;
 use std::borrow::Cow;
-use std::ffi::{c_void, CStr};
 
 #[cfg(target_arch = "x86")]
 #[inline]
@@ -58,7 +59,7 @@ pub unsafe fn set_tid_address(data: *mut c_void) -> Pid {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
-pub unsafe fn set_thread_name(name: &CStr) -> io::Result<()> {
+pub unsafe fn set_thread_name(name: &ZStr) -> io::Result<()> {
     imp::syscalls::tls::set_thread_name(name)
 }
 
@@ -128,13 +129,13 @@ pub unsafe fn fork() -> io::Result<Pid> {
 /// The first argument, by convention,
 /// should be the filename associated with the file being executed.
 pub fn execve<P: Arg>(path: P, args: &[P], env_vars: &[P]) -> io::Result<()> {
-    let arg_vec: Vec<Cow<'_, CStr>> = args
+    let arg_vec: Vec<Cow<'_, ZStr>> = args
         .into_iter()
-        .map(Arg::as_cow_c_str)
+        .map(Arg::as_cow_z_str)
         .collect::<io::Result<_>>()?;
-    let env_vec: Vec<Cow<'_, CStr>> = env_vars
+    let env_vec: Vec<Cow<'_, ZStr>> = env_vars
         .into_iter()
-        .map(Arg::as_cow_c_str)
+        .map(Arg::as_cow_z_str)
         .collect::<io::Result<_>>()?;
-    path.into_with_c_str(|path_cstr| imp::syscalls::execve(path_cstr, &arg_vec, &env_vec))
+    path.into_with_z_str(|path_cstr| imp::syscalls::execve(path_cstr, &arg_vec, &env_vec))
 }

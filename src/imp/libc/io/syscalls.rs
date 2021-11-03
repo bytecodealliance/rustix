@@ -25,12 +25,12 @@ use super::{DupFlags, MapFlags, MprotectFlags, ProtFlags, Termios, Winsize};
 use super::{EventfdFlags, UserfaultfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::{MlockFlags, ReadWriteFlags};
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+use crate::ffi::ZStr;
 use crate::io::{self, OwnedFd};
 use errno::errno;
 use std::cmp::min;
 use std::convert::TryInto;
-#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
-use std::ffi::CStr;
 use std::io::{IoSlice, IoSliceMut};
 use std::mem::MaybeUninit;
 #[cfg(not(any(target_os = "redox", target_env = "newlib")))]
@@ -432,7 +432,7 @@ pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize
             buf.as_mut_ptr().cast::<_>(),
             buf.len(),
         ))?;
-        Ok(CStr::from_ptr(buf.as_ptr().cast::<_>()).to_bytes().len())
+        Ok(ZStr::from_ptr(buf.as_ptr().cast::<_>()).to_bytes().len())
     }
 }
 

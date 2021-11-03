@@ -1,8 +1,10 @@
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 
+#[cfg(not(feature = "rustc-dep-of-std"))]
 #[cfg(not(windows))]
 mod dup2_to_replace_stdio;
+#[cfg(not(feature = "rustc-dep-of-std"))] // TODO
 #[cfg(not(windows))]
 mod epoll;
 mod error;

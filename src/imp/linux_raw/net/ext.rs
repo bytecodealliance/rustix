@@ -26,8 +26,14 @@ pub(crate) const fn in6_addr_new(s6_addr: [u8; 16]) -> c::in6_addr {
 }
 
 #[inline]
-pub(crate) const fn sockaddr_in6_sin6_scope_id(addr: &c::sockaddr_in6) -> u32 {
+pub(crate) const fn sockaddr_in6_sin6_scope_id(addr: c::sockaddr_in6) -> u32 {
     addr.sin6_scope_id
+}
+
+#[cfg(feature = "rustc-dep-of-std")]
+#[inline]
+pub(crate) fn sockaddr_in6_sin6_scope_id_mut(addr: &mut c::sockaddr_in6) -> &mut u32 {
+    &mut addr.sin6_scope_id
 }
 
 #[inline]

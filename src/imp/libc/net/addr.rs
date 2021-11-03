@@ -2,11 +2,11 @@
 
 use super::super::c;
 #[cfg(not(windows))]
+use crate::ffi::{ZStr, ZString};
+#[cfg(not(windows))]
 use crate::io;
 #[cfg(not(windows))]
 use crate::path;
-#[cfg(not(windows))]
-use std::ffi::{CStr, CString};
 #[cfg(not(windows))]
 use std::fmt;
 
@@ -15,7 +15,7 @@ use std::fmt;
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[doc(alias = "sockaddr_un")]
 pub struct SocketAddrUnix {
-    path: CString,
+    path: ZString,
 }
 
 #[cfg(not(windows))]
@@ -24,12 +24,12 @@ impl SocketAddrUnix {
     /// filesystem path.
     #[inline]
     pub fn new<P: path::Arg>(path: P) -> io::Result<Self> {
-        let path = path.into_c_str()?.into_owned();
+        let path = path.into_z_str()?.into_owned();
         Self::_new(path)
     }
 
     #[inline]
-    fn _new(path: CString) -> io::Result<Self> {
+    fn _new(path: ZString) -> io::Result<Self> {
         let bytes = path.as_bytes();
 
         let z = c::sockaddr_un {
@@ -67,7 +67,7 @@ impl SocketAddrUnix {
 
     /// Returns a reference to the contained path.
     #[inline]
-    pub fn path(&self) -> &CStr {
+    pub fn path(&self) -> &ZStr {
         &self.path
     }
 }

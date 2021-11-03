@@ -4,10 +4,10 @@ use super::ext::{in6_addr_s6_addr, in_addr_s_addr, sockaddr_in6_sin6_scope_id};
 use super::SocketAddrUnix;
 #[cfg(not(windows))]
 use crate::as_ptr;
+#[cfg(not(windows))]
+use crate::ffi::ZStr;
 use crate::io;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
-#[cfg(not(windows))]
-use std::ffi::CStr;
 use std::mem::size_of;
 
 // This must match the header of `sockaddr`.
@@ -137,7 +137,7 @@ pub(crate) unsafe fn read_sockaddr(
                         return Err(io::Error::INVAL);
                     }
                     debug_assert_eq!(
-                        CStr::from_ptr(decode.sun_path.as_ptr()).to_bytes().len(),
+                        ZStr::from_ptr(decode.sun_path.as_ptr()).to_bytes().len(),
                         provided_len
                     );
                     &decode.sun_path[..provided_len]

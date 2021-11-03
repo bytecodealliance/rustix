@@ -37,8 +37,8 @@ use super::{
     Access, Advice as FsAdvice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode,
     OFlags, RenameFlags, ResolveFlags, Stat, StatFs, StatxFlags,
 };
-use crate::io::SeekFrom;
-use crate::io::{self, OwnedFd};
+use crate::ffi::ZStr;
+use crate::io::{self, OwnedFd, SeekFrom};
 #[cfg(target_arch = "arm")]
 use linux_raw_sys::general::__NR_arm_fadvise64_64 as __NR_fadvise64_64;
 #[cfg(all(target_pointer_width = "32", not(target_arch = "arm")))]
@@ -60,7 +60,6 @@ use linux_raw_sys::v5_4::general::{
     F_GET_SEALS, F_SETPIPE_SZ,
 };
 use std::convert::TryInto;
-use std::ffi::CStr;
 use std::mem::MaybeUninit;
 #[cfg(target_pointer_width = "32")]
 use {
@@ -84,7 +83,7 @@ use {
 };
 
 #[inline]
-pub(crate) fn open(filename: &CStr, flags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
+pub(crate) fn open(filename: &ZStr, flags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     {
         openat(crate::fs::cwd().as_fd(), filename, flags, mode)
@@ -118,7 +117,7 @@ pub(crate) fn open(filename: &CStr, flags: OFlags, mode: Mode) -> io::Result<Own
 #[inline]
 pub(crate) fn openat(
     dirfd: BorrowedFd<'_>,
-    filename: &CStr,
+    filename: &ZStr,
     flags: OFlags,
     mode: Mode,
 ) -> io::Result<OwnedFd> {
@@ -147,7 +146,7 @@ pub(crate) fn openat(
 #[inline]
 pub(crate) fn openat2(
     dirfd: BorrowedFd<'_>,
-    pathname: &CStr,
+    pathname: &ZStr,
     flags: OFlags,
     mode: Mode,
     resolve: ResolveFlags,
@@ -183,7 +182,7 @@ pub(crate) fn openat2(
 }
 
 #[inline]
-pub(crate) fn chmod(filename: &CStr, mode: Mode) -> io::Result<()> {
+pub(crate) fn chmod(filename: &ZStr, mode: Mode) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_fchmodat),
@@ -195,7 +194,7 @@ pub(crate) fn chmod(filename: &CStr, mode: Mode) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, filename: &CStr, mode: Mode) -> io::Result<()> {
+pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, filename: &ZStr, mode: Mode) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_fchmodat),
@@ -220,7 +219,7 @@ pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
 #[inline]
 pub(crate) fn mknodat(
     dirfd: BorrowedFd<'_>,
-    filename: &CStr,
+    filename: &ZStr,
     mode: Mode,
     dev: u64,
 ) -> io::Result<()> {
@@ -441,7 +440,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 }
 
 #[inline]
-pub(crate) fn stat(filename: &CStr) -> io::Result<Stat> {
+pub(crate) fn stat(filename: &ZStr) -> io::Result<Stat> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         let mut result = MaybeUninit::<Stat>::uninit();
@@ -469,7 +468,7 @@ pub(crate) fn stat(filename: &CStr) -> io::Result<Stat> {
 }
 
 #[inline]
-pub(crate) fn statat(dirfd: BorrowedFd<'_>, filename: &CStr, flags: AtFlags) -> io::Result<Stat> {
+pub(crate) fn statat(dirfd: BorrowedFd<'_>, filename: &ZStr, flags: AtFlags) -> io::Result<Stat> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         let mut result = MaybeUninit::<Stat>::uninit();
@@ -497,7 +496,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, filename: &CStr, flags: AtFlags) -> 
 }
 
 #[inline]
-pub(crate) fn lstat(filename: &CStr) -> io::Result<Stat> {
+pub(crate) fn lstat(filename: &ZStr) -> io::Result<Stat> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         let mut result = MaybeUninit::<Stat>::uninit();
@@ -527,7 +526,7 @@ pub(crate) fn lstat(filename: &CStr) -> io::Result<Stat> {
 #[inline]
 pub(crate) fn statx(
     dirfd: BorrowedFd<'_>,
-    pathname: &CStr,
+    pathname: &ZStr,
     flags: AtFlags,
     mask: StatxFlags,
 ) -> io::Result<statx> {
@@ -571,7 +570,7 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
 }
 
 #[inline]
-pub(crate) fn readlink(path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
+pub(crate) fn readlink(path: &ZStr, buf: &mut [u8]) -> io::Result<usize> {
     let (buf_addr_mut, buf_len) = slice_mut(buf);
     unsafe {
         ret_usize(syscall4_readonly(
@@ -585,7 +584,7 @@ pub(crate) fn readlink(path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
 }
 
 #[inline]
-pub(crate) fn readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
+pub(crate) fn readlinkat(dirfd: BorrowedFd<'_>, path: &ZStr, buf: &mut [u8]) -> io::Result<usize> {
     let (buf_addr_mut, buf_len) = slice_mut(buf);
     unsafe {
         ret_usize(syscall4_readonly(
@@ -855,7 +854,7 @@ pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<u32> {
 }
 
 #[inline]
-pub(crate) fn rename(oldname: &CStr, newname: &CStr) -> io::Result<()> {
+pub(crate) fn rename(oldname: &ZStr, newname: &ZStr) -> io::Result<()> {
     #[cfg(target_arch = "riscv64")]
     unsafe {
         ret(syscall5_readonly(
@@ -882,9 +881,9 @@ pub(crate) fn rename(oldname: &CStr, newname: &CStr) -> io::Result<()> {
 #[inline]
 pub(crate) fn renameat(
     old_dirfd: BorrowedFd<'_>,
-    oldname: &CStr,
+    oldname: &ZStr,
     new_dirfd: BorrowedFd<'_>,
-    newname: &CStr,
+    newname: &ZStr,
 ) -> io::Result<()> {
     #[cfg(target_arch = "riscv64")]
     unsafe {
@@ -912,9 +911,9 @@ pub(crate) fn renameat(
 #[inline]
 pub(crate) fn renameat2(
     old_dirfd: BorrowedFd<'_>,
-    oldname: &CStr,
+    oldname: &ZStr,
     new_dirfd: BorrowedFd<'_>,
-    newname: &CStr,
+    newname: &ZStr,
     flags: RenameFlags,
 ) -> io::Result<()> {
     unsafe {
@@ -930,7 +929,7 @@ pub(crate) fn renameat2(
 }
 
 #[inline]
-pub(crate) fn unlink(pathname: &CStr) -> io::Result<()> {
+pub(crate) fn unlink(pathname: &ZStr) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_unlinkat),
@@ -942,7 +941,7 @@ pub(crate) fn unlink(pathname: &CStr) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn unlinkat(dirfd: BorrowedFd<'_>, pathname: &CStr, flags: AtFlags) -> io::Result<()> {
+pub(crate) fn unlinkat(dirfd: BorrowedFd<'_>, pathname: &ZStr, flags: AtFlags) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_unlinkat),
@@ -954,7 +953,7 @@ pub(crate) fn unlinkat(dirfd: BorrowedFd<'_>, pathname: &CStr, flags: AtFlags) -
 }
 
 #[inline]
-pub(crate) fn rmdir(pathname: &CStr) -> io::Result<()> {
+pub(crate) fn rmdir(pathname: &ZStr) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_unlinkat),
@@ -966,7 +965,7 @@ pub(crate) fn rmdir(pathname: &CStr) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn link(oldname: &CStr, newname: &CStr) -> io::Result<()> {
+pub(crate) fn link(oldname: &ZStr, newname: &ZStr) -> io::Result<()> {
     unsafe {
         ret(syscall5_readonly(
             nr(__NR_linkat),
@@ -982,9 +981,9 @@ pub(crate) fn link(oldname: &CStr, newname: &CStr) -> io::Result<()> {
 #[inline]
 pub(crate) fn linkat(
     old_dirfd: BorrowedFd<'_>,
-    oldname: &CStr,
+    oldname: &ZStr,
     new_dirfd: BorrowedFd<'_>,
-    newname: &CStr,
+    newname: &ZStr,
     flags: AtFlags,
 ) -> io::Result<()> {
     unsafe {
@@ -1000,7 +999,7 @@ pub(crate) fn linkat(
 }
 
 #[inline]
-pub(crate) fn symlink(oldname: &CStr, newname: &CStr) -> io::Result<()> {
+pub(crate) fn symlink(oldname: &ZStr, newname: &ZStr) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_symlinkat),
@@ -1012,7 +1011,7 @@ pub(crate) fn symlink(oldname: &CStr, newname: &CStr) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn symlinkat(oldname: &CStr, dirfd: BorrowedFd<'_>, newname: &CStr) -> io::Result<()> {
+pub(crate) fn symlinkat(oldname: &ZStr, dirfd: BorrowedFd<'_>, newname: &ZStr) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_symlinkat),
@@ -1024,7 +1023,7 @@ pub(crate) fn symlinkat(oldname: &CStr, dirfd: BorrowedFd<'_>, newname: &CStr) -
 }
 
 #[inline]
-pub(crate) fn mkdir(pathname: &CStr, mode: Mode) -> io::Result<()> {
+pub(crate) fn mkdir(pathname: &ZStr, mode: Mode) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_mkdirat),
@@ -1036,7 +1035,7 @@ pub(crate) fn mkdir(pathname: &CStr, mode: Mode) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn mkdirat(dirfd: BorrowedFd<'_>, pathname: &CStr, mode: Mode) -> io::Result<()> {
+pub(crate) fn mkdirat(dirfd: BorrowedFd<'_>, pathname: &ZStr, mode: Mode) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_mkdirat),
@@ -1064,7 +1063,7 @@ pub(crate) fn getdents(fd: BorrowedFd<'_>, dirent: &mut [u8]) -> io::Result<usiz
 #[inline]
 pub(crate) fn utimensat(
     dirfd: BorrowedFd<'_>,
-    pathname: &CStr,
+    pathname: &ZStr,
     utimes: &[__kernel_timespec; 2],
     flags: AtFlags,
 ) -> io::Result<()> {
@@ -1074,7 +1073,7 @@ pub(crate) fn utimensat(
 #[inline]
 fn _utimensat(
     dirfd: BorrowedFd<'_>,
-    pathname: Option<&CStr>,
+    pathname: Option<&ZStr>,
     utimes: &[__kernel_timespec; 2],
     flags: AtFlags,
 ) -> io::Result<()> {
@@ -1137,7 +1136,7 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &[Timespec; 2]) -> io::Result<
 
 pub(crate) fn accessat(
     dirfd: BorrowedFd<'_>,
-    path: &CStr,
+    path: &ZStr,
     access: Access,
     flags: AtFlags,
 ) -> io::Result<()> {
@@ -1158,7 +1157,7 @@ pub(crate) fn accessat(
 }
 
 #[inline]
-fn _accessat(dirfd: BorrowedFd<'_>, pathname: &CStr, mode: c::c_uint) -> io::Result<()> {
+fn _accessat(dirfd: BorrowedFd<'_>, pathname: &ZStr, mode: c::c_uint) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_faccessat),
@@ -1204,7 +1203,7 @@ fn _copy_file_range(
 }
 
 #[inline]
-pub(crate) fn memfd_create(name: &CStr, flags: MemfdFlags) -> io::Result<OwnedFd> {
+pub(crate) fn memfd_create(name: &ZStr, flags: MemfdFlags) -> io::Result<OwnedFd> {
     unsafe {
         ret_owned_fd(syscall2(
             nr(__NR_memfd_create),

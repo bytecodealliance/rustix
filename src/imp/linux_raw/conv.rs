@@ -20,6 +20,7 @@ use super::io::error::{
 };
 use super::reg::{raw_arg, ArgNumber, ArgReg, RetReg, R0};
 use super::time::ClockId;
+use crate::ffi::ZStr;
 use crate::io::{self, OwnedFd};
 use crate::{as_mut_ptr, as_ptr};
 #[cfg(target_pointer_width = "64")]
@@ -27,7 +28,6 @@ use linux_raw_sys::general::__kernel_loff_t;
 #[cfg(target_pointer_width = "32")]
 use linux_raw_sys::general::O_LARGEFILE;
 use linux_raw_sys::general::{__kernel_clockid_t, socklen_t};
-use std::ffi::CStr;
 use std::mem::{transmute, MaybeUninit};
 use std::ptr::null;
 
@@ -87,12 +87,12 @@ pub(super) fn const_void_star<'a, Num: ArgNumber>(c: *const c::c_void) -> ArgReg
 }
 
 #[inline]
-pub(super) fn c_str<'a, Num: ArgNumber>(c: &'a CStr) -> ArgReg<'a, Num> {
+pub(super) fn c_str<'a, Num: ArgNumber>(c: &'a ZStr) -> ArgReg<'a, Num> {
     raw_arg(c.as_ptr() as usize)
 }
 
 #[inline]
-pub(super) fn opt_c_str<'a, Num: ArgNumber>(t: Option<&'a CStr>) -> ArgReg<'a, Num> {
+pub(super) fn opt_c_str<'a, Num: ArgNumber>(t: Option<&'a ZStr>) -> ArgReg<'a, Num> {
     raw_arg(
         (match t {
             Some(s) => s.as_ptr(),

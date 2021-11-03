@@ -1,4 +1,5 @@
 mod error;
+#[cfg(not(windows))]
 #[cfg(feature = "rustc-dep-of-std")]
 mod io_slice;
 #[cfg(not(windows))]
@@ -9,6 +10,7 @@ mod types;
 #[cfg(not(windows))]
 pub(crate) mod syscalls;
 
+#[cfg(not(windows))]
 #[cfg(feature = "rustc-dep-of-std")]
 pub use io_slice::{IoSlice, IoSliceMut};
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -32,6 +34,7 @@ pub use types::{DupFlags, MapFlags, MprotectFlags, ProtFlags, Tcflag, Termios, W
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use types::{EventfdFlags, MlockFlags, ReadWriteFlags, UserfaultfdFlags};
 
+#[cfg(not(windows))]
 use super::c;
 
 #[cfg(not(any(windows, target_os = "redox")))]

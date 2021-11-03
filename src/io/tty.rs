@@ -12,7 +12,7 @@ use imp::fd::AsFd;
     all(linux_raw, feature = "procfs"),
     all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
 ))]
-use {imp::fd::BorrowedFd, std::ffi::CString};
+use {crate::ffi::ZString, imp::fd::BorrowedFd};
 
 /// `isatty(fd)`—Tests whether a file descriptor refers to a terminal.
 ///
@@ -44,7 +44,7 @@ pub fn isatty<Fd: AsFd>(fd: &Fd) -> bool {
 ))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 #[inline]
-pub fn ttyname<Fd: AsFd, B: Into<Vec<u8>>>(dirfd: &Fd, reuse: B) -> io::Result<CString> {
+pub fn ttyname<Fd: AsFd, B: Into<Vec<u8>>>(dirfd: &Fd, reuse: B) -> io::Result<ZString> {
     let dirfd = dirfd.as_fd();
     _ttyname(dirfd, reuse.into())
 }
@@ -53,7 +53,7 @@ pub fn ttyname<Fd: AsFd, B: Into<Vec<u8>>>(dirfd: &Fd, reuse: B) -> io::Result<C
     all(linux_raw, feature = "procfs"),
     all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
 ))]
-fn _ttyname(dirfd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<CString> {
+fn _ttyname(dirfd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<ZString> {
     // This code would benefit from having a better way to read into
     // uninitialized memory, but that requires `unsafe`.
     buffer.clear();
@@ -64,7 +64,7 @@ fn _ttyname(dirfd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<CString> {
             Err(imp::io::Error::RANGE) => buffer.resize(buffer.len() * 2, 0_u8),
             Ok(len) => {
                 buffer.resize(len, 0);
-                return Ok(CString::new(buffer).unwrap());
+                return Ok(ZString::new(buffer).unwrap());
             }
             Err(errno) => return Err(errno),
         }

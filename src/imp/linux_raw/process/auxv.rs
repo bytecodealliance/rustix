@@ -7,11 +7,11 @@
 
 use super::super::c;
 use super::super::elf::Elf_Phdr;
+use crate::ffi::ZStr;
 use linux_raw_sys::general::{
     AT_EXECFN, AT_HWCAP, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM,
 };
 use linux_raw_sys::v5_4::general::{AT_HWCAP2, AT_SYSINFO_EHDR};
-use std::ffi::CStr;
 use std::mem::size_of;
 use std::slice;
 
@@ -27,8 +27,8 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
 }
 
 #[inline]
-pub(crate) fn linux_execfn() -> &'static CStr {
-    unsafe { CStr::from_ptr(auxv().execfn as *const c::c_char) }
+pub(crate) fn linux_execfn() -> &'static ZStr {
+    unsafe { ZStr::from_ptr(auxv().execfn as *const _) }
 }
 
 #[inline]

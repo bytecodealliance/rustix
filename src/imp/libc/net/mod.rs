@@ -1,12 +1,13 @@
+#[cfg(not(windows))]
 use super::c;
 
 mod addr;
-mod ext;
 mod read_sockaddr;
 mod send_recv;
 mod types;
 mod write_sockaddr;
 
+pub(crate) mod ext;
 pub(crate) mod syscalls;
 pub use addr::SocketAddrStorage;
 #[cfg(not(windows))]

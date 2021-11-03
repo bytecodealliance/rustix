@@ -7,7 +7,7 @@
 #![allow(unsafe_code)]
 
 use crate::{imp, io};
-use std::ffi::c_void;
+use core::ffi::c_void;
 
 pub use imp::io::Advice;
 

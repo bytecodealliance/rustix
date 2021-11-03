@@ -14,8 +14,8 @@
 
 use super::c;
 use super::elf::*;
+use crate::ffi::ZStr;
 use crate::io::{self, madvise, Advice};
-use std::ffi::CStr;
 use std::mem::{align_of, size_of};
 use std::ptr::null;
 
@@ -27,7 +27,7 @@ pub(super) struct Vdso {
 
     // Symbol table
     symtab: *const Elf_Sym,
-    symstrings: *const c::c_char,
+    symstrings: *const u8,
     bucket: *const u32,
     chain: *const u32,
     nbucket: u32,
@@ -39,7 +39,7 @@ pub(super) struct Vdso {
 }
 
 // Straight from the ELF specification.
-fn elf_hash(name: &CStr) -> u32 {
+fn elf_hash(name: &ZStr) -> u32 {
     let mut h: u32 = 0;
     for b in name.to_bytes() {
         h = (h << 4).wrapping_add(u32::from(*b));
@@ -227,8 +227,7 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
         let d = &*dyn_.add(i);
         match d.d_tag {
             DT_STRTAB => {
-                vdso.symstrings =
-                    make_pointer::<c::c_char>(d.d_val.checked_add(vdso.load_offset)?)?;
+                vdso.symstrings = make_pointer::<u8>(d.d_val.checked_add(vdso.load_offset)?)?;
             }
             DT_SYMTAB => {
                 vdso.symtab = make_pointer::<Elf_Sym>(d.d_val.checked_add(vdso.load_offset)?)?;
@@ -285,7 +284,7 @@ impl Vdso {
     /// # Safety
     ///
     /// The raw pointers inside `self` must be valid.
-    unsafe fn match_version(&self, mut ver: u16, name: &CStr, hash: u32) -> bool {
+    unsafe fn match_version(&self, mut ver: u16, name: &ZStr, hash: u32) -> bool {
         // This is a helper function to check if the version indexed by
         // ver matches name (which hashes to hash).
         //
@@ -316,21 +315,21 @@ impl Vdso {
             }
 
             def = def
-                .cast::<c::c_char>()
+                .cast::<u8>()
                 .add((*def).vd_next as usize)
                 .cast::<Elf_Verdef>();
         }
 
         // Now figure out whether it matches.
-        let aux = &*(def.cast::<c::c_char>())
+        let aux = &*(def.cast::<u8>())
             .add((*def).vd_aux as usize)
             .cast::<Elf_Verdaux>();
         (*def).vd_hash == hash
-            && (name == CStr::from_ptr(self.symstrings.add(aux.vda_name as usize)))
+            && (name == ZStr::from_ptr(self.symstrings.add(aux.vda_name as usize).cast()))
     }
 
     /// Look up a symbol in the vDSO.
-    pub(super) fn sym(&self, version: &CStr, name: &CStr) -> *const c::c_void {
+    pub(super) fn sym(&self, version: &ZStr, name: &ZStr) -> *const c::c_void {
         let ver_hash = elf_hash(version);
         let name_hash = elf_hash(name);
 
@@ -348,7 +347,7 @@ impl Vdso {
 		       sym.st_shndx == SHN_UNDEF ||
 		       sym.st_shndx == SHN_ABS ||
                ELF_ST_VISIBILITY(sym.st_other) != STV_DEFAULT ||
-		       (name != CStr::from_ptr(self.symstrings.add(sym.st_name as usize))) ||
+		       (name != ZStr::from_ptr(self.symstrings.add(sym.st_name as usize).cast())) ||
 		       // Check symbol version.
 		       (!self.versym.is_null()
 		        && !self.match_version(*self.versym.add(chain as usize),

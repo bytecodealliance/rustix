@@ -45,7 +45,7 @@
 #![deny(missing_docs)]
 #![cfg_attr(linux_raw, deny(unsafe_code))]
 #![cfg_attr(linux_raw_inline_asm, feature(asm))]
-#![cfg_attr(rustc_attrs, feature(rustc_attrs))]
+#![cfg_attr(any(rustc_attrs, feature = "rustc-dep-of-std"), feature(rustc_attrs))]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 #![cfg_attr(
@@ -53,26 +53,39 @@
     feature(naked_functions)
 )]
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
+#![cfg_attr(feature = "rustc-dep-of-std", allow(incomplete_features))]
+#![cfg_attr(feature = "rustc-dep-of-std", feature(specialization))]
+#![cfg_attr(feature = "rustc-dep-of-std", feature(toowned_clone_into))]
+#![cfg_attr(feature = "rustc-dep-of-std", feature(vec_into_raw_parts))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(const_ipv4))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(const_ipv6))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(const_socketaddr))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(const_raw_ptr_deref))]
+#![cfg_attr(feature = "rustc-dep-of-std", feature(slice_internals))]
 
 #[cfg(feature = "rustc-dep-of-std")]
 extern crate alloc;
 
 /// Re-export `io_lifetimes` since we use its types in our public API, so
 /// that our users don't need to do anything special to use the same version.
+#[cfg(feature = "rustc-dep-of-std")]
+pub mod io_lifetimes {
+    use super::imp;
+    pub use imp::fd::{AsFd, BorrowedFd};
+}
+#[cfg(not(feature = "rustc-dep-of-std"))]
 pub use io_lifetimes;
 
 #[cfg(not(windows))]
 #[macro_use]
-pub(crate) mod cstr;
+pub(crate) mod zstr;
 #[macro_use]
 pub(crate) mod const_assert;
 
 mod imp;
 
+#[cfg(not(windows))]
+pub mod ffi;
 #[cfg(not(windows))]
 pub mod fs;
 pub mod io;

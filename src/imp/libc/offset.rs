@@ -1,5 +1,6 @@
 //! Automatically enable "large file" support features.
 
+#[cfg(not(windows))]
 use super::super::c;
 
 #[cfg(not(any(

@@ -11,7 +11,7 @@ pub(crate) use super::process::syscalls::*;
 #[cfg(not(windows))]
 pub(crate) use super::time::syscalls::*;
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(windows, target_os = "android", target_os = "linux"))]
 use super::c;
 #[cfg(target_os = "linux")]
 use super::conv::ret_ssize_t;

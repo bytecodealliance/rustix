@@ -7,8 +7,8 @@
 #![allow(unsafe_code)]
 
 use crate::{imp, io};
+use core::ffi::c_void;
 use imp::fd::AsFd;
-use std::ffi::c_void;
 
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use imp::io::MlockFlags;

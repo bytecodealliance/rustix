@@ -352,15 +352,15 @@ fn init() {
 
     if let Some(vdso) = vdso::Vdso::new() {
         #[cfg(target_arch = "x86_64")]
-        let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime"));
+        let ptr = vdso.sym(zstr!("LINUX_2.6"), zstr!("__vdso_clock_gettime"));
         #[cfg(target_arch = "arm")]
-        let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime"));
+        let ptr = vdso.sym(zstr!("LINUX_2.6"), zstr!("__vdso_clock_gettime"));
         #[cfg(target_arch = "aarch64")]
-        let ptr = vdso.sym(cstr!("LINUX_2.6.39"), cstr!("__kernel_clock_gettime"));
+        let ptr = vdso.sym(zstr!("LINUX_2.6.39"), zstr!("__kernel_clock_gettime"));
         #[cfg(target_arch = "x86")]
-        let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime64"));
+        let ptr = vdso.sym(zstr!("LINUX_2.6"), zstr!("__vdso_clock_gettime64"));
         #[cfg(target_arch = "riscv64")]
-        let ptr = vdso.sym(cstr!("LINUX_4.15"), cstr!("__kernel_clock_gettime"));
+        let ptr = vdso.sym(zstr!("LINUX_4.15"), zstr!("__kernel_clock_gettime"));
 
         assert!(!ptr.is_null());
 
@@ -374,7 +374,7 @@ fn init() {
         // On x86, also look up the vsyscall entry point.
         #[cfg(target_arch = "x86")]
         {
-            let ptr = vdso.sym(cstr!("LINUX_2.5"), cstr!("__kernel_vsyscall"));
+            let ptr = vdso.sym(zstr!("LINUX_2.5"), zstr!("__kernel_vsyscall"));
             assert!(!ptr.is_null());
 
             // Safety: As above, store the computed function addresses in

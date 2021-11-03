@@ -2,9 +2,9 @@
 //! pointers.
 #![cfg_attr(target_vendor = "mustang", allow(unsafe_code))]
 
-use crate::imp;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
-use std::ffi::CStr;
+use crate::ffi::ZStr;
+use crate::imp;
 
 /// `getpagesize()`—Returns the process' page size.
 #[inline]
@@ -40,7 +40,7 @@ pub fn linux_hwcap() -> (usize, usize) {
 /// [Linux]: https://man7.org/linux/man-pages/man3/getauxval.3.html
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 #[inline]
-pub fn linux_execfn() -> &'static CStr {
+pub fn linux_execfn() -> &'static ZStr {
     imp::process::linux_execfn()
 }
 
