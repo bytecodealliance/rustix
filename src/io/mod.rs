@@ -28,6 +28,8 @@ pub(crate) use {
     std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
 };
 
+#[cfg(feature = "rustc-dep-of-std")]
+mod fd;
 #[cfg(not(windows))]
 mod close;
 #[cfg(not(windows))]

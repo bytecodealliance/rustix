@@ -54,10 +54,7 @@ pub(crate) use winapi::um::ws2tcpip::socklen_t;
 pub(crate) use winapi::shared::in6addr::in6_addr;
 pub(crate) use winapi::shared::inaddr::in_addr;
 
-pub(crate) use winapi::ctypes::c_char;
-pub(crate) use winapi::ctypes::c_int;
-pub(crate) use winapi::ctypes::c_uint;
-pub(crate) use winapi::ctypes::c_void;
+pub(crate) use winapi::ctypes::*;
 
 pub(crate) use winapi::um::winsock2::ioctlsocket as ioctl;
 pub(crate) use winapi::um::winsock2::linger;
