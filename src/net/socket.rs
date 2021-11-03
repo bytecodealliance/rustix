@@ -4,7 +4,7 @@ use crate::io::AsSocketAsFd;
 use crate::io::{self, AsFd, OwnedFd};
 #[cfg(not(windows))]
 use crate::net::SocketAddrUnix;
-use crate::net::{SocketAddr, SocketAddrV4, SocketAddrV6};
+use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 
 pub use imp::net::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 
@@ -227,7 +227,7 @@ pub fn accept_with<Fd: AsFd>(sockfd: &Fd, flags: AcceptFlags) -> io::Result<Owne
 /// [Linux]: https://man7.org/linux/man-pages/man2/accept.2.html
 #[inline]
 #[doc(alias = "accept4")]
-pub fn acceptfrom<Fd: AsFd>(sockfd: &Fd) -> io::Result<(OwnedFd, SocketAddr)> {
+pub fn acceptfrom<Fd: AsFd>(sockfd: &Fd) -> io::Result<(OwnedFd, SocketAddrAny)> {
     let sockfd = sockfd.as_fd();
     imp::syscalls::acceptfrom(sockfd)
 }
@@ -251,7 +251,7 @@ pub fn acceptfrom<Fd: AsFd>(sockfd: &Fd) -> io::Result<(OwnedFd, SocketAddr)> {
 pub fn acceptfrom_with<Fd: AsFd>(
     sockfd: &Fd,
     flags: AcceptFlags,
-) -> io::Result<(OwnedFd, SocketAddr)> {
+) -> io::Result<(OwnedFd, SocketAddrAny)> {
     let sockfd = sockfd.as_fd();
     imp::syscalls::acceptfrom_with(sockfd, flags)
 }
@@ -279,7 +279,7 @@ pub fn shutdown<Fd: AsFd>(sockfd: &Fd, how: Shutdown) -> io::Result<()> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockname.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/getsockname.2.html
 #[inline]
-pub fn getsockname<Fd: AsFd>(sockfd: &Fd) -> io::Result<SocketAddr> {
+pub fn getsockname<Fd: AsFd>(sockfd: &Fd) -> io::Result<SocketAddrAny> {
     let sockfd = sockfd.as_fd();
     imp::syscalls::getsockname(sockfd)
 }
@@ -294,7 +294,7 @@ pub fn getsockname<Fd: AsFd>(sockfd: &Fd) -> io::Result<SocketAddr> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getpeername.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/getpeername.2.html
 #[inline]
-pub fn getpeername<Fd: AsFd>(sockfd: &Fd) -> io::Result<SocketAddr> {
+pub fn getpeername<Fd: AsFd>(sockfd: &Fd) -> io::Result<SocketAddrAny> {
     let sockfd = sockfd.as_fd();
     imp::syscalls::getpeername(sockfd)
 }

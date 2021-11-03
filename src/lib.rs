@@ -53,6 +53,13 @@
     feature(naked_functions)
 )]
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
+#![cfg_attr(feature = "rustc-dep-of-std", feature(const_ipv4))]
+#![cfg_attr(feature = "rustc-dep-of-std", feature(const_ipv6))]
+#![cfg_attr(feature = "rustc-dep-of-std", feature(const_socketaddr))]
+#![cfg_attr(feature = "rustc-dep-of-std", feature(const_raw_ptr_deref))]
+
+#[cfg(feature = "rustc-dep-of-std")]
+extern crate alloc;
 
 /// Re-export `io_lifetimes` since we use its types in our public API, so
 /// that our users don't need to do anything special to use the same version.

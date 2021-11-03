@@ -36,6 +36,8 @@ linux-raw-sys = { version = "0.0.29", features = ["v5_4", "v5_11"] }
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.9", features = ["ws2ipdef", "ws2tcpip", "impl-default"] }
 
+rustc-std-workspace-core = { version = "1.0.0", optional = true }
+
 [dev-dependencies]
 atty = "0.2.14"
 cstr = "0.2.8"
@@ -59,6 +61,8 @@ os_pipe = ["io-lifetimes/os_pipe"]
 socket2 = ["io-lifetimes/socket2"]
 mio = ["io-lifetimes/mio"]
 fs-err = ["io-lifetimes/fs-err"]
+
+rustc-dep-of-std = ['rustc-std-workspace-core']
 
 # Add Criterion configuration, as described here:
 # <https://bheisler.github.io/criterion.rs/book/getting_started.html#step-1---add-dependency-to-cargotoml>

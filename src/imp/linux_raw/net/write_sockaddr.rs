@@ -2,15 +2,17 @@
 //! we can interpret the rest of a `sockaddr` produced by the kernel.
 #![allow(unsafe_code)]
 
-use super::{SocketAddr, SocketAddrStorage, SocketAddrUnix};
+use crate::net::{SocketAddrAny, SocketAddrStorage, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use std::mem::size_of;
-use std::net::{SocketAddrV4, SocketAddrV6};
 
-pub(crate) unsafe fn write_sockaddr(addr: &SocketAddr, storage: *mut SocketAddrStorage) -> usize {
+pub(crate) unsafe fn write_sockaddr(
+    addr: &SocketAddrAny,
+    storage: *mut SocketAddrStorage,
+) -> usize {
     match addr {
-        SocketAddr::V4(v4) => write_sockaddr_v4(v4, storage),
-        SocketAddr::V6(v6) => write_sockaddr_v6(v6, storage),
-        SocketAddr::Unix(unix) => write_sockaddr_unix(unix, storage),
+        SocketAddrAny::V4(v4) => write_sockaddr_v4(v4, storage),
+        SocketAddrAny::V6(v6) => write_sockaddr_v6(v6, storage),
+        SocketAddrAny::Unix(unix) => write_sockaddr_unix(unix, storage),
     }
 }
 

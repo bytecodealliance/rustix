@@ -2,8 +2,13 @@
 
 use crate::imp;
 
+#[cfg(feature = "rustc-dep-of-std")]
+mod addr;
+#[cfg(feature = "rustc-dep-of-std")]
+mod ip;
 mod send_recv;
 mod socket;
+mod socket_addr_any;
 #[cfg(not(any(windows, target_os = "wasi")))]
 mod socketpair;
 #[cfg(windows)]
@@ -21,12 +26,20 @@ pub use socket::{
 };
 #[cfg(not(windows))]
 pub use socket::{bind_unix, connect_unix};
+pub use socket_addr_any::SocketAddrAny;
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use socketpair::socketpair;
 #[cfg(windows)]
 pub use wsa::{wsa_cleanup, wsa_startup};
 
+pub use imp::net::SocketAddrStorage;
 #[cfg(not(windows))]
 pub use imp::net::SocketAddrUnix;
-pub use imp::net::{SocketAddr, SocketAddrStorage};
+
+#[cfg(not(feature = "rustc-dep-of-std"))]
 pub use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
+
+#[cfg(feature = "rustc-dep-of-std")]
+pub use addr::{SocketAddrV4, SocketAddrV6, SocketAddr};
+#[cfg(feature = "rustc-dep-of-std")]
+pub use ip::{IpAddr, Ipv4Addr, Ipv6Addr};
