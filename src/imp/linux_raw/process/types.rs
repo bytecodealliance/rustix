@@ -1,4 +1,4 @@
-use super::super::libc;
+use super::super::c;
 
 /// A command for use with [`membarrier`] and [`membarrier_cpu`].
 ///
@@ -74,9 +74,9 @@ pub enum Resource {
     Rttime = linux_raw_sys::general::RLIMIT_RTTIME,
 }
 
-pub const EXIT_SUCCESS: libc::c_int = 0;
-pub const EXIT_FAILURE: libc::c_int = 1;
-pub const EXIT_SIGNALED_SIGABRT: libc::c_int = 128 + linux_raw_sys::general::SIGABRT as i32;
+pub const EXIT_SUCCESS: c::c_int = 0;
+pub const EXIT_FAILURE: c::c_int = 1;
+pub const EXIT_SIGNALED_SIGABRT: c::c_int = 128 + linux_raw_sys::general::SIGABRT as i32;
 
 pub type RawPid = u32;
 pub type RawGid = u32;

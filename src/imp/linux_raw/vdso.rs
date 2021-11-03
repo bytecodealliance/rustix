@@ -12,8 +12,8 @@
 //! additional safety checks.
 #![allow(unsafe_code)]
 
+use super::c;
 use super::elf::*;
-use super::libc;
 use crate::io::{self, madvise, Advice};
 use std::ffi::CStr;
 use std::mem::{align_of, size_of};
@@ -27,7 +27,7 @@ pub(super) struct Vdso {
 
     // Symbol table
     symtab: *const Elf_Sym,
-    symstrings: *const libc::c_char,
+    symstrings: *const c::c_char,
     bucket: *const u32,
     chain: *const u32,
     nbucket: u32,
@@ -83,16 +83,16 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
 
     // Check that we're not attempting to parse our own ELF image.
     extern "C" {
-        static __ehdr_start: libc::c_void;
+        static __ehdr_start: c::c_void;
     }
-    let ehdr_start: *const libc::c_void = &__ehdr_start;
+    let ehdr_start: *const c::c_void = &__ehdr_start;
     if base == (ehdr_start as usize) {
         return None;
     }
 
     // Check that the vDSO is page-aligned and appropriately mapped.
     if madvise(
-        base as *mut libc::c_void,
+        base as *mut c::c_void,
         size_of::<Elf_Ehdr>(),
         Advice::Normal,
     )
@@ -159,7 +159,7 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
         if ret(syscall2(
             nr(__NR_clock_getres),
             clockid_t(ClockId::Monotonic),
-            void_star(base as *mut libc::c_void),
+            void_star(base as *mut c::c_void),
         )) != Err(io::Error::FAULT)
         {
             // We can't gracefully fail here because we would seem to have just
@@ -228,7 +228,7 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
         match d.d_tag {
             DT_STRTAB => {
                 vdso.symstrings =
-                    make_pointer::<libc::c_char>(d.d_val.checked_add(vdso.load_offset)?)?;
+                    make_pointer::<c::c_char>(d.d_val.checked_add(vdso.load_offset)?)?;
             }
             DT_SYMTAB => {
                 vdso.symtab = make_pointer::<Elf_Sym>(d.d_val.checked_add(vdso.load_offset)?)?;
@@ -316,13 +316,13 @@ impl Vdso {
             }
 
             def = def
-                .cast::<libc::c_char>()
+                .cast::<c::c_char>()
                 .add((*def).vd_next as usize)
                 .cast::<Elf_Verdef>();
         }
 
         // Now figure out whether it matches.
-        let aux = &*(def.cast::<libc::c_char>())
+        let aux = &*(def.cast::<c::c_char>())
             .add((*def).vd_aux as usize)
             .cast::<Elf_Verdaux>();
         (*def).vd_hash == hash
@@ -330,7 +330,7 @@ impl Vdso {
     }
 
     /// Look up a symbol in the vDSO.
-    pub(super) fn sym(&self, version: &CStr, name: &CStr) -> *const libc::c_void {
+    pub(super) fn sym(&self, version: &CStr, name: &CStr) -> *const c::c_void {
         let ver_hash = elf_hash(version);
         let name_hash = elf_hash(name);
 
@@ -360,7 +360,7 @@ impl Vdso {
 
                 let sum = self.load_offset.checked_add(sym.st_value).unwrap();
                 assert!(sum >= self.load_addr && sum <= self.load_end);
-                return sum as *const libc::c_void;
+                return sum as *const c::c_void;
             }
         }
 

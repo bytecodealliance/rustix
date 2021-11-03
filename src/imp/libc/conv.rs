@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use super::c;
 use super::fd::{AsRawFd, BorrowedFd, FromFd, FromRawFd, IntoFd, IntoRawFd, LibcFd, RawFd};
 #[cfg(windows)]
 use super::io_lifetimes;
@@ -11,8 +12,8 @@ use std::convert::TryInto;
 use std::ffi::CStr;
 
 #[inline]
-pub(super) fn c_str(c: &CStr) -> *const libc::c_char {
-    c.as_ptr().cast::<libc::c_char>()
+pub(super) fn c_str(c: &CStr) -> *const c::c_char {
+    c.as_ptr().cast::<c::c_char>()
 }
 
 #[cfg(not(windows))]
@@ -32,7 +33,7 @@ pub(super) fn owned_fd(fd: OwnedFd) -> LibcFd {
 }
 
 #[inline]
-pub(super) fn ret(raw: libc::c_int) -> io::Result<()> {
+pub(super) fn ret(raw: c::c_int) -> io::Result<()> {
     if raw == 0 {
         Ok(())
     } else {
@@ -41,7 +42,7 @@ pub(super) fn ret(raw: libc::c_int) -> io::Result<()> {
 }
 
 #[inline]
-pub(super) fn syscall_ret(raw: libc::c_long) -> io::Result<()> {
+pub(super) fn syscall_ret(raw: c::c_long) -> io::Result<()> {
     if raw == 0 {
         Ok(())
     } else {
@@ -50,7 +51,7 @@ pub(super) fn syscall_ret(raw: libc::c_long) -> io::Result<()> {
 }
 
 #[inline]
-pub(super) fn nonnegative_ret(raw: libc::c_int) -> io::Result<()> {
+pub(super) fn nonnegative_ret(raw: c::c_int) -> io::Result<()> {
     if raw >= 0 {
         Ok(())
     } else {
@@ -59,12 +60,12 @@ pub(super) fn nonnegative_ret(raw: libc::c_int) -> io::Result<()> {
 }
 
 #[inline]
-pub(super) unsafe fn ret_infallible(raw: libc::c_int) {
+pub(super) unsafe fn ret_infallible(raw: c::c_int) {
     debug_assert_eq!(raw, 0);
 }
 
 #[inline]
-pub(super) fn ret_c_int(raw: libc::c_int) -> io::Result<libc::c_int> {
+pub(super) fn ret_c_int(raw: c::c_int) -> io::Result<c::c_int> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
@@ -73,7 +74,7 @@ pub(super) fn ret_c_int(raw: libc::c_int) -> io::Result<libc::c_int> {
 }
 
 #[inline]
-pub(super) fn ret_u32(raw: libc::c_int) -> io::Result<u32> {
+pub(super) fn ret_u32(raw: c::c_int) -> io::Result<u32> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
@@ -82,7 +83,7 @@ pub(super) fn ret_u32(raw: libc::c_int) -> io::Result<u32> {
 }
 
 #[inline]
-pub(super) fn ret_ssize_t(raw: libc::ssize_t) -> io::Result<libc::ssize_t> {
+pub(super) fn ret_ssize_t(raw: c::ssize_t) -> io::Result<c::ssize_t> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
@@ -91,24 +92,24 @@ pub(super) fn ret_ssize_t(raw: libc::ssize_t) -> io::Result<libc::ssize_t> {
 }
 
 #[inline]
-pub(super) fn syscall_ret_ssize_t(raw: libc::c_long) -> io::Result<libc::ssize_t> {
+pub(super) fn syscall_ret_ssize_t(raw: c::c_long) -> io::Result<c::ssize_t> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
-        Ok(raw as libc::ssize_t)
+        Ok(raw as c::ssize_t)
     }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
-pub(super) fn syscall_ret_u32(raw: libc::c_long) -> io::Result<u32> {
+pub(super) fn syscall_ret_u32(raw: c::c_long) -> io::Result<u32> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
         let r32 = raw as u32;
 
         // Converting `raw` to `u32` should be lossless.
-        debug_assert_eq!(r32 as libc::c_long, raw);
+        debug_assert_eq!(r32 as c::c_long, raw);
 
         Ok(r32)
     }
@@ -151,7 +152,7 @@ pub(super) fn ret_discarded_fd(raw: LibcFd) -> io::Result<()> {
 }
 
 #[inline]
-pub(super) fn ret_discarded_char_ptr(raw: *mut libc::c_char) -> io::Result<()> {
+pub(super) fn ret_discarded_char_ptr(raw: *mut c::c_char) -> io::Result<()> {
     if raw.is_null() {
         Err(io::Error::last_os_error())
     } else {
@@ -167,7 +168,7 @@ pub(super) fn ret_discarded_char_ptr(raw: *mut libc::c_char) -> io::Result<()> {
 /// which returns an owned file descriptor.
 #[cfg(not(windows))]
 #[inline]
-pub(super) unsafe fn syscall_ret_owned_fd(raw: libc::c_long) -> io::Result<OwnedFd> {
+pub(super) unsafe fn syscall_ret_owned_fd(raw: c::c_long) -> io::Result<OwnedFd> {
     if raw == -1 {
         Err(io::Error::last_os_error())
     } else {
@@ -197,13 +198,13 @@ pub(super) fn send_recv_len(len: usize) -> i32 {
 /// Convert the return value of a `send` or `recv` call.
 #[cfg(not(windows))]
 #[inline]
-pub(super) fn ret_send_recv(len: isize) -> io::Result<libc::ssize_t> {
+pub(super) fn ret_send_recv(len: isize) -> io::Result<c::ssize_t> {
     ret_ssize_t(len)
 }
 
 /// Convert the return value of a `send` or `recv` call.
 #[cfg(windows)]
 #[inline]
-pub(super) fn ret_send_recv(len: i32) -> io::Result<libc::ssize_t> {
+pub(super) fn ret_send_recv(len: i32) -> io::Result<c::ssize_t> {
     ret_ssize_t(len as isize)
 }

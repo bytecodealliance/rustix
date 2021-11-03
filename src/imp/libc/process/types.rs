@@ -1,3 +1,5 @@
+use super::super::c;
+
 /// A command for use with [`membarrier`] and [`membarrier_cpu`].
 ///
 /// For `MEMBARRIER_CMD_QUERY`, see [`membarrier_query`].
@@ -41,27 +43,27 @@ pub enum MembarrierCommand {
 #[repr(i32)]
 pub enum Resource {
     /// `RLIMIT_CPU`
-    Cpu = libc::RLIMIT_CPU as libc::c_int,
+    Cpu = c::RLIMIT_CPU as c::c_int,
     /// `RLIMIT_FSIZE`
-    Fsize = libc::RLIMIT_FSIZE as libc::c_int,
+    Fsize = c::RLIMIT_FSIZE as c::c_int,
     /// `RLIMIT_DATA`
-    Data = libc::RLIMIT_DATA as libc::c_int,
+    Data = c::RLIMIT_DATA as c::c_int,
     /// `RLIMIT_STACK`
-    Stack = libc::RLIMIT_STACK as libc::c_int,
+    Stack = c::RLIMIT_STACK as c::c_int,
     /// `RLIMIT_CORE`
-    Core = libc::RLIMIT_CORE as libc::c_int,
+    Core = c::RLIMIT_CORE as c::c_int,
     /// `RLIMIT_RSS`
     #[cfg(not(any(target_os = "ios", target_os = "macos")))]
-    Rss = libc::RLIMIT_RSS as libc::c_int,
+    Rss = c::RLIMIT_RSS as c::c_int,
     /// `RLIMIT_NPROC`
-    Nproc = libc::RLIMIT_NPROC as libc::c_int,
+    Nproc = c::RLIMIT_NPROC as c::c_int,
     /// `RLIMIT_NOFILE`
-    Nofile = libc::RLIMIT_NOFILE as libc::c_int,
+    Nofile = c::RLIMIT_NOFILE as c::c_int,
     /// `RLIMIT_MEMLOCK`
-    Memlock = libc::RLIMIT_MEMLOCK as libc::c_int,
+    Memlock = c::RLIMIT_MEMLOCK as c::c_int,
     /// `RLIMIT_AS`
     #[cfg(not(target_os = "openbsd"))]
-    As = libc::RLIMIT_AS as libc::c_int,
+    As = c::RLIMIT_AS as c::c_int,
     /// `RLIMIT_LOCKS`
     #[cfg(not(any(
         target_os = "freebsd",
@@ -70,7 +72,7 @@ pub enum Resource {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    Locks = libc::RLIMIT_LOCKS as libc::c_int,
+    Locks = c::RLIMIT_LOCKS as c::c_int,
     /// `RLIMIT_SIGPENDING`
     #[cfg(not(any(
         target_os = "freebsd",
@@ -79,7 +81,7 @@ pub enum Resource {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    Sigpending = libc::RLIMIT_SIGPENDING as libc::c_int,
+    Sigpending = c::RLIMIT_SIGPENDING as c::c_int,
     /// `RLIMIT_MSGQUEUE`
     #[cfg(not(any(
         target_os = "freebsd",
@@ -88,7 +90,7 @@ pub enum Resource {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    Msgqueue = libc::RLIMIT_MSGQUEUE as libc::c_int,
+    Msgqueue = c::RLIMIT_MSGQUEUE as c::c_int,
     /// `RLIMIT_NICE`
     #[cfg(not(any(
         target_os = "freebsd",
@@ -97,7 +99,7 @@ pub enum Resource {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    Nice = libc::RLIMIT_NICE as libc::c_int,
+    Nice = c::RLIMIT_NICE as c::c_int,
     /// `RLIMIT_RTPRIO`
     #[cfg(not(any(
         target_os = "freebsd",
@@ -106,7 +108,7 @@ pub enum Resource {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    Rtprio = libc::RLIMIT_RTPRIO as libc::c_int,
+    Rtprio = c::RLIMIT_RTPRIO as c::c_int,
     /// `RLIMIT_RTTIME`
     #[cfg(not(any(
         target_os = "emscripten",
@@ -117,7 +119,7 @@ pub enum Resource {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    Rttime = libc::RLIMIT_RTTIME as libc::c_int,
+    Rttime = c::RLIMIT_RTTIME as c::c_int,
 }
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
@@ -127,22 +129,22 @@ impl Resource {
     pub const Rss: Self = Self::As;
 }
 
-pub const EXIT_SUCCESS: libc::c_int = libc::EXIT_SUCCESS;
-pub const EXIT_FAILURE: libc::c_int = libc::EXIT_FAILURE;
+pub const EXIT_SUCCESS: c::c_int = c::EXIT_SUCCESS;
+pub const EXIT_FAILURE: c::c_int = c::EXIT_FAILURE;
 #[cfg(not(target_os = "wasi"))]
-pub const EXIT_SIGNALED_SIGABRT: libc::c_int = 128 + libc::SIGABRT;
+pub const EXIT_SIGNALED_SIGABRT: c::c_int = 128 + c::SIGABRT;
 
 #[cfg(not(target_os = "wasi"))]
-pub type RawPid = libc::pid_t;
+pub type RawPid = c::pid_t;
 #[cfg(not(target_os = "wasi"))]
-pub type RawGid = libc::gid_t;
+pub type RawGid = c::gid_t;
 #[cfg(not(target_os = "wasi"))]
-pub type RawUid = libc::uid_t;
+pub type RawUid = c::uid_t;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub type RawCpuid = u32;
 
 #[cfg(not(target_os = "wasi"))]
-pub type RawUname = libc::utsname;
+pub type RawUname = c::utsname;
 
 #[cfg(any(
     target_os = "linux",
@@ -150,7 +152,7 @@ pub type RawUname = libc::utsname;
     target_os = "fuchsia",
     target_os = "dragonfly"
 ))]
-pub type RawCpuSet = libc::cpu_set_t;
+pub type RawCpuSet = c::cpu_set_t;
 
 #[cfg(any(
     target_os = "linux",
@@ -158,4 +160,4 @@ pub type RawCpuSet = libc::cpu_set_t;
     target_os = "fuchsia",
     target_os = "dragonfly"
 ))]
-pub const CPU_SETSIZE: usize = libc::CPU_SETSIZE as usize;
+pub const CPU_SETSIZE: usize = c::CPU_SETSIZE as usize;

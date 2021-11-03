@@ -56,7 +56,7 @@
 
 #![allow(unsafe_code)]
 
-use super::super::libc;
+use super::super::c;
 use crate::imp::fd::{AsFd, AsRawFd, BorrowedFd, RawFd};
 #[cfg(not(feature = "rustc-dep-of-std"))]
 use crate::imp::fd::{FromFd, FromRawFd, IntoFd, IntoRawFd};
@@ -70,7 +70,7 @@ use std::ptr::null;
 
 bitflags! {
     /// `EPOLL_*` for use with [`Epoll::new`].
-    pub struct CreateFlags: libc::c_uint {
+    pub struct CreateFlags: c::c_uint {
         /// `EPOLL_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::EPOLL_CLOEXEC;
     }
@@ -362,7 +362,7 @@ impl<Context: self::Context> Epoll<Context> {
     pub fn wait<'context>(
         &'context self,
         event_list: &mut EventVec<'context, Context>,
-        timeout: libc::c_int,
+        timeout: c::c_int,
     ) -> io::Result<()> {
         // Safety: We're calling `epoll_wait` via FFI and we know how it
         // behaves.

@@ -1,7 +1,7 @@
 #![allow(unsafe_code)]
 
+use super::super::c;
 use super::super::elf::*;
-use super::super::libc;
 use super::super::process::exe_phdrs_slice;
 use std::ptr::null;
 
@@ -45,7 +45,7 @@ pub(crate) fn startup_tls_info() -> StartupTlsInfo {
 /// [`startup_tls_info`]: crate::runtime::startup_tls_info
 pub struct StartupTlsInfo {
     /// The base address of the TLS segment.
-    pub addr: *const libc::c_void,
+    pub addr: *const c::c_void,
     /// The size of the memory region.
     pub mem_size: usize,
     /// The size beyond which all memory is zero-initialized.

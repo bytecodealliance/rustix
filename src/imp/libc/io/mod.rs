@@ -28,11 +28,13 @@ pub use types::{DupFlags, MapFlags, MprotectFlags, ProtFlags, Tcflag, Termios, W
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use types::{EventfdFlags, MlockFlags, ReadWriteFlags, UserfaultfdFlags};
 
+use super::c;
+
 #[cfg(not(any(windows, target_os = "redox")))]
-pub(crate) const AT_FDCWD: libc::c_int = libc::AT_FDCWD;
+pub(crate) const AT_FDCWD: c::c_int = c::AT_FDCWD;
 #[cfg(not(windows))]
-pub(crate) const STDIN_FILENO: libc::c_int = libc::STDIN_FILENO;
+pub(crate) const STDIN_FILENO: c::c_int = c::STDIN_FILENO;
 #[cfg(not(windows))]
-pub(crate) const STDOUT_FILENO: libc::c_int = libc::STDOUT_FILENO;
+pub(crate) const STDOUT_FILENO: c::c_int = c::STDOUT_FILENO;
 #[cfg(not(windows))]
-pub(crate) const STDERR_FILENO: libc::c_int = libc::STDERR_FILENO;
+pub(crate) const STDERR_FILENO: c::c_int = c::STDERR_FILENO;

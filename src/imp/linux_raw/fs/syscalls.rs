@@ -20,6 +20,7 @@ use super::super::arch::choose::{
     syscall1_readonly, syscall2, syscall2_readonly, syscall3, syscall3_readonly, syscall4,
     syscall4_readonly, syscall5, syscall5_readonly, syscall6,
 };
+use super::super::c;
 #[cfg(all(target_pointer_width = "32", target_arch = "arm"))]
 use super::super::conv::zero;
 use super::super::conv::{
@@ -30,7 +31,6 @@ use super::super::conv::{
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use super::super::fd::AsFd;
 use super::super::fd::{BorrowedFd, RawFd};
-use super::super::libc;
 use super::super::reg::nr;
 use super::super::time::Timespec;
 use super::{
@@ -261,7 +261,7 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
 }
 
 #[inline]
-pub(crate) fn _seek(fd: BorrowedFd<'_>, offset: i64, whence: libc::c_uint) -> io::Result<u64> {
+pub(crate) fn _seek(fd: BorrowedFd<'_>, offset: i64, whence: c::c_uint) -> io::Result<u64> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         let mut result = MaybeUninit::<u64>::uninit();
@@ -365,7 +365,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: FsAdvice) 
         ret(syscall6_readonly(
             nr(__NR_fadvise64_64),
             borrowed_fd(fd),
-            c_uint(advice as libc::c_uint),
+            c_uint(advice as c::c_uint),
             hi(pos),
             lo(pos),
             hi(len),
@@ -384,7 +384,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: FsAdvice) 
             lo(pos),
             hi(len),
             lo(len),
-            c_uint(advice as libc::c_uint),
+            c_uint(advice as c::c_uint),
         ))
     }
     #[cfg(target_pointer_width = "64")]
@@ -394,7 +394,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: FsAdvice) 
             borrowed_fd(fd),
             loff_t_from_u64(pos),
             loff_t_from_u64(len),
-            c_uint(advice as libc::c_uint),
+            c_uint(advice as c::c_uint),
         ))
     }
 }
@@ -415,7 +415,7 @@ pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result
         ret(syscall2(
             nr(__NR_flock),
             borrowed_fd(fd),
-            c_uint(operation as libc::c_uint),
+            c_uint(operation as c::c_uint),
         ))
     }
 }
@@ -731,7 +731,7 @@ pub(crate) fn fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn fcntl_getlease(fd: BorrowedFd<'_>) -> io::Result<libc::c_int> {
+pub(crate) fn fcntl_getlease(fd: BorrowedFd<'_>) -> io::Result<c::c_int> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         ret_c_int(syscall2_readonly(
@@ -751,7 +751,7 @@ pub(crate) fn fcntl_getlease(fd: BorrowedFd<'_>) -> io::Result<libc::c_int> {
 }
 
 #[inline]
-pub(crate) fn fcntl_getown(fd: BorrowedFd<'_>) -> io::Result<libc::c_int> {
+pub(crate) fn fcntl_getown(fd: BorrowedFd<'_>) -> io::Result<c::c_int> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         ret_c_int(syscall2_readonly(
@@ -771,7 +771,7 @@ pub(crate) fn fcntl_getown(fd: BorrowedFd<'_>) -> io::Result<libc::c_int> {
 }
 
 #[inline]
-pub(crate) fn fcntl_getsig(fd: BorrowedFd<'_>) -> io::Result<libc::c_int> {
+pub(crate) fn fcntl_getsig(fd: BorrowedFd<'_>) -> io::Result<c::c_int> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         ret_c_int(syscall2_readonly(
@@ -811,7 +811,7 @@ pub(crate) fn fcntl_getpipe_sz(fd: BorrowedFd<'_>) -> io::Result<usize> {
 }
 
 #[inline]
-pub(crate) fn fcntl_setpipe_sz(fd: BorrowedFd<'_>, size: libc::c_int) -> io::Result<usize> {
+pub(crate) fn fcntl_setpipe_sz(fd: BorrowedFd<'_>, size: c::c_int) -> io::Result<usize> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         ret_usize(syscall3_readonly(
@@ -1158,7 +1158,7 @@ pub(crate) fn accessat(
 }
 
 #[inline]
-fn _accessat(dirfd: BorrowedFd<'_>, pathname: &CStr, mode: libc::c_uint) -> io::Result<()> {
+fn _accessat(dirfd: BorrowedFd<'_>, pathname: &CStr, mode: c::c_uint) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_faccessat),
@@ -1188,7 +1188,7 @@ fn _copy_file_range(
     fd_out: BorrowedFd<'_>,
     off_out: Option<&mut u64>,
     len: usize,
-    flags: libc::c_uint,
+    flags: c::c_uint,
 ) -> io::Result<usize> {
     unsafe {
         ret_usize(syscall6(

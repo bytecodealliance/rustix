@@ -1,5 +1,4 @@
-#[cfg(windows)]
-use super::super::libc;
+use super::super::c;
 use super::ext::{in6_addr_s6_addr, in_addr_s_addr, sockaddr_in6_sin6_scope_id};
 #[cfg(not(windows))]
 use super::SocketAddrUnix;
@@ -41,9 +40,9 @@ struct sockaddr_header {
 }
 
 #[inline]
-unsafe fn read_ss_family(storage: *const libc::sockaddr_storage) -> u16 {
+unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
     // Assert that we know the layout of `sockaddr`.
-    let _ = libc::sockaddr {
+    let _ = c::sockaddr {
         #[cfg(any(
             target_os = "netbsd",
             target_os = "macos",
@@ -75,31 +74,31 @@ unsafe fn read_ss_family(storage: *const libc::sockaddr_storage) -> u16 {
 }
 
 pub(crate) unsafe fn read_sockaddr(
-    storage: *const libc::sockaddr_storage,
+    storage: *const c::sockaddr_storage,
     len: usize,
 ) -> io::Result<SocketAddrAny> {
     #[cfg(not(windows))]
     let offsetof_sun_path = super::offsetof_sun_path();
 
-    if len < size_of::<libc::sa_family_t>() {
+    if len < size_of::<c::sa_family_t>() {
         return Err(io::Error::INVAL);
     }
     match read_ss_family(storage).into() {
-        libc::AF_INET => {
-            if len < size_of::<libc::sockaddr_in>() {
+        c::AF_INET => {
+            if len < size_of::<c::sockaddr_in>() {
                 return Err(io::Error::INVAL);
             }
-            let decode = *storage.cast::<libc::sockaddr_in>();
+            let decode = *storage.cast::<c::sockaddr_in>();
             Ok(SocketAddrAny::V4(SocketAddrV4::new(
                 Ipv4Addr::from(u32::from_be(in_addr_s_addr(decode.sin_addr))),
                 u16::from_be(decode.sin_port),
             )))
         }
-        libc::AF_INET6 => {
-            if len < size_of::<libc::sockaddr_in6>() {
+        c::AF_INET6 => {
+            if len < size_of::<c::sockaddr_in6>() {
                 return Err(io::Error::INVAL);
             }
-            let decode = *storage.cast::<libc::sockaddr_in6>();
+            let decode = *storage.cast::<c::sockaddr_in6>();
             #[cfg(not(windows))]
             let s6_addr = decode.sin6_addr.s6_addr;
             #[cfg(windows)]
@@ -116,14 +115,14 @@ pub(crate) unsafe fn read_sockaddr(
             )))
         }
         #[cfg(not(windows))]
-        libc::AF_UNIX => {
+        c::AF_UNIX => {
             if len < offsetof_sun_path {
                 return Err(io::Error::INVAL);
             }
             if len == offsetof_sun_path {
                 Ok(SocketAddrAny::Unix(SocketAddrUnix::new(&[][..]).unwrap()))
             } else {
-                let decode = *storage.cast::<libc::sockaddr_un>();
+                let decode = *storage.cast::<c::sockaddr_un>();
 
                 // Trim off unused bytes from the end of `path_bytes`.
                 let path_bytes = if cfg!(target_os = "freebsd") {
@@ -134,7 +133,7 @@ pub(crate) unsafe fn read_sockaddr(
                 } else {
                     // Otherwise, use the provided length.
                     let provided_len = len - 1 - offsetof_sun_path;
-                    if decode.sun_path[provided_len] != b'\0' as libc::c_char {
+                    if decode.sun_path[provided_len] != b'\0' as c::c_char {
                         return Err(io::Error::INVAL);
                     }
                     debug_assert_eq!(
@@ -155,11 +154,11 @@ pub(crate) unsafe fn read_sockaddr(
 }
 
 pub(crate) unsafe fn read_sockaddr_os(
-    storage: *const libc::sockaddr_storage,
+    storage: *const c::sockaddr_storage,
     len: usize,
 ) -> SocketAddrAny {
     #[cfg(not(windows))]
-    let z = libc::sockaddr_un {
+    let z = c::sockaddr_un {
         #[cfg(any(
             target_os = "netbsd",
             target_os = "macos",
@@ -204,19 +203,19 @@ pub(crate) unsafe fn read_sockaddr_os(
     #[cfg(not(windows))]
     let offsetof_sun_path = (as_ptr(&z.sun_path) as usize) - (as_ptr(&z) as usize);
 
-    assert!(len >= size_of::<libc::sa_family_t>());
+    assert!(len >= size_of::<c::sa_family_t>());
     match read_ss_family(storage).into() {
-        libc::AF_INET => {
-            assert!(len >= size_of::<libc::sockaddr_in>());
-            let decode = *storage.cast::<libc::sockaddr_in>();
+        c::AF_INET => {
+            assert!(len >= size_of::<c::sockaddr_in>());
+            let decode = *storage.cast::<c::sockaddr_in>();
             SocketAddrAny::V4(SocketAddrV4::new(
                 Ipv4Addr::from(u32::from_be(in_addr_s_addr(decode.sin_addr))),
                 u16::from_be(decode.sin_port),
             ))
         }
-        libc::AF_INET6 => {
-            assert!(len >= size_of::<libc::sockaddr_in6>());
-            let decode = *storage.cast::<libc::sockaddr_in6>();
+        c::AF_INET6 => {
+            assert!(len >= size_of::<c::sockaddr_in6>());
+            let decode = *storage.cast::<c::sockaddr_in6>();
             SocketAddrAny::V6(SocketAddrV6::new(
                 Ipv6Addr::from(in6_addr_s6_addr(decode.sin6_addr)),
                 u16::from_be(decode.sin6_port),
@@ -225,15 +224,15 @@ pub(crate) unsafe fn read_sockaddr_os(
             ))
         }
         #[cfg(not(windows))]
-        libc::AF_UNIX => {
+        c::AF_UNIX => {
             assert!(len >= offsetof_sun_path);
             if len == offsetof_sun_path {
                 SocketAddrAny::Unix(SocketAddrUnix::new(&[][..]).unwrap())
             } else {
-                let decode = *storage.cast::<libc::sockaddr_un>();
+                let decode = *storage.cast::<c::sockaddr_un>();
                 assert_eq!(
                     decode.sun_path[len - 1 - offsetof_sun_path],
-                    b'\0' as libc::c_char
+                    b'\0' as c::c_char
                 );
                 let path_bytes = &decode.sun_path[..len - 1 - offsetof_sun_path];
 

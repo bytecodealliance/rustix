@@ -1,3 +1,4 @@
+use super::super::c;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::syscall_ret_owned_fd;
 use super::super::conv::{
@@ -37,7 +38,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     let nread = unsafe {
-        ret_ssize_t(libc::read(
+        ret_ssize_t(c::read(
             borrowed_fd(fd),
             buf.as_mut_ptr().cast::<_>(),
             buf.len(),
@@ -48,7 +49,7 @@ pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
 
 pub(crate) fn write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     let nwritten = unsafe {
-        ret_ssize_t(libc::write(
+        ret_ssize_t(c::write(
             borrowed_fd(fd),
             buf.as_ptr().cast::<_>(),
             buf.len(),
@@ -87,10 +88,10 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<
 
 pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut]) -> io::Result<usize> {
     let nread = unsafe {
-        ret_ssize_t(libc::readv(
+        ret_ssize_t(c::readv(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()) as libc::c_int,
+            bufs.as_ptr().cast::<c::iovec>(),
+            min(bufs.len(), max_iov()) as c::c_int,
         ))?
     };
     Ok(nread as usize)
@@ -98,10 +99,10 @@ pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut]) -> io::Result<usize
 
 pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> {
     let nwritten = unsafe {
-        ret_ssize_t(libc::writev(
+        ret_ssize_t(c::writev(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()) as libc::c_int,
+            bufs.as_ptr().cast::<c::iovec>(),
+            min(bufs.len(), max_iov()) as c::c_int,
         ))?
     };
     Ok(nwritten as usize)
@@ -114,8 +115,8 @@ pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io
     let nread = unsafe {
         ret_ssize_t(libc_preadv(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()) as libc::c_int,
+            bufs.as_ptr().cast::<c::iovec>(),
+            min(bufs.len(), max_iov()) as c::c_int,
             offset,
         ))?
     };
@@ -129,8 +130,8 @@ pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::
     let nwritten = unsafe {
         ret_ssize_t(libc_pwritev(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()) as libc::c_int,
+            bufs.as_ptr().cast::<c::iovec>(),
+            min(bufs.len(), max_iov()) as c::c_int,
             offset,
         ))?
     };
@@ -149,8 +150,8 @@ pub(crate) fn preadv2(
     let nread = unsafe {
         ret_ssize_t(libc_preadv2(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()) as libc::c_int,
+            bufs.as_ptr().cast::<c::iovec>(),
+            min(bufs.len(), max_iov()) as c::c_int,
             offset,
             flags.bits(),
         ))?
@@ -187,8 +188,8 @@ pub(crate) fn pwritev2(
     let nwritten = unsafe {
         ret_ssize_t(libc_pwritev2(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()) as libc::c_int,
+            bufs.as_ptr().cast::<c::iovec>(),
+            min(bufs.len(), max_iov()) as c::c_int,
             offset,
             flags.bits(),
         ))?
@@ -232,7 +233,7 @@ fn max_iov() -> usize {
 
 #[cfg(not(any(target_os = "redox", target_env = "newlib")))]
 fn query_max_iov() -> usize {
-    let ret = unsafe { libc::sysconf(libc::_SC_IOV_MAX) };
+    let ret = unsafe { c::sysconf(c::_SC_IOV_MAX) };
 
     // 16 is the minimum value required by POSIX.
     let lim = if ret > 0 { ret as usize } else { 16 };
@@ -247,22 +248,22 @@ fn max_iov() -> usize {
 }
 
 pub(crate) unsafe fn close(raw_fd: RawFd) {
-    let _ = libc::close(raw_fd as libc::c_int);
+    let _ = c::close(raw_fd as c::c_int);
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn madvise(addr: *mut libc::c_void, len: usize, advice: IoAdvice) -> io::Result<()> {
+pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: IoAdvice) -> io::Result<()> {
     // On Linux platforms, `MADV_DONTNEED` has the same value as
     // `POSIX_MADV_DONTNEED` but different behavior. We remap it to a different
     // value, and check for it here.
     #[cfg(target_os = "linux")]
     if let IoAdvice::LinuxDontNeed = advice {
-        return unsafe { ret(libc::madvise(addr, len, libc::MADV_DONTNEED)) };
+        return unsafe { ret(c::madvise(addr, len, c::MADV_DONTNEED)) };
     }
 
     #[cfg(not(target_os = "android"))]
     {
-        let err = unsafe { libc::posix_madvise(addr, len, advice as libc::c_int) };
+        let err = unsafe { c::posix_madvise(addr, len, advice as c::c_int) };
 
         // `posix_madvise` returns its error status rather than using `errno`.
         if err == 0 {
@@ -279,54 +280,50 @@ pub(crate) fn madvise(addr: *mut libc::c_void, len: usize, advice: IoAdvice) -> 
             // `POSIX_MADV_DONTNEED`, so just discard `MADV_DONTNEED`.
             Ok(())
         } else {
-            unsafe { ret(libc::madvise(addr, len, advice as libc::c_int)) }
+            unsafe { ret(c::madvise(addr, len, advice as c::c_int)) }
         }
     }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
-    unsafe { syscall_ret_owned_fd(libc::syscall(libc::SYS_eventfd2, initval, flags.bits())) }
+    unsafe { syscall_ret_owned_fd(c::syscall(c::SYS_eventfd2, initval, flags.bits())) }
 }
 
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
-    let mut nread = MaybeUninit::<libc::c_int>::uninit();
+    let mut nread = MaybeUninit::<c::c_int>::uninit();
     unsafe {
-        ret(libc::ioctl(
-            borrowed_fd(fd),
-            libc::FIONREAD,
-            nread.as_mut_ptr(),
-        ))?;
+        ret(c::ioctl(borrowed_fd(fd), c::FIONREAD, nread.as_mut_ptr()))?;
         // `FIONREAD` returns the number of bytes silently casted to a `c_int`,
         // even when this is lossy. The best we can do is convert it back to a
         // `u64` without sign-extending it back first.
-        Ok(nread.assume_init() as libc::c_uint as u64)
+        Ok(nread.assume_init() as c::c_uint as u64)
     }
 }
 
 pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     unsafe {
-        let data = value as libc::c_int;
-        ret(libc::ioctl(borrowed_fd(fd), libc::FIONBIO, &data))
+        let data = value as c::c_int;
+        ret(c::ioctl(borrowed_fd(fd), c::FIONBIO, &data))
     }
 }
 
 pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
-    let res = unsafe { libc::isatty(borrowed_fd(fd)) };
+    let res = unsafe { c::isatty(borrowed_fd(fd)) };
     if res == 0 {
         match errno().0 {
             #[cfg(not(any(target_os = "android", target_os = "linux")))]
-            libc::ENOTTY => false,
+            c::ENOTTY => false,
 
             // Old Linux versions reportedly return `EINVAL`.
             // https://man7.org/linux/man-pages/man3/isatty.3.html#ERRORS
             #[cfg(any(target_os = "android", target_os = "linux"))]
-            libc::ENOTTY | libc::EINVAL => false,
+            c::ENOTTY | c::EINVAL => false,
 
             // Darwin mysteriously returns `EOPNOTSUPP` sometimes.
             #[cfg(any(target_os = "ios", target_os = "macos"))]
-            libc::EOPNOTSUPP => false,
+            c::EOPNOTSUPP => false,
 
             err => panic!("unexpected error from isatty: {:?}", err),
         }
@@ -344,21 +341,21 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // the read side is shut down; an `EWOULDBLOCK` indicates the read
         // side is still open.
         match unsafe {
-            libc::recv(
+            c::recv(
                 borrowed_fd(fd),
                 MaybeUninit::<[u8; 1]>::uninit()
                     .as_mut_ptr()
-                    .cast::<libc::c_void>(),
+                    .cast::<c::c_void>(),
                 1,
-                libc::MSG_PEEK | libc::MSG_DONTWAIT,
+                c::MSG_PEEK | c::MSG_DONTWAIT,
             )
         } {
             0 => read = false,
             -1 => {
                 #[allow(unreachable_patterns)] // EAGAIN may equal EWOULDBLOCK
                 match errno().0 {
-                    libc::EAGAIN | libc::EWOULDBLOCK => (),
-                    libc::ENOTSOCK => not_socket = true,
+                    c::EAGAIN | c::EWOULDBLOCK => (),
+                    c::ENOTSOCK => not_socket = true,
                     err => return Err(io::Error(err)),
                 }
             }
@@ -368,13 +365,13 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
     if write && !not_socket {
         // Do a `send` with `DONTWAIT` for 0 bytes. An `EPIPE` indicates
         // the write side is shut down.
-        match unsafe { libc::send(borrowed_fd(fd), [].as_ptr(), 0, libc::MSG_DONTWAIT) } {
+        match unsafe { c::send(borrowed_fd(fd), [].as_ptr(), 0, c::MSG_DONTWAIT) } {
             -1 => {
                 #[allow(unreachable_patterns)] // EAGAIN may equal EWOULDBLOCK
                 match errno().0 {
-                    libc::EAGAIN | libc::EWOULDBLOCK => (),
-                    libc::ENOTSOCK => (),
-                    libc::EPIPE => write = false,
+                    c::EAGAIN | c::EWOULDBLOCK => (),
+                    c::ENOTSOCK => (),
+                    c::EPIPE => write = false,
                     err => return Err(io::Error(err)),
                 }
             }
@@ -391,12 +388,12 @@ pub(crate) fn is_read_write(_fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(libc::dup(borrowed_fd(fd))) }
+    unsafe { ret_owned_fd(c::dup(borrowed_fd(fd))) }
 }
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
-    unsafe { ret_discarded_fd(libc::dup2(borrowed_fd(fd), borrowed_fd(new.as_fd()))) }
+    unsafe { ret_discarded_fd(c::dup2(borrowed_fd(fd), borrowed_fd(new.as_fd()))) }
 }
 
 #[cfg(not(any(
@@ -408,7 +405,7 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
 )))]
 pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
     unsafe {
-        ret_discarded_fd(libc::dup3(
+        ret_discarded_fd(c::dup3(
             borrowed_fd(fd),
             borrowed_fd(new.as_fd()),
             flags.bits(),
@@ -430,7 +427,7 @@ pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, _flags: DupFlags) -> 
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     unsafe {
-        ret(libc::ttyname_r(
+        ret(c::ttyname_r(
             borrowed_fd(dirfd),
             buf.as_mut_ptr().cast::<_>(),
             buf.len(),
@@ -450,12 +447,8 @@ pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize
 pub(crate) fn ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     let mut result = MaybeUninit::<Termios>::uninit();
     unsafe {
-        ret(libc::ioctl(
-            borrowed_fd(fd),
-            libc::TCGETS,
-            result.as_mut_ptr(),
-        ))
-        .map(|()| result.assume_init())
+        ret(c::ioctl(borrowed_fd(fd), c::TCGETS, result.as_mut_ptr()))
+            .map(|()| result.assume_init())
     }
 }
 
@@ -469,22 +462,22 @@ pub(crate) fn ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
 pub(crate) fn ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     let mut result = MaybeUninit::<Termios>::uninit();
     unsafe {
-        ret(libc::tcgetattr(borrowed_fd(fd), result.as_mut_ptr())).map(|()| result.assume_init())
+        ret(c::tcgetattr(borrowed_fd(fd), result.as_mut_ptr())).map(|()| result.assume_init())
     }
 }
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub(crate) fn ioctl_fioclex(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { ret(libc::ioctl(borrowed_fd(fd), libc::FIOCLEX)) }
+    unsafe { ret(c::ioctl(borrowed_fd(fd), c::FIOCLEX)) }
 }
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
     unsafe {
         let mut buf = MaybeUninit::<Winsize>::uninit();
-        ret(libc::ioctl(
+        ret(c::ioctl(
             borrowed_fd(fd),
-            libc::TIOCGWINSZ.into(),
+            c::TIOCGWINSZ.into(),
             buf.as_mut_ptr(),
         ))?;
         Ok(buf.assume_init())
@@ -493,12 +486,12 @@ pub(crate) fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd) -> io::Result<()> {
-    unsafe { ret(libc::ioctl(borrowed_fd(fd), libc::TIOCEXCL as _)) }
+    unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCEXCL as _)) }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
-    unsafe { ret(libc::ioctl(borrowed_fd(fd), libc::TIOCNXCL as _)) }
+    unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCNXCL as _)) }
 }
 
 /// # Safety
@@ -507,13 +500,13 @@ pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
 /// with memory pointed to by raw pointers is unsafe.
 #[cfg(not(target_os = "wasi"))]
 pub(crate) unsafe fn mmap(
-    ptr: *mut libc::c_void,
+    ptr: *mut c::c_void,
     len: usize,
     prot: ProtFlags,
     flags: MapFlags,
     fd: BorrowedFd<'_>,
     offset: u64,
-) -> io::Result<*mut libc::c_void> {
+) -> io::Result<*mut c::c_void> {
     let res = libc_mmap(
         ptr,
         len,
@@ -522,7 +515,7 @@ pub(crate) unsafe fn mmap(
         borrowed_fd(fd),
         offset as i64,
     );
-    if res == libc::MAP_FAILED {
+    if res == c::MAP_FAILED {
         Err(io::Error::last_os_error())
     } else {
         Ok(res)
@@ -535,20 +528,20 @@ pub(crate) unsafe fn mmap(
 /// with memory pointed to by raw pointers is unsafe.
 #[cfg(not(target_os = "wasi"))]
 pub(crate) unsafe fn mmap_anonymous(
-    ptr: *mut libc::c_void,
+    ptr: *mut c::c_void,
     len: usize,
     prot: ProtFlags,
     flags: MapFlags,
-) -> io::Result<*mut libc::c_void> {
+) -> io::Result<*mut c::c_void> {
     let res = libc_mmap(
         ptr,
         len,
         prot.bits(),
-        flags.bits() | libc::MAP_ANONYMOUS,
+        flags.bits() | c::MAP_ANONYMOUS,
         no_fd(),
         0,
     );
-    if res == libc::MAP_FAILED {
+    if res == c::MAP_FAILED {
         Err(io::Error::last_os_error())
     } else {
         Ok(res)
@@ -557,16 +550,16 @@ pub(crate) unsafe fn mmap_anonymous(
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) unsafe fn mprotect(
-    ptr: *mut libc::c_void,
+    ptr: *mut c::c_void,
     len: usize,
     flags: MprotectFlags,
 ) -> io::Result<()> {
-    ret(libc::mprotect(ptr, len, flags.bits()))
+    ret(c::mprotect(ptr, len, flags.bits()))
 }
 
 #[cfg(not(target_os = "wasi"))]
-pub(crate) unsafe fn munmap(ptr: *mut libc::c_void, len: usize) -> io::Result<()> {
-    ret(libc::munmap(ptr, len))
+pub(crate) unsafe fn munmap(ptr: *mut c::c_void, len: usize) -> io::Result<()> {
+    ret(c::munmap(ptr, len))
 }
 
 /// # Safety
@@ -575,13 +568,13 @@ pub(crate) unsafe fn munmap(ptr: *mut libc::c_void, len: usize) -> io::Result<()
 /// anything working with memory pointed to by raw pointers is unsafe.
 #[cfg(target_os = "linux")]
 pub(crate) unsafe fn mremap(
-    old_address: *mut libc::c_void,
+    old_address: *mut c::c_void,
     old_size: usize,
     new_size: usize,
     flags: MremapFlags,
-) -> io::Result<*mut libc::c_void> {
-    let res = libc::mremap(old_address, old_size, new_size, flags.bits());
-    if res == libc::MAP_FAILED {
+) -> io::Result<*mut c::c_void> {
+    let res = c::mremap(old_address, old_size, new_size, flags.bits());
+    if res == c::MAP_FAILED {
         Err(io::Error::last_os_error())
     } else {
         Ok(res)
@@ -595,20 +588,20 @@ pub(crate) unsafe fn mremap(
 /// pointers is unsafe.
 #[cfg(target_os = "linux")]
 pub(crate) unsafe fn mremap_fixed(
-    old_address: *mut libc::c_void,
+    old_address: *mut c::c_void,
     old_size: usize,
     new_size: usize,
     flags: MremapFlags,
-    new_address: *mut libc::c_void,
-) -> io::Result<*mut libc::c_void> {
-    let res = libc::mremap(
+    new_address: *mut c::c_void,
+) -> io::Result<*mut c::c_void> {
+    let res = c::mremap(
         old_address,
         old_size,
         new_size,
-        flags.bits() | libc::MAP_FIXED,
+        flags.bits() | c::MAP_FIXED,
         new_address,
     );
-    if res == libc::MAP_FAILED {
+    if res == c::MAP_FAILED {
         Err(io::Error::last_os_error())
     } else {
         Ok(res)
@@ -621,8 +614,8 @@ pub(crate) unsafe fn mremap_fixed(
 /// boundaries.
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub(crate) unsafe fn mlock(addr: *mut libc::c_void, length: usize) -> io::Result<()> {
-    ret(libc::mlock(addr, length))
+pub(crate) unsafe fn mlock(addr: *mut c::c_void, length: usize) -> io::Result<()> {
+    ret(c::mlock(addr, length))
 }
 
 /// # Safety
@@ -632,12 +625,12 @@ pub(crate) unsafe fn mlock(addr: *mut libc::c_void, length: usize) -> io::Result
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub(crate) unsafe fn mlock_with(
-    addr: *mut libc::c_void,
+    addr: *mut c::c_void,
     length: usize,
     flags: MlockFlags,
 ) -> io::Result<()> {
     assert_eq!(flags.bits(), 0, "libc doesn't define `MLOCK_*` yet");
-    ret(libc::mlock(addr, length))
+    ret(c::mlock(addr, length))
 }
 
 /// # Safety
@@ -646,15 +639,15 @@ pub(crate) unsafe fn mlock_with(
 /// boundaries.
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub(crate) unsafe fn munlock(addr: *mut libc::c_void, length: usize) -> io::Result<()> {
-    ret(libc::munlock(addr, length))
+pub(crate) unsafe fn munlock(addr: *mut c::c_void, length: usize) -> io::Result<()> {
+    ret(c::munlock(addr, length))
 }
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
-        ret(libc::pipe(result.as_mut_ptr().cast::<i32>()))?;
+        ret(c::pipe(result.as_mut_ptr().cast::<i32>()))?;
         let [p0, p1] = result.assume_init();
         Ok((p0, p1))
     }
@@ -664,24 +657,24 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
 pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
-        ret(libc::pipe2(result.as_mut_ptr().cast::<i32>(), flags.bits()))?;
+        ret(c::pipe2(result.as_mut_ptr().cast::<i32>(), flags.bits()))?;
         let [p0, p1] = result.assume_init();
         Ok((p0, p1))
     }
 }
 
 #[inline]
-pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: libc::c_int) -> io::Result<usize> {
+pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usize> {
     let nfds = fds
         .len()
         .try_into()
         .map_err(|_convert_err| io::Error::INVAL)?;
 
-    ret_c_int(unsafe { libc::poll(fds.as_mut_ptr().cast::<_>(), nfds, timeout) })
+    ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast::<_>(), nfds, timeout) })
         .map(|nready| nready as usize)
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
-    syscall_ret_owned_fd(libc::syscall(libc::SYS_userfaultfd, flags.bits()))
+    syscall_ret_owned_fd(c::syscall(c::SYS_userfaultfd, flags.bits()))
 }

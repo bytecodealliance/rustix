@@ -11,14 +11,14 @@ pub(crate) use super::process::syscalls::*;
 #[cfg(not(windows))]
 pub(crate) use super::time::syscalls::*;
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use super::c;
 #[cfg(target_os = "linux")]
 use super::conv::ret_ssize_t;
 #[cfg(windows)]
 use super::conv::{borrowed_fd, ret};
 #[cfg(windows)]
 use super::fd::{BorrowedFd, LibcFd, RawFd};
-#[cfg(windows)]
-use super::libc;
 #[cfg(target_os = "linux")]
 use super::rand::GetRandomFlags;
 #[cfg(any(windows, target_os = "linux"))]
@@ -28,14 +28,14 @@ use crate::process::Pid;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
-pub(crate) fn exit_group(code: libc::c_int) -> ! {
-    unsafe { libc::_exit(code) }
+pub(crate) fn exit_group(code: c::c_int) -> ! {
+    unsafe { c::_exit(code) }
 }
 
 #[cfg(target_os = "linux")]
 pub(crate) fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
     let nread = unsafe {
-        ret_ssize_t(libc::getrandom(
+        ret_ssize_t(c::getrandom(
             buf.as_mut_ptr().cast::<_>(),
             buf.len(),
             flags.bits(),
@@ -49,7 +49,7 @@ pub(crate) fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usi
 #[must_use]
 pub(crate) fn gettid() -> Pid {
     unsafe {
-        let tid: i32 = libc::gettid();
+        let tid: i32 = c::gettid();
         Pid::from_raw(tid)
     }
 }
@@ -57,12 +57,12 @@ pub(crate) fn gettid() -> Pid {
 #[cfg(windows)]
 pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     unsafe {
-        let mut data = value as libc::c_uint;
-        ret(libc::ioctl(borrowed_fd(fd), libc::FIONBIO, &mut data))
+        let mut data = value as c::c_uint;
+        ret(c::ioctl(borrowed_fd(fd), c::FIONBIO, &mut data))
     }
 }
 
 #[cfg(windows)]
 pub(crate) unsafe fn close(raw_fd: RawFd) {
-    let _ = libc::close(raw_fd as LibcFd);
+    let _ = c::close(raw_fd as LibcFd);
 }

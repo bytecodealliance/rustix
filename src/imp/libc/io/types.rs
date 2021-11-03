@@ -1,3 +1,4 @@
+use super::super::c;
 #[cfg(not(target_os = "wasi"))]
 use bitflags::bitflags;
 
@@ -7,22 +8,22 @@ bitflags! {
     ///
     /// [`preadv2`]: crate::io::preadv2
     /// [`pwritev2`]: crate::io::pwritev
-    pub struct ReadWriteFlags: libc::c_int {
+    pub struct ReadWriteFlags: c::c_int {
         /// `RWF_DSYNC`
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const DSYNC = libc::RWF_DSYNC;
+        const DSYNC = c::RWF_DSYNC;
         /// `RWF_HIPRI`
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const HIPRI = libc::RWF_HIPRI;
+        const HIPRI = c::RWF_HIPRI;
         /// `RWF_SYNC`
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const SYNC = libc::RWF_SYNC;
+        const SYNC = c::RWF_SYNC;
         /// `RWF_NOWAIT`
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const NOWAIT = libc::RWF_NOWAIT;
+        const NOWAIT = c::RWF_NOWAIT;
         /// `RWF_APPEND`
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const APPEND = libc::RWF_APPEND;
+        const APPEND = c::RWF_APPEND;
     }
 }
 
@@ -31,10 +32,10 @@ bitflags! {
     /// `O_*` constants for use with [`dup2`].
     ///
     /// [`dup2`]: crate::io::dup2
-    pub struct DupFlags: libc::c_int {
+    pub struct DupFlags: c::c_int {
         /// `O_CLOEXEC`
         #[cfg(not(any(target_os = "android", target_os = "ios", target_os = "macos", target_os = "redox")))] // Android 5.0 has dup3, but libc doesn't have bindings
-        const CLOEXEC = libc::O_CLOEXEC;
+        const CLOEXEC = c::O_CLOEXEC;
     }
 }
 
@@ -45,13 +46,13 @@ bitflags! {
     /// For `PROT_NONE`, use `ProtFlags::empty()`.
     ///
     /// [`mmap`]: crate::io::mmap
-    pub struct ProtFlags: libc::c_int {
+    pub struct ProtFlags: c::c_int {
         /// `PROT_READ`
-        const READ = libc::PROT_READ;
+        const READ = c::PROT_READ;
         /// `PROT_WRITE`
-        const WRITE = libc::PROT_WRITE;
+        const WRITE = c::PROT_WRITE;
         /// `PROT_EXEC`
-        const EXEC = libc::PROT_EXEC;
+        const EXEC = c::PROT_EXEC;
     }
 }
 
@@ -62,19 +63,19 @@ bitflags! {
     /// For `PROT_NONE`, use `MprotectFlags::empty()`.
     ///
     /// [`mprotect`]: crate::io::mprotect
-    pub struct MprotectFlags: libc::c_int {
+    pub struct MprotectFlags: c::c_int {
         /// `PROT_READ`
-        const READ = libc::PROT_READ;
+        const READ = c::PROT_READ;
         /// `PROT_WRITE`
-        const WRITE = libc::PROT_WRITE;
+        const WRITE = c::PROT_WRITE;
         /// `PROT_EXEC`
-        const EXEC = libc::PROT_EXEC;
+        const EXEC = c::PROT_EXEC;
         /// `PROT_GROWSUP`
         #[cfg(any(target_os = "android", target_os = "linux"))]
-        const GROWSUP = libc::PROT_GROWSUP;
+        const GROWSUP = c::PROT_GROWSUP;
         /// `PROT_GROWSDOWN`
         #[cfg(any(target_os = "android", target_os = "linux"))]
-        const GROWSDOWN = libc::PROT_GROWSDOWN;
+        const GROWSDOWN = c::PROT_GROWSDOWN;
     }
 }
 
@@ -86,9 +87,9 @@ bitflags! {
     ///
     /// [`mmap`]: crate::io::mmap
     /// [`mmap_anonymous`]: crates::io::mmap_anonymous
-    pub struct MapFlags: libc::c_int {
+    pub struct MapFlags: c::c_int {
         /// `MAP_SHARED`
-        const SHARED = libc::MAP_SHARED;
+        const SHARED = c::MAP_SHARED;
         /// `MAP_SHARED_VALIDATE`
         #[cfg(not(any(
             target_os = "android",
@@ -101,9 +102,9 @@ bitflags! {
             target_os = "openbsd",
             target_os = "redox",
         )))]
-        const SHARED_VALIDATE = libc::MAP_SHARED_VALIDATE;
+        const SHARED_VALIDATE = c::MAP_SHARED_VALIDATE;
         /// `MAP_PRIVATE`
-        const PRIVATE = libc::MAP_PRIVATE;
+        const PRIVATE = c::MAP_PRIVATE;
         /// `MAP_DENYWRITE`
         #[cfg(not(any(
             target_os = "ios",
@@ -113,7 +114,7 @@ bitflags! {
             target_os = "freebsd",
             target_os = "redox"
         )))]
-        const DENYWRITE = libc::MAP_DENYWRITE;
+        const DENYWRITE = c::MAP_DENYWRITE;
         /// `MAP_FIXED`
         #[cfg(not(any(
             target_os = "android",
@@ -123,7 +124,7 @@ bitflags! {
             target_os = "openbsd",
             target_os = "redox",
         )))]
-        const FIXED = libc::MAP_FIXED;
+        const FIXED = c::MAP_FIXED;
         /// `MAP_FIXED_NOREPLACE`
         #[cfg(not(any(
             target_os = "android",
@@ -136,7 +137,7 @@ bitflags! {
             target_os = "openbsd",
             target_os = "redox",
         )))]
-        const FIXED_NOREPLACE = libc::MAP_FIXED_NOREPLACE;
+        const FIXED_NOREPLACE = c::MAP_FIXED_NOREPLACE;
         /// `MAP_GROWSDOWN`
         #[cfg(not(any(
             target_os = "freebsd",
@@ -146,7 +147,7 @@ bitflags! {
             target_os = "openbsd",
             target_os = "redox"
         )))]
-        const GROWSDOWN = libc::MAP_GROWSDOWN;
+        const GROWSDOWN = c::MAP_GROWSDOWN;
         /// `MAP_HUGETLB`
         #[cfg(not(any(
             target_os = "freebsd",
@@ -156,7 +157,7 @@ bitflags! {
             target_os = "openbsd",
             target_os = "redox",
         )))]
-        const HUGETLB = libc::MAP_HUGETLB;
+        const HUGETLB = c::MAP_HUGETLB;
         /// `MAP_HUGE_2MB`
         #[cfg(not(any(
             target_os = "android",
@@ -169,7 +170,7 @@ bitflags! {
             target_os = "openbsd",
             target_os = "redox",
         )))]
-        const HUGE_2MB = libc::MAP_HUGE_2MB;
+        const HUGE_2MB = c::MAP_HUGE_2MB;
         /// `MAP_HUGE_1GB`
         #[cfg(not(any(
             target_os = "android",
@@ -182,7 +183,7 @@ bitflags! {
             target_os = "openbsd",
             target_os = "redox",
         )))]
-        const HUGE_1GB = libc::MAP_HUGE_1GB;
+        const HUGE_1GB = c::MAP_HUGE_1GB;
         /// `MAP_LOCKED`
         #[cfg(not(any(
             target_os = "freebsd",
@@ -192,10 +193,10 @@ bitflags! {
             target_os = "openbsd",
             target_os = "redox",
         )))]
-        const LOCKED = libc::MAP_LOCKED;
+        const LOCKED = c::MAP_LOCKED;
         /// `MAP_NORESERVE`
         #[cfg(not(any(target_os = "freebsd", target_os = "redox")))]
-        const NORESERVE = libc::MAP_NORESERVE;
+        const NORESERVE = c::MAP_NORESERVE;
         /// `MAP_POPULATE`
         #[cfg(not(any(
             target_os = "freebsd",
@@ -205,7 +206,7 @@ bitflags! {
             target_os = "openbsd",
             target_os = "redox",
         )))]
-        const POPULATE = libc::MAP_POPULATE;
+        const POPULATE = c::MAP_POPULATE;
         /// `MAP_STACK`
         #[cfg(not(any(
             target_os = "ios",
@@ -213,7 +214,7 @@ bitflags! {
             target_os = "netbsd",
             target_os = "redox",
         )))]
-        const STACK = libc::MAP_STACK;
+        const STACK = c::MAP_STACK;
         /// `MAP_SYNC`
         #[cfg(not(any(
             target_os = "android",
@@ -228,10 +229,10 @@ bitflags! {
             // TODO: Enable s390x once <https://github.com/rust-lang/libc/pull/2395> lands.
             target_arch = "s390x",
         )))]
-        const SYNC = libc::MAP_SYNC;
+        const SYNC = c::MAP_SYNC;
         /// `MAP_UNINITIALIZED`
         #[cfg(any())]
-        const UNINITIALIZED = libc::MAP_UNINITIALIZED;
+        const UNINITIALIZED = c::MAP_UNINITIALIZED;
     }
 }
 
@@ -245,7 +246,7 @@ bitflags! {
     /// [`mremap_fixed`]: crate::io::mremap_fixed
     pub struct MremapFlags: i32 {
         /// `MREMAP_MAYMOVE`
-        const MAYMOVE = libc::MREMAP_MAYMOVE;
+        const MAYMOVE = c::MREMAP_MAYMOVE;
     }
 }
 
@@ -257,7 +258,7 @@ bitflags! {
     pub struct MlockFlags: i32 {
         // libc doesn't define `MLOCK_ONFAULT` yet.
         // /// `MLOCK_ONFAULT`
-        // const ONFAULT = libc::MLOCK_ONFAULT;
+        // const ONFAULT = c::MLOCK_ONFAULT;
     }
 }
 
@@ -266,14 +267,14 @@ bitflags! {
     /// `O_*` constants for use with [`pipe_with`].
     ///
     /// [`pipe_with`]: crate::io::pipe_with
-    pub struct PipeFlags: libc::c_int {
+    pub struct PipeFlags: c::c_int {
         /// `O_CLOEXEC`
-        const CLOEXEC = libc::O_CLOEXEC;
+        const CLOEXEC = c::O_CLOEXEC;
         /// `O_DIRECT`
         #[cfg(not(any(target_os = "openbsd", target_os = "redox")))]
-        const DIRECT = libc::O_DIRECT;
+        const DIRECT = c::O_DIRECT;
         /// `O_NONBLOCK`
-        const NONBLOCK = libc::O_NONBLOCK;
+        const NONBLOCK = c::O_NONBLOCK;
     }
 }
 
@@ -282,11 +283,11 @@ bitflags! {
     /// The `O_*` flags accepted by [`userfaultfd`].
     ///
     /// [`userfaultfd`]: crate::io::userfaultfd
-    pub struct UserfaultfdFlags: libc::c_int {
+    pub struct UserfaultfdFlags: c::c_int {
         /// `O_CLOEXEC`
-        const CLOEXEC = libc::O_CLOEXEC;
+        const CLOEXEC = c::O_CLOEXEC;
         /// `O_NONBLOCK`
-        const NONBLOCK = libc::O_NONBLOCK;
+        const NONBLOCK = c::O_NONBLOCK;
     }
 }
 
@@ -295,13 +296,13 @@ bitflags! {
     /// The `EFD_*` flags accepted by [`eventfd`].
     ///
     /// [`eventfd`]: crate::io::eventfd
-    pub struct EventfdFlags: libc::c_int {
+    pub struct EventfdFlags: c::c_int {
         /// `EFD_CLOEXEC`
-        const CLOEXEC = libc::EFD_CLOEXEC;
+        const CLOEXEC = c::EFD_CLOEXEC;
         /// `EFD_NONBLOCK`
-        const NONBLOCK = libc::EFD_NONBLOCK;
+        const NONBLOCK = c::EFD_NONBLOCK;
         /// `EFD_SEMAPHORE`
-        const SEMAPHORE = libc::EFD_SEMAPHORE;
+        const SEMAPHORE = c::EFD_SEMAPHORE;
     }
 }
 
@@ -314,39 +315,39 @@ bitflags! {
 pub enum Advice {
     /// `POSIX_MADV_NORMAL`
     #[cfg(not(target_os = "android"))]
-    Normal = libc::POSIX_MADV_NORMAL,
+    Normal = c::POSIX_MADV_NORMAL,
 
     /// `POSIX_MADV_NORMAL`
     #[cfg(target_os = "android")]
-    Normal = libc::MADV_NORMAL,
+    Normal = c::MADV_NORMAL,
 
     /// `POSIX_MADV_SEQUENTIAL`
     #[cfg(not(target_os = "android"))]
-    Sequential = libc::POSIX_MADV_SEQUENTIAL,
+    Sequential = c::POSIX_MADV_SEQUENTIAL,
 
     /// `POSIX_MADV_SEQUENTIAL`
     #[cfg(target_os = "android")]
-    Sequential = libc::MADV_SEQUENTIAL,
+    Sequential = c::MADV_SEQUENTIAL,
 
     /// `POSIX_MADV_RANDOM`
     #[cfg(not(target_os = "android"))]
-    Random = libc::POSIX_MADV_RANDOM,
+    Random = c::POSIX_MADV_RANDOM,
 
     /// `POSIX_MADV_RANDOM`
     #[cfg(target_os = "android")]
-    Random = libc::MADV_RANDOM,
+    Random = c::MADV_RANDOM,
 
     /// `POSIX_MADV_WILLNEED`
     #[cfg(not(target_os = "android"))]
-    WillNeed = libc::POSIX_MADV_WILLNEED,
+    WillNeed = c::POSIX_MADV_WILLNEED,
 
     /// `POSIX_MADV_WILLNEED`
     #[cfg(target_os = "android")]
-    WillNeed = libc::MADV_WILLNEED,
+    WillNeed = c::MADV_WILLNEED,
 
     /// `POSIX_MADV_DONTNEED`
     #[cfg(not(any(target_os = "android", target_os = "emscripten")))]
-    DontNeed = libc::POSIX_MADV_DONTNEED,
+    DontNeed = c::POSIX_MADV_DONTNEED,
 
     /// `POSIX_MADV_DONTNEED`
     #[cfg(target_os = "android")]
@@ -361,47 +362,47 @@ pub enum Advice {
 
     /// `MADV_DONTNEED`
     #[cfg(target_os = "android")]
-    LinuxDontNeed = libc::MADV_DONTNEED,
+    LinuxDontNeed = c::MADV_DONTNEED,
     /// `MADV_FREE`
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    LinuxFree = libc::MADV_FREE,
+    LinuxFree = c::MADV_FREE,
     /// `MADV_REMOVE`
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    LinuxRemove = libc::MADV_REMOVE,
+    LinuxRemove = c::MADV_REMOVE,
     /// `MADV_DONTFORK`
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    LinuxDontFork = libc::MADV_DONTFORK,
+    LinuxDontFork = c::MADV_DONTFORK,
     /// `MADV_DOFORK`
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    LinuxDoFork = libc::MADV_DOFORK,
+    LinuxDoFork = c::MADV_DOFORK,
     /// `MADV_HWPOISON`
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    LinuxHwPoison = libc::MADV_HWPOISON,
+    LinuxHwPoison = c::MADV_HWPOISON,
     /// `MADV_SOFT_OFFLINE`
     // TODO: Enable riscv once <https://github.com/rust-lang/libc/pull/2391> lands.
     #[cfg(all(
         not(target_arch = "riscv64"),
         any(target_os = "android", target_os = "linux")
     ))]
-    LinuxSoftOffline = libc::MADV_SOFT_OFFLINE,
+    LinuxSoftOffline = c::MADV_SOFT_OFFLINE,
     /// `MADV_MERGEABLE`
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    LinuxMergeable = libc::MADV_MERGEABLE,
+    LinuxMergeable = c::MADV_MERGEABLE,
     /// `MADV_UNMERGEABLE`
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    LinuxUnmergeable = libc::MADV_UNMERGEABLE,
+    LinuxUnmergeable = c::MADV_UNMERGEABLE,
     /// `MADV_HUGEPAGE`
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    LinuxHugepage = libc::MADV_HUGEPAGE,
+    LinuxHugepage = c::MADV_HUGEPAGE,
     /// `MADV_NOHUGEPAGE`
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    LinuxNoHugepage = libc::MADV_NOHUGEPAGE,
+    LinuxNoHugepage = c::MADV_NOHUGEPAGE,
     /// `MADV_DONTDUMP`
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    LinuxDontDump = libc::MADV_DONTDUMP,
+    LinuxDontDump = c::MADV_DONTDUMP,
     /// `MADV_DODUMP`
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    LinuxDoDump = libc::MADV_DODUMP,
+    LinuxDoDump = c::MADV_DODUMP,
 }
 
 #[cfg(target_os = "emscripten")]
@@ -415,17 +416,17 @@ impl Advice {
 ///
 /// [`ioctl_tcgets`]: crate::io::ioctl_tcgets
 #[cfg(not(target_os = "wasi"))]
-pub type Termios = libc::termios;
+pub type Termios = c::termios;
 
 /// `struct winsize`
 #[cfg(not(target_os = "wasi"))]
-pub type Winsize = libc::winsize;
+pub type Winsize = c::winsize;
 
 #[cfg(not(target_os = "wasi"))]
-pub type Tcflag = libc::tcflag_t;
+pub type Tcflag = c::tcflag_t;
 
 #[cfg(not(target_os = "wasi"))]
-pub const ICANON: Tcflag = libc::ICANON;
+pub const ICANON: Tcflag = c::ICANON;
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub const PIPE_BUF: usize = libc::PIPE_BUF;
+pub const PIPE_BUF: usize = c::PIPE_BUF;

@@ -1,3 +1,4 @@
+use super::super::c;
 use bitflags::bitflags;
 
 bitflags! {
@@ -5,9 +6,9 @@ bitflags! {
     ///
     /// [`fcntl_getfd`]: crate::fs::fcntl_getfd
     /// [`fcntl_setfd`]: crate::fs::fcntl_setfd
-    pub struct FdFlags: libc::c_int {
+    pub struct FdFlags: c::c_int {
         /// `FD_CLOEXEC`
-        const CLOEXEC = libc::FD_CLOEXEC;
+        const CLOEXEC = c::FD_CLOEXEC;
     }
 }
 
@@ -15,18 +16,18 @@ bitflags! {
     /// `*_OK` constants for use with [`accessat`].
     ///
     /// [`accessat`]: fn.accessat.html
-    pub struct Access: libc::c_int {
+    pub struct Access: c::c_int {
         /// `R_OK`
-        const READ_OK = libc::R_OK;
+        const READ_OK = c::R_OK;
 
         /// `W_OK`
-        const WRITE_OK = libc::W_OK;
+        const WRITE_OK = c::W_OK;
 
         /// `X_OK`
-        const EXEC_OK = libc::X_OK;
+        const EXEC_OK = c::X_OK;
 
         /// `F_OK`
-        const EXISTS = libc::F_OK;
+        const EXISTS = c::F_OK;
     }
 }
 
@@ -37,25 +38,25 @@ bitflags! {
     ///
     /// [`openat`]: crate::fs::openat
     /// [`statat`]: crate::fs::statat
-    pub struct AtFlags: libc::c_int {
+    pub struct AtFlags: c::c_int {
         /// `AT_REMOVEDIR`
-        const REMOVEDIR = libc::AT_REMOVEDIR;
+        const REMOVEDIR = c::AT_REMOVEDIR;
 
         /// `AT_SYMLINK_FOLLOW`
-        const SYMLINK_FOLLOW = libc::AT_SYMLINK_FOLLOW;
+        const SYMLINK_FOLLOW = c::AT_SYMLINK_FOLLOW;
 
         /// `AT_SYMLINK_NOFOLLOW`
-        const SYMLINK_NOFOLLOW = libc::AT_SYMLINK_NOFOLLOW;
+        const SYMLINK_NOFOLLOW = c::AT_SYMLINK_NOFOLLOW;
 
         /// `AT_EMPTY_PATH`
         #[cfg(any(target_os = "android",
                   target_os = "fuchsia",
                   target_os = "linux"))]
-        const EMPTY_PATH = libc::AT_EMPTY_PATH;
+        const EMPTY_PATH = c::AT_EMPTY_PATH;
 
         /// `AT_EACCESS`
         #[cfg(not(any(target_os = "emscripten", target_os = "android")))]
-        const EACCESS = libc::AT_EACCESS;
+        const EACCESS = c::AT_EACCESS;
     }
 }
 
@@ -66,89 +67,89 @@ bitflags! {
     pub struct Mode: RawMode {
         /// `S_IRWXU`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IRWXU = libc::S_IRWXU;
+        const IRWXU = c::S_IRWXU;
 
         /// `S_IRUSR`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IRUSR = libc::S_IRUSR;
+        const IRUSR = c::S_IRUSR;
 
         /// `S_IWUSR`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IWUSR = libc::S_IWUSR;
+        const IWUSR = c::S_IWUSR;
 
         /// `S_IXUSR`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IXUSR = libc::S_IXUSR;
+        const IXUSR = c::S_IXUSR;
 
         /// `S_IRWXG`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IRWXG = libc::S_IRWXG;
+        const IRWXG = c::S_IRWXG;
 
         /// `S_IRGRP`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IRGRP = libc::S_IRGRP;
+        const IRGRP = c::S_IRGRP;
 
         /// `S_IWGRP`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IWGRP = libc::S_IWGRP;
+        const IWGRP = c::S_IWGRP;
 
         /// `S_IXGRP`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IXGRP = libc::S_IXGRP;
+        const IXGRP = c::S_IXGRP;
 
         /// `S_IRWXO`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IRWXO = libc::S_IRWXO;
+        const IRWXO = c::S_IRWXO;
 
         /// `S_IROTH`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IROTH = libc::S_IROTH;
+        const IROTH = c::S_IROTH;
 
         /// `S_IWOTH`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IWOTH = libc::S_IWOTH;
+        const IWOTH = c::S_IWOTH;
 
         /// `S_IXOTH`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IXOTH = libc::S_IXOTH;
+        const IXOTH = c::S_IXOTH;
 
         /// `S_ISUID`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const ISUID = libc::S_ISUID as libc::mode_t;
+        const ISUID = c::S_ISUID as c::mode_t;
 
         /// `S_ISGID`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const ISGID = libc::S_ISGID as libc::mode_t;
+        const ISGID = c::S_ISGID as c::mode_t;
 
         /// `S_ISVTX`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const ISVTX = libc::S_ISVTX as libc::mode_t;
+        const ISVTX = c::S_ISVTX as c::mode_t;
 
         /// `S_IFREG`
-        const IFREG = libc::S_IFREG;
+        const IFREG = c::S_IFREG;
 
         /// `S_IFDIR`
-        const IFDIR = libc::S_IFDIR;
+        const IFDIR = c::S_IFDIR;
 
         /// `S_IFLNK`
-        const IFLNK = libc::S_IFLNK;
+        const IFLNK = c::S_IFLNK;
 
         /// `S_IFIFO`
         #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `S_IFIFO`.
-        const IFIFO = libc::S_IFIFO;
+        const IFIFO = c::S_IFIFO;
 
         /// `S_IFSOCK`
         #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `S_IFSOCK`.
-        const IFSOCK = libc::S_IFSOCK;
+        const IFSOCK = c::S_IFSOCK;
 
         /// `S_IFCHR`
-        const IFCHR = libc::S_IFCHR;
+        const IFCHR = c::S_IFCHR;
 
         /// `S_IFBLK`
-        const IFBLK = libc::S_IFBLK;
+        const IFBLK = c::S_IFBLK;
 
         /// `S_IFMT`
-        const IFMT = libc::S_IFMT;
+        const IFMT = c::S_IFMT;
     }
 }
 
@@ -156,9 +157,9 @@ bitflags! {
     /// `O_*` constants for use with [`openat`].
     ///
     /// [`openat`]: crate::fs::openat
-    pub struct OFlags: libc::c_int {
+    pub struct OFlags: c::c_int {
         /// `O_ACCMODE`
-        const ACCMODE = libc::O_ACCMODE;
+        const ACCMODE = c::O_ACCMODE;
 
         /// Similar to `ACCMODE`, but just includes the read/write flags, and
         /// no other flags.
@@ -167,23 +168,23 @@ bitflags! {
         /// sometimes we really just want the read/write bits. Caution is
         /// indicated, as the presence of `O_PATH` may mean that the read/write
         /// bits don't have their usual meaning.
-        const RWMODE = libc::O_RDONLY | libc::O_WRONLY | libc::O_RDWR;
+        const RWMODE = c::O_RDONLY | c::O_WRONLY | c::O_RDWR;
 
         /// `O_APPEND`
-        const APPEND = libc::O_APPEND;
+        const APPEND = c::O_APPEND;
 
         /// `O_CREAT`
-        const CREATE = libc::O_CREAT;
+        const CREATE = c::O_CREAT;
 
         /// `O_DIRECTORY`
-        const DIRECTORY = libc::O_DIRECTORY;
+        const DIRECTORY = c::O_DIRECTORY;
 
         /// `O_DSYNC`
         #[cfg(not(any(target_os = "freebsd", target_os = "redox")))]
-        const DSYNC = libc::O_DSYNC;
+        const DSYNC = c::O_DSYNC;
 
         /// `O_EXCL`
-        const EXCL = libc::O_EXCL;
+        const EXCL = c::O_EXCL;
 
         /// `O_FSYNC`
         #[cfg(any(target_os = "dragonfly",
@@ -193,26 +194,26 @@ bitflags! {
                   target_os = "macos",
                   target_os = "netbsd",
                   target_os = "openbsd"))]
-        const FSYNC = libc::O_FSYNC;
+        const FSYNC = c::O_FSYNC;
 
         /// `O_NOFOLLOW`
-        const NOFOLLOW = libc::O_NOFOLLOW;
+        const NOFOLLOW = c::O_NOFOLLOW;
 
         /// `O_NONBLOCK`
-        const NONBLOCK = libc::O_NONBLOCK;
+        const NONBLOCK = c::O_NONBLOCK;
 
         /// `O_RDONLY`
-        const RDONLY = libc::O_RDONLY;
+        const RDONLY = c::O_RDONLY;
 
         /// `O_WRONLY`
-        const WRONLY = libc::O_WRONLY;
+        const WRONLY = c::O_WRONLY;
 
         /// `O_RDWR`
-        const RDWR = libc::O_RDWR;
+        const RDWR = c::O_RDWR;
 
         /// `O_NOCTTY`
         #[cfg(not(target_os = "redox"))]
-        const NOCTTY = libc::O_NOCTTY;
+        const NOCTTY = c::O_NOCTTY;
 
         /// `O_RSYNC`
         #[cfg(any(target_os = "android",
@@ -222,14 +223,14 @@ bitflags! {
                   target_os = "openbsd",
                   target_os = "wasi",
                   ))]
-        const RSYNC = libc::O_RSYNC;
+        const RSYNC = c::O_RSYNC;
 
         /// `O_SYNC`
         #[cfg(not(target_os = "redox"))]
-        const SYNC = libc::O_SYNC;
+        const SYNC = c::O_SYNC;
 
         /// `O_TRUNC`
-        const TRUNC = libc::O_TRUNC;
+        const TRUNC = c::O_TRUNC;
 
         /// `O_PATH`
         #[cfg(any(target_os = "android",
@@ -237,7 +238,7 @@ bitflags! {
                   target_os = "fuchsia",
                   target_os = "linux",
                   target_os = "redox"))]
-        const PATH = libc::O_PATH;
+        const PATH = c::O_PATH;
 
         /// `O_CLOEXEC`
         #[cfg(any(target_os = "android",
@@ -255,20 +256,20 @@ bitflags! {
                   target_os = "redox",
                   target_os = "solaris",
                   target_os = "vxworks"))]
-        const CLOEXEC = libc::O_CLOEXEC;
+        const CLOEXEC = c::O_CLOEXEC;
 
         /// `O_TMPFILE`
         #[cfg(any(target_os = "android",
                   target_os = "emscripten",
                   target_os = "fuchsia",
                   target_os = "linux"))]
-        const TMPFILE = libc::O_TMPFILE;
+        const TMPFILE = c::O_TMPFILE;
 
         /// `O_NOATIME`
         #[cfg(any(target_os = "android",
                   target_os = "fuchsia",
                   target_os = "linux"))]
-        const NOATIME = libc::O_NOATIME;
+        const NOATIME = c::O_NOATIME;
     }
 }
 
@@ -277,7 +278,7 @@ bitflags! {
     /// `CLONE_*` constants for use with [`fclonefileat`].
     ///
     /// [`fclonefileat`]: crate::fs::fclonefileat
-    pub struct CloneFlags: libc::c_int {
+    pub struct CloneFlags: c::c_int {
         /// `CLONE_NOFOLLOW`
         const NOFOLLOW = 1;
 
@@ -300,7 +301,7 @@ mod copyfile {
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 bitflags! {
     /// `COPYFILE_*` constants.
-    pub struct CopyfileFlags: libc::c_uint {
+    pub struct CopyfileFlags: c::c_uint {
         /// `COPYFILE_ACL`
         const ACL = copyfile::ACL;
 
@@ -352,18 +353,18 @@ bitflags! {
     /// `RENAME_*` constants for use with [`renameat_with`].
     ///
     /// [`renameat_with`]: crate::fs::renameat_with
-    pub struct RenameFlags: libc::c_uint {
+    pub struct RenameFlags: c::c_uint {
         /// `RENAME_EXCHANGE`
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const EXCHANGE = libc::RENAME_EXCHANGE;
+        const EXCHANGE = c::RENAME_EXCHANGE;
 
         /// `RENAME_NOREPLACE`
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const NOREPLACE = libc::RENAME_NOREPLACE;
+        const NOREPLACE = c::RENAME_NOREPLACE;
 
         /// `RENAME_WHITEOUT`
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const WHITEOUT = libc::RENAME_WHITEOUT;
+        const WHITEOUT = c::RENAME_WHITEOUT;
     }
 }
 
@@ -398,16 +399,16 @@ pub enum FileType {
 impl FileType {
     /// Construct a `FileType` from the `st_mode` field of a `Stat`.
     pub const fn from_raw_mode(st_mode: RawMode) -> Self {
-        match st_mode & libc::S_IFMT {
-            libc::S_IFREG => Self::RegularFile,
-            libc::S_IFDIR => Self::Directory,
-            libc::S_IFLNK => Self::Symlink,
+        match st_mode & c::S_IFMT {
+            c::S_IFREG => Self::RegularFile,
+            c::S_IFDIR => Self::Directory,
+            c::S_IFLNK => Self::Symlink,
             #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `S_IFIFO`.
-            libc::S_IFIFO => Self::Fifo,
+            c::S_IFIFO => Self::Fifo,
             #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `S_IFSOCK`.
-            libc::S_IFSOCK => Self::Socket,
-            libc::S_IFCHR => Self::CharacterDevice,
-            libc::S_IFBLK => Self::BlockDevice,
+            c::S_IFSOCK => Self::Socket,
+            c::S_IFCHR => Self::CharacterDevice,
+            c::S_IFBLK => Self::BlockDevice,
             _ => Self::Unknown,
         }
     }
@@ -418,20 +419,20 @@ impl FileType {
         Self::from_raw_mode(st_mode.bits())
     }
 
-    /// Construct a `FileType` from the `d_type` field of a `libc::dirent`.
+    /// Construct a `FileType` from the `d_type` field of a `c::dirent`.
     #[cfg(not(target_os = "redox"))]
     pub(crate) const fn from_dirent_d_type(d_type: u8) -> Self {
         match d_type {
-            libc::DT_REG => Self::RegularFile,
-            libc::DT_DIR => Self::Directory,
-            libc::DT_LNK => Self::Symlink,
+            c::DT_REG => Self::RegularFile,
+            c::DT_DIR => Self::Directory,
+            c::DT_LNK => Self::Symlink,
             #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `DT_SOCK`.
-            libc::DT_SOCK => Self::Socket,
+            c::DT_SOCK => Self::Socket,
             #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `DT_FIFO`.
-            libc::DT_FIFO => Self::Fifo,
-            libc::DT_CHR => Self::CharacterDevice,
-            libc::DT_BLK => Self::BlockDevice,
-            // libc::DT_UNKNOWN |
+            c::DT_FIFO => Self::Fifo,
+            c::DT_CHR => Self::CharacterDevice,
+            c::DT_BLK => Self::BlockDevice,
+            // c::DT_UNKNOWN |
             _ => Self::Unknown,
         }
     }
@@ -451,22 +452,22 @@ impl FileType {
 #[repr(u32)]
 pub enum Advice {
     /// `POSIX_FADV_NORMAL`
-    Normal = libc::POSIX_FADV_NORMAL as libc::c_uint,
+    Normal = c::POSIX_FADV_NORMAL as c::c_uint,
 
     /// `POSIX_FADV_SEQUENTIAL`
-    Sequential = libc::POSIX_FADV_SEQUENTIAL as libc::c_uint,
+    Sequential = c::POSIX_FADV_SEQUENTIAL as c::c_uint,
 
     /// `POSIX_FADV_RANDOM`
-    Random = libc::POSIX_FADV_RANDOM as libc::c_uint,
+    Random = c::POSIX_FADV_RANDOM as c::c_uint,
 
     /// `POSIX_FADV_NOREUSE`
-    NoReuse = libc::POSIX_FADV_NOREUSE as libc::c_uint,
+    NoReuse = c::POSIX_FADV_NOREUSE as c::c_uint,
 
     /// `POSIX_FADV_WILLNEED`
-    WillNeed = libc::POSIX_FADV_WILLNEED as libc::c_uint,
+    WillNeed = c::POSIX_FADV_WILLNEED as c::c_uint,
 
     /// `POSIX_FADV_DONTNEED`
-    DontNeed = libc::POSIX_FADV_DONTNEED as libc::c_uint,
+    DontNeed = c::POSIX_FADV_DONTNEED as c::c_uint,
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -474,12 +475,12 @@ bitflags! {
     /// `MFD_*` constants for use with [`memfd_create`].
     ///
     /// [`memfd_create`]: crate::fs::memfd_create
-    pub struct MemfdFlags: libc::c_uint {
+    pub struct MemfdFlags: c::c_uint {
         /// `MFD_CLOEXEC`
-        const CLOEXEC = libc::MFD_CLOEXEC;
+        const CLOEXEC = c::MFD_CLOEXEC;
 
         /// `MFD_ALLOW_SEALING`
-        const ALLOW_SEALING = libc::MFD_ALLOW_SEALING;
+        const ALLOW_SEALING = c::MFD_ALLOW_SEALING;
     }
 }
 
@@ -487,46 +488,46 @@ bitflags! {
 bitflags! {
     pub struct StatxFlags: u32 {
         /// `STATX_TYPE`
-        const TYPE = libc::STATX_TYPE;
+        const TYPE = c::STATX_TYPE;
 
         /// `STATX_MODE`
-        const MODE = libc::STATX_MODE;
+        const MODE = c::STATX_MODE;
 
         /// `STATX_NLINK`
-        const NLINK = libc::STATX_NLINK;
+        const NLINK = c::STATX_NLINK;
 
         /// `STATX_UID`
-        const UID = libc::STATX_UID;
+        const UID = c::STATX_UID;
 
         /// `STATX_GID`
-        const GID = libc::STATX_GID;
+        const GID = c::STATX_GID;
 
         /// `STATX_ATIME`
-        const ATIME = libc::STATX_ATIME;
+        const ATIME = c::STATX_ATIME;
 
         /// `STATX_MTIME`
-        const MTIME = libc::STATX_MTIME;
+        const MTIME = c::STATX_MTIME;
 
         /// `STATX_CTIME`
-        const CTIME = libc::STATX_CTIME;
+        const CTIME = c::STATX_CTIME;
 
         /// `STATX_INO`
-        const INO = libc::STATX_INO;
+        const INO = c::STATX_INO;
 
         /// `STATX_SIZE`
-        const SIZE = libc::STATX_SIZE;
+        const SIZE = c::STATX_SIZE;
 
         /// `STATX_BLOCKS`
-        const BLOCKS = libc::STATX_BLOCKS;
+        const BLOCKS = c::STATX_BLOCKS;
 
         /// `STATX_BASIC_STATS`
-        const BASIC_STATS = libc::STATX_BASIC_STATS;
+        const BASIC_STATS = c::STATX_BASIC_STATS;
 
         /// `STATX_BTIME`
-        const BTIME = libc::STATX_BTIME;
+        const BTIME = c::STATX_BTIME;
 
         /// `STATX_ALL`
-        const ALL = libc::STATX_ALL;
+        const ALL = c::STATX_ALL;
     }
 }
 
@@ -544,7 +545,7 @@ bitflags! {
                       target_os = "netbsd",
                       target_os = "openbsd",
                       target_os = "wasi")))]
-        const KEEP_SIZE = libc::FALLOC_FL_KEEP_SIZE;
+        const KEEP_SIZE = c::FALLOC_FL_KEEP_SIZE;
         /// `FALLOC_FL_PUNCH_HOLE`
         #[cfg(not(any(target_os = "dragonfly",
                       target_os = "freebsd",
@@ -553,7 +554,7 @@ bitflags! {
                       target_os = "netbsd",
                       target_os = "openbsd",
                       target_os = "wasi")))]
-        const PUNCH_HOLE = libc::FALLOC_FL_PUNCH_HOLE;
+        const PUNCH_HOLE = c::FALLOC_FL_PUNCH_HOLE;
         /// `FALLOC_FL_NO_HIDE_STALE`
         #[cfg(not(any(target_os = "linux",
                       target_os = "dragonfly",
@@ -565,7 +566,7 @@ bitflags! {
                       target_os = "emscripten",
                       target_os = "fuchsia",
                       target_os = "wasi")))]
-        const NO_HIDE_STALE = libc::FALLOC_FL_NO_HIDE_STALE;
+        const NO_HIDE_STALE = c::FALLOC_FL_NO_HIDE_STALE;
         /// `FALLOC_FL_COLLAPSE_RANGE`
         #[cfg(not(any(target_os = "dragonfly",
                       target_os = "freebsd",
@@ -575,7 +576,7 @@ bitflags! {
                       target_os = "openbsd",
                       target_os = "emscripten",
                       target_os = "wasi")))]
-        const COLLAPSE_RANGE = libc::FALLOC_FL_COLLAPSE_RANGE;
+        const COLLAPSE_RANGE = c::FALLOC_FL_COLLAPSE_RANGE;
         /// `FALLOC_FL_ZERO_RANGE`
         #[cfg(not(any(target_os = "dragonfly",
                       target_os = "freebsd",
@@ -585,7 +586,7 @@ bitflags! {
                       target_os = "openbsd",
                       target_os = "emscripten",
                       target_os = "wasi")))]
-        const ZERO_RANGE = libc::FALLOC_FL_ZERO_RANGE;
+        const ZERO_RANGE = c::FALLOC_FL_ZERO_RANGE;
         /// `FALLOC_FL_INSERT_RANGE`
         #[cfg(not(any(target_os = "dragonfly",
                       target_os = "freebsd",
@@ -595,7 +596,7 @@ bitflags! {
                       target_os = "openbsd",
                       target_os = "emscripten",
                       target_os = "wasi")))]
-        const INSERT_RANGE = libc::FALLOC_FL_INSERT_RANGE;
+        const INSERT_RANGE = c::FALLOC_FL_INSERT_RANGE;
         /// `FALLOC_FL_UNSHARE_RANGE`
         #[cfg(not(any(target_os = "dragonfly",
                       target_os = "freebsd",
@@ -605,7 +606,7 @@ bitflags! {
                       target_os = "openbsd",
                       target_os = "emscripten",
                       target_os = "wasi")))]
-        const UNSHARE_RANGE = libc::FALLOC_FL_UNSHARE_RANGE;
+        const UNSHARE_RANGE = c::FALLOC_FL_UNSHARE_RANGE;
     }
 }
 
@@ -617,17 +618,17 @@ bitflags! {
 #[repr(i32)]
 pub enum FlockOperation {
     /// `LOCK_SH`
-    LockShared = libc::LOCK_SH,
+    LockShared = c::LOCK_SH,
     /// `LOCK_EX`
-    LockExclusive = libc::LOCK_EX,
+    LockExclusive = c::LOCK_EX,
     /// `LOCK_UN`
-    Unlock = libc::LOCK_UN,
+    Unlock = c::LOCK_UN,
     /// `LOCK_SH | LOCK_NB`
-    NonBlockingLockShared = libc::LOCK_SH | libc::LOCK_NB,
+    NonBlockingLockShared = c::LOCK_SH | c::LOCK_NB,
     /// `LOCK_EX | LOCK_NB`
-    NonBlockingLockExclusive = libc::LOCK_EX | libc::LOCK_NB,
+    NonBlockingLockExclusive = c::LOCK_EX | c::LOCK_NB,
     /// `LOCK_UN | LOCK_NB`
-    NonBlockingUnlock = libc::LOCK_UN | libc::LOCK_NB,
+    NonBlockingUnlock = c::LOCK_UN | c::LOCK_NB,
 }
 
 /// `struct stat` for use with [`statat`] and [`fstat`].
@@ -640,7 +641,7 @@ pub enum FlockOperation {
     target_os = "emscripten",
     target_os = "l4re"
 )))]
-pub type Stat = libc::stat;
+pub type Stat = c::stat;
 
 /// `struct stat` for use with [`statat`] and [`fstat`].
 ///
@@ -652,7 +653,7 @@ pub type Stat = libc::stat;
     target_os = "emscripten",
     target_os = "l4re"
 ))]
-pub type Stat = libc::stat64;
+pub type Stat = c::stat64;
 
 /// `struct statfs` for use with [`fstatfs`].
 ///
@@ -667,7 +668,7 @@ pub type Stat = libc::stat64;
     target_os = "wasi",
 )))]
 #[allow(clippy::module_name_repetitions)]
-pub type StatFs = libc::statfs;
+pub type StatFs = c::statfs;
 
 /// `struct statfs` for use with [`fstatfs`].
 ///
@@ -678,7 +679,7 @@ pub type StatFs = libc::statfs;
     target_os = "emscripten",
     target_os = "l4re"
 ))]
-pub type StatFs = libc::statfs64;
+pub type StatFs = c::statfs64;
 
 /// `struct statx` for use with [`statx`].
 ///
@@ -686,13 +687,13 @@ pub type StatFs = libc::statfs64;
 ///
 /// [`statx`]: crate::fs::statx
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
-pub type Statx = libc::statx;
+pub type Statx = c::statx;
 
 /// `mode_t`
-pub type RawMode = libc::mode_t;
+pub type RawMode = c::mode_t;
 
 /// `dev_t`
-pub type Dev = libc::dev_t;
+pub type Dev = c::dev_t;
 
 /// `__fsword_t`
 #[cfg(all(
@@ -700,7 +701,7 @@ pub type Dev = libc::dev_t;
     not(target_env = "musl"),
     not(target_arch = "s390x")
 ))]
-pub type FsWord = libc::__fsword_t;
+pub type FsWord = c::__fsword_t;
 
 /// `__fsword_t`
 #[cfg(all(
@@ -722,13 +723,13 @@ pub type FsWord = u64;
 pub type FsWord = u32;
 
 #[cfg(not(target_os = "redox"))]
-pub use libc::{UTIME_NOW, UTIME_OMIT};
+pub use c::{UTIME_NOW, UTIME_OMIT};
 
 #[cfg(all(
     any(target_os = "android", target_os = "linux"),
     not(target_env = "musl")
 ))]
-pub const PROC_SUPER_MAGIC: FsWord = libc::PROC_SUPER_MAGIC as FsWord;
+pub const PROC_SUPER_MAGIC: FsWord = c::PROC_SUPER_MAGIC as FsWord;
 
 #[cfg(all(any(target_os = "android", target_os = "linux"), target_env = "musl"))]
 pub const PROC_SUPER_MAGIC: FsWord = 0x0000_9fa0;
@@ -737,4 +738,4 @@ pub const PROC_SUPER_MAGIC: FsWord = 0x0000_9fa0;
 #[allow(non_camel_case_types)]
 #[repr(transparent)]
 #[derive(Copy, Clone)]
-pub struct copyfile_state_t(pub(crate) *mut libc::c_void);
+pub struct copyfile_state_t(pub(crate) *mut c::c_void);

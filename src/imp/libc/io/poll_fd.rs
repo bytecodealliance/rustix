@@ -1,36 +1,37 @@
-use crate::imp::libc::conv::borrowed_fd;
+use super::super::c;
+use super::super::conv::borrowed_fd;
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::marker::PhantomData;
 
 bitflags! {
     /// `POLL*`
-    pub struct PollFlags: libc::c_short {
+    pub struct PollFlags: c::c_short {
         /// `POLLIN`
-        const IN = libc::POLLIN;
+        const IN = c::POLLIN;
         /// `POLLPRI`
         #[cfg(not(target_os = "wasi"))]
-        const PRI = libc::POLLPRI;
+        const PRI = c::POLLPRI;
         /// `POLLOUT`
-        const OUT = libc::POLLOUT;
+        const OUT = c::POLLOUT;
         /// `POLLRDNORM`
         #[cfg(not(target_os = "redox"))]
-        const RDNORM = libc::POLLRDNORM;
+        const RDNORM = c::POLLRDNORM;
         /// `POLLWRNORM`
         #[cfg(not(target_os = "redox"))]
-        const WRNORM = libc::POLLWRNORM;
+        const WRNORM = c::POLLWRNORM;
         /// `POLLRDBAND`
         #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-        const RDBAND = libc::POLLRDBAND;
+        const RDBAND = c::POLLRDBAND;
         /// `POLLWRBAND`
         #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-        const WRBAND = libc::POLLWRBAND;
+        const WRBAND = c::POLLWRBAND;
         /// `POLLERR`
-        const ERR = libc::POLLERR;
+        const ERR = c::POLLERR;
         /// `POLLHUP`
-        const HUP = libc::POLLHUP;
+        const HUP = c::POLLHUP;
         /// `POLLNVAL`
-        const NVAL = libc::POLLNVAL;
+        const NVAL = c::POLLNVAL;
         /// `POLLRDHUP`
         // TODO: Submitted to upstream libc:
         // <https://github.com/rust-lang/libc/pull/2390>
@@ -43,7 +44,7 @@ bitflags! {
 #[derive(Clone, Debug)]
 #[repr(transparent)]
 pub struct PollFd<'fd> {
-    pollfd: libc::pollfd,
+    pollfd: c::pollfd,
     _phantom: PhantomData<BorrowedFd<'fd>>,
 }
 
@@ -62,7 +63,7 @@ impl<'fd> PollFd<'fd> {
     #[inline]
     pub fn from_borrowed_fd(fd: BorrowedFd<'fd>, events: PollFlags) -> Self {
         Self {
-            pollfd: libc::pollfd {
+            pollfd: c::pollfd {
                 fd: borrowed_fd(fd),
                 events: events.bits(),
                 revents: 0,

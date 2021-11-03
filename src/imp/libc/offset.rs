@@ -1,5 +1,7 @@
 //! Automatically enable "large file" support features.
 
+use super::super::c;
+
 #[cfg(not(any(
     windows,
     target_os = "android",
@@ -7,7 +9,7 @@
     target_os = "emscripten",
     target_os = "l4re",
 )))]
-pub(super) use libc::{
+pub(super) use c::{
     fstat as libc_fstat, fstatat as libc_fstatat, lseek as libc_lseek, off_t as libc_off_t,
 };
 
@@ -17,7 +19,7 @@ pub(super) use libc::{
     target_os = "emscripten",
     target_os = "l4re",
 ))]
-pub(super) use libc::{
+pub(super) use c::{
     fstat64 as libc_fstat, fstatat64 as libc_fstatat, lseek64 as libc_lseek, off64_t as libc_off_t,
     rlimit64 as libc_rlimit,
 };
@@ -30,7 +32,7 @@ pub(super) use libc::{
     target_os = "l4re",
     target_os = "wasi",
 )))]
-pub(super) use libc::mmap as libc_mmap;
+pub(super) use c::mmap as libc_mmap;
 
 #[cfg(not(any(
     windows,
@@ -42,7 +44,7 @@ pub(super) use libc::mmap as libc_mmap;
     target_os = "redox",
     target_os = "wasi",
 )))]
-pub(super) use libc::{rlimit as libc_rlimit, RLIM_INFINITY as LIBC_RLIM_INFINITY};
+pub(super) use c::{rlimit as libc_rlimit, RLIM_INFINITY as LIBC_RLIM_INFINITY};
 
 #[cfg(not(any(
     windows,
@@ -53,7 +55,7 @@ pub(super) use libc::{rlimit as libc_rlimit, RLIM_INFINITY as LIBC_RLIM_INFINITY
     target_os = "linux",
     target_os = "wasi",
 )))]
-pub(super) use libc::getrlimit as libc_getrlimit;
+pub(super) use c::getrlimit as libc_getrlimit;
 
 // TODO: Add `RLIM64_INFINITY` to upstream libc.
 #[cfg(any(
@@ -70,7 +72,7 @@ pub(super) const LIBC_RLIM_INFINITY: u64 = !0u64;
     target_os = "emscripten",
     target_os = "l4re",
 ))]
-pub(super) use libc::{getrlimit64 as libc_getrlimit, mmap64 as libc_mmap};
+pub(super) use c::{getrlimit64 as libc_getrlimit, mmap64 as libc_mmap};
 
 #[cfg(not(any(
     windows,
@@ -80,19 +82,19 @@ pub(super) use libc::{getrlimit64 as libc_getrlimit, mmap64 as libc_mmap};
     target_os = "l4re",
     target_os = "redox",
 )))]
-pub(super) use libc::openat as libc_openat;
+pub(super) use c::openat as libc_openat;
 #[cfg(any(
     target_os = "android",
     target_os = "linux",
     target_os = "emscripten",
     target_os = "l4re",
 ))]
-pub(super) use libc::openat64 as libc_openat;
+pub(super) use c::openat64 as libc_openat;
 
 #[cfg(target_os = "fuchsia")]
-pub(super) use libc::fallocate as libc_fallocate;
+pub(super) use c::fallocate as libc_fallocate;
 #[cfg(any(target_os = "android", target_os = "linux",))]
-pub(super) use libc::fallocate64 as libc_fallocate;
+pub(super) use c::fallocate64 as libc_fallocate;
 #[cfg(not(any(
     windows,
     target_os = "android",
@@ -105,14 +107,14 @@ pub(super) use libc::fallocate64 as libc_fallocate;
     target_os = "openbsd",
     target_os = "redox",
 )))]
-pub(super) use libc::posix_fadvise as libc_posix_fadvise;
+pub(super) use c::posix_fadvise as libc_posix_fadvise;
 #[cfg(any(
     target_os = "android",
     target_os = "emscripten",
     target_os = "linux",
     target_os = "l4re",
 ))]
-pub(super) use libc::posix_fadvise64 as libc_posix_fadvise;
+pub(super) use c::posix_fadvise64 as libc_posix_fadvise;
 
 #[cfg(all(not(any(
     windows,
@@ -120,9 +122,9 @@ pub(super) use libc::posix_fadvise64 as libc_posix_fadvise;
     target_os = "linux",
     target_os = "emscripten"
 ))))]
-pub(super) use libc::{pread as libc_pread, pwrite as libc_pwrite};
+pub(super) use c::{pread as libc_pread, pwrite as libc_pwrite};
 #[cfg(any(target_os = "android", target_os = "linux", target_os = "emscripten"))]
-pub(super) use libc::{
+pub(super) use c::{
     pread64 as libc_pread, preadv64 as libc_preadv, pwrite64 as libc_pwrite,
     pwritev64 as libc_pwritev,
 };
@@ -135,28 +137,30 @@ pub(super) use libc::{
     target_os = "macos",
     target_os = "redox",
 )))]
-pub(super) use libc::{preadv as libc_preadv, pwritev as libc_pwritev};
+pub(super) use c::{preadv as libc_preadv, pwritev as libc_pwritev};
 // macOS added preadv and pwritev in version 11.0
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 mod readwrite_pv {
+    use super::c;
+
     weakcall! {
         pub(in super::super) fn preadv(
-            fd: libc::c_int,
-            iov: *const libc::iovec,
-            iovcnt: libc::c_int,
-            offset: libc::off_t
-        ) -> libc::ssize_t
+            fd: c::c_int,
+            iov: *const c::iovec,
+            iovcnt: c::c_int,
+            offset: c::off_t
+        ) -> c::ssize_t
     }
     weakcall! {
         pub(in super::super) fn pwritev(
-            fd: libc::c_int,
-            iov: *const libc::iovec,
-            iovcnt: libc::c_int, offset: libc::off_t
-        ) -> libc::ssize_t
+            fd: c::c_int,
+            iov: *const c::iovec,
+            iovcnt: c::c_int, offset: c::off_t
+        ) -> c::ssize_t
     }
 }
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
-pub(super) use libc::{preadv64v2 as libc_preadv2, pwritev64v2 as libc_pwritev2};
+pub(super) use c::{preadv64v2 as libc_preadv2, pwritev64v2 as libc_pwritev2};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
 
@@ -170,7 +174,7 @@ pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
     target_os = "redox",
     target_os = "wasi",
 )))]
-pub(super) use libc::fstatfs as libc_fstatfs;
+pub(super) use c::fstatfs as libc_fstatfs;
 #[cfg(not(any(
     windows,
     target_os = "android",
@@ -183,9 +187,9 @@ pub(super) use libc::fstatfs as libc_fstatfs;
     target_os = "openbsd",
     target_os = "redox",
 )))]
-pub(super) use libc::posix_fallocate as libc_posix_fallocate;
+pub(super) use c::posix_fallocate as libc_posix_fallocate;
 #[cfg(any(target_os = "l4re",))]
-pub(super) use libc::posix_fallocate64 as libc_posix_fallocate;
+pub(super) use c::posix_fallocate64 as libc_posix_fallocate;
 
 #[cfg(any(
     target_os = "android",
@@ -193,4 +197,4 @@ pub(super) use libc::posix_fallocate64 as libc_posix_fallocate;
     target_os = "emscripten",
     target_os = "l4re",
 ))]
-pub(super) use libc::fstatfs64 as libc_fstatfs;
+pub(super) use c::fstatfs64 as libc_fstatfs;

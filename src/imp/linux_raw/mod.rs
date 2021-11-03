@@ -25,7 +25,6 @@ pub(crate) mod fd {
 #[cfg(feature = "rustc-dep-of-std")]
 pub(crate) use crate::io::fd;
 
-// The linux_raw backend doesn't use actual libc, but it is convenient
-// to have various types defined in a module called "libc", to keep the
-// code consistent with the libc backend.
-pub(crate) mod libc;
+// The linux_raw backend doesn't use actual libc, so we define selected
+// libc-like definitions in a module called `c`.
+pub(crate) mod c;

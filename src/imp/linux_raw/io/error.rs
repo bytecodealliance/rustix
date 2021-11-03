@@ -10,7 +10,7 @@
 #![allow(unsafe_code)]
 #![cfg_attr(not(rustc_attrs), allow(unused_unsafe))]
 
-use super::super::libc;
+use super::super::c;
 use crate::imp::fd::RawFd;
 use crate::imp::linux_raw::reg::{RetNumber, RetReg};
 use crate::io;
@@ -75,11 +75,11 @@ impl Error {
 }
 
 /// Check for an error from the result of a syscall which encodes a
-/// `libc::c_int` on success.
+/// `c::c_int` on success.
 #[inline]
 pub(in crate::imp::linux_raw) fn try_decode_c_int<Num: RetNumber>(
     raw: RetReg<Num>,
-) -> io::Result<libc::c_int> {
+) -> io::Result<c::c_int> {
     if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
@@ -90,11 +90,11 @@ pub(in crate::imp::linux_raw) fn try_decode_c_int<Num: RetNumber>(
 }
 
 /// Check for an error from the result of a syscall which encodes a
-/// `libc::c_uint` on success.
+/// `c::c_uint` on success.
 #[inline]
 pub(in crate::imp::linux_raw) fn try_decode_c_uint<Num: RetNumber>(
     raw: RetReg<Num>,
-) -> io::Result<libc::c_uint> {
+) -> io::Result<c::c_uint> {
     if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
@@ -124,7 +124,7 @@ pub(in crate::imp::linux_raw) fn try_decode_usize<Num: RetNumber>(
 #[inline]
 pub(in crate::imp::linux_raw) fn try_decode_void_star<Num: RetNumber>(
     raw: RetReg<Num>,
-) -> io::Result<*mut libc::c_void> {
+) -> io::Result<*mut c::c_void> {
     if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.

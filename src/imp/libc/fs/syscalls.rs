@@ -1,3 +1,4 @@
+use super::super::c;
 #[cfg(not(any(
     target_os = "freebsd",
     target_os = "ios",
@@ -103,7 +104,7 @@ pub(crate) fn openat(
             borrowed_fd(dirfd),
             c_str(path),
             oflags.bits(),
-            libc::c_uint::from(mode.bits()),
+            c::c_uint::from(mode.bits()),
         ))
     }
 }
@@ -112,10 +113,10 @@ pub(crate) fn openat(
 #[inline]
 pub(crate) fn readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
     unsafe {
-        ret_ssize_t(libc::readlinkat(
+        ret_ssize_t(c::readlinkat(
             borrowed_fd(dirfd),
             c_str(path),
-            buf.as_mut_ptr().cast::<libc::c_char>(),
+            buf.as_mut_ptr().cast::<c::c_char>(),
             buf.len(),
         ))
         .map(|nread| nread as usize)
@@ -124,7 +125,7 @@ pub(crate) fn readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, buf: &mut [u8]) -> 
 
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn mkdirat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
-    unsafe { ret(libc::mkdirat(borrowed_fd(dirfd), c_str(path), mode.bits())) }
+    unsafe { ret(c::mkdirat(borrowed_fd(dirfd), c_str(path), mode.bits())) }
 }
 
 #[cfg(not(target_os = "redox"))]
@@ -136,7 +137,7 @@ pub(crate) fn linkat(
     flags: AtFlags,
 ) -> io::Result<()> {
     unsafe {
-        ret(libc::linkat(
+        ret(c::linkat(
             borrowed_fd(old_dirfd),
             c_str(old_path),
             borrowed_fd(new_dirfd),
@@ -148,13 +149,7 @@ pub(crate) fn linkat(
 
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<()> {
-    unsafe {
-        ret(libc::unlinkat(
-            borrowed_fd(dirfd),
-            c_str(path),
-            flags.bits(),
-        ))
-    }
+    unsafe { ret(c::unlinkat(borrowed_fd(dirfd), c_str(path), flags.bits())) }
 }
 
 #[cfg(not(target_os = "redox"))]
@@ -165,7 +160,7 @@ pub(crate) fn renameat(
     new_path: &CStr,
 ) -> io::Result<()> {
     unsafe {
-        ret(libc::renameat(
+        ret(c::renameat(
             borrowed_fd(old_dirfd),
             c_str(old_path),
             borrowed_fd(new_dirfd),
@@ -183,7 +178,7 @@ pub(crate) fn renameat2(
     flags: RenameFlags,
 ) -> io::Result<()> {
     unsafe {
-        ret(libc::renameat2(
+        ret(c::renameat2(
             borrowed_fd(old_dirfd),
             c_str(old_path),
             borrowed_fd(new_dirfd),
@@ -218,7 +213,7 @@ pub(crate) fn symlinkat(
     new_path: &CStr,
 ) -> io::Result<()> {
     unsafe {
-        ret(libc::symlinkat(
+        ret(c::symlinkat(
             c_str(old_path),
             borrowed_fd(new_dirfd),
             c_str(new_path),
@@ -248,7 +243,7 @@ pub(crate) fn accessat(
     flags: AtFlags,
 ) -> io::Result<()> {
     unsafe {
-        ret(libc::faccessat(
+        ret(c::faccessat(
             borrowed_fd(dirfd),
             c_str(path),
             access.bits(),
@@ -275,7 +270,7 @@ pub(crate) fn utimensat(
     flags: AtFlags,
 ) -> io::Result<()> {
     unsafe {
-        ret(libc::utimensat(
+        ret(c::utimensat(
             borrowed_fd(dirfd),
             c_str(path),
             times.as_ptr(),
@@ -291,22 +286,15 @@ pub(crate) fn utimensat(
     target_os = "wasi",
 )))]
 pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
-    unsafe {
-        ret(libc::fchmodat(
-            borrowed_fd(dirfd),
-            c_str(path),
-            mode.bits(),
-            0,
-        ))
-    }
+    unsafe { ret(c::fchmodat(borrowed_fd(dirfd), c_str(path), mode.bits(), 0)) }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
     // Note that Linux's `fchmodat` does not have a flags argument.
     unsafe {
-        syscall_ret(libc::syscall(
-            libc::SYS_fchmodat,
+        syscall_ret(c::syscall(
+            c::SYS_fchmodat,
             borrowed_fd(dirfd),
             c_str(path),
             mode.bits(),
@@ -325,9 +313,9 @@ pub(crate) fn fclonefileat(
         fn fclonefileat(
             srcfd: BorrowedFd<'_>,
             dst_dirfd: BorrowedFd<'_>,
-            dst: *const libc::c_char,
-            flags: libc::c_int
-        ) -> libc::c_int
+            dst: *const c::c_char,
+            flags: c::c_int
+        ) -> c::c_int
     }
 
     unsafe { ret(fclonefileat(srcfd, dst_dirfd, c_str(dst), flags.bits())) }
@@ -341,7 +329,7 @@ pub(crate) fn fclonefileat(
 )))]
 pub(crate) fn mknodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode, dev: Dev) -> io::Result<()> {
     unsafe {
-        ret(libc::mknodat(
+        ret(c::mknodat(
             borrowed_fd(dirfd),
             c_str(path),
             mode.bits(),
@@ -358,10 +346,10 @@ pub(crate) fn copy_file_range(
     off_out: Option<&mut u64>,
     len: u64,
 ) -> io::Result<u64> {
-    assert_eq!(size_of::<libc::loff_t>(), size_of::<u64>());
+    assert_eq!(size_of::<c::loff_t>(), size_of::<u64>());
 
-    let mut off_in_val: libc::loff_t = 0;
-    let mut off_out_val: libc::loff_t = 0;
+    let mut off_in_val: c::loff_t = 0;
+    let mut off_out_val: c::loff_t = 0;
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let off_in_ptr = if let Some(off_in) = &off_in {
         off_in_val = (**off_in) as i64;
@@ -377,8 +365,8 @@ pub(crate) fn copy_file_range(
     };
     let len: usize = len.try_into().unwrap_or(usize::MAX);
     let copied = unsafe {
-        syscall_ret_ssize_t(libc::syscall(
-            libc::SYS_copy_file_range,
+        syscall_ret_ssize_t(c::syscall(
+            c::SYS_copy_file_range,
             borrowed_fd(fd_in),
             off_in_ptr,
             borrowed_fd(fd_out),
@@ -428,7 +416,7 @@ pub(crate) fn fadvise(
         len
     };
 
-    let err = unsafe { libc_posix_fadvise(borrowed_fd(fd), offset, len, advice as libc::c_int) };
+    let err = unsafe { libc_posix_fadvise(borrowed_fd(fd), offset, len, advice as c::c_int) };
 
     // `posix_fadvise` returns its error status rather than using `errno`.
     if err == 0 {
@@ -439,23 +427,19 @@ pub(crate) fn fadvise(
 }
 
 pub(crate) fn fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<FdFlags> {
-    unsafe {
-        ret_c_int(libc::fcntl(borrowed_fd(fd), libc::F_GETFD)).map(FdFlags::from_bits_truncate)
-    }
+    unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GETFD)).map(FdFlags::from_bits_truncate) }
 }
 
 pub(crate) fn fcntl_setfd(fd: BorrowedFd<'_>, flags: FdFlags) -> io::Result<()> {
-    unsafe { ret(libc::fcntl(borrowed_fd(fd), libc::F_SETFD, flags.bits())) }
+    unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_SETFD, flags.bits())) }
 }
 
 pub(crate) fn fcntl_getfl(fd: BorrowedFd<'_>) -> io::Result<OFlags> {
-    unsafe {
-        ret_c_int(libc::fcntl(borrowed_fd(fd), libc::F_GETFL)).map(OFlags::from_bits_truncate)
-    }
+    unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GETFL)).map(OFlags::from_bits_truncate) }
 }
 
 pub(crate) fn fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
-    unsafe { ret(libc::fcntl(borrowed_fd(fd), libc::F_SETFL, flags.bits())) }
+    unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_SETFL, flags.bits())) }
 }
 
 #[cfg(not(any(
@@ -468,56 +452,50 @@ pub(crate) fn fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
     target_os = "wasi",
 )))]
 pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<u32> {
-    unsafe { ret_u32(libc::fcntl(borrowed_fd(fd), libc::F_GET_SEALS)) }
+    unsafe { ret_u32(c::fcntl(borrowed_fd(fd), c::F_GET_SEALS)) }
 }
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(libc::fcntl(borrowed_fd(fd), libc::F_DUPFD_CLOEXEC, min)) }
+    unsafe { ret_owned_fd(c::fcntl(borrowed_fd(fd), c::F_DUPFD_CLOEXEC, min)) }
 }
 
 pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
-    let (whence, offset): (libc::c_int, libc_off_t) = match pos {
+    let (whence, offset): (c::c_int, libc_off_t) = match pos {
         SeekFrom::Start(pos) => {
             let pos: u64 = pos;
             // Silently cast; we'll get `EINVAL` if the value is negative.
-            (libc::SEEK_SET, pos as i64)
+            (c::SEEK_SET, pos as i64)
         }
-        SeekFrom::End(offset) => (libc::SEEK_END, offset),
-        SeekFrom::Current(offset) => (libc::SEEK_CUR, offset),
+        SeekFrom::End(offset) => (c::SEEK_END, offset),
+        SeekFrom::Current(offset) => (c::SEEK_CUR, offset),
     };
     let offset = unsafe { ret_off_t(libc_lseek(borrowed_fd(fd), offset, whence))? };
     Ok(offset as u64)
 }
 
 pub(crate) fn tell(fd: BorrowedFd<'_>) -> io::Result<u64> {
-    let offset = unsafe { ret_off_t(libc_lseek(borrowed_fd(fd), 0, libc::SEEK_CUR))? };
+    let offset = unsafe { ret_off_t(libc_lseek(borrowed_fd(fd), 0, c::SEEK_CUR))? };
     Ok(offset as u64)
 }
 
 #[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
 pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
-    unsafe { ret(libc::fchmod(borrowed_fd(fd), mode.bits())) }
+    unsafe { ret(c::fchmod(borrowed_fd(fd), mode.bits())) }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
-    // Use `libc::syscall` rather than `libc::fchmod` because some libc
+    // Use `c::syscall` rather than `c::fchmod` because some libc
     // implementations, such as musl, add extra logic to `fchmod` to emulate
     // support for `O_PATH`, which uses `/proc` outside our control and
     // interferes with our own use of `O_PATH`.
-    unsafe {
-        syscall_ret(libc::syscall(
-            libc::SYS_fchmod,
-            borrowed_fd(fd),
-            mode.bits(),
-        ))
-    }
+    unsafe { syscall_ret(c::syscall(c::SYS_fchmod, borrowed_fd(fd), mode.bits())) }
 }
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result<()> {
-    unsafe { ret(libc::flock(borrowed_fd(fd), operation as libc::c_int)) }
+    unsafe { ret(c::flock(borrowed_fd(fd), operation as c::c_int)) }
 }
 
 pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
@@ -538,7 +516,7 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
 }
 
 pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &[Timespec; 2]) -> io::Result<()> {
-    unsafe { ret(libc::futimens(borrowed_fd(fd), times.as_ptr())) }
+    unsafe { ret(c::futimens(borrowed_fd(fd), times.as_ptr())) }
 }
 
 #[cfg(not(any(
@@ -591,45 +569,39 @@ pub(crate) fn fallocate(
     assert!(mode.is_empty());
 
     let new_len = offset.checked_add(len).ok_or_else(|| io::Error::FBIG)?;
-    let mut store = libc::fstore_t {
-        fst_flags: libc::F_ALLOCATECONTIG,
-        fst_posmode: libc::F_PEOFPOSMODE,
+    let mut store = c::fstore_t {
+        fst_flags: c::F_ALLOCATECONTIG,
+        fst_posmode: c::F_PEOFPOSMODE,
         fst_offset: 0,
         fst_length: new_len,
         fst_bytesalloc: 0,
     };
     unsafe {
-        if libc::fcntl(borrowed_fd(fd), libc::F_PREALLOCATE, &store) == -1 {
-            store.fst_flags = libc::F_ALLOCATEALL;
-            let _ = ret_c_int(libc::fcntl(borrowed_fd(fd), libc::F_PREALLOCATE, &store))?;
+        if c::fcntl(borrowed_fd(fd), c::F_PREALLOCATE, &store) == -1 {
+            store.fst_flags = c::F_ALLOCATEALL;
+            let _ = ret_c_int(c::fcntl(borrowed_fd(fd), c::F_PREALLOCATE, &store))?;
         }
-        ret(libc::ftruncate(borrowed_fd(fd), new_len))
+        ret(c::ftruncate(borrowed_fd(fd), new_len))
     }
 }
 
 pub(crate) fn fsync(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { ret(libc::fsync(borrowed_fd(fd))) }
+    unsafe { ret(c::fsync(borrowed_fd(fd))) }
 }
 
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
 pub(crate) fn fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { ret(libc::fdatasync(borrowed_fd(fd))) }
+    unsafe { ret(c::fdatasync(borrowed_fd(fd))) }
 }
 
 pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
     let length = length.try_into().map_err(|_overflow_err| io::Error::FBIG)?;
-    unsafe { ret(libc::ftruncate(borrowed_fd(fd), length)) }
+    unsafe { ret(c::ftruncate(borrowed_fd(fd), length)) }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn memfd_create(path: &CStr, flags: MemfdFlags) -> io::Result<OwnedFd> {
-    unsafe {
-        syscall_ret_owned_fd(libc::syscall(
-            libc::SYS_memfd_create,
-            c_str(path),
-            flags.bits(),
-        ))
-    }
+    unsafe { syscall_ret_owned_fd(c::syscall(c::SYS_memfd_create, c_str(path), flags.bits())) }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -648,7 +620,7 @@ pub(crate) fn openat2(
     };
 
     unsafe {
-        syscall_ret_owned_fd(libc::syscall(
+        syscall_ret_owned_fd(c::syscall(
             SYS_OPENAT2,
             borrowed_fd(dirfd),
             c_str(path),
@@ -687,7 +659,7 @@ pub(crate) fn sendfile(
     count: usize,
 ) -> io::Result<usize> {
     unsafe {
-        let nsent = ret_ssize_t(libc::sendfile64(
+        let nsent = ret_ssize_t(c::sendfile64(
             borrowed_fd(out_fd),
             borrowed_fd(in_fd),
             transmute(offset),
@@ -707,11 +679,11 @@ pub(crate) fn statx(
     weakcall! {
         fn statx(
             dirfd: BorrowedFd<'_>,
-            path: *const libc::c_char,
-            flags: libc::c_int,
-            mask: libc::c_uint,
+            path: *const c::c_char,
+            flags: c::c_int,
+            mask: c::c_uint,
             buf: *mut Statx
-        ) -> libc::c_int
+        ) -> c::c_int
     }
 
     let mut statx_buf = MaybeUninit::<Statx>::uninit();
@@ -736,11 +708,11 @@ pub(crate) unsafe fn fcopyfile(
 ) -> io::Result<()> {
     extern "C" {
         fn fcopyfile(
-            from: libc::c_int,
-            to: libc::c_int,
+            from: c::c_int,
+            to: c::c_int,
             state: copyfile_state_t,
-            flags: libc::c_uint,
-        ) -> libc::c_int;
+            flags: c::c_uint,
+        ) -> c::c_int;
     }
 
     nonnegative_ret(fcopyfile(
@@ -768,7 +740,7 @@ pub(crate) fn copyfile_state_alloc() -> io::Result<copyfile_state_t> {
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub(crate) unsafe fn copyfile_state_free(state: copyfile_state_t) -> io::Result<()> {
     extern "C" {
-        fn copyfile_state_free(state: copyfile_state_t) -> libc::c_int;
+        fn copyfile_state_free(state: copyfile_state_t) -> c::c_int;
     }
 
     nonnegative_ret(copyfile_state_free(state))
@@ -788,14 +760,10 @@ pub(crate) unsafe fn copyfile_state_get_copied(state: copyfile_state_t) -> io::R
 pub(crate) unsafe fn copyfile_state_get(
     state: copyfile_state_t,
     flag: u32,
-    dst: *mut libc::c_void,
+    dst: *mut c::c_void,
 ) -> io::Result<()> {
     extern "C" {
-        fn copyfile_state_get(
-            state: copyfile_state_t,
-            flag: u32,
-            dst: *mut libc::c_void,
-        ) -> libc::c_int;
+        fn copyfile_state_get(state: copyfile_state_t, flag: u32, dst: *mut c::c_void) -> c::c_int;
     }
 
     nonnegative_ret(copyfile_state_get(state, flag, dst))
@@ -808,7 +776,7 @@ pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<CString> {
     // `F_GETPATH` in terms of `MAXPATHLEN`, and there are no
     // alternatives. If a better method is invented, it should be used
     // instead.
-    let mut buf = vec![0; libc::PATH_MAX as usize];
+    let mut buf = vec![0; c::PATH_MAX as usize];
 
     // From the macOS `fcntl` man page:
     // `F_GETPATH` - Get the path of the file descriptor `Fildes`. The argument
@@ -816,11 +784,7 @@ pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<CString> {
     //
     // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
     unsafe {
-        ret(libc::fcntl(
-            borrowed_fd(fd),
-            libc::F_GETPATH,
-            buf.as_mut_ptr(),
-        ))?;
+        ret(c::fcntl(borrowed_fd(fd), c::F_GETPATH, buf.as_mut_ptr()))?;
     }
 
     let l = buf.iter().position(|&c| c == 0).unwrap();
@@ -858,10 +822,10 @@ pub(crate) fn fcntl_rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::R
         Err(_) => return Ok(()),
     };
     unsafe {
-        let radvisory = libc::radvisory {
+        let radvisory = c::radvisory {
             ra_offset,
             ra_count,
         };
-        ret(libc::fcntl(borrowed_fd(fd), libc::F_RDADVISE, &radvisory))
+        ret(c::fcntl(borrowed_fd(fd), c::F_RDADVISE, &radvisory))
     }
 }

@@ -1,8 +1,8 @@
+use super::super::c;
+use super::super::conv::owned_fd;
 use super::super::fd::{AsFd, BorrowedFd, IntoFd, RawFd};
 use super::FileType;
-use crate::imp::libc::conv::owned_fd;
 use crate::io::{self, OwnedFd};
-use errno::{errno, set_errno, Errno};
 #[cfg(not(any(
     target_os = "android",
     target_os = "emscripten",
@@ -10,21 +10,22 @@ use errno::{errno, set_errno, Errno};
     target_os = "linux",
     target_os = "openbsd",
 )))]
-use libc::dirent as libc_dirent;
+use c::dirent as libc_dirent;
 #[cfg(not(any(
     target_os = "android",
     target_os = "emscripten",
     target_os = "l4re",
     target_os = "linux",
 )))]
-use libc::readdir as libc_readdir;
+use c::readdir as libc_readdir;
 #[cfg(any(
     target_os = "android",
     target_os = "emscripten",
     target_os = "l4re",
     target_os = "linux"
 ))]
-use libc::{dirent64 as libc_dirent, readdir64 as libc_readdir};
+use c::{dirent64 as libc_dirent, readdir64 as libc_readdir};
+use errno::{errno, set_errno, Errno};
 use std::ffi::CStr;
 #[cfg(target_os = "wasi")]
 use std::ffi::CString;
@@ -33,7 +34,7 @@ use std::ptr::NonNull;
 
 /// `DIR*`
 #[repr(transparent)]
-pub struct Dir(NonNull<libc::DIR>);
+pub struct Dir(NonNull<c::DIR>);
 
 impl Dir {
     /// Construct a `Dir`, assuming ownership of the file descriptor.
@@ -53,12 +54,12 @@ impl Dir {
     fn _from(fd: OwnedFd) -> io::Result<Self> {
         let raw = owned_fd(fd);
         unsafe {
-            let d = libc::fdopendir(raw);
+            let d = c::fdopendir(raw);
             if let Some(d) = NonNull::new(d) {
                 Ok(Self(d))
             } else {
                 let e = io::Error::last_os_error();
-                let _ = libc::close(raw);
+                let _ = c::close(raw);
                 Err(e)
             }
         }
@@ -67,7 +68,7 @@ impl Dir {
     /// `rewinddir(self)`
     #[inline]
     pub fn rewind(&mut self) {
-        unsafe { libc::rewinddir(self.0.as_ptr()) }
+        unsafe { c::rewinddir(self.0.as_ptr()) }
     }
 
     /// `readdir(self)`, where `None` means the end of the directory.
@@ -205,14 +206,14 @@ unsafe impl Send for Dir {}
 impl AsFd for Dir {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
-        unsafe { BorrowedFd::borrow_raw_fd(libc::dirfd(self.0.as_ptr()) as RawFd) }
+        unsafe { BorrowedFd::borrow_raw_fd(c::dirfd(self.0.as_ptr()) as RawFd) }
     }
 }
 
 impl Drop for Dir {
     #[inline]
     fn drop(&mut self) {
-        unsafe { libc::closedir(self.0.as_ptr()) };
+        unsafe { c::closedir(self.0.as_ptr()) };
     }
 }
 
@@ -275,25 +276,25 @@ impl DirEntry {
 #[repr(C)]
 #[derive(Debug)]
 struct libc_dirent {
-    d_fileno: libc::ino_t,
-    d_off: libc::off_t,
+    d_fileno: c::ino_t,
+    d_off: c::off_t,
     d_reclen: u16,
     d_type: u8,
     d_namlen: u8,
     __d_padding: [u8; 4],
-    d_name: [libc::c_char; 256],
+    d_name: [c::c_char; 256],
 }
 
 /// We have our own copy of OpenBSD's dirent; check that the layout
 /// minimally matches libc's.
 #[cfg(target_os = "openbsd")]
-fn check_dirent_layout(dirent: &libc::dirent) {
+fn check_dirent_layout(dirent: &c::dirent) {
     use crate::as_ptr;
     use std::mem::{align_of, size_of};
 
     // Check that the basic layouts match.
-    assert_eq!(size_of::<libc_dirent>(), size_of::<libc::dirent>());
-    assert_eq!(align_of::<libc_dirent>(), align_of::<libc::dirent>());
+    assert_eq!(size_of::<libc_dirent>(), size_of::<c::dirent>());
+    assert_eq!(align_of::<libc_dirent>(), align_of::<c::dirent>());
 
     // Check that the field offsets match.
     assert_eq!(
@@ -305,7 +306,7 @@ fn check_dirent_layout(dirent: &libc::dirent) {
                 d_type: 0_u8,
                 d_namlen: 0_u8,
                 __d_padding: [0_u8; 4],
-                d_name: [0 as libc::c_char; 256],
+                d_name: [0 as c::c_char; 256],
             };
             let base = as_ptr(&z) as usize;
             (

@@ -1,5 +1,4 @@
-#[cfg(windows)]
-use super::super::libc;
+use super::super::c;
 use bitflags::bitflags;
 
 /// A type for holding raw integer socket types.
@@ -16,19 +15,19 @@ pub struct SocketType(pub(crate) RawSocketType);
 #[rustfmt::skip]
 impl SocketType {
     /// `SOCK_STREAM`
-    pub const STREAM: Self = Self(libc::SOCK_STREAM as u32);
+    pub const STREAM: Self = Self(c::SOCK_STREAM as u32);
 
     /// `SOCK_DGRAM`
-    pub const DGRAM: Self = Self(libc::SOCK_DGRAM as u32);
+    pub const DGRAM: Self = Self(c::SOCK_DGRAM as u32);
 
     /// `SOCK_SEQPACKET`
-    pub const SEQPACKET: Self = Self(libc::SOCK_SEQPACKET as u32);
+    pub const SEQPACKET: Self = Self(c::SOCK_SEQPACKET as u32);
 
     /// `SOCK_RAW`
-    pub const RAW: Self = Self(libc::SOCK_RAW as u32);
+    pub const RAW: Self = Self(c::SOCK_RAW as u32);
 
     /// `SOCK_RDM`
-    pub const RDM: Self = Self(libc::SOCK_RDM as u32);
+    pub const RDM: Self = Self(c::SOCK_RDM as u32);
 
     /// Constructs a `SocketType` from a raw integer.
     #[inline]
@@ -45,7 +44,7 @@ impl SocketType {
 
 /// A type for holding raw integer address families.
 #[doc(hidden)]
-pub type RawAddressFamily = libc::sa_family_t;
+pub type RawAddressFamily = c::sa_family_t;
 
 /// `AF_*` constants.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
@@ -55,11 +54,11 @@ pub struct AddressFamily(pub(crate) RawAddressFamily);
 #[rustfmt::skip]
 impl AddressFamily {
     /// `AF_UNSPEC`
-    pub const UNSPEC: Self = Self(libc::AF_UNSPEC as _);
+    pub const UNSPEC: Self = Self(c::AF_UNSPEC as _);
     /// `AF_INET`
-    pub const INET: Self = Self(libc::AF_INET as _);
+    pub const INET: Self = Self(c::AF_INET as _);
     /// `AF_INET6`
-    pub const INET6: Self = Self(libc::AF_INET6 as _);
+    pub const INET6: Self = Self(c::AF_INET6 as _);
     /// `AF_NETLINK`
     #[cfg(not(any(
         windows,
@@ -69,10 +68,10 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const NETLINK: Self = Self(libc::AF_NETLINK as _);
+    pub const NETLINK: Self = Self(c::AF_NETLINK as _);
     /// `AF_UNIX`, aka `AF_LOCAL`
     #[doc(alias = "LOCAL")]
-    pub const UNIX: Self = Self(libc::AF_UNIX as _);
+    pub const UNIX: Self = Self(c::AF_UNIX as _);
     /// `AF_AX25`
     #[cfg(not(any(
         windows,
@@ -82,11 +81,11 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const AX25: Self = Self(libc::AF_AX25 as _);
+    pub const AX25: Self = Self(c::AF_AX25 as _);
     /// `AF_IPX`
-    pub const IPX: Self = Self(libc::AF_IPX as _);
+    pub const IPX: Self = Self(c::AF_IPX as _);
     /// `AF_APPLETALK`
-    pub const APPLETALK: Self = Self(libc::AF_APPLETALK as _);
+    pub const APPLETALK: Self = Self(c::AF_APPLETALK as _);
     /// `AF_NETROM`
     #[cfg(not(any(
         windows,
@@ -96,7 +95,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const NETROM: Self = Self(libc::AF_NETROM as _);
+    pub const NETROM: Self = Self(c::AF_NETROM as _);
     /// `AF_BRIDGE`
     #[cfg(not(any(
         windows,
@@ -106,7 +105,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const BRIDGE: Self = Self(libc::AF_BRIDGE as _);
+    pub const BRIDGE: Self = Self(c::AF_BRIDGE as _);
     /// `AF_ATMPVC`
     #[cfg(not(any(
         windows,
@@ -116,7 +115,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const ATMPVC: Self = Self(libc::AF_ATMPVC as _);
+    pub const ATMPVC: Self = Self(c::AF_ATMPVC as _);
     /// `AF_X25`
     #[cfg(not(any(
         windows,
@@ -126,7 +125,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const X25: Self = Self(libc::AF_X25 as _);
+    pub const X25: Self = Self(c::AF_X25 as _);
     /// `AF_ROSE`
     #[cfg(not(any(
         windows,
@@ -136,10 +135,10 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const ROSE: Self = Self(libc::AF_ROSE as _);
+    pub const ROSE: Self = Self(c::AF_ROSE as _);
     /// `AF_DECnet`
     #[allow(non_upper_case_globals)]
-    pub const DECnet: Self = Self(libc::AF_DECnet as _);
+    pub const DECnet: Self = Self(c::AF_DECnet as _);
     /// `AF_NETBEUI`
     #[cfg(not(any(
         windows,
@@ -149,7 +148,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const NETBEUI: Self = Self(libc::AF_NETBEUI as _);
+    pub const NETBEUI: Self = Self(c::AF_NETBEUI as _);
     /// `AF_SECURITY`
     #[cfg(not(any(
         windows,
@@ -159,7 +158,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const SECURITY: Self = Self(libc::AF_SECURITY as _);
+    pub const SECURITY: Self = Self(c::AF_SECURITY as _);
     /// `AF_KEY`
     #[cfg(not(any(
         windows,
@@ -169,7 +168,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const KEY: Self = Self(libc::AF_KEY as _);
+    pub const KEY: Self = Self(c::AF_KEY as _);
     /// `AF_PACKET`
     #[cfg(not(any(
         windows,
@@ -179,7 +178,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const PACKET: Self = Self(libc::AF_PACKET as _);
+    pub const PACKET: Self = Self(c::AF_PACKET as _);
     /// `AF_ASH`
     #[cfg(not(any(
         windows,
@@ -189,7 +188,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const ASH: Self = Self(libc::AF_ASH as _);
+    pub const ASH: Self = Self(c::AF_ASH as _);
     /// `AF_ECONET`
     #[cfg(not(any(
         windows,
@@ -199,7 +198,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const ECONET: Self = Self(libc::AF_ECONET as _);
+    pub const ECONET: Self = Self(c::AF_ECONET as _);
     /// `AF_ATMSVC`
     #[cfg(not(any(
         windows,
@@ -209,7 +208,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const ATMSVC: Self = Self(libc::AF_ATMSVC as _);
+    pub const ATMSVC: Self = Self(c::AF_ATMSVC as _);
     /// `AF_RDS`
     #[cfg(not(any(
         windows,
@@ -219,9 +218,9 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const RDS: Self = Self(libc::AF_RDS as _);
+    pub const RDS: Self = Self(c::AF_RDS as _);
     /// `AF_SNA`
-    pub const SNA: Self = Self(libc::AF_SNA as _);
+    pub const SNA: Self = Self(c::AF_SNA as _);
     /// `AF_IRDA`
     #[cfg(not(any(
         target_os = "freebsd",
@@ -230,7 +229,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const IRDA: Self = Self(libc::AF_IRDA as _);
+    pub const IRDA: Self = Self(c::AF_IRDA as _);
     /// `AF_PPPOX`
     #[cfg(not(any(
         windows,
@@ -240,7 +239,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const PPPOX: Self = Self(libc::AF_PPPOX as _);
+    pub const PPPOX: Self = Self(c::AF_PPPOX as _);
     /// `AF_WANPIPE`
     #[cfg(not(any(
         windows,
@@ -250,7 +249,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const WANPIPE: Self = Self(libc::AF_WANPIPE as _);
+    pub const WANPIPE: Self = Self(c::AF_WANPIPE as _);
     /// `AF_LLC`
     #[cfg(not(any(
         windows,
@@ -260,7 +259,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const LLC: Self = Self(libc::AF_LLC as _);
+    pub const LLC: Self = Self(c::AF_LLC as _);
     /// `AF_CAN`
     #[cfg(not(any(
         windows,
@@ -270,7 +269,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const CAN: Self = Self(libc::AF_CAN as _);
+    pub const CAN: Self = Self(c::AF_CAN as _);
     /// `AF_TIPC`
     #[cfg(not(any(
         windows,
@@ -280,10 +279,10 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const TIPC: Self = Self(libc::AF_TIPC as _);
+    pub const TIPC: Self = Self(c::AF_TIPC as _);
     /// `AF_BLUETOOTH`
     #[cfg(not(any(windows, target_os = "ios", target_os = "macos",)))]
-    pub const BLUETOOTH: Self = Self(libc::AF_BLUETOOTH as _);
+    pub const BLUETOOTH: Self = Self(c::AF_BLUETOOTH as _);
     /// `AF_IUCV`
     #[cfg(not(any(
         windows,
@@ -293,7 +292,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const IUCV: Self = Self(libc::AF_IUCV as _);
+    pub const IUCV: Self = Self(c::AF_IUCV as _);
     /// `AF_RXRPC`
     #[cfg(not(any(
         windows,
@@ -303,10 +302,10 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const RXRPC: Self = Self(libc::AF_RXRPC as _);
+    pub const RXRPC: Self = Self(c::AF_RXRPC as _);
     /// `AF_ISDN`
     #[cfg(not(windows))]
-    pub const ISDN: Self = Self(libc::AF_ISDN as _);
+    pub const ISDN: Self = Self(c::AF_ISDN as _);
     /// `AF_PHONET`
     #[cfg(not(any(
         windows,
@@ -316,7 +315,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const PHONET: Self = Self(libc::AF_PHONET as _);
+    pub const PHONET: Self = Self(c::AF_PHONET as _);
     /// `AF_IEEE802154`
     #[cfg(not(any(
         windows,
@@ -326,7 +325,7 @@ impl AddressFamily {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const IEEE802154: Self = Self(libc::AF_IEEE802154 as _);
+    pub const IEEE802154: Self = Self(c::AF_IEEE802154 as _);
 
     /// Constructs a `AddressFamily` from a raw integer.
     #[inline]
@@ -353,45 +352,45 @@ pub struct Protocol(pub(crate) RawProtocol);
 #[rustfmt::skip]
 impl Protocol {
     /// `IPPROTO_IP`
-    pub const IP: Self = Self(libc::IPPROTO_IP as _);
+    pub const IP: Self = Self(c::IPPROTO_IP as _);
     /// `IPPROTO_ICMP`
-    pub const ICMP: Self = Self(libc::IPPROTO_ICMP as _);
+    pub const ICMP: Self = Self(c::IPPROTO_ICMP as _);
     /// `IPPROTO_IGMP`
-    pub const IGMP: Self = Self(libc::IPPROTO_IGMP as _);
+    pub const IGMP: Self = Self(c::IPPROTO_IGMP as _);
     /// `IPPROTO_IPIP`
     #[cfg(not(windows))]
-    pub const IPIP: Self = Self(libc::IPPROTO_IPIP as _);
+    pub const IPIP: Self = Self(c::IPPROTO_IPIP as _);
     /// `IPPROTO_TCP`
-    pub const TCP: Self = Self(libc::IPPROTO_TCP as _);
+    pub const TCP: Self = Self(c::IPPROTO_TCP as _);
     /// `IPPROTO_EGP`
-    pub const EGP: Self = Self(libc::IPPROTO_EGP as _);
+    pub const EGP: Self = Self(c::IPPROTO_EGP as _);
     /// `IPPROTO_PUP`
-    pub const PUP: Self = Self(libc::IPPROTO_PUP as _);
+    pub const PUP: Self = Self(c::IPPROTO_PUP as _);
     /// `IPPROTO_UDP`
-    pub const UDP: Self = Self(libc::IPPROTO_UDP as _);
+    pub const UDP: Self = Self(c::IPPROTO_UDP as _);
     /// `IPPROTO_IDP`
-    pub const IDP: Self = Self(libc::IPPROTO_IDP as _);
+    pub const IDP: Self = Self(c::IPPROTO_IDP as _);
     /// `IPPROTO_TP`
     #[cfg(not(windows))]
-    pub const TP: Self = Self(libc::IPPROTO_TP as _);
+    pub const TP: Self = Self(c::IPPROTO_TP as _);
     /// `IPPROTO_DCCP`
     #[cfg(not(any(windows, target_os = "ios", target_os = "macos", target_os = "openbsd")))]
-    pub const DCCP: Self = Self(libc::IPPROTO_DCCP as _);
+    pub const DCCP: Self = Self(c::IPPROTO_DCCP as _);
     /// `IPPROTO_IPV6`
-    pub const IPV6: Self = Self(libc::IPPROTO_IPV6 as _);
+    pub const IPV6: Self = Self(c::IPPROTO_IPV6 as _);
     /// `IPPROTO_RSVP`
     #[cfg(not(windows))]
-    pub const RSVP: Self = Self(libc::IPPROTO_RSVP as _);
+    pub const RSVP: Self = Self(c::IPPROTO_RSVP as _);
     /// `IPPROTO_GRE`
     #[cfg(not(windows))]
-    pub const GRE: Self = Self(libc::IPPROTO_GRE as _);
+    pub const GRE: Self = Self(c::IPPROTO_GRE as _);
     /// `IPPROTO_ESP`
-    pub const ESP: Self = Self(libc::IPPROTO_ESP as _);
+    pub const ESP: Self = Self(c::IPPROTO_ESP as _);
     /// `IPPROTO_AH`
-    pub const AH: Self = Self(libc::IPPROTO_AH as _);
+    pub const AH: Self = Self(c::IPPROTO_AH as _);
     /// `IPPROTO_MTP`
     #[cfg(not(any(windows, target_os = "netbsd", target_os = "openbsd")))]
-    pub const MTP: Self = Self(libc::IPPROTO_MTP as _);
+    pub const MTP: Self = Self(c::IPPROTO_MTP as _);
     /// `IPPROTO_BEETPH`
     #[cfg(not(any(
         windows,
@@ -401,12 +400,12 @@ impl Protocol {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const BEETPH: Self = Self(libc::IPPROTO_BEETPH as _);
+    pub const BEETPH: Self = Self(c::IPPROTO_BEETPH as _);
     /// `IPPROTO_ENCAP`
     #[cfg(not(windows))]
-    pub const ENCAP: Self = Self(libc::IPPROTO_ENCAP as _);
+    pub const ENCAP: Self = Self(c::IPPROTO_ENCAP as _);
     /// `IPPROTO_PIM`
-    pub const PIM: Self = Self(libc::IPPROTO_PIM as _);
+    pub const PIM: Self = Self(c::IPPROTO_PIM as _);
     /// `IPPROTO_COMP`
     #[cfg(not(any(
         windows,
@@ -416,10 +415,10 @@ impl Protocol {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const COMP: Self = Self(libc::IPPROTO_COMP as _);
+    pub const COMP: Self = Self(c::IPPROTO_COMP as _);
     /// `IPPROTO_SCTP`
     #[cfg(not(target_os = "openbsd"))]
-    pub const SCTP: Self = Self(libc::IPPROTO_SCTP as _);
+    pub const SCTP: Self = Self(c::IPPROTO_SCTP as _);
     /// `IPPROTO_UDPLITE`
     #[cfg(not(any(
         windows,
@@ -428,12 +427,12 @@ impl Protocol {
         target_os = "netbsd",
         target_os = "openbsd"
     )))]
-    pub const UDPLITE: Self = Self(libc::IPPROTO_UDPLITE as _);
+    pub const UDPLITE: Self = Self(c::IPPROTO_UDPLITE as _);
     /// `IPPROTO_MPLS`
     #[cfg(not(any(windows, target_os = "ios", target_os = "macos", target_os = "netbsd")))]
-    pub const MPLS: Self = Self(libc::IPPROTO_MPLS as _);
+    pub const MPLS: Self = Self(c::IPPROTO_MPLS as _);
     /// `IPPROTO_RAW`
-    pub const RAW: Self = Self(libc::IPPROTO_RAW as _);
+    pub const RAW: Self = Self(c::IPPROTO_RAW as _);
     /// `IPPROTO_MPTCP`
     #[cfg(not(any(
         windows,
@@ -446,11 +445,11 @@ impl Protocol {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const MPTCP: Self = Self(libc::IPPROTO_MPTCP as _);
+    pub const MPTCP: Self = Self(c::IPPROTO_MPTCP as _);
     /// `IPPROTO_FRAGMENT`
-    pub const FRAGMENT: Self = Self(libc::IPPROTO_FRAGMENT as _);
+    pub const FRAGMENT: Self = Self(c::IPPROTO_FRAGMENT as _);
     /// `IPPROTO_ICMPV6`
-    pub const ICMPV6: Self = Self(libc::IPPROTO_ICMPV6 as _);
+    pub const ICMPV6: Self = Self(c::IPPROTO_ICMPV6 as _);
     /// `IPPROTO_MH`
     #[cfg(not(any(
         windows,
@@ -459,9 +458,9 @@ impl Protocol {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    pub const MH: Self = Self(libc::IPPROTO_MH as _);
+    pub const MH: Self = Self(c::IPPROTO_MH as _);
     /// `IPPROTO_ROUTING`
-    pub const ROUTING: Self = Self(libc::IPPROTO_ROUTING as _);
+    pub const ROUTING: Self = Self(c::IPPROTO_ROUTING as _);
 
     /// Constructs a `Protocol` from a raw integer.
     #[inline]
@@ -483,11 +482,11 @@ impl Protocol {
 #[repr(i32)]
 pub enum Shutdown {
     /// `SHUT_RD`
-    Read = libc::SHUT_RD,
+    Read = c::SHUT_RD,
     /// `SHUT_WR`
-    Write = libc::SHUT_WR,
+    Write = c::SHUT_WR,
     /// `SHUT_RDWR`
-    ReadWrite = libc::SHUT_RDWR,
+    ReadWrite = c::SHUT_RDWR,
 }
 
 bitflags! {
@@ -495,14 +494,14 @@ bitflags! {
     ///
     /// [`accept_with`]: crate::net::accept_with
     /// [`acceptfrom_with`]: crate::net::acceptfrom_with
-    pub struct AcceptFlags: libc::c_int {
+    pub struct AcceptFlags: c::c_int {
         /// `SOCK_NONBLOCK`
         #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
-        const NONBLOCK = libc::SOCK_NONBLOCK;
+        const NONBLOCK = c::SOCK_NONBLOCK;
 
         /// `SOCK_CLOEXEC`
         #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
-        const CLOEXEC = libc::SOCK_CLOEXEC;
+        const CLOEXEC = c::SOCK_CLOEXEC;
     }
 }
 
@@ -510,14 +509,14 @@ bitflags! {
     /// `SOCK_*` constants for [`socket`].
     ///
     /// [`socket`]: crate::net::socket
-    pub struct SocketFlags: libc::c_int {
+    pub struct SocketFlags: c::c_int {
         /// `SOCK_NONBLOCK`
         #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
-        const NONBLOCK = libc::SOCK_NONBLOCK;
+        const NONBLOCK = c::SOCK_NONBLOCK;
 
         /// `SOCK_CLOEXEC`
         #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
-        const CLOEXEC = libc::SOCK_CLOEXEC;
+        const CLOEXEC = c::SOCK_CLOEXEC;
     }
 }
 
@@ -529,8 +528,8 @@ bitflags! {
 #[repr(i32)]
 pub enum Timeout {
     /// `SO_RCVTIMEO`—Timeout for receiving.
-    Recv = libc::SO_RCVTIMEO,
+    Recv = c::SO_RCVTIMEO,
 
     /// `SO_SNDTIMEO`—Timeout for sending.
-    Send = libc::SO_SNDTIMEO,
+    Send = c::SO_SNDTIMEO,
 }

@@ -25,15 +25,17 @@ pub(crate) mod fd {
     #[allow(unused_imports)]
     #[cfg(target_os = "wasi")]
     pub(crate) use {
-        libc::c_int as LibcFd,
+        super::c::c_int as LibcFd,
         std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
     };
 }
 
+// On Windows we emulate selected libc-compatible interfaces. On non-Windows,
+// we just use libc here, since this is the libc backend.
 #[cfg(windows)]
-mod libc;
-#[cfg(feature = "rustc-dep-of-std")]
-pub(crate) use libc;
+pub(crate) mod c;
+#[cfg(not(windows))]
+pub(crate) use libc as c;
 
 #[cfg(not(windows))]
 pub(crate) mod fs;
