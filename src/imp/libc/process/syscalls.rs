@@ -29,7 +29,6 @@ use crate::process::Rlimit;
 use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Pid, Uid, WaitOptions, WaitStatus};
-use libc::c_int;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use std::convert::TryInto;
 use std::ffi::CStr;
@@ -372,7 +371,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
 #[inline]
 pub fn waitpid(pid: RawPid, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
     unsafe {
-        let mut status: c_int = 0;
+        let mut status: libc::c_int = 0;
         let pid = ret_c_int(libc::waitpid(pid as _, &mut status, waitopts.bits() as _))?;
         if pid == 0 {
             Ok(None)

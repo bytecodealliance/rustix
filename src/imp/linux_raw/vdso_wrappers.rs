@@ -11,6 +11,7 @@
 
 use super::arch::asm::syscall2;
 use super::conv::{pass_usize, ret, void_star};
+use super::libc;
 use super::reg::nr;
 #[cfg(target_arch = "x86")]
 use super::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
@@ -18,9 +19,7 @@ use super::time::{ClockId, DynamicClockId, Timespec};
 use super::vdso;
 use crate::io;
 use linux_raw_sys::general::{__NR_clock_gettime, __kernel_clockid_t, __kernel_timespec};
-use std::ffi::c_void;
 use std::mem::{transmute, MaybeUninit};
-use std::os::raw::c_int;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::Relaxed;
 #[cfg(target_pointer_width = "32")]
@@ -70,7 +69,7 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId) -> io::Result<T
     };
 
     unsafe {
-        const EINVAL: c_int = -(linux_raw_sys::errno::EINVAL as c_int);
+        const EINVAL: libc::c_int = -(linux_raw_sys::errno::EINVAL as libc::c_int);
         let mut timespec = MaybeUninit::<Timespec>::uninit();
         let callee = match transmute(CLOCK_GETTIME.load(Relaxed)) {
             Some(callee) => callee,
@@ -215,7 +214,7 @@ pub(super) mod x86_via_vdso {
     };
 }
 
-type ClockGettimeType = unsafe extern "C" fn(c_int, *mut Timespec) -> c_int;
+type ClockGettimeType = unsafe extern "C" fn(libc::c_int, *mut Timespec) -> libc::c_int;
 #[cfg(target_arch = "x86")]
 pub(super) type SyscallType = unsafe extern "C" fn(
     SyscallNumber,
@@ -246,7 +245,10 @@ static mut CLOCK_GETTIME: AtomicUsize = AtomicUsize::new(0);
 #[cfg(target_arch = "x86")]
 static mut SYSCALL: AtomicUsize = AtomicUsize::new(0);
 
-unsafe extern "C" fn rsix_clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) -> c_int {
+unsafe extern "C" fn rsix_clock_gettime_via_syscall(
+    clockid: libc::c_int,
+    res: *mut Timespec,
+) -> libc::c_int {
     match _rsix_clock_gettime_via_syscall(clockid, res) {
         Ok(()) => 0,
         Err(e) => e.raw_os_error().wrapping_neg(),
@@ -254,11 +256,14 @@ unsafe extern "C" fn rsix_clock_gettime_via_syscall(clockid: c_int, res: *mut Ti
 }
 
 #[cfg(target_pointer_width = "32")]
-unsafe fn _rsix_clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) -> io::Result<()> {
+unsafe fn _rsix_clock_gettime_via_syscall(
+    clockid: libc::c_int,
+    res: *mut Timespec,
+) -> io::Result<()> {
     let r0 = syscall2(
         nr(__NR_clock_gettime64),
         pass_usize(clockid as usize),
-        void_star(res.cast::<c_void>()),
+        void_star(res.cast::<libc::c_void>()),
     );
     match ret(r0) {
         Err(io::Error::NOSYS) => {
@@ -290,11 +295,14 @@ unsafe fn _rsix_clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) ->
 }
 
 #[cfg(target_pointer_width = "64")]
-unsafe fn _rsix_clock_gettime_via_syscall(clockid: c_int, res: *mut Timespec) -> io::Result<()> {
+unsafe fn _rsix_clock_gettime_via_syscall(
+    clockid: libc::c_int,
+    res: *mut Timespec,
+) -> io::Result<()> {
     ret(syscall2(
         nr(__NR_clock_gettime),
         pass_usize(clockid as usize),
-        void_star(res.cast::<c_void>()),
+        void_star(res.cast::<libc::c_void>()),
     ))
 }
 
