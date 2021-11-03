@@ -26,6 +26,7 @@ use super::arch::choose::{
     syscall3, syscall3_readonly, syscall4, syscall4_readonly, syscall5, syscall5_readonly,
     syscall6,
 };
+use super::c;
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use super::conv::opt_ref;
 use super::conv::{
@@ -43,7 +44,6 @@ use super::io::{
 };
 #[cfg(not(target_os = "wasi"))]
 use super::io::{Termios, Winsize};
-use super::libc;
 use super::net::{RecvFlags, SendFlags};
 use super::process::{RawCpuSet, RawPid, RawUname, Resource, CPU_SETSIZE};
 use super::rand::GetRandomFlags;
@@ -114,7 +114,7 @@ use {
 pub(crate) use super::vdso_wrappers::{clock_gettime, clock_gettime_dynamic};
 
 #[inline]
-pub(crate) fn exit_group(code: libc::c_int) -> ! {
+pub(crate) fn exit_group(code: c::c_int) -> ! {
     unsafe { syscall1_noreturn(nr(__NR_exit_group), c_int(code)) }
 }
 
@@ -423,13 +423,13 @@ pub(crate) fn pwritev2(
 }
 
 #[inline]
-pub(crate) fn madvise(addr: *mut libc::c_void, len: usize, advice: IoAdvice) -> io::Result<()> {
+pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: IoAdvice) -> io::Result<()> {
     unsafe {
         ret(syscall3(
             nr(__NR_madvise),
             void_star(addr),
             pass_usize(len),
-            c_uint(advice as libc::c_uint),
+            c_uint(advice as c::c_uint),
         ))
     }
 }
@@ -589,13 +589,13 @@ pub(crate) fn sched_yield() {
 /// with memory pointed to by raw pointers is unsafe.
 #[inline]
 pub(crate) unsafe fn mmap(
-    addr: *mut libc::c_void,
+    addr: *mut c::c_void,
     length: usize,
     prot: ProtFlags,
     flags: MapFlags,
     fd: BorrowedFd<'_>,
     offset: u64,
-) -> io::Result<*mut libc::c_void> {
+) -> io::Result<*mut c::c_void> {
     #[cfg(target_pointer_width = "32")]
     {
         ret_void_star(syscall6(
@@ -631,11 +631,11 @@ pub(crate) unsafe fn mmap(
 /// with memory pointed to by raw pointers is unsafe.
 #[inline]
 pub(crate) unsafe fn mmap_anonymous(
-    addr: *mut libc::c_void,
+    addr: *mut c::c_void,
     length: usize,
     prot: ProtFlags,
     flags: MapFlags,
-) -> io::Result<*mut libc::c_void> {
+) -> io::Result<*mut c::c_void> {
     #[cfg(target_pointer_width = "32")]
     {
         ret_void_star(syscall6(
@@ -664,7 +664,7 @@ pub(crate) unsafe fn mmap_anonymous(
 
 #[inline]
 pub(crate) unsafe fn mprotect(
-    ptr: *mut libc::c_void,
+    ptr: *mut c::c_void,
     len: usize,
     flags: MprotectFlags,
 ) -> io::Result<()> {
@@ -681,7 +681,7 @@ pub(crate) unsafe fn mprotect(
 /// `munmap` is primarily unsafe due to the `addr` parameter, as anything
 /// working with memory pointed to by raw pointers is unsafe.
 #[inline]
-pub(crate) unsafe fn munmap(addr: *mut libc::c_void, length: usize) -> io::Result<()> {
+pub(crate) unsafe fn munmap(addr: *mut c::c_void, length: usize) -> io::Result<()> {
     ret(syscall2(
         nr(__NR_munmap),
         void_star(addr),
@@ -695,11 +695,11 @@ pub(crate) unsafe fn munmap(addr: *mut libc::c_void, length: usize) -> io::Resul
 /// anything working with memory pointed to by raw pointers is unsafe.
 #[inline]
 pub(crate) unsafe fn mremap(
-    old_address: *mut libc::c_void,
+    old_address: *mut c::c_void,
     old_size: usize,
     new_size: usize,
     flags: MremapFlags,
-) -> io::Result<*mut libc::c_void> {
+) -> io::Result<*mut c::c_void> {
     ret_void_star(syscall4(
         nr(__NR_mremap),
         void_star(old_address),
@@ -716,12 +716,12 @@ pub(crate) unsafe fn mremap(
 /// pointers is unsafe.
 #[inline]
 pub(crate) unsafe fn mremap_fixed(
-    old_address: *mut libc::c_void,
+    old_address: *mut c::c_void,
     old_size: usize,
     new_size: usize,
     flags: MremapFlags,
-    new_address: *mut libc::c_void,
-) -> io::Result<*mut libc::c_void> {
+    new_address: *mut c::c_void,
+) -> io::Result<*mut c::c_void> {
     ret_void_star(syscall5(
         nr(__NR_mremap),
         void_star(old_address),
@@ -737,7 +737,7 @@ pub(crate) unsafe fn mremap_fixed(
 /// `mlock` operates on raw pointers and may round out to the nearest page
 /// boundaries.
 #[inline]
-pub(crate) unsafe fn mlock(addr: *mut libc::c_void, length: usize) -> io::Result<()> {
+pub(crate) unsafe fn mlock(addr: *mut c::c_void, length: usize) -> io::Result<()> {
     ret(syscall2(
         nr(__NR_mlock),
         void_star(addr),
@@ -751,7 +751,7 @@ pub(crate) unsafe fn mlock(addr: *mut libc::c_void, length: usize) -> io::Result
 /// boundaries.
 #[inline]
 pub(crate) unsafe fn mlock_with(
-    addr: *mut libc::c_void,
+    addr: *mut c::c_void,
     length: usize,
     flags: MlockFlags,
 ) -> io::Result<()> {
@@ -768,7 +768,7 @@ pub(crate) unsafe fn mlock_with(
 /// `munlock` operates on raw pointers and may round out to the nearest page
 /// boundaries.
 #[inline]
-pub(crate) unsafe fn munlock(addr: *mut libc::c_void, length: usize) -> io::Result<()> {
+pub(crate) unsafe fn munlock(addr: *mut c::c_void, length: usize) -> io::Result<()> {
     ret(syscall2(
         nr(__NR_munlock),
         void_star(addr),
@@ -801,7 +801,7 @@ pub(crate) fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
     unsafe {
         ret(syscall2(
             nr(__NR_membarrier),
-            c_int(cmd as libc::c_int),
+            c_int(cmd as c::c_int),
             c_uint(0),
         ))
     }
@@ -811,7 +811,7 @@ pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<(
     unsafe {
         ret(syscall3(
             nr(__NR_membarrier),
-            c_int(cmd as libc::c_int),
+            c_int(cmd as c::c_int),
             c_uint(
                 linux_raw_sys::v5_11::general::membarrier_cmd_flag::MEMBARRIER_CMD_FLAG_CPU as _,
             ),
@@ -997,7 +997,7 @@ pub(crate) fn fchdir(fd: BorrowedFd) -> io::Result<()> {
 #[inline]
 pub(crate) fn ioctl_fionread(fd: BorrowedFd) -> io::Result<u64> {
     unsafe {
-        let mut result = MaybeUninit::<libc::c_int>::uninit();
+        let mut result = MaybeUninit::<c::c_int>::uninit();
         ret(syscall3(
             nr(__NR_ioctl),
             borrowed_fd(fd),
@@ -1011,7 +1011,7 @@ pub(crate) fn ioctl_fionread(fd: BorrowedFd) -> io::Result<u64> {
 #[inline]
 pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     unsafe {
-        let data = value as libc::c_int;
+        let data = value as c::c_int;
         ret(syscall3(
             nr(__NR_ioctl),
             borrowed_fd(fd),
@@ -1094,7 +1094,7 @@ pub(crate) fn dup2_with(fd: BorrowedFd, new: &OwnedFd, flags: DupFlags) -> io::R
 }
 
 #[inline]
-pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: libc::c_int) -> io::Result<usize> {
+pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usize> {
     let (fds_addr_mut, fds_len) = slice_mut(fds);
 
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
@@ -1323,7 +1323,7 @@ pub(crate) fn epoll_create(flags: epoll::CreateFlags) -> io::Result<OwnedFd> {
 #[inline]
 pub(crate) unsafe fn epoll_add(
     epfd: BorrowedFd<'_>,
-    fd: libc::c_int,
+    fd: c::c_int,
     event: &epoll_event,
 ) -> io::Result<()> {
     ret(syscall4(
@@ -1338,7 +1338,7 @@ pub(crate) unsafe fn epoll_add(
 #[inline]
 pub(crate) unsafe fn epoll_mod(
     epfd: BorrowedFd<'_>,
-    fd: libc::c_int,
+    fd: c::c_int,
     event: &epoll_event,
 ) -> io::Result<()> {
     ret(syscall4(
@@ -1351,7 +1351,7 @@ pub(crate) unsafe fn epoll_mod(
 }
 
 #[inline]
-pub(crate) unsafe fn epoll_del(epfd: BorrowedFd<'_>, fd: libc::c_int) -> io::Result<()> {
+pub(crate) unsafe fn epoll_del(epfd: BorrowedFd<'_>, fd: c::c_int) -> io::Result<()> {
     ret(syscall4(
         nr(__NR_epoll_ctl),
         borrowed_fd(epfd),
@@ -1366,14 +1366,14 @@ pub(crate) fn epoll_wait(
     epfd: BorrowedFd<'_>,
     events: *mut epoll_event,
     num_events: usize,
-    timeout: libc::c_int,
+    timeout: c::c_int,
 ) -> io::Result<usize> {
     #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
     unsafe {
         ret_usize(syscall4(
             nr(__NR_epoll_wait),
             borrowed_fd(epfd),
-            void_star(events.cast::<libc::c_void>()),
+            void_star(events.cast::<c::c_void>()),
             pass_usize(num_events),
             c_int(timeout),
         ))
@@ -1383,7 +1383,7 @@ pub(crate) fn epoll_wait(
         ret_usize(syscall5(
             nr(__NR_epoll_pwait),
             borrowed_fd(epfd),
-            void_star(events.cast::<libc::c_void>()),
+            void_star(events.cast::<c::c_void>()),
             pass_usize(num_events),
             c_int(timeout),
             zero(),
@@ -1500,7 +1500,7 @@ pub unsafe fn futex(
         ret_usize(syscall6(
             nr(__NR_futex_time64),
             void_star(uaddr.cast()),
-            c_uint(op as libc::c_uint | flags.bits()),
+            c_uint(op as c::c_uint | flags.bits()),
             c_uint(val),
             const_void_star(utime.cast()),
             void_star(uaddr2.cast()),
@@ -1517,7 +1517,7 @@ pub unsafe fn futex(
                 ret_usize(syscall6(
                     nr(__NR_futex),
                     void_star(uaddr.cast()),
-                    c_uint(op as libc::c_uint | flags.bits()),
+                    c_uint(op as c::c_uint | flags.bits()),
                     c_uint(val),
                     by_ref(&old_utime),
                     void_star(uaddr2.cast()),
@@ -1532,7 +1532,7 @@ pub unsafe fn futex(
     ret_usize(syscall6(
         nr(__NR_futex),
         void_star(uaddr.cast()),
-        c_uint(op as libc::c_uint | flags.bits()),
+        c_uint(op as c::c_uint | flags.bits()),
         c_uint(val),
         const_void_star(utime.cast()),
         void_star(uaddr2.cast()),
@@ -1548,7 +1548,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
         match ret(syscall4(
             nr(__NR_prlimit64),
             c_uint(0),
-            c_uint(limit as libc::c_uint),
+            c_uint(limit as c::c_uint),
             void_star(std::ptr::null_mut()),
             out(&mut result),
         )) {
@@ -1573,7 +1573,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
                 let mut result = MaybeUninit::<linux_raw_sys::general::rlimit>::uninit();
                 ret_infallible(syscall2(
                     nr(__NR_getrlimit),
-                    c_uint(limit as libc::c_uint),
+                    c_uint(limit as c::c_uint),
                     out(&mut result),
                 ));
                 let result = result.assume_init();
@@ -1596,7 +1596,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
         ret_infallible(syscall4(
             nr(__NR_prlimit64),
             c_uint(0),
-            c_uint(limit as libc::c_uint),
+            c_uint(limit as c::c_uint),
             void_star(std::ptr::null_mut()),
             out(&mut result),
         ));
@@ -1678,13 +1678,13 @@ pub(crate) mod tls {
 
     #[cfg(target_arch = "arm")]
     #[inline]
-    pub(crate) unsafe fn arm_set_tls(data: *mut libc::c_void) -> io::Result<()> {
+    pub(crate) unsafe fn arm_set_tls(data: *mut c::c_void) -> io::Result<()> {
         ret(syscall1(nr(__ARM_NR_set_tls), void_star(data)))
     }
 
     #[cfg(target_arch = "x86_64")]
     #[inline]
-    pub(crate) unsafe fn set_fs(data: *mut libc::c_void) {
+    pub(crate) unsafe fn set_fs(data: *mut c::c_void) {
         ret_infallible(syscall2(
             nr(__NR_arch_prctl),
             c_uint(ARCH_SET_FS),
@@ -1693,7 +1693,7 @@ pub(crate) mod tls {
     }
 
     #[inline]
-    pub(crate) unsafe fn set_tid_address(data: *mut libc::c_void) -> Pid {
+    pub(crate) unsafe fn set_tid_address(data: *mut c::c_void) -> Pid {
         let tid: i32 = ret_usize_infallible(syscall1(nr(__NR_set_tid_address), void_star(data)))
             as __kernel_pid_t;
         Pid::from_raw(tid as u32)
@@ -1705,7 +1705,7 @@ pub(crate) mod tls {
     }
 
     #[inline]
-    pub(crate) fn exit_thread(code: libc::c_int) -> ! {
+    pub(crate) fn exit_thread(code: c::c_int) -> ! {
         unsafe { syscall1_noreturn(nr(__NR_exit), c_int(code)) }
     }
 }

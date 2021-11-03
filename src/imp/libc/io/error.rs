@@ -3,8 +3,7 @@
 //! This type holds an OS error code, which conceptually corresponds to an
 //! `errno` value.
 
-#[cfg(windows)]
-use super::super::libc;
+use super::super::c;
 use errno::errno;
 
 /// The error type for rsix APIs.
@@ -13,12 +12,12 @@ use errno::errno;
 /// and no extra error value.
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Hash, Copy, Clone)]
-pub struct Error(pub(crate) libc::c_int);
+pub struct Error(pub(crate) c::c_int);
 
 impl Error {
-    pub const ACCES: Self = Self(libc::EACCES);
-    pub const ADDRINUSE: Self = Self(libc::EADDRINUSE);
-    pub const ADDRNOTAVAIL: Self = Self(libc::EADDRNOTAVAIL);
+    pub const ACCES: Self = Self(c::EACCES);
+    pub const ADDRINUSE: Self = Self(c::EADDRINUSE);
+    pub const ADDRNOTAVAIL: Self = Self(c::EADDRNOTAVAIL);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -29,10 +28,10 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const ADV: Self = Self(libc::EADV);
-    pub const AFNOSUPPORT: Self = Self(libc::EAFNOSUPPORT);
-    pub const AGAIN: Self = Self(libc::EAGAIN);
-    pub const ALREADY: Self = Self(libc::EALREADY);
+    pub const ADV: Self = Self(c::EADV);
+    pub const AFNOSUPPORT: Self = Self(c::EAFNOSUPPORT);
+    pub const AGAIN: Self = Self(c::EAGAIN);
+    pub const ALREADY: Self = Self(c::EALREADY);
     #[cfg(any(
         target_os = "dragonfly",
         target_os = "freebsd",
@@ -41,7 +40,7 @@ impl Error {
         target_os = "netbsd",
         target_os = "openbsd"
     ))]
-    pub const AUTH: Self = Self(libc::EAUTH);
+    pub const AUTH: Self = Self(c::EAUTH);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -52,8 +51,8 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const BADE: Self = Self(libc::EBADE);
-    pub const BADF: Self = Self(libc::EBADF);
+    pub const BADE: Self = Self(c::EBADE);
+    pub const BADF: Self = Self(c::EBADF);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -64,9 +63,9 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const BADFD: Self = Self(libc::EBADFD);
+    pub const BADFD: Self = Self(c::EBADFD);
     #[cfg(not(windows))]
-    pub const BADMSG: Self = Self(libc::EBADMSG);
+    pub const BADMSG: Self = Self(c::EBADMSG);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -77,7 +76,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const BADR: Self = Self(libc::EBADR);
+    pub const BADR: Self = Self(c::EBADR);
     #[cfg(any(
         target_os = "dragonfly",
         target_os = "freebsd",
@@ -86,7 +85,7 @@ impl Error {
         target_os = "netbsd",
         target_os = "openbsd"
     ))]
-    pub const BADRPC: Self = Self(libc::EBADRPC);
+    pub const BADRPC: Self = Self(c::EBADRPC);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -97,7 +96,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const BADRQC: Self = Self(libc::EBADRQC);
+    pub const BADRQC: Self = Self(c::EBADRQC);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -108,7 +107,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const BADSLT: Self = Self(libc::EBADSLT);
+    pub const BADSLT: Self = Self(c::EBADSLT);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -119,14 +118,14 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const BFONT: Self = Self(libc::EBFONT);
+    pub const BFONT: Self = Self(c::EBFONT);
     #[cfg(not(windows))]
-    pub const BUSY: Self = Self(libc::EBUSY);
-    pub const CANCELED: Self = Self(libc::ECANCELED);
+    pub const BUSY: Self = Self(c::EBUSY);
+    pub const CANCELED: Self = Self(c::ECANCELED);
     #[cfg(any(target_os = "dragonfly", target_os = "freebsd"))]
-    pub const CAPMODE: Self = Self(libc::ECAPMODE);
+    pub const CAPMODE: Self = Self(c::ECAPMODE);
     #[cfg(not(windows))]
-    pub const CHILD: Self = Self(libc::ECHILD);
+    pub const CHILD: Self = Self(c::ECHILD);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -137,7 +136,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const CHRNG: Self = Self(libc::ECHRNG);
+    pub const CHRNG: Self = Self(c::ECHRNG);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -148,12 +147,12 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const COMM: Self = Self(libc::ECOMM);
-    pub const CONNABORTED: Self = Self(libc::ECONNABORTED);
-    pub const CONNREFUSED: Self = Self(libc::ECONNREFUSED);
-    pub const CONNRESET: Self = Self(libc::ECONNRESET);
+    pub const COMM: Self = Self(c::ECOMM);
+    pub const CONNABORTED: Self = Self(c::ECONNABORTED);
+    pub const CONNREFUSED: Self = Self(c::ECONNREFUSED);
+    pub const CONNRESET: Self = Self(c::ECONNRESET);
     #[cfg(not(windows))]
-    pub const DEADLK: Self = Self(libc::EDEADLK);
+    pub const DEADLK: Self = Self(c::EDEADLK);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -165,14 +164,14 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const DEADLOCK: Self = Self(libc::EDEADLOCK);
-    pub const DESTADDRREQ: Self = Self(libc::EDESTADDRREQ);
+    pub const DEADLOCK: Self = Self(c::EDEADLOCK);
+    pub const DESTADDRREQ: Self = Self(c::EDESTADDRREQ);
     #[cfg(windows)]
-    pub const DISCON: Self = Self(libc::EDISCON);
+    pub const DISCON: Self = Self(c::EDISCON);
     #[cfg(not(windows))]
-    pub const DOM: Self = Self(libc::EDOM);
+    pub const DOM: Self = Self(c::EDOM);
     #[cfg(any(target_os = "dragonfly", target_os = "freebsd"))]
-    pub const DOOFUS: Self = Self(libc::EDOOFUS);
+    pub const DOOFUS: Self = Self(c::EDOOFUS);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -183,13 +182,13 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const DOTDOT: Self = Self(libc::EDOTDOT);
-    pub const DQUOT: Self = Self(libc::EDQUOT);
+    pub const DOTDOT: Self = Self(c::EDOTDOT);
+    pub const DQUOT: Self = Self(c::EDQUOT);
     #[cfg(not(windows))]
-    pub const EXIST: Self = Self(libc::EEXIST);
-    pub const FAULT: Self = Self(libc::EFAULT);
+    pub const EXIST: Self = Self(c::EEXIST);
+    pub const FAULT: Self = Self(c::EFAULT);
     #[cfg(not(windows))]
-    pub const FBIG: Self = Self(libc::EFBIG);
+    pub const FBIG: Self = Self(c::EFBIG);
     #[cfg(any(
         target_env = "newlib",
         target_os = "dragonfly",
@@ -199,10 +198,10 @@ impl Error {
         target_os = "netbsd",
         target_os = "openbsd"
     ))]
-    pub const FTYPE: Self = Self(libc::EFTYPE);
+    pub const FTYPE: Self = Self(c::EFTYPE);
     #[cfg(not(target_os = "wasi"))]
-    pub const HOSTDOWN: Self = Self(libc::EHOSTDOWN);
-    pub const HOSTUNREACH: Self = Self(libc::EHOSTUNREACH);
+    pub const HOSTDOWN: Self = Self(c::EHOSTDOWN);
+    pub const HOSTUNREACH: Self = Self(c::EHOSTUNREACH);
     #[cfg(not(any(
         windows,
         target_os = "android",
@@ -215,23 +214,23 @@ impl Error {
         target_os = "redox",
         target_os = "wasi",
     )))]
-    pub const HWPOISON: Self = Self(libc::EHWPOISON);
+    pub const HWPOISON: Self = Self(c::EHWPOISON);
     #[cfg(not(windows))]
-    pub const IDRM: Self = Self(libc::EIDRM);
+    pub const IDRM: Self = Self(c::EIDRM);
     #[cfg(not(windows))]
-    pub const ILSEQ: Self = Self(libc::EILSEQ);
-    pub const INPROGRESS: Self = Self(libc::EINPROGRESS);
-    pub const INTR: Self = Self(libc::EINTR);
-    pub const INVAL: Self = Self(libc::EINVAL);
+    pub const ILSEQ: Self = Self(c::EILSEQ);
+    pub const INPROGRESS: Self = Self(c::EINPROGRESS);
+    pub const INTR: Self = Self(c::EINTR);
+    pub const INVAL: Self = Self(c::EINVAL);
     #[cfg(windows)]
-    pub const INVALIDPROCTABLE: Self = Self(libc::EINVALIDPROCTABLE);
+    pub const INVALIDPROCTABLE: Self = Self(c::EINVALIDPROCTABLE);
     #[cfg(windows)]
-    pub const INVALIDPROVIDER: Self = Self(libc::EINVALIDPROVIDER);
+    pub const INVALIDPROVIDER: Self = Self(c::EINVALIDPROVIDER);
     #[cfg(not(windows))]
-    pub const IO: Self = Self(libc::EIO);
-    pub const ISCONN: Self = Self(libc::EISCONN);
+    pub const IO: Self = Self(c::EIO);
+    pub const ISCONN: Self = Self(c::EISCONN);
     #[cfg(not(windows))]
-    pub const ISDIR: Self = Self(libc::EISDIR);
+    pub const ISDIR: Self = Self(c::EISDIR);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -242,7 +241,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const ISNAM: Self = Self(libc::EISNAM);
+    pub const ISNAM: Self = Self(c::EISNAM);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -253,7 +252,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const KEYEXPIRED: Self = Self(libc::EKEYEXPIRED);
+    pub const KEYEXPIRED: Self = Self(c::EKEYEXPIRED);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -264,7 +263,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const KEYREJECTED: Self = Self(libc::EKEYREJECTED);
+    pub const KEYREJECTED: Self = Self(c::EKEYREJECTED);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -275,7 +274,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const KEYREVOKED: Self = Self(libc::EKEYREVOKED);
+    pub const KEYREVOKED: Self = Self(c::EKEYREVOKED);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -286,7 +285,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const L2HLT: Self = Self(libc::EL2HLT);
+    pub const L2HLT: Self = Self(c::EL2HLT);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -297,7 +296,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const L2NSYNC: Self = Self(libc::EL2NSYNC);
+    pub const L2NSYNC: Self = Self(c::EL2NSYNC);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -308,7 +307,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const L3HLT: Self = Self(libc::EL3HLT);
+    pub const L3HLT: Self = Self(c::EL3HLT);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -319,7 +318,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const L3RST: Self = Self(libc::EL3RST);
+    pub const L3RST: Self = Self(c::EL3RST);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -330,7 +329,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const LIBACC: Self = Self(libc::ELIBACC);
+    pub const LIBACC: Self = Self(c::ELIBACC);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -341,7 +340,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const LIBBAD: Self = Self(libc::ELIBBAD);
+    pub const LIBBAD: Self = Self(c::ELIBBAD);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -352,7 +351,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const LIBEXEC: Self = Self(libc::ELIBEXEC);
+    pub const LIBEXEC: Self = Self(c::ELIBEXEC);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -363,7 +362,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const LIBMAX: Self = Self(libc::ELIBMAX);
+    pub const LIBMAX: Self = Self(c::ELIBMAX);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -374,7 +373,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const LIBSCN: Self = Self(libc::ELIBSCN);
+    pub const LIBSCN: Self = Self(c::ELIBSCN);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -385,8 +384,8 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const LNRNG: Self = Self(libc::ELNRNG);
-    pub const LOOP: Self = Self(libc::ELOOP);
+    pub const LNRNG: Self = Self(c::ELNRNG);
+    pub const LOOP: Self = Self(c::ELOOP);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -397,14 +396,14 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const MEDIUMTYPE: Self = Self(libc::EMEDIUMTYPE);
-    pub const MFILE: Self = Self(libc::EMFILE);
+    pub const MEDIUMTYPE: Self = Self(c::EMEDIUMTYPE);
+    pub const MFILE: Self = Self(c::EMFILE);
     #[cfg(not(windows))]
-    pub const MLINK: Self = Self(libc::EMLINK);
-    pub const MSGSIZE: Self = Self(libc::EMSGSIZE);
+    pub const MLINK: Self = Self(c::EMLINK);
+    pub const MSGSIZE: Self = Self(c::EMSGSIZE);
     #[cfg(not(any(windows, target_os = "openbsd")))]
-    pub const MULTIHOP: Self = Self(libc::EMULTIHOP);
-    pub const NAMETOOLONG: Self = Self(libc::ENAMETOOLONG);
+    pub const MULTIHOP: Self = Self(c::EMULTIHOP);
+    pub const NAMETOOLONG: Self = Self(c::ENAMETOOLONG);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -415,7 +414,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const NAVAIL: Self = Self(libc::ENAVAIL);
+    pub const NAVAIL: Self = Self(c::ENAVAIL);
     #[cfg(any(
         target_os = "dragonfly",
         target_os = "freebsd",
@@ -424,12 +423,12 @@ impl Error {
         target_os = "netbsd",
         target_os = "openbsd"
     ))]
-    pub const NEEDAUTH: Self = Self(libc::ENEEDAUTH);
-    pub const NETDOWN: Self = Self(libc::ENETDOWN);
-    pub const NETRESET: Self = Self(libc::ENETRESET);
-    pub const NETUNREACH: Self = Self(libc::ENETUNREACH);
+    pub const NEEDAUTH: Self = Self(c::ENEEDAUTH);
+    pub const NETDOWN: Self = Self(c::ENETDOWN);
+    pub const NETRESET: Self = Self(c::ENETRESET);
+    pub const NETUNREACH: Self = Self(c::ENETUNREACH);
     #[cfg(not(windows))]
-    pub const NFILE: Self = Self(libc::ENFILE);
+    pub const NFILE: Self = Self(c::ENFILE);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -440,7 +439,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const NOANO: Self = Self(libc::ENOANO);
+    pub const NOANO: Self = Self(c::ENOANO);
     #[cfg(any(
         target_os = "dragonfly",
         target_os = "freebsd",
@@ -449,8 +448,8 @@ impl Error {
         target_os = "netbsd",
         target_os = "openbsd"
     ))]
-    pub const NOATTR: Self = Self(libc::ENOATTR);
-    pub const NOBUFS: Self = Self(libc::ENOBUFS);
+    pub const NOATTR: Self = Self(c::ENOATTR);
+    pub const NOBUFS: Self = Self(c::ENOBUFS);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -461,7 +460,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const NOCSI: Self = Self(libc::ENOCSI);
+    pub const NOCSI: Self = Self(c::ENOCSI);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -469,13 +468,13 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const NODATA: Self = Self(libc::ENODATA);
+    pub const NODATA: Self = Self(c::ENODATA);
     #[cfg(not(windows))]
-    pub const NODEV: Self = Self(libc::ENODEV);
+    pub const NODEV: Self = Self(c::ENODEV);
     #[cfg(not(windows))]
-    pub const NOENT: Self = Self(libc::ENOENT);
+    pub const NOENT: Self = Self(c::ENOENT);
     #[cfg(not(windows))]
-    pub const NOEXEC: Self = Self(libc::ENOEXEC);
+    pub const NOEXEC: Self = Self(c::ENOEXEC);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -486,11 +485,11 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const NOKEY: Self = Self(libc::ENOKEY);
+    pub const NOKEY: Self = Self(c::ENOKEY);
     #[cfg(not(windows))]
-    pub const NOLCK: Self = Self(libc::ENOLCK);
+    pub const NOLCK: Self = Self(c::ENOLCK);
     #[cfg(not(any(windows, target_os = "openbsd")))]
-    pub const NOLINK: Self = Self(libc::ENOLINK);
+    pub const NOLINK: Self = Self(c::ENOLINK);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -501,13 +500,13 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const NOMEDIUM: Self = Self(libc::ENOMEDIUM);
+    pub const NOMEDIUM: Self = Self(c::ENOMEDIUM);
     #[cfg(not(windows))]
-    pub const NOMEM: Self = Self(libc::ENOMEM);
+    pub const NOMEM: Self = Self(c::ENOMEM);
     #[cfg(windows)]
-    pub const NOMORE: Self = Self(libc::ENOMORE);
+    pub const NOMORE: Self = Self(c::ENOMORE);
     #[cfg(not(windows))]
-    pub const NOMSG: Self = Self(libc::ENOMSG);
+    pub const NOMSG: Self = Self(c::ENOMSG);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -518,7 +517,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const NONET: Self = Self(libc::ENONET);
+    pub const NONET: Self = Self(c::ENONET);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -529,10 +528,10 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const NOPKG: Self = Self(libc::ENOPKG);
-    pub const NOPROTOOPT: Self = Self(libc::ENOPROTOOPT);
+    pub const NOPKG: Self = Self(c::ENOPKG);
+    pub const NOPROTOOPT: Self = Self(c::ENOPROTOOPT);
     #[cfg(not(windows))]
-    pub const NOSPC: Self = Self(libc::ENOSPC);
+    pub const NOSPC: Self = Self(c::ENOSPC);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -540,7 +539,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const NOSR: Self = Self(libc::ENOSR);
+    pub const NOSR: Self = Self(c::ENOSR);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -548,17 +547,17 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const NOSTR: Self = Self(libc::ENOSTR);
+    pub const NOSTR: Self = Self(c::ENOSTR);
     #[cfg(not(windows))]
-    pub const NOSYS: Self = Self(libc::ENOSYS);
+    pub const NOSYS: Self = Self(c::ENOSYS);
     #[cfg(not(any(windows, target_os = "wasi")))]
-    pub const NOTBLK: Self = Self(libc::ENOTBLK);
+    pub const NOTBLK: Self = Self(c::ENOTBLK);
     #[cfg(any(target_os = "dragonfly", target_os = "freebsd"))]
-    pub const NOTCAPABLE: Self = Self(libc::ENOTCAPABLE);
-    pub const NOTCONN: Self = Self(libc::ENOTCONN);
+    pub const NOTCAPABLE: Self = Self(c::ENOTCAPABLE);
+    pub const NOTCONN: Self = Self(c::ENOTCONN);
     #[cfg(not(windows))]
-    pub const NOTDIR: Self = Self(libc::ENOTDIR);
-    pub const NOTEMPTY: Self = Self(libc::ENOTEMPTY);
+    pub const NOTDIR: Self = Self(c::ENOTDIR);
+    pub const NOTEMPTY: Self = Self(c::ENOTEMPTY);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -569,14 +568,14 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const NOTNAM: Self = Self(libc::ENOTNAM);
+    pub const NOTNAM: Self = Self(c::ENOTNAM);
     #[cfg(not(any(windows, target_os = "netbsd")))]
-    pub const NOTRECOVERABLE: Self = Self(libc::ENOTRECOVERABLE);
-    pub const NOTSOCK: Self = Self(libc::ENOTSOCK);
+    pub const NOTRECOVERABLE: Self = Self(c::ENOTRECOVERABLE);
+    pub const NOTSOCK: Self = Self(c::ENOTSOCK);
     #[cfg(not(any(windows, target_os = "redox")))]
-    pub const NOTSUP: Self = Self(libc::ENOTSUP);
+    pub const NOTSUP: Self = Self(c::ENOTSUP);
     #[cfg(not(windows))]
-    pub const NOTTY: Self = Self(libc::ENOTTY);
+    pub const NOTTY: Self = Self(c::ENOTTY);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -587,20 +586,20 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const NOTUNIQ: Self = Self(libc::ENOTUNIQ);
+    pub const NOTUNIQ: Self = Self(c::ENOTUNIQ);
     #[cfg(not(windows))]
-    pub const NXIO: Self = Self(libc::ENXIO);
-    pub const OPNOTSUPP: Self = Self(libc::EOPNOTSUPP);
+    pub const NXIO: Self = Self(c::ENXIO);
+    pub const OPNOTSUPP: Self = Self(c::EOPNOTSUPP);
     #[cfg(not(windows))]
-    pub const OVERFLOW: Self = Self(libc::EOVERFLOW);
+    pub const OVERFLOW: Self = Self(c::EOVERFLOW);
     #[cfg(not(any(windows, target_os = "netbsd")))]
-    pub const OWNERDEAD: Self = Self(libc::EOWNERDEAD);
+    pub const OWNERDEAD: Self = Self(c::EOWNERDEAD);
     #[cfg(not(windows))]
-    pub const PERM: Self = Self(libc::EPERM);
+    pub const PERM: Self = Self(c::EPERM);
     #[cfg(not(target_os = "wasi"))]
-    pub const PFNOSUPPORT: Self = Self(libc::EPFNOSUPPORT);
+    pub const PFNOSUPPORT: Self = Self(c::EPFNOSUPPORT);
     #[cfg(not(windows))]
-    pub const PIPE: Self = Self(libc::EPIPE);
+    pub const PIPE: Self = Self(c::EPIPE);
     #[cfg(any(
         target_os = "dragonfly",
         target_os = "freebsd",
@@ -609,7 +608,7 @@ impl Error {
         target_os = "netbsd",
         target_os = "openbsd"
     ))]
-    pub const PROCLIM: Self = Self(libc::EPROCLIM);
+    pub const PROCLIM: Self = Self(c::EPROCLIM);
     #[cfg(any(
         target_os = "dragonfly",
         target_os = "freebsd",
@@ -618,7 +617,7 @@ impl Error {
         target_os = "netbsd",
         target_os = "openbsd"
     ))]
-    pub const PROCUNAVAIL: Self = Self(libc::EPROCUNAVAIL);
+    pub const PROCUNAVAIL: Self = Self(c::EPROCUNAVAIL);
     #[cfg(any(
         target_os = "dragonfly",
         target_os = "freebsd",
@@ -627,7 +626,7 @@ impl Error {
         target_os = "netbsd",
         target_os = "openbsd"
     ))]
-    pub const PROGMISMATCH: Self = Self(libc::EPROGMISMATCH);
+    pub const PROGMISMATCH: Self = Self(c::EPROGMISMATCH);
     #[cfg(any(
         target_os = "dragonfly",
         target_os = "freebsd",
@@ -636,17 +635,17 @@ impl Error {
         target_os = "netbsd",
         target_os = "openbsd"
     ))]
-    pub const PROGUNAVAIL: Self = Self(libc::EPROGUNAVAIL);
+    pub const PROGUNAVAIL: Self = Self(c::EPROGUNAVAIL);
     #[cfg(not(windows))]
-    pub const PROTO: Self = Self(libc::EPROTO);
-    pub const PROTONOSUPPORT: Self = Self(libc::EPROTONOSUPPORT);
-    pub const PROTOTYPE: Self = Self(libc::EPROTOTYPE);
+    pub const PROTO: Self = Self(c::EPROTO);
+    pub const PROTONOSUPPORT: Self = Self(c::EPROTONOSUPPORT);
+    pub const PROTOTYPE: Self = Self(c::EPROTOTYPE);
     #[cfg(windows)]
-    pub const PROVIDERFAILEDINIT: Self = Self(libc::EPROVIDERFAILEDINIT);
+    pub const PROVIDERFAILEDINIT: Self = Self(c::EPROVIDERFAILEDINIT);
     #[cfg(not(windows))]
-    pub const RANGE: Self = Self(libc::ERANGE);
+    pub const RANGE: Self = Self(c::ERANGE);
     #[cfg(windows)]
-    pub const REFUSED: Self = Self(libc::EREFUSED);
+    pub const REFUSED: Self = Self(c::EREFUSED);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -657,9 +656,9 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const REMCHG: Self = Self(libc::EREMCHG);
+    pub const REMCHG: Self = Self(c::EREMCHG);
     #[cfg(not(target_os = "wasi"))]
-    pub const REMOTE: Self = Self(libc::EREMOTE);
+    pub const REMOTE: Self = Self(c::EREMOTE);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -670,7 +669,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const REMOTEIO: Self = Self(libc::EREMOTEIO);
+    pub const REMOTEIO: Self = Self(c::EREMOTEIO);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -681,7 +680,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const RESTART: Self = Self(libc::ERESTART);
+    pub const RESTART: Self = Self(c::ERESTART);
     #[cfg(not(any(
         windows,
         target_os = "android",
@@ -694,9 +693,9 @@ impl Error {
         target_os = "redox",
         target_os = "wasi",
     )))]
-    pub const RFKILL: Self = Self(libc::ERFKILL);
+    pub const RFKILL: Self = Self(c::ERFKILL);
     #[cfg(not(windows))]
-    pub const ROFS: Self = Self(libc::EROFS);
+    pub const ROFS: Self = Self(c::EROFS);
     #[cfg(any(
         target_os = "dragonfly",
         target_os = "freebsd",
@@ -705,15 +704,15 @@ impl Error {
         target_os = "netbsd",
         target_os = "openbsd"
     ))]
-    pub const RPCMISMATCH: Self = Self(libc::ERPCMISMATCH);
+    pub const RPCMISMATCH: Self = Self(c::ERPCMISMATCH);
     #[cfg(not(target_os = "wasi"))]
-    pub const SHUTDOWN: Self = Self(libc::ESHUTDOWN);
+    pub const SHUTDOWN: Self = Self(c::ESHUTDOWN);
     #[cfg(not(target_os = "wasi"))]
-    pub const SOCKTNOSUPPORT: Self = Self(libc::ESOCKTNOSUPPORT);
+    pub const SOCKTNOSUPPORT: Self = Self(c::ESOCKTNOSUPPORT);
     #[cfg(not(windows))]
-    pub const SPIPE: Self = Self(libc::ESPIPE);
+    pub const SPIPE: Self = Self(c::ESPIPE);
     #[cfg(not(windows))]
-    pub const SRCH: Self = Self(libc::ESRCH);
+    pub const SRCH: Self = Self(c::ESRCH);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -724,8 +723,8 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const SRMNT: Self = Self(libc::ESRMNT);
-    pub const STALE: Self = Self(libc::ESTALE);
+    pub const SRMNT: Self = Self(c::ESRMNT);
+    pub const STALE: Self = Self(c::ESTALE);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -736,7 +735,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const STRPIPE: Self = Self(libc::ESTRPIPE);
+    pub const STRPIPE: Self = Self(c::ESTRPIPE);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -744,14 +743,14 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const TIME: Self = Self(libc::ETIME);
-    pub const TIMEDOUT: Self = Self(libc::ETIMEDOUT);
+    pub const TIME: Self = Self(c::ETIME);
+    pub const TIMEDOUT: Self = Self(c::ETIMEDOUT);
     #[cfg(not(windows))]
-    pub const TOOBIG: Self = Self(libc::E2BIG);
+    pub const TOOBIG: Self = Self(c::E2BIG);
     #[cfg(not(target_os = "wasi"))]
-    pub const TOOMANYREFS: Self = Self(libc::ETOOMANYREFS);
+    pub const TOOMANYREFS: Self = Self(c::ETOOMANYREFS);
     #[cfg(not(windows))]
-    pub const TXTBSY: Self = Self(libc::ETXTBSY);
+    pub const TXTBSY: Self = Self(c::ETXTBSY);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -762,7 +761,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const UCLEAN: Self = Self(libc::EUCLEAN);
+    pub const UCLEAN: Self = Self(c::EUCLEAN);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -773,12 +772,12 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const UNATCH: Self = Self(libc::EUNATCH);
+    pub const UNATCH: Self = Self(c::EUNATCH);
     #[cfg(not(target_os = "wasi"))]
-    pub const USERS: Self = Self(libc::EUSERS);
-    pub const WOULDBLOCK: Self = Self(libc::EWOULDBLOCK);
+    pub const USERS: Self = Self(c::EUSERS);
+    pub const WOULDBLOCK: Self = Self(c::EWOULDBLOCK);
     #[cfg(not(windows))]
-    pub const XDEV: Self = Self(libc::EXDEV);
+    pub const XDEV: Self = Self(c::EXDEV);
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -789,7 +788,7 @@ impl Error {
         target_os = "openbsd",
         target_os = "wasi",
     )))]
-    pub const XFULL: Self = Self(libc::EXFULL);
+    pub const XFULL: Self = Self(c::EXFULL);
 }
 
 impl Error {

@@ -1,7 +1,6 @@
 //! IPv4, IPv6, and Socket addresses.
 
-#[cfg(windows)]
-use super::super::libc;
+use super::super::c;
 #[cfg(not(windows))]
 use crate::io;
 #[cfg(not(windows))]
@@ -33,7 +32,7 @@ impl SocketAddrUnix {
     fn _new(path: CString) -> io::Result<Self> {
         let bytes = path.as_bytes();
 
-        let z = libc::sockaddr_un {
+        let z = c::sockaddr_un {
             #[cfg(any(
                 target_os = "netbsd",
                 target_os = "macos",
@@ -81,4 +80,4 @@ impl fmt::Debug for SocketAddrUnix {
 }
 
 /// `struct sockaddr_storage` as a raw struct.
-pub type SocketAddrStorage = libc::sockaddr_storage;
+pub type SocketAddrStorage = c::sockaddr_storage;

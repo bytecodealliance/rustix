@@ -1,13 +1,15 @@
 mod auxv;
 mod types;
 
+use super::c;
+
 #[cfg(not(windows))]
 pub(crate) mod syscalls;
 pub(crate) use auxv::page_size;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) use auxv::{linux_execfn, linux_hwcap};
 #[cfg(not(target_os = "wasi"))]
-pub use libc::{
+pub use c::{
     WCONTINUED, WEXITSTATUS, WIFCONTINUED, WIFEXITED, WIFSIGNALED, WIFSTOPPED, WNOHANG, WSTOPSIG,
     WTERMSIG, WUNTRACED,
 };

@@ -1,3 +1,5 @@
+use super::c;
+
 mod addr;
 mod ext;
 mod read_sockaddr;
@@ -20,7 +22,7 @@ pub(crate) use write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6, write_so
 #[cfg(not(windows))]
 #[inline]
 pub(crate) fn offsetof_sun_path() -> usize {
-    let z = libc::sockaddr_un {
+    let z = c::sockaddr_un {
         #[cfg(any(
             target_os = "netbsd",
             target_os = "macos",

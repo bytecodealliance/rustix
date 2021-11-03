@@ -2,7 +2,7 @@
 //! we can interpret the rest of a `sockaddr` produced by the kernel.
 #![allow(unsafe_code)]
 
-use super::super::libc;
+use super::super::c;
 use crate::net::{SocketAddrAny, SocketAddrStorage, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use std::mem::size_of;
 
@@ -63,9 +63,9 @@ pub(crate) unsafe fn encode_sockaddr_unix(
     };
     let bytes = unix.path().to_bytes();
     for (i, b) in bytes.iter().enumerate() {
-        encoded.sun_path[i] = *b as libc::c_char;
+        encoded.sun_path[i] = *b as c::c_char;
     }
-    encoded.sun_path[bytes.len()] = b'\0' as libc::c_char;
+    encoded.sun_path[bytes.len()] = b'\0' as c::c_char;
     encoded
 }
 

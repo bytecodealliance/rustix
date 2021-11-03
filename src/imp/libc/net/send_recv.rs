@@ -1,5 +1,4 @@
-#[cfg(windows)]
-use super::super::libc;
+use super::super::c;
 use bitflags::bitflags;
 
 bitflags! {
@@ -14,15 +13,15 @@ bitflags! {
             target_os = "netbsd",
             target_os = "openbsd"
         )))]
-        const CONFIRM = libc::MSG_CONFIRM;
+        const CONFIRM = c::MSG_CONFIRM;
         /// `MSG_DONTROUTE`
-        const DONTROUTE = libc::MSG_DONTROUTE;
+        const DONTROUTE = c::MSG_DONTROUTE;
         /// `MSG_DONTWAIT`
         #[cfg(not(windows))]
-        const DONTWAIT = libc::MSG_DONTWAIT;
+        const DONTWAIT = c::MSG_DONTWAIT;
         /// `MSG_EOR`
         #[cfg(not(windows))]
-        const EOT = libc::MSG_EOR;
+        const EOT = c::MSG_EOR;
         /// `MSG_MORE`
         #[cfg(not(any(
             windows,
@@ -32,12 +31,12 @@ bitflags! {
             target_os = "netbsd",
             target_os = "openbsd"
         )))]
-        const MORE = libc::MSG_MORE;
+        const MORE = c::MSG_MORE;
         #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
         /// `MSG_NOSIGNAL`
-        const NOSIGNAL = libc::MSG_NOSIGNAL;
+        const NOSIGNAL = c::MSG_NOSIGNAL;
         /// `MSG_OOB`
-        const OOB = libc::MSG_OOB;
+        const OOB = c::MSG_OOB;
     }
 }
 
@@ -46,10 +45,10 @@ bitflags! {
     pub struct RecvFlags: i32 {
         #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
         /// `MSG_CMSG_CLOEXEC`
-        const CMSG_CLOEXEC = libc::MSG_CMSG_CLOEXEC;
+        const CMSG_CLOEXEC = c::MSG_CMSG_CLOEXEC;
         /// `MSG_DONTWAIT`
         #[cfg(not(windows))]
-        const DONTWAIT = libc::MSG_DONTWAIT;
+        const DONTWAIT = c::MSG_DONTWAIT;
         /// `MSG_ERRQUEUE`
         #[cfg(not(any(
             windows,
@@ -59,14 +58,14 @@ bitflags! {
             target_os = "netbsd",
             target_os = "openbsd"
         )))]
-        const ERRQUEUE = libc::MSG_ERRQUEUE;
+        const ERRQUEUE = c::MSG_ERRQUEUE;
         /// `MSG_OOB`
-        const OOB = libc::MSG_OOB;
+        const OOB = c::MSG_OOB;
         /// `MSG_PEEK`
-        const PEEK = libc::MSG_PEEK;
+        const PEEK = c::MSG_PEEK;
         /// `MSG_TRUNC`
-        const TRUNC = libc::MSG_TRUNC as libc::c_int;
+        const TRUNC = c::MSG_TRUNC as c::c_int;
         /// `MSG_WAITALL`
-        const WAITALL = libc::MSG_WAITALL;
+        const WAITALL = c::MSG_WAITALL;
     }
 }

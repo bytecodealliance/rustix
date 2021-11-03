@@ -54,8 +54,9 @@
 //! # }
 //! ```
 
+use super::super::c;
+use super::super::conv::{ret, ret_owned_fd, ret_u32};
 use super::super::fd::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-use crate::imp::libc::conv::{ret, ret_owned_fd, ret_u32};
 use crate::io::{self, OwnedFd};
 use bitflags::bitflags;
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd};
@@ -67,9 +68,9 @@ use std::ptr::{null, null_mut};
 
 bitflags! {
     /// `EPOLL_*` for use with [`Epoll::new`].
-    pub struct CreateFlags: libc::c_int {
+    pub struct CreateFlags: c::c_int {
         /// `EPOLL_CLOEXEC`
-        const CLOEXEC = libc::EPOLL_CLOEXEC;
+        const CLOEXEC = c::EPOLL_CLOEXEC;
     }
 }
 
@@ -78,32 +79,32 @@ bitflags! {
     #[derive(Default)]
     pub struct EventFlags: u32 {
         /// `EPOLLIN`
-        const IN = libc::EPOLLIN as u32;
+        const IN = c::EPOLLIN as u32;
 
         /// `EPOLLOUT`
-        const OUT = libc::EPOLLOUT as u32;
+        const OUT = c::EPOLLOUT as u32;
 
         /// `EPOLLPRI`
-        const PRI = libc::EPOLLPRI as u32;
+        const PRI = c::EPOLLPRI as u32;
 
         /// `EPOLLERR`
-        const ERR = libc::EPOLLERR as u32;
+        const ERR = c::EPOLLERR as u32;
 
         /// `EPOLLHUP`
-        const HUP = libc::EPOLLHUP as u32;
+        const HUP = c::EPOLLHUP as u32;
 
         /// `EPOLLET`
-        const ET = libc::EPOLLET as u32;
+        const ET = c::EPOLLET as u32;
 
         /// `EPOLLONESHOT`
-        const ONESHOT = libc::EPOLLONESHOT as u32;
+        const ONESHOT = c::EPOLLONESHOT as u32;
 
         /// `EPOLLWAKEUP`
-        const WAKEUP = libc::EPOLLWAKEUP as u32;
+        const WAKEUP = c::EPOLLWAKEUP as u32;
 
         /// `EPOLLEXCLUSIVE`
         #[cfg(not(target_os = "android"))]
-        const EXCLUSIVE = libc::EPOLLEXCLUSIVE as u32;
+        const EXCLUSIVE = c::EPOLLEXCLUSIVE as u32;
     }
 }
 
@@ -274,7 +275,7 @@ impl<Context: self::Context> Epoll<Context> {
         // behaves.
         unsafe {
             Ok(Self {
-                epoll_fd: ret_owned_fd(libc::epoll_create1(flags.bits()))?,
+                epoll_fd: ret_owned_fd(c::epoll_create1(flags.bits()))?,
                 context,
             })
         }
@@ -297,11 +298,11 @@ impl<Context: self::Context> Epoll<Context> {
             let target = self.context.acquire(data);
             let raw_fd = target.as_fd().as_raw_fd();
             let encoded = self.context.encode(target);
-            ret(libc::epoll_ctl(
+            ret(c::epoll_ctl(
                 self.epoll_fd.as_fd().as_raw_fd(),
-                libc::EPOLL_CTL_ADD,
+                c::EPOLL_CTL_ADD,
                 raw_fd,
-                &mut libc::epoll_event {
+                &mut c::epoll_event {
                     events: event_flags.bits(),
                     r#u64: encoded,
                 },
@@ -325,11 +326,11 @@ impl<Context: self::Context> Epoll<Context> {
         // Safety: We're calling `epoll_ctl` via FFI and we know how it
         // behaves.
         unsafe {
-            ret(libc::epoll_ctl(
+            ret(c::epoll_ctl(
                 self.epoll_fd.as_fd().as_raw_fd(),
-                libc::EPOLL_CTL_MOD,
+                c::EPOLL_CTL_MOD,
                 raw_fd,
-                &mut libc::epoll_event {
+                &mut c::epoll_event {
                     events: event_flags.bits(),
                     r#u64: encoded,
                 },
@@ -347,9 +348,9 @@ impl<Context: self::Context> Epoll<Context> {
         // behaves.
         unsafe {
             let raw_fd = target.as_fd().as_raw_fd();
-            ret(libc::epoll_ctl(
+            ret(c::epoll_ctl(
                 self.epoll_fd.as_fd().as_raw_fd(),
-                libc::EPOLL_CTL_DEL,
+                c::EPOLL_CTL_DEL,
                 raw_fd,
                 null_mut(),
             ))?;
@@ -366,15 +367,15 @@ impl<Context: self::Context> Epoll<Context> {
     pub fn wait<'context>(
         &'context self,
         event_list: &mut EventVec<'context, Context>,
-        timeout: libc::c_int,
+        timeout: c::c_int,
     ) -> io::Result<()> {
         // Safety: We're calling `epoll_wait` via FFI and we know how it
         // behaves.
         unsafe {
             event_list.events.set_len(0);
-            let nfds = ret_u32(libc::epoll_wait(
+            let nfds = ret_u32(c::epoll_wait(
                 self.epoll_fd.as_fd().as_raw_fd(),
-                event_list.events.as_mut_ptr().cast::<libc::epoll_event>(),
+                event_list.events.as_mut_ptr().cast::<c::epoll_event>(),
                 event_list.events.capacity().try_into().unwrap_or(i32::MAX),
                 timeout,
             ))?;
@@ -463,7 +464,7 @@ impl<'context, Context: self::Context> Iterator for Iter<'context, Context> {
     repr(packed)
 )]
 struct Event {
-    // Match the layout of `libc::epoll_event`. We just use a `u64` instead of
+    // Match the layout of `c::epoll_event`. We just use a `u64` instead of
     // the full union; `Context` implementations will simply need to deal with
     // casting the value into and out of the `u64` themselves.
     event_flags: EventFlags,

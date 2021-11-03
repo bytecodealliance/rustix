@@ -1,15 +1,16 @@
+use super::super::c;
 #[cfg(not(target_os = "wasi"))]
 use super::super::fd::BorrowedFd;
 
 /// `struct timespec`
-pub type Timespec = libc::timespec;
+pub type Timespec = c::timespec;
 
 #[allow(deprecated)]
-pub type Secs = libc::time_t;
+pub type Secs = c::time_t;
 #[cfg(all(target_arch = "x86_64", target_pointer_width = "32"))]
 pub type Nsecs = i64;
 #[cfg(not(all(target_arch = "x86_64", target_pointer_width = "32")))]
-pub type Nsecs = libc::c_long;
+pub type Nsecs = c::c_long;
 
 /// `CLOCK_*` constants for use with [`clock_gettime`].
 ///
@@ -25,30 +26,30 @@ pub type Nsecs = libc::c_long;
 #[non_exhaustive]
 pub enum ClockId {
     /// `CLOCK_REALTIME`
-    Realtime = libc::CLOCK_REALTIME,
+    Realtime = c::CLOCK_REALTIME,
 
     /// `CLOCK_MONOTONIC`
-    Monotonic = libc::CLOCK_MONOTONIC,
+    Monotonic = c::CLOCK_MONOTONIC,
 
     /// `CLOCK_PROCESS_CPUTIME_ID`
     #[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
-    ProcessCPUTime = libc::CLOCK_PROCESS_CPUTIME_ID,
+    ProcessCPUTime = c::CLOCK_PROCESS_CPUTIME_ID,
 
     /// `CLOCK_THREAD_CPUTIME_ID`
     #[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
-    ThreadCPUTime = libc::CLOCK_THREAD_CPUTIME_ID,
+    ThreadCPUTime = c::CLOCK_THREAD_CPUTIME_ID,
 
     /// `CLOCK_REALTIME_COARSE`
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    RealtimeCoarse = libc::CLOCK_REALTIME_COARSE,
+    RealtimeCoarse = c::CLOCK_REALTIME_COARSE,
 
     /// `CLOCK_MONOTONIC_COARSE`
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    MonotonicCoarse = libc::CLOCK_MONOTONIC_COARSE,
+    MonotonicCoarse = c::CLOCK_MONOTONIC_COARSE,
 
     /// `CLOCK_MONOTONIC_RAW`
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    MonotonicRaw = libc::CLOCK_MONOTONIC_RAW,
+    MonotonicRaw = c::CLOCK_MONOTONIC_RAW,
 }
 
 /// `CLOCK_*` constants for use with [`clock_gettime`].
@@ -63,16 +64,16 @@ pub enum ClockId {
 #[non_exhaustive]
 pub enum ClockId {
     /// `CLOCK_REALTIME`
-    Realtime = libc::CLOCK_REALTIME,
+    Realtime = c::CLOCK_REALTIME,
 
     /// `CLOCK_MONOTONIC`
-    Monotonic = libc::CLOCK_MONOTONIC,
+    Monotonic = c::CLOCK_MONOTONIC,
 
     /// `CLOCK_PROCESS_CPUTIME_ID`
-    ProcessCPUTime = libc::CLOCK_PROCESS_CPUTIME_ID,
+    ProcessCPUTime = c::CLOCK_PROCESS_CPUTIME_ID,
 
     /// `CLOCK_THREAD_CPUTIME_ID`
-    ThreadCPUTime = libc::CLOCK_THREAD_CPUTIME_ID,
+    ThreadCPUTime = c::CLOCK_THREAD_CPUTIME_ID,
 }
 
 /// `CLOCK_*` constants for use with [`clock_gettime_dynamic`].
