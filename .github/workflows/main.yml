@@ -399,6 +399,6 @@ jobs:
         toolchain: ${{ matrix.rust }}
 
     - run: |
-        cargo +nightly check --verbose --features rustc-dep-of-std --release --workspace
+        cargo +nightly check --verbose --no-default-features --features rustc-dep-of-std --release --workspace
       env:
         RUST_BACKTRACE: 1
