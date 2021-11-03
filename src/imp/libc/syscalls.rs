@@ -16,7 +16,7 @@ use super::conv::ret_ssize_t;
 #[cfg(windows)]
 use super::conv::{borrowed_fd, ret};
 #[cfg(windows)]
-use super::net::libc;
+use super::libc;
 #[cfg(target_os = "linux")]
 use super::rand::GetRandomFlags;
 #[cfg(any(windows, target_os = "linux"))]

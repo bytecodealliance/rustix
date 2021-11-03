@@ -1,7 +1,7 @@
 //! IPv4, IPv6, and Socket addresses.
 
 #[cfg(windows)]
-use super::libc;
+use super::super::libc;
 use super::{read_sockaddr, write_sockaddr, AddressFamily};
 use crate::io;
 use crate::net::{SocketAddrV4, SocketAddrV6};

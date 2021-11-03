@@ -1,6 +1,6 @@
 use super::ext::{Ipv4AddrExt, Ipv6AddrExt, SocketAddrV6Ext};
 #[cfg(windows)]
-use super::libc;
+use super::super::libc;
 use super::SocketAddr;
 #[cfg(not(windows))]
 use super::SocketAddrUnix;

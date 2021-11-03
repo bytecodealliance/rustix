@@ -6,13 +6,13 @@ use crate::imp;
 use imp::io::Tcflag;
 
 #[cfg(windows)]
-pub(crate) use imp::net::io_lifetimes::{AsFd, AsSocketAsFd, BorrowedFd};
+pub(crate) use imp::io_lifetimes::{AsFd, AsSocketAsFd, BorrowedFd};
 #[allow(unused_imports)]
 #[cfg(windows)]
-pub(crate) use imp::net::io_lifetimes::{AsRawFd, FromRawFd, IntoRawFd, LibcFd, OwnedFd, RawFd};
+pub(crate) use imp::io_lifetimes::{AsRawFd, FromRawFd, IntoRawFd, LibcFd, OwnedFd, RawFd};
 #[cfg(windows)]
 #[cfg(not(io_lifetimes_use_std))]
-pub(crate) use imp::net::io_lifetimes::{FromFd, IntoFd};
+pub(crate) use imp::io_lifetimes::{FromFd, IntoFd};
 #[cfg(not(windows))]
 pub(crate) use io_lifetimes::{AsFd, BorrowedFd};
 #[cfg(not(windows))]

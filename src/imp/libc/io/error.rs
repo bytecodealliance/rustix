@@ -4,7 +4,7 @@
 //! `errno` value.
 
 #[cfg(windows)]
-use super::super::net::libc;
+use super::super::libc;
 use errno::errno;
 
 /// The error type for rsix APIs.

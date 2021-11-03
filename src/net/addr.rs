@@ -5,7 +5,7 @@
 #![allow(unsafe_code)]
 
 use crate::imp::net::ext::in6_addr_s6_addr;
-use crate::imp::net::libc as c;
+use crate::imp::libc as c;
 use crate::net::ip::{IpAddr, Ipv4Addr, Ipv6Addr};
 use core::cmp::Ordering;
 use core::hash;

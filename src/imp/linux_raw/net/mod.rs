@@ -5,7 +5,6 @@ mod types;
 mod write_sockaddr;
 
 pub(crate) mod ext;
-pub(crate) mod libc;
 pub(crate) mod syscalls;
 pub(crate) use read_sockaddr::{read_sockaddr, read_sockaddr_os};
 pub(crate) use write_sockaddr::{

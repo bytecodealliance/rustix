@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 #[cfg(windows)]
-use super::net::io_lifetimes;
+use super::io_lifetimes;
 #[cfg(not(windows))]
 use super::offset::libc_off_t;
 use crate::io;

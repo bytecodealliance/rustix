@@ -1,7 +1,7 @@
 #![allow(unsafe_code)]
 #![allow(dead_code)]
 
-use super::libc;
+use super::super::libc;
 
 #[inline]
 pub(crate) const fn in_addr_s_addr(addr: libc::in_addr) -> u32 {
