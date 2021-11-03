@@ -1,5 +1,5 @@
 #[cfg(windows)]
-use super::libc;
+use super::super::libc;
 use bitflags::bitflags;
 
 bitflags! {

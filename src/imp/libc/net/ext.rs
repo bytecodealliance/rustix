@@ -1,5 +1,5 @@
 #[cfg(windows)]
-use super::libc;
+use super::super::libc;
 
 #[cfg(not(windows))]
 #[inline]

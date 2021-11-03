@@ -7,6 +7,7 @@ mod vdso_wrappers;
 pub(crate) mod elf;
 pub(crate) mod fs;
 pub(crate) mod io;
+pub(crate) mod libc;
 pub(crate) mod net;
 pub(crate) mod process;
 pub(crate) mod rand;

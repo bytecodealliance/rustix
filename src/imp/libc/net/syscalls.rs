@@ -1,6 +1,6 @@
 use super::super::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 #[cfg(windows)]
-use super::libc;
+use super::super::libc;
 #[cfg(not(windows))]
 use super::{encode_sockaddr_unix, SocketAddrUnix};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]

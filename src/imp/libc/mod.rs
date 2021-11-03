@@ -5,6 +5,16 @@ mod weak;
 mod conv;
 mod offset;
 
+#[cfg(windows)]
+pub(crate) mod io_lifetimes;
+#[cfg(not(windows))]
+pub(crate) use io_lifetimes;
+
+#[cfg(windows)]
+pub(crate) mod libc;
+#[cfg(not(windows))]
+pub(crate) use libc;
+
 #[cfg(not(windows))]
 pub(crate) mod fs;
 pub(crate) mod io;
