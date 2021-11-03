@@ -524,7 +524,7 @@ pub(crate) mod sockopt {
 
                 let tv_sec = timeout.as_secs().try_into();
                 #[cfg(not(all(target_arch = "x86_64", target_pointer_width = "32")))]
-                let tv_sec = tv_sec.unwrap_or(std::os::raw::c_long::MAX);
+                let tv_sec = tv_sec.unwrap_or(libc::c_long::MAX);
                 #[cfg(all(target_arch = "x86_64", target_pointer_width = "32"))]
                 let tv_sec = tv_sec.unwrap_or(i64::MAX);
 

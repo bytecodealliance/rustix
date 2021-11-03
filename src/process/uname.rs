@@ -9,7 +9,6 @@
 use crate::imp;
 use std::ffi::CStr;
 use std::fmt;
-use std::os::raw::c_char;
 
 /// `uname()`—Returns high-level information about the runtime OS and
 /// hardware.
@@ -26,7 +25,7 @@ impl Uname {
     /// `sysname`—Operating system release name
     #[inline]
     pub fn sysname(&self) -> &CStr {
-        Self::to_cstr(self.0.sysname.as_ptr())
+        Self::to_cstr(self.0.sysname.as_ptr().cast())
     }
 
     /// `nodename`—Name with vague meaning
@@ -36,38 +35,38 @@ impl Uname {
     /// about where the names are visible.
     #[inline]
     pub fn nodename(&self) -> &CStr {
-        Self::to_cstr(self.0.nodename.as_ptr())
+        Self::to_cstr(self.0.nodename.as_ptr().cast())
     }
 
     /// `release`—Operating system release version string
     #[inline]
     pub fn release(&self) -> &CStr {
-        Self::to_cstr(self.0.release.as_ptr())
+        Self::to_cstr(self.0.release.as_ptr().cast())
     }
 
     /// `version`—Operating system build identifiers
     #[inline]
     pub fn version(&self) -> &CStr {
-        Self::to_cstr(self.0.version.as_ptr())
+        Self::to_cstr(self.0.version.as_ptr().cast())
     }
 
     /// `machine`—Hardware architecture identifier
     #[inline]
     pub fn machine(&self) -> &CStr {
-        Self::to_cstr(self.0.machine.as_ptr())
+        Self::to_cstr(self.0.machine.as_ptr().cast())
     }
 
     /// `domainname`—NIS or YP domain identifer
     #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
     #[inline]
     pub fn domainname(&self) -> &CStr {
-        Self::to_cstr(self.0.domainname.as_ptr())
+        Self::to_cstr(self.0.domainname.as_ptr().cast())
     }
 
     #[inline]
-    fn to_cstr<'a>(ptr: *const c_char) -> &'a CStr {
+    fn to_cstr<'a>(ptr: *const u8) -> &'a CStr {
         // Safety: Strings returned from the kernel are always NUL-terminated.
-        unsafe { CStr::from_ptr(ptr) }
+        unsafe { CStr::from_ptr(ptr.cast()) }
     }
 }
 

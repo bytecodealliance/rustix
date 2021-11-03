@@ -6,15 +6,13 @@
 #![allow(unsafe_code)]
 
 use super::super::elf::Elf_Phdr;
+use super::super::libc;
 use linux_raw_sys::general::{
     AT_EXECFN, AT_HWCAP, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM,
 };
 use linux_raw_sys::v5_4::general::{AT_HWCAP2, AT_SYSINFO_EHDR};
-use std::ffi::{c_void, CStr};
+use std::ffi::CStr;
 use std::mem::size_of;
-use std::os::raw::c_char;
-#[cfg(all(target_env = "gnu", not(target_vendor = "mustang")))]
-use std::os::raw::c_int;
 use std::slice;
 
 #[inline]
@@ -30,13 +28,13 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
 
 #[inline]
 pub(crate) fn linux_execfn() -> &'static CStr {
-    unsafe { CStr::from_ptr(auxv().execfn as *const c_char) }
+    unsafe { CStr::from_ptr(auxv().execfn as *const libc::c_char) }
 }
 
 #[inline]
-pub(crate) fn exe_phdrs() -> (*const c_void, usize) {
+pub(crate) fn exe_phdrs() -> (*const libc::c_void, usize) {
     let auxv = auxv();
-    (auxv.phdr as *const c_void, auxv.phnum)
+    (auxv.phdr as *const libc::c_void, auxv.phnum)
 }
 
 #[inline]
@@ -86,8 +84,16 @@ static mut AUXV: Auxv = Auxv {
 #[cfg(all(target_env = "gnu", not(target_vendor = "mustang")))]
 #[used]
 #[link_section = ".init_array.00099"]
-static INIT_ARRAY: unsafe extern "C" fn(c_int, *mut *mut c_char, *mut *mut c_char) = {
-    unsafe extern "C" fn function(_argc: c_int, _argv: *mut *mut c_char, envp: *mut *mut c_char) {
+static INIT_ARRAY: unsafe extern "C" fn(
+    libc::c_int,
+    *mut *mut libc::c_char,
+    *mut *mut libc::c_char,
+) = {
+    unsafe extern "C" fn function(
+        _argc: libc::c_int,
+        _argv: *mut *mut libc::c_char,
+        envp: *mut *mut libc::c_char,
+    ) {
         init_from_envp(envp);
     }
     function
@@ -105,7 +111,7 @@ static INIT_ARRAY: unsafe extern "C" fn(c_int, *mut *mut c_char, *mut *mut c_cha
 static INIT_ARRAY: unsafe extern "C" fn() = {
     unsafe extern "C" fn function() {
         extern "C" {
-            static __environ: *mut *mut c_char;
+            static __environ: *mut *mut libc::c_char;
         }
 
         init_from_envp(__environ)
@@ -116,7 +122,7 @@ static INIT_ARRAY: unsafe extern "C" fn() = {
 /// On mustang, we export a function to be called during initialization.
 #[cfg(target_vendor = "mustang")]
 #[inline]
-pub(crate) unsafe fn init(envp: *mut *mut c_char) {
+pub(crate) unsafe fn init(envp: *mut *mut libc::c_char) {
     init_from_envp(envp);
 }
 
@@ -124,7 +130,7 @@ pub(crate) unsafe fn init(envp: *mut *mut c_char) {
 ///
 /// This must be passed a pointer to the environment variable buffer
 /// provided by the kernel, which is followed in memory by the auxv array.
-unsafe fn init_from_envp(mut envp: *mut *mut c_char) {
+unsafe fn init_from_envp(mut envp: *mut *mut libc::c_char) {
     while !(*envp).is_null() {
         envp = envp.add(1);
     }

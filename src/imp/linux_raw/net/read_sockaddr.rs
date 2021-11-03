@@ -2,11 +2,11 @@
 //! we can interpret the rest of a `sockaddr` produced by the kernel.
 #![allow(unsafe_code)]
 
+use super::super::libc;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use crate::{as_ptr, io};
 use linux_raw_sys::general::{__kernel_sockaddr_storage, sockaddr};
 use std::mem::size_of;
-use super::super::libc;
 
 // This must match the header of `sockaddr`.
 #[repr(C)]

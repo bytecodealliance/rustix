@@ -1,4 +1,8 @@
 //! Adapt the Linux API to resemble a POSIX-style libc API.
+//!
+//! The linux_raw backend doesn't use actual libc; this just
+//! defines certain types that are convenient to have defined
+//! in a module called libc.
 
 #![allow(unused_imports)]
 

@@ -5,8 +5,6 @@
 use crate::imp;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 use std::ffi::CStr;
-#[cfg(target_vendor = "mustang")]
-use std::os::raw::c_char;
 
 /// `getpagesize()`—Returns the process' page size.
 #[inline]
@@ -50,6 +48,6 @@ pub fn linux_execfn() -> &'static CStr {
 #[cfg(target_vendor = "mustang")]
 #[inline]
 #[doc(hidden)]
-pub unsafe fn init(envp: *mut *mut c_char) {
+pub unsafe fn init(envp: *mut *mut u8) {
     imp::process::init(envp)
 }

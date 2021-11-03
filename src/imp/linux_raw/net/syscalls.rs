@@ -33,6 +33,7 @@ use super::super::conv::{
     slice_mut, socklen_t, zero,
 };
 use super::super::fd::BorrowedFd;
+use super::super::libc;
 use super::super::reg::nr;
 #[cfg(target_arch = "x86")]
 use super::super::reg::{ArgReg, SocketArg};
@@ -58,7 +59,6 @@ use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::general::{sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t};
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
-use super::super::libc::{c_int, c_uint};
 #[cfg(target_arch = "x86")]
 use {
     super::super::conv::x86_sys,
@@ -303,7 +303,7 @@ pub(crate) fn shutdown(fd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> {
         ret(syscall2(
             nr(__NR_shutdown),
             borrowed_fd(fd),
-            c_uint(how as c_uint),
+            c_uint(how as libc::c_uint),
         ))
     }
     #[cfg(target_arch = "x86")]
@@ -311,7 +311,10 @@ pub(crate) fn shutdown(fd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> {
         ret(syscall2_readonly(
             nr(__NR_socketcall),
             x86_sys(SYS_SHUTDOWN),
-            slice_just_addr::<ArgReg<SocketArg>, _>(&[borrowed_fd(fd), c_uint(how as c_uint)]),
+            slice_just_addr::<ArgReg<SocketArg>, _>(&[
+                borrowed_fd(fd),
+                c_uint(how as libc::c_uint),
+            ]),
         ))
     }
 }
@@ -804,7 +807,7 @@ pub(crate) fn connect_unix(fd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Res
 }
 
 #[inline]
-pub(crate) fn listen(fd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
+pub(crate) fn listen(fd: BorrowedFd<'_>, backlog: libc::c_int) -> io::Result<()> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         ret(syscall2_readonly(
@@ -824,12 +827,12 @@ pub(crate) fn listen(fd: BorrowedFd<'_>, backlog: c_int) -> io::Result<()> {
 }
 
 pub(crate) mod sockopt {
+    use super::libc;
     use super::BorrowedFd;
     use crate::io;
     use crate::net::sockopt::Timeout;
     use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
     use std::convert::TryInto;
-    use std::os::raw::{c_int, c_uint};
     use std::time::Duration;
 
     // TODO use Duration::ZERO when we don't need 1.51 support
@@ -957,8 +960,8 @@ pub(crate) mod sockopt {
         linger: Option<Duration>,
     ) -> io::Result<()> {
         let linger = linux_raw_sys::general::linger {
-            l_onoff: linger.is_some() as c_int,
-            l_linger: linger.unwrap_or_default().as_secs() as c_int,
+            l_onoff: linger.is_some() as libc::c_int,
+            l_linger: linger.unwrap_or_default().as_secs() as libc::c_int,
         };
         setsockopt(
             fd,
@@ -1010,10 +1013,7 @@ pub(crate) mod sockopt {
                 }
 
                 let mut timeout = linux_raw_sys::general::timeval {
-                    tv_sec: timeout
-                        .as_secs()
-                        .try_into()
-                        .unwrap_or(std::os::raw::c_long::MAX),
+                    tv_sec: timeout.as_secs().try_into().unwrap_or(libc::c_long::MAX),
                     tv_usec: timeout.subsec_micros() as _,
                 };
                 if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
@@ -1267,12 +1267,12 @@ pub(crate) mod sockopt {
     }
 
     #[inline]
-    fn to_ipv6mr_interface(interface: u32) -> c_int {
-        interface as c_int
+    fn to_ipv6mr_interface(interface: u32) -> libc::c_int {
+        interface as libc::c_int
     }
 
     #[inline]
-    fn from_bool(value: bool) -> c_uint {
-        value as c_uint
+    fn from_bool(value: bool) -> libc::c_uint {
+        value as libc::c_uint
     }
 }

@@ -10,12 +10,11 @@
 #![allow(unsafe_code)]
 #![cfg_attr(not(rustc_attrs), allow(unused_unsafe))]
 
+use super::super::libc;
 use crate::imp::fd::RawFd;
 use crate::imp::linux_raw::reg::{RetNumber, RetReg};
 use crate::io;
 use linux_raw_sys::{errno, v5_4};
-use std::ffi::c_void;
-use std::os::raw::{c_int, c_uint};
 
 /// The error type for rsix APIs.
 ///
@@ -75,12 +74,12 @@ impl Error {
     }
 }
 
-/// Check for an error from the result of a syscall which encodes a `c_int` on
-/// success.
+/// Check for an error from the result of a syscall which encodes a
+/// `libc::c_int` on success.
 #[inline]
 pub(in crate::imp::linux_raw) fn try_decode_c_int<Num: RetNumber>(
     raw: RetReg<Num>,
-) -> io::Result<c_int> {
+) -> io::Result<libc::c_int> {
     if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
@@ -90,12 +89,12 @@ pub(in crate::imp::linux_raw) fn try_decode_c_int<Num: RetNumber>(
     Ok(raw.decode_c_int())
 }
 
-/// Check for an error from the result of a syscall which encodes a `c_uint` on
-/// success.
+/// Check for an error from the result of a syscall which encodes a
+/// `libc::c_uint` on success.
 #[inline]
 pub(in crate::imp::linux_raw) fn try_decode_c_uint<Num: RetNumber>(
     raw: RetReg<Num>,
-) -> io::Result<c_uint> {
+) -> io::Result<libc::c_uint> {
     if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
@@ -125,7 +124,7 @@ pub(in crate::imp::linux_raw) fn try_decode_usize<Num: RetNumber>(
 #[inline]
 pub(in crate::imp::linux_raw) fn try_decode_void_star<Num: RetNumber>(
     raw: RetReg<Num>,
-) -> io::Result<*mut c_void> {
+) -> io::Result<*mut libc::c_void> {
     if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.

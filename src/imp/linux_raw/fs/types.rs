@@ -1,3 +1,4 @@
+use super::super::libc;
 use bitflags::bitflags;
 
 bitflags! {
@@ -5,7 +6,7 @@ bitflags! {
     ///
     /// [`fcntl_getfd`]: crate::fs::fcntl_getfd
     /// [`fcntl_setfd`]: crate::fs::fcntl_setfd
-    pub struct FdFlags: std::os::raw::c_uint {
+    pub struct FdFlags: libc::c_uint {
         /// `FD_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::FD_CLOEXEC;
     }
@@ -15,7 +16,7 @@ bitflags! {
     /// `*_OK` constants for use with [`accessat`].
     ///
     /// [`accessat`]: fn.accessat.html
-    pub struct Access: std::os::raw::c_uint {
+    pub struct Access: libc::c_uint {
         /// `R_OK`
         const READ_OK = linux_raw_sys::general::R_OK;
 
@@ -36,7 +37,7 @@ bitflags! {
     ///
     /// [`openat`]: crate::fs::openat
     /// [`statat`]: crate::fs::statat
-    pub struct AtFlags: std::os::raw::c_uint {
+    pub struct AtFlags: libc::c_uint {
         /// `AT_REMOVEDIR`
         const REMOVEDIR = linux_raw_sys::general::AT_REMOVEDIR;
 
@@ -134,7 +135,7 @@ bitflags! {
     /// `O_*` constants for use with [`openat`].
     ///
     /// [`openat`]: crate::fs::openat
-    pub struct OFlags: std::os::raw::c_uint {
+    pub struct OFlags: libc::c_uint {
         /// `O_ACCMODE`
         const ACCMODE = linux_raw_sys::general::O_ACCMODE;
 
@@ -234,7 +235,7 @@ bitflags! {
     /// `RENAME_*` constants for use with [`renameat_with`].
     ///
     /// [`renameat_with`]: crate::fs::renameat_with
-    pub struct RenameFlags: std::os::raw::c_uint {
+    pub struct RenameFlags: libc::c_uint {
         /// `RENAME_EXCHANGE`
         const EXCHANGE = linux_raw_sys::v5_4::general::RENAME_EXCHANGE;
 
@@ -342,7 +343,7 @@ bitflags! {
     /// `MFD_*` constants for use with [`memfd_create`].
     ///
     /// [`memfd_create`]: crate::fs::memfd_create
-    pub struct MemfdFlags: std::os::raw::c_uint {
+    pub struct MemfdFlags: libc::c_uint {
         /// `MFD_CLOEXEC`
         const CLOEXEC = linux_raw_sys::v5_4::general::MFD_CLOEXEC;
 
@@ -490,7 +491,7 @@ pub type RawMode = linux_raw_sys::general::__kernel_mode_t;
     target_arch = "arm"
 ))]
 // Don't use `__kernel_mode_t` since it's `u16` which differs from `st_size`.
-pub type RawMode = std::os::raw::c_uint;
+pub type RawMode = libc::c_uint;
 
 /// `dev_t`
 // Within the kernel the dev_t is 32-bit, but userspace uses a 64-bit field.

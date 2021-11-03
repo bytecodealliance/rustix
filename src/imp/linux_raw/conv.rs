@@ -17,6 +17,7 @@ use super::io::error::{
     try_decode_c_int, try_decode_c_uint, try_decode_raw_fd, try_decode_usize, try_decode_void,
     try_decode_void_star,
 };
+use super::libc;
 use super::reg::{raw_arg, ArgNumber, ArgReg, RetReg, R0};
 use super::time::ClockId;
 use crate::io::{self, OwnedFd};
@@ -28,7 +29,6 @@ use linux_raw_sys::general::O_LARGEFILE;
 use linux_raw_sys::general::{__kernel_clockid_t, socklen_t};
 use std::ffi::CStr;
 use std::mem::{transmute, MaybeUninit};
-use super::libc::{c_int, c_uint, c_void};
 use std::ptr::null;
 
 /// Convert `SYS_*` constants for socketcall.
@@ -77,12 +77,12 @@ pub(super) fn pass_usize<'a, Num: ArgNumber>(t: usize) -> ArgReg<'a, Num> {
 }
 
 #[inline]
-pub(super) fn void_star<'a, Num: ArgNumber>(c: *mut c_void) -> ArgReg<'a, Num> {
+pub(super) fn void_star<'a, Num: ArgNumber>(c: *mut libc::c_void) -> ArgReg<'a, Num> {
     raw_arg(c as usize)
 }
 
 #[inline]
-pub(super) fn const_void_star<'a, Num: ArgNumber>(c: *const c_void) -> ArgReg<'a, Num> {
+pub(super) fn const_void_star<'a, Num: ArgNumber>(c: *const libc::c_void) -> ArgReg<'a, Num> {
     raw_arg(c as usize)
 }
 
@@ -107,14 +107,14 @@ pub(super) fn borrowed_fd<'a, Num: ArgNumber>(fd: BorrowedFd<'a>) -> ArgReg<'a, 
     // zero-extension rather than sign-extension because it's a smaller
     // instruction.
     debug_assert!(fd.as_raw_fd() == crate::fs::cwd().as_raw_fd() || fd.as_raw_fd() >= 0);
-    raw_arg(fd.as_raw_fd() as c_uint as usize)
+    raw_arg(fd.as_raw_fd() as libc::c_uint as usize)
 }
 
 #[inline]
-pub(super) fn raw_fd<'a, Num: ArgNumber>(fd: c_int) -> ArgReg<'a, Num> {
+pub(super) fn raw_fd<'a, Num: ArgNumber>(fd: libc::c_int) -> ArgReg<'a, Num> {
     // As above, use zero-extension rather than sign-extension.
     debug_assert!(fd == crate::fs::cwd().as_raw_fd() || fd >= 0);
-    raw_arg(fd as c_uint as usize)
+    raw_arg(fd as libc::c_uint as usize)
 }
 
 #[inline]
@@ -181,12 +181,12 @@ pub(super) unsafe fn opt_ref<'a, T: Sized, Num: ArgNumber>(t: Option<&'a T>) -> 
 }
 
 #[inline]
-pub(super) fn c_int<'a, Num: ArgNumber>(i: c_int) -> ArgReg<'a, Num> {
+pub(super) fn c_int<'a, Num: ArgNumber>(i: libc::c_int) -> ArgReg<'a, Num> {
     raw_arg(i as usize)
 }
 
 #[inline]
-pub(super) fn c_uint<'a, Num: ArgNumber>(i: c_uint) -> ArgReg<'a, Num> {
+pub(super) fn c_uint<'a, Num: ArgNumber>(i: libc::c_uint) -> ArgReg<'a, Num> {
     raw_arg(i as usize)
 }
 
@@ -233,7 +233,7 @@ pub(super) fn dev_t<'a, Num: ArgNumber>(dev: u64) -> io::Result<ArgReg<'a, Num>>
 }
 
 #[cfg(target_pointer_width = "32")]
-fn oflags_bits(oflags: OFlags) -> c_uint {
+fn oflags_bits(oflags: OFlags) -> libc::c_uint {
     let mut bits = oflags.bits();
     // Add `O_LARGEFILE`, unless `O_PATH` is set, as Linux returns `EINVAL`
     // when both are set.
@@ -244,7 +244,7 @@ fn oflags_bits(oflags: OFlags) -> c_uint {
 }
 
 #[cfg(target_pointer_width = "64")]
-fn oflags_bits(oflags: OFlags) -> c_uint {
+fn oflags_bits(oflags: OFlags) -> libc::c_uint {
     oflags.bits()
 }
 
@@ -291,14 +291,14 @@ pub(super) unsafe fn ret_infallible(_raw: RetReg<R0>) {
 /// Convert a `usize` returned from a syscall that effectively returns a
 /// `c_int` on success.
 #[inline]
-pub(super) fn ret_c_int(raw: RetReg<R0>) -> io::Result<c_int> {
+pub(super) fn ret_c_int(raw: RetReg<R0>) -> io::Result<libc::c_int> {
     try_decode_c_int(raw)
 }
 
 /// Convert a `usize` returned from a syscall that effectively returns a
 /// `c_uint` on success.
 #[inline]
-pub(super) fn ret_c_uint(raw: RetReg<R0>) -> io::Result<c_uint> {
+pub(super) fn ret_c_uint(raw: RetReg<R0>) -> io::Result<libc::c_uint> {
     try_decode_c_uint(raw)
 }
 
@@ -367,6 +367,6 @@ pub(super) unsafe fn ret_discarded_fd(raw: RetReg<R0>) -> io::Result<()> {
 /// Convert a `usize` returned from a syscall that effectively returns a
 /// `*mut c_void` on success.
 #[inline]
-pub(super) fn ret_void_star(raw: RetReg<R0>) -> io::Result<*mut c_void> {
+pub(super) fn ret_void_star(raw: RetReg<R0>) -> io::Result<*mut libc::c_void> {
     try_decode_void_star(raw)
 }

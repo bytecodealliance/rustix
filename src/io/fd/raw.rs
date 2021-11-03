@@ -7,11 +7,11 @@
 #![cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
 #![allow(unsafe_code)]
 
-use std::os::raw;
+use crate::imp::c;
 
 /// Raw file descriptors.
 #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-pub type RawFd = raw::c_int;
+pub type RawFd = c::c_int;
 
 /// A trait to extract the raw file descriptor from an underlying object.
 ///

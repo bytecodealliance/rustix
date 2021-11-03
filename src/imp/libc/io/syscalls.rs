@@ -26,7 +26,6 @@ use super::{EventfdFlags, UserfaultfdFlags};
 use super::{MlockFlags, ReadWriteFlags};
 use crate::io::{self, OwnedFd};
 use errno::errno;
-use libc::{c_int, c_void};
 use std::cmp::min;
 use std::convert::TryInto;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
@@ -91,7 +90,7 @@ pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut]) -> io::Result<usize
         ret_ssize_t(libc::readv(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()) as c_int,
+            min(bufs.len(), max_iov()) as libc::c_int,
         ))?
     };
     Ok(nread as usize)
@@ -102,7 +101,7 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> 
         ret_ssize_t(libc::writev(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()) as c_int,
+            min(bufs.len(), max_iov()) as libc::c_int,
         ))?
     };
     Ok(nwritten as usize)
@@ -116,7 +115,7 @@ pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io
         ret_ssize_t(libc_preadv(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()) as c_int,
+            min(bufs.len(), max_iov()) as libc::c_int,
             offset,
         ))?
     };
@@ -131,7 +130,7 @@ pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::
         ret_ssize_t(libc_pwritev(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()) as c_int,
+            min(bufs.len(), max_iov()) as libc::c_int,
             offset,
         ))?
     };
@@ -151,7 +150,7 @@ pub(crate) fn preadv2(
         ret_ssize_t(libc_preadv2(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()) as c_int,
+            min(bufs.len(), max_iov()) as libc::c_int,
             offset,
             flags.bits(),
         ))?
@@ -189,7 +188,7 @@ pub(crate) fn pwritev2(
         ret_ssize_t(libc_pwritev2(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<libc::iovec>(),
-            min(bufs.len(), max_iov()) as c_int,
+            min(bufs.len(), max_iov()) as libc::c_int,
             offset,
             flags.bits(),
         ))?
@@ -248,11 +247,11 @@ fn max_iov() -> usize {
 }
 
 pub(crate) unsafe fn close(raw_fd: RawFd) {
-    let _ = libc::close(raw_fd as c_int);
+    let _ = libc::close(raw_fd as libc::c_int);
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn madvise(addr: *mut c_void, len: usize, advice: IoAdvice) -> io::Result<()> {
+pub(crate) fn madvise(addr: *mut libc::c_void, len: usize, advice: IoAdvice) -> io::Result<()> {
     // On Linux platforms, `MADV_DONTNEED` has the same value as
     // `POSIX_MADV_DONTNEED` but different behavior. We remap it to a different
     // value, and check for it here.
@@ -308,7 +307,7 @@ pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
 
 pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     unsafe {
-        let data = value as c_int;
+        let data = value as libc::c_int;
         ret(libc::ioctl(borrowed_fd(fd), libc::FIONBIO, &data))
     }
 }
@@ -508,13 +507,13 @@ pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
 /// with memory pointed to by raw pointers is unsafe.
 #[cfg(not(target_os = "wasi"))]
 pub(crate) unsafe fn mmap(
-    ptr: *mut c_void,
+    ptr: *mut libc::c_void,
     len: usize,
     prot: ProtFlags,
     flags: MapFlags,
     fd: BorrowedFd<'_>,
     offset: u64,
-) -> io::Result<*mut c_void> {
+) -> io::Result<*mut libc::c_void> {
     let res = libc_mmap(
         ptr,
         len,
@@ -536,11 +535,11 @@ pub(crate) unsafe fn mmap(
 /// with memory pointed to by raw pointers is unsafe.
 #[cfg(not(target_os = "wasi"))]
 pub(crate) unsafe fn mmap_anonymous(
-    ptr: *mut c_void,
+    ptr: *mut libc::c_void,
     len: usize,
     prot: ProtFlags,
     flags: MapFlags,
-) -> io::Result<*mut c_void> {
+) -> io::Result<*mut libc::c_void> {
     let res = libc_mmap(
         ptr,
         len,
@@ -558,7 +557,7 @@ pub(crate) unsafe fn mmap_anonymous(
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) unsafe fn mprotect(
-    ptr: *mut c_void,
+    ptr: *mut libc::c_void,
     len: usize,
     flags: MprotectFlags,
 ) -> io::Result<()> {
@@ -566,7 +565,7 @@ pub(crate) unsafe fn mprotect(
 }
 
 #[cfg(not(target_os = "wasi"))]
-pub(crate) unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
+pub(crate) unsafe fn munmap(ptr: *mut libc::c_void, len: usize) -> io::Result<()> {
     ret(libc::munmap(ptr, len))
 }
 
@@ -576,11 +575,11 @@ pub(crate) unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
 /// anything working with memory pointed to by raw pointers is unsafe.
 #[cfg(target_os = "linux")]
 pub(crate) unsafe fn mremap(
-    old_address: *mut c_void,
+    old_address: *mut libc::c_void,
     old_size: usize,
     new_size: usize,
     flags: MremapFlags,
-) -> io::Result<*mut c_void> {
+) -> io::Result<*mut libc::c_void> {
     let res = libc::mremap(old_address, old_size, new_size, flags.bits());
     if res == libc::MAP_FAILED {
         Err(io::Error::last_os_error())
@@ -596,12 +595,12 @@ pub(crate) unsafe fn mremap(
 /// pointers is unsafe.
 #[cfg(target_os = "linux")]
 pub(crate) unsafe fn mremap_fixed(
-    old_address: *mut c_void,
+    old_address: *mut libc::c_void,
     old_size: usize,
     new_size: usize,
     flags: MremapFlags,
-    new_address: *mut c_void,
-) -> io::Result<*mut c_void> {
+    new_address: *mut libc::c_void,
+) -> io::Result<*mut libc::c_void> {
     let res = libc::mremap(
         old_address,
         old_size,
@@ -622,7 +621,7 @@ pub(crate) unsafe fn mremap_fixed(
 /// boundaries.
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub(crate) unsafe fn mlock(addr: *mut c_void, length: usize) -> io::Result<()> {
+pub(crate) unsafe fn mlock(addr: *mut libc::c_void, length: usize) -> io::Result<()> {
     ret(libc::mlock(addr, length))
 }
 
@@ -633,7 +632,7 @@ pub(crate) unsafe fn mlock(addr: *mut c_void, length: usize) -> io::Result<()> {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub(crate) unsafe fn mlock_with(
-    addr: *mut c_void,
+    addr: *mut libc::c_void,
     length: usize,
     flags: MlockFlags,
 ) -> io::Result<()> {
@@ -647,7 +646,7 @@ pub(crate) unsafe fn mlock_with(
 /// boundaries.
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub(crate) unsafe fn munlock(addr: *mut c_void, length: usize) -> io::Result<()> {
+pub(crate) unsafe fn munlock(addr: *mut libc::c_void, length: usize) -> io::Result<()> {
     ret(libc::munlock(addr, length))
 }
 
@@ -672,7 +671,7 @@ pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
 }
 
 #[inline]
-pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c_int) -> io::Result<usize> {
+pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: libc::c_int) -> io::Result<usize> {
     let nfds = fds
         .len()
         .try_into()

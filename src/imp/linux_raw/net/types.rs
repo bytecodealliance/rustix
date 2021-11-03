@@ -1,5 +1,5 @@
-use bitflags::bitflags;
 use super::super::libc;
+use bitflags::bitflags;
 
 /// A type for holding raw integer socket types.
 #[doc(hidden)]

@@ -14,9 +14,8 @@
 #![allow(unsafe_code)]
 
 use super::fd::RawFd;
-use std::ffi::c_void;
+use super::libc;
 use std::marker::PhantomData;
-use std::os::raw::{c_int, c_uint};
 
 pub(super) trait ToAsm: private::Sealed {
     /// Convert `self` to a `usize` ready to be passed to a syscall
@@ -123,9 +122,9 @@ impl<Num: RetNumber> RetReg<Num> {
     }
 
     #[inline]
-    pub(super) fn decode_c_int(self) -> c_int {
+    pub(super) fn decode_c_int(self) -> libc::c_int {
         let bits = self.decode();
-        let c_int_ = bits as c_int;
+        let c_int_ = bits as libc::c_int;
 
         // Converting `raw` to `c_int` should be lossless.
         debug_assert_eq!(c_int_ as usize, bits);
@@ -134,9 +133,9 @@ impl<Num: RetNumber> RetReg<Num> {
     }
 
     #[inline]
-    pub(super) fn decode_c_uint(self) -> c_uint {
+    pub(super) fn decode_c_uint(self) -> libc::c_uint {
         let bits = self.decode();
-        let c_uint_ = bits as c_uint;
+        let c_uint_ = bits as libc::c_uint;
 
         // Converting `raw` to `c_uint` should be lossless.
         debug_assert_eq!(c_uint_ as usize, bits);
@@ -145,8 +144,8 @@ impl<Num: RetNumber> RetReg<Num> {
     }
 
     #[inline]
-    pub(super) fn decode_void_star(self) -> *mut c_void {
-        self.decode() as *mut c_void
+    pub(super) fn decode_void_star(self) -> *mut libc::c_void {
+        self.decode() as *mut libc::c_void
     }
 
     #[cfg(target_pointer_width = "64")]
