@@ -168,7 +168,7 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
             {
                 std::process::abort();
             }
-            #[cfg(feature = "rustc-dep-of-std")]
+            #[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
             {
                 core::intrinsics::abort();
             }

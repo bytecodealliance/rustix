@@ -30,7 +30,7 @@ mod poll;
 mod procfs;
 #[cfg(not(windows))]
 mod read_write;
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
 mod seek_from;
 #[cfg(not(windows))]
 mod stdio;
@@ -106,14 +106,14 @@ pub use imp::io::Winsize;
 
 // Declare `IoSlice` and `IoSliceMut`.
 #[cfg(not(windows))]
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
 pub use imp::io::{IoSlice, IoSliceMut};
 #[cfg(not(windows))]
 #[cfg(feature = "std")]
 pub use std::io::{IoSlice, IoSliceMut};
 
 // Declare `SeekFrom`.
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
 pub use seek_from::SeekFrom;
 #[cfg(feature = "std")]
 pub use std::io::SeekFrom;
