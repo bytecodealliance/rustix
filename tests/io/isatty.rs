@@ -1,4 +1,4 @@
-use rsix::io::isatty;
+use rustix::io::isatty;
 use tempfile::{tempdir, TempDir};
 
 #[allow(unused)]
@@ -36,13 +36,16 @@ fn stdio_descriptors() {
     use std::os::wasi::io::AsRawFd;
 
     unsafe {
-        assert_eq!(rsix::io::stdin().as_raw_fd(), std::io::stdin().as_raw_fd());
         assert_eq!(
-            rsix::io::stdout().as_raw_fd(),
+            rustix::io::stdin().as_raw_fd(),
+            std::io::stdin().as_raw_fd()
+        );
+        assert_eq!(
+            rustix::io::stdout().as_raw_fd(),
             std::io::stdout().as_raw_fd()
         );
         assert_eq!(
-            rsix::io::stderr().as_raw_fd(),
+            rustix::io::stderr().as_raw_fd(),
             std::io::stderr().as_raw_fd()
         );
     }

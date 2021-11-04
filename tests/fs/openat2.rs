@@ -1,7 +1,7 @@
-use rsix::fs::{cwd, mkdirat, openat, openat2, symlinkat, Mode, OFlags, ResolveFlags};
-use rsix::io::OwnedFd;
-use rsix::io_lifetimes::AsFd;
-use rsix::{io, path};
+use rustix::fs::{cwd, mkdirat, openat, openat2, symlinkat, Mode, OFlags, ResolveFlags};
+use rustix::io::OwnedFd;
+use rustix::io_lifetimes::AsFd;
+use rustix::{io, path};
 use std::os::unix::io::AsRawFd;
 
 // Like `openat2`, but keep retrying until it fails or succeeds.

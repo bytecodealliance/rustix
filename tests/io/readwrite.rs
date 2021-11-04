@@ -2,8 +2,8 @@ use std::io::{IoSlice, IoSliceMut};
 
 #[test]
 fn test_readwrite_pv() {
-    use rsix::fs::{cwd, openat, Mode, OFlags};
-    use rsix::io::{preadv, pwritev};
+    use rustix::fs::{cwd, openat, Mode, OFlags};
+    use rustix::io::{preadv, pwritev};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -25,7 +25,7 @@ fn test_readwrite_pv() {
     {
         match pwritev(&foo, &[IoSlice::new(b"hello")], 200) {
             Ok(_) => (),
-            Err(rsix::io::Error::NOSYS) => return,
+            Err(rustix::io::Error::NOSYS) => return,
             Err(err) => Err(err).unwrap(),
         }
     }
@@ -39,8 +39,8 @@ fn test_readwrite_pv() {
 
 #[test]
 fn test_readwrite_p() {
-    use rsix::fs::{cwd, openat, Mode, OFlags};
-    use rsix::io::{pread, pwrite};
+    use rustix::fs::{cwd, openat, Mode, OFlags};
+    use rustix::io::{pread, pwrite};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -63,8 +63,8 @@ fn test_readwrite_p() {
 
 #[test]
 fn test_readwrite_v() {
-    use rsix::fs::{cwd, openat, seek, Mode, OFlags};
-    use rsix::io::{readv, writev, SeekFrom};
+    use rustix::fs::{cwd, openat, seek, Mode, OFlags};
+    use rustix::io::{readv, writev, SeekFrom};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -88,8 +88,8 @@ fn test_readwrite_v() {
 
 #[test]
 fn test_readwrite() {
-    use rsix::fs::{cwd, openat, seek, Mode, OFlags};
-    use rsix::io::{read, write};
+    use rustix::fs::{cwd, openat, seek, Mode, OFlags};
+    use rustix::io::{read, write};
     use std::io::SeekFrom;
 
     let tmp = tempfile::tempdir().unwrap();

@@ -1,8 +1,8 @@
 #[test]
 fn test_timespec_layout() {
     #[cfg(not(target_os = "redox"))]
-    use rsix::fs::{UTIME_NOW, UTIME_OMIT};
-    use rsix::time::{Nsecs, Secs, Timespec};
+    use rustix::fs::{UTIME_NOW, UTIME_OMIT};
+    use rustix::time::{Nsecs, Secs, Timespec};
 
     let tv_sec: Secs = 0;
     let tv_nsec: Nsecs = 0;

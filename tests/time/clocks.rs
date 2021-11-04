@@ -7,11 +7,11 @@
     target_os = "redox",
     target_os = "wasi",
 )))]
-use rsix::time::{clock_nanosleep_absolute, clock_nanosleep_relative, ClockId};
+use rustix::time::{clock_nanosleep_absolute, clock_nanosleep_relative, ClockId};
 #[cfg(not(target_os = "redox"))]
 use {
-    rsix::time::{nanosleep, NanosleepRelativeResult},
-    rsix::{io, time::Timespec},
+    rustix::time::{nanosleep, NanosleepRelativeResult},
+    rustix::{io, time::Timespec},
 };
 
 #[cfg(not(target_os = "redox"))]

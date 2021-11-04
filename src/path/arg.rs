@@ -31,9 +31,9 @@ use std::path::{Component, Components, Iter, Path, PathBuf};
 /// # Example
 ///
 /// ```rust
-/// use rsix::ffi::ZStr;
-/// use rsix::io;
-/// use rsix::path::Arg;
+/// use rustix::ffi::ZStr;
+/// use rustix::io;
+/// use rustix::path::Arg;
 ///
 /// pub fn touch<P: Arg>(path: P) -> io::Result<()> {
 ///     let path = path.into_z_str()?;

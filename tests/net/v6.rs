@@ -3,7 +3,7 @@
 
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]
 
-use rsix::net::{
+use rustix::net::{
     accept, bind_v6, connect_v6, getsockname, listen, recv, send, socket, AddressFamily, Ipv6Addr,
     Protocol, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV6, SocketType,
 };
@@ -75,7 +75,7 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
 #[test]
 fn test_v6() {
     #[cfg(windows)]
-    rsix::net::wsa_startup().unwrap();
+    rustix::net::wsa_startup().unwrap();
 
     let ready = Arc::new((Mutex::new(0_u16), Condvar::new()));
     let ready_clone = Arc::clone(&ready);
@@ -96,5 +96,5 @@ fn test_v6() {
     server.join().unwrap();
 
     #[cfg(windows)]
-    rsix::net::wsa_cleanup().unwrap();
+    rustix::net::wsa_cleanup().unwrap();
 }

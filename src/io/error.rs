@@ -9,12 +9,12 @@ use core::{fmt, result};
 #[cfg(feature = "std")]
 use std::error;
 
-/// A specialized `Result` type for rsix APIs.
+/// A specialized `Result` type for `rustix` APIs.
 pub type Result<T> = result::Result<T, Error>;
 
 /// `errno`—An error code.
 ///
-/// The error type for rsix APIs. This is similar to `std::io::Error`, but
+/// The error type for `rustix` APIs. This is similar to `std::io::Error`, but
 /// only holds an OS error code, and no extra error value.
 ///
 /// # References

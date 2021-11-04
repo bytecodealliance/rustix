@@ -8,13 +8,13 @@
     .file       "arm.S"
     .arch       armv5t
 
-    .section    .text.rsix_syscall0_nr_last,"ax",%progbits
+    .section    .text.rustix_syscall0_nr_last,"ax",%progbits
     .p2align    4
-    .globl      rsix_syscall0_nr_last
-    .weak       rsix_syscall0_nr_last
-    .hidden     rsix_syscall0_nr_last
-    .type       rsix_syscall0_nr_last, %function
-rsix_syscall0_nr_last:
+    .globl      rustix_syscall0_nr_last
+    .weak       rustix_syscall0_nr_last
+    .hidden     rustix_syscall0_nr_last
+    .type       rustix_syscall0_nr_last, %function
+rustix_syscall0_nr_last:
     .fnstart
     .cantunwind
     push    {r7, lr}
@@ -22,15 +22,15 @@ rsix_syscall0_nr_last:
     svc     #0
     pop     {r7, pc}
     .fnend
-    .size rsix_syscall0_nr_last, .-rsix_syscall0_nr_last
+    .size rustix_syscall0_nr_last, .-rustix_syscall0_nr_last
 
-    .section    .text.rsix_syscall1_nr_last,"ax",%progbits
+    .section    .text.rustix_syscall1_nr_last,"ax",%progbits
     .p2align 4
-    .globl      rsix_syscall1_nr_last
-    .weak       rsix_syscall1_nr_last
-    .hidden     rsix_syscall1_nr_last
-    .type       rsix_syscall1_nr_last, %function
-rsix_syscall1_nr_last:
+    .globl      rustix_syscall1_nr_last
+    .weak       rustix_syscall1_nr_last
+    .hidden     rustix_syscall1_nr_last
+    .type       rustix_syscall1_nr_last, %function
+rustix_syscall1_nr_last:
     .fnstart
     .cantunwind
     push    {r7, lr}
@@ -38,15 +38,15 @@ rsix_syscall1_nr_last:
     svc     #0
     pop     {r7, pc}
     .fnend
-    .size rsix_syscall1_nr_last, .-rsix_syscall1_nr_last
+    .size rustix_syscall1_nr_last, .-rustix_syscall1_nr_last
     
-    .section    .text.rsix_syscall1_noreturn_nr_last,"ax",%progbits
+    .section    .text.rustix_syscall1_noreturn_nr_last,"ax",%progbits
     .p2align    4
-    .globl      rsix_syscall1_noreturn_nr_last
-    .weak       rsix_syscall1_noreturn_nr_last
-    .hidden     rsix_syscall1_noreturn_nr_last
-    .type       rsix_syscall1_noreturn_nr_last, %function
-rsix_syscall1_noreturn_nr_last:
+    .globl      rustix_syscall1_noreturn_nr_last
+    .weak       rustix_syscall1_noreturn_nr_last
+    .hidden     rustix_syscall1_noreturn_nr_last
+    .type       rustix_syscall1_noreturn_nr_last, %function
+rustix_syscall1_noreturn_nr_last:
     .fnstart
     .cantunwind
     // Don't save r7 and lr; this is noreturn, so we'll never restore them.
@@ -54,15 +54,15 @@ rsix_syscall1_noreturn_nr_last:
     svc     #0
     udf     #16 // Trap instruction
     .fnend
-    .size rsix_syscall1_noreturn_nr_last, .-rsix_syscall1_noreturn_nr_last
+    .size rustix_syscall1_noreturn_nr_last, .-rustix_syscall1_noreturn_nr_last
 
-    .section    .text.rsix_syscall2_nr_last,"ax",%progbits
+    .section    .text.rustix_syscall2_nr_last,"ax",%progbits
     .p2align 4
-    .globl      rsix_syscall2_nr_last
-    .weak       rsix_syscall2_nr_last
-    .hidden     rsix_syscall2_nr_last
-    .type       rsix_syscall2_nr_last, %function
-rsix_syscall2_nr_last:
+    .globl      rustix_syscall2_nr_last
+    .weak       rustix_syscall2_nr_last
+    .hidden     rustix_syscall2_nr_last
+    .type       rustix_syscall2_nr_last, %function
+rustix_syscall2_nr_last:
     .fnstart
     .cantunwind
     push    {r7, lr}
@@ -70,15 +70,15 @@ rsix_syscall2_nr_last:
     svc     #0
     pop     {r7, pc}
     .fnend
-    .size rsix_syscall2_nr_last, .-rsix_syscall2_nr_last
+    .size rustix_syscall2_nr_last, .-rustix_syscall2_nr_last
 
-    .section    .text.rsix_syscall3_nr_last,"ax",%progbits
+    .section    .text.rustix_syscall3_nr_last,"ax",%progbits
     .p2align 4
-    .globl      rsix_syscall3_nr_last
-    .weak       rsix_syscall3_nr_last
-    .hidden     rsix_syscall3_nr_last
-    .type       rsix_syscall3_nr_last, %function
-rsix_syscall3_nr_last:
+    .globl      rustix_syscall3_nr_last
+    .weak       rustix_syscall3_nr_last
+    .hidden     rustix_syscall3_nr_last
+    .type       rustix_syscall3_nr_last, %function
+rustix_syscall3_nr_last:
     .fnstart
     .cantunwind
     push    {r7, lr}
@@ -86,15 +86,15 @@ rsix_syscall3_nr_last:
     svc     #0
     pop     {r7, pc}
     .fnend
-    .size rsix_syscall3_nr_last, .-rsix_syscall3_nr_last
+    .size rustix_syscall3_nr_last, .-rustix_syscall3_nr_last
 
-    .section    .text.rsix_syscall4_nr_last,"ax",%progbits
+    .section    .text.rustix_syscall4_nr_last,"ax",%progbits
     .p2align 4
-    .globl      rsix_syscall4_nr_last
-    .weak       rsix_syscall4_nr_last
-    .hidden     rsix_syscall4_nr_last
-    .type       rsix_syscall4_nr_last, %function
-rsix_syscall4_nr_last:
+    .globl      rustix_syscall4_nr_last
+    .weak       rustix_syscall4_nr_last
+    .hidden     rustix_syscall4_nr_last
+    .type       rustix_syscall4_nr_last, %function
+rustix_syscall4_nr_last:
     .fnstart
     .cantunwind
     push    {r7, lr}
@@ -102,15 +102,15 @@ rsix_syscall4_nr_last:
     svc     #0
     pop     {r7, pc}
     .fnend
-    .size rsix_syscall4_nr_last, .-rsix_syscall4_nr_last
+    .size rustix_syscall4_nr_last, .-rustix_syscall4_nr_last
 
-    .section    .text.rsix_syscall5_nr_last,"ax",%progbits
+    .section    .text.rustix_syscall5_nr_last,"ax",%progbits
     .p2align 4
-    .globl      rsix_syscall5_nr_last
-    .weak       rsix_syscall5_nr_last
-    .hidden     rsix_syscall5_nr_last
-    .type       rsix_syscall5_nr_last, %function
-rsix_syscall5_nr_last:
+    .globl      rustix_syscall5_nr_last
+    .weak       rustix_syscall5_nr_last
+    .hidden     rustix_syscall5_nr_last
+    .type       rustix_syscall5_nr_last, %function
+rustix_syscall5_nr_last:
     .fnstart
     .cantunwind
     push    {r4, r7, r11, lr}
@@ -119,15 +119,15 @@ rsix_syscall5_nr_last:
     svc     #0
     pop     {r4, r7, r11, pc}
     .fnend
-    .size rsix_syscall5_nr_last, .-rsix_syscall5_nr_last
+    .size rustix_syscall5_nr_last, .-rustix_syscall5_nr_last
 
-    .section    .text.rsix_syscall6_nr_last,"ax",%progbits
+    .section    .text.rustix_syscall6_nr_last,"ax",%progbits
     .p2align 4
-    .globl      rsix_syscall6_nr_last
-    .weak       rsix_syscall6_nr_last
-    .hidden     rsix_syscall6_nr_last
-    .type       rsix_syscall6_nr_last, %function
-rsix_syscall6_nr_last:
+    .globl      rustix_syscall6_nr_last
+    .weak       rustix_syscall6_nr_last
+    .hidden     rustix_syscall6_nr_last
+    .type       rustix_syscall6_nr_last, %function
+rustix_syscall6_nr_last:
     .fnstart
     .cantunwind
     push    {r4, r5, r7, lr}
@@ -136,6 +136,6 @@ rsix_syscall6_nr_last:
     svc     #0
     pop     {r4, r5, r7, pc}
     .fnend
-    .size rsix_syscall6_nr_last, .-rsix_syscall6_nr_last
+    .size rustix_syscall6_nr_last, .-rustix_syscall6_nr_last
 
     .section .note.GNU-stack,"",%progbits

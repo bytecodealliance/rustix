@@ -1,5 +1,6 @@
-//! `rsix` provides efficient memory-safe and [I/O-safe] wrappers to
-//! POSIX-like, Unix-like, and Linux syscalls.
+//! `rustix` provides efficient memory-safe and [I/O-safe] wrappers to
+//! POSIX-like, Unix-like, Linux, and Winsock syscall-like APIs, with
+//! configurable backends.
 //!
 //! The wrappers perform the following tasks:
 //!  - Error values are translated to [`Result`]s.
@@ -39,8 +40,8 @@
 //! [`OwnedFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/struct.OwnedFd.html
 //! [io-lifetimes crate]: https://crates.io/crates/io-lifetimes
 //! [I/O-safe]: https://github.com/rust-lang/rfcs/pull/3128
-//! [`Result`]: https://docs.rs/rsix/latest/rsix/io/type.Result.html
-//! [`Arg`]: https://docs.rs/rsix/latest/rsix/path/trait.Arg.html
+//! [`Result`]: https://docs.rs/rustix/latest/rustix/io/type.Result.html
+//! [`Arg`]: https://docs.rs/rustix/latest/rustix/path/trait.Arg.html
 
 #![deny(missing_docs)]
 #![cfg_attr(linux_raw, deny(unsafe_code))]

@@ -1089,7 +1089,7 @@ fn _utimensat(
             c_uint(flags.bits()),
         ))
         .or_else(|err| {
-            // See the comments in `rsix_clock_gettime_via_syscall` about
+            // See the comments in `rustix_clock_gettime_via_syscall` about
             // emulation.
             if err == io::Error::NOSYS {
                 let old_utimes = [

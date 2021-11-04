@@ -2,8 +2,8 @@
 
 #[test]
 fn test_mmap() {
-    use rsix::fs::{cwd, openat, Mode, OFlags};
-    use rsix::io::{mmap, munmap, write, MapFlags, ProtFlags};
+    use rustix::fs::{cwd, openat, Mode, OFlags};
+    use rustix::io::{mmap, munmap, write, MapFlags, ProtFlags};
     use std::ptr::null_mut;
     use std::slice;
 
@@ -57,7 +57,7 @@ fn test_mmap() {
 
 #[test]
 fn test_mmap_anonymous() {
-    use rsix::io::{mmap_anonymous, munmap, MapFlags, ProtFlags};
+    use rustix::io::{mmap_anonymous, munmap, MapFlags, ProtFlags};
     use std::ptr::null_mut;
     use std::slice;
 
@@ -72,7 +72,7 @@ fn test_mmap_anonymous() {
 
 #[test]
 fn test_mprotect() {
-    use rsix::io::{mmap_anonymous, mprotect, munmap, MapFlags, MprotectFlags, ProtFlags};
+    use rustix::io::{mmap_anonymous, mprotect, munmap, MapFlags, MprotectFlags, ProtFlags};
     use std::ptr::null_mut;
     use std::slice;
 
@@ -91,9 +91,9 @@ fn test_mprotect() {
 
 #[test]
 fn test_mlock() {
-    use rsix::io::{mlock, mmap_anonymous, munlock, munmap, MapFlags, ProtFlags};
+    use rustix::io::{mlock, mmap_anonymous, munlock, munmap, MapFlags, ProtFlags};
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    use rsix::io::{mlock_with, MlockFlags};
+    use rustix::io::{mlock_with, MlockFlags};
     use std::ptr::null_mut;
 
     unsafe {
@@ -105,7 +105,7 @@ fn test_mlock() {
         #[cfg(any(target_os = "android", target_os = "linux"))]
         {
             match mlock_with(addr, 8192, MlockFlags::empty()) {
-                Err(rsix::io::Error::NOSYS) => (),
+                Err(rustix::io::Error::NOSYS) => (),
                 Err(err) => Err(err).unwrap(),
                 Ok(()) => munlock(addr, 8192).unwrap(),
             }
@@ -113,7 +113,7 @@ fn test_mlock() {
             #[cfg(linux_raw)] // libc doesn't expose `MLOCK_UNFAULT` yet.
             {
                 match mlock_with(addr, 8192, MlockFlags::ONFAULT) {
-                    Err(rsix::io::Error::NOSYS) => (),
+                    Err(rustix::io::Error::NOSYS) => (),
                     Err(err) => Err(err).unwrap(),
                     Ok(()) => munlock(addr, 8192).unwrap(),
                 }
@@ -127,7 +127,7 @@ fn test_mlock() {
 
 #[test]
 fn test_madvise() {
-    use rsix::io::{madvise, mmap_anonymous, munmap, Advice, MapFlags, ProtFlags};
+    use rustix::io::{madvise, mmap_anonymous, munmap, Advice, MapFlags, ProtFlags};
     use std::ptr::null_mut;
 
     unsafe {

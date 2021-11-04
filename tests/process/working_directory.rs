@@ -1,5 +1,5 @@
 #[allow(unused_imports)]
-use rsix::fs::{Mode, OFlags};
+use rustix::fs::{Mode, OFlags};
 use tempfile::{tempdir, TempDir};
 
 #[allow(unused)]
@@ -14,12 +14,12 @@ fn tmpdir() -> TempDir {
 fn test_changing_working_directory() {
     let tmpdir = tmpdir();
 
-    let orig_cwd = rsix::process::getcwd(Vec::new()).expect("get the cwd");
-    let orig_fd_cwd = rsix::fs::openat(&rsix::fs::cwd(), ".", OFlags::RDONLY, Mode::empty())
+    let orig_cwd = rustix::process::getcwd(Vec::new()).expect("get the cwd");
+    let orig_fd_cwd = rustix::fs::openat(&rustix::fs::cwd(), ".", OFlags::RDONLY, Mode::empty())
         .expect("get a fd for the current directory");
 
-    rsix::process::chdir(tmpdir.path()).expect("changing dir to the tmp");
-    let ch1_cwd = rsix::process::getcwd(Vec::new()).expect("get the cwd");
+    rustix::process::chdir(tmpdir.path()).expect("changing dir to the tmp");
+    let ch1_cwd = rustix::process::getcwd(Vec::new()).expect("get the cwd");
 
     assert_ne!(orig_cwd, ch1_cwd, "The cwd hasn't changed!");
     assert_eq!(
@@ -29,10 +29,10 @@ fn test_changing_working_directory() {
     );
 
     #[cfg(not(target_os = "fuchsia"))]
-    rsix::process::fchdir(orig_fd_cwd).expect("changing dir to the original");
+    rustix::process::fchdir(orig_fd_cwd).expect("changing dir to the original");
     #[cfg(target_os = "fushcia")]
-    rsix::process::chdir(orig_cwd).expect("changing dir to the original");
-    let ch2_cwd = rsix::process::getcwd(ch1_cwd).expect("get the cwd");
+    rustix::process::chdir(orig_cwd).expect("changing dir to the original");
+    let ch2_cwd = rustix::process::getcwd(ch1_cwd).expect("get the cwd");
 
     assert_eq!(
         orig_cwd, ch2_cwd,

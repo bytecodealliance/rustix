@@ -1,4 +1,4 @@
-//! The rsix `Error` type.
+//! The `rustix` `Error` type.
 //!
 //! This type holds an OS error code, which conceptually corresponds to an
 //! `errno` value.
@@ -6,7 +6,7 @@
 use super::super::c;
 use errno::errno;
 
-/// The error type for rsix APIs.
+/// The error type for `rustix` APIs.
 ///
 /// This is similar to `std::io::Error`, but only holds an OS error code,
 /// and no extra error value.

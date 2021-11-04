@@ -668,7 +668,7 @@ impl ZString {
     /// # Examples
     ///
     /// ```
-    /// use rsix::ffi::{ZString, ZStr};
+    /// use rustix::ffi::{ZString, ZStr};
     ///
     /// let z_string = ZString::new(b"foo".to_vec()).expect("ZString::new failed");
     /// let zstr = z_string.as_z_str();
@@ -688,7 +688,7 @@ impl ZString {
     ///
     /// ```
     /// use std::ffi::CStr;
-    /// use rsix::ffi::{ZString, ZStr};
+    /// use rustix::ffi::{ZString, ZStr};
     ///
     /// let z_string = ZString::new(b"foo".to_vec()).expect("ZString::new failed");
     /// let cstr = z_string.as_c_str();
@@ -708,7 +708,7 @@ impl ZString {
     /// # Examples
     ///
     /// ```
-    /// use rsix::ffi::{ZString, ZStr};
+    /// use rustix::ffi::{ZString, ZStr};
     ///
     /// let z_string = ZString::new(b"foo".to_vec()).expect("ZString::new failed");
     /// let boxed = c_string.into_boxed_z_str();
@@ -727,7 +727,7 @@ impl ZString {
     ///
     /// ```
     /// use std::ffi::ZStr;
-    /// use rsix::ffi::{ZString, ZStr};
+    /// use rustix::ffi::{ZString, ZStr};
     ///
     /// let z_string = ZString::new(b"foo".to_vec()).expect("ZString::new failed");
     /// let boxed = z_string.into_boxed_c_str();
@@ -1567,7 +1567,7 @@ impl ZStr {
     /// # Examples
     ///
     /// ```
-    /// use rsix::ffi::ZString;
+    /// use rustix::ffi::ZString;
     ///
     /// let z_string = ZString::new(b"foo".to_vec()).expect("ZString::new failed");
     /// let boxed = z_string.into_boxed_z_str();
@@ -1588,7 +1588,7 @@ impl ZStr {
     ///
     /// ```
     /// use std::ffi::CString;
-    /// use rsix::ffi::ZString;
+    /// use rustix::ffi::ZString;
     ///
     /// let z_string = ZString::new(b"foo".to_vec()).expect("ZString::new failed");
     /// let boxed = z_string.into_boxed_z_str();

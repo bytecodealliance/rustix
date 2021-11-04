@@ -1,6 +1,6 @@
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use rsix::process::linux_hwcap;
-use rsix::process::page_size;
+use rustix::process::linux_hwcap;
+use rustix::process::page_size;
 
 #[test]
 fn test_page_size() {

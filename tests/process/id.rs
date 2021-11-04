@@ -1,4 +1,4 @@
-use rsix::process;
+use rustix::process;
 
 #[test]
 fn test_getuid() {

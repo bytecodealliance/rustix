@@ -1,6 +1,6 @@
 #![cfg(not(target_os = "redox"))]
 
-use rsix::fs::{Dir, DirEntry};
+use rustix::fs::{Dir, DirEntry};
 use std::collections::HashMap;
 
 #[test]

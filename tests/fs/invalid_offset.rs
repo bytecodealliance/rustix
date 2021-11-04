@@ -7,11 +7,11 @@
 
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]
 
-use rsix::io::SeekFrom;
+use rustix::io::SeekFrom;
 
 #[test]
 fn invalid_offset_seek() {
-    use rsix::fs::{cwd, openat, seek, Mode, OFlags};
+    use rustix::fs::{cwd, openat, seek, Mode, OFlags};
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
@@ -38,7 +38,7 @@ fn invalid_offset_seek() {
 )))]
 #[test]
 fn invalid_offset_fallocate() {
-    use rsix::fs::{cwd, fallocate, openat, FallocateFlags, Mode, OFlags};
+    use rustix::fs::{cwd, fallocate, openat, FallocateFlags, Mode, OFlags};
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
@@ -63,7 +63,7 @@ fn invalid_offset_fallocate() {
 )))]
 #[test]
 fn invalid_offset_fadvise() {
-    use rsix::fs::{cwd, fadvise, openat, Advice, Mode, OFlags};
+    use rustix::fs::{cwd, fadvise, openat, Advice, Mode, OFlags};
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
@@ -94,8 +94,8 @@ fn invalid_offset_fadvise() {
 
 #[test]
 fn invalid_offset_pread() {
-    use rsix::fs::{cwd, openat, Mode, OFlags};
-    use rsix::io::pread;
+    use rustix::fs::{cwd, openat, Mode, OFlags};
+    use rustix::io::pread;
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
@@ -114,8 +114,8 @@ fn invalid_offset_pread() {
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
 #[test]
 fn invalid_offset_pwrite() {
-    use rsix::fs::{cwd, openat, Mode, OFlags};
-    use rsix::io::pwrite;
+    use rustix::fs::{cwd, openat, Mode, OFlags};
+    use rustix::io::pwrite;
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
@@ -134,8 +134,8 @@ fn invalid_offset_pwrite() {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn invalid_offset_copy_file_range() {
-    use rsix::fs::{copy_file_range, cwd, openat, Mode, OFlags};
-    use rsix::io::write;
+    use rustix::fs::{copy_file_range, cwd, openat, Mode, OFlags};
+    use rustix::io::write;
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let foo = openat(

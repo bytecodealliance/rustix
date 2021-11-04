@@ -2,11 +2,11 @@
 fn main() {
     println!(
         "Raeal time: {:?}",
-        rsix::time::clock_gettime(rsix::time::ClockId::Realtime)
+        rustix::time::clock_gettime(rustix::time::ClockId::Realtime)
     );
     println!(
         "Monotonic time: {:?}",
-        rsix::time::clock_gettime(rsix::time::ClockId::Monotonic)
+        rustix::time::clock_gettime(rustix::time::ClockId::Monotonic)
     );
 }
 

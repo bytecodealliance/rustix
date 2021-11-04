@@ -11,9 +11,9 @@ fn main() {
     let is_x32 = arch == "x86_64" && var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap() == "32";
     println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_ARCH");
 
-    // If rsix_use_libc is set, or if we're on an architecture/OS that doesn't
+    // If rustix_use_libc is set, or if we're on an architecture/OS that doesn't
     // have raw syscall support, use libc.
-    if var("CARGO_CFG_RSIX_USE_LIBC").is_ok()
+    if var("CARGO_CFG_RUSTIX_USE_LIBC").is_ok()
         || os_name != "linux"
         || std::fs::metadata(&asm_name).is_err()
         || is_x32
@@ -30,17 +30,17 @@ fn main() {
             println!("cargo:rustc-cfg=rustc_attrs");
             println!("cargo:rustc-cfg=doc_cfg");
         } else {
-            link_in_librsix_outline(&arch, &asm_name);
+            link_in_librustix_outline(&arch, &asm_name);
         }
         if rustc_version::version().unwrap() >= rustc_version::Version::parse("1.56.0").unwrap() {
             println!("cargo:rustc-cfg=const_fn_union");
         }
     }
-    println!("cargo:rerun-if-env-changed=CARGO_CFG_RSIX_USE_LIBC");
+    println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_LIBC");
 }
 
-fn link_in_librsix_outline(arch: &str, asm_name: &str) {
-    let name = format!("rsix_outline_{}", arch);
+fn link_in_librustix_outline(arch: &str, asm_name: &str) {
+    let name = format!("rustix_outline_{}", arch);
     let profile = var("PROFILE").unwrap();
     let to = format!("{}/{}/lib{}.a", OUTLINE_PATH, profile, name);
     println!("cargo:rerun-if-changed={}", to);
