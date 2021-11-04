@@ -155,5 +155,5 @@ pub fn waitpid(pid: Pid, waitopts: WaitOptions) -> io::Result<Option<WaitStatus>
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
-    imp::syscalls::waitpid(-1 as _, waitopts)
+    imp::syscalls::waitpid(!0, waitopts)
 }
