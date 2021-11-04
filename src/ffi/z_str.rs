@@ -954,7 +954,7 @@ impl From<Box<ZStr>> for ZString {
     /// Converts a <code>[Box]<[ZStr]></code> into a [`ZString`] without copying or allocating.
     #[inline]
     fn from(s: Box<ZStr>) -> ZString {
-        s.into_c_string()
+        s.into_z_string()
     }
 }
 
