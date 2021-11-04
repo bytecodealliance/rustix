@@ -51,7 +51,7 @@ criterion = "0.3"
 
 [features]
 default = ["std"]
-std = ["io-lifetimes", "once_cell/std", "linux-raw-sys/std"]
+std = ["io-lifetimes", "linux-raw-sys/std"]
 rustc-dep-of-std = [
     "rustc-std-workspace-core",
     "rustc-std-workspace-alloc",
