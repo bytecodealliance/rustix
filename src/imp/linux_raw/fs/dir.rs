@@ -37,7 +37,6 @@ impl Dir {
         Self::_from(fd)
     }
 
-    #[cfg(not(feature = "rustc-dep-of-std"))]
     #[inline]
     fn _from(fd: OwnedFd) -> io::Result<Self> {
         Ok(Self {
