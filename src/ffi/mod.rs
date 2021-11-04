@@ -20,5 +20,5 @@ mod z_str;
 #[cfg(feature = "rustc-dep-of-std")]
 pub use z_str::{FromBytesWithNulError, FromVecWithNulError, NulError, ZStr, ZString};
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 pub use std::ffi::{CStr as ZStr, CString as ZString, FromBytesWithNulError, NulError};

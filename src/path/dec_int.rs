@@ -7,15 +7,15 @@
 use crate::ffi::ZStr;
 use crate::imp::fd::{AsFd, AsRawFd};
 use itoa::{fmt, Integer};
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 use std::ffi::{CStr, OsStr};
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 #[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 #[cfg(target_os = "wasi")]
 use std::os::wasi::ffi::OsStrExt;
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 use std::path::Path;
 
 /// Format an integer into a decimal `Path` component, without constructing a

@@ -6,21 +6,21 @@ use alloc::borrow::Cow;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::str;
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 use std::ffi::{OsStr, OsString};
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 #[cfg(target_os = "hermit")]
 use std::os::hermit::ext::ffi::{OsStrExt, OsStringExt};
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 #[cfg(unix)]
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 #[cfg(target_os = "vxworks")]
 use std::os::vxworks::ext::ffi::{OsStrExt, OsStringExt};
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 #[cfg(target_os = "wasi")]
 use std::os::wasi::ffi::{OsStrExt, OsStringExt};
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 use std::path::{Component, Components, Iter, Path, PathBuf};
 
 /// A trait for passing path arguments.

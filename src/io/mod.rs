@@ -86,10 +86,6 @@ pub use read_write::{pread, pwrite, read, readv, write, writev};
 pub use read_write::{preadv, pwritev};
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use read_write::{preadv2, pwritev2, ReadWriteFlags};
-#[cfg(feature = "rustc-dep-of-std")]
-pub use seek_from::SeekFrom;
-#[cfg(not(feature = "rustc-dep-of-std"))]
-pub use std::io::SeekFrom;
 #[cfg(not(windows))]
 pub use stdio::{stderr, stdin, stdout, take_stderr, take_stdin, take_stdout};
 #[cfg(not(windows))]
@@ -108,12 +104,19 @@ pub use imp::io::Termios;
 #[cfg(any(linux_raw, all(libc, not(any(windows, target_os = "wasi")))))]
 pub use imp::io::Winsize;
 
+// Declare `IoSlice` and `IoSliceMut`.
 #[cfg(not(windows))]
 #[cfg(feature = "rustc-dep-of-std")]
 pub use imp::io::{IoSlice, IoSliceMut};
 #[cfg(not(windows))]
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 pub use std::io::{IoSlice, IoSliceMut};
+
+// Declare `SeekFrom`.
+#[cfg(feature = "rustc-dep-of-std")]
+pub use seek_from::SeekFrom;
+#[cfg(feature = "std")]
+pub use std::io::SeekFrom;
 
 /// `ICANON`
 #[cfg(any(linux_raw, all(libc, not(any(windows, target_os = "wasi")))))]
