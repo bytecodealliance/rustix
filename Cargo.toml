@@ -22,22 +22,29 @@ rustc_version = "0.4.0"
 bitflags = "1.3.2"
 itoa = { version = "0.4.7", default-features = false, optional = true }
 io-lifetimes = { version = "0.3.2", default-features = false, optional = true }
+
+# Special dependencies used in rustc-dep-of-std mode.
 rustc-std-workspace-core = { version = "1.0.0", optional = true }
 rustc-std-workspace-alloc = { version = "1.0.0", optional = true }
 compiler_builtins = { version = '0.1.49', optional = true }
 
+# The procfs feature needs once_cell.
 [target.'cfg(any(target_os = "android", target_os = "linux"))'.dependencies]
 once_cell = { version = "1.5.2", optional = true }
 
+# For the linux_raw backend, linux-raw-sys provides Linux ABI details.
+[target.'cfg(all(not(rsix_use_libc), any(target_os = "linux"), any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "riscv64")))'.dependencies]
+linux-raw-sys = { version = "0.0.34", default-features = false, features = ["general", "errno", "v5_4", "v5_11"] }
+
+# For the libc backend on Unix platforms, use the libc crate, and errno for
+# setting `errno`.
 [target.'cfg(any(rsix_use_libc, not(all(any(target_os = "linux"), any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "riscv64")))))'.dependencies]
 errno = { version = "0.2.8", default-features = false }
 libc = { version = "0.2.98", features = ["extra_traits"] }
 
-[target.'cfg(all(not(rsix_use_libc), any(target_os = "linux"), any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "riscv64")))'.dependencies]
-linux-raw-sys = { version = "0.0.34", default-features = false, features = ["general", "errno", "v5_4", "v5_11"] }
-
+# For the libc backend on Windows, use the Winsock API in winapi.
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3.9", features = ["ws2ipdef", "ws2tcpip", "impl-default"] }
+winapi = { version = "0.3.9", features = ["ws2ipdef", "ws2tcpip"] }
 
 [dev-dependencies]
 atty = "0.2.14"
