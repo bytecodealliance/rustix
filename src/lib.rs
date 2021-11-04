@@ -53,6 +53,8 @@
     feature(naked_functions)
 )]
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "rustc-dep-of-std", no_core)]
 #![cfg_attr(feature = "rustc-dep-of-std", allow(incomplete_features))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(specialization))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(toowned_clone_into))]
@@ -60,7 +62,6 @@
 #![cfg_attr(feature = "rustc-dep-of-std", feature(const_raw_ptr_deref))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(slice_internals))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(core_intrinsics))]
-#![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
