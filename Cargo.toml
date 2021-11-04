@@ -24,8 +24,8 @@ itoa = { version = "0.4.7", default-features = false, optional = true }
 io-lifetimes = { version = "0.3.2", default-features = false, optional = true }
 
 # Special dependencies used in rustc-dep-of-std mode.
-rustc-std-workspace-core = { version = "1.0.0", optional = true }
-rustc-std-workspace-alloc = { version = "1.0.0", optional = true }
+core = { version = "1.0.0", optional = true, package = "rustc-std-workspace-core" }
+alloc = { version = "1.0.0", optional = true, package = "rustc-std-workspace-alloc" }
 compiler_builtins = { version = '0.1.49', optional = true }
 
 # The procfs feature needs once_cell.
@@ -60,8 +60,8 @@ criterion = "0.3"
 default = ["std"]
 std = ["io-lifetimes", "linux-raw-sys/std"]
 rustc-dep-of-std = [
-    "rustc-std-workspace-core",
-    "rustc-std-workspace-alloc",
+    "core",
+    "alloc",
     "compiler_builtins",
     "linux-raw-sys/rustc-dep-of-std",
     "bitflags/rustc-dep-of-std",

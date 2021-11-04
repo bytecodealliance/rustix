@@ -54,7 +54,6 @@
 )]
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(feature = "rustc-dep-of-std", no_core)]
 #![cfg_attr(feature = "rustc-dep-of-std", allow(incomplete_features))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(specialization))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(toowned_clone_into))]
@@ -65,10 +64,6 @@
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
-#[cfg(feature = "rustc-dep-of-std")]
-extern crate rustc_std_workspace_alloc as alloc;
-#[cfg(feature = "rustc-dep-of-std")]
-extern crate rustc_std_workspace_core as core;
 
 /// Re-export `io_lifetimes` since we use its types in our public API, so
 /// that our users don't need to do anything special to use the same version.

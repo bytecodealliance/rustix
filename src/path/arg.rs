@@ -187,7 +187,6 @@ impl Arg for &String {
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
 impl Arg for String {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -231,7 +230,7 @@ impl Arg for String {
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 impl Arg for &OsStr {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -275,7 +274,7 @@ impl Arg for &OsStr {
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 impl Arg for &OsString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -318,7 +317,7 @@ impl Arg for &OsString {
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 impl Arg for OsString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -362,7 +361,7 @@ impl Arg for OsString {
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 impl Arg for &Path {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -406,7 +405,7 @@ impl Arg for &Path {
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 impl Arg for &PathBuf {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -452,7 +451,7 @@ impl Arg for &PathBuf {
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 impl Arg for PathBuf {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -663,7 +662,7 @@ impl<'a> Arg for Cow<'a, str> {
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 impl<'a> Arg for Cow<'a, OsStr> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -751,7 +750,7 @@ impl<'a> Arg for Cow<'a, ZStr> {
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 impl<'a> Arg for Component<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -795,7 +794,7 @@ impl<'a> Arg for Component<'a> {
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 impl<'a> Arg for Components<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -841,7 +840,7 @@ impl<'a> Arg for Components<'a> {
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 impl<'a> Arg for Iter<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {

@@ -30,6 +30,7 @@ macro_rules! cstr {
 #[test]
 fn test_zstr() {
     use crate::ffi::ZString;
+    use alloc::borrow::ToOwned;
     assert_eq!(zstr!(""), &*ZString::new("").unwrap());
     assert_eq!(zstr!("").to_owned(), ZString::new("").unwrap());
     assert_eq!(zstr!("hello"), &*ZString::new("hello").unwrap());

@@ -2,9 +2,9 @@
 
 use crate::imp;
 
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
 mod addr;
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
 mod ip;
 mod send_recv;
 mod socket;
@@ -37,9 +37,9 @@ pub use imp::net::SocketAddrStorage;
 pub use imp::net::SocketAddrUnix;
 
 // Declare the `Ip` and `Socket` address types.
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
 pub use addr::{SocketAddr, SocketAddrV4, SocketAddrV6};
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
 pub use ip::{IpAddr, Ipv4Addr, Ipv6Addr};
 #[cfg(feature = "std")]
 pub use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};

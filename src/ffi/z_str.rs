@@ -186,7 +186,6 @@ pub struct ZString {
 ///
 /// [str]: prim@str "str"
 #[derive(Hash)]
-#[cfg_attr(not(test), rustc_diagnostic_item = "ZStr")]
 #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
 // FIXME:
 // `fn from` in `impl From<&ZStr> for Box<ZStr>` current implementation relies

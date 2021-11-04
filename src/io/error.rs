@@ -40,7 +40,7 @@ impl fmt::Display for Error {
         {
             std::io::Error::from(*self).fmt(fmt)
         }
-        #[cfg(feature = "rustc-dep-of-std")]
+        #[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
         {
             write!(fmt, "os error {}", self.raw_os_error())
         }
@@ -53,7 +53,7 @@ impl fmt::Debug for Error {
         {
             std::io::Error::from(*self).fmt(fmt)
         }
-        #[cfg(feature = "rustc-dep-of-std")]
+        #[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
         {
             write!(fmt, "os error {}", self.raw_os_error())
         }
