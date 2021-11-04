@@ -46,7 +46,7 @@ pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub(crate) fn clock_gettime_dynamic(id: DynamicClockId) -> io::Result<Timespec> {
+pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timespec> {
     let mut timespec = MaybeUninit::<Timespec>::uninit();
     unsafe {
         let id: c::clockid_t = match id {

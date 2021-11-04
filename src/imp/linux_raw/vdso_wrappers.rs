@@ -44,7 +44,7 @@ pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
 }
 
 #[inline]
-pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId) -> io::Result<Timespec> {
+pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Result<Timespec> {
     let id = match which_clock {
         DynamicClockId::Known(id) => id as __kernel_clockid_t,
 
@@ -90,7 +90,7 @@ pub(super) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall0(nr: SyscallNumber) -> RetReg<R0> {
+    pub(in crate::imp::linux_raw) unsafe fn syscall0(nr: SyscallNumber<'_>) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
@@ -101,8 +101,8 @@ pub(super) mod x86_via_vdso {
     #[inline]
     #[must_use]
     pub(in crate::imp::linux_raw) unsafe fn syscall1(
-        nr: SyscallNumber,
-        a0: ArgReg<A0>,
+        nr: SyscallNumber<'_>,
+        a0: ArgReg<'_, A0>,
     ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -113,8 +113,8 @@ pub(super) mod x86_via_vdso {
 
     #[inline]
     pub(in crate::imp::linux_raw) unsafe fn syscall1_noreturn(
-        nr: SyscallNumber,
-        a0: ArgReg<A0>,
+        nr: SyscallNumber<'_>,
+        a0: ArgReg<'_, A0>,
     ) -> ! {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -126,9 +126,9 @@ pub(super) mod x86_via_vdso {
     #[inline]
     #[must_use]
     pub(in crate::imp::linux_raw) unsafe fn syscall2(
-        nr: SyscallNumber,
-        a0: ArgReg<A0>,
-        a1: ArgReg<A1>,
+        nr: SyscallNumber<'_>,
+        a0: ArgReg<'_, A0>,
+        a1: ArgReg<'_, A1>,
     ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -140,10 +140,10 @@ pub(super) mod x86_via_vdso {
     #[inline]
     #[must_use]
     pub(in crate::imp::linux_raw) unsafe fn syscall3(
-        nr: SyscallNumber,
-        a0: ArgReg<A0>,
-        a1: ArgReg<A1>,
-        a2: ArgReg<A2>,
+        nr: SyscallNumber<'_>,
+        a0: ArgReg<'_, A0>,
+        a1: ArgReg<'_, A1>,
+        a2: ArgReg<'_, A2>,
     ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -155,11 +155,11 @@ pub(super) mod x86_via_vdso {
     #[inline]
     #[must_use]
     pub(in crate::imp::linux_raw) unsafe fn syscall4(
-        nr: SyscallNumber,
-        a0: ArgReg<A0>,
-        a1: ArgReg<A1>,
-        a2: ArgReg<A2>,
-        a3: ArgReg<A3>,
+        nr: SyscallNumber<'_>,
+        a0: ArgReg<'_, A0>,
+        a1: ArgReg<'_, A1>,
+        a2: ArgReg<'_, A2>,
+        a3: ArgReg<'_, A3>,
     ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -171,12 +171,12 @@ pub(super) mod x86_via_vdso {
     #[inline]
     #[must_use]
     pub(in crate::imp::linux_raw) unsafe fn syscall5(
-        nr: SyscallNumber,
-        a0: ArgReg<A0>,
-        a1: ArgReg<A1>,
-        a2: ArgReg<A2>,
-        a3: ArgReg<A3>,
-        a4: ArgReg<A4>,
+        nr: SyscallNumber<'_>,
+        a0: ArgReg<'_, A0>,
+        a1: ArgReg<'_, A1>,
+        a2: ArgReg<'_, A2>,
+        a3: ArgReg<'_, A3>,
+        a4: ArgReg<'_, A4>,
     ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -188,13 +188,13 @@ pub(super) mod x86_via_vdso {
     #[inline]
     #[must_use]
     pub(in crate::imp::linux_raw) unsafe fn syscall6(
-        nr: SyscallNumber,
-        a0: ArgReg<A0>,
-        a1: ArgReg<A1>,
-        a2: ArgReg<A2>,
-        a3: ArgReg<A3>,
-        a4: ArgReg<A4>,
-        a5: ArgReg<A5>,
+        nr: SyscallNumber<'_>,
+        a0: ArgReg<'_, A0>,
+        a1: ArgReg<'_, A1>,
+        a2: ArgReg<'_, A2>,
+        a3: ArgReg<'_, A3>,
+        a4: ArgReg<'_, A4>,
+        a5: ArgReg<'_, A5>,
     ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -217,12 +217,12 @@ type ClockGettimeType = unsafe extern "C" fn(c::c_int, *mut Timespec) -> c::c_in
 #[cfg(target_arch = "x86")]
 pub(super) type SyscallType = unsafe extern "C" fn(
     SyscallNumber,
-    ArgReg<A0>,
-    ArgReg<A1>,
-    ArgReg<A2>,
-    ArgReg<A3>,
-    ArgReg<A4>,
-    ArgReg<A5>,
+    ArgReg<'_, A0>,
+    ArgReg<'_, A1>,
+    ArgReg<'_, A2>,
+    ArgReg<'_, A3>,
+    ArgReg<'_, A4>,
+    ArgReg<'_, A5>,
 ) -> RetReg<R0>;
 
 fn init_clock_gettime() -> ClockGettimeType {
@@ -302,13 +302,13 @@ unsafe fn _rsix_clock_gettime_via_syscall(clockid: c::c_int, res: *mut Timespec)
 #[cfg(all(linux_raw_inline_asm, target_arch = "x86"))]
 #[naked]
 unsafe extern "C" fn rsix_int_0x80(
-    _nr: SyscallNumber,
-    _a0: ArgReg<A0>,
-    _a1: ArgReg<A1>,
-    _a2: ArgReg<A2>,
-    _a3: ArgReg<A3>,
-    _a4: ArgReg<A4>,
-    _a5: ArgReg<A5>,
+    _nr: SyscallNumber<'_>,
+    _a0: ArgReg<'_, A0>,
+    _a1: ArgReg<'_, A1>,
+    _a2: ArgReg<'_, A2>,
+    _a3: ArgReg<'_, A3>,
+    _a4: ArgReg<'_, A4>,
+    _a5: ArgReg<'_, A5>,
 ) -> RetReg<R0> {
     asm!("int $$0x80", "ret", options(noreturn))
 }
@@ -316,13 +316,13 @@ unsafe extern "C" fn rsix_int_0x80(
 #[cfg(all(not(linux_raw_inline_asm), target_arch = "x86"))]
 extern "C" {
     fn rsix_int_0x80(
-        _nr: SyscallNumber,
-        _a0: ArgReg<A0>,
-        _a1: ArgReg<A1>,
-        _a2: ArgReg<A2>,
-        _a3: ArgReg<A3>,
-        _a4: ArgReg<A4>,
-        _a5: ArgReg<A5>,
+        _nr: SyscallNumber<'_>,
+        _a0: ArgReg<'_, A0>,
+        _a1: ArgReg<'_, A1>,
+        _a2: ArgReg<'_, A2>,
+        _a3: ArgReg<'_, A3>,
+        _a4: ArgReg<'_, A4>,
+        _a5: ArgReg<'_, A5>,
     ) -> RetReg<R0>;
 }
 

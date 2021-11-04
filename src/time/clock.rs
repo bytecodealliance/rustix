@@ -50,7 +50,7 @@ pub fn clock_gettime(id: ClockId) -> Timespec {
 /// [Linux]: https://man7.org/linux/man-pages/man2/clock_gettime.2.html
 #[cfg(any(linux_raw, all(libc, not(target_os = "wasi"))))]
 #[inline]
-pub fn clock_gettime_dynamic(id: DynamicClockId) -> io::Result<Timespec> {
+pub fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timespec> {
     imp::syscalls::clock_gettime_dynamic(id)
 }
 

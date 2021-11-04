@@ -325,7 +325,7 @@ pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
 
 #[inline]
 pub(crate) fn fallocate(
-    fd: BorrowedFd,
+    fd: BorrowedFd<'_>,
     mode: FallocateFlags,
     offset: u64,
     len: u64,
