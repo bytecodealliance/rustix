@@ -20,6 +20,7 @@ impl CpuSet {
     pub const MAX_CPU: usize = imp::process::CPU_SETSIZE;
 
     /// Create a new and empty CpuSet.
+    #[inline]
     pub fn new() -> CpuSet {
         CpuSet {
             // This is a bit akward because idealy we would create
@@ -34,29 +35,34 @@ impl CpuSet {
 
     /// Test to see if a CPU is in the CpuSet.
     /// `field` is the CPU id to test
+    #[inline]
     pub fn is_set(&self, field: usize) -> bool {
         imp::syscalls::CPU_ISSET(field, &self.cpu_set)
     }
 
     /// Add a CPU to CpuSet.
     /// `field` is the CPU id to add
+    #[inline]
     pub fn set(&mut self, field: usize) {
         imp::syscalls::CPU_SET(field, &mut self.cpu_set)
     }
 
     /// Remove a CPU from CpuSet.
     /// `field` is the CPU id to remove
+    #[inline]
     pub fn unset(&mut self, field: usize) {
         imp::syscalls::CPU_CLR(field, &mut self.cpu_set)
     }
 
     /// Count the number of CPUs set in the CpuSet
     #[cfg(target_os = "linux")]
+    #[inline]
     pub fn count(&self) -> u32 {
         imp::syscalls::CPU_COUNT(&self.cpu_set)
     }
 
     /// Zeroies the CpuSet
+    #[inline]
     pub fn clear(&mut self) {
         imp::syscalls::CPU_ZERO(&mut self.cpu_set)
     }
