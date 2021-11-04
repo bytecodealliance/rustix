@@ -38,14 +38,6 @@ pub(crate) fn sockaddr_in6_sin6_scope_id_mut(addr: &mut c::sockaddr_in6) -> &mut
 
 #[inline]
 pub(crate) const fn sockaddr_in6_new(
-    #[cfg(any(
-        target_os = "netbsd",
-        target_os = "macos",
-        target_os = "ios",
-        target_os = "freebsd",
-        target_os = "openbsd"
-    ))]
-    sin6_len: u8,
     sin6_family: linux_raw_sys::general::__kernel_sa_family_t,
     sin6_port: u16,
     sin6_flowinfo: u32,
@@ -53,14 +45,6 @@ pub(crate) const fn sockaddr_in6_new(
     sin6_scope_id: u32,
 ) -> c::sockaddr_in6 {
     c::sockaddr_in6 {
-        #[cfg(any(
-            target_os = "netbsd",
-            target_os = "macos",
-            target_os = "ios",
-            target_os = "freebsd",
-            target_os = "openbsd"
-        ))]
-        sin6_len,
         sin6_family,
         sin6_port,
         sin6_flowinfo,
