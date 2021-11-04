@@ -1,7 +1,8 @@
 //! Utilities related to FFI bindings.
 
-/// Minimal and unoptimized `strlen` implementation. TODO: Replace
-/// this with a real `strlen` implementation.
+/// Minimal and unoptimized `strlen` implementation.
+///
+/// TODO: Optimize this by reading a `usize` at a time.
 #[cfg(feature = "rustc-dep-of-std")]
 #[allow(unsafe_code)]
 unsafe fn strlen(mut s: *const u8) -> usize {
