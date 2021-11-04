@@ -19,7 +19,6 @@ use super::{
 use crate::as_ptr;
 use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
-use core::convert::TryInto;
 use core::mem::{size_of, MaybeUninit};
 #[cfg(not(any(target_os = "redox", target_os = "wasi",)))]
 use core::ptr::null_mut;
@@ -398,7 +397,6 @@ pub(crate) mod sockopt {
     use crate::net::Ipv6Addr;
     use crate::net::{Ipv4Addr, SocketType};
     use crate::{as_mut_ptr, io};
-    use core::convert::TryInto;
     use core::time::Duration;
 
     #[inline]

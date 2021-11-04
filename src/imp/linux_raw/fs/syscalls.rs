@@ -39,7 +39,6 @@ use super::{
 };
 use crate::ffi::ZStr;
 use crate::io::{self, OwnedFd, SeekFrom};
-use core::convert::TryInto;
 use core::mem::MaybeUninit;
 #[cfg(target_arch = "arm")]
 use linux_raw_sys::general::__NR_arm_fadvise64_64 as __NR_fadvise64_64;

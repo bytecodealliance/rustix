@@ -228,7 +228,6 @@ pub(super) fn dev_t<'a, Num: ArgNumber>(dev: u64) -> ArgReg<'a, Num> {
 #[cfg(target_pointer_width = "32")]
 #[inline]
 pub(super) fn dev_t<'a, Num: ArgNumber>(dev: u64) -> io::Result<ArgReg<'a, Num>> {
-    use core::convert::TryInto;
     dev.try_into().map(raw_arg).map_err(|_err| io::Error::INVAL)
 }
 

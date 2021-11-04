@@ -75,7 +75,6 @@ use crate::ffi::ZStr;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use crate::ffi::ZString;
 use crate::io::{self, OwnedFd, SeekFrom};
-use core::convert::TryInto;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use core::mem::size_of;
 #[cfg(target_os = "linux")]

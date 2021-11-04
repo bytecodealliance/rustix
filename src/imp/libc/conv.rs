@@ -7,8 +7,6 @@ use super::offset::libc_off_t;
 #[cfg(not(windows))]
 use crate::ffi::ZStr;
 use crate::io::{self, OwnedFd};
-#[cfg(windows)]
-use core::convert::TryInto;
 
 #[cfg(not(windows))]
 #[inline]
