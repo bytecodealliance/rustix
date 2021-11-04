@@ -43,7 +43,6 @@ use super::{
 };
 use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
-use core::convert::TryInto;
 use core::mem::MaybeUninit;
 #[cfg(not(target_arch = "x86"))]
 use linux_raw_sys::general::{
@@ -828,7 +827,6 @@ pub(crate) mod sockopt {
     use crate::io;
     use crate::net::sockopt::Timeout;
     use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
-    use core::convert::TryInto;
     use core::time::Duration;
 
     // TODO use Duration::ZERO when we don't need 1.51 support

@@ -60,8 +60,6 @@ use crate::process::{
 use crate::time::NanosleepRelativeResult;
 use alloc::borrow::Cow;
 use alloc::vec::Vec;
-#[cfg(target_pointer_width = "32")]
-use core::convert::TryInto;
 use core::mem::{size_of_val, MaybeUninit};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use linux_raw_sys::general::__NR_epoll_pwait;
