@@ -1,6 +1,9 @@
 //! The following is derived from Rust's
 //! library/std/src/ffi/c_str.rs at revision
 //! dca3f1b786efd27be3b325ed1e01e247aa589c3b.
+//!
+//! ZStrings are like std's CStrings except that they use `u8` instead of
+//! `c_char`, so that they're not platform-dependent.
 
 #![allow(unsafe_code)]
 #![deny(unsafe_op_in_unsafe_fn)]
