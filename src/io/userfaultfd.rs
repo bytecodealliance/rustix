@@ -16,7 +16,7 @@ pub use imp::io::UserfaultfdFlags;
 /// # Safety
 ///
 /// The call itself is safe, but the returned file descriptor lets users
-/// observe and manipuate process memory in magical ways.
+/// observe and manipulate process memory in magical ways.
 ///
 /// # References
 ///  - [Linux]

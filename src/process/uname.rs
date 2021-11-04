@@ -56,7 +56,7 @@ impl Uname {
         Self::to_cstr(self.0.machine.as_ptr().cast())
     }
 
-    /// `domainname`—NIS or YP domain identifer
+    /// `domainname`—NIS or YP domain identifier
     #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
     #[inline]
     pub fn domainname(&self) -> &ZStr {

@@ -149,7 +149,7 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
     // Check that the vDSO is not writable, since that would indicate that this
     // isn't the kernel vDSO. Here we're just using `clock_getres` just as an
     // arbitrary system call which writes to a buffer and fails with `EFAULT`
-    // if the buffer is not writeable.
+    // if the buffer is not writable.
     {
         use super::arch::choose::syscall2;
         use super::conv::{clockid_t, ret, void_star};
@@ -185,7 +185,7 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
     for i in 0..hdr.e_phnum {
         let phdr = &*pt.add(i as usize);
         if phdr.p_flags & PF_W != 0 {
-            // Don't trust any vDSO that claims to be loading writeable
+            // Don't trust any vDSO that claims to be loading writable
             // segments into memory.
             return None;
         }
