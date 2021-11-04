@@ -1,4 +1,4 @@
-use rsix::fs::{major, makedev, minor};
+use rustix::fs::{major, makedev, minor};
 
 #[test]
 fn makedev_roundtrip() {

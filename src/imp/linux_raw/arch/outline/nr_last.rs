@@ -12,28 +12,28 @@ use crate::imp::linux_raw::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, 
 // We don't define `_readonly` versions of these because we have no way to tell
 // Rust that calls to our outline assembly are readonly.
 extern "C" {
-    fn rsix_syscall0_nr_last(nr: SyscallNumber<'_>) -> RetReg<R0>;
-    fn rsix_syscall1_nr_last(a0: ArgReg<'_, A0>, nr: SyscallNumber<'_>) -> RetReg<R0>;
-    fn rsix_syscall1_noreturn_nr_last(a0: ArgReg<'_, A0>, nr: SyscallNumber<'_>) -> !;
-    fn rsix_syscall2_nr_last(
+    fn rustix_syscall0_nr_last(nr: SyscallNumber<'_>) -> RetReg<R0>;
+    fn rustix_syscall1_nr_last(a0: ArgReg<'_, A0>, nr: SyscallNumber<'_>) -> RetReg<R0>;
+    fn rustix_syscall1_noreturn_nr_last(a0: ArgReg<'_, A0>, nr: SyscallNumber<'_>) -> !;
+    fn rustix_syscall2_nr_last(
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
         nr: SyscallNumber<'_>,
     ) -> RetReg<R0>;
-    fn rsix_syscall3_nr_last(
+    fn rustix_syscall3_nr_last(
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
         a2: ArgReg<'_, A2>,
         nr: SyscallNumber<'_>,
     ) -> RetReg<R0>;
-    fn rsix_syscall4_nr_last(
+    fn rustix_syscall4_nr_last(
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
         a2: ArgReg<'_, A2>,
         a3: ArgReg<'_, A3>,
         nr: SyscallNumber<'_>,
     ) -> RetReg<R0>;
-    fn rsix_syscall5_nr_last(
+    fn rustix_syscall5_nr_last(
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
         a2: ArgReg<'_, A2>,
@@ -41,7 +41,7 @@ extern "C" {
         a4: ArgReg<'_, A4>,
         nr: SyscallNumber<'_>,
     ) -> RetReg<R0>;
-    fn rsix_syscall6_nr_last(
+    fn rustix_syscall6_nr_last(
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
         a2: ArgReg<'_, A2>,
@@ -59,7 +59,7 @@ mod reorder {
     #[inline]
     #[must_use]
     pub(in crate::imp::linux_raw) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<R0> {
-        rsix_syscall0_nr_last(nr)
+        rustix_syscall0_nr_last(nr)
     }
     #[inline]
     #[must_use]
@@ -67,7 +67,7 @@ mod reorder {
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
     ) -> RetReg<R0> {
-        rsix_syscall1_nr_last(a0, nr)
+        rustix_syscall1_nr_last(a0, nr)
     }
     #[inline]
     #[must_use]
@@ -75,7 +75,7 @@ mod reorder {
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
     ) -> RetReg<R0> {
-        rsix_syscall1_nr_last(a0, nr)
+        rustix_syscall1_nr_last(a0, nr)
     }
     #[inline]
     #[must_use]
@@ -83,7 +83,7 @@ mod reorder {
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
     ) -> ! {
-        rsix_syscall1_noreturn_nr_last(a0, nr)
+        rustix_syscall1_noreturn_nr_last(a0, nr)
     }
     #[inline]
     #[must_use]
@@ -92,7 +92,7 @@ mod reorder {
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
     ) -> RetReg<R0> {
-        rsix_syscall2_nr_last(a0, a1, nr)
+        rustix_syscall2_nr_last(a0, a1, nr)
     }
     #[inline]
     #[must_use]
@@ -101,7 +101,7 @@ mod reorder {
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
     ) -> RetReg<R0> {
-        rsix_syscall2_nr_last(a0, a1, nr)
+        rustix_syscall2_nr_last(a0, a1, nr)
     }
     #[inline]
     #[must_use]
@@ -111,7 +111,7 @@ mod reorder {
         a1: ArgReg<'_, A1>,
         a2: ArgReg<'_, A2>,
     ) -> RetReg<R0> {
-        rsix_syscall3_nr_last(a0, a1, a2, nr)
+        rustix_syscall3_nr_last(a0, a1, a2, nr)
     }
     #[inline]
     #[must_use]
@@ -121,7 +121,7 @@ mod reorder {
         a1: ArgReg<'_, A1>,
         a2: ArgReg<'_, A2>,
     ) -> RetReg<R0> {
-        rsix_syscall3_nr_last(a0, a1, a2, nr)
+        rustix_syscall3_nr_last(a0, a1, a2, nr)
     }
     #[inline]
     #[must_use]
@@ -132,7 +132,7 @@ mod reorder {
         a2: ArgReg<'_, A2>,
         a3: ArgReg<'_, A3>,
     ) -> RetReg<R0> {
-        rsix_syscall4_nr_last(a0, a1, a2, a3, nr)
+        rustix_syscall4_nr_last(a0, a1, a2, a3, nr)
     }
     #[inline]
     #[must_use]
@@ -143,7 +143,7 @@ mod reorder {
         a2: ArgReg<'_, A2>,
         a3: ArgReg<'_, A3>,
     ) -> RetReg<R0> {
-        rsix_syscall4_nr_last(a0, a1, a2, a3, nr)
+        rustix_syscall4_nr_last(a0, a1, a2, a3, nr)
     }
     #[inline]
     #[must_use]
@@ -155,7 +155,7 @@ mod reorder {
         a3: ArgReg<'_, A3>,
         a4: ArgReg<'_, A4>,
     ) -> RetReg<R0> {
-        rsix_syscall5_nr_last(a0, a1, a2, a3, a4, nr)
+        rustix_syscall5_nr_last(a0, a1, a2, a3, a4, nr)
     }
     #[inline]
     #[must_use]
@@ -167,7 +167,7 @@ mod reorder {
         a3: ArgReg<'_, A3>,
         a4: ArgReg<'_, A4>,
     ) -> RetReg<R0> {
-        rsix_syscall5_nr_last(a0, a1, a2, a3, a4, nr)
+        rustix_syscall5_nr_last(a0, a1, a2, a3, a4, nr)
     }
     #[inline]
     #[must_use]
@@ -180,7 +180,7 @@ mod reorder {
         a4: ArgReg<'_, A4>,
         a5: ArgReg<'_, A5>,
     ) -> RetReg<R0> {
-        rsix_syscall6_nr_last(a0, a1, a2, a3, a4, a5, nr)
+        rustix_syscall6_nr_last(a0, a1, a2, a3, a4, a5, nr)
     }
     #[inline]
     #[must_use]
@@ -193,7 +193,7 @@ mod reorder {
         a4: ArgReg<'_, A4>,
         a5: ArgReg<'_, A5>,
     ) -> RetReg<R0> {
-        rsix_syscall6_nr_last(a0, a1, a2, a3, a4, a5, nr)
+        rustix_syscall6_nr_last(a0, a1, a2, a3, a4, a5, nr)
     }
 }
 

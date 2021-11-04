@@ -1,6 +1,6 @@
-use rsix::process::nice;
+use rustix::process::nice;
 #[cfg(not(target_os = "redox"))]
-use rsix::process::{getpriority_process, setpriority_process, Pid};
+use rustix::process::{getpriority_process, setpriority_process, Pid};
 
 #[cfg(not(target_os = "freebsd"))] // FreeBSD's nice(3) doesn't return the old value.
 #[test]

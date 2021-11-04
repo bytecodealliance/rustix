@@ -1,4 +1,4 @@
-//! The rsix `Error` type.
+//! The `rustix` `Error` type.
 //!
 //! This type holds an OS error code, which conceptually corresponds to an
 //! `errno` value.
@@ -16,7 +16,7 @@ use crate::imp::linux_raw::reg::{RetNumber, RetReg};
 use crate::io;
 use linux_raw_sys::{errno, v5_4};
 
-/// The error type for rsix APIs.
+/// The error type for `rustix` APIs.
 ///
 /// This is similar to `std::io::Error`, but only holds an OS error code,
 /// and no extra error value.

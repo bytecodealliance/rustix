@@ -11,13 +11,13 @@
 // This test uses `DecInt`.
 #![cfg(feature = "itoa")]
 
-use rsix::fs::{cwd, unlinkat, AtFlags};
-use rsix::io::{read, write};
-use rsix::net::{
+use rustix::fs::{cwd, unlinkat, AtFlags};
+use rustix::io::{read, write};
+use rustix::net::{
     accept, bind_unix, connect_unix, listen, socket, AddressFamily, Protocol, SocketAddrUnix,
     SocketType,
 };
-use rsix::path::DecInt;
+use rustix::path::DecInt;
 use std::path::Path;
 use std::str::FromStr;
 use std::sync::{Arc, Condvar, Mutex};

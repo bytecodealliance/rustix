@@ -1,9 +1,9 @@
 #[cfg(any(all(linux_raw, feature = "procfs"), all(not(windows), libc)))]
-use rsix::io::ttyname;
+use rustix::io::ttyname;
 #[cfg(not(windows))]
-use rsix::io::{self, isatty, stderr, stdin, stdout};
+use rustix::io::{self, isatty, stderr, stdin, stdout};
 #[cfg(not(windows))]
-use rsix::io_lifetimes::AsFd;
+use rustix::io_lifetimes::AsFd;
 
 #[cfg(not(windows))]
 fn main() -> io::Result<()> {
@@ -26,9 +26,9 @@ fn show<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     if isatty(fd) {
         #[cfg(any(all(linux_raw, feature = "procfs"), libc))]
         println!(" - ttyname: {}", ttyname(fd, Vec::new())?.to_string_lossy());
-        println!(" - attrs: {:?}", rsix::io::ioctl_tcgets(fd)?);
-        println!(" - winsize: {:?}", rsix::io::ioctl_tiocgwinsz(fd)?);
-        println!(" - ready: {:?}", rsix::io::ioctl_fionread(fd)?);
+        println!(" - attrs: {:?}", rustix::io::ioctl_tcgets(fd)?);
+        println!(" - winsize: {:?}", rustix::io::ioctl_tiocgwinsz(fd)?);
+        println!(" - ready: {:?}", rustix::io::ioctl_fionread(fd)?);
     } else {
         println!("Stderr is not a tty");
     }

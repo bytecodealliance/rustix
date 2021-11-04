@@ -1,4 +1,4 @@
-use rsix::path::DecInt;
+use rustix::path::DecInt;
 
 #[test]
 fn test_dec_int() {

@@ -2,7 +2,7 @@
 //!
 //! These functions are for implementing thread-local storage (TLS),
 //! managing threads, loaded libraries, and other process-wide resources.
-//! Most of rsix doesn't care about what other libraries are linked into
+//! Most of `rustix` doesn't care about what other libraries are linked into
 //! the program or what they're doing, but the features in this module
 //! generally can only be used by one entity within a process.
 //!

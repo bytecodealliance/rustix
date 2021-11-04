@@ -10,27 +10,27 @@
     .file       "x86.S"
     .intel_syntax noprefix
 
-    .section    .text.rsix_indirect_syscall0_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_indirect_syscall0_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_indirect_syscall0_nr_last_fastcall
-    .weak       rsix_indirect_syscall0_nr_last_fastcall
-    .hidden     rsix_indirect_syscall0_nr_last_fastcall
-    .type       rsix_indirect_syscall0_nr_last_fastcall, @function
-rsix_indirect_syscall0_nr_last_fastcall:
+    .globl      rustix_indirect_syscall0_nr_last_fastcall
+    .weak       rustix_indirect_syscall0_nr_last_fastcall
+    .hidden     rustix_indirect_syscall0_nr_last_fastcall
+    .type       rustix_indirect_syscall0_nr_last_fastcall, @function
+rustix_indirect_syscall0_nr_last_fastcall:
     .cfi_startproc
     mov    eax,ecx
     call   edx
     ret
     .cfi_endproc
-    .size rsix_indirect_syscall0_nr_last_fastcall, .-rsix_indirect_syscall0_nr_last_fastcall
+    .size rustix_indirect_syscall0_nr_last_fastcall, .-rustix_indirect_syscall0_nr_last_fastcall
 
-    .section    .text.rsix_indirect_syscall1_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_indirect_syscall1_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_indirect_syscall1_nr_last_fastcall
-    .weak       rsix_indirect_syscall1_nr_last_fastcall
-    .hidden     rsix_indirect_syscall1_nr_last_fastcall
-    .type       rsix_indirect_syscall1_nr_last_fastcall, @function
-rsix_indirect_syscall1_nr_last_fastcall:
+    .globl      rustix_indirect_syscall1_nr_last_fastcall
+    .weak       rustix_indirect_syscall1_nr_last_fastcall
+    .hidden     rustix_indirect_syscall1_nr_last_fastcall
+    .type       rustix_indirect_syscall1_nr_last_fastcall, @function
+rustix_indirect_syscall1_nr_last_fastcall:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -42,30 +42,30 @@ rsix_indirect_syscall1_nr_last_fastcall:
     .cfi_def_cfa_offset 4
     ret    0x4
     .cfi_endproc
-    .size rsix_indirect_syscall1_nr_last_fastcall, .-rsix_indirect_syscall1_nr_last_fastcall
+    .size rustix_indirect_syscall1_nr_last_fastcall, .-rustix_indirect_syscall1_nr_last_fastcall
 
-    .section    .text.rsix_indirect_syscall1_noreturn_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_indirect_syscall1_noreturn_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_indirect_syscall1_noreturn_nr_last_fastcall
-    .weak       rsix_indirect_syscall1_noreturn_nr_last_fastcall
-    .hidden     rsix_indirect_syscall1_noreturn_nr_last_fastcall
-    .type       rsix_indirect_syscall1_noreturn_nr_last_fastcall, @function
-rsix_indirect_syscall1_noreturn_nr_last_fastcall:
+    .globl      rustix_indirect_syscall1_noreturn_nr_last_fastcall
+    .weak       rustix_indirect_syscall1_noreturn_nr_last_fastcall
+    .hidden     rustix_indirect_syscall1_noreturn_nr_last_fastcall
+    .type       rustix_indirect_syscall1_noreturn_nr_last_fastcall, @function
+rustix_indirect_syscall1_noreturn_nr_last_fastcall:
     .cfi_startproc
     mov    ebx,ecx
     mov    eax,edx
     call   DWORD PTR [esp+0x4]
     ud2
     .cfi_endproc
-    .size rsix_indirect_syscall1_noreturn_nr_last_fastcall, .-rsix_indirect_syscall1_noreturn_nr_last_fastcall
+    .size rustix_indirect_syscall1_noreturn_nr_last_fastcall, .-rustix_indirect_syscall1_noreturn_nr_last_fastcall
 
-    .section    .text.rsix_indirect_syscall2_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_indirect_syscall2_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_indirect_syscall2_nr_last_fastcall
-    .weak       rsix_indirect_syscall2_nr_last_fastcall
-    .hidden     rsix_indirect_syscall2_nr_last_fastcall
-    .type       rsix_indirect_syscall2_nr_last_fastcall, @function
-rsix_indirect_syscall2_nr_last_fastcall:
+    .globl      rustix_indirect_syscall2_nr_last_fastcall
+    .weak       rustix_indirect_syscall2_nr_last_fastcall
+    .hidden     rustix_indirect_syscall2_nr_last_fastcall
+    .type       rustix_indirect_syscall2_nr_last_fastcall, @function
+rustix_indirect_syscall2_nr_last_fastcall:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -77,15 +77,15 @@ rsix_indirect_syscall2_nr_last_fastcall:
     .cfi_def_cfa_offset 4
     ret    0x8
     .cfi_endproc
-    .size rsix_indirect_syscall2_nr_last_fastcall, .-rsix_indirect_syscall2_nr_last_fastcall
+    .size rustix_indirect_syscall2_nr_last_fastcall, .-rustix_indirect_syscall2_nr_last_fastcall
 
-    .section    .text.rsix_indirect_syscall3_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_indirect_syscall3_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_indirect_syscall3_nr_last_fastcall
-    .weak       rsix_indirect_syscall3_nr_last_fastcall
-    .hidden     rsix_indirect_syscall3_nr_last_fastcall
-    .type       rsix_indirect_syscall3_nr_last_fastcall, @function
-rsix_indirect_syscall3_nr_last_fastcall:
+    .globl      rustix_indirect_syscall3_nr_last_fastcall
+    .weak       rustix_indirect_syscall3_nr_last_fastcall
+    .hidden     rustix_indirect_syscall3_nr_last_fastcall
+    .type       rustix_indirect_syscall3_nr_last_fastcall, @function
+rustix_indirect_syscall3_nr_last_fastcall:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -97,15 +97,15 @@ rsix_indirect_syscall3_nr_last_fastcall:
     .cfi_def_cfa_offset 4
     ret    0xc
     .cfi_endproc
-    .size rsix_indirect_syscall3_nr_last_fastcall, .-rsix_indirect_syscall3_nr_last_fastcall
+    .size rustix_indirect_syscall3_nr_last_fastcall, .-rustix_indirect_syscall3_nr_last_fastcall
 
-    .section    .text.rsix_indirect_syscall4_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_indirect_syscall4_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_indirect_syscall4_nr_last_fastcall
-    .weak       rsix_indirect_syscall4_nr_last_fastcall
-    .hidden     rsix_indirect_syscall4_nr_last_fastcall
-    .type       rsix_indirect_syscall4_nr_last_fastcall, @function
-rsix_indirect_syscall4_nr_last_fastcall:
+    .globl      rustix_indirect_syscall4_nr_last_fastcall
+    .weak       rustix_indirect_syscall4_nr_last_fastcall
+    .hidden     rustix_indirect_syscall4_nr_last_fastcall
+    .type       rustix_indirect_syscall4_nr_last_fastcall, @function
+rustix_indirect_syscall4_nr_last_fastcall:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -123,15 +123,15 @@ rsix_indirect_syscall4_nr_last_fastcall:
     .cfi_def_cfa_offset 4
     ret    0x10
     .cfi_endproc
-    .size rsix_indirect_syscall4_nr_last_fastcall, .-rsix_indirect_syscall4_nr_last_fastcall
+    .size rustix_indirect_syscall4_nr_last_fastcall, .-rustix_indirect_syscall4_nr_last_fastcall
 
-    .section    .text.rsix_indirect_syscall5_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_indirect_syscall5_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_indirect_syscall5_nr_last_fastcall
-    .weak       rsix_indirect_syscall5_nr_last_fastcall
-    .hidden     rsix_indirect_syscall5_nr_last_fastcall
-    .type       rsix_indirect_syscall5_nr_last_fastcall, @function
-rsix_indirect_syscall5_nr_last_fastcall:
+    .globl      rustix_indirect_syscall5_nr_last_fastcall
+    .weak       rustix_indirect_syscall5_nr_last_fastcall
+    .hidden     rustix_indirect_syscall5_nr_last_fastcall
+    .type       rustix_indirect_syscall5_nr_last_fastcall, @function
+rustix_indirect_syscall5_nr_last_fastcall:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -155,15 +155,15 @@ rsix_indirect_syscall5_nr_last_fastcall:
     .cfi_def_cfa_offset 4
     ret    0x14
     .cfi_endproc
-    .size rsix_indirect_syscall5_nr_last_fastcall, .-rsix_indirect_syscall5_nr_last_fastcall
+    .size rustix_indirect_syscall5_nr_last_fastcall, .-rustix_indirect_syscall5_nr_last_fastcall
 
-    .section    .text.rsix_indirect_syscall6_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_indirect_syscall6_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_indirect_syscall6_nr_last_fastcall
-    .weak       rsix_indirect_syscall6_nr_last_fastcall
-    .hidden     rsix_indirect_syscall6_nr_last_fastcall
-    .type       rsix_indirect_syscall6_nr_last_fastcall, @function
-rsix_indirect_syscall6_nr_last_fastcall:
+    .globl      rustix_indirect_syscall6_nr_last_fastcall
+    .weak       rustix_indirect_syscall6_nr_last_fastcall
+    .hidden     rustix_indirect_syscall6_nr_last_fastcall
+    .type       rustix_indirect_syscall6_nr_last_fastcall, @function
+rustix_indirect_syscall6_nr_last_fastcall:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -193,29 +193,29 @@ rsix_indirect_syscall6_nr_last_fastcall:
     .cfi_def_cfa_offset 4
     ret    0x18
     .cfi_endproc
-    .size rsix_indirect_syscall6_nr_last_fastcall, .-rsix_indirect_syscall6_nr_last_fastcall
+    .size rustix_indirect_syscall6_nr_last_fastcall, .-rustix_indirect_syscall6_nr_last_fastcall
 
-    .section    .text.rsix_syscall0_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_syscall0_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_syscall0_nr_last_fastcall
-    .weak       rsix_syscall0_nr_last_fastcall
-    .hidden     rsix_syscall0_nr_last_fastcall
-    .type       rsix_syscall0_nr_last_fastcall, @function
-rsix_syscall0_nr_last_fastcall:
+    .globl      rustix_syscall0_nr_last_fastcall
+    .weak       rustix_syscall0_nr_last_fastcall
+    .hidden     rustix_syscall0_nr_last_fastcall
+    .type       rustix_syscall0_nr_last_fastcall, @function
+rustix_syscall0_nr_last_fastcall:
     .cfi_startproc
     mov    eax,ecx
     int    0x80
     ret
     .cfi_endproc
-    .size rsix_syscall0_nr_last_fastcall, .-rsix_syscall0_nr_last_fastcall
+    .size rustix_syscall0_nr_last_fastcall, .-rustix_syscall0_nr_last_fastcall
 
-    .section    .text.rsix_syscall1_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_syscall1_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_syscall1_nr_last_fastcall
-    .weak       rsix_syscall1_nr_last_fastcall
-    .hidden     rsix_syscall1_nr_last_fastcall
-    .type       rsix_syscall1_nr_last_fastcall, @function
-rsix_syscall1_nr_last_fastcall:
+    .globl      rustix_syscall1_nr_last_fastcall
+    .weak       rustix_syscall1_nr_last_fastcall
+    .hidden     rustix_syscall1_nr_last_fastcall
+    .type       rustix_syscall1_nr_last_fastcall, @function
+rustix_syscall1_nr_last_fastcall:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -227,30 +227,30 @@ rsix_syscall1_nr_last_fastcall:
     .cfi_def_cfa_offset 4
     ret
     .cfi_endproc
-    .size rsix_syscall1_nr_last_fastcall, .-rsix_syscall1_nr_last_fastcall
+    .size rustix_syscall1_nr_last_fastcall, .-rustix_syscall1_nr_last_fastcall
 
-    .section    .text.rsix_syscall1_noreturn_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_syscall1_noreturn_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_syscall1_noreturn_nr_last_fastcall
-    .weak       rsix_syscall1_noreturn_nr_last_fastcall
-    .hidden     rsix_syscall1_noreturn_nr_last_fastcall
-    .type       rsix_syscall1_noreturn_nr_last_fastcall, @function
-rsix_syscall1_noreturn_nr_last_fastcall:
+    .globl      rustix_syscall1_noreturn_nr_last_fastcall
+    .weak       rustix_syscall1_noreturn_nr_last_fastcall
+    .hidden     rustix_syscall1_noreturn_nr_last_fastcall
+    .type       rustix_syscall1_noreturn_nr_last_fastcall, @function
+rustix_syscall1_noreturn_nr_last_fastcall:
     .cfi_startproc
     mov    eax,edx
     mov    ebx,ecx
     int    0x80
     ud2
     .cfi_endproc
-    .size rsix_syscall1_noreturn_nr_last_fastcall, .-rsix_syscall1_noreturn_nr_last_fastcall
+    .size rustix_syscall1_noreturn_nr_last_fastcall, .-rustix_syscall1_noreturn_nr_last_fastcall
 
-    .section    .text.rsix_syscall2_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_syscall2_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_syscall2_nr_last_fastcall
-    .weak       rsix_syscall2_nr_last_fastcall
-    .hidden     rsix_syscall2_nr_last_fastcall
-    .type       rsix_syscall2_nr_last_fastcall, @function
-rsix_syscall2_nr_last_fastcall:
+    .globl      rustix_syscall2_nr_last_fastcall
+    .weak       rustix_syscall2_nr_last_fastcall
+    .hidden     rustix_syscall2_nr_last_fastcall
+    .type       rustix_syscall2_nr_last_fastcall, @function
+rustix_syscall2_nr_last_fastcall:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -262,15 +262,15 @@ rsix_syscall2_nr_last_fastcall:
     .cfi_def_cfa_offset 4
     ret    0x4
     .cfi_endproc
-    .size rsix_syscall2_nr_last_fastcall, .-rsix_syscall2_nr_last_fastcall
+    .size rustix_syscall2_nr_last_fastcall, .-rustix_syscall2_nr_last_fastcall
 
-    .section    .text.rsix_syscall3_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_syscall3_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_syscall3_nr_last_fastcall
-    .weak       rsix_syscall3_nr_last_fastcall
-    .hidden     rsix_syscall3_nr_last_fastcall
-    .type       rsix_syscall3_nr_last_fastcall, @function
-rsix_syscall3_nr_last_fastcall:
+    .globl      rustix_syscall3_nr_last_fastcall
+    .weak       rustix_syscall3_nr_last_fastcall
+    .hidden     rustix_syscall3_nr_last_fastcall
+    .type       rustix_syscall3_nr_last_fastcall, @function
+rustix_syscall3_nr_last_fastcall:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -282,15 +282,15 @@ rsix_syscall3_nr_last_fastcall:
     .cfi_def_cfa_offset 4
     ret    0x8
     .cfi_endproc
-    .size rsix_syscall3_nr_last_fastcall, .-rsix_syscall3_nr_last_fastcall
+    .size rustix_syscall3_nr_last_fastcall, .-rustix_syscall3_nr_last_fastcall
 
-    .section    .text.rsix_syscall4_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_syscall4_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_syscall4_nr_last_fastcall
-    .weak       rsix_syscall4_nr_last_fastcall
-    .hidden     rsix_syscall4_nr_last_fastcall
-    .type       rsix_syscall4_nr_last_fastcall, @function
-rsix_syscall4_nr_last_fastcall:
+    .globl      rustix_syscall4_nr_last_fastcall
+    .weak       rustix_syscall4_nr_last_fastcall
+    .hidden     rustix_syscall4_nr_last_fastcall
+    .type       rustix_syscall4_nr_last_fastcall, @function
+rustix_syscall4_nr_last_fastcall:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -308,15 +308,15 @@ rsix_syscall4_nr_last_fastcall:
     .cfi_def_cfa_offset 4
     ret    0xc
     .cfi_endproc
-    .size rsix_syscall4_nr_last_fastcall, .-rsix_syscall4_nr_last_fastcall
+    .size rustix_syscall4_nr_last_fastcall, .-rustix_syscall4_nr_last_fastcall
 
-    .section    .text.rsix_syscall5_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_syscall5_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_syscall5_nr_last_fastcall
-    .weak       rsix_syscall5_nr_last_fastcall
-    .hidden     rsix_syscall5_nr_last_fastcall
-    .type       rsix_syscall5_nr_last_fastcall, @function
-rsix_syscall5_nr_last_fastcall:
+    .globl      rustix_syscall5_nr_last_fastcall
+    .weak       rustix_syscall5_nr_last_fastcall
+    .hidden     rustix_syscall5_nr_last_fastcall
+    .type       rustix_syscall5_nr_last_fastcall, @function
+rustix_syscall5_nr_last_fastcall:
     .cfi_startproc
     push   ebx
     .cfi_def_cfa_offset 8
@@ -340,15 +340,15 @@ rsix_syscall5_nr_last_fastcall:
     .cfi_def_cfa_offset 4
     ret    0x10
     .cfi_endproc
-    .size rsix_syscall5_nr_last_fastcall, .-rsix_syscall5_nr_last_fastcall
+    .size rustix_syscall5_nr_last_fastcall, .-rustix_syscall5_nr_last_fastcall
 
-    .section    .text.rsix_syscall6_nr_last_fastcall,"ax",@progbits
+    .section    .text.rustix_syscall6_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rsix_syscall6_nr_last_fastcall
-    .weak       rsix_syscall6_nr_last_fastcall
-    .hidden     rsix_syscall6_nr_last_fastcall
-    .type       rsix_syscall6_nr_last_fastcall, @function
-rsix_syscall6_nr_last_fastcall:
+    .globl      rustix_syscall6_nr_last_fastcall
+    .weak       rustix_syscall6_nr_last_fastcall
+    .hidden     rustix_syscall6_nr_last_fastcall
+    .type       rustix_syscall6_nr_last_fastcall, @function
+rustix_syscall6_nr_last_fastcall:
     .cfi_startproc
     push   ebp
     .cfi_def_cfa_offset 8
@@ -378,19 +378,19 @@ rsix_syscall6_nr_last_fastcall:
     .cfi_def_cfa_offset 4
     ret    0x14
     .cfi_endproc
-    .size rsix_syscall6_nr_last_fastcall, .-rsix_syscall6_nr_last_fastcall
+    .size rustix_syscall6_nr_last_fastcall, .-rustix_syscall6_nr_last_fastcall
 
-    .section    .text.rsix_int_0x80,"ax",@progbits
+    .section    .text.rustix_int_0x80,"ax",@progbits
     .p2align    4
-    .globl      rsix_int_0x80
-    .weak       rsix_int_0x80
-    .hidden     rsix_int_0x80
-    .type       rsix_int_0x80, @function
-rsix_int_0x80:
+    .globl      rustix_int_0x80
+    .weak       rustix_int_0x80
+    .hidden     rustix_int_0x80
+    .type       rustix_int_0x80, @function
+rustix_int_0x80:
     .cfi_startproc
     int    0x80
     ret
     .cfi_endproc
-    .size rsix_int_0x80, .-rsix_int_0x80
+    .size rustix_int_0x80, .-rustix_int_0x80
 
     .section .note.GNU-stack,"",@progbits

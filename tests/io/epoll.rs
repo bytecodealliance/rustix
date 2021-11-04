@@ -1,9 +1,9 @@
 #![cfg(any(target_os = "android", target_os = "linux"))]
 
-use rsix::io::epoll::{self, Epoll};
-use rsix::io::{ioctl_fionbio, read, write, OwnedFd};
-use rsix::io_lifetimes::AsFd;
-use rsix::net::{
+use rustix::io::epoll::{self, Epoll};
+use rustix::io::{ioctl_fionbio, read, write, OwnedFd};
+use rustix::io_lifetimes::AsFd;
+use rustix::net::{
     accept, bind_v4, connect_v4, getsockname, listen, socket, AddressFamily, Ipv4Addr, Protocol,
     SocketAddrAny, SocketAddrV4, SocketType,
 };

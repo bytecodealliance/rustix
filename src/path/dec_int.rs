@@ -26,7 +26,7 @@ use std::path::Path;
 /// # Example
 ///
 /// ```rust
-/// use rsix::path::DecInt;
+/// use rustix::path::DecInt;
 ///
 /// assert_eq!(
 ///     format!("hello {}", DecInt::new(9876).as_ref().display()),

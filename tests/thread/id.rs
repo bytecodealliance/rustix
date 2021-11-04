@@ -1,5 +1,5 @@
-use rsix::process::Pid;
-use rsix::thread;
+use rustix::process::Pid;
+use rustix::thread;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]

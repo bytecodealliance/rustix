@@ -1,7 +1,7 @@
 #[cfg(not(windows))]
-use rsix::io;
+use rustix::io;
 #[cfg(not(windows))]
-use rsix::process::*;
+use rustix::process::*;
 
 #[cfg(not(windows))]
 fn main() -> io::Result<()> {

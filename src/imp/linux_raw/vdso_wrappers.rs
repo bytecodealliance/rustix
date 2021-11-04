@@ -77,7 +77,7 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Resu
         match callee(id, timespec.as_mut_ptr()) {
             0 => (),
             EINVAL => return Err(io::Error::INVAL),
-            _ => _rsix_clock_gettime_via_syscall(id, timespec.as_mut_ptr())?,
+            _ => _rustix_clock_gettime_via_syscall(id, timespec.as_mut_ptr())?,
         }
         Ok(timespec.assume_init())
     }
@@ -244,18 +244,21 @@ static mut CLOCK_GETTIME: AtomicUsize = AtomicUsize::new(0);
 #[cfg(target_arch = "x86")]
 static mut SYSCALL: AtomicUsize = AtomicUsize::new(0);
 
-unsafe extern "C" fn rsix_clock_gettime_via_syscall(
+unsafe extern "C" fn rustix_clock_gettime_via_syscall(
     clockid: c::c_int,
     res: *mut Timespec,
 ) -> c::c_int {
-    match _rsix_clock_gettime_via_syscall(clockid, res) {
+    match _rustix_clock_gettime_via_syscall(clockid, res) {
         Ok(()) => 0,
         Err(e) => e.raw_os_error().wrapping_neg(),
     }
 }
 
 #[cfg(target_pointer_width = "32")]
-unsafe fn _rsix_clock_gettime_via_syscall(clockid: c::c_int, res: *mut Timespec) -> io::Result<()> {
+unsafe fn _rustix_clock_gettime_via_syscall(
+    clockid: c::c_int,
+    res: *mut Timespec,
+) -> io::Result<()> {
     let r0 = syscall2(
         nr(__NR_clock_gettime64),
         pass_usize(clockid as usize),
@@ -263,7 +266,7 @@ unsafe fn _rsix_clock_gettime_via_syscall(clockid: c::c_int, res: *mut Timespec)
     );
     match ret(r0) {
         Err(io::Error::NOSYS) => {
-            // Ordinarily rsix doesn't like to emulate system calls, but in
+            // Ordinarily `rustix` doesn't like to emulate system calls, but in
             // the case of time APIs, it's specific to Linux, specific to
             // 32-bit architectures *and* specific to old kernel versions, and
             // it's not that hard to fix up here, so that no other code needs
@@ -291,7 +294,10 @@ unsafe fn _rsix_clock_gettime_via_syscall(clockid: c::c_int, res: *mut Timespec)
 }
 
 #[cfg(target_pointer_width = "64")]
-unsafe fn _rsix_clock_gettime_via_syscall(clockid: c::c_int, res: *mut Timespec) -> io::Result<()> {
+unsafe fn _rustix_clock_gettime_via_syscall(
+    clockid: c::c_int,
+    res: *mut Timespec,
+) -> io::Result<()> {
     ret(syscall2(
         nr(__NR_clock_gettime),
         pass_usize(clockid as usize),
@@ -301,7 +307,7 @@ unsafe fn _rsix_clock_gettime_via_syscall(clockid: c::c_int, res: *mut Timespec)
 
 #[cfg(all(linux_raw_inline_asm, target_arch = "x86"))]
 #[naked]
-unsafe extern "C" fn rsix_int_0x80(
+unsafe extern "C" fn rustix_int_0x80(
     _nr: SyscallNumber<'_>,
     _a0: ArgReg<'_, A0>,
     _a1: ArgReg<'_, A1>,
@@ -315,7 +321,7 @@ unsafe extern "C" fn rsix_int_0x80(
 
 #[cfg(all(not(linux_raw_inline_asm), target_arch = "x86"))]
 extern "C" {
-    fn rsix_int_0x80(
+    fn rustix_int_0x80(
         _nr: SyscallNumber<'_>,
         _a0: ArgReg<'_, A0>,
         _a1: ArgReg<'_, A1>,
@@ -335,14 +341,14 @@ fn minimal_init() {
         CLOCK_GETTIME
             .compare_exchange(
                 0,
-                rsix_clock_gettime_via_syscall as ClockGettimeType as usize,
+                rustix_clock_gettime_via_syscall as ClockGettimeType as usize,
                 Relaxed,
                 Relaxed,
             )
             .ok();
         #[cfg(target_arch = "x86")]
         SYSCALL
-            .compare_exchange(0, rsix_int_0x80 as SyscallType as usize, Relaxed, Relaxed)
+            .compare_exchange(0, rustix_int_0x80 as SyscallType as usize, Relaxed, Relaxed)
             .ok();
     }
 }

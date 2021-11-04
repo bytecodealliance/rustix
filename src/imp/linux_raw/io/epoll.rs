@@ -10,9 +10,9 @@
 //! # #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 //! # fn main() -> std::io::Result<()> {
 //! use io_lifetimes::AsFd;
-//! use rsix::io::epoll::{self, Epoll};
-//! use rsix::io::{ioctl_fionbio, read, write};
-//! use rsix::net::{
+//! use rustix::io::epoll::{self, Epoll};
+//! use rustix::io::{ioctl_fionbio, read, write};
+//! use rustix::net::{
 //!     accept, bind_v4, listen, socket, AddressFamily, Ipv4Addr, Protocol, SocketAddrV4,
 //!     SocketType,
 //! };

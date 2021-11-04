@@ -1,7 +1,7 @@
-use rsix::io;
-use rsix::path::Arg;
+use rustix::io;
+use rustix::path::Arg;
 #[cfg(feature = "itoa")]
-use rsix::path::DecInt;
+use rustix::path::DecInt;
 use std::borrow::Cow;
 use std::ffi::{CStr, CString, OsStr, OsString};
 use std::path::{Component, Components, Iter, Path, PathBuf};

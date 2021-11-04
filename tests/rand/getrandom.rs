@@ -1,4 +1,4 @@
-use rsix::rand::{getrandom, GetRandomFlags};
+use rustix::rand::{getrandom, GetRandomFlags};
 
 #[test]
 fn test_getrandom() {

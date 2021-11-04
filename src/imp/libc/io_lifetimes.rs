@@ -1,6 +1,7 @@
-//! io_lifetimes types for Windows assuming that Fd is Socket.
+//! `io_lifetimes` types for Windows assuming that Fd is Socket.
 //!
-//! We can make this assumption since rsix supports only std::net on Windows.
+//! We can make this assumption since `rustix` supports only `std::net` on
+//! Windows.
 
 pub use io_lifetimes::BorrowedSocket as BorrowedFd;
 pub(crate) use io_lifetimes::OwnedSocket as OwnedFd;

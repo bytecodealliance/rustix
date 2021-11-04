@@ -1,5 +1,5 @@
 use libc::{kill, SIGSTOP};
-use rsix::process;
+use rustix::process;
 use serial_test::serial;
 use std::process::{Command, Stdio};
 

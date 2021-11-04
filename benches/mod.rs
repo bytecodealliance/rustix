@@ -26,7 +26,7 @@ mod suite {
     use criterion::Criterion;
 
     pub(super) fn simple_statat(c: &mut Criterion) {
-        use rsix::fs::{cwd, statat, AtFlags};
+        use rustix::fs::{cwd, statat, AtFlags};
 
         c.bench_function("simple statat", |b| {
             b.iter(|| {
@@ -74,7 +74,7 @@ mod suite {
     }
 
     pub(super) fn simple_statat_cstr(c: &mut Criterion) {
-        use rsix::fs::{cwd, statat, AtFlags};
+        use rustix::fs::{cwd, statat, AtFlags};
 
         c.bench_function("simple statat cstr", |b| {
             b.iter(|| {
@@ -85,7 +85,7 @@ mod suite {
 
     #[cfg(not(target_os = "wasi"))]
     pub(super) fn simple_clock_gettime(c: &mut Criterion) {
-        use rsix::time::{clock_gettime, ClockId};
+        use rustix::time::{clock_gettime, ClockId};
 
         c.bench_function("simple clock_gettime", |b| {
             b.iter(|| {
@@ -112,7 +112,7 @@ mod suite {
 
     #[cfg(not(target_os = "wasi"))]
     pub(super) fn simple_getpid(c: &mut Criterion) {
-        use rsix::process::getpid;
+        use rustix::process::getpid;
 
         c.bench_function("simple getpid", |b| {
             b.iter(|| {

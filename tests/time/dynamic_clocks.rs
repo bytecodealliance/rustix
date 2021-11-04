@@ -1,7 +1,7 @@
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]
 
-use rsix::io_lifetimes::AsFd;
-use rsix::time::{clock_gettime_dynamic, ClockId, DynamicClockId};
+use rustix::io_lifetimes::AsFd;
+use rustix::time::{clock_gettime_dynamic, ClockId, DynamicClockId};
 
 #[test]
 fn test_known_clocks() {

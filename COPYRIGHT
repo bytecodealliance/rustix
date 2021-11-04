@@ -1,19 +1,19 @@
 Short version for non-lawyers:
 
-`rsix` is triple-licensed under Apache 2.0 with the LLVM Exception,
+`rustix` is triple-licensed under Apache 2.0 with the LLVM Exception,
 Apache 2.0, and MIT terms.
 
 
 Longer version:
 
-Copyrights in the `rsix` project are retained by their contributors.
-No copyright assignment is required to contribute to the `rsix`
+Copyrights in the `rustix` project are retained by their contributors.
+No copyright assignment is required to contribute to the `rustix`
 project.
 
 Some files include code derived from Rust's `libstd`; see the comments in
 the code for details.
 
-Except as otherwise noted (below and/or in individual files), `rsix`
+Except as otherwise noted (below and/or in individual files), `rustix`
 is licensed under:
 
  - the Apache License, Version 2.0, with the LLVM Exception

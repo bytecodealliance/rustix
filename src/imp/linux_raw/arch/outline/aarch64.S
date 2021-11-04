@@ -8,116 +8,116 @@
     .file       "aarch64.S"
     .arch       armv8-a
 
-    .section    .text.rsix_syscall0_nr_last,"ax",@progbits
+    .section    .text.rustix_syscall0_nr_last,"ax",@progbits
     .p2align    2
-    .globl      rsix_syscall0_nr_last
-    .weak       rsix_syscall0_nr_last
-    .hidden     rsix_syscall0_nr_last
-    .type       rsix_syscall0_nr_last, @function
-rsix_syscall0_nr_last:
+    .globl      rustix_syscall0_nr_last
+    .weak       rustix_syscall0_nr_last
+    .hidden     rustix_syscall0_nr_last
+    .type       rustix_syscall0_nr_last, @function
+rustix_syscall0_nr_last:
     .cfi_startproc
     mov    w8, w0
     svc    #0
     ret
     .cfi_endproc
-    .size rsix_syscall0_nr_last, .-rsix_syscall0_nr_last
+    .size rustix_syscall0_nr_last, .-rustix_syscall0_nr_last
 
-    .section    .text.rsix_syscall1_nr_last,"ax",@progbits
+    .section    .text.rustix_syscall1_nr_last,"ax",@progbits
     .p2align    2
-    .globl      rsix_syscall1_nr_last
-    .weak       rsix_syscall1_nr_last
-    .hidden     rsix_syscall1_nr_last
-    .type       rsix_syscall1_nr_last, @function
-rsix_syscall1_nr_last:
+    .globl      rustix_syscall1_nr_last
+    .weak       rustix_syscall1_nr_last
+    .hidden     rustix_syscall1_nr_last
+    .type       rustix_syscall1_nr_last, @function
+rustix_syscall1_nr_last:
     .cfi_startproc
     mov    w8, w1
     svc    #0
     ret
     .cfi_endproc
-    .size rsix_syscall1_nr_last, .-rsix_syscall1_nr_last
+    .size rustix_syscall1_nr_last, .-rustix_syscall1_nr_last
 
-    .section    .text.rsix_syscall1_noreturn_nr_last,"ax",@progbits
+    .section    .text.rustix_syscall1_noreturn_nr_last,"ax",@progbits
     .p2align    2
-    .globl      rsix_syscall1_noreturn_nr_last
-    .weak       rsix_syscall1_noreturn_nr_last
-    .hidden     rsix_syscall1_noreturn_nr_last
-    .type       rsix_syscall1_noreturn_nr_last, @function
-rsix_syscall1_noreturn_nr_last:
+    .globl      rustix_syscall1_noreturn_nr_last
+    .weak       rustix_syscall1_noreturn_nr_last
+    .hidden     rustix_syscall1_noreturn_nr_last
+    .type       rustix_syscall1_noreturn_nr_last, @function
+rustix_syscall1_noreturn_nr_last:
     .cfi_startproc
     mov    w8, w1
     svc    #0
     brk    #0x1
     .cfi_endproc
-    .size rsix_syscall1_noreturn_nr_last, .-rsix_syscall1_noreturn_nr_last
+    .size rustix_syscall1_noreturn_nr_last, .-rustix_syscall1_noreturn_nr_last
 
-    .section    .text.rsix_syscall2_nr_last,"ax",@progbits
+    .section    .text.rustix_syscall2_nr_last,"ax",@progbits
     .p2align    2
-    .globl      rsix_syscall2_nr_last
-    .weak       rsix_syscall2_nr_last
-    .hidden     rsix_syscall2_nr_last
-    .type       rsix_syscall2_nr_last, @function
-rsix_syscall2_nr_last:
+    .globl      rustix_syscall2_nr_last
+    .weak       rustix_syscall2_nr_last
+    .hidden     rustix_syscall2_nr_last
+    .type       rustix_syscall2_nr_last, @function
+rustix_syscall2_nr_last:
     .cfi_startproc
     mov    w8, w2
     svc    #0
     ret
     .cfi_endproc
-    .size rsix_syscall2_nr_last, .-rsix_syscall2_nr_last
+    .size rustix_syscall2_nr_last, .-rustix_syscall2_nr_last
 
-    .section    .text.rsix_syscall3_nr_last,"ax",@progbits
+    .section    .text.rustix_syscall3_nr_last,"ax",@progbits
     .p2align    2
-    .globl      rsix_syscall3_nr_last
-    .weak       rsix_syscall3_nr_last
-    .hidden     rsix_syscall3_nr_last
-    .type       rsix_syscall3_nr_last, @function
-rsix_syscall3_nr_last:
+    .globl      rustix_syscall3_nr_last
+    .weak       rustix_syscall3_nr_last
+    .hidden     rustix_syscall3_nr_last
+    .type       rustix_syscall3_nr_last, @function
+rustix_syscall3_nr_last:
     .cfi_startproc
     mov    w8, w3
     svc    #0
     ret
     .cfi_endproc
-    .size rsix_syscall3_nr_last, .-rsix_syscall3_nr_last
+    .size rustix_syscall3_nr_last, .-rustix_syscall3_nr_last
 
-    .section    .text.rsix_syscall4_nr_last,"ax",@progbits
+    .section    .text.rustix_syscall4_nr_last,"ax",@progbits
     .p2align    2
-    .globl      rsix_syscall4_nr_last
-    .weak       rsix_syscall4_nr_last
-    .hidden     rsix_syscall4_nr_last
-    .type       rsix_syscall4_nr_last, @function
-rsix_syscall4_nr_last:
+    .globl      rustix_syscall4_nr_last
+    .weak       rustix_syscall4_nr_last
+    .hidden     rustix_syscall4_nr_last
+    .type       rustix_syscall4_nr_last, @function
+rustix_syscall4_nr_last:
     .cfi_startproc
     mov    w8, w4
     svc    #0
     ret
     .cfi_endproc
-    .size rsix_syscall4_nr_last, .-rsix_syscall4_nr_last
+    .size rustix_syscall4_nr_last, .-rustix_syscall4_nr_last
 
-    .section    .text.rsix_syscall5_nr_last,"ax",@progbits
+    .section    .text.rustix_syscall5_nr_last,"ax",@progbits
     .p2align    2
-    .globl      rsix_syscall5_nr_last
-    .weak       rsix_syscall5_nr_last
-    .hidden     rsix_syscall5_nr_last
-    .type       rsix_syscall5_nr_last, @function
-rsix_syscall5_nr_last:
+    .globl      rustix_syscall5_nr_last
+    .weak       rustix_syscall5_nr_last
+    .hidden     rustix_syscall5_nr_last
+    .type       rustix_syscall5_nr_last, @function
+rustix_syscall5_nr_last:
     .cfi_startproc
     mov    w8, w5
     svc    #0
     ret
     .cfi_endproc
-    .size rsix_syscall5_nr_last, .-rsix_syscall5_nr_last
+    .size rustix_syscall5_nr_last, .-rustix_syscall5_nr_last
 
-    .section    .text.rsix_syscall6_nr_last,"ax",@progbits
+    .section    .text.rustix_syscall6_nr_last,"ax",@progbits
     .p2align    2
-    .globl      rsix_syscall6_nr_last
-    .weak       rsix_syscall6_nr_last
-    .hidden     rsix_syscall6_nr_last
-    .type       rsix_syscall6_nr_last, @function
-rsix_syscall6_nr_last:
+    .globl      rustix_syscall6_nr_last
+    .weak       rustix_syscall6_nr_last
+    .hidden     rustix_syscall6_nr_last
+    .type       rustix_syscall6_nr_last, @function
+rustix_syscall6_nr_last:
     .cfi_startproc
     mov    w8, w6
     svc    #0
     ret
     .cfi_endproc
-    .size rsix_syscall6_nr_last, .-rsix_syscall6_nr_last
+    .size rustix_syscall6_nr_last, .-rustix_syscall6_nr_last
 
     .section .note.GNU-stack,"",@progbits
