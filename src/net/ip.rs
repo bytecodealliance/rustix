@@ -1,6 +1,11 @@
 //! The following is derived from Rust's
 //! library/std/src/net/ip.rs at revision
 //! dca3f1b786efd27be3b325ed1e01e247aa589c3b.
+//!
+//! This defines `IpAddr`, `Ipv4Addr`, and `Ipv6Addr`. Ideally, these should be
+//! defined in `core`. See [RFC 2832].
+//!
+//! [RFC 2832]: https://github.com/rust-lang/rfcs/pull/2832
 
 #![allow(unsafe_code)]
 

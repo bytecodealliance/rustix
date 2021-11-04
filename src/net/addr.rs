@@ -1,6 +1,10 @@
 //! The following is derived from Rust's
 //! library/std/src/net/addr.rs at revision
 //! dca3f1b786efd27be3b325ed1e01e247aa589c3b.
+//!
+//! This defines `SocketAddr`, `SocketAddrV4`, and `SocketAddrV6`. These are
+//! conceptually platform-independent, however in practice OS's have differing
+//! representations.
 
 #![allow(unsafe_code)]
 
