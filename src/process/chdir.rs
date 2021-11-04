@@ -14,7 +14,7 @@ use imp::fd::AsFd;
 /// [Linux]: https://man7.org/linux/man-pages/man2/chdir.2.html
 #[inline]
 pub fn chdir<P: path::Arg>(path: P) -> io::Result<()> {
-    path.into_with_z_str(|path| imp::syscalls::chdir(path))
+    path.into_with_z_str(imp::syscalls::chdir)
 }
 
 /// `fchdir(fd)`—Change the working directory.

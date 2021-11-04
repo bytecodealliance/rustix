@@ -1629,13 +1629,10 @@ pub(crate) unsafe fn fork() -> io::Result<Pid> {
 }
 
 pub fn execve(path: &ZStr, args: &[Cow<'_, ZStr>], env_vars: &[Cow<'_, ZStr>]) -> io::Result<()> {
-    let mut argv: Vec<_> = args.into_iter().map(|cstr| ZStr::as_ptr(cstr)).collect();
-    let mut envs: Vec<_> = env_vars
-        .into_iter()
-        .map(|cstr| ZStr::as_ptr(cstr))
-        .collect();
-    argv.push(core::ptr::null());
-    envs.push(core::ptr::null());
+    let mut argv: Vec<_> = args.iter().map(|zstr| ZStr::as_ptr(zstr)).collect();
+    let mut envs: Vec<_> = env_vars.iter().map(|zstr| ZStr::as_ptr(zstr)).collect();
+    argv.push(std::ptr::null());
+    envs.push(std::ptr::null());
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_execve),
