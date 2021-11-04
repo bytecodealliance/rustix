@@ -36,10 +36,10 @@ pub use imp::net::SocketAddrStorage;
 #[cfg(not(windows))]
 pub use imp::net::SocketAddrUnix;
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
-pub use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
-
+// Declare the `Ip` and `Socket` address types.
 #[cfg(feature = "rustc-dep-of-std")]
 pub use addr::{SocketAddr, SocketAddrV4, SocketAddrV6};
 #[cfg(feature = "rustc-dep-of-std")]
 pub use ip::{IpAddr, Ipv4Addr, Ipv6Addr};
+#[cfg(feature = "std")]
+pub use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};

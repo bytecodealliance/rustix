@@ -4,14 +4,14 @@
 
 pub use io_lifetimes::BorrowedSocket as BorrowedFd;
 pub(crate) use io_lifetimes::OwnedSocket as OwnedFd;
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 pub(crate) use std::os::windows::io::RawSocket as RawFd;
 pub(crate) use winapi::um::winsock2::SOCKET as LibcFd;
 
 pub(crate) trait AsRawFd {
     fn as_raw_fd(&self) -> RawFd;
 }
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 impl<T: std::os::windows::io::AsRawSocket> AsRawFd for T {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -22,7 +22,7 @@ impl<T: std::os::windows::io::AsRawSocket> AsRawFd for T {
 pub(crate) trait IntoRawFd {
     fn into_raw_fd(self) -> RawFd;
 }
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 impl<T: std::os::windows::io::IntoRawSocket> IntoRawFd for T {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -33,7 +33,7 @@ impl<T: std::os::windows::io::IntoRawSocket> IntoRawFd for T {
 pub(crate) trait FromRawFd {
     unsafe fn from_raw_fd(raw_fd: RawFd) -> Self;
 }
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 impl<T: std::os::windows::io::FromRawSocket> FromRawFd for T {
     #[inline]
     unsafe fn from_raw_fd(raw_fd: RawFd) -> Self {
