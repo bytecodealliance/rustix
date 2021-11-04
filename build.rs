@@ -2,6 +2,7 @@
 use cc::Build;
 use std::env::var;
 
+/// The directory for out-of-line ("outline") libraries.
 const OUTLINE_PATH: &str = "src/imp/linux_raw/arch/outline";
 
 fn main() {

@@ -3,6 +3,9 @@
 //! There are two forms; `indirect_*` which take a callee, which allow calling
 //! through the vDSO when possible, and plain forms, which use the `int 0x80`
 //! instruction.
+//!
+//! Note that most `rustix` syscalls use the vsyscall mechanism rather than
+//! going using `int 0x80` sequences.
 
 #![allow(dead_code)]
 

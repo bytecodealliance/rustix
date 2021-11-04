@@ -1,4 +1,4 @@
-//! Declare functions defined in out-of-line asm files.
+//! Declare functions defined in out-of-line ("outline") asm files.
 //!
 //! Kernel calling conventions differ from userspace calling conventions,
 //! so we also define inline function wrappers which reorder the arguments
