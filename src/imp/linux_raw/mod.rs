@@ -1,6 +1,6 @@
-/// The linux_raw backend.
-///
-/// This makes Linux syscalls directly, without going through libc.
+//! The linux_raw backend.
+//!
+//! This makes Linux syscalls directly, without going through libc.
 
 mod arch;
 mod conv;
