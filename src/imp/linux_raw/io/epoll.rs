@@ -169,7 +169,7 @@ pub trait Context {
     /// context, and within the context's lifetime.
     unsafe fn decode<'call>(&self, raw: u64) -> Ref<'call, Self::Target>;
 
-    /// Release ownership of the value refered to by `target` and return it.
+    /// Release ownership of the value referred to by `target` and return it.
     fn release(&self, target: Ref<'_, Self::Target>) -> Self::Data;
 }
 
@@ -272,7 +272,7 @@ impl<Context: self::Context> Epoll<Context> {
     /// `epoll_create1(flags)`—Creates a new `Epoll`.
     ///
     /// Use the [`CreateFlags::CLOEXEC`] flag to prevent the resulting file
-    /// descriptor from being implicity passed across `exec` boundaries.
+    /// descriptor from being implicitly passed across `exec` boundaries.
     #[inline]
     #[doc(alias = "epoll_create1")]
     pub fn new(flags: CreateFlags, context: Context) -> io::Result<Self> {
@@ -287,7 +287,7 @@ impl<Context: self::Context> Epoll<Context> {
     /// `epoll_ctl(self, EPOLL_CTL_ADD, data, event)`—Adds an element to an
     /// `Epoll`.
     ///
-    /// This registers interest in any of the events set in `events` occuring
+    /// This registers interest in any of the events set in `events` occurring
     /// on the file descriptor associated with `data`.
     #[doc(alias = "epoll_ctl")]
     pub fn add(

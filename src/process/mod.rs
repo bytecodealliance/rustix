@@ -138,7 +138,7 @@ pub fn waitpid(pid: Pid, waitopts: WaitOptions) -> io::Result<Option<WaitStatus>
     Ok(imp::syscalls::waitpid(pid.as_raw(), waitopts)?.map(|(_, status)| status))
 }
 
-/// `wait`—Wait for any of the childern of calling process to change state.
+/// `wait`—Wait for any of the children of calling process to change state.
 ///
 /// On success, returns the pid of the child process whose state changed,
 /// and the status of said process.

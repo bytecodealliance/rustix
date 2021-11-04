@@ -1,4 +1,4 @@
-//! Unix user, group, and process identiiers.
+//! Unix user, group, and process identifiers.
 //!
 //! # Safety
 //!

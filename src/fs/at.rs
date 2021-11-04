@@ -1,4 +1,9 @@
 //! POSIX-style `*at` functions.
+//!
+//! The `dirfd` argument to these functions may be a file descriptor for a
+//! directory, or the special value returned by [`cwd`].
+//!
+//! [`cwd`]: crate::fs::cwd
 
 use crate::ffi::{ZStr, ZString};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
@@ -24,6 +29,8 @@ use imp::time::Timespec;
 /// POSIX guarantees that `openat` will use the lowest unused file descriptor,
 /// however it is not safe in general to rely on this, as file descriptors may
 /// be unexpectedly allocated on other threads or in libraries.
+///
+/// The `Mode` argument is only significant when creating a file.
 ///
 /// # References
 ///  - [POSIX]
@@ -124,10 +131,14 @@ pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
 
 /// `unlinkat(fd, path, flags)`—Unlinks a file or remove a directory.
 ///
+/// With the [`REMOVEDIR`] flag, this removes a directory. This is in place
+/// of a `rmdirat` function.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
 ///
+/// [`REMOVEDIR`]: AtFlags::REMOVEDIR
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/unlinkat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/unlinkat.2.html
 #[inline]

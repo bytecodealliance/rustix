@@ -4,7 +4,7 @@ use crate::{imp, io};
 use imp::fd::AsFd;
 
 /// Returns a pair of booleans indicating whether the file descriptor is
-/// readable and/or writeable, respectively.
+/// readable and/or writable, respectively.
 ///
 /// Unlike [`is_file_read_write`], this correctly detects whether sockets
 /// have been shutdown, partially or completely.

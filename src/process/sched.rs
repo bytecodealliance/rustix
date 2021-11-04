@@ -16,7 +16,7 @@ pub struct CpuSet {
 }
 
 impl CpuSet {
-    /// Return the maximum number of CPU in CpuSet
+    /// The maximum number of CPU in CpuSet
     pub const MAX_CPU: usize = imp::process::CPU_SETSIZE;
 
     /// Create a new and empty CpuSet.
@@ -61,20 +61,20 @@ impl CpuSet {
         imp::syscalls::CPU_COUNT(&self.cpu_set)
     }
 
-    /// Zeroies the CpuSet
+    /// Zeroes the CpuSet.
     #[inline]
     pub fn clear(&mut self) {
         imp::syscalls::CPU_ZERO(&mut self.cpu_set)
     }
 }
 
-/// `sched_setaffinity` set a thread's CPU affinity mask
+/// `sched_setaffinity(pid, cpuset)`—Set a thread's CPU affinity mask.
 ///
-/// `pid` is the thread ID to update.
-/// If pid is `Pid::NONE`, then the calling thread is updated.
+/// `pid` is the thread ID to update. If pid is `Pid::NONE`, then the current
+/// thread is updated.
 ///
-/// The `CpuSet` argument specifies the set of CPUs on which the thread
-/// will be eligible to run.
+/// The `CpuSet` argument specifies the set of CPUs on which the thread will
+/// be eligible to run.
 ///
 /// # References
 ///  - [Linux]
@@ -85,13 +85,12 @@ pub fn sched_setaffinity(pid: Pid, cpuset: &CpuSet) -> io::Result<()> {
     imp::syscalls::sched_setaffinity(pid, &cpuset.cpu_set)
 }
 
-/// `sched_getaffinity` get a thread's CPU affinity mask
+/// `sched_getaffinity(pid)`—Get a thread's CPU affinity mask.
 ///
-/// `pid` is the thread ID to check.
-/// If pid is `Pid::NONE`, then the calling thread is checked.
+/// `pid` is the thread ID to check. If pid is `Pid::NONE`, then the current
+/// thread is checked.
 ///
-/// Returned `CpuSet` is the set of CPUs on which the thread
-/// is eligible to run.
+/// Returns the set of CPUs on which the thread is eligible to run.
 ///
 /// # References
 ///  - [Linux]
