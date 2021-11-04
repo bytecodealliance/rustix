@@ -537,7 +537,7 @@ pub(crate) fn CPU_ISSET(cpu: usize, cpuset: &RawCpuSet) -> bool {
 
 #[allow(non_snake_case)]
 #[inline]
-pub fn CPU_COUNT_S(size: usize, cpuset: &RawCpuSet) -> u32 {
+pub(crate) fn CPU_COUNT_S(size: usize, cpuset: &RawCpuSet) -> u32 {
     let mut s: u32 = 0;
     let size_of_mask = size_of_val(&cpuset.bits[0]);
     for i in cpuset.bits[..(size / size_of_mask)].iter() {
@@ -548,7 +548,7 @@ pub fn CPU_COUNT_S(size: usize, cpuset: &RawCpuSet) -> u32 {
 
 #[allow(non_snake_case)]
 #[inline]
-pub fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
+pub(crate) fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
     CPU_COUNT_S(core::mem::size_of::<RawCpuSet>(), cpuset)
 }
 
@@ -1486,7 +1486,7 @@ pub(crate) fn setpriority_process(pid: Pid, priority: i32) -> io::Result<()> {
 
 // TODO: This could be de-multiplexed.
 #[inline]
-pub unsafe fn futex(
+pub(crate) unsafe fn futex(
     uaddr: *mut u32,
     op: FutexOperation,
     flags: FutexFlags,
@@ -1628,7 +1628,11 @@ pub(crate) unsafe fn fork() -> io::Result<Pid> {
     Ok(Pid::from_raw(pid))
 }
 
-pub fn execve(path: &ZStr, args: &[Cow<'_, ZStr>], env_vars: &[Cow<'_, ZStr>]) -> io::Result<()> {
+pub(crate) fn execve(
+    path: &ZStr,
+    args: &[Cow<'_, ZStr>],
+    env_vars: &[Cow<'_, ZStr>],
+) -> io::Result<()> {
     let mut argv: Vec<_> = args.iter().map(|zstr| ZStr::as_ptr(zstr)).collect();
     let mut envs: Vec<_> = env_vars.iter().map(|zstr| ZStr::as_ptr(zstr)).collect();
     argv.push(std::ptr::null());
@@ -1644,7 +1648,7 @@ pub fn execve(path: &ZStr, args: &[Cow<'_, ZStr>], env_vars: &[Cow<'_, ZStr>]) -
 }
 
 #[inline]
-pub fn waitpid(pid: RawPid, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+pub(crate) fn waitpid(pid: RawPid, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
     unsafe {
         let mut status: u32 = 0;
         let pid = ret_c_uint(syscall4(

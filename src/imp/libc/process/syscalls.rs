@@ -208,7 +208,7 @@ pub(crate) fn CPU_ISSET(cpu: usize, cpuset: &RawCpuSet) -> bool {
 #[cfg(any(target_os = "linux"))]
 #[allow(non_snake_case)]
 #[inline]
-pub fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
+pub(crate) fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
     unsafe { c::CPU_COUNT(cpuset).try_into().unwrap() }
 }
 
@@ -352,7 +352,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn waitpid(pid: RawPid, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+pub(crate) fn waitpid(pid: RawPid, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
     unsafe {
         let mut status: c::c_int = 0;
         let pid = ret_c_int(c::waitpid(pid as _, &mut status, waitopts.bits() as _))?;

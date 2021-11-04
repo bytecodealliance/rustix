@@ -152,7 +152,7 @@ pub type RawUname = c::utsname;
     target_os = "fuchsia",
     target_os = "dragonfly"
 ))]
-pub type RawCpuSet = c::cpu_set_t;
+pub(crate) type RawCpuSet = c::cpu_set_t;
 
 #[cfg(any(
     target_os = "linux",
@@ -160,4 +160,4 @@ pub type RawCpuSet = c::cpu_set_t;
     target_os = "fuchsia",
     target_os = "dragonfly"
 ))]
-pub const CPU_SETSIZE: usize = c::CPU_SETSIZE as usize;
+pub(crate) const CPU_SETSIZE: usize = c::CPU_SETSIZE as usize;
