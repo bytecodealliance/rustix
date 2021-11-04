@@ -109,7 +109,7 @@ fn test_arg() {
     );
     assert_eq!(b"hello", t.as_maybe_utf8_bytes());
 
-    let t: Cow<str> = Cow::Borrowed("hello");
+    let t: Cow<'_, str> = Cow::Borrowed("hello");
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_z_str().unwrap()));
@@ -119,7 +119,7 @@ fn test_arg() {
     );
     assert_eq!(b"hello", t.as_maybe_utf8_bytes());
 
-    let t: Cow<str> = Cow::Owned("hello".to_owned());
+    let t: Cow<'_, str> = Cow::Owned("hello".to_owned());
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_z_str().unwrap()));
@@ -129,7 +129,7 @@ fn test_arg() {
     );
     assert_eq!(b"hello", t.as_maybe_utf8_bytes());
 
-    let t: Cow<OsStr> = Cow::Borrowed(OsStr::new("hello"));
+    let t: Cow<'_, OsStr> = Cow::Borrowed(OsStr::new("hello"));
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_z_str().unwrap()));
@@ -139,7 +139,7 @@ fn test_arg() {
     );
     assert_eq!(b"hello", t.as_maybe_utf8_bytes());
 
-    let t: Cow<OsStr> = Cow::Owned(OsString::from("hello".to_owned()));
+    let t: Cow<'_, OsStr> = Cow::Owned(OsString::from("hello".to_owned()));
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_z_str().unwrap()));
@@ -149,7 +149,7 @@ fn test_arg() {
     );
     assert_eq!(b"hello", t.as_maybe_utf8_bytes());
 
-    let t: Cow<CStr> = Cow::Borrowed(cstr!("hello"));
+    let t: Cow<'_, CStr> = Cow::Borrowed(cstr!("hello"));
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_z_str().unwrap()));
@@ -159,7 +159,7 @@ fn test_arg() {
     );
     assert_eq!(b"hello", t.as_maybe_utf8_bytes());
 
-    let t: Cow<CStr> = Cow::Owned(cstr!("hello").to_owned());
+    let t: Cow<'_, CStr> = Cow::Owned(cstr!("hello").to_owned());
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_z_str().unwrap()));

@@ -54,11 +54,12 @@ pub trait Arg {
     /// Returns a view of this string as a string slice.
     fn as_str(&self) -> io::Result<&str>;
 
-    /// Returns a potentially-lossy rendering of this string as a `Cow<str>`.
-    fn to_string_lossy(&self) -> Cow<str>;
+    /// Returns a potentially-lossy rendering of this string as a `Cow<'_,
+    /// str>`.
+    fn to_string_lossy(&self) -> Cow<'_, str>;
 
     /// Returns a view of this string as a maybe-owned [`ZStr`].
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>>;
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>>;
 
     /// Consumes `self` and returns a view of this string as a maybe-owned
     /// [`ZStr`].
@@ -77,7 +78,7 @@ pub trait Arg {
 
     /// Returns a view of this string as a maybe-owned [`ZStr`].
     #[cfg(not(feature = "rustc-dep-of-std"))]
-    fn as_cow_c_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_c_str(&self) -> io::Result<Cow<'_, ZStr>> {
         self.as_cow_z_str()
     }
 
@@ -109,12 +110,12 @@ impl Arg for &str {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         Cow::Borrowed(self)
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -152,12 +153,12 @@ impl Arg for &String {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         Cow::Borrowed(self)
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(String::as_str(self).as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -194,12 +195,12 @@ impl Arg for String {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         Cow::Borrowed(self)
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -238,12 +239,12 @@ impl Arg for &OsStr {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         OsStr::to_string_lossy(self)
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -282,12 +283,12 @@ impl Arg for &OsString {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_os_str().to_string_lossy()
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(OsString::as_os_str(self).as_bytes())
                 .map_err(|_cstr_err| io::Error::INVAL)?,
@@ -325,12 +326,12 @@ impl Arg for OsString {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_os_str().to_string_lossy()
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -369,12 +370,12 @@ impl Arg for &Path {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         Path::to_string_lossy(self)
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -416,12 +417,12 @@ impl Arg for &PathBuf {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_path().to_string_lossy()
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(PathBuf::as_path(self).as_os_str().as_bytes())
                 .map_err(|_cstr_err| io::Error::INVAL)?,
@@ -459,12 +460,12 @@ impl Arg for PathBuf {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_os_str().to_string_lossy()
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -505,12 +506,12 @@ impl Arg for &ZStr {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         ZStr::to_string_lossy(self)
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Borrowed(self))
     }
 
@@ -544,12 +545,12 @@ impl Arg for &ZString {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         unimplemented!()
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Borrowed(self))
     }
 
@@ -583,12 +584,12 @@ impl Arg for ZString {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         ZStr::to_string_lossy(self)
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Borrowed(self))
     }
 
@@ -622,12 +623,12 @@ impl<'a> Arg for Cow<'a, str> {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         Cow::Borrowed(self)
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(self.as_ref()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -670,12 +671,12 @@ impl<'a> Arg for Cow<'a, OsStr> {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         (**self).to_string_lossy()
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -717,13 +718,13 @@ impl<'a> Arg for Cow<'a, ZStr> {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         let borrow: &ZStr = core::borrow::Borrow::borrow(self);
         borrow.to_string_lossy()
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Borrowed(self))
     }
 
@@ -758,12 +759,12 @@ impl<'a> Arg for Component<'a> {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_os_str().to_string_lossy()
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -802,12 +803,12 @@ impl<'a> Arg for Components<'a> {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_path().to_string_lossy()
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(self.as_path().as_os_str().as_bytes())
                 .map_err(|_cstr_err| io::Error::INVAL)?,
@@ -848,12 +849,12 @@ impl<'a> Arg for Iter<'a> {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_path().to_string_lossy()
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(self.as_path().as_os_str().as_bytes())
                 .map_err(|_cstr_err| io::Error::INVAL)?,
@@ -893,12 +894,12 @@ impl Arg for &[u8] {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         String::from_utf8_lossy(self)
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(*self).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -936,12 +937,12 @@ impl Arg for &Vec<u8> {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         String::from_utf8_lossy(self)
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(self.as_slice()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -979,12 +980,12 @@ impl Arg for Vec<u8> {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         String::from_utf8_lossy(self)
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(self.as_slice()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
@@ -1023,12 +1024,12 @@ impl Arg for DecInt {
     }
 
     #[inline]
-    fn to_string_lossy(&self) -> Cow<str> {
+    fn to_string_lossy(&self) -> Cow<'_, str> {
         Path::to_string_lossy(self.as_ref())
     }
 
     #[inline]
-    fn as_cow_z_str(&self) -> io::Result<Cow<ZStr>> {
+    fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
             ZString::new(self.as_ref().as_os_str().as_bytes())
                 .map_err(|_cstr_err| io::Error::INVAL)?,

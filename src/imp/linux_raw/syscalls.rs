@@ -219,7 +219,7 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], pos: u64) -> io::Result<
     }
 }
 
-pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut]) -> io::Result<usize> {
+pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut<'_>]) -> io::Result<usize> {
     let (bufs_addr, bufs_len) = slice(bufs);
 
     unsafe {
@@ -232,7 +232,7 @@ pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut]) -> io::Result<usize
     }
 }
 
-pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], pos: u64) -> io::Result<usize> {
+pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut<'_>], pos: u64) -> io::Result<usize> {
     let (bufs_addr, bufs_len) = slice(bufs);
 
     #[cfg(target_pointer_width = "32")]
@@ -260,7 +260,7 @@ pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], pos: u64) -> io::R
 
 pub(crate) fn preadv2(
     fd: BorrowedFd<'_>,
-    bufs: &[IoSliceMut],
+    bufs: &[IoSliceMut<'_>],
     pos: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
@@ -346,7 +346,7 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], pos: u64) -> io::Result<usi
 }
 
 #[inline]
-pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> {
+pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
     let (bufs_addr, bufs_len) = slice(bufs);
 
     unsafe {
@@ -360,7 +360,7 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> 
 }
 
 #[inline]
-pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], pos: u64) -> io::Result<usize> {
+pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>], pos: u64) -> io::Result<usize> {
     let (bufs_addr, bufs_len) = slice(bufs);
 
     #[cfg(target_pointer_width = "32")]
@@ -389,7 +389,7 @@ pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], pos: u64) -> io::Res
 #[inline]
 pub(crate) fn pwritev2(
     fd: BorrowedFd<'_>,
-    bufs: &[IoSlice],
+    bufs: &[IoSlice<'_>],
     pos: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
@@ -988,12 +988,12 @@ pub(crate) fn chdir(filename: &ZStr) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn fchdir(fd: BorrowedFd) -> io::Result<()> {
+pub(crate) fn fchdir(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(syscall1_readonly(nr(__NR_fchdir), borrowed_fd(fd))) }
 }
 
 #[inline]
-pub(crate) fn ioctl_fionread(fd: BorrowedFd) -> io::Result<u64> {
+pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
     unsafe {
         let mut result = MaybeUninit::<c::c_int>::uninit();
         ret(syscall3(
@@ -1020,7 +1020,7 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
+pub(crate) fn ioctl_tiocgwinsz(fd: BorrowedFd<'_>) -> io::Result<Winsize> {
     unsafe {
         let mut result = MaybeUninit::<Winsize>::uninit();
         ret(syscall3(
@@ -1034,17 +1034,17 @@ pub(crate) fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
 }
 
 #[inline]
-pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd) -> io::Result<()> {
+pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(syscall2(nr(__NR_ioctl), borrowed_fd(fd), c_uint(TIOCEXCL))) }
 }
 
 #[inline]
-pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
+pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(syscall2(nr(__NR_ioctl), borrowed_fd(fd), c_uint(TIOCNXCL))) }
 }
 
 #[inline]
-pub(crate) fn ioctl_tcgets(fd: BorrowedFd) -> io::Result<Termios> {
+pub(crate) fn ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     unsafe {
         let mut result = MaybeUninit::<Termios>::uninit();
         ret(syscall3(
@@ -1058,12 +1058,12 @@ pub(crate) fn ioctl_tcgets(fd: BorrowedFd) -> io::Result<Termios> {
 }
 
 #[inline]
-pub(crate) fn dup(fd: BorrowedFd) -> io::Result<OwnedFd> {
+pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(syscall1_readonly(nr(__NR_dup), borrowed_fd(fd))) }
 }
 
 #[inline]
-pub(crate) fn dup2(fd: BorrowedFd, new: &OwnedFd) -> io::Result<()> {
+pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     {
         dup2_with(fd, new, DupFlags::empty())
@@ -1080,7 +1080,7 @@ pub(crate) fn dup2(fd: BorrowedFd, new: &OwnedFd) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn dup2_with(fd: BorrowedFd, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
+pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
     unsafe {
         ret_discarded_fd(syscall3_readonly(
             nr(__NR_dup3),
