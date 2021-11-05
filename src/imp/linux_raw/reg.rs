@@ -161,14 +161,13 @@ impl<Num: RetNumber> RetReg<Num> {
 
     #[inline]
     pub(super) fn decode_error_code(self) -> u16 {
-        let bits = self.bits;
-        let u16_ = bits as u16;
+        let bits: usize = self.bits;
 
         // `raw` must be in `-4095..0`. Linux always returns errors in
         // `-4095..0`, and we double-check it here.
-        debug_assert!((-4095..0).contains(&(u16_ as i16 as isize)));
+        debug_assert!((-4095..0).contains(&(bits as isize)));
 
-        u16_
+        bits as u16
     }
 
     #[inline]
