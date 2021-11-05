@@ -792,7 +792,6 @@ pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<ZString> {
     // TODO: On Rust 1.56, we can use `shrink_to` here.
     //buf.shrink_to(l + 1);
     buf.shrink_to_fit();
-    buf.reserve_exact(1);
 
     Ok(ZString::new(buf).unwrap())
 }
