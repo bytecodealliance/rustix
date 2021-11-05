@@ -94,4 +94,16 @@ pub(crate) struct RawCpuSet {
     pub(crate) bits: [u64; 16],
 }
 
+#[inline]
+pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
+    #[cfg(all(target_pointer_width = "32", not(target_arch = "x86_64")))]
+    {
+        RawCpuSet { bits: [0; 32] }
+    }
+    #[cfg(not(all(target_pointer_width = "32", not(target_arch = "x86_64"))))]
+    {
+        RawCpuSet { bits: [0; 16] }
+    }
+}
+
 pub(crate) const CPU_SETSIZE: usize = 8 * core::mem::size_of::<RawCpuSet>();

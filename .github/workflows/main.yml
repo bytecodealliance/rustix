@@ -24,17 +24,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, beta, nightly]
+        build: [stable, nightly, 1.48]
         include:
           - build: stable
             os: ubuntu-latest
             rust: stable
-          - build: beta
-            os: ubuntu-latest
-            rust: beta
           - build: nightly
             os: ubuntu-latest
             rust: nightly
+          - build: 1.48
+            os: ubuntu-latest
+            rust: 1.48
 
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
@@ -136,7 +136,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, ubuntu-18.04, i686-linux, aarch64-linux, riscv64-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, arm-linux-stable, macos, windows]
+        build: [ubuntu, ubuntu-18.04, i686-linux, aarch64-linux, riscv64-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, arm-linux-stable, macos, macos-11, windows, windows-2016, windows-2022]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -212,8 +212,17 @@ jobs:
           - build: macos
             os: macos-latest
             rust: stable
+          - build: macos-11
+            os: macos-11
+            rust: stable
           - build: windows
             os: windows-latest
+            rust: nightly
+          - build: windows-2022
+            os: windows-2022
+            rust: nightly
+          - build: windows-2016
+            os: windows-2016
             rust: nightly
     steps:
     - uses: actions/checkout@v2

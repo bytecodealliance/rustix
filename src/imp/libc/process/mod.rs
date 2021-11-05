@@ -13,17 +13,24 @@ pub(crate) use c::{
     WCONTINUED, WEXITSTATUS, WIFCONTINUED, WIFEXITED, WIFSIGNALED, WIFSTOPPED, WNOHANG, WSTOPSIG,
     WTERMSIG, WUNTRACED,
 };
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-pub use types::Resource;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-pub use types::{MembarrierCommand, RawCpuid};
 #[cfg(any(
     target_os = "linux",
     target_os = "android",
     target_os = "fuchsia",
     target_os = "dragonfly"
 ))]
-pub(crate) use types::{RawCpuSet, CPU_SETSIZE};
+pub(crate) mod cpu_set;
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+pub use types::Resource;
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "fuchsia",
+    target_os = "dragonfly"
+))]
+pub(crate) use types::{raw_cpu_set_new, RawCpuSet, CPU_SETSIZE};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use types::{MembarrierCommand, RawCpuid};
 #[cfg(not(target_os = "wasi"))]
 pub use types::{RawGid, RawPid, RawUid, RawUname, EXIT_SIGNALED_SIGABRT};
 pub use types::{EXIT_FAILURE, EXIT_SUCCESS};

@@ -45,7 +45,7 @@ use super::io::{
 #[cfg(not(target_os = "wasi"))]
 use super::io::{Termios, Winsize};
 use super::net::{RecvFlags, SendFlags};
-use super::process::{RawCpuSet, RawPid, RawUname, Resource, CPU_SETSIZE};
+use super::process::{RawCpuSet, RawPid, RawUname, Resource};
 use super::rand::GetRandomFlags;
 use super::reg::nr;
 use super::thread::{FutexFlags, FutexOperation};
@@ -62,7 +62,7 @@ use alloc::borrow::Cow;
 use alloc::vec::Vec;
 #[cfg(target_pointer_width = "32")]
 use core::convert::TryInto;
-use core::mem::{size_of_val, MaybeUninit};
+use core::mem::MaybeUninit;
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use linux_raw_sys::general::__NR_epoll_pwait;
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
@@ -488,68 +488,6 @@ pub(crate) fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usi
             c_uint(flags.bits()),
         ))
     }
-}
-
-#[allow(non_snake_case)]
-#[inline]
-pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) {
-    let size_in_bits = 8 * size_of_val(&cpuset.bits[0]); // 32, 64 etc
-    let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
-    *cpuset.bits.get_mut(idx).unwrap_or_else(|| {
-        panic!(
-            "cpu out of bounds: the cpu max is {} but the cpu is {}",
-            CPU_SETSIZE, cpu
-        )
-    }) |= 1 << offset;
-}
-
-#[allow(non_snake_case)]
-#[inline]
-pub(crate) fn CPU_ZERO(cpuset: &mut RawCpuSet) {
-    cpuset.bits.fill(0)
-}
-
-#[allow(non_snake_case)]
-#[inline]
-pub(crate) fn CPU_CLR(cpu: usize, cpuset: &mut RawCpuSet) {
-    let size_in_bits = 8 * size_of_val(&cpuset.bits[0]); // 32, 64 etc
-    let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
-    *cpuset.bits.get_mut(idx).unwrap_or_else(|| {
-        panic!(
-            "cpu out of bounds: the cpu max is {} but the cpu is {}",
-            CPU_SETSIZE, cpu
-        )
-    }) &= !(1 << offset);
-}
-
-#[allow(non_snake_case)]
-#[inline]
-pub(crate) fn CPU_ISSET(cpu: usize, cpuset: &RawCpuSet) -> bool {
-    let size_in_bits = 8 * size_of_val(&cpuset.bits[0]);
-    let (idx, offset) = (cpu / size_in_bits, cpu % size_in_bits);
-    0 != (cpuset.bits.get(idx).unwrap_or_else(|| {
-        panic!(
-            "cpu out of bounds: the cpu max is {} but the cpu is {}",
-            CPU_SETSIZE, cpu
-        )
-    }) & (1 << offset))
-}
-
-#[allow(non_snake_case)]
-#[inline]
-pub(crate) fn CPU_COUNT_S(size: usize, cpuset: &RawCpuSet) -> u32 {
-    let mut s: u32 = 0;
-    let size_of_mask = size_of_val(&cpuset.bits[0]);
-    for i in cpuset.bits[..(size / size_of_mask)].iter() {
-        s += i.count_ones();
-    }
-    s
-}
-
-#[allow(non_snake_case)]
-#[inline]
-pub(crate) fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
-    CPU_COUNT_S(core::mem::size_of::<RawCpuSet>(), cpuset)
 }
 
 #[inline]
@@ -1407,7 +1345,10 @@ pub(crate) fn nice(inc: i32) -> io::Result<i32> {
     } else {
         inc
     }
-    .clamp(-20, 19);
+    // TODO: With Rust 1.50, use `.clamp` instead of `.min` and `.max`.
+    //.clamp(-20, 19);
+    .min(19)
+    .max(-20);
     setpriority_process(Pid::NONE, priority)?;
     Ok(priority)
 }

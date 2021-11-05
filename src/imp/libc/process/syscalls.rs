@@ -12,15 +12,15 @@ use super::super::fd::BorrowedFd;
 use super::super::offset::libc_getrlimit;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use super::super::offset::{libc_rlimit, LIBC_RLIM_INFINITY};
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-use super::Resource;
 #[cfg(any(
     target_os = "linux",
     target_os = "android",
     target_os = "fuchsia",
     target_os = "dragonfly"
 ))]
-use super::{RawCpuSet, CPU_SETSIZE};
+use super::RawCpuSet;
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+use super::Resource;
 #[cfg(not(target_os = "wasi"))]
 use super::{RawPid, RawUname};
 use crate::ffi::ZStr;
@@ -137,79 +137,6 @@ pub(crate) fn getppid() -> Pid {
         let pid: i32 = c::getppid();
         Pid::from_raw(pid)
     }
-}
-
-#[cfg(any(
-    target_os = "linux",
-    target_os = "android",
-    target_os = "fuchsia",
-    target_os = "dragonfly"
-))]
-#[allow(non_snake_case)]
-#[inline]
-pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) {
-    if cpu >= CPU_SETSIZE {
-        panic!(
-            "cpu out of bounds: the cpu max is {} but the cpu is {}",
-            CPU_SETSIZE, cpu
-        )
-    }
-    unsafe { c::CPU_SET(cpu, cpuset) }
-}
-
-#[cfg(any(
-    target_os = "linux",
-    target_os = "android",
-    target_os = "fuchsia",
-    target_os = "dragonfly"
-))]
-#[allow(non_snake_case)]
-#[inline]
-pub(crate) fn CPU_ZERO(cpuset: &mut RawCpuSet) {
-    unsafe { c::CPU_ZERO(cpuset) }
-}
-
-#[cfg(any(
-    target_os = "linux",
-    target_os = "android",
-    target_os = "fuchsia",
-    target_os = "dragonfly"
-))]
-#[allow(non_snake_case)]
-#[inline]
-pub(crate) fn CPU_CLR(cpu: usize, cpuset: &mut RawCpuSet) {
-    if cpu >= CPU_SETSIZE {
-        panic!(
-            "cpu out of bounds: the cpu max is {} but the cpu is {}",
-            CPU_SETSIZE, cpu
-        )
-    }
-    unsafe { c::CPU_CLR(cpu, cpuset) }
-}
-
-#[cfg(any(
-    target_os = "linux",
-    target_os = "android",
-    target_os = "fuchsia",
-    target_os = "dragonfly"
-))]
-#[allow(non_snake_case)]
-#[inline]
-pub(crate) fn CPU_ISSET(cpu: usize, cpuset: &RawCpuSet) -> bool {
-    if cpu >= CPU_SETSIZE {
-        panic!(
-            "cpu out of bounds: the cpu max is {} but the cpu is {}",
-            CPU_SETSIZE, cpu
-        )
-    }
-    unsafe { c::CPU_ISSET(cpu, cpuset) }
-}
-
-#[cfg(any(target_os = "linux"))]
-#[allow(non_snake_case)]
-#[inline]
-pub(crate) fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
-    unsafe { c::CPU_COUNT(cpuset).try_into().unwrap() }
 }
 
 #[cfg(any(
