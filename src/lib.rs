@@ -75,7 +75,7 @@ extern crate alloc;
 #[cfg(feature = "rustc-dep-of-std")]
 pub mod io_lifetimes {
     use super::imp;
-    pub use imp::fd::{AsFd, BorrowedFd};
+    pub use imp::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, RawFd};
 }
 #[cfg(not(feature = "rustc-dep-of-std"))]
 pub use io_lifetimes;
