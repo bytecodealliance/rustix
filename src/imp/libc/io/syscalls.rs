@@ -29,6 +29,7 @@ use super::{MlockFlags, ReadWriteFlags};
 use crate::ffi::ZStr;
 use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
 use core::cmp::min;
+use core::convert::TryInto;
 use core::mem::MaybeUninit;
 #[cfg(not(any(target_os = "redox", target_env = "newlib")))]
 use core::sync::atomic::{AtomicUsize, Ordering};

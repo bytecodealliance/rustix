@@ -31,6 +31,8 @@ use crate::process::Rlimit;
 use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Pid, Uid, WaitOptions, WaitStatus};
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+use core::convert::TryInto;
 use core::mem::MaybeUninit;
 
 #[cfg(not(target_os = "wasi"))]

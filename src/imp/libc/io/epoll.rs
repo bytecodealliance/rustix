@@ -62,6 +62,7 @@ use super::super::fd::{FromFd, FromRawFd, IntoFd, IntoRawFd};
 use crate::io::{self, OwnedFd};
 use alloc::vec::Vec;
 use bitflags::bitflags;
+use core::convert::TryInto;
 use core::fmt;
 use core::marker::PhantomData;
 use core::ops::Deref;
