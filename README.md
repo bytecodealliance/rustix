@@ -82,6 +82,14 @@ way, so users don't need to open `.` to get a current-directory handle.
 I/O safety types rather than `RawFd`. `rustix` does not provide dynamic feature
 detection, so users must handle `NOSYS` themselves.
 
+# Minimum Supported Rust Version
+
+This crate currently works on the version of [Rust on Debian stable], which
+is currently Rust 1.48. This policy may change in the future, in minor version
+releases, so users using a fixed version of Rust should pin to a specific
+version of this crate.
+
+[Rust on Debian stable]: https://packages.debian.org/stable/rust/rustc
 [`nix`]: https://crates.io/crates/nix
 [`unix`]: https://crates.io/crates/unix
 [`nc`]: https://crates.io/crates/nc

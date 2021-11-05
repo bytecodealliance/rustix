@@ -160,4 +160,17 @@ pub(crate) type RawCpuSet = c::cpu_set_t;
     target_os = "fuchsia",
     target_os = "dragonfly"
 ))]
+#[inline]
+pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
+    let mut set = unsafe { core::mem::zeroed() };
+    super::cpu_set::CPU_ZERO(&mut set);
+    set
+}
+
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "fuchsia",
+    target_os = "dragonfly"
+))]
 pub(crate) const CPU_SETSIZE: usize = c::CPU_SETSIZE as usize;

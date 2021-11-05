@@ -401,6 +401,9 @@ pub(crate) mod sockopt {
     use core::convert::TryInto;
     use core::time::Duration;
 
+    // TODO: With Rust 1.53 we can use `Duration::ZERO` instead.
+    const DURATION_ZERO: Duration = Duration::from_secs(0);
+
     #[inline]
     fn getsockopt<T>(fd: BorrowedFd<'_>, level: i32, optname: i32) -> io::Result<T> {
         use super::*;
@@ -487,7 +490,12 @@ pub(crate) mod sockopt {
     #[inline]
     pub(crate) fn get_socket_linger(fd: BorrowedFd<'_>) -> io::Result<Option<Duration>> {
         let linger: c::linger = getsockopt(fd, c::SOL_SOCKET as _, c::SO_LINGER)?;
-        Ok((linger.l_onoff != 0).then(|| Duration::from_secs(linger.l_linger as u64)))
+        // TODO: With Rust 1.50, this could use `.then`.
+        Ok(if linger.l_onoff != 0 {
+            Some(Duration::from_secs(linger.l_linger as u64))
+        } else {
+            None
+        })
     }
 
     #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -510,7 +518,7 @@ pub(crate) mod sockopt {
     ) -> io::Result<()> {
         let timeout = match timeout {
             Some(timeout) => {
-                if timeout == Duration::ZERO {
+                if timeout == DURATION_ZERO {
                     return Err(io::Error::INVAL);
                 }
 

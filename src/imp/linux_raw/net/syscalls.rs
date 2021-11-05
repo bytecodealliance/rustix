@@ -831,7 +831,7 @@ pub(crate) mod sockopt {
     use core::convert::TryInto;
     use core::time::Duration;
 
-    // TODO use Duration::ZERO when we don't need 1.51 support
+    // TODO: With Rust 1.53 we can use `Duration::ZERO` instead.
     const DURATION_ZERO: Duration = Duration::from_secs(0);
 
     #[inline]
@@ -974,7 +974,12 @@ pub(crate) mod sockopt {
             linux_raw_sys::general::SOL_SOCKET as _,
             linux_raw_sys::general::SO_LINGER,
         )?;
-        Ok((linger.l_onoff != 0).then(|| Duration::from_secs(linger.l_linger as u64)))
+        // TODO: With Rust 1.50, this could use `.then`.
+        Ok(if linger.l_onoff != 0 {
+            Some(Duration::from_secs(linger.l_linger as u64))
+        } else {
+            None
+        })
     }
 
     #[inline]

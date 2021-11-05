@@ -13,9 +13,18 @@ pub(crate) const fn in_addr_new(s_addr: u32) -> c::in_addr {
     c::in_addr { s_addr }
 }
 
+#[cfg(feature = "rustc-dep-of-std")]
 #[inline]
 pub(crate) const fn in6_addr_s6_addr(addr: c::in6_addr) -> [u8; 16] {
     unsafe { addr.in6_u.u6_addr8 }
+}
+
+// TODO: With Rust 1.55, we can use the above `in6_addr_s6_addr` definition
+// that uses a const-fn union access instead of doing a transmute.
+#[cfg(not(feature = "rustc-dep-of-std"))]
+#[inline]
+pub(crate) fn in6_addr_s6_addr(addr: c::in6_addr) -> [u8; 16] {
+    unsafe { core::mem::transmute(addr) }
 }
 
 #[inline]
