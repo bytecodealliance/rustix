@@ -379,11 +379,7 @@ pub enum Advice {
     #[cfg(any(target_os = "android", target_os = "linux"))]
     LinuxHwPoison = c::MADV_HWPOISON,
     /// `MADV_SOFT_OFFLINE`
-    // TODO: Enable riscv once <https://github.com/rust-lang/libc/pull/2391> lands.
-    #[cfg(all(
-        not(target_arch = "riscv64"),
-        any(target_os = "android", target_os = "linux")
-    ))]
+    #[cfg(any(target_os = "android", target_os = "linux"))]
     LinuxSoftOffline = c::MADV_SOFT_OFFLINE,
     /// `MADV_MERGEABLE`
     #[cfg(any(target_os = "android", target_os = "linux"))]

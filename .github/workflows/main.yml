@@ -59,6 +59,7 @@ jobs:
         i686-unknown-linux-gnu
         i686-unknown-linux-musl
         wasm32-unknown-emscripten
+        riscv32gc-unknown-linux-gnu
         riscv64gc-unknown-linux-gnu
         aarch64-unknown-linux-gnu
         armv5te-unknown-linux-gnueabi
@@ -66,7 +67,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu gcc-arm-linux-gnueabi musl-tools
+        sudo apt-get install -y gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-riscv32-linux-gnu gcc-riscv64-linux-gnu gcc-arm-linux-gnueabi musl-tools
     - run: cargo check --workspace --release -vv
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-gnux32
@@ -78,6 +79,7 @@ jobs:
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-musl
     - run: cargo check --workspace --release -vv --target=wasm32-unknown-emscripten
+    - run: cargo check --workspace --release -vv --target=riscv32gc-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=riscv64gc-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi
@@ -136,7 +138,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, ubuntu-18.04, i686-linux, aarch64-linux, riscv64-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, arm-linux-stable, macos, windows]
+        build: [ubuntu, ubuntu-18.04, i686-linux, aarch64-linux, riscv32-linux, riscv64-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv32-linux-stable, riscv64-linux-stable, arm-linux-stable, macos, windows]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -159,6 +161,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: riscv32-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: riscv32gc-unknown-linux-gnu
+            gcc_package: gcc-riscv32-linux-gnu
+            gcc: riscv32-linux-gnu-gcc
+            qemu: qemu-riscv32 -L /usr/riscv32-linux-gnu
+            qemu_target: riscv32-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
             rust: nightly
@@ -193,6 +203,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: riscv32-linux-stable
+            os: ubuntu-latest
+            rust: stable
+            target: riscv32gc-unknown-linux-gnu
+            gcc_package: gcc-riscv32-linux-gnu
+            gcc: riscv32-linux-gnu-gcc
+            qemu: qemu-riscv32 -L /usr/riscv32-linux-gnu
+            qemu_target: riscv32-linux-user
           - build: riscv64-linux-stable
             os: ubuntu-latest
             rust: stable
@@ -273,7 +291,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, riscv32-linux, riscv64-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -293,6 +311,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: riscv32-linux
+            os: ubuntu-latest
+            rust: stable
+            target: riscv32gc-unknown-linux-gnu
+            gcc_package: gcc-riscv32-linux-gnu
+            gcc: riscv32-linux-gnu-gcc
+            qemu: qemu-riscv32 -L /usr/riscv32-linux-gnu
+            qemu_target: riscv32-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
             rust: stable
@@ -313,11 +339,12 @@ jobs:
       # -D warnings is commented out in our install-rust action; re-add it here.
       RUSTFLAGS: --cfg rustix_use_libc -D warnings
       RUSTDOCFLAGS: --cfg rustix_use_libc
-      CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
-      CARGO_TARGET_I686_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
-      CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
-      CARGO_TARGET_RISCV64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
       CARGO_TARGET_ARM_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
+      CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
+      CARGO_TARGET_I686_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
+      CARGO_TARGET_RISCV32_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
+      CARGO_TARGET_RISCV64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
+      CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
     steps:
     - uses: actions/checkout@v2
       with:

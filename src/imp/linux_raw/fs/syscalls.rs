@@ -28,7 +28,7 @@ use super::super::conv::{
     opt_c_str, opt_mut, out, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint, ret_owned_fd,
     ret_usize, size_of, slice_just_addr, slice_mut,
 };
-#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+#[cfg(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64"))]
 use super::super::fd::AsFd;
 use super::super::fd::{BorrowedFd, RawFd};
 use super::super::reg::nr;
@@ -44,9 +44,9 @@ use core::mem::MaybeUninit;
 use linux_raw_sys::general::__NR_arm_fadvise64_64 as __NR_fadvise64_64;
 #[cfg(all(target_pointer_width = "32", not(target_arch = "arm")))]
 use linux_raw_sys::general::__NR_fadvise64_64;
-#[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+#[cfg(not(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64")))]
 use linux_raw_sys::general::__NR_open;
-#[cfg(not(any(target_arch = "riscv64")))]
+#[cfg(not(any(target_arch = "riscv32", target_arch = "riscv64")))]
 use linux_raw_sys::general::__NR_renameat;
 use linux_raw_sys::general::{
     __NR_faccessat, __NR_fallocate, __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_flock,
@@ -83,13 +83,13 @@ use {
 
 #[inline]
 pub(crate) fn open(filename: &ZStr, flags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
-    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+    #[cfg(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64"))]
     {
         openat(crate::fs::cwd().as_fd(), filename, flags, mode)
     }
     #[cfg(all(
         target_pointer_width = "32",
-        not(any(target_arch = "aarch64", target_arch = "riscv64"))
+        not(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64"))
     ))]
     unsafe {
         ret_owned_fd(syscall3_readonly(
@@ -101,7 +101,7 @@ pub(crate) fn open(filename: &ZStr, flags: OFlags, mode: Mode) -> io::Result<Own
     }
     #[cfg(all(
         target_pointer_width = "64",
-        not(any(target_arch = "aarch64", target_arch = "riscv64"))
+        not(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64"))
     ))]
     unsafe {
         ret_owned_fd(syscall3_readonly(
@@ -854,7 +854,7 @@ pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<u32> {
 
 #[inline]
 pub(crate) fn rename(oldname: &ZStr, newname: &ZStr) -> io::Result<()> {
-    #[cfg(target_arch = "riscv64")]
+    #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
     unsafe {
         ret(syscall5_readonly(
             nr(__NR_renameat2),
@@ -865,7 +865,7 @@ pub(crate) fn rename(oldname: &ZStr, newname: &ZStr) -> io::Result<()> {
             c_uint(0),
         ))
     }
-    #[cfg(not(target_arch = "riscv64"))]
+    #[cfg(not(any(target_arch = "riscv32", target_arch = "riscv64")))]
     unsafe {
         ret(syscall4_readonly(
             nr(__NR_renameat),
@@ -884,7 +884,7 @@ pub(crate) fn renameat(
     new_dirfd: BorrowedFd<'_>,
     newname: &ZStr,
 ) -> io::Result<()> {
-    #[cfg(target_arch = "riscv64")]
+    #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
     unsafe {
         ret(syscall5_readonly(
             nr(__NR_renameat2),
@@ -895,7 +895,7 @@ pub(crate) fn renameat(
             c_uint(0),
         ))
     }
-    #[cfg(not(target_arch = "riscv64"))]
+    #[cfg(not(any(target_arch = "riscv32", target_arch = "riscv64")))]
     unsafe {
         ret(syscall4_readonly(
             nr(__NR_renameat),

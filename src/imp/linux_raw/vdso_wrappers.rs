@@ -357,6 +357,8 @@ fn init() {
     minimal_init();
 
     if let Some(vdso) = vdso::Vdso::new() {
+        // Look up the architecture-specific `clock_gettime` symbol.
+        // <https://man7.org/linux/man-pages/man7/vdso.7.html#ARCHITECTURE-SPECIFIC_NOTES>
         #[cfg(target_arch = "x86_64")]
         let ptr = vdso.sym(zstr!("LINUX_2.6"), zstr!("__vdso_clock_gettime"));
         #[cfg(target_arch = "arm")]
@@ -365,7 +367,7 @@ fn init() {
         let ptr = vdso.sym(zstr!("LINUX_2.6.39"), zstr!("__kernel_clock_gettime"));
         #[cfg(target_arch = "x86")]
         let ptr = vdso.sym(zstr!("LINUX_2.6"), zstr!("__vdso_clock_gettime64"));
-        #[cfg(target_arch = "riscv64")]
+        #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
         let ptr = vdso.sym(zstr!("LINUX_4.15"), zstr!("__kernel_clock_gettime"));
 
         assert!(!ptr.is_null());

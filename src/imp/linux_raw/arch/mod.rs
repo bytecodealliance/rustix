@@ -32,8 +32,9 @@ pub(in crate::imp::linux_raw) use self::outline as asm;
 #[cfg(any(
     target_arch = "arm",
     target_arch = "aarch64",
+    target_arch = "riscv32",
+    target_arch = "riscv64",
     target_arch = "x86_64",
-    target_arch = "riscv64"
 ))]
 pub(in crate::imp::linux_raw) use self::asm as choose;
 

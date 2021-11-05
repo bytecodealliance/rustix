@@ -31,8 +31,8 @@ and [`fs-set-times`] crates, for example.
 `rustix` currently has two backends available: `linux_raw` and `libc`.
 
 The `linux_raw` backend is enabled by default on Linux on x86-64, x86, aarch64,
-riscv64gc and arm (v5 onwards), and uses raw Linux system calls and vDSO calls.
-It supports stable as well as nightly Rust.
+riscv32gc, riscv64gc and arm (v5 onwards), and uses raw Linux system calls and
+vDSO calls. It supports stable as well as nightly Rust.
  - By being implemented entirely in Rust, avoiding `libc`, `errno`, and pthread
    cancellation, and employing some specialized optimizations, most functions
    compile down to very efficient code. On nightly Rust, they can often be
@@ -66,12 +66,13 @@ supported on Redox, such as `*at` functions like `openat`, which are
 important features for `rustix`.
 
 `rustix` has its own code for making direct syscalls, similar to the [`sc`]
-and [`scall`] crates, though `rustix` currently only supports direct syscalls on
-Linux on x86\_64, x86, aarch64, riscv64, and arm. `rustix` can use either the
-unstable Rust `asm!` macro or out-of-line `.s` files so it supports both Stable
-and Nightly Rust. `rustix`'s syscalls report errors using an optimized `Error`
-type, and `rustix` supports Linux's vDSO mechanism to optimize Linux
-`clock_gettime` on all architectures, and all Linux system calls on x86.
+and [`scall`] crates, though `rustix` currently only supports direct syscalls
+on Linux on x86\_64, x86, aarch64, riscv32, riscv64, and arm. `rustix` can use
+either the unstable Rust `asm!` macro or out-of-line `.s` files so it supports
+both Stable and Nightly Rust. `rustix`'s syscalls report errors using an
+optimized `Error` type, and `rustix` supports Linux's vDSO mechanism to
+optimize Linux `clock_gettime` on all architectures, and all Linux system calls
+on x86.
 
 `rustix`'s `*at` functions are similar to the [`openat`] crate, but `rustix`
 provides them as free functions rather than associated functions of a `Dir`

@@ -6,6 +6,8 @@
 mod aarch64;
 #[cfg(target_arch = "arm")]
 mod arm;
+#[cfg(target_arch = "riscv32")]
+mod riscv32;
 #[cfg(target_arch = "riscv64")]
 mod riscv64;
 #[cfg(target_arch = "x86")]
@@ -17,6 +19,8 @@ mod x86_64;
 pub(in crate::imp::linux_raw) use self::aarch64::*;
 #[cfg(target_arch = "arm")]
 pub(in crate::imp::linux_raw) use self::arm::*;
+#[cfg(target_arch = "riscv32")]
+pub(in crate::imp::linux_raw) use self::riscv32::*;
 #[cfg(target_arch = "riscv64")]
 pub(in crate::imp::linux_raw) use self::riscv64::*;
 #[cfg(target_arch = "x86")]

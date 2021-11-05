@@ -27,7 +27,7 @@ use super::arch::choose::{
     syscall6,
 };
 use super::c;
-#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+#[cfg(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64"))]
 use super::conv::opt_ref;
 use super::conv::{
     borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, const_void_star, no_fd, out,
@@ -61,9 +61,9 @@ use crate::time::NanosleepRelativeResult;
 use alloc::borrow::Cow;
 use alloc::vec::Vec;
 use core::mem::{size_of_val, MaybeUninit};
-#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+#[cfg(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64"))]
 use linux_raw_sys::general::__NR_epoll_pwait;
-#[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+#[cfg(not(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64")))]
 use linux_raw_sys::general::__NR_epoll_wait;
 #[cfg(target_arch = "arm")]
 use linux_raw_sys::general::{__ARM_NR_set_tls, __NR_mmap2};
@@ -81,7 +81,7 @@ use linux_raw_sys::general::{
     EPOLL_CTL_MOD, FIONBIO, FIONREAD, PR_SET_NAME, SIGCHLD, TCGETS, TIMER_ABSTIME, TIOCEXCL,
     TIOCGWINSZ, TIOCNXCL,
 };
-#[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+#[cfg(not(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64")))]
 use linux_raw_sys::general::{__NR_dup2, __NR_pipe, __NR_poll};
 #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
 use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getuid};
@@ -89,7 +89,7 @@ use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getui
 use linux_raw_sys::general::{__NR_getegid32, __NR_geteuid32, __NR_getgid32, __NR_getuid32};
 #[cfg(target_arch = "x86")]
 use linux_raw_sys::general::{__NR_mmap2, __NR_set_thread_area};
-#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+#[cfg(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64"))]
 use linux_raw_sys::general::{__NR_ppoll, sigset_t};
 use linux_raw_sys::v5_11::general::__NR_mremap;
 use linux_raw_sys::v5_4::general::{
@@ -453,7 +453,7 @@ pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
 
 #[inline]
 pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
-    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+    #[cfg(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64"))]
     {
         pipe_with(PipeFlags::empty())
     }
@@ -465,7 +465,8 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
         target_arch = "aarch64",
         target_arch = "mips",
         target_arch = "mips64",
-        target_arch = "riscv64"
+        target_arch = "riscv32",
+        target_arch = "riscv64",
     )))]
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
@@ -1064,12 +1065,12 @@ pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 
 #[inline]
 pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
-    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+    #[cfg(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64"))]
     {
         dup2_with(fd, new, DupFlags::empty())
     }
 
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64")))]
     unsafe {
         ret_discarded_fd(syscall2_readonly(
             nr(__NR_dup2),
@@ -1095,7 +1096,7 @@ pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> i
 pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usize> {
     let (fds_addr_mut, fds_len) = slice_mut(fds);
 
-    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+    #[cfg(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64"))]
     unsafe {
         let timeout = if timeout >= 0 {
             Some(Timespec {
@@ -1114,7 +1115,7 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
             size_of::<sigset_t, _>(),
         ))
     }
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64")))]
     unsafe {
         ret_usize(syscall3(
             nr(__NR_poll),
@@ -1366,7 +1367,7 @@ pub(crate) fn epoll_wait(
     num_events: usize,
     timeout: c::c_int,
 ) -> io::Result<usize> {
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64")))]
     unsafe {
         ret_usize(syscall4(
             nr(__NR_epoll_wait),
@@ -1376,7 +1377,7 @@ pub(crate) fn epoll_wait(
             c_int(timeout),
         ))
     }
-    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+    #[cfg(any(target_arch = "aarch64", target_arch = "riscv32", target_arch = "riscv64"))]
     unsafe {
         ret_usize(syscall5(
             nr(__NR_epoll_pwait),
