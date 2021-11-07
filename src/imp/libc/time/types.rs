@@ -22,7 +22,8 @@ pub type Nsecs = c::c_long;
 /// [`clock_gettime`]: crate::time::clock_gettime
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-#[repr(i32)]
+#[cfg_attr(not(target_os = "dragonfly"), repr(i32))]
+#[cfg_attr(target_os = "dragonfly", repr(u64))]
 #[non_exhaustive]
 pub enum ClockId {
     /// `CLOCK_REALTIME`

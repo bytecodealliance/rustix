@@ -3,7 +3,12 @@
 use crate::io::SeekFrom;
 use crate::{imp, io};
 use imp::fd::{AsFd, BorrowedFd};
-#[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "dragonfly",
+    target_os = "netbsd",
+    target_os = "openbsd",
+    target_os = "redox"
+)))]
 use imp::fs::FallocateFlags;
 use imp::fs::Stat;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
@@ -119,7 +124,12 @@ pub fn futimens<Fd: AsFd>(fd: &Fd, times: &[Timespec; 2]) -> io::Result<()> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/posix_fallocate.html
 /// [Linux `fallocate`]: https://man7.org/linux/man-pages/man2/fallocate.2.html
 /// [Linux `posix_fallocate`]: https://man7.org/linux/man-pages/man3/posix_fallocate.3.html
-#[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))] // not implemented in libc for netbsd yet
+#[cfg(not(any(
+    target_os = "dragonfly",
+    target_os = "netbsd",
+    target_os = "openbsd",
+    target_os = "redox"
+)))] // not implemented in libc for netbsd yet
 #[inline]
 #[doc(alias = "posix_fallocate")]
 pub fn fallocate<Fd: AsFd>(fd: &Fd, mode: FallocateFlags, offset: u64, len: u64) -> io::Result<()> {
@@ -187,7 +197,12 @@ pub fn fsync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fdatasync.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fdatasync.2.html
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "dragonfly",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "redox"
+)))]
 #[inline]
 pub fn fdatasync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     let fd = fd.as_fd();

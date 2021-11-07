@@ -66,6 +66,7 @@ pub enum Resource {
     As = c::RLIMIT_AS as c::c_int,
     /// `RLIMIT_LOCKS`
     #[cfg(not(any(
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -75,6 +76,7 @@ pub enum Resource {
     Locks = c::RLIMIT_LOCKS as c::c_int,
     /// `RLIMIT_SIGPENDING`
     #[cfg(not(any(
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -84,6 +86,7 @@ pub enum Resource {
     Sigpending = c::RLIMIT_SIGPENDING as c::c_int,
     /// `RLIMIT_MSGQUEUE`
     #[cfg(not(any(
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -93,6 +96,7 @@ pub enum Resource {
     Msgqueue = c::RLIMIT_MSGQUEUE as c::c_int,
     /// `RLIMIT_NICE`
     #[cfg(not(any(
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -102,6 +106,7 @@ pub enum Resource {
     Nice = c::RLIMIT_NICE as c::c_int,
     /// `RLIMIT_RTPRIO`
     #[cfg(not(any(
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -111,6 +116,7 @@ pub enum Resource {
     Rtprio = c::RLIMIT_RTPRIO as c::c_int,
     /// `RLIMIT_RTTIME`
     #[cfg(not(any(
+        target_os = "dragonfly",
         target_os = "emscripten",
         target_os = "freebsd",
         target_os = "android",

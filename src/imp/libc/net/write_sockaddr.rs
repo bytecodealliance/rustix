@@ -25,10 +25,11 @@ pub(crate) unsafe fn write_sockaddr(
 pub(crate) unsafe fn encode_sockaddr_v4(v4: &SocketAddrV4) -> c::sockaddr_in {
     c::sockaddr_in {
         #[cfg(any(
-            target_os = "netbsd",
-            target_os = "macos",
+            target_os = "dragonfly",
             target_os = "ios",
             target_os = "freebsd",
+            target_os = "macos",
+            target_os = "netbsd",
             target_os = "openbsd"
         ))]
         sin_len: size_of::<c::sockaddr_in>() as _,
@@ -47,10 +48,11 @@ unsafe fn write_sockaddr_v4(v4: &SocketAddrV4, storage: *mut SocketAddrStorage) 
 
 pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> c::sockaddr_in6 {
     #[cfg(any(
-        target_os = "netbsd",
-        target_os = "macos",
+        target_os = "dragonfly",
         target_os = "ios",
         target_os = "freebsd",
+        target_os = "macos",
+        target_os = "netbsd",
         target_os = "openbsd"
     ))]
     {
@@ -64,10 +66,11 @@ pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> c::sockaddr_in6 {
         )
     }
     #[cfg(not(any(
-        target_os = "netbsd",
-        target_os = "macos",
+        target_os = "dragonfly",
         target_os = "ios",
         target_os = "freebsd",
+        target_os = "macos",
+        target_os = "netbsd",
         target_os = "openbsd"
     )))]
     {
@@ -91,27 +94,30 @@ unsafe fn write_sockaddr_v6(v6: &SocketAddrV6, storage: *mut SocketAddrStorage) 
 pub(crate) unsafe fn encode_sockaddr_unix(unix: &SocketAddrUnix) -> c::sockaddr_un {
     let mut encoded = c::sockaddr_un {
         #[cfg(any(
-            target_os = "netbsd",
-            target_os = "macos",
+            target_os = "dragonfly",
             target_os = "ios",
             target_os = "freebsd",
+            target_os = "macos",
+            target_os = "netbsd",
             target_os = "openbsd"
         ))]
         sun_len: size_of::<c::sockaddr_un>() as _,
         sun_family: c::AF_UNIX as _,
         #[cfg(any(
-            target_os = "netbsd",
-            target_os = "macos",
+            target_os = "dragonfly",
             target_os = "ios",
             target_os = "freebsd",
+            target_os = "macos",
+            target_os = "netbsd",
             target_os = "openbsd"
         ))]
         sun_path: [0; 104],
         #[cfg(not(any(
-            target_os = "netbsd",
-            target_os = "macos",
+            target_os = "dragonfly",
             target_os = "ios",
             target_os = "freebsd",
+            target_os = "macos",
+            target_os = "netbsd",
             target_os = "openbsd"
         )))]
         sun_path: [0; 108],

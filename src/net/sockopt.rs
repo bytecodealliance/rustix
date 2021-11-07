@@ -1,6 +1,7 @@
 //! `getsockopt` and `setsockopt` functions.
 
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "ios",
     target_os = "macos",
@@ -433,6 +434,7 @@ pub fn set_ip_add_membership<Fd: AsFd>(
 /// [Linux `setsockopt`]: https://man7.org/linux/man-pages/man2/setsockopt.2.html
 /// [Linux `ipv6`]: https://man7.org/linux/man-pages/man7/ipv6.7.html
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "ios",
     target_os = "macos",
@@ -464,6 +466,7 @@ pub fn set_ipv6_join_group<Fd: AsFd>(
 /// [Linux `setsockopt`]: https://man7.org/linux/man-pages/man2/setsockopt.2.html
 /// [Linux `ip`]: https://man7.org/linux/man-pages/man7/ip.7.html
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "ios",
     target_os = "macos",
@@ -493,6 +496,7 @@ pub fn set_ip_drop_membership<Fd: AsFd>(
 /// [Linux `setsockopt`]: https://man7.org/linux/man-pages/man2/setsockopt.2.html
 /// [Linux `ipv6`]: https://man7.org/linux/man-pages/man7/ipv6.7.html
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "ios",
     target_os = "macos",

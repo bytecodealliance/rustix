@@ -62,6 +62,7 @@ impl AddressFamily {
     /// `AF_NETLINK`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -75,6 +76,7 @@ impl AddressFamily {
     /// `AF_AX25`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -89,6 +91,7 @@ impl AddressFamily {
     /// `AF_NETROM`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -99,6 +102,7 @@ impl AddressFamily {
     /// `AF_BRIDGE`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -109,6 +113,7 @@ impl AddressFamily {
     /// `AF_ATMPVC`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -119,6 +124,7 @@ impl AddressFamily {
     /// `AF_X25`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -129,6 +135,7 @@ impl AddressFamily {
     /// `AF_ROSE`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -142,6 +149,7 @@ impl AddressFamily {
     /// `AF_NETBEUI`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -152,6 +160,7 @@ impl AddressFamily {
     /// `AF_SECURITY`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -162,6 +171,7 @@ impl AddressFamily {
     /// `AF_KEY`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -172,6 +182,7 @@ impl AddressFamily {
     /// `AF_PACKET`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -182,6 +193,7 @@ impl AddressFamily {
     /// `AF_ASH`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -192,6 +204,7 @@ impl AddressFamily {
     /// `AF_ECONET`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -202,6 +215,7 @@ impl AddressFamily {
     /// `AF_ATMSVC`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -212,6 +226,7 @@ impl AddressFamily {
     /// `AF_RDS`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -223,6 +238,7 @@ impl AddressFamily {
     pub const SNA: Self = Self(c::AF_SNA as _);
     /// `AF_IRDA`
     #[cfg(not(any(
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -233,6 +249,7 @@ impl AddressFamily {
     /// `AF_PPPOX`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -243,6 +260,7 @@ impl AddressFamily {
     /// `AF_WANPIPE`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -253,6 +271,7 @@ impl AddressFamily {
     /// `AF_LLC`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -263,6 +282,7 @@ impl AddressFamily {
     /// `AF_CAN`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -273,6 +293,7 @@ impl AddressFamily {
     /// `AF_TIPC`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -286,6 +307,7 @@ impl AddressFamily {
     /// `AF_IUCV`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -296,6 +318,7 @@ impl AddressFamily {
     /// `AF_RXRPC`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -309,6 +332,7 @@ impl AddressFamily {
     /// `AF_PHONET`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -319,6 +343,7 @@ impl AddressFamily {
     /// `AF_IEEE802154`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -374,7 +399,7 @@ impl Protocol {
     #[cfg(not(windows))]
     pub const TP: Self = Self(c::IPPROTO_TP as _);
     /// `IPPROTO_DCCP`
-    #[cfg(not(any(windows, target_os = "ios", target_os = "macos", target_os = "openbsd")))]
+    #[cfg(not(any(windows, target_os = "dragonfly", target_os = "ios", target_os = "macos", target_os = "openbsd")))]
     pub const DCCP: Self = Self(c::IPPROTO_DCCP as _);
     /// `IPPROTO_IPV6`
     pub const IPV6: Self = Self(c::IPPROTO_IPV6 as _);
@@ -394,6 +419,7 @@ impl Protocol {
     /// `IPPROTO_BEETPH`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -409,6 +435,7 @@ impl Protocol {
     /// `IPPROTO_COMP`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -417,11 +444,12 @@ impl Protocol {
     )))]
     pub const COMP: Self = Self(c::IPPROTO_COMP as _);
     /// `IPPROTO_SCTP`
-    #[cfg(not(target_os = "openbsd"))]
+    #[cfg(not(any(target_os = "dragonfly", target_os = "openbsd")))]
     pub const SCTP: Self = Self(c::IPPROTO_SCTP as _);
     /// `IPPROTO_UDPLITE`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -429,7 +457,7 @@ impl Protocol {
     )))]
     pub const UDPLITE: Self = Self(c::IPPROTO_UDPLITE as _);
     /// `IPPROTO_MPLS`
-    #[cfg(not(any(windows, target_os = "ios", target_os = "macos", target_os = "netbsd")))]
+    #[cfg(not(any(windows, target_os = "dragonfly", target_os = "ios", target_os = "macos", target_os = "netbsd")))]
     pub const MPLS: Self = Self(c::IPPROTO_MPLS as _);
     /// `IPPROTO_RAW`
     pub const RAW: Self = Self(c::IPPROTO_RAW as _);
@@ -437,6 +465,7 @@ impl Protocol {
     #[cfg(not(any(
         windows,
         target_os = "android",
+        target_os = "dragonfly",
         target_os = "emscripten",
         target_os = "freebsd",
         target_os = "fuchsia",
@@ -453,6 +482,7 @@ impl Protocol {
     /// `IPPROTO_MH`
     #[cfg(not(any(
         windows,
+        target_os = "dragonfly",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",

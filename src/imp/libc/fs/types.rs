@@ -180,7 +180,7 @@ bitflags! {
         const DIRECTORY = c::O_DIRECTORY;
 
         /// `O_DSYNC`
-        #[cfg(not(any(target_os = "freebsd", target_os = "redox")))]
+        #[cfg(not(any(target_os = "dragonfly", target_os = "freebsd", target_os = "redox")))]
         const DSYNC = c::O_DSYNC;
 
         /// `O_EXCL`
@@ -442,6 +442,7 @@ impl FileType {
 ///
 /// [`fadvise`]: crate::fs::fadvise
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",

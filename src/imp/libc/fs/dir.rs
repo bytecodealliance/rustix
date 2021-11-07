@@ -125,7 +125,12 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     )))]
     let d_off = input.d_off;
 
-    #[cfg(not(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd")))]
+    #[cfg(not(any(
+        target_os = "dragonfly",
+        target_os = "freebsd",
+        target_os = "netbsd",
+        target_os = "openbsd"
+    )))]
     let d_ino = input.d_ino;
 
     #[cfg(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))]
@@ -161,7 +166,12 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
             target_os = "wasi",
         )))]
         d_off,
-        #[cfg(not(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd")))]
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "netbsd",
+            target_os = "openbsd"
+        )))]
         d_ino,
         #[cfg(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))]
         d_fileno,
@@ -262,14 +272,24 @@ impl DirEntry {
     }
 
     /// Return the inode number of this directory entry.
-    #[cfg(not(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd")))]
+    #[cfg(not(any(
+        target_os = "dragonfly",
+        target_os = "freebsd",
+        target_os = "netbsd",
+        target_os = "openbsd"
+    )))]
     #[inline]
     pub fn ino(&self) -> u64 {
         self.dirent.d_ino
     }
 
     /// Return the inode number of this directory entry.
-    #[cfg(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))]
+    #[cfg(any(
+        target_os = "dragonfly",
+        target_os = "freebsd",
+        target_os = "netbsd",
+        target_os = "openbsd"
+    ))]
     #[inline]
     pub fn ino(&self) -> u64 {
         #[allow(clippy::useless_conversion)]

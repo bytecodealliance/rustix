@@ -67,6 +67,7 @@ pub fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timespec> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_nanosleep.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/clock_nanosleep.2.html
 #[cfg(any(linux_raw, all(libc, not(any(
+    target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "ios",
@@ -93,6 +94,7 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRel
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_nanosleep.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/clock_nanosleep.2.html
 #[cfg(any(linux_raw, all(libc, not(any(
+    target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "ios",

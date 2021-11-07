@@ -646,6 +646,7 @@ pub(crate) mod sockopt {
     }
 
     #[cfg(not(any(
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -663,6 +664,7 @@ pub(crate) mod sockopt {
     }
 
     #[cfg(not(any(
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -679,6 +681,7 @@ pub(crate) mod sockopt {
     }
 
     #[cfg(not(any(
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",

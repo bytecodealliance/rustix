@@ -46,26 +46,29 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
     // Assert that we know the layout of `sockaddr`.
     let _ = c::sockaddr {
         #[cfg(any(
-            target_os = "netbsd",
-            target_os = "macos",
-            target_os = "ios",
+            target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
             target_os = "openbsd"
         ))]
         sa_len: 0_u8,
         #[cfg(any(
-            target_os = "netbsd",
-            target_os = "macos",
+            target_os = "dragonfly",
             target_os = "ios",
             target_os = "freebsd",
+            target_os = "macos",
+            target_os = "netbsd",
             target_os = "openbsd"
         ))]
         sa_family: 0_u8,
         #[cfg(not(any(
-            target_os = "netbsd",
-            target_os = "macos",
+            target_os = "dragonfly",
             target_os = "ios",
             target_os = "freebsd",
+            target_os = "macos",
+            target_os = "netbsd",
             target_os = "openbsd"
         )))]
         sa_family: 0_u16,
@@ -164,42 +167,47 @@ pub(crate) unsafe fn read_sockaddr_os(
     #[cfg(not(windows))]
     let z = c::sockaddr_un {
         #[cfg(any(
-            target_os = "netbsd",
-            target_os = "macos",
+            target_os = "dragonfly",
             target_os = "ios",
             target_os = "freebsd",
+            target_os = "macos",
+            target_os = "netbsd",
             target_os = "openbsd"
         ))]
         sun_len: 0_u8,
         #[cfg(any(
-            target_os = "netbsd",
-            target_os = "macos",
+            target_os = "dragonfly",
             target_os = "ios",
             target_os = "freebsd",
+            target_os = "macos",
+            target_os = "netbsd",
             target_os = "openbsd"
         ))]
         sun_family: 0_u8,
         #[cfg(not(any(
-            target_os = "netbsd",
-            target_os = "macos",
+            target_os = "dragonfly",
             target_os = "ios",
             target_os = "freebsd",
+            target_os = "macos",
+            target_os = "netbsd",
             target_os = "openbsd"
         )))]
         sun_family: 0_u16,
         #[cfg(any(
-            target_os = "netbsd",
-            target_os = "macos",
+            target_os = "dragonfly",
             target_os = "ios",
             target_os = "freebsd",
+            target_os = "macos",
+            target_os = "netbsd",
             target_os = "openbsd"
         ))]
         sun_path: [0; 104],
         #[cfg(not(any(
-            target_os = "netbsd",
-            target_os = "macos",
+            target_os = "dragonfly",
             target_os = "ios",
             target_os = "freebsd",
+            target_os = "macos",
+            target_os = "netbsd",
             target_os = "openbsd"
         )))]
         sun_path: [0; 108],

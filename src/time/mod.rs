@@ -13,6 +13,7 @@ pub use clock::{clock_getres, clock_gettime, clock_gettime_dynamic, ClockId, Dyn
 pub use clock::{nanosleep, NanosleepRelativeResult};
 
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
     target_os = "ios",
