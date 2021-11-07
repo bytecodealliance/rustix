@@ -130,13 +130,23 @@ pub unsafe fn fork() -> io::Result<Pid> {
 /// The first argument, by convention,
 /// should be the filename associated with the file being executed.
 pub fn execve<P: Arg, A: Arg, E: Arg>(path: P, args: &[A], env_vars: &[E]) -> io::Result<()> {
-    let arg_vec: Vec<Cow<'_, ZStr>> = args
+    let arg_zstr: Vec<Cow<'_, ZStr>> = args
         .iter()
         .map(Arg::as_cow_z_str)
         .collect::<io::Result<_>>()?;
-    let env_vec: Vec<Cow<'_, ZStr>> = env_vars
+    let arg_ptrs: Vec<_> = arg_zstr
+        .iter()
+        .map(|zstr| ZStr::as_ptr(zstr).cast::<_>())
+        .chain(core::iter::once(core::ptr::null()))
+        .collect();
+    let env_zstr: Vec<Cow<'_, ZStr>> = env_vars
         .iter()
         .map(Arg::as_cow_z_str)
         .collect::<io::Result<_>>()?;
-    path.into_with_z_str(|path_cstr| imp::syscalls::execve(path_cstr, &arg_vec, &env_vec))
+    let env_ptrs: Vec<_> = env_zstr
+        .iter()
+        .map(|zstr| ZStr::as_ptr(zstr).cast::<_>())
+        .chain(core::iter::once(core::ptr::null()))
+        .collect();
+    path.into_with_z_str(|path_cstr| imp::syscalls::execve(path_cstr, &arg_ptrs, &env_ptrs))
 }
