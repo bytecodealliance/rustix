@@ -58,8 +58,6 @@ use crate::process::{
     Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, Rlimit, Uid, WaitOptions, WaitStatus,
 };
 use crate::time::NanosleepRelativeResult;
-use alloc::borrow::Cow;
-use alloc::vec::Vec;
 #[cfg(target_pointer_width = "32")]
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
@@ -1569,29 +1567,17 @@ pub(crate) unsafe fn fork() -> io::Result<Pid> {
     Ok(Pid::from_raw(pid))
 }
 
-pub(crate) fn execve(
+pub(crate) unsafe fn execve(
     path: &ZStr,
-    args: &[Cow<'_, ZStr>],
-    env_vars: &[Cow<'_, ZStr>],
+    args: &[*const u8],
+    env_vars: &[*const u8],
 ) -> io::Result<()> {
-    let argv: Vec<_> = args
-        .iter()
-        .map(|zstr| ZStr::as_ptr(zstr))
-        .chain(core::iter::once(core::ptr::null()))
-        .collect();
-    let envs: Vec<_> = env_vars
-        .iter()
-        .map(|zstr| ZStr::as_ptr(zstr))
-        .chain(core::iter::once(core::ptr::null()))
-        .collect();
-    unsafe {
-        ret(syscall3_readonly(
-            nr(__NR_execve),
-            c_str(path),
-            slice_just_addr(&argv),
-            slice_just_addr(&envs),
-        ))
-    }
+    ret(syscall3_readonly(
+        nr(__NR_execve),
+        c_str(path),
+        slice_just_addr(&args),
+        slice_just_addr(&env_vars),
+    ))
 }
 
 #[inline]
