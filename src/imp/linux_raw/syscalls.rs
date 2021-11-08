@@ -1567,15 +1567,17 @@ pub(crate) unsafe fn fork() -> io::Result<Pid> {
     Ok(Pid::from_raw(pid))
 }
 
-pub(crate) fn execve(path: &ZStr, args: &[*const u8], env_vars: &[*const u8]) -> io::Result<()> {
-    unsafe {
-        ret(syscall3_readonly(
-            nr(__NR_execve),
-            c_str(path),
-            slice_just_addr(&args),
-            slice_just_addr(&env_vars),
-        ))
-    }
+pub(crate) unsafe fn execve(
+    path: &ZStr,
+    args: &[*const u8],
+    env_vars: &[*const u8],
+) -> io::Result<()> {
+    ret(syscall3_readonly(
+        nr(__NR_execve),
+        c_str(path),
+        slice_just_addr(&args),
+        slice_just_addr(&env_vars),
+    ))
 }
 
 #[inline]

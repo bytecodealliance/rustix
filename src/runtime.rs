@@ -148,5 +148,7 @@ pub fn execve<P: Arg, A: Arg, E: Arg>(path: P, args: &[A], env_vars: &[E]) -> io
         .map(|zstr| ZStr::as_ptr(zstr).cast::<_>())
         .chain(core::iter::once(core::ptr::null()))
         .collect();
-    path.into_with_z_str(|path_cstr| imp::syscalls::execve(path_cstr, &arg_ptrs, &env_ptrs))
+    path.into_with_z_str(|path_cstr| unsafe {
+        imp::syscalls::execve(path_cstr, &arg_ptrs, &env_ptrs)
+    })
 }
