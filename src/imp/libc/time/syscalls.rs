@@ -8,6 +8,7 @@ use crate::io;
 use crate::time::NanosleepRelativeResult;
 use core::mem::MaybeUninit;
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "emscripten",
     target_os = "ios",
@@ -85,6 +86,7 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
 }
 
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "ios",
@@ -109,6 +111,7 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
 }
 
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "emscripten",
     target_os = "ios",

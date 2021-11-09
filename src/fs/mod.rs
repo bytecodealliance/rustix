@@ -13,6 +13,7 @@ mod cwd;
 #[cfg(not(target_os = "redox"))]
 mod dir;
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -30,6 +31,7 @@ mod file_type;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 mod getpath;
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "ios",
     target_os = "freebsd",
     target_os = "macos",
@@ -84,6 +86,7 @@ pub use cwd::cwd;
 #[cfg(not(target_os = "redox"))]
 pub use dir::{Dir, DirEntry};
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -94,6 +97,7 @@ pub use fadvise::{fadvise, Advice};
 #[cfg(not(target_os = "wasi"))]
 pub use fcntl::fcntl_dupfd_cloexec;
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "ios",
     target_os = "macos",
@@ -111,9 +115,19 @@ pub use fcopyfile::{
     copyfile_state_alloc, copyfile_state_free, copyfile_state_get, copyfile_state_get_copied,
     copyfile_state_t, fcopyfile,
 };
-#[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "dragonfly",
+    target_os = "netbsd",
+    target_os = "openbsd",
+    target_os = "redox"
+)))]
 pub use fd::fallocate;
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "dragonfly",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "redox"
+)))]
 pub use fd::fdatasync;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
@@ -125,6 +139,7 @@ pub use file_type::FileType;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use getpath::getpath;
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "ios",
     target_os = "freebsd",
     target_os = "macos",

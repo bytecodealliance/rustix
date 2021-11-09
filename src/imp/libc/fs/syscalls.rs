@@ -1,5 +1,6 @@
 use super::super::c;
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "ios",
     target_os = "macos",
@@ -22,6 +23,7 @@ use super::super::offset::libc_fallocate;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 use super::super::offset::libc_fstatfs;
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -31,6 +33,7 @@ use super::super::offset::libc_fstatfs;
 use super::super::offset::libc_posix_fadvise;
 #[cfg(not(any(
     target_os = "android",
+    target_os = "dragonfly",
     target_os = "fuchsia",
     target_os = "ios",
     target_os = "linux",
@@ -43,6 +46,7 @@ use super::super::offset::libc_posix_fallocate;
 use super::super::offset::{libc_fstat, libc_fstatat, libc_lseek, libc_off_t};
 use super::super::time::Timespec;
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -57,7 +61,12 @@ use super::Advice as FsAdvice;
     target_os = "wasi",
 )))]
 use super::Dev;
-#[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "dragonfly",
+    target_os = "netbsd",
+    target_os = "openbsd",
+    target_os = "redox"
+)))]
 use super::FallocateFlags;
 #[cfg(not(target_os = "wasi"))]
 use super::FlockOperation;
@@ -384,6 +393,7 @@ pub(crate) fn copy_file_range(
 }
 
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -442,6 +452,7 @@ pub(crate) fn fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
 }
 
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "ios",
     target_os = "macos",
@@ -519,6 +530,7 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &[Timespec; 2]) -> io::Result<
 }
 
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -588,7 +600,12 @@ pub(crate) fn fsync(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::fsync(borrowed_fd(fd))) }
 }
 
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "dragonfly",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "redox"
+)))]
 pub(crate) fn fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::fdatasync(borrowed_fd(fd))) }
 }

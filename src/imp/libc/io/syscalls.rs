@@ -397,6 +397,7 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
 
 #[cfg(not(any(
     target_os = "android",
+    target_os = "dragonfly",
     target_os = "macos",
     target_os = "ios",
     target_os = "redox",
@@ -414,6 +415,7 @@ pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> i
 
 #[cfg(any(
     target_os = "android",
+    target_os = "dragonfly",
     target_os = "macos",
     target_os = "ios",
     target_os = "redox"
@@ -436,6 +438,7 @@ pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize
 }
 
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "ios",
     target_os = "macos",
@@ -452,6 +455,7 @@ pub(crate) fn ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
 }
 
 #[cfg(any(
+    target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "ios",
     target_os = "macos",

@@ -7,6 +7,7 @@ bitflags! {
         /// `MSG_CONFIRM`
         #[cfg(not(any(
             windows,
+            target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "ios",
             target_os = "macos",
@@ -25,6 +26,7 @@ bitflags! {
         /// `MSG_MORE`
         #[cfg(not(any(
             windows,
+            target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "ios",
             target_os = "macos",
@@ -52,6 +54,7 @@ bitflags! {
         /// `MSG_ERRQUEUE`
         #[cfg(not(any(
             windows,
+            target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "ios",
             target_os = "macos",

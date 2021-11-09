@@ -122,7 +122,7 @@ impl Error {
     #[cfg(not(windows))]
     pub const BUSY: Self = Self(c::EBUSY);
     pub const CANCELED: Self = Self(c::ECANCELED);
-    #[cfg(any(target_os = "dragonfly", target_os = "freebsd"))]
+    #[cfg(any(target_os = "freebsd"))]
     pub const CAPMODE: Self = Self(c::ECAPMODE);
     #[cfg(not(windows))]
     pub const CHILD: Self = Self(c::ECHILD);
@@ -552,7 +552,7 @@ impl Error {
     pub const NOSYS: Self = Self(c::ENOSYS);
     #[cfg(not(any(windows, target_os = "wasi")))]
     pub const NOTBLK: Self = Self(c::ENOTBLK);
-    #[cfg(any(target_os = "dragonfly", target_os = "freebsd"))]
+    #[cfg(any(target_os = "freebsd"))]
     pub const NOTCAPABLE: Self = Self(c::ENOTCAPABLE);
     pub const NOTCONN: Self = Self(c::ENOTCONN);
     #[cfg(not(windows))]
@@ -569,7 +569,7 @@ impl Error {
         target_os = "wasi",
     )))]
     pub const NOTNAM: Self = Self(c::ENOTNAM);
-    #[cfg(not(any(windows, target_os = "netbsd")))]
+    #[cfg(not(any(windows, target_os = "dragonfly", target_os = "netbsd")))]
     pub const NOTRECOVERABLE: Self = Self(c::ENOTRECOVERABLE);
     pub const NOTSOCK: Self = Self(c::ENOTSOCK);
     #[cfg(not(any(windows, target_os = "redox")))]
@@ -592,7 +592,7 @@ impl Error {
     pub const OPNOTSUPP: Self = Self(c::EOPNOTSUPP);
     #[cfg(not(windows))]
     pub const OVERFLOW: Self = Self(c::EOVERFLOW);
-    #[cfg(not(any(windows, target_os = "netbsd")))]
+    #[cfg(not(any(windows, target_os = "dragonfly", target_os = "netbsd")))]
     pub const OWNERDEAD: Self = Self(c::EOWNERDEAD);
     #[cfg(not(windows))]
     pub const PERM: Self = Self(c::EPERM);

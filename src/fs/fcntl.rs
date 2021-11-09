@@ -70,6 +70,7 @@ pub fn fcntl_setfl<Fd: AsFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
     all(
         libc,
         not(any(
+            target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "ios",
             target_os = "macos",

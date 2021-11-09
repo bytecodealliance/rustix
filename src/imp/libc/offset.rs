@@ -99,6 +99,7 @@ pub(super) use c::fallocate64 as libc_fallocate;
 #[cfg(not(any(
     windows,
     target_os = "android",
+    target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "ios",
     target_os = "linux",
@@ -179,6 +180,7 @@ pub(super) use c::fstatfs as libc_fstatfs;
 #[cfg(not(any(
     windows,
     target_os = "android",
+    target_os = "dragonfly",
     target_os = "fuchsia",
     target_os = "ios",
     target_os = "linux",

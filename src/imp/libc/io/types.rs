@@ -93,6 +93,7 @@ bitflags! {
         /// `MAP_SHARED_VALIDATE`
         #[cfg(not(any(
             target_os = "android",
+            target_os = "dragonfly",
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
@@ -107,6 +108,7 @@ bitflags! {
         const PRIVATE = c::MAP_PRIVATE;
         /// `MAP_DENYWRITE`
         #[cfg(not(any(
+            target_os = "dragonfly",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -128,6 +130,7 @@ bitflags! {
         /// `MAP_FIXED_NOREPLACE`
         #[cfg(not(any(
             target_os = "android",
+            target_os = "dragonfly",
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
@@ -140,6 +143,7 @@ bitflags! {
         const FIXED_NOREPLACE = c::MAP_FIXED_NOREPLACE;
         /// `MAP_GROWSDOWN`
         #[cfg(not(any(
+            target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "ios",
             target_os = "netbsd",
@@ -150,6 +154,7 @@ bitflags! {
         const GROWSDOWN = c::MAP_GROWSDOWN;
         /// `MAP_HUGETLB`
         #[cfg(not(any(
+            target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "ios",
             target_os = "macos",
@@ -161,6 +166,7 @@ bitflags! {
         /// `MAP_HUGE_2MB`
         #[cfg(not(any(
             target_os = "android",
+            target_os = "dragonfly",
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
@@ -174,6 +180,7 @@ bitflags! {
         /// `MAP_HUGE_1GB`
         #[cfg(not(any(
             target_os = "android",
+            target_os = "dragonfly",
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
@@ -186,6 +193,7 @@ bitflags! {
         const HUGE_1GB = c::MAP_HUGE_1GB;
         /// `MAP_LOCKED`
         #[cfg(not(any(
+            target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "ios",
             target_os = "macos",
@@ -195,10 +203,11 @@ bitflags! {
         )))]
         const LOCKED = c::MAP_LOCKED;
         /// `MAP_NORESERVE`
-        #[cfg(not(any(target_os = "freebsd", target_os = "redox")))]
+        #[cfg(not(any(target_os = "dragonfly", target_os = "freebsd", target_os = "redox")))]
         const NORESERVE = c::MAP_NORESERVE;
         /// `MAP_POPULATE`
         #[cfg(not(any(
+            target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "ios",
             target_os = "macos",
@@ -209,6 +218,7 @@ bitflags! {
         const POPULATE = c::MAP_POPULATE;
         /// `MAP_STACK`
         #[cfg(not(any(
+            target_os = "dragonfly",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -218,6 +228,7 @@ bitflags! {
         /// `MAP_SYNC`
         #[cfg(not(any(
             target_os = "android",
+            target_os = "dragonfly",
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
