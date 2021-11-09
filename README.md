@@ -8,7 +8,7 @@
   <strong>A <a href="https://bytecodealliance.org/">Bytecode Alliance</a> project</strong>
 
   <p>
-    <a href="https://github.com/bytecodealliance/rsix/actions?query=workflow%3ACI"><img src="https://github.com/bytecodealliance/rsix/workflows/CI/badge.svg" alt="Github Actions CI Status" /></a>
+    <a href="https://github.com/bytecodealliance/rustix/actions?query=workflow%3ACI"><img src="https://github.com/bytecodealliance/rustix/workflows/CI/badge.svg" alt="Github Actions CI Status" /></a>
     <a href="https://bytecodealliance.zulipchat.com/#narrow/stream/206238-general"><img src="https://img.shields.io/badge/zulip-join_chat-brightgreen.svg" alt="zulip chat" /></a>
     <a href="https://crates.io/crates/rustix"><img src="https://img.shields.io/crates/v/rustix.svg" alt="crates.io page" /></a>
     <a href="https://docs.rs/rustix"><img src="https://docs.rs/rustix/badge.svg" alt="docs.rs docs" /></a>
