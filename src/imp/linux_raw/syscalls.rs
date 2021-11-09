@@ -491,12 +491,19 @@ pub(crate) fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usi
 #[inline]
 pub(crate) fn sched_getaffinity(pid: Pid, cpuset: &mut RawCpuSet) -> io::Result<()> {
     unsafe {
-        ret(syscall3(
+        // the raw linux syscall returns the size (in bytes) of the cpumask_t data type,
+        // that is used internally by the kernel to represent the CPU set bit mask
+        let size = ret_usize(syscall3(
             nr(__NR_sched_getaffinity),
             c_uint(pid.as_raw()),
             size_of::<RawCpuSet, _>(),
             by_mut(&mut cpuset.bits),
-        ))
+        ))?;
+        let bytes = (cpuset as *mut RawCpuSet).cast::<u8>();
+        let rest = bytes.wrapping_add(size);
+        // zero every byte in the cpuset, not set by the kernel
+        rest.write_bytes(0, core::mem::size_of::<RawCpuSet>() - size);
+        Ok(())
     }
 }
 
