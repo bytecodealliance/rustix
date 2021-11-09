@@ -29,6 +29,7 @@ fn main() {
         {
             println!("cargo:rustc-cfg=linux_raw_inline_asm");
             println!("cargo:rustc-cfg=rustc_attrs");
+            println!("cargo:rustc-cfg=core_intrinsics");
             println!("cargo:rustc-cfg=doc_cfg");
         } else {
             link_in_librustix_outline(&arch, &asm_name);

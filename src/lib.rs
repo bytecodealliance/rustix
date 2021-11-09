@@ -62,6 +62,7 @@
 #![cfg_attr(feature = "rustc-dep-of-std", feature(const_raw_ptr_deref))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(slice_internals))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(core_intrinsics))]
+#![cfg_attr(all(not(feature = "rustc-dep-of-std"), core_intrinsics), feature(core_intrinsics))]
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
