@@ -849,3 +849,8 @@ pub(crate) fn fcntl_rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::R
         ret(c::fcntl(borrowed_fd(fd), c::F_RDADVISE, &radvisory))
     }
 }
+
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+pub(crate) fn fcntl_fullfsync(fd: BorrowedFd<'_>) -> io::Result<()> {
+    unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_FULLFSYNC)) }
+}

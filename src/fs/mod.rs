@@ -23,7 +23,7 @@ mod dir;
 mod fadvise;
 pub(crate) mod fcntl;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
-mod fcntl_rdadvise;
+mod fcntl_darwin;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 mod fcopyfile;
 pub(crate) mod fd;
@@ -109,7 +109,7 @@ pub use fcntl::fcntl_dupfd_cloexec;
 pub use fcntl::fcntl_get_seals;
 pub use fcntl::{fcntl_getfd, fcntl_getfl, fcntl_setfd, fcntl_setfl};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
-pub use fcntl_rdadvise::fcntl_rdadvise;
+pub use fcntl_darwin::{fcntl_fullfsync, fcntl_rdadvise};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use fcopyfile::{
     copyfile_state_alloc, copyfile_state_free, copyfile_state_get, copyfile_state_get_copied,
