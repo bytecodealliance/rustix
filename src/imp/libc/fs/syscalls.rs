@@ -611,6 +611,19 @@ pub(crate) fn fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
 }
 
 pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
+    // Use `ftruncate64` when available, in Android 12 and later.
+    #[cfg(all(target_os = "android", target_pointer_width = "32"))]
+    {
+        weak!(fn ftruncate64(c_int, i64) -> c_int);
+
+        unsafe {
+            match ftruncate64.get() {
+                Some(f) => return ret(f(fd, size as i64)),
+                None => {}
+            }
+        }
+    }
+
     let length = length.try_into().map_err(|_overflow_err| io::Error::FBIG)?;
     unsafe { ret(c::ftruncate(borrowed_fd(fd), length)) }
 }
