@@ -40,6 +40,6 @@ pub use imp::net::SocketAddrUnix;
 #[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
 pub use addr::{SocketAddr, SocketAddrV4, SocketAddrV6};
 #[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
-pub use ip::{IpAddr, Ipv4Addr, Ipv6Addr};
+pub use ip::{IpAddr, Ipv4Addr, Ipv6Addr, Ipv6MulticastScope};
 #[cfg(feature = "std")]
 pub use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
