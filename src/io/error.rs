@@ -70,3 +70,14 @@ impl From<Error> for std::io::Error {
         Self::from_raw_os_error(err.raw_os_error() as _)
     }
 }
+
+/// Call `f` until it either succeeds or fails other than `io::Error::INTR`.
+#[inline]
+pub fn with_retrying<T, F: FnMut() -> Result<T>>(mut f: F) -> Result<T> {
+    loop {
+        match f() {
+            Err(Error::INTR) => (),
+            result => return result,
+        }
+    }
+}
