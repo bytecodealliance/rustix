@@ -67,9 +67,6 @@ pub trait Arg {
     where
         Self: 'b;
 
-    /// Returns a view of this string as a byte slice.
-    fn as_maybe_utf8_bytes(&self) -> &[u8];
-
     /// Runs a closure with `self` passed in as a `&ZStr`.
     fn into_with_z_str<T, F>(self, f: F) -> io::Result<T>
     where
@@ -132,11 +129,6 @@ impl Arg for &str {
     }
 
     #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_bytes()
-    }
-
-    #[inline]
     fn into_with_z_str<T, F>(self, f: F) -> io::Result<T>
     where
         Self: Sized,
@@ -170,11 +162,6 @@ impl Arg for &String {
         Self: 'b,
     {
         self.as_str().into_z_str()
-    }
-
-    #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_bytes()
     }
 
     #[inline]
@@ -213,11 +200,6 @@ impl Arg for String {
         Ok(Cow::Owned(
             ZString::new(self).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
-    }
-
-    #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_bytes()
     }
 
     #[inline]
@@ -260,11 +242,6 @@ impl Arg for &OsStr {
     }
 
     #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_bytes()
-    }
-
-    #[inline]
     fn into_with_z_str<T, F>(self, f: F) -> io::Result<T>
     where
         Self: Sized,
@@ -300,11 +277,6 @@ impl Arg for &OsString {
         Self: 'b,
     {
         self.as_os_str().into_z_str()
-    }
-
-    #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_bytes()
     }
 
     #[inline]
@@ -347,11 +319,6 @@ impl Arg for OsString {
     }
 
     #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_bytes()
-    }
-
-    #[inline]
     fn into_with_z_str<T, F>(self, f: F) -> io::Result<T>
     where
         Self: Sized,
@@ -388,11 +355,6 @@ impl Arg for &Path {
         Ok(Cow::Owned(
             ZString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
-    }
-
-    #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_os_str().as_bytes()
     }
 
     #[inline]
@@ -437,11 +399,6 @@ impl Arg for &PathBuf {
     }
 
     #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        PathBuf::as_path(self).as_os_str().as_bytes()
-    }
-
-    #[inline]
     fn into_with_z_str<T, F>(self, f: F) -> io::Result<T>
     where
         Self: Sized,
@@ -478,11 +435,6 @@ impl Arg for PathBuf {
         Ok(Cow::Owned(
             ZString::new(self.into_os_string().into_vec()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
-    }
-
-    #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_os_str().as_bytes()
     }
 
     #[inline]
@@ -523,11 +475,6 @@ impl Arg for &ZStr {
     }
 
     #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.to_bytes()
-    }
-
-    #[inline]
     fn into_with_z_str<T, F>(self, f: F) -> io::Result<T>
     where
         Self: Sized,
@@ -562,11 +509,6 @@ impl Arg for &ZString {
     }
 
     #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.to_bytes()
-    }
-
-    #[inline]
     fn into_with_z_str<T, F>(self, f: F) -> io::Result<T>
     where
         Self: Sized,
@@ -598,11 +540,6 @@ impl Arg for ZString {
         Self: 'b,
     {
         Ok(Cow::Owned(self))
-    }
-
-    #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_bytes()
     }
 
     #[inline]
@@ -645,11 +582,6 @@ impl<'a> Arg for Cow<'a, str> {
             }
             .map_err(|_cstr_err| io::Error::INVAL)?,
         ))
-    }
-
-    #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_bytes()
     }
 
     #[inline]
@@ -696,11 +628,6 @@ impl<'a> Arg for Cow<'a, OsStr> {
     }
 
     #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_bytes()
-    }
-
-    #[inline]
     fn into_with_z_str<T, F>(self, f: F) -> io::Result<T>
     where
         Self: Sized,
@@ -733,11 +660,6 @@ impl<'a> Arg for Cow<'a, ZStr> {
         Self: 'b,
     {
         Ok(self)
-    }
-
-    #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.to_bytes()
     }
 
     #[inline]
@@ -777,11 +699,6 @@ impl<'a> Arg for Component<'a> {
         Ok(Cow::Owned(
             ZString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
-    }
-
-    #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_os_str().as_bytes()
     }
 
     #[inline]
@@ -826,11 +743,6 @@ impl<'a> Arg for Components<'a> {
     }
 
     #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_path().as_os_str().as_bytes()
-    }
-
-    #[inline]
     fn into_with_z_str<T, F>(self, f: F) -> io::Result<T>
     where
         Self: Sized,
@@ -872,11 +784,6 @@ impl<'a> Arg for Iter<'a> {
     }
 
     #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_path().as_os_str().as_bytes()
-    }
-
-    #[inline]
     fn into_with_z_str<T, F>(self, f: F) -> io::Result<T>
     where
         Self: Sized,
@@ -912,11 +819,6 @@ impl Arg for &[u8] {
         Ok(Cow::Owned(
             ZString::new(self).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
-    }
-
-    #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self
     }
 
     #[inline]
@@ -958,11 +860,6 @@ impl Arg for &Vec<u8> {
     }
 
     #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self
-    }
-
-    #[inline]
     fn into_with_z_str<T, F>(self, f: F) -> io::Result<T>
     where
         Self: Sized,
@@ -998,11 +895,6 @@ impl Arg for Vec<u8> {
         Ok(Cow::Owned(
             ZString::new(self).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
-    }
-
-    #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self
     }
 
     #[inline]
@@ -1044,11 +936,6 @@ impl Arg for DecInt {
             ZString::new(self.as_ref().as_os_str().as_bytes())
                 .map_err(|_cstr_err| io::Error::INVAL)?,
         ))
-    }
-
-    #[inline]
-    fn as_maybe_utf8_bytes(&self) -> &[u8] {
-        self.as_ref().as_os_str().as_bytes()
     }
 
     #[inline]
