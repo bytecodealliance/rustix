@@ -7,6 +7,7 @@
 //!
 //! [RFC 2832]: https://github.com/rust-lang/rfcs/pull/2832
 
+#![rustfmt::skip]
 #![allow(unsafe_code)]
 
 use crate::imp::c;

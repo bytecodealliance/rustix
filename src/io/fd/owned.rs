@@ -4,6 +4,7 @@
 //!
 //! Owned and borrowed Unix-like file descriptors.
 
+#![rustfmt::skip]
 #![cfg_attr(staged_api, unstable(feature = "io_safety", issue = "87074"))]
 #![deny(unsafe_op_in_unsafe_fn)]
 #![allow(unsafe_code)]

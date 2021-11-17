@@ -2,6 +2,8 @@
 //! library/std/src/io/mod.rs at revision
 //! dca3f1b786efd27be3b325ed1e01e247aa589c3b.
 
+#![rustfmt::skip]
+
 /// Enumeration of possible methods to seek within an I/O object.
 ///
 /// It is used by the [`Seek`] trait.

@@ -6,6 +6,7 @@
 //! conceptually platform-independent, however in practice OS's have differing
 //! representations.
 
+#![rustfmt::skip]
 #![allow(unsafe_code)]
 
 use crate::imp::c;
