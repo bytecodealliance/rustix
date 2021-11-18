@@ -33,10 +33,11 @@ bitflags! {
         /// `POLLNVAL`
         const NVAL = c::POLLNVAL;
         /// `POLLRDHUP`
-        // TODO: Submitted to upstream libc:
-        // <https://github.com/rust-lang/libc/pull/2390>
-        #[cfg(not(any(target_arch = "sparc", target_arch = "sparc64")))]
-        const RDHUP = 0x2000;
+        #[cfg(all(
+            any(target_os = "android", target_os = "linux"),
+            not(any(target_arch = "sparc", target_arch = "sparc64")))
+        )]
+        const RDHUP = c::POLLRDHUP;
     }
 }
 
