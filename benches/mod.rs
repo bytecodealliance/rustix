@@ -62,7 +62,7 @@ mod suite {
                     assert_eq!(
                         libc::fstatat(
                             libc::AT_FDCWD,
-                            cstr::cstr!("/").as_ptr() as _,
+                            rustix::zstr!("/").as_ptr() as _,
                             s.as_mut_ptr(),
                             0
                         ),
@@ -78,7 +78,7 @@ mod suite {
 
         c.bench_function("simple statat cstr", |b| {
             b.iter(|| {
-                statat(&cwd(), cstr::cstr!("/"), AtFlags::empty()).unwrap();
+                statat(&cwd(), rustix::zstr!("/"), AtFlags::empty()).unwrap();
             })
         });
     }
