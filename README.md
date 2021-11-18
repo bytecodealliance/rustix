@@ -109,8 +109,8 @@ version of this crate.
 [`cap-std`]: https://crates.io/crates/cap-std
 [`bitflags`]: https://crates.io/crates/bitflags
 [`Arg`]: https://docs.rs/rustix/latest/rustix/path/trait.Arg.html
-[I/O-safe]: https://github.com/rust-lang/rfcs/pull/3128
-[I/O safety]: https://github.com/rust-lang/rfcs/pull/3128
+[I/O-safe]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
+[I/O safety]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
 [y2038 bug]: https://en.wikipedia.org/wiki/Year_2038_problem
 [`OwnedFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/struct.OwnedFd.html
 [`AsFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.AsFd.html
