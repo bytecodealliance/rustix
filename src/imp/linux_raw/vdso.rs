@@ -3,7 +3,7 @@
 //! The following code is transliterated from
 //! tools/testing/selftests/vDSO/parse_vdso.c in Linux 5.11, which is licensed
 //! with Creative Commons Zero License, version 1.0,
-//! available at <http://creativecommons.org/publicdomain/zero/1.0/legalcode>
+//! available at <https://creativecommons.org/publicdomain/zero/1.0/legalcode>
 //!
 //! # Safety
 //!
