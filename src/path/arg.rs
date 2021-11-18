@@ -46,7 +46,7 @@ use std::path::{Component, Components, Iter, Path, PathBuf};
 /// }
 /// ```
 ///
-/// Users can then call `touch("foo")`, `touch(cstr!("foo"))`,
+/// Users can then call `touch("foo")`, `touch(zstr!("foo"))`,
 /// `touch(Path::new("foo"))`, or many other things.
 ///
 /// [`AsRef`]: std::convert::AsRef

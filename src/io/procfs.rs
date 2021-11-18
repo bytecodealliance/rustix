@@ -162,7 +162,7 @@ fn check_procfs(file: BorrowedFd<'_>) -> io::Result<()> {
 /// `renameat` call that would otherwise fail, but which fails with `EXDEV`
 /// first if it would cross a mount point.
 fn is_mountpoint(file: BorrowedFd<'_>) -> bool {
-    let err = renameat(&file, cstr!("../."), &file, cstr!(".")).unwrap_err();
+    let err = renameat(&file, zstr!("../."), &file, zstr!(".")).unwrap_err();
     match err {
         io::Error::XDEV => true,  // the rename failed due to crossing a mount point
         io::Error::BUSY => false, // the rename failed normally
@@ -194,7 +194,7 @@ fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
             | OFlags::NOATIME;
 
         // Open "/proc".
-        let proc = openat(&cwd(), cstr!("/proc"), oflags, Mode::empty())
+        let proc = openat(&cwd(), zstr!("/proc"), oflags, Mode::empty())
             .map_err(|_err| io::Error::NOTSUP)?;
         let proc_stat = check_proc_entry(
             Kind::Proc,
@@ -279,7 +279,7 @@ pub fn proc_self_fd() -> io::Result<BorrowedFd<'static>> {
                 | OFlags::NOATIME;
 
             // Open "/proc/self/fd".
-            let proc_self_fd = openat(&proc_self, cstr!("fd"), oflags, Mode::empty())
+            let proc_self_fd = openat(&proc_self, zstr!("fd"), oflags, Mode::empty())
                 .map_err(|_err| io::Error::NOTSUP)?;
             let proc_self_fd_stat = check_proc_entry(
                 Kind::Fd,
