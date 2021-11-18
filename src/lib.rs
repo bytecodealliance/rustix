@@ -39,7 +39,7 @@
 //! [`AsFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.AsFd.html
 //! [`OwnedFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/struct.OwnedFd.html
 //! [io-lifetimes crate]: https://crates.io/crates/io-lifetimes
-//! [I/O-safe]: https://github.com/rust-lang/rfcs/pull/3128
+//! [I/O-safe]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
 //! [`Result`]: https://docs.rs/rustix/latest/rustix/io/type.Result.html
 //! [`Arg`]: https://docs.rs/rustix/latest/rustix/path/trait.Arg.html
 
