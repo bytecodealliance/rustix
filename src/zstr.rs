@@ -9,8 +9,14 @@
 ///
 /// # Examples
 ///
-/// ```rust
-/// let stat = rustix::fs::statat(&rustix::fs::cwd(), zstr!("test.txt"), AtFlags::empty())?;
+/// ```rust,no_run
+/// # fn main() -> rustix::io::Result<()> {
+/// use rustix::zstr;
+/// use rustix::fs::{cwd, statat, AtFlags};
+///
+/// let metadata = statat(&cwd(), zstr!("test.txt"), AtFlags::empty())?;
+/// # Ok(())
+/// # }
 /// ```
 #[allow(unused_macros)]
 #[macro_export]
