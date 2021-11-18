@@ -33,7 +33,10 @@ bitflags! {
         /// `POLLNVAL`
         const NVAL = c::POLLNVAL;
         /// `POLLRDHUP`
-        #[cfg(not(any(target_arch = "sparc", target_arch = "sparc64")))]
+        #[cfg(all(
+            any(target_os = "android", target_os = "linux"),
+            not(any(target_arch = "sparc", target_arch = "sparc64")))
+        )]
         const RDHUP = c::POLLRDHUP;
     }
 }
