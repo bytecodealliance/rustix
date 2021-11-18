@@ -52,6 +52,15 @@ bitflags! {
 
         /// `AT_EACCESS`
         const EACCESS = linux_raw_sys::v5_11::general::AT_EACCESS;
+
+        /// `AT_STATX_SYNC_AS_STAT`
+        const STATX_SYNC_AS_STAT = linux_raw_sys::v5_4::general::AT_STATX_SYNC_AS_STAT;
+
+        /// `AT_STATX_FORCE_SYNC`
+        const STATX_FORCE_SYNC = linux_raw_sys::v5_4::general::AT_STATX_FORCE_SYNC;
+
+        /// `AT_STATX_DONT_SYNC`
+        const STATX_DONT_SYNC = linux_raw_sys::v5_4::general::AT_STATX_DONT_SYNC;
     }
 }
 
@@ -468,8 +477,6 @@ pub type StatFs = linux_raw_sys::general::statfs64;
 pub type StatFs = linux_raw_sys::general::statfs64;
 
 /// `struct statx` for use with [`statx`].
-///
-/// Only available on Linux with GLIBC for now.
 ///
 /// [`statx`]: crate::fs::statx
 pub type Statx = linux_raw_sys::v5_4::general::statx;

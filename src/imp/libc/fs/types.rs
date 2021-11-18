@@ -57,6 +57,18 @@ bitflags! {
         /// `AT_EACCESS`
         #[cfg(not(any(target_os = "emscripten", target_os = "android")))]
         const EACCESS = c::AT_EACCESS;
+
+        /// `AT_STATX_SYNC_AS_STAT`
+        #[cfg(all(target_os = "linux", target_env = "gnu"))]
+        const STATX_SYNC_AS_STAT = libc::AT_STATX_SYNC_AS_STAT;
+
+        /// `AT_STATX_FORCE_SYNC`
+        #[cfg(all(target_os = "linux", target_env = "gnu"))]
+        const STATX_FORCE_SYNC = libc::AT_STATX_FORCE_SYNC;
+
+        /// `AT_STATX_DONT_SYNC`
+        #[cfg(all(target_os = "linux", target_env = "gnu"))]
+        const STATX_DONT_SYNC = libc::AT_STATX_DONT_SYNC;
     }
 }
 
