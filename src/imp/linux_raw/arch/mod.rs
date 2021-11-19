@@ -16,15 +16,15 @@
 #![allow(unsafe_code)]
 
 // When inline asm is available, use it.
-#[cfg(linux_raw_inline_asm)]
+#[cfg(asm)]
 pub(in crate::imp::linux_raw) mod inline;
-#[cfg(linux_raw_inline_asm)]
+#[cfg(asm)]
 pub(in crate::imp::linux_raw) use self::inline as asm;
 
 // When inline asm isn't available, use out-of-line asm.
-#[cfg(not(linux_raw_inline_asm))]
+#[cfg(not(asm))]
 pub(in crate::imp::linux_raw) mod outline;
-#[cfg(not(linux_raw_inline_asm))]
+#[cfg(not(asm))]
 pub(in crate::imp::linux_raw) use self::outline as asm;
 
 // On most architectures, the architecture syscall instruction is fast, so use

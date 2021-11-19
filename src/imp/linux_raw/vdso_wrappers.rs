@@ -305,7 +305,7 @@ unsafe fn _rustix_clock_gettime_via_syscall(
     ))
 }
 
-#[cfg(all(linux_raw_inline_asm, target_arch = "x86"))]
+#[cfg(all(asm, target_arch = "x86"))]
 #[naked]
 unsafe extern "C" fn rustix_int_0x80(
     _nr: SyscallNumber<'_>,
@@ -319,7 +319,7 @@ unsafe extern "C" fn rustix_int_0x80(
     asm!("int $$0x80", "ret", options(noreturn))
 }
 
-#[cfg(all(not(linux_raw_inline_asm), target_arch = "x86"))]
+#[cfg(all(not(asm), target_arch = "x86"))]
 extern "C" {
     fn rustix_int_0x80(
         _nr: SyscallNumber<'_>,
