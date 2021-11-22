@@ -1,5 +1,8 @@
 //! `getsockopt` and `setsockopt` functions.
 
+#![doc(alias = "getsockopt")]
+#![doc(alias = "setsockopt")]
+
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
