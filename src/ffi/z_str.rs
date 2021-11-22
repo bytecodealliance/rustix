@@ -5,7 +5,6 @@
 //! ZStrings are like std's CStrings except that they use `u8` instead of
 //! `c_char`, so that they're not platform-dependent.
 
-#![rustfmt::skip]
 #![allow(unsafe_code)]
 #![deny(unsafe_op_in_unsafe_fn)]
 

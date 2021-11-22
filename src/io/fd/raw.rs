@@ -4,7 +4,6 @@
 //!
 //! Raw Unix-like file descriptors.
 
-#![rustfmt::skip]
 #![cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
 #![allow(unsafe_code)]
 
