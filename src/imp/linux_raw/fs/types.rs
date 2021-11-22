@@ -362,6 +362,9 @@ bitflags! {
 }
 
 bitflags! {
+    /// `STATX_*` constants for use with [`statx`].
+    ///
+    /// [`statx`]: crate::fs::statx
     pub struct StatxFlags: u32 {
         /// `STATX_TYPE`
         const TYPE = linux_raw_sys::v5_4::general::STATX_TYPE;
