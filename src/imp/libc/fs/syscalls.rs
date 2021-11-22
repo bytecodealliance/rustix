@@ -108,6 +108,9 @@ pub(crate) fn openat(
     mode: Mode,
 ) -> io::Result<OwnedFd> {
     unsafe {
+        // Pass `mode` as a `c_uint` even if `mode_t` is narrower, since
+        // `libc_openat` is declared as a variadic function and narrrower
+        // arguments are promoted.
         ret_owned_fd(libc_openat(
             borrowed_fd(dirfd),
             c_str(path),
