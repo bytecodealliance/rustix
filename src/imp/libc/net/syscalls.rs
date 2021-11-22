@@ -128,7 +128,7 @@ pub(crate) fn sendto_unix(
             send_recv_len(buf.len()),
             flags.bits(),
             as_ptr(&encode_sockaddr_unix(addr)).cast::<c::sockaddr>(),
-            size_of::<SocketAddrUnix>() as u32,
+            size_of::<SocketAddrUnix>() as _,
         ))?
     };
     Ok(nwritten as usize)

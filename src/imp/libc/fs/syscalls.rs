@@ -304,11 +304,14 @@ pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &ZStr, mode: Mode) -> io::Res
 pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &ZStr, mode: Mode) -> io::Result<()> {
     // Note that Linux's `fchmodat` does not have a flags argument.
     unsafe {
+        // Pass `mode` as a `c_uint` even if `mode_t` is narrower, since
+        // `libc_openat` is declared as a variadic function and narrrower
+        // arguments are promoted.
         syscall_ret(c::syscall(
             c::SYS_fchmodat,
             borrowed_fd(dirfd),
             c_str(path),
-            mode.bits(),
+            c::c_uint::from(mode.bits()),
         ))
     }
 }
@@ -503,7 +506,13 @@ pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
     // implementations, such as musl, add extra logic to `fchmod` to emulate
     // support for `O_PATH`, which uses `/proc` outside our control and
     // interferes with our own use of `O_PATH`.
-    unsafe { syscall_ret(c::syscall(c::SYS_fchmod, borrowed_fd(fd), mode.bits())) }
+    unsafe {
+        syscall_ret(c::syscall(
+            c::SYS_fchmod,
+            borrowed_fd(fd),
+            c::c_uint::from(mode.bits()),
+        ))
+    }
 }
 
 #[cfg(not(target_os = "wasi"))]
@@ -617,11 +626,11 @@ pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
     // Use `ftruncate64` when available, in Android 12 and later.
     #[cfg(all(target_os = "android", target_pointer_width = "32"))]
     {
-        weak!(fn ftruncate64(c_int, i64) -> c_int);
+        weak!(fn ftruncate64(c::c_int, i64) -> c::c_int);
 
         unsafe {
             match ftruncate64.get() {
-                Some(f) => return ret(f(fd, size as i64)),
+                Some(f) => return ret(f(borrowed_fd(fd), length as i64)),
                 None => {}
             }
         }

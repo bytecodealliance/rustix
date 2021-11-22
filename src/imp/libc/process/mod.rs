@@ -6,7 +6,10 @@ use super::c;
 #[cfg(not(windows))]
 pub(crate) mod syscalls;
 pub(crate) use auxv::page_size;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(
+    all(target_os = "android", target_pointer_width = "64"),
+    target_os = "linux"
+))]
 pub(crate) use auxv::{linux_execfn, linux_hwcap};
 #[cfg(not(target_os = "wasi"))]
 pub(crate) use c::{

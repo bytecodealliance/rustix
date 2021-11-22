@@ -29,7 +29,16 @@ mod wait;
 #[cfg(target_vendor = "mustang")]
 pub use auxv::init;
 pub use auxv::page_size;
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(
+    linux_raw,
+    all(
+        libc,
+        any(
+            all(target_os = "android", target_pointer_width = "64"),
+            target_os = "linux"
+        )
+    )
+))]
 pub use auxv::{linux_execfn, linux_hwcap};
 #[cfg(not(target_os = "wasi"))]
 pub use chdir::chdir;
