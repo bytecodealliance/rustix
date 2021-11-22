@@ -31,16 +31,14 @@ use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
 use core::cmp::min;
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
-#[cfg(not(any(target_os = "redox", target_env = "newlib")))]
-use core::sync::atomic::{AtomicUsize, Ordering};
 use errno::errno;
 
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     let nread = unsafe {
         ret_ssize_t(c::read(
             borrowed_fd(fd),
-            buf.as_mut_ptr().cast::<_>(),
-            buf.len(),
+            buf.as_mut_ptr().cast(),
+            min(buf.len(), READ_LIMIT),
         ))?
     };
     Ok(nread as usize)
@@ -50,38 +48,91 @@ pub(crate) fn write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     let nwritten = unsafe {
         ret_ssize_t(c::write(
             borrowed_fd(fd),
-            buf.as_ptr().cast::<_>(),
-            buf.len(),
+            buf.as_ptr().cast(),
+            min(buf.len(), READ_LIMIT),
         ))?
     };
     Ok(nwritten as usize)
 }
 
 pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Result<usize> {
-    // Silently cast; we'll get `EINVAL` if the value is negative.
-    let offset = offset as i64;
-    let nread = unsafe {
-        ret_ssize_t(libc_pread(
-            borrowed_fd(fd),
-            buf.as_mut_ptr().cast::<_>(),
-            buf.len(),
-            offset,
-        ))?
+    let len = min(buf.len(), READ_LIMIT);
+
+    #[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
+    let nread = {
+        // Silently cast; we'll get `EINVAL` if the value is negative.
+        let offset = offset as i64;
+        unsafe {
+            ret_ssize_t(libc_pread(
+                borrowed_fd(fd),
+                buf.as_mut_ptr().cast(),
+                len,
+                offset,
+            ))?
+        }
     };
+
+    #[cfg(all(target_os = "android", target_pointer_width = "32"))]
+    let nread = {
+        weak!(fn pread64(c_int, *mut c_void, size_t, i64) -> ssize_t);
+        pread64
+            .get()
+            .map(|f| ret_ssize_t(f(borrowed_fd(fd), buf.as_mut_ptr().cast(), len, offset)))
+            .unwrap_or_else(|| {
+                if let Ok(offset) = offset.try_into() {
+                    ret_ssize_t(libc_pread(
+                        borrowed_fd(fd),
+                        buf.as_mut_ptr().cast(),
+                        len,
+                        offset,
+                    ))
+                } else {
+                    return Err(io::Error::FBIG);
+                }
+            })
+    };
+
     Ok(nread as usize)
 }
 
+#[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
 pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<usize> {
-    // Silently cast; we'll get `EINVAL` if the value is negative.
-    let offset = offset as i64;
-    let nwritten = unsafe {
-        ret_ssize_t(libc_pwrite(
-            borrowed_fd(fd),
-            buf.as_ptr().cast::<_>(),
-            buf.len(),
-            offset,
-        ))?
+    let len = min(buf.len(), READ_LIMIT);
+
+    #[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
+    let nwritten = {
+        // Silently cast; we'll get `EINVAL` if the value is negative.
+        let offset = offset as i64;
+        unsafe {
+            ret_ssize_t(libc_pwrite(
+                borrowed_fd(fd),
+                buf.as_ptr().cast(),
+                len,
+                offset,
+            ))?
+        }
     };
+
+    #[cfg(all(target_os = "android", target_pointer_width = "32"))]
+    {
+        weak!(fn pwrite64(c_int, *const c_void, size_t, i64) -> ssize_t);
+        pwrite64
+            .get()
+            .map(|f| ret_ssize_t(f(borrowed_fd(fd), buf.as_mut_ptr.cast(), len, offset)))
+            .unwrap_or_else(|| {
+                if let Ok(o) = offset.try_into() {
+                    ret_ssize_t(libc_pwrite(
+                        borrowed_fd(fd),
+                        buf.as_ptr().cast(),
+                        len,
+                        offset,
+                    ))
+                } else {
+                    return Err(io::Error::FBIG);
+                }
+            })
+    }
+
     Ok(nwritten as usize)
 }
 
@@ -214,35 +265,50 @@ pub(crate) fn pwritev2(
 }
 
 // These functions are derived from Rust's library/std/src/sys/unix/fd.rs at
-// revision 108e90ca78f052c0c1c49c42a22c85620be19712.
+// revision a77da2d454e6caa227a85b16410b95f93495e7e0.
 
-#[cfg(not(any(target_os = "redox", target_env = "newlib")))]
-static LIM: AtomicUsize = AtomicUsize::new(0);
+// The maximum read limit on most POSIX-like systems is `SSIZE_MAX`,
+// with the man page quoting that if the count of bytes to read is
+// greater than `SSIZE_MAX` the result is "unspecified".
+//
+// On macOS, however, apparently the 64-bit libc is either buggy or
+// intentionally showing odd behavior by rejecting any read with a size
+// larger than or equal to INT_MAX. To handle both of these the read
+// size is capped on both platforms.
+#[cfg(target_os = "macos")]
+const READ_LIMIT: usize = libc::c_int::MAX as usize - 1;
+#[cfg(not(target_os = "macos"))]
+const READ_LIMIT: usize = libc::ssize_t::MAX as usize;
 
-#[cfg(not(any(target_os = "redox", target_env = "newlib")))]
-#[inline]
-fn max_iov() -> usize {
-    let mut lim = LIM.load(Ordering::Relaxed);
-    if lim == 0 {
-        lim = query_max_iov()
-    }
-
-    lim
+#[cfg(any(
+    target_os = "dragonfly",
+    target_os = "freebsd",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "openbsd",
+))]
+const fn max_iov() -> usize {
+    libc::IOV_MAX as usize
 }
 
-#[cfg(not(any(target_os = "redox", target_env = "newlib")))]
-fn query_max_iov() -> usize {
-    let ret = unsafe { c::sysconf(c::_SC_IOV_MAX) };
-
-    // 16 is the minimum value required by POSIX.
-    let lim = if ret > 0 { ret as usize } else { 16 };
-    LIM.store(lim, Ordering::Relaxed);
-    lim
+#[cfg(any(target_os = "android", target_os = "emscripten", target_os = "linux"))]
+const fn max_iov() -> usize {
+    libc::UIO_MAXIOV as usize
 }
 
-#[cfg(any(target_os = "redox", target_env = "newlib"))]
-#[inline]
-fn max_iov() -> usize {
+#[cfg(not(any(
+    target_os = "android",
+    target_os = "dragonfly",
+    target_os = "emscripten",
+    target_os = "freebsd",
+    target_os = "ios",
+    target_os = "linux",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "openbsd",
+)))]
+const fn max_iov() -> usize {
     16 // The minimum value required by POSIX.
 }
 
