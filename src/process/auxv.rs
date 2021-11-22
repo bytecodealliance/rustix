@@ -2,7 +2,16 @@
 //! pointers.
 #![cfg_attr(target_vendor = "mustang", allow(unsafe_code))]
 
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(
+    linux_raw,
+    all(
+        libc,
+        any(
+            all(target_os = "android", target_pointer_width = "64"),
+            target_os = "linux"
+        )
+    )
+))]
 use crate::ffi::ZStr;
 use crate::imp;
 
@@ -23,7 +32,16 @@ pub fn page_size() -> usize {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man3/getauxval.3.html
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(
+    linux_raw,
+    all(
+        libc,
+        any(
+            all(target_os = "android", target_pointer_width = "64"),
+            target_os = "linux"
+        )
+    )
+))]
 #[inline]
 pub fn linux_hwcap() -> (usize, usize) {
     imp::process::linux_hwcap()
@@ -38,7 +56,16 @@ pub fn linux_hwcap() -> (usize, usize) {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man3/getauxval.3.html
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(
+    linux_raw,
+    all(
+        libc,
+        any(
+            all(target_os = "android", target_pointer_width = "64"),
+            target_os = "linux"
+        )
+    )
+))]
 #[inline]
 pub fn linux_execfn() -> &'static ZStr {
     imp::process::linux_execfn()
