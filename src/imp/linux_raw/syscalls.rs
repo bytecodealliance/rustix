@@ -58,6 +58,7 @@ use crate::process::{
     Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, Rlimit, Uid, WaitOptions, WaitStatus,
 };
 use crate::time::NanosleepRelativeResult;
+use core::cmp;
 #[cfg(target_pointer_width = "32")]
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
@@ -220,7 +221,7 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], pos: u64) -> io::Result<
 }
 
 pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut<'_>]) -> io::Result<usize> {
-    let (bufs_addr, bufs_len) = slice(bufs);
+    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
 
     unsafe {
         ret_usize(syscall3(
@@ -233,7 +234,7 @@ pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut<'_>]) -> io::Result<u
 }
 
 pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut<'_>], pos: u64) -> io::Result<usize> {
-    let (bufs_addr, bufs_len) = slice(bufs);
+    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
 
     #[cfg(target_pointer_width = "32")]
     unsafe {
@@ -264,7 +265,7 @@ pub(crate) fn preadv2(
     pos: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    let (bufs_addr, bufs_len) = slice(bufs);
+    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
 
     #[cfg(target_pointer_width = "32")]
     unsafe {
@@ -347,7 +348,7 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], pos: u64) -> io::Result<usi
 
 #[inline]
 pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
-    let (bufs_addr, bufs_len) = slice(bufs);
+    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
 
     unsafe {
         ret_usize(syscall3_readonly(
@@ -361,7 +362,7 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>]) -> io::Result<usi
 
 #[inline]
 pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>], pos: u64) -> io::Result<usize> {
-    let (bufs_addr, bufs_len) = slice(bufs);
+    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
 
     #[cfg(target_pointer_width = "32")]
     unsafe {
@@ -393,7 +394,7 @@ pub(crate) fn pwritev2(
     pos: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    let (bufs_addr, bufs_len) = slice(bufs);
+    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
 
     #[cfg(target_pointer_width = "32")]
     unsafe {
@@ -418,6 +419,10 @@ pub(crate) fn pwritev2(
             c_uint(flags.bits()),
         ))
     }
+}
+
+const fn max_iov() -> usize {
+    linux_raw_sys::general::UIO_MAXIOV as usize
 }
 
 #[inline]
