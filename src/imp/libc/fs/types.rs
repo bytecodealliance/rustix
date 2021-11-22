@@ -499,6 +499,9 @@ bitflags! {
 
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 bitflags! {
+    /// `STATX_*` constants for use with [`statx`].
+    ///
+    /// [`statx`]: crate::fs::statx
     pub struct StatxFlags: u32 {
         /// `STATX_TYPE`
         const TYPE = c::STATX_TYPE;

@@ -417,13 +417,15 @@ impl Advice {
     pub const DontNeed: Self = Self::Normal;
 }
 
-/// `struct termios`, for use with [`ioctl_tcgets`].
+/// `struct termios` for use with [`ioctl_tcgets`].
 ///
 /// [`ioctl_tcgets`]: crate::io::ioctl_tcgets
 #[cfg(not(target_os = "wasi"))]
 pub type Termios = c::termios;
 
-/// `struct winsize`
+/// `struct winsize` for use with [`ioctl_tiocgwinsz`].
+///
+/// [`ioctl_tiocgwinsz`]: crate::io::ioctl_tiocgwinsz
 #[cfg(not(target_os = "wasi"))]
 pub type Winsize = c::winsize;
 
