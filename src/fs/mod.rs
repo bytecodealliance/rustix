@@ -50,8 +50,6 @@ mod sendfile;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 mod statx;
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub use at::chmodat;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use at::fclonefileat;
 #[cfg(not(any(
@@ -67,6 +65,8 @@ pub use at::renameat_with;
 pub use at::{
     accessat, linkat, mkdirat, openat, readlinkat, renameat, statat, symlinkat, unlinkat, utimensat,
 };
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub use at::{chmodat, chownat};
 #[cfg(not(target_os = "redox"))]
 pub use constants::AtFlags;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
