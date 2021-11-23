@@ -39,6 +39,7 @@ use super::{
 };
 use crate::ffi::ZStr;
 use crate::io::{self, OwnedFd, SeekFrom};
+use crate::process::{Gid, Uid};
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
 #[cfg(target_arch = "arm")]
@@ -50,8 +51,8 @@ use linux_raw_sys::general::__NR_open;
 #[cfg(not(any(target_arch = "riscv64")))]
 use linux_raw_sys::general::__NR_renameat;
 use linux_raw_sys::general::{
-    __NR_faccessat, __NR_fallocate, __NR_fchmod, __NR_fchmodat, __NR_fdatasync, __NR_flock,
-    __NR_fsync, __NR_getdents64, __NR_linkat, __NR_mkdirat, __NR_mknodat, __NR_openat,
+    __NR_faccessat, __NR_fallocate, __NR_fchmod, __NR_fchmodat, __NR_fchownat, __NR_fdatasync,
+    __NR_flock, __NR_fsync, __NR_getdents64, __NR_linkat, __NR_mkdirat, __NR_mknodat, __NR_openat,
     __NR_readlinkat, __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __kernel_timespec, AT_FDCWD,
     AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE,
     F_GETOWN, F_GETSIG, F_SETFD, F_SETFL,
@@ -212,6 +213,26 @@ pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
             nr(__NR_fchmod),
             borrowed_fd(fd),
             mode_as(mode),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn chownat(
+    dirfd: BorrowedFd<'_>,
+    filename: &ZStr,
+    owner: Uid,
+    group: Gid,
+    flags: AtFlags,
+) -> io::Result<()> {
+    unsafe {
+        ret(syscall5_readonly(
+            nr(__NR_fchownat),
+            borrowed_fd(dirfd),
+            c_str(filename),
+            c_uint(owner.as_raw()),
+            c_uint(group.as_raw()),
+            c_uint(flags.bits()),
         ))
     }
 }

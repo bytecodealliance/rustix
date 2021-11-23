@@ -84,6 +84,8 @@ use crate::ffi::ZStr;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use crate::ffi::ZString;
 use crate::io::{self, OwnedFd, SeekFrom};
+#[cfg(not(target_os = "wasi"))]
+use crate::process::{Gid, Uid};
 use core::convert::TryInto;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use core::mem::size_of;
@@ -333,6 +335,25 @@ pub(crate) fn fclonefileat(
     }
 
     unsafe { ret(fclonefileat(srcfd, dst_dirfd, c_str(dst), flags.bits())) }
+}
+
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub(crate) fn chownat(
+    dirfd: BorrowedFd<'_>,
+    path: &ZStr,
+    owner: Uid,
+    group: Gid,
+    flags: AtFlags,
+) -> io::Result<()> {
+    unsafe {
+        ret(c::fchownat(
+            borrowed_fd(dirfd),
+            c_str(path),
+            owner.as_raw(),
+            group.as_raw(),
+            flags.bits(),
+        ))
+    }
 }
 
 #[cfg(not(any(
