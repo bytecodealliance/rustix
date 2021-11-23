@@ -1,6 +1,8 @@
 //! Functions which operate on file descriptors.
 
 use crate::io::SeekFrom;
+#[cfg(not(target_os = "wasi"))]
+use crate::process::{Gid, Uid};
 use crate::{imp, io};
 use imp::fd::{AsFd, BorrowedFd};
 #[cfg(not(any(
@@ -66,6 +68,21 @@ pub fn tell<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
 pub fn fchmod<Fd: AsFd>(fd: &Fd, mode: Mode) -> io::Result<()> {
     let fd = fd.as_fd();
     imp::syscalls::fchmod(fd, mode)
+}
+
+/// `fchown(fd)`—Sets open file or directory ownership.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fchown.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/fchown.2.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn fchown<Fd: AsFd>(fd: &Fd, owner: Uid, group: Gid) -> io::Result<()> {
+    let fd = fd.as_fd();
+    imp::syscalls::fchown(fd, owner, group)
 }
 
 /// `fstat(fd)`—Queries metadata for an open file or directory.

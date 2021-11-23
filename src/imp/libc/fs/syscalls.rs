@@ -536,6 +536,23 @@ pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
     }
 }
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Uid, group: Gid) -> io::Result<()> {
+    unsafe {
+        syscall_ret(c::syscall(
+            c::SYS_fchown,
+            borrowed_fd(fd),
+            owner.as_raw(),
+            group.as_raw(),
+        ))
+    }
+}
+
+#[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
+pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Uid, group: Gid) -> io::Result<()> {
+    unsafe { ret(c::fchown(borrowed_fd(fd), owner.as_raw(), group.as_raw())) }
+}
+
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result<()> {
     unsafe { ret(c::flock(borrowed_fd(fd), operation as c::c_int)) }

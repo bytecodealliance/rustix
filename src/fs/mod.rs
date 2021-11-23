@@ -133,7 +133,7 @@ pub use fd::fdatasync;
 // not implemented in libc for netbsd yet
 pub use fd::fstatfs;
 #[cfg(not(target_os = "wasi"))]
-pub use fd::{fchmod, flock};
+pub use fd::{fchmod, fchown, flock};
 pub use fd::{fstat, fsync, ftruncate, futimens, is_file_read_write, seek, tell};
 pub use file_type::FileType;
 #[cfg(any(target_os = "ios", target_os = "macos"))]

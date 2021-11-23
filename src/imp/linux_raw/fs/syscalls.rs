@@ -51,11 +51,11 @@ use linux_raw_sys::general::__NR_open;
 #[cfg(not(any(target_arch = "riscv64")))]
 use linux_raw_sys::general::__NR_renameat;
 use linux_raw_sys::general::{
-    __NR_faccessat, __NR_fallocate, __NR_fchmod, __NR_fchmodat, __NR_fchownat, __NR_fdatasync,
-    __NR_flock, __NR_fsync, __NR_getdents64, __NR_linkat, __NR_mkdirat, __NR_mknodat, __NR_openat,
-    __NR_readlinkat, __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __kernel_timespec, AT_FDCWD,
-    AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE,
-    F_GETOWN, F_GETSIG, F_SETFD, F_SETFL,
+    __NR_faccessat, __NR_fallocate, __NR_fchmod, __NR_fchmodat, __NR_fchown, __NR_fchownat,
+    __NR_fdatasync, __NR_flock, __NR_fsync, __NR_getdents64, __NR_linkat, __NR_mkdirat,
+    __NR_mknodat, __NR_openat, __NR_readlinkat, __NR_symlinkat, __NR_unlinkat, __NR_utimensat,
+    __kernel_timespec, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, F_DUPFD, F_DUPFD_CLOEXEC,
+    F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL,
 };
 use linux_raw_sys::v5_11::general::{__NR_openat2, open_how};
 use linux_raw_sys::v5_4::general::{
@@ -233,6 +233,18 @@ pub(crate) fn chownat(
             c_uint(owner.as_raw()),
             c_uint(group.as_raw()),
             c_uint(flags.bits()),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Uid, group: Gid) -> io::Result<()> {
+    unsafe {
+        ret(syscall3_readonly(
+            nr(__NR_fchown),
+            borrowed_fd(fd),
+            c_uint(owner.as_raw()),
+            c_uint(group.as_raw()),
         ))
     }
 }
