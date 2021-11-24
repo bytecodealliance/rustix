@@ -19,7 +19,7 @@ mod wsa;
 pub mod sockopt;
 
 pub use crate::maybe_polyfill::net::{
-    IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6,
+    IpAddr, Ipv4Addr, Ipv6Addr, Ipv6MulticastScope, SocketAddr, SocketAddrV4, SocketAddrV6,
 };
 pub use send_recv::*;
 pub use socket::*;
