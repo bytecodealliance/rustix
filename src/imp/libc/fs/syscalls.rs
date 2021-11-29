@@ -43,7 +43,7 @@ use super::super::offset::libc_posix_fadvise;
     target_os = "redox",
 )))]
 use super::super::offset::libc_posix_fallocate;
-use super::super::offset::{libc_fstat, libc_fstatat, libc_lseek, libc_off_t};
+use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek, libc_off_t};
 use super::super::time::Timespec;
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -661,21 +661,8 @@ pub(crate) fn fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
 }
 
 pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
-    // Use `ftruncate64` when available, in Android 12 and later.
-    #[cfg(all(target_os = "android", target_pointer_width = "32"))]
-    {
-        weak!(fn ftruncate64(c::c_int, i64) -> c::c_int);
-
-        unsafe {
-            match ftruncate64.get() {
-                Some(f) => return ret(f(borrowed_fd(fd), length as i64)),
-                None => {}
-            }
-        }
-    }
-
     let length = length.try_into().map_err(|_overflow_err| io::Error::FBIG)?;
-    unsafe { ret(c::ftruncate(borrowed_fd(fd), length)) }
+    unsafe { ret(libc_ftruncate(borrowed_fd(fd), length)) }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]

@@ -11,7 +11,8 @@ use super::super::c;
     target_os = "l4re",
 )))]
 pub(super) use c::{
-    fstat as libc_fstat, fstatat as libc_fstatat, lseek as libc_lseek, off_t as libc_off_t,
+    fstat as libc_fstat, fstatat as libc_fstatat, ftruncate as libc_ftruncate, lseek as libc_lseek,
+    off_t as libc_off_t,
 };
 
 #[cfg(any(
@@ -21,8 +22,8 @@ pub(super) use c::{
     target_os = "l4re",
 ))]
 pub(super) use c::{
-    fstat64 as libc_fstat, fstatat64 as libc_fstatat, lseek64 as libc_lseek, off64_t as libc_off_t,
-    rlimit64 as libc_rlimit,
+    fstat64 as libc_fstat, fstatat64 as libc_fstatat, ftruncate64 as libc_ftruncate,
+    lseek64 as libc_lseek, off64_t as libc_off_t, rlimit64 as libc_rlimit,
 };
 
 #[cfg(not(any(
