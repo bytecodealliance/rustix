@@ -2,9 +2,9 @@
 
 #[cfg(not(windows))]
 use crate::net::SocketAddrUnix;
-use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
+use crate::net::{SocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::{imp, io};
-use imp::fd::AsFd;
+use imp::fd::{AsFd, BorrowedFd};
 
 pub use imp::net::{RecvFlags, SendFlags};
 
@@ -59,6 +59,70 @@ pub fn recvfrom<Fd: AsFd>(
 ) -> io::Result<(usize, SocketAddrAny)> {
     let fd = fd.as_fd();
     imp::net::syscalls::recvfrom(fd, buf, flags)
+}
+
+/// `sendto(fd, buf, flags, addr)`—Writes data to a socket to a specific IP
+/// address.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendto.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
+pub fn sendto<Fd: AsFd>(
+    fd: &Fd,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddr,
+) -> io::Result<usize> {
+    let fd = fd.as_fd();
+    _sendto(fd, buf, flags, addr)
+}
+
+fn _sendto(
+    fd: BorrowedFd<'_>,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddr,
+) -> io::Result<usize> {
+    match addr {
+        SocketAddr::V4(v4) => imp::net::syscalls::sendto_v4(fd, buf, flags, v4),
+        SocketAddr::V6(v6) => imp::net::syscalls::sendto_v6(fd, buf, flags, v6),
+    }
+}
+
+/// `sendto(fd, buf, flags, addr)`—Writes data to a socket to a specific
+/// address.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendto.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
+pub fn sendto_any<Fd: AsFd>(
+    fd: &Fd,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddrAny,
+) -> io::Result<usize> {
+    let fd = fd.as_fd();
+    _sendto_any(fd, buf, flags, addr)
+}
+
+fn _sendto_any(
+    fd: BorrowedFd<'_>,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddrAny,
+) -> io::Result<usize> {
+    match addr {
+        SocketAddrAny::V4(v4) => imp::net::syscalls::sendto_v4(fd, buf, flags, v4),
+        SocketAddrAny::V6(v6) => imp::net::syscalls::sendto_v6(fd, buf, flags, v6),
+        #[cfg(not(windows))]
+        SocketAddrAny::Unix(unix) => imp::net::syscalls::sendto_unix(fd, buf, flags, unix),
+    }
 }
 
 /// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_in))`—Writes data to
