@@ -61,8 +61,51 @@ pub fn socket_with(
     imp::net::syscalls::socket_with(domain, type_, flags, protocol)
 }
 
+/// `bind(sockfd, addr)`—Binds a socket to an IP address.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/bind.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
+pub fn bind<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddr) -> io::Result<()> {
+    let sockfd = sockfd.as_fd();
+    _bind(sockfd, addr)
+}
+
+fn _bind(sockfd: BorrowedFd<'_>, addr: &SocketAddr) -> io::Result<()> {
+    match addr {
+        SocketAddr::V4(v4) => imp::net::syscalls::bind_v4(sockfd, v4),
+        SocketAddr::V6(v6) => imp::net::syscalls::bind_v6(sockfd, v6),
+    }
+}
+
+/// `bind(sockfd, addr)`—Binds a socket to an address.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/bind.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
+#[doc(alias = "bind")]
+pub fn bind_any<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrAny) -> io::Result<()> {
+    let sockfd = sockfd.as_fd();
+    _bind_any(sockfd, addr)
+}
+
+fn _bind_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> {
+    match addr {
+        SocketAddrAny::V4(v4) => imp::net::syscalls::bind_v4(sockfd, v4),
+        SocketAddrAny::V6(v6) => imp::net::syscalls::bind_v6(sockfd, v6),
+        #[cfg(not(windows))]
+        SocketAddrAny::Unix(unix) => imp::net::syscalls::bind_unix(sockfd, unix),
+    }
+}
+
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in))`—Binds a socket to an
-/// address.
+/// IPv4 address.
 ///
 /// # References
 ///  - [POSIX]
@@ -80,7 +123,7 @@ pub fn bind_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> {
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in6))`—Binds a socket to an
-/// address.
+/// IPv6 address.
 ///
 /// # References
 ///  - [POSIX]
@@ -97,8 +140,8 @@ pub fn bind_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
     imp::net::syscalls::bind_v6(sockfd, addr)
 }
 
-/// `bind(sockfd, addr, sizeof(struct sockaddr_un))`—Binds a socket to an
-/// address.
+/// `bind(sockfd, addr, sizeof(struct sockaddr_un))`—Binds a socket to a
+/// Unix-domain address.
 ///
 /// # References
 ///  - [POSIX]
