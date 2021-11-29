@@ -61,7 +61,6 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Resu
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
 
-    #[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
     let nread = unsafe {
         ret_ssize_t(libc_pread(
             borrowed_fd(fd),
@@ -70,27 +69,6 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Resu
             offset,
         ))?
     };
-
-    #[cfg(all(target_os = "android", target_pointer_width = "32"))]
-    let nread = unsafe {
-        weak!(fn pread64(c::c_int, *mut c::c_void, c::size_t, i64) -> c::ssize_t);
-        pread64
-            .get()
-            .map(|f| ret_ssize_t(f(borrowed_fd(fd), buf.as_mut_ptr().cast(), len, offset)))
-            .unwrap_or_else(|| {
-                if let Ok(offset) = offset.try_into() {
-                    ret_ssize_t(libc_pread(
-                        borrowed_fd(fd),
-                        buf.as_mut_ptr().cast(),
-                        len,
-                        offset,
-                    ))
-                } else {
-                    return Err(io::Error::FBIG);
-                }
-            })?
-    };
-
     Ok(nread as usize)
 }
 
@@ -100,7 +78,6 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
 
-    #[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
     let nwritten = unsafe {
         ret_ssize_t(libc_pwrite(
             borrowed_fd(fd),
@@ -109,27 +86,6 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<
             offset,
         ))?
     };
-
-    #[cfg(all(target_os = "android", target_pointer_width = "32"))]
-    let nwritten = unsafe {
-        weak!(fn pwrite64(c::c_int, *const c::c_void, c::size_t, i64) -> c::ssize_t);
-        pwrite64
-            .get()
-            .map(|f| ret_ssize_t(f(borrowed_fd(fd), buf.as_ptr().cast(), len, offset)))
-            .unwrap_or_else(|| {
-                if let Ok(offset) = offset.try_into() {
-                    ret_ssize_t(libc_pwrite(
-                        borrowed_fd(fd),
-                        buf.as_ptr().cast(),
-                        len,
-                        offset,
-                    ))
-                } else {
-                    return Err(io::Error::FBIG);
-                }
-            })?
-    };
-
     Ok(nwritten as usize)
 }
 
