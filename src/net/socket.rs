@@ -2,8 +2,8 @@ use crate::imp;
 use crate::io::{self, OwnedFd};
 #[cfg(not(windows))]
 use crate::net::SocketAddrUnix;
-use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
-use imp::fd::AsFd;
+use crate::net::{SocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
+use imp::fd::{AsFd, BorrowedFd};
 
 pub use imp::net::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 
@@ -116,8 +116,51 @@ pub fn bind_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()>
     imp::net::syscalls::bind_unix(sockfd, addr)
 }
 
+/// `connect(sockfd, addr)`—Initiates a connection to an IP address.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/connect.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
+pub fn connect<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddr) -> io::Result<()> {
+    let sockfd = sockfd.as_fd();
+    _connect(sockfd, addr)
+}
+
+fn _connect(sockfd: BorrowedFd<'_>, addr: &SocketAddr) -> io::Result<()> {
+    match addr {
+        SocketAddr::V4(v4) => imp::net::syscalls::connect_v4(sockfd, v4),
+        SocketAddr::V6(v6) => imp::net::syscalls::connect_v6(sockfd, v6),
+    }
+}
+
+/// `connect(sockfd, addr)`—Initiates a connection.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/connect.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
+#[doc(alias = "connect")]
+pub fn connect_any<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrAny) -> io::Result<()> {
+    let sockfd = sockfd.as_fd();
+    _connect_any(sockfd, addr)
+}
+
+fn _connect_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> {
+    match addr {
+        SocketAddrAny::V4(v4) => imp::net::syscalls::connect_v4(sockfd, v4),
+        SocketAddrAny::V6(v6) => imp::net::syscalls::connect_v6(sockfd, v6),
+        #[cfg(not(windows))]
+        SocketAddrAny::Unix(unix) => imp::net::syscalls::connect_unix(sockfd, unix),
+    }
+}
+
 /// `connect(sockfd, addr, sizeof(struct sockaddr_in))`—Initiates a
-/// connection.
+/// connection to an IPv4 address.
 ///
 /// # References
 ///  - [POSIX]
@@ -135,7 +178,7 @@ pub fn connect_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> 
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_in6))`—Initiates a
-/// connection.
+/// connection to an IPv6 address.
 ///
 /// # References
 ///  - [POSIX]
@@ -153,7 +196,7 @@ pub fn connect_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> 
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_un))`—Initiates a
-/// connection.
+/// connection to a Unix-domain address.
 ///
 /// # References
 ///  - [POSIX]

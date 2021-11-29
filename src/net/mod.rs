@@ -27,9 +27,9 @@ pub mod sockopt;
 pub use send_recv::sendto_unix;
 pub use send_recv::{recv, recvfrom, send, sendto_v4, sendto_v6, RecvFlags, SendFlags};
 pub use socket::{
-    accept, accept_with, acceptfrom, acceptfrom_with, bind_v4, bind_v6, connect_v4, connect_v6,
-    getpeername, getsockname, listen, shutdown, socket, socket_with, AcceptFlags, AddressFamily,
-    Protocol, Shutdown, SocketFlags, SocketType,
+    accept, accept_with, acceptfrom, acceptfrom_with, bind_v4, bind_v6, connect, connect_any,
+    connect_v4, connect_v6, getpeername, getsockname, listen, shutdown, socket, socket_with,
+    AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType,
 };
 #[cfg(not(windows))]
 pub use socket::{bind_unix, connect_unix};
