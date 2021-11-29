@@ -57,7 +57,7 @@ use crate::path::DecInt;
 use crate::process::{
     Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, Rlimit, Uid, WaitOptions, WaitStatus,
 };
-use crate::time::NanosleepRelativeResult;
+use crate::thread::NanosleepRelativeResult;
 use core::cmp;
 #[cfg(target_pointer_width = "32")]
 use core::convert::TryInto;
