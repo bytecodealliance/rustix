@@ -9,9 +9,9 @@ pub(crate) use super::net::syscalls::*;
 #[cfg(not(windows))]
 pub(crate) use super::process::syscalls::*;
 #[cfg(not(windows))]
-pub(crate) use super::time::syscalls::*;
-#[cfg(not(windows))]
 pub(crate) use super::thread::syscalls::*;
+#[cfg(not(windows))]
+pub(crate) use super::time::syscalls::*;
 
 #[cfg(any(windows, target_os = "android", target_os = "linux"))]
 use super::c;

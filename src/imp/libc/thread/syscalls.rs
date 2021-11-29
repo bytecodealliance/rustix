@@ -1,8 +1,10 @@
 use super::super::c;
 use super::super::conv::ret;
 use super::super::time::Timespec;
-use core::mem::MaybeUninit;
 use crate::io;
+#[cfg(not(target_os = "redox"))]
+use crate::thread::NanosleepRelativeResult;
+use core::mem::MaybeUninit;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
@@ -13,12 +15,7 @@ use crate::io;
     target_os = "redox",
     target_os = "wasi",
 )))]
-use {
-    core::ptr::null_mut,
-    super::super::time::ClockId,
-};
-#[cfg(not(target_os = "redox"))]
-use crate::thread::NanosleepRelativeResult;
+use {super::super::time::ClockId, core::ptr::null_mut};
 
 #[cfg(not(any(
     target_os = "dragonfly",
