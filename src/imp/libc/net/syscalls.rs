@@ -645,31 +645,43 @@ pub(crate) mod sockopt {
         setsockopt(fd, c::IPPROTO_IP as _, c::IP_ADD_MEMBERSHIP, mreq)
     }
 
-    #[cfg(not(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd"
-    )))]
     #[inline]
-    pub(crate) fn set_ipv6_join_group(
+    pub(crate) fn set_ipv6_add_membership(
         fd: BorrowedFd<'_>,
         multiaddr: &Ipv6Addr,
         interface: u32,
     ) -> io::Result<()> {
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "openbsd",
+            target_os = "netbsd",
+            target_os = "illumos",
+            target_os = "solaris",
+            target_os = "haiku",
+            target_os = "l4re"
+        )))]
+        use c::IPV6_ADD_MEMBERSHIP;
+        #[cfg(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "openbsd",
+            target_os = "netbsd",
+            target_os = "illumos",
+            target_os = "solaris",
+            target_os = "haiku",
+            target_os = "l4re"
+        ))]
+        use c::IPV6_JOIN_GROUP as IPV6_ADD_MEMBERSHIP;
+
         let mreq = to_ipv6mr(multiaddr, interface);
-        setsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_ADD_MEMBERSHIP, mreq)
+        setsockopt(fd, c::IPPROTO_IPV6 as _, IPV6_ADD_MEMBERSHIP, mreq)
     }
 
-    #[cfg(not(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd"
-    )))]
     #[inline]
     pub(crate) fn set_ip_drop_membership(
         fd: BorrowedFd<'_>,
@@ -680,22 +692,41 @@ pub(crate) mod sockopt {
         setsockopt(fd, c::IPPROTO_IP as _, c::IP_DROP_MEMBERSHIP, mreq)
     }
 
-    #[cfg(not(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    )))]
     #[inline]
-    pub(crate) fn set_ipv6_leave_group(
+    pub(crate) fn set_ipv6_drop_membership(
         fd: BorrowedFd<'_>,
         multiaddr: &Ipv6Addr,
         interface: u32,
     ) -> io::Result<()> {
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "openbsd",
+            target_os = "netbsd",
+            target_os = "illumos",
+            target_os = "solaris",
+            target_os = "haiku",
+            target_os = "l4re"
+        )))]
+        use c::IPV6_DROP_MEMBERSHIP;
+        #[cfg(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "openbsd",
+            target_os = "netbsd",
+            target_os = "illumos",
+            target_os = "solaris",
+            target_os = "haiku",
+            target_os = "l4re"
+        ))]
+        use c::IPV6_LEAVE_GROUP as IPV6_DROP_MEMBERSHIP;
+
         let mreq = to_ipv6mr(multiaddr, interface);
-        setsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_DROP_MEMBERSHIP, mreq)
+        setsockopt(fd, c::IPPROTO_IPV6 as _, IPV6_DROP_MEMBERSHIP, mreq)
     }
 
     #[inline]

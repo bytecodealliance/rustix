@@ -1172,7 +1172,7 @@ pub(crate) mod sockopt {
     }
 
     #[inline]
-    pub(crate) fn set_ipv6_join_group(
+    pub(crate) fn set_ipv6_add_membership(
         fd: BorrowedFd<'_>,
         multiaddr: &Ipv6Addr,
         interface: u32,
@@ -1202,7 +1202,7 @@ pub(crate) mod sockopt {
     }
 
     #[inline]
-    pub(crate) fn set_ipv6_leave_group(
+    pub(crate) fn set_ipv6_drop_membership(
         fd: BorrowedFd<'_>,
         multiaddr: &Ipv6Addr,
         interface: u32,

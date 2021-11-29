@@ -3,16 +3,7 @@
 #![doc(alias = "getsockopt")]
 #![doc(alias = "setsockopt")]
 
-#[cfg(not(any(
-    target_os = "dragonfly",
-    target_os = "freebsd",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
-)))]
-use crate::net::Ipv6Addr;
-use crate::net::{Ipv4Addr, SocketType};
+use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 use crate::{imp, io};
 use core::time::Duration;
 use imp::fd::AsFd;
@@ -424,7 +415,9 @@ pub fn set_ip_add_membership<Fd: AsFd>(
     imp::syscalls::sockopt::set_ip_add_membership(fd, multiaddr, interface)
 }
 
-/// `setsockopt(fd, IPPROTO_IPV6, IPV6_JOIN_GROUP, multiaddr, interface)`
+/// `setsockopt(fd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, multiaddr, interface)`
+///
+/// `IPV6_ADD_MEMBERSHIP` is the same as `IPV6_JOIN_GROUP` in POSIX.
 ///
 /// # References
 ///  - [POSIX `setsockopt`]
@@ -436,24 +429,16 @@ pub fn set_ip_add_membership<Fd: AsFd>(
 /// [POSIX `netinet/in.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_in.h.html
 /// [Linux `setsockopt`]: https://man7.org/linux/man-pages/man2/setsockopt.2.html
 /// [Linux `ipv6`]: https://man7.org/linux/man-pages/man7/ipv6.7.html
-#[cfg(not(any(
-    target_os = "dragonfly",
-    target_os = "freebsd",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
-)))]
 #[inline]
 #[doc(alias = "IPV6_JOIN_GROUP")]
 #[doc(alias = "IPV6_ADD_MEMBERSHIP")]
-pub fn set_ipv6_join_group<Fd: AsFd>(
+pub fn set_ipv6_add_membership<Fd: AsFd>(
     fd: &Fd,
     multiaddr: &Ipv6Addr,
     interface: u32,
 ) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_ipv6_join_group(fd, multiaddr, interface)
+    imp::syscalls::sockopt::set_ipv6_add_membership(fd, multiaddr, interface)
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_DROP_MEMBERSHIP, multiaddr, interface)`
@@ -468,13 +453,6 @@ pub fn set_ipv6_join_group<Fd: AsFd>(
 /// [POSIX `netinet/in.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_in.h.html
 /// [Linux `setsockopt`]: https://man7.org/linux/man-pages/man2/setsockopt.2.html
 /// [Linux `ip`]: https://man7.org/linux/man-pages/man7/ip.7.html
-#[cfg(not(any(
-    target_os = "dragonfly",
-    target_os = "freebsd",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd"
-)))]
 #[inline]
 #[doc(alias = "IP_DROP_MEMBERSHIP")]
 pub fn set_ip_drop_membership<Fd: AsFd>(
@@ -486,7 +464,9 @@ pub fn set_ip_drop_membership<Fd: AsFd>(
     imp::syscalls::sockopt::set_ip_drop_membership(fd, multiaddr, interface)
 }
 
-/// `setsockopt(fd, IPPROTO_IPV6, IPV6_LEAVE_GROUP, multiaddr, interface)`
+/// `setsockopt(fd, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, multiaddr, interface)`
+///
+/// `IPV6_DROP_MEMBERSHIP` is the same as `IPV6_LEAVE_GROUP` in POSIX.
 ///
 /// # References
 ///  - [POSIX `setsockopt`]
@@ -498,24 +478,16 @@ pub fn set_ip_drop_membership<Fd: AsFd>(
 /// [POSIX `netinet/in.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_in.h.html
 /// [Linux `setsockopt`]: https://man7.org/linux/man-pages/man2/setsockopt.2.html
 /// [Linux `ipv6`]: https://man7.org/linux/man-pages/man7/ipv6.7.html
-#[cfg(not(any(
-    target_os = "dragonfly",
-    target_os = "freebsd",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
-)))]
 #[inline]
 #[doc(alias = "IPV6_LEAVE_GROUP")]
 #[doc(alias = "IPV6_DROP_MEMBERSHIP")]
-pub fn set_ipv6_leave_group<Fd: AsFd>(
+pub fn set_ipv6_drop_membership<Fd: AsFd>(
     fd: &Fd,
     multiaddr: &Ipv6Addr,
     interface: u32,
 ) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_ipv6_leave_group(fd, multiaddr, interface)
+    imp::syscalls::sockopt::set_ipv6_drop_membership(fd, multiaddr, interface)
 }
 
 /// `setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, nodelay)`
