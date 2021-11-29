@@ -58,3 +58,5 @@ pub(crate) mod rand;
 pub(crate) mod syscalls;
 #[cfg(not(windows))]
 pub(crate) mod time;
+#[cfg(not(windows))]
+pub(crate) mod thread;

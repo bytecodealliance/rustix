@@ -2,7 +2,6 @@
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 
-mod clocks;
 mod dynamic_clocks;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 mod monotonic;
