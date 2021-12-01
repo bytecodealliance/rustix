@@ -26,17 +26,20 @@ pub(crate) mod fd {
 #[cfg(not(windows))]
 #[cfg(not(feature = "rustc-dep-of-std"))]
 pub(crate) mod fd {
-    pub(crate) use io_lifetimes::*;
+    pub use io_lifetimes::*;
 
     #[allow(unused_imports)]
+    #[cfg(target_os = "wasi")]
+    pub(crate) use super::c::c_int as LibcFd;
+    #[allow(unused_imports)]
     #[cfg(unix)]
-    pub(crate) use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd, RawFd as LibcFd};
+    pub(crate) use std::os::unix::io::RawFd as LibcFd;
+    #[allow(unused_imports)]
+    #[cfg(unix)]
+    pub use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
     #[allow(unused_imports)]
     #[cfg(target_os = "wasi")]
-    pub(crate) use {
-        super::c::c_int as LibcFd,
-        std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
-    };
+    pub use std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 }
 
 // On Windows we emulate selected libc-compatible interfaces. On non-Windows,

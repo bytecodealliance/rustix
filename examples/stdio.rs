@@ -1,9 +1,9 @@
+#[cfg(not(windows))]
+use rustix::fd::AsFd;
 #[cfg(any(all(linux_raw, feature = "procfs"), all(not(windows), libc)))]
 use rustix::io::ttyname;
 #[cfg(not(windows))]
 use rustix::io::{self, isatty, stderr, stdin, stdout};
-#[cfg(not(windows))]
-use rustix::io_lifetimes::AsFd;
 
 #[cfg(not(windows))]
 fn main() -> io::Result<()> {

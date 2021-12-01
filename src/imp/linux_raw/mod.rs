@@ -20,10 +20,13 @@ pub(crate) mod time;
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
 pub(crate) mod fd {
-    pub(crate) use io_lifetimes::*;
+    pub use io_lifetimes::*;
 
     #[allow(unused_imports)]
-    pub(crate) use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd, RawFd as LibcFd};
+    pub use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+
+    #[allow(unused_imports)]
+    pub(crate) use std::os::unix::io::RawFd as LibcFd;
 }
 
 #[cfg(feature = "rustc-dep-of-std")]

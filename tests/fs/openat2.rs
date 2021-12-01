@@ -1,6 +1,6 @@
+use rustix::fd::AsFd;
 use rustix::fs::{cwd, mkdirat, openat, openat2, symlinkat, Mode, OFlags, ResolveFlags};
 use rustix::io::OwnedFd;
-use rustix::io_lifetimes::AsFd;
 use rustix::{io, path};
 use std::os::unix::io::AsRawFd;
 

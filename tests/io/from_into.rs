@@ -1,7 +1,7 @@
 #[cfg(not(target_os = "redox"))]
 #[test]
 fn test_owned() {
-    use rustix::io_lifetimes::AsFd;
+    use rustix::fd::AsFd;
     #[cfg(unix)]
     use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd};
     #[cfg(target_os = "wasi")]
@@ -18,7 +18,7 @@ fn test_owned() {
     let raw = file.as_raw_fd();
     assert_eq!(raw, file.as_fd().as_raw_fd());
 
-    let owned: io_lifetimes::OwnedFd = file.into();
+    let owned: rustix::io::OwnedFd = file.into();
     let inner = owned.into_raw_fd();
     assert_eq!(raw, inner);
 

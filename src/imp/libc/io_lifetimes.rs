@@ -6,10 +6,10 @@
 pub use io_lifetimes::BorrowedSocket as BorrowedFd;
 pub(crate) use io_lifetimes::OwnedSocket as OwnedFd;
 #[cfg(feature = "std")]
-pub(crate) use std::os::windows::io::RawSocket as RawFd;
+pub use std::os::windows::io::RawSocket as RawFd;
 pub(crate) use winapi::um::winsock2::SOCKET as LibcFd;
 
-pub(crate) trait AsRawFd {
+pub trait AsRawFd {
     fn as_raw_fd(&self) -> RawFd;
 }
 #[cfg(feature = "std")]
@@ -20,7 +20,7 @@ impl<T: std::os::windows::io::AsRawSocket> AsRawFd for T {
     }
 }
 
-pub(crate) trait IntoRawFd {
+pub trait IntoRawFd {
     fn into_raw_fd(self) -> RawFd;
 }
 #[cfg(feature = "std")]
@@ -31,7 +31,7 @@ impl<T: std::os::windows::io::IntoRawSocket> IntoRawFd for T {
     }
 }
 
-pub(crate) trait FromRawFd {
+pub trait FromRawFd {
     unsafe fn from_raw_fd(raw_fd: RawFd) -> Self;
 }
 #[cfg(feature = "std")]

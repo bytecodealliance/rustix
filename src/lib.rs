@@ -67,15 +67,14 @@
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
 
-/// Re-export `io_lifetimes` since we use its types in our public API, so
-/// that our users don't need to do anything special to use the same version.
-#[cfg(feature = "rustc-dep-of-std")]
-pub mod io_lifetimes {
+/// Export `*Fd*` types and traits that we use in our public API, so that
+/// our users don't need to do anything special to use the same version.
+///
+/// Note that `OwnedFd` lives at [`rustix::io::OwnedFd`].
+pub mod fd {
     use super::imp;
     pub use imp::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, RawFd};
 }
-#[cfg(not(feature = "rustc-dep-of-std"))]
-pub use io_lifetimes;
 
 #[cfg(not(windows))]
 #[macro_use]
