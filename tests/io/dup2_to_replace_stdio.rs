@@ -7,7 +7,7 @@
 #[test]
 fn dup2_to_replace_stdio() {
     use rustix::io::{dup2, pipe};
-    use rustix::io_lifetimes::AsFilelike;
+    use io_lifetimes::AsFilelike;
     use std::io::{BufRead, BufReader, Write};
     use std::mem::forget;
 

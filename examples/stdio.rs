@@ -3,7 +3,7 @@ use rustix::io::ttyname;
 #[cfg(not(windows))]
 use rustix::io::{self, isatty, stderr, stdin, stdout};
 #[cfg(not(windows))]
-use rustix::io_lifetimes::AsFd;
+use rustix::fd::AsFd;
 
 #[cfg(not(windows))]
 fn main() -> io::Result<()> {
