@@ -29,19 +29,17 @@ pub(crate) mod fd {
     pub use io_lifetimes::*;
 
     #[allow(unused_imports)]
-    #[cfg(unix)]
-    pub use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+    #[cfg(target_os = "wasi")]
+    pub(crate) use super::c::c_int as LibcFd;
     #[allow(unused_imports)]
     #[cfg(unix)]
     pub(crate) use std::os::unix::io::RawFd as LibcFd;
     #[allow(unused_imports)]
-    #[cfg(target_os = "wasi")]
-    pub use {
-        std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
-    };
+    #[cfg(unix)]
+    pub use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
     #[allow(unused_imports)]
     #[cfg(target_os = "wasi")]
-    pub(crate) use super::c::c_int as LibcFd;
+    pub use std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 }
 
 // On Windows we emulate selected libc-compatible interfaces. On non-Windows,
