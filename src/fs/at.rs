@@ -333,7 +333,8 @@ pub fn mknodat<P: path::Arg, Fd: AsFd>(
     path.into_with_z_str(|path| imp::syscalls::mknodat(dirfd, path, mode, dev))
 }
 
-/// `fchownat(dirfd, path, owner, group, flags)`—Sets file or directory ownership.
+/// `fchownat(dirfd, path, owner, group, flags)`—Sets file or directory
+/// ownership.
 ///
 /// # References
 ///  - [POSIX]
