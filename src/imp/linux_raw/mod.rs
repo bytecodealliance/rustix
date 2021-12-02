@@ -18,7 +18,7 @@ pub(crate) mod syscalls;
 pub(crate) mod thread;
 pub(crate) mod time;
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 pub(crate) mod fd {
     pub use io_lifetimes::*;
 
@@ -29,7 +29,7 @@ pub(crate) mod fd {
     pub(crate) use std::os::unix::io::RawFd as LibcFd;
 }
 
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(not(feature = "std"))]
 pub(crate) use crate::io::fd;
 
 // The linux_raw backend doesn't use actual libc, so we define selected

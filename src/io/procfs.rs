@@ -13,9 +13,9 @@ use crate::imp::fd::{AsFd, BorrowedFd};
 use crate::io::{self, OwnedFd};
 use crate::path::DecInt;
 use crate::process::{getgid, getpid, getuid, Gid, RawGid, RawUid, Uid};
-#[cfg(features = "rustc-dep-of-std")]
+#[cfg(feature = "rustc-dep-of-std")]
 use core::lazy::OnceCell;
-#[cfg(not(features = "rustc-dep-of-std"))]
+#[cfg(not(feature = "rustc-dep-of-std"))]
 use once_cell::sync::OnceCell;
 
 /// Linux's procfs always uses inode 1 for its root directory.

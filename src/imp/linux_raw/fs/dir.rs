@@ -1,11 +1,11 @@
 use super::FileType;
 use crate::as_ptr;
+#[cfg(feature = "std")]
+use crate::fd::IntoFd;
+use crate::fd::{AsFd, BorrowedFd};
 #[cfg(target_os = "wasi")]
 use crate::ffi::ZString;
 use crate::ffi::{ZStr, ZString};
-#[cfg(not(feature = "rustc-dep-of-std"))]
-use crate::imp::fd::IntoFd;
-use crate::imp::fd::{AsFd, BorrowedFd};
 use crate::io::{self, OwnedFd};
 use alloc::borrow::ToOwned;
 use alloc::vec::Vec;
@@ -22,7 +22,7 @@ pub struct Dir {
 
 impl Dir {
     /// Construct a `Dir`, assuming ownership of the file descriptor.
-    #[cfg(not(any(io_lifetimes_use_std, feature = "rustc-dep-of-std")))]
+    #[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
     #[inline]
     pub fn from<F: IntoFd>(fd: F) -> io::Result<Self> {
         let fd = fd.into_fd();
@@ -30,7 +30,7 @@ impl Dir {
     }
 
     /// Construct a `Dir`, assuming ownership of the file descriptor.
-    #[cfg(any(io_lifetimes_use_std, feature = "rustc-dep-of-std"))]
+    #[cfg(any(io_lifetimes_use_std, not(feature = "std")))]
     #[inline]
     pub fn from<F: Into<OwnedFd>>(fd: F) -> io::Result<Self> {
         let fd = fd.into();
