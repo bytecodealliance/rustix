@@ -512,4 +512,5 @@ pub type FsWord = linux_raw_sys::general::__fsword_t;
 
 pub use linux_raw_sys::general::{UTIME_NOW, UTIME_OMIT};
 
+/// `PROC_SUPER_MAGIC`—The magic number for the procfs filesystem.
 pub const PROC_SUPER_MAGIC: FsWord = linux_raw_sys::general::PROC_SUPER_MAGIC as FsWord;
