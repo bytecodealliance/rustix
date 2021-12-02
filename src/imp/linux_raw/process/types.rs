@@ -74,16 +74,23 @@ pub enum Resource {
     Rttime = linux_raw_sys::general::RLIMIT_RTTIME,
 }
 
+/// `EXIT_SUCCESS`
 pub const EXIT_SUCCESS: c::c_int = 0;
+/// `EXIT_FAILURE`
 pub const EXIT_FAILURE: c::c_int = 1;
+/// The status value of a child terminated with `SIGABRT`.
 pub const EXIT_SIGNALED_SIGABRT: c::c_int = 128 + linux_raw_sys::general::SIGABRT as i32;
 
+/// A process identifier as a raw integer.
 pub type RawPid = u32;
+/// A group identifier as a raw integer.
 pub type RawGid = u32;
+/// A user identifier as a raw integer.
 pub type RawUid = u32;
+/// A CPU identifier as a raw integer.
 pub type RawCpuid = u32;
 
-pub type RawUname = linux_raw_sys::general::new_utsname;
+pub(crate) type RawUname = linux_raw_sys::general::new_utsname;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]

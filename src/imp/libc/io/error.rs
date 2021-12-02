@@ -3,6 +3,8 @@
 //! This type holds an OS error code, which conceptually corresponds to an
 //! `errno` value.
 
+#![allow(missing_docs)]
+
 use super::super::c;
 use errno::errno;
 

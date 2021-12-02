@@ -140,17 +140,21 @@ pub const EXIT_FAILURE: c::c_int = c::EXIT_FAILURE;
 #[cfg(not(target_os = "wasi"))]
 pub const EXIT_SIGNALED_SIGABRT: c::c_int = 128 + c::SIGABRT;
 
+/// A process identifier as a raw integer.
 #[cfg(not(target_os = "wasi"))]
 pub type RawPid = c::pid_t;
+/// A group identifier as a raw integer.
 #[cfg(not(target_os = "wasi"))]
 pub type RawGid = c::gid_t;
+/// A user identifier as a raw integer.
 #[cfg(not(target_os = "wasi"))]
 pub type RawUid = c::uid_t;
+/// A CPU identifier as a raw integer.
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub type RawCpuid = u32;
 
 #[cfg(not(target_os = "wasi"))]
-pub type RawUname = c::utsname;
+pub(crate) type RawUname = c::utsname;
 
 #[cfg(any(
     target_os = "linux",
