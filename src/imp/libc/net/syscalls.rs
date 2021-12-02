@@ -1,14 +1,7 @@
 use super::super::c;
 use super::super::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 use super::super::fd::BorrowedFd;
-#[cfg(not(any(
-    target_os = "freebsd",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd"
-)))]
-use super::ext::in6_addr_new;
-use super::ext::in_addr_new;
+use super::ext::{in6_addr_new, in_addr_new};
 #[cfg(not(windows))]
 use super::{encode_sockaddr_unix, SocketAddrUnix};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
@@ -380,23 +373,9 @@ pub(crate) fn socketpair(
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) mod sockopt {
-    #[cfg(not(any(
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd"
-    )))]
-    use super::in6_addr_new;
-    use super::{c, in_addr_new, BorrowedFd};
+    use super::{c, in6_addr_new, in_addr_new, BorrowedFd};
     use crate::net::sockopt::Timeout;
-    #[cfg(not(any(
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd"
-    )))]
-    use crate::net::Ipv6Addr;
-    use crate::net::{Ipv4Addr, SocketType};
+    use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
     use crate::{as_mut_ptr, io};
     use core::convert::TryInto;
     use core::time::Duration;
@@ -752,12 +731,6 @@ pub(crate) mod sockopt {
         in_addr_new(u32::from_ne_bytes(addr.octets()))
     }
 
-    #[cfg(not(any(
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd"
-    )))]
     #[inline]
     fn to_ipv6mr(multiaddr: &Ipv6Addr, interface: u32) -> c::ipv6_mreq {
         c::ipv6_mreq {
@@ -766,12 +739,6 @@ pub(crate) mod sockopt {
         }
     }
 
-    #[cfg(not(any(
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd"
-    )))]
     #[inline]
     fn to_ipv6mr_multiaddr(multiaddr: &Ipv6Addr) -> c::in6_addr {
         in6_addr_new(multiaddr.octets())
@@ -783,13 +750,7 @@ pub(crate) mod sockopt {
         interface as c::c_int
     }
 
-    #[cfg(not(any(
-        target_os = "android",
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd"
-    )))]
+    #[cfg(not(target_os = "android"))]
     #[inline]
     fn to_ipv6mr_interface(interface: u32) -> c::c_uint {
         interface as c::c_uint
