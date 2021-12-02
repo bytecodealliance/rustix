@@ -31,7 +31,10 @@ bitflags! {
     }
 }
 
-/// `struct pollfd`
+/// `struct pollfd`—File descriptor and flags for use with [`poll`].
+///
+/// [`poll`]: rustix::io::poll
+#[doc(alias = "pollfd")]
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct PollFd<'fd> {
