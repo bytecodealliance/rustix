@@ -10,13 +10,13 @@
 //! ```rust
 //! # fn read(file: std::fs::File, buf: &mut [u8]) -> std::io::Result<()> {
 //! # use rustix::fd::AsRawFd;
-//! # use libc::MSG_DONTWAIT;
+//! # use libc::MSG_PEEK;
 //! let nread: usize = unsafe {
 //!     match libc::recv(
 //!         file.as_raw_fd(),
 //!         buf.as_mut_ptr().cast(),
 //!         buf.len(),
-//!         MSG_DONTWAIT,
+//!         MSG_PEEK,
 //!     ) {
 //!         -1 => return Err(std::io::Error::last_os_error()),
 //!         nread => nread as usize,
@@ -33,7 +33,7 @@
 //! ```rust
 //! # fn read(file: std::fs::File, buf: &mut [u8]) -> std::io::Result<()> {
 //! # use rustix::net::RecvFlags;
-//! let nread: usize = rustix::net::recv(&file, buf, RecvFlags::DONTWAIT)?;
+//! let nread: usize = rustix::net::recv(&file, buf, RecvFlags::PEEK)?;
 //! # let _ = nread;
 //! # Ok(())
 //! # }
