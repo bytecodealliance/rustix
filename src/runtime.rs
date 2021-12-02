@@ -101,25 +101,35 @@ pub use imp::thread::tls::StartupTlsInfo;
 
 /// `fork()`—Creates a new process by duplicating the calling process.
 ///
-/// On success, the PID of the child process is returned in the parent,
-/// and `Pid::NONE` is returned in the child.
-///
-/// Unlike its libc counterpart,
-/// this function does not call handlers registered with [`pthread_atfork`],
-/// and does not initializes the `pthread` data structures in the child
-/// process.
-///
-/// # Safety
+/// On success, the PID of the child process is returned in the parent, and
+/// `Pid::NONE` is returned in the child.
 ///
 /// If the parent has multiple threads, fork creates a child process containing
 /// a copy of all the memory of all the threads, but with only one actual
-/// thread, so objects in memory such as mutexes may be in unusable states.
+/// thread. Mutexes held on threads other than the one that called `fork` in
+/// the parent will appear in the child as if they are locked indefinitely,
+/// and attempting to lock them may deadlock.
+///
+/// Unlike its libc counterpart, this function does not call handlers
+/// registered with [`pthread_atfork`].
+///
+/// # Safety
+///
+/// This function does not update the threading runtime's data structures in
+/// the child process, so higher-level APIs such as `pthread_self` may return
+/// stale values in the child.
+///
+/// And because it doesn't call handlers registered with `pthread_atfork`,
+/// random number generators such as those in the [rand] crate aren't
+/// reinitialized in the child, so may generate the same values in the child
+/// as in the parent.
 ///
 /// # References
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/fork.2.html
 /// [`pthread_atfork`]: https://man7.org/linux/man-pages/man3/pthread_atfork.3.html
+/// [rand]: https://crates.io/crates/rand
 pub unsafe fn fork() -> io::Result<Pid> {
     imp::syscalls::fork()
 }
