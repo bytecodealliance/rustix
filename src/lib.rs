@@ -8,12 +8,12 @@
 //! converting the return value to the intended type:
 //!
 //! ```rust
-//! # fn read(file: std::fs::File, buf: &mut [u8]) -> std::io::Result<()> {
+//! # fn read(sock: std::net::TcpStream, buf: &mut [u8]) -> std::io::Result<()> {
 //! # use rustix::fd::AsRawFd;
 //! # use libc::MSG_PEEK;
 //! let nread: usize = unsafe {
 //!     match libc::recv(
-//!         file.as_raw_fd(),
+//!         sock.as_raw_fd(),
 //!         buf.as_mut_ptr().cast(),
 //!         buf.len(),
 //!         MSG_PEEK,
@@ -31,9 +31,9 @@
 //! [`AsFd`], pass it a slice, and get a `Result` carrying the intended type:
 //!
 //! ```rust
-//! # fn read(file: std::fs::File, buf: &mut [u8]) -> std::io::Result<()> {
+//! # fn read(sock: std::net::TcpStream, buf: &mut [u8]) -> std::io::Result<()> {
 //! # use rustix::net::RecvFlags;
-//! let nread: usize = rustix::net::recv(&file, buf, RecvFlags::PEEK)?;
+//! let nread: usize = rustix::net::recv(&sock, buf, RecvFlags::PEEK)?;
 //! # let _ = nread;
 //! # Ok(())
 //! # }
