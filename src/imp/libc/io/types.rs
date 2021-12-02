@@ -9,19 +9,19 @@ bitflags! {
     /// [`preadv2`]: crate::io::preadv2
     /// [`pwritev2`]: crate::io::pwritev
     pub struct ReadWriteFlags: c::c_int {
-        /// `RWF_DSYNC`
+        /// `RWF_DSYNC` (since Linux 4.7)
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
         const DSYNC = c::RWF_DSYNC;
-        /// `RWF_HIPRI`
+        /// `RWF_HIPRI` (since Linux 4.6)
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
         const HIPRI = c::RWF_HIPRI;
-        /// `RWF_SYNC`
+        /// `RWF_SYNC` (since Linux 4.7)
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
         const SYNC = c::RWF_SYNC;
-        /// `RWF_NOWAIT`
+        /// `RWF_NOWAIT` (since Linux 4.14)
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
         const NOWAIT = c::RWF_NOWAIT;
-        /// `RWF_APPEND`
+        /// `RWF_APPEND` (since Linux 4.16)
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
         const APPEND = c::RWF_APPEND;
     }

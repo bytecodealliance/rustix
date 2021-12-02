@@ -7,15 +7,15 @@ bitflags! {
     /// [`preadv2`]: crate::io::preadv2
     /// [`pwritev2`]: crate::io::pwritev
     pub struct ReadWriteFlags: c::c_uint {
-        /// `RWF_DSYNC`
+        /// `RWF_DSYNC` (since Linux 4.7)
         const DSYNC = linux_raw_sys::general::RWF_DSYNC;
-        /// `RWF_HIPRI`
+        /// `RWF_HIPRI` (since Linux 4.6)
         const HIPRI = linux_raw_sys::general::RWF_HIPRI;
-        /// `RWF_SYNC`
+        /// `RWF_SYNC` (since Linux 4.7)
         const SYNC = linux_raw_sys::general::RWF_SYNC;
-        /// `RWF_NOWAIT`
+        /// `RWF_NOWAIT` (since Linux 4.14)
         const NOWAIT = linux_raw_sys::general::RWF_NOWAIT;
-        /// `RWF_APPEND`
+        /// `RWF_APPEND` (since Linux 4.16)
         const APPEND = linux_raw_sys::general::RWF_APPEND;
     }
 }
