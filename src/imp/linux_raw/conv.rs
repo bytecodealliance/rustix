@@ -33,6 +33,7 @@ use linux_raw_sys::general::{__kernel_clockid_t, socklen_t};
 
 /// Convert `SYS_*` constants for socketcall.
 #[cfg(target_arch = "x86")]
+#[inline]
 pub(super) fn x86_sys<'a, Num: ArgNumber>(sys: u32) -> ArgReg<'a, Num> {
     raw_arg(sys as usize)
 }
@@ -233,6 +234,7 @@ pub(super) fn dev_t<'a, Num: ArgNumber>(dev: u64) -> io::Result<ArgReg<'a, Num>>
 }
 
 #[cfg(target_pointer_width = "32")]
+#[inline]
 fn oflags_bits(oflags: OFlags) -> c::c_uint {
     let mut bits = oflags.bits();
     // Add `O_LARGEFILE`, unless `O_PATH` is set, as Linux returns `EINVAL`
@@ -244,14 +246,17 @@ fn oflags_bits(oflags: OFlags) -> c::c_uint {
 }
 
 #[cfg(target_pointer_width = "64")]
+#[inline]
 fn oflags_bits(oflags: OFlags) -> c::c_uint {
     oflags.bits()
 }
 
+#[inline]
 pub(super) fn oflags<'a, Num: ArgNumber>(oflags: OFlags) -> ArgReg<'a, Num> {
     raw_arg(oflags_bits(oflags) as usize)
 }
 
+#[inline]
 pub(super) fn oflags_for_open_how(oflags: OFlags) -> u64 {
     u64::from(oflags_bits(oflags))
 }
