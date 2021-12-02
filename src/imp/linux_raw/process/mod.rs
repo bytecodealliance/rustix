@@ -8,9 +8,9 @@ pub(crate) mod cpu_set;
 pub(crate) use auxv::init;
 pub(crate) use auxv::{exe_phdrs, linux_execfn, linux_hwcap, page_size};
 pub(super) use auxv::{exe_phdrs_slice, sysinfo_ehdr};
-pub(crate) use types::{raw_cpu_set_new, RawCpuSet, CPU_SETSIZE};
+pub(crate) use types::{raw_cpu_set_new, RawCpuSet, RawUname, CPU_SETSIZE};
 pub use types::{
-    MembarrierCommand, RawCpuid, RawGid, RawPid, RawUid, RawUname, Resource, EXIT_FAILURE,
+    MembarrierCommand, RawCpuid, RawGid, RawPid, RawUid, Resource, EXIT_FAILURE,
     EXIT_SIGNALED_SIGABRT, EXIT_SUCCESS,
 };
 pub(crate) use wait::{

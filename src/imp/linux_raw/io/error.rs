@@ -8,6 +8,7 @@
 //! Linux uses error codes in `-4095..0`; we use rustc attributes to describe
 //! this restricted range of values.
 #![allow(unsafe_code)]
+#![allow(missing_docs)]
 #![cfg_attr(not(rustc_attrs), allow(unused_unsafe))]
 
 use super::super::c;

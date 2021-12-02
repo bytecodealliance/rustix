@@ -3,7 +3,10 @@ use super::super::fd::BorrowedFd;
 /// `struct timespec`
 pub type Timespec = linux_raw_sys::general::__kernel_timespec;
 
+/// A type for the `tv_sec` field of [`Timespec`].
 pub type Secs = linux_raw_sys::general::__kernel_time64_t;
+
+/// A type for the `tv_nsec` field of [`Timespec`].
 pub type Nsecs = i64;
 
 /// `CLOCK_*` constants for use with [`clock_gettime`].

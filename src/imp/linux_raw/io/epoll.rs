@@ -55,6 +55,7 @@
 //! ```
 
 #![allow(unsafe_code)]
+#![allow(missing_docs)] // TODO: Write more docs.
 
 use super::super::c;
 use crate::fd::{AsFd, AsRawFd, BorrowedFd, RawFd};

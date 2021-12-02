@@ -5,10 +5,13 @@ use bitflags::bitflags;
 
 #[cfg(target_os = "linux")]
 bitflags! {
+    /// `GRND_*` flags for use with [`getrandom`].
+    ///
+    /// [`getrandom`]: crate::rand::getrandom
     pub struct GetRandomFlags: u32 {
-        /// GRND_RANDOM
+        /// `GRND_RANDOM`
         const RANDOM = c::GRND_RANDOM;
-        /// GRND_NONBLOCK
+        /// `GRND_NONBLOCK`
         const NONBLOCK = c::GRND_NONBLOCK;
     }
 }

@@ -249,8 +249,12 @@ pub type Termios = linux_raw_sys::general::termios;
 /// [`ioctl_tiocgwinsz`]: crate::io::ioctl_tiocgwinsz
 pub type Winsize = linux_raw_sys::general::winsize;
 
+/// `tcflag_t`—A type for the flags fields of [`Termios`].
 pub type Tcflag = linux_raw_sys::general::tcflag_t;
 
+/// `ICANON`—A flag for the `c_lflag` field of [`Termios`] indicating
+/// canonical mode.
 pub const ICANON: c::c_uint = linux_raw_sys::general::ICANON;
 
+/// `PIPE_BUF`—The maximum size of a write to a pipe guaranteed to be atomic.
 pub const PIPE_BUF: usize = linux_raw_sys::general::PIPE_BUF as usize;

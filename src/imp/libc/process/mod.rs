@@ -23,6 +23,8 @@ pub(crate) use c::{
     target_os = "dragonfly"
 ))]
 pub(crate) mod cpu_set;
+#[cfg(not(target_os = "wasi"))]
+pub(crate) use types::RawUname;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 pub use types::Resource;
 #[cfg(any(
@@ -35,5 +37,5 @@ pub(crate) use types::{raw_cpu_set_new, RawCpuSet, CPU_SETSIZE};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use types::{MembarrierCommand, RawCpuid};
 #[cfg(not(target_os = "wasi"))]
-pub use types::{RawGid, RawPid, RawUid, RawUname, EXIT_SIGNALED_SIGABRT};
+pub use types::{RawGid, RawPid, RawUid, EXIT_SIGNALED_SIGABRT};
 pub use types::{EXIT_FAILURE, EXIT_SUCCESS};

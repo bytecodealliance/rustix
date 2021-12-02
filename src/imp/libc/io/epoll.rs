@@ -54,6 +54,8 @@
 //! # }
 //! ```
 
+#![allow(missing_docs)] // TODO: Write more docs.
+
 use super::super::c;
 use super::super::conv::{ret, ret_owned_fd, ret_u32};
 use super::super::fd::{AsFd, AsRawFd, BorrowedFd, RawFd};
