@@ -5,7 +5,7 @@ use bitflags::bitflags;
 #[doc(hidden)]
 pub type RawSocketType = u32;
 
-/// `SOCK_*` constants for [`socket`].
+/// `SOCK_*` constants for use with [`socket`].
 ///
 /// [`socket`]: crate::net::socket
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
@@ -226,22 +226,22 @@ impl Protocol {
     }
 }
 
-/// `SHUT_*` constants for [`shutdown`].
+/// `SHUT_*` constants for use with [`shutdown`].
 ///
 /// [`shutdown`]: crate::net::shutdown
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(u32)]
 pub enum Shutdown {
-    /// `SHUT_RD`
+    /// `SHUT_WR`—Disable further read operations.
     Read = linux_raw_sys::general::SHUT_RD,
-    /// `SHUT_WR`
+    /// `SHUT_WR`—Disable further write operations.
     Write = linux_raw_sys::general::SHUT_WR,
-    /// `SHUT_RDWR`
+    /// `SHUT_RDWR`—Disable further read and write operations.
     ReadWrite = linux_raw_sys::general::SHUT_RDWR,
 }
 
 bitflags! {
-    /// `SOCK_*` constants for [`accept_with`] and [`acceptfrom_with`].
+    /// `SOCK_*` constants for use with [`accept_with`] and [`acceptfrom_with`].
     ///
     /// [`accept_with`]: crate::net::accept_with
     /// [`acceptfrom_with`]: crate::net::acceptfrom_with
@@ -254,7 +254,7 @@ bitflags! {
 }
 
 bitflags! {
-    /// `SOCK_*` constants for [`socket`].
+    /// `SOCK_*` constants for use with [`socket`].
     ///
     /// [`socket`]: crate::net::socket
     pub struct SocketFlags: c::c_uint {
