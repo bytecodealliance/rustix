@@ -741,15 +741,20 @@ pub type FsWord = u32;
 #[cfg(not(target_os = "redox"))]
 pub use c::{UTIME_NOW, UTIME_OMIT};
 
+/// `PROC_SUPER_MAGIC`—The magic number for the procfs filesystem.
 #[cfg(all(
     any(target_os = "android", target_os = "linux"),
     not(target_env = "musl")
 ))]
 pub const PROC_SUPER_MAGIC: FsWord = c::PROC_SUPER_MAGIC as FsWord;
 
+/// `PROC_SUPER_MAGIC`—The magic number for the procfs filesystem.
 #[cfg(all(any(target_os = "android", target_os = "linux"), target_env = "musl"))]
 pub const PROC_SUPER_MAGIC: FsWord = 0x0000_9fa0;
 
+/// `copyfile_state_t`—State for use with [`fcopyfile`].
+///
+/// [`fcopyfile`]: crate::fs::fcopyfile
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 #[allow(non_camel_case_types)]
 #[repr(transparent)]
