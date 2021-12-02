@@ -57,7 +57,7 @@ impl<T: io_lifetimes::AsSocket> AsSocketAsFd for T {
     }
 }
 
-pub(crate) trait IntoFd {
+pub trait IntoFd {
     fn into_fd(self) -> OwnedFd;
 }
 impl<T: io_lifetimes::IntoSocket> IntoFd for T {
@@ -67,7 +67,7 @@ impl<T: io_lifetimes::IntoSocket> IntoFd for T {
     }
 }
 
-pub(crate) trait FromFd {
+pub trait FromFd {
     fn from_fd(fd: OwnedFd) -> Self;
 }
 impl<T: io_lifetimes::FromSocket> FromFd for T {
