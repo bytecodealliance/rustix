@@ -2,7 +2,9 @@ use super::super::fd::{AsFd, BorrowedFd};
 use bitflags::bitflags;
 
 bitflags! {
-    /// `POLL*`
+    /// `POLL*` flags for use with [`poll`].
+    ///
+    /// [`poll`]: rustix::io::poll
     pub struct PollFlags: u16 {
         /// `POLLIN`
         const IN = linux_raw_sys::general::POLLIN as u16;
