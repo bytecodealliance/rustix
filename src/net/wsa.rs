@@ -6,6 +6,11 @@ use winapi::um::winsock2::{WSACleanup, WSAGetLastError, WSAStartup, WSADATA};
 ///
 /// On Windows, it's necessary to initialize the sockets subsystem before
 /// using sockets APIs. The function performs the necessary initialization.
+///
+/// # References
+///  - [Winsock]
+///
+/// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsastartup
 pub fn wsa_startup() -> io::Result<WSADATA> {
     // Request version 2.2, which has been the latest version since far older
     // versions of Windows than we support here. For more information about
@@ -28,6 +33,11 @@ pub fn wsa_startup() -> io::Result<WSADATA> {
 ///
 /// In a program where `init` is called, if sockets are no longer necessary,
 /// this function releases associated resources.
+///
+/// # References
+///  - [Winsock]
+///
+/// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsacleanup
 pub fn wsa_cleanup() -> io::Result<()> {
     unsafe {
         if WSACleanup() == 0 {
