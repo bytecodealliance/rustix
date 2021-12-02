@@ -17,6 +17,8 @@ use core::mem::{forget, ManuallyDrop};
 
 /// A wrapper around `io_lifetimes::OwnedFd` which closes the file descriptor
 /// using `rustix`'s own [`close`] rather than libc's `close`.
+///
+/// [`close`]: crate::io::close
 #[repr(transparent)]
 pub struct OwnedFd {
     inner: ManuallyDrop<crate::imp::fd::OwnedFd>,
