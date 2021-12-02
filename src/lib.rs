@@ -9,15 +9,16 @@
 //!
 //! ```rust
 //! # fn read(sock: std::net::TcpStream, buf: &mut [u8]) -> std::io::Result<()> {
+//! # use std::convert::TryInto;
 //! # use rustix::fd::AsRawFd;
 //! # #[cfg(windows)]
 //! # use winapi::um::winsock2 as libc;
 //! # use libc::MSG_PEEK;
 //! let nread: usize = unsafe {
 //!     match libc::recv(
-//!         sock.as_raw_fd(),
+//!         sock.as_raw_fd() as _,
 //!         buf.as_mut_ptr().cast(),
-//!         buf.len(),
+//!         buf.len().try_into().unwrap_or(i32::MAX as _),
 //!         MSG_PEEK,
 //!     ) {
 //!         -1 => return Err(std::io::Error::last_os_error()),
