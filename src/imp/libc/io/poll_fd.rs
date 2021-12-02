@@ -5,7 +5,9 @@ use bitflags::bitflags;
 use core::marker::PhantomData;
 
 bitflags! {
-    /// `POLL*`
+    /// `POLL*` flags for use with [`poll`].
+    ///
+    /// [`poll`]: rustix::io::poll
     pub struct PollFlags: c::c_short {
         /// `POLLIN`
         const IN = c::POLLIN;
