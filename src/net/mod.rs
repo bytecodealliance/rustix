@@ -51,4 +51,4 @@ pub use addr::{SocketAddr, SocketAddrV4, SocketAddrV6};
 #[cfg(not(feature = "std"))]
 pub use ip::{IpAddr, Ipv4Addr, Ipv6Addr, Ipv6MulticastScope};
 #[cfg(feature = "std")]
-pub use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
+pub use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
