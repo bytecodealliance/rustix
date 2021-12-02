@@ -184,7 +184,7 @@ pub unsafe fn mlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
 /// `mlock2(ptr, len, flags)`—Lock memory into RAM, with
 /// flags.
 ///
-/// `mlock_with` is the same as `mlock` but adds an additional flags operand.
+/// `mlock_with` is the same as [`mlock`] but adds an additional flags operand.
 ///
 /// # Safety
 ///

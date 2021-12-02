@@ -40,7 +40,8 @@ pub fn socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> i
 /// however it is not safe in general to rely on this, as file descriptors
 /// may be unexpectedly allocated on other threads or in libraries.
 ///
-/// `socket_with` is the same as `socket` but adds an additional flags operand.
+/// `socket_with` is the same as [`socket`] but adds an additional flags
+/// operand.
 ///
 /// # References
 ///  - [POSIX]
@@ -200,7 +201,8 @@ pub fn accept<Fd: AsFd>(sockfd: &Fd) -> io::Result<OwnedFd> {
 /// descriptor, it is not safe in general to rely on this, as file descriptors
 /// may be unexpectedly allocated on other threads or in libraries.
 ///
-/// `accept_with` is the same as `accept` but adds an additional flags operand.
+/// `accept_with` is the same as [`accept`] but adds an additional flags
+/// operand.
 ///
 /// # References
 ///  - [POSIX]
@@ -238,8 +240,8 @@ pub fn acceptfrom<Fd: AsFd>(sockfd: &Fd) -> io::Result<(OwnedFd, SocketAddrAny)>
 ///
 /// Use [`accept_with`] if the peer address isn't needed.
 ///
-/// `acceptfrom_with` is the same as `acceptfrom` but adds an additional flags
-/// operand.
+/// `acceptfrom_with` is the same as [`acceptfrom`] but adds an additional
+/// flags operand.
 ///
 /// # References
 ///  - [POSIX]
