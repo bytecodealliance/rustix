@@ -18,7 +18,7 @@
 #![allow(unsafe_code)]
 
 use crate::ffi::ZStr;
-use crate::path::Arg;
+use crate::path;
 use crate::process::Pid;
 use crate::{imp, io};
 use alloc::borrow::Cow;
@@ -134,6 +134,27 @@ pub unsafe fn fork() -> io::Result<Pid> {
     imp::syscalls::fork()
 }
 
+/// Executes the program pointed to by `path`, with the arguments `args`, and
+/// the environment variables `env_vars`.
+///
+/// The first argument, by convention, should be the filename associated with
+/// the file being executed.
+pub fn execve<P: path::Arg, A: path::Arg, E: path::Arg>(
+    path: P,
+    args: &[A],
+    env_vars: &[E],
+) -> io::Result<()> {
+    let arg_zstr: Vec<Cow<'_, ZStr>> = args
+        .iter()
+        .map(path::Arg::as_cow_z_str)
+        .collect::<io::Result<_>>()?;
+    let env_zstr: Vec<Cow<'_, ZStr>> = env_vars
+        .iter()
+        .map(path::Arg::as_cow_z_str)
+        .collect::<io::Result<_>>()?;
+    path.into_with_z_str(|path_zstr| _execve(path_zstr, &arg_zstr, &env_zstr))
+}
+
 fn _execve(path: &ZStr, arg_zstr: &[Cow<'_, ZStr>], env_zstr: &[Cow<'_, ZStr>]) -> io::Result<()> {
     let arg_ptrs: Vec<_> = arg_zstr
         .iter()
@@ -146,21 +167,4 @@ fn _execve(path: &ZStr, arg_zstr: &[Cow<'_, ZStr>], env_zstr: &[Cow<'_, ZStr>]) 
         .chain(core::iter::once(core::ptr::null()))
         .collect();
     unsafe { imp::syscalls::execve(path, &arg_ptrs, &env_ptrs) }
-}
-
-/// Executes the program pointed to by `path`, with the arguments `args`,
-/// and the environment variables `env_vars`.
-///
-/// The first argument, by convention,
-/// should be the filename associated with the file being executed.
-pub fn execve<P: Arg, A: Arg, E: Arg>(path: P, args: &[A], env_vars: &[E]) -> io::Result<()> {
-    let arg_zstr: Vec<Cow<'_, ZStr>> = args
-        .iter()
-        .map(Arg::as_cow_z_str)
-        .collect::<io::Result<_>>()?;
-    let env_zstr: Vec<Cow<'_, ZStr>> = env_vars
-        .iter()
-        .map(Arg::as_cow_z_str)
-        .collect::<io::Result<_>>()?;
-    path.into_with_z_str(|path_zstr| _execve(path_zstr, &arg_zstr, &env_zstr))
 }
