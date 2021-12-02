@@ -2,7 +2,37 @@
 //! POSIX-like, Unix-like, Linux, and Winsock syscall-like APIs, with
 //! configurable backends.
 //!
-//! The wrappers perform the following tasks:
+//! For example, instead of calling libc directly, using an `unsafe` block,
+//! passing a raw file descriptor, passing a raw pointer, passing a buffer
+//! length, manually checking the return value for errors, and manually
+//! converting the return value to the intended type:
+//!
+//! ```rust
+//! # fn read(file: std::fs::File, buf: &mut [u8]) -> std::io::Result<()> {
+//! # use rustix::fd::AsRawFd;
+//! let nread: usize = unsafe {
+//!     match libc::read(file.as_raw_fd(), buf.as_mut_ptr().cast(), buf.len()) {
+//!         -1 => return Err(std::io::Error::last_os_error()),
+//!         nread => nread as usize,
+//!     }
+//! };
+//! # let _ = nread;
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! With rustix you can call a safe function, pass it any type that implements
+//! [`AsFd`], pass it a slice, and get a `Result` carrying the intended type:
+//!
+//! ```rust
+//! # fn read(file: std::fs::File, buf: &mut [u8]) -> std::io::Result<()> {
+//! let nread: usize = rustix::io::read(&file, buf)?;
+//! # let _ = nread;
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! rustix's APIs perform the following tasks:
 //!  - Error values are translated to [`Result`]s.
 //!  - Buffers are passed as Rust slices.
 //!  - Out-parameters are presented as return values.
@@ -36,7 +66,7 @@
 //! [`std`]: https://doc.rust-lang.org/std/
 //! [`getrandom`]: https://crates.io/crates/getrandom
 //! [`bitflags`]: https://crates.io/crates/bitflags
-//! [`AsFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.AsFd.html
+//! [`AsFd`]: https://doc.rust-lang.org/stable/std/os/unix/io/trait.AsFd.html
 //! [`OwnedFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/struct.OwnedFd.html
 //! [io-lifetimes crate]: https://crates.io/crates/io-lifetimes
 //! [I/O-safe]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
