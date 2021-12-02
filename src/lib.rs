@@ -12,7 +12,12 @@
 //! # use rustix::fd::AsRawFd;
 //! # use libc::MSG_DONTWAIT;
 //! let nread: usize = unsafe {
-//!     match libc::recv(file.as_raw_fd(), buf.as_mut_ptr().cast(), buf.len(), MSG_DONTWAIT) {
+//!     match libc::recv(
+//!         file.as_raw_fd(),
+//!         buf.as_mut_ptr().cast(),
+//!         buf.len(),
+//!         MSG_DONTWAIT,
+//!     ) {
 //!         -1 => return Err(std::io::Error::last_os_error()),
 //!         nread => nread as usize,
 //!     }
