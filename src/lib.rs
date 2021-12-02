@@ -10,6 +10,8 @@
 //! ```rust
 //! # fn read(sock: std::net::TcpStream, buf: &mut [u8]) -> std::io::Result<()> {
 //! # use rustix::fd::AsRawFd;
+//! # #[cfg(windows)]
+//! # use winapi::um::winsock2 as libc;
 //! # use libc::MSG_PEEK;
 //! let nread: usize = unsafe {
 //!     match libc::recv(
