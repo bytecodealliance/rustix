@@ -67,8 +67,10 @@
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
 
-/// Export `*Fd*` types and traits that we use in our public API, so that
-/// our users don't need to do anything special to use the same version.
+/// Export `*Fd*` types and traits that used in rustix's public API.
+///
+/// Users can use this to avoid needing to import anything else to use the same
+/// versions of these types and traits.
 ///
 /// Note that `OwnedFd` lives at [`rustix::io::OwnedFd`].
 pub mod fd {
