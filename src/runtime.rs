@@ -18,9 +18,8 @@
 #![allow(unsafe_code)]
 
 use crate::ffi::ZStr;
-use crate::path;
 use crate::process::Pid;
-use crate::{imp, io};
+use crate::{imp, io, path};
 use alloc::borrow::Cow;
 use alloc::vec::Vec;
 use core::ffi::c_void;
