@@ -13,7 +13,7 @@
 //! # use rustix::fd::AsRawFd;
 //! # #[cfg(windows)]
 //! # use winapi::um::winsock2 as libc;
-//! # use libc::MSG_PEEK;
+//! # const MSG_PEEK: i32 = libc::MSG_PEEK;
 //! let nread: usize = unsafe {
 //!     match libc::recv(
 //!         sock.as_raw_fd() as _,
