@@ -5,10 +5,15 @@ use super::super::fd::BorrowedFd;
 /// `struct timespec`
 pub type Timespec = c::timespec;
 
+/// A type for the `tv_sec` field of [`Timespec`].
 #[allow(deprecated)]
 pub type Secs = c::time_t;
+
+/// A type for the `tv_nsec` field of [`Timespec`].
 #[cfg(all(target_arch = "x86_64", target_pointer_width = "32"))]
 pub type Nsecs = i64;
+
+/// A type for the `tv_nsec` field of [`Timespec`].
 #[cfg(not(all(target_arch = "x86_64", target_pointer_width = "32")))]
 pub type Nsecs = c::c_long;
 
