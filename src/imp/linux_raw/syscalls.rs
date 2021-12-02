@@ -1588,8 +1588,8 @@ pub(crate) unsafe fn execve(
     ret(syscall3_readonly(
         nr(__NR_execve),
         c_str(path),
-        slice_just_addr(&args),
-        slice_just_addr(&env_vars),
+        slice_just_addr(args),
+        slice_just_addr(env_vars),
     ))
 }
 
