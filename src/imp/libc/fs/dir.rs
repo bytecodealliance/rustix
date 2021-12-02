@@ -1,6 +1,6 @@
 use super::super::c;
 use super::super::conv::owned_fd;
-#[cfg(not(any(io_lifetimes_use_std, feature = "rustc-dep-of-std")))]
+#[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
 use super::super::fd::IntoFd;
 use super::super::fd::{AsFd, BorrowedFd, RawFd};
 use super::FileType;
@@ -8,6 +8,8 @@ use crate::ffi::ZStr;
 #[cfg(target_os = "wasi")]
 use crate::ffi::ZString;
 use crate::io::{self, OwnedFd};
+#[cfg(target_os = "wasi")]
+use alloc::borrow::ToOwned;
 #[cfg(not(any(
     target_os = "android",
     target_os = "emscripten",
@@ -40,7 +42,7 @@ pub struct Dir(NonNull<c::DIR>);
 
 impl Dir {
     /// Construct a `Dir`, assuming ownership of the file descriptor.
-    #[cfg(not(any(io_lifetimes_use_std, feature = "rustc-dep-of-std")))]
+    #[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
     #[inline]
     pub fn from<F: IntoFd>(fd: F) -> io::Result<Self> {
         let fd = fd.into_fd();
@@ -48,7 +50,7 @@ impl Dir {
     }
 
     /// Construct a `Dir`, assuming ownership of the file descriptor.
-    #[cfg(any(io_lifetimes_use_std, feature = "rustc-dep-of-std"))]
+    #[cfg(any(io_lifetimes_use_std, not(feature = "std")))]
     #[inline]
     pub fn from<F: Into<OwnedFd>>(fd: F) -> io::Result<Self> {
         let fd = fd.into();
@@ -100,7 +102,7 @@ impl Dir {
                     dirent: read_dirent(core::mem::transmute(&*dirent_ptr)),
 
                     #[cfg(target_os = "wasi")]
-                    name: ZStr::from_ptr((*dirent_ptr).d_name.as_ptr()).to_owned(),
+                    name: ZStr::from_ptr((*dirent_ptr).d_name.as_ptr().cast()).to_owned(),
                 };
 
                 Some(Ok(result))
