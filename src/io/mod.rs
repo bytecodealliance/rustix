@@ -12,7 +12,7 @@ mod dup;
 mod error;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 mod eventfd;
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(not(feature = "std"))]
 pub(crate) mod fd;
 mod ioctl;
 #[cfg(not(any(windows, target_os = "redox")))]
@@ -30,7 +30,7 @@ mod poll;
 mod procfs;
 #[cfg(not(windows))]
 mod read_write;
-#[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
+#[cfg(not(feature = "std"))]
 mod seek_from;
 #[cfg(not(windows))]
 mod stdio;
@@ -106,14 +106,14 @@ pub use imp::io::Winsize;
 
 // Declare `IoSlice` and `IoSliceMut`.
 #[cfg(not(windows))]
-#[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
+#[cfg(not(feature = "std"))]
 pub use imp::io::{IoSlice, IoSliceMut};
 #[cfg(not(windows))]
 #[cfg(feature = "std")]
 pub use std::io::{IoSlice, IoSliceMut};
 
 // Declare `SeekFrom`.
-#[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
+#[cfg(not(feature = "std"))]
 pub use seek_from::SeekFrom;
 #[cfg(feature = "std")]
 pub use std::io::SeekFrom;

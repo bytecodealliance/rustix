@@ -52,12 +52,12 @@
 #![cfg_attr(all(linux_raw, asm, target_arch = "x86"), feature(naked_functions))]
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(feature = "rustc-dep-of-std", allow(incomplete_features))]
-#![cfg_attr(feature = "rustc-dep-of-std", feature(specialization))]
-#![cfg_attr(feature = "rustc-dep-of-std", feature(toowned_clone_into))]
-#![cfg_attr(feature = "rustc-dep-of-std", feature(vec_into_raw_parts))]
+#![cfg_attr(not(feature = "std"), allow(incomplete_features))]
+#![cfg_attr(not(feature = "std"), feature(specialization))]
+#![cfg_attr(not(feature = "std"), feature(slice_internals))]
+#![cfg_attr(not(feature = "std"), feature(toowned_clone_into))]
+#![cfg_attr(not(feature = "std"), feature(vec_into_raw_parts))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(const_raw_ptr_deref))]
-#![cfg_attr(feature = "rustc-dep-of-std", feature(slice_internals))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(core_intrinsics))]
 #![cfg_attr(
     all(not(feature = "rustc-dep-of-std"), core_intrinsics),
@@ -74,6 +74,8 @@ extern crate alloc;
 pub mod fd {
     use super::imp;
     pub use imp::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, RawFd};
+    #[cfg(feature = "std")]
+    pub use imp::fd::{FromFd, IntoFd};
 }
 
 #[cfg(not(windows))]

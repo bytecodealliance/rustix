@@ -3,7 +3,7 @@
 /// Minimal and unoptimized `strlen` implementation.
 ///
 /// TODO: Optimize this by reading a `usize` at a time.
-#[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
+#[cfg(not(feature = "std"))]
 #[allow(unsafe_code)]
 unsafe fn strlen(mut s: *const u8) -> usize {
     let mut len = 0;
@@ -14,10 +14,10 @@ unsafe fn strlen(mut s: *const u8) -> usize {
     len
 }
 
-#[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
+#[cfg(not(feature = "std"))]
 mod z_str;
 
-#[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
+#[cfg(not(feature = "std"))]
 pub use z_str::{FromBytesWithNulError, FromVecWithNulError, NulError, ZStr, ZString};
 
 #[cfg(feature = "std")]

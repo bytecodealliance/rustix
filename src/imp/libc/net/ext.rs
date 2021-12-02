@@ -19,7 +19,7 @@ pub(crate) const fn in_addr_s_addr(addr: c::in_addr) -> u32 {
     addr.s_addr
 }
 
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(not(feature = "std"))]
 #[cfg(windows)]
 #[inline]
 pub(crate) const fn in_addr_s_addr(addr: c::in_addr) -> u32 {
@@ -29,7 +29,7 @@ pub(crate) const fn in_addr_s_addr(addr: c::in_addr) -> u32 {
 
 // TODO: With Rust 1.55, we can use the above `in_addr_s_addr` definition
 // that uses a const-fn transmute.
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 #[cfg(windows)]
 #[inline]
 pub(crate) fn in_addr_s_addr(addr: c::in_addr) -> u32 {
@@ -43,7 +43,7 @@ pub(crate) const fn in_addr_new(s_addr: u32) -> c::in_addr {
     c::in_addr { s_addr }
 }
 
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(not(feature = "std"))]
 #[cfg(windows)]
 #[inline]
 pub(crate) const fn in_addr_new(s_addr: u32) -> c::in_addr {
@@ -52,7 +52,7 @@ pub(crate) const fn in_addr_new(s_addr: u32) -> c::in_addr {
 
 // TODO: With Rust 1.55, we can use the above `in_addr_new` definition
 // that uses a const-fn transmute.
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 #[cfg(windows)]
 #[inline]
 pub(crate) fn in_addr_new(s_addr: u32) -> c::in_addr {
@@ -65,7 +65,7 @@ pub(crate) const fn in6_addr_s6_addr(addr: c::in6_addr) -> [u8; 16] {
     addr.s6_addr
 }
 
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(not(feature = "std"))]
 #[cfg(windows)]
 #[inline]
 pub(crate) const fn in6_addr_s6_addr(addr: c::in6_addr) -> [u8; 16] {
@@ -74,7 +74,7 @@ pub(crate) const fn in6_addr_s6_addr(addr: c::in6_addr) -> [u8; 16] {
 
 // TODO: With Rust 1.55, we can use the above `in6_addr_s6_addr` definition
 // that uses a const-fn transmute.
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 #[cfg(windows)]
 #[inline]
 pub(crate) fn in6_addr_s6_addr(addr: c::in6_addr) -> [u8; 16] {
@@ -87,7 +87,7 @@ pub(crate) const fn in6_addr_new(s6_addr: [u8; 16]) -> c::in6_addr {
     c::in6_addr { s6_addr }
 }
 
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(not(feature = "std"))]
 #[cfg(windows)]
 #[inline]
 pub(crate) const fn in6_addr_new(s6_addr: [u8; 16]) -> c::in6_addr {
@@ -96,7 +96,7 @@ pub(crate) const fn in6_addr_new(s6_addr: [u8; 16]) -> c::in6_addr {
 
 // TODO: With Rust 1.55, we can use the above `in6_addr_new` definition
 // that uses a const-fn transmute.
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 #[cfg(windows)]
 #[inline]
 pub(crate) fn in6_addr_new(s6_addr: [u8; 16]) -> c::in6_addr {
@@ -109,7 +109,7 @@ pub(crate) const fn sockaddr_in6_sin6_scope_id(addr: c::sockaddr_in6) -> u32 {
     addr.sin6_scope_id
 }
 
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(not(feature = "std"))]
 #[cfg(windows)]
 #[inline]
 pub(crate) const fn sockaddr_in6_sin6_scope_id(addr: c::sockaddr_in6) -> u32 {
@@ -119,7 +119,7 @@ pub(crate) const fn sockaddr_in6_sin6_scope_id(addr: c::sockaddr_in6) -> u32 {
 
 // TODO: With Rust 1.55, we can use the above `sockaddr_in6_sin6_scope_id`
 // definition that uses a const-fn transmute.
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 #[cfg(windows)]
 #[inline]
 pub(crate) fn sockaddr_in6_sin6_scope_id(addr: c::sockaddr_in6) -> u32 {
@@ -127,14 +127,14 @@ pub(crate) fn sockaddr_in6_sin6_scope_id(addr: c::sockaddr_in6) -> u32 {
     addr.sin6_scope_id
 }
 
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(not(feature = "std"))]
 #[cfg(not(windows))]
 #[inline]
 pub(crate) fn sockaddr_in6_sin6_scope_id_mut(addr: &mut c::sockaddr_in6) -> &mut u32 {
     &mut addr.sin6_scope_id
 }
 
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(not(feature = "std"))]
 #[cfg(windows)]
 #[inline]
 pub(crate) fn sockaddr_in6_sin6_scope_id_mut(addr: &mut c::sockaddr_in6) -> &mut u32 {
@@ -178,7 +178,7 @@ pub(crate) const fn sockaddr_in6_new(
     }
 }
 
-#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(not(feature = "std"))]
 #[cfg(windows)]
 #[inline]
 pub(crate) const fn sockaddr_in6_new(
@@ -200,7 +200,7 @@ pub(crate) const fn sockaddr_in6_new(
 
 // TODO: With Rust 1.55, we can use the above `sockaddr_in6_new`
 // definition that uses a const-fn transmute.
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 #[cfg(windows)]
 #[inline]
 pub(crate) fn sockaddr_in6_new(

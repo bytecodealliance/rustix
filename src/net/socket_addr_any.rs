@@ -13,7 +13,7 @@
 use crate::net::SocketAddrUnix;
 use crate::net::{AddressFamily, SocketAddrStorage, SocketAddrV4, SocketAddrV6};
 use crate::{imp, io};
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 use core::fmt;
 
 /// `struct sockaddr_storage` as a Rust enum.
@@ -66,7 +66,7 @@ impl SocketAddrAny {
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 impl fmt::Debug for SocketAddrAny {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {

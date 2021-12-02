@@ -9,7 +9,7 @@
 #[cfg(windows)]
 use crate::imp::fd::AsSocketAsFd;
 use crate::imp::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, RawFd};
-#[cfg(all(not(io_lifetimes_use_std), not(feature = "rustc-dep-of-std")))]
+#[cfg(all(not(io_lifetimes_use_std), feature = "std"))]
 use crate::imp::fd::{FromFd, IntoFd};
 use crate::io::close;
 use core::fmt;
@@ -49,7 +49,7 @@ impl From<OwnedFd> for crate::imp::fd::OwnedFd {
     }
 }
 
-#[cfg(not(any(io_lifetimes_use_std, feature = "rustc-dep-of-std")))]
+#[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
 impl IntoFd for OwnedFd {
     #[inline]
     fn into_fd(self) -> crate::imp::fd::OwnedFd {
@@ -62,7 +62,7 @@ impl IntoFd for OwnedFd {
     }
 }
 
-#[cfg(any(io_lifetimes_use_std, feature = "rustc-dep-of-std"))]
+#[cfg(any(io_lifetimes_use_std, not(feature = "std")))]
 impl From<crate::imp::fd::OwnedFd> for OwnedFd {
     #[inline]
     fn from(owned_fd: crate::imp::fd::OwnedFd) -> Self {
@@ -72,7 +72,7 @@ impl From<crate::imp::fd::OwnedFd> for OwnedFd {
     }
 }
 
-#[cfg(all(not(io_lifetimes_use_std), not(feature = "rustc-dep-of-std")))]
+#[cfg(all(not(io_lifetimes_use_std), feature = "std"))]
 impl FromFd for OwnedFd {
     #[inline]
     fn from_fd(owned_fd: crate::imp::fd::OwnedFd) -> Self {
@@ -82,19 +82,26 @@ impl FromFd for OwnedFd {
     }
 }
 
-#[cfg(not(any(io_lifetimes_use_std, feature = "rustc-dep-of-std")))]
+#[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
 impl From<crate::imp::fd::OwnedFd> for OwnedFd {
     #[inline]
     fn from(fd: crate::imp::fd::OwnedFd) -> Self {
-        Self::from_fd(fd)
+        Self {
+            inner: ManuallyDrop::new(fd),
+        }
     }
 }
 
-#[cfg(not(any(io_lifetimes_use_std, feature = "rustc-dep-of-std")))]
+#[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
 impl From<OwnedFd> for crate::imp::fd::OwnedFd {
     #[inline]
     fn from(fd: OwnedFd) -> Self {
-        fd.into_fd()
+        // Safety: We use `as_fd().as_raw_fd()` to extract the raw file
+        // descriptor from `self.inner`, and then `forget` `self` so
+        // that they remain valid until the new `OwnedFd` acquires them.
+        let raw_fd = fd.inner.as_fd().as_raw_fd();
+        forget(fd);
+        unsafe { crate::imp::fd::OwnedFd::from_raw_fd(raw_fd) }
     }
 }
 

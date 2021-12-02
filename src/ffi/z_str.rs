@@ -734,7 +734,7 @@ impl ZString {
     /// assert_eq!(&*boxed,
     ///            CStr::from_bytes_with_nul(b"foo\0").expect("CStr::from_bytes_with_nul failed"));
     /// ```
-    #[cfg(not(feature = "rustc-dep-of-std"))]
+    #[cfg(feature = "std")]
     #[must_use = "`self` will be dropped if the result is not used"]
     #[cfg_attr(staged_api, stable(feature = "into_boxed_c_str", since = "1.20.0"))]
     pub fn into_boxed_c_str(self) -> Box<CStr> {
@@ -1209,7 +1209,7 @@ impl IntoStringError {
 
     /// Consumes this error, returning original [`CString`] which generated the
     /// error.
-    #[cfg(not(feature = "rustc-dep-of-std"))]
+    #[cfg(feature = "std")]
     #[must_use = "`self` will be dropped if the result is not used"]
     #[cfg_attr(staged_api, stable(feature = "cstring_into", since = "1.7.0"))]
     pub fn into_cstring(self) -> CString {
@@ -1594,7 +1594,7 @@ impl ZStr {
     /// let boxed = z_string.into_boxed_z_str();
     /// assert_eq!(boxed.into_c_string(), CString::new("foo").expect("ZString::new failed"));
     /// ```
-    #[cfg(not(feature = "rustc-dep-of-std"))]
+    #[cfg(feature = "std")]
     #[must_use = "`self` will be dropped if the result is not used"]
     #[cfg_attr(staged_api, stable(feature = "into_boxed_c_str", since = "1.20.0"))]
     pub fn into_c_string(self: Box<ZStr>) -> CString {
