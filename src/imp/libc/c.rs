@@ -1,4 +1,4 @@
-//! Adapt the Winsock API to resemble a POSIX-style libc API.
+//! Adapt the Winsock2 API to resemble a POSIX-style libc API.
 
 #![allow(unused_imports)]
 
@@ -50,7 +50,7 @@ pub(crate) use winapi::um::winsock2::{
 
 // [Documented] values for the `how` argument to `shutdown`.
 //
-// [Documented]: https://docs.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-shutdown#parameters
+// [Documented]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-shutdown#parameters
 const SD_RECEIVE: c_int = 0;
 const SD_SEND: c_int = 1;
 const SD_BOTH: c_int = 2;

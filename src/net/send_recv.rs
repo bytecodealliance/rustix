@@ -15,11 +15,11 @@ pub use imp::net::{RecvFlags, SendFlags};
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
-///  - [Winsock]
+///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/recv.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/recv.2.html
-/// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recv
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recv
 #[inline]
 pub fn recv<Fd: AsFd>(fd: &Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
     let fd = fd.as_fd();
@@ -31,11 +31,11 @@ pub fn recv<Fd: AsFd>(fd: &Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<u
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
-///  - [Winsock]
+///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/send.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/send.2.html
-/// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-send
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-send
 #[inline]
 pub fn send<Fd: AsFd>(fd: &Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize> {
     let fd = fd.as_fd();
@@ -48,11 +48,11 @@ pub fn send<Fd: AsFd>(fd: &Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
-///  - [Winsock]
+///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/recvfrom.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/recvfrom.2.html
-/// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recvfrom
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recvfrom
 #[inline]
 pub fn recvfrom<Fd: AsFd>(
     fd: &Fd,
@@ -69,11 +69,11 @@ pub fn recvfrom<Fd: AsFd>(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
-///  - [Winsock]
+///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendto.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
-/// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
 #[inline]
 #[doc(alias = "sendto")]
 pub fn sendto_v4<Fd: AsFd>(
@@ -92,11 +92,11 @@ pub fn sendto_v4<Fd: AsFd>(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
-///  - [Winsock]
+///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendto.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
-/// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
 #[inline]
 #[doc(alias = "sendto")]
 pub fn sendto_v6<Fd: AsFd>(
@@ -115,11 +115,11 @@ pub fn sendto_v6<Fd: AsFd>(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
-///  - [Winsock]
+///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendto.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
-/// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
 #[inline]
 #[doc(alias = "sendto")]
 #[cfg(not(windows))]

@@ -1,7 +1,7 @@
 //! The libc backend.
 //!
 //! On most platforms, this uses the `libc` crate to make system calls. On
-//! Windows, this uses the Winsock APIs in `winapi`, which can be adapted
+//! Windows, this uses the Winsock2 API in `winapi`, which can be adapted
 //! to have a very `libc`-like interface.
 
 #[cfg(not(any(windows, target_os = "wasi")))]

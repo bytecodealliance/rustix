@@ -8,15 +8,15 @@ use winapi::um::winsock2::{WSACleanup, WSAGetLastError, WSAStartup, WSADATA};
 /// using sockets APIs. The function performs the necessary initialization.
 ///
 /// # References
-///  - [Winsock]
+///  - [Winsock2]
 ///
-/// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsastartup
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsastartup
 pub fn wsa_startup() -> io::Result<WSADATA> {
     // Request version 2.2, which has been the latest version since far older
     // versions of Windows than we support here. For more information about
     // the version, see [here].
     //
-    // [here]: https://docs.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-wsastartup#remarks
+    // [here]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsastartup#remarks
     let version = 0x202;
     let mut data = MaybeUninit::uninit();
     unsafe {
@@ -35,9 +35,9 @@ pub fn wsa_startup() -> io::Result<WSADATA> {
 /// this function releases associated resources.
 ///
 /// # References
-///  - [Winsock]
+///  - [Winsock2]
 ///
-/// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsacleanup
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsacleanup
 pub fn wsa_cleanup() -> io::Result<()> {
     unsafe {
         if WSACleanup() == 0 {
