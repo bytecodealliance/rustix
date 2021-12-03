@@ -28,12 +28,6 @@ use crate::io;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::process::Pid;
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
-#[inline]
-pub(crate) fn exit_group(code: c::c_int) -> ! {
-    unsafe { c::_exit(code) }
-}
-
 #[cfg(target_os = "linux")]
 pub(crate) fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
     let nread = unsafe {

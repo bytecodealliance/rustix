@@ -18,30 +18,36 @@
 #![allow(unsafe_code)]
 
 use crate::ffi::ZStr;
+#[cfg(linux_raw)]
 use crate::process::Pid;
 use crate::{imp, io, path};
 use alloc::borrow::Cow;
 use alloc::vec::Vec;
+#[cfg(linux_raw)]
 use core::ffi::c_void;
 
+#[cfg(linux_raw)]
 #[cfg(target_arch = "x86")]
 #[inline]
 pub unsafe fn set_thread_area(u_info: &mut UserDesc) -> io::Result<()> {
     imp::syscalls::tls::set_thread_area(u_info)
 }
 
+#[cfg(linux_raw)]
 #[cfg(target_arch = "arm")]
 #[inline]
 pub unsafe fn arm_set_tls(data: *mut c_void) -> io::Result<()> {
     imp::syscalls::tls::arm_set_tls(data)
 }
 
+#[cfg(linux_raw)]
 #[cfg(target_arch = "x86_64")]
 #[inline]
 pub unsafe fn set_fs(data: *mut c_void) {
     imp::syscalls::tls::set_fs(data)
 }
 
+#[cfg(linux_raw)]
 #[inline]
 pub unsafe fn set_tid_address(data: *mut c_void) -> Pid {
     imp::syscalls::tls::set_tid_address(data)
@@ -58,11 +64,13 @@ pub unsafe fn set_tid_address(data: *mut c_void) -> Pid {
 /// See the references links above.
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/prctl.2.html
+#[cfg(linux_raw)]
 #[inline]
 pub unsafe fn set_thread_name(name: &ZStr) -> io::Result<()> {
     imp::syscalls::tls::set_thread_name(name)
 }
 
+#[cfg(linux_raw)]
 #[cfg(target_arch = "x86")]
 pub use imp::thread::tls::UserDesc;
 
@@ -71,6 +79,7 @@ pub use imp::thread::tls::UserDesc;
 /// # Safety
 ///
 /// This is a very low-level feature for implementing threading libraries.
+#[cfg(linux_raw)]
 #[inline]
 pub unsafe fn exit_thread(status: i32) -> ! {
     imp::syscalls::tls::exit_thread(status)
@@ -78,14 +87,22 @@ pub unsafe fn exit_thread(status: i32) -> ! {
 
 /// Exit all the threads in the current process' thread group.
 ///
+/// This is equivalent to `_exit` and `_Exit` in libc.
+///
 /// Note that this does not all any `__cxa_atexit`, `atexit`, or any other
 /// destructors. Most programs should use [`std::process::exit`] instead
 /// of calling this directly.
 ///
 /// # References
-///  - [Linux]
+///  - [POSIX `_Exit`]
+///  - [Linux `exit_group`]
+///  - [Linux `_Exit`]
 ///
-/// [Linux]: https://man7.org/linux/man-pages/man2/exit_group.2.html
+/// [POSIX `_Exit`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/_Exit.html
+/// [Linux `exit_group`]: https://man7.org/linux/man-pages/man2/exit_group.2.html
+/// [Linux `_Exit`]: https://man7.org/linux/man-pages/man2/exit.2.html
+#[doc(alias = "_exit")]
+#[doc(alias = "_Exit")]
 #[inline]
 pub fn exit_group(status: i32) -> ! {
     imp::syscalls::exit_group(status)
@@ -93,6 +110,7 @@ pub fn exit_group(status: i32) -> ! {
 
 /// Return fields from the main executable segment headers ("phdrs") relevant
 /// to initializing TLS provided to the program at startup.
+#[cfg(linux_raw)]
 #[inline]
 pub fn startup_tls_info() -> StartupTlsInfo {
     imp::thread::tls::startup_tls_info()
@@ -105,12 +123,14 @@ pub fn startup_tls_info() -> StartupTlsInfo {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man3/getauxval.3.html
+#[cfg(linux_raw)]
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 #[inline]
 pub fn exe_phdrs() -> (*const c_void, usize) {
     imp::process::exe_phdrs()
 }
 
+#[cfg(linux_raw)]
 pub use imp::thread::tls::StartupTlsInfo;
 
 /// `fork()`—Creates a new process by duplicating the calling process.
@@ -144,6 +164,7 @@ pub use imp::thread::tls::StartupTlsInfo;
 /// [Linux]: https://man7.org/linux/man-pages/man2/fork.2.html
 /// [`pthread_atfork`]: https://man7.org/linux/man-pages/man3/pthread_atfork.3.html
 /// [rand]: https://crates.io/crates/rand
+#[cfg(linux_raw)]
 pub unsafe fn fork() -> io::Result<Pid> {
     imp::syscalls::fork()
 }
@@ -153,6 +174,7 @@ pub unsafe fn fork() -> io::Result<Pid> {
 ///
 /// The first argument, by convention, should be the filename associated with
 /// the file being executed.
+#[cfg(not(target_os = "wasi"))]
 pub fn execve<P: path::Arg, A: path::Arg, E: path::Arg>(
     path: P,
     args: &[A],
@@ -169,6 +191,7 @@ pub fn execve<P: path::Arg, A: path::Arg, E: path::Arg>(
     path.into_with_z_str(|path_zstr| _execve(path_zstr, &arg_zstr, &env_zstr))
 }
 
+#[cfg(not(target_os = "wasi"))]
 fn _execve(path: &ZStr, arg_zstr: &[Cow<'_, ZStr>], env_zstr: &[Cow<'_, ZStr>]) -> io::Result<()> {
     let arg_ptrs: Vec<_> = arg_zstr
         .iter()
