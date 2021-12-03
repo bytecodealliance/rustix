@@ -2,7 +2,7 @@
   <h1><code>rustix</code></h1>
 
   <p>
-    <strong>Safe Rust bindings to POSIX/Unix/Linux/Winsock syscalls</strong>
+    <strong>Safe Rust bindings to POSIX/Unix/Linux/Winsock2 syscalls</strong>
   </p>
 
   <strong>A <a href="https://bytecodealliance.org/">Bytecode Alliance</a> project</strong>
@@ -16,17 +16,17 @@
 </div>
 
 `rustix` provides efficient memory-safe and [I/O-safe] wrappers to POSIX-like,
-Unix-like, Linux, and Winsock syscall-like APIs, with configurable backends. It
-uses Rust references, slices, and return values instead of raw pointers, and
+Unix-like, Linux, and Winsock2 syscall-like APIs, with configurable backends.
+It uses Rust references, slices, and return values instead of raw pointers, and
 [`io-lifetimes`] instead of raw file descriptors, providing memory safety and
 [I/O safety]. It uses `Result`s for reporting errors, [`bitflags`] instead of
 bare integer flags, an [`Arg`] trait with optimizations to efficiently accept
 any Rust string type, and several other efficient conveniences.
 
-`rustix` is low-level and, and while the `net` API supports Winsock on Windows,
-the rest of the APIs do not support Windows; for higher-level and more portable
-APIs built on this functionality, see the [`system-interface`], [`cap-std`],
-and [`fs-set-times`] crates, for example.
+`rustix` is low-level and, and while the `net` API supports Winsock2 on
+Windows, the rest of the APIs do not support Windows; for higher-level and more
+portable APIs built on this functionality, see the [`system-interface`],
+[`cap-std`], and [`fs-set-times`] crates, for example.
 
 `rustix` currently has two backends available: `linux_raw` and `libc`.
 
@@ -45,7 +45,7 @@ It supports stable as well as nightly Rust.
 The `libc` backend is enabled by default on all other platforms, and can be
 set explicitly for any target by setting `RUSTFLAGS` to
 `--cfg rustix_use_libc`. It uses the [`libc`] crate which provides bindings to
-native `libc` libraries, as well as [`winapi`] for Winsock, and is portable to
+native `libc` libraries, as well as [`winapi`] for Winsock2, and is portable to
 many OS's.
 
 ## Similar crates

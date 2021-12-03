@@ -5,7 +5,7 @@ authors = [
     "Dan Gohman <dev@sunfishcode.online>",
     "Jakub Konka <kubkon@jakubkonka.com>",
 ]
-description = "Safe Rust bindings to POSIX/Unix/Linux/Winsock-like syscalls"
+description = "Safe Rust bindings to POSIX/Unix/Linux/Winsock2-like syscalls"
 documentation = "https://docs.rs/rustix"
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 repository = "https://github.com/bytecodealliance/rustix"
@@ -41,7 +41,7 @@ linux-raw-sys = { version = "0.0.36", default-features = false, features = ["gen
 errno = { version = "0.2.8", default-features = false }
 libc = { version = "0.2.98", features = ["extra_traits"] }
 
-# For the libc backend on Windows, use the Winsock API in winapi.
+# For the libc backend on Windows, use the Winsock2 API in winapi.
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.9", features = ["ws2ipdef", "ws2tcpip"] }
 
