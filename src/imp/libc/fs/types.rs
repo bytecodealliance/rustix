@@ -267,7 +267,8 @@ bitflags! {
                   target_os = "openbsd",
                   target_os = "redox",
                   target_os = "solaris",
-                  target_os = "vxworks"))]
+                  target_os = "vxworks",
+                  target_os = "wasi"))]
         const CLOEXEC = c::O_CLOEXEC;
 
         /// `O_TMPFILE`
