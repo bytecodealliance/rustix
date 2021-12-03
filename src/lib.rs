@@ -73,7 +73,6 @@
 //! [`cap-std`]: https://crates.io/crates/cap-std
 //! [`system-interface`]: https://crates.io/crates/system-interface
 //! [`io-streams`]: https://crates.io/crates/io-streams
-//! [`std`]: https://doc.rust-lang.org/std/
 //! [`getrandom`]: https://crates.io/crates/getrandom
 //! [`bitflags`]: https://crates.io/crates/bitflags
 //! [`AsFd`]: https://doc.rust-lang.org/stable/std/os/unix/io/trait.AsFd.html
