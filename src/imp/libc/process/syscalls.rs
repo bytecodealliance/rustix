@@ -290,3 +290,17 @@ pub(crate) fn waitpid(pid: RawPid, waitopts: WaitOptions) -> io::Result<Option<(
         }
     }
 }
+
+#[inline]
+pub(crate) fn exit_group(code: c::c_int) -> ! {
+    // `_exit` and `_Exit` are the same; it's just a matter of which ones
+    // the libc bindings expose.
+    #[cfg(any(target_os = "wasi", target_os = "solid"))]
+    unsafe {
+        libc::_Exit(code)
+    }
+    #[cfg(unix)]
+    unsafe {
+        libc::_exit(code)
+    }
+}
