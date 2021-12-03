@@ -2,10 +2,18 @@
 //! POSIX-like, Unix-like, Linux, and Winsock2 syscall-like APIs, with
 //! configurable backends.
 //!
-//! For example, instead of calling libc directly, using an `unsafe` block,
-//! passing a raw file descriptor, passing a raw pointer, passing a buffer
-//! length, manually checking the return value for errors, and manually
-//! converting the return value to the intended type:
+//! With rustix, you can write code like this:
+//!
+//! ```rust
+//! # fn read(sock: std::net::TcpStream, buf: &mut [u8]) -> std::io::Result<()> {
+//! # use rustix::net::RecvFlags;
+//! let nread: usize = rustix::net::recv(&sock, buf, RecvFlags::PEEK)?;
+//! # let _ = nread;
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! instead of like this:
 //!
 //! ```rust
 //! # fn read(sock: std::net::TcpStream, buf: &mut [u8]) -> std::io::Result<()> {
@@ -25,18 +33,6 @@
 //!         nread => nread as usize,
 //!     }
 //! };
-//! # let _ = nread;
-//! # Ok(())
-//! # }
-//! ```
-//!
-//! With rustix you can call a safe function, pass it any type that implements
-//! [`AsFd`], pass it a slice, and get a `Result` carrying the intended type:
-//!
-//! ```rust
-//! # fn read(sock: std::net::TcpStream, buf: &mut [u8]) -> std::io::Result<()> {
-//! # use rustix::net::RecvFlags;
-//! let nread: usize = rustix::net::recv(&sock, buf, RecvFlags::PEEK)?;
 //! # let _ = nread;
 //! # Ok(())
 //! # }
