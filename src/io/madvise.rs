@@ -22,10 +22,12 @@ pub use imp::io::Advice;
 ///
 /// # References
 ///  - [POSIX]
-///  - [Linux]
+///  - [Linux `madvise`]
+///  - [Linux `posix_madvise`]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/posix_madvise.html
-/// [Linux]: https://man7.org/linux/man-pages/man2/posix_madvise.2.html
+/// [Linux `madvise`]: https://man7.org/linux/man-pages/man2/madvise.2.html
+/// [Linux `posix_madvise`]: https://man7.org/linux/man-pages/man3/posix_madvise.3.html
 #[inline]
 #[doc(alias = "posix_madvise")]
 pub unsafe fn madvise(addr: *mut c_void, len: usize, advice: Advice) -> io::Result<()> {

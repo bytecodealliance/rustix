@@ -119,7 +119,7 @@ pub fn fstatfs<Fd: AsFd>(fd: &Fd) -> io::Result<StatFs> {
 ///  - [Linux]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/futimens.html
-/// [Linux]: https://man7.org/linux/man-pages/man2/futimens.2.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/utimensat.2.html
 #[inline]
 pub fn futimens<Fd: AsFd>(fd: &Fd, times: &[Timespec; 2]) -> io::Result<()> {
     let fd = fd.as_fd();
