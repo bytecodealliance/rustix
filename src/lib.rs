@@ -148,7 +148,6 @@ pub mod thread;
 pub mod time;
 
 #[cfg(not(windows))]
-#[cfg(linux_raw)]
 #[doc(hidden)]
 pub mod runtime;
 

@@ -13,7 +13,10 @@ pub use imp::time::{ClockId, DynamicClockId};
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_getres.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/clock_getres.2.html
-#[cfg(any(linux_raw, all(libc, not(target_os = "wasi"))))]
+#[cfg(any(
+    linux_raw,
+    all(libc, not(any(target_os = "redox", target_os = "wasi")))
+))]
 #[inline]
 #[must_use]
 pub fn clock_getres(id: ClockId) -> Timespec {

@@ -43,7 +43,7 @@ pub use auxv::{linux_execfn, linux_hwcap};
 pub use chdir::chdir;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 pub use chdir::fchdir;
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(target_os = "wasi"))]
 pub use chdir::getcwd;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use id::Cpuid;
