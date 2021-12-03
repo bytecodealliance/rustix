@@ -5,7 +5,6 @@ use crate::{imp, io};
 mod auxv;
 #[cfg(not(target_os = "wasi"))]
 mod chdir;
-mod exit;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
@@ -46,8 +45,6 @@ pub use chdir::chdir;
 pub use chdir::fchdir;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub use chdir::getcwd;
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
-pub use exit::exit_group;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use id::Cpuid;
 #[cfg(not(target_os = "wasi"))]
