@@ -53,7 +53,7 @@ fn elf_hash(name: &ZStr) -> u32 {
 }
 
 /// Cast `value` to a pointer type, doing some checks for validity.
-fn make_pointer<T>(value: usize) -> Option<*const T> {
+const fn make_pointer<T>(value: usize) -> Option<*const T> {
     if value == 0 || value.checked_add(size_of::<T>()).is_none() || value % align_of::<T>() != 0 {
         return None;
     }
@@ -67,6 +67,10 @@ fn make_pointer<T>(value: usize) -> Option<*const T> {
 ///
 /// `base` must be a valid pointer to an ELF image in memory.
 unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
+    extern "C" {
+        static __ehdr_start: c::c_void;
+    }
+
     let mut vdso = Vdso {
         load_addr: base,
         load_end: base,
@@ -82,24 +86,17 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
     };
 
     // Check that we're not attempting to parse our own ELF image.
-    extern "C" {
-        static __ehdr_start: c::c_void;
-    }
     let ehdr_start: *const c::c_void = &__ehdr_start;
     if base == (ehdr_start as usize) {
         return None;
     }
 
     // Check that the vDSO is page-aligned and appropriately mapped.
-    if madvise(
+    madvise(
         base as *mut c::c_void,
         size_of::<Elf_Ehdr>(),
         Advice::Normal,
-    )
-    .is_err()
-    {
-        return None;
-    }
+    ).ok()?;
 
     let hdr = &*make_pointer::<Elf_Ehdr>(base)?;
 

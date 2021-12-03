@@ -220,7 +220,7 @@ pub(super) fn raw_arg<'a, Num: ArgNumber>(bits: usize) -> ArgReg<'a, Num> {
 
 /// Encode a system call number (a `__NR_*` constant) as a `SyscallNumber`.
 #[inline]
-pub(super) fn nr<'a>(nr: u32) -> SyscallNumber<'a> {
+pub(super) const fn nr<'a>(nr: u32) -> SyscallNumber<'a> {
     SyscallNumber {
         nr: nr as usize,
         _phantom: PhantomData,

@@ -247,7 +247,7 @@ fn oflags_bits(oflags: OFlags) -> c::c_uint {
 
 #[cfg(target_pointer_width = "64")]
 #[inline]
-fn oflags_bits(oflags: OFlags) -> c::c_uint {
+const fn oflags_bits(oflags: OFlags) -> c::c_uint {
     oflags.bits()
 }
 
@@ -286,10 +286,10 @@ pub(super) unsafe fn ret(raw: RetReg<R0>) -> io::Result<()> {
 /// The caller must ensure that this is the return value of a syscall which
 /// always returns `()`.
 #[inline]
-pub(super) unsafe fn ret_infallible(_raw: RetReg<R0>) {
+pub(super) unsafe fn ret_infallible(raw: RetReg<R0>) {
     #[cfg(debug_assertions)]
     {
-        try_decode_void(_raw).unwrap()
+        try_decode_void(raw).unwrap()
     }
 }
 
