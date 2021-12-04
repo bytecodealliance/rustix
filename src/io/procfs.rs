@@ -237,8 +237,13 @@ fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 
             // Open "/proc/self". Use our pid to compute the name rather than literally
             // using "self", as "self" is a symlink.
-            let proc_self = openat(&proc, DecInt::new(pid.as_raw()), oflags, Mode::empty())
-                .map_err(|_err| io::Error::NOTSUP)?;
+            let proc_self = openat(
+                &proc,
+                DecInt::new(pid.as_raw_nonzero().get()),
+                oflags,
+                Mode::empty(),
+            )
+            .map_err(|_err| io::Error::NOTSUP)?;
             let proc_self_stat = check_proc_entry(
                 Kind::Pid,
                 proc_self.as_fd(),

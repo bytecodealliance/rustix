@@ -45,7 +45,7 @@ use super::io::{
 #[cfg(not(target_os = "wasi"))]
 use super::io::{Termios, Winsize};
 use super::net::{RecvFlags, SendFlags};
-use super::process::{RawCpuSet, RawPid, RawUname, Resource};
+use super::process::{RawCpuSet, RawNonZeroPid, RawPid, RawUname, Resource};
 use super::rand::GetRandomFlags;
 use super::reg::nr;
 use super::thread::{FutexFlags, FutexOperation};
@@ -494,14 +494,14 @@ pub(crate) fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usi
 }
 
 #[inline]
-pub(crate) fn sched_getaffinity(pid: Pid, cpuset: &mut RawCpuSet) -> io::Result<()> {
+pub(crate) fn sched_getaffinity(pid: Option<Pid>, cpuset: &mut RawCpuSet) -> io::Result<()> {
     unsafe {
         // The raw linux syscall returns the size (in bytes) of the cpumask_t
         // data type that is used internally by the kernel to represent the CPU
         // set bit mask.
         let size = ret_usize(syscall3(
             nr(__NR_sched_getaffinity),
-            c_uint(pid.as_raw()),
+            c_uint(Pid::as_raw(pid)),
             size_of::<RawCpuSet, _>(),
             by_mut(&mut cpuset.bits),
         ))?;
@@ -514,11 +514,11 @@ pub(crate) fn sched_getaffinity(pid: Pid, cpuset: &mut RawCpuSet) -> io::Result<
 }
 
 #[inline]
-pub(crate) fn sched_setaffinity(pid: Pid, cpuset: &RawCpuSet) -> io::Result<()> {
+pub(crate) fn sched_setaffinity(pid: Option<Pid>, cpuset: &RawCpuSet) -> io::Result<()> {
     unsafe {
         ret(syscall3(
             nr(__NR_sched_setaffinity),
-            c_uint(pid.as_raw()),
+            c_uint(Pid::as_raw(pid)),
             size_of::<RawCpuSet, _>(),
             slice_just_addr(&cpuset.bits),
         ))
@@ -1096,12 +1096,13 @@ pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd>
 pub(crate) fn getpid() -> Pid {
     unsafe {
         let pid: i32 = ret_usize_infallible(syscall0_readonly(nr(__NR_getpid))) as __kernel_pid_t;
-        Pid::from_raw(pid as u32)
+        debug_assert_ne!(pid, 0);
+        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid as u32))
     }
 }
 
 #[inline]
-pub(crate) fn getppid() -> Pid {
+pub(crate) fn getppid() -> Option<Pid> {
     unsafe {
         let ppid: i32 = ret_usize_infallible(syscall0_readonly(nr(__NR_getppid))) as __kernel_pid_t;
         Pid::from_raw(ppid as u32)
@@ -1172,7 +1173,8 @@ pub(crate) fn geteuid() -> Uid {
 pub(crate) fn gettid() -> Pid {
     unsafe {
         let tid: i32 = ret_usize_infallible(syscall0_readonly(nr(__NR_gettid))) as __kernel_pid_t;
-        Pid::from_raw(tid as u32)
+        debug_assert_ne!(tid, 0);
+        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(tid as u32))
     }
 }
 
@@ -1352,7 +1354,7 @@ pub(crate) fn uname() -> RawUname {
 #[inline]
 pub(crate) fn nice(inc: i32) -> io::Result<i32> {
     let priority = if inc > -40 && inc < 40 {
-        inc + getpriority_process(Pid::NONE)?
+        inc + getpriority_process(None)?
     } else {
         inc
     }
@@ -1360,7 +1362,7 @@ pub(crate) fn nice(inc: i32) -> io::Result<i32> {
     //.clamp(-20, 19);
     .min(19)
     .max(-20);
-    setpriority_process(Pid::NONE, priority)?;
+    setpriority_process(None, priority)?;
     Ok(priority)
 }
 
@@ -1377,25 +1379,25 @@ pub(crate) fn getpriority_user(uid: Uid) -> io::Result<i32> {
 }
 
 #[inline]
-pub(crate) fn getpriority_pgrp(pgid: Pid) -> io::Result<i32> {
+pub(crate) fn getpriority_pgrp(pgid: Option<Pid>) -> io::Result<i32> {
     unsafe {
         Ok(20
             - ret_c_int(syscall2_readonly(
                 nr(__NR_getpriority),
                 c_uint(linux_raw_sys::general::PRIO_PGRP),
-                c_uint(pgid.as_raw()),
+                c_uint(Pid::as_raw(pgid)),
             ))?)
     }
 }
 
 #[inline]
-pub(crate) fn getpriority_process(pid: Pid) -> io::Result<i32> {
+pub(crate) fn getpriority_process(pid: Option<Pid>) -> io::Result<i32> {
     unsafe {
         Ok(20
             - ret_c_int(syscall2_readonly(
                 nr(__NR_getpriority),
                 c_uint(linux_raw_sys::general::PRIO_PROCESS),
-                c_uint(pid.as_raw()),
+                c_uint(Pid::as_raw(pid)),
             ))?)
     }
 }
@@ -1413,24 +1415,24 @@ pub(crate) fn setpriority_user(uid: Uid, priority: i32) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn setpriority_pgrp(pgid: Pid, priority: i32) -> io::Result<()> {
+pub(crate) fn setpriority_pgrp(pgid: Option<Pid>, priority: i32) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_setpriority),
             c_uint(linux_raw_sys::general::PRIO_PGRP),
-            c_uint(pgid.as_raw()),
+            c_uint(Pid::as_raw(pgid)),
             c_int(priority),
         ))
     }
 }
 
 #[inline]
-pub(crate) fn setpriority_process(pid: Pid, priority: i32) -> io::Result<()> {
+pub(crate) fn setpriority_process(pid: Option<Pid>, priority: i32) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_setpriority),
             c_uint(linux_raw_sys::general::PRIO_PROCESS),
-            c_uint(pid.as_raw()),
+            c_uint(Pid::as_raw(pid)),
             c_int(priority),
         ))
     }
@@ -1568,7 +1570,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
 }
 
 #[inline]
-pub(crate) unsafe fn fork() -> io::Result<Pid> {
+pub(crate) unsafe fn fork() -> io::Result<Option<Pid>> {
     let pid = ret_c_uint(syscall5_readonly(
         nr(__NR_clone),
         c_uint(SIGCHLD),
@@ -1594,7 +1596,23 @@ pub(crate) unsafe fn execve(
 }
 
 #[inline]
-pub(crate) fn waitpid(pid: RawPid, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+pub(crate) fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+    _waitpid(!0, waitopts)
+}
+
+#[inline]
+pub(crate) fn waitpid(
+    pid: Option<Pid>,
+    waitopts: WaitOptions,
+) -> io::Result<Option<(Pid, WaitStatus)>> {
+    _waitpid(Pid::as_raw(pid), waitopts)
+}
+
+#[inline]
+pub(crate) fn _waitpid(
+    pid: RawPid,
+    waitopts: WaitOptions,
+) -> io::Result<Option<(Pid, WaitStatus)>> {
     unsafe {
         let mut status: u32 = 0;
         let pid = ret_c_uint(syscall4(
@@ -1604,11 +1622,8 @@ pub(crate) fn waitpid(pid: RawPid, waitopts: WaitOptions) -> io::Result<Option<(
             c_int(waitopts.bits() as _),
             zero(),
         ))?;
-        if pid == 0 {
-            Ok(None)
-        } else {
-            Ok(Some((Pid::from_raw(pid), WaitStatus::new(status))))
-        }
+        Ok(RawNonZeroPid::new(pid)
+            .map(|non_zero| (Pid::from_raw_nonzero(non_zero), WaitStatus::new(status))))
     }
 }
 
@@ -1643,7 +1658,8 @@ pub(crate) mod tls {
     pub(crate) unsafe fn set_tid_address(data: *mut c::c_void) -> Pid {
         let tid: i32 = ret_usize_infallible(syscall1(nr(__NR_set_tid_address), void_star(data)))
             as __kernel_pid_t;
-        Pid::from_raw(tid as u32)
+        debug_assert_ne!(tid, 0);
+        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(tid as u32))
     }
 
     #[inline]

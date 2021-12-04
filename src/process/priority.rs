@@ -35,6 +35,8 @@ pub fn getpriority_user(uid: Uid) -> io::Result<i32> {
 /// `getpriority(PRIO_PGRP, gid)`—Get the scheduling priority of the given
 /// process group.
 ///
+/// A `pgid` of `None` means the process group of the calling process.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
@@ -46,13 +48,15 @@ pub fn getpriority_user(uid: Uid) -> io::Result<i32> {
 #[cfg(not(target_os = "redox"))]
 #[inline]
 #[doc(alias = "getpriority")]
-pub fn getpriority_pgrp(pgid: Pid) -> io::Result<i32> {
+pub fn getpriority_pgrp(pgid: Option<Pid>) -> io::Result<i32> {
     imp::syscalls::getpriority_pgrp(pgid)
 }
 
 /// `getpriority(PRIO_PROCESS, pid)`—Get the scheduling priority of the given
 /// process.
 ///
+/// A `pid` of `None` means the calling process.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
@@ -64,7 +68,7 @@ pub fn getpriority_pgrp(pgid: Pid) -> io::Result<i32> {
 #[cfg(not(target_os = "redox"))]
 #[inline]
 #[doc(alias = "getpriority")]
-pub fn getpriority_process(pid: Pid) -> io::Result<i32> {
+pub fn getpriority_process(pid: Option<Pid>) -> io::Result<i32> {
     imp::syscalls::getpriority_process(pid)
 }
 
@@ -89,6 +93,8 @@ pub fn setpriority_user(uid: Uid, priority: i32) -> io::Result<()> {
 /// `setpriority(PRIO_PGRP, pgid)`—Get the scheduling priority of the given
 /// process group.
 ///
+/// A `pgid` of `None` means the process group of the calling process.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
@@ -100,13 +106,15 @@ pub fn setpriority_user(uid: Uid, priority: i32) -> io::Result<()> {
 #[cfg(not(target_os = "redox"))]
 #[inline]
 #[doc(alias = "setpriority")]
-pub fn setpriority_pgrp(pgid: Pid, priority: i32) -> io::Result<()> {
+pub fn setpriority_pgrp(pgid: Option<Pid>, priority: i32) -> io::Result<()> {
     imp::syscalls::setpriority_pgrp(pgid, priority)
 }
 
 /// `setpriority(PRIO_PROCESS, pid)`—Get the scheduling priority of the given
 /// process.
 ///
+/// A `pid` of `None` means the calling process.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
@@ -118,6 +126,6 @@ pub fn setpriority_pgrp(pgid: Pid, priority: i32) -> io::Result<()> {
 #[cfg(not(target_os = "redox"))]
 #[inline]
 #[doc(alias = "setpriority")]
-pub fn setpriority_process(pid: Pid, priority: i32) -> io::Result<()> {
+pub fn setpriority_process(pid: Option<Pid>, priority: i32) -> io::Result<()> {
     imp::syscalls::setpriority_process(pid, priority)
 }

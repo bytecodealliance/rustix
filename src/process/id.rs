@@ -21,6 +21,9 @@ pub use imp::process::RawGid;
 /// The raw integer value of a Unix process ID.
 pub use imp::process::RawPid;
 
+/// The raw integer value of a Unix process ID.
+pub use imp::process::RawNonZeroPid;
+
 /// `uid_t`—A Unix user ID.
 #[repr(transparent)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
@@ -31,10 +34,10 @@ pub struct Uid(RawUid);
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 pub struct Gid(RawGid);
 
-/// `pid_t`—A Unix process ID.
+/// `pid_t`—A non-zero Unix process ID.
 #[repr(transparent)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
-pub struct Pid(RawPid);
+pub struct Pid(RawNonZeroPid);
 
 /// A Linux CPU ID.
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
@@ -86,24 +89,42 @@ impl Gid {
 
 impl Pid {
     /// A `Pid` corresponding to the init process (pid 1).
-    pub const INIT: Self = Self(1);
-    /// A `Pid` corresponding to no process (pid 0).
-    pub const NONE: Self = Self(0);
+    pub const INIT: Self = Self(unsafe { RawNonZeroPid::new_unchecked(1) });
 
     /// Converts a `RawPid` into a `Pid`.
     ///
     /// # Safety
     ///
-    /// `raw` must be the value of a valid Unix process ID.
+    /// `raw` must be the value of a valid Unix process ID, or zero.
     #[inline]
-    pub const unsafe fn from_raw(raw: RawPid) -> Self {
+    pub const unsafe fn from_raw(raw: RawPid) -> Option<Self> {
+        match RawNonZeroPid::new(raw) {
+            Some(pid) => Some(Self(pid)),
+            None => None,
+        }
+    }
+
+    /// Converts a known non-zero `RawPid` into a `Pid`.
+    ///
+    /// # Safety
+    ///
+    /// `raw` must be the value of a valid Unix process ID. It must not be
+    /// zero.
+    #[inline]
+    pub const unsafe fn from_raw_nonzero(raw: RawNonZeroPid) -> Self {
         Self(raw)
     }
 
-    /// Converts a `Pid` into a `RawPid`.
+    /// Converts a `Pid` into a `RawNonZeroPid`.
     #[inline]
-    pub const fn as_raw(self) -> RawPid {
+    pub const fn as_raw_nonzero(self) -> RawNonZeroPid {
         self.0
+    }
+
+    /// Converts an `Option<Pid>` into a `RawPid`.
+    #[inline]
+    pub fn as_raw(pid: Option<Self>) -> RawPid {
+        pid.map(|pid| pid.0.get()).unwrap_or(0)
     }
 }
 
@@ -206,6 +227,6 @@ pub fn getpid() -> Pid {
 /// [Linux]: https://man7.org/linux/man-pages/man2/getppid.2.html
 #[inline]
 #[must_use]
-pub fn getppid() -> Pid {
+pub fn getppid() -> Option<Pid> {
     imp::syscalls::getppid()
 }

@@ -21,6 +21,8 @@ use super::conv::ret_ssize_t;
 use super::conv::{borrowed_fd, ret};
 #[cfg(windows)]
 use super::fd::{BorrowedFd, LibcFd, RawFd};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use super::process::RawNonZeroPid;
 #[cfg(target_os = "linux")]
 use super::rand::GetRandomFlags;
 #[cfg(any(windows, target_os = "linux"))]
@@ -46,7 +48,8 @@ pub(crate) fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usi
 pub(crate) fn gettid() -> Pid {
     unsafe {
         let tid: i32 = c::gettid();
-        Pid::from_raw(tid)
+        debug_assert_ne!(tid, 0);
+        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(tid))
     }
 }
 

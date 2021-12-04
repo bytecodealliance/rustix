@@ -64,8 +64,8 @@ impl CpuSet {
 
 /// `sched_setaffinity(pid, cpuset)`—Set a thread's CPU affinity mask.
 ///
-/// `pid` is the thread ID to update. If pid is `Pid::NONE`, then the current
-/// thread is updated.
+/// `pid` is the thread ID to update. If pid is `None`, then the current thread
+/// is updated.
 ///
 /// The `CpuSet` argument specifies the set of CPUs on which the thread will
 /// be eligible to run.
@@ -75,14 +75,14 @@ impl CpuSet {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/sched_setaffinity.2.html
 #[inline]
-pub fn sched_setaffinity(pid: Pid, cpuset: &CpuSet) -> io::Result<()> {
+pub fn sched_setaffinity(pid: Option<Pid>, cpuset: &CpuSet) -> io::Result<()> {
     imp::syscalls::sched_setaffinity(pid, &cpuset.cpu_set)
 }
 
 /// `sched_getaffinity(pid)`—Get a thread's CPU affinity mask.
 ///
-/// `pid` is the thread ID to check. If pid is `Pid::NONE`, then the current
-/// thread is checked.
+/// `pid` is the thread ID to check. If pid is `None`, then the current thread
+/// is checked.
 ///
 /// Returns the set of CPUs on which the thread is eligible to run.
 ///
@@ -91,7 +91,7 @@ pub fn sched_setaffinity(pid: Pid, cpuset: &CpuSet) -> io::Result<()> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/sched_getaffinity.2.html
 #[inline]
-pub fn sched_getaffinity(pid: Pid) -> io::Result<CpuSet> {
+pub fn sched_getaffinity(pid: Option<Pid>) -> io::Result<CpuSet> {
     let mut cpuset = CpuSet::new();
     imp::syscalls::sched_getaffinity(pid, &mut cpuset.cpu_set).and(Ok(cpuset))
 }

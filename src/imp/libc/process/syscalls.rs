@@ -22,7 +22,7 @@ use super::RawCpuSet;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use super::Resource;
 #[cfg(not(target_os = "wasi"))]
-use super::{RawPid, RawUname};
+use super::{RawNonZeroPid, RawPid, RawUname};
 use crate::ffi::ZStr;
 use crate::io;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
@@ -125,14 +125,15 @@ pub(crate) fn getegid() -> Gid {
 pub(crate) fn getpid() -> Pid {
     unsafe {
         let pid = c::getpid();
-        Pid::from_raw(pid)
+        debug_assert_ne!(pid, 0);
+        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid))
     }
 }
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
-pub(crate) fn getppid() -> Pid {
+pub(crate) fn getppid() -> Option<Pid> {
     unsafe {
         let pid: i32 = c::getppid();
         Pid::from_raw(pid)
@@ -146,10 +147,10 @@ pub(crate) fn getppid() -> Pid {
     target_os = "dragonfly"
 ))]
 #[inline]
-pub(crate) fn sched_getaffinity(pid: Pid, cpuset: &mut RawCpuSet) -> io::Result<()> {
+pub(crate) fn sched_getaffinity(pid: Option<Pid>, cpuset: &mut RawCpuSet) -> io::Result<()> {
     unsafe {
         ret(c::sched_getaffinity(
-            pid.as_raw() as _,
+            Pid::as_raw(pid) as _,
             core::mem::size_of::<RawCpuSet>(),
             cpuset,
         ))
@@ -163,10 +164,10 @@ pub(crate) fn sched_getaffinity(pid: Pid, cpuset: &mut RawCpuSet) -> io::Result<
     target_os = "dragonfly"
 ))]
 #[inline]
-pub(crate) fn sched_setaffinity(pid: Pid, cpuset: &RawCpuSet) -> io::Result<()> {
+pub(crate) fn sched_setaffinity(pid: Option<Pid>, cpuset: &RawCpuSet) -> io::Result<()> {
     unsafe {
         ret(c::sched_setaffinity(
-            pid.as_raw() as _,
+            Pid::as_raw(pid) as _,
             core::mem::size_of::<RawCpuSet>(),
             cpuset,
         ))
@@ -216,9 +217,9 @@ pub(crate) fn getpriority_user(uid: Uid) -> io::Result<i32> {
 
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[inline]
-pub(crate) fn getpriority_pgrp(pgid: Pid) -> io::Result<i32> {
+pub(crate) fn getpriority_pgrp(pgid: Option<Pid>) -> io::Result<i32> {
     errno::set_errno(errno::Errno(0));
-    let r = unsafe { c::getpriority(c::PRIO_PGRP, pgid.as_raw() as _) };
+    let r = unsafe { c::getpriority(c::PRIO_PGRP, Pid::as_raw(pgid) as _) };
     if errno::errno().0 != 0 {
         ret_c_int(r)
     } else {
@@ -228,9 +229,9 @@ pub(crate) fn getpriority_pgrp(pgid: Pid) -> io::Result<i32> {
 
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[inline]
-pub(crate) fn getpriority_process(pid: Pid) -> io::Result<i32> {
+pub(crate) fn getpriority_process(pid: Option<Pid>) -> io::Result<i32> {
     errno::set_errno(errno::Errno(0));
-    let r = unsafe { c::getpriority(c::PRIO_PROCESS, pid.as_raw() as _) };
+    let r = unsafe { c::getpriority(c::PRIO_PROCESS, Pid::as_raw(pid) as _) };
     if errno::errno().0 != 0 {
         ret_c_int(r)
     } else {
@@ -246,14 +247,26 @@ pub(crate) fn setpriority_user(uid: Uid, priority: i32) -> io::Result<()> {
 
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[inline]
-pub(crate) fn setpriority_pgrp(pgid: Pid, priority: i32) -> io::Result<()> {
-    unsafe { ret(c::setpriority(c::PRIO_PGRP, pgid.as_raw() as _, priority)) }
+pub(crate) fn setpriority_pgrp(pgid: Option<Pid>, priority: i32) -> io::Result<()> {
+    unsafe {
+        ret(c::setpriority(
+            c::PRIO_PGRP,
+            Pid::as_raw(pgid) as _,
+            priority,
+        ))
+    }
 }
 
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[inline]
-pub(crate) fn setpriority_process(pid: Pid, priority: i32) -> io::Result<()> {
-    unsafe { ret(c::setpriority(c::PRIO_PROCESS, pid.as_raw() as _, priority)) }
+pub(crate) fn setpriority_process(pid: Option<Pid>, priority: i32) -> io::Result<()> {
+    unsafe {
+        ret(c::setpriority(
+            c::PRIO_PROCESS,
+            Pid::as_raw(pid) as _,
+            priority,
+        ))
+    }
 }
 
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
@@ -279,15 +292,34 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub(crate) fn waitpid(pid: RawPid, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+pub(crate) fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+    _waitpid(!0, waitopts)
+}
+
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub(crate) fn waitpid(
+    pid: Option<Pid>,
+    waitopts: WaitOptions,
+) -> io::Result<Option<(Pid, WaitStatus)>> {
+    _waitpid(Pid::as_raw(pid), waitopts)
+}
+
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub(crate) fn _waitpid(
+    pid: RawPid,
+    waitopts: WaitOptions,
+) -> io::Result<Option<(Pid, WaitStatus)>> {
     unsafe {
         let mut status: c::c_int = 0;
         let pid = ret_c_int(c::waitpid(pid as _, &mut status, waitopts.bits() as _))?;
-        if pid == 0 {
-            Ok(None)
-        } else {
-            Ok(Some((Pid::from_raw(pid), WaitStatus::new(status as _))))
-        }
+        Ok(RawNonZeroPid::new(pid).map(|non_zero| {
+            (
+                Pid::from_raw_nonzero(non_zero),
+                WaitStatus::new(status as _),
+            )
+        }))
     }
 }
 

@@ -136,7 +136,7 @@ pub use imp::thread::tls::StartupTlsInfo;
 /// `fork()`—Creates a new process by duplicating the calling process.
 ///
 /// On success, the PID of the child process is returned in the parent, and
-/// `Pid::NONE` is returned in the child.
+/// `None` is returned in the child.
 ///
 /// If the parent has multiple threads, fork creates a child process containing
 /// a copy of all the memory of all the threads, but with only one actual
@@ -165,7 +165,7 @@ pub use imp::thread::tls::StartupTlsInfo;
 /// [`pthread_atfork`]: https://man7.org/linux/man-pages/man3/pthread_atfork.3.html
 /// [rand]: https://crates.io/crates/rand
 #[cfg(linux_raw)]
-pub unsafe fn fork() -> io::Result<Pid> {
+pub unsafe fn fork() -> io::Result<Option<Pid>> {
     imp::syscalls::fork()
 }
 

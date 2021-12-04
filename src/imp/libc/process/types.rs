@@ -143,6 +143,9 @@ pub const EXIT_SIGNALED_SIGABRT: c::c_int = 128 + c::SIGABRT;
 /// A process identifier as a raw integer.
 #[cfg(not(target_os = "wasi"))]
 pub type RawPid = c::pid_t;
+/// A non-zero process identifier as a raw non-zero integer.
+#[cfg(not(target_os = "wasi"))]
+pub type RawNonZeroPid = core::num::NonZeroI32;
 /// A group identifier as a raw integer.
 #[cfg(not(target_os = "wasi"))]
 pub type RawGid = c::gid_t;
