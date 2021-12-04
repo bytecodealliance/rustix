@@ -554,7 +554,7 @@ impl Error {
     pub const NOSYS: Self = Self(c::ENOSYS);
     #[cfg(not(any(windows, target_os = "wasi")))]
     pub const NOTBLK: Self = Self(c::ENOTBLK);
-    #[cfg(any(target_os = "freebsd"))]
+    #[cfg(any(target_os = "freebsd", target_os = "wasi"))]
     pub const NOTCAPABLE: Self = Self(c::ENOTCAPABLE);
     pub const NOTCONN: Self = Self(c::ENOTCONN);
     #[cfg(not(windows))]
