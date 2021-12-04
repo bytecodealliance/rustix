@@ -92,8 +92,8 @@
 #![cfg_attr(not(feature = "std"), feature(slice_internals))]
 #![cfg_attr(not(feature = "std"), feature(toowned_clone_into))]
 #![cfg_attr(not(feature = "std"), feature(vec_into_raw_parts))]
-#![cfg_attr(feature = "rustc-dep-of-std", feature(const_raw_ptr_deref))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(core_intrinsics))]
+#![cfg_attr(feature = "rustc-dep-of-std", feature(ip))]
 #![cfg_attr(
     all(not(feature = "rustc-dep-of-std"), core_intrinsics),
     feature(core_intrinsics)

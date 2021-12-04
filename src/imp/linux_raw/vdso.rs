@@ -96,7 +96,8 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
         base as *mut c::c_void,
         size_of::<Elf_Ehdr>(),
         Advice::Normal,
-    ).ok()?;
+    )
+    .ok()?;
 
     let hdr = &*make_pointer::<Elf_Ehdr>(base)?;
 

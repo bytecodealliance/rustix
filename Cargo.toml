@@ -63,6 +63,7 @@ rustc-dep-of-std = [
     "compiler_builtins",
     "linux-raw-sys/rustc-dep-of-std",
     "bitflags/rustc-dep-of-std",
+    "libc/rustc-dep-of-std",
 ]
 
 # Enable this to enable `proc_self_fd` (on Linux) and `ttyname`.

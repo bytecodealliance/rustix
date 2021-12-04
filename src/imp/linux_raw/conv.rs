@@ -287,6 +287,7 @@ pub(super) unsafe fn ret(raw: RetReg<R0>) -> io::Result<()> {
 /// always returns `()`.
 #[inline]
 pub(super) unsafe fn ret_infallible(raw: RetReg<R0>) {
+    let _ = raw;
     #[cfg(debug_assertions)]
     {
         try_decode_void(raw).unwrap()
