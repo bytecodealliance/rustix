@@ -5,7 +5,8 @@ use rustix::process::*;
 
 #[cfg(not(windows))]
 fn main() -> io::Result<()> {
-    println!("Pid: {}", getpid().as_raw());
+    println!("Pid: {}", getpid().as_raw_nonzero());
+    println!("Parent Pid: {}", Pid::as_raw(getppid()));
     println!("Uid: {}", getuid().as_raw());
     println!("Gid: {}", getgid().as_raw());
     #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -15,8 +16,8 @@ fn main() -> io::Result<()> {
     }
     println!("Page size: {}", page_size());
     println!("Uname: {:?}", uname());
-    println!("Process group priority: {}", getpriority_pgrp(Pid::NONE)?);
-    println!("Process priority: {}", getpriority_process(Pid::NONE)?);
+    println!("Process group priority: {}", getpriority_pgrp(None)?);
+    println!("Process priority: {}", getpriority_process(None)?);
     println!("User priority: {}", getpriority_user(Uid::ROOT)?);
     println!(
         "Current working directory: {}",

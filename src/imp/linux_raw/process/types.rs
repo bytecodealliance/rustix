@@ -83,6 +83,8 @@ pub const EXIT_SIGNALED_SIGABRT: c::c_int = 128 + linux_raw_sys::general::SIGABR
 
 /// A process identifier as a raw integer.
 pub type RawPid = u32;
+/// A non-zero process identifier as a raw non-zero integer.
+pub type RawNonZeroPid = core::num::NonZeroU32;
 /// A group identifier as a raw integer.
 pub type RawGid = u32;
 /// A user identifier as a raw integer.
