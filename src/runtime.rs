@@ -151,8 +151,8 @@ pub use imp::thread::tls::StartupTlsInfo;
 ///
 ///  - Acquiring any other locks that are held in other threads on the parent
 ///    at the time of the `fork`, as the child only contains one thread, and
-///    attempting to acquire such locks will deadlock (though this is
-///    [not considered unsafe]).
+///    attempting to acquire such locks will deadlock (though this is [not
+///    considered unsafe]).
 ///
 ///  - Performing any dynamic allocation using the global allocator, since
 ///    global allocators may use locks to ensure thread safety, and their locks
