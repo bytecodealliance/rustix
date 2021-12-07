@@ -15,8 +15,8 @@ use super::io::error::decode_usize_infallible;
 #[cfg(target_pointer_width = "64")]
 use super::io::error::try_decode_u64;
 use super::io::error::{
-    try_decode_c_int, try_decode_c_uint, try_decode_raw_fd, try_decode_usize, try_decode_void,
-    try_decode_void_star,
+    try_decode_c_int, try_decode_c_uint, try_decode_error, try_decode_raw_fd, try_decode_usize,
+    try_decode_void, try_decode_void_star,
 };
 use super::reg::{raw_arg, ArgNumber, ArgReg, RetReg, R0};
 use super::time::ClockId;
@@ -276,6 +276,17 @@ pub(super) fn out<'a, T: Sized, Num: ArgNumber>(t: &'a mut MaybeUninit<T>) -> Ar
 #[inline]
 pub(super) unsafe fn ret(raw: RetReg<R0>) -> io::Result<()> {
     try_decode_void(raw)
+}
+
+/// Convert a `usize` returned from a syscall that doesn't return on success.
+///
+/// # Safety
+///
+/// The caller must ensure that this is the return value of a syscall which
+/// doesn't return on success.
+#[inline]
+pub(super) unsafe fn ret_error(raw: RetReg<R0>) -> io::Error {
+    try_decode_error(raw)
 }
 
 /// Convert a `usize` returned from a syscall that effectively always returns

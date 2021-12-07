@@ -17,14 +17,19 @@
 
 #![allow(unsafe_code)]
 
+#[cfg(linux_raw)]
 use crate::ffi::ZStr;
 #[cfg(linux_raw)]
+use crate::fs::AtFlags;
+use crate::imp;
+#[cfg(linux_raw)]
+use crate::io;
+#[cfg(linux_raw)]
 use crate::process::Pid;
-use crate::{imp, io, path};
-use alloc::borrow::Cow;
-use alloc::vec::Vec;
 #[cfg(linux_raw)]
 use core::ffi::c_void;
+#[cfg(linux_raw)]
+use imp::fd::AsFd;
 
 #[cfg(linux_raw)]
 #[cfg(target_arch = "x86")]
@@ -215,39 +220,27 @@ pub unsafe fn fork() -> io::Result<Option<Pid>> {
     imp::syscalls::fork()
 }
 
-/// Executes the program pointed to by `path`, with the arguments `args`, and
-/// the environment variables `env_vars`.
+/// `execveat(path.as_z_str(), args, env_vars)`—Execute a new command using
+/// the current process.
 ///
-/// The first argument, by convention, should be the filename associated with
-/// the file being executed.
-#[cfg(not(target_os = "wasi"))]
-pub fn execve<P: path::Arg, A: path::Arg, E: path::Arg>(
-    path: P,
-    args: &[A],
-    env_vars: &[E],
-) -> io::Result<()> {
-    let arg_zstr: Vec<Cow<'_, ZStr>> = args
-        .iter()
-        .map(path::Arg::as_cow_z_str)
-        .collect::<io::Result<_>>()?;
-    let env_zstr: Vec<Cow<'_, ZStr>> = env_vars
-        .iter()
-        .map(path::Arg::as_cow_z_str)
-        .collect::<io::Result<_>>()?;
-    path.into_with_z_str(|path_zstr| _execve(path_zstr, &arg_zstr, &env_zstr))
-}
-
-#[cfg(not(target_os = "wasi"))]
-fn _execve(path: &ZStr, arg_zstr: &[Cow<'_, ZStr>], env_zstr: &[Cow<'_, ZStr>]) -> io::Result<()> {
-    let arg_ptrs: Vec<_> = arg_zstr
-        .iter()
-        .map(|zstr| ZStr::as_ptr(zstr).cast::<_>())
-        .chain(core::iter::once(core::ptr::null()))
-        .collect();
-    let env_ptrs: Vec<_> = env_zstr
-        .iter()
-        .map(|zstr| ZStr::as_ptr(zstr).cast::<_>())
-        .chain(core::iter::once(core::ptr::null()))
-        .collect();
-    unsafe { imp::syscalls::execve(path, &arg_ptrs, &env_ptrs) }
+/// # Safety
+///
+/// The `args` and `env_vars` slices must be NUL-terminated, and their contents
+/// must be pointers to NUL-terminated byte arrays.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/execveat.2.html
+#[inline]
+#[cfg(linux_raw)]
+pub unsafe fn execveat<Fd: AsFd>(
+    dirfd: &Fd,
+    path: &ZStr,
+    argv: *const *const u8,
+    envp: *const *const u8,
+    flags: AtFlags,
+) -> io::Error {
+    let dirfd = dirfd.as_fd();
+    imp::syscalls::execveat(dirfd, path, argv, envp, flags)
 }

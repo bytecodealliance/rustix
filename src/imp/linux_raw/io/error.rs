@@ -167,6 +167,8 @@ pub(in crate::imp::linux_raw) unsafe fn try_decode_raw_fd<Num: RetNumber>(
     // this function is only used for system calls which return file
     // descriptors, and this produces smaller code.
     if raw.is_negative() {
+        debug_assert!(raw.is_in_range(-4095..0));
+
         // Tell the optimizer that we know the value is in the error range.
         // This helps it avoid unnecessary integer conversions.
         #[cfg(core_intrinsics)]
@@ -194,6 +196,8 @@ pub(in crate::imp::linux_raw) unsafe fn try_decode_void<Num: RetNumber>(
     // function is only used for system calls which have no other return value,
     // and this produces smaller code.
     if raw.is_nonzero() {
+        debug_assert!(raw.is_in_range(-4095..0));
+
         // Tell the optimizer that we know the value is in the error range.
         // This helps it avoid unnecessary integer conversions.
         #[cfg(core_intrinsics)]
@@ -207,6 +211,28 @@ pub(in crate::imp::linux_raw) unsafe fn try_decode_void<Num: RetNumber>(
     raw.decode_void();
 
     Ok(())
+}
+
+/// Check for an error from the result of a syscall which does not return on
+/// success. On success, return the unconsumed `raw` value.
+///
+/// # Safety
+///
+/// This must only be used with syscalls which do not return on success.
+#[inline]
+pub(in crate::imp::linux_raw) unsafe fn try_decode_error<Num: RetNumber>(
+    raw: RetReg<Num>,
+) -> io::Error {
+    debug_assert!(raw.is_in_range(-4095..0));
+
+    // Tell the optimizer that we know the value is in the error range.
+    // This helps it avoid unnecessary integer conversions.
+    #[cfg(core_intrinsics)]
+    {
+        core::intrinsics::assume(raw.is_in_range(-4095..0));
+    }
+
+    Error(raw.decode_error_code())
 }
 
 /// Return the contained `usize` value.
