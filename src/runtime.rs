@@ -135,35 +135,81 @@ pub use imp::thread::tls::StartupTlsInfo;
 
 /// `fork()`—Creates a new process by duplicating the calling process.
 ///
-/// On success, the PID of the child process is returned in the parent, and
+/// On success, the pid of the child process is returned in the parent, and
 /// `None` is returned in the child.
 ///
-/// If the parent has multiple threads, fork creates a child process containing
-/// a copy of all the memory of all the threads, but with only one actual
-/// thread. Mutexes held on threads other than the one that called `fork` in
-/// the parent will appear in the child as if they are locked indefinitely,
-/// and attempting to lock them may deadlock.
+/// Unlike its POSIX and libc counterparts, this `fork` does not invoke any
+/// handlers (such as those registered with `pthread_atfork`).
 ///
-/// Unlike its libc counterpart, this function does not call handlers
-/// registered with [`pthread_atfork`].
+/// The program environment in the child after a `fork` and before an `execve`
+/// is very special. All code that executes in this environment must avoid:
+///
+///  - Acquiring any other locks that are held in other threads on the parent
+///    at the time of the `fork`, as the child only contains one thread, and
+///    attempting to acquire such locks will deadlock (though this is
+///    [not considered unsafe]).
+///
+///  - Performing any dynamic allocation using the global allocator, since
+///    global allocators may use locks to ensure thread safety, and their locks
+///    may not be released in the child process, so attempts to allocate may
+///    deadlock (as described in the previous point).
+///
+///  - Accessing any external state which the parent assumes it has exclusive
+///    access to, such as a file protected by a file lock, as this could
+///    corrupt the external state.
+///
+///  - Accessing any random-number-generator state inherited from the parent,
+///    as the parent may have the same state and generate the same random
+///    numbers, which may violate security invariants.
+///
+///  - Accessing any thread runtime state, since this function does not update
+///    the thread id in the thread runtime, so thread runtime functions could
+///    cause undefined behavior.
+///
+///  - Accessing any memory shared with the parent, such as a [`MAP_SHARED`]
+///    mapping, even with anonymous or [`memfd_create`] mappings, as this could
+///    cause undefined behavior.
+///
+///  - Calling any C function which isn't known to be [async-signal-safe], as
+///    that could cause undefined behavior. The extent to which this also
+///    applies to Rust functions is unclear at this time.
 ///
 /// # Safety
 ///
-/// This function does not update the threading runtime's data structures in
-/// the child process, so higher-level APIs such as `pthread_self` may return
-/// stale values in the child.
-///
-/// And because it doesn't call handlers registered with `pthread_atfork`,
-/// random number generators such as those in the [rand] crate aren't
-/// reinitialized in the child, so may generate the same values in the child
-/// as in the parent.
+/// The child must avoid accessing any memory shared with the parent in a
+/// way that invokes undefined behavior. It must avoid accessing any threading
+/// runtime functions in a way that invokes undefined behavior. And it must
+/// avoid invoking any undefined behavior through any function that is not
+/// guaranteed to be async-signal-safe.
 ///
 /// # References
+///  - [POSIX]
 ///  - [Linux]
 ///
+/// # Literary interlude
+///
+/// > Do not jump on ancient uncles.
+/// > Do not yell at average mice.
+/// > Do not wear a broom to breakfast.
+/// > Do not ask a snake’s advice.
+/// > Do not bathe in chocolate pudding.
+/// > Do not talk to bearded bears.
+/// > Do not smoke cigars on sofas.
+/// > Do not dance on velvet chairs.
+/// > Do not take a whale to visit
+/// > Russell’s mother’s cousin’s yacht.
+/// > And whatever else you do do
+/// > It is better you
+/// > Do not.
+///
+/// - "Rules", by Karla Kuskin
+///
+/// [`MAP_SHARED`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mmap.html
+/// [not considered unsafe]: https://doc.rust-lang.org/reference/behavior-not-considered-unsafe.html#deadlocks
+/// [`memfd_create`]: https://man7.org/linux/man-pages/man2/memfd_create.2.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fork.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fork.2.html
-/// [`pthread_atfork`]: https://man7.org/linux/man-pages/man3/pthread_atfork.3.html
-/// [rand]: https://crates.io/crates/rand
+/// [async-signal-safe]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_04_03
 #[cfg(linux_raw)]
 pub unsafe fn fork() -> io::Result<Option<Pid>> {
     imp::syscalls::fork()
