@@ -95,8 +95,8 @@ use linux_raw_sys::general::{__NR_mmap2, __NR_set_thread_area};
 use linux_raw_sys::general::{__NR_ppoll, sigset_t};
 use linux_raw_sys::v5_11::general::__NR_mremap;
 use linux_raw_sys::v5_4::general::{
-    __NR_clone, __NR_eventfd2, __NR_execveat, __NR_getrandom, __NR_membarrier, __NR_mlock2,
-    __NR_preadv2, __NR_prlimit64, __NR_pwritev2, __NR_userfaultfd,
+    __NR_clone, __NR_eventfd2, __NR_execve, __NR_execveat, __NR_getrandom, __NR_membarrier,
+    __NR_mlock2, __NR_preadv2, __NR_prlimit64, __NR_pwritev2, __NR_userfaultfd,
 };
 #[cfg(target_pointer_width = "64")]
 use {super::conv::loff_t_from_u64, linux_raw_sys::general::__NR_mmap};
@@ -1597,6 +1597,19 @@ pub(crate) unsafe fn execveat(
         void_star(args as _),
         void_star(env_vars as _),
         c_uint(flags.bits()),
+    ))
+}
+
+pub(crate) unsafe fn execve(
+    path: &ZStr,
+    args: *const *const u8,
+    env_vars: *const *const u8,
+) -> io::Error {
+    ret_error(syscall3_readonly(
+        nr(__NR_execve),
+        c_str(path),
+        void_star(args as _),
+        void_star(env_vars as _),
     ))
 }
 

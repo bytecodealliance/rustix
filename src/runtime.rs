@@ -220,13 +220,13 @@ pub unsafe fn fork() -> io::Result<Option<Pid>> {
     imp::syscalls::fork()
 }
 
-/// `execveat(path.as_z_str(), args, env_vars)`—Execute a new command using
-/// the current process.
+/// `execveat(dirfd, path.as_z_str(), argv, envp, flags)`—Execute a new
+/// command using the current process.
 ///
 /// # Safety
 ///
-/// The `args` and `env_vars` slices must be NUL-terminated, and their contents
-/// must be pointers to NUL-terminated byte arrays.
+/// The `argv` and `envp` pointers must point to NUL-terminated arrays, and
+/// their contents must be pointers to NUL-terminated byte arrays.
 ///
 /// # References
 ///  - [Linux]
@@ -243,4 +243,22 @@ pub unsafe fn execveat<Fd: AsFd>(
 ) -> io::Error {
     let dirfd = dirfd.as_fd();
     imp::syscalls::execveat(dirfd, path, argv, envp, flags)
+}
+
+/// `execve(path.as_z_str(), argv, envp)`—Execute a new command using the
+/// current process.
+///
+/// # Safety
+///
+/// The `argv` and `envp` pointers must point to NUL-terminated arrays, and
+/// their contents must be pointers to NUL-terminated byte arrays.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/execve.2.html
+#[inline]
+#[cfg(linux_raw)]
+pub unsafe fn execve(path: &ZStr, argv: *const *const u8, envp: *const *const u8) -> io::Error {
+    imp::syscalls::execve(path, argv, envp)
 }
