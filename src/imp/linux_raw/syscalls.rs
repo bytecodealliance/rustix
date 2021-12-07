@@ -31,11 +31,12 @@ use super::c;
 use super::conv::opt_ref;
 use super::conv::{
     borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, clockid_t, const_void_star, no_fd, out,
-    pass_usize, raw_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_infallible, ret_owned_fd,
-    ret_usize, ret_usize_infallible, ret_void_star, size_of, slice, slice_just_addr, slice_mut,
-    void_star, zero,
+    pass_usize, raw_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_error, ret_infallible,
+    ret_owned_fd, ret_usize, ret_usize_infallible, ret_void_star, size_of, slice, slice_just_addr,
+    slice_mut, void_star, zero,
 };
 use super::fd::{AsFd, BorrowedFd, RawFd};
+use super::fs::AtFlags;
 #[cfg(feature = "procfs")]
 use super::fs::Mode;
 use super::io::{
@@ -72,8 +73,8 @@ use linux_raw_sys::general::{__ARM_NR_set_tls, __NR_mmap2};
 use linux_raw_sys::general::{__NR_arch_prctl, ARCH_SET_FS};
 use linux_raw_sys::general::{
     __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
-    __NR_epoll_create1, __NR_epoll_ctl, __NR_execve, __NR_exit, __NR_exit_group, __NR_fchdir,
-    __NR_futex, __NR_getcwd, __NR_getpid, __NR_getppid, __NR_getpriority, __NR_gettid, __NR_ioctl,
+    __NR_epoll_create1, __NR_epoll_ctl, __NR_exit, __NR_exit_group, __NR_fchdir, __NR_futex,
+    __NR_getcwd, __NR_getpid, __NR_getppid, __NR_getpriority, __NR_gettid, __NR_ioctl,
     __NR_madvise, __NR_mlock, __NR_mprotect, __NR_munlock, __NR_munmap, __NR_nanosleep, __NR_pipe2,
     __NR_prctl, __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readv,
     __NR_sched_getaffinity, __NR_sched_setaffinity, __NR_sched_yield, __NR_set_tid_address,
@@ -94,8 +95,8 @@ use linux_raw_sys::general::{__NR_mmap2, __NR_set_thread_area};
 use linux_raw_sys::general::{__NR_ppoll, sigset_t};
 use linux_raw_sys::v5_11::general::__NR_mremap;
 use linux_raw_sys::v5_4::general::{
-    __NR_clone, __NR_eventfd2, __NR_getrandom, __NR_membarrier, __NR_mlock2, __NR_preadv2,
-    __NR_prlimit64, __NR_pwritev2, __NR_userfaultfd,
+    __NR_clone, __NR_eventfd2, __NR_execveat, __NR_getrandom, __NR_membarrier, __NR_mlock2,
+    __NR_preadv2, __NR_prlimit64, __NR_pwritev2, __NR_userfaultfd,
 };
 #[cfg(target_pointer_width = "64")]
 use {super::conv::loff_t_from_u64, linux_raw_sys::general::__NR_mmap};
@@ -1582,16 +1583,20 @@ pub(crate) unsafe fn fork() -> io::Result<Option<Pid>> {
     Ok(Pid::from_raw(pid))
 }
 
-pub(crate) unsafe fn execve(
+pub(crate) unsafe fn execveat(
+    dirfd: BorrowedFd<'_>,
     path: &ZStr,
-    args: &[*const u8],
-    env_vars: &[*const u8],
-) -> io::Result<()> {
-    ret(syscall3_readonly(
-        nr(__NR_execve),
+    args: *const *const u8,
+    env_vars: *const *const u8,
+    flags: AtFlags,
+) -> io::Error {
+    ret_error(syscall5_readonly(
+        nr(__NR_execveat),
+        borrowed_fd(dirfd),
         c_str(path),
-        slice_just_addr(args),
-        slice_just_addr(env_vars),
+        void_star(args as _),
+        void_star(env_vars as _),
+        c_uint(flags.bits()),
     ))
 }
 

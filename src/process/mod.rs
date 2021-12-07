@@ -49,7 +49,8 @@ pub use chdir::getcwd;
 pub use id::Cpuid;
 #[cfg(not(target_os = "wasi"))]
 pub use id::{
-    getegid, geteuid, getgid, getpid, getppid, getuid, Gid, Pid, RawGid, RawPid, RawUid, Uid,
+    getegid, geteuid, getgid, getpid, getppid, getuid, Gid, Pid, RawGid, RawNonZeroPid, RawPid,
+    RawUid, Uid,
 };
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use membarrier::{

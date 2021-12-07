@@ -336,17 +336,3 @@ pub(crate) fn exit_group(code: c::c_int) -> ! {
         libc::_exit(code)
     }
 }
-
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-pub(crate) unsafe fn execve(
-    path: &ZStr,
-    args: &[*const u8],
-    env_vars: &[*const u8],
-) -> io::Result<()> {
-    ret(libc::execve(
-        c_str(path),
-        args.as_ptr().cast(),
-        env_vars.as_ptr().cast(),
-    ))
-}
