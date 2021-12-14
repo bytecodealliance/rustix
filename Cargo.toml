@@ -27,6 +27,9 @@ core = { version = "1.0.0", optional = true, package = "rustc-std-workspace-core
 alloc = { version = "1.0.0", optional = true, package = "rustc-std-workspace-alloc" }
 compiler_builtins = { version = '0.1.49', optional = true }
 
+[target.'cfg(all(not(rustix_use_libc), target_os = "wasi"))'.dependencies]
+wit-bindgen-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
+
 # The procfs feature needs once_cell.
 [target.'cfg(any(target_os = "android", target_os = "linux"))'.dependencies]
 once_cell = { version = "1.5.2", optional = true }
@@ -46,7 +49,7 @@ libc = { version = "0.2.126", features = ["extra_traits"], optional = true }
 #
 # On all other Unix-family platforms, and under Miri, we always use the libc
 # backend, so enable its dependencies unconditionally.
-[target.'cfg(any(rustix_use_libc, miri, not(all(target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"), all(target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64")))))))'.dependencies]
+[target.'cfg(any(rustix_use_libc, miri, not(all(target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"), all(target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64"))))), target_os = "wasi"))'.dependencies]
 libc_errno = { package = "errno", version = "0.2.8", default-features = false }
 libc = { version = "0.2.126", features = ["extra_traits"] }
 

@@ -29,6 +29,7 @@ fn main() {
     let os_name = var("CARGO_CFG_TARGET_OS").unwrap();
     let pointer_width = var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap();
     let endian = var("CARGO_CFG_TARGET_ENDIAN").unwrap();
+    let can_wasi = os_name == "wasi";
 
     // Check for special target variants.
     let is_x32 = arch == "x86_64" && pointer_width == "32";
@@ -67,7 +68,9 @@ fn main() {
     // For now Android uses the libc backend; in theory it could use the
     // linux_raw backend, but to do that we'll need to figure out how to
     // install the toolchain for it.
-    if feature_use_libc
+    if can_wasi {
+        use_feature("wasi");
+    } else if feature_use_libc
         || cfg_use_libc
         || os_name != "linux"
         || !asm_name_present
