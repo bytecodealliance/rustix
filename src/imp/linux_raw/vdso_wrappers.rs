@@ -100,10 +100,7 @@ pub(super) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp) unsafe fn syscall1(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-    ) -> RetReg<R0> {
+    pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
@@ -112,10 +109,7 @@ pub(super) mod x86_via_vdso {
     }
 
     #[inline]
-    pub(in crate::imp) unsafe fn syscall1_noreturn(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-    ) -> ! {
+    pub(in crate::imp) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> ! {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
