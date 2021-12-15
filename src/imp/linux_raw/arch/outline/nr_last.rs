@@ -1,4 +1,4 @@
-use crate::imp::linux_raw::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
+use crate::imp::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
 
 // Some architectures' outline assembly code prefers to see the `nr` argument
 // last, as that lines up the syscall calling convention with the userspace
@@ -58,12 +58,17 @@ mod reorder {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<R0> {
+    pub(in crate::imp) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<R0> {
         rustix_syscall0_nr_last(nr)
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall1(
+    pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> RetReg<R0> {
+        rustix_syscall1_nr_last(a0, nr)
+    }
+    #[inline]
+    #[must_use]
+    pub(in crate::imp) unsafe fn syscall1_readonly(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
     ) -> RetReg<R0> {
@@ -71,23 +76,12 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall1_readonly(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-    ) -> RetReg<R0> {
-        rustix_syscall1_nr_last(a0, nr)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall1_noreturn(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-    ) -> ! {
+    pub(in crate::imp) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> ! {
         rustix_syscall1_noreturn_nr_last(a0, nr)
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall2(
+    pub(in crate::imp) unsafe fn syscall2(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -96,7 +90,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall2_readonly(
+    pub(in crate::imp) unsafe fn syscall2_readonly(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -105,7 +99,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall3(
+    pub(in crate::imp) unsafe fn syscall3(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -115,7 +109,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall3_readonly(
+    pub(in crate::imp) unsafe fn syscall3_readonly(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -125,7 +119,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall4(
+    pub(in crate::imp) unsafe fn syscall4(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -136,7 +130,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall4_readonly(
+    pub(in crate::imp) unsafe fn syscall4_readonly(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -147,7 +141,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall5(
+    pub(in crate::imp) unsafe fn syscall5(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -159,7 +153,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall5_readonly(
+    pub(in crate::imp) unsafe fn syscall5_readonly(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -171,7 +165,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall6(
+    pub(in crate::imp) unsafe fn syscall6(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -184,7 +178,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall6_readonly(
+    pub(in crate::imp) unsafe fn syscall6_readonly(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -197,4 +191,4 @@ mod reorder {
     }
 }
 
-pub(in crate::imp::linux_raw) use reorder::*;
+pub(in crate::imp) use reorder::*;

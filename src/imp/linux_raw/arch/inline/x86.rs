@@ -9,14 +9,12 @@
 
 #![allow(dead_code)]
 
-use crate::imp::linux_raw::reg::{
-    ArgReg, FromAsm, RetReg, SyscallNumber, ToAsm, A0, A1, A2, A3, A4, A5, R0,
-};
-use crate::imp::linux_raw::vdso_wrappers::SyscallType;
+use crate::imp::reg::{ArgReg, FromAsm, RetReg, SyscallNumber, ToAsm, A0, A1, A2, A3, A4, A5, R0};
+use crate::imp::vdso_wrappers::SyscallType;
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn indirect_syscall0(
+pub(in crate::imp) unsafe fn indirect_syscall0(
     callee: SyscallType,
     nr: SyscallNumber<'_>,
 ) -> RetReg<R0> {
@@ -32,7 +30,7 @@ pub(in crate::imp::linux_raw) unsafe fn indirect_syscall0(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn indirect_syscall1(
+pub(in crate::imp) unsafe fn indirect_syscall1(
     callee: SyscallType,
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -49,7 +47,7 @@ pub(in crate::imp::linux_raw) unsafe fn indirect_syscall1(
 }
 
 #[inline]
-pub(in crate::imp::linux_raw) unsafe fn indirect_syscall1_noreturn(
+pub(in crate::imp) unsafe fn indirect_syscall1_noreturn(
     callee: SyscallType,
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -65,7 +63,7 @@ pub(in crate::imp::linux_raw) unsafe fn indirect_syscall1_noreturn(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn indirect_syscall2(
+pub(in crate::imp) unsafe fn indirect_syscall2(
     callee: SyscallType,
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -85,7 +83,7 @@ pub(in crate::imp::linux_raw) unsafe fn indirect_syscall2(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn indirect_syscall3(
+pub(in crate::imp) unsafe fn indirect_syscall3(
     callee: SyscallType,
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -107,7 +105,7 @@ pub(in crate::imp::linux_raw) unsafe fn indirect_syscall3(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn indirect_syscall4(
+pub(in crate::imp) unsafe fn indirect_syscall4(
     callee: SyscallType,
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -139,7 +137,7 @@ pub(in crate::imp::linux_raw) unsafe fn indirect_syscall4(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn indirect_syscall5(
+pub(in crate::imp) unsafe fn indirect_syscall5(
     callee: SyscallType,
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -175,7 +173,7 @@ pub(in crate::imp::linux_raw) unsafe fn indirect_syscall5(
 
 #[allow(clippy::too_many_arguments)]
 #[inline]
-pub(in crate::imp::linux_raw) unsafe fn indirect_syscall6(
+pub(in crate::imp) unsafe fn indirect_syscall6(
     callee: SyscallType,
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -217,7 +215,7 @@ pub(in crate::imp::linux_raw) unsafe fn indirect_syscall6(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<R0> {
+pub(in crate::imp) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<R0> {
     let r0;
     asm!(
         "int $$0x80",
@@ -229,10 +227,7 @@ pub(in crate::imp::linux_raw) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>)
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn syscall1(
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-) -> RetReg<R0> {
+pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> RetReg<R0> {
     let r0;
     asm!(
         "int $$0x80",
@@ -245,7 +240,7 @@ pub(in crate::imp::linux_raw) unsafe fn syscall1(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn syscall1_readonly(
+pub(in crate::imp) unsafe fn syscall1_readonly(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
 ) -> RetReg<R0> {
@@ -260,10 +255,7 @@ pub(in crate::imp::linux_raw) unsafe fn syscall1_readonly(
 }
 
 #[inline]
-pub(in crate::imp::linux_raw) unsafe fn syscall1_noreturn(
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-) -> ! {
+pub(in crate::imp) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> ! {
     asm!(
         "int $$0x80",
         in("eax") nr.to_asm(),
@@ -274,7 +266,7 @@ pub(in crate::imp::linux_raw) unsafe fn syscall1_noreturn(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn syscall2(
+pub(in crate::imp) unsafe fn syscall2(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
     a1: ArgReg<'_, A1>,
@@ -292,7 +284,7 @@ pub(in crate::imp::linux_raw) unsafe fn syscall2(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn syscall2_readonly(
+pub(in crate::imp) unsafe fn syscall2_readonly(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
     a1: ArgReg<'_, A1>,
@@ -310,7 +302,7 @@ pub(in crate::imp::linux_raw) unsafe fn syscall2_readonly(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn syscall3(
+pub(in crate::imp) unsafe fn syscall3(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
     a1: ArgReg<'_, A1>,
@@ -330,7 +322,7 @@ pub(in crate::imp::linux_raw) unsafe fn syscall3(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn syscall3_readonly(
+pub(in crate::imp) unsafe fn syscall3_readonly(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
     a1: ArgReg<'_, A1>,
@@ -350,7 +342,7 @@ pub(in crate::imp::linux_raw) unsafe fn syscall3_readonly(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn syscall4(
+pub(in crate::imp) unsafe fn syscall4(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
     a1: ArgReg<'_, A1>,
@@ -376,7 +368,7 @@ pub(in crate::imp::linux_raw) unsafe fn syscall4(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn syscall4_readonly(
+pub(in crate::imp) unsafe fn syscall4_readonly(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
     a1: ArgReg<'_, A1>,
@@ -400,7 +392,7 @@ pub(in crate::imp::linux_raw) unsafe fn syscall4_readonly(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn syscall5(
+pub(in crate::imp) unsafe fn syscall5(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
     a1: ArgReg<'_, A1>,
@@ -428,7 +420,7 @@ pub(in crate::imp::linux_raw) unsafe fn syscall5(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn syscall5_readonly(
+pub(in crate::imp) unsafe fn syscall5_readonly(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
     a1: ArgReg<'_, A1>,
@@ -454,7 +446,7 @@ pub(in crate::imp::linux_raw) unsafe fn syscall5_readonly(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn syscall6(
+pub(in crate::imp) unsafe fn syscall6(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
     a1: ArgReg<'_, A1>,
@@ -493,7 +485,7 @@ pub(in crate::imp::linux_raw) unsafe fn syscall6(
 
 #[inline]
 #[must_use]
-pub(in crate::imp::linux_raw) unsafe fn syscall6_readonly(
+pub(in crate::imp) unsafe fn syscall6_readonly(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
     a1: ArgReg<'_, A1>,

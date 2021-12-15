@@ -13,7 +13,7 @@
 
 use super::super::c;
 use crate::imp::fd::RawFd;
-use crate::imp::linux_raw::reg::{RetNumber, RetReg};
+use crate::imp::reg::{RetNumber, RetReg};
 use crate::io;
 use linux_raw_sys::{errno, v5_4};
 
@@ -79,9 +79,7 @@ impl Error {
 /// Check for an error from the result of a syscall which encodes a
 /// `c::c_int` on success.
 #[inline]
-pub(in crate::imp::linux_raw) fn try_decode_c_int<Num: RetNumber>(
-    raw: RetReg<Num>,
-) -> io::Result<c::c_int> {
+pub(in crate::imp) fn try_decode_c_int<Num: RetNumber>(raw: RetReg<Num>) -> io::Result<c::c_int> {
     if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
@@ -94,9 +92,7 @@ pub(in crate::imp::linux_raw) fn try_decode_c_int<Num: RetNumber>(
 /// Check for an error from the result of a syscall which encodes a
 /// `c::c_uint` on success.
 #[inline]
-pub(in crate::imp::linux_raw) fn try_decode_c_uint<Num: RetNumber>(
-    raw: RetReg<Num>,
-) -> io::Result<c::c_uint> {
+pub(in crate::imp) fn try_decode_c_uint<Num: RetNumber>(raw: RetReg<Num>) -> io::Result<c::c_uint> {
     if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
@@ -109,9 +105,7 @@ pub(in crate::imp::linux_raw) fn try_decode_c_uint<Num: RetNumber>(
 /// Check for an error from the result of a syscall which encodes a `usize` on
 /// success.
 #[inline]
-pub(in crate::imp::linux_raw) fn try_decode_usize<Num: RetNumber>(
-    raw: RetReg<Num>,
-) -> io::Result<usize> {
+pub(in crate::imp) fn try_decode_usize<Num: RetNumber>(raw: RetReg<Num>) -> io::Result<usize> {
     if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
@@ -124,7 +118,7 @@ pub(in crate::imp::linux_raw) fn try_decode_usize<Num: RetNumber>(
 /// Check for an error from the result of a syscall which encodes a
 /// `*mut c_void` on success.
 #[inline]
-pub(in crate::imp::linux_raw) fn try_decode_void_star<Num: RetNumber>(
+pub(in crate::imp) fn try_decode_void_star<Num: RetNumber>(
     raw: RetReg<Num>,
 ) -> io::Result<*mut c::c_void> {
     if raw.is_in_range(-4095..0) {
@@ -140,9 +134,7 @@ pub(in crate::imp::linux_raw) fn try_decode_void_star<Num: RetNumber>(
 /// `u64` on success.
 #[cfg(target_pointer_width = "64")]
 #[inline]
-pub(in crate::imp::linux_raw) fn try_decode_u64<Num: RetNumber>(
-    raw: RetReg<Num>,
-) -> io::Result<u64> {
+pub(in crate::imp) fn try_decode_u64<Num: RetNumber>(raw: RetReg<Num>) -> io::Result<u64> {
     if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
@@ -160,7 +152,7 @@ pub(in crate::imp::linux_raw) fn try_decode_u64<Num: RetNumber>(
 /// This must only be used with syscalls which return file descriptors on
 /// success.
 #[inline]
-pub(in crate::imp::linux_raw) unsafe fn try_decode_raw_fd<Num: RetNumber>(
+pub(in crate::imp) unsafe fn try_decode_raw_fd<Num: RetNumber>(
     raw: RetReg<Num>,
 ) -> io::Result<RawFd> {
     // Instead of using `check_result` here, we just check for negative, since
@@ -189,9 +181,7 @@ pub(in crate::imp::linux_raw) unsafe fn try_decode_raw_fd<Num: RetNumber>(
 ///
 /// This must only be used with syscalls which return no value on success.
 #[inline]
-pub(in crate::imp::linux_raw) unsafe fn try_decode_void<Num: RetNumber>(
-    raw: RetReg<Num>,
-) -> io::Result<()> {
+pub(in crate::imp) unsafe fn try_decode_void<Num: RetNumber>(raw: RetReg<Num>) -> io::Result<()> {
     // Instead of using `check_result` here, we just check for zero, since this
     // function is only used for system calls which have no other return value,
     // and this produces smaller code.
@@ -220,9 +210,7 @@ pub(in crate::imp::linux_raw) unsafe fn try_decode_void<Num: RetNumber>(
 ///
 /// This must only be used with syscalls which do not return on success.
 #[inline]
-pub(in crate::imp::linux_raw) unsafe fn try_decode_error<Num: RetNumber>(
-    raw: RetReg<Num>,
-) -> io::Error {
+pub(in crate::imp) unsafe fn try_decode_error<Num: RetNumber>(raw: RetReg<Num>) -> io::Error {
     debug_assert!(raw.is_in_range(-4095..0));
 
     // Tell the optimizer that we know the value is in the error range.
@@ -238,9 +226,7 @@ pub(in crate::imp::linux_raw) unsafe fn try_decode_error<Num: RetNumber>(
 /// Return the contained `usize` value.
 #[cfg(not(debug_assertions))]
 #[inline]
-pub(in crate::imp::linux_raw) fn decode_usize_infallible<Num: RetNumber>(
-    raw: RetReg<Num>,
-) -> usize {
+pub(in crate::imp) fn decode_usize_infallible<Num: RetNumber>(raw: RetReg<Num>) -> usize {
     raw.decode_usize()
 }
 

@@ -86,11 +86,11 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Resu
 #[cfg(target_arch = "x86")]
 pub(super) mod x86_via_vdso {
     use super::{transmute, ArgReg, Relaxed, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
-    use crate::imp::linux_raw::arch::asm;
+    use crate::imp::arch::asm;
 
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall0(nr: SyscallNumber<'_>) -> RetReg<R0> {
+    pub(in crate::imp) unsafe fn syscall0(nr: SyscallNumber<'_>) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
@@ -100,10 +100,7 @@ pub(super) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall1(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-    ) -> RetReg<R0> {
+    pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
@@ -112,10 +109,7 @@ pub(super) mod x86_via_vdso {
     }
 
     #[inline]
-    pub(in crate::imp::linux_raw) unsafe fn syscall1_noreturn(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-    ) -> ! {
+    pub(in crate::imp) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> ! {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
@@ -125,7 +119,7 @@ pub(super) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall2(
+    pub(in crate::imp) unsafe fn syscall2(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -139,7 +133,7 @@ pub(super) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall3(
+    pub(in crate::imp) unsafe fn syscall3(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -154,7 +148,7 @@ pub(super) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall4(
+    pub(in crate::imp) unsafe fn syscall4(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -170,7 +164,7 @@ pub(super) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall5(
+    pub(in crate::imp) unsafe fn syscall5(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -187,7 +181,7 @@ pub(super) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall6(
+    pub(in crate::imp) unsafe fn syscall6(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -205,7 +199,7 @@ pub(super) mod x86_via_vdso {
 
     // With the indirect call, it isn't meaningful to do a separate
     // `_readonly` optimization.
-    pub(in crate::imp::linux_raw) use {
+    pub(in crate::imp) use {
         syscall0 as syscall0_readonly, syscall1 as syscall1_readonly,
         syscall2 as syscall2_readonly, syscall3 as syscall3_readonly,
         syscall4 as syscall4_readonly, syscall5 as syscall5_readonly,

@@ -1097,7 +1097,7 @@ pub(crate) fn getdents(fd: BorrowedFd<'_>, dirent: &mut [u8]) -> io::Result<usiz
 pub(crate) fn utimensat(
     dirfd: BorrowedFd<'_>,
     pathname: &ZStr,
-    utimes: &[__kernel_timespec; 2],
+    utimes: &[Timespec; 2],
     flags: AtFlags,
 ) -> io::Result<()> {
     _utimensat(dirfd, Some(pathname), utimes, flags)

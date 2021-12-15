@@ -17,15 +17,15 @@
 
 // When inline asm is available, use it.
 #[cfg(asm)]
-pub(in crate::imp::linux_raw) mod inline;
+pub(in crate::imp) mod inline;
 #[cfg(asm)]
-pub(in crate::imp::linux_raw) use self::inline as asm;
+pub(in crate::imp) use self::inline as asm;
 
 // When inline asm isn't available, use out-of-line asm.
 #[cfg(not(asm))]
-pub(in crate::imp::linux_raw) mod outline;
+pub(in crate::imp) mod outline;
 #[cfg(not(asm))]
-pub(in crate::imp::linux_raw) use self::outline as asm;
+pub(in crate::imp) use self::outline as asm;
 
 // On most architectures, the architecture syscall instruction is fast, so use
 // it directly.
@@ -35,14 +35,14 @@ pub(in crate::imp::linux_raw) use self::outline as asm;
     target_arch = "x86_64",
     target_arch = "riscv64"
 ))]
-pub(in crate::imp::linux_raw) use self::asm as choose;
+pub(in crate::imp) use self::asm as choose;
 
 // On 32-bit x86, use vDSO wrappers for all syscalls. We could use the
 // architecture syscall instruction (`int 0x80`), but the vDSO kernel_vsyscall
 // mechanism is much faster.
 #[cfg(target_arch = "x86")]
-pub(in crate::imp::linux_raw) use super::vdso_wrappers::x86_via_vdso as choose;
+pub(in crate::imp) use super::vdso_wrappers::x86_via_vdso as choose;
 
 // This would be the code for always using `int 0x80` on 32-bit x86.
 //#[cfg(target_arch = "x86")]
-//pub(in crate::imp::linux_raw) use self::asm as choose;
+//pub(in crate::imp) use self::asm as choose;
