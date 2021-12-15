@@ -33,8 +33,8 @@ use core::{marker, mem};
 macro_rules! weak {
     (fn $name:ident($($t:ty),*) -> $ret:ty) => (
         #[allow(non_upper_case_globals)]
-        static $name: crate::imp::libc::weak::Weak<unsafe extern fn($($t),*) -> $ret> =
-            crate::imp::libc::weak::Weak::new(concat!(stringify!($name), '\0'));
+        static $name: crate::imp::weak::Weak<unsafe extern fn($($t),*) -> $ret> =
+            crate::imp::weak::Weak::new(concat!(stringify!($name), '\0'));
     )
 }
 

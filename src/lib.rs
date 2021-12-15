@@ -123,6 +123,9 @@ pub(crate) mod zstr;
 #[macro_use]
 pub(crate) mod const_assert;
 
+#[cfg_attr(libc, path = "imp/libc/mod.rs")]
+#[cfg_attr(linux_raw, path = "imp/linux_raw/mod.rs")]
+#[cfg_attr(wasi, path = "imp/wasi/mod.rs")]
 mod imp;
 
 #[cfg(not(windows))]

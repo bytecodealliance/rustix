@@ -57,7 +57,7 @@ impl Dir {
     /// `readdir(self)`, where `None` means the end of the directory.
     pub fn read(&mut self) -> Option<io::Result<DirEntry>> {
         if let Some(next) = self.next.take() {
-            match crate::imp::linux_raw::syscalls::_seek(
+            match crate::imp::syscalls::_seek(
                 self.fd.as_fd(),
                 next as i64,
                 linux_raw_sys::general::SEEK_SET,
@@ -148,8 +148,7 @@ impl Dir {
         self.buf
             .resize(self.buf.capacity() + 32 * size_of::<linux_dirent64>(), 0);
         self.pos = 0;
-        let nread = match crate::imp::linux_raw::syscalls::getdents(self.fd.as_fd(), &mut self.buf)
-        {
+        let nread = match crate::imp::syscalls::getdents(self.fd.as_fd(), &mut self.buf) {
             Ok(nread) => nread,
             Err(err) => return Some(Err(err)),
         };

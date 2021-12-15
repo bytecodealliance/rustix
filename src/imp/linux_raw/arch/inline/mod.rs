@@ -14,12 +14,12 @@ mod x86;
 mod x86_64;
 
 #[cfg(target_arch = "aarch64")]
-pub(in crate::imp::linux_raw) use self::aarch64::*;
+pub(in crate::imp) use self::aarch64::*;
 #[cfg(target_arch = "arm")]
-pub(in crate::imp::linux_raw) use self::arm::*;
+pub(in crate::imp) use self::arm::*;
 #[cfg(target_arch = "riscv64")]
-pub(in crate::imp::linux_raw) use self::riscv64::*;
+pub(in crate::imp) use self::riscv64::*;
 #[cfg(target_arch = "x86")]
-pub(in crate::imp::linux_raw) use self::x86::*;
+pub(in crate::imp) use self::x86::*;
 #[cfg(target_arch = "x86_64")]
-pub(in crate::imp::linux_raw) use self::x86_64::*;
+pub(in crate::imp) use self::x86_64::*;

@@ -61,7 +61,7 @@ use super::super::c;
 use crate::fd::{AsFd, AsRawFd, BorrowedFd, RawFd};
 #[cfg(feature = "std")]
 use crate::fd::{FromFd, FromRawFd, IntoFd, IntoRawFd};
-use crate::imp::linux_raw::syscalls::{epoll_add, epoll_create, epoll_del, epoll_mod, epoll_wait};
+use crate::imp::syscalls::{epoll_add, epoll_create, epoll_del, epoll_mod, epoll_wait};
 use crate::io::{self, OwnedFd};
 use alloc::vec::Vec;
 use bitflags::bitflags;

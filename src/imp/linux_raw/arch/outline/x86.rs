@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
-use crate::imp::linux_raw::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
-use crate::imp::linux_raw::vdso_wrappers::SyscallType;
+use crate::imp::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
+use crate::imp::vdso_wrappers::SyscallType;
 
 // x86 (using fastcall) prefers to pass a1 and a2 first, before a0, because
 // fastcall passes the first two arguments in ecx and edx, which are the second
@@ -61,12 +61,17 @@ mod reorder {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<R0> {
+    pub(in crate::imp) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<R0> {
         rustix_syscall0_nr_last_fastcall(nr)
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall1(
+    pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> RetReg<R0> {
+        rustix_syscall1_nr_last_fastcall(a0, nr)
+    }
+    #[inline]
+    #[must_use]
+    pub(in crate::imp) unsafe fn syscall1_readonly(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
     ) -> RetReg<R0> {
@@ -74,23 +79,12 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall1_readonly(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-    ) -> RetReg<R0> {
-        rustix_syscall1_nr_last_fastcall(a0, nr)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall1_noreturn(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-    ) -> ! {
+    pub(in crate::imp) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> ! {
         rustix_syscall1_noreturn_nr_last_fastcall(a0, nr)
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall2(
+    pub(in crate::imp) unsafe fn syscall2(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -99,7 +93,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall2_readonly(
+    pub(in crate::imp) unsafe fn syscall2_readonly(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -108,7 +102,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall3(
+    pub(in crate::imp) unsafe fn syscall3(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -118,7 +112,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall3_readonly(
+    pub(in crate::imp) unsafe fn syscall3_readonly(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -128,7 +122,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall4(
+    pub(in crate::imp) unsafe fn syscall4(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -139,7 +133,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall4_readonly(
+    pub(in crate::imp) unsafe fn syscall4_readonly(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -150,7 +144,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall5(
+    pub(in crate::imp) unsafe fn syscall5(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -162,7 +156,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall5_readonly(
+    pub(in crate::imp) unsafe fn syscall5_readonly(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -174,7 +168,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall6(
+    pub(in crate::imp) unsafe fn syscall6(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -187,7 +181,7 @@ mod reorder {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn syscall6_readonly(
+    pub(in crate::imp) unsafe fn syscall6_readonly(
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
@@ -200,7 +194,7 @@ mod reorder {
     }
 }
 
-pub(in crate::imp::linux_raw) use reorder::*;
+pub(in crate::imp) use reorder::*;
 
 // x86 prefers to route all syscalls through the vDSO, though this isn't
 // always possible, so it also has a special form for doing the dispatch.
@@ -272,7 +266,7 @@ mod reorder_indirect {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn indirect_syscall0(
+    pub(in crate::imp) unsafe fn indirect_syscall0(
         callee: SyscallType,
         nr: SyscallNumber<'_>,
     ) -> RetReg<R0> {
@@ -280,7 +274,7 @@ mod reorder_indirect {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn indirect_syscall1(
+    pub(in crate::imp) unsafe fn indirect_syscall1(
         callee: SyscallType,
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
@@ -289,7 +283,7 @@ mod reorder_indirect {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn indirect_syscall1_noreturn(
+    pub(in crate::imp) unsafe fn indirect_syscall1_noreturn(
         callee: SyscallType,
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
@@ -298,7 +292,7 @@ mod reorder_indirect {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn indirect_syscall2(
+    pub(in crate::imp) unsafe fn indirect_syscall2(
         callee: SyscallType,
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
@@ -308,7 +302,7 @@ mod reorder_indirect {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn indirect_syscall3(
+    pub(in crate::imp) unsafe fn indirect_syscall3(
         callee: SyscallType,
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
@@ -319,7 +313,7 @@ mod reorder_indirect {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn indirect_syscall4(
+    pub(in crate::imp) unsafe fn indirect_syscall4(
         callee: SyscallType,
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
@@ -331,7 +325,7 @@ mod reorder_indirect {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn indirect_syscall5(
+    pub(in crate::imp) unsafe fn indirect_syscall5(
         callee: SyscallType,
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
@@ -344,7 +338,7 @@ mod reorder_indirect {
     }
     #[inline]
     #[must_use]
-    pub(in crate::imp::linux_raw) unsafe fn indirect_syscall6(
+    pub(in crate::imp) unsafe fn indirect_syscall6(
         callee: SyscallType,
         nr: SyscallNumber<'_>,
         a0: ArgReg<'_, A0>,
@@ -358,4 +352,4 @@ mod reorder_indirect {
     }
 }
 
-pub(in crate::imp::linux_raw) use reorder_indirect::*;
+pub(in crate::imp) use reorder_indirect::*;
