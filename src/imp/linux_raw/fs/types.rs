@@ -163,6 +163,7 @@ bitflags! {
         const APPEND = linux_raw_sys::general::O_APPEND;
 
         /// `O_CREAT`
+        #[doc(alias = "CREAT")]
         const CREATE = linux_raw_sys::general::O_CREAT;
 
         /// `O_DIRECTORY`

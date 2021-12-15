@@ -186,6 +186,7 @@ bitflags! {
         const APPEND = c::O_APPEND;
 
         /// `O_CREAT`
+        #[doc(alias = "CREAT")]
         const CREATE = c::O_CREAT;
 
         /// `O_DIRECTORY`
