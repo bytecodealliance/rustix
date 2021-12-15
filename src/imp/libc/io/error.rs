@@ -17,7 +17,8 @@ use errno::errno;
 pub struct Error(pub(crate) c::c_int);
 
 impl Error {
-    pub const ACCES: Self = Self(c::EACCES);
+    #[doc(alias = "ACCES")]
+    pub const ACCESS: Self = Self(c::EACCES);
     pub const ADDRINUSE: Self = Self(c::EADDRINUSE);
     pub const ADDRNOTAVAIL: Self = Self(c::EADDRNOTAVAIL);
     #[cfg(not(any(

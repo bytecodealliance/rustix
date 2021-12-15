@@ -231,7 +231,8 @@ pub(in crate::imp) fn decode_usize_infallible<Num: RetNumber>(raw: RetReg<Num>) 
 }
 
 impl Error {
-    pub const ACCES: Self = Self::from_errno(errno::EACCES);
+    #[doc(alias = "ACCES")]
+    pub const ACCESS: Self = Self::from_errno(errno::EACCES);
     pub const ADDRINUSE: Self = Self::from_errno(errno::EADDRINUSE);
     pub const ADDRNOTAVAIL: Self = Self::from_errno(errno::EADDRNOTAVAIL);
     pub const ADV: Self = Self::from_errno(errno::EADV);

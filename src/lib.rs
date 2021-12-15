@@ -53,7 +53,8 @@
 //!    are presented as `i64` and `u64`.
 //!  - Behaviors that depend on the sizes of C types like `long` are hidden.
 //!  - In some places, more human-friendly and less historical-accident names
-//!    are used.
+//!    are used (and documentation aliases are used so that the original names
+//!    can still be searched for).
 //!
 //! Things they don't do include:
 //!  - Detecting whether functions are supported at runtime.
