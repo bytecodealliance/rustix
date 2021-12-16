@@ -17,6 +17,8 @@ use super::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
 use super::time::{ClockId, DynamicClockId, Timespec};
 use super::{c, vdso};
 use crate::io;
+#[cfg(all(asm, target_arch = "x86"))]
+use core::arch::asm;
 use core::mem::{transmute, MaybeUninit};
 use core::sync::atomic::AtomicUsize;
 use core::sync::atomic::Ordering::Relaxed;
