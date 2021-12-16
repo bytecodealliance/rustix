@@ -115,7 +115,12 @@ fn has_feature(feature: &str) -> bool {
         .spawn()
         .unwrap();
 
-    writeln!(child.stdin.take().unwrap(), "#![feature({})]", feature).unwrap();
+    writeln!(
+        child.stdin.take().unwrap(),
+        "#![allow(stable_features)]\n#![feature({})]",
+        feature
+    )
+    .unwrap();
 
     child.wait().unwrap().success()
 }
