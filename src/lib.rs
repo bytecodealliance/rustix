@@ -79,6 +79,7 @@
 //! [`Arg`]: https://docs.rs/rustix/latest/rustix/path/trait.Arg.html
 
 #![deny(missing_docs)]
+#![allow(stable_features)]
 #![cfg_attr(linux_raw, deny(unsafe_code))]
 #![cfg_attr(asm, feature(asm))]
 #![cfg_attr(any(rustc_attrs, not(feature = "std")), feature(rustc_attrs))]
