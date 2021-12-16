@@ -6,7 +6,8 @@
 
 use crate::ffi::ZStr;
 use crate::imp::fd::{AsFd, AsRawFd};
-use itoa::{fmt, Integer};
+use core::fmt::Write;
+use itoa::{Buffer, Integer};
 #[cfg(feature = "std")]
 use std::ffi::{CStr, OsStr};
 #[cfg(feature = "std")]
@@ -49,7 +50,8 @@ impl DecInt {
             buf: [0; 20 + 1],
             len: 0,
         });
-        fmt(&mut me, i).unwrap();
+        let mut buf = Buffer::new();
+        me.write_str(buf.format(i)).unwrap();
         me.0
     }
 
