@@ -1,4 +1,5 @@
 use crate::imp::reg::{ArgReg, FromAsm, RetReg, SyscallNumber, ToAsm, A0, A1, A2, A3, A4, A5, R0};
+use core::arch::asm;
 
 #[cfg(target_pointer_width = "32")]
 compile_error!("x32 is not yet supported");
