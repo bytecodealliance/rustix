@@ -109,12 +109,13 @@ extern crate alloc;
 /// Users can use this to avoid needing to import anything else to use the same
 /// versions of these types and traits.
 ///
-/// Note that `OwnedFd` lives at [`rustix::io::OwnedFd`].
+/// Note that rustix APIs that use `OwnedFd` use [`rustix::io::OwnedFd`]
+/// instead, which allows rustix to implement `close` for them.
 ///
 /// [`rustix::io::OwnedFd`]: crate::io::OwnedFd
 pub mod fd {
     use super::imp;
-    pub use imp::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, RawFd};
+    pub use imp::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
     #[cfg(feature = "std")]
     pub use imp::fd::{FromFd, IntoFd};
 }

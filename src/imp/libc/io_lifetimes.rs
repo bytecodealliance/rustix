@@ -3,8 +3,7 @@
 //! We can make this assumption since `rustix` supports only `std::net` on
 //! Windows.
 
-pub use io_lifetimes::BorrowedSocket as BorrowedFd;
-pub(crate) use io_lifetimes::OwnedSocket as OwnedFd;
+pub use io_lifetimes::{BorrowedSocket as BorrowedFd, OwnedSocket as OwnedFd};
 #[cfg(feature = "std")]
 pub use std::os::windows::io::RawSocket as RawFd;
 pub(crate) use winapi::um::winsock2::SOCKET as LibcFd;
