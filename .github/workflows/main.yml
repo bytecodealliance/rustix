@@ -263,6 +263,7 @@ jobs:
         # way faster at arm emulation than the current version github actions'
         # ubuntu image uses. Disable as much as we can to get it to build
         # quickly.
+        cd
         curl https://download.qemu.org/qemu-6.1.0.tar.xz | tar xJf -
         cd qemu-6.1.0
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=$HOME/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
@@ -366,6 +367,7 @@ jobs:
         # way faster at arm emulation than the current version github actions'
         # ubuntu image uses. Disable as much as we can to get it to build
         # quickly.
+        cd
         curl https://download.qemu.org/qemu-6.1.0.tar.xz | tar xJf -
         cd qemu-6.1.0
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=$HOME/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
