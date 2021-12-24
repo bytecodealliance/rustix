@@ -56,7 +56,8 @@ use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
 #[cfg(feature = "procfs")]
 use crate::path::DecInt;
 use crate::process::{
-    Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, Rlimit, Uid, WaitOptions, WaitStatus,
+    Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, Rlimit, SpawnAction, SpawnConfig, Uid,
+    WaitOptions, WaitStatus,
 };
 use crate::thread::NanosleepRelativeResult;
 use core::cmp;
@@ -1611,6 +1612,56 @@ pub(crate) unsafe fn execve(
         void_star(args as _),
         void_star(env_vars as _),
     ))
+}
+
+// attempts to execute the given program in the child process
+// send the errors through `error_pipe` back to the parent and exits on failure
+fn spawn_child_fn(
+    path: &ZStr,
+    args: &[*const u8],
+    env_vars: &[*const u8],
+    config: &SpawnConfig<'_>,
+    close_pipe: OwnedFd,
+    error_pipe: OwnedFd,
+) -> ! {
+    let error = {
+        if let Err(error) = config.get_actions().try_for_each(|action| match action {
+            SpawnAction::Dup2 { fd, new } => io::dup2(fd, new),
+        }) {
+            error
+        } else {
+            unsafe { execve(path, args.as_ptr(), env_vars.as_ptr()) }
+        }
+    };
+    let error_code = error.raw_os_error();
+    let error_bytes = i32::to_ne_bytes(error_code);
+    core::mem::drop(close_pipe);
+    // if writing to the pipe fails, no error can be sent to the parent,
+    // including the write error.
+    if let Ok(_) = write(error_pipe.as_fd(), &error_bytes) {};
+    exit_group(127)
+}
+
+pub(crate) fn posix_spawn(
+    path: &ZStr,
+    args: &[*const u8],
+    env_vars: &[*const u8],
+    config: &SpawnConfig<'_>,
+) -> io::Result<Pid> {
+    let (read_pipe, write_pipe) = pipe_with(PipeFlags::CLOEXEC)?;
+    match unsafe { fork()? } {
+        Some(pid) => {
+            core::mem::drop(write_pipe);
+            let mut error_bytes = i32::to_ne_bytes(0);
+            match read(read_pipe.as_fd(), &mut error_bytes)? {
+                0 => Ok(pid),
+                _ => Err(io::Error::from_raw_os_error(i32::from_ne_bytes(
+                    error_bytes,
+                ))),
+            }
+        }
+        None => spawn_child_fn(path, args, env_vars, config, read_pipe, write_pipe),
+    }
 }
 
 #[inline]

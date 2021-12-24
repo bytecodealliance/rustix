@@ -23,6 +23,7 @@ use super::RawCpuSet;
 use super::Resource;
 #[cfg(not(target_os = "wasi"))]
 use super::{RawNonZeroPid, RawPid, RawUname};
+use crate::fd::AsRawFd;
 use crate::ffi::ZStr;
 use crate::io;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
@@ -30,7 +31,7 @@ use crate::process::Rlimit;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "wasi"))]
-use crate::process::{Gid, Pid, Uid, WaitOptions, WaitStatus};
+use crate::process::{Gid, Pid, SpawnAction, SpawnConfig, Uid, WaitOptions, WaitStatus};
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
@@ -334,5 +335,47 @@ pub(crate) fn exit_group(code: c::c_int) -> ! {
     #[cfg(unix)]
     unsafe {
         libc::_exit(code)
+    }
+}
+
+#[cfg(not(target_os = "wasi"))]
+fn raw_spawn_config(
+    config: &SpawnConfig<'_>,
+) -> io::Result<(c::posix_spawn_file_actions_t, c::posix_spawnattr_t)> {
+    let mut file_actions = core::mem::MaybeUninit::uninit();
+    let mut attributes = core::mem::MaybeUninit::uninit();
+    unsafe {
+        ret(c::posix_spawn_file_actions_init(file_actions.as_mut_ptr()))?;
+        ret(c::posix_spawnattr_init(attributes.as_mut_ptr()))?;
+        config.get_actions().try_for_each(|action| match action {
+            SpawnAction::Dup2 { fd, new } => ret(c::posix_spawn_file_actions_adddup2(
+                file_actions.as_mut_ptr(),
+                fd.as_raw_fd(),
+                new.as_raw_fd(),
+            )),
+        })?;
+        Ok((file_actions.assume_init(), attributes.assume_init()))
+    }
+}
+
+#[cfg(not(target_os = "wasi"))]
+pub(crate) fn posix_spawn(
+    path: &ZStr,
+    args: &[*const u8],
+    env_vars: &[*const u8],
+    config: &SpawnConfig<'_>,
+) -> io::Result<Pid> {
+    let (file_actions, attributes) = raw_spawn_config(config)?;
+    let mut pid = 0;
+    unsafe {
+        ret(c::posix_spawn(
+            core::ptr::addr_of_mut!(pid),
+            path.as_ptr(),
+            core::ptr::addr_of!(file_actions),
+            core::ptr::addr_of!(attributes),
+            args.as_ptr().cast::<_>(),
+            env_vars.as_ptr().cast::<_>(),
+        ))?;
+        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid)))
     }
 }

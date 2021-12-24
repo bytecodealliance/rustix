@@ -1,6 +1,9 @@
 //! Process-associated operations.
 
-use crate::{imp, io};
+use crate::ffi::ZStr;
+use crate::{imp, io, path};
+
+use alloc::borrow::Cow;
 
 mod auxv;
 #[cfg(not(target_os = "wasi"))]
@@ -20,6 +23,8 @@ mod rlimit;
     target_os = "dragonfly"
 ))]
 mod sched;
+#[cfg(not(target_os = "wasi"))]
+mod spawn;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.
 mod uname;
 #[cfg(not(target_os = "wasi"))]
@@ -72,6 +77,10 @@ pub use rlimit::{getrlimit, Resource, Rlimit};
     target_os = "dragonfly"
 ))]
 pub use sched::{sched_getaffinity, sched_setaffinity, CpuSet};
+#[cfg(not(target_os = "wasi"))]
+pub(crate) use spawn::SpawnAction;
+#[cfg(not(target_os = "wasi"))]
+pub use spawn::SpawnConfig;
 #[cfg(not(target_os = "wasi"))]
 pub use uname::{uname, Uname};
 #[cfg(not(target_os = "wasi"))]
@@ -172,4 +181,49 @@ pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<Wai
 #[inline]
 pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
     imp::syscalls::wait(waitopts)
+}
+
+/// `posix_spawn(path, args, env_vars, config)` - create a new child process,
+/// that executes a specified file.
+///
+/// on success, returns the pid of the child process.
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/posix_spawn.html
+/// [Linux]: https://www.man7.org/linux/man-pages/man3/posix_spawn.3.html
+#[cfg(not(target_os = "wasi"))]
+pub fn posix_spawn<P: path::Arg, A: path::Arg, E: path::Arg>(
+    path: P,
+    args: &[A],
+    env_vars: &[E],
+    config: &SpawnConfig<'_>,
+) -> io::Result<Pid> {
+    let arg_zstr: Vec<Cow<'_, ZStr>> = args
+        .iter()
+        .map(path::Arg::as_cow_z_str)
+        .collect::<io::Result<_>>()?;
+    let env_zstr: Vec<Cow<'_, ZStr>> = env_vars
+        .iter()
+        .map(path::Arg::as_cow_z_str)
+        .collect::<io::Result<_>>()?;
+    path.into_with_z_str(|path_zstr| _posix_spawn(path_zstr, &arg_zstr, &env_zstr, config))
+}
+
+#[cfg(not(target_os = "wasi"))]
+fn _posix_spawn(
+    path: &ZStr,
+    arg_zstr: &[Cow<'_, ZStr>],
+    env_zstr: &[Cow<'_, ZStr>],
+    config: &SpawnConfig<'_>,
+) -> io::Result<Pid> {
+    let arg_ptrs: Vec<_> = arg_zstr
+        .iter()
+        .map(|zstr| ZStr::as_ptr(zstr).cast::<_>())
+        .chain(core::iter::once(core::ptr::null()))
+        .collect();
+    let env_ptrs: Vec<_> = env_zstr
+        .iter()
+        .map(|zstr| ZStr::as_ptr(zstr).cast::<_>())
+        .chain(core::iter::once(core::ptr::null()))
+        .collect();
+    imp::syscalls::posix_spawn(path, &arg_ptrs, &env_ptrs, config)
 }
