@@ -14,5 +14,7 @@ mod sched_yield;
 mod uname;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have waitpid.
 mod wait;
+#[cfg(not(target_os = "wasi"))] // WASI doesn't have posix_spawn.
+mod spawn;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 mod working_directory;
