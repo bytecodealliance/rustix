@@ -1,4 +1,4 @@
-use rustix::{process, io};
+use rustix::{io, process};
 
 #[test]
 fn test_posix_spawn() {
@@ -10,12 +10,8 @@ fn test_posix_spawn() {
 
     config.add_dup2_action(&write_pipe, &stdout);
 
-    let pid = process::posix_spawn(
-        "/usr/bin/echo",
-        &["echo", "-n", message],
-        env_vars,
-        &config,
-    ).unwrap();
+    let pid =
+        process::posix_spawn("/usr/bin/echo", &["echo", "-n", message], env_vars, &config).unwrap();
 
     // ensure reading from the pipe ends when the child finishes writing
     core::mem::drop(write_pipe);
