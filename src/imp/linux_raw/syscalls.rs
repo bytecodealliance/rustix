@@ -35,7 +35,7 @@ use super::conv::{
     ret_owned_fd, ret_usize, ret_usize_infallible, ret_void_star, size_of, slice, slice_just_addr,
     slice_mut, void_star, zero,
 };
-use super::fd::{AsFd, BorrowedFd, RawFd};
+use super::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, RawFd};
 use super::fs::AtFlags;
 #[cfg(feature = "procfs")]
 use super::fs::Mode;
@@ -1626,7 +1626,15 @@ fn spawn_child_fn(
 ) -> ! {
     let error = {
         if let Err(error) = config.get_actions().try_for_each(|action| match action {
-            SpawnAction::Dup2 { fd, new } => io::dup2(fd, new),
+            SpawnAction::Dup2 { fd, new } => {
+                // while the file descriptor was borrowed in the parent,
+                // it is owned in the context of the child process
+                let owned_new = unsafe { OwnedFd::from_raw_fd(new.as_raw_fd()) };
+                io::dup2(fd, &owned_new)?;
+                // avoid closing the newly dupped file descriptor
+                core::mem::forget(owned_new);
+                Ok(())
+            }
         }) {
             error
         } else {

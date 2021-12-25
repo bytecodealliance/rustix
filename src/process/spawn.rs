@@ -1,11 +1,10 @@
 use crate::fd::{AsFd, BorrowedFd};
-use crate::io::OwnedFd;
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum SpawnAction<'a> {
     Dup2 {
         fd: BorrowedFd<'a>,
-        new: &'a OwnedFd,
+        new: BorrowedFd<'a>,
     },
 }
 
@@ -28,10 +27,10 @@ impl<'a> SpawnConfig<'a> {
     /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/posix_spawn_file_actions_adddup2.html
     /// [Linux]: https://man7.org/linux/man-pages/man3/posix_spawn_file_actions_adddup2.3p.html
     #[inline]
-    pub fn add_dup2_action<Fd: AsFd>(&mut self, fd: &'a Fd, new: &'a OwnedFd) {
+    pub fn add_dup2_action<Fd: AsFd, NewFd: AsFd>(&mut self, fd: &'a Fd, new: &'a NewFd) {
         let action = SpawnAction::Dup2 {
             fd: fd.as_fd(),
-            new,
+            new: new.as_fd(),
         };
         self.actions.push(action);
     }
