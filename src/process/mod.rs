@@ -23,7 +23,7 @@ mod rlimit;
     target_os = "dragonfly"
 ))]
 mod sched;
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 mod spawn;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.
 mod uname;
@@ -77,9 +77,9 @@ pub use rlimit::{getrlimit, Resource, Rlimit};
     target_os = "dragonfly"
 ))]
 pub use sched::{sched_getaffinity, sched_setaffinity, CpuSet};
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 pub(crate) use spawn::SpawnAction;
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 pub use spawn::SpawnConfig;
 #[cfg(not(target_os = "wasi"))]
 pub use uname::{uname, Uname};
@@ -190,7 +190,7 @@ pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/posix_spawn.html
 /// [Linux]: https://www.man7.org/linux/man-pages/man3/posix_spawn.3.html
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 pub fn posix_spawn<P: path::Arg, A: path::Arg, E: path::Arg>(
     path: P,
     args: &[A],
@@ -208,7 +208,7 @@ pub fn posix_spawn<P: path::Arg, A: path::Arg, E: path::Arg>(
     path.into_with_z_str(|path_zstr| _posix_spawn(path_zstr, &arg_zstr, &env_zstr, config))
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 fn _posix_spawn(
     path: &ZStr,
     arg_zstr: &[Cow<'_, ZStr>],

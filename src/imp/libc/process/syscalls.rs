@@ -338,7 +338,7 @@ pub(crate) fn exit_group(code: c::c_int) -> ! {
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 fn raw_spawn_config(
     config: &SpawnConfig<'_>,
 ) -> io::Result<(c::posix_spawn_file_actions_t, c::posix_spawnattr_t)> {
@@ -358,7 +358,7 @@ fn raw_spawn_config(
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 pub(crate) fn posix_spawn(
     path: &ZStr,
     args: &[*const u8],
