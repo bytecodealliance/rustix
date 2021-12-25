@@ -10,8 +10,6 @@ mod membarrier;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))] // WASI doesn't have [gs]etpriority.
 mod priority;
 mod sched_yield;
-#[cfg(not(target_os = "wasi"))] // WASI doesn't have posix_spawn.
-mod spawn;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.
 mod uname;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have waitpid.
