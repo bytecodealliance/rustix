@@ -21,12 +21,19 @@ use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::fmt::{self, Write};
 use core::mem;
+#[cfg(vec_into_raw_parts)]
 use core::num::NonZeroU8;
 use core::ops;
 use core::ptr;
 use core::slice;
-use core::slice::memchr;
+#[cfg(slice_internals)]
+use core::slice::memchr::memchr;
 use core::str::{self, Utf8Error};
+
+#[cfg(not(slice_internals))]
+fn memchr(x: u8, text: &[u8]) -> Option<usize> {
+    text.iter().position(|elt| *elt == x)
+}
 
 /// A type representing an owned, C-compatible, nul-terminated string with no nul bytes in the
 /// middle.
@@ -392,12 +399,20 @@ impl ZString {
         trait SpecIntoVec {
             fn into_vec(self) -> Vec<u8>;
         }
+        #[cfg(not(specialization))]
+        impl<T: Into<Vec<u8>>> SpecIntoVec for T {
+            fn into_vec(self) -> Vec<u8> {
+                self.into()
+            }
+        }
+        #[cfg(specialization)]
         impl<T: Into<Vec<u8>>> SpecIntoVec for T {
             default fn into_vec(self) -> Vec<u8> {
                 self.into()
             }
         }
         // Specialization for avoiding reallocation.
+        #[cfg(specialization)]
         impl SpecIntoVec for &'_ [u8] {
             fn into_vec(self) -> Vec<u8> {
                 let mut v = Vec::with_capacity(self.len() + 1);
@@ -405,6 +420,7 @@ impl ZString {
                 v
             }
         }
+        #[cfg(specialization)]
         impl SpecIntoVec for &'_ str {
             fn into_vec(self) -> Vec<u8> {
                 let mut v = Vec::with_capacity(self.len() + 1);
@@ -417,7 +433,7 @@ impl ZString {
     }
 
     fn _new(bytes: Vec<u8>) -> Result<ZString, NulError> {
-        match memchr::memchr(0, &bytes) {
+        match memchr(0, &bytes) {
             Some(i) => Err(NulError(i, bytes)),
             None => Ok(unsafe { ZString::from_vec_unchecked(bytes) }),
         }
@@ -818,7 +834,7 @@ impl ZString {
         stable(feature = "cstring_from_vec_with_nul", since = "1.58.0")
     )]
     pub fn from_vec_with_nul(v: Vec<u8>) -> Result<Self, FromVecWithNulError> {
-        let nul_pos = memchr::memchr(0, &v);
+        let nul_pos = memchr(0, &v);
         match nul_pos {
             Some(nul_pos) if nul_pos + 1 == v.len() => {
                 // SAFETY: We know there is only one nul byte, at the end
@@ -957,6 +973,7 @@ impl From<Box<ZStr>> for ZString {
     }
 }
 
+#[cfg(vec_into_raw_parts)]
 #[cfg_attr(
     staged_api,
     stable(feature = "cstring_from_vec_of_nonzerou8", since = "1.43.0")
@@ -1337,7 +1354,7 @@ impl ZStr {
     /// ```
     #[cfg_attr(staged_api, stable(feature = "cstr_from_bytes", since = "1.10.0"))]
     pub fn from_bytes_with_nul(bytes: &[u8]) -> Result<&ZStr, FromBytesWithNulError> {
-        let nul_pos = memchr::memchr(0, bytes);
+        let nul_pos = memchr(0, bytes);
         if let Some(nul_pos) = nul_pos {
             if nul_pos + 1 != bytes.len() {
                 return Err(FromBytesWithNulError::interior_nul(nul_pos));
@@ -1365,6 +1382,7 @@ impl ZStr {
     ///     assert_eq!(cstr, &*cstring);
     /// }
     /// ```
+    #[cfg(const_raw_ptr_deref)]
     #[inline]
     #[must_use]
     #[cfg_attr(staged_api, stable(feature = "cstr_from_bytes", since = "1.10.0"))]
@@ -1373,6 +1391,40 @@ impl ZStr {
         rustc_const_unstable(feature = "const_cstr_unchecked", issue = "90343")
     )]
     pub const unsafe fn from_bytes_with_nul_unchecked(bytes: &[u8]) -> &ZStr {
+        // SAFETY: Casting to ZStr is safe because its internal representation
+        // is a [u8] too (safe only inside std).
+        // Dereferencing the obtained pointer is safe because it comes from a
+        // reference. Making a reference is then safe because its lifetime
+        // is bound by the lifetime of the given `bytes`.
+        unsafe { &*(bytes as *const [u8] as *const ZStr) }
+    }
+
+    /// Unsafely creates a C string wrapper from a byte slice.
+    ///
+    /// This function will cast the provided `bytes` to a `ZStr` wrapper without
+    /// performing any sanity checks. The provided slice **must** be nul-terminated
+    /// and not contain any interior nul bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::ffi::{ZStr, ZString};
+    ///
+    /// unsafe {
+    ///     let cstring = ZString::new("hello").expect("ZString::new failed");
+    ///     let cstr = ZStr::from_bytes_with_nul_unchecked(cstring.to_bytes_with_nul());
+    ///     assert_eq!(cstr, &*cstring);
+    /// }
+    /// ```
+    #[cfg(not(const_raw_ptr_deref))]
+    #[inline]
+    #[must_use]
+    #[cfg_attr(staged_api, stable(feature = "cstr_from_bytes", since = "1.10.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_cstr_unchecked", issue = "90343")
+    )]
+    pub unsafe fn from_bytes_with_nul_unchecked(bytes: &[u8]) -> &ZStr {
         // SAFETY: Casting to ZStr is safe because its internal representation
         // is a [u8] too (safe only inside std).
         // Dereferencing the obtained pointer is safe because it comes from a
@@ -1633,6 +1685,7 @@ impl ToOwned for ZStr {
         }
     }
 
+    #[cfg(toowned_clone_into)]
     fn clone_into(&self, target: &mut ZString) {
         let mut b = Vec::from(mem::take(&mut target.inner));
         self.to_bytes_with_nul().clone_into(&mut b);

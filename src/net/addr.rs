@@ -151,6 +151,7 @@ impl SocketAddr {
     /// let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
     /// assert_eq!(socket.ip(), IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)));
     /// ```
+    #[cfg(const_raw_ptr_deref)]
     #[must_use]
     #[cfg_attr(staged_api, stable(feature = "ip_addr", since = "1.7.0"))]
     #[cfg_attr(
@@ -158,6 +159,30 @@ impl SocketAddr {
         rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
     )]
     pub const fn ip(&self) -> IpAddr {
+        match *self {
+            SocketAddr::V4(ref a) => IpAddr::V4(*a.ip()),
+            SocketAddr::V6(ref a) => IpAddr::V6(*a.ip()),
+        }
+    }
+
+    /// Returns the IP address associated with this socket address.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+    ///
+    /// let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
+    /// assert_eq!(socket.ip(), IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)));
+    /// ```
+    #[cfg(not(const_raw_ptr_deref))]
+    #[must_use]
+    #[cfg_attr(staged_api, stable(feature = "ip_addr", since = "1.7.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
+    )]
+    pub fn ip(&self) -> IpAddr {
         match *self {
             SocketAddr::V4(ref a) => IpAddr::V4(*a.ip()),
             SocketAddr::V6(ref a) => IpAddr::V6(*a.ip()),
@@ -313,6 +338,7 @@ impl SocketAddrV4 {
     /// let socket = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 8080);
     /// assert_eq!(socket.ip(), &Ipv4Addr::new(127, 0, 0, 1));
     /// ```
+    #[cfg(const_raw_ptr_deref)]
     #[must_use]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[cfg_attr(
@@ -320,6 +346,29 @@ impl SocketAddrV4 {
         rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
     )]
     pub const fn ip(&self) -> &Ipv4Addr {
+        // SAFETY: `Ipv4Addr` is `#[repr(C)] struct { _: in_addr; }`.
+        // It is safe to cast from `&in_addr` to `&Ipv4Addr`.
+        unsafe { &*(&self.inner.sin_addr as *const c::in_addr as *const Ipv4Addr) }
+    }
+
+    /// Returns the IP address associated with this socket address.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::{SocketAddrV4, Ipv4Addr};
+    ///
+    /// let socket = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 8080);
+    /// assert_eq!(socket.ip(), &Ipv4Addr::new(127, 0, 0, 1));
+    /// ```
+    #[cfg(not(const_raw_ptr_deref))]
+    #[must_use]
+    #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
+    )]
+    pub fn ip(&self) -> &Ipv4Addr {
         // SAFETY: `Ipv4Addr` is `#[repr(C)] struct { _: in_addr; }`.
         // It is safe to cast from `&in_addr` to `&Ipv4Addr`.
         unsafe { &*(&self.inner.sin_addr as *const c::in_addr as *const Ipv4Addr) }
@@ -419,6 +468,7 @@ impl SocketAddrV6 {
     /// let socket = SocketAddrV6::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 8080, 0, 0);
     /// assert_eq!(socket.ip(), &Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1));
     /// ```
+    #[cfg(const_raw_ptr_deref)]
     #[must_use]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[cfg_attr(
@@ -426,6 +476,27 @@ impl SocketAddrV6 {
         rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
     )]
     pub const fn ip(&self) -> &Ipv6Addr {
+        unsafe { &*(&self.inner.sin6_addr as *const c::in6_addr as *const Ipv6Addr) }
+    }
+
+    /// Returns the IP address associated with this socket address.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::{SocketAddrV6, Ipv6Addr};
+    ///
+    /// let socket = SocketAddrV6::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 8080, 0, 0);
+    /// assert_eq!(socket.ip(), &Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1));
+    /// ```
+    #[cfg(not(const_raw_ptr_deref))]
+    #[must_use]
+    #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_unstable(feature = "const_socketaddr", issue = "82485")
+    )]
+    pub fn ip(&self) -> &Ipv6Addr {
         unsafe { &*(&self.inner.sin6_addr as *const c::in6_addr as *const Ipv6Addr) }
     }
 
