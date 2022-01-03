@@ -171,7 +171,7 @@ fn test_arg() {
     #[cfg(feature = "itoa")]
     {
         let t: DecInt = DecInt::new(43110);
-        assert_eq!("43110", t.as_str().unwrap());
+        assert_eq!("43110", t.as_str());
         assert_eq!("43110".to_owned(), Arg::to_string_lossy(&t));
         assert_eq!(zstr!("43110"), Borrow::borrow(&t.as_cow_z_str().unwrap()));
         assert_eq!(zstr!("43110"), t.as_c_str());
