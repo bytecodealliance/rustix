@@ -89,11 +89,17 @@
 #![cfg_attr(all(linux_raw, asm, target_arch = "x86"), feature(naked_functions))]
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(not(feature = "std"), allow(incomplete_features))]
-#![cfg_attr(specialization, feature(specialization))]
-#![cfg_attr(slice_internals, feature(slice_internals))]
-#![cfg_attr(toowned_clone_into, feature(toowned_clone_into))]
-#![cfg_attr(vec_into_raw_parts, feature(vec_into_raw_parts))]
+#![cfg_attr(all(not(feature = "std"), specialization), allow(incomplete_features))]
+#![cfg_attr(all(not(feature = "std"), specialization), feature(specialization))]
+#![cfg_attr(all(not(feature = "std"), slice_internals), feature(slice_internals))]
+#![cfg_attr(
+    all(not(feature = "std"), toowned_clone_into),
+    feature(toowned_clone_into)
+)]
+#![cfg_attr(
+    all(not(feature = "std"), vec_into_raw_parts),
+    feature(vec_into_raw_parts)
+)]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(core_intrinsics))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(ip))]
 #![cfg_attr(
