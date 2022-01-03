@@ -62,23 +62,30 @@ fn link_in_librustix_outline(arch: &str, asm_name: &str) {
         println!("cargo:rerun-if-changed={}", asm_name);
         let from = format!("{}/lib{}.a", out_dir, name);
         let prev_metadata = std::fs::metadata(&to);
-        std::fs::copy(&from, &to).unwrap();
-        assert!(
-            prev_metadata.is_ok(),
-            "{} didn't previously exist; please inspect the new file and `git add` it",
-            to
-        );
-        assert!(
-            std::process::Command::new("git")
-                .arg("diff")
-                .arg("--quiet")
-                .arg(&to)
-                .status()
-                .unwrap()
-                .success(),
-            "{} changed; please inspect the change and `git commit` it",
-            to
-        );
+        match std::fs::copy(&from, &to) {
+            Ok(_) => {
+                assert!(
+                    prev_metadata.is_ok(),
+                    "{} didn't previously exist; please inspect the new file and `git add` it",
+                    to
+                );
+                assert!(
+                    std::process::Command::new("git")
+                        .arg("diff")
+                        .arg("--quiet")
+                        .arg(&to)
+                        .status()
+                        .unwrap()
+                        .success(),
+                    "{} changed; please inspect the change and `git commit` it",
+                    to
+                );
+            }
+            Err(ReadOnlyFilesystem) => {}
+            Err(e) => {
+                panic!("Problem copying the file: {:?}", e);
+            }
+        }
     }
 }
 
