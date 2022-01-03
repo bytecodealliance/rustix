@@ -11,6 +11,13 @@ fn main() {
     // the rustc version.
     println!("cargo:rerun-if-changed=build.rs");
 
+    use_feature_or_nothing("vec_into_raw_parts");
+    use_feature_or_nothing("toowned_clone_into");
+    use_feature_or_nothing("rustc_attrs");
+    use_feature_or_nothing("specialization");
+    use_feature_or_nothing("slice_internals");
+    use_feature_or_nothing("const_raw_ptr_deref");
+
     let arch = var("CARGO_CFG_TARGET_ARCH").unwrap();
     let asm_name = format!("{}/{}.S", OUTLINE_PATH, arch);
     let os_name = var("CARGO_CFG_TARGET_OS").unwrap();
@@ -28,7 +35,6 @@ fn main() {
     } else {
         use_feature("linux_raw");
 
-        use_feature_or_nothing("rustc_attrs");
         use_feature_or_nothing("core_intrinsics");
         use_feature_or_nothing("doc_cfg");
 

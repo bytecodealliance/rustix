@@ -25,11 +25,11 @@ use core::mem::forget;
 /// value `-1`.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
-#[rustc_layout_scalar_valid_range_start(0)]
+#[cfg_attr(rustc_attrs, rustc_layout_scalar_valid_range_start(0))]
 // libstd/os/raw/mod.rs assures me that every libstd-supported platform has a
 // 32-bit c_int. Below is -2, in two's complement, but that only works out
 // because c_int is 32 bits.
-#[rustc_layout_scalar_valid_range_end(0xFF_FF_FF_FE)]
+#[cfg_attr(rustc_attrs, rustc_layout_scalar_valid_range_end(0xFF_FF_FF_FE))]
 #[cfg_attr(staged_api, unstable(feature = "io_safety", issue = "87074"))]
 pub struct BorrowedFd<'fd> {
     fd: RawFd,
@@ -45,11 +45,11 @@ pub struct BorrowedFd<'fd> {
 /// passed as a consumed argument or returned as an owned value, and it never
 /// has the value `-1`.
 #[repr(transparent)]
-#[rustc_layout_scalar_valid_range_start(0)]
+#[cfg_attr(rustc_attrs, rustc_layout_scalar_valid_range_start(0))]
 // libstd/os/raw/mod.rs assures me that every libstd-supported platform has a
 // 32-bit c_int. Below is -2, in two's complement, but that only works out
 // because c_int is 32 bits.
-#[rustc_layout_scalar_valid_range_end(0xFF_FF_FF_FE)]
+#[cfg_attr(rustc_attrs, rustc_layout_scalar_valid_range_end(0xFF_FF_FF_FE))]
 #[cfg_attr(staged_api, unstable(feature = "io_safety", issue = "87074"))]
 pub struct OwnedFd {
     fd: RawFd,
@@ -67,6 +67,7 @@ impl BorrowedFd<'_> {
     pub unsafe fn borrow_raw_fd(fd: RawFd) -> Self {
         assert_ne!(fd, u32::MAX as RawFd);
         // SAFETY: we just asserted that the value is in the valid range and isn't `-1` (the only value bigger than `0xFF_FF_FF_FE` unsigned)
+        #[allow(unused_unsafe)]
         unsafe {
             Self {
                 fd,
@@ -114,7 +115,10 @@ impl FromRawFd for OwnedFd {
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
         assert_ne!(fd, u32::MAX as RawFd);
         // SAFETY: we just asserted that the value is in the valid range and isn't `-1` (the only value bigger than `0xFF_FF_FF_FE` unsigned)
-        unsafe { Self { fd } }
+        #[allow(unused_unsafe)]
+        unsafe {
+            Self { fd }
+        }
     }
 }
 

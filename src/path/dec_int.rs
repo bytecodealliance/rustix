@@ -88,7 +88,7 @@ impl DecInt {
     }
 
     /// Return the raw byte buffer as a `&CStr`.
-    #[cfg(not(feature = "rustc-dep-of-std"))]
+    #[cfg(feature = "std")]
     #[inline]
     pub fn as_c_str(&self) -> &CStr {
         let bytes_with_nul = &self.buf[..=self.len];
@@ -115,7 +115,7 @@ impl core::fmt::Write for DecIntWriter {
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(feature = "std")]
 impl AsRef<Path> for DecInt {
     #[inline]
     fn as_ref(&self) -> &Path {
