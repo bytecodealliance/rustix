@@ -126,7 +126,7 @@ unsafe fn init_from_envp(mut envp: *mut *mut u8) {
     while !(*envp).is_null() {
         envp = envp.add(1);
     }
-    init_from_auxp(envp.add(1).cast::<_>())
+    init_from_auxp(envp.add(1).cast())
 }
 
 /// # Safety

@@ -22,7 +22,7 @@ pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::
     let nrecv = unsafe {
         ret_send_recv(c::recv(
             borrowed_fd(fd),
-            buf.as_mut_ptr().cast::<_>(),
+            buf.as_mut_ptr().cast(),
             send_recv_len(buf.len()),
             flags.bits(),
         ))?
@@ -35,7 +35,7 @@ pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Resu
     let nwritten = unsafe {
         ret_send_recv(c::send(
             borrowed_fd(fd),
-            buf.as_ptr().cast::<_>(),
+            buf.as_ptr().cast(),
             send_recv_len(buf.len()),
             flags.bits(),
         ))?
@@ -54,10 +54,10 @@ pub(crate) fn recvfrom(
         let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
         let nread = ret_send_recv(c::recvfrom(
             borrowed_fd(fd),
-            buf.as_mut_ptr().cast::<_>(),
+            buf.as_mut_ptr().cast(),
             send_recv_len(buf.len()),
             flags.bits(),
-            storage.as_mut_ptr().cast::<_>(),
+            storage.as_mut_ptr().cast(),
             &mut len,
         ))?;
         Ok((
@@ -77,7 +77,7 @@ pub(crate) fn sendto_v4(
     let nwritten = unsafe {
         ret_send_recv(c::sendto(
             borrowed_fd(fd),
-            buf.as_ptr().cast::<_>(),
+            buf.as_ptr().cast(),
             send_recv_len(buf.len()),
             flags.bits(),
             as_ptr(&encode_sockaddr_v4(addr)).cast::<c::sockaddr>(),
@@ -97,7 +97,7 @@ pub(crate) fn sendto_v6(
     let nwritten = unsafe {
         ret_send_recv(c::sendto(
             borrowed_fd(fd),
-            buf.as_ptr().cast::<_>(),
+            buf.as_ptr().cast(),
             send_recv_len(buf.len()),
             flags.bits(),
             as_ptr(&encode_sockaddr_v6(addr)).cast::<c::sockaddr>(),
@@ -117,7 +117,7 @@ pub(crate) fn sendto_unix(
     let nwritten = unsafe {
         ret_send_recv(c::sendto(
             borrowed_fd(fd),
-            buf.as_ptr().cast::<_>(),
+            buf.as_ptr().cast(),
             send_recv_len(buf.len()),
             flags.bits(),
             as_ptr(&encode_sockaddr_unix(addr)).cast::<c::sockaddr>(),
@@ -163,7 +163,7 @@ pub(crate) fn bind_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result
     unsafe {
         ret(c::bind(
             borrowed_fd(sockfd),
-            as_ptr(&encode_sockaddr_v4(addr)).cast::<_>(),
+            as_ptr(&encode_sockaddr_v4(addr)).cast(),
             size_of::<c::sockaddr_in>() as c::socklen_t,
         ))
     }
@@ -174,7 +174,7 @@ pub(crate) fn bind_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result
     unsafe {
         ret(c::bind(
             borrowed_fd(sockfd),
-            as_ptr(&encode_sockaddr_v6(addr)).cast::<_>(),
+            as_ptr(&encode_sockaddr_v6(addr)).cast(),
             size_of::<c::sockaddr_in6>() as c::socklen_t,
         ))
     }
@@ -185,7 +185,7 @@ pub(crate) fn bind_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Re
     unsafe {
         ret(c::bind(
             borrowed_fd(sockfd),
-            as_ptr(&encode_sockaddr_unix(addr)).cast::<_>(),
+            as_ptr(&encode_sockaddr_unix(addr)).cast(),
             size_of::<c::sockaddr_un>() as c::socklen_t,
         ))
     }
@@ -196,7 +196,7 @@ pub(crate) fn connect_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Res
     unsafe {
         ret(c::connect(
             borrowed_fd(sockfd),
-            as_ptr(&encode_sockaddr_v4(addr)).cast::<_>(),
+            as_ptr(&encode_sockaddr_v4(addr)).cast(),
             size_of::<c::sockaddr_in>() as c::socklen_t,
         ))
     }
@@ -207,7 +207,7 @@ pub(crate) fn connect_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Res
     unsafe {
         ret(c::connect(
             borrowed_fd(sockfd),
-            as_ptr(&encode_sockaddr_v6(addr)).cast::<_>(),
+            as_ptr(&encode_sockaddr_v6(addr)).cast(),
             size_of::<c::sockaddr_in6>() as c::socklen_t,
         ))
     }
@@ -218,7 +218,7 @@ pub(crate) fn connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io:
     unsafe {
         ret(c::connect(
             borrowed_fd(sockfd),
-            as_ptr(&encode_sockaddr_unix(addr)).cast::<_>(),
+            as_ptr(&encode_sockaddr_unix(addr)).cast(),
             size_of::<c::sockaddr_un>() as c::socklen_t,
         ))
     }
@@ -263,7 +263,7 @@ pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketA
         let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
         let owned_fd = ret_owned_fd(c::accept(
             borrowed_fd(sockfd),
-            storage.as_mut_ptr().cast::<_>(),
+            storage.as_mut_ptr().cast(),
             &mut len,
         ))?;
         Ok((
@@ -289,7 +289,7 @@ pub(crate) fn acceptfrom_with(
         let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
         let owned_fd = ret_owned_fd(c::accept4(
             borrowed_fd(sockfd),
-            storage.as_mut_ptr().cast::<_>(),
+            storage.as_mut_ptr().cast(),
             &mut len,
             flags.bits(),
         ))?;
@@ -329,7 +329,7 @@ pub(crate) fn getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
         let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
         ret(c::getsockname(
             borrowed_fd(sockfd),
-            storage.as_mut_ptr().cast::<_>(),
+            storage.as_mut_ptr().cast(),
             &mut len,
         ))?;
         Ok(read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()))
@@ -343,7 +343,7 @@ pub(crate) fn getpeername(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
         let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
         ret(c::getpeername(
             borrowed_fd(sockfd),
-            storage.as_mut_ptr().cast::<_>(),
+            storage.as_mut_ptr().cast(),
             &mut len,
         ))?;
         Ok(read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()))
