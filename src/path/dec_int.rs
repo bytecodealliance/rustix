@@ -1,7 +1,7 @@
 //! # Safety
 //!
-//! This uses `CStr::from_bytes_with_nul_unchecked` on the buffer that
-//! it filled itself.
+//! This uses `CStr::from_bytes_with_nul_unchecked` and
+//! `str::from_utf8_unchecked`on the buffer that it filled itself.
 #![allow(unsafe_code)]
 
 use crate::ffi::ZStr;
@@ -67,7 +67,17 @@ impl DecInt {
         &self.buf[..self.len]
     }
 
-    /// Return the raw byte buffer.
+    /// Return the raw byte buffer as a `&str`.
+    #[inline]
+    pub fn as_str(&self) -> &str {
+        // # Safety
+        //
+        // `DecInt` always holds a formatted decimal number, so it's always
+        // valid UTF-8.
+        unsafe { core::str::from_utf8_unchecked(self.as_bytes()) }
+    }
+
+    /// Return the raw byte buffer as a `&ZStr`.
     #[inline]
     pub fn as_z_str(&self) -> &ZStr {
         let bytes_with_nul = &self.buf[..=self.len];
@@ -77,7 +87,7 @@ impl DecInt {
         unsafe { ZStr::from_bytes_with_nul_unchecked(bytes_with_nul) }
     }
 
-    /// Return the raw byte buffer.
+    /// Return the raw byte buffer as a `&CStr`.
     #[cfg(not(feature = "rustc-dep-of-std"))]
     #[inline]
     pub fn as_c_str(&self) -> &CStr {
