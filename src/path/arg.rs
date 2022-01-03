@@ -911,19 +911,18 @@ impl Arg for Vec<u8> {
 impl Arg for DecInt {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_ref().as_os_str().to_str().ok_or(io::Error::INVAL)
+        Ok(self.as_str())
     }
 
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
-        Path::to_string_lossy(self.as_ref())
+        Cow::Borrowed(self.as_str())
     }
 
     #[inline]
     fn as_cow_z_str(&self) -> io::Result<Cow<'_, ZStr>> {
         Ok(Cow::Owned(
-            ZString::new(self.as_ref().as_os_str().as_bytes())
-                .map_err(|_cstr_err| io::Error::INVAL)?,
+            ZString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
@@ -933,8 +932,7 @@ impl Arg for DecInt {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            ZString::new(self.as_ref().as_os_str().as_bytes())
-                .map_err(|_cstr_err| io::Error::INVAL)?,
+            ZString::new(self.as_bytes()).map_err(|_cstr_err| io::Error::INVAL)?,
         ))
     }
 
