@@ -42,7 +42,7 @@ pub(crate) unsafe fn encode_sockaddr_v4(v4: &SocketAddrV4) -> c::sockaddr_in {
 
 unsafe fn write_sockaddr_v4(v4: &SocketAddrV4, storage: *mut SocketAddrStorage) -> usize {
     let encoded = encode_sockaddr_v4(v4);
-    core::ptr::write(storage.cast::<_>(), encoded);
+    core::ptr::write(storage.cast(), encoded);
     size_of::<c::sockaddr_in>()
 }
 
@@ -86,7 +86,7 @@ pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> c::sockaddr_in6 {
 
 unsafe fn write_sockaddr_v6(v6: &SocketAddrV6, storage: *mut SocketAddrStorage) -> usize {
     let encoded = encode_sockaddr_v6(v6);
-    core::ptr::write(storage.cast::<_>(), encoded);
+    core::ptr::write(storage.cast(), encoded);
     size_of::<c::sockaddr_in6>()
 }
 
@@ -133,6 +133,6 @@ pub(crate) unsafe fn encode_sockaddr_unix(unix: &SocketAddrUnix) -> c::sockaddr_
 #[cfg(not(windows))]
 unsafe fn write_sockaddr_unix(unix: &SocketAddrUnix, storage: *mut SocketAddrStorage) -> usize {
     let encoded = encode_sockaddr_unix(unix);
-    core::ptr::write(storage.cast::<_>(), encoded);
+    core::ptr::write(storage.cast(), encoded);
     super::offsetof_sun_path() + unix.path().to_bytes().len() + 1
 }

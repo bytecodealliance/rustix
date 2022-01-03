@@ -449,10 +449,10 @@ pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize
     unsafe {
         ret(c::ttyname_r(
             borrowed_fd(dirfd),
-            buf.as_mut_ptr().cast::<_>(),
+            buf.as_mut_ptr().cast(),
             buf.len(),
         ))?;
-        Ok(ZStr::from_ptr(buf.as_ptr().cast::<_>()).to_bytes().len())
+        Ok(ZStr::from_ptr(buf.as_ptr().cast()).to_bytes().len())
     }
 }
 
@@ -692,7 +692,7 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
         .try_into()
         .map_err(|_convert_err| io::Error::INVAL)?;
 
-    ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast::<_>(), nfds, timeout) })
+    ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast(), nfds, timeout) })
         .map(|nready| nready as usize)
 }
 

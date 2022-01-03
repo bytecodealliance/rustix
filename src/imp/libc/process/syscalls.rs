@@ -47,7 +47,7 @@ pub(crate) fn fchdir(dirfd: BorrowedFd<'_>) -> io::Result<()> {
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<()> {
-    unsafe { ret_discarded_char_ptr(c::getcwd(buf.as_mut_ptr().cast::<_>(), buf.len())) }
+    unsafe { ret_discarded_char_ptr(c::getcwd(buf.as_mut_ptr().cast(), buf.len())) }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]

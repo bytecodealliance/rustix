@@ -34,7 +34,7 @@ use crate::process::Pid;
 pub(crate) fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
     let nread = unsafe {
         ret_ssize_t(c::getrandom(
-            buf.as_mut_ptr().cast::<_>(),
+            buf.as_mut_ptr().cast(),
             buf.len(),
             flags.bits(),
         ))?

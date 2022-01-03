@@ -372,7 +372,7 @@ impl<Context: self::Context> Epoll<Context> {
             event_list.events.set_len(0);
             let nfds = epoll_wait(
                 self.epoll_fd.as_fd(),
-                event_list.events[..].as_mut_ptr().cast::<_>(),
+                event_list.events[..].as_mut_ptr().cast(),
                 event_list.events.capacity(),
                 timeout,
             )?;
