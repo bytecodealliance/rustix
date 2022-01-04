@@ -84,6 +84,32 @@ jobs:
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi
 
+  check_no_default_features:
+    name: Check
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [stable, nightly]
+        include:
+          - build: stable
+            os: ubuntu-latest
+            rust: stable
+          - build: nightly
+            os: ubuntu-latest
+            rust: nightly
+
+    env:
+      # -D warnings is commented out in our install-rust action; re-add it here.
+      RUSTFLAGS: -D warnings
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: ${{ matrix.rust }}
+    - run: cargo check --workspace --release --no-default-features --features itoa -vv
+
   check_nightly:
     name: Check on Rust nightly
     runs-on: ${{ matrix.os }}
