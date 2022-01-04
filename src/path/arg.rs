@@ -942,7 +942,7 @@ impl Arg for DecInt {
         Self: Sized,
         F: FnOnce(&ZStr) -> io::Result<T>,
     {
-        f(self.as_c_str())
+        f(self.as_z_str())
     }
 }
 
