@@ -1,5 +1,7 @@
 //! `recv` and `send`, and variants
 
+#![allow(unsafe_code)]
+
 use alloc::vec;
 use alloc::vec::Vec;
 use core::{
@@ -241,7 +243,6 @@ impl MsgHdr {
     pub fn socket_addr(&self) -> Option<SocketAddrAny> {
         match self {
             MsgHdr::V4 { socket_addr, .. } => socket_addr.and_then(|addr| {
-                #[allow(unsafe_code)]
                 let res = unsafe {
                     SocketAddrAny::read(
                         &addr as *const _ as *mut _,
@@ -252,7 +253,6 @@ impl MsgHdr {
                 res
             }),
             MsgHdr::V6 { socket_addr, .. } => socket_addr.and_then(|addr| {
-                #[allow(unsafe_code)]
                 let res = unsafe {
                     SocketAddrAny::read(
                         &addr as *const _ as *mut _,
@@ -272,7 +272,6 @@ impl MsgHdr {
                 socket_addr, hdr, ..
             } => match new_addr {
                 Some(v @ SocketAddrAny::V4(_)) => {
-                    #[allow(unsafe_code)]
                     let storage = unsafe {
                         let mut storage = MaybeUninit::<imp::c::sockaddr_in>::uninit();
                         v.write(storage.as_mut_ptr() as *mut _);
@@ -294,7 +293,6 @@ impl MsgHdr {
                 socket_addr, hdr, ..
             } => match new_addr {
                 Some(v @ SocketAddrAny::V6(_)) => {
-                    #[allow(unsafe_code)]
                     let storage = unsafe {
                         let mut storage = MaybeUninit::<imp::c::sockaddr_in6>::uninit();
                         v.write(storage.as_mut_ptr() as *mut _);
@@ -320,15 +318,7 @@ impl MsgHdr {
         let mut msg = MsgHdr::V4 {
             socket_addr: None,
             iovecs,
-            hdr: imp::c::msghdr {
-                msg_name: ptr::null_mut(),
-                msg_namelen: 0,
-                msg_iov: ptr::null_mut(),
-                msg_iovlen: 0,
-                msg_control: ptr::null_mut(),
-                msg_controllen: 0,
-                msg_flags: 0,
-            },
+            hdr: hdr_default(),
         };
         if let MsgHdr::V4 {
             ref mut hdr,
@@ -348,15 +338,7 @@ impl MsgHdr {
         let mut msg = MsgHdr::V6 {
             socket_addr: None,
             iovecs,
-            hdr: imp::c::msghdr {
-                msg_name: ptr::null_mut(),
-                msg_namelen: 0,
-                msg_iov: ptr::null_mut(),
-                msg_iovlen: 0,
-                msg_control: ptr::null_mut(),
-                msg_controllen: 0,
-                msg_flags: 0,
-            },
+            hdr: hdr_default(),
         };
         if let MsgHdr::V6 {
             ref mut hdr,
@@ -370,6 +352,25 @@ impl MsgHdr {
 
         msg
     }
+}
+
+#[inline]
+fn hdr_default() -> imp::c::msghdr {
+    // This dance is needed because Fuchisa has hidden fields in this struct.
+
+    let hdr = MaybeUninit::<imp::c::msghdr>::zeroed();
+    // This is not actually safe yet, only after we have set all the
+    // values below.
+    let mut hdr = unsafe { hdr.assume_init() };
+    hdr.msg_name = ptr::null_mut();
+    hdr.msg_namelen = 0;
+    hdr.msg_iov = ptr::null_mut();
+    hdr.msg_iovlen = 0;
+    hdr.msg_control = ptr::null_mut();
+    hdr.msg_controllen = 0;
+    hdr.msg_flags = 0;
+    // now hdr is actually fully initialized
+    hdr
 }
 
 // TODO: `recvmmsg`, `sendmmsg`
