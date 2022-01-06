@@ -8,3 +8,4 @@ mod unix;
 mod v4;
 mod v4msg;
 mod v6;
+mod v6msg;
