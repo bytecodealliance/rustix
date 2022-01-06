@@ -356,21 +356,24 @@ impl MsgHdr {
 
 #[inline]
 fn hdr_default() -> imp::c::msghdr {
-    // This dance is needed because Fuchisa has hidden fields in this struct.
+    // Needed, as in some cases not all fields are accessible.
 
-    let hdr = MaybeUninit::<imp::c::msghdr>::zeroed();
+    let mut hdr = MaybeUninit::<imp::c::msghdr>::zeroed();
     // This is not actually safe yet, only after we have set all the
     // values below.
-    let mut hdr = unsafe { hdr.assume_init() };
-    hdr.msg_name = ptr::null_mut();
-    hdr.msg_namelen = 0;
-    hdr.msg_iov = ptr::null_mut();
-    hdr.msg_iovlen = 0;
-    hdr.msg_control = ptr::null_mut();
-    hdr.msg_controllen = 0;
-    hdr.msg_flags = 0;
-    // now hdr is actually fully initialized
-    hdr
+    unsafe {
+        let ptr = hdr.as_mut_ptr();
+        (*ptr).msg_name = ptr::null_mut();
+        (*ptr).msg_namelen = 0;
+        (*ptr).msg_iov = ptr::null_mut();
+        (*ptr).msg_iovlen = 0;
+        (*ptr).msg_control = ptr::null_mut();
+        (*ptr).msg_controllen = 0;
+        (*ptr).msg_flags = 0;
+
+        // now hdr is actually fully initialized
+        hdr.assume_init()
+    }
 }
 
 // TODO: `recvmmsg`, `sendmmsg`
