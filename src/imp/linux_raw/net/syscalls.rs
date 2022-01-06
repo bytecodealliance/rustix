@@ -39,7 +39,7 @@ use super::super::reg::nr;
 use super::super::reg::{ArgReg, SocketArg};
 use super::{
     encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags,
-    AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
+    AddressFamily, MsgHdr, Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
 };
 use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
@@ -48,8 +48,8 @@ use core::mem::MaybeUninit;
 #[cfg(not(target_arch = "x86"))]
 use linux_raw_sys::general::{
     __NR_accept, __NR_accept4, __NR_bind, __NR_connect, __NR_getpeername, __NR_getsockname,
-    __NR_getsockopt, __NR_listen, __NR_recvfrom, __NR_sendto, __NR_setsockopt, __NR_shutdown,
-    __NR_socket, __NR_socketpair,
+    __NR_getsockopt, __NR_listen, __NR_recvfrom, __NR_recvmsg, __NR_sendmsg, __NR_sendto,
+    __NR_setsockopt, __NR_shutdown, __NR_socket, __NR_socketpair,
 };
 #[cfg(not(any(
     target_arch = "x86",
@@ -64,8 +64,8 @@ use {
     super::super::conv::x86_sys,
     linux_raw_sys::general::{
         __NR_socketcall, SYS_ACCEPT, SYS_ACCEPT4, SYS_BIND, SYS_CONNECT, SYS_GETPEERNAME,
-        SYS_GETSOCKNAME, SYS_GETSOCKOPT, SYS_LISTEN, SYS_RECV, SYS_RECVFROM, SYS_SEND, SYS_SENDTO,
-        SYS_SETSOCKOPT, SYS_SHUTDOWN, SYS_SOCKET, SYS_SOCKETPAIR,
+        SYS_GETSOCKNAME, SYS_GETSOCKOPT, SYS_LISTEN, SYS_RECV, SYS_RECVFROM, SYS_RECVMSG, SYS_SEND,
+        SYS_SENDMSG, SYS_SENDTO, SYS_SETSOCKOPT, SYS_SHUTDOWN, SYS_SOCKET, SYS_SOCKETPAIR,
     },
 };
 
@@ -443,6 +443,27 @@ pub(crate) fn sendto_v6(
 }
 
 #[inline]
+pub(crate) fn sendmsg(fd: BorrowedFd<'_>, msg: &MsgHdr, flags: SendFlags) -> io::Result<usize> {
+    #[cfg(not(target_arch = "x86",))]
+    unsafe {
+        ret_usize(syscall4_readonly(
+            nr(__NR_sendmsg),
+            borrowed_fd(fd),
+            msg,
+            c_uint(flags.bits()),
+        ))
+    }
+    #[cfg(target_arch = "x86")]
+    unsafe {
+        ret_usize(syscall2_readonly(
+            nr(__NR_socketcall),
+            x86_sys(SYS_SENDMSG),
+            slice_just_addr::<ArgReg<SocketArg>, _>(&[borrowed_fd(fd), msg, c_uint(flags.bits())]),
+        ))
+    }
+}
+
+#[inline]
 pub(crate) fn sendto_unix(
     fd: BorrowedFd<'_>,
     buf: &[u8],
@@ -575,6 +596,27 @@ pub(crate) fn recvfrom(
         Ok((
             nread,
             read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn recvmsg(fd: BorrowedFd<'_>, msg: &mut MsgHdr, flags: RecvFlags) -> io::Result<usize> {
+    #[cfg(not(target_arch = "x86",))]
+    unsafe {
+        ret_usize(syscall4_readonly(
+            nr(__NR_recvmsg),
+            borrowed_fd(fd),
+            msg,
+            c_uint(flags.bits()),
+        ))
+    }
+    #[cfg(target_arch = "x86")]
+    unsafe {
+        ret_usize(syscall2_readonly(
+            nr(__NR_socketcall),
+            x86_sys(SYS_RECVMSG),
+            slice_just_addr::<ArgReg<SocketArg>, _>(&[borrowed_fd(fd), msg, c_uint(flags.bits())]),
         ))
     }
 }

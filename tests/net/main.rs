@@ -6,4 +6,5 @@ mod addr;
 #[cfg(not(windows))]
 mod unix;
 mod v4;
+mod v4msg;
 mod v6;

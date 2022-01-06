@@ -1,5 +1,8 @@
 //! `recv` and `send`, and variants
 
+use std::ops::Deref;
+use std::ptr;
+
 #[cfg(not(windows))]
 use crate::net::SocketAddrUnix;
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
@@ -133,4 +136,87 @@ pub fn sendto_unix<Fd: AsFd>(
     imp::syscalls::sendto_unix(fd, buf, flags, addr)
 }
 
-// TODO: `recvmsg`, `sendmsg`
+/// `sendmsg(fd, msg, flags)`—Writes data to a socket.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///  - [Winsock2]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsasendmsg
+#[inline]
+pub fn sendmsg<Fd: AsFd>(fd: &Fd, msg: &MsgHdr, flags: SendFlags) -> io::Result<usize> {
+    let fd = fd.as_fd();
+    imp::syscalls::sendmsg(fd, &msg.hdr, flags)
+}
+
+/// `recv(fd, buf, flags)`—Reads data from a socket.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///  - [Winsock2]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/recvmsg.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/recvmsg.2.html
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recvfrom
+#[inline]
+pub fn recvmsg<Fd: AsFd>(fd: &Fd, msg: &mut MsgHdr, flags: RecvFlags) -> io::Result<usize> {
+    let fd = fd.as_fd();
+    imp::syscalls::recvmsg(fd, &mut msg.hdr, flags)
+}
+
+// TODO: where should this be located?
+/// Wrapper around `struct msghdr`.
+#[derive(Debug)]
+pub struct MsgHdr {
+    socket: Option<SocketAddrAny>,
+    iovecs: Vec<imp::c::iovec>,
+    hdr: imp::net::MsgHdr,
+}
+
+impl Deref for MsgHdr {
+    type Target = imp::net::MsgHdr;
+
+    fn deref(&self) -> &Self::Target {
+        &self.hdr
+    }
+}
+
+impl From<&mut [u8]> for MsgHdr {
+    fn from(buf: &mut [u8]) -> Self {
+        let iovecs = vec![libc::iovec {
+            iov_base: buf.as_mut_ptr() as *mut _,
+            iov_len: buf.len(),
+        }];
+
+        MsgHdr::from_iovecs(iovecs)
+    }
+}
+
+impl MsgHdr {
+    /// Construct a `MsgHdr` from a list of `libc::iovec`s.
+    pub fn from_iovecs(iovecs: Vec<imp::c::iovec>) -> Self {
+        let mut msg = MsgHdr {
+            socket: None,
+            iovecs,
+            hdr: imp::net::MsgHdr {
+                msg_name: ptr::null_mut(),
+                msg_namelen: 0,
+                msg_iov: ptr::null_mut(),
+                msg_iovlen: 0,
+                msg_control: ptr::null_mut(),
+                msg_controllen: 0,
+                msg_flags: 0,
+            },
+        };
+        msg.hdr.msg_iov = msg.iovecs.as_ptr() as *mut _;
+        msg.hdr.msg_iovlen = msg.iovecs.len() as imp::c::c_int;
+
+        msg
+    }
+}
+
+// TODO: `recvmmsg`, `sendmmsg`

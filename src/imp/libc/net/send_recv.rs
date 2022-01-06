@@ -72,3 +72,5 @@ bitflags! {
         const WAITALL = c::MSG_WAITALL;
     }
 }
+
+pub use c::msghdr as MsgHdr;
