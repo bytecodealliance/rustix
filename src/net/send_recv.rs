@@ -1,9 +1,12 @@
 //! `recv` and `send`, and variants
 
-use core::ops::Deref;
-use core::ptr;
-use std::mem::MaybeUninit;
-use std::ops::DerefMut;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::{
+    mem::MaybeUninit,
+    ops::{Deref, DerefMut},
+    ptr,
+};
 
 #[cfg(not(windows))]
 use crate::net::SocketAddrUnix;
