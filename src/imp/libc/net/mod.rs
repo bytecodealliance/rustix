@@ -13,7 +13,7 @@ pub use addr::SocketAddrStorage;
 #[cfg(not(windows))]
 pub use addr::SocketAddrUnix;
 pub(crate) use read_sockaddr::{read_sockaddr, read_sockaddr_os};
-pub use send_recv::{MsgHdr, RecvFlags, SendFlags};
+pub use send_recv::{RecvFlags, SendFlags};
 pub use types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType, Timeout};
 #[cfg(not(windows))]
 pub(crate) use write_sockaddr::encode_sockaddr_unix;

@@ -174,11 +174,11 @@ pub fn recvmsg<Fd: AsFd>(fd: &Fd, msg: &mut MsgHdr, flags: RecvFlags) -> io::Res
 pub struct MsgHdr {
     socket: Option<SocketAddrAny>,
     iovecs: Vec<imp::c::iovec>,
-    hdr: imp::net::MsgHdr,
+    hdr: imp::c::msghdr,
 }
 
 impl Deref for MsgHdr {
-    type Target = imp::net::MsgHdr;
+    type Target = imp::c::msghdr;
 
     fn deref(&self) -> &Self::Target {
         &self.hdr
@@ -202,7 +202,7 @@ impl MsgHdr {
         let mut msg = MsgHdr {
             socket: None,
             iovecs,
-            hdr: imp::net::MsgHdr {
+            hdr: imp::c::msghdr {
                 msg_name: ptr::null_mut(),
                 msg_namelen: 0,
                 msg_iov: ptr::null_mut(),

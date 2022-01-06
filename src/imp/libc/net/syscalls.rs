@@ -6,8 +6,8 @@ use super::ext::{in6_addr_new, in_addr_new};
 use super::{encode_sockaddr_unix, SocketAddrUnix};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::{
-    encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags, AddressFamily, MsgHdr,
-    Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
+    encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags, AddressFamily, Protocol,
+    RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
 };
 use crate::as_ptr;
 use crate::io::{self, OwnedFd};
@@ -68,13 +68,17 @@ pub(crate) fn recvfrom(
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn sendmsg(fd: BorrowedFd<'_>, msg: &MsgHdr, flags: SendFlags) -> io::Result<usize> {
+pub(crate) fn sendmsg(fd: BorrowedFd<'_>, msg: &c::msghdr, flags: SendFlags) -> io::Result<usize> {
     let nwritten = unsafe { ret_send_recv(c::sendmsg(borrowed_fd(fd), msg, flags.bits()))? };
     Ok(nwritten as usize)
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn recvmsg(fd: BorrowedFd<'_>, msg: &mut MsgHdr, flags: RecvFlags) -> io::Result<usize> {
+pub(crate) fn recvmsg(
+    fd: BorrowedFd<'_>,
+    msg: &mut c::msghdr,
+    flags: RecvFlags,
+) -> io::Result<usize> {
     let nrecv = unsafe { ret_send_recv(c::recvmsg(borrowed_fd(fd), msg, flags.bits()))? };
     Ok(nrecv as usize)
 }
