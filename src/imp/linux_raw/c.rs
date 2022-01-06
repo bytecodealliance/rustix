@@ -10,6 +10,6 @@ pub(crate) use linux_raw_sys::general::{
     AF_INET6,
 };
 
-pub(crate) use linux_raw_sys::general::iovec;
+pub(crate) use linux_raw_sys::general::{iovec, msghdr};
 
 pub(crate) use linux_raw_sys::ctypes::*;

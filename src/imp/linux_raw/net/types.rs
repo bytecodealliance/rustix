@@ -281,31 +281,3 @@ pub enum Timeout {
     /// `SO_SNDTIMEO`—Timeout for sending.
     Send = linux_raw_sys::general::SO_SNDTIMEO,
 }
-
-/// Structure describing messages sent by `sendmsg` and received by `recvmsg`.
-// TODO: https://github.com/sunfishcode/linux-raw-sys/issues/12
-#[repr(C)]
-pub struct MsgHdr {
-    /// Address to send to/receive from.
-    // TODO: this is void* originally, is this the correct translation?
-    pub msg_name: *mut linux_raw_sys::general::char,
-    /// Length of address data.
-    pub msg_namelen: linux_raw_sys::general::socklen_t,
-
-    /// Vector of data to send/receive into.  
-    pub msg_iov: *mut linux_raw_sys::general::iovec,
-    /// Number of elements in the vector.  
-    pub msg_iovlen: linux_raw_sys::general::size_t,
-
-    /// Ancillary data (eg BSD filedesc passing).
-    // TODO: this is void* originally, is this the correct translation?
-    pub msg_control: *mut linux_raw_sys::general::char,
-    /// Ancillary data buffer length
-    /// !! The type should be socklen_t but the definition of the
-    /// kernel is incompatible with this.
-    pub msg_controllen: linux_raw_sys::general::size_t,
-
-    /// Flags on received message.  
-    // TODO: this is int originally, is this the correct translation?
-    pub msg_flags: isize,
-}
