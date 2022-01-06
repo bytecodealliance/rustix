@@ -187,9 +187,9 @@ impl Deref for MsgHdr {
 
 impl From<&mut [u8]> for MsgHdr {
     fn from(buf: &mut [u8]) -> Self {
-        let iovecs = vec![libc::iovec {
+        let iovecs = vec![imp::c::iovec {
             iov_base: buf.as_mut_ptr() as *mut _,
-            iov_len: buf.len(),
+            iov_len: buf.len() as _,
         }];
 
         MsgHdr::from_iovecs(iovecs)
@@ -213,7 +213,7 @@ impl MsgHdr {
             },
         };
         msg.hdr.msg_iov = msg.iovecs.as_ptr() as *mut _;
-        msg.hdr.msg_iovlen = msg.iovecs.len() as imp::c::c_int;
+        msg.hdr.msg_iovlen = msg.iovecs.len() as _;
 
         msg
     }
