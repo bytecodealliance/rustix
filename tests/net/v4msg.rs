@@ -35,12 +35,12 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
 
     let data_socket = accept(&connection_socket).unwrap();
     let mut buffer = vec![0u8; BUFFER_SIZE];
-    let mut msg = MsgHdr::from(&mut buffer[..]);
+    let mut msg = MsgHdr::v4_from_slice_mut(&mut buffer[..]);
     let nread = recvmsg(&data_socket, &mut msg, RecvFlags::empty()).unwrap();
     assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "hello, world");
 
     let mut content = b"goodnight, moon".to_vec();
-    let msg = MsgHdr::from(&mut content[..]);
+    let msg = MsgHdr::v4_from_slice_mut(&mut content[..]);
     sendmsg(&data_socket, &msg, SendFlags::empty()).unwrap();
 }
 
@@ -60,11 +60,11 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     connect_v4(&data_socket, &addr).unwrap();
 
     let mut content = b"hello, world".to_vec();
-    let msg = MsgHdr::from(&mut content[..]);
+    let msg = MsgHdr::v4_from_slice_mut(&mut content[..]);
     sendmsg(&data_socket, &msg, SendFlags::empty()).unwrap();
 
     let mut buffer = vec![0u8; BUFFER_SIZE];
-    let mut msg = MsgHdr::from(&mut buffer[..]);
+    let mut msg = MsgHdr::v4_from_slice_mut(&mut buffer[..]);
     let nread = recvmsg(&data_socket, &mut msg, RecvFlags::empty()).unwrap();
     assert!(nread < 64);
     assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "goodnight, moon");

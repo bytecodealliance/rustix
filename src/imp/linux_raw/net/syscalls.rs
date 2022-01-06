@@ -38,8 +38,8 @@ use super::super::reg::nr;
 #[cfg(target_arch = "x86")]
 use super::super::reg::{ArgReg, SocketArg};
 use super::{
-    encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os,
-    AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
+    encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags,
+    AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
 };
 use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
@@ -601,7 +601,11 @@ pub(crate) fn recvfrom(
 }
 
 #[inline]
-pub(crate) fn recvmsg(fd: BorrowedFd<'_>, msg: &mut c::msghdr, flags: RecvFlags) -> io::Result<usize> {
+pub(crate) fn recvmsg(
+    fd: BorrowedFd<'_>,
+    msg: &mut c::msghdr,
+    flags: RecvFlags,
+) -> io::Result<usize> {
     #[cfg(not(target_arch = "x86",))]
     unsafe {
         ret_usize(syscall3_readonly(
