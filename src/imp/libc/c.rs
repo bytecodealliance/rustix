@@ -63,7 +63,7 @@ pub(crate) use winapi::shared::ws2def::LPWSABUF;
 
 pub(crate) unsafe fn sendmsg(
     s: SOCKET,
-    lpBufffers: LPWSABUF,
+    lpBuffers: LPWSABUF,
     dwBufferCount: c_ulong,
     lpTo: *mut sockaddr,
     iToLen: c_int,
@@ -99,8 +99,8 @@ pub(crate) unsafe fn recvmsg(
     lpBufffers: LPWSABUF,
     dwBufferCount: c_ulong,
     lpFrom: *mut sockaddr,
-    iFromLen: c_int,
-    lpFlags: c_ulong,
+    iFromLen: *mut c_int,
+    lpFlags: *mut c_ulong,
 ) -> c_int {
     let mut lpNumberOfBytesRecvd: c_ulong = 0;
 

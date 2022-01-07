@@ -111,10 +111,8 @@ pub use imp::io::Termios;
 pub use imp::io::Winsize;
 
 // Declare `IoSlice` and `IoSliceMut`.
-#[cfg(not(windows))]
 #[cfg(not(feature = "std"))]
 pub use imp::io::{IoSlice, IoSliceMut};
-#[cfg(not(windows))]
 #[cfg(feature = "std")]
 pub use std::io::{IoSlice, IoSliceMut};
 

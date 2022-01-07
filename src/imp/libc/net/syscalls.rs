@@ -76,7 +76,7 @@ pub(crate) fn sendmsg(
     flags: SendFlags,
 ) -> io::Result<usize> {
     #[cfg(not(windows))]
-    let nwritten = {
+    {
         let mut msg = msghdr_default();
         msg.msg_iov = iovs.as_ptr() as *mut _;
         msg.msg_iovlen = iovs.len() as _;
@@ -84,12 +84,13 @@ pub(crate) fn sendmsg(
         msg.msg_name = name as *mut _;
         msg.msg_namelen = namelen as _;
 
-        unsafe { ret_send_recv(c::sendmsg(borrowed_fd(fd), &msg, flags.bits()))? }
-    };
+        let nwritten = unsafe { ret_send_recv(c::sendmsg(borrowed_fd(fd), &msg, flags.bits()))? };
+        Ok(nwritten as usize)
+    }
     #[cfg(window)]
-    let nwritten = {
+    {
         let (name, namelen) = socketaddrany_as_ffi_pair(addr);
-        unsafe {
+        let nwritten = unsafe {
             ret_send_recv(c::sendmsg(
                 borrowed_fd(fd),
                 iovs.as_ptr() as *mut _,
@@ -98,9 +99,9 @@ pub(crate) fn sendmsg(
                 namelen,
                 flags.bits() as _,
             ))?
-        }
-    };
-    Ok(nwritten as usize)
+        };
+        Ok(nwritten as usize)
+    }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
@@ -123,15 +124,18 @@ pub(crate) fn recvmsg(
     };
     #[cfg(windows)]
     let nrecv = {
-        let (name, namelen) = socketaddrany_mut_as_ffi_pair(addr);
+        // TODO: check namelen to be valid when an addr is returned
+        let (name, mut namelen) = socketaddrany_mut_as_ffi_pair(addr);
+        // TODO: do the flag results need to be exposed?
+        let mut flags = flags.bits() as _;
         unsafe {
             ret_send_recv(c::recvmsg(
                 borrowed_fd(fd),
                 iovs.as_ptr() as *mut _,
                 iovs.len(),
                 name,
-                namelen,
-                flags.bits() as _,
+                &mut namelen,
+                &mut flags,
             ))?
         }
     };

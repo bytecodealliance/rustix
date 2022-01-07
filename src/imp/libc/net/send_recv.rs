@@ -1,8 +1,5 @@
 use bitflags::bitflags;
-use core::{
-    mem::{size_of, MaybeUninit},
-    ptr,
-};
+use core::{mem::size_of, ptr};
 
 use super::super::c;
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
@@ -88,7 +85,7 @@ bitflags! {
 pub(crate) fn msghdr_default() -> c::msghdr {
     // Needed, as in some cases not all fields are accessible.
 
-    let mut hdr = MaybeUninit::<c::msghdr>::zeroed();
+    let mut hdr = core::mem::MaybeUninit::<c::msghdr>::zeroed();
     // This is not actually safe yet, only after we have set all the
     // values below.
     unsafe {
@@ -114,8 +111,7 @@ pub(crate) fn socketaddrany_mut_as_ffi_pair(
             let size = size_of::<c::sockaddr_in>();
             // TODO: is there a safer way to do this?
             assert_eq!(size, size_of::<SocketAddrV4>(), "invalid layout");
-            let addr =
-                unsafe { addr as *mut SocketAddrV4 as *mut c::sockaddr_in as *mut c::sockaddr };
+            let addr = addr as *mut SocketAddrV4 as *mut c::sockaddr_in as *mut c::sockaddr;
 
             (addr, size)
         }
@@ -123,11 +119,11 @@ pub(crate) fn socketaddrany_mut_as_ffi_pair(
             let size = size_of::<c::sockaddr_in6>();
             // TODO: is there a safer way to do this?
             assert_eq!(size, size_of::<SocketAddrV6>(), "invalid layout");
-            let addr =
-                unsafe { addr as *mut SocketAddrV6 as *mut c::sockaddr_in6 as *mut c::sockaddr };
+            let addr = addr as *mut SocketAddrV6 as *mut c::sockaddr_in6 as *mut c::sockaddr;
 
             (addr, size)
         }
+        #[cfg(not(windows))]
         Some(SocketAddrAny::Unix(_)) => {
             // TODO: is this correct, or is this actually allowed?
             panic!("invalid socket addr provided");
@@ -142,10 +138,8 @@ pub(crate) fn socketaddrany_as_ffi_pair(addr: Option<&SocketAddrAny>) -> (*mut c
             let size = size_of::<c::sockaddr_in>();
             // TODO: is there a safer way to do this?
             assert_eq!(size, size_of::<SocketAddrV4>(), "invalid layout");
-            let addr = unsafe {
-                addr as *const SocketAddrV4 as *const c::sockaddr_in as *mut c::sockaddr_in
-                    as *mut c::sockaddr
-            };
+            let addr = addr as *const SocketAddrV4 as *const c::sockaddr_in as *mut c::sockaddr_in
+                as *mut c::sockaddr;
 
             (addr, size)
         }
@@ -153,13 +147,12 @@ pub(crate) fn socketaddrany_as_ffi_pair(addr: Option<&SocketAddrAny>) -> (*mut c
             let size = size_of::<c::sockaddr_in6>();
             // TODO: is there a safer way to do this?
             assert_eq!(size, size_of::<SocketAddrV6>(), "invalid layout");
-            let addr = unsafe {
-                addr as *const SocketAddrV6 as *const c::sockaddr_in6 as *mut c::sockaddr_in6
-                    as *mut c::sockaddr
-            };
+            let addr = addr as *const SocketAddrV6 as *const c::sockaddr_in6 as *mut c::sockaddr_in6
+                as *mut c::sockaddr;
 
             (addr, size)
         }
+        #[cfg(not(windows))]
         Some(SocketAddrAny::Unix(_)) => {
             // TODO: is this correct, or is this actually allowed?
             panic!("invalid socket addr provided");
