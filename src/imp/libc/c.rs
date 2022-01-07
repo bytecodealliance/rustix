@@ -96,7 +96,7 @@ pub(crate) unsafe fn sendmsg(
 
 pub(crate) unsafe fn recvmsg(
     s: SOCKET,
-    lpBufffers: LPWSABUF,
+    lpBuffers: LPWSABUF,
     dwBufferCount: c_ulong,
     lpFrom: *mut sockaddr,
     iFromLen: *mut c_int,

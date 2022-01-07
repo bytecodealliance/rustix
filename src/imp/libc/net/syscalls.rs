@@ -75,33 +75,30 @@ pub(crate) fn sendmsg(
     addr: Option<&SocketAddrAny>,
     flags: SendFlags,
 ) -> io::Result<usize> {
+    let (name, namelen) = socketaddrany_as_ffi_pair(addr);
+
     #[cfg(not(windows))]
-    {
+    let nwritten = {
         let mut msg = msghdr_default();
         msg.msg_iov = iovs.as_ptr() as *mut _;
         msg.msg_iovlen = iovs.len() as _;
-        let (name, namelen) = socketaddrany_as_ffi_pair(addr);
         msg.msg_name = name as *mut _;
         msg.msg_namelen = namelen as _;
 
-        let nwritten = unsafe { ret_send_recv(c::sendmsg(borrowed_fd(fd), &msg, flags.bits()))? };
-        Ok(nwritten as usize)
-    }
+        unsafe { ret_send_recv(c::sendmsg(borrowed_fd(fd), &msg, flags.bits()))? }
+    };
     #[cfg(window)]
-    {
-        let (name, namelen) = socketaddrany_as_ffi_pair(addr);
-        let nwritten = unsafe {
-            ret_send_recv(c::sendmsg(
-                borrowed_fd(fd),
-                iovs.as_ptr() as *mut _,
-                iovs.len(),
-                name,
-                namelen,
-                flags.bits() as _,
-            ))?
-        };
-        Ok(nwritten as usize)
-    }
+    let nwritten = unsafe {
+        ret_send_recv(c::sendmsg(
+            borrowed_fd(fd),
+            iovs.as_ptr() as *mut _,
+            iovs.len(),
+            name,
+            namelen,
+            flags.bits() as _,
+        ))?
+    };
+    Ok(nwritten as usize)
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
@@ -125,14 +122,15 @@ pub(crate) fn recvmsg(
     #[cfg(windows)]
     let nrecv = {
         // TODO: check namelen to be valid when an addr is returned
-        let (name, mut namelen) = socketaddrany_mut_as_ffi_pair(addr);
+        let (name, namelen) = socketaddrany_mut_as_ffi_pair(addr);
+        let mut namelen = namelen as _;
         // TODO: do the flag results need to be exposed?
         let mut flags = flags.bits() as _;
         unsafe {
             ret_send_recv(c::recvmsg(
                 borrowed_fd(fd),
                 iovs.as_ptr() as *mut _,
-                iovs.len(),
+                iovs.len() as _,
                 name,
                 &mut namelen,
                 &mut flags,
