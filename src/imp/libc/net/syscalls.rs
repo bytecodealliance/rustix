@@ -84,7 +84,7 @@ pub(crate) fn sendmsg(
         msg.msg_name = name as *mut _;
         msg.msg_namelen = namelen as _;
 
-        unsafe { ret_send_recv(c::sendmsg(borrowed_fd(fd), &msg, flags.bits()))? };
+        unsafe { ret_send_recv(c::sendmsg(borrowed_fd(fd), &msg, flags.bits()))? }
     };
     #[cfg(window)]
     let nwritten = {

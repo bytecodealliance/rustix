@@ -14,10 +14,10 @@ pub use addr::SocketAddrStorage;
 pub use addr::SocketAddrUnix;
 pub(crate) use read_sockaddr::{read_sockaddr, read_sockaddr_os};
 #[cfg(not(windows))]
-pub(crate) use send_recv::msghdr_default;
-pub use send_recv::{
-    socketaddrany_as_ffi_pair, socketaddrany_mut_as_ffi_pair, RecvFlags, SendFlags,
+pub(crate) use send_recv::{
+    msghdr_default, socketaddrany_as_ffi_pair, socketaddrany_mut_as_ffi_pair,
 };
+pub use send_recv::{RecvFlags, SendFlags};
 pub use types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType, Timeout};
 #[cfg(not(windows))]
 pub(crate) use write_sockaddr::encode_sockaddr_unix;
