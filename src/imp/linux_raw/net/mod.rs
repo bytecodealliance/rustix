@@ -7,12 +7,16 @@ mod write_sockaddr;
 pub(crate) mod ext;
 pub(crate) mod syscalls;
 pub(crate) use read_sockaddr::{read_sockaddr, read_sockaddr_os};
+pub(crate) use send_recv::{
+    msghdr_default, socketaddrany_as_ffi_pair, socketaddrany_mut_as_ffi_pair,
+};
 pub(crate) use write_sockaddr::{
     encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, write_sockaddr,
 };
 
 pub use addr::{SocketAddrStorage, SocketAddrUnix};
 pub use send_recv::{RecvFlags, SendFlags};
+
 pub use types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType, Timeout};
 
 /// Return the offset of the `sun_path` field of `sockaddr_un`.

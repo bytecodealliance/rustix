@@ -19,7 +19,7 @@ pub mod sockopt;
 #[cfg(not(windows))]
 pub use send_recv::sendto_unix;
 pub use send_recv::{
-    recv, recvfrom, recvmsg, send, sendmsg, sendto_v4, sendto_v6, MsgHdr, RecvFlags, SendFlags,
+    recv, recvfrom, recvmsg, send, sendmsg, sendto_v4, sendto_v6, RecvFlags, SendFlags,
 };
 pub use socket::{
     accept, accept_with, acceptfrom, acceptfrom_with, bind_v4, bind_v6, connect_v4, connect_v6,

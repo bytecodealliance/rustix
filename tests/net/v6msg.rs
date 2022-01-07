@@ -5,8 +5,9 @@
 
 use rustix::net::{
     accept, bind_v6, connect_v6, getsockname, listen, recvmsg, sendmsg, socket, AddressFamily,
-    Ipv6Addr, MsgHdr, Protocol, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV6, SocketType,
+    Ipv6Addr, Protocol, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV6, SocketType,
 };
+use std::io::{IoSlice, IoSliceMut};
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 
@@ -38,14 +39,23 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     }
 
     let mut buffer = vec![0u8; BUFFER_SIZE];
-    let mut msg = MsgHdr::v6_from_slice_mut(&mut buffer[..]);
     let data_socket = accept(&connection_socket).unwrap();
-    let nread = recvmsg(&data_socket, &mut msg, RecvFlags::empty()).unwrap();
+    let nread = recvmsg(
+        &data_socket,
+        &[IoSliceMut::new(&mut buffer)],
+        None,
+        RecvFlags::empty(),
+    )
+    .unwrap();
     assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "hello, world");
 
-    let mut content = b"goodnight, moon".to_vec();
-    let msg = MsgHdr::v6_from_slice_mut(&mut content[..]);
-    sendmsg(&data_socket, &msg, SendFlags::empty()).unwrap();
+    sendmsg(
+        &data_socket,
+        &[IoSlice::new(b"goodnight, moon")],
+        None,
+        SendFlags::empty(),
+    )
+    .unwrap();
 }
 
 fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
@@ -69,12 +79,21 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     .unwrap();
     connect_v6(&data_socket, &addr).unwrap();
 
-    let mut content = b"hello, world".to_vec();
-    let msg = MsgHdr::v6_from_slice_mut(&mut content[..]);
-    sendmsg(&data_socket, &msg, SendFlags::empty()).unwrap();
+    sendmsg(
+        &data_socket,
+        &[IoSlice::new(b"hello, world")],
+        None,
+        SendFlags::empty(),
+    )
+    .unwrap();
 
-    let mut msg = MsgHdr::v6_from_slice_mut(&mut buffer[..]);
-    let nread = recvmsg(&data_socket, &mut msg, RecvFlags::empty()).unwrap();
+    let nread = recvmsg(
+        &data_socket,
+        &[IoSliceMut::new(&mut buffer)],
+        None,
+        RecvFlags::empty(),
+    )
+    .unwrap();
     assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "goodnight, moon");
 }
 

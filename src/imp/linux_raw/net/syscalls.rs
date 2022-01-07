@@ -38,10 +38,11 @@ use super::super::reg::nr;
 #[cfg(target_arch = "x86")]
 use super::super::reg::{ArgReg, SocketArg};
 use super::{
-    encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags,
-    AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
+    encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, msghdr_default, read_sockaddr_os,
+    socketaddrany_as_ffi_pair, socketaddrany_mut_as_ffi_pair, AcceptFlags, AddressFamily, Protocol,
+    RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
 };
-use crate::io::{self, OwnedFd};
+use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
 use crate::net::{SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
@@ -443,13 +444,25 @@ pub(crate) fn sendto_v6(
 }
 
 #[inline]
-pub(crate) fn sendmsg(fd: BorrowedFd<'_>, msg: &c::msghdr, flags: SendFlags) -> io::Result<usize> {
+pub(crate) fn sendmsg(
+    fd: BorrowedFd<'_>,
+    iovs: &[IoSlice<'_>],
+    addr: Option<&SocketAddrAny>,
+    flags: SendFlags,
+) -> io::Result<usize> {
+    let mut msg = msghdr_default();
+    msg.msg_iov = iovs.as_ptr() as *mut _;
+    msg.msg_iovlen = iovs.len() as _;
+    let (name, namelen) = socketaddrany_as_ffi_pair(addr);
+    msg.msg_name = name as *mut _;
+    msg.msg_namelen = namelen as _;
+
     #[cfg(not(target_arch = "x86",))]
     unsafe {
         ret_usize(syscall3_readonly(
             nr(__NR_sendmsg),
             borrowed_fd(fd),
-            by_ref(msg),
+            by_ref(&msg),
             c_uint(flags.bits()),
         ))
     }
@@ -460,7 +473,7 @@ pub(crate) fn sendmsg(fd: BorrowedFd<'_>, msg: &c::msghdr, flags: SendFlags) -> 
             x86_sys(SYS_SENDMSG),
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 borrowed_fd(fd),
-                by_ref(msg),
+                by_ref(&msg),
                 c_uint(flags.bits()),
             ]),
         ))
@@ -607,15 +620,23 @@ pub(crate) fn recvfrom(
 #[inline]
 pub(crate) fn recvmsg(
     fd: BorrowedFd<'_>,
-    msg: &mut c::msghdr,
+    iovs: &[IoSliceMut<'_>],
+    addr: Option<&mut SocketAddrAny>,
     flags: RecvFlags,
 ) -> io::Result<usize> {
+    let mut msg = msghdr_default();
+    msg.msg_iov = iovs.as_ptr() as *mut _;
+    msg.msg_iovlen = iovs.len() as _;
+    let (name, namelen) = socketaddrany_mut_as_ffi_pair(addr);
+    msg.msg_name = name as *mut _;
+    msg.msg_namelen = namelen as _;
+
     #[cfg(not(target_arch = "x86",))]
     unsafe {
         ret_usize(syscall3_readonly(
             nr(__NR_recvmsg),
             borrowed_fd(fd),
-            by_mut(msg),
+            by_mut(&mut msg),
             c_uint(flags.bits()),
         ))
     }
@@ -626,7 +647,7 @@ pub(crate) fn recvmsg(
             x86_sys(SYS_RECVMSG),
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 borrowed_fd(fd),
-                by_mut(msg),
+                by_mut(&mut msg),
                 c_uint(flags.bits()),
             ]),
         ))

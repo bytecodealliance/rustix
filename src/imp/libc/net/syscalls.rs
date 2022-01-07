@@ -3,14 +3,15 @@ use super::super::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_rec
 use super::super::fd::BorrowedFd;
 use super::ext::{in6_addr_new, in_addr_new};
 #[cfg(not(windows))]
-use super::{encode_sockaddr_unix, SocketAddrUnix};
+use super::{encode_sockaddr_unix, msghdr_default, SocketAddrUnix};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::{
-    encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags, AddressFamily, Protocol,
-    RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
+    encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, socketaddrany_as_ffi_pair,
+    socketaddrany_mut_as_ffi_pair, AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags,
+    Shutdown, SocketFlags, SocketType,
 };
 use crate::as_ptr;
-use crate::io::{self, OwnedFd};
+use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use core::convert::TryInto;
 use core::mem::{size_of, MaybeUninit};
@@ -68,18 +69,72 @@ pub(crate) fn recvfrom(
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn sendmsg(fd: BorrowedFd<'_>, msg: &c::msghdr, flags: SendFlags) -> io::Result<usize> {
-    let nwritten = unsafe { ret_send_recv(c::sendmsg(borrowed_fd(fd), msg, flags.bits()))? };
+pub(crate) fn sendmsg(
+    fd: BorrowedFd<'_>,
+    iovs: &[IoSlice<'_>],
+    addr: Option<&SocketAddrAny>,
+    flags: SendFlags,
+) -> io::Result<usize> {
+    #[cfg(not(windows))]
+    let nwritten = {
+        let mut msg = msghdr_default();
+        msg.msg_iov = iovs.as_ptr() as *mut _;
+        msg.msg_iovlen = iovs.len() as _;
+        let (name, namelen) = socketaddrany_as_ffi_pair(addr);
+        msg.msg_name = name as *mut _;
+        msg.msg_namelen = namelen as _;
+
+        unsafe { ret_send_recv(c::sendmsg(borrowed_fd(fd), &msg, flags.bits()))? };
+    };
+    #[cfg(window)]
+    let nwritten = {
+        let (name, namelen) = socketaddrany_as_ffi_pair(addr);
+        unsafe {
+            ret_send_recv(c::sendmsg(
+                borrowed_fd(fd),
+                iovs.as_ptr() as *mut _,
+                iovs.len(),
+                name,
+                namelen,
+                flags.bits() as _,
+            ))?
+        }
+    };
     Ok(nwritten as usize)
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn recvmsg(
     fd: BorrowedFd<'_>,
-    msg: &mut c::msghdr,
+    iovs: &[IoSliceMut<'_>],
+    addr: Option<&mut SocketAddrAny>,
     flags: RecvFlags,
 ) -> io::Result<usize> {
-    let nrecv = unsafe { ret_send_recv(c::recvmsg(borrowed_fd(fd), msg, flags.bits()))? };
+    #[cfg(not(windows))]
+    let nrecv = {
+        let mut msg = msghdr_default();
+        msg.msg_iov = iovs.as_ptr() as *mut _;
+        msg.msg_iovlen = iovs.len() as _;
+        let (name, namelen) = socketaddrany_mut_as_ffi_pair(addr);
+        msg.msg_name = name as *mut _;
+        msg.msg_namelen = namelen as _;
+
+        unsafe { ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))? }
+    };
+    #[cfg(windows)]
+    let nrecv = {
+        let (name, namelen) = socketaddrany_mut_as_ffi_pair(addr);
+        unsafe {
+            ret_send_recv(c::recvmsg(
+                borrowed_fd(fd),
+                iovs.as_ptr() as *mut _,
+                iovs.len(),
+                name,
+                namelen,
+                flags.bits() as _,
+            ))?
+        }
+    };
     Ok(nrecv as usize)
 }
 

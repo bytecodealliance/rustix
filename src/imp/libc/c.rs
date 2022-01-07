@@ -59,31 +59,17 @@ pub(crate) const SHUT_WR: c_int = SD_SEND;
 pub(crate) const SHUT_RD: c_int = SD_RECEIVE;
 pub(crate) const SHUT_RDWR: c_int = SD_BOTH;
 
-pub(crate) use winapi::shared::ws2def::{LPWSABUF, SOCKADDR};
+pub(crate) use winapi::shared::ws2def::LPWSABUF;
 
-#[repr(C)]
-pub(crate) struct msghdr {
-    pub msg_name: *mut SOCKADDR,
-    pub msg_namelen: c_int,
-    pub msg_iov: LPWSABUF,
-    pub msg_iovlen: c_ulong,
-    #[allow(dead_code)]
-    pub msg_control: *mut c_void,
-    #[allow(dead_code)]
-    pub msg_controllen: c_int,
-    pub msg_flags: c_int,
-}
-
-pub(crate) unsafe fn sendmsg(fd: SOCKET, msg: *const msghdr, flags: c_int) -> ssize_t {
-    let s = fd;
-
-    let lpBuffers = (*msghdr).msg_iov;
-    let dwBufferCount = (*msghdr).msg_iovlen;
-
+pub(crate) unsafe fn sendmsg(
+    s: SOCKET,
+    lpBufffers: LPWSABUF,
+    dwBufferCount: c_ulong,
+    lpTo: *mut sockaddr,
+    iToLen: c_int,
+    dwFlags: c_ulong,
+) -> c_int {
     let mut lpNumberOfBytesSent: c_ulong = 0;
-    let dwFlags = (*msghdr).msg_flags as c_ulong;
-    let lpTo = (*msghdr).msg_name;
-    let iToLen = (*msghdr).msg_namelen;
 
     // No overlapping IO support
     let lpOverlapped = core::ptr::null_mut();
@@ -108,22 +94,21 @@ pub(crate) unsafe fn sendmsg(fd: SOCKET, msg: *const msghdr, flags: c_int) -> ss
     }
 }
 
-pub(crate) unsafe fn recvmsg(fd: SOCKET, msg: *mut msghdr, flags: c_int) -> ssize_t {
-    let s = fd;
-
-    let lpBuffers = (*msghdr).msg_iov;
-    let dwBufferCount = (*msghdr).msg_iovlen;
-
+pub(crate) unsafe fn recvmsg(
+    s: SOCKET,
+    lpBufffers: LPWSABUF,
+    dwBufferCount: c_ulong,
+    lpFrom: *mut sockaddr,
+    iFromLen: c_int,
+    lpFlags: c_ulong,
+) -> c_int {
     let mut lpNumberOfBytesRecvd: c_ulong = 0;
-    let lpFlags = (*msghdr).msg_flags as c_ulong;
-    let lpFrom = (*msghdr).msg_name;
-    let iFromLen = (*msghdr).msg_namelen;
 
     // No overlapping IO support
     let lpOverlapped = core::ptr::null_mut();
     let lpCompletionRoutine = None;
 
-    let res = WSASendTo(
+    let res = WSARecvFrom(
         s,
         lpBuffers,
         dwBufferCount,
