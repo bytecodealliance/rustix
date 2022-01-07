@@ -87,7 +87,7 @@ pub(crate) fn sendmsg(
 
         unsafe { ret_send_recv(c::sendmsg(borrowed_fd(fd), &msg, flags.bits()))? }
     };
-    #[cfg(window)]
+    #[cfg(windows)]
     let nwritten = unsafe {
         ret_send_recv(c::sendmsg(
             borrowed_fd(fd),
