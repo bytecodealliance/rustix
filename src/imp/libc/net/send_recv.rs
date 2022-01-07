@@ -39,6 +39,9 @@ bitflags! {
         const NOSIGNAL = c::MSG_NOSIGNAL;
         /// `MSG_OOB`
         const OOB = c::MSG_OOB;
+        #[cfg(windows)]
+        /// `MSG_PARTIAL`
+        const PARTIAL = c::MSG_PARTIAL;
     }
 }
 

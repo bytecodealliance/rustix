@@ -58,3 +58,84 @@ const SD_BOTH: c_int = 2;
 pub(crate) const SHUT_WR: c_int = SD_SEND;
 pub(crate) const SHUT_RD: c_int = SD_RECEIVE;
 pub(crate) const SHUT_RDWR: c_int = SD_BOTH;
+
+#[repr(C)]
+pub(crate) struct msghdr {
+    pub msg_name: *mut SOCKADDR,
+    pub msg_namelen: c_int,
+    pub msg_iov: LPWSABUF,
+    pub msg_iovlen: c_ulong,
+    #[allow(dead_code)]
+    pub msg_control: *mut c_void,
+    #[allow(dead_code)]
+    pub msg_controllen: size_t,
+    pub msg_flags: c_int,
+}
+
+pub(crate) unsafe fn sendmsg(fd: c_int, msg: *const msghdr, flags: c_int) -> c_int {
+    let s = fd as SOCKET;
+
+    let lpBuffers = (*msghdr).msg_iov;
+    let dwBufferCount = (*msghdr).msg_iovlen;
+
+    let mut lpNumberOfBytesSent: c_ulong = 0;
+    let dwFlags = (*msghdr).msg_flags as c_ulong;
+    let lpTo = (*msghdr).msg_name;
+    let iToLen = (*msghdr).msg_namelen;
+
+    // No overlapping IO support
+    let lpOverlapped = core::ptr::null_mut();
+    let lpCompletionRoutine = None;
+
+    let res = WSASendTo(
+        s,
+        lpBuffers,
+        dwBufferCount,
+        &mut lpNumberOfBytesSent,
+        dwFlags,
+        lpTo,
+        iToLen,
+        lpOverlapped,
+        lpCompletionRoutine,
+    );
+
+    if res == 0 {
+        lpNumberOfBytesSent as c_int
+    } else {
+        -1
+    }
+}
+
+pub(crate) unsafe fn recvmsg(fd: c_int, msg: *mut msghdr, flags: c_int) -> c_int {
+    let s = fd as SOCKET;
+
+    let lpBuffers = (*msghdr).msg_iov;
+    let dwBufferCount = (*msghdr).msg_iovlen;
+
+    let mut lpNumberOfBytesRecvd: c_ulong = 0;
+    let lpFlags = (*msghdr).msg_flags as c_ulong;
+    let lpFrom = (*msghdr).msg_name;
+    let iFromLen = (*msghdr).msg_namelen;
+
+    // No overlapping IO support
+    let lpOverlapped = core::ptr::null_mut();
+    let lpCompletionRoutine = None;
+
+    let res = WSASendTo(
+        s,
+        lpBuffers,
+        dwBufferCount,
+        &mut lpNumberOfBytesRecvd,
+        lpFlags,
+        lpFrom,
+        iFromLen,
+        lpOverlapped,
+        lpCompletionRoutine,
+    );
+
+    if res == 0 {
+        lpNumberOfBytesRecvd
+    } else {
+        -1
+    }
+}
