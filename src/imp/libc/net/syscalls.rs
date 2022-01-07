@@ -92,9 +92,9 @@ pub(crate) fn sendmsg(
         ret_send_recv(c::sendmsg(
             borrowed_fd(fd),
             iovs.as_ptr() as *mut _,
-            iovs.len(),
+            iovs.len() as _,
             name,
-            namelen,
+            namelen as _,
             flags.bits() as _,
         ))?
     };
