@@ -458,7 +458,11 @@ pub(crate) fn sendmsg(fd: BorrowedFd<'_>, msg: &c::msghdr, flags: SendFlags) -> 
         ret_usize(syscall2_readonly(
             nr(__NR_socketcall),
             x86_sys(SYS_SENDMSG),
-            slice_just_addr::<ArgReg<SocketArg>, _>(&[borrowed_fd(fd), by_ref(msg), c_uint(flags.bits())]),
+            slice_just_addr::<ArgReg<SocketArg>, _>(&[
+                borrowed_fd(fd),
+                by_ref(msg),
+                c_uint(flags.bits()),
+            ]),
         ))
     }
 }
@@ -620,7 +624,11 @@ pub(crate) fn recvmsg(
         ret_usize(syscall2_readonly(
             nr(__NR_socketcall),
             x86_sys(SYS_RECVMSG),
-            slice_just_addr::<ArgReg<SocketArg>, _>(&[borrowed_fd(fd), by_mut(msg), c_uint(flags.bits())]),
+            slice_just_addr::<ArgReg<SocketArg>, _>(&[
+                borrowed_fd(fd),
+                by_mut(msg),
+                c_uint(flags.bits()),
+            ]),
         ))
     }
 }
