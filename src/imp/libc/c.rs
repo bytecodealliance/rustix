@@ -59,6 +59,8 @@ pub(crate) const SHUT_WR: c_int = SD_SEND;
 pub(crate) const SHUT_RD: c_int = SD_RECEIVE;
 pub(crate) const SHUT_RDWR: c_int = SD_BOTH;
 
+pub(crate) use winapi::shared::ws2def::{LPWSABUF, SOCKADDR};
+
 #[repr(C)]
 pub(crate) struct msghdr {
     pub msg_name: *mut SOCKADDR,
@@ -68,12 +70,12 @@ pub(crate) struct msghdr {
     #[allow(dead_code)]
     pub msg_control: *mut c_void,
     #[allow(dead_code)]
-    pub msg_controllen: size_t,
+    pub msg_controllen: c_int,
     pub msg_flags: c_int,
 }
 
-pub(crate) unsafe fn sendmsg(fd: c_int, msg: *const msghdr, flags: c_int) -> c_int {
-    let s = fd as SOCKET;
+pub(crate) unsafe fn sendmsg(fd: SOCKET, msg: *const msghdr, flags: c_int) -> ssize_t {
+    let s = fd;
 
     let lpBuffers = (*msghdr).msg_iov;
     let dwBufferCount = (*msghdr).msg_iovlen;
@@ -100,14 +102,14 @@ pub(crate) unsafe fn sendmsg(fd: c_int, msg: *const msghdr, flags: c_int) -> c_i
     );
 
     if res == 0 {
-        lpNumberOfBytesSent as c_int
+        lpNumberOfBytesSent as _
     } else {
         -1
     }
 }
 
-pub(crate) unsafe fn recvmsg(fd: c_int, msg: *mut msghdr, flags: c_int) -> c_int {
-    let s = fd as SOCKET;
+pub(crate) unsafe fn recvmsg(fd: SOCKET, msg: *mut msghdr, flags: c_int) -> ssize_t {
+    let s = fd;
 
     let lpBuffers = (*msghdr).msg_iov;
     let dwBufferCount = (*msghdr).msg_iovlen;
@@ -134,7 +136,7 @@ pub(crate) unsafe fn recvmsg(fd: c_int, msg: *mut msghdr, flags: c_int) -> c_int
     );
 
     if res == 0 {
-        lpNumberOfBytesRecvd
+        lpNumberOfBytesRecvd as _
     } else {
         -1
     }
