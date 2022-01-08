@@ -6,6 +6,8 @@ mod addr;
 #[cfg(not(windows))]
 mod unix;
 mod v4;
-mod v4msg;
+mod v4msg_tcp;
+mod v4msg_udp;
 mod v6;
-mod v6msg;
+mod v6msg_tcp;
+mod v6msg_udp;

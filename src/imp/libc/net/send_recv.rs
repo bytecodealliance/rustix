@@ -103,35 +103,6 @@ pub(crate) fn msghdr_default() -> c::msghdr {
     }
 }
 
-pub(crate) fn socketaddrany_mut_as_ffi_pair(
-    addr: Option<&mut SocketAddrAny>,
-) -> (*mut c::sockaddr, usize) {
-    match addr {
-        Some(SocketAddrAny::V4(addr)) => {
-            let size = size_of::<c::sockaddr_in>();
-            // TODO: is there a safer way to do this?
-            assert_eq!(size, size_of::<SocketAddrV4>(), "invalid layout");
-            let addr = addr as *mut SocketAddrV4 as *mut c::sockaddr_in as *mut c::sockaddr;
-
-            (addr, size)
-        }
-        Some(SocketAddrAny::V6(addr)) => {
-            let size = size_of::<c::sockaddr_in6>();
-            // TODO: is there a safer way to do this?
-            assert_eq!(size, size_of::<SocketAddrV6>(), "invalid layout");
-            let addr = addr as *mut SocketAddrV6 as *mut c::sockaddr_in6 as *mut c::sockaddr;
-
-            (addr, size)
-        }
-        #[cfg(not(windows))]
-        Some(SocketAddrAny::Unix(_)) => {
-            // TODO: is this correct, or is this actually allowed?
-            panic!("invalid socket addr provided");
-        }
-        None => (ptr::null_mut(), 0),
-    }
-}
-
 pub(crate) fn socketaddrany_as_ffi_pair(addr: Option<&SocketAddrAny>) -> (*mut c::sockaddr, usize) {
     match addr {
         Some(SocketAddrAny::V4(addr)) => {

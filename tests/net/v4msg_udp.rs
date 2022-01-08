@@ -4,8 +4,8 @@
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]
 
 use rustix::net::{
-    accept, bind_v4, connect_v4, getsockname, listen, recvmsg, sendmsg, socket, AddressFamily,
-    Ipv4Addr, Protocol, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketType,
+    bind_v4, connect_v4, getsockname, recvmsg, sendmsg, socket, AddressFamily, Ipv4Addr, Protocol,
+    RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketType,
 };
 use std::io::{IoSlice, IoSliceMut};
 use std::sync::{Arc, Condvar, Mutex};
@@ -14,8 +14,7 @@ use std::thread;
 const BUFFER_SIZE: usize = 20;
 
 fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
-    let connection_socket =
-        socket(AddressFamily::INET, SocketType::STREAM, Protocol::default()).unwrap();
+    let connection_socket = socket(AddressFamily::INET, SocketType::DGRAM, Protocol::UDP).unwrap();
 
     let name = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 0);
     bind_v4(&connection_socket, &name).unwrap();
@@ -25,8 +24,6 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
         _ => panic!(),
     };
 
-    listen(&connection_socket, 1).unwrap();
-
     {
         let (lock, cvar) = &*ready;
         let mut port = lock.lock().unwrap();
@@ -34,22 +31,26 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
         cvar.notify_all();
     }
 
-    let data_socket = accept(&connection_socket).unwrap();
+    // no accept for UDP
+    let data_socket = connection_socket;
     let mut buffer = vec![0u8; BUFFER_SIZE];
 
-    let nread = recvmsg(
+    let res = recvmsg(
         &data_socket,
         &[IoSliceMut::new(&mut buffer)],
-        None,
         RecvFlags::empty(),
     )
     .unwrap();
-    assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "hello, world");
+    assert!(res.addr.is_some());
+    assert_eq!(
+        String::from_utf8_lossy(&buffer[..res.bytes]),
+        "hello, world"
+    );
 
     sendmsg(
         &data_socket,
         &[IoSlice::new(b"goodnight, moon")],
-        None,
+        res.addr.as_ref(),
         SendFlags::empty(),
     )
     .unwrap();
@@ -67,7 +68,7 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
 
     let addr = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), port);
 
-    let data_socket = socket(AddressFamily::INET, SocketType::STREAM, Protocol::default()).unwrap();
+    let data_socket = socket(AddressFamily::INET, SocketType::DGRAM, Protocol::UDP).unwrap();
     connect_v4(&data_socket, &addr).unwrap();
 
     sendmsg(
@@ -79,18 +80,21 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     .unwrap();
 
     let mut buffer = vec![0u8; BUFFER_SIZE];
-    let nread = recvmsg(
+    let res = recvmsg(
         &data_socket,
         &[IoSliceMut::new(&mut buffer)],
-        None,
         RecvFlags::empty(),
     )
     .unwrap();
-    assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "goodnight, moon");
+    assert!(res.addr.is_some());
+    assert_eq!(
+        String::from_utf8_lossy(&buffer[..res.bytes]),
+        "goodnight, moon"
+    );
 }
 
 #[test]
-fn test_v4_msg() {
+fn test_v4_msg_udp() {
     #[cfg(windows)]
     rustix::net::wsa_startup().unwrap();
 

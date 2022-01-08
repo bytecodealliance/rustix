@@ -145,7 +145,7 @@ pub fn sendto_unix<Fd: AsFd>(
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
-/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsasendmsg
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsasendto
 #[inline]
 pub fn sendmsg<Fd: AsFd>(
     fd: &Fd,
@@ -171,11 +171,18 @@ pub fn sendmsg<Fd: AsFd>(
 pub fn recvmsg<Fd: AsFd>(
     fd: &Fd,
     iovs: &[io::IoSliceMut<'_>],
-    addr: Option<&mut SocketAddrAny>,
     flags: RecvFlags,
-) -> io::Result<usize> {
+) -> io::Result<RecvMsg> {
     let fd = fd.as_fd();
-    imp::syscalls::recvmsg(fd, iovs, addr, flags)
+    imp::syscalls::recvmsg(fd, iovs, flags)
+}
+
+/// Return value from calling `recvmsg`.
+pub struct RecvMsg {
+    /// The socket addr, only set if the socket was not bound before.
+    pub addr: Option<SocketAddrAny>,
+    /// How many bytes have been received.
+    pub bytes: usize,
 }
 
 // TODO: `recvmmsg`, `sendmmsg`

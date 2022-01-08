@@ -15,7 +15,7 @@ pub use addr::SocketAddrUnix;
 pub(crate) use read_sockaddr::{read_sockaddr, read_sockaddr_os};
 #[cfg(not(windows))]
 pub(crate) use send_recv::msghdr_default;
-pub(crate) use send_recv::{socketaddrany_as_ffi_pair, socketaddrany_mut_as_ffi_pair};
+pub(crate) use send_recv::socketaddrany_as_ffi_pair;
 pub use send_recv::{RecvFlags, SendFlags};
 pub use types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType, Timeout};
 #[cfg(not(windows))]

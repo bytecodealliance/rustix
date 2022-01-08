@@ -7,12 +7,11 @@ use super::{encode_sockaddr_unix, msghdr_default, SocketAddrUnix};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::{
     encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, socketaddrany_as_ffi_pair,
-    socketaddrany_mut_as_ffi_pair, AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags,
-    Shutdown, SocketFlags, SocketType,
+    AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
 };
 use crate::as_ptr;
 use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
-use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
+use crate::net::{RecvMsg, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use core::convert::TryInto;
 use core::mem::{size_of, MaybeUninit};
 #[cfg(not(any(target_os = "redox", target_os = "wasi",)))]
@@ -105,39 +104,53 @@ pub(crate) fn sendmsg(
 pub(crate) fn recvmsg(
     fd: BorrowedFd<'_>,
     iovs: &[IoSliceMut<'_>],
-    addr: Option<&mut SocketAddrAny>,
     flags: RecvFlags,
-) -> io::Result<usize> {
+) -> io::Result<RecvMsg> {
+    use super::SocketAddrStorage;
+
     #[cfg(not(windows))]
-    let nrecv = {
+    let res = {
         let mut msg = msghdr_default();
         msg.msg_iov = iovs.as_ptr() as *mut _;
         msg.msg_iovlen = iovs.len() as _;
-        let (name, namelen) = socketaddrany_mut_as_ffi_pair(addr);
-        msg.msg_name = name as *mut _;
-        msg.msg_namelen = namelen as _;
+        let mut name = MaybeUninit::<SocketAddrStorage>::zeroed();
+        msg.msg_name = &mut name as *mut _ as *mut _;
+        msg.msg_namelen = size_of::<SocketAddrStorage>() as _;
 
-        unsafe { ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))? }
+        unsafe {
+            let bytes = ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))?;
+            let addr = SocketAddrAny::read(msg.msg_name as *const _, msg.msg_namelen as _);
+            RecvMsg {
+                bytes: bytes as usize,
+                addr: addr.ok(),
+            }
+        }
     };
     #[cfg(windows)]
-    let nrecv = {
-        // TODO: check namelen to be valid when an addr is returned
-        let (name, namelen) = socketaddrany_mut_as_ffi_pair(addr);
-        let mut namelen = namelen as _;
+    let res = {
+        let mut name = MaybeUninit::<SocketAddrStorage>::zeroed();
+        let mut namelen = size_of::<SocketAddrStorage>() as _;
         // TODO: do the flag results need to be exposed?
         let mut flags = flags.bits() as _;
         unsafe {
-            ret_send_recv(c::recvmsg(
+            let bytes = ret_send_recv(c::recvmsg(
                 borrowed_fd(fd),
                 iovs.as_ptr() as *mut _,
                 iovs.len() as _,
-                name,
+                &mut name as *mut _ as *mut _,
                 &mut namelen,
                 &mut flags,
-            ))?
+            ))?;
+
+            let addr = SocketAddrAny::read(msg.msg_name as *const _, msg.msg_namelen as _);
+            RecMsg {
+                bytes: bytes as usize,
+                addr: addr.ok(),
+            }
         }
     };
-    Ok(nrecv as usize)
+
+    Ok(res)
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]

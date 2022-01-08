@@ -39,11 +39,13 @@ use super::super::reg::nr;
 use super::super::reg::{ArgReg, SocketArg};
 use super::{
     encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, msghdr_default, read_sockaddr_os,
-    socketaddrany_as_ffi_pair, socketaddrany_mut_as_ffi_pair, AcceptFlags, AddressFamily, Protocol,
-    RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
+    socketaddrany_as_ffi_pair, AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags,
+    Shutdown, SocketFlags, SocketType,
 };
 use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
-use crate::net::{SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
+use crate::net::{
+    RecvMsg, SocketAddrAny, SocketAddrStorage, SocketAddrUnix, SocketAddrV4, SocketAddrV6,
+};
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
 #[cfg(not(target_arch = "x86"))]
@@ -621,27 +623,26 @@ pub(crate) fn recvfrom(
 pub(crate) fn recvmsg(
     fd: BorrowedFd<'_>,
     iovs: &[IoSliceMut<'_>],
-    addr: Option<&mut SocketAddrAny>,
     flags: RecvFlags,
-) -> io::Result<usize> {
+) -> io::Result<RecvMsg> {
     let mut msg = msghdr_default();
     msg.msg_iov = iovs.as_ptr() as *mut _;
     msg.msg_iovlen = iovs.len() as _;
-    let (name, namelen) = socketaddrany_mut_as_ffi_pair(addr);
-    msg.msg_name = name as *mut _;
-    msg.msg_namelen = namelen as _;
+    let mut name = MaybeUninit::<SocketAddrStorage>::zeroed();
+    msg.msg_name = &mut name as *mut _ as *mut _;
+    msg.msg_namelen = core::mem::size_of::<SocketAddrStorage>() as _;
 
     #[cfg(not(target_arch = "x86",))]
-    unsafe {
+    let bytes = unsafe {
         ret_usize(syscall3_readonly(
             nr(__NR_recvmsg),
             borrowed_fd(fd),
             by_mut(&mut msg),
             c_uint(flags.bits()),
-        ))
-    }
+        ))?
+    };
     #[cfg(target_arch = "x86")]
-    unsafe {
+    let bytes = unsafe {
         ret_usize(syscall2_readonly(
             nr(__NR_socketcall),
             x86_sys(SYS_RECVMSG),
@@ -650,8 +651,14 @@ pub(crate) fn recvmsg(
                 by_mut(&mut msg),
                 c_uint(flags.bits()),
             ]),
-        ))
-    }
+        ))?
+    };
+
+    let addr = unsafe { SocketAddrAny::read(msg.msg_name as *const _, msg.msg_namelen as _) };
+    Ok(RecvMsg {
+        bytes: bytes as usize,
+        addr: addr.ok(),
+    })
 }
 
 #[inline]
