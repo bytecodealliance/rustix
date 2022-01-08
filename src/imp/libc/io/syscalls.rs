@@ -16,6 +16,8 @@ use super::super::offset::{libc_preadv2, libc_pwritev2};
 use super::Advice as IoAdvice;
 #[cfg(target_os = "linux")]
 use super::MremapFlags;
+#[cfg(not(target_os = "wasi"))]
+use super::MsyncFlags;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 use super::PipeFlags;
 use super::PollFd;
@@ -300,6 +302,18 @@ pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: IoAdvice) -> io:
         } else {
             unsafe { ret(c::madvise(addr, len, advice as c::c_int)) }
         }
+    }
+}
+
+#[cfg(not(target_os = "wasi"))]
+pub(crate) unsafe fn msync(addr: *mut c::c_void, len: usize, flags: MsyncFlags) -> io::Result<()> {
+    let err = c::msync(addr, len, flags.bits());
+
+    // `msync` returns its error status rather than using `errno`.
+    if err == 0 {
+        Ok(())
+    } else {
+        Err(io::Error(err))
     }
 }
 

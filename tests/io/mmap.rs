@@ -142,3 +142,18 @@ fn test_madvise() {
         munmap(addr, 8192).unwrap();
     }
 }
+
+#[test]
+fn test_msync() {
+    use rustix::io::{mmap_anonymous, msync, munmap, MapFlags, MsyncFlags, ProtFlags};
+    use std::ptr::null_mut;
+
+    unsafe {
+        let addr = mmap_anonymous(null_mut(), 8192, ProtFlags::READ, MapFlags::PRIVATE).unwrap();
+
+        msync(addr, 8192, MsyncFlags::SYNC).unwrap();
+        msync(addr, 8192, MsyncFlags::ASYNC).unwrap();
+
+        munmap(addr, 8192).unwrap();
+    }
+}

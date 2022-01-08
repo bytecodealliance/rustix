@@ -41,7 +41,7 @@ use super::fs::AtFlags;
 use super::fs::Mode;
 use super::io::{
     epoll, Advice as IoAdvice, DupFlags, EventfdFlags, MapFlags, MlockFlags, MprotectFlags,
-    MremapFlags, PipeFlags, PollFd, ProtFlags, ReadWriteFlags, UserfaultfdFlags,
+    MremapFlags, MsyncFlags, PipeFlags, PollFd, ProtFlags, ReadWriteFlags, UserfaultfdFlags,
 };
 #[cfg(not(target_os = "wasi"))]
 use super::io::{Termios, Winsize};
@@ -75,13 +75,13 @@ use linux_raw_sys::general::{
     __NR_chdir, __NR_clock_getres, __NR_clock_nanosleep, __NR_close, __NR_dup, __NR_dup3,
     __NR_epoll_create1, __NR_epoll_ctl, __NR_exit, __NR_exit_group, __NR_fchdir, __NR_futex,
     __NR_getcwd, __NR_getpid, __NR_getppid, __NR_getpriority, __NR_gettid, __NR_ioctl,
-    __NR_madvise, __NR_mlock, __NR_mprotect, __NR_munlock, __NR_munmap, __NR_nanosleep, __NR_pipe2,
-    __NR_prctl, __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readv,
-    __NR_sched_getaffinity, __NR_sched_setaffinity, __NR_sched_yield, __NR_set_tid_address,
-    __NR_setpriority, __NR_uname, __NR_wait4, __NR_write, __NR_writev, __kernel_gid_t,
-    __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event, EPOLL_CTL_ADD, EPOLL_CTL_DEL,
-    EPOLL_CTL_MOD, FIONBIO, FIONREAD, PR_SET_NAME, SIGCHLD, TCGETS, TIMER_ABSTIME, TIOCEXCL,
-    TIOCGWINSZ, TIOCNXCL,
+    __NR_madvise, __NR_mlock, __NR_mprotect, __NR_msync, __NR_munlock, __NR_munmap, __NR_nanosleep,
+    __NR_pipe2, __NR_prctl, __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read,
+    __NR_readv, __NR_sched_getaffinity, __NR_sched_setaffinity, __NR_sched_yield,
+    __NR_set_tid_address, __NR_setpriority, __NR_uname, __NR_wait4, __NR_write, __NR_writev,
+    __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event, EPOLL_CTL_ADD,
+    EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, PR_SET_NAME, SIGCHLD, TCGETS, TIMER_ABSTIME,
+    TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
 };
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use linux_raw_sys::general::{__NR_dup2, __NR_pipe, __NR_poll};
@@ -436,6 +436,16 @@ pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: IoAdvice) -> io:
             c_uint(advice as c::c_uint),
         ))
     }
+}
+
+#[inline]
+pub(crate) unsafe fn msync(addr: *mut c::c_void, len: usize, flags: MsyncFlags) -> io::Result<()> {
+    ret(syscall3(
+        nr(__NR_msync),
+        void_star(addr),
+        pass_usize(len),
+        c_uint(flags.bits()),
+    ))
 }
 
 #[inline]

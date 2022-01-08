@@ -30,7 +30,9 @@ pub use types::PipeFlags;
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub use types::PIPE_BUF;
 #[cfg(not(any(windows, target_os = "wasi")))]
-pub use types::{DupFlags, MapFlags, MprotectFlags, ProtFlags, Tcflag, Termios, Winsize, ICANON};
+pub use types::{
+    DupFlags, MapFlags, MprotectFlags, MsyncFlags, ProtFlags, Tcflag, Termios, Winsize, ICANON,
+};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use types::{EventfdFlags, MlockFlags, ReadWriteFlags, UserfaultfdFlags};
 
