@@ -3,28 +3,28 @@
 
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]
 
+use rustix::fs::{cwd, unlinkat, AtFlags};
 use rustix::net::{
     bind_unix, connect_unix, recvmsg_unix, sendmsg_unix, socket, AddressFamily, Protocol,
     RecvFlags, SendFlags, SocketAddrUnix, SocketType,
 };
 use std::io::{IoSlice, IoSliceMut};
+use std::path::Path;
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 
 const BUFFER_SIZE: usize = 20;
 
-const SOCKET_NAME: &str = "test-socket";
-
-fn server(ready: Arc<(Mutex<bool>, Condvar)>) {
+fn server(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path) {
     let connection_socket =
         socket(AddressFamily::UNIX, SocketType::DGRAM, Protocol::default()).unwrap();
 
-    let name = SocketAddrUnix::new(SOCKET_NAME).unwrap();
+    let name = SocketAddrUnix::new(path).unwrap();
     bind_unix(&connection_socket, &name).unwrap();
     {
         let (lock, cvar) = &*ready;
-        let mut ready = lock.lock().unwrap();
-        *ready = true;
+        let mut started = lock.lock().unwrap();
+        *started = true;
         cvar.notify_all();
     }
 
@@ -52,18 +52,20 @@ fn server(ready: Arc<(Mutex<bool>, Condvar)>) {
         SendFlags::empty(),
     )
     .unwrap();
+
+    unlinkat(&cwd(), path, AtFlags::empty()).unwrap();
 }
 
-fn client(ready: Arc<(Mutex<bool>, Condvar)>) {
+fn client(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path) {
     {
         let (lock, cvar) = &*ready;
-        let mut ready = lock.lock().unwrap();
-        while !*ready {
-            ready = cvar.wait(ready).unwrap();
+        let mut started = lock.lock().unwrap();
+        while !*started {
+            started = cvar.wait(started).unwrap();
         }
     };
 
-    let addr = SocketAddrUnix::new(SOCKET_NAME).unwrap();
+    let addr = SocketAddrUnix::new(path).unwrap();
 
     let data_socket = socket(AddressFamily::UNIX, SocketType::DGRAM, Protocol::default()).unwrap();
     connect_unix(&data_socket, &addr).unwrap();
@@ -92,22 +94,23 @@ fn client(ready: Arc<(Mutex<bool>, Condvar)>) {
 
 #[test]
 fn test_unix_msg() {
-    // clear socket
-    std::fs::remove_file(SOCKET_NAME).unwrap();
-
     let ready = Arc::new((Mutex::new(false), Condvar::new()));
     let ready_clone = Arc::clone(&ready);
 
+    let tmp = tempfile::tempdir().unwrap();
+    let path = tmp.path().join("soccer");
+    let send_path = path.to_owned();
     let server = thread::Builder::new()
         .name("server".to_string())
         .spawn(move || {
-            server(ready);
+            server(ready, &send_path);
         })
         .unwrap();
+    let send_path = path.to_owned();
     let client = thread::Builder::new()
         .name("client".to_string())
         .spawn(move || {
-            client(ready_clone);
+            client(ready_clone, &send_path);
         })
         .unwrap();
     client.join().unwrap();
