@@ -1204,7 +1204,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     if r == buf.len() {
         return Err(io::Error::RANGE);
     }
-    buf[r] = 0;
+    buf[r] = b'\0';
 
     // Check that the path we read refers to the same file as `fd`.
     let path = ZStr::from_bytes_with_nul(&buf[..=r]).unwrap();
