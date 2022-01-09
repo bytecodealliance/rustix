@@ -200,16 +200,16 @@ pub(crate) fn recvmsg_v4(
     iovs: &[IoSliceMut<'_>],
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
-    use super::SocketAddrStorage;
+    let mut name = MaybeUninit::<c::sockaddr_in>::uninit();
+    let namelen = size_of::<c::sockaddr_in>() as _;
 
     #[cfg(not(windows))]
     let res = {
         let mut msg = msghdr_default();
         msg.msg_iov = iovs.as_ptr() as *mut _;
         msg.msg_iovlen = iovs.len() as _;
-        let mut name = MaybeUninit::<SocketAddrStorage>::zeroed();
         msg.msg_name = &mut name as *mut _ as *mut _;
-        msg.msg_namelen = size_of::<SocketAddrStorage>() as _;
+        msg.msg_namelen = namelen;
 
         unsafe {
             let bytes = ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))?;
@@ -223,10 +223,9 @@ pub(crate) fn recvmsg_v4(
     };
     #[cfg(windows)]
     let res = {
-        let mut name = MaybeUninit::<SocketAddrStorage>::zeroed();
-        let mut namelen = size_of::<SocketAddrStorage>() as _;
         // TODO: do the flag results need to be exposed?
         let mut flags = flags.bits() as _;
+        let mut namelen = namelen;
         unsafe {
             let bytes = ret_send_recv(c::recvmsg(
                 borrowed_fd(fd),
@@ -255,16 +254,16 @@ pub(crate) fn recvmsg_v6(
     iovs: &[IoSliceMut<'_>],
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV6> {
-    use super::SocketAddrStorage;
+    let mut name = MaybeUninit::<c::sockaddr_in6>::uninit();
+    let namelen = size_of::<c::sockaddr_in6>() as _;
 
     #[cfg(not(windows))]
     let res = {
         let mut msg = msghdr_default();
         msg.msg_iov = iovs.as_ptr() as *mut _;
         msg.msg_iovlen = iovs.len() as _;
-        let mut name = MaybeUninit::<SocketAddrStorage>::zeroed();
         msg.msg_name = &mut name as *mut _ as *mut _;
-        msg.msg_namelen = size_of::<SocketAddrStorage>() as _;
+        msg.msg_namelen = namelen;
 
         unsafe {
             let bytes = ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))?;
@@ -277,10 +276,9 @@ pub(crate) fn recvmsg_v6(
     };
     #[cfg(windows)]
     let res = {
-        let mut name = MaybeUninit::<SocketAddrStorage>::zeroed();
-        let mut namelen = size_of::<SocketAddrStorage>() as _;
         // TODO: do the flag results need to be exposed?
         let mut flags = flags.bits() as _;
+        let mut namelen = namelen;
         unsafe {
             let bytes = ret_send_recv(c::recvmsg(
                 borrowed_fd(fd),
@@ -308,14 +306,14 @@ pub(crate) fn recvmsg_unix(
     iovs: &[IoSliceMut<'_>],
     flags: RecvFlags,
 ) -> io::Result<RecvMsgUnix> {
-    use super::SocketAddrStorage;
+    let mut name = MaybeUninit::<c::sockaddr_un>::uninit();
+    let namelen = size_of::<c::sockaddr_un>() as _;
 
     let mut msg = msghdr_default();
     msg.msg_iov = iovs.as_ptr() as *mut _;
     msg.msg_iovlen = iovs.len() as _;
-    let mut name = MaybeUninit::<SocketAddrStorage>::zeroed();
     msg.msg_name = &mut name as *mut _ as *mut _;
-    msg.msg_namelen = size_of::<SocketAddrStorage>() as _;
+    msg.msg_namelen = namelen;
 
     unsafe {
         let bytes = ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))?;

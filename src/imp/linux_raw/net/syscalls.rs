@@ -724,9 +724,9 @@ pub(crate) fn recvmsg_v4(
     let mut msg = msghdr_default();
     msg.msg_iov = iovs.as_ptr() as *mut _;
     msg.msg_iovlen = iovs.len() as _;
-    let mut name = MaybeUninit::<sockaddr>::uninit();
+    let mut name = MaybeUninit::<sockaddr_in>::uninit();
     msg.msg_name = name.as_mut_ptr().cast();
-    msg.msg_namelen = core::mem::size_of::<sockaddr>() as socklen_t;
+    msg.msg_namelen = core::mem::size_of::<sockaddr_in>() as socklen_t;
 
     #[cfg(not(target_arch = "x86",))]
     let bytes = unsafe {
@@ -766,9 +766,9 @@ pub(crate) fn recvmsg_v6(
     let mut msg = msghdr_default();
     msg.msg_iov = iovs.as_ptr() as *mut _;
     msg.msg_iovlen = iovs.len() as _;
-    let mut name = MaybeUninit::<sockaddr>::uninit();
+    let mut name = MaybeUninit::<sockaddr_in6>::uninit();
     msg.msg_name = name.as_mut_ptr().cast();
-    msg.msg_namelen = core::mem::size_of::<sockaddr>() as socklen_t;
+    msg.msg_namelen = core::mem::size_of::<sockaddr_in6>() as socklen_t;
 
     #[cfg(not(target_arch = "x86",))]
     let bytes = unsafe {
@@ -809,9 +809,9 @@ pub(crate) fn recvmsg_unix(
     let mut msg = msghdr_default();
     msg.msg_iov = iovs.as_ptr() as *mut _;
     msg.msg_iovlen = iovs.len() as _;
-    let mut name = MaybeUninit::<sockaddr>::uninit();
+    let mut name = MaybeUninit::<sockaddr_un>::zeroed();
     msg.msg_name = name.as_mut_ptr().cast();
-    msg.msg_namelen = core::mem::size_of::<sockaddr>() as socklen_t;
+    msg.msg_namelen = core::mem::size_of::<sockaddr_un>() as socklen_t;
 
     #[cfg(not(target_arch = "x86",))]
     let bytes = unsafe {
