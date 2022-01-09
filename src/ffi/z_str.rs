@@ -433,7 +433,7 @@ impl ZString {
     }
 
     fn _new(bytes: Vec<u8>) -> Result<ZString, NulError> {
-        match memchr(0, &bytes) {
+        match memchr(b'\0', &bytes) {
             Some(i) => Err(NulError(i, bytes)),
             None => Ok(unsafe { ZString::from_vec_unchecked(bytes) }),
         }
@@ -462,7 +462,7 @@ impl ZString {
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     pub unsafe fn from_vec_unchecked(mut v: Vec<u8>) -> ZString {
         v.reserve_exact(1);
-        v.push(0);
+        v.push(b'\0');
         ZString {
             inner: v.into_boxed_slice(),
         }
@@ -834,7 +834,7 @@ impl ZString {
         stable(feature = "cstring_from_vec_with_nul", since = "1.58.0")
     )]
     pub fn from_vec_with_nul(v: Vec<u8>) -> Result<Self, FromVecWithNulError> {
-        let nul_pos = memchr(0, &v);
+        let nul_pos = memchr(b'\0', &v);
         match nul_pos {
             Some(nul_pos) if nul_pos + 1 == v.len() => {
                 // SAFETY: We know there is only one nul byte, at the end
@@ -1354,7 +1354,7 @@ impl ZStr {
     /// ```
     #[cfg_attr(staged_api, stable(feature = "cstr_from_bytes", since = "1.10.0"))]
     pub fn from_bytes_with_nul(bytes: &[u8]) -> Result<&ZStr, FromBytesWithNulError> {
-        let nul_pos = memchr(0, bytes);
+        let nul_pos = memchr(b'\0', bytes);
         if let Some(nul_pos) = nul_pos {
             if nul_pos + 1 != bytes.len() {
                 return Err(FromBytesWithNulError::interior_nul(nul_pos));
