@@ -4,8 +4,9 @@
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]
 
 use rustix::net::{
-    accept, bind_v4, connect_v4, getsockname, listen, recvmsg, sendmsg, socket, AddressFamily,
-    Ipv4Addr, Protocol, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketType,
+    accept, bind_v4, connect_v4, getsockname, listen, recvmsg_v4, sendmsg_v4, socket,
+    AddressFamily, Ipv4Addr, Protocol, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4,
+    SocketType,
 };
 use std::io::{IoSlice, IoSliceMut};
 use std::sync::{Arc, Condvar, Mutex};
@@ -36,7 +37,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
 
     let mut buffer = vec![0u8; BUFFER_SIZE];
 
-    let res = recvmsg(
+    let res = recvmsg_v4(
         &data_socket,
         &[IoSliceMut::new(&mut buffer)],
         RecvFlags::empty(),
@@ -48,7 +49,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
         "hello, world"
     );
 
-    sendmsg(
+    sendmsg_v4(
         &data_socket,
         &[IoSlice::new(b"goodnight, moon")],
         None,
@@ -72,7 +73,7 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     let data_socket = socket(AddressFamily::INET, SocketType::STREAM, Protocol::TCP).unwrap();
     connect_v4(&data_socket, &addr).unwrap();
 
-    sendmsg(
+    sendmsg_v4(
         &data_socket,
         &[IoSlice::new(b"hello, world")],
         None,
@@ -81,7 +82,7 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     .unwrap();
 
     let mut buffer = vec![0u8; BUFFER_SIZE];
-    let res = recvmsg(
+    let res = recvmsg_v4(
         &data_socket,
         &[IoSliceMut::new(&mut buffer)],
         RecvFlags::empty(),

@@ -1,12 +1,8 @@
 #![allow(unsafe_code)]
 
-use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use bitflags::bitflags;
-use core::{
-    mem::{size_of, MaybeUninit},
-    ptr,
-};
-use linux_raw_sys::general::{msghdr, sockaddr, sockaddr_in, sockaddr_in6};
+use core::{mem::MaybeUninit, ptr};
+use linux_raw_sys::general::msghdr;
 
 bitflags! {
     /// `MSG_*`
@@ -68,33 +64,5 @@ pub(crate) fn msghdr_default() -> msghdr {
 
         // now hdr is actually fully initialized
         hdr.assume_init()
-    }
-}
-
-pub(crate) fn socketaddrany_as_ffi_pair(addr: Option<&SocketAddrAny>) -> (*mut sockaddr, usize) {
-    match addr {
-        Some(SocketAddrAny::V4(addr)) => {
-            let size = size_of::<sockaddr_in>();
-            // TODO: is there a safer way to do this?
-            assert_eq!(size, size_of::<SocketAddrV4>(), "invalid layout");
-            let addr = addr as *const SocketAddrV4 as *const sockaddr_in as *mut sockaddr_in
-                as *mut sockaddr;
-
-            (addr, size)
-        }
-        Some(SocketAddrAny::V6(addr)) => {
-            let size = size_of::<sockaddr_in6>();
-            // TODO: is there a safer way to do this?
-            assert_eq!(size, size_of::<SocketAddrV6>(), "invalid layout");
-            let addr = addr as *const SocketAddrV6 as *const sockaddr_in6 as *mut sockaddr_in6
-                as *mut sockaddr;
-
-            (addr, size)
-        }
-        Some(SocketAddrAny::Unix(_)) => {
-            // TODO: is this correct, or is this actually allowed?
-            panic!("invalid socket addr provided");
-        }
-        None => (ptr::null_mut(), 0),
     }
 }

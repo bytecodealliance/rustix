@@ -12,10 +12,13 @@ pub(crate) mod syscalls;
 pub use addr::SocketAddrStorage;
 #[cfg(not(windows))]
 pub use addr::SocketAddrUnix;
-pub(crate) use read_sockaddr::{read_sockaddr, read_sockaddr_os};
+#[cfg(not(windows))]
+pub(crate) use read_sockaddr::read_sockaddr_unix_opt;
+pub(crate) use read_sockaddr::{
+    read_sockaddr, read_sockaddr_os, read_sockaddr_v4_opt, read_sockaddr_v6_opt,
+};
 #[cfg(not(windows))]
 pub(crate) use send_recv::msghdr_default;
-pub(crate) use send_recv::socketaddrany_as_ffi_pair;
 pub use send_recv::{RecvFlags, SendFlags};
 pub use types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType, Timeout};
 #[cfg(not(windows))]

@@ -263,3 +263,60 @@ pub(crate) unsafe fn read_sockaddr_os(
         other => unimplemented!("{:?}", other),
     }
 }
+
+pub(crate) unsafe fn read_sockaddr_v4_opt(
+    storage: *const c::sockaddr_storage,
+    len: usize,
+) -> Option<SocketAddrV4> {
+    if len > 0 {
+        let addr = read_sockaddr_os(storage, len);
+        if let SocketAddrAny::V4(addr) = addr {
+            Some(addr)
+        } else {
+            panic!(
+                "invalid addr type returned: {:?}, expected V4",
+                addr.address_family()
+            )
+        }
+    } else {
+        None
+    }
+}
+
+pub(crate) unsafe fn read_sockaddr_v6_opt(
+    storage: *const c::sockaddr_storage,
+    len: usize,
+) -> Option<SocketAddrV6> {
+    if len > 0 {
+        let addr = read_sockaddr_os(storage, len);
+        if let SocketAddrAny::V6(addr) = addr {
+            Some(addr)
+        } else {
+            panic!(
+                "invalid addr type returned: {:?}, expected V6",
+                addr.address_family()
+            )
+        }
+    } else {
+        None
+    }
+}
+
+pub(crate) unsafe fn read_sockaddr_unix_opt(
+    storage: *const c::sockaddr_storage,
+    len: usize,
+) -> Option<SocketAddrUnix> {
+    if len > 0 {
+        let addr = read_sockaddr_os(storage, len);
+        if let SocketAddrAny::Unix(addr) = addr {
+            Some(addr)
+        } else {
+            panic!(
+                "invalid addr type returned: {:?}, expected unix",
+                addr.address_family()
+            )
+        }
+    } else {
+        None
+    }
+}

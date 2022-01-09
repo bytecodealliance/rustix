@@ -6,10 +6,9 @@
 #![allow(unused_imports)]
 
 pub(crate) use linux_raw_sys::general::{
-    __kernel_sa_family_t as sa_family_t, in6_addr, in_addr, sockaddr_in, sockaddr_in6, AF_INET,
-    AF_INET6,
+    __kernel_sa_family_t as sa_family_t, cmsghdr, in6_addr, in6_pktinfo, in_addr, in_pktinfo,
+    iovec, msghdr, sockaddr_in, sockaddr_in6, sockaddr_un, ucred, AF_INET, AF_INET6,
+    SCM_CREDENTIALS, SCM_RIGHTS, SOL_SOCKET,
 };
-
-pub(crate) use linux_raw_sys::general::{iovec, msghdr};
 
 pub(crate) use linux_raw_sys::ctypes::*;
