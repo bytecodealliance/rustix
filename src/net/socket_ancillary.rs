@@ -22,6 +22,7 @@ pub enum UnixSendAncillaryData<'a> {
 pub struct ScmRights<'a>(AncillaryDataIter<'a, RawFd>);
 
 /// TODO: document
+#[cfg(any(target_os = "android", target_os = "linux",))]
 #[repr(transparent)]
 pub struct ScmCredentials<'a>(AncillaryDataIter<'a, c::ucred>);
 
