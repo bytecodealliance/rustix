@@ -234,7 +234,11 @@ pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut<'_>]) -> io::Resu
     }
 }
 
-pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut<'_>], pos: u64) -> io::Result<usize> {
+pub(crate) fn preadv(
+    fd: BorrowedFd<'_>,
+    bufs: &mut [IoSliceMut<'_>],
+    pos: u64,
+) -> io::Result<usize> {
     let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
 
     #[cfg(target_pointer_width = "32")]
