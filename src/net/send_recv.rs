@@ -313,7 +313,6 @@ pub fn recvmsg_v4<Fd: AsFd>(
 }
 
 /// Return value from calling `recvmsg`.
-#[derive(Debug)]
 pub struct RecvMsgV4 {
     /// The socket addr, only set if the socket was not bound before.
     pub addr: Option<SocketAddrV4>,
@@ -343,7 +342,6 @@ pub fn recvmsg_v6<Fd: AsFd>(
 }
 
 /// Return value from calling `recvmsg`.
-#[derive(Debug)]
 pub struct RecvMsgV6 {
     /// The socket addr, only set if the socket was not bound before.
     pub addr: Option<SocketAddrV6>,
@@ -375,7 +373,6 @@ pub fn recvmsg_unix<Fd: AsFd>(
 
 /// Return value from calling `recvmsg`.
 #[cfg(not(windows))]
-#[derive(Debug)]
 pub struct RecvMsgUnix {
     /// The socket addr, only set if the socket was not bound before.
     pub addr: Option<SocketAddrUnix>,
