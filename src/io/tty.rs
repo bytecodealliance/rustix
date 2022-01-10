@@ -12,7 +12,9 @@ use imp::fd::AsFd;
     all(linux_raw, feature = "procfs"),
     all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
 ))]
-use {crate::ffi::ZString, alloc::vec::Vec, imp::fd::BorrowedFd};
+use {
+    crate::ffi::ZString, crate::path::SMALL_PATH_BUFFER_SIZE, alloc::vec::Vec, imp::fd::BorrowedFd,
+};
 
 /// `isatty(fd)`—Tests whether a file descriptor refers to a terminal.
 ///
@@ -57,13 +59,17 @@ fn _ttyname(dirfd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<ZString> {
     // This code would benefit from having a better way to read into
     // uninitialized memory, but that requires `unsafe`.
     buffer.clear();
-    buffer.resize(256, 0_u8);
+    buffer.reserve(SMALL_PATH_BUFFER_SIZE);
+    buffer.resize(buffer.capacity(), 0_u8);
 
     loop {
         match imp::syscalls::ttyname(dirfd, &mut buffer) {
-            Err(imp::io::Error::RANGE) => buffer.resize(buffer.len() * 2, 0_u8),
+            Err(imp::io::Error::RANGE) => {
+                buffer.reserve(1); // use `Vec` reallocation strategy to grow capacity exponentially
+                buffer.resize(buffer.capacity(), 0_u8);
+            }
             Ok(len) => {
-                buffer.resize(len, 0);
+                buffer.resize(len, 0_u8);
                 return Ok(ZString::new(buffer).unwrap());
             }
             Err(errno) => return Err(errno),

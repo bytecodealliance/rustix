@@ -11,6 +11,7 @@ use crate::fs::CloneFlags;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 use crate::fs::RenameFlags;
 use crate::io::{self, OwnedFd};
+use crate::path::SMALL_PATH_BUFFER_SIZE;
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
 use crate::{imp, path};
@@ -71,7 +72,8 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &ZStr, mut buffer: Vec<u8>) -> io::R
     // This code would benefit from having a better way to read into
     // uninitialized memory, but that requires `unsafe`.
     buffer.clear();
-    buffer.resize(256, 0_u8);
+    buffer.reserve(SMALL_PATH_BUFFER_SIZE);
+    buffer.resize(buffer.capacity(), 0_u8);
 
     loop {
         let nread = imp::syscalls::readlinkat(dirfd, path, &mut buffer)?;
@@ -82,7 +84,8 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &ZStr, mut buffer: Vec<u8>) -> io::R
             buffer.resize(nread, 0_u8);
             return Ok(ZString::new(buffer).unwrap());
         }
-        buffer.resize(buffer.len() * 2, 0_u8);
+        buffer.reserve(1); // use `Vec` reallocation strategy to grow capacity exponentially
+        buffer.resize(buffer.capacity(), 0_u8);
     }
 }
 
