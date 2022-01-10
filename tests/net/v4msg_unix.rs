@@ -37,7 +37,6 @@ fn server(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path) {
         RecvFlags::empty(),
     )
     .unwrap();
-    dbg!(&res, &buffer);
 
     assert!(res.addr.is_some());
     assert_eq!(
@@ -56,7 +55,7 @@ fn server(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path) {
     unlinkat(&cwd(), path, AtFlags::empty()).unwrap();
 }
 
-fn client(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path) {
+fn client(ready: Arc<(Mutex<bool>, Condvar)>, server_path: &Path, client_path: &Path) {
     {
         let (lock, cvar) = &*ready;
         let mut started = lock.lock().unwrap();
@@ -65,10 +64,16 @@ fn client(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path) {
         }
     };
 
-    let addr = SocketAddrUnix::new(path).unwrap();
+    let server_addr = SocketAddrUnix::new(server_path).unwrap();
+    let client_addr = SocketAddrUnix::new(client_path).unwrap();
 
     let data_socket = socket(AddressFamily::UNIX, SocketType::DGRAM, Protocol::default()).unwrap();
-    connect_unix(&data_socket, &addr).unwrap();
+
+    // bind client
+    bind_unix(&data_socket, &client_addr).unwrap();
+
+    // connect to the server
+    connect_unix(&data_socket, &server_addr).unwrap();
 
     sendmsg_unix(
         &data_socket,
@@ -98,19 +103,23 @@ fn test_unix_msg() {
     let ready_clone = Arc::clone(&ready);
 
     let tmp = tempfile::tempdir().unwrap();
-    let path = tmp.path().join("soccer");
-    let send_path = path.to_owned();
+    let server_path = tmp.path().join("foo-server");
+    let client_path = tmp.path().join("foo-client");
+
+    let server_send_path = server_path.to_owned();
     let server = thread::Builder::new()
         .name("server".to_string())
         .spawn(move || {
-            server(ready, &send_path);
+            server(ready, &server_send_path);
         })
         .unwrap();
-    let send_path = path.to_owned();
+
+    let server_send_path = server_path.to_owned();
+    let client_send_path = client_path.to_owned();
     let client = thread::Builder::new()
         .name("client".to_string())
         .spawn(move || {
-            client(ready_clone, &send_path);
+            client(ready_clone, &server_send_path, &client_send_path);
         })
         .unwrap();
     client.join().unwrap();
