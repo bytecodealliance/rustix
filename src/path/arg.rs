@@ -2,6 +2,7 @@ use crate::ffi::{ZStr, ZString};
 use crate::io;
 #[cfg(feature = "itoa")]
 use crate::path::DecInt;
+use crate::path::SMALL_PATH_BUFFER_SIZE;
 use alloc::borrow::Cow;
 use alloc::string::String;
 use alloc::vec::Vec;
@@ -952,16 +953,17 @@ fn with_z_str<T, F>(bytes: &[u8], f: F) -> io::Result<T>
 where
     F: FnOnce(&ZStr) -> io::Result<T>,
 {
-    // Most paths are less than this long. The rest can go through the dynamic
-    // allocation path. If you're opening many files in a directory with a long
-    // path, consider opening the directory and using openat to open the files
-    // under it, which will avoid this, and is often faster in the OS as well.
-    const SIZE: usize = 256;
+    // Most paths are less than `SMALL_PATH_BUFFER_SIZE` long. The rest can go through
+    // the dynamic allocation path. If you're opening many files in a directory
+    // with a long path, consider opening the directory and using `openat` to open
+    // the files under it, which will avoid this, and is often faster in the OS
+    // as well.
+
     // Test with >= so that we have room for the trailing NUL.
-    if bytes.len() >= SIZE {
+    if bytes.len() >= SMALL_PATH_BUFFER_SIZE {
         return with_z_str_slow_path(bytes, f);
     }
-    let mut buffer: [u8; SIZE] = [0_u8; SIZE];
+    let mut buffer: [u8; SMALL_PATH_BUFFER_SIZE] = [0_u8; SMALL_PATH_BUFFER_SIZE];
     // Copy the bytes in; the buffer already has zeros for the trailing NUL.
     buffer[..bytes.len()].copy_from_slice(bytes);
     f(ZStr::from_bytes_with_nul(&buffer[..=bytes.len()]).map_err(|_cstr_err| io::Error::INVAL)?)

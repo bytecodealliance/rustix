@@ -1,4 +1,5 @@
 use crate::ffi::ZString;
+use crate::path::SMALL_PATH_BUFFER_SIZE;
 use crate::{imp, io, path};
 use alloc::vec::Vec;
 #[cfg(not(target_os = "fuchsia"))]
@@ -52,11 +53,15 @@ fn _getcwd(mut buffer: Vec<u8>) -> io::Result<ZString> {
     // This code would benefit from having a better way to read into
     // uninitialized memory, but that requires `unsafe`.
     buffer.clear();
-    buffer.resize(256, 0_u8);
+    buffer.reserve(SMALL_PATH_BUFFER_SIZE);
+    buffer.resize(buffer.capacity(), 0_u8);
 
     loop {
         match imp::syscalls::getcwd(&mut buffer) {
-            Err(imp::io::Error::RANGE) => buffer.resize(buffer.len() * 2, 0_u8),
+            Err(imp::io::Error::RANGE) => {
+                buffer.reserve(1); // use `Vec` reallocation strategy to grow capacity exponentially
+                buffer.resize(buffer.capacity(), 0_u8);
+            }
             Ok(_) => {
                 let len = buffer.iter().position(|x| *x == b'\0').unwrap();
                 buffer.resize(len, 0_u8);
