@@ -73,7 +73,7 @@ pub fn pwrite<Fd: AsFd>(fd: &Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/readv.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/readv.2.html
 #[inline]
-pub fn readv<Fd: AsFd>(fd: &Fd, bufs: &[IoSliceMut<'_>]) -> io::Result<usize> {
+pub fn readv<Fd: AsFd>(fd: &Fd, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize> {
     let fd = fd.as_fd();
     imp::syscalls::readv(fd, bufs)
 }
@@ -101,7 +101,7 @@ pub fn writev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/preadv.2.html
 #[cfg(not(target_os = "redox"))]
 #[inline]
-pub fn preadv<Fd: AsFd>(fd: &Fd, bufs: &[IoSliceMut<'_>], offset: u64) -> io::Result<usize> {
+pub fn preadv<Fd: AsFd>(fd: &Fd, bufs: &mut [IoSliceMut<'_>], offset: u64) -> io::Result<usize> {
     let fd = fd.as_fd();
     imp::syscalls::preadv(fd, bufs, offset)
 }
@@ -132,7 +132,7 @@ pub fn pwritev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice<'_>], offset: u64) -> io::Resu
 #[inline]
 pub fn preadv2<Fd: AsFd>(
     fd: &Fd,
-    bufs: &[IoSliceMut<'_>],
+    bufs: &mut [IoSliceMut<'_>],
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {

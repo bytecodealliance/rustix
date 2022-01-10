@@ -221,7 +221,7 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], pos: u64) -> io::Result<
     }
 }
 
-pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut<'_>]) -> io::Result<usize> {
+pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize> {
     let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
 
     unsafe {
@@ -234,7 +234,7 @@ pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut<'_>]) -> io::Result<u
     }
 }
 
-pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut<'_>], pos: u64) -> io::Result<usize> {
+pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut<'_>], pos: u64) -> io::Result<usize> {
     let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
 
     #[cfg(target_pointer_width = "32")]
@@ -262,7 +262,7 @@ pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut<'_>], pos: u64) -> i
 
 pub(crate) fn preadv2(
     fd: BorrowedFd<'_>,
-    bufs: &[IoSliceMut<'_>],
+    bufs: &mut [IoSliceMut<'_>],
     pos: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {

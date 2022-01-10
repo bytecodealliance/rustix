@@ -89,7 +89,7 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<
     Ok(nwritten as usize)
 }
 
-pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut]) -> io::Result<usize> {
+pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut]) -> io::Result<usize> {
     let nread = unsafe {
         ret_ssize_t(c::readv(
             borrowed_fd(fd),
@@ -112,7 +112,7 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> 
 }
 
 #[cfg(not(target_os = "redox"))]
-pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &[IoSliceMut], offset: u64) -> io::Result<usize> {
+pub(crate) fn preadv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut], offset: u64) -> io::Result<usize> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     let nread = unsafe {
@@ -144,7 +144,7 @@ pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 pub(crate) fn preadv2(
     fd: BorrowedFd<'_>,
-    bufs: &[IoSliceMut],
+    bufs: &mut [IoSliceMut],
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
@@ -171,7 +171,7 @@ pub(crate) fn preadv2(
 #[inline]
 pub(crate) fn preadv2(
     fd: BorrowedFd<'_>,
-    bufs: &[IoSliceMut],
+    bufs: &mut [IoSliceMut],
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
