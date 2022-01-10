@@ -31,9 +31,9 @@ fn test_readwrite_pv() {
     }
     pwritev(&foo, &[IoSlice::new(b"world")], 300).unwrap();
     let mut buf = [0_u8; 5];
-    preadv(&foo, &[IoSliceMut::new(&mut buf)], 200).unwrap();
+    preadv(&foo, &mut [IoSliceMut::new(&mut buf)], 200).unwrap();
     assert_eq!(&buf, b"hello");
-    preadv(&foo, &[IoSliceMut::new(&mut buf)], 300).unwrap();
+    preadv(&foo, &mut [IoSliceMut::new(&mut buf)], 300).unwrap();
     assert_eq!(&buf, b"world");
 }
 
@@ -80,9 +80,9 @@ fn test_readwrite_v() {
     writev(&foo, &[IoSlice::new(b"world")]).unwrap();
     seek(&foo, SeekFrom::Start(0)).unwrap();
     let mut buf = [0_u8; 5];
-    readv(&foo, &[IoSliceMut::new(&mut buf)]).unwrap();
+    readv(&foo, &mut [IoSliceMut::new(&mut buf)]).unwrap();
     assert_eq!(&buf, b"hello");
-    readv(&foo, &[IoSliceMut::new(&mut buf)]).unwrap();
+    readv(&foo, &mut [IoSliceMut::new(&mut buf)]).unwrap();
     assert_eq!(&buf, b"world");
 }
 
