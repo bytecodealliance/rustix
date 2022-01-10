@@ -1,15 +1,21 @@
 // TODO: remove
 #![allow(dead_code, unused_variables)]
+#![allow(unsafe_code)]
 
 use core::marker::PhantomData;
+use core::mem::size_of;
 use core::ops::{Deref, DerefMut};
+use core::ptr::read_unaligned;
 
 use crate::imp::c;
-use crate::imp::fd::{AsRawFd, RawFd};
+use crate::imp::fd::AsFd;
+use crate::imp::syscalls::{getgid, getpid, getuid};
+use crate::io::OwnedFd;
+use crate::process::{Gid, Pid, Uid};
 
 /// TODO: document
 #[non_exhaustive]
-pub enum UnixSendAncillaryData<'a> {
+pub enum UnixAncillaryData<'a> {
     /// TODO: document
     ScmRights(ScmRights<'a>),
     /// TODO: document
@@ -19,16 +25,33 @@ pub enum UnixSendAncillaryData<'a> {
 
 /// TODO: document
 #[repr(transparent)]
-pub struct ScmRights<'a>(AncillaryDataIter<'a, RawFd>);
+pub struct ScmRights<'a>(AncillaryDataIter<'a, OwnedFd>);
+
+impl<'a> Iterator for ScmRights<'a> {
+    type Item = OwnedFd;
+
+    fn next(&mut self) -> Option<OwnedFd> {
+        self.0.next()
+    }
+}
 
 /// TODO: document
 #[cfg(any(target_os = "android", target_os = "linux",))]
 #[repr(transparent)]
 pub struct ScmCredentials<'a>(AncillaryDataIter<'a, c::ucred>);
 
+#[cfg(any(doc, target_os = "android", target_os = "linux",))]
+impl<'a> Iterator for ScmCredentials<'a> {
+    type Item = SocketCred;
+
+    fn next(&mut self) -> Option<SocketCred> {
+        Some(SocketCred(self.0.next()?))
+    }
+}
+
 /// TODO: document
 #[non_exhaustive]
-pub enum Ipv4SendAncillaryData<'a> {
+pub enum Ipv4AncillaryData<'a> {
     /// TODO: document
     PacketInfos(Ipv4PacketInfos<'a>),
     /// TODO: document
@@ -37,7 +60,7 @@ pub enum Ipv4SendAncillaryData<'a> {
 
 /// TODO: document
 #[non_exhaustive]
-pub enum Ipv6SendAncillaryData<'a> {
+pub enum Ipv6AncillaryData<'a> {
     /// TODO: document
     PacketInfos(Ipv6PacketInfos<'a>),
     /// TODO: document
@@ -68,15 +91,59 @@ pub struct UdpGsoSegments<'a>(AncillaryDataIter<'a, u16>);
 #[derive(Copy, Clone)]
 pub struct SocketCred(c::ucred);
 
-/// TODO: document
-pub struct AncillaryDataIter<'a, T> {
-    data: &'a [u8],
-    _t: PhantomData<T>,
-}
+#[cfg(any(target_os = "android", target_os = "linux",))]
+impl SocketCred {
+    /// Create a Unix credential struct.
+    ///
+    /// PID, UID and GID is set to 0.
+    #[must_use]
+    pub fn new() -> Self {
+        SocketCred(c::ucred {
+            pid: 0,
+            uid: 0,
+            gid: 0,
+        })
+    }
 
-/// A type-safe zero-copy wrapper around a list of [`SendControlMessage`s].
-pub struct SendControlMessages<'a> {
-    bytes: &'a [u8],
+    /// Creates a Unix credential struct from the currrent process.
+    #[must_use]
+    pub fn from_process() -> Self {
+        SocketCred(c::ucred {
+            pid: getpid().as_raw_nonzero().into(),
+            uid: getuid().as_raw(),
+            gid: getgid().as_raw(),
+        })
+    }
+
+    /// Set the PID.
+    pub fn set_pid(&mut self, pid: Pid) {
+        self.0.pid = pid.as_raw_nonzero().into();
+    }
+
+    /// Get the current PID.
+    pub fn get_pid(&self) -> Option<Pid> {
+        unsafe { Pid::from_raw(self.0.pid) }
+    }
+
+    /// Set the UID.
+    pub fn set_uid(&mut self, uid: Uid) {
+        self.0.uid = uid.as_raw();
+    }
+
+    /// Get the current UID.
+    pub fn get_uid(&self) -> Uid {
+        unsafe { Uid::from_raw(self.0.uid) }
+    }
+
+    /// Set the GID.
+    pub fn set_gid(&mut self, gid: Gid) {
+        self.0.gid = gid.as_raw();
+    }
+
+    /// Get the current GID.
+    pub fn get_gid(&self) -> Gid {
+        unsafe { Gid::from_raw(self.0.gid) }
+    }
 }
 
 // TODO: Provide way of sizing the buffer for SocketAncillary upfront, like in
@@ -92,9 +159,9 @@ pub struct SendControlMessages<'a> {
 /// TODO: document
 #[derive(Debug)]
 pub struct SocketAncillary<'a> {
-    buffer: &'a mut [u8],
-    length: usize,
-    truncated: bool,
+    pub(crate) buffer: &'a mut [u8],
+    pub(crate) length: usize,
+    pub(crate) truncated: bool,
 }
 
 impl<'a> SocketAncillary<'a> {
@@ -120,14 +187,6 @@ impl<'a> SocketAncillary<'a> {
     /// Returns the number of used bytes.
     pub fn len(&self) -> usize {
         self.length
-    }
-
-    /// Returns the iterator of the control messages.
-    pub fn messages(&self) -> Messages<'_> {
-        Messages {
-            buffer: &self.buffer[..self.length],
-            current: None,
-        }
     }
 
     /// Is `true` if during a recv operation the ancillary was truncated.
@@ -172,7 +231,7 @@ impl<'a> UnixSocketAncillary<'a> {
     /// If there was not enough space then no file descriptors was appended.
     /// Technically, that means this operation adds a control message with the level `SOL_SOCKET`
     /// and type `SCM_RIGHTS`.
-    pub fn add_fds<Fd: AsRawFd>(&mut self, fds: &[Fd]) -> bool {
+    pub fn add_fds<Fd: AsFd>(&mut self, fds: &[Fd]) -> bool {
         self.truncated = false;
         /*add_to_ancillary_data(
                 &mut self.buffer,
@@ -203,6 +262,14 @@ impl<'a> UnixSocketAncillary<'a> {
         )*/
         todo!()
     }
+
+    /// Returns the iterator of the control messages.
+    pub fn messages(&self) -> UnixMessages<'_> {
+        UnixMessages {
+            buffer: &self.0.buffer[..self.0.length],
+            current: None,
+        }
+    }
 }
 
 /// TODO: document
@@ -230,7 +297,7 @@ impl<'a> Ipv4SocketAncillary<'a> {
     }
 
     /// TODO
-    pub fn add_packet_info<Fd: AsRawFd>(&mut self, info: &Ipv4PacketInfo) -> bool {
+    pub fn add_packet_info(&mut self, info: &Ipv4PacketInfo) -> bool {
         todo!()
     }
 }
@@ -253,8 +320,91 @@ impl<'a> DerefMut for Ipv6SocketAncillary<'a> {
     }
 }
 
+/// The error type which is returned from parsing the type a control message.
+#[non_exhaustive]
+#[derive(Debug)]
+pub enum AncillaryError {
+    /// TODO: document me
+    Unknown {
+        /// TODO: document me
+        cmsg_level: i32,
+        /// TODO: document me
+        cmsg_type: i32,
+    },
+}
+
 /// This struct is used to iterate through the control messages.
-pub struct Messages<'a> {
+pub struct UnixMessages<'a> {
     buffer: &'a [u8],
     current: Option<&'a c::cmsghdr>,
+}
+
+impl<'a> Iterator for UnixMessages<'a> {
+    type Item = Result<UnixAncillaryData<'a>, AncillaryError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // unsafe {
+        //     let mut msg: libc::msghdr = zeroed();
+        //     msg.msg_control = self.buffer.as_ptr() as *mut _;
+        //     msg.msg_controllen = self.buffer.len() as _;
+
+        //     let cmsg = if let Some(current) = self.current {
+        //         libc::CMSG_NXTHDR(&msg, current)
+        //     } else {
+        //         libc::CMSG_FIRSTHDR(&msg)
+        //     };
+
+        //     let cmsg = cmsg.as_ref()?;
+
+        //     // Most operating systems, but not Linux or emscripten, return the previous pointer
+        //     // when its length is zero. Therefore, check if the previous pointer is the same as
+        //     // the current one.
+        //     if let Some(current) = self.current {
+        //         if eq(current, cmsg) {
+        //             return None;
+        //         }
+        //     }
+
+        //     self.current = Some(cmsg);
+        //     let ancillary_result = AncillaryData::try_from_cmsghdr(cmsg);
+        //     Some(ancillary_result)
+        // }
+        todo!()
+    }
+}
+
+/// TODO: document
+struct AncillaryDataIter<'a, T> {
+    data: &'a [u8],
+    phantom: PhantomData<T>,
+}
+
+impl<'a, T> AncillaryDataIter<'a, T> {
+    /// Create `AncillaryDataIter` struct to iterate through the data unit in the control message.
+    ///
+    /// # Safety
+    ///
+    /// `data` must contain a valid control message.
+    unsafe fn new(data: &'a [u8]) -> AncillaryDataIter<'a, T> {
+        AncillaryDataIter {
+            data,
+            phantom: PhantomData,
+        }
+    }
+}
+
+impl<'a, T> Iterator for AncillaryDataIter<'a, T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<T> {
+        if size_of::<T>() <= self.data.len() {
+            unsafe {
+                let unit = read_unaligned(self.data.as_ptr().cast());
+                self.data = &self.data[size_of::<T>()..];
+                Some(unit)
+            }
+        } else {
+            None
+        }
+    }
 }

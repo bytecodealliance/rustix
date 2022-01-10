@@ -201,11 +201,9 @@ pub fn sendmsg_v6<Fd: AsFd>(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
-///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
-/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsasendto
 #[doc(alias = "sendmsg")]
 #[cfg(not(windows))]
 #[inline]
@@ -224,11 +222,9 @@ pub fn sendmsg_unix<Fd: AsFd>(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
-///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
-/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsasendto
 #[doc(alias = "sendmsg")]
 #[cfg(not(windows))]
 #[inline]
@@ -248,11 +244,9 @@ pub fn sendmsg_v4_with_ancillary<Fd: AsFd>(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
-///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
-/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsasendto
 #[doc(alias = "sendmsg")]
 #[cfg(not(windows))]
 #[inline]
@@ -272,11 +266,9 @@ pub fn sendmsg_v6_with_ancillary<Fd: AsFd>(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
-///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
-/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsasendto
 #[doc(alias = "sendmsg")]
 #[cfg(not(windows))]
 #[inline]
@@ -291,7 +283,7 @@ pub fn sendmsg_unix_with_ancillary<Fd: AsFd>(
     imp::syscalls::sendmsg_unix(fd, iovs, addr, Some(ancillary), flags)
 }
 
-/// `recv(fd, iovs, flags)`—Reads data from a socket.
+/// `recmsg(fd, iovs, flags)`—Reads data from a socket.
 ///
 /// # References
 ///  - [POSIX]
@@ -309,7 +301,28 @@ pub fn recvmsg_v4<Fd: AsFd>(
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
     let fd = fd.as_fd();
-    imp::syscalls::recvmsg_v4(fd, iovs, flags)
+    imp::syscalls::recvmsg_v4(fd, iovs, None, flags)
+}
+
+/// `recmsg(fd, iovs, flags)`—Reads data from a socket.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/recvmsg.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/recvmsg.2.html
+#[doc(alias = "recvmsg")]
+#[cfg(not(windows))]
+#[inline]
+pub fn recvmsg_v4_with_ancillary<Fd: AsFd>(
+    fd: &Fd,
+    iovs: &[io::IoSliceMut<'_>],
+    ancillary: &mut Ipv4SocketAncillary<'_>,
+    flags: RecvFlags,
+) -> io::Result<RecvMsgV4> {
+    let fd = fd.as_fd();
+    imp::syscalls::recvmsg_v4(fd, iovs, Some(ancillary), flags)
 }
 
 /// Return value from calling `recvmsg`.
@@ -318,9 +331,11 @@ pub struct RecvMsgV4 {
     pub addr: Option<SocketAddrV4>,
     /// How many bytes have been received.
     pub bytes: usize,
+    /// The returned flags.
+    pub flags: RecvFlags,
 }
 
-/// `recv(fd, iovs, flags)`—Reads data from a socket.
+/// `recvmsg(fd, iovs, flags)`—Reads data from a socket.
 ///
 /// # References
 ///  - [POSIX]
@@ -338,7 +353,28 @@ pub fn recvmsg_v6<Fd: AsFd>(
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV6> {
     let fd = fd.as_fd();
-    imp::syscalls::recvmsg_v6(fd, iovs, flags)
+    imp::syscalls::recvmsg_v6(fd, iovs, None, flags)
+}
+
+/// `recvmsg(fd, iovs, flags)`—Reads data from a socket.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/recvmsg.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/recvmsg.2.html
+#[doc(alias = "recvmsg")]
+#[cfg(not(windows))]
+#[inline]
+pub fn recvmsg_v6_with_ancillary<Fd: AsFd>(
+    fd: &Fd,
+    iovs: &[io::IoSliceMut<'_>],
+    ancillary: &mut Ipv6SocketAncillary<'_>,
+    flags: RecvFlags,
+) -> io::Result<RecvMsgV6> {
+    let fd = fd.as_fd();
+    imp::syscalls::recvmsg_v6(fd, iovs, Some(ancillary), flags)
 }
 
 /// Return value from calling `recvmsg`.
@@ -347,18 +383,18 @@ pub struct RecvMsgV6 {
     pub addr: Option<SocketAddrV6>,
     /// How many bytes have been received.
     pub bytes: usize,
+    /// The returned flags.
+    pub flags: RecvFlags,
 }
 
-/// `recv(fd, iovs, flags)`—Reads data from a socket.
+/// `recvmsg(fd, iovs, flags)`—Reads data from a socket.
 ///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
-///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/recvmsg.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/recvmsg.2.html
-/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recvfrom
 #[doc(alias = "recvmsg")]
 #[cfg(not(windows))]
 #[inline]
@@ -368,7 +404,28 @@ pub fn recvmsg_unix<Fd: AsFd>(
     flags: RecvFlags,
 ) -> io::Result<RecvMsgUnix> {
     let fd = fd.as_fd();
-    imp::syscalls::recvmsg_unix(fd, iovs, flags)
+    imp::syscalls::recvmsg_unix(fd, iovs, None, flags)
+}
+
+/// `recv(fd, iovs, flags)`—Reads data from a socket.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/recvmsg.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/recvmsg.2.html
+#[doc(alias = "recvmsg")]
+#[cfg(not(windows))]
+#[inline]
+pub fn recvmsg_unix_with_ancillary<Fd: AsFd>(
+    fd: &Fd,
+    iovs: &[io::IoSliceMut<'_>],
+    ancillary: &mut UnixSocketAncillary<'_>,
+    flags: RecvFlags,
+) -> io::Result<RecvMsgUnix> {
+    let fd = fd.as_fd();
+    imp::syscalls::recvmsg_unix(fd, iovs, Some(ancillary), flags)
 }
 
 /// Return value from calling `recvmsg`.
@@ -378,6 +435,8 @@ pub struct RecvMsgUnix {
     pub addr: Option<SocketAddrUnix>,
     /// How many bytes have been received.
     pub bytes: usize,
+    /// The returned flags.
+    pub flags: RecvFlags,
 }
 
 // TODO: `recvmmsg`, `sendmmsg`
@@ -432,12 +491,22 @@ pub(crate) unsafe fn encode_msghdr_v4_send(
     iovlen: usize,
     msg_name: Option<*const imp::c::sockaddr_in>,
     msg_namelen: usize,
+    ancillary: Option<&mut Ipv4SocketAncillary<'_>>,
 ) {
     (*msg).msg_iov = iovs as *mut imp::c::iovec;
     (*msg).msg_iovlen = iovlen as _;
 
     (*msg).msg_name = msg_name.map(|p| p as *mut _).unwrap_or_else(ptr::null_mut);
     (*msg).msg_namelen = msg_namelen as _;
+
+    if let Some(ancillary) = ancillary {
+        (*msg).msg_controllen = ancillary.length as _;
+        // macos requires that the control pointer is null when the len is 0.
+        if (*msg).msg_controllen > 0 {
+            (*msg).msg_control = ancillary.buffer.as_mut_ptr().cast();
+        }
+        ancillary.truncated = false;
+    }
 }
 
 /// Safety: pointers must all point to initialized valid memory.
@@ -447,12 +516,22 @@ pub(crate) unsafe fn encode_msghdr_v6_send(
     iovlen: usize,
     msg_name: Option<*const imp::c::sockaddr_in6>,
     msg_namelen: usize,
+    ancillary: Option<&mut Ipv6SocketAncillary<'_>>,
 ) {
     (*msg).msg_iov = iovs as *mut imp::c::iovec;
     (*msg).msg_iovlen = iovlen as _;
 
     (*msg).msg_name = msg_name.map(|p| p as *mut _).unwrap_or_else(ptr::null_mut);
     (*msg).msg_namelen = msg_namelen as _;
+
+    if let Some(ancillary) = ancillary {
+        (*msg).msg_controllen = ancillary.length as _;
+        // macos requires that the control pointer is null when the len is 0.
+        if (*msg).msg_controllen > 0 {
+            (*msg).msg_control = ancillary.buffer.as_mut_ptr().cast();
+        }
+        ancillary.truncated = false;
+    }
 }
 
 /// Safety: pointers must all point to initialized valid memory.
@@ -463,10 +542,20 @@ pub(crate) unsafe fn encode_msghdr_unix_send(
     iovlen: usize,
     msg_name: Option<*const imp::c::sockaddr_un>,
     msg_namelen: usize,
+    ancillary: Option<&mut UnixSocketAncillary<'_>>,
 ) {
     (*msg).msg_iov = iovs as *mut imp::c::iovec;
     (*msg).msg_iovlen = iovlen as _;
 
     (*msg).msg_name = msg_name.map(|p| p as *mut _).unwrap_or_else(ptr::null_mut);
     (*msg).msg_namelen = msg_namelen as _;
+
+    if let Some(ancillary) = ancillary {
+        (*msg).msg_controllen = ancillary.length as _;
+        // macos requires that the control pointer is null when the len is 0.
+        if (*msg).msg_controllen > 0 {
+            (*msg).msg_control = ancillary.buffer.as_mut_ptr().cast();
+        }
+        ancillary.truncated = false;
+    }
 }

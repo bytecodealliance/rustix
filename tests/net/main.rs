@@ -5,11 +5,11 @@
 mod addr;
 #[cfg(not(windows))]
 mod unix;
+#[cfg(not(windows))]
+mod unix_msg;
 mod v4;
 mod v4msg_tcp;
 mod v4msg_udp;
-#[cfg(not(windows))]
-mod v4msg_unix;
 mod v6;
 mod v6msg_tcp;
 mod v6msg_udp;

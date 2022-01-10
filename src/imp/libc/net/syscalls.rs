@@ -83,7 +83,7 @@ pub(crate) fn sendmsg_v4(
     fd: BorrowedFd<'_>,
     iovs: &[IoSlice<'_>],
     addr: Option<&SocketAddrV4>,
-    _ancillary: Option<&mut Ipv4SocketAncillary<'_>>,
+    ancillary: Option<&mut Ipv4SocketAncillary<'_>>,
     flags: SendFlags,
 ) -> io::Result<usize> {
     let mut msg = msghdr_default();
@@ -95,6 +95,7 @@ pub(crate) fn sendmsg_v4(
             iovs.len(),
             msg_name.as_ref().map(as_ptr),
             msg_namelen,
+            ancillary,
         );
         ret_send_recv(c::sendmsg(borrowed_fd(fd), as_ptr(&msg), flags.bits()))?
     };
@@ -129,7 +130,7 @@ pub(crate) fn sendmsg_v6(
     fd: BorrowedFd<'_>,
     iovs: &[IoSlice<'_>],
     addr: Option<&SocketAddrV6>,
-    _ancillary: Option<&mut Ipv6SocketAncillary<'_>>,
+    ancillary: Option<&mut Ipv6SocketAncillary<'_>>,
     flags: SendFlags,
 ) -> io::Result<usize> {
     let mut msg = msghdr_default();
@@ -141,6 +142,7 @@ pub(crate) fn sendmsg_v6(
             iovs.len(),
             msg_name.as_ref().map(as_ptr),
             msg_namelen,
+            ancillary,
         );
         ret_send_recv(c::sendmsg(borrowed_fd(fd), as_ptr(&msg), flags.bits()))?
     };
@@ -175,7 +177,7 @@ pub(crate) fn sendmsg_unix(
     fd: BorrowedFd<'_>,
     iovs: &[IoSlice<'_>],
     addr: Option<&SocketAddrUnix>,
-    _ancillary: Option<&mut UnixSocketAncillary<'_>>,
+    ancillary: Option<&mut UnixSocketAncillary<'_>>,
     flags: SendFlags,
 ) -> io::Result<usize> {
     let mut msg = msghdr_default();
@@ -187,6 +189,7 @@ pub(crate) fn sendmsg_unix(
             iovs.len(),
             msg_name.as_ref().map(as_ptr),
             msg_namelen,
+            ancillary,
         );
         ret_send_recv(c::sendmsg(borrowed_fd(fd), as_ptr(&msg), flags.bits()))?
     };
@@ -218,12 +221,12 @@ pub(crate) fn recvmsg_v4(
             RecvMsgV4 {
                 bytes: bytes as usize,
                 addr,
+                flags: RecvFlags::from_bits_truncate(msg.msg_flags),
             }
         }
     };
     #[cfg(windows)]
     let res = {
-        // TODO: do the flag results need to be exposed?
         let mut flags = flags.bits() as _;
         let mut namelen = namelen;
         unsafe {
@@ -241,6 +244,7 @@ pub(crate) fn recvmsg_v4(
             RecMsgV4 {
                 bytes: bytes as usize,
                 addr,
+                flags: RecvFlags::from_bits_truncate(flags),
             }
         }
     };
@@ -271,12 +275,12 @@ pub(crate) fn recvmsg_v6(
             RecvMsgV6 {
                 bytes: bytes as usize,
                 addr,
+                flags: RecvFlags::from_bits_truncate(msg.msg_flags),
             }
         }
     };
     #[cfg(windows)]
     let res = {
-        // TODO: do the flag results need to be exposed?
         let mut flags = flags.bits() as _;
         let mut namelen = namelen;
         unsafe {
@@ -293,6 +297,7 @@ pub(crate) fn recvmsg_v6(
             RecMsgV6 {
                 bytes: bytes as usize,
                 addr,
+                flags: RecvFlags::from_bits_truncate(flags),
             }
         }
     };
@@ -322,6 +327,7 @@ pub(crate) fn recvmsg_unix(
         Ok(RecvMsgUnix {
             bytes: bytes as usize,
             addr,
+            flags: RecvFlags::from_bits_truncate(msg.msg_flags),
         })
     }
 }

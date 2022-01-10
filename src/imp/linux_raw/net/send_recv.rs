@@ -41,6 +41,8 @@ bitflags! {
         const TRUNC = linux_raw_sys::general::MSG_TRUNC;
         /// `MSG_WAITALL`
         const WAITALL = linux_raw_sys::general::MSG_WAITALL;
+        /// `MSG_CTRUNC`
+        const CTRUNC = linux_raw_sys::general::MSG_CTRUNC;
     }
 }
 

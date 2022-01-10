@@ -24,8 +24,9 @@ pub use send_recv::{
 };
 #[cfg(not(windows))]
 pub use send_recv::{
-    recvmsg_unix, sendmsg_unix, sendmsg_unix_with_ancillary, sendmsg_v4_with_ancillary,
-    sendmsg_v6_with_ancillary, sendto_unix, RecvMsgUnix,
+    recvmsg_unix, recvmsg_unix_with_ancillary, recvmsg_v4_with_ancillary,
+    recvmsg_v6_with_ancillary, sendmsg_unix, sendmsg_unix_with_ancillary,
+    sendmsg_v4_with_ancillary, sendmsg_v6_with_ancillary, sendto_unix, RecvMsgUnix,
 };
 pub use socket::{
     accept, accept_with, acceptfrom, acceptfrom_with, bind_v4, bind_v6, connect_v4, connect_v6,

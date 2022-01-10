@@ -454,7 +454,7 @@ pub(crate) fn sendmsg_v4(
     fd: BorrowedFd<'_>,
     iovs: &[IoSlice<'_>],
     addr: Option<&SocketAddrV4>,
-    _ancillary: Option<&mut Ipv4SocketAncillary<'_>>,
+    ancillary: Option<&mut Ipv4SocketAncillary<'_>>,
     flags: SendFlags,
 ) -> io::Result<usize> {
     let mut msg = msghdr_default();
@@ -466,6 +466,7 @@ pub(crate) fn sendmsg_v4(
             iovs.len(),
             msg_name.as_ref().map(as_ptr),
             msg_namelen,
+            ancillary,
         );
 
         #[cfg(not(target_arch = "x86",))]
@@ -497,7 +498,7 @@ pub(crate) fn sendmsg_v6(
     fd: BorrowedFd<'_>,
     iovs: &[IoSlice<'_>],
     addr: Option<&SocketAddrV6>,
-    _ancillary: Option<&mut Ipv6SocketAncillary<'_>>,
+    ancillary: Option<&mut Ipv6SocketAncillary<'_>>,
     flags: SendFlags,
 ) -> io::Result<usize> {
     let mut msg = msghdr_default();
@@ -509,6 +510,7 @@ pub(crate) fn sendmsg_v6(
             iovs.len(),
             msg_name.as_ref().map(as_ptr),
             msg_namelen,
+            ancillary,
         );
 
         #[cfg(not(target_arch = "x86",))]
@@ -540,7 +542,7 @@ pub(crate) fn sendmsg_unix(
     fd: BorrowedFd<'_>,
     iovs: &[IoSlice<'_>],
     addr: Option<&SocketAddrUnix>,
-    _ancillary: Option<&mut UnixSocketAncillary<'_>>,
+    ancillary: Option<&mut UnixSocketAncillary<'_>>,
     flags: SendFlags,
 ) -> io::Result<usize> {
     let mut msg = msghdr_default();
@@ -552,6 +554,7 @@ pub(crate) fn sendmsg_unix(
             iovs.len(),
             msg_name.as_ref().map(as_ptr),
             msg_namelen,
+            ancillary,
         );
 
         #[cfg(not(target_arch = "x86",))]
@@ -719,6 +722,7 @@ pub(crate) fn recvfrom(
 pub(crate) fn recvmsg_v4(
     fd: BorrowedFd<'_>,
     iovs: &[IoSliceMut<'_>],
+    ancillary: Option<&mut Ipv4SocketAncillary<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
     let mut msg = msghdr_default();
@@ -754,6 +758,7 @@ pub(crate) fn recvmsg_v4(
     Ok(RecvMsgV4 {
         bytes: bytes as usize,
         addr,
+        flags: RecvFlags::from_bits_truncate(msg.msg_flags),
     })
 }
 
@@ -761,6 +766,7 @@ pub(crate) fn recvmsg_v4(
 pub(crate) fn recvmsg_v6(
     fd: BorrowedFd<'_>,
     iovs: &[IoSliceMut<'_>],
+    ancillary: Option<&mut Ipv6SocketAncillary<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV6> {
     let mut msg = msghdr_default();
@@ -797,6 +803,7 @@ pub(crate) fn recvmsg_v6(
     Ok(RecvMsgV6 {
         bytes: bytes as usize,
         addr,
+        flags: RecvFlags::from_bits_truncate(msg.msg_flags),
     })
 }
 
@@ -804,6 +811,7 @@ pub(crate) fn recvmsg_v6(
 pub(crate) fn recvmsg_unix(
     fd: BorrowedFd<'_>,
     iovs: &[IoSliceMut<'_>],
+    ancillary: Option<&mut UnixSocketAncillary<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgUnix> {
     let mut msg = msghdr_default();
@@ -840,6 +848,7 @@ pub(crate) fn recvmsg_unix(
     Ok(RecvMsgUnix {
         bytes: bytes as usize,
         addr,
+        flags: RecvFlags::from_bits_truncate(msg.msg_flags),
     })
 }
 
