@@ -75,6 +75,8 @@ bitflags! {
         const TRUNC = c::MSG_TRUNC as c::c_int;
         /// `MSG_WAITALL`
         const WAITALL = c::MSG_WAITALL;
+        /// `MSG_CTRUNC`
+        const CTRUNC = c::MSG_CTRUNC as c::c_int;
     }
 }
 
