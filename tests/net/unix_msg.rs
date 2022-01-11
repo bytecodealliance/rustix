@@ -127,7 +127,8 @@ fn test_unix_msg() {
 #[test]
 fn test_scm_credentials_and_rights() {
     use io_lifetimes::AsFd;
-    use rustix::io::{pipe, read, write};
+    use rustix::cmsg_space;
+    use rustix::io::{pipe, read, write, OwnedFd};
     use rustix::net::{
         recvmsg_unix_with_ancillary, sendmsg_unix_with_ancillary, SocketCred, UnixAncillaryData,
         UnixSocketAncillary,
@@ -135,8 +136,7 @@ fn test_scm_credentials_and_rights() {
     use rustix::net::{sockopt::set_socket_passcred, SocketFlags};
     use rustix::process::{getgid, getpid, getuid};
 
-    // FIXME
-    let mut space = vec![0u8; 100];
+    let mut space = cmsg_space!(OwnedFd, SocketCred);
 
     let (send, recv) = socketpair(
         AddressFamily::UNIX,

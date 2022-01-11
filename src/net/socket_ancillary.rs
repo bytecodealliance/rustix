@@ -14,6 +14,34 @@ use crate::imp::syscalls::{getgid, getpid, getuid};
 use crate::io::OwnedFd;
 use crate::process::{Gid, Pid, Uid};
 
+/// Create a buffer large enough for storing some control messages as returned by `recvmsg`.
+///
+/// # Examples
+///
+/// ```
+/// # fn main() {
+/// use rustix::{cmsg_space, net::SocketCred};
+/// use rustix::io::OwnedFd;
+/// // Create a buffer big enough for a `ScmRights` message with two file descriptors.
+/// let _ = cmsg_space!([OwnedFd; 2]);
+/// // Create a buffer big enough for a `ScmRights` message and a `ScmCredentials` message.
+/// let _ = cmsg_space!(OwnedFd, SocketCred);
+/// # }
+/// ```
+#[macro_export]
+macro_rules! cmsg_space {
+    ( $( $x:ty ),* ) => {
+        {
+            [0u8; 0 $(
+                + $crate::net::CMSG_SPACE(core::mem::size_of::<$x>() as _) as usize
+            )*]
+        }
+    }
+}
+
+#[doc(hidden)]
+pub use c::CMSG_SPACE;
+
 /// TODO: document
 #[non_exhaustive]
 pub enum UnixAncillaryData<'a> {
@@ -22,6 +50,9 @@ pub enum UnixAncillaryData<'a> {
     /// TODO: document
     #[cfg(any(target_os = "android", target_os = "linux",))]
     ScmCredentials(ScmCredentials<'a>),
+    /// Catch-all variant for unimplemented cmsg types.
+    #[doc(hidden)]
+    Unknown(UnknownCmsgs<'a>),
 }
 
 impl<'a> UnixAncillaryData<'a> {
@@ -76,6 +107,18 @@ impl<'a> UnixAncillaryData<'a> {
     }
 }
 
+/// An opaque structure to capture unknown cmsgs.
+#[doc(hidden)]
+pub struct UnknownCmsgs<'a>(AncillaryDataIter<'a, &'a [u8]>);
+
+impl<'a> Iterator for UnknownCmsgs<'a> {
+    type Item = &'a [u8];
+
+    fn next(&mut self) -> Option<&'a [u8]> {
+        self.0.next()
+    }
+}
+
 /// TODO: document
 #[repr(transparent)]
 pub struct ScmRights<'a>(AncillaryDataIter<'a, OwnedFd>);
@@ -108,7 +151,34 @@ pub enum Ipv4AncillaryData<'a> {
     /// TODO: document
     PacketInfos(Ipv4PacketInfos<'a>),
     /// TODO: document
+    #[cfg(target_os = "linux")]
     UdpGsoSegments(UdpGsoSegments<'a>),
+    /// TODO: document
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    ))]
+    Ipv4RecvIf(libc::sockaddr_dl),
+    /// TODO: document
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    ))]
+    Ipv4RecvDstAddr(libc::in_addr),
+    // /// Socket error queue control messages read with the `MSG_ERRQUEUE` flag.
+    // #[cfg(any(target_os = "android", target_os = "linux"))]
+    // Ipv4RecvErr(libc::sock_extended_err, Option<sockaddr_in>),
+    // #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+    // RxqOvfl(u32),
+    /// Catch-all variant for unimplemented cmsg types.
+    #[doc(hidden)]
+    Unknown(UnknownCmsgs<'a>),
 }
 
 /// TODO: document
@@ -117,7 +187,16 @@ pub enum Ipv6AncillaryData<'a> {
     /// TODO: document
     PacketInfos(Ipv6PacketInfos<'a>),
     /// TODO: document
+    #[cfg(target_os = "linux")]
     UdpGsoSegments(UdpGsoSegments<'a>),
+    /// Socket error queue control messages read with the `MSG_ERRQUEUE` flag.
+    // #[cfg(any(target_os = "android", target_os = "linux"))]
+    // Ipv6RecvErr(libc::sock_extended_err, Option<sockaddr_in6>),
+    // #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+    RxqOvfl(u32),
+    /// Catch-all variant for unimplemented cmsg types.
+    #[doc(hidden)]
+    Unknown(UnknownCmsgs<'a>),
 }
 
 /// TODO: document
@@ -137,11 +216,13 @@ pub struct Ipv4PacketInfos<'a>(AncillaryDataIter<'a, c::in_pktinfo>);
 pub struct Ipv6PacketInfos<'a>(AncillaryDataIter<'a, c::in6_pktinfo>);
 
 /// TODO: document
+#[cfg(target_os = "linux")]
 pub struct UdpGsoSegments<'a>(AncillaryDataIter<'a, u16>);
 
 /// Unix credential.
 #[cfg(any(target_os = "android", target_os = "linux",))]
 #[derive(Copy, Clone)]
+#[repr(transparent)]
 pub struct SocketCred(c::ucred);
 
 #[cfg(any(target_os = "android", target_os = "linux",))]
@@ -526,4 +607,19 @@ fn add_to_ancillary_data<T>(
     }
 
     true
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::io::OwnedFd;
+
+    #[test]
+    fn test_cmsg_space() {
+        let buf = cmsg_space!([OwnedFd; 2]);
+        assert_eq!(
+            buf.len(),
+            c::CMSG_SPACE(core::mem::size_of::<[OwnedFd; 2]>() as _) as _
+        );
+    }
 }
