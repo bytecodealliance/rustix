@@ -4,10 +4,13 @@
 
 #[cfg(not(windows))]
 use super::{Ipv4SocketAncillary, Ipv6SocketAncillary, UnixSocketAncillary};
+use crate::imp::net::{read_sockaddr_unix_opt, read_sockaddr_v4_opt, read_sockaddr_v6_opt};
+use crate::io::IoSliceMut;
 #[cfg(not(windows))]
 use crate::net::SocketAddrUnix;
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::{imp, io};
+use core::mem::size_of;
 use core::ptr;
 use imp::fd::AsFd;
 #[cfg(windows)]
@@ -335,6 +338,43 @@ pub struct RecvMsgV4 {
     pub flags: RecvFlags,
 }
 
+impl RecvMsgV4 {
+    /// Safety: `msg` must be a valid return value from an Ipv4 based `recvmsg` call.
+    #[cfg(not(windows))]
+    pub(crate) unsafe fn new(
+        bytes: usize,
+        msg: imp::c::msghdr,
+        ancillary: Option<&mut Ipv4SocketAncillary<'_>>,
+    ) -> Self {
+        let addr = read_sockaddr_v4_opt(msg.msg_name as *const _, msg.msg_namelen as _);
+        let flags = RecvFlags::from_bits_truncate(msg.msg_flags);
+
+        if let Some(ancillary) = ancillary {
+            ancillary.length = msg.msg_controllen as usize;
+            ancillary.truncated = flags.contains(RecvFlags::CTRUNC);
+        }
+
+        RecvMsgV4 {
+            bytes: bytes as usize,
+            addr,
+            flags,
+        }
+    }
+
+    /// Safety: `msg` must be a valid return value from an Ipv4 based `recvmsg` call.
+    #[cfg(windows)]
+    pub(crate) unsafe fn new(bytes: usize, msg: imp::c::msghdr) -> Self {
+        let addr = read_sockaddr_v4_opt(msg.msg_name as *const _, msg.msg_namelen as _);
+        let flags = RecvFlags::from_bits_truncate(msg.msg_flags);
+
+        RecvMsgV4 {
+            bytes: bytes as usize,
+            addr,
+            flags,
+        }
+    }
+}
+
 /// `recvmsg(fd, iovs, flags)`—Reads data from a socket.
 ///
 /// # References
@@ -387,6 +427,43 @@ pub struct RecvMsgV6 {
     pub flags: RecvFlags,
 }
 
+impl RecvMsgV6 {
+    /// Safety: `msg` must be a valid return value from an Ipv6 based `recvmsg` call.
+    #[cfg(not(windows))]
+    pub(crate) unsafe fn new(
+        bytes: usize,
+        msg: imp::c::msghdr,
+        ancillary: Option<&mut Ipv6SocketAncillary<'_>>,
+    ) -> Self {
+        let addr = read_sockaddr_v6_opt(msg.msg_name as *const _, msg.msg_namelen as _);
+        let flags = RecvFlags::from_bits_truncate(msg.msg_flags);
+
+        if let Some(ancillary) = ancillary {
+            ancillary.length = msg.msg_controllen as usize;
+            ancillary.truncated = flags.contains(RecvFlags::CTRUNC);
+        }
+
+        RecvMsgV6 {
+            bytes: bytes as usize,
+            addr,
+            flags,
+        }
+    }
+
+    /// Safety: `msg` must be a valid return value from an Ipv6 based `recvmsg` call.
+    #[cfg(windows)]
+    pub(crate) unsafe fn new(bytes: usize, msg: imp::c::msghdr) -> Self {
+        let addr = read_sockaddr_v6_opt(msg.msg_name as *const _, msg.msg_namelen as _);
+        let flags = RecvFlags::from_bits_truncate(msg.msg_flags);
+
+        RecvMsgV6 {
+            bytes: bytes as usize,
+            addr,
+            flags,
+        }
+    }
+}
+
 /// `recvmsg(fd, iovs, flags)`—Reads data from a socket.
 ///
 /// # References
@@ -437,6 +514,30 @@ pub struct RecvMsgUnix {
     pub bytes: usize,
     /// The returned flags.
     pub flags: RecvFlags,
+}
+
+#[cfg(not(windows))]
+impl RecvMsgUnix {
+    /// Safety: `msg` must be a valid return value from an Unix based `recvmsg` call.
+    pub(crate) unsafe fn new(
+        bytes: usize,
+        msg: imp::c::msghdr,
+        ancillary: Option<&mut UnixSocketAncillary<'_>>,
+    ) -> Self {
+        let addr = read_sockaddr_unix_opt(msg.msg_name as *const _, msg.msg_namelen as _);
+        let flags = RecvFlags::from_bits_truncate(msg.msg_flags);
+
+        if let Some(ancillary) = ancillary {
+            ancillary.length = msg.msg_controllen as usize;
+            ancillary.truncated = flags.contains(RecvFlags::CTRUNC);
+        }
+
+        RecvMsgUnix {
+            bytes: bytes as usize,
+            addr,
+            flags,
+        }
+    }
 }
 
 // TODO: `recvmmsg`, `sendmmsg`
@@ -557,5 +658,68 @@ pub(crate) unsafe fn encode_msghdr_unix_send(
             (*msg).msg_control = ancillary.buffer.as_mut_ptr().cast();
         }
         ancillary.truncated = false;
+    }
+}
+
+pub(crate) fn encode_msghdr_v4_recv(
+    msg: &mut imp::c::msghdr,
+    iovs: &[IoSliceMut<'_>],
+    msg_name: *mut imp::c::sockaddr_in,
+    ancillary: &mut Option<&mut Ipv4SocketAncillary<'_>>,
+) {
+    msg.msg_iov = iovs.as_ptr() as *mut imp::c::iovec;
+    msg.msg_iovlen = iovs.len() as _;
+
+    msg.msg_name = msg_name.cast();
+    msg.msg_namelen = size_of::<imp::c::sockaddr_in>() as _;
+
+    if let Some(ancillary) = ancillary {
+        msg.msg_controllen = ancillary.buffer.len() as _;
+        // macos requires that the control pointer is null when the len is 0.
+        if msg.msg_controllen > 0 {
+            msg.msg_control = ancillary.buffer.as_mut_ptr().cast();
+        }
+    }
+}
+
+pub(crate) fn encode_msghdr_v6_recv(
+    msg: &mut imp::c::msghdr,
+    iovs: &[IoSliceMut<'_>],
+    msg_name: *mut imp::c::sockaddr_in6,
+    ancillary: &mut Option<&mut Ipv6SocketAncillary<'_>>,
+) {
+    msg.msg_iov = iovs.as_ptr() as *mut imp::c::iovec;
+    msg.msg_iovlen = iovs.len() as _;
+
+    msg.msg_name = msg_name.cast();
+    msg.msg_namelen = size_of::<imp::c::sockaddr_in6>() as _;
+
+    if let Some(ancillary) = ancillary {
+        msg.msg_controllen = ancillary.buffer.len() as _;
+        // macos requires that the control pointer is null when the len is 0.
+        if msg.msg_controllen > 0 {
+            msg.msg_control = ancillary.buffer.as_mut_ptr().cast();
+        }
+    }
+}
+
+pub(crate) fn encode_msghdr_unix_recv(
+    msg: &mut imp::c::msghdr,
+    iovs: &[IoSliceMut<'_>],
+    msg_name: *mut imp::c::sockaddr_un,
+    ancillary: &mut Option<&mut UnixSocketAncillary<'_>>,
+) {
+    msg.msg_iov = iovs.as_ptr() as *mut imp::c::iovec;
+    msg.msg_iovlen = iovs.len() as _;
+
+    msg.msg_name = msg_name.cast();
+    msg.msg_namelen = size_of::<imp::c::sockaddr_un>() as _;
+
+    if let Some(ancillary) = ancillary {
+        msg.msg_controllen = ancillary.buffer.len() as _;
+        // macos requires that the control pointer is null when the len is 0.
+        if msg.msg_controllen > 0 {
+            msg.msg_control = ancillary.buffer.as_mut_ptr().cast();
+        }
     }
 }

@@ -197,138 +197,110 @@ pub(crate) fn sendmsg_unix(
     Ok(nwritten as usize)
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+pub(crate) fn recvmsg_v4(
+    fd: BorrowedFd<'_>,
+    iovs: &[IoSliceMut<'_>],
+    mut ancillary: Option<&mut Ipv4SocketAncillary<'_>>,
+    flags: RecvFlags,
+) -> io::Result<RecvMsgV4> {
+    let mut msg = msghdr_default();
+    let mut name = MaybeUninit::<c::sockaddr_in>::zeroed();
+
+    encode_msghdr_v4_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
+
+    unsafe {
+        let bytes = ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))?;
+
+        Ok(RecvMsgV4::new(bytes, msg, ancillary))
+    }
+}
+
+#[cfg(windows)]
 pub(crate) fn recvmsg_v4(
     fd: BorrowedFd<'_>,
     iovs: &[IoSliceMut<'_>],
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
-    let mut name = MaybeUninit::<c::sockaddr_in>::uninit();
+    let mut name = MaybeUninit::<c::sockaddr_in>::zeroed();
     let namelen = size_of::<c::sockaddr_in>() as _;
 
-    #[cfg(not(windows))]
-    let res = {
-        let mut msg = msghdr_default();
-        msg.msg_iov = iovs.as_ptr() as *mut _;
-        msg.msg_iovlen = iovs.len() as _;
-        msg.msg_name = &mut name as *mut _ as *mut _;
-        msg.msg_namelen = namelen;
+    let mut flags = flags.bits() as _;
+    let mut namelen = namelen;
+    unsafe {
+        let bytes = ret_send_recv(c::recvmsg(
+            borrowed_fd(fd),
+            iovs.as_ptr() as *mut _,
+            iovs.len() as _,
+            &mut name as *mut _ as *mut _,
+            &mut namelen,
+            &mut flags,
+        ))?;
 
-        unsafe {
-            let bytes = ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))?;
-            let addr = read_sockaddr_v4_opt(msg.msg_name as *const _, msg.msg_namelen as _);
-
-            RecvMsgV4 {
-                bytes: bytes as usize,
-                addr,
-                flags: RecvFlags::from_bits_truncate(msg.msg_flags),
-            }
-        }
-    };
-    #[cfg(windows)]
-    let res = {
-        let mut flags = flags.bits() as _;
-        let mut namelen = namelen;
-        unsafe {
-            let bytes = ret_send_recv(c::recvmsg(
-                borrowed_fd(fd),
-                iovs.as_ptr() as *mut _,
-                iovs.len() as _,
-                &mut name as *mut _ as *mut _,
-                &mut namelen,
-                &mut flags,
-            ))?;
-
-            let addr = read_sockaddr_v4_opt(msg.msg_name as *const _, msg.msg_namelen as _);
-
-            RecMsgV4 {
-                bytes: bytes as usize,
-                addr,
-                flags: RecvFlags::from_bits_truncate(flags),
-            }
-        }
-    };
-
-    Ok(res)
+        Ok(RecMsgV4::new(bytes, msg))
+    }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+pub(crate) fn recvmsg_v6(
+    fd: BorrowedFd<'_>,
+    iovs: &[IoSliceMut<'_>],
+    mut ancillary: Option<&mut Ipv6SocketAncillary<'_>>,
+    flags: RecvFlags,
+) -> io::Result<RecvMsgV6> {
+    let mut msg = msghdr_default();
+    let mut name = MaybeUninit::<c::sockaddr_in6>::zeroed();
+
+    encode_msghdr_v6_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
+
+    unsafe {
+        let bytes = ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))?;
+
+        Ok(RecvMsgV6::new(bytes, msg, ancillary))
+    }
+}
+
+#[cfg(windows)]
 pub(crate) fn recvmsg_v6(
     fd: BorrowedFd<'_>,
     iovs: &[IoSliceMut<'_>],
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV6> {
-    let mut name = MaybeUninit::<c::sockaddr_in6>::uninit();
+    let mut name = MaybeUninit::<c::sockaddr_in6>::zeroed();
     let namelen = size_of::<c::sockaddr_in6>() as _;
 
-    #[cfg(not(windows))]
-    let res = {
-        let mut msg = msghdr_default();
-        msg.msg_iov = iovs.as_ptr() as *mut _;
-        msg.msg_iovlen = iovs.len() as _;
-        msg.msg_name = &mut name as *mut _ as *mut _;
-        msg.msg_namelen = namelen;
+    let mut flags = flags.bits() as _;
+    let mut namelen = namelen;
+    unsafe {
+        let bytes = ret_send_recv(c::recvmsg(
+            borrowed_fd(fd),
+            iovs.as_ptr() as *mut _,
+            iovs.len() as _,
+            &mut name as *mut _ as *mut _,
+            &mut namelen,
+            &mut flags,
+        ))?;
 
-        unsafe {
-            let bytes = ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))?;
-            let addr = read_sockaddr_v6_opt(msg.msg_name as *const _, msg.msg_namelen as _);
-            RecvMsgV6 {
-                bytes: bytes as usize,
-                addr,
-                flags: RecvFlags::from_bits_truncate(msg.msg_flags),
-            }
-        }
-    };
-    #[cfg(windows)]
-    let res = {
-        let mut flags = flags.bits() as _;
-        let mut namelen = namelen;
-        unsafe {
-            let bytes = ret_send_recv(c::recvmsg(
-                borrowed_fd(fd),
-                iovs.as_ptr() as *mut _,
-                iovs.len() as _,
-                &mut name as *mut _ as *mut _,
-                &mut namelen,
-                &mut flags,
-            ))?;
-
-            let addr = read_sockaddr_v6_opt(msg.msg_name as *const _, msg.msg_namelen as _);
-            RecMsgV6 {
-                bytes: bytes as usize,
-                addr,
-                flags: RecvFlags::from_bits_truncate(flags),
-            }
-        }
-    };
-
-    Ok(res)
+        Ok(RecMsgV6::new(bytes, msg))
+    }
 }
 
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub(crate) fn recvmsg_unix(
     fd: BorrowedFd<'_>,
     iovs: &[IoSliceMut<'_>],
+    mut ancillary: Option<&mut Ipv4SocketAncillary<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgUnix> {
-    let mut name = MaybeUninit::<c::sockaddr_un>::uninit();
-    let namelen = size_of::<c::sockaddr_un>() as _;
-
     let mut msg = msghdr_default();
-    msg.msg_iov = iovs.as_ptr() as *mut _;
-    msg.msg_iovlen = iovs.len() as _;
-    msg.msg_name = &mut name as *mut _ as *mut _;
-    msg.msg_namelen = namelen;
+    let mut name = MaybeUninit::<c::sockaddr_un>::zeroed();
+
+    encode_msghdr_unix_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
 
     unsafe {
         let bytes = ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))?;
-        let addr = read_sockaddr_unix_opt(msg.msg_name as *const _, msg.msg_namelen as _);
 
-        Ok(RecvMsgUnix {
-            bytes: bytes as usize,
-            addr,
-            flags: RecvFlags::from_bits_truncate(msg.msg_flags),
-        })
+        Ok(RecvMsgUnix::new(bytes, msg, ancillary))
     }
 }
 

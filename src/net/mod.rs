@@ -56,8 +56,10 @@ pub use ip::{IpAddr, Ipv4Addr, Ipv6Addr, Ipv6MulticastScope};
 pub use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
 
 #[cfg(not(windows))]
-pub(crate) use send_recv::{encode_msghdr_unix_send, encode_socketaddr_unix_opt};
 pub(crate) use send_recv::{
-    encode_msghdr_v4_send, encode_msghdr_v6_send, encode_socketaddr_v4_opt,
-    encode_socketaddr_v6_opt,
+    encode_msghdr_unix_recv, encode_msghdr_unix_send, encode_socketaddr_unix_opt,
+};
+pub(crate) use send_recv::{
+    encode_msghdr_v4_recv, encode_msghdr_v4_send, encode_msghdr_v6_recv, encode_msghdr_v6_send,
+    encode_socketaddr_v4_opt, encode_socketaddr_v6_opt,
 };

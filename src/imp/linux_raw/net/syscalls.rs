@@ -39,15 +39,15 @@ use super::super::reg::nr;
 use super::super::reg::{ArgReg, SocketArg};
 use super::{
     encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, msghdr_default, read_sockaddr_os,
-    read_sockaddr_unix_opt, read_sockaddr_v4_opt, read_sockaddr_v6_opt, AcceptFlags, AddressFamily,
-    Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
+    AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
 };
 use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
 use crate::net::{
-    encode_msghdr_unix_send, encode_msghdr_v4_send, encode_msghdr_v6_send,
-    encode_socketaddr_unix_opt, encode_socketaddr_v4_opt, encode_socketaddr_v6_opt,
-    Ipv4SocketAncillary, Ipv6SocketAncillary, RecvMsgUnix, RecvMsgV4, RecvMsgV6, SocketAddrAny,
-    SocketAddrUnix, SocketAddrV4, SocketAddrV6, UnixSocketAncillary,
+    encode_msghdr_unix_recv, encode_msghdr_unix_send, encode_msghdr_v4_recv, encode_msghdr_v4_send,
+    encode_msghdr_v6_recv, encode_msghdr_v6_send, encode_socketaddr_unix_opt,
+    encode_socketaddr_v4_opt, encode_socketaddr_v6_opt, Ipv4SocketAncillary, Ipv6SocketAncillary,
+    RecvMsgUnix, RecvMsgV4, RecvMsgV6, SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6,
+    UnixSocketAncillary,
 };
 use crate::{as_mut_ptr, as_ptr};
 use core::convert::TryInto;
@@ -722,15 +722,12 @@ pub(crate) fn recvfrom(
 pub(crate) fn recvmsg_v4(
     fd: BorrowedFd<'_>,
     iovs: &[IoSliceMut<'_>],
-    ancillary: Option<&mut Ipv4SocketAncillary<'_>>,
+    mut ancillary: Option<&mut Ipv4SocketAncillary<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
     let mut msg = msghdr_default();
-    msg.msg_iov = iovs.as_ptr() as *mut _;
-    msg.msg_iovlen = iovs.len() as _;
-    let mut name = MaybeUninit::<sockaddr_in>::uninit();
-    msg.msg_name = name.as_mut_ptr().cast();
-    msg.msg_namelen = core::mem::size_of::<sockaddr_in>() as _;
+    let mut name = MaybeUninit::<c::sockaddr_in>::zeroed();
+    encode_msghdr_v4_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
 
     #[cfg(not(target_arch = "x86",))]
     let bytes = unsafe {
@@ -754,27 +751,20 @@ pub(crate) fn recvmsg_v4(
         ))?
     };
 
-    let addr = unsafe { read_sockaddr_v4_opt(msg.msg_name as *const _, msg.msg_namelen as _) };
-    Ok(RecvMsgV4 {
-        bytes: bytes as usize,
-        addr,
-        flags: RecvFlags::from_bits_truncate(msg.msg_flags),
-    })
+    Ok(unsafe { RecvMsgV4::new(bytes, msg, ancillary) })
 }
 
 #[inline]
 pub(crate) fn recvmsg_v6(
     fd: BorrowedFd<'_>,
     iovs: &[IoSliceMut<'_>],
-    ancillary: Option<&mut Ipv6SocketAncillary<'_>>,
+    mut ancillary: Option<&mut Ipv6SocketAncillary<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV6> {
     let mut msg = msghdr_default();
-    msg.msg_iov = iovs.as_ptr() as *mut _;
-    msg.msg_iovlen = iovs.len() as _;
-    let mut name = MaybeUninit::<sockaddr_in6>::uninit();
-    msg.msg_name = name.as_mut_ptr().cast();
-    msg.msg_namelen = core::mem::size_of::<sockaddr_in6>() as _;
+    let mut name = MaybeUninit::<c::sockaddr_in6>::zeroed();
+
+    encode_msghdr_v6_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
 
     #[cfg(not(target_arch = "x86",))]
     let bytes = unsafe {
@@ -798,28 +788,20 @@ pub(crate) fn recvmsg_v6(
         ))?
     };
 
-    let addr = unsafe { read_sockaddr_v6_opt(msg.msg_name as *const _, msg.msg_namelen as _) };
-
-    Ok(RecvMsgV6 {
-        bytes: bytes as usize,
-        addr,
-        flags: RecvFlags::from_bits_truncate(msg.msg_flags),
-    })
+    Ok(unsafe { RecvMsgV6::new(bytes, msg, ancillary) })
 }
 
 #[inline]
 pub(crate) fn recvmsg_unix(
     fd: BorrowedFd<'_>,
     iovs: &[IoSliceMut<'_>],
-    ancillary: Option<&mut UnixSocketAncillary<'_>>,
+    mut ancillary: Option<&mut UnixSocketAncillary<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgUnix> {
     let mut msg = msghdr_default();
-    msg.msg_iov = iovs.as_ptr() as *mut _;
-    msg.msg_iovlen = iovs.len() as _;
-    let mut name = MaybeUninit::<sockaddr_un>::zeroed();
-    msg.msg_name = name.as_mut_ptr().cast();
-    msg.msg_namelen = core::mem::size_of::<sockaddr_un>() as _;
+    let mut name = MaybeUninit::<c::sockaddr_un>::zeroed();
+
+    encode_msghdr_unix_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
 
     #[cfg(not(target_arch = "x86",))]
     let bytes = unsafe {
@@ -843,13 +825,7 @@ pub(crate) fn recvmsg_unix(
         ))?
     };
 
-    let addr = unsafe { read_sockaddr_unix_opt(msg.msg_name as *const _, msg.msg_namelen as _) };
-
-    Ok(RecvMsgUnix {
-        bytes: bytes as usize,
-        addr,
-        flags: RecvFlags::from_bits_truncate(msg.msg_flags),
-    })
+    Ok(unsafe { RecvMsgUnix::new(bytes, msg, ancillary) })
 }
 
 #[inline]
