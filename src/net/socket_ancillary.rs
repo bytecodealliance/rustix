@@ -3,9 +3,10 @@
 #![allow(unsafe_code)]
 
 use core::marker::PhantomData;
-use core::mem::size_of;
+use core::mem::{size_of, zeroed};
 use core::ops::{Deref, DerefMut};
-use core::ptr::read_unaligned;
+use core::ptr::{self, read_unaligned};
+use core::slice;
 
 use crate::imp::c;
 use crate::imp::fd::AsFd;
@@ -21,6 +22,58 @@ pub enum UnixAncillaryData<'a> {
     /// TODO: document
     #[cfg(any(target_os = "android", target_os = "linux",))]
     ScmCredentials(ScmCredentials<'a>),
+}
+
+impl<'a> UnixAncillaryData<'a> {
+    /// Create an `UnixAncillaryData::ScmRights` variant.
+    ///
+    /// # Safety
+    ///
+    /// `data` must contain a valid control message and the control message must be type of
+    /// `SOL_SOCKET` and level of `SCM_RIGHTS`.
+    unsafe fn as_rights(data: &'a [u8]) -> Self {
+        let ancillary_data_iter = AncillaryDataIter::new(data);
+        let scm_rights = ScmRights(ancillary_data_iter);
+        UnixAncillaryData::ScmRights(scm_rights)
+    }
+
+    /// Create an `UnixAncillaryData::ScmCredentials` variant.
+    ///
+    /// # Safety
+    ///
+    /// `data` must contain a valid control message and the control message must be type of
+    /// `SOL_SOCKET` and level of `SCM_CREDENTIALS` or `SCM_CREDENTIALS`.
+    #[cfg(any(doc, target_os = "android", target_os = "linux",))]
+    unsafe fn as_credentials(data: &'a [u8]) -> Self {
+        let ancillary_data_iter = AncillaryDataIter::new(data);
+        let scm_credentials = ScmCredentials(ancillary_data_iter);
+        UnixAncillaryData::ScmCredentials(scm_credentials)
+    }
+
+    fn try_from_cmsghdr(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
+        unsafe {
+            let cmsg_len_zero = c::CMSG_LEN(0) as usize;
+            let data_len = (*cmsg).cmsg_len as usize - cmsg_len_zero;
+            let data = c::CMSG_DATA(cmsg).cast();
+            let data = slice::from_raw_parts(data, data_len);
+
+            match (*cmsg).cmsg_level as _ {
+                c::SOL_SOCKET => match (*cmsg).cmsg_type as _ {
+                    c::SCM_RIGHTS => Ok(Self::as_rights(data)),
+                    #[cfg(any(target_os = "android", target_os = "linux",))]
+                    c::SCM_CREDENTIALS => Ok(Self::as_credentials(data)),
+                    cmsg_type => Err(AncillaryError::Unknown {
+                        cmsg_level: c::SOL_SOCKET as _,
+                        cmsg_type: cmsg_type as _,
+                    }),
+                },
+                cmsg_level => Err(AncillaryError::Unknown {
+                    cmsg_level: (*cmsg).cmsg_level,
+                    cmsg_type: (*cmsg).cmsg_type,
+                }),
+            }
+        }
+    }
 }
 
 /// TODO: document
@@ -233,14 +286,13 @@ impl<'a> UnixSocketAncillary<'a> {
     /// and type `SCM_RIGHTS`.
     pub fn add_fds<Fd: AsFd>(&mut self, fds: &[Fd]) -> bool {
         self.truncated = false;
-        /*add_to_ancillary_data(
-                &mut self.buffer,
-                &mut self.length,
-                fds,
-                c::SOL_SOCKET,
-                c::SCM_RIGHTS,
-        )*/
-        todo!()
+        add_to_ancillary_data(
+            &mut self.0.buffer,
+            &mut self.0.length,
+            fds,
+            c::SOL_SOCKET as _,
+            c::SCM_RIGHTS as _,
+        )
     }
 
     /// Add credentials to the ancillary data.
@@ -253,14 +305,13 @@ impl<'a> UnixSocketAncillary<'a> {
     #[cfg(any(target_os = "android", target_os = "linux",))]
     pub fn add_creds(&mut self, creds: &[SocketCred]) -> bool {
         self.truncated = false;
-        /*add_to_ancillary_data(
-                &mut self.buffer,
-                &mut self.length,
-                creds,
-                c::SOL_SOCKET,
-                c::SCM_CREDENTIALS,
-        )*/
-        todo!()
+        add_to_ancillary_data(
+            &mut self.0.buffer,
+            &mut self.0.length,
+            creds,
+            c::SOL_SOCKET as _,
+            c::SCM_CREDENTIALS as _,
+        )
     }
 
     /// Returns the iterator of the control messages.
@@ -343,33 +394,32 @@ impl<'a> Iterator for UnixMessages<'a> {
     type Item = Result<UnixAncillaryData<'a>, AncillaryError>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // unsafe {
-        //     let mut msg: libc::msghdr = zeroed();
-        //     msg.msg_control = self.buffer.as_ptr() as *mut _;
-        //     msg.msg_controllen = self.buffer.len() as _;
+        unsafe {
+            let mut msg: c::msghdr = zeroed();
+            msg.msg_control = self.buffer.as_ptr() as *mut _;
+            msg.msg_controllen = self.buffer.len() as _;
 
-        //     let cmsg = if let Some(current) = self.current {
-        //         libc::CMSG_NXTHDR(&msg, current)
-        //     } else {
-        //         libc::CMSG_FIRSTHDR(&msg)
-        //     };
+            let cmsg = if let Some(current) = self.current {
+                c::CMSG_NXTHDR(&msg, current)
+            } else {
+                c::CMSG_FIRSTHDR(&msg)
+            };
 
-        //     let cmsg = cmsg.as_ref()?;
+            let cmsg = cmsg.as_ref()?;
 
-        //     // Most operating systems, but not Linux or emscripten, return the previous pointer
-        //     // when its length is zero. Therefore, check if the previous pointer is the same as
-        //     // the current one.
-        //     if let Some(current) = self.current {
-        //         if eq(current, cmsg) {
-        //             return None;
-        //         }
-        //     }
+            // Most operating systems, but not Linux or emscripten, return the previous pointer
+            // when its length is zero. Therefore, check if the previous pointer is the same as
+            // the current one.
+            if let Some(current) = self.current {
+                if ptr::eq(current, cmsg) {
+                    return None;
+                }
+            }
 
-        //     self.current = Some(cmsg);
-        //     let ancillary_result = AncillaryData::try_from_cmsghdr(cmsg);
-        //     Some(ancillary_result)
-        // }
-        todo!()
+            self.current = Some(cmsg);
+            let ancillary_result = UnixAncillaryData::try_from_cmsghdr(cmsg);
+            Some(ancillary_result)
+        }
     }
 }
 
@@ -407,4 +457,73 @@ impl<'a, T> Iterator for AncillaryDataIter<'a, T> {
             None
         }
     }
+}
+
+fn add_to_ancillary_data<T>(
+    buffer: &mut [u8],
+    length: &mut usize,
+    source: &[T],
+    cmsg_level: c::c_uint,
+    cmsg_type: c::c_uint,
+) -> bool {
+    use core::convert::TryFrom;
+    let source_len = if let Some(source_len) = source.len().checked_mul(size_of::<T>()) {
+        if let Ok(source_len) = u32::try_from(source_len) {
+            source_len
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    };
+
+    unsafe {
+        let additional_space = c::CMSG_SPACE(source_len as _) as usize;
+
+        let new_length = if let Some(new_length) = additional_space.checked_add(*length) {
+            new_length
+        } else {
+            return false;
+        };
+
+        if new_length > buffer.len() {
+            return false;
+        }
+
+        buffer[*length..new_length].fill(0);
+
+        *length = new_length;
+
+        let mut msg: c::msghdr = zeroed();
+        msg.msg_control = buffer.as_mut_ptr().cast();
+        msg.msg_controllen = *length as _;
+
+        let mut cmsg = c::CMSG_FIRSTHDR(&msg);
+        let mut previous_cmsg = cmsg;
+        while !cmsg.is_null() {
+            previous_cmsg = cmsg;
+            cmsg = c::CMSG_NXTHDR(&msg, cmsg);
+
+            // Most operating systems, but not Linux or emscripten, return the previous pointer
+            // when its length is zero. Therefore, check if the previous pointer is the same as
+            // the current one.
+            if ptr::eq(cmsg, previous_cmsg) {
+                break;
+            }
+        }
+
+        if previous_cmsg.is_null() {
+            return false;
+        }
+
+        (*previous_cmsg).cmsg_level = cmsg_level as _;
+        (*previous_cmsg).cmsg_type = cmsg_type as _;
+        (*previous_cmsg).cmsg_len = c::CMSG_LEN(source_len as _) as _;
+
+        let data: *mut T = c::CMSG_DATA(previous_cmsg).cast();
+
+        ptr::copy_nonoverlapping(source.as_ptr().cast(), data, source.len());
+    }
+
+    true
 }
