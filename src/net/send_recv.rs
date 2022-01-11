@@ -3,7 +3,10 @@
 #![allow(unsafe_code)]
 
 #[cfg(not(windows))]
-use super::{Ipv4SocketAncillary, Ipv6SocketAncillary, UnixSocketAncillary};
+use super::{
+    RecvSocketAncillaryUnix, RecvSocketAncillaryV4, RecvSocketAncillaryV6, SendSocketAncillaryUnix,
+    SendSocketAncillaryV4, SendSocketAncillaryV6,
+};
 use crate::imp::net::{read_sockaddr_unix_opt, read_sockaddr_v4_opt, read_sockaddr_v6_opt};
 use crate::io::IoSliceMut;
 #[cfg(not(windows))]
@@ -235,7 +238,7 @@ pub fn sendmsg_v4_with_ancillary<Fd: AsFd>(
     fd: &Fd,
     iovs: &[io::IoSlice<'_>],
     addr: Option<&SocketAddrV4>,
-    ancillary: &mut Ipv4SocketAncillary<'_>,
+    ancillary: &mut SendSocketAncillaryV4<'_>,
     flags: SendFlags,
 ) -> io::Result<usize> {
     let fd = fd.as_fd();
@@ -257,7 +260,7 @@ pub fn sendmsg_v6_with_ancillary<Fd: AsFd>(
     fd: &Fd,
     iovs: &[io::IoSlice<'_>],
     addr: Option<&SocketAddrV6>,
-    ancillary: &mut Ipv6SocketAncillary<'_>,
+    ancillary: &mut SendSocketAncillaryV6<'_>,
     flags: SendFlags,
 ) -> io::Result<usize> {
     let fd = fd.as_fd();
@@ -279,7 +282,7 @@ pub fn sendmsg_unix_with_ancillary<Fd: AsFd>(
     fd: &Fd,
     iovs: &[io::IoSlice<'_>],
     addr: Option<&SocketAddrUnix>,
-    ancillary: &mut UnixSocketAncillary<'_>,
+    ancillary: &mut SendSocketAncillaryUnix<'_>,
     flags: SendFlags,
 ) -> io::Result<usize> {
     let fd = fd.as_fd();
@@ -321,7 +324,7 @@ pub fn recvmsg_v4<Fd: AsFd>(
 pub fn recvmsg_v4_with_ancillary<Fd: AsFd>(
     fd: &Fd,
     iovs: &[io::IoSliceMut<'_>],
-    ancillary: &mut Ipv4SocketAncillary<'_>,
+    ancillary: &mut RecvSocketAncillaryV4<'_>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
     let fd = fd.as_fd();
@@ -344,7 +347,7 @@ impl RecvMsgV4 {
     pub(crate) unsafe fn new(
         bytes: usize,
         msg: imp::c::msghdr,
-        ancillary: Option<&mut Ipv4SocketAncillary<'_>>,
+        ancillary: Option<&mut RecvSocketAncillaryV4<'_>>,
     ) -> Self {
         let addr = read_sockaddr_v4_opt(msg.msg_name as *const _, msg.msg_namelen as _);
         let flags = RecvFlags::from_bits_truncate(msg.msg_flags);
@@ -410,7 +413,7 @@ pub fn recvmsg_v6<Fd: AsFd>(
 pub fn recvmsg_v6_with_ancillary<Fd: AsFd>(
     fd: &Fd,
     iovs: &[io::IoSliceMut<'_>],
-    ancillary: &mut Ipv6SocketAncillary<'_>,
+    ancillary: &mut RecvSocketAncillaryV6<'_>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV6> {
     let fd = fd.as_fd();
@@ -433,7 +436,7 @@ impl RecvMsgV6 {
     pub(crate) unsafe fn new(
         bytes: usize,
         msg: imp::c::msghdr,
-        ancillary: Option<&mut Ipv6SocketAncillary<'_>>,
+        ancillary: Option<&mut RecvSocketAncillaryV6<'_>>,
     ) -> Self {
         let addr = read_sockaddr_v6_opt(msg.msg_name as *const _, msg.msg_namelen as _);
         let flags = RecvFlags::from_bits_truncate(msg.msg_flags);
@@ -498,7 +501,7 @@ pub fn recvmsg_unix<Fd: AsFd>(
 pub fn recvmsg_unix_with_ancillary<Fd: AsFd>(
     fd: &Fd,
     iovs: &[io::IoSliceMut<'_>],
-    ancillary: &mut UnixSocketAncillary<'_>,
+    ancillary: &mut RecvSocketAncillaryUnix<'_>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgUnix> {
     let fd = fd.as_fd();
@@ -522,7 +525,7 @@ impl RecvMsgUnix {
     pub(crate) unsafe fn new(
         bytes: usize,
         msg: imp::c::msghdr,
-        ancillary: Option<&mut UnixSocketAncillary<'_>>,
+        ancillary: Option<&mut RecvSocketAncillaryUnix<'_>>,
     ) -> Self {
         let addr = read_sockaddr_unix_opt(msg.msg_name as *const _, msg.msg_namelen as _);
         let flags = RecvFlags::from_bits_truncate(msg.msg_flags);
@@ -592,7 +595,7 @@ pub(crate) unsafe fn encode_msghdr_v4_send(
     iovlen: usize,
     msg_name: Option<*const imp::c::sockaddr_in>,
     msg_namelen: usize,
-    ancillary: Option<&mut Ipv4SocketAncillary<'_>>,
+    ancillary: Option<&mut SendSocketAncillaryV4<'_>>,
 ) {
     (*msg).msg_iov = iovs as *mut imp::c::iovec;
     (*msg).msg_iovlen = iovlen as _;
@@ -617,7 +620,7 @@ pub(crate) unsafe fn encode_msghdr_v6_send(
     iovlen: usize,
     msg_name: Option<*const imp::c::sockaddr_in6>,
     msg_namelen: usize,
-    ancillary: Option<&mut Ipv6SocketAncillary<'_>>,
+    ancillary: Option<&mut SendSocketAncillaryV6<'_>>,
 ) {
     (*msg).msg_iov = iovs as *mut imp::c::iovec;
     (*msg).msg_iovlen = iovlen as _;
@@ -643,7 +646,7 @@ pub(crate) unsafe fn encode_msghdr_unix_send(
     iovlen: usize,
     msg_name: Option<*const imp::c::sockaddr_un>,
     msg_namelen: usize,
-    ancillary: Option<&mut UnixSocketAncillary<'_>>,
+    ancillary: Option<&mut SendSocketAncillaryUnix<'_>>,
 ) {
     (*msg).msg_iov = iovs as *mut imp::c::iovec;
     (*msg).msg_iovlen = iovlen as _;
@@ -665,7 +668,7 @@ pub(crate) fn encode_msghdr_v4_recv(
     msg: &mut imp::c::msghdr,
     iovs: &[IoSliceMut<'_>],
     msg_name: *mut imp::c::sockaddr_in,
-    ancillary: &mut Option<&mut Ipv4SocketAncillary<'_>>,
+    ancillary: &mut Option<&mut RecvSocketAncillaryV4<'_>>,
 ) {
     msg.msg_iov = iovs.as_ptr() as *mut imp::c::iovec;
     msg.msg_iovlen = iovs.len() as _;
@@ -686,7 +689,7 @@ pub(crate) fn encode_msghdr_v6_recv(
     msg: &mut imp::c::msghdr,
     iovs: &[IoSliceMut<'_>],
     msg_name: *mut imp::c::sockaddr_in6,
-    ancillary: &mut Option<&mut Ipv6SocketAncillary<'_>>,
+    ancillary: &mut Option<&mut RecvSocketAncillaryV6<'_>>,
 ) {
     msg.msg_iov = iovs.as_ptr() as *mut imp::c::iovec;
     msg.msg_iovlen = iovs.len() as _;
@@ -707,7 +710,7 @@ pub(crate) fn encode_msghdr_unix_recv(
     msg: &mut imp::c::msghdr,
     iovs: &[IoSliceMut<'_>],
     msg_name: *mut imp::c::sockaddr_un,
-    ancillary: &mut Option<&mut UnixSocketAncillary<'_>>,
+    ancillary: &mut Option<&mut RecvSocketAncillaryUnix<'_>>,
 ) {
     msg.msg_iov = iovs.as_ptr() as *mut imp::c::iovec;
     msg.msg_iovlen = iovs.len() as _;

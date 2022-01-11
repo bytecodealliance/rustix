@@ -45,9 +45,10 @@ use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
 use crate::net::{
     encode_msghdr_unix_recv, encode_msghdr_unix_send, encode_msghdr_v4_recv, encode_msghdr_v4_send,
     encode_msghdr_v6_recv, encode_msghdr_v6_send, encode_socketaddr_unix_opt,
-    encode_socketaddr_v4_opt, encode_socketaddr_v6_opt, Ipv4SocketAncillary, Ipv6SocketAncillary,
-    RecvMsgUnix, RecvMsgV4, RecvMsgV6, SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6,
-    UnixSocketAncillary,
+    encode_socketaddr_v4_opt, encode_socketaddr_v6_opt, RecvMsgUnix, RecvMsgV4, RecvMsgV6,
+    RecvSocketAncillaryUnix, RecvSocketAncillaryV4, RecvSocketAncillaryV6, SendSocketAncillaryUnix,
+    SendSocketAncillaryV4, SendSocketAncillaryV6, SocketAddrAny, SocketAddrUnix, SocketAddrV4,
+    SocketAddrV6,
 };
 use crate::{as_mut_ptr, as_ptr};
 use core::convert::TryInto;
@@ -454,7 +455,7 @@ pub(crate) fn sendmsg_v4(
     fd: BorrowedFd<'_>,
     iovs: &[IoSlice<'_>],
     addr: Option<&SocketAddrV4>,
-    ancillary: Option<&mut Ipv4SocketAncillary<'_>>,
+    ancillary: Option<&mut SendSocketAncillaryV4<'_>>,
     flags: SendFlags,
 ) -> io::Result<usize> {
     let mut msg = msghdr_default();
@@ -498,7 +499,7 @@ pub(crate) fn sendmsg_v6(
     fd: BorrowedFd<'_>,
     iovs: &[IoSlice<'_>],
     addr: Option<&SocketAddrV6>,
-    ancillary: Option<&mut Ipv6SocketAncillary<'_>>,
+    ancillary: Option<&mut SendSocketAncillaryV6<'_>>,
     flags: SendFlags,
 ) -> io::Result<usize> {
     let mut msg = msghdr_default();
@@ -542,7 +543,7 @@ pub(crate) fn sendmsg_unix(
     fd: BorrowedFd<'_>,
     iovs: &[IoSlice<'_>],
     addr: Option<&SocketAddrUnix>,
-    ancillary: Option<&mut UnixSocketAncillary<'_>>,
+    ancillary: Option<&mut SendSocketAncillaryUnix<'_>>,
     flags: SendFlags,
 ) -> io::Result<usize> {
     let mut msg = msghdr_default();
@@ -722,7 +723,7 @@ pub(crate) fn recvfrom(
 pub(crate) fn recvmsg_v4(
     fd: BorrowedFd<'_>,
     iovs: &[IoSliceMut<'_>],
-    mut ancillary: Option<&mut Ipv4SocketAncillary<'_>>,
+    mut ancillary: Option<&mut RecvSocketAncillaryV4<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
     let mut msg = msghdr_default();
@@ -758,7 +759,7 @@ pub(crate) fn recvmsg_v4(
 pub(crate) fn recvmsg_v6(
     fd: BorrowedFd<'_>,
     iovs: &[IoSliceMut<'_>],
-    mut ancillary: Option<&mut Ipv6SocketAncillary<'_>>,
+    mut ancillary: Option<&mut RecvSocketAncillaryV6<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV6> {
     let mut msg = msghdr_default();
@@ -795,7 +796,7 @@ pub(crate) fn recvmsg_v6(
 pub(crate) fn recvmsg_unix(
     fd: BorrowedFd<'_>,
     iovs: &[IoSliceMut<'_>],
-    mut ancillary: Option<&mut UnixSocketAncillary<'_>>,
+    mut ancillary: Option<&mut RecvSocketAncillaryUnix<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgUnix> {
     let mut msg = msghdr_default();
@@ -1482,6 +1483,16 @@ pub(crate) mod sockopt {
             linux_raw_sys::general::IPPROTO_TCP as _,
             linux_raw_sys::general::TCP_NODELAY,
         )
+    }
+
+    #[inline]
+    pub(crate) fn set_udp_segment(fd: BorrowedFd<'_>, gso: u32) -> io::Result<()> {
+        setsockopt(fd, c::SOL_UDP as _, c::UDP_SEGMENT as _, gso)
+    }
+
+    #[inline]
+    pub(crate) fn get_udp_segment(fd: BorrowedFd<'_>) -> io::Result<u32> {
+        getsockopt(fd, c::SOL_UDP as _, c::UDP_SEGMENT as _)
     }
 
     #[inline]

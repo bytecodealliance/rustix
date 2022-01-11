@@ -2,9 +2,9 @@
 #![allow(dead_code, unused_variables)]
 #![allow(unsafe_code)]
 
+use core::convert::TryFrom;
 use core::marker::PhantomData;
 use core::mem::{size_of, zeroed};
-use core::ops::{Deref, DerefMut};
 use core::ptr::{self, read_unaligned};
 use core::slice;
 
@@ -44,78 +44,69 @@ pub use c::CMSG_SPACE;
 
 /// TODO: document
 #[non_exhaustive]
-pub enum UnixAncillaryData<'a> {
+pub enum SendAncillaryDataUnix<'a> {
     /// TODO: document
     ScmRights(ScmRights<'a>),
     /// TODO: document
     #[cfg(any(target_os = "android", target_os = "linux",))]
     ScmCredentials(ScmCredentials<'a>),
-    /// Catch-all variant for unimplemented cmsg types.
-    #[doc(hidden)]
-    Unknown(UnknownCmsgs<'a>),
 }
 
-impl<'a> UnixAncillaryData<'a> {
-    /// Create an `UnixAncillaryData::ScmRights` variant.
-    ///
-    /// # Safety
-    ///
-    /// `data` must contain a valid control message and the control message must be type of
-    /// `SOL_SOCKET` and level of `SCM_RIGHTS`.
-    unsafe fn as_rights(data: &'a [u8]) -> Self {
-        let ancillary_data_iter = AncillaryDataIter::new(data);
-        let scm_rights = ScmRights(ancillary_data_iter);
-        UnixAncillaryData::ScmRights(scm_rights)
-    }
+/// TODO: document
+#[non_exhaustive]
+pub enum RecvAncillaryDataUnix<'a> {
+    /// TODO: document
+    ScmRights(ScmRights<'a>),
+    /// TODO: document
+    #[cfg(any(target_os = "android", target_os = "linux",))]
+    ScmCredentials(ScmCredentials<'a>),
+}
 
-    /// Create an `UnixAncillaryData::ScmCredentials` variant.
-    ///
-    /// # Safety
-    ///
-    /// `data` must contain a valid control message and the control message must be type of
-    /// `SOL_SOCKET` and level of `SCM_CREDENTIALS` or `SCM_CREDENTIALS`.
-    #[cfg(any(doc, target_os = "android", target_os = "linux",))]
-    unsafe fn as_credentials(data: &'a [u8]) -> Self {
-        let ancillary_data_iter = AncillaryDataIter::new(data);
-        let scm_credentials = ScmCredentials(ancillary_data_iter);
-        UnixAncillaryData::ScmCredentials(scm_credentials)
-    }
+impl<'a> TryFrom<&'a c::cmsghdr> for SendAncillaryDataUnix<'a> {
+    type Error = AncillaryError;
 
-    fn try_from_cmsghdr(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
+    fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
         unsafe {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
             let data_len = (*cmsg).cmsg_len as usize - cmsg_len_zero;
             let data = c::CMSG_DATA(cmsg).cast();
             let data = slice::from_raw_parts(data, data_len);
 
-            match (*cmsg).cmsg_level as _ {
-                c::SOL_SOCKET => match (*cmsg).cmsg_type as _ {
-                    c::SCM_RIGHTS => Ok(Self::as_rights(data)),
-                    #[cfg(any(target_os = "android", target_os = "linux",))]
-                    c::SCM_CREDENTIALS => Ok(Self::as_credentials(data)),
-                    cmsg_type => Err(AncillaryError::Unknown {
-                        cmsg_level: c::SOL_SOCKET as _,
-                        cmsg_type: cmsg_type as _,
-                    }),
-                },
-                cmsg_level => Err(AncillaryError::Unknown {
-                    cmsg_level: (*cmsg).cmsg_level,
-                    cmsg_type: (*cmsg).cmsg_type,
-                }),
+            match ((*cmsg).cmsg_level as _, (*cmsg).cmsg_type as _) {
+                (c::SOL_SOCKET, c::SCM_RIGHTS) => Ok(SendAncillaryDataUnix::ScmRights(ScmRights(
+                    AncillaryDataIter::new(data),
+                ))),
+                #[cfg(any(target_os = "android", target_os = "linux",))]
+                (c::SOL_SOCKET, c::SCM_CREDENTIALS) => Ok(SendAncillaryDataUnix::ScmCredentials(
+                    ScmCredentials(AncillaryDataIter::new(data)),
+                )),
+                (_, _) => Err(AncillaryError::from_cmsg(&*cmsg)),
             }
         }
     }
 }
 
-/// An opaque structure to capture unknown cmsgs.
-#[doc(hidden)]
-pub struct UnknownCmsgs<'a>(AncillaryDataIter<'a, &'a [u8]>);
+impl<'a> TryFrom<&'a c::cmsghdr> for RecvAncillaryDataUnix<'a> {
+    type Error = AncillaryError;
 
-impl<'a> Iterator for UnknownCmsgs<'a> {
-    type Item = &'a [u8];
+    fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
+        unsafe {
+            let cmsg_len_zero = c::CMSG_LEN(0) as usize;
+            let data_len = (*cmsg).cmsg_len as usize - cmsg_len_zero;
+            let data = c::CMSG_DATA(cmsg).cast();
+            let data = slice::from_raw_parts(data, data_len);
 
-    fn next(&mut self) -> Option<&'a [u8]> {
-        self.0.next()
+            match ((*cmsg).cmsg_level as _, (*cmsg).cmsg_type as _) {
+                (c::SOL_SOCKET, c::SCM_RIGHTS) => Ok(RecvAncillaryDataUnix::ScmRights(ScmRights(
+                    AncillaryDataIter::new(data),
+                ))),
+                #[cfg(any(target_os = "android", target_os = "linux",))]
+                (c::SOL_SOCKET, c::SCM_CREDENTIALS) => Ok(RecvAncillaryDataUnix::ScmCredentials(
+                    ScmCredentials(AncillaryDataIter::new(data)),
+                )),
+                (_, _) => Err(AncillaryError::from_cmsg(&*cmsg)),
+            }
+        }
     }
 }
 
@@ -147,57 +138,242 @@ impl<'a> Iterator for ScmCredentials<'a> {
 
 /// TODO: document
 #[non_exhaustive]
-pub enum Ipv4AncillaryData<'a> {
+pub enum SendAncillaryDataV4<'a> {
     /// TODO: document
     PacketInfos(Ipv4PacketInfos<'a>),
     /// TODO: document
     #[cfg(target_os = "linux")]
     UdpGsoSegments(UdpGsoSegments<'a>),
-    /// TODO: document
-    #[cfg(any(
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    ))]
-    Ipv4RecvIf(libc::sockaddr_dl),
-    /// TODO: document
-    #[cfg(any(
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    ))]
-    Ipv4RecvDstAddr(libc::in_addr),
-    // /// Socket error queue control messages read with the `MSG_ERRQUEUE` flag.
-    // #[cfg(any(target_os = "android", target_os = "linux"))]
-    // Ipv4RecvErr(libc::sock_extended_err, Option<sockaddr_in>),
-    // #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
-    // RxqOvfl(u32),
-    /// Catch-all variant for unimplemented cmsg types.
-    #[doc(hidden)]
-    Unknown(UnknownCmsgs<'a>),
 }
 
 /// TODO: document
 #[non_exhaustive]
-pub enum Ipv6AncillaryData<'a> {
+pub enum RecvAncillaryDataV4<'a> {
+    /// TODO: document
+    PacketInfos(Ipv4PacketInfos<'a>),
+    /// TODO: document
+    #[cfg(target_os = "linux")]
+    UdpGroSegments(UdpGroSegments<'a>),
+    /// TODO: document
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    ))]
+    RecvIf(Ipv4RecvIfs<'a>),
+    /// TODO: document
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    ))]
+    RecvDstAddr(Ipv4RecvDstAddrs<'a>),
+    /// Socket error queue control messages read with the `MSG_ERRQUEUE` flag.
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    RecvErr(Ipv4RecvErrs<'a>),
+    /// TODO: document
+    #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+    RxqOvfl(RxqOvfls<'a>),
+}
+
+impl<'a> TryFrom<&'a c::cmsghdr> for SendAncillaryDataV4<'a> {
+    type Error = AncillaryError;
+
+    fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
+        unsafe {
+            let cmsg_len_zero = c::CMSG_LEN(0) as usize;
+            let data_len = (*cmsg).cmsg_len as usize - cmsg_len_zero;
+            let data = c::CMSG_DATA(cmsg).cast();
+            let data = slice::from_raw_parts(data, data_len);
+
+            match ((*cmsg).cmsg_level as _, (*cmsg).cmsg_type as _) {
+                (c::IPPROTO_IP, c::IP_PKTINFO) => Ok(SendAncillaryDataV4::PacketInfos(
+                    Ipv4PacketInfos(AncillaryDataIter::new(data)),
+                )),
+                #[cfg(target_os = "linux")]
+                (c::SOL_UDP, c::UDP_SEGMENT) => Ok(SendAncillaryDataV4::UdpGsoSegments(
+                    UdpGsoSegments(AncillaryDataIter::new(data)),
+                )),
+                (_, _) => Err(AncillaryError::from_cmsg(&*cmsg)),
+            }
+        }
+    }
+}
+
+impl<'a> TryFrom<&'a c::cmsghdr> for RecvAncillaryDataV4<'a> {
+    type Error = AncillaryError;
+
+    fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
+        unsafe {
+            let cmsg_len_zero = c::CMSG_LEN(0) as usize;
+            let data_len = (*cmsg).cmsg_len as usize - cmsg_len_zero;
+            let data = c::CMSG_DATA(cmsg).cast();
+            let data = slice::from_raw_parts(data, data_len);
+
+            match ((*cmsg).cmsg_level as _, (*cmsg).cmsg_type as _) {
+                (c::IPPROTO_IP, c::IP_PKTINFO) => Ok(RecvAncillaryDataV4::PacketInfos(
+                    Ipv4PacketInfos(AncillaryDataIter::new(data)),
+                )),
+                #[cfg(target_os = "linux")]
+                (c::SOL_UDP, c::UDP_GRO) => Ok(RecvAncillaryDataV4::UdpGroSegments(
+                    UdpGroSegments(AncillaryDataIter::new(data)),
+                )),
+                #[cfg(any(
+                    target_os = "freebsd",
+                    target_os = "ios",
+                    target_os = "macos",
+                    target_os = "netbsd",
+                    target_os = "openbsd",
+                ))]
+                (c::IPPROTO_IP, c::IP_RECVIF) => Ok(RecvAncillaryDataV4::RecvIf(Ipv4RecvIfs(
+                    AncillaryDataIter::new(data),
+                ))),
+                #[cfg(any(
+                    target_os = "freebsd",
+                    target_os = "ios",
+                    target_os = "macos",
+                    target_os = "netbsd",
+                    target_os = "openbsd",
+                ))]
+                (c::IPPROTO_IP, c::IP_RECVDSTADDR) => Ok(RecvAncillaryDataV4::RecvDstAddr(
+                    Ipv4RecvDstAddrs(AncillaryDataIter::new(data)),
+                )),
+                #[cfg(any(target_os = "android", target_os = "linux"))]
+                (c::IPPROTO_IP, c::IP_RECVERR) => Ok(RecvAncillaryDataV4::RecvErr(Ipv4RecvErrs(
+                    AncillaryDataIter::new(data),
+                ))),
+                #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+                (c::SOL_SOCKET, c::SO_RXQ_OVFL) => Ok(RecvAncillaryDataV4::RxqOvfl(RxqOvfls(
+                    AncillaryDataIter::new(data),
+                ))),
+                (_, _) => Err(AncillaryError::from_cmsg(&*cmsg)),
+            }
+        }
+    }
+}
+
+/// TODO: document
+#[cfg(any(
+    target_os = "freebsd",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "openbsd",
+))]
+#[repr(transparent)]
+pub struct Ipv4RecvIfs<'a>(AncillaryDataIter<'a, c::sockaddr_dl>);
+
+/// TODO: document
+#[cfg(any(
+    target_os = "freebsd",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "openbsd",
+))]
+#[repr(transparent)]
+pub struct Ipv4RecvDstAddrs<'a>(AncillaryDataIter<'a, libc::in_addr>);
+
+/// TODO: document
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[repr(transparent)]
+pub struct Ipv4RecvErrs<'a>(AncillaryDataIter<'a, (c::sock_extended_err, Option<c::sockaddr_in>)>);
+
+/// TODO: document
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[repr(transparent)]
+pub struct RxqOvfls<'a>(AncillaryDataIter<'a, u32>);
+
+/// TODO: document
+#[non_exhaustive]
+pub enum SendAncillaryDataV6<'a> {
     /// TODO: document
     PacketInfos(Ipv6PacketInfos<'a>),
     /// TODO: document
     #[cfg(target_os = "linux")]
     UdpGsoSegments(UdpGsoSegments<'a>),
-    /// Socket error queue control messages read with the `MSG_ERRQUEUE` flag.
-    // #[cfg(any(target_os = "android", target_os = "linux"))]
-    // Ipv6RecvErr(libc::sock_extended_err, Option<sockaddr_in6>),
-    // #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
-    RxqOvfl(u32),
-    /// Catch-all variant for unimplemented cmsg types.
-    #[doc(hidden)]
-    Unknown(UnknownCmsgs<'a>),
 }
+
+impl<'a> TryFrom<&'a c::cmsghdr> for SendAncillaryDataV6<'a> {
+    type Error = AncillaryError;
+
+    fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
+        unsafe {
+            let cmsg_len_zero = c::CMSG_LEN(0) as usize;
+            let data_len = (*cmsg).cmsg_len as usize - cmsg_len_zero;
+            let data = c::CMSG_DATA(cmsg).cast();
+            let data = slice::from_raw_parts(data, data_len);
+
+            match ((*cmsg).cmsg_level as _, (*cmsg).cmsg_type as _) {
+                (c::IPPROTO_IPV6, c::IPV6_PKTINFO) => Ok(SendAncillaryDataV6::PacketInfos(
+                    Ipv6PacketInfos(AncillaryDataIter::new(data)),
+                )),
+                #[cfg(target_os = "linux")]
+                (c::SOL_SOCKET, c::UDP_SEGMENT) => Ok(SendAncillaryDataV6::UdpGsoSegments(
+                    UdpGsoSegments(AncillaryDataIter::new(data)),
+                )),
+                (_, _) => Err(AncillaryError::from_cmsg(&*cmsg)),
+            }
+        }
+    }
+}
+
+/// TODO: document
+#[non_exhaustive]
+pub enum RecvAncillaryDataV6<'a> {
+    /// TODO: document
+    PacketInfos(Ipv6PacketInfos<'a>),
+    /// TODO: document
+    #[cfg(target_os = "linux")]
+    UdpGroSegments(UdpGroSegments<'a>),
+    /// Socket error queue control messages read with the `MSG_ERRQUEUE` flag.
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    RecvErr(Ipv6RecvErrs<'a>),
+    /// TODO: document
+    #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+    RxqOvfl(RxqOvfls<'a>),
+}
+
+impl<'a> TryFrom<&'a c::cmsghdr> for RecvAncillaryDataV6<'a> {
+    type Error = AncillaryError;
+
+    fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
+        unsafe {
+            let cmsg_len_zero = c::CMSG_LEN(0) as usize;
+            let data_len = (*cmsg).cmsg_len as usize - cmsg_len_zero;
+            let data = c::CMSG_DATA(cmsg).cast();
+            let data = slice::from_raw_parts(data, data_len);
+
+            match ((*cmsg).cmsg_level as _, (*cmsg).cmsg_type as _) {
+                (c::IPPROTO_IPV6, c::IPV6_PKTINFO) => Ok(RecvAncillaryDataV6::PacketInfos(
+                    Ipv6PacketInfos(AncillaryDataIter::new(data)),
+                )),
+                #[cfg(target_os = "linux")]
+                (c::SOL_UDP, c::UDP_GRO) => Ok(RecvAncillaryDataV6::UdpGroSegments(
+                    UdpGroSegments(AncillaryDataIter::new(data)),
+                )),
+                #[cfg(any(target_os = "android", target_os = "linux"))]
+                (c::IPPROTO_IPV6, c::IPV6_RECVERR) => Ok(RecvAncillaryDataV6::RecvErr(
+                    Ipv6RecvErrs(AncillaryDataIter::new(data)),
+                )),
+                #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+                (c::SOL_SOCKET, c::SO_RXQ_OVFL) => Ok(RecvAncillaryDataV6::RxqOvfl(RxqOvfls(
+                    AncillaryDataIter::new(data),
+                ))),
+                (_, _) => Err(AncillaryError::from_cmsg(&*cmsg)),
+            }
+        }
+    }
+}
+
+/// TODO: document
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[repr(transparent)]
+pub struct Ipv6RecvErrs<'a>(AncillaryDataIter<'a, (c::sock_extended_err, Option<c::sockaddr_in6>)>);
 
 /// TODO: document
 #[derive(Copy, Clone)]
@@ -218,6 +394,10 @@ pub struct Ipv6PacketInfos<'a>(AncillaryDataIter<'a, c::in6_pktinfo>);
 /// TODO: document
 #[cfg(target_os = "linux")]
 pub struct UdpGsoSegments<'a>(AncillaryDataIter<'a, u16>);
+
+/// TODO: document
+#[cfg(target_os = "linux")]
+pub struct UdpGroSegments<'a>(AncillaryDataIter<'a, u16>);
 
 /// Unix credential.
 #[cfg(any(target_os = "android", target_os = "linux",))]
@@ -292,19 +472,21 @@ impl SocketCred {
 
 /// TODO: document
 #[derive(Debug)]
-pub struct SocketAncillary<'a> {
+pub struct SocketAncillary<'a, T: TryFrom<&'a c::cmsghdr>> {
     pub(crate) buffer: &'a mut [u8],
     pub(crate) length: usize,
     pub(crate) truncated: bool,
+    _t: PhantomData<T>,
 }
 
-impl<'a> SocketAncillary<'a> {
+impl<'a, T: TryFrom<&'a c::cmsghdr>> SocketAncillary<'a, T> {
     /// Create an ancillary data with the given buffer.
     pub fn new(buffer: &'a mut [u8]) -> Self {
         SocketAncillary {
             buffer,
             length: 0,
             truncated: false,
+            _t: Default::default(),
         }
     }
 
@@ -333,32 +515,21 @@ impl<'a> SocketAncillary<'a> {
         self.length = 0;
         self.truncated = false;
     }
+
+    /// Returns the iterator of the control messages.
+    pub fn messages<'b: 'a>(&'b self) -> Messages<'a, T> {
+        Messages {
+            buffer: &self.buffer[..self.length],
+            current: None,
+            _t: Default::default(),
+        }
+    }
 }
 
 /// TODO: document
-#[derive(Debug)]
-pub struct UnixSocketAncillary<'a>(SocketAncillary<'a>);
+pub type SendSocketAncillaryUnix<'a> = SocketAncillary<'a, SendAncillaryDataUnix<'a>>;
 
-impl<'a> Deref for UnixSocketAncillary<'a> {
-    type Target = SocketAncillary<'a>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<'a> DerefMut for UnixSocketAncillary<'a> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-impl<'a> UnixSocketAncillary<'a> {
-    /// Create an ancillary data with the given buffer.
-    pub fn new(buffer: &'a mut [u8]) -> Self {
-        UnixSocketAncillary(SocketAncillary::new(buffer))
-    }
-
+impl<'a> SocketAncillary<'a, SendAncillaryDataUnix<'a>> {
     /// Add file descriptors to the ancillary data.
     ///
     /// The function returns `true` if there was enough space in the buffer.
@@ -368,8 +539,8 @@ impl<'a> UnixSocketAncillary<'a> {
     pub fn add_fds<Fd: AsFd>(&mut self, fds: &[Fd]) -> bool {
         self.truncated = false;
         add_to_ancillary_data(
-            &mut self.0.buffer,
-            &mut self.0.length,
+            &mut self.buffer,
+            &mut self.length,
             fds,
             c::SOL_SOCKET as _,
             c::SCM_RIGHTS as _,
@@ -387,47 +558,22 @@ impl<'a> UnixSocketAncillary<'a> {
     pub fn add_creds(&mut self, creds: &[SocketCred]) -> bool {
         self.truncated = false;
         add_to_ancillary_data(
-            &mut self.0.buffer,
-            &mut self.0.length,
+            &mut self.buffer,
+            &mut self.length,
             creds,
             c::SOL_SOCKET as _,
             c::SCM_CREDENTIALS as _,
         )
     }
-
-    /// Returns the iterator of the control messages.
-    pub fn messages(&self) -> UnixMessages<'_> {
-        UnixMessages {
-            buffer: &self.0.buffer[..self.0.length],
-            current: None,
-        }
-    }
 }
 
 /// TODO: document
-#[derive(Debug)]
-pub struct Ipv4SocketAncillary<'a>(SocketAncillary<'a>);
+pub type RecvSocketAncillaryUnix<'a> = SocketAncillary<'a, RecvAncillaryDataUnix<'a>>;
 
-impl<'a> Deref for Ipv4SocketAncillary<'a> {
-    type Target = SocketAncillary<'a>;
+/// TODO: document
+pub type SendSocketAncillaryV4<'a> = SocketAncillary<'a, SendAncillaryDataV4<'a>>;
 
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<'a> DerefMut for Ipv4SocketAncillary<'a> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-impl<'a> Ipv4SocketAncillary<'a> {
-    /// Create an ancillary data with the given buffer.
-    pub fn new(buffer: &'a mut [u8]) -> Self {
-        Ipv4SocketAncillary(SocketAncillary::new(buffer))
-    }
-
+impl<'a> SocketAncillary<'a, SendAncillaryDataV4<'a>> {
     /// TODO
     pub fn add_packet_info(&mut self, info: &Ipv4PacketInfo) -> bool {
         todo!()
@@ -435,22 +581,20 @@ impl<'a> Ipv4SocketAncillary<'a> {
 }
 
 /// TODO: document
-#[derive(Debug)]
-pub struct Ipv6SocketAncillary<'a>(SocketAncillary<'a>);
+pub type RecvSocketAncillaryV4<'a> = SocketAncillary<'a, RecvAncillaryDataV4<'a>>;
 
-impl<'a> Deref for Ipv6SocketAncillary<'a> {
-    type Target = SocketAncillary<'a>;
+/// TODO: document
+pub type SendSocketAncillaryV6<'a> = SocketAncillary<'a, SendAncillaryDataV6<'a>>;
 
-    fn deref(&self) -> &Self::Target {
-        &self.0
+impl<'a> SocketAncillary<'a, SendAncillaryDataV6<'a>> {
+    /// TODO
+    pub fn add_packet_info(&mut self, info: &Ipv6PacketInfo) -> bool {
+        todo!()
     }
 }
 
-impl<'a> DerefMut for Ipv6SocketAncillary<'a> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
+/// TODO: document
+pub type RecvSocketAncillaryV6<'a> = SocketAncillary<'a, RecvAncillaryDataV6<'a>>;
 
 /// The error type which is returned from parsing the type a control message.
 #[non_exhaustive]
@@ -465,14 +609,24 @@ pub enum AncillaryError {
     },
 }
 
-/// This struct is used to iterate through the control messages.
-pub struct UnixMessages<'a> {
-    buffer: &'a [u8],
-    current: Option<&'a c::cmsghdr>,
+impl AncillaryError {
+    fn from_cmsg(cmsg: &c::cmsghdr) -> Self {
+        AncillaryError::Unknown {
+            cmsg_level: cmsg.cmsg_level as _,
+            cmsg_type: cmsg.cmsg_type as _,
+        }
+    }
 }
 
-impl<'a> Iterator for UnixMessages<'a> {
-    type Item = Result<UnixAncillaryData<'a>, AncillaryError>;
+/// This struct is used to iterate through the control messages.
+pub struct Messages<'a, T: TryFrom<&'a c::cmsghdr>> {
+    buffer: &'a [u8],
+    current: Option<&'a c::cmsghdr>,
+    _t: PhantomData<T>,
+}
+
+impl<'a, T: TryFrom<&'a c::cmsghdr>> Iterator for Messages<'a, T> {
+    type Item = Result<T, T::Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
         unsafe {
@@ -498,8 +652,7 @@ impl<'a> Iterator for UnixMessages<'a> {
             }
 
             self.current = Some(cmsg);
-            let ancillary_result = UnixAncillaryData::try_from_cmsghdr(cmsg);
-            Some(ancillary_result)
+            Some(T::try_from(cmsg))
         }
     }
 }
@@ -547,7 +700,6 @@ fn add_to_ancillary_data<T>(
     cmsg_level: c::c_uint,
     cmsg_type: c::c_uint,
 ) -> bool {
-    use core::convert::TryFrom;
     let source_len = if let Some(source_len) = source.len().checked_mul(size_of::<T>()) {
         if let Ok(source_len) = u32::try_from(source_len) {
             source_len

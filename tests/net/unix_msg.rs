@@ -130,8 +130,8 @@ fn test_scm_credentials_and_rights() {
     use rustix::cmsg_space;
     use rustix::io::{pipe, read, write, OwnedFd};
     use rustix::net::{
-        recvmsg_unix_with_ancillary, sendmsg_unix_with_ancillary, SocketCred, UnixAncillaryData,
-        UnixSocketAncillary,
+        recvmsg_unix_with_ancillary, sendmsg_unix_with_ancillary, RecvAncillaryDataUnix,
+        RecvSocketAncillaryUnix, SendSocketAncillaryUnix, SocketCred,
     };
     use rustix::net::{sockopt::set_socket_passcred, SocketFlags};
     use rustix::process::{getgid, getpid, getuid};
@@ -152,7 +152,7 @@ fn test_scm_credentials_and_rights() {
 
     {
         let iovs = [IoSlice::new(b"hello")];
-        let mut cmsgs = UnixSocketAncillary::new(&mut space);
+        let mut cmsgs = SendSocketAncillaryUnix::new(&mut space);
         let cred = SocketCred::from_process();
         assert!(cmsgs.add_creds(&[cred]));
 
@@ -169,7 +169,7 @@ fn test_scm_credentials_and_rights() {
     {
         let mut buf = [0u8; 5];
         let iovs = [IoSliceMut::new(&mut buf[..])];
-        let mut cmsgs = UnixSocketAncillary::new(&mut space);
+        let mut cmsgs = RecvSocketAncillaryUnix::new(&mut space);
         let msg =
             recvmsg_unix_with_ancillary(&recv, &iovs, &mut cmsgs, RecvFlags::empty()).unwrap();
 
@@ -177,13 +177,13 @@ fn test_scm_credentials_and_rights() {
         let mut received_cred = None;
         for cmsg in cmsgs.messages() {
             match cmsg.unwrap() {
-                UnixAncillaryData::ScmRights(fds) => {
+                RecvAncillaryDataUnix::ScmRights(fds) => {
                     assert!(received_r.is_none(), "already received fd");
                     let fds = fds.collect::<Vec<_>>();
                     assert_eq!(fds.len(), 1);
                     received_r = Some(fds);
                 }
-                UnixAncillaryData::ScmCredentials(creds) => {
+                RecvAncillaryDataUnix::ScmCredentials(creds) => {
                     assert!(received_cred.is_none());
                     let creds = creds.collect::<Vec<_>>();
                     assert_eq!(creds.len(), 1);
