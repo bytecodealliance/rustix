@@ -7,8 +7,8 @@ pub(crate) use winapi::shared::ws2def::{
     AF_INET6, AF_IPX, AF_IRDA, AF_SNA, AF_UNIX, AF_UNSPEC, IPPROTO_AH, IPPROTO_EGP, IPPROTO_ESP,
     IPPROTO_FRAGMENT, IPPROTO_ICMP, IPPROTO_ICMPV6, IPPROTO_IDP, IPPROTO_IGMP, IPPROTO_IP,
     IPPROTO_IPV6, IPPROTO_PIM, IPPROTO_PUP, IPPROTO_RAW, IPPROTO_ROUTING, IPPROTO_SCTP,
-    IPPROTO_TCP, IPPROTO_UDP, MSG_TRUNC, SOCKADDR as sockaddr, SOCKADDR_IN as sockaddr_in,
-    SOCKADDR_STORAGE_LH as sockaddr_storage, TCP_NODELAY,
+    IPPROTO_TCP, IPPROTO_UDP, LPWSABUF, MSG_TRUNC, SOCKADDR as sockaddr,
+    SOCKADDR_IN as sockaddr_in, SOCKADDR_STORAGE_LH as sockaddr_storage, TCP_NODELAY,
 };
 
 pub(crate) use winapi::shared::ws2ipdef::{
@@ -58,8 +58,6 @@ const SD_BOTH: c_int = 2;
 pub(crate) const SHUT_WR: c_int = SD_SEND;
 pub(crate) const SHUT_RD: c_int = SD_RECEIVE;
 pub(crate) const SHUT_RDWR: c_int = SD_BOTH;
-
-pub(crate) use winapi::shared::ws2def::LPWSABUF;
 
 pub(crate) unsafe fn sendmsg(
     s: SOCKET,

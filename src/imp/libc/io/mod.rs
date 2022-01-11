@@ -1,5 +1,10 @@
 mod error;
+
 #[cfg(not(feature = "std"))]
+#[cfg_attr(not(windows), path = "io_slice.rs")]
+mod io_slice;
+#[cfg(not(feature = "std"))]
+#[cfg_attr(windows, path = "io_slice_windows.rs")]
 mod io_slice;
 #[cfg(not(windows))]
 mod poll_fd;
