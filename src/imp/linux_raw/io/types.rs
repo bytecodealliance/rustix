@@ -135,6 +135,22 @@ bitflags! {
 }
 
 bitflags! {
+    /// `MS_*` flags for use with [`msync`].
+    ///
+    /// [`msync`]: crate::io::msync
+    pub struct MsyncFlags: u32 {
+        /// `MS_SYNC` Requests an update and waits for it to complete.
+        const SYNC = linux_raw_sys::general::MS_SYNC;
+        /// `MS_ASYNC` Specifies that an update be scheduled,
+        /// but the call returns immediately.
+        const ASYNC = linux_raw_sys::general::MS_ASYNC;
+        /// `MS_INVALIDATE` Asks to invalidate other mappings of the same file (so
+        /// that they can be updated with the fresh values just written).
+        const INVALIDATE = linux_raw_sys::general::MS_INVALIDATE;
+    }
+}
+
+bitflags! {
     /// `O_*` constants for use with [`pipe_with`].
     ///
     /// [`pipe_with`]: crate::io::pipe_with

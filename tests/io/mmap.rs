@@ -1,5 +1,6 @@
-#![cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#![cfg(not(target_os = "wasi"))]
 
+#[cfg(not(target_ot = "redox"))]
 #[test]
 fn test_mmap() {
     use rustix::fs::{cwd, openat, Mode, OFlags};
@@ -125,6 +126,7 @@ fn test_mlock() {
     }
 }
 
+#[cfg(not(target_ot = "redox"))]
 #[test]
 fn test_madvise() {
     use rustix::io::{madvise, mmap_anonymous, munmap, Advice, MapFlags, ProtFlags};
@@ -138,6 +140,21 @@ fn test_madvise() {
 
         #[cfg(any(target_os = "android", target_os = "linux"))]
         madvise(addr, 8192, Advice::LinuxDontNeed).unwrap();
+
+        munmap(addr, 8192).unwrap();
+    }
+}
+
+#[test]
+fn test_msync() {
+    use rustix::io::{mmap_anonymous, msync, munmap, MapFlags, MsyncFlags, ProtFlags};
+    use std::ptr::null_mut;
+
+    unsafe {
+        let addr = mmap_anonymous(null_mut(), 8192, ProtFlags::READ, MapFlags::PRIVATE).unwrap();
+
+        msync(addr, 8192, MsyncFlags::SYNC).unwrap();
+        msync(addr, 8192, MsyncFlags::ASYNC).unwrap();
 
         munmap(addr, 8192).unwrap();
     }

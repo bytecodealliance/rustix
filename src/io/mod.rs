@@ -21,6 +21,8 @@ mod is_read_write;
 mod madvise;
 #[cfg(not(any(windows, target_os = "wasi")))]
 mod mmap;
+#[cfg(not(any(windows, target_os = "wasi")))]
+mod msync;
 mod owned_fd;
 #[cfg(not(any(windows, target_os = "wasi")))]
 mod pipe;
@@ -71,6 +73,8 @@ pub use mmap::{
 pub use mmap::{mlock_with, MlockFlags};
 #[cfg(any(linux_raw, all(libc, target_os = "linux")))]
 pub use mmap::{mremap, mremap_fixed, MremapFlags};
+#[cfg(not(any(windows, target_os = "wasi")))]
+pub use msync::{msync, MsyncFlags};
 pub use owned_fd::OwnedFd;
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use pipe::pipe;
