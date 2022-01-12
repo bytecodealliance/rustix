@@ -10,9 +10,11 @@ use imp::fd::AsSocketAsFd;
 /// Also known as `tcgetattr`.
 ///
 /// # References
+///  - [POSIX `tcgetattr`]
 ///  - [Linux `ioctl_tty`]
 ///  - [Linux `termios`]
 ///
+/// [POSIX `tcgetattr`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/tcgetattr.html
 /// [Linux `ioctl_tty`]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
 /// [Linux `termios`]: https://man7.org/linux/man-pages/man3/termios.3.html
 #[cfg(not(any(windows, target_os = "wasi")))]
