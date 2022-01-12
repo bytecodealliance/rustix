@@ -19,7 +19,7 @@ fn main() {
     use_feature_or_nothing("const_raw_ptr_deref");
 
     let arch = var("CARGO_CFG_TARGET_ARCH").unwrap();
-    let asm_name = format!("{}/{}.S", OUTLINE_PATH, arch);
+    let asm_name = format!("{}/{}.s", OUTLINE_PATH, arch);
     let os_name = var("CARGO_CFG_TARGET_OS").unwrap();
     let is_x32 = arch == "x86_64" && var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap() == "32";
     println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_ARCH");

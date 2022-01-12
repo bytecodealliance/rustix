@@ -7,12 +7,11 @@
 // `ret imm` instructions to clean up the stack. We don't need callee
 // cleanup per se, it just comes along with using "fastcall".
 
-    .file       "x86.S"
+    .file       "x86.s"
     .intel_syntax noprefix
 
     .section    .text.rustix_indirect_syscall0_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_indirect_syscall0_nr_last_fastcall
     .weak       rustix_indirect_syscall0_nr_last_fastcall
     .hidden     rustix_indirect_syscall0_nr_last_fastcall
     .type       rustix_indirect_syscall0_nr_last_fastcall, @function
@@ -26,7 +25,6 @@ rustix_indirect_syscall0_nr_last_fastcall:
 
     .section    .text.rustix_indirect_syscall1_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_indirect_syscall1_nr_last_fastcall
     .weak       rustix_indirect_syscall1_nr_last_fastcall
     .hidden     rustix_indirect_syscall1_nr_last_fastcall
     .type       rustix_indirect_syscall1_nr_last_fastcall, @function
@@ -46,7 +44,6 @@ rustix_indirect_syscall1_nr_last_fastcall:
 
     .section    .text.rustix_indirect_syscall1_noreturn_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_indirect_syscall1_noreturn_nr_last_fastcall
     .weak       rustix_indirect_syscall1_noreturn_nr_last_fastcall
     .hidden     rustix_indirect_syscall1_noreturn_nr_last_fastcall
     .type       rustix_indirect_syscall1_noreturn_nr_last_fastcall, @function
@@ -61,7 +58,6 @@ rustix_indirect_syscall1_noreturn_nr_last_fastcall:
 
     .section    .text.rustix_indirect_syscall2_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_indirect_syscall2_nr_last_fastcall
     .weak       rustix_indirect_syscall2_nr_last_fastcall
     .hidden     rustix_indirect_syscall2_nr_last_fastcall
     .type       rustix_indirect_syscall2_nr_last_fastcall, @function
@@ -81,7 +77,6 @@ rustix_indirect_syscall2_nr_last_fastcall:
 
     .section    .text.rustix_indirect_syscall3_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_indirect_syscall3_nr_last_fastcall
     .weak       rustix_indirect_syscall3_nr_last_fastcall
     .hidden     rustix_indirect_syscall3_nr_last_fastcall
     .type       rustix_indirect_syscall3_nr_last_fastcall, @function
@@ -101,7 +96,6 @@ rustix_indirect_syscall3_nr_last_fastcall:
 
     .section    .text.rustix_indirect_syscall4_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_indirect_syscall4_nr_last_fastcall
     .weak       rustix_indirect_syscall4_nr_last_fastcall
     .hidden     rustix_indirect_syscall4_nr_last_fastcall
     .type       rustix_indirect_syscall4_nr_last_fastcall, @function
@@ -127,7 +121,6 @@ rustix_indirect_syscall4_nr_last_fastcall:
 
     .section    .text.rustix_indirect_syscall5_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_indirect_syscall5_nr_last_fastcall
     .weak       rustix_indirect_syscall5_nr_last_fastcall
     .hidden     rustix_indirect_syscall5_nr_last_fastcall
     .type       rustix_indirect_syscall5_nr_last_fastcall, @function
@@ -159,7 +152,6 @@ rustix_indirect_syscall5_nr_last_fastcall:
 
     .section    .text.rustix_indirect_syscall6_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_indirect_syscall6_nr_last_fastcall
     .weak       rustix_indirect_syscall6_nr_last_fastcall
     .hidden     rustix_indirect_syscall6_nr_last_fastcall
     .type       rustix_indirect_syscall6_nr_last_fastcall, @function
@@ -197,7 +189,6 @@ rustix_indirect_syscall6_nr_last_fastcall:
 
     .section    .text.rustix_syscall0_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_syscall0_nr_last_fastcall
     .weak       rustix_syscall0_nr_last_fastcall
     .hidden     rustix_syscall0_nr_last_fastcall
     .type       rustix_syscall0_nr_last_fastcall, @function
@@ -211,7 +202,6 @@ rustix_syscall0_nr_last_fastcall:
 
     .section    .text.rustix_syscall1_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_syscall1_nr_last_fastcall
     .weak       rustix_syscall1_nr_last_fastcall
     .hidden     rustix_syscall1_nr_last_fastcall
     .type       rustix_syscall1_nr_last_fastcall, @function
@@ -231,7 +221,6 @@ rustix_syscall1_nr_last_fastcall:
 
     .section    .text.rustix_syscall1_noreturn_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_syscall1_noreturn_nr_last_fastcall
     .weak       rustix_syscall1_noreturn_nr_last_fastcall
     .hidden     rustix_syscall1_noreturn_nr_last_fastcall
     .type       rustix_syscall1_noreturn_nr_last_fastcall, @function
@@ -246,7 +235,6 @@ rustix_syscall1_noreturn_nr_last_fastcall:
 
     .section    .text.rustix_syscall2_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_syscall2_nr_last_fastcall
     .weak       rustix_syscall2_nr_last_fastcall
     .hidden     rustix_syscall2_nr_last_fastcall
     .type       rustix_syscall2_nr_last_fastcall, @function
@@ -266,7 +254,6 @@ rustix_syscall2_nr_last_fastcall:
 
     .section    .text.rustix_syscall3_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_syscall3_nr_last_fastcall
     .weak       rustix_syscall3_nr_last_fastcall
     .hidden     rustix_syscall3_nr_last_fastcall
     .type       rustix_syscall3_nr_last_fastcall, @function
@@ -286,7 +273,6 @@ rustix_syscall3_nr_last_fastcall:
 
     .section    .text.rustix_syscall4_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_syscall4_nr_last_fastcall
     .weak       rustix_syscall4_nr_last_fastcall
     .hidden     rustix_syscall4_nr_last_fastcall
     .type       rustix_syscall4_nr_last_fastcall, @function
@@ -312,7 +298,6 @@ rustix_syscall4_nr_last_fastcall:
 
     .section    .text.rustix_syscall5_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_syscall5_nr_last_fastcall
     .weak       rustix_syscall5_nr_last_fastcall
     .hidden     rustix_syscall5_nr_last_fastcall
     .type       rustix_syscall5_nr_last_fastcall, @function
@@ -344,7 +329,6 @@ rustix_syscall5_nr_last_fastcall:
 
     .section    .text.rustix_syscall6_nr_last_fastcall,"ax",@progbits
     .p2align    4
-    .globl      rustix_syscall6_nr_last_fastcall
     .weak       rustix_syscall6_nr_last_fastcall
     .hidden     rustix_syscall6_nr_last_fastcall
     .type       rustix_syscall6_nr_last_fastcall, @function
@@ -382,7 +366,6 @@ rustix_syscall6_nr_last_fastcall:
 
     .section    .text.rustix_int_0x80,"ax",@progbits
     .p2align    4
-    .globl      rustix_int_0x80
     .weak       rustix_int_0x80
     .hidden     rustix_int_0x80
     .type       rustix_int_0x80, @function
