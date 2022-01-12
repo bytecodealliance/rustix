@@ -302,7 +302,7 @@ jobs:
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
-        cargo test --verbose --features=all-impls,procfs --release --workspace -- --nocapture
+        cargo test --verbose --features=all-impls,procfs,cc --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: 1
 
