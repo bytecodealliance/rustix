@@ -87,7 +87,7 @@ impl<F> Weak<F> {
         }
     }
 
-    // Cold because it should only happen during first-time initalization.
+    // Cold because it should only happen during first-time initialization.
     #[cold]
     unsafe fn initialize(&self) -> Option<F> {
         let val = fetch(self.name);
