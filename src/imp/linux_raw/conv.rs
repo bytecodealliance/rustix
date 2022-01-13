@@ -9,7 +9,7 @@
 
 use super::c;
 use super::fd::{AsRawFd, BorrowedFd, FromRawFd};
-use super::fs::{Mode, OFlags};
+use super::fs::{FileType, Mode, OFlags};
 #[cfg(not(debug_assertions))]
 use super::io::error::decode_usize_infallible;
 #[cfg(target_pointer_width = "64")]
@@ -218,6 +218,14 @@ pub(super) fn socklen_t<'a, Num: ArgNumber>(i: socklen_t) -> ArgReg<'a, Num> {
 #[inline]
 pub(super) fn mode_as<'a, Num: ArgNumber>(mode: Mode) -> ArgReg<'a, Num> {
     raw_arg(mode.bits() as usize)
+}
+
+#[inline]
+pub(super) fn mode_and_type_as<'a, Num: ArgNumber>(
+    mode: Mode,
+    file_type: FileType,
+) -> ArgReg<'a, Num> {
+    raw_arg(mode.as_raw_mode() as usize | file_type.as_raw_mode() as usize)
 }
 
 #[cfg(target_pointer_width = "64")]

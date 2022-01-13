@@ -14,13 +14,13 @@ fn test_mknodat() {
     // Create a regular file. Not supported on FreeBSD or OpenBSD.
     #[cfg(not(any(target_os = "freebsd", target_os = "openbsd")))]
     {
-        mknodat(&dir, "foo", Mode::IFREG, 0).unwrap();
+        mknodat(&dir, "foo", FileType::RegularFile, Mode::empty(), 0).unwrap();
         let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
         assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::RegularFile);
         unlinkat(&dir, "foo", AtFlags::empty()).unwrap();
     }
 
-    mknodat(&dir, "foo", Mode::IFIFO, 0).unwrap();
+    mknodat(&dir, "foo", FileType::Fifo, Mode::empty(), 0).unwrap();
     let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
     assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::Fifo);
     unlinkat(&dir, "foo", AtFlags::empty()).unwrap();

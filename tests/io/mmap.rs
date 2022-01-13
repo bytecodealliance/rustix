@@ -15,7 +15,7 @@ fn test_mmap() {
         &dir,
         "foo",
         OFlags::CREATE | OFlags::WRONLY | OFlags::TRUNC,
-        Mode::IRUSR,
+        Mode::RUSR,
     )
     .unwrap();
     write(&file, &[b'a'; 8192]).unwrap();

@@ -18,9 +18,9 @@ use crate::process::{Gid, Uid};
 use crate::{imp, path};
 use alloc::vec::Vec;
 use imp::fd::{AsFd, BorrowedFd};
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi",)))]
-use imp::fs::Dev;
 use imp::fs::{Access, AtFlags, Mode, OFlags, Stat};
+#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
+use imp::fs::{Dev, FileType};
 
 /// `openat(dirfd, path, oflags, mode)`—Opens a file.
 ///
@@ -220,12 +220,17 @@ pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsFd>(
 
 /// `fstatat(dirfd, path, flags)`—Queries metadata for a file or directory.
 ///
+/// [`Mode::from_raw_mode`] and [`FileType::from_raw_mode`] may be used to
+/// interpret the `st_mode` field.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fstatat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fstatat.2.html
+/// [`Mode::from_raw_mode`]: crate::fs::Mode::from_raw_mode
+/// [`FileType::from_raw_mode`]: crate::fs::FileType::from_raw_mode
 #[inline]
 #[doc(alias = "fstatat")]
 pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags) -> io::Result<Stat> {
@@ -329,11 +334,12 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
 pub fn mknodat<P: path::Arg, Fd: AsFd>(
     dirfd: &Fd,
     path: P,
+    file_type: FileType,
     mode: Mode,
     dev: Dev,
 ) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
-    path.into_with_z_str(|path| imp::syscalls::mknodat(dirfd, path, mode, dev))
+    path.into_with_z_str(|path| imp::syscalls::mknodat(dirfd, path, file_type, mode, dev))
 }
 
 /// `fchownat(dirfd, path, owner, group, flags)`—Sets file or directory

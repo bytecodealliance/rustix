@@ -6,7 +6,7 @@ fn test_mkdirat() {
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
-    mkdirat(&dir, "foo", Mode::IRWXU).unwrap();
+    mkdirat(&dir, "foo", Mode::RWXU).unwrap();
     let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
     assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::Directory);
     unlinkat(&dir, "foo", AtFlags::REMOVEDIR).unwrap();
@@ -26,7 +26,7 @@ fn test_mkdirat_with_o_path() {
     )
     .unwrap();
 
-    mkdirat(&dir, "foo", Mode::IRWXU).unwrap();
+    mkdirat(&dir, "foo", Mode::RWXU).unwrap();
     let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
     assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::Directory);
     unlinkat(&dir, "foo", AtFlags::REMOVEDIR).unwrap();

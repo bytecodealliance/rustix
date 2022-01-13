@@ -54,13 +54,6 @@ use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek,
 )))]
 use super::Advice as FsAdvice;
 #[cfg(not(any(
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
-use super::Dev;
-#[cfg(not(any(
     target_os = "dragonfly",
     target_os = "netbsd",
     target_os = "openbsd",
@@ -75,6 +68,13 @@ use super::MemfdFlags;
 // not implemented in libc for netbsd yet
 use super::StatFs;
 use super::{Access, FdFlags, Mode, OFlags, Stat};
+#[cfg(not(any(
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "redox",
+    target_os = "wasi",
+)))]
+use super::{Dev, FileType};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::{RenameFlags, ResolveFlags};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
@@ -366,12 +366,18 @@ pub(crate) fn chownat(
     target_os = "redox",
     target_os = "wasi",
 )))]
-pub(crate) fn mknodat(dirfd: BorrowedFd<'_>, path: &ZStr, mode: Mode, dev: Dev) -> io::Result<()> {
+pub(crate) fn mknodat(
+    dirfd: BorrowedFd<'_>,
+    path: &ZStr,
+    file_type: FileType,
+    mode: Mode,
+    dev: Dev,
+) -> io::Result<()> {
     unsafe {
         ret(c::mknodat(
             borrowed_fd(dirfd),
             c_str(path),
-            mode.bits(),
+            mode.bits() | file_type.as_raw_mode(),
             dev,
         ))
     }

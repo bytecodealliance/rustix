@@ -45,7 +45,7 @@ fn test_openat2() {
         &dir,
         "test.txt",
         OFlags::WRONLY | OFlags::CREATE | OFlags::TRUNC,
-        Mode::IRUSR,
+        Mode::RUSR,
         ResolveFlags::empty(),
     )
     .unwrap();
@@ -172,7 +172,7 @@ fn test_openat2() {
         ResolveFlags::IN_ROOT,
     )
     .unwrap_err();
-    mkdirat(&dir, "proc", Mode::IRUSR | Mode::IXUSR).unwrap();
+    mkdirat(&dir, "proc", Mode::RUSR | Mode::XUSR).unwrap();
     let _ = openat2_more(
         &dir,
         "/proc",

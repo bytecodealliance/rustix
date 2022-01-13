@@ -11,7 +11,7 @@ fn test_readwrite_pv() {
         &dir,
         "foo",
         OFlags::RDWR | OFlags::CREATE | OFlags::TRUNC,
-        Mode::IRUSR | Mode::IWUSR,
+        Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
 
@@ -48,7 +48,7 @@ fn test_readwrite_p() {
         &dir,
         "foo",
         OFlags::RDWR | OFlags::CREATE | OFlags::TRUNC,
-        Mode::IRUSR | Mode::IWUSR,
+        Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
 
@@ -72,7 +72,7 @@ fn test_readwrite_v() {
         &dir,
         "foo",
         OFlags::RDWR | OFlags::CREATE | OFlags::TRUNC,
-        Mode::IRUSR | Mode::IWUSR,
+        Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
 
@@ -98,7 +98,7 @@ fn test_readwrite() {
         &dir,
         "foo",
         OFlags::RDWR | OFlags::CREATE | OFlags::TRUNC,
-        Mode::IRUSR | Mode::IWUSR,
+        Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
 
