@@ -281,11 +281,10 @@ pub(crate) fn recvmsg_v4(
     iovs: &mut [IoSliceMut<'_>],
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
-    let mut name = MaybeUninit::<c::sockaddr_in>::zeroed();
-    let namelen = size_of::<c::sockaddr_in>() as _;
-
+    let mut name = MaybeUninit::<c::sockaddr>::zeroed();
+    let mut namelen = size_of::<c::sockaddr>() as _;
     let mut flags = flags.bits() as _;
-    let mut namelen = namelen;
+
     unsafe {
         let bytes = ret_send_recv(c::recvmsg(
             borrowed_fd(fd),
@@ -330,11 +329,10 @@ pub(crate) fn recvmsg_v6(
     iovs: &mut [IoSliceMut<'_>],
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV6> {
-    let mut name = MaybeUninit::<c::sockaddr_in6>::zeroed();
-    let namelen = size_of::<c::sockaddr_in6>() as _;
-
+    let mut name = MaybeUninit::<c::sockaddr>::zeroed();
+    let mut namelen = size_of::<c::sockaddr>() as _;
     let mut flags = flags.bits() as _;
-    let mut namelen = namelen;
+
     unsafe {
         let bytes = ret_send_recv(c::recvmsg(
             borrowed_fd(fd),

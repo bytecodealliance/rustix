@@ -261,6 +261,24 @@ pub enum RecvAncillaryDataV4<'a> {
 }
 
 impl<'a> FromCmsghdr<'a> for SendAncillaryDataV4<'a> {
+    #[cfg(not(any(
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "android",
+        target_os = "ios",
+    )))]
+    fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
+        Err(AncillaryError::from_cmsg(&*cmsg))
+    }
+
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "android",
+        target_os = "ios",
+    ))]
     fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
         unsafe {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
@@ -272,13 +290,6 @@ impl<'a> FromCmsghdr<'a> for SendAncillaryDataV4<'a> {
                 cmsg.cmsg_level as c::IpConstantType,
                 cmsg.cmsg_type as c::IpConstantType,
             ) {
-                #[cfg(any(
-                    target_os = "linux",
-                    target_os = "macos",
-                    target_os = "netbsd",
-                    target_os = "android",
-                    target_os = "ios",
-                ))]
                 (c::IPPROTO_IP, c::IP_PKTINFO) => Ok(SendAncillaryDataV4::PacketInfos(
                     Ipv4PacketInfos(AncillaryDataIter::new(data)),
                 )),
@@ -463,6 +474,26 @@ pub enum RecvAncillaryDataV6<'a> {
 }
 
 impl<'a> FromCmsghdr<'a> for RecvAncillaryDataV6<'a> {
+    #[cfg(not(any(
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "android",
+        target_os = "ios",
+        target_os = "fuchsia",
+    )))]
+    fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
+        Err(AncillaryError::from_cmsg(&*cmsg))
+    }
+
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "android",
+        target_os = "ios",
+        target_os = "fuchsia",
+    ))]
     fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
         unsafe {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
