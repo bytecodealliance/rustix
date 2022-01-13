@@ -123,6 +123,8 @@ fn test_unix_msg() {
     server.join().unwrap();
 }
 
+// Ported from https://github.com/nix-rust/nix/blob/master/test/sys/test_socket.rs
+// Original License: MIT
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn test_scm_credentials_and_rights() {

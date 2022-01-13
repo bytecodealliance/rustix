@@ -104,7 +104,7 @@ impl<'a> FromCmsghdr<'a> for SendAncillaryDataUnix<'a> {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
             let data_len = cmsg.cmsg_len as usize - cmsg_len_zero;
             let data = c::CMSG_DATA(cmsg).cast();
-            let data = slice::from_raw_parts(data, data_len);
+            let data: &[u8] = slice::from_raw_parts(data, data_len);
 
             match (
                 cmsg.cmsg_level as c::IpConstantType,
@@ -129,7 +129,7 @@ impl<'a> FromCmsghdr<'a> for RecvAncillaryDataUnix<'a> {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
             let data_len = cmsg.cmsg_len as usize - cmsg_len_zero;
             let data = c::CMSG_DATA(cmsg).cast();
-            let data = slice::from_raw_parts(data, data_len);
+            let data: &[u8] = slice::from_raw_parts(data, data_len);
 
             match (
                 cmsg.cmsg_level as c::IpConstantType,
@@ -266,7 +266,7 @@ impl<'a> FromCmsghdr<'a> for SendAncillaryDataV4<'a> {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
             let data_len = cmsg.cmsg_len as usize - cmsg_len_zero;
             let data = c::CMSG_DATA(cmsg).cast();
-            let data = slice::from_raw_parts(data, data_len);
+            let data: &[u8] = slice::from_raw_parts(data, data_len);
 
             match (
                 cmsg.cmsg_level as c::IpConstantType,
@@ -298,7 +298,7 @@ impl<'a> FromCmsghdr<'a> for RecvAncillaryDataV4<'a> {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
             let data_len = cmsg.cmsg_len as usize - cmsg_len_zero;
             let data = c::CMSG_DATA(cmsg).cast();
-            let data = slice::from_raw_parts(data, data_len);
+            let data: &[u8] = slice::from_raw_parts(data, data_len);
 
             match (
                 cmsg.cmsg_level as c::IpConstantType,
@@ -410,7 +410,7 @@ impl<'a> FromCmsghdr<'a> for SendAncillaryDataV6<'a> {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
             let data_len = cmsg.cmsg_len as usize - cmsg_len_zero;
             let data = c::CMSG_DATA(cmsg).cast();
-            let data = slice::from_raw_parts(data, data_len);
+            let data: &[u8] = slice::from_raw_parts(data, data_len);
 
             match (
                 cmsg.cmsg_level as c::IpConstantType,
@@ -468,9 +468,12 @@ impl<'a> FromCmsghdr<'a> for RecvAncillaryDataV6<'a> {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
             let data_len = cmsg.cmsg_len as usize - cmsg_len_zero;
             let data = c::CMSG_DATA(cmsg).cast();
-            let data = slice::from_raw_parts(data, data_len);
+            let data: &[u8] = slice::from_raw_parts(data, data_len);
 
-            match (cmsg.cmsg_level as _, cmsg.cmsg_type as _) {
+            match (
+                cmsg.cmsg_level as c::IpConstantType,
+                cmsg.cmsg_type as c::IpConstantType,
+            ) {
                 #[cfg(any(
                     target_os = "linux",
                     target_os = "macos",

@@ -119,6 +119,9 @@ fn test_v6_msg_udp() {
     rustix::net::wsa_cleanup().unwrap();
 }
 
+// Ported from https://github.com/nix-rust/nix/blob/master/test/sys/test_socket.rs
+// Original License: MIT
+//
 // Verify `Ipv6PacketInfo` for `sendmsg`.
 // This creates a (udp) socket bound to localhost, then sends a message to
 // itself but uses Ipv6PacketInfo to force the source address to be
