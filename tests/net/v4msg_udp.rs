@@ -162,3 +162,106 @@ pub fn test_v4_msg_ipv4packetinfo() {
     )
     .expect("sendmsg");
 }
+
+// #[cfg(any(
+//     target_os = "android",
+//     target_os = "ios",
+//     target_os = "linux",
+//     target_os = "macos",
+//     target_os = "netbsd",
+// ))]
+// #[test]
+// pub fn test_recv_ipv4pktinfo() {
+//     let lo_ifaddr = loopback_address(AddressFamily::INET);
+//     let (lo_name, lo) = match lo_ifaddr {
+//         Some(ifaddr) => (
+//             ifaddr.interface_name,
+//             ifaddr.address.expect("Expect IPv4 address on interface"),
+//         ),
+//         None => return,
+//     };
+//     let receive = socket(AddressFamily::INET, SocketType::DGRAM, Protocol::default())
+//         .expect("receive socket failed");
+//     bind_v4(receive, &lo).expect("bind failed");
+//     let sa = getsockname(receive).expect("getsockname failed");
+//     setsockopt(receive, Ipv4PacketInfo, &true).expect("setsockopt failed");
+
+//     {
+//         let slice = [1u8, 2, 3, 4, 5, 6, 7, 8];
+//         let iov = [IoVec::from_slice(&slice)];
+
+//         let send = socket(
+//             AddressFamily::Inet,
+//             SockType::Datagram,
+//             SockFlag::empty(),
+//             None,
+//         )
+//         .expect("send socket failed");
+//         sendmsg(send, &iov, &[], MsgFlags::empty(), Some(&sa)).expect("sendmsg failed");
+//     }
+
+//     {
+//         let mut buf = [0u8; 8];
+//         let iovec = [IoVec::from_mut_slice(&mut buf)];
+//         let mut space = cmsg_space!(libc::in_pktinfo);
+//         let msg =
+//             recvmsg(receive, &iovec, Some(&mut space), MsgFlags::empty()).expect("recvmsg failed");
+//         assert!(!msg
+//             .flags
+//             .intersects(MsgFlags::MSG_TRUNC | MsgFlags::MSG_CTRUNC));
+
+//         let mut cmsgs = msg.cmsgs();
+//         if let Some(ControlMessageOwned::Ipv4PacketInfo(pktinfo)) = cmsgs.next() {
+//             let i = if_nametoindex(lo_name.as_bytes()).expect("if_nametoindex");
+//             assert_eq!(
+//                 pktinfo.ipi_ifindex as libc::c_uint, i,
+//                 "unexpected ifindex (expected {}, got {})",
+//                 i, pktinfo.ipi_ifindex
+//             );
+//         }
+//         assert!(cmsgs.next().is_none(), "unexpected additional control msg");
+//         assert_eq!(msg.bytes, 8);
+//         assert_eq!(iovec[0].as_slice(), [1u8, 2, 3, 4, 5, 6, 7, 8]);
+//     }
+// }
+
+// #[cfg(any(
+//     target_os = "android",
+//     target_os = "freebsd",
+//     target_os = "ios",
+//     target_os = "linux",
+//     target_os = "macos",
+//     target_os = "netbsd",
+//     target_os = "openbsd",
+// ))]
+// fn loopback_address(family: AddressFamily) -> Option<nix::ifaddrs::InterfaceAddress> {
+//     use std::io;
+//     use std::io::Write;
+
+//     let addrs = match getifaddrs() {
+//         Ok(iter) => iter,
+//         Err(e) => {
+//             let stdioerr = io::stderr();
+//             let mut handle = stdioerr.lock();
+//             writeln!(handle, "getifaddrs: {:?}", e).unwrap();
+//             return None;
+//         }
+//     };
+//     // return first address matching family
+//     for ifaddr in addrs {
+//         if ifaddr.flags.contains(InterfaceFlags::IFF_LOOPBACK) {
+//             match ifaddr.address {
+//                 Some(SockAddr::Inet(InetAddr::V4(..))) => match family {
+//                     AddressFamily::Inet => return Some(ifaddr),
+//                     _ => continue,
+//                 },
+//                 Some(SockAddr::Inet(InetAddr::V6(..))) => match family {
+//                     AddressFamily::Inet6 => return Some(ifaddr),
+//                     _ => continue,
+//                 },
+//                 _ => continue,
+//             }
+//         }
+//     }
+//     None
+// }

@@ -43,12 +43,12 @@ use super::{
 };
 use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
 use crate::net::{
-    encode_msghdr_unix_recv, encode_msghdr_unix_send, encode_msghdr_v4_recv, encode_msghdr_v4_send,
-    encode_msghdr_v6_recv, encode_msghdr_v6_send, encode_socketaddr_unix_opt,
-    encode_socketaddr_v4_opt, encode_socketaddr_v6_opt, RecvMsgUnix, RecvMsgV4, RecvMsgV6,
-    RecvSocketAncillaryUnix, RecvSocketAncillaryV4, RecvSocketAncillaryV6, SendSocketAncillaryUnix,
-    SendSocketAncillaryV4, SendSocketAncillaryV6, SocketAddrAny, SocketAddrUnix, SocketAddrV4,
-    SocketAddrV6,
+    encode_msghdr_any_recv, encode_msghdr_unix_recv, encode_msghdr_unix_send,
+    encode_msghdr_v4_recv, encode_msghdr_v4_send, encode_msghdr_v6_recv, encode_msghdr_v6_send,
+    encode_socketaddr_unix_opt, encode_socketaddr_v4_opt, encode_socketaddr_v6_opt, RecvMsgAny,
+    RecvMsgUnix, RecvMsgV4, RecvMsgV6, RecvSocketAncillaryAny, RecvSocketAncillaryUnix,
+    RecvSocketAncillaryV4, RecvSocketAncillaryV6, SendSocketAncillaryUnix, SendSocketAncillaryV4,
+    SendSocketAncillaryV6, SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6,
 };
 use crate::{as_mut_ptr, as_ptr};
 use core::convert::TryInto;
@@ -717,6 +717,42 @@ pub(crate) fn recvfrom(
             read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
         ))
     }
+}
+
+#[inline]
+pub(crate) fn recvmsg(
+    fd: BorrowedFd<'_>,
+    iovs: &mut [IoSliceMut<'_>],
+    mut ancillary: Option<&mut RecvSocketAncillaryAny<'_>>,
+    flags: RecvFlags,
+) -> io::Result<RecvMsgAny> {
+    let mut msg = msghdr_default();
+    let mut name = MaybeUninit::<c::sockaddr>::zeroed();
+    encode_msghdr_any_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
+
+    #[cfg(not(target_arch = "x86",))]
+    let bytes = unsafe {
+        ret_usize(syscall3_readonly(
+            nr(__NR_recvmsg),
+            borrowed_fd(fd),
+            by_mut(&mut msg),
+            c_uint(flags.bits()),
+        ))?
+    };
+    #[cfg(target_arch = "x86")]
+    let bytes = unsafe {
+        ret_usize(syscall2_readonly(
+            nr(__NR_socketcall),
+            x86_sys(SYS_RECVMSG),
+            slice_just_addr::<ArgReg<SocketArg>, _>(&[
+                borrowed_fd(fd),
+                by_mut(&mut msg),
+                c_uint(flags.bits()),
+            ]),
+        ))?
+    };
+
+    Ok(unsafe { RecvMsgAny::new(bytes, msg, ancillary) })
 }
 
 #[inline]

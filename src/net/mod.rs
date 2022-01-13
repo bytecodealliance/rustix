@@ -19,13 +19,13 @@ mod wsa;
 pub mod sockopt;
 
 pub use send_recv::{
-    recv, recvfrom, recvmsg_v4, recvmsg_v6, send, sendmsg_v4, sendmsg_v6, sendto_v4, sendto_v6,
-    RecvFlags, RecvMsgV4, RecvMsgV6, SendFlags,
+    recv, recvfrom, recvmsg, recvmsg_v4, recvmsg_v6, send, sendmsg_v4, sendmsg_v6, sendto_v4,
+    sendto_v6, RecvFlags, RecvMsgAny, RecvMsgV4, RecvMsgV6, SendFlags,
 };
 #[cfg(not(windows))]
 pub use send_recv::{
     recvmsg_unix, recvmsg_unix_with_ancillary, recvmsg_v4_with_ancillary,
-    recvmsg_v6_with_ancillary, sendmsg_unix, sendmsg_unix_with_ancillary,
+    recvmsg_v6_with_ancillary, recvmsg_with_ancillary, sendmsg_unix, sendmsg_unix_with_ancillary,
     sendmsg_v4_with_ancillary, sendmsg_v6_with_ancillary, sendto_unix, RecvMsgUnix,
 };
 pub use socket::{
@@ -55,11 +55,11 @@ pub use ip::{IpAddr, Ipv4Addr, Ipv6Addr, Ipv6MulticastScope};
 #[cfg(feature = "std")]
 pub use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
 
+pub(crate) use send_recv::{
+    encode_msghdr_any_recv, encode_msghdr_v4_recv, encode_msghdr_v4_send, encode_msghdr_v6_recv,
+    encode_msghdr_v6_send, encode_socketaddr_v4_opt, encode_socketaddr_v6_opt,
+};
 #[cfg(not(windows))]
 pub(crate) use send_recv::{
     encode_msghdr_unix_recv, encode_msghdr_unix_send, encode_socketaddr_unix_opt,
-};
-pub(crate) use send_recv::{
-    encode_msghdr_v4_recv, encode_msghdr_v4_send, encode_msghdr_v6_recv, encode_msghdr_v6_send,
-    encode_socketaddr_v4_opt, encode_socketaddr_v6_opt,
 };

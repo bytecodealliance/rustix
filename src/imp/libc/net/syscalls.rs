@@ -13,16 +13,16 @@ use super::{msghdr_default, SocketAddrUnix};
 use crate::as_mut_ptr;
 use crate::as_ptr;
 use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
+use crate::net::{
+    encode_msghdr_any_recv, encode_msghdr_v4_recv, encode_msghdr_v4_send, encode_msghdr_v6_recv,
+    encode_msghdr_v6_send, encode_socketaddr_v4_opt, encode_socketaddr_v6_opt, RecvMsgAny,
+    RecvMsgV4, RecvMsgV6, RecvSocketAncillaryV4, RecvSocketAncillaryV6, SendSocketAncillaryV4,
+    SendSocketAncillaryV6, SocketAddrAny, SocketAddrV4, SocketAddrV6,
+};
 #[cfg(not(windows))]
 use crate::net::{
     encode_msghdr_unix_recv, encode_msghdr_unix_send, encode_socketaddr_unix_opt, RecvMsgUnix,
-    RecvSocketAncillaryUnix, SendSocketAncillaryUnix,
-};
-use crate::net::{
-    encode_msghdr_v4_recv, encode_msghdr_v4_send, encode_msghdr_v6_recv, encode_msghdr_v6_send,
-    encode_socketaddr_v4_opt, encode_socketaddr_v6_opt, RecvMsgV4, RecvMsgV6,
-    RecvSocketAncillaryV4, RecvSocketAncillaryV6, SendSocketAncillaryV4, SendSocketAncillaryV6,
-    SocketAddrAny, SocketAddrV4, SocketAddrV6,
+    RecvSocketAncillaryAny, RecvSocketAncillaryUnix, SendSocketAncillaryUnix,
 };
 use core::convert::TryInto;
 use core::mem::{size_of, MaybeUninit};
@@ -196,6 +196,50 @@ pub(crate) fn sendmsg_unix(
     };
 
     Ok(nwritten as usize)
+}
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+pub(crate) fn recvmsg(
+    fd: BorrowedFd<'_>,
+    iovs: &mut [IoSliceMut<'_>],
+    mut ancillary: Option<&mut RecvSocketAncillaryAny<'_>>,
+    flags: RecvFlags,
+) -> io::Result<RecvMsgAny> {
+    let mut msg = msghdr_default();
+    let mut name = MaybeUninit::<c::sockaddr>::zeroed();
+
+    encode_msghdr_any_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
+
+    unsafe {
+        let bytes = ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))?;
+
+        Ok(RecvMsgAny::new(bytes as usize, msg, ancillary))
+    }
+}
+
+#[cfg(windows)]
+pub(crate) fn recvmsg(
+    fd: BorrowedFd<'_>,
+    iovs: &mut [IoSliceMut<'_>],
+    flags: RecvFlags,
+) -> io::Result<RecvMsgAny> {
+    let mut name = MaybeUninit::<c::sockaddr>::zeroed();
+    let namelen = size_of::<c::sockaddr>() as _;
+
+    let mut flags = flags.bits() as _;
+    let mut namelen = namelen;
+    unsafe {
+        let bytes = ret_send_recv(c::recvmsg(
+            borrowed_fd(fd),
+            iovs.as_ptr() as *mut _,
+            iovs.len() as _,
+            &mut name as *mut _ as *mut _,
+            &mut namelen,
+            &mut flags,
+        ))?;
+
+        Ok(RecMsgAny::new(bytes as usize, msg))
+    }
 }
 
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]

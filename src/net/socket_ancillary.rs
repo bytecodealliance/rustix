@@ -88,6 +88,7 @@ mod private {
     impl<'a> SealFromCmsghdr for RecvAncillaryDataV4<'a> {}
     impl<'a> SealFromCmsghdr for RecvAncillaryDataV6<'a> {}
     impl<'a> SealFromCmsghdr for RecvAncillaryDataUnix<'a> {}
+    impl<'a> SealFromCmsghdr for RecvAncillaryDataAny<'a> {}
 }
 
 impl<'a> FromCmsghdr<'a> for SendAncillaryDataUnix<'a> {
@@ -175,6 +176,31 @@ pub enum SendAncillaryDataV4<'a> {
     /// TODO: document
     #[cfg(target_os = "linux")]
     UdpGsoSegments(UdpGsoSegments<'a>),
+}
+
+/// TODO: document
+pub enum RecvAncillaryDataAny<'a> {
+    /// TODO: document
+    V4(RecvAncillaryDataV4<'a>),
+    /// TODO: document
+    V6(RecvAncillaryDataV6<'a>),
+    /// TODO: document
+    Unix(RecvAncillaryDataUnix<'a>),
+}
+
+impl<'a> FromCmsghdr<'a> for RecvAncillaryDataAny<'a> {
+    fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
+        if let Ok(v4) = <RecvAncillaryDataV4 as FromCmsghdr>::try_from(cmsg) {
+            return Ok(RecvAncillaryDataAny::V4(v4));
+        }
+        if let Ok(v6) = <RecvAncillaryDataV6 as FromCmsghdr>::try_from(cmsg) {
+            return Ok(RecvAncillaryDataAny::V6(v6));
+        }
+        if let Ok(unix) = <RecvAncillaryDataUnix as FromCmsghdr>::try_from(cmsg) {
+            return Ok(RecvAncillaryDataAny::Unix(unix));
+        }
+        Err(AncillaryError::from_cmsg(&*cmsg))
+    }
 }
 
 /// TODO: document
@@ -835,6 +861,9 @@ impl<'a> SocketAncillary<'a, SendAncillaryDataUnix<'a>> {
         }
     }
 }
+
+/// TODO: document
+pub type RecvSocketAncillaryAny<'a> = SocketAncillary<'a, RecvAncillaryDataAny<'a>>;
 
 /// TODO: document
 pub type RecvSocketAncillaryUnix<'a> = SocketAncillary<'a, RecvAncillaryDataUnix<'a>>;
