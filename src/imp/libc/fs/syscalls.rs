@@ -44,7 +44,6 @@ use super::super::offset::libc_posix_fadvise;
 )))]
 use super::super::offset::libc_posix_fallocate;
 use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek, libc_off_t};
-use super::super::time::Timespec;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "ios",
@@ -80,9 +79,11 @@ use super::{Access, FdFlags, Mode, OFlags, Stat};
 use super::{RenameFlags, ResolveFlags};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::{Statx, StatxFlags};
+use crate::as_ptr;
 use crate::ffi::ZStr;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use crate::ffi::ZString;
+use crate::fs::Timestamps;
 use crate::io::{self, OwnedFd, SeekFrom};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
@@ -279,14 +280,17 @@ pub(crate) fn accessat(
 pub(crate) fn utimensat(
     dirfd: BorrowedFd<'_>,
     path: &ZStr,
-    times: &[Timespec; 2],
+    times: &Timestamps,
     flags: AtFlags,
 ) -> io::Result<()> {
     unsafe {
+        // Assert that `Timestamps` has the expected layout.
+        let _ = core::mem::transmute::<Timestamps, [c::timespec; 2]>(times.clone());
+
         ret(c::utimensat(
             borrowed_fd(dirfd),
             c_str(path),
-            times.as_ptr(),
+            as_ptr(times).cast(),
             flags.bits(),
         ))
     }
@@ -575,8 +579,13 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
     }
 }
 
-pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &[Timespec; 2]) -> io::Result<()> {
-    unsafe { ret(c::futimens(borrowed_fd(fd), times.as_ptr())) }
+pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()> {
+    unsafe {
+        // Assert that `Timestamps` has the expected layout.
+        let _ = core::mem::transmute::<Timestamps, [c::timespec; 2]>(times.clone());
+
+        ret(c::futimens(borrowed_fd(fd), as_ptr(times).cast()))
+    }
 }
 
 #[cfg(not(any(
