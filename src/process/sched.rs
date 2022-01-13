@@ -21,7 +21,7 @@ impl CpuSet {
 
     /// Create a new and empty CpuSet.
     #[inline]
-    pub fn new() -> CpuSet {
+    pub const fn new() -> CpuSet {
         CpuSet {
             cpu_set: imp::process::raw_cpu_set_new(),
         }

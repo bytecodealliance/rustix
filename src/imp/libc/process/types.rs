@@ -174,7 +174,7 @@ pub(crate) type RawCpuSet = c::cpu_set_t;
     target_os = "dragonfly"
 ))]
 #[inline]
-pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
+pub(crate) const fn raw_cpu_set_new() -> RawCpuSet {
     let mut set = unsafe { core::mem::zeroed() };
     super::cpu_set::CPU_ZERO(&mut set);
     set

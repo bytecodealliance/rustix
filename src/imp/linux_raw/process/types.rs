@@ -104,7 +104,7 @@ pub(crate) struct RawCpuSet {
 }
 
 #[inline]
-pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
+pub(crate) const fn raw_cpu_set_new() -> RawCpuSet {
     #[cfg(all(target_pointer_width = "32", not(target_arch = "x86_64")))]
     {
         RawCpuSet { bits: [0; 32] }
