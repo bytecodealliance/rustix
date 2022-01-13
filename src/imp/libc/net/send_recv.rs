@@ -1,4 +1,5 @@
 use bitflags::bitflags;
+#[cfg(not(windows))]
 use core::ptr;
 
 use super::super::c;

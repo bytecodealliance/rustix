@@ -50,6 +50,9 @@ pub(crate) mod c;
 pub(crate) mod c {
     pub use libc::*;
 
+    /// The type of constants like `IPPROTO_IP`.
+    pub type IpConstantType = c_int;
+
     // Reimplement these as const functions, until `libc` constifies them.
     #[allow(non_snake_case, missing_docs)]
     #[cfg(not(any(target_os = "redox", target_os = "wasi")))]

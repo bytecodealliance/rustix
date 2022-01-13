@@ -18,6 +18,9 @@ pub(crate) use linux_raw_sys::ctypes::*;
 
 use core::{mem, ptr};
 
+/// The type of constants like `IPPROTO_IP`.
+pub type IpConstantType = u32;
+
 /// Given a length, returns it including the required alignment.
 ///
 /// https://man7.org/linux/man-pages/man3/cmsg_align.3.html
@@ -110,19 +113,19 @@ pub unsafe fn SO_EE_OFFENDER(ee: *const sock_extended_err) -> *mut sockaddr {
 }
 
 // avoid enum bindgen type
-pub const IPPROTO_IP: u32 = linux_raw_sys::general::IPPROTO_IP as u32;
-pub const IPPROTO_IPV6: u32 = linux_raw_sys::general::IPPROTO_IPV6 as u32;
+pub const IPPROTO_IP: IpConstantType = linux_raw_sys::general::IPPROTO_IP as IpConstantType;
+pub const IPPROTO_IPV6: IpConstantType = linux_raw_sys::general::IPPROTO_IPV6 as IpConstantType;
 
 // TODO: move these constants to linux-raw-sys
 
 #[cfg(target_os = "linux")]
-pub const SOL_UDP: u32 = 17;
+pub const SOL_UDP: IpConstantType = 17;
 // Only available on kernel >= 5.0
 #[cfg(target_os = "linux")]
-pub const UDP_GRO: u32 = 104;
+pub const UDP_GRO: IpConstantType = 104;
 // only available on kernel >= 4.18
 #[cfg(target_os = "linux")]
-pub const UDP_SEGMENT: u32 = 103;
+pub const UDP_SEGMENT: IpConstantType = 103;
 #[cfg(any(
     target_os = "freebsd",
     target_os = "ios",
@@ -130,9 +133,9 @@ pub const UDP_SEGMENT: u32 = 103;
     target_os = "netbsd",
     target_os = "openbsd",
 ))]
-pub const IP_RECVDSTADDR: u32 = 7;
+pub const IP_RECVDSTADDR: IpConstantType = 7;
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
-pub const SO_RXQ_OVFL: u32 = 40;
+pub const SO_RXQ_OVFL: IpConstantType = 40;
 #[cfg(any(
     target_os = "freebsd",
     target_os = "ios",
@@ -140,4 +143,4 @@ pub const SO_RXQ_OVFL: u32 = 40;
     target_os = "netbsd",
     target_os = "openbsd",
 ))]
-pub const IP_RECVIF: u32 = 20;
+pub const IP_RECVIF: IpConstantType = 20;

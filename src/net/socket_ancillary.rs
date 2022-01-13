@@ -106,7 +106,10 @@ impl<'a> FromCmsghdr<'a> for SendAncillaryDataUnix<'a> {
             let data = c::CMSG_DATA(cmsg).cast();
             let data = slice::from_raw_parts(data, data_len);
 
-            match (cmsg.cmsg_level as _, cmsg.cmsg_type as _) {
+            match (
+                cmsg.cmsg_level as c::IpConstantType,
+                cmsg.cmsg_type as c::IpConstantType,
+            ) {
                 (c::SOL_SOCKET, c::SCM_RIGHTS) => Ok(SendAncillaryDataUnix::ScmRights(ScmRights(
                     AncillaryDataIter::new(data),
                 ))),
@@ -128,7 +131,10 @@ impl<'a> FromCmsghdr<'a> for RecvAncillaryDataUnix<'a> {
             let data = c::CMSG_DATA(cmsg).cast();
             let data = slice::from_raw_parts(data, data_len);
 
-            match (cmsg.cmsg_level as _, cmsg.cmsg_type as _) {
+            match (
+                cmsg.cmsg_level as c::IpConstantType,
+                cmsg.cmsg_type as c::IpConstantType,
+            ) {
                 (c::SOL_SOCKET, c::SCM_RIGHTS) => Ok(RecvAncillaryDataUnix::ScmRights(ScmRights(
                     AncillaryDataIter::new(data),
                 ))),
@@ -262,7 +268,10 @@ impl<'a> FromCmsghdr<'a> for SendAncillaryDataV4<'a> {
             let data = c::CMSG_DATA(cmsg).cast();
             let data = slice::from_raw_parts(data, data_len);
 
-            match (cmsg.cmsg_level as _, cmsg.cmsg_type as _) {
+            match (
+                cmsg.cmsg_level as c::IpConstantType,
+                cmsg.cmsg_type as c::IpConstantType,
+            ) {
                 #[cfg(any(
                     target_os = "linux",
                     target_os = "macos",
@@ -291,7 +300,10 @@ impl<'a> FromCmsghdr<'a> for RecvAncillaryDataV4<'a> {
             let data = c::CMSG_DATA(cmsg).cast();
             let data = slice::from_raw_parts(data, data_len);
 
-            match (cmsg.cmsg_level as _, cmsg.cmsg_type as _) {
+            match (
+                cmsg.cmsg_level as c::IpConstantType,
+                cmsg.cmsg_type as c::IpConstantType,
+            ) {
                 #[cfg(any(
                     target_os = "linux",
                     target_os = "macos",
@@ -400,7 +412,10 @@ impl<'a> FromCmsghdr<'a> for SendAncillaryDataV6<'a> {
             let data = c::CMSG_DATA(cmsg).cast();
             let data = slice::from_raw_parts(data, data_len);
 
-            match (cmsg.cmsg_level as _, cmsg.cmsg_type as _) {
+            match (
+                cmsg.cmsg_level as c::IpConstantType,
+                cmsg.cmsg_type as c::IpConstantType,
+            ) {
                 #[cfg(any(
                     target_os = "linux",
                     target_os = "macos",

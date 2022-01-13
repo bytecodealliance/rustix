@@ -112,9 +112,9 @@ pub(crate) fn sendmsg_v4(
     addr: Option<&SocketAddrV4>,
     flags: SendFlags,
 ) -> io::Result<usize> {
-    let (mut msg_name, msg_namelen) = encode_socketaddr_v4_opt(addr);
-
     let nwritten = unsafe {
+        let (mut msg_name, msg_namelen) = encode_socketaddr_v4_opt(addr);
+
         ret_send_recv(c::sendmsg(
             borrowed_fd(fd),
             iovs as *const _ as *mut _,
@@ -163,9 +163,9 @@ pub(crate) fn sendmsg_v6(
     addr: Option<&SocketAddrV6>,
     flags: SendFlags,
 ) -> io::Result<usize> {
-    let (mut msg_name, msg_namelen) = encode_socketaddr_v6_opt(addr);
-
     let nwritten = unsafe {
+        let (mut msg_name, msg_namelen) = encode_socketaddr_v6_opt(addr);
+
         ret_send_recv(c::sendmsg(
             borrowed_fd(fd),
             iovs as *const _ as *mut _,
