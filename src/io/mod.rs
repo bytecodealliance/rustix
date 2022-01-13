@@ -53,14 +53,14 @@ pub use imp::io::epoll;
 pub use ioctl::ioctl_fioclex;
 pub use ioctl::ioctl_fionbio;
 #[cfg(not(any(windows, target_os = "redox")))]
-pub use ioctl::{ioctl_blkpbszget, ioctl_blksszget, ioctl_fionread};
+pub use ioctl::ioctl_fionread;
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use ioctl::{ioctl_tcgets, ioctl_tiocgwinsz};
 #[cfg(any(
     linux_raw,
     all(libc, not(any(windows, target_os = "redox", target_os = "wasi")))
 ))]
-pub use ioctl::{ioctl_tiocexcl, ioctl_tiocnxcl};
+pub use ioctl::{ioctl_tiocexcl, ioctl_tiocnxcl, ioctl_blkpbszget, ioctl_blksszget};
 #[cfg(not(any(windows, target_os = "redox")))]
 pub use is_read_write::is_read_write;
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
