@@ -102,3 +102,11 @@ pub fn ioctl_fionread<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
     let fd = fd.as_fd();
     imp::syscalls::ioctl_fionread(fd)
 }
+
+/// `ioctl(fd, BLKPBSZGET)`—Returns the physical block size of a block device.
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub fn ioctl_blkpbszget<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
+    let fd = fd.as_fd();
+    imp::syscalls::ioctl_blkpbszget(fd)
+}

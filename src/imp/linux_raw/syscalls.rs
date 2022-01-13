@@ -80,7 +80,7 @@ use linux_raw_sys::general::{
     __NR_readv, __NR_sched_getaffinity, __NR_sched_setaffinity, __NR_sched_yield,
     __NR_set_tid_address, __NR_setpriority, __NR_uname, __NR_wait4, __NR_write, __NR_writev,
     __kernel_gid_t, __kernel_pid_t, __kernel_timespec, __kernel_uid_t, epoll_event, EPOLL_CTL_ADD,
-    EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, PR_SET_NAME, SIGCHLD, TCGETS, TIMER_ABSTIME,
+    EPOLL_CTL_DEL, EPOLL_CTL_MOD, FIONBIO, FIONREAD, BLKPBSZGET, PR_SET_NAME, SIGCHLD, TCGETS, TIMER_ABSTIME,
     TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
 };
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
@@ -956,6 +956,21 @@ pub(crate) fn chdir(filename: &ZStr) -> io::Result<()> {
 #[inline]
 pub(crate) fn fchdir(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(syscall1_readonly(nr(__NR_fchdir), borrowed_fd(fd))) }
+}
+
+#[cfg(target_os = "linux")]
+#[inline]
+pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
+    let mut result = MaybeUninit::<c::c_uint>::uninit();
+    unsafe {
+        ret(syscall3(
+            nr(__NR_ioctl),
+            borrowed_fd(fd),
+            c_uint(BLKPBSZGET),
+            out(&mut result)
+        ))
+        .map(|()| result.assume_init() as u32)
+    }
 }
 
 #[inline]

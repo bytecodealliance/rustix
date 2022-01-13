@@ -53,7 +53,7 @@ pub use imp::io::epoll;
 pub use ioctl::ioctl_fioclex;
 pub use ioctl::ioctl_fionbio;
 #[cfg(not(any(windows, target_os = "redox")))]
-pub use ioctl::ioctl_fionread;
+pub use ioctl::{ioctl_fionread, ioctl_blkpbszget};
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use ioctl::{ioctl_tcgets, ioctl_tiocgwinsz};
 #[cfg(any(

@@ -326,6 +326,20 @@ pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> 
     unsafe { syscall_ret_owned_fd(c::syscall(c::SYS_eventfd2, initval, flags.bits())) }
 }
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
+    let mut result = MaybeUninit::<c::c_uint>::uninit();
+    unsafe {
+        ret(libc::ioctl(
+            borrowed_fd(fd),
+            libc::BLKPBSZGET,
+            result.as_mut_ptr(),
+        ))?;
+        Ok(result.assume_init() as u32)
+    }
+}
+
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
     let mut nread = MaybeUninit::<c::c_int>::uninit();
