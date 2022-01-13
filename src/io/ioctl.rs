@@ -104,7 +104,7 @@ pub fn ioctl_fionread<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
 }
 
 /// `ioctl(fd, BLKPBSZGET)`—Returns the logical block size of a block device.
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(target_os = "linux")]
 #[inline]
 pub fn ioctl_blksszget<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
     let fd = fd.as_fd();
@@ -112,7 +112,7 @@ pub fn ioctl_blksszget<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
 }
 
 /// `ioctl(fd, BLKPBSZGET)`—Returns the physical block size of a block device.
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(target_os = "linux")]
 #[inline]
 pub fn ioctl_blkpbszget<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
     let fd = fd.as_fd();
