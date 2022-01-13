@@ -1,3 +1,5 @@
+# Assembly code for making riscv64 syscalls.
+#
 # riscv64 syscall argument register ordering is the same as the riscv64
 # userspace argument register ordering except that the syscall number
 # (nr) is passed in a7.

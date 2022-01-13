@@ -1,5 +1,10 @@
 //! A wrapper around `io_lifetimes::OwnedFd`.
 //!
+//! rustix needs to wrap `OwnedFd` so that it can call its own [`close`]
+//! function when the `OwnedFd` is dropped.
+//!
+//! [`close`]: crate::io::close
+//!
 //! # Safety
 //!
 //! We wrap an `OwnedFd` in a `ManuallyDrop` so that we can extract the

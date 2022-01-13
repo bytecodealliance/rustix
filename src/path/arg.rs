@@ -1,3 +1,6 @@
+//! This module defines the `Arg` trait and implements it for several common
+//! string types.
+
 use crate::ffi::{ZStr, ZString};
 use crate::io;
 #[cfg(feature = "itoa")]
@@ -953,11 +956,11 @@ fn with_z_str<T, F>(bytes: &[u8], f: F) -> io::Result<T>
 where
     F: FnOnce(&ZStr) -> io::Result<T>,
 {
-    // Most paths are less than `SMALL_PATH_BUFFER_SIZE` long. The rest can go through
-    // the dynamic allocation path. If you're opening many files in a directory
-    // with a long path, consider opening the directory and using `openat` to open
-    // the files under it, which will avoid this, and is often faster in the OS
-    // as well.
+    // Most paths are less than `SMALL_PATH_BUFFER_SIZE` long. The rest can go
+    // through the dynamic allocation path. If you're opening many files in a
+    // directory with a long path, consider opening the directory and using
+    // `openat` to open the files under it, which will avoid this, and is often
+    // faster in the OS as well.
 
     // Test with >= so that we have room for the trailing NUL.
     if bytes.len() >= SMALL_PATH_BUFFER_SIZE {

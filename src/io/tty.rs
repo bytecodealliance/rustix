@@ -1,4 +1,4 @@
-//! Functions which operate on file descriptors.
+//! Functions which operate on file descriptors which might be terminals.
 
 use crate::imp;
 #[cfg(any(

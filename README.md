@@ -32,7 +32,7 @@ portable APIs built on this functionality, see the [`system-interface`],
 
 The `linux_raw` backend is enabled by default on Linux on x86-64, x86, aarch64,
 riscv64gc and arm (v5 onwards), and uses raw Linux system calls and vDSO calls.
-It supports stable as well as nightly Rust.
+It supports stable as well as nightly and 1.48 Rust.
  - By being implemented entirely in Rust, avoiding `libc`, `errno`, and pthread
    cancellation, and employing some specialized optimizations, most functions
    compile down to very efficient code. On nightly Rust, they can often be
@@ -42,11 +42,10 @@ It supports stable as well as nightly Rust.
  - `linux_raw` uses a 64-bit `time_t` type on all platforms, avoiding the
    [y2038 bug].
 
-The `libc` backend is enabled by default on all other platforms, and can be
-set explicitly for any target by setting `RUSTFLAGS` to
-`--cfg rustix_use_libc`. It uses the [`libc`] crate which provides bindings to
-native `libc` libraries, as well as [`winapi`] for Winsock2, and is portable to
-many OS's.
+The `libc` backend is enabled by default on all other platforms, and can be set
+explicitly for any target by setting `RUSTFLAGS` to `--cfg=rustix_use_libc`. It
+uses the [`libc`] crate which provides bindings to native `libc` libraries, and
+[`winapi`] for Winsock2, and is portable to many OS's.
 
 ## Similar crates
 
@@ -80,12 +79,12 @@ way, so users don't need to open `.` to get a current-directory handle.
 
 `rustix`'s `openat2` function is similar to the [`openat2`] crate, but uses
 I/O safety types rather than `RawFd`. `rustix` does not provide dynamic feature
-detection, so users must handle `NOSYS` themselves.
+detection, so users must handle the [`NOSYS`] error themselves.
 
-# Minimum Supported Rust Version
+# Minimum Supported Rust Version (MSRV)
 
-This crate currently works on the version of [Rust on Debian stable], which
-is currently Rust 1.48. This policy may change in the future, in minor version
+This crate currently works on the version of [Rust on Debian stable], which is
+currently Rust 1.48. This policy may change in the future, in minor version
 releases, so users using a fixed version of Rust should pin to a specific
 version of this crate.
 
@@ -114,3 +113,4 @@ version of this crate.
 [y2038 bug]: https://en.wikipedia.org/wiki/Year_2038_problem
 [`OwnedFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/struct.OwnedFd.html
 [`AsFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.AsFd.html
+[`NOSYS`]: https://docs.rs/rustix/latest/rustix/io/struct.Error.html#associatedconstant.NOSYS

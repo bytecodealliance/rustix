@@ -27,7 +27,7 @@ fn dup2_to_replace_stdio() {
     drop(reader);
     drop(writer);
 
-    // Don't use std::io::stdout() because in tests it's captured.
+    // Don't use `std::io::stdout()` because in tests it's captured.
     unsafe {
         writeln!(
             rustix::io::stdout().as_filelike_view::<std::fs::File>(),

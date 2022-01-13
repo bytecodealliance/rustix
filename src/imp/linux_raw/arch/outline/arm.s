@@ -1,3 +1,5 @@
+// Assembly code for making arm syscalls.
+//
 // arm syscall argument register ordering is the similar to the arm
 // userspace argument register ordering except that the syscall number
 // (nr) is passed in r7.
@@ -37,7 +39,7 @@ rustix_syscall1_nr_last:
     pop     {r7, pc}
     .fnend
     .size rustix_syscall1_nr_last, .-rustix_syscall1_nr_last
-    
+
     .section    .text.rustix_syscall1_noreturn_nr_last,"ax",%progbits
     .p2align    4
     .weak       rustix_syscall1_noreturn_nr_last

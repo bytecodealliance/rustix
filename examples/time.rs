@@ -1,3 +1,6 @@
+//! A command which prints the current values of the realtime and monotonic
+//! clocks it's given.
+
 #[cfg(not(windows))]
 fn main() {
     println!(

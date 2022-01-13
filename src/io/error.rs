@@ -71,7 +71,7 @@ impl From<Error> for std::io::Error {
     }
 }
 
-/// Call `f` until it either succeeds or fails other than `io::Error::INTR`.
+/// Call `f` until it either succeeds or fails other than [`Error::INTR`].
 #[inline]
 pub fn with_retrying<T, F: FnMut() -> Result<T>>(mut f: F) -> Result<T> {
     loop {

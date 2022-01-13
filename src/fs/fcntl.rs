@@ -1,3 +1,8 @@
+//! The Unix `fcntl` function is effectively lots of different functions
+//! hidden behind a single dynamic dispatch interface. In order to provide
+//! a type-safe API, rustix makes them all separate functions so that they
+//! can have dedicated static type signatures.
+
 use crate::imp;
 use crate::io::{self, OwnedFd};
 use imp::fd::{AsFd, RawFd};
@@ -12,6 +17,7 @@ use imp::fs::{FdFlags, OFlags};
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[inline]
+#[doc(alias = "F_GETFD")]
 pub fn fcntl_getfd<Fd: AsFd>(fd: &Fd) -> io::Result<FdFlags> {
     let fd = fd.as_fd();
     imp::syscalls::fcntl_getfd(fd)
@@ -26,6 +32,7 @@ pub fn fcntl_getfd<Fd: AsFd>(fd: &Fd) -> io::Result<FdFlags> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[inline]
+#[doc(alias = "F_SETFD")]
 pub fn fcntl_setfd<Fd: AsFd>(fd: &Fd, flags: FdFlags) -> io::Result<()> {
     let fd = fd.as_fd();
     imp::syscalls::fcntl_setfd(fd, flags)
@@ -40,6 +47,7 @@ pub fn fcntl_setfd<Fd: AsFd>(fd: &Fd, flags: FdFlags) -> io::Result<()> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[inline]
+#[doc(alias = "F_GETFL")]
 pub fn fcntl_getfl<Fd: AsFd>(fd: &Fd) -> io::Result<OFlags> {
     let fd = fd.as_fd();
     imp::syscalls::fcntl_getfl(fd)
@@ -54,6 +62,7 @@ pub fn fcntl_getfl<Fd: AsFd>(fd: &Fd) -> io::Result<OFlags> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[inline]
+#[doc(alias = "F_SETFL")]
 pub fn fcntl_setfl<Fd: AsFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
     let fd = fd.as_fd();
     imp::syscalls::fcntl_setfl(fd, flags)
@@ -82,6 +91,7 @@ pub fn fcntl_setfl<Fd: AsFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
     )
 ))]
 #[inline]
+#[doc(alias = "F_GET_SEALS")]
 pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
     let fd = fd.as_fd();
     imp::syscalls::fcntl_get_seals(fd)
@@ -104,6 +114,7 @@ pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
+#[doc(alias = "F_DUPFD_CLOEXEC")]
 pub fn fcntl_dupfd_cloexec<Fd: AsFd>(fd: &Fd, min: RawFd) -> io::Result<OwnedFd> {
     let fd = fd.as_fd();
     imp::syscalls::fcntl_dupfd_cloexec(fd, min)

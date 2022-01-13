@@ -112,6 +112,8 @@ pub const EXIT_SIGNALED_SIGABRT: i32 = imp::process::EXIT_SIGNALED_SIGABRT;
 
 /// `sched_yield()`—Hints to the OS that other processes should run.
 ///
+/// This function always succeeds.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]

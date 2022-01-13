@@ -1,3 +1,5 @@
+// Assembly code for making x86-64 syscalls.
+//
 // x86-64 syscall argument register ordering is the same as the x86-64
 // userspace argument register ordering except that a3 is passed in r10
 // instead of rcx, and the syscall number (nr) is passed in eax.

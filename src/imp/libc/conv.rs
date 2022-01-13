@@ -1,3 +1,7 @@
+//! Libc call arguments and return values are often things like `c_int`,
+//! `c_uint`, or libc-specific pointer types. This module provides functions
+//! for converting between rustix's types and libc types.
+
 #![allow(dead_code)]
 
 use super::c;

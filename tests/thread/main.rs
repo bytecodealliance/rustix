@@ -1,3 +1,5 @@
+//! Tests for [`rustix::thread`].
+
 #![cfg(not(windows))]
 
 #[cfg(not(any(target_os = "redox")))]

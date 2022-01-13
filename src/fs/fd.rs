@@ -198,12 +198,16 @@ pub(crate) fn _is_file_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)
 /// `fsync(fd)`—Ensures that file data and metadata is written to the
 /// underlying storage device.
 ///
+/// Note that on iOS and macOS this isn't sufficient to ensure that data has
+/// reached persistent storage; use [`fcntl_fullfsync`] to ensure that.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fsync.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fsync.2.html
+/// [`fcntl_fullfsync`]: https://docs.rs/rustix/*/x86_64-apple-darwin/rustix/fs/fn.fcntl_fullfsync.html
 #[inline]
 pub fn fsync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     let fd = fd.as_fd();

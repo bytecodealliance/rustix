@@ -1,3 +1,5 @@
+// Assembly code for making x86 syscalls.
+//
 // On x86 we use the "fastcall" convention which passes the first two
 // arguments in ecx and edx. Outline.rs reorders the arguments to put
 // a1 and a2 in those registers so they we don't have to move them to

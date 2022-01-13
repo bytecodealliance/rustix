@@ -20,8 +20,10 @@ pub use imp::io::UserfaultfdFlags;
 ///
 /// # References
 ///  - [Linux]
+///  - [Linux userfaultfd]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/userfaultfd.2.html
+/// [Linux userfaultfd]: https://www.kernel.org/doc/Documentation/vm/userfaultfd.txt
 #[inline]
 pub unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
     imp::syscalls::userfaultfd(flags)
