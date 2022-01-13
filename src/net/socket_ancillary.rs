@@ -416,6 +416,24 @@ pub enum SendAncillaryDataV6<'a> {
 }
 
 impl<'a> FromCmsghdr<'a> for SendAncillaryDataV6<'a> {
+    #[cfg(not(any(
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "android",
+        target_os = "ios",
+    )))]
+    fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
+        qErr(AncillaryError::from_cmsg(&*cmsg))
+    }
+
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "android",
+        target_os = "ios",
+    ))]
     fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
         unsafe {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
@@ -427,13 +445,6 @@ impl<'a> FromCmsghdr<'a> for SendAncillaryDataV6<'a> {
                 cmsg.cmsg_level as c::IpConstantType,
                 cmsg.cmsg_type as c::IpConstantType,
             ) {
-                #[cfg(any(
-                    target_os = "linux",
-                    target_os = "macos",
-                    target_os = "netbsd",
-                    target_os = "android",
-                    target_os = "ios",
-                ))]
                 (c::IPPROTO_IPV6, c::IPV6_PKTINFO) => Ok(SendAncillaryDataV6::PacketInfos(
                     Ipv6PacketInfos(AncillaryDataIter::new(data)),
                 )),
