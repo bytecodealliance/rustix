@@ -10,12 +10,11 @@ use super::{
 #[cfg(not(windows))]
 use crate::imp::net::read_sockaddr_unix_opt;
 use crate::imp::net::{read_sockaddr_os, read_sockaddr_v4_opt, read_sockaddr_v6_opt};
-use crate::io::IoSliceMut;
 #[cfg(not(windows))]
 use crate::net::SocketAddrUnix;
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::{imp, io};
-use core::mem::size_of;
+#[cfg(not(windows))]
 use core::ptr;
 use imp::fd::AsFd;
 #[cfg(windows)]
@@ -323,12 +322,11 @@ pub fn recvmsg<Fd: AsFd>(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
-///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/recvmsg.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/recvmsg.2.html
-/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recvfrom
 #[inline]
+#[cfg(not(windows))]
 pub fn recvmsg_with_ancillary<Fd: AsFd>(
     fd: &Fd,
     iovs: &mut [io::IoSliceMut<'_>],
@@ -381,7 +379,7 @@ impl RecvMsgAny {
     #[cfg(windows)]
     pub(crate) unsafe fn new(
         bytes: usize,
-        name: imp::c::sockaddr,
+        name: *const imp::c::sockaddr,
         namelen: usize,
         flags: imp::c::c_ulong,
     ) -> Self {
@@ -390,7 +388,7 @@ impl RecvMsgAny {
         } else {
             None
         };
-        let flags = RecvFlags::from_bits_truncate(flags);
+        let flags = RecvFlags::from_bits_truncate(flags as _);
 
         RecvMsgAny {
             bytes: bytes as usize,
@@ -486,12 +484,12 @@ impl RecvMsgV4 {
     #[cfg(windows)]
     pub(crate) unsafe fn new(
         bytes: usize,
-        name: imp::c::sockaddr,
+        name: *const imp::c::sockaddr,
         namelen: usize,
         flags: imp::c::c_ulong,
     ) -> Self {
         let addr = read_sockaddr_v4_opt(name as *const _, namelen as _);
-        let flags = RecvFlags::from_bits_truncate(flags);
+        let flags = RecvFlags::from_bits_truncate(flags as _);
 
         RecvMsgV4 {
             bytes: bytes as usize,
@@ -587,12 +585,12 @@ impl RecvMsgV6 {
     #[cfg(windows)]
     pub(crate) unsafe fn new(
         bytes: usize,
-        name: imp::c::sockaddr,
+        name: *const imp::c::sockaddr,
         namelen: usize,
         flags: imp::c::c_ulong,
     ) -> Self {
         let addr = read_sockaddr_v6_opt(name as *const _, namelen as _);
-        let flags = RecvFlags::from_bits_truncate(flags);
+        let flags = RecvFlags::from_bits_truncate(flags as _);
 
         RecvMsgV6 {
             bytes: bytes as usize,
@@ -804,7 +802,7 @@ pub(crate) unsafe fn encode_msghdr_unix_send(
 #[cfg(not(windows))]
 pub(crate) fn encode_msghdr_v4_recv(
     msg: &mut imp::c::msghdr,
-    iovs: &mut [IoSliceMut<'_>],
+    iovs: &mut [io::IoSliceMut<'_>],
     msg_name: *mut imp::c::sockaddr_in,
     ancillary: &mut Option<&mut RecvSocketAncillaryV4<'_>>,
 ) {
@@ -812,7 +810,7 @@ pub(crate) fn encode_msghdr_v4_recv(
     msg.msg_iovlen = iovs.len() as _;
 
     msg.msg_name = msg_name.cast();
-    msg.msg_namelen = size_of::<imp::c::sockaddr_in>() as _;
+    msg.msg_namelen = core::mem::size_of::<imp::c::sockaddr_in>() as _;
 
     if let Some(ancillary) = ancillary {
         msg.msg_controllen = ancillary.buffer_len() as _;
@@ -826,7 +824,7 @@ pub(crate) fn encode_msghdr_v4_recv(
 #[cfg(not(windows))]
 pub(crate) fn encode_msghdr_v6_recv(
     msg: &mut imp::c::msghdr,
-    iovs: &mut [IoSliceMut<'_>],
+    iovs: &mut [io::IoSliceMut<'_>],
     msg_name: *mut imp::c::sockaddr_in6,
     ancillary: &mut Option<&mut RecvSocketAncillaryV6<'_>>,
 ) {
@@ -834,7 +832,7 @@ pub(crate) fn encode_msghdr_v6_recv(
     msg.msg_iovlen = iovs.len() as _;
 
     msg.msg_name = msg_name.cast();
-    msg.msg_namelen = size_of::<imp::c::sockaddr_in6>() as _;
+    msg.msg_namelen = core::mem::size_of::<imp::c::sockaddr_in6>() as _;
 
     if let Some(ancillary) = ancillary {
         msg.msg_controllen = ancillary.buffer_len() as _;
@@ -848,7 +846,7 @@ pub(crate) fn encode_msghdr_v6_recv(
 #[cfg(not(windows))]
 pub(crate) fn encode_msghdr_unix_recv(
     msg: &mut imp::c::msghdr,
-    iovs: &mut [IoSliceMut<'_>],
+    iovs: &mut [io::IoSliceMut<'_>],
     msg_name: *mut imp::c::sockaddr_un,
     ancillary: &mut Option<&mut RecvSocketAncillaryUnix<'_>>,
 ) {
@@ -856,7 +854,7 @@ pub(crate) fn encode_msghdr_unix_recv(
     msg.msg_iovlen = iovs.len() as _;
 
     msg.msg_name = msg_name.cast();
-    msg.msg_namelen = size_of::<imp::c::sockaddr_un>() as _;
+    msg.msg_namelen = core::mem::size_of::<imp::c::sockaddr_un>() as _;
 
     if let Some(ancillary) = ancillary {
         msg.msg_controllen = ancillary.buffer_len() as _;
@@ -870,7 +868,7 @@ pub(crate) fn encode_msghdr_unix_recv(
 #[cfg(not(windows))]
 pub(crate) fn encode_msghdr_any_recv(
     msg: &mut imp::c::msghdr,
-    iovs: &mut [IoSliceMut<'_>],
+    iovs: &mut [io::IoSliceMut<'_>],
     msg_name: *mut imp::c::sockaddr,
     ancillary: &mut Option<&mut RecvSocketAncillaryAny<'_>>,
 ) {
@@ -878,7 +876,7 @@ pub(crate) fn encode_msghdr_any_recv(
     msg.msg_iovlen = iovs.len() as _;
 
     msg.msg_name = msg_name.cast();
-    msg.msg_namelen = size_of::<imp::c::sockaddr>() as _;
+    msg.msg_namelen = core::mem::size_of::<imp::c::sockaddr>() as _;
 
     if let Some(ancillary) = ancillary {
         msg.msg_controllen = ancillary.buffer_len() as _;

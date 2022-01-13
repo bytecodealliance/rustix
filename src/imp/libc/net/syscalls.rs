@@ -119,7 +119,11 @@ pub(crate) fn sendmsg_v4(
             borrowed_fd(fd),
             iovs as *const _ as *mut _,
             iovs.len() as _,
-            msg_name.as_mut().map(as_mut_ptr).unwrap_or_else(null_mut()),
+            msg_name
+                .as_mut()
+                .map(as_mut_ptr)
+                .unwrap_or_else(null_mut)
+                .cast(),
             msg_namelen as _,
             flags.bits() as _,
         ))?
@@ -159,14 +163,18 @@ pub(crate) fn sendmsg_v6(
     addr: Option<&SocketAddrV6>,
     flags: SendFlags,
 ) -> io::Result<usize> {
-    let (msg_name, msg_namelen) = encode_socketaddr_v6_opt(addr);
+    let (mut msg_name, msg_namelen) = encode_socketaddr_v6_opt(addr);
 
     let nwritten = unsafe {
         ret_send_recv(c::sendmsg(
             borrowed_fd(fd),
             iovs as *const _ as *mut _,
             iovs.len() as _,
-            msg_name.as_mut().map(as_mut_ptr).unwrap_or_else(null_mut()),
+            msg_name
+                .as_mut()
+                .map(as_mut_ptr)
+                .unwrap_or_else(null_mut)
+                .cast(),
             msg_namelen as _,
             flags.bits() as _,
         ))?
@@ -239,7 +247,12 @@ pub(crate) fn recvmsg(
             &mut flags,
         ))?;
 
-        Ok(RecvMsgAny::new(bytes as usize, name, namelen, flags as _))
+        Ok(RecvMsgAny::new(
+            bytes as usize,
+            name.as_ptr().cast(),
+            namelen as _,
+            flags as _,
+        ))
     }
 }
 
@@ -283,7 +296,12 @@ pub(crate) fn recvmsg_v4(
             &mut flags,
         ))?;
 
-        Ok(RecvMsgV4::new(bytes as usize, name, namelen, flags as _))
+        Ok(RecvMsgV4::new(
+            bytes as usize,
+            name.as_ptr().cast(),
+            namelen as _,
+            flags as _,
+        ))
     }
 }
 
@@ -327,7 +345,12 @@ pub(crate) fn recvmsg_v6(
             &mut flags,
         ))?;
 
-        Ok(RecvMsgV6::new(bytes as usize, name, namelen, flags))
+        Ok(RecvMsgV6::new(
+            bytes as usize,
+            name.as_ptr().cast(),
+            namelen as _,
+            flags,
+        ))
     }
 }
 
