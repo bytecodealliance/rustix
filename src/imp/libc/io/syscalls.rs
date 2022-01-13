@@ -328,6 +328,20 @@ pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> 
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
+pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
+    let mut result = MaybeUninit::<c::c_uint>::uninit();
+    unsafe {
+        ret(libc::ioctl(
+            borrowed_fd(fd),
+            libc::BLKSSZGET,
+            result.as_mut_ptr(),
+        ))?;
+        Ok(result.assume_init() as u32)
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
 pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
     let mut result = MaybeUninit::<c::c_uint>::uninit();
     unsafe {
