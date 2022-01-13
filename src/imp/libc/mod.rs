@@ -52,12 +52,14 @@ pub(crate) mod c {
 
     // Reimplement these as const functions, until `libc` constifies them.
     #[allow(non_snake_case, missing_docs)]
+    #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
     pub const fn CMSG_ALIGN(len: c_uint) -> c_uint {
         len + core::mem::size_of::<usize>() as c_uint - 1
             & !(core::mem::size_of::<usize>() as c_uint - 1)
     }
 
     #[allow(non_snake_case, missing_docs)]
+    #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
     pub const fn CMSG_SPACE(length: c_uint) -> c_uint {
         CMSG_ALIGN(length) + CMSG_ALIGN(core::mem::size_of::<cmsghdr>() as c_uint)
     }
