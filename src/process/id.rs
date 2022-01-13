@@ -2,10 +2,9 @@
 //!
 //! # Safety
 //!
-//! The `Uid`, `Gid`, and `Uid` types can be constructed from raw integers,
-//! which is marked safe for similar reasons as [`FromRawFd::from_raw_fd`].
-//!
-//! [`FromRawFd::from_raw_fd`]: https://doc.rust-lang.org/std/os/unix/io/trait.FromRawFd.html#tymethod.from_raw_fd
+//! The `Uid`, `Gid`, and `Pid` types can be constructed from raw integers,
+//! which is marked unsafe because actual OS's assign special meaning to some
+//! integer values.
 #![allow(unsafe_code)]
 
 use crate::imp;

@@ -1,3 +1,8 @@
+//! The Unix `ioctl` function is effectively lots of different functions
+//! hidden behind a single dynamic dispatch interface. In order to provide
+//! a type-safe API, rustix makes them all separate functions so that they
+//! can have dedicated static type signatures.
+
 #[cfg(not(any(windows, target_os = "wasi")))]
 use crate::io::{Termios, Winsize};
 use crate::{imp, io};
@@ -20,6 +25,7 @@ use imp::fd::AsSocketAsFd;
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[inline]
 #[doc(alias = "tcgetattr")]
+#[doc(alias = "TCGETS")]
 pub fn ioctl_tcgets<Fd: AsFd>(fd: &Fd) -> io::Result<Termios> {
     let fd = fd.as_fd();
     imp::syscalls::ioctl_tcgets(fd)
@@ -30,6 +36,8 @@ pub fn ioctl_tcgets<Fd: AsFd>(fd: &Fd) -> io::Result<Termios> {
 /// Also known as `fcntl(fd, F_SETFD, FD_CLOEXEC)`.
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 #[inline]
+#[doc(alias = "FIOCLEX")]
+#[doc(alias = "FD_CLOEXEC")]
 pub fn ioctl_fioclex<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     let fd = fd.as_fd();
     imp::syscalls::ioctl_fioclex(fd)
@@ -43,6 +51,7 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[inline]
+#[doc(alias = "TIOCGWINSZ")]
 pub fn ioctl_tiocgwinsz<Fd: AsFd>(fd: &Fd) -> io::Result<Winsize> {
     let fd = fd.as_fd();
     imp::syscalls::ioctl_tiocgwinsz(fd)
@@ -50,6 +59,7 @@ pub fn ioctl_tiocgwinsz<Fd: AsFd>(fd: &Fd) -> io::Result<Winsize> {
 
 /// `ioctl(fd, FIONBIO, &value)`—Enables or disables non-blocking mode.
 #[inline]
+#[doc(alias = "FIONBIO")]
 pub fn ioctl_fionbio<Fd: AsFd>(fd: &Fd, value: bool) -> io::Result<()> {
     let fd = fd.as_fd();
     imp::syscalls::ioctl_fionbio(fd, value)
@@ -66,6 +76,7 @@ pub fn ioctl_fionbio<Fd: AsFd>(fd: &Fd, value: bool) -> io::Result<()> {
     all(libc, not(any(windows, target_os = "redox", target_os = "wasi")))
 ))]
 #[inline]
+#[doc(alias = "TIOCEXCL")]
 pub fn ioctl_tiocexcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     let fd = fd.as_fd();
     imp::syscalls::ioctl_tiocexcl(fd)
@@ -82,6 +93,7 @@ pub fn ioctl_tiocexcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     all(libc, not(any(windows, target_os = "redox", target_os = "wasi")))
 ))]
 #[inline]
+#[doc(alias = "TIOCNXCL")]
 pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     let fd = fd.as_fd();
     imp::syscalls::ioctl_tiocnxcl(fd)
@@ -98,14 +110,16 @@ pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/ioctl_tty.2.html
 #[cfg(not(any(windows, target_os = "redox")))]
 #[inline]
+#[doc(alias = "FIONREAD")]
 pub fn ioctl_fionread<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
     let fd = fd.as_fd();
     imp::syscalls::ioctl_fionread(fd)
 }
 
-/// `ioctl(fd, BLKPBSZGET)`—Returns the logical block size of a block device.
+/// `ioctl(fd, BLKSSZGET)`—Returns the logical block size of a block device.
 #[cfg(target_os = "linux")]
 #[inline]
+#[doc(alias = "BLKSSZGET")]
 pub fn ioctl_blksszget<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
     let fd = fd.as_fd();
     imp::syscalls::ioctl_blksszget(fd)
@@ -114,6 +128,7 @@ pub fn ioctl_blksszget<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
 /// `ioctl(fd, BLKPBSZGET)`—Returns the physical block size of a block device.
 #[cfg(target_os = "linux")]
 #[inline]
+#[doc(alias = "BLKPBSZGET")]
 pub fn ioctl_blkpbszget<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
     let fd = fd.as_fd();
     imp::syscalls::ioctl_blkpbszget(fd)

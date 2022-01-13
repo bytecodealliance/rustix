@@ -1,3 +1,5 @@
+//! A command which prints out information about the process it runs in.
+
 #[cfg(not(windows))]
 use rustix::io;
 #[cfg(not(windows))]

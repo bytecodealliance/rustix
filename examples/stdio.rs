@@ -1,3 +1,6 @@
+//! A command which prints out information about the standard input,
+//! output, and error streams provided to it.
+
 #[cfg(not(windows))]
 use rustix::fd::AsFd;
 #[cfg(any(all(linux_raw, feature = "procfs"), all(not(windows), libc)))]

@@ -1,14 +1,17 @@
 use crate::process::Pid;
 use crate::{imp, io};
 
-/// CpuSet represent a bit-mask of CPUs.
-/// CpuSets are used by `sched_setaffinity` and
-/// `sched_getaffinity` for example.
+/// `CpuSet` represents a bit-mask of CPUs.
+///
+/// `CpuSet`s are used by [`sched_setaffinity`] and [`sched_getaffinity`], for
+/// example.
 ///
 /// # References
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man3/CPU_SET.3.html
+/// [`sched_setaffinity`]: crate::process::sched_setaffinity
+/// [`sched_getaffinity`]: crate::process::sched_getaffinity
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct CpuSet {
@@ -16,7 +19,7 @@ pub struct CpuSet {
 }
 
 impl CpuSet {
-    /// The maximum number of CPU in CpuSet
+    /// The maximum number of CPU in `CpuSet`.
     pub const MAX_CPU: usize = imp::process::CPU_SETSIZE;
 
     /// Create a new and empty CpuSet.
@@ -27,35 +30,38 @@ impl CpuSet {
         }
     }
 
-    /// Test to see if a CPU is in the CpuSet.
-    /// `field` is the CPU id to test
+    /// Test to see if a CPU is in the `CpuSet`.
+    ///
+    /// `field` is the CPU id to test.
     #[inline]
     pub fn is_set(&self, field: usize) -> bool {
         imp::process::cpu_set::CPU_ISSET(field, &self.cpu_set)
     }
 
-    /// Add a CPU to CpuSet.
-    /// `field` is the CPU id to add
+    /// Add a CPU to `CpuSet`.
+    ///
+    /// `field` is the CPU id to add.
     #[inline]
     pub fn set(&mut self, field: usize) {
         imp::process::cpu_set::CPU_SET(field, &mut self.cpu_set)
     }
 
-    /// Remove a CPU from CpuSet.
-    /// `field` is the CPU id to remove
+    /// Remove a CPU from `CpuSet`.
+    ///
+    /// `field` is the CPU id to remove.
     #[inline]
     pub fn unset(&mut self, field: usize) {
         imp::process::cpu_set::CPU_CLR(field, &mut self.cpu_set)
     }
 
-    /// Count the number of CPUs set in the CpuSet
+    /// Count the number of CPUs set in the `CpuSet`.
     #[cfg(target_os = "linux")]
     #[inline]
     pub fn count(&self) -> u32 {
         imp::process::cpu_set::CPU_COUNT(&self.cpu_set)
     }
 
-    /// Zeroes the CpuSet.
+    /// Zeroes the `CpuSet`.
     #[inline]
     pub fn clear(&mut self) {
         imp::process::cpu_set::CPU_ZERO(&mut self.cpu_set)

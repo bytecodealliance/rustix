@@ -281,7 +281,7 @@ impl Vdso {
     /// to our expectations.
     #[inline]
     pub(super) fn new() -> Option<Self> {
-        init_from_proc_self_auxv()
+        init_from_auxv()
     }
 
     /// Check the version for a symbol.
@@ -372,9 +372,8 @@ impl Vdso {
     }
 }
 
-// Find the `AT_SYSINFO_EHDR` in auxv records in memory. We don't currently
-// have direct access to the auxv records in memory, so we use /proc/self/auxv
-// instead.
+// Find the `AT_SYSINFO_EHDR` in auxv records in memory. We have our own code
+// for reading the auxv records in memory, so we don't currently use this.
 //
 // # Safety
 //
@@ -394,8 +393,8 @@ unsafe fn init_from_auxv(elf_auxv: *const Elf_auxv_t) -> Option<Vdso> {
 }
 */
 
-// Find the `AT_SYSINFO_EHDR` in auxv records in /proc/self/auxv.
-fn init_from_proc_self_auxv() -> Option<Vdso> {
+// Find the vDSO image by following the `AT_SYSINFO_EHDR` auxv record pointer.
+fn init_from_auxv() -> Option<Vdso> {
     // Safety: `sysinfo_ehdr` does extensive checks to ensure that the value
     // we get really is an `AT_SYSINFO_EHDR` value from the kernel.
     unsafe { init_from_sysinfo_ehdr(super::process::sysinfo_ehdr()) }

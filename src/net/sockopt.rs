@@ -1,4 +1,7 @@
 //! `getsockopt` and `setsockopt` functions.
+//!
+//! In the rustix API, there is a separate function for each option, so that
+//! it can be given an option-specific type signature.
 
 #![doc(alias = "getsockopt")]
 #![doc(alias = "setsockopt")]

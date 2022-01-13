@@ -2,8 +2,8 @@
 //!
 //! # Safety
 //!
-//! `mmap` manipulates raw pointers and has special semantics and is
-//! wildly unsafe.
+//! `mmap` and related functions manipulate raw pointers and have special
+//! semantics and are wildly unsafe.
 #![allow(unsafe_code)]
 
 use crate::{imp, io};

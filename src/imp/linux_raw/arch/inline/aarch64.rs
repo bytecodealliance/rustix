@@ -1,3 +1,5 @@
+//! aarch64 Linux system calls.
+
 use crate::imp::reg::{ArgReg, FromAsm, RetReg, SyscallNumber, ToAsm, A0, A1, A2, A3, A4, A5, R0};
 use core::arch::asm;
 

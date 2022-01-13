@@ -1,4 +1,5 @@
-//! Low-level implementation details for libc-like runtime libraries.
+//! Low-level implementation details for libc-like runtime libraries such as
+//! [origin].
 //!
 //! These functions are for implementing thread-local storage (TLS),
 //! managing threads, loaded libraries, and other process-wide resources.
@@ -8,6 +9,8 @@
 //!
 //! The API for these functions is not stable, and this module is
 //! `doc(hidden)`.
+//!
+//! [origin]: https://github.com/sunfishcode/mustang/tree/main/origin
 //!
 //! # Safety
 //!

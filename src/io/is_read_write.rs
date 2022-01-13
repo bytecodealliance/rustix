@@ -1,4 +1,4 @@
-//! Functions which operate on file descriptors.
+//! The [`is_read_write`] function.
 
 use crate::{imp, io};
 use imp::fd::AsFd;
