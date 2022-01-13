@@ -997,7 +997,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn get_tcp_nodelay(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(fd, c::SOL_UDP as _, c::UDP_SEGMENT)
+        getsockopt(fd, c::IPPROTO_TCP as _, c::TCP_NODELAY)
     }
 
     #[inline]

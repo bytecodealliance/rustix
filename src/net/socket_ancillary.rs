@@ -8,6 +8,13 @@ use core::slice;
 
 use crate::imp::c;
 use crate::imp::fd::{AsFd, AsRawFd, RawFd};
+#[cfg(any(
+    target_os = "linux",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "android",
+    target_os = "ios",
+))]
 use crate::imp::net::ext::{in6_addr_new, in_addr_new};
 #[cfg(any(target_os = "android", target_os = "linux",))]
 use crate::imp::syscalls::{getgid, getpid, getuid};
@@ -176,6 +183,9 @@ pub enum SendAncillaryDataV4<'a> {
     /// TODO: document
     #[cfg(target_os = "linux")]
     UdpGsoSegments(UdpGsoSegments<'a>),
+    /// Make the compiler happy if there are no variants present
+    #[doc(hidden)]
+    Other(&'a [u8]),
 }
 
 /// TODO: document
@@ -377,6 +387,9 @@ pub enum SendAncillaryDataV6<'a> {
     /// TODO: document
     #[cfg(target_os = "linux")]
     UdpGsoSegments(UdpGsoSegments<'a>),
+    /// Make the compiler happy if there are no variants present
+    #[doc(hidden)]
+    Other(&'a [u8]),
 }
 
 impl<'a> FromCmsghdr<'a> for SendAncillaryDataV6<'a> {
