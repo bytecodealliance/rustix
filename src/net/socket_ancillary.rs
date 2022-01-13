@@ -776,8 +776,11 @@ impl<'a, T: FromCmsghdr<'a>> SocketAncillary<'a, T> {
             return None;
         }
 
-        self.buffer[self.length..new_length].fill(0);
+        for i in self.length..new_length {
+            self.buffer[i] = 0;
+        }
         self.length = new_length;
+        self.msg.msg_control = self.buffer.as_mut_ptr().cast();
         self.msg.msg_controllen = self.length as _;
 
         let mut cmsg = c::CMSG_FIRSTHDR(&self.msg);

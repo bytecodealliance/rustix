@@ -18,11 +18,11 @@ use crate::net::{
     encode_msghdr_any_recv, encode_msghdr_unix_recv, encode_msghdr_unix_send,
     encode_msghdr_v4_recv, encode_msghdr_v4_send, encode_msghdr_v6_recv, encode_msghdr_v6_send,
     encode_socketaddr_unix_opt, RecvMsgUnix, RecvSocketAncillaryAny, RecvSocketAncillaryUnix,
-    SendSocketAncillaryUnix,
+    RecvSocketAncillaryV4, RecvSocketAncillaryV6, SendSocketAncillaryUnix, SendSocketAncillaryV4,
+    SendSocketAncillaryV6,
 };
 use crate::net::{
     encode_socketaddr_v4_opt, encode_socketaddr_v6_opt, RecvMsgAny, RecvMsgV4, RecvMsgV6,
-    RecvSocketAncillaryV4, RecvSocketAncillaryV6, SendSocketAncillaryV4, SendSocketAncillaryV6,
     SocketAddrAny, SocketAddrV4, SocketAddrV6,
 };
 use core::convert::TryInto;
@@ -112,14 +112,14 @@ pub(crate) fn sendmsg_v4(
     addr: Option<&SocketAddrV4>,
     flags: SendFlags,
 ) -> io::Result<usize> {
-    let (msg_name, msg_namelen) = encode_socketaddr_v4_opt(addr);
+    let (mut msg_name, msg_namelen) = encode_socketaddr_v4_opt(addr);
 
     let nwritten = unsafe {
         ret_send_recv(c::sendmsg(
             borrowed_fd(fd),
             iovs as *const _ as *mut _,
             iovs.len() as _,
-            msg_name,
+            msg_name.as_mut().map(as_mut_ptr).unwrap_or_else(null_mut()),
             msg_namelen as _,
             flags.bits() as _,
         ))?
@@ -166,7 +166,7 @@ pub(crate) fn sendmsg_v6(
             borrowed_fd(fd),
             iovs as *const _ as *mut _,
             iovs.len() as _,
-            msg_name,
+            msg_name.as_mut().map(as_mut_ptr).unwrap_or_else(null_mut()),
             msg_namelen as _,
             flags.bits() as _,
         ))?
@@ -239,7 +239,7 @@ pub(crate) fn recvmsg(
             &mut flags,
         ))?;
 
-        Ok(RecMsgAny::new(bytes as usize, name, namelen, flags))
+        Ok(RecvMsgAny::new(bytes as usize, name, namelen, flags as _))
     }
 }
 
@@ -283,13 +283,7 @@ pub(crate) fn recvmsg_v4(
             &mut flags,
         ))?;
 
-        Ok(RecMsgV4::new(
-            bytes as usize,
-            name,
-            namelen,
-            flagsbytes as usize,
-            msg,
-        ))
+        Ok(RecvMsgV4::new(bytes as usize, name, namelen, flags as _))
     }
 }
 
@@ -333,7 +327,7 @@ pub(crate) fn recvmsg_v6(
             &mut flags,
         ))?;
 
-        Ok(RecMsgV6::new(bytes as usize, name, namelen, flags))
+        Ok(RecvMsgV6::new(bytes as usize, name, namelen, flags))
     }
 }
 

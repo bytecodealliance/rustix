@@ -7,9 +7,9 @@ use super::{
     RecvSocketAncillaryAny, RecvSocketAncillaryUnix, RecvSocketAncillaryV4, RecvSocketAncillaryV6,
     SendSocketAncillaryUnix, SendSocketAncillaryV4, SendSocketAncillaryV6,
 };
-use crate::imp::net::{
-    read_sockaddr_os, read_sockaddr_unix_opt, read_sockaddr_v4_opt, read_sockaddr_v6_opt,
-};
+#[cfg(not(windows))]
+use crate::imp::net::read_sockaddr_unix_opt;
+use crate::imp::net::{read_sockaddr_os, read_sockaddr_v4_opt, read_sockaddr_v6_opt};
 use crate::io::IoSliceMut;
 #[cfg(not(windows))]
 use crate::net::SocketAddrUnix;
@@ -308,7 +308,14 @@ pub fn recvmsg<Fd: AsFd>(
     flags: RecvFlags,
 ) -> io::Result<RecvMsgAny> {
     let fd = fd.as_fd();
-    imp::syscalls::recvmsg(fd, iovs, None, flags)
+    #[cfg(windows)]
+    {
+        imp::syscalls::recvmsg(fd, iovs, flags)
+    }
+    #[cfg(not(windows))]
+    {
+        imp::syscalls::recvmsg(fd, iovs, None, flags)
+    }
 }
 
 /// `recmsg(fd, iovs, flags)`—Reads data from a socket.
@@ -374,9 +381,9 @@ impl RecvMsgAny {
     #[cfg(windows)]
     pub(crate) unsafe fn new(
         bytes: usize,
-        name: c::sockaddr,
+        name: imp::c::sockaddr,
         namelen: usize,
-        flags: c::c_ulong,
+        flags: imp::c::c_ulong,
     ) -> Self {
         let addr = if namelen > 0 {
             Some(read_sockaddr_os(name as *const _, namelen as _))
@@ -479,9 +486,9 @@ impl RecvMsgV4 {
     #[cfg(windows)]
     pub(crate) unsafe fn new(
         bytes: usize,
-        name: c::sockaddr,
+        name: imp::c::sockaddr,
         namelen: usize,
-        flags: c::c_ulong,
+        flags: imp::c::c_ulong,
     ) -> Self {
         let addr = read_sockaddr_v4_opt(name as *const _, namelen as _);
         let flags = RecvFlags::from_bits_truncate(flags);
@@ -580,9 +587,9 @@ impl RecvMsgV6 {
     #[cfg(windows)]
     pub(crate) unsafe fn new(
         bytes: usize,
-        name: c::sockaddr,
+        name: imp::c::sockaddr,
         namelen: usize,
-        flags: c::c_ulong,
+        flags: imp::c::c_ulong,
     ) -> Self {
         let addr = read_sockaddr_v6_opt(name as *const _, namelen as _);
         let flags = RecvFlags::from_bits_truncate(flags);
@@ -717,7 +724,7 @@ pub(crate) unsafe fn encode_socketaddr_unix_opt(
 }
 
 /// Safety: pointers must all point to initialized valid memory.
-#[cfg(not(window))]
+#[cfg(not(windows))]
 pub(crate) unsafe fn encode_msghdr_v4_send(
     msg: *mut imp::c::msghdr,
     iovs: *const imp::c::iovec,
@@ -743,7 +750,7 @@ pub(crate) unsafe fn encode_msghdr_v4_send(
 }
 
 /// Safety: pointers must all point to initialized valid memory.
-#[cfg(not(window))]
+#[cfg(not(windows))]
 pub(crate) unsafe fn encode_msghdr_v6_send(
     msg: *mut imp::c::msghdr,
     iovs: *const imp::c::iovec,
