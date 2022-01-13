@@ -2,27 +2,28 @@ use super::super::c;
 use super::super::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 use super::super::fd::BorrowedFd;
 use super::ext::{in6_addr_new, in_addr_new};
+#[cfg(not(windows))]
+use super::{encode_sockaddr_unix, msghdr_default, SocketAddrUnix};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::{
-    encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags,
-    AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
+    encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags, AddressFamily, Protocol,
+    RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
 };
-#[cfg(not(windows))]
-use super::{msghdr_default, SocketAddrUnix};
 #[cfg(not(any(target_os = "redox", target_os = "wasi",)))]
 use crate::as_mut_ptr;
 use crate::as_ptr;
 use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
-use crate::net::{
-    encode_msghdr_any_recv, encode_msghdr_v4_recv, encode_msghdr_v4_send, encode_msghdr_v6_recv,
-    encode_msghdr_v6_send, encode_socketaddr_v4_opt, encode_socketaddr_v6_opt, RecvMsgAny,
-    RecvMsgV4, RecvMsgV6, RecvSocketAncillaryV4, RecvSocketAncillaryV6, SendSocketAncillaryV4,
-    SendSocketAncillaryV6, SocketAddrAny, SocketAddrV4, SocketAddrV6,
-};
 #[cfg(not(windows))]
 use crate::net::{
-    encode_msghdr_unix_recv, encode_msghdr_unix_send, encode_socketaddr_unix_opt, RecvMsgUnix,
-    RecvSocketAncillaryAny, RecvSocketAncillaryUnix, SendSocketAncillaryUnix,
+    encode_msghdr_any_recv, encode_msghdr_unix_recv, encode_msghdr_unix_send,
+    encode_msghdr_v4_recv, encode_msghdr_v4_send, encode_msghdr_v6_recv, encode_msghdr_v6_send,
+    encode_socketaddr_unix_opt, RecvMsgUnix, RecvSocketAncillaryAny, RecvSocketAncillaryUnix,
+    SendSocketAncillaryUnix,
+};
+use crate::net::{
+    encode_socketaddr_v4_opt, encode_socketaddr_v6_opt, RecvMsgAny, RecvMsgV4, RecvMsgV6,
+    RecvSocketAncillaryV4, RecvSocketAncillaryV6, SendSocketAncillaryV4, SendSocketAncillaryV6,
+    SocketAddrAny, SocketAddrV4, SocketAddrV6,
 };
 use core::convert::TryInto;
 use core::mem::{size_of, MaybeUninit};
@@ -238,7 +239,7 @@ pub(crate) fn recvmsg(
             &mut flags,
         ))?;
 
-        Ok(RecMsgAny::new(bytes as usize, msg))
+        Ok(RecMsgAny::new(bytes as usize, name, namelen, flags))
     }
 }
 
@@ -282,7 +283,13 @@ pub(crate) fn recvmsg_v4(
             &mut flags,
         ))?;
 
-        Ok(RecMsgV4::new(bytes as usize, msg))
+        Ok(RecMsgV4::new(
+            bytes as usize,
+            name,
+            namelen,
+            flagsbytes as usize,
+            msg,
+        ))
     }
 }
 
@@ -326,7 +333,7 @@ pub(crate) fn recvmsg_v6(
             &mut flags,
         ))?;
 
-        Ok(RecMsgV6::new(bytes as usize, msg))
+        Ok(RecMsgV6::new(bytes as usize, name, namelen, flags))
     }
 }
 

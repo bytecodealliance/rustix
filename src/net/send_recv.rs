@@ -372,9 +372,18 @@ impl RecvMsgAny {
     }
 
     #[cfg(windows)]
-    pub(crate) unsafe fn new(bytes: usize, msg: imp::c::msghdr) -> Self {
-        let addr = read_sockaddr_os(msg.msg_name as *const _, msg.msg_namelen as _);
-        let flags = RecvFlags::from_bits_truncate(msg.msg_flags);
+    pub(crate) unsafe fn new(
+        bytes: usize,
+        name: c::sockaddr,
+        namelen: usize,
+        flags: c::c_ulong,
+    ) -> Self {
+        let addr = if namelen > 0 {
+            Some(read_sockaddr_os(name as *const _, namelen as _))
+        } else {
+            None
+        };
+        let flags = RecvFlags::from_bits_truncate(flags);
 
         RecvMsgAny {
             bytes: bytes as usize,
@@ -402,7 +411,14 @@ pub fn recvmsg_v4<Fd: AsFd>(
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
     let fd = fd.as_fd();
-    imp::syscalls::recvmsg_v4(fd, iovs, None, flags)
+    #[cfg(windows)]
+    {
+        imp::syscalls::recvmsg_v4(fd, iovs, flags)
+    }
+    #[cfg(not(windows))]
+    {
+        imp::syscalls::recvmsg_v4(fd, iovs, None, flags)
+    }
 }
 
 /// `recmsg(fd, iovs, flags)`—Reads data from a socket.
@@ -461,9 +477,14 @@ impl RecvMsgV4 {
 
     /// Safety: `msg` must be a valid return value from an Ipv4 based `recvmsg` call.
     #[cfg(windows)]
-    pub(crate) unsafe fn new(bytes: usize, msg: imp::c::msghdr) -> Self {
-        let addr = read_sockaddr_v4_opt(msg.msg_name as *const _, msg.msg_namelen as _);
-        let flags = RecvFlags::from_bits_truncate(msg.msg_flags);
+    pub(crate) unsafe fn new(
+        bytes: usize,
+        name: c::sockaddr,
+        namelen: usize,
+        flags: c::c_ulong,
+    ) -> Self {
+        let addr = read_sockaddr_v4_opt(name as *const _, namelen as _);
+        let flags = RecvFlags::from_bits_truncate(flags);
 
         RecvMsgV4 {
             bytes: bytes as usize,
@@ -491,7 +512,14 @@ pub fn recvmsg_v6<Fd: AsFd>(
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV6> {
     let fd = fd.as_fd();
-    imp::syscalls::recvmsg_v6(fd, iovs, None, flags)
+    #[cfg(windows)]
+    {
+        imp::syscalls::recvmsg_v6(fd, iovs, flags)
+    }
+    #[cfg(not(windows))]
+    {
+        imp::syscalls::recvmsg_v6(fd, iovs, None, flags)
+    }
 }
 
 /// `recvmsg(fd, iovs, flags)`—Reads data from a socket.
@@ -550,9 +578,14 @@ impl RecvMsgV6 {
 
     /// Safety: `msg` must be a valid return value from an Ipv6 based `recvmsg` call.
     #[cfg(windows)]
-    pub(crate) unsafe fn new(bytes: usize, msg: imp::c::msghdr) -> Self {
-        let addr = read_sockaddr_v6_opt(msg.msg_name as *const _, msg.msg_namelen as _);
-        let flags = RecvFlags::from_bits_truncate(msg.msg_flags);
+    pub(crate) unsafe fn new(
+        bytes: usize,
+        name: c::sockaddr,
+        namelen: usize,
+        flags: c::c_ulong,
+    ) -> Self {
+        let addr = read_sockaddr_v6_opt(name as *const _, namelen as _);
+        let flags = RecvFlags::from_bits_truncate(flags);
 
         RecvMsgV6 {
             bytes: bytes as usize,
@@ -684,6 +717,7 @@ pub(crate) unsafe fn encode_socketaddr_unix_opt(
 }
 
 /// Safety: pointers must all point to initialized valid memory.
+#[cfg(not(window))]
 pub(crate) unsafe fn encode_msghdr_v4_send(
     msg: *mut imp::c::msghdr,
     iovs: *const imp::c::iovec,
@@ -709,6 +743,7 @@ pub(crate) unsafe fn encode_msghdr_v4_send(
 }
 
 /// Safety: pointers must all point to initialized valid memory.
+#[cfg(not(window))]
 pub(crate) unsafe fn encode_msghdr_v6_send(
     msg: *mut imp::c::msghdr,
     iovs: *const imp::c::iovec,
@@ -759,6 +794,7 @@ pub(crate) unsafe fn encode_msghdr_unix_send(
     }
 }
 
+#[cfg(not(windows))]
 pub(crate) fn encode_msghdr_v4_recv(
     msg: &mut imp::c::msghdr,
     iovs: &mut [IoSliceMut<'_>],
@@ -780,6 +816,7 @@ pub(crate) fn encode_msghdr_v4_recv(
     }
 }
 
+#[cfg(not(windows))]
 pub(crate) fn encode_msghdr_v6_recv(
     msg: &mut imp::c::msghdr,
     iovs: &mut [IoSliceMut<'_>],
@@ -801,6 +838,7 @@ pub(crate) fn encode_msghdr_v6_recv(
     }
 }
 
+#[cfg(not(windows))]
 pub(crate) fn encode_msghdr_unix_recv(
     msg: &mut imp::c::msghdr,
     iovs: &mut [IoSliceMut<'_>],
@@ -822,6 +860,7 @@ pub(crate) fn encode_msghdr_unix_recv(
     }
 }
 
+#[cfg(not(windows))]
 pub(crate) fn encode_msghdr_any_recv(
     msg: &mut imp::c::msghdr,
     iovs: &mut [IoSliceMut<'_>],

@@ -185,7 +185,7 @@ pub enum SendAncillaryDataV4<'a> {
     UdpGsoSegments(UdpGsoSegments<'a>),
     /// Make the compiler happy if there are no variants present
     #[doc(hidden)]
-    Other(&'a [u8]),
+    Other(PhantomData<&'a [u8]>),
 }
 
 /// TODO: document
@@ -389,7 +389,7 @@ pub enum SendAncillaryDataV6<'a> {
     UdpGsoSegments(UdpGsoSegments<'a>),
     /// Make the compiler happy if there are no variants present
     #[doc(hidden)]
-    Other(&'a [u8]),
+    Other(PhantomData<&'a [u8]>),
 }
 
 impl<'a> FromCmsghdr<'a> for SendAncillaryDataV6<'a> {
@@ -442,6 +442,9 @@ pub enum RecvAncillaryDataV6<'a> {
     /// TODO: document
     #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
     RxqOvfl(RxqOvfls<'a>),
+    /// Make the compiler happy if there are no variants present
+    #[doc(hidden)]
+    Other(PhantomData<&'a [u8]>),
 }
 
 impl<'a> FromCmsghdr<'a> for RecvAncillaryDataV6<'a> {
@@ -807,18 +810,6 @@ impl<'a, T: FromCmsghdr<'a>> SocketAncillary<'a, T> {
     }
 }
 
-fn size_of_data<U>(source: &[U]) -> Option<u32> {
-    if let Some(source_len) = source.len().checked_mul(size_of::<U>()) {
-        if let Ok(source_len) = u32::try_from(source_len) {
-            Some(source_len)
-        } else {
-            return None;
-        }
-    } else {
-        None
-    }
-}
-
 /// TODO: document
 pub type SendSocketAncillaryUnix<'a> = SocketAncillary<'a, SendAncillaryDataUnix<'a>>;
 
@@ -832,7 +823,10 @@ impl<'a> SocketAncillary<'a, SendAncillaryDataUnix<'a>> {
     pub fn add_fds<Fd: AsFd>(&mut self, fds: &[Fd]) -> bool {
         self.truncated = false;
         let size_single = size_of::<RawFd>();
-        let size = u32::try_from(fds.len() * size_single).ok();
+        let size = fds
+            .len()
+            .checked_mul(size_single)
+            .and_then(|v| u32::try_from(v).ok());
 
         unsafe {
             match self.get_cmsg_data(size, c::SOL_SOCKET as _, c::SCM_RIGHTS as _) {
@@ -858,7 +852,11 @@ impl<'a> SocketAncillary<'a, SendAncillaryDataUnix<'a>> {
     #[cfg(any(target_os = "android", target_os = "linux",))]
     pub fn add_creds(&mut self, creds: &[SocketCred]) -> bool {
         self.truncated = false;
-        let size = size_of_data(creds);
+        let size = creds
+            .len()
+            .checked_mul(size_of::<c::ucred>())
+            .and_then(|v| u32::try_from(v).ok());
+
         unsafe {
             match self.get_cmsg_data(size, c::SOL_SOCKET as _, c::SCM_CREDENTIALS as _) {
                 Some((size, data)) => {

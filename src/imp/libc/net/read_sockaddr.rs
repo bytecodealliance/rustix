@@ -302,6 +302,7 @@ pub(crate) unsafe fn read_sockaddr_v6_opt(
     }
 }
 
+#[cfg(not(windows))]
 pub(crate) unsafe fn read_sockaddr_unix_opt(
     storage: *const c::sockaddr_storage,
     len: usize,

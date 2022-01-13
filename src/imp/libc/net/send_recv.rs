@@ -76,6 +76,7 @@ bitflags! {
         /// `MSG_WAITALL`
         const WAITALL = c::MSG_WAITALL;
         /// `MSG_CTRUNC`
+        #[cfg(not(windows))]
         const CTRUNC = c::MSG_CTRUNC as c::c_int;
     }
 }
