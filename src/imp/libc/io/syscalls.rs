@@ -333,7 +333,7 @@ pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
     unsafe {
         ret(libc::ioctl(
             borrowed_fd(fd),
-            libc::BLKSSZGET as u32,
+            libc::BLKSSZGET as c::c_ulong,
             result.as_mut_ptr(),
         ))?;
         Ok(result.assume_init() as u32)
@@ -347,7 +347,7 @@ pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
     unsafe {
         ret(libc::ioctl(
             borrowed_fd(fd),
-            libc::BLKPBSZGET as u32,
+            libc::BLKPBSZGET as c::c_ulong,
             result.as_mut_ptr(),
         ))?;
         Ok(result.assume_init() as u32)
