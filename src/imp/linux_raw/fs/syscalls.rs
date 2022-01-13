@@ -64,7 +64,7 @@ use linux_raw_sys::v5_4::general::{
 };
 #[cfg(target_pointer_width = "32")]
 use {
-    super::super::conv::{hi, lo},
+    super::super::conv::{hi, lo, slice_just_addr},
     linux_raw_sys::{
         general::timespec as __kernel_old_timespec,
         general::{
@@ -1128,12 +1128,28 @@ fn _utimensat(
             if err == io::Error::NOSYS {
                 let old_times = [
                     __kernel_old_timespec {
-                        tv_sec: times[0].tv_sec.try_into().map_err(|_| io::Error::INVAL)?,
-                        tv_nsec: times[0].tv_nsec.try_into().map_err(|_| io::Error::INVAL)?,
+                        tv_sec: times
+                            .last_access
+                            .tv_sec
+                            .try_into()
+                            .map_err(|_| io::Error::INVAL)?,
+                        tv_nsec: times
+                            .last_access
+                            .tv_nsec
+                            .try_into()
+                            .map_err(|_| io::Error::INVAL)?,
                     },
                     __kernel_old_timespec {
-                        tv_sec: times[1].tv_sec.try_into().map_err(|_| io::Error::INVAL)?,
-                        tv_nsec: times[1].tv_nsec.try_into().map_err(|_| io::Error::INVAL)?,
+                        tv_sec: times
+                            .last_modification
+                            .tv_sec
+                            .try_into()
+                            .map_err(|_| io::Error::INVAL)?,
+                        tv_nsec: times
+                            .last_modification
+                            .tv_nsec
+                            .try_into()
+                            .map_err(|_| io::Error::INVAL)?,
                     },
                 ];
                 // The length of the array is fixed and not passed into the syscall.
