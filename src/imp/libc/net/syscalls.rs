@@ -957,11 +957,13 @@ pub(crate) mod sockopt {
     }
 
     #[inline]
+    #[cfg(target_os = "linux")]
     pub(crate) fn set_udp_segment(fd: BorrowedFd<'_>, gso: u32) -> io::Result<()> {
         setsockopt(fd, c::SOL_UDP as _, c::UDP_SEGMENT, gso)
     }
 
     #[inline]
+    #[cfg(target_os = "linux")]
     pub(crate) fn get_udp_segment(fd: BorrowedFd<'_>) -> io::Result<u32> {
         getsockopt(fd, c::SOL_UDP as _, c::UDP_SEGMENT)
     }

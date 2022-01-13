@@ -9,9 +9,18 @@ use core::slice;
 use crate::imp::c;
 use crate::imp::fd::{AsFd, AsRawFd, RawFd};
 use crate::imp::net::ext::{in6_addr_new, in_addr_new};
+#[cfg(any(target_os = "android", target_os = "linux",))]
 use crate::imp::syscalls::{getgid, getpid, getuid};
 use crate::io::OwnedFd;
+#[cfg(any(
+    target_os = "linux",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "android",
+    target_os = "ios",
+))]
 use crate::net::{SocketAddrV4, SocketAddrV6};
+#[cfg(any(target_os = "android", target_os = "linux",))]
 use crate::process::{Gid, Pid, Uid};
 
 /// Create a `[u8; N]` type buffer, where `N` is sized such that it fits the provided types
@@ -155,6 +164,13 @@ impl<'a> Iterator for ScmCredentials<'a> {
 #[non_exhaustive]
 pub enum SendAncillaryDataV4<'a> {
     /// TODO: document
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "android",
+        target_os = "ios",
+    ))]
     PacketInfos(Ipv4PacketInfos<'a>),
     /// TODO: document
     #[cfg(target_os = "linux")]
@@ -165,6 +181,13 @@ pub enum SendAncillaryDataV4<'a> {
 #[non_exhaustive]
 pub enum RecvAncillaryDataV4<'a> {
     /// TODO: document
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "android",
+        target_os = "ios",
+    ))]
     PacketInfos(Ipv4PacketInfos<'a>),
     /// TODO: document
     #[cfg(target_os = "linux")]
@@ -317,6 +340,13 @@ pub struct RxqOvfls<'a>(AncillaryDataIter<'a, u32>);
 #[non_exhaustive]
 pub enum SendAncillaryDataV6<'a> {
     /// TODO: document
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "android",
+        target_os = "ios",
+    ))]
     PacketInfos(Ipv6PacketInfos<'a>),
     /// TODO: document
     #[cfg(target_os = "linux")]
@@ -356,6 +386,13 @@ impl<'a> FromCmsghdr<'a> for SendAncillaryDataV6<'a> {
 #[non_exhaustive]
 pub enum RecvAncillaryDataV6<'a> {
     /// TODO: document
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "android",
+        target_os = "ios",
+    ))]
     PacketInfos(Ipv6PacketInfos<'a>),
     /// TODO: document
     #[cfg(target_os = "linux")]
@@ -466,8 +503,8 @@ impl Ipv4PacketInfo {
     }
 
     /// Sets `ipi_ifindex`, the interface index to the provided `index`.
-    pub fn set_interface_index(&mut self, index: i32) {
-        self.0.ipi_ifindex = index;
+    pub fn set_interface_index(&mut self, index: u32) {
+        self.0.ipi_ifindex = index as _;
     }
 }
 

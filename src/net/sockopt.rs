@@ -636,6 +636,7 @@ pub fn get_tcp_nodelay<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
 /// [Linux `udp`]: https://man7.org/linux/man-pages/man7/udp.7.html
 #[inline]
 #[doc(alias = "UDP_SEGMENT")]
+#[cfg(target_os = "linux")]
 pub fn set_udp_segment<Fd: AsFd>(fd: &Fd, gso: u32) -> io::Result<()> {
     let fd = fd.as_fd();
     imp::syscalls::sockopt::set_udp_segment(fd, gso)
@@ -653,7 +654,7 @@ pub fn set_udp_segment<Fd: AsFd>(fd: &Fd, gso: u32) -> io::Result<()> {
 /// [Linux `udp`]: https://man7.org/linux/man-pages/man7/udp.7.html
 #[inline]
 #[doc(alias = "UDP_SEGMENT")]
-#[cfg(not(windows))]
+#[cfg(target_os = "linux")]
 pub fn get_udp_segment<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
     let fd = fd.as_fd();
     imp::syscalls::sockopt::get_udp_segment(fd)
