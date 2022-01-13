@@ -201,7 +201,7 @@ pub(crate) fn sendmsg_unix(
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub(crate) fn recvmsg_v4(
     fd: BorrowedFd<'_>,
-    iovs: &[IoSliceMut<'_>],
+    iovs: &mut [IoSliceMut<'_>],
     mut ancillary: Option<&mut RecvSocketAncillaryV4<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
@@ -220,7 +220,7 @@ pub(crate) fn recvmsg_v4(
 #[cfg(windows)]
 pub(crate) fn recvmsg_v4(
     fd: BorrowedFd<'_>,
-    iovs: &[IoSliceMut<'_>],
+    iovs: &mut [IoSliceMut<'_>],
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
     let mut name = MaybeUninit::<c::sockaddr_in>::zeroed();
@@ -245,7 +245,7 @@ pub(crate) fn recvmsg_v4(
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub(crate) fn recvmsg_v6(
     fd: BorrowedFd<'_>,
-    iovs: &[IoSliceMut<'_>],
+    iovs: &mut [IoSliceMut<'_>],
     mut ancillary: Option<&mut RecvSocketAncillaryV6<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV6> {
@@ -264,7 +264,7 @@ pub(crate) fn recvmsg_v6(
 #[cfg(windows)]
 pub(crate) fn recvmsg_v6(
     fd: BorrowedFd<'_>,
-    iovs: &[IoSliceMut<'_>],
+    iovs: &mut [IoSliceMut<'_>],
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV6> {
     let mut name = MaybeUninit::<c::sockaddr_in6>::zeroed();
@@ -289,7 +289,7 @@ pub(crate) fn recvmsg_v6(
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub(crate) fn recvmsg_unix(
     fd: BorrowedFd<'_>,
-    iovs: &[IoSliceMut<'_>],
+    iovs: &mut [IoSliceMut<'_>],
     mut ancillary: Option<&mut RecvSocketAncillaryUnix<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgUnix> {

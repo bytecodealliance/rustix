@@ -722,7 +722,7 @@ pub(crate) fn recvfrom(
 #[inline]
 pub(crate) fn recvmsg_v4(
     fd: BorrowedFd<'_>,
-    iovs: &[IoSliceMut<'_>],
+    iovs: &mut [IoSliceMut<'_>],
     mut ancillary: Option<&mut RecvSocketAncillaryV4<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
@@ -758,7 +758,7 @@ pub(crate) fn recvmsg_v4(
 #[inline]
 pub(crate) fn recvmsg_v6(
     fd: BorrowedFd<'_>,
-    iovs: &[IoSliceMut<'_>],
+    iovs: &mut [IoSliceMut<'_>],
     mut ancillary: Option<&mut RecvSocketAncillaryV6<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV6> {
@@ -795,7 +795,7 @@ pub(crate) fn recvmsg_v6(
 #[inline]
 pub(crate) fn recvmsg_unix(
     fd: BorrowedFd<'_>,
-    iovs: &[IoSliceMut<'_>],
+    iovs: &mut [IoSliceMut<'_>],
     mut ancillary: Option<&mut RecvSocketAncillaryUnix<'_>>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgUnix> {

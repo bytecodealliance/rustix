@@ -37,7 +37,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
 
     let res = recvmsg_v4(
         &data_socket,
-        &[IoSliceMut::new(&mut buffer)],
+        &mut [IoSliceMut::new(&mut buffer)],
         RecvFlags::empty(),
     )
     .unwrap();
@@ -82,7 +82,7 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     let mut buffer = vec![0u8; BUFFER_SIZE];
     let res = recvmsg_v4(
         &data_socket,
-        &[IoSliceMut::new(&mut buffer)],
+        &mut [IoSliceMut::new(&mut buffer)],
         RecvFlags::empty(),
     )
     .unwrap();
@@ -118,4 +118,47 @@ fn test_v4_msg_udp() {
 
     #[cfg(windows)]
     rustix::net::wsa_cleanup().unwrap();
+}
+
+// Verify `Ipv4PacketInfo` for `sendmsg`.
+// This creates a (udp) socket bound to localhost, then sends a message to
+// itself but uses Ipv4PacketInfo to force the source address to be localhost.
+#[cfg(any(target_os = "linux", target_os = "macos", target_os = "netbsd"))]
+#[test]
+pub fn test_v4_msg_ipv4packetinfo() {
+    use cfg_if::cfg_if;
+    use rustix::{
+        cmsg_buffer,
+        net::{sendmsg_v4_with_ancillary, Ipv4PacketInfo, SendSocketAncillaryV4},
+    };
+
+    let connection_socket =
+        socket(AddressFamily::INET, SocketType::DGRAM, Protocol::default()).expect("socket failed");
+
+    let name = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 4000);
+    bind_v4(&connection_socket, &name).expect("bind failed");
+
+    let slice = [1u8, 2, 3, 4, 5, 6, 7, 8];
+    let iovs = [IoSlice::new(&slice)];
+
+    cfg_if! {
+        if #[cfg(target_os = "netbsd")] {
+            let pi = Ipv4PacketInfo::default();
+        } else {
+            let mut pi = Ipv4PacketInfo::default();
+            pi.set_local_addr(&name);
+        }
+    }
+
+    let mut cmsg_buffer = cmsg_buffer!(Ipv4PacketInfo);
+    let mut cmsg = SendSocketAncillaryV4::new(&mut cmsg_buffer);
+    cmsg.add_packet_info(&pi);
+    sendmsg_v4_with_ancillary(
+        &connection_socket,
+        &iovs,
+        Some(&name),
+        &mut cmsg,
+        SendFlags::empty(),
+    )
+    .expect("sendmsg");
 }

@@ -36,7 +36,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     let data_socket = connection_socket;
     let res = recvmsg_v6(
         &data_socket,
-        &[IoSliceMut::new(&mut buffer)],
+        &mut [IoSliceMut::new(&mut buffer)],
         RecvFlags::empty(),
     )
     .unwrap();
@@ -81,7 +81,7 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
 
     let res = recvmsg_v6(
         &data_socket,
-        &[IoSliceMut::new(&mut buffer)],
+        &mut [IoSliceMut::new(&mut buffer)],
         RecvFlags::empty(),
     )
     .unwrap();
@@ -117,4 +117,41 @@ fn test_v6_msg_udp() {
 
     #[cfg(windows)]
     rustix::net::wsa_cleanup().unwrap();
+}
+
+// Verify `Ipv6PacketInfo` for `sendmsg`.
+// This creates a (udp) socket bound to localhost, then sends a message to
+// itself but uses Ipv6PacketInfo to force the source address to be
+// ip6-localhost.
+#[cfg(any(target_os = "linux", target_os = "macos", target_os = "netbsd"))]
+#[test]
+pub fn test_v6_msg_ipv6packetinfo() {
+    use rustix::{
+        cmsg_buffer,
+        net::{sendmsg_v6_with_ancillary, Ipv6PacketInfo, SendSocketAncillaryV6},
+    };
+
+    let connection_socket = socket(AddressFamily::INET6, SocketType::DGRAM, Protocol::default())
+        .expect("socket failed");
+
+    let name = SocketAddrV6::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 6000, 0, 0);
+    bind_v6(&connection_socket, &name).expect("bind failed");
+
+    let slice = [1u8, 2, 3, 4, 5, 6, 7, 8];
+    let iovs = [IoSlice::new(&slice)];
+
+    let mut pi = Ipv6PacketInfo::default();
+    pi.set_source_addr(&name);
+
+    let mut cmsg_buffer = cmsg_buffer!(Ipv6PacketInfo);
+    let mut cmsg = SendSocketAncillaryV6::new(&mut cmsg_buffer);
+    cmsg.add_packet_info(&pi);
+    sendmsg_v6_with_ancillary(
+        &connection_socket,
+        &iovs,
+        Some(&name),
+        &mut cmsg,
+        SendFlags::empty(),
+    )
+    .expect("sendmsg");
 }

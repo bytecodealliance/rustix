@@ -39,7 +39,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
 
     let res = recvmsg_v4(
         &data_socket,
-        &[IoSliceMut::new(&mut buffer)],
+        &mut [IoSliceMut::new(&mut buffer)],
         RecvFlags::empty(),
     )
     .unwrap();
@@ -84,7 +84,7 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     let mut buffer = vec![0u8; BUFFER_SIZE];
     let res = recvmsg_v4(
         &data_socket,
-        &[IoSliceMut::new(&mut buffer)],
+        &mut [IoSliceMut::new(&mut buffer)],
         RecvFlags::empty(),
     )
     .unwrap();

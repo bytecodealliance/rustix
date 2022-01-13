@@ -20,7 +20,7 @@ use core::{mem, ptr};
 
 /// Given a length, returns it including the required alignment.
 ///
-/// https://linux.die.net/man/3/cmsg_align
+/// https://man7.org/linux/man-pages/man3/cmsg_align.3.html
 #[allow(non_snake_case)]
 pub const fn CMSG_ALIGN(len: size_t) -> size_t {
     len + mem::size_of::<usize>() as size_t - 1 & !(mem::size_of::<usize>() as size_t - 1)
@@ -28,7 +28,7 @@ pub const fn CMSG_ALIGN(len: size_t) -> size_t {
 
 /// Returns a pointer to the first `cmsghdr` in the ancillary data buffer associated with the passed `msghdr`.
 ///
-/// https://linux.die.net/man/3/cmsg_align
+/// https://man7.org/linux/man-pages/man3/cmsg.3.html
 /// Safety: `mhdr` must point to an initialized `msghdr`.
 #[allow(non_snake_case)]
 pub unsafe fn CMSG_FIRSTHDR(mhdr: *const msghdr) -> *mut cmsghdr {
@@ -41,7 +41,7 @@ pub unsafe fn CMSG_FIRSTHDR(mhdr: *const msghdr) -> *mut cmsghdr {
 
 /// Returns a pointer to the data portion of a cmsghdr.
 ///
-/// https://linux.die.net/man/3/cmsg_align
+/// https://man7.org/linux/man-pages/man3/cmsg.3.html
 #[allow(non_snake_case)]
 pub unsafe fn CMSG_DATA(cmsg: *const cmsghdr) -> *mut c_uchar {
     cmsg.offset(1) as *mut _
@@ -50,7 +50,7 @@ pub unsafe fn CMSG_DATA(cmsg: *const cmsghdr) -> *mut c_uchar {
 /// Returns the number of bytes an ancillary element with payload of the passed
 /// data length occupies.
 ///
-/// https://linux.die.net/man/3/cmsg_align
+/// https://man7.org/linux/man-pages/man3/cmsg.3.html
 #[allow(non_snake_case)]
 pub const fn CMSG_SPACE(length: size_t) -> size_t {
     CMSG_ALIGN(length) + CMSG_ALIGN(mem::size_of::<cmsghdr>() as size_t)
@@ -58,7 +58,7 @@ pub const fn CMSG_SPACE(length: size_t) -> size_t {
 
 /// Given a length, returns it including the required alignment.
 ///
-/// https://linux.die.net/man/3/cmsg_align
+/// https://man7.org/linux/man-pages/man3/cmsg.3.html
 #[allow(non_snake_case)]
 pub const fn CMSG_LEN(length: size_t) -> size_t {
     CMSG_ALIGN(mem::size_of::<cmsghdr>() as size_t) + length
@@ -67,7 +67,7 @@ pub const fn CMSG_LEN(length: size_t) -> size_t {
 /// Returns the next valid `cmsghdr` after the passed `cmsghdr`. It returns NULL when there
 /// isn't enough space left in the buffer.
 ///
-/// https://linux.die.net/man/3/cmsg_align
+/// https://man7.org/linux/man-pages/man3/cmsg.3.html
 #[allow(non_snake_case)]
 pub unsafe fn CMSG_NXTHDR(mhdr: *const msghdr, cmsg: *const cmsghdr) -> *mut cmsghdr {
     if ((*cmsg).cmsg_len as usize) < mem::size_of::<cmsghdr>() {
@@ -104,7 +104,6 @@ pub const SO_EE_ORIGIN_ICMP: u8 = 2;
 pub const SO_EE_ORIGIN_ICMP6: u8 = 3;
 pub const SO_EE_ORIGIN_TIMESTAMPING: u8 = 4;
 
-///
 #[allow(non_snake_case)]
 pub unsafe fn SO_EE_OFFENDER(ee: *const sock_extended_err) -> *mut sockaddr {
     ee.offset(1) as *mut sockaddr

@@ -1,5 +1,3 @@
-// TODO: remove
-#![allow(dead_code, unused_variables)]
 #![allow(unsafe_code)]
 
 use core::convert::TryFrom;
@@ -9,34 +7,35 @@ use core::ptr::{self, read_unaligned};
 use core::slice;
 
 use crate::imp::c;
-use crate::imp::fd::AsFd;
+use crate::imp::fd::{AsFd, AsRawFd, RawFd};
+use crate::imp::net::ext::{in6_addr_new, in_addr_new};
 use crate::imp::syscalls::{getgid, getpid, getuid};
 use crate::io::OwnedFd;
+use crate::net::{SocketAddrV4, SocketAddrV6};
 use crate::process::{Gid, Pid, Uid};
 
-/// Create a buffer large enough for storing some control messages as returned by `recvmsg`.
+/// Create a `[u8; N]` type buffer, where `N` is sized such that it fits the provided types
+/// as control messages, as used by `sendmsg` and `recvmsg`.
 ///
 /// # Examples
 ///
 /// ```
 /// # fn main() {
-/// use rustix::{cmsg_space, net::SocketCred};
+/// use rustix::{cmsg_buffer, net::SocketCred};
 /// use rustix::io::OwnedFd;
 /// // Create a buffer big enough for a `ScmRights` message with two file descriptors.
-/// let _ = cmsg_space!([OwnedFd; 2]);
+/// let _ = cmsg_buffer!([OwnedFd; 2]);
 /// // Create a buffer big enough for a `ScmRights` message and a `ScmCredentials` message.
-/// let _ = cmsg_space!(OwnedFd, SocketCred);
+/// let _ = cmsg_buffer!(OwnedFd, SocketCred);
 /// # }
 /// ```
 #[macro_export]
-macro_rules! cmsg_space {
-    ( $( $x:ty ),* ) => {
-        {
-            [0u8; 0 $(
-                + $crate::net::CMSG_SPACE(core::mem::size_of::<$x>() as _) as usize
-            )*]
-        }
-    }
+macro_rules! cmsg_buffer {
+    ( $( $x:ty ),* ) => {{
+        [0u8; 0 $(
+            + $crate::net::CMSG_SPACE(core::mem::size_of::<$x>() as _) as usize
+        )*]
+    }}
 }
 
 #[doc(hidden)]
@@ -62,17 +61,35 @@ pub enum RecvAncillaryDataUnix<'a> {
     ScmCredentials(ScmCredentials<'a>),
 }
 
-impl<'a> TryFrom<&'a c::cmsghdr> for SendAncillaryDataUnix<'a> {
-    type Error = AncillaryError;
+/// Conversion trait for internal use.
+#[doc(hidden)]
+pub trait FromCmsghdr<'a>: Sized + private::SealFromCmsghdr {
+    fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError>;
+}
 
+mod private {
+    use super::*;
+
+    /// Marker trait to seal FromCmsghdr.
+    pub trait SealFromCmsghdr {}
+
+    impl<'a> SealFromCmsghdr for SendAncillaryDataV4<'a> {}
+    impl<'a> SealFromCmsghdr for SendAncillaryDataV6<'a> {}
+    impl<'a> SealFromCmsghdr for SendAncillaryDataUnix<'a> {}
+    impl<'a> SealFromCmsghdr for RecvAncillaryDataV4<'a> {}
+    impl<'a> SealFromCmsghdr for RecvAncillaryDataV6<'a> {}
+    impl<'a> SealFromCmsghdr for RecvAncillaryDataUnix<'a> {}
+}
+
+impl<'a> FromCmsghdr<'a> for SendAncillaryDataUnix<'a> {
     fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
         unsafe {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
-            let data_len = (*cmsg).cmsg_len as usize - cmsg_len_zero;
+            let data_len = cmsg.cmsg_len as usize - cmsg_len_zero;
             let data = c::CMSG_DATA(cmsg).cast();
             let data = slice::from_raw_parts(data, data_len);
 
-            match ((*cmsg).cmsg_level as _, (*cmsg).cmsg_type as _) {
+            match (cmsg.cmsg_level as _, cmsg.cmsg_type as _) {
                 (c::SOL_SOCKET, c::SCM_RIGHTS) => Ok(SendAncillaryDataUnix::ScmRights(ScmRights(
                     AncillaryDataIter::new(data),
                 ))),
@@ -86,17 +103,15 @@ impl<'a> TryFrom<&'a c::cmsghdr> for SendAncillaryDataUnix<'a> {
     }
 }
 
-impl<'a> TryFrom<&'a c::cmsghdr> for RecvAncillaryDataUnix<'a> {
-    type Error = AncillaryError;
-
+impl<'a> FromCmsghdr<'a> for RecvAncillaryDataUnix<'a> {
     fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
         unsafe {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
-            let data_len = (*cmsg).cmsg_len as usize - cmsg_len_zero;
+            let data_len = cmsg.cmsg_len as usize - cmsg_len_zero;
             let data = c::CMSG_DATA(cmsg).cast();
             let data = slice::from_raw_parts(data, data_len);
 
-            match ((*cmsg).cmsg_level as _, (*cmsg).cmsg_type as _) {
+            match (cmsg.cmsg_level as _, cmsg.cmsg_type as _) {
                 (c::SOL_SOCKET, c::SCM_RIGHTS) => Ok(RecvAncillaryDataUnix::ScmRights(ScmRights(
                     AncillaryDataIter::new(data),
                 ))),
@@ -180,17 +195,22 @@ pub enum RecvAncillaryDataV4<'a> {
     RxqOvfl(RxqOvfls<'a>),
 }
 
-impl<'a> TryFrom<&'a c::cmsghdr> for SendAncillaryDataV4<'a> {
-    type Error = AncillaryError;
-
+impl<'a> FromCmsghdr<'a> for SendAncillaryDataV4<'a> {
     fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
         unsafe {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
-            let data_len = (*cmsg).cmsg_len as usize - cmsg_len_zero;
+            let data_len = cmsg.cmsg_len as usize - cmsg_len_zero;
             let data = c::CMSG_DATA(cmsg).cast();
             let data = slice::from_raw_parts(data, data_len);
 
-            match ((*cmsg).cmsg_level as _, (*cmsg).cmsg_type as _) {
+            match (cmsg.cmsg_level as _, cmsg.cmsg_type as _) {
+                #[cfg(any(
+                    target_os = "linux",
+                    target_os = "macos",
+                    target_os = "netbsd",
+                    target_os = "android",
+                    target_os = "ios",
+                ))]
                 (c::IPPROTO_IP, c::IP_PKTINFO) => Ok(SendAncillaryDataV4::PacketInfos(
                     Ipv4PacketInfos(AncillaryDataIter::new(data)),
                 )),
@@ -204,17 +224,22 @@ impl<'a> TryFrom<&'a c::cmsghdr> for SendAncillaryDataV4<'a> {
     }
 }
 
-impl<'a> TryFrom<&'a c::cmsghdr> for RecvAncillaryDataV4<'a> {
-    type Error = AncillaryError;
-
+impl<'a> FromCmsghdr<'a> for RecvAncillaryDataV4<'a> {
     fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
         unsafe {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
-            let data_len = (*cmsg).cmsg_len as usize - cmsg_len_zero;
+            let data_len = cmsg.cmsg_len as usize - cmsg_len_zero;
             let data = c::CMSG_DATA(cmsg).cast();
             let data = slice::from_raw_parts(data, data_len);
 
-            match ((*cmsg).cmsg_level as _, (*cmsg).cmsg_type as _) {
+            match (cmsg.cmsg_level as _, cmsg.cmsg_type as _) {
+                #[cfg(any(
+                    target_os = "linux",
+                    target_os = "macos",
+                    target_os = "netbsd",
+                    target_os = "android",
+                    target_os = "ios",
+                ))]
                 (c::IPPROTO_IP, c::IP_PKTINFO) => Ok(RecvAncillaryDataV4::PacketInfos(
                     Ipv4PacketInfos(AncillaryDataIter::new(data)),
                 )),
@@ -298,17 +323,22 @@ pub enum SendAncillaryDataV6<'a> {
     UdpGsoSegments(UdpGsoSegments<'a>),
 }
 
-impl<'a> TryFrom<&'a c::cmsghdr> for SendAncillaryDataV6<'a> {
-    type Error = AncillaryError;
-
+impl<'a> FromCmsghdr<'a> for SendAncillaryDataV6<'a> {
     fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
         unsafe {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
-            let data_len = (*cmsg).cmsg_len as usize - cmsg_len_zero;
+            let data_len = cmsg.cmsg_len as usize - cmsg_len_zero;
             let data = c::CMSG_DATA(cmsg).cast();
             let data = slice::from_raw_parts(data, data_len);
 
-            match ((*cmsg).cmsg_level as _, (*cmsg).cmsg_type as _) {
+            match (cmsg.cmsg_level as _, cmsg.cmsg_type as _) {
+                #[cfg(any(
+                    target_os = "linux",
+                    target_os = "macos",
+                    target_os = "netbsd",
+                    target_os = "android",
+                    target_os = "ios",
+                ))]
                 (c::IPPROTO_IPV6, c::IPV6_PKTINFO) => Ok(SendAncillaryDataV6::PacketInfos(
                     Ipv6PacketInfos(AncillaryDataIter::new(data)),
                 )),
@@ -338,17 +368,22 @@ pub enum RecvAncillaryDataV6<'a> {
     RxqOvfl(RxqOvfls<'a>),
 }
 
-impl<'a> TryFrom<&'a c::cmsghdr> for RecvAncillaryDataV6<'a> {
-    type Error = AncillaryError;
-
+impl<'a> FromCmsghdr<'a> for RecvAncillaryDataV6<'a> {
     fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
         unsafe {
             let cmsg_len_zero = c::CMSG_LEN(0) as usize;
-            let data_len = (*cmsg).cmsg_len as usize - cmsg_len_zero;
+            let data_len = cmsg.cmsg_len as usize - cmsg_len_zero;
             let data = c::CMSG_DATA(cmsg).cast();
             let data = slice::from_raw_parts(data, data_len);
 
-            match ((*cmsg).cmsg_level as _, (*cmsg).cmsg_type as _) {
+            match (cmsg.cmsg_level as _, cmsg.cmsg_type as _) {
+                #[cfg(any(
+                    target_os = "linux",
+                    target_os = "macos",
+                    target_os = "netbsd",
+                    target_os = "android",
+                    target_os = "ios",
+                ))]
                 (c::IPPROTO_IPV6, c::IPV6_PKTINFO) => Ok(RecvAncillaryDataV6::PacketInfos(
                     Ipv6PacketInfos(AncillaryDataIter::new(data)),
                 )),
@@ -376,19 +411,126 @@ impl<'a> TryFrom<&'a c::cmsghdr> for RecvAncillaryDataV6<'a> {
 pub struct Ipv6RecvErrs<'a>(AncillaryDataIter<'a, (c::sock_extended_err, Option<c::sockaddr_in6>)>);
 
 /// TODO: document
+#[cfg(any(
+    target_os = "linux",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "android",
+    target_os = "ios",
+))]
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Ipv4PacketInfo(c::in_pktinfo);
+
+#[cfg(any(
+    target_os = "linux",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "android",
+    target_os = "ios",
+))]
+impl Default for Ipv4PacketInfo {
+    #[cfg(target_os = "netbsd")]
+    fn default() -> Self {
+        let info = c::in_pktinfo {
+            ipi_ifindex: 0,
+            ipi_addr: c::in_addr { s_addr: 0 },
+        };
+        Ipv4PacketInfo(info)
+    }
+
+    #[cfg(not(target_os = "netbsd"))]
+    fn default() -> Self {
+        let info = c::in_pktinfo {
+            ipi_ifindex: 0,
+            ipi_addr: c::in_addr { s_addr: 0 },
+            ipi_spec_dst: c::in_addr { s_addr: 0 },
+        };
+        Ipv4PacketInfo(info)
+    }
+}
+
+#[cfg(any(
+    target_os = "linux",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "android",
+    target_os = "ios",
+))]
+impl Ipv4PacketInfo {
+    /// Sets `ipi_spec_dst`, the local address to the provided `addr`.
+    #[cfg(not(target_os = "netbsd"))]
+    pub fn set_local_addr(&mut self, addr: &SocketAddrV4) {
+        let sin_addr = in_addr_new(u32::from_ne_bytes(addr.ip().octets()));
+        self.0.ipi_spec_dst = sin_addr;
+    }
+
+    /// Sets `ipi_ifindex`, the interface index to the provided `index`.
+    pub fn set_interface_index(&mut self, index: i32) {
+        self.0.ipi_ifindex = index;
+    }
+}
 
 /// TODO: document
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Ipv6PacketInfo(c::in6_pktinfo);
 
+#[cfg(any(
+    target_os = "linux",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "android",
+    target_os = "ios",
+))]
+impl Default for Ipv6PacketInfo {
+    fn default() -> Self {
+        let info = c::in6_pktinfo {
+            ipi6_ifindex: 0,
+            ipi6_addr: in6_addr_new([0u8; 16]),
+        };
+        Ipv6PacketInfo(info)
+    }
+}
+
+#[cfg(any(
+    target_os = "linux",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "android",
+    target_os = "ios",
+))]
+impl Ipv6PacketInfo {
+    /// Sets `ipi6_addr`, the source address to the provided `addr`.
+    pub fn set_source_addr(&mut self, addr: &SocketAddrV6) {
+        let sin_addr = in6_addr_new(addr.ip().octets());
+        self.0.ipi6_addr = sin_addr;
+    }
+
+    /// Sets `ipi6_ifindex`, the interface index to the provided `index`.
+    pub fn set_interface_index(&mut self, index: u32) {
+        self.0.ipi6_ifindex = index as _;
+    }
+}
+
 /// TODO: document
+#[cfg(any(
+    target_os = "linux",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "android",
+    target_os = "ios",
+))]
 pub struct Ipv4PacketInfos<'a>(AncillaryDataIter<'a, c::in_pktinfo>);
 
 /// TODO: document
+#[cfg(any(
+    target_os = "linux",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "android",
+    target_os = "ios",
+))]
 pub struct Ipv6PacketInfos<'a>(AncillaryDataIter<'a, c::in6_pktinfo>);
 
 /// TODO: document
@@ -460,9 +602,6 @@ impl SocketCred {
     }
 }
 
-// TODO: Provide way of sizing the buffer for SocketAncillary upfront, like in
-// https://docs.rs/nix/latest/nix/macro.cmsg_space.html
-
 // TODO: Find a way to use MaybeUninit as backing data.
 
 // TODO: Should there exist a convenience wrapper that owns the buffer and potentially
@@ -472,20 +611,27 @@ impl SocketCred {
 
 /// TODO: document
 #[derive(Debug)]
-pub struct SocketAncillary<'a, T: TryFrom<&'a c::cmsghdr>> {
-    pub(crate) buffer: &'a mut [u8],
+pub struct SocketAncillary<'a, T: FromCmsghdr<'a>> {
+    buffer: &'a mut [u8],
     pub(crate) length: usize,
     pub(crate) truncated: bool,
+    /// helper struct to easily operate the `CMSG_*` macros.
+    msg: c::msghdr,
     _t: PhantomData<T>,
 }
 
-impl<'a, T: TryFrom<&'a c::cmsghdr>> SocketAncillary<'a, T> {
+impl<'a, T: FromCmsghdr<'a>> SocketAncillary<'a, T> {
     /// Create an ancillary data with the given buffer.
     pub fn new(buffer: &'a mut [u8]) -> Self {
+        let mut msg: c::msghdr = unsafe { zeroed() };
+        msg.msg_control = buffer.as_mut_ptr().cast();
+        msg.msg_controllen = 0;
+
         SocketAncillary {
             buffer,
             length: 0,
             truncated: false,
+            msg,
             _t: Default::default(),
         }
     }
@@ -514,6 +660,7 @@ impl<'a, T: TryFrom<&'a c::cmsghdr>> SocketAncillary<'a, T> {
     pub fn clear(&mut self) {
         self.length = 0;
         self.truncated = false;
+        self.msg.msg_controllen = 0;
     }
 
     /// Returns the iterator of the control messages.
@@ -523,6 +670,76 @@ impl<'a, T: TryFrom<&'a c::cmsghdr>> SocketAncillary<'a, T> {
             current: None,
             _t: Default::default(),
         }
+    }
+
+    pub(crate) unsafe fn buffer_mut_ptr(&mut self) -> *mut u8 {
+        self.buffer.as_mut_ptr()
+    }
+
+    pub(crate) fn buffer_len(&self) -> usize {
+        self.buffer.len()
+    }
+
+    /// Returns a pointer to the next `cmsgshdr` data section to write to, if enough space is available.
+    unsafe fn get_cmsg_data(
+        &mut self,
+        source_len: Option<u32>,
+        cmsg_level: u32,
+        cmsg_type: u32,
+    ) -> Option<(u32, &mut [u8])> {
+        let source_len = source_len?;
+
+        let additional_space = c::CMSG_SPACE(source_len as _) as usize;
+
+        let new_length = additional_space.checked_add(self.length)?;
+
+        if new_length > self.buffer.len() {
+            return None;
+        }
+
+        self.buffer[self.length..new_length].fill(0);
+        self.length = new_length;
+        self.msg.msg_controllen = self.length as _;
+
+        let mut cmsg = c::CMSG_FIRSTHDR(&self.msg);
+        let mut previous_cmsg = cmsg;
+        while !cmsg.is_null() {
+            previous_cmsg = cmsg;
+            cmsg = c::CMSG_NXTHDR(&self.msg, cmsg);
+
+            // Most operating systems, but not Linux or emscripten, return the previous pointer
+            // when its length is zero. Therefore, check if the previous pointer is the same as
+            // the current one.
+            if ptr::eq(cmsg, previous_cmsg) {
+                break;
+            }
+        }
+
+        if previous_cmsg.is_null() {
+            return None;
+        }
+
+        let cmsg_len = c::CMSG_LEN(source_len as _);
+        (*previous_cmsg).cmsg_level = cmsg_level as _;
+        (*previous_cmsg).cmsg_type = cmsg_type as _;
+        (*previous_cmsg).cmsg_len = cmsg_len as _;
+
+        let data: *mut u8 = c::CMSG_DATA(previous_cmsg).cast();
+        let data_slice = slice::from_raw_parts_mut(data, usize::try_from(cmsg_len).ok()?);
+
+        Some((source_len, data_slice))
+    }
+}
+
+fn size_of_data<U>(source: &[U]) -> Option<u32> {
+    if let Some(source_len) = source.len().checked_mul(size_of::<U>()) {
+        if let Ok(source_len) = u32::try_from(source_len) {
+            Some(source_len)
+        } else {
+            return None;
+        }
+    } else {
+        None
     }
 }
 
@@ -538,13 +755,21 @@ impl<'a> SocketAncillary<'a, SendAncillaryDataUnix<'a>> {
     /// and type `SCM_RIGHTS`.
     pub fn add_fds<Fd: AsFd>(&mut self, fds: &[Fd]) -> bool {
         self.truncated = false;
-        add_to_ancillary_data(
-            &mut self.buffer,
-            &mut self.length,
-            fds,
-            c::SOL_SOCKET as _,
-            c::SCM_RIGHTS as _,
-        )
+        let size_single = size_of::<RawFd>();
+        let size = u32::try_from(fds.len() * size_single).ok();
+
+        unsafe {
+            match self.get_cmsg_data(size, c::SOL_SOCKET as _, c::SCM_RIGHTS as _) {
+                Some((_, data)) => {
+                    for (fd, data_chunk) in fds.iter().zip(data.chunks_mut(size_single)) {
+                        let raw = fd.as_fd().as_raw_fd();
+                        data_chunk[..size_single].copy_from_slice(&raw.to_ne_bytes());
+                    }
+                    true
+                }
+                None => false,
+            }
+        }
     }
 
     /// Add credentials to the ancillary data.
@@ -557,13 +782,20 @@ impl<'a> SocketAncillary<'a, SendAncillaryDataUnix<'a>> {
     #[cfg(any(target_os = "android", target_os = "linux",))]
     pub fn add_creds(&mut self, creds: &[SocketCred]) -> bool {
         self.truncated = false;
-        add_to_ancillary_data(
-            &mut self.buffer,
-            &mut self.length,
-            creds,
-            c::SOL_SOCKET as _,
-            c::SCM_CREDENTIALS as _,
-        )
+        let size = size_of_data(creds);
+        unsafe {
+            match self.get_cmsg_data(size, c::SOL_SOCKET as _, c::SCM_CREDENTIALS as _) {
+                Some((size, data)) => {
+                    ptr::copy_nonoverlapping(
+                        creds as *const _ as *mut c::ucred as *mut u8,
+                        data.as_mut_ptr(),
+                        size as usize,
+                    );
+                    true
+                }
+                None => false,
+            }
+        }
     }
 }
 
@@ -575,8 +807,45 @@ pub type SendSocketAncillaryV4<'a> = SocketAncillary<'a, SendAncillaryDataV4<'a>
 
 impl<'a> SocketAncillary<'a, SendAncillaryDataV4<'a>> {
     /// TODO
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "android",
+        target_os = "ios",
+    ))]
     pub fn add_packet_info(&mut self, info: &Ipv4PacketInfo) -> bool {
-        todo!()
+        self.truncated = false;
+        let size = u32::try_from(size_of::<c::in_pktinfo>()).ok();
+        unsafe {
+            match self.get_cmsg_data(size, c::IPPROTO_IP as _, c::IP_PKTINFO as _) {
+                Some((size, data)) => {
+                    ptr::copy_nonoverlapping(
+                        info as *const _ as *mut c::in_pktinfo as *mut u8,
+                        data.as_mut_ptr(),
+                        size as usize,
+                    );
+                    true
+                }
+                None => false,
+            }
+        }
+    }
+
+    /// TODO: document
+    #[cfg(target_os = "linux")]
+    pub fn add_udp_gso_segment(&mut self, gso_size: u16) -> bool {
+        self.truncated = false;
+        let size = u32::try_from(size_of::<u16>()).ok();
+        unsafe {
+            match self.get_cmsg_data(size, c::SOL_UDP as _, c::UDP_SEGMENT as _) {
+                Some((size, data)) => {
+                    data[..size as usize].copy_from_slice(&gso_size.to_ne_bytes());
+                    true
+                }
+                None => false,
+            }
+        }
     }
 }
 
@@ -588,8 +857,45 @@ pub type SendSocketAncillaryV6<'a> = SocketAncillary<'a, SendAncillaryDataV6<'a>
 
 impl<'a> SocketAncillary<'a, SendAncillaryDataV6<'a>> {
     /// TODO
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "android",
+        target_os = "ios",
+    ))]
     pub fn add_packet_info(&mut self, info: &Ipv6PacketInfo) -> bool {
-        todo!()
+        self.truncated = false;
+        let size = u32::try_from(size_of::<c::in6_pktinfo>()).ok();
+        unsafe {
+            match self.get_cmsg_data(size, c::IPPROTO_IPV6 as _, c::IPV6_PKTINFO as _) {
+                Some((size, data)) => {
+                    ptr::copy_nonoverlapping(
+                        info as *const _ as *mut c::in6_pktinfo as *mut u8,
+                        data.as_mut_ptr(),
+                        size as usize,
+                    );
+                    true
+                }
+                None => false,
+            }
+        }
+    }
+
+    /// TODO: document
+    #[cfg(target_os = "linux")]
+    pub fn add_udp_gso_segment(&mut self, gso_size: u16) -> bool {
+        self.truncated = false;
+        let size = u32::try_from(size_of::<u16>()).ok();
+        unsafe {
+            match self.get_cmsg_data(size, c::SOL_UDP as _, c::UDP_SEGMENT as _) {
+                Some((size, data)) => {
+                    data[..size as usize].copy_from_slice(&gso_size.to_ne_bytes());
+                    true
+                }
+                None => false,
+            }
+        }
     }
 }
 
@@ -619,14 +925,14 @@ impl AncillaryError {
 }
 
 /// This struct is used to iterate through the control messages.
-pub struct Messages<'a, T: TryFrom<&'a c::cmsghdr>> {
+pub struct Messages<'a, T: FromCmsghdr<'a>> {
     buffer: &'a [u8],
     current: Option<&'a c::cmsghdr>,
     _t: PhantomData<T>,
 }
 
-impl<'a, T: TryFrom<&'a c::cmsghdr>> Iterator for Messages<'a, T> {
-    type Item = Result<T, T::Error>;
+impl<'a, T: FromCmsghdr<'a>> Iterator for Messages<'a, T> {
+    type Item = Result<T, AncillaryError>;
 
     fn next(&mut self) -> Option<Self::Item> {
         unsafe {
@@ -693,82 +999,14 @@ impl<'a, T> Iterator for AncillaryDataIter<'a, T> {
     }
 }
 
-fn add_to_ancillary_data<T>(
-    buffer: &mut [u8],
-    length: &mut usize,
-    source: &[T],
-    cmsg_level: c::c_uint,
-    cmsg_type: c::c_uint,
-) -> bool {
-    let source_len = if let Some(source_len) = source.len().checked_mul(size_of::<T>()) {
-        if let Ok(source_len) = u32::try_from(source_len) {
-            source_len
-        } else {
-            return false;
-        }
-    } else {
-        return false;
-    };
-
-    unsafe {
-        let additional_space = c::CMSG_SPACE(source_len as _) as usize;
-
-        let new_length = if let Some(new_length) = additional_space.checked_add(*length) {
-            new_length
-        } else {
-            return false;
-        };
-
-        if new_length > buffer.len() {
-            return false;
-        }
-
-        buffer[*length..new_length].fill(0);
-
-        *length = new_length;
-
-        let mut msg: c::msghdr = zeroed();
-        msg.msg_control = buffer.as_mut_ptr().cast();
-        msg.msg_controllen = *length as _;
-
-        let mut cmsg = c::CMSG_FIRSTHDR(&msg);
-        let mut previous_cmsg = cmsg;
-        while !cmsg.is_null() {
-            previous_cmsg = cmsg;
-            cmsg = c::CMSG_NXTHDR(&msg, cmsg);
-
-            // Most operating systems, but not Linux or emscripten, return the previous pointer
-            // when its length is zero. Therefore, check if the previous pointer is the same as
-            // the current one.
-            if ptr::eq(cmsg, previous_cmsg) {
-                break;
-            }
-        }
-
-        if previous_cmsg.is_null() {
-            return false;
-        }
-
-        (*previous_cmsg).cmsg_level = cmsg_level as _;
-        (*previous_cmsg).cmsg_type = cmsg_type as _;
-        (*previous_cmsg).cmsg_len = c::CMSG_LEN(source_len as _) as _;
-
-        let data: *mut T = c::CMSG_DATA(previous_cmsg).cast();
-
-        ptr::copy_nonoverlapping(source.as_ptr().cast(), data, source.len());
-    }
-
-    true
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::io::OwnedFd;
 
     #[test]
-    fn test_cmsg_space() {
-        let buf = cmsg_space!([OwnedFd; 2]);
+    fn test_cmsg_buffer() {
+        let buf = cmsg_buffer!([OwnedFd; 2]);
         assert_eq!(
             buf.len(),
             c::CMSG_SPACE(core::mem::size_of::<[OwnedFd; 2]>() as _) as _

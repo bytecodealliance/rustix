@@ -30,7 +30,7 @@ fn server(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path) {
 
     let res = recvmsg_unix(
         &data_socket,
-        &[IoSliceMut::new(&mut buffer)],
+        &mut [IoSliceMut::new(&mut buffer)],
         RecvFlags::empty(),
     )
     .unwrap();
@@ -83,7 +83,7 @@ fn client(ready: Arc<(Mutex<bool>, Condvar)>, server_path: &Path, client_path: &
     let mut buffer = vec![0u8; BUFFER_SIZE];
     let res = recvmsg_unix(
         &data_socket,
-        &[IoSliceMut::new(&mut buffer)],
+        &mut [IoSliceMut::new(&mut buffer)],
         RecvFlags::empty(),
     )
     .unwrap();
@@ -127,7 +127,7 @@ fn test_unix_msg() {
 #[test]
 fn test_scm_credentials_and_rights() {
     use io_lifetimes::AsFd;
-    use rustix::cmsg_space;
+    use rustix::cmsg_buffer;
     use rustix::io::{pipe, read, write, OwnedFd};
     use rustix::net::{
         recvmsg_unix_with_ancillary, sendmsg_unix_with_ancillary, RecvAncillaryDataUnix,
@@ -136,7 +136,7 @@ fn test_scm_credentials_and_rights() {
     use rustix::net::{sockopt::set_socket_passcred, SocketFlags};
     use rustix::process::{getgid, getpid, getuid};
 
-    let mut space = cmsg_space!(OwnedFd, SocketCred);
+    let mut space = cmsg_buffer!(OwnedFd, SocketCred);
 
     let (send, recv) = socketpair(
         AddressFamily::UNIX,
@@ -168,10 +168,10 @@ fn test_scm_credentials_and_rights() {
 
     {
         let mut buf = [0u8; 5];
-        let iovs = [IoSliceMut::new(&mut buf[..])];
+        let mut iovs = [IoSliceMut::new(&mut buf[..])];
         let mut cmsgs = RecvSocketAncillaryUnix::new(&mut space);
         let msg =
-            recvmsg_unix_with_ancillary(&recv, &iovs, &mut cmsgs, RecvFlags::empty()).unwrap();
+            recvmsg_unix_with_ancillary(&recv, &mut iovs, &mut cmsgs, RecvFlags::empty()).unwrap();
 
         assert_eq!(cmsgs.messages().count(), 2, "expected 2 cmsgs");
         let mut received_cred = None;

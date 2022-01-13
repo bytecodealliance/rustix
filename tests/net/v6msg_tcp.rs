@@ -39,7 +39,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     let data_socket = accept(&connection_socket).unwrap();
     let res = recvmsg_v6(
         &data_socket,
-        &[IoSliceMut::new(&mut buffer)],
+        &mut [IoSliceMut::new(&mut buffer)],
         RecvFlags::empty(),
     )
     .unwrap();
@@ -83,7 +83,7 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
 
     let res = recvmsg_v6(
         &data_socket,
-        &[IoSliceMut::new(&mut buffer)],
+        &mut [IoSliceMut::new(&mut buffer)],
         RecvFlags::empty(),
     )
     .unwrap();

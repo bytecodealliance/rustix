@@ -303,7 +303,7 @@ pub fn sendmsg_unix_with_ancillary<Fd: AsFd>(
 #[inline]
 pub fn recvmsg_v4<Fd: AsFd>(
     fd: &Fd,
-    iovs: &[io::IoSliceMut<'_>],
+    iovs: &mut [io::IoSliceMut<'_>],
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
     let fd = fd.as_fd();
@@ -323,7 +323,7 @@ pub fn recvmsg_v4<Fd: AsFd>(
 #[inline]
 pub fn recvmsg_v4_with_ancillary<Fd: AsFd>(
     fd: &Fd,
-    iovs: &[io::IoSliceMut<'_>],
+    iovs: &mut [io::IoSliceMut<'_>],
     ancillary: &mut RecvSocketAncillaryV4<'_>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
@@ -392,7 +392,7 @@ impl RecvMsgV4 {
 #[inline]
 pub fn recvmsg_v6<Fd: AsFd>(
     fd: &Fd,
-    iovs: &[io::IoSliceMut<'_>],
+    iovs: &mut [io::IoSliceMut<'_>],
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV6> {
     let fd = fd.as_fd();
@@ -412,7 +412,7 @@ pub fn recvmsg_v6<Fd: AsFd>(
 #[inline]
 pub fn recvmsg_v6_with_ancillary<Fd: AsFd>(
     fd: &Fd,
-    iovs: &[io::IoSliceMut<'_>],
+    iovs: &mut [io::IoSliceMut<'_>],
     ancillary: &mut RecvSocketAncillaryV6<'_>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV6> {
@@ -480,7 +480,7 @@ impl RecvMsgV6 {
 #[inline]
 pub fn recvmsg_unix<Fd: AsFd>(
     fd: &Fd,
-    iovs: &[io::IoSliceMut<'_>],
+    iovs: &mut [io::IoSliceMut<'_>],
     flags: RecvFlags,
 ) -> io::Result<RecvMsgUnix> {
     let fd = fd.as_fd();
@@ -500,7 +500,7 @@ pub fn recvmsg_unix<Fd: AsFd>(
 #[inline]
 pub fn recvmsg_unix_with_ancillary<Fd: AsFd>(
     fd: &Fd,
-    iovs: &[io::IoSliceMut<'_>],
+    iovs: &mut [io::IoSliceMut<'_>],
     ancillary: &mut RecvSocketAncillaryUnix<'_>,
     flags: RecvFlags,
 ) -> io::Result<RecvMsgUnix> {
@@ -607,7 +607,7 @@ pub(crate) unsafe fn encode_msghdr_v4_send(
         (*msg).msg_controllen = ancillary.length as _;
         // macos requires that the control pointer is null when the len is 0.
         if (*msg).msg_controllen > 0 {
-            (*msg).msg_control = ancillary.buffer.as_mut_ptr().cast();
+            (*msg).msg_control = ancillary.buffer_mut_ptr().cast();
         }
         ancillary.truncated = false;
     }
@@ -632,7 +632,7 @@ pub(crate) unsafe fn encode_msghdr_v6_send(
         (*msg).msg_controllen = ancillary.length as _;
         // macos requires that the control pointer is null when the len is 0.
         if (*msg).msg_controllen > 0 {
-            (*msg).msg_control = ancillary.buffer.as_mut_ptr().cast();
+            (*msg).msg_control = ancillary.buffer_mut_ptr().cast();
         }
         ancillary.truncated = false;
     }
@@ -658,7 +658,7 @@ pub(crate) unsafe fn encode_msghdr_unix_send(
         (*msg).msg_controllen = ancillary.length as _;
         // macos requires that the control pointer is null when the len is 0.
         if (*msg).msg_controllen > 0 {
-            (*msg).msg_control = ancillary.buffer.as_mut_ptr().cast();
+            (*msg).msg_control = ancillary.buffer_mut_ptr().cast();
         }
         ancillary.truncated = false;
     }
@@ -666,63 +666,63 @@ pub(crate) unsafe fn encode_msghdr_unix_send(
 
 pub(crate) fn encode_msghdr_v4_recv(
     msg: &mut imp::c::msghdr,
-    iovs: &[IoSliceMut<'_>],
+    iovs: &mut [IoSliceMut<'_>],
     msg_name: *mut imp::c::sockaddr_in,
     ancillary: &mut Option<&mut RecvSocketAncillaryV4<'_>>,
 ) {
-    msg.msg_iov = iovs.as_ptr() as *mut imp::c::iovec;
+    msg.msg_iov = iovs.as_mut_ptr().cast();
     msg.msg_iovlen = iovs.len() as _;
 
     msg.msg_name = msg_name.cast();
     msg.msg_namelen = size_of::<imp::c::sockaddr_in>() as _;
 
     if let Some(ancillary) = ancillary {
-        msg.msg_controllen = ancillary.buffer.len() as _;
+        msg.msg_controllen = ancillary.buffer_len() as _;
         // macos requires that the control pointer is null when the len is 0.
         if msg.msg_controllen > 0 {
-            msg.msg_control = ancillary.buffer.as_mut_ptr().cast();
+            msg.msg_control = unsafe { ancillary.buffer_mut_ptr().cast() };
         }
     }
 }
 
 pub(crate) fn encode_msghdr_v6_recv(
     msg: &mut imp::c::msghdr,
-    iovs: &[IoSliceMut<'_>],
+    iovs: &mut [IoSliceMut<'_>],
     msg_name: *mut imp::c::sockaddr_in6,
     ancillary: &mut Option<&mut RecvSocketAncillaryV6<'_>>,
 ) {
-    msg.msg_iov = iovs.as_ptr() as *mut imp::c::iovec;
+    msg.msg_iov = iovs.as_mut_ptr().cast();
     msg.msg_iovlen = iovs.len() as _;
 
     msg.msg_name = msg_name.cast();
     msg.msg_namelen = size_of::<imp::c::sockaddr_in6>() as _;
 
     if let Some(ancillary) = ancillary {
-        msg.msg_controllen = ancillary.buffer.len() as _;
+        msg.msg_controllen = ancillary.buffer_len() as _;
         // macos requires that the control pointer is null when the len is 0.
         if msg.msg_controllen > 0 {
-            msg.msg_control = ancillary.buffer.as_mut_ptr().cast();
+            msg.msg_control = unsafe { ancillary.buffer_mut_ptr().cast() };
         }
     }
 }
 
 pub(crate) fn encode_msghdr_unix_recv(
     msg: &mut imp::c::msghdr,
-    iovs: &[IoSliceMut<'_>],
+    iovs: &mut [IoSliceMut<'_>],
     msg_name: *mut imp::c::sockaddr_un,
     ancillary: &mut Option<&mut RecvSocketAncillaryUnix<'_>>,
 ) {
-    msg.msg_iov = iovs.as_ptr() as *mut imp::c::iovec;
+    msg.msg_iov = iovs.as_mut_ptr().cast();
     msg.msg_iovlen = iovs.len() as _;
 
     msg.msg_name = msg_name.cast();
     msg.msg_namelen = size_of::<imp::c::sockaddr_un>() as _;
 
     if let Some(ancillary) = ancillary {
-        msg.msg_controllen = ancillary.buffer.len() as _;
+        msg.msg_controllen = ancillary.buffer_len() as _;
         // macos requires that the control pointer is null when the len is 0.
         if msg.msg_controllen > 0 {
-            msg.msg_control = ancillary.buffer.as_mut_ptr().cast();
+            msg.msg_control = unsafe { ancillary.buffer_mut_ptr().cast() };
         }
     }
 }
