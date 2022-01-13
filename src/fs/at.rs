@@ -10,6 +10,7 @@ use crate::ffi::{ZStr, ZString};
 use crate::fs::CloneFlags;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 use crate::fs::RenameFlags;
+use crate::fs::Timestamps;
 use crate::io::{self, OwnedFd};
 use crate::path::SMALL_PATH_BUFFER_SIZE;
 #[cfg(not(target_os = "wasi"))]
@@ -20,7 +21,6 @@ use imp::fd::{AsFd, BorrowedFd};
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi",)))]
 use imp::fs::Dev;
 use imp::fs::{Access, AtFlags, Mode, OFlags, Stat};
-use imp::time::Timespec;
 
 /// `openat(dirfd, path, oflags, mode)`—Opens a file.
 ///
@@ -266,7 +266,7 @@ pub fn accessat<P: path::Arg, Fd: AsFd>(
 pub fn utimensat<P: path::Arg, Fd: AsFd>(
     dirfd: &Fd,
     path: P,
-    times: &[Timespec; 2],
+    times: &Timestamps,
     flags: AtFlags,
 ) -> io::Result<()> {
     let dirfd = dirfd.as_fd();

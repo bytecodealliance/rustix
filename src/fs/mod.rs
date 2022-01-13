@@ -196,6 +196,21 @@ pub const PROC_SUPER_MAGIC: FsWord = imp::fs::PROC_SUPER_MAGIC;
 pub use imp::fs::FlockOperation;
 pub use imp::fs::{Dev, RawMode};
 
+/// Timestamps used by [`utimensat`] and [`futimens`].
+//
+// This is `repr(c)` and specifically layed out to match the representation
+// used by `utimensat` and `futimens`, which expect 2-element arrays of
+// timestamps.
+#[repr(C)]
+#[derive(Clone, Debug)]
+pub struct Timestamps {
+    /// The timestamp of the last access to a filesystem object.
+    pub last_access: crate::time::Timespec,
+
+    /// The timestamp of the last modification of a filesystem object.
+    pub last_modification: crate::time::Timespec,
+}
+
 /// Re-export types common to POSIX-ish platforms.
 #[cfg(feature = "std")]
 #[cfg(unix)]

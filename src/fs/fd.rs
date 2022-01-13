@@ -1,5 +1,6 @@
 //! Functions which operate on file descriptors.
 
+use crate::fs::Timestamps;
 use crate::io::SeekFrom;
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
@@ -18,7 +19,6 @@ use imp::fs::Stat;
 use imp::fs::StatFs;
 #[cfg(not(target_os = "wasi"))]
 use imp::fs::{FlockOperation, Mode};
-use imp::time::Timespec;
 
 /// `lseek(fd, offset, whence)`—Repositions a file descriptor within a file.
 ///
@@ -121,7 +121,7 @@ pub fn fstatfs<Fd: AsFd>(fd: &Fd) -> io::Result<StatFs> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/futimens.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/utimensat.2.html
 #[inline]
-pub fn futimens<Fd: AsFd>(fd: &Fd, times: &[Timespec; 2]) -> io::Result<()> {
+pub fn futimens<Fd: AsFd>(fd: &Fd, times: &Timestamps) -> io::Result<()> {
     let fd = fd.as_fd();
     imp::syscalls::futimens(fd, times)
 }

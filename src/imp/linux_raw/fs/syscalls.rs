@@ -26,18 +26,18 @@ use super::super::conv::zero;
 use super::super::conv::{
     borrowed_fd, by_ref, c_int, c_str, c_uint, dev_t, mode_as, oflags, oflags_for_open_how,
     opt_c_str, opt_mut, out, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint, ret_owned_fd,
-    ret_usize, size_of, slice_just_addr, slice_mut,
+    ret_usize, size_of, slice_mut,
 };
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use super::super::fd::AsFd;
 use super::super::fd::{BorrowedFd, RawFd};
 use super::super::reg::nr;
-use super::super::time::Timespec;
 use super::{
     Access, Advice as FsAdvice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode,
     OFlags, RenameFlags, ResolveFlags, Stat, StatFs, StatxFlags,
 };
 use crate::ffi::ZStr;
+use crate::fs::Timestamps;
 use crate::io::{self, OwnedFd, SeekFrom};
 use crate::process::{Gid, Uid};
 use core::convert::TryInto;
@@ -64,7 +64,7 @@ use linux_raw_sys::v5_4::general::{
 };
 #[cfg(target_pointer_width = "32")]
 use {
-    super::super::conv::{hi, lo},
+    super::super::conv::{hi, lo, slice_just_addr},
     linux_raw_sys::{
         general::timespec as __kernel_old_timespec,
         general::{
@@ -1097,21 +1097,21 @@ pub(crate) fn getdents(fd: BorrowedFd<'_>, dirent: &mut [u8]) -> io::Result<usiz
 pub(crate) fn utimensat(
     dirfd: BorrowedFd<'_>,
     pathname: &ZStr,
-    utimes: &[Timespec; 2],
+    times: &Timestamps,
     flags: AtFlags,
 ) -> io::Result<()> {
-    _utimensat(dirfd, Some(pathname), utimes, flags)
+    _utimensat(dirfd, Some(pathname), times, flags)
 }
 
 #[inline]
 fn _utimensat(
     dirfd: BorrowedFd<'_>,
     pathname: Option<&ZStr>,
-    utimes: &[__kernel_timespec; 2],
+    times: &Timestamps,
     flags: AtFlags,
 ) -> io::Result<()> {
-    // The length of the array is fixed and not passed into the syscall.
-    let utimes_addr = slice_just_addr(utimes);
+    // Assert that `Timestamps` has the expected layout.
+    let _ = unsafe { core::mem::transmute::<Timestamps, [__kernel_timespec; 2]>(times.clone()) };
 
     #[cfg(target_pointer_width = "32")]
     unsafe {
@@ -1119,30 +1119,46 @@ fn _utimensat(
             nr(__NR_utimensat_time64),
             borrowed_fd(dirfd),
             opt_c_str(pathname),
-            utimes_addr,
+            by_ref(times),
             c_uint(flags.bits()),
         ))
         .or_else(|err| {
             // See the comments in `rustix_clock_gettime_via_syscall` about
             // emulation.
             if err == io::Error::NOSYS {
-                let old_utimes = [
+                let old_times = [
                     __kernel_old_timespec {
-                        tv_sec: utimes[0].tv_sec.try_into().map_err(|_| io::Error::INVAL)?,
-                        tv_nsec: utimes[0].tv_nsec.try_into().map_err(|_| io::Error::INVAL)?,
+                        tv_sec: times
+                            .last_access
+                            .tv_sec
+                            .try_into()
+                            .map_err(|_| io::Error::INVAL)?,
+                        tv_nsec: times
+                            .last_access
+                            .tv_nsec
+                            .try_into()
+                            .map_err(|_| io::Error::INVAL)?,
                     },
                     __kernel_old_timespec {
-                        tv_sec: utimes[1].tv_sec.try_into().map_err(|_| io::Error::INVAL)?,
-                        tv_nsec: utimes[1].tv_nsec.try_into().map_err(|_| io::Error::INVAL)?,
+                        tv_sec: times
+                            .last_modification
+                            .tv_sec
+                            .try_into()
+                            .map_err(|_| io::Error::INVAL)?,
+                        tv_nsec: times
+                            .last_modification
+                            .tv_nsec
+                            .try_into()
+                            .map_err(|_| io::Error::INVAL)?,
                     },
                 ];
                 // The length of the array is fixed and not passed into the syscall.
-                let old_utimes_addr = slice_just_addr(&old_utimes);
+                let old_times_addr = slice_just_addr(&old_times);
                 ret(syscall4_readonly(
                     nr(__NR_utimensat),
                     borrowed_fd(dirfd),
                     opt_c_str(pathname),
-                    old_utimes_addr,
+                    old_times_addr,
                     c_uint(flags.bits()),
                 ))
             } else {
@@ -1156,14 +1172,14 @@ fn _utimensat(
             nr(__NR_utimensat),
             borrowed_fd(dirfd),
             opt_c_str(pathname),
-            utimes_addr,
+            by_ref(times),
             c_uint(flags.bits()),
         ))
     }
 }
 
 #[inline]
-pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &[Timespec; 2]) -> io::Result<()> {
+pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()> {
     _utimensat(fd, None, times, AtFlags::empty())
 }
 
