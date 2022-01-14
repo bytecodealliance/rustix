@@ -265,6 +265,9 @@ pub enum RecvAncillaryDataV4<'a> {
     /// TODO: document
     #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
     RxqOvfl(RxqOvfls<'a>),
+    /// Make the compiler happy if there are no variants present
+    #[doc(hidden)]
+    Other(PhantomData<&'a [u8]>),
 }
 
 impl<'a> FromCmsghdr<'a> for SendAncillaryDataV4<'a> {

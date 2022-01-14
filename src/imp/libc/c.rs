@@ -67,23 +67,20 @@ pub(crate) unsafe fn sendmsg(
     iToLen: c_int,
     dwFlags: c_ulong,
 ) -> c_int {
-    let mut lpMsg: WSAMSG = core::mem::zeroed();
-    lpMsg.name = lpTo;
-    lpMsg.namelen = iToLen;
-    lpMsg.lpBuffers = lpBuffers;
-    lpMsg.dwBufferCount = dwBufferCount;
-
     let mut lpNumberOfBytesSent: c_ulong = 0;
 
     // No overlapping IO support
     let lpOverlapped = core::ptr::null_mut();
     let lpCompletionRoutine = None;
 
+    // Uses WSASendTo, because WSASendMsg is only usable with Datagram or Raw Sockets.
+    // But the the expectation from sendmsg, is that it works with other sockets, like Stream based ones as well.
     let res = WSASendMsg(
         handle,
-        &mut lpMsg,
-        dwFlags,
+        lpBuffers,
+        dwBufferCount,
         &mut lpNumberOfBytesSent,
+        dwFlags,
         lpOverlapped,
         lpCompletionRoutine,
     );
@@ -109,6 +106,8 @@ pub(crate) unsafe fn recvmsg(
     let lpOverlapped = core::ptr::null_mut();
     let lpCompletionRoutine = None;
 
+    // Use WSARecvFrom, as WSARecMsg is a Microsoft specific extension, that is not supported
+    // by winapi.
     let res = WSARecvFrom(
         s,
         lpBuffers,
