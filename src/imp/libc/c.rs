@@ -8,7 +8,7 @@ pub(crate) use winapi::shared::ws2def::{
     IPPROTO_FRAGMENT, IPPROTO_ICMP, IPPROTO_ICMPV6, IPPROTO_IDP, IPPROTO_IGMP, IPPROTO_IP,
     IPPROTO_IPV6, IPPROTO_PIM, IPPROTO_PUP, IPPROTO_RAW, IPPROTO_ROUTING, IPPROTO_SCTP,
     IPPROTO_TCP, IPPROTO_UDP, LPWSABUF, MSG_TRUNC, SOCKADDR as sockaddr,
-    SOCKADDR_IN as sockaddr_in, SOCKADDR_STORAGE_LH as sockaddr_storage, TCP_NODELAY,
+    SOCKADDR_IN as sockaddr_in, SOCKADDR_STORAGE_LH as sockaddr_storage, TCP_NODELAY, WSAMSG,
 };
 
 pub(crate) use winapi::shared::ws2ipdef::{
@@ -60,27 +60,30 @@ pub(crate) const SHUT_RD: c_int = SD_RECEIVE;
 pub(crate) const SHUT_RDWR: c_int = SD_BOTH;
 
 pub(crate) unsafe fn sendmsg(
-    s: SOCKET,
+    handle: SOCKET,
     lpBuffers: LPWSABUF,
     dwBufferCount: c_ulong,
     lpTo: *mut sockaddr,
     iToLen: c_int,
     dwFlags: c_ulong,
 ) -> c_int {
+    let mut lpMsg = WSAMSG::default();
+    lpMsg.name = lpTo;
+    lpMsg.namelen = iToLen;
+    lpMsg.lpBuffers = lpBuffers;
+    lpMsg.dwBufferCount = dwBufferCount;
+
     let mut lpNumberOfBytesSent: c_ulong = 0;
 
     // No overlapping IO support
     let lpOverlapped = core::ptr::null_mut();
     let lpCompletionRoutine = None;
 
-    let res = WSASendTo(
-        s,
-        lpBuffers,
-        dwBufferCount,
-        &mut lpNumberOfBytesSent,
+    let res = WSASendMsg(
+        handle,
+        &mut lpMsg,
         dwFlags,
-        lpTo,
-        iToLen,
+        &mut lpNumberOfBytesSent,
         lpOverlapped,
         lpCompletionRoutine,
     );

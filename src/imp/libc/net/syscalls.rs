@@ -281,7 +281,7 @@ pub(crate) fn recvmsg_v4(
     iovs: &mut [IoSliceMut<'_>],
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
-    let mut name = MaybeUninit::<c::sockaddr_in>::uninit();
+    let mut name = MaybeUninit::<c::sockaddr_in>::zeroed();
     let mut namelen = size_of::<c::sockaddr_in>() as _;
     let mut flags = flags.bits() as _;
 
@@ -295,7 +295,12 @@ pub(crate) fn recvmsg_v4(
             &mut flags,
         ))?;
 
-        dbg!(&name, namelen);
+        /// Because the lpFrom and lpFromlen parameters are ignored for connection-oriented sockets, we manually check if the address buffer is all zero, and set `iFromLen` to `0` manually.
+        let nc = name.assume_init();
+        if nc.sin_family == 0 && nc.sin_port == 0 && in_addr_s_addr(nc.sin_addr) == 0 {
+            namelen = 0;
+        }
+
         Ok(RecvMsgV4::new(
             bytes as usize,
             name.as_ptr().cast(),
@@ -330,19 +335,29 @@ pub(crate) fn recvmsg_v6(
     iovs: &mut [IoSliceMut<'_>],
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV6> {
-    let mut name = MaybeUninit::<c::sockaddr>::zeroed();
-    let mut namelen = size_of::<c::sockaddr>() as _;
+    let mut name = MaybeUninit::<c::sockaddr_in6>::zeroed();
+    let mut namelen = size_of::<c::sockaddr_in6>() as _;
     let mut flags = flags.bits() as _;
 
     unsafe {
         let bytes = ret_send_recv(c::recvmsg(
             borrowed_fd(fd),
-            iovs.as_ptr() as *mut _,
+            iovs.as_mut_ptr().cast(),
             iovs.len() as _,
-            &mut name as *mut _ as *mut _,
+            name.as_mut_ptr().cast(),
             &mut namelen,
             &mut flags,
         ))?;
+
+        /// Because the lpFrom and lpFromlen parameters are ignored for connection-oriented sockets, we manually check if the address buffer is all zero, and set `iFromLen` to `0` manually.
+        let nc = name.assume_init();
+        if nc.sin6_family == 0
+            && nc.sin6_port == 0
+            && nc.sin6_flowinfo == 0
+            && in6_addr_s6_addr(nc.sin6_addr) == [0u8; 16]
+        {
+            namelen = 0;
+        }
 
         Ok(RecvMsgV6::new(
             bytes as usize,
