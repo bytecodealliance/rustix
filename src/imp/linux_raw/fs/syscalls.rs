@@ -24,13 +24,14 @@ use super::super::c;
 #[cfg(all(target_pointer_width = "32", target_arch = "arm"))]
 use super::super::conv::zero;
 use super::super::conv::{
-    borrowed_fd, by_ref, c_int, c_str, c_uint, dev_t, mode_as, oflags, oflags_for_open_how,
-    opt_c_str, opt_mut, out, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint, ret_owned_fd,
-    ret_usize, size_of, slice_mut,
+    borrowed_fd, by_ref, c_int, c_str, c_uint, dev_t, mode_and_type_as, mode_as, oflags,
+    oflags_for_open_how, opt_c_str, opt_mut, out, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint,
+    ret_owned_fd, ret_usize, size_of, slice_mut,
 };
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use super::super::fd::AsFd;
 use super::super::fd::{BorrowedFd, RawFd};
+use super::super::fs::FileType;
 use super::super::reg::nr;
 use super::{
     Access, Advice as FsAdvice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode,
@@ -253,6 +254,7 @@ pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Uid, group: Gid) -> io::Result<(
 pub(crate) fn mknodat(
     dirfd: BorrowedFd<'_>,
     filename: &ZStr,
+    file_type: FileType,
     mode: Mode,
     dev: u64,
 ) -> io::Result<()> {
@@ -262,7 +264,7 @@ pub(crate) fn mknodat(
             nr(__NR_mknodat),
             borrowed_fd(dirfd),
             c_str(filename),
-            mode_as(mode),
+            mode_and_type_as(mode, file_type),
             dev_t(dev)?,
         ))
     }
@@ -272,7 +274,7 @@ pub(crate) fn mknodat(
             nr(__NR_mknodat),
             borrowed_fd(dirfd),
             c_str(filename),
-            mode_as(mode),
+            mode_and_type_as(mode, file_type),
             dev_t(dev),
         ))
     }

@@ -87,12 +87,17 @@ pub fn fchown<Fd: AsFd>(fd: &Fd, owner: Uid, group: Gid) -> io::Result<()> {
 
 /// `fstat(fd)`—Queries metadata for an open file or directory.
 ///
+/// [`Mode::from_raw_mode`] and [`FileType::from_raw_mode`] may be used to
+/// interpret the `st_mode` field.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fstat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fstat.2.html
+/// [`Mode::from_raw_mode`]: crate::fs::Mode::from_raw_mode
+/// [`FileType::from_raw_mode`]: crate::fs::FileType::from_raw_mode
 #[inline]
 pub fn fstat<Fd: AsFd>(fd: &Fd) -> io::Result<Stat> {
     let fd = fd.as_fd();

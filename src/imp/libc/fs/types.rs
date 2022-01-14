@@ -73,95 +73,86 @@ bitflags! {
 }
 
 bitflags! {
-    /// `S_I*` constants for use with [`openat`].
+    /// `S_I*` constants for use with [`openat`], [`chmodat`], and [`fchmod`].
     ///
     /// [`openat`]: crate::fs::openat
+    /// [`chmodat`]: crate::fs::chmodat
+    /// [`fchmod`]: crate::fs::fchmod
     pub struct Mode: RawMode {
         /// `S_IRWXU`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IRWXU = c::S_IRWXU;
+        const RWXU = c::S_IRWXU;
 
         /// `S_IRUSR`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IRUSR = c::S_IRUSR;
+        const RUSR = c::S_IRUSR;
 
         /// `S_IWUSR`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IWUSR = c::S_IWUSR;
+        const WUSR = c::S_IWUSR;
 
         /// `S_IXUSR`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IXUSR = c::S_IXUSR;
+        const XUSR = c::S_IXUSR;
 
         /// `S_IRWXG`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IRWXG = c::S_IRWXG;
+        const RWXG = c::S_IRWXG;
 
         /// `S_IRGRP`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IRGRP = c::S_IRGRP;
+        const RGRP = c::S_IRGRP;
 
         /// `S_IWGRP`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IWGRP = c::S_IWGRP;
+        const WGRP = c::S_IWGRP;
 
         /// `S_IXGRP`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IXGRP = c::S_IXGRP;
+        const XGRP = c::S_IXGRP;
 
         /// `S_IRWXO`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IRWXO = c::S_IRWXO;
+        const RWXO = c::S_IRWXO;
 
         /// `S_IROTH`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IROTH = c::S_IROTH;
+        const ROTH = c::S_IROTH;
 
         /// `S_IWOTH`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IWOTH = c::S_IWOTH;
+        const WOTH = c::S_IWOTH;
 
         /// `S_IXOTH`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const IXOTH = c::S_IXOTH;
+        const XOTH = c::S_IXOTH;
 
         /// `S_ISUID`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const ISUID = c::S_ISUID as c::mode_t;
+        const SUID = c::S_ISUID as c::mode_t;
 
         /// `S_ISGID`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const ISGID = c::S_ISGID as c::mode_t;
+        const SGID = c::S_ISGID as c::mode_t;
 
         /// `S_ISVTX`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const ISVTX = c::S_ISVTX as c::mode_t;
+        const SVTX = c::S_ISVTX as c::mode_t;
+    }
+}
 
-        /// `S_IFREG`
-        const IFREG = c::S_IFREG;
+impl Mode {
+    /// Construct a `Mode` from the mode bits of the `st_mode` field of
+    /// a `Stat`.
+    #[inline]
+    pub const fn from_raw_mode(st_mode: RawMode) -> Self {
+        Self::from_bits_truncate(st_mode)
+    }
 
-        /// `S_IFDIR`
-        const IFDIR = c::S_IFDIR;
-
-        /// `S_IFLNK`
-        const IFLNK = c::S_IFLNK;
-
-        /// `S_IFIFO`
-        #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `S_IFIFO`.
-        const IFIFO = c::S_IFIFO;
-
-        /// `S_IFSOCK`
-        #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `S_IFSOCK`.
-        const IFSOCK = c::S_IFSOCK;
-
-        /// `S_IFCHR`
-        const IFCHR = c::S_IFCHR;
-
-        /// `S_IFBLK`
-        const IFBLK = c::S_IFBLK;
-
-        /// `S_IFMT`
-        const IFMT = c::S_IFMT;
+    /// Construct an `st_mode` value from `Stat`.
+    #[inline]
+    pub const fn as_raw_mode(self) -> RawMode {
+        self.bits()
     }
 }
 
@@ -382,36 +373,43 @@ bitflags! {
     }
 }
 
-/// `S_IF*` constants.
+/// `S_IF*` constants for use with [`mknodat`] and [`Stat`]'s `st_mode` field.
+///
+/// [`mknodat`]: crate::fs::mknodat
+/// [`Stat`]: crate::fs::Stat
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FileType {
     /// `S_IFREG`
-    RegularFile,
+    RegularFile = c::S_IFREG as isize,
 
     /// `S_IFDIR`
-    Directory,
+    Directory = c::S_IFDIR as isize,
 
     /// `S_IFLNK`
-    Symlink,
+    Symlink = c::S_IFLNK as isize,
 
     /// `S_IFIFO`
-    Fifo,
+    #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `S_IFIFO`.
+    #[doc(alias = "IFO")]
+    Fifo = c::S_IFIFO as isize,
 
     /// `S_IFSOCK`
-    Socket,
+    #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `S_IFSOCK`.
+    Socket = c::S_IFSOCK as isize,
 
     /// `S_IFCHR`
-    CharacterDevice,
+    CharacterDevice = c::S_IFCHR as isize,
 
     /// `S_IFBLK`
-    BlockDevice,
+    BlockDevice = c::S_IFBLK as isize,
 
     /// An unknown filesystem object.
     Unknown,
 }
 
 impl FileType {
-    /// Construct a `FileType` from the `st_mode` field of a `Stat`.
+    /// Construct a `FileType` from the `S_IFMT` bits of the `st_mode` field of
+    /// a `Stat`.
     pub const fn from_raw_mode(st_mode: RawMode) -> Self {
         match st_mode & c::S_IFMT {
             c::S_IFREG => Self::RegularFile,
@@ -427,10 +425,20 @@ impl FileType {
         }
     }
 
-    /// Construct a `FileType` from the `st_mode` field of a `Stat`.
-    #[inline]
-    pub const fn from_mode(st_mode: Mode) -> Self {
-        Self::from_raw_mode(st_mode.bits())
+    /// Construct an `st_mode` value from `Stat`.
+    pub const fn as_raw_mode(self) -> RawMode {
+        match self {
+            Self::RegularFile => c::S_IFREG,
+            Self::Directory => c::S_IFDIR,
+            Self::Symlink => c::S_IFLNK,
+            #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `S_IFIFO`.
+            Self::Fifo => c::S_IFIFO,
+            #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `S_IFSOCK`.
+            Self::Socket => c::S_IFSOCK,
+            Self::CharacterDevice => c::S_IFCHR,
+            Self::BlockDevice => c::S_IFBLK,
+            Self::Unknown => c::S_IFMT,
+        }
     }
 
     /// Construct a `FileType` from the `d_type` field of a `c::dirent`.

@@ -65,78 +65,71 @@ bitflags! {
 }
 
 bitflags! {
-    /// `S_I*` constants for use with [`openat`].
+    /// `S_I*` constants for use with [`openat`], [`chmodat`], and [`fchmod`].
     ///
     /// [`openat`]: crate::fs::openat
+    /// [`chmodat`]: crate::fs::chmodat
+    /// [`fchmod`]: crate::fs::fchmod
     pub struct Mode: RawMode {
         /// `S_IRWXU`
-        const IRWXU = linux_raw_sys::general::S_IRWXU;
+        const RWXU = linux_raw_sys::general::S_IRWXU;
 
         /// `S_IRUSR`
-        const IRUSR = linux_raw_sys::general::S_IRUSR;
+        const RUSR = linux_raw_sys::general::S_IRUSR;
 
         /// `S_IWUSR`
-        const IWUSR = linux_raw_sys::general::S_IWUSR;
+        const WUSR = linux_raw_sys::general::S_IWUSR;
 
         /// `S_IXUSR`
-        const IXUSR = linux_raw_sys::general::S_IXUSR;
+        const XUSR = linux_raw_sys::general::S_IXUSR;
 
         /// `S_IRWXG`
-        const IRWXG = linux_raw_sys::general::S_IRWXG;
+        const RWXG = linux_raw_sys::general::S_IRWXG;
 
         /// `S_IRGRP`
-        const IRGRP = linux_raw_sys::general::S_IRGRP;
+        const RGRP = linux_raw_sys::general::S_IRGRP;
 
         /// `S_IWGRP`
-        const IWGRP = linux_raw_sys::general::S_IWGRP;
+        const WGRP = linux_raw_sys::general::S_IWGRP;
 
         /// `S_IXGRP`
-        const IXGRP = linux_raw_sys::general::S_IXGRP;
+        const XGRP = linux_raw_sys::general::S_IXGRP;
 
         /// `S_IRWXO`
-        const IRWXO = linux_raw_sys::general::S_IRWXO;
+        const RWXO = linux_raw_sys::general::S_IRWXO;
 
         /// `S_IROTH`
-        const IROTH = linux_raw_sys::general::S_IROTH;
+        const ROTH = linux_raw_sys::general::S_IROTH;
 
         /// `S_IWOTH`
-        const IWOTH = linux_raw_sys::general::S_IWOTH;
+        const WOTH = linux_raw_sys::general::S_IWOTH;
 
         /// `S_IXOTH`
-        const IXOTH = linux_raw_sys::general::S_IXOTH;
+        const XOTH = linux_raw_sys::general::S_IXOTH;
 
         /// `S_ISUID`
-        const ISUID = linux_raw_sys::general::S_ISUID;
+        const SUID = linux_raw_sys::general::S_ISUID;
 
         /// `S_ISGID`
-        const ISGID = linux_raw_sys::general::S_ISGID;
+        const SGID = linux_raw_sys::general::S_ISGID;
 
         /// `S_ISVTX`
-        const ISVTX = linux_raw_sys::general::S_ISVTX;
+        const SVTX = linux_raw_sys::general::S_ISVTX;
+    }
+}
 
-        /// `S_IFREG`
-        const IFREG = linux_raw_sys::general::S_IFREG;
+impl Mode {
+    /// Construct a `Mode` from the mode bits of the `st_mode` field of
+    /// a `Stat`.
+    #[inline]
+    pub const fn from_raw_mode(st_mode: RawMode) -> Self {
+        Self::from_bits_truncate(st_mode)
+    }
 
-        /// `S_IFDIR`
-        const IFDIR = linux_raw_sys::general::S_IFDIR;
-
-        /// `S_IFLNK`
-        const IFLNK = linux_raw_sys::general::S_IFLNK;
-
-        /// `S_IFIFO`
-        const IFIFO = linux_raw_sys::general::S_IFIFO;
-
-        /// `S_IFSOCK`
-        const IFSOCK = linux_raw_sys::general::S_IFSOCK;
-
-        /// `S_IFCHR`
-        const IFCHR = linux_raw_sys::general::S_IFCHR;
-
-        /// `S_IFBLK`
-        const IFBLK = linux_raw_sys::general::S_IFBLK;
-
-        /// `S_IFMT`
-        const IFMT = linux_raw_sys::general::S_IFMT;
+    /// Construct an `st_mode` value from `Stat`.
+    #[inline]
+    pub const fn as_raw_mode(self) -> RawMode {
+        self.bits()
     }
 }
 
@@ -257,36 +250,40 @@ bitflags! {
     }
 }
 
-/// `S_IF*` constants.
+/// `S_IF*` constants for use with [`mknodat`] and [`Stat`]'s `st_mode` field.
+///
+/// [`mknodat`]: crate::fs::mknodat
+/// [`Stat`]: crate::fs::Stat
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FileType {
     /// `S_IFREG`
-    RegularFile,
+    RegularFile = linux_raw_sys::general::S_IFREG as isize,
 
     /// `S_IFDIR`
-    Directory,
+    Directory = linux_raw_sys::general::S_IFDIR as isize,
 
     /// `S_IFLNK`
-    Symlink,
+    Symlink = linux_raw_sys::general::S_IFLNK as isize,
 
     /// `S_IFIFO`
-    Fifo,
+    Fifo = linux_raw_sys::general::S_IFIFO as isize,
 
     /// `S_IFSOCK`
-    Socket,
+    Socket = linux_raw_sys::general::S_IFSOCK as isize,
 
     /// `S_IFCHR`
-    CharacterDevice,
+    CharacterDevice = linux_raw_sys::general::S_IFCHR as isize,
 
     /// `S_IFBLK`
-    BlockDevice,
+    BlockDevice = linux_raw_sys::general::S_IFBLK as isize,
 
     /// An unknown filesystem object.
     Unknown,
 }
 
 impl FileType {
-    /// Construct a `FileType` from the `st_mode` field of a `Stat`.
+    /// Construct a `FileType` from the `S_IFMT` bits of the `st_mode` field of
+    /// a `Stat`.
     #[inline]
     pub const fn from_raw_mode(st_mode: RawMode) -> Self {
         match st_mode & linux_raw_sys::general::S_IFMT {
@@ -301,10 +298,19 @@ impl FileType {
         }
     }
 
-    /// Construct a `FileType` from the `st_mode` field of a `Stat`.
+    /// Construct an `st_mode` value from `Stat`.
     #[inline]
-    pub const fn from_mode(st_mode: Mode) -> Self {
-        Self::from_raw_mode(st_mode.bits())
+    pub const fn as_raw_mode(self) -> RawMode {
+        match self {
+            Self::RegularFile => linux_raw_sys::general::S_IFREG,
+            Self::Directory => linux_raw_sys::general::S_IFDIR,
+            Self::Symlink => linux_raw_sys::general::S_IFLNK,
+            Self::Fifo => linux_raw_sys::general::S_IFIFO,
+            Self::Socket => linux_raw_sys::general::S_IFSOCK,
+            Self::CharacterDevice => linux_raw_sys::general::S_IFCHR,
+            Self::BlockDevice => linux_raw_sys::general::S_IFBLK,
+            Self::Unknown => linux_raw_sys::general::S_IFMT,
+        }
     }
 
     /// Construct a `FileType` from the `d_type` field of a `dirent`.

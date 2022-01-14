@@ -18,7 +18,7 @@ fn invalid_offset_seek() {
         &dir,
         "foo",
         OFlags::WRONLY | OFlags::TRUNC | OFlags::CREATE,
-        Mode::IRUSR | Mode::IWUSR,
+        Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
 
@@ -45,7 +45,7 @@ fn invalid_offset_fallocate() {
         &dir,
         "foo",
         OFlags::WRONLY | OFlags::TRUNC | OFlags::CREATE,
-        Mode::IRUSR | Mode::IWUSR,
+        Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
 
@@ -70,7 +70,7 @@ fn invalid_offset_fadvise() {
         &dir,
         "foo",
         OFlags::WRONLY | OFlags::TRUNC | OFlags::CREATE,
-        Mode::IRUSR | Mode::IWUSR,
+        Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
 
@@ -102,7 +102,7 @@ fn invalid_offset_pread() {
         &dir,
         "foo",
         OFlags::RDWR | OFlags::TRUNC | OFlags::CREATE,
-        Mode::IRUSR | Mode::IWUSR,
+        Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
 
@@ -122,7 +122,7 @@ fn invalid_offset_pwrite() {
         &dir,
         "foo",
         OFlags::WRONLY | OFlags::TRUNC | OFlags::CREATE,
-        Mode::IRUSR | Mode::IWUSR,
+        Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
 
@@ -142,14 +142,14 @@ fn invalid_offset_copy_file_range() {
         &dir,
         "foo",
         OFlags::RDWR | OFlags::TRUNC | OFlags::CREATE,
-        Mode::IRUSR | Mode::IWUSR,
+        Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
     let bar = openat(
         &dir,
         "bar",
         OFlags::WRONLY | OFlags::TRUNC | OFlags::CREATE,
-        Mode::IRUSR | Mode::IWUSR,
+        Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
     write(&foo, b"a").unwrap();

@@ -11,7 +11,7 @@ fn test_long_paths() {
     #[cfg(linux_raw)]
     const PATH_MAX: usize = linux_raw_sys::general::PATH_MAX as usize;
 
-    mkdirat(&dir, "a", Mode::IRUSR | Mode::IXUSR | Mode::IWUSR).unwrap();
+    mkdirat(&dir, "a", Mode::RUSR | Mode::XUSR | Mode::WUSR).unwrap();
 
     let mut long_path = String::new();
     for _ in 0..PATH_MAX / 5 {
