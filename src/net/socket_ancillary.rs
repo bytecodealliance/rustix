@@ -424,7 +424,7 @@ impl<'a> FromCmsghdr<'a> for SendAncillaryDataV6<'a> {
         target_os = "ios",
     )))]
     fn try_from(cmsg: &'a c::cmsghdr) -> Result<Self, AncillaryError> {
-        qErr(AncillaryError::from_cmsg(&*cmsg))
+        Err(AncillaryError::from_cmsg(&*cmsg))
     }
 
     #[cfg(any(

@@ -295,10 +295,10 @@ pub(crate) fn recvmsg_v4(
             &mut flags,
         ))?;
 
-        dbg!(&name namelen);
+        dbg!(&name, namelen);
         Ok(RecvMsgV4::new(
             bytes as usize,
-            name.as_ptr(),
+            name.as_ptr().cast(),
             namelen as _,
             flags as _,
         ))
