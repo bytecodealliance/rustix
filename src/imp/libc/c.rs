@@ -1,33 +1,61 @@
 //! Adapt the Winsock2 API to resemble a POSIX-style libc API.
 
 #![allow(unused_imports)]
+#![allow(non_camel_case_types)]
 
-pub(crate) use winapi::shared::ws2def::{
-    AF_DECnet, ADDRESS_FAMILY as sa_family_t, ADDRINFOA as addrinfo, AF_APPLETALK, AF_INET,
-    AF_INET6, AF_IPX, AF_IRDA, AF_SNA, AF_UNIX, AF_UNSPEC, IPPROTO_AH, IPPROTO_EGP, IPPROTO_ESP,
-    IPPROTO_FRAGMENT, IPPROTO_ICMP, IPPROTO_ICMPV6, IPPROTO_IDP, IPPROTO_IGMP, IPPROTO_IP,
-    IPPROTO_IPV6, IPPROTO_PIM, IPPROTO_PUP, IPPROTO_RAW, IPPROTO_ROUTING, IPPROTO_SCTP,
-    IPPROTO_TCP, IPPROTO_UDP, MSG_TRUNC, SOCKADDR as sockaddr, SOCKADDR_IN as sockaddr_in,
-    SOCKADDR_STORAGE_LH as sockaddr_storage, TCP_NODELAY,
+use windows_sys::Win32::Networking::WinSock;
+
+pub(crate) use libc::{
+    c_char, c_int, c_long, c_longlong, c_schar, c_short, c_uchar, c_uint, c_ulong, c_ulonglong,
+    c_ushort, ssize_t,
 };
+pub(crate) type socklen_t = i32;
 
-pub(crate) use winapi::shared::ws2ipdef::{
-    IPV6_ADD_MEMBERSHIP, IPV6_DROP_MEMBERSHIP, IPV6_MREQ as ipv6_mreq, IPV6_MULTICAST_LOOP,
-    IPV6_V6ONLY, IP_ADD_MEMBERSHIP, IP_DROP_MEMBERSHIP, IP_MREQ as ip_mreq, IP_MULTICAST_LOOP,
-    IP_MULTICAST_TTL, IP_TTL, SOCKADDR_IN6_LH as sockaddr_in6,
-};
+// windows-sys declares these constants as unsigned. For better compatibility
+// with Unix-family APIs, redeclare them as signed. Filed upstream:
+// <https://github.com/microsoft/windows-rs/issues/1718>
+pub(crate) const AF_INET: i32 = WinSock::AF_INET as _;
+pub(crate) const AF_INET6: i32 = WinSock::AF_INET6 as _;
+pub(crate) const AF_UNSPEC: i32 = WinSock::AF_UNSPEC as _;
+pub(crate) const SO_TYPE: i32 = WinSock::SO_TYPE as _;
+pub(crate) const SO_REUSEADDR: i32 = WinSock::SO_REUSEADDR as _;
+pub(crate) const SO_BROADCAST: i32 = WinSock::SO_BROADCAST as _;
+pub(crate) const SO_LINGER: i32 = WinSock::SO_LINGER as _;
+pub(crate) const SOL_SOCKET: i32 = WinSock::SOL_SOCKET as _;
+pub(crate) const SO_RCVTIMEO: i32 = WinSock::SO_RCVTIMEO as _;
+pub(crate) const SO_SNDTIMEO: i32 = WinSock::SO_SNDTIMEO as _;
+pub(crate) const IP_TTL: i32 = WinSock::IP_TTL as _;
+pub(crate) const TCP_NODELAY: i32 = WinSock::TCP_NODELAY as _;
+pub(crate) const IP_ADD_MEMBERSHIP: i32 = WinSock::IP_ADD_MEMBERSHIP as _;
+pub(crate) const IP_DROP_MEMBERSHIP: i32 = WinSock::IP_DROP_MEMBERSHIP as _;
+pub(crate) const IP_MULTICAST_TTL: i32 = WinSock::IP_MULTICAST_TTL as _;
+pub(crate) const IP_MULTICAST_LOOP: i32 = WinSock::IP_MULTICAST_LOOP as _;
+pub(crate) const IPV6_ADD_MEMBERSHIP: i32 = WinSock::IPV6_ADD_MEMBERSHIP as _;
+pub(crate) const IPV6_DROP_MEMBERSHIP: i32 = WinSock::IPV6_DROP_MEMBERSHIP as _;
+pub(crate) const IPV6_MULTICAST_LOOP: i32 = WinSock::IPV6_MULTICAST_LOOP as _;
+pub(crate) const IPV6_V6ONLY: i32 = WinSock::IPV6_V6ONLY as _;
+pub(crate) const POLLERR: i16 = WinSock::POLLERR as _;
+pub(crate) const POLLIN: i16 = WinSock::POLLIN as _;
+pub(crate) const POLLNVAL: i16 = WinSock::POLLNVAL as _;
+pub(crate) const POLLHUP: i16 = WinSock::POLLHUP as _;
+pub(crate) const POLLPRI: i16 = WinSock::POLLPRI as _;
+pub(crate) const POLLOUT: i16 = WinSock::POLLOUT as _;
+pub(crate) const POLLRDNORM: i16 = WinSock::POLLRDNORM as _;
+pub(crate) const POLLWRNORM: i16 = WinSock::POLLWRNORM as _;
+pub(crate) const POLLRDBAND: i16 = WinSock::POLLRDBAND as _;
+pub(crate) const POLLWRBAND: i16 = WinSock::POLLWRBAND as _;
 
-pub(crate) use winapi::um::ws2tcpip::socklen_t;
+// As above, cast the types for better compatibility, and also rename these to
+// their Unix names.
+pub(crate) const SHUT_RDWR: i32 = WinSock::SD_BOTH as _;
+pub(crate) const SHUT_RD: i32 = WinSock::SD_RECEIVE as _;
+pub(crate) const SHUT_WR: i32 = WinSock::SD_SEND as _;
 
-pub(crate) use winapi::shared::in6addr::in6_addr;
-pub(crate) use winapi::shared::inaddr::in_addr;
-
-pub(crate) use winapi::ctypes::*;
-pub(crate) use winapi::shared::basetsd::SSIZE_T as ssize_t;
-
-pub(crate) use winapi::um::winsock2::{
-    closesocket as close, ioctlsocket as ioctl, linger, WSAPoll as poll, SOL_SOCKET, SO_BROADCAST,
-    SO_LINGER, SO_RCVTIMEO, SO_REUSEADDR, SO_SNDTIMEO, SO_TYPE, WSAEACCES as EACCES,
+pub(crate) use WinSock::{
+    closesocket as close, ioctlsocket as ioctl, WSAPoll as poll, ADDRESS_FAMILY as sa_family_t,
+    ADDRINFOA as addrinfo, IN6_ADDR as in6_addr, IN_ADDR as in_addr, IPV6_MREQ as ipv6_mreq,
+    IP_MREQ as ip_mreq, SOCKADDR as sockaddr, SOCKADDR_IN as sockaddr_in,
+    SOCKADDR_IN6 as sockaddr_in6, SOCKADDR_STORAGE as sockaddr_storage, WSAEACCES as EACCES,
     WSAEADDRINUSE as EADDRINUSE, WSAEADDRNOTAVAIL as EADDRNOTAVAIL,
     WSAEAFNOSUPPORT as EAFNOSUPPORT, WSAEALREADY as EALREADY, WSAEBADF as EBADF,
     WSAECANCELLED as ECANCELED, WSAECONNABORTED as ECONNABORTED, WSAECONNREFUSED as ECONNREFUSED,
@@ -47,14 +75,3 @@ pub(crate) use winapi::um::winsock2::{
     WSAETIMEDOUT as ETIMEDOUT, WSAETOOMANYREFS as ETOOMANYREFS, WSAEUSERS as EUSERS,
     WSAEWOULDBLOCK as EWOULDBLOCK, WSAEWOULDBLOCK as EAGAIN, WSAPOLLFD as pollfd, *,
 };
-
-// [Documented] values for the `how` argument to `shutdown`.
-//
-// [Documented]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-shutdown#parameters
-const SD_RECEIVE: c_int = 0;
-const SD_SEND: c_int = 1;
-const SD_BOTH: c_int = 2;
-
-pub(crate) const SHUT_WR: c_int = SD_SEND;
-pub(crate) const SHUT_RD: c_int = SD_RECEIVE;
-pub(crate) const SHUT_RDWR: c_int = SD_BOTH;

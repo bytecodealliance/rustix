@@ -62,12 +62,12 @@ impl OwnedFd {
     /// handle as the existing `OwnedFd` instance.
     #[cfg(target_os = "windows")]
     pub fn try_clone(&self) -> std::io::Result<Self> {
-        use winapi::um::processthreadsapi::GetCurrentProcessId;
-        use winapi::um::winsock2::{
+        use windows_sys::Win32::Networking::WinSock::{
             WSADuplicateSocketW, WSAGetLastError, WSASocketW, INVALID_SOCKET, SOCKET_ERROR,
             WSAEINVAL, WSAEPROTOTYPE, WSAPROTOCOL_INFOW, WSA_FLAG_NO_HANDLE_INHERIT,
             WSA_FLAG_OVERLAPPED,
         };
+        use windows_sys::Win32::System::Threading::GetCurrentProcessId;
 
         let mut info = unsafe { std::mem::zeroed::<WSAPROTOCOL_INFOW>() };
         let result =
@@ -123,9 +123,7 @@ impl OwnedFd {
     #[cfg(windows)]
     #[cfg(not(target_vendor = "uwp"))]
     fn set_no_inherit(&self) -> std::io::Result<()> {
-        use winapi::um::handleapi::SetHandleInformation;
-        use winapi::um::winbase::HANDLE_FLAG_INHERIT;
-        use winapi::um::winnt::HANDLE;
+        use windows_sys::Win32::Foundation::{SetHandleInformation, HANDLE, HANDLE_FLAG_INHERIT};
         match unsafe { SetHandleInformation(self.as_raw_fd() as HANDLE, HANDLE_FLAG_INHERIT, 0) } {
             0 => return Err(std::io::Error::last_os_error()),
             _ => Ok(()),

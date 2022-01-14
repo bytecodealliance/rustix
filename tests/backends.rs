@@ -23,7 +23,7 @@ fn test_backends() {
     }
 
     #[cfg(windows)]
-    let libc_dep = "winapi";
+    let libc_dep = "windows-sys";
     #[cfg(unix)]
     let libc_dep = "libc";
 

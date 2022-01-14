@@ -116,11 +116,11 @@ pub(crate) unsafe fn read_sockaddr(
             #[cfg(not(windows))]
             let s6_addr = decode.sin6_addr.s6_addr;
             #[cfg(windows)]
-            let s6_addr = *decode.sin6_addr.u.Byte();
+            let s6_addr = decode.sin6_addr.u.Byte;
             #[cfg(not(windows))]
             let sin6_scope_id = decode.sin6_scope_id;
             #[cfg(windows)]
-            let sin6_scope_id = *decode.u.sin6_scope_id();
+            let sin6_scope_id = decode.Anonymous.sin6_scope_id;
             Ok(SocketAddrAny::V6(SocketAddrV6::new(
                 Ipv6Addr::from(s6_addr),
                 u16::from_be(decode.sin6_port),

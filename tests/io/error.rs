@@ -9,6 +9,6 @@ fn test_error() {
     #[cfg(windows)]
     assert_eq!(
         rustix::io::Error::INVAL.raw_os_error(),
-        winapi::um::winsock2::WSAEINVAL
+        windows_sys::Win32::Networking::WinSock::WSAEINVAL
     );
 }
