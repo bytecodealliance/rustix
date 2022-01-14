@@ -38,7 +38,7 @@ pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Resu
     let nwritten = unsafe {
         ret_send_recv(c::send(
             borrowed_fd(fd),
-            buf.as_ptr().cast(),
+            buf.as_ptr() as _,
             send_recv_len(buf.len()),
             flags.bits(),
         ))?
@@ -86,7 +86,7 @@ pub(crate) fn sendto_v4(
     let nwritten = unsafe {
         ret_send_recv(c::sendto(
             borrowed_fd(fd),
-            buf.as_ptr().cast(),
+            buf.as_ptr() as _,
             send_recv_len(buf.len()),
             flags.bits(),
             as_ptr(&encode_sockaddr_v4(addr)).cast::<c::sockaddr>(),
@@ -106,7 +106,7 @@ pub(crate) fn sendto_v6(
     let nwritten = unsafe {
         ret_send_recv(c::sendto(
             borrowed_fd(fd),
-            buf.as_ptr().cast(),
+            buf.as_ptr() as _,
             send_recv_len(buf.len()),
             flags.bits(),
             as_ptr(&encode_sockaddr_v6(addr)).cast::<c::sockaddr>(),
@@ -392,7 +392,7 @@ pub(crate) mod sockopt {
     use core::convert::TryInto;
     use core::time::Duration;
     #[cfg(windows)]
-    use winapi::shared::minwindef::{BOOL, DWORD};
+    use windows_sys::Win32::Foundation::BOOL;
 
     // TODO: With Rust 1.53 we can use `Duration::ZERO` instead.
     const DURATION_ZERO: Duration = Duration::from_secs(0);
@@ -449,7 +449,7 @@ pub(crate) mod sockopt {
                 borrowed_fd(fd),
                 level,
                 optname,
-                as_ptr(&value).cast(),
+                as_ptr(&value) as _,
                 optlen,
             ))
         }
@@ -572,7 +572,7 @@ pub(crate) mod sockopt {
         };
 
         #[cfg(windows)]
-        let timeout: DWORD = match timeout {
+        let timeout: u32 = match timeout {
             Some(timeout) => {
                 if timeout == DURATION_ZERO {
                     return Err(io::Error::INVAL);
@@ -580,7 +580,7 @@ pub(crate) mod sockopt {
 
                 // `as_millis` rounds down, so we use `as_nanos` and
                 // manually round up.
-                let mut timeout: DWORD = ((timeout.as_nanos() + 999999) / 1000000)
+                let mut timeout: u32 = ((timeout.as_nanos() + 999999) / 1000000)
                     .try_into()
                     .map_err(|_convert_err| io::Error::INVAL)?;
                 if timeout == 0 {
@@ -619,7 +619,7 @@ pub(crate) mod sockopt {
 
         #[cfg(windows)]
         {
-            let timeout: DWORD = getsockopt(fd, c::SOL_SOCKET, optname)?;
+            let timeout: u32 = getsockopt(fd, c::SOL_SOCKET, optname)?;
             if timeout == 0 {
                 Ok(None)
             } else {

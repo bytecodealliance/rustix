@@ -6,7 +6,7 @@
 pub use io_lifetimes::{BorrowedSocket as BorrowedFd, OwnedSocket as OwnedFd};
 #[cfg(feature = "std")]
 pub use std::os::windows::io::RawSocket as RawFd;
-pub(crate) use winapi::um::winsock2::SOCKET as LibcFd;
+pub(crate) use windows_sys::Win32::Networking::WinSock::SOCKET as LibcFd;
 
 // Re-export the `Socket` traits so that users can implement them.
 pub use io_lifetimes::{AsSocket, FromSocket, IntoSocket};

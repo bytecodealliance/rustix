@@ -50,11 +50,15 @@ libc = { version = "0.2.118", features = ["extra_traits"] }
 # we use the linux-raw-sys ABI and `libc::syscall`.
 linux-raw-sys = { version = "0.0.46", default-features = false, optional = true, features = ["general", "no_std"] }
 
-# For the libc backend on Windows, use the Winsock2 API in winapi.
-[target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3.9", features = ["ws2ipdef", "ws2tcpip"] }
-[target.'cfg(all(windows, not(target_vendor = "uwp")))'.dependencies]
-winapi = { version = "0.3.9", features = ["handleapi"] }
+# For the libc backend on Windows, use the Winsock2 API in windows-sys.
+[target.'cfg(windows)'.dependencies.windows-sys]
+version = "0.36.0"
+features = [
+    "Win32_Foundation",
+    "Win32_Networking_WinSock",
+    "Win32_NetworkManagement_IpHelper",
+    "Win32_System_Threading"
+]
 
 [dev-dependencies]
 tempfile = "3.2.0"

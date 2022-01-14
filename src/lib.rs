@@ -20,7 +20,7 @@
 //! # use std::convert::TryInto;
 //! # use rustix::fd::AsRawFd;
 //! # #[cfg(windows)]
-//! # use winapi::um::winsock2 as libc;
+//! # use windows_sys::Win32::Networking::WinSock as libc;
 //! # const MSG_PEEK: i32 = libc::MSG_PEEK;
 //! let nread: usize = unsafe {
 //!     match libc::recv(

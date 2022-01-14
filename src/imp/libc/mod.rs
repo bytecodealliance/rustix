@@ -1,7 +1,7 @@
 //! The libc backend.
 //!
 //! On most platforms, this uses the `libc` crate to make system calls. On
-//! Windows, this uses the Winsock2 API in `winapi`, which can be adapted
+//! Windows, this uses the Winsock2 API in `windows-sys`, which can be adapted
 //! to have a very `libc`-like interface.
 
 // Every FFI call requires an unsafe block, and there are a lot of FFI

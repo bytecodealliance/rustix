@@ -44,8 +44,8 @@ portable APIs built on this functionality, see the [`system-interface`],
       [y2038 bug].
 
  * libc, which uses the [`libc`] crate which provides bindings to native `libc`
-   libraries on Unix-family platforms, and [`winapi`] for Winsock2 on Windows,
-   and is portable to many OS's.
+   libraries on Unix-family platforms, and [`windows-sys`] for Winsock2 on
+   Windows, and is portable to many OS's.
 
 The linux-raw backend is enabled by default on platforms which support it. To
 enable the libc backend instead, either enable the "use-libc" cargo feature:
@@ -119,7 +119,7 @@ version of this crate.
 [`io-lifetimes`]: https://crates.io/crates/io-lifetimes
 [`termios`]: https://crates.io/crates/termios
 [`libc`]: https://crates.io/crates/libc
-[`winapi`]: https://crates.io/crates/winapi
+[`windows-sys`]: https://crates.io/crates/windows-sys
 [`cap-std`]: https://crates.io/crates/cap-std
 [`bitflags`]: https://crates.io/crates/bitflags
 [`Arg`]: https://docs.rs/rustix/latest/rustix/path/trait.Arg.html
