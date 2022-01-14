@@ -22,11 +22,18 @@ use crate::io::OwnedFd;
 #[cfg(any(
     target_os = "linux",
     target_os = "macos",
+    target_os = "android",
+    target_os = "ios",
+))]
+use crate::net::SocketAddrV4;
+#[cfg(any(
+    target_os = "linux",
+    target_os = "macos",
     target_os = "netbsd",
     target_os = "android",
     target_os = "ios",
 ))]
-use crate::net::{SocketAddrV4, SocketAddrV6};
+use crate::net::SocketAddrV6;
 #[cfg(any(target_os = "android", target_os = "linux",))]
 use crate::process::{Gid, Pid, Uid};
 
@@ -573,7 +580,7 @@ impl Default for Ipv4PacketInfo {
     fn default() -> Self {
         let info = c::in_pktinfo {
             ipi_ifindex: 0,
-            ipi_addr: c::in_addr { s_addr: 0 },
+            ipi_addr: in_addr_new(0),
         };
         Ipv4PacketInfo(info)
     }
@@ -583,7 +590,7 @@ impl Default for Ipv4PacketInfo {
         let info = c::in_pktinfo {
             ipi_ifindex: 0,
             ipi_addr: c::in_addr { s_addr: 0 },
-            ipi_spec_dst: c::in_addr { s_addr: 0 },
+            ipi_spec_dst: in_addr_new(0),
         };
         Ipv4PacketInfo(info)
     }

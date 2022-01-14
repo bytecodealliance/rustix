@@ -9,6 +9,8 @@ use super::{
     encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags, AddressFamily, Protocol,
     RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
 };
+#[cfg(windows)]
+use super::{in6_addr_s6_addr, in_addr_s_addr};
 #[cfg(not(any(target_os = "redox", target_os = "wasi",)))]
 use crate::as_mut_ptr;
 use crate::as_ptr;
@@ -295,7 +297,7 @@ pub(crate) fn recvmsg_v4(
             &mut flags,
         ))?;
 
-        /// Because the lpFrom and lpFromlen parameters are ignored for connection-oriented sockets, we manually check if the address buffer is all zero, and set `iFromLen` to `0` manually.
+        // Because the lpFrom and lpFromlen parameters are ignored for connection-oriented sockets, we manually check if the address buffer is all zero, and set `iFromLen` to `0` manually.
         let nc = name.assume_init();
         if nc.sin_family == 0 && nc.sin_port == 0 && in_addr_s_addr(nc.sin_addr) == 0 {
             namelen = 0;
@@ -349,7 +351,7 @@ pub(crate) fn recvmsg_v6(
             &mut flags,
         ))?;
 
-        /// Because the lpFrom and lpFromlen parameters are ignored for connection-oriented sockets, we manually check if the address buffer is all zero, and set `iFromLen` to `0` manually.
+        // Because the lpFrom and lpFromlen parameters are ignored for connection-oriented sockets, we manually check if the address buffer is all zero, and set `iFromLen` to `0` manually.
         let nc = name.assume_init();
         if nc.sin6_family == 0
             && nc.sin6_port == 0
