@@ -281,23 +281,24 @@ pub(crate) fn recvmsg_v4(
     iovs: &mut [IoSliceMut<'_>],
     flags: RecvFlags,
 ) -> io::Result<RecvMsgV4> {
-    let mut name = MaybeUninit::<c::sockaddr>::zeroed();
-    let mut namelen = size_of::<c::sockaddr>() as _;
+    let mut name = MaybeUninit::<c::sockaddr_in>::uninit();
+    let mut namelen = size_of::<c::sockaddr_in>() as _;
     let mut flags = flags.bits() as _;
 
     unsafe {
         let bytes = ret_send_recv(c::recvmsg(
             borrowed_fd(fd),
-            iovs.as_ptr() as *mut _,
+            iovs.as_mut_ptr().cast(),
             iovs.len() as _,
-            &mut name as *mut _ as *mut _,
+            name.as_mut_ptr().cast(),
             &mut namelen,
             &mut flags,
         ))?;
 
+        dbg!(&name namelen);
         Ok(RecvMsgV4::new(
             bytes as usize,
-            name.as_ptr().cast(),
+            name.as_ptr(),
             namelen as _,
             flags as _,
         ))
