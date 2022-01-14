@@ -2,6 +2,8 @@ use super::super::c;
 use super::super::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 use super::super::fd::BorrowedFd;
 use super::ext::{in6_addr_new, in_addr_new};
+#[cfg(windows)]
+use super::ext::{in6_addr_s6_addr, in_addr_s_addr};
 #[cfg(not(windows))]
 use super::{encode_sockaddr_unix, msghdr_default, SocketAddrUnix};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
@@ -9,8 +11,6 @@ use super::{
     encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags, AddressFamily, Protocol,
     RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
 };
-#[cfg(windows)]
-use super::{in6_addr_s6_addr, in_addr_s_addr};
 #[cfg(not(any(target_os = "redox", target_os = "wasi",)))]
 use crate::as_mut_ptr;
 use crate::as_ptr;

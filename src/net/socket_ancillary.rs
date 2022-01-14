@@ -618,6 +618,13 @@ impl Ipv4PacketInfo {
 }
 
 /// TODO: document
+#[cfg(any(
+    target_os = "linux",
+    target_os = "macos",
+    target_os = "netbsd",
+    target_os = "android",
+    target_os = "ios",
+))]
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct Ipv6PacketInfo(c::in6_pktinfo);

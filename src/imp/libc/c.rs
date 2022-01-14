@@ -67,7 +67,7 @@ pub(crate) unsafe fn sendmsg(
     iToLen: c_int,
     dwFlags: c_ulong,
 ) -> c_int {
-    let mut lpMsg = WSAMSG::default();
+    let mut lpMsg: WSAMSG = core::mem::zeroed();
     lpMsg.name = lpTo;
     lpMsg.namelen = iToLen;
     lpMsg.lpBuffers = lpBuffers;
