@@ -7,7 +7,7 @@
 //! on top of the paths we open.
 
 use crate::fs::{
-    cwd, fstat, fstatfs, major, openat, renameat, Mode, OFlags, Stat, PROC_SUPER_MAGIC,
+    cwd, fstat, fstatfs, major, openat, renameat, FileType, Mode, OFlags, Stat, PROC_SUPER_MAGIC,
 };
 use crate::imp::fd::{AsFd, BorrowedFd};
 use crate::io::{self, OwnedFd};
@@ -93,7 +93,7 @@ fn check_proc_entry_with_stat(
 fn check_proc_root(entry: BorrowedFd<'_>, stat: &Stat) -> io::Result<()> {
     // We use `O_DIRECTORY` for proc directories, so open should fail if we
     // don't get a directory when we expect one.
-    assert_eq!(stat.st_mode & Mode::IFMT.bits(), Mode::IFDIR.bits());
+    assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::Directory);
 
     // Check the root inode number.
     if stat.st_ino != PROC_ROOT_INO {
@@ -121,7 +121,7 @@ fn check_proc_subdir(
 ) -> io::Result<()> {
     // We use `O_DIRECTORY` for proc directories, so open should fail if we
     // don't get a directory when we expect one.
-    assert_eq!(stat.st_mode & Mode::IFMT.bits(), Mode::IFDIR.bits());
+    assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::Directory);
 
     check_proc_nonroot(stat, proc_stat)?;
 

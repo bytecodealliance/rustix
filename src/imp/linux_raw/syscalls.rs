@@ -37,8 +37,6 @@ use super::conv::{
 };
 use super::fd::{AsFd, BorrowedFd, RawFd};
 use super::fs::AtFlags;
-#[cfg(feature = "procfs")]
-use super::fs::Mode;
 use super::io::{
     epoll, Advice as IoAdvice, DupFlags, EventfdFlags, MapFlags, MlockFlags, MprotectFlags,
     MremapFlags, MsyncFlags, PipeFlags, PollFd, ProtFlags, ReadWriteFlags, UserfaultfdFlags,
@@ -53,12 +51,15 @@ use super::thread::{FutexFlags, FutexOperation};
 use super::time::{ClockId, Timespec};
 use crate::ffi::ZStr;
 use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
-#[cfg(feature = "procfs")]
-use crate::path::DecInt;
 use crate::process::{
     Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, Rlimit, Uid, WaitOptions, WaitStatus,
 };
 use crate::thread::NanosleepRelativeResult;
+#[cfg(feature = "procfs")]
+use crate::{
+    fs::{FileType, Mode},
+    path::DecInt,
+};
 use core::cmp;
 #[cfg(target_pointer_width = "32")]
 use core::convert::TryInto;
@@ -1229,7 +1230,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     let fd_stat = fstat(fd)?;
 
     // Quick check: if `fd` isn't a character device, it's not a tty.
-    if (fd_stat.st_mode & Mode::IFMT.bits()) != Mode::IFCHR.bits() {
+    if FileType::from_raw_mode(fd_stat.st_mode) != FileType::CharacterDevice {
         return Err(crate::io::Error::NOTTY);
     }
 
