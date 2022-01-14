@@ -75,12 +75,14 @@ pub(crate) unsafe fn sendmsg(
 
     // Uses WSASendTo, because WSASendMsg is only usable with Datagram or Raw Sockets.
     // But the the expectation from sendmsg, is that it works with other sockets, like Stream based ones as well.
-    let res = WSASendMsg(
+    let res = WSASendTo(
         handle,
         lpBuffers,
         dwBufferCount,
         &mut lpNumberOfBytesSent,
         dwFlags,
+        lpTo,
+        iToLen,
         lpOverlapped,
         lpCompletionRoutine,
     );
