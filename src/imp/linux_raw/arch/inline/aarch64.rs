@@ -5,7 +5,7 @@ use core::arch::asm;
 
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall0_readonly(nr: SyscallNumber) -> RetReg<R0> {
+pub(in crate::imp) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<R0> {
     let r0;
     asm!(
         "svc 0",
