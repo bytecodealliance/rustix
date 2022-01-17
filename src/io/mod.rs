@@ -85,7 +85,7 @@ pub use pipe::{pipe_with, PipeFlags};
 #[cfg(not(windows))]
 pub use poll::{poll, PollFd, PollFlags};
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
-pub use procfs::proc_self_fd;
+pub use procfs::{proc_self, proc_self_fd};
 #[cfg(not(windows))]
 pub use read_write::{pread, pwrite, read, readv, write, writev};
 #[cfg(not(any(windows, target_os = "redox")))]

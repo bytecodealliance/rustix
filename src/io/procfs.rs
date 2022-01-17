@@ -219,7 +219,7 @@ fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
-fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
+pub fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     static PROC_SELF: StaticFd = StaticFd::new();
 
     // The init function here may run multiple times; see above.
