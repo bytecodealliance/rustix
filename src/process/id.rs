@@ -67,6 +67,12 @@ impl Uid {
     pub const fn as_raw(self) -> RawUid {
         self.0
     }
+
+    /// Test whether this uid represents the root user (uid 0).
+    #[inline]
+    pub const fn is_root(self) -> bool {
+        self.0 == Self::ROOT.0
+    }
 }
 
 impl Gid {
@@ -87,6 +93,12 @@ impl Gid {
     #[inline]
     pub const fn as_raw(self) -> RawGid {
         self.0
+    }
+
+    /// Test whether this gid represents the root group (gid 0).
+    #[inline]
+    pub const fn is_root(self) -> bool {
+        self.0 == Self::ROOT.0
     }
 }
 
@@ -141,6 +153,12 @@ impl Pid {
     #[inline]
     pub fn as_raw(pid: Option<Self>) -> RawPid {
         pid.map_or(0, |pid| pid.0.get())
+    }
+
+    /// Test whether this pid represents the init process (pid 0).
+    #[inline]
+    pub const fn is_init(self) -> bool {
+        self.0.get() == Self::INIT.0.get()
     }
 }
 
