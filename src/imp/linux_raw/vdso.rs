@@ -67,9 +67,8 @@ const fn make_pointer<T>(value: usize) -> Option<*const T> {
 ///
 /// `base` must be a valid pointer to an ELF image in memory.
 unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
-    extern "C" {
-        static __ehdr_start: c::c_void;
-    }
+    // Check that `base` is a valid pointer to the kernel-provided vDSO.
+    let hdr = check_vdso_base(base)?;
 
     let mut vdso = Vdso {
         load_addr: base,
@@ -84,94 +83,6 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
         versym: null(),
         verdef: null(),
     };
-
-    // Check that we're not attempting to parse our own ELF image.
-    let ehdr_start: *const c::c_void = &__ehdr_start;
-    if base == (ehdr_start as usize) {
-        return None;
-    }
-
-    // Check that the vDSO is page-aligned and appropriately mapped.
-    madvise(
-        base as *mut c::c_void,
-        size_of::<Elf_Ehdr>(),
-        Advice::Normal,
-    )
-    .ok()?;
-
-    let hdr = &*make_pointer::<Elf_Ehdr>(base)?;
-
-    if hdr.e_ident[..SELFMAG] != ELFMAG {
-        return None; // Wrong ELF magic
-    }
-    if hdr.e_ident[EI_CLASS] != ELFCLASS {
-        return None; // Wrong ELF class
-    }
-    if hdr.e_ident[EI_DATA] != ELFDATA {
-        return None; // Wrong ELF data
-    }
-    if !matches!(hdr.e_ident[EI_OSABI], ELFOSABI_SYSV | ELFOSABI_LINUX) {
-        return None; // Unrecognized ELF OS ABI
-    }
-    if hdr.e_ident[EI_ABIVERSION] != ELFABIVERSION {
-        return None; // Unrecognized ELF ABI version
-    }
-    if hdr.e_type != ET_DYN {
-        return None; // Wrong ELF type
-    }
-    // Verify that the `e_machine` matches the architecture we're running as.
-    // This helps catch cases where we're running under qemu.
-    if hdr.e_machine != EM_CURRENT {
-        return None; // Wrong machine type
-    }
-
-    // If ELF is extended, we'll need to adjust.
-    if hdr.e_ident[EI_VERSION] != EV_CURRENT
-        || hdr.e_ehsize as usize != size_of::<Elf_Ehdr>()
-        || hdr.e_phentsize as usize != size_of::<Elf_Phdr>()
-    {
-        return None;
-    }
-    // We don't currently support extra-large numbers of segments.
-    if hdr.e_phnum == PN_XNUM {
-        return None;
-    }
-
-    // If `e_phoff` is zero, it's more likely that we're looking at memory that
-    // has been zeroed than that the kernel has somehow aliased the `Ehdr` and
-    // the `Phdr`.
-    if hdr.e_phoff < size_of::<Elf_Ehdr>() {
-        return None;
-    }
-
-    // Check that the vDSO is not writable, since that would indicate that this
-    // isn't the kernel vDSO. Here we're just using `clock_getres` just as an
-    // arbitrary system call which writes to a buffer and fails with `EFAULT`
-    // if the buffer is not writable.
-    {
-        use super::arch::choose::syscall2;
-        use super::conv::{clockid_t, ret, void_star};
-        use super::reg::nr;
-        use crate::time::ClockId;
-        use linux_raw_sys::general::__NR_clock_getres;
-        if ret(syscall2(
-            nr(__NR_clock_getres),
-            clockid_t(ClockId::Monotonic),
-            void_star(base as *mut c::c_void),
-        )) != Err(io::Error::FAULT)
-        {
-            // We can't gracefully fail here because we would seem to have just
-            // mutated some unknown memory.
-            #[cfg(feature = "std")]
-            {
-                std::process::abort();
-            }
-            #[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
-            {
-                core::intrinsics::abort();
-            }
-        }
-    }
 
     let pt = make_pointer::<Elf_Phdr>(base.checked_add(hdr.e_phoff)?)?;
     let mut dyn_: *const Elf_Dyn = null();
@@ -272,6 +183,107 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
 
     // That's all we need.
     Some(vdso)
+}
+
+/// Check that `base` is a valid pointer to the kernel-provided vDSO.
+///
+/// `base` is some value we got from a `AT_SYSINFO_EHDR` aux record somewhere,
+/// which hopefully holds the value of the kernel-provided vDSO in memory. Do
+/// a series of checks to be as sure as we can that it's safe to use.
+unsafe fn check_vdso_base<'vdso>(base: usize) -> Option<&'vdso Elf_Ehdr> {
+    extern "C" {
+        static __ehdr_start: c::c_void;
+    }
+
+    // Check that we're not attempting to parse our own ELF image.
+    let ehdr_start: *const c::c_void = &__ehdr_start;
+    if base == (ehdr_start as usize) {
+        return None;
+    }
+
+    // Check that the vDSO is page-aligned and appropriately mapped.
+    madvise(
+        base as *mut c::c_void,
+        size_of::<Elf_Ehdr>(),
+        Advice::Normal,
+    )
+    .ok()?;
+
+    let hdr = &*make_pointer::<Elf_Ehdr>(base)?;
+
+    if hdr.e_ident[..SELFMAG] != ELFMAG {
+        return None; // Wrong ELF magic
+    }
+    if hdr.e_ident[EI_CLASS] != ELFCLASS {
+        return None; // Wrong ELF class
+    }
+    if hdr.e_ident[EI_DATA] != ELFDATA {
+        return None; // Wrong ELF data
+    }
+    if !matches!(hdr.e_ident[EI_OSABI], ELFOSABI_SYSV | ELFOSABI_LINUX) {
+        return None; // Unrecognized ELF OS ABI
+    }
+    if hdr.e_ident[EI_ABIVERSION] != ELFABIVERSION {
+        return None; // Unrecognized ELF ABI version
+    }
+    if hdr.e_type != ET_DYN {
+        return None; // Wrong ELF type
+    }
+    // Verify that the `e_machine` matches the architecture we're running as.
+    // This helps catch cases where we're running under qemu.
+    if hdr.e_machine != EM_CURRENT {
+        return None; // Wrong machine type
+    }
+
+    // If ELF is extended, we'll need to adjust.
+    if hdr.e_ident[EI_VERSION] != EV_CURRENT
+        || hdr.e_ehsize as usize != size_of::<Elf_Ehdr>()
+        || hdr.e_phentsize as usize != size_of::<Elf_Phdr>()
+    {
+        return None;
+    }
+    // We don't currently support extra-large numbers of segments.
+    if hdr.e_phnum == PN_XNUM {
+        return None;
+    }
+
+    // If `e_phoff` is zero, it's more likely that we're looking at memory that
+    // has been zeroed than that the kernel has somehow aliased the `Ehdr` and
+    // the `Phdr`.
+    if hdr.e_phoff < size_of::<Elf_Ehdr>() {
+        return None;
+    }
+
+    // Check that the vDSO is not writable, since that would indicate that this
+    // isn't the kernel vDSO. Here we're just using `clock_getres` just as an
+    // arbitrary system call which writes to a buffer and fails with `EFAULT`
+    // if the buffer is not writable.
+    {
+        use super::arch::choose::syscall2;
+        use super::conv::{clockid_t, ret, void_star};
+        use super::reg::nr;
+        use crate::time::ClockId;
+        use linux_raw_sys::general::__NR_clock_getres;
+        if ret(syscall2(
+            nr(__NR_clock_getres),
+            clockid_t(ClockId::Monotonic),
+            void_star(base as *mut c::c_void),
+        )) != Err(io::Error::FAULT)
+        {
+            // We can't gracefully fail here because we would seem to have just
+            // mutated some unknown memory.
+            #[cfg(feature = "std")]
+            {
+                std::process::abort();
+            }
+            #[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
+            {
+                core::intrinsics::abort();
+            }
+        }
+    }
+
+    Some(hdr)
 }
 
 impl Vdso {
