@@ -19,7 +19,7 @@ pub(crate) use super::io::syscalls::*;
 pub(crate) use super::net::syscalls::*;
 #[cfg(not(windows))]
 pub(crate) use super::process::syscalls::*;
-#[cfg(not(windows))]
+#[cfg(target_os = "linux")]
 pub(crate) use super::rand::syscalls::*;
 #[cfg(not(windows))]
 pub(crate) use super::thread::syscalls::*;
