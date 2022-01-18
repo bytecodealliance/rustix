@@ -50,6 +50,12 @@ impl<'fd> PollFd<'fd> {
         Self::from_borrowed_fd(fd.as_fd(), events)
     }
 
+    /// Sets the contained file descriptor to `fd`.
+    #[inline]
+    pub fn set_fd<Fd: AsFd>(&mut self, fd: &'fd Fd) {
+        self.fd = fd.as_fd();
+    }
+
     /// Constructs a new `PollFd` holding `fd` and `events`.
     ///
     /// This is the same as `new`, but can be used to avoid borrowing the
