@@ -192,6 +192,14 @@ pub use imp::fs::FsWord;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub const PROC_SUPER_MAGIC: FsWord = imp::fs::PROC_SUPER_MAGIC;
 
+/// The filesystem magic number for NFS.
+///
+/// See [the `fstatfs` man page] for more information.
+///
+/// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
+#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+pub const NFS_SUPER_MAGIC: FsWord = imp::fs::NFS_SUPER_MAGIC;
+
 #[cfg(not(target_os = "wasi"))]
 pub use imp::fs::FlockOperation;
 pub use imp::fs::{Dev, RawMode};

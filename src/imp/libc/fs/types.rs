@@ -758,9 +758,20 @@ pub use c::{UTIME_NOW, UTIME_OMIT};
 ))]
 pub const PROC_SUPER_MAGIC: FsWord = c::PROC_SUPER_MAGIC as FsWord;
 
+/// `NFS_SUPER_MAGIC`—The magic number for the NFS filesystem.
+#[cfg(all(
+    any(target_os = "android", target_os = "linux"),
+    not(target_env = "musl")
+))]
+pub const NFS_SUPER_MAGIC: FsWord = c::NFS_SUPER_MAGIC as FsWord;
+
 /// `PROC_SUPER_MAGIC`—The magic number for the procfs filesystem.
 #[cfg(all(any(target_os = "android", target_os = "linux"), target_env = "musl"))]
 pub const PROC_SUPER_MAGIC: FsWord = 0x0000_9fa0;
+
+/// `NFS_SUPER_MAGIC`—The magic number for the NFS filesystem.
+#[cfg(all(any(target_os = "android", target_os = "linux"), target_env = "musl"))]
+pub const NFS_SUPER_MAGIC: FsWord = 0x0000_6969;
 
 /// `copyfile_state_t`—State for use with [`fcopyfile`].
 ///
