@@ -1,4 +1,4 @@
-use super::super::fd::BorrowedFd;
+use crate::fd::BorrowedFd;
 
 /// `struct timespec`
 pub type Timespec = linux_raw_sys::general::__kernel_timespec;

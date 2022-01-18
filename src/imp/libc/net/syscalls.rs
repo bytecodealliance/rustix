@@ -1,6 +1,7 @@
+//! libc syscalls supporting `rustix::net`.
+
 use super::super::c;
 use super::super::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
-use super::super::fd::BorrowedFd;
 use super::ext::{in6_addr_new, in_addr_new};
 #[cfg(not(windows))]
 use super::{encode_sockaddr_unix, SocketAddrUnix};
@@ -10,6 +11,7 @@ use super::{
     RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
 };
 use crate::as_ptr;
+use crate::fd::BorrowedFd;
 use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use core::convert::TryInto;

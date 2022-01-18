@@ -1,6 +1,6 @@
 use super::super::c;
 #[cfg(not(target_os = "wasi"))]
-use super::super::fd::BorrowedFd;
+use crate::fd::BorrowedFd;
 
 /// `struct timespec`
 pub type Timespec = c::timespec;

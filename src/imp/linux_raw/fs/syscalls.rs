@@ -1,21 +1,12 @@
-//! Safe (where possible) wrappers around filesystem system calls.
+//! linux_raw syscalls supporting `rustix::fs`.
 //!
 //! # Safety
 //!
-//! This file performs raw system calls, and sometimes passes them
-//! uninitialized memory buffers. The signatures in this file are currently
-//! manually maintained and must correspond with the signatures of the actual
-//! Linux syscalls.
-//!
-//! Some of this could be auto-generated from the Linux header file
-//! <linux/syscalls.h>, but we often need more information than it provides,
-//! such as which pointers are array slices, out parameters, or in-out
-//! parameters, which integers are owned or borrowed file descriptors, etc.
+//! See the `rustix::imp::syscalls` module documentation for details.
+
 #![allow(unsafe_code)]
 #![allow(dead_code)]
 
-#[cfg(target_pointer_width = "32")]
-use super::super::arch::choose::syscall6_readonly;
 use super::super::arch::choose::{
     syscall1_readonly, syscall2, syscall2_readonly, syscall3, syscall3_readonly, syscall4,
     syscall4_readonly, syscall5, syscall5_readonly, syscall6,
@@ -28,17 +19,16 @@ use super::super::conv::{
     oflags_for_open_how, opt_c_str, opt_mut, out, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint,
     ret_owned_fd, ret_usize, size_of, slice_mut,
 };
-#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
-use super::super::fd::AsFd;
-use super::super::fd::{BorrowedFd, RawFd};
-use super::super::fs::FileType;
 use super::super::reg::nr;
 use super::{
-    Access, Advice as FsAdvice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode,
-    OFlags, RenameFlags, ResolveFlags, Stat, StatFs, StatxFlags,
+    Access, Advice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode, OFlags,
+    RenameFlags, ResolveFlags, Stat, StatFs, StatxFlags,
 };
+#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+use crate::fd::AsFd;
+use crate::fd::{BorrowedFd, RawFd};
 use crate::ffi::ZStr;
-use crate::fs::Timestamps;
+use crate::fs::{FileType, Timestamps};
 use crate::io::{self, OwnedFd, SeekFrom};
 use crate::process::{Gid, Uid};
 use core::convert::TryInto;
@@ -65,15 +55,13 @@ use linux_raw_sys::v5_4::general::{
 };
 #[cfg(target_pointer_width = "32")]
 use {
+    super::super::arch::choose::syscall6_readonly,
     super::super::conv::{hi, lo, slice_just_addr},
-    linux_raw_sys::{
-        general::timespec as __kernel_old_timespec,
-        general::{
-            __NR__llseek, __NR_fcntl64, __NR_fstat64, __NR_fstatat64, __NR_fstatfs64,
-            __NR_ftruncate64, __NR_sendfile64,
-        },
-        v5_4::general::__NR_utimensat_time64,
+    linux_raw_sys::general::{
+        __NR__llseek, __NR_fcntl64, __NR_fstat64, __NR_fstatat64, __NR_fstatfs64, __NR_ftruncate64,
+        __NR_sendfile64, timespec as __kernel_old_timespec,
     },
+    linux_raw_sys::v5_4::general::__NR_utimensat_time64,
 };
 #[cfg(target_pointer_width = "64")]
 use {
@@ -391,7 +379,7 @@ pub(crate) fn fallocate(
 }
 
 #[inline]
-pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: FsAdvice) -> io::Result<()> {
+pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) -> io::Result<()> {
     // On arm and powerpc, the system calls are reordered so that the len and
     // pos argument pairs are aligned.
     #[cfg(any(target_arch = "arm", target_arch = "powerpc"))]

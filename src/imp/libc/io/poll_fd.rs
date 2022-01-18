@@ -1,6 +1,6 @@
 use super::super::c;
 use super::super::conv::borrowed_fd;
-use super::super::fd::{AsFd, BorrowedFd};
+use crate::fd::{AsFd, BorrowedFd};
 use bitflags::bitflags;
 use core::marker::PhantomData;
 

@@ -1,9 +1,9 @@
 use super::super::c;
 use super::super::conv::owned_fd;
-#[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
-use super::super::fd::IntoFd;
-use super::super::fd::{AsFd, BorrowedFd, RawFd};
 use super::FileType;
+#[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
+use crate::fd::IntoFd;
+use crate::fd::{AsFd, BorrowedFd, RawFd};
 use crate::ffi::ZStr;
 #[cfg(target_os = "wasi")]
 use crate::ffi::ZString;

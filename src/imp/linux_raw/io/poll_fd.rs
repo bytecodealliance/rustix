@@ -1,4 +1,4 @@
-use super::super::fd::{AsFd, BorrowedFd};
+use crate::fd::{AsFd, BorrowedFd};
 use bitflags::bitflags;
 
 bitflags! {

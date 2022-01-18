@@ -1,9 +1,13 @@
+//! libc syscalls supporting `rustix::thread`.
+
 use super::super::c;
 use super::super::conv::ret;
-use super::super::time::Timespec;
 use crate::io;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use crate::process::{Pid, RawNonZeroPid};
 #[cfg(not(target_os = "redox"))]
 use crate::thread::NanosleepRelativeResult;
+use crate::time::Timespec;
 use core::mem::MaybeUninit;
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -15,7 +19,7 @@ use core::mem::MaybeUninit;
     target_os = "redox",
     target_os = "wasi",
 )))]
-use {super::super::time::ClockId, core::ptr::null_mut};
+use {crate::time::ClockId, core::ptr::null_mut};
 
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -71,5 +75,16 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
             Err(io::Error::INTR) => NanosleepRelativeResult::Interrupted(remain.assume_init()),
             Err(err) => NanosleepRelativeResult::Err(err),
         }
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+#[must_use]
+pub(crate) fn gettid() -> Pid {
+    unsafe {
+        let tid: i32 = c::gettid();
+        debug_assert_ne!(tid, 0);
+        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(tid))
     }
 }

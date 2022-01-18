@@ -5,6 +5,8 @@ mod io_slice;
 mod poll_fd;
 mod types;
 
+pub(crate) mod syscalls;
+
 pub use error::Error;
 #[cfg(not(feature = "std"))]
 pub use io_slice::{IoSlice, IoSliceMut};
