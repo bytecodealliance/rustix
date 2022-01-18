@@ -52,6 +52,7 @@ pub use id::{
     getegid, geteuid, getgid, getpid, getppid, getuid, Gid, Pid, RawGid, RawNonZeroPid, RawPid,
     RawUid, Uid,
 };
+pub use imp::process::Signal;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use membarrier::{
     membarrier, membarrier_cpu, membarrier_query, MembarrierCommand, MembarrierQuery,
@@ -172,4 +173,68 @@ pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<Wai
 #[inline]
 pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
     imp::syscalls::wait(waitopts)
+}
+
+/// `setsid()`—Create a new session.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/setsid.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/setsid.2.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn setsid() -> io::Result<Pid> {
+    imp::syscalls::setsid()
+}
+
+/// `kill(pid, sig)`—Sends a signal to a process.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/kill.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/kill.2.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+#[doc(alias = "kill")]
+pub fn kill_process(pid: Pid, sig: Signal) -> io::Result<()> {
+    imp::syscalls::kill_process(pid, sig)
+}
+
+/// `kill(-pid, sig)`—Sends a signal to all processes in a process group.
+///
+/// If `pid` is 1, this sends a signal to all processes the current process
+/// has permission to send signals to, except process process `1`, possibly
+/// other system-specific processes, and on some systems, the current process.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/kill.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/kill.2.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+#[doc(alias = "kill")]
+pub fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
+    imp::syscalls::kill_process_group(pid, sig)
+}
+
+/// `kill(0, sig)`—Sends a signal to all processes in the current process
+/// group.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/kill.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/kill.2.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+#[doc(alias = "kill")]
+pub fn kill_current_process_group(sig: Signal) -> io::Result<()> {
+    imp::syscalls::kill_current_process_group(sig)
 }

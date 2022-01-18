@@ -37,5 +37,5 @@ pub(crate) use types::{raw_cpu_set_new, RawCpuSet, CPU_SETSIZE};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use types::{MembarrierCommand, RawCpuid};
 #[cfg(not(target_os = "wasi"))]
-pub use types::{RawGid, RawNonZeroPid, RawPid, RawUid, EXIT_SIGNALED_SIGABRT};
+pub use types::{RawGid, RawNonZeroPid, RawPid, RawUid, Signal, EXIT_SIGNALED_SIGABRT};
 pub use types::{EXIT_FAILURE, EXIT_SUCCESS};
