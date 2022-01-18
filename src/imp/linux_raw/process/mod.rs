@@ -11,8 +11,8 @@ pub(crate) use auxv::{exe_phdrs, linux_execfn, linux_hwcap, page_size};
 pub(super) use auxv::{exe_phdrs_slice, sysinfo_ehdr};
 pub(crate) use types::{raw_cpu_set_new, RawCpuSet, RawUname, CPU_SETSIZE};
 pub use types::{
-    MembarrierCommand, RawCpuid, RawGid, RawNonZeroPid, RawPid, RawUid, Resource, EXIT_FAILURE,
-    EXIT_SIGNALED_SIGABRT, EXIT_SUCCESS,
+    MembarrierCommand, RawCpuid, RawGid, RawNonZeroPid, RawPid, RawUid, Resource, Signal,
+    EXIT_FAILURE, EXIT_SIGNALED_SIGABRT, EXIT_SUCCESS,
 };
 pub(crate) use wait::{
     WCONTINUED, WEXITSTATUS, WIFCONTINUED, WIFEXITED, WIFSIGNALED, WIFSTOPPED, WNOHANG, WSTOPSIG,

@@ -30,7 +30,7 @@ use {
 #[cfg(not(target_os = "wasi"))]
 use {
     super::RawUname,
-    crate::process::{Gid, Pid, RawNonZeroPid, RawPid, Uid, WaitOptions, WaitStatus},
+    crate::process::{Gid, Pid, RawNonZeroPid, RawPid, Signal, Uid, WaitOptions, WaitStatus},
 };
 
 #[cfg(not(target_os = "wasi"))]
@@ -333,4 +333,33 @@ pub(crate) fn exit_group(code: c::c_int) -> ! {
     unsafe {
         libc::_exit(code)
     }
+}
+
+#[inline]
+pub(crate) fn setsid() -> io::Result<Pid> {
+    unsafe {
+        let pid = ret_c_int(libc::setsid())?;
+        debug_assert_ne!(pid, 0);
+        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid)))
+    }
+}
+
+#[inline]
+pub(crate) fn kill_process(pid: Pid, sig: Signal) -> io::Result<()> {
+    unsafe { ret(libc::kill(pid.as_raw_nonzero().get(), sig as i32)) }
+}
+
+#[inline]
+pub(crate) fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
+    unsafe {
+        ret(libc::kill(
+            pid.as_raw_nonzero().get().wrapping_neg(),
+            sig as i32,
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn kill_current_process_group(sig: Signal) -> io::Result<()> {
+    unsafe { ret(libc::kill(0, sig as i32)) }
 }

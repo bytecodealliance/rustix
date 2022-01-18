@@ -135,6 +135,121 @@ impl Resource {
     pub const Rss: Self = Self::As;
 }
 
+/// A signal number for use with [`kill`].
+///
+/// [`kill`]: crate::process::kill
+#[cfg(not(target_os = "wasi"))]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[repr(i32)]
+pub enum Signal {
+    /// `SIGHUP`
+    Hup = c::SIGHUP,
+    /// `SIGINT`
+    Int = c::SIGINT,
+    /// `SIGQUIT`
+    Quit = c::SIGQUIT,
+    /// `SIGILL`
+    Ill = c::SIGILL,
+    /// `SIGTRAP`
+    Trap = c::SIGTRAP,
+    /// `SIGABRT`, aka `SIGIOT`
+    #[doc(alias = "Iot")]
+    Abrt = c::SIGABRT,
+    /// `SIGBUS`
+    Bus = c::SIGBUS,
+    /// `SIGFPE`
+    Fpe = c::SIGFPE,
+    /// `SIGKILL`
+    Kill = c::SIGKILL,
+    /// `SIGUSR1`
+    Usr1 = c::SIGUSR1,
+    /// `SIGSEGV`
+    Segv = c::SIGSEGV,
+    /// `SIGUSR2`
+    Usr2 = c::SIGUSR2,
+    /// `SIGPIPE`
+    Pipe = c::SIGPIPE,
+    /// `SIGALRM`
+    Alrm = c::SIGALRM,
+    /// `SIGTERM`
+    Term = c::SIGTERM,
+    /// `SIGSTKFLT`
+    Stkflt = c::SIGSTKFLT,
+    /// `SIGCHLD`
+    Chld = c::SIGCHLD,
+    /// `SIGCONT`
+    Cont = c::SIGCONT,
+    /// `SIGSTOP`
+    Stop = c::SIGSTOP,
+    /// `SIGTSTP`
+    Tstp = c::SIGTSTP,
+    /// `SIGTTIN`
+    Ttin = c::SIGTTIN,
+    /// `SIGTTOU`
+    Ttou = c::SIGTTOU,
+    /// `SIGURG`
+    Urg = c::SIGURG,
+    /// `SIGXCPU`
+    Xcpu = c::SIGXCPU,
+    /// `SIGXFSZ`
+    Xfsz = c::SIGXFSZ,
+    /// `SIGVTALRM`
+    Vtalrm = c::SIGVTALRM,
+    /// `SIGPROF`
+    Prof = c::SIGPROF,
+    /// `SIGWINCH`
+    Winch = c::SIGWINCH,
+    /// `SIGIO`, aka `SIGPOLL`
+    #[doc(alias = "Poll")]
+    Io = c::SIGIO,
+    /// `SIGPWR`
+    Pwr = c::SIGPWR,
+    /// `SIGSYS`, aka `SIGUNUSED`
+    #[doc(alias = "Unused")]
+    Sys = c::SIGSYS,
+}
+
+#[cfg(not(target_os = "wasi"))]
+impl Signal {
+    /// Convert a raw signal number into a `Signal`, if possible.
+    pub fn from_raw(sig: i32) -> Option<Self> {
+        match sig as _ {
+            c::SIGHUP => Some(Self::Hup),
+            c::SIGINT => Some(Self::Int),
+            c::SIGQUIT => Some(Self::Quit),
+            c::SIGILL => Some(Self::Ill),
+            c::SIGTRAP => Some(Self::Trap),
+            c::SIGABRT => Some(Self::Abrt),
+            c::SIGBUS => Some(Self::Bus),
+            c::SIGFPE => Some(Self::Fpe),
+            c::SIGKILL => Some(Self::Kill),
+            c::SIGUSR1 => Some(Self::Usr1),
+            c::SIGSEGV => Some(Self::Segv),
+            c::SIGUSR2 => Some(Self::Usr2),
+            c::SIGPIPE => Some(Self::Pipe),
+            c::SIGALRM => Some(Self::Alrm),
+            c::SIGTERM => Some(Self::Term),
+            c::SIGSTKFLT => Some(Self::Stkflt),
+            c::SIGCHLD => Some(Self::Chld),
+            c::SIGCONT => Some(Self::Cont),
+            c::SIGSTOP => Some(Self::Stop),
+            c::SIGTSTP => Some(Self::Tstp),
+            c::SIGTTIN => Some(Self::Ttin),
+            c::SIGTTOU => Some(Self::Ttou),
+            c::SIGURG => Some(Self::Urg),
+            c::SIGXCPU => Some(Self::Xcpu),
+            c::SIGXFSZ => Some(Self::Xfsz),
+            c::SIGVTALRM => Some(Self::Vtalrm),
+            c::SIGPROF => Some(Self::Prof),
+            c::SIGWINCH => Some(Self::Winch),
+            c::SIGIO => Some(Self::Io),
+            c::SIGPWR => Some(Self::Pwr),
+            c::SIGSYS => Some(Self::Sys),
+            _ => None,
+        }
+    }
+}
+
 pub const EXIT_SUCCESS: c::c_int = c::EXIT_SUCCESS;
 pub const EXIT_FAILURE: c::c_int = c::EXIT_FAILURE;
 #[cfg(not(target_os = "wasi"))]

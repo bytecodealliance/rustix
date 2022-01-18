@@ -12,8 +12,9 @@ use super::super::arch::choose::{
 };
 use super::super::c;
 use super::super::conv::{
-    borrowed_fd, by_mut, c_int, c_str, c_uint, out, ret, ret_c_int, ret_c_uint, ret_infallible,
-    ret_usize, ret_usize_infallible, size_of, slice_just_addr, slice_mut, void_star, zero,
+    borrowed_fd, by_mut, c_int, c_str, c_uint, out, pass_usize, ret, ret_c_int, ret_c_uint,
+    ret_infallible, ret_usize, ret_usize_infallible, size_of, slice_just_addr, slice_mut,
+    void_star, zero,
 };
 use super::super::reg::nr;
 use super::{RawCpuSet, RawUname};
@@ -22,13 +23,14 @@ use crate::ffi::ZStr;
 use crate::io;
 use crate::process::{
     Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, RawNonZeroPid, RawPid, Resource, Rlimit,
-    Uid, WaitOptions, WaitStatus,
+    Signal, Uid, WaitOptions, WaitStatus,
 };
 use core::mem::MaybeUninit;
 use linux_raw_sys::general::{
     __NR_chdir, __NR_exit_group, __NR_fchdir, __NR_getcwd, __NR_getpid, __NR_getppid,
-    __NR_getpriority, __NR_sched_getaffinity, __NR_sched_setaffinity, __NR_sched_yield,
-    __NR_setpriority, __NR_uname, __NR_wait4, __kernel_gid_t, __kernel_pid_t, __kernel_uid_t,
+    __NR_getpriority, __NR_kill, __NR_sched_getaffinity, __NR_sched_setaffinity, __NR_sched_yield,
+    __NR_setpriority, __NR_setsid, __NR_uname, __NR_wait4, __kernel_gid_t, __kernel_pid_t,
+    __kernel_uid_t,
 };
 #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
 use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getuid};
@@ -420,4 +422,48 @@ pub(crate) fn _waitpid(
 #[inline]
 pub(crate) fn exit_group(code: c::c_int) -> ! {
     unsafe { syscall1_noreturn(nr(__NR_exit_group), c_int(code)) }
+}
+
+#[inline]
+pub(crate) fn setsid() -> io::Result<Pid> {
+    unsafe {
+        let pid = ret_usize(syscall0_readonly(nr(__NR_setsid)))?;
+        debug_assert_ne!(pid, 0);
+        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(
+            pid as u32,
+        )))
+    }
+}
+
+#[inline]
+pub(crate) fn kill_process(pid: Pid, sig: Signal) -> io::Result<()> {
+    unsafe {
+        ret(syscall2_readonly(
+            nr(__NR_kill),
+            pass_usize(pid.as_raw_nonzero().get() as usize),
+            pass_usize(sig as usize),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
+    unsafe {
+        ret(syscall2_readonly(
+            nr(__NR_kill),
+            pass_usize((pid.as_raw_nonzero().get() as usize).wrapping_neg()),
+            pass_usize(sig as usize),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn kill_current_process_group(sig: Signal) -> io::Result<()> {
+    unsafe {
+        ret(syscall2_readonly(
+            nr(__NR_kill),
+            pass_usize(0),
+            pass_usize(sig as usize),
+        ))
+    }
 }
