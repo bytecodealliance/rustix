@@ -3,6 +3,7 @@
 use crate::imp;
 use imp::time::Nsecs;
 
+mod abs;
 #[cfg(not(target_os = "redox"))]
 mod at;
 mod constants;
@@ -50,6 +51,8 @@ mod sendfile;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 mod statx;
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use abs::statfs;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use at::fclonefileat;
 #[cfg(not(any(

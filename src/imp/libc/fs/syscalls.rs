@@ -19,8 +19,6 @@ use super::super::conv::{
 use super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t};
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 use super::super::offset::libc_fallocate;
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
-use super::super::offset::libc_fstatfs;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "ios",
@@ -43,6 +41,8 @@ use super::super::offset::libc_posix_fadvise;
 )))]
 use super::super::offset::libc_posix_fallocate;
 use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek, libc_off_t};
+#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
+use super::super::offset::{libc_fstatfs, libc_statfs};
 use crate::as_ptr;
 use crate::fd::BorrowedFd;
 #[cfg(not(target_os = "wasi"))]
@@ -121,6 +121,16 @@ pub(crate) fn openat(
             oflags.bits(),
             c::c_uint::from(mode.bits()),
         ))
+    }
+}
+
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub(crate) fn statfs(filename: &ZStr) -> io::Result<StatFs> {
+    unsafe {
+        let mut result = MaybeUninit::<StatFs>::uninit();
+        ret(libc_statfs(c_str(filename), result.as_mut_ptr()))?;
+        Ok(result.assume_init())
     }
 }
 

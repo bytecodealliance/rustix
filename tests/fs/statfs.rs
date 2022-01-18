@@ -1,6 +1,6 @@
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
-fn test_statx() {
+fn test_statfs_abi() {
     use rustix::fs::{FsWord, StatFs, NFS_SUPER_MAGIC, PROC_SUPER_MAGIC};
 
     // Ensure these all have consistent types.
@@ -37,4 +37,11 @@ fn test_statx() {
 
     assert_eq!(PROC_SUPER_MAGIC, 0x0000_9fa0);
     assert_eq!(NFS_SUPER_MAGIC, 0x0000_6969);
+}
+
+#[test]
+fn test_statfs() {
+    let statfs = rustix::fs::statfs("Cargo.toml").unwrap();
+    assert_ne!(statfs.f_blocks, 0);
+    assert_ne!(statfs.f_files, 0);
 }

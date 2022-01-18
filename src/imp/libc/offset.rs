@@ -170,17 +170,6 @@ pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
 #[cfg(not(any(
     windows,
     target_os = "android",
-    target_os = "linux",
-    target_os = "emscripten",
-    target_os = "l4re",
-    target_os = "netbsd",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
-pub(super) use c::fstatfs as libc_fstatfs;
-#[cfg(not(any(
-    windows,
-    target_os = "android",
     target_os = "dragonfly",
     target_os = "fuchsia",
     target_os = "ios",
@@ -194,6 +183,17 @@ pub(super) use c::fstatfs as libc_fstatfs;
 pub(super) use c::posix_fallocate as libc_posix_fallocate;
 #[cfg(any(target_os = "l4re",))]
 pub(super) use c::posix_fallocate64 as libc_posix_fallocate;
+#[cfg(not(any(
+    windows,
+    target_os = "android",
+    target_os = "linux",
+    target_os = "emscripten",
+    target_os = "l4re",
+    target_os = "netbsd",
+    target_os = "redox",
+    target_os = "wasi",
+)))]
+pub(super) use {c::fstatfs as libc_fstatfs, c::statfs as libc_statfs};
 
 #[cfg(any(
     target_os = "android",
@@ -201,4 +201,4 @@ pub(super) use c::posix_fallocate64 as libc_posix_fallocate;
     target_os = "emscripten",
     target_os = "l4re",
 ))]
-pub(super) use c::fstatfs64 as libc_fstatfs;
+pub(super) use {c::fstatfs64 as libc_fstatfs, c::statfs64 as libc_statfs};
