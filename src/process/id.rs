@@ -115,6 +115,19 @@ impl Pid {
         Self(raw)
     }
 
+    /// Creates a `Pid` holding the ID of the given child process.
+    #[cfg(feature = "std")]
+    #[inline]
+    pub fn from_child(child: &std::process::Child) -> Self {
+        // Safety
+        //
+        // We know the returned ID is valid because it came directly from
+        // an OS API.
+        let id = child.id();
+        debug_assert_ne!(id, 0);
+        unsafe { Self::from_raw_nonzero(RawNonZeroPid::new_unchecked(id as _)) }
+    }
+
     /// Converts a `Pid` into a `RawNonZeroPid`.
     #[inline]
     pub const fn as_raw_nonzero(self) -> RawNonZeroPid {
