@@ -335,6 +335,7 @@ pub(crate) fn exit_group(code: c::c_int) -> ! {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) fn setsid() -> io::Result<Pid> {
     unsafe {
@@ -344,11 +345,13 @@ pub(crate) fn setsid() -> io::Result<Pid> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) fn kill_process(pid: Pid, sig: Signal) -> io::Result<()> {
     unsafe { ret(libc::kill(pid.as_raw_nonzero().get(), sig as i32)) }
 }
 
+#[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
     unsafe {
@@ -359,6 +362,7 @@ pub(crate) fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) fn kill_current_process_group(sig: Signal) -> io::Result<()> {
     unsafe { ret(libc::kill(0, sig as i32)) }

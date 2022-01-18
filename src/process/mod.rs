@@ -52,6 +52,7 @@ pub use id::{
     getegid, geteuid, getgid, getpid, getppid, getuid, Gid, Pid, RawGid, RawNonZeroPid, RawPid,
     RawUid, Uid,
 };
+#[cfg(not(target_os = "wasi"))]
 pub use imp::process::Signal;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use membarrier::{

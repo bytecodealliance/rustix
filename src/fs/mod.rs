@@ -51,7 +51,7 @@ mod sendfile;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 mod statx;
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 pub use abs::statfs;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use at::fclonefileat;
