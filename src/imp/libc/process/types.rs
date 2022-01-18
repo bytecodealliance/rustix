@@ -178,7 +178,8 @@ pub enum Signal {
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
-        target_os = "netbsd"
+        target_os = "netbsd",
+        target_os = "openbsd",
     )))]
     Stkflt = c::SIGSTKFLT,
     /// `SIGCHLD`
@@ -213,7 +214,8 @@ pub enum Signal {
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
-        target_os = "netbsd"
+        target_os = "netbsd",
+        target_os = "openbsd"
     )))]
     Pwr = c::SIGPWR,
     /// `SIGSYS`, aka `SIGUNUSED`
@@ -245,7 +247,8 @@ impl Signal {
                 target_os = "freebsd",
                 target_os = "ios",
                 target_os = "macos",
-                target_os = "netbsd"
+                target_os = "netbsd",
+                target_os = "openbsd",
             )))]
             c::SIGSTKFLT => Some(Self::Stkflt),
             c::SIGCHLD => Some(Self::Chld),
@@ -265,7 +268,8 @@ impl Signal {
                 target_os = "freebsd",
                 target_os = "ios",
                 target_os = "macos",
-                target_os = "netbsd"
+                target_os = "netbsd",
+                target_os = "openbsd",
             )))]
             c::SIGPWR => Some(Self::Pwr),
             c::SIGSYS => Some(Self::Sys),
