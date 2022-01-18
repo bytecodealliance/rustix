@@ -24,4 +24,6 @@ mod mknodat;
 mod openat2;
 mod readdir;
 mod renameat;
+#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
+// not implemented in libc for netbsd yet
 mod statfs;

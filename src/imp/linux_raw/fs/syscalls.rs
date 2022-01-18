@@ -59,7 +59,7 @@ use {
     super::super::conv::{hi, lo, slice_just_addr},
     linux_raw_sys::general::{
         __NR__llseek, __NR_fcntl64, __NR_fstat64, __NR_fstatat64, __NR_fstatfs64, __NR_ftruncate64,
-        __NR_sendfile64, timespec as __kernel_old_timespec,
+        __NR_sendfile64, __NR_statfs64, timespec as __kernel_old_timespec,
     },
     linux_raw_sys::v5_4::general::__NR_utimensat_time64,
 };
@@ -68,7 +68,7 @@ use {
     super::super::conv::{loff_t, loff_t_from_u64, ret_u64},
     linux_raw_sys::general::{
         __NR_fadvise64, __NR_fcntl, __NR_fstat, __NR_fstatfs, __NR_ftruncate, __NR_lseek,
-        __NR_newfstatat, __NR_sendfile,
+        __NR_newfstatat, __NR_sendfile, __NR_statfs,
     },
 };
 
@@ -589,6 +589,27 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
             out(&mut result),
         ))
         .map(|()| result.assume_init())
+    }
+}
+
+#[inline]
+pub(crate) fn statfs(filename: &ZStr) -> io::Result<StatFs> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        let mut result = MaybeUninit::<StatFs>::uninit();
+        ret(syscall3(
+            nr(__NR_statfs64),
+            c_str(filename),
+            size_of::<StatFs, _>(),
+            out(&mut result),
+        ))
+        .map(|()| result.assume_init())
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        let mut result = MaybeUninit::<StatFs>::uninit();
+        ret(syscall2(nr(__NR_statfs), c_str(filename), out(&mut result)))
+            .map(|()| result.assume_init())
     }
 }
 
