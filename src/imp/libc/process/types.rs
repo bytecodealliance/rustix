@@ -174,6 +174,12 @@ pub enum Signal {
     /// `SIGTERM`
     Term = c::SIGTERM,
     /// `SIGSTKFLT`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd"
+    )))]
     Stkflt = c::SIGSTKFLT,
     /// `SIGCHLD`
     Chld = c::SIGCHLD,
@@ -203,6 +209,12 @@ pub enum Signal {
     #[doc(alias = "Poll")]
     Io = c::SIGIO,
     /// `SIGPWR`
+    #[cfg(not(any(
+        target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd"
+    )))]
     Pwr = c::SIGPWR,
     /// `SIGSYS`, aka `SIGUNUSED`
     #[doc(alias = "Unused")]
@@ -229,6 +241,12 @@ impl Signal {
             c::SIGPIPE => Some(Self::Pipe),
             c::SIGALRM => Some(Self::Alrm),
             c::SIGTERM => Some(Self::Term),
+            #[cfg(not(any(
+                target_os = "freebsd",
+                target_os = "ios",
+                target_os = "macos",
+                target_os = "netbsd"
+            )))]
             c::SIGSTKFLT => Some(Self::Stkflt),
             c::SIGCHLD => Some(Self::Chld),
             c::SIGCONT => Some(Self::Cont),
@@ -243,6 +261,12 @@ impl Signal {
             c::SIGPROF => Some(Self::Prof),
             c::SIGWINCH => Some(Self::Winch),
             c::SIGIO => Some(Self::Io),
+            #[cfg(not(any(
+                target_os = "freebsd",
+                target_os = "ios",
+                target_os = "macos",
+                target_os = "netbsd"
+            )))]
             c::SIGPWR => Some(Self::Pwr),
             c::SIGSYS => Some(Self::Sys),
             _ => None,

@@ -124,7 +124,7 @@ pub(crate) fn openat(
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn statfs(filename: &ZStr) -> io::Result<StatFs> {
     unsafe {
