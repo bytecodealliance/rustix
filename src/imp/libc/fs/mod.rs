@@ -50,6 +50,6 @@ pub use types::{Access, Dev, FdFlags, FileType, Mode, OFlags, RawMode, Stat};
 #[cfg(not(target_os = "redox"))]
 pub use types::{AtFlags, UTIME_NOW, UTIME_OMIT};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use types::{FsWord, MemfdFlags, RenameFlags, ResolveFlags, PROC_SUPER_MAGIC};
+pub use types::{FsWord, MemfdFlags, RenameFlags, ResolveFlags, NFS_SUPER_MAGIC, PROC_SUPER_MAGIC};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 pub use types::{Statx, StatxFlags};

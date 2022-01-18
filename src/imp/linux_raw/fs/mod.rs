@@ -9,5 +9,5 @@ pub use makedev::{major, makedev, minor};
 pub use types::{
     Access, Advice, AtFlags, Dev, FallocateFlags, FdFlags, FileType, FlockOperation, FsWord,
     MemfdFlags, Mode, OFlags, RawMode, RenameFlags, ResolveFlags, Stat, StatFs, Statx, StatxFlags,
-    PROC_SUPER_MAGIC, UTIME_NOW, UTIME_OMIT,
+    NFS_SUPER_MAGIC, PROC_SUPER_MAGIC, UTIME_NOW, UTIME_OMIT,
 };
