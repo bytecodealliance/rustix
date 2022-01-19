@@ -413,7 +413,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         } {
             0 => read = false,
             -1 => {
-                #[allow(unreachable_patterns)] // EAGAIN may equal EWOULDBLOCK
+                #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
                 match errno().0 {
                     c::EAGAIN | c::EWOULDBLOCK => (),
                     c::ENOTSOCK => not_socket = true,
@@ -428,7 +428,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // the write side is shut down.
         match unsafe { c::send(borrowed_fd(fd), [].as_ptr(), 0, c::MSG_DONTWAIT) } {
             -1 => {
-                #[allow(unreachable_patterns)] // EAGAIN may equal EWOULDBLOCK
+                #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
                 match errno().0 {
                     c::EAGAIN | c::EWOULDBLOCK => (),
                     c::ENOTSOCK => (),
@@ -483,7 +483,7 @@ pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> i
     target_os = "redox"
 ))]
 pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, _flags: DupFlags) -> io::Result<()> {
-    // Android 5.0 has dup3, but libc doesn't have bindings
+    // Android 5.0 has `dup3`, but libc doesn't have bindings
     dup2(fd, new)
 }
 

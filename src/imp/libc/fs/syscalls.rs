@@ -113,7 +113,7 @@ pub(crate) fn openat(
 ) -> io::Result<OwnedFd> {
     unsafe {
         // Pass `mode` as a `c_uint` even if `mode_t` is narrower, since
-        // `libc_openat` is declared as a variadic function and narrrower
+        // `libc_openat` is declared as a variadic function and narrower
         // arguments are promoted.
         ret_owned_fd(libc_openat(
             borrowed_fd(dirfd),
@@ -322,7 +322,7 @@ pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &ZStr, mode: Mode) -> io::Res
     // Note that Linux's `fchmodat` does not have a flags argument.
     unsafe {
         // Pass `mode` as a `c_uint` even if `mode_t` is narrower, since
-        // `libc_openat` is declared as a variadic function and narrrower
+        // `libc_openat` is declared as a variadic function and narrower
         // arguments are promoted.
         syscall_ret(c::syscall(
             c::SYS_fchmodat,

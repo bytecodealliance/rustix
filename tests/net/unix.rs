@@ -1,7 +1,7 @@
 //! Test a simple Unix-domain socket server and client. The client sends lists
 //! of integers and the server sends back sums.
 
-// This test uses AF_UNIX with SOCK_SEQPACKET which is unsupported on macOS.
+// This test uses `AF_UNIX` with `SOCK_SEQPACKET` which is unsupported on macOS.
 #![cfg(not(any(
     target_os = "ios",
     target_os = "macos",

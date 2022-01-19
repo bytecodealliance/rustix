@@ -15,7 +15,7 @@ fn test_readwrite_pv() {
     )
     .unwrap();
 
-    // For most targets, just call pwritev.
+    // For most targets, just call `pwritev`.
     #[cfg(not(any(target_os = "ios", target_os = "macos")))]
     {
         pwritev(&foo, &[IoSlice::new(b"hello")], 200).unwrap();
