@@ -15,6 +15,7 @@ mod cwd;
 mod dir;
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -33,6 +34,7 @@ mod file_type;
 mod getpath;
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "freebsd",
     target_os = "macos",
@@ -51,8 +53,15 @@ mod sendfile;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 mod statx;
 
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "netbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 pub use abs::statfs;
+#[cfg(not(any(target_os = "illumos", target_os = "redox")))]
+pub use at::accessat;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use at::fclonefileat;
 #[cfg(not(any(
@@ -64,12 +73,12 @@ pub use at::fclonefileat;
 pub use at::mknodat;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use at::renameat_with;
-#[cfg(not(target_os = "redox"))]
-pub use at::{
-    accessat, linkat, mkdirat, openat, readlinkat, renameat, statat, symlinkat, unlinkat, utimensat,
-};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub use at::{chmodat, chownat};
+#[cfg(not(target_os = "redox"))]
+pub use at::{
+    linkat, mkdirat, openat, readlinkat, renameat, statat, symlinkat, unlinkat, utimensat,
+};
 #[cfg(not(target_os = "redox"))]
 pub use constants::AtFlags;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
@@ -90,6 +99,7 @@ pub use cwd::cwd;
 pub use dir::{Dir, DirEntry};
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -102,6 +112,7 @@ pub use fcntl::fcntl_dupfd_cloexec;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -120,6 +131,7 @@ pub use fcopyfile::{
 };
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox"
@@ -132,7 +144,12 @@ pub use fd::fallocate;
     target_os = "redox"
 )))]
 pub use fd::fdatasync;
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "netbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 // not implemented in libc for netbsd yet
 pub use fd::fstatfs;
 #[cfg(not(target_os = "wasi"))]
@@ -143,6 +160,7 @@ pub use file_type::FileType;
 pub use getpath::getpath;
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "freebsd",
     target_os = "macos",
@@ -163,13 +181,23 @@ pub use statx::{statx, StatxFlags};
 
 pub use imp::fs::Stat;
 
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "netbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 pub use imp::fs::StatFs;
 
 #[cfg(any(linux_raw, all(libc, target_os = "linux", target_env = "gnu")))]
 pub use imp::fs::Statx;
 
-#[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "netbsd",
+    target_os = "openbsd",
+    target_os = "redox"
+)))]
 pub use imp::fs::FallocateFlags;
 
 /// `UTIME_NOW` for use with [`utimensat`].

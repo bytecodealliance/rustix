@@ -38,11 +38,21 @@ pub enum ClockId {
     Monotonic = c::CLOCK_MONOTONIC,
 
     /// `CLOCK_PROCESS_CPUTIME_ID`
-    #[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
+    #[cfg(not(any(
+        target_os = "illumos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+        target_os = "redox"
+    )))]
     ProcessCPUTime = c::CLOCK_PROCESS_CPUTIME_ID,
 
     /// `CLOCK_THREAD_CPUTIME_ID`
-    #[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
+    #[cfg(not(any(
+        target_os = "illumos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+        target_os = "redox"
+    )))]
     ThreadCPUTime = c::CLOCK_THREAD_CPUTIME_ID,
 
     /// `CLOCK_REALTIME_COARSE`

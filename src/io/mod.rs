@@ -139,6 +139,14 @@ pub const ICANON: Tcflag = imp::io::ICANON;
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/write.html
 #[cfg(any(
     linux_raw,
-    all(libc, not(any(windows, target_os = "redox", target_os = "wasi")))
+    all(
+        libc,
+        not(any(
+            windows,
+            target_os = "illumos",
+            target_os = "redox",
+            target_os = "wasi"
+        ))
+    )
 ))]
 pub const PIPE_BUF: usize = imp::io::PIPE_BUF;

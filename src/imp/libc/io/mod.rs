@@ -27,7 +27,12 @@ pub use types::MremapFlags;
     not(any(windows, target_os = "ios", target_os = "macos", target_os = "wasi"))
 ))]
 pub use types::PipeFlags;
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    windows,
+    target_os = "illumos",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 pub use types::PIPE_BUF;
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use types::{

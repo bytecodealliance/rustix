@@ -8,13 +8,19 @@ use crate::{imp, io};
 use imp::fd::{AsFd, BorrowedFd};
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox"
 )))]
 use imp::fs::FallocateFlags;
 use imp::fs::Stat;
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "netbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 // not implemented in libc for netbsd yet
 use imp::fs::StatFs;
 #[cfg(not(target_os = "wasi"))]
@@ -110,7 +116,12 @@ pub fn fstat<Fd: AsFd>(fd: &Fd) -> io::Result<Stat> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/fstatfs.2.html
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))] // not implemented in libc for netbsd yet
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "netbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))] // not implemented in libc for netbsd yet
 #[inline]
 pub fn fstatfs<Fd: AsFd>(fd: &Fd) -> io::Result<StatFs> {
     let fd = fd.as_fd();
@@ -148,6 +159,7 @@ pub fn futimens<Fd: AsFd>(fd: &Fd, times: &Timestamps) -> io::Result<()> {
 /// [Linux `posix_fallocate`]: https://man7.org/linux/man-pages/man3/posix_fallocate.3.html
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox"

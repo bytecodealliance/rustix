@@ -97,6 +97,7 @@ bitflags! {
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
+            target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -109,6 +110,7 @@ bitflags! {
         /// `MAP_DENYWRITE`
         #[cfg(not(any(
             target_os = "dragonfly",
+            target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -134,6 +136,7 @@ bitflags! {
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
+            target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -145,6 +148,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "illumos",
             target_os = "ios",
             target_os = "netbsd",
             target_os = "macos",
@@ -156,6 +160,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -170,6 +175,7 @@ bitflags! {
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
+            target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -184,6 +190,7 @@ bitflags! {
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
+            target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -195,6 +202,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -209,6 +217,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -219,6 +228,7 @@ bitflags! {
         /// `MAP_STACK`
         #[cfg(not(any(
             target_os = "dragonfly",
+            target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -232,6 +242,7 @@ bitflags! {
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
+            target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -297,7 +308,7 @@ bitflags! {
         /// `O_CLOEXEC`
         const CLOEXEC = c::O_CLOEXEC;
         /// `O_DIRECT`
-        #[cfg(not(any(target_os = "openbsd", target_os = "redox")))]
+        #[cfg(not(any(target_os = "illumos", target_os = "openbsd", target_os = "redox")))]
         const DIRECT = c::O_DIRECT;
         /// `O_NONBLOCK`
         const NONBLOCK = c::O_NONBLOCK;
@@ -456,5 +467,5 @@ pub type Tcflag = c::tcflag_t;
 pub const ICANON: Tcflag = c::ICANON;
 
 /// `PIPE_BUF`—The maximum size of a write to a pipe guaranteed to be atomic.
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
 pub const PIPE_BUF: usize = c::PIPE_BUF;

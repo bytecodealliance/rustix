@@ -5,6 +5,7 @@ pub(crate) mod syscalls;
 mod dir;
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "freebsd",
     target_os = "macos",
@@ -20,6 +21,7 @@ mod types;
 pub use dir::{Dir, DirEntry};
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "freebsd",
     target_os = "macos",
@@ -31,6 +33,7 @@ pub use dir::{Dir, DirEntry};
 pub use makedev::{major, makedev, minor};
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -38,11 +41,21 @@ pub use makedev::{major, makedev, minor};
     target_os = "redox"
 )))]
 pub use types::Advice;
-#[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "netbsd",
+    target_os = "openbsd",
+    target_os = "redox"
+)))]
 pub use types::FallocateFlags;
 #[cfg(not(target_os = "wasi"))]
 pub use types::FlockOperation;
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "netbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 pub use types::StatFs;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use types::{copyfile_state_t, CloneFlags, CopyfileFlags};

@@ -57,6 +57,7 @@ jobs:
         x86_64-unknown-freebsd
         x86_64-unknown-netbsd
         x86_64-fuchsia
+        x86_64-unknown-illumos
         i686-unknown-linux-gnu
         i686-unknown-linux-musl
         wasm32-unknown-emscripten
@@ -77,6 +78,7 @@ jobs:
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-freebsd
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-netbsd
     - run: cargo check --workspace --release -vv --target=x86_64-fuchsia
+    - run: cargo check --workspace --release -vv --target=x86_64-unknown-illumos
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-musl
     - run: cargo check --workspace --release -vv --target=wasm32-unknown-emscripten
