@@ -8,6 +8,7 @@ use super::c;
 use core::marker::PhantomData;
 use core::slice;
 
+/// <https://doc.rust-lang.org/nightly/std/io/struct.IoSlice.html>
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct IoSlice<'a> {
@@ -16,6 +17,7 @@ pub struct IoSlice<'a> {
 }
 
 impl<'a> IoSlice<'a> {
+    /// <https://doc.rust-lang.org/nightly/std/io/struct.IoSlice.html#method.new>
     #[inline]
     pub fn new(buf: &'a [u8]) -> IoSlice<'a> {
         IoSlice {
@@ -27,6 +29,7 @@ impl<'a> IoSlice<'a> {
         }
     }
 
+    /// <https://doc.rust-lang.org/nightly/std/io/struct.IoSlice.html#method.advance>
     #[inline]
     pub fn advance(&mut self, n: usize) {
         if self.vec.iov_len < n as u64 {
@@ -39,12 +42,14 @@ impl<'a> IoSlice<'a> {
         }
     }
 
+    /// <https://doc.rust-lang.org/nightly/std/io/struct.IoSlice.html#method.as_slice>
     #[inline]
     pub fn as_slice(&self) -> &[u8] {
         unsafe { slice::from_raw_parts(self.vec.iov_base as *mut u8, self.vec.iov_len as usize) }
     }
 }
 
+/// <https://doc.rust-lang.org/nightly/std/io/struct.IoSliceMut.html>
 #[repr(transparent)]
 pub struct IoSliceMut<'a> {
     vec: c::iovec,
@@ -52,6 +57,7 @@ pub struct IoSliceMut<'a> {
 }
 
 impl<'a> IoSliceMut<'a> {
+    /// <https://doc.rust-lang.org/nightly/std/io/struct.IoSliceMut.html#method.new>
     #[inline]
     pub fn new(buf: &'a mut [u8]) -> IoSliceMut<'a> {
         IoSliceMut {
@@ -63,6 +69,7 @@ impl<'a> IoSliceMut<'a> {
         }
     }
 
+    /// <https://doc.rust-lang.org/nightly/std/io/struct.IoSliceMut.html#method.advance>
     #[inline]
     pub fn advance(&mut self, n: usize) {
         if self.vec.iov_len < n as u64 {
@@ -75,11 +82,13 @@ impl<'a> IoSliceMut<'a> {
         }
     }
 
+    /// <https://doc.rust-lang.org/nightly/std/io/struct.IoSliceMut.html#method.as_slice>
     #[inline]
     pub fn as_slice(&self) -> &[u8] {
         unsafe { slice::from_raw_parts(self.vec.iov_base as *mut u8, self.vec.iov_len as usize) }
     }
 
+    /// <https://doc.rust-lang.org/nightly/std/io/struct.IoSliceMut.html#method.as_slice_mut>
     #[inline]
     pub fn as_mut_slice(&mut self) -> &mut [u8] {
         unsafe {
