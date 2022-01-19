@@ -93,7 +93,8 @@ pub enum Signal {
     Trap = linux_raw_sys::general::SIGTRAP,
     /// `SIGABRT`, aka `SIGIOT`
     #[doc(alias = "Iot")]
-    Abrt = linux_raw_sys::general::SIGABRT,
+    #[doc(alias = "Abrt")]
+    Abort = linux_raw_sys::general::SIGABRT,
     /// `SIGBUS`
     Bus = linux_raw_sys::general::SIGBUS,
     /// `SIGFPE`
@@ -109,13 +110,15 @@ pub enum Signal {
     /// `SIGPIPE`
     Pipe = linux_raw_sys::general::SIGPIPE,
     /// `SIGALRM`
-    Alrm = linux_raw_sys::general::SIGALRM,
+    #[doc(alias = "Alrm")]
+    Alarm = linux_raw_sys::general::SIGALRM,
     /// `SIGTERM`
     Term = linux_raw_sys::general::SIGTERM,
     /// `SIGSTKFLT`
     Stkflt = linux_raw_sys::general::SIGSTKFLT,
     /// `SIGCHLD`
-    Chld = linux_raw_sys::general::SIGCHLD,
+    #[doc(alias = "Chld")]
+    Child = linux_raw_sys::general::SIGCHLD,
     /// `SIGCONT`
     Cont = linux_raw_sys::general::SIGCONT,
     /// `SIGSTOP`
@@ -133,7 +136,8 @@ pub enum Signal {
     /// `SIGXFSZ`
     Xfsz = linux_raw_sys::general::SIGXFSZ,
     /// `SIGVTALRM`
-    Vtalrm = linux_raw_sys::general::SIGVTALRM,
+    #[doc(alias = "Vtalrm")]
+    Vtalarm = linux_raw_sys::general::SIGVTALRM,
     /// `SIGPROF`
     Prof = linux_raw_sys::general::SIGPROF,
     /// `SIGWINCH`
@@ -142,7 +146,8 @@ pub enum Signal {
     #[doc(alias = "Poll")]
     Io = linux_raw_sys::general::SIGIO,
     /// `SIGPWR`
-    Pwr = linux_raw_sys::general::SIGPWR,
+    #[doc(alias = "Pwr")]
+    Power = linux_raw_sys::general::SIGPWR,
     /// `SIGSYS`, aka `SIGUNUSED`
     #[doc(alias = "Unused")]
     Sys = linux_raw_sys::general::SIGSYS,
@@ -159,7 +164,7 @@ impl Signal {
             linux_raw_sys::general::SIGQUIT => Some(Self::Quit),
             linux_raw_sys::general::SIGILL => Some(Self::Ill),
             linux_raw_sys::general::SIGTRAP => Some(Self::Trap),
-            linux_raw_sys::general::SIGABRT => Some(Self::Abrt),
+            linux_raw_sys::general::SIGABRT => Some(Self::Abort),
             linux_raw_sys::general::SIGBUS => Some(Self::Bus),
             linux_raw_sys::general::SIGFPE => Some(Self::Fpe),
             linux_raw_sys::general::SIGKILL => Some(Self::Kill),
@@ -167,10 +172,10 @@ impl Signal {
             linux_raw_sys::general::SIGSEGV => Some(Self::Segv),
             linux_raw_sys::general::SIGUSR2 => Some(Self::Usr2),
             linux_raw_sys::general::SIGPIPE => Some(Self::Pipe),
-            linux_raw_sys::general::SIGALRM => Some(Self::Alrm),
+            linux_raw_sys::general::SIGALRM => Some(Self::Alarm),
             linux_raw_sys::general::SIGTERM => Some(Self::Term),
             linux_raw_sys::general::SIGSTKFLT => Some(Self::Stkflt),
-            linux_raw_sys::general::SIGCHLD => Some(Self::Chld),
+            linux_raw_sys::general::SIGCHLD => Some(Self::Child),
             linux_raw_sys::general::SIGCONT => Some(Self::Cont),
             linux_raw_sys::general::SIGSTOP => Some(Self::Stop),
             linux_raw_sys::general::SIGTSTP => Some(Self::Tstp),
@@ -179,11 +184,11 @@ impl Signal {
             linux_raw_sys::general::SIGURG => Some(Self::Urg),
             linux_raw_sys::general::SIGXCPU => Some(Self::Xcpu),
             linux_raw_sys::general::SIGXFSZ => Some(Self::Xfsz),
-            linux_raw_sys::general::SIGVTALRM => Some(Self::Vtalrm),
+            linux_raw_sys::general::SIGVTALRM => Some(Self::Vtalarm),
             linux_raw_sys::general::SIGPROF => Some(Self::Prof),
             linux_raw_sys::general::SIGWINCH => Some(Self::Winch),
             linux_raw_sys::general::SIGIO => Some(Self::Io),
-            linux_raw_sys::general::SIGPWR => Some(Self::Pwr),
+            linux_raw_sys::general::SIGPWR => Some(Self::Power),
             linux_raw_sys::general::SIGSYS => Some(Self::Sys),
             linux_raw_sys::general::SIGRTMIN => Some(Self::Rtmin),
             _ => None,

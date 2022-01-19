@@ -154,7 +154,8 @@ pub enum Signal {
     Trap = c::SIGTRAP,
     /// `SIGABRT`, aka `SIGIOT`
     #[doc(alias = "Iot")]
-    Abrt = c::SIGABRT,
+    #[doc(alias = "Abrt")]
+    Abort = c::SIGABRT,
     /// `SIGBUS`
     Bus = c::SIGBUS,
     /// `SIGFPE`
@@ -170,7 +171,8 @@ pub enum Signal {
     /// `SIGPIPE`
     Pipe = c::SIGPIPE,
     /// `SIGALRM`
-    Alrm = c::SIGALRM,
+    #[doc(alias = "Alrm")]
+    Alarm = c::SIGALRM,
     /// `SIGTERM`
     Term = c::SIGTERM,
     /// `SIGSTKFLT`
@@ -183,7 +185,8 @@ pub enum Signal {
     )))]
     Stkflt = c::SIGSTKFLT,
     /// `SIGCHLD`
-    Chld = c::SIGCHLD,
+    #[doc(alias = "Chld")]
+    Child = c::SIGCHLD,
     /// `SIGCONT`
     Cont = c::SIGCONT,
     /// `SIGSTOP`
@@ -201,7 +204,8 @@ pub enum Signal {
     /// `SIGXFSZ`
     Xfsz = c::SIGXFSZ,
     /// `SIGVTALRM`
-    Vtalrm = c::SIGVTALRM,
+    #[doc(alias = "Vtalrm")]
+    Vtalarm = c::SIGVTALRM,
     /// `SIGPROF`
     Prof = c::SIGPROF,
     /// `SIGWINCH`
@@ -217,7 +221,8 @@ pub enum Signal {
         target_os = "netbsd",
         target_os = "openbsd"
     )))]
-    Pwr = c::SIGPWR,
+    #[doc(alias = "Pwr")]
+    Power = c::SIGPWR,
     /// `SIGSYS`, aka `SIGUNUSED`
     #[doc(alias = "Unused")]
     Sys = c::SIGSYS,
@@ -233,7 +238,7 @@ impl Signal {
             c::SIGQUIT => Some(Self::Quit),
             c::SIGILL => Some(Self::Ill),
             c::SIGTRAP => Some(Self::Trap),
-            c::SIGABRT => Some(Self::Abrt),
+            c::SIGABRT => Some(Self::Abort),
             c::SIGBUS => Some(Self::Bus),
             c::SIGFPE => Some(Self::Fpe),
             c::SIGKILL => Some(Self::Kill),
@@ -241,7 +246,7 @@ impl Signal {
             c::SIGSEGV => Some(Self::Segv),
             c::SIGUSR2 => Some(Self::Usr2),
             c::SIGPIPE => Some(Self::Pipe),
-            c::SIGALRM => Some(Self::Alrm),
+            c::SIGALRM => Some(Self::Alarm),
             c::SIGTERM => Some(Self::Term),
             #[cfg(not(any(
                 target_os = "freebsd",
@@ -251,7 +256,7 @@ impl Signal {
                 target_os = "openbsd",
             )))]
             c::SIGSTKFLT => Some(Self::Stkflt),
-            c::SIGCHLD => Some(Self::Chld),
+            c::SIGCHLD => Some(Self::Child),
             c::SIGCONT => Some(Self::Cont),
             c::SIGSTOP => Some(Self::Stop),
             c::SIGTSTP => Some(Self::Tstp),
@@ -260,7 +265,7 @@ impl Signal {
             c::SIGURG => Some(Self::Urg),
             c::SIGXCPU => Some(Self::Xcpu),
             c::SIGXFSZ => Some(Self::Xfsz),
-            c::SIGVTALRM => Some(Self::Vtalrm),
+            c::SIGVTALRM => Some(Self::Vtalarm),
             c::SIGPROF => Some(Self::Prof),
             c::SIGWINCH => Some(Self::Winch),
             c::SIGIO => Some(Self::Io),
@@ -271,7 +276,7 @@ impl Signal {
                 target_os = "netbsd",
                 target_os = "openbsd",
             )))]
-            c::SIGPWR => Some(Self::Pwr),
+            c::SIGPWR => Some(Self::Power),
             c::SIGSYS => Some(Self::Sys),
             _ => None,
         }
