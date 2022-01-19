@@ -378,7 +378,7 @@ pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
             c::ENOTTY => false,
 
             // Old Linux versions reportedly return `EINVAL`.
-            // https://man7.org/linux/man-pages/man3/isatty.3.html#ERRORS
+            // <https://man7.org/linux/man-pages/man3/isatty.3.html#ERRORS>
             #[cfg(any(target_os = "android", target_os = "linux"))]
             c::ENOTTY | c::EINVAL => false,
 

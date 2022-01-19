@@ -855,11 +855,11 @@ pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<ZString> {
     // instead.
     let mut buf = vec![0; c::PATH_MAX as usize];
 
-    // From the macOS `fcntl` man page:
+    // From the [macOS `fcntl` man page]:
     // `F_GETPATH` - Get the path of the file descriptor `Fildes`. The argument
     //               must be a buffer of size `MAXPATHLEN` or greater.
     //
-    // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
+    // [macOS `fcntl` man page]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
     unsafe {
         ret(c::fcntl(borrowed_fd(fd), c::F_GETPATH, buf.as_mut_ptr()))?;
     }
@@ -876,7 +876,7 @@ pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<ZString> {
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub(crate) fn fcntl_rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
-    // From the macOS `fcntl` man page:
+    // From the [macOS `fcntl` man page]:
     // `F_RDADVISE` - Issue an advisory read async with no copy to user.
     //
     // The `F_RDADVISE` command operates on the following structure which holds
@@ -889,7 +889,7 @@ pub(crate) fn fcntl_rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::R
     // };
     // ```
     //
-    // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
+    // [macOS `fcntl` man page]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
     let ra_offset = match offset.try_into() {
         Ok(len) => len,
         // If this conversion fails, the user is providing an offset outside

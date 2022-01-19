@@ -317,7 +317,7 @@ pub(crate) fn tell(fd: BorrowedFd<'_>) -> io::Result<u64> {
 
 #[inline]
 pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
-    // https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L81-L83
+    // <https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L81-L83>
     #[cfg(all(target_pointer_width = "32", target_arch = "arm"))]
     unsafe {
         ret(syscall4_readonly(
