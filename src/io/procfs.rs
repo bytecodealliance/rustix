@@ -5,6 +5,16 @@
 //! This module does a considerable amount of work to determine whether `/proc`
 //! is mounted, with actual `procfs`, and without any additional mount points
 //! on top of the paths we open.
+//!
+//! Why all the effort to detect bind mount points? People are doing all kinds
+//! of things with Linux containers these days, with many different privilege
+//! schemes, and we want to avoid making any unnecessary assumptions. Rustix
+//! and its users will sometimes use procfs *implicitly* (when Linux gives them
+//! no better options), in ways that aren't obvious from their public APIs.
+//! These filesystem accesses might not be visible to someone auditing the main
+//! code of an application for places which may be influenced by the filesystem
+//! namespace. So with the checking here, they may fail, but they won't be able
+//! to succeed with bogus results.
 
 use crate::fd::{AsFd, BorrowedFd};
 use crate::ffi::ZStr;
