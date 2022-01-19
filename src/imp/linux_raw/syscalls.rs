@@ -23,7 +23,7 @@ pub(crate) use super::thread::syscalls::*;
 pub(crate) use super::time::syscalls::*;
 
 use super::arch::choose::{
-    syscall1, syscall1_noreturn, syscall2, syscall3_readonly, syscall5_readonly,
+    syscall1_noreturn, syscall1_readonly, syscall2_readonly, syscall3_readonly, syscall5_readonly,
 };
 use super::c;
 use super::conv::{
@@ -104,19 +104,19 @@ pub(crate) mod tls {
     #[cfg(target_arch = "x86")]
     #[inline]
     pub(crate) unsafe fn set_thread_area(u_info: &mut UserDesc) -> io::Result<()> {
-        ret(syscall1(nr(__NR_set_thread_area), by_mut(u_info)))
+        ret(syscall1_readonly(nr(__NR_set_thread_area), by_mut(u_info)))
     }
 
     #[cfg(target_arch = "arm")]
     #[inline]
     pub(crate) unsafe fn arm_set_tls(data: *mut c::c_void) -> io::Result<()> {
-        ret(syscall1(nr(__ARM_NR_set_tls), void_star(data)))
+        ret(syscall1_readonly(nr(__ARM_NR_set_tls), void_star(data)))
     }
 
     #[cfg(target_arch = "x86_64")]
     #[inline]
     pub(crate) unsafe fn set_fs(data: *mut c::c_void) {
-        ret_infallible(syscall2(
+        ret_infallible(syscall2_readonly(
             nr(__NR_arch_prctl),
             c_uint(ARCH_SET_FS),
             void_star(data),
@@ -125,15 +125,20 @@ pub(crate) mod tls {
 
     #[inline]
     pub(crate) unsafe fn set_tid_address(data: *mut c::c_void) -> Pid {
-        let tid: i32 = ret_usize_infallible(syscall1(nr(__NR_set_tid_address), void_star(data)))
-            as __kernel_pid_t;
+        let tid: i32 =
+            ret_usize_infallible(syscall1_readonly(nr(__NR_set_tid_address), void_star(data)))
+                as __kernel_pid_t;
         debug_assert_ne!(tid, 0);
         Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(tid as u32))
     }
 
     #[inline]
     pub(crate) unsafe fn set_thread_name(name: &ZStr) -> io::Result<()> {
-        ret(syscall2(nr(__NR_prctl), c_uint(PR_SET_NAME), c_str(name)))
+        ret(syscall2_readonly(
+            nr(__NR_prctl),
+            c_uint(PR_SET_NAME),
+            c_str(name),
+        ))
     }
 
     #[inline]

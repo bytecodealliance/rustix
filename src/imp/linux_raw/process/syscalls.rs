@@ -200,7 +200,7 @@ pub(crate) fn sched_getaffinity(pid: Option<Pid>, cpuset: &mut RawCpuSet) -> io:
 #[inline]
 pub(crate) fn sched_setaffinity(pid: Option<Pid>, cpuset: &RawCpuSet) -> io::Result<()> {
     unsafe {
-        ret(syscall3(
+        ret(syscall3_readonly(
             nr(__NR_sched_setaffinity),
             c_uint(Pid::as_raw(pid)),
             size_of::<RawCpuSet, _>(),
