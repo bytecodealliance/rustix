@@ -3,7 +3,6 @@
 //! dca3f1b786efd27be3b325ed1e01e247aa589c3b.
 
 #![allow(unsafe_code)]
-#![allow(missing_docs)]
 
 use super::c;
 use core::marker::PhantomData;

@@ -54,8 +54,6 @@
 //! # }
 //! ```
 
-#![allow(missing_docs)] // TODO: Write more docs.
-
 use super::super::c;
 use super::super::conv::{ret, ret_owned_fd, ret_u32};
 use crate::fd::{AsFd, AsRawFd, BorrowedFd, RawFd};
@@ -442,6 +440,7 @@ impl<'context, T: AsFd + IntoFd + FromFd> From<OwnedFd> for Epoll<Owning<'contex
     }
 }
 
+/// An iterator over the `Event`s in an `EventVec`.
 pub struct Iter<'context, Context: self::Context> {
     iter: core::slice::Iter<'context, Event>,
     context: *const Context,
@@ -484,6 +483,7 @@ struct Event {
     encoded: u64,
 }
 
+/// A vector of `Event`s, plus context for interpreting them.
 pub struct EventVec<'context, Context: self::Context> {
     events: Vec<Event>,
     context: *const Context,
@@ -491,6 +491,7 @@ pub struct EventVec<'context, Context: self::Context> {
 }
 
 impl<'context, Context: self::Context> EventVec<'context, Context> {
+    /// Constructs an `EventVec` with memory for `capacity` `Event`s.
     #[inline]
     pub fn with_capacity(capacity: usize) -> Self {
         Self {
@@ -500,31 +501,37 @@ impl<'context, Context: self::Context> EventVec<'context, Context> {
         }
     }
 
+    /// Returns the current `Event` capacity of this `EventVec`.
     #[inline]
     pub fn capacity(&self) -> usize {
         self.events.capacity()
     }
 
+    /// Reserves enough memory for at least `additional` more `Event`s.
     #[inline]
     pub fn reserve(&mut self, additional: usize) {
         self.events.reserve(additional);
     }
 
+    /// Reserves enough memory for exactly `additional` more `Event`s.
     #[inline]
     pub fn reserve_exact(&mut self, additional: usize) {
         self.events.reserve_exact(additional);
     }
 
+    /// Clears all the `Events` out of this `EventVec`.
     #[inline]
     pub fn clear(&mut self) {
         self.events.clear();
     }
 
+    /// Shrinks the capacity of this `EventVec` as much as possible.
     #[inline]
     pub fn shrink_to_fit(&mut self) {
         self.events.shrink_to_fit();
     }
 
+    /// Returns an iterator over the `Event`s in this `EventVec`.
     #[inline]
     pub fn iter(&self) -> Iter<'_, Context> {
         Iter {
@@ -534,6 +541,7 @@ impl<'context, Context: self::Context> EventVec<'context, Context> {
         }
     }
 
+    /// Returns the number of `Event`s logically contained in this `EventVec`.
     #[inline]
     pub fn len(&mut self) -> usize {
         self.events.len()
