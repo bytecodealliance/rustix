@@ -252,6 +252,7 @@ bitflags! {
                   target_os = "freebsd",
                   target_os = "haiku",
                   target_os = "hermit",
+                  target_os = "illumos",
                   target_os = "ios",
                   target_os = "linux",
                   target_os = "macos",
@@ -442,7 +443,7 @@ impl FileType {
     }
 
     /// Construct a `FileType` from the `d_type` field of a `c::dirent`.
-    #[cfg(not(target_os = "redox"))]
+    #[cfg(not(any(target_os = "illumos", target_os = "redox")))]
     pub(crate) const fn from_dirent_d_type(d_type: u8) -> Self {
         match d_type {
             c::DT_REG => Self::RegularFile,
@@ -465,6 +466,7 @@ impl FileType {
 /// [`fadvise`]: crate::fs::fadvise
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -557,7 +559,12 @@ bitflags! {
     }
 }
 
-#[cfg(not(any(target_os = "netbsd", target_os = "openbsd", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "netbsd",
+    target_os = "openbsd",
+    target_os = "redox"
+)))]
 bitflags! {
     /// `FALLOC_FL_*` constants for use with [`fallocate`].
     ///
@@ -686,8 +693,9 @@ pub type Stat = c::stat64;
 /// [`fstatfs`]: crate::fs::fstatfs
 #[cfg(not(any(
     target_os = "android",
-    target_os = "linux",
     target_os = "emscripten",
+    target_os = "illumos",
+    target_os = "linux",
     target_os = "l4re",
     target_os = "netbsd",
     target_os = "redox",

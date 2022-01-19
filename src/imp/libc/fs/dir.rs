@@ -1,5 +1,6 @@
 use super::super::c;
 use super::super::conv::owned_fd;
+#[cfg(not(target_os = "illumos"))]
 use super::FileType;
 #[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
 use crate::fd::IntoFd;
@@ -115,6 +116,7 @@ impl Dir {
 // struct, as the name is NUL-terminated and memory may not be allocated for
 // the full extent of the struct. Copy the fields one at a time.
 unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
+    #[cfg(not(target_os = "illumos"))]
     let d_type = input.d_type;
 
     #[cfg(not(any(
@@ -158,6 +160,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     // whole `d_name` field, which may not be entirely allocated.
     #[cfg_attr(target_os = "wasi", allow(unused_mut))]
     let mut dirent = libc_dirent {
+        #[cfg(not(target_os = "illumos"))]
         d_type,
         #[cfg(not(any(
             target_os = "dragonfly",
@@ -269,6 +272,7 @@ impl DirEntry {
 
     /// Returns the type of this directory entry.
     #[inline]
+    #[cfg(not(target_os = "illumos"))]
     pub fn file_type(&self) -> FileType {
         FileType::from_dirent_d_type(self.dirent.d_type)
     }

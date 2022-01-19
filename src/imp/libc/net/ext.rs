@@ -175,6 +175,8 @@ pub(crate) const fn sockaddr_in6_new(
         sin6_flowinfo,
         sin6_addr,
         sin6_scope_id,
+        #[cfg(target_os = "illumos")]
+        __sin6_src_id: 0,
     }
 }
 

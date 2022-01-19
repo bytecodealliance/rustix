@@ -53,13 +53,15 @@ pub enum Resource {
     /// `RLIMIT_CORE`
     Core = c::RLIMIT_CORE as c::c_int,
     /// `RLIMIT_RSS`
-    #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+    #[cfg(not(any(target_os = "illumos", target_os = "ios", target_os = "macos")))]
     Rss = c::RLIMIT_RSS as c::c_int,
     /// `RLIMIT_NPROC`
+    #[cfg(not(target_os = "illumos"))]
     Nproc = c::RLIMIT_NPROC as c::c_int,
     /// `RLIMIT_NOFILE`
     Nofile = c::RLIMIT_NOFILE as c::c_int,
     /// `RLIMIT_MEMLOCK`
+    #[cfg(not(target_os = "illumos"))]
     Memlock = c::RLIMIT_MEMLOCK as c::c_int,
     /// `RLIMIT_AS`
     #[cfg(not(target_os = "openbsd"))]
@@ -68,6 +70,7 @@ pub enum Resource {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -78,6 +81,7 @@ pub enum Resource {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -88,6 +92,7 @@ pub enum Resource {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -98,6 +103,7 @@ pub enum Resource {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -108,6 +114,7 @@ pub enum Resource {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -116,10 +123,11 @@ pub enum Resource {
     Rtprio = c::RLIMIT_RTPRIO as c::c_int,
     /// `RLIMIT_RTTIME`
     #[cfg(not(any(
+        target_os = "android",
         target_os = "dragonfly",
         target_os = "emscripten",
         target_os = "freebsd",
-        target_os = "android",
+        target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -178,6 +186,7 @@ pub enum Signal {
     /// `SIGSTKFLT`
     #[cfg(not(any(
         target_os = "freebsd",
+        target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -250,6 +259,7 @@ impl Signal {
             c::SIGTERM => Some(Self::Term),
             #[cfg(not(any(
                 target_os = "freebsd",
+                target_os = "illumos",
                 target_os = "ios",
                 target_os = "macos",
                 target_os = "netbsd",

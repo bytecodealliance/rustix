@@ -4,6 +4,7 @@ use super::super::c;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -21,6 +22,7 @@ use super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t}
 use super::super::offset::libc_fallocate;
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -32,6 +34,7 @@ use super::super::offset::libc_posix_fadvise;
     target_os = "android",
     target_os = "dragonfly",
     target_os = "fuchsia",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "linux",
     target_os = "macos",
@@ -41,7 +44,12 @@ use super::super::offset::libc_posix_fadvise;
 )))]
 use super::super::offset::libc_posix_fallocate;
 use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek, libc_off_t};
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "netbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 use super::super::offset::{libc_fstatfs, libc_statfs};
 use crate::as_ptr;
 use crate::fd::BorrowedFd;
@@ -50,8 +58,11 @@ use crate::fd::RawFd;
 use crate::ffi::ZStr;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use crate::ffi::ZString;
+#[cfg(not(target_os = "illumos"))]
+use crate::fs::Access;
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -61,6 +72,7 @@ use crate::ffi::ZString;
 use crate::fs::Advice;
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox"
@@ -70,10 +82,14 @@ use crate::fs::FallocateFlags;
 use crate::fs::FlockOperation;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::MemfdFlags;
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "netbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 // not implemented in libc for netbsd yet
 use crate::fs::StatFs;
-use crate::fs::{Access, FdFlags, Mode, OFlags, Stat, Timestamps};
 #[cfg(not(any(
     target_os = "ios",
     target_os = "macos",
@@ -81,6 +97,7 @@ use crate::fs::{Access, FdFlags, Mode, OFlags, Stat, Timestamps};
     target_os = "wasi",
 )))]
 use crate::fs::{Dev, FileType};
+use crate::fs::{FdFlags, Mode, OFlags, Stat, Timestamps};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::{RenameFlags, ResolveFlags};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
@@ -124,7 +141,12 @@ pub(crate) fn openat(
     }
 }
 
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "netbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 #[inline]
 pub(crate) fn statfs(filename: &ZStr) -> io::Result<StatFs> {
     unsafe {
@@ -260,7 +282,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &ZStr, flags: AtFlags) -> io::
     }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "emscripten")))]
+#[cfg(not(any(target_os = "emscripten", target_os = "illumos", target_os = "redox")))]
 pub(crate) fn accessat(
     dirfd: BorrowedFd<'_>,
     path: &ZStr,
@@ -442,6 +464,7 @@ pub(crate) fn copy_file_range(
 
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -497,6 +520,7 @@ pub(crate) fn fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -582,7 +606,12 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     }
 }
 
-#[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))] // not implemented in libc for netbsd yet
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "netbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))] // not implemented in libc for netbsd yet
 pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
     let mut statfs = MaybeUninit::<StatFs>::uninit();
     unsafe {
@@ -602,6 +631,7 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
 
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
