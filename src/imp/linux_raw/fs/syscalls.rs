@@ -596,7 +596,7 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
 pub(crate) fn readlink(path: &ZStr, buf: &mut [u8]) -> io::Result<usize> {
     let (buf_addr_mut, buf_len) = slice_mut(buf);
     unsafe {
-        ret_usize(syscall4_readonly(
+        ret_usize(syscall4(
             nr(__NR_readlinkat),
             c_int(AT_FDCWD),
             c_str(path),
@@ -610,7 +610,7 @@ pub(crate) fn readlink(path: &ZStr, buf: &mut [u8]) -> io::Result<usize> {
 pub(crate) fn readlinkat(dirfd: BorrowedFd<'_>, path: &ZStr, buf: &mut [u8]) -> io::Result<usize> {
     let (buf_addr_mut, buf_len) = slice_mut(buf);
     unsafe {
-        ret_usize(syscall4_readonly(
+        ret_usize(syscall4(
             nr(__NR_readlinkat),
             borrowed_fd(dirfd),
             c_str(path),
