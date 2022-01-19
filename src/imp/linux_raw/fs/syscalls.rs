@@ -1244,7 +1244,7 @@ fn _copy_file_range(
 #[inline]
 pub(crate) fn memfd_create(name: &ZStr, flags: MemfdFlags) -> io::Result<OwnedFd> {
     unsafe {
-        ret_owned_fd(syscall2(
+        ret_owned_fd(syscall2_readonly(
             nr(__NR_memfd_create),
             c_str(name),
             c_uint(flags.bits()),

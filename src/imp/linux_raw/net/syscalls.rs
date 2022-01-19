@@ -6,7 +6,7 @@
 
 #![allow(unsafe_code)]
 
-use super::super::arch::choose::{syscall2, syscall2_readonly};
+use super::super::arch::choose::syscall2_readonly;
 use super::super::c;
 use super::super::conv::{
     borrowed_fd, by_mut, by_ref, c_int, c_uint, out, ret, ret_owned_fd, ret_usize, size_of, slice,
@@ -22,31 +22,17 @@ use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
-use linux_raw_sys::general::{sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t};
 #[cfg(not(any(
     target_arch = "x86",
     target_arch = "x86_64",
     target_arch = "aarch64",
     target_arch = "riscv64"
 )))]
-use {
-    super::super::arch::choose::syscall4_readonly,
-    linux_raw_sys::general::{__NR_recv, __NR_send},
-};
-#[cfg(not(target_arch = "x86"))]
-use {
-    super::super::arch::choose::{
-        syscall3, syscall3_readonly, syscall4, syscall5, syscall5_readonly, syscall6,
-        syscall6_readonly,
-    },
-    linux_raw_sys::general::{
-        __NR_accept, __NR_accept4, __NR_bind, __NR_connect, __NR_getpeername, __NR_getsockname,
-        __NR_getsockopt, __NR_listen, __NR_recvfrom, __NR_sendto, __NR_setsockopt, __NR_shutdown,
-        __NR_socket, __NR_socketpair,
-    },
-};
+use linux_raw_sys::general::{__NR_recv, __NR_send};
+use linux_raw_sys::general::{sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t};
 #[cfg(target_arch = "x86")]
 use {
+    super::super::arch::choose::syscall2,
     super::super::conv::slice_just_addr,
     super::super::conv::x86_sys,
     super::super::reg::{ArgReg, SocketArg},
@@ -54,6 +40,18 @@ use {
         __NR_socketcall, SYS_ACCEPT, SYS_ACCEPT4, SYS_BIND, SYS_CONNECT, SYS_GETPEERNAME,
         SYS_GETSOCKNAME, SYS_GETSOCKOPT, SYS_LISTEN, SYS_RECV, SYS_RECVFROM, SYS_SEND, SYS_SENDTO,
         SYS_SETSOCKOPT, SYS_SHUTDOWN, SYS_SOCKET, SYS_SOCKETPAIR,
+    },
+};
+#[cfg(not(target_arch = "x86"))]
+use {
+    super::super::arch::choose::{
+        syscall3, syscall3_readonly, syscall4, syscall4_readonly, syscall5, syscall5_readonly,
+        syscall6, syscall6_readonly,
+    },
+    linux_raw_sys::general::{
+        __NR_accept, __NR_accept4, __NR_bind, __NR_connect, __NR_getpeername, __NR_getsockname,
+        __NR_getsockopt, __NR_listen, __NR_recvfrom, __NR_sendto, __NR_setsockopt, __NR_shutdown,
+        __NR_socket, __NR_socketpair,
     },
 };
 
@@ -162,12 +160,17 @@ pub(crate) fn socketpair(
 pub(crate) fn accept(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
-        let fd = ret_owned_fd(syscall3(nr(__NR_accept), borrowed_fd(fd), zero(), zero()))?;
+        let fd = ret_owned_fd(syscall3_readonly(
+            nr(__NR_accept),
+            borrowed_fd(fd),
+            zero(),
+            zero(),
+        ))?;
         Ok(fd)
     }
     #[cfg(target_arch = "x86")]
     unsafe {
-        let fd = ret_owned_fd(syscall2(
+        let fd = ret_owned_fd(syscall2_readonly(
             nr(__NR_socketcall),
             x86_sys(SYS_ACCEPT),
             slice_just_addr::<ArgReg<SocketArg>, _>(&[borrowed_fd(fd), zero(), zero()]),
@@ -180,7 +183,7 @@ pub(crate) fn accept(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 pub(crate) fn accept_with(fd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<OwnedFd> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
-        let fd = ret_owned_fd(syscall4(
+        let fd = ret_owned_fd(syscall4_readonly(
             nr(__NR_accept4),
             borrowed_fd(fd),
             zero(),
@@ -191,7 +194,7 @@ pub(crate) fn accept_with(fd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<
     }
     #[cfg(target_arch = "x86")]
     unsafe {
-        let fd = ret_owned_fd(syscall2(
+        let fd = ret_owned_fd(syscall2_readonly(
             nr(__NR_socketcall),
             x86_sys(SYS_ACCEPT4),
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
@@ -288,7 +291,7 @@ pub(crate) fn acceptfrom_with(
 pub(crate) fn shutdown(fd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
-        ret(syscall2(
+        ret(syscall2_readonly(
             nr(__NR_shutdown),
             borrowed_fd(fd),
             c_uint(how as c::c_uint),

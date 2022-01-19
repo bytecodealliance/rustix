@@ -6,9 +6,16 @@
 
 #![allow(unsafe_code)]
 
+#[cfg(not(any(
+    target_arch = "aarch64",
+    target_arch = "mips",
+    target_arch = "mips64",
+    target_arch = "riscv64"
+)))]
+use super::super::arch::choose::syscall1;
 use super::super::arch::choose::{
-    syscall1, syscall1_readonly, syscall2, syscall3, syscall3_readonly, syscall4, syscall5,
-    syscall5_readonly, syscall6,
+    syscall1_readonly, syscall2, syscall2_readonly, syscall3, syscall3_readonly, syscall4,
+    syscall4_readonly, syscall5, syscall5_readonly, syscall6,
 };
 use super::super::c;
 use super::super::conv::{
@@ -41,28 +48,24 @@ use linux_raw_sys::general::{
 use linux_raw_sys::v5_4::general::{
     __NR_eventfd2, __NR_mlock2, __NR_preadv2, __NR_pwritev2, __NR_userfaultfd,
 };
-#[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
-use {
-    super::super::arch::choose::syscall2_readonly,
-    linux_raw_sys::general::__NR_epoll_wait,
-    linux_raw_sys::general::{__NR_dup2, __NR_pipe, __NR_poll},
-};
-#[cfg(target_pointer_width = "64")]
-use {
-    super::super::arch::choose::syscall4_readonly, super::super::conv::loff_t_from_u64,
-    linux_raw_sys::general::__NR_mmap,
-};
 #[cfg(target_pointer_width = "32")]
 use {
     super::super::arch::choose::syscall6_readonly,
     super::super::conv::{hi, lo},
     core::convert::TryInto,
 };
+#[cfg(target_pointer_width = "64")]
+use {super::super::conv::loff_t_from_u64, linux_raw_sys::general::__NR_mmap};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use {
     super::super::conv::{opt_ref, size_of},
     linux_raw_sys::general::__NR_epoll_pwait,
     linux_raw_sys::general::{__NR_ppoll, __kernel_timespec, sigset_t},
+};
+#[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+use {
+    linux_raw_sys::general::__NR_epoll_wait,
+    linux_raw_sys::general::{__NR_dup2, __NR_pipe, __NR_poll},
 };
 
 #[inline]
@@ -358,7 +361,7 @@ pub(crate) unsafe fn msync(addr: *mut c::c_void, len: usize, flags: MsyncFlags) 
 #[inline]
 pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
     unsafe {
-        ret_owned_fd(syscall2(
+        ret_owned_fd(syscall2_readonly(
             nr(__NR_eventfd2),
             c_uint(initval),
             c_uint(flags.bits()),
@@ -384,7 +387,7 @@ pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
 pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     unsafe {
         let data = value as c::c_int;
-        ret(syscall3(
+        ret(syscall3_readonly(
             nr(__NR_ioctl),
             borrowed_fd(fd),
             c_uint(FIONBIO),
@@ -409,12 +412,24 @@ pub(crate) fn ioctl_tiocgwinsz(fd: BorrowedFd<'_>) -> io::Result<Winsize> {
 
 #[inline]
 pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { ret(syscall2(nr(__NR_ioctl), borrowed_fd(fd), c_uint(TIOCEXCL))) }
+    unsafe {
+        ret(syscall2_readonly(
+            nr(__NR_ioctl),
+            borrowed_fd(fd),
+            c_uint(TIOCEXCL),
+        ))
+    }
 }
 
 #[inline]
 pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { ret(syscall2(nr(__NR_ioctl), borrowed_fd(fd), c_uint(TIOCNXCL))) }
+    unsafe {
+        ret(syscall2_readonly(
+            nr(__NR_ioctl),
+            borrowed_fd(fd),
+            c_uint(TIOCNXCL),
+        ))
+    }
 }
 
 #[inline]
@@ -855,12 +870,20 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
 
 #[inline]
 pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
-    ret_owned_fd(syscall1(nr(__NR_userfaultfd), c_uint(flags.bits())))
+    ret_owned_fd(syscall1_readonly(
+        nr(__NR_userfaultfd),
+        c_uint(flags.bits()),
+    ))
 }
 
 #[inline]
 pub(crate) fn epoll_create(flags: epoll::CreateFlags) -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(syscall1(nr(__NR_epoll_create1), c_uint(flags.bits()))) }
+    unsafe {
+        ret_owned_fd(syscall1_readonly(
+            nr(__NR_epoll_create1),
+            c_uint(flags.bits()),
+        ))
+    }
 }
 
 #[inline]
@@ -869,7 +892,7 @@ pub(crate) unsafe fn epoll_add(
     fd: c::c_int,
     event: &epoll_event,
 ) -> io::Result<()> {
-    ret(syscall4(
+    ret(syscall4_readonly(
         nr(__NR_epoll_ctl),
         borrowed_fd(epfd),
         c_uint(EPOLL_CTL_ADD),
@@ -884,7 +907,7 @@ pub(crate) unsafe fn epoll_mod(
     fd: c::c_int,
     event: &epoll_event,
 ) -> io::Result<()> {
-    ret(syscall4(
+    ret(syscall4_readonly(
         nr(__NR_epoll_ctl),
         borrowed_fd(epfd),
         c_uint(EPOLL_CTL_MOD),
@@ -895,7 +918,7 @@ pub(crate) unsafe fn epoll_mod(
 
 #[inline]
 pub(crate) unsafe fn epoll_del(epfd: BorrowedFd<'_>, fd: c::c_int) -> io::Result<()> {
-    ret(syscall4(
+    ret(syscall4_readonly(
         nr(__NR_epoll_ctl),
         borrowed_fd(epfd),
         c_uint(EPOLL_CTL_DEL),
