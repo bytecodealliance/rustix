@@ -744,7 +744,7 @@ pub type FsWord = u32;
 ))]
 pub type FsWord = u64;
 
-// s390x uses u32 for statfs entries, even though __fsword_t is u64.
+// s390x uses `u32` for `statfs` entries, even though `__fsword_t` is `u64`.
 #[cfg(all(target_os = "linux", target_arch = "s390x"))]
 pub type FsWord = u32;
 

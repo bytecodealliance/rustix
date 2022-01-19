@@ -22,7 +22,7 @@ impl CpuSet {
     /// The maximum number of CPU in `CpuSet`.
     pub const MAX_CPU: usize = imp::process::CPU_SETSIZE;
 
-    /// Create a new and empty CpuSet.
+    /// Create a new and empty `CpuSet`.
     #[inline]
     pub fn new() -> CpuSet {
         CpuSet {

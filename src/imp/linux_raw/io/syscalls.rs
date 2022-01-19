@@ -484,7 +484,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         match super::super::syscalls::recv(fd, &mut buf, RecvFlags::PEEK | RecvFlags::DONTWAIT) {
             Ok(0) => read = false,
             Err(err) => {
-                #[allow(unreachable_patterns)] // EAGAIN may equal EWOULDBLOCK
+                #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
                 match err {
                     io::Error::AGAIN | io::Error::WOULDBLOCK => (),
                     io::Error::NOTSOCK => not_socket = true,
@@ -497,7 +497,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
     if write && !not_socket {
         // Do a `send` with `DONTWAIT` for 0 bytes. An `EPIPE` indicates
         // the write side is shut down.
-        #[allow(unreachable_patterns)] // EAGAIN equals EWOULDBLOCK
+        #[allow(unreachable_patterns)] // `EAGAIN` equals `EWOULDBLOCK`
         match super::super::syscalls::send(fd, &[], SendFlags::DONTWAIT) {
             // TODO or-patterns when we don't need 1.51
             Err(io::Error::AGAIN) => (),
