@@ -463,6 +463,10 @@ fn open_and_check_file(dir: BorrowedFd, dir_stat: &Stat, name: &ZStr) -> io::Res
     // if we can find a regular file with an inode and name that matches the
     // file we just opened. If we can't find it, there could be a file bind
     // mount on top of the file we want.
+    //
+    // TODO: With Linux 5.8 we might be able to use `statx and
+    // `STATX_ATTR_MOUNT_ROOT` to detect mountpoints directly instead of doing
+    // this scanning.
     let dir = Dir::from(dot).map_err(|_err| io::Error::NOTSUP)?;
     for entry in dir {
         let entry = entry.map_err(|_err| io::Error::NOTSUP)?;
