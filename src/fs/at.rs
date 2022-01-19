@@ -332,7 +332,7 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mknodat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mknodat.2.html
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi",)))]
+#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 #[inline]
 pub fn mknodat<P: path::Arg, Fd: AsFd>(
     dirfd: &Fd,
@@ -354,7 +354,7 @@ pub fn mknodat<P: path::Arg, Fd: AsFd>(
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fchownat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fchownat.2.html
-#[cfg(not(any(target_os = "wasi",)))]
+#[cfg(not(any(target_os = "wasi")))]
 #[inline]
 pub fn chownat<P: path::Arg, Fd: AsFd>(
     dirfd: &Fd,

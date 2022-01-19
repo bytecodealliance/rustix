@@ -16,7 +16,7 @@ use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use core::convert::TryInto;
 use core::mem::{size_of, MaybeUninit};
-#[cfg(not(any(target_os = "redox", target_os = "wasi",)))]
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use core::ptr::null_mut;
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]

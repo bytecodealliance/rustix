@@ -95,7 +95,7 @@ pub(super) use c::openat64 as libc_openat;
 
 #[cfg(target_os = "fuchsia")]
 pub(super) use c::fallocate as libc_fallocate;
-#[cfg(any(target_os = "android", target_os = "linux",))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub(super) use c::fallocate64 as libc_fallocate;
 #[cfg(not(any(
     windows,
@@ -183,7 +183,7 @@ pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
     target_os = "redox",
 )))]
 pub(super) use c::posix_fallocate as libc_posix_fallocate;
-#[cfg(any(target_os = "l4re",))]
+#[cfg(any(target_os = "l4re"))]
 pub(super) use c::posix_fallocate64 as libc_posix_fallocate;
 #[cfg(not(any(
     windows,

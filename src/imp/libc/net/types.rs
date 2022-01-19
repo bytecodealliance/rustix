@@ -320,7 +320,7 @@ impl AddressFamily {
     )))]
     pub const TIPC: Self = Self(c::AF_TIPC as _);
     /// `AF_BLUETOOTH`
-    #[cfg(not(any(windows, target_os = "illumos", target_os = "ios", target_os = "macos",)))]
+    #[cfg(not(any(windows, target_os = "illumos", target_os = "ios", target_os = "macos")))]
     pub const BLUETOOTH: Self = Self(c::AF_BLUETOOTH as _);
     /// `AF_IUCV`
     #[cfg(not(any(
