@@ -3,6 +3,7 @@ mod types;
 mod wait;
 
 pub(crate) mod cpu_set;
+pub(crate) mod syscalls;
 
 #[cfg(target_vendor = "mustang")]
 pub(crate) use auxv::init;

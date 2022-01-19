@@ -13,8 +13,9 @@ use rustix::{
 };
 #[cfg(not(target_os = "redox"))]
 use {
+    rustix::io,
     rustix::thread::{nanosleep, NanosleepRelativeResult},
-    rustix::{io, time::Timespec},
+    rustix::time::Timespec,
 };
 
 #[cfg(not(target_os = "redox"))]

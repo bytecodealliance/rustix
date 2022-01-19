@@ -58,9 +58,9 @@
 
 use super::super::c;
 use super::super::conv::{ret, ret_owned_fd, ret_u32};
-use super::super::fd::{AsFd, AsRawFd, BorrowedFd, RawFd};
+use crate::fd::{AsFd, AsRawFd, BorrowedFd, RawFd};
 #[cfg(not(feature = "rustc-dep-of-std"))]
-use super::super::fd::{FromFd, FromRawFd, IntoFd, IntoRawFd};
+use crate::fd::{FromFd, FromRawFd, IntoFd, IntoRawFd};
 use crate::io::{self, OwnedFd};
 use alloc::vec::Vec;
 use bitflags::bitflags;

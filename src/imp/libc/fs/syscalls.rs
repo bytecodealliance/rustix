@@ -1,3 +1,5 @@
+//! libc syscalls supporting `rustix::fs`.
+
 use super::super::c;
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -15,9 +17,6 @@ use super::super::conv::{
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t};
-use super::super::fd::BorrowedFd;
-#[cfg(not(target_os = "wasi"))]
-use super::super::fd::RawFd;
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 use super::super::offset::libc_fallocate;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
@@ -44,6 +43,13 @@ use super::super::offset::libc_posix_fadvise;
 )))]
 use super::super::offset::libc_posix_fallocate;
 use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek, libc_off_t};
+use crate::as_ptr;
+use crate::fd::BorrowedFd;
+#[cfg(not(target_os = "wasi"))]
+use crate::fd::RawFd;
+use crate::ffi::ZStr;
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+use crate::ffi::ZString;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "ios",
@@ -52,38 +58,33 @@ use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek,
     target_os = "openbsd",
     target_os = "redox",
 )))]
-use super::Advice as FsAdvice;
+use crate::fs::Advice;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox"
 )))]
-use super::FallocateFlags;
+use crate::fs::FallocateFlags;
 #[cfg(not(target_os = "wasi"))]
-use super::FlockOperation;
+use crate::fs::FlockOperation;
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use super::MemfdFlags;
+use crate::fs::MemfdFlags;
 #[cfg(not(any(target_os = "netbsd", target_os = "redox", target_os = "wasi")))]
 // not implemented in libc for netbsd yet
-use super::StatFs;
-use super::{Access, FdFlags, Mode, OFlags, Stat};
+use crate::fs::StatFs;
+use crate::fs::{Access, FdFlags, Mode, OFlags, Stat, Timestamps};
 #[cfg(not(any(
     target_os = "ios",
     target_os = "macos",
     target_os = "redox",
     target_os = "wasi",
 )))]
-use super::{Dev, FileType};
+use crate::fs::{Dev, FileType};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use super::{RenameFlags, ResolveFlags};
+use crate::fs::{RenameFlags, ResolveFlags};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
-use super::{Statx, StatxFlags};
-use crate::as_ptr;
-use crate::ffi::ZStr;
-#[cfg(any(target_os = "ios", target_os = "macos"))]
-use crate::ffi::ZString;
-use crate::fs::Timestamps;
+use crate::fs::{Statx, StatxFlags};
 use crate::io::{self, OwnedFd, SeekFrom};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
@@ -98,10 +99,10 @@ use core::ptr::null_mut;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use {
     super::super::conv::nonnegative_ret,
-    super::{copyfile_state_t, CloneFlags, CopyfileFlags},
+    crate::fs::{copyfile_state_t, CloneFlags, CopyfileFlags},
 };
 #[cfg(not(target_os = "redox"))]
-use {super::super::offset::libc_openat, super::AtFlags};
+use {super::super::offset::libc_openat, crate::fs::AtFlags};
 
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn openat(
@@ -437,12 +438,7 @@ pub(crate) fn copy_file_range(
     target_os = "openbsd",
     target_os = "redox"
 )))]
-pub(crate) fn fadvise(
-    fd: BorrowedFd<'_>,
-    offset: u64,
-    len: u64,
-    advice: FsAdvice,
-) -> io::Result<()> {
+pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
     let offset = offset as i64;
     let len = len as i64;
 

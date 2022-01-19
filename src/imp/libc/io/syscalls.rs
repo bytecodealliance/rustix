@@ -1,10 +1,11 @@
+//! libc syscalls supporting `rustix::io`.
+
 use super::super::c;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::syscall_ret_owned_fd;
 use super::super::conv::{
     borrowed_fd, no_fd, ret, ret_c_int, ret_discarded_fd, ret_owned_fd, ret_ssize_t,
 };
-use super::super::fd::{AsFd, BorrowedFd, RawFd};
 #[cfg(not(target_os = "wasi"))]
 use super::super::offset::libc_mmap;
 use super::super::offset::{libc_pread, libc_pwrite};
@@ -12,24 +13,20 @@ use super::super::offset::{libc_pread, libc_pwrite};
 use super::super::offset::{libc_preadv, libc_pwritev};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::super::offset::{libc_preadv2, libc_pwritev2};
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-use super::Advice as IoAdvice;
-#[cfg(target_os = "linux")]
-use super::MremapFlags;
-#[cfg(not(target_os = "wasi"))]
-use super::MsyncFlags;
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
-use super::PipeFlags;
-use super::PollFd;
-#[cfg(not(target_os = "wasi"))]
-use super::{DupFlags, MapFlags, MprotectFlags, ProtFlags, Termios, Winsize};
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use super::{EventfdFlags, UserfaultfdFlags};
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use super::{MlockFlags, ReadWriteFlags};
+use crate::fd::{AsFd, BorrowedFd, RawFd};
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use crate::ffi::ZStr;
-use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+use crate::io::Advice;
+#[cfg(target_os = "linux")]
+use crate::io::MremapFlags;
+#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
+use crate::io::PipeFlags;
+use crate::io::{self, IoSlice, IoSliceMut, OwnedFd, PollFd};
+#[cfg(not(target_os = "wasi"))]
+use crate::io::{DupFlags, MapFlags, MprotectFlags, MsyncFlags, ProtFlags, Termios, Winsize};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use crate::io::{EventfdFlags, MlockFlags, ReadWriteFlags, UserfaultfdFlags};
 use core::cmp::min;
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
@@ -276,12 +273,12 @@ pub(crate) unsafe fn close(raw_fd: RawFd) {
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: IoAdvice) -> io::Result<()> {
+pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: Advice) -> io::Result<()> {
     // On Linux platforms, `MADV_DONTNEED` has the same value as
     // `POSIX_MADV_DONTNEED` but different behavior. We remap it to a different
     // value, and check for it here.
     #[cfg(target_os = "linux")]
-    if let IoAdvice::LinuxDontNeed = advice {
+    if let Advice::LinuxDontNeed = advice {
         return unsafe { ret(c::madvise(addr, len, c::MADV_DONTNEED)) };
     }
 
@@ -299,7 +296,7 @@ pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: IoAdvice) -> io:
 
     #[cfg(target_os = "android")]
     {
-        if let IoAdvice::DontNeed = advice {
+        if let Advice::DontNeed = advice {
             // Do nothing. Linux's `MADV_DONTNEED` isn't the same as
             // `POSIX_MADV_DONTNEED`, so just discard `MADV_DONTNEED`.
             Ok(())

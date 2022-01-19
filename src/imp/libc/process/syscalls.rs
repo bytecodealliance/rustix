@@ -1,17 +1,11 @@
+//! libc syscalls supporting `rustix::process`.
+
 use super::super::c;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use super::super::conv::borrowed_fd;
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-use super::super::conv::ret_infallible;
 use super::super::conv::{c_str, ret, ret_c_int, ret_discarded_char_ptr};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::{syscall_ret, syscall_ret_u32};
-#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
-use super::super::fd::BorrowedFd;
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-use super::super::offset::libc_getrlimit;
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-use super::super::offset::{libc_rlimit, LIBC_RLIM_INFINITY};
 #[cfg(any(
     target_os = "linux",
     target_os = "android",
@@ -19,21 +13,25 @@ use super::super::offset::{libc_rlimit, LIBC_RLIM_INFINITY};
     target_os = "dragonfly"
 ))]
 use super::RawCpuSet;
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-use super::Resource;
-#[cfg(not(target_os = "wasi"))]
-use super::{RawNonZeroPid, RawPid, RawUname};
+#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
+use crate::fd::BorrowedFd;
 use crate::ffi::ZStr;
 use crate::io;
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-use crate::process::Rlimit;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
-#[cfg(not(target_os = "wasi"))]
-use crate::process::{Gid, Pid, Uid, WaitOptions, WaitStatus};
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-use core::convert::TryInto;
 use core::mem::MaybeUninit;
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+use {
+    super::super::conv::ret_infallible,
+    super::super::offset::{libc_getrlimit, libc_rlimit, LIBC_RLIM_INFINITY},
+    crate::process::{Resource, Rlimit},
+    core::convert::TryInto,
+};
+#[cfg(not(target_os = "wasi"))]
+use {
+    super::RawUname,
+    crate::process::{Gid, Pid, RawNonZeroPid, RawPid, Uid, WaitOptions, WaitStatus},
+};
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn chdir(path: &ZStr) -> io::Result<()> {

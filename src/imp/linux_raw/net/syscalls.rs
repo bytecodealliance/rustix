@@ -1,67 +1,55 @@
-//! Safe (where possible) wrappers around network system calls.
+//! linux_raw syscalls supporting `rustix::net`.
 //!
 //! # Safety
 //!
-//! This file performs raw system calls, and sometimes passes them
-//! uninitialized memory buffers. The signatures in this file are currently
-//! manually maintained and must correspond with the signatures of the actual
-//! Linux syscalls.
-//!
-//! Some of this could be auto-generated from the Linux header file
-//! <linux/syscalls.h>, but we often need more information than it provides,
-//! such as which pointers are array slices, out parameters, or in-out
-//! parameters, which integers are owned or borrowed file descriptors, etc.
-#![allow(unsafe_code)]
-#![allow(dead_code)]
+//! See the `rustix::imp::syscalls` module documentation for details.
 
-#[cfg(not(any(
-    target_arch = "x86",
-    target_arch = "x86_64",
-    target_arch = "aarch64",
-    target_arch = "riscv64"
-)))]
-use super::super::arch::choose::syscall4_readonly;
+#![allow(unsafe_code)]
+
 use super::super::arch::choose::{syscall2, syscall2_readonly};
-#[cfg(not(target_arch = "x86"))]
-use super::super::arch::choose::{
-    syscall3, syscall3_readonly, syscall4, syscall5, syscall5_readonly, syscall6, syscall6_readonly,
-};
 use super::super::c;
-#[cfg(target_arch = "x86")]
-use super::super::conv::slice_just_addr;
 use super::super::conv::{
     borrowed_fd, by_mut, by_ref, c_int, c_uint, out, ret, ret_owned_fd, ret_usize, size_of, slice,
     slice_mut, socklen_t, zero,
 };
-use super::super::fd::BorrowedFd;
 use super::super::reg::nr;
-#[cfg(target_arch = "x86")]
-use super::super::reg::{ArgReg, SocketArg};
 use super::{
     encode_sockaddr_unix, encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags,
     AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
 };
+use crate::fd::BorrowedFd;
 use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
-#[cfg(not(target_arch = "x86"))]
-use linux_raw_sys::general::{
-    __NR_accept, __NR_accept4, __NR_bind, __NR_connect, __NR_getpeername, __NR_getsockname,
-    __NR_getsockopt, __NR_listen, __NR_recvfrom, __NR_sendto, __NR_setsockopt, __NR_shutdown,
-    __NR_socket, __NR_socketpair,
-};
+use linux_raw_sys::general::{sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t};
 #[cfg(not(any(
     target_arch = "x86",
     target_arch = "x86_64",
     target_arch = "aarch64",
     target_arch = "riscv64"
 )))]
-use linux_raw_sys::general::{__NR_recv, __NR_send};
-use linux_raw_sys::general::{sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t};
+use {
+    super::super::arch::choose::syscall4_readonly,
+    linux_raw_sys::general::{__NR_recv, __NR_send},
+};
+#[cfg(not(target_arch = "x86"))]
+use {
+    super::super::arch::choose::{
+        syscall3, syscall3_readonly, syscall4, syscall5, syscall5_readonly, syscall6,
+        syscall6_readonly,
+    },
+    linux_raw_sys::general::{
+        __NR_accept, __NR_accept4, __NR_bind, __NR_connect, __NR_getpeername, __NR_getsockname,
+        __NR_getsockopt, __NR_listen, __NR_recvfrom, __NR_sendto, __NR_setsockopt, __NR_shutdown,
+        __NR_socket, __NR_socketpair,
+    },
+};
 #[cfg(target_arch = "x86")]
 use {
+    super::super::conv::slice_just_addr,
     super::super::conv::x86_sys,
+    super::super::reg::{ArgReg, SocketArg},
     linux_raw_sys::general::{
         __NR_socketcall, SYS_ACCEPT, SYS_ACCEPT4, SYS_BIND, SYS_CONNECT, SYS_GETPEERNAME,
         SYS_GETSOCKNAME, SYS_GETSOCKOPT, SYS_LISTEN, SYS_RECV, SYS_RECVFROM, SYS_SEND, SYS_SENDTO,

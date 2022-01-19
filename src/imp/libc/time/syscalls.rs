@@ -1,3 +1,5 @@
+//! libc syscalls supporting `rustix::time`.
+
 use super::super::c;
 use super::super::conv::ret;
 use super::Timespec;
@@ -42,7 +44,7 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
 
             #[cfg(any(target_os = "android", target_os = "linux"))]
             DynamicClockId::Dynamic(fd) => {
-                use super::super::fd::AsRawFd;
+                use crate::fd::AsRawFd;
                 const CLOCKFD: i32 = 3;
                 (!fd.as_raw_fd() << 3) | CLOCKFD
             }
