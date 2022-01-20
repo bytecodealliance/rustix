@@ -19,6 +19,8 @@ mod isatty;
 #[cfg(not(windows))]
 mod mmap;
 #[cfg(not(windows))]
+mod poll;
+#[cfg(not(windows))]
 mod prot;
 #[cfg(not(windows))]
 #[cfg(not(target_os = "redox"))] // redox doesn't have cwd/openat
