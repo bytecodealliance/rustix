@@ -1,6 +1,6 @@
 use super::super::c;
 use super::super::conv::borrowed_fd;
-use crate::fd::{AsFd, BorrowedFd};
+use crate::fd::{AsFd, AsRawFd, BorrowedFd};
 use bitflags::bitflags;
 use core::marker::PhantomData;
 
@@ -61,6 +61,12 @@ impl<'fd> PollFd<'fd> {
         Self::from_borrowed_fd(fd.as_fd(), events)
     }
 
+    /// Sets the contained file descriptor to `fd`.
+    #[inline]
+    pub fn set_fd<Fd: AsFd>(&mut self, fd: &'fd Fd) {
+        self.pollfd.fd = fd.as_fd().as_raw_fd();
+    }
+
     /// Constructs a new `PollFd` holding `fd` and `events`.
     ///
     /// This is the same as `new`, but can be used to avoid borrowing the
@@ -78,11 +84,22 @@ impl<'fd> PollFd<'fd> {
         }
     }
 
-    /// Return the ready events.
+    /// Returns the ready events.
     #[inline]
     pub fn revents(&self) -> PollFlags {
         // Use `unwrap()` here because in theory we know we know all the bits
         // the OS might set here, but OS's have added extensions in the past.
         PollFlags::from_bits(self.pollfd.revents).unwrap()
+    }
+}
+
+impl<'fd> AsFd for PollFd<'fd> {
+    #[inline]
+    fn as_fd(&self) -> BorrowedFd<'_> {
+        // Safety:
+        //
+        // Our constructors and `set_fd` require `pollfd.fd` to be valid
+        // for the `fd lifetime.
+        unsafe { BorrowedFd::borrow_raw_fd(self.pollfd.fd) }
     }
 }
