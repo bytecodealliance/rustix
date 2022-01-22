@@ -1,6 +1,6 @@
+use is_terminal::IsTerminal;
 use rustix::io::isatty;
 use tempfile::{tempdir, TempDir};
-use is_terminal::IsTerminal;
 
 #[allow(unused)]
 fn tmpdir() -> TempDir {
