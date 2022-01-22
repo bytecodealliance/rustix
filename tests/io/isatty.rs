@@ -1,5 +1,6 @@
 use rustix::io::isatty;
 use tempfile::{tempdir, TempDir};
+use is_terminal::IsTerminal;
 
 #[allow(unused)]
 fn tmpdir() -> TempDir {
@@ -24,8 +25,8 @@ fn stdout_stderr_terminals() {
     {
         return;
     }
-    assert_eq!(isatty(&std::io::stdout()), atty::is(atty::Stream::Stdout));
-    assert_eq!(isatty(&std::io::stderr()), atty::is(atty::Stream::Stderr));
+    assert_eq!(isatty(&std::io::stdout()), std::io::stdout().is_terminal());
+    assert_eq!(isatty(&std::io::stderr()), std::io::stderr().is_terminal());
 }
 
 #[test]
