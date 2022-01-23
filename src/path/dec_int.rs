@@ -6,6 +6,8 @@
 
 use crate::ffi::ZStr;
 use crate::imp::fd::{AsFd, AsRawFd};
+#[cfg(feature = "std")]
+use core::fmt;
 use core::fmt::Write;
 use itoa::{Buffer, Integer};
 #[cfg(feature = "std")]
@@ -121,5 +123,12 @@ impl AsRef<Path> for DecInt {
     fn as_ref(&self) -> &Path {
         let as_os_str: &OsStr = OsStrExt::from_bytes(&self.buf[..self.len]);
         Path::new(as_os_str)
+    }
+}
+
+#[cfg(feature = "std")]
+impl fmt::Debug for DecInt {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.as_str().fmt(fmt)
     }
 }
