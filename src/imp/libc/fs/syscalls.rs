@@ -1,18 +1,6 @@
 //! libc syscalls supporting `rustix::fs`.
 
 use super::super::c;
-#[cfg(not(any(
-    target_os = "dragonfly",
-    target_os = "freebsd",
-    target_os = "illumos",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
-use super::super::conv::ret_u32;
 use super::super::conv::{
     borrowed_fd, c_str, ret, ret_c_int, ret_off_t, ret_owned_fd, ret_ssize_t,
 };
@@ -82,6 +70,13 @@ use crate::fs::FallocateFlags;
 use crate::fs::FlockOperation;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::MemfdFlags;
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "fuchsia",
+    target_os = "freebsd",
+))]
+use crate::fs::SealFlags;
 #[cfg(not(any(
     target_os = "illumos",
     target_os = "netbsd",
@@ -517,19 +512,27 @@ pub(crate) fn fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
     unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_SETFL, flags.bits())) }
 }
 
-#[cfg(not(any(
-    target_os = "dragonfly",
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "fuchsia",
     target_os = "freebsd",
-    target_os = "illumos",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
-pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<u32> {
-    unsafe { ret_u32(c::fcntl(borrowed_fd(fd), c::F_GET_SEALS)) }
+))]
+pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<SealFlags> {
+    unsafe {
+        ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GET_SEALS))
+            .map(|flags| SealFlags::from_bits_unchecked(flags))
+    }
+}
+
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "fuchsia",
+    target_os = "freebsd",
+))]
+pub(crate) fn fcntl_add_seals(fd: BorrowedFd<'_>, seals: SealFlags) -> io::Result<()> {
+    unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_ADD_SEALS, seals.bits())) }
 }
 
 #[cfg(not(target_os = "wasi"))]

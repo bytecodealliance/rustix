@@ -50,6 +50,13 @@ pub use types::Advice;
 pub use types::FallocateFlags;
 #[cfg(not(target_os = "wasi"))]
 pub use types::FlockOperation;
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "fuchsia",
+    target_os = "freebsd"
+))]
+pub use types::SealFlags;
 #[cfg(not(any(
     target_os = "illumos",
     target_os = "netbsd",

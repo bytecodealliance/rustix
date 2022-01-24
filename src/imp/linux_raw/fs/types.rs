@@ -365,6 +365,54 @@ bitflags! {
 
         /// `MFD_ALLOW_SEALING`
         const ALLOW_SEALING = linux_raw_sys::v5_4::general::MFD_ALLOW_SEALING;
+
+        /// `MFD_HUGETLB` (since Linux 4.14)
+        const HUGETLB = linux_raw_sys::v5_4::general::MFD_HUGETLB;
+
+        /// `MFD_HUGE_64KB`
+        const HUGE_64KB = linux_raw_sys::v5_4::general::MFD_HUGE_64KB;
+        /// `MFD_HUGE_512JB`
+        const HUGE_512KB = linux_raw_sys::v5_4::general::MFD_HUGE_512KB;
+        /// `MFD_HUGE_1MB`
+        const HUGE_1MB = linux_raw_sys::v5_4::general::MFD_HUGE_1MB;
+        /// `MFD_HUGE_2MB`
+        const HUGE_2MB = linux_raw_sys::v5_4::general::MFD_HUGE_2MB;
+        /// `MFD_HUGE_8MB`
+        const HUGE_8MB = linux_raw_sys::v5_4::general::MFD_HUGE_8MB;
+        /// `MFD_HUGE_16MB`
+        const HUGE_16MB = linux_raw_sys::v5_4::general::MFD_HUGE_16MB;
+        /// `MFD_HUGE_32MB`
+        const HUGE_32MB = linux_raw_sys::v5_4::general::MFD_HUGE_32MB;
+        /// `MFD_HUGE_256MB`
+        const HUGE_256MB = linux_raw_sys::v5_4::general::MFD_HUGE_256MB;
+        /// `MFD_HUGE_512MB`
+        const HUGE_512MB = linux_raw_sys::v5_4::general::MFD_HUGE_512MB;
+        /// `MFD_HUGE_1GB`
+        const HUGE_1GB = linux_raw_sys::v5_4::general::MFD_HUGE_1GB;
+        /// `MFD_HUGE_2GB`
+        const HUGE_2GB = linux_raw_sys::v5_4::general::MFD_HUGE_2GB;
+        /// `MFD_HUGE_16GB`
+        const HUGE_16GB = linux_raw_sys::v5_4::general::MFD_HUGE_16GB;
+    }
+}
+
+bitflags! {
+    /// `F_SEAL_*` constants for use with [`fcntl_add_seals`] and
+    /// [`fcntl_get_seals`].
+    ///
+    /// [`fcntl_add_seals`]: rustix::fs::fcntl_add_seals
+    /// [`fcntl_get_seals`]: rustix::fs::fcntl_get_seals
+    pub struct SealFlags: u32 {
+       /// `F_SEAL_SEAL`.
+       const SEAL = linux_raw_sys::v5_4::general::F_SEAL_SEAL;
+       /// `F_SEAL_SHRINK`.
+       const SHRINK = linux_raw_sys::v5_4::general::F_SEAL_SHRINK;
+       /// `F_SEAL_GROW`.
+       const GROW = linux_raw_sys::v5_4::general::F_SEAL_GROW;
+       /// `F_SEAL_WRITE`.
+       const WRITE = linux_raw_sys::v5_4::general::F_SEAL_WRITE;
+       /// `F_SEAL_FUTURE_WRITE` (since Linux 5.1)
+       const FUTURE_WRITE = linux_raw_sys::v5_4::general::F_SEAL_FUTURE_WRITE;
     }
 }
 

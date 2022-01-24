@@ -506,6 +506,61 @@ bitflags! {
 
         /// `MFD_ALLOW_SEALING`
         const ALLOW_SEALING = c::MFD_ALLOW_SEALING;
+
+        /// `MFD_HUGETLB` (since Linux 4.14)
+        const HUGETLB = c::MFD_HUGETLB;
+
+        /// `MFD_HUGE_64KB`
+        const HUGE_64KB = c::MFD_HUGE_64KB;
+        /// `MFD_HUGE_512JB`
+        const HUGE_512KB = c::MFD_HUGE_512KB;
+        /// `MFD_HUGE_1MB`
+        const HUGE_1MB = c::MFD_HUGE_1MB;
+        /// `MFD_HUGE_2MB`
+        const HUGE_2MB = c::MFD_HUGE_2MB;
+        /// `MFD_HUGE_8MB`
+        const HUGE_8MB = c::MFD_HUGE_8MB;
+        /// `MFD_HUGE_16MB`
+        const HUGE_16MB = c::MFD_HUGE_16MB;
+        /// `MFD_HUGE_32MB`
+        const HUGE_32MB = c::MFD_HUGE_32MB;
+        /// `MFD_HUGE_256MB`
+        const HUGE_256MB = c::MFD_HUGE_256MB;
+        /// `MFD_HUGE_512MB`
+        const HUGE_512MB = c::MFD_HUGE_512MB;
+        /// `MFD_HUGE_1GB`
+        const HUGE_1GB = c::MFD_HUGE_1GB;
+        /// `MFD_HUGE_2GB`
+        const HUGE_2GB = c::MFD_HUGE_2GB;
+        /// `MFD_HUGE_16GB`
+        const HUGE_16GB = c::MFD_HUGE_16GB;
+    }
+}
+
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "fuchsia",
+    target_os = "freebsd"
+))]
+bitflags! {
+    /// `F_SEAL_*` constants for use with [`fcntl_add_seals`] and
+    /// [`fcntl_get_seals`].
+    ///
+    /// [`fcntl_add_seals`]: rustix::fs::fcntl_add_seals
+    /// [`fcntl_get_seals`]: rustix::fs::fcntl_get_seals
+    pub struct SealFlags: i32 {
+       /// `F_SEAL_SEAL`.
+       const SEAL = c::F_SEAL_SEAL;
+       /// `F_SEAL_SHRINK`.
+       const SHRINK = c::F_SEAL_SHRINK;
+       /// `F_SEAL_GROW`.
+       const GROW = c::F_SEAL_GROW;
+       /// `F_SEAL_WRITE`.
+       const WRITE = c::F_SEAL_WRITE;
+       /// `F_SEAL_FUTURE_WRITE` (since Linux 5.1)
+       #[cfg(target_os = "linux")]
+       const FUTURE_WRITE = c::F_SEAL_FUTURE_WRITE;
     }
 }
 
