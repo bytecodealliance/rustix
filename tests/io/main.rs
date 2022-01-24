@@ -20,6 +20,8 @@ mod isatty;
 mod mmap;
 #[cfg(not(windows))]
 mod poll;
+#[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
+mod procfs;
 #[cfg(not(windows))]
 mod prot;
 #[cfg(not(windows))]

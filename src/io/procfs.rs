@@ -35,6 +35,7 @@ const PROC_ROOT_INO: u64 = 1;
 
 // Identify an entry within "/proc", to determine which anomalies to
 // check for.
+#[derive(Debug)]
 enum Kind {
     Proc,
     Pid,
@@ -72,9 +73,13 @@ fn check_proc_entry_with_stat(
         Kind::File => check_proc_file(&entry_stat, proc_stat)?,
     }
 
-    // Check the ownership of the directory.
-    if (entry_stat.st_uid, entry_stat.st_gid) != (uid, gid) {
-        return Err(io::Error::NOTSUP);
+    // Check the ownership of the directory.  We can't do that for the toplevel /proc
+    // though, because in e.g. a user namespace scenario, root outside the container
+    // may be mapped to another uid like `nobody`.
+    if !matches!(kind, Kind::Proc) {
+        if (entry_stat.st_uid, entry_stat.st_gid) != (uid, gid) {
+            return Err(io::Error::NOTSUP);
+        }
     }
 
     // "/proc" directories are typically mounted r-xr-xr-x.
