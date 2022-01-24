@@ -75,27 +75,43 @@ pub fn fcntl_setfl<Fd: AsFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[cfg(any(
-    linux_raw,
-    all(
-        libc,
-        not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-            target_os = "redox",
-            target_os = "wasi",
-        ))
-    )
+    target_os = "android",
+    target_os = "linux",
+    target_os = "fuchsia",
+    target_os = "freebsd",
 ))]
 #[inline]
 #[doc(alias = "F_GET_SEALS")]
-pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
+pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<SealFlags> {
     let fd = fd.as_fd();
     imp::syscalls::fcntl_get_seals(fd)
+}
+
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "fuchsia",
+    target_os = "freebsd",
+))]
+pub use imp::fs::SealFlags;
+
+/// `fcntl(fd, F_ADD_SEALS)`
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "fuchsia",
+    target_os = "freebsd",
+))]
+#[inline]
+#[doc(alias = "F_ADD_SEALS")]
+pub fn fcntl_add_seals<Fd: AsFd>(fd: &Fd, seals: SealFlags) -> io::Result<()> {
+    let fd = fd.as_fd();
+    imp::syscalls::fcntl_add_seals(fd, seals)
 }
 
 /// `fcntl(fd, F_DUPFD_CLOEXEC)`—Creates a new `OwnedFd` instance, with value

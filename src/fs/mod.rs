@@ -109,18 +109,13 @@ pub use dir::{Dir, DirEntry};
 pub use fadvise::{fadvise, Advice};
 #[cfg(not(target_os = "wasi"))]
 pub use fcntl::fcntl_dupfd_cloexec;
-#[cfg(not(any(
-    target_os = "dragonfly",
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "fuchsia",
     target_os = "freebsd",
-    target_os = "illumos",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
-pub use fcntl::fcntl_get_seals;
+))]
+pub use fcntl::{fcntl_add_seals, fcntl_get_seals, SealFlags};
 pub use fcntl::{fcntl_getfd, fcntl_getfl, fcntl_setfd, fcntl_setfl};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use fcntl_darwin::{fcntl_fullfsync, fcntl_rdadvise};

@@ -28,7 +28,7 @@ use super::{
 use crate::fd::AsFd;
 use crate::fd::{BorrowedFd, RawFd};
 use crate::ffi::ZStr;
-use crate::fs::{FileType, Timestamps};
+use crate::fs::{FileType, SealFlags, Timestamps};
 use crate::io::{self, OwnedFd, SeekFrom};
 use crate::process::{Gid, Uid};
 use core::convert::TryInto;
@@ -50,8 +50,8 @@ use linux_raw_sys::general::{
 };
 use linux_raw_sys::v5_11::general::{__NR_openat2, open_how};
 use linux_raw_sys::v5_4::general::{
-    __NR_copy_file_range, __NR_memfd_create, __NR_renameat2, __NR_statx, statx, F_GETPIPE_SZ,
-    F_GET_SEALS, F_SETPIPE_SZ,
+    __NR_copy_file_range, __NR_memfd_create, __NR_renameat2, __NR_statx, statx, F_ADD_SEALS,
+    F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ,
 };
 #[cfg(target_pointer_width = "32")]
 use {
@@ -876,7 +876,7 @@ pub(crate) fn fcntl_setpipe_sz(fd: BorrowedFd<'_>, size: c::c_int) -> io::Result
 }
 
 #[inline]
-pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<u32> {
+pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<SealFlags> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         ret_c_int(syscall2_readonly(
@@ -884,7 +884,7 @@ pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<u32> {
             borrowed_fd(fd),
             c_uint(F_GET_SEALS),
         ))
-        .map(|seals| seals as u32)
+        .map(|seals| SealFlags::from_bits_unchecked(seals as u32))
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
@@ -893,7 +893,29 @@ pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<u32> {
             borrowed_fd(fd),
             c_uint(F_GET_SEALS),
         ))
-        .map(|seals| seals as u32)
+        .map(|seals| SealFlags::from_bits_unchecked(seals as u32))
+    }
+}
+
+#[inline]
+pub(crate) fn fcntl_add_seals(fd: BorrowedFd<'_>, seals: SealFlags) -> io::Result<()> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret(syscall3_readonly(
+            nr(__NR_fcntl64),
+            borrowed_fd(fd),
+            c_uint(F_ADD_SEALS),
+            c_uint(seals.bits()),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret(syscall3_readonly(
+            nr(__NR_fcntl),
+            borrowed_fd(fd),
+            c_uint(F_ADD_SEALS),
+            c_uint(seals.bits()),
+        ))
     }
 }
 
