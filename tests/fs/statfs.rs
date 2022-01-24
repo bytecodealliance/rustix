@@ -43,5 +43,5 @@ fn test_statfs_abi() {
 fn test_statfs() {
     let statfs = rustix::fs::statfs("Cargo.toml").unwrap();
     assert_ne!(statfs.f_blocks, 0);
-    assert_ne!(statfs.f_files, 0);
+    // Previously we checked f_files != 0 here, but at least btrfs doesn't set that.
 }
