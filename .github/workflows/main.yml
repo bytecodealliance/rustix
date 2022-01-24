@@ -304,9 +304,14 @@ jobs:
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
+        # Run the tests, and check the prebuilt release libraries.
         cargo test --verbose --features=all-impls,procfs,cc --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: 1
+
+    - run: |
+        # Check the prebuilt debug libraries too.
+        cargo check --features=cc
 
   test_rustix_use_libc:
     name: Test rustix_use_libc
