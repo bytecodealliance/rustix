@@ -323,7 +323,7 @@ pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> 
     unsafe { syscall_ret_owned_fd(c::syscall(c::SYS_eventfd2, initval, flags.bits())) }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
     let mut result = MaybeUninit::<c::c_uint>::uninit();
@@ -337,7 +337,7 @@ pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
     let mut result = MaybeUninit::<c::c_uint>::uninit();
