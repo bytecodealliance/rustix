@@ -16,6 +16,12 @@ use {
     crate::ffi::ZString, crate::path::SMALL_PATH_BUFFER_SIZE, alloc::vec::Vec, imp::fd::BorrowedFd,
 };
 
+pub use imp::io::Tcflag;
+
+/// `ICANON`
+#[cfg(not(any(windows, target_os = "wasi")))]
+pub const ICANON: Tcflag = imp::io::ICANON;
+
 /// `isatty(fd)`—Tests whether a file descriptor refers to a terminal.
 ///
 /// # References

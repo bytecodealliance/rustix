@@ -7,8 +7,8 @@
 //! integer values.
 #![allow(unsafe_code)]
 
-use crate::imp;
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+use crate::{imp, io};
+#[cfg(any(target_os = "android", target_os = "linux"))]
 use imp::process::RawCpuid;
 
 /// The raw integer value of a Unix user ID.
@@ -43,7 +43,7 @@ pub struct Gid(RawGid);
 pub struct Pid(RawNonZeroPid);
 
 /// A Linux CPU ID.
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 #[repr(transparent)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 pub struct Cpuid(RawCpuid);
@@ -162,7 +162,7 @@ impl Pid {
     }
 }
 
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 impl Cpuid {
     /// Converts a `RawCpuid` into a `Cpuid`.
     ///
@@ -263,4 +263,17 @@ pub fn getpid() -> Pid {
 #[must_use]
 pub fn getppid() -> Option<Pid> {
     imp::process::syscalls::getppid()
+}
+
+/// `setsid()`—Create a new session.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/setsid.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/setsid.2.html
+#[inline]
+pub fn setsid() -> io::Result<Pid> {
+    imp::process::syscalls::setsid()
 }

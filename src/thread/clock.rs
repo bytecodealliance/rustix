@@ -2,7 +2,7 @@ use crate::time::Timespec;
 use crate::{imp, io};
 
 /// `clockid_t`
-#[cfg(any(linux_raw, all(libc, not(any(
+#[cfg(not(any(
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
@@ -11,7 +11,7 @@ use crate::{imp, io};
     target_os = "openbsd",
     target_os = "redox",
     target_os = "wasi",
-)))))]
+)))]
 use imp::time::ClockId;
 
 /// `clock_nanosleep(id, 0, request, remain)`—Sleeps for a duration on a
@@ -26,7 +26,7 @@ use imp::time::ClockId;
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_nanosleep.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/clock_nanosleep.2.html
-#[cfg(any(linux_raw, all(libc, not(any(
+#[cfg(not(any(
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
@@ -35,7 +35,7 @@ use imp::time::ClockId;
     target_os = "openbsd",
     target_os = "redox",
     target_os = "wasi",
-)))))]
+)))]
 #[inline]
 pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRelativeResult {
     imp::thread::syscalls::clock_nanosleep_relative(id, request)
@@ -53,7 +53,7 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRel
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_nanosleep.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/clock_nanosleep.2.html
-#[cfg(any(linux_raw, all(libc, not(any(
+#[cfg(not(any(
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
@@ -62,7 +62,7 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRel
     target_os = "openbsd",
     target_os = "redox",
     target_os = "wasi",
-)))))]
+)))]
 #[inline]
 pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::Result<()> {
     imp::thread::syscalls::clock_nanosleep_absolute(id, request)

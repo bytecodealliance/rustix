@@ -7,8 +7,6 @@
 //! [`wsa_startup`]: https://docs.rs/rustix/latest/x86_64-pc-windows-msvc/rustix/net/fn.wsa_startup.html
 //! [`wsa_cleanup`]: https://docs.rs/rustix/latest/x86_64-pc-windows-msvc/rustix/net/fn.wsa_cleanup.html
 
-use crate::imp;
-
 #[cfg(not(feature = "std"))]
 mod addr;
 #[cfg(not(feature = "std"))]
@@ -34,16 +32,12 @@ pub use socket::{
     socket_with, AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType,
 };
 #[cfg(unix)]
-pub use socket::{bind_unix, connect_unix};
-pub use socket_addr_any::SocketAddrAny;
+pub use socket::{bind_unix, connect_unix, SocketAddrUnix};
+pub use socket_addr_any::{SocketAddrAny, SocketAddrStorage};
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use socketpair::socketpair;
 #[cfg(windows)]
 pub use wsa::{wsa_cleanup, wsa_startup};
-
-pub use imp::net::SocketAddrStorage;
-#[cfg(unix)]
-pub use imp::net::SocketAddrUnix;
 
 // Declare the `Ip` and `Socket` address types.
 #[cfg(not(feature = "std"))]

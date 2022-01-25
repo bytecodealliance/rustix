@@ -6,7 +6,7 @@ mod poll_fd;
 #[cfg(not(windows))]
 mod types;
 
-#[cfg(not(windows))]
+#[cfg_attr(windows, path = "windows_syscalls.rs")]
 pub(crate) mod syscalls;
 
 #[cfg(windows)]

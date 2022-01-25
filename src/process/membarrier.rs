@@ -11,7 +11,7 @@ use crate::{imp, io};
 
 pub use imp::process::MembarrierCommand;
 
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags::bitflags! {
     /// A result from [`membarrier_query`].
     ///
@@ -41,7 +41,7 @@ bitflags::bitflags! {
     }
 }
 
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 impl MembarrierQuery {
     /// Test whether this query result contains the given command.
     #[inline]

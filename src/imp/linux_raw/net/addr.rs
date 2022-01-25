@@ -6,7 +6,6 @@
 #![allow(unsafe_code)]
 
 use super::super::c;
-use super::offsetof_sun_path;
 use crate::ffi::ZStr;
 use crate::{io, path};
 use core::convert::TryInto;
@@ -158,3 +157,13 @@ impl fmt::Debug for SocketAddrUnix {
 
 /// `struct sockaddr_storage` as a raw struct.
 pub type SocketAddrStorage = linux_raw_sys::general::sockaddr;
+
+/// Return the offset of the `sun_path` field of `sockaddr_un`.
+#[inline]
+pub(crate) fn offsetof_sun_path() -> usize {
+    let z = linux_raw_sys::general::sockaddr_un {
+        sun_family: 0_u16,
+        sun_path: [0; 108],
+    };
+    (crate::as_ptr(&z.sun_path) as usize) - (crate::as_ptr(&z) as usize)
+}
