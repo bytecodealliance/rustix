@@ -15,7 +15,7 @@ use super::super::c;
 #[cfg(all(target_pointer_width = "32", target_arch = "arm"))]
 use super::super::conv::zero;
 use super::super::conv::{
-    borrowed_fd, by_ref, c_int, c_str, c_uint, dev_t, mode_and_type_as, mode_as, oflags,
+    borrowed_fd, by_ref, c_int, c_str, c_uint, dev_t, fs_advice, mode_and_type_as, mode_as, oflags,
     oflags_for_open_how, opt_c_str, opt_mut, out, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint,
     ret_owned_fd, ret_usize, size_of, slice_mut,
 };
@@ -387,7 +387,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) ->
         ret(syscall6_readonly(
             nr(__NR_fadvise64_64),
             borrowed_fd(fd),
-            c_uint(advice as c::c_uint),
+            fs_advice(advice),
             hi(pos),
             lo(pos),
             hi(len),
@@ -406,7 +406,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) ->
             lo(pos),
             hi(len),
             lo(len),
-            c_uint(advice as c::c_uint),
+            fs_advice(advice),
         ))
     }
     #[cfg(target_pointer_width = "64")]
@@ -416,7 +416,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) ->
             borrowed_fd(fd),
             loff_t_from_u64(pos),
             loff_t_from_u64(len),
-            c_uint(advice as c::c_uint),
+            fs_advice(advice),
         ))
     }
 }
