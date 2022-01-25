@@ -21,12 +21,15 @@ use core::mem::MaybeUninit;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use {
     super::super::conv::ret_infallible,
-    super::super::offset::libc_prlimit,
     super::super::offset::{libc_getrlimit, libc_rlimit, libc_setrlimit, LIBC_RLIM_INFINITY},
     crate::as_ptr,
-    crate::process::{Cpuid, MembarrierCommand, MembarrierQuery},
     crate::process::{Resource, Rlimit},
     core::convert::TryInto,
+};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use {
+    super::super::offset::libc_prlimit,
+    crate::process::{Cpuid, MembarrierCommand, MembarrierQuery},
 };
 #[cfg(not(target_os = "wasi"))]
 use {
