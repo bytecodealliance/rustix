@@ -295,16 +295,14 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
-    let rlim_cur: libc::rlim_t = match new.current {
+    let rlim_cur = match new.current {
         Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
-        None => None,
-    }
-    .unwrap_or(LIBC_RLIM_INFINITY as _);
-    let rlim_max: libc::rlim_t = match new.maximum {
+        None => LIBC_RLIM_INFINITY as _,
+    };
+    let rlim_max = match new.maximum {
         Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
-        None => None,
-    }
-    .unwrap_or(LIBC_RLIM_INFINITY as _);
+        None => LIBC_RLIM_INFINITY as _,
+    };
     let lim = libc_rlimit { rlim_cur, rlim_max };
     unsafe { ret(libc_setrlimit(limit as _, as_ptr(&lim))) }
 }
