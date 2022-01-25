@@ -32,18 +32,7 @@ pub(crate) fn clock_getres(which_clock: ClockId) -> __kernel_timespec {
             // See the comments in `rustix_clock_gettime_via_syscall` about
             // emulation.
             if err == io::Error::NOSYS {
-                let mut old_result = MaybeUninit::<__kernel_old_timespec>::uninit();
-                let res = ret(syscall2(
-                    nr(__NR_clock_getres),
-                    clockid_t(which_clock),
-                    out(&mut old_result),
-                ));
-                let old_result = old_result.assume_init();
-                *result.as_mut_ptr() = __kernel_timespec {
-                    tv_sec: old_result.tv_sec.into(),
-                    tv_nsec: old_result.tv_nsec.into(),
-                };
-                res
+                clock_getres_old(which_clock, &mut result)
             } else {
                 Err(err)
             }
@@ -60,4 +49,23 @@ pub(crate) fn clock_getres(which_clock: ClockId) -> __kernel_timespec {
         );
         result.assume_init()
     }
+}
+
+#[cfg(target_pointer_width = "32")]
+unsafe fn clock_getres_old(
+    which_clock: ClockId,
+    result: &mut MaybeUninit<__kernel_timespec>,
+) -> io::Result<()> {
+    let mut old_result = MaybeUninit::<__kernel_old_timespec>::uninit();
+    let res = ret(syscall2(
+        nr(__NR_clock_getres),
+        clockid_t(which_clock),
+        out(&mut old_result),
+    ));
+    let old_result = old_result.assume_init();
+    *result.as_mut_ptr() = __kernel_timespec {
+        tv_sec: old_result.tv_sec.into(),
+        tv_nsec: old_result.tv_nsec.into(),
+    };
+    res
 }
