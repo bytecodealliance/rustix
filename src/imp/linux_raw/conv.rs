@@ -22,7 +22,7 @@ use super::reg::{raw_arg, ArgNumber, ArgReg, RetReg, R0};
 use super::time::ClockId;
 use crate::ffi::ZStr;
 use crate::io::{self, OwnedFd};
-use crate::process::Resource;
+use crate::process::{Pid, Resource, Signal};
 use crate::{as_mut_ptr, as_ptr};
 use core::mem::{transmute, MaybeUninit};
 use core::ptr::null;
@@ -274,6 +274,26 @@ pub(super) fn oflags_for_open_how(oflags: OFlags) -> u64 {
 #[inline]
 pub(super) fn resource<'a, Num: ArgNumber>(resource: Resource) -> ArgReg<'a, Num> {
     c_uint(resource as c::c_uint)
+}
+
+#[inline]
+pub(super) fn regular_pid<'a, Num: ArgNumber>(pid: Pid) -> ArgReg<'a, Num> {
+    raw_arg(pid.as_raw_nonzero().get() as usize)
+}
+
+#[inline]
+pub(super) fn negative_pid<'a, Num: ArgNumber>(pid: Pid) -> ArgReg<'a, Num> {
+    raw_arg(pid.as_raw_nonzero().get().wrapping_neg() as usize)
+}
+
+#[inline]
+pub(super) fn signal<'a, Num: ArgNumber>(sig: Signal) -> ArgReg<'a, Num> {
+    raw_arg(sig as usize)
+}
+
+#[inline]
+pub(super) fn fs_advice<'a, Num: ArgNumber>(advice: crate::fs::Advice) -> ArgReg<'a, Num> {
+    c_uint(advice as c::c_uint)
 }
 
 #[inline]

@@ -12,9 +12,9 @@ use super::super::arch::choose::{
 };
 use super::super::c;
 use super::super::conv::{
-    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, const_void_star, out, pass_usize, resource,
-    ret, ret_c_int, ret_c_uint, ret_infallible, ret_usize, ret_usize_infallible, size_of,
-    slice_just_addr, slice_mut, void_star, zero,
+    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, const_void_star, negative_pid, out,
+    pass_usize, regular_pid, resource, ret, ret_c_int, ret_c_uint, ret_infallible, ret_usize,
+    ret_usize_infallible, signal, size_of, slice_just_addr, slice_mut, void_star, zero,
 };
 use super::super::reg::nr;
 use super::{RawCpuSet, RawUname};
@@ -527,8 +527,8 @@ pub(crate) fn kill_process(pid: Pid, sig: Signal) -> io::Result<()> {
     unsafe {
         ret(syscall2_readonly(
             nr(__NR_kill),
-            pass_usize(pid.as_raw_nonzero().get() as usize),
-            pass_usize(sig as usize),
+            regular_pid(pid),
+            signal(sig),
         ))
     }
 }
@@ -538,19 +538,13 @@ pub(crate) fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
     unsafe {
         ret(syscall2_readonly(
             nr(__NR_kill),
-            pass_usize((pid.as_raw_nonzero().get() as usize).wrapping_neg()),
-            pass_usize(sig as usize),
+            negative_pid(pid),
+            signal(sig),
         ))
     }
 }
 
 #[inline]
 pub(crate) fn kill_current_process_group(sig: Signal) -> io::Result<()> {
-    unsafe {
-        ret(syscall2_readonly(
-            nr(__NR_kill),
-            pass_usize(0),
-            pass_usize(sig as usize),
-        ))
-    }
+    unsafe { ret(syscall2_readonly(nr(__NR_kill), pass_usize(0), signal(sig))) }
 }
