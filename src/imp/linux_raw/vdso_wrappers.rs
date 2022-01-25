@@ -259,29 +259,35 @@ unsafe fn _rustix_clock_gettime_via_syscall(
         void_star(res.cast::<c::c_void>()),
     );
     match ret(r0) {
-        Err(io::Error::NOSYS) => {
-            // Ordinarily `rustix` doesn't like to emulate system calls, but in
-            // the case of time APIs, it's specific to Linux, specific to
-            // 32-bit architectures *and* specific to old kernel versions, and
-            // it's not that hard to fix up here, so that no other code needs
-            // to worry about this.
-            let mut old_result = MaybeUninit::<__kernel_old_timespec>::uninit();
-            let r0 = syscall2(
-                nr(__NR_clock_gettime),
-                pass_usize(clockid as usize),
-                out(&mut old_result),
-            );
-            match ret(r0) {
-                Ok(()) => {
-                    let old_result = old_result.assume_init();
-                    *res = Timespec {
-                        tv_sec: old_result.tv_sec.into(),
-                        tv_nsec: old_result.tv_nsec.into(),
-                    };
-                    Ok(())
-                }
-                otherwise => otherwise,
-            }
+        Err(io::Error::NOSYS) => _rustix_clock_gettime_via_syscall_old(clockid, res),
+        otherwise => otherwise,
+    }
+}
+
+#[cfg(target_pointer_width = "32")]
+unsafe fn _rustix_clock_gettime_via_syscall_old(
+    clockid: c::c_int,
+    res: *mut Timespec,
+) -> io::Result<()> {
+    // Ordinarily `rustix` doesn't like to emulate system calls, but in
+    // the case of time APIs, it's specific to Linux, specific to
+    // 32-bit architectures *and* specific to old kernel versions, and
+    // it's not that hard to fix up here, so that no other code needs
+    // to worry about this.
+    let mut old_result = MaybeUninit::<__kernel_old_timespec>::uninit();
+    let r0 = syscall2(
+        nr(__NR_clock_gettime),
+        pass_usize(clockid as usize),
+        out(&mut old_result),
+    );
+    match ret(r0) {
+        Ok(()) => {
+            let old_result = old_result.assume_init();
+            *res = Timespec {
+                tv_sec: old_result.tv_sec.into(),
+                tv_nsec: old_result.tv_nsec.into(),
+            };
+            Ok(())
         }
         otherwise => otherwise,
     }

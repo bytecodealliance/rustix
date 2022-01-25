@@ -1126,56 +1126,16 @@ fn _utimensat(
 
     #[cfg(target_pointer_width = "32")]
     unsafe {
-        ret(syscall4_readonly(
+        match ret(syscall4_readonly(
             nr(__NR_utimensat_time64),
             borrowed_fd(dirfd),
             opt_c_str(pathname),
             by_ref(times),
             c_uint(flags.bits()),
-        ))
-        .or_else(|err| {
-            // See the comments in `rustix_clock_gettime_via_syscall` about
-            // emulation.
-            if err == io::Error::NOSYS {
-                let old_times = [
-                    __kernel_old_timespec {
-                        tv_sec: times
-                            .last_access
-                            .tv_sec
-                            .try_into()
-                            .map_err(|_| io::Error::INVAL)?,
-                        tv_nsec: times
-                            .last_access
-                            .tv_nsec
-                            .try_into()
-                            .map_err(|_| io::Error::INVAL)?,
-                    },
-                    __kernel_old_timespec {
-                        tv_sec: times
-                            .last_modification
-                            .tv_sec
-                            .try_into()
-                            .map_err(|_| io::Error::INVAL)?,
-                        tv_nsec: times
-                            .last_modification
-                            .tv_nsec
-                            .try_into()
-                            .map_err(|_| io::Error::INVAL)?,
-                    },
-                ];
-                // The length of the array is fixed and not passed into the syscall.
-                let old_times_addr = slice_just_addr(&old_times);
-                ret(syscall4_readonly(
-                    nr(__NR_utimensat),
-                    borrowed_fd(dirfd),
-                    opt_c_str(pathname),
-                    old_times_addr,
-                    c_uint(flags.bits()),
-                ))
-            } else {
-                Err(err)
-            }
-        })
+        )) {
+            Err(io::Error::NOSYS) => _utimensat_old(dirfd, pathname, times, flags),
+            otherwise => otherwise,
+        }
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
@@ -1187,6 +1147,52 @@ fn _utimensat(
             c_uint(flags.bits()),
         ))
     }
+}
+
+#[cfg(target_pointer_width = "32")]
+unsafe fn _utimensat_old(
+    dirfd: BorrowedFd<'_>,
+    pathname: Option<&ZStr>,
+    times: &Timestamps,
+    flags: AtFlags,
+) -> io::Result<()> {
+    // See the comments in `rustix_clock_gettime_via_syscall` about
+    // emulation.
+    let old_times = [
+        __kernel_old_timespec {
+            tv_sec: times
+                .last_access
+                .tv_sec
+                .try_into()
+                .map_err(|_| io::Error::INVAL)?,
+            tv_nsec: times
+                .last_access
+                .tv_nsec
+                .try_into()
+                .map_err(|_| io::Error::INVAL)?,
+        },
+        __kernel_old_timespec {
+            tv_sec: times
+                .last_modification
+                .tv_sec
+                .try_into()
+                .map_err(|_| io::Error::INVAL)?,
+            tv_nsec: times
+                .last_modification
+                .tv_nsec
+                .try_into()
+                .map_err(|_| io::Error::INVAL)?,
+        },
+    ];
+    // The length of the array is fixed and not passed into the syscall.
+    let old_times_addr = slice_just_addr(&old_times);
+    ret(syscall4_readonly(
+        nr(__NR_utimensat),
+        borrowed_fd(dirfd),
+        opt_c_str(pathname),
+        old_times_addr,
+        c_uint(flags.bits()),
+    ))
 }
 
 #[inline]
