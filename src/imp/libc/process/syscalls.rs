@@ -305,6 +305,7 @@ pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Res
 }
 
 /// Convert a Rust [`Rlimit`] to a C `libc_rlimit`.
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 fn rlimit_from_libc(lim: libc_rlimit) -> Rlimit {
     let current = if lim.rlim_cur == LIBC_RLIM_INFINITY {
         None
@@ -320,6 +321,7 @@ fn rlimit_from_libc(lim: libc_rlimit) -> Rlimit {
 }
 
 /// Convert a C `libc_rlimit` to a Rust `Rlimit`.
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 fn rlimit_to_libc(lim: Rlimit) -> io::Result<libc_rlimit> {
     let rlim_cur = match lim.current {
         Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
