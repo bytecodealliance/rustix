@@ -296,8 +296,8 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
 #[inline]
 pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
     let lim = libc_rlimit {
-        rlim_cur: new.current.unwrap_or(LIBC_RLIM_INFINITY),
-        rlim_max: new.maximum.unwrap_or(LIBC_RLIM_INFINITY),
+        rlim_cur: new.current.unwrap_or(LIBC_RLIM_INFINITY as _),
+        rlim_max: new.maximum.unwrap_or(LIBC_RLIM_INFINITY as _),
     };
     unsafe { ret(libc_setrlimit(limit as _, as_ptr(&lim))) }
 }
