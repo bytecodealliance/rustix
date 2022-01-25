@@ -22,7 +22,6 @@ use core::mem::MaybeUninit;
 use {
     super::super::conv::ret_infallible,
     super::super::offset::{libc_getrlimit, libc_rlimit, libc_setrlimit, LIBC_RLIM_INFINITY},
-    crate::as_ptr,
     crate::process::{Resource, Rlimit},
     core::convert::TryInto,
 };
@@ -285,7 +284,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
 #[inline]
 pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
     let lim = rlimit_to_libc(new)?;
-    unsafe { ret(libc_setrlimit(limit as _, as_ptr(&lim))) }
+    unsafe { ret(libc_setrlimit(limit as _, &lim)) }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -297,7 +296,7 @@ pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Res
         ret_infallible(libc_prlimit(
             Pid::as_raw(pid),
             limit as _,
-            as_ptr(&lim),
+            &lim,
             result.as_mut_ptr(),
         ));
         Ok(rlimit_from_libc(result.assume_init()))

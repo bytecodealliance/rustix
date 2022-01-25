@@ -270,6 +270,7 @@ pub(super) fn oflags_for_open_how(oflags: OFlags) -> u64 {
     u64::from(oflags_bits(oflags))
 }
 
+/// Convert a `Resource` into a syscall argument.
 #[inline]
 pub(super) fn resource<'a, Num: ArgNumber>(resource: Resource) -> ArgReg<'a, Num> {
     c_uint(resource as c::c_uint)

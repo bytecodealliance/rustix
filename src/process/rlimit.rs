@@ -27,20 +27,20 @@ pub fn getrlimit(resource: Resource) -> Rlimit {
     imp::syscalls::getrlimit(resource)
 }
 
-/// `setrlimit(resource, lim)`—Set a process resource limit value.
+/// `setrlimit(resource, new)`—Set a process resource limit value.
 ///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getrlimit.html
-/// [Linux]: https://man7.org/linux/man-pages/man2/getrlimit.2.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/setrlimit.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/setrlimit.2.html
 #[inline]
 pub fn setrlimit(resource: Resource, new: Rlimit) -> io::Result<()> {
     imp::syscalls::setrlimit(resource, new)
 }
 
-/// `prlimit(pid, resource, lim)`—Get and set a process resource limit value.
+/// `prlimit(pid, resource, new)`—Get and set a process resource limit value.
 ///
 /// # References
 ///  - [Linux]
