@@ -12,9 +12,9 @@ use super::super::arch::choose::{
 };
 use super::super::c;
 use super::super::conv::{
-    borrowed_fd, by_mut, c_int, c_str, c_uint, out, pass_usize, ret, ret_c_int, ret_c_uint,
-    ret_infallible, ret_usize, ret_usize_infallible, size_of, slice_just_addr, slice_mut,
-    void_star, zero,
+    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, const_void_star, out, pass_usize, resource,
+    ret, ret_c_int, ret_c_uint, ret_infallible, ret_usize, ret_usize_infallible, size_of,
+    slice_just_addr, slice_mut, void_star, zero,
 };
 use super::super::reg::nr;
 use super::{RawCpuSet, RawUname};
@@ -25,6 +25,7 @@ use crate::process::{
     Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, RawNonZeroPid, RawPid, Resource, Rlimit,
     Signal, Uid, WaitOptions, WaitStatus,
 };
+use core::convert::TryInto;
 use core::mem::MaybeUninit;
 use linux_raw_sys::general::{
     __NR_chdir, __NR_exit_group, __NR_fchdir, __NR_getcwd, __NR_getpid, __NR_getppid,
@@ -36,9 +37,9 @@ use linux_raw_sys::general::{
 use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getuid};
 #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
 use linux_raw_sys::general::{__NR_getegid32, __NR_geteuid32, __NR_getgid32, __NR_getuid32};
-use linux_raw_sys::v5_4::general::{__NR_membarrier, __NR_prlimit64};
 #[cfg(target_pointer_width = "32")]
-use {core::convert::TryInto, linux_raw_sys::general::__NR_getrlimit};
+use linux_raw_sys::general::{__NR_getrlimit, __NR_setrlimit};
+use linux_raw_sys::v5_4::general::{__NR_membarrier, __NR_prlimit64};
 
 #[inline]
 pub(crate) fn chdir(filename: &ZStr) -> io::Result<()> {
@@ -320,46 +321,14 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
         match ret(syscall4(
             nr(__NR_prlimit64),
             c_uint(0),
-            c_uint(limit as c::c_uint),
-            void_star(core::ptr::null_mut()),
+            resource(limit),
+            const_void_star(core::ptr::null()),
             out(&mut result),
         )) {
-            Ok(()) => {
-                let result = result.assume_init();
-                let current =
-                    if result.rlim_cur == linux_raw_sys::v5_4::general::RLIM64_INFINITY as _ {
-                        None
-                    } else {
-                        Some(result.rlim_cur)
-                    };
-                let maximum =
-                    if result.rlim_max == linux_raw_sys::v5_4::general::RLIM64_INFINITY as _ {
-                        None
-                    } else {
-                        Some(result.rlim_max)
-                    };
-                Rlimit { current, maximum }
-            }
+            Ok(()) => rlimit_from_linux(result.assume_init()),
             Err(e) => {
                 debug_assert_eq!(e, io::Error::NOSYS);
-                let mut result = MaybeUninit::<linux_raw_sys::general::rlimit>::uninit();
-                ret_infallible(syscall2(
-                    nr(__NR_getrlimit),
-                    c_uint(limit as c::c_uint),
-                    out(&mut result),
-                ));
-                let result = result.assume_init();
-                let current = if result.rlim_cur == linux_raw_sys::general::RLIM_INFINITY as _ {
-                    None
-                } else {
-                    result.rlim_cur.try_into().ok()
-                };
-                let maximum = if result.rlim_max == linux_raw_sys::general::RLIM_INFINITY as _ {
-                    None
-                } else {
-                    result.rlim_cur.try_into().ok()
-                };
-                Rlimit { current, maximum }
+                getrlimit_old(limit)
             }
         }
     }
@@ -368,23 +337,141 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
         ret_infallible(syscall4(
             nr(__NR_prlimit64),
             c_uint(0),
-            c_uint(limit as c::c_uint),
-            void_star(core::ptr::null_mut()),
+            resource(limit),
+            const_void_star(core::ptr::null()),
             out(&mut result),
         ));
-        let result = result.assume_init();
-        let current = if result.rlim_cur == linux_raw_sys::general::RLIM_INFINITY as _ {
-            None
-        } else {
-            Some(result.rlim_cur)
-        };
-        let maximum = if result.rlim_max == linux_raw_sys::general::RLIM_INFINITY as _ {
-            None
-        } else {
-            Some(result.rlim_max)
-        };
-        Rlimit { current, maximum }
+        rlimit_from_linux(result.assume_init())
     }
+}
+
+/// The old 32-bit-only `getrlimit` syscall, for when we lack the new
+/// `prlimit64`.
+#[cfg(target_pointer_width = "32")]
+unsafe fn getrlimit_old(limit: Resource) -> Rlimit {
+    let mut result = MaybeUninit::<linux_raw_sys::general::rlimit>::uninit();
+    ret_infallible(syscall2(
+        nr(__NR_getrlimit),
+        resource(limit),
+        out(&mut result),
+    ));
+    rlimit_from_linux_old(result.assume_init())
+}
+
+#[inline]
+pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        let lim = rlimit_to_linux(new.clone())?;
+        match ret(syscall4(
+            nr(__NR_prlimit64),
+            c_uint(0),
+            resource(limit),
+            by_ref(&lim),
+            void_star(core::ptr::null_mut()),
+        )) {
+            Ok(()) => Ok(()),
+            Err(io::Error::NOSYS) => setrlimit_old(limit, new),
+            Err(e) => Err(e),
+        }
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        let lim = rlimit_to_linux(new)?;
+        ret(syscall4(
+            nr(__NR_prlimit64),
+            c_uint(0),
+            resource(limit),
+            by_ref(&lim),
+            void_star(core::ptr::null_mut()),
+        ))
+    }
+}
+
+/// The old 32-bit-only `setrlimit` syscall, for when we lack the new
+/// `prlimit64`.
+#[cfg(target_pointer_width = "32")]
+unsafe fn setrlimit_old(limit: Resource, new: Rlimit) -> io::Result<()> {
+    let lim = rlimit_to_linux_old(new)?;
+    ret(syscall2(nr(__NR_setrlimit), resource(limit), by_ref(&lim)))
+}
+
+#[inline]
+pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Result<Rlimit> {
+    let lim = rlimit_to_linux(new)?;
+    let mut result = MaybeUninit::<linux_raw_sys::v5_4::general::rlimit64>::uninit();
+    unsafe {
+        match ret(syscall4(
+            nr(__NR_prlimit64),
+            c_uint(Pid::as_raw(pid)),
+            resource(limit),
+            by_ref(&lim),
+            out(&mut result),
+        )) {
+            Ok(()) => Ok(rlimit_from_linux(result.assume_init())),
+            Err(e) => Err(e),
+        }
+    }
+}
+
+/// Convert a Rust [`Rlimit`] to a C `rlimit64`.
+#[inline]
+fn rlimit_from_linux(lim: linux_raw_sys::v5_4::general::rlimit64) -> Rlimit {
+    let current = if lim.rlim_cur == linux_raw_sys::v5_4::general::RLIM64_INFINITY as _ {
+        None
+    } else {
+        Some(lim.rlim_cur)
+    };
+    let maximum = if lim.rlim_max == linux_raw_sys::v5_4::general::RLIM64_INFINITY as _ {
+        None
+    } else {
+        Some(lim.rlim_max)
+    };
+    Rlimit { current, maximum }
+}
+
+/// Convert a C `rlimit64` to a Rust `Rlimit`.
+#[inline]
+fn rlimit_to_linux(lim: Rlimit) -> io::Result<linux_raw_sys::v5_4::general::rlimit64> {
+    let rlim_cur = match lim.current {
+        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+        None => linux_raw_sys::v5_4::general::RLIM64_INFINITY as _,
+    };
+    let rlim_max = match lim.maximum {
+        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+        None => linux_raw_sys::v5_4::general::RLIM64_INFINITY as _,
+    };
+    Ok(linux_raw_sys::v5_4::general::rlimit64 { rlim_cur, rlim_max })
+}
+
+/// Like `rlimit_from_linux` but uses Linux's old 32-bit `rlimit`.
+#[cfg(target_pointer_width = "32")]
+fn rlimit_from_linux_old(lim: linux_raw_sys::general::rlimit) -> Rlimit {
+    let current = if lim.rlim_cur == linux_raw_sys::general::RLIM_INFINITY as _ {
+        None
+    } else {
+        Some(lim.rlim_cur.into())
+    };
+    let maximum = if lim.rlim_max == linux_raw_sys::general::RLIM_INFINITY as _ {
+        None
+    } else {
+        Some(lim.rlim_max.into())
+    };
+    Rlimit { current, maximum }
+}
+
+/// Like `rlimit_to_linux` but uses Linux's old 32-bit `rlimit`.
+#[cfg(target_pointer_width = "32")]
+fn rlimit_to_linux_old(lim: Rlimit) -> io::Result<linux_raw_sys::general::rlimit> {
+    let rlim_cur = match lim.current {
+        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+        None => linux_raw_sys::general::RLIM_INFINITY as _,
+    };
+    let rlim_max = match lim.maximum {
+        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+        None => linux_raw_sys::general::RLIM_INFINITY as _,
+    };
+    Ok(linux_raw_sys::general::rlimit { rlim_cur, rlim_max })
 }
 
 #[inline]

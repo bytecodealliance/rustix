@@ -65,8 +65,10 @@ pub use priority::{
     getpriority_pgrp, getpriority_process, getpriority_user, setpriority_pgrp, setpriority_process,
     setpriority_user,
 };
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use rlimit::prlimit;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-pub use rlimit::{getrlimit, Resource, Rlimit};
+pub use rlimit::{getrlimit, setrlimit, Resource, Rlimit};
 #[cfg(any(
     target_os = "linux",
     target_os = "android",

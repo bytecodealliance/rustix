@@ -17,15 +17,18 @@ use super::RawCpuSet;
 use crate::fd::BorrowedFd;
 use crate::ffi::ZStr;
 use crate::io;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 use core::mem::MaybeUninit;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use {
     super::super::conv::ret_infallible,
-    super::super::offset::{libc_getrlimit, libc_rlimit, LIBC_RLIM_INFINITY},
+    super::super::offset::{libc_getrlimit, libc_rlimit, libc_setrlimit, LIBC_RLIM_INFINITY},
     crate::process::{Resource, Rlimit},
     core::convert::TryInto,
+};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use {
+    super::super::offset::libc_prlimit,
+    crate::process::{Cpuid, MembarrierCommand, MembarrierQuery},
 };
 #[cfg(not(target_os = "wasi"))]
 use {
@@ -273,19 +276,61 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
     let mut result = MaybeUninit::<libc_rlimit>::uninit();
     unsafe {
         ret_infallible(libc_getrlimit(limit as _, result.as_mut_ptr()));
-        let result = result.assume_init();
-        let current = if result.rlim_cur == LIBC_RLIM_INFINITY {
-            None
-        } else {
-            result.rlim_cur.try_into().ok()
-        };
-        let maximum = if result.rlim_max == LIBC_RLIM_INFINITY {
-            None
-        } else {
-            result.rlim_max.try_into().ok()
-        };
-        Rlimit { current, maximum }
+        rlimit_from_libc(result.assume_init())
     }
+}
+
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[inline]
+pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
+    let lim = rlimit_to_libc(new)?;
+    unsafe { ret(libc_setrlimit(limit as _, &lim)) }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Result<Rlimit> {
+    let lim = rlimit_to_libc(new)?;
+    let mut result = MaybeUninit::<libc_rlimit>::uninit();
+    unsafe {
+        ret_infallible(libc_prlimit(
+            Pid::as_raw(pid),
+            limit as _,
+            &lim,
+            result.as_mut_ptr(),
+        ));
+        Ok(rlimit_from_libc(result.assume_init()))
+    }
+}
+
+/// Convert a Rust [`Rlimit`] to a C `libc_rlimit`.
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+fn rlimit_from_libc(lim: libc_rlimit) -> Rlimit {
+    let current = if lim.rlim_cur == LIBC_RLIM_INFINITY {
+        None
+    } else {
+        Some(lim.rlim_cur.try_into().unwrap())
+    };
+    let maximum = if lim.rlim_max == LIBC_RLIM_INFINITY {
+        None
+    } else {
+        Some(lim.rlim_max.try_into().unwrap())
+    };
+    Rlimit { current, maximum }
+}
+
+/// Convert a C `libc_rlimit` to a Rust `Rlimit`.
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+fn rlimit_to_libc(lim: Rlimit) -> io::Result<libc_rlimit> {
+    let rlim_cur = match lim.current {
+        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+        None => LIBC_RLIM_INFINITY as _,
+    };
+    let rlim_max = match lim.maximum {
+        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+        None => LIBC_RLIM_INFINITY as _,
+    };
+    Ok(libc_rlimit { rlim_cur, rlim_max })
 }
 
 #[cfg(not(target_os = "wasi"))]

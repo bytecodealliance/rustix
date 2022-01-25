@@ -35,9 +35,12 @@ pub enum MembarrierCommand {
     RegisterPrivateExpeditedRseq = 256,
 }
 
-/// A resource value for use with [`getrlimit`].
+/// A resource value for use with [`getrlimit`], [`setrlimit`], and
+/// [`prlimit`].
 ///
 /// [`getrlimit`]: crate::process::getrlimit
+/// [`setrlimit`]: crate::process::setrlimit
+/// [`prlimit`]: crate::process::prlimit
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(i32)]
