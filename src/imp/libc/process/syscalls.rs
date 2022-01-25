@@ -17,13 +17,14 @@ use super::RawCpuSet;
 use crate::fd::BorrowedFd;
 use crate::ffi::ZStr;
 use crate::io;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 use core::mem::MaybeUninit;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use {
     super::super::conv::ret_infallible,
-    super::super::offset::{libc_getrlimit, libc_rlimit, LIBC_RLIM_INFINITY},
+    super::super::offset::libc_prlimit,
+    super::super::offset::{libc_getrlimit, libc_rlimit, libc_setrlimit, LIBC_RLIM_INFINITY},
+    crate::as_ptr,
+    crate::process::{Cpuid, MembarrierCommand, MembarrierQuery},
     crate::process::{Resource, Rlimit},
     core::convert::TryInto,
 };
@@ -285,6 +286,46 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
             result.rlim_max.try_into().ok()
         };
         Rlimit { current, maximum }
+    }
+}
+
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[inline]
+pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
+    let lim = libc_rlimit {
+        rlim_cur: new.current.unwrap_or(LIBC_RLIM_INFINITY),
+        rlim_max: new.maximum.unwrap_or(LIBC_RLIM_INFINITY),
+    };
+    unsafe { ret(libc_setrlimit(limit as _, as_ptr(&lim))) }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Result<Rlimit> {
+    let lim = libc_rlimit {
+        rlim_cur: new.current.unwrap_or(LIBC_RLIM_INFINITY),
+        rlim_max: new.maximum.unwrap_or(LIBC_RLIM_INFINITY),
+    };
+    let mut result = MaybeUninit::<libc_rlimit>::uninit();
+    unsafe {
+        ret_infallible(libc_prlimit(
+            Pid::as_raw(pid),
+            limit as _,
+            as_ptr(&lim),
+            result.as_mut_ptr(),
+        ));
+        let result = result.assume_init();
+        let current = if result.rlim_cur == LIBC_RLIM_INFINITY {
+            None
+        } else {
+            result.rlim_cur.try_into().ok()
+        };
+        let maximum = if result.rlim_max == LIBC_RLIM_INFINITY {
+            None
+        } else {
+            result.rlim_max.try_into().ok()
+        };
+        Ok(Rlimit { current, maximum })
     }
 }
 

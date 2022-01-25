@@ -12,7 +12,7 @@ use super::super::arch::choose::{
 };
 use super::super::c;
 use super::super::conv::{
-    borrowed_fd, by_mut, c_int, c_str, c_uint, out, pass_usize, ret, ret_c_int, ret_c_uint,
+    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, out, pass_usize, ret, ret_c_int, ret_c_uint,
     ret_infallible, ret_usize, ret_usize_infallible, size_of, slice_just_addr, slice_mut,
     void_star, zero,
 };
@@ -38,7 +38,10 @@ use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getui
 use linux_raw_sys::general::{__NR_getegid32, __NR_geteuid32, __NR_getgid32, __NR_getuid32};
 use linux_raw_sys::v5_4::general::{__NR_membarrier, __NR_prlimit64};
 #[cfg(target_pointer_width = "32")]
-use {core::convert::TryInto, linux_raw_sys::general::__NR_getrlimit};
+use {
+    core::convert::TryInto,
+    linux_raw_sys::general::{__NR_getrlimit, __NR_prlimit, __NR_setrlimit},
+};
 
 #[inline]
 pub(crate) fn chdir(filename: &ZStr) -> io::Result<()> {
@@ -384,6 +387,96 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
             Some(result.rlim_max)
         };
         Rlimit { current, maximum }
+    }
+}
+
+#[inline]
+pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
+    let lim = linux_raw_sys::v5_4::general::rlimit64 {
+        rlim_cur: new
+            .current
+            .unwrap_or(linux_raw_sys::general::RLIM_INFINITY as _),
+        rlim_max: new
+            .maximum
+            .unwrap_or(linux_raw_sys::general::RLIM_INFINITY as _),
+    };
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        match ret(syscall4(
+            nr(__NR_prlimit64),
+            c_uint(0),
+            c_uint(limit as c::c_uint),
+            by_ref(&lim),
+            void_star(core::ptr::null_mut()),
+        )) {
+            Ok(()) => Ok(()),
+            Err(io::Error::NOSYS) => {
+                let lim = linux_raw_sys::general::rlimit {
+                    rlim_cur: new
+                        .current
+                        .unwrap_or(linux_raw_sys::general::RLIM_INFINITY as _),
+                    rlim_max: new
+                        .maximum
+                        .unwrap_or(linux_raw_sys::general::RLIM_INFINITY as _),
+                };
+                ret(syscall2(
+                    nr(__NR_setrlimit),
+                    c_uint(limit as c::c_uint),
+                    by_ref(&lim),
+                ))
+            }
+            Err(e) => Err(e),
+        }
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret(syscall4(
+            nr(__NR_prlimit64),
+            c_uint(0),
+            c_uint(limit as c::c_uint),
+            by_ref(&lim),
+            void_star(core::ptr::null_mut()),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Result<Rlimit> {
+    let lim = linux_raw_sys::v5_4::general::rlimit64 {
+        rlim_cur: new
+            .current
+            .unwrap_or(linux_raw_sys::general::RLIM_INFINITY as _),
+        rlim_max: new
+            .maximum
+            .unwrap_or(linux_raw_sys::general::RLIM_INFINITY as _),
+    };
+    let mut result = MaybeUninit::<linux_raw_sys::v5_4::general::rlimit64>::uninit();
+    unsafe {
+        match ret(syscall4(
+            nr(__NR_prlimit64),
+            c_uint(Pid::as_raw(pid)),
+            c_uint(limit as c::c_uint),
+            by_ref(&lim),
+            out(&mut result),
+        )) {
+            Ok(()) => {
+                let result = result.assume_init();
+                let current =
+                    if result.rlim_cur == linux_raw_sys::v5_4::general::RLIM64_INFINITY as _ {
+                        None
+                    } else {
+                        Some(result.rlim_cur)
+                    };
+                let maximum =
+                    if result.rlim_max == linux_raw_sys::v5_4::general::RLIM64_INFINITY as _ {
+                        None
+                    } else {
+                        Some(result.rlim_max)
+                    };
+                Ok(Rlimit { current, maximum })
+            }
+            Err(e) => Err(e),
+        }
     }
 }
 

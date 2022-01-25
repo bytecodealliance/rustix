@@ -34,9 +34,12 @@ pub enum MembarrierCommand {
         linux_raw_sys::v5_11::general::membarrier_cmd::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_RSEQ as _,
 }
 
-/// A resource value for use with [`getrlimit`].
+/// A resource value for use with [`getrlimit`], [`setrlimit`], and
+/// [`prlimit`].
 ///
 /// [`getrlimit`]: crate::process::getrlimit
+/// [`setrlimit`]: crate::process::setrlimit
+/// [`prlimit`]: crate::process::prlimit
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(u32)]
 pub enum Resource {

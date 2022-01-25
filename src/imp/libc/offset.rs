@@ -57,7 +57,7 @@ pub(super) use c::{rlimit as libc_rlimit, RLIM_INFINITY as LIBC_RLIM_INFINITY};
     target_os = "linux",
     target_os = "wasi",
 )))]
-pub(super) use c::getrlimit as libc_getrlimit;
+pub(super) use c::{getrlimit as libc_getrlimit, setrlimit as libc_setrlimit};
 
 // TODO: Add `RLIM64_INFINITY` to upstream libc.
 #[cfg(any(
@@ -74,7 +74,12 @@ pub(super) const LIBC_RLIM_INFINITY: u64 = !0u64;
     target_os = "emscripten",
     target_os = "l4re",
 ))]
-pub(super) use c::{getrlimit64 as libc_getrlimit, mmap64 as libc_mmap};
+pub(super) use c::{
+    getrlimit64 as libc_getrlimit, mmap64 as libc_mmap, setrlimit64 as libc_setrlimit,
+};
+
+#[cfg(any(target_os = "android", target_os = "linux",))]
+pub(super) use c::prlimit64 as libc_prlimit;
 
 #[cfg(not(any(
     windows,
