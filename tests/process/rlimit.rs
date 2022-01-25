@@ -24,11 +24,19 @@ fn test_prlimit() {
         maximum: Some(0),
     };
 
-    let _old = rustix::process::prlimit(None, Resource::Core, new.clone()).unwrap();
+    let first = rustix::process::getrlimit(Resource::Core);
+
+    let old = rustix::process::prlimit(None, Resource::Core, new.clone()).unwrap();
+
+    assert_eq!(first, old);
+
+    let other = Rlimit {
+        current: Some(0),
+        maximum: Some(0),
+    };
 
     let again =
-        rustix::process::prlimit(Some(rustix::process::getpid()), Resource::Core, new.clone())
-            .unwrap();
+        rustix::process::prlimit(Some(rustix::process::getpid()), Resource::Core, other).unwrap();
 
     assert_eq!(again, new);
 }
