@@ -22,6 +22,7 @@ use super::reg::{raw_arg, ArgNumber, ArgReg, RetReg, R0};
 use super::time::ClockId;
 use crate::ffi::ZStr;
 use crate::io::{self, OwnedFd};
+use crate::process::Resource;
 use crate::{as_mut_ptr, as_ptr};
 use core::mem::{transmute, MaybeUninit};
 use core::ptr::null;
@@ -267,6 +268,11 @@ pub(super) fn oflags<'a, Num: ArgNumber>(oflags: OFlags) -> ArgReg<'a, Num> {
 #[inline]
 pub(super) fn oflags_for_open_how(oflags: OFlags) -> u64 {
     u64::from(oflags_bits(oflags))
+}
+
+#[inline]
+pub(super) fn resource<'a, Num: ArgNumber>(resource: Resource) -> ArgReg<'a, Num> {
+    c_uint(resource as c::c_uint)
 }
 
 #[inline]

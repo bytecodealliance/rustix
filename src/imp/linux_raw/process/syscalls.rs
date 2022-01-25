@@ -12,9 +12,9 @@ use super::super::arch::choose::{
 };
 use super::super::c;
 use super::super::conv::{
-    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, out, pass_usize, ret, ret_c_int, ret_c_uint,
-    ret_infallible, ret_usize, ret_usize_infallible, size_of, slice_just_addr, slice_mut,
-    void_star, zero,
+    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, out, pass_usize, resource, ret, ret_c_int,
+    ret_c_uint, ret_infallible, ret_usize, ret_usize_infallible, size_of, slice_just_addr,
+    slice_mut, void_star, zero,
 };
 use super::super::reg::nr;
 use super::{RawCpuSet, RawUname};
@@ -324,7 +324,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
         match ret(syscall4(
             nr(__NR_prlimit64),
             c_uint(0),
-            c_uint(limit as c::c_uint),
+            resource(limit),
             void_star(core::ptr::null_mut()), // fixme: non-mut
             out(&mut result),
         )) {
@@ -334,7 +334,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
                 let mut result = MaybeUninit::<linux_raw_sys::general::rlimit>::uninit();
                 ret_infallible(syscall2(
                     nr(__NR_getrlimit),
-                    c_uint(limit as c::c_uint),
+                    resource(limit),
                     out(&mut result),
                 ));
                 rlimit_from_linux_old(result.assume_init())
@@ -346,7 +346,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
         ret_infallible(syscall4(
             nr(__NR_prlimit64),
             c_uint(0),
-            c_uint(limit as c::c_uint),
+            resource(limit),
             void_star(core::ptr::null_mut()), // fixme: non-mut
             out(&mut result),
         ));
@@ -362,18 +362,14 @@ pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
         match ret(syscall4(
             nr(__NR_prlimit64),
             c_uint(0),
-            c_uint(limit as c::c_uint),
+            resource(limit),
             by_ref(&lim),
             void_star(core::ptr::null_mut()),
         )) {
             Ok(()) => Ok(()),
             Err(io::Error::NOSYS) => {
                 let lim = rlimit_to_linux_old(new)?;
-                ret(syscall2(
-                    nr(__NR_setrlimit),
-                    c_uint(limit as c::c_uint),
-                    by_ref(&lim),
-                ))
+                ret(syscall2(nr(__NR_setrlimit), resource(limit), by_ref(&lim)))
             }
             Err(e) => Err(e),
         }
@@ -383,7 +379,7 @@ pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
         ret(syscall4(
             nr(__NR_prlimit64),
             c_uint(0),
-            c_uint(limit as c::c_uint),
+            resource(limit),
             by_ref(&lim),
             void_star(core::ptr::null_mut()),
         ))
@@ -398,7 +394,7 @@ pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Res
         match ret(syscall4(
             nr(__NR_prlimit64),
             c_uint(Pid::as_raw(pid)),
-            c_uint(limit as c::c_uint),
+            resource(limit),
             by_ref(&lim),
             out(&mut result),
         )) {
