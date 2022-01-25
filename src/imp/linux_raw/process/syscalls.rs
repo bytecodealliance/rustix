@@ -411,14 +411,17 @@ pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
         )) {
             Ok(()) => Ok(()),
             Err(io::Error::NOSYS) => {
-                let lim = linux_raw_sys::general::rlimit {
-                    rlim_cur: new
-                        .current
-                        .unwrap_or(linux_raw_sys::general::RLIM_INFINITY as _),
-                    rlim_max: new
-                        .maximum
-                        .unwrap_or(linux_raw_sys::general::RLIM_INFINITY as _),
-                };
+                let rlim_cur = match new.current {
+                    Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+                    None => None,
+                }
+                .unwrap_or(linux_raw_sys::general::RLIM_INFINITY as _);
+                let rlim_max = match new.maximum {
+                    Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+                    None => None,
+                }
+                .unwrap_or(linux_raw_sys::general::RLIM_INFINITY as _);
+                let lim = linux_raw_sys::general::rlimit { rlim_cur, rlim_max };
                 ret(syscall2(
                     nr(__NR_setrlimit),
                     c_uint(limit as c::c_uint),
