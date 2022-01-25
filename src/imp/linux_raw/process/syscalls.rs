@@ -37,12 +37,9 @@ use linux_raw_sys::general::{
 use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getuid};
 #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
 use linux_raw_sys::general::{__NR_getegid32, __NR_geteuid32, __NR_getgid32, __NR_getuid32};
-use linux_raw_sys::v5_4::general::{__NR_membarrier, __NR_prlimit64};
 #[cfg(target_pointer_width = "32")]
-use {
-    core::convert::TryInto,
-    linux_raw_sys::general::{__NR_getrlimit, __NR_setrlimit},
-};
+use linux_raw_sys::general::{__NR_getrlimit, __NR_setrlimit};
+use linux_raw_sys::v5_4::general::{__NR_membarrier, __NR_prlimit64};
 
 #[inline]
 pub(crate) fn chdir(filename: &ZStr) -> io::Result<()> {
@@ -356,9 +353,9 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
 
 #[inline]
 pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
-    let lim = rlimit_to_linux(new)?;
     #[cfg(target_pointer_width = "32")]
     unsafe {
+        let lim = rlimit_to_linux(new.clone())?;
         match ret(syscall4(
             nr(__NR_prlimit64),
             c_uint(0),
@@ -376,6 +373,7 @@ pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
+        let lim = rlimit_to_linux(new)?;
         ret(syscall4(
             nr(__NR_prlimit64),
             c_uint(0),
@@ -438,12 +436,12 @@ fn rlimit_from_linux_old(lim: linux_raw_sys::general::rlimit) -> Rlimit {
     let current = if lim.rlim_cur == linux_raw_sys::general::RLIM_INFINITY as _ {
         None
     } else {
-        lim.rlim_cur.try_into().unwrap()
+        Some(lim.rlim_cur.try_into().unwrap())
     };
     let maximum = if lim.rlim_max == linux_raw_sys::general::RLIM_INFINITY as _ {
         None
     } else {
-        lim.rlim_max.try_into().unwrap()
+        Some(lim.rlim_max.try_into().unwrap())
     };
     Rlimit { current, maximum }
 }

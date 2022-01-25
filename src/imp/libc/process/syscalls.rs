@@ -284,21 +284,21 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
-    let lim = rlimit_to_libc(new);
+    let lim = rlimit_to_libc(new)?;
     unsafe { ret(libc_setrlimit(limit as _, as_ptr(&lim))) }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Result<Rlimit> {
-    let lim = rlimit_to_libc(new);
+    let lim = rlimit_to_libc(new)?;
     let mut result = MaybeUninit::<libc_rlimit>::uninit();
     unsafe {
         ret_infallible(libc_prlimit(
             Pid::as_raw(pid),
             limit as _,
-            result.as_mut_ptr(),
             as_ptr(&lim),
+            result.as_mut_ptr(),
         ));
         Ok(rlimit_from_libc(result.assume_init()))
     }
@@ -329,7 +329,7 @@ fn rlimit_to_libc(lim: Rlimit) -> io::Result<libc_rlimit> {
         Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
         None => LIBC_RLIM_INFINITY as _,
     };
-    libc_rlimit { rlim_cur, rlim_max }
+    Ok(libc_rlimit { rlim_cur, rlim_max })
 }
 
 #[cfg(not(target_os = "wasi"))]
