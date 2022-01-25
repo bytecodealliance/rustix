@@ -309,12 +309,12 @@ fn rlimit_from_libc(lim: libc_rlimit) -> Rlimit {
     let current = if lim.rlim_cur == LIBC_RLIM_INFINITY {
         None
     } else {
-        lim.rlim_cur.try_into().unwrap()
+        Some(lim.rlim_cur.try_into().unwrap())
     };
     let maximum = if lim.rlim_max == LIBC_RLIM_INFINITY {
         None
     } else {
-        lim.rlim_max.try_into().unwrap()
+        Some(lim.rlim_max.try_into().unwrap())
     };
     Rlimit { current, maximum }
 }

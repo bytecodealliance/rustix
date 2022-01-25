@@ -407,12 +407,12 @@ fn rlimit_from_linux(lim: linux_raw_sys::v5_4::general::rlimit64) -> Rlimit {
     let current = if lim.rlim_cur == linux_raw_sys::v5_4::general::RLIM64_INFINITY as _ {
         None
     } else {
-        lim.rlim_cur.try_into().unwrap()
+        Some(lim.rlim_cur.try_into().unwrap())
     };
     let maximum = if lim.rlim_max == linux_raw_sys::v5_4::general::RLIM64_INFINITY as _ {
         None
     } else {
-        lim.rlim_max.try_into().unwrap()
+        Some(lim.rlim_max.try_into().unwrap())
     };
     Rlimit { current, maximum }
 }
