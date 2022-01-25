@@ -40,7 +40,7 @@ use linux_raw_sys::v5_4::general::{__NR_membarrier, __NR_prlimit64};
 #[cfg(target_pointer_width = "32")]
 use {
     core::convert::TryInto,
-    linux_raw_sys::general::{__NR_getrlimit, __NR_prlimit, __NR_setrlimit},
+    linux_raw_sys::general::{__NR_getrlimit, __NR_setrlimit},
 };
 
 #[inline]
