@@ -101,8 +101,14 @@ pub use tty::isatty;
     all(libc, not(any(windows, target_os = "fuchsia", target_os = "wasi")))
 ))]
 pub use tty::ttyname;
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
-pub use userfaultfd::{userfaultfd, UserfaultfdFlags};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use userfaultfd::{
+    ioctl_uffdio_api, ioctl_uffdio_copy, ioctl_uffdio_register, ioctl_uffdio_unregister,
+    ioctl_uffdio_wake, ioctl_uffdio_writeprotect, ioctl_uffdio_zeropage, userfaultfd, UffdEvent,
+    UffdFeatureFlags, UffdMsg, UffdPagefaultFlags, UffdioApi, UffdioCopy, UffdioCopyModeFlags,
+    UffdioIoctlFlags, UffdioRange, UffdioRegister, UffdioRegisterModeFlags, UffdioWriteprotect,
+    UffdioZeropage, UffdioZeropageModeFlags, UserfaultfdFlags, UFFD_API,
+};
 
 #[cfg(any(linux_raw, not(any(windows, target_os = "wasi"))))]
 pub use imp::io::Termios;

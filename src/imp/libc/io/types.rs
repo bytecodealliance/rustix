@@ -317,7 +317,7 @@ bitflags! {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
-    /// The `O_*` flags accepted by [`userfaultfd`].
+    /// The `O_*` and `UFFD_*` flags accepted by [`userfaultfd`].
     ///
     /// [`userfaultfd`]: crate::io::userfaultfd
     pub struct UserfaultfdFlags: c::c_int {
@@ -325,8 +325,139 @@ bitflags! {
         const CLOEXEC = c::O_CLOEXEC;
         /// `O_NONBLOCK`
         const NONBLOCK = c::O_NONBLOCK;
+        /// `UFFD_USER_MODE_ONLY` (since Linux 5.11)
+        const USER_MODE_ONLY = userfaultfd_sys::UFFD_USER_MODE_ONLY as _;
     }
 }
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    /// The `UFFD_FEATURE_*` flags for use in [`ioctl_uffdio_api`].
+    ///
+    /// [`ioctl_uffdio_api`]: crate::io::ioctl_uffdio_api
+    pub struct UffdFeatureFlags: u64 {
+       /// `UFFD_FEATURE_EVENT_FORK` (since Linux 4.11)
+       const EVENT_FORK = userfaultfd_sys::UFFD_FEATURE_EVENT_FORK;
+       /// `UFFD_FEATURE_EVENT_REMAP` (since Linux 4.11)
+       const EVENT_REMAP = userfaultfd_sys::UFFD_FEATURE_EVENT_REMAP;
+       /// `UFFD_FEATURE_EVENT_REMOVE` (since Linux 4.11)
+       const EVENT_REMOVE = userfaultfd_sys::UFFD_FEATURE_EVENT_REMOVE;
+       /// `UFFD_FEATURE_EVENT_UNMAP` (since Linux 4.11)
+       const EVENT_UNMAP = userfaultfd_sys::UFFD_FEATURE_EVENT_UNMAP;
+       /// `UFFD_FEATURE_MISSING_HUGETLBFS` (since Linux 4.11)
+       const MISSING_HUGETLBFS = userfaultfd_sys::UFFD_FEATURE_MISSING_HUGETLBFS;
+       /// `UFFD_FEATURE_MISSING_SHMEM` (since Linux 4.11)
+       const MISSING_SHMEM = userfaultfd_sys::UFFD_FEATURE_MISSING_SHMEM;
+       /// `UFFD_FEATURE_SIGBUS` (since Linux 4.14)
+       const SIGBUS = userfaultfd_sys::UFFD_FEATURE_SIGBUS;
+       /// `UFFD_FEATURE_THREAD_ID` (since Linux 4.14)
+       const THREAD_ID = userfaultfd_sys::UFFD_FEATURE_THREAD_ID;
+       /// `UFFD_FEATURE_PAGEFAULT_FLAG_WP` (since Linux 5.7)
+       const PAGEFAULT_FLAG_WP = userfaultfd_sys::UFFD_FEATURE_PAGEFAULT_FLAG_WP;
+    }
+}
+
+/// The `UFFD_EVENT_*` flags for use in [`UffdMsg`].
+///
+/// [`UffdMsg`]: crate::io::UffdMsg
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[repr(u8)]
+pub enum UffdEvent {
+    /// `UFFD_EVENT_PAGEFAULT` (since Linux 4.3)
+    Pagefault = userfaultfd_sys::UFFD_EVENT_PAGEFAULT as _,
+    /// `UFFD_EVENT_FORK` (since Linux 4.11)
+    Fork = userfaultfd_sys::UFFD_EVENT_FORK as _,
+    /// `UFFD_EVENT_REMAP` (since Linux 4.11)
+    Remap = userfaultfd_sys::UFFD_EVENT_REMAP as _,
+    /// `UFFD_EVENT_REMOVE` (since Linux 4.11)
+    Remove = userfaultfd_sys::UFFD_EVENT_REMOVE as _,
+    /// `UFFD_EVENT_UNMAP` (since Linux 4.11)
+    Unmap = userfaultfd_sys::UFFD_EVENT_UNMAP as _,
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+impl UffdEvent {
+    /// Convert a raw uffd event number into a `UffdEvent`, if possible.
+    pub const fn from_raw(raw: u8) -> Option<Self> {
+        match raw as _ {
+            userfaultfd_sys::UFFD_EVENT_PAGEFAULT => Some(Self::Pagefault),
+            userfaultfd_sys::UFFD_EVENT_FORK => Some(Self::Fork),
+            userfaultfd_sys::UFFD_EVENT_REMAP => Some(Self::Remap),
+            userfaultfd_sys::UFFD_EVENT_REMOVE => Some(Self::Remove),
+            userfaultfd_sys::UFFD_EVENT_UNMAP => Some(Self::Unmap),
+            _ => None,
+        }
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    /// `UFFD_PAGEFAULT_FLAG_*` flags for use in [`UffdMsg`].
+    ///
+    /// [`UffdMsg`]: crate::io::UffdMsg
+    pub struct UffdPagefaultFlags: u64 {
+        /// `UFFD_PAGEFAULT_FLAG_WRITE`
+        const WRITE = userfaultfd_sys::UFFD_PAGEFAULT_FLAG_WRITE;
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    /// `UFFDIO_REGISTER_MODE_*` flags for use in [`UffdRegister`].
+    ///
+    /// [`UffdRegister`]: crate::io::UffdRegister
+    pub struct UffdioRegisterModeFlags: u64 {
+       /// `UFFDIO_REGISTER_MODE_MISSING`
+       const MISSING = userfaultfd_sys::UFFDIO_REGISTER_MODE_MISSING;
+       /// `UFFDIO_REGISTER_MODE_WP`
+       const WP = userfaultfd_sys::UFFDIO_REGISTER_MODE_WP;
+    }
+}
+
+bitflags! {
+    /// `UFFDIO_COPY_MODE_*` flags for use in [`ioctl_uffdio_copy`].
+    ///
+    /// [`ioctl_uffdio_copy`]: crate::io::ioctl_uffdio_copy
+    pub struct UffdioCopyModeFlags: u64 {
+        /// `UFFDIO_COPY_MODE_DONTWAKE`
+        const DONTWAKE = userfaultfd_sys::UFFDIO_COPY_MODE_DONTWAKE;
+        /// `UFFDIO_COPY_MODE_WP`
+        const WP = userfaultfd_sys::UFFDIO_COPY_MODE_WP;
+    }
+}
+
+bitflags! {
+    /// `UFFDIO_ZEROPAGE_MODE_*` flags for use in [`ioctl_uffdio_zeropage`].
+    ///
+    /// [`ioctl_uffdio_zeropage`]: crate::io::ioctl_uffdio_zeropage
+    pub struct UffdioZeropageModeFlags: u64 {
+        /// `UFFDIO_ZEROPAGE_MODE_DONTWAKE`
+        const DONTWAKE = userfaultfd_sys::UFFDIO_ZEROPAGE_MODE_DONTWAKE;
+    }
+}
+
+bitflags! {
+    /// `_UFFDIO_*` flags for use with [`ioctl_uffdio_register`].
+    ///
+    /// [`ioctl_uffdio_register`]: crate::io::ioctl_uffdio_register
+    pub struct UffdioIoctlFlags: u64 {
+        /// `_UFFDIO_REGISTER`
+        const REGISTER = 1 << userfaultfd_sys::_UFFDIO_REGISTER;
+        /// `_UFFDIO_UNREGISTER`
+        const UNREGISTER = 1 << userfaultfd_sys::_UFFDIO_UNREGISTER;
+        /// `_UFFDIO_WAKE`
+        const WAKE = 1 << userfaultfd_sys::_UFFDIO_WAKE;
+        /// `_UFFDIO_COPY`
+        const COPY = 1 << userfaultfd_sys::_UFFDIO_COPY;
+        /// `_UFFDIO_ZEROPAGE`
+        const ZEROPAGE = 1 << userfaultfd_sys::_UFFDIO_ZEROPAGE;
+        /// `_UFFDIO_API`
+        const API = 1 << userfaultfd_sys::_UFFDIO_API;
+    }
+}
+
+/// `UFFD_API` for use with [`ioctl_uffdio_api`].
+pub const UFFD_API: u64 = userfaultfd_sys::UFFD_API;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
@@ -460,6 +591,50 @@ pub type Winsize = c::winsize;
 /// `tcflag_t`—A type for the flags fields of [`Termios`].
 #[cfg(not(target_os = "wasi"))]
 pub type Tcflag = c::tcflag_t;
+
+/// `struct uffd_msg` for use with [`read`] from a [`userfaultfd`] file descriptor.
+///
+/// [`read`]: crate::io::read
+/// [`userfaultfd`]: crate::io::userfaultfd
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub type UffdMsg = userfaultfd_sys::uffd_msg;
+
+/// `struct uffd_api` for use with [`ioctl_uffdio_api`].
+///
+/// [`ioctl_uffdio_api`]: crate::io::ioctl_uffdio_api
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub type UffdioApi = userfaultfd_sys::uffdio_api;
+
+/// `struct uffd_register` for use with [`ioctl_uffdio_register`].
+///
+/// [`ioctl_uffdio_register`]: crate::io::ioctl_uffdio_register
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub type UffdioRegister = userfaultfd_sys::uffdio_register;
+
+/// `struct uffd_range` for use with [`ioctl_uffdio_unregister`] and [`ioctl_uffdio_wake`].
+///
+/// [`ioctl_uffdio_unregister`]: crate::io::ioctl_uffdio_unregister
+/// [`ioctl_uffdio_wake`]: crate::io::ioctl_uffdio_wake
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub type UffdioRange = userfaultfd_sys::uffdio_range;
+
+/// `struct uffd_copy` for use with [`ioctl_uffdio_copy`].
+///
+/// [`ioctl_uffdio_copy`]: crate::io::ioctl_uffdio_copy
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub type UffdioCopy = userfaultfd_sys::uffdio_copy;
+
+/// `struct uffd_zeropage` for use with [`ioctl_uffdio_zeropage`].
+///
+/// [`ioctl_uffdio_zeropage`]: crate::io::ioctl_uffdio_zeropage
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub type UffdioZeropage = userfaultfd_sys::uffdio_zeropage;
+
+/// `struct uffd_writeprotect` for use with [`ioctl_uffdio_writeprotect`] (as of Linux 5.7).
+///
+/// [`ioctl_uffdio_writeprotect`]: crate::io::ioctl_uffdio_writeprotect
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub type UffdioWriteprotect = userfaultfd_sys::uffdio_writeprotect;
 
 /// `ICANON`—A flag for the `c_lflag` field of [`Termios`] indicating
 /// canonical mode.

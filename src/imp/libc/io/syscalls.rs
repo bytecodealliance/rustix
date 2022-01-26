@@ -26,7 +26,10 @@ use crate::io::{self, IoSlice, IoSliceMut, OwnedFd, PollFd};
 #[cfg(not(target_os = "wasi"))]
 use crate::io::{DupFlags, MapFlags, MprotectFlags, MsyncFlags, ProtFlags, Termios, Winsize};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::io::{EventfdFlags, MlockFlags, ReadWriteFlags, UserfaultfdFlags};
+use crate::io::{
+    EventfdFlags, MlockFlags, ReadWriteFlags, UffdioApi, UffdioCopy, UffdioRange, UffdioRegister,
+    UffdioWriteprotect, UffdioZeropage, UserfaultfdFlags,
+};
 use core::cmp::min;
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
@@ -348,6 +351,92 @@ pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
             result.as_mut_ptr(),
         ))?;
         Ok(result.assume_init() as u32)
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_uffdio_api(fd: BorrowedFd, api: &mut UffdioApi) -> io::Result<()> {
+    unsafe {
+        ret(libc::ioctl(
+            borrowed_fd(fd),
+            userfaultfd_sys::UFFDIO_API as _,
+            api,
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_uffdio_register(
+    fd: BorrowedFd,
+    register: &mut UffdioRegister,
+) -> io::Result<()> {
+    unsafe {
+        ret(libc::ioctl(
+            borrowed_fd(fd),
+            userfaultfd_sys::UFFDIO_REGISTER as _,
+            register,
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_uffdio_unregister(fd: BorrowedFd, range: &UffdioRange) -> io::Result<()> {
+    unsafe {
+        ret(libc::ioctl(
+            borrowed_fd(fd),
+            userfaultfd_sys::UFFDIO_UNREGISTER as _,
+            range,
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_uffdio_wake(fd: BorrowedFd, range: &UffdioRange) -> io::Result<()> {
+    unsafe {
+        ret(libc::ioctl(
+            borrowed_fd(fd),
+            userfaultfd_sys::UFFDIO_WAKE as _,
+            range,
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_uffdio_copy(fd: BorrowedFd, copy: &mut UffdioCopy) -> io::Result<()> {
+    unsafe {
+        ret(libc::ioctl(
+            borrowed_fd(fd),
+            userfaultfd_sys::UFFDIO_COPY as _,
+            copy,
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_uffdio_zeropage(
+    fd: BorrowedFd,
+    zeropage: &mut UffdioZeropage,
+) -> io::Result<()> {
+    unsafe {
+        ret(libc::ioctl(
+            borrowed_fd(fd),
+            userfaultfd_sys::UFFDIO_ZEROPAGE as _,
+            zeropage,
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_uffdio_writeprotect(
+    fd: BorrowedFd,
+    writeprotect: &mut UffdioWriteprotect,
+) -> io::Result<()> {
+    unsafe {
+        ret(libc::ioctl(
+            borrowed_fd(fd),
+            userfaultfd_sys::UFFDIO_WRITEPROTECT as _,
+            writeprotect,
+        ))
     }
 }
 

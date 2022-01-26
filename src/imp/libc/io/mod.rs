@@ -59,7 +59,12 @@ pub use types::{
     DupFlags, MapFlags, MprotectFlags, MsyncFlags, ProtFlags, Tcflag, Termios, Winsize, ICANON,
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use types::{EventfdFlags, MlockFlags, ReadWriteFlags, UserfaultfdFlags};
+pub use types::{
+    EventfdFlags, MlockFlags, ReadWriteFlags, UffdEvent, UffdFeatureFlags, UffdMsg,
+    UffdPagefaultFlags, UffdioApi, UffdioCopy, UffdioCopyModeFlags, UffdioIoctlFlags, UffdioRange,
+    UffdioRegister, UffdioRegisterModeFlags, UffdioWriteprotect, UffdioZeropage,
+    UffdioZeropageModeFlags, UserfaultfdFlags, UFFD_API,
+};
 
 use super::c;
 
