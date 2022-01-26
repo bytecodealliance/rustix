@@ -13,8 +13,10 @@ pub use io_slice::{IoSlice, IoSliceMut};
 pub use poll_fd::{PollFd, PollFlags};
 pub use types::{
     Advice, DupFlags, EventfdFlags, MapFlags, MlockFlags, MprotectFlags, MremapFlags, MsyncFlags,
-    PipeFlags, ProtFlags, ReadWriteFlags, Tcflag, Termios, UserfaultfdFlags, Winsize, ICANON,
-    PIPE_BUF,
+    PipeFlags, ProtFlags, ReadWriteFlags, Tcflag, Termios, UffdEvent, UffdFeatureFlags, UffdMsg,
+    UffdPagefaultFlags, UffdioApi, UffdioCopy, UffdioCopyModeFlags, UffdioIoctlFlags, UffdioRange,
+    UffdioRegister, UffdioRegisterModeFlags, UffdioWriteprotect, UffdioZeropage,
+    UffdioZeropageModeFlags, UserfaultfdFlags, Winsize, ICANON, PIPE_BUF, UFFD_API,
 };
 
 use super::c;

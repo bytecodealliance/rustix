@@ -19,15 +19,17 @@ use super::super::arch::choose::{
 };
 use super::super::c;
 use super::super::conv::{
-    borrowed_fd, by_ref, c_int, c_uint, no_fd, out, pass_usize, raw_fd, ret, ret_discarded_fd,
-    ret_owned_fd, ret_usize, ret_void_star, slice, slice_mut, void_star, zero,
+    borrowed_fd, by_mut, by_ref, c_int, c_uint, no_fd, out, pass_usize, raw_fd, ret,
+    ret_discarded_fd, ret_owned_fd, ret_usize, ret_void_star, slice, slice_mut, void_star, zero,
 };
 use super::super::reg::nr;
 use crate::fd::{AsFd, BorrowedFd, RawFd};
 use crate::io::{
     self, epoll, Advice, DupFlags, EventfdFlags, IoSlice, IoSliceMut, MapFlags, MlockFlags,
     MprotectFlags, MremapFlags, MsyncFlags, OwnedFd, PipeFlags, PollFd, ProtFlags, ReadWriteFlags,
-    Termios, UserfaultfdFlags, Winsize,
+    Termios, Winsize,
+    UffdioApi, UffdioCopy, UffdioRange, UffdioRegister, UffdioWriteprotect, UffdioZeropage,
+    UserfaultfdFlags,
 };
 use crate::net::{RecvFlags, SendFlags};
 #[cfg(feature = "procfs")]
@@ -492,6 +494,99 @@ pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
             out(&mut result),
         ))
         .map(|()| result.assume_init() as u32)
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_uffdio_api(fd: BorrowedFd, api: &mut UffdioApi) -> io::Result<()> {
+    unsafe {
+        ret(syscall3(
+            nr(__NR_ioctl),
+            borrowed_fd(fd),
+            c_uint(linux_raw_sys::ioctl::UFFDIO_API),
+            by_mut(api),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_uffdio_register(
+    fd: BorrowedFd,
+    register: &mut UffdioRegister,
+) -> io::Result<()> {
+    unsafe {
+        ret(syscall3(
+            nr(__NR_ioctl),
+            borrowed_fd(fd),
+            c_uint(linux_raw_sys::ioctl::UFFDIO_REGISTER),
+            by_mut(register),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_uffdio_unregister(fd: BorrowedFd, range: &UffdioRange) -> io::Result<()> {
+    unsafe {
+        ret(syscall3(
+            nr(__NR_ioctl),
+            borrowed_fd(fd),
+            c_uint(linux_raw_sys::ioctl::UFFDIO_UNREGISTER),
+            by_ref(range),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_uffdio_wake(fd: BorrowedFd, range: &UffdioRange) -> io::Result<()> {
+    unsafe {
+        ret(syscall3(
+            nr(__NR_ioctl),
+            borrowed_fd(fd),
+            c_uint(linux_raw_sys::ioctl::UFFDIO_WAKE),
+            by_ref(range),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_uffdio_copy(fd: BorrowedFd, copy: &mut UffdioCopy) -> io::Result<()> {
+    unsafe {
+        ret(syscall3(
+            nr(__NR_ioctl),
+            borrowed_fd(fd),
+            c_uint(linux_raw_sys::ioctl::UFFDIO_COPY),
+            by_mut(copy),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_uffdio_zeropage(
+    fd: BorrowedFd,
+    zeropage: &mut UffdioZeropage,
+) -> io::Result<()> {
+    unsafe {
+        ret(syscall3(
+            nr(__NR_ioctl),
+            borrowed_fd(fd),
+            c_uint(linux_raw_sys::ioctl::UFFDIO_ZEROPAGE),
+            by_mut(zeropage),
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_uffdio_writeprotect(
+    fd: BorrowedFd,
+    writeprotect: &mut UffdioWriteprotect,
+) -> io::Result<()> {
+    unsafe {
+        ret(syscall3(
+            nr(__NR_ioctl),
+            borrowed_fd(fd),
+            c_uint(linux_raw_sys::ioctl::UFFDIO_WRITEPROTECT),
+            by_mut(writeprotect),
+        ))
     }
 }
 

@@ -167,7 +167,7 @@ pub enum Signal {
 
 impl Signal {
     /// Convert a raw signal number into a `Signal`, if possible.
-    pub fn from_raw(sig: i32) -> Option<Self> {
+    pub const fn from_raw(sig: i32) -> Option<Self> {
         match sig as _ {
             linux_raw_sys::general::SIGHUP => Some(Self::Hup),
             linux_raw_sys::general::SIGINT => Some(Self::Int),
