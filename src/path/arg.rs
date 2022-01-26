@@ -79,6 +79,7 @@ pub trait Arg {
 
     /// Returns a view of this string as a maybe-owned [`ZStr`].
     #[cfg(not(feature = "rustc-dep-of-std"))]
+    #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, ZStr>> {
         self.as_cow_z_str()
     }
@@ -86,6 +87,7 @@ pub trait Arg {
     /// Consumes `self` and returns a view of this string as a maybe-owned
     /// [`ZStr`].
     #[cfg(not(feature = "rustc-dep-of-std"))]
+    #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, ZStr>>
     where
         Self: 'b + Sized,
@@ -95,6 +97,7 @@ pub trait Arg {
 
     /// Runs a closure with `self` passed in as a `&ZStr`.
     #[cfg(not(feature = "rustc-dep-of-std"))]
+    #[inline]
     fn into_with_c_str<T, F>(self, f: F) -> io::Result<T>
     where
         Self: Sized,
