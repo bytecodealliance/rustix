@@ -58,6 +58,7 @@ pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<usize> {
     unsafe { ret_usize(syscall2(nr(__NR_getcwd), buf_addr_mut, buf_len)) }
 }
 
+#[inline]
 pub(crate) fn membarrier_query() -> MembarrierQuery {
     unsafe {
         match ret_c_uint(syscall2(
@@ -79,6 +80,7 @@ pub(crate) fn membarrier_query() -> MembarrierQuery {
     }
 }
 
+#[inline]
 pub(crate) fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
     unsafe {
         ret(syscall2(
@@ -89,6 +91,7 @@ pub(crate) fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
     }
 }
 
+#[inline]
 pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<()> {
     unsafe {
         ret(syscall3(
