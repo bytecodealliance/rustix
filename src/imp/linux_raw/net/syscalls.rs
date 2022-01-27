@@ -821,6 +821,10 @@ pub(crate) mod sockopt {
     use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
     use core::convert::TryInto;
     use core::time::Duration;
+    use linux_raw_sys::general::{
+        __kernel_timespec, timeval, SOL_SOCKET, SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_SNDTIMEO_NEW,
+        SO_SNDTIMEO_OLD,
+    };
 
     // TODO: With Rust 1.53 we can use `Duration::ZERO` instead.
     const DURATION_ZERO: Duration = Duration::from_secs(0);
@@ -998,13 +1002,50 @@ pub(crate) mod sockopt {
         id: Timeout,
         timeout: Option<Duration>,
     ) -> io::Result<()> {
-        let timeout = match timeout {
+        let time = match timeout {
             Some(timeout) => {
                 if timeout == DURATION_ZERO {
                     return Err(io::Error::INVAL);
                 }
+                let mut timeout = __kernel_timespec {
+                    tv_sec: timeout.as_secs().try_into().unwrap_or(i64::MAX),
+                    tv_nsec: timeout.subsec_nanos() as _,
+                };
+                if timeout.tv_sec == 0 && timeout.tv_nsec == 0 {
+                    timeout.tv_nsec = 1;
+                }
+                timeout
+            }
+            None => __kernel_timespec {
+                tv_sec: 0,
+                tv_nsec: 0,
+            },
+        };
+        let optname = match id {
+            Timeout::Recv => SO_RCVTIMEO_NEW,
+            Timeout::Send => SO_SNDTIMEO_NEW,
+        };
+        match setsockopt(fd, SOL_SOCKET, optname, time) {
+            Err(io::Error::NOPROTOOPT) if SO_RCVTIMEO_NEW != SO_RCVTIMEO_OLD => {
+                set_socket_timeout_old(fd, id, timeout)
+            }
+            otherwise => otherwise,
+        }
+    }
 
-                let mut timeout = linux_raw_sys::general::timeval {
+    /// Same as `set_socket_timeout` but uses `timeval` instead of
+    /// `__kernel_timespec` and `_OLD` constants instead of `_NEW`.
+    fn set_socket_timeout_old(
+        fd: BorrowedFd<'_>,
+        id: Timeout,
+        timeout: Option<Duration>,
+    ) -> io::Result<()> {
+        let time = match timeout {
+            Some(timeout) => {
+                if timeout == DURATION_ZERO {
+                    return Err(io::Error::INVAL);
+                }
+                let mut timeout = timeval {
                     tv_sec: timeout.as_secs().try_into().unwrap_or(c::c_long::MAX),
                     tv_usec: timeout.subsec_micros() as _,
                 };
@@ -1013,16 +1054,16 @@ pub(crate) mod sockopt {
                 }
                 timeout
             }
-            None => linux_raw_sys::general::timeval {
+            None => timeval {
                 tv_sec: 0,
                 tv_usec: 0,
             },
         };
         let optname = match id {
-            Timeout::Recv => linux_raw_sys::general::SO_RCVTIMEO,
-            Timeout::Send => linux_raw_sys::general::SO_SNDTIMEO,
+            Timeout::Recv => SO_RCVTIMEO_OLD,
+            Timeout::Send => SO_SNDTIMEO_OLD,
         };
-        setsockopt(fd, linux_raw_sys::general::SOL_SOCKET, optname, timeout)
+        setsockopt(fd, SOL_SOCKET, optname, time)
     }
 
     #[inline]
@@ -1031,17 +1072,38 @@ pub(crate) mod sockopt {
         id: Timeout,
     ) -> io::Result<Option<Duration>> {
         let optname = match id {
-            Timeout::Recv => linux_raw_sys::general::SO_RCVTIMEO,
-            Timeout::Send => linux_raw_sys::general::SO_SNDTIMEO,
+            Timeout::Recv => SO_RCVTIMEO_NEW,
+            Timeout::Send => SO_SNDTIMEO_NEW,
         };
-        let timeout: linux_raw_sys::general::timeval =
-            getsockopt(fd, linux_raw_sys::general::SOL_SOCKET, optname)?;
-        if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
+        let time: __kernel_timespec = match getsockopt(fd, SOL_SOCKET, optname) {
+            Err(io::Error::NOPROTOOPT) if SO_RCVTIMEO_NEW != SO_RCVTIMEO_OLD => {
+                return get_socket_timeout_old(fd, id)
+            }
+            otherwise => otherwise?,
+        };
+        if time.tv_sec == 0 && time.tv_nsec == 0 {
             Ok(None)
         } else {
             Ok(Some(
-                Duration::from_secs(timeout.tv_sec as u64)
-                    + Duration::from_micros(timeout.tv_usec as u64),
+                Duration::from_secs(time.tv_sec as u64) + Duration::from_nanos(time.tv_nsec as u64),
+            ))
+        }
+    }
+
+    /// Same as `get_socket_timeout` but uses `timeval` instead of
+    /// `__kernel_timespec` and `_OLD` constants instead of `_NEW`.
+    fn get_socket_timeout_old(fd: BorrowedFd<'_>, id: Timeout) -> io::Result<Option<Duration>> {
+        let optname = match id {
+            Timeout::Recv => SO_RCVTIMEO_OLD,
+            Timeout::Send => SO_SNDTIMEO_OLD,
+        };
+        let time: timeval = getsockopt(fd, SOL_SOCKET, optname)?;
+        if time.tv_sec == 0 && time.tv_usec == 0 {
+            Ok(None)
+        } else {
+            Ok(Some(
+                Duration::from_secs(time.tv_sec as u64)
+                    + Duration::from_micros(time.tv_usec as u64),
             ))
         }
     }

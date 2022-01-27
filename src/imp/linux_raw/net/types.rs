@@ -276,8 +276,8 @@ bitflags! {
 #[repr(u32)]
 pub enum Timeout {
     /// `SO_RCVTIMEO`—Timeout for receiving.
-    Recv = linux_raw_sys::general::SO_RCVTIMEO,
+    Recv = linux_raw_sys::general::SO_RCVTIMEO_NEW,
 
     /// `SO_SNDTIMEO`—Timeout for sending.
-    Send = linux_raw_sys::general::SO_SNDTIMEO,
+    Send = linux_raw_sys::general::SO_SNDTIMEO_NEW,
 }
