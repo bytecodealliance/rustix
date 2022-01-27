@@ -39,14 +39,14 @@ use core::mem::MaybeUninit;
 #[cfg(any(target_arch = "arm", target_arch = "x86"))]
 use linux_raw_sys::general::__NR_mmap2;
 use linux_raw_sys::general::{
-    __NR_close, __NR_dup, __NR_dup3, __NR_epoll_create1, __NR_epoll_ctl, __NR_ioctl, __NR_madvise,
-    __NR_mlock, __NR_mprotect, __NR_mremap, __NR_msync, __NR_munlock, __NR_munmap, __NR_pipe2,
-    __NR_pread64, __NR_preadv, __NR_pwrite64, __NR_pwritev, __NR_read, __NR_readv, __NR_write,
-    __NR_writev, epoll_event, BLKPBSZGET, BLKSSZGET, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD,
-    FIONBIO, FIONREAD, TCGETS, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
+    __NR_close, __NR_dup, __NR_dup3, __NR_epoll_create1, __NR_epoll_ctl, __NR_eventfd2, __NR_ioctl,
+    __NR_madvise, __NR_mlock, __NR_mlock2, __NR_mprotect, __NR_mremap, __NR_msync, __NR_munlock,
+    __NR_munmap, __NR_pipe2, __NR_pread64, __NR_preadv, __NR_preadv2, __NR_pwrite64, __NR_pwritev,
+    __NR_pwritev2, __NR_read, __NR_readv, __NR_userfaultfd, __NR_write, __NR_writev, epoll_event,
+    EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD,
 };
-use linux_raw_sys::v5_4::general::{
-    __NR_eventfd2, __NR_mlock2, __NR_preadv2, __NR_pwritev2, __NR_userfaultfd,
+use linux_raw_sys::ioctl::{
+    BLKPBSZGET, BLKSSZGET, FIONBIO, FIONREAD, TCGETS, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
 };
 #[cfg(target_pointer_width = "32")]
 use {

@@ -77,7 +77,7 @@ bitflags! {
         /// `MAP_SHARED`
         const SHARED = linux_raw_sys::general::MAP_SHARED;
         /// `MAP_SHARED_VALIDATE` (since Linux 4.15)
-        const SHARED_VALIDATE = linux_raw_sys::v5_4::general::MAP_SHARED_VALIDATE;
+        const SHARED_VALIDATE = linux_raw_sys::general::MAP_SHARED_VALIDATE;
         /// `MAP_PRIVATE`
         const PRIVATE = linux_raw_sys::general::MAP_PRIVATE;
         /// `MAP_DENYWRITE`
@@ -85,15 +85,15 @@ bitflags! {
         /// `MAP_FIXED`
         const FIXED = linux_raw_sys::general::MAP_FIXED;
         /// `MAP_FIXED_NOREPLACE` (since Linux 4.17)
-        const FIXED_NOREPLACE = linux_raw_sys::v5_4::general::MAP_FIXED_NOREPLACE;
+        const FIXED_NOREPLACE = linux_raw_sys::general::MAP_FIXED_NOREPLACE;
         /// `MAP_GROWSDOWN`
         const GROWSDOWN = linux_raw_sys::general::MAP_GROWSDOWN;
         /// `MAP_HUGETLB`
         const HUGETLB = linux_raw_sys::general::MAP_HUGETLB;
         /// `MAP_HUGE_2MB` (since Linux 3.8)
-        const HUGE_2MB = linux_raw_sys::v5_4::general::MAP_HUGE_2MB;
+        const HUGE_2MB = linux_raw_sys::general::MAP_HUGE_2MB;
         /// `MAP_HUGE_1GB` (since Linux 3.8)
-        const HUGE_1GB = linux_raw_sys::v5_4::general::MAP_HUGE_1GB;
+        const HUGE_1GB = linux_raw_sys::general::MAP_HUGE_1GB;
         /// `MAP_LOCKED`
         const LOCKED = linux_raw_sys::general::MAP_LOCKED;
         /// `MAP_NORESERVE`
@@ -103,9 +103,9 @@ bitflags! {
         /// `MAP_STACK`
         const STACK = linux_raw_sys::general::MAP_STACK;
         /// `MAP_SYNC` (since Linux 4.15)
-        const SYNC = linux_raw_sys::v5_4::general::MAP_SYNC;
+        const SYNC = linux_raw_sys::general::MAP_SYNC;
         /// `MAP_UNINITIALIZED`
-        const UNINITIALIZED = linux_raw_sys::v5_4::general::MAP_UNINITIALIZED;
+        const UNINITIALIZED = linux_raw_sys::general::MAP_UNINITIALIZED;
     }
 }
 
@@ -120,7 +120,7 @@ bitflags! {
         /// `MREMAP_MAYMOVE`
         const MAYMOVE = linux_raw_sys::general::MREMAP_MAYMOVE;
         /// `MREMAP_DONTUNMAP` (since Linux 5.7)
-        const DONTUNMAP = linux_raw_sys::v5_11::general::MREMAP_DONTUNMAP;
+        const DONTUNMAP = linux_raw_sys::general::MREMAP_DONTUNMAP;
     }
 }
 
@@ -130,7 +130,7 @@ bitflags! {
     /// [`mlock_with`]: crate::io::mlock_with
     pub struct MlockFlags: u32 {
         /// `MLOCK_ONFAULT`
-        const ONFAULT = linux_raw_sys::v5_4::general::MLOCK_ONFAULT;
+        const ONFAULT = linux_raw_sys::general::MLOCK_ONFAULT;
     }
 }
 
@@ -212,7 +212,7 @@ pub enum Advice {
     LinuxDontNeed = linux_raw_sys::general::MADV_DONTNEED,
 
     /// `MADV_FREE` (since Linux 4.5)
-    LinuxFree = linux_raw_sys::v5_4::general::MADV_FREE,
+    LinuxFree = linux_raw_sys::general::MADV_FREE,
     /// `MADV_REMOVE`
     LinuxRemove = linux_raw_sys::general::MADV_REMOVE,
     /// `MADV_DONTFORK`
@@ -222,27 +222,27 @@ pub enum Advice {
     /// `MADV_HWPOISON`
     LinuxHwPoison = linux_raw_sys::general::MADV_HWPOISON,
     /// `MADV_SOFT_OFFLINE`
-    LinuxSoftOffline = linux_raw_sys::v5_4::general::MADV_SOFT_OFFLINE,
+    LinuxSoftOffline = linux_raw_sys::general::MADV_SOFT_OFFLINE,
     /// `MADV_MERGEABLE`
     LinuxMergeable = linux_raw_sys::general::MADV_MERGEABLE,
     /// `MADV_UNMERGEABLE`
     LinuxUnmergeable = linux_raw_sys::general::MADV_UNMERGEABLE,
     /// `MADV_HUGEPAGE` (since Linux 2.6.38)
-    LinuxHugepage = linux_raw_sys::v5_4::general::MADV_HUGEPAGE,
+    LinuxHugepage = linux_raw_sys::general::MADV_HUGEPAGE,
     /// `MADV_NOHUGEPAGE` (since Linux 2.6.38)
-    LinuxNoHugepage = linux_raw_sys::v5_4::general::MADV_NOHUGEPAGE,
+    LinuxNoHugepage = linux_raw_sys::general::MADV_NOHUGEPAGE,
     /// `MADV_DONTDUMP` (since Linux 3.4)
-    LinuxDontDump = linux_raw_sys::v5_4::general::MADV_DONTDUMP,
+    LinuxDontDump = linux_raw_sys::general::MADV_DONTDUMP,
     /// `MADV_DODUMP` (since Linux 3.4)
-    LinuxDoDump = linux_raw_sys::v5_4::general::MADV_DODUMP,
+    LinuxDoDump = linux_raw_sys::general::MADV_DODUMP,
     /// `MADV_WIPEONFORK` (since Linux 4.14)
-    LinuxWipeOnFork = linux_raw_sys::v5_4::general::MADV_WIPEONFORK,
+    LinuxWipeOnFork = linux_raw_sys::general::MADV_WIPEONFORK,
     /// `MADV_KEEPONFORK` (since Linux 4.14)
-    LinuxKeepOnFork = linux_raw_sys::v5_4::general::MADV_KEEPONFORK,
+    LinuxKeepOnFork = linux_raw_sys::general::MADV_KEEPONFORK,
     /// `MADV_COLD` (since Linux 5.4)
-    LinuxCold = linux_raw_sys::v5_4::general::MADV_COLD,
+    LinuxCold = linux_raw_sys::general::MADV_COLD,
     /// `MADV_PAGEOUT` (since Linux 5.4)
-    LinuxPageOut = linux_raw_sys::v5_4::general::MADV_PAGEOUT,
+    LinuxPageOut = linux_raw_sys::general::MADV_PAGEOUT,
 }
 
 impl Advice {

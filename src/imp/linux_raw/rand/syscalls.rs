@@ -11,7 +11,7 @@ use super::super::conv::{c_uint, ret_usize, slice_mut};
 use super::super::reg::nr;
 use crate::io;
 use crate::rand::GetRandomFlags;
-use linux_raw_sys::v5_4::general::__NR_getrandom;
+use linux_raw_sys::general::__NR_getrandom;
 
 #[inline]
 pub(crate) fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {

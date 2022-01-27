@@ -28,7 +28,7 @@ use linux_raw_sys::general::{
 use {
     core::convert::TryInto,
     linux_raw_sys::general::timespec as __kernel_old_timespec,
-    linux_raw_sys::v5_4::general::{__NR_clock_nanosleep_time64, __NR_futex_time64},
+    linux_raw_sys::general::{__NR_clock_nanosleep_time64, __NR_futex_time64},
 };
 
 #[inline]
