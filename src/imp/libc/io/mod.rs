@@ -10,6 +10,26 @@ mod types;
 #[cfg(not(windows))]
 pub(crate) mod syscalls;
 
+#[cfg(windows)]
+pub(crate) mod syscalls {
+    use super::super::conv::{borrowed_fd, ret};
+    use super::super::fd::LibcFd;
+    use super::c;
+    use crate::fd::{BorrowedFd, RawFd};
+    use crate::io;
+
+    pub(crate) unsafe fn close(raw_fd: RawFd) {
+        let _ = c::close(raw_fd as LibcFd);
+    }
+
+    pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+        unsafe {
+            let mut data = value as c::c_uint;
+            ret(c::ioctl(borrowed_fd(fd), c::FIONBIO, &mut data))
+        }
+    }
+}
+
 #[cfg(not(windows))]
 #[cfg(not(feature = "std"))]
 pub use io_slice::{IoSlice, IoSliceMut};
@@ -41,7 +61,6 @@ pub use types::{
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use types::{EventfdFlags, MlockFlags, ReadWriteFlags, UserfaultfdFlags};
 
-#[cfg(not(windows))]
 use super::c;
 
 #[cfg(not(any(windows, target_os = "redox")))]

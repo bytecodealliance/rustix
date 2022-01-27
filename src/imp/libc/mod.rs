@@ -58,7 +58,6 @@ pub(crate) mod net;
 pub(crate) mod process;
 #[cfg(not(windows))]
 pub(crate) mod rand;
-pub(crate) mod syscalls;
 #[cfg(not(windows))]
 pub(crate) mod thread;
 #[cfg(not(windows))]
