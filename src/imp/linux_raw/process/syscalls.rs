@@ -27,6 +27,15 @@ use crate::process::{
 };
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
+#[cfg(all(
+    not(any(target_arch = "arm", target_arch = "powerpc64", target_arch = "x86")),
+    target_pointer_width = "32"
+))]
+use linux_raw_sys::general::__NR_getrlimit;
+#[cfg(target_pointer_width = "32")]
+use linux_raw_sys::general::__NR_setrlimit;
+#[cfg(any(target_arch = "arm", target_arch = "powerpc64", target_arch = "x86"))]
+use linux_raw_sys::general::__NR_ugetrlimit as __NR_getrlimit;
 use linux_raw_sys::general::{
     __NR_chdir, __NR_exit_group, __NR_fchdir, __NR_getcwd, __NR_getpid, __NR_getppid,
     __NR_getpriority, __NR_kill, __NR_membarrier, __NR_prlimit64, __NR_sched_getaffinity,
@@ -37,8 +46,6 @@ use linux_raw_sys::general::{
 use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getuid};
 #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
 use linux_raw_sys::general::{__NR_getegid32, __NR_geteuid32, __NR_getgid32, __NR_getuid32};
-#[cfg(target_pointer_width = "32")]
-use linux_raw_sys::general::{__NR_getrlimit, __NR_setrlimit};
 
 #[inline]
 pub(crate) fn chdir(filename: &ZStr) -> io::Result<()> {
