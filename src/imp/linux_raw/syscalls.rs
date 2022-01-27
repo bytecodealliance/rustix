@@ -41,9 +41,6 @@ use {
     linux_raw_sys::general::{__NR_arch_prctl, ARCH_SET_FS},
 };
 
-// `clock_gettime` has special optimizations via the vDSO.
-pub(crate) use super::vdso_wrappers::{clock_gettime, clock_gettime_dynamic};
-
 #[inline]
 pub(crate) unsafe fn fork() -> io::Result<Option<Pid>> {
     let pid = ret_c_uint(syscall5_readonly(

@@ -18,6 +18,9 @@ use {
     linux_raw_sys::v5_4::general::__NR_clock_getres_time64,
 };
 
+// `clock_gettime` has special optimizations via the vDSO.
+pub(crate) use super::super::vdso_wrappers::{clock_gettime, clock_gettime_dynamic};
+
 #[inline]
 pub(crate) fn clock_getres(which_clock: ClockId) -> __kernel_timespec {
     #[cfg(target_pointer_width = "32")]
