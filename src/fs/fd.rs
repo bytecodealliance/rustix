@@ -37,7 +37,7 @@ use imp::fs::{FlockOperation, Mode};
 #[inline]
 pub fn seek<Fd: AsFd>(fd: &Fd, pos: SeekFrom) -> io::Result<u64> {
     let fd = fd.as_fd();
-    imp::syscalls::seek(fd, pos)
+    imp::fs::syscalls::seek(fd, pos)
 }
 
 /// `lseek(fd, 0, SEEK_CUR)`—Returns the current position within a file.
@@ -55,7 +55,7 @@ pub fn seek<Fd: AsFd>(fd: &Fd, pos: SeekFrom) -> io::Result<u64> {
 #[inline]
 pub fn tell<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
     let fd = fd.as_fd();
-    imp::syscalls::tell(fd)
+    imp::fs::syscalls::tell(fd)
 }
 
 /// `fchmod(fd)`—Sets open file or directory permissions.
@@ -73,7 +73,7 @@ pub fn tell<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
 #[inline]
 pub fn fchmod<Fd: AsFd>(fd: &Fd, mode: Mode) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::fchmod(fd, mode)
+    imp::fs::syscalls::fchmod(fd, mode)
 }
 
 /// `fchown(fd)`—Sets open file or directory ownership.
@@ -88,7 +88,7 @@ pub fn fchmod<Fd: AsFd>(fd: &Fd, mode: Mode) -> io::Result<()> {
 #[inline]
 pub fn fchown<Fd: AsFd>(fd: &Fd, owner: Uid, group: Gid) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::fchown(fd, owner, group)
+    imp::fs::syscalls::fchown(fd, owner, group)
 }
 
 /// `fstat(fd)`—Queries metadata for an open file or directory.
@@ -107,7 +107,7 @@ pub fn fchown<Fd: AsFd>(fd: &Fd, owner: Uid, group: Gid) -> io::Result<()> {
 #[inline]
 pub fn fstat<Fd: AsFd>(fd: &Fd) -> io::Result<Stat> {
     let fd = fd.as_fd();
-    imp::syscalls::fstat(fd)
+    imp::fs::syscalls::fstat(fd)
 }
 
 /// `fstatfs(fd)`—Queries filesystem statistics for an open file or directory.
@@ -125,7 +125,7 @@ pub fn fstat<Fd: AsFd>(fd: &Fd) -> io::Result<Stat> {
 #[inline]
 pub fn fstatfs<Fd: AsFd>(fd: &Fd) -> io::Result<StatFs> {
     let fd = fd.as_fd();
-    imp::syscalls::fstatfs(fd)
+    imp::fs::syscalls::fstatfs(fd)
 }
 
 /// `futimens(fd, times)`—Sets timestamps for an open file or directory.
@@ -139,7 +139,7 @@ pub fn fstatfs<Fd: AsFd>(fd: &Fd) -> io::Result<StatFs> {
 #[inline]
 pub fn futimens<Fd: AsFd>(fd: &Fd, times: &Timestamps) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::futimens(fd, times)
+    imp::fs::syscalls::futimens(fd, times)
 }
 
 /// `fallocate(fd, mode, offset, len)`—Adjusts file allocation.
@@ -168,7 +168,7 @@ pub fn futimens<Fd: AsFd>(fd: &Fd, times: &Timestamps) -> io::Result<()> {
 #[doc(alias = "posix_fallocate")]
 pub fn fallocate<Fd: AsFd>(fd: &Fd, mode: FallocateFlags, offset: u64, len: u64) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::fallocate(fd, mode, offset, len)
+    imp::fs::syscalls::fallocate(fd, mode, offset, len)
 }
 
 /// `fcntl(fd, F_GETFL) & O_ACCMODE`
@@ -184,7 +184,7 @@ pub fn is_file_read_write<Fd: AsFd>(fd: &Fd) -> io::Result<(bool, bool)> {
 }
 
 pub(crate) fn _is_file_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
-    let mode = imp::syscalls::fcntl_getfl(fd)?;
+    let mode = imp::fs::syscalls::fcntl_getfl(fd)?;
 
     // Check for `O_PATH`.
     #[cfg(any(
@@ -223,7 +223,7 @@ pub(crate) fn _is_file_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)
 #[inline]
 pub fn fsync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::fsync(fd)
+    imp::fs::syscalls::fsync(fd)
 }
 
 /// `fdatasync(fd)`—Ensures that file data is written to the underlying
@@ -244,7 +244,7 @@ pub fn fsync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 #[inline]
 pub fn fdatasync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::fdatasync(fd)
+    imp::fs::syscalls::fdatasync(fd)
 }
 
 /// `ftruncate(fd, length)`—Sets the length of a file.
@@ -258,7 +258,7 @@ pub fn fdatasync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 #[inline]
 pub fn ftruncate<Fd: AsFd>(fd: &Fd, length: u64) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::ftruncate(fd, length)
+    imp::fs::syscalls::ftruncate(fd, length)
 }
 
 /// `flock(fd, operation)`—Acquire or release an advisory lock on an open file.
@@ -271,5 +271,5 @@ pub fn ftruncate<Fd: AsFd>(fd: &Fd, length: u64) -> io::Result<()> {
 #[inline]
 pub fn flock<Fd: AsFd>(fd: &Fd, operation: FlockOperation) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::flock(fd, operation)
+    imp::fs::syscalls::flock(fd, operation)
 }

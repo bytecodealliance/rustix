@@ -28,5 +28,5 @@ pub use imp::io::MsyncFlags;
 /// [Linux `msync`]: https://man7.org/linux/man-pages/man2/msync.2.html
 #[inline]
 pub unsafe fn msync(addr: *mut c_void, len: usize, flags: MsyncFlags) -> io::Result<()> {
-    imp::syscalls::msync(addr, len, flags)
+    imp::io::syscalls::msync(addr, len, flags)
 }

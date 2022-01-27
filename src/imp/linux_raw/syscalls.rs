@@ -13,15 +13,6 @@
 //! parameters, which integers are owned or borrowed file descriptors, etc.
 #![allow(unsafe_code)]
 
-// There are a lot of system calls, so they're split out into separate files.
-pub(crate) use super::fs::syscalls::*;
-pub(crate) use super::io::syscalls::*;
-pub(crate) use super::net::syscalls::*;
-pub(crate) use super::process::syscalls::*;
-pub(crate) use super::rand::syscalls::*;
-pub(crate) use super::thread::syscalls::*;
-pub(crate) use super::time::syscalls::*;
-
 use super::arch::choose::{
     syscall1_noreturn, syscall1_readonly, syscall2_readonly, syscall3_readonly, syscall5_readonly,
 };

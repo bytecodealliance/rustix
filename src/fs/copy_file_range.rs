@@ -18,5 +18,5 @@ pub fn copy_file_range<InFd: AsFd, OutFd: AsFd>(
 ) -> io::Result<u64> {
     let fd_in = fd_in.as_fd();
     let fd_out = fd_out.as_fd();
-    imp::syscalls::copy_file_range(fd_in, off_in, fd_out, off_out, len)
+    imp::fs::syscalls::copy_file_range(fd_in, off_in, fd_out, off_out, len)
 }

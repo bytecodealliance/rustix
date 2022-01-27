@@ -17,7 +17,7 @@ pub use imp::io::PipeFlags;
 /// [Linux]: https://man7.org/linux/man-pages/man2/pipe.2.html
 #[inline]
 pub fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
-    imp::syscalls::pipe()
+    imp::io::syscalls::pipe()
 }
 
 /// `pipe2(flags)`—Creates a pipe, with flags.
@@ -33,5 +33,5 @@ pub fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
 #[inline]
 #[doc(alias = "pipe2")]
 pub fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
-    imp::syscalls::pipe_with(flags)
+    imp::io::syscalls::pipe_with(flags)
 }

@@ -126,7 +126,7 @@ pub const EXIT_SIGNALED_SIGABRT: i32 = imp::process::EXIT_SIGNALED_SIGABRT;
 /// [Linux]: https://man7.org/linux/man-pages/man2/sched_yield.2.html
 #[inline]
 pub fn sched_yield() {
-    imp::syscalls::sched_yield()
+    imp::process::syscalls::sched_yield()
 }
 
 /// `waitpid(pid, waitopts)`—Wait for a specific process to change state.
@@ -156,7 +156,7 @@ pub fn sched_yield() {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<WaitStatus>> {
-    Ok(imp::syscalls::waitpid(pid, waitopts)?.map(|(_, status)| status))
+    Ok(imp::process::syscalls::waitpid(pid, waitopts)?.map(|(_, status)| status))
 }
 
 /// `wait(waitopts)`—Wait for any of the children of calling process to
@@ -177,7 +177,7 @@ pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<Wai
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
-    imp::syscalls::wait(waitopts)
+    imp::process::syscalls::wait(waitopts)
 }
 
 /// `setsid()`—Create a new session.
@@ -191,7 +191,7 @@ pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn setsid() -> io::Result<Pid> {
-    imp::syscalls::setsid()
+    imp::process::syscalls::setsid()
 }
 
 /// `kill(pid, sig)`—Sends a signal to a process.
@@ -206,7 +206,7 @@ pub fn setsid() -> io::Result<Pid> {
 #[inline]
 #[doc(alias = "kill")]
 pub fn kill_process(pid: Pid, sig: Signal) -> io::Result<()> {
-    imp::syscalls::kill_process(pid, sig)
+    imp::process::syscalls::kill_process(pid, sig)
 }
 
 /// `kill(-pid, sig)`—Sends a signal to all processes in a process group.
@@ -225,7 +225,7 @@ pub fn kill_process(pid: Pid, sig: Signal) -> io::Result<()> {
 #[inline]
 #[doc(alias = "kill")]
 pub fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
-    imp::syscalls::kill_process_group(pid, sig)
+    imp::process::syscalls::kill_process_group(pid, sig)
 }
 
 /// `kill(0, sig)`—Sends a signal to all processes in the current process
@@ -241,5 +241,5 @@ pub fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
 #[inline]
 #[doc(alias = "kill")]
 pub fn kill_current_process_group(sig: Signal) -> io::Result<()> {
-    imp::syscalls::kill_current_process_group(sig)
+    imp::process::syscalls::kill_current_process_group(sig)
 }

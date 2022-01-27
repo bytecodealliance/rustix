@@ -27,7 +27,7 @@ use {
 #[inline]
 pub fn isatty<Fd: AsFd>(fd: &Fd) -> bool {
     let fd = fd.as_fd();
-    imp::syscalls::isatty(fd)
+    imp::io::syscalls::isatty(fd)
 }
 
 /// `ttyname_r(fd)`
@@ -63,7 +63,7 @@ fn _ttyname(dirfd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<ZString> {
     buffer.resize(buffer.capacity(), 0_u8);
 
     loop {
-        match imp::syscalls::ttyname(dirfd, &mut buffer) {
+        match imp::io::syscalls::ttyname(dirfd, &mut buffer) {
             Err(imp::io::Error::RANGE) => {
                 buffer.reserve(1); // use `Vec` reallocation strategy to grow capacity exponentially
                 buffer.resize(buffer.capacity(), 0_u8);

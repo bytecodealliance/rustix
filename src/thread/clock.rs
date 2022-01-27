@@ -38,7 +38,7 @@ use imp::time::ClockId;
 )))))]
 #[inline]
 pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRelativeResult {
-    imp::syscalls::clock_nanosleep_relative(id, request)
+    imp::thread::syscalls::clock_nanosleep_relative(id, request)
 }
 
 /// `clock_nanosleep(id, TIMER_ABSTIME, request, NULL)`—Sleeps until an
@@ -65,7 +65,7 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRel
 )))))]
 #[inline]
 pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::Result<()> {
-    imp::syscalls::clock_nanosleep_absolute(id, request)
+    imp::thread::syscalls::clock_nanosleep_absolute(id, request)
 }
 
 /// `nanosleep(request, remain)`—Sleeps for a duration.
@@ -80,7 +80,7 @@ pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::Result<(
 /// [Linux]: https://man7.org/linux/man-pages/man2/nanosleep.2.html
 #[inline]
 pub fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
-    imp::syscalls::nanosleep(request)
+    imp::thread::syscalls::nanosleep(request)
 }
 
 /// A return type for `nanosleep` and `clock_nanosleep_relative`.

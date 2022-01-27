@@ -35,7 +35,7 @@ pub use imp::net::Timeout;
 #[doc(alias = "SO_TYPE")]
 pub fn get_socket_type<Fd: AsFd>(fd: &Fd) -> io::Result<SocketType> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::get_socket_type(fd)
+    imp::net::syscalls::sockopt::get_socket_type(fd)
 }
 
 /// `setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, value)`
@@ -58,7 +58,7 @@ pub fn get_socket_type<Fd: AsFd>(fd: &Fd) -> io::Result<SocketType> {
 #[doc(alias = "SO_REUSEADDR")]
 pub fn set_socket_reuseaddr<Fd: AsFd>(fd: &Fd, value: bool) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_socket_reuseaddr(fd, value)
+    imp::net::syscalls::sockopt::set_socket_reuseaddr(fd, value)
 }
 
 /// `setsockopt(fd, SOL_SOCKET, SO_BROADCAST, broadcast)`
@@ -81,7 +81,7 @@ pub fn set_socket_reuseaddr<Fd: AsFd>(fd: &Fd, value: bool) -> io::Result<()> {
 #[doc(alias = "SO_BROADCAST")]
 pub fn set_socket_broadcast<Fd: AsFd>(fd: &Fd, broadcast: bool) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_socket_broadcast(fd, broadcast)
+    imp::net::syscalls::sockopt::set_socket_broadcast(fd, broadcast)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_BROADCAST)`
@@ -104,7 +104,7 @@ pub fn set_socket_broadcast<Fd: AsFd>(fd: &Fd, broadcast: bool) -> io::Result<()
 #[doc(alias = "SO_BROADCAST")]
 pub fn get_socket_broadcast<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::get_socket_broadcast(fd)
+    imp::net::syscalls::sockopt::get_socket_broadcast(fd)
 }
 
 /// `setsockopt(fd, SOL_SOCKET, SO_LINGER, linger)`
@@ -127,7 +127,7 @@ pub fn get_socket_broadcast<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
 #[doc(alias = "SO_LINGER")]
 pub fn set_socket_linger<Fd: AsFd>(fd: &Fd, linger: Option<Duration>) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_socket_linger(fd, linger)
+    imp::net::syscalls::sockopt::set_socket_linger(fd, linger)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_LINGER)`
@@ -150,7 +150,7 @@ pub fn set_socket_linger<Fd: AsFd>(fd: &Fd, linger: Option<Duration>) -> io::Res
 #[doc(alias = "SO_LINGER")]
 pub fn get_socket_linger<Fd: AsFd>(fd: &Fd) -> io::Result<Option<Duration>> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::get_socket_linger(fd)
+    imp::net::syscalls::sockopt::get_socket_linger(fd)
 }
 
 /// `setsockopt(fd, SOL_SOCKET, SO_PASSCRED, passcred)`
@@ -166,7 +166,7 @@ pub fn get_socket_linger<Fd: AsFd>(fd: &Fd) -> io::Result<Option<Duration>> {
 #[doc(alias = "SO_PASSCRED")]
 pub fn set_socket_passcred<Fd: AsFd>(fd: &Fd, passcred: bool) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_socket_passcred(fd, passcred)
+    imp::net::syscalls::sockopt::set_socket_passcred(fd, passcred)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_PASSCRED)`
@@ -182,7 +182,7 @@ pub fn set_socket_passcred<Fd: AsFd>(fd: &Fd, passcred: bool) -> io::Result<()> 
 #[doc(alias = "SO_PASSCRED")]
 pub fn get_socket_passcred<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::get_socket_passcred(fd)
+    imp::net::syscalls::sockopt::get_socket_passcred(fd)
 }
 
 /// `setsockopt(fd, SOL_SOCKET, id, timeout)`—Set the sending
@@ -211,7 +211,7 @@ pub fn set_socket_timeout<Fd: AsFd>(
     timeout: Option<Duration>,
 ) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_socket_timeout(fd, id, timeout)
+    imp::net::syscalls::sockopt::set_socket_timeout(fd, id, timeout)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, id)`—Get the sending or receiving timeout.
@@ -235,7 +235,7 @@ pub fn set_socket_timeout<Fd: AsFd>(
 #[doc(alias = "SO_SNDTIMEO")]
 pub fn get_socket_timeout<Fd: AsFd>(fd: &Fd, id: Timeout) -> io::Result<Option<Duration>> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::get_socket_timeout(fd, id)
+    imp::net::syscalls::sockopt::get_socket_timeout(fd, id)
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_TTL, ttl)`
@@ -257,7 +257,7 @@ pub fn get_socket_timeout<Fd: AsFd>(fd: &Fd, id: Timeout) -> io::Result<Option<D
 #[doc(alias = "IP_TTL")]
 pub fn set_ip_ttl<Fd: AsFd>(fd: &Fd, ttl: u32) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_ip_ttl(fd, ttl)
+    imp::net::syscalls::sockopt::set_ip_ttl(fd, ttl)
 }
 
 /// `getsockopt(fd, IPPROTO_IP, IP_TTL)`
@@ -280,7 +280,7 @@ pub fn set_ip_ttl<Fd: AsFd>(fd: &Fd, ttl: u32) -> io::Result<()> {
 #[doc(alias = "IP_TTL")]
 pub fn get_ip_ttl<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::get_ip_ttl(fd)
+    imp::net::syscalls::sockopt::get_ip_ttl(fd)
 }
 
 /// `setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, only_v6)`
@@ -303,7 +303,7 @@ pub fn get_ip_ttl<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
 #[doc(alias = "IPV6_V6ONLY")]
 pub fn set_ipv6_v6only<Fd: AsFd>(fd: &Fd, only_v6: bool) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_ipv6_v6only(fd, only_v6)
+    imp::net::syscalls::sockopt::set_ipv6_v6only(fd, only_v6)
 }
 
 /// `getsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY)`
@@ -326,7 +326,7 @@ pub fn set_ipv6_v6only<Fd: AsFd>(fd: &Fd, only_v6: bool) -> io::Result<()> {
 #[doc(alias = "IPV6_V6ONLY")]
 pub fn get_ipv6_v6only<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::get_ipv6_v6only(fd)
+    imp::net::syscalls::sockopt::get_ipv6_v6only(fd)
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP, multicast_loop)`
@@ -349,7 +349,7 @@ pub fn get_ipv6_v6only<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
 #[doc(alias = "IP_MULTICAST_LOOP")]
 pub fn set_ip_multicast_loop<Fd: AsFd>(fd: &Fd, multicast_loop: bool) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_ip_multicast_loop(fd, multicast_loop)
+    imp::net::syscalls::sockopt::set_ip_multicast_loop(fd, multicast_loop)
 }
 
 /// `getsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP)`
@@ -372,7 +372,7 @@ pub fn set_ip_multicast_loop<Fd: AsFd>(fd: &Fd, multicast_loop: bool) -> io::Res
 #[doc(alias = "IP_MULTICAST_LOOP")]
 pub fn get_ip_multicast_loop<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::get_ip_multicast_loop(fd)
+    imp::net::syscalls::sockopt::get_ip_multicast_loop(fd)
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL, multicast_ttl)`
@@ -395,7 +395,7 @@ pub fn get_ip_multicast_loop<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
 #[doc(alias = "IP_MULTICAST_TTL")]
 pub fn set_ip_multicast_ttl<Fd: AsFd>(fd: &Fd, multicast_ttl: u32) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_ip_multicast_ttl(fd, multicast_ttl)
+    imp::net::syscalls::sockopt::set_ip_multicast_ttl(fd, multicast_ttl)
 }
 
 /// `getsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL)`
@@ -418,7 +418,7 @@ pub fn set_ip_multicast_ttl<Fd: AsFd>(fd: &Fd, multicast_ttl: u32) -> io::Result
 #[doc(alias = "IP_MULTICAST_TTL")]
 pub fn get_ip_multicast_ttl<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::get_ip_multicast_ttl(fd)
+    imp::net::syscalls::sockopt::get_ip_multicast_ttl(fd)
 }
 
 /// `setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, multicast_loop)`
@@ -441,7 +441,7 @@ pub fn get_ip_multicast_ttl<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
 #[doc(alias = "IPV6_MULTICAST_LOOP")]
 pub fn set_ipv6_multicast_loop<Fd: AsFd>(fd: &Fd, multicast_loop: bool) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_ipv6_multicast_loop(fd, multicast_loop)
+    imp::net::syscalls::sockopt::set_ipv6_multicast_loop(fd, multicast_loop)
 }
 
 /// `getsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP)`
@@ -464,7 +464,7 @@ pub fn set_ipv6_multicast_loop<Fd: AsFd>(fd: &Fd, multicast_loop: bool) -> io::R
 #[doc(alias = "IPV6_MULTICAST_LOOP")]
 pub fn get_ipv6_multicast_loop<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::get_ipv6_multicast_loop(fd)
+    imp::net::syscalls::sockopt::get_ipv6_multicast_loop(fd)
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, multiaddr, interface)`
@@ -491,7 +491,7 @@ pub fn set_ip_add_membership<Fd: AsFd>(
     interface: &Ipv4Addr,
 ) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_ip_add_membership(fd, multiaddr, interface)
+    imp::net::syscalls::sockopt::set_ip_add_membership(fd, multiaddr, interface)
 }
 
 /// `setsockopt(fd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, multiaddr, interface)`
@@ -521,7 +521,7 @@ pub fn set_ipv6_add_membership<Fd: AsFd>(
     interface: u32,
 ) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_ipv6_add_membership(fd, multiaddr, interface)
+    imp::net::syscalls::sockopt::set_ipv6_add_membership(fd, multiaddr, interface)
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_DROP_MEMBERSHIP, multiaddr, interface)`
@@ -548,7 +548,7 @@ pub fn set_ip_drop_membership<Fd: AsFd>(
     interface: &Ipv4Addr,
 ) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_ip_drop_membership(fd, multiaddr, interface)
+    imp::net::syscalls::sockopt::set_ip_drop_membership(fd, multiaddr, interface)
 }
 
 /// `setsockopt(fd, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, multiaddr, interface)`
@@ -578,7 +578,7 @@ pub fn set_ipv6_drop_membership<Fd: AsFd>(
     interface: u32,
 ) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_ipv6_drop_membership(fd, multiaddr, interface)
+    imp::net::syscalls::sockopt::set_ipv6_drop_membership(fd, multiaddr, interface)
 }
 
 /// `setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, nodelay)`
@@ -601,7 +601,7 @@ pub fn set_ipv6_drop_membership<Fd: AsFd>(
 #[doc(alias = "TCP_NODELAY")]
 pub fn set_tcp_nodelay<Fd: AsFd>(fd: &Fd, nodelay: bool) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::set_tcp_nodelay(fd, nodelay)
+    imp::net::syscalls::sockopt::set_tcp_nodelay(fd, nodelay)
 }
 
 /// `getsockopt(fd, IPPROTO_TCP, TCP_NODELAY)`
@@ -624,5 +624,5 @@ pub fn set_tcp_nodelay<Fd: AsFd>(fd: &Fd, nodelay: bool) -> io::Result<()> {
 #[doc(alias = "TCP_NODELAY")]
 pub fn get_tcp_nodelay<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
     let fd = fd.as_fd();
-    imp::syscalls::sockopt::get_tcp_nodelay(fd)
+    imp::net::syscalls::sockopt::get_tcp_nodelay(fd)
 }

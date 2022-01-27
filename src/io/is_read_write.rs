@@ -13,5 +13,5 @@ use imp::fd::AsFd;
 #[inline]
 pub fn is_read_write<Fd: AsFd>(fd: &Fd) -> io::Result<(bool, bool)> {
     let fd = fd.as_fd();
-    imp::syscalls::is_read_write(fd)
+    imp::io::syscalls::is_read_write(fd)
 }

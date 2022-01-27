@@ -11,5 +11,5 @@ use imp::fd::AsFd;
 #[inline]
 pub fn getpath<Fd: AsFd>(fd: &Fd) -> io::Result<ZString> {
     let fd = fd.as_fd();
-    imp::syscalls::getpath(fd)
+    imp::fs::syscalls::getpath(fd)
 }

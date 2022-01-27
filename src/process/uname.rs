@@ -14,7 +14,7 @@ use core::fmt;
 /// hardware.
 #[inline]
 pub fn uname() -> Uname {
-    Uname(imp::syscalls::uname())
+    Uname(imp::process::syscalls::uname())
 }
 
 /// `struct utsname`—Return type for [`uname`].

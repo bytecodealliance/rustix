@@ -46,7 +46,7 @@ pub fn openat<P: path::Arg, Fd: AsFd>(
     create_mode: Mode,
 ) -> io::Result<OwnedFd> {
     let dirfd = dirfd.as_fd();
-    path.into_with_z_str(|path| imp::syscalls::openat(dirfd, path, oflags, create_mode))
+    path.into_with_z_str(|path| imp::fs::syscalls::openat(dirfd, path, oflags, create_mode))
 }
 
 /// `readlinkat(fd, path)`—Reads the contents of a symlink.
@@ -78,7 +78,7 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &ZStr, mut buffer: Vec<u8>) -> io::R
     buffer.resize(buffer.capacity(), 0_u8);
 
     loop {
-        let nread = imp::syscalls::readlinkat(dirfd, path, &mut buffer)?;
+        let nread = imp::fs::syscalls::readlinkat(dirfd, path, &mut buffer)?;
 
         let nread = nread as usize;
         assert!(nread <= buffer.len());
@@ -102,7 +102,7 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &ZStr, mut buffer: Vec<u8>) -> io::R
 #[inline]
 pub fn mkdirat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
-    path.into_with_z_str(|path| imp::syscalls::mkdirat(dirfd, path, mode))
+    path.into_with_z_str(|path| imp::fs::syscalls::mkdirat(dirfd, path, mode))
 }
 
 /// `linkat(old_dirfd, old_path, new_dirfd, new_path, flags)`—Creates a hard
@@ -126,7 +126,7 @@ pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
     let new_dirfd = new_dirfd.as_fd();
     old_path.into_with_z_str(|old_path| {
         new_path.into_with_z_str(|new_path| {
-            imp::syscalls::linkat(old_dirfd, old_path, new_dirfd, new_path, flags)
+            imp::fs::syscalls::linkat(old_dirfd, old_path, new_dirfd, new_path, flags)
         })
     })
 }
@@ -146,7 +146,7 @@ pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
 #[inline]
 pub fn unlinkat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
-    path.into_with_z_str(|path| imp::syscalls::unlinkat(dirfd, path, flags))
+    path.into_with_z_str(|path| imp::fs::syscalls::unlinkat(dirfd, path, flags))
 }
 
 /// `renameat(old_dirfd, old_path, new_dirfd, new_path)`—Renames a file or
@@ -169,7 +169,7 @@ pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
     let new_dirfd = new_dirfd.as_fd();
     old_path.into_with_z_str(|old_path| {
         new_path.into_with_z_str(|new_path| {
-            imp::syscalls::renameat(old_dirfd, old_path, new_dirfd, new_path)
+            imp::fs::syscalls::renameat(old_dirfd, old_path, new_dirfd, new_path)
         })
     })
 }
@@ -195,7 +195,7 @@ pub fn renameat_with<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
     let new_dirfd = new_dirfd.as_fd();
     old_path.into_with_z_str(|old_path| {
         new_path.into_with_z_str(|new_path| {
-            imp::syscalls::renameat2(old_dirfd, old_path, new_dirfd, new_path, flags)
+            imp::fs::syscalls::renameat2(old_dirfd, old_path, new_dirfd, new_path, flags)
         })
     })
 }
@@ -216,7 +216,8 @@ pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsFd>(
 ) -> io::Result<()> {
     let new_dirfd = new_dirfd.as_fd();
     old_path.into_with_z_str(|old_path| {
-        new_path.into_with_z_str(|new_path| imp::syscalls::symlinkat(old_path, new_dirfd, new_path))
+        new_path
+            .into_with_z_str(|new_path| imp::fs::syscalls::symlinkat(old_path, new_dirfd, new_path))
     })
 }
 
@@ -237,7 +238,7 @@ pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsFd>(
 #[doc(alias = "fstatat")]
 pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags) -> io::Result<Stat> {
     let dirfd = dirfd.as_fd();
-    path.into_with_z_str(|path| imp::syscalls::statat(dirfd, path, flags))
+    path.into_with_z_str(|path| imp::fs::syscalls::statat(dirfd, path, flags))
 }
 
 /// `faccessat(dirfd, path, access, flags)`—Tests permissions for a file or
@@ -259,7 +260,7 @@ pub fn accessat<P: path::Arg, Fd: AsFd>(
     flags: AtFlags,
 ) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
-    path.into_with_z_str(|path| imp::syscalls::accessat(dirfd, path, access, flags))
+    path.into_with_z_str(|path| imp::fs::syscalls::accessat(dirfd, path, access, flags))
 }
 
 /// `utimensat(dirfd, path, times, flags)`—Sets file or directory timestamps.
@@ -278,7 +279,7 @@ pub fn utimensat<P: path::Arg, Fd: AsFd>(
     flags: AtFlags,
 ) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
-    path.into_with_z_str(|path| imp::syscalls::utimensat(dirfd, path, times, flags))
+    path.into_with_z_str(|path| imp::fs::syscalls::utimensat(dirfd, path, times, flags))
 }
 
 /// `fchmodat(dirfd, path, mode, 0)`—Sets file or directory permissions.
@@ -300,7 +301,7 @@ pub fn utimensat<P: path::Arg, Fd: AsFd>(
 #[doc(alias = "fchmodat")]
 pub fn chmodat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
-    path.into_with_z_str(|path| imp::syscalls::chmodat(dirfd, path, mode))
+    path.into_with_z_str(|path| imp::fs::syscalls::chmodat(dirfd, path, mode))
 }
 
 /// `fclonefileat(src, dst_dir, dst, flags)`—Efficiently copies between files.
@@ -320,7 +321,7 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
     let srcfd = src.as_fd();
     let dst_dirfd = dst_dir.as_fd();
     dst.into_with_z_str(|dst| {
-        imp::syscalls::fclonefileat(srcfd.as_fd(), dst_dirfd.as_fd(), &dst, flags)
+        imp::fs::syscalls::fclonefileat(srcfd.as_fd(), dst_dirfd.as_fd(), &dst, flags)
     })
 }
 
@@ -342,7 +343,7 @@ pub fn mknodat<P: path::Arg, Fd: AsFd>(
     dev: Dev,
 ) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
-    path.into_with_z_str(|path| imp::syscalls::mknodat(dirfd, path, file_type, mode, dev))
+    path.into_with_z_str(|path| imp::fs::syscalls::mknodat(dirfd, path, file_type, mode, dev))
 }
 
 /// `fchownat(dirfd, path, owner, group, flags)`—Sets file or directory
@@ -364,5 +365,5 @@ pub fn chownat<P: path::Arg, Fd: AsFd>(
     flags: AtFlags,
 ) -> io::Result<()> {
     let dirfd = dirfd.as_fd();
-    path.into_with_z_str(|path| imp::syscalls::chownat(dirfd, path, owner, group, flags))
+    path.into_with_z_str(|path| imp::fs::syscalls::chownat(dirfd, path, owner, group, flags))
 }

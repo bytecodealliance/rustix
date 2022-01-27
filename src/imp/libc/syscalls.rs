@@ -10,22 +10,6 @@
 //! slices, out parameters, or in-out parameters, which integers are owned or
 //! borrowed file descriptors, etc.
 
-// There are a lot of system calls, so they're split out into separate files.
-#[cfg(not(windows))]
-pub(crate) use super::fs::syscalls::*;
-#[cfg(not(windows))]
-pub(crate) use super::io::syscalls::*;
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) use super::net::syscalls::*;
-#[cfg(not(windows))]
-pub(crate) use super::process::syscalls::*;
-#[cfg(target_os = "linux")]
-pub(crate) use super::rand::syscalls::*;
-#[cfg(not(windows))]
-pub(crate) use super::thread::syscalls::*;
-#[cfg(not(windows))]
-pub(crate) use super::time::syscalls::*;
-
 #[cfg(windows)]
 use super::c;
 #[cfg(windows)]

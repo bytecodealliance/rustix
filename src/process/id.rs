@@ -170,7 +170,7 @@ impl Cpuid {
 #[inline]
 #[must_use]
 pub fn getuid() -> Uid {
-    imp::syscalls::getuid()
+    imp::process::syscalls::getuid()
 }
 
 /// `geteuid()`—Returns the process' effective user ID.
@@ -184,7 +184,7 @@ pub fn getuid() -> Uid {
 #[inline]
 #[must_use]
 pub fn geteuid() -> Uid {
-    imp::syscalls::geteuid()
+    imp::process::syscalls::geteuid()
 }
 
 /// `getgid()`—Returns the process' real group ID.
@@ -198,7 +198,7 @@ pub fn geteuid() -> Uid {
 #[inline]
 #[must_use]
 pub fn getgid() -> Gid {
-    imp::syscalls::getgid()
+    imp::process::syscalls::getgid()
 }
 
 /// `getegid()`—Returns the process' effective group ID.
@@ -212,7 +212,7 @@ pub fn getgid() -> Gid {
 #[inline]
 #[must_use]
 pub fn getegid() -> Gid {
-    imp::syscalls::getegid()
+    imp::process::syscalls::getegid()
 }
 
 /// `getpid()`—Returns the process' ID.
@@ -226,7 +226,7 @@ pub fn getegid() -> Gid {
 #[inline]
 #[must_use]
 pub fn getpid() -> Pid {
-    imp::syscalls::getpid()
+    imp::process::syscalls::getpid()
 }
 
 /// `getppid()`—Returns the parent process' ID.
@@ -240,5 +240,5 @@ pub fn getpid() -> Pid {
 #[inline]
 #[must_use]
 pub fn getppid() -> Option<Pid> {
-    imp::syscalls::getppid()
+    imp::process::syscalls::getppid()
 }

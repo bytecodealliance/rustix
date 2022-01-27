@@ -19,7 +19,7 @@ pub use imp::io::ReadWriteFlags;
 #[inline]
 pub fn read<Fd: AsFd>(fd: &Fd, buf: &mut [u8]) -> io::Result<usize> {
     let fd = fd.as_fd();
-    imp::syscalls::read(fd, buf)
+    imp::io::syscalls::read(fd, buf)
 }
 
 /// `write(fd, buf)`—Writes to a stream.
@@ -33,7 +33,7 @@ pub fn read<Fd: AsFd>(fd: &Fd, buf: &mut [u8]) -> io::Result<usize> {
 #[inline]
 pub fn write<Fd: AsFd>(fd: &Fd, buf: &[u8]) -> io::Result<usize> {
     let fd = fd.as_fd();
-    imp::syscalls::write(fd, buf)
+    imp::io::syscalls::write(fd, buf)
 }
 
 /// `pread(fd, buf, offset)`—Reads from a file at a given position.
@@ -47,7 +47,7 @@ pub fn write<Fd: AsFd>(fd: &Fd, buf: &[u8]) -> io::Result<usize> {
 #[inline]
 pub fn pread<Fd: AsFd>(fd: &Fd, buf: &mut [u8], offset: u64) -> io::Result<usize> {
     let fd = fd.as_fd();
-    imp::syscalls::pread(fd, buf, offset)
+    imp::io::syscalls::pread(fd, buf, offset)
 }
 
 /// `pwrite(fd, bufs)`—Writes to a file at a given position.
@@ -61,7 +61,7 @@ pub fn pread<Fd: AsFd>(fd: &Fd, buf: &mut [u8], offset: u64) -> io::Result<usize
 #[inline]
 pub fn pwrite<Fd: AsFd>(fd: &Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
     let fd = fd.as_fd();
-    imp::syscalls::pwrite(fd, buf, offset)
+    imp::io::syscalls::pwrite(fd, buf, offset)
 }
 
 /// `readv(fd, bufs)`—Reads from a stream into multiple buffers.
@@ -75,7 +75,7 @@ pub fn pwrite<Fd: AsFd>(fd: &Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
 #[inline]
 pub fn readv<Fd: AsFd>(fd: &Fd, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize> {
     let fd = fd.as_fd();
-    imp::syscalls::readv(fd, bufs)
+    imp::io::syscalls::readv(fd, bufs)
 }
 
 /// `writev(fd, bufs)`—Writes to a stream from multiple buffers.
@@ -89,7 +89,7 @@ pub fn readv<Fd: AsFd>(fd: &Fd, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize
 #[inline]
 pub fn writev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
     let fd = fd.as_fd();
-    imp::syscalls::writev(fd, bufs)
+    imp::io::syscalls::writev(fd, bufs)
 }
 
 /// `preadv(fd, bufs, offset)`—Reads from a file at a given position into
@@ -103,7 +103,7 @@ pub fn writev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
 #[inline]
 pub fn preadv<Fd: AsFd>(fd: &Fd, bufs: &mut [IoSliceMut<'_>], offset: u64) -> io::Result<usize> {
     let fd = fd.as_fd();
-    imp::syscalls::preadv(fd, bufs, offset)
+    imp::io::syscalls::preadv(fd, bufs, offset)
 }
 
 /// `pwritev(fd, bufs, offset)`—Writes to a file at a given position from
@@ -117,7 +117,7 @@ pub fn preadv<Fd: AsFd>(fd: &Fd, bufs: &mut [IoSliceMut<'_>], offset: u64) -> io
 #[inline]
 pub fn pwritev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice<'_>], offset: u64) -> io::Result<usize> {
     let fd = fd.as_fd();
-    imp::syscalls::pwritev(fd, bufs, offset)
+    imp::io::syscalls::pwritev(fd, bufs, offset)
 }
 
 /// `preadv2(fd, bufs, offset, flags)`—Reads data, with several options.
@@ -137,7 +137,7 @@ pub fn preadv2<Fd: AsFd>(
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
     let fd = fd.as_fd();
-    imp::syscalls::preadv2(fd, bufs, offset, flags)
+    imp::io::syscalls::preadv2(fd, bufs, offset, flags)
 }
 
 /// `pwritev2(fd, bufs, offset, flags)`—Writes data, with several options.
@@ -157,5 +157,5 @@ pub fn pwritev2<Fd: AsFd>(
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
     let fd = fd.as_fd();
-    imp::syscalls::pwritev2(fd, bufs, offset, flags)
+    imp::io::syscalls::pwritev2(fd, bufs, offset, flags)
 }

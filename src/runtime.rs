@@ -113,7 +113,7 @@ pub unsafe fn exit_thread(status: i32) -> ! {
 #[doc(alias = "_Exit")]
 #[inline]
 pub fn exit_group(status: i32) -> ! {
-    imp::syscalls::exit_group(status)
+    imp::process::syscalls::exit_group(status)
 }
 
 /// Return fields from the main executable segment headers ("phdrs") relevant

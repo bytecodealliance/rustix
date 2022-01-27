@@ -25,7 +25,7 @@ pub unsafe fn fcopyfile<FromFd: AsFd, ToFd: AsFd>(
 ) -> io::Result<()> {
     let from = from.as_fd();
     let to = to.as_fd();
-    imp::syscalls::fcopyfile(from, to, state, flags)
+    imp::fs::syscalls::fcopyfile(from, to, state, flags)
 }
 
 /// `copyfile_state_alloc()`
@@ -36,7 +36,7 @@ pub unsafe fn fcopyfile<FromFd: AsFd, ToFd: AsFd>(
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/fcopyfile.3.html
 #[inline]
 pub fn copyfile_state_alloc() -> io::Result<copyfile_state_t> {
-    imp::syscalls::copyfile_state_alloc()
+    imp::fs::syscalls::copyfile_state_alloc()
 }
 
 /// `copyfile_state_free(state)`
@@ -52,7 +52,7 @@ pub fn copyfile_state_alloc() -> io::Result<copyfile_state_t> {
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/fcopyfile.3.html
 #[inline]
 pub unsafe fn copyfile_state_free(state: copyfile_state_t) -> io::Result<()> {
-    imp::syscalls::copyfile_state_free(state)
+    imp::fs::syscalls::copyfile_state_free(state)
 }
 
 /// `copyfile_state_get(state, COPYFILE_STATE_COPIED)`
@@ -68,7 +68,7 @@ pub unsafe fn copyfile_state_free(state: copyfile_state_t) -> io::Result<()> {
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/fcopyfile.3.html
 #[inline]
 pub unsafe fn copyfile_state_get_copied(state: copyfile_state_t) -> io::Result<u64> {
-    imp::syscalls::copyfile_state_get_copied(state)
+    imp::fs::syscalls::copyfile_state_get_copied(state)
 }
 
 /// `copyfile_state_get(state, flags, dst)`
@@ -88,5 +88,5 @@ pub unsafe fn copyfile_state_get(
     flag: u32,
     dst: *mut core::ffi::c_void,
 ) -> io::Result<()> {
-    imp::syscalls::copyfile_state_get(state, flag, dst)
+    imp::fs::syscalls::copyfile_state_get(state, flag, dst)
 }

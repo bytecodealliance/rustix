@@ -36,5 +36,5 @@ use imp::fd::RawFd;
 /// not valid after the call.
 #[inline]
 pub unsafe fn close(raw_fd: RawFd) {
-    imp::syscalls::close(raw_fd)
+    imp::io::syscalls::close(raw_fd)
 }

@@ -20,7 +20,7 @@ pub use imp::time::{ClockId, DynamicClockId};
 #[inline]
 #[must_use]
 pub fn clock_getres(id: ClockId) -> Timespec {
-    imp::syscalls::clock_getres(id)
+    imp::time::syscalls::clock_getres(id)
 }
 
 /// `clock_gettime(id)`—Returns the current value of a clock.

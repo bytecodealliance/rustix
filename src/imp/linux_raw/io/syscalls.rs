@@ -496,7 +496,8 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // TODO: This code would benefit from having a better way to read into
         // uninitialized memory.
         let mut buf = [0];
-        match super::super::syscalls::recv(fd, &mut buf, RecvFlags::PEEK | RecvFlags::DONTWAIT) {
+        match super::super::net::syscalls::recv(fd, &mut buf, RecvFlags::PEEK | RecvFlags::DONTWAIT)
+        {
             Ok(0) => read = false,
             Err(err) => {
                 #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
@@ -513,7 +514,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // Do a `send` with `DONTWAIT` for 0 bytes. An `EPIPE` indicates
         // the write side is shut down.
         #[allow(unreachable_patterns)] // `EAGAIN` equals `EWOULDBLOCK`
-        match super::super::syscalls::send(fd, &[], SendFlags::DONTWAIT) {
+        match super::super::net::syscalls::send(fd, &[], SendFlags::DONTWAIT) {
             // TODO or-patterns when we don't need 1.51
             Err(io::Error::AGAIN) => (),
             Err(io::Error::WOULDBLOCK) => (),
