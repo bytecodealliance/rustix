@@ -11,12 +11,17 @@ fn main() {
     // the rustc version.
     println!("cargo:rerun-if-changed=build.rs");
 
-    use_feature_or_nothing("vec_into_raw_parts");
-    use_feature_or_nothing("toowned_clone_into");
     use_feature_or_nothing("rustc_attrs");
-    use_feature_or_nothing("specialization");
-    use_feature_or_nothing("slice_internals");
-    use_feature_or_nothing("const_raw_ptr_deref");
+
+    // Features only used in no-std configurations.
+    #[cfg(not(feature = "std"))]
+    {
+        use_feature_or_nothing("vec_into_raw_parts");
+        use_feature_or_nothing("toowned_clone_into");
+        use_feature_or_nothing("specialization");
+        use_feature_or_nothing("slice_internals");
+        use_feature_or_nothing("const_raw_ptr_deref");
+    }
 
     let arch = var("CARGO_CFG_TARGET_ARCH").unwrap();
     let asm_name = format!("{}/{}.s", OUTLINE_PATH, arch);
@@ -34,10 +39,7 @@ fn main() {
         use_feature("libc");
     } else {
         use_feature("linux_raw");
-
         use_feature_or_nothing("core_intrinsics");
-        use_feature_or_nothing("doc_cfg");
-
         use_feature_or_else("asm", || {
             link_in_librustix_outline(&arch, &asm_name);
         });
