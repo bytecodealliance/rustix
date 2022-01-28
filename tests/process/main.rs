@@ -20,3 +20,4 @@ mod uname;
 mod wait;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 mod working_directory;
+mod cpu_set;
