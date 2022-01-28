@@ -72,9 +72,9 @@ use crate::fs::FlockOperation;
 use crate::fs::MemfdFlags;
 #[cfg(any(
     target_os = "android",
-    target_os = "linux",
-    target_os = "fuchsia",
     target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "linux",
 ))]
 use crate::fs::SealFlags;
 #[cfg(not(any(
@@ -514,9 +514,9 @@ pub(crate) fn fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
 
 #[cfg(any(
     target_os = "android",
-    target_os = "linux",
-    target_os = "fuchsia",
     target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "linux",
 ))]
 pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<SealFlags> {
     unsafe {
@@ -527,9 +527,9 @@ pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<SealFlags> {
 
 #[cfg(any(
     target_os = "android",
-    target_os = "linux",
-    target_os = "fuchsia",
     target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "linux",
 ))]
 pub(crate) fn fcntl_add_seals(fd: BorrowedFd<'_>, seals: SealFlags) -> io::Result<()> {
     unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_ADD_SEALS, seals.bits())) }

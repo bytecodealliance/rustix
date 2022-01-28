@@ -32,8 +32,8 @@ use imp::time::ClockId;
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "ios",
     target_os = "macos",
-    target_os = "redox",
     target_os = "openbsd",
+    target_os = "redox",
     target_os = "wasi",
 )))))]
 #[inline]

@@ -147,8 +147,8 @@ pub(crate) fn sockaddr_in6_sin6_scope_id_mut(addr: &mut c::sockaddr_in6) -> &mut
 pub(crate) const fn sockaddr_in6_new(
     #[cfg(any(
         target_os = "dragonfly",
-        target_os = "ios",
         target_os = "freebsd",
+        target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd"
@@ -163,8 +163,8 @@ pub(crate) const fn sockaddr_in6_new(
     c::sockaddr_in6 {
         #[cfg(any(
             target_os = "dragonfly",
-            target_os = "ios",
             target_os = "freebsd",
+            target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd"

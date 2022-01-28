@@ -5,9 +5,9 @@ pub(crate) mod syscalls;
 mod dir;
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "freebsd",
     target_os = "illumos",
     target_os = "ios",
-    target_os = "freebsd",
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
@@ -21,9 +21,9 @@ mod types;
 pub use dir::{Dir, DirEntry};
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "freebsd",
     target_os = "illumos",
     target_os = "ios",
-    target_os = "freebsd",
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
@@ -52,9 +52,9 @@ pub use types::FallocateFlags;
 pub use types::FlockOperation;
 #[cfg(any(
     target_os = "android",
-    target_os = "linux",
+    target_os = "freebsd",
     target_os = "fuchsia",
-    target_os = "freebsd"
+    target_os = "linux",
 ))]
 pub use types::SealFlags;
 #[cfg(not(any(

@@ -26,8 +26,8 @@ pub(crate) unsafe fn encode_sockaddr_v4(v4: &SocketAddrV4) -> c::sockaddr_in {
     c::sockaddr_in {
         #[cfg(any(
             target_os = "dragonfly",
-            target_os = "ios",
             target_os = "freebsd",
+            target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd"
@@ -49,8 +49,8 @@ unsafe fn write_sockaddr_v4(v4: &SocketAddrV4, storage: *mut SocketAddrStorage) 
 pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> c::sockaddr_in6 {
     #[cfg(any(
         target_os = "dragonfly",
-        target_os = "ios",
         target_os = "freebsd",
+        target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd"
@@ -67,8 +67,8 @@ pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> c::sockaddr_in6 {
     }
     #[cfg(not(any(
         target_os = "dragonfly",
-        target_os = "ios",
         target_os = "freebsd",
+        target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd"

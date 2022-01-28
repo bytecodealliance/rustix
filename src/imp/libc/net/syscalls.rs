@@ -645,27 +645,27 @@ pub(crate) mod sockopt {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "openbsd",
-            target_os = "netbsd",
-            target_os = "illumos",
-            target_os = "solaris",
             target_os = "haiku",
-            target_os = "l4re"
+            target_os = "illumos",
+            target_os = "ios",
+            target_os = "l4re",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "solaris",
         )))]
         use c::IPV6_ADD_MEMBERSHIP;
         #[cfg(any(
             target_os = "dragonfly",
             target_os = "freebsd",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "openbsd",
-            target_os = "netbsd",
-            target_os = "illumos",
-            target_os = "solaris",
             target_os = "haiku",
-            target_os = "l4re"
+            target_os = "illumos",
+            target_os = "ios",
+            target_os = "l4re",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "solaris",
         ))]
         use c::IPV6_JOIN_GROUP as IPV6_ADD_MEMBERSHIP;
 
@@ -692,27 +692,27 @@ pub(crate) mod sockopt {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "openbsd",
-            target_os = "netbsd",
-            target_os = "illumos",
-            target_os = "solaris",
             target_os = "haiku",
-            target_os = "l4re"
+            target_os = "illumos",
+            target_os = "ios",
+            target_os = "l4re",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "solaris",
         )))]
         use c::IPV6_DROP_MEMBERSHIP;
         #[cfg(any(
             target_os = "dragonfly",
             target_os = "freebsd",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "openbsd",
-            target_os = "netbsd",
-            target_os = "illumos",
-            target_os = "solaris",
             target_os = "haiku",
-            target_os = "l4re"
+            target_os = "illumos",
+            target_os = "ios",
+            target_os = "l4re",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "solaris",
         ))]
         use c::IPV6_LEAVE_GROUP as IPV6_DROP_MEMBERSHIP;
 

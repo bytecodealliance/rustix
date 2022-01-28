@@ -72,9 +72,9 @@ pub fn fcntl_setfl<Fd: AsFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[cfg(any(
     target_os = "android",
-    target_os = "linux",
-    target_os = "fuchsia",
     target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "linux",
 ))]
 #[inline]
 #[doc(alias = "F_GET_SEALS")]
@@ -84,9 +84,9 @@ pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<SealFlags> {
 
 #[cfg(any(
     target_os = "android",
-    target_os = "linux",
-    target_os = "fuchsia",
     target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "linux",
 ))]
 pub use imp::fs::SealFlags;
 
@@ -98,9 +98,9 @@ pub use imp::fs::SealFlags;
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[cfg(any(
     target_os = "android",
-    target_os = "linux",
-    target_os = "fuchsia",
     target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "linux",
 ))]
 #[inline]
 #[doc(alias = "F_ADD_SEALS")]

@@ -26,8 +26,8 @@ pub(crate) fn offsetof_sun_path() -> usize {
     let z = c::sockaddr_un {
         #[cfg(any(
             target_os = "dragonfly",
-            target_os = "ios",
             target_os = "freebsd",
+            target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd"
@@ -35,8 +35,8 @@ pub(crate) fn offsetof_sun_path() -> usize {
         sun_len: 0_u8,
         #[cfg(any(
             target_os = "dragonfly",
-            target_os = "ios",
             target_os = "freebsd",
+            target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd"
@@ -44,8 +44,8 @@ pub(crate) fn offsetof_sun_path() -> usize {
         sun_family: 0_u8,
         #[cfg(not(any(
             target_os = "dragonfly",
-            target_os = "ios",
             target_os = "freebsd",
+            target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd"
@@ -53,8 +53,8 @@ pub(crate) fn offsetof_sun_path() -> usize {
         sun_family: 0_u16,
         #[cfg(any(
             target_os = "dragonfly",
-            target_os = "ios",
             target_os = "freebsd",
+            target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd"
@@ -62,8 +62,8 @@ pub(crate) fn offsetof_sun_path() -> usize {
         sun_path: [0; 104],
         #[cfg(not(any(
             target_os = "dragonfly",
-            target_os = "ios",
             target_os = "freebsd",
+            target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd"

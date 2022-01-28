@@ -248,8 +248,8 @@ bitflags! {
         #[cfg(any(target_os = "android",
                   target_os = "dragonfly",
                   target_os = "emscripten",
-                  target_os = "fuchsia",
                   target_os = "freebsd",
+                  target_os = "fuchsia",
                   target_os = "haiku",
                   target_os = "hermit",
                   target_os = "illumos",
@@ -539,9 +539,9 @@ bitflags! {
 
 #[cfg(any(
     target_os = "android",
-    target_os = "linux",
+    target_os = "freebsd",
     target_os = "fuchsia",
-    target_os = "freebsd"
+    target_os = "linux",
 ))]
 bitflags! {
     /// `F_SEAL_*` constants for use with [`fcntl_add_seals`] and
@@ -644,10 +644,10 @@ bitflags! {
                       target_os = "wasi")))]
         const PUNCH_HOLE = c::FALLOC_FL_PUNCH_HOLE;
         /// `FALLOC_FL_NO_HIDE_STALE`
-        #[cfg(not(any(target_os = "linux",
-                      target_os = "dragonfly",
+        #[cfg(not(any(target_os = "dragonfly",
                       target_os = "freebsd",
                       target_os = "ios",
+                      target_os = "linux",
                       target_os = "macos",
                       target_os = "netbsd",
                       target_os = "openbsd",
