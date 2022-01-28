@@ -1,9 +1,19 @@
+//! Syscall wrappers for platforms which pass the syscall number specially.
+//!
+//! Rustix aims to minimize the amount of assembly code it needs. To that end,
+//! this code reorders syscall arguments as close as feasible to the actual
+//! syscall convention before calling the assembly functions.
+//!
+//! Many architectures use a convention where the syscall number is passed in a
+//! special register, with the regular syscall arguments passed in either the
+//! same or similar registers as the platform C convention. This code
+//! approximates that order by passing the regular syscall arguments first, and
+//! the syscall number last. That way, the outline assembly code typically just
+//! needs to move the syscall number to its special register, and leave the
+//! other arguments mostly as they are.
+
 use crate::imp::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
 
-// Some architectures' outline assembly code prefers to see the `nr` argument
-// last, as that lines up the syscall calling convention with the userspace
-// calling convention better.
-//
 // First we declare the actual assembly routines with `*_nr_last` names and
 // reordered arguments. If the signatures or calling conventions are ever
 // changed, the symbol names should also be updated accordingly, to avoid
@@ -125,8 +135,9 @@ pub(in crate::imp) unsafe fn syscall6(
     rustix_syscall6_nr_last(a0, a1, a2, a3, a4, a5, nr)
 }
 
-// We don't have separate `_readonly` implementations, so these can just be
-// aliases to their non-`_readonly` counterparts.
+// Then we define the `_readonly` versions of the wrappers. We don't have
+// separate `_readonly` implementations, so these can just be aliases to
+// their non-`_readonly` counterparts.
 pub(in crate::imp) use {
     syscall0 as syscall0_readonly, syscall1 as syscall1_readonly, syscall2 as syscall2_readonly,
     syscall3 as syscall3_readonly, syscall4 as syscall4_readonly, syscall5 as syscall5_readonly,
