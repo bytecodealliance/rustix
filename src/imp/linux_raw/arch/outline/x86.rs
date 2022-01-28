@@ -1,12 +1,22 @@
+//! Syscall wrappers for 32-bit x86.
+//!
+//! This module is similar to the `nr_last` module, except specialized for
+//! 32-bit x86.
+//!
+//! The syscall convention passes all arguments in registers. The closest we
+//! can easily get to that from Rust is to use the fastcall convention which
+//! passes the first two arguments in `ecx` and `edx`, which are the second
+//! and third Linux syscall arguments. To line them up, this function passes
+//! the second and third syscall argument as the first and second argument to
+//! the outline assembly, followed by the first syscall argument, and then the
+//! rest of the syscall arguments. The assembly code still has to do some work,
+//! but at least we can get up to two arguments into the right place for it.
+
 #![allow(dead_code, unused_imports)]
 
 use crate::imp::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
 use crate::imp::vdso_wrappers::SyscallType;
 
-// x86 (using fastcall) prefers to pass a1 and a2 first, before a0, because
-// fastcall passes the first two arguments in ecx and edx, which are the second
-// and third Linux syscall arguments.
-//
 // First we declare the actual assembly routines with `*_nr_last_fastcall`
 // names and reordered arguments. If the signatures or calling conventions are
 // ever changed, the symbol names should also be updated accordingly, to avoid
@@ -128,8 +138,9 @@ pub(in crate::imp) unsafe fn syscall6(
     rustix_syscall6_nr_last_fastcall(a1, a2, a0, a3, a4, a5, nr)
 }
 
-// We don't have separate `_readonly` implementations, so these can just be
-// aliases to their non-`_readonly` counterparts.
+// Then we define the `_readonly` versions of the wrappers. We don't have
+// separate `_readonly` implementations, so these can just be aliases to
+// their non-`_readonly` counterparts.
 pub(in crate::imp) use {
     syscall0 as syscall0_readonly, syscall1 as syscall1_readonly, syscall2 as syscall2_readonly,
     syscall3 as syscall3_readonly, syscall4 as syscall4_readonly, syscall5 as syscall5_readonly,
