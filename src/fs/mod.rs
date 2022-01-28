@@ -232,7 +232,7 @@ pub use imp::fs::{Dev, RawMode};
 
 /// Timestamps used by [`utimensat`] and [`futimens`].
 //
-// This is `repr(c)` and specifically laid out to match the representation
+// This is `repr(C)` and specifically laid out to match the representation
 // used by `utimensat` and `futimens`, which expect 2-element arrays of
 // timestamps.
 #[repr(C)]

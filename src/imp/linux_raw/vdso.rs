@@ -314,7 +314,7 @@ impl Vdso {
         //
         // The version definition table is a mess, and I don't know how
         // to do this in better than linear time without allocating memory
-        // to build an index.  I also don't know why the table has
+        // to build an index. I also don't know why the table has
         // variable size entries in the first place.
         //
         // For added fun, I can't find a comprehensible specification of how
