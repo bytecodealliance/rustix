@@ -32,7 +32,7 @@ impl Default for Protocol {
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-socket
 #[inline]
 pub fn socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::Result<OwnedFd> {
-    imp::syscalls::socket(domain, type_, protocol)
+    imp::net::syscalls::socket(domain, type_, protocol)
 }
 
 /// `socket_with(domain, type_ | flags, protocol)`—Creates a socket, with
@@ -60,7 +60,7 @@ pub fn socket_with(
     flags: SocketFlags,
     protocol: Protocol,
 ) -> io::Result<OwnedFd> {
-    imp::syscalls::socket_with(domain, type_, flags, protocol)
+    imp::net::syscalls::socket_with(domain, type_, flags, protocol)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in))`—Binds a socket to an
@@ -78,7 +78,7 @@ pub fn socket_with(
 #[doc(alias = "bind")]
 pub fn bind_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::bind_v4(sockfd, addr)
+    imp::net::syscalls::bind_v4(sockfd, addr)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in6))`—Binds a socket to an
@@ -96,7 +96,7 @@ pub fn bind_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> {
 #[doc(alias = "bind")]
 pub fn bind_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::bind_v6(sockfd, addr)
+    imp::net::syscalls::bind_v6(sockfd, addr)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_un))`—Binds a socket to an
@@ -115,7 +115,7 @@ pub fn bind_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
 #[cfg(not(windows))]
 pub fn bind_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::bind_unix(sockfd, addr)
+    imp::net::syscalls::bind_unix(sockfd, addr)
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_in))`—Initiates a
@@ -133,7 +133,7 @@ pub fn bind_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()>
 #[doc(alias = "connect")]
 pub fn connect_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::connect_v4(sockfd, addr)
+    imp::net::syscalls::connect_v4(sockfd, addr)
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_in6))`—Initiates a
@@ -151,7 +151,7 @@ pub fn connect_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> 
 #[doc(alias = "connect")]
 pub fn connect_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::connect_v6(sockfd, addr)
+    imp::net::syscalls::connect_v6(sockfd, addr)
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_un))`—Initiates a
@@ -168,7 +168,7 @@ pub fn connect_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> 
 #[cfg(not(windows))]
 pub fn connect_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::connect_unix(sockfd, addr)
+    imp::net::syscalls::connect_unix(sockfd, addr)
 }
 
 /// `listen(fd, backlog)`—Enables listening for incoming connections.
@@ -184,7 +184,7 @@ pub fn connect_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<
 #[inline]
 pub fn listen<Fd: AsFd>(sockfd: &Fd, backlog: i32) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::listen(sockfd, backlog)
+    imp::net::syscalls::listen(sockfd, backlog)
 }
 
 /// `accept(fd, NULL, NULL)`—Accepts an incoming connection.
@@ -207,7 +207,7 @@ pub fn listen<Fd: AsFd>(sockfd: &Fd, backlog: i32) -> io::Result<()> {
 #[doc(alias = "accept4")]
 pub fn accept<Fd: AsFd>(sockfd: &Fd) -> io::Result<OwnedFd> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::accept(sockfd)
+    imp::net::syscalls::accept(sockfd)
 }
 
 /// `accept4(fd, NULL, NULL, flags)`—Accepts an incoming connection, with
@@ -234,7 +234,7 @@ pub fn accept<Fd: AsFd>(sockfd: &Fd) -> io::Result<OwnedFd> {
 #[doc(alias = "accept4")]
 pub fn accept_with<Fd: AsFd>(sockfd: &Fd, flags: AcceptFlags) -> io::Result<OwnedFd> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::accept_with(sockfd, flags)
+    imp::net::syscalls::accept_with(sockfd, flags)
 }
 
 /// `accept(fd, &addr, &len)`—Accepts an incoming connection and returns the
@@ -254,7 +254,7 @@ pub fn accept_with<Fd: AsFd>(sockfd: &Fd, flags: AcceptFlags) -> io::Result<Owne
 #[doc(alias = "accept4")]
 pub fn acceptfrom<Fd: AsFd>(sockfd: &Fd) -> io::Result<(OwnedFd, SocketAddrAny)> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::acceptfrom(sockfd)
+    imp::net::syscalls::acceptfrom(sockfd)
 }
 
 /// `accept4(fd, &addr, &len, flags)`—Accepts an incoming connection and
@@ -280,7 +280,7 @@ pub fn acceptfrom_with<Fd: AsFd>(
     flags: AcceptFlags,
 ) -> io::Result<(OwnedFd, SocketAddrAny)> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::acceptfrom_with(sockfd, flags)
+    imp::net::syscalls::acceptfrom_with(sockfd, flags)
 }
 
 /// `shutdown(fd, how)`—Closes the read and/or write sides of a stream.
@@ -296,7 +296,7 @@ pub fn acceptfrom_with<Fd: AsFd>(
 #[inline]
 pub fn shutdown<Fd: AsFd>(sockfd: &Fd, how: Shutdown) -> io::Result<()> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::shutdown(sockfd, how)
+    imp::net::syscalls::shutdown(sockfd, how)
 }
 
 /// `getsockname(fd, addr, len)`—Returns the address a socket is bound to.
@@ -312,7 +312,7 @@ pub fn shutdown<Fd: AsFd>(sockfd: &Fd, how: Shutdown) -> io::Result<()> {
 #[inline]
 pub fn getsockname<Fd: AsFd>(sockfd: &Fd) -> io::Result<SocketAddrAny> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::getsockname(sockfd)
+    imp::net::syscalls::getsockname(sockfd)
 }
 
 /// `getpeername(fd, addr, len)`—Returns the address a socket is connected
@@ -329,5 +329,5 @@ pub fn getsockname<Fd: AsFd>(sockfd: &Fd) -> io::Result<SocketAddrAny> {
 #[inline]
 pub fn getpeername<Fd: AsFd>(sockfd: &Fd) -> io::Result<SocketAddrAny> {
     let sockfd = sockfd.as_fd();
-    imp::syscalls::getpeername(sockfd)
+    imp::net::syscalls::getpeername(sockfd)
 }

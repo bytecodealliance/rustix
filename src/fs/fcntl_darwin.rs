@@ -10,7 +10,7 @@ use imp::fd::AsFd;
 #[inline]
 pub fn fcntl_rdadvise<Fd: AsFd>(fd: &Fd, offset: u64, len: u64) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::fcntl_rdadvise(fd, offset, len)
+    imp::fs::syscalls::fcntl_rdadvise(fd, offset, len)
 }
 
 /// `fcntl(fd, F_FULLFSYNC)`
@@ -22,5 +22,5 @@ pub fn fcntl_rdadvise<Fd: AsFd>(fd: &Fd, offset: u64, len: u64) -> io::Result<()
 #[inline]
 pub fn fcntl_fullfsync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::fcntl_fullfsync(fd)
+    imp::fs::syscalls::fcntl_fullfsync(fd)
 }

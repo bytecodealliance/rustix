@@ -66,7 +66,7 @@ impl MembarrierQuery {
 #[inline]
 #[doc(alias = "MEMBARRIER_CMD_QUERY")]
 pub fn membarrier_query() -> MembarrierQuery {
-    imp::syscalls::membarrier_query()
+    imp::process::syscalls::membarrier_query()
 }
 
 /// `membarrier(cmd, 0, 0)`—Perform a memory barrier.
@@ -77,7 +77,7 @@ pub fn membarrier_query() -> MembarrierQuery {
 /// [Linux]: https://man7.org/linux/man-pages/man2/membarrier.2.html
 #[inline]
 pub fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
-    imp::syscalls::membarrier(cmd)
+    imp::process::syscalls::membarrier(cmd)
 }
 
 /// `membarrier(cmd, MEMBARRIER_CMD_FLAG_CPU, cpu)`—Perform a memory barrier
@@ -89,5 +89,5 @@ pub fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/membarrier.2.html
 #[inline]
 pub fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<()> {
-    imp::syscalls::membarrier_cpu(cmd, cpu)
+    imp::process::syscalls::membarrier_cpu(cmd, cpu)
 }

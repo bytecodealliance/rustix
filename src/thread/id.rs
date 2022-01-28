@@ -10,5 +10,5 @@ use crate::process::Pid;
 #[inline]
 #[must_use]
 pub fn gettid() -> Pid {
-    imp::syscalls::gettid()
+    imp::thread::syscalls::gettid()
 }

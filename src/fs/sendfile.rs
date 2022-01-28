@@ -17,5 +17,5 @@ pub fn sendfile<OutFd: AsFd, InFd: AsFd>(
 ) -> io::Result<usize> {
     let out_fd = out_fd.as_fd();
     let in_fd = in_fd.as_fd();
-    imp::syscalls::sendfile(out_fd, in_fd, offset, count)
+    imp::fs::syscalls::sendfile(out_fd, in_fd, offset, count)
 }

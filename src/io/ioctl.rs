@@ -28,7 +28,7 @@ use imp::fd::AsSocketAsFd;
 #[doc(alias = "TCGETS")]
 pub fn ioctl_tcgets<Fd: AsFd>(fd: &Fd) -> io::Result<Termios> {
     let fd = fd.as_fd();
-    imp::syscalls::ioctl_tcgets(fd)
+    imp::io::syscalls::ioctl_tcgets(fd)
 }
 
 /// `ioctl(fd, FIOCLEX)`—Set the close-on-exec flag.
@@ -40,7 +40,7 @@ pub fn ioctl_tcgets<Fd: AsFd>(fd: &Fd) -> io::Result<Termios> {
 #[doc(alias = "FD_CLOEXEC")]
 pub fn ioctl_fioclex<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::ioctl_fioclex(fd)
+    imp::io::syscalls::ioctl_fioclex(fd)
 }
 
 /// `ioctl(fd, TIOCGWINSZ)`—Get the current terminal window size.
@@ -54,7 +54,7 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 #[doc(alias = "TIOCGWINSZ")]
 pub fn ioctl_tiocgwinsz<Fd: AsFd>(fd: &Fd) -> io::Result<Winsize> {
     let fd = fd.as_fd();
-    imp::syscalls::ioctl_tiocgwinsz(fd)
+    imp::io::syscalls::ioctl_tiocgwinsz(fd)
 }
 
 /// `ioctl(fd, FIONBIO, &value)`—Enables or disables non-blocking mode.
@@ -62,7 +62,7 @@ pub fn ioctl_tiocgwinsz<Fd: AsFd>(fd: &Fd) -> io::Result<Winsize> {
 #[doc(alias = "FIONBIO")]
 pub fn ioctl_fionbio<Fd: AsFd>(fd: &Fd, value: bool) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::ioctl_fionbio(fd, value)
+    imp::io::syscalls::ioctl_fionbio(fd, value)
 }
 
 /// `ioctl(fd, TIOCEXCL)`—Enables exclusive mode on a terminal.
@@ -79,7 +79,7 @@ pub fn ioctl_fionbio<Fd: AsFd>(fd: &Fd, value: bool) -> io::Result<()> {
 #[doc(alias = "TIOCEXCL")]
 pub fn ioctl_tiocexcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::ioctl_tiocexcl(fd)
+    imp::io::syscalls::ioctl_tiocexcl(fd)
 }
 
 /// `ioctl(fd, TIOCNXCL)`—Disables exclusive mode on a terminal.
@@ -96,7 +96,7 @@ pub fn ioctl_tiocexcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 #[doc(alias = "TIOCNXCL")]
 pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::ioctl_tiocnxcl(fd)
+    imp::io::syscalls::ioctl_tiocnxcl(fd)
 }
 
 /// `ioctl(fd, FIONREAD)`—Returns the number of bytes ready to be read.
@@ -113,7 +113,7 @@ pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 #[doc(alias = "FIONREAD")]
 pub fn ioctl_fionread<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
     let fd = fd.as_fd();
-    imp::syscalls::ioctl_fionread(fd)
+    imp::io::syscalls::ioctl_fionread(fd)
 }
 
 /// `ioctl(fd, BLKSSZGET)`—Returns the logical block size of a block device.
@@ -122,7 +122,7 @@ pub fn ioctl_fionread<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
 #[doc(alias = "BLKSSZGET")]
 pub fn ioctl_blksszget<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
     let fd = fd.as_fd();
-    imp::syscalls::ioctl_blksszget(fd)
+    imp::io::syscalls::ioctl_blksszget(fd)
 }
 
 /// `ioctl(fd, BLKPBSZGET)`—Returns the physical block size of a block device.
@@ -131,5 +131,5 @@ pub fn ioctl_blksszget<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
 #[doc(alias = "BLKPBSZGET")]
 pub fn ioctl_blkpbszget<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
     let fd = fd.as_fd();
-    imp::syscalls::ioctl_blkpbszget(fd)
+    imp::io::syscalls::ioctl_blkpbszget(fd)
 }

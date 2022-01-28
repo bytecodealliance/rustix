@@ -496,7 +496,8 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // TODO: This code would benefit from having a better way to read into
         // uninitialized memory.
         let mut buf = [0];
-        match super::super::syscalls::recv(fd, &mut buf, RecvFlags::PEEK | RecvFlags::DONTWAIT) {
+        match super::super::net::syscalls::recv(fd, &mut buf, RecvFlags::PEEK | RecvFlags::DONTWAIT)
+        {
             Ok(0) => read = false,
             Err(err) => {
                 #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
@@ -513,7 +514,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // Do a `send` with `DONTWAIT` for 0 bytes. An `EPIPE` indicates
         // the write side is shut down.
         #[allow(unreachable_patterns)] // `EAGAIN` equals `EWOULDBLOCK`
-        match super::super::syscalls::send(fd, &[], SendFlags::DONTWAIT) {
+        match super::super::net::syscalls::send(fd, &[], SendFlags::DONTWAIT) {
             // TODO or-patterns when we don't need 1.51
             Err(io::Error::AGAIN) => (),
             Err(io::Error::WOULDBLOCK) => (),
@@ -563,7 +564,7 @@ pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> i
 #[cfg(feature = "procfs")]
 #[inline]
 pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
-    let fd_stat = super::super::syscalls::fstat(fd)?;
+    let fd_stat = super::super::fs::syscalls::fstat(fd)?;
 
     // Quick check: if `fd` isn't a character device, it's not a tty.
     if FileType::from_raw_mode(fd_stat.st_mode) != FileType::CharacterDevice {
@@ -577,7 +578,8 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     let proc_self_fd = io::proc_self_fd()?;
 
     // Gather the ttyname by reading the 'fd' file inside 'proc_self_fd'.
-    let r = super::super::syscalls::readlinkat(proc_self_fd, DecInt::from_fd(&fd).as_c_str(), buf)?;
+    let r =
+        super::super::fs::syscalls::readlinkat(proc_self_fd, DecInt::from_fd(&fd).as_c_str(), buf)?;
 
     // If the number of bytes is equal to the buffer length, truncation may
     // have occurred. This check also ensures that we have enough space for
@@ -590,7 +592,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     // Check that the path we read refers to the same file as `fd`.
     let path = ZStr::from_bytes_with_nul(&buf[..=r]).unwrap();
 
-    let path_stat = super::super::syscalls::stat(path)?;
+    let path_stat = super::super::fs::syscalls::stat(path)?;
     if path_stat.st_dev != fd_stat.st_dev || path_stat.st_ino != fd_stat.st_ino {
         return Err(crate::io::Error::NODEV);
     }

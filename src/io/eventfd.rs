@@ -12,5 +12,5 @@ pub use imp::io::EventfdFlags;
 /// [Linux]: https://man7.org/linux/man-pages/man2/eventfd.2.html
 #[inline]
 pub fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
-    imp::syscalls::eventfd(initval, flags)
+    imp::io::syscalls::eventfd(initval, flags)
 }

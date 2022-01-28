@@ -17,5 +17,5 @@ pub fn socketpair(
     flags: SocketFlags,
     protocol: Protocol,
 ) -> io::Result<(OwnedFd, OwnedFd)> {
-    imp::syscalls::socketpair(domain, type_, flags, protocol)
+    imp::net::syscalls::socketpair(domain, type_, flags, protocol)
 }

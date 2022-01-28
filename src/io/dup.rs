@@ -29,7 +29,7 @@ pub use imp::io::DupFlags;
 #[inline]
 pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
     let fd = fd.as_fd();
-    imp::syscalls::dup(fd)
+    imp::io::syscalls::dup(fd)
 }
 
 /// `dup2(fd, new)`—Creates a new `OwnedFd` instance that shares the
@@ -51,7 +51,7 @@ pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
 #[inline]
 pub fn dup2<Fd: AsFd>(fd: &Fd, new: &OwnedFd) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::dup2(fd, new)
+    imp::io::syscalls::dup2(fd, new)
 }
 
 /// `dup3(fd, new, flags)`—Creates a new `OwnedFd` instance that shares the
@@ -72,5 +72,5 @@ pub fn dup2<Fd: AsFd>(fd: &Fd, new: &OwnedFd) -> io::Result<()> {
 #[doc(alias = "dup3")]
 pub fn dup2_with<Fd: AsFd>(fd: &Fd, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
     let fd = fd.as_fd();
-    imp::syscalls::dup2_with(fd, new, flags)
+    imp::io::syscalls::dup2_with(fd, new, flags)
 }

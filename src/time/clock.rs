@@ -20,7 +20,7 @@ pub use imp::time::{ClockId, DynamicClockId};
 #[inline]
 #[must_use]
 pub fn clock_getres(id: ClockId) -> Timespec {
-    imp::syscalls::clock_getres(id)
+    imp::time::syscalls::clock_getres(id)
 }
 
 /// `clock_gettime(id)`—Returns the current value of a clock.
@@ -40,7 +40,7 @@ pub fn clock_getres(id: ClockId) -> Timespec {
 #[inline]
 #[must_use]
 pub fn clock_gettime(id: ClockId) -> Timespec {
-    imp::syscalls::clock_gettime(id)
+    imp::time::syscalls::clock_gettime(id)
 }
 
 /// Like [`clock_gettime`] but with support for dynamic clocks.
@@ -54,5 +54,5 @@ pub fn clock_gettime(id: ClockId) -> Timespec {
 #[cfg(any(linux_raw, all(libc, not(target_os = "wasi"))))]
 #[inline]
 pub fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timespec> {
-    imp::syscalls::clock_gettime_dynamic(id)
+    imp::time::syscalls::clock_gettime_dynamic(id)
 }

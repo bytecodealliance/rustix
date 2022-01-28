@@ -23,7 +23,7 @@ pub use imp::net::{RecvFlags, SendFlags};
 #[inline]
 pub fn recv<Fd: AsFd>(fd: &Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
     let fd = fd.as_fd();
-    imp::syscalls::recv(fd, buf, flags)
+    imp::net::syscalls::recv(fd, buf, flags)
 }
 
 /// `send(fd, buf, flags)`—Writes data to a socket.
@@ -39,7 +39,7 @@ pub fn recv<Fd: AsFd>(fd: &Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<u
 #[inline]
 pub fn send<Fd: AsFd>(fd: &Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize> {
     let fd = fd.as_fd();
-    imp::syscalls::send(fd, buf, flags)
+    imp::net::syscalls::send(fd, buf, flags)
 }
 
 /// `recvfrom(fd, buf, flags, addr, len)`—Reads data from a socket and
@@ -60,7 +60,7 @@ pub fn recvfrom<Fd: AsFd>(
     flags: RecvFlags,
 ) -> io::Result<(usize, SocketAddrAny)> {
     let fd = fd.as_fd();
-    imp::syscalls::recvfrom(fd, buf, flags)
+    imp::net::syscalls::recvfrom(fd, buf, flags)
 }
 
 /// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_in))`—Writes data to
@@ -83,7 +83,7 @@ pub fn sendto_v4<Fd: AsFd>(
     addr: &SocketAddrV4,
 ) -> io::Result<usize> {
     let fd = fd.as_fd();
-    imp::syscalls::sendto_v4(fd, buf, flags, addr)
+    imp::net::syscalls::sendto_v4(fd, buf, flags, addr)
 }
 
 /// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_in6))`—Writes data
@@ -106,7 +106,7 @@ pub fn sendto_v6<Fd: AsFd>(
     addr: &SocketAddrV6,
 ) -> io::Result<usize> {
     let fd = fd.as_fd();
-    imp::syscalls::sendto_v6(fd, buf, flags, addr)
+    imp::net::syscalls::sendto_v6(fd, buf, flags, addr)
 }
 
 /// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_un))`—Writes data to
@@ -130,7 +130,7 @@ pub fn sendto_unix<Fd: AsFd>(
     addr: &SocketAddrUnix,
 ) -> io::Result<usize> {
     let fd = fd.as_fd();
-    imp::syscalls::sendto_unix(fd, buf, flags, addr)
+    imp::net::syscalls::sendto_unix(fd, buf, flags, addr)
 }
 
 // TODO: `recvmsg`, `sendmsg`

@@ -42,7 +42,7 @@ pub unsafe fn mmap<Fd: AsFd>(
     offset: u64,
 ) -> io::Result<*mut c_void> {
     let fd = fd.as_fd();
-    imp::syscalls::mmap(ptr, len, prot, flags, fd, offset)
+    imp::io::syscalls::mmap(ptr, len, prot, flags, fd, offset)
 }
 
 /// `mmap(ptr, len, prot, MAP_ANONYMOUS | flags, -1, 0)`—Create an anonymous
@@ -68,7 +68,7 @@ pub unsafe fn mmap_anonymous(
     prot: ProtFlags,
     flags: MapFlags,
 ) -> io::Result<*mut c_void> {
-    imp::syscalls::mmap_anonymous(ptr, len, prot, flags)
+    imp::io::syscalls::mmap_anonymous(ptr, len, prot, flags)
 }
 
 /// `munmap(ptr, len)`
@@ -85,7 +85,7 @@ pub unsafe fn mmap_anonymous(
 /// [Linux]: https://man7.org/linux/man-pages/man2/munmap.2.html
 #[inline]
 pub unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
-    imp::syscalls::munmap(ptr, len)
+    imp::io::syscalls::munmap(ptr, len)
 }
 
 /// `mremap(old_address, old_size, new_size, flags)`—Resize, modify,
@@ -110,7 +110,7 @@ pub unsafe fn mremap(
     new_size: usize,
     flags: MremapFlags,
 ) -> io::Result<*mut c_void> {
-    imp::syscalls::mremap(old_address, old_size, new_size, flags)
+    imp::io::syscalls::mremap(old_address, old_size, new_size, flags)
 }
 
 /// `mremap(old_address, old_size, new_size, MREMAP_FIXED | flags)`—Resize,
@@ -137,7 +137,7 @@ pub unsafe fn mremap_fixed(
     flags: MremapFlags,
     new_address: *mut c_void,
 ) -> io::Result<*mut c_void> {
-    imp::syscalls::mremap_fixed(old_address, old_size, new_size, flags, new_address)
+    imp::io::syscalls::mremap_fixed(old_address, old_size, new_size, flags, new_address)
 }
 
 /// `mprotect(ptr, len, flags)`
@@ -154,7 +154,7 @@ pub unsafe fn mremap_fixed(
 /// [Linux]: https://man7.org/linux/man-pages/man2/mprotect.2.html
 #[inline]
 pub unsafe fn mprotect(ptr: *mut c_void, len: usize, flags: MprotectFlags) -> io::Result<()> {
-    imp::syscalls::mprotect(ptr, len, flags)
+    imp::io::syscalls::mprotect(ptr, len, flags)
 }
 
 /// `mlock(ptr, len)`—Lock memory into RAM.
@@ -178,7 +178,7 @@ pub unsafe fn mprotect(ptr: *mut c_void, len: usize, flags: MprotectFlags) -> io
 /// [Linux]: https://man7.org/linux/man-pages/man2/mlock.2.html
 #[inline]
 pub unsafe fn mlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
-    imp::syscalls::mlock(ptr, len)
+    imp::io::syscalls::mlock(ptr, len)
 }
 
 /// `mlock2(ptr, len, flags)`—Lock memory into RAM, with
@@ -205,7 +205,7 @@ pub unsafe fn mlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
 #[inline]
 #[doc(alias = "mlock2")]
 pub unsafe fn mlock_with(ptr: *mut c_void, len: usize, flags: MlockFlags) -> io::Result<()> {
-    imp::syscalls::mlock_with(ptr, len, flags)
+    imp::io::syscalls::mlock_with(ptr, len, flags)
 }
 
 /// `munlock(ptr, len)`—Unlock memory.
@@ -228,5 +228,5 @@ pub unsafe fn mlock_with(ptr: *mut c_void, len: usize, flags: MlockFlags) -> io:
 /// [Linux]: https://man7.org/linux/man-pages/man2/munlock.2.html
 #[inline]
 pub unsafe fn munlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
-    imp::syscalls::munlock(ptr, len)
+    imp::io::syscalls::munlock(ptr, len)
 }

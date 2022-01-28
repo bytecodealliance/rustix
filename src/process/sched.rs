@@ -82,7 +82,7 @@ impl CpuSet {
 /// [Linux]: https://man7.org/linux/man-pages/man2/sched_setaffinity.2.html
 #[inline]
 pub fn sched_setaffinity(pid: Option<Pid>, cpuset: &CpuSet) -> io::Result<()> {
-    imp::syscalls::sched_setaffinity(pid, &cpuset.cpu_set)
+    imp::process::syscalls::sched_setaffinity(pid, &cpuset.cpu_set)
 }
 
 /// `sched_getaffinity(pid)`—Get a thread's CPU affinity mask.
@@ -99,5 +99,5 @@ pub fn sched_setaffinity(pid: Option<Pid>, cpuset: &CpuSet) -> io::Result<()> {
 #[inline]
 pub fn sched_getaffinity(pid: Option<Pid>) -> io::Result<CpuSet> {
     let mut cpuset = CpuSet::new();
-    imp::syscalls::sched_getaffinity(pid, &mut cpuset.cpu_set).and(Ok(cpuset))
+    imp::process::syscalls::sched_getaffinity(pid, &mut cpuset.cpu_set).and(Ok(cpuset))
 }

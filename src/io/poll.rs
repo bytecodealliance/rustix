@@ -12,5 +12,5 @@ pub use imp::io::{PollFd, PollFlags};
 /// [Linux]: https://man7.org/linux/man-pages/man2/poll.2.html
 #[inline]
 pub fn poll(fds: &mut [PollFd<'_>], timeout: i32) -> io::Result<usize> {
-    imp::syscalls::poll(fds, timeout)
+    imp::io::syscalls::poll(fds, timeout)
 }

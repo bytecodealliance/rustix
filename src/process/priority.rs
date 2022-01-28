@@ -11,7 +11,7 @@ use crate::{imp, io};
 /// [Linux]: https://man7.org/linux/man-pages/man2/nice.2.html
 #[inline]
 pub fn nice(inc: i32) -> io::Result<i32> {
-    imp::syscalls::nice(inc)
+    imp::process::syscalls::nice(inc)
 }
 
 /// `getpriority(PRIO_USER, uid)`—Get the scheduling priority of the given
@@ -29,7 +29,7 @@ pub fn nice(inc: i32) -> io::Result<i32> {
 #[inline]
 #[doc(alias = "getpriority")]
 pub fn getpriority_user(uid: Uid) -> io::Result<i32> {
-    imp::syscalls::getpriority_user(uid)
+    imp::process::syscalls::getpriority_user(uid)
 }
 
 /// `getpriority(PRIO_PGRP, gid)`—Get the scheduling priority of the given
@@ -49,7 +49,7 @@ pub fn getpriority_user(uid: Uid) -> io::Result<i32> {
 #[inline]
 #[doc(alias = "getpriority")]
 pub fn getpriority_pgrp(pgid: Option<Pid>) -> io::Result<i32> {
-    imp::syscalls::getpriority_pgrp(pgid)
+    imp::process::syscalls::getpriority_pgrp(pgid)
 }
 
 /// `getpriority(PRIO_PROCESS, pid)`—Get the scheduling priority of the given
@@ -69,7 +69,7 @@ pub fn getpriority_pgrp(pgid: Option<Pid>) -> io::Result<i32> {
 #[inline]
 #[doc(alias = "getpriority")]
 pub fn getpriority_process(pid: Option<Pid>) -> io::Result<i32> {
-    imp::syscalls::getpriority_process(pid)
+    imp::process::syscalls::getpriority_process(pid)
 }
 
 /// `setpriority(PRIO_USER, uid)`—Get the scheduling priority of the given
@@ -87,7 +87,7 @@ pub fn getpriority_process(pid: Option<Pid>) -> io::Result<i32> {
 #[inline]
 #[doc(alias = "setpriority")]
 pub fn setpriority_user(uid: Uid, priority: i32) -> io::Result<()> {
-    imp::syscalls::setpriority_user(uid, priority)
+    imp::process::syscalls::setpriority_user(uid, priority)
 }
 
 /// `setpriority(PRIO_PGRP, pgid)`—Get the scheduling priority of the given
@@ -107,7 +107,7 @@ pub fn setpriority_user(uid: Uid, priority: i32) -> io::Result<()> {
 #[inline]
 #[doc(alias = "setpriority")]
 pub fn setpriority_pgrp(pgid: Option<Pid>, priority: i32) -> io::Result<()> {
-    imp::syscalls::setpriority_pgrp(pgid, priority)
+    imp::process::syscalls::setpriority_pgrp(pgid, priority)
 }
 
 /// `setpriority(PRIO_PROCESS, pid)`—Get the scheduling priority of the given
@@ -127,5 +127,5 @@ pub fn setpriority_pgrp(pgid: Option<Pid>, priority: i32) -> io::Result<()> {
 #[inline]
 #[doc(alias = "setpriority")]
 pub fn setpriority_process(pid: Option<Pid>, priority: i32) -> io::Result<()> {
-    imp::syscalls::setpriority_process(pid, priority)
+    imp::process::syscalls::setpriority_process(pid, priority)
 }

@@ -35,5 +35,5 @@ pub unsafe fn futex(
     uaddr2: *mut u32,
     val3: u32,
 ) -> io::Result<usize> {
-    imp::syscalls::futex(uaddr, op, flags, val, utime, uaddr2, val3)
+    imp::thread::syscalls::futex(uaddr, op, flags, val, utime, uaddr2, val3)
 }

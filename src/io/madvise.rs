@@ -31,5 +31,5 @@ pub use imp::io::Advice;
 #[inline]
 #[doc(alias = "posix_madvise")]
 pub unsafe fn madvise(addr: *mut c_void, len: usize, advice: Advice) -> io::Result<()> {
-    imp::syscalls::madvise(addr, len, advice)
+    imp::io::syscalls::madvise(addr, len, advice)
 }
