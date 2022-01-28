@@ -101,19 +101,14 @@ pub(super) struct RetReg<Num: RetNumber> {
 
 impl<Num: RetNumber> RetReg<Num> {
     #[inline]
-    fn decode(self) -> usize {
+    pub(super) fn decode_usize(self) -> usize {
         debug_assert!(!(-4095..0).contains(&(self.bits as isize)));
         self.bits
     }
 
     #[inline]
-    pub(super) fn decode_usize(self) -> usize {
-        self.decode()
-    }
-
-    #[inline]
     pub(super) fn decode_raw_fd(self) -> RawFd {
-        let bits = self.decode();
+        let bits = self.decode_usize();
         let raw_fd = bits as RawFd;
 
         // Converting `raw` to `RawFd` should be lossless.
@@ -124,7 +119,7 @@ impl<Num: RetNumber> RetReg<Num> {
 
     #[inline]
     pub(super) fn decode_c_int(self) -> c::c_int {
-        let bits = self.decode();
+        let bits = self.decode_usize();
         let c_int_ = bits as c::c_int;
 
         // Converting `raw` to `c_int` should be lossless.
@@ -135,7 +130,7 @@ impl<Num: RetNumber> RetReg<Num> {
 
     #[inline]
     pub(super) fn decode_c_uint(self) -> c::c_uint {
-        let bits = self.decode();
+        let bits = self.decode_usize();
         let c_uint_ = bits as c::c_uint;
 
         // Converting `raw` to `c_uint` should be lossless.
@@ -146,18 +141,19 @@ impl<Num: RetNumber> RetReg<Num> {
 
     #[inline]
     pub(super) fn decode_void_star(self) -> *mut c::c_void {
-        self.decode() as *mut c::c_void
+        self.decode_usize() as *mut c::c_void
     }
 
     #[cfg(target_pointer_width = "64")]
     #[inline]
     pub(super) fn decode_u64(self) -> u64 {
-        self.decode() as u64
+        self.decode_usize() as u64
     }
 
     #[inline]
     pub(super) fn decode_void(self) {
-        let _ = self.decode();
+        let ignore = self.decode_usize();
+        debug_assert_eq!(ignore, 0);
     }
 
     #[inline]

@@ -225,7 +225,9 @@ pub(crate) fn sched_setaffinity(pid: Option<Pid>, cpuset: &RawCpuSet) -> io::Res
 #[inline]
 pub(crate) fn sched_yield() {
     unsafe {
-        let _ = syscall0_readonly(nr(__NR_sched_yield));
+        // See the docunentation for [`crate::process::sched_yield`] for why
+        // errors are ignored.
+        syscall0_readonly(nr(__NR_sched_yield)).decode_void();
     }
 }
 

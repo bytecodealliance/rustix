@@ -353,7 +353,8 @@ const fn max_iov() -> usize {
 
 #[inline]
 pub(crate) unsafe fn close(fd: RawFd) {
-    let _ = syscall1_readonly(nr(__NR_close), raw_fd(fd));
+    // See the docunentation for [`io::close`] for why errors are ignored.
+    syscall1_readonly(nr(__NR_close), raw_fd(fd)).decode_void();
 }
 
 #[inline]
