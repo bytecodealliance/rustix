@@ -56,145 +56,140 @@ extern "fastcall" {
 }
 
 // Then we define inline wrapper functions that do the reordering.
-mod reorder {
-    use super::*;
 
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<R0> {
-        rustix_syscall0_nr_last_fastcall(nr)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> RetReg<R0> {
-        rustix_syscall1_nr_last_fastcall(a0, nr)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn syscall1_readonly(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-    ) -> RetReg<R0> {
-        rustix_syscall1_nr_last_fastcall(a0, nr)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> ! {
-        rustix_syscall1_noreturn_nr_last_fastcall(a0, nr)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn syscall2(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-    ) -> RetReg<R0> {
-        rustix_syscall2_nr_last_fastcall(a1, a0, nr)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn syscall2_readonly(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-    ) -> RetReg<R0> {
-        rustix_syscall2_nr_last_fastcall(a1, a0, nr)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn syscall3(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
-    ) -> RetReg<R0> {
-        rustix_syscall3_nr_last_fastcall(a1, a2, a0, nr)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn syscall3_readonly(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
-    ) -> RetReg<R0> {
-        rustix_syscall3_nr_last_fastcall(a1, a2, a0, nr)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn syscall4(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
-        a3: ArgReg<'_, A3>,
-    ) -> RetReg<R0> {
-        rustix_syscall4_nr_last_fastcall(a1, a2, a0, a3, nr)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn syscall4_readonly(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
-        a3: ArgReg<'_, A3>,
-    ) -> RetReg<R0> {
-        rustix_syscall4_nr_last_fastcall(a1, a2, a0, a3, nr)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn syscall5(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
-        a3: ArgReg<'_, A3>,
-        a4: ArgReg<'_, A4>,
-    ) -> RetReg<R0> {
-        rustix_syscall5_nr_last_fastcall(a1, a2, a0, a3, a4, nr)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn syscall5_readonly(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
-        a3: ArgReg<'_, A3>,
-        a4: ArgReg<'_, A4>,
-    ) -> RetReg<R0> {
-        rustix_syscall5_nr_last_fastcall(a1, a2, a0, a3, a4, nr)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn syscall6(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
-        a3: ArgReg<'_, A3>,
-        a4: ArgReg<'_, A4>,
-        a5: ArgReg<'_, A5>,
-    ) -> RetReg<R0> {
-        rustix_syscall6_nr_last_fastcall(a1, a2, a0, a3, a4, a5, nr)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn syscall6_readonly(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
-        a3: ArgReg<'_, A3>,
-        a4: ArgReg<'_, A4>,
-        a5: ArgReg<'_, A5>,
-    ) -> RetReg<R0> {
-        rustix_syscall6_nr_last_fastcall(a1, a2, a0, a3, a4, a5, nr)
-    }
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<R0> {
+    rustix_syscall0_nr_last_fastcall(nr)
 }
-
-pub(in crate::imp) use reorder::*;
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> RetReg<R0> {
+    rustix_syscall1_nr_last_fastcall(a0, nr)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall1_readonly(
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+) -> RetReg<R0> {
+    rustix_syscall1_nr_last_fastcall(a0, nr)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> ! {
+    rustix_syscall1_noreturn_nr_last_fastcall(a0, nr)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall2(
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+) -> RetReg<R0> {
+    rustix_syscall2_nr_last_fastcall(a1, a0, nr)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall2_readonly(
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+) -> RetReg<R0> {
+    rustix_syscall2_nr_last_fastcall(a1, a0, nr)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall3(
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+) -> RetReg<R0> {
+    rustix_syscall3_nr_last_fastcall(a1, a2, a0, nr)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall3_readonly(
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+) -> RetReg<R0> {
+    rustix_syscall3_nr_last_fastcall(a1, a2, a0, nr)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall4(
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
+) -> RetReg<R0> {
+    rustix_syscall4_nr_last_fastcall(a1, a2, a0, a3, nr)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall4_readonly(
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
+) -> RetReg<R0> {
+    rustix_syscall4_nr_last_fastcall(a1, a2, a0, a3, nr)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall5(
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
+    a4: ArgReg<'_, A4>,
+) -> RetReg<R0> {
+    rustix_syscall5_nr_last_fastcall(a1, a2, a0, a3, a4, nr)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall5_readonly(
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
+    a4: ArgReg<'_, A4>,
+) -> RetReg<R0> {
+    rustix_syscall5_nr_last_fastcall(a1, a2, a0, a3, a4, nr)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall6(
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
+    a4: ArgReg<'_, A4>,
+    a5: ArgReg<'_, A5>,
+) -> RetReg<R0> {
+    rustix_syscall6_nr_last_fastcall(a1, a2, a0, a3, a4, a5, nr)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall6_readonly(
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
+    a4: ArgReg<'_, A4>,
+    a5: ArgReg<'_, A5>,
+) -> RetReg<R0> {
+    rustix_syscall6_nr_last_fastcall(a1, a2, a0, a3, a4, a5, nr)
+}
 
 // x86 prefers to route all syscalls through the vDSO, though this isn't
 // always possible, so it also has a special form for doing the dispatch.
@@ -261,95 +256,90 @@ extern "fastcall" {
 }
 
 // Then we define inline wrapper functions that do the reordering.
-mod reorder_indirect {
-    use super::*;
 
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn indirect_syscall0(
-        callee: SyscallType,
-        nr: SyscallNumber<'_>,
-    ) -> RetReg<R0> {
-        rustix_indirect_syscall0_nr_last_fastcall(nr, callee)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn indirect_syscall1(
-        callee: SyscallType,
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-    ) -> RetReg<R0> {
-        rustix_indirect_syscall1_nr_last_fastcall(a0, nr, callee)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn indirect_syscall1_noreturn(
-        callee: SyscallType,
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-    ) -> ! {
-        rustix_indirect_syscall1_noreturn_nr_last_fastcall(a0, nr, callee)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn indirect_syscall2(
-        callee: SyscallType,
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-    ) -> RetReg<R0> {
-        rustix_indirect_syscall2_nr_last_fastcall(a1, a0, nr, callee)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn indirect_syscall3(
-        callee: SyscallType,
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
-    ) -> RetReg<R0> {
-        rustix_indirect_syscall3_nr_last_fastcall(a1, a2, a0, nr, callee)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn indirect_syscall4(
-        callee: SyscallType,
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
-        a3: ArgReg<'_, A3>,
-    ) -> RetReg<R0> {
-        rustix_indirect_syscall4_nr_last_fastcall(a1, a2, a0, a3, nr, callee)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn indirect_syscall5(
-        callee: SyscallType,
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
-        a3: ArgReg<'_, A3>,
-        a4: ArgReg<'_, A4>,
-    ) -> RetReg<R0> {
-        rustix_indirect_syscall5_nr_last_fastcall(a1, a2, a0, a3, a4, nr, callee)
-    }
-    #[inline]
-    #[must_use]
-    pub(in crate::imp) unsafe fn indirect_syscall6(
-        callee: SyscallType,
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
-        a3: ArgReg<'_, A3>,
-        a4: ArgReg<'_, A4>,
-        a5: ArgReg<'_, A5>,
-    ) -> RetReg<R0> {
-        rustix_indirect_syscall6_nr_last_fastcall(a1, a2, a0, a3, a4, a5, nr, callee)
-    }
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn indirect_syscall0(
+    callee: SyscallType,
+    nr: SyscallNumber<'_>,
+) -> RetReg<R0> {
+    rustix_indirect_syscall0_nr_last_fastcall(nr, callee)
 }
-
-pub(in crate::imp) use reorder_indirect::*;
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn indirect_syscall1(
+    callee: SyscallType,
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+) -> RetReg<R0> {
+    rustix_indirect_syscall1_nr_last_fastcall(a0, nr, callee)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn indirect_syscall1_noreturn(
+    callee: SyscallType,
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+) -> ! {
+    rustix_indirect_syscall1_noreturn_nr_last_fastcall(a0, nr, callee)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn indirect_syscall2(
+    callee: SyscallType,
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+) -> RetReg<R0> {
+    rustix_indirect_syscall2_nr_last_fastcall(a1, a0, nr, callee)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn indirect_syscall3(
+    callee: SyscallType,
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+) -> RetReg<R0> {
+    rustix_indirect_syscall3_nr_last_fastcall(a1, a2, a0, nr, callee)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn indirect_syscall4(
+    callee: SyscallType,
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
+) -> RetReg<R0> {
+    rustix_indirect_syscall4_nr_last_fastcall(a1, a2, a0, a3, nr, callee)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn indirect_syscall5(
+    callee: SyscallType,
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
+    a4: ArgReg<'_, A4>,
+) -> RetReg<R0> {
+    rustix_indirect_syscall5_nr_last_fastcall(a1, a2, a0, a3, a4, nr, callee)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn indirect_syscall6(
+    callee: SyscallType,
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
+    a4: ArgReg<'_, A4>,
+    a5: ArgReg<'_, A5>,
+) -> RetReg<R0> {
+    rustix_indirect_syscall6_nr_last_fastcall(a1, a2, a0, a3, a4, a5, nr, callee)
+}
