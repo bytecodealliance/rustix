@@ -1,4 +1,4 @@
-#![allow(dead_code)]
+#![allow(dead_code, unused_imports)]
 
 use crate::imp::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
 use crate::imp::vdso_wrappers::SyscallType;
@@ -59,20 +59,12 @@ extern "fastcall" {
 
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<R0> {
+pub(in crate::imp) unsafe fn syscall0(nr: SyscallNumber<'_>) -> RetReg<R0> {
     rustix_syscall0_nr_last_fastcall(nr)
 }
 #[inline]
 #[must_use]
 pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> RetReg<R0> {
-    rustix_syscall1_nr_last_fastcall(a0, nr)
-}
-#[inline]
-#[must_use]
-pub(in crate::imp) unsafe fn syscall1_readonly(
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-) -> RetReg<R0> {
     rustix_syscall1_nr_last_fastcall(a0, nr)
 }
 #[inline]
@@ -91,15 +83,6 @@ pub(in crate::imp) unsafe fn syscall2(
 }
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall2_readonly(
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-    a1: ArgReg<'_, A1>,
-) -> RetReg<R0> {
-    rustix_syscall2_nr_last_fastcall(a1, a0, nr)
-}
-#[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall3(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -110,28 +93,7 @@ pub(in crate::imp) unsafe fn syscall3(
 }
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall3_readonly(
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-    a1: ArgReg<'_, A1>,
-    a2: ArgReg<'_, A2>,
-) -> RetReg<R0> {
-    rustix_syscall3_nr_last_fastcall(a1, a2, a0, nr)
-}
-#[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall4(
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-    a1: ArgReg<'_, A1>,
-    a2: ArgReg<'_, A2>,
-    a3: ArgReg<'_, A3>,
-) -> RetReg<R0> {
-    rustix_syscall4_nr_last_fastcall(a1, a2, a0, a3, nr)
-}
-#[inline]
-#[must_use]
-pub(in crate::imp) unsafe fn syscall4_readonly(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
     a1: ArgReg<'_, A1>,
@@ -154,18 +116,6 @@ pub(in crate::imp) unsafe fn syscall5(
 }
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall5_readonly(
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-    a1: ArgReg<'_, A1>,
-    a2: ArgReg<'_, A2>,
-    a3: ArgReg<'_, A3>,
-    a4: ArgReg<'_, A4>,
-) -> RetReg<R0> {
-    rustix_syscall5_nr_last_fastcall(a1, a2, a0, a3, a4, nr)
-}
-#[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall6(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -177,19 +127,14 @@ pub(in crate::imp) unsafe fn syscall6(
 ) -> RetReg<R0> {
     rustix_syscall6_nr_last_fastcall(a1, a2, a0, a3, a4, a5, nr)
 }
-#[inline]
-#[must_use]
-pub(in crate::imp) unsafe fn syscall6_readonly(
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-    a1: ArgReg<'_, A1>,
-    a2: ArgReg<'_, A2>,
-    a3: ArgReg<'_, A3>,
-    a4: ArgReg<'_, A4>,
-    a5: ArgReg<'_, A5>,
-) -> RetReg<R0> {
-    rustix_syscall6_nr_last_fastcall(a1, a2, a0, a3, a4, a5, nr)
-}
+
+// We don't have separate `_readonly` implementations, so these can just be
+// aliases to their non-`_readonly` counterparts.
+pub(in crate::imp) use {
+    syscall0 as syscall0_readonly, syscall1 as syscall1_readonly, syscall2 as syscall2_readonly,
+    syscall3 as syscall3_readonly, syscall4 as syscall4_readonly, syscall5 as syscall5_readonly,
+    syscall6 as syscall6_readonly,
+};
 
 // x86 prefers to route all syscalls through the vDSO, though this isn't
 // always possible, so it also has a special form for doing the dispatch.
