@@ -1,5 +1,5 @@
-//! This is an example of how to use `dup2` to replace the stdin and stdout file
-//! descriptors.
+//! This is an example of how to use `dup2` to replace the stdin and stdout
+//! file descriptors.
 
 #[cfg(not(windows))]
 fn main() {

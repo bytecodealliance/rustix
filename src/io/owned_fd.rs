@@ -28,8 +28,8 @@ pub struct OwnedFd {
 }
 
 impl OwnedFd {
-    /// Creates a new `OwnedFd` instance that shares the same underlying file handle
-    /// as the existing `OwnedFd` instance.
+    /// Creates a new `OwnedFd` instance that shares the same underlying file
+    /// handle as the existing `OwnedFd` instance.
     #[cfg(all(unix, not(target_os = "wasi")))]
     pub fn try_clone(&self) -> crate::io::Result<Self> {
         // We want to atomically duplicate this file descriptor and set the
@@ -40,7 +40,7 @@ impl OwnedFd {
 
         // For ESP-IDF, F_DUPFD is used instead, because the CLOEXEC semantics
         // will never be supported, as this is a bare metal framework with
-        // no capabilities for multi-process execution.  While F_DUPFD is also
+        // no capabilities for multi-process execution. While F_DUPFD is also
         // not supported yet, it might be (currently it returns ENOSYS).
         #[cfg(target_os = "espidf")]
         let fd = crate::fs::fcntl_dupfd(self)?;
@@ -48,8 +48,8 @@ impl OwnedFd {
         Ok(fd)
     }
 
-    /// Creates a new `OwnedFd` instance that shares the same underlying file handle
-    /// as the existing `OwnedFd` instance.
+    /// Creates a new `OwnedFd` instance that shares the same underlying file
+    /// handle as the existing `OwnedFd` instance.
     #[cfg(target_os = "wasi")]
     pub fn try_clone(&self) -> std::io::Result<Self> {
         Err(std::io::Error::new(

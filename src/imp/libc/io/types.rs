@@ -276,13 +276,14 @@ bitflags! {
     ///
     /// [`msync`]: crate::io::msync
     pub struct MsyncFlags: i32 {
-        /// `MS_SYNC` Requests an update and waits for it to complete.
+        /// `MS_SYNC`—Requests an update and waits for it to complete.
         const SYNC = c::MS_SYNC;
-        /// `MS_ASYNC` Specifies that an update be scheduled,
-        /// but the call returns immediately.
+        /// `MS_ASYNC`—Specifies that an update be scheduled, but the call
+        /// returns immediately.
         const ASYNC = c::MS_ASYNC;
-        /// `MS_INVALIDATE` Asks to invalidate other mappings of the same file (so
-        /// that they can be updated with the fresh values just written).
+        /// `MS_INVALIDATE`—Asks to invalidate other mappings of the same
+        /// file (so that they can be updated with the fresh values just
+        /// written).
         const INVALIDATE = c::MS_INVALIDATE;
     }
 }
