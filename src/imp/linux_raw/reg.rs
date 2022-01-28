@@ -90,8 +90,7 @@ impl<'a, Num: ArgNumber> ToAsm for ArgReg<'a, Num> {
 /// discourage accidental misuse of the raw integer values.
 ///
 /// Note that it doesn't implement `Clone` or `Copy`; it should be used
-/// exactly once. And it has a lifetime to ensure that it doesn't outlive
-/// any resources it might be pointing to.
+/// exactly once.
 #[repr(transparent)]
 pub(super) struct RetReg<Num: RetNumber> {
     bits: usize,
