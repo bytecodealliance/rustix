@@ -204,8 +204,8 @@ unsafe fn inner_read_sockaddr_os(
     let z = c::sockaddr_un {
         #[cfg(any(
             target_os = "dragonfly",
-            target_os = "ios",
             target_os = "freebsd",
+            target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd"
@@ -213,8 +213,8 @@ unsafe fn inner_read_sockaddr_os(
         sun_len: 0_u8,
         #[cfg(any(
             target_os = "dragonfly",
-            target_os = "ios",
             target_os = "freebsd",
+            target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd"
@@ -222,8 +222,8 @@ unsafe fn inner_read_sockaddr_os(
         sun_family: 0_u8,
         #[cfg(not(any(
             target_os = "dragonfly",
-            target_os = "ios",
             target_os = "freebsd",
+            target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd"
@@ -231,8 +231,8 @@ unsafe fn inner_read_sockaddr_os(
         sun_family: 0_u16,
         #[cfg(any(
             target_os = "dragonfly",
-            target_os = "ios",
             target_os = "freebsd",
+            target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd"
@@ -240,8 +240,8 @@ unsafe fn inner_read_sockaddr_os(
         sun_path: [0; 104],
         #[cfg(not(any(
             target_os = "dragonfly",
-            target_os = "ios",
             target_os = "freebsd",
+            target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd"

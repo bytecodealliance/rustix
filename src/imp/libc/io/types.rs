@@ -110,12 +110,12 @@ bitflags! {
         /// `MAP_DENYWRITE`
         #[cfg(not(any(
             target_os = "dragonfly",
+            target_os = "freebsd",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
-            target_os = "freebsd",
             target_os = "redox"
         )))]
         const DENYWRITE = c::MAP_DENYWRITE;
@@ -150,8 +150,8 @@ bitflags! {
             target_os = "freebsd",
             target_os = "illumos",
             target_os = "ios",
-            target_os = "netbsd",
             target_os = "macos",
+            target_os = "netbsd",
             target_os = "openbsd",
             target_os = "redox"
         )))]

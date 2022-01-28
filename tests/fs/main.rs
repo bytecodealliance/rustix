@@ -11,8 +11,8 @@ mod flock;
 mod invalid_offset;
 mod long_paths;
 #[cfg(not(any(
-    target_os = "ios",
     target_os = "freebsd",
+    target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
