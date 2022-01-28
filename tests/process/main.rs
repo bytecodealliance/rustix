@@ -5,6 +5,7 @@
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 
 mod auxv;
+mod cpu_set;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -20,4 +21,3 @@ mod uname;
 mod wait;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 mod working_directory;
-mod cpu_set;
