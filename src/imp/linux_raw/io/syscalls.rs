@@ -27,10 +27,8 @@ use crate::fd::{AsFd, BorrowedFd, RawFd};
 use crate::io::{
     self, epoll, Advice, DupFlags, EventfdFlags, IoSlice, IoSliceMut, MapFlags, MlockFlags,
     MprotectFlags, MremapFlags, MsyncFlags, OwnedFd, PipeFlags, PollFd, ProtFlags, ReadWriteFlags,
-    UserfaultfdFlags,
+    Termios, UserfaultfdFlags, Winsize,
 };
-#[cfg(not(target_os = "wasi"))]
-use crate::io::{Termios, Winsize};
 use crate::net::{RecvFlags, SendFlags};
 #[cfg(feature = "procfs")]
 use crate::{ffi::ZStr, fs::FileType, path::DecInt};
@@ -446,7 +444,6 @@ pub(crate) fn ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     }
 }
 
-#[cfg(target_os = "linux")]
 #[inline]
 pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
     let mut result = MaybeUninit::<c::c_uint>::uninit();
@@ -461,7 +458,6 @@ pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
     }
 }
 
-#[cfg(target_os = "linux")]
 #[inline]
 pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
     let mut result = MaybeUninit::<c::c_uint>::uninit();

@@ -3,8 +3,6 @@ use crate::as_ptr;
 #[cfg(feature = "std")]
 use crate::fd::IntoFd;
 use crate::fd::{AsFd, BorrowedFd};
-#[cfg(target_os = "wasi")]
-use crate::ffi::ZString;
 use crate::ffi::{ZStr, ZString};
 use crate::io::{self, OwnedFd};
 use alloc::borrow::ToOwned;

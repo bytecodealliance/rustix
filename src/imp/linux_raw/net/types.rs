@@ -259,11 +259,9 @@ bitflags! {
     /// [`socket`]: crate::net::socket
     pub struct SocketFlags: c::c_uint {
         /// `SOCK_NONBLOCK`
-        #[cfg(not(any(target_os = "ios", target_os = "macos")))]
         const NONBLOCK = linux_raw_sys::general::O_NONBLOCK;
 
         /// `SOCK_CLOEXEC`
-        #[cfg(not(any(target_os = "ios", target_os = "macos")))]
         const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
     }
 }
