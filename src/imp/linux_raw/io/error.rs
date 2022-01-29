@@ -67,7 +67,6 @@ impl Error {
         let encoded = raw.wrapping_neg() as u16;
 
         // TODO: Use Range::contains, once that's `const`.
-        // TODO: Use `assert!`, once that's stable for use in const fn.
         const_assert!(encoded >= 0xf001);
 
         // Safety: Linux syscalls return negated error values in the range
