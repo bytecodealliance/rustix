@@ -365,17 +365,16 @@ impl Vdso {
                 let sym = &*self.symtab.add(chain as usize);
 
                 // Check for a defined global or weak function w/ right name.
-                if ELF_ST_TYPE(sym.st_info) != STT_FUNC ||
-		       (ELF_ST_BIND(sym.st_info) != STB_GLOBAL &&
-		        ELF_ST_BIND(sym.st_info) != STB_WEAK) ||
-		       sym.st_shndx == SHN_UNDEF ||
-		       sym.st_shndx == SHN_ABS ||
-               ELF_ST_VISIBILITY(sym.st_other) != STV_DEFAULT ||
-		       (name != ZStr::from_ptr(self.symstrings.add(sym.st_name as usize).cast())) ||
-		       // Check symbol version.
-		       (!self.versym.is_null()
-		        && !self.match_version(*self.versym.add(chain as usize),
-					       version, ver_hash))
+                if ELF_ST_TYPE(sym.st_info) != STT_FUNC
+                    || (ELF_ST_BIND(sym.st_info) != STB_GLOBAL
+                        && ELF_ST_BIND(sym.st_info) != STB_WEAK)
+                    || sym.st_shndx == SHN_UNDEF
+                    || sym.st_shndx == SHN_ABS
+                    || ELF_ST_VISIBILITY(sym.st_other) != STV_DEFAULT
+                    || (name != ZStr::from_ptr(self.symstrings.add(sym.st_name as usize).cast()))
+                    // Check symbol version.
+                    || (!self.versym.is_null()
+                        && !self.match_version(*self.versym.add(chain as usize), version, ver_hash))
                 {
                     chain = *self.chain.add(chain as usize);
                     continue;
