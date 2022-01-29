@@ -20,7 +20,7 @@ pub fn cwd() -> BorrowedFd<'static> {
     // # Safety
     //
     // `AT_FDCWD` is a reserved value that is never dynamically allocated, so
-    // it'll remain valid for the duration of 'static.
+    // it'll remain valid for the duration of `'static`.
     #[allow(unsafe_code)]
     unsafe {
         BorrowedFd::<'static>::borrow_raw_fd(at_fdcwd)
