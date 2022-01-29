@@ -115,7 +115,7 @@ pub(in crate::imp) unsafe fn indirect_syscall4(
     a3: ArgReg<'_, A3>,
 ) -> RetReg<R0> {
     let r0;
-    // a3 should go in esi, but asm! won't let us use it as an operand.
+    // a3 should go in esi, but `asm!` won't let us use it as an operand.
     // temporarily swap it into place, and then swap it back afterward.
     //
     // Note that we hard-code the callee operand to use edi instead of
@@ -148,7 +148,7 @@ pub(in crate::imp) unsafe fn indirect_syscall5(
     a4: ArgReg<'_, A4>,
 ) -> RetReg<R0> {
     let r0;
-    // Oof. a3 should go in esi, and asm! won't let us use that register as
+    // Oof. a3 should go in esi, and `asm!` won't let us use that register as
     // an operand. And we can't request stack slots. And there are no other
     // registers free. Use eax as a temporary pointer to a slice, since it
     // gets clobbered as the return value anyway.
@@ -185,9 +185,9 @@ pub(in crate::imp) unsafe fn indirect_syscall6(
     a5: ArgReg<'_, A5>,
 ) -> RetReg<R0> {
     let r0;
-    // Oof again. a3 should go in esi, and a5 should go in ebp, and asm! won't
-    // let us use either of those registers as operands. And we can't request
-    // stack slots. And there are no other registers free. Use eax as a
+    // Oof again. a3 should go in esi, and a5 should go in ebp, and `asm!`
+    // won't let us use either of those registers as operands. And we can't
+    // request stack slots. And there are no other registers free. Use eax as a
     // temporary pointer to a slice, since it gets clobbered as the return
     // value anyway.
     //
@@ -351,7 +351,7 @@ pub(in crate::imp) unsafe fn syscall4(
     a3: ArgReg<'_, A3>,
 ) -> RetReg<R0> {
     let r0;
-    // a3 should go in esi, but asm! won't let us use it as an operand.
+    // a3 should go in esi, but `asm!` won't let us use it as an operand.
     // Temporarily swap it into place, and then swap it back afterward.
     asm!(
         "xchg esi, {a3}",
@@ -457,7 +457,7 @@ pub(in crate::imp) unsafe fn syscall6(
     a5: ArgReg<'_, A5>,
 ) -> RetReg<R0> {
     let r0;
-    // Oof. a3 should go in esi, and a5 should go in ebp, and asm! won't
+    // Oof. a3 should go in esi, and a5 should go in ebp, and `asm!` won't
     // let us use either of those registers as operands. And we can't request
     // stack slots. And there are no other registers free. Use eax as a
     // temporary pointer to a slice, since it gets clobbered as the return
