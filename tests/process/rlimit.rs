@@ -26,7 +26,11 @@ fn test_prlimit() {
 
     let first = rustix::process::getrlimit(Resource::Core);
 
-    let old = rustix::process::prlimit(None, Resource::Core, new.clone()).unwrap();
+    let old = match rustix::process::prlimit(None, Resource::Core, new.clone()) {
+        Ok(rlimit) => rlimit,
+        Err(rustix::io::Error::NOSYS) => return,
+        Err(e) => Err(e).unwrap(),
+    };
 
     assert_eq!(first, old);
 
