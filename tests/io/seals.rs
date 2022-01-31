@@ -5,7 +5,11 @@ use std::io::Write;
 
 #[test]
 fn test_seals() {
-    let fd = memfd_create("test", MemfdFlags::CLOEXEC | MemfdFlags::ALLOW_SEALING).unwrap();
+    let fd = match memfd_create("test", MemfdFlags::CLOEXEC | MemfdFlags::ALLOW_SEALING) {
+        Ok(fd) => fd,
+        Err(rustix::io::Error::NOSYS) => return,
+        Err(err) => Err(err).unwrap(),
+    };
     let mut file = File::from_fd(fd.into());
 
     writeln!(&mut file, "Hello!").unwrap();
