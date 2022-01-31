@@ -26,7 +26,9 @@ fn main() {
     let arch = var("CARGO_CFG_TARGET_ARCH").unwrap();
     let asm_name = format!("{}/{}.s", OUTLINE_PATH, arch);
     let os_name = var("CARGO_CFG_TARGET_OS").unwrap();
-    let is_x32 = arch == "x86_64" && var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap() == "32";
+    let pointer_width = var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap();
+    let is_x32 = arch == "x86_64" && pointer_width == "32";
+    let is_arm64_ilp32 = arch == "aarch64" && pointer_width == "32";
     println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_ARCH");
 
     // If rustix_use_libc is set, or if we're on an architecture/OS that doesn't
@@ -35,6 +37,7 @@ fn main() {
         || os_name != "linux"
         || std::fs::metadata(&asm_name).is_err()
         || is_x32
+        || is_arm64_ilp32
     {
         use_feature("libc");
     } else {

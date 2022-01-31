@@ -6,6 +6,8 @@
 //
 // outline.rs takes care of reordering the nr argument to the end for us,
 // so we only need to move nr into w8.
+//
+// arm64-ilp32 is not yet supported.
 
     .file       "aarch64.s"
     .arch       armv8-a
