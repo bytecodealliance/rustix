@@ -3,6 +3,9 @@
 use crate::imp::reg::{ArgReg, FromAsm, RetReg, SyscallNumber, ToAsm, A0, A1, A2, A3, A4, A5, R0};
 use core::arch::asm;
 
+#[cfg(target_pointer_width = "32")]
+compile_error!("arm64-ilp32 is not supported yet");
+
 #[inline]
 #[must_use]
 pub(in crate::imp) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<R0> {
