@@ -78,7 +78,7 @@ pub(super) use c::{
     getrlimit64 as libc_getrlimit, mmap64 as libc_mmap, setrlimit64 as libc_setrlimit,
 };
 
-#[cfg(any(target_os = "android", target_os = "linux",))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub(super) use c::prlimit64 as libc_prlimit;
 
 #[cfg(not(any(
