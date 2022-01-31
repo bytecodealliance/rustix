@@ -4,7 +4,7 @@
 #[cfg(not(windows))]
 fn main() {
     println!(
-        "Raeal time: {:?}",
+        "Real time: {:?}",
         rustix::time::clock_gettime(rustix::time::ClockId::Realtime)
     );
     println!(
