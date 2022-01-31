@@ -14,8 +14,8 @@ use core::mem::MaybeUninit;
 use linux_raw_sys::general::{__NR_clock_getres, __kernel_timespec};
 #[cfg(target_pointer_width = "32")]
 use {
-    super::super::conv::ret, crate::io, linux_raw_sys::general::timespec as __kernel_old_timespec,
-    linux_raw_sys::v5_4::general::__NR_clock_getres_time64,
+    super::super::conv::ret, crate::io, linux_raw_sys::general::__NR_clock_getres_time64,
+    linux_raw_sys::general::timespec as __kernel_old_timespec,
 };
 
 // `clock_gettime` has special optimizations via the vDSO.

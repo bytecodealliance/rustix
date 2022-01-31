@@ -30,9 +30,9 @@ use crate::process::{Pid, RawNonZeroPid};
 #[cfg(target_arch = "arm")]
 use linux_raw_sys::general::__ARM_NR_set_tls;
 use linux_raw_sys::general::{
-    __NR_exit, __NR_prctl, __NR_set_tid_address, __kernel_pid_t, PR_SET_NAME, SIGCHLD,
+    __NR_clone, __NR_execve, __NR_execveat, __NR_exit, __NR_prctl, __NR_set_tid_address,
+    __kernel_pid_t, PR_SET_NAME, SIGCHLD,
 };
-use linux_raw_sys::v5_4::general::{__NR_clone, __NR_execve, __NR_execveat};
 #[cfg(target_arch = "x86")]
 use {super::conv::by_mut, linux_raw_sys::general::__NR_set_thread_area};
 #[cfg(target_arch = "x86_64")]

@@ -27,19 +27,25 @@ use crate::process::{
 };
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
+#[cfg(all(
+    not(any(target_arch = "arm", target_arch = "powerpc64", target_arch = "x86")),
+    target_pointer_width = "32"
+))]
+use linux_raw_sys::general::__NR_getrlimit;
+#[cfg(target_pointer_width = "32")]
+use linux_raw_sys::general::__NR_setrlimit;
+#[cfg(any(target_arch = "arm", target_arch = "powerpc64", target_arch = "x86"))]
+use linux_raw_sys::general::__NR_ugetrlimit as __NR_getrlimit;
 use linux_raw_sys::general::{
     __NR_chdir, __NR_exit_group, __NR_fchdir, __NR_getcwd, __NR_getpid, __NR_getppid,
-    __NR_getpriority, __NR_kill, __NR_sched_getaffinity, __NR_sched_setaffinity, __NR_sched_yield,
-    __NR_setpriority, __NR_setsid, __NR_uname, __NR_wait4, __kernel_gid_t, __kernel_pid_t,
-    __kernel_uid_t,
+    __NR_getpriority, __NR_kill, __NR_membarrier, __NR_prlimit64, __NR_sched_getaffinity,
+    __NR_sched_setaffinity, __NR_sched_yield, __NR_setpriority, __NR_setsid, __NR_uname,
+    __NR_wait4, __kernel_gid_t, __kernel_pid_t, __kernel_uid_t,
 };
 #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
 use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getuid};
 #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
 use linux_raw_sys::general::{__NR_getegid32, __NR_geteuid32, __NR_getgid32, __NR_getuid32};
-#[cfg(target_pointer_width = "32")]
-use linux_raw_sys::general::{__NR_getrlimit, __NR_setrlimit};
-use linux_raw_sys::v5_4::general::{__NR_membarrier, __NR_prlimit64};
 
 #[inline]
 pub(crate) fn chdir(filename: &ZStr) -> io::Result<()> {
@@ -61,7 +67,7 @@ pub(crate) fn membarrier_query() -> MembarrierQuery {
     unsafe {
         match ret_c_uint(syscall2(
             nr(__NR_membarrier),
-            c_int(linux_raw_sys::v5_4::general::membarrier_cmd::MEMBARRIER_CMD_QUERY as _),
+            c_int(linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_QUERY as _),
             c_uint(0),
         )) {
             Ok(query) => {
@@ -93,9 +99,7 @@ pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<(
         ret(syscall3(
             nr(__NR_membarrier),
             c_int(cmd as c::c_int),
-            c_uint(
-                linux_raw_sys::v5_11::general::membarrier_cmd_flag::MEMBARRIER_CMD_FLAG_CPU as _,
-            ),
+            c_uint(linux_raw_sys::general::membarrier_cmd_flag::MEMBARRIER_CMD_FLAG_CPU as _),
             c_uint(cpu.as_raw()),
         ))
     }
@@ -315,7 +319,7 @@ pub(crate) fn setpriority_process(pid: Option<Pid>, priority: i32) -> io::Result
 
 #[inline]
 pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
-    let mut result = MaybeUninit::<linux_raw_sys::v5_4::general::rlimit64>::uninit();
+    let mut result = MaybeUninit::<linux_raw_sys::general::rlimit64>::uninit();
     #[cfg(target_pointer_width = "32")]
     unsafe {
         match ret(syscall4(
@@ -399,7 +403,7 @@ unsafe fn setrlimit_old(limit: Resource, new: Rlimit) -> io::Result<()> {
 #[inline]
 pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Result<Rlimit> {
     let lim = rlimit_to_linux(new)?;
-    let mut result = MaybeUninit::<linux_raw_sys::v5_4::general::rlimit64>::uninit();
+    let mut result = MaybeUninit::<linux_raw_sys::general::rlimit64>::uninit();
     unsafe {
         match ret(syscall4(
             nr(__NR_prlimit64),
@@ -416,13 +420,13 @@ pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Res
 
 /// Convert a Rust [`Rlimit`] to a C `rlimit64`.
 #[inline]
-fn rlimit_from_linux(lim: linux_raw_sys::v5_4::general::rlimit64) -> Rlimit {
-    let current = if lim.rlim_cur == linux_raw_sys::v5_4::general::RLIM64_INFINITY as _ {
+fn rlimit_from_linux(lim: linux_raw_sys::general::rlimit64) -> Rlimit {
+    let current = if lim.rlim_cur == linux_raw_sys::general::RLIM64_INFINITY as _ {
         None
     } else {
         Some(lim.rlim_cur)
     };
-    let maximum = if lim.rlim_max == linux_raw_sys::v5_4::general::RLIM64_INFINITY as _ {
+    let maximum = if lim.rlim_max == linux_raw_sys::general::RLIM64_INFINITY as _ {
         None
     } else {
         Some(lim.rlim_max)
@@ -432,16 +436,16 @@ fn rlimit_from_linux(lim: linux_raw_sys::v5_4::general::rlimit64) -> Rlimit {
 
 /// Convert a C `rlimit64` to a Rust `Rlimit`.
 #[inline]
-fn rlimit_to_linux(lim: Rlimit) -> io::Result<linux_raw_sys::v5_4::general::rlimit64> {
+fn rlimit_to_linux(lim: Rlimit) -> io::Result<linux_raw_sys::general::rlimit64> {
     let rlim_cur = match lim.current {
         Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
-        None => linux_raw_sys::v5_4::general::RLIM64_INFINITY as _,
+        None => linux_raw_sys::general::RLIM64_INFINITY as _,
     };
     let rlim_max = match lim.maximum {
         Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
-        None => linux_raw_sys::v5_4::general::RLIM64_INFINITY as _,
+        None => linux_raw_sys::general::RLIM64_INFINITY as _,
     };
-    Ok(linux_raw_sys::v5_4::general::rlimit64 { rlim_cur, rlim_max })
+    Ok(linux_raw_sys::general::rlimit64 { rlim_cur, rlim_max })
 }
 
 /// Like `rlimit_from_linux` but uses Linux's old 32-bit `rlimit`.

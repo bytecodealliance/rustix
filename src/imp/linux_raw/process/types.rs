@@ -13,25 +13,31 @@ pub enum MembarrierCommand {
     /// `MEMBARRIER_CMD_GLOBAL`
     #[doc(alias = "Shared")]
     #[doc(alias = "MEMBARRIER_CMD_SHARED")]
-    Global = linux_raw_sys::v5_4::general::membarrier_cmd::MEMBARRIER_CMD_GLOBAL as _,
+    Global = linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_GLOBAL as _,
     /// `MEMBARRIER_CMD_GLOBAL_EXPEDITED`
-    GlobalExpedited = linux_raw_sys::v5_4::general::membarrier_cmd::MEMBARRIER_CMD_GLOBAL_EXPEDITED as _,
+    GlobalExpedited = linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_GLOBAL_EXPEDITED as _,
     /// `MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED`
-    RegisterGlobalExpedited = linux_raw_sys::v5_4::general::membarrier_cmd::MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED as _,
+    RegisterGlobalExpedited =
+        linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED as _,
     /// `MEMBARRIER_CMD_PRIVATE_EXPEDITED`
-    PrivateExpedited = linux_raw_sys::v5_4::general::membarrier_cmd::MEMBARRIER_CMD_PRIVATE_EXPEDITED as _,
+    PrivateExpedited =
+        linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_PRIVATE_EXPEDITED as _,
     /// `MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED`
-    RegisterPrivateExpedited = linux_raw_sys::v5_4::general::membarrier_cmd::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED as _,
+    RegisterPrivateExpedited =
+        linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED as _,
     /// `MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE`
-    PrivateExpeditedSyncCore = linux_raw_sys::v5_4::general::membarrier_cmd::MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE as _,
+    PrivateExpeditedSyncCore =
+        linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE as _,
     /// `MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE`
     RegisterPrivateExpeditedSyncCore =
-        linux_raw_sys::v5_4::general::membarrier_cmd::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE as _,
+        linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE
+            as _,
     /// `MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ` (since Linux 5.10)
-    PrivateExpeditedRseq = linux_raw_sys::v5_11::general::membarrier_cmd::MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ as _,
+    PrivateExpeditedRseq =
+        linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ as _,
     /// `MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_RSEQ` (since Linux 5.10)
     RegisterPrivateExpeditedRseq =
-        linux_raw_sys::v5_11::general::membarrier_cmd::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_RSEQ as _,
+        linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_RSEQ as _,
 }
 
 /// A resource value for use with [`getrlimit`], [`setrlimit`], and

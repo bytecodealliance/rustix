@@ -14,7 +14,7 @@ use super::super::c;
 use crate::imp::fd::RawFd;
 use crate::imp::reg::{RetNumber, RetReg};
 use crate::io;
-use linux_raw_sys::{errno, v5_4};
+use linux_raw_sys::errno;
 
 /// The error type for `rustix` APIs.
 ///
@@ -301,7 +301,7 @@ impl Error {
     /// `EHOSTUNREACH`
     pub const HOSTUNREACH: Self = Self::from_errno(errno::EHOSTUNREACH);
     /// `EHWPOISON`
-    pub const HWPOISON: Self = Self::from_errno(v5_4::errno::EHWPOISON);
+    pub const HWPOISON: Self = Self::from_errno(errno::EHWPOISON);
     /// `EIDRM`
     pub const IDRM: Self = Self::from_errno(errno::EIDRM);
     /// `EILSEQ`

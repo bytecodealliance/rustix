@@ -42,26 +42,23 @@ use linux_raw_sys::general::__NR_open;
 #[cfg(not(any(target_arch = "riscv64")))]
 use linux_raw_sys::general::__NR_renameat;
 use linux_raw_sys::general::{
-    __NR_faccessat, __NR_fallocate, __NR_fchmod, __NR_fchmodat, __NR_fchown, __NR_fchownat,
-    __NR_fdatasync, __NR_flock, __NR_fsync, __NR_getdents64, __NR_linkat, __NR_mkdirat,
-    __NR_mknodat, __NR_openat, __NR_readlinkat, __NR_symlinkat, __NR_unlinkat, __NR_utimensat,
-    __kernel_timespec, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, F_DUPFD, F_DUPFD_CLOEXEC,
-    F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETSIG, F_SETFD, F_SETFL,
-};
-use linux_raw_sys::v5_11::general::{__NR_openat2, open_how};
-use linux_raw_sys::v5_4::general::{
-    __NR_copy_file_range, __NR_memfd_create, __NR_renameat2, __NR_statx, statx, F_ADD_SEALS,
-    F_GETPIPE_SZ, F_GET_SEALS, F_SETPIPE_SZ,
+    __NR_copy_file_range, __NR_faccessat, __NR_fallocate, __NR_fchmod, __NR_fchmodat, __NR_fchown,
+    __NR_fchownat, __NR_fdatasync, __NR_flock, __NR_fsync, __NR_getdents64, __NR_linkat,
+    __NR_memfd_create, __NR_mkdirat, __NR_mknodat, __NR_openat, __NR_openat2, __NR_readlinkat,
+    __NR_renameat2, __NR_statx, __NR_symlinkat, __NR_unlinkat, __NR_utimensat, __kernel_timespec,
+    open_how, statx, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, F_ADD_SEALS, F_DUPFD,
+    F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETPIPE_SZ, F_GETSIG, F_GET_SEALS,
+    F_SETFD, F_SETFL, F_SETPIPE_SZ,
 };
 #[cfg(target_pointer_width = "32")]
 use {
     super::super::arch::choose::syscall6_readonly,
     super::super::conv::{hi, lo, slice_just_addr},
+    linux_raw_sys::general::__NR_utimensat_time64,
     linux_raw_sys::general::{
         __NR__llseek, __NR_fcntl64, __NR_fstat64, __NR_fstatat64, __NR_fstatfs64, __NR_ftruncate64,
         __NR_sendfile64, __NR_statfs64, timespec as __kernel_old_timespec,
     },
-    linux_raw_sys::v5_4::general::__NR_utimensat_time64,
 };
 #[cfg(target_pointer_width = "64")]
 use {
@@ -1229,14 +1226,14 @@ pub(crate) fn accessat(
     flags: AtFlags,
 ) -> io::Result<()> {
     if flags.is_empty()
-        || (flags.bits() == linux_raw_sys::v5_11::general::AT_EACCESS
+        || (flags.bits() == linux_raw_sys::general::AT_EACCESS
             && crate::process::getuid() == crate::process::geteuid()
             && crate::process::getgid() == crate::process::getegid())
     {
         return _accessat(dirfd, path, access.bits());
     }
 
-    if flags.bits() != linux_raw_sys::v5_11::general::AT_EACCESS {
+    if flags.bits() != linux_raw_sys::general::AT_EACCESS {
         return Err(io::Error::INVAL);
     }
 

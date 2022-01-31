@@ -169,7 +169,7 @@ impl Protocol {
     /// `IPPROTO_IDP`
     pub const IDP: Self = Self(linux_raw_sys::general::IPPROTO_IDP as _);
     /// `IPPROTO_TP`
-    pub const TP: Self = Self(linux_raw_sys::v5_4::general::IPPROTO_TP as _);
+    pub const TP: Self = Self(linux_raw_sys::general::IPPROTO_TP as _);
     /// `IPPROTO_DCCP`
     pub const DCCP: Self = Self(linux_raw_sys::general::IPPROTO_DCCP as _);
     /// `IPPROTO_IPV6`
@@ -183,11 +183,11 @@ impl Protocol {
     /// `IPPROTO_AH`
     pub const AH: Self = Self(linux_raw_sys::general::IPPROTO_AH as _);
     /// `IPPROTO_MTP`
-    pub const MTP: Self = Self(linux_raw_sys::v5_4::general::IPPROTO_MTP as _);
+    pub const MTP: Self = Self(linux_raw_sys::general::IPPROTO_MTP as _);
     /// `IPPROTO_BEETPH`
     pub const BEETPH: Self = Self(linux_raw_sys::general::IPPROTO_BEETPH as _);
     /// `IPPROTO_ENCAP`
-    pub const ENCAP: Self = Self(linux_raw_sys::v5_4::general::IPPROTO_ENCAP as _);
+    pub const ENCAP: Self = Self(linux_raw_sys::general::IPPROTO_ENCAP as _);
     /// `IPPROTO_PIM`
     pub const PIM: Self = Self(linux_raw_sys::general::IPPROTO_PIM as _);
     /// `IPPROTO_COMP`
@@ -197,13 +197,13 @@ impl Protocol {
     /// `IPPROTO_UDPLITE`
     pub const UDPLITE: Self = Self(linux_raw_sys::general::IPPROTO_UDPLITE as _);
     /// `IPPROTO_MPLS`
-    pub const MPLS: Self = Self(linux_raw_sys::v5_4::general::IPPROTO_MPLS as _);
+    pub const MPLS: Self = Self(linux_raw_sys::general::IPPROTO_MPLS as _);
     /// `IPPROTO_ETHERNET`
-    pub const ETHERNET: Self = Self(linux_raw_sys::v5_11::general::IPPROTO_ETHERNET as _);
+    pub const ETHERNET: Self = Self(linux_raw_sys::general::IPPROTO_ETHERNET as _);
     /// `IPPROTO_RAW`
     pub const RAW: Self = Self(linux_raw_sys::general::IPPROTO_RAW as _);
     /// `IPPROTO_MPTCP`
-    pub const MPTCP: Self = Self(linux_raw_sys::v5_11::general::IPPROTO_MPTCP as _);
+    pub const MPTCP: Self = Self(linux_raw_sys::general::IPPROTO_MPTCP as _);
     /// `IPPROTO_FRAGMENT`
     pub const FRAGMENT: Self = Self(linux_raw_sys::general::IPPROTO_FRAGMENT as _);
     /// `IPPROTO_ICMPV6`
@@ -276,8 +276,8 @@ bitflags! {
 #[repr(u32)]
 pub enum Timeout {
     /// `SO_RCVTIMEO`—Timeout for receiving.
-    Recv = linux_raw_sys::general::SO_RCVTIMEO,
+    Recv = linux_raw_sys::general::SO_RCVTIMEO_NEW,
 
     /// `SO_SNDTIMEO`—Timeout for sending.
-    Send = linux_raw_sys::general::SO_SNDTIMEO,
+    Send = linux_raw_sys::general::SO_SNDTIMEO_NEW,
 }

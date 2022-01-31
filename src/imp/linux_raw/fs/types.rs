@@ -48,19 +48,19 @@ bitflags! {
         const SYMLINK_NOFOLLOW = linux_raw_sys::general::AT_SYMLINK_NOFOLLOW;
 
         /// `AT_EMPTY_PATH`
-        const EMPTY_PATH = linux_raw_sys::v5_4::general::AT_EMPTY_PATH;
+        const EMPTY_PATH = linux_raw_sys::general::AT_EMPTY_PATH;
 
         /// `AT_EACCESS`
-        const EACCESS = linux_raw_sys::v5_11::general::AT_EACCESS;
+        const EACCESS = linux_raw_sys::general::AT_EACCESS;
 
         /// `AT_STATX_SYNC_AS_STAT`
-        const STATX_SYNC_AS_STAT = linux_raw_sys::v5_4::general::AT_STATX_SYNC_AS_STAT;
+        const STATX_SYNC_AS_STAT = linux_raw_sys::general::AT_STATX_SYNC_AS_STAT;
 
         /// `AT_STATX_FORCE_SYNC`
-        const STATX_FORCE_SYNC = linux_raw_sys::v5_4::general::AT_STATX_FORCE_SYNC;
+        const STATX_FORCE_SYNC = linux_raw_sys::general::AT_STATX_FORCE_SYNC;
 
         /// `AT_STATX_DONT_SYNC`
-        const STATX_DONT_SYNC = linux_raw_sys::v5_4::general::AT_STATX_DONT_SYNC;
+        const STATX_DONT_SYNC = linux_raw_sys::general::AT_STATX_DONT_SYNC;
     }
 }
 
@@ -199,13 +199,13 @@ bitflags! {
         const TRUNC = linux_raw_sys::general::O_TRUNC;
 
         /// `O_PATH`
-        const PATH = linux_raw_sys::v5_4::general::O_PATH;
+        const PATH = linux_raw_sys::general::O_PATH;
 
         /// `O_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
 
         /// `O_TMPFILE`
-        const TMPFILE = linux_raw_sys::v5_4::general::O_TMPFILE;
+        const TMPFILE = linux_raw_sys::general::O_TMPFILE;
 
         /// `O_NOATIME`
         const NOATIME = linux_raw_sys::general::O_NOATIME;
@@ -218,19 +218,19 @@ bitflags! {
     /// [`openat2`]: crate::fs::openat2
     pub struct ResolveFlags: u64 {
         /// `RESOLVE_NO_XDEV`
-        const NO_XDEV = linux_raw_sys::v5_11::general::RESOLVE_NO_XDEV as u64;
+        const NO_XDEV = linux_raw_sys::general::RESOLVE_NO_XDEV as u64;
 
         /// `RESOLVE_NO_MAGICLINKS`
-        const NO_MAGICLINKS = linux_raw_sys::v5_11::general::RESOLVE_NO_MAGICLINKS as u64;
+        const NO_MAGICLINKS = linux_raw_sys::general::RESOLVE_NO_MAGICLINKS as u64;
 
         /// `RESOLVE_NO_SYMLINKS`
-        const NO_SYMLINKS = linux_raw_sys::v5_11::general::RESOLVE_NO_SYMLINKS as u64;
+        const NO_SYMLINKS = linux_raw_sys::general::RESOLVE_NO_SYMLINKS as u64;
 
         /// `RESOLVE_BENEATH`
-        const BENEATH = linux_raw_sys::v5_11::general::RESOLVE_BENEATH as u64;
+        const BENEATH = linux_raw_sys::general::RESOLVE_BENEATH as u64;
 
         /// `RESOLVE_IN_ROOT`
-        const IN_ROOT = linux_raw_sys::v5_11::general::RESOLVE_IN_ROOT as u64;
+        const IN_ROOT = linux_raw_sys::general::RESOLVE_IN_ROOT as u64;
     }
 }
 
@@ -240,13 +240,13 @@ bitflags! {
     /// [`renameat_with`]: crate::fs::renameat_with
     pub struct RenameFlags: c::c_uint {
         /// `RENAME_EXCHANGE`
-        const EXCHANGE = linux_raw_sys::v5_4::general::RENAME_EXCHANGE;
+        const EXCHANGE = linux_raw_sys::general::RENAME_EXCHANGE;
 
         /// `RENAME_NOREPLACE`
-        const NOREPLACE = linux_raw_sys::v5_4::general::RENAME_NOREPLACE;
+        const NOREPLACE = linux_raw_sys::general::RENAME_NOREPLACE;
 
         /// `RENAME_WHITEOUT`
-        const WHITEOUT = linux_raw_sys::v5_4::general::RENAME_WHITEOUT;
+        const WHITEOUT = linux_raw_sys::general::RENAME_WHITEOUT;
     }
 }
 
@@ -361,38 +361,38 @@ bitflags! {
     /// [`memfd_create`]: crate::fs::memfd_create
     pub struct MemfdFlags: c::c_uint {
         /// `MFD_CLOEXEC`
-        const CLOEXEC = linux_raw_sys::v5_4::general::MFD_CLOEXEC;
+        const CLOEXEC = linux_raw_sys::general::MFD_CLOEXEC;
 
         /// `MFD_ALLOW_SEALING`
-        const ALLOW_SEALING = linux_raw_sys::v5_4::general::MFD_ALLOW_SEALING;
+        const ALLOW_SEALING = linux_raw_sys::general::MFD_ALLOW_SEALING;
 
         /// `MFD_HUGETLB` (since Linux 4.14)
-        const HUGETLB = linux_raw_sys::v5_4::general::MFD_HUGETLB;
+        const HUGETLB = linux_raw_sys::general::MFD_HUGETLB;
 
         /// `MFD_HUGE_64KB`
-        const HUGE_64KB = linux_raw_sys::v5_4::general::MFD_HUGE_64KB;
+        const HUGE_64KB = linux_raw_sys::general::MFD_HUGE_64KB;
         /// `MFD_HUGE_512JB`
-        const HUGE_512KB = linux_raw_sys::v5_4::general::MFD_HUGE_512KB;
+        const HUGE_512KB = linux_raw_sys::general::MFD_HUGE_512KB;
         /// `MFD_HUGE_1MB`
-        const HUGE_1MB = linux_raw_sys::v5_4::general::MFD_HUGE_1MB;
+        const HUGE_1MB = linux_raw_sys::general::MFD_HUGE_1MB;
         /// `MFD_HUGE_2MB`
-        const HUGE_2MB = linux_raw_sys::v5_4::general::MFD_HUGE_2MB;
+        const HUGE_2MB = linux_raw_sys::general::MFD_HUGE_2MB;
         /// `MFD_HUGE_8MB`
-        const HUGE_8MB = linux_raw_sys::v5_4::general::MFD_HUGE_8MB;
+        const HUGE_8MB = linux_raw_sys::general::MFD_HUGE_8MB;
         /// `MFD_HUGE_16MB`
-        const HUGE_16MB = linux_raw_sys::v5_4::general::MFD_HUGE_16MB;
+        const HUGE_16MB = linux_raw_sys::general::MFD_HUGE_16MB;
         /// `MFD_HUGE_32MB`
-        const HUGE_32MB = linux_raw_sys::v5_4::general::MFD_HUGE_32MB;
+        const HUGE_32MB = linux_raw_sys::general::MFD_HUGE_32MB;
         /// `MFD_HUGE_256MB`
-        const HUGE_256MB = linux_raw_sys::v5_4::general::MFD_HUGE_256MB;
+        const HUGE_256MB = linux_raw_sys::general::MFD_HUGE_256MB;
         /// `MFD_HUGE_512MB`
-        const HUGE_512MB = linux_raw_sys::v5_4::general::MFD_HUGE_512MB;
+        const HUGE_512MB = linux_raw_sys::general::MFD_HUGE_512MB;
         /// `MFD_HUGE_1GB`
-        const HUGE_1GB = linux_raw_sys::v5_4::general::MFD_HUGE_1GB;
+        const HUGE_1GB = linux_raw_sys::general::MFD_HUGE_1GB;
         /// `MFD_HUGE_2GB`
-        const HUGE_2GB = linux_raw_sys::v5_4::general::MFD_HUGE_2GB;
+        const HUGE_2GB = linux_raw_sys::general::MFD_HUGE_2GB;
         /// `MFD_HUGE_16GB`
-        const HUGE_16GB = linux_raw_sys::v5_4::general::MFD_HUGE_16GB;
+        const HUGE_16GB = linux_raw_sys::general::MFD_HUGE_16GB;
     }
 }
 
@@ -404,15 +404,15 @@ bitflags! {
     /// [`fcntl_get_seals`]: rustix::fs::fcntl_get_seals
     pub struct SealFlags: u32 {
        /// `F_SEAL_SEAL`.
-       const SEAL = linux_raw_sys::v5_4::general::F_SEAL_SEAL;
+       const SEAL = linux_raw_sys::general::F_SEAL_SEAL;
        /// `F_SEAL_SHRINK`.
-       const SHRINK = linux_raw_sys::v5_4::general::F_SEAL_SHRINK;
+       const SHRINK = linux_raw_sys::general::F_SEAL_SHRINK;
        /// `F_SEAL_GROW`.
-       const GROW = linux_raw_sys::v5_4::general::F_SEAL_GROW;
+       const GROW = linux_raw_sys::general::F_SEAL_GROW;
        /// `F_SEAL_WRITE`.
-       const WRITE = linux_raw_sys::v5_4::general::F_SEAL_WRITE;
+       const WRITE = linux_raw_sys::general::F_SEAL_WRITE;
        /// `F_SEAL_FUTURE_WRITE` (since Linux 5.1)
-       const FUTURE_WRITE = linux_raw_sys::v5_4::general::F_SEAL_FUTURE_WRITE;
+       const FUTURE_WRITE = linux_raw_sys::general::F_SEAL_FUTURE_WRITE;
     }
 }
 
@@ -422,46 +422,46 @@ bitflags! {
     /// [`statx`]: crate::fs::statx
     pub struct StatxFlags: u32 {
         /// `STATX_TYPE`
-        const TYPE = linux_raw_sys::v5_4::general::STATX_TYPE;
+        const TYPE = linux_raw_sys::general::STATX_TYPE;
 
         /// `STATX_MODE`
-        const MODE = linux_raw_sys::v5_4::general::STATX_MODE;
+        const MODE = linux_raw_sys::general::STATX_MODE;
 
         /// `STATX_NLINK`
-        const NLINK = linux_raw_sys::v5_4::general::STATX_NLINK;
+        const NLINK = linux_raw_sys::general::STATX_NLINK;
 
         /// `STATX_UID`
-        const UID = linux_raw_sys::v5_4::general::STATX_UID;
+        const UID = linux_raw_sys::general::STATX_UID;
 
         /// `STATX_GID`
-        const GID = linux_raw_sys::v5_4::general::STATX_GID;
+        const GID = linux_raw_sys::general::STATX_GID;
 
         /// `STATX_ATIME`
-        const ATIME = linux_raw_sys::v5_4::general::STATX_ATIME;
+        const ATIME = linux_raw_sys::general::STATX_ATIME;
 
         /// `STATX_MTIME`
-        const MTIME = linux_raw_sys::v5_4::general::STATX_MTIME;
+        const MTIME = linux_raw_sys::general::STATX_MTIME;
 
         /// `STATX_CTIME`
-        const CTIME = linux_raw_sys::v5_4::general::STATX_CTIME;
+        const CTIME = linux_raw_sys::general::STATX_CTIME;
 
         /// `STATX_INO`
-        const INO = linux_raw_sys::v5_4::general::STATX_INO;
+        const INO = linux_raw_sys::general::STATX_INO;
 
         /// `STATX_SIZE`
-        const SIZE = linux_raw_sys::v5_4::general::STATX_SIZE;
+        const SIZE = linux_raw_sys::general::STATX_SIZE;
 
         /// `STATX_BLOCKS`
-        const BLOCKS = linux_raw_sys::v5_4::general::STATX_BLOCKS;
+        const BLOCKS = linux_raw_sys::general::STATX_BLOCKS;
 
         /// `STATX_BASIC_STATS`
-        const BASIC_STATS = linux_raw_sys::v5_4::general::STATX_BASIC_STATS;
+        const BASIC_STATS = linux_raw_sys::general::STATX_BASIC_STATS;
 
         /// `STATX_BTIME`
-        const BTIME = linux_raw_sys::v5_4::general::STATX_BTIME;
+        const BTIME = linux_raw_sys::general::STATX_BTIME;
 
         /// `STATX_ALL`
-        const ALL = linux_raw_sys::v5_4::general::STATX_ALL;
+        const ALL = linux_raw_sys::general::STATX_ALL;
     }
 }
 
@@ -473,17 +473,17 @@ bitflags! {
         /// `FALLOC_FL_KEEP_SIZE`
         const KEEP_SIZE = linux_raw_sys::general::FALLOC_FL_KEEP_SIZE;
         /// `FALLOC_FL_PUNCH_HOLE`
-        const PUNCH_HOLE = linux_raw_sys::v5_4::general::FALLOC_FL_PUNCH_HOLE;
+        const PUNCH_HOLE = linux_raw_sys::general::FALLOC_FL_PUNCH_HOLE;
         /// `FALLOC_FL_NO_HIDE_STALE`
-        const NO_HIDE_STALE = linux_raw_sys::v5_4::general::FALLOC_FL_NO_HIDE_STALE;
+        const NO_HIDE_STALE = linux_raw_sys::general::FALLOC_FL_NO_HIDE_STALE;
         /// `FALLOC_FL_COLLAPSE_RANGE`
-        const COLLAPSE_RANGE = linux_raw_sys::v5_4::general::FALLOC_FL_COLLAPSE_RANGE;
+        const COLLAPSE_RANGE = linux_raw_sys::general::FALLOC_FL_COLLAPSE_RANGE;
         /// `FALLOC_FL_ZERO_RANGE`
-        const ZERO_RANGE = linux_raw_sys::v5_4::general::FALLOC_FL_ZERO_RANGE;
+        const ZERO_RANGE = linux_raw_sys::general::FALLOC_FL_ZERO_RANGE;
         /// `FALLOC_FL_INSERT_RANGE`
-        const INSERT_RANGE = linux_raw_sys::v5_4::general::FALLOC_FL_INSERT_RANGE;
+        const INSERT_RANGE = linux_raw_sys::general::FALLOC_FL_INSERT_RANGE;
         /// `FALLOC_FL_UNSHARE_RANGE`
-        const UNSHARE_RANGE = linux_raw_sys::v5_4::general::FALLOC_FL_UNSHARE_RANGE;
+        const UNSHARE_RANGE = linux_raw_sys::general::FALLOC_FL_UNSHARE_RANGE;
     }
 }
 
@@ -537,7 +537,7 @@ pub type StatFs = linux_raw_sys::general::statfs64;
 /// `struct statx` for use with [`statx`].
 ///
 /// [`statx`]: crate::fs::statx
-pub type Statx = linux_raw_sys::v5_4::general::statx;
+pub type Statx = linux_raw_sys::general::statx;
 
 /// `mode_t`
 #[cfg(not(any(
