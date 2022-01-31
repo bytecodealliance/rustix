@@ -27,20 +27,15 @@ use crate::process::{
 };
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
-#[cfg(all(
-    not(any(target_arch = "arm", target_arch = "powerpc64", target_arch = "x86")),
-    target_pointer_width = "32"
-))]
+#[cfg(not(any(target_arch = "arm", target_arch = "powerpc64", target_arch = "x86")))]
 use linux_raw_sys::general::__NR_getrlimit;
-#[cfg(target_pointer_width = "32")]
-use linux_raw_sys::general::__NR_setrlimit;
 #[cfg(any(target_arch = "arm", target_arch = "powerpc64", target_arch = "x86"))]
 use linux_raw_sys::general::__NR_ugetrlimit as __NR_getrlimit;
 use linux_raw_sys::general::{
     __NR_chdir, __NR_exit_group, __NR_fchdir, __NR_getcwd, __NR_getpid, __NR_getppid,
     __NR_getpriority, __NR_kill, __NR_membarrier, __NR_prlimit64, __NR_sched_getaffinity,
-    __NR_sched_setaffinity, __NR_sched_yield, __NR_setpriority, __NR_setsid, __NR_uname,
-    __NR_wait4, __kernel_gid_t, __kernel_pid_t, __kernel_uid_t,
+    __NR_sched_setaffinity, __NR_sched_yield, __NR_setpriority, __NR_setrlimit, __NR_setsid,
+    __NR_uname, __NR_wait4, __kernel_gid_t, __kernel_pid_t, __kernel_uid_t,
 };
 #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
 use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getuid};
@@ -320,7 +315,6 @@ pub(crate) fn setpriority_process(pid: Option<Pid>, priority: i32) -> io::Result
 #[inline]
 pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
     let mut result = MaybeUninit::<linux_raw_sys::general::rlimit64>::uninit();
-    #[cfg(target_pointer_width = "32")]
     unsafe {
         match ret(syscall4(
             nr(__NR_prlimit64),
@@ -336,22 +330,10 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
             }
         }
     }
-    #[cfg(target_pointer_width = "64")]
-    unsafe {
-        ret_infallible(syscall4(
-            nr(__NR_prlimit64),
-            c_uint(0),
-            resource(limit),
-            const_void_star(core::ptr::null()),
-            out(&mut result),
-        ));
-        rlimit_from_linux(result.assume_init())
-    }
 }
 
 /// The old 32-bit-only `getrlimit` syscall, for when we lack the new
 /// `prlimit64`.
-#[cfg(target_pointer_width = "32")]
 unsafe fn getrlimit_old(limit: Resource) -> Rlimit {
     let mut result = MaybeUninit::<linux_raw_sys::general::rlimit>::uninit();
     ret_infallible(syscall2(
@@ -364,7 +346,6 @@ unsafe fn getrlimit_old(limit: Resource) -> Rlimit {
 
 #[inline]
 pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
-    #[cfg(target_pointer_width = "32")]
     unsafe {
         let lim = rlimit_to_linux(new.clone())?;
         match ret(syscall4(
@@ -379,22 +360,10 @@ pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
             Err(e) => Err(e),
         }
     }
-    #[cfg(target_pointer_width = "64")]
-    unsafe {
-        let lim = rlimit_to_linux(new)?;
-        ret(syscall4(
-            nr(__NR_prlimit64),
-            c_uint(0),
-            resource(limit),
-            by_ref(&lim),
-            void_star(core::ptr::null_mut()),
-        ))
-    }
 }
 
 /// The old 32-bit-only `setrlimit` syscall, for when we lack the new
 /// `prlimit64`.
-#[cfg(target_pointer_width = "32")]
 unsafe fn setrlimit_old(limit: Resource, new: Rlimit) -> io::Result<()> {
     let lim = rlimit_to_linux_old(new)?;
     ret(syscall2(nr(__NR_setrlimit), resource(limit), by_ref(&lim)))
@@ -449,7 +418,6 @@ fn rlimit_to_linux(lim: Rlimit) -> io::Result<linux_raw_sys::general::rlimit64> 
 }
 
 /// Like `rlimit_from_linux` but uses Linux's old 32-bit `rlimit`.
-#[cfg(target_pointer_width = "32")]
 fn rlimit_from_linux_old(lim: linux_raw_sys::general::rlimit) -> Rlimit {
     let current = if lim.rlim_cur == linux_raw_sys::general::RLIM_INFINITY as _ {
         None
@@ -465,7 +433,6 @@ fn rlimit_from_linux_old(lim: linux_raw_sys::general::rlimit) -> Rlimit {
 }
 
 /// Like `rlimit_to_linux` but uses Linux's old 32-bit `rlimit`.
-#[cfg(target_pointer_width = "32")]
 fn rlimit_to_linux_old(lim: Rlimit) -> io::Result<linux_raw_sys::general::rlimit> {
     let rlim_cur = match lim.current {
         Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
