@@ -355,24 +355,41 @@ fn init() {
     minimal_init();
 
     if let Some(vdso) = vdso::Vdso::new() {
+        // Look up the platform-specific `clock_gettime` symbol as documented
+        // [here], except on 32-bit platforms where we look up the
+        // `64`-suffixed variant and fail if we don't find it.
+        //
+        // [here]: https://man7.org/linux/man-pages/man7/vdso.7.html
         #[cfg(target_arch = "x86_64")]
         let ptr = vdso.sym(zstr!("LINUX_2.6"), zstr!("__vdso_clock_gettime"));
         #[cfg(target_arch = "arm")]
-        let ptr = vdso.sym(zstr!("LINUX_2.6"), zstr!("__vdso_clock_gettime"));
+        let ptr = vdso.sym(zstr!("LINUX_2.6"), zstr!("__vdso_clock_gettime64"));
         #[cfg(target_arch = "aarch64")]
         let ptr = vdso.sym(zstr!("LINUX_2.6.39"), zstr!("__kernel_clock_gettime"));
         #[cfg(target_arch = "x86")]
         let ptr = vdso.sym(zstr!("LINUX_2.6"), zstr!("__vdso_clock_gettime64"));
         #[cfg(target_arch = "riscv64")]
-        let ptr = vdso.sym(zstr!("LINUX_4.15"), zstr!("__kernel_clock_gettime"));
+        let ptr = vdso.sym(zstr!("LINUX_4.15"), zstr!("__vdso_clock_gettime"));
 
-        assert!(!ptr.is_null());
+        // On all 64-bit platforms, the 64-bit `clock_gettime` symbols are
+        // always available.
+        #[cfg(any(target_pointer_width = "64"))]
+        let ok = true;
 
-        // Safety: Store the computed function addresses in static storage
-        // so that we don't need to compute it again (but if we do, it doesn't
-        // hurt anything).
-        unsafe {
-            CLOCK_GETTIME.store(ptr as usize, Relaxed);
+        // On some 32-bit platforms, the 64-bit `clock_gettime` symbols are not
+        // available on older kernel versions.
+        #[cfg(any(target_arch = "arm", target_arch = "x86"))]
+        let ok = !ptr.is_null();
+
+        if ok {
+            assert!(!ptr.is_null());
+
+            // Safety: Store the computed function addresses in static storage
+            // so that we don't need to compute it again (but if we do, it doesn't
+            // hurt anything).
+            unsafe {
+                CLOCK_GETTIME.store(ptr as usize, Relaxed);
+            }
         }
 
         // On x86, also look up the vsyscall entry point.
