@@ -191,15 +191,22 @@ unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
 /// which hopefully holds the value of the kernel-provided vDSO in memory. Do
 /// a series of checks to be as sure as we can that it's safe to use.
 unsafe fn check_vdso_base<'vdso>(base: usize) -> Option<&'vdso Elf_Ehdr> {
-    extern "C" {
-        static __ehdr_start: c::c_void;
-    }
+    // In theory, we could check that we're not attempting to parse our own ELF
+    // image, as an additional check. However, older Linux toolchains don't
+    // support this, and Rust's `#[linkage = "extern_weak"]` isn't stable yet,
+    // so just disable this for now.
+    /*
+    {
+        extern "C" {
+            static __ehdr_start: c::c_void;
+        }
 
-    // Check that we're not attempting to parse our own ELF image.
-    let ehdr_start: *const c::c_void = &__ehdr_start;
-    if base == (ehdr_start as usize) {
-        return None;
+        let ehdr_start: *const c::c_void = &__ehdr_start;
+        if base == (ehdr_start as usize) {
+            return None;
+        }
     }
+    */
 
     // Check that the vDSO is page-aligned and appropriately mapped.
     madvise(
