@@ -40,7 +40,7 @@ pub(crate) fn CPU_ISSET(cpu: usize, cpuset: &RawCpuSet) -> bool {
     unsafe { libc::CPU_ISSET(cpu, cpuset) }
 }
 
-#[cfg(any(target_os = "linux"))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub(crate) fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
     use core::convert::TryInto;
