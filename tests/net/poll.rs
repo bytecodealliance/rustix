@@ -94,7 +94,7 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
 }
 
 #[test]
-fn test_v6() {
+fn test_poll() {
     #[cfg(windows)]
     rustix::net::wsa_startup().unwrap();
 
