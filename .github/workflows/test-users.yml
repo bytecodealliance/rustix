@@ -344,6 +344,8 @@ jobs:
         ref: rustix
         # Fetch enough to let the bootstrap script find an LLVM revision.
         fetch-depth: 2000
+    # Include the changes needed to support std.
+    - run: git rebase rustc-dep-of-std
     # Download a pre-built LLVM instead of building it from source.
     - run: cd rust && echo "[llvm]" >> config.toml
     - run: cd rust && echo "download-ci-llvm = true" >> config.toml
