@@ -22,9 +22,11 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-
+    - uses: actions/checkout@v2
+      with:
+        repository: sunfishcode/async-io
+        path: async-io
     - run: sed -i 's/^version = "\([[:digit:].]*\)-alpha.0"$/version = "\1"/' Cargo.toml
-    - run: git clone https://github.com/sunfishcode/async-io
     - run: cd async-io && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd async-io && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd async-io && cargo test
@@ -46,9 +48,11 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-
+    - uses: actions/checkout@v2
+      with:
+        repository: bytecodealliance/cap-std
+        path: cap-std
     - run: sed -i 's/^version = "\([[:digit:].]*\)-alpha.0"$/version = "\1"/' Cargo.toml
-    - run: git clone https://github.com/bytecodealliance/cap-std
     - run: cd cap-std && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd cap-std && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd cap-std && cargo test
@@ -70,10 +74,12 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
+    - uses: actions/checkout@v2
+      with:
+        repository: sunfishcode/cargo
+        path: cargo
+        ref: rustix
     - run: sed -i 's/^version = "\([[:digit:].]*\)-alpha.0"$/version = "\1"/' Cargo.toml
-    - run: git clone https://github.com/sunfishcode/cargo
-    # The rustix port is currently on the rustix branch.
-    - run: cd cargo && git checkout rustix
     - run: cd cargo && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd cargo && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd cargo && cargo test --workspace
@@ -98,9 +104,11 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-
+    - uses: actions/checkout@v2
+      with:
+        repository: sunfishcode/memfd-rs
+        path: memfd-rs
     - run: sed -i 's/^version = "\([[:digit:].]*\)-alpha.0"$/version = "\1"/' Cargo.toml
-    - run: git clone https://github.com/sunfishcode/memfd-rs
     - run: cd memfd-rs && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd memfd-rs && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd memfd-rs && cargo test
@@ -122,9 +130,11 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-
+    - uses: actions/checkout@v2
+      with:
+        repository: sunfishcode/tempfile
+        path: tempfile
     - run: sed -i 's/^version = "\([[:digit:].]*\)-alpha.0"$/version = "\1"/' Cargo.toml
-    - run: git clone https://github.com/sunfishcode/tempfile
     - run: cd tempfile && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd tempfile && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd tempfile && cargo test
@@ -146,10 +156,12 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-
+    - uses: actions/checkout@v2
+      with:
+        repository: yoshuawuyts/fd-lock
+        path: fd-lock
     # fd-lock currently uses rustix 0.32.
     - run: sed -i 's/^version = "\([[:digit:].]*\)-alpha.0"$/version = "0.32.0"/' Cargo.toml
-    - run: git clone https://github.com/yoshuawuyts/fd-lock
     - run: cd fd-lock && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd fd-lock && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd fd-lock && cargo test
@@ -171,12 +183,13 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-
+    - uses: actions/checkout@v2
+      with:
+        repository: bytecodealliance/wasmtime
+        path: wasmtime
+        submodules: true
     - run: rustup target add wasm32-wasi
     - run: sed -i 's/^version = "\([[:digit:].]*\)-alpha.0"$/version = "\1"/' Cargo.toml
-    - run: git clone https://github.com/bytecodealliance/wasmtime
-    - run: cd wasmtime && git submodule init
-    - run: cd wasmtime && git submodule update
     - run: cd wasmtime && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd wasmtime && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd wasmtime && cargo test
@@ -198,9 +211,11 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-
+    - uses: actions/checkout@v2
+      with:
+        repository: sunfishcode/nameless
+        path: nameless
     - run: sed -i 's/^version = "\([[:digit:].]*\)-alpha.0"$/version = "\1"/' Cargo.toml
-    - run: git clone https://github.com/sunfishcode/nameless
     - run: cd nameless && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd nameless && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd nameless && cargo test
@@ -222,9 +237,11 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-
+    - uses: actions/checkout@v2
+      with:
+        repository: cgwalters/cap-std-ext
+        path: cap-std-ext
     - run: sed -i 's/^version = "\([[:digit:].]*\)-alpha.0"$/version = "\1"/' Cargo.toml
-    - run: git clone https://github.com/cgwalters/cap-std-ext
     - run: cd cap-std-ext && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd cap-std-ext && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd cap-std-ext && cargo test
@@ -246,9 +263,11 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-
+    - uses: actions/checkout@v2
+      with:
+        repository: ostreedev/ostree-ext
+        path: ostree-ext
     - run: sed -i 's/^version = "\([[:digit:].]*\)-alpha.0"$/version = "\1"/' Cargo.toml
-    - run: git clone https://github.com/cgwalters/ostree-ext
     - run: cd ostree-ext && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd ostree-ext && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd ostree-ext && cargo test
@@ -270,11 +289,13 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-
+    - uses: actions/checkout@v2
+      with:
+        repository: sunfishcode/dbus-rs
+        path: dbus-rs
     - run: sudo apt-get update
     - run: sudo apt-get install -y libdbus-1-dev
     - run: sed -i 's/^version = "\([[:digit:].]*\)-alpha.0"$/version = "\1"/' Cargo.toml
-    - run: git clone https://github.com/sunfishcode/dbus-rs
     - run: cd dbus-rs && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd dbus-rs && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd dbus-rs && cargo test
@@ -296,10 +317,12 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-
+    - uses: actions/checkout@v2
+      with:
+        repository: sunfishcode/mustang
+        path: mustang
     - run: rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
     - run: sed -i 's/^version = "\([[:digit:].]*\)-alpha.0"$/version = "\1"/' Cargo.toml
-    - run: git clone https://github.com/sunfishcode/mustang
     - run: cd mustang && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd mustang && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd mustang && sed -i 's/fn concurrent_recursive_mkdir()/#[ignore]\rfn concurrent_recursive_mkdir()/' tests/fs.rs
@@ -323,8 +346,11 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - run: git clone https://github.com/sunfishcode/rust
-    - run: cd rust && git checkout rustix
+    - uses: actions/checkout@v2
+      with:
+        repository: sunfishcode/rust
+        path: rust
+        ref: rustix
     - run: cd rust && sed -i 's/\<git = "https:\/\/github\.com\/bytecodealliance\/rustix", branch = "rustc-dep-of-std"/path = "..\/..\/.."/' library/std/Cargo.toml
     - run: cd rust && ./x.py test library/std --stage=0
       # See <https://github.com/bytecodealliance/rustix/issues/76#issuecomment-962196433>
