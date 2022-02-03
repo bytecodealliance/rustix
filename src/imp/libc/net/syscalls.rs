@@ -4,7 +4,7 @@ use super::super::c;
 use super::super::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 use super::ext::{in6_addr_new, in_addr_new};
 #[cfg(not(windows))]
-use super::{encode_sockaddr_unix, SocketAddrUnix};
+use super::SocketAddrUnix;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::{
     encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags, AddressFamily, Protocol,
@@ -122,8 +122,8 @@ pub(crate) fn sendto_unix(
             buf.as_ptr().cast(),
             send_recv_len(buf.len()),
             flags.bits(),
-            as_ptr(&encode_sockaddr_unix(addr)).cast::<c::sockaddr>(),
-            size_of::<SocketAddrUnix>() as _,
+            as_ptr(&addr.unix).cast(),
+            addr.addr_len(),
         ))?
     };
     Ok(nwritten as usize)
@@ -187,8 +187,8 @@ pub(crate) fn bind_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Re
     unsafe {
         ret(c::bind(
             borrowed_fd(sockfd),
-            as_ptr(&encode_sockaddr_unix(addr)).cast(),
-            size_of::<c::sockaddr_un>() as c::socklen_t,
+            as_ptr(&addr.unix).cast(),
+            addr.addr_len(),
         ))
     }
 }
@@ -220,8 +220,8 @@ pub(crate) fn connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io:
     unsafe {
         ret(c::connect(
             borrowed_fd(sockfd),
-            as_ptr(&encode_sockaddr_unix(addr)).cast(),
-            size_of::<c::sockaddr_un>() as c::socklen_t,
+            as_ptr(&addr.unix).cast(),
+            addr.addr_len(),
         ))
     }
 }
