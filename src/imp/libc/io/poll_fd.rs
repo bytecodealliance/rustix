@@ -83,6 +83,12 @@ impl<'fd> PollFd<'fd> {
         self.pollfd.fd = fd.as_fd().as_raw_fd() as LibcFd;
     }
 
+    /// Clears the ready events.
+    #[inline]
+    pub fn clear_revents(&mut self) {
+        self.pollfd.revents = 0;
+    }
+
     /// Constructs a new `PollFd` holding `fd` and `events`.
     ///
     /// This is the same as `new`, but can be used to avoid borrowing the

@@ -28,6 +28,11 @@ fn test_poll() {
     assert_eq!(poll_fds[0].revents(), PollFlags::IN);
     assert_eq!(poll_fds[0].as_fd().as_raw_fd(), reader.as_fd().as_raw_fd());
 
+    let mut temp = poll_fds[0].clone();
+    assert_eq!(temp.revents(), PollFlags::IN);
+    temp.clear_revents();
+    assert!(temp.revents().is_empty());
+
     // Read the byte from the pipe.
     let mut buf = [b'\0'];
     assert_eq!(with_retrying(|| read(&reader, &mut buf)).unwrap(), 1);
