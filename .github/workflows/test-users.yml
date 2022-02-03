@@ -287,7 +287,7 @@ jobs:
         repository: sunfishcode/dbus-rs
         path: dbus-rs
     - run: sudo apt-get update
-    - run: sudo apt-get install -y libdbus-1-dev
+    - run: sudo apt-get install -y libdbus-1-dev at-spi2-core
     - run: cd dbus-rs && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd dbus-rs && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd dbus-rs && env DBUS_SESSION_BUS_ADDRESS=`dbus-daemon --session --print-address --fork` cargo test --workspace
@@ -342,6 +342,8 @@ jobs:
         repository: sunfishcode/rust
         path: rust
         ref: rustix
+        # Fetch enough to let the bootstrap script find an LLVM revision.
+        fetch-depth: 2000
     # Download a pre-built LLVM instead of building it from source.
     - run: cd rust && echo "[llvm]" >> config.toml
     - run: cd rust && echo "download-ci-llvm = true" >> config.toml
