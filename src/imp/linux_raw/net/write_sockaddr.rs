@@ -2,7 +2,6 @@
 //! we can interpret the rest of a `sockaddr` produced by the kernel.
 #![allow(unsafe_code)]
 
-use super::super::c;
 use crate::net::{SocketAddrAny, SocketAddrStorage, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use core::mem::size_of;
 
@@ -54,23 +53,7 @@ unsafe fn write_sockaddr_v6(v6: &SocketAddrV6, storage: *mut SocketAddrStorage) 
     size_of::<linux_raw_sys::general::sockaddr_in6>()
 }
 
-pub(crate) unsafe fn encode_sockaddr_unix(
-    unix: &SocketAddrUnix,
-) -> linux_raw_sys::general::sockaddr_un {
-    let mut encoded = linux_raw_sys::general::sockaddr_un {
-        sun_family: linux_raw_sys::general::AF_UNIX as _,
-        sun_path: [0; 108_usize],
-    };
-    let bytes = unix.path().to_bytes();
-    for (i, b) in bytes.iter().enumerate() {
-        encoded.sun_path[i] = *b as c::c_char;
-    }
-    encoded.sun_path[bytes.len()] = b'\0' as c::c_char;
-    encoded
-}
-
 unsafe fn write_sockaddr_unix(unix: &SocketAddrUnix, storage: *mut SocketAddrStorage) -> usize {
-    let encoded = encode_sockaddr_unix(unix);
-    core::ptr::write(storage.cast(), encoded);
-    super::offsetof_sun_path() + unix.path().to_bytes().len() + 1
+    core::ptr::write(storage.cast(), unix.unix);
+    unix.len()
 }

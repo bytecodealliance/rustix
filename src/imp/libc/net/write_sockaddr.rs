@@ -91,48 +91,7 @@ unsafe fn write_sockaddr_v6(v6: &SocketAddrV6, storage: *mut SocketAddrStorage) 
 }
 
 #[cfg(not(windows))]
-pub(crate) unsafe fn encode_sockaddr_unix(unix: &SocketAddrUnix) -> c::sockaddr_un {
-    let mut encoded = c::sockaddr_un {
-        #[cfg(any(
-            target_os = "dragonfly",
-            target_os = "ios",
-            target_os = "freebsd",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd"
-        ))]
-        sun_len: size_of::<c::sockaddr_un>() as _,
-        sun_family: c::AF_UNIX as _,
-        #[cfg(any(
-            target_os = "dragonfly",
-            target_os = "ios",
-            target_os = "freebsd",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd"
-        ))]
-        sun_path: [0; 104],
-        #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "ios",
-            target_os = "freebsd",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd"
-        )))]
-        sun_path: [0; 108],
-    };
-    let bytes = unix.path().to_bytes();
-    for (i, b) in bytes.iter().enumerate() {
-        encoded.sun_path[i] = *b as c::c_char;
-    }
-    encoded.sun_path[bytes.len()] = b'\0' as c::c_char;
-    encoded
-}
-
-#[cfg(not(windows))]
 unsafe fn write_sockaddr_unix(unix: &SocketAddrUnix, storage: *mut SocketAddrStorage) -> usize {
-    let encoded = encode_sockaddr_unix(unix);
-    core::ptr::write(storage.cast(), encoded);
-    super::offsetof_sun_path() + unix.path().to_bytes().len() + 1
+    core::ptr::write(storage.cast(), unix.unix);
+    unix.len()
 }

@@ -29,3 +29,64 @@ fn encode_decode() {
         }
     }
 }
+
+#[cfg(not(windows))]
+#[test]
+fn test_unix_addr() {
+    use rustix::net::SocketAddrUnix;
+    use rustix::zstr;
+
+    assert_eq!(
+        SocketAddrUnix::new("/").unwrap().path().unwrap(),
+        zstr!("/")
+    );
+    assert_eq!(
+        SocketAddrUnix::new("//").unwrap().path().unwrap(),
+        zstr!("//")
+    );
+    assert_eq!(
+        SocketAddrUnix::new("/foo/bar").unwrap().path().unwrap(),
+        zstr!("/foo/bar")
+    );
+    assert_eq!(
+        SocketAddrUnix::new("foo").unwrap().path().unwrap(),
+        zstr!("foo")
+    );
+    SocketAddrUnix::new("/foo\0/bar").unwrap_err();
+    assert!(SocketAddrUnix::new("").unwrap().path().is_none());
+
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    {
+        assert!(SocketAddrUnix::new("foo")
+            .unwrap()
+            .abstract_name()
+            .is_none());
+
+        assert_eq!(
+            SocketAddrUnix::new_abstract_name(b"test")
+                .unwrap()
+                .abstract_name()
+                .unwrap(),
+            b"test"
+        );
+        assert_eq!(
+            SocketAddrUnix::new_abstract_name(b"")
+                .unwrap()
+                .abstract_name()
+                .unwrap(),
+            b""
+        );
+        assert_eq!(
+            SocketAddrUnix::new_abstract_name(b"this\0that")
+                .unwrap()
+                .abstract_name()
+                .unwrap(),
+            b"this\0that"
+        );
+        SocketAddrUnix::new_abstract_name(&[b'a'; 500]).unwrap_err();
+        assert!(SocketAddrUnix::new_abstract_name(b"test")
+            .unwrap()
+            .path()
+            .is_none());
+    }
+}
