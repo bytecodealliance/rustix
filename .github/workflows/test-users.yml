@@ -238,8 +238,8 @@ jobs:
     - run: cd cap-std-ext && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd cap-std-ext && cargo test
 
-  ostree-ext:
-    name: ostree-ext
+  ostree-rs-ext:
+    name: ostree-rs-ext
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -257,11 +257,13 @@ jobs:
         toolchain: ${{ matrix.rust }}
     - uses: actions/checkout@v2
       with:
-        repository: ostreedev/ostree-ext
-        path: ostree-ext
-    - run: cd ostree-ext && echo '[patch.crates-io]' >> Cargo.toml
-    - run: cd ostree-ext && echo 'rustix = { path = ".." }' >> Cargo.toml
-    - run: cd ostree-ext && cargo test
+        repository: ostreedev/ostree-rs-ext
+        path: ostree-rs-ext
+    - run: sudo apt-get update
+    - run: sudo apt-get install -y libostree-dev
+    - run: cd ostree-rs-ext && echo '[patch.crates-io]' >> Cargo.toml
+    - run: cd ostree-rs-ext && echo 'rustix = { path = ".." }' >> Cargo.toml
+    - run: cd ostree-rs-ext && cargo test
 
   dbus-rs:
     name: dbus-rs ported to rustix
@@ -288,7 +290,7 @@ jobs:
     - run: sudo apt-get install -y libdbus-1-dev
     - run: cd dbus-rs && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd dbus-rs && echo 'rustix = { path = ".." }' >> Cargo.toml
-    - run: cd dbus-rs && cargo test
+    - run: cd dbus-rs && env DBUS_SESSION_BUS_ADDRESS=`dbus-daemon --session --print-address --fork` cargo test --workspace
 
   mustang:
     name: mustang
@@ -340,6 +342,9 @@ jobs:
         repository: sunfishcode/rust
         path: rust
         ref: rustix
+    # Download a pre-built LLVM instead of building it from source.
+    - run: cd rust && echo "[llvm]" >> config.toml
+    - run: cd rust && echo "download-ci-llvm = true" >> config.toml
     - run: cd rust && sed -i 's/\<git = "https:\/\/github\.com\/bytecodealliance\/rustix", branch = "rustc-dep-of-std"/path = "..\/..\/.."/' library/std/Cargo.toml
     - run: cd rust && ./x.py test library/std --stage=0
       # See <https://github.com/bytecodealliance/rustix/issues/76#issuecomment-962196433>
