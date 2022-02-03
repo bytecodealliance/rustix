@@ -56,6 +56,12 @@ impl<'fd> PollFd<'fd> {
         self.fd = fd.as_fd();
     }
 
+    /// Clears the ready events.
+    #[inline]
+    pub fn clear_revents(&mut self) {
+        self.revents = 0;
+    }
+
     /// Constructs a new `PollFd` holding `fd` and `events`.
     ///
     /// This is the same as `new`, but can be used to avoid borrowing the
