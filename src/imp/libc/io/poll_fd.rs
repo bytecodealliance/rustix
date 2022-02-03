@@ -1,8 +1,12 @@
 use super::super::c;
 use super::super::conv::borrowed_fd;
-use crate::fd::{AsFd, AsRawFd, BorrowedFd};
+#[cfg(windows)]
+use super::super::fd::RawFd;
+use super::super::fd::{AsFd, AsRawFd, BorrowedFd, LibcFd};
 use bitflags::bitflags;
 use core::marker::PhantomData;
+#[cfg(windows)]
+use std::fmt;
 
 bitflags! {
     /// `POLL*` flags for use with [`poll`].
@@ -47,11 +51,23 @@ bitflags! {
 ///
 /// [`poll`]: rustix::io::poll
 #[doc(alias = "pollfd")]
-#[derive(Clone, Debug)]
+#[derive(Clone)]
+#[cfg_attr(not(windows), derive(Debug))]
 #[repr(transparent)]
 pub struct PollFd<'fd> {
     pollfd: c::pollfd,
     _phantom: PhantomData<BorrowedFd<'fd>>,
+}
+
+#[cfg(windows)]
+impl<'fd> fmt::Debug for PollFd<'fd> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt.debug_struct("pollfd")
+            .field("fd", &self.pollfd.fd)
+            .field("events", &self.pollfd.events)
+            .field("revents", &self.pollfd.revents)
+            .finish()
+    }
 }
 
 impl<'fd> PollFd<'fd> {
@@ -64,7 +80,7 @@ impl<'fd> PollFd<'fd> {
     /// Sets the contained file descriptor to `fd`.
     #[inline]
     pub fn set_fd<Fd: AsFd>(&mut self, fd: &'fd Fd) {
-        self.pollfd.fd = fd.as_fd().as_raw_fd();
+        self.pollfd.fd = fd.as_fd().as_raw_fd() as LibcFd;
     }
 
     /// Constructs a new `PollFd` holding `fd` and `events`.
@@ -93,6 +109,7 @@ impl<'fd> PollFd<'fd> {
     }
 }
 
+#[cfg(not(windows))]
 impl<'fd> AsFd for PollFd<'fd> {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
@@ -101,5 +118,17 @@ impl<'fd> AsFd for PollFd<'fd> {
         // Our constructors and `set_fd` require `pollfd.fd` to be valid
         // for the `fd lifetime.
         unsafe { BorrowedFd::borrow_raw_fd(self.pollfd.fd) }
+    }
+}
+
+#[cfg(windows)]
+impl<'fd> io_lifetimes::AsSocket for PollFd<'fd> {
+    #[inline]
+    fn as_socket(&self) -> BorrowedFd<'_> {
+        // Safety:
+        //
+        // Our constructors and `set_fd` require `pollfd.fd` to be valid
+        // for the `fd lifetime.
+        unsafe { BorrowedFd::borrow_raw_socket(self.pollfd.fd as RawFd) }
     }
 }

@@ -11,8 +11,6 @@
 //! file descriptor and close it ourselves.
 #![allow(unsafe_code)]
 
-#[cfg(windows)]
-use crate::imp::fd::AsSocketAsFd;
 use crate::imp::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(all(not(io_lifetimes_use_std), feature = "std"))]
 use crate::imp::fd::{FromFd, IntoFd};
@@ -29,14 +27,16 @@ pub struct OwnedFd {
     inner: ManuallyDrop<crate::imp::fd::OwnedFd>,
 }
 
+#[cfg(not(windows))]
 impl AsFd for OwnedFd {
-    #[cfg(not(windows))]
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
         self.inner.as_fd()
     }
+}
 
-    #[cfg(windows)]
+#[cfg(windows)]
+impl io_lifetimes::AsSocket for OwnedFd {
     #[inline]
     fn as_socket(&self) -> BorrowedFd<'_> {
         self.inner.as_socket()

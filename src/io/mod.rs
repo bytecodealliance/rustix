@@ -26,7 +26,6 @@ mod msync;
 mod owned_fd;
 #[cfg(not(any(windows, target_os = "wasi")))]
 mod pipe;
-#[cfg(not(windows))]
 mod poll;
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
 mod procfs;
@@ -82,7 +81,6 @@ pub use owned_fd::OwnedFd;
 pub use pipe::pipe;
 #[cfg(not(any(windows, target_os = "ios", target_os = "macos", target_os = "wasi")))]
 pub use pipe::{pipe_with, PipeFlags};
-#[cfg(not(windows))]
 pub use poll::{poll, PollFd, PollFlags};
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
 pub use procfs::{proc_self_fd, proc_self_fdinfo_fd, proc_self_maps, proc_self_pagemap};

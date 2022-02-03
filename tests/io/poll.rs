@@ -1,8 +1,13 @@
 use rustix::fd::{AsFd, AsRawFd, FromRawFd, IntoRawFd, OwnedFd};
-use rustix::io::{pipe, poll, read, with_retrying, write, PollFd, PollFlags};
+#[cfg(not(windows))]
+use rustix::io::{poll, with_retrying};
+use rustix::io::{PollFd, PollFlags};
 
+#[cfg(not(windows))]
 #[test]
 fn test_poll() {
+    use rustix::io::{pipe, read, write};
+
     // Create a pipe.
     let (reader, writer) = pipe().unwrap();
     let mut poll_fds = [PollFd::new(&reader, PollFlags::IN)];
