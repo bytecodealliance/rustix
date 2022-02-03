@@ -5,7 +5,7 @@ use crate::{imp, io};
 pub use crate::imp::process::Resource;
 
 /// `struct rlimit`—Current and maximum values used in [`getrlimit`],
-/// [`setrlimit`]`, and [`prlimit`].
+/// [`setrlimit`], and [`prlimit`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Rlimit {
     /// Current effective, "soft", limit.
