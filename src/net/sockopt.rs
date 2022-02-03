@@ -10,8 +10,6 @@ use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 use crate::{imp, io};
 use core::time::Duration;
 use imp::fd::AsFd;
-#[cfg(windows)]
-use imp::fd::AsSocketAsFd;
 
 pub use imp::net::Timeout;
 

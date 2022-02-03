@@ -62,15 +62,11 @@ impl<T: std::os::windows::io::FromRawSocket> FromRawFd for T {
 /// A version of [`AsFd`] for use with Winsock2 API.
 ///
 /// [`AsFd`]: https://doc.rust-lang.org/stable/std/os/unix/io/trait.AsFd.html
-pub use io_lifetimes::AsSocket as AsFd;
-
-/// We define `AsFd` as an alias for `AsSocket`, but that doesn't provide
-/// an `as_fd` function. This trait adapts an `AsSocket` implementation to
-/// provide `as_fd` using a blanket implementation.
-pub(crate) trait AsSocketAsFd {
+pub trait AsFd {
+    /// An `as_fd` function for Winsock2, where a `Fd` is a `Socket`.
     fn as_fd(&self) -> BorrowedFd;
 }
-impl<T: io_lifetimes::AsSocket> AsSocketAsFd for T {
+impl<T: io_lifetimes::AsSocket> AsFd for T {
     #[inline]
     fn as_fd(&self) -> BorrowedFd {
         self.as_socket()

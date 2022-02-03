@@ -7,8 +7,6 @@
 use crate::io::{Termios, Winsize};
 use crate::{imp, io};
 use imp::fd::AsFd;
-#[cfg(windows)]
-use imp::fd::AsSocketAsFd;
 
 /// `ioctl(fd, TCGETS)`—Get terminal attributes.
 ///
