@@ -10,11 +10,45 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable]
+        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
         include:
-          - build: stable
+          - build: ubuntu
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
+          - build: i686-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: i686-unknown-linux-gnu
+            gcc_package: gcc-i686-linux-gnu
+            gcc: i686-linux-gnu-gcc
+            libc_package: libc-dev-i386-cross
+          - build: aarch64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: aarch64-unknown-linux-gnu
+            gcc_package: gcc-aarch64-linux-gnu
+            gcc: aarch64-linux-gnu-gcc
+            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu_target: aarch64-linux-user
+          - build: riscv64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: riscv64gc-unknown-linux-gnu
+            gcc_package: gcc-riscv64-linux-gnu
+            gcc: riscv64-linux-gnu-gcc
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu_target: riscv64-linux-user
+          - build: arm-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: armv5te-unknown-linux-gnueabi
+            gcc_package: gcc-arm-linux-gnueabi
+            gcc: arm-linux-gnueabi-gcc
+            qemu: qemu-arm -L /usr/arm-linux-gnueabi
+            qemu_target: arm-linux-user
+          - build: macos-11
+            os: macos-11
+            rust: nightly
     steps:
     - uses: actions/checkout@v2
       with:
@@ -26,6 +60,15 @@ jobs:
       with:
         repository: sunfishcode/async-io
         path: async-io
+    - uses: ./.github/workflows/cross.yml
+      with:
+        os: ${{ matrix.os }
+        target: ${{ matrix.target }}
+        libc_package: ${{ matrix.libc_package }}
+        gcc_package: ${{ matrix.gcc_package }}
+        gcc: ${{ matrix.gcc }}
+        qemu: ${{ matrix.qemu }}
+        qemu_target: ${{ matrix.qemu_target }}
     - run: cd async-io && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd async-io && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd async-io && cargo test
@@ -35,11 +78,45 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable]
+        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
         include:
-          - build: stable
+          - build: ubuntu
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
+          - build: i686-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: i686-unknown-linux-gnu
+            gcc_package: gcc-i686-linux-gnu
+            gcc: i686-linux-gnu-gcc
+            libc_package: libc-dev-i386-cross
+          - build: aarch64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: aarch64-unknown-linux-gnu
+            gcc_package: gcc-aarch64-linux-gnu
+            gcc: aarch64-linux-gnu-gcc
+            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu_target: aarch64-linux-user
+          - build: riscv64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: riscv64gc-unknown-linux-gnu
+            gcc_package: gcc-riscv64-linux-gnu
+            gcc: riscv64-linux-gnu-gcc
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu_target: riscv64-linux-user
+          - build: arm-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: armv5te-unknown-linux-gnueabi
+            gcc_package: gcc-arm-linux-gnueabi
+            gcc: arm-linux-gnueabi-gcc
+            qemu: qemu-arm -L /usr/arm-linux-gnueabi
+            qemu_target: arm-linux-user
+          - build: macos-11
+            os: macos-11
+            rust: nightly
     steps:
     - uses: actions/checkout@v2
       with:
@@ -51,6 +128,15 @@ jobs:
       with:
         repository: bytecodealliance/cap-std
         path: cap-std
+    - uses: ./.github/workflows/cross.yml
+      with:
+        os: ${{ matrix.os }
+        target: ${{ matrix.target }}
+        libc_package: ${{ matrix.libc_package }}
+        gcc_package: ${{ matrix.gcc_package }}
+        gcc: ${{ matrix.gcc }}
+        qemu: ${{ matrix.qemu }}
+        qemu_target: ${{ matrix.qemu_target }}
     - run: cd cap-std && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd cap-std && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd cap-std && cargo test
@@ -60,11 +146,45 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable]
+        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
         include:
-          - build: stable
+          - build: ubuntu
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
+          - build: i686-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: i686-unknown-linux-gnu
+            gcc_package: gcc-i686-linux-gnu
+            gcc: i686-linux-gnu-gcc
+            libc_package: libc-dev-i386-cross
+          - build: aarch64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: aarch64-unknown-linux-gnu
+            gcc_package: gcc-aarch64-linux-gnu
+            gcc: aarch64-linux-gnu-gcc
+            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu_target: aarch64-linux-user
+          - build: riscv64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: riscv64gc-unknown-linux-gnu
+            gcc_package: gcc-riscv64-linux-gnu
+            gcc: riscv64-linux-gnu-gcc
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu_target: riscv64-linux-user
+          - build: arm-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: armv5te-unknown-linux-gnueabi
+            gcc_package: gcc-arm-linux-gnueabi
+            gcc: arm-linux-gnueabi-gcc
+            qemu: qemu-arm -L /usr/arm-linux-gnueabi
+            qemu_target: arm-linux-user
+          - build: macos-11
+            os: macos-11
+            rust: nightly
     steps:
     - uses: actions/checkout@v2
       with:
@@ -77,6 +197,15 @@ jobs:
         repository: sunfishcode/cargo
         path: cargo
         ref: rustix
+    - uses: ./.github/workflows/cross.yml
+      with:
+        os: ${{ matrix.os }
+        target: ${{ matrix.target }}
+        libc_package: ${{ matrix.libc_package }}
+        gcc_package: ${{ matrix.gcc_package }}
+        gcc: ${{ matrix.gcc }}
+        qemu: ${{ matrix.qemu }}
+        qemu_target: ${{ matrix.qemu_target }}
     - run: cd cargo && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd cargo && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd cargo && cargo test --workspace
@@ -89,11 +218,45 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable]
+        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
         include:
-          - build: stable
+          - build: ubuntu
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
+          - build: i686-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: i686-unknown-linux-gnu
+            gcc_package: gcc-i686-linux-gnu
+            gcc: i686-linux-gnu-gcc
+            libc_package: libc-dev-i386-cross
+          - build: aarch64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: aarch64-unknown-linux-gnu
+            gcc_package: gcc-aarch64-linux-gnu
+            gcc: aarch64-linux-gnu-gcc
+            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu_target: aarch64-linux-user
+          - build: riscv64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: riscv64gc-unknown-linux-gnu
+            gcc_package: gcc-riscv64-linux-gnu
+            gcc: riscv64-linux-gnu-gcc
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu_target: riscv64-linux-user
+          - build: arm-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: armv5te-unknown-linux-gnueabi
+            gcc_package: gcc-arm-linux-gnueabi
+            gcc: arm-linux-gnueabi-gcc
+            qemu: qemu-arm -L /usr/arm-linux-gnueabi
+            qemu_target: arm-linux-user
+          - build: macos-11
+            os: macos-11
+            rust: nightly
     steps:
     - uses: actions/checkout@v2
       with:
@@ -105,6 +268,15 @@ jobs:
       with:
         repository: sunfishcode/memfd-rs
         path: memfd-rs
+    - uses: ./.github/workflows/cross.yml
+      with:
+        os: ${{ matrix.os }
+        target: ${{ matrix.target }}
+        libc_package: ${{ matrix.libc_package }}
+        gcc_package: ${{ matrix.gcc_package }}
+        gcc: ${{ matrix.gcc }}
+        qemu: ${{ matrix.qemu }}
+        qemu_target: ${{ matrix.qemu_target }}
     - run: cd memfd-rs && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd memfd-rs && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd memfd-rs && cargo test
@@ -114,11 +286,45 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable]
+        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
         include:
-          - build: stable
+          - build: ubuntu
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
+          - build: i686-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: i686-unknown-linux-gnu
+            gcc_package: gcc-i686-linux-gnu
+            gcc: i686-linux-gnu-gcc
+            libc_package: libc-dev-i386-cross
+          - build: aarch64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: aarch64-unknown-linux-gnu
+            gcc_package: gcc-aarch64-linux-gnu
+            gcc: aarch64-linux-gnu-gcc
+            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu_target: aarch64-linux-user
+          - build: riscv64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: riscv64gc-unknown-linux-gnu
+            gcc_package: gcc-riscv64-linux-gnu
+            gcc: riscv64-linux-gnu-gcc
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu_target: riscv64-linux-user
+          - build: arm-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: armv5te-unknown-linux-gnueabi
+            gcc_package: gcc-arm-linux-gnueabi
+            gcc: arm-linux-gnueabi-gcc
+            qemu: qemu-arm -L /usr/arm-linux-gnueabi
+            qemu_target: arm-linux-user
+          - build: macos-11
+            os: macos-11
+            rust: nightly
     steps:
     - uses: actions/checkout@v2
       with:
@@ -130,6 +336,15 @@ jobs:
       with:
         repository: sunfishcode/tempfile
         path: tempfile
+    - uses: ./.github/workflows/cross.yml
+      with:
+        os: ${{ matrix.os }
+        target: ${{ matrix.target }}
+        libc_package: ${{ matrix.libc_package }}
+        gcc_package: ${{ matrix.gcc_package }}
+        gcc: ${{ matrix.gcc }}
+        qemu: ${{ matrix.qemu }}
+        qemu_target: ${{ matrix.qemu_target }}
     - run: cd tempfile && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd tempfile && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd tempfile && cargo test
@@ -139,11 +354,45 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable]
+        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
         include:
-          - build: stable
+          - build: ubuntu
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
+          - build: i686-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: i686-unknown-linux-gnu
+            gcc_package: gcc-i686-linux-gnu
+            gcc: i686-linux-gnu-gcc
+            libc_package: libc-dev-i386-cross
+          - build: aarch64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: aarch64-unknown-linux-gnu
+            gcc_package: gcc-aarch64-linux-gnu
+            gcc: aarch64-linux-gnu-gcc
+            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu_target: aarch64-linux-user
+          - build: riscv64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: riscv64gc-unknown-linux-gnu
+            gcc_package: gcc-riscv64-linux-gnu
+            gcc: riscv64-linux-gnu-gcc
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu_target: riscv64-linux-user
+          - build: arm-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: armv5te-unknown-linux-gnueabi
+            gcc_package: gcc-arm-linux-gnueabi
+            gcc: arm-linux-gnueabi-gcc
+            qemu: qemu-arm -L /usr/arm-linux-gnueabi
+            qemu_target: arm-linux-user
+          - build: macos-11
+            os: macos-11
+            rust: nightly
     steps:
     - uses: actions/checkout@v2
       with:
@@ -155,6 +404,15 @@ jobs:
       with:
         repository: yoshuawuyts/fd-lock
         path: fd-lock
+    - uses: ./.github/workflows/cross.yml
+      with:
+        os: ${{ matrix.os }
+        target: ${{ matrix.target }}
+        libc_package: ${{ matrix.libc_package }}
+        gcc_package: ${{ matrix.gcc_package }}
+        gcc: ${{ matrix.gcc }}
+        qemu: ${{ matrix.qemu }}
+        qemu_target: ${{ matrix.qemu_target }}
     # fd-lock currently uses rustix 0.32.
     - run: sed -i 's/^version = "\([[:digit:].-]*\)"$/version = "0.32.0"/' Cargo.toml
     - run: cd fd-lock && echo '[patch.crates-io]' >> Cargo.toml
@@ -166,11 +424,45 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable]
+        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
         include:
-          - build: stable
+          - build: ubuntu
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
+          - build: i686-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: i686-unknown-linux-gnu
+            gcc_package: gcc-i686-linux-gnu
+            gcc: i686-linux-gnu-gcc
+            libc_package: libc-dev-i386-cross
+          - build: aarch64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: aarch64-unknown-linux-gnu
+            gcc_package: gcc-aarch64-linux-gnu
+            gcc: aarch64-linux-gnu-gcc
+            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu_target: aarch64-linux-user
+          - build: riscv64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: riscv64gc-unknown-linux-gnu
+            gcc_package: gcc-riscv64-linux-gnu
+            gcc: riscv64-linux-gnu-gcc
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu_target: riscv64-linux-user
+          - build: arm-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: armv5te-unknown-linux-gnueabi
+            gcc_package: gcc-arm-linux-gnueabi
+            gcc: arm-linux-gnueabi-gcc
+            qemu: qemu-arm -L /usr/arm-linux-gnueabi
+            qemu_target: arm-linux-user
+          - build: macos-11
+            os: macos-11
+            rust: nightly
     steps:
     - uses: actions/checkout@v2
       with:
@@ -183,6 +475,15 @@ jobs:
         repository: bytecodealliance/wasmtime
         path: wasmtime
         submodules: true
+    - uses: ./.github/workflows/cross.yml
+      with:
+        os: ${{ matrix.os }
+        target: ${{ matrix.target }}
+        libc_package: ${{ matrix.libc_package }}
+        gcc_package: ${{ matrix.gcc_package }}
+        gcc: ${{ matrix.gcc }}
+        qemu: ${{ matrix.qemu }}
+        qemu_target: ${{ matrix.qemu_target }}
     - run: rustup target add wasm32-wasi
     - run: cd wasmtime && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd wasmtime && echo 'rustix = { path = ".." }' >> Cargo.toml
@@ -193,11 +494,45 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable]
+        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
         include:
-          - build: stable
+          - build: ubuntu
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
+          - build: i686-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: i686-unknown-linux-gnu
+            gcc_package: gcc-i686-linux-gnu
+            gcc: i686-linux-gnu-gcc
+            libc_package: libc-dev-i386-cross
+          - build: aarch64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: aarch64-unknown-linux-gnu
+            gcc_package: gcc-aarch64-linux-gnu
+            gcc: aarch64-linux-gnu-gcc
+            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu_target: aarch64-linux-user
+          - build: riscv64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: riscv64gc-unknown-linux-gnu
+            gcc_package: gcc-riscv64-linux-gnu
+            gcc: riscv64-linux-gnu-gcc
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu_target: riscv64-linux-user
+          - build: arm-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: armv5te-unknown-linux-gnueabi
+            gcc_package: gcc-arm-linux-gnueabi
+            gcc: arm-linux-gnueabi-gcc
+            qemu: qemu-arm -L /usr/arm-linux-gnueabi
+            qemu_target: arm-linux-user
+          - build: macos-11
+            os: macos-11
+            rust: nightly
     steps:
     - uses: actions/checkout@v2
       with:
@@ -209,6 +544,15 @@ jobs:
       with:
         repository: sunfishcode/nameless
         path: nameless
+    - uses: ./.github/workflows/cross.yml
+      with:
+        os: ${{ matrix.os }
+        target: ${{ matrix.target }}
+        libc_package: ${{ matrix.libc_package }}
+        gcc_package: ${{ matrix.gcc_package }}
+        gcc: ${{ matrix.gcc }}
+        qemu: ${{ matrix.qemu }}
+        qemu_target: ${{ matrix.qemu_target }}
     - run: cd nameless && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd nameless && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd nameless && cargo test
@@ -218,11 +562,45 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable]
+        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
         include:
-          - build: stable
+          - build: ubuntu
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
+          - build: i686-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: i686-unknown-linux-gnu
+            gcc_package: gcc-i686-linux-gnu
+            gcc: i686-linux-gnu-gcc
+            libc_package: libc-dev-i386-cross
+          - build: aarch64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: aarch64-unknown-linux-gnu
+            gcc_package: gcc-aarch64-linux-gnu
+            gcc: aarch64-linux-gnu-gcc
+            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu_target: aarch64-linux-user
+          - build: riscv64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: riscv64gc-unknown-linux-gnu
+            gcc_package: gcc-riscv64-linux-gnu
+            gcc: riscv64-linux-gnu-gcc
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu_target: riscv64-linux-user
+          - build: arm-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: armv5te-unknown-linux-gnueabi
+            gcc_package: gcc-arm-linux-gnueabi
+            gcc: arm-linux-gnueabi-gcc
+            qemu: qemu-arm -L /usr/arm-linux-gnueabi
+            qemu_target: arm-linux-user
+          - build: macos-11
+            os: macos-11
+            rust: nightly
     steps:
     - uses: actions/checkout@v2
       with:
@@ -234,6 +612,15 @@ jobs:
       with:
         repository: cgwalters/cap-std-ext
         path: cap-std-ext
+    - uses: ./.github/workflows/cross.yml
+      with:
+        os: ${{ matrix.os }
+        target: ${{ matrix.target }}
+        libc_package: ${{ matrix.libc_package }}
+        gcc_package: ${{ matrix.gcc_package }}
+        gcc: ${{ matrix.gcc }}
+        qemu: ${{ matrix.qemu }}
+        qemu_target: ${{ matrix.qemu_target }}
     - run: cd cap-std-ext && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd cap-std-ext && echo 'rustix = { path = ".." }' >> Cargo.toml
     - run: cd cap-std-ext && cargo test
@@ -243,11 +630,45 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable]
+        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
         include:
-          - build: stable
+          - build: ubuntu
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
+          - build: i686-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: i686-unknown-linux-gnu
+            gcc_package: gcc-i686-linux-gnu
+            gcc: i686-linux-gnu-gcc
+            libc_package: libc-dev-i386-cross
+          - build: aarch64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: aarch64-unknown-linux-gnu
+            gcc_package: gcc-aarch64-linux-gnu
+            gcc: aarch64-linux-gnu-gcc
+            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu_target: aarch64-linux-user
+          - build: riscv64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: riscv64gc-unknown-linux-gnu
+            gcc_package: gcc-riscv64-linux-gnu
+            gcc: riscv64-linux-gnu-gcc
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu_target: riscv64-linux-user
+          - build: arm-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: armv5te-unknown-linux-gnueabi
+            gcc_package: gcc-arm-linux-gnueabi
+            gcc: arm-linux-gnueabi-gcc
+            qemu: qemu-arm -L /usr/arm-linux-gnueabi
+            qemu_target: arm-linux-user
+          - build: macos-11
+            os: macos-11
+            rust: nightly
     steps:
     - uses: actions/checkout@v2
       with:
@@ -259,6 +680,15 @@ jobs:
       with:
         repository: ostreedev/ostree-rs-ext
         path: ostree-rs-ext
+    - uses: ./.github/workflows/cross.yml
+      with:
+        os: ${{ matrix.os }
+        target: ${{ matrix.target }}
+        libc_package: ${{ matrix.libc_package }}
+        gcc_package: ${{ matrix.gcc_package }}
+        gcc: ${{ matrix.gcc }}
+        qemu: ${{ matrix.qemu }}
+        qemu_target: ${{ matrix.qemu_target }}
     - run: sudo apt-get update
     - run: sudo apt-get install -y libostree-dev
     - run: cd ostree-rs-ext && echo '[patch.crates-io]' >> Cargo.toml
@@ -270,12 +700,46 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable]
+        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
         include:
-          - build: stable
+          - build: ubuntu
             os: ubuntu-latest
-            rust: stable
-    steps:
+            rust: nightly
+          - build: i686-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: i686-unknown-linux-gnu
+            gcc_package: gcc-i686-linux-gnu
+            gcc: i686-linux-gnu-gcc
+            libc_package: libc-dev-i386-cross
+          - build: aarch64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: aarch64-unknown-linux-gnu
+            gcc_package: gcc-aarch64-linux-gnu
+            gcc: aarch64-linux-gnu-gcc
+            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu_target: aarch64-linux-user
+          - build: riscv64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: riscv64gc-unknown-linux-gnu
+            gcc_package: gcc-riscv64-linux-gnu
+            gcc: riscv64-linux-gnu-gcc
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu_target: riscv64-linux-user
+          - build: arm-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: armv5te-unknown-linux-gnueabi
+            gcc_package: gcc-arm-linux-gnueabi
+            gcc: arm-linux-gnueabi-gcc
+            qemu: qemu-arm -L /usr/arm-linux-gnueabi
+            qemu_target: arm-linux-user
+          - build: macos-11
+            os: macos-11
+            rust: nightly
+  steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
@@ -286,6 +750,15 @@ jobs:
       with:
         repository: sunfishcode/dbus-rs
         path: dbus-rs
+    - uses: ./.github/workflows/cross.yml
+      with:
+        os: ${{ matrix.os }
+        target: ${{ matrix.target }}
+        libc_package: ${{ matrix.libc_package }}
+        gcc_package: ${{ matrix.gcc_package }}
+        gcc: ${{ matrix.gcc }}
+        qemu: ${{ matrix.qemu }}
+        qemu_target: ${{ matrix.qemu_target }}
     - run: sudo apt-get update
     - run: sudo apt-get install -y libdbus-1-dev at-spi2-core
     - run: cd dbus-rs && echo '[patch.crates-io]' >> Cargo.toml
@@ -297,12 +770,46 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [nightly]
+        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
         include:
-          - build: nightly
+          - build: ubuntu
             os: ubuntu-latest
             rust: nightly
-    steps:
+          - build: i686-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: i686-unknown-linux-gnu
+            gcc_package: gcc-i686-linux-gnu
+            gcc: i686-linux-gnu-gcc
+            libc_package: libc-dev-i386-cross
+          - build: aarch64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: aarch64-unknown-linux-gnu
+            gcc_package: gcc-aarch64-linux-gnu
+            gcc: aarch64-linux-gnu-gcc
+            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu_target: aarch64-linux-user
+          - build: riscv64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: riscv64gc-unknown-linux-gnu
+            gcc_package: gcc-riscv64-linux-gnu
+            gcc: riscv64-linux-gnu-gcc
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu_target: riscv64-linux-user
+          - build: arm-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: armv5te-unknown-linux-gnueabi
+            gcc_package: gcc-arm-linux-gnueabi
+            gcc: arm-linux-gnueabi-gcc
+            qemu: qemu-arm -L /usr/arm-linux-gnueabi
+            qemu_target: arm-linux-user
+          - build: macos-11
+            os: macos-11
+            rust: nightly
+  steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
@@ -313,9 +820,19 @@ jobs:
       with:
         repository: sunfishcode/mustang
         path: mustang
+    - uses: ./.github/workflows/cross.yml
+      with:
+        os: ${{ matrix.os }
+        target: ${{ matrix.target }}
+        libc_package: ${{ matrix.libc_package }}
+        gcc_package: ${{ matrix.gcc_package }}
+        gcc: ${{ matrix.gcc }}
+        qemu: ${{ matrix.qemu }}
+        qemu_target: ${{ matrix.qemu_target }}
     - run: rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
     - run: cd mustang && echo '[patch.crates-io]' >> Cargo.toml
     - run: cd mustang && echo 'rustix = { path = ".." }' >> Cargo.toml
+    # This test takes too long.
     - run: cd mustang && sed -i 's/fn concurrent_recursive_mkdir()/#[ignore]\rfn concurrent_recursive_mkdir()/' tests/fs.rs
     # Use jobs=1 to hopefully avoid apparently oversubscribing the runner.
     - run: cd mustang && cargo test --target=specs/x86_64-mustang-linux-gnu.json -Zbuild-std --jobs=1
@@ -325,9 +842,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [nightly]
+        build: [ubuntu]
         include:
-          - build: nightly
+          - build: ubuntu
             os: ubuntu-latest
             rust: nightly
     steps:
