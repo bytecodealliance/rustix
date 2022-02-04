@@ -64,6 +64,7 @@ jobs:
         riscv64gc-unknown-linux-gnu
         aarch64-unknown-linux-gnu
         aarch64-unknown-linux-musl
+        powerpc64le-unknown-linux-gnu
         armv5te-unknown-linux-gnueabi
     - name: Install cross-compilation tools
       run: |
@@ -86,6 +87,7 @@ jobs:
     - run: cargo check --workspace --release -vv --target=riscv64gc-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl
+    - run: cargo check --workspace --release -vv --target=powerpc64le-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi
 
   check_no_default_features:
@@ -168,7 +170,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, ubuntu-18.04, i686-linux, aarch64-linux, riscv64-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, arm-linux-stable, macos, macos-11, windows, windows-2016, windows-2022]
+        build: [ubuntu, ubuntu-18.04, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, arm-linux-stable, macos, macos-11, windows, windows-2016, windows-2022]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -191,6 +193,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: powerpc64le-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: powerpc64le-unknown-linux-gnu
+            gcc_package: gcc-powerpc64le-linux-gnu
+            gcc: powerpc64le-linux-gnu-gcc
+            qemu: qemu-ppc64le -L /usr/powerpc64le-linux-gnu
+            qemu_target: ppc64le-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
             rust: nightly
@@ -320,7 +330,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -340,6 +350,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: powerpc64le-linux
+            os: ubuntu-latest
+            rust: stable
+            target: powerpc64le-unknown-linux-gnu
+            gcc_package: gcc-powerpc64le-linux-gnu
+            gcc: powerpc64le-linux-gnu-gcc
+            qemu: qemu-ppc64le -L /usr/powerpc64le-linux-gnu
+            qemu_target: ppc64le-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
             rust: stable
@@ -363,8 +381,83 @@ jobs:
       CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
       CARGO_TARGET_I686_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
       CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
+      CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
       CARGO_TARGET_RISCV64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
       CARGO_TARGET_ARM_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: ${{ matrix.rust }}
+
+    - name: Configure Cargo target
+      run: |
+        echo CARGO_BUILD_TARGET=${{ matrix.target }} >> $GITHUB_ENV
+        rustup target add ${{ matrix.target }}
+      if: matrix.target != ''
+
+    - name: Install cross-compilation tools
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
+        upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
+        echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
+      if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'
+
+    - name: Install cross-compilation libraries
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get install -y ${{ matrix.libc_package }}
+      if: matrix.libc_package != '' && matrix.os == 'ubuntu-latest'
+
+    - name: Install qemu
+      run: |
+        set -ex
+        # Download and build qemu from source since the most recent release is
+        # way faster at arm emulation than the current version github actions'
+        # ubuntu image uses. Disable as much as we can to get it to build
+        # quickly.
+        cd
+        curl https://download.qemu.org/qemu-6.1.0.tar.xz | tar xJf -
+        cd qemu-6.1.0
+        ./configure --target-list=${{ matrix.qemu_target }} --prefix=$HOME/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
+        make -j$(nproc) install
+
+        # Configure Cargo for cross compilation and tell it how it can run
+        # cross executables
+        upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
+        echo CARGO_TARGET_${upcase}_RUNNER=$HOME/qemu/bin/${{ matrix.qemu }} >> $GITHUB_ENV
+      if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
+
+    - run: |
+        cargo test --verbose --features=all-impls,procfs --release --workspace -- --nocapture
+      env:
+        RUST_BACKTRACE: 1
+
+  test_rustix_use_experimental_asm:
+    name: Test rustix_use_experimental_asm
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [powerpc64le-linux]
+        include:
+          - build: powerpc64le-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: powerpc64le-unknown-linux-gnu
+            gcc_package: gcc-powerpc64le-linux-gnu
+            gcc: powerpc64le-linux-gnu-gcc
+            qemu: qemu-ppc64le -L /usr/powerpc64le-linux-gnu
+            qemu_target: ppc64le-linux-user
+    env:
+      # -D warnings is commented out in our install-rust action; re-add it here.
+      RUSTFLAGS: --cfg rustix_use_experimental_asm -D warnings
+      RUSTDOCFLAGS: --cfg rustix_use_experimental_asm
+      CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_experimental_asm
     steps:
     - uses: actions/checkout@v2
       with:

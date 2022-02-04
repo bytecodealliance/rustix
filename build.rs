@@ -27,27 +27,40 @@ fn main() {
     let asm_name = format!("{}/{}.s", OUTLINE_PATH, arch);
     let os_name = var("CARGO_CFG_TARGET_OS").unwrap();
     let pointer_width = var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap();
+    let endian = var("CARGO_CFG_TARGET_ENDIAN").unwrap();
     let is_x32 = arch == "x86_64" && pointer_width == "32";
     let is_arm64_ilp32 = arch == "aarch64" && pointer_width == "32";
-    println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_ARCH");
+    let is_powerpc64be = arch == "powerpc64" && endian == "big";
+    let rustix_use_libc = var("CARGO_CFG_RUSTIX_USE_LIBC").is_ok();
+    let rustix_use_experimental_asm = var("CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM").is_ok();
 
     // If rustix_use_libc is set, or if we're on an architecture/OS that doesn't
     // have raw syscall support, use libc.
-    if var("CARGO_CFG_RUSTIX_USE_LIBC").is_ok()
+    if rustix_use_libc
         || os_name != "linux"
         || std::fs::metadata(&asm_name).is_err()
         || is_x32
         || is_arm64_ilp32
+        || is_powerpc64be
     {
         use_feature("libc");
     } else {
         use_feature("linux_raw");
         use_feature_or_nothing("core_intrinsics");
-        use_feature_or_else("asm", || {
+
+        // On PowerPC, Rust's inline asm is considered experimental, so only
+        // use it if `--cfg=rustix_use_experimental_asm` is given.
+        if has_feature("asm") && (arch != "powerpc64" || rustix_use_experimental_asm) {
+            use_feature("asm");
+            if rustix_use_experimental_asm {
+                use_feature("asm_experimental_arch");
+            }
+        } else {
             link_in_librustix_outline(&arch, &asm_name);
-        });
+        }
     }
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_LIBC");
+    println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM");
 }
 
 fn link_in_librustix_outline(arch: &str, asm_name: &str) {
@@ -98,14 +111,6 @@ fn link_in_librustix_outline(arch: &str, asm_name: &str) {
 fn use_feature_or_nothing(feature: &str) {
     if has_feature(feature) {
         use_feature(feature);
-    }
-}
-
-fn use_feature_or_else<F: FnOnce()>(feature: &str, or_else: F) {
-    if has_feature(feature) {
-        use_feature(feature);
-    } else {
-        or_else();
     }
 }
 

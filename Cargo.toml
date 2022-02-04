@@ -32,12 +32,12 @@ compiler_builtins = { version = '0.1.49', optional = true }
 once_cell = { version = "1.5.2", optional = true }
 
 # For the linux_raw backend, linux-raw-sys provides Linux ABI details.
-[target.'cfg(all(not(rustix_use_libc), any(target_os = "linux"), any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "riscv64")))'.dependencies]
+[target.'cfg(all(not(rustix_use_libc), any(target_os = "linux"), any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64")))'.dependencies]
 linux-raw-sys = { version = "0.0.40", default-features = false, features = ["general", "errno", "ioctl", "no_std"] }
 
 # For the libc backend on Unix platforms, use the libc crate, and errno for
 # setting `errno`.
-[target.'cfg(any(rustix_use_libc, not(all(any(target_os = "linux"), any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "riscv64")))))'.dependencies]
+[target.'cfg(any(rustix_use_libc, not(all(any(target_os = "linux"), any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64")))))'.dependencies]
 errno = { version = "0.2.8", default-features = false }
 libc = { version = "0.2.114", features = ["extra_traits"] }
 
