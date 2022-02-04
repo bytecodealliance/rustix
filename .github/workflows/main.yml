@@ -273,21 +273,47 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: ./.github/workflows/cross.yml
-      with:
-        os: ${{ matrix.os }
-        target: ${{ matrix.target }}
-        libc_package: ${{ matrix.libc_package }}
-        gcc_package: ${{ matrix.gcc_package }}
-        gcc: ${{ matrix.gcc }}
-        qemu: ${{ matrix.qemu }}
-        qemu_target: ${{ matrix.qemu_target }}
 
     - name: Configure Cargo target
       run: |
         echo CARGO_BUILD_TARGET=${{ matrix.target }} >> $GITHUB_ENV
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
+
+    - name: Install cross-compilation tools
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
+        upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
+        echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
+      if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'
+
+    - name: Install cross-compilation libraries
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get install -y ${{ matrix.libc_package }}
+      if: matrix.libc_package != '' && matrix.os == 'ubuntu-latest'
+
+    - name: Install qemu
+      run: |
+        set -ex
+        # Download and build qemu from source since the most recent release is
+        # way faster at arm emulation than the current version github actions'
+        # ubuntu image uses. Disable as much as we can to get it to build
+        # quickly.
+        cd
+        curl https://download.qemu.org/qemu-6.1.0.tar.xz | tar xJf -
+        cd qemu-6.1.0
+        ./configure --target-list=${{ matrix.qemu_target }} --prefix=$HOME/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
+        make -j$(nproc) install
+
+        # Configure Cargo for cross compilation and tell it how it can run
+        # cross executables
+        upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
+        echo CARGO_TARGET_${upcase}_RUNNER=$HOME/qemu/bin/${{ matrix.qemu }} >> $GITHUB_ENV
+      if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
         # Run the tests, and check the prebuilt release libraries.
@@ -365,21 +391,47 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: ./.github/workflows/cross.yml
-      with:
-        os: ${{ matrix.os }
-        target: ${{ matrix.target }}
-        libc_package: ${{ matrix.libc_package }}
-        gcc_package: ${{ matrix.gcc_package }}
-        gcc: ${{ matrix.gcc }}
-        qemu: ${{ matrix.qemu }}
-        qemu_target: ${{ matrix.qemu_target }}
 
     - name: Configure Cargo target
       run: |
         echo CARGO_BUILD_TARGET=${{ matrix.target }} >> $GITHUB_ENV
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
+
+    - name: Install cross-compilation tools
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
+        upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
+        echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
+      if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'
+
+    - name: Install cross-compilation libraries
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get install -y ${{ matrix.libc_package }}
+      if: matrix.libc_package != '' && matrix.os == 'ubuntu-latest'
+
+    - name: Install qemu
+      run: |
+        set -ex
+        # Download and build qemu from source since the most recent release is
+        # way faster at arm emulation than the current version github actions'
+        # ubuntu image uses. Disable as much as we can to get it to build
+        # quickly.
+        cd
+        curl https://download.qemu.org/qemu-6.1.0.tar.xz | tar xJf -
+        cd qemu-6.1.0
+        ./configure --target-list=${{ matrix.qemu_target }} --prefix=$HOME/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
+        make -j$(nproc) install
+
+        # Configure Cargo for cross compilation and tell it how it can run
+        # cross executables
+        upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
+        echo CARGO_TARGET_${upcase}_RUNNER=$HOME/qemu/bin/${{ matrix.qemu }} >> $GITHUB_ENV
+      if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
         cargo test --verbose --features=all-impls,procfs --release --workspace -- --nocapture
