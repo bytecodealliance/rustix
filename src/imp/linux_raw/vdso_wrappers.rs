@@ -370,6 +370,8 @@ fn init() {
         let ptr = vdso.sym(zstr!("LINUX_2.6"), zstr!("__vdso_clock_gettime64"));
         #[cfg(target_arch = "riscv64")]
         let ptr = vdso.sym(zstr!("LINUX_4.15"), zstr!("__vdso_clock_gettime"));
+        #[cfg(target_arch = "powerpc64")]
+        let ptr = vdso.sym(zstr!("LINUX_2.6.15"), zstr!("__kernel_clock_gettime"));
 
         // On all 64-bit platforms, the 64-bit `clock_gettime` symbols are
         // always available.

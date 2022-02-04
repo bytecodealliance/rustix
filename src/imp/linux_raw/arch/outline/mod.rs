@@ -7,19 +7,21 @@
 
 #[cfg(target_arch = "x86")]
 mod x86;
-// For riscv64, x86_64, arm and aarch64, pass the `nr` argument last.
+// For these architectures, pass the `nr` argument last.
 #[cfg(any(
-    target_arch = "riscv64",
     target_arch = "arm",
     target_arch = "aarch64",
+    target_arch = "powerpc64",
+    target_arch = "riscv64",
     target_arch = "x86_64"
 ))]
 mod nr_last;
 
 #[cfg(any(
-    target_arch = "riscv64",
     target_arch = "arm",
     target_arch = "aarch64",
+    target_arch = "powerpc64",
+    target_arch = "riscv64",
     target_arch = "x86_64"
 ))]
 pub(in crate::imp) use nr_last::*;

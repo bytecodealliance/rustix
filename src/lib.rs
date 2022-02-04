@@ -106,6 +106,7 @@
     all(not(feature = "rustc-dep-of-std"), core_intrinsics),
     feature(core_intrinsics)
 )]
+#![cfg_attr(asm_experimental_arch, feature(asm_experimental_arch))]
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
