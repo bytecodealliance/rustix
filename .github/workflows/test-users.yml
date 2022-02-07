@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux, macos-11]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -30,6 +30,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: powerpc64le-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: powerpc64le-unknown-linux-gnu
+            gcc_package: gcc-powerpc64le-linux-gnu
+            gcc: powerpc64le-linux-gnu-gcc
+            qemu: qemu-ppc64le -L /usr/powerpc64le-linux-gnu
+            qemu_target: ppc64le-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
             rust: nightly
@@ -109,7 +117,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux, macos-11]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -129,6 +137,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: powerpc64le-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: powerpc64le-unknown-linux-gnu
+            gcc_package: gcc-powerpc64le-linux-gnu
+            gcc: powerpc64le-linux-gnu-gcc
+            qemu: qemu-ppc64le -L /usr/powerpc64le-linux-gnu
+            qemu_target: ppc64le-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
             rust: nightly
@@ -279,7 +295,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -299,6 +315,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: powerpc64le-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: powerpc64le-unknown-linux-gnu
+            gcc_package: gcc-powerpc64le-linux-gnu
+            gcc: powerpc64le-linux-gnu-gcc
+            qemu: qemu-ppc64le -L /usr/powerpc64le-linux-gnu
+            qemu_target: ppc64le-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
             rust: nightly
@@ -375,7 +399,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux, macos-11]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -395,6 +419,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: powerpc64le-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: powerpc64le-unknown-linux-gnu
+            gcc_package: gcc-powerpc64le-linux-gnu
+            gcc: powerpc64le-linux-gnu-gcc
+            qemu: qemu-ppc64le -L /usr/powerpc64le-linux-gnu
+            qemu_target: ppc64le-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
             rust: nightly
@@ -474,7 +506,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux, macos-11]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux, macos-11]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -494,6 +526,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: powerpc64le-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: powerpc64le-unknown-linux-gnu
+            gcc_package: gcc-powerpc64le-linux-gnu
+            gcc: powerpc64le-linux-gnu-gcc
+            qemu: qemu-ppc64le -L /usr/powerpc64le-linux-gnu
+            qemu_target: ppc64le-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
             rust: nightly
@@ -683,7 +723,7 @@ jobs:
     strategy:
       matrix:
         # cap-std-ext only builds on Linux at the moment.
-        build: [ubuntu, i686-linux, aarch64-linux, riscv64-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -703,6 +743,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: powerpc64le-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: powerpc64le-unknown-linux-gnu
+            gcc_package: gcc-powerpc64le-linux-gnu
+            gcc: powerpc64le-linux-gnu-gcc
+            qemu: qemu-ppc64le -L /usr/powerpc64le-linux-gnu
+            qemu_target: ppc64le-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
             rust: nightly
