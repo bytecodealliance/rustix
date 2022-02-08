@@ -30,6 +30,7 @@ pub struct OwnedFd {
 impl OwnedFd {
     /// Creates a new `OwnedFd` instance that shares the same underlying file handle
     /// as the existing `OwnedFd` instance.
+    #[cfg(not(target_os = "wasi"))]
     pub fn try_clone(&self) -> crate::io::Result<Self> {
         // We want to atomically duplicate this file descriptor and set the
         // CLOEXEC flag, and currently that's done via F_DUPFD_CLOEXEC. This
@@ -45,6 +46,16 @@ impl OwnedFd {
         let fd = crate::fs::fcntl_dupfd(self)?;
 
         Ok(fd)
+    }
+
+    /// Creates a new `OwnedFd` instance that shares the same underlying file handle
+    /// as the existing `OwnedFd` instance.
+    #[cfg(target_os = "wasi")]
+    pub fn try_clone(&self) -> std::io::Result<Self> {
+        Err(std::io::Error::new(
+            std::io::ErrorKind::Unsupported,
+            "operation not supported on WASI yet",
+        ))
     }
 }
 
