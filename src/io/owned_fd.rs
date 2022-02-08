@@ -27,6 +27,120 @@ pub struct OwnedFd {
     inner: ManuallyDrop<crate::imp::fd::OwnedFd>,
 }
 
+impl OwnedFd {
+    /// Creates a new `OwnedFd` instance that shares the same underlying file handle
+    /// as the existing `OwnedFd` instance.
+    #[cfg(all(unix, not(target_os = "wasi")))]
+    pub fn try_clone(&self) -> crate::io::Result<Self> {
+        // We want to atomically duplicate this file descriptor and set the
+        // CLOEXEC flag, and currently that's done via F_DUPFD_CLOEXEC. This
+        // is a POSIX flag that was added to Linux in 2.6.24.
+        #[cfg(not(target_os = "espidf"))]
+        let fd = crate::fs::fcntl_dupfd_cloexec(self, 0)?;
+
+        // For ESP-IDF, F_DUPFD is used instead, because the CLOEXEC semantics
+        // will never be supported, as this is a bare metal framework with
+        // no capabilities for multi-process execution.  While F_DUPFD is also
+        // not supported yet, it might be (currently it returns ENOSYS).
+        #[cfg(target_os = "espidf")]
+        let fd = crate::fs::fcntl_dupfd(self)?;
+
+        Ok(fd)
+    }
+
+    /// Creates a new `OwnedFd` instance that shares the same underlying file handle
+    /// as the existing `OwnedFd` instance.
+    #[cfg(target_os = "wasi")]
+    pub fn try_clone(&self) -> std::io::Result<Self> {
+        Err(std::io::Error::new(
+            std::io::ErrorKind::Unsupported,
+            "operation not supported on WASI yet",
+        ))
+    }
+
+    /// Creates a new `OwnedFd` instance that shares the same underlying file
+    /// handle as the existing `OwnedFd` instance.
+    #[cfg(target_os = "windows")]
+    pub fn try_clone(&self) -> std::io::Result<Self> {
+        use winapi::um::processthreadsapi::GetCurrentProcessId;
+        use winapi::um::winsock2::{
+            WSADuplicateSocketW, WSAGetLastError, WSASocketW, INVALID_SOCKET, WSAEINVAL,
+            WSAEPROTOTYPE, WSAPROTOCOL_INFOW, WSA_FLAG_NO_HANDLE_INHERIT, WSA_FLAG_OVERLAPPED,
+        };
+
+        let mut info = unsafe { std::mem::zeroed::<WSAPROTOCOL_INFOW>() };
+        let result =
+            unsafe { WSADuplicateSocketW(self.as_raw_fd() as _, GetCurrentProcessId(), &mut info) };
+        match result {
+            SOCKET_ERROR => return Err(std::io::Error::last_os_error()),
+            0 => (),
+            _ => panic!(),
+        }
+        let socket = unsafe {
+            WSASocketW(
+                info.iAddressFamily,
+                info.iSocketType,
+                info.iProtocol,
+                &mut info,
+                0,
+                WSA_FLAG_OVERLAPPED | WSA_FLAG_NO_HANDLE_INHERIT,
+            )
+        };
+
+        if socket != INVALID_SOCKET {
+            unsafe { Ok(Self::from_raw_fd(socket as _)) }
+        } else {
+            let error = unsafe { WSAGetLastError() };
+
+            if error != WSAEPROTOTYPE && error != WSAEINVAL {
+                return Err(std::io::Error::from_raw_os_error(error));
+            }
+
+            let socket = unsafe {
+                WSASocketW(
+                    info.iAddressFamily,
+                    info.iSocketType,
+                    info.iProtocol,
+                    &mut info,
+                    0,
+                    WSA_FLAG_OVERLAPPED,
+                )
+            };
+
+            if socket == INVALID_SOCKET {
+                return Err(std::io::Error::last_os_error());
+            }
+
+            unsafe {
+                let socket = Self::from_raw_fd(socket as _);
+                socket.set_no_inherit()?;
+                Ok(socket)
+            }
+        }
+    }
+
+    #[cfg(windows)]
+    #[cfg(not(target_vendor = "uwp"))]
+    fn set_no_inherit(&self) -> std::io::Result<()> {
+        use winapi::um::handleapi::SetHandleInformation;
+        use winapi::um::winbase::HANDLE_FLAG_INHERIT;
+        use winapi::um::winnt::HANDLE;
+        match unsafe { SetHandleInformation(self.as_raw_fd() as HANDLE, HANDLE_FLAG_INHERIT, 0) } {
+            0 => return Err(std::io::Error::last_os_error()),
+            _ => Ok(()),
+        }
+    }
+
+    #[cfg(windows)]
+    #[cfg(target_vendor = "uwp")]
+    fn set_no_inherit(&self) -> std::io::Result<()> {
+        Err(io::Error::new_const(
+            std::io::ErrorKind::Unsupported,
+            &"Unavailable on UWP",
+        ))
+    }
+}
+
 #[cfg(not(windows))]
 impl AsFd for OwnedFd {
     #[inline]
