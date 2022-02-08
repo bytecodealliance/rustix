@@ -27,6 +27,27 @@ pub struct OwnedFd {
     inner: ManuallyDrop<crate::imp::fd::OwnedFd>,
 }
 
+impl OwnedFd {
+    /// Creates a new `OwnedFd` instance that shares the same underlying file handle
+    /// as the existing `OwnedFd` instance.
+    pub fn try_clone(&self) -> std::io::Result<Self> {
+        // We want to atomically duplicate this file descriptor and set the
+        // CLOEXEC flag, and currently that's done via F_DUPFD_CLOEXEC. This
+        // is a POSIX flag that was added to Linux in 2.6.24.
+        #[cfg(not(target_os = "espidf"))]
+        let fd = crate::fs::fcntl_dupfd_cloexec(self, 0)?;
+
+        // For ESP-IDF, F_DUPFD is used instead, because the CLOEXEC semantics
+        // will never be supported, as this is a bare metal framework with
+        // no capabilities for multi-process execution.  While F_DUPFD is also
+        // not supported yet, it might be (currently it returns ENOSYS).
+        #[cfg(target_os = "espidf")]
+        let fd = crate::fs::fcntl_dupfd(self)?;
+
+        Ok(fd)
+    }
+}
+
 #[cfg(not(windows))]
 impl AsFd for OwnedFd {
     #[inline]
