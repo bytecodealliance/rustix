@@ -9,6 +9,7 @@ use crate::ffi::ZStr;
 use crate::io;
 #[cfg(not(windows))]
 use crate::path;
+#[cfg(not(windows))]
 use core::convert::TryInto;
 #[cfg(not(windows))]
 use core::fmt;
