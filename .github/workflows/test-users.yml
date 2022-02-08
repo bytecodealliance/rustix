@@ -5,6 +5,125 @@ name: Test rustix's users
 on: workflow_dispatch
 
 jobs:
+  listenfd:
+    name: listenfd ported to rustix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux, macos-11]
+        include:
+          - build: ubuntu
+            os: ubuntu-latest
+            rust: nightly
+          - build: i686-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: i686-unknown-linux-gnu
+            gcc_package: gcc-i686-linux-gnu
+            gcc: i686-linux-gnu-gcc
+            libc_package: libc-dev-i386-cross
+          - build: aarch64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: aarch64-unknown-linux-gnu
+            gcc_package: gcc-aarch64-linux-gnu
+            gcc: aarch64-linux-gnu-gcc
+            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu_target: aarch64-linux-user
+          - build: powerpc64le-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: powerpc64le-unknown-linux-gnu
+            gcc_package: gcc-powerpc64le-linux-gnu
+            gcc: powerpc64le-linux-gnu-gcc
+            qemu: qemu-ppc64le -L /usr/powerpc64le-linux-gnu
+            qemu_target: ppc64le-linux-user
+          - build: riscv64-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: riscv64gc-unknown-linux-gnu
+            gcc_package: gcc-riscv64-linux-gnu
+            gcc: riscv64-linux-gnu-gcc
+            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu_target: riscv64-linux-user
+          - build: arm-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: armv5te-unknown-linux-gnueabi
+            gcc_package: gcc-arm-linux-gnueabi
+            gcc: arm-linux-gnueabi-gcc
+            qemu: qemu-arm -L /usr/arm-linux-gnueabi
+            qemu_target: arm-linux-user
+          - build: macos-11
+            os: macos-11
+            rust: nightly
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: ${{ matrix.rust }}
+    - uses: actions/checkout@v2
+      with:
+        repository: sunfishcode/rust-listenfd
+        path: rust-listenfd
+    - uses: actions/checkout@v2
+      with:
+        repository: davidedelpapa/thttp
+        path: thttp
+
+    - name: Configure Cargo target
+      run: |
+        echo CARGO_BUILD_TARGET=${{ matrix.target }} >> $GITHUB_ENV
+        rustup target add ${{ matrix.target }}
+      if: matrix.target != ''
+
+    - name: Install cross-compilation tools
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
+        upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
+        echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
+      if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'
+
+    - name: Install cross-compilation libraries
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get install -y ${{ matrix.libc_package }}
+      if: matrix.libc_package != '' && matrix.os == 'ubuntu-latest'
+
+    - name: Install qemu
+      run: |
+        set -ex
+        # Download and build qemu from source since the most recent release is
+        # way faster at arm emulation than the current version github actions'
+        # ubuntu image uses. Disable as much as we can to get it to build
+        # quickly.
+        cd
+        curl https://download.qemu.org/qemu-6.1.0.tar.xz | tar xJf -
+        cd qemu-6.1.0
+        ./configure --target-list=${{ matrix.qemu_target }} --prefix=$HOME/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
+        make -j$(nproc) install
+
+        # Configure Cargo for cross compilation and tell it how it can run
+        # cross executables
+        upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
+        echo CARGO_TARGET_${upcase}_RUNNER=$HOME/qemu/bin/${{ matrix.qemu }} >> $GITHUB_ENV
+      if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
+
+    - run: cargo install systemfd
+
+    - run: cd rust-listenfd && echo '[patch.crates-io]' >> Cargo.toml
+    - run: cd rust-listenfd && echo 'rustix = { path = ".." }' >> Cargo.toml
+
+    - run: cd thttp && echo '[patch.crates-io]' >> Cargo.toml
+    - run: cd thttp && echo 'listenfd = { path = "../rust-listenfd" }' >> Cargo.toml
+
+    - run: cd thttp && systemfd --no-pid -s http::0.0.0.0:5052 -- cargo run &
+    - run: wget http://127.0.0.1:5052/Cargo.toml
+    - run: diff -u Cargo.toml Cargo.toml.1
+
   async-io:
     name: async-io ported to rustix
     runs-on: ${{ matrix.os }}
@@ -774,7 +893,7 @@ jobs:
         toolchain: ${{ matrix.rust }}
     - uses: actions/checkout@v2
       with:
-        repository: cgwalters/cap-std-ext
+        repository: coreos/cap-std-ext
         path: cap-std-ext
 
     - name: Configure Cargo target
