@@ -160,6 +160,17 @@ pub(crate) unsafe fn read_sockaddr(
     }
 }
 
+pub(crate) unsafe fn maybe_read_sockaddr_os(
+    storage: *const c::sockaddr_storage,
+    len: usize,
+) -> Option<SocketAddrAny> {
+    if len == 0 {
+        None
+    } else {
+        Some(read_sockaddr_os(storage, len))
+    }
+}
+
 pub(crate) unsafe fn read_sockaddr_os(
     storage: *const c::sockaddr_storage,
     len: usize,

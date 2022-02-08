@@ -12,7 +12,7 @@ pub(crate) mod syscalls;
 pub use addr::SocketAddrStorage;
 #[cfg(not(windows))]
 pub use addr::SocketAddrUnix;
-pub(crate) use read_sockaddr::{read_sockaddr, read_sockaddr_os};
+pub(crate) use read_sockaddr::{maybe_read_sockaddr_os, read_sockaddr, read_sockaddr_os};
 pub use send_recv::{RecvFlags, SendFlags};
 pub use types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType, Timeout};
 pub(crate) use write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6, write_sockaddr};

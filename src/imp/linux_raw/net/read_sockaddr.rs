@@ -104,6 +104,22 @@ pub(crate) unsafe fn read_sockaddr(
 /// # Safety
 ///
 /// `storage` must point to a valid socket address returned from the OS.
+pub(crate) unsafe fn maybe_read_sockaddr_os(
+    storage: *const sockaddr,
+    len: usize,
+) -> Option<SocketAddrAny> {
+    if len == 0 {
+        None
+    } else {
+        Some(read_sockaddr_os(storage, len))
+    }
+}
+
+/// Read a socket address returned from the OS.
+///
+/// # Safety
+///
+/// `storage` must point to a valid socket address returned from the OS.
 pub(crate) unsafe fn read_sockaddr_os(storage: *const sockaddr, len: usize) -> SocketAddrAny {
     let z = linux_raw_sys::general::sockaddr_un {
         sun_family: 0_u16,

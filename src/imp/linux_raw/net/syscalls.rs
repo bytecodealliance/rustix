@@ -14,8 +14,8 @@ use super::super::conv::{
 };
 use super::super::reg::nr;
 use super::{
-    encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags, AddressFamily, Protocol,
-    RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
+    encode_sockaddr_v4, encode_sockaddr_v6, maybe_read_sockaddr_os, read_sockaddr_os, AcceptFlags,
+    AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
 };
 use crate::fd::BorrowedFd;
 use crate::io::{self, OwnedFd};
@@ -209,7 +209,7 @@ pub(crate) fn accept_with(fd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<
 }
 
 #[inline]
-pub(crate) fn acceptfrom(fd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddrAny)> {
+pub(crate) fn acceptfrom(fd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
@@ -222,7 +222,7 @@ pub(crate) fn acceptfrom(fd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddrA
         ))?;
         Ok((
             fd,
-            read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
+            maybe_read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
         ))
     }
     #[cfg(target_arch = "x86")]
@@ -240,7 +240,7 @@ pub(crate) fn acceptfrom(fd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddrA
         ))?;
         Ok((
             fd,
-            read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
+            maybe_read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
         ))
     }
 }
@@ -249,7 +249,7 @@ pub(crate) fn acceptfrom(fd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddrA
 pub(crate) fn acceptfrom_with(
     fd: BorrowedFd<'_>,
     flags: AcceptFlags,
-) -> io::Result<(OwnedFd, SocketAddrAny)> {
+) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
@@ -263,7 +263,7 @@ pub(crate) fn acceptfrom_with(
         ))?;
         Ok((
             fd,
-            read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
+            maybe_read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
         ))
     }
     #[cfg(target_arch = "x86")]
@@ -282,7 +282,7 @@ pub(crate) fn acceptfrom_with(
         ))?;
         Ok((
             fd,
-            read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
+            maybe_read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
         ))
     }
 }
@@ -526,7 +526,7 @@ pub(crate) fn recvfrom(
     fd: BorrowedFd<'_>,
     buf: &mut [u8],
     flags: RecvFlags,
-) -> io::Result<(usize, SocketAddrAny)> {
+) -> io::Result<(usize, Option<SocketAddrAny>)> {
     let (buf_addr_mut, buf_len) = slice_mut(buf);
 
     #[cfg(not(target_arch = "x86"))]
@@ -544,7 +544,7 @@ pub(crate) fn recvfrom(
         ))?;
         Ok((
             nread,
-            read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
+            maybe_read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
         ))
     }
     #[cfg(target_arch = "x86")]
@@ -565,13 +565,13 @@ pub(crate) fn recvfrom(
         ))?;
         Ok((
             nread,
-            read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
+            maybe_read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
         ))
     }
 }
 
 #[inline]
-pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
+pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<Option<SocketAddrAny>> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
@@ -582,7 +582,7 @@ pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
             out(&mut storage),
             by_mut(&mut addrlen),
         ))?;
-        Ok(read_sockaddr_os(
+        Ok(maybe_read_sockaddr_os(
             &storage.assume_init(),
             addrlen.try_into().unwrap(),
         ))
@@ -600,7 +600,7 @@ pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
                 by_mut(&mut addrlen),
             ]),
         ))?;
-        Ok(read_sockaddr_os(
+        Ok(maybe_read_sockaddr_os(
             &storage.assume_init(),
             addrlen.try_into().unwrap(),
         ))
