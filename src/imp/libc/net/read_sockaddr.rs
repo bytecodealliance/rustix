@@ -165,13 +165,29 @@ pub(crate) unsafe fn maybe_read_sockaddr_os(
     len: usize,
 ) -> Option<SocketAddrAny> {
     if len == 0 {
+        return None;
+    }
+
+    assert!(len >= size_of::<c::sa_family_t>());
+    let family = read_ss_family(storage).into();
+    if family == c::AF_UNSPEC {
         None
     } else {
-        Some(read_sockaddr_os(storage, len))
+        Some(inner_read_sockaddr_os(family, storage, len))
     }
 }
 
 pub(crate) unsafe fn read_sockaddr_os(
+    storage: *const c::sockaddr_storage,
+    len: usize,
+) -> SocketAddrAny {
+    assert!(len >= size_of::<c::sa_family_t>());
+    let family = read_ss_family(storage).into();
+    inner_read_sockaddr_os(family, storage, len)
+}
+
+unsafe fn inner_read_sockaddr_os(
+    family: c::c_int,
     storage: *const c::sockaddr_storage,
     len: usize,
 ) -> SocketAddrAny {
@@ -227,7 +243,7 @@ pub(crate) unsafe fn read_sockaddr_os(
     let offsetof_sun_path = (as_ptr(&z.sun_path) as usize) - (as_ptr(&z) as usize);
 
     assert!(len >= size_of::<c::sa_family_t>());
-    match read_ss_family(storage).into() {
+    match family {
         c::AF_INET => {
             assert!(len >= size_of::<c::sockaddr_in>());
             let decode = *storage.cast::<c::sockaddr_in>();
