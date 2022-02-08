@@ -336,7 +336,7 @@ pub fn accept_with<Fd: AsFd>(sockfd: &Fd, flags: AcceptFlags) -> io::Result<Owne
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-accept
 #[inline]
 #[doc(alias = "accept4")]
-pub fn acceptfrom<Fd: AsFd>(sockfd: &Fd) -> io::Result<(OwnedFd, SocketAddrAny)> {
+pub fn acceptfrom<Fd: AsFd>(sockfd: &Fd) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     let sockfd = sockfd.as_fd();
     imp::net::syscalls::acceptfrom(sockfd)
 }
@@ -362,7 +362,7 @@ pub fn acceptfrom<Fd: AsFd>(sockfd: &Fd) -> io::Result<(OwnedFd, SocketAddrAny)>
 pub fn acceptfrom_with<Fd: AsFd>(
     sockfd: &Fd,
     flags: AcceptFlags,
-) -> io::Result<(OwnedFd, SocketAddrAny)> {
+) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     let sockfd = sockfd.as_fd();
     imp::net::syscalls::acceptfrom_with(sockfd, flags)
 }
@@ -411,7 +411,7 @@ pub fn getsockname<Fd: AsFd>(sockfd: &Fd) -> io::Result<SocketAddrAny> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/getpeername.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getpeername
 #[inline]
-pub fn getpeername<Fd: AsFd>(sockfd: &Fd) -> io::Result<SocketAddrAny> {
+pub fn getpeername<Fd: AsFd>(sockfd: &Fd) -> io::Result<Option<SocketAddrAny>> {
     let sockfd = sockfd.as_fd();
     imp::net::syscalls::getpeername(sockfd)
 }

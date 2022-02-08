@@ -7,8 +7,8 @@ use super::ext::{in6_addr_new, in_addr_new};
 use super::SocketAddrUnix;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::{
-    encode_sockaddr_v4, encode_sockaddr_v6, read_sockaddr_os, AcceptFlags, AddressFamily, Protocol,
-    RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
+    encode_sockaddr_v4, encode_sockaddr_v6, maybe_read_sockaddr_os, read_sockaddr_os, AcceptFlags,
+    AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
 };
 use crate::as_ptr;
 use crate::fd::BorrowedFd;
@@ -50,7 +50,7 @@ pub(crate) fn recvfrom(
     fd: BorrowedFd<'_>,
     buf: &mut [u8],
     flags: RecvFlags,
-) -> io::Result<(usize, SocketAddrAny)> {
+) -> io::Result<(usize, Option<SocketAddrAny>)> {
     unsafe {
         let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
         let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
@@ -64,7 +64,7 @@ pub(crate) fn recvfrom(
         ))?;
         Ok((
             nread as usize,
-            read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()),
+            maybe_read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()),
         ))
     }
 }
@@ -259,7 +259,7 @@ pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Res
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketAddrAny)> {
+pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     unsafe {
         let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
         let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
@@ -270,7 +270,7 @@ pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketA
         ))?;
         Ok((
             owned_fd,
-            read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()),
+            maybe_read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()),
         ))
     }
 }
@@ -285,7 +285,7 @@ pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, SocketA
 pub(crate) fn acceptfrom_with(
     sockfd: BorrowedFd<'_>,
     flags: AcceptFlags,
-) -> io::Result<(OwnedFd, SocketAddrAny)> {
+) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     unsafe {
         let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
         let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
@@ -297,7 +297,7 @@ pub(crate) fn acceptfrom_with(
         ))?;
         Ok((
             owned_fd,
-            read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()),
+            maybe_read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()),
         ))
     }
 }
@@ -315,7 +315,7 @@ pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, _flags: AcceptFlags) -> io::Re
 pub(crate) fn acceptfrom_with(
     sockfd: BorrowedFd<'_>,
     _flags: AcceptFlags,
-) -> io::Result<(OwnedFd, SocketAddrAny)> {
+) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     acceptfrom(sockfd)
 }
 
@@ -339,7 +339,7 @@ pub(crate) fn getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn getpeername(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
+pub(crate) fn getpeername(sockfd: BorrowedFd<'_>) -> io::Result<Option<SocketAddrAny>> {
     unsafe {
         let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
         let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
@@ -348,7 +348,10 @@ pub(crate) fn getpeername(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
             storage.as_mut_ptr().cast(),
             &mut len,
         ))?;
-        Ok(read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()))
+        Ok(maybe_read_sockaddr_os(
+            storage.as_ptr(),
+            len.try_into().unwrap(),
+        ))
     }
 }
 

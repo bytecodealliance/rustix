@@ -56,7 +56,7 @@ pub fn recvfrom<Fd: AsFd>(
     fd: &Fd,
     buf: &mut [u8],
     flags: RecvFlags,
-) -> io::Result<(usize, SocketAddrAny)> {
+) -> io::Result<(usize, Option<SocketAddrAny>)> {
     let fd = fd.as_fd();
     imp::net::syscalls::recvfrom(fd, buf, flags)
 }
