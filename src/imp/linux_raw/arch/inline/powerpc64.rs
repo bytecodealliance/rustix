@@ -98,9 +98,6 @@ pub(in crate::imp) unsafe fn syscall1_readonly(
 pub(in crate::imp) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> ! {
     asm!(
         "sc",
-        "bns 0f",
-        "neg 3, 3",
-        "0:",
         in("r0") nr.to_asm(),
         in("r3") a0.to_asm(),
         options(noreturn)

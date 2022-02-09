@@ -50,9 +50,7 @@ rustix_syscall1_noreturn_nr_last:
     .cfi_startproc
     mr     0, 4
     sc
-    bnslr
-    neg 3, 3
-    blr
+    trap
     .cfi_endproc
     .size rustix_syscall1_noreturn_nr_last, .-rustix_syscall1_noreturn_nr_last
 
