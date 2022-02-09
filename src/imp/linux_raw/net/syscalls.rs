@@ -14,8 +14,9 @@ use super::super::conv::{
 };
 use super::super::reg::nr;
 use super::{
-    encode_sockaddr_v4, encode_sockaddr_v6, maybe_read_sockaddr_os, read_sockaddr_os, AcceptFlags,
-    AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
+    encode_sockaddr_v4, encode_sockaddr_v6, initialize_family_to_unspec, maybe_read_sockaddr_os,
+    read_sockaddr_os, AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown,
+    SocketFlags, SocketType,
 };
 use crate::fd::BorrowedFd;
 use crate::io::{self, OwnedFd};
@@ -529,10 +530,16 @@ pub(crate) fn recvfrom(
 ) -> io::Result<(usize, Option<SocketAddrAny>)> {
     let (buf_addr_mut, buf_len) = slice_mut(buf);
 
-    #[cfg(not(target_arch = "x86"))]
+    let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
+    let mut storage = MaybeUninit::<sockaddr>::uninit();
+
     unsafe {
-        let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
-        let mut storage = MaybeUninit::<sockaddr>::uninit();
+        // `recvfrom` does not write to the storage if the socket is
+        // connection-oriented sockets, so we initialize the family field to
+        // `AF_UNSPEC` so that we can detect this case.
+        initialize_family_to_unspec(storage.as_mut_ptr());
+
+        #[cfg(not(target_arch = "x86"))]
         let nread = ret_usize(syscall6(
             nr(__NR_recvfrom),
             borrowed_fd(fd),
@@ -542,15 +549,7 @@ pub(crate) fn recvfrom(
             out(&mut storage),
             by_mut(&mut addrlen),
         ))?;
-        Ok((
-            nread,
-            maybe_read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
-        ))
-    }
-    #[cfg(target_arch = "x86")]
-    unsafe {
-        let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
-        let mut storage = MaybeUninit::<sockaddr>::uninit();
+        #[cfg(target_arch = "x86")]
         let nread = ret_usize(syscall2(
             nr(__NR_socketcall),
             x86_sys(SYS_RECVFROM),
@@ -563,6 +562,7 @@ pub(crate) fn recvfrom(
                 by_mut(&mut addrlen),
             ]),
         ))?;
+
         Ok((
             nread,
             maybe_read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),

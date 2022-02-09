@@ -7,8 +7,9 @@ use super::ext::{in6_addr_new, in_addr_new};
 use super::SocketAddrUnix;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::{
-    encode_sockaddr_v4, encode_sockaddr_v6, maybe_read_sockaddr_os, read_sockaddr_os, AcceptFlags,
-    AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown, SocketFlags, SocketType,
+    encode_sockaddr_v4, encode_sockaddr_v6, initialize_family_to_unspec, maybe_read_sockaddr_os,
+    read_sockaddr_os, AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown,
+    SocketFlags, SocketType,
 };
 use crate::as_ptr;
 use crate::fd::BorrowedFd;
@@ -54,6 +55,12 @@ pub(crate) fn recvfrom(
     unsafe {
         let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
         let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
+
+        // `recvfrom` does not write to the storage if the socket is
+        // connection-oriented sockets, so we initialize the family field to
+        // `AF_UNSPEC` so that we can detect this case.
+        initialize_family_to_unspec(storage.as_mut_ptr());
+
         let nread = ret_send_recv(c::recvfrom(
             borrowed_fd(fd),
             buf.as_mut_ptr().cast(),

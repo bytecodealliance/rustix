@@ -81,6 +81,12 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
     (*storage.cast::<sockaddr_header>()).ss_family.into()
 }
 
+/// Set the `ss_family` field of a socket address to `AF_UNSPEC`, so that we
+/// can test for `AF_UNSPEC` to test whether it was stored to.
+pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut c::sockaddr_storage) {
+    (*storage.cast::<sockaddr_header>()).ss_family = c::AF_UNSPEC as _;
+}
+
 pub(crate) unsafe fn read_sockaddr(
     storage: *const c::sockaddr_storage,
     len: usize,
