@@ -12,9 +12,9 @@ bitflags! {
         const PRI = linux_raw_sys::general::POLLPRI as u16;
         /// `POLLOUT`
         const OUT = linux_raw_sys::general::POLLOUT as u16;
-        /// `POLLNORM`
+        /// `POLLRDNORM`
         const RDNORM = linux_raw_sys::general::POLLRDNORM as u16;
-        /// `POLLNORM`
+        /// `POLLWRNORM`
         const WRNORM = linux_raw_sys::general::POLLWRNORM as u16;
         /// `POLLRDBAND`
         const RDBAND = linux_raw_sys::general::POLLRDBAND as u16;
