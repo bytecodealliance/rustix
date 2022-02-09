@@ -19,8 +19,7 @@ use imp::fs::{FdFlags, OFlags};
 #[inline]
 #[doc(alias = "F_GETFD")]
 pub fn fcntl_getfd<Fd: AsFd>(fd: &Fd) -> io::Result<FdFlags> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::fcntl_getfd(fd)
+    imp::fs::syscalls::fcntl_getfd(fd.as_fd())
 }
 
 /// `fcntl(fd, F_SETFD, flags)`—Sets a file descriptor's flags.
@@ -34,8 +33,7 @@ pub fn fcntl_getfd<Fd: AsFd>(fd: &Fd) -> io::Result<FdFlags> {
 #[inline]
 #[doc(alias = "F_SETFD")]
 pub fn fcntl_setfd<Fd: AsFd>(fd: &Fd, flags: FdFlags) -> io::Result<()> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::fcntl_setfd(fd, flags)
+    imp::fs::syscalls::fcntl_setfd(fd.as_fd(), flags)
 }
 
 /// `fcntl(fd, F_GETFL)`—Returns a file descriptor's access mode and status.
@@ -49,8 +47,7 @@ pub fn fcntl_setfd<Fd: AsFd>(fd: &Fd, flags: FdFlags) -> io::Result<()> {
 #[inline]
 #[doc(alias = "F_GETFL")]
 pub fn fcntl_getfl<Fd: AsFd>(fd: &Fd) -> io::Result<OFlags> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::fcntl_getfl(fd)
+    imp::fs::syscalls::fcntl_getfl(fd.as_fd())
 }
 
 /// `fcntl(fd, F_SETFL, flags)`—Sets a file descriptor's status.
@@ -64,8 +61,7 @@ pub fn fcntl_getfl<Fd: AsFd>(fd: &Fd) -> io::Result<OFlags> {
 #[inline]
 #[doc(alias = "F_SETFL")]
 pub fn fcntl_setfl<Fd: AsFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::fcntl_setfl(fd, flags)
+    imp::fs::syscalls::fcntl_setfl(fd.as_fd(), flags)
 }
 
 /// `fcntl(fd, F_GET_SEALS)`
@@ -83,8 +79,7 @@ pub fn fcntl_setfl<Fd: AsFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
 #[inline]
 #[doc(alias = "F_GET_SEALS")]
 pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<SealFlags> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::fcntl_get_seals(fd)
+    imp::fs::syscalls::fcntl_get_seals(fd.as_fd())
 }
 
 #[cfg(any(
@@ -110,8 +105,7 @@ pub use imp::fs::SealFlags;
 #[inline]
 #[doc(alias = "F_ADD_SEALS")]
 pub fn fcntl_add_seals<Fd: AsFd>(fd: &Fd, seals: SealFlags) -> io::Result<()> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::fcntl_add_seals(fd, seals)
+    imp::fs::syscalls::fcntl_add_seals(fd.as_fd(), seals)
 }
 
 /// `fcntl(fd, F_DUPFD_CLOEXEC)`—Creates a new `OwnedFd` instance, with value
@@ -133,6 +127,5 @@ pub fn fcntl_add_seals<Fd: AsFd>(fd: &Fd, seals: SealFlags) -> io::Result<()> {
 #[inline]
 #[doc(alias = "F_DUPFD_CLOEXEC")]
 pub fn fcntl_dupfd_cloexec<Fd: AsFd>(fd: &Fd, min: RawFd) -> io::Result<OwnedFd> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::fcntl_dupfd_cloexec(fd, min)
+    imp::fs::syscalls::fcntl_dupfd_cloexec(fd.as_fd(), min)
 }

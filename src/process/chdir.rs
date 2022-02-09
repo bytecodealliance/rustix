@@ -29,8 +29,7 @@ pub fn chdir<P: path::Arg>(path: P) -> io::Result<()> {
 #[cfg(not(target_os = "fuchsia"))]
 #[inline]
 pub fn fchdir<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    let fd = fd.as_fd();
-    imp::process::syscalls::fchdir(fd)
+    imp::process::syscalls::fchdir(fd.as_fd())
 }
 
 /// `getcwd()`

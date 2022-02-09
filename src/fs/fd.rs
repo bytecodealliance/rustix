@@ -36,8 +36,7 @@ use imp::fs::{FlockOperation, Mode};
 /// [Linux]: https://man7.org/linux/man-pages/man2/lseek.2.html
 #[inline]
 pub fn seek<Fd: AsFd>(fd: &Fd, pos: SeekFrom) -> io::Result<u64> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::seek(fd, pos)
+    imp::fs::syscalls::seek(fd.as_fd(), pos)
 }
 
 /// `lseek(fd, 0, SEEK_CUR)`—Returns the current position within a file.
@@ -54,8 +53,7 @@ pub fn seek<Fd: AsFd>(fd: &Fd, pos: SeekFrom) -> io::Result<u64> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/lseek.2.html
 #[inline]
 pub fn tell<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::tell(fd)
+    imp::fs::syscalls::tell(fd.as_fd())
 }
 
 /// `fchmod(fd)`—Sets open file or directory permissions.
@@ -72,8 +70,7 @@ pub fn tell<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn fchmod<Fd: AsFd>(fd: &Fd, mode: Mode) -> io::Result<()> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::fchmod(fd, mode)
+    imp::fs::syscalls::fchmod(fd.as_fd(), mode)
 }
 
 /// `fchown(fd)`—Sets open file or directory ownership.
@@ -87,8 +84,7 @@ pub fn fchmod<Fd: AsFd>(fd: &Fd, mode: Mode) -> io::Result<()> {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn fchown<Fd: AsFd>(fd: &Fd, owner: Uid, group: Gid) -> io::Result<()> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::fchown(fd, owner, group)
+    imp::fs::syscalls::fchown(fd.as_fd(), owner, group)
 }
 
 /// `fstat(fd)`—Queries metadata for an open file or directory.
@@ -106,8 +102,7 @@ pub fn fchown<Fd: AsFd>(fd: &Fd, owner: Uid, group: Gid) -> io::Result<()> {
 /// [`FileType::from_raw_mode`]: crate::fs::FileType::from_raw_mode
 #[inline]
 pub fn fstat<Fd: AsFd>(fd: &Fd) -> io::Result<Stat> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::fstat(fd)
+    imp::fs::syscalls::fstat(fd.as_fd())
 }
 
 /// `fstatfs(fd)`—Queries filesystem statistics for an open file or directory.
@@ -124,8 +119,7 @@ pub fn fstat<Fd: AsFd>(fd: &Fd) -> io::Result<Stat> {
 )))] // not implemented in libc for netbsd yet
 #[inline]
 pub fn fstatfs<Fd: AsFd>(fd: &Fd) -> io::Result<StatFs> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::fstatfs(fd)
+    imp::fs::syscalls::fstatfs(fd.as_fd())
 }
 
 /// `futimens(fd, times)`—Sets timestamps for an open file or directory.
@@ -138,8 +132,7 @@ pub fn fstatfs<Fd: AsFd>(fd: &Fd) -> io::Result<StatFs> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/utimensat.2.html
 #[inline]
 pub fn futimens<Fd: AsFd>(fd: &Fd, times: &Timestamps) -> io::Result<()> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::futimens(fd, times)
+    imp::fs::syscalls::futimens(fd.as_fd(), times)
 }
 
 /// `fallocate(fd, mode, offset, len)`—Adjusts file allocation.
@@ -167,8 +160,7 @@ pub fn futimens<Fd: AsFd>(fd: &Fd, times: &Timestamps) -> io::Result<()> {
 #[inline]
 #[doc(alias = "posix_fallocate")]
 pub fn fallocate<Fd: AsFd>(fd: &Fd, mode: FallocateFlags, offset: u64, len: u64) -> io::Result<()> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::fallocate(fd, mode, offset, len)
+    imp::fs::syscalls::fallocate(fd.as_fd(), mode, offset, len)
 }
 
 /// `fcntl(fd, F_GETFL) & O_ACCMODE`
@@ -179,8 +171,7 @@ pub fn fallocate<Fd: AsFd>(fd: &Fd, mode: FallocateFlags, offset: u64, len: u64)
 /// general I/O handle support, use [`io::is_read_write`].
 #[inline]
 pub fn is_file_read_write<Fd: AsFd>(fd: &Fd) -> io::Result<(bool, bool)> {
-    let fd = fd.as_fd();
-    _is_file_read_write(fd)
+    _is_file_read_write(fd.as_fd())
 }
 
 pub(crate) fn _is_file_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
@@ -222,8 +213,7 @@ pub(crate) fn _is_file_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)
 /// [`fcntl_fullfsync`]: https://docs.rs/rustix/*/x86_64-apple-darwin/rustix/fs/fn.fcntl_fullfsync.html
 #[inline]
 pub fn fsync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::fsync(fd)
+    imp::fs::syscalls::fsync(fd.as_fd())
 }
 
 /// `fdatasync(fd)`—Ensures that file data is written to the underlying
@@ -243,8 +233,7 @@ pub fn fsync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 )))]
 #[inline]
 pub fn fdatasync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::fdatasync(fd)
+    imp::fs::syscalls::fdatasync(fd.as_fd())
 }
 
 /// `ftruncate(fd, length)`—Sets the length of a file.
@@ -257,8 +246,7 @@ pub fn fdatasync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/ftruncate.2.html
 #[inline]
 pub fn ftruncate<Fd: AsFd>(fd: &Fd, length: u64) -> io::Result<()> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::ftruncate(fd, length)
+    imp::fs::syscalls::ftruncate(fd.as_fd(), length)
 }
 
 /// `flock(fd, operation)`—Acquire or release an advisory lock on an open file.
@@ -270,6 +258,5 @@ pub fn ftruncate<Fd: AsFd>(fd: &Fd, length: u64) -> io::Result<()> {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn flock<Fd: AsFd>(fd: &Fd, operation: FlockOperation) -> io::Result<()> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::flock(fd, operation)
+    imp::fs::syscalls::flock(fd.as_fd(), operation)
 }

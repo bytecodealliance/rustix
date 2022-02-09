@@ -26,8 +26,7 @@ use {
 /// [Linux]: https://man7.org/linux/man-pages/man3/isatty.3.html
 #[inline]
 pub fn isatty<Fd: AsFd>(fd: &Fd) -> bool {
-    let fd = fd.as_fd();
-    imp::io::syscalls::isatty(fd)
+    imp::io::syscalls::isatty(fd.as_fd())
 }
 
 /// `ttyname_r(fd)`
@@ -47,8 +46,7 @@ pub fn isatty<Fd: AsFd>(fd: &Fd) -> bool {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 #[inline]
 pub fn ttyname<Fd: AsFd, B: Into<Vec<u8>>>(dirfd: &Fd, reuse: B) -> io::Result<ZString> {
-    let dirfd = dirfd.as_fd();
-    _ttyname(dirfd, reuse.into())
+    _ttyname(dirfd.as_fd(), reuse.into())
 }
 
 #[cfg(any(

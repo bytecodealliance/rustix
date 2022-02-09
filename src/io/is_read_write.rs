@@ -12,6 +12,5 @@ use imp::fd::AsFd;
 /// [`is_file_read_write`]: crate::fs::is_file_read_write
 #[inline]
 pub fn is_read_write<Fd: AsFd>(fd: &Fd) -> io::Result<(bool, bool)> {
-    let fd = fd.as_fd();
-    imp::io::syscalls::is_read_write(fd)
+    imp::io::syscalls::is_read_write(fd.as_fd())
 }

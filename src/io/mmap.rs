@@ -41,8 +41,7 @@ pub unsafe fn mmap<Fd: AsFd>(
     fd: &Fd,
     offset: u64,
 ) -> io::Result<*mut c_void> {
-    let fd = fd.as_fd();
-    imp::io::syscalls::mmap(ptr, len, prot, flags, fd, offset)
+    imp::io::syscalls::mmap(ptr, len, prot, flags, fd.as_fd(), offset)
 }
 
 /// `mmap(ptr, len, prot, MAP_ANONYMOUS | flags, -1, 0)`—Create an anonymous
