@@ -193,7 +193,8 @@ jobs:
             target: aarch64-unknown-linux-gnu
             gcc_package: gcc-aarch64-linux-gnu
             gcc: aarch64-linux-gnu-gcc
-            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu: qemu-aarch64
+            qemu_args: -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
           - build: powerpc64le-linux
             os: ubuntu-latest
@@ -201,7 +202,8 @@ jobs:
             target: powerpc64le-unknown-linux-gnu
             gcc_package: gcc-powerpc64le-linux-gnu
             gcc: powerpc64le-linux-gnu-gcc
-            qemu: qemu-ppc64le -L /usr/powerpc64le-linux-gnu
+            qemu: qemu-ppc64le
+            qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
@@ -209,7 +211,8 @@ jobs:
             target: riscv64gc-unknown-linux-gnu
             gcc_package: gcc-riscv64-linux-gnu
             gcc: riscv64-linux-gnu-gcc
-            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu: qemu-riscv64
+            qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
           - build: arm-linux
             os: ubuntu-latest
@@ -217,7 +220,8 @@ jobs:
             target: armv5te-unknown-linux-gnueabi
             gcc_package: gcc-arm-linux-gnueabi
             gcc: arm-linux-gnueabi-gcc
-            qemu: qemu-arm -L /usr/arm-linux-gnueabi
+            qemu: qemu-arm
+            qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
           - build: ubuntu-stable
             os: ubuntu-latest
@@ -235,7 +239,8 @@ jobs:
             target: aarch64-unknown-linux-gnu
             gcc_package: gcc-aarch64-linux-gnu
             gcc: aarch64-linux-gnu-gcc
-            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu: qemu-aarch64
+            qemu_args: -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
           - build: riscv64-linux-stable
             os: ubuntu-latest
@@ -243,7 +248,8 @@ jobs:
             target: riscv64gc-unknown-linux-gnu
             gcc_package: gcc-riscv64-linux-gnu
             gcc: riscv64-linux-gnu-gcc
-            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu: qemu-riscv64
+            qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
           - build: arm-linux-stable
             os: ubuntu-latest
@@ -251,7 +257,8 @@ jobs:
             target: armv5te-unknown-linux-gnueabi
             gcc_package: gcc-arm-linux-gnueabi
             gcc: arm-linux-gnueabi-gcc
-            qemu: qemu-arm -L /usr/arm-linux-gnueabi
+            qemu: qemu-arm
+            qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
           - build: macos
             os: macos-latest
@@ -308,8 +315,11 @@ jobs:
       run: |
         set -ex
 
+        upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
+        echo CARGO_TARGET_${upcase}_RUNNER=${{ runner.tool_cache }}/qemu/bin/${{ matrix.qemu }} ${{ matrix.qemu_args }} >> $GITHUB_ENV
+
         # See if qemu is already in the cache
-        if [ -f ${{ runner.tool_cache }}/qemu/built ]; then
+        if [ -f ${{ runner.tool_cache }}/qemu/bin/${{ matrix.qemu }} ]; then
           exit 0
         fi
 
@@ -322,12 +332,6 @@ jobs:
         cd qemu-$QEMU_BUILD_VERSION
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
-        touch ${{ runner.tool_cache }}/qemu/built
-
-        # Configure Cargo for cross compilation and tell it how it can run
-        # cross executables
-        upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
-        echo CARGO_TARGET_${upcase}_RUNNER=$HOME/qemu/bin/${{ matrix.qemu }} >> $GITHUB_ENV
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
@@ -363,7 +367,8 @@ jobs:
             target: aarch64-unknown-linux-gnu
             gcc_package: gcc-aarch64-linux-gnu
             gcc: aarch64-linux-gnu-gcc
-            qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
+            qemu: qemu-aarch64
+            qemu_args: -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
           - build: powerpc64le-linux
             os: ubuntu-latest
@@ -371,7 +376,8 @@ jobs:
             target: powerpc64le-unknown-linux-gnu
             gcc_package: gcc-powerpc64le-linux-gnu
             gcc: powerpc64le-linux-gnu-gcc
-            qemu: qemu-ppc64le -L /usr/powerpc64le-linux-gnu
+            qemu: qemu-ppc64le
+            qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
@@ -379,7 +385,8 @@ jobs:
             target: riscv64gc-unknown-linux-gnu
             gcc_package: gcc-riscv64-linux-gnu
             gcc: riscv64-linux-gnu-gcc
-            qemu: qemu-riscv64 -L /usr/riscv64-linux-gnu
+            qemu: qemu-riscv64
+            qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
           - build: arm-linux
             os: ubuntu-latest
@@ -387,7 +394,8 @@ jobs:
             target: armv7-unknown-linux-gnueabihf
             gcc_package: gcc-arm-linux-gnueabihf
             gcc: arm-linux-gnueabihf-gcc
-            qemu: qemu-arm -L /usr/arm-linux-gnueabihf
+            qemu: qemu-arm
+            qemu_args: -L /usr/arm-linux-gnueabihf
             qemu_target: arm-linux-user
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
@@ -440,8 +448,11 @@ jobs:
       run: |
         set -ex
 
+        upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
+        echo CARGO_TARGET_${upcase}_RUNNER=${{ runner.tool_cache }}/qemu/bin/${{ matrix.qemu }} ${{ matrix.qemu_args }} >> $GITHUB_ENV
+
         # See if qemu is already in the cache
-        if [ -f ${{ runner.tool_cache }}/qemu/built ]; then
+        if [ -f ${{ runner.tool_cache }}/qemu/bin/${{ matrix.qemu }} ]; then
           exit 0
         fi
 
@@ -454,12 +465,6 @@ jobs:
         cd qemu-$QEMU_BUILD_VERSION
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
-        touch ${{ runner.tool_cache }}/qemu/built
-
-        # Configure Cargo for cross compilation and tell it how it can run
-        # cross executables
-        upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
-        echo CARGO_TARGET_${upcase}_RUNNER=$HOME/qemu/bin/${{ matrix.qemu }} >> $GITHUB_ENV
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
@@ -480,7 +485,8 @@ jobs:
             target: powerpc64le-unknown-linux-gnu
             gcc_package: gcc-powerpc64le-linux-gnu
             gcc: powerpc64le-linux-gnu-gcc
-            qemu: qemu-ppc64le -L /usr/powerpc64le-linux-gnu
+            qemu: qemu-ppc64le
+            qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
@@ -528,8 +534,11 @@ jobs:
       run: |
         set -ex
 
+        upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
+        echo CARGO_TARGET_${upcase}_RUNNER=${{ runner.tool_cache }}/qemu/bin/${{ matrix.qemu }} ${{ matrix.qemu_args }} >> $GITHUB_ENV
+
         # See if qemu is already in the cache
-        if [ -f ${{ runner.tool_cache }}/qemu/built ]; then
+        if [ -f ${{ runner.tool_cache }}/qemu/bin/${{ matrix.qemu }} ]; then
           exit 0
         fi
 
@@ -542,12 +551,6 @@ jobs:
         cd qemu-$QEMU_BUILD_VERSION
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
-        touch ${{ runner.tool_cache }}/qemu/built
-
-        # Configure Cargo for cross compilation and tell it how it can run
-        # cross executables
-        upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
-        echo CARGO_TARGET_${upcase}_RUNNER=$HOME/qemu/bin/${{ matrix.qemu }} >> $GITHUB_ENV
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
