@@ -38,6 +38,13 @@ unsafe fn read_ss_family(storage: *const sockaddr) -> u16 {
     (*storage.cast::<sockaddr_header>()).ss_family
 }
 
+/// Set the `ss_family` field of a socket address to `AF_UNSPEC`, so that we
+/// can test for `AF_UNSPEC` to test whether it was stored to.
+#[inline]
+pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut sockaddr) {
+    (*storage.cast::<sockaddr_header>()).ss_family = linux_raw_sys::general::AF_UNSPEC as _;
+}
+
 /// Read a socket address encoded in a platform-specific format.
 ///
 /// # Safety
