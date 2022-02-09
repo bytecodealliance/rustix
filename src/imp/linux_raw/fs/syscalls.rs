@@ -7,12 +7,17 @@
 #![allow(unsafe_code)]
 #![allow(dead_code)]
 
+#[cfg(target_arch = "mips")]
+use super::super::arch::choose::syscall7_readonly;
 use super::super::arch::choose::{
     syscall1_readonly, syscall2, syscall2_readonly, syscall3, syscall3_readonly, syscall4,
     syscall4_readonly, syscall5, syscall5_readonly, syscall6,
 };
 use super::super::c;
-#[cfg(all(target_pointer_width = "32", target_arch = "arm"))]
+#[cfg(all(
+    target_pointer_width = "32",
+    any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc")
+))]
 use super::super::conv::zero;
 use super::super::conv::{
     borrowed_fd, by_ref, c_int, c_str, c_uint, dev_t, fs_advice, mode_and_type_as, mode_as, oflags,
@@ -35,7 +40,12 @@ use core::convert::TryInto;
 use core::mem::MaybeUninit;
 #[cfg(target_arch = "arm")]
 use linux_raw_sys::general::__NR_arm_fadvise64_64 as __NR_fadvise64_64;
-#[cfg(all(target_pointer_width = "32", not(target_arch = "arm")))]
+#[cfg(target_arch = "mips")]
+use linux_raw_sys::general::__NR_fadvise64;
+#[cfg(all(
+    target_pointer_width = "32",
+    not(any(target_arch = "arm", target_arch = "mips"))
+))]
 use linux_raw_sys::general::__NR_fadvise64_64;
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use linux_raw_sys::general::__NR_open;
@@ -315,7 +325,10 @@ pub(crate) fn tell(fd: BorrowedFd<'_>) -> io::Result<u64> {
 #[inline]
 pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
     // <https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L81-L83>
-    #[cfg(all(target_pointer_width = "32", target_arch = "arm"))]
+    #[cfg(all(
+        target_pointer_width = "32",
+        any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc")
+    ))]
     unsafe {
         ret(syscall4_readonly(
             nr(__NR_ftruncate64),
@@ -325,7 +338,10 @@ pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
             lo(length),
         ))
     }
-    #[cfg(all(target_pointer_width = "32", not(target_arch = "arm")))]
+    #[cfg(all(
+        target_pointer_width = "32",
+        not(any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc"))
+    ))]
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_ftruncate64),
@@ -377,7 +393,7 @@ pub(crate) fn fallocate(
 
 #[inline]
 pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) -> io::Result<()> {
-    // On arm and powerpc, the system calls are reordered so that the len and
+    // On arm and powerpc, the arguments are reordered so that the len and
     // pos argument pairs are aligned.
     #[cfg(any(target_arch = "arm", target_arch = "powerpc"))]
     unsafe {
@@ -391,9 +407,24 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) ->
             lo(len),
         ))
     }
+    // On mips, the arguments are not reordered, and padding is inserted
+    // instead to ensure alignment.
+    #[cfg(target_arch = "mips")]
+    unsafe {
+        ret(syscall7_readonly(
+            nr(__NR_fadvise64),
+            borrowed_fd(fd),
+            zero(),
+            hi(pos),
+            lo(pos),
+            hi(len),
+            lo(len),
+            fs_advice(advice),
+        ))
+    }
     #[cfg(all(
         target_pointer_width = "32",
-        not(any(target_arch = "arm", target_arch = "powerpc"))
+        not(any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc"))
     ))]
     unsafe {
         ret(syscall6_readonly(

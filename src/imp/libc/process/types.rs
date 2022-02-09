@@ -194,6 +194,10 @@ pub enum Signal {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        all(
+            any(target_os = "android", target_os = "linux"),
+            any(target_arch = "mips", target_arch = "mips64")
+        )
     )))]
     Stkflt = c::SIGSTKFLT,
     /// `SIGCHLD`
@@ -267,6 +271,10 @@ impl Signal {
                 target_os = "macos",
                 target_os = "netbsd",
                 target_os = "openbsd",
+                all(
+                    any(target_os = "android", target_os = "linux"),
+                    any(target_arch = "mips", target_arch = "mips64")
+                )
             )))]
             c::SIGSTKFLT => Some(Self::Stkflt),
             c::SIGCHLD => Some(Self::Child),

@@ -46,6 +46,8 @@ pub(super) struct A2 {}
 pub(super) struct A3 {}
 pub(super) struct A4 {}
 pub(super) struct A5 {}
+#[cfg(target_arch = "mips")]
+pub(super) struct A6 {}
 #[cfg(target_arch = "x86")]
 pub(super) struct SocketArg {}
 
@@ -56,16 +58,16 @@ impl ArgNumber for A2 {}
 impl ArgNumber for A3 {}
 impl ArgNumber for A4 {}
 impl ArgNumber for A5 {}
+#[cfg(target_arch = "mips")]
+impl ArgNumber for A6 {}
 #[cfg(target_arch = "x86")]
 impl ArgNumber for SocketArg {}
 
 // Return value numbers.
 pub(super) struct R0 {}
-pub(super) struct R1 {}
 
 pub(super) trait RetNumber: private::Sealed {}
 impl RetNumber for R0 {}
-impl RetNumber for R1 {}
 
 /// Syscall arguments use register-sized types. We use a newtype to
 /// discourage accidental misuse of the raw integer values.
@@ -242,8 +244,9 @@ mod private {
     impl Sealed for super::A3 {}
     impl Sealed for super::A4 {}
     impl Sealed for super::A5 {}
+    #[cfg(target_arch = "mips")]
+    impl Sealed for super::A6 {}
     #[cfg(target_arch = "x86")]
     impl Sealed for super::SocketArg {}
     impl Sealed for super::R0 {}
-    impl Sealed for super::R1 {}
 }

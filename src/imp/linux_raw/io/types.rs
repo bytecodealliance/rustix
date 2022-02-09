@@ -103,8 +103,10 @@ bitflags! {
         /// `MAP_STACK`
         const STACK = linux_raw_sys::general::MAP_STACK;
         /// `MAP_SYNC` (since Linux 4.15)
+        #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
         const SYNC = linux_raw_sys::general::MAP_SYNC;
         /// `MAP_UNINITIALIZED`
+        #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
         const UNINITIALIZED = linux_raw_sys::general::MAP_UNINITIALIZED;
     }
 }
@@ -223,6 +225,7 @@ pub enum Advice {
     /// `MADV_HWPOISON`
     LinuxHwPoison = linux_raw_sys::general::MADV_HWPOISON,
     /// `MADV_SOFT_OFFLINE`
+    #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
     LinuxSoftOffline = linux_raw_sys::general::MADV_SOFT_OFFLINE,
     /// `MADV_MERGEABLE`
     LinuxMergeable = linux_raw_sys::general::MADV_MERGEABLE,

@@ -372,6 +372,10 @@ fn init() {
         let ptr = vdso.sym(zstr!("LINUX_4.15"), zstr!("__vdso_clock_gettime"));
         #[cfg(target_arch = "powerpc64")]
         let ptr = vdso.sym(zstr!("LINUX_2.6.15"), zstr!("__kernel_clock_gettime"));
+        #[cfg(target_arch = "mips")]
+        let ptr = vdso.sym(zstr!("LINUX_2.6"), zstr!("__vdso_clock_gettime64"));
+        #[cfg(target_arch = "mips64")]
+        let ptr = vdso.sym(zstr!("LINUX_2.6"), zstr!("__vdso_clock_gettime"));
 
         // On all 64-bit platforms, the 64-bit `clock_gettime` symbols are
         // always available.
@@ -380,7 +384,7 @@ fn init() {
 
         // On some 32-bit platforms, the 64-bit `clock_gettime` symbols are not
         // available on older kernel versions.
-        #[cfg(any(target_arch = "arm", target_arch = "x86"))]
+        #[cfg(any(target_arch = "arm", target_arch = "mips", target_arch = "x86"))]
         let ok = !ptr.is_null();
 
         if ok {

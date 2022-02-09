@@ -31,8 +31,8 @@ portable APIs built on this functionality, see the [`system-interface`],
 `rustix` currently has two backends available:
 
  * linux-raw, which uses raw Linux system calls and vDSO calls, and is
-   supported on Linux on x86-64, x86, aarch64, riscv64gc, powerpc64le, and
-   arm (v5 onwards), with stable, nightly, and 1.48 Rust.
+   supported on Linux on x86-64, x86, aarch64, riscv64gc, powerpc64le,
+   arm (v5 onwards), mipsel, and mips64el, with stable, nightly, and 1.48 Rust.
     - By being implemented entirely in Rust, avoiding `libc`, `errno`, and pthread
       cancellation, and employing some specialized optimizations, most functions
       compile down to very efficient code. On nightly Rust, they can often be

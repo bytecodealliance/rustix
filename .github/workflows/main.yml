@@ -65,6 +65,8 @@ jobs:
         aarch64-unknown-linux-gnu
         aarch64-unknown-linux-musl
         powerpc64le-unknown-linux-gnu
+        mipsel-unknown-linux-gnu
+        mips64el-unknown-linux-gnuabi64
         armv5te-unknown-linux-gnueabi
     - name: Install cross-compilation tools
       run: |
@@ -88,6 +90,8 @@ jobs:
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl
     - run: cargo check --workspace --release -vv --target=powerpc64le-unknown-linux-gnu
+    - run: cargo check --workspace --release -vv --target=mipsel-unknown-linux-gnu
+    - run: cargo check --workspace --release -vv --target=mips64el-unknown-linux-gnuabi64
     - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi
 
   check_no_default_features:
@@ -172,7 +176,7 @@ jobs:
       QEMU_BUILD_VERSION: 6.1.0
     strategy:
       matrix:
-        build: [ubuntu, ubuntu-18.04, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, arm-linux-stable, macos, macos-11, windows, windows-2016, windows-2022]
+        build: [ubuntu, ubuntu-18.04, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, mipsel-linux-stable, mips64el-linux-stable, powerpc64le-linux-stable, arm-linux-stable, macos, macos-11, windows, windows-2016, windows-2022]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -205,6 +209,22 @@ jobs:
             qemu: qemu-ppc64le
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
+          - build: mips64el-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: mips64el-unknown-linux-gnuabi64
+            gcc_package: gcc-mips64el-linux-gnuabi64
+            gcc: mips64el-linux-gnuabi64-gcc
+            qemu: qemu-mips64el -L /usr/mips64el-linux-gnuabi64
+            qemu_target: mips64el-linux-user
+          - build: mipsel-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: mipsel-unknown-linux-gnu
+            gcc_package: gcc-mipsel-linux-gnu
+            gcc: mipsel-linux-gnu-gcc
+            qemu: qemu-mipsel -L /usr/mipsel-linux-gnu
+            qemu_target: mipsel-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
             rust: nightly
@@ -251,6 +271,31 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: powerpc64le-linux-stable
+            os: ubuntu-latest
+            rust: stable
+            target: powerpc64le-unknown-linux-gnu
+            gcc_package: gcc-powerpc64le-linux-gnu
+            gcc: powerpc64le-linux-gnu-gcc
+            qemu: qemu-ppc64le
+            qemu_args: -L /usr/powerpc64le-linux-gnu
+            qemu_target: ppc64le-linux-user
+          - build: mips64el-linux-stable
+            os: ubuntu-latest
+            rust: stable
+            target: mips64el-unknown-linux-gnuabi64
+            gcc_package: gcc-mips64el-linux-gnuabi64
+            gcc: mips64el-linux-gnuabi64-gcc
+            qemu: qemu-mips64el -L /usr/mips64el-linux-gnuabi64
+            qemu_target: mips64el-linux-user
+          - build: mipsel-linux-stable
+            os: ubuntu-latest
+            rust: stable
+            target: mipsel-unknown-linux-gnu
+            gcc_package: gcc-mipsel-linux-gnu
+            gcc: mipsel-linux-gnu-gcc
+            qemu: qemu-mipsel -L /usr/mipsel-linux-gnu
+            qemu_target: mipsel-linux-user
           - build: arm-linux-stable
             os: ubuntu-latest
             rust: stable
@@ -349,7 +394,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, mips64el-linux, mipsel-linux, riscv64-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -379,6 +424,22 @@ jobs:
             qemu: qemu-ppc64le
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
+          - build: mips64el-linux
+            os: ubuntu-latest
+            rust: stable
+            target: mips64el-unknown-linux-gnuabi64
+            gcc_package: gcc-mips64el-linux-gnuabi64
+            gcc: mips64el-linux-gnuabi64-gcc
+            qemu: qemu-mips64el -L /usr/mips64el-linux-gnuabi64
+            qemu_target: mips64el-linux-user
+          - build: mipsel-linux
+            os: ubuntu-latest
+            rust: stable
+            target: mipsel-unknown-linux-gnu
+            gcc_package: gcc-mipsel-linux-gnu
+            gcc: mipsel-linux-gnu-gcc
+            qemu: qemu-mipsel -L /usr/mipsel-linux-gnu
+            qemu_target: mipsel-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
             rust: stable
@@ -470,7 +531,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [powerpc64le-linux]
+        build: [powerpc64le-linux, mipsel-linux, mips64el-linux]
         include:
           - build: powerpc64le-linux
             os: ubuntu-latest
@@ -481,11 +542,29 @@ jobs:
             qemu: qemu-ppc64le
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
+          - build: mips64el-linux
+            os: ubuntu-latest
+            rust: stable
+            target: mips64el-unknown-linux-gnuabi64
+            gcc_package: gcc-mips64el-linux-gnuabi64
+            gcc: mips64el-linux-gnuabi64-gcc
+            qemu: qemu-mips64el -L /usr/mips64el-linux-gnuabi64
+            qemu_target: mips64el-linux-user
+          - build: mipsel-linux
+            os: ubuntu-latest
+            rust: stable
+            target: mipsel-unknown-linux-gnu
+            gcc_package: gcc-mipsel-linux-gnu
+            gcc: mipsel-linux-gnu-gcc
+            qemu: qemu-mipsel -L /usr/mipsel-linux-gnu
+            qemu_target: mipsel-linux-user
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
       RUSTFLAGS: --cfg rustix_use_experimental_asm -D warnings
       RUSTDOCFLAGS: --cfg rustix_use_experimental_asm
       CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_experimental_asm
+      CARGO_TARGET_MIPSEL_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_experimental_asm
+      CARGO_TARGET_MIPS64EL_UNKNOWN_LINUX_GNUABI64_RUSTFLAGS: --cfg rustix_use_experimental_asm
       QEMU_BUILD_VERSION: 6.1.0
     steps:
     - uses: actions/checkout@v2

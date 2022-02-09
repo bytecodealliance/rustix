@@ -248,6 +248,10 @@ bitflags! {
             target_os = "netbsd",
             target_os = "openbsd",
             target_os = "redox",
+            all(
+                any(target_os = "android", target_os = "linux"),
+                any(target_arch = "mips", target_arch = "mips64")
+            )
         )))]
         const SYNC = c::MAP_SYNC;
         /// `MAP_UNINITIALIZED`
@@ -417,7 +421,10 @@ pub enum Advice {
     #[cfg(any(target_os = "android", target_os = "linux"))]
     LinuxHwPoison = c::MADV_HWPOISON,
     /// `MADV_SOFT_OFFLINE`
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(all(
+        any(target_os = "android", target_os = "linux"),
+        not(any(target_arch = "mips", target_arch = "mips64"))
+    ))]
     LinuxSoftOffline = c::MADV_SOFT_OFFLINE,
     /// `MADV_MERGEABLE`
     #[cfg(any(target_os = "android", target_os = "linux"))]
