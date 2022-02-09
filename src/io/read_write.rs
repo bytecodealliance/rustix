@@ -18,8 +18,7 @@ pub use imp::io::ReadWriteFlags;
 /// [Linux]: https://man7.org/linux/man-pages/man2/read.2.html
 #[inline]
 pub fn read<Fd: AsFd>(fd: &Fd, buf: &mut [u8]) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    imp::io::syscalls::read(fd, buf)
+    imp::io::syscalls::read(fd.as_fd(), buf)
 }
 
 /// `write(fd, buf)`—Writes to a stream.
@@ -32,8 +31,7 @@ pub fn read<Fd: AsFd>(fd: &Fd, buf: &mut [u8]) -> io::Result<usize> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/write.2.html
 #[inline]
 pub fn write<Fd: AsFd>(fd: &Fd, buf: &[u8]) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    imp::io::syscalls::write(fd, buf)
+    imp::io::syscalls::write(fd.as_fd(), buf)
 }
 
 /// `pread(fd, buf, offset)`—Reads from a file at a given position.
@@ -46,8 +44,7 @@ pub fn write<Fd: AsFd>(fd: &Fd, buf: &[u8]) -> io::Result<usize> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/pread.2.html
 #[inline]
 pub fn pread<Fd: AsFd>(fd: &Fd, buf: &mut [u8], offset: u64) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    imp::io::syscalls::pread(fd, buf, offset)
+    imp::io::syscalls::pread(fd.as_fd(), buf, offset)
 }
 
 /// `pwrite(fd, bufs)`—Writes to a file at a given position.
@@ -60,8 +57,7 @@ pub fn pread<Fd: AsFd>(fd: &Fd, buf: &mut [u8], offset: u64) -> io::Result<usize
 /// [Linux]: https://man7.org/linux/man-pages/man2/pwrite.2.html
 #[inline]
 pub fn pwrite<Fd: AsFd>(fd: &Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    imp::io::syscalls::pwrite(fd, buf, offset)
+    imp::io::syscalls::pwrite(fd.as_fd(), buf, offset)
 }
 
 /// `readv(fd, bufs)`—Reads from a stream into multiple buffers.
@@ -74,8 +70,7 @@ pub fn pwrite<Fd: AsFd>(fd: &Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/readv.2.html
 #[inline]
 pub fn readv<Fd: AsFd>(fd: &Fd, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    imp::io::syscalls::readv(fd, bufs)
+    imp::io::syscalls::readv(fd.as_fd(), bufs)
 }
 
 /// `writev(fd, bufs)`—Writes to a stream from multiple buffers.
@@ -88,8 +83,7 @@ pub fn readv<Fd: AsFd>(fd: &Fd, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize
 /// [Linux]: https://man7.org/linux/man-pages/man2/writev.2.html
 #[inline]
 pub fn writev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    imp::io::syscalls::writev(fd, bufs)
+    imp::io::syscalls::writev(fd.as_fd(), bufs)
 }
 
 /// `preadv(fd, bufs, offset)`—Reads from a file at a given position into
@@ -102,8 +96,7 @@ pub fn writev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
 #[cfg(not(target_os = "redox"))]
 #[inline]
 pub fn preadv<Fd: AsFd>(fd: &Fd, bufs: &mut [IoSliceMut<'_>], offset: u64) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    imp::io::syscalls::preadv(fd, bufs, offset)
+    imp::io::syscalls::preadv(fd.as_fd(), bufs, offset)
 }
 
 /// `pwritev(fd, bufs, offset)`—Writes to a file at a given position from
@@ -116,8 +109,7 @@ pub fn preadv<Fd: AsFd>(fd: &Fd, bufs: &mut [IoSliceMut<'_>], offset: u64) -> io
 #[cfg(not(target_os = "redox"))]
 #[inline]
 pub fn pwritev<Fd: AsFd>(fd: &Fd, bufs: &[IoSlice<'_>], offset: u64) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    imp::io::syscalls::pwritev(fd, bufs, offset)
+    imp::io::syscalls::pwritev(fd.as_fd(), bufs, offset)
 }
 
 /// `preadv2(fd, bufs, offset, flags)`—Reads data, with several options.
@@ -136,8 +128,7 @@ pub fn preadv2<Fd: AsFd>(
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    imp::io::syscalls::preadv2(fd, bufs, offset, flags)
+    imp::io::syscalls::preadv2(fd.as_fd(), bufs, offset, flags)
 }
 
 /// `pwritev2(fd, bufs, offset, flags)`—Writes data, with several options.
@@ -156,6 +147,5 @@ pub fn pwritev2<Fd: AsFd>(
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    imp::io::syscalls::pwritev2(fd, bufs, offset, flags)
+    imp::io::syscalls::pwritev2(fd.as_fd(), bufs, offset, flags)
 }

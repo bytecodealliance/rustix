@@ -23,9 +23,7 @@ pub unsafe fn fcopyfile<FromFd: AsFd, ToFd: AsFd>(
     state: copyfile_state_t,
     flags: CopyfileFlags,
 ) -> io::Result<()> {
-    let from = from.as_fd();
-    let to = to.as_fd();
-    imp::fs::syscalls::fcopyfile(from, to, state, flags)
+    imp::fs::syscalls::fcopyfile(from.as_fd(), to.as_fd(), state, flags)
 }
 
 /// `copyfile_state_alloc()`

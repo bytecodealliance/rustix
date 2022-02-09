@@ -244,8 +244,7 @@ pub unsafe fn execveat<Fd: AsFd>(
     envp: *const *const u8,
     flags: AtFlags,
 ) -> io::Error {
-    let dirfd = dirfd.as_fd();
-    imp::syscalls::execveat(dirfd, path, argv, envp, flags)
+    imp::syscalls::execveat(dirfd.as_fd(), path, argv, envp, flags)
 }
 
 /// `execve(path.as_z_str(), argv, envp)`—Execute a new command using the

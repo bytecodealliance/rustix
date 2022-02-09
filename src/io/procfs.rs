@@ -370,8 +370,7 @@ fn proc_self_fdinfo() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 #[inline]
 pub fn proc_self_fdinfo_fd<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
-    let fd = fd.as_fd();
-    _proc_self_fdinfo(fd)
+    _proc_self_fdinfo(fd.as_fd())
 }
 
 fn _proc_self_fdinfo(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {

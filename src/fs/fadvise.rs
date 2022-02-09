@@ -15,6 +15,5 @@ pub use imp::fs::Advice;
 #[inline]
 #[doc(alias = "posix_fadvise")]
 pub fn fadvise<Fd: AsFd>(fd: &Fd, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
-    let fd = fd.as_fd();
-    imp::fs::syscalls::fadvise(fd, offset, len, advice)
+    imp::fs::syscalls::fadvise(fd.as_fd(), offset, len, advice)
 }

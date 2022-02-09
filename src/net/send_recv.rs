@@ -20,8 +20,7 @@ pub use imp::net::{RecvFlags, SendFlags};
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recv
 #[inline]
 pub fn recv<Fd: AsFd>(fd: &Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    imp::net::syscalls::recv(fd, buf, flags)
+    imp::net::syscalls::recv(fd.as_fd(), buf, flags)
 }
 
 /// `send(fd, buf, flags)`—Writes data to a socket.
@@ -36,8 +35,7 @@ pub fn recv<Fd: AsFd>(fd: &Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<u
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-send
 #[inline]
 pub fn send<Fd: AsFd>(fd: &Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    imp::net::syscalls::send(fd, buf, flags)
+    imp::net::syscalls::send(fd.as_fd(), buf, flags)
 }
 
 /// `recvfrom(fd, buf, flags, addr, len)`—Reads data from a socket and
@@ -57,8 +55,7 @@ pub fn recvfrom<Fd: AsFd>(
     buf: &mut [u8],
     flags: RecvFlags,
 ) -> io::Result<(usize, Option<SocketAddrAny>)> {
-    let fd = fd.as_fd();
-    imp::net::syscalls::recvfrom(fd, buf, flags)
+    imp::net::syscalls::recvfrom(fd.as_fd(), buf, flags)
 }
 
 /// `sendto(fd, buf, flags, addr)`—Writes data to a socket to a specific IP
@@ -76,8 +73,7 @@ pub fn sendto<Fd: AsFd>(
     flags: SendFlags,
     addr: &SocketAddr,
 ) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    _sendto(fd, buf, flags, addr)
+    _sendto(fd.as_fd(), buf, flags, addr)
 }
 
 fn _sendto(
@@ -107,8 +103,7 @@ pub fn sendto_any<Fd: AsFd>(
     flags: SendFlags,
     addr: &SocketAddrAny,
 ) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    _sendto_any(fd, buf, flags, addr)
+    _sendto_any(fd.as_fd(), buf, flags, addr)
 }
 
 fn _sendto_any(
@@ -144,8 +139,7 @@ pub fn sendto_v4<Fd: AsFd>(
     flags: SendFlags,
     addr: &SocketAddrV4,
 ) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    imp::net::syscalls::sendto_v4(fd, buf, flags, addr)
+    imp::net::syscalls::sendto_v4(fd.as_fd(), buf, flags, addr)
 }
 
 /// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_in6))`—Writes data
@@ -167,8 +161,7 @@ pub fn sendto_v6<Fd: AsFd>(
     flags: SendFlags,
     addr: &SocketAddrV6,
 ) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    imp::net::syscalls::sendto_v6(fd, buf, flags, addr)
+    imp::net::syscalls::sendto_v6(fd.as_fd(), buf, flags, addr)
 }
 
 /// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_un))`—Writes data to
@@ -191,8 +184,7 @@ pub fn sendto_unix<Fd: AsFd>(
     flags: SendFlags,
     addr: &SocketAddrUnix,
 ) -> io::Result<usize> {
-    let fd = fd.as_fd();
-    imp::net::syscalls::sendto_unix(fd, buf, flags, addr)
+    imp::net::syscalls::sendto_unix(fd.as_fd(), buf, flags, addr)
 }
 
 // TODO: `recvmsg`, `sendmsg`
