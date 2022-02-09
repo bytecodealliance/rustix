@@ -16,26 +16,29 @@ use core::mem::size_of;
 #[repr(C)]
 struct sockaddr_header {
     #[cfg(any(
-        target_os = "netbsd",
-        target_os = "macos",
-        target_os = "ios",
+        target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
         target_os = "openbsd"
     ))]
     sa_len: u8,
     #[cfg(any(
-        target_os = "netbsd",
-        target_os = "macos",
-        target_os = "ios",
+        target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
         target_os = "openbsd"
     ))]
     ss_family: u8,
     #[cfg(not(any(
-        target_os = "netbsd",
-        target_os = "macos",
-        target_os = "ios",
+        target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
         target_os = "openbsd"
     )))]
     ss_family: u16,
@@ -56,17 +59,17 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
         sa_len: 0_u8,
         #[cfg(any(
             target_os = "dragonfly",
-            target_os = "ios",
             target_os = "freebsd",
+            target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         ))]
         sa_family: 0_u8,
         #[cfg(not(any(
             target_os = "dragonfly",
-            target_os = "ios",
             target_os = "freebsd",
+            target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd"
