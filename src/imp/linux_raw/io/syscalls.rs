@@ -34,8 +34,15 @@ use crate::net::{RecvFlags, SendFlags};
 use crate::{ffi::ZStr, fs::FileType, path::DecInt};
 use core::cmp;
 use core::mem::MaybeUninit;
-#[cfg(any(target_arch = "arm", target_arch = "x86"))]
+#[cfg(any(target_arch = "arm", target_arch = "mips", target_arch = "x86"))]
 use linux_raw_sys::general::__NR_mmap2;
+#[cfg(not(any(
+    target_arch = "aarch64",
+    target_arch = "mips",
+    target_arch = "mips64",
+    target_arch = "riscv64"
+)))]
+use linux_raw_sys::general::__NR_pipe;
 use linux_raw_sys::general::{
     __NR_close, __NR_dup, __NR_dup3, __NR_epoll_create1, __NR_epoll_ctl, __NR_eventfd2, __NR_ioctl,
     __NR_madvise, __NR_mlock, __NR_mlock2, __NR_mprotect, __NR_mremap, __NR_msync, __NR_munlock,
@@ -63,7 +70,7 @@ use {
 #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
 use {
     linux_raw_sys::general::__NR_epoll_wait,
-    linux_raw_sys::general::{__NR_dup2, __NR_pipe, __NR_poll},
+    linux_raw_sys::general::{__NR_dup2, __NR_poll},
 };
 
 #[inline]
@@ -85,7 +92,10 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], pos: u64) -> io::Result<
     let (buf_addr_mut, buf_len) = slice_mut(buf);
 
     // <https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L75>
-    #[cfg(all(target_pointer_width = "32", target_arch = "arm"))]
+    #[cfg(all(
+        target_pointer_width = "32",
+        any(target_arch = "arm", target_arch = "mips", target_arch = "power")
+    ))]
     unsafe {
         ret_usize(syscall6(
             nr(__NR_pread64),
@@ -97,7 +107,10 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], pos: u64) -> io::Result<
             lo(pos),
         ))
     }
-    #[cfg(all(target_pointer_width = "32", not(target_arch = "arm")))]
+    #[cfg(all(
+        target_pointer_width = "32",
+        not(any(target_arch = "arm", target_arch = "mips", target_arch = "power"))
+    ))]
     unsafe {
         ret_usize(syscall5(
             nr(__NR_pread64),
@@ -218,7 +231,10 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], pos: u64) -> io::Result<usi
     let (buf_addr, buf_len) = slice(buf);
 
     // <https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L81-L83>
-    #[cfg(all(target_pointer_width = "32", target_arch = "arm"))]
+    #[cfg(all(
+        target_pointer_width = "32",
+        any(target_arch = "arm", target_arch = "mips", target_arch = "power")
+    ))]
     unsafe {
         ret_usize(syscall6_readonly(
             nr(__NR_pwrite64),
@@ -230,7 +246,10 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], pos: u64) -> io::Result<usi
             lo(pos),
         ))
     }
-    #[cfg(all(target_pointer_width = "32", not(target_arch = "arm")))]
+    #[cfg(all(
+        target_pointer_width = "32",
+        not(any(target_arch = "arm", target_arch = "mips", target_arch = "power"))
+    ))]
     unsafe {
         ret_usize(syscall5_readonly(
             nr(__NR_pwrite64),
@@ -794,11 +813,6 @@ pub(crate) unsafe fn munlock(addr: *mut c::c_void, length: usize) -> io::Result<
 
 #[inline]
 pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
-    #[cfg(any(target_arch = "mips", target_arch = "mips64"))]
-    {
-        todo!("On MIPS pipe returns multiple values")
-    }
-    #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
         ret(syscall2(
@@ -813,13 +827,17 @@ pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
 
 #[inline]
 pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
-    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+    // aarch64 and risc64 omit `__NR_pipe`. On mips, `__NR_pipe` uses a special
+    // calling convention, but using it is not worth complicating our syscall
+    // wrapping infrastructure at this time.
+    #[cfg(any(
+        target_arch = "aarch64",
+        target_arch = "mips",
+        target_arch = "mips64",
+        target_arch = "riscv64"
+    ))]
     {
         pipe_with(PipeFlags::empty())
-    }
-    #[cfg(any(target_arch = "mips", target_arch = "mips64"))]
-    {
-        todo!("On MIPS pipe returns multiple values")
     }
     #[cfg(not(any(
         target_arch = "aarch64",

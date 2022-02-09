@@ -124,6 +124,7 @@ pub enum Signal {
     /// `SIGTERM`
     Term = linux_raw_sys::general::SIGTERM,
     /// `SIGSTKFLT`
+    #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
     Stkflt = linux_raw_sys::general::SIGSTKFLT,
     /// `SIGCHLD`
     #[doc(alias = "Chld")]
@@ -183,6 +184,7 @@ impl Signal {
             linux_raw_sys::general::SIGPIPE => Some(Self::Pipe),
             linux_raw_sys::general::SIGALRM => Some(Self::Alarm),
             linux_raw_sys::general::SIGTERM => Some(Self::Term),
+            #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
             linux_raw_sys::general::SIGSTKFLT => Some(Self::Stkflt),
             linux_raw_sys::general::SIGCHLD => Some(Self::Child),
             linux_raw_sys::general::SIGCONT => Some(Self::Cont),

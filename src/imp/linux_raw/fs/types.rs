@@ -563,7 +563,12 @@ pub type RawMode = c::c_uint;
 pub type Dev = u64;
 
 /// `__fsword_t`
+#[cfg(not(target_arch = "mips64"))]
 pub type FsWord = linux_raw_sys::general::__fsword_t;
+
+/// `__fsword_t`
+#[cfg(target_arch = "mips64")]
+pub type FsWord = i64;
 
 pub use linux_raw_sys::general::{UTIME_NOW, UTIME_OMIT};
 

@@ -27,9 +27,19 @@ use crate::process::{
 };
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
-#[cfg(not(any(target_arch = "arm", target_arch = "powerpc64", target_arch = "x86")))]
+#[cfg(not(any(
+    target_arch = "arm",
+    target_arch = "powerpc",
+    target_arch = "powerpc64",
+    target_arch = "x86"
+)))]
 use linux_raw_sys::general::__NR_getrlimit;
-#[cfg(any(target_arch = "arm", target_arch = "powerpc64", target_arch = "x86"))]
+#[cfg(any(
+    target_arch = "arm",
+    target_arch = "powerpc",
+    target_arch = "powerpc64",
+    target_arch = "x86"
+))]
 use linux_raw_sys::general::__NR_ugetrlimit as __NR_getrlimit;
 use linux_raw_sys::general::{
     __NR_chdir, __NR_exit_group, __NR_fchdir, __NR_getcwd, __NR_getpid, __NR_getppid,

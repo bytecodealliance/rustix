@@ -11,6 +11,8 @@ mod x86;
 #[cfg(any(
     target_arch = "arm",
     target_arch = "aarch64",
+    target_arch = "mips",
+    target_arch = "mips64",
     target_arch = "powerpc64",
     target_arch = "riscv64",
     target_arch = "x86_64"
@@ -20,6 +22,8 @@ mod nr_last;
 #[cfg(any(
     target_arch = "arm",
     target_arch = "aarch64",
+    target_arch = "mips",
+    target_arch = "mips64",
     target_arch = "powerpc64",
     target_arch = "riscv64",
     target_arch = "x86_64"

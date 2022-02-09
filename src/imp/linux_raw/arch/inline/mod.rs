@@ -6,6 +6,10 @@
 mod aarch64;
 #[cfg(target_arch = "arm")]
 mod arm;
+#[cfg(target_arch = "mips")]
+mod mips;
+#[cfg(target_arch = "mips64")]
+mod mips64;
 #[cfg(target_arch = "powerpc64")]
 mod powerpc64;
 #[cfg(target_arch = "riscv64")]
@@ -19,6 +23,10 @@ mod x86_64;
 pub(in crate::imp) use self::aarch64::*;
 #[cfg(target_arch = "arm")]
 pub(in crate::imp) use self::arm::*;
+#[cfg(target_arch = "mips")]
+pub(in crate::imp) use self::mips::*;
+#[cfg(target_arch = "mips64")]
+pub(in crate::imp) use self::mips64::*;
 #[cfg(target_arch = "powerpc64")]
 pub(in crate::imp) use self::powerpc64::*;
 #[cfg(target_arch = "riscv64")]

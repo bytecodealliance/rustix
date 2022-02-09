@@ -24,10 +24,11 @@ use crate::net::{SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
 #[cfg(not(any(
+    target_arch = "aarch64",
+    target_arch = "mips64",
+    target_arch = "riscv64",
     target_arch = "x86",
     target_arch = "x86_64",
-    target_arch = "aarch64",
-    target_arch = "riscv64"
 )))]
 use linux_raw_sys::general::{__NR_recv, __NR_send};
 use linux_raw_sys::general::{sockaddr, sockaddr_in, sockaddr_in6, socklen_t};
@@ -313,10 +314,11 @@ pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Resu
     let (buf_addr, buf_len) = slice(buf);
 
     #[cfg(not(any(
+        target_arch = "aarch64",
+        target_arch = "mips64",
+        target_arch = "riscv64",
         target_arch = "x86",
         target_arch = "x86_64",
-        target_arch = "aarch64",
-        target_arch = "riscv64"
     )))]
     unsafe {
         ret_usize(syscall4_readonly(
@@ -328,9 +330,10 @@ pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Resu
         ))
     }
     #[cfg(any(
-        target_arch = "x86_64",
         target_arch = "aarch64",
-        target_arch = "riscv64"
+        target_arch = "mips64",
+        target_arch = "riscv64",
+        target_arch = "x86_64",
     ))]
     unsafe {
         ret_usize(syscall6_readonly(
@@ -477,10 +480,11 @@ pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::
     let (buf_addr_mut, buf_len) = slice_mut(buf);
 
     #[cfg(not(any(
+        target_arch = "aarch64",
+        target_arch = "mips64",
+        target_arch = "riscv64",
         target_arch = "x86",
         target_arch = "x86_64",
-        target_arch = "aarch64",
-        target_arch = "riscv64"
     )))]
     unsafe {
         ret_usize(syscall4(
@@ -492,9 +496,10 @@ pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::
         ))
     }
     #[cfg(any(
-        target_arch = "x86_64",
         target_arch = "aarch64",
-        target_arch = "riscv64"
+        target_arch = "mips64",
+        target_arch = "riscv64",
+        target_arch = "x86_64",
     ))]
     unsafe {
         ret_usize(syscall6(

@@ -12,6 +12,8 @@
 //! needs to move the syscall number to its special register, and leave the
 //! other arguments mostly as they are.
 
+#[cfg(target_arch = "mips")]
+use crate::imp::reg::A6;
 use crate::imp::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
 
 // First we declare the actual assembly routines with `*_nr_last` names and
@@ -58,6 +60,17 @@ extern "C" {
         a3: ArgReg<'_, A3>,
         a4: ArgReg<'_, A4>,
         a5: ArgReg<'_, A5>,
+        nr: SyscallNumber<'_>,
+    ) -> RetReg<R0>;
+    #[cfg(target_arch = "mips")]
+    fn rustix_syscall7_nr_last(
+        a0: ArgReg<'_, A0>,
+        a1: ArgReg<'_, A1>,
+        a2: ArgReg<'_, A2>,
+        a3: ArgReg<'_, A3>,
+        a4: ArgReg<'_, A4>,
+        a5: ArgReg<'_, A5>,
+        a6: ArgReg<'_, A6>,
         nr: SyscallNumber<'_>,
     ) -> RetReg<R0>;
 }
@@ -134,10 +147,27 @@ pub(in crate::imp) unsafe fn syscall6(
 ) -> RetReg<R0> {
     rustix_syscall6_nr_last(a0, a1, a2, a3, a4, a5, nr)
 }
+#[cfg(target_arch = "mips")]
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall7(
+    nr: SyscallNumber<'_>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
+    a4: ArgReg<'_, A4>,
+    a5: ArgReg<'_, A5>,
+    a6: ArgReg<'_, A6>,
+) -> RetReg<R0> {
+    rustix_syscall7_nr_last(a0, a1, a2, a3, a4, a5, a6, nr)
+}
 
 // Then we define the `_readonly` versions of the wrappers. We don't have
 // separate `_readonly` implementations, so these can just be aliases to
 // their non-`_readonly` counterparts.
+#[cfg(target_arch = "mips")]
+pub(in crate::imp) use syscall7 as syscall7_readonly;
 pub(in crate::imp) use {
     syscall0 as syscall0_readonly, syscall1 as syscall1_readonly, syscall2 as syscall2_readonly,
     syscall3 as syscall3_readonly, syscall4 as syscall4_readonly, syscall5 as syscall5_readonly,
