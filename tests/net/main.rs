@@ -11,3 +11,19 @@ mod poll;
 mod unix;
 mod v4;
 mod v6;
+
+/// Windows requires us to call a setup function before using any of the
+/// socket APIs.
+#[cfg(windows)]
+#[ctor::ctor]
+fn windows_startup() {
+    let _ = rustix::net::wsa_startup().unwrap();
+}
+
+/// Windows requires us to call a cleanup function after using any of the
+/// socket APIs.
+#[cfg(windows)]
+#[ctor::dtor]
+fn windows_shutdown() {
+    rustix::net::wsa_cleanup().unwrap();
+}

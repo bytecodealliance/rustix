@@ -54,6 +54,9 @@ serial_test = "0.5"
 [target.'cfg(not(target_os = "emscripten"))'.dev-dependencies]
 criterion = "0.3"
 
+[target.'cfg(windows)'.dev-dependencies]
+ctor = "0.1.21"
+
 [features]
 default = ["std"]
 std = ["io-lifetimes", "linux-raw-sys/std"]
