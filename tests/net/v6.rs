@@ -74,9 +74,6 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
 
 #[test]
 fn test_v6() {
-    #[cfg(windows)]
-    rustix::net::wsa_startup().unwrap();
-
     let ready = Arc::new((Mutex::new(0_u16), Condvar::new()));
     let ready_clone = Arc::clone(&ready);
 
@@ -94,7 +91,4 @@ fn test_v6() {
         .unwrap();
     client.join().unwrap();
     server.join().unwrap();
-
-    #[cfg(windows)]
-    rustix::net::wsa_cleanup().unwrap();
 }

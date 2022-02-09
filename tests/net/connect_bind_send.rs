@@ -7,9 +7,6 @@ use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 // Test `connect_any`.
 #[test]
 fn net_v4_connect_any() -> std::io::Result<()> {
-    #[cfg(windows)]
-    rustix::net::wsa_startup();
-
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
     let listener =
@@ -36,18 +33,12 @@ fn net_v4_connect_any() -> std::io::Result<()> {
 
     assert_eq!(request, &response[..n]);
 
-    #[cfg(windows)]
-    rustix::net::wsa_cleanup();
-
     Ok(())
 }
 
 // Similar, but with V6.
 #[test]
 fn net_v6_connect_any() -> std::io::Result<()> {
-    #[cfg(windows)]
-    rustix::net::wsa_startup();
-
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
     let listener = rustix::net::socket(
@@ -81,18 +72,12 @@ fn net_v6_connect_any() -> std::io::Result<()> {
 
     assert_eq!(request, &response[..n]);
 
-    #[cfg(windows)]
-    rustix::net::wsa_cleanup();
-
     Ok(())
 }
 
 // Test `connect` with a `SocketAddr`.
 #[test]
 fn net_v4_connect() -> std::io::Result<()> {
-    #[cfg(windows)]
-    rustix::net::wsa_startup();
-
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
     let listener =
@@ -123,18 +108,12 @@ fn net_v4_connect() -> std::io::Result<()> {
 
     assert_eq!(request, &response[..n]);
 
-    #[cfg(windows)]
-    rustix::net::wsa_cleanup();
-
     Ok(())
 }
 
 // Similar, but use V6.
 #[test]
 fn net_v6_connect() -> std::io::Result<()> {
-    #[cfg(windows)]
-    rustix::net::wsa_startup();
-
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
     let listener = rustix::net::socket(
@@ -172,18 +151,12 @@ fn net_v6_connect() -> std::io::Result<()> {
 
     assert_eq!(request, &response[..n]);
 
-    #[cfg(windows)]
-    rustix::net::wsa_cleanup();
-
     Ok(())
 }
 
 // Test `bind_any`.
 #[test]
 fn net_v4_bind_any() -> std::io::Result<()> {
-    #[cfg(windows)]
-    rustix::net::wsa_startup();
-
     let localhost = Ipv4Addr::LOCALHOST;
     let addr = SocketAddrAny::V4(SocketAddrV4::new(localhost, 0));
     let listener =
@@ -210,18 +183,12 @@ fn net_v4_bind_any() -> std::io::Result<()> {
 
     assert_eq!(request, &response[..n]);
 
-    #[cfg(windows)]
-    rustix::net::wsa_cleanup();
-
     Ok(())
 }
 
 // Similar, but use V6.
 #[test]
 fn net_v6_bind_any() -> std::io::Result<()> {
-    #[cfg(windows)]
-    rustix::net::wsa_startup();
-
     let localhost = Ipv6Addr::LOCALHOST;
     let addr = SocketAddrAny::V6(SocketAddrV6::new(localhost, 0, 0, 0));
     let listener = rustix::net::socket(
@@ -255,18 +222,12 @@ fn net_v6_bind_any() -> std::io::Result<()> {
 
     assert_eq!(request, &response[..n]);
 
-    #[cfg(windows)]
-    rustix::net::wsa_cleanup();
-
     Ok(())
 }
 
 // Test `sendto`.
 #[test]
 fn net_v4_sendto() -> std::io::Result<()> {
-    #[cfg(windows)]
-    rustix::net::wsa_startup();
-
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
     let listener =
@@ -299,18 +260,12 @@ fn net_v4_sendto() -> std::io::Result<()> {
     assert_eq!(request, &response[..n]);
     assert!(from.is_none());
 
-    #[cfg(windows)]
-    rustix::net::wsa_cleanup();
-
     Ok(())
 }
 
 // Similar, but with V6.
 #[test]
 fn net_v6_sendto() -> std::io::Result<()> {
-    #[cfg(windows)]
-    rustix::net::wsa_startup();
-
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
     let listener = rustix::net::socket(
@@ -350,18 +305,12 @@ fn net_v6_sendto() -> std::io::Result<()> {
     assert_eq!(request, &response[..n]);
     assert!(from.is_none());
 
-    #[cfg(windows)]
-    rustix::net::wsa_cleanup();
-
     Ok(())
 }
 
 // Test `sendto_any`.
 #[test]
 fn net_v4_sendto_any() -> std::io::Result<()> {
-    #[cfg(windows)]
-    rustix::net::wsa_startup();
-
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
     let listener =
@@ -390,9 +339,6 @@ fn net_v4_sendto_any() -> std::io::Result<()> {
 
     assert_eq!(request, &response[..n]);
     assert!(from.is_none());
-
-    #[cfg(windows)]
-    rustix::net::wsa_cleanup();
 
     Ok(())
 }
@@ -400,9 +346,6 @@ fn net_v4_sendto_any() -> std::io::Result<()> {
 // Test `sendto_any`.
 #[test]
 fn net_v6_sendto_any() -> std::io::Result<()> {
-    #[cfg(windows)]
-    rustix::net::wsa_startup();
-
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
     let listener = rustix::net::socket(
@@ -439,18 +382,12 @@ fn net_v6_sendto_any() -> std::io::Result<()> {
     assert_eq!(request, &response[..n]);
     assert!(from.is_none());
 
-    #[cfg(windows)]
-    rustix::net::wsa_cleanup();
-
     Ok(())
 }
 
 // Test `acceptfrom`.
 #[test]
 fn net_v4_acceptfrom() -> std::io::Result<()> {
-    #[cfg(windows)]
-    rustix::net::wsa_startup();
-
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
     let listener =
@@ -492,18 +429,12 @@ fn net_v4_acceptfrom() -> std::io::Result<()> {
 
     assert_eq!(request, &response[..n]);
 
-    #[cfg(windows)]
-    rustix::net::wsa_cleanup();
-
     Ok(())
 }
 
 // Similar, but with V6.
 #[test]
 fn net_v6_acceptfrom() -> std::io::Result<()> {
-    #[cfg(windows)]
-    rustix::net::wsa_startup();
-
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
     let listener = rustix::net::socket(
@@ -551,9 +482,6 @@ fn net_v6_acceptfrom() -> std::io::Result<()> {
     assert_eq!(n, request.len());
 
     assert_eq!(request, &response[..n]);
-
-    #[cfg(windows)]
-    rustix::net::wsa_cleanup();
 
     Ok(())
 }
