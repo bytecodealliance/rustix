@@ -143,9 +143,9 @@ jobs:
 
     - run: cd thttp && cargo build
     - run: cd thttp && systemfd --no-pid -s http::0.0.0.0:5052 -- cargo run &
-    - run: sleep 5
-    - run: wget http://127.0.0.1:5052/Cargo.toml
-    - run: diff -u Cargo.toml Cargo.toml.1
+    - run: cd thttp && sleep 5
+    - run: cd thttp && wget http://127.0.0.1:5052/Cargo.toml
+    - run: cd thttp && diff -u Cargo.toml Cargo.toml.1
 
   async-io:
     name: async-io ported to rustix
