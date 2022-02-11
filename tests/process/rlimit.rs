@@ -9,38 +9,43 @@ fn test_getrlimit() {
 
 #[test]
 fn test_setrlimit() {
+    let old = rustix::process::getrlimit(Resource::Core);
     let new = Rlimit {
         current: Some(0),
-        maximum: Some(0),
+        maximum: Some(4096),
     };
-    rustix::process::setrlimit(Resource::Core, new).unwrap();
-}
+    assert_ne!(old, new);
+    rustix::process::setrlimit(Resource::Core, new.clone()).unwrap();
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
-#[test]
-fn test_prlimit() {
-    let new = Rlimit {
-        current: Some(0),
-        maximum: Some(0),
-    };
+    let lim = rustix::process::getrlimit(Resource::Core);
+    assert_eq!(lim, new);
 
-    let first = rustix::process::getrlimit(Resource::Core);
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    {
+        let new = Rlimit {
+            current: Some(0),
+            maximum: Some(0),
+        };
 
-    let old = match rustix::process::prlimit(None, Resource::Core, new.clone()) {
-        Ok(rlimit) => rlimit,
-        Err(rustix::io::Error::NOSYS) => return,
-        Err(e) => Err(e).unwrap(),
-    };
+        let first = rustix::process::getrlimit(Resource::Core);
 
-    assert_eq!(first, old);
+        let old = match rustix::process::prlimit(None, Resource::Core, new.clone()) {
+            Ok(rlimit) => rlimit,
+            Err(rustix::io::Error::NOSYS) => return,
+            Err(e) => Err(e).unwrap(),
+        };
 
-    let other = Rlimit {
-        current: Some(0),
-        maximum: Some(0),
-    };
+        assert_eq!(first, old);
 
-    let again =
-        rustix::process::prlimit(Some(rustix::process::getpid()), Resource::Core, other).unwrap();
+        let other = Rlimit {
+            current: Some(0),
+            maximum: Some(0),
+        };
 
-    assert_eq!(again, new);
+        let again =
+            rustix::process::prlimit(Some(rustix::process::getpid()), Resource::Core, other)
+                .unwrap();
+
+        assert_eq!(again, new);
+    }
 }
