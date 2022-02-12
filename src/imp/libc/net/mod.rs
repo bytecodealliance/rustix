@@ -10,7 +10,7 @@ mod write_sockaddr;
 pub(crate) mod ext;
 pub(crate) mod syscalls;
 pub use addr::SocketAddrStorage;
-#[cfg(not(windows))]
+#[cfg(unix)]
 pub use addr::SocketAddrUnix;
 pub(crate) use read_sockaddr::{
     initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr, read_sockaddr_os,
@@ -20,7 +20,7 @@ pub use types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, Soc
 pub(crate) use write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6, write_sockaddr};
 
 /// Return the offset of the `sun_path` field of `sockaddr_un`.
-#[cfg(not(windows))]
+#[cfg(unix)]
 #[inline]
 pub(crate) fn offsetof_sun_path() -> usize {
     let z = c::sockaddr_un {

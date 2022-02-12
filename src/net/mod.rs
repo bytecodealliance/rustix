@@ -23,7 +23,7 @@ mod wsa;
 
 pub mod sockopt;
 
-#[cfg(not(windows))]
+#[cfg(unix)]
 pub use send_recv::sendto_unix;
 pub use send_recv::{
     recv, recvfrom, send, sendto, sendto_any, sendto_v4, sendto_v6, RecvFlags, SendFlags,
@@ -33,7 +33,7 @@ pub use socket::{
     connect_any, connect_v4, connect_v6, getpeername, getsockname, listen, shutdown, socket,
     socket_with, AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType,
 };
-#[cfg(not(windows))]
+#[cfg(unix)]
 pub use socket::{bind_unix, connect_unix};
 pub use socket_addr_any::SocketAddrAny;
 #[cfg(not(any(windows, target_os = "wasi")))]
@@ -42,7 +42,7 @@ pub use socketpair::socketpair;
 pub use wsa::{wsa_cleanup, wsa_startup};
 
 pub use imp::net::SocketAddrStorage;
-#[cfg(not(windows))]
+#[cfg(unix)]
 pub use imp::net::SocketAddrUnix;
 
 // Declare the `Ip` and `Socket` address types.

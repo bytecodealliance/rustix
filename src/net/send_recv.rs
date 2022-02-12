@@ -1,6 +1,6 @@
 //! `recv` and `send`, and variants
 
-#[cfg(not(windows))]
+#[cfg(unix)]
 use crate::net::SocketAddrUnix;
 use crate::net::{SocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::{imp, io};
@@ -115,7 +115,7 @@ fn _sendto_any(
     match addr {
         SocketAddrAny::V4(v4) => imp::net::syscalls::sendto_v4(fd, buf, flags, v4),
         SocketAddrAny::V6(v6) => imp::net::syscalls::sendto_v6(fd, buf, flags, v6),
-        #[cfg(not(windows))]
+        #[cfg(unix)]
         SocketAddrAny::Unix(unix) => imp::net::syscalls::sendto_unix(fd, buf, flags, unix),
     }
 }
@@ -177,7 +177,7 @@ pub fn sendto_v6<Fd: AsFd>(
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
 #[inline]
 #[doc(alias = "sendto")]
-#[cfg(not(windows))]
+#[cfg(unix)]
 pub fn sendto_unix<Fd: AsFd>(
     fd: &Fd,
     buf: &[u8],

@@ -7,7 +7,7 @@
 mod addr;
 mod connect_bind_send;
 mod poll;
-#[cfg(not(windows))]
+#[cfg(unix)]
 mod unix;
 mod v4;
 mod v6;
