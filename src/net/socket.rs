@@ -1,6 +1,6 @@
 use crate::imp;
 use crate::io::{self, OwnedFd};
-#[cfg(not(windows))]
+#[cfg(unix)]
 use crate::net::SocketAddrUnix;
 use crate::net::{SocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use imp::fd::{AsFd, BorrowedFd};
@@ -97,7 +97,7 @@ fn _bind_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> {
     match addr {
         SocketAddrAny::V4(v4) => imp::net::syscalls::bind_v4(sockfd, v4),
         SocketAddrAny::V6(v6) => imp::net::syscalls::bind_v6(sockfd, v6),
-        #[cfg(not(windows))]
+        #[cfg(unix)]
         SocketAddrAny::Unix(unix) => imp::net::syscalls::bind_unix(sockfd, unix),
     }
 }
@@ -149,7 +149,7 @@ pub fn bind_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-bind
 #[inline]
 #[doc(alias = "bind")]
-#[cfg(not(windows))]
+#[cfg(unix)]
 pub fn bind_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     imp::net::syscalls::bind_unix(sockfd.as_fd(), addr)
 }
@@ -190,7 +190,7 @@ fn _connect_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> 
     match addr {
         SocketAddrAny::V4(v4) => imp::net::syscalls::connect_v4(sockfd, v4),
         SocketAddrAny::V6(v6) => imp::net::syscalls::connect_v6(sockfd, v6),
-        #[cfg(not(windows))]
+        #[cfg(unix)]
         SocketAddrAny::Unix(unix) => imp::net::syscalls::connect_unix(sockfd, unix),
     }
 }
@@ -240,7 +240,7 @@ pub fn connect_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> 
 /// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
 #[inline]
 #[doc(alias = "connect")]
-#[cfg(not(windows))]
+#[cfg(unix)]
 pub fn connect_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     imp::net::syscalls::connect_unix(sockfd.as_fd(), addr)
 }

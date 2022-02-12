@@ -1,23 +1,23 @@
 //! IPv4, IPv6, and Socket addresses.
 
 use super::super::c;
-#[cfg(not(windows))]
+#[cfg(unix)]
 use super::offsetof_sun_path;
-#[cfg(not(windows))]
+#[cfg(unix)]
 use crate::ffi::ZStr;
-#[cfg(not(windows))]
+#[cfg(unix)]
 use crate::io;
-#[cfg(not(windows))]
+#[cfg(unix)]
 use crate::path;
 #[cfg(not(windows))]
 use core::convert::TryInto;
-#[cfg(not(windows))]
+#[cfg(unix)]
 use core::fmt;
-#[cfg(not(windows))]
+#[cfg(unix)]
 use core::mem::transmute;
 
 /// `struct sockaddr_un`
-#[cfg(not(windows))]
+#[cfg(unix)]
 #[derive(Clone)]
 #[doc(alias = "sockaddr_un")]
 pub struct SocketAddrUnix {
@@ -33,7 +33,7 @@ pub struct SocketAddrUnix {
     len: libc::socklen_t,
 }
 
-#[cfg(not(windows))]
+#[cfg(unix)]
 impl SocketAddrUnix {
     /// Construct a new Unix-domain address from a filesystem path.
     #[inline]
@@ -200,7 +200,7 @@ impl SocketAddrUnix {
     }
 }
 
-#[cfg(not(windows))]
+#[cfg(unix)]
 impl PartialEq for SocketAddrUnix {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
@@ -210,10 +210,10 @@ impl PartialEq for SocketAddrUnix {
     }
 }
 
-#[cfg(not(windows))]
+#[cfg(unix)]
 impl Eq for SocketAddrUnix {}
 
-#[cfg(not(windows))]
+#[cfg(unix)]
 impl PartialOrd for SocketAddrUnix {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
@@ -223,7 +223,7 @@ impl PartialOrd for SocketAddrUnix {
     }
 }
 
-#[cfg(not(windows))]
+#[cfg(unix)]
 impl Ord for SocketAddrUnix {
     #[inline]
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
@@ -233,7 +233,7 @@ impl Ord for SocketAddrUnix {
     }
 }
 
-#[cfg(not(windows))]
+#[cfg(unix)]
 impl core::hash::Hash for SocketAddrUnix {
     #[inline]
     fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
@@ -242,7 +242,7 @@ impl core::hash::Hash for SocketAddrUnix {
     }
 }
 
-#[cfg(not(windows))]
+#[cfg(unix)]
 impl fmt::Debug for SocketAddrUnix {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(path) = self.path() {

@@ -1,6 +1,6 @@
 use super::super::c;
 use super::ext::{in6_addr_s6_addr, in_addr_s_addr, sockaddr_in6_sin6_scope_id};
-#[cfg(not(windows))]
+#[cfg(unix)]
 use super::SocketAddrUnix;
 #[cfg(not(windows))]
 use crate::as_ptr;
@@ -91,7 +91,7 @@ pub(crate) unsafe fn read_sockaddr(
     storage: *const c::sockaddr_storage,
     len: usize,
 ) -> io::Result<SocketAddrAny> {
-    #[cfg(not(windows))]
+    #[cfg(unix)]
     let offsetof_sun_path = super::offsetof_sun_path();
 
     if len < size_of::<c::sa_family_t>() {
@@ -128,7 +128,7 @@ pub(crate) unsafe fn read_sockaddr(
                 sin6_scope_id,
             )))
         }
-        #[cfg(not(windows))]
+        #[cfg(unix)]
         c::AF_UNIX => {
             if len < offsetof_sun_path {
                 return Err(io::Error::INVAL);
@@ -200,7 +200,7 @@ unsafe fn inner_read_sockaddr_os(
     storage: *const c::sockaddr_storage,
     len: usize,
 ) -> SocketAddrAny {
-    #[cfg(not(windows))]
+    #[cfg(unix)]
     let z = c::sockaddr_un {
         #[cfg(any(
             target_os = "dragonfly",
@@ -248,7 +248,7 @@ unsafe fn inner_read_sockaddr_os(
         )))]
         sun_path: [0; 108],
     };
-    #[cfg(not(windows))]
+    #[cfg(unix)]
     let offsetof_sun_path = (as_ptr(&z.sun_path) as usize) - (as_ptr(&z) as usize);
 
     assert!(len >= size_of::<c::sa_family_t>());
@@ -271,7 +271,7 @@ unsafe fn inner_read_sockaddr_os(
                 sockaddr_in6_sin6_scope_id(decode),
             ))
         }
-        #[cfg(not(windows))]
+        #[cfg(unix)]
         c::AF_UNIX => {
             assert!(len >= offsetof_sun_path);
             if len == offsetof_sun_path {

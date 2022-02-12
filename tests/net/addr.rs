@@ -1,6 +1,6 @@
 #[test]
 fn encode_decode() {
-    #[cfg(not(windows))]
+    #[cfg(unix)]
     use rustix::net::SocketAddrUnix;
     use rustix::net::{
         Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrStorage, SocketAddrV4, SocketAddrV6,

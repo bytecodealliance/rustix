@@ -3,7 +3,7 @@
 use super::super::c;
 use super::super::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 use super::ext::{in6_addr_new, in_addr_new};
-#[cfg(not(windows))]
+#[cfg(unix)]
 use super::SocketAddrUnix;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::{

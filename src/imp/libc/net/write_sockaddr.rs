@@ -5,7 +5,7 @@
 use super::super::c;
 use super::ext::{in6_addr_new, in_addr_new, sockaddr_in6_new};
 use super::SocketAddrStorage;
-#[cfg(not(windows))]
+#[cfg(unix)]
 use super::SocketAddrUnix;
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use core::mem::size_of;
@@ -17,7 +17,7 @@ pub(crate) unsafe fn write_sockaddr(
     match addr {
         SocketAddrAny::V4(v4) => write_sockaddr_v4(v4, storage),
         SocketAddrAny::V6(v6) => write_sockaddr_v6(v6, storage),
-        #[cfg(not(windows))]
+        #[cfg(unix)]
         SocketAddrAny::Unix(unix) => write_sockaddr_unix(unix, storage),
     }
 }
@@ -90,7 +90,7 @@ unsafe fn write_sockaddr_v6(v6: &SocketAddrV6, storage: *mut SocketAddrStorage) 
     size_of::<c::sockaddr_in6>()
 }
 
-#[cfg(not(windows))]
+#[cfg(unix)]
 unsafe fn write_sockaddr_unix(unix: &SocketAddrUnix, storage: *mut SocketAddrStorage) -> usize {
     core::ptr::write(storage.cast(), unix.unix);
     unix.len()

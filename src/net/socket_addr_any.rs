@@ -9,7 +9,7 @@
 //! OS-specific socket address representations in memory.
 #![allow(unsafe_code)]
 
-#[cfg(not(windows))]
+#[cfg(unix)]
 use crate::net::SocketAddrUnix;
 use crate::net::{AddressFamily, SocketAddrStorage, SocketAddrV4, SocketAddrV6};
 use crate::{imp, io};
@@ -26,7 +26,7 @@ pub enum SocketAddrAny {
     /// `struct sockaddr_in6`
     V6(SocketAddrV6),
     /// `struct sockaddr_un`
-    #[cfg(not(windows))]
+    #[cfg(unix)]
     Unix(SocketAddrUnix),
 }
 
@@ -37,7 +37,7 @@ impl SocketAddrAny {
         match self {
             SocketAddrAny::V4(_) => AddressFamily::INET,
             SocketAddrAny::V6(_) => AddressFamily::INET6,
-            #[cfg(not(windows))]
+            #[cfg(unix)]
             SocketAddrAny::Unix(_) => AddressFamily::UNIX,
         }
     }
@@ -72,7 +72,7 @@ impl fmt::Debug for SocketAddrAny {
         match self {
             SocketAddrAny::V4(v4) => v4.fmt(fmt),
             SocketAddrAny::V6(v6) => v6.fmt(fmt),
-            #[cfg(not(windows))]
+            #[cfg(unix)]
             SocketAddrAny::Unix(unix) => unix.fmt(fmt),
         }
     }
