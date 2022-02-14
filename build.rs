@@ -120,6 +120,7 @@ fn use_feature(feature: &str) {
 
 /// Test whether the rustc at `var("RUSTC")` supports the given feature.
 fn has_feature(feature: &str) -> bool {
+    use std::process::Stdio;
     let out_dir = var("OUT_DIR").unwrap();
     let rustc = var("RUSTC").unwrap();
 
@@ -129,7 +130,8 @@ fn has_feature(feature: &str) -> bool {
         .arg("--out-dir")
         .arg(out_dir) // Put the output somewhere inconsequential.
         .arg("-") // Read from stdin.
-        .stdin(std::process::Stdio::piped()) // Stdin is a pipe.
+        .stdin(Stdio::piped()) // Stdin is a pipe.
+        .stderr(Stdio::null())
         .spawn()
         .unwrap();
 
