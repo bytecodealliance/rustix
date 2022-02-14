@@ -399,14 +399,7 @@ jobs:
             qemu_target: arm-linux-user
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
-      RUSTFLAGS: --cfg rustix_use_libc -D warnings
-      RUSTDOCFLAGS: --cfg rustix_use_libc
-      CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
-      CARGO_TARGET_I686_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
-      CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
-      CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
-      CARGO_TARGET_RISCV64_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
-      CARGO_TARGET_ARM_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_libc
+      RUSTFLAGS: -D warnings
       QEMU_BUILD_VERSION: 6.1.0
     steps:
     - uses: actions/checkout@v2
@@ -468,7 +461,7 @@ jobs:
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
-        cargo test --verbose --features=all-impls,procfs --release --workspace -- --nocapture
+        cargo test --verbose --features=backend-libc,all-impls,procfs --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: 1
 

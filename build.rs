@@ -6,6 +6,12 @@ use std::io::Write;
 /// The directory for out-of-line ("outline") libraries.
 const OUTLINE_PATH: &str = "src/imp/linux_raw/arch/outline";
 
+#[derive(PartialEq, Eq)]
+enum Backend {
+    Libc,
+    LinuxRaw,
+}
+
 fn main() {
     // Don't rerun this on changes other than build.rs, as we only depend on
     // the rustc version.
@@ -23,40 +29,69 @@ fn main() {
         use_feature_or_nothing("const_raw_ptr_deref");
     }
 
+    // Gather basic metadata
     let arch = var("CARGO_CFG_TARGET_ARCH").unwrap();
     let asm_name = format!("{}/{}.s", OUTLINE_PATH, arch);
     let os_name = var("CARGO_CFG_TARGET_OS").unwrap();
     let pointer_width = var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap();
     let endian = var("CARGO_CFG_TARGET_ENDIAN").unwrap();
+
+    // Specific sub-architecture checks
     let is_x32 = arch == "x86_64" && pointer_width == "32";
     let is_arm64_ilp32 = arch == "aarch64" && pointer_width == "32";
     let is_powerpc64be = arch == "powerpc64" && endian == "big";
-    let rustix_use_libc = var("CARGO_CFG_RUSTIX_USE_LIBC").is_ok();
-    let rustix_use_experimental_asm = var("CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM").is_ok();
+    let can_do_raw_arch = !(is_x32 || is_arm64_ilp32 || is_powerpc64be);
+
+    // Gather requested backend
+    let rustix_libc = var("CARGO_FEATURE_LIBC").is_ok();
+    let rustix_linux_raw = var("CARGO_FEATURE_BACKEND_LINUX_RAW").is_ok();
+
+    let backend = if !(rustix_libc || rustix_linux_raw) {
+        eprintln!("rustix: At least one of use-libc or use-linux-raw must be set");
+        std::process::exit(1)
+    } else if rustix_libc {
+        // If backend-libc is set (as it must be explicitly), then it takes precedence
+        if rustix_linux_raw {
+            println!(
+                "cargo:warning=Both backend-libc and backend-linux-raw are set; defaulting to libc"
+            )
+        }
+        Backend::Libc
+    } else {
+        Backend::LinuxRaw
+    };
 
     // If rustix_use_libc is set, or if we're on an architecture/OS that doesn't
     // have raw syscall support, use libc.
-    if rustix_use_libc
-        || os_name != "linux"
-        || std::fs::metadata(&asm_name).is_err()
-        || is_x32
-        || is_arm64_ilp32
-        || is_powerpc64be
-    {
-        use_feature("libc");
-    } else {
-        use_feature("linux_raw");
-        use_feature_or_nothing("core_intrinsics");
-
-        // On PowerPC, Rust's inline asm is considered experimental, so only
-        // use it if `--cfg=rustix_use_experimental_asm` is given.
-        if has_feature("asm") && (arch != "powerpc64" || rustix_use_experimental_asm) {
-            use_feature("asm");
-            if rustix_use_experimental_asm {
-                use_feature("asm_experimental_arch");
+    match backend {
+        Backend::Libc => {
+            use_feature("libc");
+        }
+        Backend::LinuxRaw => {
+            let can_use_linux_raw =
+                os_name == "linux" && std::fs::metadata(&asm_name).is_ok() && can_do_raw_arch;
+            if !can_use_linux_raw {
+                eprintln!(
+                    "backend-linux-raw feature is set, but not supported on OS {} and architecture {}",
+                    os_name, arch
+                );
+                std::process::exit(1)
             }
-        } else {
-            link_in_librustix_outline(&arch, &asm_name);
+            // Otherwise, we currently default to the linux_raw backend.
+            let rustix_use_experimental_asm = var("CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM").is_ok();
+            use_feature("linux_raw");
+            use_feature_or_nothing("core_intrinsics");
+
+            // On PowerPC, Rust's inline asm is considered experimental, so only
+            // use it if `--cfg=rustix_use_experimental_asm` is given.
+            if has_feature("asm") && (arch != "powerpc64" || rustix_use_experimental_asm) {
+                use_feature("asm");
+                if rustix_use_experimental_asm {
+                    use_feature("asm_experimental_arch");
+                }
+            } else {
+                link_in_librustix_outline(&arch, &asm_name);
+            }
         }
     }
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_LIBC");
