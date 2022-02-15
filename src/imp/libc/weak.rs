@@ -111,7 +111,7 @@ unsafe fn fetch(name: &str) -> usize {
 
 #[cfg(not(any(target_os = "android", target_os = "linux")))]
 macro_rules! syscall {
-    (fn $name:ident($($arg_name:ident: $t:ty),*) -> $ret:ty) => (
+    (fn $name:ident($($arg_name:ident: $t:ty),*) via $_sys_name:ident -> $ret:ty) => (
         unsafe fn $name($($arg_name: $t),*) -> $ret {
             weak! { fn $name($($t),*) -> $ret }
 
@@ -127,16 +127,22 @@ macro_rules! syscall {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 macro_rules! syscall {
-    (fn $name:ident($($arg_name:ident: $t:ty),*) -> $ret:ty) => (
+    (fn $name:ident($($arg_name:ident: $t:ty),*) via $sys_name:ident -> $ret:ty) => (
         unsafe fn $name($($arg_name:$t),*) -> $ret {
             // This looks like a hack, but concat_idents only accepts idents
             // (not paths).
             use libc::*;
 
+            // `concat_idents is unstable, so we take an extra `sys_name`
+            // parameter and have our users do the concat for us for now.
+            /*
             syscall(
                 concat_idents!(SYS_, $name),
                 $($arg_name as c_long),*
             ) as $ret
+            */
+
+            syscall($sys_name, $($arg_name as c_long),*) as $ret
         }
     )
 }

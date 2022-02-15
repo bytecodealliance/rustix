@@ -78,8 +78,43 @@ pub(super) use c::{
     getrlimit64 as libc_getrlimit, mmap64 as libc_mmap, setrlimit64 as libc_setrlimit,
 };
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
-pub(super) use c::prlimit64 as libc_prlimit;
+// `prlimit64` wasn't supported in glibc until 2.13.
+#[cfg(target_os = "linux")]
+syscall! {
+    fn prlimit64(
+        pid: c::pid_t,
+        resource: c::__rlimit_resource_t,
+        new_limit: *const c::rlimit64,
+        old_limit: *mut c::rlimit64
+    ) via SYS_prlimit64 -> c::c_int
+}
+#[cfg(target_os = "android")]
+syscall! {
+    fn prlimit64(
+        pid: c::pid_t,
+        resource: c::c_int,
+        new_limit: *const c::rlimit64,
+        old_limit: *mut c::rlimit64
+    ) via SYS_prlimit64 -> c::c_int
+}
+#[cfg(target_os = "linux")]
+pub(super) unsafe fn libc_prlimit(
+    pid: c::pid_t,
+    resource: c::__rlimit_resource_t,
+    new_limit: *const c::rlimit64,
+    old_limit: *mut c::rlimit64,
+) -> c::c_int {
+    prlimit64(pid, resource, new_limit, old_limit)
+}
+#[cfg(target_os = "android")]
+pub(super) unsafe fn libc_prlimit(
+    pid: c::pid_t,
+    resource: c::c_int,
+    new_limit: *const c::rlimit64,
+    old_limit: *mut c::rlimit64,
+) -> c::c_int {
+    prlimit64(pid, resource, new_limit, old_limit)
+}
 
 #[cfg(not(any(
     windows,
