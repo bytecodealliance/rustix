@@ -68,6 +68,8 @@ fn main() {
             use_feature("libc");
         }
         Backend::LinuxRaw => {
+            // In the future we could probably support `android` here too, but it looks like that
+            // needs at least a few fixes.
             let can_use_linux_raw =
                 os_name == "linux" && std::fs::metadata(&asm_name).is_ok() && can_do_raw_arch;
             if !can_use_linux_raw {
