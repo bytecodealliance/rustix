@@ -47,7 +47,8 @@ fn main() {
     let rustix_linux_raw = var("CARGO_FEATURE_BACKEND_LINUX_RAW").is_ok();
 
     let backend = if !(rustix_libc || rustix_linux_raw) {
-        eprintln!("rustix: At least one of use-libc or use-linux-raw must be set");
+        // https://internals.rust-lang.org/t/clearer-display-of-build-script-errors-in-cargo/14222/5
+        eprintln!("error: At least one of use-libc or use-linux-raw must be set");
         std::process::exit(1)
     } else if rustix_libc {
         // If backend-libc is set (as it must be explicitly), then it takes precedence
