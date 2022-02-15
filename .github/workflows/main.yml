@@ -114,7 +114,7 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - run: cargo check --workspace --release --no-default-features --features itoa -vv
+    - run: cargo check --workspace --release --no-default-features --features backend-linux-raw,itoa -vv
 
   check_nightly:
     name: Check on Rust nightly
