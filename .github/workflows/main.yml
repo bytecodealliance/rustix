@@ -164,7 +164,7 @@ jobs:
         # See the comments in the libc crate
         RUSTFLAGS: -A improper_ctypes_definitions
     - run: rustup component add rust-src
-    - run: cargo check -Z build-std=core,alloc,std --no-default=features --features=backend-libc,std --target x86_64-unknown-openbsd --all-targets
+    - run: cargo check -Z build-std=core,alloc,std --no-default-features --features=backend-libc,std --target x86_64-unknown-openbsd --all-targets
 
   test:
     name: Test
