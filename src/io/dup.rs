@@ -27,7 +27,7 @@ pub use imp::io::DupFlags;
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
+pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
     imp::io::syscalls::dup(fd.as_fd())
 }
 
@@ -48,7 +48,7 @@ pub fn dup<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup2.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn dup2<Fd: AsFd>(fd: &Fd, new: &OwnedFd) -> io::Result<()> {
+pub fn dup2<Fd: AsFd>(fd: Fd, new: &OwnedFd) -> io::Result<()> {
     imp::io::syscalls::dup2(fd.as_fd(), new)
 }
 
@@ -68,6 +68,6 @@ pub fn dup2<Fd: AsFd>(fd: &Fd, new: &OwnedFd) -> io::Result<()> {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[doc(alias = "dup3")]
-pub fn dup2_with<Fd: AsFd>(fd: &Fd, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
+pub fn dup2_with<Fd: AsFd>(fd: Fd, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
     imp::io::syscalls::dup2_with(fd.as_fd(), new, flags)
 }

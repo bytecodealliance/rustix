@@ -238,7 +238,7 @@ pub unsafe fn fork() -> io::Result<Option<Pid>> {
 #[inline]
 #[cfg(linux_raw)]
 pub unsafe fn execveat<Fd: AsFd>(
-    dirfd: &Fd,
+    dirfd: Fd,
     path: &ZStr,
     argv: *const *const u8,
     envp: *const *const u8,

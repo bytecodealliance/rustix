@@ -59,7 +59,7 @@ impl DecInt {
 
     /// Construct a new path component from a file descriptor.
     #[inline]
-    pub fn from_fd<Fd: AsFd>(fd: &Fd) -> Self {
+    pub fn from_fd<Fd: AsFd>(fd: Fd) -> Self {
         Self::new(fd.as_fd().as_raw_fd())
     }
 

@@ -31,7 +31,7 @@ pub use imp::net::Timeout;
 /// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
 #[inline]
 #[doc(alias = "SO_TYPE")]
-pub fn get_socket_type<Fd: AsFd>(fd: &Fd) -> io::Result<SocketType> {
+pub fn get_socket_type<Fd: AsFd>(fd: Fd) -> io::Result<SocketType> {
     imp::net::syscalls::sockopt::get_socket_type(fd.as_fd())
 }
 
@@ -53,7 +53,7 @@ pub fn get_socket_type<Fd: AsFd>(fd: &Fd) -> io::Result<SocketType> {
 /// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
 #[inline]
 #[doc(alias = "SO_REUSEADDR")]
-pub fn set_socket_reuseaddr<Fd: AsFd>(fd: &Fd, value: bool) -> io::Result<()> {
+pub fn set_socket_reuseaddr<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
     imp::net::syscalls::sockopt::set_socket_reuseaddr(fd.as_fd(), value)
 }
 
@@ -75,7 +75,7 @@ pub fn set_socket_reuseaddr<Fd: AsFd>(fd: &Fd, value: bool) -> io::Result<()> {
 /// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
 #[inline]
 #[doc(alias = "SO_BROADCAST")]
-pub fn set_socket_broadcast<Fd: AsFd>(fd: &Fd, broadcast: bool) -> io::Result<()> {
+pub fn set_socket_broadcast<Fd: AsFd>(fd: Fd, broadcast: bool) -> io::Result<()> {
     imp::net::syscalls::sockopt::set_socket_broadcast(fd.as_fd(), broadcast)
 }
 
@@ -97,7 +97,7 @@ pub fn set_socket_broadcast<Fd: AsFd>(fd: &Fd, broadcast: bool) -> io::Result<()
 /// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
 #[inline]
 #[doc(alias = "SO_BROADCAST")]
-pub fn get_socket_broadcast<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
+pub fn get_socket_broadcast<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     imp::net::syscalls::sockopt::get_socket_broadcast(fd.as_fd())
 }
 
@@ -119,7 +119,7 @@ pub fn get_socket_broadcast<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
 /// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
 #[inline]
 #[doc(alias = "SO_LINGER")]
-pub fn set_socket_linger<Fd: AsFd>(fd: &Fd, linger: Option<Duration>) -> io::Result<()> {
+pub fn set_socket_linger<Fd: AsFd>(fd: Fd, linger: Option<Duration>) -> io::Result<()> {
     imp::net::syscalls::sockopt::set_socket_linger(fd.as_fd(), linger)
 }
 
@@ -141,7 +141,7 @@ pub fn set_socket_linger<Fd: AsFd>(fd: &Fd, linger: Option<Duration>) -> io::Res
 /// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
 #[inline]
 #[doc(alias = "SO_LINGER")]
-pub fn get_socket_linger<Fd: AsFd>(fd: &Fd) -> io::Result<Option<Duration>> {
+pub fn get_socket_linger<Fd: AsFd>(fd: Fd) -> io::Result<Option<Duration>> {
     imp::net::syscalls::sockopt::get_socket_linger(fd.as_fd())
 }
 
@@ -156,7 +156,7 @@ pub fn get_socket_linger<Fd: AsFd>(fd: &Fd) -> io::Result<Option<Duration>> {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 #[doc(alias = "SO_PASSCRED")]
-pub fn set_socket_passcred<Fd: AsFd>(fd: &Fd, passcred: bool) -> io::Result<()> {
+pub fn set_socket_passcred<Fd: AsFd>(fd: Fd, passcred: bool) -> io::Result<()> {
     imp::net::syscalls::sockopt::set_socket_passcred(fd.as_fd(), passcred)
 }
 
@@ -171,7 +171,7 @@ pub fn set_socket_passcred<Fd: AsFd>(fd: &Fd, passcred: bool) -> io::Result<()> 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 #[doc(alias = "SO_PASSCRED")]
-pub fn get_socket_passcred<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
+pub fn get_socket_passcred<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     imp::net::syscalls::sockopt::get_socket_passcred(fd.as_fd())
 }
 
@@ -196,7 +196,7 @@ pub fn get_socket_passcred<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
 #[doc(alias = "SO_RCVTIMEO")]
 #[doc(alias = "SO_SNDTIMEO")]
 pub fn set_socket_timeout<Fd: AsFd>(
-    fd: &Fd,
+    fd: Fd,
     id: Timeout,
     timeout: Option<Duration>,
 ) -> io::Result<()> {
@@ -222,7 +222,7 @@ pub fn set_socket_timeout<Fd: AsFd>(
 #[inline]
 #[doc(alias = "SO_RCVTIMEO")]
 #[doc(alias = "SO_SNDTIMEO")]
-pub fn get_socket_timeout<Fd: AsFd>(fd: &Fd, id: Timeout) -> io::Result<Option<Duration>> {
+pub fn get_socket_timeout<Fd: AsFd>(fd: Fd, id: Timeout) -> io::Result<Option<Duration>> {
     imp::net::syscalls::sockopt::get_socket_timeout(fd.as_fd(), id)
 }
 
@@ -243,7 +243,7 @@ pub fn get_socket_timeout<Fd: AsFd>(fd: &Fd, id: Timeout) -> io::Result<Option<D
 /// [Winsock2 `IPPROTO_IP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ip-socket-options
 #[inline]
 #[doc(alias = "IP_TTL")]
-pub fn set_ip_ttl<Fd: AsFd>(fd: &Fd, ttl: u32) -> io::Result<()> {
+pub fn set_ip_ttl<Fd: AsFd>(fd: Fd, ttl: u32) -> io::Result<()> {
     imp::net::syscalls::sockopt::set_ip_ttl(fd.as_fd(), ttl)
 }
 
@@ -265,7 +265,7 @@ pub fn set_ip_ttl<Fd: AsFd>(fd: &Fd, ttl: u32) -> io::Result<()> {
 /// [Winsock2 `IPPROTO_IP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ip-socket-options
 #[inline]
 #[doc(alias = "IP_TTL")]
-pub fn get_ip_ttl<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
+pub fn get_ip_ttl<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
     imp::net::syscalls::sockopt::get_ip_ttl(fd.as_fd())
 }
 
@@ -287,7 +287,7 @@ pub fn get_ip_ttl<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
 /// [Winsock2 `IPPROTO_IPV6` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ipv6-socket-options
 #[inline]
 #[doc(alias = "IPV6_V6ONLY")]
-pub fn set_ipv6_v6only<Fd: AsFd>(fd: &Fd, only_v6: bool) -> io::Result<()> {
+pub fn set_ipv6_v6only<Fd: AsFd>(fd: Fd, only_v6: bool) -> io::Result<()> {
     imp::net::syscalls::sockopt::set_ipv6_v6only(fd.as_fd(), only_v6)
 }
 
@@ -309,7 +309,7 @@ pub fn set_ipv6_v6only<Fd: AsFd>(fd: &Fd, only_v6: bool) -> io::Result<()> {
 /// [Winsock2 `IPPROTO_IPV6` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ipv6-socket-options
 #[inline]
 #[doc(alias = "IPV6_V6ONLY")]
-pub fn get_ipv6_v6only<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
+pub fn get_ipv6_v6only<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     imp::net::syscalls::sockopt::get_ipv6_v6only(fd.as_fd())
 }
 
@@ -331,7 +331,7 @@ pub fn get_ipv6_v6only<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
 /// [Winsock2 `IPPROTO_IP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ip-socket-options
 #[inline]
 #[doc(alias = "IP_MULTICAST_LOOP")]
-pub fn set_ip_multicast_loop<Fd: AsFd>(fd: &Fd, multicast_loop: bool) -> io::Result<()> {
+pub fn set_ip_multicast_loop<Fd: AsFd>(fd: Fd, multicast_loop: bool) -> io::Result<()> {
     imp::net::syscalls::sockopt::set_ip_multicast_loop(fd.as_fd(), multicast_loop)
 }
 
@@ -353,7 +353,7 @@ pub fn set_ip_multicast_loop<Fd: AsFd>(fd: &Fd, multicast_loop: bool) -> io::Res
 /// [Winsock2 `IPPROTO_IP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ip-socket-options
 #[inline]
 #[doc(alias = "IP_MULTICAST_LOOP")]
-pub fn get_ip_multicast_loop<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
+pub fn get_ip_multicast_loop<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     imp::net::syscalls::sockopt::get_ip_multicast_loop(fd.as_fd())
 }
 
@@ -375,7 +375,7 @@ pub fn get_ip_multicast_loop<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
 /// [Winsock2 `IPPROTO_IP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ip-socket-options
 #[inline]
 #[doc(alias = "IP_MULTICAST_TTL")]
-pub fn set_ip_multicast_ttl<Fd: AsFd>(fd: &Fd, multicast_ttl: u32) -> io::Result<()> {
+pub fn set_ip_multicast_ttl<Fd: AsFd>(fd: Fd, multicast_ttl: u32) -> io::Result<()> {
     imp::net::syscalls::sockopt::set_ip_multicast_ttl(fd.as_fd(), multicast_ttl)
 }
 
@@ -397,7 +397,7 @@ pub fn set_ip_multicast_ttl<Fd: AsFd>(fd: &Fd, multicast_ttl: u32) -> io::Result
 /// [Winsock2 `IPPROTO_IP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ip-socket-options
 #[inline]
 #[doc(alias = "IP_MULTICAST_TTL")]
-pub fn get_ip_multicast_ttl<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
+pub fn get_ip_multicast_ttl<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
     imp::net::syscalls::sockopt::get_ip_multicast_ttl(fd.as_fd())
 }
 
@@ -419,7 +419,7 @@ pub fn get_ip_multicast_ttl<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
 /// [Winsock2 `IPPROTO_IPV6` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ipv6-socket-options
 #[inline]
 #[doc(alias = "IPV6_MULTICAST_LOOP")]
-pub fn set_ipv6_multicast_loop<Fd: AsFd>(fd: &Fd, multicast_loop: bool) -> io::Result<()> {
+pub fn set_ipv6_multicast_loop<Fd: AsFd>(fd: Fd, multicast_loop: bool) -> io::Result<()> {
     imp::net::syscalls::sockopt::set_ipv6_multicast_loop(fd.as_fd(), multicast_loop)
 }
 
@@ -441,7 +441,7 @@ pub fn set_ipv6_multicast_loop<Fd: AsFd>(fd: &Fd, multicast_loop: bool) -> io::R
 /// [Winsock2 `IPPROTO_IPV6` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ipv6-socket-options
 #[inline]
 #[doc(alias = "IPV6_MULTICAST_LOOP")]
-pub fn get_ipv6_multicast_loop<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
+pub fn get_ipv6_multicast_loop<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     imp::net::syscalls::sockopt::get_ipv6_multicast_loop(fd.as_fd())
 }
 
@@ -464,7 +464,7 @@ pub fn get_ipv6_multicast_loop<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
 #[inline]
 #[doc(alias = "IP_ADD_MEMBERSHIP")]
 pub fn set_ip_add_membership<Fd: AsFd>(
-    fd: &Fd,
+    fd: Fd,
     multiaddr: &Ipv4Addr,
     interface: &Ipv4Addr,
 ) -> io::Result<()> {
@@ -493,7 +493,7 @@ pub fn set_ip_add_membership<Fd: AsFd>(
 #[doc(alias = "IPV6_JOIN_GROUP")]
 #[doc(alias = "IPV6_ADD_MEMBERSHIP")]
 pub fn set_ipv6_add_membership<Fd: AsFd>(
-    fd: &Fd,
+    fd: Fd,
     multiaddr: &Ipv6Addr,
     interface: u32,
 ) -> io::Result<()> {
@@ -519,7 +519,7 @@ pub fn set_ipv6_add_membership<Fd: AsFd>(
 #[inline]
 #[doc(alias = "IP_DROP_MEMBERSHIP")]
 pub fn set_ip_drop_membership<Fd: AsFd>(
-    fd: &Fd,
+    fd: Fd,
     multiaddr: &Ipv4Addr,
     interface: &Ipv4Addr,
 ) -> io::Result<()> {
@@ -548,7 +548,7 @@ pub fn set_ip_drop_membership<Fd: AsFd>(
 #[doc(alias = "IPV6_LEAVE_GROUP")]
 #[doc(alias = "IPV6_DROP_MEMBERSHIP")]
 pub fn set_ipv6_drop_membership<Fd: AsFd>(
-    fd: &Fd,
+    fd: Fd,
     multiaddr: &Ipv6Addr,
     interface: u32,
 ) -> io::Result<()> {
@@ -573,7 +573,7 @@ pub fn set_ipv6_drop_membership<Fd: AsFd>(
 /// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
 #[inline]
 #[doc(alias = "TCP_NODELAY")]
-pub fn set_tcp_nodelay<Fd: AsFd>(fd: &Fd, nodelay: bool) -> io::Result<()> {
+pub fn set_tcp_nodelay<Fd: AsFd>(fd: Fd, nodelay: bool) -> io::Result<()> {
     imp::net::syscalls::sockopt::set_tcp_nodelay(fd.as_fd(), nodelay)
 }
 
@@ -595,6 +595,6 @@ pub fn set_tcp_nodelay<Fd: AsFd>(fd: &Fd, nodelay: bool) -> io::Result<()> {
 /// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
 #[inline]
 #[doc(alias = "TCP_NODELAY")]
-pub fn get_tcp_nodelay<Fd: AsFd>(fd: &Fd) -> io::Result<bool> {
+pub fn get_tcp_nodelay<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     imp::net::syscalls::sockopt::get_tcp_nodelay(fd.as_fd())
 }

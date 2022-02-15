@@ -18,7 +18,7 @@ pub use imp::fs::StatxFlags;
 /// [Linux]: https://man7.org/linux/man-pages/man2/statx.2.html
 #[inline]
 pub fn statx<P: path::Arg, Fd: AsFd>(
-    dirfd: &Fd,
+    dirfd: Fd,
     path: P,
     flags: AtFlags,
     mask: StatxFlags,

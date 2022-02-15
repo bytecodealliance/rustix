@@ -8,7 +8,7 @@ use imp::fd::AsFd;
 ///
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
 #[inline]
-pub fn fcntl_rdadvise<Fd: AsFd>(fd: &Fd, offset: u64, len: u64) -> io::Result<()> {
+pub fn fcntl_rdadvise<Fd: AsFd>(fd: Fd, offset: u64, len: u64) -> io::Result<()> {
     imp::fs::syscalls::fcntl_rdadvise(fd.as_fd(), offset, len)
 }
 
@@ -19,6 +19,6 @@ pub fn fcntl_rdadvise<Fd: AsFd>(fd: &Fd, offset: u64, len: u64) -> io::Result<()
 ///
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
 #[inline]
-pub fn fcntl_fullfsync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
+pub fn fcntl_fullfsync<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     imp::fs::syscalls::fcntl_fullfsync(fd.as_fd())
 }

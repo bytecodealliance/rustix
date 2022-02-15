@@ -6,7 +6,7 @@ use std::os::unix::io::AsRawFd;
 
 // Like `openat2`, but keep retrying until it fails or succeeds.
 fn openat2_more<Fd: AsFd, P: path::Arg>(
-    dirfd: &Fd,
+    dirfd: Fd,
     path: P,
     oflags: OFlags,
     mode: Mode,
@@ -14,7 +14,7 @@ fn openat2_more<Fd: AsFd, P: path::Arg>(
 ) -> io::Result<OwnedFd> {
     let path = path.as_cow_z_str().unwrap().into_owned();
     loop {
-        match openat2(dirfd, &path, oflags, mode, resolve) {
+        match openat2(dirfd.as_fd(), &path, oflags, mode, resolve) {
             Ok(file) => return Ok(file),
             Err(io::Error::AGAIN) => continue,
             Err(err) => return Err(err),

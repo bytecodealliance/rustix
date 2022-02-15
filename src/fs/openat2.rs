@@ -11,7 +11,7 @@ use imp::fs::{Mode, OFlags, ResolveFlags};
 /// [Linux]: https://man7.org/linux/man-pages/man2/openat2.2.html
 #[inline]
 pub fn openat2<Fd: AsFd, P: path::Arg>(
-    dirfd: &Fd,
+    dirfd: Fd,
     path: P,
     oflags: OFlags,
     mode: Mode,

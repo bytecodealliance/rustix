@@ -24,7 +24,7 @@ use imp::fd::AsFd;
 #[inline]
 #[doc(alias = "tcgetattr")]
 #[doc(alias = "TCGETS")]
-pub fn ioctl_tcgets<Fd: AsFd>(fd: &Fd) -> io::Result<Termios> {
+pub fn ioctl_tcgets<Fd: AsFd>(fd: Fd) -> io::Result<Termios> {
     imp::io::syscalls::ioctl_tcgets(fd.as_fd())
 }
 
@@ -35,7 +35,7 @@ pub fn ioctl_tcgets<Fd: AsFd>(fd: &Fd) -> io::Result<Termios> {
 #[inline]
 #[doc(alias = "FIOCLEX")]
 #[doc(alias = "FD_CLOEXEC")]
-pub fn ioctl_fioclex<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
+pub fn ioctl_fioclex<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     imp::io::syscalls::ioctl_fioclex(fd.as_fd())
 }
 
@@ -48,14 +48,14 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[inline]
 #[doc(alias = "TIOCGWINSZ")]
-pub fn ioctl_tiocgwinsz<Fd: AsFd>(fd: &Fd) -> io::Result<Winsize> {
+pub fn ioctl_tiocgwinsz<Fd: AsFd>(fd: Fd) -> io::Result<Winsize> {
     imp::io::syscalls::ioctl_tiocgwinsz(fd.as_fd())
 }
 
 /// `ioctl(fd, FIONBIO, &value)`—Enables or disables non-blocking mode.
 #[inline]
 #[doc(alias = "FIONBIO")]
-pub fn ioctl_fionbio<Fd: AsFd>(fd: &Fd, value: bool) -> io::Result<()> {
+pub fn ioctl_fionbio<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
     imp::io::syscalls::ioctl_fionbio(fd.as_fd(), value)
 }
 
@@ -71,7 +71,7 @@ pub fn ioctl_fionbio<Fd: AsFd>(fd: &Fd, value: bool) -> io::Result<()> {
 ))]
 #[inline]
 #[doc(alias = "TIOCEXCL")]
-pub fn ioctl_tiocexcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
+pub fn ioctl_tiocexcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     imp::io::syscalls::ioctl_tiocexcl(fd.as_fd())
 }
 
@@ -87,7 +87,7 @@ pub fn ioctl_tiocexcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 ))]
 #[inline]
 #[doc(alias = "TIOCNXCL")]
-pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
+pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     imp::io::syscalls::ioctl_tiocnxcl(fd.as_fd())
 }
 
@@ -103,7 +103,7 @@ pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 #[cfg(not(any(windows, target_os = "redox")))]
 #[inline]
 #[doc(alias = "FIONREAD")]
-pub fn ioctl_fionread<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
+pub fn ioctl_fionread<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
     imp::io::syscalls::ioctl_fionread(fd.as_fd())
 }
 
@@ -111,7 +111,7 @@ pub fn ioctl_fionread<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 #[doc(alias = "BLKSSZGET")]
-pub fn ioctl_blksszget<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
+pub fn ioctl_blksszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
     imp::io::syscalls::ioctl_blksszget(fd.as_fd())
 }
 
@@ -119,6 +119,6 @@ pub fn ioctl_blksszget<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 #[doc(alias = "BLKPBSZGET")]
-pub fn ioctl_blkpbszget<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
+pub fn ioctl_blkpbszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
     imp::io::syscalls::ioctl_blkpbszget(fd.as_fd())
 }

@@ -18,7 +18,7 @@ use imp::fs::{FdFlags, OFlags};
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[inline]
 #[doc(alias = "F_GETFD")]
-pub fn fcntl_getfd<Fd: AsFd>(fd: &Fd) -> io::Result<FdFlags> {
+pub fn fcntl_getfd<Fd: AsFd>(fd: Fd) -> io::Result<FdFlags> {
     imp::fs::syscalls::fcntl_getfd(fd.as_fd())
 }
 
@@ -32,7 +32,7 @@ pub fn fcntl_getfd<Fd: AsFd>(fd: &Fd) -> io::Result<FdFlags> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[inline]
 #[doc(alias = "F_SETFD")]
-pub fn fcntl_setfd<Fd: AsFd>(fd: &Fd, flags: FdFlags) -> io::Result<()> {
+pub fn fcntl_setfd<Fd: AsFd>(fd: Fd, flags: FdFlags) -> io::Result<()> {
     imp::fs::syscalls::fcntl_setfd(fd.as_fd(), flags)
 }
 
@@ -46,7 +46,7 @@ pub fn fcntl_setfd<Fd: AsFd>(fd: &Fd, flags: FdFlags) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[inline]
 #[doc(alias = "F_GETFL")]
-pub fn fcntl_getfl<Fd: AsFd>(fd: &Fd) -> io::Result<OFlags> {
+pub fn fcntl_getfl<Fd: AsFd>(fd: Fd) -> io::Result<OFlags> {
     imp::fs::syscalls::fcntl_getfl(fd.as_fd())
 }
 
@@ -60,7 +60,7 @@ pub fn fcntl_getfl<Fd: AsFd>(fd: &Fd) -> io::Result<OFlags> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[inline]
 #[doc(alias = "F_SETFL")]
-pub fn fcntl_setfl<Fd: AsFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
+pub fn fcntl_setfl<Fd: AsFd>(fd: Fd, flags: OFlags) -> io::Result<()> {
     imp::fs::syscalls::fcntl_setfl(fd.as_fd(), flags)
 }
 
@@ -78,7 +78,7 @@ pub fn fcntl_setfl<Fd: AsFd>(fd: &Fd, flags: OFlags) -> io::Result<()> {
 ))]
 #[inline]
 #[doc(alias = "F_GET_SEALS")]
-pub fn fcntl_get_seals<Fd: AsFd>(fd: &Fd) -> io::Result<SealFlags> {
+pub fn fcntl_get_seals<Fd: AsFd>(fd: Fd) -> io::Result<SealFlags> {
     imp::fs::syscalls::fcntl_get_seals(fd.as_fd())
 }
 
@@ -104,7 +104,7 @@ pub use imp::fs::SealFlags;
 ))]
 #[inline]
 #[doc(alias = "F_ADD_SEALS")]
-pub fn fcntl_add_seals<Fd: AsFd>(fd: &Fd, seals: SealFlags) -> io::Result<()> {
+pub fn fcntl_add_seals<Fd: AsFd>(fd: Fd, seals: SealFlags) -> io::Result<()> {
     imp::fs::syscalls::fcntl_add_seals(fd.as_fd(), seals)
 }
 
@@ -126,6 +126,6 @@ pub fn fcntl_add_seals<Fd: AsFd>(fd: &Fd, seals: SealFlags) -> io::Result<()> {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[doc(alias = "F_DUPFD_CLOEXEC")]
-pub fn fcntl_dupfd_cloexec<Fd: AsFd>(fd: &Fd, min: RawFd) -> io::Result<OwnedFd> {
+pub fn fcntl_dupfd_cloexec<Fd: AsFd>(fd: Fd, min: RawFd) -> io::Result<OwnedFd> {
     imp::fs::syscalls::fcntl_dupfd_cloexec(fd.as_fd(), min)
 }

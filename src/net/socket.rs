@@ -69,7 +69,7 @@ pub fn socket_with(
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/bind.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
-pub fn bind<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddr) -> io::Result<()> {
+pub fn bind<Fd: AsFd>(sockfd: Fd, addr: &SocketAddr) -> io::Result<()> {
     _bind(sockfd.as_fd(), addr)
 }
 
@@ -89,7 +89,7 @@ fn _bind(sockfd: BorrowedFd<'_>, addr: &SocketAddr) -> io::Result<()> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/bind.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
 #[doc(alias = "bind")]
-pub fn bind_any<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrAny) -> io::Result<()> {
+pub fn bind_any<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrAny) -> io::Result<()> {
     _bind_any(sockfd.as_fd(), addr)
 }
 
@@ -115,7 +115,7 @@ fn _bind_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> {
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-bind
 #[inline]
 #[doc(alias = "bind")]
-pub fn bind_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> {
+pub fn bind_v4<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
     imp::net::syscalls::bind_v4(sockfd.as_fd(), addr)
 }
 
@@ -132,7 +132,7 @@ pub fn bind_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> {
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-bind
 #[inline]
 #[doc(alias = "bind")]
-pub fn bind_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
+pub fn bind_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
     imp::net::syscalls::bind_v6(sockfd.as_fd(), addr)
 }
 
@@ -150,7 +150,7 @@ pub fn bind_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
 #[inline]
 #[doc(alias = "bind")]
 #[cfg(unix)]
-pub fn bind_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()> {
+pub fn bind_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     imp::net::syscalls::bind_unix(sockfd.as_fd(), addr)
 }
 
@@ -162,7 +162,7 @@ pub fn bind_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()>
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/connect.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
-pub fn connect<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddr) -> io::Result<()> {
+pub fn connect<Fd: AsFd>(sockfd: Fd, addr: &SocketAddr) -> io::Result<()> {
     _connect(sockfd.as_fd(), addr)
 }
 
@@ -182,7 +182,7 @@ fn _connect(sockfd: BorrowedFd<'_>, addr: &SocketAddr) -> io::Result<()> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/connect.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
 #[doc(alias = "connect")]
-pub fn connect_any<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrAny) -> io::Result<()> {
+pub fn connect_any<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrAny) -> io::Result<()> {
     _connect_any(sockfd.as_fd(), addr)
 }
 
@@ -208,7 +208,7 @@ fn _connect_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> 
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect
 #[inline]
 #[doc(alias = "connect")]
-pub fn connect_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> {
+pub fn connect_v4<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
     imp::net::syscalls::connect_v4(sockfd.as_fd(), addr)
 }
 
@@ -225,7 +225,7 @@ pub fn connect_v4<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV4) -> io::Result<()> 
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect
 #[inline]
 #[doc(alias = "connect")]
-pub fn connect_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> {
+pub fn connect_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
     imp::net::syscalls::connect_v6(sockfd.as_fd(), addr)
 }
 
@@ -241,7 +241,7 @@ pub fn connect_v6<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrV6) -> io::Result<()> 
 #[inline]
 #[doc(alias = "connect")]
 #[cfg(unix)]
-pub fn connect_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<()> {
+pub fn connect_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     imp::net::syscalls::connect_unix(sockfd.as_fd(), addr)
 }
 
@@ -256,7 +256,7 @@ pub fn connect_unix<Fd: AsFd>(sockfd: &Fd, addr: &SocketAddrUnix) -> io::Result<
 /// [Linux]: https://man7.org/linux/man-pages/man2/listen.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-listen
 #[inline]
-pub fn listen<Fd: AsFd>(sockfd: &Fd, backlog: i32) -> io::Result<()> {
+pub fn listen<Fd: AsFd>(sockfd: Fd, backlog: i32) -> io::Result<()> {
     imp::net::syscalls::listen(sockfd.as_fd(), backlog)
 }
 
@@ -278,7 +278,7 @@ pub fn listen<Fd: AsFd>(sockfd: &Fd, backlog: i32) -> io::Result<()> {
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-accept
 #[inline]
 #[doc(alias = "accept4")]
-pub fn accept<Fd: AsFd>(sockfd: &Fd) -> io::Result<OwnedFd> {
+pub fn accept<Fd: AsFd>(sockfd: Fd) -> io::Result<OwnedFd> {
     imp::net::syscalls::accept(sockfd.as_fd())
 }
 
@@ -304,7 +304,7 @@ pub fn accept<Fd: AsFd>(sockfd: &Fd) -> io::Result<OwnedFd> {
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-accept
 #[inline]
 #[doc(alias = "accept4")]
-pub fn accept_with<Fd: AsFd>(sockfd: &Fd, flags: AcceptFlags) -> io::Result<OwnedFd> {
+pub fn accept_with<Fd: AsFd>(sockfd: Fd, flags: AcceptFlags) -> io::Result<OwnedFd> {
     imp::net::syscalls::accept_with(sockfd.as_fd(), flags)
 }
 
@@ -323,7 +323,7 @@ pub fn accept_with<Fd: AsFd>(sockfd: &Fd, flags: AcceptFlags) -> io::Result<Owne
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-accept
 #[inline]
 #[doc(alias = "accept4")]
-pub fn acceptfrom<Fd: AsFd>(sockfd: &Fd) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
+pub fn acceptfrom<Fd: AsFd>(sockfd: Fd) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     imp::net::syscalls::acceptfrom(sockfd.as_fd())
 }
 
@@ -346,7 +346,7 @@ pub fn acceptfrom<Fd: AsFd>(sockfd: &Fd) -> io::Result<(OwnedFd, Option<SocketAd
 #[inline]
 #[doc(alias = "accept4")]
 pub fn acceptfrom_with<Fd: AsFd>(
-    sockfd: &Fd,
+    sockfd: Fd,
     flags: AcceptFlags,
 ) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     imp::net::syscalls::acceptfrom_with(sockfd.as_fd(), flags)
@@ -363,7 +363,7 @@ pub fn acceptfrom_with<Fd: AsFd>(
 /// [Linux]: https://man7.org/linux/man-pages/man2/shutdown.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-shutdown
 #[inline]
-pub fn shutdown<Fd: AsFd>(sockfd: &Fd, how: Shutdown) -> io::Result<()> {
+pub fn shutdown<Fd: AsFd>(sockfd: Fd, how: Shutdown) -> io::Result<()> {
     imp::net::syscalls::shutdown(sockfd.as_fd(), how)
 }
 
@@ -378,7 +378,7 @@ pub fn shutdown<Fd: AsFd>(sockfd: &Fd, how: Shutdown) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/getsockname.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockname
 #[inline]
-pub fn getsockname<Fd: AsFd>(sockfd: &Fd) -> io::Result<SocketAddrAny> {
+pub fn getsockname<Fd: AsFd>(sockfd: Fd) -> io::Result<SocketAddrAny> {
     imp::net::syscalls::getsockname(sockfd.as_fd())
 }
 
@@ -394,6 +394,6 @@ pub fn getsockname<Fd: AsFd>(sockfd: &Fd) -> io::Result<SocketAddrAny> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/getpeername.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getpeername
 #[inline]
-pub fn getpeername<Fd: AsFd>(sockfd: &Fd) -> io::Result<Option<SocketAddrAny>> {
+pub fn getpeername<Fd: AsFd>(sockfd: Fd) -> io::Result<Option<SocketAddrAny>> {
     imp::net::syscalls::getpeername(sockfd.as_fd())
 }

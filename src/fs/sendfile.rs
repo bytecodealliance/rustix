@@ -10,8 +10,8 @@ use imp::fd::AsFd;
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 #[inline]
 pub fn sendfile<OutFd: AsFd, InFd: AsFd>(
-    out_fd: &OutFd,
-    in_fd: &InFd,
+    out_fd: OutFd,
+    in_fd: InFd,
     offset: Option<&mut u64>,
     count: usize,
 ) -> io::Result<usize> {

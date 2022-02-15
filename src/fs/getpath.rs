@@ -9,6 +9,6 @@ use imp::fd::AsFd;
 ///
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
 #[inline]
-pub fn getpath<Fd: AsFd>(fd: &Fd) -> io::Result<ZString> {
+pub fn getpath<Fd: AsFd>(fd: Fd) -> io::Result<ZString> {
     imp::fs::syscalls::getpath(fd.as_fd())
 }
