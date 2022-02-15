@@ -37,8 +37,15 @@ linux-raw-sys = { version = "0.0.40", default-features = false, features = ["gen
 # For the libc backend on Unix platforms, use the libc crate, and errno for
 # setting `errno`.  Don't try to enable these directly; instead, enable
 # via `use-libc` feature.
+[target.'cfg(target_os = "linux")'.dependencies]
+# Keep these in sync with the non-Linux case below
 errno = { version = "0.2.8", default-features = false, optional = true }
 libc = { version = "0.2.114", features = ["extra_traits"], optional = true }
+
+# libc/errno are hard required on non-Linux
+[target.'cfg(not(target_os = "linux"))'.dependencies]
+errno = { version = "0.2.8", default-features = false }
+libc = { version = "0.2.114", features = ["extra_traits"] }
 
 # For the libc backend on Windows, use the Winsock2 API in winapi.
 [target.'cfg(windows)'.dependencies]
