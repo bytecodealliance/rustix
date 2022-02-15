@@ -208,7 +208,7 @@ fn is_mountpoint(file: BorrowedFd<'_>) -> bool {
 }
 
 /// Open a directory in `/proc`, mapping all errors to `io::Error::NOTSUP`.
-fn proc_opendirat<P: crate::path::Arg, Fd: AsFd>(dirfd: &Fd, path: P) -> io::Result<OwnedFd> {
+fn proc_opendirat<P: crate::path::Arg, Fd: AsFd>(dirfd: Fd, path: P) -> io::Result<OwnedFd> {
     // We could add `PATH`|`NOATIME` here but Linux 2.6.32 doesn't support it.
     let oflags = OFlags::NOFOLLOW | OFlags::DIRECTORY | OFlags::CLOEXEC | OFlags::NOCTTY;
     openat(dirfd, path, oflags, Mode::empty()).map_err(|_err| io::Error::NOTSUP)
@@ -369,7 +369,7 @@ fn proc_self_fdinfo() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 #[inline]
-pub fn proc_self_fdinfo_fd<Fd: AsFd>(fd: &Fd) -> io::Result<OwnedFd> {
+pub fn proc_self_fdinfo_fd<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
     _proc_self_fdinfo(fd.as_fd())
 }
 

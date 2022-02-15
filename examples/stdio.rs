@@ -25,7 +25,8 @@ fn main() -> io::Result<()> {
 }
 
 #[cfg(not(windows))]
-fn show<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
+fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
+    let fd = fd.as_fd();
     if isatty(fd) {
         #[cfg(any(all(linux_raw, feature = "procfs"), libc))]
         println!(" - ttyname: {}", ttyname(fd, Vec::new())?.to_string_lossy());

@@ -38,7 +38,7 @@ pub unsafe fn mmap<Fd: AsFd>(
     len: usize,
     prot: ProtFlags,
     flags: MapFlags,
-    fd: &Fd,
+    fd: Fd,
     offset: u64,
 ) -> io::Result<*mut c_void> {
     imp::io::syscalls::mmap(ptr, len, prot, flags, fd.as_fd(), offset)

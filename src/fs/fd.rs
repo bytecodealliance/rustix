@@ -35,7 +35,7 @@ use imp::fs::{FlockOperation, Mode};
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/lseek.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/lseek.2.html
 #[inline]
-pub fn seek<Fd: AsFd>(fd: &Fd, pos: SeekFrom) -> io::Result<u64> {
+pub fn seek<Fd: AsFd>(fd: Fd, pos: SeekFrom) -> io::Result<u64> {
     imp::fs::syscalls::seek(fd.as_fd(), pos)
 }
 
@@ -52,7 +52,7 @@ pub fn seek<Fd: AsFd>(fd: &Fd, pos: SeekFrom) -> io::Result<u64> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/lseek.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/lseek.2.html
 #[inline]
-pub fn tell<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
+pub fn tell<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
     imp::fs::syscalls::tell(fd.as_fd())
 }
 
@@ -69,7 +69,7 @@ pub fn tell<Fd: AsFd>(fd: &Fd) -> io::Result<u64> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/fchmod.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn fchmod<Fd: AsFd>(fd: &Fd, mode: Mode) -> io::Result<()> {
+pub fn fchmod<Fd: AsFd>(fd: Fd, mode: Mode) -> io::Result<()> {
     imp::fs::syscalls::fchmod(fd.as_fd(), mode)
 }
 
@@ -83,7 +83,7 @@ pub fn fchmod<Fd: AsFd>(fd: &Fd, mode: Mode) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/fchown.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn fchown<Fd: AsFd>(fd: &Fd, owner: Uid, group: Gid) -> io::Result<()> {
+pub fn fchown<Fd: AsFd>(fd: Fd, owner: Uid, group: Gid) -> io::Result<()> {
     imp::fs::syscalls::fchown(fd.as_fd(), owner, group)
 }
 
@@ -101,7 +101,7 @@ pub fn fchown<Fd: AsFd>(fd: &Fd, owner: Uid, group: Gid) -> io::Result<()> {
 /// [`Mode::from_raw_mode`]: crate::fs::Mode::from_raw_mode
 /// [`FileType::from_raw_mode`]: crate::fs::FileType::from_raw_mode
 #[inline]
-pub fn fstat<Fd: AsFd>(fd: &Fd) -> io::Result<Stat> {
+pub fn fstat<Fd: AsFd>(fd: Fd) -> io::Result<Stat> {
     imp::fs::syscalls::fstat(fd.as_fd())
 }
 
@@ -118,7 +118,7 @@ pub fn fstat<Fd: AsFd>(fd: &Fd) -> io::Result<Stat> {
     target_os = "wasi"
 )))] // not implemented in libc for netbsd yet
 #[inline]
-pub fn fstatfs<Fd: AsFd>(fd: &Fd) -> io::Result<StatFs> {
+pub fn fstatfs<Fd: AsFd>(fd: Fd) -> io::Result<StatFs> {
     imp::fs::syscalls::fstatfs(fd.as_fd())
 }
 
@@ -131,7 +131,7 @@ pub fn fstatfs<Fd: AsFd>(fd: &Fd) -> io::Result<StatFs> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/futimens.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/utimensat.2.html
 #[inline]
-pub fn futimens<Fd: AsFd>(fd: &Fd, times: &Timestamps) -> io::Result<()> {
+pub fn futimens<Fd: AsFd>(fd: Fd, times: &Timestamps) -> io::Result<()> {
     imp::fs::syscalls::futimens(fd.as_fd(), times)
 }
 
@@ -159,7 +159,7 @@ pub fn futimens<Fd: AsFd>(fd: &Fd, times: &Timestamps) -> io::Result<()> {
 )))] // not implemented in libc for netbsd yet
 #[inline]
 #[doc(alias = "posix_fallocate")]
-pub fn fallocate<Fd: AsFd>(fd: &Fd, mode: FallocateFlags, offset: u64, len: u64) -> io::Result<()> {
+pub fn fallocate<Fd: AsFd>(fd: Fd, mode: FallocateFlags, offset: u64, len: u64) -> io::Result<()> {
     imp::fs::syscalls::fallocate(fd.as_fd(), mode, offset, len)
 }
 
@@ -170,7 +170,7 @@ pub fn fallocate<Fd: AsFd>(fd: &Fd, mode: FallocateFlags, offset: u64, len: u64)
 /// example, it doesn't reflect whether sockets have been shut down; for
 /// general I/O handle support, use [`io::is_read_write`].
 #[inline]
-pub fn is_file_read_write<Fd: AsFd>(fd: &Fd) -> io::Result<(bool, bool)> {
+pub fn is_file_read_write<Fd: AsFd>(fd: Fd) -> io::Result<(bool, bool)> {
     _is_file_read_write(fd.as_fd())
 }
 
@@ -212,7 +212,7 @@ pub(crate) fn _is_file_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)
 /// [Linux]: https://man7.org/linux/man-pages/man2/fsync.2.html
 /// [`fcntl_fullfsync`]: https://docs.rs/rustix/*/x86_64-apple-darwin/rustix/fs/fn.fcntl_fullfsync.html
 #[inline]
-pub fn fsync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
+pub fn fsync<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     imp::fs::syscalls::fsync(fd.as_fd())
 }
 
@@ -232,7 +232,7 @@ pub fn fsync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
     target_os = "redox"
 )))]
 #[inline]
-pub fn fdatasync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
+pub fn fdatasync<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     imp::fs::syscalls::fdatasync(fd.as_fd())
 }
 
@@ -245,7 +245,7 @@ pub fn fdatasync<Fd: AsFd>(fd: &Fd) -> io::Result<()> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/ftruncate.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/ftruncate.2.html
 #[inline]
-pub fn ftruncate<Fd: AsFd>(fd: &Fd, length: u64) -> io::Result<()> {
+pub fn ftruncate<Fd: AsFd>(fd: Fd, length: u64) -> io::Result<()> {
     imp::fs::syscalls::ftruncate(fd.as_fd(), length)
 }
 
@@ -257,6 +257,6 @@ pub fn ftruncate<Fd: AsFd>(fd: &Fd, length: u64) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/flock.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn flock<Fd: AsFd>(fd: &Fd, operation: FlockOperation) -> io::Result<()> {
+pub fn flock<Fd: AsFd>(fd: Fd, operation: FlockOperation) -> io::Result<()> {
     imp::fs::syscalls::flock(fd.as_fd(), operation)
 }

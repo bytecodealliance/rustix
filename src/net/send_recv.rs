@@ -19,7 +19,7 @@ pub use imp::net::{RecvFlags, SendFlags};
 /// [Linux]: https://man7.org/linux/man-pages/man2/recv.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recv
 #[inline]
-pub fn recv<Fd: AsFd>(fd: &Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
+pub fn recv<Fd: AsFd>(fd: Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
     imp::net::syscalls::recv(fd.as_fd(), buf, flags)
 }
 
@@ -34,7 +34,7 @@ pub fn recv<Fd: AsFd>(fd: &Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<u
 /// [Linux]: https://man7.org/linux/man-pages/man2/send.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-send
 #[inline]
-pub fn send<Fd: AsFd>(fd: &Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize> {
+pub fn send<Fd: AsFd>(fd: Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize> {
     imp::net::syscalls::send(fd.as_fd(), buf, flags)
 }
 
@@ -51,7 +51,7 @@ pub fn send<Fd: AsFd>(fd: &Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recvfrom
 #[inline]
 pub fn recvfrom<Fd: AsFd>(
-    fd: &Fd,
+    fd: Fd,
     buf: &mut [u8],
     flags: RecvFlags,
 ) -> io::Result<(usize, Option<SocketAddrAny>)> {
@@ -68,7 +68,7 @@ pub fn recvfrom<Fd: AsFd>(
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendto.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
 pub fn sendto<Fd: AsFd>(
-    fd: &Fd,
+    fd: Fd,
     buf: &[u8],
     flags: SendFlags,
     addr: &SocketAddr,
@@ -98,7 +98,7 @@ fn _sendto(
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendto.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
 pub fn sendto_any<Fd: AsFd>(
-    fd: &Fd,
+    fd: Fd,
     buf: &[u8],
     flags: SendFlags,
     addr: &SocketAddrAny,
@@ -134,7 +134,7 @@ fn _sendto_any(
 #[inline]
 #[doc(alias = "sendto")]
 pub fn sendto_v4<Fd: AsFd>(
-    fd: &Fd,
+    fd: Fd,
     buf: &[u8],
     flags: SendFlags,
     addr: &SocketAddrV4,
@@ -156,7 +156,7 @@ pub fn sendto_v4<Fd: AsFd>(
 #[inline]
 #[doc(alias = "sendto")]
 pub fn sendto_v6<Fd: AsFd>(
-    fd: &Fd,
+    fd: Fd,
     buf: &[u8],
     flags: SendFlags,
     addr: &SocketAddrV6,
@@ -179,7 +179,7 @@ pub fn sendto_v6<Fd: AsFd>(
 #[doc(alias = "sendto")]
 #[cfg(unix)]
 pub fn sendto_unix<Fd: AsFd>(
-    fd: &Fd,
+    fd: Fd,
     buf: &[u8],
     flags: SendFlags,
     addr: &SocketAddrUnix,

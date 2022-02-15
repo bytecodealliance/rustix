@@ -40,7 +40,7 @@ use imp::fs::{Dev, FileType};
 /// [Linux]: https://man7.org/linux/man-pages/man2/open.2.html
 #[inline]
 pub fn openat<P: path::Arg, Fd: AsFd>(
-    dirfd: &Fd,
+    dirfd: Fd,
     path: P,
     oflags: OFlags,
     create_mode: Mode,
@@ -60,7 +60,7 @@ pub fn openat<P: path::Arg, Fd: AsFd>(
 /// [Linux]: https://man7.org/linux/man-pages/man2/readlinkat.2.html
 #[inline]
 pub fn readlinkat<P: path::Arg, Fd: AsFd, B: Into<Vec<u8>>>(
-    dirfd: &Fd,
+    dirfd: Fd,
     path: P,
     reuse: B,
 ) -> io::Result<ZString> {
@@ -97,7 +97,7 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &ZStr, mut buffer: Vec<u8>) -> io::R
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mkdirat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mkdirat.2.html
 #[inline]
-pub fn mkdirat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
+pub fn mkdirat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, mode: Mode) -> io::Result<()> {
     path.into_with_z_str(|path| imp::fs::syscalls::mkdirat(dirfd.as_fd(), path, mode))
 }
 
@@ -112,9 +112,9 @@ pub fn mkdirat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> io::R
 /// [Linux]: https://man7.org/linux/man-pages/man2/linkat.2.html
 #[inline]
 pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
-    old_dirfd: &PFd,
+    old_dirfd: PFd,
     old_path: P,
-    new_dirfd: &QFd,
+    new_dirfd: QFd,
     new_path: Q,
     flags: AtFlags,
 ) -> io::Result<()> {
@@ -144,7 +144,7 @@ pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/unlinkat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/unlinkat.2.html
 #[inline]
-pub fn unlinkat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags) -> io::Result<()> {
+pub fn unlinkat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> io::Result<()> {
     path.into_with_z_str(|path| imp::fs::syscalls::unlinkat(dirfd.as_fd(), path, flags))
 }
 
@@ -159,9 +159,9 @@ pub fn unlinkat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags) -> 
 /// [Linux]: https://man7.org/linux/man-pages/man2/renameat.2.html
 #[inline]
 pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
-    old_dirfd: &PFd,
+    old_dirfd: PFd,
     old_path: P,
-    new_dirfd: &QFd,
+    new_dirfd: QFd,
     new_path: Q,
 ) -> io::Result<()> {
     old_path.into_with_z_str(|old_path| {
@@ -182,9 +182,9 @@ pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
 #[inline]
 #[doc(alias = "renameat2")]
 pub fn renameat_with<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
-    old_dirfd: &PFd,
+    old_dirfd: PFd,
     old_path: P,
-    new_dirfd: &QFd,
+    new_dirfd: QFd,
     new_path: Q,
     flags: RenameFlags,
 ) -> io::Result<()> {
@@ -212,7 +212,7 @@ pub fn renameat_with<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
 #[inline]
 pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsFd>(
     old_path: P,
-    new_dirfd: &Fd,
+    new_dirfd: Fd,
     new_path: Q,
 ) -> io::Result<()> {
     old_path.into_with_z_str(|old_path| {
@@ -237,7 +237,7 @@ pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsFd>(
 /// [`FileType::from_raw_mode`]: crate::fs::FileType::from_raw_mode
 #[inline]
 #[doc(alias = "fstatat")]
-pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags) -> io::Result<Stat> {
+pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> io::Result<Stat> {
     path.into_with_z_str(|path| imp::fs::syscalls::statat(dirfd.as_fd(), path, flags))
 }
 
@@ -254,7 +254,7 @@ pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, flags: AtFlags) -> io
 #[inline]
 #[doc(alias = "faccessat")]
 pub fn accessat<P: path::Arg, Fd: AsFd>(
-    dirfd: &Fd,
+    dirfd: Fd,
     path: P,
     access: Access,
     flags: AtFlags,
@@ -272,7 +272,7 @@ pub fn accessat<P: path::Arg, Fd: AsFd>(
 /// [Linux]: https://man7.org/linux/man-pages/man2/utimensat.2.html
 #[inline]
 pub fn utimensat<P: path::Arg, Fd: AsFd>(
-    dirfd: &Fd,
+    dirfd: Fd,
     path: P,
     times: &Timestamps,
     flags: AtFlags,
@@ -297,7 +297,7 @@ pub fn utimensat<P: path::Arg, Fd: AsFd>(
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[doc(alias = "fchmodat")]
-pub fn chmodat<P: path::Arg, Fd: AsFd>(dirfd: &Fd, path: P, mode: Mode) -> io::Result<()> {
+pub fn chmodat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, mode: Mode) -> io::Result<()> {
     path.into_with_z_str(|path| imp::fs::syscalls::chmodat(dirfd.as_fd(), path, mode))
 }
 
@@ -331,7 +331,7 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 #[inline]
 pub fn mknodat<P: path::Arg, Fd: AsFd>(
-    dirfd: &Fd,
+    dirfd: Fd,
     path: P,
     file_type: FileType,
     mode: Mode,
@@ -354,7 +354,7 @@ pub fn mknodat<P: path::Arg, Fd: AsFd>(
 #[cfg(not(any(target_os = "wasi")))]
 #[inline]
 pub fn chownat<P: path::Arg, Fd: AsFd>(
-    dirfd: &Fd,
+    dirfd: Fd,
     path: P,
     owner: Uid,
     group: Gid,
