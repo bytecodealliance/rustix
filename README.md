@@ -28,9 +28,10 @@ Windows, the rest of the APIs do not support Windows; for higher-level and more
 portable APIs built on this functionality, see the [`system-interface`],
 [`cap-std`], and [`fs-set-times`] crates, for example.
 
-`rustix` currently has two backends available: `linux_raw` and `libc`.
+`rustix` currently has two backends available exposed via the feature flags
+`backend-linux-raw` and `backend-libc`.
 
-The `linux_raw` backend is enabled by default on Linux on x86-64, x86, aarch64,
+`backend-linux-raw` is enabled by default; it works on Linux on x86-64, x86, aarch64,
 riscv64gc, powerpc64le, and arm (v5 onwards), and uses raw Linux system calls
 and vDSO calls. It supports stable as well as nightly and 1.48 Rust.
  - By being implemented entirely in Rust, avoiding `libc`, `errno`, and pthread
@@ -42,10 +43,13 @@ and vDSO calls. It supports stable as well as nightly and 1.48 Rust.
  - `linux_raw` uses a 64-bit `time_t` type on all platforms, avoiding the
    [y2038 bug].
 
-The `libc` backend is enabled by default on all other platforms, and can be set
-explicitly for any target by setting `RUSTFLAGS` to `--cfg=rustix_use_libc`. It
+On other platforms, you must enable the `use-libc` feature.  This
 uses the [`libc`] crate which provides bindings to native `libc` libraries, and
 [`winapi`] for Winsock2, and is portable to many OS's.
+
+At the current time, building with both `backend-linux-raw` and `backend-libc`
+will use libc (but still try to compile `linux-raw-sys`)  It's recommended to use e.g.:
+`rustix = { version = "...", default-features = false, features = ["std", "backend-libc"] }`
 
 ## Similar crates
 
