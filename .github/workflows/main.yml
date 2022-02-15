@@ -73,23 +73,22 @@ jobs:
         sudo apt-get install -y gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu gcc-arm-linux-gnueabi musl-tools
     - run: cargo check --workspace --release -vv
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl
+    - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-gnux32
+    - run: cargo check --workspace --release -vv --target=x86_64-linux-android
+    - run: cargo check --workspace --release -vv --target=i686-linux-android
+    - run: cargo check --workspace --release -vv --target=x86_64-apple-darwin
+    - run: cargo check --workspace --release -vv --target=x86_64-unknown-freebsd
+    - run: cargo check --workspace --release -vv --target=x86_64-unknown-netbsd
+    - run: cargo check --workspace --release -vv --target=x86_64-fuchsia
+    - run: cargo check --workspace --release -vv --target=x86_64-unknown-illumos
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-musl
+    - run: cargo check --workspace --release -vv --target=wasm32-unknown-emscripten
     - run: cargo check --workspace --release -vv --target=riscv64gc-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl
     - run: cargo check --workspace --release -vv --target=powerpc64le-unknown-linux-gnu
-    # List backends that require libc here
-    - run: cargo check --workspace --release --features backend-libc -vv --target=x86_64-linux-android
-    - run: cargo check --workspace --release --features backend-libc -vv --target=i686-linux-android
-    - run: cargo check --workspace --release --features backend-libc -vv --target=x86_64-unknown-linux-gnux32
-    - run: cargo check --workspace --release --features backend-libc -vv --target=x86_64-unknown-freebsd
-    - run: cargo check --workspace --release --features backend-libc -vv --target=x86_64-unknown-netbsd
-    - run: cargo check --workspace --release --features backend-libc -vv --target=x86_64-unknown-illumos
-    - run: cargo check --workspace --release --features backend-libc -vv --target=wasm32-unknown-emscripten
-    - run: cargo check --workspace --release --features backend-libc -vv --target=x86_64-apple-darwin
-    - run: cargo check --workspace --release --features backend-libc -vv --target=x86_64-fuchsia
-    - run: cargo check --workspace --release --features backend-libc -vv --target=armv5te-unknown-linux-gnueabi
+    - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi
 
   check_no_default_features:
     name: Check
@@ -115,7 +114,7 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - run: cargo check --workspace --release --no-default-features --features backend-linux-raw,itoa -vv
+    - run: cargo check --workspace --release --no-default-features --features itoa -vv
 
   check_nightly:
     name: Check on Rust nightly
@@ -139,8 +138,8 @@ jobs:
         rustup target add
         x86_64-unknown-redox
         wasm32-wasi
-    - run: cargo check --workspace --release --no-default-features --features=backend-libc,std -vv --target=x86_64-unknown-redox
-    - run: cargo check --workspace --release --no-default-features --features=backend-libc,std -vv --target=wasm32-wasi
+    - run: cargo check --workspace --release -vv --target=x86_64-unknown-redox
+    - run: cargo check --workspace --release -vv --target=wasm32-wasi
 
   check_tier3:
     name: Check selected Tier 3 platforms
@@ -164,7 +163,7 @@ jobs:
         # See the comments in the libc crate
         RUSTFLAGS: -A improper_ctypes_definitions
     - run: rustup component add rust-src
-    - run: cargo check -Z build-std=core,alloc,std --no-default-features --features=backend-libc,std --target x86_64-unknown-openbsd --all-targets
+    - run: cargo check -Z build-std=core,alloc,std --target x86_64-unknown-openbsd --all-targets
 
   test:
     name: Test
@@ -337,14 +336,7 @@ jobs:
 
     - run: |
         # Run the tests, and check the prebuilt release libraries.
-        features=all-impls,procfs,cc
-        # Use libc on macos/windows
-        case "${{ matrix.os }}" in
-          *windows*|*macos*) args="--no-default-features --features=backend-libc,$features";;
-          *) args="--features=$features"
-        esac
-
-        cargo test --verbose $args --release --workspace -- --nocapture
+        cargo test --verbose --features=all-impls,procfs,cc --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: 1
 
@@ -469,7 +461,7 @@ jobs:
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
-        cargo test --verbose --features=backend-libc,all-impls,procfs --release --workspace -- --nocapture
+        cargo test --verbose --features=use-libc,all-impls,procfs --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: 1
 

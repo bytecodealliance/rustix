@@ -6,12 +6,6 @@ use std::io::Write;
 /// The directory for out-of-line ("outline") libraries.
 const OUTLINE_PATH: &str = "src/imp/linux_raw/arch/outline";
 
-#[derive(PartialEq, Eq)]
-enum Backend {
-    Libc,
-    LinuxRaw,
-}
-
 fn main() {
     // Don't rerun this on changes other than build.rs, as we only depend on
     // the rustc version.
@@ -29,75 +23,65 @@ fn main() {
         use_feature_or_nothing("const_raw_ptr_deref");
     }
 
-    // Gather basic metadata
+    // Gather target information.
     let arch = var("CARGO_CFG_TARGET_ARCH").unwrap();
     let asm_name = format!("{}/{}.s", OUTLINE_PATH, arch);
+    let asm_name_present = std::fs::metadata(&asm_name).is_ok();
     let os_name = var("CARGO_CFG_TARGET_OS").unwrap();
     let pointer_width = var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap();
     let endian = var("CARGO_CFG_TARGET_ENDIAN").unwrap();
 
-    // Specific sub-architecture checks
+    // Check for special target variants.
     let is_x32 = arch == "x86_64" && pointer_width == "32";
     let is_arm64_ilp32 = arch == "aarch64" && pointer_width == "32";
     let is_powerpc64be = arch == "powerpc64" && endian == "big";
-    let can_do_raw_arch = !(is_x32 || is_arm64_ilp32 || is_powerpc64be);
+    let is_unsupported_abi = is_x32 || is_arm64_ilp32 || is_powerpc64be;
 
-    // Gather requested backend
-    let rustix_libc = var("CARGO_FEATURE_LIBC").is_ok();
-    let rustix_linux_raw = var("CARGO_FEATURE_BACKEND_LINUX_RAW").is_ok();
+    // Check for `--features=use-libc`. This allows crate users to enable the
+    // libc backend.
+    let feature_use_libc = var("CARGO_FEATURE_BACKEND_LIBC").is_ok();
 
-    let backend = if !(rustix_libc || rustix_linux_raw) {
-        // https://internals.rust-lang.org/t/clearer-display-of-build-script-errors-in-cargo/14222/5
-        eprintln!("error: At least one of use-libc or use-linux-raw must be set");
-        std::process::exit(1)
-    } else if rustix_libc {
-        // If backend-libc is set (as it must be explicitly), then it takes precedence
-        if rustix_linux_raw {
-            println!(
-                "cargo:warning=Both backend-libc and backend-linux-raw are set; defaulting to libc"
-            )
-        }
-        Backend::Libc
+    // Check for `RUSTFLAGS=--cfg=rustix_use_libc`. This allows end users to
+    // enable the libc backend even if rustix is depended on transitively.
+    let cfg_use_libc = var("CARGO_CFG_RUSTIX_USE_LIBC").is_ok();
+
+    // Check for eg. `RUSTFLAGS=--cfg=rustix_use_experimental_asm`. This is a
+    // rustc flag rather than a cargo feature flag because it's experimental
+    // and not something we want accidentally enabled via --all-features.
+    let rustix_use_experimental_asm = var("CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM").is_ok();
+
+    // If the libc backend is requested, or if we're not on a platform for
+    // which we have linux-raw support, use the libc backend.
+    //
+    // For now Android uses the libc backend; in theory it could use the
+    // linux-raw backend, but to do that we'll need to figure out how to
+    // install the toolchain for it.
+    if feature_use_libc
+        || cfg_use_libc
+        || os_name != "linux"
+        || !asm_name_present
+        || is_unsupported_abi
+    {
+        // Use the libc backend.
+        use_feature("libc");
     } else {
-        Backend::LinuxRaw
-    };
+        // Use the linux-raw backend.
+        use_feature("linux_raw");
+        use_feature_or_nothing("core_intrinsics");
 
-    // If rustix_use_libc is set, or if we're on an architecture/OS that doesn't
-    // have raw syscall support, use libc.
-    match backend {
-        Backend::Libc => {
-            use_feature("libc");
-        }
-        Backend::LinuxRaw => {
-            // In the future we could probably support `android` here too, but it looks like that
-            // needs at least a few fixes.
-            let can_use_linux_raw =
-                os_name == "linux" && std::fs::metadata(&asm_name).is_ok() && can_do_raw_arch;
-            if !can_use_linux_raw {
-                eprintln!(
-                    "backend-linux-raw feature is set, but not supported on OS {} and architecture {}",
-                    os_name, arch
-                );
-                std::process::exit(1)
+        // Use inline asm if we have it, or outline asm otherwise. On PowerPC,
+        // Rust's inline asm is considered experimental, so only use it if
+        // `--cfg=rustix_use_experimental_asm` is given.
+        if has_feature("asm") && (arch != "powerpc64" || rustix_use_experimental_asm) {
+            use_feature("asm");
+            if rustix_use_experimental_asm {
+                use_feature("asm_experimental_arch");
             }
-            // Otherwise, we currently default to the linux_raw backend.
-            let rustix_use_experimental_asm = var("CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM").is_ok();
-            use_feature("linux_raw");
-            use_feature_or_nothing("core_intrinsics");
-
-            // On PowerPC, Rust's inline asm is considered experimental, so only
-            // use it if `--cfg=rustix_use_experimental_asm` is given.
-            if has_feature("asm") && (arch != "powerpc64" || rustix_use_experimental_asm) {
-                use_feature("asm");
-                if rustix_use_experimental_asm {
-                    use_feature("asm_experimental_arch");
-                }
-            } else {
-                link_in_librustix_outline(&arch, &asm_name);
-            }
+        } else {
+            link_in_librustix_outline(&arch, &asm_name);
         }
     }
-    println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_LIBC");
+
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM");
 }
 
