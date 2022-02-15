@@ -73,22 +73,23 @@ jobs:
         sudo apt-get install -y gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu gcc-arm-linux-gnueabi musl-tools
     - run: cargo check --workspace --release -vv
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl
-    - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-gnux32
     - run: cargo check --workspace --release -vv --target=x86_64-linux-android
     - run: cargo check --workspace --release -vv --target=i686-linux-android
-    - run: cargo check --workspace --release -vv --target=x86_64-apple-darwin
-    - run: cargo check --workspace --release -vv --target=x86_64-unknown-freebsd
-    - run: cargo check --workspace --release -vv --target=x86_64-unknown-netbsd
-    - run: cargo check --workspace --release -vv --target=x86_64-fuchsia
-    - run: cargo check --workspace --release -vv --target=x86_64-unknown-illumos
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-musl
-    - run: cargo check --workspace --release -vv --target=wasm32-unknown-emscripten
     - run: cargo check --workspace --release -vv --target=riscv64gc-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl
     - run: cargo check --workspace --release -vv --target=powerpc64le-unknown-linux-gnu
-    - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi
+    # List backends that require libc here
+    - run: cargo check --workspace --release --features backend-libc -vv --target=x86_64-unknown-linux-gnux32
+    - run: cargo check --workspace --release --features backend-libc -vv --target=x86_64-unknown-freebsd
+    - run: cargo check --workspace --release --features backend-libc -vv --target=x86_64-unknown-netbsd
+    - run: cargo check --workspace --release --features backend-libc -vv --target=x86_64-unknown-illumos
+    - run: cargo check --workspace --release --features backend-libc -vv --target=wasm32-unknown-emscripten
+    - run: cargo check --workspace --release --features backend-libc -vv --target=x86_64-apple-darwin
+    - run: cargo check --workspace --release --features backend-libc -vv --target=x86_64-fuchsia
+    - run: cargo check --workspace --release --features backend-libc -vv --target=armv5te-unknown-linux-gnueabi
 
   check_no_default_features:
     name: Check
