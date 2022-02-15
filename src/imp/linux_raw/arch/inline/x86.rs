@@ -400,8 +400,10 @@ pub(in crate::imp) unsafe fn syscall5(
     a4: ArgReg<'_, A4>,
 ) -> RetReg<R0> {
     let r0;
-    // As in syscall 4, use xchg to handle a3. a4 should go in edi, and
-    // we can use that register as an operand.
+    // As in `syscall4`, use xchg to handle a3. a4 should go in edi, and we can
+    // use that register as an operand. Unlike in `indirect_syscall5`, we don't
+    // have a `callee` operand taking up a register, so we have enough
+    // registers and don't need to use a slice.
     asm!(
         "xchg esi, {a3}",
         "int $$0x80",
@@ -428,6 +430,7 @@ pub(in crate::imp) unsafe fn syscall5_readonly(
     a4: ArgReg<'_, A4>,
 ) -> RetReg<R0> {
     let r0;
+    // See the comments in `syscall5`.
     asm!(
         "xchg esi, {a3}",
         "int $$0x80",
@@ -455,14 +458,7 @@ pub(in crate::imp) unsafe fn syscall6(
     a5: ArgReg<'_, A5>,
 ) -> RetReg<R0> {
     let r0;
-    // Oof. a3 should go in esi, and a5 should go in ebp, and `asm!` won't
-    // let us use either of those registers as operands. And we can't request
-    // stack slots. And there are no other registers free. Use eax as a
-    // temporary pointer to a slice, since it gets clobbered as the return
-    // value anyway.
-    //
-    // This is another reason that syscalls should be compiler intrinsics
-    // rather than inline asm.
+    // See the comments in `indirect_syscall6`.
     asm!(
         "push ebp",
         "push esi",
@@ -494,6 +490,7 @@ pub(in crate::imp) unsafe fn syscall6_readonly(
     a5: ArgReg<'_, A5>,
 ) -> RetReg<R0> {
     let r0;
+    // See the comments in `indirect_syscall6`.
     asm!(
         "push ebp",
         "push esi",
