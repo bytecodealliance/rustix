@@ -337,7 +337,14 @@ jobs:
 
     - run: |
         # Run the tests, and check the prebuilt release libraries.
-        cargo test --verbose --features=all-impls,procfs,cc --release --workspace -- --nocapture
+        features=all-impls,procfs,cc
+        # Use libc on macos/windows
+        case "${{ matrix.os }}" in
+          *windows*|*macos*) args="--no-default-features --features=backend-libc,$features";;
+          *) args="--features=$features"
+        esac
+
+        cargo test --verbose $args --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: 1
 
