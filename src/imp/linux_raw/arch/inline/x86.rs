@@ -153,7 +153,6 @@ pub(in crate::imp) unsafe fn indirect_syscall5(
     // registers free. Use eax as a temporary pointer to a slice, since it
     // gets clobbered as the return value anyway.
     asm!(
-        "push ebp",
         "push esi",
         "push DWORD PTR [eax + 0]",
         "mov esi, DWORD PTR [eax + 4]",
@@ -161,7 +160,6 @@ pub(in crate::imp) unsafe fn indirect_syscall5(
         "call DWORD PTR [esp]",
         "pop esi",
         "pop esi",
-        "pop ebp",
         inout("eax") &[callee as usize, a3.to_asm(), nr.to_asm()] => r0,
         in("ebx") a0.to_asm(),
         in("ecx") a1.to_asm(),
