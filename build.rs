@@ -39,7 +39,7 @@ fn main() {
 
     // Check for `--features=use-libc`. This allows crate users to enable the
     // libc backend.
-    let feature_use_libc = var("CARGO_FEATURE_BACKEND_LIBC").is_ok();
+    let feature_use_libc = var("CARGO_FEATURE_USE_LIBC").is_ok();
 
     // Check for `RUSTFLAGS=--cfg=rustix_use_libc`. This allows end users to
     // enable the libc backend even if rustix is depended on transitively.
