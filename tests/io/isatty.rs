@@ -1,5 +1,5 @@
-use is_terminal::IsTerminal;
-use rustix::io::isatty;
+use rustix::fd::AsRawFd;
+use rustix::io::{ioctl_tiocgwinsz, isatty};
 use tempfile::{tempdir, TempDir};
 
 #[allow(unused)]
@@ -25,8 +25,24 @@ fn stdout_stderr_terminals() {
     {
         return;
     }
-    assert_eq!(isatty(&std::io::stdout()), std::io::stdout().is_terminal());
-    assert_eq!(isatty(&std::io::stderr()), std::io::stderr().is_terminal());
+
+    // Compare `isatty` against `libc::isatty`.
+    assert_eq!(isatty(&std::io::stdout()), unsafe {
+        libc::isatty(std::io::stdout().as_raw_fd()) != 0
+    });
+    assert_eq!(isatty(&std::io::stderr()), unsafe {
+        libc::isatty(std::io::stderr().as_raw_fd()) != 0
+    });
+
+    // Compare `isatty` against `ioctl_tiocgwinsz`.
+    assert_eq!(
+        isatty(&std::io::stdout()),
+        ioctl_tiocgwinsz(&std::io::stdout()).is_ok()
+    );
+    assert_eq!(
+        isatty(&std::io::stderr()),
+        ioctl_tiocgwinsz(&std::io::stderr()).is_ok()
+    );
 }
 
 #[test]
