@@ -2,25 +2,35 @@ use std::process::Command;
 
 #[test]
 fn test_backends() {
-    // Test the use-default crate.
-    assert!(
-        !has_dependency("test-crates/use-default", &[], &["RUSTFLAGS"], "libc"),
-        "use-default depends on libc"
-    );
-    assert!(
-        has_dependency(
-            "test-crates/use-default",
-            &[],
-            &["RUSTFLAGS"],
-            "linux-raw-sys"
-        ),
-        "use-default does not depend on linux-raw-sys"
-    );
+    // Pick an arbitrary platform where linux-raw is enabled by default and
+    // ensure that the use-default crate uses it.
+    #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
+    {
+        assert!(
+            !has_dependency("test-crates/use-default", &[], &["RUSTFLAGS"], "libc"),
+            "use-default depends on libc"
+        );
+        assert!(
+            has_dependency(
+                "test-crates/use-default",
+                &[],
+                &["RUSTFLAGS"],
+                "linux-raw-sys"
+            ),
+            "use-default does not depend on linux-raw-sys"
+        );
+    }
+
+    #[cfg(windows)]
+    let libc_dep = "winapi";
+    #[cfg(unix)]
+    let libc_dep = "libc";
 
     // Test the use-libc crate, which enables the "use-libc" cargo feature.
     assert!(
-        has_dependency("test-crates/use-libc", &[], &["RUSTFLAGS"], "libc"),
-        "use-libc doesn't depend on libc"
+        has_dependency("test-crates/use-libc", &[], &["RUSTFLAGS"], libc_dep),
+        "use-libc doesn't depend on {}",
+        libc_dep
     );
 
     // Test the use-default crate with --cfg=rustix_use_libc
@@ -29,9 +39,10 @@ fn test_backends() {
             "test-crates/use-default",
             &[("RUSTFLAGS", "--cfg=rustix_use_libc")],
             &[],
-            "libc"
+            libc_dep
         ),
-        "use-default with --cfg=rustix_use_libc does not depend on libc"
+        "use-default with --cfg=rustix_use_libc does not depend on {}",
+        libc_dep
     );
     assert!(
         !has_dependency(
