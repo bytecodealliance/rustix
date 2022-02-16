@@ -1,0 +1,9 @@
+[package]
+name = "use-default"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+# Request that rustix use the default backend.
+rustix = { path = "../.." }

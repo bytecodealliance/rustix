@@ -28,24 +28,33 @@ Windows, the rest of the APIs do not support Windows; for higher-level and more
 portable APIs built on this functionality, see the [`system-interface`],
 [`cap-std`], and [`fs-set-times`] crates, for example.
 
-`rustix` currently has two backends available: `linux_raw` and `libc`.
+`rustix` currently has two backends available:
 
-The `linux_raw` backend is enabled by default on Linux on x86-64, x86, aarch64,
-riscv64gc, powerpc64le, and arm (v5 onwards), and uses raw Linux system calls
-and vDSO calls. It supports stable as well as nightly and 1.48 Rust.
- - By being implemented entirely in Rust, avoiding `libc`, `errno`, and pthread
-   cancellation, and employing some specialized optimizations, most functions
-   compile down to very efficient code. On nightly Rust, they can often be
-   fully inlined into user code.
- - Most functions in `linux_raw` preserve memory and I/O safety all the way
-   down to the syscalls.
- - `linux_raw` uses a 64-bit `time_t` type on all platforms, avoiding the
-   [y2038 bug].
+ * linux-raw, which uses raw Linux system calls and vDSO calls, and is
+   supported on Linux on x86-64, x86, aarch64, riscv64gc, powerpc64le, and
+   arm (v5 onwards), with stable, nightly, and 1.48 Rust.
+    - By being implemented entirely in Rust, avoiding `libc`, `errno`, and pthread
+      cancellation, and employing some specialized optimizations, most functions
+      compile down to very efficient code. On nightly Rust, they can often be
+      fully inlined into user code.
+    - Most functions in `linux_raw` preserve memory and I/O safety all the way
+      down to the syscalls.
+    - `linux_raw` uses a 64-bit `time_t` type on all platforms, avoiding the
+      [y2038 bug].
 
-The `libc` backend is enabled by default on all other platforms, and can be set
-explicitly for any target by setting `RUSTFLAGS` to `--cfg=rustix_use_libc`. It
-uses the [`libc`] crate which provides bindings to native `libc` libraries, and
-[`winapi`] for Winsock2, and is portable to many OS's.
+ * libc, which uses the [`libc`] crate which provides bindings to native `libc`
+   libraries on Unix-family platforms, and [`winapi`] for Winsock2 on Windows,
+   and is portable to many OS's.
+
+The linux-raw backend is enabled by default on platforms which support it. To
+enable the libc backend instead, either enable the "use-libc" cargo feature:
+
+```toml
+rustix = { version = "...", features = ["use-libc"] }
+````
+
+or set the `RUSTFLAGS` environment variable to `--cfg=rustix_use_libc` when
+building.
 
 ## Similar crates
 

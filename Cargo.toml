@@ -12,7 +12,7 @@ repository = "https://github.com/bytecodealliance/rustix"
 edition = "2018"
 keywords = ["api", "file", "network", "safe", "syscall"]
 categories = ["os::unix-apis", "date-and-time", "filesystem", "network-programming"]
-exclude = ["/.*"]
+exclude = ["/.*", "test-crates"]
 
 [build-dependencies]
 cc = { version = "1.0.68", optional = true }
@@ -31,13 +31,17 @@ compiler_builtins = { version = '0.1.49', optional = true }
 [target.'cfg(any(target_os = "android", target_os = "linux"))'.dependencies]
 once_cell = { version = "1.5.2", optional = true }
 
-# For the linux_raw backend, linux-raw-sys provides Linux ABI details.
-[target.'cfg(all(not(rustix_use_libc), any(target_os = "linux"), any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64")))'.dependencies]
+# On Linux on selected architectures, we have two supported backends: linux_raw
+# and libc. The libc and errno dependencies are only enabled when the libc
+# backend is in use.
+[target.'cfg(all(not(rustix_use_libc), target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64")))'.dependencies]
 linux-raw-sys = { version = "0.0.40", default-features = false, features = ["general", "errno", "ioctl", "no_std"] }
+errno = { version = "0.2.8", default-features = false, optional = true }
+libc = { version = "0.2.114", features = ["extra_traits"], optional = true }
 
-# For the libc backend on Unix platforms, use the libc crate, and errno for
-# setting `errno`.
-[target.'cfg(any(rustix_use_libc, not(all(any(target_os = "linux"), any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64")))))'.dependencies]
+# On all other Unix-family platforms, we always use the libc backend, so enable
+# its dependencies unconditionally.
+[target.'cfg(any(rustix_use_libc, not(all(target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64")))))'.dependencies]
 errno = { version = "0.2.8", default-features = false }
 libc = { version = "0.2.114", features = ["extra_traits"] }
 
@@ -68,6 +72,9 @@ rustc-dep-of-std = [
     "bitflags/rustc-dep-of-std",
     "libc/rustc-dep-of-std",
 ]
+
+# Enable this to request the libc backend.
+use-libc = ["errno", "libc"]
 
 # Enable this to enable `proc_self_fd` (on Linux) and `ttyname`.
 procfs = ["once_cell", "itoa"]
