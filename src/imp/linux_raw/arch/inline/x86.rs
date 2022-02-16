@@ -24,7 +24,7 @@ pub(in crate::imp) unsafe fn indirect_syscall0(
         "call {callee}",
         callee = in(reg) callee,
         inlateout("eax") nr.to_asm() => r0,
-        options(nostack, preserves_flags)
+        options(preserves_flags)
     );
     FromAsm::from_asm(r0)
 }
@@ -42,7 +42,7 @@ pub(in crate::imp) unsafe fn indirect_syscall1(
         callee = in(reg) callee,
         inlateout("eax") nr.to_asm() => r0,
         in("ebx") a0.to_asm(),
-        options(nostack, preserves_flags)
+        options(preserves_flags)
     );
     FromAsm::from_asm(r0)
 }
@@ -77,7 +77,7 @@ pub(in crate::imp) unsafe fn indirect_syscall2(
         inlateout("eax") nr.to_asm() => r0,
         in("ebx") a0.to_asm(),
         in("ecx") a1.to_asm(),
-        options(nostack, preserves_flags)
+        options(preserves_flags)
     );
     FromAsm::from_asm(r0)
 }
@@ -99,7 +99,7 @@ pub(in crate::imp) unsafe fn indirect_syscall3(
         in("ebx") a0.to_asm(),
         in("ecx") a1.to_asm(),
         in("edx") a2.to_asm(),
-        options(nostack, preserves_flags)
+        options(preserves_flags)
     );
     FromAsm::from_asm(r0)
 }
@@ -131,7 +131,7 @@ pub(in crate::imp) unsafe fn indirect_syscall4(
         in("ebx") a0.to_asm(),
         in("ecx") a1.to_asm(),
         in("edx") a2.to_asm(),
-        options(nostack, preserves_flags)
+        options(preserves_flags)
     );
     FromAsm::from_asm(r0)
 }
