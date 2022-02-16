@@ -7,12 +7,13 @@ fn test_backends() {
     #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
     {
         assert!(
-            !has_dependency("test-crates/use-default", &[], &["RUSTFLAGS"], "libc"),
+            !has_dependency("test-crates/use-default", &[], &[], &["RUSTFLAGS"], "libc"),
             "use-default depends on libc"
         );
         assert!(
             has_dependency(
                 "test-crates/use-default",
+                &[],
                 &[],
                 &["RUSTFLAGS"],
                 "linux-raw-sys"
@@ -28,7 +29,7 @@ fn test_backends() {
 
     // Test the use-libc crate, which enables the "use-libc" cargo feature.
     assert!(
-        has_dependency("test-crates/use-libc", &[], &["RUSTFLAGS"], libc_dep),
+        has_dependency("test-crates/use-libc", &[], &[], &["RUSTFLAGS"], libc_dep),
         "use-libc doesn't depend on {}",
         libc_dep
     );
@@ -37,6 +38,7 @@ fn test_backends() {
     assert!(
         has_dependency(
             "test-crates/use-default",
+            &[],
             &[("RUSTFLAGS", "--cfg=rustix_use_libc")],
             &[],
             libc_dep
@@ -47,11 +49,25 @@ fn test_backends() {
     assert!(
         !has_dependency(
             "test-crates/use-default",
+            &[],
             &[("RUSTFLAGS", "--cfg=rustix_use_libc")],
             &[],
             "linux-raw-sys"
         ),
         "use-default with --cfg=rustix_use_libc depends on linux-raw-sys"
+    );
+
+    // Test the use-default crate with --features=rustix/use-libc
+    assert!(
+        has_dependency(
+            "test-crates/use-default",
+            &["--features=rustix/use-libc"],
+            &[],
+            &[],
+            libc_dep
+        ),
+        "use-default with --features=rustix/use-libc does not depend on {}",
+        libc_dep
     );
 }
 
@@ -60,6 +76,7 @@ fn test_backends() {
 /// variables `remove_envs` when running `cargo`.
 fn has_dependency(
     dir: &str,
+    args: &[&str],
     envs: &[(&str, &str)],
     remove_envs: &[&str],
     dependency: &str,
@@ -69,9 +86,11 @@ fn has_dependency(
     command
         .arg("tree")
         .arg("--quiet")
+        .arg("--edges=normal")
         .arg(&format!("--invert={}", dependency))
         .current_dir(dir);
 
+    command.args(args);
     for (key, value) in envs {
         command.env(key, value);
     }
