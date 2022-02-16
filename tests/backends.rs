@@ -55,6 +55,9 @@ fn test_backends() {
     );
 }
 
+/// Test whether the crate at directory `dir` has a dependency on `dependency`,
+/// setting the environment variables `envs` and unsetting the environment
+/// variables `remove_envs` when running `cargo`.
 fn has_dependency(
     dir: &str,
     envs: &[(&str, &str)],
@@ -78,5 +81,10 @@ fn has_dependency(
 
     let child = command.output().unwrap();
 
+    // `cargo tree --invert=foo` can fail in two different ways: it exits with
+    // a non-zero status if the dependency is not present in the Cargo.toml
+    // cofiguration, and it exists with a zero status and prints nothing if the
+    // dependency is present but optional and not enabled. So we check for
+    // both here.
     child.status.success() && !child.stdout.is_empty()
 }
