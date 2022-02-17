@@ -53,9 +53,11 @@ pub(crate) const SHUT_WR: i32 = WinSock::SD_SEND as _;
 
 pub(crate) use WinSock::{
     closesocket as close, ioctlsocket as ioctl, WSAPoll as poll, ADDRESS_FAMILY as sa_family_t,
-    ADDRINFOA as addrinfo, IN6_ADDR as in6_addr, IN_ADDR as in_addr, IPV6_MREQ as ipv6_mreq,
-    IP_MREQ as ip_mreq, SOCKADDR as sockaddr, SOCKADDR_IN as sockaddr_in,
-    SOCKADDR_IN6 as sockaddr_in6, SOCKADDR_STORAGE as sockaddr_storage, WSAEACCES as EACCES,
+    ADDRINFOA as addrinfo, IN6_ADDR as in6_addr, IN_ADDR as in_addr, IPPROTO_TCP, IPPROTO_UDP,
+    IPV6_MREQ as ipv6_mreq, IP_MREQ as ip_mreq, LPWSABUF, MSG_TRUNC, SOCKADDR as sockaddr,
+    SOCKADDR as sockaddr, SOCKADDR_IN as sockaddr_in, SOCKADDR_IN as sockaddr_in,
+    SOCKADDR_IN6 as sockaddr_in6, SOCKADDR_STORAGE as sockaddr_storage,
+    SOCKADDR_STORAGE_LH as sockaddr_storage, TCP_NODELAY, WSAEACCES as EACCES,
     WSAEADDRINUSE as EADDRINUSE, WSAEADDRNOTAVAIL as EADDRNOTAVAIL,
     WSAEAFNOSUPPORT as EAFNOSUPPORT, WSAEALREADY as EALREADY, WSAEBADF as EBADF,
     WSAECANCELLED as ECANCELED, WSAECONNABORTED as ECONNABORTED, WSAECONNREFUSED as ECONNREFUSED,
@@ -73,5 +75,78 @@ pub(crate) use WinSock::{
     WSAEPROVIDERFAILEDINIT as EPROVIDERFAILEDINIT, WSAEREFUSED as EREFUSED, WSAEREMOTE as EREMOTE,
     WSAESHUTDOWN as ESHUTDOWN, WSAESOCKTNOSUPPORT as ESOCKTNOSUPPORT, WSAESTALE as ESTALE,
     WSAETIMEDOUT as ETIMEDOUT, WSAETOOMANYREFS as ETOOMANYREFS, WSAEUSERS as EUSERS,
-    WSAEWOULDBLOCK as EWOULDBLOCK, WSAEWOULDBLOCK as EAGAIN, WSAPOLLFD as pollfd, *,
+    WSAEWOULDBLOCK as EWOULDBLOCK, WSAEWOULDBLOCK as EAGAIN, WSAMSG, WSAPOLLFD as pollfd, *,
 };
+
+#[allow(non_snake_case)]
+pub(crate) unsafe fn sendmsg(
+    handle: SOCKET,
+    lpBuffers: LPWSABUF,
+    dwBufferCount: c_ulong,
+    lpTo: *mut sockaddr,
+    iToLen: c_int,
+    dwFlags: c_ulong,
+) -> c_int {
+    let mut lpNumberOfBytesSent: c_ulong = 0;
+
+    // No overlapping IO support
+    let lpOverlapped = core::ptr::null_mut();
+    let lpCompletionRoutine = None;
+
+    // Uses WSASendTo, because WSASendMsg is only usable with Datagram or Raw
+    // Sockets. But the the expectation from sendmsg, is that it works with
+    // other sockets, like Stream based ones as well.
+    let res = WSASendTo(
+        handle,
+        lpBuffers,
+        dwBufferCount,
+        &mut lpNumberOfBytesSent,
+        dwFlags,
+        lpTo,
+        iToLen,
+        lpOverlapped,
+        lpCompletionRoutine,
+    );
+
+    if res == 0 {
+        lpNumberOfBytesSent as _
+    } else {
+        -1
+    }
+}
+
+#[allow(non_snake_case)]
+pub(crate) unsafe fn recvmsg(
+    s: SOCKET,
+    lpBuffers: LPWSABUF,
+    dwBufferCount: c_ulong,
+    lpFrom: *mut sockaddr,
+    iFromLen: *mut c_int,
+    lpFlags: *mut c_ulong,
+) -> c_int {
+    let mut lpNumberOfBytesRecvd: c_ulong = 0;
+
+    // No overlapping IO support
+    let lpOverlapped = core::ptr::null_mut();
+    let lpCompletionRoutine = None;
+
+    // Use WSARecvFrom, as WSARecMsg is a Microsoft specific extension, that is not
+    // supported by winapi.
+    let res = WSARecvFrom(
+        s,
+        lpBuffers,
+        dwBufferCount,
+        &mut lpNumberOfBytesRecvd,
+        lpFlags,
+        lpFrom,
+        iFromLen,
+        lpOverlapped,
+        lpCompletionRoutine,
+    );
+
+    if res == 0 {
+        lpNumberOfBytesRecvd as _
+    } else {
+        -1
+    }
+}

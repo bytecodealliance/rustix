@@ -5,10 +5,14 @@ use super::super::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_rec
 #[cfg(unix)]
 use super::addr::SocketAddrUnix;
 use super::ext::{in6_addr_new, in_addr_new};
+#[cfg(windows)]
+use super::ext::{in6_addr_s6_addr, in_addr_s_addr};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::read_sockaddr::initialize_family_to_unspec;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::read_sockaddr::{maybe_read_sockaddr_os, read_sockaddr_os};
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+use super::send_recv::msghdr_default;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::send_recv::{RecvFlags, SendFlags};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
@@ -16,8 +20,21 @@ use super::types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 use crate::fd::BorrowedFd;
-use crate::io::{self, OwnedFd};
-use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
+use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
+#[cfg(not(windows))]
+use crate::net::{
+    encode_msghdr_any_recv, encode_msghdr_unix_recv, encode_msghdr_unix_send,
+    encode_msghdr_v4_recv, encode_msghdr_v4_send, encode_msghdr_v6_recv, encode_msghdr_v6_send,
+    encode_socketaddr_unix_opt, RecvMsgUnix, RecvSocketAncillaryAny, RecvSocketAncillaryUnix,
+    RecvSocketAncillaryV4, RecvSocketAncillaryV6, SendSocketAncillaryUnix, SendSocketAncillaryV4,
+    SendSocketAncillaryV6,
+};
+use crate::net::{
+    encode_socketaddr_v4_opt, encode_socketaddr_v6_opt, RecvMsgAny, RecvMsgV4, RecvMsgV6,
+    SocketAddrAny, SocketAddrV4, SocketAddrV6,
+};
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+use crate::utils::as_mut_ptr;
 use crate::utils::as_ptr;
 use core::convert::TryInto;
 use core::mem::{size_of, MaybeUninit};
@@ -77,6 +94,317 @@ pub(crate) fn recvfrom(
             nread as usize,
             maybe_read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()),
         ))
+    }
+}
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+pub(crate) fn sendmsg_v4(
+    fd: BorrowedFd<'_>,
+    iovs: &[IoSlice<'_>],
+    addr: Option<&SocketAddrV4>,
+    ancillary: Option<&mut SendSocketAncillaryV4<'_>>,
+    flags: SendFlags,
+) -> io::Result<usize> {
+    let mut msg = msghdr_default();
+    let nwritten = unsafe {
+        let (msg_name, msg_namelen) = encode_socketaddr_v4_opt(addr);
+        encode_msghdr_v4_send(
+            as_mut_ptr(&mut msg),
+            iovs.as_ptr().cast(),
+            iovs.len(),
+            msg_name.as_ref().map(as_ptr),
+            msg_namelen,
+            ancillary,
+        );
+        ret_send_recv(c::sendmsg(borrowed_fd(fd), as_ptr(&msg), flags.bits()))?
+    };
+
+    Ok(nwritten as usize)
+}
+
+#[cfg(windows)]
+pub(crate) fn sendmsg_v4(
+    fd: BorrowedFd<'_>,
+    iovs: &[IoSlice<'_>],
+    addr: Option<&SocketAddrV4>,
+    flags: SendFlags,
+) -> io::Result<usize> {
+    let nwritten = unsafe {
+        let (mut msg_name, msg_namelen) = encode_socketaddr_v4_opt(addr);
+
+        ret_send_recv(c::sendmsg(
+            borrowed_fd(fd),
+            iovs as *const _ as *mut _,
+            iovs.len() as _,
+            msg_name
+                .as_mut()
+                .map(as_mut_ptr)
+                .unwrap_or_else(null_mut)
+                .cast(),
+            msg_namelen as _,
+            flags.bits() as _,
+        ))?
+    };
+    Ok(nwritten as usize)
+}
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+pub(crate) fn sendmsg_v6(
+    fd: BorrowedFd<'_>,
+    iovs: &[IoSlice<'_>],
+    addr: Option<&SocketAddrV6>,
+    ancillary: Option<&mut SendSocketAncillaryV6<'_>>,
+    flags: SendFlags,
+) -> io::Result<usize> {
+    let mut msg = msghdr_default();
+    let nwritten = unsafe {
+        let (msg_name, msg_namelen) = encode_socketaddr_v6_opt(addr);
+        encode_msghdr_v6_send(
+            as_mut_ptr(&mut msg),
+            iovs.as_ptr().cast(),
+            iovs.len(),
+            msg_name.as_ref().map(as_ptr),
+            msg_namelen,
+            ancillary,
+        );
+        ret_send_recv(c::sendmsg(borrowed_fd(fd), as_ptr(&msg), flags.bits()))?
+    };
+
+    Ok(nwritten as usize)
+}
+
+#[cfg(windows)]
+pub(crate) fn sendmsg_v6(
+    fd: BorrowedFd<'_>,
+    iovs: &[IoSlice<'_>],
+    addr: Option<&SocketAddrV6>,
+    flags: SendFlags,
+) -> io::Result<usize> {
+    let nwritten = unsafe {
+        let (mut msg_name, msg_namelen) = encode_socketaddr_v6_opt(addr);
+
+        ret_send_recv(c::sendmsg(
+            borrowed_fd(fd),
+            iovs as *const _ as *mut _,
+            iovs.len() as _,
+            msg_name
+                .as_mut()
+                .map(as_mut_ptr)
+                .unwrap_or_else(null_mut)
+                .cast(),
+            msg_namelen as _,
+            flags.bits() as _,
+        ))?
+    };
+    Ok(nwritten as usize)
+}
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+pub(crate) fn sendmsg_unix(
+    fd: BorrowedFd<'_>,
+    iovs: &[IoSlice<'_>],
+    addr: Option<&SocketAddrUnix>,
+    ancillary: Option<&mut SendSocketAncillaryUnix<'_>>,
+    flags: SendFlags,
+) -> io::Result<usize> {
+    let mut msg = msghdr_default();
+    let nwritten = unsafe {
+        let (msg_name, msg_namelen) = encode_socketaddr_unix_opt(addr);
+        encode_msghdr_unix_send(
+            as_mut_ptr(&mut msg),
+            iovs.as_ptr().cast(),
+            iovs.len(),
+            msg_name.as_ref().map(as_ptr),
+            msg_namelen,
+            ancillary,
+        );
+        ret_send_recv(c::sendmsg(borrowed_fd(fd), as_ptr(&msg), flags.bits()))?
+    };
+
+    Ok(nwritten as usize)
+}
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+pub(crate) fn recvmsg(
+    fd: BorrowedFd<'_>,
+    iovs: &mut [IoSliceMut<'_>],
+    mut ancillary: Option<&mut RecvSocketAncillaryAny<'_>>,
+    flags: RecvFlags,
+) -> io::Result<RecvMsgAny> {
+    let mut msg = msghdr_default();
+    let mut name = MaybeUninit::<c::sockaddr>::zeroed();
+
+    encode_msghdr_any_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
+
+    unsafe {
+        let bytes = ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))?;
+
+        Ok(RecvMsgAny::new(bytes as usize, msg, ancillary))
+    }
+}
+
+#[cfg(windows)]
+pub(crate) fn recvmsg(
+    fd: BorrowedFd<'_>,
+    iovs: &mut [IoSliceMut<'_>],
+    flags: RecvFlags,
+) -> io::Result<RecvMsgAny> {
+    let mut name = MaybeUninit::<c::sockaddr>::zeroed();
+    let namelen = size_of::<c::sockaddr>() as _;
+
+    let mut flags = flags.bits() as _;
+    let mut namelen = namelen;
+    unsafe {
+        let bytes = ret_send_recv(c::recvmsg(
+            borrowed_fd(fd),
+            iovs.as_ptr() as *mut _,
+            iovs.len() as _,
+            &mut name as *mut _ as *mut _,
+            &mut namelen,
+            &mut flags,
+        ))?;
+
+        Ok(RecvMsgAny::new(
+            bytes as usize,
+            name.as_ptr().cast(),
+            namelen as _,
+            flags as _,
+        ))
+    }
+}
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+pub(crate) fn recvmsg_v4(
+    fd: BorrowedFd<'_>,
+    iovs: &mut [IoSliceMut<'_>],
+    mut ancillary: Option<&mut RecvSocketAncillaryV4<'_>>,
+    flags: RecvFlags,
+) -> io::Result<RecvMsgV4> {
+    let mut msg = msghdr_default();
+    let mut name = MaybeUninit::<c::sockaddr_in>::zeroed();
+
+    encode_msghdr_v4_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
+
+    unsafe {
+        let bytes = ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))?;
+
+        Ok(RecvMsgV4::new(bytes as usize, msg, ancillary))
+    }
+}
+
+#[cfg(windows)]
+pub(crate) fn recvmsg_v4(
+    fd: BorrowedFd<'_>,
+    iovs: &mut [IoSliceMut<'_>],
+    flags: RecvFlags,
+) -> io::Result<RecvMsgV4> {
+    let mut name = MaybeUninit::<c::sockaddr_in>::zeroed();
+    let mut namelen = size_of::<c::sockaddr_in>() as _;
+    let mut flags = flags.bits() as _;
+
+    unsafe {
+        let bytes = ret_send_recv(c::recvmsg(
+            borrowed_fd(fd),
+            iovs.as_mut_ptr().cast(),
+            iovs.len() as _,
+            name.as_mut_ptr().cast(),
+            &mut namelen,
+            &mut flags,
+        ))?;
+
+        // Because the lpFrom and lpFromlen parameters are ignored for
+        // connection-oriented sockets, we manually check if the address buffer is all
+        // zero, and set `iFromLen` to `0` manually.
+        let nc = name.assume_init();
+        if nc.sin_family == 0 && nc.sin_port == 0 && in_addr_s_addr(nc.sin_addr) == 0 {
+            namelen = 0;
+        }
+
+        Ok(RecvMsgV4::new(
+            bytes as usize,
+            name.as_ptr().cast(),
+            namelen as _,
+            flags as _,
+        ))
+    }
+}
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+pub(crate) fn recvmsg_v6(
+    fd: BorrowedFd<'_>,
+    iovs: &mut [IoSliceMut<'_>],
+    mut ancillary: Option<&mut RecvSocketAncillaryV6<'_>>,
+    flags: RecvFlags,
+) -> io::Result<RecvMsgV6> {
+    let mut msg = msghdr_default();
+    let mut name = MaybeUninit::<c::sockaddr_in6>::zeroed();
+
+    encode_msghdr_v6_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
+
+    unsafe {
+        let bytes = ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))?;
+
+        Ok(RecvMsgV6::new(bytes as usize, msg, ancillary))
+    }
+}
+
+#[cfg(windows)]
+pub(crate) fn recvmsg_v6(
+    fd: BorrowedFd<'_>,
+    iovs: &mut [IoSliceMut<'_>],
+    flags: RecvFlags,
+) -> io::Result<RecvMsgV6> {
+    let mut name = MaybeUninit::<c::sockaddr_in6>::zeroed();
+    let mut namelen = size_of::<c::sockaddr_in6>() as _;
+    let mut flags = flags.bits() as _;
+
+    unsafe {
+        let bytes = ret_send_recv(c::recvmsg(
+            borrowed_fd(fd),
+            iovs.as_mut_ptr().cast(),
+            iovs.len() as _,
+            name.as_mut_ptr().cast(),
+            &mut namelen,
+            &mut flags,
+        ))?;
+
+        // Because the lpFrom and lpFromlen parameters are ignored for
+        // connection-oriented sockets, we manually check if the address buffer is all
+        // zero, and set `iFromLen` to `0` manually.
+        let nc = name.assume_init();
+        if nc.sin6_family == 0
+            && nc.sin6_port == 0
+            && nc.sin6_flowinfo == 0
+            && in6_addr_s6_addr(nc.sin6_addr) == [0u8; 16]
+        {
+            namelen = 0;
+        }
+
+        Ok(RecvMsgV6::new(
+            bytes as usize,
+            name.as_ptr().cast(),
+            namelen as _,
+            flags,
+        ))
+    }
+}
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+pub(crate) fn recvmsg_unix(
+    fd: BorrowedFd<'_>,
+    iovs: &mut [IoSliceMut<'_>],
+    mut ancillary: Option<&mut RecvSocketAncillaryUnix<'_>>,
+    flags: RecvFlags,
+) -> io::Result<RecvMsgUnix> {
+    let mut msg = msghdr_default();
+    let mut name = MaybeUninit::<c::sockaddr_un>::zeroed();
+
+    encode_msghdr_unix_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
+
+    unsafe {
+        let bytes = ret_send_recv(c::recvmsg(borrowed_fd(fd), &mut msg, flags.bits()))?;
+
+        Ok(RecvMsgUnix::new(bytes as usize, msg, ancillary))
     }
 }
 
@@ -393,7 +721,6 @@ pub(crate) mod sockopt {
     use crate::io;
     use crate::net::sockopt::Timeout;
     use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
-    use crate::utils::as_mut_ptr;
     use core::convert::TryInto;
     use core::time::Duration;
     #[cfg(windows)]
@@ -801,6 +1128,18 @@ pub(crate) mod sockopt {
     #[inline]
     pub(crate) fn get_tcp_nodelay(fd: BorrowedFd<'_>) -> io::Result<bool> {
         getsockopt(fd, c::IPPROTO_TCP as _, c::TCP_NODELAY).map(to_bool)
+    }
+
+    #[inline]
+    #[cfg(target_os = "linux")]
+    pub(crate) fn set_udp_segment(fd: BorrowedFd<'_>, gso: u32) -> io::Result<()> {
+        setsockopt(fd, c::SOL_UDP as _, c::UDP_SEGMENT, gso)
+    }
+
+    #[inline]
+    #[cfg(target_os = "linux")]
+    pub(crate) fn get_udp_segment(fd: BorrowedFd<'_>) -> io::Result<u32> {
+        getsockopt(fd, c::SOL_UDP as _, c::UDP_SEGMENT)
     }
 
     #[inline]

@@ -69,6 +69,7 @@ libc_errno = { package = "errno", version = "0.2.8" }
 # of 1.48.
 serial_test = "0.6"
 memoffset = "0.6.5"
+cfg-if = "1.0.0"
 
 [target.'cfg(not(target_os = "emscripten"))'.dev-dependencies]
 criterion = "0.3"

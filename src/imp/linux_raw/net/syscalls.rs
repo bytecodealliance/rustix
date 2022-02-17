@@ -12,16 +12,22 @@ use super::super::conv::{
     socklen_t, zero,
 };
 use super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr_os};
-use super::send_recv::{RecvFlags, SendFlags};
+use super::send_recv::{msghdr_default, RecvFlags, SendFlags};
 use super::types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 use crate::fd::BorrowedFd;
-use crate::io::{self, OwnedFd};
-use crate::net::{SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
-use c::{sockaddr_in, sockaddr_in6, socklen_t};
+use crate::io::{self, IoSlice, IoSliceMut, OwnedFd};
+use crate::net::{
+    encode_msghdr_any_recv, encode_msghdr_unix_recv, encode_msghdr_unix_send,
+    encode_msghdr_v4_recv, encode_msghdr_v4_send, encode_msghdr_v6_recv, encode_msghdr_v6_send,
+    encode_socketaddr_unix_opt, encode_socketaddr_v4_opt, encode_socketaddr_v6_opt, RecvMsgAny,
+    RecvMsgUnix, RecvMsgV4, RecvMsgV6, RecvSocketAncillaryAny, RecvSocketAncillaryUnix,
+    RecvSocketAncillaryV4, RecvSocketAncillaryV6, SendSocketAncillaryUnix, SendSocketAncillaryV4,
+    SendSocketAncillaryV6, SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6,
+};
+use crate::utils::{as_mut_ptr, as_ptr};
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
-use linux_raw_sys::general::sockaddr;
 #[cfg(target_arch = "x86")]
 use {
     super::super::conv::{slice_just_addr, x86_sys},
@@ -169,8 +175,8 @@ pub(crate) fn accept_with(fd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<
 pub(crate) fn acceptfrom(fd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
-        let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
-        let mut storage = MaybeUninit::<sockaddr>::uninit();
+        let mut addrlen = core::mem::size_of::<c::sockaddr>() as c::socklen_t;
+        let mut storage = MaybeUninit::<c::sockaddr>::uninit();
         let fd = ret_owned_fd(syscall!(
             __NR_accept,
             fd,
@@ -184,8 +190,8 @@ pub(crate) fn acceptfrom(fd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<Sock
     }
     #[cfg(target_arch = "x86")]
     unsafe {
-        let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
-        let mut storage = MaybeUninit::<sockaddr>::uninit();
+        let mut addrlen = core::mem::size_of::<c::sockaddr>() as c::socklen_t;
+        let mut storage = MaybeUninit::<c::sockaddr>::uninit();
         let fd = ret_owned_fd(syscall!(
             __NR_socketcall,
             x86_sys(SYS_ACCEPT),
@@ -209,8 +215,8 @@ pub(crate) fn acceptfrom_with(
 ) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
-        let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
-        let mut storage = MaybeUninit::<sockaddr>::uninit();
+        let mut addrlen = core::mem::size_of::<c::sockaddr>() as c::socklen_t;
+        let mut storage = MaybeUninit::<c::sockaddr>::uninit();
         let fd = ret_owned_fd(syscall!(
             __NR_accept4,
             fd,
@@ -225,8 +231,8 @@ pub(crate) fn acceptfrom_with(
     }
     #[cfg(target_arch = "x86")]
     unsafe {
-        let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
-        let mut storage = MaybeUninit::<sockaddr>::uninit();
+        let mut addrlen = core::mem::size_of::<c::sockaddr>() as c::socklen_t;
+        let mut storage = MaybeUninit::<c::sockaddr>::uninit();
         let fd = ret_owned_fd(syscall!(
             __NR_socketcall,
             x86_sys(SYS_ACCEPT4),
@@ -323,7 +329,7 @@ pub(crate) fn sendto_v4(
             buf_len,
             flags,
             by_ref(&encode_sockaddr_v4(addr)),
-            size_of::<sockaddr_in, _>()
+            size_of::<c::sockaddr_in, _>()
         ))
     }
     #[cfg(target_arch = "x86")]
@@ -337,8 +343,8 @@ pub(crate) fn sendto_v4(
                 buf_len,
                 flags.into(),
                 by_ref(&encode_sockaddr_v4(addr)),
-                size_of::<sockaddr_in, _>(),
-            ])
+                size_of::<c::sockaddr_in, _>()
+            ]),
         ))
     }
 }
@@ -361,7 +367,7 @@ pub(crate) fn sendto_v6(
             buf_len,
             flags,
             by_ref(&encode_sockaddr_v6(addr)),
-            size_of::<sockaddr_in6, _>()
+            size_of::<c::sockaddr_in6, _>()
         ))
     }
     #[cfg(target_arch = "x86")]
@@ -375,9 +381,129 @@ pub(crate) fn sendto_v6(
                 buf_len,
                 flags.into(),
                 by_ref(&encode_sockaddr_v6(addr)),
-                size_of::<sockaddr_in6, _>(),
-            ])
+                size_of::<c::sockaddr_in6, _>()
+            ]),
         ))
+    }
+}
+
+#[inline]
+pub(crate) fn sendmsg_v4(
+    fd: BorrowedFd<'_>,
+    iovs: &[IoSlice<'_>],
+    addr: Option<&SocketAddrV4>,
+    ancillary: Option<&mut SendSocketAncillaryV4<'_>>,
+    flags: SendFlags,
+) -> io::Result<usize> {
+    let mut msg = msghdr_default();
+    unsafe {
+        let (msg_name, msg_namelen) = encode_socketaddr_v4_opt(addr);
+        encode_msghdr_v4_send(
+            as_mut_ptr(&mut msg),
+            iovs.as_ptr().cast(),
+            iovs.len(),
+            msg_name.as_ref().map(as_ptr),
+            msg_namelen,
+            ancillary,
+        );
+
+        #[cfg(not(target_arch = "x86",))]
+        {
+            ret_usize(syscall_readonly!(
+                __NR_sendmsg,
+                fd,
+                by_ref(&msg),
+                c_uint(flags.bits())
+            ))
+        }
+        #[cfg(target_arch = "x86")]
+        {
+            ret_usize(syscall_readonly!(
+                __NR_socketcall,
+                x86_sys(SYS_SENDMSG),
+                slice_just_addr::<ArgReg<SocketArg>, _>(&[fd, by_ref(&msg), c_uint(flags.bits()),])
+            ))
+        }
+    }
+}
+
+#[inline]
+pub(crate) fn sendmsg_v6(
+    fd: BorrowedFd<'_>,
+    iovs: &[IoSlice<'_>],
+    addr: Option<&SocketAddrV6>,
+    ancillary: Option<&mut SendSocketAncillaryV6<'_>>,
+    flags: SendFlags,
+) -> io::Result<usize> {
+    let mut msg = msghdr_default();
+    unsafe {
+        let (msg_name, msg_namelen) = encode_socketaddr_v6_opt(addr);
+        encode_msghdr_v6_send(
+            as_mut_ptr(&mut msg),
+            iovs.as_ptr().cast(),
+            iovs.len(),
+            msg_name.as_ref().map(as_ptr),
+            msg_namelen,
+            ancillary,
+        );
+
+        #[cfg(not(target_arch = "x86",))]
+        {
+            ret_usize(syscall_readonly!(
+                __NR_sendmsg,
+                fd,
+                by_ref(&msg),
+                c_uint(flags.bits())
+            ))
+        }
+        #[cfg(target_arch = "x86")]
+        {
+            ret_usize(syscall_readonly!(
+                __NR_socketcall,
+                x86_sys(SYS_SENDMSG),
+                slice_just_addr::<ArgReg<SocketArg>, _>(&[fd, by_ref(&msg), c_uint(flags.bits())]),
+            ))
+        }
+    }
+}
+
+#[inline]
+pub(crate) fn sendmsg_unix(
+    fd: BorrowedFd<'_>,
+    iovs: &[IoSlice<'_>],
+    addr: Option<&SocketAddrUnix>,
+    ancillary: Option<&mut SendSocketAncillaryUnix<'_>>,
+    flags: SendFlags,
+) -> io::Result<usize> {
+    let mut msg = msghdr_default();
+    unsafe {
+        let (msg_name, msg_namelen) = encode_socketaddr_unix_opt(addr);
+        encode_msghdr_unix_send(
+            as_mut_ptr(&mut msg),
+            iovs.as_ptr().cast(),
+            iovs.len(),
+            msg_name.as_ref().map(as_ptr),
+            msg_namelen,
+            ancillary,
+        );
+
+        #[cfg(not(target_arch = "x86",))]
+        {
+            ret_usize(syscall_readonly!(
+                __NR_sendmsg,
+                fd,
+                by_ref(&msg),
+                c_uint(flags.bits())
+            ))
+        }
+        #[cfg(target_arch = "x86")]
+        {
+            ret_usize(syscall_readonly!(
+                __NR_socketcall,
+                x86_sys(SYS_SENDMSG),
+                slice_just_addr::<ArgReg<SocketArg>, _>(&[fd, by_ref(&msg), c_uint(flags.bits()),])
+            ))
+        }
     }
 }
 
@@ -473,8 +599,8 @@ pub(crate) fn recvfrom(
 ) -> io::Result<(usize, Option<SocketAddrAny>)> {
     let (buf_addr_mut, buf_len) = slice_mut(buf);
 
-    let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
-    let mut storage = MaybeUninit::<sockaddr>::uninit();
+    let mut addrlen = core::mem::size_of::<c::sockaddr>() as c::socklen_t;
+    let mut storage = MaybeUninit::<c::sockaddr>::uninit();
 
     unsafe {
         // `recvfrom` does not write to the storage if the socket is
@@ -514,11 +640,141 @@ pub(crate) fn recvfrom(
 }
 
 #[inline]
+pub(crate) fn recvmsg(
+    fd: BorrowedFd<'_>,
+    iovs: &mut [IoSliceMut<'_>],
+    mut ancillary: Option<&mut RecvSocketAncillaryAny<'_>>,
+    flags: RecvFlags,
+) -> io::Result<RecvMsgAny> {
+    let mut msg = msghdr_default();
+    let mut name = MaybeUninit::<c::sockaddr>::zeroed();
+    encode_msghdr_any_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
+
+    #[cfg(not(target_arch = "x86",))]
+    let bytes = unsafe {
+        ret_usize(syscall_readonly!(
+            __NR_recvmsg,
+            fd,
+            by_mut(&mut msg),
+            c_uint(flags.bits())
+        ))?
+    };
+    #[cfg(target_arch = "x86")]
+    let bytes = unsafe {
+        ret_usize(syscall_readonly!(
+            __NR_socketcall,
+            x86_sys(SYS_RECVMSG),
+            slice_just_addr::<ArgReg<SocketArg>, _>(&[fd, by_mut(&mut msg), c_uint(flags.bits())]),
+        ))?
+    };
+
+    Ok(unsafe { RecvMsgAny::new(bytes, msg, ancillary) })
+}
+
+#[inline]
+pub(crate) fn recvmsg_v4(
+    fd: BorrowedFd<'_>,
+    iovs: &mut [IoSliceMut<'_>],
+    mut ancillary: Option<&mut RecvSocketAncillaryV4<'_>>,
+    flags: RecvFlags,
+) -> io::Result<RecvMsgV4> {
+    let mut msg = msghdr_default();
+    let mut name = MaybeUninit::<c::sockaddr_in>::zeroed();
+    encode_msghdr_v4_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
+
+    #[cfg(not(target_arch = "x86",))]
+    let bytes = unsafe {
+        ret_usize(syscall_readonly!(
+            __NR_recvmsg,
+            fd,
+            by_mut(&mut msg),
+            c_uint(flags.bits())
+        ))?
+    };
+    #[cfg(target_arch = "x86")]
+    let bytes = unsafe {
+        ret_usize(syscall_readonly!(
+            __NR_socketcall,
+            x86_sys(SYS_RECVMSG),
+            slice_just_addr::<ArgReg<SocketArg>, _>(&[fd, by_mut(&mut msg), c_uint(flags.bits()),])
+        ))?
+    };
+
+    Ok(unsafe { RecvMsgV4::new(bytes, msg, ancillary) })
+}
+
+#[inline]
+pub(crate) fn recvmsg_v6(
+    fd: BorrowedFd<'_>,
+    iovs: &mut [IoSliceMut<'_>],
+    mut ancillary: Option<&mut RecvSocketAncillaryV6<'_>>,
+    flags: RecvFlags,
+) -> io::Result<RecvMsgV6> {
+    let mut msg = msghdr_default();
+    let mut name = MaybeUninit::<c::sockaddr_in6>::zeroed();
+
+    encode_msghdr_v6_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
+
+    #[cfg(not(target_arch = "x86",))]
+    let bytes = unsafe {
+        ret_usize(syscall_readonly!(
+            __NR_recvmsg,
+            fd,
+            by_mut(&mut msg),
+            c_uint(flags.bits())
+        ))?
+    };
+    #[cfg(target_arch = "x86")]
+    let bytes = unsafe {
+        ret_usize(syscall_readonly!(
+            __NR_socketcall,
+            x86_sys(SYS_RECVMSG),
+            slice_just_addr::<ArgReg<SocketArg>, _>(&[fd, by_mut(&mut msg), c_uint(flags.bits()),])
+        ))?
+    };
+
+    Ok(unsafe { RecvMsgV6::new(bytes, msg, ancillary) })
+}
+
+#[inline]
+pub(crate) fn recvmsg_unix(
+    fd: BorrowedFd<'_>,
+    iovs: &mut [IoSliceMut<'_>],
+    mut ancillary: Option<&mut RecvSocketAncillaryUnix<'_>>,
+    flags: RecvFlags,
+) -> io::Result<RecvMsgUnix> {
+    let mut msg = msghdr_default();
+    let mut name = MaybeUninit::<c::sockaddr_un>::zeroed();
+
+    encode_msghdr_unix_recv(&mut msg, iovs, name.as_mut_ptr(), &mut ancillary);
+
+    #[cfg(not(target_arch = "x86",))]
+    let bytes = unsafe {
+        ret_usize(syscall_readonly!(
+            __NR_recvmsg,
+            fd,
+            by_mut(&mut msg),
+            c_uint(flags.bits())
+        ))?
+    };
+    #[cfg(target_arch = "x86")]
+    let bytes = unsafe {
+        ret_usize(syscall_readonly!(
+            __NR_socketcall,
+            x86_sys(SYS_RECVMSG),
+            slice_just_addr::<ArgReg<SocketArg>, _>(&[fd, by_mut(&mut msg), c_uint(flags.bits()),])
+        ))?
+    };
+
+    Ok(unsafe { RecvMsgUnix::new(bytes, msg, ancillary) })
+}
+
+#[inline]
 pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<Option<SocketAddrAny>> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
-        let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
-        let mut storage = MaybeUninit::<sockaddr>::uninit();
+        let mut addrlen = core::mem::size_of::<c::sockaddr>() as c::socklen_t;
+        let mut storage = MaybeUninit::<c::sockaddr>::uninit();
         ret(syscall!(
             __NR_getpeername,
             fd,
@@ -532,8 +788,8 @@ pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<Option<SocketAddrAny
     }
     #[cfg(target_arch = "x86")]
     unsafe {
-        let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
-        let mut storage = MaybeUninit::<sockaddr>::uninit();
+        let mut addrlen = core::mem::size_of::<c::sockaddr>() as c::socklen_t;
+        let mut storage = MaybeUninit::<c::sockaddr>::uninit();
         ret(syscall!(
             __NR_socketcall,
             x86_sys(SYS_GETPEERNAME),
@@ -554,8 +810,8 @@ pub(crate) fn getpeername(fd: BorrowedFd<'_>) -> io::Result<Option<SocketAddrAny
 pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
-        let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
-        let mut storage = MaybeUninit::<sockaddr>::uninit();
+        let mut addrlen = core::mem::size_of::<c::sockaddr>() as c::socklen_t;
+        let mut storage = MaybeUninit::<c::sockaddr>::uninit();
         ret(syscall!(
             __NR_getsockname,
             fd,
@@ -569,8 +825,8 @@ pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
     }
     #[cfg(target_arch = "x86")]
     unsafe {
-        let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
-        let mut storage = MaybeUninit::<sockaddr>::uninit();
+        let mut addrlen = core::mem::size_of::<c::sockaddr>() as c::socklen_t;
+        let mut storage = MaybeUninit::<c::sockaddr>::uninit();
         ret(syscall!(
             __NR_socketcall,
             x86_sys(SYS_GETSOCKNAME),
@@ -595,7 +851,7 @@ pub(crate) fn bind_v4(fd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()>
             __NR_bind,
             fd,
             by_ref(&encode_sockaddr_v4(addr)),
-            size_of::<sockaddr_in, _>()
+            size_of::<c::sockaddr_in, _>()
         ))
     }
     #[cfg(target_arch = "x86")]
@@ -606,7 +862,7 @@ pub(crate) fn bind_v4(fd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()>
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 fd.into(),
                 by_ref(&encode_sockaddr_v4(addr)),
-                size_of::<sockaddr_in, _>(),
+                size_of::<c::sockaddr_in, _>(),
             ])
         ))
     }
@@ -620,7 +876,7 @@ pub(crate) fn bind_v6(fd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()>
             __NR_bind,
             fd,
             by_ref(&encode_sockaddr_v6(addr)),
-            size_of::<sockaddr_in6, _>()
+            size_of::<c::sockaddr_in6, _>()
         ))
     }
     #[cfg(target_arch = "x86")]
@@ -631,7 +887,7 @@ pub(crate) fn bind_v6(fd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()>
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 fd.into(),
                 by_ref(&encode_sockaddr_v6(addr)),
-                size_of::<sockaddr_in6, _>(),
+                size_of::<c::sockaddr_in6, _>(),
             ])
         ))
     }
@@ -670,7 +926,7 @@ pub(crate) fn connect_v4(fd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<
             __NR_connect,
             fd,
             by_ref(&encode_sockaddr_v4(addr)),
-            size_of::<sockaddr_in, _>()
+            size_of::<c::sockaddr_in, _>()
         ))
     }
     #[cfg(target_arch = "x86")]
@@ -681,7 +937,7 @@ pub(crate) fn connect_v4(fd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 fd.into(),
                 by_ref(&encode_sockaddr_v4(addr)),
-                size_of::<sockaddr_in, _>(),
+                size_of::<c::sockaddr_in, _>(),
             ])
         ))
     }
@@ -695,7 +951,7 @@ pub(crate) fn connect_v6(fd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<
             __NR_connect,
             fd,
             by_ref(&encode_sockaddr_v6(addr)),
-            size_of::<sockaddr_in6, _>()
+            size_of::<c::sockaddr_in6, _>()
         ))
     }
     #[cfg(target_arch = "x86")]
@@ -706,7 +962,7 @@ pub(crate) fn connect_v6(fd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<
             slice_just_addr::<ArgReg<SocketArg>, _>(&[
                 fd.into(),
                 by_ref(&encode_sockaddr_v6(addr)),
-                size_of::<sockaddr_in6, _>(),
+                size_of::<c::sockaddr_in6, _>(),
             ])
         ))
     }
@@ -1184,6 +1440,18 @@ pub(crate) mod sockopt {
     #[inline]
     pub(crate) fn get_tcp_nodelay(fd: BorrowedFd<'_>) -> io::Result<bool> {
         getsockopt(fd, c::IPPROTO_TCP as _, c::TCP_NODELAY).map(to_bool)
+    }
+
+    #[cfg(target_os = "linux")]
+    #[inline]
+    pub(crate) fn set_udp_segment(fd: BorrowedFd<'_>, gso: u32) -> io::Result<()> {
+        setsockopt(fd, c::SOL_UDP as _, c::UDP_SEGMENT as _, gso)
+    }
+
+    #[cfg(target_os = "linux")]
+    #[inline]
+    pub(crate) fn get_udp_segment(fd: BorrowedFd<'_>) -> io::Result<u32> {
+        getsockopt(fd, c::SOL_UDP as _, c::UDP_SEGMENT as _)
     }
 
     #[inline]

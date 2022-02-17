@@ -11,8 +11,14 @@ mod poll;
 mod sockopt;
 #[cfg(unix)]
 mod unix;
+#[cfg(not(windows))]
+mod unix_msg;
 mod v4;
+mod v4msg_tcp;
+mod v4msg_udp;
 mod v6;
+mod v6msg_tcp;
+mod v6msg_udp;
 
 /// Windows requires us to call a setup function before using any of the
 /// socket APIs.

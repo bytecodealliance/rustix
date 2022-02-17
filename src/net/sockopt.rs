@@ -598,3 +598,39 @@ pub fn set_tcp_nodelay<Fd: AsFd>(fd: Fd, nodelay: bool) -> io::Result<()> {
 pub fn get_tcp_nodelay<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     imp::net::syscalls::sockopt::get_tcp_nodelay(fd.as_fd())
 }
+
+/// `setsockopt(fd, SOL_UDP, UDP_SEGMENT, gso)`
+///
+/// # References
+///  - [POSIX `setsockopt`]
+///  - [Linux `setsockopt`]
+///  - [Linux `udp`]
+///
+/// [POSIX `setsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/setsockopt.html
+/// [Linux `setsockopt`]: https://man7.org/linux/man-pages/man2/setsockopt.2.html
+/// [Linux `udp`]: https://man7.org/linux/man-pages/man7/udp.7.html
+#[inline]
+#[doc(alias = "UDP_SEGMENT")]
+#[cfg(target_os = "linux")]
+pub fn set_udp_segment<Fd: AsFd>(fd: &Fd, gso: u32) -> io::Result<()> {
+    let fd = fd.as_fd();
+    imp::net::syscalls::sockopt::set_udp_segment(fd, gso)
+}
+
+/// `getsockopt(fd, SOL_UDP, UDP_SEGMENT)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [Linux `getsockopt`]
+///  - [Linux `udp`]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `udp`]: https://man7.org/linux/man-pages/man7/udp.7.html
+#[inline]
+#[doc(alias = "UDP_SEGMENT")]
+#[cfg(target_os = "linux")]
+pub fn get_udp_segment<Fd: AsFd>(fd: &Fd) -> io::Result<u32> {
+    let fd = fd.as_fd();
+    imp::net::syscalls::sockopt::get_udp_segment(fd)
+}

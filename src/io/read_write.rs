@@ -1,15 +1,8 @@
 //! `read` and `write`, optionally positioned, optionally vectored
 
-use crate::{imp, io};
+use crate::imp;
+use crate::io::{self, IoSlice, IoSliceMut};
 use imp::fd::AsFd;
-
-// Declare `IoSlice` and `IoSliceMut`.
-#[cfg(not(windows))]
-#[cfg(not(feature = "std"))]
-pub use imp::io::io_slice::{IoSlice, IoSliceMut};
-#[cfg(not(windows))]
-#[cfg(feature = "std")]
-pub use std::io::{IoSlice, IoSliceMut};
 
 /// `RWF_*` constants for use with [`preadv2`] and [`pwritev2`].
 #[cfg(any(target_os = "android", target_os = "linux"))]
