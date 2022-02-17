@@ -44,6 +44,20 @@ fn test_mlock_with() {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn test_mlock_with_onfault() {
+    // With glibc, `mlock2` with `MLOCK_ONFAULT` returns `EINVAL` if the
+    // `mlock2` system call returns `ENOSYS`. That's not what we want
+    // here though, because `ENOSYS` just means the OS doesn't have
+    // `mlock2`, while `EINVAL` may indicate a bug in rustix.
+    //
+    // To work around this, we use `libc::syscall` to make a `mlock2`
+    // syscall directly to test for `ENOSYS`, before running the main
+    // test below.
+    unsafe {
+        if libc::syscall(libc::SYS_mlock2, 0, 0) == -1 && errno::errno().0 == libc::ENOSYS {
+            return;
+        }
+    }
+
     let mut buf = vec![0u8; 4096];
 
     unsafe {
