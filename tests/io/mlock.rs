@@ -32,7 +32,9 @@ fn test_mlock_with() {
         ) {
             Ok(()) => rustix::io::munlock(buf.as_mut_ptr().cast::<c_void>(), buf.len()).unwrap(),
             // Tests won't always have enough memory or permissions, and that's ok.
-            Err(rustix::io::Error::PERM) | Err(rustix::io::Error::NOMEM) => {}
+            Err(rustix::io::Error::PERM)
+            | Err(rustix::io::Error::NOMEM)
+            | Err(rustix::io::Error::NOSYS) => {}
             // But they shouldn't fail otherwise.
             Err(other) => Err(other).unwrap(),
         }
@@ -52,7 +54,9 @@ fn test_mlock_with_onfault() {
         ) {
             Ok(()) => rustix::io::munlock(buf.as_mut_ptr().cast::<c_void>(), buf.len()).unwrap(),
             // Tests won't always have enough memory or permissions, and that's ok.
-            Err(rustix::io::Error::PERM) | Err(rustix::io::Error::NOMEM) => {}
+            Err(rustix::io::Error::PERM)
+            | Err(rustix::io::Error::NOMEM)
+            | Err(rustix::io::Error::NOSYS) => {}
             // But they shouldn't fail otherwise.
             Err(other) => Err(other).unwrap(),
         }
