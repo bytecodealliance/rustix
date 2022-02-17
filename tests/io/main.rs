@@ -17,6 +17,9 @@ mod from_into;
 #[cfg(not(windows))]
 mod isatty;
 #[cfg(not(windows))]
+#[cfg(not(target_os = "wasi"))]
+mod mlock;
+#[cfg(not(windows))]
 mod mmap;
 mod poll;
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]

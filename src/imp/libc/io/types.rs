@@ -298,9 +298,8 @@ bitflags! {
     ///
     /// [`mlock_with`]: crate::io::mlock_with
     pub struct MlockFlags: i32 {
-        // libc doesn't define `MLOCK_ONFAULT` yet.
-        // /// `MLOCK_ONFAULT`
-        // const ONFAULT = c::MLOCK_ONFAULT;
+        /// `MLOCK_ONFAULT`
+        const ONFAULT = c::MLOCK_ONFAULT as _;
     }
 }
 
