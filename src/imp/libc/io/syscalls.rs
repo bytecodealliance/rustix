@@ -694,8 +694,15 @@ pub(crate) unsafe fn mlock_with(
     length: usize,
     flags: MlockFlags,
 ) -> io::Result<()> {
-    assert_eq!(flags.bits(), 0, "libc doesn't define `MLOCK_*` yet");
-    ret(c::mlock(addr, length))
+    weak_or_syscall! {
+        fn mlock2(
+            addr: *const c::c_void,
+            len: c::size_t,
+            flags: c::c_int
+        ) via SYS_mlock2 -> c::c_int
+    }
+
+    ret(mlock2(addr, length, flags.bits()))
 }
 
 /// # Safety
