@@ -65,7 +65,7 @@ pub(super) fn nonnegative_ret(raw: c::c_int) -> io::Result<()> {
 
 #[inline]
 pub(super) unsafe fn ret_infallible(raw: c::c_int) {
-    debug_assert_eq!(raw, 0);
+    debug_assert_eq!(raw, 0, "unexpected error: {:?}", io::Error::last_os_error());
 }
 
 #[inline]
