@@ -293,13 +293,13 @@ pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Res
     let lim = rlimit_to_libc(new)?;
     let mut result = MaybeUninit::<libc_rlimit>::uninit();
     unsafe {
-        ret_infallible(libc_prlimit(
+        ret(libc_prlimit(
             Pid::as_raw(pid),
             limit as _,
             &lim,
             result.as_mut_ptr(),
-        ));
-        Ok(rlimit_from_libc(result.assume_init()))
+        ))
+        .map(|()| rlimit_from_libc(result.assume_init()))
     }
 }
 

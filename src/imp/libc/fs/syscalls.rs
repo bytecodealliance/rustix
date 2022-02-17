@@ -219,8 +219,19 @@ pub(crate) fn renameat2(
     new_path: &ZStr,
     flags: RenameFlags,
 ) -> io::Result<()> {
+    // `getrandom` wasn't supported in glibc until 2.28.
+    weak_or_syscall! {
+        fn renameat2(
+            olddirfd: c::c_int,
+            oldpath: *const c::c_char,
+            newdirfd: c::c_int,
+            newpath: *const c::c_char,
+            flags: c::c_uint
+        ) via SYS_renameat2 -> c::c_int
+    }
+
     unsafe {
-        ret(c::renameat2(
+        ret(renameat2(
             borrowed_fd(old_dirfd),
             c_str(old_path),
             borrowed_fd(new_dirfd),
