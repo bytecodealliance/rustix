@@ -85,7 +85,7 @@ pub(crate) fn gettid() -> Pid {
     // `gettid` wasn't supported in glibc until 2.30, and musl until 1.2.2,
     // so use `syscall`.
     // <https://sourceware.org/bugzilla/show_bug.cgi?id=6399#c62>
-    syscall! {
+    weak_or_syscall! {
         fn gettid() via SYS_gettid -> c::pid_t
     }
 

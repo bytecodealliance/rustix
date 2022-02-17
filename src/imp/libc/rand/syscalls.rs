@@ -8,7 +8,7 @@ use {super::super::c, super::super::conv::ret_ssize_t, crate::io, crate::rand::G
 #[cfg(target_os = "linux")]
 pub(crate) fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
     // `getrandom` wasn't supported in glibc until 2.25.
-    syscall! {
+    weak_or_syscall! {
         fn getrandom(buf: *mut c::c_void, buflen: c::size_t, flags: c::c_uint) via SYS_getrandom -> c::ssize_t
     }
 

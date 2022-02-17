@@ -80,7 +80,7 @@ pub(super) use c::{
 
 // `prlimit64` wasn't supported in glibc until 2.13.
 #[cfg(target_os = "linux")]
-syscall! {
+weak_or_syscall! {
     fn prlimit64(
         pid: c::pid_t,
         resource: c::__rlimit_resource_t,
@@ -89,7 +89,7 @@ syscall! {
     ) via SYS_prlimit64 -> c::c_int
 }
 #[cfg(target_os = "android")]
-syscall! {
+weak_or_syscall! {
     fn prlimit64(
         pid: c::pid_t,
         resource: c::c_int,
