@@ -26,7 +26,7 @@ pub fn page_size() -> usize {
 /// data.
 ///
 /// Return the Linux `AT_HWCAP` and `AT_HWCAP2` values passed to the
-/// current process.
+/// current process. Returns 0 for each value if it is not available.
 ///
 /// # References
 ///  - [Linux]
@@ -50,7 +50,7 @@ pub fn linux_hwcap() -> (usize, usize) {
 /// `getauxval(AT_EXECFN)`—Returns the Linux "execfn" string.
 ///
 /// Return the string that Linux has recorded as the filesystem path to the
-/// executable.
+/// executable. Returns an empty string if the string is not available.
 ///
 /// # References
 ///  - [Linux]

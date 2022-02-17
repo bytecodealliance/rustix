@@ -363,7 +363,7 @@ pub(crate) fn fclonefileat(
             dst_dirfd: BorrowedFd<'_>,
             dst: *const c::c_char,
             flags: c::c_int
-        ) -> c::c_int
+        ) via SYS_fclonefileat -> c::c_int
     }
 
     unsafe { ret(fclonefileat(srcfd, dst_dirfd, c_str(dst), flags.bits())) }
