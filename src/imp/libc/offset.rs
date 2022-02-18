@@ -79,11 +79,20 @@ pub(super) use c::{
 };
 
 // `prlimit64` wasn't supported in glibc until 2.13.
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
 weak_or_syscall! {
     fn prlimit64(
         pid: c::pid_t,
         resource: c::__rlimit_resource_t,
+        new_limit: *const c::rlimit64,
+        old_limit: *mut c::rlimit64
+    ) via SYS_prlimit64 -> c::c_int
+}
+#[cfg(all(target_os = "linux", target_env = "musl"))]
+weak_or_syscall! {
+    fn prlimit64(
+        pid: c::pid_t,
+        resource: c::c_int,
         new_limit: *const c::rlimit64,
         old_limit: *mut c::rlimit64
     ) via SYS_prlimit64 -> c::c_int
@@ -97,10 +106,19 @@ weak_or_syscall! {
         old_limit: *mut c::rlimit64
     ) via SYS_prlimit64 -> c::c_int
 }
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
 pub(super) unsafe fn libc_prlimit(
     pid: c::pid_t,
     resource: c::__rlimit_resource_t,
+    new_limit: *const c::rlimit64,
+    old_limit: *mut c::rlimit64,
+) -> c::c_int {
+    prlimit64(pid, resource, new_limit, old_limit)
+}
+#[cfg(all(target_os = "linux", target_env = "musl"))]
+pub(super) unsafe fn libc_prlimit(
+    pid: c::pid_t,
+    resource: c::c_int,
     new_limit: *const c::rlimit64,
     old_limit: *mut c::rlimit64,
 ) -> c::c_int {
