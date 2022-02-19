@@ -74,12 +74,11 @@ supported on Redox, such as `*at` functions like `openat`, which are
 important features for `rustix`.
 
 `rustix` has its own code for making direct syscalls, similar to the [`sc`]
-and [`scall`] crates, though `rustix` currently only supports direct syscalls on
-Linux on x86\_64, x86, aarch64, riscv64, and arm. `rustix` can use either the
-unstable Rust `asm!` macro or out-of-line `.s` files so it supports both Stable
-and Nightly Rust. `rustix`'s syscalls report errors using an optimized `Error`
-type, and `rustix` supports Linux's vDSO mechanism to optimize Linux
-`clock_gettime` on all architectures, and all Linux system calls on x86.
+and [`scall`] crates, though `rustix` can use either the unstable Rust `asm!`
+macro or out-of-line `.s` files so it supports both Stable and Nightly Rust.
+`rustix` can also use Linux's vDSO mechanism to optimize Linux `clock_gettime`
+on all architectures, and all Linux system calls on x86. And `rustix`'s
+syscalls report errors using an optimized `Error` type.
 
 `rustix`'s `*at` functions are similar to the [`openat`] crate, but `rustix`
 provides them as free functions rather than associated functions of a `Dir`
