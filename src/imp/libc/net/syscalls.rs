@@ -19,6 +19,8 @@ use core::convert::TryInto;
 use core::mem::{size_of, MaybeUninit};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use core::ptr::null_mut;
+#[cfg(windows)]
+use winapi::shared::minwindef::DWORD;
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
