@@ -33,6 +33,7 @@ fn test_sockopts() {
     assert_ne!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 0);
     assert_ne!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 77);
     #[cfg(not(any(
+        windows,
         target_os = "dragonfly",
         target_os = "ios",
         target_os = "freebsd",
@@ -45,6 +46,7 @@ fn test_sockopts() {
         true
     );
     #[cfg(not(any(
+        windows,
         target_os = "dragonfly",
         target_os = "ios",
         target_os = "freebsd",
@@ -127,6 +129,7 @@ fn test_sockopts() {
     assert_eq!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 77);
 
     #[cfg(not(any(
+        windows,
         target_os = "dragonfly",
         target_os = "ios",
         target_os = "freebsd",
@@ -150,6 +153,7 @@ fn test_sockopts() {
 
     // Check that the nodelay flag is set.
     if cfg!(not(any(
+        windows,
         target_os = "dragonfly",
         target_os = "ios",
         target_os = "freebsd",
