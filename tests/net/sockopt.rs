@@ -83,24 +83,26 @@ fn test_sockopts() {
         );
     }
 
-    // Set the broadcast flag;
-    rustix::net::sockopt::set_socket_broadcast(&s, true).unwrap();
+    #[cfg(not(windows))]
+    {
+        // Set the broadcast flag;
+        rustix::net::sockopt::set_socket_broadcast(&s, true).unwrap();
 
-    // Check that the broadcast flag is set. This has no effect on stream
-    // sockets, and not all platforms even remember the value.
-    #[cfg(not(any(
-        windows,
-        target_os = "dragonfly",
-        target_os = "ios",
-        target_os = "freebsd",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd"
-    )))]
-    assert_eq!(
-        rustix::net::sockopt::get_socket_broadcast(&s).unwrap(),
-        true
-    );
+        // Check that the broadcast flag is set. This has no effect on stream
+        // sockets, and not all platforms even remember the value.
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "ios",
+            target_os = "freebsd",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd"
+        )))]
+        assert_eq!(
+            rustix::net::sockopt::get_socket_broadcast(&s).unwrap(),
+            true
+        );
+    }
 
     // Set a linger.
     rustix::net::sockopt::set_socket_linger(&s, Some(Duration::new(1, 1))).unwrap();
