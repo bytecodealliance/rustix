@@ -36,6 +36,7 @@ fn test_sockopts() {
         rustix::net::sockopt::get_ip_multicast_loop(&s).unwrap(),
         true
     );
+    #[cfg(not(any(target_os = "ios", target_os = "macos")))]
     assert_eq!(rustix::net::sockopt::get_ip_multicast_ttl(&s).unwrap(), 1);
     assert_eq!(rustix::net::sockopt::get_tcp_nodelay(&s).unwrap(), false);
 
