@@ -155,7 +155,6 @@ fn test_sockopts() {
 
     // Check that the nodelay flag is set.
     if cfg!(not(any(
-        windows,
         target_os = "dragonfly",
         target_os = "ios",
         target_os = "freebsd",
