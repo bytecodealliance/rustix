@@ -64,7 +64,7 @@ fn test_sockopts() {
     .unwrap();
 
     // Check that we have a timeout of at least the time we set.
-    if cfg(not(target_os = "freebsd")) {
+    if cfg!(not(target_os = "freebsd")) {
         assert!(
             rustix::net::sockopt::get_socket_timeout(&s, rustix::net::sockopt::Timeout::Recv)
                 .unwrap()
