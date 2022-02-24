@@ -109,5 +109,9 @@ fn test_sockopts() {
     rustix::net::sockopt::set_tcp_nodelay(&s, true).unwrap();
 
     // Check that the nodelay flag is set.
-    assert_eq!(rustix::net::sockopt::get_tcp_nodelay(&s).unwrap(), true);
+    if cfg!(not(any(target_os = "ios", target_os = "macos"))) {
+        assert_eq!(rustix::net::sockopt::get_tcp_nodelay(&s).unwrap(), true);
+    } else {
+        assert_eq!(rustix::net::sockopt::get_tcp_nodelay(&s).unwrap(), false);
+    }
 }
