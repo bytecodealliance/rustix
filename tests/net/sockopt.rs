@@ -24,6 +24,7 @@ fn test_sockopts() {
     assert!(rustix::net::sockopt::get_socket_linger(&s)
         .unwrap()
         .is_none());
+    #[cfg(any(target_os = "android", target_os = "linux"))]
     assert_eq!(
         rustix::net::sockopt::get_socket_passcred(&s).unwrap(),
         false
@@ -73,11 +74,14 @@ fn test_sockopts() {
             >= Duration::new(1, 1)
     );
 
-    // Set the passcred flag;
-    rustix::net::sockopt::set_socket_passcred(&s, true).unwrap();
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    {
+        // Set the passcred flag;
+        rustix::net::sockopt::set_socket_passcred(&s, true).unwrap();
 
-    // Check that the passcred flag is set.
-    assert_eq!(rustix::net::sockopt::get_socket_passcred(&s).unwrap(), true);
+        // Check that the passcred flag is set.
+        assert_eq!(rustix::net::sockopt::get_socket_passcred(&s).unwrap(), true);
+    }
 
     // Set the ip ttl.
     rustix::net::sockopt::set_ip_ttl(&s, 77).unwrap();
