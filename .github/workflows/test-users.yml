@@ -102,7 +102,7 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ${{ runner.tool_cache }}/qemu
-        key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}
+        key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
       if: matrix.target != '' && matrix.os == 'ubuntu-latest'
 
     - name: Install cross-compilation tools
@@ -141,6 +141,8 @@ jobs:
         cd
         curl https://download.qemu.org/qemu-$QEMU_BUILD_VERSION.tar.xz | tar xJf -
         cd qemu-$QEMU_BUILD_VERSION
+        patch -p1 < $GITHUB_WORKSPACE/ci/translate-errno.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/getsockopt-timeouts.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
@@ -256,7 +258,7 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ${{ runner.tool_cache }}/qemu
-        key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patcherrno
+        key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
       if: matrix.target != '' && matrix.os == 'ubuntu-latest'
 
     - name: Install cross-compilation tools
@@ -295,6 +297,7 @@ jobs:
         curl https://download.qemu.org/qemu-$QEMU_BUILD_VERSION.tar.xz | tar xJf -
         cd qemu-$QEMU_BUILD_VERSION
         patch -p1 < $GITHUB_WORKSPACE/ci/translate-errno.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/getsockopt-timeouts.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
@@ -398,7 +401,7 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ${{ runner.tool_cache }}/qemu
-        key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}
+        key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
       if: matrix.target != '' && matrix.os == 'ubuntu-latest'
 
     - name: Install cross-compilation tools
@@ -436,6 +439,8 @@ jobs:
         cd
         curl https://download.qemu.org/qemu-$QEMU_BUILD_VERSION.tar.xz | tar xJf -
         cd qemu-$QEMU_BUILD_VERSION
+        patch -p1 < $GITHUB_WORKSPACE/ci/translate-errno.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/getsockopt-timeouts.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
@@ -568,7 +573,7 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ${{ runner.tool_cache }}/qemu
-        key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}
+        key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
       if: matrix.target != '' && matrix.os == 'ubuntu-latest'
 
     - name: Install cross-compilation tools
@@ -606,6 +611,8 @@ jobs:
         cd
         curl https://download.qemu.org/qemu-$QEMU_BUILD_VERSION.tar.xz | tar xJf -
         cd qemu-$QEMU_BUILD_VERSION
+        patch -p1 < $GITHUB_WORKSPACE/ci/translate-errno.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/getsockopt-timeouts.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
@@ -709,7 +716,7 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ${{ runner.tool_cache }}/qemu
-        key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}
+        key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
       if: matrix.target != '' && matrix.os == 'ubuntu-latest'
 
     - name: Install cross-compilation tools
@@ -747,6 +754,8 @@ jobs:
         cd
         curl https://download.qemu.org/qemu-$QEMU_BUILD_VERSION.tar.xz | tar xJf -
         cd qemu-$QEMU_BUILD_VERSION
+        patch -p1 < $GITHUB_WORKSPACE/ci/translate-errno.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/getsockopt-timeouts.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
@@ -850,7 +859,7 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ${{ runner.tool_cache }}/qemu
-        key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}
+        key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
       if: matrix.target != '' && matrix.os == 'ubuntu-latest'
 
     - name: Install cross-compilation tools
@@ -888,6 +897,8 @@ jobs:
         cd
         curl https://download.qemu.org/qemu-$QEMU_BUILD_VERSION.tar.xz | tar xJf -
         cd qemu-$QEMU_BUILD_VERSION
+        patch -p1 < $GITHUB_WORKSPACE/ci/translate-errno.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/getsockopt-timeouts.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
@@ -1054,7 +1065,7 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ${{ runner.tool_cache }}/qemu
-        key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}
+        key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
       if: matrix.target != '' && matrix.os == 'ubuntu-latest'
 
     - name: Install cross-compilation tools
@@ -1092,6 +1103,8 @@ jobs:
         cd
         curl https://download.qemu.org/qemu-$QEMU_BUILD_VERSION.tar.xz | tar xJf -
         cd qemu-$QEMU_BUILD_VERSION
+        patch -p1 < $GITHUB_WORKSPACE/ci/translate-errno.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/getsockopt-timeouts.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'

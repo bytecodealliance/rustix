@@ -519,9 +519,11 @@ pub(crate) mod sockopt {
                 #[cfg(all(target_arch = "x86_64", target_pointer_width = "32"))]
                 let tv_sec = tv_sec.unwrap_or(i64::MAX);
 
+                // `subsec_micros` rounds down, so we use `subsec_nanos` and
+                // manually round up.
                 let mut timeout = c::timeval {
                     tv_sec,
-                    tv_usec: timeout.subsec_micros() as _,
+                    tv_usec: ((timeout.subsec_nanos() + 999) / 1000) as _,
                 };
                 if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
                     timeout.tv_usec = 1;

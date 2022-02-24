@@ -7,6 +7,7 @@
 mod addr;
 mod connect_bind_send;
 mod poll;
+mod sockopt;
 #[cfg(unix)]
 mod unix;
 mod v4;

@@ -849,6 +849,7 @@ pub(crate) mod sockopt {
                 out(&mut value),
                 by_mut(&mut optlen),
             ))?;
+
             assert_eq!(
                 optlen as usize,
                 core::mem::size_of::<T>(),
@@ -1119,9 +1120,12 @@ pub(crate) mod sockopt {
                 if timeout == DURATION_ZERO {
                     return Err(io::Error::INVAL);
                 }
+
+                // `subsec_micros` rounds down, so we use `subsec_nanos` and
+                // manually round up.
                 let mut timeout = timeval {
                     tv_sec: timeout.as_secs().try_into().unwrap_or(c::c_long::MAX),
-                    tv_usec: timeout.subsec_micros() as _,
+                    tv_usec: ((timeout.subsec_nanos() + 999) / 1000) as _,
                 };
                 if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
                     timeout.tv_usec = 1;
