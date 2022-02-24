@@ -64,12 +64,22 @@ fn test_sockopts() {
     .unwrap();
 
     // Check that we have a timeout of at least the time we set.
-    assert!(
-        rustix::net::sockopt::get_socket_timeout(&s, rustix::net::sockopt::Timeout::Recv)
-            .unwrap()
-            .unwrap()
-            >= Duration::new(1, 1)
-    );
+    if cfg(not(target_os = "freebsd")) {
+        assert!(
+            rustix::net::sockopt::get_socket_timeout(&s, rustix::net::sockopt::Timeout::Recv)
+                .unwrap()
+                .unwrap()
+                >= Duration::new(1, 1)
+        );
+    } else {
+        // On FreeBSD <= 12, it appears the system rounds the timeout down.
+        assert!(
+            rustix::net::sockopt::get_socket_timeout(&s, rustix::net::sockopt::Timeout::Recv)
+                .unwrap()
+                .unwrap()
+                >= Duration::new(1, 0)
+        );
+    }
 
     // Set the broadcast flag;
     rustix::net::sockopt::set_socket_broadcast(&s, true).unwrap();
