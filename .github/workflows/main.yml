@@ -98,7 +98,7 @@ jobs:
     - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi
 
   check_no_default_features:
-    name: Check
+    name: Check --no-default-features
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -124,7 +124,7 @@ jobs:
     - run: cargo check --workspace --release --no-default-features --features itoa -vv
 
   check_nightly:
-    name: Check on Rust nightly
+    name: Check nightly-only targets
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
