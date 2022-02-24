@@ -19,8 +19,6 @@ use core::convert::TryInto;
 use core::mem::{size_of, MaybeUninit};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use core::ptr::null_mut;
-#[cfg(windows)]
-use winapi::shared::minwindef::DWORD;
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
@@ -393,6 +391,8 @@ pub(crate) mod sockopt {
     use crate::{as_mut_ptr, io};
     use core::convert::TryInto;
     use core::time::Duration;
+    #[cfg(windows)]
+    use winapi::shared::minwindef::DWORD;
 
     // TODO: With Rust 1.53 we can use `Duration::ZERO` instead.
     const DURATION_ZERO: Duration = Duration::from_secs(0);
