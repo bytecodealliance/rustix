@@ -31,12 +31,26 @@ fn test_sockopts() {
     );
     assert_ne!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 0);
     assert_ne!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 77);
-    #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+    #[cfg(not(any(
+        target_os = "dragonfly",
+        target_os = "ios",
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd"
+    )))]
     assert_eq!(
         rustix::net::sockopt::get_ip_multicast_loop(&s).unwrap(),
         true
     );
-    #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+    #[cfg(not(any(
+        target_os = "dragonfly",
+        target_os = "ios",
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd"
+    )))]
     assert_eq!(rustix::net::sockopt::get_ip_multicast_ttl(&s).unwrap(), 1);
     assert_eq!(rustix::net::sockopt::get_tcp_nodelay(&s).unwrap(), false);
 
@@ -61,7 +75,14 @@ fn test_sockopts() {
 
     // Check that the broadcast flag is set. This has no effect on stream
     // sockets, and not all platforms even remember the value.
-    #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+    #[cfg(not(any(
+        target_os = "dragonfly",
+        target_os = "ios",
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd"
+    )))]
     assert_eq!(
         rustix::net::sockopt::get_socket_broadcast(&s).unwrap(),
         true
@@ -93,7 +114,14 @@ fn test_sockopts() {
     // Check the ip ttl.
     assert_eq!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 77);
 
-    #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+    #[cfg(not(any(
+        target_os = "dragonfly",
+        target_os = "ios",
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd"
+    )))]
     {
         // Set the multicast loop flag;
         rustix::net::sockopt::set_ip_multicast_loop(&s, false).unwrap();
@@ -109,7 +137,14 @@ fn test_sockopts() {
     rustix::net::sockopt::set_tcp_nodelay(&s, true).unwrap();
 
     // Check that the nodelay flag is set.
-    if cfg!(not(any(target_os = "ios", target_os = "macos"))) {
+    if cfg!(not(any(
+        target_os = "dragonfly",
+        target_os = "ios",
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "openbsd"
+    ))) {
         assert_eq!(rustix::net::sockopt::get_tcp_nodelay(&s).unwrap(), true);
     } else {
         assert_eq!(rustix::net::sockopt::get_tcp_nodelay(&s).unwrap(), false);
