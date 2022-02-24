@@ -31,6 +31,7 @@ fn test_sockopts() {
     );
     assert_ne!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 0);
     assert_ne!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 77);
+    #[cfg(not(target_os = "ios", target_os = "macos"))]
     assert_eq!(
         rustix::net::sockopt::get_ip_multicast_loop(&s).unwrap(),
         true
@@ -89,14 +90,17 @@ fn test_sockopts() {
     // Check the ip ttl.
     assert_eq!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 77);
 
-    // Set the multicast loop flag;
-    rustix::net::sockopt::set_ip_multicast_loop(&s, false).unwrap();
+    #[cfg(not(target_os = "ios", target_os = "macos"))]
+    {
+        // Set the multicast loop flag;
+        rustix::net::sockopt::set_ip_multicast_loop(&s, false).unwrap();
 
-    // Check that the multicast loop flag is set.
-    assert_eq!(
-        rustix::net::sockopt::get_ip_multicast_loop(&s).unwrap(),
-        false
-    );
+        // Check that the multicast loop flag is set.
+        assert_eq!(
+            rustix::net::sockopt::get_ip_multicast_loop(&s).unwrap(),
+            false
+        );
+    }
 
     // Set the nodelay flag;
     rustix::net::sockopt::set_tcp_nodelay(&s, true).unwrap();
