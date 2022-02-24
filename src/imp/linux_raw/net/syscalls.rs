@@ -956,9 +956,19 @@ pub(crate) mod sockopt {
         fd: BorrowedFd<'_>,
         linger: Option<Duration>,
     ) -> io::Result<()> {
+        // Convert `linger` to seconds, rounding up.
+        let l_linger = if let Some(linger) = linger {
+            let mut l_linger = linger.as_secs();
+            if linger.subsec_nanos() != 0 {
+                l_linger = l_linger.checked_add(1).ok_or(io::Error::INVAL)?;
+            }
+            l_linger.try_into().map_err(|_| io::Error::INVAL)?
+        } else {
+            0
+        };
         let linger = linux_raw_sys::general::linger {
             l_onoff: linger.is_some() as c::c_int,
-            l_linger: linger.unwrap_or_default().as_secs() as c::c_int,
+            l_linger,
         };
         setsockopt(
             fd,
