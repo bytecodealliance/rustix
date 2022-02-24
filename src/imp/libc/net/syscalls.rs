@@ -507,6 +507,12 @@ pub(crate) mod sockopt {
         id: Timeout,
         timeout: Option<Duration>,
     ) -> io::Result<()> {
+        let optname = match id {
+            Timeout::Recv => c::SO_RCVTIMEO,
+            Timeout::Send => c::SO_SNDTIMEO,
+        };
+
+        #[cfg(not(windows))]
         let timeout = match timeout {
             Some(timeout) => {
                 if timeout == DURATION_ZERO {
@@ -535,10 +541,29 @@ pub(crate) mod sockopt {
                 tv_usec: 0,
             },
         };
-        let optname = match id {
-            Timeout::Recv => c::SO_RCVTIMEO,
-            Timeout::Send => c::SO_SNDTIMEO,
+
+        #[cfg(windows)]
+        let timeout: DWORD = match timeout {
+            Some(timeout) => {
+                if timeout == DURATION_ZERO {
+                    return Err(io::Error::INVAL);
+                }
+
+                let millis = timeout.as_millis();
+
+                // `as_millis` rounds down, so we use `as_nanos` and
+                // manually round up.
+                let mut timeout: DWORD = ((timeout.as_nanos() + 999999) / 1000000)
+                    .try_into()
+                    .map_err(|_convert_err| io::Error::INVAL)?;
+                if timeout == 0 {
+                    timeout = 1;
+                }
+                timeout
+            }
+            None => 0,
         };
+
         setsockopt(fd, c::SOL_SOCKET, optname, timeout)
     }
 
@@ -551,14 +576,28 @@ pub(crate) mod sockopt {
             Timeout::Recv => c::SO_RCVTIMEO,
             Timeout::Send => c::SO_SNDTIMEO,
         };
-        let timeout: c::timeval = getsockopt(fd, c::SOL_SOCKET, optname)?;
-        if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
-            Ok(None)
-        } else {
-            Ok(Some(
-                Duration::from_secs(timeout.tv_sec as u64)
-                    + Duration::from_micros(timeout.tv_usec as u64),
-            ))
+
+        #[cfg(not(windows))]
+        {
+            let timeout: c::timeval = getsockopt(fd, c::SOL_SOCKET, optname)?;
+            if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
+                Ok(None)
+            } else {
+                Ok(Some(
+                    Duration::from_secs(timeout.tv_sec as u64)
+                        + Duration::from_micros(timeout.tv_usec as u64),
+                ))
+            }
+        }
+
+        #[cfg(windows)]
+        {
+            let timeout: DWORD = getsockopt(fd, c::SOL_SOCKET, optname)?;
+            if timeout == 0 {
+                Ok(None)
+            } else {
+                Ok(Some(Duration::from_millis(timeout as u64)))
+            }
         }
     }
 
