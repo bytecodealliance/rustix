@@ -59,7 +59,9 @@ fn test_sockopts() {
     // Set the broadcast flag;
     rustix::net::sockopt::set_socket_broadcast(&s, true).unwrap();
 
-    // Check that the broadcast flag is set.
+    // Check that the broadcast flag is set. This has no effect on stream
+    // sockets, and not all platforms even remember the value.
+    #[cfg(not(any(target_os = "ios", target_os = "macos")))]
     assert_eq!(
         rustix::net::sockopt::get_socket_broadcast(&s).unwrap(),
         true
