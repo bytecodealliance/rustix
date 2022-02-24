@@ -16,6 +16,7 @@ fn test_sockopts() {
         rustix::net::sockopt::get_socket_type(&s).unwrap(),
         SocketType::STREAM
     );
+    #[cfg(not(windows))]
     assert_eq!(
         rustix::net::sockopt::get_socket_broadcast(&s).unwrap(),
         false
@@ -76,6 +77,7 @@ fn test_sockopts() {
     // Check that the broadcast flag is set. This has no effect on stream
     // sockets, and not all platforms even remember the value.
     #[cfg(not(any(
+        windows,
         target_os = "dragonfly",
         target_os = "ios",
         target_os = "freebsd",
