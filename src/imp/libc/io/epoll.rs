@@ -547,6 +547,7 @@ impl<'context, Context: self::Context> EventVec<'context, Context> {
         self.events.len()
     }
 
+    /// Tests whether this `EventVec` is logically empty.
     #[inline]
     pub fn is_empty(&mut self) -> bool {
         self.events.is_empty()
