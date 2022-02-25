@@ -75,10 +75,14 @@ fn main() {
         // and MIPS, Rust's inline asm is considered experimental, so only use
         // it if `--cfg=rustix_use_experimental_asm` is given.
         if can_compile("use std::arch::asm;")
+            && (arch != "x86" || has_feature("naked_functions"))
             && ((arch != "powerpc64" && arch != "mips" && arch != "mips64")
                 || rustix_use_experimental_asm)
         {
             use_feature("asm");
+            if arch == "x86" {
+                use_feature("naked_functions");
+            }
             if rustix_use_experimental_asm {
                 use_feature("asm_experimental_arch");
             }

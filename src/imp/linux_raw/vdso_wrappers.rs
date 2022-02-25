@@ -303,31 +303,19 @@ unsafe fn _rustix_clock_gettime_via_syscall(
     ))
 }
 
+/// A symbol pointing to an `int 0x80` instruction. This "function" is only
+/// called from assembly, and only with the x86 syscall calling convention,
+/// so its signature here is not its true signature.
 #[cfg(all(asm, target_arch = "x86"))]
 #[naked]
-unsafe extern "C" fn rustix_int_0x80(
-    _nr: SyscallNumber<'_>,
-    _a0: ArgReg<'_, A0>,
-    _a1: ArgReg<'_, A1>,
-    _a2: ArgReg<'_, A2>,
-    _a3: ArgReg<'_, A3>,
-    _a4: ArgReg<'_, A4>,
-    _a5: ArgReg<'_, A5>,
-) -> RetReg<R0> {
+unsafe extern "C" fn rustix_int_0x80() {
     asm!("int $$0x80", "ret", options(noreturn))
 }
 
+/// The outline version of the `rustix_int_0x80` above.
 #[cfg(all(not(asm), target_arch = "x86"))]
 extern "C" {
-    fn rustix_int_0x80(
-        _nr: SyscallNumber<'_>,
-        _a0: ArgReg<'_, A0>,
-        _a1: ArgReg<'_, A1>,
-        _a2: ArgReg<'_, A2>,
-        _a3: ArgReg<'_, A3>,
-        _a4: ArgReg<'_, A4>,
-        _a5: ArgReg<'_, A5>,
-    ) -> RetReg<R0>;
+    fn rustix_int_0x80();
 }
 
 fn minimal_init() {
