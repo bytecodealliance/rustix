@@ -147,7 +147,10 @@ fn use_feature(feature: &str) {
 
 /// Test whether the rustc at `var("RUSTC")` supports the given feature.
 fn has_feature(feature: &str) -> bool {
-    can_compile(&format!("#![allow(stable_features)]\n#![feature({})]", feature))
+    can_compile(&format!(
+        "#![allow(stable_features)]\n#![feature({})]",
+        feature
+    ))
 }
 
 /// Test whether the rustc at `var("RUSTC")` can compile the given code.
@@ -167,12 +170,7 @@ fn can_compile(code: &str) -> bool {
         .spawn()
         .unwrap();
 
-    writeln!(
-        child.stdin.take().unwrap(),
-        "{}",
-        code
-    )
-    .unwrap();
+    writeln!(child.stdin.take().unwrap(), "{}", code).unwrap();
 
     child.wait().unwrap().success()
 }
