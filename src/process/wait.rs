@@ -21,7 +21,7 @@ impl WaitStatus {
     /// create a `WaitStatus` out of an integer.
     #[inline]
     pub(crate) fn new(status: u32) -> Self {
-        WaitStatus(status)
+        Self(status)
     }
 
     /// Converts a `WaitStatus` into its raw representation as an integer.

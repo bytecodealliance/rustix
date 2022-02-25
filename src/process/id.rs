@@ -140,7 +140,7 @@ impl Pid {
     /// Converts an `Option<Pid>` into a `RawPid`.
     #[inline]
     pub fn as_raw(pid: Option<Self>) -> RawPid {
-        pid.map(|pid| pid.0.get()).unwrap_or(0)
+        pid.map_or(0, |pid| pid.0.get())
     }
 }
 
