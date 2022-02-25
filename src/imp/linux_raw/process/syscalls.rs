@@ -25,6 +25,7 @@ use crate::process::{
     Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, RawNonZeroPid, RawPid, Resource, Rlimit,
     Signal, Uid, WaitOptions, WaitStatus,
 };
+use core::convert::TryInto;
 use core::mem::MaybeUninit;
 #[cfg(not(any(
     target_arch = "arm",
@@ -434,12 +435,12 @@ fn rlimit_from_linux_old(lim: linux_raw_sys::general::rlimit) -> Rlimit {
     let current = if lim.rlim_cur == linux_raw_sys::general::RLIM_INFINITY as _ {
         None
     } else {
-        Some(lim.rlim_cur)
+        Some(lim.rlim_cur.into())
     };
     let maximum = if lim.rlim_max == linux_raw_sys::general::RLIM_INFINITY as _ {
         None
     } else {
-        Some(lim.rlim_max)
+        Some(lim.rlim_max.into())
     };
     Rlimit { current, maximum }
 }
@@ -447,11 +448,11 @@ fn rlimit_from_linux_old(lim: linux_raw_sys::general::rlimit) -> Rlimit {
 /// Like `rlimit_to_linux` but uses Linux's old 32-bit `rlimit`.
 fn rlimit_to_linux_old(lim: Rlimit) -> io::Result<linux_raw_sys::general::rlimit> {
     let rlim_cur = match lim.current {
-        Some(r) => r,
+        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
         None => linux_raw_sys::general::RLIM_INFINITY as _,
     };
     let rlim_max = match lim.maximum {
-        Some(r) => r,
+        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
         None => linux_raw_sys::general::RLIM_INFINITY as _,
     };
     Ok(linux_raw_sys::general::rlimit { rlim_cur, rlim_max })

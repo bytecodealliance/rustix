@@ -1098,7 +1098,7 @@ pub(crate) mod sockopt {
                 }
                 let mut timeout = __kernel_timespec {
                     tv_sec: timeout.as_secs().try_into().unwrap_or(i64::MAX),
-                    tv_nsec: timeout.subsec_nanos().into(),
+                    tv_nsec: timeout.subsec_nanos() as _,
                 };
                 if timeout.tv_sec == 0 && timeout.tv_nsec == 0 {
                     timeout.tv_nsec = 1;
@@ -1121,7 +1121,7 @@ pub(crate) mod sockopt {
                 }
                 let mut timeout = timeval {
                     tv_sec: timeout.as_secs().try_into().unwrap_or(c::c_long::MAX),
-                    tv_usec: timeout.subsec_micros().into(),
+                    tv_usec: timeout.subsec_micros() as _,
                 };
                 if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
                     timeout.tv_usec = 1;
