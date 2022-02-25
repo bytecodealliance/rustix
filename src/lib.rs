@@ -85,7 +85,7 @@
 #![cfg_attr(rustc_attrs, feature(rustc_attrs))]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![cfg_attr(all(target_os = "wasi", feature = "std"), feature(wasi_ext))]
-#![cfg_attr(all(linux_raw, asm, target_arch = "x86"), feature(naked_functions))]
+#![cfg_attr(all(linux_raw, target_arch = "x86"), feature(naked_functions))]
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(all(not(feature = "std"), specialization), allow(incomplete_features))]
