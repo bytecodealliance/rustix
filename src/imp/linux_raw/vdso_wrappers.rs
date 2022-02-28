@@ -206,16 +206,12 @@ pub(super) mod x86_via_vdso {
 }
 
 type ClockGettimeType = unsafe extern "C" fn(c::c_int, *mut Timespec) -> c::c_int;
+
+/// The underlying syscall functions are only called from asm, using the
+/// special syscall calling convention to pass arguments and return values,
+/// which the signature here doesn't reflect.
 #[cfg(target_arch = "x86")]
-pub(super) type SyscallType = unsafe extern "C" fn(
-    SyscallNumber,
-    ArgReg<'_, A0>,
-    ArgReg<'_, A1>,
-    ArgReg<'_, A2>,
-    ArgReg<'_, A3>,
-    ArgReg<'_, A4>,
-    ArgReg<'_, A5>,
-) -> RetReg<R0>;
+pub(super) type SyscallType = unsafe extern "C" fn();
 
 fn init_clock_gettime() -> ClockGettimeType {
     init();
