@@ -74,11 +74,15 @@ fn main() {
         // Use inline asm if we have it, or outline asm otherwise. On PowerPC
         // and MIPS, Rust's inline asm is considered experimental, so only use
         // it if `--cfg=rustix_use_experimental_asm` is given.
-        if has_feature("asm")
+        if can_compile("use std::arch::asm;")
+            && (arch != "x86" || has_feature("naked_functions"))
             && ((arch != "powerpc64" && arch != "mips" && arch != "mips64")
                 || rustix_use_experimental_asm)
         {
             use_feature("asm");
+            if arch == "x86" {
+                use_feature("naked_functions");
+            }
             if rustix_use_experimental_asm {
                 use_feature("asm_experimental_arch");
             }
@@ -147,6 +151,14 @@ fn use_feature(feature: &str) {
 
 /// Test whether the rustc at `var("RUSTC")` supports the given feature.
 fn has_feature(feature: &str) -> bool {
+    can_compile(&format!(
+        "#![allow(stable_features)]\n#![feature({})]",
+        feature
+    ))
+}
+
+/// Test whether the rustc at `var("RUSTC")` can compile the given code.
+fn can_compile(code: &str) -> bool {
     use std::process::Stdio;
     let out_dir = var("OUT_DIR").unwrap();
     let rustc = var("RUSTC").unwrap();
@@ -162,12 +174,7 @@ fn has_feature(feature: &str) -> bool {
         .spawn()
         .unwrap();
 
-    writeln!(
-        child.stdin.take().unwrap(),
-        "#![allow(stable_features)]\n#![feature({})]",
-        feature
-    )
-    .unwrap();
+    writeln!(child.stdin.take().unwrap(), "{}", code).unwrap();
 
     child.wait().unwrap().success()
 }

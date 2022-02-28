@@ -551,7 +551,7 @@ jobs:
             qemu_target: ppc64le-linux-user
           - build: mips64el-linux
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
             target: mips64el-unknown-linux-gnuabi64
             gcc_package: gcc-mips64el-linux-gnuabi64
             gcc: mips64el-linux-gnuabi64-gcc
@@ -559,7 +559,7 @@ jobs:
             qemu_target: mips64el-linux-user
           - build: mipsel-linux
             os: ubuntu-latest
-            rust: stable
+            rust: nightly
             target: mipsel-unknown-linux-gnu
             gcc_package: gcc-mipsel-linux-gnu
             gcc: mipsel-linux-gnu-gcc
