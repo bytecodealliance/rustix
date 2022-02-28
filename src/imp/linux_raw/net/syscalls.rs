@@ -849,6 +849,7 @@ pub(crate) mod sockopt {
                 out(&mut value),
                 by_mut(&mut optlen),
             ))?;
+
             assert_eq!(
                 optlen as usize,
                 core::mem::size_of::<T>(),
@@ -955,9 +956,19 @@ pub(crate) mod sockopt {
         fd: BorrowedFd<'_>,
         linger: Option<Duration>,
     ) -> io::Result<()> {
+        // Convert `linger` to seconds, rounding up.
+        let l_linger = if let Some(linger) = linger {
+            let mut l_linger = linger.as_secs();
+            if linger.subsec_nanos() != 0 {
+                l_linger = l_linger.checked_add(1).ok_or(io::Error::INVAL)?;
+            }
+            l_linger.try_into().map_err(|_| io::Error::INVAL)?
+        } else {
+            0
+        };
         let linger = linux_raw_sys::general::linger {
             l_onoff: linger.is_some() as c::c_int,
-            l_linger: linger.unwrap_or_default().as_secs() as c::c_int,
+            l_linger,
         };
         setsockopt(
             fd,
@@ -1119,9 +1130,12 @@ pub(crate) mod sockopt {
                 if timeout == DURATION_ZERO {
                     return Err(io::Error::INVAL);
                 }
+
+                // `subsec_micros` rounds down, so we use `subsec_nanos` and
+                // manually round up.
                 let mut timeout = timeval {
                     tv_sec: timeout.as_secs().try_into().unwrap_or(c::c_long::MAX),
-                    tv_usec: timeout.subsec_micros() as _,
+                    tv_usec: ((timeout.subsec_nanos() + 999) / 1000) as _,
                 };
                 if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
                     timeout.tv_usec = 1;
