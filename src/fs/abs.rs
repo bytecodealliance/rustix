@@ -29,5 +29,5 @@ use imp::fs::StatFs;
 )))]
 #[inline]
 pub fn statfs<P: path::Arg>(path: P) -> io::Result<StatFs> {
-    path.into_with_z_str(|path| imp::fs::syscalls::statfs(path))
+    path.into_with_z_str(imp::fs::syscalls::statfs)
 }

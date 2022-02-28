@@ -416,7 +416,7 @@ impl<'context, T: AsFd + IntoFd + FromFd> AsFd for Epoll<Owning<'context, T>> {
 
 #[cfg(feature = "std")]
 impl<'context, T: AsFd + IntoFd + FromFd> From<Epoll<Owning<'context, T>>> for OwnedFd {
-    fn from(epoll: Epoll<Owning<'context, T>>) -> OwnedFd {
+    fn from(epoll: Epoll<Owning<'context, T>>) -> Self {
         epoll.epoll_fd
     }
 }
@@ -527,6 +527,12 @@ impl<'context, Context: self::Context> EventVec<'context, Context> {
     #[inline]
     pub fn len(&mut self) -> usize {
         self.events.len()
+    }
+
+    /// Tests whether this `EventVec` is logically empty.
+    #[inline]
+    pub fn is_empty(&mut self) -> bool {
+        self.events.is_empty()
     }
 }
 

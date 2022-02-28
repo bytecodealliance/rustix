@@ -546,6 +546,12 @@ impl<'context, Context: self::Context> EventVec<'context, Context> {
     pub fn len(&mut self) -> usize {
         self.events.len()
     }
+
+    /// Tests whether this `EventVec` is logically empty.
+    #[inline]
+    pub fn is_empty(&mut self) -> bool {
+        self.events.is_empty()
+    }
 }
 
 impl<'context, Context: self::Context> IntoIterator for &'context EventVec<'context, Context> {

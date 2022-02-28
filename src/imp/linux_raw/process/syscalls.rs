@@ -420,11 +420,11 @@ fn rlimit_from_linux(lim: linux_raw_sys::general::rlimit64) -> Rlimit {
 #[inline]
 fn rlimit_to_linux(lim: Rlimit) -> io::Result<linux_raw_sys::general::rlimit64> {
     let rlim_cur = match lim.current {
-        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+        Some(r) => r,
         None => linux_raw_sys::general::RLIM64_INFINITY as _,
     };
     let rlim_max = match lim.maximum {
-        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+        Some(r) => r,
         None => linux_raw_sys::general::RLIM64_INFINITY as _,
     };
     Ok(linux_raw_sys::general::rlimit64 { rlim_cur, rlim_max })

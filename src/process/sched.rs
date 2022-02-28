@@ -24,8 +24,8 @@ impl CpuSet {
 
     /// Create a new and empty `CpuSet`.
     #[inline]
-    pub fn new() -> CpuSet {
-        CpuSet {
+    pub fn new() -> Self {
+        Self {
             cpu_set: imp::process::raw_cpu_set_new(),
         }
     }

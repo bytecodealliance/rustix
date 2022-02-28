@@ -40,7 +40,7 @@ pub(crate) fn exe_phdrs() -> (*const c::c_void, usize) {
 #[inline]
 pub(in super::super) fn exe_phdrs_slice() -> &'static [Elf_Phdr] {
     let (ptr, len) = exe_phdrs();
-    unsafe { slice::from_raw_parts(ptr as *const Elf_Phdr, len) }
+    unsafe { slice::from_raw_parts(ptr.cast(), len) }
 }
 
 #[inline]
