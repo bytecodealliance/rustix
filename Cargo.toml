@@ -48,6 +48,8 @@ libc = { version = "0.2.116", features = ["extra_traits"] }
 # For the libc backend on Windows, use the Winsock2 API in winapi.
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.9", features = ["ws2ipdef", "ws2tcpip"] }
+[target.'cfg(all(windows, not(target_vendor = "uwp")))'.dependencies]
+winapi = { version = "0.3.9", features = ["handleapi"] }
 
 [dev-dependencies]
 tempfile = "3.2.0"
