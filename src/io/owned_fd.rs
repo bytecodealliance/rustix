@@ -135,9 +135,9 @@ impl OwnedFd {
     #[cfg(windows)]
     #[cfg(target_vendor = "uwp")]
     fn set_no_inherit(&self) -> std::io::Result<()> {
-        Err(io::Error::new_const(
+        Err(std::io::Error::new(
             std::io::ErrorKind::Unsupported,
-            &"Unavailable on UWP",
+            "Unavailable on UWP",
         ))
     }
 }
