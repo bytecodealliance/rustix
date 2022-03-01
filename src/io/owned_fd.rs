@@ -64,8 +64,9 @@ impl OwnedFd {
     pub fn try_clone(&self) -> std::io::Result<Self> {
         use winapi::um::processthreadsapi::GetCurrentProcessId;
         use winapi::um::winsock2::{
-            WSADuplicateSocketW, WSAGetLastError, WSASocketW, INVALID_SOCKET, WSAEINVAL,
-            WSAEPROTOTYPE, WSAPROTOCOL_INFOW, WSA_FLAG_NO_HANDLE_INHERIT, WSA_FLAG_OVERLAPPED,
+            WSADuplicateSocketW, WSAGetLastError, WSASocketW, INVALID_SOCKET, SOCKET_ERROR,
+            WSAEINVAL, WSAEPROTOTYPE, WSAPROTOCOL_INFOW, WSA_FLAG_NO_HANDLE_INHERIT,
+            WSA_FLAG_OVERLAPPED,
         };
 
         let mut info = unsafe { std::mem::zeroed::<WSAPROTOCOL_INFOW>() };
