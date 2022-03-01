@@ -171,6 +171,7 @@ jobs:
         RUSTFLAGS: -A improper_ctypes_definitions
     - run: rustup component add rust-src
     - run: cargo check -Z build-std=core,alloc,std --target x86_64-unknown-openbsd --all-targets
+    - run: cargo check -Z build-std=core,alloc,std --target x86_64-uwp-windows-msvc --all-targets
 
   test:
     name: Test
