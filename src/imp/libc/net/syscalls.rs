@@ -557,8 +557,6 @@ pub(crate) mod sockopt {
                     return Err(io::Error::INVAL);
                 }
 
-                let millis = timeout.as_millis();
-
                 // `as_millis` rounds down, so we use `as_nanos` and
                 // manually round up.
                 let mut timeout: DWORD = ((timeout.as_nanos() + 999999) / 1000000)
