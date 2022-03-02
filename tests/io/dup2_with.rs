@@ -14,8 +14,20 @@ fn test_dup2() {
 #[test]
 fn test_dup2_with() {
     let (a, b) = rustix::io::pipe().unwrap();
-    assert_eq!(rustix::io::dup2_with(&a, &a, DupFlags::empty()), Err(rustix::io::Error::INVAL));
-    assert_eq!(rustix::io::dup2_with(&b, &b, DupFlags::empty()), Err(rustix::io::Error::INVAL));
-    assert_eq!(rustix::io::dup2_with(&a, &a, DupFlags::CLOEXEC), Err(rustix::io::Error::INVAL));
-    assert_eq!(rustix::io::dup2_with(&b, &b, DupFlags::CLOEXEC), Err(rustix::io::Error::INVAL));
+    assert_eq!(
+        rustix::io::dup2_with(&a, &a, DupFlags::empty()),
+        Err(rustix::io::Error::INVAL)
+    );
+    assert_eq!(
+        rustix::io::dup2_with(&b, &b, DupFlags::empty()),
+        Err(rustix::io::Error::INVAL)
+    );
+    assert_eq!(
+        rustix::io::dup2_with(&a, &a, DupFlags::CLOEXEC),
+        Err(rustix::io::Error::INVAL)
+    );
+    assert_eq!(
+        rustix::io::dup2_with(&b, &b, DupFlags::CLOEXEC),
+        Err(rustix::io::Error::INVAL)
+    );
 }

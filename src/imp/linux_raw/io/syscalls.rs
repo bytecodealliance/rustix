@@ -557,7 +557,7 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
         // `dup3` fails if the old and new file descriptors have the same
         // value, so emulate the `dup2` behvior.
         if fd.as_raw_fd() == new.as_raw_fd() {
-            return Ok(())
+            return Ok(());
         }
         dup2_with(fd, new, DupFlags::empty())
     }
