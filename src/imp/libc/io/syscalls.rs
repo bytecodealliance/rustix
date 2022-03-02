@@ -486,6 +486,7 @@ pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, _flags: DupFlags) -> 
     // Android 5.0 has `dup3`, but libc doesn't have bindings. Emulate it
     // using `dup2`, including the difference of failing with `EINVAL`
     // when the file descriptors are equal.
+    use std::os::unix::io::AsRawFd;
     if fd.as_raw_fd() == new.as_raw_fd() {
         return Err(io::Error::INVAL);
     }
