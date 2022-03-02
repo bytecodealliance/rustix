@@ -22,12 +22,20 @@ fn test_dup2_with() {
         rustix::io::dup2_with(&b, &b, DupFlags::empty()),
         Err(rustix::io::Error::INVAL)
     );
-    assert_eq!(
-        rustix::io::dup2_with(&a, &a, DupFlags::CLOEXEC),
-        Err(rustix::io::Error::INVAL)
-    );
-    assert_eq!(
-        rustix::io::dup2_with(&b, &b, DupFlags::CLOEXEC),
-        Err(rustix::io::Error::INVAL)
-    );
+    #[cfg(not(any(
+        target_os = "android",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "redox"
+    )))] // Android 5.0 has dup3, but libc doesn't have bindings
+    {
+        assert_eq!(
+            rustix::io::dup2_with(&a, &a, DupFlags::CLOEXEC),
+            Err(rustix::io::Error::INVAL)
+        );
+        assert_eq!(
+            rustix::io::dup2_with(&b, &b, DupFlags::CLOEXEC),
+            Err(rustix::io::Error::INVAL)
+        );
+    }
 }
