@@ -1,6 +1,6 @@
 use super::FileType;
 use crate::as_ptr;
-#[cfg(feature = "std")]
+#[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
 use crate::fd::IntoFd;
 use crate::fd::{AsFd, BorrowedFd};
 use crate::ffi::{ZStr, ZString};
@@ -31,8 +31,9 @@ impl Dir {
     /// Construct a `Dir`, assuming ownership of the file descriptor.
     #[cfg(any(io_lifetimes_use_std, not(feature = "std")))]
     #[inline]
-    pub fn from<F: Into<OwnedFd>>(fd: F) -> io::Result<Self> {
-        let fd = fd.into();
+    pub fn from<F: Into<crate::fd::OwnedFd>>(fd: F) -> io::Result<Self> {
+        let fd: crate::fd::OwnedFd = fd.into();
+        let fd: OwnedFd = fd.into();
         Self::_from(fd)
     }
 
