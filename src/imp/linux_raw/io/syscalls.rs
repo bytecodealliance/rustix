@@ -555,6 +555,12 @@ pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     {
+        // `dup3` fails if the old and new file descriptors have the same
+        // value, so emulate the `dup2` behvior.
+        use std::os::unix::io::AsRawFd;
+        if fd.as_raw_fd() == new.as_raw_fd() {
+            return Ok(());
+        }
         dup2_with(fd, new, DupFlags::empty())
     }
 

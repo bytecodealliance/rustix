@@ -6,6 +6,8 @@
 #[cfg(not(feature = "rustc-dep-of-std"))]
 #[cfg(not(windows))]
 mod dup2_to_replace_stdio;
+#[cfg(not(windows))]
+mod dup2_with;
 #[cfg(not(feature = "rustc-dep-of-std"))] // TODO
 #[cfg(not(windows))]
 mod epoll;

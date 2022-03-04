@@ -56,7 +56,9 @@ pub fn dup2<Fd: AsFd>(fd: Fd, new: &OwnedFd) -> io::Result<()> {
 /// same underlying [file description] as the existing `OwnedFd` instance,
 /// closing `new` and reusing its file descriptor, with flags.
 ///
-/// `dup2_with` is the same as [`dup2`] but adds an additional flags operand.
+/// `dup2_with` is the same as [`dup2`] but adds an additional flags operand,
+/// and fails in the case that `fd` and `new` have the same file descriptor
+/// value.
 ///
 /// # References
 ///  - [POSIX]
