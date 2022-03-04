@@ -15,11 +15,38 @@
 use crate::ffi::ZStr;
 use crate::imp;
 
-/// `getpagesize()`—Returns the process' page size.
+/// `sysconf(_SC_PAGESIZE)`—Returns the process' page size.
+///
+/// Also known as `getpagesize`.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux `sysconf`]
+///  - [Linux `getpagesize`]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sysconf.html
+/// [Linux `sysconf`]: https://man7.org/linux/man-pages/man3/sysconf.3.html
+/// [Linux `getpagesize`]: https://man7.org/linux/man-pages/man2/getpagesize.2.html
 #[inline]
+#[doc(alias = "_SC_PAGESIZE")]
+#[doc(alias = "_SC_PAGE_SIZE")]
 #[doc(alias = "getpagesize")]
 pub fn page_size() -> usize {
     imp::process::page_size()
+}
+
+/// `sysconf(_SC_CLK_TCK)`—Returns the process' clock ticks per second.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sysconf.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/sysconf.3.html
+#[inline]
+#[doc(alias = "_SC_CLK_TCK")]
+pub fn clock_ticks_per_second() -> u64 {
+    imp::process::clock_ticks_per_second()
 }
 
 /// `(getauxval(AT_HWCAP), getauxval(AT_HWCAP2)`—Returns the Linux "hwcap"

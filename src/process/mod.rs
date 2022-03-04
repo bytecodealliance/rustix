@@ -27,7 +27,7 @@ mod wait;
 
 #[cfg(target_vendor = "mustang")]
 pub use auxv::init;
-pub use auxv::page_size;
+pub use auxv::{page_size, clock_ticks_per_second};
 #[cfg(any(
     linux_raw,
     all(

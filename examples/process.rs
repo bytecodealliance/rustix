@@ -17,6 +17,7 @@ fn main() -> io::Result<()> {
         println!("Linux hwcap: {:#x}, {:#x}", a, b);
     }
     println!("Page size: {}", page_size());
+    println!("Page size: {}", clock_ticks_per_second());
     println!("Uname: {:?}", uname());
     println!("Process group priority: {}", getpriority_pgrp(None)?);
     println!("Process priority: {}", getpriority_process(None)?);

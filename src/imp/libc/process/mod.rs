@@ -5,7 +5,7 @@ use super::c;
 
 #[cfg(not(windows))]
 pub(crate) mod syscalls;
-pub(crate) use auxv::page_size;
+pub(crate) use auxv::{page_size, clock_ticks_per_second};
 #[cfg(any(
     all(target_os = "android", target_pointer_width = "64"),
     target_os = "linux"
