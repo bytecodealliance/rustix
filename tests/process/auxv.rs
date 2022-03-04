@@ -1,7 +1,7 @@
+use rustix::process::clock_ticks_per_second;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use rustix::process::linux_hwcap;
 use rustix::process::page_size;
-use rustix::process::clock_ticks_per_second;
 
 #[test]
 fn test_page_size() {

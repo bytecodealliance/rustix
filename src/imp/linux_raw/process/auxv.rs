@@ -11,8 +11,8 @@ use crate::ffi::ZStr;
 use core::mem::size_of;
 use core::slice;
 use linux_raw_sys::general::{
-    AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM,
-    AT_SYSINFO_EHDR, AT_CLKTCK
+    AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM,
+    AT_SYSINFO_EHDR,
 };
 
 #[inline]
