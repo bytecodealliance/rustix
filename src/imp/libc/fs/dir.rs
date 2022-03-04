@@ -33,6 +33,7 @@ use c::readdir as libc_readdir;
     target_os = "linux"
 ))]
 use c::{dirent64 as libc_dirent, readdir64 as libc_readdir};
+use core::fmt;
 use core::mem::zeroed;
 use core::ptr::NonNull;
 use errno::{errno, set_errno, Errno};
@@ -245,6 +246,14 @@ impl Iterator for Dir {
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         Self::read(self)
+    }
+}
+
+impl fmt::Debug for Dir {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Dir")
+            .field("fd", unsafe { &c::dirfd(self.0.as_ptr()) })
+            .finish()
     }
 }
 

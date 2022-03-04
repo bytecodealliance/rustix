@@ -7,6 +7,7 @@ use crate::ffi::{ZStr, ZString};
 use crate::io::{self, OwnedFd};
 use alloc::borrow::ToOwned;
 use alloc::vec::Vec;
+use core::fmt;
 use core::mem::size_of;
 use linux_raw_sys::general::linux_dirent64;
 
@@ -172,6 +173,12 @@ impl Iterator for Dir {
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         Self::read(self)
+    }
+}
+
+impl fmt::Debug for Dir {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Dir").field("fd", &self.fd).finish()
     }
 }
 
