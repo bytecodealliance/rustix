@@ -7,7 +7,7 @@ pub(crate) mod syscalls;
 
 #[cfg(target_vendor = "mustang")]
 pub(crate) use auxv::init;
-pub(crate) use auxv::{exe_phdrs, linux_execfn, linux_hwcap, page_size};
+pub(crate) use auxv::{clock_ticks_per_second, exe_phdrs, linux_execfn, linux_hwcap, page_size};
 pub(super) use auxv::{exe_phdrs_slice, sysinfo_ehdr};
 pub(crate) use types::{raw_cpu_set_new, RawCpuSet, RawUname, CPU_SETSIZE};
 pub use types::{

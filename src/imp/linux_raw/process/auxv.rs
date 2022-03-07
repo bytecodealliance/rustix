@@ -11,13 +11,18 @@ use crate::ffi::ZStr;
 use core::mem::size_of;
 use core::slice;
 use linux_raw_sys::general::{
-    AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM,
+    AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM,
     AT_SYSINFO_EHDR,
 };
 
 #[inline]
 pub(crate) fn page_size() -> usize {
     auxv().page_size
+}
+
+#[inline]
+pub(crate) fn clock_ticks_per_second() -> u64 {
+    auxv().clock_ticks_per_second as u64
 }
 
 #[inline]
@@ -58,6 +63,7 @@ fn auxv() -> &'static Auxv {
 /// A struct for holding fields obtained from the kernel-provided auxv array.
 struct Auxv {
     page_size: usize,
+    clock_ticks_per_second: usize,
     hwcap: usize,
     hwcap2: usize,
     sysinfo_ehdr: usize,
@@ -70,6 +76,7 @@ struct Auxv {
 /// program startup below.
 static mut AUXV: Auxv = Auxv {
     page_size: 0,
+    clock_ticks_per_second: 0,
     hwcap: 0,
     hwcap2: 0,
     sysinfo_ehdr: 0,
@@ -137,6 +144,7 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) {
         let Elf_auxv_t { a_type, a_val } = *auxp;
         match a_type as _ {
             AT_PAGESZ => AUXV.page_size = a_val,
+            AT_CLKTCK => AUXV.clock_ticks_per_second = a_val,
             AT_HWCAP => AUXV.hwcap = a_val,
             AT_HWCAP2 => AUXV.hwcap2 = a_val,
             AT_SYSINFO_EHDR => AUXV.sysinfo_ehdr = a_val,
