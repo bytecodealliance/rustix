@@ -23,6 +23,6 @@ pub fn cwd() -> BorrowedFd<'static> {
     // it'll remain valid for the duration of `'static`.
     #[allow(unsafe_code)]
     unsafe {
-        BorrowedFd::<'static>::borrow_raw_fd(at_fdcwd)
+        BorrowedFd::<'static>::borrow_raw(at_fdcwd)
     }
 }

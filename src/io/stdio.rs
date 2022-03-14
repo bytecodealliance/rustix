@@ -38,7 +38,7 @@ use imp::fd::{BorrowedFd, FromRawFd, RawFd};
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
 #[inline]
 pub unsafe fn stdin() -> BorrowedFd<'static> {
-    BorrowedFd::borrow_raw_fd(imp::io::STDIN_FILENO as RawFd)
+    BorrowedFd::borrow_raw(imp::io::STDIN_FILENO as RawFd)
 }
 
 /// `STDIN_FILENO`—Standard input, owned.
@@ -99,7 +99,7 @@ pub unsafe fn take_stdin() -> OwnedFd {
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
 #[inline]
 pub unsafe fn stdout() -> BorrowedFd<'static> {
-    BorrowedFd::borrow_raw_fd(imp::io::STDOUT_FILENO as RawFd)
+    BorrowedFd::borrow_raw(imp::io::STDOUT_FILENO as RawFd)
 }
 
 /// `STDOUT_FILENO`—Standard output, owned.
@@ -159,7 +159,7 @@ pub unsafe fn take_stdout() -> OwnedFd {
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
 #[inline]
 pub unsafe fn stderr() -> BorrowedFd<'static> {
-    BorrowedFd::borrow_raw_fd(imp::io::STDERR_FILENO as RawFd)
+    BorrowedFd::borrow_raw(imp::io::STDERR_FILENO as RawFd)
 }
 
 /// `STDERR_FILENO`—Standard error, owned.
