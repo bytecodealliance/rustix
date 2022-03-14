@@ -230,7 +230,7 @@ unsafe impl Send for Dir {}
 impl AsFd for Dir {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
-        unsafe { BorrowedFd::borrow_raw_fd(c::dirfd(self.0.as_ptr()) as RawFd) }
+        unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr()) as RawFd) }
     }
 }
 

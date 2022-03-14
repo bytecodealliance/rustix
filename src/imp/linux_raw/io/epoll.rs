@@ -194,7 +194,7 @@ impl<'a> Context for Borrowing<'a> {
 
     #[inline]
     unsafe fn decode<'call>(&self, raw: u64) -> Ref<'call, Self::Target> {
-        Ref::new(BorrowedFd::<'a>::borrow_raw_fd(raw as RawFd))
+        Ref::new(BorrowedFd::<'a>::borrow_raw(raw as RawFd))
     }
 
     #[inline]
@@ -236,9 +236,9 @@ impl<'context, T: AsFd + IntoFd + FromFd> Context for Owning<'context, T> {
         // Safety: `epoll` will assign ownership of the file descriptor to the
         // kernel epoll object. We use `IntoFd`+`IntoRawFd` to consume the
         // `Data` and extract the raw file descriptor and then "borrow" it
-        // with `borrow_raw_fd` knowing that the borrow won't outlive the
+        // with `borrow_raw` knowing that the borrow won't outlive the
         // kernel epoll object.
-        unsafe { Ref::new(BorrowedFd::<'context>::borrow_raw_fd(raw_fd)) }
+        unsafe { Ref::new(BorrowedFd::<'context>::borrow_raw(raw_fd)) }
     }
 
     #[inline]
@@ -248,7 +248,7 @@ impl<'context, T: AsFd + IntoFd + FromFd> Context for Owning<'context, T> {
 
     #[inline]
     unsafe fn decode<'call>(&self, raw: u64) -> Ref<'call, Self::Target> {
-        Ref::new(BorrowedFd::<'context>::borrow_raw_fd(raw as RawFd))
+        Ref::new(BorrowedFd::<'context>::borrow_raw(raw as RawFd))
     }
 
     #[inline]

@@ -123,7 +123,7 @@ impl<'fd> AsFd for PollFd<'fd> {
         //
         // Our constructors and `set_fd` require `pollfd.fd` to be valid
         // for the `fd lifetime.
-        unsafe { BorrowedFd::borrow_raw_fd(self.pollfd.fd) }
+        unsafe { BorrowedFd::borrow_raw(self.pollfd.fd) }
     }
 }
 
@@ -135,6 +135,6 @@ impl<'fd> io_lifetimes::AsSocket for PollFd<'fd> {
         //
         // Our constructors and `set_fd` require `pollfd.fd` to be valid
         // for the `fd lifetime.
-        unsafe { BorrowedFd::borrow_raw_socket(self.pollfd.fd as RawFd) }
+        unsafe { BorrowedFd::borrow_raw(self.pollfd.fd as RawFd) }
     }
 }
