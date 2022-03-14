@@ -42,7 +42,7 @@ mod userfaultfd;
 
 pub use close::close;
 #[cfg(not(any(windows, target_os = "wasi")))]
-pub use dup::{dup, dup2, dup2_with, DupFlags};
+pub use dup::{dup, dup2, dup3, DupFlags};
 pub use error::{with_retrying, Error, Result};
 #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
 pub use eventfd::{eventfd, EventfdFlags};

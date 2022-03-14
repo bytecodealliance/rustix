@@ -36,7 +36,7 @@ pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 /// closing `new` and reusing its file descriptor.
 ///
 /// Note that this function does not set the `O_CLOEXEC` flag. To do a `dup2`
-/// that does set `O_CLOEXEC`, use [`dup2_with`] with [`DupFlags::CLOEXEC`] on
+/// that does set `O_CLOEXEC`, use [`dup3`] with [`DupFlags::CLOEXEC`] on
 /// platforms which support it.
 ///
 /// # References
@@ -56,9 +56,10 @@ pub fn dup2<Fd: AsFd>(fd: Fd, new: &OwnedFd) -> io::Result<()> {
 /// same underlying [file description] as the existing `OwnedFd` instance,
 /// closing `new` and reusing its file descriptor, with flags.
 ///
-/// `dup2_with` is the same as [`dup2`] but adds an additional flags operand,
-/// and fails in the case that `fd` and `new` have the same file descriptor
-/// value.
+/// `dup3` is the same as [`dup2`] but adds an additional flags operand,
+/// and it fails in the case that `fd` and `new` have the same file descriptor
+/// value. This additional difference is the reason this function isn't named
+/// `dup2_with`.
 ///
 /// # References
 ///  - [POSIX]
@@ -69,7 +70,6 @@ pub fn dup2<Fd: AsFd>(fd: Fd, new: &OwnedFd) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup2.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-#[doc(alias = "dup3")]
-pub fn dup2_with<Fd: AsFd>(fd: Fd, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
-    imp::io::syscalls::dup2_with(fd.as_fd(), new, flags)
+pub fn dup3<Fd: AsFd>(fd: Fd, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
+    imp::io::syscalls::dup3(fd.as_fd(), new, flags)
 }

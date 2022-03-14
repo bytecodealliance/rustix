@@ -465,7 +465,7 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
     target_os = "redox",
     target_os = "wasi"
 )))]
-pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
+pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
     unsafe {
         ret_discarded_fd(c::dup3(
             borrowed_fd(fd),
@@ -482,7 +482,7 @@ pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> i
     target_os = "ios",
     target_os = "redox"
 ))]
-pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, _flags: DupFlags) -> io::Result<()> {
+pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, _flags: DupFlags) -> io::Result<()> {
     // Android 5.0 has `dup3`, but libc doesn't have bindings. Emulate it
     // using `dup2`, including the difference of failing with `EINVAL`
     // when the file descriptors are equal.

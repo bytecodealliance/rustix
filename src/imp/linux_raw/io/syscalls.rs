@@ -561,7 +561,7 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
         if fd.as_raw_fd() == new.as_raw_fd() {
             return Ok(());
         }
-        dup2_with(fd, new, DupFlags::empty())
+        dup3(fd, new, DupFlags::empty())
     }
 
     #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
@@ -575,7 +575,7 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn dup2_with(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
+pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
     unsafe {
         ret_discarded_fd(syscall3_readonly(
             nr(__NR_dup3),
