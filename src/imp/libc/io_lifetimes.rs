@@ -8,6 +8,9 @@ pub use io_lifetimes::{BorrowedSocket as BorrowedFd, OwnedSocket as OwnedFd};
 pub use std::os::windows::io::RawSocket as RawFd;
 pub(crate) use winapi::um::winsock2::SOCKET as LibcFd;
 
+// Re-export the `Socket` traits so that users can implement them.
+pub use io_lifetimes::{AsSocket, FromSocket, IntoSocket};
+
 /// A version of [`AsRawFd`] for use with Winsock2 API.
 ///
 /// [`AsRawFd`]: https://doc.rust-lang.org/stable/std/os/unix/io/trait.AsRawFd.html
@@ -66,7 +69,7 @@ pub trait AsFd {
     /// An `as_fd` function for Winsock2, where a `Fd` is a `Socket`.
     fn as_fd(&self) -> BorrowedFd;
 }
-impl<T: io_lifetimes::AsSocket> AsFd for T {
+impl<T: AsSocket> AsFd for T {
     #[inline]
     fn as_fd(&self) -> BorrowedFd {
         self.as_socket()
@@ -82,7 +85,7 @@ pub trait IntoFd {
     /// [`into_fd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.IntoFd.html#tymethod.into_fd
     fn into_fd(self) -> OwnedFd;
 }
-impl<T: io_lifetimes::IntoSocket> IntoFd for T {
+impl<T: IntoSocket> IntoFd for T {
     #[inline]
     fn into_fd(self) -> OwnedFd {
         self.into_socket()
@@ -98,7 +101,7 @@ pub trait FromFd {
     /// [`from_fd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.FromFd.html#tymethod.from_fd
     fn from_fd(fd: OwnedFd) -> Self;
 }
-impl<T: io_lifetimes::FromSocket> FromFd for T {
+impl<T: FromSocket> FromFd for T {
     #[inline]
     fn from_fd(fd: OwnedFd) -> Self {
         Self::from_socket(fd)
