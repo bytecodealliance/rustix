@@ -125,6 +125,8 @@ extern crate alloc;
 pub mod fd {
     use super::imp;
     pub use imp::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
+    #[cfg(windows)]
+    pub use imp::fd::{AsSocket, FromSocket, IntoSocket};
     #[cfg(feature = "std")]
     pub use imp::fd::{FromFd, IntoFd};
 }
