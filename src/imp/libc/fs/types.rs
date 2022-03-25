@@ -559,7 +559,7 @@ bitflags! {
        /// `F_SEAL_WRITE`.
        const WRITE = c::F_SEAL_WRITE;
        /// `F_SEAL_FUTURE_WRITE` (since Linux 5.1)
-       #[cfg(target_os = "linux")]
+       #[cfg(any(target_os = "android", target_os = "linux"))]
        const FUTURE_WRITE = c::F_SEAL_FUTURE_WRITE;
     }
 }
