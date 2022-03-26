@@ -746,7 +746,7 @@ pub(crate) fn memfd_create(path: &ZStr, flags: MemfdFlags) -> io::Result<OwnedFd
             ) via SYS_memfd_create -> c::c_int
         }
 
-        ret(memfd_create(c_str(path), flags.bits()))
+        ret_owned_fd(memfd_create(c_str(path), flags.bits()))
     }
 }
 
