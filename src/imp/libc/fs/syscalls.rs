@@ -748,9 +748,7 @@ pub(crate) fn memfd_create(path: &ZStr, flags: MemfdFlags) -> io::Result<OwnedFd
         ) via SYS_memfd_create -> c::c_int
     }
 
-    unsafe {
-        ret_owned_fd(memfd_create(c_str(path), flags.bits()))
-    }
+    unsafe { ret_owned_fd(memfd_create(c_str(path), flags.bits())) }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
