@@ -733,19 +733,22 @@ pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
 #[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 pub(crate) fn memfd_create(path: &ZStr, flags: MemfdFlags) -> io::Result<OwnedFd> {
     #[cfg(target_os = "freebsd")]
-    unsafe {
-        ret_owned_fd(libc::memfd_create(c_str(path), flags.bits()))
+    weakcall! {
+        fn memfd_create(
+            name: *const c::c_char,
+            flags: c::c_uint
+        ) via SYS_memfd_create -> c::c_int
     }
 
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    unsafe {
-        weak_or_syscall! {
-            fn memfd_create(
-                name: *const c::c_char,
-                flags: c::c_uint
-            ) via SYS_memfd_create -> c::c_int
-        }
+    weak_or_syscall! {
+        fn memfd_create(
+            name: *const c::c_char,
+            flags: c::c_uint
+        ) via SYS_memfd_create -> c::c_int
+    }
 
+    unsafe {
         ret_owned_fd(memfd_create(c_str(path), flags.bits()))
     }
 }
