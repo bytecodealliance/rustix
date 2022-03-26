@@ -51,6 +51,10 @@ pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<()> {
     unsafe { ret_discarded_char_ptr(c::getcwd(buf.as_mut_ptr().cast(), buf.len())) }
 }
 
+// GLIBC does not have a wrapper for `membarrier`; [the documentation]
+// says to use `syscall`.
+//
+// [the documentation]: https://man7.org/linux/man-pages/man2/membarrier.2.html#NOTES
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn membarrier_query() -> MembarrierQuery {
     const MEMBARRIER_CMD_QUERY: u32 = 0;

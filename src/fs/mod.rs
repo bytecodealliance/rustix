@@ -44,7 +44,7 @@ mod getpath;
     target_os = "wasi"
 )))]
 mod makedev;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 mod memfd_create;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod openat2;
@@ -165,7 +165,7 @@ pub use getpath::getpath;
     target_os = "wasi"
 )))]
 pub use makedev::{major, makedev, minor};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 pub use memfd_create::{memfd_create, MemfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use openat2::openat2;
