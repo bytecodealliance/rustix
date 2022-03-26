@@ -737,7 +737,7 @@ pub(crate) fn memfd_create(path: &ZStr, flags: MemfdFlags) -> io::Result<OwnedFd
         fn memfd_create(
             name: *const c::c_char,
             flags: c::c_uint
-        ) via SYS_memfd_create -> c::c_int
+        ) -> c::c_int
     }
 
     #[cfg(any(target_os = "android", target_os = "linux"))]
