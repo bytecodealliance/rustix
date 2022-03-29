@@ -495,7 +495,7 @@ pub enum Advice {
     DontNeed = c::POSIX_FADV_DONTNEED as c::c_uint,
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 bitflags! {
     /// `MFD_*` constants for use with [`memfd_create`].
     ///
@@ -511,28 +511,40 @@ bitflags! {
         const HUGETLB = c::MFD_HUGETLB;
 
         /// `MFD_HUGE_64KB`
+        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_64KB = c::MFD_HUGE_64KB;
         /// `MFD_HUGE_512JB`
+        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_512KB = c::MFD_HUGE_512KB;
         /// `MFD_HUGE_1MB`
+        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_1MB = c::MFD_HUGE_1MB;
         /// `MFD_HUGE_2MB`
+        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_2MB = c::MFD_HUGE_2MB;
         /// `MFD_HUGE_8MB`
+        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_8MB = c::MFD_HUGE_8MB;
         /// `MFD_HUGE_16MB`
+        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_16MB = c::MFD_HUGE_16MB;
         /// `MFD_HUGE_32MB`
+        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_32MB = c::MFD_HUGE_32MB;
         /// `MFD_HUGE_256MB`
+        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_256MB = c::MFD_HUGE_256MB;
         /// `MFD_HUGE_512MB`
+        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_512MB = c::MFD_HUGE_512MB;
         /// `MFD_HUGE_1GB`
+        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_1GB = c::MFD_HUGE_1GB;
         /// `MFD_HUGE_2GB`
+        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_2GB = c::MFD_HUGE_2GB;
         /// `MFD_HUGE_16GB`
+        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_16GB = c::MFD_HUGE_16GB;
     }
 }
