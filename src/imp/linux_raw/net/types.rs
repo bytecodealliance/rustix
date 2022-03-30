@@ -15,19 +15,19 @@ pub struct SocketType(pub(crate) RawSocketType);
 #[rustfmt::skip]
 impl SocketType {
     /// `SOCK_STREAM`
-    pub const STREAM: Self = Self(linux_raw_sys::general::SOCK_STREAM);
+    pub const STREAM: Self = Self(c::SOCK_STREAM);
 
     /// `SOCK_DGRAM`
-    pub const DGRAM: Self = Self(linux_raw_sys::general::SOCK_DGRAM);
+    pub const DGRAM: Self = Self(c::SOCK_DGRAM);
 
     /// `SOCK_SEQPACKET`
-    pub const SEQPACKET: Self = Self(linux_raw_sys::general::SOCK_SEQPACKET);
+    pub const SEQPACKET: Self = Self(c::SOCK_SEQPACKET);
 
     /// `SOCK_RAW`
-    pub const RAW: Self = Self(linux_raw_sys::general::SOCK_RAW);
+    pub const RAW: Self = Self(c::SOCK_RAW);
 
     /// `SOCK_RDM`
-    pub const RDM: Self = Self(linux_raw_sys::general::SOCK_RDM);
+    pub const RDM: Self = Self(c::SOCK_RDM);
 
     /// Constructs a `SocketType` from a raw integer.
     #[inline]
@@ -44,7 +44,7 @@ impl SocketType {
 
 /// A type for holding raw integer address families.
 #[doc(hidden)]
-pub type RawAddressFamily = linux_raw_sys::general::__kernel_sa_family_t;
+pub type RawAddressFamily = c::sa_family_t;
 
 /// `AF_*` constants.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
@@ -54,77 +54,77 @@ pub struct AddressFamily(pub(crate) RawAddressFamily);
 #[rustfmt::skip]
 impl AddressFamily {
     /// `AF_UNSPEC`
-    pub const UNSPEC: Self = Self(linux_raw_sys::general::AF_UNSPEC as _);
+    pub const UNSPEC: Self = Self(c::AF_UNSPEC as _);
     /// `AF_INET`
-    pub const INET: Self = Self(linux_raw_sys::general::AF_INET as _);
+    pub const INET: Self = Self(c::AF_INET as _);
     /// `AF_INET6`
-    pub const INET6: Self = Self(linux_raw_sys::general::AF_INET6 as _);
+    pub const INET6: Self = Self(c::AF_INET6 as _);
     /// `AF_NETLINK`
-    pub const NETLINK: Self = Self(linux_raw_sys::general::AF_NETLINK as _);
+    pub const NETLINK: Self = Self(c::AF_NETLINK as _);
     /// `AF_UNIX`, aka `AF_LOCAL`
     #[doc(alias = "LOCAL")]
-    pub const UNIX: Self = Self(linux_raw_sys::general::AF_UNIX as _);
+    pub const UNIX: Self = Self(c::AF_UNIX as _);
     /// `AF_AX25`
-    pub const AX25: Self = Self(linux_raw_sys::general::AF_AX25 as _);
+    pub const AX25: Self = Self(c::AF_AX25 as _);
     /// `AF_IPX`
-    pub const IPX: Self = Self(linux_raw_sys::general::AF_IPX as _);
+    pub const IPX: Self = Self(c::AF_IPX as _);
     /// `AF_APPLETALK`
-    pub const APPLETALK: Self = Self(linux_raw_sys::general::AF_APPLETALK as _);
+    pub const APPLETALK: Self = Self(c::AF_APPLETALK as _);
     /// `AF_NETROM`
-    pub const NETROM: Self = Self(linux_raw_sys::general::AF_NETROM as _);
+    pub const NETROM: Self = Self(c::AF_NETROM as _);
     /// `AF_BRIDGE`
-    pub const BRIDGE: Self = Self(linux_raw_sys::general::AF_BRIDGE as _);
+    pub const BRIDGE: Self = Self(c::AF_BRIDGE as _);
     /// `AF_ATMPVC`
-    pub const ATMPVC: Self = Self(linux_raw_sys::general::AF_ATMPVC as _);
+    pub const ATMPVC: Self = Self(c::AF_ATMPVC as _);
     /// `AF_X25`
-    pub const X25: Self = Self(linux_raw_sys::general::AF_X25 as _);
+    pub const X25: Self = Self(c::AF_X25 as _);
     /// `AF_ROSE`
-    pub const ROSE: Self = Self(linux_raw_sys::general::AF_ROSE as _);
+    pub const ROSE: Self = Self(c::AF_ROSE as _);
     /// `AF_DECnet`
     #[allow(non_upper_case_globals)]
-    pub const DECnet: Self = Self(linux_raw_sys::general::AF_DECnet as _);
+    pub const DECnet: Self = Self(c::AF_DECnet as _);
     /// `AF_NETBEUI`
-    pub const NETBEUI: Self = Self(linux_raw_sys::general::AF_NETBEUI as _);
+    pub const NETBEUI: Self = Self(c::AF_NETBEUI as _);
     /// `AF_SECURITY`
-    pub const SECURITY: Self = Self(linux_raw_sys::general::AF_SECURITY as _);
+    pub const SECURITY: Self = Self(c::AF_SECURITY as _);
     /// `AF_KEY`
-    pub const KEY: Self = Self(linux_raw_sys::general::AF_KEY as _);
+    pub const KEY: Self = Self(c::AF_KEY as _);
     /// `AF_PACKET`
-    pub const PACKET: Self = Self(linux_raw_sys::general::AF_PACKET as _);
+    pub const PACKET: Self = Self(c::AF_PACKET as _);
     /// `AF_ASH`
-    pub const ASH: Self = Self(linux_raw_sys::general::AF_ASH as _);
+    pub const ASH: Self = Self(c::AF_ASH as _);
     /// `AF_ECONET`
-    pub const ECONET: Self = Self(linux_raw_sys::general::AF_ECONET as _);
+    pub const ECONET: Self = Self(c::AF_ECONET as _);
     /// `AF_ATMSVC`
-    pub const ATMSVC: Self = Self(linux_raw_sys::general::AF_ATMSVC as _);
+    pub const ATMSVC: Self = Self(c::AF_ATMSVC as _);
     /// `AF_RDS`
-    pub const RDS: Self = Self(linux_raw_sys::general::AF_RDS as _);
+    pub const RDS: Self = Self(c::AF_RDS as _);
     /// `AF_SNA`
-    pub const SNA: Self = Self(linux_raw_sys::general::AF_SNA as _);
+    pub const SNA: Self = Self(c::AF_SNA as _);
     /// `AF_IRDA`
-    pub const IRDA: Self = Self(linux_raw_sys::general::AF_IRDA as _);
+    pub const IRDA: Self = Self(c::AF_IRDA as _);
     /// `AF_PPPOX`
-    pub const PPPOX: Self = Self(linux_raw_sys::general::AF_PPPOX as _);
+    pub const PPPOX: Self = Self(c::AF_PPPOX as _);
     /// `AF_WANPIPE`
-    pub const WANPIPE: Self = Self(linux_raw_sys::general::AF_WANPIPE as _);
+    pub const WANPIPE: Self = Self(c::AF_WANPIPE as _);
     /// `AF_LLC`
-    pub const LLC: Self = Self(linux_raw_sys::general::AF_LLC as _);
+    pub const LLC: Self = Self(c::AF_LLC as _);
     /// `AF_CAN`
-    pub const CAN: Self = Self(linux_raw_sys::general::AF_CAN as _);
+    pub const CAN: Self = Self(c::AF_CAN as _);
     /// `AF_TIPC`
-    pub const TIPC: Self = Self(linux_raw_sys::general::AF_TIPC as _);
+    pub const TIPC: Self = Self(c::AF_TIPC as _);
     /// `AF_BLUETOOTH`
-    pub const BLUETOOTH: Self = Self(linux_raw_sys::general::AF_BLUETOOTH as _);
+    pub const BLUETOOTH: Self = Self(c::AF_BLUETOOTH as _);
     /// `AF_IUCV`
-    pub const IUCV: Self = Self(linux_raw_sys::general::AF_IUCV as _);
+    pub const IUCV: Self = Self(c::AF_IUCV as _);
     /// `AF_RXRPC`
-    pub const RXRPC: Self = Self(linux_raw_sys::general::AF_RXRPC as _);
+    pub const RXRPC: Self = Self(c::AF_RXRPC as _);
     /// `AF_ISDN`
-    pub const ISDN: Self = Self(linux_raw_sys::general::AF_ISDN as _);
+    pub const ISDN: Self = Self(c::AF_ISDN as _);
     /// `AF_PHONET`
-    pub const PHONET: Self = Self(linux_raw_sys::general::AF_PHONET as _);
+    pub const PHONET: Self = Self(c::AF_PHONET as _);
     /// `AF_IEEE802154`
-    pub const IEEE802154: Self = Self(linux_raw_sys::general::AF_IEEE802154 as _);
+    pub const IEEE802154: Self = Self(c::AF_IEEE802154 as _);
 
     /// Constructs a `AddressFamily` from a raw integer.
     #[inline]
@@ -151,67 +151,67 @@ pub struct Protocol(pub(crate) RawProtocol);
 #[rustfmt::skip]
 impl Protocol {
     /// `IPPROTO_IP`
-    pub const IP: Self = Self(linux_raw_sys::general::IPPROTO_IP as _);
+    pub const IP: Self = Self(c::IPPROTO_IP as _);
     /// `IPPROTO_ICMP`
-    pub const ICMP: Self = Self(linux_raw_sys::general::IPPROTO_ICMP as _);
+    pub const ICMP: Self = Self(c::IPPROTO_ICMP as _);
     /// `IPPROTO_IGMP`
-    pub const IGMP: Self = Self(linux_raw_sys::general::IPPROTO_IGMP as _);
+    pub const IGMP: Self = Self(c::IPPROTO_IGMP as _);
     /// `IPPROTO_IPIP`
-    pub const IPIP: Self = Self(linux_raw_sys::general::IPPROTO_IPIP as _);
+    pub const IPIP: Self = Self(c::IPPROTO_IPIP as _);
     /// `IPPROTO_TCP`
-    pub const TCP: Self = Self(linux_raw_sys::general::IPPROTO_TCP as _);
+    pub const TCP: Self = Self(c::IPPROTO_TCP as _);
     /// `IPPROTO_EGP`
-    pub const EGP: Self = Self(linux_raw_sys::general::IPPROTO_EGP as _);
+    pub const EGP: Self = Self(c::IPPROTO_EGP as _);
     /// `IPPROTO_PUP`
-    pub const PUP: Self = Self(linux_raw_sys::general::IPPROTO_PUP as _);
+    pub const PUP: Self = Self(c::IPPROTO_PUP as _);
     /// `IPPROTO_UDP`
-    pub const UDP: Self = Self(linux_raw_sys::general::IPPROTO_UDP as _);
+    pub const UDP: Self = Self(c::IPPROTO_UDP as _);
     /// `IPPROTO_IDP`
-    pub const IDP: Self = Self(linux_raw_sys::general::IPPROTO_IDP as _);
+    pub const IDP: Self = Self(c::IPPROTO_IDP as _);
     /// `IPPROTO_TP`
-    pub const TP: Self = Self(linux_raw_sys::general::IPPROTO_TP as _);
+    pub const TP: Self = Self(c::IPPROTO_TP as _);
     /// `IPPROTO_DCCP`
-    pub const DCCP: Self = Self(linux_raw_sys::general::IPPROTO_DCCP as _);
+    pub const DCCP: Self = Self(c::IPPROTO_DCCP as _);
     /// `IPPROTO_IPV6`
-    pub const IPV6: Self = Self(linux_raw_sys::general::IPPROTO_IPV6 as _);
+    pub const IPV6: Self = Self(c::IPPROTO_IPV6 as _);
     /// `IPPROTO_RSVP`
-    pub const RSVP: Self = Self(linux_raw_sys::general::IPPROTO_RSVP as _);
+    pub const RSVP: Self = Self(c::IPPROTO_RSVP as _);
     /// `IPPROTO_GRE`
-    pub const GRE: Self = Self(linux_raw_sys::general::IPPROTO_GRE as _);
+    pub const GRE: Self = Self(c::IPPROTO_GRE as _);
     /// `IPPROTO_ESP`
-    pub const ESP: Self = Self(linux_raw_sys::general::IPPROTO_ESP as _);
+    pub const ESP: Self = Self(c::IPPROTO_ESP as _);
     /// `IPPROTO_AH`
-    pub const AH: Self = Self(linux_raw_sys::general::IPPROTO_AH as _);
+    pub const AH: Self = Self(c::IPPROTO_AH as _);
     /// `IPPROTO_MTP`
-    pub const MTP: Self = Self(linux_raw_sys::general::IPPROTO_MTP as _);
+    pub const MTP: Self = Self(c::IPPROTO_MTP as _);
     /// `IPPROTO_BEETPH`
-    pub const BEETPH: Self = Self(linux_raw_sys::general::IPPROTO_BEETPH as _);
+    pub const BEETPH: Self = Self(c::IPPROTO_BEETPH as _);
     /// `IPPROTO_ENCAP`
-    pub const ENCAP: Self = Self(linux_raw_sys::general::IPPROTO_ENCAP as _);
+    pub const ENCAP: Self = Self(c::IPPROTO_ENCAP as _);
     /// `IPPROTO_PIM`
-    pub const PIM: Self = Self(linux_raw_sys::general::IPPROTO_PIM as _);
+    pub const PIM: Self = Self(c::IPPROTO_PIM as _);
     /// `IPPROTO_COMP`
-    pub const COMP: Self = Self(linux_raw_sys::general::IPPROTO_COMP as _);
+    pub const COMP: Self = Self(c::IPPROTO_COMP as _);
     /// `IPPROTO_SCTP`
-    pub const SCTP: Self = Self(linux_raw_sys::general::IPPROTO_SCTP as _);
+    pub const SCTP: Self = Self(c::IPPROTO_SCTP as _);
     /// `IPPROTO_UDPLITE`
-    pub const UDPLITE: Self = Self(linux_raw_sys::general::IPPROTO_UDPLITE as _);
+    pub const UDPLITE: Self = Self(c::IPPROTO_UDPLITE as _);
     /// `IPPROTO_MPLS`
-    pub const MPLS: Self = Self(linux_raw_sys::general::IPPROTO_MPLS as _);
+    pub const MPLS: Self = Self(c::IPPROTO_MPLS as _);
     /// `IPPROTO_ETHERNET`
-    pub const ETHERNET: Self = Self(linux_raw_sys::general::IPPROTO_ETHERNET as _);
+    pub const ETHERNET: Self = Self(c::IPPROTO_ETHERNET as _);
     /// `IPPROTO_RAW`
-    pub const RAW: Self = Self(linux_raw_sys::general::IPPROTO_RAW as _);
+    pub const RAW: Self = Self(c::IPPROTO_RAW as _);
     /// `IPPROTO_MPTCP`
-    pub const MPTCP: Self = Self(linux_raw_sys::general::IPPROTO_MPTCP as _);
+    pub const MPTCP: Self = Self(c::IPPROTO_MPTCP as _);
     /// `IPPROTO_FRAGMENT`
-    pub const FRAGMENT: Self = Self(linux_raw_sys::general::IPPROTO_FRAGMENT as _);
+    pub const FRAGMENT: Self = Self(c::IPPROTO_FRAGMENT as _);
     /// `IPPROTO_ICMPV6`
-    pub const ICMPV6: Self = Self(linux_raw_sys::general::IPPROTO_ICMPV6 as _);
+    pub const ICMPV6: Self = Self(c::IPPROTO_ICMPV6 as _);
     /// `IPPROTO_MH`
-    pub const MH: Self = Self(linux_raw_sys::general::IPPROTO_MH as _);
+    pub const MH: Self = Self(c::IPPROTO_MH as _);
     /// `IPPROTO_ROUTING`
-    pub const ROUTING: Self = Self(linux_raw_sys::general::IPPROTO_ROUTING as _);
+    pub const ROUTING: Self = Self(c::IPPROTO_ROUTING as _);
 
     /// Constructs a `Protocol` from a raw integer.
     #[inline]
@@ -233,11 +233,11 @@ impl Protocol {
 #[repr(u32)]
 pub enum Shutdown {
     /// `SHUT_WR`—Disable further read operations.
-    Read = linux_raw_sys::general::SHUT_RD,
+    Read = c::SHUT_RD,
     /// `SHUT_WR`—Disable further write operations.
-    Write = linux_raw_sys::general::SHUT_WR,
+    Write = c::SHUT_WR,
     /// `SHUT_RDWR`—Disable further read and write operations.
-    ReadWrite = linux_raw_sys::general::SHUT_RDWR,
+    ReadWrite = c::SHUT_RDWR,
 }
 
 bitflags! {
@@ -247,9 +247,9 @@ bitflags! {
     /// [`acceptfrom_with`]: crate::net::acceptfrom_with
     pub struct AcceptFlags: c::c_uint {
         /// `SOCK_NONBLOCK`
-        const NONBLOCK = linux_raw_sys::general::O_NONBLOCK;
+        const NONBLOCK = c::O_NONBLOCK;
         /// `SOCK_CLOEXEC`
-        const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
+        const CLOEXEC = c::O_CLOEXEC;
     }
 }
 
@@ -259,10 +259,10 @@ bitflags! {
     /// [`socket`]: crate::net::socket
     pub struct SocketFlags: c::c_uint {
         /// `SOCK_NONBLOCK`
-        const NONBLOCK = linux_raw_sys::general::O_NONBLOCK;
+        const NONBLOCK = c::O_NONBLOCK;
 
         /// `SOCK_CLOEXEC`
-        const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
+        const CLOEXEC = c::O_CLOEXEC;
     }
 }
 
@@ -274,8 +274,8 @@ bitflags! {
 #[repr(u32)]
 pub enum Timeout {
     /// `SO_RCVTIMEO`—Timeout for receiving.
-    Recv = linux_raw_sys::general::SO_RCVTIMEO_NEW,
+    Recv = c::SO_RCVTIMEO_NEW,
 
     /// `SO_SNDTIMEO`—Timeout for sending.
-    Send = linux_raw_sys::general::SO_SNDTIMEO_NEW,
+    Send = c::SO_SNDTIMEO_NEW,
 }

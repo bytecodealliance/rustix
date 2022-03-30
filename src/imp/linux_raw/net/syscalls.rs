@@ -21,8 +21,10 @@ use super::{
 use crate::fd::BorrowedFd;
 use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
+use c::{sockaddr_in, sockaddr_in6, socklen_t};
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
+use linux_raw_sys::general::sockaddr;
 #[cfg(not(any(
     target_arch = "aarch64",
     target_arch = "mips64",
@@ -31,7 +33,6 @@ use core::mem::MaybeUninit;
     target_arch = "x86_64",
 )))]
 use linux_raw_sys::general::{__NR_recv, __NR_send};
-use linux_raw_sys::general::{sockaddr, sockaddr_in, sockaddr_in6, socklen_t};
 #[cfg(target_arch = "x86")]
 use {
     super::super::arch::choose::syscall2,
@@ -824,12 +825,10 @@ pub(crate) mod sockopt {
     use crate::io;
     use crate::net::sockopt::Timeout;
     use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
+    use c::{SOL_SOCKET, SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_SNDTIMEO_NEW, SO_SNDTIMEO_OLD};
     use core::convert::TryInto;
     use core::time::Duration;
-    use linux_raw_sys::general::{
-        __kernel_timespec, timeval, SOL_SOCKET, SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_SNDTIMEO_NEW,
-        SO_SNDTIMEO_OLD,
-    };
+    use linux_raw_sys::general::{__kernel_timespec, timeval};
 
     // TODO: With Rust 1.53 we can use `Duration::ZERO` instead.
     const DURATION_ZERO: Duration = Duration::from_secs(0);
@@ -915,19 +914,15 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn get_socket_type(fd: BorrowedFd<'_>) -> io::Result<SocketType> {
-        getsockopt(
-            fd,
-            linux_raw_sys::general::SOL_SOCKET as _,
-            linux_raw_sys::general::SO_TYPE,
-        )
+        getsockopt(fd, c::SOL_SOCKET as _, c::SO_TYPE)
     }
 
     #[inline]
     pub(crate) fn set_socket_reuseaddr(fd: BorrowedFd<'_>, reuseaddr: bool) -> io::Result<()> {
         setsockopt(
             fd,
-            linux_raw_sys::general::SOL_SOCKET as _,
-            linux_raw_sys::general::SO_REUSEADDR,
+            c::SOL_SOCKET as _,
+            c::SO_REUSEADDR,
             from_bool(reuseaddr),
         )
     }
@@ -936,19 +931,15 @@ pub(crate) mod sockopt {
     pub(crate) fn set_socket_broadcast(fd: BorrowedFd<'_>, broadcast: bool) -> io::Result<()> {
         setsockopt(
             fd,
-            linux_raw_sys::general::SOL_SOCKET as _,
-            linux_raw_sys::general::SO_BROADCAST,
+            c::SOL_SOCKET as _,
+            c::SO_BROADCAST,
             from_bool(broadcast),
         )
     }
 
     #[inline]
     pub(crate) fn get_socket_broadcast(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(
-            fd,
-            linux_raw_sys::general::SOL_SOCKET as _,
-            linux_raw_sys::general::SO_BROADCAST,
-        )
+        getsockopt(fd, c::SOL_SOCKET as _, c::SO_BROADCAST)
     }
 
     #[inline]
@@ -966,25 +957,16 @@ pub(crate) mod sockopt {
         } else {
             0
         };
-        let linger = linux_raw_sys::general::linger {
+        let linger = c::linger {
             l_onoff: linger.is_some() as c::c_int,
             l_linger,
         };
-        setsockopt(
-            fd,
-            linux_raw_sys::general::SOL_SOCKET as _,
-            linux_raw_sys::general::SO_LINGER,
-            linger,
-        )
+        setsockopt(fd, c::SOL_SOCKET as _, c::SO_LINGER, linger)
     }
 
     #[inline]
     pub(crate) fn get_socket_linger(fd: BorrowedFd<'_>) -> io::Result<Option<Duration>> {
-        let linger: linux_raw_sys::general::linger = getsockopt(
-            fd,
-            linux_raw_sys::general::SOL_SOCKET as _,
-            linux_raw_sys::general::SO_LINGER,
-        )?;
+        let linger: c::linger = getsockopt(fd, c::SOL_SOCKET as _, c::SO_LINGER)?;
         // TODO: With Rust 1.50, this could use `.then`.
         Ok(if linger.l_onoff != 0 {
             Some(Duration::from_secs(linger.l_linger as u64))
@@ -995,21 +977,12 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn set_socket_passcred(fd: BorrowedFd<'_>, passcred: bool) -> io::Result<()> {
-        setsockopt(
-            fd,
-            linux_raw_sys::general::SOL_SOCKET as _,
-            linux_raw_sys::general::SO_PASSCRED,
-            from_bool(passcred),
-        )
+        setsockopt(fd, c::SOL_SOCKET as _, c::SO_PASSCRED, from_bool(passcred))
     }
 
     #[inline]
     pub(crate) fn get_socket_passcred(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(
-            fd,
-            linux_raw_sys::general::SOL_SOCKET as _,
-            linux_raw_sys::general::SO_PASSCRED,
-        )
+        getsockopt(fd, c::SOL_SOCKET as _, c::SO_PASSCRED)
     }
 
     #[inline]
@@ -1151,40 +1124,22 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn set_ip_ttl(fd: BorrowedFd<'_>, ttl: u32) -> io::Result<()> {
-        setsockopt(
-            fd,
-            linux_raw_sys::general::IPPROTO_IP as _,
-            linux_raw_sys::general::IP_TTL,
-            ttl,
-        )
+        setsockopt(fd, c::IPPROTO_IP as _, c::IP_TTL, ttl)
     }
 
     #[inline]
     pub(crate) fn get_ip_ttl(fd: BorrowedFd<'_>) -> io::Result<u32> {
-        getsockopt(
-            fd,
-            linux_raw_sys::general::IPPROTO_IP as _,
-            linux_raw_sys::general::IP_TTL,
-        )
+        getsockopt(fd, c::IPPROTO_IP as _, c::IP_TTL)
     }
 
     #[inline]
     pub(crate) fn set_ipv6_v6only(fd: BorrowedFd<'_>, only_v6: bool) -> io::Result<()> {
-        setsockopt(
-            fd,
-            linux_raw_sys::general::IPPROTO_IPV6 as _,
-            linux_raw_sys::general::IPV6_V6ONLY,
-            from_bool(only_v6),
-        )
+        setsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_V6ONLY, from_bool(only_v6))
     }
 
     #[inline]
     pub(crate) fn get_ipv6_v6only(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(
-            fd,
-            linux_raw_sys::general::IPPROTO_IPV6 as _,
-            linux_raw_sys::general::IPV6_V6ONLY,
-        )
+        getsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_V6ONLY)
     }
 
     #[inline]
@@ -1194,38 +1149,25 @@ pub(crate) mod sockopt {
     ) -> io::Result<()> {
         setsockopt(
             fd,
-            linux_raw_sys::general::IPPROTO_IP as _,
-            linux_raw_sys::general::IP_MULTICAST_LOOP,
+            c::IPPROTO_IP as _,
+            c::IP_MULTICAST_LOOP,
             from_bool(multicast_loop),
         )
     }
 
     #[inline]
     pub(crate) fn get_ip_multicast_loop(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(
-            fd,
-            linux_raw_sys::general::IPPROTO_IP as _,
-            linux_raw_sys::general::IP_MULTICAST_LOOP,
-        )
+        getsockopt(fd, c::IPPROTO_IP as _, c::IP_MULTICAST_LOOP)
     }
 
     #[inline]
     pub(crate) fn set_ip_multicast_ttl(fd: BorrowedFd<'_>, multicast_ttl: u32) -> io::Result<()> {
-        setsockopt(
-            fd,
-            linux_raw_sys::general::IPPROTO_IP as _,
-            linux_raw_sys::general::IP_MULTICAST_TTL,
-            multicast_ttl,
-        )
+        setsockopt(fd, c::IPPROTO_IP as _, c::IP_MULTICAST_TTL, multicast_ttl)
     }
 
     #[inline]
     pub(crate) fn get_ip_multicast_ttl(fd: BorrowedFd<'_>) -> io::Result<u32> {
-        getsockopt(
-            fd,
-            linux_raw_sys::general::IPPROTO_IP as _,
-            linux_raw_sys::general::IP_MULTICAST_TTL,
-        )
+        getsockopt(fd, c::IPPROTO_IP as _, c::IP_MULTICAST_TTL)
     }
 
     #[inline]
@@ -1235,19 +1177,15 @@ pub(crate) mod sockopt {
     ) -> io::Result<()> {
         setsockopt(
             fd,
-            linux_raw_sys::general::IPPROTO_IPV6 as _,
-            linux_raw_sys::general::IPV6_MULTICAST_LOOP,
+            c::IPPROTO_IPV6 as _,
+            c::IPV6_MULTICAST_LOOP,
             from_bool(multicast_loop),
         )
     }
 
     #[inline]
     pub(crate) fn get_ipv6_multicast_loop(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(
-            fd,
-            linux_raw_sys::general::IPPROTO_IPV6 as _,
-            linux_raw_sys::general::IPV6_MULTICAST_LOOP,
-        )
+        getsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_MULTICAST_LOOP)
     }
 
     #[inline]
@@ -1257,12 +1195,7 @@ pub(crate) mod sockopt {
         interface: &Ipv4Addr,
     ) -> io::Result<()> {
         let mreq = to_imr(multiaddr, interface);
-        setsockopt(
-            fd,
-            linux_raw_sys::general::IPPROTO_IP as _,
-            linux_raw_sys::general::IP_ADD_MEMBERSHIP,
-            mreq,
-        )
+        setsockopt(fd, c::IPPROTO_IP as _, c::IP_ADD_MEMBERSHIP, mreq)
     }
 
     #[inline]
@@ -1272,12 +1205,7 @@ pub(crate) mod sockopt {
         interface: u32,
     ) -> io::Result<()> {
         let mreq = to_ipv6mr(multiaddr, interface);
-        setsockopt(
-            fd,
-            linux_raw_sys::general::IPPROTO_IPV6 as _,
-            linux_raw_sys::general::IPV6_ADD_MEMBERSHIP,
-            mreq,
-        )
+        setsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_ADD_MEMBERSHIP, mreq)
     }
 
     #[inline]
@@ -1287,12 +1215,7 @@ pub(crate) mod sockopt {
         interface: &Ipv4Addr,
     ) -> io::Result<()> {
         let mreq = to_imr(multiaddr, interface);
-        setsockopt(
-            fd,
-            linux_raw_sys::general::IPPROTO_IP as _,
-            linux_raw_sys::general::IP_DROP_MEMBERSHIP,
-            mreq,
-        )
+        setsockopt(fd, c::IPPROTO_IP as _, c::IP_DROP_MEMBERSHIP, mreq)
     }
 
     #[inline]
@@ -1302,59 +1225,45 @@ pub(crate) mod sockopt {
         interface: u32,
     ) -> io::Result<()> {
         let mreq = to_ipv6mr(multiaddr, interface);
-        setsockopt(
-            fd,
-            linux_raw_sys::general::IPPROTO_IPV6 as _,
-            linux_raw_sys::general::IPV6_DROP_MEMBERSHIP,
-            mreq,
-        )
+        setsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_DROP_MEMBERSHIP, mreq)
     }
 
     #[inline]
     pub(crate) fn set_tcp_nodelay(fd: BorrowedFd<'_>, nodelay: bool) -> io::Result<()> {
-        setsockopt(
-            fd,
-            linux_raw_sys::general::IPPROTO_TCP as _,
-            linux_raw_sys::general::TCP_NODELAY,
-            from_bool(nodelay),
-        )
+        setsockopt(fd, c::IPPROTO_TCP as _, c::TCP_NODELAY, from_bool(nodelay))
     }
 
     #[inline]
     pub(crate) fn get_tcp_nodelay(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(
-            fd,
-            linux_raw_sys::general::IPPROTO_TCP as _,
-            linux_raw_sys::general::TCP_NODELAY,
-        )
+        getsockopt(fd, c::IPPROTO_TCP as _, c::TCP_NODELAY)
     }
 
     #[inline]
-    fn to_imr(multiaddr: &Ipv4Addr, interface: &Ipv4Addr) -> linux_raw_sys::general::ip_mreq {
-        linux_raw_sys::general::ip_mreq {
+    fn to_imr(multiaddr: &Ipv4Addr, interface: &Ipv4Addr) -> c::ip_mreq {
+        c::ip_mreq {
             imr_multiaddr: to_imr_addr(multiaddr),
             imr_interface: to_imr_addr(interface),
         }
     }
 
     #[inline]
-    fn to_imr_addr(addr: &Ipv4Addr) -> linux_raw_sys::general::in_addr {
-        linux_raw_sys::general::in_addr {
+    fn to_imr_addr(addr: &Ipv4Addr) -> c::in_addr {
+        c::in_addr {
             s_addr: u32::from_ne_bytes(addr.octets()),
         }
     }
 
     #[inline]
-    fn to_ipv6mr(multiaddr: &Ipv6Addr, interface: u32) -> linux_raw_sys::general::ipv6_mreq {
-        linux_raw_sys::general::ipv6_mreq {
+    fn to_ipv6mr(multiaddr: &Ipv6Addr, interface: u32) -> c::ipv6_mreq {
+        c::ipv6_mreq {
             ipv6mr_multiaddr: to_ipv6mr_multiaddr(multiaddr),
             ipv6mr_ifindex: to_ipv6mr_interface(interface),
         }
     }
 
     #[inline]
-    fn to_ipv6mr_multiaddr(multiaddr: &Ipv6Addr) -> linux_raw_sys::general::in6_addr {
-        linux_raw_sys::general::in6_addr {
+    fn to_ipv6mr_multiaddr(multiaddr: &Ipv6Addr) -> c::in6_addr {
+        c::in6_addr {
             in6_u: linux_raw_sys::general::in6_addr__bindgen_ty_1 {
                 u6_addr8: multiaddr.octets(),
             },

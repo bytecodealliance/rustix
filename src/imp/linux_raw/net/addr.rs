@@ -16,8 +16,8 @@ use core::mem::transmute;
 #[derive(Clone)]
 #[doc(alias = "sockaddr_un")]
 pub struct SocketAddrUnix {
-    pub(crate) unix: linux_raw_sys::general::sockaddr_un,
-    len: linux_raw_sys::general::socklen_t,
+    pub(crate) unix: c::sockaddr_un,
+    len: c::socklen_t,
 }
 
 impl SocketAddrUnix {
@@ -59,9 +59,9 @@ impl SocketAddrUnix {
         Ok(Self { unix, len })
     }
 
-    fn init() -> linux_raw_sys::general::sockaddr_un {
-        linux_raw_sys::general::sockaddr_un {
-            sun_family: linux_raw_sys::general::AF_UNIX as _,
+    fn init() -> c::sockaddr_un {
+        c::sockaddr_un {
+            sun_family: c::AF_UNIX as _,
             sun_path: [0; 108],
         }
     }
@@ -96,7 +96,7 @@ impl SocketAddrUnix {
     }
 
     #[inline]
-    pub(crate) fn addr_len(&self) -> linux_raw_sys::general::socklen_t {
+    pub(crate) fn addr_len(&self) -> c::socklen_t {
         self.len
     }
 
@@ -161,7 +161,7 @@ pub type SocketAddrStorage = linux_raw_sys::general::sockaddr;
 /// Return the offset of the `sun_path` field of `sockaddr_un`.
 #[inline]
 pub(crate) fn offsetof_sun_path() -> usize {
-    let z = linux_raw_sys::general::sockaddr_un {
+    let z = c::sockaddr_un {
         sun_family: 0_u16,
         sun_path: [0; 108],
     };

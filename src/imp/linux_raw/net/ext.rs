@@ -47,10 +47,10 @@ pub(crate) fn sockaddr_in6_sin6_scope_id_mut(addr: &mut c::sockaddr_in6) -> &mut
 
 #[inline]
 pub(crate) const fn sockaddr_in6_new(
-    sin6_family: linux_raw_sys::general::__kernel_sa_family_t,
+    sin6_family: c::sa_family_t,
     sin6_port: u16,
     sin6_flowinfo: u32,
-    sin6_addr: linux_raw_sys::general::in6_addr,
+    sin6_addr: c::in6_addr,
     sin6_scope_id: u32,
 ) -> c::sockaddr_in6 {
     c::sockaddr_in6 {

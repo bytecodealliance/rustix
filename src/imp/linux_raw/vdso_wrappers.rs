@@ -67,7 +67,7 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Resu
     };
 
     unsafe {
-        const EINVAL: c::c_int = -(linux_raw_sys::errno::EINVAL as c::c_int);
+        const EINVAL: c::c_int = -(c::EINVAL as c::c_int);
         let mut timespec = MaybeUninit::<Timespec>::uninit();
         let callee = match transmute(CLOCK_GETTIME.load(Relaxed)) {
             Some(callee) => callee,
