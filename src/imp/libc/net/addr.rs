@@ -19,7 +19,7 @@ use core::mem::transmute;
 #[derive(Clone)]
 #[doc(alias = "sockaddr_un")]
 pub struct SocketAddrUnix {
-    pub(crate) unix: libc::sockaddr_un,
+    pub(crate) unix: c::sockaddr_un,
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
@@ -28,7 +28,7 @@ pub struct SocketAddrUnix {
         target_os = "netbsd",
         target_os = "openbsd"
     )))]
-    len: libc::socklen_t,
+    len: c::socklen_t,
 }
 
 #[cfg(unix)]

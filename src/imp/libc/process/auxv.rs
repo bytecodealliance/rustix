@@ -10,7 +10,7 @@ use crate::ffi::ZStr;
     all(target_os = "android", target_pointer_width = "64"),
     target_os = "linux"
 ))]
-weak!(fn getauxval(libc::c_ulong) -> libc::c_ulong);
+weak!(fn getauxval(c::c_ulong) -> c::c_ulong);
 
 #[inline]
 pub(crate) fn page_size() -> usize {
