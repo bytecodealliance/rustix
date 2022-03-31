@@ -66,7 +66,10 @@ const fn make_pointer<T>(value: usize) -> Option<*const T> {
 /// # Safety
 ///
 /// `base` must be a valid pointer to an ELF image in memory.
-unsafe fn init_from_sysinfo_ehdr(base: usize) -> Option<Vdso> {
+unsafe fn init_from_sysinfo_ehdr(base: *const Elf_Ehdr) -> Option<Vdso> {
+    // The vDSO parsing code does not yet preserve provenance.
+    let base = base as usize;
+
     // Check that `base` is a valid pointer to the kernel-provided vDSO.
     let hdr = check_vdso_base(base)?;
 
