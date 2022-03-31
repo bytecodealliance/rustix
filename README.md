@@ -18,10 +18,11 @@
 `rustix` provides efficient memory-safe and [I/O-safe] wrappers to POSIX-like,
 Unix-like, Linux, and Winsock2 syscall-like APIs, with configurable backends.
 It uses Rust references, slices, and return values instead of raw pointers, and
-[`io-lifetimes`] instead of raw file descriptors, providing memory safety and
-[I/O safety]. It uses `Result`s for reporting errors, [`bitflags`] instead of
-bare integer flags, an [`Arg`] trait with optimizations to efficiently accept
-any Rust string type, and several other efficient conveniences.
+[`io-lifetimes`] instead of raw file descriptors, providing memory safety,
+[I/O safety], and [provenance]. It uses `Result`s for reporting errors,
+[`bitflags`] instead of bare integer flags, an [`Arg`] trait with optimizations
+to efficiently accept any Rust string type, and several other efficient
+conveniences.
 
 `rustix` is low-level and, and while the `net` API supports Winsock2 on
 Windows, the rest of the APIs do not support Windows; for higher-level and more
@@ -37,8 +38,8 @@ portable APIs built on this functionality, see the [`system-interface`],
       cancellation, and employing some specialized optimizations, most functions
       compile down to very efficient code. On nightly Rust, they can often be
       fully inlined into user code.
-    - Most functions in `linux_raw` preserve memory and I/O safety all the way
-      down to the syscalls.
+    - Most functions in `linux_raw` preserve memory, I/O safety, and pointer
+      provenance all the way down to the syscalls.
     - `linux_raw` uses a 64-bit `time_t` type on all platforms, avoiding the
       [y2038 bug].
 
@@ -118,6 +119,7 @@ version of this crate.
 [`Arg`]: https://docs.rs/rustix/latest/rustix/path/trait.Arg.html
 [I/O-safe]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
 [I/O safety]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
+[provenance]: https://github.com/rust-lang/rust/issues/95228
 [y2038 bug]: https://en.wikipedia.org/wiki/Year_2038_problem
 [`OwnedFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/struct.OwnedFd.html
 [`AsFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.AsFd.html
