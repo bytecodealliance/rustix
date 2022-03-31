@@ -249,7 +249,7 @@ pub(super) fn dev_t<'a, Num: ArgNumber>(dev: u64) -> ArgReg<'a, Num> {
 pub(super) fn dev_t<'a, Num: ArgNumber>(dev: u64) -> io::Result<ArgReg<'a, Num>> {
     use core::convert::TryInto;
     dev.try_into()
-        .map(|dev: usize| raw_arg(dev))
+        .map(|dev: usize| raw_arg(dev as *mut c::c_void))
         .map_err(|_err| io::Error::INVAL)
 }
 
