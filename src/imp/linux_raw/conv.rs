@@ -114,13 +114,24 @@ pub(super) fn opt_c_str<'a, Num: ArgNumber>(t: Option<&'a ZStr>) -> ArgReg<'a, N
     })
 }
 
+/// Pass a borrowed file-descriptor argument.
 #[inline]
 pub(super) fn borrowed_fd<'a, Num: ArgNumber>(fd: BorrowedFd<'a>) -> ArgReg<'a, Num> {
-    raw_fd(fd.as_raw_fd())
+    // Safety: `BorrowedFd` ensures that the file descriptor is valid, and the
+    // lifetime parameter on the resulting `ArgReg` ensures that the result is
+    // bounded by the `BorrowedFd`'s lifetime.
+    unsafe { raw_fd(fd.as_raw_fd()) }
 }
 
+/// Pass a raw file-descriptor argument. Most users should use [`borrowed_fd`]
+/// instead, to preserve I/O safety as long as possible.
+///
+/// # Safety
+///
+/// `fd` must be a valid open file descriptor.
 #[inline]
-pub(super) fn raw_fd<'a, Num: ArgNumber>(fd: RawFd) -> ArgReg<'a, Num> {
+pub(super) unsafe fn raw_fd<'a, Num: ArgNumber>(fd: RawFd) -> ArgReg<'a, Num> {
+    // Use `no_fd` when passing `-1` is intended.
     debug_assert!(fd == crate::fs::cwd().as_raw_fd() || fd >= 0);
 
     // Linux doesn't look at the high bits beyond the `c_int`, so use
