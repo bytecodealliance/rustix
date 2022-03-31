@@ -3,7 +3,7 @@
 use crate::imp;
 
 mod clock;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 mod timerfd;
 
 // TODO: Convert WASI'S clock APIs to use handles rather than ambient clock
