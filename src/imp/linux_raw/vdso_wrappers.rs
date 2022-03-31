@@ -20,7 +20,8 @@ use crate::io;
 #[cfg(all(asm, target_arch = "x86"))]
 use core::arch::asm;
 use core::mem::{transmute, MaybeUninit};
-use core::sync::atomic::AtomicUsize;
+use core::ptr::null_mut;
+use core::sync::atomic::AtomicPtr;
 use core::sync::atomic::Ordering::Relaxed;
 use linux_raw_sys::general::{__NR_clock_gettime, __kernel_clockid_t, __kernel_timespec};
 #[cfg(target_pointer_width = "32")]
@@ -37,7 +38,7 @@ pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
             Some(callee) => callee,
             None => init_clock_gettime(),
         };
-        let r0 = callee(which_clock as _, result.as_mut_ptr());
+        let r0 = callee(which_clock as c::c_int, result.as_mut_ptr());
         assert_eq!(r0, 0);
         result.assume_init()
     }
@@ -228,9 +229,12 @@ fn init_syscall() -> SyscallType {
     unsafe { transmute(SYSCALL.load(Relaxed)) }
 }
 
-static mut CLOCK_GETTIME: AtomicUsize = AtomicUsize::new(0);
+/// `AtomicPtr` can't hold a `fn` pointer, so we use a `*` pointer to this
+/// placeholder type, and cast it as needed.
+struct Function;
+static mut CLOCK_GETTIME: AtomicPtr<Function> = AtomicPtr::new(null_mut());
 #[cfg(target_arch = "x86")]
-static mut SYSCALL: AtomicUsize = AtomicUsize::new(0);
+static mut SYSCALL: AtomicPtr<Function> = AtomicPtr::new(null_mut());
 
 unsafe extern "C" fn rustix_clock_gettime_via_syscall(
     clockid: c::c_int,
@@ -322,16 +326,23 @@ fn minimal_init() {
     unsafe {
         CLOCK_GETTIME
             .compare_exchange(
-                0,
-                rustix_clock_gettime_via_syscall as ClockGettimeType as usize,
+                null_mut(),
+                rustix_clock_gettime_via_syscall as *mut Function,
                 Relaxed,
                 Relaxed,
             )
             .ok();
         #[cfg(target_arch = "x86")]
-        SYSCALL
-            .compare_exchange(0, rustix_int_0x80 as SyscallType as usize, Relaxed, Relaxed)
-            .ok();
+        {
+            SYSCALL
+                .compare_exchange(
+                    null_mut(),
+                    rustix_int_0x80 as *mut Function,
+                    Relaxed,
+                    Relaxed,
+                )
+                .ok();
+        }
     }
 }
 
@@ -378,7 +389,7 @@ fn init() {
             // so that we don't need to compute it again (but if we do, it doesn't
             // hurt anything).
             unsafe {
-                CLOCK_GETTIME.store(ptr as usize, Relaxed);
+                CLOCK_GETTIME.store(ptr.cast(), Relaxed);
             }
         }
 
@@ -391,7 +402,7 @@ fn init() {
             // Safety: As above, store the computed function addresses in
             // static storage.
             unsafe {
-                SYSCALL.store(ptr as usize, Relaxed);
+                SYSCALL.store(ptr.cast(), Relaxed);
             }
         }
     }
