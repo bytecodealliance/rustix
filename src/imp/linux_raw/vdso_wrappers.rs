@@ -19,8 +19,9 @@ use super::{c, vdso};
 use crate::io;
 #[cfg(all(asm, target_arch = "x86"))]
 use core::arch::asm;
-use core::mem::{transmute, MaybeUninit};
-use core::sync::atomic::AtomicUsize;
+use core::mem::MaybeUninit;
+use core::ptr;
+use core::sync::atomic::AtomicPtr;
 use core::sync::atomic::Ordering::Relaxed;
 use linux_raw_sys::general::{__NR_clock_gettime, __kernel_clockid_t, __kernel_timespec};
 #[cfg(target_pointer_width = "32")]
@@ -33,11 +34,11 @@ use {
 pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
     unsafe {
         let mut result = MaybeUninit::<__kernel_timespec>::uninit();
-        let callee = match transmute(CLOCK_GETTIME.load(Relaxed)) {
-            Some(callee) => callee,
-            None => init_clock_gettime(),
-        };
-        let r0 = callee(which_clock as _, result.as_mut_ptr());
+        let mut callee = CLOCK_GETTIME.load(Relaxed);
+        if callee.is_null() {
+            callee = init_clock_gettime();
+        }
+        let r0 = (*callee)(which_clock as c::c_int, result.as_mut_ptr());
         assert_eq!(r0, 0);
         result.assume_init()
     }
@@ -68,11 +69,11 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Resu
     unsafe {
         const EINVAL: c::c_int = -(linux_raw_sys::errno::EINVAL as c::c_int);
         let mut timespec = MaybeUninit::<Timespec>::uninit();
-        let callee = match transmute(CLOCK_GETTIME.load(Relaxed)) {
-            Some(callee) => callee,
-            None => init_clock_gettime(),
-        };
-        match callee(id, timespec.as_mut_ptr()) {
+        let mut callee = CLOCK_GETTIME.load(Relaxed);
+        if callee.is_null() {
+            callee = init_clock_gettime();
+        }
+        match (*callee)(id, timespec.as_mut_ptr()) {
             0 => (),
             EINVAL => return Err(io::Error::INVAL),
             _ => _rustix_clock_gettime_via_syscall(id, timespec.as_mut_ptr())?,
@@ -83,35 +84,37 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Resu
 
 #[cfg(target_arch = "x86")]
 pub(super) mod x86_via_vdso {
-    use super::{transmute, ArgReg, Relaxed, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
+    use super::{
+        init_syscall, ArgReg, Relaxed, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0, SYSCALL,
+    };
     use crate::imp::arch::asm;
 
     #[inline]
     #[must_use]
     pub(in crate::imp) unsafe fn syscall0(nr: SyscallNumber<'_>) -> RetReg<R0> {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
+        let mut callee = SYSCALL.load(Relaxed);
+        if callee.is_null() {
+            callee = init_syscall();
+        }
         asm::indirect_syscall0(callee, nr)
     }
 
     #[inline]
     #[must_use]
     pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> RetReg<R0> {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
+        let mut callee = SYSCALL.load(Relaxed);
+        if callee.is_null() {
+            callee = init_syscall();
+        }
         asm::indirect_syscall1(callee, nr, a0)
     }
 
     #[inline]
     pub(in crate::imp) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> ! {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
+        let mut callee = SYSCALL.load(Relaxed);
+        if callee.is_null() {
+            callee = init_syscall();
+        }
         asm::indirect_syscall1_noreturn(callee, nr, a0)
     }
 
@@ -122,10 +125,10 @@ pub(super) mod x86_via_vdso {
         a0: ArgReg<'_, A0>,
         a1: ArgReg<'_, A1>,
     ) -> RetReg<R0> {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
+        let mut callee = SYSCALL.load(Relaxed);
+        if callee.is_null() {
+            callee = init_syscall();
+        }
         asm::indirect_syscall2(callee, nr, a0, a1)
     }
 
@@ -137,10 +140,10 @@ pub(super) mod x86_via_vdso {
         a1: ArgReg<'_, A1>,
         a2: ArgReg<'_, A2>,
     ) -> RetReg<R0> {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
+        let mut callee = SYSCALL.load(Relaxed);
+        if callee.is_null() {
+            callee = init_syscall();
+        }
         asm::indirect_syscall3(callee, nr, a0, a1, a2)
     }
 
@@ -153,10 +156,10 @@ pub(super) mod x86_via_vdso {
         a2: ArgReg<'_, A2>,
         a3: ArgReg<'_, A3>,
     ) -> RetReg<R0> {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
+        let mut callee = SYSCALL.load(Relaxed);
+        if callee.is_null() {
+            callee = init_syscall();
+        }
         asm::indirect_syscall4(callee, nr, a0, a1, a2, a3)
     }
 
@@ -170,10 +173,10 @@ pub(super) mod x86_via_vdso {
         a3: ArgReg<'_, A3>,
         a4: ArgReg<'_, A4>,
     ) -> RetReg<R0> {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
+        let mut callee = SYSCALL.load(Relaxed);
+        if callee.is_null() {
+            callee = init_syscall();
+        }
         asm::indirect_syscall5(callee, nr, a0, a1, a2, a3, a4)
     }
 
@@ -188,10 +191,10 @@ pub(super) mod x86_via_vdso {
         a4: ArgReg<'_, A4>,
         a5: ArgReg<'_, A5>,
     ) -> RetReg<R0> {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
+        let mut callee = SYSCALL.load(Relaxed);
+        if callee.is_null() {
+            callee = init_syscall();
+        }
         asm::indirect_syscall6(callee, nr, a0, a1, a2, a3, a4, a5)
     }
 
@@ -213,24 +216,24 @@ type ClockGettimeType = unsafe extern "C" fn(c::c_int, *mut Timespec) -> c::c_in
 #[cfg(target_arch = "x86")]
 pub(super) type SyscallType = unsafe extern "C" fn();
 
-fn init_clock_gettime() -> ClockGettimeType {
+fn init_clock_gettime() -> *mut ClockGettimeType {
     init();
     // Safety: Load the function address from static storage that we
     // just initialized.
-    unsafe { transmute(CLOCK_GETTIME.load(Relaxed)) }
+    unsafe { CLOCK_GETTIME.load(Relaxed) }
 }
 
 #[cfg(target_arch = "x86")]
-fn init_syscall() -> SyscallType {
+fn init_syscall() -> *mut SyscallType {
     init();
     // Safety: Load the function address from static storage that we
     // just initialized.
-    unsafe { transmute(SYSCALL.load(Relaxed)) }
+    unsafe { SYSCALL.load(Relaxed) }
 }
 
-static mut CLOCK_GETTIME: AtomicUsize = AtomicUsize::new(0);
+static mut CLOCK_GETTIME: AtomicPtr<ClockGettimeType> = AtomicPtr::new(ptr::null_mut());
 #[cfg(target_arch = "x86")]
-static mut SYSCALL: AtomicUsize = AtomicUsize::new(0);
+static mut SYSCALL: AtomicPtr<SyscallType> = AtomicPtr::new(ptr::null_mut());
 
 unsafe extern "C" fn rustix_clock_gettime_via_syscall(
     clockid: c::c_int,
@@ -320,18 +323,17 @@ fn minimal_init() {
     // If the memory happens to already be initialized, this is redundant, but
     // not harmful.
     unsafe {
+        let callee: *mut _ = &mut rustix_clock_gettime_via_syscall;
         CLOCK_GETTIME
-            .compare_exchange(
-                0,
-                rustix_clock_gettime_via_syscall as ClockGettimeType as usize,
-                Relaxed,
-                Relaxed,
-            )
+            .compare_exchange(ptr::null_mut(), callee.cast(), Relaxed, Relaxed)
             .ok();
         #[cfg(target_arch = "x86")]
-        SYSCALL
-            .compare_exchange(0, rustix_int_0x80 as SyscallType as usize, Relaxed, Relaxed)
-            .ok();
+        {
+            let callee: *mut _ = &mut rustix_int_0x80;
+            SYSCALL
+                .compare_exchange(ptr::null_mut(), callee.cast(), Relaxed, Relaxed)
+                .ok();
+        }
     }
 }
 
@@ -378,7 +380,7 @@ fn init() {
             // so that we don't need to compute it again (but if we do, it doesn't
             // hurt anything).
             unsafe {
-                CLOCK_GETTIME.store(ptr as usize, Relaxed);
+                CLOCK_GETTIME.store(ptr.cast(), Relaxed);
             }
         }
 
@@ -391,7 +393,7 @@ fn init() {
             // Safety: As above, store the computed function addresses in
             // static storage.
             unsafe {
-                SYSCALL.store(ptr as usize, Relaxed);
+                SYSCALL.store(ptr.cast(), Relaxed);
             }
         }
     }

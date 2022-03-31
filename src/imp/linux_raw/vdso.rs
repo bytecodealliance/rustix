@@ -17,7 +17,7 @@ use super::elf::*;
 use crate::ffi::ZStr;
 use crate::io::{self, madvise, Advice};
 use core::mem::{align_of, size_of};
-use core::ptr::null;
+use core::ptr::{null, null_mut};
 
 pub(super) struct Vdso {
     // Load information
@@ -353,7 +353,7 @@ impl Vdso {
     }
 
     /// Look up a symbol in the vDSO.
-    pub(super) fn sym(&self, version: &ZStr, name: &ZStr) -> *const c::c_void {
+    pub(super) fn sym(&self, version: &ZStr, name: &ZStr) -> *mut c::c_void {
         let ver_hash = elf_hash(version);
         let name_hash = elf_hash(name);
 
@@ -382,11 +382,11 @@ impl Vdso {
 
                 let sum = self.load_offset.checked_add(sym.st_value).unwrap();
                 assert!(sum >= self.load_addr && sum <= self.load_end);
-                return sum as *const c::c_void;
+                return sum as *mut c::c_void;
             }
         }
 
-        null()
+        null_mut()
     }
 }
 
