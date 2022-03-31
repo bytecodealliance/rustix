@@ -25,7 +25,9 @@ pub(super) trait ToAsm: private::Sealed {
     ///
     /// This should be used immediately before the syscall instruction, and
     /// the returned value shouldn't be used for any other purpose.
-    unsafe fn to_asm(self) -> *mut ();
+    // TODO: With newer Rust versions, we could use `*mut ()` here instead
+    // of `*mut c::c_void`.
+    unsafe fn to_asm(self) -> *mut c::c_void;
 }
 
 pub(super) trait FromAsm: private::Sealed {
@@ -36,7 +38,7 @@ pub(super) trait FromAsm: private::Sealed {
     ///
     /// This should be used immediately after the syscall instruction, and
     /// the operand value shouldn't be used for any other purpose.
-    unsafe fn from_asm(bits: *mut ()) -> Self;
+    unsafe fn from_asm(bits: *mut c::c_void) -> Self;
 }
 
 // Argument numbers.
@@ -77,13 +79,13 @@ impl RetNumber for R0 {}
 /// any resources it might be pointing to.
 #[repr(transparent)]
 pub(super) struct ArgReg<'a, Num: ArgNumber> {
-    bits: *mut (),
+    bits: *mut c::c_void,
     _phantom: PhantomData<(&'a (), Num)>,
 }
 
 impl<'a, Num: ArgNumber> ToAsm for ArgReg<'a, Num> {
     #[inline]
-    unsafe fn to_asm(self) -> *mut () {
+    unsafe fn to_asm(self) -> *mut c::c_void {
         self.bits
     }
 }
@@ -95,7 +97,7 @@ impl<'a, Num: ArgNumber> ToAsm for ArgReg<'a, Num> {
 /// exactly once.
 #[repr(transparent)]
 pub(super) struct RetReg<Num: RetNumber> {
-    bits: *mut (),
+    bits: *mut c::c_void,
     _phantom: PhantomData<Num>,
 }
 
@@ -185,7 +187,7 @@ impl<Num: RetNumber> RetReg<Num> {
 
 impl<Num: RetNumber> FromAsm for RetReg<Num> {
     #[inline]
-    unsafe fn from_asm(bits: *mut ()) -> Self {
+    unsafe fn from_asm(bits: *mut c::c_void) -> Self {
         Self {
             bits,
             _phantom: PhantomData,
@@ -201,14 +203,14 @@ pub(super) struct SyscallNumber<'a> {
 
 impl<'a> ToAsm for SyscallNumber<'a> {
     #[inline]
-    unsafe fn to_asm(self) -> *mut () {
-        self.nr as usize as *mut ()
+    unsafe fn to_asm(self) -> *mut c::c_void {
+        self.nr as usize as *mut c::c_void
     }
 }
 
 /// Encode a system call argument as an `ArgReg`.
 #[inline]
-pub(super) fn raw_arg<'a, Num: ArgNumber>(bits: *mut ()) -> ArgReg<'a, Num> {
+pub(super) fn raw_arg<'a, Num: ArgNumber>(bits: *mut c::c_void) -> ArgReg<'a, Num> {
     ArgReg {
         bits,
         _phantom: PhantomData,
