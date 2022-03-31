@@ -27,20 +27,25 @@
 #![allow(clippy::doc_markdown)]
 
 use crate::ffi::ZStr;
-use core::sync::atomic::{self, AtomicUsize, Ordering};
+use core::ffi::c_void;
+use core::ptr::null_mut;
+use core::sync::atomic::{self, AtomicPtr, Ordering};
 use core::{marker, mem};
+
+const NULL: *mut c_void = null_mut();
+const INVALID: *mut c_void = 1 as *mut c_void;
 
 macro_rules! weak {
     (fn $name:ident($($t:ty),*) -> $ret:ty) => (
         #[allow(non_upper_case_globals)]
-        static $name: crate::imp::weak::Weak<unsafe extern fn($($t),*) -> $ret> =
-            crate::imp::weak::Weak::new(concat!(stringify!($name), '\0'));
+        static $name: $crate::imp::weak::Weak<unsafe extern fn($($t),*) -> $ret> =
+            $crate::imp::weak::Weak::new(concat!(stringify!($name), '\0'));
     )
 }
 
 pub(crate) struct Weak<F> {
     name: &'static str,
-    addr: AtomicUsize,
+    addr: AtomicPtr<c_void>,
     _marker: marker::PhantomData<F>,
 }
 
@@ -48,7 +53,7 @@ impl<F> Weak<F> {
     pub(crate) const fn new(name: &'static str) -> Self {
         Self {
             name,
-            addr: AtomicUsize::new(1),
+            addr: AtomicPtr::new(INVALID),
             _marker: marker::PhantomData,
         }
     }
@@ -59,10 +64,10 @@ impl<F> Weak<F> {
             // Relaxed is fine here because we fence before reading through the
             // pointer (see the comment below).
             match self.addr.load(Ordering::Relaxed) {
-                1 => self.initialize(),
-                0 => None,
+                INVALID => self.initialize(),
+                NULL => None,
                 addr => {
-                    let func = mem::transmute_copy::<usize, F>(&addr);
+                    let func = mem::transmute_copy::<*mut c_void, F>(&addr);
                     // The caller is presumably going to read through this value
                     // (by calling the function we've dlsymed). This means we'd
                     // need to have loaded it with at least C11's consume
@@ -95,18 +100,18 @@ impl<F> Weak<F> {
         self.addr.store(val, Ordering::Release);
 
         match val {
-            0 => None,
-            addr => Some(mem::transmute_copy::<usize, F>(&addr)),
+            NULL => None,
+            addr => Some(mem::transmute_copy::<*mut c_void, F>(&addr)),
         }
     }
 }
 
-unsafe fn fetch(name: &str) -> usize {
+unsafe fn fetch(name: &str) -> *mut c_void {
     let name = match ZStr::from_bytes_with_nul(name.as_bytes()) {
         Ok(c_str) => c_str,
-        Err(..) => return 0,
+        Err(..) => return null_mut(),
     };
-    libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr().cast()) as usize
+    libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr().cast())
 }
 
 #[cfg(not(any(target_os = "android", target_os = "linux")))]
