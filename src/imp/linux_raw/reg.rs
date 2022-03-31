@@ -25,7 +25,7 @@ pub(super) trait ToAsm: private::Sealed {
     ///
     /// This should be used immediately before the syscall instruction, and
     /// the returned value shouldn't be used for any other purpose.
-    unsafe fn to_asm(self) -> usize;
+    unsafe fn to_asm(self) -> *mut ();
 }
 
 pub(super) trait FromAsm: private::Sealed {
@@ -36,7 +36,7 @@ pub(super) trait FromAsm: private::Sealed {
     ///
     /// This should be used immediately after the syscall instruction, and
     /// the operand value shouldn't be used for any other purpose.
-    unsafe fn from_asm(bits: usize) -> Self;
+    unsafe fn from_asm(bits: *mut ()) -> Self;
 }
 
 // Argument numbers.
@@ -77,13 +77,13 @@ impl RetNumber for R0 {}
 /// any resources it might be pointing to.
 #[repr(transparent)]
 pub(super) struct ArgReg<'a, Num: ArgNumber> {
-    bits: usize,
+    bits: *mut (),
     _phantom: PhantomData<(&'a (), Num)>,
 }
 
 impl<'a, Num: ArgNumber> ToAsm for ArgReg<'a, Num> {
     #[inline]
-    unsafe fn to_asm(self) -> usize {
+    unsafe fn to_asm(self) -> *mut () {
         self.bits
     }
 }
@@ -95,7 +95,7 @@ impl<'a, Num: ArgNumber> ToAsm for ArgReg<'a, Num> {
 /// exactly once.
 #[repr(transparent)]
 pub(super) struct RetReg<Num: RetNumber> {
-    bits: usize,
+    bits: *mut (),
     _phantom: PhantomData<Num>,
 }
 
@@ -103,7 +103,7 @@ impl<Num: RetNumber> RetReg<Num> {
     #[inline]
     pub(super) fn decode_usize(self) -> usize {
         debug_assert!(!(-4095..0).contains(&(self.bits as isize)));
-        self.bits
+        self.bits as usize
     }
 
     #[inline]
@@ -141,7 +141,7 @@ impl<Num: RetNumber> RetReg<Num> {
 
     #[inline]
     pub(super) fn decode_void_star(self) -> *mut c::c_void {
-        self.decode_usize() as *mut c::c_void
+        self.bits.cast()
     }
 
     #[cfg(target_pointer_width = "64")]
@@ -158,7 +158,7 @@ impl<Num: RetNumber> RetReg<Num> {
 
     #[inline]
     pub(super) fn decode_error_code(self) -> u16 {
-        let bits: usize = self.bits;
+        let bits = self.bits as usize;
 
         // `raw` must be in `-4095..0`. Linux always returns errors in
         // `-4095..0`, and we double-check it here.
@@ -169,7 +169,7 @@ impl<Num: RetNumber> RetReg<Num> {
 
     #[inline]
     pub(super) fn is_nonzero(&self) -> bool {
-        self.bits != 0
+        !self.bits.is_null()
     }
 
     #[inline]
@@ -185,7 +185,7 @@ impl<Num: RetNumber> RetReg<Num> {
 
 impl<Num: RetNumber> FromAsm for RetReg<Num> {
     #[inline]
-    unsafe fn from_asm(bits: usize) -> Self {
+    unsafe fn from_asm(bits: *mut ()) -> Self {
         Self {
             bits,
             _phantom: PhantomData,
@@ -201,14 +201,14 @@ pub(super) struct SyscallNumber<'a> {
 
 impl<'a> ToAsm for SyscallNumber<'a> {
     #[inline]
-    unsafe fn to_asm(self) -> usize {
-        self.nr
+    unsafe fn to_asm(self) -> *mut () {
+        self.nr as usize as *mut ()
     }
 }
 
 /// Encode a system call argument as an `ArgReg`.
 #[inline]
-pub(super) fn raw_arg<'a, Num: ArgNumber>(bits: usize) -> ArgReg<'a, Num> {
+pub(super) fn raw_arg<'a, Num: ArgNumber>(bits: *mut ()) -> ArgReg<'a, Num> {
     ArgReg {
         bits,
         _phantom: PhantomData,
