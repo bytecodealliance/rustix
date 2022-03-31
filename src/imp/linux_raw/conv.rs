@@ -39,40 +39,48 @@ pub(super) fn x86_sys<'a, Num: ArgNumber>(sys: u32) -> ArgReg<'a, Num> {
     pass_usize(sys as usize)
 }
 
-#[cfg(all(target_endian = "little", target_pointer_width = "32"))]
+/// Pass the "low" half of the endian-specific memory encoding of a `u64`, for
+/// 32-bit architectures.
+#[cfg(target_pointer_width = "32")]
 #[inline]
 pub(super) fn lo<'a, Num: ArgNumber>(x: u64) -> ArgReg<'a, Num> {
-    pass_usize((x >> 32) as usize)
+    #[cfg(target_endian = "little")]
+    let x = x >> 32;
+    #[cfg(target_endian = "big")]
+    let x = x & 0xffff_ffff;
+
+    pass_usize(x as usize)
 }
 
-#[cfg(all(target_endian = "little", target_pointer_width = "32"))]
+/// Pass the "high" half of the endian-specific memory encoding of a `u64`, for
+/// 32-bit architectures.
+#[cfg(target_pointer_width = "32")]
 #[inline]
 pub(super) fn hi<'a, Num: ArgNumber>(x: u64) -> ArgReg<'a, Num> {
-    pass_usize((x & 0xffff_ffff) as usize)
+    #[cfg(target_endian = "little")]
+    let x = x & 0xffff_ffff;
+    #[cfg(target_endian = "big")]
+    let x = x >> 32;
+
+    pass_usize(x as usize)
 }
 
-#[cfg(all(target_endian = "big", target_pointer_width = "32"))]
-#[inline]
-pub(super) fn lo<'a, Num: ArgNumber>(x: u64) -> ArgReg<'a, Num> {
-    pass_usize((x & 0xffff_ffff) as usize)
-}
-
-#[cfg(all(target_endian = "big", target_pointer_width = "32"))]
-#[inline]
-pub(super) fn hi<'a, Num: ArgNumber>(x: u64) -> ArgReg<'a, Num> {
-    pass_usize((x >> 32) as usize)
-}
-
+/// Pass a zero, or null, argument.
 #[inline]
 pub(super) fn zero<'a, Num: ArgNumber>() -> ArgReg<'a, Num> {
     raw_arg(null_mut())
 }
 
+/// Pass the `mem::size_of` of a type.
 #[inline]
 pub(super) fn size_of<'a, T: Sized, Num: ArgNumber>() -> ArgReg<'a, Num> {
     pass_usize(core::mem::size_of::<T>())
 }
 
+/// Pass an arbitrary `usize` value.
+///
+/// For passing pointers, use `void_star` or other functions which take a raw
+/// pointer instead of casting to `usize`, so that provenance is preserved.
 #[inline]
 pub(super) fn pass_usize<'a, Num: ArgNumber>(t: usize) -> ArgReg<'a, Num> {
     raw_arg(t as *mut c::c_void)
