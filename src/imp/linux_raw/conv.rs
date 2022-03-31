@@ -83,7 +83,7 @@ pub(super) fn size_of<'a, T: Sized, Num: ArgNumber>() -> ArgReg<'a, Num> {
 /// pointer instead of casting to `usize`, so that provenance is preserved.
 #[inline]
 pub(super) fn pass_usize<'a, Num: ArgNumber>(t: usize) -> ArgReg<'a, Num> {
-    raw_arg(t as *mut c::c_void)
+    raw_arg(t as *mut _)
 }
 
 #[inline]
