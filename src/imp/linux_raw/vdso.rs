@@ -16,14 +16,15 @@ use super::c;
 use super::elf::*;
 use crate::ffi::ZStr;
 use crate::io::{self, madvise, Advice};
+use core::ffi::c_void;
 use core::mem::{align_of, size_of};
 use core::ptr::{null, null_mut};
 
 pub(super) struct Vdso {
     // Load information
-    load_addr: usize,
-    load_end: usize,    // the end of the `PT_LOAD` segment
-    load_offset: usize, // load_addr - recorded vaddr
+    load_addr: *const Elf_Ehdr,
+    load_end: *const c_void, // the end of the `PT_LOAD` segment
+    pv_offset: usize,        // recorded paddr - recorded vaddr
 
     // Symbol table
     symtab: *const Elf_Sym,
@@ -53,12 +54,15 @@ fn elf_hash(name: &ZStr) -> u32 {
 }
 
 /// Cast `value` to a pointer type, doing some checks for validity.
-const fn make_pointer<T>(value: usize) -> Option<*const T> {
-    if value == 0 || value.checked_add(size_of::<T>()).is_none() || value % align_of::<T>() != 0 {
+fn make_pointer<T>(value: *const c_void) -> Option<*const T> {
+    if value.is_null()
+        || (value as usize).checked_add(size_of::<T>()).is_none()
+        || (value as usize) % align_of::<T>() != 0
+    {
         return None;
     }
 
-    Some(value as *const T)
+    Some(value.cast())
 }
 
 /// Create a `Vdso` value by parsing the vDSO at the given address.
@@ -67,16 +71,13 @@ const fn make_pointer<T>(value: usize) -> Option<*const T> {
 ///
 /// `base` must be a valid pointer to an ELF image in memory.
 unsafe fn init_from_sysinfo_ehdr(base: *const Elf_Ehdr) -> Option<Vdso> {
-    // The vDSO parsing code does not yet preserve provenance.
-    let base = base as usize;
-
     // Check that `base` is a valid pointer to the kernel-provided vDSO.
     let hdr = check_vdso_base(base)?;
 
     let mut vdso = Vdso {
         load_addr: base,
-        load_end: base,
-        load_offset: 0,
+        load_end: base.cast(),
+        pv_offset: 0,
         symtab: null(),
         symstrings: null(),
         bucket: null(),
@@ -87,7 +88,7 @@ unsafe fn init_from_sysinfo_ehdr(base: *const Elf_Ehdr) -> Option<Vdso> {
         verdef: null(),
     };
 
-    let pt = make_pointer::<Elf_Phdr>(base.checked_add(hdr.e_phoff)?)?;
+    let pt = make_pointer::<Elf_Phdr>(vdso.base_plus(hdr.e_phoff)?)?;
     let mut dyn_: *const Elf_Dyn = null();
     let mut num_dyn = 0;
 
@@ -108,8 +109,8 @@ unsafe fn init_from_sysinfo_ehdr(base: *const Elf_Ehdr) -> Option<Vdso> {
                 return None;
             }
             found_vaddr = true;
-            vdso.load_end = base.checked_add(phdr.p_offset.checked_add(phdr.p_memsz)?)?;
-            vdso.load_offset = base.wrapping_add(phdr.p_offset.wrapping_sub(phdr.p_vaddr));
+            vdso.load_end = vdso.base_plus(phdr.p_offset.checked_add(phdr.p_memsz)?)?;
+            vdso.pv_offset = phdr.p_offset.wrapping_sub(phdr.p_vaddr);
         } else if phdr.p_type == PT_DYNAMIC {
             // If `p_offset` is zero, it's more likely that we're looking at memory
             // that has been zeroed than that the kernel has somehow aliased the
@@ -118,7 +119,7 @@ unsafe fn init_from_sysinfo_ehdr(base: *const Elf_Ehdr) -> Option<Vdso> {
                 return None;
             }
 
-            dyn_ = make_pointer::<Elf_Dyn>(base.checked_add(phdr.p_offset)?)?;
+            dyn_ = make_pointer::<Elf_Dyn>(vdso.base_plus(phdr.p_offset)?)?;
             num_dyn = phdr.p_memsz / size_of::<Elf_Dyn>();
         } else if phdr.p_type == PT_INTERP || phdr.p_type == PT_GNU_RELRO {
             // Don't trust any ELF image that has an "interpreter" or that uses
@@ -146,19 +147,19 @@ unsafe fn init_from_sysinfo_ehdr(base: *const Elf_Ehdr) -> Option<Vdso> {
         let d = &*dyn_.add(i);
         match d.d_tag {
             DT_STRTAB => {
-                vdso.symstrings = make_pointer::<u8>(d.d_val.checked_add(vdso.load_offset)?)?;
+                vdso.symstrings = make_pointer::<u8>(vdso.addr_from_elf(d.d_val)?)?;
             }
             DT_SYMTAB => {
-                vdso.symtab = make_pointer::<Elf_Sym>(d.d_val.checked_add(vdso.load_offset)?)?;
+                vdso.symtab = make_pointer::<Elf_Sym>(vdso.addr_from_elf(d.d_val)?)?;
             }
             DT_HASH => {
-                hash = make_pointer::<u32>(d.d_val.checked_add(vdso.load_offset)?)?;
+                hash = make_pointer::<u32>(vdso.addr_from_elf(d.d_val)?)?;
             }
             DT_VERSYM => {
-                vdso.versym = make_pointer::<u16>(d.d_val.checked_add(vdso.load_offset)?)?;
+                vdso.versym = make_pointer::<u16>(vdso.addr_from_elf(d.d_val)?)?;
             }
             DT_VERDEF => {
-                vdso.verdef = make_pointer::<Elf_Verdef>(d.d_val.checked_add(vdso.load_offset)?)?;
+                vdso.verdef = make_pointer::<Elf_Verdef>(vdso.addr_from_elf(d.d_val)?)?;
             }
             DT_SYMENT => {
                 if d.d_val != size_of::<Elf_Sym>() {
@@ -193,7 +194,7 @@ unsafe fn init_from_sysinfo_ehdr(base: *const Elf_Ehdr) -> Option<Vdso> {
 /// `base` is some value we got from a `AT_SYSINFO_EHDR` aux record somewhere,
 /// which hopefully holds the value of the kernel-provided vDSO in memory. Do
 /// a series of checks to be as sure as we can that it's safe to use.
-unsafe fn check_vdso_base<'vdso>(base: usize) -> Option<&'vdso Elf_Ehdr> {
+unsafe fn check_vdso_base<'vdso>(base: *const Elf_Ehdr) -> Option<&'vdso Elf_Ehdr> {
     // In theory, we could check that we're not attempting to parse our own ELF
     // image, as an additional check. However, older Linux toolchains don't
     // support this, and Rust's `#[linkage = "extern_weak"]` isn't stable yet,
@@ -205,21 +206,16 @@ unsafe fn check_vdso_base<'vdso>(base: usize) -> Option<&'vdso Elf_Ehdr> {
         }
 
         let ehdr_start: *const c::c_void = &__ehdr_start;
-        if base == (ehdr_start as usize) {
+        if base == ehdr_start {
             return None;
         }
     }
     */
 
     // Check that the vDSO is page-aligned and appropriately mapped.
-    madvise(
-        base as *mut c::c_void,
-        size_of::<Elf_Ehdr>(),
-        Advice::Normal,
-    )
-    .ok()?;
+    madvise(base as *mut c_void, size_of::<Elf_Ehdr>(), Advice::Normal).ok()?;
 
-    let hdr = &*make_pointer::<Elf_Ehdr>(base)?;
+    let hdr = &*make_pointer::<Elf_Ehdr>(base.cast())?;
 
     if hdr.e_ident[..SELFMAG] != ELFMAG {
         return None; // Wrong ELF magic
@@ -383,13 +379,25 @@ impl Vdso {
                     continue;
                 }
 
-                let sum = self.load_offset.checked_add(sym.st_value).unwrap();
-                assert!(sum >= self.load_addr && sum <= self.load_end);
+                let sum = self.addr_from_elf(sym.st_value).unwrap();
+                assert!(
+                    sum as usize >= self.load_addr as usize
+                        && sum as usize <= self.load_end as usize
+                );
                 return sum as *mut c::c_void;
             }
         }
 
         null_mut()
+    }
+
+    unsafe fn base_plus(&self, offset: usize) -> Option<*const c_void> {
+        let _ = (self.load_addr as usize).checked_add(offset)?;
+        Some(self.load_addr.cast::<u8>().add(offset).cast())
+    }
+
+    unsafe fn addr_from_elf(&self, elf_addr: usize) -> Option<*const c_void> {
+        self.base_plus(elf_addr.wrapping_add(self.pv_offset))
     }
 }
 
