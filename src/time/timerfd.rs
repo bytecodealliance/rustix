@@ -1,6 +1,6 @@
+use crate::fd::AsFd;
 use crate::imp;
 use crate::io::{self, OwnedFd};
-use crate::fd::AsFd;
 
 pub use imp::time::{Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags};
 
