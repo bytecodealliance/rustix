@@ -141,9 +141,11 @@ pub(super) unsafe fn raw_fd<'a, Num: ArgNumber>(fd: RawFd) -> ArgReg<'a, Num> {
     pass_usize(fd as c::c_uint as usize)
 }
 
+/// Deliberately pass `-1` to a file-descriptor argument, for system calls
+/// like `mmap` where this indicates the argument is omitted.
 #[inline]
 pub(super) fn no_fd<'a, Num: ArgNumber>() -> ArgReg<'a, Num> {
-    pass_usize(-1_isize as usize)
+    pass_usize(!0_usize)
 }
 
 #[inline]
