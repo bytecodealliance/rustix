@@ -25,19 +25,25 @@ pub(super) trait ToAsm: private::Sealed {
     ///
     /// This should be used immediately before the syscall instruction, and
     /// the returned value shouldn't be used for any other purpose.
-    unsafe fn to_asm(self) -> usize;
+    unsafe fn to_asm(self) -> *mut Opaque;
 }
 
 pub(super) trait FromAsm: private::Sealed {
-    /// Convert `bits` from a value produced by a syscall machine instruction
+    /// Convert `raw` from a value produced by a syscall machine instruction
     /// into a `Self`.
     ///
     /// # Safety
     ///
     /// This should be used immediately after the syscall instruction, and
     /// the operand value shouldn't be used for any other purpose.
-    unsafe fn from_asm(bits: usize) -> Self;
+    unsafe fn from_asm(raw: *mut Opaque) -> Self;
 }
+
+/// To preserve provenance, syscall arguments and return values are passed as
+/// pointer types. They need a type to point to, so we define a custom private
+/// type, to prevent it from being used for anything else.
+#[repr(transparent)]
+pub(super) struct Opaque(c::c_void);
 
 // Argument numbers.
 pub(super) struct A0 {}
@@ -77,14 +83,14 @@ impl RetNumber for R0 {}
 /// any resources it might be pointing to.
 #[repr(transparent)]
 pub(super) struct ArgReg<'a, Num: ArgNumber> {
-    bits: usize,
+    raw: *mut Opaque,
     _phantom: PhantomData<(&'a (), Num)>,
 }
 
 impl<'a, Num: ArgNumber> ToAsm for ArgReg<'a, Num> {
     #[inline]
-    unsafe fn to_asm(self) -> usize {
-        self.bits
+    unsafe fn to_asm(self) -> *mut Opaque {
+        self.raw
     }
 }
 
@@ -95,15 +101,15 @@ impl<'a, Num: ArgNumber> ToAsm for ArgReg<'a, Num> {
 /// exactly once.
 #[repr(transparent)]
 pub(super) struct RetReg<Num: RetNumber> {
-    bits: usize,
+    raw: *mut Opaque,
     _phantom: PhantomData<Num>,
 }
 
 impl<Num: RetNumber> RetReg<Num> {
     #[inline]
     pub(super) fn decode_usize(self) -> usize {
-        debug_assert!(!(-4095..0).contains(&(self.bits as isize)));
-        self.bits
+        debug_assert!(!(-4095..0).contains(&(self.raw as isize)));
+        self.raw as usize
     }
 
     #[inline]
@@ -141,7 +147,7 @@ impl<Num: RetNumber> RetReg<Num> {
 
     #[inline]
     pub(super) fn decode_void_star(self) -> *mut c::c_void {
-        self.decode_usize() as *mut c::c_void
+        self.raw.cast()
     }
 
     #[cfg(target_pointer_width = "64")]
@@ -158,7 +164,7 @@ impl<Num: RetNumber> RetReg<Num> {
 
     #[inline]
     pub(super) fn decode_error_code(self) -> u16 {
-        let bits: usize = self.bits;
+        let bits = self.raw as usize;
 
         // `raw` must be in `-4095..0`. Linux always returns errors in
         // `-4095..0`, and we double-check it here.
@@ -169,25 +175,25 @@ impl<Num: RetNumber> RetReg<Num> {
 
     #[inline]
     pub(super) fn is_nonzero(&self) -> bool {
-        self.bits != 0
+        !self.raw.is_null()
     }
 
     #[inline]
     pub(super) fn is_negative(&self) -> bool {
-        (self.bits as isize) < 0
+        (self.raw as isize) < 0
     }
 
     #[inline]
     pub(super) fn is_in_range(&self, range: core::ops::Range<isize>) -> bool {
-        range.contains(&(self.bits as isize))
+        range.contains(&(self.raw as isize))
     }
 }
 
 impl<Num: RetNumber> FromAsm for RetReg<Num> {
     #[inline]
-    unsafe fn from_asm(bits: usize) -> Self {
+    unsafe fn from_asm(raw: *mut Opaque) -> Self {
         Self {
-            bits,
+            raw,
             _phantom: PhantomData,
         }
     }
@@ -201,16 +207,16 @@ pub(super) struct SyscallNumber<'a> {
 
 impl<'a> ToAsm for SyscallNumber<'a> {
     #[inline]
-    unsafe fn to_asm(self) -> usize {
-        self.nr
+    unsafe fn to_asm(self) -> *mut Opaque {
+        self.nr as usize as *mut Opaque
     }
 }
 
 /// Encode a system call argument as an `ArgReg`.
 #[inline]
-pub(super) fn raw_arg<'a, Num: ArgNumber>(bits: usize) -> ArgReg<'a, Num> {
+pub(super) fn raw_arg<'a, Num: ArgNumber>(raw: *mut Opaque) -> ArgReg<'a, Num> {
     ArgReg {
-        bits,
+        raw,
         _phantom: PhantomData,
     }
 }

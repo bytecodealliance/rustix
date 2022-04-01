@@ -12,7 +12,7 @@ use core::arch::asm;
 #[inline]
 #[must_use]
 pub(in crate::imp) unsafe fn syscall0_readonly(nr: SyscallNumber) -> RetReg<R0> {
-    let x0: usize;
+    let x0;
     let err: usize;
     asm!(
         "syscall",
@@ -30,13 +30,17 @@ pub(in crate::imp) unsafe fn syscall0_readonly(nr: SyscallNumber) -> RetReg<R0> 
         lateout("$25" /*$t9*/) _,
         options(nostack, preserves_flags, readonly)
     );
-    FromAsm::from_asm(if err != 0 { x0.wrapping_neg() } else { x0 })
+    FromAsm::from_asm(if err != 0 {
+        (x0 as usize).wrapping_neg() as *mut _
+    } else {
+        x0
+    })
 }
 
 #[inline]
 #[must_use]
 pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> RetReg<R0> {
-    let x0: usize;
+    let x0;
     let err: usize;
     asm!(
         "syscall",
@@ -55,7 +59,11 @@ pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>)
         lateout("$25" /*$t9*/) _,
         options(nostack, preserves_flags)
     );
-    FromAsm::from_asm(if err != 0 { x0.wrapping_neg() } else { x0 })
+    FromAsm::from_asm(if err != 0 {
+        (x0 as usize).wrapping_neg() as *mut _
+    } else {
+        x0
+    })
 }
 
 #[inline]
@@ -64,7 +72,7 @@ pub(in crate::imp) unsafe fn syscall1_readonly(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
 ) -> RetReg<R0> {
-    let x0: usize;
+    let x0;
     let err: usize;
     asm!(
         "syscall",
@@ -83,7 +91,11 @@ pub(in crate::imp) unsafe fn syscall1_readonly(
         lateout("$25" /*$t9*/) _,
         options(nostack, preserves_flags, readonly)
     );
-    FromAsm::from_asm(if err != 0 { x0.wrapping_neg() } else { x0 })
+    FromAsm::from_asm(if err != 0 {
+        (x0 as usize).wrapping_neg() as *mut _
+    } else {
+        x0
+    })
 }
 
 #[inline]
@@ -104,7 +116,7 @@ pub(in crate::imp) unsafe fn syscall2(
     a0: ArgReg<'_, A0>,
     a1: ArgReg<'_, A1>,
 ) -> RetReg<R0> {
-    let x0: usize;
+    let x0;
     let err: usize;
     asm!(
         "syscall",
@@ -124,7 +136,11 @@ pub(in crate::imp) unsafe fn syscall2(
         lateout("$25" /*$t9*/) _,
         options(nostack, preserves_flags)
     );
-    FromAsm::from_asm(if err != 0 { x0.wrapping_neg() } else { x0 })
+    FromAsm::from_asm(if err != 0 {
+        (x0 as usize).wrapping_neg() as *mut _
+    } else {
+        x0
+    })
 }
 
 #[inline]
@@ -134,7 +150,7 @@ pub(in crate::imp) unsafe fn syscall2_readonly(
     a0: ArgReg<'_, A0>,
     a1: ArgReg<'_, A1>,
 ) -> RetReg<R0> {
-    let x0: usize;
+    let x0;
     let err: usize;
     asm!(
         "syscall",
@@ -154,7 +170,11 @@ pub(in crate::imp) unsafe fn syscall2_readonly(
         lateout("$25" /*$t9*/) _,
         options(nostack, preserves_flags, readonly)
     );
-    FromAsm::from_asm(if err != 0 { x0.wrapping_neg() } else { x0 })
+    FromAsm::from_asm(if err != 0 {
+        (x0 as usize).wrapping_neg() as *mut _
+    } else {
+        x0
+    })
 }
 
 #[inline]
@@ -165,7 +185,7 @@ pub(in crate::imp) unsafe fn syscall3(
     a1: ArgReg<'_, A1>,
     a2: ArgReg<'_, A2>,
 ) -> RetReg<R0> {
-    let x0: usize;
+    let x0;
     let err: usize;
     asm!(
         "syscall",
@@ -186,7 +206,11 @@ pub(in crate::imp) unsafe fn syscall3(
         lateout("$25" /*$t9*/) _,
         options(nostack, preserves_flags)
     );
-    FromAsm::from_asm(if err != 0 { x0.wrapping_neg() } else { x0 })
+    FromAsm::from_asm(if err != 0 {
+        (x0 as usize).wrapping_neg() as *mut _
+    } else {
+        x0
+    })
 }
 
 #[inline]
@@ -197,7 +221,7 @@ pub(in crate::imp) unsafe fn syscall3_readonly(
     a1: ArgReg<'_, A1>,
     a2: ArgReg<'_, A2>,
 ) -> RetReg<R0> {
-    let x0: usize;
+    let x0;
     let err: usize;
     asm!(
         "syscall",
@@ -218,7 +242,11 @@ pub(in crate::imp) unsafe fn syscall3_readonly(
         lateout("$25" /*$t9*/) _,
         options(nostack, preserves_flags, readonly)
     );
-    FromAsm::from_asm(if err != 0 { x0.wrapping_neg() } else { x0 })
+    FromAsm::from_asm(if err != 0 {
+        (x0 as usize).wrapping_neg() as *mut _
+    } else {
+        x0
+    })
 }
 
 #[inline]
@@ -230,7 +258,7 @@ pub(in crate::imp) unsafe fn syscall4(
     a2: ArgReg<'_, A2>,
     a3: ArgReg<'_, A3>,
 ) -> RetReg<R0> {
-    let x0: usize;
+    let x0;
     let err: usize;
     asm!(
         "syscall",
@@ -251,7 +279,11 @@ pub(in crate::imp) unsafe fn syscall4(
         lateout("$25" /*$t9*/) _,
         options(nostack, preserves_flags)
     );
-    FromAsm::from_asm(if err != 0 { x0.wrapping_neg() } else { x0 })
+    FromAsm::from_asm(if err != 0 {
+        (x0 as usize).wrapping_neg() as *mut _
+    } else {
+        x0
+    })
 }
 
 #[inline]
@@ -263,7 +295,7 @@ pub(in crate::imp) unsafe fn syscall4_readonly(
     a2: ArgReg<'_, A2>,
     a3: ArgReg<'_, A3>,
 ) -> RetReg<R0> {
-    let x0: usize;
+    let x0;
     let err: usize;
     asm!(
         "syscall",
@@ -284,7 +316,11 @@ pub(in crate::imp) unsafe fn syscall4_readonly(
         lateout("$25" /*$t9*/) _,
         options(nostack, preserves_flags, readonly)
     );
-    FromAsm::from_asm(if err != 0 { x0.wrapping_neg() } else { x0 })
+    FromAsm::from_asm(if err != 0 {
+        (x0 as usize).wrapping_neg() as *mut _
+    } else {
+        x0
+    })
 }
 
 #[inline]
@@ -297,7 +333,7 @@ pub(in crate::imp) unsafe fn syscall5(
     a3: ArgReg<'_, A3>,
     a4: ArgReg<'_, A4>,
 ) -> RetReg<R0> {
-    let x0: usize;
+    let x0;
     let err: usize;
     asm!(
         "syscall",
@@ -318,7 +354,11 @@ pub(in crate::imp) unsafe fn syscall5(
         lateout("$25" /*$t9*/) _,
         options(nostack, preserves_flags)
     );
-    FromAsm::from_asm(if err != 0 { x0.wrapping_neg() } else { x0 })
+    FromAsm::from_asm(if err != 0 {
+        (x0 as usize).wrapping_neg() as *mut _
+    } else {
+        x0
+    })
 }
 
 #[inline]
@@ -331,7 +371,7 @@ pub(in crate::imp) unsafe fn syscall5_readonly(
     a3: ArgReg<'_, A3>,
     a4: ArgReg<'_, A4>,
 ) -> RetReg<R0> {
-    let x0: usize;
+    let x0;
     let err: usize;
     asm!(
         "syscall",
@@ -352,7 +392,11 @@ pub(in crate::imp) unsafe fn syscall5_readonly(
         lateout("$25" /*$t9*/) _,
         options(nostack, preserves_flags, readonly)
     );
-    FromAsm::from_asm(if err != 0 { x0.wrapping_neg() } else { x0 })
+    FromAsm::from_asm(if err != 0 {
+        (x0 as usize).wrapping_neg() as *mut _
+    } else {
+        x0
+    })
 }
 
 #[inline]
@@ -366,7 +410,7 @@ pub(in crate::imp) unsafe fn syscall6(
     a4: ArgReg<'_, A4>,
     a5: ArgReg<'_, A5>,
 ) -> RetReg<R0> {
-    let x0: usize;
+    let x0;
     let err: usize;
     asm!(
         "syscall",
@@ -387,7 +431,11 @@ pub(in crate::imp) unsafe fn syscall6(
         lateout("$25" /*$t9*/) _,
         options(nostack, preserves_flags)
     );
-    FromAsm::from_asm(if err != 0 { x0.wrapping_neg() } else { x0 })
+    FromAsm::from_asm(if err != 0 {
+        (x0 as usize).wrapping_neg() as *mut _
+    } else {
+        x0
+    })
 }
 
 #[inline]
@@ -401,7 +449,7 @@ pub(in crate::imp) unsafe fn syscall6_readonly(
     a4: ArgReg<'_, A4>,
     a5: ArgReg<'_, A5>,
 ) -> RetReg<R0> {
-    let x0: usize;
+    let x0;
     let err: usize;
     asm!(
         "syscall",
@@ -422,5 +470,9 @@ pub(in crate::imp) unsafe fn syscall6_readonly(
         lateout("$25" /*$t9*/) _,
         options(nostack, preserves_flags, readonly)
     );
-    FromAsm::from_asm(if err != 0 { x0.wrapping_neg() } else { x0 })
+    FromAsm::from_asm(if err != 0 {
+        (x0 as usize).wrapping_neg() as *mut _
+    } else {
+        x0
+    })
 }
