@@ -116,6 +116,30 @@ use {
 #[cfg(not(target_os = "redox"))]
 use {super::super::offset::libc_openat, crate::fs::AtFlags};
 
+#[cfg(all(unix, target_env = "gnu"))]
+/// Use direct syscall (via libc) for openat().
+/// Only currently necessary as a workaround for old glibc; see below.
+fn openat_via_syscall(
+    dirfd: BorrowedFd<'_>,
+    path: &ZStr,
+    oflags: OFlags,
+    mode: Mode,
+) -> io::Result<OwnedFd> {
+    unsafe {
+        let dirfd = borrowed_fd(dirfd);
+        let path = c_str(path);
+        let oflags = oflags.bits();
+        let mode = c::c_uint::from(mode.bits());
+        ret_owned_fd(libc::syscall(
+            libc::SYS_openat,
+            dirfd as c::c_long,
+            path as c::c_long,
+            oflags as c::c_long,
+            mode as c::c_long,
+        ) as c::c_int)
+    }
+}
+
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn openat(
     dirfd: BorrowedFd<'_>,
@@ -123,6 +147,12 @@ pub(crate) fn openat(
     oflags: OFlags,
     mode: Mode,
 ) -> io::Result<OwnedFd> {
+    // Work around https://sourceware.org/bugzilla/show_bug.cgi?id=17523
+    // Basically old glibc versions don't handle O_TMPFILE correctly.
+    #[cfg(all(unix, target_env = "gnu"))]
+    if oflags.contains(OFlags::TMPFILE) && crate::imp::if_glibc_is_less_than_2_25() {
+        return openat_via_syscall(dirfd, path, oflags, mode);
+    }
     unsafe {
         // Pass `mode` as a `c_uint` even if `mode_t` is narrower, since
         // `libc_openat` is declared as a variadic function and narrower

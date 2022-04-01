@@ -31,10 +31,10 @@ use core::sync::atomic::{self, AtomicUsize, Ordering};
 use core::{marker, mem};
 
 macro_rules! weak {
-    (fn $name:ident($($t:ty),*) -> $ret:ty) => (
+    ($vis:vis fn $name:ident($($t:ty),*) -> $ret:ty) => (
         #[allow(non_upper_case_globals)]
-        static $name: crate::imp::weak::Weak<unsafe extern fn($($t),*) -> $ret> =
-            crate::imp::weak::Weak::new(concat!(stringify!($name), '\0'));
+        $vis static $name: $crate::imp::weak::Weak<unsafe extern fn($($t),*) -> $ret> =
+            $crate::imp::weak::Weak::new(concat!(stringify!($name), '\0'));
     )
 }
 
