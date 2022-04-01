@@ -36,9 +36,9 @@ const NULL: *mut c_void = null_mut();
 const INVALID: *mut c_void = 1 as *mut c_void;
 
 macro_rules! weak {
-    (fn $name:ident($($t:ty),*) -> $ret:ty) => (
+    ($vis:vis fn $name:ident($($t:ty),*) -> $ret:ty) => (
         #[allow(non_upper_case_globals)]
-        static $name: $crate::imp::weak::Weak<unsafe extern fn($($t),*) -> $ret> =
+        $vis static $name: $crate::imp::weak::Weak<unsafe extern fn($($t),*) -> $ret> =
             $crate::imp::weak::Weak::new(concat!(stringify!($name), '\0'));
     )
 }
