@@ -169,7 +169,7 @@ pub enum TimerfdClockId {
     ///
     /// This is a clock that tells the amount of time elapsed since the
     /// Unix epoch, 1970-01-01T00:00:00Z. The clock is externally settable, so
-    /// it is not monotonica. Successive reads may see decreasing times, so it
+    /// it is not monotonic. Successive reads may see decreasing times, so it
     /// isn't reliable for measuring durations.
     Realtime = c::CLOCK_REALTIME,
 
