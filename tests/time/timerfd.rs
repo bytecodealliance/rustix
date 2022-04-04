@@ -13,11 +13,16 @@ fn test_timerfd() {
             tv_nsec: 4,
         },
         it_value: Timespec {
-            tv_sec: 5,
-            tv_nsec: 6,
+            tv_sec: 1,
+            tv_nsec: 2,
         },
     };
     let _old: Itimerspec = timerfd_settime(&fd, TimerfdTimerFlags::ABSTIME, &set).unwrap();
+
+    // Wait for the timer to expire.
+    let mut buf = [0u8; 8usize];
+    assert_eq!(rustix::io::read(&fd, &mut buf), Ok(8));
+    assert!(u64::from_ne_bytes(buf) >= 1);
 
     let new = timerfd_gettime(&fd).unwrap();
 
