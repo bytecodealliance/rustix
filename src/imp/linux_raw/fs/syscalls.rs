@@ -29,7 +29,11 @@ use super::{
     Access, Advice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode, OFlags,
     RenameFlags, ResolveFlags, Stat, StatFs, StatxFlags,
 };
-#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+#[cfg(any(
+    target_arch = "aarch64",
+    target_arch = "riscv64",
+    target_pointer_width = "32"
+))]
 use crate::fd::AsFd;
 use crate::fd::{BorrowedFd, RawFd};
 use crate::ffi::ZStr;
@@ -62,6 +66,7 @@ use linux_raw_sys::general::{
 };
 #[cfg(target_pointer_width = "32")]
 use {
+    core::sync::atomic::{AtomicBool, Ordering::Relaxed},
     super::super::arch::choose::syscall6_readonly,
     super::super::conv::{hi, lo, slice_just_addr},
     linux_raw_sys::general::__NR_utimensat_time64,
@@ -470,17 +475,22 @@ pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result
     }
 }
 
+/// `statx` was introduced in Linux 4.11.
+#[cfg(target_pointer_width = "32")]
+static NO_STATX: AtomicBool = AtomicBool::new(false);
+
 #[inline]
 pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     #[cfg(target_pointer_width = "32")]
-    unsafe {
-        let mut result = MaybeUninit::<Stat>::uninit();
-        ret(syscall2(
-            nr(__NR_fstat64),
-            borrowed_fd(fd),
-            out(&mut result),
-        ))
-        .map(|()| result.assume_init())
+    {
+        if !NO_STATX.load(Relaxed) {
+            match statx(fd, zstr!(""), AtFlags::EMPTY_PATH, StatxFlags::ALL) {
+                Ok(x) => return statx_to_stat(x),
+                Err(io::Error::NOSYS) => NO_STATX.store(true, Relaxed),
+                Err(e) => return Err(e),
+            }
+        }
+        fstat_old(fd)
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
@@ -490,19 +500,36 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     }
 }
 
+#[cfg(target_pointer_width = "32")]
+fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
+    unsafe {
+        let mut result = MaybeUninit::<linux_raw_sys::general::stat64>::uninit();
+        ret(syscall2(
+            nr(__NR_fstat64),
+            borrowed_fd(fd),
+            out(&mut result),
+        ))
+        .and_then(|()| stat64_to_stat(result.assume_init()))
+    }
+}
+
 #[inline]
 pub(crate) fn stat(filename: &ZStr) -> io::Result<Stat> {
     #[cfg(target_pointer_width = "32")]
-    unsafe {
-        let mut result = MaybeUninit::<Stat>::uninit();
-        ret(syscall4(
-            nr(__NR_fstatat64),
-            c_int(AT_FDCWD),
-            c_str(filename),
-            out(&mut result),
-            c_uint(0),
-        ))
-        .map(|()| result.assume_init())
+    {
+        if !NO_STATX.load(Relaxed) {
+            match statx(
+                crate::fs::cwd().as_fd(),
+                filename,
+                AtFlags::empty(),
+                StatxFlags::ALL,
+            ) {
+                Ok(x) => return statx_to_stat(x),
+                Err(io::Error::NOSYS) => NO_STATX.store(true, Relaxed),
+                Err(e) => return Err(e),
+            }
+        }
+        stat_old(filename)
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
@@ -515,22 +542,36 @@ pub(crate) fn stat(filename: &ZStr) -> io::Result<Stat> {
             c_uint(0),
         ))
         .map(|()| result.assume_init())
+    }
+}
+
+#[cfg(target_pointer_width = "32")]
+fn stat_old(filename: &ZStr) -> io::Result<Stat> {
+    unsafe {
+        let mut result = MaybeUninit::<linux_raw_sys::general::stat64>::uninit();
+        ret(syscall4(
+            nr(__NR_fstatat64),
+            c_int(AT_FDCWD),
+            c_str(filename),
+            out(&mut result),
+            c_uint(0),
+        ))
+        .and_then(|()| stat64_to_stat(result.assume_init()))
     }
 }
 
 #[inline]
 pub(crate) fn statat(dirfd: BorrowedFd<'_>, filename: &ZStr, flags: AtFlags) -> io::Result<Stat> {
     #[cfg(target_pointer_width = "32")]
-    unsafe {
-        let mut result = MaybeUninit::<Stat>::uninit();
-        ret(syscall4(
-            nr(__NR_fstatat64),
-            borrowed_fd(dirfd),
-            c_str(filename),
-            out(&mut result),
-            c_uint(flags.bits()),
-        ))
-        .map(|()| result.assume_init())
+    {
+        if !NO_STATX.load(Relaxed) {
+            match statx(dirfd, filename, flags, StatxFlags::ALL) {
+                Ok(x) => return statx_to_stat(x),
+                Err(io::Error::NOSYS) => NO_STATX.store(true, Relaxed),
+                Err(e) => return Err(e),
+            }
+        }
+        statat_old(dirfd, filename, flags)
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
@@ -546,19 +587,38 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, filename: &ZStr, flags: AtFlags) -> 
     }
 }
 
+#[cfg(target_pointer_width = "32")]
+fn statat_old(dirfd: BorrowedFd<'_>, filename: &ZStr, flags: AtFlags) -> io::Result<Stat> {
+    unsafe {
+        let mut result = MaybeUninit::<linux_raw_sys::general::stat64>::uninit();
+        ret(syscall4(
+            nr(__NR_fstatat64),
+            borrowed_fd(dirfd),
+            c_str(filename),
+            out(&mut result),
+            c_uint(flags.bits()),
+        ))
+        .and_then(|()| stat64_to_stat(result.assume_init()))
+    }
+}
+
 #[inline]
 pub(crate) fn lstat(filename: &ZStr) -> io::Result<Stat> {
     #[cfg(target_pointer_width = "32")]
-    unsafe {
-        let mut result = MaybeUninit::<Stat>::uninit();
-        ret(syscall4(
-            nr(__NR_fstatat64),
-            c_int(AT_FDCWD),
-            c_str(filename),
-            out(&mut result),
-            c_uint(AT_SYMLINK_NOFOLLOW),
-        ))
-        .map(|()| result.assume_init())
+    {
+        if !NO_STATX.load(Relaxed) {
+            match statx(
+                crate::fs::cwd().as_fd(),
+                filename,
+                AtFlags::SYMLINK_NOFOLLOW,
+                StatxFlags::ALL,
+            ) {
+                Ok(x) => return statx_to_stat(x),
+                Err(io::Error::NOSYS) => NO_STATX.store(true, Relaxed),
+                Err(e) => return Err(e),
+            }
+        }
+        lstat_old(filename)
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
@@ -572,6 +632,88 @@ pub(crate) fn lstat(filename: &ZStr) -> io::Result<Stat> {
         ))
         .map(|()| result.assume_init())
     }
+}
+
+#[cfg(target_pointer_width = "32")]
+fn lstat_old(filename: &ZStr) -> io::Result<Stat> {
+    unsafe {
+        let mut result = MaybeUninit::<linux_raw_sys::general::stat64>::uninit();
+        ret(syscall4(
+            nr(__NR_fstatat64),
+            c_int(AT_FDCWD),
+            c_str(filename),
+            out(&mut result),
+            c_uint(AT_SYMLINK_NOFOLLOW),
+        ))
+        .and_then(|()| stat64_to_stat(result.assume_init()))
+    }
+}
+
+/// Convert from a Linux `statx` value to rustix's `Stat`.
+#[cfg(target_pointer_width = "32")]
+fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
+    Ok(Stat {
+        st_dev: crate::fs::makedev(x.stx_dev_major, x.stx_dev_minor),
+        st_mode: x.stx_mode.into(),
+        st_nlink: x.stx_nlink.into(),
+        st_uid: x.stx_uid.into(),
+        st_gid: x.stx_gid.into(),
+        st_rdev: crate::fs::makedev(x.stx_rdev_major, x.stx_rdev_minor),
+        st_size: x.stx_size.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        st_blksize: x.stx_blksize.into(),
+        st_blocks: x.stx_blocks.into(),
+        st_atime: x
+            .stx_atime
+            .tv_sec
+            .try_into()
+            .map_err(|_| io::Error::OVERFLOW)?,
+        st_atime_nsec: x.stx_atime.tv_nsec.into(),
+        st_mtime: x
+            .stx_mtime
+            .tv_sec
+            .try_into()
+            .map_err(|_| io::Error::OVERFLOW)?,
+        st_mtime_nsec: x.stx_mtime.tv_nsec.into(),
+        st_ctime: x
+            .stx_ctime
+            .tv_sec
+            .try_into()
+            .map_err(|_| io::Error::OVERFLOW)?,
+        st_ctime_nsec: x.stx_ctime.tv_nsec.into(),
+        st_ino: x.stx_ino.into(),
+    })
+}
+
+/// Convert from a Linux `stat64` value to rustix's `Stat`.
+#[cfg(target_pointer_width = "32")]
+fn stat64_to_stat(s64: linux_raw_sys::general::stat64) -> io::Result<Stat> {
+    Ok(Stat {
+        st_dev: s64.st_dev.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        st_mode: s64.st_mode.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        st_nlink: s64.st_nlink.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        st_uid: s64.st_uid.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        st_gid: s64.st_gid.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        st_rdev: s64.st_rdev.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        st_size: s64.st_size.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        st_blksize: s64.st_blksize.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        st_blocks: s64.st_blocks.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        st_atime: s64.st_atime.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        st_atime_nsec: s64
+            .st_atime_nsec
+            .try_into()
+            .map_err(|_| io::Error::OVERFLOW)?,
+        st_mtime: s64.st_mtime.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        st_mtime_nsec: s64
+            .st_mtime_nsec
+            .try_into()
+            .map_err(|_| io::Error::OVERFLOW)?,
+        st_ctime: s64.st_ctime.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        st_ctime_nsec: s64
+            .st_ctime_nsec
+            .try_into()
+            .map_err(|_| io::Error::OVERFLOW)?,
+        st_ino: s64.st_ino.try_into().map_err(|_| io::Error::OVERFLOW)?,
+    })
 }
 
 #[inline]
