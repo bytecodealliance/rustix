@@ -3,6 +3,8 @@
 use crate::imp;
 
 mod clock;
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+mod timerfd;
 
 // TODO: Convert WASI'S clock APIs to use handles rather than ambient clock
 // identifiers, update `wasi-libc`, and then add support in `rustix`.
@@ -10,5 +12,9 @@ mod clock;
 pub use clock::clock_getres;
 #[cfg(not(target_os = "wasi"))]
 pub use clock::{clock_gettime, clock_gettime_dynamic, ClockId, DynamicClockId};
-
 pub use imp::time::{Nsecs, Secs, Timespec};
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+pub use timerfd::{
+    timerfd_create, timerfd_gettime, timerfd_settime, Itimerspec, TimerfdClockId, TimerfdFlags,
+    TimerfdTimerFlags,
+};

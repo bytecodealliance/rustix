@@ -27,6 +27,7 @@ use linux_raw_sys::general::{
 #[cfg(target_pointer_width = "32")]
 use {
     core::convert::TryInto,
+    core::ptr,
     linux_raw_sys::general::timespec as __kernel_old_timespec,
     linux_raw_sys::general::{__NR_clock_nanosleep_time64, __NR_futex_time64},
 };
@@ -88,19 +89,23 @@ unsafe fn clock_nanosleep_relative_old(
         tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Error::INVAL)?,
     };
     let mut old_rem = MaybeUninit::<__kernel_old_timespec>::uninit();
-    let res = ret(syscall4(
+    ret(syscall4(
         nr(__NR_clock_nanosleep),
         clockid_t(id),
         c_int(0),
         by_ref(&old_req),
         out(&mut old_rem),
-    ));
+    ))?;
     let old_rem = old_rem.assume_init();
-    *rem.as_mut_ptr() = __kernel_timespec {
-        tv_sec: old_rem.tv_sec.into(),
-        tv_nsec: old_rem.tv_nsec.into(),
-    };
-    res
+    // TODO: With Rust 1.55, we can use MaybeUninit::write here.
+    ptr::write(
+        rem.as_mut_ptr(),
+        __kernel_timespec {
+            tv_sec: old_rem.tv_sec.into(),
+            tv_nsec: old_rem.tv_nsec.into(),
+        },
+    );
+    Ok(())
 }
 
 #[inline]
@@ -198,17 +203,21 @@ unsafe fn nanosleep_old(
         tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Error::INVAL)?,
     };
     let mut old_rem = MaybeUninit::<__kernel_old_timespec>::uninit();
-    let res = ret(syscall2(
+    ret(syscall2(
         nr(__NR_nanosleep),
         by_ref(&old_req),
         out(&mut old_rem),
-    ));
+    ))?;
     let old_rem = old_rem.assume_init();
-    *rem.as_mut_ptr() = __kernel_timespec {
-        tv_sec: old_rem.tv_sec.into(),
-        tv_nsec: old_rem.tv_nsec.into(),
-    };
-    res
+    // TODO: With Rust 1.55, we can use MaybeUninit::write here.
+    ptr::write(
+        rem.as_mut_ptr(),
+        __kernel_timespec {
+            tv_sec: old_rem.tv_sec.into(),
+            tv_nsec: old_rem.tv_nsec.into(),
+        },
+    );
+    Ok(())
 }
 
 #[inline]
