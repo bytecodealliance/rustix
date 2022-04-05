@@ -28,7 +28,7 @@ fn test_timerfd() {
 
     assert_eq!(set.it_interval.tv_sec, new.it_interval.tv_sec);
     assert_eq!(set.it_interval.tv_nsec, new.it_interval.tv_nsec);
-    assert!(new.it_value.tv_sec <= set.it_value.tv_sec);
+    assert!(new.it_value.tv_sec >= set.it_value.tv_sec);
     assert!(
         set.it_value.tv_nsec <= new.it_value.tv_nsec || set.it_value.tv_sec < new.it_value.tv_sec
     );
