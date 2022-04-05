@@ -66,9 +66,9 @@ use linux_raw_sys::general::{
 };
 #[cfg(target_pointer_width = "32")]
 use {
-    core::sync::atomic::{AtomicBool, Ordering::Relaxed},
     super::super::arch::choose::syscall6_readonly,
     super::super::conv::{hi, lo, slice_just_addr},
+    core::sync::atomic::{AtomicBool, Ordering::Relaxed},
     linux_raw_sys::general::__NR_utimensat_time64,
     linux_raw_sys::general::{
         __NR__llseek, __NR_fcntl64, __NR_fstat64, __NR_fstatat64, __NR_fstatfs64, __NR_ftruncate64,
