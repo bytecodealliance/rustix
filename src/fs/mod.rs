@@ -47,7 +47,7 @@ mod memfd_create;
 mod openat2;
 #[cfg(target_os = "linux")]
 mod sendfile;
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 mod statx;
 
 #[cfg(not(any(
@@ -172,7 +172,7 @@ pub use memfd_create::{memfd_create, MemfdFlags};
 pub use openat2::openat2;
 #[cfg(target_os = "linux")]
 pub use sendfile::sendfile;
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub use statx::{statx, Statx, StatxFlags};
 
 /// Re-export types common to POSIX-ish platforms.

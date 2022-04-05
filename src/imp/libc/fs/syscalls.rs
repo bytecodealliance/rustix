@@ -846,21 +846,21 @@ pub(crate) fn sendfile(
     }
 }
 
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn statx(
     dirfd: BorrowedFd<'_>,
     path: &ZStr,
     flags: AtFlags,
     mask: StatxFlags,
 ) -> io::Result<Statx> {
-    weakcall! {
+    weak_or_syscall! {
         fn statx(
-            dirfd: BorrowedFd<'_>,
+            pirfd: BorrowedFd<'_>,
             path: *const c::c_char,
             flags: c::c_int,
             mask: c::c_uint,
             buf: *mut Statx
-        ) -> c::c_int
+        ) via SYS_statx -> c::c_int
     }
 
     let mut statx_buf = MaybeUninit::<Statx>::uninit();

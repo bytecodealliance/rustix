@@ -138,16 +138,53 @@ macro_rules! syscall {
             // (not paths).
             use libc::*;
 
+            trait AsSyscallArg {
+                type SyscallArgType;
+                fn as_syscall_arg(self) -> Self::SyscallArgType;
+            }
+
+            // Pass pointer types as pointers, to preserve provenance.
+            impl<T> AsSyscallArg for *mut T {
+                type SyscallArgType = *mut T;
+                fn as_syscall_arg(self) -> Self::SyscallArgType { self }
+            }
+            impl<T> AsSyscallArg for *const T {
+                type SyscallArgType = *const T;
+                fn as_syscall_arg(self) -> Self::SyscallArgType { self }
+            }
+
+            // Pass `BorrowedFd` values as the integer value.
+            impl AsSyscallArg for $crate::fd::BorrowedFd<'_> {
+                type SyscallArgType = c::c_long;
+                fn as_syscall_arg(self) -> Self::SyscallArgType {
+                    $crate::fd::AsRawFd::as_raw_fd(&self) as _
+                }
+            }
+
+            // Coerce integer values into `c_long`.
+            impl AsSyscallArg for i32 {
+                type SyscallArgType = c::c_long;
+                fn as_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+            }
+            impl AsSyscallArg for u32 {
+                type SyscallArgType = c::c_long;
+                fn as_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+            }
+            impl AsSyscallArg for usize {
+                type SyscallArgType = c::c_long;
+                fn as_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+            }
+
             // `concat_idents is unstable, so we take an extra `sys_name`
             // parameter and have our users do the concat for us for now.
             /*
             syscall(
                 concat_idents!(SYS_, $name),
-                $($arg_name as c_long),*
+                $($arg_name.as_syscall_arg()),*
             ) as $ret
             */
 
-            syscall($sys_name, $($arg_name as c_long),*) as $ret
+            syscall($sys_name, $($arg_name.as_syscall_arg()),*) as $ret
         }
     )
 }
