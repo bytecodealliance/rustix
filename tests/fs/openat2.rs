@@ -31,7 +31,7 @@ fn test_openat2() {
     match openat2(
         &dir,
         ".",
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::empty(),
     ) {
@@ -44,7 +44,7 @@ fn test_openat2() {
     let _ = openat2_more(
         &dir,
         "test.txt",
-        OFlags::WRONLY | OFlags::CREATE | OFlags::TRUNC,
+        OFlags::WRONLY | OFlags::CREATE | OFlags::TRUNC | OFlags::CLOEXEC,
         Mode::RUSR,
         ResolveFlags::empty(),
     )
@@ -55,7 +55,7 @@ fn test_openat2() {
     let _ = openat2_more(
         &dir,
         "symlink.txt",
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::empty(),
     )
@@ -63,7 +63,7 @@ fn test_openat2() {
     let _ = openat2_more(
         &dir,
         "symlink.txt",
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::NO_MAGICLINKS,
     )
@@ -71,7 +71,7 @@ fn test_openat2() {
     let _ = openat2_more(
         &dir,
         "symlink.txt",
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::NO_SYMLINKS,
     )
@@ -81,7 +81,7 @@ fn test_openat2() {
     let test = openat2_more(
         &dir,
         "test.txt",
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::empty(),
     )
@@ -89,7 +89,7 @@ fn test_openat2() {
     let _ = openat2_more(
         &dir,
         &format!("/proc/self/fd/{}", test.as_fd().as_raw_fd()),
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::empty(),
     )
@@ -97,7 +97,7 @@ fn test_openat2() {
     let _ = openat2_more(
         &dir,
         &format!("/proc/self/fd/{}", test.as_fd().as_raw_fd()),
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::NO_SYMLINKS,
     )
@@ -105,7 +105,7 @@ fn test_openat2() {
     let _ = openat2_more(
         &dir,
         &format!("/proc/self/fd/{}", test.as_fd().as_raw_fd()),
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::NO_MAGICLINKS,
     )
@@ -115,7 +115,7 @@ fn test_openat2() {
     let root = openat2_more(
         &dir,
         "/",
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::empty(),
     )
@@ -123,7 +123,7 @@ fn test_openat2() {
     let _ = openat2_more(
         &root,
         "proc",
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::empty(),
     )
@@ -131,7 +131,7 @@ fn test_openat2() {
     let _ = openat2_more(
         &root,
         "proc",
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::NO_XDEV,
     )
@@ -141,7 +141,7 @@ fn test_openat2() {
     let _ = openat2_more(
         &dir,
         "..",
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::empty(),
     )
@@ -149,7 +149,7 @@ fn test_openat2() {
     let _ = openat2_more(
         &dir,
         "..",
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::BENEATH,
     )
@@ -159,7 +159,7 @@ fn test_openat2() {
     let _ = openat2_more(
         &dir,
         "/proc",
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::empty(),
     )
@@ -167,7 +167,7 @@ fn test_openat2() {
     let _ = openat2_more(
         &dir,
         "/proc",
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::IN_ROOT,
     )
@@ -176,7 +176,7 @@ fn test_openat2() {
     let _ = openat2_more(
         &dir,
         "/proc",
-        OFlags::RDONLY,
+        OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::IN_ROOT,
     )
