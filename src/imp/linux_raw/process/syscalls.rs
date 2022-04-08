@@ -117,7 +117,7 @@ pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<(
 pub(crate) fn getpid() -> Pid {
     unsafe {
         let pid: i32 = ret_usize_infallible(syscall0_readonly(nr(__NR_getpid))) as __kernel_pid_t;
-        debug_assert_ne!(pid, 0);
+        debug_assert!(pid > 0);
         Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid as u32))
     }
 }
@@ -501,7 +501,7 @@ pub(crate) fn exit_group(code: c::c_int) -> ! {
 pub(crate) fn setsid() -> io::Result<Pid> {
     unsafe {
         let pid = ret_usize(syscall0_readonly(nr(__NR_setsid)))?;
-        debug_assert_ne!(pid, 0);
+        debug_assert!(pid > 0);
         Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(
             pid as u32,
         )))

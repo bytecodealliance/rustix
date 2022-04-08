@@ -15,6 +15,7 @@ pub(crate) mod net;
 pub(crate) mod process;
 pub(crate) mod rand;
 pub(crate) mod syscalls;
+pub(crate) mod termios;
 pub(crate) mod thread;
 pub(crate) mod time;
 

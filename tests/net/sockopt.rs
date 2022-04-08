@@ -35,8 +35,8 @@ fn test_sockopts() {
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
-        target_os = "ios",
         target_os = "freebsd",
+        target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd"
@@ -48,8 +48,8 @@ fn test_sockopts() {
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
-        target_os = "ios",
         target_os = "freebsd",
+        target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd"
@@ -92,8 +92,8 @@ fn test_sockopts() {
         // sockets, and not all platforms even remember the value.
         #[cfg(not(any(
             target_os = "dragonfly",
-            target_os = "ios",
             target_os = "freebsd",
+            target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd"
@@ -133,8 +133,8 @@ fn test_sockopts() {
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
-        target_os = "ios",
         target_os = "freebsd",
+        target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd"

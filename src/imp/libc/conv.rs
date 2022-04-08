@@ -129,6 +129,16 @@ pub(super) fn ret_off_t(raw: libc_off_t) -> io::Result<libc_off_t> {
     }
 }
 
+#[cfg(not(windows))]
+#[inline]
+pub(super) fn ret_pid_t(raw: c::pid_t) -> io::Result<c::pid_t> {
+    if raw == -1 {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(raw)
+    }
+}
+
 /// Convert a c_int returned from a libc function to an `OwnedFd`, if valid.
 ///
 /// # Safety

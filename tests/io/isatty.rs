@@ -1,5 +1,6 @@
 use rustix::fd::AsRawFd;
-use rustix::io::{ioctl_tiocgwinsz, isatty};
+use rustix::io::isatty;
+use rustix::termios::tcgetwinsize;
 use tempfile::{tempdir, TempDir};
 
 #[allow(unused)]
@@ -34,14 +35,14 @@ fn stdout_stderr_terminals() {
         libc::isatty(std::io::stderr().as_raw_fd()) != 0
     });
 
-    // Compare `isatty` against `ioctl_tiocgwinsz`.
+    // Compare `isatty` against `tcgetwinsize`.
     assert_eq!(
         isatty(&std::io::stdout()),
-        ioctl_tiocgwinsz(&std::io::stdout()).is_ok()
+        tcgetwinsize(&std::io::stdout()).is_ok()
     );
     assert_eq!(
         isatty(&std::io::stderr()),
-        ioctl_tiocgwinsz(&std::io::stderr()).is_ok()
+        tcgetwinsize(&std::io::stderr()).is_ok()
     );
 }
 

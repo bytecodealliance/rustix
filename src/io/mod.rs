@@ -49,8 +49,6 @@ pub use ioctl::ioctl_fionbio;
 pub use ioctl::ioctl_fionread;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use ioctl::{ioctl_blkpbszget, ioctl_blksszget};
-#[cfg(not(any(windows, target_os = "wasi")))]
-pub use ioctl::{ioctl_tcgets, ioctl_tiocgwinsz, Termios, Winsize};
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub use ioctl::{ioctl_tiocexcl, ioctl_tiocnxcl};
 #[cfg(not(any(windows, target_os = "redox")))]
@@ -96,8 +94,6 @@ pub use tty::isatty;
 #[cfg(feature = "procfs")]
 pub use tty::ttyname;
 #[cfg(not(windows))]
-#[cfg(not(target_os = "wasi"))]
-pub use tty::{Tcflag, ICANON};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use userfaultfd::{userfaultfd, UserfaultfdFlags};
 

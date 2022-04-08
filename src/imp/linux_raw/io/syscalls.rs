@@ -27,7 +27,7 @@ use crate::fd::{AsFd, BorrowedFd, RawFd};
 use crate::io::{
     self, epoll, Advice, DupFlags, EventfdFlags, IoSlice, IoSliceMut, MapFlags, MlockFlags,
     MprotectFlags, MremapFlags, MsyncFlags, OwnedFd, PipeFlags, PollFd, ProtFlags, ReadWriteFlags,
-    Termios, UserfaultfdFlags, Winsize,
+    UserfaultfdFlags,
 };
 use crate::net::{RecvFlags, SendFlags};
 #[cfg(feature = "procfs")]
@@ -50,9 +50,7 @@ use linux_raw_sys::general::{
     __NR_pwritev2, __NR_read, __NR_readv, __NR_userfaultfd, __NR_write, __NR_writev, epoll_event,
     EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD,
 };
-use linux_raw_sys::ioctl::{
-    BLKPBSZGET, BLKSSZGET, FIONBIO, FIONREAD, TCGETS, TIOCEXCL, TIOCGWINSZ, TIOCNXCL,
-};
+use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET, FIONBIO, FIONREAD, TIOCEXCL, TIOCNXCL};
 #[cfg(target_pointer_width = "32")]
 use {
     super::super::arch::choose::syscall6_readonly,
@@ -418,20 +416,6 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn ioctl_tiocgwinsz(fd: BorrowedFd<'_>) -> io::Result<Winsize> {
-    unsafe {
-        let mut result = MaybeUninit::<Winsize>::uninit();
-        ret(syscall3(
-            nr(__NR_ioctl),
-            borrowed_fd(fd),
-            c_uint(TIOCGWINSZ),
-            out(&mut result),
-        ))
-        .map(|()| result.assume_init())
-    }
-}
-
-#[inline]
 pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe {
         ret(syscall2_readonly(
@@ -450,20 +434,6 @@ pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd<'_>) -> io::Result<()> {
             borrowed_fd(fd),
             c_uint(TIOCNXCL),
         ))
-    }
-}
-
-#[inline]
-pub(crate) fn ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
-    unsafe {
-        let mut result = MaybeUninit::<Termios>::uninit();
-        ret(syscall3(
-            nr(__NR_ioctl),
-            borrowed_fd(fd),
-            c_uint(TCGETS),
-            out(&mut result),
-        ))
-        .map(|()| result.assume_init())
     }
 }
 
@@ -501,7 +471,7 @@ pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
     // (otherwise), because we assume we're never passing an invalid
     // file descriptor (which would get `EBADF`). Either way, an error
     // means we don't have a tty.
-    ioctl_tiocgwinsz(fd).is_ok()
+    super::super::termios::syscalls::tcgetwinsize(fd).is_ok()
 }
 
 pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
@@ -597,7 +567,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     }
 
     // Check that `fd` is really a tty.
-    ioctl_tiocgwinsz(fd)?;
+    super::super::termios::syscalls::tcgetwinsize(fd)?;
 
     // Get a fd to '/proc/self/fd'.
     let proc_self_fd = io::proc_self_fd()?;

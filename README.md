@@ -90,6 +90,11 @@ way, so users don't need to open `.` to get a current-directory handle.
 I/O safety types rather than `RawFd`. `rustix` does not provide dynamic feature
 detection, so users must handle the [`NOSYS`] error themselves.
 
+`rustix`'s `termios` module is similar to the [`termios`] crate, but uses
+I/O safety types rather than `RawFd`, and the flags parameters to functions
+such as `tcsetattr` are `enum`s rather than bare integers. And, Rustix calls
+its `tcgetattr` function `tcgetattr`, rather than `Termios::from_fd`.
+
 # Minimum Supported Rust Version (MSRV)
 
 This crate currently works on the version of [Rust on Debian stable], which is
@@ -112,6 +117,7 @@ version of this crate.
 [`openat2`]: https://crates.io/crates/openat2
 [`fs-set-times`]: https://crates.io/crates/fs-set-times
 [`io-lifetimes`]: https://crates.io/crates/io-lifetimes
+[`termios`]: https://crates.io/crates/termios
 [`libc`]: https://crates.io/crates/libc
 [`winapi`]: https://crates.io/crates/winapi
 [`cap-std`]: https://crates.io/crates/cap-std

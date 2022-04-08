@@ -25,7 +25,7 @@ use crate::io::MremapFlags;
 use crate::io::PipeFlags;
 use crate::io::{self, IoSlice, IoSliceMut, OwnedFd, PollFd};
 #[cfg(not(target_os = "wasi"))]
-use crate::io::{DupFlags, MapFlags, MprotectFlags, MsyncFlags, ProtFlags, Termios, Winsize};
+use crate::io::{DupFlags, MapFlags, MprotectFlags, MsyncFlags, ProtFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::io::{EventfdFlags, MlockFlags, ReadWriteFlags, UserfaultfdFlags};
 use core::cmp::min;
@@ -503,54 +503,9 @@ pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize
     }
 }
 
-#[cfg(not(any(
-    target_os = "dragonfly",
-    target_os = "freebsd",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
-    target_os = "wasi"
-)))]
-pub(crate) fn ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
-    let mut result = MaybeUninit::<Termios>::uninit();
-    unsafe {
-        ret(c::ioctl(borrowed_fd(fd), c::TCGETS, result.as_mut_ptr()))
-            .map(|()| result.assume_init())
-    }
-}
-
-#[cfg(any(
-    target_os = "dragonfly",
-    target_os = "freebsd",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
-))]
-pub(crate) fn ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
-    let mut result = MaybeUninit::<Termios>::uninit();
-    unsafe {
-        ret(c::tcgetattr(borrowed_fd(fd), result.as_mut_ptr())).map(|()| result.assume_init())
-    }
-}
-
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub(crate) fn ioctl_fioclex(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::FIOCLEX)) }
-}
-
-#[cfg(not(target_os = "wasi"))]
-pub(crate) fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
-    unsafe {
-        let mut buf = MaybeUninit::<Winsize>::uninit();
-        ret(c::ioctl(
-            borrowed_fd(fd),
-            c::TIOCGWINSZ.into(),
-            buf.as_mut_ptr(),
-        ))?;
-        Ok(buf.assume_init())
-    }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
