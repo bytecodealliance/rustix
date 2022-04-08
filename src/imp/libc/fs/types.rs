@@ -784,11 +784,65 @@ pub type StatFs = c::statfs64;
 
 /// `struct statx` for use with [`statx`].
 ///
-/// Only available on Linux with GLIBC for now.
-///
 /// [`statx`]: crate::fs::statx
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
+// Use the glibc `struct statx`.
 pub type Statx = c::statx;
+
+/// `struct statx_timestamp` for use with [`Statx`].
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
+// Use the glibc `struct statx_timestamp`.
+pub type StatxTimestamp = c::statx;
+
+/// `struct statx` for use with [`statx`].
+///
+/// [`statx`]: crate::fs::statx
+// Non-glibc ABIs don't currently declare a `struct statx`, so we declare it
+// ourselves.
+#[cfg(any(
+    target_os = "android",
+    all(target_os = "linux", not(target_env = "gnu"))
+))]
+#[repr(C)]
+pub struct Statx {
+    pub stx_mask: u32,
+    pub stx_blksize: u32,
+    pub stx_attributes: u64,
+    pub stx_nlink: u32,
+    pub stx_uid: u32,
+    pub stx_gid: u32,
+    pub stx_mode: u16,
+    __statx_pad1: [u16; 1],
+    pub stx_ino: u64,
+    pub stx_size: u64,
+    pub stx_blocks: u64,
+    pub stx_attributes_mask: u64,
+    pub stx_atime: StatxTimestamp,
+    pub stx_btime: StatxTimestamp,
+    pub stx_ctime: StatxTimestamp,
+    pub stx_mtime: StatxTimestamp,
+    pub stx_rdev_major: u32,
+    pub stx_rdev_minor: u32,
+    pub stx_dev_major: u32,
+    pub stx_dev_minor: u32,
+    pub stx_mnt_id: u64,
+    __statx_pad2: u64,
+    __statx_pad3: [u64; 12],
+}
+
+/// `struct statx_timestamp` for use with [`Statx`].
+// Non-glibc ABIs don't currently declare a `struct statx_timestamp`, so we
+// declare it ourselves.
+#[cfg(any(
+    target_os = "android",
+    all(target_os = "linux", not(target_env = "gnu"))
+))]
+#[repr(C)]
+pub struct StatxTimestamp {
+    pub tv_sec: i64,
+    pub tv_nsec: u32,
+    pub __statx_timestamp_pad1: [i32; 1],
+}
 
 /// `mode_t`
 pub type RawMode = c::mode_t;

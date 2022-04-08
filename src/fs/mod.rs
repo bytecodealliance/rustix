@@ -173,7 +173,7 @@ pub use openat2::openat2;
 #[cfg(target_os = "linux")]
 pub use sendfile::sendfile;
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use statx::{statx, Statx, StatxFlags};
+pub use statx::{statx, Statx, StatxFlags, StatxTimestamp};
 
 /// Re-export types common to POSIX-ish platforms.
 #[cfg(feature = "std")]

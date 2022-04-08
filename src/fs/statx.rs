@@ -4,7 +4,7 @@ use crate::{imp, io, path};
 use imp::fd::AsFd;
 use imp::fs::AtFlags;
 
-pub use imp::fs::Statx;
+pub use imp::fs::{Statx, StatxTimestamp};
 
 /// `STATX_*` constants.
 pub use imp::fs::StatxFlags;

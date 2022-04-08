@@ -563,6 +563,9 @@ pub type StatFs = linux_raw_sys::general::statfs64;
 /// [`statx`]: crate::fs::statx
 pub type Statx = linux_raw_sys::general::statx;
 
+/// `struct statx_timestamp` for use with [`Statx`].
+pub type StatxTimestamp = linux_raw_sys::general::statx_timestamp;
+
 /// `mode_t`
 #[cfg(not(any(
     target_arch = "x86",
