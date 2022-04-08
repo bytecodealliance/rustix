@@ -845,6 +845,7 @@ pub(crate) fn sendfile(
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
+#[allow(non_upper_case_globals)]
 pub(crate) fn statx(
     dirfd: BorrowedFd<'_>,
     path: &ZStr,
