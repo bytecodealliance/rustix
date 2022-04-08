@@ -6,6 +6,7 @@ mod write_sockaddr;
 
 pub(crate) mod ext;
 pub(crate) mod syscalls;
+#[cfg(unix)]
 pub(crate) use addr::offsetof_sun_path;
 pub use addr::SocketAddrStorage;
 #[cfg(unix)]

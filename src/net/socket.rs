@@ -1,8 +1,6 @@
 use crate::imp;
 use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
-#[cfg(windows)]
-use imp::fd::AsSocketAsFd;
 use imp::fd::{AsFd, BorrowedFd};
 
 #[cfg(unix)]
