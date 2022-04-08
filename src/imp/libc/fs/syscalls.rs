@@ -852,13 +852,13 @@ pub(crate) fn statx(
     mask: StatxFlags,
 ) -> io::Result<Statx> {
     #[cfg(all(target_os = "android", target_arch = "arm"))]
-    const SYS_statx: c_long = 397;
+    const SYS_statx: c::c_long = 397;
     #[cfg(all(target_os = "android", target_arch = "x86"))]
-    const SYS_statx: c_long = 383;
+    const SYS_statx: c::c_long = 383;
     #[cfg(all(target_os = "android", target_arch = "aarch64"))]
-    const SYS_statx: c_long = 291;
+    const SYS_statx: c::c_long = 291;
     #[cfg(all(target_os = "android", target_arch = "x86_64"))]
-    const SYS_statx: c_long = 332;
+    const SYS_statx: c::c_long = 332;
 
     weak_or_syscall! {
         fn statx(
