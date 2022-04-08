@@ -460,6 +460,9 @@ bitflags! {
         /// `STATX_BTIME`
         const BTIME = linux_raw_sys::general::STATX_BTIME;
 
+        /// `STATX_MNT_ID` (since Linux 5.8)
+        const MNT_ID = linux_raw_sys::general::STATX_MNT_ID;
+
         /// `STATX_ALL`
         const ALL = linux_raw_sys::general::STATX_ALL;
     }

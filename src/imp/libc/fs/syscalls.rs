@@ -94,9 +94,7 @@ use crate::fs::StatFs;
 use crate::fs::{Dev, FileType};
 use crate::fs::{FdFlags, Mode, OFlags, Stat, Timestamps};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::fs::{RenameFlags, ResolveFlags};
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
-use crate::fs::{Statx, StatxFlags};
+use crate::fs::{RenameFlags, ResolveFlags, Statx, StatxFlags};
 use crate::io::{self, OwnedFd, SeekFrom};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
