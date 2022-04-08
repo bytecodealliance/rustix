@@ -49,7 +49,9 @@ pub use chdir::chdir;
 pub use chdir::fchdir;
 #[cfg(not(target_os = "wasi"))]
 pub use chdir::getcwd;
-pub use exit::{EXIT_FAILURE, EXIT_SIGNALED_SIGABRT, EXIT_SUCCESS};
+#[cfg(not(target_os = "wasi"))]
+pub use exit::EXIT_SIGNALED_SIGABRT;
+pub use exit::{EXIT_FAILURE, EXIT_SUCCESS};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use id::Cpuid;
 #[cfg(not(target_os = "wasi"))]

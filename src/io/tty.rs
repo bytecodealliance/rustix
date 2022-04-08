@@ -16,6 +16,7 @@ use {
     crate::ffi::ZString, crate::path::SMALL_PATH_BUFFER_SIZE, alloc::vec::Vec, imp::fd::BorrowedFd,
 };
 
+#[cfg(not(target_os = "wasi"))]
 pub use imp::io::Tcflag;
 
 /// `ICANON`
