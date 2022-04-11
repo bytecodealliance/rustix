@@ -57,7 +57,7 @@ impl Uname {
     }
 
     /// `domainname`—NIS or YP domain identifier
-    #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+    #[cfg(any(target_os = "android", target_os = "linux"))]
     #[inline]
     pub fn domainname(&self) -> &ZStr {
         Self::to_cstr(self.0.domainname.as_ptr().cast())
@@ -72,7 +72,7 @@ impl Uname {
 
 impl fmt::Debug for Uname {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        #[cfg(not(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux")))))]
+        #[cfg(not(any(target_os = "android", target_os = "linux")))]
         {
             write!(
                 fmt,
@@ -84,7 +84,7 @@ impl fmt::Debug for Uname {
                 self.machine().to_string_lossy(),
             )
         }
-        #[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+        #[cfg(any(target_os = "android", target_os = "linux"))]
         {
             write!(
                 fmt,

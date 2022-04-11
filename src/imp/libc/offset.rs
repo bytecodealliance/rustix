@@ -219,7 +219,7 @@ mod readwrite_pv64 {
         offset: c::off64_t,
     ) -> c::ssize_t {
         // Older Android libc lacks `preadv64`, so use the `weak!` mechanism
-        // to test for it, and call back to `libc::syscall`. We don't use
+        // to test for it, and call back to `c::syscall`. We don't use
         // `weak_or_syscall` here because we need to pass the 64-bit offset
         // speciallly.
         weak! {
@@ -230,8 +230,8 @@ mod readwrite_pv64 {
         } else {
             #[cfg(target_pointer_width = "32")]
             {
-                libc::syscall(
-                    libc::SYS_preadv,
+                c::syscall(
+                    c::SYS_preadv,
                     fd,
                     iov,
                     iovcnt,
@@ -241,7 +241,7 @@ mod readwrite_pv64 {
             }
             #[cfg(target_pointer_width = "64")]
             {
-                libc::syscall(libc::SYS_preadv, fd, iov, iovcnt, offset) as c::ssize_t
+                c::syscall(c::SYS_preadv, fd, iov, iovcnt, offset) as c::ssize_t
             }
         }
     }
@@ -260,8 +260,8 @@ mod readwrite_pv64 {
         } else {
             #[cfg(target_pointer_width = "32")]
             {
-                libc::syscall(
-                    libc::SYS_pwritev,
+                c::syscall(
+                    c::SYS_pwritev,
                     fd,
                     iov,
                     iovcnt,
@@ -271,7 +271,7 @@ mod readwrite_pv64 {
             }
             #[cfg(target_pointer_width = "64")]
             {
-                libc::syscall(libc::SYS_pwritev, fd, iov, iovcnt, offset) as c::ssize_t
+                c::syscall(c::SYS_pwritev, fd, iov, iovcnt, offset) as c::ssize_t
             }
         }
     }

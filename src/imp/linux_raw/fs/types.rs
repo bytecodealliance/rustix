@@ -460,6 +460,9 @@ bitflags! {
         /// `STATX_BTIME`
         const BTIME = linux_raw_sys::general::STATX_BTIME;
 
+        /// `STATX_MNT_ID` (since Linux 5.8)
+        const MNT_ID = linux_raw_sys::general::STATX_MNT_ID;
+
         /// `STATX_ALL`
         const ALL = linux_raw_sys::general::STATX_ALL;
     }
@@ -562,6 +565,9 @@ pub type StatFs = linux_raw_sys::general::statfs64;
 ///
 /// [`statx`]: crate::fs::statx
 pub type Statx = linux_raw_sys::general::statx;
+
+/// `struct statx_timestamp` for use with [`Statx`].
+pub type StatxTimestamp = linux_raw_sys::general::statx_timestamp;
 
 /// `mode_t`
 #[cfg(not(any(

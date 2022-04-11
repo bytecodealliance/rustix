@@ -1,11 +1,18 @@
 //! `read` and `write`, optionally positioned, optionally vectored
 
-use crate::io::{IoSlice, IoSliceMut};
 use crate::{imp, io};
 use imp::fd::AsFd;
 
+// Declare `IoSlice` and `IoSliceMut`.
+#[cfg(not(windows))]
+#[cfg(not(feature = "std"))]
+pub use imp::io::{IoSlice, IoSliceMut};
+#[cfg(not(windows))]
+#[cfg(feature = "std")]
+pub use std::io::{IoSlice, IoSliceMut};
+
 /// `RWF_*` constants for use with [`preadv2`] and [`pwritev2`].
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub use imp::io::ReadWriteFlags;
 
 /// `read(fd, buf)`—Reads from a stream.
@@ -120,7 +127,7 @@ pub fn pwritev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>], offset: u64) -> io::Resul
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/preadv2.2.html
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub fn preadv2<Fd: AsFd>(
     fd: Fd,
@@ -139,7 +146,7 @@ pub fn preadv2<Fd: AsFd>(
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/pwritev2.2.html
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub fn pwritev2<Fd: AsFd>(
     fd: Fd,

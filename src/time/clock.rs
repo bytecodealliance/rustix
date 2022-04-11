@@ -1,8 +1,9 @@
-use crate::time::Timespec;
 use crate::{imp, io};
 
+pub use imp::time::{Nsecs, Secs, Timespec};
+
 /// `clockid_t`
-#[cfg(any(linux_raw, all(libc, not(target_os = "wasi"))))]
+#[cfg(any(not(target_os = "wasi")))]
 pub use imp::time::{ClockId, DynamicClockId};
 
 /// `clock_getres(id)`—Returns the resolution of a clock.
@@ -13,10 +14,7 @@ pub use imp::time::{ClockId, DynamicClockId};
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_getres.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/clock_getres.2.html
-#[cfg(any(
-    linux_raw,
-    all(libc, not(any(target_os = "redox", target_os = "wasi")))
-))]
+#[cfg(any(not(any(target_os = "redox", target_os = "wasi"))))]
 #[inline]
 #[must_use]
 pub fn clock_getres(id: ClockId) -> Timespec {
@@ -36,7 +34,7 @@ pub fn clock_getres(id: ClockId) -> Timespec {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_gettime.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/clock_gettime.2.html
-#[cfg(any(linux_raw, all(libc, not(target_os = "wasi"))))]
+#[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
 pub fn clock_gettime(id: ClockId) -> Timespec {
@@ -51,7 +49,7 @@ pub fn clock_gettime(id: ClockId) -> Timespec {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_gettime.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/clock_gettime.2.html
-#[cfg(any(linux_raw, all(libc, not(target_os = "wasi"))))]
+#[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timespec> {
     imp::time::syscalls::clock_gettime_dynamic(id)

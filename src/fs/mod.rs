@@ -1,8 +1,5 @@
 //! Filesystem operations.
 
-use crate::imp;
-use imp::time::Nsecs;
-
 mod abs;
 #[cfg(not(target_os = "redox"))]
 mod at;
@@ -50,7 +47,7 @@ mod memfd_create;
 mod openat2;
 #[cfg(target_os = "linux")]
 mod sendfile;
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 mod statx;
 
 #[cfg(not(any(
@@ -71,13 +68,14 @@ pub use at::fclonefileat;
     target_os = "wasi",
 )))]
 pub use at::mknodat;
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub use at::renameat_with;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub use at::{chmodat, chownat};
 #[cfg(not(target_os = "redox"))]
 pub use at::{
-    linkat, mkdirat, openat, readlinkat, renameat, statat, symlinkat, unlinkat, utimensat,
+    linkat, mkdirat, openat, readlinkat, renameat, statat, symlinkat, unlinkat, utimensat, Dev,
+    RawMode, UTIME_NOW, UTIME_OMIT,
 };
 #[cfg(not(target_os = "redox"))]
 pub use constants::AtFlags;
@@ -86,7 +84,7 @@ pub use constants::CloneFlags;
 /// `copyfile_flags_t`
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use constants::CopyfileFlags;
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub use constants::RenameFlags;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use constants::ResolveFlags;
@@ -131,7 +129,8 @@ pub use fcopyfile::{
     target_os = "openbsd",
     target_os = "redox"
 )))]
-pub use fd::fallocate;
+pub use fd::{fallocate, FallocateFlags};
+
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "ios",
@@ -139,6 +138,9 @@ pub use fd::fallocate;
     target_os = "redox"
 )))]
 pub use fd::fdatasync;
+#[cfg(not(target_os = "wasi"))]
+pub use fd::{fchmod, fchown, flock, FlockOperation};
+pub use fd::{fstat, fsync, ftruncate, futimens, is_file_read_write, seek, tell, Stat, Timestamps};
 #[cfg(not(any(
     target_os = "illumos",
     target_os = "netbsd",
@@ -146,10 +148,9 @@ pub use fd::fdatasync;
     target_os = "wasi"
 )))]
 // not implemented in libc for netbsd yet
-pub use fd::fstatfs;
-#[cfg(not(target_os = "wasi"))]
-pub use fd::{fchmod, fchown, flock};
-pub use fd::{fstat, fsync, ftruncate, futimens, is_file_read_write, seek, tell};
+pub use fd::{fstatfs, StatFs};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use fd::{FsWord, NFS_SUPER_MAGIC, PROC_SUPER_MAGIC};
 pub use file_type::FileType;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use getpath::getpath;
@@ -171,79 +172,8 @@ pub use memfd_create::{memfd_create, MemfdFlags};
 pub use openat2::openat2;
 #[cfg(target_os = "linux")]
 pub use sendfile::sendfile;
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
-pub use statx::{statx, StatxFlags};
-
-pub use imp::fs::Stat;
-
-#[cfg(not(any(
-    target_os = "illumos",
-    target_os = "netbsd",
-    target_os = "redox",
-    target_os = "wasi"
-)))]
-pub use imp::fs::StatFs;
-
-#[cfg(any(linux_raw, all(libc, target_os = "linux", target_env = "gnu")))]
-pub use imp::fs::Statx;
-
-#[cfg(not(any(
-    target_os = "illumos",
-    target_os = "netbsd",
-    target_os = "openbsd",
-    target_os = "redox"
-)))]
-pub use imp::fs::FallocateFlags;
-
-/// `UTIME_NOW` for use with [`utimensat`].
-///
-/// [`utimensat`]: crate::fs::utimensat
-#[cfg(any(linux_raw, all(libc, not(target_os = "redox"))))]
-pub const UTIME_NOW: Nsecs = imp::fs::UTIME_NOW as Nsecs;
-
-/// `UTIME_OMIT` for use with [`utimensat`].
-///
-/// [`utimensat`]: crate::fs::utimensat
-#[cfg(any(linux_raw, all(libc, not(target_os = "redox"))))]
-pub const UTIME_OMIT: Nsecs = imp::fs::UTIME_OMIT as Nsecs;
-
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
-pub use imp::fs::FsWord;
-
-/// The filesystem magic number for procfs.
-///
-/// See [the `fstatfs` man page] for more information.
-///
-/// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
-pub const PROC_SUPER_MAGIC: FsWord = imp::fs::PROC_SUPER_MAGIC;
-
-/// The filesystem magic number for NFS.
-///
-/// See [the `fstatfs` man page] for more information.
-///
-/// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
-pub const NFS_SUPER_MAGIC: FsWord = imp::fs::NFS_SUPER_MAGIC;
-
-#[cfg(not(target_os = "wasi"))]
-pub use imp::fs::FlockOperation;
-pub use imp::fs::{Dev, RawMode};
-
-/// Timestamps used by [`utimensat`] and [`futimens`].
-//
-// This is `repr(C)` and specifically laid out to match the representation
-// used by `utimensat` and `futimens`, which expect 2-element arrays of
-// timestamps.
-#[repr(C)]
-#[derive(Clone, Debug)]
-pub struct Timestamps {
-    /// The timestamp of the last access to a filesystem object.
-    pub last_access: crate::time::Timespec,
-
-    /// The timestamp of the last modification of a filesystem object.
-    pub last_modification: crate::time::Timespec,
-}
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use statx::{statx, Statx, StatxFlags, StatxTimestamp};
 
 /// Re-export types common to POSIX-ish platforms.
 #[cfg(feature = "std")]

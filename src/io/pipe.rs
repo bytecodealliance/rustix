@@ -1,8 +1,25 @@
 use crate::imp;
 use crate::io::{self, OwnedFd};
 
-#[cfg(any(linux_raw, all(libc, not(any(target_os = "ios", target_os = "macos")))))]
+#[cfg(not(any(target_os = "ios", target_os = "macos")))]
 pub use imp::io::PipeFlags;
+
+/// `PIPE_BUF`—The maximum length at which writes to a pipe are atomic.
+///
+/// # References
+///
+///  - [Linux]
+///  - [POSIX]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man7/pipe.7.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/write.html
+#[cfg(not(any(
+    windows,
+    target_os = "illumos",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
+pub const PIPE_BUF: usize = imp::io::PIPE_BUF;
 
 /// `pipe()`—Creates a pipe.
 ///

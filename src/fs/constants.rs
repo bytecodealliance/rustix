@@ -19,8 +19,8 @@ pub use imp::fs::CloneFlags;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use imp::fs::CopyfileFlags;
 
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub use imp::fs::ResolveFlags;
 
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub use imp::fs::RenameFlags;

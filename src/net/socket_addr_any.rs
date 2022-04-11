@@ -11,10 +11,12 @@
 
 #[cfg(unix)]
 use crate::net::SocketAddrUnix;
-use crate::net::{AddressFamily, SocketAddrStorage, SocketAddrV4, SocketAddrV6};
+use crate::net::{AddressFamily, SocketAddrV4, SocketAddrV6};
 use crate::{imp, io};
 #[cfg(feature = "std")]
 use core::fmt;
+
+pub use imp::net::SocketAddrStorage;
 
 /// `struct sockaddr_storage` as a Rust enum.
 #[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]

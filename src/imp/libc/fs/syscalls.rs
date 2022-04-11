@@ -94,9 +94,7 @@ use crate::fs::StatFs;
 use crate::fs::{Dev, FileType};
 use crate::fs::{FdFlags, Mode, OFlags, Stat, Timestamps};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::fs::{RenameFlags, ResolveFlags};
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
-use crate::fs::{Statx, StatxFlags};
+use crate::fs::{RenameFlags, ResolveFlags, Statx, StatxFlags};
 use crate::io::{self, OwnedFd, SeekFrom};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
@@ -846,21 +844,31 @@ pub(crate) fn sendfile(
     }
 }
 
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[allow(non_upper_case_globals)]
 pub(crate) fn statx(
     dirfd: BorrowedFd<'_>,
     path: &ZStr,
     flags: AtFlags,
     mask: StatxFlags,
 ) -> io::Result<Statx> {
-    weakcall! {
+    #[cfg(all(target_os = "android", target_arch = "arm"))]
+    const SYS_statx: c::c_long = 397;
+    #[cfg(all(target_os = "android", target_arch = "x86"))]
+    const SYS_statx: c::c_long = 383;
+    #[cfg(all(target_os = "android", target_arch = "aarch64"))]
+    const SYS_statx: c::c_long = 291;
+    #[cfg(all(target_os = "android", target_arch = "x86_64"))]
+    const SYS_statx: c::c_long = 332;
+
+    weak_or_syscall! {
         fn statx(
-            dirfd: BorrowedFd<'_>,
+            pirfd: BorrowedFd<'_>,
             path: *const c::c_char,
             flags: c::c_int,
             mask: c::c_uint,
             buf: *mut Statx
-        ) -> c::c_int
+        ) via SYS_statx -> c::c_int
     }
 
     let mut statx_buf = MaybeUninit::<Statx>::uninit();

@@ -232,9 +232,9 @@ pub(crate) fn pwritev2(
 // larger than or equal to INT_MAX. To handle both of these the read
 // size is capped on both platforms.
 #[cfg(target_os = "macos")]
-const READ_LIMIT: usize = libc::c_int::MAX as usize - 1;
+const READ_LIMIT: usize = c::c_int::MAX as usize - 1;
 #[cfg(not(target_os = "macos"))]
-const READ_LIMIT: usize = libc::ssize_t::MAX as usize;
+const READ_LIMIT: usize = c::ssize_t::MAX as usize;
 
 #[cfg(any(
     target_os = "dragonfly",
@@ -245,12 +245,12 @@ const READ_LIMIT: usize = libc::ssize_t::MAX as usize;
     target_os = "openbsd",
 ))]
 const fn max_iov() -> usize {
-    libc::IOV_MAX as usize
+    c::IOV_MAX as usize
 }
 
 #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "linux"))]
 const fn max_iov() -> usize {
-    libc::UIO_MAXIOV as usize
+    c::UIO_MAXIOV as usize
 }
 
 #[cfg(not(any(
@@ -328,11 +328,7 @@ pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> 
 pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
     let mut result = MaybeUninit::<c::c_uint>::uninit();
     unsafe {
-        ret(libc::ioctl(
-            borrowed_fd(fd),
-            libc::BLKSSZGET,
-            result.as_mut_ptr(),
-        ))?;
+        ret(c::ioctl(borrowed_fd(fd), c::BLKSSZGET, result.as_mut_ptr()))?;
         Ok(result.assume_init() as u32)
     }
 }
@@ -342,9 +338,9 @@ pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
 pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
     let mut result = MaybeUninit::<c::c_uint>::uninit();
     unsafe {
-        ret(libc::ioctl(
+        ret(c::ioctl(
             borrowed_fd(fd),
-            libc::BLKPBSZGET,
+            c::BLKPBSZGET,
             result.as_mut_ptr(),
         ))?;
         Ok(result.assume_init() as u32)

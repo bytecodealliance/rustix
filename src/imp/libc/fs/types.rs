@@ -60,15 +60,15 @@ bitflags! {
 
         /// `AT_STATX_SYNC_AS_STAT`
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const STATX_SYNC_AS_STAT = libc::AT_STATX_SYNC_AS_STAT;
+        const STATX_SYNC_AS_STAT = c::AT_STATX_SYNC_AS_STAT;
 
         /// `AT_STATX_FORCE_SYNC`
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const STATX_FORCE_SYNC = libc::AT_STATX_FORCE_SYNC;
+        const STATX_FORCE_SYNC = c::AT_STATX_FORCE_SYNC;
 
         /// `AT_STATX_DONT_SYNC`
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const STATX_DONT_SYNC = libc::AT_STATX_DONT_SYNC;
+        const STATX_DONT_SYNC = c::AT_STATX_DONT_SYNC;
     }
 }
 
@@ -621,8 +621,67 @@ bitflags! {
         /// `STATX_BTIME`
         const BTIME = c::STATX_BTIME;
 
+        /// `STATX_MNT_ID` (since Linux 5.8)
+        const MNT_ID = c::STATX_MNT_ID;
+
         /// `STATX_ALL`
         const ALL = c::STATX_ALL;
+    }
+}
+
+#[cfg(any(
+    target_os = "android",
+    all(target_os = "linux", not(target_env = "gnu"))
+))]
+bitflags! {
+    /// `STATX_*` constants for use with [`statx`].
+    ///
+    /// [`statx`]: crate::fs::statx
+    pub struct StatxFlags: u32 {
+        /// `STATX_TYPE`
+        const TYPE = 0x0001;
+
+        /// `STATX_MODE`
+        const MODE = 0x0002;
+
+        /// `STATX_NLINK`
+        const NLINK = 0x0004;
+
+        /// `STATX_UID`
+        const UID = 0x0008;
+
+        /// `STATX_GID`
+        const GID = 0x0010;
+
+        /// `STATX_ATIME`
+        const ATIME = 0x0020;
+
+        /// `STATX_MTIME`
+        const MTIME = 0x0040;
+
+        /// `STATX_CTIME`
+        const CTIME = 0x0080;
+
+        /// `STATX_INO`
+        const INO = 0x0100;
+
+        /// `STATX_SIZE`
+        const SIZE = 0x0200;
+
+        /// `STATX_BLOCKS`
+        const BLOCKS = 0x0400;
+
+        /// `STATX_BASIC_STATS`
+        const BASIC_STATS = 0x07ff;
+
+        /// `STATX_BTIME`
+        const BTIME = 0x800;
+
+        /// `STATX_MNT_ID` (since Linux 5.8)
+        const MNT_ID = 0x1000;
+
+        /// `STATX_ALL`
+        const ALL = 0xfff;
     }
 }
 
@@ -784,11 +843,67 @@ pub type StatFs = c::statfs64;
 
 /// `struct statx` for use with [`statx`].
 ///
-/// Only available on Linux with GLIBC for now.
-///
 /// [`statx`]: crate::fs::statx
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
+// Use the glibc `struct statx`.
 pub type Statx = c::statx;
+
+/// `struct statx_timestamp` for use with [`Statx`].
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
+// Use the glibc `struct statx_timestamp`.
+pub type StatxTimestamp = c::statx;
+
+/// `struct statx` for use with [`statx`].
+///
+/// [`statx`]: crate::fs::statx
+// Non-glibc ABIs don't currently declare a `struct statx`, so we declare it
+// ourselves.
+#[cfg(any(
+    target_os = "android",
+    all(target_os = "linux", not(target_env = "gnu"))
+))]
+#[repr(C)]
+#[allow(missing_docs)]
+pub struct Statx {
+    pub stx_mask: u32,
+    pub stx_blksize: u32,
+    pub stx_attributes: u64,
+    pub stx_nlink: u32,
+    pub stx_uid: u32,
+    pub stx_gid: u32,
+    pub stx_mode: u16,
+    __statx_pad1: [u16; 1],
+    pub stx_ino: u64,
+    pub stx_size: u64,
+    pub stx_blocks: u64,
+    pub stx_attributes_mask: u64,
+    pub stx_atime: StatxTimestamp,
+    pub stx_btime: StatxTimestamp,
+    pub stx_ctime: StatxTimestamp,
+    pub stx_mtime: StatxTimestamp,
+    pub stx_rdev_major: u32,
+    pub stx_rdev_minor: u32,
+    pub stx_dev_major: u32,
+    pub stx_dev_minor: u32,
+    pub stx_mnt_id: u64,
+    __statx_pad2: u64,
+    __statx_pad3: [u64; 12],
+}
+
+/// `struct statx_timestamp` for use with [`Statx`].
+// Non-glibc ABIs don't currently declare a `struct statx_timestamp`, so we
+// declare it ourselves.
+#[cfg(any(
+    target_os = "android",
+    all(target_os = "linux", not(target_env = "gnu"))
+))]
+#[repr(C)]
+#[allow(missing_docs)]
+pub struct StatxTimestamp {
+    pub tv_sec: i64,
+    pub tv_nsec: u32,
+    pub __statx_timestamp_pad1: [i32; 1],
+}
 
 /// `mode_t`
 pub type RawMode = c::mode_t;

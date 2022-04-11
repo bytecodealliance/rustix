@@ -376,11 +376,11 @@ pub(crate) fn exit_group(code: c::c_int) -> ! {
     // the libc bindings expose.
     #[cfg(any(target_os = "wasi", target_os = "solid"))]
     unsafe {
-        libc::_Exit(code)
+        c::_Exit(code)
     }
     #[cfg(unix)]
     unsafe {
-        libc::_exit(code)
+        c::_exit(code)
     }
 }
 
@@ -388,7 +388,7 @@ pub(crate) fn exit_group(code: c::c_int) -> ! {
 #[inline]
 pub(crate) fn setsid() -> io::Result<Pid> {
     unsafe {
-        let pid = ret_c_int(libc::setsid())?;
+        let pid = ret_c_int(c::setsid())?;
         debug_assert_ne!(pid, 0);
         Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid)))
     }
@@ -397,14 +397,14 @@ pub(crate) fn setsid() -> io::Result<Pid> {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) fn kill_process(pid: Pid, sig: Signal) -> io::Result<()> {
-    unsafe { ret(libc::kill(pid.as_raw_nonzero().get(), sig as i32)) }
+    unsafe { ret(c::kill(pid.as_raw_nonzero().get(), sig as i32)) }
 }
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
     unsafe {
-        ret(libc::kill(
+        ret(c::kill(
             pid.as_raw_nonzero().get().wrapping_neg(),
             sig as i32,
         ))
@@ -414,5 +414,5 @@ pub(crate) fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) fn kill_current_process_group(sig: Signal) -> io::Result<()> {
-    unsafe { ret(libc::kill(0, sig as i32)) }
+    unsafe { ret(c::kill(0, sig as i32)) }
 }

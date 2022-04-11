@@ -42,7 +42,7 @@ unsafe fn read_ss_family(storage: *const sockaddr) -> u16 {
 /// can test for `AF_UNSPEC` to test whether it was stored to.
 #[inline]
 pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut sockaddr) {
-    (*storage.cast::<sockaddr_header>()).ss_family = linux_raw_sys::general::AF_UNSPEC as _;
+    (*storage.cast::<sockaddr_header>()).ss_family = c::AF_UNSPEC as _;
 }
 
 /// Read a socket address encoded in a platform-specific format.
@@ -56,25 +56,25 @@ pub(crate) unsafe fn read_sockaddr(
 ) -> io::Result<SocketAddrAny> {
     let offsetof_sun_path = super::offsetof_sun_path();
 
-    if len < size_of::<linux_raw_sys::general::__kernel_sa_family_t>() {
+    if len < size_of::<c::sa_family_t>() {
         return Err(io::Error::INVAL);
     }
     match read_ss_family(storage).into() {
-        linux_raw_sys::general::AF_INET => {
-            if len < size_of::<linux_raw_sys::general::sockaddr_in>() {
+        c::AF_INET => {
+            if len < size_of::<c::sockaddr_in>() {
                 return Err(io::Error::INVAL);
             }
-            let decode = *storage.cast::<linux_raw_sys::general::sockaddr_in>();
+            let decode = *storage.cast::<c::sockaddr_in>();
             Ok(SocketAddrAny::V4(SocketAddrV4::new(
                 Ipv4Addr::from(u32::from_be(decode.sin_addr.s_addr)),
                 u16::from_be(decode.sin_port),
             )))
         }
-        linux_raw_sys::general::AF_INET6 => {
-            if len < size_of::<linux_raw_sys::general::sockaddr_in6>() {
+        c::AF_INET6 => {
+            if len < size_of::<c::sockaddr_in6>() {
                 return Err(io::Error::INVAL);
             }
-            let decode = *storage.cast::<linux_raw_sys::general::sockaddr_in6>();
+            let decode = *storage.cast::<c::sockaddr_in6>();
             Ok(SocketAddrAny::V6(SocketAddrV6::new(
                 Ipv6Addr::from(decode.sin6_addr.in6_u.u6_addr8),
                 u16::from_be(decode.sin6_port),
@@ -82,14 +82,14 @@ pub(crate) unsafe fn read_sockaddr(
                 decode.sin6_scope_id,
             )))
         }
-        linux_raw_sys::general::AF_UNIX => {
+        c::AF_UNIX => {
             if len < offsetof_sun_path {
                 return Err(io::Error::INVAL);
             }
             if len == offsetof_sun_path {
                 Ok(SocketAddrAny::Unix(SocketAddrUnix::new(&[][..])?))
             } else {
-                let decode = *storage.cast::<linux_raw_sys::general::sockaddr_un>();
+                let decode = *storage.cast::<c::sockaddr_un>();
                 assert_eq!(
                     decode.sun_path[len - 1 - offsetof_sun_path],
                     b'\0' as c::c_char
@@ -128,25 +128,25 @@ pub(crate) unsafe fn maybe_read_sockaddr_os(
 ///
 /// `storage` must point to a valid socket address returned from the OS.
 pub(crate) unsafe fn read_sockaddr_os(storage: *const sockaddr, len: usize) -> SocketAddrAny {
-    let z = linux_raw_sys::general::sockaddr_un {
+    let z = c::sockaddr_un {
         sun_family: 0_u16,
         sun_path: [0; 108],
     };
     let offsetof_sun_path = (as_ptr(&z.sun_path) as usize) - (as_ptr(&z) as usize);
 
-    assert!(len >= size_of::<linux_raw_sys::general::__kernel_sa_family_t>());
+    assert!(len >= size_of::<c::sa_family_t>());
     match read_ss_family(storage).into() {
-        linux_raw_sys::general::AF_INET => {
-            assert!(len >= size_of::<linux_raw_sys::general::sockaddr_in>());
-            let decode = *storage.cast::<linux_raw_sys::general::sockaddr_in>();
+        c::AF_INET => {
+            assert!(len >= size_of::<c::sockaddr_in>());
+            let decode = *storage.cast::<c::sockaddr_in>();
             SocketAddrAny::V4(SocketAddrV4::new(
                 Ipv4Addr::from(u32::from_be(decode.sin_addr.s_addr)),
                 u16::from_be(decode.sin_port),
             ))
         }
-        linux_raw_sys::general::AF_INET6 => {
-            assert!(len >= size_of::<linux_raw_sys::general::sockaddr_in6>());
-            let decode = *storage.cast::<linux_raw_sys::general::sockaddr_in6>();
+        c::AF_INET6 => {
+            assert!(len >= size_of::<c::sockaddr_in6>());
+            let decode = *storage.cast::<c::sockaddr_in6>();
             SocketAddrAny::V6(SocketAddrV6::new(
                 Ipv6Addr::from(decode.sin6_addr.in6_u.u6_addr8),
                 u16::from_be(decode.sin6_port),
@@ -154,12 +154,12 @@ pub(crate) unsafe fn read_sockaddr_os(storage: *const sockaddr, len: usize) -> S
                 decode.sin6_scope_id,
             ))
         }
-        linux_raw_sys::general::AF_UNIX => {
+        c::AF_UNIX => {
             assert!(len >= offsetof_sun_path);
             if len == offsetof_sun_path {
                 SocketAddrAny::Unix(SocketAddrUnix::new(&[][..]).unwrap())
             } else {
-                let decode = *storage.cast::<linux_raw_sys::general::sockaddr_un>();
+                let decode = *storage.cast::<c::sockaddr_un>();
                 assert_eq!(
                     decode.sun_path[len - 1 - offsetof_sun_path],
                     b'\0' as c::c_char

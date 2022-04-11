@@ -2,8 +2,6 @@
 
 use super::super::c;
 #[cfg(unix)]
-use super::offsetof_sun_path;
-#[cfg(unix)]
 use crate::ffi::ZStr;
 #[cfg(unix)]
 use crate::io;
@@ -21,7 +19,7 @@ use core::mem::transmute;
 #[derive(Clone)]
 #[doc(alias = "sockaddr_un")]
 pub struct SocketAddrUnix {
-    pub(crate) unix: libc::sockaddr_un,
+    pub(crate) unix: c::sockaddr_un,
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
@@ -30,7 +28,7 @@ pub struct SocketAddrUnix {
         target_os = "netbsd",
         target_os = "openbsd"
     )))]
-    len: libc::socklen_t,
+    len: c::socklen_t,
 }
 
 #[cfg(unix)]
@@ -260,3 +258,57 @@ impl fmt::Debug for SocketAddrUnix {
 
 /// `struct sockaddr_storage` as a raw struct.
 pub type SocketAddrStorage = c::sockaddr_storage;
+
+/// Return the offset of the `sun_path` field of `sockaddr_un`.
+#[cfg(not(windows))]
+#[inline]
+pub(crate) fn offsetof_sun_path() -> usize {
+    let z = c::sockaddr_un {
+        #[cfg(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd"
+        ))]
+        sun_len: 0_u8,
+        #[cfg(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd"
+        ))]
+        sun_family: 0_u8,
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd"
+        )))]
+        sun_family: 0_u16,
+        #[cfg(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd"
+        ))]
+        sun_path: [0; 104],
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd"
+        )))]
+        sun_path: [0; 108],
+    };
+    (crate::as_ptr(&z.sun_path) as usize) - (crate::as_ptr(&z) as usize)
+}

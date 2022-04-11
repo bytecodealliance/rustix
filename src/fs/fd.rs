@@ -1,11 +1,16 @@
 //! Functions which operate on file descriptors.
 
-use crate::fs::Timestamps;
 use crate::io::SeekFrom;
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
 use crate::{imp, io};
 use imp::fd::{AsFd, BorrowedFd};
+#[cfg(not(target_os = "wasi"))]
+use imp::fs::Mode;
+
+#[cfg(not(target_os = "wasi"))]
+pub use imp::fs::FlockOperation;
+
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "illumos",
@@ -13,18 +18,53 @@ use imp::fd::{AsFd, BorrowedFd};
     target_os = "openbsd",
     target_os = "redox"
 )))]
-use imp::fs::FallocateFlags;
-use imp::fs::Stat;
+pub use imp::fs::FallocateFlags;
+
+pub use imp::fs::Stat;
+
 #[cfg(not(any(
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
     target_os = "wasi"
 )))]
-// not implemented in libc for netbsd yet
-use imp::fs::StatFs;
-#[cfg(not(target_os = "wasi"))]
-use imp::fs::{FlockOperation, Mode};
+pub use imp::fs::StatFs;
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use imp::fs::FsWord;
+
+/// Timestamps used by [`utimensat`] and [`futimens`].
+///
+/// [`futimens`]: crate::fs::futimens
+//
+// This is `repr(C)` and specifically laid out to match the representation
+// used by `utimensat` and `futimens`, which expect 2-element arrays of
+// timestamps.
+#[repr(C)]
+#[derive(Clone, Debug)]
+pub struct Timestamps {
+    /// The timestamp of the last access to a filesystem object.
+    pub last_access: crate::time::Timespec,
+
+    /// The timestamp of the last modification of a filesystem object.
+    pub last_modification: crate::time::Timespec,
+}
+
+/// The filesystem magic number for procfs.
+///
+/// See [the `fstatfs` man page] for more information.
+///
+/// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub const PROC_SUPER_MAGIC: FsWord = imp::fs::PROC_SUPER_MAGIC;
+
+/// The filesystem magic number for NFS.
+///
+/// See [the `fstatfs` man page] for more information.
+///
+/// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub const NFS_SUPER_MAGIC: FsWord = imp::fs::NFS_SUPER_MAGIC;
 
 /// `lseek(fd, offset, whence)`—Repositions a file descriptor within a file.
 ///

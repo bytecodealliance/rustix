@@ -8,9 +8,9 @@
 use crate::ffi::{ZStr, ZString};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use crate::fs::CloneFlags;
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::RenameFlags;
-use crate::fs::Timestamps;
+use crate::fs::{Stat, Timestamps};
 use crate::io::{self, OwnedFd};
 use crate::path::SMALL_PATH_BUFFER_SIZE;
 #[cfg(not(target_os = "wasi"))]
@@ -20,9 +20,24 @@ use alloc::vec::Vec;
 use imp::fd::{AsFd, BorrowedFd};
 #[cfg(not(target_os = "illumos"))]
 use imp::fs::Access;
-use imp::fs::{AtFlags, Mode, OFlags, Stat};
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
-use imp::fs::{Dev, FileType};
+use imp::fs::FileType;
+use imp::fs::{AtFlags, Mode, OFlags};
+use imp::time::Nsecs;
+
+pub use imp::fs::{Dev, RawMode};
+
+/// `UTIME_NOW` for use with [`utimensat`].
+///
+/// [`utimensat`]: crate::fs::utimensat
+#[cfg(not(target_os = "redox"))]
+pub const UTIME_NOW: Nsecs = imp::fs::UTIME_NOW as Nsecs;
+
+/// `UTIME_OMIT` for use with [`utimensat`].
+///
+/// [`utimensat`]: crate::fs::utimensat
+#[cfg(not(target_os = "redox"))]
+pub const UTIME_OMIT: Nsecs = imp::fs::UTIME_OMIT as Nsecs;
 
 /// `openat(dirfd, path, oflags, mode)`—Opens a file.
 ///
@@ -178,7 +193,7 @@ pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/renameat2.2.html
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 #[doc(alias = "renameat2")]
 pub fn renameat_with<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
