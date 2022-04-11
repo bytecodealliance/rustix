@@ -212,10 +212,12 @@ unsafe fn check_vdso_base<'vdso>(base: *const Elf_Ehdr) -> Option<&'vdso Elf_Ehd
     }
     */
 
-    // Check that the vDSO is page-aligned and appropriately mapped.
-    madvise(base as *mut c_void, size_of::<Elf_Ehdr>(), Advice::Normal).ok()?;
-
     let hdr = &*make_pointer::<Elf_Ehdr>(base.cast())?;
+
+    // Check that the vDSO is page-aligned and appropriately mapped. We call
+    // this after `make_pointer` so that we don't do a syscall if there's no
+    // chance the pointer is valid.
+    madvise(base as *mut c_void, size_of::<Elf_Ehdr>(), Advice::Normal).ok()?;
 
     if hdr.e_ident[..SELFMAG] != ELFMAG {
         return None; // Wrong ELF magic
