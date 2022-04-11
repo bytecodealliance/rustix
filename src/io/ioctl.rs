@@ -3,10 +3,11 @@
 //! a type-safe API, rustix makes them all separate functions so that they
 //! can have dedicated static type signatures.
 
-#[cfg(not(any(windows, target_os = "wasi")))]
-use crate::io::{Termios, Winsize};
 use crate::{imp, io};
 use imp::fd::AsFd;
+
+#[cfg(not(any(windows, target_os = "wasi")))]
+pub use imp::io::{Termios, Winsize};
 
 /// `ioctl(fd, TCGETS)`—Get terminal attributes.
 ///
@@ -65,10 +66,7 @@ pub fn ioctl_fionbio<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
-#[cfg(any(
-    linux_raw,
-    all(libc, not(any(windows, target_os = "redox", target_os = "wasi")))
-))]
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 #[inline]
 #[doc(alias = "TIOCEXCL")]
 pub fn ioctl_tiocexcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
@@ -81,10 +79,7 @@ pub fn ioctl_tiocexcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
-#[cfg(any(
-    linux_raw,
-    all(libc, not(any(windows, target_os = "redox", target_os = "wasi")))
-))]
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 #[inline]
 #[doc(alias = "TIOCNXCL")]
 pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {

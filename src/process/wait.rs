@@ -1,4 +1,5 @@
-use crate::imp;
+use crate::process::Pid;
+use crate::{imp, io};
 use bitflags::bitflags;
 
 bitflags! {
@@ -74,4 +75,55 @@ impl WaitStatus {
             None
         }
     }
+}
+
+/// `waitpid(pid, waitopts)`—Wait for a specific process to change state.
+///
+/// If the pid is `None`, the call will wait for any child process whose
+/// process group id matches that of the calling process.
+///
+/// If the pid is equal to `RawPid::MAX`, the call will wait for any child
+/// process.
+///
+/// Otherwise if the `wrapping_neg` of pid is less than pid, the call will wait
+/// for any child process with a group ID equal to the `wrapping_neg` of `pid`.
+///
+/// Otherwise, the call will wait for the child process with the given pid.
+///
+/// On Success, returns the status of the selected process.
+///
+/// If `NOHANG` was specified in the options, and the selected child process
+/// didn't change state, returns `None`.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/wait.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/waitpid.2.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<WaitStatus>> {
+    Ok(imp::process::syscalls::waitpid(pid, waitopts)?.map(|(_, status)| status))
+}
+
+/// `wait(waitopts)`—Wait for any of the children of calling process to
+/// change state.
+///
+/// On success, returns the pid of the child process whose state changed, and
+/// the status of said process.
+///
+/// If `NOHANG` was specified in the options, and the selected child process
+/// didn't change state, returns `None`.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/wait.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/waitpid.2.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+    imp::process::syscalls::wait(waitopts)
 }

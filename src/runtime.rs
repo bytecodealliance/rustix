@@ -132,7 +132,7 @@ pub fn startup_tls_info() -> StartupTlsInfo {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man3/getauxval.3.html
 #[cfg(linux_raw)]
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub fn exe_phdrs() -> (*const c_void, usize) {
     imp::process::exe_phdrs()

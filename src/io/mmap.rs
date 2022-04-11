@@ -10,7 +10,7 @@ use crate::{imp, io};
 use core::ffi::c_void;
 use imp::fd::AsFd;
 
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub use imp::io::MlockFlags;
 #[cfg(any(linux_raw, all(libc, target_os = "linux")))]
 pub use imp::io::MremapFlags;
@@ -200,7 +200,7 @@ pub unsafe fn mlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mlock2.2.html
-#[cfg(any(linux_raw, all(libc, any(target_os = "android", target_os = "linux"))))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 #[doc(alias = "mlock2")]
 pub unsafe fn mlock_with(ptr: *mut c_void, len: usize, flags: MlockFlags) -> io::Result<()> {
