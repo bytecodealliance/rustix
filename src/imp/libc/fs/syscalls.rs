@@ -101,12 +101,22 @@ use crate::io::{self, OwnedFd, SeekFrom};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
 use core::convert::TryInto;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(
+    target_os = "android",
+    target_os = "ios",
+    target_os = "linux",
+    target_os = "macos"
+))]
 use core::mem::size_of;
 #[cfg(target_os = "linux")]
 use core::mem::transmute;
 use core::mem::MaybeUninit;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(
+    target_os = "android",
+    target_os = "ios",
+    target_os = "linux",
+    target_os = "macos"
+))]
 use core::ptr::null_mut;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use {
@@ -352,6 +362,7 @@ pub(crate) fn utimensat(
     times: &Timestamps,
     flags: AtFlags,
 ) -> io::Result<()> {
+    #[cfg(not(any(target_os = "ios", target_os = "macos")))]
     unsafe {
         // Assert that `Timestamps` has the expected layout.
         let _ = core::mem::transmute::<Timestamps, [c::timespec; 2]>(times.clone());
@@ -362,6 +373,120 @@ pub(crate) fn utimensat(
             as_ptr(times).cast(),
             flags.bits(),
         ))
+    }
+
+    // `utimensat` was introduced in macOS 10.13.
+    #[cfg(any(target_os = "ios", target_os = "macos"))]
+    unsafe {
+        // ABI details
+        weak! {
+            fn utimensat(
+                c::c_int,
+                *const c::c_char,
+                *const c::timespec,
+                c::c_int
+            ) -> c::c_int
+        }
+        extern "C" {
+            fn setattrlist(
+                path: *const c::c_char,
+                attr_list: *const Attrlist,
+                attr_buf: *const c::c_void,
+                attr_buf_size: c::size_t,
+                options: c::c_ulong,
+            ) -> c::c_int;
+        }
+        const FSOPT_NOFOLLOW: c::c_ulong = 0x00000001;
+
+        // If we have `utimensat`, use it.
+        if let Some(have_utimensat) = utimensat.get() {
+            // Assert that `Timestamps` has the expected layout.
+            let _ = core::mem::transmute::<Timestamps, [c::timespec; 2]>(times.clone());
+
+            return ret(have_utimensat(
+                borrowed_fd(dirfd),
+                c_str(path),
+                as_ptr(times).cast(),
+                flags.bits(),
+            ));
+        }
+
+        // `setattrlistat` was introduced in 10.13 along with `utimensat`, so if
+        // we don't have `utimensat`, we don't have `setattrlistat` either.
+        // Emulate it using `fork`, and `fchdir` and [`setattrlist`].
+        //
+        // [`setattrlist`]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/setattrlist.2.html
+        match c::fork() {
+            -1 => Err(io::Error::IO),
+            0 => {
+                if c::fchdir(borrowed_fd(dirfd)) != 0 {
+                    let code = match errno::errno().0 {
+                        libc::EACCES => 2,
+                        libc::ENOTDIR => 3,
+                        _ => 1,
+                    };
+                    c::_exit(code);
+                }
+
+                let mut flags_arg = 0;
+                if flags.contains(AtFlags::SYMLINK_NOFOLLOW) {
+                    flags_arg |= FSOPT_NOFOLLOW;
+                }
+
+                let (attrbuf_size, times, attrs) = times_to_attrlist(times);
+
+                if setattrlist(
+                    c_str(path),
+                    &attrs,
+                    as_ptr(&times).cast(),
+                    attrbuf_size,
+                    flags_arg,
+                ) != 0
+                {
+                    // Translate expected errno codes into ad-hoc integer
+                    // values suitable for exit statuses.
+                    let code = match errno::errno().0 {
+                        libc::EACCES => 2,
+                        libc::ENOTDIR => 3,
+                        libc::EPERM => 4,
+                        libc::EROFS => 5,
+                        libc::ELOOP => 6,
+                        libc::ENOENT => 7,
+                        libc::ENAMETOOLONG => 8,
+                        libc::EINVAL => 9,
+                        libc::ESRCH => 10,
+                        libc::ENOTSUP => 11,
+                        _ => 1,
+                    };
+                    c::_exit(code);
+                }
+
+                c::_exit(0);
+            }
+            child_pid => {
+                let mut wstatus = 0;
+                let _ = ret_c_int(c::waitpid(child_pid, &mut wstatus, 0))?;
+                if c::WIFEXITED(wstatus) {
+                    // Translate our ad-hoc exit statuses back to errno codes.
+                    match c::WEXITSTATUS(wstatus) {
+                        0 => Ok(()),
+                        2 => Err(io::Error::ACCESS),
+                        3 => Err(io::Error::NOTDIR),
+                        4 => Err(io::Error::PERM),
+                        5 => Err(io::Error::ROFS),
+                        6 => Err(io::Error::LOOP),
+                        7 => Err(io::Error::NOENT),
+                        8 => Err(io::Error::NAMETOOLONG),
+                        9 => Err(io::Error::INVAL),
+                        10 => Err(io::Error::SRCH),
+                        11 => Err(io::Error::NOTSUP),
+                        _ => Err(io::Error::IO),
+                    }
+                } else {
+                    Err(io::Error::IO)
+                }
+            }
+        }
     }
 }
 
@@ -665,11 +790,49 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
 }
 
 pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()> {
+    #[cfg(not(any(target_os = "ios", target_os = "macos")))]
     unsafe {
         // Assert that `Timestamps` has the expected layout.
         let _ = core::mem::transmute::<Timestamps, [c::timespec; 2]>(times.clone());
 
         ret(c::futimens(borrowed_fd(fd), as_ptr(times).cast()))
+    }
+
+    // `futimens` was introduced in macOS 10.13.
+    #[cfg(any(target_os = "ios", target_os = "macos"))]
+    unsafe {
+        // ABI details.
+        weak! {
+            fn futimens(c::c_int, *const c::timespec) -> c::c_int
+        }
+        extern "C" {
+            fn fsetattrlist(
+                fd: c::c_int,
+                attr_list: *const Attrlist,
+                attr_buf: *const c::c_void,
+                attr_buf_size: c::size_t,
+                options: c::c_ulong,
+            ) -> c::c_int;
+        }
+
+        // If we have `futimens`, use it.
+        if let Some(have_futimens) = futimens.get() {
+            // Assert that `Timestamps` has the expected layout.
+            let _ = core::mem::transmute::<Timestamps, [c::timespec; 2]>(times.clone());
+
+            return ret(have_futimens(borrowed_fd(fd), as_ptr(times).cast()));
+        }
+
+        // Otherwise use `fsetattrlist`.
+        let (attrbuf_size, times, attrs) = times_to_attrlist(times);
+
+        ret(fsetattrlist(
+            borrowed_fd(fd),
+            &attrs,
+            as_ptr(&times).cast(),
+            attrbuf_size,
+            0,
+        ))
     }
 }
 
@@ -998,4 +1161,90 @@ pub(crate) fn fcntl_rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::R
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub(crate) fn fcntl_fullfsync(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_FULLFSYNC)) }
+}
+
+/// Convert `times` from a `futimens`/`utimensat` argument into `setattrlist`
+/// arguments.
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+fn times_to_attrlist(times: &Timestamps) -> (c::size_t, [c::timespec; 2], Attrlist) {
+    // ABI details.
+    const ATTR_CMN_MODTIME: u32 = 0x00000400;
+    const ATTR_CMN_ACCTIME: u32 = 0x00001000;
+    const ATTR_BIT_MAP_COUNT: u16 = 5;
+
+    let mut times = times.clone();
+
+    // If we have any `UTIME_NOW` elements, replace them with the current time.
+    if times.last_access.tv_nsec == c::UTIME_NOW || times.last_modification.tv_nsec == c::UTIME_NOW
+    {
+        let now = {
+            let mut tv = c::timeval {
+                tv_sec: 0,
+                tv_usec: 0,
+            };
+            unsafe {
+                let r = c::gettimeofday(&mut tv, null_mut());
+                assert_eq!(r, 0);
+            }
+            c::timespec {
+                tv_sec: tv.tv_sec,
+                tv_nsec: (tv.tv_usec * 1000) as _,
+            }
+        };
+        if times.last_access.tv_nsec == c::UTIME_NOW {
+            times.last_access = now;
+        }
+        if times.last_modification.tv_nsec == c::UTIME_NOW {
+            times.last_modification = now;
+        }
+    }
+
+    // Pack the return values following the rules for [`getattrlist`].
+    //
+    // [`getattrlist`]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getattrlist.2.html
+    let mut times_size = 0;
+    let mut attrs = Attrlist {
+        bitmapcount: ATTR_BIT_MAP_COUNT,
+        reserved: 0,
+        commonattr: 0,
+        volattr: 0,
+        dirattr: 0,
+        fileattr: 0,
+        forkattr: 0,
+    };
+    let mut return_times = [c::timespec {
+        tv_sec: 0,
+        tv_nsec: 0,
+    }; 2];
+    let mut times_index = 0;
+    if times.last_modification.tv_nsec != c::UTIME_OMIT {
+        attrs.commonattr |= ATTR_CMN_MODTIME;
+        return_times[times_index] = times.last_modification;
+        times_index += 1;
+        times_size += size_of::<c::timespec>();
+    }
+    if times.last_access.tv_nsec != c::UTIME_OMIT {
+        attrs.commonattr |= ATTR_CMN_ACCTIME;
+        return_times[times_index] = times.last_access;
+        times_size += size_of::<c::timespec>();
+    }
+
+    (times_size, return_times, attrs)
+}
+
+/// Support type for `Attrlist`.
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+type Attrgroup = u32;
+
+/// Attribute list for use with `setattrlist`.
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[repr(C)]
+struct Attrlist {
+    bitmapcount: u16,
+    reserved: u16,
+    commonattr: Attrgroup,
+    volattr: Attrgroup,
+    dirattr: Attrgroup,
+    fileattr: Attrgroup,
+    forkattr: Attrgroup,
 }
