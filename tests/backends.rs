@@ -5,6 +5,7 @@
 use std::process::Command;
 
 #[test]
+#[cfg_attr(miri, ignore)] // pipe2 is not supported under miri yet.
 fn test_backends() {
     // Pick an arbitrary platform where linux_raw is enabled by default and
     // ensure that the use-default crate uses it.
