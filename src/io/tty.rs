@@ -1,17 +1,12 @@
 //! Functions which operate on file descriptors which might be terminals.
 
 use crate::imp;
-#[cfg(any(
-    all(linux_raw, feature = "procfs"),
-    all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
-))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+#[cfg(feature = "procfs")]
 use crate::io;
 use imp::fd::AsFd;
-#[cfg(any(
-    all(linux_raw, feature = "procfs"),
-    all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
-))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+#[cfg(feature = "procfs")]
 use {
     crate::ffi::ZString, crate::path::SMALL_PATH_BUFFER_SIZE, alloc::vec::Vec, imp::fd::BorrowedFd,
 };
@@ -46,20 +41,16 @@ pub fn isatty<Fd: AsFd>(fd: Fd) -> bool {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/ttyname.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/ttyname.3.html
-#[cfg(any(
-    all(linux_raw, feature = "procfs"),
-    all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
-))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+#[cfg(feature = "procfs")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 #[inline]
 pub fn ttyname<Fd: AsFd, B: Into<Vec<u8>>>(dirfd: Fd, reuse: B) -> io::Result<ZString> {
     _ttyname(dirfd.as_fd(), reuse.into())
 }
 
-#[cfg(any(
-    all(linux_raw, feature = "procfs"),
-    all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
-))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+#[cfg(feature = "procfs")]
 fn _ttyname(dirfd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<ZString> {
     // This code would benefit from having a better way to read into
     // uninitialized memory, but that requires `unsafe`.
