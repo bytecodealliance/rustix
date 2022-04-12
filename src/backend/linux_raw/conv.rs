@@ -43,7 +43,7 @@ use crate::process::Resource;
 use crate::signal::Signal;
 use crate::utils::{as_mut_ptr, as_ptr};
 use core::mem::MaybeUninit;
-use core::ptr::null_mut;
+use core::ptr::{self, null_mut};
 #[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
 use linux_raw_sys::general::__kernel_clockid_t;
 #[cfg(target_pointer_width = "64")]
@@ -102,7 +102,7 @@ pub(super) fn size_of<'a, T: Sized, Num: ArgNumber>() -> ArgReg<'a, Num> {
 /// pointer instead of casting to `usize`, so that provenance is preserved.
 #[inline]
 pub(super) fn pass_usize<'a, Num: ArgNumber>(t: usize) -> ArgReg<'a, Num> {
-    raw_arg(t as *mut _)
+    raw_arg(ptr::without_provenance_mut(t))
 }
 
 impl<'a, Num: ArgNumber, T> From<*mut T> for ArgReg<'a, Num> {
