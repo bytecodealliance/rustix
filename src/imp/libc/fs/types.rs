@@ -559,8 +559,8 @@ bitflags! {
     /// `F_SEAL_*` constants for use with [`fcntl_add_seals`] and
     /// [`fcntl_get_seals`].
     ///
-    /// [`fcntl_add_seals`]: rustix::fs::fcntl_add_seals
-    /// [`fcntl_get_seals`]: rustix::fs::fcntl_get_seals
+    /// [`fcntl_add_seals`]: crate::fs::fcntl_add_seals
+    /// [`fcntl_get_seals`]: crate::fs::fcntl_get_seals
     pub struct SealFlags: i32 {
        /// `F_SEAL_SEAL`.
        const SEAL = c::F_SEAL_SEAL;

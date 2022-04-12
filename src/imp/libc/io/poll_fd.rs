@@ -11,7 +11,7 @@ use std::fmt;
 bitflags! {
     /// `POLL*` flags for use with [`poll`].
     ///
-    /// [`poll`]: rustix::io::poll
+    /// [`poll`]: crate::io::poll
     pub struct PollFlags: c::c_short {
         /// `POLLIN`
         const IN = c::POLLIN;
@@ -49,7 +49,7 @@ bitflags! {
 
 /// `struct pollfd`—File descriptor and flags for use with [`poll`].
 ///
-/// [`poll`]: rustix::io::poll
+/// [`poll`]: crate::io::poll
 #[doc(alias = "pollfd")]
 #[derive(Clone)]
 #[cfg_attr(not(windows), derive(Debug))]
