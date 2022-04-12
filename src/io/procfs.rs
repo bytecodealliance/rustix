@@ -291,6 +291,7 @@ fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
+#[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 pub fn proc_self_fd() -> io::Result<BorrowedFd<'static>> {
     static PROC_SELF_FD: StaticFd = StaticFd::new();
 
@@ -369,6 +370,7 @@ fn proc_self_fdinfo() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 #[inline]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 pub fn proc_self_fdinfo_fd<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
     _proc_self_fdinfo(fd.as_fd())
 }
@@ -391,6 +393,7 @@ fn _proc_self_fdinfo(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 /// [Linux pagemap]: https://www.kernel.org/doc/Documentation/vm/pagemap.txt
 #[inline]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 pub fn proc_self_pagemap() -> io::Result<OwnedFd> {
     proc_self_file(zstr!("pagemap"))
 }
@@ -405,6 +408,7 @@ pub fn proc_self_pagemap() -> io::Result<OwnedFd> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 #[inline]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 pub fn proc_self_maps() -> io::Result<OwnedFd> {
     proc_self_file(zstr!("maps"))
 }
