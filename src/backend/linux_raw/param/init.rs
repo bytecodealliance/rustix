@@ -146,24 +146,24 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) {
         let Elf_auxv_t { a_type, a_val } = read(auxp);
 
         match a_type as _ {
-            AT_PAGESZ => PAGE_SIZE.store(a_val as usize, Ordering::Relaxed),
-            AT_CLKTCK => CLOCK_TICKS_PER_SECOND.store(a_val as usize, Ordering::Relaxed),
-            AT_HWCAP => HWCAP.store(a_val as usize, Ordering::Relaxed),
-            AT_HWCAP2 => HWCAP2.store(a_val as usize, Ordering::Relaxed),
-            AT_MINSIGSTKSZ => MINSIGSTKSZ.store(a_val as usize, Ordering::Relaxed),
+            AT_PAGESZ => PAGE_SIZE.store(a_val.addr(), Ordering::Relaxed),
+            AT_CLKTCK => CLOCK_TICKS_PER_SECOND.store(a_val.addr(), Ordering::Relaxed),
+            AT_HWCAP => HWCAP.store(a_val.addr(), Ordering::Relaxed),
+            AT_HWCAP2 => HWCAP2.store(a_val.addr(), Ordering::Relaxed),
+            AT_MINSIGSTKSZ => MINSIGSTKSZ.store(a_val.addr(), Ordering::Relaxed),
             AT_EXECFN => EXECFN.store(a_val.cast::<c::c_char>(), Ordering::Relaxed),
             AT_SYSINFO_EHDR => SYSINFO_EHDR.store(a_val.cast::<Elf_Ehdr>(), Ordering::Relaxed),
 
             #[cfg(feature = "runtime")]
-            AT_SECURE => SECURE.store(a_val as usize != 0, Ordering::Relaxed),
+            AT_SECURE => SECURE.store(a_val.addr() != 0, Ordering::Relaxed),
             #[cfg(feature = "runtime")]
             AT_PHDR => PHDR.store(a_val.cast::<Elf_Phdr>(), Ordering::Relaxed),
             #[cfg(feature = "runtime")]
-            AT_PHNUM => PHNUM.store(a_val as usize, Ordering::Relaxed),
+            AT_PHNUM => PHNUM.store(a_val.addr(), Ordering::Relaxed),
             #[cfg(feature = "runtime")]
-            AT_PHENT => PHENT.store(a_val as usize, Ordering::Relaxed),
+            AT_PHENT => PHENT.store(a_val.addr(), Ordering::Relaxed),
             #[cfg(feature = "runtime")]
-            AT_ENTRY => ENTRY.store(a_val as usize, Ordering::Relaxed),
+            AT_ENTRY => ENTRY.store(a_val.addr(), Ordering::Relaxed),
             #[cfg(feature = "runtime")]
             AT_RANDOM => RANDOM.store(a_val.cast::<[u8; 16]>(), Ordering::Relaxed),
 

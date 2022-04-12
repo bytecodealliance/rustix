@@ -96,6 +96,10 @@
 //! [`Arg`]: path::Arg
 //! [support for externally defined flags]: bitflags#externally-defined-flags
 
+#![feature(strict_provenance)]
+#![feature(strict_provenance_lints)]
+#![deny(fuzzy_provenance_casts)]
+#![deny(lossy_provenance_casts)]
 #![deny(missing_docs)]
 #![allow(stable_features)]
 #![cfg_attr(linux_raw, deny(unsafe_code))]

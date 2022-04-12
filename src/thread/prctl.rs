@@ -54,7 +54,13 @@ const PR_SET_KEEPCAPS: c_int = 8;
 /// [`prctl(PR_SET_KEEPCAPS,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn set_keep_capabilities(enable: bool) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_KEEPCAPS, usize::from(enable) as *mut _) }.map(|_r| ())
+    unsafe {
+        prctl_2args(
+            PR_SET_KEEPCAPS,
+            ptr::without_provenance_mut(usize::from(enable)),
+        )
+    }
+    .map(|_r| ())
 }
 
 //
@@ -168,7 +174,7 @@ const PR_SET_SECCOMP: c_int = 22;
 /// [`prctl(PR_SET_SECCOMP,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn set_secure_computing_mode(mode: SecureComputingMode) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_SECCOMP, mode as usize as *mut _) }.map(|_r| ())
+    unsafe { prctl_2args(PR_SET_SECCOMP, ptr::without_provenance_mut(mode as usize)) }.map(|_r| ())
 }
 
 //
@@ -392,7 +398,13 @@ pub enum Capability {
 /// [`prctl(PR_CAPBSET_READ,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn capability_is_in_bounding_set(capability: Capability) -> io::Result<bool> {
-    unsafe { prctl_2args(PR_CAPBSET_READ, capability as usize as *mut _) }.map(|r| r != 0)
+    unsafe {
+        prctl_2args(
+            PR_CAPBSET_READ,
+            ptr::without_provenance_mut(capability as usize),
+        )
+    }
+    .map(|r| r != 0)
 }
 
 const PR_CAPBSET_DROP: c_int = 24;
@@ -407,7 +419,13 @@ const PR_CAPBSET_DROP: c_int = 24;
 /// [`prctl(PR_CAPBSET_DROP,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn remove_capability_from_bounding_set(capability: Capability) -> io::Result<()> {
-    unsafe { prctl_2args(PR_CAPBSET_DROP, capability as usize as *mut _) }.map(|_r| ())
+    unsafe {
+        prctl_2args(
+            PR_CAPBSET_DROP,
+            ptr::without_provenance_mut(capability as usize),
+        )
+    }
+    .map(|_r| ())
 }
 
 //
@@ -481,7 +499,13 @@ const PR_SET_SECUREBITS: c_int = 28;
 /// [`prctl(PR_SET_SECUREBITS,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn set_capabilities_secure_bits(bits: CapabilitiesSecureBits) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_SECUREBITS, bits.bits() as usize as *mut _) }.map(|_r| ())
+    unsafe {
+        prctl_2args(
+            PR_SET_SECUREBITS,
+            ptr::without_provenance_mut(bits.bits() as usize),
+        )
+    }
+    .map(|_r| ())
 }
 
 //
@@ -512,7 +536,7 @@ const PR_SET_TIMERSLACK: c_int = 29;
 #[inline]
 pub fn set_current_timer_slack(value: Option<NonZeroU64>) -> io::Result<()> {
     let value = usize::try_from(value.map_or(0, NonZeroU64::get)).map_err(|_r| io::Errno::RANGE)?;
-    unsafe { prctl_2args(PR_SET_TIMERSLACK, value as *mut _) }.map(|_r| ())
+    unsafe { prctl_2args(PR_SET_TIMERSLACK, ptr::without_provenance_mut(value)) }.map(|_r| ())
 }
 
 //
@@ -542,7 +566,13 @@ const PR_SET_NO_NEW_PRIVS: c_int = 38;
 /// [`prctl(PR_SET_NO_NEW_PRIVS,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn set_no_new_privs(no_new_privs: bool) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_NO_NEW_PRIVS, usize::from(no_new_privs) as *mut _) }.map(|_r| ())
+    unsafe {
+        prctl_2args(
+            PR_SET_NO_NEW_PRIVS,
+            ptr::without_provenance_mut(usize::from(no_new_privs)),
+        )
+    }
+    .map(|_r| ())
 }
 
 //
@@ -590,7 +620,13 @@ const PR_SET_THP_DISABLE: c_int = 41;
 /// [`prctl(PR_SET_THP_DISABLE,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn disable_transparent_huge_pages(thp_disable: bool) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_THP_DISABLE, usize::from(thp_disable) as *mut _) }.map(|_r| ())
+    unsafe {
+        prctl_2args(
+            PR_SET_THP_DISABLE,
+            ptr::without_provenance_mut(usize::from(thp_disable)),
+        )
+    }
+    .map(|_r| ())
 }
 
 //
@@ -609,8 +645,15 @@ const PR_CAP_AMBIENT_IS_SET: usize = 1;
 /// [`prctl(PR_CAP_AMBIENT,PR_CAP_AMBIENT_IS_SET,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn capability_is_in_ambient_set(capability: Capability) -> io::Result<bool> {
-    let cap = capability as usize as *mut _;
-    unsafe { prctl_3args(PR_CAP_AMBIENT, PR_CAP_AMBIENT_IS_SET as *mut _, cap) }.map(|r| r != 0)
+    let cap = ptr::without_provenance_mut(capability as usize);
+    unsafe {
+        prctl_3args(
+            PR_CAP_AMBIENT,
+            ptr::without_provenance_mut(PR_CAP_AMBIENT_IS_SET),
+            cap,
+        )
+    }
+    .map(|r| r != 0)
 }
 
 const PR_CAP_AMBIENT_CLEAR_ALL: usize = 4;
@@ -623,7 +666,13 @@ const PR_CAP_AMBIENT_CLEAR_ALL: usize = 4;
 /// [`prctl(PR_CAP_AMBIENT,PR_CAP_AMBIENT_CLEAR_ALL,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn clear_ambient_capability_set() -> io::Result<()> {
-    unsafe { prctl_2args(PR_CAP_AMBIENT, PR_CAP_AMBIENT_CLEAR_ALL as *mut _) }.map(|_r| ())
+    unsafe {
+        prctl_2args(
+            PR_CAP_AMBIENT,
+            ptr::without_provenance_mut(PR_CAP_AMBIENT_CLEAR_ALL),
+        )
+    }
+    .map(|_r| ())
 }
 
 const PR_CAP_AMBIENT_RAISE: usize = 2;
@@ -642,9 +691,16 @@ pub fn configure_capability_in_ambient_set(capability: Capability, enable: bool)
     } else {
         PR_CAP_AMBIENT_LOWER
     };
-    let cap = capability as usize as *mut _;
+    let cap = ptr::without_provenance_mut(capability as usize);
 
-    unsafe { prctl_3args(PR_CAP_AMBIENT, sub_operation as *mut _, cap) }.map(|_r| ())
+    unsafe {
+        prctl_3args(
+            PR_CAP_AMBIENT,
+            ptr::without_provenance_mut(sub_operation),
+            cap,
+        )
+    }
+    .map(|_r| ())
 }
 
 //
@@ -714,7 +770,7 @@ pub unsafe fn set_sve_vector_length_configuration(
         bits |= PR_SVE_SET_VL_ONEXEC;
     }
 
-    prctl_2args(PR_SVE_SET_VL, bits as usize as *mut _).map(|_r| ())
+    prctl_2args(PR_SVE_SET_VL, ptr::without_provenance_mut(bits as usize)).map(|_r| ())
 }
 
 //
@@ -740,7 +796,11 @@ pub unsafe fn reset_pointer_authentication_keys(
     keys: Option<PointerAuthenticationKeys>,
 ) -> io::Result<()> {
     let keys = keys.as_ref().map_or(0_u32, PointerAuthenticationKeys::bits);
-    prctl_2args(PR_PAC_RESET_KEYS, keys as usize as *mut _).map(|_r| ())
+    prctl_2args(
+        PR_PAC_RESET_KEYS,
+        ptr::without_provenance_mut(keys as usize),
+    )
+    .map(|_r| ())
 }
 
 //
@@ -805,7 +865,11 @@ pub unsafe fn set_current_tagged_address_mode(
 ) -> io::Result<()> {
     let config = mode.as_ref().map_or(0_u32, TaggedAddressMode::bits)
         | ((mte_tag << PR_MTE_TAG_SHIFT) & PR_MTE_TAG_MASK);
-    prctl_2args(PR_SET_TAGGED_ADDR_CTRL, config as usize as *mut _).map(|_r| ())
+    prctl_2args(
+        PR_SET_TAGGED_ADDR_CTRL,
+        ptr::without_provenance_mut(config as usize),
+    )
+    .map(|_r| ())
 }
 
 //
@@ -829,7 +893,11 @@ const PR_SYS_DISPATCH_OFF: usize = 0;
 /// [`prctl(PR_SET_SYSCALL_USER_DISPATCH,PR_SYS_DISPATCH_OFF,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub unsafe fn disable_syscall_user_dispatch() -> io::Result<()> {
-    prctl_2args(PR_SET_SYSCALL_USER_DISPATCH, PR_SYS_DISPATCH_OFF as *mut _).map(|_r| ())
+    prctl_2args(
+        PR_SET_SYSCALL_USER_DISPATCH,
+        ptr::without_provenance_mut(PR_SYS_DISPATCH_OFF),
+    )
+    .map(|_r| ())
 }
 
 const PR_SYS_DISPATCH_ON: usize = 1;
@@ -880,9 +948,9 @@ pub unsafe fn enable_syscall_user_dispatch(
 ) -> io::Result<()> {
     syscalls::prctl(
         PR_SET_SYSCALL_USER_DISPATCH,
-        PR_SYS_DISPATCH_ON as *mut _,
+        ptr::without_provenance_mut(PR_SYS_DISPATCH_ON),
         always_allowed_region.as_ptr() as *mut _,
-        always_allowed_region.len() as *mut _,
+        ptr::without_provenance_mut(always_allowed_region.len()),
         as_ptr(fast_switch_flag) as *mut _,
     )
     .map(|_r| ())
@@ -938,9 +1006,9 @@ pub fn core_scheduling_cookie(pid: Pid, scope: CoreSchedulingScope) -> io::Resul
     unsafe {
         syscalls::prctl(
             PR_SCHED_CORE,
-            PR_SCHED_CORE_GET as *mut _,
-            pid.as_raw_nonzero().get() as usize as *mut _,
-            scope as usize as *mut _,
+            ptr::without_provenance_mut(PR_SCHED_CORE_GET),
+            ptr::without_provenance_mut(pid.as_raw_nonzero().get() as usize),
+            ptr::without_provenance_mut(scope as usize),
             value.as_mut_ptr().cast(),
         )?;
         Ok(value.assume_init())
@@ -960,9 +1028,9 @@ pub fn create_core_scheduling_cookie(pid: Pid, scope: CoreSchedulingScope) -> io
     unsafe {
         syscalls::prctl(
             PR_SCHED_CORE,
-            PR_SCHED_CORE_CREATE as *mut _,
-            pid.as_raw_nonzero().get() as usize as *mut _,
-            scope as usize as *mut _,
+            ptr::without_provenance_mut(PR_SCHED_CORE_CREATE),
+            ptr::without_provenance_mut(pid.as_raw_nonzero().get() as usize),
+            ptr::without_provenance_mut(scope as usize),
             ptr::null_mut(),
         )
         .map(|_r| ())
@@ -982,9 +1050,9 @@ pub fn push_core_scheduling_cookie(pid: Pid, scope: CoreSchedulingScope) -> io::
     unsafe {
         syscalls::prctl(
             PR_SCHED_CORE,
-            PR_SCHED_CORE_SHARE_TO as *mut _,
-            pid.as_raw_nonzero().get() as usize as *mut _,
-            scope as usize as *mut _,
+            ptr::without_provenance_mut(PR_SCHED_CORE_SHARE_TO),
+            ptr::without_provenance_mut(pid.as_raw_nonzero().get() as usize),
+            ptr::without_provenance_mut(scope as usize),
             ptr::null_mut(),
         )
         .map(|_r| ())
@@ -1004,9 +1072,9 @@ pub fn pull_core_scheduling_cookie(pid: Pid, scope: CoreSchedulingScope) -> io::
     unsafe {
         syscalls::prctl(
             PR_SCHED_CORE,
-            PR_SCHED_CORE_SHARE_FROM as *mut _,
-            pid.as_raw_nonzero().get() as usize as *mut _,
-            scope as usize as *mut _,
+            ptr::without_provenance_mut(PR_SCHED_CORE_SHARE_FROM),
+            ptr::without_provenance_mut(pid.as_raw_nonzero().get() as usize),
+            ptr::without_provenance_mut(scope as usize),
             ptr::null_mut(),
         )
         .map(|_r| ())
