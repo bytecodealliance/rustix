@@ -836,10 +836,16 @@ pub(crate) mod sockopt {
     #[inline]
     fn getsockopt<T>(fd: BorrowedFd<'_>, level: u32, optname: u32) -> io::Result<T> {
         use super::*;
+
+        let mut optlen = core::mem::size_of::<T>();
+        debug_assert!(
+            optlen >= 4,
+            "Socket APIs don't ever use `bool` directly"
+        );
+
         #[cfg(not(target_arch = "x86"))]
         unsafe {
             let mut value = MaybeUninit::<T>::uninit();
-            let mut optlen = core::mem::size_of::<T>();
             ret(syscall5(
                 nr(__NR_getsockopt),
                 borrowed_fd(fd),
@@ -859,7 +865,6 @@ pub(crate) mod sockopt {
         #[cfg(target_arch = "x86")]
         unsafe {
             let mut value = MaybeUninit::<T>::uninit();
-            let mut optlen = core::mem::size_of::<T>();
             ret(syscall2(
                 nr(__NR_socketcall),
                 x86_sys(SYS_GETSOCKOPT),
@@ -883,9 +888,15 @@ pub(crate) mod sockopt {
     #[inline]
     fn setsockopt<T>(fd: BorrowedFd<'_>, level: u32, optname: u32, value: T) -> io::Result<()> {
         use super::*;
+
+        let optlen = core::mem::size_of::<T>().try_into().unwrap();
+        debug_assert!(
+            optlen >= 4,
+            "Socket APIs don't ever use `bool` directly"
+        );
+
         #[cfg(not(target_arch = "x86"))]
         unsafe {
-            let optlen = core::mem::size_of::<T>().try_into().unwrap();
             ret(syscall5_readonly(
                 nr(__NR_setsockopt),
                 borrowed_fd(fd),
@@ -897,7 +908,6 @@ pub(crate) mod sockopt {
         }
         #[cfg(target_arch = "x86")]
         unsafe {
-            let optlen = core::mem::size_of::<T>().try_into().unwrap();
             ret(syscall2_readonly(
                 nr(__NR_socketcall),
                 x86_sys(SYS_SETSOCKOPT),
@@ -939,7 +949,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn get_socket_broadcast(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(fd, c::SOL_SOCKET as _, c::SO_BROADCAST)
+        getsockopt(fd, c::SOL_SOCKET as _, c::SO_BROADCAST).map(to_bool)
     }
 
     #[inline]
@@ -982,7 +992,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn get_socket_passcred(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(fd, c::SOL_SOCKET as _, c::SO_PASSCRED)
+        getsockopt(fd, c::SOL_SOCKET as _, c::SO_PASSCRED).map(to_bool)
     }
 
     #[inline]
@@ -1139,7 +1149,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn get_ipv6_v6only(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_V6ONLY)
+        getsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_V6ONLY).map(to_bool)
     }
 
     #[inline]
@@ -1157,7 +1167,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn get_ip_multicast_loop(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(fd, c::IPPROTO_IP as _, c::IP_MULTICAST_LOOP)
+        getsockopt(fd, c::IPPROTO_IP as _, c::IP_MULTICAST_LOOP).map(to_bool)
     }
 
     #[inline]
@@ -1185,7 +1195,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn get_ipv6_multicast_loop(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_MULTICAST_LOOP)
+        getsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_MULTICAST_LOOP).map(to_bool)
     }
 
     #[inline]
@@ -1235,7 +1245,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn get_tcp_nodelay(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(fd, c::IPPROTO_TCP as _, c::TCP_NODELAY)
+        getsockopt(fd, c::IPPROTO_TCP as _, c::TCP_NODELAY).map(to_bool)
     }
 
     #[inline]
@@ -1278,5 +1288,10 @@ pub(crate) mod sockopt {
     #[inline]
     fn from_bool(value: bool) -> c::c_uint {
         value as c::c_uint
+    }
+
+    #[inline]
+    fn to_bool(value: c::c_uint) -> bool {
+        value != 0
     }
 }
