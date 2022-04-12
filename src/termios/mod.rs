@@ -3,6 +3,8 @@
 mod cf;
 mod constants;
 mod tc;
+#[cfg(not(windows))]
+mod tty;
 
 pub use cf::{cfgetispeed, cfgetospeed, cfmakeraw, cfsetispeed, cfsetospeed, cfsetspeed};
 #[cfg(not(any(
@@ -601,3 +603,5 @@ pub use tc::{
     tcsetpgrp, tcsetwinsize, Action, OptionalActions, QueueSelector, Speed, Tcflag, Termios,
     Winsize,
 };
+#[cfg(not(windows))]
+pub use tty::isatty;

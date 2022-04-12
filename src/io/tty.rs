@@ -1,28 +1,14 @@
 //! Functions which operate on file descriptors which might be terminals.
 
-use crate::imp;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 #[cfg(feature = "procfs")]
 use crate::io;
-use imp::fd::AsFd;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 #[cfg(feature = "procfs")]
 use {
-    crate::ffi::ZString, crate::path::SMALL_PATH_BUFFER_SIZE, alloc::vec::Vec, imp::fd::BorrowedFd,
+    crate::ffi::ZString, crate::imp, crate::path::SMALL_PATH_BUFFER_SIZE, alloc::vec::Vec,
+    imp::fd::AsFd, imp::fd::BorrowedFd,
 };
-
-/// `isatty(fd)`—Tests whether a file descriptor refers to a terminal.
-///
-/// # References
-///  - [POSIX]
-///  - [Linux]
-///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/isatty.html
-/// [Linux]: https://man7.org/linux/man-pages/man3/isatty.3.html
-#[inline]
-pub fn isatty<Fd: AsFd>(fd: Fd) -> bool {
-    imp::io::syscalls::isatty(fd.as_fd())
-}
 
 /// `ttyname_r(fd)`
 ///

@@ -13,6 +13,7 @@ use crate::io;
 use crate::process::{Pid, RawNonZeroPid};
 use crate::termios::{Action, OptionalActions, QueueSelector, Speed, Termios, Winsize};
 use core::mem::MaybeUninit;
+use errno::errno;
 
 pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     let mut result = MaybeUninit::<Termios>::uninit();
@@ -117,4 +118,27 @@ pub(crate) fn cfsetispeed(termios: &mut Termios, speed: Speed) -> io::Result<()>
 #[inline]
 pub(crate) fn cfsetspeed(termios: &mut Termios, speed: Speed) -> io::Result<()> {
     unsafe { ret(c::cfsetspeed(termios, speed)) }
+}
+
+pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
+    let res = unsafe { c::isatty(borrowed_fd(fd)) };
+    if res == 0 {
+        match errno().0 {
+            #[cfg(not(any(target_os = "android", target_os = "linux")))]
+            c::ENOTTY => false,
+
+            // Old Linux versions reportedly return `EINVAL`.
+            // <https://man7.org/linux/man-pages/man3/isatty.3.html#ERRORS>
+            #[cfg(any(target_os = "android", target_os = "linux"))]
+            c::ENOTTY | c::EINVAL => false,
+
+            // Darwin mysteriously returns `EOPNOTSUPP` sometimes.
+            #[cfg(any(target_os = "ios", target_os = "macos"))]
+            c::EOPNOTSUPP => false,
+
+            err => panic!("unexpected error from isatty: {:?}", err),
+        }
+    } else {
+        true
+    }
 }

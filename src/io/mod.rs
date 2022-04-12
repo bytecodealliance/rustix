@@ -88,8 +88,6 @@ pub use read_write::{preadv, pwritev};
 pub use read_write::{preadv2, pwritev2, ReadWriteFlags};
 #[cfg(not(windows))]
 pub use stdio::{stderr, stdin, stdout, take_stderr, take_stdin, take_stdout};
-#[cfg(not(windows))]
-pub use tty::isatty;
 #[cfg(not(any(windows, target_os = "fuchsia", target_os = "wasi")))]
 #[cfg(feature = "procfs")]
 pub use tty::ttyname;

@@ -465,15 +465,6 @@ pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
     }
 }
 
-#[inline]
-pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
-    // On error, Linux will return either `EINVAL` (2.6.32) or `ENOTTY`
-    // (otherwise), because we assume we're never passing an invalid
-    // file descriptor (which would get `EBADF`). Either way, an error
-    // means we don't have a tty.
-    super::super::termios::syscalls::tcgetwinsize(fd).is_ok()
-}
-
 pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
     let (mut read, mut write) = crate::fs::fd::_is_file_read_write(fd)?;
     let mut not_socket = false;

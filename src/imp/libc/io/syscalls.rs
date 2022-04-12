@@ -367,29 +367,6 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     }
 }
 
-pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
-    let res = unsafe { c::isatty(borrowed_fd(fd)) };
-    if res == 0 {
-        match errno().0 {
-            #[cfg(not(any(target_os = "android", target_os = "linux")))]
-            c::ENOTTY => false,
-
-            // Old Linux versions reportedly return `EINVAL`.
-            // <https://man7.org/linux/man-pages/man3/isatty.3.html#ERRORS>
-            #[cfg(any(target_os = "android", target_os = "linux"))]
-            c::ENOTTY | c::EINVAL => false,
-
-            // Darwin mysteriously returns `EOPNOTSUPP` sometimes.
-            #[cfg(any(target_os = "ios", target_os = "macos"))]
-            c::EOPNOTSUPP => false,
-
-            err => panic!("unexpected error from isatty: {:?}", err),
-        }
-    } else {
-        true
-    }
-}
-
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
     let (mut read, mut write) = crate::fs::fd::_is_file_read_write(fd)?;

@@ -244,3 +244,12 @@ pub fn cfsetspeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
     termios.c_cflag |= speed;
     Ok(())
 }
+
+#[inline]
+pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
+    // On error, Linux will return either `EINVAL` (2.6.32) or `ENOTTY`
+    // (otherwise), because we assume we're never passing an invalid
+    // file descriptor (which would get `EBADF`). Either way, an error
+    // means we don't have a tty.
+    tcgetwinsize(fd).is_ok()
+}
