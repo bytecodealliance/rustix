@@ -10,7 +10,7 @@ use crate::ffi::ZStr;
     all(target_os = "android", target_pointer_width = "64"),
     target_os = "linux"
 ))]
-weak!(fn getauxval(c::c_ulong) -> c::c_ulong);
+weak!(fn getauxval(c::c_ulong) -> *mut c::c_void);
 
 #[inline]
 pub(crate) fn page_size() -> usize {
@@ -47,7 +47,7 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
 #[inline]
 pub(crate) fn linux_execfn() -> &'static ZStr {
     if let Some(libc_getauxval) = getauxval.get() {
-        unsafe { ZStr::from_ptr(libc_getauxval(c::AT_EXECFN) as *const _) }
+        unsafe { ZStr::from_ptr(libc_getauxval(c::AT_EXECFN).cast()) }
     } else {
         zstr!("")
     }
