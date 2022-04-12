@@ -489,6 +489,7 @@ pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, _flags: DupFlags) -> io::R
     dup2(fd, new)
 }
 
+#[cfg(feature = "procfs")]
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     unsafe {
