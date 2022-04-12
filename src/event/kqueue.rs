@@ -79,7 +79,8 @@ impl Event {
                 },
                 udata: {
                     // On NetBSD, udata is an `isize` and not a pointer.
-                    udata as _
+                    // TODO: Strict provenance, prevent int-to-ptr cast.
+                    core::ptr::from_exposed_addr_mut(udata as usize)
                 },
                 ..unsafe { zeroed() }
             },
@@ -94,7 +95,8 @@ impl Event {
     /// Get the user data for this event.
     pub fn udata(&self) -> *mut c::c_void {
         // On NetBSD, udata is an isize and not a pointer.
-        self.inner.udata as _
+        // TODO: Strict provenance, prevent ptr-to-int cast.
+        self.inner.udata.expose_addr() as isize
     }
 
     /// Get the raw data for this event.
