@@ -478,7 +478,7 @@ fn align_for_cmsghdr(buffer: &mut [MaybeUninit<u8>]) -> &mut [MaybeUninit<u8>] {
     }
 
     let align = align_of::<c::cmsghdr>();
-    let addr = buffer.as_ptr() as usize;
+    let addr = buffer.as_ptr().addr();
     let adjusted = (addr + (align - 1)) & align.wrapping_neg();
     &mut buffer[adjusted - addr..]
 }

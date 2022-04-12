@@ -138,12 +138,12 @@ impl Dir {
             d_reclen: 0_u16,
             d_name: Default::default(),
         };
-        let base = as_ptr(&z) as usize;
-        let offsetof_d_reclen = (as_ptr(&z.d_reclen) as usize) - base;
-        let offsetof_d_name = (as_ptr(&z.d_name) as usize) - base;
-        let offsetof_d_ino = (as_ptr(&z.d_ino) as usize) - base;
-        let offsetof_d_off = (as_ptr(&z.d_off) as usize) - base;
-        let offsetof_d_type = (as_ptr(&z.d_type) as usize) - base;
+        let base = as_ptr(&z).addr();
+        let offsetof_d_reclen = as_ptr(&z.d_reclen).addr() - base;
+        let offsetof_d_name = as_ptr(&z.d_name).addr() - base;
+        let offsetof_d_ino = as_ptr(&z.d_ino).addr() - base;
+        let offsetof_d_off = as_ptr(&z.d_off).addr() - base;
+        let offsetof_d_type = as_ptr(&z.d_type).addr() - base;
 
         // Test if we need more entries, and if so, read more.
         if self.buf.len() - self.pos < size_of::<linux_dirent64>() {

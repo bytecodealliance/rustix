@@ -211,7 +211,7 @@ unsafe impl ioctl::Ioctl for Tiocgptpeer {
     }
 
     fn as_ptr(&mut self) -> *mut c::c_void {
-        self.0.bits() as *mut c::c_void
+        core::ptr::without_provenance_mut(self.0.bits() as usize)
     }
 
     unsafe fn output_from_ptr(
