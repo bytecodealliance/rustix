@@ -17,6 +17,8 @@ use crate::termios::{
     ECHONL, ICANON, ICRNL, IEXTEN, IGNBRK, IGNCR, INLCR, ISIG, ISTRIP, IXON, OPOST, PARENB, PARMRK,
     VMIN, VTIME,
 };
+#[cfg(feature = "procfs")]
+use crate::{ffi::ZStr, fs::FileType, path::DecInt};
 use core::mem::MaybeUninit;
 use linux_raw_sys::general::{__NR_ioctl, __kernel_pid_t};
 use linux_raw_sys::ioctl::{
@@ -252,4 +254,42 @@ pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
     // file descriptor (which would get `EBADF`). Either way, an error
     // means we don't have a tty.
     tcgetwinsize(fd).is_ok()
+}
+
+#[cfg(feature = "procfs")]
+pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
+    let fd_stat = super::super::fs::syscalls::fstat(fd)?;
+
+    // Quick check: if `fd` isn't a character device, it's not a tty.
+    if FileType::from_raw_mode(fd_stat.st_mode) != FileType::CharacterDevice {
+        return Err(crate::io::Error::NOTTY);
+    }
+
+    // Check that `fd` is really a tty.
+    tcgetwinsize(fd)?;
+
+    // Get a fd to '/proc/self/fd'.
+    let proc_self_fd = io::proc_self_fd()?;
+
+    // Gather the ttyname by reading the 'fd' file inside 'proc_self_fd'.
+    let r =
+        super::super::fs::syscalls::readlinkat(proc_self_fd, DecInt::from_fd(&fd).as_z_str(), buf)?;
+
+    // If the number of bytes is equal to the buffer length, truncation may
+    // have occurred. This check also ensures that we have enough space for
+    // adding a NUL terminator.
+    if r == buf.len() {
+        return Err(io::Error::RANGE);
+    }
+    buf[r] = b'\0';
+
+    // Check that the path we read refers to the same file as `fd`.
+    let path = ZStr::from_bytes_with_nul(&buf[..=r]).unwrap();
+
+    let path_stat = super::super::fs::syscalls::stat(path)?;
+    if path_stat.st_dev != fd_stat.st_dev || path_stat.st_ino != fd_stat.st_ino {
+        return Err(crate::io::Error::NODEV);
+    }
+
+    Ok(r)
 }

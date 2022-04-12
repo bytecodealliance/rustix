@@ -605,3 +605,6 @@ pub use tc::{
 };
 #[cfg(not(windows))]
 pub use tty::isatty;
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+#[cfg(feature = "procfs")]
+pub use tty::ttyname;

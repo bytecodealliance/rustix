@@ -30,8 +30,6 @@ use crate::io::{
     UserfaultfdFlags,
 };
 use crate::net::{RecvFlags, SendFlags};
-#[cfg(feature = "procfs")]
-use crate::{ffi::ZStr, fs::FileType, path::DecInt};
 use core::cmp;
 use core::mem::MaybeUninit;
 #[cfg(any(target_arch = "arm", target_arch = "mips", target_arch = "x86"))]
@@ -545,45 +543,6 @@ pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> io::Re
             c_uint(flags.bits()),
         ))
     }
-}
-
-#[cfg(feature = "procfs")]
-#[inline]
-pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
-    let fd_stat = super::super::fs::syscalls::fstat(fd)?;
-
-    // Quick check: if `fd` isn't a character device, it's not a tty.
-    if FileType::from_raw_mode(fd_stat.st_mode) != FileType::CharacterDevice {
-        return Err(crate::io::Error::NOTTY);
-    }
-
-    // Check that `fd` is really a tty.
-    super::super::termios::syscalls::tcgetwinsize(fd)?;
-
-    // Get a fd to '/proc/self/fd'.
-    let proc_self_fd = io::proc_self_fd()?;
-
-    // Gather the ttyname by reading the 'fd' file inside 'proc_self_fd'.
-    let r =
-        super::super::fs::syscalls::readlinkat(proc_self_fd, DecInt::from_fd(&fd).as_z_str(), buf)?;
-
-    // If the number of bytes is equal to the buffer length, truncation may
-    // have occurred. This check also ensures that we have enough space for
-    // adding a NUL terminator.
-    if r == buf.len() {
-        return Err(io::Error::RANGE);
-    }
-    buf[r] = b'\0';
-
-    // Check that the path we read refers to the same file as `fd`.
-    let path = ZStr::from_bytes_with_nul(&buf[..=r]).unwrap();
-
-    let path_stat = super::super::fs::syscalls::stat(path)?;
-    if path_stat.st_dev != fd_stat.st_dev || path_stat.st_ino != fd_stat.st_ino {
-        return Err(crate::io::Error::NODEV);
-    }
-
-    Ok(r)
 }
 
 /// # Safety

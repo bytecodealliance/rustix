@@ -1,6 +1,5 @@
 use rustix::fd::AsRawFd;
-use rustix::io::isatty;
-use rustix::termios::tcgetwinsize;
+use rustix::termios::{isatty, tcgetwinsize};
 use tempfile::{tempdir, TempDir};
 
 #[allow(unused)]

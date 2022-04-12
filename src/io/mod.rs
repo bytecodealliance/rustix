@@ -29,8 +29,6 @@ mod read_write;
 mod seek_from;
 #[cfg(not(windows))]
 mod stdio;
-#[cfg(not(windows))]
-mod tty;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod userfaultfd;
 
@@ -88,9 +86,6 @@ pub use read_write::{preadv, pwritev};
 pub use read_write::{preadv2, pwritev2, ReadWriteFlags};
 #[cfg(not(windows))]
 pub use stdio::{stderr, stdin, stdout, take_stderr, take_stdin, take_stdout};
-#[cfg(not(any(windows, target_os = "fuchsia", target_os = "wasi")))]
-#[cfg(feature = "procfs")]
-pub use tty::ttyname;
 #[cfg(not(windows))]
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use userfaultfd::{userfaultfd, UserfaultfdFlags};

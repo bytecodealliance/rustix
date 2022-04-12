@@ -5,11 +5,13 @@
 
 #[cfg(not(windows))]
 use rustix::fd::AsFd;
-#[cfg(feature = "procfs")]
 #[cfg(not(windows))]
-use rustix::io::ttyname;
+use rustix::io::{self, stderr, stdin, stdout};
+#[cfg(feature = "termios")]
 #[cfg(not(windows))]
-use rustix::io::{self, isatty, stderr, stdin, stdout};
+use rustix::termios::isatty;
+#[cfg(all(not(windows), feature = "termios", feature = "procfs"))]
+use rustix::termios::ttyname;
 
 #[cfg(not(windows))]
 fn main() -> io::Result<()> {
@@ -32,6 +34,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     let fd = fd.as_fd();
     println!(" - ready: {:?}", rustix::io::ioctl_fionread(fd)?);
 
+    #[cfg(feature = "termios")]
     if isatty(fd) {
         #[cfg(feature = "procfs")]
         println!(" - ttyname: {}", ttyname(fd, Vec::new())?.to_string_lossy());
@@ -440,6 +443,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     Ok(())
 }
 
+#[cfg(feature = "termios")]
 #[cfg(not(windows))]
 fn display_speed(speed: rustix::termios::Speed) -> Option<u32> {
     use rustix::termios::*;
@@ -479,6 +483,7 @@ fn display_speed(speed: rustix::termios::Speed) -> Option<u32> {
     }
 }
 
+#[cfg(feature = "termios")]
 #[cfg(not(windows))]
 fn key(b: u8) -> String {
     if b == 0 {
