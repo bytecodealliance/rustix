@@ -834,7 +834,7 @@ pub(crate) mod sockopt {
     const DURATION_ZERO: Duration = Duration::from_secs(0);
 
     #[inline]
-    fn getsockopt<T>(fd: BorrowedFd<'_>, level: u32, optname: u32) -> io::Result<T> {
+    fn getsockopt<T: Copy>(fd: BorrowedFd<'_>, level: u32, optname: u32) -> io::Result<T> {
         use super::*;
 
         let mut optlen = core::mem::size_of::<T>();
@@ -886,7 +886,12 @@ pub(crate) mod sockopt {
     }
 
     #[inline]
-    fn setsockopt<T>(fd: BorrowedFd<'_>, level: u32, optname: u32, value: T) -> io::Result<()> {
+    fn setsockopt<T: Copy>(
+        fd: BorrowedFd<'_>,
+        level: u32,
+        optname: u32,
+        value: T,
+    ) -> io::Result<()> {
         use super::*;
 
         let optlen = core::mem::size_of::<T>().try_into().unwrap();
