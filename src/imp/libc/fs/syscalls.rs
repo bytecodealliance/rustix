@@ -143,7 +143,7 @@ fn openat_via_syscall(
         ret_owned_fd(libc::syscall(
             libc::SYS_openat,
             dirfd as c::c_long,
-            path as c::c_long,
+            path,
             oflags as c::c_long,
             mode as c::c_long,
         ) as c::c_int)
