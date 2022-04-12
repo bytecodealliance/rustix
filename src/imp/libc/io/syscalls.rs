@@ -15,6 +15,7 @@ use super::super::offset::{libc_preadv, libc_pwritev};
 use super::super::offset::{libc_preadv2, libc_pwritev2};
 use crate::fd::{AsFd, BorrowedFd, RawFd};
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+#[cfg(feature = "procfs")]
 use crate::ffi::ZStr;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use crate::io::Advice;
@@ -489,8 +490,8 @@ pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, _flags: DupFlags) -> io::R
     dup2(fd, new)
 }
 
-#[cfg(feature = "procfs")]
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+#[cfg(feature = "procfs")]
 pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     unsafe {
         ret(c::ttyname_r(
