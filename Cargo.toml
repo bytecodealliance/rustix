@@ -81,6 +81,12 @@ use-libc = ["errno", "libc"]
 # Enable this to enable `proc_self_fd` (on Linux) and `ttyname`.
 procfs = ["once_cell", "itoa"]
 
+# Enable `rustix::termios::*`.
+termios = []
+
+# Enable all API features.
+all-apis = ["procfs", "termios"]
+
 # Expose io-lifetimes' features for third-party crate impls.
 async-std = ["io-lifetimes/async-std"]
 tokio = ["io-lifetimes/tokio"]
@@ -97,7 +103,7 @@ name = "mod"
 harness = false
 
 [package.metadata.docs.rs]
-features = ["procfs"]
+features = ["all-apis"]
 rustdoc-args = ["--cfg", "doc_cfg"]
 targets = [
     "x86_64-unknown-linux-gnu",
