@@ -906,7 +906,10 @@ pub struct StatxTimestamp {
 }
 
 /// `mode_t`
+#[cfg(not(all(target_os = "android", target_arch = "x86")))]
 pub type RawMode = c::mode_t;
+#[cfg(all(target_os = "android", target_arch = "x86"))]
+pub type RawMode = c::c_uint;
 
 /// `dev_t`
 pub type Dev = c::dev_t;
