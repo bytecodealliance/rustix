@@ -13,8 +13,14 @@ fn test_priorities() {
         assert_eq!(get_prio, old);
     }
 
+    // Lower the priority by one.
     let new = nice(1).unwrap();
-    assert_eq!(old + 1, new);
+
+    // If the test wasn't running with the lowest priority initially, test that
+    // we were able to lower the priority.
+    if old < 19 {
+        assert_eq!(old + 1, new);
+    }
 
     let get = nice(0).unwrap();
     assert_eq!(new, get);
