@@ -914,7 +914,12 @@ pub type RawMode = c::mode_t;
 pub type RawMode = c::c_uint;
 
 /// `dev_t`
+#[cfg(not(all(target_os = "android", target_arch = "x86")))]
 pub type Dev = c::dev_t;
+
+/// `dev_t`
+#[cfg(all(target_os = "android", target_arch = "x86"))]
+pub type Dev = c::c_ulonglong;
 
 /// `__fsword_t`
 #[cfg(all(

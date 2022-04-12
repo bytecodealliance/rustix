@@ -565,7 +565,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
 
     // Gather the ttyname by reading the 'fd' file inside 'proc_self_fd'.
     let r =
-        super::super::fs::syscalls::readlinkat(proc_self_fd, DecInt::from_fd(&fd).as_c_str(), buf)?;
+        super::super::fs::syscalls::readlinkat(proc_self_fd, DecInt::from_fd(&fd).as_z_str(), buf)?;
 
     // If the number of bytes is equal to the buffer length, truncation may
     // have occurred. This check also ensures that we have enough space for
