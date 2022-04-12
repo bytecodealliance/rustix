@@ -4,7 +4,7 @@ use bitflags::bitflags;
 bitflags! {
     /// `POLL*` flags for use with [`poll`].
     ///
-    /// [`poll`]: rustix::io::poll
+    /// [`poll`]: crate::io::poll
     pub struct PollFlags: u16 {
         /// `POLLIN`
         const IN = linux_raw_sys::general::POLLIN as u16;
@@ -33,7 +33,7 @@ bitflags! {
 
 /// `struct pollfd`—File descriptor and flags for use with [`poll`].
 ///
-/// [`poll`]: rustix::io::poll
+/// [`poll`]: crate::io::poll
 #[doc(alias = "pollfd")]
 #[repr(C)]
 #[derive(Debug, Clone)]
