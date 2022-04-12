@@ -35,6 +35,7 @@ pub use imp::fs::FsWord;
 
 /// Timestamps used by [`utimensat`] and [`futimens`].
 ///
+/// [`utimensat`]: crate::fs::utimensat
 /// [`futimens`]: crate::fs::futimens
 //
 // This is `repr(C)` and specifically laid out to match the representation
