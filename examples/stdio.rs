@@ -5,7 +5,8 @@
 
 #[cfg(not(windows))]
 use rustix::fd::AsFd;
-#[cfg(any(all(linux_raw, feature = "procfs"), all(not(windows), libc)))]
+#[cfg(feature = "procfs")]
+#[cfg(not(windows))]
 use rustix::io::ttyname;
 #[cfg(not(windows))]
 use rustix::io::{self, isatty, stderr, stdin, stdout};
@@ -30,7 +31,7 @@ fn main() -> io::Result<()> {
 fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     let fd = fd.as_fd();
     if isatty(fd) {
-        #[cfg(any(all(linux_raw, feature = "procfs"), libc))]
+        #[cfg(feature = "procfs")]
         println!(" - ttyname: {}", ttyname(fd, Vec::new())?.to_string_lossy());
         println!(" - attrs: {:?}", rustix::io::ioctl_tcgets(fd)?);
         println!(" - winsize: {:?}", rustix::io::ioctl_tiocgwinsz(fd)?);

@@ -92,10 +92,8 @@ pub use read_write::{preadv2, pwritev2, ReadWriteFlags};
 pub use stdio::{stderr, stdin, stdout, take_stderr, take_stdin, take_stdout};
 #[cfg(not(windows))]
 pub use tty::isatty;
-#[cfg(any(
-    all(linux_raw, feature = "procfs"),
-    all(libc, not(any(windows, target_os = "fuchsia", target_os = "wasi")))
-))]
+#[cfg(not(any(windows, target_os = "fuchsia", target_os = "wasi")))]
+#[cfg(feature = "procfs")]
 pub use tty::ttyname;
 #[cfg(not(windows))]
 #[cfg(not(target_os = "wasi"))]
