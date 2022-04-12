@@ -402,10 +402,7 @@ pub(crate) mod sockopt {
         use super::*;
 
         let mut optlen = core::mem::size_of::<T>().try_into().unwrap();
-        debug_assert!(
-            optlen >= 4,
-            "Socket APIs don't ever use `bool` directly"
-        );
+        debug_assert!(optlen >= 4, "Socket APIs don't ever use `bool` directly");
 
         unsafe {
             let mut value = MaybeUninit::<T>::uninit();
@@ -430,10 +427,7 @@ pub(crate) mod sockopt {
         use super::*;
 
         let optlen = core::mem::size_of::<T>().try_into().unwrap();
-        debug_assert!(
-            optlen >= 4,
-            "Socket APIs don't ever use `bool` directly"
-        );
+        debug_assert!(optlen >= 4, "Socket APIs don't ever use `bool` directly");
 
         unsafe {
             ret(c::setsockopt(
