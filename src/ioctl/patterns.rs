@@ -231,7 +231,7 @@ impl<Opcode: CompileTimeOpcode> IntegerSetter<Opcode> {
     #[inline]
     pub unsafe fn new_usize(value: usize) -> Self {
         Self {
-            value: value as _,
+            value: core::ptr::without_provenance_mut(value),
             _opcode: PhantomData,
         }
     }

@@ -373,8 +373,8 @@ impl Vdso {
                     {
                         let sum = self.addr_from_elf(sym.st_value).unwrap();
                         assert!(
-                            sum as usize >= self.load_addr as usize
-                                && sum as usize <= self.load_end as usize
+                            sum.addr() >= self.load_addr.addr()
+                                && sum.addr() <= self.load_end.addr()
                         );
                         return sum as *mut c::c_void;
                     }
@@ -393,8 +393,8 @@ impl Vdso {
                     {
                         let sum = self.addr_from_elf(sym.st_value).unwrap();
                         assert!(
-                            sum as usize >= self.load_addr as usize
-                                && sum as usize <= self.load_end as usize
+                            sum.addr() >= self.load_addr.addr()
+                                && sum.addr() <= self.load_end.addr()
                         );
                         return sum as *mut c::c_void;
                     }
@@ -409,7 +409,7 @@ impl Vdso {
     /// Add the given address to the vDSO base address.
     unsafe fn base_plus(&self, offset: usize) -> Option<*const c_void> {
         // Check for overflow.
-        let _ = (self.load_addr as usize).checked_add(offset)?;
+        let _ = (self.load_addr.addr()).checked_add(offset)?;
         // Add the offset to the base.
         Some(self.load_addr.cast::<u8>().add(offset).cast())
     }

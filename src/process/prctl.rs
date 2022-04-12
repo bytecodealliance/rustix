@@ -7,7 +7,7 @@
 
 use core::mem::size_of;
 use core::num::NonZeroI32;
-use core::ptr::{null, null_mut, NonNull};
+use core::ptr::{self, null, null_mut, NonNull};
 
 use bitflags::bitflags;
 
@@ -65,7 +65,7 @@ const PR_SET_PDEATHSIG: c_int = 1;
 #[doc(alias = "PR_SET_PDEATHSIG")]
 pub fn set_parent_process_death_signal(signal: Option<Signal>) -> io::Result<()> {
     let signal = signal.map_or(0_usize, |signal| signal.as_raw() as usize);
-    unsafe { prctl_2args(PR_SET_PDEATHSIG, signal as *mut _) }.map(|_r| ())
+    unsafe { prctl_2args(PR_SET_PDEATHSIG, ptr::without_provenance_mut(signal)) }.map(|_r| ())
 }
 
 //
@@ -138,7 +138,13 @@ const PR_SET_DUMPABLE: c_int = 4;
 #[inline]
 #[doc(alias = "PR_SET_DUMPABLE")]
 pub fn set_dumpable_behavior(config: DumpableBehavior) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_DUMPABLE, config as usize as *mut _) }.map(|_r| ())
+    unsafe {
+        prctl_2args(
+            PR_SET_DUMPABLE,
+            ptr::without_provenance_mut(config as usize),
+        )
+    }
+    .map(|_r| ())
 }
 
 //
@@ -190,7 +196,13 @@ const PR_SET_UNALIGN: c_int = 6;
 #[inline]
 #[doc(alias = "PR_SET_UNALIGN")]
 pub fn set_unaligned_access_control(config: UnalignedAccessControl) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_UNALIGN, config.bits() as usize as *mut _) }.map(|_r| ())
+    unsafe {
+        prctl_2args(
+            PR_SET_UNALIGN,
+            ptr::without_provenance_mut(config.bits() as usize),
+        )
+    }
+    .map(|_r| ())
 }
 
 //
@@ -241,7 +253,13 @@ const PR_SET_FPEMU: c_int = 10;
 pub fn set_floating_point_emulation_control(
     config: FloatingPointEmulationControl,
 ) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_FPEMU, config.bits() as usize as *mut _) }.map(|_r| ())
+    unsafe {
+        prctl_2args(
+            PR_SET_FPEMU,
+            ptr::without_provenance_mut(config.bits() as usize),
+        )
+    }
+    .map(|_r| ())
 }
 
 //
@@ -304,7 +322,7 @@ pub fn set_floating_point_exception_mode(
     config: Option<FloatingPointExceptionMode>,
 ) -> io::Result<()> {
     let config = config.as_ref().map_or(0, FloatingPointExceptionMode::bits);
-    unsafe { prctl_2args(PR_SET_FPEXC, config as usize as *mut _) }.map(|_r| ())
+    unsafe { prctl_2args(PR_SET_FPEXC, ptr::without_provenance_mut(config as usize)) }.map(|_r| ())
 }
 
 //
@@ -363,7 +381,7 @@ const PR_SET_TIMING: c_int = 14;
 #[inline]
 #[doc(alias = "PR_SET_TIMING")]
 pub fn set_timing_method(method: TimingMethod) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_TIMING, method as usize as *mut _) }.map(|_r| ())
+    unsafe { prctl_2args(PR_SET_TIMING, ptr::without_provenance_mut(method as usize)) }.map(|_r| ())
 }
 
 //
@@ -429,7 +447,7 @@ const PR_SET_ENDIAN: c_int = 20;
 #[inline]
 #[doc(alias = "PR_SET_ENDIAN")]
 pub unsafe fn set_endian_mode(mode: EndianMode) -> io::Result<()> {
-    prctl_2args(PR_SET_ENDIAN, mode as usize as *mut _).map(|_r| ())
+    prctl_2args(PR_SET_ENDIAN, ptr::without_provenance_mut(mode as usize)).map(|_r| ())
 }
 
 //
@@ -490,7 +508,13 @@ const PR_SET_TSC: c_int = 26;
 pub fn set_time_stamp_counter_readability(
     readability: TimeStampCounterReadability,
 ) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_TSC, readability as usize as *mut _) }.map(|_r| ())
+    unsafe {
+        prctl_2args(
+            PR_SET_TSC,
+            ptr::without_provenance_mut(readability as usize),
+        )
+    }
+    .map(|_r| ())
 }
 
 //
@@ -592,12 +616,22 @@ pub fn set_machine_check_memory_corruption_kill_policy(
     policy: Option<MachineCheckMemoryCorruptionKillPolicy>,
 ) -> io::Result<()> {
     let (sub_operation, policy) = if let Some(policy) = policy {
-        (PR_MCE_KILL_SET, policy as usize as *mut _)
+        (
+            PR_MCE_KILL_SET,
+            ptr::without_provenance_mut(policy as usize),
+        )
     } else {
         (PR_MCE_KILL_CLEAR, null_mut())
     };
 
-    unsafe { prctl_3args(PR_MCE_KILL, sub_operation as *mut _, policy) }.map(|_r| ())
+    unsafe {
+        prctl_3args(
+            PR_MCE_KILL,
+            ptr::without_provenance_mut(sub_operation),
+            policy,
+        )
+    }
+    .map(|_r| ())
 }
 
 //
@@ -672,7 +706,12 @@ pub unsafe fn set_virtual_memory_map_address(
     address: Option<NonNull<c_void>>,
 ) -> io::Result<()> {
     let address = address.map_or_else(null_mut, NonNull::as_ptr);
-    prctl_3args(PR_SET_MM, option as usize as *mut _, address).map(|_r| ())
+    prctl_3args(
+        PR_SET_MM,
+        ptr::without_provenance_mut(option as usize),
+        address,
+    )
+    .map(|_r| ())
 }
 
 /// Supersede the `/proc/pid/exe` symbolic link with a new one pointing to a
@@ -687,7 +726,14 @@ pub unsafe fn set_virtual_memory_map_address(
 #[doc(alias = "PR_SET_MM_EXE_FILE")]
 pub fn set_executable_file(fd: BorrowedFd<'_>) -> io::Result<()> {
     let fd = usize::try_from(fd.as_raw_fd()).map_err(|_r| io::Errno::RANGE)?;
-    unsafe { prctl_3args(PR_SET_MM, PR_SET_MM_EXE_FILE as *mut _, fd as *mut _) }.map(|_r| ())
+    unsafe {
+        prctl_3args(
+            PR_SET_MM,
+            ptr::without_provenance_mut(PR_SET_MM_EXE_FILE),
+            ptr::without_provenance_mut(fd),
+        )
+    }
+    .map(|_r| ())
 }
 
 /// Set a new auxiliary vector.
@@ -707,9 +753,9 @@ pub fn set_executable_file(fd: BorrowedFd<'_>) -> io::Result<()> {
 pub unsafe fn set_auxiliary_vector(auxv: &[*const c_void]) -> io::Result<()> {
     syscalls::prctl(
         PR_SET_MM,
-        PR_SET_MM_AUXV as *mut _,
+        ptr::without_provenance_mut(PR_SET_MM_AUXV),
         auxv.as_ptr() as *mut _,
-        auxv.len() as *mut _,
+        ptr::without_provenance_mut(auxv.len()),
         null_mut(),
     )
     .map(|_r| ())
@@ -727,7 +773,13 @@ pub unsafe fn set_auxiliary_vector(auxv: &[*const c_void]) -> io::Result<()> {
 pub fn virtual_memory_map_config_struct_size() -> io::Result<usize> {
     let mut value: c_uint = 0;
     let value_ptr = as_mut_ptr(&mut value);
-    unsafe { prctl_3args(PR_SET_MM, PR_SET_MM_MAP_SIZE as *mut _, value_ptr.cast())? };
+    unsafe {
+        prctl_3args(
+            PR_SET_MM,
+            ptr::without_provenance_mut(PR_SET_MM_MAP_SIZE),
+            value_ptr.cast(),
+        )?
+    };
     Ok(value as usize)
 }
 
@@ -786,9 +838,9 @@ pub struct PrctlMmMap {
 pub unsafe fn configure_virtual_memory_map(config: &PrctlMmMap) -> io::Result<()> {
     syscalls::prctl(
         PR_SET_MM,
-        PR_SET_MM_MAP as *mut _,
+        ptr::without_provenance_mut(PR_SET_MM_MAP),
         as_ptr(config) as *mut _,
-        size_of::<PrctlMmMap>() as *mut _,
+        ptr::without_provenance_mut(size_of::<PrctlMmMap>()),
         null_mut(),
     )
     .map(|_r| ())
@@ -825,8 +877,8 @@ pub enum PTracer {
 pub fn set_ptracer(tracer: PTracer) -> io::Result<()> {
     let pid = match tracer {
         PTracer::None => null_mut(),
-        PTracer::Any => PR_SET_PTRACER_ANY as *mut _,
-        PTracer::ProcessID(pid) => pid.as_raw_nonzero().get() as usize as *mut _,
+        PTracer::Any => ptr::without_provenance_mut(PR_SET_PTRACER_ANY),
+        PTracer::ProcessID(pid) => ptr::without_provenance_mut(pid.as_raw_nonzero().get() as usize),
     };
 
     unsafe { prctl_2args(PR_SET_PTRACER, pid) }.map(|_r| ())
@@ -865,7 +917,7 @@ const PR_SET_CHILD_SUBREAPER: c_int = 36;
 #[doc(alias = "PR_SET_CHILD_SUBREAPER")]
 pub fn set_child_subreaper(pid: Option<Pid>) -> io::Result<()> {
     let pid = pid.map_or(0_usize, |pid| pid.as_raw_nonzero().get() as usize);
-    unsafe { prctl_2args(PR_SET_CHILD_SUBREAPER, pid as *mut _) }.map(|_r| ())
+    unsafe { prctl_2args(PR_SET_CHILD_SUBREAPER, ptr::without_provenance_mut(pid)) }.map(|_r| ())
 }
 
 //
@@ -924,7 +976,7 @@ const PR_SET_FP_MODE: c_int = 45;
 #[inline]
 #[doc(alias = "PR_SET_FP_MODE")]
 pub fn set_floating_point_mode(mode: FloatingPointMode) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_FP_MODE, mode as usize as *mut _) }.map(|_r| ())
+    unsafe { prctl_2args(PR_SET_FP_MODE, ptr::without_provenance_mut(mode as usize)) }.map(|_r| ())
 }
 
 //
@@ -1013,7 +1065,12 @@ bitflags! {
 pub fn speculative_feature_state(
     feature: SpeculationFeature,
 ) -> io::Result<Option<SpeculationFeatureState>> {
-    let r = unsafe { prctl_2args(PR_GET_SPECULATION_CTRL, feature as usize as *mut _)? } as c_uint;
+    let r = unsafe {
+        prctl_2args(
+            PR_GET_SPECULATION_CTRL,
+            ptr::without_provenance_mut(feature as usize),
+        )?
+    } as c_uint;
     Ok(SpeculationFeatureState::from_bits(r))
 }
 
@@ -1031,8 +1088,8 @@ pub fn control_speculative_feature(
     feature: SpeculationFeature,
     config: SpeculationFeatureControl,
 ) -> io::Result<()> {
-    let feature = feature as usize as *mut _;
-    let config = config.bits() as usize as *mut _;
+    let feature = ptr::without_provenance_mut(feature as usize);
+    let config = ptr::without_provenance_mut(config.bits() as usize);
     unsafe { prctl_3args(PR_SET_SPECULATION_CTRL, feature, config) }.map(|_r| ())
 }
 
@@ -1066,7 +1123,13 @@ const PR_SET_IO_FLUSHER: c_int = 57;
 #[inline]
 #[doc(alias = "PR_SET_IO_FLUSHER")]
 pub fn configure_io_flusher_behavior(enable: bool) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_IO_FLUSHER, usize::from(enable) as *mut _) }.map(|_r| ())
+    unsafe {
+        prctl_2args(
+            PR_SET_IO_FLUSHER,
+            ptr::without_provenance_mut(usize::from(enable)),
+        )
+    }
+    .map(|_r| ())
 }
 
 //
@@ -1128,8 +1191,8 @@ pub unsafe fn configure_pointer_authentication_keys<
 
     prctl_3args(
         PR_PAC_SET_ENABLED_KEYS,
-        affected_keys as usize as *mut _,
-        enabled_keys as usize as *mut _,
+        ptr::without_provenance_mut(affected_keys as usize),
+        ptr::without_provenance_mut(enabled_keys as usize),
     )
     .map(|_r| ())
 }
@@ -1155,9 +1218,9 @@ pub fn set_virtual_memory_region_name(region: &[u8], name: Option<&CStr>) -> io:
     unsafe {
         syscalls::prctl(
             PR_SET_VMA,
-            PR_SET_VMA_ANON_NAME as *mut _,
+            ptr::without_provenance_mut(PR_SET_VMA_ANON_NAME),
             region.as_ptr() as *mut _,
-            region.len() as *mut _,
+            ptr::without_provenance_mut(region.len()),
             name.map_or_else(null, CStr::as_ptr) as *mut _,
         )
         .map(|_r| ())
