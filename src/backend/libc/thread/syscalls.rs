@@ -30,6 +30,7 @@ use crate::timespec::{as_libc_timespec_mut_ptr, as_libc_timespec_ptr};
 #[cfg(linux_kernel)]
 use crate::utils::option_as_ptr;
 use core::mem::MaybeUninit;
+use core::ptr;
 #[cfg(linux_kernel)]
 use core::sync::atomic::AtomicU32;
 #[cfg(linux_kernel)]
@@ -462,7 +463,7 @@ pub(crate) unsafe fn futex_val2(
     // the pointer.
     //
     // [“the kernel casts the timeout value first to unsigned long, then to uint32_t”]: https://man7.org/linux/man-pages/man2/futex.2.html
-    let timeout = val2 as usize as *const Timespec;
+    let timeout = ptr::without_provenance::<Timespec>(val2 as usize);
 
     #[cfg(all(
         target_pointer_width = "32",

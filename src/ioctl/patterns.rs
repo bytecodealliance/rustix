@@ -230,7 +230,9 @@ impl<const OPCODE: Opcode> IntegerSetter<OPCODE> {
     ///  - The integer is in the valid range for this opcode.
     #[inline]
     pub const unsafe fn new_usize(value: usize) -> Self {
-        Self { value: value as _ }
+        Self {
+            value: core::ptr::without_provenance_mut(value),
+        }
     }
 
     /// Create a new integer `Ioctl` helper containing a `*mut c_void`.

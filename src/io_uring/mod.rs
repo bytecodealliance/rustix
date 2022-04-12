@@ -312,7 +312,7 @@ pub unsafe fn io_uring_enter_reg_wait<Fd: AsFd>(
         to_submit,
         min_complete,
         flags,
-        reg_wait as *mut c_void,
+        core::ptr::without_provenance_mut(reg_wait),
         size_of::<io_uring_reg_wait>(),
     )
 }
@@ -1997,8 +1997,8 @@ mod tests {
         // io_uring stores them in a `u64`.
         unsafe {
             const MAGIC: u64 = !0x0123_4567_89ab_cdef;
-            let ptr = io_uring_ptr::new(MAGIC as usize as *mut c_void);
-            assert_eq!(ptr.ptr, MAGIC as usize as *mut c_void);
+            let ptr = io_uring_ptr::new(core::ptr::without_provenance_mut(MAGIC as usize));
+            assert_eq!(ptr.ptr, core::ptr::without_provenance_mut(MAGIC as usize));
             #[cfg(target_pointer_width = "16")]
             assert_eq!(ptr.__pad16, 0);
             #[cfg(any(target_pointer_width = "16", target_pointer_width = "32"))]
@@ -2021,8 +2021,12 @@ mod tests {
                 core::mem::transmute::<io_uring_user_data, u64>(user_data),
                 MAGIC
             );
-            let user_data = io_uring_user_data::from_ptr(MAGIC as usize as *mut c_void);
-            assert_eq!(user_data.ptr(), MAGIC as usize as *mut c_void);
+            let user_data =
+                io_uring_user_data::from_ptr(core::ptr::without_provenance_mut(MAGIC as usize));
+            assert_eq!(
+                user_data.ptr(),
+                core::ptr::without_provenance_mut(MAGIC as usize)
+            );
             assert_eq!(
                 core::mem::transmute::<io_uring_user_data, u64>(user_data),
                 MAGIC as usize as u64

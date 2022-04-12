@@ -83,7 +83,7 @@ unsafe impl ioctl::Ioctl for Ficlone<'_> {
     }
 
     fn as_ptr(&mut self) -> *mut c::c_void {
-        self.0.as_raw_fd() as *mut c::c_void
+        core::ptr::without_provenance_mut(self.0.as_raw_fd() as usize)
     }
 
     unsafe fn output_from_ptr(
