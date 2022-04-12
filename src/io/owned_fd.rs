@@ -158,7 +158,7 @@ impl io_lifetimes::AsSocket for OwnedFd {
     }
 }
 
-#[cfg(io_lifetimes_use_std)]
+#[cfg(any(io_lifetimes_use_std, not(feature = "std")))]
 impl From<OwnedFd> for crate::imp::fd::OwnedFd {
     #[inline]
     fn from(owned_fd: OwnedFd) -> Self {
