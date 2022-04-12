@@ -94,8 +94,8 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
     #[cfg(not(feature = "runtime"))]
     unsafe {
         if let Some(libc_getauxval) = getauxval.get() {
-            let hwcap = libc_getauxval(AT_HWCAP) as usize;
-            let hwcap2 = libc_getauxval(AT_HWCAP2) as usize;
+            let hwcap = libc_getauxval(AT_HWCAP).addr();
+            let hwcap2 = libc_getauxval(AT_HWCAP2).addr();
             (hwcap, hwcap2)
         } else {
             (0, 0)
@@ -104,8 +104,8 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
 
     #[cfg(feature = "runtime")]
     unsafe {
-        let hwcap = getauxval(AT_HWCAP) as usize;
-        let hwcap2 = getauxval(AT_HWCAP2) as usize;
+        let hwcap = getauxval(AT_HWCAP).addr();
+        let hwcap2 = getauxval(AT_HWCAP2).addr();
         (hwcap, hwcap2)
     }
 }
@@ -122,7 +122,7 @@ pub(crate) fn linux_minsigstksz() -> usize {
 
     #[cfg(feature = "runtime")]
     unsafe {
-        getauxval(AT_MINSIGSTKSZ) as usize
+        getauxval(AT_MINSIGSTKSZ).addr()
     }
 }
 
@@ -147,16 +147,16 @@ pub(crate) fn linux_execfn() -> &'static CStr {
 #[cfg(feature = "runtime")]
 #[inline]
 pub(crate) fn linux_secure() -> bool {
-    unsafe { getauxval(AT_SECURE) as usize != 0 }
+    unsafe { getauxval(AT_SECURE).addr() != 0 }
 }
 
 #[cfg(feature = "runtime")]
 #[inline]
 pub(crate) fn exe_phdrs() -> (*const c::c_void, usize, usize) {
     unsafe {
-        let phdr = getauxval(AT_PHDR) as *const c::c_void;
-        let phent = getauxval(AT_PHENT) as usize;
-        let phnum = getauxval(AT_PHNUM) as usize;
+        let phdr = getauxval(AT_PHDR).cast();
+        let phent = getauxval(AT_PHENT).addr();
+        let phnum = getauxval(AT_PHNUM).addr();
         (phdr, phent, phnum)
     }
 }
@@ -183,7 +183,7 @@ pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
 #[cfg(feature = "runtime")]
 #[inline]
 pub(crate) fn entry() -> usize {
-    unsafe { getauxval(AT_ENTRY) as usize }
+    unsafe { getauxval(AT_ENTRY).addr() }
 }
 
 #[cfg(feature = "runtime")]
