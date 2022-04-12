@@ -1,3 +1,7 @@
+#[cfg(not(any(
+    all(target_os = "android", target_arch = "x86"),
+    target_os = "emscripten"
+)))]
 use super::super::c;
 use super::Dev;
 

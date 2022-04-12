@@ -576,7 +576,7 @@ pub(crate) fn mknodat(
             borrowed_fd(dirfd),
             c_str(path),
             (mode.bits() | file_type.as_raw_mode()) as c::mode_t,
-            dev,
+            dev.try_into().map_err(|_| io::Error::PERM)?,
         ))
     }
 }
