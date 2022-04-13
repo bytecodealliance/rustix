@@ -16,8 +16,14 @@ fn test_futimens() {
     )
     .unwrap();
 
-    let before = fstat(&foo).unwrap();
+    let before: rustix::fs::Stat = fstat(&foo).unwrap();
     dbg!(&before);
+
+    dbg!(memoffset::offset_of!(rustix::fs::Stat, st_mtime));
+    dbg!(memoffset::offset_of!(rustix::fs::Stat, st_mtime_nsec));
+    dbg!(memoffset::offset_of!(rustix::fs::Stat, st_ctime));
+    dbg!(std::mem::size_of_val(&before.st_mtime));
+    dbg!(std::mem::size_of_val(&before.st_mtime_nsec));
 
     let bf = unsafe { std::fs::File::from_raw_fd(foo.as_raw_fd()) };
     let bm = bf.metadata().unwrap();
