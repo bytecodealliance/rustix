@@ -1,7 +1,14 @@
 From: Dan Gohman <dev@sunfishcode.online>
 Subject: [PATCH] Define `TARGET_STAT_HAVE_NSEC` for s390x
 
-It's not yet known why upstream doesn't define this.
+Without this, The `fstat` syscall sets `st_mtime_nsec` and the other `_nsec`
+fields to 0. Libc `fstat` will sometimes use the `fstatat` or `fstat64`
+syscalls instead, which aren't affected, but the libc `fstat` on ubuntu-20.04
+on Github Actions appears to be affected.
+
+This can be seen in the `st_mtime_nsec` assert in tests/fs/futimens.rs.
+
+It's not yet known why upstream qemu doesn't define this.
 
 ---
  linux-user/generic/sockbits.h | 1 +
