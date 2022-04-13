@@ -408,7 +408,7 @@ pub(crate) mod sockopt {
         );
 
         unsafe {
-            let mut value = MaybeUninit::<T>::uninit();
+            let mut value = core::mem::zeroed::<T>();
             ret(c::getsockopt(
                 borrowed_fd(fd),
                 level,
@@ -416,12 +416,16 @@ pub(crate) mod sockopt {
                 as_mut_ptr(&mut value).cast(),
                 &mut optlen,
             ))?;
-            assert_eq!(
-                optlen as usize,
-                size_of::<T>(),
+            // On Windows at least, `getsockopt` has been observed writing 1
+            // byte on at least (`IPPROTO_TCP`, `TCP_NODELAY`), even though
+            // Windows' documentation says that should write a 4-byte `BOOL`.
+            // So, we initialize the memory to zeros above, and just assert
+            // that `getsockopt` doesn't write too many bytes here.
+            assert!(
+                optlen as usize <= size_of::<T>(),
                 "unexpected getsockopt size"
             );
-            Ok(value.assume_init())
+            Ok(value)
         }
     }
 
