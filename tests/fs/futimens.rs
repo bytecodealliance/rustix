@@ -32,6 +32,8 @@ fn test_futimens() {
 
     let x = rustix::fs::statx(&foo, rustix::zstr!(""), rustix::fs::AtFlags::EMPTY_PATH, rustix::fs::StatxFlags::ALL).unwrap();
     dbg!(&x);
+    let y = rustix::fs::statat(&foo, rustix::zstr!(""), rustix::fs::AtFlags::EMPTY_PATH).unwrap();
+    dbg!(&y);
 
     let times = Timestamps {
         last_access: Timespec {
