@@ -3,6 +3,7 @@
 fn test_futimens() {
     use rustix::fs::{cwd, fstat, futimens, openat, Mode, OFlags, Timestamps};
     use rustix::time::Timespec;
+    use rustix::fd::{AsRawFd, FromRawFd};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -16,8 +17,12 @@ fn test_futimens() {
     .unwrap();
 
     let before = fstat(&foo).unwrap();
-
     dbg!(&before);
+
+    let bf = unsafe { std::fs::File::from_raw_fd(foo.as_raw_fd()) };
+    let bm = bf.metadata().unwrap();
+    dbg!(&bm.modified());
+    std::mem::forget(bf);
 
     let times = Timestamps {
         last_access: Timespec {
@@ -34,6 +39,11 @@ fn test_futimens() {
     let after = fstat(&foo).unwrap();
 
     dbg!(&after);
+
+    let af = unsafe { std::fs::File::from_raw_fd(foo.as_raw_fd()) };
+    let am = af.metadata().unwrap();
+    dbg!(&am.modified());
+    std::mem::forget(af);
 
     dbg!(&times);
 

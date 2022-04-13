@@ -7,51 +7,6 @@ on:
   pull_request:
 
 jobs:
-  rustfmt:
-    name: Rustfmt
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-    - uses: ./.github/actions/install-rust
-      with:
-        toolchain: stable
-    - run: cargo fmt --all -- --check
-
-  check:
-    name: Check
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        build: [stable, nightly, 1.48]
-        include:
-          - build: stable
-            os: ubuntu-latest
-            rust: stable
-          - build: nightly
-            os: ubuntu-latest
-            rust: nightly
-          - build: 1.48
-            os: ubuntu-latest
-            rust: 1.48
-
-    env:
-      # -D warnings is commented out in our install-rust action; re-add it here.
-      RUSTFLAGS: -D warnings
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-    - uses: ./.github/actions/install-rust
-      with:
-        toolchain: ${{ matrix.rust }}
-
-    - run: >
-        rustup target add
-        s390x-unknown-linux-gnu
-    - run: cargo check --workspace --release -vv --target=s390x-unknown-linux-gnu
-
   test:
     name: Test
     runs-on: ${{ matrix.os }}
