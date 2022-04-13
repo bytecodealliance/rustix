@@ -21,9 +21,10 @@ fn test_openat_tmpfile() {
         Mode::from_bits_truncate(0o644),
     ) {
         Ok(f) => Ok(Some(File::from_fd(f.into_fd()))),
-        Err(rustix::io::Error::OPNOTSUPP | rustix::io::Error::ISDIR | rustix::io::Error::NOENT) => {
-            Ok(None)
-        }
+        // TODO: Factor out the `Err`, once we no longer support Rust 1.48.
+        Err(rustix::io::Error::OPNOTSUPP)
+        | Err(rustix::io::Error::ISDIR)
+        | Err(rustix::io::Error::NOENT) => Ok(None),
         Err(e) => Err(e),
     };
     if let Some(mut f) = f.unwrap() {
