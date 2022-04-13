@@ -392,17 +392,23 @@ pub(crate) mod sockopt {
     use core::convert::TryInto;
     use core::time::Duration;
     #[cfg(windows)]
-    use winapi::shared::minwindef::DWORD;
+    use winapi::shared::minwindef::{BOOL, DWORD};
 
     // TODO: With Rust 1.53 we can use `Duration::ZERO` instead.
     const DURATION_ZERO: Duration = Duration::from_secs(0);
 
     #[inline]
-    fn getsockopt<T>(fd: BorrowedFd<'_>, level: i32, optname: i32) -> io::Result<T> {
+    fn getsockopt<T: Copy>(fd: BorrowedFd<'_>, level: i32, optname: i32) -> io::Result<T> {
         use super::*;
+
+        let mut optlen = core::mem::size_of::<T>().try_into().unwrap();
+        debug_assert!(
+            optlen as usize >= core::mem::size_of::<c::c_int>(),
+            "Socket APIs don't ever use `bool` directly"
+        );
+
         unsafe {
-            let mut value = MaybeUninit::<T>::uninit();
-            let mut optlen = core::mem::size_of::<T>().try_into().unwrap();
+            let mut value = core::mem::zeroed::<T>();
             ret(c::getsockopt(
                 borrowed_fd(fd),
                 level,
@@ -410,20 +416,35 @@ pub(crate) mod sockopt {
                 as_mut_ptr(&mut value).cast(),
                 &mut optlen,
             ))?;
-            assert_eq!(
-                optlen as usize,
-                size_of::<T>(),
+            // On Windows at least, `getsockopt` has been observed writing 1
+            // byte on at least (`IPPROTO_TCP`, `TCP_NODELAY`), even though
+            // Windows' documentation says that should write a 4-byte `BOOL`.
+            // So, we initialize the memory to zeros above, and just assert
+            // that `getsockopt` doesn't write too many bytes here.
+            assert!(
+                optlen as usize <= size_of::<T>(),
                 "unexpected getsockopt size"
             );
-            Ok(value.assume_init())
+            Ok(value)
         }
     }
 
     #[inline]
-    fn setsockopt<T>(fd: BorrowedFd<'_>, level: i32, optname: i32, value: T) -> io::Result<()> {
+    fn setsockopt<T: Copy>(
+        fd: BorrowedFd<'_>,
+        level: i32,
+        optname: i32,
+        value: T,
+    ) -> io::Result<()> {
         use super::*;
+
+        let optlen = core::mem::size_of::<T>().try_into().unwrap();
+        debug_assert!(
+            optlen as usize >= core::mem::size_of::<c::c_int>(),
+            "Socket APIs don't ever use `bool` directly"
+        );
+
         unsafe {
-            let optlen = core::mem::size_of::<T>().try_into().unwrap();
             ret(c::setsockopt(
                 borrowed_fd(fd),
                 level,
@@ -461,7 +482,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn get_socket_broadcast(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(fd, c::SOL_SOCKET as _, c::SO_BROADCAST)
+        getsockopt(fd, c::SOL_SOCKET as _, c::SO_BROADCAST).map(to_bool)
     }
 
     #[inline]
@@ -506,7 +527,7 @@ pub(crate) mod sockopt {
     #[cfg(any(target_os = "android", target_os = "linux"))]
     #[inline]
     pub(crate) fn get_socket_passcred(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(fd, c::SOL_SOCKET as _, c::SO_PASSCRED)
+        getsockopt(fd, c::SOL_SOCKET as _, c::SO_PASSCRED).map(to_bool)
     }
 
     #[inline]
@@ -624,7 +645,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn get_ipv6_v6only(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_V6ONLY)
+        getsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_V6ONLY).map(to_bool)
     }
 
     #[inline]
@@ -642,7 +663,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn get_ip_multicast_loop(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(fd, c::IPPROTO_IP as _, c::IP_MULTICAST_LOOP)
+        getsockopt(fd, c::IPPROTO_IP as _, c::IP_MULTICAST_LOOP).map(to_bool)
     }
 
     #[inline]
@@ -670,7 +691,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn get_ipv6_multicast_loop(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_MULTICAST_LOOP)
+        getsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_MULTICAST_LOOP).map(to_bool)
     }
 
     #[inline]
@@ -774,7 +795,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn get_tcp_nodelay(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(fd, c::IPPROTO_TCP as _, c::TCP_NODELAY)
+        getsockopt(fd, c::IPPROTO_TCP as _, c::TCP_NODELAY).map(to_bool)
     }
 
     #[inline]
@@ -815,8 +836,26 @@ pub(crate) mod sockopt {
         interface as c::c_uint
     }
 
+    // `getsockopt` and `setsockopt` represent boolean values as integers.
+    #[cfg(not(windows))]
+    type RawSocketBool = c::c_int;
+    #[cfg(windows)]
+    type RawSocketBool = BOOL;
+
+    // Wrap `RawSocketBool` in a newtype to discourage misuse.
+    #[repr(transparent)]
+    #[derive(Copy, Clone)]
+    struct SocketBool(RawSocketBool);
+
+    // Convert from a `bool` to a `SocketBool`.
     #[inline]
-    fn from_bool(value: bool) -> c::c_uint {
-        value as c::c_uint
+    fn from_bool(value: bool) -> SocketBool {
+        SocketBool(value as _)
+    }
+
+    // Convert from a `SocketBool` to a `bool`.
+    #[inline]
+    fn to_bool(value: SocketBool) -> bool {
+        value.0 != 0
     }
 }

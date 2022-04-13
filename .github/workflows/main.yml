@@ -386,7 +386,7 @@ jobs:
         # Run the tests, and check the prebuilt release libraries.
         cargo test --verbose --features=all-impls,procfs,cc --release --workspace -- --nocapture
       env:
-        RUST_BACKTRACE: 1
+        RUST_BACKTRACE: full
 
     - run: |
         # Check the prebuilt debug libraries too.
@@ -529,7 +529,7 @@ jobs:
     - run: |
         cargo test --verbose --features=use-libc,all-impls,procfs --release --workspace -- --nocapture
       env:
-        RUST_BACKTRACE: 1
+        RUST_BACKTRACE: full
 
   test_rustix_use_experimental_asm:
     name: Test rustix_use_experimental_asm
@@ -635,4 +635,4 @@ jobs:
     - run: |
         cargo test --verbose --features=all-impls,procfs --release --workspace -- --nocapture
       env:
-        RUST_BACKTRACE: 1
+        RUST_BACKTRACE: full
