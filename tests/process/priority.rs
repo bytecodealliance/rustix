@@ -32,7 +32,12 @@ fn test_priorities() {
 
         setpriority_process(None, get + 1).unwrap();
         let now = getpriority_process(None).unwrap();
-        assert_eq!(get + 1, now);
+
+        // If the test wasn't running with the lowest priority initially, test
+        // that we were able to lower the priority.
+        if get < 19 {
+            assert_eq!(get + 1, now);
+        }
         setpriority_process(None, get + 10000).unwrap();
         let now = getpriority_process(None).unwrap();
         // Linux's max is 19; Darwin's max is 20.
