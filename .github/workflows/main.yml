@@ -97,6 +97,7 @@ jobs:
     - run: cargo check --workspace --release -vv --target=mipsel-unknown-linux-gnu
     - run: cargo check --workspace --release -vv --target=mips64el-unknown-linux-gnuabi64
     - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi
+    - run: cargo check --workspace --release -vv --target=s390x-unknown-linux-gnu
 
   check_no_default_features:
     name: Check --no-default-features
