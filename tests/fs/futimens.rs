@@ -15,6 +15,10 @@ fn test_futimens() {
     )
     .unwrap();
 
+    let before = fstat(&foo).unwrap();
+
+    dbg!(&before);
+
     let times = Timestamps {
         last_access: Timespec {
             tv_sec: 44000,
@@ -28,6 +32,10 @@ fn test_futimens() {
     futimens(&foo, &times).unwrap();
 
     let after = fstat(&foo).unwrap();
+
+    dbg!(&after);
+
+    dbg!(&times);
 
     assert_eq!(times.last_modification.tv_sec as u64, after.st_mtime as u64);
     assert_eq!(
