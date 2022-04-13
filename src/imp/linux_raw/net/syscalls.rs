@@ -835,12 +835,18 @@ pub(crate) mod sockopt {
     const DURATION_ZERO: Duration = Duration::from_secs(0);
 
     #[inline]
-    fn getsockopt<T>(fd: BorrowedFd<'_>, level: u32, optname: u32) -> io::Result<T> {
+    fn getsockopt<T: Copy>(fd: BorrowedFd<'_>, level: u32, optname: u32) -> io::Result<T> {
         use super::*;
+
+        let mut optlen = core::mem::size_of::<T>();
+        debug_assert!(
+            optlen as usize >= core::mem::size_of::<c::c_int>(),
+            "Socket APIs don't ever use `bool` directly"
+        );
+
         #[cfg(not(target_arch = "x86"))]
         unsafe {
             let mut value = MaybeUninit::<T>::uninit();
-            let mut optlen = core::mem::size_of::<T>();
             ret(syscall5(
                 nr(__NR_getsockopt),
                 borrowed_fd(fd),
@@ -860,7 +866,6 @@ pub(crate) mod sockopt {
         #[cfg(target_arch = "x86")]
         unsafe {
             let mut value = MaybeUninit::<T>::uninit();
-            let mut optlen = core::mem::size_of::<T>();
             ret(syscall2(
                 nr(__NR_socketcall),
                 x86_sys(SYS_GETSOCKOPT),
@@ -882,11 +887,22 @@ pub(crate) mod sockopt {
     }
 
     #[inline]
-    fn setsockopt<T>(fd: BorrowedFd<'_>, level: u32, optname: u32, value: T) -> io::Result<()> {
+    fn setsockopt<T: Copy>(
+        fd: BorrowedFd<'_>,
+        level: u32,
+        optname: u32,
+        value: T,
+    ) -> io::Result<()> {
         use super::*;
+
+        let optlen = core::mem::size_of::<T>().try_into().unwrap();
+        debug_assert!(
+            optlen as usize >= core::mem::size_of::<c::c_int>(),
+            "Socket APIs don't ever use `bool` directly"
+        );
+
         #[cfg(not(target_arch = "x86"))]
         unsafe {
-            let optlen = core::mem::size_of::<T>().try_into().unwrap();
             ret(syscall5_readonly(
                 nr(__NR_setsockopt),
                 borrowed_fd(fd),
@@ -898,7 +914,6 @@ pub(crate) mod sockopt {
         }
         #[cfg(target_arch = "x86")]
         unsafe {
-            let optlen = core::mem::size_of::<T>().try_into().unwrap();
             ret(syscall2_readonly(
                 nr(__NR_socketcall),
                 x86_sys(SYS_SETSOCKOPT),
@@ -949,6 +964,7 @@ pub(crate) mod sockopt {
             linux_raw_sys::general::SOL_SOCKET as _,
             linux_raw_sys::general::SO_BROADCAST,
         )
+        .map(to_bool)
     }
 
     #[inline]
@@ -1010,6 +1026,7 @@ pub(crate) mod sockopt {
             linux_raw_sys::general::SOL_SOCKET as _,
             linux_raw_sys::general::SO_PASSCRED,
         )
+        .map(to_bool)
     }
 
     #[inline]
@@ -1185,6 +1202,7 @@ pub(crate) mod sockopt {
             linux_raw_sys::general::IPPROTO_IPV6 as _,
             linux_raw_sys::general::IPV6_V6ONLY,
         )
+        .map(to_bool)
     }
 
     #[inline]
@@ -1207,6 +1225,7 @@ pub(crate) mod sockopt {
             linux_raw_sys::general::IPPROTO_IP as _,
             linux_raw_sys::general::IP_MULTICAST_LOOP,
         )
+        .map(to_bool)
     }
 
     #[inline]
@@ -1248,6 +1267,7 @@ pub(crate) mod sockopt {
             linux_raw_sys::general::IPPROTO_IPV6 as _,
             linux_raw_sys::general::IPV6_MULTICAST_LOOP,
         )
+        .map(to_bool)
     }
 
     #[inline]
@@ -1327,6 +1347,7 @@ pub(crate) mod sockopt {
             linux_raw_sys::general::IPPROTO_TCP as _,
             linux_raw_sys::general::TCP_NODELAY,
         )
+        .map(to_bool)
     }
 
     #[inline]
@@ -1369,5 +1390,10 @@ pub(crate) mod sockopt {
     #[inline]
     fn from_bool(value: bool) -> c::c_uint {
         value as c::c_uint
+    }
+
+    #[inline]
+    fn to_bool(value: c::c_uint) -> bool {
+        value != 0
     }
 }
