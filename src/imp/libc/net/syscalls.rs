@@ -392,7 +392,7 @@ pub(crate) mod sockopt {
     use core::convert::TryInto;
     use core::time::Duration;
     #[cfg(windows)]
-    use winapi::shared::minwindef::DWORD;
+    use winapi::shared::minwindef::{BOOL, DWORD};
 
     // TODO: With Rust 1.53 we can use `Duration::ZERO` instead.
     const DURATION_ZERO: Duration = Duration::from_secs(0);
@@ -836,13 +836,26 @@ pub(crate) mod sockopt {
         interface as c::c_uint
     }
 
+    // `getsockopt` and `setsockopt` represent boolean values as integers.
+    #[cfg(not(windows))]
+    type RawSocketBool = c::c_int;
+    #[cfg(windows)]
+    type RawSocketBool = BOOL;
+
+    // Wrap `RawSocketBool` in a newtype to discourage misuse.
+    #[repr(transparent)]
+    #[derive(Copy, Clone)]
+    struct SocketBool(RawSocketBool);
+
+    // Convert from a `bool` to a `SocketBool`.
     #[inline]
-    fn from_bool(value: bool) -> c::c_uint {
-        value as c::c_uint
+    fn from_bool(value: bool) -> SocketBool {
+        SocketBool(value as _)
     }
 
+    // Convert from a `SocketBool` to a `bool`.
     #[inline]
-    fn to_bool(value: c::c_uint) -> bool {
-        value != 0
+    fn to_bool(value: SocketBool) -> bool {
+        value.0 != 0
     }
 }
