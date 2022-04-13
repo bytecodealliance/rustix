@@ -30,6 +30,9 @@ fn test_futimens() {
     dbg!(&bm.modified());
     std::mem::forget(bf);
 
+    let x = rustix::fs::statx(&foo, rustix::zstr!(""), rustix::fs::AtFlags::EMPTY_PATH, rustix::fs::StatxFlags::ALL).unwrap();
+    dbg!(&x);
+
     let times = Timestamps {
         last_access: Timespec {
             tv_sec: 44000,
