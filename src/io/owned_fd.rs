@@ -223,7 +223,7 @@ impl From<OwnedFd> for crate::imp::fd::OwnedFd {
         // that they remain valid until the new `OwnedFd` acquires them.
         let raw_fd = fd.inner.as_fd().as_raw_fd();
         forget(fd);
-        unsafe { crate::imp::fd::OwnedFd::from_raw_fd(raw_fd) }
+        unsafe { Self::from_raw_fd(raw_fd) }
     }
 }
 
