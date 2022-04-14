@@ -181,7 +181,7 @@ jobs:
       QEMU_BUILD_VERSION: 6.1.0
     strategy:
       matrix:
-        build: [ubuntu, ubuntu-18.04, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, mipsel-linux-stable, mips64el-linux-stable, powerpc64le-linux-stable, arm-linux-stable, macos, macos-11, windows, windows-2022]
+        build: [ubuntu, ubuntu-18.04, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, mipsel-linux-stable, mips64el-linux-stable, powerpc64le-linux-stable, arm-linux-stable, macos-latest, macos-10.15, windows, windows-2019]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -328,17 +328,17 @@ jobs:
             qemu: qemu-arm
             qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
-          - build: macos
+          - build: macos-latest
             os: macos-latest
             rust: stable
-          - build: macos-11
-            os: macos-11
+          - build: macos-10.15
+            os: macos-10.15
             rust: stable
           - build: windows
             os: windows-latest
             rust: nightly
-          - build: windows-2022
-            os: windows-2022
+          - build: windows-2019
+            os: windows-2019
             rust: nightly
     steps:
     - uses: actions/checkout@v2

@@ -12,7 +12,7 @@ jobs:
       QEMU_BUILD_VERSION: 6.1.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-11]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -76,8 +76,8 @@ jobs:
             qemu: qemu-arm
             qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
-          - build: macos-11
-            os: macos-11
+          - build: macos-latest
+            os: macos-latest
             rust: nightly
     steps:
     - uses: actions/checkout@v2
@@ -172,7 +172,7 @@ jobs:
       QEMU_BUILD_VERSION: 6.1.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-11]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -236,8 +236,8 @@ jobs:
             qemu: qemu-arm
             qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
-          - build: macos-11
-            os: macos-11
+          - build: macos-latest
+            os: macos-latest
             rust: nightly
     steps:
     - uses: actions/checkout@v2
@@ -315,7 +315,7 @@ jobs:
       QEMU_BUILD_VERSION: 6.1.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-11]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -379,8 +379,8 @@ jobs:
             qemu: qemu-arm
             qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
-          - build: macos-11
-            os: macos-11
+          - build: macos-latest
+            os: macos-latest
             rust: nightly
     steps:
     - uses: actions/checkout@v2
@@ -630,7 +630,7 @@ jobs:
       QEMU_BUILD_VERSION: 6.1.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-11]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -694,8 +694,8 @@ jobs:
             qemu: qemu-arm
             qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
-          - build: macos-11
-            os: macos-11
+          - build: macos-latest
+            os: macos-latest
             rust: nightly
     steps:
     - uses: actions/checkout@v2
@@ -773,7 +773,7 @@ jobs:
       QEMU_BUILD_VERSION: 6.1.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-11]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -837,8 +837,8 @@ jobs:
             qemu: qemu-arm
             qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
-          - build: macos-11
-            os: macos-11
+          - build: macos-latest
+            os: macos-latest
             rust: nightly
     steps:
     - uses: actions/checkout@v2
@@ -915,13 +915,13 @@ jobs:
     strategy:
       matrix:
         # Qemu doesn't support running Wasmtime.
-        build: [ubuntu, macos-11]
+        build: [ubuntu, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
             rust: nightly
-          - build: macos-11
-            os: macos-11
+          - build: macos-latest
+            os: macos-latest
             rust: nightly
     steps:
     - uses: actions/checkout@v2
