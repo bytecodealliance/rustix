@@ -1,7 +1,5 @@
 //! libc syscalls supporting `rustix::rand`.
 
-#![allow(unsafe_code)]
-
 #[cfg(target_os = "linux")]
 use {super::super::c, super::super::conv::ret_ssize_t, crate::io, crate::rand::GetRandomFlags};
 

@@ -2,8 +2,8 @@
 //!
 //! # Safety
 //!
-//! `msync` operates on a raw pointer. Some forms of `msync` may
-//! mutate the memory or have other side effects.
+//! `msync` operates on a raw pointer. Some forms of `msync` may mutate the
+//! memory or have other side effects.
 #![allow(unsafe_code)]
 
 use crate::{imp, io};

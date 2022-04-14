@@ -1,3 +1,7 @@
+//! APIs which are associated with the auxv array on Linux.
+//!
+//! # Safety
+//!
 //! On mustang, the `init` function is unsafe because it operates on raw
 //! pointers.
 #![cfg_attr(target_vendor = "mustang", allow(unsafe_code))]

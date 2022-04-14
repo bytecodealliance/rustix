@@ -4,7 +4,6 @@
 //!
 //! Futex is a very low-level mechanism for implementing concurrency
 //! primitives.
-
 #![allow(unsafe_code)]
 
 use crate::time::Timespec;

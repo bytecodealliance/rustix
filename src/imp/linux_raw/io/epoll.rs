@@ -253,10 +253,11 @@ impl<'context, T: AsFd + IntoFd + FromFd> Context for Owning<'context, T> {
 
     #[inline]
     fn release(&self, target: Ref<'_, Self::Target>) -> Self::Data {
+        let raw_fd = target.consume().as_raw_fd();
+
         // Safety: The file descriptor was held by the kernel epoll object and
         // is now being released, so we can create a new `OwnedFd` that assumes
         // ownership.
-        let raw_fd = target.consume().as_raw_fd();
         unsafe { T::from_fd(io_lifetimes::OwnedFd::from_raw_fd(raw_fd)) }
     }
 }
@@ -442,13 +443,13 @@ impl<'context, Context: self::Context> Iterator for Iter<'context, Context> {
     type Item = (EventFlags, Ref<'context, Context::Target>);
 
     fn next(&mut self) -> Option<Self::Item> {
-        // Safety: `self.context` is guaranteed to be valid because we hold
-        // `'context` for it. And we know this event is associated with this
-        // context because `wait` sets both.
         self.iter.next().map(|event| {
-            (event.event_flags, unsafe {
-                (*self.context).decode(event.encoded)
-            })
+            // Safety: `self.context` is guaranteed to be valid because we hold
+            // `'context` for it. And we know this event is associated with this
+            // context because `wait` sets both.
+            let decoded = unsafe { (*self.context).decode(event.encoded) };
+
+            (event.event_flags, decoded)
         })
     }
 }

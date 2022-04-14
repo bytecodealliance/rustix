@@ -1,3 +1,12 @@
+//! The `cwd` function, representing the current working directory.
+//!
+//! # Safety
+//!
+//! This file uses `AT_FDCWD`, which is a raw file descriptor, but which is
+//! always valid.
+
+#![allow(unsafe_code)]
+
 use crate::imp;
 use imp::fd::{BorrowedFd, RawFd};
 
@@ -17,12 +26,7 @@ use imp::fd::{BorrowedFd, RawFd};
 pub fn cwd() -> BorrowedFd<'static> {
     let at_fdcwd = imp::io::AT_FDCWD as RawFd;
 
-    // # Safety
-    //
-    // `AT_FDCWD` is a reserved value that is never dynamically allocated, so
-    // it'll remain valid for the duration of `'static`.
-    #[allow(unsafe_code)]
-    unsafe {
-        BorrowedFd::<'static>::borrow_raw(at_fdcwd)
-    }
+    // Safety: `AT_FDCWD` is a reserved value that is never dynamically
+    // allocated, so it'll remain valid for the duration of `'static`.
+    unsafe { BorrowedFd::<'static>::borrow_raw(at_fdcwd) }
 }

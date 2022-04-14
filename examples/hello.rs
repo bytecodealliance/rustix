@@ -11,10 +11,8 @@ fn main() -> std::io::Result<()> {
     // need the ability to compute substrings at arbitrary byte offsets.
     let mut bytes = message.as_bytes();
 
-    // # Safety
-    //
-    // See [here] for the safety conditions for calling `stdout`. In this
-    // example, the code is inside `main` itself so we know how `stdout`
+    // Safety: See [here] for the safety conditions for calling `stdout`. In
+    // this example, the code is inside `main` itself so we know how `stdout`
     // is being used and we know that it's not dropped.
     //
     // [here]: https://docs.rs/rustix/*/rustix/io/fn.stdout.html#safety

@@ -16,6 +16,7 @@ pub(crate) const fn in_addr_new(s_addr: u32) -> c::in_addr {
 #[cfg(not(feature = "std"))]
 #[inline]
 pub(crate) const fn in6_addr_s6_addr(addr: c::in6_addr) -> [u8; 16] {
+    // Safety: `in6_addr` is `repr(C)` and contains plain integer data.
     unsafe { addr.in6_u.u6_addr8 }
 }
 
@@ -24,6 +25,7 @@ pub(crate) const fn in6_addr_s6_addr(addr: c::in6_addr) -> [u8; 16] {
 #[cfg(not(not(feature = "std")))]
 #[inline]
 pub(crate) fn in6_addr_s6_addr(addr: c::in6_addr) -> [u8; 16] {
+    // Safety: `in6_addr` is `repr(C)` and contains plain integer data.
     unsafe { core::mem::transmute(addr) }
 }
 

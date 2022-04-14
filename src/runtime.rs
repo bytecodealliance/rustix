@@ -17,7 +17,6 @@
 //! This module is intended to be used for implementing a runtime library
 //! such as libc. Use of these features for any other purpose is likely
 //! to create serious problems.
-
 #![allow(unsafe_code)]
 
 #[cfg(linux_raw)]
