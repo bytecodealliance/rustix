@@ -4,11 +4,11 @@
 
 mod arch;
 mod conv;
+mod elf;
 mod reg;
 mod vdso;
 mod vdso_wrappers;
 
-pub(crate) mod elf;
 pub(crate) mod fs;
 pub(crate) mod io;
 #[cfg(feature = "io_uring")]
