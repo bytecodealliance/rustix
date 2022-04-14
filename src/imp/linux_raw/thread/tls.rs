@@ -14,8 +14,11 @@ pub(crate) fn startup_tls_info() -> StartupTlsInfo {
     let mut tls_phdr = null();
     let mut stack_size = 0;
 
+    let phdrs = exe_phdrs_slice();
+
+    // Safety: We assume the phdr array pointer and length the kernel provided
+    // to the process describe a valid phdr array.
     unsafe {
-        let phdrs = exe_phdrs_slice();
         for phdr in phdrs {
             match (*phdr).p_type {
                 PT_PHDR => {

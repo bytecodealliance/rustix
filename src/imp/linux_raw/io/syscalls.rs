@@ -5,6 +5,7 @@
 //! See the `rustix::imp::syscalls` module documentation for details.
 
 #![allow(unsafe_code)]
+#![allow(clippy::undocumented_unsafe_blocks)]
 
 #[cfg(not(any(
     target_arch = "aarch64",

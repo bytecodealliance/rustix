@@ -162,11 +162,12 @@ impl io_lifetimes::AsSocket for OwnedFd {
 impl From<OwnedFd> for crate::imp::fd::OwnedFd {
     #[inline]
     fn from(owned_fd: OwnedFd) -> Self {
+        let raw_fd = owned_fd.inner.as_fd().as_raw_fd();
+        forget(owned_fd);
+
         // Safety: We use `as_fd().as_raw_fd()` to extract the raw file
         // descriptor from `self.inner`, and then `forget` `self` so
         // that they remain valid until the new `OwnedFd` acquires them.
-        let raw_fd = owned_fd.inner.as_fd().as_raw_fd();
-        forget(owned_fd);
         unsafe { crate::imp::fd::OwnedFd::from_raw_fd(raw_fd) }
     }
 }
@@ -175,11 +176,12 @@ impl From<OwnedFd> for crate::imp::fd::OwnedFd {
 impl IntoFd for OwnedFd {
     #[inline]
     fn into_fd(self) -> crate::imp::fd::OwnedFd {
+        let raw_fd = self.inner.as_fd().as_raw_fd();
+        forget(self);
+
         // Safety: We use `as_fd().as_raw_fd()` to extract the raw file
         // descriptor from `self.inner`, and then `forget` `self` so
         // that they remain valid until the new `OwnedFd` acquires them.
-        let raw_fd = self.inner.as_fd().as_raw_fd();
-        forget(self);
         unsafe { crate::imp::fd::OwnedFd::from_raw_fd(raw_fd) }
     }
 }
@@ -218,11 +220,12 @@ impl From<crate::imp::fd::OwnedFd> for OwnedFd {
 impl From<OwnedFd> for crate::imp::fd::OwnedFd {
     #[inline]
     fn from(fd: OwnedFd) -> Self {
+        let raw_fd = fd.inner.as_fd().as_raw_fd();
+        forget(fd);
+
         // Safety: We use `as_fd().as_raw_fd()` to extract the raw file
         // descriptor from `self.inner`, and then `forget` `self` so
         // that they remain valid until the new `OwnedFd` acquires them.
-        let raw_fd = fd.inner.as_fd().as_raw_fd();
-        forget(fd);
         unsafe { Self::from_raw_fd(raw_fd) }
     }
 }

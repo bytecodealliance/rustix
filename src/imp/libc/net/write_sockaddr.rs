@@ -1,6 +1,5 @@
 //! The BSD sockets API requires us to read the `ss_family` field before
 //! we can interpret the rest of a `sockaddr` produced by the kernel.
-#![allow(unsafe_code)]
 
 use super::super::c;
 use super::ext::{in6_addr_new, in_addr_new, sockaddr_in6_new};

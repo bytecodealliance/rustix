@@ -6,6 +6,7 @@
 
 #![allow(unsafe_code)]
 #![allow(dead_code)]
+#![allow(clippy::undocumented_unsafe_blocks)]
 
 #[cfg(target_arch = "mips")]
 use super::super::arch::choose::syscall7_readonly;

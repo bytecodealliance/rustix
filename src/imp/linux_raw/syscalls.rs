@@ -11,7 +11,9 @@
 //! <linux/syscalls.h>, but we often need more information than it provides,
 //! such as which pointers are array slices, out parameters, or in-out
 //! parameters, which integers are owned or borrowed file descriptors, etc.
+
 #![allow(unsafe_code)]
+#![allow(clippy::undocumented_unsafe_blocks)]
 
 use super::arch::choose::{
     syscall1_noreturn, syscall1_readonly, syscall2_readonly, syscall3_readonly, syscall5_readonly,

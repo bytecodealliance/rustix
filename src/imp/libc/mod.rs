@@ -4,6 +4,10 @@
 //! Windows, this uses the Winsock2 API in `winapi`, which can be adapted
 //! to have a very `libc`-like interface.
 
+// Every FFI call requires an unsafe block, and there are a lot of FFI
+// calls. For now, set this to allow for the libc backend.
+#![allow(clippy::undocumented_unsafe_blocks)]
+
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[macro_use]
 mod weak;

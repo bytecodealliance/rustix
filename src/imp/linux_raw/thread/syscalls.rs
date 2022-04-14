@@ -5,6 +5,7 @@
 //! See the `rustix::imp::syscalls` module documentation for details.
 
 #![allow(unsafe_code)]
+#![allow(clippy::undocumented_unsafe_blocks)]
 
 use super::super::arch::choose::{
     syscall0_readonly, syscall2, syscall4, syscall4_readonly, syscall6,

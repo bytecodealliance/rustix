@@ -104,7 +104,10 @@ impl Gid {
 
 impl Pid {
     /// A `Pid` corresponding to the init process (pid 1).
-    pub const INIT: Self = Self(unsafe { RawNonZeroPid::new_unchecked(1) });
+    pub const INIT: Self = Self(
+        // Safety: The init process' pid is always valid.
+        unsafe { RawNonZeroPid::new_unchecked(1) },
+    );
 
     /// Converts a `RawPid` into a `Pid`.
     ///
@@ -134,12 +137,11 @@ impl Pid {
     #[cfg(feature = "std")]
     #[inline]
     pub fn from_child(child: &std::process::Child) -> Self {
-        // Safety
-        //
-        // We know the returned ID is valid because it came directly from
-        // an OS API.
         let id = child.id();
         debug_assert_ne!(id, 0);
+
+        // Safety: We know the returned ID is valid because it came directly
+        // from an OS API.
         unsafe { Self::from_raw_nonzero(RawNonZeroPid::new_unchecked(id as _)) }
     }
 

@@ -34,7 +34,11 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
 
 #[inline]
 pub(crate) fn linux_execfn() -> &'static ZStr {
-    unsafe { ZStr::from_ptr(auxv().execfn.cast()) }
+    let execfn = auxv().execfn;
+
+    // Safety: We assume the `AT_EXECFN` value provided by the kernel is a
+    // valid pointer to a valid NUL-terminated array of bytes.
+    unsafe { ZStr::from_ptr(execfn.cast()) }
 }
 
 #[inline]
@@ -46,6 +50,9 @@ pub(crate) fn exe_phdrs() -> (*const c::c_void, usize) {
 #[inline]
 pub(in super::super) fn exe_phdrs_slice() -> &'static [Elf_Phdr] {
     let auxv = auxv();
+
+    // Safety: We assume the `AT_PHDR` and `AT_PHNUM` values provided by the
+    // kernel form a valid slice.
     unsafe { slice::from_raw_parts(auxv.phdr, auxv.phnum) }
 }
 
@@ -56,8 +63,9 @@ pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
 
 #[inline]
 fn auxv() -> &'static Auxv {
-    // Safety: `AUXV` is initialized from the `.init_array` so it's ready
-    // before any user code calls this.
+    // Safety: `AUXV` is initialized from the `.init_array`, and we never
+    // mutate it thereafter, so it's effectively initialized read-only in all
+    // other code.
     unsafe { &AUXV }
 }
 
