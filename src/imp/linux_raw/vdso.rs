@@ -365,7 +365,12 @@ impl Vdso {
                 let sym = &*self.symtab.add(chain as usize);
 
                 // Check for a defined global or weak function w/ right name.
-                if ELF_ST_TYPE(sym.st_info) != STT_FUNC
+                //
+                // The reference parser in Linux's parse_vdso.c requires
+                // symbols to have type `STT_FUNC`, but on powerpc64, the vDSO
+                // uses `STT_NOTYPE`, so allow that too.
+                if (ELF_ST_TYPE(sym.st_info) != STT_FUNC &&
+                        ELF_ST_TYPE(sym.st_info) != STT_NOTYPE)
                     || (ELF_ST_BIND(sym.st_info) != STB_GLOBAL
                         && ELF_ST_BIND(sym.st_info) != STB_WEAK)
                     || sym.st_shndx == SHN_UNDEF
