@@ -46,6 +46,7 @@ pub(super) const DT_VERSYM: i32 = 0x6fff_fff0;
 pub(super) const DT_VERDEF: i32 = 0x6fff_fffc;
 pub(super) const STB_WEAK: u8 = 2;
 pub(super) const STB_GLOBAL: u8 = 1;
+pub(super) const STT_NOTYPE: u8 = 0;
 pub(super) const STT_FUNC: u8 = 2;
 pub(super) const STN_UNDEF: u32 = 0;
 pub(super) const VER_FLG_BASE: u16 = 0x1;
