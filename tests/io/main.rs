@@ -17,8 +17,6 @@ mod eventfd;
 #[cfg(not(windows))]
 mod from_into;
 #[cfg(not(windows))]
-mod isatty;
-#[cfg(not(windows))]
 #[cfg(not(target_os = "wasi"))]
 mod mlock;
 #[cfg(not(windows))]

@@ -14,9 +14,6 @@ use super::super::offset::{libc_preadv, libc_pwritev};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::super::offset::{libc_preadv2, libc_pwritev2};
 use crate::fd::{AsFd, BorrowedFd, RawFd};
-#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
-#[cfg(feature = "procfs")]
-use crate::ffi::ZStr;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use crate::io::Advice;
 #[cfg(target_os = "linux")]
@@ -25,7 +22,7 @@ use crate::io::MremapFlags;
 use crate::io::PipeFlags;
 use crate::io::{self, IoSlice, IoSliceMut, OwnedFd, PollFd};
 #[cfg(not(target_os = "wasi"))]
-use crate::io::{DupFlags, MapFlags, MprotectFlags, MsyncFlags, ProtFlags, Termios, Winsize};
+use crate::io::{DupFlags, MapFlags, MprotectFlags, MsyncFlags, ProtFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::io::{EventfdFlags, MlockFlags, ReadWriteFlags, UserfaultfdFlags};
 use core::cmp::min;
@@ -367,29 +364,6 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     }
 }
 
-pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
-    let res = unsafe { c::isatty(borrowed_fd(fd)) };
-    if res == 0 {
-        match errno().0 {
-            #[cfg(not(any(target_os = "android", target_os = "linux")))]
-            c::ENOTTY => false,
-
-            // Old Linux versions reportedly return `EINVAL`.
-            // <https://man7.org/linux/man-pages/man3/isatty.3.html#ERRORS>
-            #[cfg(any(target_os = "android", target_os = "linux"))]
-            c::ENOTTY | c::EINVAL => false,
-
-            // Darwin mysteriously returns `EOPNOTSUPP` sometimes.
-            #[cfg(any(target_os = "ios", target_os = "macos"))]
-            c::EOPNOTSUPP => false,
-
-            err => panic!("unexpected error from isatty: {:?}", err),
-        }
-    } else {
-        true
-    }
-}
-
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
     let (mut read, mut write) = crate::fs::fd::_is_file_read_write(fd)?;
@@ -490,67 +464,9 @@ pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, _flags: DupFlags) -> io::R
     dup2(fd, new)
 }
 
-#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
-#[cfg(feature = "procfs")]
-pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
-    unsafe {
-        ret(c::ttyname_r(
-            borrowed_fd(dirfd),
-            buf.as_mut_ptr().cast(),
-            buf.len(),
-        ))?;
-        Ok(ZStr::from_ptr(buf.as_ptr().cast()).to_bytes().len())
-    }
-}
-
-#[cfg(not(any(
-    target_os = "dragonfly",
-    target_os = "freebsd",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
-    target_os = "wasi"
-)))]
-pub(crate) fn ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
-    let mut result = MaybeUninit::<Termios>::uninit();
-    unsafe {
-        ret(c::ioctl(borrowed_fd(fd), c::TCGETS, result.as_mut_ptr()))
-            .map(|()| result.assume_init())
-    }
-}
-
-#[cfg(any(
-    target_os = "dragonfly",
-    target_os = "freebsd",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
-))]
-pub(crate) fn ioctl_tcgets(fd: BorrowedFd<'_>) -> io::Result<Termios> {
-    let mut result = MaybeUninit::<Termios>::uninit();
-    unsafe {
-        ret(c::tcgetattr(borrowed_fd(fd), result.as_mut_ptr())).map(|()| result.assume_init())
-    }
-}
-
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub(crate) fn ioctl_fioclex(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::FIOCLEX)) }
-}
-
-#[cfg(not(target_os = "wasi"))]
-pub(crate) fn ioctl_tiocgwinsz(fd: BorrowedFd) -> io::Result<Winsize> {
-    unsafe {
-        let mut buf = MaybeUninit::<Winsize>::uninit();
-        ret(c::ioctl(
-            borrowed_fd(fd),
-            c::TIOCGWINSZ.into(),
-            buf.as_mut_ptr(),
-        ))?;
-        Ok(buf.assume_init())
-    }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]

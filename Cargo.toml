@@ -35,7 +35,7 @@ once_cell = { version = "1.5.2", optional = true }
 # and libc. The libc and errno dependencies are only enabled when the libc
 # backend is in use.
 [target.'cfg(all(not(rustix_use_libc), not(miri), target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64")))'.dependencies]
-linux-raw-sys = { version = "0.0.42", default-features = false, features = ["general", "errno", "ioctl", "no_std"] }
+linux-raw-sys = { version = "0.0.43", default-features = false, features = ["general", "errno", "ioctl", "no_std"] }
 errno = { version = "0.2.8", default-features = false, optional = true }
 libc = { version = "0.2.118", features = ["extra_traits"], optional = true }
 
@@ -81,6 +81,12 @@ use-libc = ["errno", "libc"]
 # Enable this to enable `proc_self_fd` (on Linux) and `ttyname`.
 procfs = ["once_cell", "itoa"]
 
+# Enable `rustix::termios::*`.
+termios = []
+
+# Enable all API features.
+all-apis = ["procfs", "termios"]
+
 # Expose io-lifetimes' features for third-party crate impls.
 async-std = ["io-lifetimes/async-std"]
 tokio = ["io-lifetimes/tokio"]
@@ -97,7 +103,7 @@ name = "mod"
 harness = false
 
 [package.metadata.docs.rs]
-features = ["procfs"]
+features = ["all-apis"]
 rustdoc-args = ["--cfg", "doc_cfg"]
 targets = [
     "x86_64-unknown-linux-gnu",

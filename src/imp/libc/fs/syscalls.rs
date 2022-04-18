@@ -205,7 +205,13 @@ pub(crate) fn readlinkat(dirfd: BorrowedFd<'_>, path: &ZStr, buf: &mut [u8]) -> 
 
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn mkdirat(dirfd: BorrowedFd<'_>, path: &ZStr, mode: Mode) -> io::Result<()> {
-    unsafe { ret(c::mkdirat(borrowed_fd(dirfd), c_str(path), mode.bits())) }
+    unsafe {
+        ret(c::mkdirat(
+            borrowed_fd(dirfd),
+            c_str(path),
+            mode.bits() as c::mode_t,
+        ))
+    }
 }
 
 #[cfg(not(target_os = "redox"))]
@@ -569,8 +575,8 @@ pub(crate) fn mknodat(
         ret(c::mknodat(
             borrowed_fd(dirfd),
             c_str(path),
-            mode.bits() | file_type.as_raw_mode(),
-            dev,
+            (mode.bits() | file_type.as_raw_mode()) as c::mode_t,
+            dev.try_into().map_err(|_| io::Error::PERM)?,
         ))
     }
 }

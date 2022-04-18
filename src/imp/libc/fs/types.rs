@@ -81,63 +81,63 @@ bitflags! {
     pub struct Mode: RawMode {
         /// `S_IRWXU`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const RWXU = c::S_IRWXU;
+        const RWXU = c::S_IRWXU as RawMode;
 
         /// `S_IRUSR`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const RUSR = c::S_IRUSR;
+        const RUSR = c::S_IRUSR as RawMode;
 
         /// `S_IWUSR`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const WUSR = c::S_IWUSR;
+        const WUSR = c::S_IWUSR as RawMode;
 
         /// `S_IXUSR`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const XUSR = c::S_IXUSR;
+        const XUSR = c::S_IXUSR as RawMode;
 
         /// `S_IRWXG`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const RWXG = c::S_IRWXG;
+        const RWXG = c::S_IRWXG as RawMode;
 
         /// `S_IRGRP`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const RGRP = c::S_IRGRP;
+        const RGRP = c::S_IRGRP as RawMode;
 
         /// `S_IWGRP`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const WGRP = c::S_IWGRP;
+        const WGRP = c::S_IWGRP as RawMode;
 
         /// `S_IXGRP`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const XGRP = c::S_IXGRP;
+        const XGRP = c::S_IXGRP as RawMode;
 
         /// `S_IRWXO`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const RWXO = c::S_IRWXO;
+        const RWXO = c::S_IRWXO as RawMode;
 
         /// `S_IROTH`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const ROTH = c::S_IROTH;
+        const ROTH = c::S_IROTH as RawMode;
 
         /// `S_IWOTH`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const WOTH = c::S_IWOTH;
+        const WOTH = c::S_IWOTH as RawMode;
 
         /// `S_IXOTH`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const XOTH = c::S_IXOTH;
+        const XOTH = c::S_IXOTH as RawMode;
 
         /// `S_ISUID`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const SUID = c::S_ISUID as c::mode_t;
+        const SUID = c::S_ISUID as RawMode;
 
         /// `S_ISGID`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const SGID = c::S_ISGID as c::mode_t;
+        const SGID = c::S_ISGID as RawMode;
 
         /// `S_ISVTX`
         #[cfg(not(target_os = "wasi"))] // WASI doesn't have Unix-style mode flags.
-        const SVTX = c::S_ISVTX as c::mode_t;
+        const SVTX = c::S_ISVTX as RawMode;
     }
 }
 
@@ -412,7 +412,7 @@ impl FileType {
     /// Construct a `FileType` from the `S_IFMT` bits of the `st_mode` field of
     /// a `Stat`.
     pub const fn from_raw_mode(st_mode: RawMode) -> Self {
-        match st_mode & c::S_IFMT {
+        match (st_mode as c::mode_t) & c::S_IFMT {
             c::S_IFREG => Self::RegularFile,
             c::S_IFDIR => Self::Directory,
             c::S_IFLNK => Self::Symlink,
@@ -429,16 +429,16 @@ impl FileType {
     /// Construct an `st_mode` value from `Stat`.
     pub const fn as_raw_mode(self) -> RawMode {
         match self {
-            Self::RegularFile => c::S_IFREG,
-            Self::Directory => c::S_IFDIR,
-            Self::Symlink => c::S_IFLNK,
+            Self::RegularFile => c::S_IFREG as RawMode,
+            Self::Directory => c::S_IFDIR as RawMode,
+            Self::Symlink => c::S_IFLNK as RawMode,
             #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `S_IFIFO`.
-            Self::Fifo => c::S_IFIFO,
+            Self::Fifo => c::S_IFIFO as RawMode,
             #[cfg(not(target_os = "wasi"))] // TODO: Use WASI's `S_IFSOCK`.
-            Self::Socket => c::S_IFSOCK,
-            Self::CharacterDevice => c::S_IFCHR,
-            Self::BlockDevice => c::S_IFBLK,
-            Self::Unknown => c::S_IFMT,
+            Self::Socket => c::S_IFSOCK as RawMode,
+            Self::CharacterDevice => c::S_IFCHR as RawMode,
+            Self::BlockDevice => c::S_IFBLK as RawMode,
+            Self::Unknown => c::S_IFMT as RawMode,
         }
     }
 
@@ -906,10 +906,20 @@ pub struct StatxTimestamp {
 }
 
 /// `mode_t`
+#[cfg(not(all(target_os = "android", target_arch = "x86")))]
 pub type RawMode = c::mode_t;
 
+/// `mode_t`
+#[cfg(all(target_os = "android", target_arch = "x86"))]
+pub type RawMode = c::c_uint;
+
 /// `dev_t`
+#[cfg(not(all(target_os = "android", target_arch = "x86")))]
 pub type Dev = c::dev_t;
+
+/// `dev_t`
+#[cfg(all(target_os = "android", target_arch = "x86"))]
+pub type Dev = c::c_ulonglong;
 
 /// `__fsword_t`
 #[cfg(all(

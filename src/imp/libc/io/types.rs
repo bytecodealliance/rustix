@@ -452,27 +452,6 @@ impl Advice {
     pub const DontNeed: Self = Self::Normal;
 }
 
-/// `struct termios` for use with [`ioctl_tcgets`].
-///
-/// [`ioctl_tcgets`]: crate::io::ioctl_tcgets
-#[cfg(not(target_os = "wasi"))]
-pub type Termios = c::termios;
-
-/// `struct winsize` for use with [`ioctl_tiocgwinsz`].
-///
-/// [`ioctl_tiocgwinsz`]: crate::io::ioctl_tiocgwinsz
-#[cfg(not(target_os = "wasi"))]
-pub type Winsize = c::winsize;
-
-/// `tcflag_t`—A type for the flags fields of [`Termios`].
-#[cfg(not(target_os = "wasi"))]
-pub type Tcflag = c::tcflag_t;
-
-/// `ICANON`—A flag for the `c_lflag` field of [`Termios`] indicating
-/// canonical mode.
-#[cfg(not(target_os = "wasi"))]
-pub const ICANON: Tcflag = c::ICANON;
-
 /// `PIPE_BUF`—The maximum size of a write to a pipe guaranteed to be atomic.
 #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
 pub const PIPE_BUF: usize = c::PIPE_BUF;

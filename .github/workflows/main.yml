@@ -76,29 +76,31 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu gcc-arm-linux-gnueabi musl-tools
     - run: cargo check --workspace --release -vv
-    - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl
-    - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl --features=use-libc
-    - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-gnux32
-    - run: cargo check --workspace --release -vv --target=x86_64-linux-android
-    - run: cargo check --workspace --release -vv --target=i686-linux-android
-    - run: cargo check --workspace --release -vv --target=x86_64-apple-darwin
-    - run: cargo check --workspace --release -vv --target=x86_64-unknown-freebsd
-    - run: cargo check --workspace --release -vv --target=x86_64-unknown-netbsd
-    - run: cargo check --workspace --release -vv --target=x86_64-fuchsia
-    - run: cargo check --workspace --release -vv --target=x86_64-unknown-illumos
-    - run: cargo check --workspace --release -vv --target=i686-unknown-linux-gnu
-    - run: cargo check --workspace --release -vv --target=i686-unknown-linux-musl
-    - run: cargo check --workspace --release -vv --target=i686-unknown-linux-musl --features=use-libc
-    - run: cargo check --workspace --release -vv --target=wasm32-unknown-emscripten
-    - run: cargo check --workspace --release -vv --target=riscv64gc-unknown-linux-gnu
-    - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-gnu
-    - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl
-    - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl --features=use-libc
-    - run: cargo check --workspace --release -vv --target=powerpc64le-unknown-linux-gnu
-    - run: cargo check --workspace --release -vv --target=mipsel-unknown-linux-gnu
-    - run: cargo check --workspace --release -vv --target=mips64el-unknown-linux-gnuabi64
-    - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi
-    - run: cargo check --workspace --release -vv --target=s390x-unknown-linux-gnu
+    - run: cargo check --workspace --release -vv --features=all-apis
+    - run: cargo check --workspace --release -vv --features=use-libc,all-apis
+    - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl --features=all-apis
+    - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl --features=use-libc,all-apis
+    - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-gnux32 --features=all-apis
+    - run: cargo check --workspace --release -vv --target=x86_64-linux-android --features=all-apis
+    - run: cargo check --workspace --release -vv --target=i686-linux-android --features=all-apis
+    - run: cargo check --workspace --release -vv --target=x86_64-apple-darwin --features=all-apis
+    - run: cargo check --workspace --release -vv --target=x86_64-unknown-freebsd --features=all-apis
+    - run: cargo check --workspace --release -vv --target=x86_64-unknown-netbsd --features=all-apis
+    - run: cargo check --workspace --release -vv --target=x86_64-fuchsia --features=all-apis
+    - run: cargo check --workspace --release -vv --target=x86_64-unknown-illumos --features=all-apis
+    - run: cargo check --workspace --release -vv --target=i686-unknown-linux-gnu --features=all-apis
+    - run: cargo check --workspace --release -vv --target=i686-unknown-linux-musl --features=all-apis
+    - run: cargo check --workspace --release -vv --target=i686-unknown-linux-musl --features=use-libc,all-apis
+    - run: cargo check --workspace --release -vv --target=wasm32-unknown-emscripten --features=all-apis
+    - run: cargo check --workspace --release -vv --target=riscv64gc-unknown-linux-gnu --features=all-apis
+    - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-gnu --features=all-apis
+    - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl --features=all-apis
+    - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl --features=use-libc,all-apis
+    - run: cargo check --workspace --release -vv --target=powerpc64le-unknown-linux-gnu --features=all-apis
+    - run: cargo check --workspace --release -vv --target=mipsel-unknown-linux-gnu --features=all-apis
+    - run: cargo check --workspace --release -vv --target=mips64el-unknown-linux-gnuabi64 --features=all-apis
+    - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi --features=all-apis
+    - run: cargo check --workspace --release -vv --target=s390x-unknown-linux-gnu --features=all-apis
 
   check_no_default_features:
     name: Check --no-default-features
@@ -124,7 +126,7 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - run: cargo check --workspace --release --no-default-features --features itoa -vv
+    - run: cargo check --workspace --release --no-default-features --features all-apis -vv
 
   check_nightly:
     name: Check nightly-only targets
@@ -148,8 +150,8 @@ jobs:
         rustup target add
         x86_64-unknown-redox
         wasm32-wasi
-    - run: cargo check --workspace --release -vv --target=x86_64-unknown-redox
-    - run: cargo check --workspace --release -vv --target=wasm32-wasi
+    - run: cargo check --workspace --release -vv --target=x86_64-unknown-redox --features=all-apis
+    - run: cargo check --workspace --release -vv --target=wasm32-wasi --features=all-apis
 
   check_tier3:
     name: Check selected Tier 3 platforms
@@ -173,8 +175,8 @@ jobs:
         # See the comments in the libc crate
         RUSTFLAGS: -A improper_ctypes_definitions
     - run: rustup component add rust-src
-    - run: cargo check -Z build-std=core,alloc,std --target x86_64-unknown-openbsd --all-targets
-    - run: cargo check -Z build-std=core,alloc,std --target x86_64-uwp-windows-msvc --all-targets
+    - run: cargo check -Z build-std=core,alloc,std --target x86_64-unknown-openbsd --all-targets --features=all-apis
+    - run: cargo check -Z build-std=core,alloc,std --target x86_64-uwp-windows-msvc --all-targets --features=all-apis
 
   test:
     name: Test
@@ -406,13 +408,13 @@ jobs:
 
     - run: |
         # Run the tests, and check the prebuilt release libraries.
-        cargo test --verbose --features=all-impls,procfs,cc --release --workspace -- --nocapture
+        cargo test --verbose --features=all-impls,all-apis,cc --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: full
 
     - run: |
         # Check the prebuilt debug libraries too.
-        cargo check --features=cc
+        cargo check --features=all-impls,all-apis,cc
 
   test_use_libc:
     name: Test use-libc
@@ -550,7 +552,7 @@ jobs:
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
-        cargo test --verbose --features=use-libc,all-impls,procfs --release --workspace -- --nocapture
+        cargo test --verbose --features=use-libc,all-impls,all-apis --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: full
 
@@ -657,6 +659,6 @@ jobs:
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
-        cargo test --verbose --features=all-impls,procfs --release --workspace -- --nocapture
+        cargo test --verbose --features=all-impls,all-apis --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: full
