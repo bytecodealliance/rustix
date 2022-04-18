@@ -24,7 +24,7 @@ pub type Nsecs = c::c_long;
 /// These constants are always supported at runtime so `clock_gettime` never
 /// has to fail with `INVAL` due to an unsupported clock. See
 /// [`DynamicClockId`] for a greater set of clocks, with the caveat that not
-/// all of them are always support
+/// all of them are always supported.
 ///
 /// [`clock_gettime`]: crate::time::clock_gettime
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
@@ -75,7 +75,7 @@ pub enum ClockId {
 /// These constants are always supported at runtime so `clock_gettime` never
 /// has to fail with `INVAL` due to an unsupported clock. See
 /// [`DynamicClockId`] for a greater set of clocks, with the caveat that not
-/// all of them are always support
+/// all of them are always supported.
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(u32)]
