@@ -24,7 +24,7 @@ pub type Itimerspec = linux_raw_sys::general::__kernel_itimerspec;
 /// These constants are always supported at runtime, so `clock_gettime` never
 /// has to fail with `INVAL` due to an unsupported clock. See
 /// [`DynamicClockId`] for a greater set of clocks, with the caveat that not
-/// all of them are always support
+/// all of them are always supported.
 ///
 /// [`clock_gettime`]: crate::time::clock_gettime
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
