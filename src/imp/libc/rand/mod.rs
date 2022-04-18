@@ -1,6 +1,2 @@
-mod types;
-
 pub(crate) mod syscalls;
-
-#[cfg(target_os = "linux")]
-pub use types::GetRandomFlags;
+pub(crate) mod types;

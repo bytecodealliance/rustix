@@ -2,7 +2,7 @@ use crate::fd::AsFd;
 use crate::imp;
 use crate::io::{self, OwnedFd};
 
-pub use imp::time::{Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags};
+pub use imp::time::types::{Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags};
 
 /// `timerfd_create(clockid, flags)`—Create a timer.
 ///

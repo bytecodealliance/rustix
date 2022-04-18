@@ -54,7 +54,7 @@ pub(crate) unsafe fn read_sockaddr(
     storage: *const sockaddr,
     len: usize,
 ) -> io::Result<SocketAddrAny> {
-    let offsetof_sun_path = super::offsetof_sun_path();
+    let offsetof_sun_path = super::addr::offsetof_sun_path();
 
     if len < size_of::<c::sa_family_t>() {
         return Err(io::Error::INVAL);

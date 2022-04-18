@@ -1,6 +1,6 @@
 #[cfg(not(all(target_os = "android", target_arch = "x86")))]
 use super::super::c;
-use super::Dev;
+use crate::fs::Dev;
 
 #[cfg(not(any(target_os = "android", target_os = "emscripten")))]
 #[inline]

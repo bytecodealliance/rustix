@@ -6,14 +6,14 @@ use imp::fd::AsFd;
 // Declare `IoSlice` and `IoSliceMut`.
 #[cfg(not(windows))]
 #[cfg(not(feature = "std"))]
-pub use imp::io::{IoSlice, IoSliceMut};
+pub use imp::io::io_slice::{IoSlice, IoSliceMut};
 #[cfg(not(windows))]
 #[cfg(feature = "std")]
 pub use std::io::{IoSlice, IoSliceMut};
 
 /// `RWF_*` constants for use with [`preadv2`] and [`pwritev2`].
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use imp::io::ReadWriteFlags;
+pub use imp::io::types::ReadWriteFlags;
 
 /// `read(fd, buf)`—Reads from a stream.
 ///

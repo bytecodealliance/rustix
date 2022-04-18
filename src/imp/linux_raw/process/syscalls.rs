@@ -19,7 +19,7 @@ use super::super::conv::{
     ret_usize_infallible, signal, size_of, slice_just_addr, slice_mut, void_star, zero,
 };
 use super::super::reg::nr;
-use super::{RawCpuSet, RawUname};
+use super::types::{RawCpuSet, RawUname};
 use crate::fd::BorrowedFd;
 use crate::ffi::ZStr;
 use crate::io;

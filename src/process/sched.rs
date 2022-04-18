@@ -15,18 +15,18 @@ use crate::{imp, io};
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct CpuSet {
-    cpu_set: imp::process::RawCpuSet,
+    cpu_set: imp::process::types::RawCpuSet,
 }
 
 impl CpuSet {
     /// The maximum number of CPU in `CpuSet`.
-    pub const MAX_CPU: usize = imp::process::CPU_SETSIZE;
+    pub const MAX_CPU: usize = imp::process::types::CPU_SETSIZE;
 
     /// Create a new and empty `CpuSet`.
     #[inline]
     pub fn new() -> Self {
         Self {
-            cpu_set: imp::process::raw_cpu_set_new(),
+            cpu_set: imp::process::types::raw_cpu_set_new(),
         }
     }
 

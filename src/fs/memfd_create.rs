@@ -1,7 +1,7 @@
 use crate::io::{self, OwnedFd};
 use crate::{imp, path};
 
-pub use imp::fs::MemfdFlags;
+pub use imp::fs::types::MemfdFlags;
 
 /// `memfd_create(path, flags)`
 ///

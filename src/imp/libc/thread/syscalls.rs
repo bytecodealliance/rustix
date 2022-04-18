@@ -2,12 +2,12 @@
 
 use super::super::c;
 use super::super::conv::ret;
+use crate::imp::time::types::Timespec;
 use crate::io;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::process::{Pid, RawNonZeroPid};
 #[cfg(not(target_os = "redox"))]
 use crate::thread::NanosleepRelativeResult;
-use crate::time::Timespec;
 use core::mem::MaybeUninit;
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -19,7 +19,7 @@ use core::mem::MaybeUninit;
     target_os = "redox",
     target_os = "wasi",
 )))]
-use {crate::time::ClockId, core::ptr::null_mut};
+use {crate::imp::time::types::ClockId, core::ptr::null_mut};
 
 #[cfg(not(any(
     target_os = "dragonfly",

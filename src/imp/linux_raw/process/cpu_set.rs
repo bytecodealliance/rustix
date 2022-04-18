@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use super::RawCpuSet;
+use super::types::RawCpuSet;
 use core::mem::size_of_val;
 
 #[inline]

@@ -2,7 +2,7 @@ use crate::imp;
 use crate::io::{self, OwnedFd};
 
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
-pub use imp::io::PipeFlags;
+pub use imp::io::types::PipeFlags;
 
 /// `PIPE_BUF`—The maximum length at which writes to a pipe are atomic.
 ///
@@ -19,7 +19,7 @@ pub use imp::io::PipeFlags;
     target_os = "redox",
     target_os = "wasi"
 )))]
-pub const PIPE_BUF: usize = imp::io::PIPE_BUF;
+pub const PIPE_BUF: usize = imp::io::types::PIPE_BUF;
 
 /// `pipe()`—Creates a pipe.
 ///

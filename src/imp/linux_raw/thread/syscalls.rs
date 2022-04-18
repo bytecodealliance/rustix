@@ -15,10 +15,10 @@ use super::super::conv::{
     void_star, zero,
 };
 use super::super::reg::nr;
+use crate::imp::time::types::{ClockId, Timespec};
 use crate::io;
 use crate::process::{Pid, RawNonZeroPid};
 use crate::thread::{FutexFlags, FutexOperation, NanosleepRelativeResult};
-use crate::time::{ClockId, Timespec};
 use core::mem::MaybeUninit;
 use linux_raw_sys::general::{
     __NR_clock_nanosleep, __NR_futex, __NR_gettid, __NR_nanosleep, __kernel_pid_t,

@@ -1,8 +1,7 @@
-use super::FileType;
 use crate::as_ptr;
 use crate::fd::{AsFd, BorrowedFd};
 use crate::ffi::{ZStr, ZString};
-use crate::fs::{fcntl_getfl, fstat, fstatfs, openat, Mode, OFlags, Stat, StatFs};
+use crate::fs::{fcntl_getfl, fstat, fstatfs, openat, FileType, Mode, OFlags, Stat, StatFs};
 use crate::io::{self, OwnedFd};
 use crate::process::fchdir;
 use alloc::borrow::ToOwned;

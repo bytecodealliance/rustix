@@ -2,28 +2,16 @@
 
 use crate::imp;
 
-pub use imp::fs::FdFlags;
-
-pub use imp::fs::Access;
+pub use imp::fs::types::{Access, FdFlags, Mode, OFlags};
 
 #[cfg(not(target_os = "redox"))]
-pub use imp::fs::AtFlags;
-
-pub use imp::fs::Mode;
-
-pub use imp::fs::OFlags;
+pub use imp::fs::types::AtFlags;
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
-pub use imp::fs::CloneFlags;
-
-#[cfg(any(target_os = "ios", target_os = "macos"))]
-pub use imp::fs::CopyfileFlags;
+pub use imp::fs::types::{CloneFlags, CopyfileFlags};
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use imp::fs::ResolveFlags;
-
-#[cfg(any(target_os = "android", target_os = "linux"))]
-pub use imp::fs::RenameFlags;
+pub use imp::fs::types::{RenameFlags, ResolveFlags};
 
 #[cfg(not(target_os = "redox"))]
-pub use imp::fs::Dev;
+pub use imp::fs::types::Dev;

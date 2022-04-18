@@ -3,7 +3,7 @@
 #[cfg(feature = "fs")]
 mod abs;
 #[cfg(not(target_os = "redox"))]
-#[cfg(feature = "fs")]
+#[cfg(any(feature = "fs", feature = "procfs"))]
 mod at;
 mod constants;
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -11,7 +11,7 @@ mod copy_file_range;
 #[cfg(not(target_os = "redox"))]
 mod cwd;
 #[cfg(not(target_os = "redox"))]
-#[cfg(feature = "fs")]
+#[cfg(any(feature = "fs", feature = "procfs"))]
 mod dir;
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -83,7 +83,7 @@ pub use at::renameat_with;
 #[cfg(feature = "fs")]
 pub use at::{chmodat, chownat};
 #[cfg(not(target_os = "redox"))]
-#[cfg(feature = "fs")]
+#[cfg(any(feature = "fs", feature = "procfs"))]
 pub use at::{
     linkat, mkdirat, openat, readlinkat, renameat, statat, symlinkat, unlinkat, utimensat, RawMode,
     UTIME_NOW, UTIME_OMIT,
@@ -105,7 +105,7 @@ pub use copy_file_range::copy_file_range;
 #[cfg(not(target_os = "redox"))]
 pub use cwd::cwd;
 #[cfg(not(target_os = "redox"))]
-#[cfg(feature = "fs")]
+#[cfg(any(feature = "fs", feature = "procfs"))]
 pub use dir::{Dir, DirEntry};
 #[cfg(not(any(
     target_os = "dragonfly",

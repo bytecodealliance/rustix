@@ -1,10 +1,10 @@
 use crate::{imp, io};
 
-pub use imp::time::{Nsecs, Secs, Timespec};
+pub use imp::time::types::{Nsecs, Secs, Timespec};
 
 /// `clockid_t`
 #[cfg(any(not(target_os = "wasi")))]
-pub use imp::time::{ClockId, DynamicClockId};
+pub use imp::time::types::{ClockId, DynamicClockId};
 
 /// `clock_getres(id)`—Returns the resolution of a clock.
 ///

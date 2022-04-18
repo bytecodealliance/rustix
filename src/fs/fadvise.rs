@@ -1,7 +1,7 @@
 use crate::{imp, io};
 use imp::fd::AsFd;
 
-pub use imp::fs::Advice;
+pub use imp::fs::types::Advice;
 
 /// `posix_fadvise(fd, offset, len, advice)`—Declares an expected access
 /// pattern for a file.

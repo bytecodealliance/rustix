@@ -1,7 +1,7 @@
 use crate::{imp, io};
 
 /// `GRND_*`
-pub use imp::rand::GetRandomFlags;
+pub use imp::rand::types::GetRandomFlags;
 
 /// `getrandom(buf, flags)`—Reads a sequence of random bytes.
 ///

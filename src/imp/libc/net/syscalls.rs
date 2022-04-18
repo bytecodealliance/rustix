@@ -2,15 +2,19 @@
 
 use super::super::c;
 use super::super::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
-use super::ext::{in6_addr_new, in_addr_new};
 #[cfg(unix)]
-use super::SocketAddrUnix;
+use super::addr::SocketAddrUnix;
+use super::ext::{in6_addr_new, in_addr_new};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-use super::{
-    encode_sockaddr_v4, encode_sockaddr_v6, initialize_family_to_unspec, maybe_read_sockaddr_os,
-    read_sockaddr_os, AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown,
-    SocketFlags, SocketType,
-};
+use super::read_sockaddr::initialize_family_to_unspec;
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+use super::read_sockaddr::{maybe_read_sockaddr_os, read_sockaddr_os};
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+use super::send_recv::{RecvFlags, SendFlags};
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+use super::types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 use crate::as_ptr;
 use crate::fd::BorrowedFd;
 use crate::io::{self, OwnedFd};

@@ -12,7 +12,7 @@ use super::super::conv::{syscall_ret, syscall_ret_u32};
     target_os = "fuchsia",
     target_os = "dragonfly"
 ))]
-use super::RawCpuSet;
+use super::types::RawCpuSet;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use crate::fd::BorrowedFd;
 use crate::ffi::ZStr;
@@ -32,7 +32,7 @@ use {
 };
 #[cfg(not(target_os = "wasi"))]
 use {
-    super::RawUname,
+    super::types::RawUname,
     crate::process::{Gid, Pid, RawNonZeroPid, RawPid, Signal, Uid, WaitOptions, WaitStatus},
 };
 

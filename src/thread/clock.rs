@@ -1,5 +1,5 @@
-use crate::time::Timespec;
 use crate::{imp, io};
+use imp::time::types::Timespec;
 
 /// `clockid_t`
 #[cfg(not(any(
@@ -12,7 +12,7 @@ use crate::{imp, io};
     target_os = "redox",
     target_os = "wasi",
 )))]
-use imp::time::ClockId;
+use imp::time::types::ClockId;
 
 /// `clock_nanosleep(id, 0, request, remain)`—Sleeps for a duration on a
 /// given clock.

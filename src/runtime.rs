@@ -134,7 +134,7 @@ pub fn startup_tls_info() -> StartupTlsInfo {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub fn exe_phdrs() -> (*const c_void, usize) {
-    imp::process::exe_phdrs()
+    imp::process::auxv::exe_phdrs()
 }
 
 #[cfg(linux_raw)]

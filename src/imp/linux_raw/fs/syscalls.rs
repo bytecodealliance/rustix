@@ -25,10 +25,6 @@ use super::super::conv::{
     ret_owned_fd, ret_usize, size_of, slice_mut,
 };
 use super::super::reg::nr;
-use super::{
-    Access, Advice, AtFlags, FallocateFlags, FdFlags, FlockOperation, MemfdFlags, Mode, OFlags,
-    RenameFlags, ResolveFlags, Stat, StatFs, StatxFlags,
-};
 #[cfg(any(
     target_arch = "aarch64",
     target_arch = "riscv64",
@@ -37,7 +33,10 @@ use super::{
 use crate::fd::AsFd;
 use crate::fd::{BorrowedFd, RawFd};
 use crate::ffi::ZStr;
-use crate::fs::{FileType, SealFlags, Timestamps};
+use crate::fs::{
+    Access, Advice, AtFlags, FallocateFlags, FdFlags, FileType, FlockOperation, MemfdFlags, Mode,
+    OFlags, RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatxFlags, Timestamps,
+};
 use crate::io::{self, OwnedFd, SeekFrom};
 use crate::process::{Gid, Uid};
 use core::convert::TryInto;

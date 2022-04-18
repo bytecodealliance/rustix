@@ -1,13 +1,10 @@
 //! Linux `statx`.
 
+use crate::fs::AtFlags;
 use crate::{imp, io, path};
 use imp::fd::AsFd;
-use imp::fs::AtFlags;
 
-pub use imp::fs::{Statx, StatxTimestamp};
-
-/// `STATX_*` constants.
-pub use imp::fs::StatxFlags;
+pub use imp::fs::types::{Statx, StatxFlags, StatxTimestamp};
 
 /// `statx(dirfd, path, flags, mask, statxbuf)`
 ///

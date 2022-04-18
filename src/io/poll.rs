@@ -1,6 +1,6 @@
 use crate::{imp, io};
 
-pub use imp::io::{PollFd, PollFlags};
+pub use imp::io::poll_fd::{PollFd, PollFlags};
 
 /// `poll(self.fds, timeout)`
 ///

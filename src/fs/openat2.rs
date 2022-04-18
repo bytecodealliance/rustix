@@ -1,7 +1,7 @@
 use crate::io::{self, OwnedFd};
 use crate::{imp, path};
 use imp::fd::AsFd;
-use imp::fs::{Mode, OFlags, ResolveFlags};
+use imp::fs::types::{Mode, OFlags, ResolveFlags};
 
 /// `openat2(dirfd, path, OpenHow { oflags, mode, resolve }, sizeof(OpenHow))`
 ///

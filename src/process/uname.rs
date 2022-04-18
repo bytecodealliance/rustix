@@ -19,7 +19,7 @@ pub fn uname() -> Uname {
 
 /// `struct utsname`—Return type for [`uname`].
 #[doc(alias = "utsname")]
-pub struct Uname(imp::process::RawUname);
+pub struct Uname(imp::process::types::RawUname);
 
 impl Uname {
     /// `sysname`—Operating system release name

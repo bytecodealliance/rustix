@@ -2,9 +2,9 @@
 
 use super::super::c;
 use super::super::conv::ret;
-use super::Timespec;
+use super::types::Timespec;
 #[cfg(not(target_os = "wasi"))]
-use super::{ClockId, DynamicClockId};
+use super::types::{ClockId, DynamicClockId};
 use crate::io;
 use core::mem::MaybeUninit;
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]

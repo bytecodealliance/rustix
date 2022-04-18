@@ -6,7 +6,7 @@ use crate::net::{SocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::{imp, io};
 use imp::fd::{AsFd, BorrowedFd};
 
-pub use imp::net::{RecvFlags, SendFlags};
+pub use imp::net::send_recv::{RecvFlags, SendFlags};
 
 /// `recv(fd, buf, flags)`—Reads data from a socket.
 ///

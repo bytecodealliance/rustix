@@ -2,10 +2,10 @@
 //! we can interpret the rest of a `sockaddr` produced by the kernel.
 
 use super::super::c;
-use super::ext::{in6_addr_new, in_addr_new, sockaddr_in6_new};
-use super::SocketAddrStorage;
+use super::addr::SocketAddrStorage;
 #[cfg(unix)]
-use super::SocketAddrUnix;
+use super::addr::SocketAddrUnix;
+use super::ext::{in6_addr_new, in_addr_new, sockaddr_in6_new};
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use core::mem::size_of;
 

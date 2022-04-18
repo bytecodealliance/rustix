@@ -6,7 +6,7 @@
 //! primitives.
 #![allow(unsafe_code)]
 
-use crate::time::Timespec;
+use crate::imp::time::types::Timespec;
 use crate::{imp, io};
 
 pub use imp::thread::{FutexFlags, FutexOperation};

@@ -1,7 +1,7 @@
 use super::super::c;
 use super::super::conv::owned_fd;
 #[cfg(not(target_os = "illumos"))]
-use super::FileType;
+use super::types::FileType;
 use crate::fd::{AsFd, BorrowedFd};
 use crate::ffi::ZStr;
 #[cfg(target_os = "wasi")]

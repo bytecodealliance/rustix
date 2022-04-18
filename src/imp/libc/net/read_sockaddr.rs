@@ -1,7 +1,7 @@
 use super::super::c;
-use super::ext::{in6_addr_s6_addr, in_addr_s_addr, sockaddr_in6_sin6_scope_id};
 #[cfg(unix)]
-use super::SocketAddrUnix;
+use super::addr::SocketAddrUnix;
+use super::ext::{in6_addr_s6_addr, in_addr_s_addr, sockaddr_in6_sin6_scope_id};
 #[cfg(not(windows))]
 use crate::as_ptr;
 #[cfg(not(windows))]
@@ -92,7 +92,7 @@ pub(crate) unsafe fn read_sockaddr(
     len: usize,
 ) -> io::Result<SocketAddrAny> {
     #[cfg(unix)]
-    let offsetof_sun_path = super::offsetof_sun_path();
+    let offsetof_sun_path = super::addr::offsetof_sun_path();
 
     if len < size_of::<c::sa_family_t>() {
         return Err(io::Error::INVAL);
