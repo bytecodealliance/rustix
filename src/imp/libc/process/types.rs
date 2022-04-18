@@ -146,9 +146,12 @@ impl Resource {
     pub const Rss: Self = Self::As;
 }
 
-/// A signal number for use with [`kill`].
+/// A signal number for use with [`kill_process`], [`kill_process_group`],
+/// and [`kill_current_process_group`].
 ///
-/// [`kill`]: crate::process::kill
+/// [`kill_process`]: crate::process::kill_process
+/// [`kill_process_group`]: crate::process::kill_process_group
+/// [`kill_current_process_group`]: crate::process::kill_current_process_group
 #[cfg(not(target_os = "wasi"))]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(i32)]
