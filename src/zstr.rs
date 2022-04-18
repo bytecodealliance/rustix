@@ -35,7 +35,7 @@ macro_rules! zstr {
             "zstr argument contains embedded NUL bytes",
         );
 
-        #[allow(unsafe_code)]
+        #[allow(unsafe_code, unused_unsafe)]
         {
             // Now that we know the string doesn't have embedded NULs, we can call
             // `from_bytes_with_nul_unchecked`, which as of this writing is defined
