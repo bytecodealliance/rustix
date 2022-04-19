@@ -65,19 +65,19 @@ pub(crate) mod time;
 
 /// If the host libc is glibc, return `true` if it is less than version 2.25.
 ///
-/// To restate and clarify, this function returning true does not mean the libc is glibc
-/// just that if it is glibc, it is less than version 2.25.
+/// To restate and clarify, this function returning true does not mean the libc
+/// is glibc just that if it is glibc, it is less than version 2.25.
 ///
 /// For now, this function is only available on Linux, but if it ends up being
 /// used beyond that, this could be changed to e.g. `#[cfg(unix)]`.
 #[cfg(all(unix, target_env = "gnu"))]
 pub(crate) fn if_glibc_is_less_than_2_25() -> bool {
-    // This is also defined inside `weak_or_syscall!` in imp/libc/rand/syscalls.rs, but
-    // it's not convenient to re-export the weak symbol from that macro, so we duplicate it at
-    // a small cost here.
+    // This is also defined inside `weak_or_syscall!` in
+    // imp/libc/rand/syscalls.rs, but it's not convenient to re-export the weak
+    // symbol from that macro, so we duplicate it at a small cost here.
     weak! { fn getrandom(*mut c::c_void, c::size_t, c::c_uint) -> c::ssize_t }
 
-    // glibc 2.25 has getrandom(), which is how we satisfy the API contract of this function.
-    // But, there are likely other libc versions which have it.
+    // glibc 2.25 has `getrandom`, which is how we satisfy the API contract of
+    // this function. But, there are likely other libc versions which have it.
     getrandom.get().is_none()
 }
