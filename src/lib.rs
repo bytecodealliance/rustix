@@ -113,7 +113,7 @@
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
 
-/// Export `*Fd*` types and traits that used in rustix's public API.
+/// Export `*Fd` types and traits that used in rustix's public API.
 ///
 /// Users can use this to avoid needing to import anything else to use the same
 /// versions of these types and traits.
