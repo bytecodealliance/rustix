@@ -43,6 +43,12 @@ fn main() {
     // libc backend.
     let feature_use_libc = var("CARGO_FEATURE_USE_LIBC").is_ok();
 
+    // Check for `--features=rustc-dep-of-std`. This is used when rustix is
+    // being used to build std, in which case `can_compile` doesn't work
+    // because `core` isn't available yet, but also, we can assume we have a
+    // recent compiler.
+    let feature_rustc_dep_of_std = var("CARGO_FEATURE_RUSTC_DEP_OF_STD").is_ok();
+
     // Check for `RUSTFLAGS=--cfg=rustix_use_libc`. This allows end users to
     // enable the libc backend even if rustix is depended on transitively.
     let cfg_use_libc = var("CARGO_CFG_RUSTIX_USE_LIBC").is_ok();
@@ -79,7 +85,7 @@ fn main() {
         // Use inline asm if we have it, or outline asm otherwise. On PowerPC
         // and MIPS, Rust's inline asm is considered experimental, so only use
         // it if `--cfg=rustix_use_experimental_asm` is given.
-        if can_compile("use std::arch::asm;")
+        if (feature_rustc_dep_of_std || can_compile("use std::arch::asm;"))
             && (arch != "x86" || has_feature("naked_functions"))
             && ((arch != "powerpc64" && arch != "mips" && arch != "mips64")
                 || rustix_use_experimental_asm)
