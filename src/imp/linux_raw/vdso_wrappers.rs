@@ -312,7 +312,7 @@ unsafe extern "C" fn rustix_int_0x80() {
     asm!("int $$0x80", "ret", options(noreturn))
 }
 
-/// The outline version of the `rustix_int_0x80` above.
+// The outline version of the `rustix_int_0x80` above.
 #[cfg(all(not(asm), target_arch = "x86"))]
 extern "C" {
     fn rustix_int_0x80();
