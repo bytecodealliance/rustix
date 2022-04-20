@@ -190,6 +190,10 @@ pub enum Advice {
     LinuxCold = linux_raw_sys::general::MADV_COLD,
     /// `MADV_PAGEOUT` (since Linux 5.4)
     LinuxPageOut = linux_raw_sys::general::MADV_PAGEOUT,
+    /// `MADV_POPULATE_READ` (since Linux 5.14)
+    LinuxPopulateRead = linux_raw_sys::general::MADV_POPULATE_READ,
+    /// `MADV_POPULATE_WRITE` (since Linux 5.14)
+    LinuxPopulateWrite = linux_raw_sys::general::MADV_POPULATE_WRITE,
 }
 
 impl Advice {

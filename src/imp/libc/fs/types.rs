@@ -352,6 +352,9 @@ bitflags! {
 
         /// `RESOLVE_IN_ROOT`
         const IN_ROOT = 0x10;
+
+        /// `RESOLVE_CACHED` (since Linux 5.12)
+        const CACHED = 0x20;
     }
 }
 
