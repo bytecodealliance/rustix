@@ -232,6 +232,9 @@ bitflags! {
 
         /// `RESOLVE_IN_ROOT`
         const IN_ROOT = linux_raw_sys::general::RESOLVE_IN_ROOT as u64;
+
+        /// `RESOLVE_CACHED` (since Linux 5.12)
+        const CACHED = linux_raw_sys::general::RESOLVE_CACHED as u64;
     }
 }
 

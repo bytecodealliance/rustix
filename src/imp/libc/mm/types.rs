@@ -349,18 +349,36 @@ pub enum Advice {
     /// `MADV_UNMERGEABLE`
     #[cfg(any(target_os = "android", target_os = "linux"))]
     LinuxUnmergeable = c::MADV_UNMERGEABLE,
-    /// `MADV_HUGEPAGE`
+    /// `MADV_HUGEPAGE` (since Linux 2.6.38)
     #[cfg(any(target_os = "android", target_os = "linux"))]
     LinuxHugepage = c::MADV_HUGEPAGE,
-    /// `MADV_NOHUGEPAGE`
+    /// `MADV_NOHUGEPAGE` (since Linux 2.6.38)
     #[cfg(any(target_os = "android", target_os = "linux"))]
     LinuxNoHugepage = c::MADV_NOHUGEPAGE,
-    /// `MADV_DONTDUMP`
+    /// `MADV_DONTDUMP` (since Linux 3.4)
     #[cfg(any(target_os = "android", target_os = "linux"))]
     LinuxDontDump = c::MADV_DONTDUMP,
-    /// `MADV_DODUMP`
+    /// `MADV_DODUMP` (since Linux 3.4)
     #[cfg(any(target_os = "android", target_os = "linux"))]
     LinuxDoDump = c::MADV_DODUMP,
+    /// `MADV_WIPEONFORK` (since Linux 4.14)
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxWipeOnFork = linux_raw_sys::general::MADV_WIPEONFORK as i32,
+    /// `MADV_KEEPONFORK` (since Linux 4.14)
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxKeepOnFork = linux_raw_sys::general::MADV_KEEPONFORK as i32,
+    /// `MADV_COLD` (since Linux 5.4)
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxCold = linux_raw_sys::general::MADV_COLD as i32,
+    /// `MADV_PAGEOUT` (since Linux 5.4)
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxPageOut = linux_raw_sys::general::MADV_PAGEOUT as i32,
+    /// `MADV_POPULATE_READ` (since Linux 5.14)
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxPopulateRead = linux_raw_sys::general::MADV_POPULATE_READ as i32,
+    /// `MADV_POPULATE_WRITE` (since Linux 5.14)
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    LinuxPopulateWrite = linux_raw_sys::general::MADV_POPULATE_WRITE as i32,
 }
 
 #[cfg(target_os = "emscripten")]
