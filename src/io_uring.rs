@@ -18,6 +18,7 @@ use crate::fd::{AsFd, BorrowedFd, RawFd};
 use crate::imp;
 use crate::io::{self, OwnedFd};
 use core::ffi::c_void;
+use core::ptr::null_mut;
 use linux_raw_sys::general as sys;
 
 /// `io_uring_setup(entries, params)`—Setup a context for performing
@@ -467,6 +468,113 @@ pub fn io_uring_register_files_skip() -> BorrowedFd<'static> {
     }
 }
 
+/// `io_uring`'s native API represents pointers as `u64` values. In order to
+/// preserve strict-provenance, use a `*mut c_void`. On platforms where
+/// pointers are narrower than 64 bits, this requires additional padding.
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct io_uring_ptr {
+    #[doc(hidden)]
+    #[cfg(all(target_pointer_width = "32", target_endian = "big"))]
+    pub __pad32: u32,
+    #[doc(hidden)]
+    #[cfg(all(target_pointer_width = "16", target_endian = "big"))]
+    pub __pad16: u16,
+
+    /// The pointer value.
+    pub ptr: *mut c_void,
+
+    #[doc(hidden)]
+    #[cfg(all(target_pointer_width = "16", target_endian = "little"))]
+    pub __pad16: u16,
+    #[doc(hidden)]
+    #[cfg(all(target_pointer_width = "32", target_endian = "little"))]
+    pub __pad32: u32,
+}
+
+impl From<*mut c_void> for io_uring_ptr {
+    #[inline]
+    fn from(ptr: *mut c_void) -> Self {
+        Self {
+            ptr,
+
+            #[cfg(target_pointer_width = "16")]
+            __pad16: Default::default(),
+            #[cfg(any(target_pointer_width = "16", target_pointer_width = "32"))]
+            __pad32: Default::default(),
+        }
+    }
+}
+
+impl Default for io_uring_ptr {
+    #[inline]
+    fn default() -> Self {
+        Self::from(null_mut())
+    }
+}
+
+/// `io_uring`'s native API represents `user_data` fields as `u64` values. In
+/// order to preserve strict-provenance, use a union which allows users to
+/// optionally store pointers.
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union io_uring_user_data {
+    /// An arbitrary `u64`.
+    pub u64_: u64,
+
+    /// A pointer.
+    pub ptr: io_uring_ptr,
+}
+
+impl io_uring_user_data {
+    /// Return the `u64` value.
+    #[inline]
+    pub fn u64_(self) -> u64 {
+        // Safety: All the fields have the same underlying representation.
+        unsafe { self.u64_ }
+    }
+
+    /// Create a `Self` from a `u64` value.
+    #[inline]
+    pub fn from_u64(u64_: u64) -> Self {
+        Self { u64_ }
+    }
+
+    /// Return the `ptr` pointer value.
+    #[inline]
+    pub fn ptr(self) -> *mut c_void {
+        // Safety: All the fields have the same underlying representation.
+        unsafe { self.ptr }.ptr
+    }
+
+    /// Create a `Self` from a pointer value.
+    #[inline]
+    pub fn from_ptr(ptr: *mut c_void) -> Self {
+        Self {
+            ptr: io_uring_ptr::from(ptr),
+        }
+    }
+}
+
+impl Default for io_uring_user_data {
+    #[inline]
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+
+impl core::fmt::Debug for io_uring_user_data {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        // Just format as a `u64`, since formatting doesn't preserve
+        // provenance, and we don't have a discriminant.
+        unsafe { self.u64_.fmt(fmt) }
+    }
+}
+
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Copy, Clone, Default)]
@@ -479,7 +587,7 @@ pub struct io_uring_sqe {
     pub addr_or_splice_off_in: addr_or_splice_off_in_union,
     pub len: u32,
     pub op_flags: op_flags_union,
-    pub user_data: u64,
+    pub user_data: io_uring_user_data,
     pub buf: buf_union,
     pub personality: u16,
     pub splice_fd_in_or_file_index: splice_fd_in_or_file_index_union,
@@ -491,14 +599,14 @@ pub struct io_uring_sqe {
 #[derive(Copy, Clone)]
 pub union off_or_addr2_union {
     pub off: u64,
-    pub addr2: u64,
+    pub addr2: io_uring_ptr,
 }
 
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union addr_or_splice_off_in_union {
-    pub addr: u64,
+    pub addr: io_uring_ptr,
     pub splice_off_in: u64,
 }
 
@@ -549,7 +657,7 @@ pub union splice_fd_in_or_file_index_union {
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
 pub struct io_uring_cqe {
-    pub user_data: u64,
+    pub user_data: io_uring_user_data,
     pub res: i32,
     pub flags: IoringCqeFlags,
 }
