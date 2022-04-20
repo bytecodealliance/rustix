@@ -490,11 +490,43 @@ bitflags::bitflags! {
     }
 }
 
-pub use sys::{
-    IORING_CQE_BUFFER_SHIFT, IORING_CQ_EVENTFD_DISABLED, IORING_POLL_ADD_MULTI,
-    IORING_POLL_UPDATE_EVENTS, IORING_POLL_UPDATE_USER_DATA, IORING_SQ_CQ_OVERFLOW,
-    IORING_SQ_NEED_WAKEUP,
-};
+bitflags::bitflags! {
+    /// `IORING_SQ_*` flags.
+    #[derive(Default)]
+    pub struct IoringSqFlags: u32 {
+        /// `IORING_SQ_NEED_WAKEUP`
+        const NEED_WAKEUP = sys::IORING_SQ_NEED_WAKEUP;
+
+        /// `IORING_SQ_CQ_OVERFLOW`
+        const CQ_OVERFLOW = sys::IORING_SQ_CQ_OVERFLOW;
+    }
+}
+
+bitflags::bitflags! {
+    /// `IORING_CQ_*` flags.
+    #[derive(Default)]
+    pub struct IoringCqFlags: u32 {
+        /// `IORING_CQ_EVENTFD_DISABLED`
+        const EVENTFD_DISABLED = sys::IORING_CQ_EVENTFD_DISABLED;
+    }
+}
+
+bitflags::bitflags! {
+    /// `IORING_POLL_*` flags.
+    #[derive(Default)]
+    pub struct IoringPollFlags: u32 {
+        /// `IORING_POLL_ADD_MULTI`
+        const ADD_MULTI = sys::IORING_POLL_ADD_MULTI;
+
+        /// `IORING_POLL_UPDATE_EVENTS`
+        const UPDATE_EVENTS = sys::IORING_POLL_UPDATE_EVENTS;
+
+        /// `IORING_POLL_UPDATE_USER_DATA`
+        const UPDATE_USER_DATA = sys::IORING_POLL_UPDATE_USER_DATA;
+    }
+}
+
+pub use sys::IORING_CQE_BUFFER_SHIFT;
 
 // Re-export these as `u64`, which is the `offset` type in `rustix::io::mmap`.
 #[allow(missing_docs)]
