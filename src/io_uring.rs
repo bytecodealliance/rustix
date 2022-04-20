@@ -526,7 +526,8 @@ bitflags::bitflags! {
     }
 }
 
-pub use sys::IORING_CQE_BUFFER_SHIFT;
+#[allow(missing_docs)]
+pub const IORING_CQE_BUFFER_SHIFT: u32 = sys::IORING_CQE_BUFFER_SHIFT as _;
 
 // Re-export these as `u64`, which is the `offset` type in `rustix::io::mmap`.
 #[allow(missing_docs)]
