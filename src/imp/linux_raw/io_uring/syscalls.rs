@@ -5,7 +5,7 @@
 //! See the `rustix::imp::syscalls` module documentation for details.
 #![allow(unsafe_code)]
 
-use super::super::arch::choose::{syscall2, syscall4_readonly, syscall6_readonly};
+use super::super::arch::choose::{syscall2, syscall4_readonly, syscall6};
 use super::super::conv::{
     borrowed_fd, by_mut, c_uint, const_void_star, pass_usize, ret, ret_c_uint, ret_owned_fd,
 };
@@ -53,7 +53,10 @@ pub(crate) unsafe fn io_uring_enter(
     arg: *const c_void,
     size: usize,
 ) -> io::Result<u32> {
-    ret_c_uint(syscall6_readonly(
+    // This is not `_readonly` because `io_uring_enter` waits for I/O to
+    // complete, and I/O could involve writing to memory buffers, which
+    // could be a side effect depended on by the caller.
+    ret_c_uint(syscall6(
         nr(__NR_io_uring_enter),
         borrowed_fd(fd),
         c_uint(to_submit),
