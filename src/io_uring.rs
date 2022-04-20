@@ -170,9 +170,9 @@ pub enum IoringRegisterOp {
 }
 
 /// `IORING_OP_*` constants for use with [`io_uring_sqe`].
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum IoringOp {
     /// `IORING_OP_NOP`
     Nop = sys::IORING_OP_NOP as _,
@@ -303,9 +303,9 @@ impl Default for IoringOp {
 }
 
 /// `IORING_RESTRICTION_*` constants for use with [`io_uring_restriction`].
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(u16)]
 #[non_exhaustive]
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum IoringRestrictionOp {
     /// `IORING_RESTRICTION_REGISTER_OP`
     RegisterOp = sys::IORING_RESTRICTION_REGISTER_OP as _,
