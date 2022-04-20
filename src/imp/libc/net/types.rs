@@ -591,6 +591,7 @@ bitflags! {
 ///
 /// [`set_socket_timeout`]: crate::net::sockopt::set_socket_timeout.
 /// [`get_socket_timeout`]: crate::net::sockopt::get_socket_timeout.
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(i32)]
 pub enum Timeout {
     /// `SO_RCVTIMEO`—Timeout for receiving.

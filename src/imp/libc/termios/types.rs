@@ -3,6 +3,7 @@ use super::super::c;
 /// `TCSA*` values for use with [`tcsetattr`].
 ///
 /// [`tcsetattr`]: crate::termios::tcsetattr
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(i32)]
 pub enum OptionalActions {
     /// `TCSANOW`—Make the change immediately.
@@ -19,6 +20,7 @@ pub enum OptionalActions {
 /// `TC*` values for use with [`tcflush`].
 ///
 /// [`tcflush`]: crate::termios::tcflush
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(i32)]
 pub enum QueueSelector {
     /// `TCIFLUSH`—Flush data received but not read.
@@ -34,6 +36,7 @@ pub enum QueueSelector {
 /// `TC*` values for use with [`tcflow`].
 ///
 /// [`tcflow`]: crate::termios::tcflow
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(i32)]
 pub enum Action {
     /// `TCOOFF`—Suspend output.
