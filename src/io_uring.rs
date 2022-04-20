@@ -842,7 +842,7 @@ pub struct io_uring_probe_op {
 }
 
 #[allow(missing_docs)]
-#[repr(C)]
+#[repr(C, align(8))]
 #[derive(Debug, Copy, Clone, Default)]
 pub struct io_uring_files_update {
     pub offset: u32,
@@ -851,7 +851,7 @@ pub struct io_uring_files_update {
 }
 
 #[allow(missing_docs)]
-#[repr(C)]
+#[repr(C, align(8))]
 #[derive(Debug, Copy, Clone, Default)]
 pub struct io_uring_rsrc_register {
     pub nr: u32,
@@ -862,7 +862,7 @@ pub struct io_uring_rsrc_register {
 }
 
 #[allow(missing_docs)]
-#[repr(C)]
+#[repr(C, align(8))]
 #[derive(Debug, Copy, Clone, Default)]
 pub struct io_uring_rsrc_update {
     pub offset: u32,
@@ -871,7 +871,7 @@ pub struct io_uring_rsrc_update {
 }
 
 #[allow(missing_docs)]
-#[repr(C)]
+#[repr(C, align(8))]
 #[derive(Debug, Copy, Clone, Default)]
 pub struct io_uring_rsrc_update2 {
     pub offset: u32,
