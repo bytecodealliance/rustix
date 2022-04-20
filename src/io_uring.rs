@@ -302,6 +302,31 @@ impl Default for IoringOp {
     }
 }
 
+/// `IORING_RESTRICTION_*` constants for use with [`io_uring_restriction`].
+#[repr(u16)]
+#[non_exhaustive]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+pub enum IoringRestrictionOp {
+    /// `IORING_RESTRICTION_REGISTER_OP`
+    RegisterOp = sys::IORING_RESTRICTION_REGISTER_OP as _,
+
+    /// `IORING_RESTRICTION_SQE_FLAGS_ALLOWED`
+    SqeFlagsAllowed = sys::IORING_RESTRICTION_SQE_FLAGS_ALLOWED as _,
+
+    /// `IORING_RESTRICTION_SQE_FLAGS_REQUIRED`
+    SqeFlagsRequired = sys::IORING_RESTRICTION_SQE_FLAGS_REQUIRED as _,
+
+    /// `IORING_RESTRICTION_SQE_OP`
+    SqeOp = sys::IORING_RESTRICTION_SQE_OP as _,
+}
+
+impl Default for IoringRestrictionOp {
+    #[inline]
+    fn default() -> Self {
+        Self::RegisterOp
+    }
+}
+
 bitflags::bitflags! {
     /// `IORING_SETUP_*` flags for use with [`io_uring_params`].
     #[derive(Default)]
@@ -375,13 +400,33 @@ bitflags::bitflags! {
 }
 
 bitflags::bitflags! {
-    /// `IORING_TIMEOUT_*` flags for use with [`io_uring_sqe`].
+    /// `IORING_TIMEOUT_*` and `IORING_LINK_TIMEOUT_UPDATE` flags for use with
+    /// [`io_uring_sqe`].
     #[derive(Default)]
     pub struct IoringTimeoutFlags: u32 {
         /// `IORING_TIMEOUT_ABS`
         const ABS = sys::IORING_TIMEOUT_ABS;
+
         /// `IORING_TIMEOUT_UPDATE`
         const UPDATE = sys::IORING_TIMEOUT_UPDATE;
+
+        /// `IORING_TIMEOUT_BOOTTIME`
+        const BOOTTIME = sys::IORING_TIMEOUT_BOOTTIME;
+
+        /// `IORING_TIMEOUT_ETIME_SUCCESS`
+        const ETIME_SUCCESS = sys::IORING_TIMEOUT_ETIME_SUCCESS;
+
+        /// `IORING_TIMEOUT_REALTIME`
+        const REALTIME = sys::IORING_TIMEOUT_REALTIME;
+
+        /// `IORING_TIMEOUT_CLOCK_MASK`
+        const CLOCK_MASK = sys::IORING_TIMEOUT_CLOCK_MASK;
+
+        /// `IORING_TIMEOUT_UPDATE_MASK`
+        const UPDATE_MASK = sys::IORING_TIMEOUT_UPDATE_MASK;
+
+        /// `IORING_LINK_TIMEOUT_UPDATE`
+        const LINK_TIMEOUT_UPDATE = sys::IORING_LINK_TIMEOUT_UPDATE;
     }
 }
 
@@ -436,19 +481,28 @@ bitflags::bitflags! {
     }
 }
 
-// Structs and constants that have not yet been converted into manual
-// declarations.
+bitflags::bitflags! {
+    /// `IO_URING_OP_*` flags for use with [`io_uring_probe_op`].
+    #[derive(Default)]
+    pub struct IoringOpFlags: u16 {
+        /// `IO_URING_OP_SUPPORTED`
+        const SUPPORTED = sys::IO_URING_OP_SUPPORTED as _;
+    }
+}
+
 pub use sys::{
-    io_uring_files_update, io_uring_getevents_arg, io_uring_probe, io_uring_probe_op,
-    io_uring_rsrc_register, io_uring_rsrc_update, io_uring_rsrc_update2, iovec, open_how,
-    IORING_CQE_BUFFER_SHIFT, IORING_CQ_EVENTFD_DISABLED, IORING_LINK_TIMEOUT_UPDATE,
-    IORING_OFF_CQ_RING, IORING_OFF_SQES, IORING_OFF_SQ_RING, IORING_POLL_ADD_MULTI,
-    IORING_POLL_UPDATE_EVENTS, IORING_POLL_UPDATE_USER_DATA, IORING_RESTRICTION_REGISTER_OP,
-    IORING_RESTRICTION_SQE_FLAGS_ALLOWED, IORING_RESTRICTION_SQE_FLAGS_REQUIRED,
-    IORING_RESTRICTION_SQE_OP, IORING_SQ_CQ_OVERFLOW, IORING_SQ_NEED_WAKEUP,
-    IORING_TIMEOUT_BOOTTIME, IORING_TIMEOUT_CLOCK_MASK, IORING_TIMEOUT_ETIME_SUCCESS,
-    IORING_TIMEOUT_REALTIME, IORING_TIMEOUT_UPDATE_MASK, IO_URING_OP_SUPPORTED,
+    IORING_CQE_BUFFER_SHIFT, IORING_CQ_EVENTFD_DISABLED, IORING_POLL_ADD_MULTI,
+    IORING_POLL_UPDATE_EVENTS, IORING_POLL_UPDATE_USER_DATA, IORING_SQ_CQ_OVERFLOW,
+    IORING_SQ_NEED_WAKEUP,
 };
+
+// Re-export these as `u64`, which is the `offset` type in `rustix::io::mmap`.
+#[allow(missing_docs)]
+pub const IORING_OFF_SQ_RING: u64 = sys::IORING_OFF_SQ_RING as _;
+#[allow(missing_docs)]
+pub const IORING_OFF_CQ_RING: u64 = sys::IORING_OFF_CQ_RING as _;
+#[allow(missing_docs)]
+pub const IORING_OFF_SQES: u64 = sys::IORING_OFF_SQES as _;
 
 /// `IORING_REGISTER_FILES_SKIP`
 ///
@@ -673,7 +727,7 @@ pub struct io_uring_cqe {
 #[repr(C)]
 #[derive(Copy, Clone, Default)]
 pub struct io_uring_restriction {
-    pub opcode: u16,
+    pub opcode: IoringRestrictionOp,
     pub register_or_sqe_op_or_sqe_flags: register_or_sqe_op_or_sqe_flags_union,
     pub resv: u8,
     pub resv2: [u32; 3usize],
@@ -732,6 +786,103 @@ pub struct io_cqring_offsets {
     pub flags: u32,
     pub resv1: u32,
     pub resv2: u64,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default)]
+pub struct io_uring_probe {
+    pub last_op: IoringOp,
+    pub ops_len: u8,
+    pub resv: u16,
+    pub resv2: [u32; 3usize],
+    pub ops: sys::__IncompleteArrayField<io_uring_probe_op>,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+pub struct io_uring_probe_op {
+    pub op: IoringOp,
+    pub resv: u8,
+    pub flags: IoringOpFlags,
+    pub resv2: u32,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+pub struct io_uring_files_update {
+    pub offset: u32,
+    pub resv: u32,
+    pub fds: u64,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+pub struct io_uring_rsrc_register {
+    pub nr: u32,
+    pub resv: u32,
+    pub resv2: u64,
+    pub data: u64,
+    pub tags: u64,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+pub struct io_uring_rsrc_update {
+    pub offset: u32,
+    pub resv: u32,
+    pub data: u64,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+pub struct io_uring_rsrc_update2 {
+    pub offset: u32,
+    pub resv: u32,
+    pub data: u64,
+    pub tags: u64,
+    pub nr: u32,
+    pub resv2: u32,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+pub struct io_uring_getevents_arg {
+    pub sigmask: u64,
+    pub sigmask_sz: u32,
+    pub pad: u32,
+    pub ts: u64,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct iovec {
+    pub iov_base: *mut c_void,
+    pub iov_len: usize,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+pub struct open_how {
+    /// An [`OFlags`] value represented as a `u64`.
+    ///
+    /// [`OFlags`]: crate::fs::OFlags
+    pub flags: u64,
+
+    /// A [`Mode`] value represented as a `u64`.
+    ///
+    /// [`Mode`]: crate::fs::Mode
+    pub mode: u64,
+
+    pub resolve: crate::fs::ResolveFlags,
 }
 
 impl Default for off_or_addr2_union {
@@ -849,6 +1000,22 @@ fn io_uring_layouts() {
         };
     }
 
+    // For the common case of no renaming, check all fields of a struct.
+    macro_rules! check_struct {
+        ($name:ident, $($field:ident),*) => {
+            // Check the size and alignment.
+            check_type!($name);
+
+            // Check that we have all the fields.
+            let _test = $name {
+                $($field: unsafe { core::mem::zeroed() }),*
+            };
+
+            // Check that the fields have the right sizes and offsets.
+            $(check_struct_field!($name, $field));*
+        };
+    }
+
     check_renamed_union!(off_or_addr2_union, io_uring_sqe__bindgen_ty_1);
     check_renamed_union!(addr_or_splice_off_in_union, io_uring_sqe__bindgen_ty_2);
     check_renamed_union!(op_flags_union, io_uring_sqe__bindgen_ty_3);
@@ -858,14 +1025,8 @@ fn io_uring_layouts() {
         register_or_sqe_op_or_sqe_flags_union,
         io_uring_restriction__bindgen_ty_1
     );
-    check_type!(io_uring_sqe);
-    check_type!(io_uring_cqe);
-    check_type!(io_uring_restriction);
-    check_type!(io_uring_params);
-    check_type!(io_sqring_offsets);
-    check_type!(io_cqring_offsets);
 
-    check_struct_field!(io_uring_sqe, opcode);
+    check_type!(io_uring_sqe);
     check_struct_field!(io_uring_sqe, opcode);
     check_struct_field!(io_uring_sqe, flags);
     check_struct_field!(io_uring_sqe, ioprio);
@@ -880,10 +1041,7 @@ fn io_uring_layouts() {
     check_struct_renamed_union_field!(io_uring_sqe, splice_fd_in_or_file_index, __bindgen_anon_5);
     check_struct_field!(io_uring_sqe, __pad2);
 
-    check_struct_field!(io_uring_cqe, user_data);
-    check_struct_field!(io_uring_cqe, res);
-    check_struct_field!(io_uring_cqe, flags);
-
+    check_type!(io_uring_restriction);
     check_struct_field!(io_uring_restriction, opcode);
     check_struct_renamed_union_field!(
         io_uring_restriction,
@@ -893,34 +1051,51 @@ fn io_uring_layouts() {
     check_struct_field!(io_uring_restriction, resv);
     check_struct_field!(io_uring_restriction, resv2);
 
-    check_struct_field!(io_uring_params, sq_entries);
-    check_struct_field!(io_uring_params, cq_entries);
-    check_struct_field!(io_uring_params, flags);
-    check_struct_field!(io_uring_params, sq_thread_cpu);
-    check_struct_field!(io_uring_params, sq_thread_idle);
-    check_struct_field!(io_uring_params, features);
-    check_struct_field!(io_uring_params, wq_fd);
-    check_struct_field!(io_uring_params, resv);
-    check_struct_field!(io_uring_params, sq_off);
-    check_struct_field!(io_uring_params, cq_off);
-
-    check_struct_field!(io_sqring_offsets, head);
-    check_struct_field!(io_sqring_offsets, tail);
-    check_struct_field!(io_sqring_offsets, ring_mask);
-    check_struct_field!(io_sqring_offsets, ring_entries);
-    check_struct_field!(io_sqring_offsets, flags);
-    check_struct_field!(io_sqring_offsets, dropped);
-    check_struct_field!(io_sqring_offsets, array);
-    check_struct_field!(io_sqring_offsets, resv1);
-    check_struct_field!(io_sqring_offsets, resv2);
-
-    check_struct_field!(io_cqring_offsets, head);
-    check_struct_field!(io_cqring_offsets, tail);
-    check_struct_field!(io_cqring_offsets, ring_mask);
-    check_struct_field!(io_cqring_offsets, ring_entries);
-    check_struct_field!(io_cqring_offsets, overflow);
-    check_struct_field!(io_cqring_offsets, cqes);
-    check_struct_field!(io_cqring_offsets, flags);
-    check_struct_field!(io_cqring_offsets, resv1);
-    check_struct_field!(io_cqring_offsets, resv2);
+    check_struct!(io_uring_cqe, user_data, res, flags);
+    check_struct!(
+        io_uring_params,
+        sq_entries,
+        cq_entries,
+        flags,
+        sq_thread_cpu,
+        sq_thread_idle,
+        features,
+        wq_fd,
+        resv,
+        sq_off,
+        cq_off
+    );
+    check_struct!(
+        io_sqring_offsets,
+        head,
+        tail,
+        ring_mask,
+        ring_entries,
+        flags,
+        dropped,
+        array,
+        resv1,
+        resv2
+    );
+    check_struct!(
+        io_cqring_offsets,
+        head,
+        tail,
+        ring_mask,
+        ring_entries,
+        overflow,
+        cqes,
+        flags,
+        resv1,
+        resv2
+    );
+    check_struct!(io_uring_probe, last_op, ops_len, resv, resv2, ops);
+    check_struct!(io_uring_probe_op, op, resv, flags, resv2);
+    check_struct!(io_uring_files_update, offset, resv, fds);
+    check_struct!(io_uring_rsrc_register, nr, resv, resv2, data, tags);
+    check_struct!(io_uring_rsrc_update, offset, resv, data);
+    check_struct!(io_uring_rsrc_update2, offset, resv, data, tags, nr, resv2);
+    check_struct!(io_uring_getevents_arg, sigmask, sigmask_sz, pad, ts);
+    check_struct!(iovec, iov_base, iov_len);
+    check_struct!(open_how, flags, mode, resolve);
 }
