@@ -386,7 +386,7 @@ bitflags::bitflags! {
 }
 
 bitflags::bitflags! {
-    /// `SPLICE_F_*` flags for use with [`io_uring_seq`].
+    /// `SPLICE_F_*` flags for use with [`io_uring_sqe`].
     #[derive(Default)]
     pub struct SpliceFlags: u32 {
         /// `SPLICE_F_FD_IN_FIXED`
@@ -451,6 +451,7 @@ pub use sys::{
 };
 
 /// `IORING_REGISTER_FILES_SKIP`
+///
 /// TODO: Make this a const fn. It needs borrow_raw to be a const fn.
 #[inline]
 #[doc(alias = "IORING_REGISTER_FILES_SKIP")]
@@ -468,6 +469,8 @@ pub fn io_uring_register_files_skip() -> BorrowedFd<'static> {
     }
 }
 
+/// A pointer in the io_uring API.
+///
 /// `io_uring`'s native API represents pointers as `u64` values. In order to
 /// preserve strict-provenance, use a `*mut c_void`. On platforms where
 /// pointers are narrower than 64 bits, this requires additional padding.
@@ -513,6 +516,8 @@ impl Default for io_uring_ptr {
     }
 }
 
+/// User data in the io_uring API.
+///
 /// `io_uring`'s native API represents `user_data` fields as `u64` values. In
 /// order to preserve strict-provenance, use a union which allows users to
 /// optionally store pointers.
@@ -575,6 +580,7 @@ impl core::fmt::Debug for io_uring_user_data {
     }
 }
 
+/// An io_uring Submission Queue Entry.
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Copy, Clone, Default)]
@@ -653,6 +659,7 @@ pub union splice_fd_in_or_file_index_union {
     pub file_index: u32,
 }
 
+/// An io_uring Completion Queue Entry.
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
