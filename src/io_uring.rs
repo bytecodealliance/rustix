@@ -1,4 +1,9 @@
-//! Linux [io_uring] APIs.
+//! Linux [io_uring].
+//!
+//! This API is very low-level. The main adaptations it makes from the raw
+//! Linux io_uring API are the use of appropriately-sized `bitflags`, `enum`,
+//! `Result`, `OwnedFd`, `AsFd`, `RawFd`, and `*mut c_void` in place of plain
+//! integers.
 //!
 //! # Safety
 //!
