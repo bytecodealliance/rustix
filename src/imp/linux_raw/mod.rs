@@ -14,6 +14,7 @@ pub(crate) mod io;
 #[cfg(feature = "io_uring")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "io_uring")))]
 pub(crate) mod io_uring;
+#[cfg(feature = "net")]
 pub(crate) mod net;
 pub(crate) mod process;
 pub(crate) mod rand;

@@ -61,6 +61,7 @@ pub(crate) mod io;
 #[cfg_attr(doc_cfg, doc(cfg(feature = "io_uring")))]
 pub(crate) mod io_uring;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))] // WASI doesn't support `net` yet.
+#[cfg(feature = "net")]
 pub(crate) mod net;
 #[cfg(not(windows))]
 pub(crate) mod process;

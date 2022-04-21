@@ -10,6 +10,7 @@ mod eventfd;
 pub(crate) mod fd;
 mod ioctl;
 #[cfg(not(any(windows, target_os = "redox")))]
+#[cfg(feature = "net")]
 mod is_read_write;
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 mod madvise;
@@ -50,6 +51,7 @@ pub use ioctl::{ioctl_blkpbszget, ioctl_blksszget};
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub use ioctl::{ioctl_tiocexcl, ioctl_tiocnxcl};
 #[cfg(not(any(windows, target_os = "redox")))]
+#[cfg(feature = "net")]
 pub use is_read_write::is_read_write;
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub use madvise::{madvise, Advice};

@@ -28,6 +28,7 @@ use crate::io::{EventfdFlags, MlockFlags, ReadWriteFlags, UserfaultfdFlags};
 use core::cmp::min;
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
+#[cfg(feature = "net")]
 use errno::errno;
 
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
@@ -365,6 +366,7 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(feature = "net")]
 pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
     let (mut read, mut write) = crate::fs::fd::_is_file_read_write(fd)?;
     let mut not_socket = false;
@@ -414,6 +416,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
 }
 
 #[cfg(target_os = "wasi")]
+#[cfg(feature = "net")]
 pub(crate) fn is_read_write(_fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
     todo!("Implement is_read_write for WASI in terms of fd_fdstat_get");
 }

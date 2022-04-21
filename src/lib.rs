@@ -210,9 +210,6 @@ pub mod runtime;
 #[cfg(not(windows))]
 #[cfg(not(feature = "fs"))]
 pub(crate) mod fs;
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-#[cfg(not(feature = "net"))]
-pub(crate) mod net;
 #[cfg(not(windows))]
 #[cfg(not(any(feature = "fs", feature = "net")))]
 pub(crate) mod path;

@@ -30,6 +30,7 @@ use crate::io::{
     MprotectFlags, MremapFlags, MsyncFlags, OwnedFd, PipeFlags, PollFd, ProtFlags, ReadWriteFlags,
     UserfaultfdFlags,
 };
+#[cfg(feature = "net")]
 use crate::net::{RecvFlags, SendFlags};
 use core::cmp;
 use core::mem::MaybeUninit;
@@ -464,6 +465,7 @@ pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
     }
 }
 
+#[cfg(feature = "net")]
 pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
     let (mut read, mut write) = crate::fs::fd::_is_file_read_write(fd)?;
     let mut not_socket = false;
