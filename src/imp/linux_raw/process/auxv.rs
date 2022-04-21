@@ -10,6 +10,7 @@ use super::super::elf::{Elf_Ehdr, Elf_Phdr};
 use crate::ffi::ZStr;
 use core::mem::size_of;
 use core::ptr::null;
+#[cfg(feature = "runtime")]
 use core::slice;
 use linux_raw_sys::general::{
     AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM,
@@ -41,12 +42,14 @@ pub(crate) fn linux_execfn() -> &'static ZStr {
     unsafe { ZStr::from_ptr(execfn.cast()) }
 }
 
+#[cfg(feature = "runtime")]
 #[inline]
 pub(crate) fn exe_phdrs() -> (*const c::c_void, usize) {
     let auxv = auxv();
     (auxv.phdr.cast(), auxv.phnum)
 }
 
+#[cfg(feature = "runtime")]
 #[inline]
 pub(in super::super) fn exe_phdrs_slice() -> &'static [Elf_Phdr] {
     let auxv = auxv();

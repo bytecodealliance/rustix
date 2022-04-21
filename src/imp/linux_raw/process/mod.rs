@@ -5,10 +5,14 @@ mod wait;
 pub(crate) mod cpu_set;
 pub(crate) mod syscalls;
 
+#[cfg(feature = "runtime")]
+pub(crate) use auxv::exe_phdrs;
+#[cfg(feature = "runtime")]
+pub(super) use auxv::exe_phdrs_slice;
 #[cfg(target_vendor = "mustang")]
 pub(crate) use auxv::init;
-pub(crate) use auxv::{clock_ticks_per_second, exe_phdrs, linux_execfn, linux_hwcap, page_size};
-pub(super) use auxv::{exe_phdrs_slice, sysinfo_ehdr};
+pub(super) use auxv::sysinfo_ehdr;
+pub(crate) use auxv::{clock_ticks_per_second, linux_execfn, linux_hwcap, page_size};
 pub(crate) use types::{raw_cpu_set_new, RawCpuSet, RawUname, CPU_SETSIZE};
 pub use types::{
     MembarrierCommand, RawCpuid, RawGid, RawNonZeroPid, RawPid, RawUid, Resource, Signal,

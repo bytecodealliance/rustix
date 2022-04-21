@@ -1,6 +1,18 @@
 //! The linux_raw backend.
 //!
 //! This makes Linux syscalls directly, without going through libc.
+//!
+//! # Safety
+//!
+//! These files performs raw system calls, and sometimes passes them
+//! uninitialized memory buffers. The signatures in this file are currently
+//! manually maintained and must correspond with the signatures of the actual
+//! Linux syscalls.
+//!
+//! Some of this could be auto-generated from the Linux header file
+//! <linux/syscalls.h>, but we often need more information than it provides,
+//! such as which pointers are array slices, out parameters, or in-out
+//! parameters, which integers are owned or borrowed file descriptors, etc.
 
 mod arch;
 mod conv;
@@ -18,7 +30,8 @@ pub(crate) mod io_uring;
 pub(crate) mod net;
 pub(crate) mod process;
 pub(crate) mod rand;
-pub(crate) mod syscalls;
+#[cfg(feature = "runtime")]
+pub(crate) mod runtime;
 #[cfg(feature = "termios")]
 pub(crate) mod termios;
 pub(crate) mod thread;

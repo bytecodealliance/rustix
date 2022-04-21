@@ -12,11 +12,13 @@ use super::fd::{AsRawFd, BorrowedFd, FromRawFd, RawFd};
 use super::fs::{FileType, Mode, OFlags};
 #[cfg(not(debug_assertions))]
 use super::io::error::decode_usize_infallible;
+#[cfg(feature = "runtime")]
+use super::io::error::try_decode_error;
 #[cfg(target_pointer_width = "64")]
 use super::io::error::try_decode_u64;
 use super::io::error::{
-    try_decode_c_int, try_decode_c_uint, try_decode_error, try_decode_raw_fd, try_decode_usize,
-    try_decode_void, try_decode_void_star,
+    try_decode_c_int, try_decode_c_uint, try_decode_raw_fd, try_decode_usize, try_decode_void,
+    try_decode_void_star,
 };
 use super::reg::{raw_arg, ArgNumber, ArgReg, RetReg, R0};
 use super::time::{ClockId, TimerfdClockId};
@@ -353,6 +355,7 @@ pub(super) unsafe fn ret(raw: RetReg<R0>) -> io::Result<()> {
 ///
 /// The caller must ensure that this is the return value of a syscall which
 /// doesn't return on success.
+#[cfg(feature = "runtime")]
 #[inline]
 pub(super) unsafe fn ret_error(raw: RetReg<R0>) -> io::Error {
     try_decode_error(raw)

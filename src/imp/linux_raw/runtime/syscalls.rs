@@ -1,32 +1,22 @@
-//! Safe (where possible) wrappers around system calls.
+//! linux_raw syscalls supporting `rustix::runtime`.
 //!
 //! # Safety
 //!
-//! This file performs raw system calls, and sometimes passes them
-//! uninitialized memory buffers. The signatures in this file are currently
-//! manually maintained and must correspond with the signatures of the actual
-//! Linux syscalls.
-//!
-//! Some of this could be auto-generated from the Linux header file
-//! <linux/syscalls.h>, but we often need more information than it provides,
-//! such as which pointers are array slices, out parameters, or in-out
-//! parameters, which integers are owned or borrowed file descriptors, etc.
-
+//! See the `rustix::imp` module documentation for details.
 #![allow(unsafe_code)]
-#![allow(clippy::undocumented_unsafe_blocks)]
 
-use super::arch::choose::{
+use super::super::arch::choose::{
     syscall1_noreturn, syscall1_readonly, syscall2_readonly, syscall3_readonly, syscall5_readonly,
 };
-use super::c;
-use super::conv::{
+use super::super::c;
+use super::super::conv::{
     borrowed_fd, c_int, c_str, c_uint, ret, ret_c_uint, ret_error, ret_usize_infallible, void_star,
     zero,
 };
-use super::fd::BorrowedFd;
-use super::fs::AtFlags;
-use super::reg::nr;
+use super::super::reg::nr;
+use crate::fd::BorrowedFd;
 use crate::ffi::ZStr;
+use crate::fs::AtFlags;
 use crate::io;
 use crate::process::{Pid, RawNonZeroPid};
 #[cfg(target_arch = "arm")]
@@ -36,10 +26,10 @@ use linux_raw_sys::general::{
     __kernel_pid_t, PR_SET_NAME, SIGCHLD,
 };
 #[cfg(target_arch = "x86")]
-use {super::conv::by_mut, linux_raw_sys::general::__NR_set_thread_area};
+use {super::super::conv::by_mut, linux_raw_sys::general::__NR_set_thread_area};
 #[cfg(target_arch = "x86_64")]
 use {
-    super::conv::ret_infallible,
+    super::super::conv::ret_infallible,
     linux_raw_sys::general::{__NR_arch_prctl, ARCH_SET_FS},
 };
 
@@ -88,7 +78,7 @@ pub(crate) unsafe fn execve(
 
 pub(crate) mod tls {
     #[cfg(target_arch = "x86")]
-    use super::super::thread::tls::UserDesc;
+    use super::super::tls::UserDesc;
     use super::*;
 
     #[cfg(target_arch = "x86")]

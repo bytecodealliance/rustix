@@ -2,8 +2,7 @@
 //!
 //! # Safety
 //!
-//! See the `rustix::imp::syscalls` module documentation for details.
-
+//! See the `rustix::imp` module documentation for details.
 #![allow(unsafe_code)]
 
 use super::super::arch::choose::{syscall3, syscall3_readonly};

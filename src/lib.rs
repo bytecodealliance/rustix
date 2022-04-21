@@ -225,7 +225,3 @@ pub(crate) mod thread;
 #[cfg(not(windows))]
 #[cfg(not(feature = "time"))]
 pub(crate) mod time;
-
-#[cfg(not(windows))]
-#[cfg(not(feature = "runtime"))]
-pub(crate) mod runtime;

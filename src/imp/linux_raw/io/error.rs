@@ -208,6 +208,7 @@ pub(in crate::imp) unsafe fn try_decode_void<Num: RetNumber>(raw: RetReg<Num>) -
 /// # Safety
 ///
 /// This must only be used with syscalls which do not return on success.
+#[cfg(feature = "runtime")]
 #[inline]
 pub(in crate::imp) unsafe fn try_decode_error<Num: RetNumber>(raw: RetReg<Num>) -> io::Error {
     debug_assert!(raw.is_in_range(-4095..0));
