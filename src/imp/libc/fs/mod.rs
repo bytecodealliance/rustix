@@ -2,6 +2,7 @@
 pub(crate) mod syscalls;
 
 #[cfg(not(target_os = "redox"))]
+#[cfg(feature = "fs")]
 mod dir;
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -18,6 +19,7 @@ mod makedev;
 mod types;
 
 #[cfg(not(target_os = "redox"))]
+#[cfg(feature = "fs")]
 pub use dir::{Dir, DirEntry};
 #[cfg(not(any(
     target_os = "dragonfly",

@@ -24,3 +24,6 @@ pub use imp::fs::ResolveFlags;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use imp::fs::RenameFlags;
+
+#[cfg(not(target_os = "redox"))]
+pub use imp::fs::Dev;
