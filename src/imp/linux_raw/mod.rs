@@ -18,7 +18,9 @@ mod arch;
 mod conv;
 mod elf;
 mod reg;
+#[cfg(any(feature = "time", target_arch = "x86"))]
 mod vdso;
+#[cfg(any(feature = "time", target_arch = "x86"))]
 mod vdso_wrappers;
 
 pub(crate) mod fs;

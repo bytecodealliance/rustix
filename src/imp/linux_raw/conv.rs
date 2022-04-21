@@ -21,13 +21,17 @@ use super::io::error::{
     try_decode_void_star,
 };
 use super::reg::{raw_arg, ArgNumber, ArgReg, RetReg, R0};
-use super::time::{ClockId, TimerfdClockId};
+#[cfg(any(feature = "time", target_arch = "x86"))]
+use super::time::ClockId;
+#[cfg(feature = "time")]
+use super::time::TimerfdClockId;
 use crate::ffi::ZStr;
 use crate::io::{self, OwnedFd};
 use crate::process::{Pid, Resource, Signal};
 use crate::{as_mut_ptr, as_ptr};
 use core::mem::{transmute, MaybeUninit};
 use core::ptr::null_mut;
+#[cfg(any(feature = "time", target_arch = "x86"))]
 use linux_raw_sys::general::__kernel_clockid_t;
 #[cfg(target_pointer_width = "64")]
 use linux_raw_sys::general::__kernel_loff_t;
@@ -236,11 +240,13 @@ pub(super) fn loff_t_from_u64<'a, Num: ArgNumber>(i: u64) -> ArgReg<'a, Num> {
     pass_usize(i as usize)
 }
 
+#[cfg(any(feature = "time", target_arch = "x86"))]
 #[inline]
 pub(super) fn clockid_t<'a, Num: ArgNumber>(i: ClockId) -> ArgReg<'a, Num> {
     pass_usize(i as __kernel_clockid_t as usize)
 }
 
+#[cfg(feature = "time")]
 #[inline]
 pub(super) fn timerfd_clockid_t<'a, Num: ArgNumber>(i: TimerfdClockId) -> ArgReg<'a, Num> {
     pass_usize(i as __kernel_clockid_t as usize)

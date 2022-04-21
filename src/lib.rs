@@ -220,5 +220,5 @@ pub(crate) mod process;
 #[cfg(not(feature = "rand"))]
 pub(crate) mod rand;
 #[cfg(not(windows))]
-#[cfg(not(feature = "time"))]
+#[cfg(all(not(feature = "time"), target_arch = "x86"))]
 pub(crate) mod time;

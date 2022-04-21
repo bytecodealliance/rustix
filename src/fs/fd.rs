@@ -45,10 +45,10 @@ pub use imp::fs::FsWord;
 #[derive(Clone, Debug)]
 pub struct Timestamps {
     /// The timestamp of the last access to a filesystem object.
-    pub last_access: crate::time::Timespec,
+    pub last_access: imp::time::Timespec,
 
     /// The timestamp of the last modification of a filesystem object.
-    pub last_modification: crate::time::Timespec,
+    pub last_modification: imp::time::Timespec,
 }
 
 /// The filesystem magic number for procfs.
