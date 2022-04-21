@@ -32,6 +32,7 @@ pub(crate) mod io_uring;
 #[cfg(feature = "net")]
 pub(crate) mod net;
 pub(crate) mod process;
+#[cfg(feature = "rand")]
 pub(crate) mod rand;
 #[cfg(feature = "runtime")]
 pub(crate) mod runtime;
