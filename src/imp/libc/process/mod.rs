@@ -6,12 +6,15 @@ use super::c;
 #[cfg(not(windows))]
 pub(crate) mod syscalls;
 #[cfg(not(target_os = "wasi"))]
+#[cfg(feature = "process")]
 pub(crate) use auxv::clock_ticks_per_second;
+#[cfg(feature = "process")]
 pub(crate) use auxv::page_size;
 #[cfg(any(
     all(target_os = "android", target_pointer_width = "64"),
     target_os = "linux"
 ))]
+#[cfg(feature = "process")]
 pub(crate) use auxv::{linux_execfn, linux_hwcap};
 #[cfg(not(target_os = "wasi"))]
 pub(crate) use c::{

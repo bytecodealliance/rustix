@@ -1,5 +1,6 @@
 //! Process-associated operations.
 
+#[cfg(feature = "process")]
 mod auxv;
 #[cfg(not(target_os = "wasi"))]
 mod chdir;
@@ -28,9 +29,12 @@ mod uname;
 mod wait;
 
 #[cfg(not(target_os = "wasi"))]
+#[cfg(feature = "process")]
 pub use auxv::clock_ticks_per_second;
 #[cfg(target_vendor = "mustang")]
+#[cfg(feature = "process")]
 pub use auxv::init;
+#[cfg(feature = "process")]
 pub use auxv::page_size;
 #[cfg(any(
     linux_raw,
@@ -42,6 +46,7 @@ pub use auxv::page_size;
         )
     )
 ))]
+#[cfg(feature = "process")]
 pub use auxv::{linux_execfn, linux_hwcap};
 #[cfg(not(target_os = "wasi"))]
 pub use chdir::chdir;
