@@ -4,7 +4,8 @@
 #[test]
 fn test_mmap() {
     use rustix::fs::{cwd, openat, Mode, OFlags};
-    use rustix::io::{mmap, munmap, write, MapFlags, ProtFlags};
+    use rustix::io::write;
+    use rustix::mm::{mmap, munmap, MapFlags, ProtFlags};
     use std::ptr::null_mut;
     use std::slice;
 
@@ -58,7 +59,7 @@ fn test_mmap() {
 
 #[test]
 fn test_mmap_anonymous() {
-    use rustix::io::{mmap_anonymous, munmap, MapFlags, ProtFlags};
+    use rustix::mm::{mmap_anonymous, munmap, MapFlags, ProtFlags};
     use std::ptr::null_mut;
     use std::slice;
 
@@ -73,7 +74,7 @@ fn test_mmap_anonymous() {
 
 #[test]
 fn test_mprotect() {
-    use rustix::io::{mmap_anonymous, mprotect, munmap, MapFlags, MprotectFlags, ProtFlags};
+    use rustix::mm::{mmap_anonymous, mprotect, munmap, MapFlags, MprotectFlags, ProtFlags};
     use std::ptr::null_mut;
     use std::slice;
 
@@ -92,9 +93,9 @@ fn test_mprotect() {
 
 #[test]
 fn test_mlock() {
-    use rustix::io::{mlock, mmap_anonymous, munlock, munmap, MapFlags, ProtFlags};
+    use rustix::mm::{mlock, mmap_anonymous, munlock, munmap, MapFlags, ProtFlags};
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    use rustix::io::{mlock_with, MlockFlags};
+    use rustix::mm::{mlock_with, MlockFlags};
     use std::ptr::null_mut;
 
     unsafe {
@@ -129,7 +130,7 @@ fn test_mlock() {
 #[cfg(not(target_ot = "redox"))]
 #[test]
 fn test_madvise() {
-    use rustix::io::{madvise, mmap_anonymous, munmap, Advice, MapFlags, ProtFlags};
+    use rustix::mm::{madvise, mmap_anonymous, munmap, Advice, MapFlags, ProtFlags};
     use std::ptr::null_mut;
 
     unsafe {
@@ -147,7 +148,7 @@ fn test_madvise() {
 
 #[test]
 fn test_msync() {
-    use rustix::io::{mmap_anonymous, msync, munmap, MapFlags, MsyncFlags, ProtFlags};
+    use rustix::mm::{mmap_anonymous, msync, munmap, MapFlags, MsyncFlags, ProtFlags};
     use std::ptr::null_mut;
 
     unsafe {

@@ -109,9 +109,24 @@
     feature(core_intrinsics)
 )]
 #![cfg_attr(asm_experimental_arch, feature(asm_experimental_arch))]
+#![cfg_attr(not(feature = "all-apis"), allow(dead_code))]
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
+
+/// Convert a `&T` into a `*const T` without using an `as`.
+#[inline]
+#[allow(dead_code)]
+const fn as_ptr<T>(t: &T) -> *const T {
+    t
+}
+
+/// Convert a `&mut T` into a `*mut T` without using an `as`.
+#[inline]
+#[allow(dead_code)]
+fn as_mut_ptr<T>(t: &mut T) -> *mut T {
+    t
+}
 
 /// Export `*Fd` types and traits that used in rustix's public API.
 ///
@@ -145,6 +160,8 @@ mod imp;
 #[cfg(not(windows))]
 pub mod ffi;
 #[cfg(not(windows))]
+#[cfg(feature = "fs")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "fs")))]
 pub mod fs;
 pub mod io;
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -152,36 +169,66 @@ pub mod io;
 #[cfg_attr(doc_cfg, doc(cfg(feature = "io_uring")))]
 pub mod io_uring;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))] // WASI doesn't support `net` yet.
+#[cfg(feature = "net")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "net")))]
 pub mod net;
 #[cfg(not(windows))]
+#[cfg(any(feature = "fs", feature = "net"))]
+#[cfg_attr(doc_cfg, doc(cfg(any(feature = "fs", feature = "net"))))]
 pub mod path;
 #[cfg(not(windows))]
+#[cfg(feature = "process")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "process")))]
 pub mod process;
 #[cfg(not(windows))]
+#[cfg(feature = "rand")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "rand")))]
 pub mod rand;
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[cfg(feature = "termios")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "termios")))]
 pub mod termios;
 #[cfg(not(windows))]
+#[cfg(feature = "thread")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "thread")))]
 pub mod thread;
 #[cfg(not(windows))]
+#[cfg(feature = "time")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "time")))]
 pub mod time;
 
 #[cfg(not(windows))]
 #[doc(hidden)]
+#[cfg(feature = "runtime")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "runtime")))]
 pub mod runtime;
 
-/// Convert a `&T` into a `*const T` without using an `as`.
-#[inline]
-#[allow(dead_code)]
-const fn as_ptr<T>(t: &T) -> *const T {
-    t
-}
+// We have some internal interdependencies in the API features, so for now,
+// for API features that aren't enabled, declare them as `pub(crate)` so
+// that they're not public, but still available for internal use.
 
-/// Convert a `&mut T` into a `*mut T` without using an `as`.
-#[inline]
-#[allow(dead_code)]
-fn as_mut_ptr<T>(t: &mut T) -> *mut T {
-    t
-}
+#[cfg(not(windows))]
+#[cfg(not(feature = "fs"))]
+pub(crate) mod fs;
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(feature = "net"))]
+pub(crate) mod net;
+#[cfg(not(windows))]
+#[cfg(not(any(feature = "fs", feature = "net")))]
+pub(crate) mod path;
+#[cfg(not(windows))]
+#[cfg(not(feature = "process"))]
+pub(crate) mod process;
+#[cfg(not(windows))]
+#[cfg(not(feature = "rand"))]
+pub(crate) mod rand;
+#[cfg(not(windows))]
+#[cfg(not(feature = "thread"))]
+pub(crate) mod thread;
+#[cfg(not(windows))]
+#[cfg(not(feature = "time"))]
+pub(crate) mod time;
+
+#[cfg(not(windows))]
+#[cfg(not(feature = "runtime"))]
+pub(crate) mod runtime;

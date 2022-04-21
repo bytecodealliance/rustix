@@ -16,16 +16,9 @@ mod error;
 mod eventfd;
 #[cfg(not(windows))]
 mod from_into;
-#[cfg(not(windows))]
-#[cfg(not(target_os = "wasi"))]
-mod mlock;
-#[cfg(not(windows))]
-mod mmap;
 mod poll;
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
 mod procfs;
-#[cfg(not(windows))]
-mod prot;
 #[cfg(not(windows))]
 #[cfg(not(target_os = "redox"))] // redox doesn't have cwd/openat
 #[cfg(not(target_os = "wasi"))] // wasi support for S_IRUSR etc. submitted to libc in #2264

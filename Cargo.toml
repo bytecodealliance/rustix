@@ -73,41 +73,6 @@ criterion = "0.3"
 [target.'cfg(windows)'.dev-dependencies]
 ctor = "0.1.21"
 
-[features]
-default = ["std"]
-std = ["io-lifetimes"]
-rustc-dep-of-std = [
-    "core",
-    "alloc",
-    "compiler_builtins",
-    "linux-raw-sys/rustc-dep-of-std",
-    "bitflags/rustc-dep-of-std",
-]
-
-# Enable this to request the libc backend.
-use-libc = ["errno", "libc"]
-
-# Enable this to enable `proc_self_fd` (on Linux) and `ttyname`.
-procfs = ["once_cell", "itoa"]
-
-# Enable `rustix::termios::*`.
-termios = []
-
-# Enable `rustix::io_uring::*` (on platforms that support it).
-io_uring = ["linux-raw-sys"]
-
-# Enable all API features.
-all-apis = ["io_uring", "procfs", "termios"]
-
-# Expose io-lifetimes' features for third-party crate impls.
-async-std = ["io-lifetimes/async-std"]
-tokio = ["io-lifetimes/tokio"]
-os_pipe = ["io-lifetimes/os_pipe"]
-socket2 = ["io-lifetimes/socket2"]
-mio = ["io-lifetimes/mio"]
-fs-err = ["io-lifetimes/fs-err"]
-all-impls = ["async-std", "tokio", "os_pipe", "socket2", "mio", "fs-err"]
-
 # Add Criterion configuration, as described here:
 # <https://bheisler.github.io/criterion.rs/book/getting_started.html#step-1---add-dependency-to-cargotoml>
 [[bench]]
@@ -123,3 +88,70 @@ targets = [
     "x86_64-apple-darwin",
     "x86_64-pc-windows-msvc",
 ]
+
+[features]
+default = ["std"]
+std = ["io-lifetimes"]
+rustc-dep-of-std = [
+    "core",
+    "alloc",
+    "compiler_builtins",
+    "linux-raw-sys/rustc-dep-of-std",
+    "bitflags/rustc-dep-of-std",
+]
+
+# Enable this to request the libc backend.
+use-libc = ["errno", "libc"]
+
+# Enable `rustix::fs::*`.
+fs = []
+
+# Enable `rustix::io_uring::*` (on platforms that support it).
+io_uring = ["linux-raw-sys"]
+
+# Enable `rustix::net::*`.
+net = []
+
+# Enable `rustix::thread::*`.
+thread = []
+
+# Enable `rustix::process::*`.
+process = []
+
+# Enable `rustix::time::*`.
+time = []
+
+# Enable this to enable `rustix::io::proc_self_*` (on Linux) and `ttyname`.
+procfs = ["once_cell", "itoa"]
+
+# Enable `rustix::termios::*`.
+termios = []
+
+# Enable `rustix::rand::*`.
+rand = []
+
+# Enable `rustix::runtime::*`. This API is undocumented and unstable.
+runtime = []
+
+# Enable all API features.
+all-apis = [
+    "fs",
+    "io_uring",
+    "net",
+    "process",
+    "procfs",
+    "rand",
+    "runtime",
+    "termios",
+    "thread",
+    "time",
+]
+
+# Expose io-lifetimes' features for third-party crate impls.
+async-std = ["io-lifetimes/async-std"]
+tokio = ["io-lifetimes/tokio"]
+os_pipe = ["io-lifetimes/os_pipe"]
+socket2 = ["io-lifetimes/socket2"]
+mio = ["io-lifetimes/mio"]
+fs-err = ["io-lifetimes/fs-err"]
+all-impls = ["async-std", "tokio", "os_pipe", "socket2", "mio", "fs-err"]

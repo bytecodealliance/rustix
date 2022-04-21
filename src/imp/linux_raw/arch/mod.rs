@@ -14,6 +14,7 @@
 //! syscall instructions.
 
 #![allow(unsafe_code)]
+#![cfg_attr(not(feature = "all-apis"), allow(unused_imports))]
 
 // When inline asm is available, use it.
 #[cfg(asm)]
