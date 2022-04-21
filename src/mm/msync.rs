@@ -9,7 +9,7 @@
 use crate::{imp, io};
 use core::ffi::c_void;
 
-pub use imp::io::MsyncFlags;
+pub use imp::mm::types::MsyncFlags;
 
 /// `msync(addr, len, flags)`—Declares an expected access pattern
 /// for a memory-mapped file.
@@ -28,5 +28,5 @@ pub use imp::io::MsyncFlags;
 /// [Linux `msync`]: https://man7.org/linux/man-pages/man2/msync.2.html
 #[inline]
 pub unsafe fn msync(addr: *mut c_void, len: usize, flags: MsyncFlags) -> io::Result<()> {
-    imp::io::syscalls::msync(addr, len, flags)
+    imp::mm::syscalls::msync(addr, len, flags)
 }

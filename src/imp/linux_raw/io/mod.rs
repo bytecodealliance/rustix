@@ -11,10 +11,7 @@ pub use error::Error;
 #[cfg(not(feature = "std"))]
 pub use io_slice::{IoSlice, IoSliceMut};
 pub use poll_fd::{PollFd, PollFlags};
-pub use types::{
-    Advice, DupFlags, EventfdFlags, MapFlags, MlockFlags, MprotectFlags, MremapFlags, MsyncFlags,
-    PipeFlags, ProtFlags, ReadWriteFlags, UserfaultfdFlags, PIPE_BUF,
-};
+pub use types::{DupFlags, EventfdFlags, PipeFlags, ReadWriteFlags, PIPE_BUF};
 
 use super::c;
 

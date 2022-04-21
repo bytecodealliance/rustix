@@ -29,6 +29,8 @@ pub(crate) mod io;
 #[cfg(feature = "io_uring")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "io_uring")))]
 pub(crate) mod io_uring;
+#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+pub(crate) mod mm;
 #[cfg(feature = "net")]
 pub(crate) mod net;
 pub(crate) mod process;

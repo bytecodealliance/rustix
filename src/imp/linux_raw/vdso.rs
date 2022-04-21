@@ -15,7 +15,8 @@
 use super::c;
 use super::elf::*;
 use crate::ffi::ZStr;
-use crate::io::{self, madvise, Advice};
+use crate::io;
+use crate::mm::{madvise, Advice};
 use core::ffi::c_void;
 use core::mem::{align_of, size_of};
 use core::ptr::{null, null_mut};

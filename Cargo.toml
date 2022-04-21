@@ -127,6 +127,9 @@ procfs = ["once_cell", "itoa"]
 # Enable `rustix::termios::*`.
 termios = []
 
+# Enable `rustix::mm::*`.
+mm = []
+
 # Enable `rustix::rand::*`.
 rand = []
 
@@ -137,6 +140,7 @@ runtime = []
 all-apis = [
     "fs",
     "io_uring",
+    "mm",
     "net",
     "process",
     "procfs",

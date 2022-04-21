@@ -12,12 +12,6 @@ mod ioctl;
 #[cfg(not(any(windows, target_os = "redox")))]
 #[cfg(feature = "net")]
 mod is_read_write;
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
-mod madvise;
-#[cfg(not(any(windows, target_os = "wasi")))]
-mod mmap;
-#[cfg(not(any(windows, target_os = "wasi")))]
-mod msync;
 mod owned_fd;
 #[cfg(not(any(windows, target_os = "wasi")))]
 mod pipe;
@@ -30,8 +24,6 @@ mod read_write;
 mod seek_from;
 #[cfg(not(windows))]
 mod stdio;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-mod userfaultfd;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use crate::imp::io::epoll;
@@ -53,18 +45,6 @@ pub use ioctl::{ioctl_tiocexcl, ioctl_tiocnxcl};
 #[cfg(not(any(windows, target_os = "redox")))]
 #[cfg(feature = "net")]
 pub use is_read_write::is_read_write;
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
-pub use madvise::{madvise, Advice};
-#[cfg(not(any(windows, target_os = "wasi")))]
-pub use mmap::{
-    mlock, mmap, mmap_anonymous, mprotect, munlock, munmap, MapFlags, MprotectFlags, ProtFlags,
-};
-#[cfg(any(target_os = "android", target_os = "linux"))]
-pub use mmap::{mlock_with, MlockFlags};
-#[cfg(any(linux_raw, all(libc, target_os = "linux")))]
-pub use mmap::{mremap, mremap_fixed, MremapFlags};
-#[cfg(not(any(windows, target_os = "wasi")))]
-pub use msync::{msync, MsyncFlags};
 pub use owned_fd::OwnedFd;
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use pipe::pipe;
@@ -88,11 +68,7 @@ pub use read_write::{preadv, pwritev};
 pub use read_write::{preadv2, pwritev2, ReadWriteFlags};
 #[cfg(not(windows))]
 pub use stdio::{stderr, stdin, stdout, take_stderr, take_stdin, take_stdout};
-#[cfg(not(windows))]
-#[cfg(any(target_os = "android", target_os = "linux"))]
-pub use userfaultfd::{userfaultfd, UserfaultfdFlags};
 
-// Declare `SeekFrom`.
 #[cfg(not(feature = "std"))]
 pub use seek_from::SeekFrom;
 #[cfg(feature = "std")]

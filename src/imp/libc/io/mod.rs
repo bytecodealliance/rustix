@@ -16,10 +16,8 @@ pub use io_slice::{IoSlice, IoSliceMut};
 pub mod epoll;
 pub use error::Error;
 pub use poll_fd::{PollFd, PollFlags};
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
-pub use types::Advice;
-#[cfg(target_os = "linux")]
-pub use types::MremapFlags;
+#[cfg(not(any(windows, target_os = "wasi")))]
+pub use types::DupFlags;
 #[cfg(all(
     libc,
     not(any(windows, target_os = "ios", target_os = "macos", target_os = "wasi"))
@@ -32,10 +30,8 @@ pub use types::PipeFlags;
     target_os = "wasi"
 )))]
 pub use types::PIPE_BUF;
-#[cfg(not(any(windows, target_os = "wasi")))]
-pub use types::{DupFlags, MapFlags, MprotectFlags, MsyncFlags, ProtFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use types::{EventfdFlags, MlockFlags, ReadWriteFlags, UserfaultfdFlags};
+pub use types::{EventfdFlags, ReadWriteFlags};
 
 use super::c;
 

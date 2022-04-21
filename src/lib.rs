@@ -168,6 +168,10 @@ pub mod io;
 #[cfg(feature = "io_uring")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "io_uring")))]
 pub mod io_uring;
+#[cfg(not(windows))]
+#[cfg(feature = "mm")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "mm")))]
+pub mod mm;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))] // WASI doesn't support `net` yet.
 #[cfg(feature = "net")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "net")))]
@@ -210,6 +214,9 @@ pub mod runtime;
 #[cfg(not(windows))]
 #[cfg(not(feature = "fs"))]
 pub(crate) mod fs;
+#[cfg(not(windows))]
+#[cfg(all(not(feature = "mm"), any(feature = "time", target_arch = "x86")))]
+pub(crate) mod mm;
 #[cfg(not(windows))]
 #[cfg(not(any(feature = "fs", feature = "net")))]
 pub(crate) mod path;

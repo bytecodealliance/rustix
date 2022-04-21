@@ -9,7 +9,7 @@
 use crate::imp;
 use crate::io::{self, OwnedFd};
 
-pub use imp::io::UserfaultfdFlags;
+pub use imp::mm::types::UserfaultfdFlags;
 
 /// `userfaultfd(flags)`
 ///
@@ -26,5 +26,5 @@ pub use imp::io::UserfaultfdFlags;
 /// [Linux userfaultfd]: https://www.kernel.org/doc/Documentation/vm/userfaultfd.txt
 #[inline]
 pub unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
-    imp::io::syscalls::userfaultfd(flags)
+    imp::mm::syscalls::userfaultfd(flags)
 }
