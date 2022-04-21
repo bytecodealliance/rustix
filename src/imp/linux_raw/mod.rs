@@ -34,6 +34,7 @@ pub(crate) mod rand;
 pub(crate) mod runtime;
 #[cfg(feature = "termios")]
 pub(crate) mod termios;
+#[cfg(feature = "thread")]
 pub(crate) mod thread;
 pub(crate) mod time;
 

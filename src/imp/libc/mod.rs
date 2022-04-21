@@ -71,6 +71,7 @@ pub(crate) mod rand;
 #[cfg(feature = "termios")]
 pub(crate) mod termios;
 #[cfg(not(windows))]
+#[cfg(feature = "thread")]
 pub(crate) mod thread;
 #[cfg(not(windows))]
 pub(crate) mod time;
