@@ -68,7 +68,6 @@ pub(crate) mod process;
 pub(crate) mod rand;
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[cfg(feature = "termios")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "termios")))]
 pub(crate) mod termios;
 #[cfg(not(windows))]
 pub(crate) mod thread;

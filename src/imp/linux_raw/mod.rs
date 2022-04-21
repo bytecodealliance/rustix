@@ -19,7 +19,6 @@ pub(crate) mod process;
 pub(crate) mod rand;
 pub(crate) mod syscalls;
 #[cfg(feature = "termios")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "termios")))]
 pub(crate) mod termios;
 pub(crate) mod thread;
 pub(crate) mod time;
