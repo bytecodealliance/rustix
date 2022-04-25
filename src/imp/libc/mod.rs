@@ -52,6 +52,10 @@ pub(crate) use libc as c;
 #[cfg(not(windows))]
 pub(crate) mod fs;
 pub(crate) mod io;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(feature = "io_uring")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "io_uring")))]
+pub(crate) mod io_uring;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))] // WASI doesn't support `net` yet.
 pub(crate) mod net;
 #[cfg(not(windows))]

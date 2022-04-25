@@ -34,7 +34,7 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
 
 #[inline]
 pub(crate) fn linux_execfn() -> &'static ZStr {
-    unsafe { ZStr::from_ptr(auxv().execfn) }
+    unsafe { ZStr::from_ptr(auxv().execfn.cast()) }
 }
 
 #[inline]
