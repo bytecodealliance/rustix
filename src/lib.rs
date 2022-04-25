@@ -147,6 +147,10 @@ pub mod ffi;
 #[cfg(not(windows))]
 pub mod fs;
 pub mod io;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(feature = "io_uring")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "io_uring")))]
+pub mod io_uring;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))] // WASI doesn't support `net` yet.
 pub mod net;
 #[cfg(not(windows))]

@@ -216,6 +216,7 @@ bitflags! {
     /// `RESOLVE_*` constants for use with [`openat2`].
     ///
     /// [`openat2`]: crate::fs::openat2
+    #[derive(Default)]
     pub struct ResolveFlags: u64 {
         /// `RESOLVE_NO_XDEV`
         const NO_XDEV = linux_raw_sys::general::RESOLVE_NO_XDEV as u64;
