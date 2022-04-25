@@ -51,7 +51,7 @@ fn check_proc_entry(
     uid: RawUid,
     gid: RawGid,
 ) -> io::Result<Stat> {
-    let entry_stat = fstat(&entry)?;
+    let entry_stat = fstat(entry)?;
     check_proc_entry_with_stat(kind, entry, entry_stat, proc_stat, uid, gid)
 }
 
@@ -186,7 +186,7 @@ fn check_proc_nonroot(stat: &Stat, proc_stat: Option<&Stat>) -> io::Result<()> {
 
 /// Check that `file` is opened on a `procfs` filesystem.
 fn check_procfs(file: BorrowedFd<'_>) -> io::Result<()> {
-    let statfs = fstatfs(&file)?;
+    let statfs = fstatfs(file)?;
     let f_type = statfs.f_type;
     if f_type != PROC_SUPER_MAGIC {
         return Err(io::Error::NOTSUP);
@@ -199,7 +199,7 @@ fn check_procfs(file: BorrowedFd<'_>) -> io::Result<()> {
 /// `renameat` call that would otherwise fail, but which fails with `EXDEV`
 /// first if it would cross a mount point.
 fn is_mountpoint(file: BorrowedFd<'_>) -> bool {
-    let err = renameat(&file, zstr!("../."), &file, zstr!(".")).unwrap_err();
+    let err = renameat(file, zstr!("../."), file, zstr!(".")).unwrap_err();
     match err {
         io::Error::XDEV => true,  // the rename failed due to crossing a mount point
         io::Error::BUSY => false, // the rename failed normally
@@ -267,7 +267,7 @@ fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 
             // Open "/proc/self". Use our pid to compute the name rather than literally
             // using "self", as "self" is a symlink.
-            let proc_self = proc_opendirat(&proc, DecInt::new(pid.as_raw_nonzero().get()))?;
+            let proc_self = proc_opendirat(proc, DecInt::new(pid.as_raw_nonzero().get()))?;
             let proc_self_stat = check_proc_entry(
                 Kind::Pid,
                 proc_self.as_fd(),
@@ -303,7 +303,7 @@ pub fn proc_self_fd() -> io::Result<BorrowedFd<'static>> {
             let (proc_self, proc_self_stat) = proc_self()?;
 
             // Open "/proc/self/fd".
-            let proc_self_fd = proc_opendirat(&proc_self, zstr!("fd"))?;
+            let proc_self_fd = proc_opendirat(proc_self, zstr!("fd"))?;
             let proc_self_fd_stat = check_proc_entry(
                 Kind::Fd,
                 proc_self_fd.as_fd(),
@@ -345,7 +345,7 @@ fn proc_self_fdinfo() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
             let (proc_self, proc_self_stat) = proc_self()?;
 
             // Open "/proc/self/fdinfo".
-            let proc_self_fdinfo = proc_opendirat(&proc_self, zstr!("fdinfo"))?;
+            let proc_self_fdinfo = proc_opendirat(proc_self, zstr!("fdinfo"))?;
             let proc_self_fdinfo_stat = check_proc_entry(
                 Kind::Fd,
                 proc_self_fdinfo.as_fd(),
@@ -377,7 +377,7 @@ pub fn proc_self_fdinfo_fd<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 
 fn _proc_self_fdinfo(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     let (proc_self_fdinfo, proc_self_fdinfo_stat) = proc_self_fdinfo()?;
-    let fd_str = DecInt::from_fd(&fd);
+    let fd_str = DecInt::from_fd(fd);
     open_and_check_file(proc_self_fdinfo, proc_self_fdinfo_stat, fd_str.as_z_str())
 }
 
