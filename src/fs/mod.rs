@@ -97,7 +97,7 @@ pub use constants::CopyfileFlags;
 pub use constants::RenameFlags;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use constants::ResolveFlags;
-pub use constants::{Access, FdFlags, Mode, OFlags};
+pub use constants::{Access, FdFlags, Mode, Nsecs, OFlags, Secs, Timespec};
 #[cfg(not(target_os = "redox"))]
 pub use constants::{AtFlags, Dev};
 #[cfg(any(target_os = "android", target_os = "linux"))]

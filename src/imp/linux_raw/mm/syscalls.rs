@@ -13,12 +13,12 @@ use super::super::conv::{
     borrowed_fd, c_uint, no_fd, pass_usize, ret, ret_owned_fd, ret_void_star, void_star,
 };
 use super::super::reg::nr;
-use crate::fd::BorrowedFd;
-use crate::io::{self, OwnedFd};
-use crate::mm::{
+use super::types::{
     Advice, MapFlags, MlockFlags, MprotectFlags, MremapFlags, MsyncFlags, ProtFlags,
     UserfaultfdFlags,
 };
+use crate::fd::BorrowedFd;
+use crate::io::{self, OwnedFd};
 #[cfg(target_pointer_width = "32")]
 use core::convert::TryInto;
 #[cfg(any(target_arch = "arm", target_arch = "mips", target_arch = "x86"))]

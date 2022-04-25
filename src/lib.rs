@@ -215,14 +215,8 @@ pub mod runtime;
 #[cfg(not(feature = "fs"))]
 pub(crate) mod fs;
 #[cfg(not(windows))]
-#[cfg(all(not(feature = "mm"), any(feature = "time", target_arch = "x86")))]
-pub(crate) mod mm;
-#[cfg(not(windows))]
 #[cfg(not(any(feature = "fs", feature = "net")))]
 pub(crate) mod path;
 #[cfg(not(windows))]
 #[cfg(not(feature = "process"))]
 pub(crate) mod process;
-#[cfg(not(windows))]
-#[cfg(all(not(feature = "time"), target_arch = "x86"))]
-pub(crate) mod time;

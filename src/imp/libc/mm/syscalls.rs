@@ -6,16 +6,16 @@ use super::super::conv::syscall_ret_owned_fd;
 use super::super::conv::{borrowed_fd, no_fd, ret};
 #[cfg(not(target_os = "wasi"))]
 use super::super::offset::libc_mmap;
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+use super::types::Advice;
+#[cfg(target_os = "linux")]
+use super::types::MremapFlags;
+#[cfg(not(target_os = "wasi"))]
+use super::types::{MapFlags, MprotectFlags, MsyncFlags, ProtFlags};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use super::types::{MlockFlags, UserfaultfdFlags};
 use crate::fd::BorrowedFd;
 use crate::io::{self, OwnedFd};
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-use crate::mm::Advice;
-#[cfg(target_os = "linux")]
-use crate::mm::MremapFlags;
-#[cfg(not(target_os = "wasi"))]
-use crate::mm::{MapFlags, MprotectFlags, MsyncFlags, ProtFlags};
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::mm::{MlockFlags, UserfaultfdFlags};
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: Advice) -> io::Result<()> {

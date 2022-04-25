@@ -14,9 +14,10 @@
 
 use super::c;
 use super::elf::*;
+use super::mm::syscalls::madvise;
+use super::mm::types::Advice;
 use crate::ffi::ZStr;
 use crate::io;
-use crate::mm::{madvise, Advice};
 use core::ffi::c_void;
 use core::mem::{align_of, size_of};
 use core::ptr::{null, null_mut};
@@ -271,7 +272,7 @@ unsafe fn check_vdso_base<'vdso>(base: *const Elf_Ehdr) -> Option<&'vdso Elf_Ehd
         use super::arch::choose::syscall2;
         use super::conv::{clockid_t, ret, void_star};
         use super::reg::nr;
-        use crate::time::ClockId;
+        use super::time::types::ClockId;
         use linux_raw_sys::general::__NR_clock_getres;
         if ret(syscall2(
             nr(__NR_clock_getres),

@@ -13,12 +13,12 @@ use super::super::arch::choose::syscall4;
 use super::super::conv::{borrowed_fd, by_ref, c_uint, ret_owned_fd, timerfd_clockid_t};
 use super::super::conv::{clockid_t, out, ret, ret_infallible};
 use super::super::reg::nr;
+use super::types::ClockId;
 #[cfg(feature = "time")]
 use crate::fd::BorrowedFd;
 use crate::io;
 #[cfg(feature = "time")]
 use crate::io::OwnedFd;
-use crate::time::ClockId;
 #[cfg(feature = "time")]
 use crate::time::{Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags};
 use core::mem::MaybeUninit;
@@ -39,6 +39,7 @@ use {
 };
 
 // `clock_gettime` has special optimizations via the vDSO.
+#[cfg(feature = "time")]
 pub(crate) use super::super::vdso_wrappers::{clock_gettime, clock_gettime_dynamic};
 
 #[inline]

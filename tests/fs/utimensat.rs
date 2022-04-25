@@ -1,8 +1,7 @@
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_utimensat() {
-    use rustix::fs::{cwd, openat, statat, utimensat, AtFlags, Mode, OFlags, Timestamps};
-    use rustix::time::Timespec;
+    use rustix::fs::{cwd, openat, statat, utimensat, AtFlags, Mode, OFlags, Timespec, Timestamps};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
@@ -45,8 +44,7 @@ fn test_utimensat() {
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_utimensat_noent() {
-    use rustix::fs::{cwd, openat, utimensat, AtFlags, Mode, OFlags, Timestamps};
-    use rustix::time::Timespec;
+    use rustix::fs::{cwd, openat, utimensat, AtFlags, Mode, OFlags, Timespec, Timestamps};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
@@ -76,8 +74,7 @@ fn test_utimensat_noent() {
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_utimensat_notdir() {
-    use rustix::fs::{cwd, openat, utimensat, AtFlags, Mode, OFlags, Timestamps};
-    use rustix::time::Timespec;
+    use rustix::fs::{cwd, openat, utimensat, AtFlags, Mode, OFlags, Timespec, Timestamps};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(

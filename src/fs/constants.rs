@@ -15,3 +15,5 @@ pub use imp::fs::types::{RenameFlags, ResolveFlags};
 
 #[cfg(not(target_os = "redox"))]
 pub use imp::fs::types::Dev;
+
+pub use imp::time::types::{Nsecs, Secs, Timespec};
