@@ -30,7 +30,7 @@ mod suite {
 
         c.bench_function("simple statat", |b| {
             b.iter(|| {
-                statat(&cwd(), "/", AtFlags::empty()).unwrap();
+                statat(cwd(), "/", AtFlags::empty()).unwrap();
             })
         });
     }
@@ -78,7 +78,7 @@ mod suite {
 
         c.bench_function("simple statat cstr", |b| {
             b.iter(|| {
-                statat(&cwd(), rustix::zstr!("/"), AtFlags::empty()).unwrap();
+                statat(cwd(), rustix::zstr!("/"), AtFlags::empty()).unwrap();
             })
         });
     }

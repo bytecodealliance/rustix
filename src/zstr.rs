@@ -14,7 +14,7 @@
 /// use rustix::fs::{cwd, statat, AtFlags};
 /// use rustix::zstr;
 ///
-/// let metadata = statat(&cwd(), zstr!("test.txt"), AtFlags::empty())?;
+/// let metadata = statat(cwd(), zstr!("test.txt"), AtFlags::empty())?;
 /// # Ok(())
 /// # }
 /// ```

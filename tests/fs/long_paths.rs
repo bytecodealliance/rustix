@@ -4,7 +4,7 @@ fn test_long_paths() {
     use rustix::fs::{cwd, mkdirat, openat, Mode, OFlags};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     #[cfg(libc)]
     const PATH_MAX: usize = libc::PATH_MAX as usize;
