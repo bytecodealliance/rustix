@@ -107,7 +107,7 @@ use-libc = ["errno", "libc"]
 fs = []
 
 # Enable `rustix::io_uring::*` (on platforms that support it).
-io_uring = ["linux-raw-sys"]
+io_uring = ["linux-raw-sys", "fs", "net"]
 
 # Enable `rustix::net::*`.
 net = []
