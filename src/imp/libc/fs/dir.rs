@@ -2,14 +2,12 @@ use super::super::c;
 use super::super::conv::owned_fd;
 #[cfg(not(target_os = "illumos"))]
 use super::FileType;
-#[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
-use crate::fd::IntoFd;
-use crate::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd};
+use crate::fd::{AsFd, BorrowedFd};
 use crate::ffi::ZStr;
 #[cfg(target_os = "wasi")]
 use crate::ffi::ZString;
 use crate::fs::{fcntl_getfl, fstat, fstatfs, openat, Mode, OFlags, Stat, StatFs};
-use crate::io::{self, OwnedFd};
+use crate::io;
 use crate::process::fchdir;
 #[cfg(target_os = "wasi")]
 use alloc::borrow::ToOwned;
@@ -36,7 +34,7 @@ use c::readdir as libc_readdir;
 ))]
 use c::{dirent64 as libc_dirent, readdir64 as libc_readdir};
 use core::fmt;
-use core::mem::{forget, zeroed};
+use core::mem::zeroed;
 use core::ptr::NonNull;
 use errno::{errno, set_errno, Errno};
 
@@ -79,13 +77,13 @@ impl Dir {
     /// `rewinddir(self)`
     #[inline]
     pub fn rewind(&mut self) {
-        unsafe { c::rewinddir(self.libc_dir.as_ptr()) }
+        unsafe { c::rewinddir(self.0.as_ptr()) }
     }
 
     /// `readdir(self)`, where `None` means the end of the directory.
     pub fn read(&mut self) -> Option<io::Result<DirEntry>> {
         set_errno(Errno(0));
-        let dirent_ptr = unsafe { libc_readdir(self.libc_dir.as_ptr()) };
+        let dirent_ptr = unsafe { libc_readdir(self.0.as_ptr()) };
         if dirent_ptr.is_null() {
             let curr_errno = errno().0;
             if curr_errno == 0 {
@@ -118,19 +116,19 @@ impl Dir {
     /// `fstat(self)`
     #[inline]
     pub fn stat(&self) -> io::Result<Stat> {
-        fstat(unsafe { BorrowedFd::borrow_raw_fd(c::dirfd(self.0)) })
+        fstat(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr())) })
     }
 
     /// `fstatfs(self)`
     #[inline]
     pub fn statfs(&self) -> io::Result<StatFs> {
-        fstatfs(unsafe { BorrowedFd::borrow_raw_fd(c::dirfd(self.0)) })
+        fstatfs(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr())) })
     }
 
     /// `fchdir(self)`
     #[inline]
     pub fn chdir(&self) -> io::Result<()> {
-        fchdir(unsafe { BorrowedFd::borrow_raw_fd(c::dirfd(self.0)) })
+        fchdir(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr())) })
     }
 }
 
@@ -250,7 +248,7 @@ unsafe impl Send for Dir {}
 impl Drop for Dir {
     #[inline]
     fn drop(&mut self) {
-        unsafe { c::closedir(self.libc_dir.as_ptr()) };
+        unsafe { c::closedir(self.0.as_ptr()) };
     }
 }
 
@@ -266,7 +264,7 @@ impl Iterator for Dir {
 impl fmt::Debug for Dir {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Dir")
-            .field("fd", &self.as_fd().as_raw_fd())
+            .field("fd", unsafe { &c::dirfd(self.0.as_ptr()) })
             .finish()
     }
 }
