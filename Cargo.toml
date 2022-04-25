@@ -35,7 +35,7 @@ once_cell = { version = "1.5.2", optional = true }
 # and libc. The libc and errno dependencies are only enabled when the libc
 # backend is in use.
 [target.'cfg(all(not(rustix_use_libc), not(miri), target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64")))'.dependencies]
-linux-raw-sys = { version = "0.0.42", default-features = false, features = ["general", "errno", "ioctl", "no_std"] }
+linux-raw-sys = { version = "0.0.46", default-features = false, features = ["general", "errno", "ioctl", "no_std"] }
 errno = { version = "0.2.8", default-features = false, optional = true }
 libc = { version = "0.2.118", features = ["extra_traits"], optional = true }
 
@@ -44,6 +44,11 @@ libc = { version = "0.2.118", features = ["extra_traits"], optional = true }
 [target.'cfg(any(rustix_use_libc, miri, not(all(target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64")))))'.dependencies]
 errno = { version = "0.2.8", default-features = false }
 libc = { version = "0.2.118", features = ["extra_traits"] }
+
+[target.'cfg(all(any(target_os = "android", target_os = "linux"), any(rustix_use_libc, miri, not(all(target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", not(target_pointer_width = "32")), target_arch = "arm", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64"))))))'.dependencies]
+# Some syscalls do not have libc wrappers, such as in `io_uring`. For these,
+# we use the linux-raw-sys ABI and `libc::syscall`.
+linux-raw-sys = { version = "0.0.46", default-features = false, optional = true, features = ["general", "no_std"] }
 
 # For the libc backend on Windows, use the Winsock2 API in winapi.
 [target.'cfg(windows)'.dependencies]
@@ -56,6 +61,7 @@ tempfile = "3.2.0"
 libc = "0.2.118"
 errno = "0.2.8"
 serial_test = "0.6"
+memoffset = "0.6.5"
 
 [target.'cfg(not(target_os = "emscripten"))'.dev-dependencies]
 criterion = "0.3"
@@ -65,7 +71,7 @@ ctor = "0.1.21"
 
 [features]
 default = ["std"]
-std = ["io-lifetimes", "linux-raw-sys/std"]
+std = ["io-lifetimes"]
 rustc-dep-of-std = [
     "core",
     "alloc",
@@ -80,6 +86,12 @@ use-libc = ["errno", "libc"]
 
 # Enable this to enable `proc_self_fd` (on Linux) and `ttyname`.
 procfs = ["once_cell", "itoa"]
+
+# Enable `rustix::io_uring::*` (on platforms that support it).
+io_uring = ["linux-raw-sys"]
+
+# Enable all API features.
+all-apis = ["io_uring", "procfs"]
 
 # Expose io-lifetimes' features for third-party crate impls.
 async-std = ["io-lifetimes/async-std"]
