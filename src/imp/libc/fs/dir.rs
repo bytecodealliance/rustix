@@ -15,6 +15,7 @@ use crate::fs::{fcntl_getfl, fstat, openat, Mode, OFlags, Stat};
 )))] // not implemented in libc for netbsd yet
 use crate::fs::{fstatfs, StatFs};
 use crate::io;
+#[cfg(not(target_os = "fuchsia"))]
 use crate::process::fchdir;
 #[cfg(target_os = "wasi")]
 use alloc::borrow::ToOwned;
@@ -139,6 +140,7 @@ impl Dir {
     }
 
     /// `fchdir(self)`
+    #[cfg(not(target_os = "fuchsia"))]
     #[inline]
     pub fn chdir(&self) -> io::Result<()> {
         fchdir(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr())) })
