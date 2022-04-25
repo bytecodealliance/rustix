@@ -25,7 +25,7 @@ fn openat2_more<Fd: AsFd, P: path::Arg>(
 #[test]
 fn test_openat2() {
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     // Detect whether `openat2` is available.
     match openat2(

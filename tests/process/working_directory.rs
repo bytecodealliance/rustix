@@ -15,7 +15,7 @@ fn test_changing_working_directory() {
     let tmpdir = tmpdir();
 
     let orig_cwd = rustix::process::getcwd(Vec::new()).expect("get the cwd");
-    let orig_fd_cwd = rustix::fs::openat(&rustix::fs::cwd(), ".", OFlags::RDONLY, Mode::empty())
+    let orig_fd_cwd = rustix::fs::openat(rustix::fs::cwd(), ".", OFlags::RDONLY, Mode::empty())
         .expect("get a fd for the current directory");
 
     rustix::process::chdir(tmpdir.path()).expect("changing dir to the tmp");

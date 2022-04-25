@@ -6,7 +6,7 @@ fn test_readwrite_pv() {
     use rustix::io::{preadv, pwritev};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let foo = openat(
         &dir,
         "foo",
@@ -43,7 +43,7 @@ fn test_readwrite_p() {
     use rustix::io::{pread, pwrite};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let foo = openat(
         &dir,
         "foo",
@@ -67,7 +67,7 @@ fn test_readwrite_v() {
     use rustix::io::{readv, writev, SeekFrom};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let foo = openat(
         &dir,
         "foo",
@@ -93,7 +93,7 @@ fn test_readwrite() {
     use std::io::SeekFrom;
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let foo = openat(
         &dir,
         "foo",

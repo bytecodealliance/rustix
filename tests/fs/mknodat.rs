@@ -9,7 +9,7 @@ fn test_mknodat() {
     use rustix::fs::{cwd, mknodat, openat, statat, unlinkat, AtFlags, FileType, Mode, OFlags};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     // Create a regular file. Not supported on FreeBSD or OpenBSD.
     #[cfg(not(any(target_os = "freebsd", target_os = "openbsd")))]

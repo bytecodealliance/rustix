@@ -5,7 +5,7 @@ fn test_futimens() {
     use rustix::time::Timespec;
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     let foo = openat(
         &dir,

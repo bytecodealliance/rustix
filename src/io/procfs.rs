@@ -231,7 +231,7 @@ fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     // has no side effects.
     PROC.get_or_try_init(|| {
         // Open "/proc".
-        let proc = proc_opendirat(&cwd(), zstr!("/proc"))?;
+        let proc = proc_opendirat(cwd(), zstr!("/proc"))?;
         let proc_stat = check_proc_entry(
             Kind::Proc,
             proc.as_fd(),

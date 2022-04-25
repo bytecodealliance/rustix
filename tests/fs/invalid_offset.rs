@@ -13,7 +13,7 @@ use rustix::io::SeekFrom;
 fn invalid_offset_seek() {
     use rustix::fs::{cwd, openat, seek, Mode, OFlags};
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
         &dir,
         "foo",
@@ -40,7 +40,7 @@ fn invalid_offset_seek() {
 fn invalid_offset_fallocate() {
     use rustix::fs::{cwd, fallocate, openat, FallocateFlags, Mode, OFlags};
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
         &dir,
         "foo",
@@ -65,7 +65,7 @@ fn invalid_offset_fallocate() {
 fn invalid_offset_fadvise() {
     use rustix::fs::{cwd, fadvise, openat, Advice, Mode, OFlags};
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
         &dir,
         "foo",
@@ -97,7 +97,7 @@ fn invalid_offset_pread() {
     use rustix::fs::{cwd, openat, Mode, OFlags};
     use rustix::io::pread;
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
         &dir,
         "foo",
@@ -117,7 +117,7 @@ fn invalid_offset_pwrite() {
     use rustix::fs::{cwd, openat, Mode, OFlags};
     use rustix::io::pwrite;
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
         &dir,
         "foo",
@@ -137,7 +137,7 @@ fn invalid_offset_copy_file_range() {
     use rustix::fs::{copy_file_range, cwd, openat, Mode, OFlags};
     use rustix::io::write;
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let foo = openat(
         &dir,
         "foo",
