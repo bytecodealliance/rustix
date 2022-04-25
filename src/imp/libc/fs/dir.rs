@@ -6,14 +6,14 @@ use crate::fd::{AsFd, BorrowedFd};
 use crate::ffi::ZStr;
 #[cfg(target_os = "wasi")]
 use crate::ffi::ZString;
+use crate::fs::{fcntl_getfl, fstat, openat, Mode, OFlags, Stat};
 #[cfg(not(any(
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
     target_os = "wasi"
 )))] // not implemented in libc for netbsd yet
-use crate::fs::fstatfs;
-use crate::fs::{fcntl_getfl, fstat, openat, Mode, OFlags, Stat, StatFs};
+use crate::fs::{fstatfs, StatFs};
 use crate::io;
 use crate::process::fchdir;
 #[cfg(target_os = "wasi")]
