@@ -6,7 +6,7 @@
 #![allow(unsafe_code)]
 
 use super::super::arch::choose::{syscall3, syscall3_readonly};
-use super::super::conv::{borrowed_fd, by_ref, c_uint, out, regular_pid, ret};
+use super::super::conv::{by_ref, c_uint, ret};
 use super::super::reg::nr;
 use crate::fd::BorrowedFd;
 use crate::io;
@@ -30,9 +30,9 @@ pub(crate) fn tcgetwinsize(fd: BorrowedFd<'_>) -> io::Result<Winsize> {
         let mut result = MaybeUninit::<Winsize>::uninit();
         ret(syscall3(
             nr(__NR_ioctl),
-            borrowed_fd(fd),
+            fd,
             c_uint(TIOCGWINSZ),
-            out(&mut result),
+            &mut result,
         ))
         .map(|()| result.assume_init())
     }
@@ -42,13 +42,8 @@ pub(crate) fn tcgetwinsize(fd: BorrowedFd<'_>) -> io::Result<Winsize> {
 pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     unsafe {
         let mut result = MaybeUninit::<Termios>::uninit();
-        ret(syscall3(
-            nr(__NR_ioctl),
-            borrowed_fd(fd),
-            c_uint(TCGETS),
-            out(&mut result),
-        ))
-        .map(|()| result.assume_init())
+        ret(syscall3(nr(__NR_ioctl), fd, c_uint(TCGETS), &mut result))
+            .map(|()| result.assume_init())
     }
 }
 
@@ -56,13 +51,7 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
 pub(crate) fn tcgetpgrp(fd: BorrowedFd<'_>) -> io::Result<Pid> {
     unsafe {
         let mut result = MaybeUninit::<__kernel_pid_t>::uninit();
-        ret(syscall3(
-            nr(__NR_ioctl),
-            borrowed_fd(fd),
-            c_uint(TIOCGPGRP),
-            out(&mut result),
-        ))
-        .map(|()| {
+        ret(syscall3(nr(__NR_ioctl), fd, c_uint(TIOCGPGRP), &mut result)).map(|()| {
             let pid = result.assume_init();
             debug_assert!(pid > 0);
             Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid as u32))
@@ -86,7 +75,7 @@ pub(crate) fn tcsetattr(
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_ioctl),
-            borrowed_fd(fd),
+            fd,
             c_uint(request as u32),
             by_ref(termios),
         ))
@@ -98,7 +87,7 @@ pub(crate) fn tcsendbreak(fd: BorrowedFd) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_ioctl),
-            borrowed_fd(fd),
+            fd,
             c_uint(TCSBRK),
             c_uint(0),
         ))
@@ -110,7 +99,7 @@ pub(crate) fn tcdrain(fd: BorrowedFd) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_ioctl),
-            borrowed_fd(fd),
+            fd,
             c_uint(TCSBRK),
             c_uint(1),
         ))
@@ -122,7 +111,7 @@ pub(crate) fn tcflush(fd: BorrowedFd, queue_selector: QueueSelector) -> io::Resu
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_ioctl),
-            borrowed_fd(fd),
+            fd,
             c_uint(TCFLSH),
             c_uint(queue_selector as u32),
         ))
@@ -134,7 +123,7 @@ pub(crate) fn tcflow(fd: BorrowedFd, action: Action) -> io::Result<()> {
     unsafe {
         ret(syscall3_readonly(
             nr(__NR_ioctl),
-            borrowed_fd(fd),
+            fd,
             c_uint(TCXONC),
             c_uint(action as u32),
         ))
@@ -145,13 +134,7 @@ pub(crate) fn tcflow(fd: BorrowedFd, action: Action) -> io::Result<()> {
 pub(crate) fn tcgetsid(fd: BorrowedFd) -> io::Result<Pid> {
     unsafe {
         let mut result = MaybeUninit::<__kernel_pid_t>::uninit();
-        ret(syscall3(
-            nr(__NR_ioctl),
-            borrowed_fd(fd),
-            c_uint(TIOCGSID),
-            out(&mut result),
-        ))
-        .map(|()| {
+        ret(syscall3(nr(__NR_ioctl), fd, c_uint(TIOCGSID), &mut result)).map(|()| {
             let pid = result.assume_init();
             debug_assert!(pid > 0);
             Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid as u32))
@@ -164,7 +147,7 @@ pub(crate) fn tcsetwinsize(fd: BorrowedFd, winsize: Winsize) -> io::Result<()> {
     unsafe {
         ret(syscall3(
             nr(__NR_ioctl),
-            borrowed_fd(fd),
+            fd,
             c_uint(TIOCSWINSZ),
             by_ref(&winsize),
         ))
@@ -173,14 +156,7 @@ pub(crate) fn tcsetwinsize(fd: BorrowedFd, winsize: Winsize) -> io::Result<()> {
 
 #[inline]
 pub(crate) fn tcsetpgrp(fd: BorrowedFd<'_>, pid: Pid) -> io::Result<()> {
-    unsafe {
-        ret(syscall3(
-            nr(__NR_ioctl),
-            borrowed_fd(fd),
-            c_uint(TIOCSPGRP),
-            regular_pid(pid),
-        ))
-    }
+    unsafe { ret(syscall3(nr(__NR_ioctl), fd, c_uint(TIOCSPGRP), pid)) }
 }
 
 #[inline]

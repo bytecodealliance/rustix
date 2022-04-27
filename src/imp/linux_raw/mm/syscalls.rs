@@ -9,9 +9,7 @@ use super::super::arch::choose::{
     syscall1_readonly, syscall2, syscall3, syscall4, syscall5, syscall6,
 };
 use super::super::c;
-use super::super::conv::{
-    borrowed_fd, c_uint, no_fd, pass_usize, ret, ret_owned_fd, ret_void_star, void_star,
-};
+use super::super::conv::{c_uint, no_fd, pass_usize, ret, ret_owned_fd, ret_void_star};
 use super::super::reg::nr;
 use super::types::{
     Advice, MapFlags, MlockFlags, MprotectFlags, MremapFlags, MsyncFlags, ProtFlags,
@@ -35,7 +33,7 @@ pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: Advice) -> io::R
     unsafe {
         ret(syscall3(
             nr(__NR_madvise),
-            void_star(addr),
+            addr,
             pass_usize(len),
             c_uint(advice as c::c_uint),
         ))
@@ -44,12 +42,7 @@ pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: Advice) -> io::R
 
 #[inline]
 pub(crate) unsafe fn msync(addr: *mut c::c_void, len: usize, flags: MsyncFlags) -> io::Result<()> {
-    ret(syscall3(
-        nr(__NR_msync),
-        void_star(addr),
-        pass_usize(len),
-        c_uint(flags.bits()),
-    ))
+    ret(syscall3(nr(__NR_msync), addr, pass_usize(len), flags))
 }
 
 /// # Safety
@@ -69,11 +62,11 @@ pub(crate) unsafe fn mmap(
     {
         ret_void_star(syscall6(
             nr(__NR_mmap2),
-            void_star(addr),
+            addr,
             pass_usize(length),
-            c_uint(prot.bits()),
-            c_uint(flags.bits()),
-            borrowed_fd(fd),
+            prot,
+            flags,
+            fd,
             (offset / 4096)
                 .try_into()
                 .map(|scaled_offset| pass_usize(scaled_offset))
@@ -84,11 +77,11 @@ pub(crate) unsafe fn mmap(
     {
         ret_void_star(syscall6(
             nr(__NR_mmap),
-            void_star(addr),
+            addr,
             pass_usize(length),
-            c_uint(prot.bits()),
-            c_uint(flags.bits()),
-            borrowed_fd(fd),
+            prot,
+            flags,
+            fd,
             loff_t_from_u64(offset),
         ))
     }
@@ -109,9 +102,9 @@ pub(crate) unsafe fn mmap_anonymous(
     {
         ret_void_star(syscall6(
             nr(__NR_mmap2),
-            void_star(addr),
+            addr,
             pass_usize(length),
-            c_uint(prot.bits()),
+            prot,
             c_uint(flags.bits() | linux_raw_sys::general::MAP_ANONYMOUS),
             no_fd(),
             pass_usize(0),
@@ -121,9 +114,9 @@ pub(crate) unsafe fn mmap_anonymous(
     {
         ret_void_star(syscall6(
             nr(__NR_mmap),
-            void_star(addr),
+            addr,
             pass_usize(length),
-            c_uint(prot.bits()),
+            prot,
             c_uint(flags.bits() | linux_raw_sys::general::MAP_ANONYMOUS),
             no_fd(),
             loff_t_from_u64(0),
@@ -137,12 +130,7 @@ pub(crate) unsafe fn mprotect(
     len: usize,
     flags: MprotectFlags,
 ) -> io::Result<()> {
-    ret(syscall3(
-        nr(__NR_mprotect),
-        void_star(ptr),
-        pass_usize(len),
-        c_uint(flags.bits()),
-    ))
+    ret(syscall3(nr(__NR_mprotect), ptr, pass_usize(len), flags))
 }
 
 /// # Safety
@@ -151,11 +139,7 @@ pub(crate) unsafe fn mprotect(
 /// working with memory pointed to by raw pointers is unsafe.
 #[inline]
 pub(crate) unsafe fn munmap(addr: *mut c::c_void, length: usize) -> io::Result<()> {
-    ret(syscall2(
-        nr(__NR_munmap),
-        void_star(addr),
-        pass_usize(length),
-    ))
+    ret(syscall2(nr(__NR_munmap), addr, pass_usize(length)))
 }
 
 /// # Safety
@@ -171,10 +155,10 @@ pub(crate) unsafe fn mremap(
 ) -> io::Result<*mut c::c_void> {
     ret_void_star(syscall4(
         nr(__NR_mremap),
-        void_star(old_address),
+        old_address,
         pass_usize(old_size),
         pass_usize(new_size),
-        c_uint(flags.bits()),
+        flags,
     ))
 }
 
@@ -193,11 +177,11 @@ pub(crate) unsafe fn mremap_fixed(
 ) -> io::Result<*mut c::c_void> {
     ret_void_star(syscall5(
         nr(__NR_mremap),
-        void_star(old_address),
+        old_address,
         pass_usize(old_size),
         pass_usize(new_size),
-        c_uint(flags.bits()),
-        void_star(new_address),
+        flags,
+        new_address,
     ))
 }
 
@@ -207,11 +191,7 @@ pub(crate) unsafe fn mremap_fixed(
 /// boundaries.
 #[inline]
 pub(crate) unsafe fn mlock(addr: *mut c::c_void, length: usize) -> io::Result<()> {
-    ret(syscall2(
-        nr(__NR_mlock),
-        void_star(addr),
-        pass_usize(length),
-    ))
+    ret(syscall2(nr(__NR_mlock), addr, pass_usize(length)))
 }
 
 /// # Safety
@@ -224,12 +204,7 @@ pub(crate) unsafe fn mlock_with(
     length: usize,
     flags: MlockFlags,
 ) -> io::Result<()> {
-    ret(syscall3(
-        nr(__NR_mlock2),
-        void_star(addr),
-        pass_usize(length),
-        c_uint(flags.bits()),
-    ))
+    ret(syscall3(nr(__NR_mlock2), addr, pass_usize(length), flags))
 }
 
 /// # Safety
@@ -238,17 +213,10 @@ pub(crate) unsafe fn mlock_with(
 /// boundaries.
 #[inline]
 pub(crate) unsafe fn munlock(addr: *mut c::c_void, length: usize) -> io::Result<()> {
-    ret(syscall2(
-        nr(__NR_munlock),
-        void_star(addr),
-        pass_usize(length),
-    ))
+    ret(syscall2(nr(__NR_munlock), addr, pass_usize(length)))
 }
 
 #[inline]
 pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
-    ret_owned_fd(syscall1_readonly(
-        nr(__NR_userfaultfd),
-        c_uint(flags.bits()),
-    ))
+    ret_owned_fd(syscall1_readonly(nr(__NR_userfaultfd), flags))
 }

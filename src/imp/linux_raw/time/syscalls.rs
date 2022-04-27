@@ -10,8 +10,8 @@ use super::super::arch::choose::syscall2;
 #[cfg(feature = "time")]
 use super::super::arch::choose::syscall4;
 #[cfg(feature = "time")]
-use super::super::conv::{borrowed_fd, by_ref, c_uint, ret_owned_fd, timerfd_clockid_t};
-use super::super::conv::{clockid_t, out, ret, ret_infallible};
+use super::super::conv::{by_ref, ret_owned_fd};
+use super::super::conv::{ret, ret_infallible};
 use super::super::reg::nr;
 use super::types::ClockId;
 #[cfg(feature = "time")]
@@ -49,8 +49,8 @@ pub(crate) fn clock_getres(which_clock: ClockId) -> __kernel_timespec {
         let mut result = MaybeUninit::<__kernel_timespec>::uninit();
         if let Err(err) = ret(syscall2(
             nr(__NR_clock_getres_time64),
-            clockid_t(which_clock),
-            out(&mut result),
+            which_clock,
+            &mut result,
         )) {
             // See the comments in `rustix_clock_gettime_via_syscall` about
             // emulation.
@@ -62,11 +62,7 @@ pub(crate) fn clock_getres(which_clock: ClockId) -> __kernel_timespec {
     #[cfg(target_pointer_width = "64")]
     unsafe {
         let mut result = MaybeUninit::<__kernel_timespec>::uninit();
-        ret_infallible(syscall2(
-            nr(__NR_clock_getres),
-            clockid_t(which_clock),
-            out(&mut result),
-        ));
+        ret_infallible(syscall2(nr(__NR_clock_getres), which_clock, &mut result));
         result.assume_init()
     }
 }
@@ -76,8 +72,8 @@ unsafe fn clock_getres_old(which_clock: ClockId, result: &mut MaybeUninit<__kern
     let mut old_result = MaybeUninit::<__kernel_old_timespec>::uninit();
     ret_infallible(syscall2(
         nr(__NR_clock_getres),
-        clockid_t(which_clock),
-        out(&mut old_result),
+        which_clock,
+        &mut old_result,
     ));
     let old_result = old_result.assume_init();
     // TODO: With Rust 1.55, we can use MaybeUninit::write here.
@@ -93,13 +89,7 @@ unsafe fn clock_getres_old(which_clock: ClockId, result: &mut MaybeUninit<__kern
 #[cfg(feature = "time")]
 #[inline]
 pub(crate) fn timerfd_create(clockid: TimerfdClockId, flags: TimerfdFlags) -> io::Result<OwnedFd> {
-    unsafe {
-        ret_owned_fd(syscall2(
-            nr(__NR_timerfd_create),
-            timerfd_clockid_t(clockid),
-            c_uint(flags.bits()),
-        ))
-    }
+    unsafe { ret_owned_fd(syscall2(nr(__NR_timerfd_create), clockid, flags)) }
 }
 
 #[cfg(feature = "time")]
@@ -115,10 +105,10 @@ pub(crate) fn timerfd_settime(
     unsafe {
         ret(syscall4(
             nr(__NR_timerfd_settime),
-            borrowed_fd(fd),
-            c_uint(flags.bits()),
+            fd,
+            flags,
             by_ref(new_value),
-            out(&mut result),
+            &mut result,
         ))
         .map(|()| result.assume_init())
     }
@@ -127,10 +117,10 @@ pub(crate) fn timerfd_settime(
     unsafe {
         ret(syscall4(
             nr(__NR_timerfd_settime64),
-            borrowed_fd(fd),
-            c_uint(flags.bits()),
+            fd,
+            flags,
             by_ref(new_value),
-            out(&mut result),
+            &mut result,
         ))
         .or_else(|err| {
             // See the comments in `rustix_clock_gettime_via_syscall` about
@@ -182,10 +172,10 @@ unsafe fn timerfd_settime_old(
     };
     ret(syscall4(
         nr(__NR_timerfd_settime),
-        borrowed_fd(fd),
-        c_uint(flags.bits()),
+        fd,
+        flags,
         by_ref(&old_new_value),
-        out(&mut old_result),
+        &mut old_result,
     ))?;
     let old_result = old_result.assume_init();
     // TODO: With Rust 1.55, we can use MaybeUninit::write here.
@@ -212,31 +202,22 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
 
     #[cfg(target_pointer_width = "64")]
     unsafe {
-        ret(syscall2(
-            nr(__NR_timerfd_gettime),
-            borrowed_fd(fd),
-            out(&mut result),
-        ))
-        .map(|()| result.assume_init())
+        ret(syscall2(nr(__NR_timerfd_gettime), fd, &mut result)).map(|()| result.assume_init())
     }
 
     #[cfg(target_pointer_width = "32")]
     unsafe {
-        ret(syscall2(
-            nr(__NR_timerfd_gettime64),
-            borrowed_fd(fd),
-            out(&mut result),
-        ))
-        .or_else(|err| {
-            // See the comments in `rustix_clock_gettime_via_syscall` about
-            // emulation.
-            if err == io::Error::NOSYS {
-                timerfd_gettime_old(fd, &mut result)
-            } else {
-                Err(err)
-            }
-        })
-        .map(|()| result.assume_init())
+        ret(syscall2(nr(__NR_timerfd_gettime64), fd, &mut result))
+            .or_else(|err| {
+                // See the comments in `rustix_clock_gettime_via_syscall` about
+                // emulation.
+                if err == io::Error::NOSYS {
+                    timerfd_gettime_old(fd, &mut result)
+                } else {
+                    Err(err)
+                }
+            })
+            .map(|()| result.assume_init())
     }
 }
 
@@ -247,11 +228,7 @@ unsafe fn timerfd_gettime_old(
     result: &mut MaybeUninit<Itimerspec>,
 ) -> io::Result<()> {
     let mut old_result = MaybeUninit::<__kernel_old_itimerspec>::uninit();
-    ret(syscall2(
-        nr(__NR_timerfd_gettime),
-        borrowed_fd(fd),
-        out(&mut old_result),
-    ))?;
+    ret(syscall2(nr(__NR_timerfd_gettime), fd, &mut old_result))?;
     let old_result = old_result.assume_init();
     // TODO: With Rust 1.55, we can use MaybeUninit::write here.
     ptr::write(

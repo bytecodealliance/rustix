@@ -9,10 +9,7 @@ use super::super::arch::choose::{
     syscall1_noreturn, syscall1_readonly, syscall2_readonly, syscall3_readonly, syscall5_readonly,
 };
 use super::super::c;
-use super::super::conv::{
-    borrowed_fd, c_int, c_str, c_uint, ret, ret_c_uint, ret_error, ret_usize_infallible, void_star,
-    zero,
-};
+use super::super::conv::{c_int, c_uint, ret, ret_c_uint, ret_error, ret_usize_infallible, zero};
 use super::super::reg::nr;
 use crate::fd::BorrowedFd;
 use crate::ffi::ZStr;
@@ -55,11 +52,11 @@ pub(crate) unsafe fn execveat(
 ) -> io::Error {
     ret_error(syscall5_readonly(
         nr(__NR_execveat),
-        borrowed_fd(dirfd),
-        c_str(path),
-        void_star(args as _),
-        void_star(env_vars as _),
-        c_uint(flags.bits()),
+        dirfd,
+        path,
+        args,
+        env_vars,
+        flags,
     ))
 }
 
@@ -68,12 +65,7 @@ pub(crate) unsafe fn execve(
     args: *const *const u8,
     env_vars: *const *const u8,
 ) -> io::Error {
-    ret_error(syscall3_readonly(
-        nr(__NR_execve),
-        c_str(path),
-        void_star(args as _),
-        void_star(env_vars as _),
-    ))
+    ret_error(syscall3_readonly(nr(__NR_execve), path, args, env_vars))
 }
 
 pub(crate) mod tls {
@@ -90,7 +82,7 @@ pub(crate) mod tls {
     #[cfg(target_arch = "arm")]
     #[inline]
     pub(crate) unsafe fn arm_set_tls(data: *mut c::c_void) -> io::Result<()> {
-        ret(syscall1_readonly(nr(__ARM_NR_set_tls), void_star(data)))
+        ret(syscall1_readonly(nr(__ARM_NR_set_tls), data))
     }
 
     #[cfg(target_arch = "x86_64")]
@@ -99,26 +91,21 @@ pub(crate) mod tls {
         ret_infallible(syscall2_readonly(
             nr(__NR_arch_prctl),
             c_uint(ARCH_SET_FS),
-            void_star(data),
+            data,
         ))
     }
 
     #[inline]
     pub(crate) unsafe fn set_tid_address(data: *mut c::c_void) -> Pid {
-        let tid: i32 =
-            ret_usize_infallible(syscall1_readonly(nr(__NR_set_tid_address), void_star(data)))
-                as __kernel_pid_t;
+        let tid: i32 = ret_usize_infallible(syscall1_readonly(nr(__NR_set_tid_address), data))
+            as __kernel_pid_t;
         debug_assert_ne!(tid, 0);
         Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(tid as u32))
     }
 
     #[inline]
     pub(crate) unsafe fn set_thread_name(name: &ZStr) -> io::Result<()> {
-        ret(syscall2_readonly(
-            nr(__NR_prctl),
-            c_uint(PR_SET_NAME),
-            c_str(name),
-        ))
+        ret(syscall2_readonly(nr(__NR_prctl), c_uint(PR_SET_NAME), name))
     }
 
     #[inline]

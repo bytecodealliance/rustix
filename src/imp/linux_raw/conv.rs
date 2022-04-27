@@ -1,5 +1,11 @@
-//! System call arguments and return values are all `usize`. This module
-//! provides functions for converting into and out of `usize` values.
+//! Convert values to [`ArgReg`] and from [`RetReg`].
+//!
+//! System call arguments and return values are all communicated with inline
+//! asm and FFI as `*mut Opaque`. To protect these raw pointers from escaping
+//! or being accidentally misused as they travel through the code, we wrap
+//! them in [`ArgReg`] and [`RetReg`] structs. This file provides `From`
+//! implementations and explicit conversion functions for converting values
+//! into and out of these wrapper structs.
 //!
 //! # Safety
 //!
@@ -94,41 +100,51 @@ pub(super) fn pass_usize<'a, Num: ArgNumber>(t: usize) -> ArgReg<'a, Num> {
     raw_arg(t as *mut _)
 }
 
-#[inline]
-pub(super) fn void_star<'a, Num: ArgNumber>(c: *mut c::c_void) -> ArgReg<'a, Num> {
-    raw_arg(c.cast())
+impl<'a, Num: ArgNumber, T> From<*mut T> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(c: *mut T) -> ArgReg<'a, Num> {
+        raw_arg(c.cast())
+    }
 }
 
-#[inline]
-pub(super) fn const_void_star<'a, Num: ArgNumber>(c: *const c::c_void) -> ArgReg<'a, Num> {
-    let mut_ptr = c as *mut c::c_void;
-    raw_arg(mut_ptr.cast())
+impl<'a, Num: ArgNumber, T> From<*const T> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(c: *const T) -> ArgReg<'a, Num> {
+        let mut_ptr = c as *mut T;
+        raw_arg(mut_ptr.cast())
+    }
 }
 
-#[inline]
-pub(super) fn c_str<'a, Num: ArgNumber>(c: &'a ZStr) -> ArgReg<'a, Num> {
-    let mut_ptr = c.as_ptr() as *mut u8;
-    raw_arg(mut_ptr.cast())
+impl<'a, Num: ArgNumber> From<&'a ZStr> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(c: &'a ZStr) -> Self {
+        let mut_ptr = c.as_ptr() as *mut u8;
+        raw_arg(mut_ptr.cast())
+    }
 }
 
-#[inline]
-pub(super) fn opt_c_str<'a, Num: ArgNumber>(t: Option<&'a ZStr>) -> ArgReg<'a, Num> {
-    raw_arg(match t {
-        Some(s) => {
-            let mut_ptr = s.as_ptr() as *mut u8;
-            mut_ptr.cast()
-        }
-        None => null_mut(),
-    })
+impl<'a, Num: ArgNumber> From<Option<&'a ZStr>> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(t: Option<&'a ZStr>) -> Self {
+        raw_arg(match t {
+            Some(s) => {
+                let mut_ptr = s.as_ptr() as *mut u8;
+                mut_ptr.cast()
+            }
+            None => null_mut(),
+        })
+    }
 }
 
 /// Pass a borrowed file-descriptor argument.
-#[inline]
-pub(super) fn borrowed_fd<'a, Num: ArgNumber>(fd: BorrowedFd<'a>) -> ArgReg<'a, Num> {
-    // Safety: `BorrowedFd` ensures that the file descriptor is valid, and the
-    // lifetime parameter on the resulting `ArgReg` ensures that the result is
-    // bounded by the `BorrowedFd`'s lifetime.
-    unsafe { raw_fd(fd.as_raw_fd()) }
+impl<'a, Num: ArgNumber> From<BorrowedFd<'a>> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(fd: BorrowedFd<'a>) -> Self {
+        // Safety: `BorrowedFd` ensures that the file descriptor is valid, and the
+        // lifetime parameter on the resulting `ArgReg` ensures that the result is
+        // bounded by the `BorrowedFd`'s lifetime.
+        unsafe { raw_fd(fd.as_raw_fd()) }
+    }
 }
 
 /// Pass a raw file-descriptor argument. Most users should use [`borrowed_fd`]
@@ -212,11 +228,15 @@ pub(super) fn opt_ref<'a, T: Sized, Num: ArgNumber>(t: Option<&'a T>) -> ArgReg<
     }
 }
 
+/// Convert a `c_int` into an `ArgReg`.
+///
+/// Be sure to use `raw_fd` to pass `RawFd` values.
 #[inline]
 pub(super) fn c_int<'a, Num: ArgNumber>(i: c::c_int) -> ArgReg<'a, Num> {
     pass_usize(i as usize)
 }
 
+/// Convert a `c_uint` into an `ArgReg`.
 #[inline]
 pub(super) fn c_uint<'a, Num: ArgNumber>(i: c::c_uint) -> ArgReg<'a, Num> {
     pass_usize(i as usize)
@@ -237,15 +257,19 @@ pub(super) fn loff_t_from_u64<'a, Num: ArgNumber>(i: u64) -> ArgReg<'a, Num> {
 }
 
 #[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
-#[inline]
-pub(super) fn clockid_t<'a, Num: ArgNumber>(i: ClockId) -> ArgReg<'a, Num> {
-    pass_usize(i as __kernel_clockid_t as usize)
+impl<'a, Num: ArgNumber> From<ClockId> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(i: ClockId) -> Self {
+        pass_usize(i as __kernel_clockid_t as usize)
+    }
 }
 
 #[cfg(feature = "time")]
-#[inline]
-pub(super) fn timerfd_clockid_t<'a, Num: ArgNumber>(i: TimerfdClockId) -> ArgReg<'a, Num> {
-    pass_usize(i as __kernel_clockid_t as usize)
+impl<'a, Num: ArgNumber> From<TimerfdClockId> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(i: TimerfdClockId) -> Self {
+        pass_usize(i as __kernel_clockid_t as usize)
+    }
 }
 
 #[cfg(feature = "net")]
@@ -254,17 +278,144 @@ pub(super) fn socklen_t<'a, Num: ArgNumber>(i: socklen_t) -> ArgReg<'a, Num> {
     pass_usize(i as usize)
 }
 
-#[inline]
-pub(super) fn mode_as<'a, Num: ArgNumber>(mode: Mode) -> ArgReg<'a, Num> {
-    pass_usize(mode.bits() as usize)
+impl<'a, Num: ArgNumber> From<Mode> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(mode: Mode) -> Self {
+        pass_usize(mode.bits() as usize)
+    }
 }
 
-#[inline]
-pub(super) fn mode_and_type_as<'a, Num: ArgNumber>(
-    mode: Mode,
-    file_type: FileType,
-) -> ArgReg<'a, Num> {
-    pass_usize(mode.as_raw_mode() as usize | file_type.as_raw_mode() as usize)
+impl<'a, Num: ArgNumber> From<(Mode, FileType)> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(pair: (Mode, FileType)) -> Self {
+        pass_usize(pair.0.as_raw_mode() as usize | pair.1.as_raw_mode() as usize)
+    }
+}
+
+impl<'a, Num: ArgNumber> From<crate::fs::AtFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::fs::AtFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+impl<'a, Num: ArgNumber> From<crate::fs::MemfdFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::fs::MemfdFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+impl<'a, Num: ArgNumber> From<crate::fs::RenameFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::fs::RenameFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+impl<'a, Num: ArgNumber> From<crate::fs::StatxFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::fs::StatxFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+impl<'a, Num: ArgNumber> From<crate::fs::FdFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::fs::FdFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+impl<'a, Num: ArgNumber> From<crate::io::PipeFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::io::PipeFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+impl<'a, Num: ArgNumber> From<crate::io::DupFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::io::DupFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+impl<'a, Num: ArgNumber> From<crate::io::ReadWriteFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::io::ReadWriteFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+impl<'a, Num: ArgNumber> From<crate::io::EventfdFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::io::EventfdFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+impl<'a, Num: ArgNumber> From<crate::io::epoll::CreateFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::io::epoll::CreateFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+impl<'a, Num: ArgNumber> From<crate::imp::mm::types::ProtFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::imp::mm::types::ProtFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+impl<'a, Num: ArgNumber> From<crate::imp::mm::types::MsyncFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::imp::mm::types::MsyncFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+impl<'a, Num: ArgNumber> From<crate::imp::mm::types::MremapFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::imp::mm::types::MremapFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+impl<'a, Num: ArgNumber> From<crate::imp::mm::types::MlockFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::imp::mm::types::MlockFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+impl<'a, Num: ArgNumber> From<crate::imp::mm::types::MapFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::imp::mm::types::MapFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+impl<'a, Num: ArgNumber> From<crate::imp::mm::types::MprotectFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::imp::mm::types::MprotectFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+impl<'a, Num: ArgNumber> From<crate::imp::mm::types::UserfaultfdFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::imp::mm::types::UserfaultfdFlags) -> Self {
+        c_uint(flags.bits())
+    }
 }
 
 #[cfg(target_pointer_width = "64")]
@@ -298,25 +449,39 @@ const fn oflags_bits(oflags: OFlags) -> c::c_uint {
     oflags.bits()
 }
 
-#[inline]
-pub(super) fn oflags<'a, Num: ArgNumber>(oflags: OFlags) -> ArgReg<'a, Num> {
-    pass_usize(oflags_bits(oflags) as usize)
+impl<'a, Num: ArgNumber> From<OFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(oflags: OFlags) -> Self {
+        pass_usize(oflags_bits(oflags) as usize)
+    }
 }
 
+/// Convert an `OFlags` into a `u64` for use in the `open_how` struct.
 #[inline]
 pub(super) fn oflags_for_open_how(oflags: OFlags) -> u64 {
     u64::from(oflags_bits(oflags))
 }
 
-/// Convert a `Resource` into a syscall argument.
-#[inline]
-pub(super) fn resource<'a, Num: ArgNumber>(resource: Resource) -> ArgReg<'a, Num> {
-    c_uint(resource as c::c_uint)
+impl<'a, Num: ArgNumber> From<crate::fs::FallocateFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::fs::FallocateFlags) -> Self {
+        c_uint(flags.bits())
+    }
 }
 
-#[inline]
-pub(super) fn regular_pid<'a, Num: ArgNumber>(pid: Pid) -> ArgReg<'a, Num> {
-    pass_usize(pid.as_raw_nonzero().get() as usize)
+/// Convert a `Resource` into a syscall argument.
+impl<'a, Num: ArgNumber> From<Resource> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(resource: Resource) -> Self {
+        c_uint(resource as c::c_uint)
+    }
+}
+
+impl<'a, Num: ArgNumber> From<Pid> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(pid: Pid) -> Self {
+        pass_usize(pid.as_raw_nonzero().get() as usize)
+    }
 }
 
 #[inline]
@@ -324,19 +489,132 @@ pub(super) fn negative_pid<'a, Num: ArgNumber>(pid: Pid) -> ArgReg<'a, Num> {
     pass_usize(pid.as_raw_nonzero().get().wrapping_neg() as usize)
 }
 
-#[inline]
-pub(super) fn signal<'a, Num: ArgNumber>(sig: Signal) -> ArgReg<'a, Num> {
-    pass_usize(sig as usize)
+impl<'a, Num: ArgNumber> From<Signal> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(sig: Signal) -> Self {
+        pass_usize(sig as usize)
+    }
 }
 
-#[inline]
-pub(super) fn fs_advice<'a, Num: ArgNumber>(advice: crate::fs::Advice) -> ArgReg<'a, Num> {
-    c_uint(advice as c::c_uint)
+impl<'a, Num: ArgNumber> From<crate::fs::Advice> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(advice: crate::fs::Advice) -> Self {
+        c_uint(advice as c::c_uint)
+    }
 }
 
-#[inline]
-pub(super) fn out<'a, T: Sized, Num: ArgNumber>(t: &'a mut MaybeUninit<T>) -> ArgReg<'a, Num> {
-    raw_arg(t.as_mut_ptr().cast())
+impl<'a, Num: ArgNumber> From<crate::fs::SealFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::fs::SealFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(feature = "io_uring")]
+impl<'a, Num: ArgNumber> From<crate::io_uring::IoringEnterFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::io_uring::IoringEnterFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(feature = "time")]
+impl<'a, Num: ArgNumber> From<crate::time::TimerfdFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::time::TimerfdFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(feature = "time")]
+impl<'a, Num: ArgNumber> From<crate::time::TimerfdTimerFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::time::TimerfdTimerFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(feature = "rand")]
+impl<'a, Num: ArgNumber> From<crate::rand::GetRandomFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::rand::GetRandomFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(feature = "net")]
+impl<'a, Num: ArgNumber> From<crate::net::RecvFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::net::RecvFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(feature = "net")]
+impl<'a, Num: ArgNumber> From<crate::net::SendFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::net::SendFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(feature = "net")]
+impl<'a, Num: ArgNumber> From<crate::net::AcceptFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::net::AcceptFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(feature = "net")]
+impl<'a, Num: ArgNumber> From<crate::net::AddressFamily> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(family: crate::net::AddressFamily) -> Self {
+        c_uint(family.0.into())
+    }
+}
+
+#[cfg(feature = "net")]
+impl<'a, Num: ArgNumber> From<(crate::net::SocketType, crate::net::SocketFlags)>
+    for ArgReg<'a, Num>
+{
+    #[inline]
+    fn from(pair: (crate::net::SocketType, crate::net::SocketFlags)) -> Self {
+        c_uint(pair.0 .0 | pair.1.bits())
+    }
+}
+
+#[cfg(feature = "thread")]
+impl<'a, Num: ArgNumber> From<(crate::thread::FutexOperation, crate::thread::FutexFlags)>
+    for ArgReg<'a, Num>
+{
+    #[inline]
+    fn from(pair: (crate::thread::FutexOperation, crate::thread::FutexFlags)) -> Self {
+        c_uint(pair.0 as u32 | pair.1.bits())
+    }
+}
+
+#[cfg(feature = "net")]
+impl<'a, Num: ArgNumber> From<crate::net::SocketType> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(type_: crate::net::SocketType) -> Self {
+        c_uint(type_.0)
+    }
+}
+
+#[cfg(feature = "net")]
+impl<'a, Num: ArgNumber> From<crate::net::Protocol> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(protocol: crate::net::Protocol) -> Self {
+        c_uint(protocol.0)
+    }
+}
+
+impl<'a, Num: ArgNumber, T> From<&'a mut MaybeUninit<T>> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(t: &'a mut MaybeUninit<T>) -> Self {
+        raw_arg(t.as_mut_ptr().cast())
+    }
 }
 
 /// Convert a `usize` returned from a syscall that effectively returns `()` on

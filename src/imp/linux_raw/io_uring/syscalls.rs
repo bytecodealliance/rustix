@@ -6,9 +6,7 @@
 #![allow(unsafe_code)]
 
 use super::super::arch::choose::{syscall2, syscall4_readonly, syscall6};
-use super::super::conv::{
-    borrowed_fd, by_mut, c_uint, const_void_star, pass_usize, ret, ret_c_uint, ret_owned_fd,
-};
+use super::super::conv::{by_mut, c_uint, pass_usize, ret, ret_c_uint, ret_owned_fd};
 use super::super::reg::nr;
 use crate::fd::BorrowedFd;
 use crate::io;
@@ -37,9 +35,9 @@ pub(crate) unsafe fn io_uring_register(
 ) -> io::Result<()> {
     ret(syscall4_readonly(
         nr(__NR_io_uring_register),
-        borrowed_fd(fd),
+        fd,
         c_uint(opcode as u32),
-        const_void_star(arg),
+        arg,
         c_uint(nr_args),
     ))
 }
@@ -58,11 +56,11 @@ pub(crate) unsafe fn io_uring_enter(
     // could be a side effect depended on by the caller.
     ret_c_uint(syscall6(
         nr(__NR_io_uring_enter),
-        borrowed_fd(fd),
+        fd,
         c_uint(to_submit),
         c_uint(min_complete),
-        c_uint(flags.bits()),
-        const_void_star(arg),
+        flags,
+        arg,
         pass_usize(size),
     ))
 }

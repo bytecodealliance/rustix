@@ -74,68 +74,82 @@ pub(in crate::imp) unsafe fn syscall0(nr: SyscallNumber<'_>) -> RetReg<R0> {
 }
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> RetReg<R0> {
-    rustix_syscall1_nr_last_fastcall(a0, nr)
-}
-#[inline]
-#[must_use]
-pub(in crate::imp) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> ! {
-    rustix_syscall1_noreturn_nr_last_fastcall(a0, nr)
-}
-#[inline]
-#[must_use]
-pub(in crate::imp) unsafe fn syscall2(
+pub(in crate::imp) unsafe fn syscall1<'a>(
     nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-    a1: ArgReg<'_, A1>,
+    a0: impl Into<ArgReg<'a, A0>>,
 ) -> RetReg<R0> {
-    rustix_syscall2_nr_last_fastcall(a1, a0, nr)
+    rustix_syscall1_nr_last_fastcall(a0.into(), nr)
 }
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall3(
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-    a1: ArgReg<'_, A1>,
-    a2: ArgReg<'_, A2>,
-) -> RetReg<R0> {
-    rustix_syscall3_nr_last_fastcall(a1, a2, a0, nr)
+pub(in crate::imp) unsafe fn syscall1_noreturn<'a>(
+    nr: SyscallNumber<'a>,
+    a0: impl Into<ArgReg<'a, A0>>,
+) -> ! {
+    rustix_syscall1_noreturn_nr_last_fastcall(a0.into(), nr)
 }
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall4(
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-    a1: ArgReg<'_, A1>,
-    a2: ArgReg<'_, A2>,
-    a3: ArgReg<'_, A3>,
+pub(in crate::imp) unsafe fn syscall2<'a>(
+    nr: SyscallNumber<'a>,
+    a0: impl Into<ArgReg<'a, A0>>,
+    a1: impl Into<ArgReg<'a, A1>>,
 ) -> RetReg<R0> {
-    rustix_syscall4_nr_last_fastcall(a1, a2, a0, a3, nr)
+    rustix_syscall2_nr_last_fastcall(a1.into(), a0.into(), nr)
 }
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall5(
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-    a1: ArgReg<'_, A1>,
-    a2: ArgReg<'_, A2>,
-    a3: ArgReg<'_, A3>,
-    a4: ArgReg<'_, A4>,
+pub(in crate::imp) unsafe fn syscall3<'a>(
+    nr: SyscallNumber<'a>,
+    a0: impl Into<ArgReg<'a, A0>>,
+    a1: impl Into<ArgReg<'a, A1>>,
+    a2: impl Into<ArgReg<'a, A2>>,
 ) -> RetReg<R0> {
-    rustix_syscall5_nr_last_fastcall(a1, a2, a0, a3, a4, nr)
+    rustix_syscall3_nr_last_fastcall(a1.into(), a2.into(), a0.into(), nr)
 }
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall6(
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-    a1: ArgReg<'_, A1>,
-    a2: ArgReg<'_, A2>,
-    a3: ArgReg<'_, A3>,
-    a4: ArgReg<'_, A4>,
-    a5: ArgReg<'_, A5>,
+pub(in crate::imp) unsafe fn syscall4<'a>(
+    nr: SyscallNumber<'a>,
+    a0: impl Into<ArgReg<'a, A0>>,
+    a1: impl Into<ArgReg<'a, A1>>,
+    a2: impl Into<ArgReg<'a, A2>>,
+    a3: impl Into<ArgReg<'a, A3>>,
 ) -> RetReg<R0> {
-    rustix_syscall6_nr_last_fastcall(a1, a2, a0, a3, a4, a5, nr)
+    rustix_syscall4_nr_last_fastcall(a1.into(), a2.into(), a0.into(), a3.into(), nr)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall5<'a>(
+    nr: SyscallNumber<'a>,
+    a0: impl Into<ArgReg<'a, A0>>,
+    a1: impl Into<ArgReg<'a, A1>>,
+    a2: impl Into<ArgReg<'a, A2>>,
+    a3: impl Into<ArgReg<'a, A3>>,
+    a4: impl Into<ArgReg<'a, A4>>,
+) -> RetReg<R0> {
+    rustix_syscall5_nr_last_fastcall(a1.into(), a2.into(), a0.into(), a3.into(), a4.into(), nr)
+}
+#[inline]
+#[must_use]
+pub(in crate::imp) unsafe fn syscall6<'a>(
+    nr: SyscallNumber<'a>,
+    a0: impl Into<ArgReg<'a, A0>>,
+    a1: impl Into<ArgReg<'a, A1>>,
+    a2: impl Into<ArgReg<'a, A2>>,
+    a3: impl Into<ArgReg<'a, A3>>,
+    a4: impl Into<ArgReg<'a, A4>>,
+    a5: impl Into<ArgReg<'a, A5>>,
+) -> RetReg<R0> {
+    rustix_syscall6_nr_last_fastcall(
+        a1.into(),
+        a2.into(),
+        a0.into(),
+        a3.into(),
+        a4.into(),
+        a5.into(),
+        nr,
+    )
 }
 
 // Then we define the `_readonly` versions of the wrappers. We don't have
@@ -223,79 +237,103 @@ pub(in crate::imp) unsafe fn indirect_syscall0(
 }
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn indirect_syscall1(
+pub(in crate::imp) unsafe fn indirect_syscall1<'a>(
     callee: SyscallType,
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
+    nr: SyscallNumber<'a>,
+    a0: impl Into<ArgReg<'a, A0>>,
 ) -> RetReg<R0> {
-    rustix_indirect_syscall1_nr_last_fastcall(a0, nr, callee)
+    rustix_indirect_syscall1_nr_last_fastcall(a0.into(), nr, callee)
 }
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn indirect_syscall1_noreturn(
+pub(in crate::imp) unsafe fn indirect_syscall1_noreturn<'a>(
     callee: SyscallType,
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
+    nr: SyscallNumber<'a>,
+    a0: impl Into<ArgReg<'a, A0>>,
 ) -> ! {
-    rustix_indirect_syscall1_noreturn_nr_last_fastcall(a0, nr, callee)
+    rustix_indirect_syscall1_noreturn_nr_last_fastcall(a0.into(), nr, callee)
 }
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn indirect_syscall2(
+pub(in crate::imp) unsafe fn indirect_syscall2<'a>(
     callee: SyscallType,
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-    a1: ArgReg<'_, A1>,
+    nr: SyscallNumber<'a>,
+    a0: impl Into<ArgReg<'a, A0>>,
+    a1: impl Into<ArgReg<'a, A1>>,
 ) -> RetReg<R0> {
-    rustix_indirect_syscall2_nr_last_fastcall(a1, a0, nr, callee)
+    rustix_indirect_syscall2_nr_last_fastcall(a1.into(), a0.into(), nr, callee)
 }
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn indirect_syscall3(
+pub(in crate::imp) unsafe fn indirect_syscall3<'a>(
     callee: SyscallType,
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-    a1: ArgReg<'_, A1>,
-    a2: ArgReg<'_, A2>,
+    nr: SyscallNumber<'a>,
+    a0: impl Into<ArgReg<'a, A0>>,
+    a1: impl Into<ArgReg<'a, A1>>,
+    a2: impl Into<ArgReg<'a, A2>>,
 ) -> RetReg<R0> {
-    rustix_indirect_syscall3_nr_last_fastcall(a1, a2, a0, nr, callee)
+    rustix_indirect_syscall3_nr_last_fastcall(a1.into(), a2.into(), a0.into(), nr, callee)
 }
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn indirect_syscall4(
+pub(in crate::imp) unsafe fn indirect_syscall4<'a>(
     callee: SyscallType,
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-    a1: ArgReg<'_, A1>,
-    a2: ArgReg<'_, A2>,
-    a3: ArgReg<'_, A3>,
+    nr: SyscallNumber<'a>,
+    a0: impl Into<ArgReg<'a, A0>>,
+    a1: impl Into<ArgReg<'a, A1>>,
+    a2: impl Into<ArgReg<'a, A2>>,
+    a3: impl Into<ArgReg<'a, A3>>,
 ) -> RetReg<R0> {
-    rustix_indirect_syscall4_nr_last_fastcall(a1, a2, a0, a3, nr, callee)
+    rustix_indirect_syscall4_nr_last_fastcall(
+        a1.into(),
+        a2.into(),
+        a0.into(),
+        a3.into(),
+        nr,
+        callee,
+    )
 }
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn indirect_syscall5(
+pub(in crate::imp) unsafe fn indirect_syscall5<'a>(
     callee: SyscallType,
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-    a1: ArgReg<'_, A1>,
-    a2: ArgReg<'_, A2>,
-    a3: ArgReg<'_, A3>,
-    a4: ArgReg<'_, A4>,
+    nr: SyscallNumber<'a>,
+    a0: impl Into<ArgReg<'a, A0>>,
+    a1: impl Into<ArgReg<'a, A1>>,
+    a2: impl Into<ArgReg<'a, A2>>,
+    a3: impl Into<ArgReg<'a, A3>>,
+    a4: impl Into<ArgReg<'a, A4>>,
 ) -> RetReg<R0> {
-    rustix_indirect_syscall5_nr_last_fastcall(a1, a2, a0, a3, a4, nr, callee)
+    rustix_indirect_syscall5_nr_last_fastcall(
+        a1.into(),
+        a2.into(),
+        a0.into(),
+        a3.into(),
+        a4.into(),
+        nr,
+        callee,
+    )
 }
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn indirect_syscall6(
+pub(in crate::imp) unsafe fn indirect_syscall6<'a>(
     callee: SyscallType,
-    nr: SyscallNumber<'_>,
-    a0: ArgReg<'_, A0>,
-    a1: ArgReg<'_, A1>,
-    a2: ArgReg<'_, A2>,
-    a3: ArgReg<'_, A3>,
-    a4: ArgReg<'_, A4>,
-    a5: ArgReg<'_, A5>,
+    nr: SyscallNumber<'a>,
+    a0: impl Into<ArgReg<'a, A0>>,
+    a1: impl Into<ArgReg<'a, A1>>,
+    a2: impl Into<ArgReg<'a, A2>>,
+    a3: impl Into<ArgReg<'a, A3>>,
+    a4: impl Into<ArgReg<'a, A4>>,
+    a5: impl Into<ArgReg<'a, A5>>,
 ) -> RetReg<R0> {
-    rustix_indirect_syscall6_nr_last_fastcall(a1, a2, a0, a3, a4, a5, nr, callee)
+    rustix_indirect_syscall6_nr_last_fastcall(
+        a1.into(),
+        a2.into(),
+        a0.into(),
+        a3.into(),
+        a4.into(),
+        a5.into(),
+        nr,
+        callee,
+    )
 }

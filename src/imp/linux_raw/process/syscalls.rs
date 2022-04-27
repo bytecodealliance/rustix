@@ -14,9 +14,8 @@ use super::super::arch::choose::{
 };
 use super::super::c;
 use super::super::conv::{
-    borrowed_fd, by_mut, by_ref, c_int, c_str, c_uint, const_void_star, negative_pid, out,
-    pass_usize, regular_pid, resource, ret, ret_c_int, ret_c_uint, ret_infallible, ret_usize,
-    ret_usize_infallible, signal, size_of, slice_just_addr, slice_mut, void_star, zero,
+    by_mut, by_ref, c_int, c_uint, negative_pid, pass_usize, ret, ret_c_int, ret_c_uint,
+    ret_infallible, ret_usize, ret_usize_infallible, size_of, slice_just_addr, slice_mut, zero,
 };
 use super::super::reg::nr;
 use super::types::{RawCpuSet, RawUname};
@@ -29,6 +28,7 @@ use crate::process::{
 };
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
+use core::ptr::{null, null_mut};
 #[cfg(feature = "runtime")]
 use linux_raw_sys::general::__NR_exit_group;
 #[cfg(not(any(
@@ -58,12 +58,12 @@ use linux_raw_sys::general::{__NR_getegid32, __NR_geteuid32, __NR_getgid32, __NR
 
 #[inline]
 pub(crate) fn chdir(filename: &ZStr) -> io::Result<()> {
-    unsafe { ret(syscall1_readonly(nr(__NR_chdir), c_str(filename))) }
+    unsafe { ret(syscall1_readonly(nr(__NR_chdir), filename)) }
 }
 
 #[inline]
 pub(crate) fn fchdir(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { ret(syscall1_readonly(nr(__NR_fchdir), borrowed_fd(fd))) }
+    unsafe { ret(syscall1_readonly(nr(__NR_fchdir), fd)) }
 }
 
 #[inline]
@@ -239,7 +239,7 @@ pub(crate) fn sched_yield() {
 pub(crate) fn uname() -> RawUname {
     let mut uname = MaybeUninit::<RawUname>::uninit();
     unsafe {
-        ret(syscall1(nr(__NR_uname), out(&mut uname))).unwrap();
+        ret(syscall1(nr(__NR_uname), &mut uname)).unwrap();
         uname.assume_init()
     }
 }
@@ -338,9 +338,9 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
         match ret(syscall4(
             nr(__NR_prlimit64),
             c_uint(0),
-            resource(limit),
-            const_void_star(core::ptr::null()),
-            out(&mut result),
+            limit,
+            null::<c::c_void>(),
+            &mut result,
         )) {
             Ok(()) => rlimit_from_linux(result.assume_init()),
             Err(e) => {
@@ -355,11 +355,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
 /// `prlimit64`.
 unsafe fn getrlimit_old(limit: Resource) -> Rlimit {
     let mut result = MaybeUninit::<linux_raw_sys::general::rlimit>::uninit();
-    ret_infallible(syscall2(
-        nr(__NR_getrlimit),
-        resource(limit),
-        out(&mut result),
-    ));
+    ret_infallible(syscall2(nr(__NR_getrlimit), limit, &mut result));
     rlimit_from_linux_old(result.assume_init())
 }
 
@@ -370,9 +366,9 @@ pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
         match ret(syscall4(
             nr(__NR_prlimit64),
             c_uint(0),
-            resource(limit),
+            limit,
             by_ref(&lim),
-            void_star(core::ptr::null_mut()),
+            null_mut::<c::c_void>(),
         )) {
             Ok(()) => Ok(()),
             Err(io::Error::NOSYS) => setrlimit_old(limit, new),
@@ -385,7 +381,7 @@ pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
 /// `prlimit64`.
 unsafe fn setrlimit_old(limit: Resource, new: Rlimit) -> io::Result<()> {
     let lim = rlimit_to_linux_old(new)?;
-    ret(syscall2(nr(__NR_setrlimit), resource(limit), by_ref(&lim)))
+    ret(syscall2(nr(__NR_setrlimit), limit, by_ref(&lim)))
 }
 
 #[inline]
@@ -396,9 +392,9 @@ pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Res
         match ret(syscall4(
             nr(__NR_prlimit64),
             c_uint(Pid::as_raw(pid)),
-            resource(limit),
+            limit,
             by_ref(&lim),
-            out(&mut result),
+            &mut result,
         )) {
             Ok(()) => Ok(rlimit_from_linux(result.assume_init())),
             Err(e) => Err(e),
@@ -483,16 +479,20 @@ pub(crate) fn _waitpid(
     waitopts: WaitOptions,
 ) -> io::Result<Option<(Pid, WaitStatus)>> {
     unsafe {
-        let mut status: u32 = 0;
+        let mut status = MaybeUninit::<u32>::uninit();
         let pid = ret_c_uint(syscall4(
             nr(__NR_wait4),
             c_int(pid as _),
-            by_mut(&mut status),
+            &mut status,
             c_int(waitopts.bits() as _),
             zero(),
         ))?;
-        Ok(RawNonZeroPid::new(pid)
-            .map(|non_zero| (Pid::from_raw_nonzero(non_zero), WaitStatus::new(status))))
+        Ok(RawNonZeroPid::new(pid).map(|non_zero| {
+            (
+                Pid::from_raw_nonzero(non_zero),
+                WaitStatus::new(status.assume_init()),
+            )
+        }))
     }
 }
 
@@ -515,27 +515,15 @@ pub(crate) fn setsid() -> io::Result<Pid> {
 
 #[inline]
 pub(crate) fn kill_process(pid: Pid, sig: Signal) -> io::Result<()> {
-    unsafe {
-        ret(syscall2_readonly(
-            nr(__NR_kill),
-            regular_pid(pid),
-            signal(sig),
-        ))
-    }
+    unsafe { ret(syscall2_readonly(nr(__NR_kill), pid, sig)) }
 }
 
 #[inline]
 pub(crate) fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
-    unsafe {
-        ret(syscall2_readonly(
-            nr(__NR_kill),
-            negative_pid(pid),
-            signal(sig),
-        ))
-    }
+    unsafe { ret(syscall2_readonly(nr(__NR_kill), negative_pid(pid), sig)) }
 }
 
 #[inline]
 pub(crate) fn kill_current_process_group(sig: Signal) -> io::Result<()> {
-    unsafe { ret(syscall2_readonly(nr(__NR_kill), pass_usize(0), signal(sig))) }
+    unsafe { ret(syscall2_readonly(nr(__NR_kill), pass_usize(0), sig)) }
 }
