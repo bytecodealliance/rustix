@@ -1,8 +1,8 @@
 //! Windows system calls in the `io` module.
 
+use super::super::c;
 use super::super::conv::{borrowed_fd, ret, ret_c_int};
 use super::super::fd::LibcFd;
-use super::c;
 use crate::fd::{BorrowedFd, RawFd};
 use crate::io;
 use crate::io::PollFd;

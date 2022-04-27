@@ -4,7 +4,7 @@
 
 #![allow(unsafe_code)]
 
-use super::c;
+use super::super::c;
 use core::marker::PhantomData;
 use core::slice;
 

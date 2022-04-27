@@ -15,7 +15,9 @@ use super::types::{MapFlags, MprotectFlags, MsyncFlags, ProtFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::types::{MlockFlags, UserfaultfdFlags};
 use crate::fd::BorrowedFd;
-use crate::io::{self, OwnedFd};
+use crate::io;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use crate::io::OwnedFd;
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: Advice) -> io::Result<()> {

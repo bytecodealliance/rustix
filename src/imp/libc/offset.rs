@@ -34,6 +34,7 @@ pub(super) use c::{
     target_os = "l4re",
     target_os = "wasi",
 )))]
+#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
 pub(super) use c::mmap as libc_mmap;
 
 #[cfg(not(any(
