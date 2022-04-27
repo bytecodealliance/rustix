@@ -66,6 +66,7 @@
 //!  - In some places, more human-friendly and less historical-accident names
 //!    are used (and documentation aliases are used so that the original names
 //!    can still be searched for).
+//!  - Provide y2038 compatibility, on platforms which support this.
 //!
 //! Things they don't do include:
 //!  - Detecting whether functions are supported at runtime.

@@ -40,8 +40,6 @@ portable APIs built on this functionality, see the [`system-interface`],
       fully inlined into user code.
     - Most functions in `linux_raw` preserve memory, I/O safety, and pointer
       provenance all the way down to the syscalls.
-    - `linux_raw` uses a 64-bit `time_t` type on all platforms, avoiding the
-      [y2038 bug].
 
  * libc, which uses the [`libc`] crate which provides bindings to native `libc`
    libraries on Unix-family platforms, and [`windows-sys`] for Winsock2 on
@@ -126,7 +124,6 @@ version of this crate.
 [I/O-safe]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
 [I/O safety]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
 [provenance]: https://github.com/rust-lang/rust/issues/95228
-[y2038 bug]: https://en.wikipedia.org/wiki/Year_2038_problem
 [`OwnedFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/struct.OwnedFd.html
 [`AsFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.AsFd.html
 [`NOSYS`]: https://docs.rs/rustix/latest/rustix/io/struct.Error.html#associatedconstant.NOSYS

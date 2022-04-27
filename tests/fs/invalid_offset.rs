@@ -31,10 +31,11 @@ fn invalid_offset_seek() {
 }
 
 #[cfg(not(any(
+    target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "ios",
-    target_os = "macos"
+    target_os = "redox"
 )))]
 #[test]
 fn invalid_offset_fallocate() {
@@ -56,10 +57,13 @@ fn invalid_offset_fallocate() {
 }
 
 #[cfg(not(any(
-    target_os = "netbsd",
-    target_os = "openbsd",
+    target_os = "dragonfly",
+    target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
+    target_os = "netbsd",
+    target_os = "openbsd",
+    target_os = "redox"
 )))]
 #[test]
 fn invalid_offset_fadvise() {

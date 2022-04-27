@@ -5,11 +5,39 @@ use crate::fd::BorrowedFd;
 use bitflags::bitflags;
 
 /// `struct timespec`
+#[cfg(not(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+)))]
 pub type Timespec = c::timespec;
 
+/// `struct timespec`
+#[allow(missing_docs)]
+#[derive(Debug, Clone)]
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+))]
+#[repr(C)]
+pub struct Timespec {
+    pub tv_sec: Secs,
+    pub tv_nsec: Nsecs,
+}
+
 /// A type for the `tv_sec` field of [`Timespec`].
+#[cfg(not(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+)))]
 #[allow(deprecated)]
 pub type Secs = c::time_t;
+
+/// A type for the `tv_sec` field of [`Timespec`].
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+))]
+pub type Secs = i64;
 
 /// A type for the `tv_nsec` field of [`Timespec`].
 #[cfg(all(target_arch = "x86_64", target_pointer_width = "32"))]
@@ -130,26 +158,42 @@ pub enum DynamicClockId<'a> {
 
 /// `struct itimerspec`
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
-pub type Itimerspec = libc::itimerspec;
+#[cfg(not(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+)))]
+pub type Itimerspec = c::itimerspec;
+
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+))]
+#[allow(missing_docs)]
+#[repr(C)]
+pub struct Itimerspec {
+    pub it_interval: Timespec,
+    pub it_value: Timespec,
+}
 
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 bitflags! {
     /// `TFD_*` flags for use with [`timerfd_create`].
-    pub struct TimerfdFlags: libc::c_int {
+    pub struct TimerfdFlags: c::c_int {
         /// `TFD_NONBLOCK`
-        const NONBLOCK = libc::TFD_NONBLOCK;
+        const NONBLOCK = c::TFD_NONBLOCK;
 
         /// `TFD_CLOEXEC`
-        const CLOEXEC = libc::TFD_CLOEXEC;
+        const CLOEXEC = c::TFD_CLOEXEC;
     }
 }
 
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 bitflags! {
     /// `TFD_TIMER_*` flags for use with [`timerfd_settime`].
-    pub struct TimerfdTimerFlags: libc::c_int {
+    pub struct TimerfdTimerFlags: c::c_int {
         /// `TFD_TIMER_ABSTIME`
-        const ABSTIME = libc::TFD_TIMER_ABSTIME;
+        const ABSTIME = c::TFD_TIMER_ABSTIME;
 
         /// `TFD_TIMER_CANCEL_ON_SET`
         #[cfg(any(target_os = "android", target_os = "linux"))]
