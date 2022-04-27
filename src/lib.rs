@@ -5,6 +5,7 @@
 //! With rustix, you can write code like this:
 //!
 //! ```rust
+//! # #[cfg(feature = "net")]
 //! # fn read(sock: std::net::TcpStream, buf: &mut [u8]) -> std::io::Result<()> {
 //! # use rustix::net::RecvFlags;
 //! let nread: usize = rustix::net::recv(&sock, buf, RecvFlags::PEEK)?;
@@ -16,15 +17,25 @@
 //! instead of like this:
 //!
 //! ```rust
+//! # #[cfg(feature = "net")]
 //! # fn read(sock: std::net::TcpStream, buf: &mut [u8]) -> std::io::Result<()> {
 //! # use std::convert::TryInto;
-//! # use rustix::fd::AsRawFd;
+//! # #[cfg(unix)]
+//! # use std::os::unix::io::AsRawFd;
+//! # #[cfg(target_os = "wasi")]
+//! # use std::os::wasi::io::AsRawFd;
 //! # #[cfg(windows)]
 //! # use windows_sys::Win32::Networking::WinSock as libc;
+//! # #[cfg(windows)]
+//! # use std::os::windows::io::AsRawSocket;
 //! # const MSG_PEEK: i32 = libc::MSG_PEEK;
 //! let nread: usize = unsafe {
+//!     #[cfg(any(unix, target_os = "wasi"))]
+//!     let raw = sock.as_raw_fd();
+//!     #[cfg(windows)]
+//!     let raw = sock.as_raw_socket();
 //!     match libc::recv(
-//!         sock.as_raw_fd() as _,
+//!         raw as _,
 //!         buf.as_mut_ptr().cast(),
 //!         buf.len().try_into().unwrap_or(i32::MAX as _),
 //!         MSG_PEEK,

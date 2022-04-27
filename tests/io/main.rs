@@ -10,6 +10,7 @@ mod dup2_to_replace_stdio;
 mod dup3;
 #[cfg(not(feature = "rustc-dep-of-std"))] // TODO
 #[cfg(not(windows))]
+#[cfg(feature = "net")]
 mod epoll;
 mod error;
 #[cfg(not(windows))]

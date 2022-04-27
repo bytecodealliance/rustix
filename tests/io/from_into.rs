@@ -1,3 +1,4 @@
+#[cfg(feature = "fs")]
 #[cfg(not(target_os = "redox"))]
 #[test]
 fn test_owned() {

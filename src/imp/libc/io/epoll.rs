@@ -8,6 +8,7 @@
 //!
 //! ```rust,no_run
 //! # #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
+//! # #[cfg(feature = "net")]
 //! # fn main() -> std::io::Result<()> {
 //! use io_lifetimes::AsFd;
 //! use rustix::io::epoll::{self, Epoll};
@@ -52,6 +53,8 @@
 //!     }
 //! }
 //! # }
+//! # #[cfg(not(feature = "net"))]
+//! # fn main() {}
 //! ```
 
 use super::super::c;

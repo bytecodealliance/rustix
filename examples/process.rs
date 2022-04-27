@@ -1,12 +1,12 @@
 //! A command which prints out information about the process it runs in.
 
-#[cfg(not(windows))]
 use rustix::io;
-#[cfg(not(windows))]
-use rustix::process::*;
 
+#[cfg(feature = "process")]
 #[cfg(not(windows))]
 fn main() -> io::Result<()> {
+    use rustix::process::*;
+
     println!("Pid: {}", getpid().as_raw_nonzero());
     println!("Parent Pid: {}", Pid::as_raw(getppid()));
     println!("Uid: {}", getuid().as_raw());
@@ -92,7 +92,7 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(windows)]
-fn main() {
+#[cfg(any(windows, not(feature = "process")))]
+fn main() -> io::Result<()> {
     unimplemented!()
 }
