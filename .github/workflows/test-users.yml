@@ -9,7 +9,7 @@ jobs:
     name: listenfd ported to rustix
     runs-on: ${{ matrix.os }}
     env:
-      QEMU_BUILD_VERSION: 6.1.0
+      QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
         build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
@@ -170,7 +170,7 @@ jobs:
     name: async-io ported to rustix
     runs-on: ${{ matrix.os }}
     env:
-      QEMU_BUILD_VERSION: 6.1.0
+      QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
         build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
@@ -314,7 +314,7 @@ jobs:
     name: cap-std
     runs-on: ${{ matrix.os }}
     env:
-      QEMU_BUILD_VERSION: 6.1.0
+      QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
         build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
@@ -490,7 +490,7 @@ jobs:
     name: memfd-rs ported to rustix
     runs-on: ${{ matrix.os }}
     env:
-      QEMU_BUILD_VERSION: 6.1.0
+      QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
         build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux]
@@ -631,7 +631,7 @@ jobs:
     name: tempfile ported to rustix
     runs-on: ${{ matrix.os }}
     env:
-      QEMU_BUILD_VERSION: 6.1.0
+      QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
         build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
@@ -775,7 +775,7 @@ jobs:
     name: fd-lock
     runs-on: ${{ matrix.os }}
     env:
-      QEMU_BUILD_VERSION: 6.1.0
+      QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
         build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
@@ -983,7 +983,7 @@ jobs:
     name: cap-std-ext
     runs-on: ${{ matrix.os }}
     env:
-      QEMU_BUILD_VERSION: 6.1.0
+      QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
         # cap-std-ext only builds on Linux at the moment.
