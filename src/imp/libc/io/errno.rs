@@ -1,10 +1,10 @@
-//! The `rustix` `Error` type.
+//! The `rustix` `Errno` type.
 //!
 //! This type holds an OS error code, which conceptually corresponds to an
 //! `errno` value.
 
 use super::super::c;
-use errno::errno;
+use libc_errno::errno;
 
 /// The error type for `rustix` APIs.
 ///
@@ -13,9 +13,9 @@ use errno::errno;
 #[repr(transparent)]
 #[doc(alias = "errno")]
 #[derive(Eq, PartialEq, Hash, Copy, Clone)]
-pub struct Error(pub(crate) c::c_int);
+pub struct Errno(pub(crate) c::c_int);
 
-impl Error {
+impl Errno {
     /// `EACCES`
     #[doc(alias = "ACCES")]
     pub const ACCESS: Self = Self(c::EACCES);
@@ -966,8 +966,8 @@ impl Error {
     pub const XFULL: Self = Self(c::EXFULL);
 }
 
-impl Error {
-    /// Extract an `Error` value from a `std::io::Error`.
+impl Errno {
+    /// Extract an `Errno` value from a `std::io::Error`.
     ///
     /// This isn't a `From` conversion because it's expected to be relatively
     /// uncommon.
@@ -985,7 +985,7 @@ impl Error {
         self.0
     }
 
-    /// Construct an `Error` from a raw OS error number.
+    /// Construct an `Errno` from a raw OS error number.
     #[inline]
     pub const fn from_raw_os_error(raw: i32) -> Self {
         Self(raw)

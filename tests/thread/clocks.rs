@@ -21,14 +21,14 @@ fn test_invalid_nanosleep() {
         tv_sec: 0,
         tv_nsec: 1000000000,
     }) {
-        NanosleepRelativeResult::Err(io::Error::INVAL) => (),
+        NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
         otherwise => panic!("unexpected resut: {:?}", otherwise),
     }
     match nanosleep(&Timespec {
         tv_sec: 0,
         tv_nsec: -1 as _,
     }) {
-        NanosleepRelativeResult::Err(io::Error::INVAL) => (),
+        NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
         otherwise => panic!("unexpected resut: {:?}", otherwise),
     }
 }
@@ -51,7 +51,7 @@ fn test_invalid_nanosleep_absolute() {
             tv_nsec: 1000000000,
         },
     ) {
-        Err(io::Error::INVAL) => (),
+        Err(io::Errno::INVAL) => (),
         otherwise => panic!("unexpected resut: {:?}", otherwise),
     }
     match clock_nanosleep_absolute(
@@ -61,7 +61,7 @@ fn test_invalid_nanosleep_absolute() {
             tv_nsec: -1 as _,
         },
     ) {
-        Err(io::Error::INVAL) => (),
+        Err(io::Errno::INVAL) => (),
         otherwise => panic!("unexpected resut: {:?}", otherwise),
     }
 }
@@ -84,7 +84,7 @@ fn test_invalid_nanosleep_relative() {
             tv_nsec: 1000000000,
         },
     ) {
-        NanosleepRelativeResult::Err(io::Error::INVAL) => (),
+        NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
         otherwise => panic!("unexpected resut: {:?}", otherwise),
     }
     match clock_nanosleep_relative(
@@ -94,7 +94,7 @@ fn test_invalid_nanosleep_relative() {
             tv_nsec: -1 as _,
         },
     ) {
-        NanosleepRelativeResult::Err(io::Error::INVAL) => (),
+        NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
         otherwise => panic!("unexpected resut: {:?}", otherwise),
     }
 }

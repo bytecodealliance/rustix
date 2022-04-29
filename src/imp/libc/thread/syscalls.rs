@@ -62,10 +62,10 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
                 remain.as_mut_ptr(),
             ) {
                 0 => NanosleepRelativeResult::Ok,
-                err if err == io::Error::INTR.0 => {
+                err if err == io::Errno::INTR.0 => {
                     NanosleepRelativeResult::Interrupted(remain.assume_init().into())
                 }
-                err => NanosleepRelativeResult::Err(io::Error(err)),
+                err => NanosleepRelativeResult::Err(io::Errno(err)),
             }
         } else {
             clock_nanosleep_relative_old(id, request)
@@ -80,10 +80,10 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
     unsafe {
         match c::clock_nanosleep(id as c::clockid_t, flags, request, remain.as_mut_ptr()) {
             0 => NanosleepRelativeResult::Ok,
-            err if err == io::Error::INTR.0 => {
+            err if err == io::Errno::INTR.0 => {
                 NanosleepRelativeResult::Interrupted(remain.assume_init())
             }
-            err => NanosleepRelativeResult::Err(io::Error(err)),
+            err => NanosleepRelativeResult::Err(io::Errno(err)),
         }
     }
 }
@@ -108,7 +108,7 @@ unsafe fn clock_nanosleep_relative_old(id: ClockId, request: &Timespec) -> Nanos
         old_remain.as_mut_ptr(),
     ) {
         0 => NanosleepRelativeResult::Ok,
-        err if err == io::Error::INTR.0 => {
+        err if err == io::Errno::INTR.0 => {
             let old_remain = old_remain.assume_init();
             let remain = Timespec {
                 tv_sec: old_remain.tv_sec.into(),
@@ -116,7 +116,7 @@ unsafe fn clock_nanosleep_relative_old(id: ClockId, request: &Timespec) -> Nanos
             };
             NanosleepRelativeResult::Interrupted(remain)
         }
-        err => NanosleepRelativeResult::Err(io::Error(err)),
+        err => NanosleepRelativeResult::Err(io::Errno(err)),
     }
 }
 
@@ -151,7 +151,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
                 )
             } {
                 0 => Ok(()),
-                err => Err(io::Error(err)),
+                err => Err(io::Errno(err)),
             }
         } else {
             clock_nanosleep_absolute_old(id, request)
@@ -165,7 +165,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
     )))]
     match unsafe { c::clock_nanosleep(id as c::clockid_t, flags, request, null_mut()) } {
         0 => Ok(()),
-        err => Err(io::Error(err)),
+        err => Err(io::Errno(err)),
     }
 }
 
@@ -179,12 +179,12 @@ fn clock_nanosleep_absolute_old(id: ClockId, request: &Timespec) -> io::Result<(
     let flags = c::TIMER_ABSTIME;
 
     let old_request = c::timespec {
-        tv_sec: request.tv_sec.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        tv_sec: request.tv_sec.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         tv_nsec: request.tv_nsec as _,
     };
     match unsafe { c::clock_nanosleep(id as c::clockid_t, flags, &old_request, null_mut()) } {
         0 => Ok(()),
-        err => Err(io::Error(err)),
+        err => Err(io::Errno(err)),
     }
 }
 
@@ -203,7 +203,7 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
         if let Some(libc_nanosleep) = __nanosleep64.get() {
             match ret(libc_nanosleep(&request.clone().into(), remain.as_mut_ptr())) {
                 Ok(()) => NanosleepRelativeResult::Ok,
-                Err(io::Error::INTR) => {
+                Err(io::Errno::INTR) => {
                     NanosleepRelativeResult::Interrupted(remain.assume_init().into())
                 }
                 Err(err) => NanosleepRelativeResult::Err(err),
@@ -221,7 +221,7 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
     unsafe {
         match ret(c::nanosleep(&request.clone().into(), remain.as_mut_ptr())) {
             Ok(()) => NanosleepRelativeResult::Ok,
-            Err(io::Error::INTR) => NanosleepRelativeResult::Interrupted(remain.assume_init()),
+            Err(io::Errno::INTR) => NanosleepRelativeResult::Interrupted(remain.assume_init()),
             Err(err) => NanosleepRelativeResult::Err(err),
         }
     }
@@ -235,7 +235,7 @@ unsafe fn nanosleep_old(request: &Timespec) -> NanosleepRelativeResult {
     use core::convert::TryInto;
     let tv_sec = match request.tv_sec.try_into() {
         Ok(tv_sec) => tv_sec,
-        Err(_) => return NanosleepRelativeResult::Err(io::Error::OVERFLOW),
+        Err(_) => return NanosleepRelativeResult::Err(io::Errno::OVERFLOW),
     };
     let old_request = c::timespec {
         tv_sec,
@@ -245,7 +245,7 @@ unsafe fn nanosleep_old(request: &Timespec) -> NanosleepRelativeResult {
 
     match ret(c::nanosleep(&old_request, old_remain.as_mut_ptr())) {
         Ok(()) => NanosleepRelativeResult::Ok,
-        Err(io::Error::INTR) => {
+        Err(io::Errno::INTR) => {
             let old_remain = old_remain.assume_init();
             let remain = Timespec {
                 tv_sec: old_remain.tv_sec.into(),

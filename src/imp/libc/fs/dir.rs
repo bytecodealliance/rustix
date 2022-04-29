@@ -44,7 +44,7 @@ use c::{dirent64 as libc_dirent, readdir64 as libc_readdir};
 use core::fmt;
 use core::mem::zeroed;
 use core::ptr::NonNull;
-use errno::{errno, set_errno, Errno};
+use libc_errno::{errno, set_errno, Errno};
 
 /// `DIR*`
 #[repr(transparent)]
@@ -75,7 +75,7 @@ impl Dir {
             if let Some(libc_dir) = NonNull::new(libc_dir) {
                 Ok(Self(libc_dir))
             } else {
-                let e = io::Error::last_os_error();
+                let e = io::Errno::last_os_error();
                 let _ = c::close(raw);
                 Err(e)
             }
@@ -99,7 +99,7 @@ impl Dir {
                 None
             } else {
                 // `errno` is unknown or non-zero, so an error occurred.
-                Some(Err(io::Error(curr_errno)))
+                Some(Err(io::Errno(curr_errno)))
             }
         } else {
             // We successfully read an entry.

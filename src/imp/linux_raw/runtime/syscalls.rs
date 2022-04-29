@@ -37,7 +37,7 @@ pub(crate) unsafe fn execveat(
     args: *const *const u8,
     env_vars: *const *const u8,
     flags: AtFlags,
-) -> io::Error {
+) -> io::Errno {
     ret_error(syscall_readonly!(
         __NR_execveat,
         dirfd,
@@ -52,7 +52,7 @@ pub(crate) unsafe fn execve(
     path: &ZStr,
     args: *const *const u8,
     env_vars: *const *const u8,
-) -> io::Error {
+) -> io::Errno {
     ret_error(syscall_readonly!(__NR_execve, path, args, env_vars))
 }
 

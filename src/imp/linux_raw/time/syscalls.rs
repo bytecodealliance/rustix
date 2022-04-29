@@ -37,7 +37,7 @@ pub(crate) fn clock_getres(which_clock: ClockId) -> __kernel_timespec {
         if let Err(err) = ret(syscall!(__NR_clock_getres_time64, which_clock, &mut result)) {
             // See the comments in `rustix_clock_gettime_via_syscall` about
             // emulation.
-            debug_assert_eq!(err, io::Error::NOSYS);
+            debug_assert_eq!(err, io::Errno::NOSYS);
             clock_getres_old(which_clock, &mut result);
         }
         result.assume_init()
@@ -104,7 +104,7 @@ pub(crate) fn timerfd_settime(
         .or_else(|err| {
             // See the comments in `rustix_clock_gettime_via_syscall` about
             // emulation.
-            if err == io::Error::NOSYS {
+            if err == io::Errno::NOSYS {
                 timerfd_settime_old(fd, flags, new_value, &mut result)
             } else {
                 Err(err)
@@ -129,24 +129,24 @@ unsafe fn timerfd_settime_old(
                 .it_interval
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Error::INVAL)?,
+                .map_err(|_| io::Errno::INVAL)?,
             tv_nsec: new_value
                 .it_interval
                 .tv_nsec
                 .try_into()
-                .map_err(|_| io::Error::INVAL)?,
+                .map_err(|_| io::Errno::INVAL)?,
         },
         it_value: __kernel_old_timespec {
             tv_sec: new_value
                 .it_value
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Error::INVAL)?,
+                .map_err(|_| io::Errno::INVAL)?,
             tv_nsec: new_value
                 .it_value
                 .tv_nsec
                 .try_into()
-                .map_err(|_| io::Error::INVAL)?,
+                .map_err(|_| io::Errno::INVAL)?,
         },
     };
     ret(syscall!(
@@ -190,7 +190,7 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
             .or_else(|err| {
                 // See the comments in `rustix_clock_gettime_via_syscall` about
                 // emulation.
-                if err == io::Error::NOSYS {
+                if err == io::Errno::NOSYS {
                     timerfd_gettime_old(fd, &mut result)
                 } else {
                     Err(err)

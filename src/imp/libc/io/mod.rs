@@ -1,4 +1,4 @@
-pub(crate) mod error;
+pub(crate) mod errno;
 #[cfg(not(windows))]
 #[cfg(not(feature = "std"))]
 pub(crate) mod io_slice;

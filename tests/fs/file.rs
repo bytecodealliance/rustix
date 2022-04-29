@@ -18,7 +18,7 @@ fn test_file() {
             rustix::fs::Mode::empty(),
         )
         .unwrap_err(),
-        rustix::io::Error::NOENT
+        rustix::io::Errno::NOENT
     );
 
     let file = rustix::fs::openat(
@@ -37,7 +37,7 @@ fn test_file() {
             rustix::fs::Mode::empty(),
         )
         .unwrap_err(),
-        rustix::io::Error::NOTDIR
+        rustix::io::Errno::NOTDIR
     );
 
     #[cfg(not(any(

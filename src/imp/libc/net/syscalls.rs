@@ -499,9 +499,9 @@ pub(crate) mod sockopt {
         let l_linger = if let Some(linger) = linger {
             let mut l_linger = linger.as_secs();
             if linger.subsec_nanos() != 0 {
-                l_linger = l_linger.checked_add(1).ok_or(io::Error::INVAL)?;
+                l_linger = l_linger.checked_add(1).ok_or(io::Errno::INVAL)?;
             }
-            l_linger.try_into().map_err(|_| io::Error::INVAL)?
+            l_linger.try_into().map_err(|_| io::Errno::INVAL)?
         } else {
             0
         };
@@ -550,7 +550,7 @@ pub(crate) mod sockopt {
         let timeout = match timeout {
             Some(timeout) => {
                 if timeout == DURATION_ZERO {
-                    return Err(io::Error::INVAL);
+                    return Err(io::Errno::INVAL);
                 }
 
                 let tv_sec = timeout.as_secs().try_into();
@@ -580,14 +580,14 @@ pub(crate) mod sockopt {
         let timeout: u32 = match timeout {
             Some(timeout) => {
                 if timeout == DURATION_ZERO {
-                    return Err(io::Error::INVAL);
+                    return Err(io::Errno::INVAL);
                 }
 
                 // `as_millis` rounds down, so we use `as_nanos` and
                 // manually round up.
                 let mut timeout: u32 = ((timeout.as_nanos() + 999999) / 1000000)
                     .try_into()
-                    .map_err(|_convert_err| io::Error::INVAL)?;
+                    .map_err(|_convert_err| io::Errno::INVAL)?;
                 if timeout == 0 {
                     timeout = 1;
                 }

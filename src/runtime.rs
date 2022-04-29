@@ -242,7 +242,7 @@ pub unsafe fn execveat<Fd: AsFd>(
     argv: *const *const u8,
     envp: *const *const u8,
     flags: AtFlags,
-) -> io::Error {
+) -> io::Errno {
     imp::runtime::syscalls::execveat(dirfd.as_fd(), path, argv, envp, flags)
 }
 
@@ -260,6 +260,6 @@ pub unsafe fn execveat<Fd: AsFd>(
 /// [Linux]: https://man7.org/linux/man-pages/man2/execve.2.html
 #[inline]
 #[cfg(linux_raw)]
-pub unsafe fn execve(path: &ZStr, argv: *const *const u8, envp: *const *const u8) -> io::Error {
+pub unsafe fn execve(path: &ZStr, argv: *const *const u8, envp: *const *const u8) -> io::Errno {
     imp::runtime::syscalls::execve(path, argv, envp)
 }

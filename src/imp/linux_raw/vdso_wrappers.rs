@@ -76,7 +76,7 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Resu
         };
         match callee(id, timespec.as_mut_ptr()) {
             0 => (),
-            EINVAL => return Err(io::Error::INVAL),
+            EINVAL => return Err(io::Errno::INVAL),
             _ => _rustix_clock_gettime_via_syscall(id, timespec.as_mut_ptr())?,
         }
         Ok(timespec.assume_init())
@@ -260,7 +260,7 @@ unsafe fn _rustix_clock_gettime_via_syscall(
 ) -> io::Result<()> {
     let r0 = syscall!(__NR_clock_gettime64, c_int(clockid), res);
     match ret(r0) {
-        Err(io::Error::NOSYS) => _rustix_clock_gettime_via_syscall_old(clockid, res),
+        Err(io::Errno::NOSYS) => _rustix_clock_gettime_via_syscall_old(clockid, res),
         otherwise => otherwise,
     }
 }

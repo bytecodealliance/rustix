@@ -16,7 +16,7 @@ fn openat2_more<Fd: AsFd, P: path::Arg>(
     loop {
         match openat2(dirfd.as_fd(), &path, oflags, mode, resolve) {
             Ok(file) => return Ok(file),
-            Err(io::Error::AGAIN) => continue,
+            Err(io::Errno::AGAIN) => continue,
             Err(err) => return Err(err),
         }
     }
@@ -36,7 +36,7 @@ fn test_openat2() {
         ResolveFlags::empty(),
     ) {
         Ok(_file) => (),
-        Err(io::Error::NOSYS) => return,
+        Err(io::Errno::NOSYS) => return,
         Err(_err) => return,
     }
 

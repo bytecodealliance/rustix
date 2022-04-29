@@ -93,12 +93,12 @@ pub(crate) unsafe fn read_sockaddr(
     let offsetof_sun_path = super::addr::offsetof_sun_path();
 
     if len < size_of::<c::sa_family_t>() {
-        return Err(io::Error::INVAL);
+        return Err(io::Errno::INVAL);
     }
     match read_ss_family(storage).into() {
         c::AF_INET => {
             if len < size_of::<c::sockaddr_in>() {
-                return Err(io::Error::INVAL);
+                return Err(io::Errno::INVAL);
             }
             let decode = *storage.cast::<c::sockaddr_in>();
             Ok(SocketAddrAny::V4(SocketAddrV4::new(
@@ -108,7 +108,7 @@ pub(crate) unsafe fn read_sockaddr(
         }
         c::AF_INET6 => {
             if len < size_of::<c::sockaddr_in6>() {
-                return Err(io::Error::INVAL);
+                return Err(io::Errno::INVAL);
             }
             let decode = *storage.cast::<c::sockaddr_in6>();
             #[cfg(not(windows))]
@@ -129,7 +129,7 @@ pub(crate) unsafe fn read_sockaddr(
         #[cfg(unix)]
         c::AF_UNIX => {
             if len < offsetof_sun_path {
-                return Err(io::Error::INVAL);
+                return Err(io::Errno::INVAL);
             }
             if len == offsetof_sun_path {
                 Ok(SocketAddrAny::Unix(SocketAddrUnix::new(&[][..]).unwrap()))
@@ -146,7 +146,7 @@ pub(crate) unsafe fn read_sockaddr(
                     // Otherwise, use the provided length.
                     let provided_len = len - 1 - offsetof_sun_path;
                     if decode.sun_path[provided_len] != b'\0' as c::c_char {
-                        return Err(io::Error::INVAL);
+                        return Err(io::Errno::INVAL);
                     }
                     debug_assert_eq!(
                         ZStr::from_ptr(decode.sun_path.as_ptr().cast())
@@ -163,7 +163,7 @@ pub(crate) unsafe fn read_sockaddr(
                 ))
             }
         }
-        _ => Err(io::Error::INVAL),
+        _ => Err(io::Errno::INVAL),
     }
 }
 

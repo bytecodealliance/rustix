@@ -23,7 +23,7 @@ use core::cmp::min;
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
 #[cfg(feature = "net")]
-use errno::errno;
+use libc_errno::errno;
 
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     let nread = unsafe {
@@ -338,7 +338,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
                 match errno().0 {
                     c::EAGAIN | c::EWOULDBLOCK => (),
                     c::ENOTSOCK => not_socket = true,
-                    err => return Err(io::Error(err)),
+                    err => return Err(io::Errno(err)),
                 }
             }
             _ => (),
@@ -354,7 +354,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
                     c::EAGAIN | c::EWOULDBLOCK => (),
                     c::ENOTSOCK => (),
                     c::EPIPE => write = false,
-                    err => return Err(io::Error(err)),
+                    err => return Err(io::Errno(err)),
                 }
             }
             _ => (),
@@ -410,7 +410,7 @@ pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, _flags: DupFlags) -> io::R
     // when the file descriptors are equal.
     use std::os::unix::io::AsRawFd;
     if fd.as_raw_fd() == new.as_raw_fd() {
-        return Err(io::Error::INVAL);
+        return Err(io::Errno::INVAL);
     }
     dup2(fd, new)
 }
@@ -455,7 +455,7 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
     let nfds = fds
         .len()
         .try_into()
-        .map_err(|_convert_err| io::Error::INVAL)?;
+        .map_err(|_convert_err| io::Errno::INVAL)?;
 
     ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast(), nfds, timeout) })
         .map(|nready| nready as usize)

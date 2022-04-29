@@ -354,7 +354,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &ZStr, flags: AtFlags) -> io::
         if !NO_STATX.load(Relaxed) {
             match statx(dirfd, path, flags, StatxFlags::ALL) {
                 Ok(x) => return statx_to_stat(x),
-                Err(io::Error::NOSYS) => NO_STATX.store(true, Relaxed),
+                Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
                 Err(e) => return Err(e),
             }
         }
@@ -516,10 +516,10 @@ pub(crate) fn utimensat(
         //
         // [`setattrlist`]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/setattrlist.2.html
         match c::fork() {
-            -1 => Err(io::Error::IO),
+            -1 => Err(io::Errno::IO),
             0 => {
                 if c::fchdir(borrowed_fd(dirfd)) != 0 {
-                    let code = match errno::errno().0 {
+                    let code = match libc_errno::errno().0 {
                         c::EACCES => 2,
                         c::ENOTDIR => 3,
                         _ => 1,
@@ -544,7 +544,7 @@ pub(crate) fn utimensat(
                 {
                     // Translate expected errno codes into ad-hoc integer
                     // values suitable for exit statuses.
-                    let code = match errno::errno().0 {
+                    let code = match libc_errno::errno().0 {
                         c::EACCES => 2,
                         c::ENOTDIR => 3,
                         c::EPERM => 4,
@@ -569,20 +569,20 @@ pub(crate) fn utimensat(
                     // Translate our ad-hoc exit statuses back to errno codes.
                     match c::WEXITSTATUS(wstatus) {
                         0 => Ok(()),
-                        2 => Err(io::Error::ACCESS),
-                        3 => Err(io::Error::NOTDIR),
-                        4 => Err(io::Error::PERM),
-                        5 => Err(io::Error::ROFS),
-                        6 => Err(io::Error::LOOP),
-                        7 => Err(io::Error::NOENT),
-                        8 => Err(io::Error::NAMETOOLONG),
-                        9 => Err(io::Error::INVAL),
-                        10 => Err(io::Error::SRCH),
-                        11 => Err(io::Error::NOTSUP),
-                        _ => Err(io::Error::IO),
+                        2 => Err(io::Errno::ACCESS),
+                        3 => Err(io::Errno::NOTDIR),
+                        4 => Err(io::Errno::PERM),
+                        5 => Err(io::Errno::ROFS),
+                        6 => Err(io::Errno::LOOP),
+                        7 => Err(io::Errno::NOENT),
+                        8 => Err(io::Errno::NAMETOOLONG),
+                        9 => Err(io::Errno::INVAL),
+                        10 => Err(io::Errno::SRCH),
+                        11 => Err(io::Errno::NOTSUP),
+                        _ => Err(io::Errno::IO),
                     }
                 } else {
-                    Err(io::Error::IO)
+                    Err(io::Errno::IO)
                 }
             }
         }
@@ -605,7 +605,7 @@ unsafe fn utimensat_old(
                 .last_access
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Error::OVERFLOW)?,
+                .map_err(|_| io::Errno::OVERFLOW)?,
             tv_nsec: times.last_access.tv_nsec,
         },
         c::timespec {
@@ -613,7 +613,7 @@ unsafe fn utimensat_old(
                 .last_modification
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Error::OVERFLOW)?,
+                .map_err(|_| io::Errno::OVERFLOW)?,
             tv_nsec: times.last_modification.tv_nsec,
         },
     ];
@@ -707,7 +707,7 @@ pub(crate) fn mknodat(
             borrowed_fd(dirfd),
             c_str(path),
             (mode.bits() | file_type.as_raw_mode()) as c::mode_t,
-            dev.try_into().map_err(|_| io::Error::PERM)?,
+            dev.try_into().map_err(|_| io::Errno::PERM)?,
         ))
     }
 }
@@ -793,7 +793,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice)
     if err == 0 {
         Ok(())
     } else {
-        Err(io::Error(err))
+        Err(io::Errno(err))
     }
 }
 
@@ -920,7 +920,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
         if !NO_STATX.load(Relaxed) {
             match statx(fd, zstr!(""), AtFlags::EMPTY_PATH, StatxFlags::ALL) {
                 Ok(x) => return statx_to_stat(x),
-                Err(io::Error::NOSYS) => NO_STATX.store(true, Relaxed),
+                Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
                 Err(e) => return Err(e),
             }
         }
@@ -1051,7 +1051,7 @@ unsafe fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
                 .last_access
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Error::OVERFLOW)?,
+                .map_err(|_| io::Errno::OVERFLOW)?,
             tv_nsec: times.last_access.tv_nsec,
         },
         c::timespec {
@@ -1059,7 +1059,7 @@ unsafe fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
                 .last_modification
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Error::OVERFLOW)?,
+                .map_err(|_| io::Errno::OVERFLOW)?,
             tv_nsec: times.last_modification.tv_nsec,
         },
     ];
@@ -1100,7 +1100,7 @@ pub(crate) fn fallocate(
         if err == 0 {
             Ok(())
         } else {
-            Err(io::Error(err))
+            Err(io::Errno(err))
         }
     }
 }
@@ -1112,12 +1112,12 @@ pub(crate) fn fallocate(
     offset: u64,
     len: u64,
 ) -> io::Result<()> {
-    let offset: i64 = offset.try_into().map_err(|_e| io::Error::INVAL)?;
+    let offset: i64 = offset.try_into().map_err(|_e| io::Errno::INVAL)?;
     let len = len as i64;
 
     assert!(mode.is_empty());
 
-    let new_len = offset.checked_add(len).ok_or_else(|| io::Error::FBIG)?;
+    let new_len = offset.checked_add(len).ok_or_else(|| io::Errno::FBIG)?;
     let mut store = c::fstore_t {
         fst_flags: c::F_ALLOCATECONTIG,
         fst_posmode: c::F_PEOFPOSMODE,
@@ -1149,7 +1149,7 @@ pub(crate) fn fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
 }
 
 pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
-    let length = length.try_into().map_err(|_overflow_err| io::Error::FBIG)?;
+    let length = length.try_into().map_err(|_overflow_err| io::Errno::FBIG)?;
     unsafe { ret(libc_ftruncate(borrowed_fd(fd), length)) }
 }
 
@@ -1255,26 +1255,26 @@ fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
         st_uid: x.stx_uid.into(),
         st_gid: x.stx_gid.into(),
         st_rdev: crate::fs::makedev(x.stx_rdev_major, x.stx_rdev_minor),
-        st_size: x.stx_size.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        st_size: x.stx_size.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         st_blksize: x.stx_blksize.into(),
         st_blocks: x.stx_blocks.into(),
         st_atime: x
             .stx_atime
             .tv_sec
             .try_into()
-            .map_err(|_| io::Error::OVERFLOW)?,
+            .map_err(|_| io::Errno::OVERFLOW)?,
         st_atime_nsec: x.stx_atime.tv_nsec as _,
         st_mtime: x
             .stx_mtime
             .tv_sec
             .try_into()
-            .map_err(|_| io::Error::OVERFLOW)?,
+            .map_err(|_| io::Errno::OVERFLOW)?,
         st_mtime_nsec: x.stx_mtime.tv_nsec as _,
         st_ctime: x
             .stx_ctime
             .tv_sec
             .try_into()
-            .map_err(|_| io::Error::OVERFLOW)?,
+            .map_err(|_| io::Errno::OVERFLOW)?,
         st_ctime_nsec: x.stx_ctime.tv_nsec as _,
         st_ino: x.stx_ino.into(),
     })
@@ -1296,26 +1296,26 @@ fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
     result.st_uid = x.stx_uid.into();
     result.st_gid = x.stx_gid.into();
     result.st_rdev = crate::fs::makedev(x.stx_rdev_major, x.stx_rdev_minor);
-    result.st_size = x.stx_size.try_into().map_err(|_| io::Error::OVERFLOW)?;
+    result.st_size = x.stx_size.try_into().map_err(|_| io::Errno::OVERFLOW)?;
     result.st_blksize = x.stx_blksize.into();
-    result.st_blocks = x.stx_blocks.try_into().map_err(|_e| io::Error::OVERFLOW)?;
+    result.st_blocks = x.stx_blocks.try_into().map_err(|_e| io::Errno::OVERFLOW)?;
     result.st_atime = x
         .stx_atime
         .tv_sec
         .try_into()
-        .map_err(|_| io::Error::OVERFLOW)?;
+        .map_err(|_| io::Errno::OVERFLOW)?;
     result.st_atime_nsec = x.stx_atime.tv_nsec as _;
     result.st_mtime = x
         .stx_mtime
         .tv_sec
         .try_into()
-        .map_err(|_| io::Error::OVERFLOW)?;
+        .map_err(|_| io::Errno::OVERFLOW)?;
     result.st_mtime_nsec = x.stx_mtime.tv_nsec as _;
     result.st_ctime = x
         .stx_ctime
         .tv_sec
         .try_into()
-        .map_err(|_| io::Error::OVERFLOW)?;
+        .map_err(|_| io::Errno::OVERFLOW)?;
     result.st_ctime_nsec = x.stx_ctime.tv_nsec as _;
     result.st_ino = x.stx_ino.into();
 
@@ -1329,31 +1329,31 @@ fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
 ))]
 fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
     Ok(Stat {
-        st_dev: s64.st_dev.try_into().map_err(|_| io::Error::OVERFLOW)?,
-        st_mode: s64.st_mode.try_into().map_err(|_| io::Error::OVERFLOW)?,
-        st_nlink: s64.st_nlink.try_into().map_err(|_| io::Error::OVERFLOW)?,
-        st_uid: s64.st_uid.try_into().map_err(|_| io::Error::OVERFLOW)?,
-        st_gid: s64.st_gid.try_into().map_err(|_| io::Error::OVERFLOW)?,
-        st_rdev: s64.st_rdev.try_into().map_err(|_| io::Error::OVERFLOW)?,
-        st_size: s64.st_size.try_into().map_err(|_| io::Error::OVERFLOW)?,
-        st_blksize: s64.st_blksize.try_into().map_err(|_| io::Error::OVERFLOW)?,
-        st_blocks: s64.st_blocks.try_into().map_err(|_| io::Error::OVERFLOW)?,
-        st_atime: s64.st_atime.try_into().map_err(|_| io::Error::OVERFLOW)?,
+        st_dev: s64.st_dev.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+        st_mode: s64.st_mode.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+        st_nlink: s64.st_nlink.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+        st_uid: s64.st_uid.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+        st_gid: s64.st_gid.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+        st_rdev: s64.st_rdev.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+        st_size: s64.st_size.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+        st_blksize: s64.st_blksize.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+        st_blocks: s64.st_blocks.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+        st_atime: s64.st_atime.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         st_atime_nsec: s64
             .st_atime_nsec
             .try_into()
-            .map_err(|_| io::Error::OVERFLOW)?,
-        st_mtime: s64.st_mtime.try_into().map_err(|_| io::Error::OVERFLOW)?,
+            .map_err(|_| io::Errno::OVERFLOW)?,
+        st_mtime: s64.st_mtime.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         st_mtime_nsec: s64
             .st_mtime_nsec
             .try_into()
-            .map_err(|_| io::Error::OVERFLOW)?,
-        st_ctime: s64.st_ctime.try_into().map_err(|_| io::Error::OVERFLOW)?,
+            .map_err(|_| io::Errno::OVERFLOW)?,
+        st_ctime: s64.st_ctime.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         st_ctime_nsec: s64
             .st_ctime_nsec
             .try_into()
-            .map_err(|_| io::Error::OVERFLOW)?,
-        st_ino: s64.st_ino.try_into().map_err(|_| io::Error::OVERFLOW)?,
+            .map_err(|_| io::Errno::OVERFLOW)?,
+        st_ino: s64.st_ino.try_into().map_err(|_| io::Errno::OVERFLOW)?,
     })
 }
 
@@ -1368,31 +1368,31 @@ fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
 fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
     let mut result: Stat = unsafe { core::mem::zeroed() };
 
-    result.st_dev = s64.st_dev.try_into().map_err(|_| io::Error::OVERFLOW)?;
-    result.st_mode = s64.st_mode.try_into().map_err(|_| io::Error::OVERFLOW)?;
-    result.st_nlink = s64.st_nlink.try_into().map_err(|_| io::Error::OVERFLOW)?;
-    result.st_uid = s64.st_uid.try_into().map_err(|_| io::Error::OVERFLOW)?;
-    result.st_gid = s64.st_gid.try_into().map_err(|_| io::Error::OVERFLOW)?;
-    result.st_rdev = s64.st_rdev.try_into().map_err(|_| io::Error::OVERFLOW)?;
-    result.st_size = s64.st_size.try_into().map_err(|_| io::Error::OVERFLOW)?;
-    result.st_blksize = s64.st_blksize.try_into().map_err(|_| io::Error::OVERFLOW)?;
-    result.st_blocks = s64.st_blocks.try_into().map_err(|_| io::Error::OVERFLOW)?;
-    result.st_atime = s64.st_atime.try_into().map_err(|_| io::Error::OVERFLOW)?;
+    result.st_dev = s64.st_dev.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_mode = s64.st_mode.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_nlink = s64.st_nlink.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_uid = s64.st_uid.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_gid = s64.st_gid.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_rdev = s64.st_rdev.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_size = s64.st_size.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_blksize = s64.st_blksize.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_blocks = s64.st_blocks.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_atime = s64.st_atime.try_into().map_err(|_| io::Errno::OVERFLOW)?;
     result.st_atime_nsec = s64
         .st_atime_nsec
         .try_into()
-        .map_err(|_| io::Error::OVERFLOW)?;
-    result.st_mtime = s64.st_mtime.try_into().map_err(|_| io::Error::OVERFLOW)?;
+        .map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_mtime = s64.st_mtime.try_into().map_err(|_| io::Errno::OVERFLOW)?;
     result.st_mtime_nsec = s64
         .st_mtime_nsec
         .try_into()
-        .map_err(|_| io::Error::OVERFLOW)?;
-    result.st_ctime = s64.st_ctime.try_into().map_err(|_| io::Error::OVERFLOW)?;
+        .map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_ctime = s64.st_ctime.try_into().map_err(|_| io::Errno::OVERFLOW)?;
     result.st_ctime_nsec = s64
         .st_ctime_nsec
         .try_into()
-        .map_err(|_| io::Error::OVERFLOW)?;
-    result.st_ino = s64.st_ino.try_into().map_err(|_| io::Error::OVERFLOW)?;
+        .map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_ino = s64.st_ino.try_into().map_err(|_| io::Errno::OVERFLOW)?;
 
     Ok(result)
 }
@@ -1469,7 +1469,7 @@ pub(crate) fn copyfile_state_alloc() -> io::Result<copyfile_state_t> {
 
     let result = unsafe { copyfile_state_alloc() };
     if result.0.is_null() {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         Ok(result)
     }

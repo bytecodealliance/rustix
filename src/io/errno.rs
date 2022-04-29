@@ -1,4 +1,4 @@
-//! The `Error` type, which is a minimal wrapper around an error code.
+//! The `Errno` type, which is a minimal wrapper around an error code.
 //!
 //! We define the error constants as individual `const`s instead of an
 //! enum because we may not know about all of the host's error values
@@ -10,7 +10,7 @@ use core::{fmt, result};
 use std::error;
 
 /// A specialized `Result` type for `rustix` APIs.
-pub type Result<T> = result::Result<T, Error>;
+pub type Result<T> = result::Result<T, Errno>;
 
 /// `errno`—An error code.
 ///
@@ -23,9 +23,9 @@ pub type Result<T> = result::Result<T, Error>;
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/errno.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/errno.3.html
-pub use imp::io::error::Error;
+pub use imp::io::errno::Errno;
 
-impl Error {
+impl Errno {
     /// Shorthand for `std::io::Error::from(self).kind()`.
     #[cfg(feature = "std")]
     #[inline]
@@ -34,7 +34,7 @@ impl Error {
     }
 }
 
-impl fmt::Display for Error {
+impl fmt::Display for Errno {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         #[cfg(feature = "std")]
         {
@@ -47,7 +47,7 @@ impl fmt::Display for Error {
     }
 }
 
-impl fmt::Debug for Error {
+impl fmt::Debug for Errno {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         #[cfg(feature = "std")]
         {
@@ -61,22 +61,22 @@ impl fmt::Debug for Error {
 }
 
 #[cfg(feature = "std")]
-impl error::Error for Error {}
+impl error::Error for Errno {}
 
 #[cfg(feature = "std")]
-impl From<Error> for std::io::Error {
+impl From<Errno> for std::io::Error {
     #[inline]
-    fn from(err: Error) -> Self {
+    fn from(err: Errno) -> Self {
         Self::from_raw_os_error(err.raw_os_error() as _)
     }
 }
 
-/// Call `f` until it either succeeds or fails other than [`Error::INTR`].
+/// Call `f` until it either succeeds or fails other than [`Errno::INTR`].
 #[inline]
 pub fn with_retrying<T, F: FnMut() -> Result<T>>(mut f: F) -> Result<T> {
     loop {
         match f() {
-            Err(Error::INTR) => (),
+            Err(Errno::INTR) => (),
             result => return result,
         }
     }

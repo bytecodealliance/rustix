@@ -31,7 +31,7 @@ impl SocketAddrUnix {
         let mut unix = Self::init();
         let bytes = path.to_bytes_with_nul();
         if bytes.len() > unix.sun_path.len() {
-            return Err(io::Error::NAMETOOLONG);
+            return Err(io::Errno::NAMETOOLONG);
         }
         for (i, b) in bytes.iter().enumerate() {
             unix.sun_path[i] = *b as c::c_char;
@@ -47,7 +47,7 @@ impl SocketAddrUnix {
     pub fn new_abstract_name(name: &[u8]) -> io::Result<Self> {
         let mut unix = Self::init();
         if 1 + name.len() > unix.sun_path.len() {
-            return Err(io::Error::NAMETOOLONG);
+            return Err(io::Errno::NAMETOOLONG);
         }
         unix.sun_path[0] = b'\0' as c::c_char;
         for (i, b) in name.iter().enumerate() {

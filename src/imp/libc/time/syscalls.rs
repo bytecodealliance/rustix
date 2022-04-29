@@ -168,7 +168,7 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
             #[cfg(not(any(target_os = "android", target_os = "linux")))]
             DynamicClockId::Dynamic(_fd) => {
                 // Dynamic clocks are not supported on this platform.
-                return Err(io::Error::INVAL);
+                return Err(io::Errno::INVAL);
             }
 
             #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -301,7 +301,7 @@ unsafe fn timerfd_settime_old(
                 .it_interval
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Error::OVERFLOW)?,
+                .map_err(|_| io::Errno::OVERFLOW)?,
             tv_nsec: new_value.it_interval.tv_nsec as _,
         },
         it_value: c::timespec {
@@ -309,7 +309,7 @@ unsafe fn timerfd_settime_old(
                 .it_value
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Error::OVERFLOW)?,
+                .map_err(|_| io::Errno::OVERFLOW)?,
             tv_nsec: new_value.it_value.tv_nsec as _,
         },
     };
@@ -328,7 +328,7 @@ unsafe fn timerfd_settime_old(
                 .it_interval
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Error::OVERFLOW)?,
+                .map_err(|_| io::Errno::OVERFLOW)?,
             tv_nsec: old_result.it_interval.tv_nsec as _,
         },
         it_value: Timespec {
@@ -336,7 +336,7 @@ unsafe fn timerfd_settime_old(
                 .it_interval
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Error::OVERFLOW)?,
+                .map_err(|_| io::Errno::OVERFLOW)?,
             tv_nsec: old_result.it_interval.tv_nsec as _,
         },
     })
@@ -389,7 +389,7 @@ unsafe fn timerfd_gettime_old(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
                 .it_interval
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Error::OVERFLOW)?,
+                .map_err(|_| io::Errno::OVERFLOW)?,
             tv_nsec: old_result.it_interval.tv_nsec as _,
         },
         it_value: Timespec {
@@ -397,7 +397,7 @@ unsafe fn timerfd_gettime_old(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
                 .it_interval
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Error::OVERFLOW)?,
+                .map_err(|_| io::Errno::OVERFLOW)?,
             tv_nsec: old_result.it_interval.tv_nsec as _,
         },
     })

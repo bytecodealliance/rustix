@@ -199,9 +199,9 @@ pub(crate) fn uname() -> RawUname {
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 #[inline]
 pub(crate) fn nice(inc: i32) -> io::Result<i32> {
-    errno::set_errno(errno::Errno(0));
+    libc_errno::set_errno(libc_errno::Errno(0));
     let r = unsafe { c::nice(inc) };
-    if errno::errno().0 != 0 {
+    if libc_errno::errno().0 != 0 {
         ret_c_int(r)
     } else {
         Ok(r)
@@ -211,9 +211,9 @@ pub(crate) fn nice(inc: i32) -> io::Result<i32> {
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn getpriority_user(uid: Uid) -> io::Result<i32> {
-    errno::set_errno(errno::Errno(0));
+    libc_errno::set_errno(libc_errno::Errno(0));
     let r = unsafe { c::getpriority(c::PRIO_USER, uid.as_raw() as _) };
-    if errno::errno().0 != 0 {
+    if libc_errno::errno().0 != 0 {
         ret_c_int(r)
     } else {
         Ok(r)
@@ -223,9 +223,9 @@ pub(crate) fn getpriority_user(uid: Uid) -> io::Result<i32> {
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn getpriority_pgrp(pgid: Option<Pid>) -> io::Result<i32> {
-    errno::set_errno(errno::Errno(0));
+    libc_errno::set_errno(libc_errno::Errno(0));
     let r = unsafe { c::getpriority(c::PRIO_PGRP, Pid::as_raw(pgid) as _) };
-    if errno::errno().0 != 0 {
+    if libc_errno::errno().0 != 0 {
         ret_c_int(r)
     } else {
         Ok(r)
@@ -235,9 +235,9 @@ pub(crate) fn getpriority_pgrp(pgid: Option<Pid>) -> io::Result<i32> {
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn getpriority_process(pid: Option<Pid>) -> io::Result<i32> {
-    errno::set_errno(errno::Errno(0));
+    libc_errno::set_errno(libc_errno::Errno(0));
     let r = unsafe { c::getpriority(c::PRIO_PROCESS, Pid::as_raw(pid) as _) };
-    if errno::errno().0 != 0 {
+    if libc_errno::errno().0 != 0 {
         ret_c_int(r)
     } else {
         Ok(r)
@@ -327,11 +327,11 @@ fn rlimit_from_libc(lim: libc_rlimit) -> Rlimit {
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 fn rlimit_to_libc(lim: Rlimit) -> io::Result<libc_rlimit> {
     let rlim_cur = match lim.current {
-        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+        Some(r) => r.try_into().map_err(|_| io::Errno::INVAL)?,
         None => LIBC_RLIM_INFINITY as _,
     };
     let rlim_max = match lim.maximum {
-        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+        Some(r) => r.try_into().map_err(|_| io::Errno::INVAL)?,
         None => LIBC_RLIM_INFINITY as _,
     };
     Ok(libc_rlimit { rlim_cur, rlim_max })

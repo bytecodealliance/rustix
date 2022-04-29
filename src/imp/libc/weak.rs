@@ -123,7 +123,7 @@ macro_rules! syscall {
             if let Some(fun) = $name.get() {
                 fun($($arg_name),*)
             } else {
-                errno::set_errno(errno::Errno(libc::ENOSYS));
+                libc_errno::set_errno(libc_errno::Errno(libc::ENOSYS));
                 -1
             }
         }
@@ -199,7 +199,7 @@ macro_rules! weakcall {
             if let Some(fun) = $name.get() {
                 fun($($arg_name),*)
             } else {
-                errno::set_errno(errno::Errno(libc::ENOSYS));
+                libc_errno::set_errno(libc_errno::Errno(libc::ENOSYS));
                 -1
             }
         }
