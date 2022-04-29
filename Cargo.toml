@@ -109,7 +109,7 @@ name = "mod"
 harness = false
 
 [package.metadata.docs.rs]
-features = ["procfs"]
+features = ["all-apis"]
 rustdoc-args = ["--cfg", "doc_cfg"]
 targets = [
     "x86_64-unknown-linux-gnu",
