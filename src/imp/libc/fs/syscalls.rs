@@ -106,8 +106,6 @@ use core::convert::TryInto;
     target_os = "macos"
 ))]
 use core::mem::size_of;
-#[cfg(target_os = "linux")]
-use core::mem::transmute;
 use core::mem::MaybeUninit;
 #[cfg(any(
     target_os = "android",
@@ -1006,7 +1004,7 @@ pub(crate) fn sendfile(
         let nsent = ret_ssize_t(c::sendfile64(
             borrowed_fd(out_fd),
             borrowed_fd(in_fd),
-            transmute(offset),
+            offset.map(crate::as_mut_ptr).unwrap_or(null_mut()).cast(),
             count,
         ))?;
         Ok(nsent as usize)

@@ -9,8 +9,7 @@ use super::super::c;
 use crate::ffi::ZStr;
 use crate::{io, path};
 use core::convert::TryInto;
-use core::fmt;
-use core::mem::transmute;
+use core::{fmt, slice};
 
 /// `struct sockaddr_un`
 #[derive(Clone)]
@@ -72,9 +71,14 @@ impl SocketAddrUnix {
         let len = self.len();
         if len != 0 && self.unix.sun_path[0] != b'\0' as c::c_char {
             let end = len as usize - offsetof_sun_path();
-            // Safety: Transmuting between `&[c_char]` and `&[u8]`.
+            let bytes = &self.unix.sun_path[..end];
+            // Safety: `from_raw_parts` to convert from `&[c_char]` to `&[u8]`. And
+            // `from_bytes_with_nul_unchecked` since the string is NUL-terminated.
             unsafe {
-                Some(ZStr::from_bytes_with_nul(transmute(&self.unix.sun_path[..end])).unwrap())
+                Some(ZStr::from_bytes_with_nul_unchecked(slice::from_raw_parts(
+                    bytes.as_ptr().cast(),
+                    bytes.len(),
+                )))
             }
         } else {
             None
@@ -88,8 +92,9 @@ impl SocketAddrUnix {
         let len = self.len();
         if len != 0 && self.unix.sun_path[0] == b'\0' as c::c_char {
             let end = len as usize - offsetof_sun_path();
-            // Safety: Transmuting between `&[c_char]` and `&[u8]`.
-            unsafe { Some(transmute(&self.unix.sun_path[1..end])) }
+            let bytes = &self.unix.sun_path[1..end];
+            // Safety: `from_raw_parts` to convert from `&[c_char]` to `&[u8]`.
+            unsafe { Some(slice::from_raw_parts(bytes.as_ptr().cast(), bytes.len())) }
         } else {
             None
         }
