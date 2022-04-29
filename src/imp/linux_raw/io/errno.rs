@@ -1,4 +1,4 @@
-//! The `rustix` `Error` type.
+//! The `rustix` `Errno` type.
 //!
 //! This type holds an OS error code, which conceptually corresponds to an
 //! `errno` value.
@@ -27,10 +27,10 @@ use linux_raw_sys::errno;
 // error codes are in `-4095..0`.
 #[cfg_attr(rustc_attrs, rustc_layout_scalar_valid_range_start(0xf001))]
 #[cfg_attr(rustc_attrs, rustc_layout_scalar_valid_range_end(0xffff))]
-pub struct Error(u16);
+pub struct Errno(u16);
 
-impl Error {
-    /// Extract an `Error` value from a `std::io::Error`.
+impl Errno {
+    /// Extract an `Errno` value from a `std::io::Error`.
     ///
     /// This isn't a `From` conversion because it's expected to be relatively
     /// uncommon.
@@ -54,13 +54,13 @@ impl Error {
         (self.0 as i16 as i32).wrapping_neg()
     }
 
-    /// Construct an `Error` from a raw OS error number.
+    /// Construct an `Errno` from a raw OS error number.
     #[inline]
     pub const fn from_raw_os_error(raw: i32) -> Self {
         Self::from_errno(raw as u32)
     }
 
-    /// Convert from a C errno value (which is positive) to an `Error`.
+    /// Convert from a C errno value (which is positive) to an `Errno`.
     const fn from_errno(raw: u32) -> Self {
         // We store error values in negated form, so that we don't have to negate
         // them after every syscall.
@@ -82,7 +82,7 @@ pub(in crate::imp) fn try_decode_c_int<Num: RetNumber>(raw: RetReg<Num>) -> io::
     if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
-        return Err(unsafe { Error(raw.decode_error_code()) });
+        return Err(unsafe { Errno(raw.decode_error_code()) });
     }
 
     Ok(raw.decode_c_int())
@@ -95,7 +95,7 @@ pub(in crate::imp) fn try_decode_c_uint<Num: RetNumber>(raw: RetReg<Num>) -> io:
     if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
-        return Err(unsafe { Error(raw.decode_error_code()) });
+        return Err(unsafe { Errno(raw.decode_error_code()) });
     }
 
     Ok(raw.decode_c_uint())
@@ -108,7 +108,7 @@ pub(in crate::imp) fn try_decode_usize<Num: RetNumber>(raw: RetReg<Num>) -> io::
     if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
-        return Err(unsafe { Error(raw.decode_error_code()) });
+        return Err(unsafe { Errno(raw.decode_error_code()) });
     }
 
     Ok(raw.decode_usize())
@@ -123,7 +123,7 @@ pub(in crate::imp) fn try_decode_void_star<Num: RetNumber>(
     if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
-        return Err(unsafe { Error(raw.decode_error_code()) });
+        return Err(unsafe { Errno(raw.decode_error_code()) });
     }
 
     Ok(raw.decode_void_star())
@@ -137,7 +137,7 @@ pub(in crate::imp) fn try_decode_u64<Num: RetNumber>(raw: RetReg<Num>) -> io::Re
     if raw.is_in_range(-4095..0) {
         // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
-        return Err(unsafe { Error(raw.decode_error_code()) });
+        return Err(unsafe { Errno(raw.decode_error_code()) });
     }
 
     Ok(raw.decode_u64())
@@ -167,7 +167,7 @@ pub(in crate::imp) unsafe fn try_decode_raw_fd<Num: RetNumber>(
             core::intrinsics::assume(raw.is_in_range(-4095..0));
         }
 
-        return Err(Error(raw.decode_error_code()));
+        return Err(Errno(raw.decode_error_code()));
     }
 
     Ok(raw.decode_raw_fd())
@@ -194,7 +194,7 @@ pub(in crate::imp) unsafe fn try_decode_void<Num: RetNumber>(raw: RetReg<Num>) -
             core::intrinsics::assume(raw.is_in_range(-4095..0));
         }
 
-        return Err(Error(raw.decode_error_code()));
+        return Err(Errno(raw.decode_error_code()));
     }
 
     raw.decode_void();
@@ -210,7 +210,7 @@ pub(in crate::imp) unsafe fn try_decode_void<Num: RetNumber>(raw: RetReg<Num>) -
 /// This must only be used with syscalls which do not return on success.
 #[cfg(feature = "runtime")]
 #[inline]
-pub(in crate::imp) unsafe fn try_decode_error<Num: RetNumber>(raw: RetReg<Num>) -> io::Error {
+pub(in crate::imp) unsafe fn try_decode_error<Num: RetNumber>(raw: RetReg<Num>) -> io::Errno {
     debug_assert!(raw.is_in_range(-4095..0));
 
     // Tell the optimizer that we know the value is in the error range.
@@ -220,7 +220,7 @@ pub(in crate::imp) unsafe fn try_decode_error<Num: RetNumber>(raw: RetReg<Num>) 
         core::intrinsics::assume(raw.is_in_range(-4095..0));
     }
 
-    Error(raw.decode_error_code())
+    Errno(raw.decode_error_code())
 }
 
 /// Return the contained `usize` value.
@@ -230,7 +230,7 @@ pub(in crate::imp) fn decode_usize_infallible<Num: RetNumber>(raw: RetReg<Num>) 
     raw.decode_usize()
 }
 
-impl Error {
+impl Errno {
     /// `EACCES`
     #[doc(alias = "ACCES")]
     pub const ACCESS: Self = Self::from_errno(errno::EACCES);

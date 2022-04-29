@@ -27,7 +27,7 @@ fn test_readwrite_pv() {
     {
         match pwritev(&foo, &[IoSlice::new(b"hello")], 200) {
             Ok(_) => (),
-            Err(rustix::io::Error::NOSYS) => return,
+            Err(rustix::io::Errno::NOSYS) => return,
             Err(err) => Err(err).unwrap(),
         }
     }

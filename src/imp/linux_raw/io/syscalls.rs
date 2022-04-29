@@ -361,8 +361,8 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
             Err(err) => {
                 #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
                 match err {
-                    io::Error::AGAIN | io::Error::WOULDBLOCK => (),
-                    io::Error::NOTSOCK => not_socket = true,
+                    io::Errno::AGAIN | io::Errno::WOULDBLOCK => (),
+                    io::Errno::NOTSOCK => not_socket = true,
                     _ => return Err(err),
                 }
             }
@@ -375,10 +375,10 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         #[allow(unreachable_patterns)] // `EAGAIN` equals `EWOULDBLOCK`
         match super::super::net::syscalls::send(fd, &[], SendFlags::DONTWAIT) {
             // TODO or-patterns when we don't need 1.51
-            Err(io::Error::AGAIN) => (),
-            Err(io::Error::WOULDBLOCK) => (),
-            Err(io::Error::NOTSOCK) => (),
-            Err(io::Error::PIPE) => write = false,
+            Err(io::Errno::AGAIN) => (),
+            Err(io::Errno::WOULDBLOCK) => (),
+            Err(io::Errno::NOTSOCK) => (),
+            Err(io::Errno::PIPE) => write = false,
             Err(err) => return Err(err),
             Ok(_) => (),
         }

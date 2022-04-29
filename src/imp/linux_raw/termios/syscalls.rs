@@ -170,7 +170,7 @@ pub(crate) fn cfmakeraw(termios: &mut Termios) {
 #[inline]
 pub(crate) fn cfsetospeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
     if (speed & !CBAUD) != 0 {
-        return Err(io::Error::INVAL);
+        return Err(io::Errno::INVAL);
     }
     termios.c_cflag &= !CBAUD;
     termios.c_cflag |= speed;
@@ -183,7 +183,7 @@ pub(crate) fn cfsetispeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
         return Ok(());
     }
     if (speed & !CBAUD) != 0 {
-        return Err(io::Error::INVAL);
+        return Err(io::Errno::INVAL);
     }
     termios.c_cflag &= !CBAUD;
     termios.c_cflag |= speed;
@@ -193,7 +193,7 @@ pub(crate) fn cfsetispeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
 #[inline]
 pub(crate) fn cfsetspeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
     if (speed & !CBAUD) != 0 {
-        return Err(io::Error::INVAL);
+        return Err(io::Errno::INVAL);
     }
     termios.c_cflag &= !CBAUD;
     termios.c_cflag |= speed;
@@ -215,7 +215,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
 
     // Quick check: if `fd` isn't a character device, it's not a tty.
     if FileType::from_raw_mode(fd_stat.st_mode) != FileType::CharacterDevice {
-        return Err(crate::io::Error::NOTTY);
+        return Err(crate::io::Errno::NOTTY);
     }
 
     // Check that `fd` is really a tty.
@@ -232,7 +232,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     // have occurred. This check also ensures that we have enough space for
     // adding a NUL terminator.
     if r == buf.len() {
-        return Err(io::Error::RANGE);
+        return Err(io::Errno::RANGE);
     }
     buf[r] = b'\0';
 
@@ -241,7 +241,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
 
     let path_stat = super::super::fs::syscalls::stat(path)?;
     if path_stat.st_dev != fd_stat.st_dev || path_stat.st_ino != fd_stat.st_ino {
-        return Err(crate::io::Error::NODEV);
+        return Err(crate::io::Errno::NODEV);
     }
 
     Ok(r)

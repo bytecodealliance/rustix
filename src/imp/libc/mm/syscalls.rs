@@ -37,7 +37,7 @@ pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: Advice) -> io::R
         if err == 0 {
             Ok(())
         } else {
-            Err(io::Error(err))
+            Err(io::Errno(err))
         }
     }
 
@@ -61,7 +61,7 @@ pub(crate) unsafe fn msync(addr: *mut c::c_void, len: usize, flags: MsyncFlags) 
     if err == 0 {
         Ok(())
     } else {
-        Err(io::Error(err))
+        Err(io::Errno(err))
     }
 }
 
@@ -87,7 +87,7 @@ pub(crate) unsafe fn mmap(
         offset as i64,
     );
     if res == c::MAP_FAILED {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         Ok(res)
     }
@@ -113,7 +113,7 @@ pub(crate) unsafe fn mmap_anonymous(
         0,
     );
     if res == c::MAP_FAILED {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         Ok(res)
     }
@@ -146,7 +146,7 @@ pub(crate) unsafe fn mremap(
 ) -> io::Result<*mut c::c_void> {
     let res = c::mremap(old_address, old_size, new_size, flags.bits());
     if res == c::MAP_FAILED {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         Ok(res)
     }
@@ -173,7 +173,7 @@ pub(crate) unsafe fn mremap_fixed(
         new_address,
     );
     if res == c::MAP_FAILED {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         Ok(res)
     }

@@ -24,7 +24,7 @@ pub fn wsa_startup() -> io::Result<WSAData> {
         if ret == 0 {
             Ok(data.assume_init())
         } else {
-            Err(io::Error::from_raw_os_error(WSAGetLastError()))
+            Err(io::Errno::from_raw_os_error(WSAGetLastError()))
         }
     }
 }
@@ -43,7 +43,7 @@ pub fn wsa_cleanup() -> io::Result<()> {
         if WSACleanup() == 0 {
             Ok(())
         } else {
-            Err(io::Error::from_raw_os_error(WSAGetLastError()))
+            Err(io::Errno::from_raw_os_error(WSAGetLastError()))
         }
     }
 }

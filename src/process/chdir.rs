@@ -57,7 +57,7 @@ fn _getcwd(mut buffer: Vec<u8>) -> io::Result<ZString> {
 
     loop {
         match imp::process::syscalls::getcwd(&mut buffer) {
-            Err(io::Error::RANGE) => {
+            Err(io::Errno::RANGE) => {
                 buffer.reserve(1); // use `Vec` reallocation strategy to grow capacity exponentially
                 buffer.resize(buffer.capacity(), 0_u8);
             }

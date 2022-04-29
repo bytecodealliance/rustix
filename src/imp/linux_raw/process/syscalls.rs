@@ -305,7 +305,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
         )) {
             Ok(()) => rlimit_from_linux(result.assume_init()),
             Err(e) => {
-                debug_assert_eq!(e, io::Error::NOSYS);
+                debug_assert_eq!(e, io::Errno::NOSYS);
                 getrlimit_old(limit)
             }
         }
@@ -354,7 +354,7 @@ pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
             null_mut::<c::c_void>()
         )) {
             Ok(()) => Ok(()),
-            Err(io::Error::NOSYS) => setrlimit_old(limit, new),
+            Err(io::Errno::NOSYS) => setrlimit_old(limit, new),
             Err(e) => Err(e),
         }
     }
@@ -433,11 +433,11 @@ fn rlimit_from_linux_old(lim: linux_raw_sys::general::rlimit) -> Rlimit {
 /// Like `rlimit_to_linux` but uses Linux's old 32-bit `rlimit`.
 fn rlimit_to_linux_old(lim: Rlimit) -> io::Result<linux_raw_sys::general::rlimit> {
     let rlim_cur = match lim.current {
-        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+        Some(r) => r.try_into().map_err(|_| io::Errno::INVAL)?,
         None => linux_raw_sys::general::RLIM_INFINITY as _,
     };
     let rlim_max = match lim.maximum {
-        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+        Some(r) => r.try_into().map_err(|_| io::Errno::INVAL)?,
         None => linux_raw_sys::general::RLIM_INFINITY as _,
     };
     Ok(linux_raw_sys::general::rlimit { rlim_cur, rlim_max })

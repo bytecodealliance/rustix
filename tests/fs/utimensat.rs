@@ -84,7 +84,7 @@ fn test_utimensat_noent() {
     };
     assert_eq!(
         utimensat(&dir, "foo", &times, AtFlags::empty()).unwrap_err(),
-        rustix::io::Error::NOENT
+        rustix::io::Errno::NOENT
     );
 }
 
@@ -122,6 +122,6 @@ fn test_utimensat_notdir() {
     };
     assert_eq!(
         utimensat(&foo, "bar", &times, AtFlags::empty()).unwrap_err(),
-        rustix::io::Error::NOTDIR
+        rustix::io::Errno::NOTDIR
     );
 }

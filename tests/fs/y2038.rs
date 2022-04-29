@@ -38,7 +38,7 @@ fn test_y2038_with_utimensat() {
         // On 32-bit platforms, accept `EOVERFLOW`, meaning that y2038 support
         // is not available in this version of the OS.
         #[cfg(target_pointer_width = "32")]
-        Err(rustix::io::Error::OVERFLOW) => return,
+        Err(rustix::io::Errno::OVERFLOW) => return,
 
         Err(e) => panic!("unexpected error: {:?}", e),
     }
@@ -113,7 +113,7 @@ fn test_y2038_with_futimens() {
         // On 32-bit platforms, accept `EOVERFLOW`, meaning that y2038 support
         // is not available in this version of the OS.
         #[cfg(target_pointer_width = "32")]
-        Err(rustix::io::Error::OVERFLOW) => return,
+        Err(rustix::io::Errno::OVERFLOW) => return,
 
         Err(e) => panic!("unexpected error: {:?}", e),
     }

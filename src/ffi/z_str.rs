@@ -1150,10 +1150,10 @@ impl fmt::Display for NulError {
 }
 
 #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-impl From<NulError> for io::Error {
-    /// Converts a [`NulError`] into a [`io::Error`].
-    fn from(_: NulError) -> io::Error {
-        io::Error::INVAL
+impl From<NulError> for io::Errno {
+    /// Converts a [`NulError`] into a [`io::Errno`].
+    fn from(_: NulError) -> io::Errno {
+        io::Errno::INVAL
     }
 }
 

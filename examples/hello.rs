@@ -26,7 +26,7 @@ fn main() -> std::io::Result<()> {
 
             // `write` can be interrupted before doing any work; if that
             // happens, retry it.
-            Err(rustix::io::Error::INTR) => (),
+            Err(rustix::io::Errno::INTR) => (),
 
             // `write` can also fail for external reasons, such as running out
             // of storage space.

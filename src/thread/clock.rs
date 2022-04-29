@@ -92,5 +92,5 @@ pub enum NanosleepRelativeResult {
     /// The sleep was interrupted, the remaining time is returned.
     Interrupted(Timespec),
     /// An invalid time value was provided.
-    Err(io::Error),
+    Err(io::Errno),
 }

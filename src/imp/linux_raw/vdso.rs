@@ -271,7 +271,7 @@ unsafe fn check_vdso_base<'vdso>(base: *const Elf_Ehdr) -> Option<&'vdso Elf_Ehd
     {
         use super::conv::ret;
         use super::time::types::ClockId;
-        if ret(syscall!(__NR_clock_getres, ClockId::Monotonic, base)) != Err(io::Error::FAULT) {
+        if ret(syscall!(__NR_clock_getres, ClockId::Monotonic, base)) != Err(io::Errno::FAULT) {
             // We can't gracefully fail here because we would seem to have just
             // mutated some unknown memory.
             #[cfg(feature = "std")]

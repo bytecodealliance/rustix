@@ -60,7 +60,7 @@ pub(crate) unsafe fn mmap(
             (offset / 4096)
                 .try_into()
                 .map(|scaled_offset| pass_usize(scaled_offset))
-                .map_err(|_| io::Error::INVAL)?
+                .map_err(|_| io::Errno::INVAL)?
         ))
     }
     #[cfg(target_pointer_width = "64")]

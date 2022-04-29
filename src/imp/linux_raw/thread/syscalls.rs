@@ -35,14 +35,14 @@ pub(crate) fn clock_nanosleep_relative(
         .or_else(|err| {
             // See the comments in `rustix_clock_gettime_via_syscall` about
             // emulation.
-            if err == io::Error::NOSYS {
+            if err == io::Errno::NOSYS {
                 clock_nanosleep_relative_old(id, req, &mut rem)
             } else {
                 Err(err)
             }
         }) {
             Ok(()) => NanosleepRelativeResult::Ok,
-            Err(io::Error::INTR) => NanosleepRelativeResult::Interrupted(rem.assume_init()),
+            Err(io::Errno::INTR) => NanosleepRelativeResult::Interrupted(rem.assume_init()),
             Err(err) => NanosleepRelativeResult::Err(err),
         }
     }
@@ -57,7 +57,7 @@ pub(crate) fn clock_nanosleep_relative(
             &mut rem
         )) {
             Ok(()) => NanosleepRelativeResult::Ok,
-            Err(io::Error::INTR) => NanosleepRelativeResult::Interrupted(rem.assume_init()),
+            Err(io::Errno::INTR) => NanosleepRelativeResult::Interrupted(rem.assume_init()),
             Err(err) => NanosleepRelativeResult::Err(err),
         }
     }
@@ -70,8 +70,8 @@ unsafe fn clock_nanosleep_relative_old(
     rem: &mut MaybeUninit<__kernel_timespec>,
 ) -> io::Result<()> {
     let old_req = __kernel_old_timespec {
-        tv_sec: req.tv_sec.try_into().map_err(|_| io::Error::INVAL)?,
-        tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Error::INVAL)?,
+        tv_sec: req.tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
+        tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Errno::INVAL)?,
     };
     let mut old_rem = MaybeUninit::<__kernel_old_timespec>::uninit();
     ret(syscall!(
@@ -107,7 +107,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, req: &__kernel_timespec) -> 
         .or_else(|err| {
             // See the comments in `rustix_clock_gettime_via_syscall` about
             // emulation.
-            if err == io::Error::NOSYS {
+            if err == io::Errno::NOSYS {
                 clock_nanosleep_absolute_old(id, req)
             } else {
                 Err(err)
@@ -129,8 +129,8 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, req: &__kernel_timespec) -> 
 #[cfg(target_pointer_width = "32")]
 unsafe fn clock_nanosleep_absolute_old(id: ClockId, req: &__kernel_timespec) -> io::Result<()> {
     let old_req = __kernel_old_timespec {
-        tv_sec: req.tv_sec.try_into().map_err(|_| io::Error::INVAL)?,
-        tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Error::INVAL)?,
+        tv_sec: req.tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
+        tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Errno::INVAL)?,
     };
     ret(syscall_readonly!(
         __NR_clock_nanosleep,
@@ -156,14 +156,14 @@ pub(crate) fn nanosleep(req: &__kernel_timespec) -> NanosleepRelativeResult {
         .or_else(|err| {
             // See the comments in `rustix_clock_gettime_via_syscall` about
             // emulation.
-            if err == io::Error::NOSYS {
+            if err == io::Errno::NOSYS {
                 nanosleep_old(req, &mut rem)
             } else {
                 Err(err)
             }
         }) {
             Ok(()) => NanosleepRelativeResult::Ok,
-            Err(io::Error::INTR) => NanosleepRelativeResult::Interrupted(rem.assume_init()),
+            Err(io::Errno::INTR) => NanosleepRelativeResult::Interrupted(rem.assume_init()),
             Err(err) => NanosleepRelativeResult::Err(err),
         }
     }
@@ -172,7 +172,7 @@ pub(crate) fn nanosleep(req: &__kernel_timespec) -> NanosleepRelativeResult {
         let mut rem = MaybeUninit::<__kernel_timespec>::uninit();
         match ret(syscall!(__NR_nanosleep, by_ref(req), &mut rem)) {
             Ok(()) => NanosleepRelativeResult::Ok,
-            Err(io::Error::INTR) => NanosleepRelativeResult::Interrupted(rem.assume_init()),
+            Err(io::Errno::INTR) => NanosleepRelativeResult::Interrupted(rem.assume_init()),
             Err(err) => NanosleepRelativeResult::Err(err),
         }
     }
@@ -184,8 +184,8 @@ unsafe fn nanosleep_old(
     rem: &mut MaybeUninit<__kernel_timespec>,
 ) -> io::Result<()> {
     let old_req = __kernel_old_timespec {
-        tv_sec: req.tv_sec.try_into().map_err(|_| io::Error::INVAL)?,
-        tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Error::INVAL)?,
+        tv_sec: req.tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
+        tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Errno::INVAL)?,
     };
     let mut old_rem = MaybeUninit::<__kernel_old_timespec>::uninit();
     ret(syscall!(__NR_nanosleep, by_ref(&old_req), &mut old_rem))?;
@@ -235,7 +235,7 @@ pub(crate) unsafe fn futex(
         .or_else(|err| {
             // See the comments in `rustix_clock_gettime_via_syscall` about
             // emulation.
-            if err == io::Error::NOSYS {
+            if err == io::Errno::NOSYS {
                 futex_old(uaddr, op, flags, val, utime, uaddr2, val3)
             } else {
                 Err(err)
@@ -265,8 +265,8 @@ unsafe fn futex_old(
     val3: u32,
 ) -> io::Result<usize> {
     let old_utime = __kernel_old_timespec {
-        tv_sec: (*utime).tv_sec.try_into().map_err(|_| io::Error::INVAL)?,
-        tv_nsec: (*utime).tv_nsec.try_into().map_err(|_| io::Error::INVAL)?,
+        tv_sec: (*utime).tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
+        tv_nsec: (*utime).tv_nsec.try_into().map_err(|_| io::Errno::INVAL)?,
     };
     ret_usize(syscall!(
         __NR_futex,

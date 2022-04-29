@@ -16,12 +16,12 @@
 use super::c;
 use super::fd::{AsRawFd, BorrowedFd, FromRawFd, RawFd};
 #[cfg(not(debug_assertions))]
-use super::io::error::decode_usize_infallible;
+use super::io::errno::decode_usize_infallible;
 #[cfg(feature = "runtime")]
-use super::io::error::try_decode_error;
+use super::io::errno::try_decode_error;
 #[cfg(target_pointer_width = "64")]
-use super::io::error::try_decode_u64;
-use super::io::error::{
+use super::io::errno::try_decode_u64;
+use super::io::errno::{
     try_decode_c_int, try_decode_c_uint, try_decode_raw_fd, try_decode_usize, try_decode_void,
     try_decode_void_star,
 };
@@ -442,7 +442,7 @@ pub(super) fn dev_t<'a, Num: ArgNumber>(dev: u64) -> ArgReg<'a, Num> {
 #[inline]
 pub(super) fn dev_t<'a, Num: ArgNumber>(dev: u64) -> io::Result<ArgReg<'a, Num>> {
     use core::convert::TryInto;
-    Ok(pass_usize(dev.try_into().map_err(|_err| io::Error::INVAL)?))
+    Ok(pass_usize(dev.try_into().map_err(|_err| io::Errno::INVAL)?))
 }
 
 #[cfg(target_pointer_width = "32")]
@@ -651,7 +651,7 @@ pub(super) unsafe fn ret(raw: RetReg<R0>) -> io::Result<()> {
 /// doesn't return on success.
 #[cfg(feature = "runtime")]
 #[inline]
-pub(super) unsafe fn ret_error(raw: RetReg<R0>) -> io::Error {
+pub(super) unsafe fn ret_error(raw: RetReg<R0>) -> io::Errno {
     try_decode_error(raw)
 }
 
