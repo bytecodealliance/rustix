@@ -25,8 +25,6 @@ use crate::io::{self, OwnedFd};
 use crate::process::{Pid, Resource, Signal};
 use crate::{as_mut_ptr, as_ptr};
 use core::mem::MaybeUninit;
-#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
-use core::ptr::null;
 use core::ptr::null_mut;
 #[cfg(target_pointer_width = "64")]
 use linux_raw_sys::general::__kernel_loff_t;
@@ -202,7 +200,7 @@ pub(super) fn opt_ref<'a, T: Sized, Num: ArgNumber>(t: Option<&'a T>) -> ArgReg<
     // advantage of not requiring `unsafe`.
     match t {
         Some(t) => by_ref(t),
-        None => raw_arg(null()),
+        None => raw_arg(null_mut()),
     }
 }
 
