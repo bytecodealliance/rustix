@@ -5,7 +5,7 @@ fn test_utimensat() {
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
-        &cwd(),
+        cwd(),
         tmp.path(),
         OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
@@ -48,7 +48,7 @@ fn test_utimensat_noent() {
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
-        &cwd(),
+        cwd(),
         tmp.path(),
         OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
@@ -78,7 +78,7 @@ fn test_utimensat_notdir() {
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
-        &cwd(),
+        cwd(),
         tmp.path(),
         OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),

@@ -13,7 +13,7 @@ fn test_renameat() {
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
-        &cwd(),
+        cwd(),
         tmp.path(),
         OFlags::RDONLY | OFlags::PATH,
         Mode::empty(),
@@ -34,7 +34,7 @@ fn test_renameat_with() {
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
-        &cwd(),
+        cwd(),
         tmp.path(),
         OFlags::RDONLY | OFlags::PATH,
         Mode::empty(),

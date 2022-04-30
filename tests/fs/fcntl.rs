@@ -5,7 +5,7 @@ fn test_fcntl_dupfd_cloexec() {
     use std::os::unix::io::AsRawFd;
 
     let file = rustix::fs::openat(
-        &rustix::fs::cwd(),
+        rustix::fs::cwd(),
         "Cargo.toml",
         rustix::fs::OFlags::RDONLY,
         rustix::fs::Mode::empty(),

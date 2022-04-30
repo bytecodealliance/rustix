@@ -58,7 +58,7 @@ fn read_entries(dir: &mut Dir) -> HashMap<String, DirEntry> {
 #[test]
 fn dir_from_openat() {
     let dirfd = rustix::fs::openat(
-        &rustix::fs::cwd(),
+        rustix::fs::cwd(),
         ".",
         rustix::fs::OFlags::RDONLY,
         rustix::fs::Mode::empty(),
