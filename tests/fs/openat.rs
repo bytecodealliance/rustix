@@ -8,7 +8,7 @@ use std::io::Write;
 fn test_openat_tmpfile() {
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
-        &cwd(),
+        cwd(),
         tmp.path(),
         OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),

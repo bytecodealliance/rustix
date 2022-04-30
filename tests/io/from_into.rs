@@ -8,7 +8,7 @@ fn test_owned() {
     use std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd};
 
     let file = rustix::fs::openat(
-        &rustix::fs::cwd(),
+        rustix::fs::cwd(),
         "Cargo.toml",
         rustix::fs::OFlags::RDONLY,
         rustix::fs::Mode::empty(),
