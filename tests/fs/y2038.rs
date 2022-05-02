@@ -8,6 +8,7 @@
 #[cfg(not(all(target_os = "emscripten", target_pointer_width = "32")))]
 fn test_y2038_with_utimensat() {
     use rustix::fs::{cwd, openat, statat, utimensat, AtFlags, Mode, OFlags, Timespec, Timestamps};
+    use std::convert::TryInto;
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -31,9 +32,12 @@ fn test_y2038_with_utimensat() {
     let _ = utimensat(&dir, "foo", &timestamps, AtFlags::empty()).unwrap();
     let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
 
-    assert_eq!(stat.st_mtime.try_into().unwrap() as u64, m_sec);
+    assert_eq!(
+        TryInto::<u64>::try_into(stat.st_mtime).unwrap() as u64,
+        m_sec
+    );
     assert_eq!(stat.st_mtime_nsec as u32, m_nsec);
-    assert!(stat.st_atime.try_into().unwrap() as u64 >= a_sec);
+    assert!(TryInto::<u64>::try_into(stat.st_atime).unwrap() as u64 >= a_sec);
     assert!(stat.st_atime_nsec as u32 >= a_nsec);
 }
 
@@ -47,6 +51,7 @@ fn test_y2038_with_utimensat() {
 #[cfg(not(all(target_os = "emscripten", target_pointer_width = "32")))]
 fn test_y2038_with_futimens() {
     use rustix::fs::{cwd, futimens, openat, statat, AtFlags, Mode, OFlags, Timespec, Timestamps};
+    use std::convert::TryInto;
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(&cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -70,8 +75,8 @@ fn test_y2038_with_futimens() {
     let _ = futimens(&file, &timestamps).unwrap();
     let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
 
-    assert_eq!(stat.st_mtime.try_into().unwrap(), m_sec);
+    assert_eq!(TryInto::<u64>::try_into(stat.st_mtime).unwrap(), m_sec);
     assert_eq!(stat.st_mtime_nsec as u32, m_nsec);
-    assert!(stat.st_atime.try_into().unwrap() >= a_sec);
+    assert!(TryInto::<u64>::try_into(stat.st_atime).unwrap() >= a_sec);
     assert!(stat.st_atime_nsec as u32 >= a_nsec);
 }
