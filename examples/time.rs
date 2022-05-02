@@ -2,6 +2,7 @@
 //! clocks it's given.
 
 #[cfg(not(windows))]
+#[cfg(feature = "time")]
 fn main() {
     println!(
         "Real time: {:?}",
@@ -13,7 +14,7 @@ fn main() {
     );
 }
 
-#[cfg(windows)]
+#[cfg(any(windows, not(feature = "time")))]
 fn main() {
     unimplemented!()
 }

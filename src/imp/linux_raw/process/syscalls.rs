@@ -2,14 +2,15 @@
 //!
 //! # Safety
 //!
-//! See the `rustix::imp::syscalls` module documentation for details.
-
+//! See the `rustix::imp` module documentation for details.
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
+#[cfg(feature = "runtime")]
+use super::super::arch::choose::syscall1_noreturn;
 use super::super::arch::choose::{
-    syscall0_readonly, syscall1, syscall1_noreturn, syscall1_readonly, syscall2, syscall2_readonly,
-    syscall3, syscall3_readonly, syscall4,
+    syscall0_readonly, syscall1, syscall1_readonly, syscall2, syscall2_readonly, syscall3,
+    syscall3_readonly, syscall4,
 };
 use super::super::c;
 use super::super::conv::{
@@ -18,7 +19,7 @@ use super::super::conv::{
     ret_usize_infallible, signal, size_of, slice_just_addr, slice_mut, void_star, zero,
 };
 use super::super::reg::nr;
-use super::{RawCpuSet, RawUname};
+use super::types::{RawCpuSet, RawUname};
 use crate::fd::BorrowedFd;
 use crate::ffi::ZStr;
 use crate::io;
@@ -28,6 +29,8 @@ use crate::process::{
 };
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
+#[cfg(feature = "runtime")]
+use linux_raw_sys::general::__NR_exit_group;
 #[cfg(not(any(
     target_arch = "arm",
     target_arch = "powerpc",
@@ -43,10 +46,10 @@ use linux_raw_sys::general::__NR_getrlimit;
 ))]
 use linux_raw_sys::general::__NR_ugetrlimit as __NR_getrlimit;
 use linux_raw_sys::general::{
-    __NR_chdir, __NR_exit_group, __NR_fchdir, __NR_getcwd, __NR_getpid, __NR_getppid,
-    __NR_getpriority, __NR_kill, __NR_membarrier, __NR_prlimit64, __NR_sched_getaffinity,
-    __NR_sched_setaffinity, __NR_sched_yield, __NR_setpriority, __NR_setrlimit, __NR_setsid,
-    __NR_uname, __NR_wait4, __kernel_gid_t, __kernel_pid_t, __kernel_uid_t,
+    __NR_chdir, __NR_fchdir, __NR_getcwd, __NR_getpid, __NR_getppid, __NR_getpriority, __NR_kill,
+    __NR_membarrier, __NR_prlimit64, __NR_sched_getaffinity, __NR_sched_setaffinity,
+    __NR_sched_yield, __NR_setpriority, __NR_setrlimit, __NR_setsid, __NR_uname, __NR_wait4,
+    __kernel_gid_t, __kernel_pid_t, __kernel_uid_t,
 };
 #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
 use linux_raw_sys::general::{__NR_getegid, __NR_geteuid, __NR_getgid, __NR_getuid};
@@ -493,6 +496,7 @@ pub(crate) fn _waitpid(
     }
 }
 
+#[cfg(feature = "runtime")]
 #[inline]
 pub(crate) fn exit_group(code: c::c_int) -> ! {
     unsafe { syscall1_noreturn(nr(__NR_exit_group), c_int(code)) }

@@ -10,6 +10,7 @@
 /// # Examples
 ///
 /// ```rust,no_run
+/// # #[cfg(feature = "fs")]
 /// # fn main() -> rustix::io::Result<()> {
 /// use rustix::fs::{cwd, statat, AtFlags};
 /// use rustix::zstr;
@@ -17,6 +18,8 @@
 /// let metadata = statat(cwd(), zstr!("test.txt"), AtFlags::empty())?;
 /// # Ok(())
 /// # }
+/// # #[cfg(not(feature = "fs"))]
+/// # fn main() {}
 /// ```
 #[allow(unused_macros)]
 #[macro_export]

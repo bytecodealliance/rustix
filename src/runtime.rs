@@ -37,27 +37,27 @@ use imp::fd::AsFd;
 #[cfg(target_arch = "x86")]
 #[inline]
 pub unsafe fn set_thread_area(u_info: &mut UserDesc) -> io::Result<()> {
-    imp::syscalls::tls::set_thread_area(u_info)
+    imp::runtime::syscalls::tls::set_thread_area(u_info)
 }
 
 #[cfg(linux_raw)]
 #[cfg(target_arch = "arm")]
 #[inline]
 pub unsafe fn arm_set_tls(data: *mut c_void) -> io::Result<()> {
-    imp::syscalls::tls::arm_set_tls(data)
+    imp::runtime::syscalls::tls::arm_set_tls(data)
 }
 
 #[cfg(linux_raw)]
 #[cfg(target_arch = "x86_64")]
 #[inline]
 pub unsafe fn set_fs(data: *mut c_void) {
-    imp::syscalls::tls::set_fs(data)
+    imp::runtime::syscalls::tls::set_fs(data)
 }
 
 #[cfg(linux_raw)]
 #[inline]
 pub unsafe fn set_tid_address(data: *mut c_void) -> Pid {
-    imp::syscalls::tls::set_tid_address(data)
+    imp::runtime::syscalls::tls::set_tid_address(data)
 }
 
 /// `prctl(PR_SET_NAME, name)`
@@ -74,12 +74,12 @@ pub unsafe fn set_tid_address(data: *mut c_void) -> Pid {
 #[cfg(linux_raw)]
 #[inline]
 pub unsafe fn set_thread_name(name: &ZStr) -> io::Result<()> {
-    imp::syscalls::tls::set_thread_name(name)
+    imp::runtime::syscalls::tls::set_thread_name(name)
 }
 
 #[cfg(linux_raw)]
 #[cfg(target_arch = "x86")]
-pub use imp::thread::tls::UserDesc;
+pub use imp::runtime::tls::UserDesc;
 
 /// `syscall(SYS_exit, status)`—Exit the current thread.
 ///
@@ -89,7 +89,7 @@ pub use imp::thread::tls::UserDesc;
 #[cfg(linux_raw)]
 #[inline]
 pub unsafe fn exit_thread(status: i32) -> ! {
-    imp::syscalls::tls::exit_thread(status)
+    imp::runtime::syscalls::tls::exit_thread(status)
 }
 
 /// Exit all the threads in the current process' thread group.
@@ -120,7 +120,7 @@ pub fn exit_group(status: i32) -> ! {
 #[cfg(linux_raw)]
 #[inline]
 pub fn startup_tls_info() -> StartupTlsInfo {
-    imp::thread::tls::startup_tls_info()
+    imp::runtime::tls::startup_tls_info()
 }
 
 /// `(getauxval(AT_PHDR), getauxval(AT_PHNUM))`—Returns the address and
@@ -134,11 +134,11 @@ pub fn startup_tls_info() -> StartupTlsInfo {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub fn exe_phdrs() -> (*const c_void, usize) {
-    imp::process::exe_phdrs()
+    imp::process::auxv::exe_phdrs()
 }
 
 #[cfg(linux_raw)]
-pub use imp::thread::tls::StartupTlsInfo;
+pub use imp::runtime::tls::StartupTlsInfo;
 
 /// `fork()`—Creates a new process by duplicating the calling process.
 ///
@@ -219,7 +219,7 @@ pub use imp::thread::tls::StartupTlsInfo;
 /// [async-signal-safe]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_04_03
 #[cfg(linux_raw)]
 pub unsafe fn fork() -> io::Result<Option<Pid>> {
-    imp::syscalls::fork()
+    imp::runtime::syscalls::fork()
 }
 
 /// `execveat(dirfd, path.as_z_str(), argv, envp, flags)`—Execute a new
@@ -243,7 +243,7 @@ pub unsafe fn execveat<Fd: AsFd>(
     envp: *const *const u8,
     flags: AtFlags,
 ) -> io::Error {
-    imp::syscalls::execveat(dirfd.as_fd(), path, argv, envp, flags)
+    imp::runtime::syscalls::execveat(dirfd.as_fd(), path, argv, envp, flags)
 }
 
 /// `execve(path.as_z_str(), argv, envp)`—Execute a new command using the
@@ -261,5 +261,5 @@ pub unsafe fn execveat<Fd: AsFd>(
 #[inline]
 #[cfg(linux_raw)]
 pub unsafe fn execve(path: &ZStr, argv: *const *const u8, envp: *const *const u8) -> io::Error {
-    imp::syscalls::execve(path, argv, envp)
+    imp::runtime::syscalls::execve(path, argv, envp)
 }

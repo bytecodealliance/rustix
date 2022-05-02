@@ -23,7 +23,7 @@ pub type Result<T> = result::Result<T, Error>;
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/errno.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/errno.3.html
-pub use imp::io::Error;
+pub use imp::io::error::Error;
 
 impl Error {
     /// Shorthand for `std::io::Error::from(self).kind()`.

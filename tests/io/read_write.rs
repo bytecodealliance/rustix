@@ -1,5 +1,7 @@
+#[cfg(feature = "fs")]
 use std::io::{IoSlice, IoSliceMut};
 
+#[cfg(feature = "fs")]
 #[test]
 fn test_readwrite_pv() {
     use rustix::fs::{cwd, openat, Mode, OFlags};
@@ -37,6 +39,7 @@ fn test_readwrite_pv() {
     assert_eq!(&buf, b"world");
 }
 
+#[cfg(feature = "fs")]
 #[test]
 fn test_readwrite_p() {
     use rustix::fs::{cwd, openat, Mode, OFlags};
@@ -61,6 +64,7 @@ fn test_readwrite_p() {
     assert_eq!(&buf, b"world");
 }
 
+#[cfg(feature = "fs")]
 #[test]
 fn test_readwrite_v() {
     use rustix::fs::{cwd, openat, seek, Mode, OFlags};
@@ -86,6 +90,7 @@ fn test_readwrite_v() {
     assert_eq!(&buf, b"world");
 }
 
+#[cfg(feature = "fs")]
 #[test]
 fn test_readwrite() {
     use rustix::fs::{cwd, openat, seek, Mode, OFlags};

@@ -7,31 +7,37 @@
 
 use super::super::c;
 use super::super::elf::{Elf_Ehdr, Elf_Phdr};
+#[cfg(feature = "process")]
 use crate::ffi::ZStr;
 use core::mem::size_of;
 use core::ptr::null;
+#[cfg(feature = "runtime")]
 use core::slice;
 use linux_raw_sys::general::{
     AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM,
     AT_SYSINFO_EHDR,
 };
 
+#[cfg(feature = "process")]
 #[inline]
 pub(crate) fn page_size() -> usize {
     auxv().page_size
 }
 
+#[cfg(feature = "process")]
 #[inline]
 pub(crate) fn clock_ticks_per_second() -> u64 {
     auxv().clock_ticks_per_second as u64
 }
 
+#[cfg(feature = "process")]
 #[inline]
 pub(crate) fn linux_hwcap() -> (usize, usize) {
     let auxv = auxv();
     (auxv.hwcap, auxv.hwcap2)
 }
 
+#[cfg(feature = "process")]
 #[inline]
 pub(crate) fn linux_execfn() -> &'static ZStr {
     let execfn = auxv().execfn;
@@ -41,12 +47,14 @@ pub(crate) fn linux_execfn() -> &'static ZStr {
     unsafe { ZStr::from_ptr(execfn.cast()) }
 }
 
+#[cfg(feature = "runtime")]
 #[inline]
 pub(crate) fn exe_phdrs() -> (*const c::c_void, usize) {
     let auxv = auxv();
     (auxv.phdr.cast(), auxv.phnum)
 }
 
+#[cfg(feature = "runtime")]
 #[inline]
 pub(in super::super) fn exe_phdrs_slice() -> &'static [Elf_Phdr] {
     let auxv = auxv();

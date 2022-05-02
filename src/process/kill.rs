@@ -1,7 +1,7 @@
 use crate::process::Pid;
 use crate::{imp, io};
 
-pub use imp::process::Signal;
+pub use imp::process::types::Signal;
 
 /// `kill(pid, sig)`—Sends a signal to a process.
 ///

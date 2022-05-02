@@ -55,23 +55,29 @@ pub(crate) mod c;
 pub(crate) use libc as c;
 
 #[cfg(not(windows))]
+// #[cfg(feature = "fs")] // TODO: Enable this once `OwnedFd` moves out of the tree.
 pub(crate) mod fs;
 pub(crate) mod io;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[cfg(feature = "io_uring")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "io_uring")))]
 pub(crate) mod io_uring;
+#[cfg(not(windows))]
+#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+pub(crate) mod mm;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))] // WASI doesn't support `net` yet.
+#[cfg(feature = "net")]
 pub(crate) mod net;
 #[cfg(not(windows))]
 pub(crate) mod process;
 #[cfg(not(windows))]
+#[cfg(feature = "rand")]
 pub(crate) mod rand;
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[cfg(feature = "termios")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "termios")))]
 pub(crate) mod termios;
 #[cfg(not(windows))]
+#[cfg(feature = "thread")]
 pub(crate) mod thread;
 #[cfg(not(windows))]
 pub(crate) mod time;

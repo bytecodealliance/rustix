@@ -6,7 +6,7 @@
 use crate::imp;
 use crate::io::{self, OwnedFd};
 use imp::fd::{AsFd, RawFd};
-use imp::fs::{FdFlags, OFlags};
+use imp::fs::types::{FdFlags, OFlags};
 
 /// `fcntl(fd, F_GETFD)`—Returns a file descriptor's flags.
 ///
@@ -88,7 +88,7 @@ pub fn fcntl_get_seals<Fd: AsFd>(fd: Fd) -> io::Result<SealFlags> {
     target_os = "fuchsia",
     target_os = "linux",
 ))]
-pub use imp::fs::SealFlags;
+pub use imp::fs::types::SealFlags;
 
 /// `fcntl(fd, F_ADD_SEALS)`
 ///

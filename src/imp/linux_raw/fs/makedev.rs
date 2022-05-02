@@ -1,4 +1,4 @@
-use super::Dev;
+use crate::fs::Dev;
 
 #[inline]
 pub fn makedev(maj: u32, min: u32) -> Dev {

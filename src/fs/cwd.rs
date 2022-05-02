@@ -24,7 +24,7 @@ use imp::fd::{BorrowedFd, RawFd};
 #[inline]
 #[doc(alias = "AT_FDCWD")]
 pub fn cwd() -> BorrowedFd<'static> {
-    let at_fdcwd = imp::io::AT_FDCWD as RawFd;
+    let at_fdcwd = imp::io::types::AT_FDCWD as RawFd;
 
     // Safety: `AT_FDCWD` is a reserved value that is never dynamically
     // allocated, so it'll remain valid for the duration of `'static`.

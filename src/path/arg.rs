@@ -35,15 +35,19 @@ use std::path::{Component, Components, Iter, Path, PathBuf};
 /// # Example
 ///
 /// ```rust
+/// # #[cfg(any(feature = "fs", feature = "net"))]
 /// use rustix::ffi::ZStr;
 /// use rustix::io;
+/// # #[cfg(any(feature = "fs", feature = "net"))]
 /// use rustix::path::Arg;
 ///
+/// # #[cfg(any(feature = "fs", feature = "net"))]
 /// pub fn touch<P: Arg>(path: P) -> io::Result<()> {
 ///     let path = path.into_z_str()?;
 ///     _touch(&path)
 /// }
 ///
+/// # #[cfg(any(feature = "fs", feature = "net"))]
 /// fn _touch(path: &ZStr) -> io::Result<()> {
 ///     // implementation goes here
 ///     Ok(())

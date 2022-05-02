@@ -9,19 +9,19 @@
 
 use crate::{imp, io};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use imp::process::RawCpuid;
+use imp::process::types::RawCpuid;
 
 /// The raw integer value of a Unix user ID.
-pub use imp::process::RawUid;
+pub use imp::process::types::RawUid;
 
 /// The raw integer value of a Unix group ID.
-pub use imp::process::RawGid;
+pub use imp::process::types::RawGid;
 
 /// The raw integer value of a Unix process ID.
-pub use imp::process::RawPid;
+pub use imp::process::types::RawPid;
 
 /// The raw integer value of a Unix process ID.
-pub use imp::process::RawNonZeroPid;
+pub use imp::process::types::RawNonZeroPid;
 
 /// `uid_t`—A Unix user ID.
 #[repr(transparent)]

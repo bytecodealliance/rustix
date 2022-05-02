@@ -11,7 +11,7 @@ use crate::{imp, io};
 use core::time::Duration;
 use imp::fd::AsFd;
 
-pub use imp::net::Timeout;
+pub use imp::net::types::Timeout;
 
 /// `getsockopt(fd, SOL_SOCKET, SO_TYPE)`—Returns the type of a socket.
 ///

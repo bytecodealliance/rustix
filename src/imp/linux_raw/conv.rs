@@ -9,28 +9,36 @@
 
 use super::c;
 use super::fd::{AsRawFd, BorrowedFd, FromRawFd, RawFd};
-use super::fs::{FileType, Mode, OFlags};
 #[cfg(not(debug_assertions))]
 use super::io::error::decode_usize_infallible;
+#[cfg(feature = "runtime")]
+use super::io::error::try_decode_error;
 #[cfg(target_pointer_width = "64")]
 use super::io::error::try_decode_u64;
 use super::io::error::{
-    try_decode_c_int, try_decode_c_uint, try_decode_error, try_decode_raw_fd, try_decode_usize,
-    try_decode_void, try_decode_void_star,
+    try_decode_c_int, try_decode_c_uint, try_decode_raw_fd, try_decode_usize, try_decode_void,
+    try_decode_void_star,
 };
 use super::reg::{raw_arg, ArgNumber, ArgReg, RetReg, R0};
-use super::time::{ClockId, TimerfdClockId};
+#[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
+use super::time::types::ClockId;
+#[cfg(feature = "time")]
+use super::time::types::TimerfdClockId;
 use crate::ffi::ZStr;
+use crate::fs::{FileType, Mode, OFlags};
 use crate::io::{self, OwnedFd};
 use crate::process::{Pid, Resource, Signal};
 use crate::{as_mut_ptr, as_ptr};
 use core::mem::{transmute, MaybeUninit};
 use core::ptr::null_mut;
+#[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
+use linux_raw_sys::general::__kernel_clockid_t;
 #[cfg(target_pointer_width = "64")]
 use linux_raw_sys::general::__kernel_loff_t;
+#[cfg(feature = "net")]
+use linux_raw_sys::general::socklen_t;
 #[cfg(target_pointer_width = "32")]
 use linux_raw_sys::general::O_LARGEFILE;
-use linux_raw_sys::general::{__kernel_clockid_t, socklen_t};
 
 /// Convert `SYS_*` constants for socketcall.
 #[cfg(target_arch = "x86")]
@@ -232,16 +240,19 @@ pub(super) fn loff_t_from_u64<'a, Num: ArgNumber>(i: u64) -> ArgReg<'a, Num> {
     pass_usize(i as usize)
 }
 
+#[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
 #[inline]
 pub(super) fn clockid_t<'a, Num: ArgNumber>(i: ClockId) -> ArgReg<'a, Num> {
     pass_usize(i as __kernel_clockid_t as usize)
 }
 
+#[cfg(feature = "time")]
 #[inline]
 pub(super) fn timerfd_clockid_t<'a, Num: ArgNumber>(i: TimerfdClockId) -> ArgReg<'a, Num> {
     pass_usize(i as __kernel_clockid_t as usize)
 }
 
+#[cfg(feature = "net")]
 #[inline]
 pub(super) fn socklen_t<'a, Num: ArgNumber>(i: socklen_t) -> ArgReg<'a, Num> {
     pass_usize(i as usize)
@@ -350,6 +361,7 @@ pub(super) unsafe fn ret(raw: RetReg<R0>) -> io::Result<()> {
 ///
 /// The caller must ensure that this is the return value of a syscall which
 /// doesn't return on success.
+#[cfg(feature = "runtime")]
 #[inline]
 pub(super) unsafe fn ret_error(raw: RetReg<R0>) -> io::Error {
     try_decode_error(raw)

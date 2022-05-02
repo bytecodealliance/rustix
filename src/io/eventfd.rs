@@ -1,7 +1,7 @@
 use crate::imp;
 use crate::io::{self, OwnedFd};
 
-pub use imp::io::EventfdFlags;
+pub use imp::io::types::EventfdFlags;
 
 /// `eventfd(initval, flags)`—Creates a file descriptor for event
 /// notification.

@@ -34,6 +34,7 @@ pub(super) use c::{
     target_os = "l4re",
     target_os = "wasi",
 )))]
+#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
 pub(super) use c::mmap as libc_mmap;
 
 #[cfg(not(any(
@@ -74,9 +75,16 @@ pub(super) const LIBC_RLIM_INFINITY: u64 = !0u64;
     target_os = "emscripten",
     target_os = "l4re",
 ))]
-pub(super) use c::{
-    getrlimit64 as libc_getrlimit, mmap64 as libc_mmap, setrlimit64 as libc_setrlimit,
-};
+pub(super) use c::{getrlimit64 as libc_getrlimit, setrlimit64 as libc_setrlimit};
+
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "emscripten",
+    target_os = "l4re",
+))]
+#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+pub(super) use c::mmap64 as libc_mmap;
 
 // `prlimit64` wasn't supported in glibc until 2.13.
 #[cfg(all(target_os = "linux", target_env = "gnu"))]

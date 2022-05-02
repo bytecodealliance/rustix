@@ -6,8 +6,7 @@ use crate::io;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::process::{Pid, RawNonZeroPid};
 #[cfg(not(target_os = "redox"))]
-use crate::thread::NanosleepRelativeResult;
-use crate::time::Timespec;
+use crate::thread::{NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -19,7 +18,7 @@ use core::mem::MaybeUninit;
     target_os = "redox",
     target_os = "wasi",
 )))]
-use {crate::time::ClockId, core::ptr::null_mut};
+use {crate::thread::ClockId, core::ptr::null_mut};
 
 #[cfg(not(any(
     target_os = "dragonfly",

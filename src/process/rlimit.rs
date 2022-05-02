@@ -2,7 +2,7 @@
 use crate::process::Pid;
 use crate::{imp, io};
 
-pub use crate::imp::process::Resource;
+pub use imp::process::types::Resource;
 
 /// `struct rlimit`—Current and maximum values used in [`getrlimit`],
 /// [`setrlimit`], and [`prlimit`].

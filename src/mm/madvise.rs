@@ -9,7 +9,7 @@
 use crate::{imp, io};
 use core::ffi::c_void;
 
-pub use imp::io::Advice;
+pub use imp::mm::types::Advice;
 
 /// `posix_madvise(addr, len, advice)`—Declares an expected access pattern
 /// for a memory-mapped file.
@@ -31,5 +31,5 @@ pub use imp::io::Advice;
 #[inline]
 #[doc(alias = "posix_madvise")]
 pub unsafe fn madvise(addr: *mut c_void, len: usize, advice: Advice) -> io::Result<()> {
-    imp::io::syscalls::madvise(addr, len, advice)
+    imp::mm::syscalls::madvise(addr, len, advice)
 }

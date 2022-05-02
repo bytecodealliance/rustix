@@ -2,8 +2,7 @@
 //!
 //! # Safety
 //!
-//! See the `rustix::imp::syscalls` module documentation for details.
-
+//! See the `rustix::imp` module documentation for details.
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
@@ -14,11 +13,10 @@ use super::super::conv::{
     slice_mut, socklen_t, zero,
 };
 use super::super::reg::nr;
-use super::{
-    encode_sockaddr_v4, encode_sockaddr_v6, initialize_family_to_unspec, maybe_read_sockaddr_os,
-    read_sockaddr_os, AcceptFlags, AddressFamily, Protocol, RecvFlags, SendFlags, Shutdown,
-    SocketFlags, SocketType,
-};
+use super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr_os};
+use super::send_recv::{RecvFlags, SendFlags};
+use super::types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
+use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 use crate::fd::BorrowedFd;
 use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};

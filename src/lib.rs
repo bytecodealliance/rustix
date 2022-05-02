@@ -5,6 +5,7 @@
 //! With rustix, you can write code like this:
 //!
 //! ```rust
+//! # #[cfg(feature = "net")]
 //! # fn read(sock: std::net::TcpStream, buf: &mut [u8]) -> std::io::Result<()> {
 //! # use rustix::net::RecvFlags;
 //! let nread: usize = rustix::net::recv(&sock, buf, RecvFlags::PEEK)?;
@@ -16,15 +17,25 @@
 //! instead of like this:
 //!
 //! ```rust
+//! # #[cfg(feature = "net")]
 //! # fn read(sock: std::net::TcpStream, buf: &mut [u8]) -> std::io::Result<()> {
 //! # use std::convert::TryInto;
-//! # use rustix::fd::AsRawFd;
+//! # #[cfg(unix)]
+//! # use std::os::unix::io::AsRawFd;
+//! # #[cfg(target_os = "wasi")]
+//! # use std::os::wasi::io::AsRawFd;
 //! # #[cfg(windows)]
 //! # use windows_sys::Win32::Networking::WinSock as libc;
+//! # #[cfg(windows)]
+//! # use std::os::windows::io::AsRawSocket;
 //! # const MSG_PEEK: i32 = libc::MSG_PEEK;
 //! let nread: usize = unsafe {
+//!     #[cfg(any(unix, target_os = "wasi"))]
+//!     let raw = sock.as_raw_fd();
+//!     #[cfg(windows)]
+//!     let raw = sock.as_raw_socket();
 //!     match libc::recv(
-//!         sock.as_raw_fd() as _,
+//!         raw as _,
 //!         buf.as_mut_ptr().cast(),
 //!         buf.len().try_into().unwrap_or(i32::MAX as _),
 //!         MSG_PEEK,
@@ -109,9 +120,24 @@
     feature(core_intrinsics)
 )]
 #![cfg_attr(asm_experimental_arch, feature(asm_experimental_arch))]
+#![cfg_attr(not(feature = "all-apis"), allow(dead_code))]
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
+
+/// Convert a `&T` into a `*const T` without using an `as`.
+#[inline]
+#[allow(dead_code)]
+const fn as_ptr<T>(t: &T) -> *const T {
+    t
+}
+
+/// Convert a `&mut T` into a `*mut T` without using an `as`.
+#[inline]
+#[allow(dead_code)]
+fn as_mut_ptr<T>(t: &mut T) -> *mut T {
+    t
+}
 
 /// Export `*Fd` types and traits that used in rustix's public API.
 ///
@@ -145,43 +171,63 @@ mod imp;
 #[cfg(not(windows))]
 pub mod ffi;
 #[cfg(not(windows))]
+#[cfg(feature = "fs")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "fs")))]
 pub mod fs;
 pub mod io;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[cfg(feature = "io_uring")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "io_uring")))]
 pub mod io_uring;
+#[cfg(not(windows))]
+#[cfg(feature = "mm")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "mm")))]
+pub mod mm;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))] // WASI doesn't support `net` yet.
+#[cfg(feature = "net")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "net")))]
 pub mod net;
 #[cfg(not(windows))]
+#[cfg(any(feature = "fs", feature = "net"))]
+#[cfg_attr(doc_cfg, doc(cfg(any(feature = "fs", feature = "net"))))]
 pub mod path;
 #[cfg(not(windows))]
+#[cfg(feature = "process")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "process")))]
 pub mod process;
 #[cfg(not(windows))]
+#[cfg(feature = "rand")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "rand")))]
 pub mod rand;
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[cfg(feature = "termios")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "termios")))]
 pub mod termios;
 #[cfg(not(windows))]
+#[cfg(feature = "thread")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "thread")))]
 pub mod thread;
 #[cfg(not(windows))]
+#[cfg(feature = "time")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "time")))]
 pub mod time;
 
 #[cfg(not(windows))]
 #[doc(hidden)]
+#[cfg(feature = "runtime")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "runtime")))]
 pub mod runtime;
 
-/// Convert a `&T` into a `*const T` without using an `as`.
-#[inline]
-#[allow(dead_code)]
-const fn as_ptr<T>(t: &T) -> *const T {
-    t
-}
+// We have some internal interdependencies in the API features, so for now,
+// for API features that aren't enabled, declare them as `pub(crate)` so
+// that they're not public, but still available for internal use.
 
-/// Convert a `&mut T` into a `*mut T` without using an `as`.
-#[inline]
-#[allow(dead_code)]
-fn as_mut_ptr<T>(t: &mut T) -> *mut T {
-    t
-}
+#[cfg(not(windows))]
+#[cfg(not(feature = "fs"))]
+pub(crate) mod fs;
+#[cfg(not(windows))]
+#[cfg(not(any(feature = "fs", feature = "net")))]
+pub(crate) mod path;
+#[cfg(not(windows))]
+#[cfg(not(feature = "process"))]
+pub(crate) mod process;

@@ -6,11 +6,15 @@
 //! [`cwd`]: crate::fs::cwd
 
 use crate::ffi::{ZStr, ZString};
+#[cfg(not(target_os = "illumos"))]
+use crate::fs::Access;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use crate::fs::CloneFlags;
+#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
+use crate::fs::FileType;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::RenameFlags;
-use crate::fs::{Stat, Timestamps};
+use crate::fs::{AtFlags, Mode, OFlags, Stat, Timestamps};
 use crate::io::{self, OwnedFd};
 use crate::path::SMALL_PATH_BUFFER_SIZE;
 #[cfg(not(target_os = "wasi"))]
@@ -18,26 +22,21 @@ use crate::process::{Gid, Uid};
 use crate::{imp, path};
 use alloc::vec::Vec;
 use imp::fd::{AsFd, BorrowedFd};
-#[cfg(not(target_os = "illumos"))]
-use imp::fs::Access;
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
-use imp::fs::FileType;
-use imp::fs::{AtFlags, Mode, OFlags};
-use imp::time::Nsecs;
+use imp::time::types::Nsecs;
 
-pub use imp::fs::{Dev, RawMode};
+pub use imp::fs::types::{Dev, RawMode};
 
 /// `UTIME_NOW` for use with [`utimensat`].
 ///
 /// [`utimensat`]: crate::fs::utimensat
 #[cfg(not(target_os = "redox"))]
-pub const UTIME_NOW: Nsecs = imp::fs::UTIME_NOW as Nsecs;
+pub const UTIME_NOW: Nsecs = imp::fs::types::UTIME_NOW as Nsecs;
 
 /// `UTIME_OMIT` for use with [`utimensat`].
 ///
 /// [`utimensat`]: crate::fs::utimensat
 #[cfg(not(target_os = "redox"))]
-pub const UTIME_OMIT: Nsecs = imp::fs::UTIME_OMIT as Nsecs;
+pub const UTIME_OMIT: Nsecs = imp::fs::types::UTIME_OMIT as Nsecs;
 
 /// `openat(dirfd, path, oflags, mode)`—Opens a file.
 ///

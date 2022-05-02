@@ -4,8 +4,10 @@ use crate::net::{SocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use imp::fd::{AsFd, BorrowedFd};
 
 #[cfg(unix)]
-pub use imp::net::SocketAddrUnix;
-pub use imp::net::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
+pub use imp::net::addr::SocketAddrUnix;
+pub use imp::net::types::{
+    AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType,
+};
 
 impl Default for Protocol {
     #[inline]

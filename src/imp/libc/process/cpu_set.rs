@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 
 use super::super::c;
-use super::{RawCpuSet, CPU_SETSIZE};
+use super::types::{RawCpuSet, CPU_SETSIZE};
 
 #[inline]
 pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) {

@@ -5,7 +5,7 @@ use crate::io::{self, OwnedFd};
 use imp::fd::AsFd;
 
 #[cfg(not(target_os = "wasi"))]
-pub use imp::io::DupFlags;
+pub use imp::io::types::DupFlags;
 
 /// `dup(fd)`—Creates a new `OwnedFd` instance that shares the same
 /// underlying [file description] as `fd`.

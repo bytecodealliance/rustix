@@ -9,7 +9,7 @@
 use crate::process::Cpuid;
 use crate::{imp, io};
 
-pub use imp::process::MembarrierCommand;
+pub use imp::process::types::MembarrierCommand;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags::bitflags! {

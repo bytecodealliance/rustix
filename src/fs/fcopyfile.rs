@@ -1,9 +1,9 @@
+use crate::fs::CopyfileFlags;
 use crate::{imp, io};
 use imp::fd::AsFd;
-use imp::fs::CopyfileFlags;
 
 /// `copyfile_state_t`
-pub use imp::fs::copyfile_state_t;
+pub use imp::fs::types::copyfile_state_t;
 
 /// `fcopyfile(from, to, state, flags)`
 ///

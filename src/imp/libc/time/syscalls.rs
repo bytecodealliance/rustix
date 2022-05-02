@@ -2,12 +2,13 @@
 
 use super::super::c;
 use super::super::conv::ret;
-use super::Timespec;
+use super::types::Timespec;
 #[cfg(not(target_os = "wasi"))]
-use super::{ClockId, DynamicClockId};
+use super::types::{ClockId, DynamicClockId};
 use crate::io;
 use core::mem::MaybeUninit;
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(feature = "time")]
 use {
     super::super::conv::{borrowed_fd, ret_owned_fd},
     crate::fd::BorrowedFd,
@@ -82,11 +83,13 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
 }
 
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(feature = "time")]
 pub(crate) fn timerfd_create(id: TimerfdClockId, flags: TimerfdFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(libc::timerfd_create(id as c::clockid_t, flags.bits())) }
 }
 
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(feature = "time")]
 pub(crate) fn timerfd_settime(
     fd: BorrowedFd<'_>,
     flags: TimerfdTimerFlags,
@@ -105,6 +108,7 @@ pub(crate) fn timerfd_settime(
 }
 
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(feature = "time")]
 pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
     let mut result = MaybeUninit::<Itimerspec>::uninit();
     unsafe {

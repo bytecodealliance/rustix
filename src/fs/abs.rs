@@ -6,14 +6,14 @@
     target_os = "redox",
     target_os = "wasi"
 )))]
-use crate::{imp, io, path};
+use crate::fs::StatFs;
 #[cfg(not(any(
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
     target_os = "wasi"
 )))]
-use imp::fs::StatFs;
+use crate::{imp, io, path};
 
 /// `statfs`—Queries filesystem metadata.
 ///

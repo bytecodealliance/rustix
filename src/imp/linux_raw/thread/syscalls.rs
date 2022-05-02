@@ -2,8 +2,7 @@
 //!
 //! # Safety
 //!
-//! See the `rustix::imp::syscalls` module documentation for details.
-
+//! See the `rustix::imp` module documentation for details.
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
@@ -18,8 +17,7 @@ use super::super::conv::{
 use super::super::reg::nr;
 use crate::io;
 use crate::process::{Pid, RawNonZeroPid};
-use crate::thread::{FutexFlags, FutexOperation, NanosleepRelativeResult};
-use crate::time::{ClockId, Timespec};
+use crate::thread::{ClockId, FutexFlags, FutexOperation, NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
 use linux_raw_sys::general::{
     __NR_clock_nanosleep, __NR_futex, __NR_gettid, __NR_nanosleep, __kernel_pid_t,

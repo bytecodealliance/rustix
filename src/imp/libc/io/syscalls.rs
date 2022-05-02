@@ -4,30 +4,25 @@ use super::super::c;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::syscall_ret_owned_fd;
 use super::super::conv::{
-    borrowed_fd, no_fd, ret, ret_c_int, ret_discarded_fd, ret_owned_fd, ret_ssize_t,
+    borrowed_fd, ret, ret_c_int, ret_discarded_fd, ret_owned_fd, ret_ssize_t,
 };
-#[cfg(not(target_os = "wasi"))]
-use super::super::offset::libc_mmap;
 use super::super::offset::{libc_pread, libc_pwrite};
 #[cfg(not(target_os = "redox"))]
 use super::super::offset::{libc_preadv, libc_pwritev};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::super::offset::{libc_preadv2, libc_pwritev2};
 use crate::fd::{AsFd, BorrowedFd, RawFd};
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-use crate::io::Advice;
-#[cfg(target_os = "linux")]
-use crate::io::MremapFlags;
+#[cfg(not(target_os = "wasi"))]
+use crate::io::DupFlags;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 use crate::io::PipeFlags;
 use crate::io::{self, IoSlice, IoSliceMut, OwnedFd, PollFd};
-#[cfg(not(target_os = "wasi"))]
-use crate::io::{DupFlags, MapFlags, MprotectFlags, MsyncFlags, ProtFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::io::{EventfdFlags, MlockFlags, ReadWriteFlags, UserfaultfdFlags};
+use crate::io::{EventfdFlags, ReadWriteFlags};
 use core::cmp::min;
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
+#[cfg(feature = "net")]
 use errno::errno;
 
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
@@ -270,52 +265,6 @@ pub(crate) unsafe fn close(raw_fd: RawFd) {
     let _ = c::close(raw_fd as c::c_int);
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: Advice) -> io::Result<()> {
-    // On Linux platforms, `MADV_DONTNEED` has the same value as
-    // `POSIX_MADV_DONTNEED` but different behavior. We remap it to a different
-    // value, and check for it here.
-    #[cfg(target_os = "linux")]
-    if let Advice::LinuxDontNeed = advice {
-        return unsafe { ret(c::madvise(addr, len, c::MADV_DONTNEED)) };
-    }
-
-    #[cfg(not(target_os = "android"))]
-    {
-        let err = unsafe { c::posix_madvise(addr, len, advice as c::c_int) };
-
-        // `posix_madvise` returns its error status rather than using `errno`.
-        if err == 0 {
-            Ok(())
-        } else {
-            Err(io::Error(err))
-        }
-    }
-
-    #[cfg(target_os = "android")]
-    {
-        if let Advice::DontNeed = advice {
-            // Do nothing. Linux's `MADV_DONTNEED` isn't the same as
-            // `POSIX_MADV_DONTNEED`, so just discard `MADV_DONTNEED`.
-            Ok(())
-        } else {
-            unsafe { ret(c::madvise(addr, len, advice as c::c_int)) }
-        }
-    }
-}
-
-#[cfg(not(target_os = "wasi"))]
-pub(crate) unsafe fn msync(addr: *mut c::c_void, len: usize, flags: MsyncFlags) -> io::Result<()> {
-    let err = c::msync(addr, len, flags.bits());
-
-    // `msync` returns its error status rather than using `errno`.
-    if err == 0 {
-        Ok(())
-    } else {
-        Err(io::Error(err))
-    }
-}
-
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
     unsafe { syscall_ret_owned_fd(c::syscall(c::SYS_eventfd2, initval, flags.bits())) }
@@ -365,6 +314,7 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(feature = "net")]
 pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
     let (mut read, mut write) = crate::fs::fd::_is_file_read_write(fd)?;
     let mut not_socket = false;
@@ -414,6 +364,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
 }
 
 #[cfg(target_os = "wasi")]
+#[cfg(feature = "net")]
 pub(crate) fn is_read_write(_fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
     todo!("Implement is_read_write for WASI in terms of fd_fdstat_get");
 }
@@ -479,162 +430,6 @@ pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCNXCL as _)) }
 }
 
-/// # Safety
-///
-/// `mmap` is primarily unsafe due to the `addr` parameter, as anything working
-/// with memory pointed to by raw pointers is unsafe.
-#[cfg(not(target_os = "wasi"))]
-pub(crate) unsafe fn mmap(
-    ptr: *mut c::c_void,
-    len: usize,
-    prot: ProtFlags,
-    flags: MapFlags,
-    fd: BorrowedFd<'_>,
-    offset: u64,
-) -> io::Result<*mut c::c_void> {
-    let res = libc_mmap(
-        ptr,
-        len,
-        prot.bits(),
-        flags.bits(),
-        borrowed_fd(fd),
-        offset as i64,
-    );
-    if res == c::MAP_FAILED {
-        Err(io::Error::last_os_error())
-    } else {
-        Ok(res)
-    }
-}
-
-/// # Safety
-///
-/// `mmap` is primarily unsafe due to the `addr` parameter, as anything working
-/// with memory pointed to by raw pointers is unsafe.
-#[cfg(not(target_os = "wasi"))]
-pub(crate) unsafe fn mmap_anonymous(
-    ptr: *mut c::c_void,
-    len: usize,
-    prot: ProtFlags,
-    flags: MapFlags,
-) -> io::Result<*mut c::c_void> {
-    let res = libc_mmap(
-        ptr,
-        len,
-        prot.bits(),
-        flags.bits() | c::MAP_ANONYMOUS,
-        no_fd(),
-        0,
-    );
-    if res == c::MAP_FAILED {
-        Err(io::Error::last_os_error())
-    } else {
-        Ok(res)
-    }
-}
-
-#[cfg(not(target_os = "wasi"))]
-pub(crate) unsafe fn mprotect(
-    ptr: *mut c::c_void,
-    len: usize,
-    flags: MprotectFlags,
-) -> io::Result<()> {
-    ret(c::mprotect(ptr, len, flags.bits()))
-}
-
-#[cfg(not(target_os = "wasi"))]
-pub(crate) unsafe fn munmap(ptr: *mut c::c_void, len: usize) -> io::Result<()> {
-    ret(c::munmap(ptr, len))
-}
-
-/// # Safety
-///
-/// `mremap` is primarily unsafe due to the `old_address` parameter, as
-/// anything working with memory pointed to by raw pointers is unsafe.
-#[cfg(target_os = "linux")]
-pub(crate) unsafe fn mremap(
-    old_address: *mut c::c_void,
-    old_size: usize,
-    new_size: usize,
-    flags: MremapFlags,
-) -> io::Result<*mut c::c_void> {
-    let res = c::mremap(old_address, old_size, new_size, flags.bits());
-    if res == c::MAP_FAILED {
-        Err(io::Error::last_os_error())
-    } else {
-        Ok(res)
-    }
-}
-
-/// # Safety
-///
-/// `mremap_fixed` is primarily unsafe due to the `old_address` and
-/// `new_address` parameters, as anything working with memory pointed to by raw
-/// pointers is unsafe.
-#[cfg(target_os = "linux")]
-pub(crate) unsafe fn mremap_fixed(
-    old_address: *mut c::c_void,
-    old_size: usize,
-    new_size: usize,
-    flags: MremapFlags,
-    new_address: *mut c::c_void,
-) -> io::Result<*mut c::c_void> {
-    let res = c::mremap(
-        old_address,
-        old_size,
-        new_size,
-        flags.bits() | c::MAP_FIXED,
-        new_address,
-    );
-    if res == c::MAP_FAILED {
-        Err(io::Error::last_os_error())
-    } else {
-        Ok(res)
-    }
-}
-
-/// # Safety
-///
-/// `mlock` operates on raw pointers and may round out to the nearest page
-/// boundaries.
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-pub(crate) unsafe fn mlock(addr: *mut c::c_void, length: usize) -> io::Result<()> {
-    ret(c::mlock(addr, length))
-}
-
-/// # Safety
-///
-/// `mlock_with` operates on raw pointers and may round out to the nearest page
-/// boundaries.
-#[cfg(any(target_os = "android", target_os = "linux"))]
-#[inline]
-pub(crate) unsafe fn mlock_with(
-    addr: *mut c::c_void,
-    length: usize,
-    flags: MlockFlags,
-) -> io::Result<()> {
-    weak_or_syscall! {
-        fn mlock2(
-            addr: *const c::c_void,
-            len: c::size_t,
-            flags: c::c_int
-        ) via SYS_mlock2 -> c::c_int
-    }
-
-    ret(mlock2(addr, length, flags.bits()))
-}
-
-/// # Safety
-///
-/// `munlock` operates on raw pointers and may round out to the nearest page
-/// boundaries.
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-pub(crate) unsafe fn munlock(addr: *mut c::c_void, length: usize) -> io::Result<()> {
-    ret(c::munlock(addr, length))
-}
-
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
@@ -664,9 +459,4 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
 
     ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast(), nfds, timeout) })
         .map(|nready| nready as usize)
-}
-
-#[cfg(any(target_os = "android", target_os = "linux"))]
-pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
-    syscall_ret_owned_fd(c::syscall(c::SYS_userfaultfd, flags.bits()))
 }

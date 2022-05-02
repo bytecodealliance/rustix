@@ -1,26 +1,46 @@
 //! The linux_raw backend.
 //!
 //! This makes Linux syscalls directly, without going through libc.
+//!
+//! # Safety
+//!
+//! These files performs raw system calls, and sometimes passes them
+//! uninitialized memory buffers. The signatures in this file are currently
+//! manually maintained and must correspond with the signatures of the actual
+//! Linux syscalls.
+//!
+//! Some of this could be auto-generated from the Linux header file
+//! <linux/syscalls.h>, but we often need more information than it provides,
+//! such as which pointers are array slices, out parameters, or in-out
+//! parameters, which integers are owned or borrowed file descriptors, etc.
 
 mod arch;
 mod conv;
 mod elf;
 mod reg;
+#[cfg(any(feature = "time", target_arch = "x86"))]
 mod vdso;
+#[cfg(any(feature = "time", target_arch = "x86"))]
 mod vdso_wrappers;
 
+// #[cfg(feature = "fs")] // TODO: Enable once `OwnedFd` moves out of the tree.
 pub(crate) mod fs;
 pub(crate) mod io;
 #[cfg(feature = "io_uring")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "io_uring")))]
 pub(crate) mod io_uring;
+#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+pub(crate) mod mm;
+#[cfg(feature = "net")]
 pub(crate) mod net;
 pub(crate) mod process;
+#[cfg(feature = "rand")]
 pub(crate) mod rand;
-pub(crate) mod syscalls;
+#[cfg(feature = "runtime")]
+pub(crate) mod runtime;
 #[cfg(feature = "termios")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "termios")))]
 pub(crate) mod termios;
+#[cfg(feature = "thread")]
 pub(crate) mod thread;
 pub(crate) mod time;
 

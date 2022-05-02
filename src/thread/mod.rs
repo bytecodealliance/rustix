@@ -14,7 +14,7 @@ pub use futex::{futex, FutexFlags, FutexOperation};
 pub use id::gettid;
 
 #[cfg(not(target_os = "redox"))]
-pub use clock::{nanosleep, NanosleepRelativeResult};
+pub use clock::{nanosleep, NanosleepRelativeResult, Timespec};
 
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -26,4 +26,4 @@ pub use clock::{nanosleep, NanosleepRelativeResult};
     target_os = "redox",
     target_os = "wasi",
 )))]
-pub use clock::{clock_nanosleep_absolute, clock_nanosleep_relative};
+pub use clock::{clock_nanosleep_absolute, clock_nanosleep_relative, ClockId};
