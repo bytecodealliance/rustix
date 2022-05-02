@@ -2,13 +2,21 @@ use super::super::c;
 use super::super::conv::owned_fd;
 #[cfg(not(target_os = "illumos"))]
 use super::FileType;
-#[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
-use crate::fd::IntoFd;
-use crate::fd::{AsFd, BorrowedFd, RawFd};
+use crate::fd::{AsFd, BorrowedFd};
 use crate::ffi::ZStr;
 #[cfg(target_os = "wasi")]
 use crate::ffi::ZString;
-use crate::io::{self, OwnedFd};
+use crate::fs::{fcntl_getfl, fstat, openat, Mode, OFlags, Stat};
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "netbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))] // not implemented in libc for netbsd yet
+use crate::fs::{fstatfs, StatFs};
+use crate::io;
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+use crate::process::fchdir;
 #[cfg(target_os = "wasi")]
 use alloc::borrow::ToOwned;
 #[cfg(not(any(
@@ -43,29 +51,29 @@ use errno::{errno, set_errno, Errno};
 pub struct Dir(NonNull<c::DIR>);
 
 impl Dir {
-    /// Construct a `Dir`, assuming ownership of the file descriptor.
-    #[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
+    /// Construct a `Dir` that reads entries from the given directory
+    /// file descriptor.
     #[inline]
-    pub fn from<F: IntoFd>(fd: F) -> io::Result<Self> {
-        let fd = fd.into_fd();
-        Self::_from(fd.into())
+    pub fn read_from<Fd: AsFd>(fd: Fd) -> io::Result<Self> {
+        Self::_read_from(fd.as_fd())
     }
 
-    /// Construct a `Dir`, assuming ownership of the file descriptor.
-    #[cfg(any(io_lifetimes_use_std, not(feature = "std")))]
     #[inline]
-    pub fn from<F: Into<crate::fd::OwnedFd>>(fd: F) -> io::Result<Self> {
-        let fd: crate::fd::OwnedFd = fd.into();
-        let fd: OwnedFd = fd.into();
-        Self::_from(fd)
-    }
+    fn _read_from(fd: BorrowedFd<'_>) -> io::Result<Self> {
+        // Given an arbitrary `OwnedFd`, it's impossible to know whether the
+        // user holds a `dup`'d copy which could continue to modify the
+        // file description state, which would cause Undefined Behavior after
+        // our call to `fdopendir`. To prevent this, we obtain an independent
+        // `OwnedFd`.
+        let flags = fcntl_getfl(&fd)?;
+        let fd_for_dir = openat(&fd, zstr!("."), flags | OFlags::CLOEXEC, Mode::empty())?;
 
-    fn _from(fd: OwnedFd) -> io::Result<Self> {
-        let raw = owned_fd(fd);
+        let raw = owned_fd(fd_for_dir);
         unsafe {
-            let d = c::fdopendir(raw);
-            if let Some(d) = NonNull::new(d) {
-                Ok(Self(d))
+            let libc_dir = c::fdopendir(raw);
+
+            if let Some(libc_dir) = NonNull::new(libc_dir) {
+                Ok(Self(libc_dir))
             } else {
                 let e = io::Error::last_os_error();
                 let _ = c::close(raw);
@@ -111,6 +119,31 @@ impl Dir {
                 Some(Ok(result))
             }
         }
+    }
+
+    /// `fstat(self)`
+    #[inline]
+    pub fn stat(&self) -> io::Result<Stat> {
+        fstat(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr())) })
+    }
+
+    /// `fstatfs(self)`
+    #[cfg(not(any(
+        target_os = "illumos",
+        target_os = "netbsd",
+        target_os = "redox",
+        target_os = "wasi"
+    )))] // not implemented in libc for netbsd yet
+    #[inline]
+    pub fn statfs(&self) -> io::Result<StatFs> {
+        fstatfs(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr())) })
+    }
+
+    /// `fchdir(self)`
+    #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+    #[inline]
+    pub fn chdir(&self) -> io::Result<()> {
+        fchdir(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr())) })
     }
 }
 
@@ -226,13 +259,6 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
 /// need `Sync`, which is effectively what'd need to do to implement `Sync`
 /// ourselves.
 unsafe impl Send for Dir {}
-
-impl AsFd for Dir {
-    #[inline]
-    fn as_fd(&self) -> BorrowedFd<'_> {
-        unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr()) as RawFd) }
-    }
-}
 
 impl Drop for Dir {
     #[inline]

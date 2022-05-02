@@ -428,34 +428,36 @@ fn open_and_check_file(dir: BorrowedFd, dir_stat: &Stat, name: &ZStr) -> io::Res
     let file = openat(&dir, name, oflags, Mode::empty()).map_err(|_err| io::Error::NOTSUP)?;
     let file_stat = fstat(&file)?;
 
-    // Open a copy of the `dir` handle so that we can read from it
-    // without modifying the current position of the original handle.
-    let dot = openat(&dir, zstr!("."), oflags | OFlags::DIRECTORY, Mode::empty())
-        .map_err(|_err| io::Error::NOTSUP)?;
-
-    // Confirm that we got the same inode.
-    let dot_stat = fstat(&dot).map_err(|_err| io::Error::NOTSUP)?;
-    if (dot_stat.st_dev, dot_stat.st_ino) != (dir_stat.st_dev, dir_stat.st_ino) {
-        return Err(io::Error::NOTSUP);
-    }
-
     // `is_mountpoint` only works on directory mount points, not file mount
     // points. To detect file mount points, scan the parent directory to see
     // if we can find a regular file with an inode and name that matches the
     // file we just opened. If we can't find it, there could be a file bind
     // mount on top of the file we want.
     //
+    // As we scan, we also check for ".", to make sure it's the same directory
+    // as our original directory, to detect mount points, since
+    // `Dir::read_from` reopens ".".
+    //
     // TODO: With Linux 5.8 we might be able to use `statx` and
     // `STATX_ATTR_MOUNT_ROOT` to detect mountpoints directly instead of doing
     // this scanning.
-    let dir = Dir::from(dot).map_err(|_err| io::Error::NOTSUP)?;
+    let dir = Dir::read_from(dir).map_err(|_err| io::Error::NOTSUP)?;
+
+    // Confirm that we got the same inode.
+    let dot_stat = dir.stat().map_err(|_err| io::Error::NOTSUP)?;
+    if (dot_stat.st_dev, dot_stat.st_ino) != (dir_stat.st_dev, dir_stat.st_ino) {
+        return Err(io::Error::NOTSUP);
+    }
+
+    let mut found_file = false;
+    let mut found_dot = false;
     for entry in dir {
         let entry = entry.map_err(|_err| io::Error::NOTSUP)?;
         if entry.ino() == file_stat.st_ino
             && entry.file_type() == FileType::RegularFile
             && entry.file_name() == name
         {
-            // Ok, we found it. Proceed to check the file handle and succeed.
+            // We found the file. Proceed to check the file handle.
             let _ = check_proc_entry_with_stat(
                 Kind::File,
                 file.as_fd(),
@@ -465,9 +467,19 @@ fn open_and_check_file(dir: BorrowedFd, dir_stat: &Stat, name: &ZStr) -> io::Res
                 dir_stat.st_gid,
             )?;
 
-            return Ok(file);
+            found_file = true;
+        } else if entry.ino() == dir_stat.st_ino
+            && entry.file_type() == FileType::Directory
+            && entry.file_name() == zstr!(".")
+        {
+            // We found ".", and it's the right ".".
+            found_dot = true;
         }
     }
 
-    Err(io::Error::NOTSUP)
+    if found_file && found_dot {
+        Ok(file)
+    } else {
+        Err(io::Error::NOTSUP)
+    }
 }

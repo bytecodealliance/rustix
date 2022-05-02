@@ -1,10 +1,10 @@
 use super::FileType;
 use crate::as_ptr;
-#[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
-use crate::fd::IntoFd;
 use crate::fd::{AsFd, BorrowedFd};
 use crate::ffi::{ZStr, ZString};
+use crate::fs::{fcntl_getfl, fstat, fstatfs, openat, Mode, OFlags, Stat, StatFs};
 use crate::io::{self, OwnedFd};
+use crate::process::fchdir;
 use alloc::borrow::ToOwned;
 use alloc::vec::Vec;
 use core::fmt;
@@ -13,34 +13,29 @@ use linux_raw_sys::general::linux_dirent64;
 
 /// `DIR*`
 pub struct Dir {
+    /// The `OwnedFd` that we read directory entries from.
     fd: OwnedFd,
+
     buf: Vec<u8>,
     pos: usize,
     next: Option<u64>,
 }
 
 impl Dir {
-    /// Construct a `Dir`, assuming ownership of the file descriptor.
-    #[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
+    /// Construct a `Dir` that reads entries from the given directory
+    /// file descriptor.
     #[inline]
-    pub fn from<F: IntoFd>(fd: F) -> io::Result<Self> {
-        let fd = fd.into_fd();
-        Self::_from(fd.into())
-    }
-
-    /// Construct a `Dir`, assuming ownership of the file descriptor.
-    #[cfg(any(io_lifetimes_use_std, not(feature = "std")))]
-    #[inline]
-    pub fn from<F: Into<crate::fd::OwnedFd>>(fd: F) -> io::Result<Self> {
-        let fd: crate::fd::OwnedFd = fd.into();
-        let fd: OwnedFd = fd.into();
-        Self::_from(fd)
+    pub fn read_from<Fd: AsFd>(fd: Fd) -> io::Result<Self> {
+        Self::_read_from(fd.as_fd())
     }
 
     #[inline]
-    fn _from(fd: OwnedFd) -> io::Result<Self> {
+    fn _read_from(fd: BorrowedFd<'_>) -> io::Result<Self> {
+        let flags = fcntl_getfl(fd)?;
+        let fd_for_dir = openat(fd, zstr!("."), flags | OFlags::CLOEXEC, Mode::empty())?;
+
         Ok(Self {
-            fd,
+            fd: fd_for_dir,
             buf: Vec::new(),
             pos: 0,
             next: None,
@@ -159,12 +154,23 @@ impl Dir {
             Some(Ok(()))
         }
     }
-}
 
-impl AsFd for Dir {
+    /// `fstat(self)`
     #[inline]
-    fn as_fd(&self) -> BorrowedFd<'_> {
-        self.fd.as_fd()
+    pub fn stat(&self) -> io::Result<Stat> {
+        fstat(&self.fd)
+    }
+
+    /// `fstatfs(self)`
+    #[inline]
+    pub fn statfs(&self) -> io::Result<StatFs> {
+        fstatfs(&self.fd)
+    }
+
+    /// `fchdir(self)`
+    #[inline]
+    pub fn chdir(&self) -> io::Result<()> {
+        fchdir(&self.fd)
     }
 }
 
