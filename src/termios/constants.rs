@@ -594,8 +594,8 @@ pub use imp::termios::types::{
 /// Translate from a `Speed` code to a speed value `u32`.
 ///
 /// ```rust
-/// let speed = speed_value(rustix::termios::B57600);
-/// assert_eq!(speed, 57600);
+/// let speed = rustix::termios::speed_value(rustix::termios::B57600);
+/// assert_eq!(speed, Some(57600));
 /// ```
 pub fn speed_value(speed: imp::termios::types::Speed) -> Option<u32> {
     match speed {
