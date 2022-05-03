@@ -511,7 +511,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
 fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     unsafe {
-        let mut result = MaybeUninit::<linux_stat>::uninit();
+        let mut result = MaybeUninit::<linux_stat64>::uninit();
         ret(syscall2(
             nr(__NR_fstat64),
             borrowed_fd(fd),
@@ -557,7 +557,7 @@ pub(crate) fn stat(filename: &ZStr) -> io::Result<Stat> {
 #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
 fn stat_old(filename: &ZStr) -> io::Result<Stat> {
     unsafe {
-        let mut result = MaybeUninit::<linux_stat>::uninit();
+        let mut result = MaybeUninit::<linux_stat64>::uninit();
         ret(syscall4(
             nr(__NR_fstatat64),
             c_int(AT_FDCWD),
@@ -600,7 +600,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, filename: &ZStr, flags: AtFlags) -> 
 #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
 fn statat_old(dirfd: BorrowedFd<'_>, filename: &ZStr, flags: AtFlags) -> io::Result<Stat> {
     unsafe {
-        let mut result = MaybeUninit::<linux_stat>::uninit();
+        let mut result = MaybeUninit::<linux_stat64>::uninit();
         ret(syscall4(
             nr(__NR_fstatat64),
             borrowed_fd(dirfd),
@@ -648,7 +648,7 @@ pub(crate) fn lstat(filename: &ZStr) -> io::Result<Stat> {
 #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
 fn lstat_old(filename: &ZStr) -> io::Result<Stat> {
     unsafe {
-        let mut result = MaybeUninit::<linux_stat>::uninit();
+        let mut result = MaybeUninit::<linux_stat64>::uninit();
         ret(syscall4(
             nr(__NR_fstatat64),
             c_int(AT_FDCWD),
