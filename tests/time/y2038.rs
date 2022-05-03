@@ -56,9 +56,10 @@ fn test_y2038_with_timerfd() {
     let _old: Itimerspec = match timerfd_settime(&fd, TimerfdTimerFlags::ABSTIME, &set) {
         Ok(i) => i,
 
-        // On mips and mips64 platforms, accept `EOVERFLOW`, meaning that y2038
-        // support in `timerfd` APIs is not available on this platform.
-        #[cfg(any(target_arch = "mips", target_arch = "mips64"))]
+        // On 32-bit and mips64 platforms, accept `EOVERFLOW`, meaning that
+        // y2038 support in `timerfd` APIs is not available on this platform
+        // or this version of the platform.
+        #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
         Err(rustix::io::Error::OVERFLOW) => return,
 
         Err(e) => panic!("unexpected error: {:?}", e),
