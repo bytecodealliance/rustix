@@ -29,7 +29,18 @@ fn test_y2038_with_utimensat() {
         },
     };
     let _ = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
-    let _ = utimensat(&dir, "foo", &timestamps, AtFlags::empty()).unwrap();
+
+    match utimensat(&dir, "foo", &timestamps, AtFlags::empty()) {
+        Ok(()) => (),
+
+        // On 32-bit platforms, accept `EOVERFLOW`, meaning that y2038 support
+        // is not available in this version of the OS.
+        #[cfg(target_pointer_width = "32")]
+        Err(rustix::io::Error::OVERFLOW) => return,
+
+        Err(e) => panic!("unexpected error: {:?}", e),
+    }
+
     let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
 
     assert_eq!(
@@ -72,7 +83,18 @@ fn test_y2038_with_futimens() {
         },
     };
     let file = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
-    let _ = futimens(&file, &timestamps).unwrap();
+
+    match futimens(&file, &timestamps) {
+        Ok(()) => (),
+
+        // On 32-bit platforms, accept `EOVERFLOW`, meaning that y2038 support
+        // is not available in this version of the OS.
+        #[cfg(target_pointer_width = "32")]
+        Err(rustix::io::Error::OVERFLOW) => return,
+
+        Err(e) => panic!("unexpected error: {:?}", e),
+    }
+
     let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
 
     assert_eq!(TryInto::<u64>::try_into(stat.st_mtime).unwrap(), m_sec);

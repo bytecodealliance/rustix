@@ -452,7 +452,8 @@ pub(crate) fn utimensat(
         }
     }
 
-    // Main version: libc is y2038 safe and has `utimensat`.
+    // Main version: libc is y2038 safe and has `utimensat`. Or, the platform
+    // is not y2038 safe and there's nothing practical we can do.
     #[cfg(not(any(
         target_os = "ios",
         target_os = "macos",
@@ -982,7 +983,8 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
         }
     }
 
-    // Main version: libc is y2038 safe and has `futimens`.
+    // Main version: libc is y2038 safe and has `futimens`. Or, the platform
+    // is not y2038 safe and there's nothing practical we can do.
     #[cfg(not(any(
         target_os = "ios",
         target_os = "macos",
