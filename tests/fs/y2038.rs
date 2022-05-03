@@ -7,7 +7,9 @@
 #[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
 #[cfg(not(all(target_os = "emscripten", target_pointer_width = "32")))]
 fn test_y2038_with_utimensat() {
-    use rustix::fs::{cwd, openat, statat, utimensat, AtFlags, Mode, OFlags, Timespec, Timestamps};
+    use rustix::fs::{
+        cwd, fstat, openat, statat, utimensat, AtFlags, Mode, OFlags, Timespec, Timestamps,
+    };
     use std::convert::TryInto;
 
     let tmp = tempfile::tempdir().unwrap();
@@ -28,7 +30,7 @@ fn test_y2038_with_utimensat() {
             tv_nsec: a_nsec as _,
         },
     };
-    let _ = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
+    let _ = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::RUSR).unwrap();
 
     match utimensat(&dir, "foo", &timestamps, AtFlags::empty()) {
         Ok(()) => (),
@@ -41,6 +43,7 @@ fn test_y2038_with_utimensat() {
         Err(e) => panic!("unexpected error: {:?}", e),
     }
 
+    // Use `statat` to read back the timestamp.
     let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
 
     assert_eq!(
@@ -49,7 +52,25 @@ fn test_y2038_with_utimensat() {
     );
     assert_eq!(stat.st_mtime_nsec as u32, m_nsec);
     assert!(TryInto::<u64>::try_into(stat.st_atime).unwrap() as u64 >= a_sec);
-    assert!(stat.st_atime_nsec as u32 >= a_nsec);
+    assert!(
+        TryInto::<u64>::try_into(stat.st_atime).unwrap() as u64 > a_sec
+            || stat.st_atime_nsec as u32 >= a_nsec
+    );
+
+    // Now test the same thing, but with `fstat`.
+    let file = openat(&dir, "foo", OFlags::RDONLY, Mode::empty()).unwrap();
+    let stat = fstat(&file).unwrap();
+
+    assert_eq!(
+        TryInto::<u64>::try_into(stat.st_mtime).unwrap() as u64,
+        m_sec
+    );
+    assert_eq!(stat.st_mtime_nsec as u32, m_nsec);
+    assert!(TryInto::<u64>::try_into(stat.st_atime).unwrap() as u64 >= a_sec);
+    assert!(
+        TryInto::<u64>::try_into(stat.st_atime).unwrap() as u64 > a_sec
+            || stat.st_atime_nsec as u32 >= a_nsec
+    );
 }
 
 /// Test that we can set a file timestamp to a date past the year 2038 with
@@ -61,7 +82,9 @@ fn test_y2038_with_utimensat() {
 #[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
 #[cfg(not(all(target_os = "emscripten", target_pointer_width = "32")))]
 fn test_y2038_with_futimens() {
-    use rustix::fs::{cwd, futimens, openat, statat, AtFlags, Mode, OFlags, Timespec, Timestamps};
+    use rustix::fs::{
+        cwd, fstat, futimens, openat, statat, AtFlags, Mode, OFlags, Timespec, Timestamps,
+    };
     use std::convert::TryInto;
 
     let tmp = tempfile::tempdir().unwrap();
@@ -82,7 +105,7 @@ fn test_y2038_with_futimens() {
             tv_nsec: a_nsec as _,
         },
     };
-    let file = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
+    let file = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::RUSR).unwrap();
 
     match futimens(&file, &timestamps) {
         Ok(()) => (),
@@ -95,10 +118,29 @@ fn test_y2038_with_futimens() {
         Err(e) => panic!("unexpected error: {:?}", e),
     }
 
+    // Use `statat` to read back the timestamp.
     let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
 
     assert_eq!(TryInto::<u64>::try_into(stat.st_mtime).unwrap(), m_sec);
     assert_eq!(stat.st_mtime_nsec as u32, m_nsec);
     assert!(TryInto::<u64>::try_into(stat.st_atime).unwrap() >= a_sec);
-    assert!(stat.st_atime_nsec as u32 >= a_nsec);
+    assert!(
+        TryInto::<u64>::try_into(stat.st_atime).unwrap() > a_sec
+            || stat.st_atime_nsec as u32 >= a_nsec
+    );
+
+    // Now test the same thing, but with `fstat`.
+    let file = openat(&dir, "foo", OFlags::RDONLY, Mode::empty()).unwrap();
+    let stat = fstat(&file).unwrap();
+
+    assert_eq!(
+        TryInto::<u64>::try_into(stat.st_mtime).unwrap() as u64,
+        m_sec
+    );
+    assert_eq!(stat.st_mtime_nsec as u32, m_nsec);
+    assert!(TryInto::<u64>::try_into(stat.st_atime).unwrap() as u64 >= a_sec);
+    assert!(
+        TryInto::<u64>::try_into(stat.st_atime).unwrap() as u64 > a_sec
+            || stat.st_atime_nsec as u32 >= a_nsec
+    );
 }

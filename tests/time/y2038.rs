@@ -32,3 +32,45 @@ fn test_y2038() {
         };
     }
 }
+
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[test]
+fn test_y2038_with_timerfd() {
+    use rustix::time::{
+        timerfd_create, timerfd_gettime, timerfd_settime, Itimerspec, TimerfdClockId, TimerfdFlags,
+        TimerfdTimerFlags, Timespec,
+    };
+
+    let fd = timerfd_create(TimerfdClockId::Monotonic, TimerfdFlags::CLOEXEC).unwrap();
+
+    let set = Itimerspec {
+        it_interval: Timespec {
+            tv_sec: (1_u64 << 32) as _,
+            tv_nsec: 20,
+        },
+        it_value: Timespec {
+            tv_sec: (1_u64 << 32) as _,
+            tv_nsec: 21,
+        },
+    };
+    let _old: Itimerspec = match timerfd_settime(&fd, TimerfdTimerFlags::ABSTIME, &set) {
+        Ok(i) => i,
+
+        // On mips and mips64 platforms, accept `EOVERFLOW`, meaning that y2038
+        // support in `timerfd` APIs is not available on this platform.
+        #[cfg(any(target_arch = "mips", target_arch = "mips64"))]
+        Err(rustix::io::Error::OVERFLOW) => return,
+
+        Err(e) => panic!("unexpected error: {:?}", e),
+    };
+
+    let new = timerfd_gettime(&fd).unwrap();
+
+    // The timer counts down.
+    assert_eq!(set.it_interval.tv_sec, new.it_interval.tv_sec);
+    assert_eq!(set.it_interval.tv_nsec, new.it_interval.tv_nsec);
+    assert!(new.it_value.tv_sec <= set.it_value.tv_sec);
+    assert!(
+        new.it_value.tv_nsec < set.it_value.tv_nsec || new.it_value.tv_sec < set.it_value.tv_sec
+    );
+}

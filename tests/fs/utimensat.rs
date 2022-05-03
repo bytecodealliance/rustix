@@ -45,6 +45,17 @@ fn test_utimensat() {
         times.last_modification.tv_nsec as u64,
         after.st_mtimensec as u64
     );
+    assert!(times.last_access.tv_sec as u64 >= after.st_atime as u64);
+    #[cfg(not(target_os = "netbsd"))]
+    assert!(
+        times.last_access.tv_sec as u64 > after.st_atime as u64
+            || times.last_access.tv_nsec as u64 >= after.st_atime_nsec as u64
+    );
+    #[cfg(target_os = "netbsd")]
+    assert!(
+        times.last_access.tv_sec as u64 > after.st_atime as u64
+            || times.last_access.tv_nsec as u64 >= after.st_atimensec as u64
+    );
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
