@@ -1110,8 +1110,7 @@ pub(crate) fn fallocate(
     offset: u64,
     len: u64,
 ) -> io::Result<()> {
-    // Silently cast; we'll get `EINVAL` if the value is negative.
-    let offset = offset as i64;
+    let offset: i64 = offset.try_into().map_err(|_e| io::Error::INVAL)?;
     let len = len as i64;
 
     assert!(mode.is_empty());
