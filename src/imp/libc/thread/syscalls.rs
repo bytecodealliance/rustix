@@ -2,6 +2,7 @@
 
 use super::super::c;
 use super::super::conv::ret;
+use super::super::time::types::LibcTimespec;
 use crate::io;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::process::{Pid, RawNonZeroPid};
@@ -24,12 +25,12 @@ use {crate::thread::ClockId, core::ptr::null_mut};
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu"
 ))]
-weak!(fn __clock_nanosleep_time64(c::clockid_t, c::c_int, *const Timespec, *mut Timespec) -> c::c_int);
+weak!(fn __clock_nanosleep_time64(c::clockid_t, c::c_int, *const LibcTimespec, *mut LibcTimespec) -> c::c_int);
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu"
 ))]
-weak!(fn __nanosleep64(*const Timespec, *mut Timespec) -> c::c_int);
+weak!(fn __nanosleep64(*const LibcTimespec, *mut LibcTimespec) -> c::c_int);
 
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -43,7 +44,7 @@ weak!(fn __nanosleep64(*const Timespec, *mut Timespec) -> c::c_int);
 )))]
 #[inline]
 pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRelativeResult {
-    let mut remain = MaybeUninit::<Timespec>::uninit();
+    let mut remain = MaybeUninit::<LibcTimespec>::uninit();
     let flags = 0;
 
     // 32-bit gnu version: libc has `clock_nanosleep` but it is not y2038 safe by
@@ -54,10 +55,15 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
     ))]
     unsafe {
         if let Some(libc_clock_nanosleep) = __clock_nanosleep_time64.get() {
-            match libc_clock_nanosleep(id as c::clockid_t, flags, request, remain.as_mut_ptr()) {
+            match libc_clock_nanosleep(
+                id as c::clockid_t,
+                flags,
+                &request.clone().into(),
+                remain.as_mut_ptr(),
+            ) {
                 0 => NanosleepRelativeResult::Ok,
                 err if err == io::Error::INTR.0 => {
-                    NanosleepRelativeResult::Interrupted(remain.assume_init())
+                    NanosleepRelativeResult::Interrupted(remain.assume_init().into())
                 }
                 err => NanosleepRelativeResult::Err(io::Error(err)),
             }
@@ -136,7 +142,14 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
     ))]
     {
         if let Some(libc_clock_nanosleep) = __clock_nanosleep_time64.get() {
-            match unsafe { libc_clock_nanosleep(id as c::clockid_t, flags, request, null_mut()) } {
+            match unsafe {
+                libc_clock_nanosleep(
+                    id as c::clockid_t,
+                    flags,
+                    &request.clone().into(),
+                    null_mut(),
+                )
+            } {
                 0 => Ok(()),
                 err => Err(io::Error(err)),
             }
@@ -178,7 +191,7 @@ fn clock_nanosleep_absolute_old(id: ClockId, request: &Timespec) -> io::Result<(
 #[cfg(not(target_os = "redox"))]
 #[inline]
 pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
-    let mut remain = MaybeUninit::<Timespec>::uninit();
+    let mut remain = MaybeUninit::<LibcTimespec>::uninit();
 
     // 32-bit gnu version: libc has `nanosleep` but it is not y2038 safe by
     // default.
@@ -188,9 +201,11 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
     ))]
     unsafe {
         if let Some(libc_nanosleep) = __nanosleep64.get() {
-            match ret(libc_nanosleep(request, remain.as_mut_ptr())) {
+            match ret(libc_nanosleep(&request.clone().into(), remain.as_mut_ptr())) {
                 Ok(()) => NanosleepRelativeResult::Ok,
-                Err(io::Error::INTR) => NanosleepRelativeResult::Interrupted(remain.assume_init()),
+                Err(io::Error::INTR) => {
+                    NanosleepRelativeResult::Interrupted(remain.assume_init().into())
+                }
                 Err(err) => NanosleepRelativeResult::Err(err),
             }
         } else {
@@ -204,7 +219,7 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
         target_env = "gnu"
     )))]
     unsafe {
-        match ret(c::nanosleep(request, remain.as_mut_ptr())) {
+        match ret(c::nanosleep(&request.clone().into(), remain.as_mut_ptr())) {
             Ok(()) => NanosleepRelativeResult::Ok,
             Err(io::Error::INTR) => NanosleepRelativeResult::Interrupted(remain.assume_init()),
             Err(err) => NanosleepRelativeResult::Err(err),

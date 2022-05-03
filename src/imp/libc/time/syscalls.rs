@@ -2,6 +2,10 @@
 
 use super::super::c;
 use super::super::conv::ret;
+#[cfg(feature = "time")]
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+use super::super::time::types::LibcItimerspec;
+use super::super::time::types::LibcTimespec;
 use super::types::Timespec;
 #[cfg(not(target_os = "wasi"))]
 use super::types::{ClockId, DynamicClockId};
@@ -20,30 +24,30 @@ use {
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu"
 ))]
-weak!(fn __clock_gettime64(c::clockid_t, *mut Timespec) -> c::c_int);
+weak!(fn __clock_gettime64(c::clockid_t, *mut LibcTimespec) -> c::c_int);
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu"
 ))]
-weak!(fn __clock_getres64(c::clockid_t, *mut Timespec) -> c::c_int);
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
-))]
-#[cfg(feature = "time")]
-weak!(fn __timerfd_gettime64(c::c_int, *mut Itimerspec) -> c::c_int);
+weak!(fn __clock_getres64(c::clockid_t, *mut LibcTimespec) -> c::c_int);
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu"
 ))]
 #[cfg(feature = "time")]
-weak!(fn __timerfd_settime64(c::c_int, c::c_int, *const Itimerspec, *mut Itimerspec) -> c::c_int);
+weak!(fn __timerfd_gettime64(c::c_int, *mut LibcItimerspec) -> c::c_int);
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+))]
+#[cfg(feature = "time")]
+weak!(fn __timerfd_settime64(c::c_int, c::c_int, *const LibcItimerspec, *mut LibcItimerspec) -> c::c_int);
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[inline]
 #[must_use]
 pub(crate) fn clock_getres(id: ClockId) -> Timespec {
-    let mut timespec = MaybeUninit::<Timespec>::uninit();
+    let mut timespec = MaybeUninit::<LibcTimespec>::uninit();
 
     // 32-bit gnu version: libc has `clock_getres` but it is not y2038 safe by
     // default.
@@ -54,7 +58,7 @@ pub(crate) fn clock_getres(id: ClockId) -> Timespec {
     unsafe {
         if let Some(libc_clock_getres) = __clock_getres64.get() {
             ret(libc_clock_getres(id as c::clockid_t, timespec.as_mut_ptr())).unwrap();
-            timespec.assume_init()
+            timespec.assume_init().into()
         } else {
             clock_getres_old(id)
         }
@@ -94,7 +98,7 @@ unsafe fn clock_getres_old(id: ClockId) -> Timespec {
 #[inline]
 #[must_use]
 pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
-    let mut timespec = MaybeUninit::<Timespec>::uninit();
+    let mut timespec = MaybeUninit::<LibcTimespec>::uninit();
 
     #[cfg(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
@@ -107,7 +111,7 @@ pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
                 timespec.as_mut_ptr(),
             ))
             .unwrap();
-            timespec.assume_init()
+            timespec.assume_init().into()
         } else {
             clock_gettime_old(id)
         }
@@ -149,7 +153,7 @@ unsafe fn clock_gettime_old(id: ClockId) -> Timespec {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timespec> {
-    let mut timespec = MaybeUninit::<Timespec>::uninit();
+    let mut timespec = MaybeUninit::<LibcTimespec>::uninit();
     unsafe {
         let id: c::clockid_t = match id {
             DynamicClockId::Known(id) => id as c::clockid_t,
@@ -191,7 +195,7 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
                     timespec.as_mut_ptr(),
                 ))?;
 
-                Ok(timespec.assume_init())
+                Ok(timespec.assume_init().into())
             } else {
                 clock_gettime_dynamic_old(id)
             }
@@ -242,7 +246,7 @@ pub(crate) fn timerfd_settime(
     flags: TimerfdTimerFlags,
     new_value: &Itimerspec,
 ) -> io::Result<Itimerspec> {
-    let mut result = MaybeUninit::<Itimerspec>::uninit();
+    let mut result = MaybeUninit::<LibcItimerspec>::uninit();
 
     #[cfg(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
@@ -253,10 +257,10 @@ pub(crate) fn timerfd_settime(
             ret(libc_timerfd_settime(
                 borrowed_fd(fd),
                 flags.bits(),
-                new_value,
+                &new_value.clone().into(),
                 result.as_mut_ptr(),
             ))
-            .map(|()| result.assume_init())
+            .map(|()| result.assume_init().into())
         } else {
             timerfd_settime_old(fd, flags, new_value)
         }
@@ -341,7 +345,7 @@ unsafe fn timerfd_settime_old(
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 #[cfg(feature = "time")]
 pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
-    let mut result = MaybeUninit::<Itimerspec>::uninit();
+    let mut result = MaybeUninit::<LibcItimerspec>::uninit();
 
     #[cfg(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
@@ -350,7 +354,7 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
     unsafe {
         if let Some(libc_timerfd_gettime) = __timerfd_gettime64.get() {
             ret(libc_timerfd_gettime(borrowed_fd(fd), result.as_mut_ptr()))
-                .map(|()| result.assume_init())
+                .map(|()| result.assume_init().into())
         } else {
             timerfd_gettime_old(fd)
         }

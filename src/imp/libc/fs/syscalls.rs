@@ -39,6 +39,15 @@ use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek,
     target_os = "wasi"
 )))]
 use super::super::offset::{libc_fstatfs, libc_statfs};
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+))]
+use super::super::time::types::LibcTimespec;
+#[cfg(not(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+)))]
 use crate::as_ptr;
 use crate::fd::BorrowedFd;
 #[cfg(not(target_os = "wasi"))]
@@ -133,12 +142,12 @@ use {super::super::offset::libc_openat, crate::fs::AtFlags};
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu"
 ))]
-weak!(fn __utimensat64(c::c_int, *const c::c_char, *const c::timespec, c::c_int) -> c::c_int);
+weak!(fn __utimensat64(c::c_int, *const c::c_char, *const LibcTimespec, c::c_int) -> c::c_int);
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu"
 ))]
-weak!(fn __futimens64(c::c_int, *const c::timespec) -> c::c_int);
+weak!(fn __futimens64(c::c_int, *const LibcTimespec) -> c::c_int);
 
 #[cfg(all(unix, target_env = "gnu"))]
 /// Use direct syscall (via libc) for openat().
@@ -427,10 +436,15 @@ pub(crate) fn utimensat(
     ))]
     unsafe {
         if let Some(libc_utimensat) = __utimensat64.get() {
+            let libc_times: [LibcTimespec; 2] = [
+                times.last_access.clone().into(),
+                times.last_modification.clone().into(),
+            ];
+
             ret(libc_utimensat(
                 borrowed_fd(dirfd),
                 c_str(path),
-                as_ptr(times).cast(),
+                libc_times.as_ptr(),
                 flags.bits(),
             ))
         } else {
@@ -591,7 +605,7 @@ unsafe fn utimensat_old(
                 .tv_sec
                 .try_into()
                 .map_err(|_| io::Error::OVERFLOW)?,
-            tv_nsec: times.last_access.tv_nsec as _,
+            tv_nsec: times.last_access.tv_nsec,
         },
         c::timespec {
             tv_sec: times
@@ -599,7 +613,7 @@ unsafe fn utimensat_old(
                 .tv_sec
                 .try_into()
                 .map_err(|_| io::Error::OVERFLOW)?,
-            tv_nsec: times.last_modification.tv_nsec as _,
+            tv_nsec: times.last_modification.tv_nsec,
         },
     ];
     ret(c::utimensat(
@@ -957,7 +971,12 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
     ))]
     unsafe {
         if let Some(libc_futimens) = __futimens64.get() {
-            ret(libc_futimens(borrowed_fd(fd), as_ptr(times).cast()))
+            let libc_times: [LibcTimespec; 2] = [
+                times.last_access.clone().into(),
+                times.last_modification.clone().into(),
+            ];
+
+            ret(libc_futimens(borrowed_fd(fd), libc_times.as_ptr()))
         } else {
             futimens_old(fd, times)
         }
@@ -1029,7 +1048,7 @@ unsafe fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
                 .tv_sec
                 .try_into()
                 .map_err(|_| io::Error::OVERFLOW)?,
-            tv_nsec: times.last_access.tv_nsec as _,
+            tv_nsec: times.last_access.tv_nsec,
         },
         c::timespec {
             tv_sec: times
@@ -1037,7 +1056,7 @@ unsafe fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
                 .tv_sec
                 .try_into()
                 .map_err(|_| io::Error::OVERFLOW)?,
-            tv_nsec: times.last_modification.tv_nsec as _,
+            tv_nsec: times.last_modification.tv_nsec,
         },
     ];
 
