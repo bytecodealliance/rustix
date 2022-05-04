@@ -3,9 +3,8 @@
 use super::super::c;
 use super::super::conv::{borrowed_fd, syscall_ret, syscall_ret_owned_fd, syscall_ret_u32};
 use crate::fd::BorrowedFd;
-use crate::io::OwnedFd;
+use crate::io::{self, OwnedFd};
 use crate::io_uring::{io_uring_params, IoringEnterFlags, IoringRegisterOp};
-use crate::{as_mut_ptr, io};
 use linux_raw_sys::general::{__NR_io_uring_enter, __NR_io_uring_register, __NR_io_uring_setup};
 
 #[inline]
@@ -14,7 +13,7 @@ pub(crate) fn io_uring_setup(entries: u32, params: &mut io_uring_params) -> io::
         syscall_ret_owned_fd(c::syscall(
             __NR_io_uring_setup as _,
             entries as usize,
-            as_mut_ptr(params),
+            params,
         ))
     }
 }

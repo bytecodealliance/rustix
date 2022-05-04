@@ -3,8 +3,8 @@
 #![allow(unsafe_code)]
 
 use super::super::c;
+use crate::io;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
-use crate::{as_ptr, io};
 use alloc::vec::Vec;
 use core::mem::size_of;
 use linux_raw_sys::general::{__kernel_sockaddr_storage, sockaddr};
@@ -128,11 +128,7 @@ pub(crate) unsafe fn maybe_read_sockaddr_os(
 ///
 /// `storage` must point to a valid socket address returned from the OS.
 pub(crate) unsafe fn read_sockaddr_os(storage: *const sockaddr, len: usize) -> SocketAddrAny {
-    let z = c::sockaddr_un {
-        sun_family: 0_u16,
-        sun_path: [0; 108],
-    };
-    let offsetof_sun_path = (as_ptr(&z.sun_path) as usize) - (as_ptr(&z) as usize);
+    let offsetof_sun_path = super::addr::offsetof_sun_path();
 
     assert!(len >= size_of::<c::sa_family_t>());
     match read_ss_family(storage).into() {

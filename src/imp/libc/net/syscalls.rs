@@ -15,10 +15,10 @@ use super::send_recv::{RecvFlags, SendFlags};
 use super::types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
-use crate::as_ptr;
 use crate::fd::BorrowedFd;
 use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
+use crate::utils::as_ptr;
 use core::convert::TryInto;
 use core::mem::{size_of, MaybeUninit};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
@@ -390,9 +390,10 @@ pub(crate) fn socketpair(
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) mod sockopt {
     use super::{c, in6_addr_new, in_addr_new, BorrowedFd};
+    use crate::io;
     use crate::net::sockopt::Timeout;
     use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
-    use crate::{as_mut_ptr, io};
+    use crate::utils::as_mut_ptr;
     use core::convert::TryInto;
     use core::time::Duration;
     #[cfg(windows)]

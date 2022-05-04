@@ -44,11 +44,6 @@ use super::super::offset::{libc_fstatfs, libc_statfs};
     target_env = "gnu"
 ))]
 use super::super::time::types::LibcTimespec;
-#[cfg(not(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
-)))]
-use crate::as_ptr;
 use crate::fd::BorrowedFd;
 #[cfg(not(target_os = "wasi"))]
 use crate::fd::RawFd;
@@ -107,6 +102,11 @@ use crate::fs::{RenameFlags, ResolveFlags, Statx, StatxFlags};
 use crate::io::{self, OwnedFd, SeekFrom};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
+#[cfg(not(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+)))]
+use crate::utils::as_ptr;
 use core::convert::TryInto;
 #[cfg(any(
     target_os = "android",
@@ -1231,7 +1231,10 @@ pub(crate) fn sendfile(
         let nsent = ret_ssize_t(c::sendfile64(
             borrowed_fd(out_fd),
             borrowed_fd(in_fd),
-            offset.map(crate::as_mut_ptr).unwrap_or(null_mut()).cast(),
+            offset
+                .map(crate::utils::as_mut_ptr)
+                .unwrap_or(null_mut())
+                .cast(),
             count,
         ))?;
         Ok(nsent as usize)

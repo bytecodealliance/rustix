@@ -316,5 +316,5 @@ pub(crate) fn offsetof_sun_path() -> usize {
         )))]
         sun_path: [0; 108],
     };
-    (crate::as_ptr(&z.sun_path) as usize) - (crate::as_ptr(&z) as usize)
+    (crate::utils::as_ptr(&z.sun_path) as usize) - (crate::utils::as_ptr(&z) as usize)
 }
