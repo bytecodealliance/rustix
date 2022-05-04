@@ -299,8 +299,8 @@ pub fn utimensat<P: path::Arg, Fd: AsFd>(
 /// The flags argument is fixed to 0, so `AT_SYMLINK_NOFOLLOW` is not
 /// supported. <details>Platform support for this flag varies widely.</details>
 ///
-/// Note that this implementation does not support `O_PATH` file descriptors,
-/// even on platforms where the host libc emulates it.
+/// This implementation does not support `O_PATH` file descriptors, even on
+/// platforms where the host libc emulates it.
 ///
 /// # References
 ///  - [POSIX]

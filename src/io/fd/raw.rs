@@ -37,7 +37,7 @@ pub trait AsRawFd {
     /// use std::os::wasi::io::{AsRawFd, RawFd};
     ///
     /// let mut f = File::open("foo.txt")?;
-    /// // Note that `raw_fd` is only valid as long as `f` exists.
+    /// // `raw_fd` is only valid as long as `f` exists.
     /// #[cfg(any(unix, target_os = "wasi"))]
     /// let raw_fd: RawFd = f.as_raw_fd();
     /// # Ok::<(), io::Error>(())

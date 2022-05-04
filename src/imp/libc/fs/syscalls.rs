@@ -147,9 +147,10 @@ weak!(fn __utimensat64(c::c_int, *const c::c_char, *const LibcTimespec, c::c_int
 ))]
 weak!(fn __futimens64(c::c_int, *const LibcTimespec) -> c::c_int);
 
+/// Use a direct syscall (via libc) for `openat`.
+///
+/// This is only currently necessary as a workaround for old glibc; see below.
 #[cfg(all(unix, target_env = "gnu"))]
-/// Use direct syscall (via libc) for openat().
-/// Only currently necessary as a workaround for old glibc; see below.
 fn openat_via_syscall(
     dirfd: BorrowedFd<'_>,
     path: &ZStr,
@@ -636,7 +637,7 @@ pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &ZStr, mode: Mode) -> io::Res
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &ZStr, mode: Mode) -> io::Result<()> {
-    // Note that Linux's `fchmodat` does not have a flags argument.
+    // Linux's `fchmodat` does not have a flags argument.
     unsafe {
         // Pass `mode` as a `c_uint` even if `mode_t` is narrower, since
         // `libc_openat` is declared as a variadic function and narrower

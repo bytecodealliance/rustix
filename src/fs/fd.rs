@@ -99,8 +99,8 @@ pub fn tell<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
 
 /// `fchmod(fd)`—Sets open file or directory permissions.
 ///
-/// Note that this implementation does not support `O_PATH` file descriptors,
-/// even on platforms where the host libc emulates it.
+/// This implementation does not support `O_PATH` file descriptors, even on
+/// platforms where the host libc emulates it.
 ///
 /// # References
 ///  - [POSIX]
@@ -242,8 +242,8 @@ pub(crate) fn _is_file_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)
 /// `fsync(fd)`—Ensures that file data and metadata is written to the
 /// underlying storage device.
 ///
-/// Note that on iOS and macOS this isn't sufficient to ensure that data has
-/// reached persistent storage; use [`fcntl_fullfsync`] to ensure that.
+/// On iOS and macOS this isn't sufficient to ensure that data has reached
+/// persistent storage; use [`fcntl_fullfsync`] to ensure that.
 ///
 /// # References
 ///  - [POSIX]

@@ -145,8 +145,8 @@ fn as_mut_ptr<T>(t: &mut T) -> *mut T {
 /// Users can use this to avoid needing to import anything else to use the same
 /// versions of these types and traits.
 ///
-/// Note that rustix APIs that use `OwnedFd` use [`rustix::io::OwnedFd`]
-/// instead, which allows rustix to implement `close` for them.
+/// Rustix APIs that use `OwnedFd` use [`rustix::io::OwnedFd`] instead, which
+/// allows rustix to implement `close` for them.
 ///
 /// [`rustix::io::OwnedFd`]: crate::io::OwnedFd
 pub mod fd {
@@ -184,7 +184,7 @@ pub mod io_uring;
 #[cfg(feature = "mm")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "mm")))]
 pub mod mm;
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))] // WASI doesn't support `net` yet.
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[cfg(feature = "net")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "net")))]
 pub mod net;

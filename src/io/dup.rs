@@ -10,8 +10,8 @@ pub use imp::io::types::DupFlags;
 /// `dup(fd)`—Creates a new `OwnedFd` instance that shares the same
 /// underlying [file description] as `fd`.
 ///
-/// Note that this function does not set the `O_CLOEXEC` flag. To do a `dup`
-/// that does set `O_CLOEXEC`, use [`fcntl_dupfd_cloexec`].
+/// This function does not set the `O_CLOEXEC` flag. To do a `dup` that does
+/// set `O_CLOEXEC`, use [`fcntl_dupfd_cloexec`].
 ///
 /// POSIX guarantees that `dup` will use the lowest unused file descriptor,
 /// however it is not safe in general to rely on this, as file descriptors may
@@ -35,9 +35,9 @@ pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 /// same underlying [file description] as the existing `OwnedFd` instance,
 /// closing `new` and reusing its file descriptor.
 ///
-/// Note that this function does not set the `O_CLOEXEC` flag. To do a `dup2`
-/// that does set `O_CLOEXEC`, use [`dup3`] with [`DupFlags::CLOEXEC`] on
-/// platforms which support it.
+/// This function does not set the `O_CLOEXEC` flag. To do a `dup2` that does
+/// set `O_CLOEXEC`, use [`dup3`] with [`DupFlags::CLOEXEC`] on platforms which
+/// support it.
 ///
 /// # References
 ///  - [POSIX]

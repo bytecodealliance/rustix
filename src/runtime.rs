@@ -96,9 +96,9 @@ pub unsafe fn exit_thread(status: i32) -> ! {
 ///
 /// This is equivalent to `_exit` and `_Exit` in libc.
 ///
-/// Note that this does not all any `__cxa_atexit`, `atexit`, or any other
-/// destructors. Most programs should use [`std::process::exit`] instead
-/// of calling this directly.
+/// This does not all any `__cxa_atexit`, `atexit`, or any other destructors.
+/// Most programs should use [`std::process::exit`] instead of calling this
+/// directly.
 ///
 /// # References
 ///  - [POSIX `_Exit`]

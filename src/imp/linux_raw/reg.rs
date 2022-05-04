@@ -78,9 +78,9 @@ impl RetNumber for R0 {}
 /// Syscall arguments use register-sized types. We use a newtype to
 /// discourage accidental misuse of the raw integer values.
 ///
-/// Note that it doesn't implement `Clone` or `Copy`; it should be used
-/// exactly once. And it has a lifetime to ensure that it doesn't outlive
-/// any resources it might be pointing to.
+/// This type doesn't implement `Clone` or `Copy`; it should be used exactly
+/// once. And it has a lifetime to ensure that it doesn't outlive any resources
+/// it might be pointing to.
 #[repr(transparent)]
 pub(super) struct ArgReg<'a, Num: ArgNumber> {
     raw: *mut Opaque,
@@ -97,8 +97,8 @@ impl<'a, Num: ArgNumber> ToAsm for ArgReg<'a, Num> {
 /// Syscall return values use register-sized types. We use a newtype to
 /// discourage accidental misuse of the raw integer values.
 ///
-/// Note that it doesn't implement `Clone` or `Copy`; it should be used
-/// exactly once.
+/// This type doesn't implement `Clone` or `Copy`; it should be used exactly
+/// once.
 #[repr(transparent)]
 pub(super) struct RetReg<Num: RetNumber> {
     raw: *mut Opaque,

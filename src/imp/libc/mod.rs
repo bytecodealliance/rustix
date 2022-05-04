@@ -65,7 +65,7 @@ pub(crate) mod io_uring;
 #[cfg(not(windows))]
 #[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
 pub(crate) mod mm;
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))] // WASI doesn't support `net` yet.
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[cfg(feature = "net")]
 pub(crate) mod net;
 #[cfg(not(windows))]
