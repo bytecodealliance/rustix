@@ -158,6 +158,7 @@ pub mod fd {
     pub use imp::fd::{FromFd, IntoFd};
 }
 
+// The public API modules.
 #[cfg(not(windows))]
 pub mod ffi;
 #[cfg(not(windows))]
@@ -202,6 +203,7 @@ pub mod thread;
 #[cfg_attr(doc_cfg, doc(cfg(feature = "time")))]
 pub mod time;
 
+// "runtime" is also a public API module, but it's only for libc-like users.
 #[cfg(not(windows))]
 #[doc(hidden)]
 #[cfg(feature = "runtime")]

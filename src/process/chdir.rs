@@ -5,7 +5,7 @@ use alloc::vec::Vec;
 #[cfg(not(target_os = "fuchsia"))]
 use imp::fd::AsFd;
 
-/// `chdir(path)`—Change the working directory.
+/// `chdir(path)`—Change the current working directory.
 ///
 /// # References
 ///  - [POSIX]
@@ -18,7 +18,7 @@ pub fn chdir<P: path::Arg>(path: P) -> io::Result<()> {
     path.into_with_z_str(imp::process::syscalls::chdir)
 }
 
-/// `fchdir(fd)`—Change the working directory.
+/// `fchdir(fd)`—Change the current working directory.
 ///
 /// # References
 ///  - [POSIX]
@@ -32,7 +32,7 @@ pub fn fchdir<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     imp::process::syscalls::fchdir(fd.as_fd())
 }
 
-/// `getcwd()`
+/// `getcwd()`—Return the current working directory.
 ///
 /// If `reuse` is non-empty, reuse its buffer to store the result if possible.
 ///

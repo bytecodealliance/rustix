@@ -278,6 +278,8 @@ pub(crate) fn pwritev2(
     }
 }
 
+/// The maximum number of buffers that can be passed into a vectored I/O system
+/// call on the current platform.
 const fn max_iov() -> usize {
     linux_raw_sys::general::UIO_MAXIOV as usize
 }

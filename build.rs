@@ -105,6 +105,8 @@ fn main() {
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM");
 }
 
+/// Link in the desired version of librustix_outline_{arch}.a, containing the
+/// outline assembly code for making syscalls.
 fn link_in_librustix_outline(arch: &str, asm_name: &str) {
     let name = format!("rustix_outline_{}", arch);
     let profile = var("PROFILE").unwrap();

@@ -361,6 +361,8 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &ZStr, flags: AtFlags) -> io::
         statat_old(dirfd, path, flags)
     }
 
+    // Main version: libc is y2038 safe. Or, the platform is not y2038 safe and
+    // there's nothing practical we can do.
     #[cfg(not(all(
         any(target_os = "android", target_os = "linux"),
         any(target_pointer_width = "32", target_arch = "mips64")

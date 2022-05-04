@@ -1311,6 +1311,8 @@ pub(crate) fn accessat(
     access: Access,
     flags: AtFlags,
 ) -> io::Result<()> {
+    // Linux's `faccessat` doesn't have a flags parameter. If we have
+    // `AT_EACCESS` and we're not setuid or setgid, we can emulate it.
     if flags.is_empty()
         || (flags.bits() == linux_raw_sys::general::AT_EACCESS
             && crate::process::getuid() == crate::process::geteuid()
