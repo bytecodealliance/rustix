@@ -147,7 +147,7 @@ impl<'a, Num: ArgNumber> From<BorrowedFd<'a>> for ArgReg<'a, Num> {
     }
 }
 
-/// Pass a raw file-descriptor argument. Most users should use [`borrowed_fd`]
+/// Pass a raw file-descriptor argument. Most users should use [`ArgReg::from`]
 /// instead, to preserve I/O safety as long as possible.
 ///
 /// # Safety
