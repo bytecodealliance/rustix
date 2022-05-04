@@ -615,6 +615,13 @@ impl<'a, Num: ArgNumber> From<(crate::thread::FutexOperation, crate::thread::Fut
     }
 }
 
+impl<'a, Num: ArgNumber> From<crate::fs::Access> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(access: crate::fs::Access) -> Self {
+        c_uint(access.bits())
+    }
+}
+
 #[cfg(feature = "net")]
 impl<'a, Num: ArgNumber> From<crate::net::SocketType> for ArgReg<'a, Num> {
     #[inline]

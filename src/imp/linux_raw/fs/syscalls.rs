@@ -1318,7 +1318,7 @@ pub(crate) fn accessat(
             && crate::process::getuid() == crate::process::geteuid()
             && crate::process::getgid() == crate::process::getegid())
     {
-        return _accessat(dirfd, path, access.bits());
+        return unsafe { ret(syscall_readonly!(__NR_faccessat, dirfd, path, access)) };
     }
 
     if flags.bits() != linux_raw_sys::general::AT_EACCESS {
@@ -1327,18 +1327,6 @@ pub(crate) fn accessat(
 
     // TODO: Use faccessat2 in newer Linux versions.
     Err(io::Errno::NOSYS)
-}
-
-#[inline]
-fn _accessat(dirfd: BorrowedFd<'_>, pathname: &ZStr, mode: c::c_uint) -> io::Result<()> {
-    unsafe {
-        ret(syscall_readonly!(
-            __NR_faccessat,
-            dirfd,
-            pathname,
-            c_uint(mode)
-        ))
-    }
 }
 
 #[inline]
