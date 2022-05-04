@@ -127,11 +127,11 @@ impl Drop for OwnedFd {
     #[inline]
     fn drop(&mut self) {
         unsafe {
-            // Note that errors are ignored when closing a file descriptor. The
-            // reason for this is that if an error occurs we don't actually know if
+            // Errors are ignored when closing a file descriptor. The reason
+            // for this is that if an error occurs we don't actually know if
             // the file descriptor was closed or not, and if we retried (for
-            // something like EINTR), we might close another valid file descriptor
-            // opened after we closed ours.
+            // something like EINTR), we might close another valid file
+            // descriptor opened after we closed ours.
             let _ = close(self.fd as _);
         }
     }

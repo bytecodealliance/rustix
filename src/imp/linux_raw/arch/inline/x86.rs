@@ -4,8 +4,8 @@
 //! through the vDSO when possible, and plain forms, which use the `int 0x80`
 //! instruction.
 //!
-//! Note that most `rustix` syscalls use the vsyscall mechanism rather than
-//! going using `int 0x80` sequences.
+//! Most `rustix` syscalls use the vsyscall mechanism rather than going using
+//! `int 0x80` sequences.
 
 #![allow(dead_code)]
 
@@ -118,9 +118,9 @@ pub(in crate::imp) unsafe fn indirect_syscall4(
     // a3 should go in esi, but `asm!` won't let us use it as an operand.
     // temporarily swap it into place, and then swap it back afterward.
     //
-    // Note that we hard-code the callee operand to use edi instead of
-    // `in(reg)` because even though we can't name esi as an operand,
-    // the compiler can use esi to satisfy `in(reg)`.
+    // We hard-code the callee operand to use edi instead of `in(reg)` because
+    // even though we can't name esi as an operand, the compiler can use esi to
+    // satisfy `in(reg)`.
     asm!(
         "xchg esi, {a3}",
         "call edi",

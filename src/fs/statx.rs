@@ -8,8 +8,8 @@ pub use imp::fs::types::{Statx, StatxFlags, StatxTimestamp};
 
 /// `statx(dirfd, path, flags, mask, statxbuf)`
 ///
-/// Note that this isn't available on Linux before 4.11; returns `ENOSYS` in
-/// that case.
+/// This isn't available on Linux before 4.11; it returns `ENOSYS` in that
+/// case.
 ///
 /// # References
 ///  - [Linux]

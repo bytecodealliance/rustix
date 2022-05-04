@@ -35,9 +35,9 @@ pub struct Gid(RawGid);
 
 /// `pid_t`—A non-zero Unix process ID.
 ///
-/// Note that this is a pid, and not a pidfd. It is not a file descriptor,
-/// and the process it refers to could disappear at any time and be replaced
-/// by another, unrelated, process.
+/// This is a pid, and not a pidfd. It is not a file descriptor, and the
+/// process it refers to could disappear at any time and be replaced by
+/// another, unrelated, process.
 #[repr(transparent)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 pub struct Pid(RawNonZeroPid);
