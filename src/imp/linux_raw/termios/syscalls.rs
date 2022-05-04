@@ -186,19 +186,19 @@ pub(crate) fn tcsetpgrp(fd: BorrowedFd<'_>, pid: Pid) -> io::Result<()> {
 #[inline]
 #[must_use]
 #[allow(clippy::missing_const_for_fn)]
-pub fn cfgetospeed(termios: &Termios) -> u32 {
+pub(crate) fn cfgetospeed(termios: &Termios) -> u32 {
     termios.c_cflag & CBAUD
 }
 
 #[inline]
 #[must_use]
 #[allow(clippy::missing_const_for_fn)]
-pub fn cfgetispeed(termios: &Termios) -> u32 {
+pub(crate) fn cfgetispeed(termios: &Termios) -> u32 {
     termios.c_cflag & CBAUD
 }
 
 #[inline]
-pub fn cfmakeraw(termios: &mut Termios) {
+pub(crate) fn cfmakeraw(termios: &mut Termios) {
     // From the Linux [`cfmakeraw` man page]:
     //
     // [`cfmakeraw` man page]: https://man7.org/linux/man-pages/man3/cfmakeraw.3.html
@@ -214,7 +214,7 @@ pub fn cfmakeraw(termios: &mut Termios) {
 }
 
 #[inline]
-pub fn cfsetospeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
+pub(crate) fn cfsetospeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
     if (speed & !CBAUD) != 0 {
         return Err(io::Error::INVAL);
     }
@@ -224,7 +224,7 @@ pub fn cfsetospeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
 }
 
 #[inline]
-pub fn cfsetispeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
+pub(crate) fn cfsetispeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
     if speed == 0 {
         return Ok(());
     }
@@ -237,7 +237,7 @@ pub fn cfsetispeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
 }
 
 #[inline]
-pub fn cfsetspeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
+pub(crate) fn cfsetspeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
     if (speed & !CBAUD) != 0 {
         return Err(io::Error::INVAL);
     }
