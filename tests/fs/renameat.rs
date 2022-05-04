@@ -27,6 +27,30 @@ fn test_renameat() {
     assert!(same(&before, &renamed));
 }
 
+/// Like `test_renameat` but the file already exists, so `renameat`
+/// overwrites it.
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[test]
+fn test_renameat_overwrite() {
+    use rustix::fs::{cwd, openat, renameat, statat, AtFlags, Mode, OFlags};
+
+    let tmp = tempfile::tempdir().unwrap();
+    let dir = openat(
+        cwd(),
+        tmp.path(),
+        OFlags::RDONLY | OFlags::PATH,
+        Mode::empty(),
+    )
+    .unwrap();
+
+    let _ = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
+    let _ = openat(&dir, "bar", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
+    let before = statat(&dir, "foo", AtFlags::empty()).unwrap();
+    renameat(&dir, "foo", &dir, "bar").unwrap();
+    let renamed = statat(&dir, "bar", AtFlags::empty()).unwrap();
+    assert!(same(&before, &renamed));
+}
+
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn test_renameat_with() {
