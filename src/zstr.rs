@@ -68,3 +68,9 @@ fn test_zstr() {
 fn test_invalid_zstr() {
     let _ = zstr!("hello\0world");
 }
+
+#[test]
+#[should_panic]
+fn test_invalid_empty_zstr() {
+    let _ = zstr!("\0");
+}
