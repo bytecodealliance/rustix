@@ -48,12 +48,9 @@ pub(crate) mod time;
 #[cfg(feature = "std")]
 pub(crate) mod fd {
     pub use io_lifetimes::*;
-
-    #[allow(unused_imports)]
-    pub use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-
     #[allow(unused_imports)]
     pub(crate) use std::os::unix::io::RawFd as LibcFd;
+    pub use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 }
 
 #[cfg(not(feature = "std"))]

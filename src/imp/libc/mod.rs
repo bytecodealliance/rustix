@@ -38,10 +38,8 @@ pub(crate) mod fd {
     #[allow(unused_imports)]
     #[cfg(unix)]
     pub(crate) use std::os::unix::io::RawFd as LibcFd;
-    #[allow(unused_imports)]
     #[cfg(unix)]
     pub use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-    #[allow(unused_imports)]
     #[cfg(target_os = "wasi")]
     pub use std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 }
