@@ -3,8 +3,6 @@ use super::super::c;
 use super::addr::SocketAddrUnix;
 use super::ext::{in6_addr_s6_addr, in_addr_s_addr, sockaddr_in6_sin6_scope_id};
 #[cfg(not(windows))]
-use crate::as_ptr;
-#[cfg(not(windows))]
 use crate::ffi::ZStr;
 use crate::io;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
@@ -201,55 +199,7 @@ unsafe fn inner_read_sockaddr_os(
     len: usize,
 ) -> SocketAddrAny {
     #[cfg(unix)]
-    let z = c::sockaddr_un {
-        #[cfg(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd"
-        ))]
-        sun_len: 0_u8,
-        #[cfg(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd"
-        ))]
-        sun_family: 0_u8,
-        #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd"
-        )))]
-        sun_family: 0_u16,
-        #[cfg(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd"
-        ))]
-        sun_path: [0; 104],
-        #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd"
-        )))]
-        sun_path: [0; 108],
-    };
-    #[cfg(unix)]
-    let offsetof_sun_path = (as_ptr(&z.sun_path) as usize) - (as_ptr(&z) as usize);
+    let offsetof_sun_path = super::addr::offsetof_sun_path();
 
     assert!(len >= size_of::<c::sa_family_t>());
     match family {

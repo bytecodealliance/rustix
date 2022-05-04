@@ -358,7 +358,7 @@ struct libc_dirent {
 /// minimally matches libc's.
 #[cfg(target_os = "openbsd")]
 fn check_dirent_layout(dirent: &c::dirent) {
-    use crate::as_ptr;
+    use crate::utils::as_ptr;
     use core::mem::{align_of, size_of};
 
     // Check that the basic layouts match.

@@ -126,19 +126,19 @@
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
 
-/// Convert a `&T` into a `*const T` without using an `as`.
-#[inline]
-#[allow(dead_code)]
-const fn as_ptr<T>(t: &T) -> *const T {
-    t
-}
+// Internal utilities.
+#[cfg(not(windows))]
+#[macro_use]
+pub(crate) mod zstr;
+#[macro_use]
+pub(crate) mod const_assert;
+pub(crate) mod utils;
 
-/// Convert a `&mut T` into a `*mut T` without using an `as`.
-#[inline]
-#[allow(dead_code)]
-fn as_mut_ptr<T>(t: &mut T) -> *mut T {
-    t
-}
+// Pick the backend implementation to use.
+#[cfg_attr(libc, path = "imp/libc/mod.rs")]
+#[cfg_attr(linux_raw, path = "imp/linux_raw/mod.rs")]
+#[cfg_attr(wasi, path = "imp/wasi/mod.rs")]
+mod imp;
 
 /// Export `*Fd` types and traits that used in rustix's public API.
 ///
@@ -157,17 +157,6 @@ pub mod fd {
     #[cfg(feature = "std")]
     pub use imp::fd::{FromFd, IntoFd};
 }
-
-#[cfg(not(windows))]
-#[macro_use]
-pub(crate) mod zstr;
-#[macro_use]
-pub(crate) mod const_assert;
-
-#[cfg_attr(libc, path = "imp/libc/mod.rs")]
-#[cfg_attr(linux_raw, path = "imp/linux_raw/mod.rs")]
-#[cfg_attr(wasi, path = "imp/wasi/mod.rs")]
-mod imp;
 
 #[cfg(not(windows))]
 pub mod ffi;

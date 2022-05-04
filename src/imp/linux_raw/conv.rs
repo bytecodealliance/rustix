@@ -34,7 +34,7 @@ use crate::ffi::ZStr;
 use crate::fs::{FileType, Mode, OFlags};
 use crate::io::{self, OwnedFd};
 use crate::process::{Pid, Resource, Signal};
-use crate::{as_mut_ptr, as_ptr};
+use crate::utils::{as_mut_ptr, as_ptr};
 use core::mem::MaybeUninit;
 use core::ptr::null_mut;
 #[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
