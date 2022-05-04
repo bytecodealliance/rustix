@@ -158,6 +158,13 @@ pub(super) unsafe fn raw_fd<'a, Num: ArgNumber>(fd: RawFd) -> ArgReg<'a, Num> {
     // Use `no_fd` when passing `-1` is intended.
     debug_assert!(fd == crate::fs::cwd().as_raw_fd() || fd >= 0);
 
+    // Don't pass the `io_uring_register_files_skip` sentry value this way.
+    #[cfg(feature = "io_uring")]
+    debug_assert_ne!(
+        fd,
+        crate::io_uring::io_uring_register_files_skip().as_raw_fd()
+    );
+
     // Linux doesn't look at the high bits beyond the `c_int`, so use
     // zero-extension rather than sign-extension because it's a smaller
     // instruction.
