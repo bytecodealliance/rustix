@@ -19,10 +19,6 @@ fn main() {
     let (stdin, stdout) = unsafe { (rustix::io::take_stdin(), rustix::io::take_stdout()) };
 
     // Use `dup2` to copy our new file descriptors over the stdio file descriptors.
-    //
-    // These take their second argument as an `&OwnedFd` rather than the usual
-    // `impl AsFd` because they conceptually do a `close` on the original file
-    // descriptor, which one shouldn't be able to do with just a `BorrowedFd`.
     dup2(&reader, &stdin).unwrap();
     dup2(&writer, &stdout).unwrap();
 

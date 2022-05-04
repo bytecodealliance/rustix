@@ -15,7 +15,7 @@ use super::super::conv::{
 };
 #[cfg(target_pointer_width = "32")]
 use super::super::conv::{hi, lo};
-use crate::fd::{AsFd, BorrowedFd, RawFd};
+use crate::fd::{BorrowedFd, RawFd};
 use crate::io::{
     self, epoll, DupFlags, EventfdFlags, IoSlice, IoSliceMut, OwnedFd, PipeFlags, PollFd,
     ReadWriteFlags,
@@ -392,7 +392,7 @@ pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 }
 
 #[inline]
-pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
+pub(crate) fn dup2(fd: BorrowedFd<'_>, new: BorrowedFd<'_>) -> io::Result<()> {
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     {
         // `dup3` fails if the old and new file descriptors have the same
@@ -406,13 +406,13 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
 
     #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
     unsafe {
-        ret_discarded_fd(syscall_readonly!(__NR_dup2, fd, new.as_fd()))
+        ret_discarded_fd(syscall_readonly!(__NR_dup2, fd, new))
     }
 }
 
 #[inline]
-pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
-    unsafe { ret_discarded_fd(syscall_readonly!(__NR_dup3, fd, new.as_fd(), flags)) }
+pub(crate) fn dup3(fd: BorrowedFd<'_>, new: BorrowedFd<'_>, flags: DupFlags) -> io::Result<()> {
+    unsafe { ret_discarded_fd(syscall_readonly!(__NR_dup3, fd, new, flags)) }
 }
 
 #[inline]

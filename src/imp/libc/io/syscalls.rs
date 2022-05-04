@@ -11,7 +11,7 @@ use super::super::offset::{libc_pread, libc_pwrite};
 use super::super::offset::{libc_preadv, libc_pwritev};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::super::offset::{libc_preadv2, libc_pwritev2};
-use crate::fd::{AsFd, BorrowedFd, RawFd};
+use crate::fd::{BorrowedFd, RawFd};
 #[cfg(not(target_os = "wasi"))]
 use crate::io::DupFlags;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
@@ -375,8 +375,8 @@ pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 }
 
 #[cfg(not(target_os = "wasi"))]
-pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
-    unsafe { ret_discarded_fd(c::dup2(borrowed_fd(fd), borrowed_fd(new.as_fd()))) }
+pub(crate) fn dup2(fd: BorrowedFd<'_>, new: BorrowedFd<'_>) -> io::Result<()> {
+    unsafe { ret_discarded_fd(c::dup2(borrowed_fd(fd), borrowed_fd(new))) }
 }
 
 #[cfg(not(any(
@@ -387,14 +387,8 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
     target_os = "redox",
     target_os = "wasi"
 )))]
-pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
-    unsafe {
-        ret_discarded_fd(c::dup3(
-            borrowed_fd(fd),
-            borrowed_fd(new.as_fd()),
-            flags.bits(),
-        ))
-    }
+pub(crate) fn dup3(fd: BorrowedFd<'_>, new: BorrowedFd<'_>, flags: DupFlags) -> io::Result<()> {
+    unsafe { ret_discarded_fd(c::dup3(borrowed_fd(fd), borrowed_fd(new), flags.bits())) }
 }
 
 #[cfg(any(
@@ -404,7 +398,7 @@ pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> io::Re
     target_os = "ios",
     target_os = "redox"
 ))]
-pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, _flags: DupFlags) -> io::Result<()> {
+pub(crate) fn dup3(fd: BorrowedFd<'_>, new: BorrowedFd<'_>, _flags: DupFlags) -> io::Result<()> {
     // Android 5.0 has `dup3`, but libc doesn't have bindings. Emulate it
     // using `dup2`, including the difference of failing with `EINVAL`
     // when the file descriptors are equal.
