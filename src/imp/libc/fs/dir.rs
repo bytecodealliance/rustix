@@ -110,7 +110,7 @@ impl Dir {
                 check_dirent_layout(&*dirent_ptr);
 
                 let result = DirEntry {
-                    dirent: read_dirent(core::mem::transmute(&*dirent_ptr)),
+                    dirent: read_dirent(&*dirent_ptr.cast()),
 
                     #[cfg(target_os = "wasi")]
                     name: ZStr::from_ptr((*dirent_ptr).d_name.as_ptr().cast()).to_owned(),

@@ -3,8 +3,8 @@
 //!
 //! # Safety
 //!
-//! Some of these functions are `unsafe` because they `transmute` `Option`
-//! types knowing their layouts, or construct owned file descriptors.
+//! Some of this code is `unsafe` in order to work with raw file descriptors,
+//! and some is `unsafe` to interpret the values in a `RetReg`.
 #![allow(unsafe_code)]
 
 use super::c;
@@ -29,7 +29,7 @@ use crate::fs::{FileType, Mode, OFlags};
 use crate::io::{self, OwnedFd};
 use crate::process::{Pid, Resource, Signal};
 use crate::{as_mut_ptr, as_ptr};
-use core::mem::{transmute, MaybeUninit};
+use core::mem::MaybeUninit;
 use core::ptr::null_mut;
 #[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
 use linux_raw_sys::general::__kernel_clockid_t;
@@ -189,31 +189,27 @@ pub(super) fn by_mut<'a, T: Sized, Num: ArgNumber>(t: &'a mut T) -> ArgReg<'a, N
 
 /// Convert an optional mutable reference into a `usize` for passing to a
 /// syscall.
-///
-/// # Safety
-///
-/// `Option<&mut T>` is represented as a nullable pointer to `T`, which is the
-/// same size as a `usize`, so we can directly transmute it and pass the result
-/// to syscalls expecting nullable pointers.
 #[inline]
-pub(super) unsafe fn opt_mut<'a, T: Sized, Num: ArgNumber>(
-    t: Option<&'a mut T>,
-) -> ArgReg<'a, Num> {
-    transmute(t)
+pub(super) fn opt_mut<'a, T: Sized, Num: ArgNumber>(t: Option<&'a mut T>) -> ArgReg<'a, Num> {
+    // This optimizes into the equivalent of `transmute(t)`, and has the
+    // advantage of not requiring `unsafe`.
+    match t {
+        Some(t) => by_mut(t),
+        None => raw_arg(null_mut()),
+    }
 }
 
 /// Convert an optional immutable reference into a `usize` for passing to a
 /// syscall.
-///
-/// # Safety
-///
-/// `Option<&T>` is represented as a nullable pointer to `T`, which is the
-/// same size as a `usize`, so we can directly transmute it and pass the result
-/// to syscalls expecting nullable pointers.
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 #[inline]
-pub(super) unsafe fn opt_ref<'a, T: Sized, Num: ArgNumber>(t: Option<&'a T>) -> ArgReg<'a, Num> {
-    transmute(t)
+pub(super) fn opt_ref<'a, T: Sized, Num: ArgNumber>(t: Option<&'a T>) -> ArgReg<'a, Num> {
+    // This optimizes into the equivalent of `transmute(t)`, and has the
+    // advantage of not requiring `unsafe`.
+    match t {
+        Some(t) => by_ref(t),
+        None => raw_arg(null_mut()),
+    }
 }
 
 #[inline]
