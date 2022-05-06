@@ -418,6 +418,20 @@ impl<'a, Num: ArgNumber> From<crate::imp::mm::types::UserfaultfdFlags> for ArgRe
     }
 }
 
+impl<'a, Num: ArgNumber> From<crate::imp::process::types::MembarrierCommand> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(cmd: crate::imp::process::types::MembarrierCommand) -> Self {
+        c_uint(cmd as u32)
+    }
+}
+
+impl<'a, Num: ArgNumber> From<crate::process::Cpuid> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(cpuid: crate::process::Cpuid) -> Self {
+        c_uint(cpuid.as_raw())
+    }
+}
+
 #[cfg(target_pointer_width = "64")]
 #[inline]
 pub(super) fn dev_t<'a, Num: ArgNumber>(dev: u64) -> ArgReg<'a, Num> {

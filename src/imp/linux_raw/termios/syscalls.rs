@@ -5,9 +5,7 @@
 //! See the `rustix::imp` module documentation for details.
 #![allow(unsafe_code)]
 
-use super::super::arch::choose::{syscall3, syscall3_readonly};
 use super::super::conv::{by_ref, c_uint, ret};
-use super::super::reg::nr;
 use crate::fd::BorrowedFd;
 use crate::io;
 use crate::process::{Pid, RawNonZeroPid};
@@ -19,7 +17,7 @@ use crate::termios::{
 #[cfg(feature = "procfs")]
 use crate::{ffi::ZStr, fs::FileType, path::DecInt};
 use core::mem::MaybeUninit;
-use linux_raw_sys::general::{__NR_ioctl, __kernel_pid_t};
+use linux_raw_sys::general::__kernel_pid_t;
 use linux_raw_sys::ioctl::{
     TCFLSH, TCGETS, TCSBRK, TCSETS, TCXONC, TIOCGPGRP, TIOCGSID, TIOCGWINSZ, TIOCSPGRP, TIOCSWINSZ,
 };
@@ -28,13 +26,8 @@ use linux_raw_sys::ioctl::{
 pub(crate) fn tcgetwinsize(fd: BorrowedFd<'_>) -> io::Result<Winsize> {
     unsafe {
         let mut result = MaybeUninit::<Winsize>::uninit();
-        ret(syscall3(
-            nr(__NR_ioctl),
-            fd,
-            c_uint(TIOCGWINSZ),
-            &mut result,
-        ))
-        .map(|()| result.assume_init())
+        ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGWINSZ), &mut result))
+            .map(|()| result.assume_init())
     }
 }
 
@@ -42,8 +35,7 @@ pub(crate) fn tcgetwinsize(fd: BorrowedFd<'_>) -> io::Result<Winsize> {
 pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     unsafe {
         let mut result = MaybeUninit::<Termios>::uninit();
-        ret(syscall3(nr(__NR_ioctl), fd, c_uint(TCGETS), &mut result))
-            .map(|()| result.assume_init())
+        ret(syscall!(__NR_ioctl, fd, c_uint(TCGETS), &mut result)).map(|()| result.assume_init())
     }
 }
 
@@ -51,7 +43,7 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
 pub(crate) fn tcgetpgrp(fd: BorrowedFd<'_>) -> io::Result<Pid> {
     unsafe {
         let mut result = MaybeUninit::<__kernel_pid_t>::uninit();
-        ret(syscall3(nr(__NR_ioctl), fd, c_uint(TIOCGPGRP), &mut result)).map(|()| {
+        ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGPGRP), &mut result)).map(|()| {
             let pid = result.assume_init();
             debug_assert!(pid > 0);
             Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid as u32))
@@ -73,47 +65,33 @@ pub(crate) fn tcsetattr(
         TCSETS + optional_actions as u32
     };
     unsafe {
-        ret(syscall3_readonly(
-            nr(__NR_ioctl),
+        ret(syscall_readonly!(
+            __NR_ioctl,
             fd,
             c_uint(request as u32),
-            by_ref(termios),
+            by_ref(termios)
         ))
     }
 }
 
 #[inline]
 pub(crate) fn tcsendbreak(fd: BorrowedFd) -> io::Result<()> {
-    unsafe {
-        ret(syscall3_readonly(
-            nr(__NR_ioctl),
-            fd,
-            c_uint(TCSBRK),
-            c_uint(0),
-        ))
-    }
+    unsafe { ret(syscall_readonly!(__NR_ioctl, fd, c_uint(TCSBRK), c_uint(0))) }
 }
 
 #[inline]
 pub(crate) fn tcdrain(fd: BorrowedFd) -> io::Result<()> {
-    unsafe {
-        ret(syscall3_readonly(
-            nr(__NR_ioctl),
-            fd,
-            c_uint(TCSBRK),
-            c_uint(1),
-        ))
-    }
+    unsafe { ret(syscall_readonly!(__NR_ioctl, fd, c_uint(TCSBRK), c_uint(1))) }
 }
 
 #[inline]
 pub(crate) fn tcflush(fd: BorrowedFd, queue_selector: QueueSelector) -> io::Result<()> {
     unsafe {
-        ret(syscall3_readonly(
-            nr(__NR_ioctl),
+        ret(syscall_readonly!(
+            __NR_ioctl,
             fd,
             c_uint(TCFLSH),
-            c_uint(queue_selector as u32),
+            c_uint(queue_selector as u32)
         ))
     }
 }
@@ -121,11 +99,11 @@ pub(crate) fn tcflush(fd: BorrowedFd, queue_selector: QueueSelector) -> io::Resu
 #[inline]
 pub(crate) fn tcflow(fd: BorrowedFd, action: Action) -> io::Result<()> {
     unsafe {
-        ret(syscall3_readonly(
-            nr(__NR_ioctl),
+        ret(syscall_readonly!(
+            __NR_ioctl,
             fd,
             c_uint(TCXONC),
-            c_uint(action as u32),
+            c_uint(action as u32)
         ))
     }
 }
@@ -134,7 +112,7 @@ pub(crate) fn tcflow(fd: BorrowedFd, action: Action) -> io::Result<()> {
 pub(crate) fn tcgetsid(fd: BorrowedFd) -> io::Result<Pid> {
     unsafe {
         let mut result = MaybeUninit::<__kernel_pid_t>::uninit();
-        ret(syscall3(nr(__NR_ioctl), fd, c_uint(TIOCGSID), &mut result)).map(|()| {
+        ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGSID), &mut result)).map(|()| {
             let pid = result.assume_init();
             debug_assert!(pid > 0);
             Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid as u32))
@@ -145,18 +123,18 @@ pub(crate) fn tcgetsid(fd: BorrowedFd) -> io::Result<Pid> {
 #[inline]
 pub(crate) fn tcsetwinsize(fd: BorrowedFd, winsize: Winsize) -> io::Result<()> {
     unsafe {
-        ret(syscall3(
-            nr(__NR_ioctl),
+        ret(syscall!(
+            __NR_ioctl,
             fd,
             c_uint(TIOCSWINSZ),
-            by_ref(&winsize),
+            by_ref(&winsize)
         ))
     }
 }
 
 #[inline]
 pub(crate) fn tcsetpgrp(fd: BorrowedFd<'_>, pid: Pid) -> io::Result<()> {
-    unsafe { ret(syscall3(nr(__NR_ioctl), fd, c_uint(TIOCSPGRP), pid)) }
+    unsafe { ret(syscall!(__NR_ioctl, fd, c_uint(TIOCSPGRP), pid)) }
 }
 
 #[inline]

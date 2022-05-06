@@ -6,25 +6,15 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use super::super::arch::choose::{
-    syscall0_readonly, syscall2, syscall4, syscall4_readonly, syscall6,
-};
 use super::super::conv::{by_ref, c_int, c_uint, ret, ret_usize, ret_usize_infallible, zero};
-use super::super::reg::nr;
 use crate::io;
 use crate::process::{Pid, RawNonZeroPid};
 use crate::thread::{ClockId, FutexFlags, FutexOperation, NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
-use linux_raw_sys::general::{
-    __NR_clock_nanosleep, __NR_futex, __NR_gettid, __NR_nanosleep, __kernel_pid_t,
-    __kernel_timespec, TIMER_ABSTIME,
-};
+use linux_raw_sys::general::{__kernel_pid_t, __kernel_timespec, TIMER_ABSTIME};
 #[cfg(target_pointer_width = "32")]
 use {
-    core::convert::TryInto,
-    core::ptr,
-    linux_raw_sys::general::timespec as __kernel_old_timespec,
-    linux_raw_sys::general::{__NR_clock_nanosleep_time64, __NR_futex_time64},
+    core::convert::TryInto, core::ptr, linux_raw_sys::general::timespec as __kernel_old_timespec,
 };
 
 #[inline]
@@ -35,12 +25,12 @@ pub(crate) fn clock_nanosleep_relative(
     #[cfg(target_pointer_width = "32")]
     unsafe {
         let mut rem = MaybeUninit::<__kernel_timespec>::uninit();
-        match ret(syscall4(
-            nr(__NR_clock_nanosleep_time64),
+        match ret(syscall!(
+            __NR_clock_nanosleep_time64,
             id,
             c_int(0),
             by_ref(req),
-            &mut rem,
+            &mut rem
         ))
         .or_else(|err| {
             // See the comments in `rustix_clock_gettime_via_syscall` about
@@ -59,12 +49,12 @@ pub(crate) fn clock_nanosleep_relative(
     #[cfg(target_pointer_width = "64")]
     unsafe {
         let mut rem = MaybeUninit::<__kernel_timespec>::uninit();
-        match ret(syscall4(
-            nr(__NR_clock_nanosleep),
+        match ret(syscall!(
+            __NR_clock_nanosleep,
             id,
             c_int(0),
             by_ref(req),
-            &mut rem,
+            &mut rem
         )) {
             Ok(()) => NanosleepRelativeResult::Ok,
             Err(io::Error::INTR) => NanosleepRelativeResult::Interrupted(rem.assume_init()),
@@ -84,12 +74,12 @@ unsafe fn clock_nanosleep_relative_old(
         tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Error::INVAL)?,
     };
     let mut old_rem = MaybeUninit::<__kernel_old_timespec>::uninit();
-    ret(syscall4(
-        nr(__NR_clock_nanosleep),
+    ret(syscall!(
+        __NR_clock_nanosleep,
         id,
         c_int(0),
         by_ref(&old_req),
-        &mut old_rem,
+        &mut old_rem
     ))?;
     let old_rem = old_rem.assume_init();
     // TODO: With Rust 1.55, we can use MaybeUninit::write here.
@@ -107,12 +97,12 @@ unsafe fn clock_nanosleep_relative_old(
 pub(crate) fn clock_nanosleep_absolute(id: ClockId, req: &__kernel_timespec) -> io::Result<()> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
-        ret(syscall4_readonly(
-            nr(__NR_clock_nanosleep_time64),
+        ret(syscall_readonly!(
+            __NR_clock_nanosleep_time64,
             id,
             c_uint(TIMER_ABSTIME),
             by_ref(req),
-            zero(),
+            zero()
         ))
         .or_else(|err| {
             // See the comments in `rustix_clock_gettime_via_syscall` about
@@ -126,12 +116,12 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, req: &__kernel_timespec) -> 
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
-        ret(syscall4_readonly(
-            nr(__NR_clock_nanosleep),
+        ret(syscall_readonly!(
+            __NR_clock_nanosleep,
             id,
             c_uint(TIMER_ABSTIME),
             by_ref(req),
-            zero(),
+            zero()
         ))
     }
 }
@@ -142,12 +132,12 @@ unsafe fn clock_nanosleep_absolute_old(id: ClockId, req: &__kernel_timespec) -> 
         tv_sec: req.tv_sec.try_into().map_err(|_| io::Error::INVAL)?,
         tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Error::INVAL)?,
     };
-    ret(syscall4_readonly(
-        nr(__NR_clock_nanosleep),
+    ret(syscall_readonly!(
+        __NR_clock_nanosleep,
         id,
         c_int(0),
         by_ref(&old_req),
-        zero(),
+        zero()
     ))
 }
 
@@ -156,12 +146,12 @@ pub(crate) fn nanosleep(req: &__kernel_timespec) -> NanosleepRelativeResult {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         let mut rem = MaybeUninit::<__kernel_timespec>::uninit();
-        match ret(syscall4(
-            nr(__NR_clock_nanosleep_time64),
+        match ret(syscall!(
+            __NR_clock_nanosleep_time64,
             ClockId::Realtime,
             c_int(0),
             by_ref(req),
-            &mut rem,
+            &mut rem
         ))
         .or_else(|err| {
             // See the comments in `rustix_clock_gettime_via_syscall` about
@@ -180,7 +170,7 @@ pub(crate) fn nanosleep(req: &__kernel_timespec) -> NanosleepRelativeResult {
     #[cfg(target_pointer_width = "64")]
     unsafe {
         let mut rem = MaybeUninit::<__kernel_timespec>::uninit();
-        match ret(syscall2(nr(__NR_nanosleep), by_ref(req), &mut rem)) {
+        match ret(syscall!(__NR_nanosleep, by_ref(req), &mut rem)) {
             Ok(()) => NanosleepRelativeResult::Ok,
             Err(io::Error::INTR) => NanosleepRelativeResult::Interrupted(rem.assume_init()),
             Err(err) => NanosleepRelativeResult::Err(err),
@@ -198,7 +188,7 @@ unsafe fn nanosleep_old(
         tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Error::INVAL)?,
     };
     let mut old_rem = MaybeUninit::<__kernel_old_timespec>::uninit();
-    ret(syscall2(nr(__NR_nanosleep), by_ref(&old_req), &mut old_rem))?;
+    ret(syscall!(__NR_nanosleep, by_ref(&old_req), &mut old_rem))?;
     let old_rem = old_rem.assume_init();
     // TODO: With Rust 1.55, we can use MaybeUninit::write here.
     ptr::write(
@@ -214,7 +204,7 @@ unsafe fn nanosleep_old(
 #[inline]
 pub(crate) fn gettid() -> Pid {
     unsafe {
-        let tid: i32 = ret_usize_infallible(syscall0_readonly(nr(__NR_gettid))) as __kernel_pid_t;
+        let tid: i32 = ret_usize_infallible(syscall_readonly!(__NR_gettid)) as __kernel_pid_t;
         debug_assert_ne!(tid, 0);
         Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(tid as u32))
     }
@@ -233,14 +223,14 @@ pub(crate) unsafe fn futex(
 ) -> io::Result<usize> {
     #[cfg(target_pointer_width = "32")]
     {
-        ret_usize(syscall6(
-            nr(__NR_futex_time64),
+        ret_usize(syscall!(
+            __NR_futex_time64,
             uaddr,
             (op, flags),
             c_uint(val),
             utime,
             uaddr2,
-            c_uint(val3),
+            c_uint(val3)
         ))
         .or_else(|err| {
             // See the comments in `rustix_clock_gettime_via_syscall` about
@@ -253,14 +243,14 @@ pub(crate) unsafe fn futex(
         })
     }
     #[cfg(target_pointer_width = "64")]
-    ret_usize(syscall6(
-        nr(__NR_futex),
+    ret_usize(syscall!(
+        __NR_futex,
         uaddr,
         (op, flags),
         c_uint(val),
         utime,
         uaddr2,
-        c_uint(val3),
+        c_uint(val3)
     ))
 }
 
@@ -278,13 +268,13 @@ unsafe fn futex_old(
         tv_sec: (*utime).tv_sec.try_into().map_err(|_| io::Error::INVAL)?,
         tv_nsec: (*utime).tv_nsec.try_into().map_err(|_| io::Error::INVAL)?,
     };
-    ret_usize(syscall6(
-        nr(__NR_futex),
+    ret_usize(syscall!(
+        __NR_futex,
         uaddr,
         (op, flags),
         c_uint(val),
         by_ref(&old_utime),
         uaddr2,
-        c_uint(val3),
+        c_uint(val3)
     ))
 }

@@ -21,15 +21,12 @@ pub(in crate::imp) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<
 
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall1<'a>(
-    nr: SyscallNumber<'_>,
-    a0: impl Into<ArgReg<'a, A0>>,
-) -> RetReg<R0> {
+pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> RetReg<R0> {
     let r0;
     asm!(
         "svc 0",
         in("x8") nr.to_asm(),
-        inlateout("x0") a0.into().to_asm() => r0,
+        inlateout("x0") a0.to_asm() => r0,
         options(nostack, preserves_flags)
     );
     FromAsm::from_asm(r0)
@@ -37,15 +34,15 @@ pub(in crate::imp) unsafe fn syscall1<'a>(
 
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall1_readonly<'a>(
+pub(in crate::imp) unsafe fn syscall1_readonly(
     nr: SyscallNumber<'_>,
-    a0: impl Into<ArgReg<'a, A0>>,
+    a0: ArgReg<'_, A0>,
 ) -> RetReg<R0> {
     let r0;
     asm!(
         "svc 0",
         in("x8") nr.to_asm(),
-        inlateout("x0") a0.into().to_asm() => r0,
+        inlateout("x0") a0.to_asm() => r0,
         options(nostack, preserves_flags, readonly)
     );
     FromAsm::from_asm(r0)
@@ -53,31 +50,28 @@ pub(in crate::imp) unsafe fn syscall1_readonly<'a>(
 
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall1_noreturn<'a>(
-    nr: SyscallNumber<'_>,
-    a0: impl Into<ArgReg<'a, A0>>,
-) -> ! {
+pub(in crate::imp) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> ! {
     asm!(
         "svc 0",
         in("x8") nr.to_asm(),
-        in("x0") a0.into().to_asm(),
+        in("x0") a0.to_asm(),
         options(noreturn)
     )
 }
 
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall2<'a>(
+pub(in crate::imp) unsafe fn syscall2(
     nr: SyscallNumber<'_>,
-    a0: impl Into<ArgReg<'a, A0>>,
-    a1: impl Into<ArgReg<'a, A1>>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
 ) -> RetReg<R0> {
     let r0;
     asm!(
         "svc 0",
         in("x8") nr.to_asm(),
-        inlateout("x0") a0.into().to_asm() => r0,
-        in("x1") a1.into().to_asm(),
+        inlateout("x0") a0.to_asm() => r0,
+        in("x1") a1.to_asm(),
         options(nostack, preserves_flags)
     );
     FromAsm::from_asm(r0)
@@ -85,17 +79,17 @@ pub(in crate::imp) unsafe fn syscall2<'a>(
 
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall2_readonly<'a>(
+pub(in crate::imp) unsafe fn syscall2_readonly(
     nr: SyscallNumber<'_>,
-    a0: impl Into<ArgReg<'a, A0>>,
-    a1: impl Into<ArgReg<'a, A1>>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
 ) -> RetReg<R0> {
     let r0;
     asm!(
         "svc 0",
         in("x8") nr.to_asm(),
-        inlateout("x0") a0.into().to_asm() => r0,
-        in("x1") a1.into().to_asm(),
+        inlateout("x0") a0.to_asm() => r0,
+        in("x1") a1.to_asm(),
         options(nostack, preserves_flags, readonly)
     );
     FromAsm::from_asm(r0)
@@ -103,19 +97,19 @@ pub(in crate::imp) unsafe fn syscall2_readonly<'a>(
 
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall3<'a>(
+pub(in crate::imp) unsafe fn syscall3(
     nr: SyscallNumber<'_>,
-    a0: impl Into<ArgReg<'a, A0>>,
-    a1: impl Into<ArgReg<'a, A1>>,
-    a2: impl Into<ArgReg<'a, A2>>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
 ) -> RetReg<R0> {
     let r0;
     asm!(
         "svc 0",
         in("x8") nr.to_asm(),
-        inlateout("x0") a0.into().to_asm() => r0,
-        in("x1") a1.into().to_asm(),
-        in("x2") a2.into().to_asm(),
+        inlateout("x0") a0.to_asm() => r0,
+        in("x1") a1.to_asm(),
+        in("x2") a2.to_asm(),
         options(nostack, preserves_flags)
     );
     FromAsm::from_asm(r0)
@@ -123,19 +117,19 @@ pub(in crate::imp) unsafe fn syscall3<'a>(
 
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall3_readonly<'a>(
+pub(in crate::imp) unsafe fn syscall3_readonly(
     nr: SyscallNumber<'_>,
-    a0: impl Into<ArgReg<'a, A0>>,
-    a1: impl Into<ArgReg<'a, A1>>,
-    a2: impl Into<ArgReg<'a, A2>>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
 ) -> RetReg<R0> {
     let r0;
     asm!(
         "svc 0",
         in("x8") nr.to_asm(),
-        inlateout("x0") a0.into().to_asm() => r0,
-        in("x1") a1.into().to_asm(),
-        in("x2") a2.into().to_asm(),
+        inlateout("x0") a0.to_asm() => r0,
+        in("x1") a1.to_asm(),
+        in("x2") a2.to_asm(),
         options(nostack, preserves_flags, readonly)
     );
     FromAsm::from_asm(r0)
@@ -143,21 +137,21 @@ pub(in crate::imp) unsafe fn syscall3_readonly<'a>(
 
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall4<'a>(
+pub(in crate::imp) unsafe fn syscall4(
     nr: SyscallNumber<'_>,
-    a0: impl Into<ArgReg<'a, A0>>,
-    a1: impl Into<ArgReg<'a, A1>>,
-    a2: impl Into<ArgReg<'a, A2>>,
-    a3: impl Into<ArgReg<'a, A3>>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
 ) -> RetReg<R0> {
     let r0;
     asm!(
         "svc 0",
         in("x8") nr.to_asm(),
-        inlateout("x0") a0.into().to_asm() => r0,
-        in("x1") a1.into().to_asm(),
-        in("x2") a2.into().to_asm(),
-        in("x3") a3.into().to_asm(),
+        inlateout("x0") a0.to_asm() => r0,
+        in("x1") a1.to_asm(),
+        in("x2") a2.to_asm(),
+        in("x3") a3.to_asm(),
         options(nostack, preserves_flags)
     );
     FromAsm::from_asm(r0)
@@ -165,21 +159,21 @@ pub(in crate::imp) unsafe fn syscall4<'a>(
 
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall4_readonly<'a>(
+pub(in crate::imp) unsafe fn syscall4_readonly(
     nr: SyscallNumber<'_>,
-    a0: impl Into<ArgReg<'a, A0>>,
-    a1: impl Into<ArgReg<'a, A1>>,
-    a2: impl Into<ArgReg<'a, A2>>,
-    a3: impl Into<ArgReg<'a, A3>>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
 ) -> RetReg<R0> {
     let r0;
     asm!(
         "svc 0",
         in("x8") nr.to_asm(),
-        inlateout("x0") a0.into().to_asm() => r0,
-        in("x1") a1.into().to_asm(),
-        in("x2") a2.into().to_asm(),
-        in("x3") a3.into().to_asm(),
+        inlateout("x0") a0.to_asm() => r0,
+        in("x1") a1.to_asm(),
+        in("x2") a2.to_asm(),
+        in("x3") a3.to_asm(),
         options(nostack, preserves_flags, readonly)
     );
     FromAsm::from_asm(r0)
@@ -187,23 +181,23 @@ pub(in crate::imp) unsafe fn syscall4_readonly<'a>(
 
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall5<'a>(
+pub(in crate::imp) unsafe fn syscall5(
     nr: SyscallNumber<'_>,
-    a0: impl Into<ArgReg<'a, A0>>,
-    a1: impl Into<ArgReg<'a, A1>>,
-    a2: impl Into<ArgReg<'a, A2>>,
-    a3: impl Into<ArgReg<'a, A3>>,
-    a4: impl Into<ArgReg<'a, A4>>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
+    a4: ArgReg<'_, A4>,
 ) -> RetReg<R0> {
     let r0;
     asm!(
         "svc 0",
         in("x8") nr.to_asm(),
-        inlateout("x0") a0.into().to_asm() => r0,
-        in("x1") a1.into().to_asm(),
-        in("x2") a2.into().to_asm(),
-        in("x3") a3.into().to_asm(),
-        in("x4") a4.into().to_asm(),
+        inlateout("x0") a0.to_asm() => r0,
+        in("x1") a1.to_asm(),
+        in("x2") a2.to_asm(),
+        in("x3") a3.to_asm(),
+        in("x4") a4.to_asm(),
         options(nostack, preserves_flags)
     );
     FromAsm::from_asm(r0)
@@ -211,23 +205,23 @@ pub(in crate::imp) unsafe fn syscall5<'a>(
 
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall5_readonly<'a>(
+pub(in crate::imp) unsafe fn syscall5_readonly(
     nr: SyscallNumber<'_>,
-    a0: impl Into<ArgReg<'a, A0>>,
-    a1: impl Into<ArgReg<'a, A1>>,
-    a2: impl Into<ArgReg<'a, A2>>,
-    a3: impl Into<ArgReg<'a, A3>>,
-    a4: impl Into<ArgReg<'a, A4>>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
+    a4: ArgReg<'_, A4>,
 ) -> RetReg<R0> {
     let r0;
     asm!(
         "svc 0",
         in("x8") nr.to_asm(),
-        inlateout("x0") a0.into().to_asm() => r0,
-        in("x1") a1.into().to_asm(),
-        in("x2") a2.into().to_asm(),
-        in("x3") a3.into().to_asm(),
-        in("x4") a4.into().to_asm(),
+        inlateout("x0") a0.to_asm() => r0,
+        in("x1") a1.to_asm(),
+        in("x2") a2.to_asm(),
+        in("x3") a3.to_asm(),
+        in("x4") a4.to_asm(),
         options(nostack, preserves_flags, readonly)
     );
     FromAsm::from_asm(r0)
@@ -235,25 +229,25 @@ pub(in crate::imp) unsafe fn syscall5_readonly<'a>(
 
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall6<'a>(
+pub(in crate::imp) unsafe fn syscall6(
     nr: SyscallNumber<'_>,
-    a0: impl Into<ArgReg<'a, A0>>,
-    a1: impl Into<ArgReg<'a, A1>>,
-    a2: impl Into<ArgReg<'a, A2>>,
-    a3: impl Into<ArgReg<'a, A3>>,
-    a4: impl Into<ArgReg<'a, A4>>,
-    a5: impl Into<ArgReg<'a, A5>>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
+    a4: ArgReg<'_, A4>,
+    a5: ArgReg<'_, A5>,
 ) -> RetReg<R0> {
     let r0;
     asm!(
         "svc 0",
         in("x8") nr.to_asm(),
-        inlateout("x0") a0.into().to_asm() => r0,
-        in("x1") a1.into().to_asm(),
-        in("x2") a2.into().to_asm(),
-        in("x3") a3.into().to_asm(),
-        in("x4") a4.into().to_asm(),
-        in("x5") a5.into().to_asm(),
+        inlateout("x0") a0.to_asm() => r0,
+        in("x1") a1.to_asm(),
+        in("x2") a2.to_asm(),
+        in("x3") a3.to_asm(),
+        in("x4") a4.to_asm(),
+        in("x5") a5.to_asm(),
         options(nostack, preserves_flags)
     );
     FromAsm::from_asm(r0)
@@ -261,25 +255,25 @@ pub(in crate::imp) unsafe fn syscall6<'a>(
 
 #[inline]
 #[must_use]
-pub(in crate::imp) unsafe fn syscall6_readonly<'a>(
+pub(in crate::imp) unsafe fn syscall6_readonly(
     nr: SyscallNumber<'_>,
-    a0: impl Into<ArgReg<'a, A0>>,
-    a1: impl Into<ArgReg<'a, A1>>,
-    a2: impl Into<ArgReg<'a, A2>>,
-    a3: impl Into<ArgReg<'a, A3>>,
-    a4: impl Into<ArgReg<'a, A4>>,
-    a5: impl Into<ArgReg<'a, A5>>,
+    a0: ArgReg<'_, A0>,
+    a1: ArgReg<'_, A1>,
+    a2: ArgReg<'_, A2>,
+    a3: ArgReg<'_, A3>,
+    a4: ArgReg<'_, A4>,
+    a5: ArgReg<'_, A5>,
 ) -> RetReg<R0> {
     let r0;
     asm!(
         "svc 0",
         in("x8") nr.to_asm(),
-        inlateout("x0") a0.into().to_asm() => r0,
-        in("x1") a1.into().to_asm(),
-        in("x2") a2.into().to_asm(),
-        in("x3") a3.into().to_asm(),
-        in("x4") a4.into().to_asm(),
-        in("x5") a5.into().to_asm(),
+        inlateout("x0") a0.to_asm() => r0,
+        in("x1") a1.to_asm(),
+        in("x2") a2.to_asm(),
+        in("x3") a3.to_asm(),
+        in("x4") a4.to_asm(),
+        in("x5") a5.to_asm(),
         options(nostack, preserves_flags, readonly)
     );
     FromAsm::from_asm(r0)

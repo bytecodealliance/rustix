@@ -14,6 +14,7 @@
 //! such as which pointers are array slices, out parameters, or in-out
 //! parameters, which integers are owned or borrowed file descriptors, etc.
 
+#[macro_use]
 mod arch;
 mod conv;
 mod elf;
