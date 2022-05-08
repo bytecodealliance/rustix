@@ -5,11 +5,41 @@ use crate::fd::BorrowedFd;
 use bitflags::bitflags;
 
 /// `struct timespec`
+#[cfg(not(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+)))]
 pub type Timespec = c::timespec;
 
+/// `struct timespec`
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+))]
+#[derive(Debug, Clone)]
+#[repr(C)]
+pub struct Timespec {
+    /// Seconds.
+    pub tv_sec: Secs,
+
+    /// Nanoseconds. Must be less than 1_000_000_000.
+    pub tv_nsec: Nsecs,
+}
+
 /// A type for the `tv_sec` field of [`Timespec`].
+#[cfg(not(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+)))]
 #[allow(deprecated)]
 pub type Secs = c::time_t;
+
+/// A type for the `tv_sec` field of [`Timespec`].
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+))]
+pub type Secs = i64;
 
 /// A type for the `tv_nsec` field of [`Timespec`].
 #[cfg(all(target_arch = "x86_64", target_pointer_width = "32"))]
@@ -18,6 +48,63 @@ pub type Nsecs = i64;
 /// A type for the `tv_nsec` field of [`Timespec`].
 #[cfg(not(all(target_arch = "x86_64", target_pointer_width = "32")))]
 pub type Nsecs = c::c_long;
+
+/// On most platforms, `LibcTimespec` is just `Timespec`.
+#[cfg(not(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+)))]
+pub(crate) type LibcTimespec = Timespec;
+
+/// On 32-bit glibc platforms, `timespec` has anonymous padding fields, which
+/// Rust doesn't support yet (see `unnamed_fields`), so we define our own
+/// struct with explicit padding, with bidirectional `From` impls.
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+))]
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub(crate) struct LibcTimespec {
+    pub(crate) tv_sec: Secs,
+
+    #[cfg(target_endian = "big")]
+    padding: core::mem::MaybeUninit<u32>,
+
+    pub(crate) tv_nsec: Nsecs,
+
+    #[cfg(target_endian = "little")]
+    padding: core::mem::MaybeUninit<u32>,
+}
+
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+))]
+impl From<LibcTimespec> for Timespec {
+    #[inline]
+    fn from(t: LibcTimespec) -> Self {
+        Self {
+            tv_sec: t.tv_sec,
+            tv_nsec: t.tv_nsec,
+        }
+    }
+}
+
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+))]
+impl From<Timespec> for LibcTimespec {
+    #[inline]
+    fn from(t: Timespec) -> Self {
+        Self {
+            tv_sec: t.tv_sec,
+            tv_nsec: t.tv_nsec,
+            padding: core::mem::MaybeUninit::uninit(),
+        }
+    }
+}
 
 /// `CLOCK_*` constants for use with [`clock_gettime`].
 ///
@@ -130,26 +217,95 @@ pub enum DynamicClockId<'a> {
 
 /// `struct itimerspec`
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
-pub type Itimerspec = libc::itimerspec;
+#[cfg(not(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+)))]
+pub type Itimerspec = c::itimerspec;
+
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+))]
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub struct Itimerspec {
+    pub it_interval: Timespec,
+    pub it_value: Timespec,
+}
+
+/// On most platforms, `LibcItimerspec` is just `Itimerspec`.
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(not(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+)))]
+pub(crate) type LibcItimerspec = Itimerspec;
+
+/// On 32-bit glibc platforms, `LibcTimespec` differs from `Timespec`, so we
+/// define our own struct, with bidirectional `From` impls.
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+))]
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub(crate) struct LibcItimerspec {
+    pub it_interval: LibcTimespec,
+    pub it_value: LibcTimespec,
+}
+
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+))]
+impl From<LibcItimerspec> for Itimerspec {
+    #[inline]
+    fn from(t: LibcItimerspec) -> Self {
+        Self {
+            it_interval: t.it_interval.into(),
+            it_value: t.it_value.into(),
+        }
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu"
+))]
+impl From<Itimerspec> for LibcItimerspec {
+    #[inline]
+    fn from(t: Itimerspec) -> Self {
+        Self {
+            it_interval: t.it_interval.into(),
+            it_value: t.it_value.into(),
+        }
+    }
+}
 
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 bitflags! {
     /// `TFD_*` flags for use with [`timerfd_create`].
-    pub struct TimerfdFlags: libc::c_int {
+    pub struct TimerfdFlags: c::c_int {
         /// `TFD_NONBLOCK`
-        const NONBLOCK = libc::TFD_NONBLOCK;
+        const NONBLOCK = c::TFD_NONBLOCK;
 
         /// `TFD_CLOEXEC`
-        const CLOEXEC = libc::TFD_CLOEXEC;
+        const CLOEXEC = c::TFD_CLOEXEC;
     }
 }
 
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 bitflags! {
     /// `TFD_TIMER_*` flags for use with [`timerfd_settime`].
-    pub struct TimerfdTimerFlags: libc::c_int {
+    pub struct TimerfdTimerFlags: c::c_int {
         /// `TFD_TIMER_ABSTIME`
-        const ABSTIME = libc::TFD_TIMER_ABSTIME;
+        const ABSTIME = c::TFD_TIMER_ABSTIME;
 
         /// `TFD_TIMER_CANCEL_ON_SET`
         #[cfg(any(target_os = "android", target_os = "linux"))]

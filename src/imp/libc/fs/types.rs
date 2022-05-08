@@ -811,12 +811,47 @@ pub type Stat = c::stat;
 /// [`statat`]: crate::fs::statat
 /// [`fstat`]: crate::fs::fstat
 #[cfg(any(
-    target_os = "android",
-    target_os = "linux",
+    all(
+        any(target_os = "android", target_os = "linux"),
+        target_pointer_width = "64"
+    ),
     target_os = "emscripten",
     target_os = "l4re"
 ))]
 pub type Stat = c::stat64;
+
+/// `struct stat` for use with [`statat`] and [`fstat`].
+///
+/// [`statat`]: crate::fs::statat
+/// [`fstat`]: crate::fs::fstat
+// On 32-bit, Linux's `struct stat64` has a 32-bit `st_mtime` and friends, so
+// we use our own struct, populated from `statx` where possible, to avoid the
+// y2038 bug.
+#[cfg(all(
+    any(target_os = "android", target_os = "linux"),
+    target_pointer_width = "32"
+))]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+#[allow(missing_docs)]
+pub struct Stat {
+    pub st_dev: u64,
+    pub st_mode: u32,
+    pub st_nlink: u32,
+    pub st_uid: u32,
+    pub st_gid: u32,
+    pub st_rdev: u64,
+    pub st_size: i64,
+    pub st_blksize: u32,
+    pub st_blocks: u64,
+    pub st_atime: u64,
+    pub st_atime_nsec: u32,
+    pub st_mtime: u64,
+    pub st_mtime_nsec: u32,
+    pub st_ctime: u64,
+    pub st_ctime_nsec: u32,
+    pub st_ino: u64,
+}
 
 /// `struct statfs` for use with [`fstatfs`].
 ///

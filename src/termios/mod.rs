@@ -7,6 +7,7 @@ mod tc;
 mod tty;
 
 pub use cf::{cfgetispeed, cfgetospeed, cfmakeraw, cfsetispeed, cfsetospeed, cfsetspeed};
+pub use constants::speed_value;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",

@@ -1,6 +1,6 @@
 #![cfg(not(target_os = "wasi"))]
 
-#[cfg(not(target_ot = "redox"))]
+#[cfg(not(target_os = "redox"))]
 #[test]
 fn test_mmap() {
     use rustix::fs::{cwd, openat, Mode, OFlags};
@@ -127,7 +127,7 @@ fn test_mlock() {
     }
 }
 
-#[cfg(not(target_ot = "redox"))]
+#[cfg(not(target_os = "redox"))]
 #[test]
 fn test_madvise() {
     use rustix::mm::{madvise, mmap_anonymous, munmap, Advice, MapFlags, ProtFlags};

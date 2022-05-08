@@ -11,7 +11,10 @@ fn main() -> io::Result<()> {
     println!("Parent Pid: {}", Pid::as_raw(getppid()));
     println!("Uid: {}", getuid().as_raw());
     println!("Gid: {}", getgid().as_raw());
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(any(
+        all(target_os = "android", target_pointer_width = "64"),
+        target_os = "linux"
+    ))]
     {
         let (a, b) = linux_hwcap();
         println!("Linux hwcap: {:#x}, {:#x}", a, b);

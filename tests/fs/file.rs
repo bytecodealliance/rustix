@@ -1,6 +1,7 @@
 #[cfg(not(target_os = "redox"))]
 #[test]
 fn test_file() {
+    #[cfg(not(target_os = "illumos"))]
     rustix::fs::accessat(
         rustix::fs::cwd(),
         "Cargo.toml",
@@ -40,10 +41,13 @@ fn test_file() {
     );
 
     #[cfg(not(any(
+        target_os = "dragonfly",
+        target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
+        target_os = "redox"
     )))]
     rustix::fs::fadvise(&file, 0, 10, rustix::fs::Advice::Normal).unwrap();
 
@@ -60,7 +64,12 @@ fn test_file() {
     assert!(stat.st_size > 0);
     assert!(stat.st_blocks > 0);
 
-    #[cfg(not(any(target_os = "netbsd", target_os = "wasi")))]
+    #[cfg(not(any(
+        target_os = "illumos",
+        target_os = "netbsd",
+        target_os = "redox",
+        target_os = "wasi"
+    )))]
     // not implemented in libc for netbsd yet
     {
         let statfs = rustix::fs::fstatfs(&file).unwrap();

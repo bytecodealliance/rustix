@@ -9,6 +9,7 @@
 #[macro_use]
 mod weak;
 
+#[cfg(not(target_os = "wasi"))]
 mod auxv;
 mod cpu_set;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
@@ -17,7 +18,7 @@ mod id;
 mod membarrier;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))] // WASI doesn't have [gs]etpriority.
 mod priority;
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 mod rlimit;
 mod sched_yield;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.

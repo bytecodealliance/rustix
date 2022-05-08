@@ -45,10 +45,10 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             use rustix::termios::*;
             let term = tcgetattr(fd)?;
 
-            if let Some(speed) = display_speed(cfgetispeed(&term)) {
+            if let Some(speed) = speed_value(cfgetispeed(&term)) {
                 println!(" - ispeed: {}", speed);
             }
-            if let Some(speed) = display_speed(cfgetospeed(&term)) {
+            if let Some(speed) = speed_value(cfgetospeed(&term)) {
                 println!(" - ospeed: {}", speed);
             }
 
@@ -441,46 +441,6 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 
     println!();
     Ok(())
-}
-
-#[cfg(feature = "termios")]
-#[cfg(not(windows))]
-fn display_speed(speed: rustix::termios::Speed) -> Option<u32> {
-    use rustix::termios::*;
-    match speed {
-        B0 => Some(0),
-        B50 => Some(50),
-        B75 => Some(75),
-        B110 => Some(110),
-        B134 => Some(134),
-        B150 => Some(150),
-        B200 => Some(200),
-        B300 => Some(300),
-        B600 => Some(600),
-        B1200 => Some(1200),
-        B1800 => Some(1800),
-        B2400 => Some(2400),
-        B4800 => Some(4800),
-        B9600 => Some(9600),
-        B19200 => Some(19200),
-        B38400 => Some(38400),
-        B57600 => Some(57600),
-        B115200 => Some(115200),
-        B230400 => Some(230400),
-        B460800 => Some(460800),
-        B500000 => Some(500000),
-        B576000 => Some(576000),
-        B921600 => Some(921600),
-        B1000000 => Some(1000000),
-        B1152000 => Some(1152000),
-        B1500000 => Some(1500000),
-        B2000000 => Some(2000000),
-        B2500000 => Some(2500000),
-        B3000000 => Some(3000000),
-        B3500000 => Some(3500000),
-        B4000000 => Some(4000000),
-        _ => None,
-    }
 }
 
 #[cfg(feature = "termios")]

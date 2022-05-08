@@ -5,15 +5,19 @@
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
 #[cfg(not(windows))]
+#[cfg(not(target_os = "wasi"))]
 mod dup2_to_replace_stdio;
 #[cfg(not(windows))]
+#[cfg(not(target_os = "wasi"))]
 mod dup3;
 #[cfg(not(feature = "rustc-dep-of-std"))] // TODO
 #[cfg(not(windows))]
 #[cfg(feature = "net")]
+#[cfg(not(target_os = "wasi"))]
 mod epoll;
 mod error;
 #[cfg(not(windows))]
+#[cfg(not(target_os = "wasi"))]
 mod eventfd;
 #[cfg(not(windows))]
 mod from_into;

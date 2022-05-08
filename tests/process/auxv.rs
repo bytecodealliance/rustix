@@ -1,4 +1,7 @@
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(
+    all(target_os = "android", target_pointer_width = "64"),
+    target_os = "linux"
+))]
 use rustix::process::linux_hwcap;
 use rustix::process::{clock_ticks_per_second, page_size};
 
@@ -19,7 +22,10 @@ fn test_clock_ticks_per_second() {
 }
 
 #[test]
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(
+    all(target_os = "android", target_pointer_width = "64"),
+    target_os = "linux"
+))]
 fn test_linux_hwcap() {
     weak!(fn getauxval(libc::c_ulong) -> libc::c_ulong);
 

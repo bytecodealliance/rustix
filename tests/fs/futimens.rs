@@ -29,8 +29,14 @@ fn test_futimens() {
     let after = fstat(&foo).unwrap();
 
     assert_eq!(times.last_modification.tv_sec as u64, after.st_mtime as u64);
+    #[cfg(not(target_os = "netbsd"))]
     assert_eq!(
         times.last_modification.tv_nsec as u64,
         after.st_mtime_nsec as u64
+    );
+    #[cfg(target_os = "netbsd")]
+    assert_eq!(
+        times.last_modification.tv_nsec as u64,
+        after.st_mtimensec as u64
     );
 }
