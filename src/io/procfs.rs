@@ -35,7 +35,7 @@ const PROC_ROOT_INO: u64 = 1;
 
 // Identify an entry within "/proc", to determine which anomalies to
 // check for.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 enum Kind {
     Proc,
     Pid,

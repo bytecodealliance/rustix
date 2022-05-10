@@ -326,12 +326,13 @@ fn rlimit_from_libc(lim: libc_rlimit) -> Rlimit {
 /// Convert a C `libc_rlimit` to a Rust `Rlimit`.
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 fn rlimit_to_libc(lim: Rlimit) -> io::Result<libc_rlimit> {
-    let rlim_cur = match lim.current {
-        Some(r) => r.try_into().map_err(|_| io::Errno::INVAL)?,
+    let Rlimit { current, maximum } = lim;
+    let rlim_cur = match current {
+        Some(r) => r.try_into().map_err(|_e| io::Errno::INVAL)?,
         None => LIBC_RLIM_INFINITY as _,
     };
-    let rlim_max = match lim.maximum {
-        Some(r) => r.try_into().map_err(|_| io::Errno::INVAL)?,
+    let rlim_max = match maximum {
+        Some(r) => r.try_into().map_err(|_e| io::Errno::INVAL)?,
         None => LIBC_RLIM_INFINITY as _,
     };
     Ok(libc_rlimit { rlim_cur, rlim_max })

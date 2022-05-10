@@ -901,12 +901,12 @@ pub(crate) mod sockopt {
             if linger.subsec_nanos() != 0 {
                 l_linger = l_linger.checked_add(1).ok_or(io::Errno::INVAL)?;
             }
-            l_linger.try_into().map_err(|_| io::Errno::INVAL)?
+            l_linger.try_into().map_err(|_e| io::Errno::INVAL)?
         } else {
             0
         };
         let linger = c::linger {
-            l_onoff: linger.is_some() as c::c_int,
+            l_onoff: c::c_int::from(linger.is_some()),
             l_linger,
         };
         setsockopt(fd, c::SOL_SOCKET as _, c::SO_LINGER, linger)
@@ -1030,7 +1030,7 @@ pub(crate) mod sockopt {
                 }
                 let mut timeout = __kernel_timespec {
                     tv_sec: timeout.as_secs().try_into().unwrap_or(i64::MAX),
-                    tv_nsec: timeout.subsec_nanos() as _,
+                    tv_nsec: timeout.subsec_nanos().into(),
                 };
                 if timeout.tv_sec == 0 && timeout.tv_nsec == 0 {
                     timeout.tv_nsec = 1;
@@ -1225,7 +1225,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     fn from_bool(value: bool) -> c::c_uint {
-        value as c::c_uint
+        c::c_uint::from(value)
     }
 
     #[inline]

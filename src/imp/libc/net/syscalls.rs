@@ -376,7 +376,7 @@ pub(crate) fn socketpair(
     unsafe {
         let mut fds = MaybeUninit::<[OwnedFd; 2]>::uninit();
         ret(c::socketpair(
-            domain.0 as c::c_int,
+            c::c_int::from(domain.0),
             type_.0 as c::c_int | flags.bits(),
             protocol.0,
             fds.as_mut_ptr().cast::<c::c_int>(),
@@ -501,7 +501,7 @@ pub(crate) mod sockopt {
             if linger.subsec_nanos() != 0 {
                 l_linger = l_linger.checked_add(1).ok_or(io::Errno::INVAL)?;
             }
-            l_linger.try_into().map_err(|_| io::Errno::INVAL)?
+            l_linger.try_into().map_err(|_e| io::Errno::INVAL)?
         } else {
             0
         };

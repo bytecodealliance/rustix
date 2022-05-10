@@ -302,7 +302,7 @@ pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
         // `FIONREAD` returns the number of bytes silently casted to a `c_int`,
         // even when this is lossy. The best we can do is convert it back to a
         // `u64` without sign-extending it back first.
-        Ok(nread.assume_init() as c::c_uint as u64)
+        Ok(u64::from(nread.assume_init() as c::c_uint))
     }
 }
 

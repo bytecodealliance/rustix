@@ -180,40 +180,40 @@ pub(super) fn no_fd<'a, Num: ArgNumber>() -> ArgReg<'a, Num> {
 }
 
 #[inline]
-pub(super) fn slice_just_addr<'a, T: Sized, Num: ArgNumber>(v: &'a [T]) -> ArgReg<'a, Num> {
+pub(super) fn slice_just_addr<T: Sized, Num: ArgNumber>(v: &[T]) -> ArgReg<Num> {
     let mut_ptr = v.as_ptr() as *mut T;
     raw_arg(mut_ptr.cast())
 }
 
 #[inline]
-pub(super) fn slice<'a, T: Sized, Num0: ArgNumber, Num1: ArgNumber>(
-    v: &'a [T],
-) -> (ArgReg<'a, Num0>, ArgReg<'a, Num1>) {
+pub(super) fn slice<T: Sized, Num0: ArgNumber, Num1: ArgNumber>(
+    v: &[T],
+) -> (ArgReg<Num0>, ArgReg<Num1>) {
     (slice_just_addr(v), pass_usize(v.len()))
 }
 
 #[inline]
-pub(super) fn slice_mut<'a, T: Sized, Num0: ArgNumber, Num1: ArgNumber>(
+pub(super) fn slice_mut<T: Sized, Num0: ArgNumber, Num1: ArgNumber>(
     v: &mut [T],
-) -> (ArgReg<'a, Num0>, ArgReg<'a, Num1>) {
+) -> (ArgReg<Num0>, ArgReg<Num1>) {
     (raw_arg(v.as_mut_ptr().cast()), pass_usize(v.len()))
 }
 
 #[inline]
-pub(super) fn by_ref<'a, T: Sized, Num: ArgNumber>(t: &'a T) -> ArgReg<'a, Num> {
+pub(super) fn by_ref<T: Sized, Num: ArgNumber>(t: &T) -> ArgReg<Num> {
     let mut_ptr = as_ptr(t) as *mut T;
     raw_arg(mut_ptr.cast())
 }
 
 #[inline]
-pub(super) fn by_mut<'a, T: Sized, Num: ArgNumber>(t: &'a mut T) -> ArgReg<'a, Num> {
+pub(super) fn by_mut<T: Sized, Num: ArgNumber>(t: &mut T) -> ArgReg<Num> {
     raw_arg(as_mut_ptr(t).cast())
 }
 
 /// Convert an optional mutable reference into a `usize` for passing to a
 /// syscall.
 #[inline]
-pub(super) fn opt_mut<'a, T: Sized, Num: ArgNumber>(t: Option<&'a mut T>) -> ArgReg<'a, Num> {
+pub(super) fn opt_mut<T: Sized, Num: ArgNumber>(t: Option<&mut T>) -> ArgReg<Num> {
     // This optimizes into the equivalent of `transmute(t)`, and has the
     // advantage of not requiring `unsafe`.
     match t {

@@ -269,6 +269,7 @@ bitflags! {
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(i32)]
+#[non_exhaustive]
 pub enum Advice {
     /// `POSIX_MADV_NORMAL`
     #[cfg(not(target_os = "android"))]

@@ -616,10 +616,10 @@ pub fn speed_value(speed: imp::termios::types::Speed) -> Option<u32> {
         imp::termios::types::B19200 => Some(19200),
         imp::termios::types::B38400 => Some(38400),
         imp::termios::types::B57600 => Some(57600),
-        imp::termios::types::B115200 => Some(115200),
-        imp::termios::types::B230400 => Some(230400),
+        imp::termios::types::B115200 => Some(115_200),
+        imp::termios::types::B230400 => Some(230_400),
         #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
-        imp::termios::types::B460800 => Some(460800),
+        imp::termios::types::B460800 => Some(460_800),
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
@@ -629,7 +629,7 @@ pub fn speed_value(speed: imp::termios::types::Speed) -> Option<u32> {
             target_os = "netbsd",
             target_os = "openbsd",
         )))]
-        imp::termios::types::B500000 => Some(500000),
+        imp::termios::types::B500000 => Some(500_000),
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
@@ -639,9 +639,9 @@ pub fn speed_value(speed: imp::termios::types::Speed) -> Option<u32> {
             target_os = "netbsd",
             target_os = "openbsd",
         )))]
-        imp::termios::types::B576000 => Some(576000),
+        imp::termios::types::B576000 => Some(576_000),
         #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
-        imp::termios::types::B921600 => Some(921600),
+        imp::termios::types::B921600 => Some(921_600),
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
@@ -650,7 +650,7 @@ pub fn speed_value(speed: imp::termios::types::Speed) -> Option<u32> {
             target_os = "netbsd",
             target_os = "openbsd",
         )))]
-        imp::termios::types::B1000000 => Some(1000000),
+        imp::termios::types::B1000000 => Some(1_000_000),
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
@@ -659,7 +659,7 @@ pub fn speed_value(speed: imp::termios::types::Speed) -> Option<u32> {
             target_os = "netbsd",
             target_os = "openbsd",
         )))]
-        imp::termios::types::B1152000 => Some(1152000),
+        imp::termios::types::B1152000 => Some(1_152_000),
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
@@ -668,7 +668,7 @@ pub fn speed_value(speed: imp::termios::types::Speed) -> Option<u32> {
             target_os = "netbsd",
             target_os = "openbsd",
         )))]
-        imp::termios::types::B1500000 => Some(1500000),
+        imp::termios::types::B1500000 => Some(1_500_000),
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
@@ -677,7 +677,7 @@ pub fn speed_value(speed: imp::termios::types::Speed) -> Option<u32> {
             target_os = "netbsd",
             target_os = "openbsd",
         )))]
-        imp::termios::types::B2000000 => Some(2000000),
+        imp::termios::types::B2000000 => Some(2_000_000),
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
@@ -686,7 +686,7 @@ pub fn speed_value(speed: imp::termios::types::Speed) -> Option<u32> {
             target_os = "netbsd",
             target_os = "openbsd",
         )))]
-        imp::termios::types::B2500000 => Some(2500000),
+        imp::termios::types::B2500000 => Some(2_500_000),
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
@@ -695,7 +695,7 @@ pub fn speed_value(speed: imp::termios::types::Speed) -> Option<u32> {
             target_os = "netbsd",
             target_os = "openbsd",
         )))]
-        imp::termios::types::B3000000 => Some(3000000),
+        imp::termios::types::B3000000 => Some(3_000_000),
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
@@ -704,7 +704,7 @@ pub fn speed_value(speed: imp::termios::types::Speed) -> Option<u32> {
             target_os = "netbsd",
             target_os = "openbsd",
         )))]
-        imp::termios::types::B3500000 => Some(3500000),
+        imp::termios::types::B3500000 => Some(3_500_000),
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
@@ -713,7 +713,7 @@ pub fn speed_value(speed: imp::termios::types::Speed) -> Option<u32> {
             target_os = "netbsd",
             target_os = "openbsd",
         )))]
-        imp::termios::types::B4000000 => Some(4000000),
+        imp::termios::types::B4000000 => Some(4_000_000),
         _ => None,
     }
 }

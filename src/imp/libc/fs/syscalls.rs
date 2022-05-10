@@ -164,9 +164,9 @@ fn openat_via_syscall(
         let mode = c::c_uint::from(mode.bits());
         ret_owned_fd(c::syscall(
             c::SYS_openat,
-            dirfd as c::c_long,
+            c::c_long::from(dirfd),
             path,
-            oflags as c::c_long,
+            c::c_long::from(oflags),
             mode as c::c_long,
         ) as c::c_int)
     }
@@ -707,7 +707,7 @@ pub(crate) fn mknodat(
             borrowed_fd(dirfd),
             c_str(path),
             (mode.bits() | file_type.as_raw_mode()) as c::mode_t,
-            dev.try_into().map_err(|_| io::Errno::PERM)?,
+            dev.try_into().map_err(|_e| io::Errno::PERM)?,
         ))
     }
 }

@@ -547,18 +547,14 @@ pub const IORING_OFF_SQES: u64 = sys::IORING_OFF_SQES as _;
 /// TODO: Make this a const fn. It needs borrow_raw to be a const fn.
 #[inline]
 #[doc(alias = "IORING_REGISTER_FILES_SKIP")]
+#[allow(unsafe_code)]
 pub fn io_uring_register_files_skip() -> BorrowedFd<'static> {
     let files_skip = sys::IORING_REGISTER_FILES_SKIP as RawFd;
 
-    // # Safety
-    //
-    // `IORING_REGISTER_FILES_SKIP` is a reserved value that is never
+    // Safety: `IORING_REGISTER_FILES_SKIP` is a reserved value that is never
     // dynamically allocated, so it'll remain valid for the duration of
     // `'static`.
-    #[allow(unsafe_code)]
-    unsafe {
-        BorrowedFd::<'static>::borrow_raw(files_skip)
-    }
+    unsafe { BorrowedFd::<'static>::borrow_raw(files_skip) }
 }
 
 /// A pointer in the io_uring API.
@@ -657,6 +653,7 @@ impl Default for io_uring_user_data {
     #[inline]
     fn default() -> Self {
         let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        // Safety: All of Linux's io_uring structs may be zero-initialized.
         unsafe {
             ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
             s.assume_init()
@@ -666,7 +663,7 @@ impl Default for io_uring_user_data {
 
 impl core::fmt::Debug for io_uring_user_data {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        // Just format as a `u64`, since formatting doesn't preserve
+        // Safety: Just format as a `u64`, since formatting doesn't preserve
         // provenance, and we don't have a discriminant.
         unsafe { self.u64_.fmt(fmt) }
     }
@@ -689,7 +686,7 @@ pub struct io_uring_sqe {
     pub buf: buf_union,
     pub personality: u16,
     pub splice_fd_in_or_file_index: splice_fd_in_or_file_index_union,
-    pub __pad2: [u64; 2usize],
+    pub __pad2: [u64; 2_usize],
 }
 
 #[allow(missing_docs)]
@@ -768,7 +765,7 @@ pub struct io_uring_restriction {
     pub opcode: IoringRestrictionOp,
     pub register_or_sqe_op_or_sqe_flags: register_or_sqe_op_or_sqe_flags_union,
     pub resv: u8,
-    pub resv2: [u32; 3usize],
+    pub resv2: [u32; 3_usize],
 }
 
 #[allow(missing_docs)]
@@ -791,7 +788,7 @@ pub struct io_uring_params {
     pub sq_thread_idle: u32,
     pub features: IoringFeatureFlags,
     pub wq_fd: u32,
-    pub resv: [u32; 3usize],
+    pub resv: [u32; 3_usize],
     pub sq_off: io_sqring_offsets,
     pub cq_off: io_cqring_offsets,
 }
@@ -833,7 +830,7 @@ pub struct io_uring_probe {
     pub last_op: IoringOp,
     pub ops_len: u8,
     pub resv: u16,
-    pub resv2: [u32; 3usize],
+    pub resv2: [u32; 3_usize],
     pub ops: sys::__IncompleteArrayField<io_uring_probe_op>,
 }
 
@@ -927,6 +924,7 @@ impl Default for off_or_addr2_union {
     #[inline]
     fn default() -> Self {
         let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        // Safety: All of Linux's io_uring structs may be zero-initialized.
         unsafe {
             ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
             s.assume_init()
@@ -938,6 +936,7 @@ impl Default for addr_or_splice_off_in_union {
     #[inline]
     fn default() -> Self {
         let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        // Safety: All of Linux's io_uring structs may be zero-initialized.
         unsafe {
             ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
             s.assume_init()
@@ -949,6 +948,7 @@ impl Default for op_flags_union {
     #[inline]
     fn default() -> Self {
         let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        // Safety: All of Linux's io_uring structs may be zero-initialized.
         unsafe {
             ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
             s.assume_init()
@@ -960,6 +960,7 @@ impl Default for buf_union {
     #[inline]
     fn default() -> Self {
         let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        // Safety: All of Linux's io_uring structs may be zero-initialized.
         unsafe {
             ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
             s.assume_init()
@@ -971,6 +972,7 @@ impl Default for splice_fd_in_or_file_index_union {
     #[inline]
     fn default() -> Self {
         let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        // Safety: All of Linux's io_uring structs may be zero-initialized.
         unsafe {
             ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
             s.assume_init()
@@ -982,6 +984,7 @@ impl Default for register_or_sqe_op_or_sqe_flags_union {
     #[inline]
     fn default() -> Self {
         let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        // Safety: All of Linux's io_uring structs may be zero-initialized.
         unsafe {
             ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
             s.assume_init()

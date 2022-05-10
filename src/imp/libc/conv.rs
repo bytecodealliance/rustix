@@ -139,7 +139,7 @@ pub(super) fn ret_pid_t(raw: c::pid_t) -> io::Result<c::pid_t> {
     }
 }
 
-/// Convert a c_int returned from a libc function to an `OwnedFd`, if valid.
+/// Convert a `c_int` returned from a libc function to an `OwnedFd`, if valid.
 ///
 /// # Safety
 ///
@@ -172,7 +172,7 @@ pub(super) fn ret_discarded_char_ptr(raw: *mut c::c_char) -> io::Result<()> {
     }
 }
 
-/// Convert a c_long returned from `syscall` to an `OwnedFd`, if valid.
+/// Convert a `c_long` returned from `syscall` to an `OwnedFd`, if valid.
 ///
 /// # Safety
 ///
