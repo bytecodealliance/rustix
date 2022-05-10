@@ -389,8 +389,8 @@ fn statat_old(dirfd: BorrowedFd<'_>, path: &ZStr, flags: AtFlags) -> io::Result<
             c_str(path),
             result.as_mut_ptr(),
             flags.bits(),
-        ))
-        .and_then(|()| stat64_to_stat(result.assume_init()))
+        ))?;
+        stat64_to_stat(result.assume_init())
     }
 }
 
@@ -947,8 +947,8 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     unsafe {
         let mut result = MaybeUninit::<c::stat64>::uninit();
-        ret(libc_fstat(borrowed_fd(fd), result.as_mut_ptr()))
-            .and_then(|()| stat64_to_stat(result.assume_init()))
+        ret(libc_fstat(borrowed_fd(fd), result.as_mut_ptr()))?;
+        stat64_to_stat(result.assume_init())
     }
 }
 

@@ -5,43 +5,28 @@
 //! See the `rustix::imp` module documentation for details.
 #![allow(unsafe_code)]
 
-use super::super::arch::choose::{
-    syscall1_noreturn, syscall1_readonly, syscall2_readonly, syscall3_readonly, syscall5_readonly,
-};
 use super::super::c;
-use super::super::conv::{
-    borrowed_fd, c_int, c_str, c_uint, ret, ret_c_uint, ret_error, ret_usize_infallible, void_star,
-    zero,
-};
-use super::super::reg::nr;
+#[cfg(target_arch = "x86")]
+use super::super::conv::by_mut;
+use super::super::conv::{c_int, c_uint, ret, ret_c_uint, ret_error, ret_usize_infallible, zero};
 use crate::fd::BorrowedFd;
 use crate::ffi::ZStr;
 use crate::fs::AtFlags;
 use crate::io;
 use crate::process::{Pid, RawNonZeroPid};
-#[cfg(target_arch = "arm")]
-use linux_raw_sys::general::__ARM_NR_set_tls;
-use linux_raw_sys::general::{
-    __NR_clone, __NR_execve, __NR_execveat, __NR_exit, __NR_prctl, __NR_set_tid_address,
-    __kernel_pid_t, PR_SET_NAME, SIGCHLD,
-};
-#[cfg(target_arch = "x86")]
-use {super::super::conv::by_mut, linux_raw_sys::general::__NR_set_thread_area};
+use linux_raw_sys::general::{__kernel_pid_t, PR_SET_NAME, SIGCHLD};
 #[cfg(target_arch = "x86_64")]
-use {
-    super::super::conv::ret_infallible,
-    linux_raw_sys::general::{__NR_arch_prctl, ARCH_SET_FS},
-};
+use {super::super::conv::ret_infallible, linux_raw_sys::general::ARCH_SET_FS};
 
 #[inline]
 pub(crate) unsafe fn fork() -> io::Result<Option<Pid>> {
-    let pid = ret_c_uint(syscall5_readonly(
-        nr(__NR_clone),
+    let pid = ret_c_uint(syscall_readonly!(
+        __NR_clone,
         c_uint(SIGCHLD),
         zero(),
         zero(),
         zero(),
-        zero(),
+        zero()
     ))?;
     Ok(Pid::from_raw(pid))
 }
@@ -53,13 +38,13 @@ pub(crate) unsafe fn execveat(
     env_vars: *const *const u8,
     flags: AtFlags,
 ) -> io::Error {
-    ret_error(syscall5_readonly(
-        nr(__NR_execveat),
-        borrowed_fd(dirfd),
-        c_str(path),
-        void_star(args as _),
-        void_star(env_vars as _),
-        c_uint(flags.bits()),
+    ret_error(syscall_readonly!(
+        __NR_execveat,
+        dirfd,
+        path,
+        args,
+        env_vars,
+        flags
     ))
 }
 
@@ -68,12 +53,7 @@ pub(crate) unsafe fn execve(
     args: *const *const u8,
     env_vars: *const *const u8,
 ) -> io::Error {
-    ret_error(syscall3_readonly(
-        nr(__NR_execve),
-        c_str(path),
-        void_star(args as _),
-        void_star(env_vars as _),
-    ))
+    ret_error(syscall_readonly!(__NR_execve, path, args, env_vars))
 }
 
 pub(crate) mod tls {
@@ -84,45 +64,40 @@ pub(crate) mod tls {
     #[cfg(target_arch = "x86")]
     #[inline]
     pub(crate) unsafe fn set_thread_area(u_info: &mut UserDesc) -> io::Result<()> {
-        ret(syscall1_readonly(nr(__NR_set_thread_area), by_mut(u_info)))
+        ret(syscall_readonly!(__NR_set_thread_area, by_mut(u_info)))
     }
 
     #[cfg(target_arch = "arm")]
     #[inline]
     pub(crate) unsafe fn arm_set_tls(data: *mut c::c_void) -> io::Result<()> {
-        ret(syscall1_readonly(nr(__ARM_NR_set_tls), void_star(data)))
+        ret(syscall_readonly!(__ARM_NR_set_tls, data))
     }
 
     #[cfg(target_arch = "x86_64")]
     #[inline]
     pub(crate) unsafe fn set_fs(data: *mut c::c_void) {
-        ret_infallible(syscall2_readonly(
-            nr(__NR_arch_prctl),
+        ret_infallible(syscall_readonly!(
+            __NR_arch_prctl,
             c_uint(ARCH_SET_FS),
-            void_star(data),
+            data
         ))
     }
 
     #[inline]
     pub(crate) unsafe fn set_tid_address(data: *mut c::c_void) -> Pid {
         let tid: i32 =
-            ret_usize_infallible(syscall1_readonly(nr(__NR_set_tid_address), void_star(data)))
-                as __kernel_pid_t;
+            ret_usize_infallible(syscall_readonly!(__NR_set_tid_address, data)) as __kernel_pid_t;
         debug_assert_ne!(tid, 0);
         Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(tid as u32))
     }
 
     #[inline]
     pub(crate) unsafe fn set_thread_name(name: &ZStr) -> io::Result<()> {
-        ret(syscall2_readonly(
-            nr(__NR_prctl),
-            c_uint(PR_SET_NAME),
-            c_str(name),
-        ))
+        ret(syscall_readonly!(__NR_prctl, c_uint(PR_SET_NAME), name))
     }
 
     #[inline]
     pub(crate) fn exit_thread(code: c::c_int) -> ! {
-        unsafe { syscall1_noreturn(nr(__NR_exit), c_int(code)) }
+        unsafe { syscall_noreturn!(__NR_exit, c_int(code)) }
     }
 }

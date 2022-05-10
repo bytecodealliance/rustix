@@ -9,9 +9,7 @@
 //! functions.
 #![allow(unsafe_code)]
 
-use super::arch::asm::syscall2;
-use super::conv::{pass_usize, ret, void_star};
-use super::reg::nr;
+use super::conv::{c_int, ret};
 #[cfg(target_arch = "x86")]
 use super::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
 use super::time::types::{ClockId, DynamicClockId, Timespec};
@@ -23,12 +21,9 @@ use core::mem::{transmute, MaybeUninit};
 use core::ptr::null_mut;
 use core::sync::atomic::AtomicPtr;
 use core::sync::atomic::Ordering::Relaxed;
-use linux_raw_sys::general::{__NR_clock_gettime, __kernel_clockid_t, __kernel_timespec};
 #[cfg(target_pointer_width = "32")]
-use {
-    super::conv::out, linux_raw_sys::general::__NR_clock_gettime64,
-    linux_raw_sys::general::timespec as __kernel_old_timespec,
-};
+use linux_raw_sys::general::timespec as __kernel_old_timespec;
+use linux_raw_sys::general::{__kernel_clockid_t, __kernel_timespec};
 
 #[inline]
 pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
@@ -105,7 +100,10 @@ pub(super) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> RetReg<R0> {
+    pub(in crate::imp) unsafe fn syscall1<'a>(
+        nr: SyscallNumber<'a>,
+        a0: ArgReg<'a, A0>,
+    ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
@@ -114,7 +112,10 @@ pub(super) mod x86_via_vdso {
     }
 
     #[inline]
-    pub(in crate::imp) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> ! {
+    pub(in crate::imp) unsafe fn syscall1_noreturn<'a>(
+        nr: SyscallNumber<'a>,
+        a0: ArgReg<'a, A0>,
+    ) -> ! {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
             None => super::init_syscall(),
@@ -124,10 +125,10 @@ pub(super) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp) unsafe fn syscall2(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
+    pub(in crate::imp) unsafe fn syscall2<'a>(
+        nr: SyscallNumber<'a>,
+        a0: ArgReg<'a, A0>,
+        a1: ArgReg<'a, A1>,
     ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -138,11 +139,11 @@ pub(super) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp) unsafe fn syscall3(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
+    pub(in crate::imp) unsafe fn syscall3<'a>(
+        nr: SyscallNumber<'a>,
+        a0: ArgReg<'a, A0>,
+        a1: ArgReg<'a, A1>,
+        a2: ArgReg<'a, A2>,
     ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -153,12 +154,12 @@ pub(super) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp) unsafe fn syscall4(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
-        a3: ArgReg<'_, A3>,
+    pub(in crate::imp) unsafe fn syscall4<'a>(
+        nr: SyscallNumber<'a>,
+        a0: ArgReg<'a, A0>,
+        a1: ArgReg<'a, A1>,
+        a2: ArgReg<'a, A2>,
+        a3: ArgReg<'a, A3>,
     ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -169,13 +170,13 @@ pub(super) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp) unsafe fn syscall5(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
-        a3: ArgReg<'_, A3>,
-        a4: ArgReg<'_, A4>,
+    pub(in crate::imp) unsafe fn syscall5<'a>(
+        nr: SyscallNumber<'a>,
+        a0: ArgReg<'a, A0>,
+        a1: ArgReg<'a, A1>,
+        a2: ArgReg<'a, A2>,
+        a3: ArgReg<'a, A3>,
+        a4: ArgReg<'a, A4>,
     ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -186,14 +187,14 @@ pub(super) mod x86_via_vdso {
 
     #[inline]
     #[must_use]
-    pub(in crate::imp) unsafe fn syscall6(
-        nr: SyscallNumber<'_>,
-        a0: ArgReg<'_, A0>,
-        a1: ArgReg<'_, A1>,
-        a2: ArgReg<'_, A2>,
-        a3: ArgReg<'_, A3>,
-        a4: ArgReg<'_, A4>,
-        a5: ArgReg<'_, A5>,
+    pub(in crate::imp) unsafe fn syscall6<'a>(
+        nr: SyscallNumber<'a>,
+        a0: ArgReg<'a, A0>,
+        a1: ArgReg<'a, A1>,
+        a2: ArgReg<'a, A2>,
+        a3: ArgReg<'a, A3>,
+        a4: ArgReg<'a, A4>,
+        a5: ArgReg<'a, A5>,
     ) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -257,11 +258,7 @@ unsafe fn _rustix_clock_gettime_via_syscall(
     clockid: c::c_int,
     res: *mut Timespec,
 ) -> io::Result<()> {
-    let r0 = syscall2(
-        nr(__NR_clock_gettime64),
-        pass_usize(clockid as usize),
-        void_star(res.cast::<c::c_void>()),
-    );
+    let r0 = syscall!(__NR_clock_gettime64, c_int(clockid), res);
     match ret(r0) {
         Err(io::Error::NOSYS) => _rustix_clock_gettime_via_syscall_old(clockid, res),
         otherwise => otherwise,
@@ -279,11 +276,7 @@ unsafe fn _rustix_clock_gettime_via_syscall_old(
     // it's not that hard to fix up here, so that no other code needs
     // to worry about this.
     let mut old_result = MaybeUninit::<__kernel_old_timespec>::uninit();
-    let r0 = syscall2(
-        nr(__NR_clock_gettime),
-        pass_usize(clockid as usize),
-        out(&mut old_result),
-    );
+    let r0 = syscall!(__NR_clock_gettime, c_int(clockid), &mut old_result);
     match ret(r0) {
         Ok(()) => {
             let old_result = old_result.assume_init();
@@ -302,11 +295,7 @@ unsafe fn _rustix_clock_gettime_via_syscall(
     clockid: c::c_int,
     res: *mut Timespec,
 ) -> io::Result<()> {
-    ret(syscall2(
-        nr(__NR_clock_gettime),
-        pass_usize(clockid as usize),
-        void_star(res.cast::<c::c_void>()),
-    ))
+    ret(syscall!(__NR_clock_gettime, c_int(clockid), res))
 }
 
 /// A symbol pointing to an `int 0x80` instruction. This "function" is only

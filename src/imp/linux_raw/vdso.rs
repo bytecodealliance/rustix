@@ -269,17 +269,9 @@ unsafe fn check_vdso_base<'vdso>(base: *const Elf_Ehdr) -> Option<&'vdso Elf_Ehd
     // arbitrary system call which writes to a buffer and fails with `EFAULT`
     // if the buffer is not writable.
     {
-        use super::arch::choose::syscall2;
-        use super::conv::{clockid_t, ret, void_star};
-        use super::reg::nr;
+        use super::conv::ret;
         use super::time::types::ClockId;
-        use linux_raw_sys::general::__NR_clock_getres;
-        if ret(syscall2(
-            nr(__NR_clock_getres),
-            clockid_t(ClockId::Monotonic),
-            void_star(base as *mut c::c_void),
-        )) != Err(io::Error::FAULT)
-        {
+        if ret(syscall!(__NR_clock_getres, ClockId::Monotonic, base)) != Err(io::Error::FAULT) {
             // We can't gracefully fail here because we would seem to have just
             // mutated some unknown memory.
             #[cfg(feature = "std")]
