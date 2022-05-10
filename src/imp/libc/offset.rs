@@ -67,7 +67,7 @@ pub(super) use c::{getrlimit as libc_getrlimit, setrlimit as libc_setrlimit};
     target_os = "emscripten",
     target_os = "l4re",
 ))]
-pub(super) const LIBC_RLIM_INFINITY: u64 = !0u64;
+pub(super) const LIBC_RLIM_INFINITY: u64 = !0_u64;
 
 #[cfg(any(
     target_os = "android",

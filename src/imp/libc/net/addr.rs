@@ -36,7 +36,7 @@ impl SocketAddrUnix {
     /// Construct a new Unix-domain address from a filesystem path.
     #[inline]
     pub fn new<P: path::Arg>(path: P) -> io::Result<Self> {
-        path.into_with_z_str(|path| Self::_new(path))
+        path.into_with_z_str(Self::_new)
     }
 
     #[inline]

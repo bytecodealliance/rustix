@@ -305,7 +305,7 @@ pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
 #[inline]
 pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     unsafe {
-        let data = value as c::c_int;
+        let data = c::c_int::from(value);
         ret(syscall_readonly!(
             __NR_ioctl,
             fd,

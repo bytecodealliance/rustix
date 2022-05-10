@@ -416,6 +416,7 @@ fn rlimit_to_linux(lim: Rlimit) -> io::Result<linux_raw_sys::general::rlimit64> 
 }
 
 /// Like `rlimit_from_linux` but uses Linux's old 32-bit `rlimit`.
+#[allow(clippy::useless_conversion)]
 fn rlimit_from_linux_old(lim: linux_raw_sys::general::rlimit) -> Rlimit {
     let current = if lim.rlim_cur == linux_raw_sys::general::RLIM_INFINITY as _ {
         None
@@ -431,13 +432,14 @@ fn rlimit_from_linux_old(lim: linux_raw_sys::general::rlimit) -> Rlimit {
 }
 
 /// Like `rlimit_to_linux` but uses Linux's old 32-bit `rlimit`.
+#[allow(clippy::useless_conversion)]
 fn rlimit_to_linux_old(lim: Rlimit) -> io::Result<linux_raw_sys::general::rlimit> {
     let rlim_cur = match lim.current {
-        Some(r) => r.try_into().map_err(|_| io::Errno::INVAL)?,
+        Some(r) => r.try_into().map_err(|_e| io::Errno::INVAL)?,
         None => linux_raw_sys::general::RLIM_INFINITY as _,
     };
     let rlim_max = match lim.maximum {
-        Some(r) => r.try_into().map_err(|_| io::Errno::INVAL)?,
+        Some(r) => r.try_into().map_err(|_e| io::Errno::INVAL)?,
         None => linux_raw_sys::general::RLIM_INFINITY as _,
     };
     Ok(linux_raw_sys::general::rlimit { rlim_cur, rlim_max })
