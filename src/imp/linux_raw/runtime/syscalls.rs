@@ -64,7 +64,7 @@ pub(crate) mod tls {
     #[cfg(target_arch = "x86")]
     #[inline]
     pub(crate) unsafe fn set_thread_area(u_info: &mut UserDesc) -> io::Result<()> {
-        ret(syscall_readonly!(__NR_set_thread_area, by_mut(u_info)))
+        ret(syscall!(__NR_set_thread_area, by_mut(u_info)))
     }
 
     #[cfg(target_arch = "arm")]
