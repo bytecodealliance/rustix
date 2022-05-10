@@ -346,7 +346,7 @@ unsafe fn getrlimit_old(limit: Resource) -> Rlimit {
 pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
     unsafe {
         let lim = rlimit_to_linux(new.clone())?;
-        match ret(syscall!(
+        match ret(syscall_readonly!(
             __NR_prlimit64,
             c_uint(0),
             limit,
@@ -364,7 +364,7 @@ pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
 /// `prlimit64`.
 unsafe fn setrlimit_old(limit: Resource, new: Rlimit) -> io::Result<()> {
     let lim = rlimit_to_linux_old(new)?;
-    ret(syscall!(__NR_setrlimit, limit, by_ref(&lim)))
+    ret(syscall_readonly!(__NR_setrlimit, limit, by_ref(&lim)))
 }
 
 #[inline]
