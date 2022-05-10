@@ -34,7 +34,10 @@ use linux_raw_sys::general::{
     __kernel_pid_t, PR_SET_NAME, SIGCHLD,
 };
 #[cfg(target_arch = "x86")]
-use {super::conv::by_mut, linux_raw_sys::general::__NR_set_thread_area};
+use {
+    super::arch::choose::syscall1, super::conv::by_mut,
+    linux_raw_sys::general::__NR_set_thread_area,
+};
 #[cfg(target_arch = "x86_64")]
 use {
     super::conv::ret_infallible,
@@ -92,7 +95,7 @@ pub(crate) mod tls {
     #[cfg(target_arch = "x86")]
     #[inline]
     pub(crate) unsafe fn set_thread_area(u_info: &mut UserDesc) -> io::Result<()> {
-        ret(syscall1_readonly(nr(__NR_set_thread_area), by_mut(u_info)))
+        ret(syscall1(nr(__NR_set_thread_area), by_mut(u_info)))
     }
 
     #[cfg(target_arch = "arm")]
