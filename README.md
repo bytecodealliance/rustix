@@ -69,15 +69,15 @@ users to use a variety of string types, including non-UTF-8 string types.
 C-compatible interfaces and higher-level C/POSIX standard-library
 functionality; `rustix` just aims to provide safe and idiomatic Rust interfaces
 to low-level syscalls. `relibc` also doesn't tend to support features not
-supported on Redox, such as `*at` functions like `openat`, which are
-important features for `rustix`.
+supported on Redox, such as `*at` functions like `openat`, which are important
+features for `rustix`.
 
-`rustix` has its own code for making direct syscalls, similar to the [`sc`]
-and [`scall`] crates, though `rustix` can use either the unstable Rust `asm!`
-macro or out-of-line `.s` files so it supports both Stable and Nightly Rust.
-`rustix` can also use Linux's vDSO mechanism to optimize Linux `clock_gettime`
-on all architectures, and all Linux system calls on x86. And `rustix`'s
-syscalls report errors using an optimized `Errno` type.
+`rustix` has its own code for making direct syscalls, similar to the [`sc`] and
+[`scall`] crates, though `rustix` can use either the unstable Rust `asm!` macro
+or out-of-line `.s` files so it supports both Stable and Nightly Rust. `rustix`
+can also use Linux's vDSO mechanism to optimize Linux `clock_gettime` on all
+architectures, and all Linux system calls on x86. And `rustix`'s syscalls
+report errors using an optimized `Errno` type.
 
 `rustix`'s `*at` functions are similar to the [`openat`] crate, but `rustix`
 provides them as free functions rather than associated functions of a `Dir`
