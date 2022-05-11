@@ -102,8 +102,8 @@ fn has_dependency(
 
     // `cargo tree --invert=foo` can fail in two different ways: it exits with
     // a non-zero status if the dependency is not present in the Cargo.toml
-    // cofiguration, and it exists with a zero status and prints nothing if the
-    // dependency is present but optional and not enabled. So we check for
+    // configuration, and it exists with a zero status and prints nothing if
+    // the dependency is present but optional and not enabled. So we check for
     // both here.
     child.status.success() && !child.stdout.is_empty()
 }

@@ -286,7 +286,7 @@ const fn max_iov() -> usize {
 
 #[inline]
 pub(crate) unsafe fn close(fd: RawFd) {
-    // See the docunentation for [`io::close`] for why errors are ignored.
+    // See the documentation for [`io::close`] for why errors are ignored.
     syscall_readonly!(__NR_close, raw_fd(fd)).decode_void();
 }
 
@@ -398,7 +398,7 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     {
         // `dup3` fails if the old and new file descriptors have the same
-        // value, so emulate the `dup2` behvior.
+        // value, so emulate the `dup2` behavior.
         use std::os::unix::io::AsRawFd;
         if fd.as_raw_fd() == new.as_raw_fd() {
             return Ok(());

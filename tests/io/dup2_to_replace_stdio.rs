@@ -7,7 +7,7 @@ use std::process::Command;
 #[test]
 fn dup2_to_replace_stdio() {
     // This test modifies the stdio file descriptors, so we run it in a
-    // separate process so that it doesn't inferfere with the test harness.
+    // separate process so that it doesn't interfere with the test harness.
     assert!(Command::new(env::var("CARGO").unwrap())
         .arg("run")
         .arg("--example")
