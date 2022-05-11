@@ -40,7 +40,7 @@ pub fn tcgetwinsize<Fd: AsFd>(fd: Fd) -> io::Result<Winsize> {
     imp::termios::syscalls::tcgetwinsize(fd.as_fd())
 }
 
-/// `tcgetpgrp(fd)`—Get the terminal terminal foreground process group.
+/// `tcgetpgrp(fd)`—Get the terminal foreground process group.
 ///
 /// Also known as the `TIOCGPGRP` operation with `ioctl`.
 ///
@@ -57,7 +57,7 @@ pub fn tcgetpgrp<Fd: AsFd>(fd: Fd) -> io::Result<Pid> {
     imp::termios::syscalls::tcgetpgrp(fd.as_fd())
 }
 
-/// `tcsetpgrp(fd, pid)`—Set the terminal terminal foreground process group.
+/// `tcsetpgrp(fd, pid)`—Set the terminal foreground process group.
 ///
 /// Also known as the `TIOCSPGRP` operation with `ioctl`.
 ///
