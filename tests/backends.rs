@@ -2,7 +2,7 @@ use std::process::Command;
 
 #[test]
 fn test_backends() {
-    // Pick an arbitrary platform where linux-raw is enabled by default and
+    // Pick an arbitrary platform where linux_raw is enabled by default and
     // ensure that the use-default crate uses it.
     #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
     {

@@ -31,7 +31,7 @@ portable APIs built on this functionality, see the [`system-interface`],
 
 `rustix` currently has two backends available:
 
- * linux-raw, which uses raw Linux system calls and vDSO calls, and is
+ * linux_raw, which uses raw Linux system calls and vDSO calls, and is
    supported on Linux on x86-64, x86, aarch64, riscv64gc, powerpc64le,
    arm (v5 onwards), mipsel, and mips64el, with stable, nightly, and 1.48 Rust.
     - By being implemented entirely in Rust, avoiding `libc`, `errno`, and pthread
@@ -45,7 +45,7 @@ portable APIs built on this functionality, see the [`system-interface`],
    libraries on Unix-family platforms, and [`windows-sys`] for Winsock2 on
    Windows, and is portable to many OS's.
 
-The linux-raw backend is enabled by default on platforms which support it. To
+The linux_raw backend is enabled by default on platforms which support it. To
 enable the libc backend instead, either enable the "use-libc" cargo feature:
 
 ```toml
