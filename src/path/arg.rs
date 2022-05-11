@@ -4,7 +4,6 @@
 //! string types. This allows users to pass any of these string types directly
 //! to rustix APIs with string arguments, and it allows rustix to implement
 //! NUL-termination without the need for copying where possible.
-//! possible.
 
 use crate::ffi::{ZStr, ZString};
 use crate::io;
