@@ -18,8 +18,8 @@ pub use imp::fs::types::copyfile_state_t;
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/fcopyfile.3.html
 #[inline]
 pub unsafe fn fcopyfile<FromFd: AsFd, ToFd: AsFd>(
-    from: &FromFd,
-    to: &ToFd,
+    from: FromFd,
+    to: ToFd,
     state: copyfile_state_t,
     flags: CopyfileFlags,
 ) -> io::Result<()> {

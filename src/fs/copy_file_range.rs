@@ -10,9 +10,9 @@ use imp::fd::AsFd;
 /// [Linux]: https://man7.org/linux/man-pages/man2/copy_file_range.2.html
 #[inline]
 pub fn copy_file_range<InFd: AsFd, OutFd: AsFd>(
-    fd_in: &InFd,
+    fd_in: InFd,
     off_in: Option<&mut u64>,
-    fd_out: &OutFd,
+    fd_out: OutFd,
     off_out: Option<&mut u64>,
     len: u64,
 ) -> io::Result<u64> {
