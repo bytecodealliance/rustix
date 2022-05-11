@@ -23,7 +23,7 @@ pub fn timerfd_create(clockid: TimerfdClockId, flags: TimerfdFlags) -> io::Resul
 /// [Linux]: https://man7.org/linux/man-pages/man2/timerfd_settime.2.html
 #[inline]
 pub fn timerfd_settime<Fd: AsFd>(
-    fd: &Fd,
+    fd: Fd,
     flags: TimerfdTimerFlags,
     new_value: &Itimerspec,
 ) -> io::Result<Itimerspec> {
@@ -37,6 +37,6 @@ pub fn timerfd_settime<Fd: AsFd>(
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/timerfd_gettime.2.html
 #[inline]
-pub fn timerfd_gettime<Fd: AsFd>(fd: &Fd) -> io::Result<Itimerspec> {
+pub fn timerfd_gettime<Fd: AsFd>(fd: Fd) -> io::Result<Itimerspec> {
     imp::time::syscalls::timerfd_gettime(fd.as_fd())
 }
