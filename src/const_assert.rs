@@ -15,3 +15,8 @@ macro_rules! const_assert {
 fn test_const_assert() {
     const_assert!(true);
 }
+
+#[test]
+const fn test_const_assert_in_const_fn() {
+    const_assert!(true);
+}
