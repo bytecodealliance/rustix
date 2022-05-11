@@ -93,7 +93,7 @@ I/O safety types rather than `RawFd`, and the flags parameters to functions
 such as `tcsetattr` are `enum`s rather than bare integers. And, Rustix calls
 its `tcgetattr` function `tcgetattr`, rather than `Termios::from_fd`.
 
-# Minimum Supported Rust Version (MSRV)
+## Minimum Supported Rust Version (MSRV)
 
 This crate currently works on the version of [Rust on Debian stable], which is
 currently Rust 1.48. This policy may change in the future, in minor version
