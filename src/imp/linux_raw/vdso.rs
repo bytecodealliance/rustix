@@ -427,7 +427,7 @@ unsafe fn init_from_auxv(elf_auxv: *const Elf_auxv_t) -> Option<Vdso> {
 }
 */
 
-// Find the vDSO image by following the `AT_SYSINFO_EHDR` auxv record pointer.
+/// Find the vDSO image by following the `AT_SYSINFO_EHDR` auxv record pointer.
 fn init_from_auxv() -> Option<Vdso> {
     // Safety: `sysinfo_ehdr` does extensive checks to ensure that the value
     // we get really is an `AT_SYSINFO_EHDR` value from the kernel.
