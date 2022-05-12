@@ -4,7 +4,7 @@ use rustix::net::{
 };
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
-// Test `connect_any`.
+/// Test `connect_any`.
 #[test]
 fn net_v4_connect_any() -> std::io::Result<()> {
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
@@ -36,7 +36,7 @@ fn net_v4_connect_any() -> std::io::Result<()> {
     Ok(())
 }
 
-// Similar, but with V6.
+/// Similar, but with V6.
 #[test]
 fn net_v6_connect_any() -> std::io::Result<()> {
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
@@ -75,7 +75,7 @@ fn net_v6_connect_any() -> std::io::Result<()> {
     Ok(())
 }
 
-// Test `connect` with a `SocketAddr`.
+/// Test `connect` with a `SocketAddr`.
 #[test]
 fn net_v4_connect() -> std::io::Result<()> {
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
@@ -111,7 +111,7 @@ fn net_v4_connect() -> std::io::Result<()> {
     Ok(())
 }
 
-// Similar, but use V6.
+/// Similar, but use V6.
 #[test]
 fn net_v6_connect() -> std::io::Result<()> {
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
@@ -154,7 +154,7 @@ fn net_v6_connect() -> std::io::Result<()> {
     Ok(())
 }
 
-// Test `bind_any`.
+/// Test `bind_any`.
 #[test]
 fn net_v4_bind_any() -> std::io::Result<()> {
     let localhost = Ipv4Addr::LOCALHOST;
@@ -186,7 +186,7 @@ fn net_v4_bind_any() -> std::io::Result<()> {
     Ok(())
 }
 
-// Similar, but use V6.
+/// Similar, but use V6.
 #[test]
 fn net_v6_bind_any() -> std::io::Result<()> {
     let localhost = Ipv6Addr::LOCALHOST;
@@ -225,7 +225,7 @@ fn net_v6_bind_any() -> std::io::Result<()> {
     Ok(())
 }
 
-// Test `sendto`.
+/// Test `sendto`.
 #[test]
 fn net_v4_sendto() -> std::io::Result<()> {
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
@@ -263,7 +263,7 @@ fn net_v4_sendto() -> std::io::Result<()> {
     Ok(())
 }
 
-// Similar, but with V6.
+/// Similar, but with V6.
 #[test]
 fn net_v6_sendto() -> std::io::Result<()> {
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
@@ -308,7 +308,7 @@ fn net_v6_sendto() -> std::io::Result<()> {
     Ok(())
 }
 
-// Test `sendto_any`.
+/// Test `sendto_any`.
 #[test]
 fn net_v4_sendto_any() -> std::io::Result<()> {
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
@@ -343,7 +343,7 @@ fn net_v4_sendto_any() -> std::io::Result<()> {
     Ok(())
 }
 
-// Test `sendto_any`.
+/// Test `sendto_any`.
 #[test]
 fn net_v6_sendto_any() -> std::io::Result<()> {
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
@@ -385,7 +385,7 @@ fn net_v6_sendto_any() -> std::io::Result<()> {
     Ok(())
 }
 
-// Test `acceptfrom`.
+/// Test `acceptfrom`.
 #[test]
 fn net_v4_acceptfrom() -> std::io::Result<()> {
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
@@ -432,7 +432,7 @@ fn net_v4_acceptfrom() -> std::io::Result<()> {
     Ok(())
 }
 
-// Similar, but with V6.
+/// Similar, but with V6.
 #[test]
 fn net_v6_acceptfrom() -> std::io::Result<()> {
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);

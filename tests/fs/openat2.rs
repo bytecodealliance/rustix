@@ -4,7 +4,7 @@ use rustix::io::OwnedFd;
 use rustix::{io, path};
 use std::os::unix::io::AsRawFd;
 
-// Like `openat2`, but keep retrying until it fails or succeeds.
+/// Like `openat2`, but keep retrying until it fails or succeeds.
 fn openat2_more<Fd: AsFd, P: path::Arg>(
     dirfd: Fd,
     path: P,

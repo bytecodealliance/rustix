@@ -35,8 +35,8 @@ fn test_timerfd() {
     );
 }
 
-// Similar, but set an interval for a repeated timer. Don't check that the
-// times are monotonic because that would race with the timer repeating.
+/// Similar, but set an interval for a repeated timer. Don't check that the
+/// times are monotonic because that would race with the timer repeating.
 #[test]
 fn test_timerfd_with_interval() {
     let fd = timerfd_create(TimerfdClockId::Monotonic, TimerfdFlags::CLOEXEC).unwrap();

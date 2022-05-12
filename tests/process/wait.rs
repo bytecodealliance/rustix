@@ -3,9 +3,9 @@ use rustix::process;
 use serial_test::serial;
 use std::process::{Command, Stdio};
 
-// these tests must execute serially to prevent race condition,
-// where `test_wait` waits for the child process spawned in `test_waitpid`,
-// causing the tests to get stuck.
+// These tests must execute serially to prevent race condition, where
+// `test_wait` waits for the child process spawned in `test_waitpid`, causing
+// the tests to get stuck.
 
 #[test]
 #[serial]
