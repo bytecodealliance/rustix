@@ -85,9 +85,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "android",
             target_os = "emscripten",
-            target_os = "freebsd",
             target_os = "fuchsia",
-            target_os = "openbsd",
             target_os = "redox",
         )))]
         const FIXED = c::MAP_FIXED;
