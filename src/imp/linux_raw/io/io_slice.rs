@@ -23,7 +23,7 @@ impl<'a> IoSlice<'a> {
         IoSlice {
             vec: c::iovec {
                 iov_base: buf.as_ptr() as *mut u8 as *mut c::c_void,
-                iov_len: buf.len() as u64,
+                iov_len: buf.len() as _,
             },
             _p: PhantomData,
         }
@@ -32,12 +32,12 @@ impl<'a> IoSlice<'a> {
     /// <https://doc.rust-lang.org/nightly/std/io/struct.IoSlice.html#method.advance>
     #[inline]
     pub fn advance(&mut self, n: usize) {
-        if self.vec.iov_len < n as u64 {
+        if self.vec.iov_len < n as _ {
             panic!("advancing IoSlice beyond its length");
         }
 
         unsafe {
-            self.vec.iov_len -= n as u64;
+            self.vec.iov_len -= n as _;
             self.vec.iov_base = self.vec.iov_base.add(n);
         }
     }
@@ -63,7 +63,7 @@ impl<'a> IoSliceMut<'a> {
         IoSliceMut {
             vec: c::iovec {
                 iov_base: buf.as_mut_ptr() as *mut c::c_void,
-                iov_len: buf.len() as u64,
+                iov_len: buf.len() as _,
             },
             _p: PhantomData,
         }
@@ -72,12 +72,12 @@ impl<'a> IoSliceMut<'a> {
     /// <https://doc.rust-lang.org/nightly/std/io/struct.IoSliceMut.html#method.advance>
     #[inline]
     pub fn advance(&mut self, n: usize) {
-        if self.vec.iov_len < n as u64 {
+        if self.vec.iov_len < n as _ {
             panic!("advancing IoSliceMut beyond its length");
         }
 
         unsafe {
-            self.vec.iov_len -= n as u64;
+            self.vec.iov_len -= n as _;
             self.vec.iov_base = self.vec.iov_base.add(n);
         }
     }
