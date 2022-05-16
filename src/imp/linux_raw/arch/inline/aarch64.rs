@@ -7,7 +7,6 @@ use core::arch::asm;
 compile_error!("arm64-ilp32 is not supported yet");
 
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<R0> {
     let r0;
     asm!(
@@ -20,7 +19,6 @@ pub(in crate::imp) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<
 }
 
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> RetReg<R0> {
     let r0;
     asm!(
@@ -33,7 +31,6 @@ pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>)
 }
 
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall1_readonly(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -49,7 +46,6 @@ pub(in crate::imp) unsafe fn syscall1_readonly(
 }
 
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> ! {
     asm!(
         "svc 0",
@@ -60,7 +56,6 @@ pub(in crate::imp) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg
 }
 
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall2(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -78,7 +73,6 @@ pub(in crate::imp) unsafe fn syscall2(
 }
 
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall2_readonly(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -96,7 +90,6 @@ pub(in crate::imp) unsafe fn syscall2_readonly(
 }
 
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall3(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -116,7 +109,6 @@ pub(in crate::imp) unsafe fn syscall3(
 }
 
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall3_readonly(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -136,7 +128,6 @@ pub(in crate::imp) unsafe fn syscall3_readonly(
 }
 
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall4(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -158,7 +149,6 @@ pub(in crate::imp) unsafe fn syscall4(
 }
 
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall4_readonly(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -180,7 +170,6 @@ pub(in crate::imp) unsafe fn syscall4_readonly(
 }
 
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall5(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -204,7 +193,6 @@ pub(in crate::imp) unsafe fn syscall5(
 }
 
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall5_readonly(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -228,7 +216,6 @@ pub(in crate::imp) unsafe fn syscall5_readonly(
 }
 
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall6(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -254,7 +241,6 @@ pub(in crate::imp) unsafe fn syscall6(
 }
 
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall6_readonly(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,

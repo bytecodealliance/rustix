@@ -78,22 +78,18 @@ extern "C" {
 // Then we define inline wrapper functions that do the reordering.
 
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall0(nr: SyscallNumber<'_>) -> RetReg<R0> {
     rustix_syscall0_nr_last(nr)
 }
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall1(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> RetReg<R0> {
     rustix_syscall1_nr_last(a0, nr)
 }
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> ! {
     rustix_syscall1_noreturn_nr_last(a0, nr)
 }
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall2(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -102,7 +98,6 @@ pub(in crate::imp) unsafe fn syscall2(
     rustix_syscall2_nr_last(a0, a1, nr)
 }
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall3(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -112,7 +107,6 @@ pub(in crate::imp) unsafe fn syscall3(
     rustix_syscall3_nr_last(a0, a1, a2, nr)
 }
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall4(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -123,7 +117,6 @@ pub(in crate::imp) unsafe fn syscall4(
     rustix_syscall4_nr_last(a0, a1, a2, a3, nr)
 }
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall5(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -135,7 +128,6 @@ pub(in crate::imp) unsafe fn syscall5(
     rustix_syscall5_nr_last(a0, a1, a2, a3, a4, nr)
 }
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall6(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
@@ -149,7 +141,6 @@ pub(in crate::imp) unsafe fn syscall6(
 }
 #[cfg(target_arch = "mips")]
 #[inline]
-#[must_use]
 pub(in crate::imp) unsafe fn syscall7(
     nr: SyscallNumber<'_>,
     a0: ArgReg<'_, A0>,
