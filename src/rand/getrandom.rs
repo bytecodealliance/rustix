@@ -5,6 +5,12 @@ pub use imp::rand::types::GetRandomFlags;
 
 /// `getrandom(buf, flags)`—Reads a sequence of random bytes.
 ///
+/// This is a very low-level API which may be difficult to use correctly. Most
+/// users should prefer to use [`getrandom`] or [`rand`] APIs instead.
+///
+/// [`getrandom`]: https://crates.io/crates/getrandom
+/// [`rand`]: https://crates.io/crates/rand
+///
 /// # References
 ///  - [Linux]
 ///

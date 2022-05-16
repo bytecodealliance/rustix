@@ -223,6 +223,7 @@ pub enum DynamicClockId<'a> {
 )))]
 pub type Itimerspec = c::itimerspec;
 
+/// `struct itimerspec`
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),

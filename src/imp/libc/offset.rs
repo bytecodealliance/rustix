@@ -226,10 +226,10 @@ mod readwrite_pv64 {
         iovcnt: c::c_int,
         offset: c::off64_t,
     ) -> c::ssize_t {
-        // Older Android libc lacks `preadv64`, so use the `weak!` mechanism
-        // to test for it, and call back to `c::syscall`. We don't use
+        // Older Android libc lacks `preadv64`, so use the `weak!` mechanism to
+        // test for it, and call back to `c::syscall`. We don't use
         // `weak_or_syscall` here because we need to pass the 64-bit offset
-        // speciallly.
+        // specially.
         weak! {
             fn preadv64(c::c_int, *const c::iovec, c::c_int, c::off64_t) -> c::ssize_t
         }

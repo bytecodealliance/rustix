@@ -2,12 +2,12 @@
 //!
 //! On powerpc64le, Linux indicates success or failure using `cr0.SO` rather
 //! than by returning a negative error code as most other architectures do. In
-//! theory we could immediately translate this into a `Result`, and it'd save
-//! a few branches. And in theory we could have specialized sequences for use
+//! theory we could immediately translate this into a `Result`, and it'd save a
+//! few branches. And in theory we could have specialized sequences for use
 //! with syscalls that are known to never fail. However, those would require
 //! more extensive changes in rustix's platform-independent code. For now, we
-//! check the flag and negatate the error value to make PowerPC64 look like
-//! other architectures.
+//! check the flag and negate the error value to make PowerPC64 look like other
+//! architectures.
 
 use crate::imp::reg::{ArgReg, FromAsm, RetReg, SyscallNumber, ToAsm, A0, A1, A2, A3, A4, A5, R0};
 use core::arch::asm;

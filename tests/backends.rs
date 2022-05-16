@@ -2,7 +2,7 @@ use std::process::Command;
 
 #[test]
 fn test_backends() {
-    // Pick an arbitrary platform where linux-raw is enabled by default and
+    // Pick an arbitrary platform where linux_raw is enabled by default and
     // ensure that the use-default crate uses it.
     #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
     {
@@ -102,8 +102,8 @@ fn has_dependency(
 
     // `cargo tree --invert=foo` can fail in two different ways: it exits with
     // a non-zero status if the dependency is not present in the Cargo.toml
-    // cofiguration, and it exists with a zero status and prints nothing if the
-    // dependency is present but optional and not enabled. So we check for
+    // configuration, and it exists with a zero status and prints nothing if
+    // the dependency is present but optional and not enabled. So we check for
     // both here.
     child.status.success() && !child.stdout.is_empty()
 }

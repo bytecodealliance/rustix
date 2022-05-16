@@ -13,7 +13,7 @@ fn test_poll() {
     let mut poll_fds = [PollFd::new(&reader, PollFlags::IN)];
     assert_eq!(poll_fds[0].as_fd().as_raw_fd(), reader.as_fd().as_raw_fd());
 
-    // `poll` should say there's nothing ready to be read fron the pipe.
+    // `poll` should say there's nothing ready to be read from the pipe.
     let num = with_retrying(|| poll(&mut poll_fds, 0)).unwrap();
     assert_eq!(num, 0);
     assert!(poll_fds[0].revents().is_empty());

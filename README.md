@@ -31,7 +31,7 @@ portable APIs built on this functionality, see the [`system-interface`],
 
 `rustix` currently has two backends available:
 
- * linux-raw, which uses raw Linux system calls and vDSO calls, and is
+ * linux_raw, which uses raw Linux system calls and vDSO calls, and is
    supported on Linux on x86-64, x86, aarch64, riscv64gc, powerpc64le,
    arm (v5 onwards), mipsel, and mips64el, with stable, nightly, and 1.48 Rust.
     - By being implemented entirely in Rust, avoiding `libc`, `errno`, and pthread
@@ -45,7 +45,7 @@ portable APIs built on this functionality, see the [`system-interface`],
    libraries on Unix-family platforms, and [`windows-sys`] for Winsock2 on
    Windows, and is portable to many OS's.
 
-The linux-raw backend is enabled by default on platforms which support it. To
+The linux_raw backend is enabled by default on platforms which support it. To
 enable the libc backend instead, either enable the "use-libc" cargo feature:
 
 ```toml
@@ -69,15 +69,15 @@ users to use a variety of string types, including non-UTF-8 string types.
 C-compatible interfaces and higher-level C/POSIX standard-library
 functionality; `rustix` just aims to provide safe and idiomatic Rust interfaces
 to low-level syscalls. `relibc` also doesn't tend to support features not
-supported on Redox, such as `*at` functions like `openat`, which are
-important features for `rustix`.
+supported on Redox, such as `*at` functions like `openat`, which are important
+features for `rustix`.
 
-`rustix` has its own code for making direct syscalls, similar to the [`sc`]
-and [`scall`] crates, though `rustix` can use either the unstable Rust `asm!`
-macro or out-of-line `.s` files so it supports both Stable and Nightly Rust.
-`rustix` can also use Linux's vDSO mechanism to optimize Linux `clock_gettime`
-on all architectures, and all Linux system calls on x86. And `rustix`'s
-syscalls report errors using an optimized `Errno` type.
+`rustix` has its own code for making direct syscalls, similar to the [`sc`] and
+[`scall`] crates, though `rustix` can use either the unstable Rust `asm!` macro
+or out-of-line `.s` files so it supports both Stable and Nightly Rust. `rustix`
+can also use Linux's vDSO mechanism to optimize Linux `clock_gettime` on all
+architectures, and all Linux system calls on x86. And `rustix`'s syscalls
+report errors using an optimized `Errno` type.
 
 `rustix`'s `*at` functions are similar to the [`openat`] crate, but `rustix`
 provides them as free functions rather than associated functions of a `Dir`
@@ -93,7 +93,7 @@ I/O safety types rather than `RawFd`, and the flags parameters to functions
 such as `tcsetattr` are `enum`s rather than bare integers. And, Rustix calls
 its `tcgetattr` function `tcgetattr`, rather than `Termios::from_fd`.
 
-# Minimum Supported Rust Version (MSRV)
+## Minimum Supported Rust Version (MSRV)
 
 This crate currently works on the version of [Rust on Debian stable], which is
 currently Rust 1.48. This policy may change in the future, in minor version

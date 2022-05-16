@@ -190,7 +190,7 @@ pub(crate) fn sched_setaffinity(pid: Option<Pid>, cpuset: &RawCpuSet) -> io::Res
 #[inline]
 pub(crate) fn sched_yield() {
     unsafe {
-        // See the docunentation for [`crate::process::sched_yield`] for why
+        // See the documentation for [`crate::process::sched_yield`] for why
         // errors are ignored.
         syscall_readonly!(__NR_sched_yield).decode_void();
     }
