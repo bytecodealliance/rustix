@@ -25,6 +25,7 @@ pub(super) trait ToAsm: private::Sealed {
     ///
     /// This should be used immediately before the syscall instruction, and
     /// the returned value shouldn't be used for any other purpose.
+    #[must_use]
     unsafe fn to_asm(self) -> *mut Opaque;
 }
 
@@ -36,6 +37,7 @@ pub(super) trait FromAsm: private::Sealed {
     ///
     /// This should be used immediately after the syscall instruction, and
     /// the operand value shouldn't be used for any other purpose.
+    #[must_use]
     unsafe fn from_asm(raw: *mut Opaque) -> Self;
 }
 
@@ -46,14 +48,14 @@ pub(super) trait FromAsm: private::Sealed {
 pub(super) struct Opaque(c::c_void);
 
 // Argument numbers.
-pub(super) struct A0;
-pub(super) struct A1;
-pub(super) struct A2;
-pub(super) struct A3;
-pub(super) struct A4;
-pub(super) struct A5;
+pub(super) struct A0(());
+pub(super) struct A1(());
+pub(super) struct A2(());
+pub(super) struct A3(());
+pub(super) struct A4(());
+pub(super) struct A5(());
 #[cfg(target_arch = "mips")]
-pub(super) struct A6;
+pub(super) struct A6(());
 #[cfg(target_arch = "x86")]
 pub(super) struct SocketArg;
 
@@ -70,7 +72,7 @@ impl ArgNumber for A6 {}
 impl ArgNumber for SocketArg {}
 
 // Return value numbers.
-pub(super) struct R0;
+pub(super) struct R0(());
 
 pub(super) trait RetNumber: private::Sealed {}
 impl RetNumber for R0 {}
@@ -82,6 +84,7 @@ impl RetNumber for R0 {}
 /// once. And it has a lifetime to ensure that it doesn't outlive any resources
 /// it might be pointing to.
 #[repr(transparent)]
+#[must_use]
 pub(super) struct ArgReg<'a, Num: ArgNumber> {
     raw: *mut Opaque,
     _phantom: PhantomData<(&'a (), Num)>,
@@ -100,6 +103,7 @@ impl<'a, Num: ArgNumber> ToAsm for ArgReg<'a, Num> {
 /// This type doesn't implement `Clone` or `Copy`; it should be used exactly
 /// once.
 #[repr(transparent)]
+#[must_use]
 pub(super) struct RetReg<Num: RetNumber> {
     raw: *mut Opaque,
     _phantom: PhantomData<Num>,

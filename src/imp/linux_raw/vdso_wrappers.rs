@@ -89,7 +89,6 @@ pub(super) mod x86_via_vdso {
     use crate::imp::arch::asm;
 
     #[inline]
-    #[must_use]
     pub(in crate::imp) unsafe fn syscall0(nr: SyscallNumber<'_>) -> RetReg<R0> {
         let callee = match transmute(super::SYSCALL.load(Relaxed)) {
             Some(callee) => callee,
@@ -99,7 +98,6 @@ pub(super) mod x86_via_vdso {
     }
 
     #[inline]
-    #[must_use]
     pub(in crate::imp) unsafe fn syscall1<'a>(
         nr: SyscallNumber<'a>,
         a0: ArgReg<'a, A0>,
@@ -124,7 +122,6 @@ pub(super) mod x86_via_vdso {
     }
 
     #[inline]
-    #[must_use]
     pub(in crate::imp) unsafe fn syscall2<'a>(
         nr: SyscallNumber<'a>,
         a0: ArgReg<'a, A0>,
@@ -138,7 +135,6 @@ pub(super) mod x86_via_vdso {
     }
 
     #[inline]
-    #[must_use]
     pub(in crate::imp) unsafe fn syscall3<'a>(
         nr: SyscallNumber<'a>,
         a0: ArgReg<'a, A0>,
@@ -153,7 +149,6 @@ pub(super) mod x86_via_vdso {
     }
 
     #[inline]
-    #[must_use]
     pub(in crate::imp) unsafe fn syscall4<'a>(
         nr: SyscallNumber<'a>,
         a0: ArgReg<'a, A0>,
@@ -169,7 +164,6 @@ pub(super) mod x86_via_vdso {
     }
 
     #[inline]
-    #[must_use]
     pub(in crate::imp) unsafe fn syscall5<'a>(
         nr: SyscallNumber<'a>,
         a0: ArgReg<'a, A0>,
@@ -186,7 +180,6 @@ pub(super) mod x86_via_vdso {
     }
 
     #[inline]
-    #[must_use]
     pub(in crate::imp) unsafe fn syscall6<'a>(
         nr: SyscallNumber<'a>,
         a0: ArgReg<'a, A0>,
