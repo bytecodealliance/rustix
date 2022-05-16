@@ -899,14 +899,14 @@ pub(crate) mod sockopt {
         let l_linger = if let Some(linger) = linger {
             let mut l_linger = linger.as_secs();
             if linger.subsec_nanos() != 0 {
-                l_linger = l_linger.checked_add(1).ok_or(io::Error::INVAL)?;
+                l_linger = l_linger.checked_add(1).ok_or(io::Errno::INVAL)?;
             }
-            l_linger.try_into().map_err(|_| io::Error::INVAL)?
+            l_linger.try_into().map_err(|_e| io::Errno::INVAL)?
         } else {
             0
         };
         let linger = c::linger {
-            l_onoff: linger.is_some() as c::c_int,
+            l_onoff: c::c_int::from(linger.is_some()),
             l_linger,
         };
         setsockopt(fd, c::SOL_SOCKET as _, c::SO_LINGER, linger)
@@ -945,7 +945,7 @@ pub(crate) mod sockopt {
             Timeout::Send => SO_SNDTIMEO_NEW,
         };
         match setsockopt(fd, SOL_SOCKET, optname, time) {
-            Err(io::Error::NOPROTOOPT) if SO_RCVTIMEO_NEW != SO_RCVTIMEO_OLD => {
+            Err(io::Errno::NOPROTOOPT) if SO_RCVTIMEO_NEW != SO_RCVTIMEO_OLD => {
                 set_socket_timeout_old(fd, id, timeout)
             }
             otherwise => otherwise,
@@ -977,7 +977,7 @@ pub(crate) mod sockopt {
             Timeout::Send => SO_SNDTIMEO_NEW,
         };
         let time: __kernel_timespec = match getsockopt(fd, SOL_SOCKET, optname) {
-            Err(io::Error::NOPROTOOPT) if SO_RCVTIMEO_NEW != SO_RCVTIMEO_OLD => {
+            Err(io::Errno::NOPROTOOPT) if SO_RCVTIMEO_NEW != SO_RCVTIMEO_OLD => {
                 return get_socket_timeout_old(fd, id)
             }
             otherwise => otherwise?,
@@ -1026,11 +1026,11 @@ pub(crate) mod sockopt {
         Ok(match timeout {
             Some(timeout) => {
                 if timeout == DURATION_ZERO {
-                    return Err(io::Error::INVAL);
+                    return Err(io::Errno::INVAL);
                 }
                 let mut timeout = __kernel_timespec {
                     tv_sec: timeout.as_secs().try_into().unwrap_or(i64::MAX),
-                    tv_nsec: timeout.subsec_nanos() as _,
+                    tv_nsec: timeout.subsec_nanos().into(),
                 };
                 if timeout.tv_sec == 0 && timeout.tv_nsec == 0 {
                     timeout.tv_nsec = 1;
@@ -1049,7 +1049,7 @@ pub(crate) mod sockopt {
         Ok(match timeout {
             Some(timeout) => {
                 if timeout == DURATION_ZERO {
-                    return Err(io::Error::INVAL);
+                    return Err(io::Errno::INVAL);
                 }
 
                 // `subsec_micros` rounds down, so we use `subsec_nanos` and
@@ -1225,7 +1225,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     fn from_bool(value: bool) -> c::c_uint {
-        value as c::c_uint
+        c::c_uint::from(value)
     }
 
     #[inline]

@@ -23,7 +23,7 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
     let nfds = fds
         .len()
         .try_into()
-        .map_err(|_convert_err| io::Error::INVAL)?;
+        .map_err(|_convert_err| io::Errno::INVAL)?;
 
     ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast(), nfds, timeout) })
         .map(|nready| nready as usize)

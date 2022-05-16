@@ -1,3 +1,5 @@
+//! Efficient decimal integer formatting.
+//!
 //! # Safety
 //!
 //! This uses `CStr::from_bytes_with_nul_unchecked` and

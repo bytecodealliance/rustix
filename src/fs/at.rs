@@ -324,8 +324,8 @@ pub fn chmodat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, mode: Mode) -> io::Re
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 #[inline]
 pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
-    src: &Fd,
-    dst_dir: &DstFd,
+    src: Fd,
+    dst_dir: DstFd,
     dst: P,
     flags: CloneFlags,
 ) -> io::Result<()> {

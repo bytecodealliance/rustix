@@ -16,11 +16,11 @@ fn test_dup3() {
     let (a, b) = rustix::io::pipe().unwrap();
     assert_eq!(
         rustix::io::dup3(&a, &a, DupFlags::empty()),
-        Err(rustix::io::Error::INVAL)
+        Err(rustix::io::Errno::INVAL)
     );
     assert_eq!(
         rustix::io::dup3(&b, &b, DupFlags::empty()),
-        Err(rustix::io::Error::INVAL)
+        Err(rustix::io::Errno::INVAL)
     );
     #[cfg(not(any(
         target_os = "android",
@@ -31,11 +31,11 @@ fn test_dup3() {
     {
         assert_eq!(
             rustix::io::dup3(&a, &a, DupFlags::CLOEXEC),
-            Err(rustix::io::Error::INVAL)
+            Err(rustix::io::Errno::INVAL)
         );
         assert_eq!(
             rustix::io::dup3(&b, &b, DupFlags::CLOEXEC),
-            Err(rustix::io::Error::INVAL)
+            Err(rustix::io::Errno::INVAL)
         );
     }
 }

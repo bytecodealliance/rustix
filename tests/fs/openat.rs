@@ -22,9 +22,9 @@ fn test_openat_tmpfile() {
     ) {
         Ok(f) => Ok(Some(File::from_fd(f.into_fd()))),
         // TODO: Factor out the `Err`, once we no longer support Rust 1.48.
-        Err(rustix::io::Error::OPNOTSUPP)
-        | Err(rustix::io::Error::ISDIR)
-        | Err(rustix::io::Error::NOENT) => Ok(None),
+        Err(rustix::io::Errno::OPNOTSUPP)
+        | Err(rustix::io::Errno::ISDIR)
+        | Err(rustix::io::Errno::NOENT) => Ok(None),
         Err(e) => Err(e),
     };
     if let Some(mut f) = f.unwrap() {

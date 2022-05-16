@@ -107,7 +107,7 @@ fn test_mlock() {
         #[cfg(any(target_os = "android", target_os = "linux"))]
         {
             match mlock_with(addr, 8192, MlockFlags::empty()) {
-                Err(rustix::io::Error::NOSYS) => (),
+                Err(rustix::io::Errno::NOSYS) => (),
                 Err(err) => Err(err).unwrap(),
                 Ok(()) => munlock(addr, 8192).unwrap(),
             }
@@ -115,7 +115,7 @@ fn test_mlock() {
             #[cfg(linux_raw)] // libc doesn't expose `MLOCK_UNFAULT` yet.
             {
                 match mlock_with(addr, 8192, MlockFlags::ONFAULT) {
-                    Err(rustix::io::Error::NOSYS) => (),
+                    Err(rustix::io::Errno::NOSYS) => (),
                     Err(err) => Err(err).unwrap(),
                     Ok(()) => munlock(addr, 8192).unwrap(),
                 }

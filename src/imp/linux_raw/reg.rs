@@ -46,16 +46,16 @@ pub(super) trait FromAsm: private::Sealed {
 pub(super) struct Opaque(c::c_void);
 
 // Argument numbers.
-pub(super) struct A0 {}
-pub(super) struct A1 {}
-pub(super) struct A2 {}
-pub(super) struct A3 {}
-pub(super) struct A4 {}
-pub(super) struct A5 {}
+pub(super) struct A0;
+pub(super) struct A1;
+pub(super) struct A2;
+pub(super) struct A3;
+pub(super) struct A4;
+pub(super) struct A5;
 #[cfg(target_arch = "mips")]
-pub(super) struct A6 {}
+pub(super) struct A6;
 #[cfg(target_arch = "x86")]
-pub(super) struct SocketArg {}
+pub(super) struct SocketArg;
 
 pub(super) trait ArgNumber: private::Sealed {}
 impl ArgNumber for A0 {}
@@ -70,7 +70,7 @@ impl ArgNumber for A6 {}
 impl ArgNumber for SocketArg {}
 
 // Return value numbers.
-pub(super) struct R0 {}
+pub(super) struct R0;
 
 pub(super) trait RetNumber: private::Sealed {}
 impl RetNumber for R0 {}

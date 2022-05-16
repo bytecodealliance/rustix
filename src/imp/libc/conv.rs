@@ -41,7 +41,7 @@ pub(super) fn ret(raw: c::c_int) -> io::Result<()> {
     if raw == 0 {
         Ok(())
     } else {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     }
 }
 
@@ -50,7 +50,7 @@ pub(super) fn syscall_ret(raw: c::c_long) -> io::Result<()> {
     if raw == 0 {
         Ok(())
     } else {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     }
 }
 
@@ -59,19 +59,19 @@ pub(super) fn nonnegative_ret(raw: c::c_int) -> io::Result<()> {
     if raw >= 0 {
         Ok(())
     } else {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     }
 }
 
 #[inline]
 pub(super) unsafe fn ret_infallible(raw: c::c_int) {
-    debug_assert_eq!(raw, 0, "unexpected error: {:?}", io::Error::last_os_error());
+    debug_assert_eq!(raw, 0, "unexpected error: {:?}", io::Errno::last_os_error());
 }
 
 #[inline]
 pub(super) fn ret_c_int(raw: c::c_int) -> io::Result<c::c_int> {
     if raw == -1 {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         Ok(raw)
     }
@@ -80,7 +80,7 @@ pub(super) fn ret_c_int(raw: c::c_int) -> io::Result<c::c_int> {
 #[inline]
 pub(super) fn ret_u32(raw: c::c_int) -> io::Result<u32> {
     if raw == -1 {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         Ok(raw as u32)
     }
@@ -89,7 +89,7 @@ pub(super) fn ret_u32(raw: c::c_int) -> io::Result<u32> {
 #[inline]
 pub(super) fn ret_ssize_t(raw: c::ssize_t) -> io::Result<c::ssize_t> {
     if raw == -1 {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         Ok(raw)
     }
@@ -98,7 +98,7 @@ pub(super) fn ret_ssize_t(raw: c::ssize_t) -> io::Result<c::ssize_t> {
 #[inline]
 pub(super) fn syscall_ret_ssize_t(raw: c::c_long) -> io::Result<c::ssize_t> {
     if raw == -1 {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         Ok(raw as c::ssize_t)
     }
@@ -108,7 +108,7 @@ pub(super) fn syscall_ret_ssize_t(raw: c::c_long) -> io::Result<c::ssize_t> {
 #[inline]
 pub(super) fn syscall_ret_u32(raw: c::c_long) -> io::Result<u32> {
     if raw == -1 {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         let r32 = raw as u32;
 
@@ -123,7 +123,7 @@ pub(super) fn syscall_ret_u32(raw: c::c_long) -> io::Result<u32> {
 #[inline]
 pub(super) fn ret_off_t(raw: libc_off_t) -> io::Result<libc_off_t> {
     if raw == -1 {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         Ok(raw)
     }
@@ -133,13 +133,13 @@ pub(super) fn ret_off_t(raw: libc_off_t) -> io::Result<libc_off_t> {
 #[inline]
 pub(super) fn ret_pid_t(raw: c::pid_t) -> io::Result<c::pid_t> {
     if raw == -1 {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         Ok(raw)
     }
 }
 
-/// Convert a c_int returned from a libc function to an `OwnedFd`, if valid.
+/// Convert a `c_int` returned from a libc function to an `OwnedFd`, if valid.
 ///
 /// # Safety
 ///
@@ -148,7 +148,7 @@ pub(super) fn ret_pid_t(raw: c::pid_t) -> io::Result<c::pid_t> {
 #[inline]
 pub(super) unsafe fn ret_owned_fd(raw: LibcFd) -> io::Result<OwnedFd> {
     if raw == !0 {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         Ok(OwnedFd::from_raw_fd(raw as RawFd))
     }
@@ -157,7 +157,7 @@ pub(super) unsafe fn ret_owned_fd(raw: LibcFd) -> io::Result<OwnedFd> {
 #[inline]
 pub(super) fn ret_discarded_fd(raw: LibcFd) -> io::Result<()> {
     if raw == !0 {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         Ok(())
     }
@@ -166,13 +166,13 @@ pub(super) fn ret_discarded_fd(raw: LibcFd) -> io::Result<()> {
 #[inline]
 pub(super) fn ret_discarded_char_ptr(raw: *mut c::c_char) -> io::Result<()> {
     if raw.is_null() {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         Ok(())
     }
 }
 
-/// Convert a c_long returned from `syscall` to an `OwnedFd`, if valid.
+/// Convert a `c_long` returned from `syscall` to an `OwnedFd`, if valid.
 ///
 /// # Safety
 ///
@@ -182,7 +182,7 @@ pub(super) fn ret_discarded_char_ptr(raw: *mut c::c_char) -> io::Result<()> {
 #[inline]
 pub(super) unsafe fn syscall_ret_owned_fd(raw: c::c_long) -> io::Result<OwnedFd> {
     if raw == -1 {
-        Err(io::Error::last_os_error())
+        Err(io::Errno::last_os_error())
     } else {
         Ok(OwnedFd::from_raw_fd(raw as RawFd))
     }

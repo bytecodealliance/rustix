@@ -278,13 +278,15 @@ pub(crate) fn pwritev2(
     }
 }
 
+/// The maximum number of buffers that can be passed into a vectored I/O system
+/// call on the current platform.
 const fn max_iov() -> usize {
     linux_raw_sys::general::UIO_MAXIOV as usize
 }
 
 #[inline]
 pub(crate) unsafe fn close(fd: RawFd) {
-    // See the docunentation for [`io::close`] for why errors are ignored.
+    // See the documentation for [`io::close`] for why errors are ignored.
     syscall_readonly!(__NR_close, raw_fd(fd)).decode_void();
 }
 
@@ -305,7 +307,7 @@ pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
 #[inline]
 pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     unsafe {
-        let data = value as c::c_int;
+        let data = c::c_int::from(value);
         ret(syscall_readonly!(
             __NR_ioctl,
             fd,
@@ -361,8 +363,8 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
             Err(err) => {
                 #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
                 match err {
-                    io::Error::AGAIN | io::Error::WOULDBLOCK => (),
-                    io::Error::NOTSOCK => not_socket = true,
+                    io::Errno::AGAIN | io::Errno::WOULDBLOCK => (),
+                    io::Errno::NOTSOCK => not_socket = true,
                     _ => return Err(err),
                 }
             }
@@ -375,10 +377,10 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         #[allow(unreachable_patterns)] // `EAGAIN` equals `EWOULDBLOCK`
         match super::super::net::syscalls::send(fd, &[], SendFlags::DONTWAIT) {
             // TODO or-patterns when we don't need 1.51
-            Err(io::Error::AGAIN) => (),
-            Err(io::Error::WOULDBLOCK) => (),
-            Err(io::Error::NOTSOCK) => (),
-            Err(io::Error::PIPE) => write = false,
+            Err(io::Errno::AGAIN) => (),
+            Err(io::Errno::WOULDBLOCK) => (),
+            Err(io::Errno::NOTSOCK) => (),
+            Err(io::Errno::PIPE) => write = false,
             Err(err) => return Err(err),
             Ok(_) => (),
         }
@@ -396,7 +398,7 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     {
         // `dup3` fails if the old and new file descriptors have the same
-        // value, so emulate the `dup2` behvior.
+        // value, so emulate the `dup2` behavior.
         use crate::fd::AsRawFd;
         if fd.as_raw_fd() == new.as_raw_fd() {
             return Ok(());

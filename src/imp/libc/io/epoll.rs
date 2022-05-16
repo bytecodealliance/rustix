@@ -428,7 +428,7 @@ impl<'context, T: AsFd + IntoFd + FromFd> AsFd for Epoll<Owning<'context, T>> {
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
 impl<'context, T: AsFd + IntoFd + FromFd> From<Epoll<Owning<'context, T>>> for OwnedFd {
-    fn from(epoll: Epoll<Owning<'context, T>>) -> OwnedFd {
+    fn from(epoll: Epoll<Owning<'context, T>>) -> Self {
         epoll.epoll_fd
     }
 }

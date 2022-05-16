@@ -29,7 +29,7 @@ use linux_raw_sys::general::{__kernel_clockid_t, __kernel_timespec};
 pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
     // Safety: `CLOCK_GETTIME` contains either null or the address of a
     // function with an ABI like libc `clock_gettime`, and calling it has
-    // the side effect ot writing to the result buffer, and no others.
+    // the side effect of writing to the result buffer, and no others.
     unsafe {
         let mut result = MaybeUninit::<__kernel_timespec>::uninit();
         let callee = match transmute(CLOCK_GETTIME.load(Relaxed)) {
@@ -66,7 +66,7 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Resu
 
     // Safety: `CLOCK_GETTIME` contains either null or the address of a
     // function with an ABI like libc `clock_gettime`, and calling it has
-    // the side effect ot writing to the result buffer, and no others.
+    // the side effect of writing to the result buffer, and no others.
     unsafe {
         const EINVAL: c::c_int = -(c::EINVAL as c::c_int);
         let mut timespec = MaybeUninit::<Timespec>::uninit();
@@ -76,7 +76,7 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Resu
         };
         match callee(id, timespec.as_mut_ptr()) {
             0 => (),
-            EINVAL => return Err(io::Error::INVAL),
+            EINVAL => return Err(io::Errno::INVAL),
             _ => _rustix_clock_gettime_via_syscall(id, timespec.as_mut_ptr())?,
         }
         Ok(timespec.assume_init())
@@ -260,7 +260,7 @@ unsafe fn _rustix_clock_gettime_via_syscall(
 ) -> io::Result<()> {
     let r0 = syscall!(__NR_clock_gettime64, c_int(clockid), res);
     match ret(r0) {
-        Err(io::Error::NOSYS) => _rustix_clock_gettime_via_syscall_old(clockid, res),
+        Err(io::Errno::NOSYS) => _rustix_clock_gettime_via_syscall_old(clockid, res),
         otherwise => otherwise,
     }
 }

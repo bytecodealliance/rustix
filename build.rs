@@ -63,10 +63,10 @@ fn main() {
     let miri = var("CARGO_CFG_MIRI").is_ok();
 
     // If the libc backend is requested, or if we're not on a platform for
-    // which we have linux-raw support, use the libc backend.
+    // which we have linux_raw support, use the libc backend.
     //
     // For now Android uses the libc backend; in theory it could use the
-    // linux-raw backend, but to do that we'll need to figure out how to
+    // linux_raw backend, but to do that we'll need to figure out how to
     // install the toolchain for it.
     if feature_use_libc
         || cfg_use_libc
@@ -78,7 +78,7 @@ fn main() {
         // Use the libc backend.
         use_feature("libc");
     } else {
-        // Use the linux-raw backend.
+        // Use the linux_raw backend.
         use_feature("linux_raw");
         use_feature_or_nothing("core_intrinsics");
 
@@ -105,6 +105,8 @@ fn main() {
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM");
 }
 
+/// Link in the desired version of librustix_outline_{arch}.a, containing the
+/// outline assembly code for making syscalls.
 fn link_in_librustix_outline(arch: &str, asm_name: &str) {
     let name = format!("rustix_outline_{}", arch);
     let profile = var("PROFILE").unwrap();

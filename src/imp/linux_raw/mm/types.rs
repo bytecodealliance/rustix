@@ -141,6 +141,7 @@ bitflags! {
 /// [`madvise`]: crate::mm::madvise
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
+#[non_exhaustive]
 pub enum Advice {
     /// `POSIX_MADV_NORMAL`
     Normal = linux_raw_sys::general::MADV_NORMAL,

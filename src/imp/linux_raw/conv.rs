@@ -16,12 +16,12 @@
 use super::c;
 use super::fd::{AsRawFd, BorrowedFd, FromRawFd, RawFd};
 #[cfg(not(debug_assertions))]
-use super::io::error::decode_usize_infallible;
+use super::io::errno::decode_usize_infallible;
 #[cfg(feature = "runtime")]
-use super::io::error::try_decode_error;
+use super::io::errno::try_decode_error;
 #[cfg(target_pointer_width = "64")]
-use super::io::error::try_decode_u64;
-use super::io::error::{
+use super::io::errno::try_decode_u64;
+use super::io::errno::{
     try_decode_c_int, try_decode_c_uint, try_decode_raw_fd, try_decode_usize, try_decode_void,
     try_decode_void_star,
 };
@@ -158,6 +158,13 @@ pub(super) unsafe fn raw_fd<'a, Num: ArgNumber>(fd: RawFd) -> ArgReg<'a, Num> {
     // Use `no_fd` when passing `-1` is intended.
     debug_assert!(fd == crate::fs::cwd().as_raw_fd() || fd >= 0);
 
+    // Don't pass the `io_uring_register_files_skip` sentry value this way.
+    #[cfg(feature = "io_uring")]
+    debug_assert_ne!(
+        fd,
+        crate::io_uring::io_uring_register_files_skip().as_raw_fd()
+    );
+
     // Linux doesn't look at the high bits beyond the `c_int`, so use
     // zero-extension rather than sign-extension because it's a smaller
     // instruction.
@@ -173,40 +180,40 @@ pub(super) fn no_fd<'a, Num: ArgNumber>() -> ArgReg<'a, Num> {
 }
 
 #[inline]
-pub(super) fn slice_just_addr<'a, T: Sized, Num: ArgNumber>(v: &'a [T]) -> ArgReg<'a, Num> {
+pub(super) fn slice_just_addr<T: Sized, Num: ArgNumber>(v: &[T]) -> ArgReg<Num> {
     let mut_ptr = v.as_ptr() as *mut T;
     raw_arg(mut_ptr.cast())
 }
 
 #[inline]
-pub(super) fn slice<'a, T: Sized, Num0: ArgNumber, Num1: ArgNumber>(
-    v: &'a [T],
-) -> (ArgReg<'a, Num0>, ArgReg<'a, Num1>) {
+pub(super) fn slice<T: Sized, Num0: ArgNumber, Num1: ArgNumber>(
+    v: &[T],
+) -> (ArgReg<Num0>, ArgReg<Num1>) {
     (slice_just_addr(v), pass_usize(v.len()))
 }
 
 #[inline]
-pub(super) fn slice_mut<'a, T: Sized, Num0: ArgNumber, Num1: ArgNumber>(
+pub(super) fn slice_mut<T: Sized, Num0: ArgNumber, Num1: ArgNumber>(
     v: &mut [T],
-) -> (ArgReg<'a, Num0>, ArgReg<'a, Num1>) {
+) -> (ArgReg<Num0>, ArgReg<Num1>) {
     (raw_arg(v.as_mut_ptr().cast()), pass_usize(v.len()))
 }
 
 #[inline]
-pub(super) fn by_ref<'a, T: Sized, Num: ArgNumber>(t: &'a T) -> ArgReg<'a, Num> {
+pub(super) fn by_ref<T: Sized, Num: ArgNumber>(t: &T) -> ArgReg<Num> {
     let mut_ptr = as_ptr(t) as *mut T;
     raw_arg(mut_ptr.cast())
 }
 
 #[inline]
-pub(super) fn by_mut<'a, T: Sized, Num: ArgNumber>(t: &'a mut T) -> ArgReg<'a, Num> {
+pub(super) fn by_mut<T: Sized, Num: ArgNumber>(t: &mut T) -> ArgReg<Num> {
     raw_arg(as_mut_ptr(t).cast())
 }
 
 /// Convert an optional mutable reference into a `usize` for passing to a
 /// syscall.
 #[inline]
-pub(super) fn opt_mut<'a, T: Sized, Num: ArgNumber>(t: Option<&'a mut T>) -> ArgReg<'a, Num> {
+pub(super) fn opt_mut<T: Sized, Num: ArgNumber>(t: Option<&mut T>) -> ArgReg<Num> {
     // This optimizes into the equivalent of `transmute(t)`, and has the
     // advantage of not requiring `unsafe`.
     match t {
@@ -442,7 +449,7 @@ pub(super) fn dev_t<'a, Num: ArgNumber>(dev: u64) -> ArgReg<'a, Num> {
 #[inline]
 pub(super) fn dev_t<'a, Num: ArgNumber>(dev: u64) -> io::Result<ArgReg<'a, Num>> {
     use core::convert::TryInto;
-    Ok(pass_usize(dev.try_into().map_err(|_err| io::Error::INVAL)?))
+    Ok(pass_usize(dev.try_into().map_err(|_err| io::Errno::INVAL)?))
 }
 
 #[cfg(target_pointer_width = "32")]
@@ -651,7 +658,7 @@ pub(super) unsafe fn ret(raw: RetReg<R0>) -> io::Result<()> {
 /// doesn't return on success.
 #[cfg(feature = "runtime")]
 #[inline]
-pub(super) unsafe fn ret_error(raw: RetReg<R0>) -> io::Error {
+pub(super) unsafe fn ret_error(raw: RetReg<R0>) -> io::Errno {
     try_decode_error(raw)
 }
 

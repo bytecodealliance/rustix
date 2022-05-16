@@ -60,7 +60,7 @@ fn test_y2038_with_timerfd() {
         // y2038 support in `timerfd` APIs is not available on this platform
         // or this version of the platform.
         #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
-        Err(rustix::io::Error::OVERFLOW) => return,
+        Err(rustix::io::Errno::OVERFLOW) => return,
 
         Err(e) => panic!("unexpected error: {:?}", e),
     };

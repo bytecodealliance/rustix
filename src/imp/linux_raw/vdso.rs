@@ -271,7 +271,7 @@ unsafe fn check_vdso_base<'vdso>(base: *const Elf_Ehdr) -> Option<&'vdso Elf_Ehd
     {
         use super::conv::ret;
         use super::time::types::ClockId;
-        if ret(syscall!(__NR_clock_getres, ClockId::Monotonic, base)) != Err(io::Error::FAULT) {
+        if ret(syscall!(__NR_clock_getres, ClockId::Monotonic, base)) != Err(io::Errno::FAULT) {
             // We can't gracefully fail here because we would seem to have just
             // mutated some unknown memory.
             #[cfg(feature = "std")]
@@ -392,11 +392,15 @@ impl Vdso {
         null_mut()
     }
 
+    /// Add the given address to the vDSO base address.
     unsafe fn base_plus(&self, offset: usize) -> Option<*const c_void> {
+        // Check for overflow.
         let _ = (self.load_addr as usize).checked_add(offset)?;
+        // Add the offset to the base.
         Some(self.load_addr.cast::<u8>().add(offset).cast())
     }
 
+    /// Translate an ELF-address-space address into a usable virtual address.
     unsafe fn addr_from_elf(&self, elf_addr: usize) -> Option<*const c_void> {
         self.base_plus(elf_addr.wrapping_add(self.pv_offset))
     }

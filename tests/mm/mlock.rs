@@ -12,7 +12,7 @@ fn test_mlock() {
         match rustix::mm::mlock(buf.as_mut_ptr().cast::<c_void>(), buf.len()) {
             Ok(()) => rustix::mm::munlock(buf.as_mut_ptr().cast::<c_void>(), buf.len()).unwrap(),
             // Tests won't always have enough memory or permissions, and that's ok.
-            Err(rustix::io::Error::PERM) | Err(rustix::io::Error::NOMEM) => {}
+            Err(rustix::io::Errno::PERM) | Err(rustix::io::Errno::NOMEM) => {}
             // But they shouldn't fail otherwise.
             Err(other) => Err(other).unwrap(),
         }
@@ -32,9 +32,9 @@ fn test_mlock_with() {
         ) {
             Ok(()) => rustix::mm::munlock(buf.as_mut_ptr().cast::<c_void>(), buf.len()).unwrap(),
             // Tests won't always have enough memory or permissions, and that's ok.
-            Err(rustix::io::Error::PERM)
-            | Err(rustix::io::Error::NOMEM)
-            | Err(rustix::io::Error::NOSYS) => {}
+            Err(rustix::io::Errno::PERM)
+            | Err(rustix::io::Errno::NOMEM)
+            | Err(rustix::io::Errno::NOSYS) => {}
             // But they shouldn't fail otherwise.
             Err(other) => Err(other).unwrap(),
         }
@@ -53,7 +53,7 @@ fn test_mlock_with_onfault() {
     // syscall directly to test for `ENOSYS`, before running the main
     // test below.
     unsafe {
-        if libc::syscall(libc::SYS_mlock2, 0, 0) == -1 && errno::errno().0 == libc::ENOSYS {
+        if libc::syscall(libc::SYS_mlock2, 0, 0) == -1 && libc_errno::errno().0 == libc::ENOSYS {
             return;
         }
     }
@@ -68,9 +68,9 @@ fn test_mlock_with_onfault() {
         ) {
             Ok(()) => rustix::mm::munlock(buf.as_mut_ptr().cast::<c_void>(), buf.len()).unwrap(),
             // Tests won't always have enough memory or permissions, and that's ok.
-            Err(rustix::io::Error::PERM)
-            | Err(rustix::io::Error::NOMEM)
-            | Err(rustix::io::Error::NOSYS) => {}
+            Err(rustix::io::Errno::PERM)
+            | Err(rustix::io::Errno::NOMEM)
+            | Err(rustix::io::Errno::NOSYS) => {}
             // But they shouldn't fail otherwise.
             Err(other) => Err(other).unwrap(),
         }

@@ -190,7 +190,7 @@ pub(crate) fn sched_setaffinity(pid: Option<Pid>, cpuset: &RawCpuSet) -> io::Res
 #[inline]
 pub(crate) fn sched_yield() {
     unsafe {
-        // See the docunentation for [`crate::process::sched_yield`] for why
+        // See the documentation for [`crate::process::sched_yield`] for why
         // errors are ignored.
         syscall_readonly!(__NR_sched_yield).decode_void();
     }
@@ -305,7 +305,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
         )) {
             Ok(()) => rlimit_from_linux(result.assume_init()),
             Err(e) => {
-                debug_assert_eq!(e, io::Error::NOSYS);
+                debug_assert_eq!(e, io::Errno::NOSYS);
                 getrlimit_old(limit)
             }
         }
@@ -346,7 +346,7 @@ unsafe fn getrlimit_old(limit: Resource) -> Rlimit {
 pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
     unsafe {
         let lim = rlimit_to_linux(new.clone())?;
-        match ret(syscall!(
+        match ret(syscall_readonly!(
             __NR_prlimit64,
             c_uint(0),
             limit,
@@ -354,7 +354,7 @@ pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
             null_mut::<c::c_void>()
         )) {
             Ok(()) => Ok(()),
-            Err(io::Error::NOSYS) => setrlimit_old(limit, new),
+            Err(io::Errno::NOSYS) => setrlimit_old(limit, new),
             Err(e) => Err(e),
         }
     }
@@ -364,7 +364,7 @@ pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
 /// `prlimit64`.
 unsafe fn setrlimit_old(limit: Resource, new: Rlimit) -> io::Result<()> {
     let lim = rlimit_to_linux_old(new)?;
-    ret(syscall!(__NR_setrlimit, limit, by_ref(&lim)))
+    ret(syscall_readonly!(__NR_setrlimit, limit, by_ref(&lim)))
 }
 
 #[inline]
@@ -416,6 +416,7 @@ fn rlimit_to_linux(lim: Rlimit) -> io::Result<linux_raw_sys::general::rlimit64> 
 }
 
 /// Like `rlimit_from_linux` but uses Linux's old 32-bit `rlimit`.
+#[allow(clippy::useless_conversion)]
 fn rlimit_from_linux_old(lim: linux_raw_sys::general::rlimit) -> Rlimit {
     let current = if lim.rlim_cur == linux_raw_sys::general::RLIM_INFINITY as _ {
         None
@@ -431,13 +432,14 @@ fn rlimit_from_linux_old(lim: linux_raw_sys::general::rlimit) -> Rlimit {
 }
 
 /// Like `rlimit_to_linux` but uses Linux's old 32-bit `rlimit`.
+#[allow(clippy::useless_conversion)]
 fn rlimit_to_linux_old(lim: Rlimit) -> io::Result<linux_raw_sys::general::rlimit> {
     let rlim_cur = match lim.current {
-        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+        Some(r) => r.try_into().map_err(|_e| io::Errno::INVAL)?,
         None => linux_raw_sys::general::RLIM_INFINITY as _,
     };
     let rlim_max = match lim.maximum {
-        Some(r) => r.try_into().map_err(|_| io::Error::INVAL)?,
+        Some(r) => r.try_into().map_err(|_e| io::Errno::INVAL)?,
         None => linux_raw_sys::general::RLIM_INFINITY as _,
     };
     Ok(linux_raw_sys::general::rlimit { rlim_cur, rlim_max })

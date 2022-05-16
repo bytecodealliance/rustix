@@ -16,7 +16,7 @@ use crate::io;
 use crate::process::{Pid, RawNonZeroPid};
 use crate::termios::{Action, OptionalActions, QueueSelector, Speed, Termios, Winsize};
 use core::mem::MaybeUninit;
-use errno::errno;
+use libc_errno::errno;
 
 pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     let mut result = MaybeUninit::<Termios>::uninit();
