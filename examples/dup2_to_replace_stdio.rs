@@ -16,15 +16,16 @@ fn main() {
     // that stdin and stdout will be open or safe to use. It's ok here, because
     // we're directly inside `main`, so we know that stdin and stdout haven't
     // been closed and aren't being used for other purposes.
-    let (stdin, stdout) = unsafe { (rustix::io::take_stdin(), rustix::io::take_stdout()) };
+    let (mut stdin, mut stdout) = unsafe { (rustix::io::take_stdin(), rustix::io::take_stdout()) };
 
     // Use `dup2` to copy our new file descriptors over the stdio file descriptors.
     //
-    // These take their second argument as an `&OwnedFd` rather than the usual
-    // `impl AsFd` because they conceptually do a `close` on the original file
-    // descriptor, which one shouldn't be able to do with just a `BorrowedFd`.
-    dup2(&reader, &stdin).unwrap();
-    dup2(&writer, &stdout).unwrap();
+    // These take their second argument as an `&mut OwnedFd` rather than the
+    // usual `impl AsFd` because they conceptually do a `close` on the original
+    // file descriptor, which one shouldn't be able to do with just a
+    // `BorrowedFd`.
+    dup2(&reader, &mut stdin).unwrap();
+    dup2(&writer, &mut stdout).unwrap();
 
     // Then, forget the stdio `OwnedFd`s, because actually dropping them would
     // close them. Here, we want stdin and stdout to remain open for the rest

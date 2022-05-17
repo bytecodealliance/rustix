@@ -375,7 +375,7 @@ pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 }
 
 #[cfg(not(target_os = "wasi"))]
-pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
+pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
     unsafe { ret_discarded_fd(c::dup2(borrowed_fd(fd), borrowed_fd(new.as_fd()))) }
 }
 
@@ -387,7 +387,7 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
     target_os = "redox",
     target_os = "wasi"
 )))]
-pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
+pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, flags: DupFlags) -> io::Result<()> {
     unsafe {
         ret_discarded_fd(c::dup3(
             borrowed_fd(fd),
@@ -404,14 +404,11 @@ pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> io::Re
     target_os = "ios",
     target_os = "redox"
 ))]
-pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, _flags: DupFlags) -> io::Result<()> {
+pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, _flags: DupFlags) -> io::Result<()> {
     // Android 5.0 has `dup3`, but libc doesn't have bindings. Emulate it
-    // using `dup2`, including the difference of failing with `EINVAL`
-    // when the file descriptors are equal.
-    use std::os::unix::io::AsRawFd;
-    if fd.as_raw_fd() == new.as_raw_fd() {
-        return Err(io::Errno::INVAL);
-    }
+    // using `dup2`. We don't need to worry about the difference between
+    // `dup2` and `dup3` when the file descriptors are equal because we
+    // have an `&mut OwnedFd` which means `fd` doesn't alias it.
     dup2(fd, new)
 }
 

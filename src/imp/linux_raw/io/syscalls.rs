@@ -394,15 +394,12 @@ pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 }
 
 #[inline]
-pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
+pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     {
-        // `dup3` fails if the old and new file descriptors have the same
-        // value, so emulate the `dup2` behavior.
-        use crate::fd::AsRawFd;
-        if fd.as_raw_fd() == new.as_raw_fd() {
-            return Ok(());
-        }
+        // We don't need to worry about the difference between `dup2` and
+        // `dup3` when the file descriptors are equal because we have an
+        // `&mut OwnedFd` which means `fd` doesn't alias it.
         dup3(fd, new, DupFlags::empty())
     }
 
@@ -413,7 +410,7 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &OwnedFd) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &OwnedFd, flags: DupFlags) -> io::Result<()> {
+pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, flags: DupFlags) -> io::Result<()> {
     unsafe { ret_discarded_fd(syscall_readonly!(__NR_dup3, fd, new.as_fd(), flags)) }
 }
 
