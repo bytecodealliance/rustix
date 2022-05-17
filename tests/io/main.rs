@@ -7,9 +7,6 @@
 #[cfg(not(windows))]
 #[cfg(not(target_os = "wasi"))]
 mod dup2_to_replace_stdio;
-#[cfg(not(windows))]
-#[cfg(not(target_os = "wasi"))]
-mod dup3;
 #[cfg(not(feature = "rustc-dep-of-std"))] // TODO
 #[cfg(not(windows))]
 #[cfg(feature = "net")]
