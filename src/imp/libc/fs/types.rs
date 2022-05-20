@@ -49,9 +49,11 @@ bitflags! {
         const SYMLINK_NOFOLLOW = c::AT_SYMLINK_NOFOLLOW;
 
         /// `AT_EMPTY_PATH`
-        #[cfg(any(target_os = "android",
-                  target_os = "fuchsia",
-                  target_os = "linux"))]
+        #[cfg(any(
+            target_os = "android",
+            target_os = "fuchsia",
+            target_os = "linux",
+        ))]
         const EMPTY_PATH = c::AT_EMPTY_PATH;
 
         /// `AT_EACCESS`
@@ -191,13 +193,15 @@ bitflags! {
         const EXCL = c::O_EXCL;
 
         /// `O_FSYNC`
-        #[cfg(any(target_os = "dragonfly",
-                  target_os = "freebsd",
-                  target_os = "ios",
-                  all(target_os = "linux", not(target_env = "musl")),
-                  target_os = "macos",
-                  target_os = "netbsd",
-                  target_os = "openbsd"))]
+        #[cfg(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            all(target_os = "linux", not(target_env = "musl")),
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+        ))]
         const FSYNC = c::O_FSYNC;
 
         /// `O_NOFOLLOW`
@@ -220,13 +224,14 @@ bitflags! {
         const NOCTTY = c::O_NOCTTY;
 
         /// `O_RSYNC`
-        #[cfg(any(target_os = "android",
-                  target_os = "emscripten",
-                  target_os = "linux",
-                  target_os = "netbsd",
-                  target_os = "openbsd",
-                  target_os = "wasi",
-                  ))]
+        #[cfg(any(
+            target_os = "android",
+            target_os = "emscripten",
+            target_os = "linux",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "wasi",
+        ))]
         const RSYNC = c::O_RSYNC;
 
         /// `O_SYNC`
@@ -237,44 +242,52 @@ bitflags! {
         const TRUNC = c::O_TRUNC;
 
         /// `O_PATH`
-        #[cfg(any(target_os = "android",
-                  target_os = "emscripten",
-                  target_os = "fuchsia",
-                  target_os = "linux",
-                  target_os = "redox"))]
+        #[cfg(any(
+            target_os = "android",
+            target_os = "emscripten",
+            target_os = "fuchsia",
+            target_os = "linux",
+            target_os = "redox",
+        ))]
         const PATH = c::O_PATH;
 
         /// `O_CLOEXEC`
-        #[cfg(any(target_os = "android",
-                  target_os = "dragonfly",
-                  target_os = "emscripten",
-                  target_os = "freebsd",
-                  target_os = "fuchsia",
-                  target_os = "haiku",
-                  target_os = "hermit",
-                  target_os = "illumos",
-                  target_os = "ios",
-                  target_os = "linux",
-                  target_os = "macos",
-                  target_os = "netbsd",
-                  target_os = "openbsd",
-                  target_os = "redox",
-                  target_os = "solaris",
-                  target_os = "vxworks",
-                  target_os = "wasi"))]
+        #[cfg(any(
+            target_os = "android",
+            target_os = "dragonfly",
+            target_os = "emscripten",
+            target_os = "freebsd",
+            target_os = "fuchsia",
+            target_os = "haiku",
+            target_os = "hermit",
+            target_os = "illumos",
+            target_os = "ios",
+            target_os = "linux",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "redox",
+            target_os = "solaris",
+            target_os = "vxworks",
+            target_os = "wasi",
+        ))]
         const CLOEXEC = c::O_CLOEXEC;
 
         /// `O_TMPFILE`
-        #[cfg(any(target_os = "android",
-                  target_os = "emscripten",
-                  target_os = "fuchsia",
-                  target_os = "linux"))]
+        #[cfg(any(
+            target_os = "android",
+            target_os = "emscripten",
+            target_os = "fuchsia",
+            target_os = "linux",
+        ))]
         const TMPFILE = c::O_TMPFILE;
 
         /// `O_NOATIME`
-        #[cfg(any(target_os = "android",
-                  target_os = "fuchsia",
-                  target_os = "linux"))]
+        #[cfg(any(
+            target_os = "android",
+            target_os = "fuchsia",
+            target_os = "linux",
+        ))]
         const NOATIME = c::O_NOATIME;
     }
 }
