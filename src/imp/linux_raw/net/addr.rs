@@ -42,7 +42,6 @@ impl SocketAddrUnix {
     }
 
     /// Construct a new abstract Unix-domain address from a byte slice.
-    #[cfg(any(target_os = "android", target_os = "linux"))]
     #[inline]
     pub fn new_abstract_name(name: &[u8]) -> io::Result<Self> {
         let mut unix = Self::init();
@@ -87,7 +86,6 @@ impl SocketAddrUnix {
 
     /// For an abstract address, return the identifier.
     #[inline]
-    #[cfg(any(target_os = "android", target_os = "linux"))]
     pub fn abstract_name(&self) -> Option<&[u8]> {
         let len = self.len();
         if len != 0 && self.unix.sun_path[0] == b'\0' as c::c_char {
