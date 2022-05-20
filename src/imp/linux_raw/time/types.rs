@@ -16,7 +16,6 @@ pub type Nsecs = i64;
 ///
 /// [`timerfd_gettime`]: crate::time::timerfd_gettime
 /// [`timerfd_settime`]: crate::time::timerfd_settime
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 pub type Itimerspec = linux_raw_sys::general::__kernel_itimerspec;
 
 /// `CLOCK_*` constants for use with [`clock_gettime`].
