@@ -1,5 +1,5 @@
 use crate::fd::{AsFd, BorrowedFd};
-use crate::ffi::{ZStr, ZString};
+use crate::ffi::{CStr, CString};
 use crate::fs::{fcntl_getfl, fstat, fstatfs, openat, FileType, Mode, OFlags, Stat, StatFs};
 use crate::io::{self, OwnedFd};
 use crate::process::fchdir;
@@ -31,7 +31,7 @@ impl Dir {
     #[inline]
     fn _read_from(fd: BorrowedFd<'_>) -> io::Result<Self> {
         let flags = fcntl_getfl(fd)?;
-        let fd_for_dir = openat(fd, zstr!("."), flags | OFlags::CLOEXEC, Mode::empty())?;
+        let fd_for_dir = openat(fd, cstr!("."), flags | OFlags::CLOEXEC, Mode::empty())?;
 
         Ok(Self {
             fd: fd_for_dir,
@@ -96,14 +96,14 @@ impl Dir {
 
         // Read the NUL-terminated name from the `d_name` field. Without
         // `unsafe`, we need to scan for the NUL twice: once to obtain a size
-        // for the slice, and then once within `ZStr::from_bytes_with_nul`.
+        // for the slice, and then once within `CStr::from_bytes_with_nul`.
         let name_start = pos + offsetof_d_name;
         let name_len = self.buf[name_start..]
             .iter()
             .position(|x| *x == b'\0')
             .unwrap();
         let name =
-            ZStr::from_bytes_with_nul(&self.buf[name_start..name_start + name_len + 1]).unwrap();
+            CStr::from_bytes_with_nul(&self.buf[name_start..name_start + name_len + 1]).unwrap();
         let name = name.to_owned();
         assert!(name.as_bytes().len() <= self.buf.len() - name_start);
 
@@ -193,13 +193,13 @@ impl fmt::Debug for Dir {
 pub struct DirEntry {
     d_ino: u64,
     d_type: u8,
-    name: ZString,
+    name: CString,
 }
 
 impl DirEntry {
     /// Returns the file name of this directory entry.
     #[inline]
-    pub fn file_name(&self) -> &ZStr {
+    pub fn file_name(&self) -> &CStr {
         &self.name
     }
 

@@ -26,7 +26,7 @@
 #![allow(dead_code, unused_macros)]
 #![allow(clippy::doc_markdown)]
 
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 use core::ffi::c_void;
 use core::ptr::null_mut;
 use core::sync::atomic::{self, AtomicPtr, Ordering};
@@ -107,7 +107,7 @@ impl<F> Weak<F> {
 }
 
 unsafe fn fetch(name: &str) -> *mut c_void {
-    let name = match ZStr::from_bytes_with_nul(name.as_bytes()) {
+    let name = match CStr::from_bytes_with_nul(name.as_bytes()) {
         Ok(c_str) => c_str,
         Err(..) => return null_mut(),
     };

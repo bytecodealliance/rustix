@@ -8,7 +8,7 @@
 use super::super::c;
 use super::super::elf::{Elf_Ehdr, Elf_Phdr};
 #[cfg(feature = "process")]
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 use core::mem::size_of;
 use core::ptr::null;
 #[cfg(feature = "runtime")]
@@ -39,12 +39,12 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
 
 #[cfg(feature = "process")]
 #[inline]
-pub(crate) fn linux_execfn() -> &'static ZStr {
+pub(crate) fn linux_execfn() -> &'static CStr {
     let execfn = auxv().execfn;
 
     // Safety: We assume the `AT_EXECFN` value provided by the kernel is a
     // valid pointer to a valid NUL-terminated array of bytes.
-    unsafe { ZStr::from_ptr(execfn.cast()) }
+    unsafe { CStr::from_ptr(execfn.cast()) }
 }
 
 #[cfg(feature = "runtime")]

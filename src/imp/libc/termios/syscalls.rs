@@ -11,7 +11,7 @@ use super::super::conv::{borrowed_fd, ret, ret_pid_t};
 use crate::fd::BorrowedFd;
 #[cfg(feature = "procfs")]
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 use crate::io;
 use crate::process::{Pid, RawNonZeroPid};
 use crate::termios::{Action, OptionalActions, QueueSelector, Speed, Termios, Winsize};
@@ -155,6 +155,6 @@ pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize
             buf.as_mut_ptr().cast(),
             buf.len(),
         ))?;
-        Ok(ZStr::from_ptr(buf.as_ptr().cast()).to_bytes().len())
+        Ok(CStr::from_ptr(buf.as_ptr().cast()).to_bytes().len())
     }
 }

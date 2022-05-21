@@ -1,4 +1,4 @@
-use crate::ffi::ZString;
+use crate::ffi::CString;
 use crate::path::SMALL_PATH_BUFFER_SIZE;
 use crate::{imp, io, path};
 use alloc::vec::Vec;
@@ -15,7 +15,7 @@ use imp::fd::AsFd;
 /// [Linux]: https://man7.org/linux/man-pages/man2/chdir.2.html
 #[inline]
 pub fn chdir<P: path::Arg>(path: P) -> io::Result<()> {
-    path.into_with_z_str(imp::process::syscalls::chdir)
+    path.into_with_c_str(imp::process::syscalls::chdir)
 }
 
 /// `fchdir(fd)`—Change the current working directory.
@@ -44,11 +44,11 @@ pub fn fchdir<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man3/getcwd.3.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn getcwd<B: Into<Vec<u8>>>(reuse: B) -> io::Result<ZString> {
+pub fn getcwd<B: Into<Vec<u8>>>(reuse: B) -> io::Result<CString> {
     _getcwd(reuse.into())
 }
 
-fn _getcwd(mut buffer: Vec<u8>) -> io::Result<ZString> {
+fn _getcwd(mut buffer: Vec<u8>) -> io::Result<CString> {
     // This code would benefit from having a better way to read into
     // uninitialized memory, but that requires `unsafe`.
     buffer.clear();
@@ -64,7 +64,7 @@ fn _getcwd(mut buffer: Vec<u8>) -> io::Result<ZString> {
             Ok(_) => {
                 let len = buffer.iter().position(|x| *x == b'\0').unwrap();
                 buffer.resize(len, 0_u8);
-                return Ok(ZString::new(buffer).unwrap());
+                return Ok(CString::new(buffer).unwrap());
             }
             Err(errno) => return Err(errno),
         }

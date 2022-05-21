@@ -16,10 +16,6 @@ fn main() {
     // Features only used in no-std configurations.
     #[cfg(not(feature = "std"))]
     {
-        use_feature_or_nothing("vec_into_raw_parts");
-        use_feature_or_nothing("toowned_clone_into");
-        use_feature_or_nothing("specialization");
-        use_feature_or_nothing("slice_internals");
         use_feature_or_nothing("const_raw_ptr_deref");
     }
 

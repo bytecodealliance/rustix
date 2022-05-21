@@ -3,9 +3,9 @@ use super::super::conv::owned_fd;
 #[cfg(not(target_os = "illumos"))]
 use super::types::FileType;
 use crate::fd::{AsFd, BorrowedFd};
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 #[cfg(target_os = "wasi")]
-use crate::ffi::ZString;
+use crate::ffi::CString;
 use crate::fs::{fcntl_getfl, fstat, openat, Mode, OFlags, Stat};
 #[cfg(not(any(
     target_os = "illumos",
@@ -66,7 +66,7 @@ impl Dir {
         // our call to `fdopendir`. To prevent this, we obtain an independent
         // `OwnedFd`.
         let flags = fcntl_getfl(&fd)?;
-        let fd_for_dir = openat(&fd, zstr!("."), flags | OFlags::CLOEXEC, Mode::empty())?;
+        let fd_for_dir = openat(&fd, cstr!("."), flags | OFlags::CLOEXEC, Mode::empty())?;
 
         let raw = owned_fd(fd_for_dir);
         unsafe {
@@ -113,7 +113,7 @@ impl Dir {
                     dirent: read_dirent(&*dirent_ptr.cast()),
 
                     #[cfg(target_os = "wasi")]
-                    name: ZStr::from_ptr((*dirent_ptr).d_name.as_ptr().cast()).to_owned(),
+                    name: CStr::from_ptr((*dirent_ptr).d_name.as_ptr().cast()).to_owned(),
                 };
 
                 Some(Ok(result))
@@ -244,7 +244,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     // Copy from d_name, reading up to and including the first NUL.
     #[cfg(not(target_os = "wasi"))]
     {
-        let name_len = ZStr::from_ptr(input.d_name.as_ptr().cast())
+        let name_len = CStr::from_ptr(input.d_name.as_ptr().cast())
             .to_bytes()
             .len()
             + 1;
@@ -290,16 +290,16 @@ pub struct DirEntry {
     dirent: libc_dirent,
 
     #[cfg(target_os = "wasi")]
-    name: ZString,
+    name: CString,
 }
 
 impl DirEntry {
     /// Returns the file name of this directory entry.
     #[inline]
-    pub fn file_name(&self) -> &ZStr {
+    pub fn file_name(&self) -> &CStr {
         #[cfg(not(target_os = "wasi"))]
         unsafe {
-            ZStr::from_ptr(self.dirent.d_name.as_ptr().cast())
+            CStr::from_ptr(self.dirent.d_name.as_ptr().cast())
         }
 
         #[cfg(target_os = "wasi")]

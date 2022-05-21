@@ -15,7 +15,7 @@ use super::super::conv::{syscall_ret, syscall_ret_u32};
 use super::types::RawCpuSet;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use crate::fd::BorrowedFd;
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 use crate::io;
 use core::mem::MaybeUninit;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
@@ -37,7 +37,7 @@ use {
 };
 
 #[cfg(not(target_os = "wasi"))]
-pub(crate) fn chdir(path: &ZStr) -> io::Result<()> {
+pub(crate) fn chdir(path: &CStr) -> io::Result<()> {
     unsafe { ret(c::chdir(c_str(path))) }
 }
 

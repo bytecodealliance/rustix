@@ -6,14 +6,14 @@
 //! `str::from_utf8_unchecked`on the buffer that it filled itself.
 #![allow(unsafe_code)]
 
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 use crate::imp::fd::{AsFd, AsRawFd};
 #[cfg(feature = "std")]
 use core::fmt;
 use core::fmt::Write;
 use itoa::{Buffer, Integer};
 #[cfg(feature = "std")]
-use std::ffi::{CStr, OsStr};
+use std::ffi::OsStr;
 #[cfg(feature = "std")]
 #[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
@@ -79,23 +79,12 @@ impl DecInt {
         unsafe { core::str::from_utf8_unchecked(self.as_bytes()) }
     }
 
-    /// Return the raw byte buffer as a `&ZStr`.
-    #[inline]
-    pub fn as_z_str(&self) -> &ZStr {
-        let bytes_with_nul = &self.buf[..=self.len];
-        debug_assert!(ZStr::from_bytes_with_nul(bytes_with_nul).is_ok());
-
-        // Safety: `self.buf` holds a single decimal ASCII representation and
-        // at least one extra NUL byte.
-        unsafe { ZStr::from_bytes_with_nul_unchecked(bytes_with_nul) }
-    }
-
     /// Return the raw byte buffer as a `&CStr`.
-    #[cfg(feature = "std")]
     #[inline]
     pub fn as_c_str(&self) -> &CStr {
         let bytes_with_nul = &self.buf[..=self.len];
         debug_assert!(CStr::from_bytes_with_nul(bytes_with_nul).is_ok());
+
         // Safety: `self.buf` holds a single decimal ASCII representation and
         // at least one extra NUL byte.
         unsafe { CStr::from_bytes_with_nul_unchecked(bytes_with_nul) }

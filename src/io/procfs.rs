@@ -17,7 +17,7 @@
 //! to succeed with bogus results.
 
 use crate::fd::{AsFd, BorrowedFd};
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 use crate::fs::{
     cwd, fstat, fstatfs, major, openat, renameat, Dir, FileType, Mode, OFlags, Stat,
     PROC_SUPER_MAGIC,
@@ -199,7 +199,7 @@ fn check_procfs(file: BorrowedFd<'_>) -> io::Result<()> {
 /// `renameat` call that would otherwise fail, but which fails with `EXDEV`
 /// first if it would cross a mount point.
 fn is_mountpoint(file: BorrowedFd<'_>) -> bool {
-    let err = renameat(file, zstr!("../."), file, zstr!(".")).unwrap_err();
+    let err = renameat(file, cstr!("../."), file, cstr!(".")).unwrap_err();
     match err {
         io::Errno::XDEV => true,  // the rename failed due to crossing a mount point
         io::Errno::BUSY => false, // the rename failed normally
@@ -231,7 +231,7 @@ fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     // has no side effects.
     PROC.get_or_try_init(|| {
         // Open "/proc".
-        let proc = proc_opendirat(cwd(), zstr!("/proc"))?;
+        let proc = proc_opendirat(cwd(), cstr!("/proc"))?;
         let proc_stat = check_proc_entry(
             Kind::Proc,
             proc.as_fd(),
@@ -303,7 +303,7 @@ pub fn proc_self_fd() -> io::Result<BorrowedFd<'static>> {
             let (proc_self, proc_self_stat) = proc_self()?;
 
             // Open "/proc/self/fd".
-            let proc_self_fd = proc_opendirat(proc_self, zstr!("fd"))?;
+            let proc_self_fd = proc_opendirat(proc_self, cstr!("fd"))?;
             let proc_self_fd_stat = check_proc_entry(
                 Kind::Fd,
                 proc_self_fd.as_fd(),
@@ -345,7 +345,7 @@ fn proc_self_fdinfo() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
             let (proc_self, proc_self_stat) = proc_self()?;
 
             // Open "/proc/self/fdinfo".
-            let proc_self_fdinfo = proc_opendirat(proc_self, zstr!("fdinfo"))?;
+            let proc_self_fdinfo = proc_opendirat(proc_self, cstr!("fdinfo"))?;
             let proc_self_fdinfo_stat = check_proc_entry(
                 Kind::Fd,
                 proc_self_fdinfo.as_fd(),
@@ -378,7 +378,7 @@ pub fn proc_self_fdinfo_fd<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 fn _proc_self_fdinfo(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     let (proc_self_fdinfo, proc_self_fdinfo_stat) = proc_self_fdinfo()?;
     let fd_str = DecInt::from_fd(fd);
-    open_and_check_file(proc_self_fdinfo, proc_self_fdinfo_stat, fd_str.as_z_str())
+    open_and_check_file(proc_self_fdinfo, proc_self_fdinfo_stat, fd_str.as_c_str())
 }
 
 /// Returns a handle to a Linux `/proc/self/pagemap` file.
@@ -395,7 +395,7 @@ fn _proc_self_fdinfo(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 #[inline]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 pub fn proc_self_pagemap() -> io::Result<OwnedFd> {
-    proc_self_file(zstr!("pagemap"))
+    proc_self_file(cstr!("pagemap"))
 }
 
 /// Returns a handle to a Linux `/proc/self/maps` file.
@@ -410,17 +410,17 @@ pub fn proc_self_pagemap() -> io::Result<OwnedFd> {
 #[inline]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 pub fn proc_self_maps() -> io::Result<OwnedFd> {
-    proc_self_file(zstr!("maps"))
+    proc_self_file(cstr!("maps"))
 }
 
 /// Open a file under `/proc/self`.
-fn proc_self_file(name: &ZStr) -> io::Result<OwnedFd> {
+fn proc_self_file(name: &CStr) -> io::Result<OwnedFd> {
     let (proc_self, proc_self_stat) = proc_self()?;
     open_and_check_file(proc_self, proc_self_stat, name)
 }
 
 /// Open a procfs file within in `dir` and check it for bind mounts.
-fn open_and_check_file(dir: BorrowedFd, dir_stat: &Stat, name: &ZStr) -> io::Result<OwnedFd> {
+fn open_and_check_file(dir: BorrowedFd, dir_stat: &Stat, name: &CStr) -> io::Result<OwnedFd> {
     let (_, proc_stat) = proc()?;
 
     let oflags =
@@ -470,7 +470,7 @@ fn open_and_check_file(dir: BorrowedFd, dir_stat: &Stat, name: &ZStr) -> io::Res
             found_file = true;
         } else if entry.ino() == dir_stat.st_ino
             && entry.file_type() == FileType::Directory
-            && entry.file_name() == zstr!(".")
+            && entry.file_name() == cstr!(".")
         {
             // We found ".", and it's the right ".".
             found_dot = true;
