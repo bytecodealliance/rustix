@@ -91,7 +91,12 @@ targets = [
 
 [features]
 default = ["std"]
+
+# This enables use of std. Disabling this enables no_std, and
+# requires nightly Rust.
 std = ["io-lifetimes"]
+
+# This is used in the port of std to rustix.
 rustc-dep-of-std = [
     "core",
     "alloc",
