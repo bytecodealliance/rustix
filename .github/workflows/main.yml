@@ -107,11 +107,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, nightly]
+        build: [nightly]
         include:
-          - build: stable
-            os: ubuntu-latest
-            rust: stable
           - build: nightly
             os: ubuntu-latest
             rust: nightly
