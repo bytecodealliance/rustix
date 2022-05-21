@@ -108,5 +108,5 @@ pub fn linux_execfn() -> &'static ZStr {
 #[inline]
 #[doc(hidden)]
 pub unsafe fn init(envp: *mut *mut u8) {
-    imp::process::init(envp)
+    imp::process::auxv::init(envp)
 }
