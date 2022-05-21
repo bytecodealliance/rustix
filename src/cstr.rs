@@ -12,8 +12,8 @@
 /// ```rust,no_run
 /// # #[cfg(feature = "fs")]
 /// # fn main() -> rustix::io::Result<()> {
-/// use rustix::fs::{cwd, statat, AtFlags};
 /// use rustix::cstr;
+/// use rustix::fs::{cwd, statat, AtFlags};
 ///
 /// let metadata = statat(cwd(), cstr!("test.txt"), AtFlags::empty())?;
 /// # Ok(())
