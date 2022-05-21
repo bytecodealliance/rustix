@@ -18,6 +18,7 @@ fn main() {
     {
         use_feature_or_nothing("const_raw_ptr_deref");
         use_feature_or_nothing("core_c_str");
+        use_feature_or_nothing("alloc_c_string");
     }
 
     // Gather target information.
