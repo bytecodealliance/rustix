@@ -104,7 +104,10 @@ pub fn linux_execfn() -> &'static CStr {
 }
 
 /// Initialize process-wide state.
-#[cfg(target_vendor = "mustang")]
+#[cfg(any(
+    target_vendor = "mustang",
+    not(any(target_env = "gnu", target_env = "musl"))
+))]
 #[inline]
 #[doc(hidden)]
 pub unsafe fn init(envp: *mut *mut u8) {

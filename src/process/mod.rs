@@ -31,7 +31,10 @@ mod wait;
 #[cfg(not(target_os = "wasi"))]
 #[cfg(feature = "process")]
 pub use auxv::clock_ticks_per_second;
-#[cfg(target_vendor = "mustang")]
+#[cfg(any(
+    target_vendor = "mustang",
+    not(any(target_env = "gnu", target_env = "musl"))
+))]
 #[cfg(feature = "process")]
 pub use auxv::init;
 #[cfg(feature = "process")]

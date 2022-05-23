@@ -74,7 +74,14 @@ fn auxv() -> &'static Auxv {
     // Safety: `AUXV` is initialized from the `.init_array`, and we never
     // mutate it thereafter, so it's effectively initialized read-only in all
     // other code.
-    unsafe { &AUXV }
+    unsafe {
+        // Assert that the initialization has happened. On glibc and musl, this
+        // is handled automatically by `.init_array` functions. Otherwise,
+        // `rustix::process::init` must be called explicitly.
+        debug_assert_ne!(AUXV.page_size, 0);
+
+        &AUXV
+    }
 }
 
 /// A struct for holding fields obtained from the kernel-provided auxv array.
@@ -115,13 +122,13 @@ static INIT_ARRAY: unsafe extern "C" fn(c::c_int, *mut *mut u8, *mut *mut u8) = 
     function
 };
 
-/// For musl etc., assume that `__environ` is available and points to the
-/// original environment from the kernel, so we can find the auxv array in
-/// memory after it. Use priority 99 so that we run before any normal
-/// user-defined constructor functions.
+/// For musl, assume that `__environ` is available and points to the original
+/// environment from the kernel, so we can find the auxv array in memory after
+/// it. Use priority 99 so that we run before any normal user-defined
+/// constructor functions.
 ///
 /// <https://refspecs.linuxbase.org/LSB_5.0.0/LSB-Core-generic/LSB-Core-generic/baselib---environ.html>
-#[cfg(not(any(target_env = "gnu", target_vendor = "mustang")))]
+#[cfg(all(target_env = "musl", not(target_vendor = "mustang")))]
 #[used]
 #[link_section = ".init_array.00099"]
 static INIT_ARRAY: unsafe extern "C" fn() = {
@@ -135,8 +142,14 @@ static INIT_ARRAY: unsafe extern "C" fn() = {
     function
 };
 
-/// On mustang, we export a function to be called during initialization.
-#[cfg(target_vendor = "mustang")]
+/// On mustang or any non-musl non-glibic platform where we don't know that we
+/// have `.init_array`, we export a function to be called during
+/// initialization, and passed a pointer to the original environment variable
+/// block set up by the OS.
+#[cfg(any(
+    target_vendor = "mustang",
+    not(any(target_env = "gnu", target_env = "musl"))
+))]
 #[inline]
 pub(crate) unsafe fn init(envp: *mut *mut u8) {
     init_from_envp(envp);
