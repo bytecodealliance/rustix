@@ -431,5 +431,5 @@ unsafe fn init_from_auxv(elf_auxv: *const Elf_auxv_t) -> Option<Vdso> {
 fn init_from_auxv() -> Option<Vdso> {
     // Safety: `sysinfo_ehdr` does extensive checks to ensure that the value
     // we get really is an `AT_SYSINFO_EHDR` value from the kernel.
-    unsafe { init_from_sysinfo_ehdr(super::process::auxv::sysinfo_ehdr()) }
+    unsafe { init_from_sysinfo_ehdr(super::conf::auxv::sysinfo_ehdr()) }
 }

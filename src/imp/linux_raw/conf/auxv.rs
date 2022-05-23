@@ -7,7 +7,7 @@
 
 use super::super::c;
 use super::super::elf::{Elf_Ehdr, Elf_Phdr};
-#[cfg(feature = "process")]
+#[cfg(feature = "conf")]
 use crate::ffi::CStr;
 use core::mem::size_of;
 use core::ptr::null;
@@ -18,26 +18,26 @@ use linux_raw_sys::general::{
     AT_SYSINFO_EHDR,
 };
 
-#[cfg(feature = "process")]
+#[cfg(feature = "conf")]
 #[inline]
 pub(crate) fn page_size() -> usize {
     auxv().page_size
 }
 
-#[cfg(feature = "process")]
+#[cfg(feature = "conf")]
 #[inline]
 pub(crate) fn clock_ticks_per_second() -> u64 {
     auxv().clock_ticks_per_second as u64
 }
 
-#[cfg(feature = "process")]
+#[cfg(feature = "conf")]
 #[inline]
 pub(crate) fn linux_hwcap() -> (usize, usize) {
     let auxv = auxv();
     (auxv.hwcap, auxv.hwcap2)
 }
 
-#[cfg(feature = "process")]
+#[cfg(feature = "conf")]
 #[inline]
 pub(crate) fn linux_execfn() -> &'static CStr {
     let execfn = auxv().execfn;

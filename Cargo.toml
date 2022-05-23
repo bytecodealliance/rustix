@@ -108,6 +108,9 @@ rustc-dep-of-std = [
 # Enable this to request the libc backend.
 use-libc = ["libc_errno", "libc"]
 
+# Enable `rustix::conf::*`.
+conf = []
+
 # Enable `rustix::fs::*`.
 fs = []
 
@@ -143,6 +146,7 @@ runtime = []
 
 # Enable all API features.
 all-apis = [
+    "conf",
     "fs",
     "io_uring",
     "mm",

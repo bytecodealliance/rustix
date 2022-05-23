@@ -152,6 +152,10 @@ pub mod fd {
 
 // The public API modules.
 #[cfg(not(windows))]
+#[cfg(feature = "conf")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "conf")))]
+pub mod conf;
+#[cfg(not(windows))]
 pub mod ffi;
 #[cfg(not(windows))]
 #[cfg(feature = "fs")]
@@ -206,6 +210,12 @@ pub mod runtime;
 // for API features that aren't enabled, declare them as `pub(crate)` so
 // that they're not public, but still available for internal use.
 
+#[cfg(not(windows))]
+#[cfg(all(
+    not(feature = "conf"),
+    any(feature = "runtime", feature = "time", target_arch = "x86")
+))]
+pub(crate) mod conf;
 #[cfg(not(windows))]
 #[cfg(not(feature = "fs"))]
 pub(crate) mod fs;
