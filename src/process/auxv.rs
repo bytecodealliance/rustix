@@ -104,6 +104,12 @@ pub fn linux_execfn() -> &'static CStr {
 }
 
 /// Initialize process-wide state.
+///
+/// # Safety
+///
+/// This must be passed a pointer to the original environment variable block
+/// set up by the OS at process startup, and it must be called before any
+/// other rustix functions are called.
 #[cfg(any(
     target_vendor = "mustang",
     not(any(target_env = "gnu", target_env = "musl"))
