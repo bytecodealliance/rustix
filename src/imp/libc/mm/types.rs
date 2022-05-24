@@ -82,12 +82,6 @@ bitflags! {
         )))]
         const DENYWRITE = c::MAP_DENYWRITE;
         /// `MAP_FIXED`
-        #[cfg(not(any(
-            target_os = "android",
-            target_os = "emscripten",
-            target_os = "fuchsia",
-            target_os = "redox",
-        )))]
         const FIXED = c::MAP_FIXED;
         /// `MAP_FIXED_NOREPLACE`
         #[cfg(not(any(
