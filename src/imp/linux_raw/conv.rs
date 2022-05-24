@@ -33,7 +33,7 @@ use super::time::types::TimerfdClockId;
 use crate::ffi::CStr;
 use crate::fs::{FileType, Mode, OFlags};
 use crate::io::{self, OwnedFd};
-use crate::process::{Pid, Signal, Resource};
+use crate::process::{Pid, Resource, Signal};
 use crate::utils::{as_mut_ptr, as_ptr};
 use core::mem::MaybeUninit;
 use core::ptr::null_mut;

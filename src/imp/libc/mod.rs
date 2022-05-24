@@ -52,6 +52,7 @@ pub(crate) mod c;
 #[cfg(not(windows))]
 pub(crate) use libc as c;
 
+#[cfg(not(windows))]
 #[cfg(any(
     feature = "conf",
     feature = "runtime",
