@@ -252,25 +252,6 @@ bitflags! {
         const PATH = c::O_PATH;
 
         /// `O_CLOEXEC`
-        #[cfg(any(
-            target_os = "android",
-            target_os = "dragonfly",
-            target_os = "emscripten",
-            target_os = "freebsd",
-            target_os = "fuchsia",
-            target_os = "haiku",
-            target_os = "hermit",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "linux",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-            target_os = "redox",
-            target_os = "solaris",
-            target_os = "vxworks",
-            target_os = "wasi",
-        ))]
         const CLOEXEC = c::O_CLOEXEC;
 
         /// `O_TMPFILE`
