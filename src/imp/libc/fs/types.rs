@@ -695,74 +695,88 @@ bitflags! {
     /// [`fallocate`]: crate::fs::fallocate
     pub struct FallocateFlags: i32 {
         /// `FALLOC_FL_KEEP_SIZE`
-        #[cfg(not(any(target_os = "dragonfly",
-                      target_os = "freebsd",
-                      target_os = "ios",
-                      target_os = "macos",
-                      target_os = "netbsd",
-                      target_os = "openbsd",
-                      target_os = "wasi")))]
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "wasi",
+        )))]
         const KEEP_SIZE = c::FALLOC_FL_KEEP_SIZE;
         /// `FALLOC_FL_PUNCH_HOLE`
-        #[cfg(not(any(target_os = "dragonfly",
-                      target_os = "freebsd",
-                      target_os = "ios",
-                      target_os = "macos",
-                      target_os = "netbsd",
-                      target_os = "openbsd",
-                      target_os = "wasi")))]
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "wasi",
+        )))]
         const PUNCH_HOLE = c::FALLOC_FL_PUNCH_HOLE;
         /// `FALLOC_FL_NO_HIDE_STALE`
-        #[cfg(not(any(target_os = "dragonfly",
-                      target_os = "freebsd",
-                      target_os = "ios",
-                      target_os = "linux",
-                      target_os = "macos",
-                      target_os = "netbsd",
-                      target_os = "openbsd",
-                      target_os = "emscripten",
-                      target_os = "fuchsia",
-                      target_os = "wasi")))]
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "linux",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "emscripten",
+            target_os = "fuchsia",
+            target_os = "wasi",
+        )))]
         const NO_HIDE_STALE = c::FALLOC_FL_NO_HIDE_STALE;
         /// `FALLOC_FL_COLLAPSE_RANGE`
-        #[cfg(not(any(target_os = "dragonfly",
-                      target_os = "freebsd",
-                      target_os = "ios",
-                      target_os = "macos",
-                      target_os = "netbsd",
-                      target_os = "openbsd",
-                      target_os = "emscripten",
-                      target_os = "wasi")))]
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "emscripten",
+            target_os = "wasi",
+        )))]
         const COLLAPSE_RANGE = c::FALLOC_FL_COLLAPSE_RANGE;
         /// `FALLOC_FL_ZERO_RANGE`
-        #[cfg(not(any(target_os = "dragonfly",
-                      target_os = "freebsd",
-                      target_os = "ios",
-                      target_os = "macos",
-                      target_os = "netbsd",
-                      target_os = "openbsd",
-                      target_os = "emscripten",
-                      target_os = "wasi")))]
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "emscripten",
+            target_os = "wasi",
+        )))]
         const ZERO_RANGE = c::FALLOC_FL_ZERO_RANGE;
         /// `FALLOC_FL_INSERT_RANGE`
-        #[cfg(not(any(target_os = "dragonfly",
-                      target_os = "freebsd",
-                      target_os = "ios",
-                      target_os = "macos",
-                      target_os = "netbsd",
-                      target_os = "openbsd",
-                      target_os = "emscripten",
-                      target_os = "wasi")))]
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "emscripten",
+            target_os = "wasi",
+        )))]
         const INSERT_RANGE = c::FALLOC_FL_INSERT_RANGE;
         /// `FALLOC_FL_UNSHARE_RANGE`
-        #[cfg(not(any(target_os = "dragonfly",
-                      target_os = "freebsd",
-                      target_os = "ios",
-                      target_os = "macos",
-                      target_os = "netbsd",
-                      target_os = "openbsd",
-                      target_os = "emscripten",
-                      target_os = "wasi")))]
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "emscripten",
+            target_os = "wasi",
+        )))]
         const UNSHARE_RANGE = c::FALLOC_FL_UNSHARE_RANGE;
     }
 }
