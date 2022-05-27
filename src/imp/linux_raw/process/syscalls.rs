@@ -13,7 +13,7 @@ use super::super::conv::{
 };
 use super::types::{RawCpuSet, RawUname};
 use crate::fd::BorrowedFd;
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 use crate::io;
 use crate::process::{
     Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, RawNonZeroPid, RawPid, Resource, Rlimit,
@@ -25,7 +25,7 @@ use core::ptr::{null, null_mut};
 use linux_raw_sys::general::{__kernel_gid_t, __kernel_pid_t, __kernel_uid_t};
 
 #[inline]
-pub(crate) fn chdir(filename: &ZStr) -> io::Result<()> {
+pub(crate) fn chdir(filename: &CStr) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_chdir, filename)) }
 }
 

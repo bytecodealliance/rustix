@@ -20,7 +20,7 @@
 #![allow(unsafe_code)]
 
 #[cfg(linux_raw)]
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 #[cfg(linux_raw)]
 use crate::fs::AtFlags;
 use crate::imp;
@@ -73,7 +73,7 @@ pub unsafe fn set_tid_address(data: *mut c_void) -> Pid {
 /// [Linux]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[cfg(linux_raw)]
 #[inline]
-pub unsafe fn set_thread_name(name: &ZStr) -> io::Result<()> {
+pub unsafe fn set_thread_name(name: &CStr) -> io::Result<()> {
     imp::runtime::syscalls::tls::set_thread_name(name)
 }
 
@@ -222,7 +222,7 @@ pub unsafe fn fork() -> io::Result<Option<Pid>> {
     imp::runtime::syscalls::fork()
 }
 
-/// `execveat(dirfd, path.as_z_str(), argv, envp, flags)`—Execute a new
+/// `execveat(dirfd, path.as_c_str(), argv, envp, flags)`—Execute a new
 /// command using the current process.
 ///
 /// # Safety
@@ -238,7 +238,7 @@ pub unsafe fn fork() -> io::Result<Option<Pid>> {
 #[cfg(linux_raw)]
 pub unsafe fn execveat<Fd: AsFd>(
     dirfd: Fd,
-    path: &ZStr,
+    path: &CStr,
     argv: *const *const u8,
     envp: *const *const u8,
     flags: AtFlags,
@@ -246,7 +246,7 @@ pub unsafe fn execveat<Fd: AsFd>(
     imp::runtime::syscalls::execveat(dirfd.as_fd(), path, argv, envp, flags)
 }
 
-/// `execve(path.as_z_str(), argv, envp)`—Execute a new command using the
+/// `execve(path.as_c_str(), argv, envp)`—Execute a new command using the
 /// current process.
 ///
 /// # Safety
@@ -260,6 +260,6 @@ pub unsafe fn execveat<Fd: AsFd>(
 /// [Linux]: https://man7.org/linux/man-pages/man2/execve.2.html
 #[inline]
 #[cfg(linux_raw)]
-pub unsafe fn execve(path: &ZStr, argv: *const *const u8, envp: *const *const u8) -> io::Errno {
+pub unsafe fn execve(path: &CStr, argv: *const *const u8, envp: *const *const u8) -> io::Errno {
     imp::runtime::syscalls::execve(path, argv, envp)
 }

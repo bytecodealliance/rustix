@@ -33,24 +33,24 @@ fn encode_decode() {
 #[cfg(not(windows))]
 #[test]
 fn test_unix_addr() {
+    use rustix::cstr;
     use rustix::net::SocketAddrUnix;
-    use rustix::zstr;
 
     assert_eq!(
         SocketAddrUnix::new("/").unwrap().path().unwrap(),
-        zstr!("/")
+        cstr!("/")
     );
     assert_eq!(
         SocketAddrUnix::new("//").unwrap().path().unwrap(),
-        zstr!("//")
+        cstr!("//")
     );
     assert_eq!(
         SocketAddrUnix::new("/foo/bar").unwrap().path().unwrap(),
-        zstr!("/foo/bar")
+        cstr!("/foo/bar")
     );
     assert_eq!(
         SocketAddrUnix::new("foo").unwrap().path().unwrap(),
-        zstr!("foo")
+        cstr!("foo")
     );
     SocketAddrUnix::new("/foo\0/bar").unwrap_err();
     assert!(SocketAddrUnix::new("").unwrap().path().is_none());

@@ -3,7 +3,7 @@ use super::super::c;
     all(target_os = "android", target_pointer_width = "64"),
     target_os = "linux"
 ))]
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 
 // `getauxval` wasn't supported in glibc until 2.16.
 #[cfg(any(
@@ -45,10 +45,10 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
     target_os = "linux"
 ))]
 #[inline]
-pub(crate) fn linux_execfn() -> &'static ZStr {
+pub(crate) fn linux_execfn() -> &'static CStr {
     if let Some(libc_getauxval) = getauxval.get() {
-        unsafe { ZStr::from_ptr(libc_getauxval(c::AT_EXECFN).cast()) }
+        unsafe { CStr::from_ptr(libc_getauxval(c::AT_EXECFN).cast()) }
     } else {
-        zstr!("")
+        cstr!("")
     }
 }

@@ -1,21 +1,21 @@
-/// A macro for [`ZStr`] literals.
+/// A macro for [`CStr`] literals.
 ///
 /// This can make passing string literals to rustix APIs more efficient, since
 /// most underlying system calls with string arguments expect NUL-terminated
-/// strings, and passing strings to rustix as `ZStr`s means that rustix doesn't
+/// strings, and passing strings to rustix as `CStr`s means that rustix doesn't
 /// need to copy them into a separate buffer to NUL-terminate them.
 ///
-/// [`ZStr`]: crate::ffi::ZStr
+/// [`CStr`]: crate::ffi::CStr
 ///
 /// # Examples
 ///
 /// ```rust,no_run
 /// # #[cfg(feature = "fs")]
 /// # fn main() -> rustix::io::Result<()> {
+/// use rustix::cstr;
 /// use rustix::fs::{cwd, statat, AtFlags};
-/// use rustix::zstr;
 ///
-/// let metadata = statat(cwd(), zstr!("test.txt"), AtFlags::empty())?;
+/// let metadata = statat(cwd(), cstr!("test.txt"), AtFlags::empty())?;
 /// # Ok(())
 /// # }
 /// # #[cfg(not(feature = "fs"))]
@@ -23,7 +23,7 @@
 /// ```
 #[allow(unused_macros)]
 #[macro_export]
-macro_rules! zstr {
+macro_rules! cstr {
     ($str:literal) => {{
         // Check for NUL manually, to ensure safety.
         //
@@ -35,7 +35,7 @@ macro_rules! zstr {
         // constant-fold away.
         assert!(
             !$str.bytes().any(|b| b == b'\0'),
-            "zstr argument contains embedded NUL bytes",
+            "cstr argument contains embedded NUL bytes",
         );
 
         #[allow(unsafe_code, unused_unsafe)]
@@ -47,30 +47,30 @@ macro_rules! zstr {
             // Safety: We have manually checked that the string does not contain
             // embedded NULs above, and we append or own NUL terminator here.
             unsafe {
-                $crate::ffi::ZStr::from_bytes_with_nul_unchecked(concat!($str, "\0").as_bytes())
+                $crate::ffi::CStr::from_bytes_with_nul_unchecked(concat!($str, "\0").as_bytes())
             }
         }
     }};
 }
 
 #[test]
-fn test_zstr() {
-    use crate::ffi::ZString;
+fn test_cstr() {
+    use crate::ffi::CString;
     use alloc::borrow::ToOwned;
-    assert_eq!(zstr!(""), &*ZString::new("").unwrap());
-    assert_eq!(zstr!("").to_owned(), ZString::new("").unwrap());
-    assert_eq!(zstr!("hello"), &*ZString::new("hello").unwrap());
-    assert_eq!(zstr!("hello").to_owned(), ZString::new("hello").unwrap());
+    assert_eq!(cstr!(""), &*CString::new("").unwrap());
+    assert_eq!(cstr!("").to_owned(), CString::new("").unwrap());
+    assert_eq!(cstr!("hello"), &*CString::new("hello").unwrap());
+    assert_eq!(cstr!("hello").to_owned(), CString::new("hello").unwrap());
 }
 
 #[test]
 #[should_panic]
-fn test_invalid_zstr() {
-    let _ = zstr!("hello\0world");
+fn test_invalid_cstr() {
+    let _ = cstr!("hello\0world");
 }
 
 #[test]
 #[should_panic]
-fn test_invalid_empty_zstr() {
-    let _ = zstr!("\0");
+fn test_invalid_empty_cstr() {
+    let _ = cstr!("\0");
 }

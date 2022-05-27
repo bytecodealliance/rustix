@@ -22,5 +22,5 @@ pub fn statx<P: path::Arg, Fd: AsFd>(
     flags: AtFlags,
     mask: StatxFlags,
 ) -> io::Result<Statx> {
-    path.into_with_z_str(|path| imp::fs::syscalls::statx(dirfd.as_fd(), path, flags, mask))
+    path.into_with_c_str(|path| imp::fs::syscalls::statx(dirfd.as_fd(), path, flags, mask))
 }

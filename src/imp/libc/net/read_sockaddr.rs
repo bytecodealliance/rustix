@@ -3,7 +3,7 @@ use super::super::c;
 use super::addr::SocketAddrUnix;
 use super::ext::{in6_addr_s6_addr, in_addr_s_addr, sockaddr_in6_sin6_scope_id};
 #[cfg(not(windows))]
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 use crate::io;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 #[cfg(not(windows))]
@@ -149,7 +149,7 @@ pub(crate) unsafe fn read_sockaddr(
                         return Err(io::Errno::INVAL);
                     }
                     debug_assert_eq!(
-                        ZStr::from_ptr(decode.sun_path.as_ptr().cast())
+                        CStr::from_ptr(decode.sun_path.as_ptr().cast())
                             .to_bytes()
                             .len(),
                         provided_len

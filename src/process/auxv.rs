@@ -16,7 +16,7 @@
         )
     )
 ))]
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 use crate::imp;
 
 /// `sysconf(_SC_PAGESIZE)`—Returns the process' page size.
@@ -99,7 +99,7 @@ pub fn linux_hwcap() -> (usize, usize) {
     )
 ))]
 #[inline]
-pub fn linux_execfn() -> &'static ZStr {
+pub fn linux_execfn() -> &'static CStr {
     imp::process::auxv::linux_execfn()
 }
 

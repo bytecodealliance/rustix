@@ -29,5 +29,5 @@ use crate::{imp, io, path};
 )))]
 #[inline]
 pub fn statfs<P: path::Arg>(path: P) -> io::Result<StatFs> {
-    path.into_with_z_str(imp::fs::syscalls::statfs)
+    path.into_with_c_str(imp::fs::syscalls::statfs)
 }
