@@ -1269,7 +1269,7 @@ unsafe fn _utimensat_old(
                 .last_access
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Errno::INVAL)?,
+                .map_err(|_| io::Errno::OVERFLOW)?,
             tv_nsec: times
                 .last_access
                 .tv_nsec
@@ -1281,7 +1281,7 @@ unsafe fn _utimensat_old(
                 .last_modification
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Errno::INVAL)?,
+                .map_err(|_| io::Errno::OVERFLOW)?,
             tv_nsec: times
                 .last_modification
                 .tv_nsec
