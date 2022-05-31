@@ -235,6 +235,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 print!(" BSDLY");
             }
             #[cfg(not(any(
+                all(libc, target_env = "musl"),
                 target_os = "dragonfly",
                 target_os = "freebsd",
                 target_os = "illumos",
@@ -248,6 +249,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 print!(" VTDLY");
             }
             #[cfg(not(any(
+                all(libc, target_env = "musl"),
                 target_os = "dragonfly",
                 target_os = "freebsd",
                 target_os = "illumos",
