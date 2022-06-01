@@ -41,9 +41,9 @@ use core::sync::atomic::{AtomicBool, Ordering::Relaxed};
 #[cfg(target_arch = "mips64")]
 use linux_raw_sys::general::stat as linux_stat64;
 use linux_raw_sys::general::{
-    __kernel_timespec, open_how, statx, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, F_ADD_SEALS,
-    F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETPIPE_SZ, F_GETSIG,
-    F_GET_SEALS, F_SETFD, F_SETFL, F_SETPIPE_SZ,
+    __kernel_timespec, open_how, statx, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW,
+    F_ADD_SEALS, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETPIPE_SZ,
+    F_GETSIG, F_GET_SEALS, F_SETFD, F_SETFL, F_SETPIPE_SZ, SEEK_CUR, SEEK_END, SEEK_SET,
 };
 #[cfg(target_pointer_width = "32")]
 use {
@@ -219,10 +219,10 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         SeekFrom::Start(pos) => {
             let pos: u64 = pos;
             // Silently cast; we'll get `EINVAL` if the value is negative.
-            (linux_raw_sys::general::SEEK_SET, pos as i64)
+            (SEEK_SET, pos as i64)
         }
-        SeekFrom::End(offset) => (linux_raw_sys::general::SEEK_END, offset),
-        SeekFrom::Current(offset) => (linux_raw_sys::general::SEEK_CUR, offset),
+        SeekFrom::End(offset) => (SEEK_END, offset),
+        SeekFrom::Current(offset) => (SEEK_CUR, offset),
     };
     _seek(fd, offset, whence)
 }
@@ -257,7 +257,7 @@ pub(crate) fn _seek(fd: BorrowedFd<'_>, offset: i64, whence: c::c_uint) -> io::R
 
 #[inline]
 pub(crate) fn tell(fd: BorrowedFd<'_>) -> io::Result<u64> {
-    _seek(fd, 0, linux_raw_sys::general::SEEK_CUR).map(|x| x as u64)
+    _seek(fd, 0, SEEK_CUR).map(|x| x as u64)
 }
 
 #[inline]
@@ -1314,14 +1314,14 @@ pub(crate) fn accessat(
     // Linux's `faccessat` doesn't have a flags parameter. If we have
     // `AT_EACCESS` and we're not setuid or setgid, we can emulate it.
     if flags.is_empty()
-        || (flags.bits() == linux_raw_sys::general::AT_EACCESS
+        || (flags.bits() == AT_EACCESS
             && crate::process::getuid() == crate::process::geteuid()
             && crate::process::getgid() == crate::process::getegid())
     {
         return unsafe { ret(syscall_readonly!(__NR_faccessat, dirfd, path, access)) };
     }
 
-    if flags.bits() != linux_raw_sys::general::AT_EACCESS {
+    if flags.bits() != AT_EACCESS {
         return Err(io::Errno::INVAL);
     }
 

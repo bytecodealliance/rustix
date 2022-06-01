@@ -8,7 +8,7 @@ use alloc::borrow::ToOwned;
 use alloc::vec::Vec;
 use core::fmt;
 use core::mem::size_of;
-use linux_raw_sys::general::linux_dirent64;
+use linux_raw_sys::general::{linux_dirent64, SEEK_SET};
 
 /// `DIR*`
 pub struct Dir {
@@ -51,11 +51,7 @@ impl Dir {
     /// `readdir(self)`, where `None` means the end of the directory.
     pub fn read(&mut self) -> Option<io::Result<DirEntry>> {
         if let Some(next) = self.next.take() {
-            match crate::imp::fs::syscalls::_seek(
-                self.fd.as_fd(),
-                next as i64,
-                linux_raw_sys::general::SEEK_SET,
-            ) {
+            match crate::imp::fs::syscalls::_seek(self.fd.as_fd(), next as i64, SEEK_SET) {
                 Ok(_) => (),
                 Err(err) => return Some(Err(err)),
             }
