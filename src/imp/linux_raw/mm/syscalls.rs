@@ -17,6 +17,7 @@ use crate::fd::BorrowedFd;
 use crate::io::{self, OwnedFd};
 #[cfg(target_pointer_width = "32")]
 use core::convert::TryInto;
+use linux_raw_sys::general::MAP_ANONYMOUS;
 
 #[inline]
 pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: Advice) -> io::Result<()> {
@@ -95,7 +96,7 @@ pub(crate) unsafe fn mmap_anonymous(
             addr,
             pass_usize(length),
             prot,
-            c_uint(flags.bits() | linux_raw_sys::general::MAP_ANONYMOUS),
+            c_uint(flags.bits() | MAP_ANONYMOUS),
             no_fd(),
             pass_usize(0)
         ))
@@ -107,7 +108,7 @@ pub(crate) unsafe fn mmap_anonymous(
             addr,
             pass_usize(length),
             prot,
-            c_uint(flags.bits() | linux_raw_sys::general::MAP_ANONYMOUS),
+            c_uint(flags.bits() | MAP_ANONYMOUS),
             no_fd(),
             loff_t_from_u64(0)
         ))
