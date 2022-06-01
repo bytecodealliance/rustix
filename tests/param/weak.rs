@@ -30,7 +30,7 @@ use core::ffi::c_void;
 use core::ptr::null_mut;
 use core::sync::atomic::{self, AtomicPtr, Ordering};
 use core::{marker, mem};
-use rustix::ffi::ZStr;
+use rustix::ffi::CStr;
 
 const NULL: *mut c_void = null_mut();
 const INVALID: *mut c_void = 1 as *mut c_void;
@@ -107,11 +107,11 @@ impl<F> Weak<F> {
 }
 
 unsafe fn fetch(name: &str) -> *mut c_void {
-    let name = match ZStr::from_bytes_with_nul(name.as_bytes()) {
+    let name = match CStr::from_bytes_with_nul(name.as_bytes()) {
         Ok(c_str) => c_str,
         Err(..) => return null_mut(),
     };
-    libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr().cast())
+    libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr())
 }
 
 #[cfg(not(any(target_os = "android", target_os = "linux")))]
