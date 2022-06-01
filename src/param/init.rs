@@ -19,5 +19,5 @@ use crate::imp;
 #[inline]
 #[doc(hidden)]
 pub unsafe fn init(envp: *mut *mut u8) {
-    imp::conf::auxv::init(envp)
+    imp::param::auxv::init(envp)
 }

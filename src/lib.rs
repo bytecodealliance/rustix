@@ -152,9 +152,9 @@ pub mod fd {
 
 // The public API modules.
 #[cfg(not(windows))]
-#[cfg(feature = "conf")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "conf")))]
-pub mod conf;
+#[cfg(feature = "param")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "param")))]
+pub mod param;
 #[cfg(not(windows))]
 pub mod ffi;
 #[cfg(not(windows))]
@@ -212,10 +212,10 @@ pub mod runtime;
 
 #[cfg(not(windows))]
 #[cfg(all(
-    not(feature = "conf"),
+    not(feature = "param"),
     any(feature = "runtime", feature = "time", target_arch = "x86")
 ))]
-pub(crate) mod conf;
+pub(crate) mod param;
 #[cfg(not(windows))]
 #[cfg(not(feature = "fs"))]
 pub(crate) mod fs;

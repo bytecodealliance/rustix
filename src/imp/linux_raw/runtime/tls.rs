@@ -1,7 +1,7 @@
 #![allow(unsafe_code)]
 
 use super::super::c;
-use super::super::conf::auxv::exe_phdrs_slice;
+use super::super::param::auxv::exe_phdrs_slice;
 use super::super::elf::*;
 use core::ptr::null;
 

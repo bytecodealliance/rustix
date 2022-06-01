@@ -1,11 +1,11 @@
-//! Process configuration APIs.
+//! Process parameters.
 //!
 //! These values correspond to `sysconf` in POSIX, and the auxv array in Linux.
-//! Despite the name "sysconf", these aren't *system* configuration parameters;
-//! they're *process* configuration parameters, as they may differ between
-//! different processes on the same system.
+//! Despite the POSIX name "sysconf", these aren't *system* configuration
+//! parameters; they're *process* configuration parameters, as they may differ
+//! between different processes on the same system.
 
-#[cfg(feature = "conf")]
+#[cfg(feature = "param")]
 mod auxv;
 #[cfg(any(
     target_vendor = "mustang",
@@ -13,12 +13,12 @@ mod auxv;
 ))]
 mod init;
 
-#[cfg(feature = "conf")]
+#[cfg(feature = "param")]
 #[cfg(not(target_os = "wasi"))]
 pub use auxv::clock_ticks_per_second;
-#[cfg(feature = "conf")]
+#[cfg(feature = "param")]
 pub use auxv::page_size;
-#[cfg(feature = "conf")]
+#[cfg(feature = "param")]
 #[cfg(any(
     linux_raw,
     all(

@@ -108,9 +108,6 @@ rustc-dep-of-std = [
 # Enable this to request the libc backend.
 use-libc = ["libc_errno", "libc"]
 
-# Enable `rustix::conf::*`.
-conf = []
-
 # Enable `rustix::fs::*`.
 fs = []
 
@@ -129,6 +126,9 @@ process = []
 # Enable `rustix::time::*`.
 time = []
 
+# Enable `rustix::param::*`.
+param = []
+
 # Enable this to enable `rustix::io::proc_self_*` (on Linux) and `ttyname`.
 procfs = ["once_cell", "itoa"]
 
@@ -146,11 +146,11 @@ runtime = []
 
 # Enable all API features.
 all-apis = [
-    "conf",
     "fs",
     "io_uring",
     "mm",
     "net",
+    "param",
     "process",
     "procfs",
     "rand",

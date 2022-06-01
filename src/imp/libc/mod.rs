@@ -54,12 +54,12 @@ pub(crate) use libc as c;
 
 #[cfg(not(windows))]
 #[cfg(any(
-    feature = "conf",
+    feature = "param",
     feature = "runtime",
     feature = "time",
     target_arch = "x86"
 ))]
-pub(crate) mod conf;
+pub(crate) mod param;
 #[cfg(not(windows))]
 // #[cfg(feature = "fs")] // TODO: Enable this once `OwnedFd` moves out of the tree.
 pub(crate) mod fs;
