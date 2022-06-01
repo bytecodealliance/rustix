@@ -53,14 +53,6 @@ pub(crate) mod c;
 pub(crate) use libc as c;
 
 #[cfg(not(windows))]
-#[cfg(any(
-    feature = "param",
-    feature = "runtime",
-    feature = "time",
-    target_arch = "x86"
-))]
-pub(crate) mod param;
-#[cfg(not(windows))]
 // #[cfg(feature = "fs")] // TODO: Enable this once `OwnedFd` moves out of the tree.
 pub(crate) mod fs;
 pub(crate) mod io;
@@ -74,6 +66,14 @@ pub(crate) mod mm;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[cfg(feature = "net")]
 pub(crate) mod net;
+#[cfg(not(windows))]
+#[cfg(any(
+    feature = "param",
+    feature = "runtime",
+    feature = "time",
+    target_arch = "x86"
+))]
+pub(crate) mod param;
 #[cfg(not(windows))]
 pub(crate) mod process;
 #[cfg(not(windows))]

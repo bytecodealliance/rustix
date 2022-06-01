@@ -1,8 +1,8 @@
 #![allow(unsafe_code)]
 
 use super::super::c;
-use super::super::param::auxv::exe_phdrs_slice;
 use super::super::elf::*;
+use super::super::param::auxv::exe_phdrs_slice;
 use core::ptr::null;
 
 /// For use with `set_thread_area`.
