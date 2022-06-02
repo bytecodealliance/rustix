@@ -5,6 +5,7 @@
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 
+mod cwd;
 mod dir;
 mod fcntl;
 mod file;

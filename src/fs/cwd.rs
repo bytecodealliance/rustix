@@ -23,7 +23,7 @@ use imp::fd::{BorrowedFd, RawFd};
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/fcntl.h.html
 #[inline]
 #[doc(alias = "AT_FDCWD")]
-pub fn cwd() -> BorrowedFd<'static> {
+pub const fn cwd() -> BorrowedFd<'static> {
     let at_fdcwd = imp::io::types::AT_FDCWD as RawFd;
 
     // Safety: `AT_FDCWD` is a reserved value that is never dynamically
