@@ -34,18 +34,18 @@ once_cell = { version = "1.5.2", optional = true }
 # On Linux on selected architectures, we have two supported backends: linux_raw
 # and libc. The libc and libc_errno dependencies are only enabled when the libc
 # backend is in use.
-[target.'cfg(all(not(rustix_use_libc), not(miri), target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"), target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), all(target_arch = "powerpc64", target_endian = "little"), target_arch = "riscv64", all(target_arch = "mips", target_endian = "little"), all(target_arch = "mips64", target_endian = "little"))))'.dependencies]
+[target.'cfg(all(not(rustix_use_libc), not(miri), target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"), all(target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64")))))'.dependencies]
 linux-raw-sys = { version = "0.0.46", default-features = false, features = ["general", "errno", "ioctl", "no_std"] }
 libc_errno = { package = "errno", version = "0.2.8", default-features = false, optional = true }
 libc = { version = "0.2.118", features = ["extra_traits"], optional = true }
 
 # On all other Unix-family platforms, and under Miri, we always use the libc
 # backend, so enable its dependencies unconditionally.
-[target.'cfg(any(rustix_use_libc, miri, not(all(target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"), target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), all(target_arch = "powerpc64", target_endian = "little"), target_arch = "riscv64", all(target_arch = "mips", target_endian = "little"), all(target_arch = "mips64", target_endian = "little"))))))'.dependencies]
+[target.'cfg(any(rustix_use_libc, miri, not(all(target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"), all(target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64")))))))'.dependencies]
 libc_errno = { package = "errno", version = "0.2.8", default-features = false }
 libc = { version = "0.2.118", features = ["extra_traits"] }
 
-[target.'cfg(all(any(target_os = "android", target_os = "linux"), any(rustix_use_libc, miri, not(all(target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"), target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), all(target_arch = "powerpc64", target_endian = "little"), target_arch = "riscv64", all(target_arch = "mips", target_endian = "little"), all(target_arch = "mips64", target_endian = "little")))))))'.dependencies]
+[target.'cfg(all(any(target_os = "android", target_os = "linux"), any(rustix_use_libc, miri, not(all(target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"), all(target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64"))))))))'.dependencies]
 # Some syscalls do not have libc wrappers, such as in `io_uring`. For these,
 # we use the linux-raw-sys ABI and `libc::syscall`.
 linux-raw-sys = { version = "0.0.46", default-features = false, optional = true, features = ["general", "no_std"] }

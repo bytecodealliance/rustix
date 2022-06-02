@@ -173,6 +173,7 @@ jobs:
         RUSTFLAGS: -A improper_ctypes_definitions
     - run: rustup component add rust-src
     - run: cargo check -Z build-std=core,alloc,std --target x86_64-unknown-openbsd --all-targets --features=all-apis
+    - run: cargo check -Z build-std=core,alloc,std --target mips64-openwrt-linux-musl --all-targets --features=all-apis
     # x86_64-uwp-windows-msvc isn't currently working.
     #- run: cargo check -Z build-std=core,alloc,std --target x86_64-uwp-windows-msvc --all-targets --features=all-apis
 
