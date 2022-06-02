@@ -164,22 +164,27 @@ pub(crate) fn chownat(
             __NR_fchownat,
             dirfd,
             filename,
-            c_uint(owner.as_raw()),
-            c_uint(group.as_raw()),
+            c_int(owner.as_raw()),
+            c_int(group.as_raw()),
             flags
         ))
     }
 }
 
 #[inline]
-pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Uid, group: Gid) -> io::Result<()> {
+pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
     unsafe {
-        ret(syscall_readonly!(
-            __NR_fchown,
-            fd,
-            c_uint(owner.as_raw()),
-            c_uint(group.as_raw())
-        ))
+        let ow = match owner {
+            Some(o) => o.as_raw(),
+            None => -1,
+        };
+
+        let gr = match group {
+            Some(g) => g.as_raw(),
+            None => -1,
+        };
+
+        ret(syscall_readonly!(__NR_fchown, fd, c_int(ow), c_int(gr)))
     }
 }
 
