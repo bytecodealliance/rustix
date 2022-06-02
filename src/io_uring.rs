@@ -543,12 +543,10 @@ pub const IORING_OFF_CQ_RING: u64 = sys::IORING_OFF_CQ_RING as _;
 pub const IORING_OFF_SQES: u64 = sys::IORING_OFF_SQES as _;
 
 /// `IORING_REGISTER_FILES_SKIP`
-///
-/// TODO: Make this a const fn. It needs borrow_raw to be a const fn.
 #[inline]
 #[doc(alias = "IORING_REGISTER_FILES_SKIP")]
 #[allow(unsafe_code)]
-pub fn io_uring_register_files_skip() -> BorrowedFd<'static> {
+pub const fn io_uring_register_files_skip() -> BorrowedFd<'static> {
     let files_skip = sys::IORING_REGISTER_FILES_SKIP as RawFd;
 
     // Safety: `IORING_REGISTER_FILES_SKIP` is a reserved value that is never
