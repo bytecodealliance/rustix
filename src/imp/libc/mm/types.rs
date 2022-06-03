@@ -356,21 +356,27 @@ pub enum Advice {
     LinuxDoDump = c::MADV_DODUMP,
     /// `MADV_WIPEONFORK` (since Linux 4.14)
     #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(feature = "mm")]
     LinuxWipeOnFork = linux_raw_sys::general::MADV_WIPEONFORK as i32,
     /// `MADV_KEEPONFORK` (since Linux 4.14)
     #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(feature = "mm")]
     LinuxKeepOnFork = linux_raw_sys::general::MADV_KEEPONFORK as i32,
     /// `MADV_COLD` (since Linux 5.4)
     #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(feature = "mm")]
     LinuxCold = linux_raw_sys::general::MADV_COLD as i32,
     /// `MADV_PAGEOUT` (since Linux 5.4)
     #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(feature = "mm")]
     LinuxPageOut = linux_raw_sys::general::MADV_PAGEOUT as i32,
     /// `MADV_POPULATE_READ` (since Linux 5.14)
     #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(feature = "mm")]
     LinuxPopulateRead = linux_raw_sys::general::MADV_POPULATE_READ as i32,
     /// `MADV_POPULATE_WRITE` (since Linux 5.14)
     #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(feature = "mm")]
     LinuxPopulateWrite = linux_raw_sys::general::MADV_POPULATE_WRITE as i32,
 }
 
