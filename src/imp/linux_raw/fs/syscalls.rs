@@ -425,7 +425,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
     {
         if !NO_STATX.load(Relaxed) {
-            match statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::ALL) {
+            match statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
                 Ok(x) => return statx_to_stat(x),
                 Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
                 Err(e) => return Err(e),
@@ -467,7 +467,7 @@ pub(crate) fn stat(filename: &CStr) -> io::Result<Stat> {
                 crate::fs::cwd().as_fd(),
                 filename,
                 AtFlags::empty(),
-                StatxFlags::ALL,
+                StatxFlags::BASIC_STATS,
             ) {
                 Ok(x) => return statx_to_stat(x),
                 Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
@@ -525,7 +525,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, filename: &CStr, flags: AtFlags) -> 
     #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
     {
         if !NO_STATX.load(Relaxed) {
-            match statx(dirfd, filename, flags, StatxFlags::ALL) {
+            match statx(dirfd, filename, flags, StatxFlags::BASIC_STATS) {
                 Ok(x) => return statx_to_stat(x),
                 Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
                 Err(e) => return Err(e),
@@ -586,7 +586,7 @@ pub(crate) fn lstat(filename: &CStr) -> io::Result<Stat> {
                 crate::fs::cwd().as_fd(),
                 filename,
                 AtFlags::SYMLINK_NOFOLLOW,
-                StatxFlags::ALL,
+                StatxFlags::BASIC_STATS,
             ) {
                 Ok(x) => return statx_to_stat(x),
                 Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
