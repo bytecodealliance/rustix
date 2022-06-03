@@ -4,6 +4,7 @@
 //!
 //! See the `rustix::imp` module documentation for details.
 #![allow(unsafe_code)]
+#![allow(clippy::undocumented_unsafe_blocks)]
 
 use super::super::conv::{by_ref, c_uint, ret};
 use crate::fd::BorrowedFd;

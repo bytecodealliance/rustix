@@ -42,7 +42,7 @@ pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Resu
     let nwritten = unsafe {
         ret_send_recv(c::send(
             borrowed_fd(fd),
-            buf.as_ptr() as _,
+            buf.as_ptr().cast(),
             send_recv_len(buf.len()),
             flags.bits(),
         ))?
@@ -90,7 +90,7 @@ pub(crate) fn sendto_v4(
     let nwritten = unsafe {
         ret_send_recv(c::sendto(
             borrowed_fd(fd),
-            buf.as_ptr() as _,
+            buf.as_ptr().cast(),
             send_recv_len(buf.len()),
             flags.bits(),
             as_ptr(&encode_sockaddr_v4(addr)).cast::<c::sockaddr>(),
@@ -110,7 +110,7 @@ pub(crate) fn sendto_v6(
     let nwritten = unsafe {
         ret_send_recv(c::sendto(
             borrowed_fd(fd),
-            buf.as_ptr() as _,
+            buf.as_ptr().cast(),
             send_recv_len(buf.len()),
             flags.bits(),
             as_ptr(&encode_sockaddr_v6(addr)).cast::<c::sockaddr>(),
@@ -454,7 +454,7 @@ pub(crate) mod sockopt {
                 borrowed_fd(fd),
                 level,
                 optname,
-                as_ptr(&value) as _,
+                as_ptr(&value).cast(),
                 optlen,
             ))
         }
