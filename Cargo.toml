@@ -139,7 +139,7 @@ procfs = ["once_cell", "itoa"]
 termios = []
 
 # Enable `rustix::mm::*`.
-mm = []
+mm = ["linux-raw-sys"]
 
 # Enable `rustix::rand::*`.
 rand = []
