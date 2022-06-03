@@ -1,4 +1,3 @@
-pub(crate) mod auxv;
 #[cfg(any(
     target_os = "linux",
     target_os = "android",

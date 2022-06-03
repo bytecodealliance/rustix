@@ -1,11 +1,3 @@
-//! APIs which are associated with the auxv array on Linux.
-//!
-//! # Safety
-//!
-//! On mustang, the `init` function is unsafe because it operates on raw
-//! pointers.
-#![cfg_attr(target_vendor = "mustang", allow(unsafe_code))]
-
 #[cfg(any(
     linux_raw,
     all(
@@ -36,7 +28,7 @@ use crate::imp;
 #[doc(alias = "_SC_PAGE_SIZE")]
 #[doc(alias = "getpagesize")]
 pub fn page_size() -> usize {
-    imp::process::auxv::page_size()
+    imp::param::auxv::page_size()
 }
 
 /// `sysconf(_SC_CLK_TCK)`—Returns the process' clock ticks per second.
@@ -51,7 +43,7 @@ pub fn page_size() -> usize {
 #[inline]
 #[doc(alias = "_SC_CLK_TCK")]
 pub fn clock_ticks_per_second() -> u64 {
-    imp::process::auxv::clock_ticks_per_second()
+    imp::param::auxv::clock_ticks_per_second()
 }
 
 /// `(getauxval(AT_HWCAP), getauxval(AT_HWCAP2)`—Returns the Linux "hwcap"
@@ -76,7 +68,7 @@ pub fn clock_ticks_per_second() -> u64 {
 ))]
 #[inline]
 pub fn linux_hwcap() -> (usize, usize) {
-    imp::process::auxv::linux_hwcap()
+    imp::param::auxv::linux_hwcap()
 }
 
 /// `getauxval(AT_EXECFN)`—Returns the Linux "execfn" string.
@@ -100,13 +92,5 @@ pub fn linux_hwcap() -> (usize, usize) {
 ))]
 #[inline]
 pub fn linux_execfn() -> &'static CStr {
-    imp::process::auxv::linux_execfn()
-}
-
-/// Initialize process-wide state.
-#[cfg(target_vendor = "mustang")]
-#[inline]
-#[doc(hidden)]
-pub unsafe fn init(envp: *mut *mut u8) {
-    imp::process::auxv::init(envp)
+    imp::param::auxv::linux_execfn()
 }

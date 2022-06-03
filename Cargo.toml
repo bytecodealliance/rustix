@@ -126,6 +126,9 @@ process = []
 # Enable `rustix::time::*`.
 time = []
 
+# Enable `rustix::param::*`.
+param = []
+
 # Enable this to enable `rustix::io::proc_self_*` (on Linux) and `ttyname`.
 procfs = ["once_cell", "itoa"]
 
@@ -147,6 +150,7 @@ all-apis = [
     "io_uring",
     "mm",
     "net",
+    "param",
     "process",
     "procfs",
     "rand",

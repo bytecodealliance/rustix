@@ -52,3 +52,15 @@ pub(crate) fn linux_execfn() -> &'static CStr {
         cstr!("")
     }
 }
+
+/// Initialize process-wide state.
+#[cfg(any(
+    target_vendor = "mustang",
+    not(any(target_env = "gnu", target_env = "musl"))
+))]
+#[inline]
+#[doc(hidden)]
+pub(crate) unsafe fn init(_envp: *mut *mut u8) {
+    // Nothing to do. This is the libc backend, and libc does the
+    // initialization for us.
+}

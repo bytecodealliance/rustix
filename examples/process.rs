@@ -2,9 +2,10 @@
 
 use rustix::io;
 
-#[cfg(feature = "process")]
+#[cfg(all(feature = "process", feature = "param"))]
 #[cfg(not(windows))]
 fn main() -> io::Result<()> {
+    use rustix::param::*;
     use rustix::process::*;
 
     println!("Pid: {}", getpid().as_raw_nonzero());
@@ -95,7 +96,7 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(any(windows, not(feature = "process")))]
+#[cfg(any(windows, not(all(feature = "process", feature = "param"))))]
 fn main() -> io::Result<()> {
     unimplemented!()
 }

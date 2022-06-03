@@ -171,6 +171,10 @@ pub mod mm;
 #[cfg_attr(doc_cfg, doc(cfg(feature = "net")))]
 pub mod net;
 #[cfg(not(windows))]
+#[cfg(feature = "param")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "param")))]
+pub mod param;
+#[cfg(not(windows))]
 #[cfg(any(feature = "fs", feature = "net"))]
 #[cfg_attr(doc_cfg, doc(cfg(any(feature = "fs", feature = "net"))))]
 pub mod path;
@@ -209,6 +213,12 @@ pub mod runtime;
 #[cfg(not(windows))]
 #[cfg(not(feature = "fs"))]
 pub(crate) mod fs;
+#[cfg(not(windows))]
+#[cfg(all(
+    not(feature = "param"),
+    any(feature = "runtime", feature = "time", target_arch = "x86")
+))]
+pub(crate) mod param;
 #[cfg(not(windows))]
 #[cfg(not(any(feature = "fs", feature = "net")))]
 pub(crate) mod path;
