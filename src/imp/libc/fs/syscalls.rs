@@ -352,7 +352,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
     ))]
     {
         if !NO_STATX.load(Relaxed) {
-            match statx(dirfd, path, flags, StatxFlags::ALL) {
+            match statx(dirfd, path, flags, StatxFlags::BASIC_STATS) {
                 Ok(x) => return statx_to_stat(x),
                 Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
                 Err(e) => return Err(e),
@@ -920,7 +920,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     ))]
     {
         if !NO_STATX.load(Relaxed) {
-            match statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::ALL) {
+            match statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
                 Ok(x) => return statx_to_stat(x),
                 Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
                 Err(e) => return Err(e),
