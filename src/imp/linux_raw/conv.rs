@@ -678,11 +678,12 @@ pub(super) unsafe fn ret_error(raw: RetReg<R0>) -> io::Errno {
 /// always returns `()`.
 #[inline]
 pub(super) unsafe fn ret_infallible(raw: RetReg<R0>) {
-    let _ = raw;
     #[cfg(debug_assertions)]
     {
         try_decode_void(raw).unwrap()
     }
+    #[cfg(not(debug_assertions))]
+    drop(raw);
 }
 
 /// Convert a `usize` returned from a syscall that effectively returns a

@@ -1234,10 +1234,7 @@ pub(crate) fn sendfile(
         let nsent = ret_ssize_t(c::sendfile64(
             borrowed_fd(out_fd),
             borrowed_fd(in_fd),
-            offset
-                .map(crate::utils::as_mut_ptr)
-                .unwrap_or(null_mut())
-                .cast(),
+            offset.map_or(null_mut(), crate::utils::as_mut_ptr).cast(),
             count,
         ))?;
         Ok(nsent as usize)

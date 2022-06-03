@@ -219,7 +219,7 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
         target_env = "gnu"
     )))]
     unsafe {
-        match ret(c::nanosleep(&request.clone().into(), remain.as_mut_ptr())) {
+        match ret(c::nanosleep(request, remain.as_mut_ptr())) {
             Ok(()) => NanosleepRelativeResult::Ok,
             Err(io::Errno::INTR) => NanosleepRelativeResult::Interrupted(remain.assume_init()),
             Err(err) => NanosleepRelativeResult::Err(err),
