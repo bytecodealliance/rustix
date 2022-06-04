@@ -77,7 +77,7 @@ fn check_proc_entry_with_stat(
     // "/proc" though, because in e.g. a user namespace scenario, root outside
     // the container may be mapped to another uid like `nobody`.
     if !matches!(kind, Kind::Proc) {
-        if (entry_stat.st_uid, entry_stat.st_gid) != (uid, gid) {
+        if (entry_stat.st_uid as i32, entry_stat.st_gid as i32) != (uid, gid) {
             return Err(io::Errno::NOTSUP);
         }
     }
@@ -308,8 +308,8 @@ pub fn proc_self_fd() -> io::Result<BorrowedFd<'static>> {
                 Kind::Fd,
                 proc_self_fd.as_fd(),
                 Some(proc_stat),
-                proc_self_stat.st_uid,
-                proc_self_stat.st_gid,
+                proc_self_stat.st_uid as i32,
+                proc_self_stat.st_gid as i32,
             )
             .map_err(|_err| io::Errno::NOTSUP)?;
 
@@ -350,8 +350,8 @@ fn proc_self_fdinfo() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
                 Kind::Fd,
                 proc_self_fdinfo.as_fd(),
                 Some(proc_stat),
-                proc_self_stat.st_uid,
-                proc_self_stat.st_gid,
+                proc_self_stat.st_uid as i32,
+                proc_self_stat.st_gid as i32,
             )
             .map_err(|_err| io::Errno::NOTSUP)?;
 
@@ -463,8 +463,8 @@ fn open_and_check_file(dir: BorrowedFd, dir_stat: &Stat, name: &ZStr) -> io::Res
                 file.as_fd(),
                 file_stat,
                 Some(proc_stat),
-                dir_stat.st_uid,
-                dir_stat.st_gid,
+                dir_stat.st_uid as i32,
+                dir_stat.st_gid as i32,
             )?;
 
             found_file = true;
