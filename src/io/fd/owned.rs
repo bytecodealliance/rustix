@@ -31,6 +31,7 @@ use core::mem::forget;
 // because c_int is 32 bits.
 #[cfg_attr(rustc_attrs, rustc_layout_scalar_valid_range_end(0xFF_FF_FF_FE))]
 #[cfg_attr(staged_api, unstable(feature = "io_safety", issue = "87074"))]
+#[cfg_attr(rustc_attrs, rustc_nonnull_optimization_guaranteed)]
 pub struct BorrowedFd<'fd> {
     fd: RawFd,
     _phantom: PhantomData<&'fd OwnedFd>,
@@ -51,6 +52,7 @@ pub struct BorrowedFd<'fd> {
 // because c_int is 32 bits.
 #[cfg_attr(rustc_attrs, rustc_layout_scalar_valid_range_end(0xFF_FF_FF_FE))]
 #[cfg_attr(staged_api, unstable(feature = "io_safety", issue = "87074"))]
+#[cfg_attr(rustc_attrs, rustc_nonnull_optimization_guaranteed)]
 pub struct OwnedFd {
     fd: RawFd,
 }
