@@ -350,7 +350,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
     {
         match statx(dirfd, path, flags, StatxFlags::BASIC_STATS) {
             Ok(x) => return statx_to_stat(x),
-            Err(io::Error::NOSYS) => statat_old(dirfd, path, flags),
+            Err(io::Errno::NOSYS) => statat_old(dirfd, path, flags),
             Err(e) => return Err(e),
         }
     }
@@ -908,7 +908,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     {
         match statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
             Ok(x) => return statx_to_stat(x),
-            Err(io::Error::NOSYS) => fstat_old(fd),
+            Err(io::Errno::NOSYS) => fstat_old(fd),
             Err(e) => return Err(e),
         }
     }
