@@ -20,7 +20,7 @@ cc = { version = "1.0.68", optional = true }
 [dependencies]
 bitflags = "1.2.1"
 itoa = { version = "1.0.1", default-features = false, optional = true }
-io-lifetimes = { version = "0.7.0-beta.0", default-features = false, optional = true }
+io-lifetimes = { version = "0.7.0", default-features = false, optional = true }
 
 # Special dependencies used in rustc-dep-of-std mode.
 core = { version = "1.0.0", optional = true, package = "rustc-std-workspace-core" }
@@ -64,7 +64,7 @@ features = [
 tempfile = "3.2.0"
 libc = "0.2.118"
 libc_errno = { package = "errno", version = "0.2.8" }
-serial_test = "0.6"
+serial_test = "0.7"
 memoffset = "0.6.5"
 
 [target.'cfg(not(target_os = "emscripten"))'.dev-dependencies]
