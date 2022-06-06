@@ -67,6 +67,8 @@
 //!    are used (and documentation aliases are used so that the original names
 //!    can still be searched for).
 //!  - Provide y2038 compatibility, on platforms which support this.
+//!  - Correct selected platform bugs, such as behavioral differences when
+//!    running under seccomp.
 //!
 //! Things they don't do include:
 //!  - Detecting whether functions are supported at runtime.

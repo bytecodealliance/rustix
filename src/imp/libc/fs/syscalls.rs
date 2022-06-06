@@ -89,6 +89,8 @@ use crate::fs::SealFlags;
 )))]
 // not implemented in libc for netbsd yet
 use crate::fs::StatFs;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags};
 #[cfg(not(any(
     target_os = "ios",
     target_os = "macos",
@@ -97,8 +99,6 @@ use crate::fs::StatFs;
 )))]
 use crate::fs::{Dev, FileType};
 use crate::fs::{FdFlags, Mode, OFlags, Stat, Timestamps};
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::fs::{RenameFlags, ResolveFlags, Statx, StatxFlags};
 use crate::io::{self, OwnedFd, SeekFrom};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
@@ -116,6 +116,8 @@ use core::convert::TryInto;
 ))]
 use core::mem::size_of;
 use core::mem::MaybeUninit;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use core::ptr::null;
 #[cfg(any(
     target_os = "android",
     target_os = "ios",
@@ -351,14 +353,11 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
         any(target_pointer_width = "32", target_arch = "mips64")
     ))]
     {
-        if !NO_STATX.load(Relaxed) {
-            match statx(dirfd, path, flags, StatxFlags::BASIC_STATS) {
-                Ok(x) => return statx_to_stat(x),
-                Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
-                Err(e) => return Err(e),
-            }
+        match statx(dirfd, path, flags, StatxFlags::BASIC_STATS) {
+            Ok(x) => return statx_to_stat(x),
+            Err(io::Error::NOSYS) => statat_old(dirfd, path, flags),
+            Err(e) => return Err(e),
         }
-        statat_old(dirfd, path, flags)
     }
 
     // Main version: libc is y2038 safe. Or, the platform is not y2038 safe and
@@ -904,13 +903,6 @@ pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result
     unsafe { ret(c::flock(borrowed_fd(fd), operation as c::c_int)) }
 }
 
-/// `statx` was introduced in Linux 4.11.
-#[cfg(all(
-    any(target_os = "android", target_os = "linux"),
-    any(target_pointer_width = "32", target_arch = "mips64")
-))]
-static NO_STATX: AtomicBool = AtomicBool::new(false);
-
 pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     // 32-bit and mips64 Linux: `struct stat64` is not y2038 compatible; use
     // `statx`.
@@ -919,14 +911,11 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
         any(target_pointer_width = "32", target_arch = "mips64")
     ))]
     {
-        if !NO_STATX.load(Relaxed) {
-            match statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
-                Ok(x) => return statx_to_stat(x),
-                Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
-                Err(e) => return Err(e),
-            }
+        match statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
+            Ok(x) => return statx_to_stat(x),
+            Err(io::Error::NOSYS) => fstat_old(fd),
+            Err(e) => return Err(e),
         }
-        fstat_old(fd)
     }
 
     // Main version: libc is y2038 safe. Or, the platform is not y2038 safe and
@@ -1397,13 +1386,9 @@ fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
-#[allow(non_upper_case_globals)]
-pub(crate) fn statx(
-    dirfd: BorrowedFd<'_>,
-    path: &CStr,
-    flags: AtFlags,
-    mask: StatxFlags,
-) -> io::Result<Statx> {
+mod sys {
+    use super::{c, BorrowedFd, Statx};
+
     #[cfg(all(target_os = "android", target_arch = "arm"))]
     const SYS_statx: c::c_long = 397;
     #[cfg(all(target_os = "android", target_arch = "x86"))]
@@ -1414,7 +1399,7 @@ pub(crate) fn statx(
     const SYS_statx: c::c_long = 332;
 
     weak_or_syscall! {
-        fn statx(
+        pub(super) fn statx(
             pirfd: BorrowedFd<'_>,
             path: *const c::c_char,
             flags: c::c_int,
@@ -1422,10 +1407,19 @@ pub(crate) fn statx(
             buf: *mut Statx
         ) via SYS_statx -> c::c_int
     }
+}
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[allow(non_upper_case_globals)]
+pub(crate) fn statx(
+    dirfd: BorrowedFd<'_>,
+    path: &CStr,
+    flags: AtFlags,
+    mask: StatxFlags,
+) -> io::Result<Statx> {
     let mut statx_buf = MaybeUninit::<Statx>::uninit();
     unsafe {
-        ret(statx(
+        ret(sys::statx(
             dirfd,
             c_str(path),
             flags.bits(),
@@ -1433,6 +1427,19 @@ pub(crate) fn statx(
             statx_buf.as_mut_ptr(),
         ))?;
         Ok(statx_buf.assume_init())
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub(crate) fn is_statx_available() -> bool {
+    unsafe {
+        // Call `statx` with null pointers so that if it fails for any reason
+        // other than `EFAULT`, we know it's not supported.
+        matches!(
+            ret(sys::statx(cwd(), null(), 0, 0, null_mut())),
+            Err(io::Errno::FAULT)
+        )
     }
 }
 

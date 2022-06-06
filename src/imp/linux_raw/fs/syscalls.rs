@@ -8,14 +8,9 @@
 #![allow(clippy::undocumented_unsafe_blocks)]
 
 use super::super::c;
-#[cfg(all(
-    target_pointer_width = "32",
-    any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc")
-))]
-use super::super::conv::zero;
 use super::super::conv::{
     by_ref, c_int, c_uint, dev_t, oflags_for_open_how, opt_mut, pass_usize, raw_fd, ret, ret_c_int,
-    ret_c_uint, ret_owned_fd, ret_usize, size_of, slice_mut,
+    ret_c_uint, ret_owned_fd, ret_usize, size_of, slice_mut, zero,
 };
 #[cfg(target_pointer_width = "64")]
 use super::super::conv::{loff_t, loff_t_from_u64, ret_u64};
@@ -416,22 +411,15 @@ pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result
     unsafe { ret(syscall!(__NR_flock, fd, c_uint(operation as c::c_uint))) }
 }
 
-/// `statx` was introduced in Linux 4.11.
-#[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
-static NO_STATX: AtomicBool = AtomicBool::new(false);
-
 #[inline]
 pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
     {
-        if !NO_STATX.load(Relaxed) {
-            match statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
-                Ok(x) => return statx_to_stat(x),
-                Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
-                Err(e) => return Err(e),
-            }
+        match statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
+            Ok(x) => statx_to_stat(x),
+            Err(io::Errno::NOSYS) => fstat_old(fd),
+            Err(e) => Err(e),
         }
-        fstat_old(fd)
     }
 
     #[cfg(all(target_pointer_width = "64", not(target_arch = "mips64")))]
@@ -462,19 +450,16 @@ fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 pub(crate) fn stat(filename: &CStr) -> io::Result<Stat> {
     #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
     {
-        if !NO_STATX.load(Relaxed) {
-            match statx(
-                crate::fs::cwd().as_fd(),
-                filename,
-                AtFlags::empty(),
-                StatxFlags::BASIC_STATS,
-            ) {
-                Ok(x) => return statx_to_stat(x),
-                Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
-                Err(e) => return Err(e),
-            }
+        match statx(
+            crate::fs::cwd().as_fd(),
+            filename,
+            AtFlags::empty(),
+            StatxFlags::BASIC_STATS,
+        ) {
+            Ok(x) => return statx_to_stat(x),
+            Err(io::Errno::NOSYS) => stat_old(filename),
+            Err(e) => return Err(e),
         }
-        stat_old(filename)
     }
 
     #[cfg(all(target_pointer_width = "64", not(target_arch = "mips64")))]
@@ -524,14 +509,11 @@ fn stat_old(filename: &CStr) -> io::Result<Stat> {
 pub(crate) fn statat(dirfd: BorrowedFd<'_>, filename: &CStr, flags: AtFlags) -> io::Result<Stat> {
     #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
     {
-        if !NO_STATX.load(Relaxed) {
-            match statx(dirfd, filename, flags, StatxFlags::BASIC_STATS) {
-                Ok(x) => return statx_to_stat(x),
-                Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
-                Err(e) => return Err(e),
-            }
+        match statx(dirfd, filename, flags, StatxFlags::BASIC_STATS) {
+            Ok(x) => return statx_to_stat(x),
+            Err(io::Errno::NOSYS) => statat_old(dirfd, filename, flags),
+            Err(e) => return Err(e),
         }
-        statat_old(dirfd, filename, flags)
     }
 
     #[cfg(all(target_pointer_width = "64", not(target_arch = "mips64")))]
@@ -581,19 +563,16 @@ fn statat_old(dirfd: BorrowedFd<'_>, filename: &CStr, flags: AtFlags) -> io::Res
 pub(crate) fn lstat(filename: &CStr) -> io::Result<Stat> {
     #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
     {
-        if !NO_STATX.load(Relaxed) {
-            match statx(
-                crate::fs::cwd().as_fd(),
-                filename,
-                AtFlags::SYMLINK_NOFOLLOW,
-                StatxFlags::BASIC_STATS,
-            ) {
-                Ok(x) => return statx_to_stat(x),
-                Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
-                Err(e) => return Err(e),
-            }
+        match statx(
+            crate::fs::cwd().as_fd(),
+            filename,
+            AtFlags::SYMLINK_NOFOLLOW,
+            StatxFlags::BASIC_STATS,
+        ) {
+            Ok(x) => return statx_to_stat(x),
+            Err(io::Errno::NOSYS) => lstat_old(filename),
+            Err(e) => return Err(e),
         }
-        lstat_old(filename)
     }
 
     #[cfg(all(target_pointer_width = "64", not(target_arch = "mips64")))]
@@ -756,6 +735,25 @@ pub(crate) fn statx(
             &mut statx_buf
         ))
         .map(|()| statx_buf.assume_init())
+    }
+}
+
+#[inline]
+pub(crate) fn is_statx_available() -> bool {
+    unsafe {
+        // Call `statx` with null pointers so that if it fails for any reason
+        // other than `EFAULT`, we know it's not supported.
+        matches!(
+            ret(syscall!(
+                __NR_statx,
+                raw_fd(AT_FDCWD),
+                zero(),
+                zero(),
+                zero(),
+                zero()
+            )),
+            Err(io::Errno::FAULT)
+        )
     }
 }
 
