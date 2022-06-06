@@ -125,11 +125,6 @@ use core::ptr::null;
     target_os = "macos"
 ))]
 use core::ptr::null_mut;
-#[cfg(all(
-    any(target_os = "android", target_os = "linux"),
-    any(target_pointer_width = "32", target_arch = "mips64")
-))]
-use core::sync::atomic::{AtomicBool, Ordering::Relaxed};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use {
     super::super::conv::nonnegative_ret,
