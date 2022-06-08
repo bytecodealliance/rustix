@@ -9,5 +9,7 @@ bitflags! {
         const RANDOM = linux_raw_sys::general::GRND_RANDOM;
         /// `GRND_NONBLOCK`
         const NONBLOCK = linux_raw_sys::general::GRND_NONBLOCK;
+        /// `GRND_INSECURE`
+        const INSECURE = linux_raw_sys::general::GRND_INSECURE;
     }
 }
