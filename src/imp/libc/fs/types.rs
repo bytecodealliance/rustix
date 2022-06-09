@@ -359,16 +359,13 @@ bitflags! {
     /// [`renameat_with`]: crate::fs::renameat_with
     pub struct RenameFlags: c::c_uint {
         /// `RENAME_EXCHANGE`
-        #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const EXCHANGE = c::RENAME_EXCHANGE;
+        const EXCHANGE = c::RENAME_EXCHANGE as _;
 
         /// `RENAME_NOREPLACE`
-        #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const NOREPLACE = c::RENAME_NOREPLACE;
+        const NOREPLACE = c::RENAME_NOREPLACE as _;
 
         /// `RENAME_WHITEOUT`
-        #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const WHITEOUT = c::RENAME_WHITEOUT;
+        const WHITEOUT = c::RENAME_WHITEOUT as _;
     }
 }
 
