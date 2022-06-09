@@ -46,14 +46,43 @@ portable APIs built on this functionality, see the [`system-interface`],
    Windows, and is portable to many OS's.
 
 The linux_raw backend is enabled by default on platforms which support it. To
-enable the libc backend instead, either enable the "use-libc" cargo feature:
-
-```toml
-rustix = { version = "...", features = ["use-libc"] }
-````
-
+enable the libc backend instead, either enable the "use-libc" cargo feature,
 or set the `RUSTFLAGS` environment variable to `--cfg=rustix_use_libc` when
 building.
+
+## Cargo features
+
+The modules [`rustix::io`], [`rustix::fd`], and [`rustix::ffi`] are enabled
+by default. The rest of the API is conditional with cargo feature flags:
+
+| Name       | Description
+| ---------- | ---------------------
+| `fs`       | [`rustix::fs`] and [`rustix::path`]—Filesystem operations.
+| `io_uring` | [`rustix::io_uring`]—Linux io_uring.
+| `mm`       | [`rustix::mm`]—Memory map operations.
+| `net`      | [`rustix::net`] and [`rustix::path`]—Network-related operations.
+| `param`    | [`rustix::param`]—Process parameters.
+| `process`  | [`rustix::process`]—Process-associated operations.
+| `rand`     | [`rustix::rand`]—Random-related operations.
+| `termios`  | [`rustix::termios`]—Terminal I/O stream operations.
+| `thread`   | [`rustix::thread`]—Thread-associated operations.
+| `time`     | [`rustix::time`]—Time-related operations.
+|            |
+| `use-libc` | Enable the libc backend.
+
+[`rustix::fs`]: https://docs.rs/rustix/latest/rustix/fs/index.html
+[`rustix::io_uring`]: https://docs.rs/rustix/latest/rustix/io_uring/index.html
+[`rustix::mm`]: https://docs.rs/rustix/latest/rustix/mm/index.html
+[`rustix::net`]: https://docs.rs/rustix/latest/rustix/net/index.html
+[`rustix::param`]: https://docs.rs/rustix/latest/rustix/param/index.html
+[`rustix::process`]: https://docs.rs/rustix/latest/rustix/process/index.html
+[`rustix::rand`]: https://docs.rs/rustix/latest/rustix/rand/index.html
+[`rustix::termios`]: https://docs.rs/rustix/latest/rustix/termios/index.html
+[`rustix::thread`]: https://docs.rs/rustix/latest/rustix/thread/index.html
+[`rustix::time`]: https://docs.rs/rustix/latest/rustix/time/index.html
+[`rustix::io`]: https://docs.rs/rustix/latest/rustix/io/index.html
+[`rustix::fd`]: https://docs.rs/rustix/latest/rustix/fd/index.html
+[`rustix::ffi`]: https://docs.rs/rustix/latest/rustix/ffi/index.html
 
 ## Similar crates
 
