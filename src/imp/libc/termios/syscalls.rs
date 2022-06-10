@@ -150,11 +150,10 @@ pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     unsafe {
-        ret(c::ttyname_r(
-            borrowed_fd(dirfd),
-            buf.as_mut_ptr().cast(),
-            buf.len(),
-        ))?;
-        Ok(CStr::from_ptr(buf.as_ptr().cast()).to_bytes().len())
+        // `ttyname_r` returns its error status rather than using `errno`.
+        match c::ttyname_r(borrowed_fd(dirfd), buf.as_mut_ptr().cast(), buf.len()) {
+            0 => Ok(CStr::from_ptr(buf.as_ptr().cast()).to_bytes().len()),
+            err => Err(io::Errno::from_raw_os_error(err)),
+        }
     }
 }

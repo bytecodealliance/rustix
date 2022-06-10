@@ -6,3 +6,5 @@
 
 #[cfg(not(windows))]
 mod isatty;
+#[cfg(not(windows))]
+mod ttyname;
