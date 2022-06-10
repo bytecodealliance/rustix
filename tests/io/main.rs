@@ -18,6 +18,8 @@ mod error;
 mod eventfd;
 #[cfg(not(windows))]
 mod from_into;
+#[cfg(not(target_os = "redox"))]
+mod ioctl;
 mod poll;
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
 mod procfs;

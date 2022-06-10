@@ -57,7 +57,7 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 ///  - [Winsock2]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/ioctl.2.html
-/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-ioctlsocket
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/winsock/winsock-ioctls#unix-ioctl-codes
 #[inline]
 #[doc(alias = "FIONBIO")]
 pub fn ioctl_fionbio<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
@@ -71,9 +71,11 @@ pub fn ioctl_fionbio<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 ///
 /// # References
 ///  - [Linux]
+///  - [Winsock2]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/ioctl_tty.2.html
-#[cfg(not(any(windows, target_os = "redox")))]
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/winsock/winsock-ioctls#unix-ioctl-codes
+#[cfg(not(target_os = "redox"))]
 #[inline]
 #[doc(alias = "FIONREAD")]
 pub fn ioctl_fionread<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
