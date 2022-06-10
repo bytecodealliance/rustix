@@ -31,8 +31,10 @@ use std::path::Path;
 /// # Example
 ///
 /// ```rust
+/// # #[cfg(feature = "path")]
 /// use rustix::path::DecInt;
 ///
+/// # #[cfg(feature = "path")]
 /// assert_eq!(
 ///     format!("hello {}", DecInt::new(9876).as_ref().display()),
 ///     "hello 9876"

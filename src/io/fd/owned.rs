@@ -176,7 +176,7 @@ pub trait AsFd {
     /// let mut f = File::open("foo.txt")?;
     /// # #[cfg(any(unix, target_os = "wasi"))]
     /// let borrowed_fd: BorrowedFd<'_> = f.as_fd();
-    /// # Ok::<(), io::Errno>(())
+    /// # Ok::<(), io::Error>(())
     /// ```
     #[cfg_attr(staged_api, unstable(feature = "io_safety", issue = "87074"))]
     fn as_fd(&self) -> BorrowedFd<'_>;

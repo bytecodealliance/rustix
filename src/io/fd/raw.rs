@@ -40,7 +40,7 @@ pub trait AsRawFd {
     /// // `raw_fd` is only valid as long as `f` exists.
     /// #[cfg(any(unix, target_os = "wasi"))]
     /// let raw_fd: RawFd = f.as_raw_fd();
-    /// # Ok::<(), io::Errno>(())
+    /// # Ok::<(), io::Error>(())
     /// ```
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     fn as_raw_fd(&self) -> RawFd;
@@ -80,7 +80,7 @@ pub trait FromRawFd {
     /// // is only one owner for the file descriptor.
     /// # #[cfg(any(unix, target_os = "wasi"))]
     /// let f = unsafe { File::from_raw_fd(raw_fd) };
-    /// # Ok::<(), io::Errno>(())
+    /// # Ok::<(), io::Error>(())
     /// ```
     #[cfg_attr(staged_api, stable(feature = "from_raw_os", since = "1.1.0"))]
     unsafe fn from_raw_fd(fd: RawFd) -> Self;
@@ -109,7 +109,7 @@ pub trait IntoRawFd {
     /// let f = File::open("foo.txt")?;
     /// #[cfg(any(unix, target_os = "wasi"))]
     /// let raw_fd: RawFd = f.into_raw_fd();
-    /// # Ok::<(), io::Errno>(())
+    /// # Ok::<(), io::Error>(())
     /// ```
     #[cfg_attr(staged_api, stable(feature = "into_raw_os", since = "1.4.0"))]
     fn into_raw_fd(self) -> RawFd;

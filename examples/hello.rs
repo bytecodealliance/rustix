@@ -1,6 +1,6 @@
 //! Hello world, via plain syscalls.
 
-#[cfg(not(windows))]
+#[cfg(all(feature = "std", not(windows)))]
 fn main() -> std::io::Result<()> {
     // The message to print. It includes an explicit newline because we're
     // not using `println!`, so we have to include the newline manually.
@@ -37,7 +37,7 @@ fn main() -> std::io::Result<()> {
     Ok(())
 }
 
-#[cfg(windows)]
+#[cfg(any(not(feature = "std"), windows))]
 fn main() {
     unimplemented!()
 }
