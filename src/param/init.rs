@@ -1,4 +1,4 @@
-//! rustix's `init` finction.
+//! rustix's `init` function.
 //!
 //! # Safety
 //!

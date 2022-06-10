@@ -37,7 +37,6 @@ pub use imp::fs::types::FsWord;
 ///
 /// [`utimensat`]: crate::fs::utimensat
 /// [`futimens`]: crate::fs::futimens
-//
 // This is `repr(C)` and specifically laid out to match the representation used
 // by `utimensat` and `futimens`, which expect 2-element arrays of timestamps.
 #[repr(C)]

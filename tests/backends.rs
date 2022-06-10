@@ -34,7 +34,7 @@ fn test_backends() {
         libc_dep
     );
 
-    // Test the use-default crate with --cfg=rustix_use_libc
+    // Test the use-default crate with `--cfg=rustix_use_libc`.
     assert!(
         has_dependency(
             "test-crates/use-default",
@@ -57,7 +57,7 @@ fn test_backends() {
         "use-default with --cfg=rustix_use_libc depends on linux-raw-sys"
     );
 
-    // Test the use-default crate with --features=rustix/use-libc
+    // Test the use-default crate with `--features=rustix/use-libc`.
     assert!(
         has_dependency(
             "test-crates/use-default",
