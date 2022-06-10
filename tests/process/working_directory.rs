@@ -1,3 +1,5 @@
+#![cfg(feature = "fs")]
+
 #[cfg(not(target_os = "macos"))]
 use rustix::fs::{Mode, OFlags};
 use tempfile::{tempdir, TempDir};

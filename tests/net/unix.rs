@@ -10,6 +10,7 @@
 )))]
 // This test uses `DecInt`.
 #![cfg(feature = "itoa")]
+#![cfg(feature = "fs")]
 
 use rustix::fs::{cwd, unlinkat, AtFlags};
 use rustix::io::{read, write};

@@ -76,6 +76,7 @@ fn test_file() {
         assert!(statfs.f_blocks > 0);
     }
 
+    #[cfg(feature = "net")]
     assert_eq!(rustix::io::is_read_write(&file).unwrap(), (true, false));
 
     assert_ne!(rustix::io::ioctl_fionread(&file).unwrap(), 0);
