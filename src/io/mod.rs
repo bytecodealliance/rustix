@@ -36,7 +36,7 @@ pub use eventfd::{eventfd, EventfdFlags};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use ioctl::ioctl_fioclex;
 pub use ioctl::ioctl_fionbio;
-#[cfg(not(any(windows, target_os = "redox")))]
+#[cfg(not(target_os = "redox"))]
 pub use ioctl::ioctl_fionread;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use ioctl::{ioctl_blkpbszget, ioctl_blksszget};

@@ -7,7 +7,7 @@ use windows_sys::Win32::Networking::WinSock;
 
 pub(crate) use libc::{
     c_char, c_int, c_long, c_longlong, c_schar, c_short, c_uchar, c_uint, c_ulong, c_ulonglong,
-    c_ushort, ssize_t,
+    c_ushort, c_void, ssize_t,
 };
 pub(crate) type socklen_t = i32;
 
