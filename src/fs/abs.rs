@@ -4,14 +4,14 @@
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 use crate::fs::StatFs;
 #[cfg(not(any(
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 use crate::{imp, io, path};
 
@@ -25,7 +25,7 @@ use crate::{imp, io, path};
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 #[inline]
 pub fn statfs<P: path::Arg>(path: P) -> io::Result<StatFs> {

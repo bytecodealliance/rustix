@@ -1,6 +1,7 @@
-//! Tests for `mlock`. We can't easily test that it actually locks memory,
-//! but we can test that we can call it and either get success or a reasonable
-//! error message.
+//! Tests for `mlock`.
+//!
+//! We can't easily test that it actually locks memory, but we can test that we
+//! can call it and either get success or a reasonable error message.
 
 use std::ffi::c_void;
 

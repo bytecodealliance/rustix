@@ -238,7 +238,7 @@ pub enum Signal {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     )))]
     #[doc(alias = "Pwr")]
     Power = c::SIGPWR,
@@ -332,18 +332,18 @@ pub type RawCpuid = u32;
 pub(crate) type RawUname = c::utsname;
 
 #[cfg(any(
-    target_os = "linux",
     target_os = "android",
+    target_os = "dragonfly",
     target_os = "fuchsia",
-    target_os = "dragonfly"
+    target_os = "linux",
 ))]
 pub(crate) type RawCpuSet = c::cpu_set_t;
 
 #[cfg(any(
-    target_os = "linux",
     target_os = "android",
+    target_os = "dragonfly",
     target_os = "fuchsia",
-    target_os = "dragonfly"
+    target_os = "linux",
 ))]
 #[inline]
 pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
@@ -353,9 +353,9 @@ pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
 }
 
 #[cfg(any(
-    target_os = "linux",
     target_os = "android",
+    target_os = "dragonfly",
     target_os = "fuchsia",
-    target_os = "dragonfly"
+    target_os = "linux",
 ))]
 pub(crate) const CPU_SETSIZE: usize = c::CPU_SETSIZE as usize;

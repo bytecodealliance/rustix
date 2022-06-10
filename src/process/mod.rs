@@ -14,10 +14,10 @@ mod priority;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 mod rlimit;
 #[cfg(any(
-    target_os = "linux",
     target_os = "android",
+    target_os = "dragonfly",
     target_os = "fuchsia",
-    target_os = "dragonfly"
+    target_os = "linux",
 ))]
 mod sched;
 mod sched_yield;
@@ -60,10 +60,10 @@ pub use rlimit::prlimit;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 pub use rlimit::{getrlimit, setrlimit, Resource, Rlimit};
 #[cfg(any(
-    target_os = "linux",
     target_os = "android",
+    target_os = "dragonfly",
     target_os = "fuchsia",
-    target_os = "dragonfly"
+    target_os = "linux",
 ))]
 pub use sched::{sched_getaffinity, sched_setaffinity, CpuSet};
 pub use sched_yield::sched_yield;

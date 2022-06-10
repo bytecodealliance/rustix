@@ -16,7 +16,7 @@ pub use imp::fs::types::FlockOperation;
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 pub use imp::fs::types::FallocateFlags;
 
@@ -26,7 +26,7 @@ pub use imp::fs::types::Stat;
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 pub use imp::fs::types::StatFs;
 
@@ -156,7 +156,7 @@ pub fn fstat<Fd: AsFd>(fd: Fd) -> io::Result<Stat> {
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))] // not implemented in libc for netbsd yet
 #[inline]
 pub fn fstatfs<Fd: AsFd>(fd: Fd) -> io::Result<StatFs> {
@@ -196,7 +196,7 @@ pub fn futimens<Fd: AsFd>(fd: Fd, times: &Timestamps) -> io::Result<()> {
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))] // not implemented in libc for netbsd yet
 #[inline]
 #[doc(alias = "posix_fallocate")]
@@ -223,7 +223,7 @@ pub(crate) fn _is_file_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)
         target_os = "android",
         target_os = "fuchsia",
         target_os = "linux",
-        target_os = "emscripten"
+        target_os = "emscripten",
     ))]
     if mode.contains(crate::fs::OFlags::PATH) {
         return Ok((false, false));
@@ -270,7 +270,7 @@ pub fn fsync<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     target_os = "dragonfly",
     target_os = "ios",
     target_os = "macos",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 #[inline]
 pub fn fdatasync<Fd: AsFd>(fd: Fd) -> io::Result<()> {

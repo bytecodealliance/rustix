@@ -1,5 +1,6 @@
-//! Test a simple IPv4 socket server and client. The client send a
-//! message and the server sends one back.
+//! Test a simple IPv4 socket server and client.
+//!
+//! The client send a message and the server sends one back.
 
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]
 

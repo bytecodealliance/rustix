@@ -28,7 +28,7 @@ mod vdso_wrappers;
     feature = "param",
     feature = "runtime",
     feature = "time",
-    target_arch = "x86"
+    target_arch = "x86",
 ))]
 pub(crate) mod param;
 // #[cfg(feature = "fs")] // TODO: Enable once `OwnedFd` moves out of the tree.

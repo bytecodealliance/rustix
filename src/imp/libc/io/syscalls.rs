@@ -382,10 +382,10 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
 #[cfg(not(any(
     target_os = "android",
     target_os = "dragonfly",
-    target_os = "macos",
     target_os = "ios",
+    target_os = "macos",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, flags: DupFlags) -> io::Result<()> {
     unsafe {
@@ -400,9 +400,9 @@ pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, flags: DupFlags) -> io
 #[cfg(any(
     target_os = "android",
     target_os = "dragonfly",
-    target_os = "macos",
     target_os = "ios",
-    target_os = "redox"
+    target_os = "macos",
+    target_os = "redox",
 ))]
 pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, _flags: DupFlags) -> io::Result<()> {
     // Android 5.0 has `dup3`, but libc doesn't have bindings. Emulate it

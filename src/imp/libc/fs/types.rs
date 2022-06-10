@@ -466,7 +466,7 @@ impl FileType {
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
@@ -684,7 +684,7 @@ bitflags! {
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 bitflags! {
     /// `FALLOC_FL_*` constants for use with [`fallocate`].
@@ -807,7 +807,7 @@ pub enum FlockOperation {
     target_os = "android",
     target_os = "linux",
     target_os = "emscripten",
-    target_os = "l4re"
+    target_os = "l4re",
 )))]
 pub type Stat = c::stat;
 
@@ -818,10 +818,10 @@ pub type Stat = c::stat;
 #[cfg(any(
     all(
         any(target_os = "android", target_os = "linux"),
-        target_pointer_width = "64"
+        target_pointer_width = "64",
     ),
     target_os = "emscripten",
-    target_os = "l4re"
+    target_os = "l4re",
 ))]
 pub type Stat = c::stat64;
 
@@ -834,7 +834,7 @@ pub type Stat = c::stat64;
 // y2038 bug.
 #[cfg(all(
     any(target_os = "android", target_os = "linux"),
-    target_pointer_width = "32"
+    target_pointer_width = "32",
 ))]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -881,7 +881,7 @@ pub type StatFs = c::statfs;
     target_os = "android",
     target_os = "linux",
     target_os = "emscripten",
-    target_os = "l4re"
+    target_os = "l4re",
 ))]
 pub type StatFs = c::statfs64;
 
@@ -976,7 +976,7 @@ pub type FsWord = c::__fsword_t;
 /// `__fsword_t`
 #[cfg(all(
     any(target_os = "android", all(target_os = "linux", target_env = "musl")),
-    target_pointer_width = "32"
+    target_pointer_width = "32",
 ))]
 pub type FsWord = u32;
 
@@ -984,7 +984,7 @@ pub type FsWord = u32;
 #[cfg(all(
     any(target_os = "android", all(target_os = "linux", target_env = "musl")),
     not(target_arch = "s390x"),
-    target_pointer_width = "64"
+    target_pointer_width = "64",
 ))]
 pub type FsWord = u64;
 

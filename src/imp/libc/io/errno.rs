@@ -48,7 +48,7 @@ impl Errno {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     ))]
     pub const AUTH: Self = Self(c::EAUTH);
     /// `EBADE`
@@ -99,7 +99,7 @@ impl Errno {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     ))]
     pub const BADRPC: Self = Self(c::EBADRPC);
     /// `EBADRQC`
@@ -237,7 +237,7 @@ impl Errno {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     ))]
     pub const FTYPE: Self = Self(c::EFTYPE);
     /// `EHOSTDOWN`
@@ -510,7 +510,7 @@ impl Errno {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     ))]
     pub const NEEDAUTH: Self = Self(c::ENEEDAUTH);
     /// `ENETDOWN`
@@ -541,7 +541,7 @@ impl Errno {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     ))]
     pub const NOATTR: Self = Self(c::ENOATTR);
     /// `ENOBUFS`
@@ -743,7 +743,7 @@ impl Errno {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     ))]
     pub const PROCLIM: Self = Self(c::EPROCLIM);
     /// `EPROCUNAVAIL`
@@ -753,7 +753,7 @@ impl Errno {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     ))]
     pub const PROCUNAVAIL: Self = Self(c::EPROCUNAVAIL);
     /// `EPROGMISMATCH`
@@ -763,7 +763,7 @@ impl Errno {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     ))]
     pub const PROGMISMATCH: Self = Self(c::EPROGMISMATCH);
     /// `EPROGUNAVAIL`
@@ -773,7 +773,7 @@ impl Errno {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     ))]
     pub const PROGUNAVAIL: Self = Self(c::EPROGUNAVAIL);
     /// `EPROTO`
@@ -857,7 +857,7 @@ impl Errno {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     ))]
     pub const RPCMISMATCH: Self = Self(c::ERPCMISMATCH);
     /// `ESHUTDOWN`

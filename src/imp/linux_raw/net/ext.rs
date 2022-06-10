@@ -1,5 +1,4 @@
 #![allow(unsafe_code)]
-#![allow(dead_code)]
 
 use super::super::c;
 

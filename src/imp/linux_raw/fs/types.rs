@@ -578,7 +578,7 @@ pub type StatxTimestamp = linux_raw_sys::general::statx_timestamp;
     target_arch = "x86",
     target_arch = "sparc",
     target_arch = "avr",
-    target_arch = "arm"
+    target_arch = "arm",
 )))]
 pub type RawMode = linux_raw_sys::general::__kernel_mode_t;
 
@@ -587,7 +587,7 @@ pub type RawMode = linux_raw_sys::general::__kernel_mode_t;
     target_arch = "x86",
     target_arch = "sparc",
     target_arch = "avr",
-    target_arch = "arm"
+    target_arch = "arm",
 ))]
 // Don't use `__kernel_mode_t` since it's `u16` which differs from `st_size`.
 pub type RawMode = c::c_uint;

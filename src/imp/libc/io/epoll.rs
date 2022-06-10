@@ -474,7 +474,7 @@ impl<'context, Context: self::Context> Iterator for Iter<'context, Context> {
             not(target_env = "musl"),
             not(target_os = "android")
         ),
-        target_arch = "x86_64"
+        target_arch = "x86_64",
     ),
     repr(packed)
 )]

@@ -25,7 +25,7 @@ pub use auxv::page_size;
         libc,
         any(
             all(target_os = "android", target_pointer_width = "64"),
-            target_os = "linux"
+            target_os = "linux",
         )
     )
 ))]

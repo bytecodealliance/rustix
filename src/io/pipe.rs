@@ -17,7 +17,7 @@ pub use imp::io::types::PipeFlags;
     windows,
     target_os = "illumos",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 pub const PIPE_BUF: usize = imp::io::types::PIPE_BUF;
 

@@ -4,7 +4,7 @@
         libc,
         any(
             all(target_os = "android", target_pointer_width = "64"),
-            target_os = "linux"
+            target_os = "linux",
         )
     )
 ))]
@@ -62,7 +62,7 @@ pub fn clock_ticks_per_second() -> u64 {
         libc,
         any(
             all(target_os = "android", target_pointer_width = "64"),
-            target_os = "linux"
+            target_os = "linux",
         )
     )
 ))]
@@ -86,7 +86,7 @@ pub fn linux_hwcap() -> (usize, usize) {
         libc,
         any(
             all(target_os = "android", target_pointer_width = "64"),
-            target_os = "linux"
+            target_os = "linux",
         )
     )
 ))]

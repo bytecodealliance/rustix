@@ -2,7 +2,7 @@
     windows,
     target_os = "emscripten",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 ))]
 fn main() {
     unimplemented!()
@@ -12,7 +12,7 @@ fn main() {
     windows,
     target_os = "emscripten",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 use criterion::{criterion_group, criterion_main};
 
@@ -20,7 +20,7 @@ use criterion::{criterion_group, criterion_main};
     windows,
     target_os = "emscripten",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 mod suite {
     use criterion::Criterion;
@@ -135,7 +135,7 @@ mod suite {
     windows,
     target_os = "emscripten",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 criterion_group!(
     benches,
@@ -152,6 +152,6 @@ criterion_group!(
     windows,
     target_os = "emscripten",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 criterion_main!(benches);

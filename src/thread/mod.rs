@@ -7,15 +7,6 @@ mod futex;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod id;
 
-#[cfg(linux_raw)]
-pub use futex::{futex, FutexFlags, FutexOperation};
-
-#[cfg(any(target_os = "android", target_os = "linux"))]
-pub use id::gettid;
-
-#[cfg(not(target_os = "redox"))]
-pub use clock::{nanosleep, NanosleepRelativeResult, Timespec};
-
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "emscripten",
@@ -27,3 +18,9 @@ pub use clock::{nanosleep, NanosleepRelativeResult, Timespec};
     target_os = "wasi",
 )))]
 pub use clock::{clock_nanosleep_absolute, clock_nanosleep_relative, ClockId};
+#[cfg(not(target_os = "redox"))]
+pub use clock::{nanosleep, NanosleepRelativeResult, Timespec};
+#[cfg(linux_raw)]
+pub use futex::{futex, FutexFlags, FutexOperation};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use id::gettid;

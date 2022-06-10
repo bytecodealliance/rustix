@@ -149,9 +149,9 @@ pub fn bind_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/bind.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-bind
+#[cfg(unix)]
 #[inline]
 #[doc(alias = "bind")]
-#[cfg(unix)]
 pub fn bind_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     imp::net::syscalls::bind_unix(sockfd.as_fd(), addr)
 }
@@ -240,9 +240,9 @@ pub fn connect_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/connect.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
+#[cfg(unix)]
 #[inline]
 #[doc(alias = "connect")]
-#[cfg(unix)]
 pub fn connect_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
     imp::net::syscalls::connect_unix(sockfd.as_fd(), addr)
 }

@@ -1,5 +1,6 @@
-//! Test a simple Unix-domain socket server and client. The client sends lists
-//! of integers and the server sends back sums.
+//! Test a simple Unix-domain socket server and client.
+//!
+//! The client sends lists of integers and the server sends back sums.
 
 // This test uses `AF_UNIX` with `SOCK_SEQPACKET` which is unsupported on macOS.
 #![cfg(not(any(

@@ -26,7 +26,7 @@ pub struct SocketAddrUnix {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     )))]
     len: c::socklen_t,
 }
@@ -56,7 +56,7 @@ impl SocketAddrUnix {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         ))]
         {
             unix.sun_len = (offsetof_sun_path() + bytes.len()).try_into().unwrap();
@@ -70,7 +70,7 @@ impl SocketAddrUnix {
                 target_os = "ios",
                 target_os = "macos",
                 target_os = "netbsd",
-                target_os = "openbsd"
+                target_os = "openbsd",
             )))]
             len: (offsetof_sun_path() + bytes.len()).try_into().unwrap(),
         })
@@ -98,7 +98,7 @@ impl SocketAddrUnix {
                 target_os = "ios",
                 target_os = "macos",
                 target_os = "netbsd",
-                target_os = "openbsd"
+                target_os = "openbsd",
             )))]
             len,
         })
@@ -112,7 +112,7 @@ impl SocketAddrUnix {
                 target_os = "ios",
                 target_os = "macos",
                 target_os = "netbsd",
-                target_os = "openbsd"
+                target_os = "openbsd",
             ))]
             sun_len: 0,
             sun_family: c::AF_UNIX as _,
@@ -122,7 +122,7 @@ impl SocketAddrUnix {
                 target_os = "ios",
                 target_os = "macos",
                 target_os = "netbsd",
-                target_os = "openbsd"
+                target_os = "openbsd",
             ))]
             sun_path: [0; 104],
             #[cfg(not(any(
@@ -131,7 +131,7 @@ impl SocketAddrUnix {
                 target_os = "ios",
                 target_os = "macos",
                 target_os = "netbsd",
-                target_os = "openbsd"
+                target_os = "openbsd",
             )))]
             sun_path: [0; 108],
         }
@@ -158,8 +158,8 @@ impl SocketAddrUnix {
     }
 
     /// For an abstract address, return the identifier.
-    #[inline]
     #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[inline]
     pub fn abstract_name(&self) -> Option<&[u8]> {
         let len = self.len();
         if len != 0 && self.unix.sun_path[0] == b'\0' as c::c_char {
@@ -180,7 +180,7 @@ impl SocketAddrUnix {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         )))]
         {
             self.len
@@ -191,7 +191,7 @@ impl SocketAddrUnix {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         ))]
         {
             c::socklen_t::from(self.unix.sun_len)
@@ -276,7 +276,7 @@ pub(crate) fn offsetof_sun_path() -> usize {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         ))]
         sun_len: 0_u8,
         #[cfg(any(
@@ -285,7 +285,7 @@ pub(crate) fn offsetof_sun_path() -> usize {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         ))]
         sun_family: 0_u8,
         #[cfg(not(any(
@@ -294,7 +294,7 @@ pub(crate) fn offsetof_sun_path() -> usize {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         )))]
         sun_family: 0_u16,
         #[cfg(any(
@@ -303,7 +303,7 @@ pub(crate) fn offsetof_sun_path() -> usize {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         ))]
         sun_path: [0; 104],
         #[cfg(not(any(
@@ -312,7 +312,7 @@ pub(crate) fn offsetof_sun_path() -> usize {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         )))]
         sun_path: [0; 108],
     };

@@ -20,7 +20,7 @@ mod dir;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 mod fadvise;
 pub(crate) mod fcntl;
@@ -41,7 +41,7 @@ mod getpath;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 mod makedev;
 #[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
@@ -58,7 +58,7 @@ mod statx;
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 #[cfg(feature = "fs")]
 pub use abs::statfs;
@@ -114,7 +114,7 @@ pub use dir::{Dir, DirEntry};
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 pub use fadvise::{fadvise, Advice};
 #[cfg(not(target_os = "wasi"))]
@@ -136,20 +136,19 @@ pub use fcopyfile::{
 };
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "redox",
+)))]
+pub use fd::fdatasync;
+#[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 pub use fd::{fallocate, FallocateFlags};
-
-#[cfg(not(any(
-    target_os = "dragonfly",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "redox"
-)))]
-pub use fd::fdatasync;
 #[cfg(not(target_os = "wasi"))]
 pub use fd::{fchmod, fchown, flock, FlockOperation};
 pub use fd::{fstat, fsync, ftruncate, futimens, is_file_read_write, seek, tell, Stat, Timestamps};
@@ -157,7 +156,7 @@ pub use fd::{fstat, fsync, ftruncate, futimens, is_file_read_write, seek, tell, 
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 // not implemented in libc for netbsd yet
 pub use fd::{fstatfs, StatFs};
@@ -175,7 +174,7 @@ pub use getpath::getpath;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 pub use makedev::{major, makedev, minor};
 #[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]

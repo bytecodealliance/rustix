@@ -19,7 +19,7 @@ struct sockaddr_header {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     ))]
     sa_len: u8,
     #[cfg(any(
@@ -28,7 +28,7 @@ struct sockaddr_header {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     ))]
     ss_family: u8,
     #[cfg(not(any(
@@ -37,7 +37,7 @@ struct sockaddr_header {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     )))]
     ss_family: u16,
 }
@@ -52,7 +52,7 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         ))]
         sa_len: 0_u8,
         #[cfg(any(
@@ -70,7 +70,7 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         )))]
         sa_family: 0_u16,
         sa_data: [0; 14],

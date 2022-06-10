@@ -13,7 +13,7 @@ bitflags! {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         )))]
         const CONFIRM = c::MSG_CONFIRM;
         /// `MSG_DONTROUTE`
@@ -33,7 +33,7 @@ bitflags! {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         )))]
         const MORE = c::MSG_MORE;
         #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
@@ -62,7 +62,7 @@ bitflags! {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         )))]
         const ERRQUEUE = c::MSG_ERRQUEUE;
         /// `MSG_OOB`

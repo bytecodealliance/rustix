@@ -372,7 +372,7 @@ pub use imp::termios::types::IUCLC;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 pub use imp::termios::types::IUTF8;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
@@ -444,7 +444,7 @@ pub use imp::termios::types::OFILL;
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 pub use imp::termios::types::OLCUC;
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
@@ -531,7 +531,7 @@ pub use imp::termios::types::TOSTOP;
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
-    target_os = "openbsd"
+    target_os = "openbsd",
 )))]
 pub use imp::termios::types::VSWTC;
 #[cfg(not(any(
