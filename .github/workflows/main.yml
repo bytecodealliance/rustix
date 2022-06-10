@@ -70,6 +70,7 @@ jobs:
         mips64el-unknown-linux-gnuabi64
         armv5te-unknown-linux-gnueabi
         s390x-unknown-linux-gnu
+        arm-linux-androideabi
     - name: Install cross-compilation tools
       run: |
         set -ex
@@ -101,6 +102,7 @@ jobs:
     - run: cargo check --workspace --release -vv --target=mips64el-unknown-linux-gnuabi64 --features=all-apis
     - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi --features=all-apis
     - run: cargo check --workspace --release -vv --target=s390x-unknown-linux-gnu --features=all-apis
+    - run: cargo check --workspace --release -vv --target=arm-linux-androideabi --features=all-apis
 
   check_no_default_features:
     name: Check --no-default-features
