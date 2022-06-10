@@ -1,7 +1,7 @@
-//! A wrapper around `io_lifetimes::OwnedFd`.
+//! A wrapper around [`io_lifetimes::OwnedFd`].
 //!
-//! rustix needs to wrap `OwnedFd` so that it can call its own [`close`]
-//! function when the `OwnedFd` is dropped.
+//! rustix needs to wrap io-lifetimes' `OwnedFd` type so that it can call its
+//! own [`close`] function when the `OwnedFd` is dropped.
 //!
 //! [`close`]: crate::io::close
 //!
@@ -18,8 +18,8 @@ use crate::io::close;
 use core::fmt;
 use core::mem::{forget, ManuallyDrop};
 
-/// A wrapper around `io_lifetimes::OwnedFd` which closes the file descriptor
-/// using `rustix`'s own [`close`] rather than libc's `close`.
+/// A wrapper around [`io_lifetimes::OwnedFd`] which closes the file descriptor
+/// using rustix's own [`close`] rather than libc's `close`.
 ///
 /// [`close`]: crate::io::close
 #[repr(transparent)]

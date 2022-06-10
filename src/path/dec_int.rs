@@ -67,12 +67,6 @@ impl DecInt {
         Self::new(fd.as_fd().as_raw_fd())
     }
 
-    /// Return the raw byte buffer.
-    #[inline]
-    pub fn as_bytes(&self) -> &[u8] {
-        &self.buf[..self.len]
-    }
-
     /// Return the raw byte buffer as a `&str`.
     #[inline]
     pub fn as_str(&self) -> &str {
@@ -90,6 +84,12 @@ impl DecInt {
         // Safety: `self.buf` holds a single decimal ASCII representation and
         // at least one extra NUL byte.
         unsafe { CStr::from_bytes_with_nul_unchecked(bytes_with_nul) }
+    }
+
+    /// Return the raw byte buffer.
+    #[inline]
+    pub fn as_bytes(&self) -> &[u8] {
+        &self.buf[..self.len]
     }
 }
 

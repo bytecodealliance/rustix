@@ -18,10 +18,9 @@ use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 use crate::fd::BorrowedFd;
 use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
-use c::{sockaddr_in, sockaddr_in6, socklen_t};
+use c::{sockaddr, sockaddr_in, sockaddr_in6, socklen_t};
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
-use linux_raw_sys::general::sockaddr;
 #[cfg(target_arch = "x86")]
 use {
     super::super::conv::{slice_just_addr, x86_sys},
@@ -758,7 +757,7 @@ pub(crate) mod sockopt {
     use crate::io;
     use crate::net::sockopt::Timeout;
     use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
-    use c::{SOL_SOCKET, SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_SNDTIMEO_NEW, SO_SNDTIMEO_OLD};
+    use c::{SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_SNDTIMEO_NEW, SO_SNDTIMEO_OLD};
     use core::convert::TryInto;
     use core::time::Duration;
     use linux_raw_sys::general::{__kernel_timespec, timeval};
@@ -944,7 +943,7 @@ pub(crate) mod sockopt {
             Timeout::Recv => SO_RCVTIMEO_NEW,
             Timeout::Send => SO_SNDTIMEO_NEW,
         };
-        match setsockopt(fd, SOL_SOCKET, optname, time) {
+        match setsockopt(fd, c::SOL_SOCKET, optname, time) {
             Err(io::Errno::NOPROTOOPT) if SO_RCVTIMEO_NEW != SO_RCVTIMEO_OLD => {
                 set_socket_timeout_old(fd, id, timeout)
             }
@@ -964,7 +963,7 @@ pub(crate) mod sockopt {
             Timeout::Recv => SO_RCVTIMEO_OLD,
             Timeout::Send => SO_SNDTIMEO_OLD,
         };
-        setsockopt(fd, SOL_SOCKET, optname, time)
+        setsockopt(fd, c::SOL_SOCKET, optname, time)
     }
 
     #[inline]
@@ -976,7 +975,7 @@ pub(crate) mod sockopt {
             Timeout::Recv => SO_RCVTIMEO_NEW,
             Timeout::Send => SO_SNDTIMEO_NEW,
         };
-        let time: __kernel_timespec = match getsockopt(fd, SOL_SOCKET, optname) {
+        let time: __kernel_timespec = match getsockopt(fd, c::SOL_SOCKET, optname) {
             Err(io::Errno::NOPROTOOPT) if SO_RCVTIMEO_NEW != SO_RCVTIMEO_OLD => {
                 return get_socket_timeout_old(fd, id)
             }
@@ -992,7 +991,7 @@ pub(crate) mod sockopt {
             Timeout::Recv => SO_RCVTIMEO_OLD,
             Timeout::Send => SO_SNDTIMEO_OLD,
         };
-        let time: timeval = getsockopt(fd, SOL_SOCKET, optname)?;
+        let time: timeval = getsockopt(fd, c::SOL_SOCKET, optname)?;
         Ok(duration_from_linux_old(time))
     }
 

@@ -33,8 +33,7 @@ use once_cell::sync::OnceCell;
 /// Linux's procfs always uses inode 1 for its root directory.
 const PROC_ROOT_INO: u64 = 1;
 
-// Identify an entry within "/proc", to determine which anomalies to
-// check for.
+// Identify an entry within "/proc", to determine which anomalies to check for.
 #[derive(Copy, Clone, Debug)]
 enum Kind {
     Proc,

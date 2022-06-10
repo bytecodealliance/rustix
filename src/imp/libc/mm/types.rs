@@ -389,7 +389,7 @@ impl Advice {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
-    /// The `O_*` flags accepted by [`userfaultfd`].
+    /// `O_*` flags for use with [`userfaultfd`].
     ///
     /// [`userfaultfd`]: crate::io::userfaultfd
     pub struct UserfaultfdFlags: c::c_int {

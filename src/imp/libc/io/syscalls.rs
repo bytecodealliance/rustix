@@ -216,14 +216,14 @@ pub(crate) fn pwritev2(
 // These functions are derived from Rust's library/std/src/sys/unix/fd.rs at
 // revision a77da2d454e6caa227a85b16410b95f93495e7e0.
 
-// The maximum read limit on most POSIX-like systems is `SSIZE_MAX`,
-// with the man page quoting that if the count of bytes to read is
-// greater than `SSIZE_MAX` the result is "unspecified".
+// The maximum read limit on most POSIX-like systems is `SSIZE_MAX`, with the
+// man page quoting that if the count of bytes to read is greater than
+// `SSIZE_MAX` the result is "unspecified".
 //
 // On macOS, however, apparently the 64-bit libc is either buggy or
-// intentionally showing odd behavior by rejecting any read with a size
-// larger than or equal to INT_MAX. To handle both of these the read
-// size is capped on both platforms.
+// intentionally showing odd behavior by rejecting any read with a size larger
+// than or equal to `INT_MAX`. To handle both of these the read size is capped
+// on both platforms.
 #[cfg(target_os = "macos")]
 const READ_LIMIT: usize = c::c_int::MAX as usize - 1;
 #[cfg(not(target_os = "macos"))]

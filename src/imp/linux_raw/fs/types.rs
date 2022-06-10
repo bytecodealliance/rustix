@@ -119,8 +119,8 @@ bitflags! {
 }
 
 impl Mode {
-    /// Construct a `Mode` from the mode bits of the `st_mode` field of
-    /// a `Stat`.
+    /// Construct a `Mode` from the mode bits of the `st_mode` field of a
+    /// `Stat`.
     #[inline]
     pub const fn from_raw_mode(st_mode: RawMode) -> Self {
         Self::from_bits_truncate(st_mode)
@@ -519,8 +519,8 @@ pub enum FlockOperation {
 /// [`statat`]: crate::fs::statat
 /// [`fstat`]: crate::fs::fstat
 // On 32-bit, and mips64, Linux's `struct stat64` has a 32-bit `st_mtime` and
-// friends, so we use our own struct, populated from `statx` where possible,
-// to avoid the y2038 bug.
+// friends, so we use our own struct, populated from `statx` where possible, to
+// avoid the y2038 bug.
 #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]

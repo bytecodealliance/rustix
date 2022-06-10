@@ -159,7 +159,7 @@ impl fmt::Debug for SocketAddrUnix {
 }
 
 /// `struct sockaddr_storage` as a raw struct.
-pub type SocketAddrStorage = linux_raw_sys::general::sockaddr;
+pub type SocketAddrStorage = c::sockaddr;
 
 /// Return the offset of the `sun_path` field of `sockaddr_un`.
 #[inline]
