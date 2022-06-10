@@ -1,8 +1,8 @@
 #[cfg(any(
-    target_os = "linux",
     target_os = "android",
+    target_os = "dragonfly",
     target_os = "fuchsia",
-    target_os = "dragonfly"
+    target_os = "linux",
 ))]
 pub(crate) mod cpu_set;
 #[cfg(not(windows))]

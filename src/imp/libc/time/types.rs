@@ -7,14 +7,14 @@ use bitflags::bitflags;
 /// `struct timespec`
 #[cfg(not(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 )))]
 pub type Timespec = c::timespec;
 
 /// `struct timespec`
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 #[derive(Debug, Clone)]
 #[repr(C)]
@@ -29,7 +29,7 @@ pub struct Timespec {
 /// A type for the `tv_sec` field of [`Timespec`].
 #[cfg(not(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 )))]
 #[allow(deprecated)]
 pub type Secs = c::time_t;
@@ -37,7 +37,7 @@ pub type Secs = c::time_t;
 /// A type for the `tv_sec` field of [`Timespec`].
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 pub type Secs = i64;
 
@@ -52,7 +52,7 @@ pub type Nsecs = c::c_long;
 /// On most platforms, `LibcTimespec` is just `Timespec`.
 #[cfg(not(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 )))]
 pub(crate) type LibcTimespec = Timespec;
 
@@ -61,7 +61,7 @@ pub(crate) type LibcTimespec = Timespec;
 /// struct with explicit padding, with bidirectional `From` impls.
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 #[repr(C)]
 #[derive(Debug, Clone)]
@@ -79,7 +79,7 @@ pub(crate) struct LibcTimespec {
 
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 impl From<LibcTimespec> for Timespec {
     #[inline]
@@ -93,7 +93,7 @@ impl From<LibcTimespec> for Timespec {
 
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 impl From<Timespec> for LibcTimespec {
     #[inline]
@@ -131,7 +131,7 @@ pub enum ClockId {
         target_os = "illumos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "redox"
+        target_os = "redox",
     )))]
     ProcessCPUTime = c::CLOCK_PROCESS_CPUTIME_ID,
 
@@ -140,7 +140,7 @@ pub enum ClockId {
         target_os = "illumos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "redox"
+        target_os = "redox",
     )))]
     ThreadCPUTime = c::CLOCK_THREAD_CPUTIME_ID,
 
@@ -219,7 +219,7 @@ pub enum DynamicClockId<'a> {
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 #[cfg(not(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 )))]
 pub type Itimerspec = c::itimerspec;
 
@@ -227,7 +227,7 @@ pub type Itimerspec = c::itimerspec;
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 #[allow(missing_docs)]
 #[repr(C)]
@@ -241,7 +241,7 @@ pub struct Itimerspec {
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 #[cfg(not(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 )))]
 pub(crate) type LibcItimerspec = Itimerspec;
 
@@ -250,7 +250,7 @@ pub(crate) type LibcItimerspec = Itimerspec;
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 #[repr(C)]
 #[derive(Debug, Clone)]
@@ -262,7 +262,7 @@ pub(crate) struct LibcItimerspec {
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 impl From<LibcItimerspec> for Itimerspec {
     #[inline]
@@ -277,7 +277,7 @@ impl From<LibcItimerspec> for Itimerspec {
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 impl From<Itimerspec> for LibcItimerspec {
     #[inline]

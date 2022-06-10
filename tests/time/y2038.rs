@@ -11,10 +11,10 @@
 /// such support itself.
 ///
 /// [not y2038 compatible]: https://android.googlesource.com/platform/bionic/+/refs/heads/master/docs/32-bit-abi.md#is-32_bit-on-lp32-y2038
-#[test]
 #[cfg(not(all(target_env = "musl", target_pointer_width = "32")))]
 #[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
 #[cfg(not(all(target_os = "emscripten", target_pointer_width = "32")))]
+#[test]
 fn test_y2038() {
     use rustix::time::{Secs, Timespec};
 

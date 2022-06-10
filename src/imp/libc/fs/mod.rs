@@ -10,7 +10,7 @@ pub(crate) mod dir;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 pub(crate) mod makedev;
 #[cfg(not(windows))]

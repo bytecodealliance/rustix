@@ -11,7 +11,7 @@ use crate::fs::{fcntl_getfl, fstat, openat, Mode, OFlags, Stat};
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))] // not implemented in libc for netbsd yet
 use crate::fs::{fstatfs, StatFs};
 use crate::io;
@@ -38,7 +38,7 @@ use c::readdir as libc_readdir;
     target_os = "android",
     target_os = "emscripten",
     target_os = "l4re",
-    target_os = "linux"
+    target_os = "linux",
 ))]
 use c::{dirent64 as libc_dirent, readdir64 as libc_readdir};
 use core::fmt;
@@ -132,7 +132,7 @@ impl Dir {
         target_os = "illumos",
         target_os = "netbsd",
         target_os = "redox",
-        target_os = "wasi"
+        target_os = "wasi",
     )))] // not implemented in libc for netbsd yet
     #[inline]
     pub fn statfs(&self) -> io::Result<StatFs> {
@@ -168,7 +168,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     )))]
     let d_ino = input.d_ino;
 
@@ -183,7 +183,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "ios",
-        target_os = "macos"
+        target_os = "macos",
     ))]
     let d_namlen = input.d_namlen;
 
@@ -210,7 +210,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
             target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         )))]
         d_ino,
         #[cfg(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))]
@@ -307,8 +307,8 @@ impl DirEntry {
     }
 
     /// Returns the type of this directory entry.
-    #[inline]
     #[cfg(not(target_os = "illumos"))]
+    #[inline]
     pub fn file_type(&self) -> FileType {
         FileType::from_dirent_d_type(self.dirent.d_type)
     }
@@ -318,7 +318,7 @@ impl DirEntry {
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     )))]
     #[inline]
     pub fn ino(&self) -> u64 {
@@ -330,7 +330,7 @@ impl DirEntry {
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     ))]
     #[inline]
     pub fn ino(&self) -> u64 {

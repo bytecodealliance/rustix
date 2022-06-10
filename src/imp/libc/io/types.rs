@@ -34,7 +34,12 @@ bitflags! {
     /// [`dup2`]: crate::io::dup2
     pub struct DupFlags: c::c_int {
         /// `O_CLOEXEC`
-        #[cfg(not(any(target_os = "android", target_os = "ios", target_os = "macos", target_os = "redox")))] // Android 5.0 has dup3, but libc doesn't have bindings
+        #[cfg(not(any(
+            target_os = "android",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "redox",
+        )))] // Android 5.0 has dup3, but libc doesn't have bindings
         const CLOEXEC = c::O_CLOEXEC;
     }
 }

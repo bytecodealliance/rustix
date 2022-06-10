@@ -29,7 +29,7 @@ pub(crate) unsafe fn encode_sockaddr_v4(v4: &SocketAddrV4) -> c::sockaddr_in {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         ))]
         sin_len: size_of::<c::sockaddr_in>() as _,
         sin_family: c::AF_INET as _,
@@ -52,7 +52,7 @@ pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> c::sockaddr_in6 {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     ))]
     {
         sockaddr_in6_new(
@@ -70,7 +70,7 @@ pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> c::sockaddr_in6 {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     )))]
     {
         sockaddr_in6_new(

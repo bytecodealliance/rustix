@@ -47,7 +47,7 @@ fn test_file() {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "redox"
+        target_os = "redox",
     )))]
     rustix::fs::fadvise(&file, 0, 10, rustix::fs::Advice::Normal).unwrap();
 
@@ -68,7 +68,7 @@ fn test_file() {
         target_os = "illumos",
         target_os = "netbsd",
         target_os = "redox",
-        target_os = "wasi"
+        target_os = "wasi",
     )))]
     // not implemented in libc for netbsd yet
     {

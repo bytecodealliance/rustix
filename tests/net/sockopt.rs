@@ -39,7 +39,7 @@ fn test_sockopts() {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     )))]
     assert_eq!(
         rustix::net::sockopt::get_ip_multicast_loop(&s).unwrap(),
@@ -52,7 +52,7 @@ fn test_sockopts() {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     )))]
     assert_eq!(rustix::net::sockopt::get_ip_multicast_ttl(&s).unwrap(), 1);
     assert_eq!(rustix::net::sockopt::get_tcp_nodelay(&s).unwrap(), false);
@@ -96,7 +96,7 @@ fn test_sockopts() {
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         )))]
         assert_eq!(
             rustix::net::sockopt::get_socket_broadcast(&s).unwrap(),
@@ -137,7 +137,7 @@ fn test_sockopts() {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     )))]
     {
         // Set the multicast loop flag;

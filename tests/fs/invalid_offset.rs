@@ -1,3 +1,5 @@
+//! Tests for extreme `u64` file offsets.
+//!
 //! POSIX-ish interfaces tend to use signed integers for file offsets, while
 //! Rust APIs tend to use `u64`. Test that extreme `u64` values in APIs that
 //! take file offsets are properly diagnosed.
@@ -35,7 +37,7 @@ fn invalid_offset_seek() {
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 #[test]
 fn invalid_offset_fallocate() {
@@ -63,7 +65,7 @@ fn invalid_offset_fallocate() {
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 #[test]
 fn invalid_offset_fadvise() {

@@ -24,7 +24,7 @@ mod long_paths;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 mod makedev;
 mod mkdirat;
@@ -39,7 +39,7 @@ mod renameat;
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 // not implemented in libc for netbsd yet
 mod statfs;

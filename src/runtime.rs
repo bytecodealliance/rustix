@@ -234,8 +234,8 @@ pub unsafe fn fork() -> io::Result<Option<Pid>> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/execveat.2.html
-#[inline]
 #[cfg(linux_raw)]
+#[inline]
 pub unsafe fn execveat<Fd: AsFd>(
     dirfd: Fd,
     path: &CStr,
@@ -258,8 +258,8 @@ pub unsafe fn execveat<Fd: AsFd>(
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/execve.2.html
-#[inline]
 #[cfg(linux_raw)]
+#[inline]
 pub unsafe fn execve(path: &CStr, argv: *const *const u8, envp: *const *const u8) -> io::Errno {
     imp::runtime::syscalls::execve(path, argv, envp)
 }

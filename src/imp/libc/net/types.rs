@@ -425,7 +425,14 @@ impl Protocol {
     #[cfg(not(any(windows, target_os = "illumos")))]
     pub const TP: Self = Self(c::IPPROTO_TP as _);
     /// `IPPROTO_DCCP`
-    #[cfg(not(any(windows, target_os = "dragonfly", target_os = "illumos", target_os = "ios", target_os = "macos", target_os = "openbsd")))]
+    #[cfg(not(any(
+        windows,
+        target_os = "dragonfly",
+        target_os = "illumos",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "openbsd",
+    )))]
     pub const DCCP: Self = Self(c::IPPROTO_DCCP as _);
     /// `IPPROTO_IPV6`
     pub const IPV6: Self = Self(c::IPPROTO_IPV6 as _);
@@ -442,7 +449,12 @@ impl Protocol {
     #[cfg(not(target_os = "illumos"))]
     pub const AH: Self = Self(c::IPPROTO_AH as _);
     /// `IPPROTO_MTP`
-    #[cfg(not(any(windows, target_os = "illumos", target_os = "netbsd", target_os = "openbsd")))]
+    #[cfg(not(any(
+        windows,
+        target_os = "illumos",
+        target_os = "netbsd",
+        target_os = "openbsd",
+    )))]
     pub const MTP: Self = Self(c::IPPROTO_MTP as _);
     /// `IPPROTO_BEETPH`
     #[cfg(not(any(
@@ -485,11 +497,18 @@ impl Protocol {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     )))]
     pub const UDPLITE: Self = Self(c::IPPROTO_UDPLITE as _);
     /// `IPPROTO_MPLS`
-    #[cfg(not(any(windows, target_os = "dragonfly", target_os = "illumos", target_os = "ios", target_os = "macos", target_os = "netbsd")))]
+    #[cfg(not(any(
+        windows,
+        target_os = "dragonfly",
+        target_os = "illumos",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
+    )))]
     pub const MPLS: Self = Self(c::IPPROTO_MPLS as _);
     /// `IPPROTO_RAW`
     pub const RAW: Self = Self(c::IPPROTO_RAW as _);

@@ -255,7 +255,7 @@ pub(crate) fn accept(sockfd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     target_os = "ios",
     target_os = "macos",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<OwnedFd> {
     unsafe {
@@ -291,7 +291,7 @@ pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<
     target_os = "ios",
     target_os = "macos",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 pub(crate) fn acceptfrom_with(
     sockfd: BorrowedFd<'_>,

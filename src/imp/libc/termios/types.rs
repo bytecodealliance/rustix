@@ -99,7 +99,7 @@ pub const VMIN: usize = c::VMIN as usize;
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
-    target_os = "openbsd"
+    target_os = "openbsd",
 )))]
 pub const VSWTC: usize = c::VSWTC as usize;
 
@@ -196,7 +196,7 @@ pub const IMAXBEL: c::c_uint = c::IMAXBEL;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 pub const IUTF8: c::c_uint = c::IUTF8;
 
@@ -211,7 +211,7 @@ pub const OPOST: c::c_uint = c::OPOST;
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 pub const OLCUC: c::c_uint = c::OLCUC;
 

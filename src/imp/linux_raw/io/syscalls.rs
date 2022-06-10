@@ -435,7 +435,7 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
         target_arch = "aarch64",
         target_arch = "mips",
         target_arch = "mips64",
-        target_arch = "riscv64"
+        target_arch = "riscv64",
     ))]
     {
         pipe_with(PipeFlags::empty())
@@ -444,7 +444,7 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
         target_arch = "aarch64",
         target_arch = "mips",
         target_arch = "mips64",
-        target_arch = "riscv64"
+        target_arch = "riscv64",
     )))]
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();

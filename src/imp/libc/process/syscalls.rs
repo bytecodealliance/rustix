@@ -7,10 +7,10 @@ use super::super::conv::{c_str, ret, ret_c_int, ret_discarded_char_ptr};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::{syscall_ret, syscall_ret_u32};
 #[cfg(any(
-    target_os = "linux",
     target_os = "android",
+    target_os = "dragonfly",
     target_os = "fuchsia",
-    target_os = "dragonfly"
+    target_os = "linux",
 ))]
 use super::types::RawCpuSet;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
@@ -146,10 +146,10 @@ pub(crate) fn getppid() -> Option<Pid> {
 }
 
 #[cfg(any(
-    target_os = "linux",
     target_os = "android",
+    target_os = "dragonfly",
     target_os = "fuchsia",
-    target_os = "dragonfly"
+    target_os = "linux",
 ))]
 #[inline]
 pub(crate) fn sched_getaffinity(pid: Option<Pid>, cpuset: &mut RawCpuSet) -> io::Result<()> {
@@ -163,10 +163,10 @@ pub(crate) fn sched_getaffinity(pid: Option<Pid>, cpuset: &mut RawCpuSet) -> io:
 }
 
 #[cfg(any(
-    target_os = "linux",
     target_os = "android",
+    target_os = "dragonfly",
     target_os = "fuchsia",
-    target_os = "dragonfly"
+    target_os = "linux",
 ))]
 #[inline]
 pub(crate) fn sched_setaffinity(pid: Option<Pid>, cpuset: &RawCpuSet) -> io::Result<()> {

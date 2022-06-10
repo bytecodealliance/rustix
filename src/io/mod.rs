@@ -52,7 +52,7 @@ pub use pipe::pipe;
     windows,
     target_os = "illumos",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 pub use pipe::PIPE_BUF;
 #[cfg(not(any(windows, target_os = "ios", target_os = "macos", target_os = "wasi")))]

@@ -1,14 +1,14 @@
 use super::super::c;
 #[cfg(any(
     all(target_os = "android", target_pointer_width = "64"),
-    target_os = "linux"
+    target_os = "linux",
 ))]
 use crate::ffi::CStr;
 
 // `getauxval` wasn't supported in glibc until 2.16.
 #[cfg(any(
     all(target_os = "android", target_pointer_width = "64"),
-    target_os = "linux"
+    target_os = "linux",
 ))]
 weak!(fn getauxval(c::c_ulong) -> *mut c::c_void);
 
@@ -25,7 +25,7 @@ pub(crate) fn clock_ticks_per_second() -> u64 {
 
 #[cfg(any(
     all(target_os = "android", target_pointer_width = "64"),
-    target_os = "linux"
+    target_os = "linux",
 ))]
 #[inline]
 pub(crate) fn linux_hwcap() -> (usize, usize) {
@@ -42,7 +42,7 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
 
 #[cfg(any(
     all(target_os = "android", target_pointer_width = "64"),
-    target_os = "linux"
+    target_os = "linux",
 ))]
 #[inline]
 pub(crate) fn linux_execfn() -> &'static CStr {

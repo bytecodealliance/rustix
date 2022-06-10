@@ -14,7 +14,7 @@ fn main() -> io::Result<()> {
     println!("Gid: {}", getgid().as_raw());
     #[cfg(any(
         all(target_os = "android", target_pointer_width = "64"),
-        target_os = "linux"
+        target_os = "linux",
     ))]
     {
         let (a, b) = linux_hwcap();
@@ -82,9 +82,9 @@ fn main() -> io::Result<()> {
     )))]
     println!("Rtprio Limit: {:?}", getrlimit(Resource::Rtprio));
     #[cfg(not(any(
+        target_os = "android",
         target_os = "emscripten",
         target_os = "freebsd",
-        target_os = "android",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",

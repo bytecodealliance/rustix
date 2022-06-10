@@ -563,21 +563,21 @@ pub const fn io_uring_register_files_skip() -> BorrowedFd<'static> {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct io_uring_ptr {
-    #[doc(hidden)]
     #[cfg(all(target_pointer_width = "32", target_endian = "big"))]
-    pub __pad32: u32,
     #[doc(hidden)]
+    pub __pad32: u32,
     #[cfg(all(target_pointer_width = "16", target_endian = "big"))]
+    #[doc(hidden)]
     pub __pad16: u16,
 
     /// The pointer value.
     pub ptr: *mut c_void,
 
-    #[doc(hidden)]
     #[cfg(all(target_pointer_width = "16", target_endian = "little"))]
-    pub __pad16: u16,
     #[doc(hidden)]
+    pub __pad16: u16,
     #[cfg(all(target_pointer_width = "32", target_endian = "little"))]
+    #[doc(hidden)]
     pub __pad32: u32,
 }
 

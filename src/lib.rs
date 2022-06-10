@@ -203,8 +203,8 @@ pub mod time;
 
 // "runtime" is also a public API module, but it's only for libc-like users.
 #[cfg(not(windows))]
-#[doc(hidden)]
 #[cfg(feature = "runtime")]
+#[doc(hidden)]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "runtime")))]
 pub mod runtime;
 

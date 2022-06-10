@@ -32,11 +32,11 @@ pub(crate) mod fd {
 pub(crate) mod fd {
     pub use io_lifetimes::*;
 
-    #[allow(unused_imports)]
     #[cfg(target_os = "wasi")]
-    pub(crate) use super::c::c_int as LibcFd;
     #[allow(unused_imports)]
+    pub(crate) use super::c::c_int as LibcFd;
     #[cfg(unix)]
+    #[allow(unused_imports)]
     pub(crate) use std::os::unix::io::RawFd as LibcFd;
     #[cfg(unix)]
     pub use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
@@ -71,7 +71,7 @@ pub(crate) mod net;
     feature = "param",
     feature = "runtime",
     feature = "time",
-    target_arch = "x86"
+    target_arch = "x86",
 ))]
 pub(crate) mod param;
 #[cfg(not(windows))]

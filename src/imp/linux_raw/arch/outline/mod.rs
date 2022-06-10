@@ -15,7 +15,7 @@ mod x86;
     target_arch = "mips64",
     target_arch = "powerpc64",
     target_arch = "riscv64",
-    target_arch = "x86_64"
+    target_arch = "x86_64",
 ))]
 mod nr_last;
 
@@ -26,7 +26,7 @@ mod nr_last;
     target_arch = "mips64",
     target_arch = "powerpc64",
     target_arch = "riscv64",
-    target_arch = "x86_64"
+    target_arch = "x86_64",
 ))]
 pub(in crate::imp) use nr_last::*;
 #[cfg(target_arch = "x86")]

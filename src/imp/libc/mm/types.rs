@@ -78,7 +78,7 @@ bitflags! {
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
-            target_os = "redox"
+            target_os = "redox",
         )))]
         const DENYWRITE = c::MAP_DENYWRITE;
         /// `MAP_FIXED`
@@ -107,7 +107,7 @@ bitflags! {
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
-            target_os = "redox"
+            target_os = "redox",
         )))]
         const GROWSDOWN = c::MAP_GROWSDOWN;
         /// `MAP_HUGETLB`

@@ -18,7 +18,7 @@ use super::super::conv::{loff_t, loff_t_from_u64, ret_u64};
     target_arch = "aarch64",
     target_arch = "riscv64",
     target_arch = "mips64",
-    target_pointer_width = "32"
+    target_pointer_width = "32",
 ))]
 use crate::fd::AsFd;
 use crate::fd::{BorrowedFd, RawFd};

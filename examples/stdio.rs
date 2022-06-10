@@ -123,7 +123,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 target_os = "macos",
                 target_os = "netbsd",
                 target_os = "openbsd",
-                target_os = "redox"
+                target_os = "redox",
             )))]
             if (term.c_iflag & IUTF8) != 0 {
                 print!(" IUTF8");
@@ -141,7 +141,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 target_os = "ios",
                 target_os = "macos",
                 target_os = "netbsd",
-                target_os = "redox"
+                target_os = "redox",
             )))]
             if (term.c_oflag & OLCUC) != 0 {
                 print!(" OLCUC");

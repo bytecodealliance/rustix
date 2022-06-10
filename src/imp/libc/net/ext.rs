@@ -151,7 +151,7 @@ pub(crate) const fn sockaddr_in6_new(
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
-        target_os = "openbsd"
+        target_os = "openbsd",
     ))]
     sin6_len: u8,
     sin6_family: c::sa_family_t,
@@ -167,7 +167,7 @@ pub(crate) const fn sockaddr_in6_new(
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
-            target_os = "openbsd"
+            target_os = "openbsd",
         ))]
         sin6_len,
         sin6_family,

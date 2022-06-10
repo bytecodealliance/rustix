@@ -2,10 +2,10 @@
 /// `utimensat` and read it back again.
 ///
 /// See tests/time/y2038.rs for more information about y2038 testing.
-#[test]
 #[cfg(not(all(target_env = "musl", target_pointer_width = "32")))]
 #[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
 #[cfg(not(all(target_os = "emscripten", target_pointer_width = "32")))]
+#[test]
 fn test_y2038_with_utimensat() {
     use rustix::fs::{
         cwd, fstat, openat, statat, utimensat, AtFlags, Mode, OFlags, Timespec, Timestamps,
@@ -77,10 +77,10 @@ fn test_y2038_with_utimensat() {
 /// `futimens` and read it back again.
 ///
 /// See tests/time/y2038.rs for more information about y2038 testing.
-#[test]
 #[cfg(not(all(target_env = "musl", target_pointer_width = "32")))]
 #[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
 #[cfg(not(all(target_os = "emscripten", target_pointer_width = "32")))]
+#[test]
 fn test_y2038_with_futimens() {
     use rustix::fs::{
         cwd, fstat, futimens, openat, statat, AtFlags, Mode, OFlags, Timespec, Timestamps,

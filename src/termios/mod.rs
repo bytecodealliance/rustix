@@ -7,7 +7,6 @@ mod tc;
 mod tty;
 
 pub use cf::{cfgetispeed, cfgetospeed, cfmakeraw, cfsetispeed, cfsetospeed, cfsetspeed};
-pub use constants::speed_value;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
@@ -381,7 +380,7 @@ pub use constants::IUCLC;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 pub use constants::IUTF8;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
@@ -453,7 +452,7 @@ pub use constants::OFILL;
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 pub use constants::OLCUC;
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
@@ -540,7 +539,7 @@ pub use constants::TOSTOP;
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
-    target_os = "openbsd"
+    target_os = "openbsd",
 )))]
 pub use constants::VSWTC;
 #[cfg(not(any(
@@ -595,9 +594,9 @@ pub use constants::XCASE;
 )))]
 pub use constants::XTABS;
 pub use constants::{
-    B0, B110, B115200, B1200, B134, B150, B1800, B19200, B200, B230400, B2400, B300, B38400, B4800,
-    B50, B57600, B600, B75, B9600, ICANON, VDISCARD, VEOF, VEOL, VEOL2, VERASE, VINTR, VKILL,
-    VLNEXT, VMIN, VQUIT, VREPRINT, VSTART, VSTOP, VSUSP, VTIME, VWERASE,
+    speed_value, B0, B110, B115200, B1200, B134, B150, B1800, B19200, B200, B230400, B2400, B300,
+    B38400, B4800, B50, B57600, B600, B75, B9600, ICANON, VDISCARD, VEOF, VEOL, VEOL2, VERASE,
+    VINTR, VKILL, VLNEXT, VMIN, VQUIT, VREPRINT, VSTART, VSTOP, VSUSP, VTIME, VWERASE,
 };
 pub use tc::{
     tcdrain, tcflow, tcflush, tcgetattr, tcgetpgrp, tcgetsid, tcgetwinsize, tcsendbreak, tcsetattr,

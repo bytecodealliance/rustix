@@ -325,7 +325,7 @@ unsafe fn getrlimit_old(limit: Resource) -> Rlimit {
         target_arch = "arm",
         target_arch = "powerpc",
         target_arch = "powerpc64",
-        target_arch = "x86"
+        target_arch = "x86",
     ))]
     {
         ret_infallible(syscall!(__NR_ugetrlimit, limit, &mut result));
@@ -336,7 +336,7 @@ unsafe fn getrlimit_old(limit: Resource) -> Rlimit {
         target_arch = "arm",
         target_arch = "powerpc",
         target_arch = "powerpc64",
-        target_arch = "x86"
+        target_arch = "x86",
     )))]
     {
         ret_infallible(syscall!(__NR_getrlimit, limit, &mut result));

@@ -36,12 +36,12 @@ use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek,
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 use super::super::offset::{libc_fstatfs, libc_statfs};
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 use super::super::time::types::LibcTimespec;
 use crate::fd::BorrowedFd;
@@ -67,7 +67,7 @@ use crate::fs::Advice;
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 use crate::fs::FallocateFlags;
 #[cfg(not(target_os = "wasi"))]
@@ -85,7 +85,7 @@ use crate::fs::SealFlags;
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 // not implemented in libc for netbsd yet
 use crate::fs::StatFs;
@@ -104,7 +104,7 @@ use crate::io::{self, OwnedFd, SeekFrom};
 use crate::process::{Gid, Uid};
 #[cfg(not(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 )))]
 use crate::utils::as_ptr;
 use core::convert::TryInto;
@@ -112,7 +112,7 @@ use core::convert::TryInto;
     target_os = "android",
     target_os = "ios",
     target_os = "linux",
-    target_os = "macos"
+    target_os = "macos",
 ))]
 use core::mem::size_of;
 use core::mem::MaybeUninit;
@@ -122,7 +122,7 @@ use core::ptr::null;
     target_os = "android",
     target_os = "ios",
     target_os = "linux",
-    target_os = "macos"
+    target_os = "macos",
 ))]
 use core::ptr::null_mut;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
@@ -135,12 +135,12 @@ use {super::super::offset::libc_openat, crate::fs::AtFlags};
 
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 weak!(fn __utimensat64(c::c_int, *const c::c_char, *const LibcTimespec, c::c_int) -> c::c_int);
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 weak!(fn __futimens64(c::c_int, *const LibcTimespec) -> c::c_int);
 
@@ -176,7 +176,7 @@ pub(crate) fn openat(
     oflags: OFlags,
     mode: Mode,
 ) -> io::Result<OwnedFd> {
-    // Work around https://sourceware.org/bugzilla/show_bug.cgi?id=17523
+    // Work around <https://sourceware.org/bugzilla/show_bug.cgi?id=17523>.
     // Basically old glibc versions don't handle O_TMPFILE correctly.
     #[cfg(all(unix, target_env = "gnu"))]
     if oflags.contains(OFlags::TMPFILE) && crate::imp::if_glibc_is_less_than_2_25() {
@@ -199,7 +199,7 @@ pub(crate) fn openat(
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 #[inline]
 pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
@@ -428,7 +428,7 @@ pub(crate) fn utimensat(
     // default.
     #[cfg(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu"
+        target_env = "gnu",
     ))]
     unsafe {
         if let Some(libc_utimensat) = __utimensat64.get() {
@@ -455,7 +455,7 @@ pub(crate) fn utimensat(
         target_os = "macos",
         all(
             any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-            target_env = "gnu"
+            target_env = "gnu",
         )
     )))]
     unsafe {
@@ -587,7 +587,7 @@ pub(crate) fn utimensat(
 
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 unsafe fn utimensat_old(
     dirfd: BorrowedFd<'_>,
@@ -762,7 +762,7 @@ pub(crate) fn copy_file_range(
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
     let offset = offset as i64;
@@ -946,7 +946,7 @@ fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))] // not implemented in libc for netbsd yet
 pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
     let mut statfs = MaybeUninit::<StatFs>::uninit();
@@ -960,7 +960,7 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
     // 32-bit gnu version: libc has `futimens` but it is not y2038 safe by default.
     #[cfg(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu"
+        target_env = "gnu",
     ))]
     unsafe {
         if let Some(libc_futimens) = __futimens64.get() {
@@ -982,7 +982,7 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
         target_os = "macos",
         all(
             any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-            target_env = "gnu"
+            target_env = "gnu",
         )
     )))]
     unsafe {
@@ -1032,7 +1032,7 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
 
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 unsafe fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()> {
     let old_times = [
@@ -1064,7 +1064,7 @@ unsafe fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 pub(crate) fn fallocate(
     fd: BorrowedFd<'_>,
@@ -1132,7 +1132,7 @@ pub(crate) fn fsync(fd: BorrowedFd<'_>) -> io::Result<()> {
     target_os = "dragonfly",
     target_os = "ios",
     target_os = "macos",
-    target_os = "redox"
+    target_os = "redox",
 )))]
 pub(crate) fn fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::fdatasync(borrowed_fd(fd))) }
@@ -1232,7 +1232,7 @@ pub(crate) fn sendfile(
 /// Convert from a Linux `statx` value to rustix's `Stat`.
 #[cfg(all(
     any(target_os = "android", target_os = "linux"),
-    target_pointer_width = "32"
+    target_pointer_width = "32",
 ))]
 fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
     Ok(Stat {
@@ -1272,7 +1272,7 @@ fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
 /// mips64' `struct stat64` in libc has private fields, and `stx_blocks`
 #[cfg(all(
     any(target_os = "android", target_os = "linux"),
-    target_arch = "mips64"
+    target_arch = "mips64",
 ))]
 fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
     let mut result: Stat = unsafe { core::mem::zeroed() };
@@ -1312,7 +1312,7 @@ fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
 /// Convert from a Linux `stat64` value to rustix's `Stat`.
 #[cfg(all(
     any(target_os = "android", target_os = "linux"),
-    target_pointer_width = "32"
+    target_pointer_width = "32",
 ))]
 fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
     Ok(Stat {
@@ -1350,7 +1350,7 @@ fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
 /// type `i64`.
 #[cfg(all(
     any(target_os = "android", target_os = "linux"),
-    target_arch = "mips64"
+    target_arch = "mips64",
 ))]
 fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
     let mut result: Stat = unsafe { core::mem::zeroed() };

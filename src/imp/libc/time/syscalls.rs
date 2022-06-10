@@ -22,23 +22,23 @@ use {
 
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 weak!(fn __clock_gettime64(c::clockid_t, *mut LibcTimespec) -> c::c_int);
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 weak!(fn __clock_getres64(c::clockid_t, *mut LibcTimespec) -> c::c_int);
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 #[cfg(feature = "time")]
 weak!(fn __timerfd_gettime64(c::c_int, *mut LibcItimerspec) -> c::c_int);
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 #[cfg(feature = "time")]
 weak!(fn __timerfd_settime64(c::c_int, c::c_int, *const LibcItimerspec, *mut LibcItimerspec) -> c::c_int);
@@ -53,7 +53,7 @@ pub(crate) fn clock_getres(id: ClockId) -> Timespec {
     // default.
     #[cfg(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu"
+        target_env = "gnu",
     ))]
     unsafe {
         if let Some(libc_clock_getres) = __clock_getres64.get() {
@@ -67,7 +67,7 @@ pub(crate) fn clock_getres(id: ClockId) -> Timespec {
     // Main version: libc is y2038 safe and has `clock_getres`.
     #[cfg(not(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu"
+        target_env = "gnu",
     )))]
     unsafe {
         let _ = c::clock_getres(id as c::clockid_t, timespec.as_mut_ptr());
@@ -77,7 +77,7 @@ pub(crate) fn clock_getres(id: ClockId) -> Timespec {
 
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 #[must_use]
 unsafe fn clock_getres_old(id: ClockId) -> Timespec {
@@ -102,7 +102,7 @@ pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
 
     #[cfg(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu"
+        target_env = "gnu",
     ))]
     unsafe {
         if let Some(libc_clock_gettime) = __clock_gettime64.get() {
@@ -123,7 +123,7 @@ pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
     // configured.
     #[cfg(not(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu"
+        target_env = "gnu",
     )))]
     unsafe {
         ret(c::clock_gettime(id as c::clockid_t, timespec.as_mut_ptr())).unwrap();
@@ -133,7 +133,7 @@ pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
 
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 #[must_use]
 unsafe fn clock_gettime_old(id: ClockId) -> Timespec {
@@ -186,7 +186,7 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
 
         #[cfg(all(
             any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-            target_env = "gnu"
+            target_env = "gnu",
         ))]
         {
             if let Some(libc_clock_gettime) = __clock_gettime64.get() {
@@ -203,7 +203,7 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
 
         #[cfg(not(all(
             any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-            target_env = "gnu"
+            target_env = "gnu",
         )))]
         {
             ret(c::clock_gettime(id as c::clockid_t, timespec.as_mut_ptr()))?;
@@ -215,7 +215,7 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
 
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 #[inline]
 unsafe fn clock_gettime_dynamic_old(id: c::clockid_t) -> io::Result<Timespec> {
@@ -250,7 +250,7 @@ pub(crate) fn timerfd_settime(
 
     #[cfg(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu"
+        target_env = "gnu",
     ))]
     unsafe {
         if let Some(libc_timerfd_settime) = __timerfd_settime64.get() {
@@ -268,7 +268,7 @@ pub(crate) fn timerfd_settime(
 
     #[cfg(not(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu"
+        target_env = "gnu",
     )))]
     unsafe {
         ret(c::timerfd_settime(
@@ -284,7 +284,7 @@ pub(crate) fn timerfd_settime(
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 #[cfg(feature = "time")]
 unsafe fn timerfd_settime_old(
@@ -349,7 +349,7 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
 
     #[cfg(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu"
+        target_env = "gnu",
     ))]
     unsafe {
         if let Some(libc_timerfd_gettime) = __timerfd_gettime64.get() {
@@ -362,7 +362,7 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
 
     #[cfg(not(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu"
+        target_env = "gnu",
     )))]
     unsafe {
         ret(c::timerfd_gettime(borrowed_fd(fd), result.as_mut_ptr())).map(|()| result.assume_init())
@@ -372,7 +372,7 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu"
+    target_env = "gnu",
 ))]
 #[cfg(feature = "time")]
 unsafe fn timerfd_gettime_old(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {

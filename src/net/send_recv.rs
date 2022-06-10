@@ -1,4 +1,4 @@
-//! `recv` and `send`, and variants
+//! `recv` and `send`, and variants.
 
 #[cfg(unix)]
 use crate::net::SocketAddrUnix;
@@ -175,9 +175,9 @@ pub fn sendto_v6<Fd: AsFd>(
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendto.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
+#[cfg(unix)]
 #[inline]
 #[doc(alias = "sendto")]
-#[cfg(unix)]
 pub fn sendto_unix<Fd: AsFd>(
     fd: Fd,
     buf: &[u8],
