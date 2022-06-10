@@ -19,8 +19,7 @@ fn test_owned() {
     let raw = file.as_raw_fd();
     assert_eq!(raw, file.as_fd().as_raw_fd());
 
-    let owned: rustix::io::OwnedFd = file.into();
-    let inner = owned.into_raw_fd();
+    let inner = file.into_raw_fd();
     assert_eq!(raw, inner);
 
     let new = unsafe { rustix::io::OwnedFd::from_raw_fd(inner) };
