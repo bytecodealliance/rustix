@@ -5,7 +5,9 @@ use super::super::elf::*;
 use super::super::param::auxv::exe_phdrs_slice;
 use core::ptr::null;
 
-/// For use with `set_thread_area`.
+/// For use with [`set_thread_area`].
+///
+/// [`set_thread_area`]: crate::runtime::set_thread_area
 #[cfg(target_arch = "x86")]
 pub type UserDesc = linux_raw_sys::general::user_desc;
 

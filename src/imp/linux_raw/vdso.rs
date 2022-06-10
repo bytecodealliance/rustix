@@ -194,8 +194,8 @@ unsafe fn init_from_sysinfo_ehdr(base: *const Elf_Ehdr) -> Option<Vdso> {
 /// Check that `base` is a valid pointer to the kernel-provided vDSO.
 ///
 /// `base` is some value we got from a `AT_SYSINFO_EHDR` aux record somewhere,
-/// which hopefully holds the value of the kernel-provided vDSO in memory. Do
-/// a series of checks to be as sure as we can that it's safe to use.
+/// which hopefully holds the value of the kernel-provided vDSO in memory. Do a
+/// series of checks to be as sure as we can that it's safe to use.
 unsafe fn check_vdso_base<'vdso>(base: *const Elf_Ehdr) -> Option<&'vdso Elf_Ehdr> {
     // In theory, we could check that we're not attempting to parse our own ELF
     // image, as an additional check. However, older Linux toolchains don't

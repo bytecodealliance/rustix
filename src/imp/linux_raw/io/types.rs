@@ -45,7 +45,7 @@ bitflags! {
 }
 
 bitflags! {
-    /// The `EFD_*` flags accepted by [`eventfd`].
+    /// `EFD_*` flags for use with [`eventfd`].
     ///
     /// [`eventfd`]: crate::io::eventfd
     pub struct EventfdFlags: c::c_uint {

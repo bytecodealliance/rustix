@@ -61,7 +61,7 @@
 //!  - Variadic functions (eg. `openat`, etc.) are presented as non-variadic.
 //!  - Functions and types which need `l` prefixes or `64` suffixes to enable
 //!    large-file support are used automatically, and file sizes and offsets
-//!    are presented as `i64` and `u64`.
+//!    are presented as `u64` and `i64`.
 //!  - Behaviors that depend on the sizes of C types like `long` are hidden.
 //!  - In some places, more human-friendly and less historical-accident names
 //!    are used (and documentation aliases are used so that the original names
@@ -134,7 +134,7 @@ pub(crate) mod utils;
 #[cfg_attr(wasi, path = "imp/wasi/mod.rs")]
 mod imp;
 
-/// Export `*Fd` types and traits that used in rustix's public API.
+/// Export the `*Fd` types and traits that are used in rustix's public API.
 ///
 /// Users can use this to avoid needing to import anything else to use the same
 /// versions of these types and traits.

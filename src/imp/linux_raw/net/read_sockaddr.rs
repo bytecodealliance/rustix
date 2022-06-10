@@ -7,7 +7,6 @@ use crate::io;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use alloc::vec::Vec;
 use core::mem::size_of;
-use linux_raw_sys::general::{__kernel_sockaddr_storage, sockaddr};
 
 // This must match the header of `sockaddr`.
 #[repr(C)]
@@ -21,10 +20,10 @@ struct sockaddr_header {
 ///
 /// `storage` must point to a valid socket address returned from the OS.
 #[inline]
-unsafe fn read_ss_family(storage: *const sockaddr) -> u16 {
+unsafe fn read_ss_family(storage: *const c::sockaddr) -> u16 {
     // Assert that we know the layout of `sockaddr`.
-    let _ = sockaddr {
-        __storage: __kernel_sockaddr_storage {
+    let _ = c::sockaddr {
+        __storage: c::sockaddr_storage {
             __bindgen_anon_1: linux_raw_sys::general::__kernel_sockaddr_storage__bindgen_ty_1 {
                 __bindgen_anon_1:
                     linux_raw_sys::general::__kernel_sockaddr_storage__bindgen_ty_1__bindgen_ty_1 {
@@ -41,7 +40,7 @@ unsafe fn read_ss_family(storage: *const sockaddr) -> u16 {
 /// Set the `ss_family` field of a socket address to `AF_UNSPEC`, so that we
 /// can test for `AF_UNSPEC` to test whether it was stored to.
 #[inline]
-pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut sockaddr) {
+pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut c::sockaddr) {
     (*storage.cast::<sockaddr_header>()).ss_family = c::AF_UNSPEC as _;
 }
 
@@ -51,7 +50,7 @@ pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut sockaddr) {
 ///
 /// `storage` must point to valid socket address storage.
 pub(crate) unsafe fn read_sockaddr(
-    storage: *const sockaddr,
+    storage: *const c::sockaddr,
     len: usize,
 ) -> io::Result<SocketAddrAny> {
     let offsetof_sun_path = super::addr::offsetof_sun_path();
@@ -112,7 +111,7 @@ pub(crate) unsafe fn read_sockaddr(
 ///
 /// `storage` must point to a valid socket address returned from the OS.
 pub(crate) unsafe fn maybe_read_sockaddr_os(
-    storage: *const sockaddr,
+    storage: *const c::sockaddr,
     len: usize,
 ) -> Option<SocketAddrAny> {
     if len == 0 {
@@ -127,7 +126,7 @@ pub(crate) unsafe fn maybe_read_sockaddr_os(
 /// # Safety
 ///
 /// `storage` must point to a valid socket address returned from the OS.
-pub(crate) unsafe fn read_sockaddr_os(storage: *const sockaddr, len: usize) -> SocketAddrAny {
+pub(crate) unsafe fn read_sockaddr_os(storage: *const c::sockaddr, len: usize) -> SocketAddrAny {
     let offsetof_sun_path = super::addr::offsetof_sun_path();
 
     assert!(len >= size_of::<c::sa_family_t>());

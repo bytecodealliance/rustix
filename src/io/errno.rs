@@ -9,7 +9,9 @@ use core::{fmt, result};
 #[cfg(feature = "std")]
 use std::error;
 
-/// A specialized `Result` type for `rustix` APIs.
+/// A specialized [`Result`] type for `rustix` APIs.
+///
+/// [`Result`]: core::result::Result
 pub type Result<T> = result::Result<T, Errno>;
 
 /// `errno`—An error code.

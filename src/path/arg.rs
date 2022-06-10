@@ -100,7 +100,7 @@ impl Arg for &str {
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Errno::INVAL)?,
+            CString::new(*self).map_err(|_cstr_err| io::Errno::INVAL)?,
         ))
     }
 
@@ -138,7 +138,7 @@ impl Arg for &String {
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
-            CString::new(String::as_str(self).as_bytes()).map_err(|_cstr_err| io::Errno::INVAL)?,
+            CString::new(String::as_str(self)).map_err(|_cstr_err| io::Errno::INVAL)?,
         ))
     }
 
@@ -174,7 +174,7 @@ impl Arg for String {
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Errno::INVAL)?,
+            CString::new(self.as_str()).map_err(|_cstr_err| io::Errno::INVAL)?,
         ))
     }
 
@@ -907,9 +907,7 @@ impl Arg for DecInt {
 
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
-        Ok(Cow::Owned(
-            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        Ok(Cow::Borrowed(self.as_c_str()))
     }
 
     #[inline]
@@ -917,9 +915,7 @@ impl Arg for DecInt {
     where
         Self: 'b,
     {
-        Ok(Cow::Owned(
-            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        Ok(Cow::Owned(self.as_c_str().to_owned()))
     }
 
     #[inline]

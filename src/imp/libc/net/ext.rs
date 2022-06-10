@@ -27,8 +27,8 @@ pub(crate) const fn in_addr_s_addr(addr: c::in_addr) -> u32 {
     unsafe { core::mem::transmute(addr) }
 }
 
-// TODO: With Rust 1.55, we can use the above `in_addr_s_addr` definition
-// that uses a const-fn transmute.
+// TODO: With Rust 1.55, we can use the above `in_addr_s_addr` definition that
+// uses a const-fn transmute.
 #[cfg(feature = "std")]
 #[cfg(windows)]
 #[inline]
@@ -50,8 +50,8 @@ pub(crate) const fn in_addr_new(s_addr: u32) -> c::in_addr {
     unsafe { core::mem::transmute(s_addr) }
 }
 
-// TODO: With Rust 1.55, we can use the above `in_addr_new` definition
-// that uses a const-fn transmute.
+// TODO: With Rust 1.55, we can use the above `in_addr_new` definition that
+// uses a const-fn transmute.
 #[cfg(feature = "std")]
 #[cfg(windows)]
 #[inline]
@@ -94,8 +94,8 @@ pub(crate) const fn in6_addr_new(s6_addr: [u8; 16]) -> c::in6_addr {
     unsafe { core::mem::transmute(s6_addr) }
 }
 
-// TODO: With Rust 1.55, we can use the above `in6_addr_new` definition
-// that uses a const-fn transmute.
+// TODO: With Rust 1.55, we can use the above `in6_addr_new` definition that
+// uses a const-fn transmute.
 #[cfg(feature = "std")]
 #[cfg(windows)]
 #[inline]
@@ -200,8 +200,8 @@ pub(crate) const fn sockaddr_in6_new(
     unsafe { core::mem::transmute(addr) }
 }
 
-// TODO: With Rust 1.55, we can use the above `sockaddr_in6_new`
-// definition that uses a const-fn transmute.
+// TODO: With Rust 1.55, we can use the above `sockaddr_in6_new` definition
+// that uses a const-fn transmute.
 #[cfg(feature = "std")]
 #[cfg(windows)]
 #[inline]
