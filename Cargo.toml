@@ -34,8 +34,8 @@ once_cell = { version = "1.5.2", optional = true }
 # Dependencies for platforms where linux_raw is supported, in addition to libc:
 #
 # On Linux on selected architectures, the linux_raw backend is supported, in
-# addition to the libc backend. The linux_raw backend is used by default.
-# The libc # backend can be selected via adding `--cfg=rustix_use_libc` to
+# addition to the libc backend. The linux_raw backend is used by default. The
+# libc backend can be selected via adding `--cfg=rustix_use_libc` to
 # `RUSTFLAGS` or enabling the `use-libc` cargo feature.
 [target.'cfg(all(not(rustix_use_libc), not(miri), target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"), all(target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64")))))'.dependencies]
 linux-raw-sys = { version = "0.0.46", default-features = false, features = ["general", "errno", "ioctl", "no_std"] }
@@ -73,8 +73,7 @@ libc = "0.2.118"
 libc_errno = { package = "errno", version = "0.2.8" }
 io-lifetimes = { version = "0.7.0", default-features = false }
 # Don't upgrade to serial_test 0.7 for now because it depends on a
-# `parking_lot_core` version which is not compatible with our MSRV
-# of 1.48.
+# `parking_lot_core` version which is not compatible with our MSRV of 1.48.
 serial_test = "0.6"
 memoffset = "0.6.5"
 
@@ -103,8 +102,8 @@ targets = [
 [features]
 default = ["std"]
 
-# This enables use of std. Disabling this enables no_std, and
-# requires nightly Rust.
+# This enables use of std. Disabling this enables `#![no_std], and requires
+# nightly Rust.
 std = ["io-lifetimes"]
 
 # This is used in the port of std to rustix.

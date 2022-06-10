@@ -119,7 +119,7 @@ detection, so users must handle the [`NOSYS`] error themselves.
 
 `rustix`'s `termios` module is similar to the [`termios`] crate, but uses
 I/O safety types rather than `RawFd`, and the flags parameters to functions
-such as `tcsetattr` are `enum`s rather than bare integers. And, Rustix calls
+such as `tcsetattr` are `enum`s rather than bare integers. And, rustix calls
 its `tcgetattr` function `tcgetattr`, rather than `Termios::from_fd`.
 
 ## Minimum Supported Rust Version (MSRV)

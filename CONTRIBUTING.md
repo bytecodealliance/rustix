@@ -1,4 +1,4 @@
-# Contributing to Rustix
+# Contributing to rustix
 
 Rustix is a [Bytecode Alliance] project. It follows the Bytecode Alliance's
 [Code of Conduct] and [Organizational Code of Conduct].
@@ -21,7 +21,7 @@ enable the `use-libc` feature:
 cargo test --features=all-apis,use-libc
 ```
 
-Beyond that, Rustix's CI tests many targets and configurations. Asking for
+Beyond that, rustix's CI tests many targets and configurations. Asking for
 help is always welcome, and it's especially encouraged when the issue is
 getting all the `cfg`s lined up to get everything compiling on all the
 configurations on CI.
