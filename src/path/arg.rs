@@ -1,4 +1,4 @@
-//! Convenient and efficient string argment passing.
+//! Convenient and efficient string argument passing.
 //!
 //! This module defines the `Arg` trait and implements it for several common
 //! string types. This allows users to pass any of these string types directly

@@ -54,7 +54,7 @@ fn main() {
 
     // Check for eg. `RUSTFLAGS=--cfg=rustix_use_experimental_asm`. This is a
     // rustc flag rather than a cargo feature flag because it's experimental
-    // and not something we want accidentally enabled via --all-features.
+    // and not something we want accidentally enabled via `--all-features`.
     let rustix_use_experimental_asm = var("CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM").is_ok();
 
     // Miri doesn't support inline asm, and has builtin support for recognizing
