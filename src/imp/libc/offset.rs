@@ -1,4 +1,4 @@
-//! Automatically enable "large file" support features.
+//! Automatically enable “large file” support features.
 
 #[cfg(not(windows))]
 use super::c;

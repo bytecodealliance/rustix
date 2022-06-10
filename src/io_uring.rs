@@ -1047,6 +1047,7 @@ fn io_uring_layouts() {
 
             // Check that we have all the fields.
             let _test = $name {
+                // Safety: All of io_uring's types can be zero-initialized.
                 $($field: unsafe { core::mem::zeroed() }),*
             };
 
