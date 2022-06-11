@@ -68,6 +68,13 @@ impl CpuSet {
     }
 }
 
+impl Default for CpuSet {
+    #[inline]
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// `sched_setaffinity(pid, cpuset)`—Set a thread's CPU affinity mask.
 ///
 /// `pid` is the thread ID to update. If pid is `None`, then the current thread

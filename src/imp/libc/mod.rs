@@ -7,6 +7,9 @@
 // Every FFI call requires an unsafe block, and there are a lot of FFI
 // calls. For now, set this to allow for the libc backend.
 #![allow(clippy::undocumented_unsafe_blocks)]
+// Lots of libc types vary between platforms, so we often need a `.into()` on
+// one platform where it's redundant on another.
+#![allow(clippy::useless_conversion)]
 
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[macro_use]
