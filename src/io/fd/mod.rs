@@ -1,6 +1,6 @@
 //! The following is derived from Rust's
 //! library/std/src/os/fd/mod.rs at revision
-//! dca3f1b786efd27be3b325ed1e01e247aa589c3b.
+//! fa68e73e9947be8ffc5b3b46d899e4953a44e7e9.
 //!
 //! Owned and borrowed Unix-like file descriptors.
 
