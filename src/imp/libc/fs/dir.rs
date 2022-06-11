@@ -113,7 +113,7 @@ impl Dir {
                     dirent: read_dirent(&*dirent_ptr.cast()),
 
                     #[cfg(target_os = "wasi")]
-                    name: CStr::from_ptr((*dirent_ptr).d_name.as_ptr().cast()).to_owned(),
+                    name: CStr::from_ptr((*dirent_ptr).d_name.as_ptr()).to_owned(),
                 };
 
                 Some(Ok(result))
@@ -244,10 +244,9 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     // Copy from d_name, reading up to and including the first NUL.
     #[cfg(not(target_os = "wasi"))]
     {
-        let name_len = CStr::from_ptr(input.d_name.as_ptr().cast())
-            .to_bytes()
-            .len()
-            + 1;
+        let name_len = CStr::from_ptr(input.d_name.as_ptr())
+            .to_bytes_with_nul()
+            .len();
         dirent.d_name[..name_len].copy_from_slice(&input.d_name[..name_len]);
     }
 
@@ -299,7 +298,7 @@ impl DirEntry {
     pub fn file_name(&self) -> &CStr {
         #[cfg(not(target_os = "wasi"))]
         unsafe {
-            CStr::from_ptr(self.dirent.d_name.as_ptr().cast())
+            CStr::from_ptr(self.dirent.d_name.as_ptr())
         }
 
         #[cfg(target_os = "wasi")]
