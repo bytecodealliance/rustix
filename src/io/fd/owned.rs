@@ -1,6 +1,6 @@
 //! The following is derived from Rust's
 //! library/std/src/os/fd/owned.rs at revision
-//! dca3f1b786efd27be3b325ed1e01e247aa589c3b.
+//! fa68e73e9947be8ffc5b3b46d899e4953a44e7e9.
 //!
 //! Owned and borrowed Unix-like file descriptors.
 
@@ -23,6 +23,10 @@ use core::mem::forget;
 /// descriptor, so it can be used in FFI in places where a file descriptor is
 /// passed as an argument, it is not captured or consumed, and it never has the
 /// value `-1`.
+///
+/// This type's `.to_owned()` implementation returns another `BorrowedFd`
+/// rather than an `OwnedFd`. It just makes a trivial copy of the raw file
+/// descriptor, which is then borrowed under the same lifetime.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 #[cfg_attr(rustc_attrs, rustc_layout_scalar_valid_range_start(0))]
@@ -76,6 +80,36 @@ impl BorrowedFd<'_> {
                 _phantom: PhantomData,
             }
         }
+    }
+}
+
+impl OwnedFd {
+    /// Creates a new `OwnedFd` instance that shares the same underlying file handle
+    /// as the existing `OwnedFd` instance.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn try_clone(&self) -> crate::io::Result<Self> {
+        // We want to atomically duplicate this file descriptor and set the
+        // CLOEXEC flag, and currently that's done via F_DUPFD_CLOEXEC. This
+        // is a POSIX flag that was added to Linux in 2.6.24.
+        #[cfg(not(target_os = "espidf"))]
+        let fd = crate::fs::fcntl_dupfd_cloexec(self, 0)?;
+
+        // For ESP-IDF, F_DUPFD is used instead, because the CLOEXEC semantics
+        // will never be supported, as this is a bare metal framework with
+        // no capabilities for multi-process execution. While F_DUPFD is also
+        // not supported yet, it might be (currently it returns ENOSYS).
+        #[cfg(target_os = "espidf")]
+        let fd = crate::fs::fcntl_dupfd(self)?;
+
+        Ok(fd.into())
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    pub fn try_clone(&self) -> crate::io::Result<Self> {
+        Err(crate::io::const_io_error!(
+            crate::io::ErrorKind::Unsupported,
+            "operation not supported on WASI yet",
+        ))
     }
 }
 
