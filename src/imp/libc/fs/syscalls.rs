@@ -893,20 +893,15 @@ pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>)
     // interferes with our own use of `O_PATH`.
     unsafe {
         let (ow, gr) = unwrap_fchown_args(owner, group);
-        syscall_ret(c::syscall(
-            c::SYS_fchown,
-            borrowed_fd(fd),
-            ow,
-            gr,
-        ))
+        syscall_ret(c::syscall(c::SYS_fchown, borrowed_fd(fd), ow, gr))
     }
 }
 
 #[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
 pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
-    unsafe { 
+    unsafe {
         let (ow, gr) = unwrap_fchown_args(owner, group);
-        ret(c::fchown(borrowed_fd(fd), ow, gr)) 
+        ret(c::fchown(borrowed_fd(fd), ow, gr))
     }
 }
 
