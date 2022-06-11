@@ -11,6 +11,8 @@ use crate::io;
 use crate::path::DecInt;
 use crate::path::SMALL_PATH_BUFFER_SIZE;
 use alloc::borrow::Cow;
+#[cfg(feature = "itoa")]
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::str;
