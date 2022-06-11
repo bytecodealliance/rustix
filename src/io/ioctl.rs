@@ -35,6 +35,13 @@ pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 /// `ioctl(fd, FIOCLEX)`—Set the close-on-exec flag.
 ///
 /// Also known as `fcntl(fd, F_SETFD, FD_CLOEXEC)`.
+///
+/// # References
+///  - [Linux]
+///  - [Winsock2]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/ioctl.2.html
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-ioctlsocket
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 #[inline]
 #[doc(alias = "FIOCLEX")]
@@ -44,6 +51,13 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 }
 
 /// `ioctl(fd, FIONBIO, &value)`—Enables or disables non-blocking mode.
+///
+/// # References
+///  - [Linux]
+///  - [Winsock2]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/ioctl.2.html
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-ioctlsocket
 #[inline]
 #[doc(alias = "FIONBIO")]
 pub fn ioctl_fionbio<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {

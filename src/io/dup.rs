@@ -20,11 +20,13 @@ pub use imp::io::types::DupFlags;
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [file description]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_258
 /// [`fcntl_dupfd_cloexec`]: crate::fs::fcntl_dupfd_cloexec
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/dup.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/dup.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
@@ -45,11 +47,13 @@ pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [file description]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_258
+/// [`fcntl_dupfd_cloexec`]: crate::fs::fcntl_dupfd_cloexec
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/dup2.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup2.2.html
-/// [`fcntl_dupfd_cloexec`]: crate::fs::fcntl_dupfd_cloexec
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/dup2.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {
@@ -59,18 +63,16 @@ pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {
 /// `dup3(fd, new, flags)`—Changes the [file description] of a file
 /// descriptor, with flags.
 ///
-/// `dup3` is the same as [`dup2`] but adds an additional flags operand,
-/// and it fails in the case that `fd` and `new` have the same file descriptor
-/// value. This additional difference is the reason this function isn't named
+/// `dup3` is the same as [`dup2`] but adds an additional flags operand, and it
+/// fails in the case that `fd` and `new` have the same file descriptor value.
+/// This additional difference is the reason this function isn't named
 /// `dup2_with`.
 ///
 /// # References
-///  - [POSIX]
 ///  - [Linux]
 ///
 /// [file description]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_258
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/dup2.html
-/// [Linux]: https://man7.org/linux/man-pages/man2/dup2.2.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/dup3.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn dup3<Fd: AsFd>(fd: Fd, new: &mut OwnedFd, flags: DupFlags) -> io::Result<()> {

@@ -7,7 +7,6 @@ pub use imp::io::types::PipeFlags;
 /// `PIPE_BUF`—The maximum length at which writes to a pipe are atomic.
 ///
 /// # References
-///
 ///  - [Linux]
 ///  - [POSIX]
 ///

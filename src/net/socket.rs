@@ -25,10 +25,12 @@ impl Default for Protocol {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/socket.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/socket.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/socket.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-socket
 #[inline]
 pub fn socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::Result<OwnedFd> {
@@ -48,10 +50,12 @@ pub fn socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> i
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/socket.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/socket.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/socket.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-socket
 #[inline]
 pub fn socket_with(
@@ -68,9 +72,13 @@ pub fn socket_with(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
+///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/bind.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/bind.2.html
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-bind
 pub fn bind<Fd: AsFd>(sockfd: Fd, addr: &SocketAddr) -> io::Result<()> {
     _bind(sockfd.as_fd(), addr)
 }
@@ -87,9 +95,13 @@ fn _bind(sockfd: BorrowedFd<'_>, addr: &SocketAddr) -> io::Result<()> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
+///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/bind.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/bind.2.html
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-bind
 #[doc(alias = "bind")]
 pub fn bind_any<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrAny) -> io::Result<()> {
     _bind_any(sockfd.as_fd(), addr)
@@ -110,10 +122,12 @@ fn _bind_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/bind.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/bind.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-bind
 #[inline]
 #[doc(alias = "bind")]
@@ -127,10 +141,12 @@ pub fn bind_v4<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/bind.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/bind.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-bind
 #[inline]
 #[doc(alias = "bind")]
@@ -144,10 +160,12 @@ pub fn bind_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/bind.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/bind.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-bind
 #[cfg(unix)]
 #[inline]
@@ -161,9 +179,13 @@ pub fn bind_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> 
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
+///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/connect.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/connect.2.html
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect
 pub fn connect<Fd: AsFd>(sockfd: Fd, addr: &SocketAddr) -> io::Result<()> {
     _connect(sockfd.as_fd(), addr)
 }
@@ -180,9 +202,13 @@ fn _connect(sockfd: BorrowedFd<'_>, addr: &SocketAddr) -> io::Result<()> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
+///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/connect.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/connect.2.html
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect
 #[doc(alias = "connect")]
 pub fn connect_any<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrAny) -> io::Result<()> {
     _connect_any(sockfd.as_fd(), addr)
@@ -203,10 +229,12 @@ fn _connect_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> 
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/connect.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/connect.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect
 #[inline]
 #[doc(alias = "connect")]
@@ -220,10 +248,12 @@ pub fn connect_v4<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/connect.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/connect.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect
 #[inline]
 #[doc(alias = "connect")]
@@ -237,9 +267,13 @@ pub fn connect_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
+///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/connect.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/connect.2.html
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect
 #[cfg(unix)]
 #[inline]
 #[doc(alias = "connect")]
@@ -252,10 +286,12 @@ pub fn connect_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/listen.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/listen.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/listen.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-listen
 #[inline]
 pub fn listen<Fd: AsFd>(sockfd: Fd, backlog: i32) -> io::Result<()> {
@@ -273,10 +309,12 @@ pub fn listen<Fd: AsFd>(sockfd: Fd, backlog: i32) -> io::Result<()> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/accept.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/accept.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/accept.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-accept
 #[inline]
 #[doc(alias = "accept4")]
@@ -297,13 +335,9 @@ pub fn accept<Fd: AsFd>(sockfd: Fd) -> io::Result<OwnedFd> {
 /// operand.
 ///
 /// # References
-///  - [POSIX]
 ///  - [Linux]
-///  - [Winsock2]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/accept.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/accept4.2.html
-/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-accept
 #[inline]
 #[doc(alias = "accept4")]
 pub fn accept_with<Fd: AsFd>(sockfd: Fd, flags: AcceptFlags) -> io::Result<OwnedFd> {
@@ -318,10 +352,12 @@ pub fn accept_with<Fd: AsFd>(sockfd: Fd, flags: AcceptFlags) -> io::Result<Owned
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/accept.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/accept.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/accept.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-accept
 #[inline]
 #[doc(alias = "accept4")]
@@ -338,13 +374,9 @@ pub fn acceptfrom<Fd: AsFd>(sockfd: Fd) -> io::Result<(OwnedFd, Option<SocketAdd
 /// flags operand.
 ///
 /// # References
-///  - [POSIX]
 ///  - [Linux]
-///  - [Winsock2]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/accept.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/accept4.2.html
-/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-accept
 #[inline]
 #[doc(alias = "accept4")]
 pub fn acceptfrom_with<Fd: AsFd>(
@@ -359,10 +391,12 @@ pub fn acceptfrom_with<Fd: AsFd>(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/shutdown.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/shutdown.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/shutdown.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-shutdown
 #[inline]
 pub fn shutdown<Fd: AsFd>(sockfd: Fd, how: Shutdown) -> io::Result<()> {
@@ -374,10 +408,12 @@ pub fn shutdown<Fd: AsFd>(sockfd: Fd, how: Shutdown) -> io::Result<()> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockname.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/getsockname.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getsockname.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockname
 #[inline]
 pub fn getsockname<Fd: AsFd>(sockfd: Fd) -> io::Result<SocketAddrAny> {
@@ -390,10 +426,12 @@ pub fn getsockname<Fd: AsFd>(sockfd: Fd) -> io::Result<SocketAddrAny> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///  - [Winsock2]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getpeername.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/getpeername.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getpeername.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getpeername
 #[inline]
 pub fn getpeername<Fd: AsFd>(sockfd: Fd) -> io::Result<Option<SocketAddrAny>> {
