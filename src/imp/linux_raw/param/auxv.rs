@@ -148,7 +148,7 @@ static INIT_ARRAY: unsafe extern "C" fn() = {
 /// block set up by the OS.
 #[cfg(any(
     target_vendor = "mustang",
-    not(any(target_env = "gnu", target_env = "musl"))
+    not(any(target_env = "gnu", target_env = "musl")),
 ))]
 #[inline]
 pub(crate) unsafe fn init(envp: *mut *mut u8) {

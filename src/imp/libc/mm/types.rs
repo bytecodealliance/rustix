@@ -204,7 +204,7 @@ bitflags! {
             target_os = "redox",
             all(
                 any(target_os = "android", target_os = "linux"),
-                any(target_arch = "mips", target_arch = "mips64")
+                any(target_arch = "mips", target_arch = "mips64"),
             )
         )))]
         const SYNC = c::MAP_SYNC;
@@ -333,7 +333,7 @@ pub enum Advice {
     /// `MADV_SOFT_OFFLINE`
     #[cfg(all(
         any(target_os = "android", target_os = "linux"),
-        not(any(target_arch = "mips", target_arch = "mips64"))
+        not(any(target_arch = "mips", target_arch = "mips64")),
     ))]
     LinuxSoftOffline = c::MADV_SOFT_OFFLINE,
     /// `MADV_MERGEABLE`

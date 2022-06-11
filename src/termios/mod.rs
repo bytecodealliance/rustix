@@ -367,7 +367,7 @@ pub use constants::ISTRIP;
     linux_raw,
     all(
         libc,
-        any(target_os = "haiku", target_os = "illumos", target_os = "solaris")
+        any(target_os = "haiku", target_os = "illumos", target_os = "solaris"),
     )
 ))]
 pub use constants::IUCLC;

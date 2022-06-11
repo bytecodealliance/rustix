@@ -41,7 +41,7 @@ bitflags! {
         /// `POLLRDHUP`
         #[cfg(all(
             any(target_os = "android", target_os = "linux"),
-            not(any(target_arch = "sparc", target_arch = "sparc64")))
+            not(any(target_arch = "sparc", target_arch = "sparc64"))),
         )]
         const RDHUP = c::POLLRDHUP;
     }

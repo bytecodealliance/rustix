@@ -53,14 +53,14 @@ pub(crate) fn open(filename: &CStr, flags: OFlags, mode: Mode) -> io::Result<Own
     }
     #[cfg(all(
         target_pointer_width = "32",
-        not(any(target_arch = "aarch64", target_arch = "riscv64"))
+        not(any(target_arch = "aarch64", target_arch = "riscv64")),
     ))]
     unsafe {
         ret_owned_fd(syscall_readonly!(__NR_open, filename, flags, mode))
     }
     #[cfg(all(
         target_pointer_width = "64",
-        not(any(target_arch = "aarch64", target_arch = "riscv64"))
+        not(any(target_arch = "aarch64", target_arch = "riscv64")),
     ))]
     unsafe {
         ret_owned_fd(syscall_readonly!(__NR_open, filename, flags, mode))
@@ -255,7 +255,7 @@ pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
     // <https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L81-L83>
     #[cfg(all(
         target_pointer_width = "32",
-        any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc")
+        any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc"),
     ))]
     unsafe {
         ret(syscall_readonly!(
@@ -268,7 +268,7 @@ pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
     }
     #[cfg(all(
         target_pointer_width = "32",
-        not(any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc"))
+        not(any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc")),
     ))]
     unsafe {
         ret(syscall_readonly!(
@@ -366,7 +366,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) ->
     }
     #[cfg(all(
         target_pointer_width = "32",
-        not(any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc"))
+        not(any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc")),
     ))]
     unsafe {
         ret(syscall_readonly!(

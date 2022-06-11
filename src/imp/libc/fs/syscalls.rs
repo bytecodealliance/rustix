@@ -310,7 +310,7 @@ pub(crate) fn renameat2(
 /// ABIs, `RenameFlags` has no flags defined, and we use plain `renameat`.
 #[cfg(any(
     target_os = "android",
-    all(target_os = "linux", not(target_env = "gnu"))
+    all(target_os = "linux", not(target_env = "gnu")),
 ))]
 #[inline]
 pub(crate) fn renameat2(
@@ -345,7 +345,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
     // `statx`.
     #[cfg(all(
         any(target_os = "android", target_os = "linux"),
-        any(target_pointer_width = "32", target_arch = "mips64")
+        any(target_pointer_width = "32", target_arch = "mips64"),
     ))]
     {
         match statx(dirfd, path, flags, StatxFlags::BASIC_STATS) {
@@ -359,7 +359,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
     // there's nothing practical we can do.
     #[cfg(not(all(
         any(target_os = "android", target_os = "linux"),
-        any(target_pointer_width = "32", target_arch = "mips64")
+        any(target_pointer_width = "32", target_arch = "mips64"),
     )))]
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
@@ -375,7 +375,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
 
 #[cfg(all(
     any(target_os = "android", target_os = "linux"),
-    any(target_pointer_width = "32", target_arch = "mips64")
+    any(target_pointer_width = "32", target_arch = "mips64"),
 ))]
 fn statat_old(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
     unsafe {
@@ -907,7 +907,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     // `statx`.
     #[cfg(all(
         any(target_os = "android", target_os = "linux"),
-        any(target_pointer_width = "32", target_arch = "mips64")
+        any(target_pointer_width = "32", target_arch = "mips64"),
     ))]
     {
         match statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
@@ -921,7 +921,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     // there's nothing practical we can do.
     #[cfg(not(all(
         any(target_os = "android", target_os = "linux"),
-        any(target_pointer_width = "32", target_arch = "mips64")
+        any(target_pointer_width = "32", target_arch = "mips64"),
     )))]
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
@@ -932,7 +932,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 
 #[cfg(all(
     any(target_os = "android", target_os = "linux"),
-    any(target_pointer_width = "32", target_arch = "mips64")
+    any(target_pointer_width = "32", target_arch = "mips64"),
 ))]
 fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     unsafe {
@@ -1191,12 +1191,12 @@ pub(crate) fn openat2(
 }
 #[cfg(all(
     target_pointer_width = "32",
-    any(target_os = "android", target_os = "linux")
+    any(target_os = "android", target_os = "linux"),
 ))]
 const SYS_OPENAT2: i32 = 437;
 #[cfg(all(
     target_pointer_width = "64",
-    any(target_os = "android", target_os = "linux")
+    any(target_os = "android", target_os = "linux"),
 ))]
 const SYS_OPENAT2: i64 = 437;
 

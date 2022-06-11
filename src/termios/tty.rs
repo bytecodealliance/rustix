@@ -3,14 +3,14 @@
 use crate::imp;
 #[cfg(any(
     all(linux_raw, feature = "procfs"),
-    all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
+    all(libc, not(any(target_os = "fuchsia", target_os = "wasi"))),
 ))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 use crate::io;
 use imp::fd::AsFd;
 #[cfg(any(
     all(linux_raw, feature = "procfs"),
-    all(libc, not(any(target_os = "fuchsia", target_os = "wasi")))
+    all(libc, not(any(target_os = "fuchsia", target_os = "wasi"))),
 ))]
 use {
     crate::ffi::CString, crate::path::SMALL_PATH_BUFFER_SIZE, alloc::vec::Vec, imp::fd::BorrowedFd,
