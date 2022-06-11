@@ -35,7 +35,7 @@ pub(crate) unsafe fn encode_sockaddr_v4(v4: &SocketAddrV4) -> c::sockaddr_in {
         sin_family: c::AF_INET as _,
         sin_port: u16::to_be(v4.port()),
         sin_addr: in_addr_new(u32::from_ne_bytes(v4.ip().octets())),
-        sin_zero: [0_u8; 8],
+        sin_zero: [0; 8_usize],
     }
 }
 
