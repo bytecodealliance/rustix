@@ -56,7 +56,7 @@ pub(crate) fn linux_execfn() -> &'static CStr {
 /// Initialize process-wide state.
 #[cfg(any(
     target_vendor = "mustang",
-    not(any(target_env = "gnu", target_env = "musl"))
+    not(any(target_env = "gnu", target_env = "musl")),
 ))]
 #[inline]
 #[doc(hidden)]

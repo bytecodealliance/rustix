@@ -219,7 +219,7 @@ pub(crate) mod fs;
 #[cfg(not(windows))]
 #[cfg(all(
     not(feature = "param"),
-    any(feature = "runtime", feature = "time", target_arch = "x86")
+    any(feature = "runtime", feature = "time", target_arch = "x86"),
 ))]
 pub(crate) mod param;
 #[cfg(not(windows))]

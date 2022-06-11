@@ -162,7 +162,7 @@ pub(crate) fn preadv2(
 /// ABIs, `ReadWriteFlags` has no flags defined, and we use plain `preadv`.
 #[cfg(any(
     target_os = "android",
-    all(target_os = "linux", not(target_env = "gnu"))
+    all(target_os = "linux", not(target_env = "gnu")),
 ))]
 #[inline]
 pub(crate) fn preadv2(
@@ -200,7 +200,7 @@ pub(crate) fn pwritev2(
 /// ABIs, `ReadWriteFlags` has no flags defined, and we use plain `pwritev`.
 #[cfg(any(
     target_os = "android",
-    all(target_os = "linux", not(target_env = "gnu"))
+    all(target_os = "linux", not(target_env = "gnu")),
 ))]
 #[inline]
 pub(crate) fn pwritev2(

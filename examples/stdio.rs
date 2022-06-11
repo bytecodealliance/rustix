@@ -93,7 +93,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 linux_raw,
                 all(
                     libc,
-                    any(target_os = "haiku", target_os = "illumos", target_os = "solaris")
+                    any(target_os = "haiku", target_os = "illumos", target_os = "solaris"),
                 )
             ))]
             if (term.c_iflag & IUCLC) != 0 {

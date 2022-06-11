@@ -359,7 +359,7 @@ pub use imp::termios::types::ISTRIP;
     linux_raw,
     all(
         libc,
-        any(target_os = "haiku", target_os = "illumos", target_os = "solaris")
+        any(target_os = "haiku", target_os = "illumos", target_os = "solaris"),
     )
 ))]
 pub use imp::termios::types::IUCLC;

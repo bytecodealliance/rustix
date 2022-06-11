@@ -626,7 +626,7 @@ bitflags! {
 
 #[cfg(any(
     target_os = "android",
-    all(target_os = "linux", not(target_env = "gnu"))
+    all(target_os = "linux", not(target_env = "gnu")),
 ))]
 bitflags! {
     /// `STATX_*` constants for use with [`statx`].
@@ -904,7 +904,7 @@ pub type StatxTimestamp = c::statx;
 // ourselves.
 #[cfg(any(
     target_os = "android",
-    all(target_os = "linux", not(target_env = "gnu"))
+    all(target_os = "linux", not(target_env = "gnu")),
 ))]
 #[repr(C)]
 #[allow(missing_docs)]
@@ -939,7 +939,7 @@ pub struct Statx {
 // declare it ourselves.
 #[cfg(any(
     target_os = "android",
-    all(target_os = "linux", not(target_env = "gnu"))
+    all(target_os = "linux", not(target_env = "gnu")),
 ))]
 #[repr(C)]
 #[allow(missing_docs)]
@@ -969,7 +969,7 @@ pub type Dev = c::c_ulonglong;
 #[cfg(all(
     target_os = "linux",
     not(target_env = "musl"),
-    not(target_arch = "s390x")
+    not(target_arch = "s390x"),
 ))]
 pub type FsWord = c::__fsword_t;
 
@@ -999,14 +999,14 @@ pub use c::{UTIME_NOW, UTIME_OMIT};
 /// `PROC_SUPER_MAGIC`—The magic number for the procfs filesystem.
 #[cfg(all(
     any(target_os = "android", target_os = "linux"),
-    not(target_env = "musl")
+    not(target_env = "musl"),
 ))]
 pub const PROC_SUPER_MAGIC: FsWord = c::PROC_SUPER_MAGIC as FsWord;
 
 /// `NFS_SUPER_MAGIC`—The magic number for the NFS filesystem.
 #[cfg(all(
     any(target_os = "android", target_os = "linux"),
-    not(target_env = "musl")
+    not(target_env = "musl"),
 ))]
 pub const NFS_SUPER_MAGIC: FsWord = c::NFS_SUPER_MAGIC as FsWord;
 

@@ -9,7 +9,7 @@
 mod auxv;
 #[cfg(any(
     target_vendor = "mustang",
-    not(any(target_env = "gnu", target_env = "musl"))
+    not(any(target_env = "gnu", target_env = "musl")),
 ))]
 mod init;
 
@@ -32,6 +32,6 @@ pub use auxv::page_size;
 pub use auxv::{linux_execfn, linux_hwcap};
 #[cfg(any(
     target_vendor = "mustang",
-    not(any(target_env = "gnu", target_env = "musl"))
+    not(any(target_env = "gnu", target_env = "musl")),
 ))]
 pub use init::init;

@@ -472,7 +472,7 @@ impl<'context, Context: self::Context> Iterator for Iter<'context, Context> {
         all(
             target_arch = "x86",
             not(target_env = "musl"),
-            not(target_os = "android")
+            not(target_os = "android"),
         ),
         target_arch = "x86_64",
     ),
