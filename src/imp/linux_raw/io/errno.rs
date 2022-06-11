@@ -311,9 +311,9 @@ impl Errno {
     /// `EINTR`.
     ///
     /// For a convenient way to retry system calls that exit with `INTR`, use
-    /// [`with_retrying`].
+    /// [`retry_on_intr`].
     ///
-    /// [`with_retrying`]: io::with_retrying
+    /// [`retry_on_intr`]: io::retry_on_intr
     pub const INTR: Self = Self::from_errno(errno::EINTR);
     /// `EINVAL`
     pub const INVAL: Self = Self::from_errno(errno::EINVAL);

@@ -75,7 +75,7 @@ impl From<Errno> for std::io::Error {
 
 /// Call `f` until it either succeeds or fails other than [`Errno::INTR`].
 #[inline]
-pub fn with_retrying<T, F: FnMut() -> Result<T>>(mut f: F) -> Result<T> {
+pub fn retry_on_intr<T, F: FnMut() -> Result<T>>(mut f: F) -> Result<T> {
     loop {
         match f() {
             Err(Errno::INTR) => (),

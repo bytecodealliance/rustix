@@ -1,6 +1,6 @@
 use rustix::fd::{AsFd, AsRawFd, FromRawFd, IntoRawFd, OwnedFd};
 #[cfg(not(windows))]
-use rustix::io::{poll, with_retrying};
+use rustix::io::{poll, retry_on_intr};
 use rustix::io::{PollFd, PollFlags};
 
 #[cfg(not(windows))]
@@ -14,16 +14,16 @@ fn test_poll() {
     assert_eq!(poll_fds[0].as_fd().as_raw_fd(), reader.as_fd().as_raw_fd());
 
     // `poll` should say there's nothing ready to be read from the pipe.
-    let num = with_retrying(|| poll(&mut poll_fds, 0)).unwrap();
+    let num = retry_on_intr(|| poll(&mut poll_fds, 0)).unwrap();
     assert_eq!(num, 0);
     assert!(poll_fds[0].revents().is_empty());
     assert_eq!(poll_fds[0].as_fd().as_raw_fd(), reader.as_fd().as_raw_fd());
 
     // Write a byte to the pipe.
-    assert_eq!(with_retrying(|| write(&writer, b"a")).unwrap(), 1);
+    assert_eq!(retry_on_intr(|| write(&writer, b"a")).unwrap(), 1);
 
     // `poll` should now say there's data to be read.
-    let num = with_retrying(|| poll(&mut poll_fds, -1)).unwrap();
+    let num = retry_on_intr(|| poll(&mut poll_fds, -1)).unwrap();
     assert_eq!(num, 1);
     assert_eq!(poll_fds[0].revents(), PollFlags::IN);
     assert_eq!(poll_fds[0].as_fd().as_raw_fd(), reader.as_fd().as_raw_fd());
@@ -35,12 +35,12 @@ fn test_poll() {
 
     // Read the byte from the pipe.
     let mut buf = [b'\0'];
-    assert_eq!(with_retrying(|| read(&reader, &mut buf)).unwrap(), 1);
+    assert_eq!(retry_on_intr(|| read(&reader, &mut buf)).unwrap(), 1);
     assert_eq!(buf[0], b'a');
     assert_eq!(poll_fds[0].as_fd().as_raw_fd(), reader.as_fd().as_raw_fd());
 
     // Poll should now say there's no more data to be read.
-    let num = with_retrying(|| poll(&mut poll_fds, 0)).unwrap();
+    let num = retry_on_intr(|| poll(&mut poll_fds, 0)).unwrap();
     assert_eq!(num, 0);
     assert!(poll_fds[0].revents().is_empty());
     assert_eq!(poll_fds[0].as_fd().as_raw_fd(), reader.as_fd().as_raw_fd());
