@@ -24,7 +24,9 @@ use crate::io::{
 use crate::net::{RecvFlags, SendFlags};
 use core::cmp;
 use core::mem::MaybeUninit;
-use linux_raw_sys::general::{epoll_event, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD};
+use linux_raw_sys::general::{
+    epoll_event, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, UIO_MAXIOV,
+};
 use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET, FIONBIO, FIONREAD, TIOCEXCL, TIOCNXCL};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use {
@@ -281,7 +283,7 @@ pub(crate) fn pwritev2(
 /// The maximum number of buffers that can be passed into a vectored I/O system
 /// call on the current platform.
 const fn max_iov() -> usize {
-    linux_raw_sys::general::UIO_MAXIOV as usize
+    UIO_MAXIOV as usize
 }
 
 #[inline]

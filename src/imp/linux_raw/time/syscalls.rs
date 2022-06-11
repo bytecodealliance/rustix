@@ -129,7 +129,7 @@ unsafe fn timerfd_settime_old(
                 .it_interval
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Errno::INVAL)?,
+                .map_err(|_| io::Errno::OVERFLOW)?,
             tv_nsec: new_value
                 .it_interval
                 .tv_nsec
@@ -141,7 +141,7 @@ unsafe fn timerfd_settime_old(
                 .it_value
                 .tv_sec
                 .try_into()
-                .map_err(|_| io::Errno::INVAL)?,
+                .map_err(|_| io::Errno::OVERFLOW)?,
             tv_nsec: new_value
                 .it_value
                 .tv_nsec

@@ -47,9 +47,9 @@ use super::super::time::types::LibcTimespec;
 use crate::fd::BorrowedFd;
 #[cfg(not(target_os = "wasi"))]
 use crate::fd::RawFd;
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
-use crate::ffi::ZString;
+use crate::ffi::CString;
 #[cfg(not(target_os = "illumos"))]
 use crate::fs::Access;
 #[cfg(not(any(
@@ -155,7 +155,7 @@ weak!(fn __futimens64(c::c_int, *const LibcTimespec) -> c::c_int);
 #[cfg(all(unix, target_env = "gnu"))]
 fn openat_via_syscall(
     dirfd: BorrowedFd<'_>,
-    path: &ZStr,
+    path: &CStr,
     oflags: OFlags,
     mode: Mode,
 ) -> io::Result<OwnedFd> {
@@ -177,7 +177,7 @@ fn openat_via_syscall(
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn openat(
     dirfd: BorrowedFd<'_>,
-    path: &ZStr,
+    path: &CStr,
     oflags: OFlags,
     mode: Mode,
 ) -> io::Result<OwnedFd> {
@@ -207,7 +207,7 @@ pub(crate) fn openat(
     target_os = "wasi"
 )))]
 #[inline]
-pub(crate) fn statfs(filename: &ZStr) -> io::Result<StatFs> {
+pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
     unsafe {
         let mut result = MaybeUninit::<StatFs>::uninit();
         ret(libc_statfs(c_str(filename), result.as_mut_ptr()))?;
@@ -217,7 +217,7 @@ pub(crate) fn statfs(filename: &ZStr) -> io::Result<StatFs> {
 
 #[cfg(not(target_os = "redox"))]
 #[inline]
-pub(crate) fn readlinkat(dirfd: BorrowedFd<'_>, path: &ZStr, buf: &mut [u8]) -> io::Result<usize> {
+pub(crate) fn readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
     unsafe {
         ret_ssize_t(c::readlinkat(
             borrowed_fd(dirfd),
@@ -230,7 +230,7 @@ pub(crate) fn readlinkat(dirfd: BorrowedFd<'_>, path: &ZStr, buf: &mut [u8]) -> 
 }
 
 #[cfg(not(target_os = "redox"))]
-pub(crate) fn mkdirat(dirfd: BorrowedFd<'_>, path: &ZStr, mode: Mode) -> io::Result<()> {
+pub(crate) fn mkdirat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
     unsafe {
         ret(c::mkdirat(
             borrowed_fd(dirfd),
@@ -243,9 +243,9 @@ pub(crate) fn mkdirat(dirfd: BorrowedFd<'_>, path: &ZStr, mode: Mode) -> io::Res
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn linkat(
     old_dirfd: BorrowedFd<'_>,
-    old_path: &ZStr,
+    old_path: &CStr,
     new_dirfd: BorrowedFd<'_>,
-    new_path: &ZStr,
+    new_path: &CStr,
     flags: AtFlags,
 ) -> io::Result<()> {
     unsafe {
@@ -260,16 +260,16 @@ pub(crate) fn linkat(
 }
 
 #[cfg(not(target_os = "redox"))]
-pub(crate) fn unlinkat(dirfd: BorrowedFd<'_>, path: &ZStr, flags: AtFlags) -> io::Result<()> {
+pub(crate) fn unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<()> {
     unsafe { ret(c::unlinkat(borrowed_fd(dirfd), c_str(path), flags.bits())) }
 }
 
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn renameat(
     old_dirfd: BorrowedFd<'_>,
-    old_path: &ZStr,
+    old_path: &CStr,
     new_dirfd: BorrowedFd<'_>,
-    new_path: &ZStr,
+    new_path: &CStr,
 ) -> io::Result<()> {
     unsafe {
         ret(c::renameat(
@@ -284,9 +284,9 @@ pub(crate) fn renameat(
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 pub(crate) fn renameat2(
     old_dirfd: BorrowedFd<'_>,
-    old_path: &ZStr,
+    old_path: &CStr,
     new_dirfd: BorrowedFd<'_>,
-    new_path: &ZStr,
+    new_path: &CStr,
     flags: RenameFlags,
 ) -> io::Result<()> {
     // `getrandom` wasn't supported in glibc until 2.28.
@@ -320,9 +320,9 @@ pub(crate) fn renameat2(
 #[inline]
 pub(crate) fn renameat2(
     old_dirfd: BorrowedFd<'_>,
-    old_path: &ZStr,
+    old_path: &CStr,
     new_dirfd: BorrowedFd<'_>,
-    new_path: &ZStr,
+    new_path: &CStr,
     flags: RenameFlags,
 ) -> io::Result<()> {
     assert!(flags.is_empty());
@@ -331,9 +331,9 @@ pub(crate) fn renameat2(
 
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn symlinkat(
-    old_path: &ZStr,
+    old_path: &CStr,
     new_dirfd: BorrowedFd<'_>,
-    new_path: &ZStr,
+    new_path: &CStr,
 ) -> io::Result<()> {
     unsafe {
         ret(c::symlinkat(
@@ -345,7 +345,7 @@ pub(crate) fn symlinkat(
 }
 
 #[cfg(not(target_os = "redox"))]
-pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &ZStr, flags: AtFlags) -> io::Result<Stat> {
+pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
     // 32-bit and mips64 Linux: `struct stat64` is not y2038 compatible; use
     // `statx`.
     #[cfg(all(
@@ -354,7 +354,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &ZStr, flags: AtFlags) -> io::
     ))]
     {
         if !NO_STATX.load(Relaxed) {
-            match statx(dirfd, path, flags, StatxFlags::ALL) {
+            match statx(dirfd, path, flags, StatxFlags::BASIC_STATS) {
                 Ok(x) => return statx_to_stat(x),
                 Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
                 Err(e) => return Err(e),
@@ -385,7 +385,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &ZStr, flags: AtFlags) -> io::
     any(target_os = "android", target_os = "linux"),
     any(target_pointer_width = "32", target_arch = "mips64")
 ))]
-fn statat_old(dirfd: BorrowedFd<'_>, path: &ZStr, flags: AtFlags) -> io::Result<Stat> {
+fn statat_old(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
     unsafe {
         let mut result = MaybeUninit::<c::stat64>::uninit();
         ret(libc_fstatat(
@@ -401,7 +401,7 @@ fn statat_old(dirfd: BorrowedFd<'_>, path: &ZStr, flags: AtFlags) -> io::Result<
 #[cfg(not(any(target_os = "emscripten", target_os = "illumos", target_os = "redox")))]
 pub(crate) fn accessat(
     dirfd: BorrowedFd<'_>,
-    path: &ZStr,
+    path: &CStr,
     access: Access,
     flags: AtFlags,
 ) -> io::Result<()> {
@@ -418,7 +418,7 @@ pub(crate) fn accessat(
 #[cfg(target_os = "emscripten")]
 pub(crate) fn accessat(
     _dirfd: BorrowedFd<'_>,
-    _path: &ZStr,
+    _path: &CStr,
     _access: Access,
     _flags: AtFlags,
 ) -> io::Result<()> {
@@ -428,7 +428,7 @@ pub(crate) fn accessat(
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn utimensat(
     dirfd: BorrowedFd<'_>,
-    path: &ZStr,
+    path: &CStr,
     times: &Timestamps,
     flags: AtFlags,
 ) -> io::Result<()> {
@@ -599,7 +599,7 @@ pub(crate) fn utimensat(
 ))]
 unsafe fn utimensat_old(
     dirfd: BorrowedFd<'_>,
-    path: &ZStr,
+    path: &CStr,
     times: &Timestamps,
     flags: AtFlags,
 ) -> io::Result<()> {
@@ -635,12 +635,12 @@ unsafe fn utimensat_old(
     target_os = "redox",
     target_os = "wasi",
 )))]
-pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &ZStr, mode: Mode) -> io::Result<()> {
+pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
     unsafe { ret(c::fchmodat(borrowed_fd(dirfd), c_str(path), mode.bits(), 0)) }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &ZStr, mode: Mode) -> io::Result<()> {
+pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
     // Linux's `fchmodat` does not have a flags argument.
     unsafe {
         // Pass `mode` as a `c_uint` even if `mode_t` is narrower, since
@@ -659,7 +659,7 @@ pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &ZStr, mode: Mode) -> io::Res
 pub(crate) fn fclonefileat(
     srcfd: BorrowedFd<'_>,
     dst_dirfd: BorrowedFd<'_>,
-    dst: &ZStr,
+    dst: &CStr,
     flags: CloneFlags,
 ) -> io::Result<()> {
     syscall! {
@@ -677,7 +677,7 @@ pub(crate) fn fclonefileat(
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn chownat(
     dirfd: BorrowedFd<'_>,
-    path: &ZStr,
+    path: &CStr,
     owner: Option<Uid>,
     group: Option<Gid>,
     flags: AtFlags,
@@ -702,7 +702,7 @@ pub(crate) fn chownat(
 )))]
 pub(crate) fn mknodat(
     dirfd: BorrowedFd<'_>,
-    path: &ZStr,
+    path: &CStr,
     file_type: FileType,
     mode: Mode,
     dev: Dev,
@@ -931,7 +931,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     ))]
     {
         if !NO_STATX.load(Relaxed) {
-            match statx(fd, zstr!(""), AtFlags::EMPTY_PATH, StatxFlags::ALL) {
+            match statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
                 Ok(x) => return statx_to_stat(x),
                 Err(io::Errno::NOSYS) => NO_STATX.store(true, Relaxed),
                 Err(e) => return Err(e),
@@ -1167,7 +1167,7 @@ pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
 }
 
 #[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
-pub(crate) fn memfd_create(path: &ZStr, flags: MemfdFlags) -> io::Result<OwnedFd> {
+pub(crate) fn memfd_create(path: &CStr, flags: MemfdFlags) -> io::Result<OwnedFd> {
     #[cfg(target_os = "freebsd")]
     weakcall! {
         fn memfd_create(
@@ -1190,7 +1190,7 @@ pub(crate) fn memfd_create(path: &ZStr, flags: MemfdFlags) -> io::Result<OwnedFd
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn openat2(
     dirfd: BorrowedFd<'_>,
-    path: &ZStr,
+    path: &CStr,
     oflags: OFlags,
     mode: Mode,
     resolve: ResolveFlags,
@@ -1245,10 +1245,7 @@ pub(crate) fn sendfile(
         let nsent = ret_ssize_t(c::sendfile64(
             borrowed_fd(out_fd),
             borrowed_fd(in_fd),
-            offset
-                .map(crate::utils::as_mut_ptr)
-                .unwrap_or(null_mut())
-                .cast(),
+            offset.map_or(null_mut(), crate::utils::as_mut_ptr).cast(),
             count,
         ))?;
         Ok(nsent as usize)
@@ -1414,7 +1411,7 @@ fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
 #[allow(non_upper_case_globals)]
 pub(crate) fn statx(
     dirfd: BorrowedFd<'_>,
-    path: &ZStr,
+    path: &CStr,
     flags: AtFlags,
     mask: StatxFlags,
 ) -> io::Result<Statx> {
@@ -1521,7 +1518,7 @@ pub(crate) unsafe fn copyfile_state_get(
 }
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
-pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<ZString> {
+pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<CString> {
     // The use of PATH_MAX is generally not encouraged, but it
     // is inevitable in this case because macOS defines `fcntl` with
     // `F_GETPATH` in terms of `MAXPATHLEN`, and there are no
@@ -1545,7 +1542,7 @@ pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<ZString> {
     //buf.shrink_to(l + 1);
     buf.shrink_to_fit();
 
-    Ok(ZString::new(buf).unwrap())
+    Ok(CString::new(buf).unwrap())
 }
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]

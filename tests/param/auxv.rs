@@ -2,8 +2,8 @@
     all(target_os = "android", target_pointer_width = "64"),
     target_os = "linux"
 ))]
-use rustix::process::linux_hwcap;
-use rustix::process::{clock_ticks_per_second, page_size};
+use rustix::param::linux_hwcap;
+use rustix::param::{clock_ticks_per_second, page_size};
 
 #[test]
 fn test_page_size() {

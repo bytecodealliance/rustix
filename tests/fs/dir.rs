@@ -2,7 +2,7 @@
 fn test_dir() {
     let t = rustix::fs::openat(
         rustix::fs::cwd(),
-        rustix::zstr!("."),
+        rustix::cstr!("."),
         rustix::fs::OFlags::RDONLY | rustix::fs::OFlags::CLOEXEC,
         rustix::fs::Mode::empty(),
     )
@@ -12,7 +12,7 @@ fn test_dir() {
 
     let _file = rustix::fs::openat(
         &t,
-        rustix::zstr!("Cargo.toml"),
+        rustix::cstr!("Cargo.toml"),
         rustix::fs::OFlags::RDONLY | rustix::fs::OFlags::CLOEXEC,
         rustix::fs::Mode::empty(),
     )
@@ -23,11 +23,11 @@ fn test_dir() {
     let mut saw_cargo_toml = false;
     for entry in dir {
         let entry = entry.unwrap();
-        if entry.file_name() == rustix::zstr!(".") {
+        if entry.file_name() == rustix::cstr!(".") {
             saw_dot = true;
-        } else if entry.file_name() == rustix::zstr!("..") {
+        } else if entry.file_name() == rustix::cstr!("..") {
             saw_dotdot = true;
-        } else if entry.file_name() == rustix::zstr!("Cargo.toml") {
+        } else if entry.file_name() == rustix::cstr!("Cargo.toml") {
             saw_cargo_toml = true;
         }
     }

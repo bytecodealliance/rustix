@@ -9,14 +9,14 @@ use super::fd::{AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, LibcFd, RawFd};
 #[cfg(not(windows))]
 use super::offset::libc_off_t;
 #[cfg(not(windows))]
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 use crate::io::{self, OwnedFd};
 #[cfg(windows)]
 use core::convert::TryInto;
 
 #[cfg(not(windows))]
 #[inline]
-pub(super) fn c_str(c: &ZStr) -> *const c::c_char {
+pub(super) fn c_str(c: &CStr) -> *const c::c_char {
     c.as_ptr().cast::<c::c_char>()
 }
 

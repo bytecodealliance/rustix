@@ -9,8 +9,6 @@
 #[macro_use]
 mod weak;
 
-#[cfg(not(target_os = "wasi"))]
-mod auxv;
 mod cpu_set;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;

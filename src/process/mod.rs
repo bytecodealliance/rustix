@@ -1,7 +1,5 @@
 //! Process-associated operations.
 
-#[cfg(feature = "process")]
-mod auxv;
 #[cfg(not(target_os = "wasi"))]
 mod chdir;
 mod exit;
@@ -28,26 +26,6 @@ mod uname;
 #[cfg(not(target_os = "wasi"))]
 mod wait;
 
-#[cfg(not(target_os = "wasi"))]
-#[cfg(feature = "process")]
-pub use auxv::clock_ticks_per_second;
-#[cfg(target_vendor = "mustang")]
-#[cfg(feature = "process")]
-pub use auxv::init;
-#[cfg(feature = "process")]
-pub use auxv::page_size;
-#[cfg(any(
-    linux_raw,
-    all(
-        libc,
-        any(
-            all(target_os = "android", target_pointer_width = "64"),
-            target_os = "linux"
-        )
-    )
-))]
-#[cfg(feature = "process")]
-pub use auxv::{linux_execfn, linux_hwcap};
 #[cfg(not(target_os = "wasi"))]
 pub use chdir::chdir;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]

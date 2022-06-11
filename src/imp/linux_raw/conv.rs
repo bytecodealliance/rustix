@@ -30,7 +30,7 @@ use super::reg::{raw_arg, ArgNumber, ArgReg, RetReg, R0};
 use super::time::types::ClockId;
 #[cfg(feature = "time")]
 use super::time::types::TimerfdClockId;
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 use crate::fs::{FileType, Mode, OFlags};
 use crate::io::{self, OwnedFd};
 use crate::process::{Pid, Resource, Signal};
@@ -115,17 +115,17 @@ impl<'a, Num: ArgNumber, T> From<*const T> for ArgReg<'a, Num> {
     }
 }
 
-impl<'a, Num: ArgNumber> From<&'a ZStr> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<&'a CStr> for ArgReg<'a, Num> {
     #[inline]
-    fn from(c: &'a ZStr) -> Self {
+    fn from(c: &'a CStr) -> Self {
         let mut_ptr = c.as_ptr() as *mut u8;
         raw_arg(mut_ptr.cast())
     }
 }
 
-impl<'a, Num: ArgNumber> From<Option<&'a ZStr>> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<Option<&'a CStr>> for ArgReg<'a, Num> {
     #[inline]
-    fn from(t: Option<&'a ZStr>) -> Self {
+    fn from(t: Option<&'a CStr>) -> Self {
         raw_arg(match t {
             Some(s) => {
                 let mut_ptr = s.as_ptr() as *mut u8;
@@ -678,11 +678,12 @@ pub(super) unsafe fn ret_error(raw: RetReg<R0>) -> io::Errno {
 /// always returns `()`.
 #[inline]
 pub(super) unsafe fn ret_infallible(raw: RetReg<R0>) {
-    let _ = raw;
     #[cfg(debug_assertions)]
     {
         try_decode_void(raw).unwrap()
     }
+    #[cfg(not(debug_assertions))]
+    drop(raw);
 }
 
 /// Convert a `usize` returned from a syscall that effectively returns a

@@ -2,7 +2,7 @@
 
 use super::super::c;
 #[cfg(unix)]
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 #[cfg(unix)]
 use crate::io;
 #[cfg(unix)]
@@ -36,11 +36,11 @@ impl SocketAddrUnix {
     /// Construct a new Unix-domain address from a filesystem path.
     #[inline]
     pub fn new<P: path::Arg>(path: P) -> io::Result<Self> {
-        path.into_with_z_str(Self::_new)
+        path.into_with_c_str(Self::_new)
     }
 
     #[inline]
-    fn _new(path: &ZStr) -> io::Result<Self> {
+    fn _new(path: &CStr) -> io::Result<Self> {
         let mut unix = Self::init();
         let bytes = path.to_bytes_with_nul();
         if bytes.len() > unix.sun_path.len() {
@@ -139,7 +139,7 @@ impl SocketAddrUnix {
 
     /// For a filesystem path address, return the path.
     #[inline]
-    pub fn path(&self) -> Option<&ZStr> {
+    pub fn path(&self) -> Option<&CStr> {
         let len = self.len();
         if len != 0 && self.unix.sun_path[0] != b'\0' as c::c_char {
             let end = len as usize - offsetof_sun_path();
@@ -147,7 +147,7 @@ impl SocketAddrUnix {
             // Safety: `from_raw_parts` to convert from `&[c_char]` to `&[u8]`. And
             // `from_bytes_with_nul_unchecked` since the string is NUL-terminated.
             unsafe {
-                Some(ZStr::from_bytes_with_nul_unchecked(slice::from_raw_parts(
+                Some(CStr::from_bytes_with_nul_unchecked(slice::from_raw_parts(
                     bytes.as_ptr().cast(),
                     bytes.len(),
                 )))

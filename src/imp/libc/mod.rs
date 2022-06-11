@@ -67,6 +67,14 @@ pub(crate) mod mm;
 #[cfg(feature = "net")]
 pub(crate) mod net;
 #[cfg(not(windows))]
+#[cfg(any(
+    feature = "param",
+    feature = "runtime",
+    feature = "time",
+    target_arch = "x86"
+))]
+pub(crate) mod param;
+#[cfg(not(windows))]
 pub(crate) mod process;
 #[cfg(not(windows))]
 #[cfg(feature = "rand")]

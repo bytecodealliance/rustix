@@ -4,13 +4,14 @@
 //!
 //! See the `rustix::imp` module documentation for details.
 #![allow(unsafe_code)]
+#![allow(clippy::undocumented_unsafe_blocks)]
 
 use super::super::c;
 #[cfg(target_arch = "x86")]
 use super::super::conv::by_mut;
 use super::super::conv::{c_int, c_uint, ret, ret_c_uint, ret_error, ret_usize_infallible, zero};
 use crate::fd::BorrowedFd;
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 use crate::fs::AtFlags;
 use crate::io;
 use crate::process::{Pid, RawNonZeroPid};
@@ -33,7 +34,7 @@ pub(crate) unsafe fn fork() -> io::Result<Option<Pid>> {
 
 pub(crate) unsafe fn execveat(
     dirfd: BorrowedFd<'_>,
-    path: &ZStr,
+    path: &CStr,
     args: *const *const u8,
     env_vars: *const *const u8,
     flags: AtFlags,
@@ -49,7 +50,7 @@ pub(crate) unsafe fn execveat(
 }
 
 pub(crate) unsafe fn execve(
-    path: &ZStr,
+    path: &CStr,
     args: *const *const u8,
     env_vars: *const *const u8,
 ) -> io::Errno {
@@ -92,7 +93,7 @@ pub(crate) mod tls {
     }
 
     #[inline]
-    pub(crate) unsafe fn set_thread_name(name: &ZStr) -> io::Result<()> {
+    pub(crate) unsafe fn set_thread_name(name: &CStr) -> io::Result<()> {
         ret(syscall_readonly!(__NR_prctl, c_uint(PR_SET_NAME), name))
     }
 

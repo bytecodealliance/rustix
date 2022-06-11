@@ -102,18 +102,10 @@
     feature(naked_functions)
 )]
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
+#![cfg_attr(core_c_str, feature(core_c_str))]
+#![cfg_attr(alloc_c_string, feature(alloc_ffi))]
+#![cfg_attr(alloc_c_string, feature(alloc_c_string))]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(all(not(feature = "std"), specialization), allow(incomplete_features))]
-#![cfg_attr(all(not(feature = "std"), specialization), feature(specialization))]
-#![cfg_attr(all(not(feature = "std"), slice_internals), feature(slice_internals))]
-#![cfg_attr(
-    all(not(feature = "std"), toowned_clone_into),
-    feature(toowned_clone_into)
-)]
-#![cfg_attr(
-    all(not(feature = "std"), vec_into_raw_parts),
-    feature(vec_into_raw_parts)
-)]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(core_intrinsics))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(ip))]
 #![cfg_attr(
@@ -129,7 +121,7 @@ extern crate alloc;
 // Internal utilities.
 #[cfg(not(windows))]
 #[macro_use]
-pub(crate) mod zstr;
+pub(crate) mod cstr;
 #[macro_use]
 pub(crate) mod const_assert;
 pub(crate) mod utils;
@@ -179,6 +171,10 @@ pub mod mm;
 #[cfg_attr(doc_cfg, doc(cfg(feature = "net")))]
 pub mod net;
 #[cfg(not(windows))]
+#[cfg(feature = "param")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "param")))]
+pub mod param;
+#[cfg(not(windows))]
 #[cfg(any(feature = "fs", feature = "net"))]
 #[cfg_attr(doc_cfg, doc(cfg(any(feature = "fs", feature = "net"))))]
 pub mod path;
@@ -217,6 +213,12 @@ pub mod runtime;
 #[cfg(not(windows))]
 #[cfg(not(feature = "fs"))]
 pub(crate) mod fs;
+#[cfg(not(windows))]
+#[cfg(all(
+    not(feature = "param"),
+    any(feature = "runtime", feature = "time", target_arch = "x86")
+))]
+pub(crate) mod param;
 #[cfg(not(windows))]
 #[cfg(not(any(feature = "fs", feature = "net")))]
 pub(crate) mod path;

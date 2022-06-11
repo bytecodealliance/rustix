@@ -1,4 +1,5 @@
 use super::super::c;
+use linux_raw_sys::general::membarrier_cmd;
 
 /// A command for use with [`membarrier`] and [`membarrier_cpu`].
 ///
@@ -13,31 +14,25 @@ pub enum MembarrierCommand {
     /// `MEMBARRIER_CMD_GLOBAL`
     #[doc(alias = "Shared")]
     #[doc(alias = "MEMBARRIER_CMD_SHARED")]
-    Global = linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_GLOBAL as _,
+    Global = membarrier_cmd::MEMBARRIER_CMD_GLOBAL as _,
     /// `MEMBARRIER_CMD_GLOBAL_EXPEDITED`
-    GlobalExpedited = linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_GLOBAL_EXPEDITED as _,
+    GlobalExpedited = membarrier_cmd::MEMBARRIER_CMD_GLOBAL_EXPEDITED as _,
     /// `MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED`
-    RegisterGlobalExpedited =
-        linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED as _,
+    RegisterGlobalExpedited = membarrier_cmd::MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED as _,
     /// `MEMBARRIER_CMD_PRIVATE_EXPEDITED`
-    PrivateExpedited =
-        linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_PRIVATE_EXPEDITED as _,
+    PrivateExpedited = membarrier_cmd::MEMBARRIER_CMD_PRIVATE_EXPEDITED as _,
     /// `MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED`
-    RegisterPrivateExpedited =
-        linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED as _,
+    RegisterPrivateExpedited = membarrier_cmd::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED as _,
     /// `MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE`
-    PrivateExpeditedSyncCore =
-        linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE as _,
+    PrivateExpeditedSyncCore = membarrier_cmd::MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE as _,
     /// `MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE`
     RegisterPrivateExpeditedSyncCore =
-        linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE
-            as _,
+        membarrier_cmd::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE as _,
     /// `MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ` (since Linux 5.10)
-    PrivateExpeditedRseq =
-        linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ as _,
+    PrivateExpeditedRseq = membarrier_cmd::MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ as _,
     /// `MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_RSEQ` (since Linux 5.10)
     RegisterPrivateExpeditedRseq =
-        linux_raw_sys::general::membarrier_cmd::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_RSEQ as _,
+        membarrier_cmd::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_RSEQ as _,
 }
 
 /// A resource value for use with [`getrlimit`], [`setrlimit`], and

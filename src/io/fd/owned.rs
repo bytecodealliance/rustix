@@ -31,6 +31,7 @@ use core::mem::forget;
 // because c_int is 32 bits.
 #[cfg_attr(rustc_attrs, rustc_layout_scalar_valid_range_end(0xFF_FF_FF_FE))]
 #[cfg_attr(staged_api, unstable(feature = "io_safety", issue = "87074"))]
+#[cfg_attr(rustc_attrs, rustc_nonnull_optimization_guaranteed)]
 pub struct BorrowedFd<'fd> {
     fd: RawFd,
     _phantom: PhantomData<&'fd OwnedFd>,
@@ -51,6 +52,7 @@ pub struct BorrowedFd<'fd> {
 // because c_int is 32 bits.
 #[cfg_attr(rustc_attrs, rustc_layout_scalar_valid_range_end(0xFF_FF_FF_FE))]
 #[cfg_attr(staged_api, unstable(feature = "io_safety", issue = "87074"))]
+#[cfg_attr(rustc_attrs, rustc_nonnull_optimization_guaranteed)]
 pub struct OwnedFd {
     fd: RawFd,
 }
@@ -64,8 +66,8 @@ impl BorrowedFd<'_> {
     /// the returned `BorrowedFd`, and it must not have the value `-1`.
     #[inline]
     #[cfg_attr(staged_api, unstable(feature = "io_safety", issue = "87074"))]
-    pub unsafe fn borrow_raw(fd: RawFd) -> Self {
-        assert_ne!(fd, u32::MAX as RawFd);
+    pub const unsafe fn borrow_raw(fd: RawFd) -> Self {
+        assert!(fd != u32::MAX as RawFd);
         // SAFETY: we just asserted that the value is in the valid range and isn't `-1` (the only value bigger than `0xFF_FF_FF_FE` unsigned)
         #[allow(unused_unsafe)]
         unsafe {

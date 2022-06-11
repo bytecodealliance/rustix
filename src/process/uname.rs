@@ -6,7 +6,7 @@
 //! kernel into `&str` references, which assumes that they're NUL-terminated.
 #![allow(unsafe_code)]
 
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 use crate::imp;
 use core::fmt;
 
@@ -24,7 +24,7 @@ pub struct Uname(imp::process::types::RawUname);
 impl Uname {
     /// `sysname`—Operating system release name
     #[inline]
-    pub fn sysname(&self) -> &ZStr {
+    pub fn sysname(&self) -> &CStr {
         Self::to_cstr(self.0.sysname.as_ptr().cast())
     }
 
@@ -34,39 +34,39 @@ impl Uname {
     /// information about hosts that have multiple names, or any information
     /// about where the names are visible.
     #[inline]
-    pub fn nodename(&self) -> &ZStr {
+    pub fn nodename(&self) -> &CStr {
         Self::to_cstr(self.0.nodename.as_ptr().cast())
     }
 
     /// `release`—Operating system release version string
     #[inline]
-    pub fn release(&self) -> &ZStr {
+    pub fn release(&self) -> &CStr {
         Self::to_cstr(self.0.release.as_ptr().cast())
     }
 
     /// `version`—Operating system build identifiers
     #[inline]
-    pub fn version(&self) -> &ZStr {
+    pub fn version(&self) -> &CStr {
         Self::to_cstr(self.0.version.as_ptr().cast())
     }
 
     /// `machine`—Hardware architecture identifier
     #[inline]
-    pub fn machine(&self) -> &ZStr {
+    pub fn machine(&self) -> &CStr {
         Self::to_cstr(self.0.machine.as_ptr().cast())
     }
 
     /// `domainname`—NIS or YP domain identifier
     #[cfg(any(target_os = "android", target_os = "linux"))]
     #[inline]
-    pub fn domainname(&self) -> &ZStr {
+    pub fn domainname(&self) -> &CStr {
         Self::to_cstr(self.0.domainname.as_ptr().cast())
     }
 
     #[inline]
-    fn to_cstr<'a>(ptr: *const u8) -> &'a ZStr {
+    fn to_cstr<'a>(ptr: *const u8) -> &'a CStr {
         // Safety: Strings returned from the kernel are always NUL-terminated.
-        unsafe { ZStr::from_ptr(ptr.cast()) }
+        unsafe { CStr::from_ptr(ptr.cast()) }
     }
 }
 

@@ -45,7 +45,7 @@ bitflags::bitflags! {
 impl MembarrierQuery {
     /// Test whether this query result contains the given command.
     #[inline]
-    pub fn contains_command(&self, cmd: MembarrierCommand) -> bool {
+    pub fn contains_command(self, cmd: MembarrierCommand) -> bool {
         // Safety: `MembarrierCommand` is an enum that only contains values
         // also valid in `MembarrierQuery`.
         self.contains(unsafe { Self::from_bits_unchecked(cmd as _) })

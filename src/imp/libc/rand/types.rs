@@ -13,5 +13,7 @@ bitflags! {
         const RANDOM = c::GRND_RANDOM;
         /// `GRND_NONBLOCK`
         const NONBLOCK = c::GRND_NONBLOCK;
+        /// `GRND_INSECURE`
+        const INSECURE = c::GRND_INSECURE;
     }
 }

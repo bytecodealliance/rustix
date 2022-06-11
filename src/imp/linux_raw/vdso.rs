@@ -16,7 +16,7 @@ use super::c;
 use super::elf::*;
 use super::mm::syscalls::madvise;
 use super::mm::types::Advice;
-use crate::ffi::ZStr;
+use crate::ffi::CStr;
 use crate::io;
 use core::ffi::c_void;
 use core::mem::{align_of, size_of};
@@ -42,7 +42,7 @@ pub(super) struct Vdso {
 }
 
 // Straight from the ELF specification.
-fn elf_hash(name: &ZStr) -> u32 {
+fn elf_hash(name: &CStr) -> u32 {
     let mut h: u32 = 0;
     for b in name.to_bytes() {
         h = (h << 4).wrapping_add(u32::from(*b));
@@ -303,7 +303,7 @@ impl Vdso {
     /// # Safety
     ///
     /// The raw pointers inside `self` must be valid.
-    unsafe fn match_version(&self, mut ver: u16, name: &ZStr, hash: u32) -> bool {
+    unsafe fn match_version(&self, mut ver: u16, name: &CStr, hash: u32) -> bool {
         // This is a helper function to check if the version indexed by
         // ver matches name (which hashes to hash).
         //
@@ -344,11 +344,11 @@ impl Vdso {
             .add((*def).vd_aux as usize)
             .cast::<Elf_Verdaux>();
         (*def).vd_hash == hash
-            && (name == ZStr::from_ptr(self.symstrings.add(aux.vda_name as usize).cast()))
+            && (name == CStr::from_ptr(self.symstrings.add(aux.vda_name as usize).cast()))
     }
 
     /// Look up a symbol in the vDSO.
-    pub(super) fn sym(&self, version: &ZStr, name: &ZStr) -> *mut c::c_void {
+    pub(super) fn sym(&self, version: &CStr, name: &CStr) -> *mut c::c_void {
         let ver_hash = elf_hash(version);
         let name_hash = elf_hash(name);
 
@@ -371,7 +371,7 @@ impl Vdso {
                     || sym.st_shndx == SHN_UNDEF
                     || sym.st_shndx == SHN_ABS
                     || ELF_ST_VISIBILITY(sym.st_other) != STV_DEFAULT
-                    || (name != ZStr::from_ptr(self.symstrings.add(sym.st_name as usize).cast()))
+                    || (name != CStr::from_ptr(self.symstrings.add(sym.st_name as usize).cast()))
                     // Check symbol version.
                     || (!self.versym.is_null()
                         && !self.match_version(*self.versym.add(chain as usize), version, ver_hash))
@@ -431,5 +431,5 @@ unsafe fn init_from_auxv(elf_auxv: *const Elf_auxv_t) -> Option<Vdso> {
 fn init_from_auxv() -> Option<Vdso> {
     // Safety: `sysinfo_ehdr` does extensive checks to ensure that the value
     // we get really is an `AT_SYSINFO_EHDR` value from the kernel.
-    unsafe { init_from_sysinfo_ehdr(super::process::auxv::sysinfo_ehdr()) }
+    unsafe { init_from_sysinfo_ehdr(super::param::auxv::sysinfo_ehdr()) }
 }
