@@ -17,7 +17,7 @@ use core::convert::TryInto;
 #[cfg(not(windows))]
 #[inline]
 pub(super) fn c_str(c: &CStr) -> *const c::c_char {
-    c.as_ptr().cast::<c::c_char>()
+    c.as_ptr()
 }
 
 #[cfg(not(windows))]
