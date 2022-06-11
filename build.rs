@@ -17,6 +17,7 @@ fn main() {
     #[cfg(not(feature = "std"))]
     {
         use_feature_or_nothing("const_raw_ptr_deref");
+        use_feature_or_nothing("core_ffi_c");
         use_feature_or_nothing("core_c_str");
         use_feature_or_nothing("alloc_c_string");
     }
