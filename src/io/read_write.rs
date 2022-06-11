@@ -20,9 +20,11 @@ pub use imp::io::types::ReadWriteFlags;
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/read.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/read.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/read.2.html
 #[inline]
 pub fn read<Fd: AsFd>(fd: Fd, buf: &mut [u8]) -> io::Result<usize> {
     imp::io::syscalls::read(fd.as_fd(), buf)
@@ -33,9 +35,11 @@ pub fn read<Fd: AsFd>(fd: Fd, buf: &mut [u8]) -> io::Result<usize> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/write.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/write.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/write.2.html
 #[inline]
 pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
     imp::io::syscalls::write(fd.as_fd(), buf)
@@ -46,9 +50,11 @@ pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/pread.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/pread.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/pread.2.html
 #[inline]
 pub fn pread<Fd: AsFd>(fd: Fd, buf: &mut [u8], offset: u64) -> io::Result<usize> {
     imp::io::syscalls::pread(fd.as_fd(), buf, offset)
@@ -59,9 +65,11 @@ pub fn pread<Fd: AsFd>(fd: Fd, buf: &mut [u8], offset: u64) -> io::Result<usize>
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/pwrite.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/pwrite.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/pwrite.2.html
 #[inline]
 pub fn pwrite<Fd: AsFd>(fd: Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
     imp::io::syscalls::pwrite(fd.as_fd(), buf, offset)
@@ -72,9 +80,11 @@ pub fn pwrite<Fd: AsFd>(fd: Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/readv.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/readv.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/readv.2.html
 #[inline]
 pub fn readv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize> {
     imp::io::syscalls::readv(fd.as_fd(), bufs)
@@ -85,9 +95,11 @@ pub fn readv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize>
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/writev.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/writev.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/writev.2.html
 #[inline]
 pub fn writev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
     imp::io::syscalls::writev(fd.as_fd(), bufs)
