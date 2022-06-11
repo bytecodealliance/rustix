@@ -684,7 +684,7 @@ pub struct io_uring_sqe {
     pub buf: buf_union,
     pub personality: u16,
     pub splice_fd_in_or_file_index: splice_fd_in_or_file_index_union,
-    pub __pad2: [u64; 2_usize],
+    pub __pad2: [u64; 2],
 }
 
 #[allow(missing_docs)]
@@ -763,7 +763,7 @@ pub struct io_uring_restriction {
     pub opcode: IoringRestrictionOp,
     pub register_or_sqe_op_or_sqe_flags: register_or_sqe_op_or_sqe_flags_union,
     pub resv: u8,
-    pub resv2: [u32; 3_usize],
+    pub resv2: [u32; 3],
 }
 
 #[allow(missing_docs)]
@@ -786,7 +786,7 @@ pub struct io_uring_params {
     pub sq_thread_idle: u32,
     pub features: IoringFeatureFlags,
     pub wq_fd: u32,
-    pub resv: [u32; 3_usize],
+    pub resv: [u32; 3],
     pub sq_off: io_sqring_offsets,
     pub cq_off: io_cqring_offsets,
 }
@@ -828,7 +828,7 @@ pub struct io_uring_probe {
     pub last_op: IoringOp,
     pub ops_len: u8,
     pub resv: u16,
-    pub resv2: [u32; 3_usize],
+    pub resv2: [u32; 3],
     pub ops: sys::__IncompleteArrayField<io_uring_probe_op>,
 }
 

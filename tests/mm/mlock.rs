@@ -7,7 +7,7 @@ use std::ffi::c_void;
 
 #[test]
 fn test_mlock() {
-    let mut buf = vec![0u8; 4096];
+    let mut buf = vec![0_u8; 4096];
 
     unsafe {
         match rustix::mm::mlock(buf.as_mut_ptr().cast::<c_void>(), buf.len()) {
@@ -23,7 +23,7 @@ fn test_mlock() {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn test_mlock_with() {
-    let mut buf = vec![0u8; 4096];
+    let mut buf = vec![0_u8; 4096];
 
     unsafe {
         match rustix::mm::mlock_with(
@@ -59,7 +59,7 @@ fn test_mlock_with_onfault() {
         }
     }
 
-    let mut buf = vec![0u8; 4096];
+    let mut buf = vec![0_u8; 4096];
 
     unsafe {
         match rustix::mm::mlock_with(
