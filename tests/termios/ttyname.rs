@@ -1,15 +1,17 @@
 use rustix::io;
-use rustix::termios::ttyname;
+use rustix::termios::{isatty, ttyname};
 use std::fs::File;
 
 #[test]
 fn test_ttyname_ok() {
     let file = File::open("/dev/stdin").unwrap();
-    assert!(ttyname(&file, Vec::new())
-        .unwrap()
-        .into_string()
-        .unwrap()
-        .starts_with("/dev/"));
+    if isatty(&file) {
+        assert!(ttyname(&file, Vec::new())
+            .unwrap()
+            .into_string()
+            .unwrap()
+            .starts_with("/dev/"));
+    }
 }
 
 #[test]
