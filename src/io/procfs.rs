@@ -75,10 +75,8 @@ fn check_proc_entry_with_stat(
     // Check the ownership of the directory. We can't do that for the toplevel
     // "/proc" though, because in e.g. a user namespace scenario, root outside
     // the container may be mapped to another uid like `nobody`.
-    if !matches!(kind, Kind::Proc) {
-        if (entry_stat.st_uid, entry_stat.st_gid) != (uid, gid) {
-            return Err(io::Errno::NOTSUP);
-        }
+    if !matches!(kind, Kind::Proc) && (entry_stat.st_uid, entry_stat.st_gid) != (uid, gid) {
+        return Err(io::Errno::NOTSUP);
     }
 
     // "/proc" directories are typically mounted r-xr-xr-x.
