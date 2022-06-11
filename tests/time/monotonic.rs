@@ -37,7 +37,7 @@ fn test_monotonic_clock_with_sleep_1ms() {
     let a = clock_gettime(ClockId::Monotonic);
     let _rem = nanosleep(&Timespec {
         tv_sec: 0,
-        tv_nsec: 1000000,
+        tv_nsec: 1_000_000,
     });
     let b = clock_gettime(ClockId::Monotonic);
     assert!(b.tv_sec >= a.tv_sec);

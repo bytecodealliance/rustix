@@ -463,7 +463,7 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
         let timeout = if timeout >= 0 {
             Some(__kernel_timespec {
                 tv_sec: (timeout as i64) / 1000,
-                tv_nsec: (timeout as i64) % 1000 * 1000000,
+                tv_nsec: (timeout as i64) % 1000 * 1_000_000,
             })
         } else {
             None

@@ -295,6 +295,8 @@ unsafe fn timerfd_settime_old(
     use core::convert::TryInto;
 
     let mut old_result = MaybeUninit::<c::itimerspec>::uninit();
+
+    // Convert `new_value` to the old `itimerspec` format.
     let old_new_value = c::itimerspec {
         it_interval: c::timespec {
             tv_sec: new_value
@@ -302,7 +304,11 @@ unsafe fn timerfd_settime_old(
                 .tv_sec
                 .try_into()
                 .map_err(|_| io::Errno::OVERFLOW)?,
-            tv_nsec: new_value.it_interval.tv_nsec as _,
+            tv_nsec: new_value
+                .it_interval
+                .tv_nsec
+                .try_into()
+                .map_err(|_| io::Errno::INVAL)?,
         },
         it_value: c::timespec {
             tv_sec: new_value
@@ -310,7 +316,11 @@ unsafe fn timerfd_settime_old(
                 .tv_sec
                 .try_into()
                 .map_err(|_| io::Errno::OVERFLOW)?,
-            tv_nsec: new_value.it_value.tv_nsec as _,
+            tv_nsec: new_value
+                .it_value
+                .tv_nsec
+                .try_into()
+                .map_err(|_| io::Errno::INVAL)?,
         },
     };
 

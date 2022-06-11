@@ -123,6 +123,8 @@ unsafe fn timerfd_settime_old(
     result: &mut MaybeUninit<Itimerspec>,
 ) -> io::Result<()> {
     let mut old_result = MaybeUninit::<__kernel_old_itimerspec>::uninit();
+
+    // Convert `new_value` to the old `__kernel_old_itimerspec` format.
     let old_new_value = __kernel_old_itimerspec {
         it_interval: __kernel_old_timespec {
             tv_sec: new_value

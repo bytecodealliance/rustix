@@ -19,14 +19,28 @@ use {
 fn test_invalid_nanosleep() {
     match nanosleep(&Timespec {
         tv_sec: 0,
-        tv_nsec: 1000000000,
+        tv_nsec: 1_000_000_000,
     }) {
         NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
         otherwise => panic!("unexpected resut: {:?}", otherwise),
     }
     match nanosleep(&Timespec {
         tv_sec: 0,
-        tv_nsec: -1 as _,
+        tv_nsec: !0,
+    }) {
+        NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
+        otherwise => panic!("unexpected resut: {:?}", otherwise),
+    }
+    match nanosleep(&Timespec {
+        tv_sec: !0,
+        tv_nsec: 1_000_000_000,
+    }) {
+        NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
+        otherwise => panic!("unexpected resut: {:?}", otherwise),
+    }
+    match nanosleep(&Timespec {
+        tv_sec: !0,
+        tv_nsec: !0,
     }) {
         NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
         otherwise => panic!("unexpected resut: {:?}", otherwise),
@@ -58,7 +72,27 @@ fn test_invalid_nanosleep_absolute() {
         ClockId::Monotonic,
         &Timespec {
             tv_sec: 0,
-            tv_nsec: -1 as _,
+            tv_nsec: !0,
+        },
+    ) {
+        Err(io::Errno::INVAL) => (),
+        otherwise => panic!("unexpected resut: {:?}", otherwise),
+    }
+    match clock_nanosleep_absolute(
+        ClockId::Monotonic,
+        &Timespec {
+            tv_sec: !0,
+            tv_nsec: 1_000_000_000,
+        },
+    ) {
+        Err(io::Errno::INVAL) => (),
+        otherwise => panic!("unexpected resut: {:?}", otherwise),
+    }
+    match clock_nanosleep_absolute(
+        ClockId::Monotonic,
+        &Timespec {
+            tv_sec: !0,
+            tv_nsec: !0,
         },
     ) {
         Err(io::Errno::INVAL) => (),
@@ -81,7 +115,7 @@ fn test_invalid_nanosleep_relative() {
         ClockId::Monotonic,
         &Timespec {
             tv_sec: 0,
-            tv_nsec: 1000000000,
+            tv_nsec: 1_000_000_000,
         },
     ) {
         NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
@@ -91,7 +125,27 @@ fn test_invalid_nanosleep_relative() {
         ClockId::Monotonic,
         &Timespec {
             tv_sec: 0,
-            tv_nsec: -1 as _,
+            tv_nsec: !0,
+        },
+    ) {
+        NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
+        otherwise => panic!("unexpected resut: {:?}", otherwise),
+    }
+    match clock_nanosleep_relative(
+        ClockId::Monotonic,
+        &Timespec {
+            tv_sec: !0,
+            tv_nsec: 1_000_000_000,
+        },
+    ) {
+        NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
+        otherwise => panic!("unexpected resut: {:?}", otherwise),
+    }
+    match clock_nanosleep_relative(
+        ClockId::Monotonic,
+        &Timespec {
+            tv_sec: !0,
+            tv_nsec: !0,
         },
     ) {
         NanosleepRelativeResult::Err(io::Errno::INVAL) => (),

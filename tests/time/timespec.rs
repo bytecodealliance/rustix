@@ -21,6 +21,6 @@ fn test_timespec_layout() {
     let _ = Timespec { tv_sec, tv_nsec: 0 };
     let _ = Timespec {
         tv_sec,
-        tv_nsec: 999999999,
+        tv_nsec: 999_999_999,
     };
 }

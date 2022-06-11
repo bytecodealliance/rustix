@@ -585,7 +585,7 @@ pub(crate) mod sockopt {
 
                 // `as_millis` rounds down, so we use `as_nanos` and
                 // manually round up.
-                let mut timeout: u32 = ((timeout.as_nanos() + 999999) / 1000000)
+                let mut timeout: u32 = ((timeout.as_nanos() + 999_999) / 1_000_000)
                     .try_into()
                     .map_err(|_convert_err| io::Errno::INVAL)?;
                 if timeout == 0 {
