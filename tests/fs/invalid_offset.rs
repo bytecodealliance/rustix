@@ -112,7 +112,7 @@ fn invalid_offset_pread() {
     )
     .unwrap();
 
-    let mut buf = [0_u8; 1_usize];
+    let mut buf = [0_u8; 1];
     pread(&file, &mut buf, u64::MAX).unwrap_err();
     pread(&file, &mut buf, i64::MAX as u64 + 1).unwrap_err();
 }
@@ -132,7 +132,7 @@ fn invalid_offset_pwrite() {
     )
     .unwrap();
 
-    let buf = [0_u8; 1_usize];
+    let buf = [0_u8; 1];
     pwrite(&file, &buf, u64::MAX).unwrap_err();
     pwrite(&file, &buf, i64::MAX as u64 + 1).unwrap_err();
 }
