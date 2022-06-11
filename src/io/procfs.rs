@@ -128,7 +128,7 @@ fn check_proc_root(entry: BorrowedFd<'_>, stat: &Stat) -> io::Result<()> {
 
     // Proc is a non-device filesystem, so check for major number 0.
     // <https://www.kernel.org/doc/Documentation/admin-guide/devices.txt>
-    if major(stat.st_dev.into()) != 0 {
+    if major(stat.st_dev) != 0 {
         return Err(io::Errno::NOTSUP);
     }
 
