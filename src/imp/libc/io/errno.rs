@@ -271,9 +271,9 @@ impl Errno {
     /// `EINTR`
     ///
     /// For a convenient way to retry system calls that exit with `INTR`, use
-    /// [`with_retrying`].
+    /// [`retry_on_intr`].
     ///
-    /// [`with_retrying`]: crate::io::with_retrying
+    /// [`retry_on_intr`]: crate::io::retry_on_intr
     pub const INTR: Self = Self(c::EINTR);
     /// `EINVAL`
     pub const INVAL: Self = Self(c::EINVAL);
