@@ -491,7 +491,7 @@ pub(crate) fn utimensat(
                 options: c::c_ulong,
             ) -> c::c_int;
         }
-        const FSOPT_NOFOLLOW: c::c_ulong = 0x00000001;
+        const FSOPT_NOFOLLOW: c::c_ulong = 0x0000_0001;
 
         // If we have `utimensat`, use it.
         if let Some(have_utimensat) = utimensat.get() {
@@ -1588,8 +1588,8 @@ pub(crate) fn fcntl_fullfsync(fd: BorrowedFd<'_>) -> io::Result<()> {
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 fn times_to_attrlist(times: &Timestamps) -> (c::size_t, [c::timespec; 2], Attrlist) {
     // ABI details.
-    const ATTR_CMN_MODTIME: u32 = 0x00000400;
-    const ATTR_CMN_ACCTIME: u32 = 0x00001000;
+    const ATTR_CMN_MODTIME: u32 = 0x0000_0400;
+    const ATTR_CMN_ACCTIME: u32 = 0x0000_1000;
     const ATTR_BIT_MAP_COUNT: u16 = 5;
 
     let mut times = times.clone();
