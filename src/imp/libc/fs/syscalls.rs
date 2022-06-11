@@ -136,6 +136,8 @@ use {
 #[cfg(not(target_os = "redox"))]
 use {super::super::offset::libc_openat, crate::fs::AtFlags};
 
+use crate::utils::unwrap_fchown_args;
+
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu"
@@ -676,16 +678,17 @@ pub(crate) fn fclonefileat(
 pub(crate) fn chownat(
     dirfd: BorrowedFd<'_>,
     path: &ZStr,
-    owner: Uid,
-    group: Gid,
+    owner: Option<Uid>,
+    group: Option<Gid>,
     flags: AtFlags,
 ) -> io::Result<()> {
     unsafe {
+        let (ow, gr) = unwrap_fchown_args(owner, group);
         ret(c::fchownat(
             borrowed_fd(dirfd),
             c_str(path),
-            owner.as_raw(),
-            group.as_raw(),
+            ow,
+            gr,
             flags.bits(),
         ))
     }
@@ -883,20 +886,28 @@ pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Uid, group: Gid) -> io::Result<()> {
+pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
+    // Use `c::syscall` rather than `c::fchown` because some libc
+    // implementations, such as musl, add extra logic to `fchown` to emulate
+    // support for `O_PATH`, which uses `/proc` outside our control and
+    // interferes with our own use of `O_PATH`.
     unsafe {
+        let (ow, gr) = unwrap_fchown_args(owner, group);
         syscall_ret(c::syscall(
             c::SYS_fchown,
             borrowed_fd(fd),
-            owner.as_raw(),
-            group.as_raw(),
+            ow,
+            gr,
         ))
     }
 }
 
 #[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
-pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Uid, group: Gid) -> io::Result<()> {
-    unsafe { ret(c::fchown(borrowed_fd(fd), owner.as_raw(), group.as_raw())) }
+pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
+    unsafe { 
+        let (ow, gr) = unwrap_fchown_args(owner, group);
+        ret(c::fchown(borrowed_fd(fd), ow, gr)) 
+    }
 }
 
 #[cfg(not(target_os = "wasi"))]

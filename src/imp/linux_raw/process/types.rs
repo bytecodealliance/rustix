@@ -219,9 +219,9 @@ pub type RawPid = u32;
 /// A non-zero process identifier as a raw non-zero integer.
 pub type RawNonZeroPid = core::num::NonZeroU32;
 /// A group identifier as a raw integer.
-pub type RawGid = i32;
+pub type RawGid = u32;
 /// A user identifier as a raw integer.
-pub type RawUid = i32;
+pub type RawUid = u32;
 /// A CPU identifier as a raw integer.
 pub type RawCpuid = u32;
 

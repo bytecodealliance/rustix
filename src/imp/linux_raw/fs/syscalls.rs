@@ -52,6 +52,8 @@ use {
     linux_raw_sys::general::timespec as __kernel_old_timespec,
 };
 
+use crate::utils::unwrap_fchown_args;
+
 #[inline]
 pub(crate) fn open(filename: &ZStr, flags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
@@ -155,17 +157,18 @@ pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
 pub(crate) fn chownat(
     dirfd: BorrowedFd<'_>,
     filename: &ZStr,
-    owner: Uid,
-    group: Gid,
+    owner: Option<Uid>,
+    group: Option<Gid>,
     flags: AtFlags,
 ) -> io::Result<()> {
     unsafe {
+        let (ow, gr) = unwrap_fchown_args(owner, group);
         ret(syscall_readonly!(
             __NR_fchownat,
             dirfd,
             filename,
-            c_int(owner.as_raw()),
-            c_int(group.as_raw()),
+            c_uint(ow),
+            c_uint(gr),
             flags
         ))
     }
@@ -174,17 +177,8 @@ pub(crate) fn chownat(
 #[inline]
 pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
     unsafe {
-        let ow = match owner {
-            Some(o) => o.as_raw(),
-            None => -1,
-        };
-
-        let gr = match group {
-            Some(g) => g.as_raw(),
-            None => -1,
-        };
-
-        ret(syscall_readonly!(__NR_fchown, fd, c_int(ow), c_int(gr)))
+        let (ow, gr) = unwrap_fchown_args(owner, group);
+        ret(syscall_readonly!(__NR_fchown, fd, c_uint(ow), c_uint(gr)))
     }
 }
 
