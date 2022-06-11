@@ -1549,7 +1549,7 @@ pub(crate) fn fcntl_rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::R
     // The `F_RDADVISE` command operates on the following structure which holds
     // information passed from the user to the system:
     //
-    // ```
+    // ```c
     // struct radvisory {
     //      off_t   ra_offset;  /* offset into the file */
     //      int     ra_count;   /* size of the read     */
