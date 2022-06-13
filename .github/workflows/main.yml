@@ -70,6 +70,8 @@ jobs:
         mips64el-unknown-linux-gnuabi64
         armv5te-unknown-linux-gnueabi
         s390x-unknown-linux-gnu
+        arm-linux-androideabi
+        aarch64-apple-ios
     - name: Install cross-compilation tools
       run: |
         set -ex
@@ -101,6 +103,8 @@ jobs:
     - run: cargo check --workspace --release -vv --target=mips64el-unknown-linux-gnuabi64 --features=all-apis
     - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi --features=all-apis
     - run: cargo check --workspace --release -vv --target=s390x-unknown-linux-gnu --features=all-apis
+    - run: cargo check --workspace --release -vv --target=arm-linux-androideabi --features=all-apis
+    - run: cargo check --workspace --release -vv --target=aarch64-apple-ios --features=all-apis
 
   check_no_default_features:
     name: Check --no-default-features
@@ -223,7 +227,8 @@ jobs:
             target: mips64el-unknown-linux-gnuabi64
             gcc_package: gcc-mips64el-linux-gnuabi64
             gcc: mips64el-linux-gnuabi64-gcc
-            qemu: qemu-mips64el -L /usr/mips64el-linux-gnuabi64
+            qemu: qemu-mips64el
+            qemu_args: -L /usr/mips64el-linux-gnuabi64
             qemu_target: mips64el-linux-user
           - build: mipsel-linux
             os: ubuntu-latest
@@ -231,7 +236,8 @@ jobs:
             target: mipsel-unknown-linux-gnu
             gcc_package: gcc-mipsel-linux-gnu
             gcc: mipsel-linux-gnu-gcc
-            qemu: qemu-mipsel -L /usr/mipsel-linux-gnu
+            qemu: qemu-mipsel
+            qemu_args: -L /usr/mipsel-linux-gnu
             qemu_target: mipsel-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
@@ -312,7 +318,8 @@ jobs:
             target: mips64el-unknown-linux-gnuabi64
             gcc_package: gcc-mips64el-linux-gnuabi64
             gcc: mips64el-linux-gnuabi64-gcc
-            qemu: qemu-mips64el -L /usr/mips64el-linux-gnuabi64
+            qemu: qemu-mips64el
+            qemu_args: -L /usr/mips64el-linux-gnuabi64
             qemu_target: mips64el-linux-user
           - build: mipsel-linux-stable
             os: ubuntu-latest
@@ -320,7 +327,8 @@ jobs:
             target: mipsel-unknown-linux-gnu
             gcc_package: gcc-mipsel-linux-gnu
             gcc: mipsel-linux-gnu-gcc
-            qemu: qemu-mipsel -L /usr/mipsel-linux-gnu
+            qemu: qemu-mipsel
+            qemu_args: -L /usr/mipsel-linux-gnu
             qemu_target: mipsel-linux-user
           - build: arm-linux-stable
             os: ubuntu-latest
@@ -456,7 +464,8 @@ jobs:
             target: mips64el-unknown-linux-gnuabi64
             gcc_package: gcc-mips64el-linux-gnuabi64
             gcc: mips64el-linux-gnuabi64-gcc
-            qemu: qemu-mips64el -L /usr/mips64el-linux-gnuabi64
+            qemu: qemu-mips64el
+            qemu_args: -L /usr/mips64el-linux-gnuabi64
             qemu_target: mips64el-linux-user
           - build: mipsel-linux
             os: ubuntu-latest
@@ -464,7 +473,8 @@ jobs:
             target: mipsel-unknown-linux-gnu
             gcc_package: gcc-mipsel-linux-gnu
             gcc: mipsel-linux-gnu-gcc
-            qemu: qemu-mipsel -L /usr/mipsel-linux-gnu
+            qemu: qemu-mipsel
+            qemu_args: -L /usr/mipsel-linux-gnu
             qemu_target: mipsel-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
@@ -577,7 +587,8 @@ jobs:
             target: mips64el-unknown-linux-gnuabi64
             gcc_package: gcc-mips64el-linux-gnuabi64
             gcc: mips64el-linux-gnuabi64-gcc
-            qemu: qemu-mips64el -L /usr/mips64el-linux-gnuabi64
+            qemu: qemu-mips64el
+            qemu_args: -L /usr/mips64el-linux-gnuabi64
             qemu_target: mips64el-linux-user
           - build: mipsel-linux
             os: ubuntu-latest
@@ -585,7 +596,8 @@ jobs:
             target: mipsel-unknown-linux-gnu
             gcc_package: gcc-mipsel-linux-gnu
             gcc: mipsel-linux-gnu-gcc
-            qemu: qemu-mipsel -L /usr/mipsel-linux-gnu
+            qemu: qemu-mipsel
+            qemu_args: -L /usr/mipsel-linux-gnu
             qemu_target: mipsel-linux-user
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.

@@ -1232,12 +1232,12 @@ pub(crate) fn sendfile(
 ))]
 fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
     Ok(Stat {
-        st_dev: crate::fs::makedev(x.stx_dev_major, x.stx_dev_minor),
+        st_dev: crate::fs::makedev(x.stx_dev_major, x.stx_dev_minor).into(),
         st_mode: x.stx_mode.into(),
         st_nlink: x.stx_nlink.into(),
         st_uid: x.stx_uid.into(),
         st_gid: x.stx_gid.into(),
-        st_rdev: crate::fs::makedev(x.stx_rdev_major, x.stx_rdev_minor),
+        st_rdev: crate::fs::makedev(x.stx_rdev_major, x.stx_rdev_minor).into(),
         st_size: x.stx_size.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         st_blksize: x.stx_blksize.into(),
         st_blocks: x.stx_blocks.into(),
