@@ -66,10 +66,9 @@ pub use read_write::{pread, pwrite, read, readv, write, writev, IoSlice, IoSlice
 pub use read_write::{preadv, pwritev};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use read_write::{preadv2, pwritev2, ReadWriteFlags};
-#[cfg(not(windows))]
-pub use stdio::{stderr, stdin, stdout, take_stderr, take_stdin, take_stdout};
-
 #[cfg(not(feature = "std"))]
 pub use seek_from::SeekFrom;
 #[cfg(feature = "std")]
 pub use std::io::SeekFrom;
+#[cfg(not(windows))]
+pub use stdio::{stderr, stdin, stdout, take_stderr, take_stdin, take_stdout};

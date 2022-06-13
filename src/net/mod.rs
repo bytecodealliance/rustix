@@ -21,8 +21,6 @@ mod wsa;
 
 pub mod sockopt;
 
-#[cfg(unix)]
-pub use send_recv::sendto_unix;
 pub use send_recv::{
     recv, recvfrom, send, sendto, sendto_any, sendto_v4, sendto_v6, RecvFlags, SendFlags,
 };
@@ -31,18 +29,20 @@ pub use socket::{
     connect_any, connect_v4, connect_v6, getpeername, getsockname, listen, shutdown, socket,
     socket_with, AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType,
 };
-#[cfg(unix)]
-pub use socket::{bind_unix, connect_unix, SocketAddrUnix};
 pub use socket_addr_any::{SocketAddrAny, SocketAddrStorage};
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use socketpair::socketpair;
-#[cfg(windows)]
-pub use wsa::{wsa_cleanup, wsa_startup};
-
-// Declare the `Ip` and `Socket` address types.
-#[cfg(not(feature = "std"))]
-pub use addr::{SocketAddr, SocketAddrV4, SocketAddrV6};
-#[cfg(not(feature = "std"))]
-pub use ip::{IpAddr, Ipv4Addr, Ipv6Addr, Ipv6MulticastScope};
 #[cfg(feature = "std")]
 pub use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
+#[cfg(windows)]
+pub use wsa::{wsa_cleanup, wsa_startup};
+#[cfg(not(feature = "std"))]
+pub use {
+    addr::{SocketAddr, SocketAddrV4, SocketAddrV6},
+    ip::{IpAddr, Ipv4Addr, Ipv6Addr, Ipv6MulticastScope},
+};
+#[cfg(unix)]
+pub use {
+    send_recv::sendto_unix,
+    socket::{bind_unix, connect_unix, SocketAddrUnix},
+};
