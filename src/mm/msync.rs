@@ -11,8 +11,8 @@ use core::ffi::c_void;
 
 pub use imp::mm::types::MsyncFlags;
 
-/// `msync(addr, len, flags)`—Declares an expected access pattern
-/// for a memory-mapped file.
+/// `msync(addr, len, flags)`—Synchronizes a memory-mapping with its backing
+/// storage.
 ///
 /// # Safety
 ///
