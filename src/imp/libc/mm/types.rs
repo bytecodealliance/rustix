@@ -1,7 +1,6 @@
 use super::super::c;
 use bitflags::bitflags;
 
-#[cfg(not(target_os = "wasi"))]
 bitflags! {
     /// `PROT_*` flags for use with [`mmap`].
     ///
@@ -18,7 +17,6 @@ bitflags! {
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
 bitflags! {
     /// `PROT_*` flags for use with [`mprotect`].
     ///
@@ -41,7 +39,6 @@ bitflags! {
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
 bitflags! {
     /// `MAP_*` flags for use with [`mmap`].
     ///
@@ -228,7 +225,6 @@ bitflags! {
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
 bitflags! {
     /// `MS_*` flags for use with [`msync`].
     ///
@@ -260,7 +256,7 @@ bitflags! {
 /// `POSIX_MADV_*` constants for use with [`madvise`].
 ///
 /// [`madvise`]: crate::mm::madvise
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(target_os = "redox"))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(i32)]
 #[non_exhaustive]

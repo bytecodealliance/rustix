@@ -4,13 +4,11 @@ use super::super::c;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::syscall_ret_owned_fd;
 use super::super::conv::{borrowed_fd, no_fd, ret};
-#[cfg(not(target_os = "wasi"))]
 use super::super::offset::libc_mmap;
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(target_os = "redox"))]
 use super::types::Advice;
 #[cfg(target_os = "linux")]
 use super::types::MremapFlags;
-#[cfg(not(target_os = "wasi"))]
 use super::types::{MapFlags, MprotectFlags, MsyncFlags, ProtFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::types::{MlockFlags, UserfaultfdFlags};
@@ -19,7 +17,7 @@ use crate::io;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::io::OwnedFd;
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(target_os = "redox"))]
 pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: Advice) -> io::Result<()> {
     // On Linux platforms, `MADV_DONTNEED` has the same value as
     // `POSIX_MADV_DONTNEED` but different behavior. We remap it to a different
@@ -53,7 +51,6 @@ pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: Advice) -> io::R
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
 pub(crate) unsafe fn msync(addr: *mut c::c_void, len: usize, flags: MsyncFlags) -> io::Result<()> {
     let err = c::msync(addr, len, flags.bits());
 
@@ -69,7 +66,6 @@ pub(crate) unsafe fn msync(addr: *mut c::c_void, len: usize, flags: MsyncFlags) 
 ///
 /// `mmap` is primarily unsafe due to the `addr` parameter, as anything working
 /// with memory pointed to by raw pointers is unsafe.
-#[cfg(not(target_os = "wasi"))]
 pub(crate) unsafe fn mmap(
     ptr: *mut c::c_void,
     len: usize,
@@ -97,7 +93,6 @@ pub(crate) unsafe fn mmap(
 ///
 /// `mmap` is primarily unsafe due to the `addr` parameter, as anything working
 /// with memory pointed to by raw pointers is unsafe.
-#[cfg(not(target_os = "wasi"))]
 pub(crate) unsafe fn mmap_anonymous(
     ptr: *mut c::c_void,
     len: usize,
@@ -119,7 +114,6 @@ pub(crate) unsafe fn mmap_anonymous(
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
 pub(crate) unsafe fn mprotect(
     ptr: *mut c::c_void,
     len: usize,
@@ -128,7 +122,6 @@ pub(crate) unsafe fn mprotect(
     ret(c::mprotect(ptr, len, flags.bits()))
 }
 
-#[cfg(not(target_os = "wasi"))]
 pub(crate) unsafe fn munmap(ptr: *mut c::c_void, len: usize) -> io::Result<()> {
     ret(c::munmap(ptr, len))
 }
@@ -183,7 +176,6 @@ pub(crate) unsafe fn mremap_fixed(
 ///
 /// `mlock` operates on raw pointers and may round out to the nearest page
 /// boundaries.
-#[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) unsafe fn mlock(addr: *mut c::c_void, length: usize) -> io::Result<()> {
     ret(c::mlock(addr, length))
@@ -215,7 +207,6 @@ pub(crate) unsafe fn mlock_with(
 ///
 /// `munlock` operates on raw pointers and may round out to the nearest page
 /// boundaries.
-#[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) unsafe fn munlock(addr: *mut c::c_void, length: usize) -> io::Result<()> {
     ret(c::munlock(addr, length))
