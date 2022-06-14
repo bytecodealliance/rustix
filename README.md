@@ -83,6 +83,7 @@ by default. The rest of the API is conditional with cargo feature flags:
 [`rustix::io`]: https://docs.rs/rustix/latest/rustix/io/index.html
 [`rustix::fd`]: https://docs.rs/rustix/latest/rustix/fd/index.html
 [`rustix::ffi`]: https://docs.rs/rustix/latest/rustix/ffi/index.html
+[`rustix::path`]: https://docs.rs/rustix/latest/rustix/path/index.html
 
 ## Similar crates
 
