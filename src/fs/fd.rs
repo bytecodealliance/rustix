@@ -124,7 +124,7 @@ pub fn fchmod<Fd: AsFd>(fd: Fd, mode: Mode) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/fchown.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn fchown<Fd: AsFd>(fd: Fd, owner: Uid, group: Gid) -> io::Result<()> {
+pub fn fchown<Fd: AsFd>(fd: Fd, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
     imp::fs::syscalls::fchown(fd.as_fd(), owner, group)
 }
 

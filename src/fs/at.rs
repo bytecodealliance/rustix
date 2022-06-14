@@ -370,8 +370,8 @@ pub fn mknodat<P: path::Arg, Fd: AsFd>(
 pub fn chownat<P: path::Arg, Fd: AsFd>(
     dirfd: Fd,
     path: P,
-    owner: Uid,
-    group: Gid,
+    owner: Option<Uid>,
+    group: Option<Gid>,
     flags: AtFlags,
 ) -> io::Result<()> {
     path.into_with_c_str(|path| {

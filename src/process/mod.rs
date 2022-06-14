@@ -71,3 +71,6 @@ pub use sched_yield::sched_yield;
 pub use uname::{uname, Uname};
 #[cfg(not(target_os = "wasi"))]
 pub use wait::{wait, waitpid, WaitOptions, WaitStatus};
+
+#[cfg(not(target_os = "wasi"))]
+pub(crate) use id::translate_fchown_args;

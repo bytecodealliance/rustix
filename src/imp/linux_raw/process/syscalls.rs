@@ -110,7 +110,7 @@ pub(crate) fn getgid() -> Gid {
     #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
     unsafe {
         let gid = ret_usize_infallible(syscall_readonly!(__NR_getgid)) as __kernel_gid_t;
-        Gid::from_raw(gid)
+        Gid::from_raw(gid as u32)
     }
 }
 
@@ -125,7 +125,7 @@ pub(crate) fn getegid() -> Gid {
     #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
     unsafe {
         let gid = ret_usize_infallible(syscall_readonly!(__NR_getegid)) as __kernel_gid_t;
-        Gid::from_raw(gid)
+        Gid::from_raw(gid as u32)
     }
 }
 
@@ -139,7 +139,7 @@ pub(crate) fn getuid() -> Uid {
     #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
     unsafe {
         let uid = ret_usize_infallible(syscall_readonly!(__NR_getuid)) as __kernel_uid_t;
-        Uid::from_raw(uid)
+        Uid::from_raw(uid as u32)
     }
 }
 
@@ -154,7 +154,7 @@ pub(crate) fn geteuid() -> Uid {
     #[cfg(not(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm")))]
     unsafe {
         let uid = ret_usize_infallible(syscall_readonly!(__NR_geteuid)) as __kernel_uid_t;
-        Uid::from_raw(uid)
+        Uid::from_raw(uid as u32)
     }
 }
 

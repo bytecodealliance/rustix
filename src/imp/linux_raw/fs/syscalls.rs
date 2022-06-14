@@ -148,31 +148,28 @@ pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
 pub(crate) fn chownat(
     dirfd: BorrowedFd<'_>,
     filename: &CStr,
-    owner: Uid,
-    group: Gid,
+    owner: Option<Uid>,
+    group: Option<Gid>,
     flags: AtFlags,
 ) -> io::Result<()> {
     unsafe {
+        let (ow, gr) = crate::process::translate_fchown_args(owner, group);
         ret(syscall_readonly!(
             __NR_fchownat,
             dirfd,
             filename,
-            c_uint(owner.as_raw()),
-            c_uint(group.as_raw()),
+            c_uint(ow),
+            c_uint(gr),
             flags
         ))
     }
 }
 
 #[inline]
-pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Uid, group: Gid) -> io::Result<()> {
+pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
     unsafe {
-        ret(syscall_readonly!(
-            __NR_fchown,
-            fd,
-            c_uint(owner.as_raw()),
-            c_uint(group.as_raw())
-        ))
+        let (ow, gr) = crate::process::translate_fchown_args(owner, group);
+        ret(syscall_readonly!(__NR_fchown, fd, c_uint(ow), c_uint(gr)))
     }
 }
 
