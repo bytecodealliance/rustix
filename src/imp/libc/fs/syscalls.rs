@@ -136,8 +136,6 @@ use {
 #[cfg(not(target_os = "redox"))]
 use {super::super::offset::libc_openat, crate::fs::AtFlags};
 
-use crate::utils::unwrap_fchown_args;
-
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu"
@@ -683,7 +681,7 @@ pub(crate) fn chownat(
     flags: AtFlags,
 ) -> io::Result<()> {
     unsafe {
-        let (ow, gr) = unwrap_fchown_args(owner, group);
+        let (ow, gr) = crate::process::translate_fchown_args(owner, group);
         ret(c::fchownat(
             borrowed_fd(dirfd),
             c_str(path),
@@ -892,7 +890,7 @@ pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>)
     // support for `O_PATH`, which uses `/proc` outside our control and
     // interferes with our own use of `O_PATH`.
     unsafe {
-        let (ow, gr) = unwrap_fchown_args(owner, group);
+        let (ow, gr) = crate::process::translate_fchown_args(owner, group);
         syscall_ret(c::syscall(c::SYS_fchown, borrowed_fd(fd), ow, gr))
     }
 }
@@ -900,7 +898,7 @@ pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>)
 #[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
 pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
     unsafe {
-        let (ow, gr) = unwrap_fchown_args(owner, group);
+        let (ow, gr) = crate::process::translate_fchown_args(owner, group);
         ret(c::fchown(borrowed_fd(fd), ow, gr))
     }
 }

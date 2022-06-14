@@ -279,3 +279,20 @@ pub fn getppid() -> Option<Pid> {
 pub fn setsid() -> io::Result<Pid> {
     imp::process::syscalls::setsid()
 }
+
+// translate_fchown_args returns the raw value of the IDs. In case of `None`
+// it returns `u32::MAX` since it has the same bit pattern as `-1` indicating
+// no change to the owner/group ID.
+pub(crate) fn translate_fchown_args(owner: Option<Uid>, group: Option<Gid>) -> (u32, u32) {
+    let ow = match owner {
+        Some(o) => o.as_raw(),
+        None => u32::MAX,
+    };
+
+    let gr = match group {
+        Some(g) => g.as_raw(),
+        None => u32::MAX,
+    };
+
+    (ow, gr)
+}

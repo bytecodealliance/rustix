@@ -52,8 +52,6 @@ use {
     linux_raw_sys::general::timespec as __kernel_old_timespec,
 };
 
-use crate::utils::unwrap_fchown_args;
-
 #[inline]
 pub(crate) fn open(filename: &CStr, flags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
@@ -162,7 +160,7 @@ pub(crate) fn chownat(
     flags: AtFlags,
 ) -> io::Result<()> {
     unsafe {
-        let (ow, gr) = unwrap_fchown_args(owner, group);
+        let (ow, gr) = crate::process::translate_fchown_args(owner, group);
         ret(syscall_readonly!(
             __NR_fchownat,
             dirfd,
@@ -177,7 +175,7 @@ pub(crate) fn chownat(
 #[inline]
 pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
     unsafe {
-        let (ow, gr) = unwrap_fchown_args(owner, group);
+        let (ow, gr) = crate::process::translate_fchown_args(owner, group);
         ret(syscall_readonly!(__NR_fchown, fd, c_uint(ow), c_uint(gr)))
     }
 }
