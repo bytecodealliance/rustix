@@ -28,7 +28,7 @@ unsafe fn read_ss_family(storage: *const c::sockaddr) -> u16 {
                 __bindgen_anon_1:
                     linux_raw_sys::general::__kernel_sockaddr_storage__bindgen_ty_1__bindgen_ty_1 {
                         ss_family: 0_u16,
-                        __data: [0_u8; 126],
+                        __data: [0; 126_usize],
                     },
             },
         },
