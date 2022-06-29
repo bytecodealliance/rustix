@@ -19,8 +19,8 @@
 //! [io_uring]: https://en.wikipedia.org/wiki/Io_uring
 #![allow(unsafe_code)]
 
+use crate::backend;
 use crate::fd::{AsFd, BorrowedFd, RawFd};
-use crate::imp;
 use crate::io::{self, OwnedFd};
 use core::ffi::c_void;
 use core::ptr::null_mut;
@@ -35,7 +35,7 @@ use linux_raw_sys::general as sys;
 /// [Linux]: https://man.archlinux.org/man/io_uring_setup.2.en
 #[inline]
 pub fn io_uring_setup(entries: u32, params: &mut io_uring_params) -> io::Result<OwnedFd> {
-    imp::io_uring::syscalls::io_uring_setup(entries, params)
+    backend::io_uring::syscalls::io_uring_setup(entries, params)
 }
 
 /// `io_uring_register(fd, opcode, arg, nr_args)`—Register files or user
@@ -58,7 +58,7 @@ pub unsafe fn io_uring_register<Fd: AsFd>(
     arg: *const c_void,
     nr_args: u32,
 ) -> io::Result<()> {
-    imp::io_uring::syscalls::io_uring_register(fd.as_fd(), opcode, arg, nr_args)
+    backend::io_uring::syscalls::io_uring_register(fd.as_fd(), opcode, arg, nr_args)
 }
 
 /// `io_uring_enter(fd, to_submit, min_complete, flags, arg, size)`—Initiate
@@ -83,7 +83,14 @@ pub unsafe fn io_uring_enter<Fd: AsFd>(
     arg: *const c_void,
     size: usize,
 ) -> io::Result<u32> {
-    imp::io_uring::syscalls::io_uring_enter(fd.as_fd(), to_submit, min_complete, flags, arg, size)
+    backend::io_uring::syscalls::io_uring_enter(
+        fd.as_fd(),
+        to_submit,
+        min_complete,
+        flags,
+        arg,
+        size,
+    )
 }
 
 bitflags::bitflags! {

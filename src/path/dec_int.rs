@@ -6,8 +6,8 @@
 //! `str::from_utf8_unchecked`on the buffer that it filled itself.
 #![allow(unsafe_code)]
 
+use crate::backend::fd::{AsFd, AsRawFd};
 use crate::ffi::CStr;
-use crate::imp::fd::{AsFd, AsRawFd};
 #[cfg(feature = "std")]
 use core::fmt;
 use core::fmt::Write;

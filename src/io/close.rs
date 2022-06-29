@@ -5,8 +5,8 @@
 //! Operating on raw file descriptors is unsafe.
 #![allow(unsafe_code)]
 
-use crate::imp;
-use imp::fd::RawFd;
+use crate::backend;
+use backend::fd::RawFd;
 
 /// `close(raw_fd)`—Closes a `RawFd` directly.
 ///
@@ -37,5 +37,5 @@ use imp::fd::RawFd;
 /// not valid after the call.
 #[inline]
 pub unsafe fn close(raw_fd: RawFd) {
-    imp::io::syscalls::close(raw_fd)
+    backend::io::syscalls::close(raw_fd)
 }

@@ -1,7 +1,7 @@
 use crate::io::{self, OwnedFd};
-use crate::{imp, path};
+use crate::{backend, path};
 
-pub use imp::fs::types::MemfdFlags;
+pub use backend::fs::types::MemfdFlags;
 
 /// `memfd_create(path, flags)`
 ///
@@ -11,5 +11,5 @@ pub use imp::fs::types::MemfdFlags;
 /// [Linux]: https://man7.org/linux/man-pages/man2/memfd_create.2.html
 #[inline]
 pub fn memfd_create<P: path::Arg>(path: P, flags: MemfdFlags) -> io::Result<OwnedFd> {
-    path.into_with_c_str(|path| imp::fs::syscalls::memfd_create(path, flags))
+    path.into_with_c_str(|path| backend::fs::syscalls::memfd_create(path, flags))
 }

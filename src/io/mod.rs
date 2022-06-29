@@ -26,7 +26,7 @@ mod seek_from;
 mod stdio;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use crate::imp::io::epoll;
+pub use crate::backend::io::epoll;
 pub use close::close;
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use dup::{dup, dup2, dup3, DupFlags};

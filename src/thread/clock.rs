@@ -1,6 +1,6 @@
-use crate::{imp, io};
+use crate::{backend, io};
 
-pub use imp::time::types::Timespec;
+pub use backend::time::types::Timespec;
 
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -12,7 +12,7 @@ pub use imp::time::types::Timespec;
     target_os = "redox",
     target_os = "wasi",
 )))]
-pub use imp::time::types::ClockId;
+pub use backend::time::types::ClockId;
 
 /// `clock_nanosleep(id, 0, request, remain)`—Sleeps for a duration on a
 /// given clock.
@@ -38,7 +38,7 @@ pub use imp::time::types::ClockId;
 )))]
 #[inline]
 pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRelativeResult {
-    imp::thread::syscalls::clock_nanosleep_relative(id, request)
+    backend::thread::syscalls::clock_nanosleep_relative(id, request)
 }
 
 /// `clock_nanosleep(id, TIMER_ABSTIME, request, NULL)`—Sleeps until an
@@ -65,7 +65,7 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRel
 )))]
 #[inline]
 pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::Result<()> {
-    imp::thread::syscalls::clock_nanosleep_absolute(id, request)
+    backend::thread::syscalls::clock_nanosleep_absolute(id, request)
 }
 
 /// `nanosleep(request, remain)`—Sleeps for a duration.
@@ -80,7 +80,7 @@ pub fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::Result<(
 /// [Linux]: https://man7.org/linux/man-pages/man2/nanosleep.2.html
 #[inline]
 pub fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
-    imp::thread::syscalls::nanosleep(request)
+    backend::thread::syscalls::nanosleep(request)
 }
 
 /// A return type for `nanosleep` and `clock_nanosleep_relative`.

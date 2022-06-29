@@ -7,7 +7,7 @@
 #![cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
 #![allow(unsafe_code)]
 
-use crate::imp::c;
+use crate::backend::c;
 
 /// Raw file descriptors.
 #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]

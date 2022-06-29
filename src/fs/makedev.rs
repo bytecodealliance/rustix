@@ -1,5 +1,5 @@
+use crate::backend;
 use crate::fs::Dev;
-use crate::imp;
 
 /// `makedev(maj, min)`
 ///
@@ -9,7 +9,7 @@ use crate::imp;
 /// [Linux]: https://man7.org/linux/man-pages/man3/makedev.3.html
 #[inline]
 pub fn makedev(maj: u32, min: u32) -> Dev {
-    imp::fs::makedev::makedev(maj, min)
+    backend::fs::makedev::makedev(maj, min)
 }
 
 /// `minor(dev)`
@@ -20,7 +20,7 @@ pub fn makedev(maj: u32, min: u32) -> Dev {
 /// [Linux]: https://man7.org/linux/man-pages/man3/minor.3.html
 #[inline]
 pub fn minor(dev: Dev) -> u32 {
-    imp::fs::makedev::minor(dev)
+    backend::fs::makedev::minor(dev)
 }
 
 /// `major(dev)`
@@ -31,5 +31,5 @@ pub fn minor(dev: Dev) -> u32 {
 /// [Linux]: https://man7.org/linux/man-pages/man3/major.3.html
 #[inline]
 pub fn major(dev: Dev) -> u32 {
-    imp::fs::makedev::major(dev)
+    backend::fs::makedev::major(dev)
 }

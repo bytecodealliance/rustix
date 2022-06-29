@@ -1,7 +1,7 @@
-use crate::{imp, io};
-use imp::fd::AsFd;
+use crate::{backend, io};
+use backend::fd::AsFd;
 
-pub use imp::fs::types::Advice;
+pub use backend::fs::types::Advice;
 
 /// `posix_fadvise(fd, offset, len, advice)`—Declares an expected access
 /// pattern for a file.
@@ -15,5 +15,5 @@ pub use imp::fs::types::Advice;
 #[inline]
 #[doc(alias = "posix_fadvise")]
 pub fn fadvise<Fd: AsFd>(fd: Fd, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
-    imp::fs::syscalls::fadvise(fd.as_fd(), offset, len, advice)
+    backend::fs::syscalls::fadvise(fd.as_fd(), offset, len, advice)
 }

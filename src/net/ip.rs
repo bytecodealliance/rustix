@@ -9,8 +9,8 @@
 
 #![allow(unsafe_code)]
 
-use crate::imp::c;
-use crate::imp::net::ext::{in6_addr_new, in6_addr_s6_addr, in_addr_new, in_addr_s_addr};
+use crate::backend::c;
+use crate::backend::net::ext::{in6_addr_new, in6_addr_s6_addr, in_addr_new, in_addr_s_addr};
 use core::cmp::Ordering;
 use core::hash;
 use core::mem::transmute;

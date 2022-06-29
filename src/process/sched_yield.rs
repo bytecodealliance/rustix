@@ -1,4 +1,4 @@
-use crate::imp;
+use crate::backend;
 
 /// `sched_yield()`—Hints to the OS that other processes should run.
 ///
@@ -12,5 +12,5 @@ use crate::imp;
 /// [Linux]: https://man7.org/linux/man-pages/man2/sched_yield.2.html
 #[inline]
 pub fn sched_yield() {
-    imp::process::syscalls::sched_yield()
+    backend::process::syscalls::sched_yield()
 }

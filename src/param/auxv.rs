@@ -1,3 +1,4 @@
+use crate::backend;
 #[cfg(any(
     linux_raw,
     all(
@@ -9,7 +10,6 @@
     )
 ))]
 use crate::ffi::CStr;
-use crate::imp;
 
 /// `sysconf(_SC_PAGESIZE)`—Returns the process' page size.
 ///
@@ -28,7 +28,7 @@ use crate::imp;
 #[doc(alias = "_SC_PAGE_SIZE")]
 #[doc(alias = "getpagesize")]
 pub fn page_size() -> usize {
-    imp::param::auxv::page_size()
+    backend::param::auxv::page_size()
 }
 
 /// `sysconf(_SC_CLK_TCK)`—Returns the process' clock ticks per second.
@@ -43,7 +43,7 @@ pub fn page_size() -> usize {
 #[inline]
 #[doc(alias = "_SC_CLK_TCK")]
 pub fn clock_ticks_per_second() -> u64 {
-    imp::param::auxv::clock_ticks_per_second()
+    backend::param::auxv::clock_ticks_per_second()
 }
 
 /// `(getauxval(AT_HWCAP), getauxval(AT_HWCAP2)`—Returns the Linux "hwcap"
@@ -68,7 +68,7 @@ pub fn clock_ticks_per_second() -> u64 {
 ))]
 #[inline]
 pub fn linux_hwcap() -> (usize, usize) {
-    imp::param::auxv::linux_hwcap()
+    backend::param::auxv::linux_hwcap()
 }
 
 /// `getauxval(AT_EXECFN)`—Returns the Linux "execfn" string.
@@ -92,5 +92,5 @@ pub fn linux_hwcap() -> (usize, usize) {
 ))]
 #[inline]
 pub fn linux_execfn() -> &'static CStr {
-    imp::param::auxv::linux_execfn()
+    backend::param::auxv::linux_execfn()
 }

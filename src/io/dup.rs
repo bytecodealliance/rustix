@@ -1,11 +1,11 @@
 //! Functions which duplicate file descriptors.
 
-use crate::imp;
+use crate::backend;
 use crate::io::{self, OwnedFd};
-use imp::fd::AsFd;
+use backend::fd::AsFd;
 
 #[cfg(not(target_os = "wasi"))]
-pub use imp::io::types::DupFlags;
+pub use backend::io::types::DupFlags;
 
 /// `dup(fd)`—Creates a new `OwnedFd` instance that shares the same
 /// underlying [file description] as `fd`.
@@ -30,7 +30,7 @@ pub use imp::io::types::DupFlags;
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
-    imp::io::syscalls::dup(fd.as_fd())
+    backend::io::syscalls::dup(fd.as_fd())
 }
 
 /// `dup2(fd, new)`—Changes the [file description] of a file descriptor.
@@ -57,7 +57,7 @@ pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {
-    imp::io::syscalls::dup2(fd.as_fd(), new)
+    backend::io::syscalls::dup2(fd.as_fd(), new)
 }
 
 /// `dup3(fd, new, flags)`—Changes the [file description] of a file
@@ -76,5 +76,5 @@ pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn dup3<Fd: AsFd>(fd: Fd, new: &mut OwnedFd, flags: DupFlags) -> io::Result<()> {
-    imp::io::syscalls::dup3(fd.as_fd(), new, flags)
+    backend::io::syscalls::dup3(fd.as_fd(), new, flags)
 }

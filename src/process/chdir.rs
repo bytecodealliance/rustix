@@ -1,9 +1,9 @@
 use crate::ffi::CString;
 use crate::path::SMALL_PATH_BUFFER_SIZE;
-use crate::{imp, io, path};
+use crate::{backend, io, path};
 use alloc::vec::Vec;
 #[cfg(not(target_os = "fuchsia"))]
-use imp::fd::AsFd;
+use backend::fd::AsFd;
 
 /// `chdir(path)`—Change the current working directory.
 ///
@@ -15,7 +15,7 @@ use imp::fd::AsFd;
 /// [Linux]: https://man7.org/linux/man-pages/man2/chdir.2.html
 #[inline]
 pub fn chdir<P: path::Arg>(path: P) -> io::Result<()> {
-    path.into_with_c_str(imp::process::syscalls::chdir)
+    path.into_with_c_str(backend::process::syscalls::chdir)
 }
 
 /// `fchdir(fd)`—Change the current working directory.
@@ -29,7 +29,7 @@ pub fn chdir<P: path::Arg>(path: P) -> io::Result<()> {
 #[cfg(not(target_os = "fuchsia"))]
 #[inline]
 pub fn fchdir<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    imp::process::syscalls::fchdir(fd.as_fd())
+    backend::process::syscalls::fchdir(fd.as_fd())
 }
 
 /// `getcwd()`—Return the current working directory.
@@ -56,7 +56,7 @@ fn _getcwd(mut buffer: Vec<u8>) -> io::Result<CString> {
     buffer.resize(buffer.capacity(), 0_u8);
 
     loop {
-        match imp::process::syscalls::getcwd(&mut buffer) {
+        match backend::process::syscalls::getcwd(&mut buffer) {
             Err(io::Errno::RANGE) => {
                 buffer.reserve(1); // use `Vec` reallocation strategy to grow capacity exponentially
                 buffer.resize(buffer.capacity(), 0_u8);

@@ -1,5 +1,5 @@
 use crate::process::Pid;
-use crate::{imp, io};
+use crate::{backend, io};
 
 /// `CpuSet` represents a bit-mask of CPUs.
 ///
@@ -15,18 +15,18 @@ use crate::{imp, io};
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct CpuSet {
-    cpu_set: imp::process::types::RawCpuSet,
+    cpu_set: backend::process::types::RawCpuSet,
 }
 
 impl CpuSet {
     /// The maximum number of CPU in `CpuSet`.
-    pub const MAX_CPU: usize = imp::process::types::CPU_SETSIZE;
+    pub const MAX_CPU: usize = backend::process::types::CPU_SETSIZE;
 
     /// Create a new and empty `CpuSet`.
     #[inline]
     pub fn new() -> Self {
         Self {
-            cpu_set: imp::process::types::raw_cpu_set_new(),
+            cpu_set: backend::process::types::raw_cpu_set_new(),
         }
     }
 
@@ -35,7 +35,7 @@ impl CpuSet {
     /// `field` is the CPU id to test.
     #[inline]
     pub fn is_set(&self, field: usize) -> bool {
-        imp::process::cpu_set::CPU_ISSET(field, &self.cpu_set)
+        backend::process::cpu_set::CPU_ISSET(field, &self.cpu_set)
     }
 
     /// Add a CPU to `CpuSet`.
@@ -43,7 +43,7 @@ impl CpuSet {
     /// `field` is the CPU id to add.
     #[inline]
     pub fn set(&mut self, field: usize) {
-        imp::process::cpu_set::CPU_SET(field, &mut self.cpu_set)
+        backend::process::cpu_set::CPU_SET(field, &mut self.cpu_set)
     }
 
     /// Remove a CPU from `CpuSet`.
@@ -51,20 +51,20 @@ impl CpuSet {
     /// `field` is the CPU id to remove.
     #[inline]
     pub fn unset(&mut self, field: usize) {
-        imp::process::cpu_set::CPU_CLR(field, &mut self.cpu_set)
+        backend::process::cpu_set::CPU_CLR(field, &mut self.cpu_set)
     }
 
     /// Count the number of CPUs set in the `CpuSet`.
     #[cfg(any(target_os = "android", target_os = "linux"))]
     #[inline]
     pub fn count(&self) -> u32 {
-        imp::process::cpu_set::CPU_COUNT(&self.cpu_set)
+        backend::process::cpu_set::CPU_COUNT(&self.cpu_set)
     }
 
     /// Zeroes the `CpuSet`.
     #[inline]
     pub fn clear(&mut self) {
-        imp::process::cpu_set::CPU_ZERO(&mut self.cpu_set)
+        backend::process::cpu_set::CPU_ZERO(&mut self.cpu_set)
     }
 }
 
@@ -89,7 +89,7 @@ impl Default for CpuSet {
 /// [Linux]: https://man7.org/linux/man-pages/man2/sched_setaffinity.2.html
 #[inline]
 pub fn sched_setaffinity(pid: Option<Pid>, cpuset: &CpuSet) -> io::Result<()> {
-    imp::process::syscalls::sched_setaffinity(pid, &cpuset.cpu_set)
+    backend::process::syscalls::sched_setaffinity(pid, &cpuset.cpu_set)
 }
 
 /// `sched_getaffinity(pid)`—Get a thread's CPU affinity mask.
@@ -106,5 +106,5 @@ pub fn sched_setaffinity(pid: Option<Pid>, cpuset: &CpuSet) -> io::Result<()> {
 #[inline]
 pub fn sched_getaffinity(pid: Option<Pid>) -> io::Result<CpuSet> {
     let mut cpuset = CpuSet::new();
-    imp::process::syscalls::sched_getaffinity(pid, &mut cpuset.cpu_set).and(Ok(cpuset))
+    backend::process::syscalls::sched_getaffinity(pid, &mut cpuset.cpu_set).and(Ok(cpuset))
 }

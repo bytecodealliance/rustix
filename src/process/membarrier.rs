@@ -7,9 +7,9 @@
 #![allow(unsafe_code)]
 
 use crate::process::Cpuid;
-use crate::{imp, io};
+use crate::{backend, io};
 
-pub use imp::process::types::MembarrierCommand;
+pub use backend::process::types::MembarrierCommand;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags::bitflags! {
@@ -66,7 +66,7 @@ impl MembarrierQuery {
 #[inline]
 #[doc(alias = "MEMBARRIER_CMD_QUERY")]
 pub fn membarrier_query() -> MembarrierQuery {
-    imp::process::syscalls::membarrier_query()
+    backend::process::syscalls::membarrier_query()
 }
 
 /// `membarrier(cmd, 0, 0)`—Perform a memory barrier.
@@ -77,7 +77,7 @@ pub fn membarrier_query() -> MembarrierQuery {
 /// [Linux]: https://man7.org/linux/man-pages/man2/membarrier.2.html
 #[inline]
 pub fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
-    imp::process::syscalls::membarrier(cmd)
+    backend::process::syscalls::membarrier(cmd)
 }
 
 /// `membarrier(cmd, MEMBARRIER_CMD_FLAG_CPU, cpu)`—Perform a memory barrier
@@ -89,5 +89,5 @@ pub fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/membarrier.2.html
 #[inline]
 pub fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<()> {
-    imp::process::syscalls::membarrier_cpu(cmd, cpu)
+    backend::process::syscalls::membarrier_cpu(cmd, cpu)
 }

@@ -7,21 +7,21 @@
 //! integer values.
 #![allow(unsafe_code)]
 
-use crate::{imp, io};
+use crate::{backend, io};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use imp::process::types::RawCpuid;
+use backend::process::types::RawCpuid;
 
 /// The raw integer value of a Unix user ID.
-pub use imp::process::types::RawUid;
+pub use backend::process::types::RawUid;
 
 /// The raw integer value of a Unix group ID.
-pub use imp::process::types::RawGid;
+pub use backend::process::types::RawGid;
 
 /// The raw integer value of a Unix process ID.
-pub use imp::process::types::RawPid;
+pub use backend::process::types::RawPid;
 
 /// The raw integer value of a Unix process ID.
-pub use imp::process::types::RawNonZeroPid;
+pub use backend::process::types::RawNonZeroPid;
 
 /// `uid_t`—A Unix user ID.
 #[repr(transparent)]
@@ -194,7 +194,7 @@ impl Cpuid {
 #[inline]
 #[must_use]
 pub fn getuid() -> Uid {
-    imp::process::syscalls::getuid()
+    backend::process::syscalls::getuid()
 }
 
 /// `geteuid()`—Returns the process' effective user ID.
@@ -208,7 +208,7 @@ pub fn getuid() -> Uid {
 #[inline]
 #[must_use]
 pub fn geteuid() -> Uid {
-    imp::process::syscalls::geteuid()
+    backend::process::syscalls::geteuid()
 }
 
 /// `getgid()`—Returns the process' real group ID.
@@ -222,7 +222,7 @@ pub fn geteuid() -> Uid {
 #[inline]
 #[must_use]
 pub fn getgid() -> Gid {
-    imp::process::syscalls::getgid()
+    backend::process::syscalls::getgid()
 }
 
 /// `getegid()`—Returns the process' effective group ID.
@@ -236,7 +236,7 @@ pub fn getgid() -> Gid {
 #[inline]
 #[must_use]
 pub fn getegid() -> Gid {
-    imp::process::syscalls::getegid()
+    backend::process::syscalls::getegid()
 }
 
 /// `getpid()`—Returns the process' ID.
@@ -250,7 +250,7 @@ pub fn getegid() -> Gid {
 #[inline]
 #[must_use]
 pub fn getpid() -> Pid {
-    imp::process::syscalls::getpid()
+    backend::process::syscalls::getpid()
 }
 
 /// `getppid()`—Returns the parent process' ID.
@@ -264,7 +264,7 @@ pub fn getpid() -> Pid {
 #[inline]
 #[must_use]
 pub fn getppid() -> Option<Pid> {
-    imp::process::syscalls::getppid()
+    backend::process::syscalls::getppid()
 }
 
 /// `setsid()`—Create a new session.
@@ -277,7 +277,7 @@ pub fn getppid() -> Option<Pid> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/setsid.2.html
 #[inline]
 pub fn setsid() -> io::Result<Pid> {
-    imp::process::syscalls::setsid()
+    backend::process::syscalls::setsid()
 }
 
 // translate_fchown_args returns the raw value of the IDs. In case of `None`

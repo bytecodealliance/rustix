@@ -6,10 +6,10 @@
 //! mutate the memory or have other side effects.
 #![allow(unsafe_code)]
 
-use crate::{imp, io};
+use crate::{backend, io};
 use core::ffi::c_void;
 
-pub use imp::mm::types::Advice;
+pub use backend::mm::types::Advice;
 
 /// `posix_madvise(addr, len, advice)`—Declares an expected access pattern
 /// for a memory-mapped file.
@@ -31,5 +31,5 @@ pub use imp::mm::types::Advice;
 #[inline]
 #[doc(alias = "posix_madvise")]
 pub unsafe fn madvise(addr: *mut c_void, len: usize, advice: Advice) -> io::Result<()> {
-    imp::mm::syscalls::madvise(addr, len, advice)
+    backend::mm::syscalls::madvise(addr, len, advice)
 }

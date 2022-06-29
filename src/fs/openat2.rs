@@ -1,7 +1,7 @@
 use crate::io::{self, OwnedFd};
-use crate::{imp, path};
-use imp::fd::AsFd;
-use imp::fs::types::{Mode, OFlags, ResolveFlags};
+use crate::{backend, path};
+use backend::fd::AsFd;
+use backend::fs::types::{Mode, OFlags, ResolveFlags};
 
 /// `openat2(dirfd, path, OpenHow { oflags, mode, resolve }, sizeof(OpenHow))`
 ///
@@ -18,6 +18,6 @@ pub fn openat2<Fd: AsFd, P: path::Arg>(
     resolve: ResolveFlags,
 ) -> io::Result<OwnedFd> {
     path.into_with_c_str(|path| {
-        imp::fs::syscalls::openat2(dirfd.as_fd(), path, oflags, mode, resolve)
+        backend::fs::syscalls::openat2(dirfd.as_fd(), path, oflags, mode, resolve)
     })
 }

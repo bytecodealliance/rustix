@@ -1,8 +1,8 @@
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::process::Pid;
-use crate::{imp, io};
+use crate::{backend, io};
 
-pub use imp::process::types::Resource;
+pub use backend::process::types::Resource;
 
 /// `struct rlimit`—Current and maximum values used in [`getrlimit`],
 /// [`setrlimit`], and [`prlimit`].
@@ -24,7 +24,7 @@ pub struct Rlimit {
 /// [Linux]: https://man7.org/linux/man-pages/man2/getrlimit.2.html
 #[inline]
 pub fn getrlimit(resource: Resource) -> Rlimit {
-    imp::process::syscalls::getrlimit(resource)
+    backend::process::syscalls::getrlimit(resource)
 }
 
 /// `setrlimit(resource, new)`—Set a process resource limit value.
@@ -37,7 +37,7 @@ pub fn getrlimit(resource: Resource) -> Rlimit {
 /// [Linux]: https://man7.org/linux/man-pages/man2/setrlimit.2.html
 #[inline]
 pub fn setrlimit(resource: Resource, new: Rlimit) -> io::Result<()> {
-    imp::process::syscalls::setrlimit(resource, new)
+    backend::process::syscalls::setrlimit(resource, new)
 }
 
 /// `prlimit(pid, resource, new)`—Get and set a process resource limit value.
@@ -49,5 +49,5 @@ pub fn setrlimit(resource: Resource, new: Rlimit) -> io::Result<()> {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub fn prlimit(pid: Option<Pid>, resource: Resource, new: Rlimit) -> io::Result<Rlimit> {
-    imp::process::syscalls::prlimit(pid, resource, new)
+    backend::process::syscalls::prlimit(pid, resource, new)
 }

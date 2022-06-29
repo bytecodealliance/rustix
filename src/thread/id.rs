@@ -1,4 +1,4 @@
-use crate::imp;
+use crate::backend;
 use crate::process::Pid;
 
 /// `gettid()`—Returns the thread ID.
@@ -13,5 +13,5 @@ use crate::process::Pid;
 #[inline]
 #[must_use]
 pub fn gettid() -> Pid {
-    imp::thread::syscalls::gettid()
+    backend::thread::syscalls::gettid()
 }
