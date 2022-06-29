@@ -6,10 +6,10 @@
 //! observe and manipulate process memory in magical ways.
 #![allow(unsafe_code)]
 
-use crate::imp;
+use crate::backend;
 use crate::io::{self, OwnedFd};
 
-pub use imp::mm::types::UserfaultfdFlags;
+pub use backend::mm::types::UserfaultfdFlags;
 
 /// `userfaultfd(flags)`
 ///
@@ -26,5 +26,5 @@ pub use imp::mm::types::UserfaultfdFlags;
 /// [Linux userfaultfd]: https://www.kernel.org/doc/Documentation/vm/userfaultfd.txt
 #[inline]
 pub unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
-    imp::mm::syscalls::userfaultfd(flags)
+    backend::mm::syscalls::userfaultfd(flags)
 }

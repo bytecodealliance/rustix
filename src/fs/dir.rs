@@ -1,5 +1,5 @@
 //! `Dir` and `Entry`.
 
-use crate::imp;
+use crate::backend;
 
-pub use imp::fs::dir::{Dir, DirEntry};
+pub use backend::fs::dir::{Dir, DirEntry};

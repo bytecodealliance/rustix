@@ -1,16 +1,16 @@
 use crate::process::Pid;
-use crate::{imp, io};
+use crate::{backend, io};
 use bitflags::bitflags;
 
 bitflags! {
     /// Options for modifying the behavior of wait/waitpid
     pub struct WaitOptions: u32 {
         /// Return immediately if no child has exited.
-        const NOHANG = imp::process::wait::WNOHANG as _;
+        const NOHANG = backend::process::wait::WNOHANG as _;
         /// Return if a child has stopped (but not traced via `ptrace(2)`)
-        const UNTRACED = imp::process::wait::WUNTRACED as _;
+        const UNTRACED = backend::process::wait::WUNTRACED as _;
         /// Return if a stopped child has been resumed by delivery of `SIGCONT`
-        const CONTINUED = imp::process::wait::WCONTINUED as _;
+        const CONTINUED = backend::process::wait::WCONTINUED as _;
     }
 }
 
@@ -34,13 +34,13 @@ impl WaitStatus {
     /// Returns whether the process is currently stopped.
     #[inline]
     pub fn stopped(self) -> bool {
-        imp::process::wait::WIFSTOPPED(self.0 as _)
+        backend::process::wait::WIFSTOPPED(self.0 as _)
     }
 
     /// Returns whether the process has continued from a job control stop.
     #[inline]
     pub fn continued(self) -> bool {
-        imp::process::wait::WIFCONTINUED(self.0 as _)
+        backend::process::wait::WIFCONTINUED(self.0 as _)
     }
 
     /// Returns the number of the signal that stopped the process,
@@ -48,7 +48,7 @@ impl WaitStatus {
     #[inline]
     pub fn stopping_signal(self) -> Option<u32> {
         if self.stopped() {
-            Some(imp::process::wait::WSTOPSIG(self.0 as _) as _)
+            Some(backend::process::wait::WSTOPSIG(self.0 as _) as _)
         } else {
             None
         }
@@ -58,8 +58,8 @@ impl WaitStatus {
     /// if it exited normally.
     #[inline]
     pub fn exit_status(self) -> Option<u32> {
-        if imp::process::wait::WIFEXITED(self.0 as _) {
-            Some(imp::process::wait::WEXITSTATUS(self.0 as _) as _)
+        if backend::process::wait::WIFEXITED(self.0 as _) {
+            Some(backend::process::wait::WEXITSTATUS(self.0 as _) as _)
         } else {
             None
         }
@@ -69,8 +69,8 @@ impl WaitStatus {
     /// if the process was terminated by a signal.
     #[inline]
     pub fn terminating_signal(self) -> Option<u32> {
-        if imp::process::wait::WIFSIGNALED(self.0 as _) {
-            Some(imp::process::wait::WTERMSIG(self.0 as _) as _)
+        if backend::process::wait::WIFSIGNALED(self.0 as _) {
+            Some(backend::process::wait::WTERMSIG(self.0 as _) as _)
         } else {
             None
         }
@@ -104,7 +104,7 @@ impl WaitStatus {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<WaitStatus>> {
-    Ok(imp::process::syscalls::waitpid(pid, waitopts)?.map(|(_, status)| status))
+    Ok(backend::process::syscalls::waitpid(pid, waitopts)?.map(|(_, status)| status))
 }
 
 /// `wait(waitopts)`—Wait for any of the children of calling process to
@@ -125,5 +125,5 @@ pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<Wai
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
-    imp::process::syscalls::wait(waitopts)
+    backend::process::syscalls::wait(waitopts)
 }

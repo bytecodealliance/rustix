@@ -4,7 +4,7 @@
 //! enum because we may not know about all of the host's error values
 //! and we don't want unrecognized values to create UB.
 
-use crate::imp;
+use crate::backend;
 use core::{fmt, result};
 #[cfg(feature = "std")]
 use std::error;
@@ -25,7 +25,7 @@ pub type Result<T> = result::Result<T, Errno>;
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/errno.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/errno.3.html
-pub use imp::io::errno::Errno;
+pub use backend::io::errno::Errno;
 
 impl Errno {
     /// Shorthand for `std::io::Error::from(self).kind()`.

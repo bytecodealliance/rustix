@@ -11,9 +11,9 @@
 //! file descriptor and close it ourselves.
 #![allow(unsafe_code)]
 
-use crate::imp::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, RawFd};
+use crate::backend::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(all(not(io_lifetimes_use_std), feature = "std"))]
-use crate::imp::fd::{FromFd, IntoFd};
+use crate::backend::fd::{FromFd, IntoFd};
 use crate::io::close;
 use core::fmt;
 use core::mem::{forget, ManuallyDrop};
@@ -24,7 +24,7 @@ use core::mem::{forget, ManuallyDrop};
 /// [`close`]: crate::io::close
 #[repr(transparent)]
 pub struct OwnedFd {
-    inner: ManuallyDrop<crate::imp::fd::OwnedFd>,
+    inner: ManuallyDrop<crate::backend::fd::OwnedFd>,
 }
 
 impl OwnedFd {
@@ -157,7 +157,7 @@ impl io_lifetimes::AsSocket for OwnedFd {
 }
 
 #[cfg(any(io_lifetimes_use_std, not(feature = "std")))]
-impl From<OwnedFd> for crate::imp::fd::OwnedFd {
+impl From<OwnedFd> for crate::backend::fd::OwnedFd {
     #[inline]
     fn from(owned_fd: OwnedFd) -> Self {
         let raw_fd = owned_fd.inner.as_fd().as_raw_fd();
@@ -166,28 +166,28 @@ impl From<OwnedFd> for crate::imp::fd::OwnedFd {
         // Safety: We use `as_fd().as_raw_fd()` to extract the raw file
         // descriptor from `self.inner`, and then `forget` `self` so
         // that they remain valid until the new `OwnedFd` acquires them.
-        unsafe { crate::imp::fd::OwnedFd::from_raw_fd(raw_fd) }
+        unsafe { crate::backend::fd::OwnedFd::from_raw_fd(raw_fd) }
     }
 }
 
 #[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
 impl IntoFd for OwnedFd {
     #[inline]
-    fn into_fd(self) -> crate::imp::fd::OwnedFd {
+    fn into_fd(self) -> crate::backend::fd::OwnedFd {
         let raw_fd = self.inner.as_fd().as_raw_fd();
         forget(self);
 
         // Safety: We use `as_fd().as_raw_fd()` to extract the raw file
         // descriptor from `self.inner`, and then `forget` `self` so
         // that they remain valid until the new `OwnedFd` acquires them.
-        unsafe { crate::imp::fd::OwnedFd::from_raw_fd(raw_fd) }
+        unsafe { crate::backend::fd::OwnedFd::from_raw_fd(raw_fd) }
     }
 }
 
 #[cfg(any(io_lifetimes_use_std, not(feature = "std")))]
-impl From<crate::imp::fd::OwnedFd> for OwnedFd {
+impl From<crate::backend::fd::OwnedFd> for OwnedFd {
     #[inline]
-    fn from(owned_fd: crate::imp::fd::OwnedFd) -> Self {
+    fn from(owned_fd: crate::backend::fd::OwnedFd) -> Self {
         Self {
             inner: ManuallyDrop::new(owned_fd),
         }
@@ -197,7 +197,7 @@ impl From<crate::imp::fd::OwnedFd> for OwnedFd {
 #[cfg(all(not(io_lifetimes_use_std), feature = "std"))]
 impl FromFd for OwnedFd {
     #[inline]
-    fn from_fd(owned_fd: crate::imp::fd::OwnedFd) -> Self {
+    fn from_fd(owned_fd: crate::backend::fd::OwnedFd) -> Self {
         Self {
             inner: ManuallyDrop::new(owned_fd),
         }
@@ -205,9 +205,9 @@ impl FromFd for OwnedFd {
 }
 
 #[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
-impl From<crate::imp::fd::OwnedFd> for OwnedFd {
+impl From<crate::backend::fd::OwnedFd> for OwnedFd {
     #[inline]
-    fn from(fd: crate::imp::fd::OwnedFd) -> Self {
+    fn from(fd: crate::backend::fd::OwnedFd) -> Self {
         Self {
             inner: ManuallyDrop::new(fd),
         }
@@ -215,7 +215,7 @@ impl From<crate::imp::fd::OwnedFd> for OwnedFd {
 }
 
 #[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
-impl From<OwnedFd> for crate::imp::fd::OwnedFd {
+impl From<OwnedFd> for crate::backend::fd::OwnedFd {
     #[inline]
     fn from(fd: OwnedFd) -> Self {
         let raw_fd = fd.inner.as_fd().as_raw_fd();
@@ -248,7 +248,7 @@ impl FromRawFd for OwnedFd {
     #[inline]
     unsafe fn from_raw_fd(raw_fd: RawFd) -> Self {
         Self {
-            inner: ManuallyDrop::new(crate::imp::fd::OwnedFd::from_raw_fd(raw_fd)),
+            inner: ManuallyDrop::new(crate::backend::fd::OwnedFd::from_raw_fd(raw_fd)),
         }
     }
 }

@@ -1,5 +1,5 @@
-use crate::{imp, io};
-use imp::fd::AsFd;
+use crate::{backend, io};
+use backend::fd::AsFd;
 
 /// `sendfile(out_fd, in_fd, offset, count)`
 ///
@@ -15,5 +15,5 @@ pub fn sendfile<OutFd: AsFd, InFd: AsFd>(
     offset: Option<&mut u64>,
     count: usize,
 ) -> io::Result<usize> {
-    imp::fs::syscalls::sendfile(out_fd.as_fd(), in_fd.as_fd(), offset, count)
+    backend::fs::syscalls::sendfile(out_fd.as_fd(), in_fd.as_fd(), offset, count)
 }

@@ -1,7 +1,7 @@
 //! The [`is_read_write`] function.
 
-use crate::{imp, io};
-use imp::fd::AsFd;
+use crate::{backend, io};
+use backend::fd::AsFd;
 
 /// Returns a pair of booleans indicating whether the file descriptor is
 /// readable and/or writable, respectively.
@@ -12,5 +12,5 @@ use imp::fd::AsFd;
 /// [`is_file_read_write`]: crate::fs::is_file_read_write
 #[inline]
 pub fn is_read_write<Fd: AsFd>(fd: Fd) -> io::Result<(bool, bool)> {
-    imp::io::syscalls::is_read_write(fd.as_fd())
+    backend::io::syscalls::is_read_write(fd.as_fd())
 }

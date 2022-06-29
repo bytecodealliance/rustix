@@ -6,15 +6,15 @@
 //! semantics and are wildly unsafe.
 #![allow(unsafe_code)]
 
-use crate::{imp, io};
+use crate::{backend, io};
+use backend::fd::AsFd;
 use core::ffi::c_void;
-use imp::fd::AsFd;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use imp::mm::types::MlockFlags;
+pub use backend::mm::types::MlockFlags;
 #[cfg(any(linux_raw, all(libc, target_os = "linux")))]
-pub use imp::mm::types::MremapFlags;
-pub use imp::mm::types::{MapFlags, MprotectFlags, ProtFlags};
+pub use backend::mm::types::MremapFlags;
+pub use backend::mm::types::{MapFlags, MprotectFlags, ProtFlags};
 
 /// `mmap(ptr, len, prot, flags, fd, offset)`—Create a file-backed memory
 /// mapping.
@@ -41,7 +41,7 @@ pub unsafe fn mmap<Fd: AsFd>(
     fd: Fd,
     offset: u64,
 ) -> io::Result<*mut c_void> {
-    imp::mm::syscalls::mmap(ptr, len, prot, flags, fd.as_fd(), offset)
+    backend::mm::syscalls::mmap(ptr, len, prot, flags, fd.as_fd(), offset)
 }
 
 /// `mmap(ptr, len, prot, MAP_ANONYMOUS | flags, -1, 0)`—Create an anonymous
@@ -67,7 +67,7 @@ pub unsafe fn mmap_anonymous(
     prot: ProtFlags,
     flags: MapFlags,
 ) -> io::Result<*mut c_void> {
-    imp::mm::syscalls::mmap_anonymous(ptr, len, prot, flags)
+    backend::mm::syscalls::mmap_anonymous(ptr, len, prot, flags)
 }
 
 /// `munmap(ptr, len)`
@@ -84,7 +84,7 @@ pub unsafe fn mmap_anonymous(
 /// [Linux]: https://man7.org/linux/man-pages/man2/munmap.2.html
 #[inline]
 pub unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
-    imp::mm::syscalls::munmap(ptr, len)
+    backend::mm::syscalls::munmap(ptr, len)
 }
 
 /// `mremap(old_address, old_size, new_size, flags)`—Resize, modify,
@@ -109,7 +109,7 @@ pub unsafe fn mremap(
     new_size: usize,
     flags: MremapFlags,
 ) -> io::Result<*mut c_void> {
-    imp::mm::syscalls::mremap(old_address, old_size, new_size, flags)
+    backend::mm::syscalls::mremap(old_address, old_size, new_size, flags)
 }
 
 /// `mremap(old_address, old_size, new_size, MREMAP_FIXED | flags)`—Resize,
@@ -136,7 +136,7 @@ pub unsafe fn mremap_fixed(
     flags: MremapFlags,
     new_address: *mut c_void,
 ) -> io::Result<*mut c_void> {
-    imp::mm::syscalls::mremap_fixed(old_address, old_size, new_size, flags, new_address)
+    backend::mm::syscalls::mremap_fixed(old_address, old_size, new_size, flags, new_address)
 }
 
 /// `mprotect(ptr, len, flags)`
@@ -153,7 +153,7 @@ pub unsafe fn mremap_fixed(
 /// [Linux]: https://man7.org/linux/man-pages/man2/mprotect.2.html
 #[inline]
 pub unsafe fn mprotect(ptr: *mut c_void, len: usize, flags: MprotectFlags) -> io::Result<()> {
-    imp::mm::syscalls::mprotect(ptr, len, flags)
+    backend::mm::syscalls::mprotect(ptr, len, flags)
 }
 
 /// `mlock(ptr, len)`—Lock memory into RAM.
@@ -177,7 +177,7 @@ pub unsafe fn mprotect(ptr: *mut c_void, len: usize, flags: MprotectFlags) -> io
 /// [Linux]: https://man7.org/linux/man-pages/man2/mlock.2.html
 #[inline]
 pub unsafe fn mlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
-    imp::mm::syscalls::mlock(ptr, len)
+    backend::mm::syscalls::mlock(ptr, len)
 }
 
 /// `mlock2(ptr, len, flags)`—Lock memory into RAM, with
@@ -204,7 +204,7 @@ pub unsafe fn mlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
 #[inline]
 #[doc(alias = "mlock2")]
 pub unsafe fn mlock_with(ptr: *mut c_void, len: usize, flags: MlockFlags) -> io::Result<()> {
-    imp::mm::syscalls::mlock_with(ptr, len, flags)
+    backend::mm::syscalls::mlock_with(ptr, len, flags)
 }
 
 /// `munlock(ptr, len)`—Unlock memory.
@@ -227,5 +227,5 @@ pub unsafe fn mlock_with(ptr: *mut c_void, len: usize, flags: MlockFlags) -> io:
 /// [Linux]: https://man7.org/linux/man-pages/man2/munlock.2.html
 #[inline]
 pub unsafe fn munlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
-    imp::mm::syscalls::munlock(ptr, len)
+    backend::mm::syscalls::munlock(ptr, len)
 }

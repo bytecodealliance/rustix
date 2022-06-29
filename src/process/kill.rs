@@ -1,7 +1,7 @@
 use crate::process::Pid;
-use crate::{imp, io};
+use crate::{backend, io};
 
-pub use imp::process::types::Signal;
+pub use backend::process::types::Signal;
 
 /// `kill(pid, sig)`—Sends a signal to a process.
 ///
@@ -14,7 +14,7 @@ pub use imp::process::types::Signal;
 #[inline]
 #[doc(alias = "kill")]
 pub fn kill_process(pid: Pid, sig: Signal) -> io::Result<()> {
-    imp::process::syscalls::kill_process(pid, sig)
+    backend::process::syscalls::kill_process(pid, sig)
 }
 
 /// `kill(-pid, sig)`—Sends a signal to all processes in a process group.
@@ -32,7 +32,7 @@ pub fn kill_process(pid: Pid, sig: Signal) -> io::Result<()> {
 #[inline]
 #[doc(alias = "kill")]
 pub fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
-    imp::process::syscalls::kill_process_group(pid, sig)
+    backend::process::syscalls::kill_process_group(pid, sig)
 }
 
 /// `kill(0, sig)`—Sends a signal to all processes in the current process
@@ -47,5 +47,5 @@ pub fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
 #[inline]
 #[doc(alias = "kill")]
 pub fn kill_current_process_group(sig: Signal) -> io::Result<()> {
-    imp::process::syscalls::kill_current_process_group(sig)
+    backend::process::syscalls::kill_current_process_group(sig)
 }

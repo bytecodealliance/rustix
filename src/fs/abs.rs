@@ -13,7 +13,7 @@ use crate::fs::StatFs;
     target_os = "redox",
     target_os = "wasi",
 )))]
-use crate::{imp, io, path};
+use crate::{backend, io, path};
 
 /// `statfs`—Queries filesystem metadata.
 ///
@@ -29,5 +29,5 @@ use crate::{imp, io, path};
 )))]
 #[inline]
 pub fn statfs<P: path::Arg>(path: P) -> io::Result<StatFs> {
-    path.into_with_c_str(imp::fs::syscalls::statfs)
+    path.into_with_c_str(backend::fs::syscalls::statfs)
 }

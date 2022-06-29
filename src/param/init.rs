@@ -7,7 +7,7 @@
 //! operates on raw pointers.
 #![allow(unsafe_code)]
 
-use crate::imp;
+use crate::backend;
 
 /// Initialize process-wide state.
 ///
@@ -19,5 +19,5 @@ use crate::imp;
 #[inline]
 #[doc(hidden)]
 pub unsafe fn init(envp: *mut *mut u8) {
-    imp::param::auxv::init(envp)
+    backend::param::auxv::init(envp)
 }

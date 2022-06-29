@@ -1,19 +1,19 @@
 //! `read` and `write`, optionally positioned, optionally vectored
 
-use crate::{imp, io};
-use imp::fd::AsFd;
+use crate::{backend, io};
+use backend::fd::AsFd;
 
 // Declare `IoSlice` and `IoSliceMut`.
 #[cfg(not(windows))]
 #[cfg(not(feature = "std"))]
-pub use imp::io::io_slice::{IoSlice, IoSliceMut};
+pub use backend::io::io_slice::{IoSlice, IoSliceMut};
 #[cfg(not(windows))]
 #[cfg(feature = "std")]
 pub use std::io::{IoSlice, IoSliceMut};
 
 /// `RWF_*` constants for use with [`preadv2`] and [`pwritev2`].
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use imp::io::types::ReadWriteFlags;
+pub use backend::io::types::ReadWriteFlags;
 
 /// `read(fd, buf)`—Reads from a stream.
 ///
@@ -27,7 +27,7 @@ pub use imp::io::types::ReadWriteFlags;
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/read.2.html
 #[inline]
 pub fn read<Fd: AsFd>(fd: Fd, buf: &mut [u8]) -> io::Result<usize> {
-    imp::io::syscalls::read(fd.as_fd(), buf)
+    backend::io::syscalls::read(fd.as_fd(), buf)
 }
 
 /// `write(fd, buf)`—Writes to a stream.
@@ -42,7 +42,7 @@ pub fn read<Fd: AsFd>(fd: Fd, buf: &mut [u8]) -> io::Result<usize> {
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/write.2.html
 #[inline]
 pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
-    imp::io::syscalls::write(fd.as_fd(), buf)
+    backend::io::syscalls::write(fd.as_fd(), buf)
 }
 
 /// `pread(fd, buf, offset)`—Reads from a file at a given position.
@@ -57,7 +57,7 @@ pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/pread.2.html
 #[inline]
 pub fn pread<Fd: AsFd>(fd: Fd, buf: &mut [u8], offset: u64) -> io::Result<usize> {
-    imp::io::syscalls::pread(fd.as_fd(), buf, offset)
+    backend::io::syscalls::pread(fd.as_fd(), buf, offset)
 }
 
 /// `pwrite(fd, bufs)`—Writes to a file at a given position.
@@ -72,7 +72,7 @@ pub fn pread<Fd: AsFd>(fd: Fd, buf: &mut [u8], offset: u64) -> io::Result<usize>
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/pwrite.2.html
 #[inline]
 pub fn pwrite<Fd: AsFd>(fd: Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
-    imp::io::syscalls::pwrite(fd.as_fd(), buf, offset)
+    backend::io::syscalls::pwrite(fd.as_fd(), buf, offset)
 }
 
 /// `readv(fd, bufs)`—Reads from a stream into multiple buffers.
@@ -87,7 +87,7 @@ pub fn pwrite<Fd: AsFd>(fd: Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/readv.2.html
 #[inline]
 pub fn readv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize> {
-    imp::io::syscalls::readv(fd.as_fd(), bufs)
+    backend::io::syscalls::readv(fd.as_fd(), bufs)
 }
 
 /// `writev(fd, bufs)`—Writes to a stream from multiple buffers.
@@ -102,7 +102,7 @@ pub fn readv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize>
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/writev.2.html
 #[inline]
 pub fn writev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
-    imp::io::syscalls::writev(fd.as_fd(), bufs)
+    backend::io::syscalls::writev(fd.as_fd(), bufs)
 }
 
 /// `preadv(fd, bufs, offset)`—Reads from a file at a given position into
@@ -115,7 +115,7 @@ pub fn writev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
 #[cfg(not(target_os = "redox"))]
 #[inline]
 pub fn preadv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>], offset: u64) -> io::Result<usize> {
-    imp::io::syscalls::preadv(fd.as_fd(), bufs, offset)
+    backend::io::syscalls::preadv(fd.as_fd(), bufs, offset)
 }
 
 /// `pwritev(fd, bufs, offset)`—Writes to a file at a given position from
@@ -128,7 +128,7 @@ pub fn preadv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>], offset: u64) -> io:
 #[cfg(not(target_os = "redox"))]
 #[inline]
 pub fn pwritev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>], offset: u64) -> io::Result<usize> {
-    imp::io::syscalls::pwritev(fd.as_fd(), bufs, offset)
+    backend::io::syscalls::pwritev(fd.as_fd(), bufs, offset)
 }
 
 /// `preadv2(fd, bufs, offset, flags)`—Reads data, with several options.
@@ -147,7 +147,7 @@ pub fn preadv2<Fd: AsFd>(
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    imp::io::syscalls::preadv2(fd.as_fd(), bufs, offset, flags)
+    backend::io::syscalls::preadv2(fd.as_fd(), bufs, offset, flags)
 }
 
 /// `pwritev2(fd, bufs, offset, flags)`—Writes data, with several options.
@@ -166,5 +166,5 @@ pub fn pwritev2<Fd: AsFd>(
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    imp::io::syscalls::pwritev2(fd.as_fd(), bufs, offset, flags)
+    backend::io::syscalls::pwritev2(fd.as_fd(), bufs, offset, flags)
 }

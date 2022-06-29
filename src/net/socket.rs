@@ -1,11 +1,11 @@
-use crate::imp;
+use crate::backend;
 use crate::io::{self, OwnedFd};
 use crate::net::{SocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
-use imp::fd::{AsFd, BorrowedFd};
+use backend::fd::{AsFd, BorrowedFd};
 
 #[cfg(unix)]
-pub use imp::net::addr::SocketAddrUnix;
-pub use imp::net::types::{
+pub use backend::net::addr::SocketAddrUnix;
+pub use backend::net::types::{
     AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType,
 };
 
@@ -34,7 +34,7 @@ impl Default for Protocol {
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-socket
 #[inline]
 pub fn socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::Result<OwnedFd> {
-    imp::net::syscalls::socket(domain, type_, protocol)
+    backend::net::syscalls::socket(domain, type_, protocol)
 }
 
 /// `socket_with(domain, type_ | flags, protocol)`—Creates a socket, with
@@ -64,7 +64,7 @@ pub fn socket_with(
     flags: SocketFlags,
     protocol: Protocol,
 ) -> io::Result<OwnedFd> {
-    imp::net::syscalls::socket_with(domain, type_, flags, protocol)
+    backend::net::syscalls::socket_with(domain, type_, flags, protocol)
 }
 
 /// `bind(sockfd, addr)`—Binds a socket to an IP address.
@@ -85,8 +85,8 @@ pub fn bind<Fd: AsFd>(sockfd: Fd, addr: &SocketAddr) -> io::Result<()> {
 
 fn _bind(sockfd: BorrowedFd<'_>, addr: &SocketAddr) -> io::Result<()> {
     match addr {
-        SocketAddr::V4(v4) => imp::net::syscalls::bind_v4(sockfd, v4),
-        SocketAddr::V6(v6) => imp::net::syscalls::bind_v6(sockfd, v6),
+        SocketAddr::V4(v4) => backend::net::syscalls::bind_v4(sockfd, v4),
+        SocketAddr::V6(v6) => backend::net::syscalls::bind_v6(sockfd, v6),
     }
 }
 
@@ -109,10 +109,10 @@ pub fn bind_any<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrAny) -> io::Result<()> {
 
 fn _bind_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> {
     match addr {
-        SocketAddrAny::V4(v4) => imp::net::syscalls::bind_v4(sockfd, v4),
-        SocketAddrAny::V6(v6) => imp::net::syscalls::bind_v6(sockfd, v6),
+        SocketAddrAny::V4(v4) => backend::net::syscalls::bind_v4(sockfd, v4),
+        SocketAddrAny::V6(v6) => backend::net::syscalls::bind_v6(sockfd, v6),
         #[cfg(unix)]
-        SocketAddrAny::Unix(unix) => imp::net::syscalls::bind_unix(sockfd, unix),
+        SocketAddrAny::Unix(unix) => backend::net::syscalls::bind_unix(sockfd, unix),
     }
 }
 
@@ -132,7 +132,7 @@ fn _bind_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> {
 #[inline]
 #[doc(alias = "bind")]
 pub fn bind_v4<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
-    imp::net::syscalls::bind_v4(sockfd.as_fd(), addr)
+    backend::net::syscalls::bind_v4(sockfd.as_fd(), addr)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in6))`—Binds a socket to an
@@ -151,7 +151,7 @@ pub fn bind_v4<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
 #[inline]
 #[doc(alias = "bind")]
 pub fn bind_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
-    imp::net::syscalls::bind_v6(sockfd.as_fd(), addr)
+    backend::net::syscalls::bind_v6(sockfd.as_fd(), addr)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_un))`—Binds a socket to a
@@ -171,7 +171,7 @@ pub fn bind_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
 #[inline]
 #[doc(alias = "bind")]
 pub fn bind_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
-    imp::net::syscalls::bind_unix(sockfd.as_fd(), addr)
+    backend::net::syscalls::bind_unix(sockfd.as_fd(), addr)
 }
 
 /// `connect(sockfd, addr)`—Initiates a connection to an IP address.
@@ -192,8 +192,8 @@ pub fn connect<Fd: AsFd>(sockfd: Fd, addr: &SocketAddr) -> io::Result<()> {
 
 fn _connect(sockfd: BorrowedFd<'_>, addr: &SocketAddr) -> io::Result<()> {
     match addr {
-        SocketAddr::V4(v4) => imp::net::syscalls::connect_v4(sockfd, v4),
-        SocketAddr::V6(v6) => imp::net::syscalls::connect_v6(sockfd, v6),
+        SocketAddr::V4(v4) => backend::net::syscalls::connect_v4(sockfd, v4),
+        SocketAddr::V6(v6) => backend::net::syscalls::connect_v6(sockfd, v6),
     }
 }
 
@@ -216,10 +216,10 @@ pub fn connect_any<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrAny) -> io::Result<()>
 
 fn _connect_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> {
     match addr {
-        SocketAddrAny::V4(v4) => imp::net::syscalls::connect_v4(sockfd, v4),
-        SocketAddrAny::V6(v6) => imp::net::syscalls::connect_v6(sockfd, v6),
+        SocketAddrAny::V4(v4) => backend::net::syscalls::connect_v4(sockfd, v4),
+        SocketAddrAny::V6(v6) => backend::net::syscalls::connect_v6(sockfd, v6),
         #[cfg(unix)]
-        SocketAddrAny::Unix(unix) => imp::net::syscalls::connect_unix(sockfd, unix),
+        SocketAddrAny::Unix(unix) => backend::net::syscalls::connect_unix(sockfd, unix),
     }
 }
 
@@ -239,7 +239,7 @@ fn _connect_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> 
 #[inline]
 #[doc(alias = "connect")]
 pub fn connect_v4<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
-    imp::net::syscalls::connect_v4(sockfd.as_fd(), addr)
+    backend::net::syscalls::connect_v4(sockfd.as_fd(), addr)
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_in6))`—Initiates a
@@ -258,7 +258,7 @@ pub fn connect_v4<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
 #[inline]
 #[doc(alias = "connect")]
 pub fn connect_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
-    imp::net::syscalls::connect_v6(sockfd.as_fd(), addr)
+    backend::net::syscalls::connect_v6(sockfd.as_fd(), addr)
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_un))`—Initiates a
@@ -278,7 +278,7 @@ pub fn connect_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
 #[inline]
 #[doc(alias = "connect")]
 pub fn connect_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
-    imp::net::syscalls::connect_unix(sockfd.as_fd(), addr)
+    backend::net::syscalls::connect_unix(sockfd.as_fd(), addr)
 }
 
 /// `listen(fd, backlog)`—Enables listening for incoming connections.
@@ -295,7 +295,7 @@ pub fn connect_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<(
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-listen
 #[inline]
 pub fn listen<Fd: AsFd>(sockfd: Fd, backlog: i32) -> io::Result<()> {
-    imp::net::syscalls::listen(sockfd.as_fd(), backlog)
+    backend::net::syscalls::listen(sockfd.as_fd(), backlog)
 }
 
 /// `accept(fd, NULL, NULL)`—Accepts an incoming connection.
@@ -319,7 +319,7 @@ pub fn listen<Fd: AsFd>(sockfd: Fd, backlog: i32) -> io::Result<()> {
 #[inline]
 #[doc(alias = "accept4")]
 pub fn accept<Fd: AsFd>(sockfd: Fd) -> io::Result<OwnedFd> {
-    imp::net::syscalls::accept(sockfd.as_fd())
+    backend::net::syscalls::accept(sockfd.as_fd())
 }
 
 /// `accept4(fd, NULL, NULL, flags)`—Accepts an incoming connection, with
@@ -341,7 +341,7 @@ pub fn accept<Fd: AsFd>(sockfd: Fd) -> io::Result<OwnedFd> {
 #[inline]
 #[doc(alias = "accept4")]
 pub fn accept_with<Fd: AsFd>(sockfd: Fd, flags: AcceptFlags) -> io::Result<OwnedFd> {
-    imp::net::syscalls::accept_with(sockfd.as_fd(), flags)
+    backend::net::syscalls::accept_with(sockfd.as_fd(), flags)
 }
 
 /// `accept(fd, &addr, &len)`—Accepts an incoming connection and returns the
@@ -362,7 +362,7 @@ pub fn accept_with<Fd: AsFd>(sockfd: Fd, flags: AcceptFlags) -> io::Result<Owned
 #[inline]
 #[doc(alias = "accept4")]
 pub fn acceptfrom<Fd: AsFd>(sockfd: Fd) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
-    imp::net::syscalls::acceptfrom(sockfd.as_fd())
+    backend::net::syscalls::acceptfrom(sockfd.as_fd())
 }
 
 /// `accept4(fd, &addr, &len, flags)`—Accepts an incoming connection and
@@ -383,7 +383,7 @@ pub fn acceptfrom_with<Fd: AsFd>(
     sockfd: Fd,
     flags: AcceptFlags,
 ) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
-    imp::net::syscalls::acceptfrom_with(sockfd.as_fd(), flags)
+    backend::net::syscalls::acceptfrom_with(sockfd.as_fd(), flags)
 }
 
 /// `shutdown(fd, how)`—Closes the read and/or write sides of a stream.
@@ -400,7 +400,7 @@ pub fn acceptfrom_with<Fd: AsFd>(
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-shutdown
 #[inline]
 pub fn shutdown<Fd: AsFd>(sockfd: Fd, how: Shutdown) -> io::Result<()> {
-    imp::net::syscalls::shutdown(sockfd.as_fd(), how)
+    backend::net::syscalls::shutdown(sockfd.as_fd(), how)
 }
 
 /// `getsockname(fd, addr, len)`—Returns the address a socket is bound to.
@@ -417,7 +417,7 @@ pub fn shutdown<Fd: AsFd>(sockfd: Fd, how: Shutdown) -> io::Result<()> {
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockname
 #[inline]
 pub fn getsockname<Fd: AsFd>(sockfd: Fd) -> io::Result<SocketAddrAny> {
-    imp::net::syscalls::getsockname(sockfd.as_fd())
+    backend::net::syscalls::getsockname(sockfd.as_fd())
 }
 
 /// `getpeername(fd, addr, len)`—Returns the address a socket is connected
@@ -435,5 +435,5 @@ pub fn getsockname<Fd: AsFd>(sockfd: Fd) -> io::Result<SocketAddrAny> {
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getpeername
 #[inline]
 pub fn getpeername<Fd: AsFd>(sockfd: Fd) -> io::Result<Option<SocketAddrAny>> {
-    imp::net::syscalls::getpeername(sockfd.as_fd())
+    backend::net::syscalls::getpeername(sockfd.as_fd())
 }

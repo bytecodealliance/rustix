@@ -6,10 +6,10 @@
 //! memory or have other side effects.
 #![allow(unsafe_code)]
 
-use crate::{imp, io};
+use crate::{backend, io};
 use core::ffi::c_void;
 
-pub use imp::mm::types::MsyncFlags;
+pub use backend::mm::types::MsyncFlags;
 
 /// `msync(addr, len, flags)`—Synchronizes a memory-mapping with its backing
 /// storage.
@@ -28,5 +28,5 @@ pub use imp::mm::types::MsyncFlags;
 /// [Linux `msync`]: https://man7.org/linux/man-pages/man2/msync.2.html
 #[inline]
 pub unsafe fn msync(addr: *mut c_void, len: usize, flags: MsyncFlags) -> io::Result<()> {
-    imp::mm::syscalls::msync(addr, len, flags)
+    backend::mm::syscalls::msync(addr, len, flags)
 }

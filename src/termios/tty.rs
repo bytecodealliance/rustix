@@ -1,19 +1,20 @@
 //! Functions which operate on file descriptors which might be terminals.
 
-use crate::imp;
+use crate::backend;
 #[cfg(any(
     all(linux_raw, feature = "procfs"),
     all(libc, not(any(target_os = "fuchsia", target_os = "wasi"))),
 ))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 use crate::io;
-use imp::fd::AsFd;
+use backend::fd::AsFd;
 #[cfg(any(
     all(linux_raw, feature = "procfs"),
     all(libc, not(any(target_os = "fuchsia", target_os = "wasi"))),
 ))]
 use {
-    crate::ffi::CString, crate::path::SMALL_PATH_BUFFER_SIZE, alloc::vec::Vec, imp::fd::BorrowedFd,
+    crate::ffi::CString, crate::path::SMALL_PATH_BUFFER_SIZE, alloc::vec::Vec,
+    backend::fd::BorrowedFd,
 };
 
 /// `isatty(fd)`—Tests whether a file descriptor refers to a terminal.
@@ -26,7 +27,7 @@ use {
 /// [Linux]: https://man7.org/linux/man-pages/man3/isatty.3.html
 #[inline]
 pub fn isatty<Fd: AsFd>(fd: Fd) -> bool {
-    imp::termios::syscalls::isatty(fd.as_fd())
+    backend::termios::syscalls::isatty(fd.as_fd())
 }
 
 /// `ttyname_r(fd)`
@@ -57,7 +58,7 @@ fn _ttyname(dirfd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<CString> {
     buffer.resize(buffer.capacity(), 0_u8);
 
     loop {
-        match imp::termios::syscalls::ttyname(dirfd, &mut buffer) {
+        match backend::termios::syscalls::ttyname(dirfd, &mut buffer) {
             Err(io::Errno::RANGE) => {
                 buffer.reserve(1); // use `Vec` reallocation strategy to grow capacity exponentially
                 buffer.resize(buffer.capacity(), 0_u8);

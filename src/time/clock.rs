@@ -1,10 +1,10 @@
-use crate::{imp, io};
+use crate::{backend, io};
 
-pub use imp::time::types::{Nsecs, Secs, Timespec};
+pub use backend::time::types::{Nsecs, Secs, Timespec};
 
 /// `clockid_t`
 #[cfg(any(not(target_os = "wasi")))]
-pub use imp::time::types::{ClockId, DynamicClockId};
+pub use backend::time::types::{ClockId, DynamicClockId};
 
 /// `clock_getres(id)`—Returns the resolution of a clock.
 ///
@@ -18,7 +18,7 @@ pub use imp::time::types::{ClockId, DynamicClockId};
 #[inline]
 #[must_use]
 pub fn clock_getres(id: ClockId) -> Timespec {
-    imp::time::syscalls::clock_getres(id)
+    backend::time::syscalls::clock_getres(id)
 }
 
 /// `clock_gettime(id)`—Returns the current value of a clock.
@@ -38,7 +38,7 @@ pub fn clock_getres(id: ClockId) -> Timespec {
 #[inline]
 #[must_use]
 pub fn clock_gettime(id: ClockId) -> Timespec {
-    imp::time::syscalls::clock_gettime(id)
+    backend::time::syscalls::clock_gettime(id)
 }
 
 /// Like [`clock_gettime`] but with support for dynamic clocks.
@@ -52,5 +52,5 @@ pub fn clock_gettime(id: ClockId) -> Timespec {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timespec> {
-    imp::time::syscalls::clock_gettime_dynamic(id)
+    backend::time::syscalls::clock_gettime_dynamic(id)
 }

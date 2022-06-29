@@ -1,7 +1,7 @@
-use crate::{imp, io};
+use crate::{backend, io};
 
 /// `GRND_*`
-pub use imp::rand::types::GetRandomFlags;
+pub use backend::rand::types::GetRandomFlags;
 
 /// `getrandom(buf, flags)`—Reads a sequence of random bytes.
 ///
@@ -17,5 +17,5 @@ pub use imp::rand::types::GetRandomFlags;
 /// [Linux]: https://man7.org/linux/man-pages/man2/getrandom.2.html
 #[inline]
 pub fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
-    imp::rand::syscalls::getrandom(buf, flags)
+    backend::rand::syscalls::getrandom(buf, flags)
 }
