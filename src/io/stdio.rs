@@ -36,6 +36,7 @@ use imp::fd::{BorrowedFd, FromRawFd, RawFd};
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
+#[doc(alias = "STDIN_FILENO")]
 #[inline]
 pub unsafe fn stdin() -> BorrowedFd<'static> {
     BorrowedFd::borrow_raw(imp::io::types::STDIN_FILENO as RawFd)
@@ -65,6 +66,7 @@ pub unsafe fn stdin() -> BorrowedFd<'static> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
+#[doc(alias = "STDIN_FILENO")]
 #[inline]
 pub unsafe fn take_stdin() -> OwnedFd {
     OwnedFd::from(imp::fd::OwnedFd::from_raw_fd(
@@ -97,6 +99,7 @@ pub unsafe fn take_stdin() -> OwnedFd {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
+#[doc(alias = "STDOUT_FILENO")]
 #[inline]
 pub unsafe fn stdout() -> BorrowedFd<'static> {
     BorrowedFd::borrow_raw(imp::io::types::STDOUT_FILENO as RawFd)
@@ -126,6 +129,7 @@ pub unsafe fn stdout() -> BorrowedFd<'static> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
+#[doc(alias = "STDOUT_FILENO")]
 #[inline]
 pub unsafe fn take_stdout() -> OwnedFd {
     OwnedFd::from(imp::fd::OwnedFd::from_raw_fd(
@@ -157,6 +161,7 @@ pub unsafe fn take_stdout() -> OwnedFd {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
+#[doc(alias = "STDERR_FILENO")]
 #[inline]
 pub unsafe fn stderr() -> BorrowedFd<'static> {
     BorrowedFd::borrow_raw(imp::io::types::STDERR_FILENO as RawFd)
@@ -186,9 +191,70 @@ pub unsafe fn stderr() -> BorrowedFd<'static> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
+#[doc(alias = "STDERR_FILENO")]
 #[inline]
 pub unsafe fn take_stderr() -> OwnedFd {
     OwnedFd::from(imp::fd::OwnedFd::from_raw_fd(
         imp::io::types::STDERR_FILENO as RawFd,
     ))
+}
+
+/// `STDIN_FILENO`—Standard input, raw.
+///
+/// This is similar to [`stdin`], however it returns a `RawFd`.
+///
+/// # Other hazards
+///
+/// This has the same hazards as [`stdin`].
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
+#[doc(alias = "STDIN_FILENO")]
+#[inline]
+pub fn raw_stdin() -> RawFd {
+    imp::io::types::STDIN_FILENO as RawFd
+}
+
+/// `STDOUT_FILENO`—Standard output, raw.
+///
+/// This is similar to [`stdout`], however it returns a `RawFd`.
+///
+/// # Other hazards
+///
+/// This has the same hazards as [`stdout`].
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
+#[doc(alias = "STDOUT_FILENO")]
+#[inline]
+pub fn raw_stdout() -> RawFd {
+    imp::io::types::STDOUT_FILENO as RawFd
+}
+
+/// `STDERR_FILENO`—Standard error, raw.
+///
+/// This is similar to [`stderr`], however it returns a `RawFd`.
+///
+/// # Other hazards
+///
+/// This has the same hazards as [`stderr`].
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
+#[doc(alias = "STDERR_FILENO")]
+#[inline]
+pub fn raw_stderr() -> RawFd {
+    imp::io::types::STDERR_FILENO as RawFd
 }
