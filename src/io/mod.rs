@@ -71,4 +71,6 @@ pub use seek_from::SeekFrom;
 #[cfg(feature = "std")]
 pub use std::io::SeekFrom;
 #[cfg(not(windows))]
-pub use stdio::{stderr, stdin, stdout, take_stderr, take_stdin, take_stdout};
+pub use stdio::{
+    raw_stderr, raw_stdin, raw_stdout, stderr, stdin, stdout, take_stderr, take_stdin, take_stdout,
+};
