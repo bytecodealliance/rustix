@@ -216,7 +216,7 @@ pub unsafe fn take_stderr() -> OwnedFd {
 #[doc(alias = "STDIN_FILENO")]
 #[inline]
 pub fn raw_stdin() -> RawFd {
-    imp::io::types::STDIN_FILENO as RawFd
+    backend::io::types::STDIN_FILENO as RawFd
 }
 
 /// `STDOUT_FILENO`—Standard output, raw.
@@ -236,7 +236,7 @@ pub fn raw_stdin() -> RawFd {
 #[doc(alias = "STDOUT_FILENO")]
 #[inline]
 pub fn raw_stdout() -> RawFd {
-    imp::io::types::STDOUT_FILENO as RawFd
+    backend::io::types::STDOUT_FILENO as RawFd
 }
 
 /// `STDERR_FILENO`—Standard error, raw.
@@ -256,5 +256,5 @@ pub fn raw_stdout() -> RawFd {
 #[doc(alias = "STDERR_FILENO")]
 #[inline]
 pub fn raw_stderr() -> RawFd {
-    imp::io::types::STDERR_FILENO as RawFd
+    backend::io::types::STDERR_FILENO as RawFd
 }
