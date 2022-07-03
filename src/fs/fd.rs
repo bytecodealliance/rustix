@@ -149,6 +149,9 @@ pub fn fstat<Fd: AsFd>(fd: Fd) -> io::Result<Stat> {
 
 /// `fstatfs(fd)`—Queries filesystem statistics for an open file or directory.
 ///
+/// Compared to [`fstatvfs`], this function often provides more information,
+/// though it's less portable.
+///
 /// # References
 ///  - [Linux]
 ///
@@ -166,6 +169,11 @@ pub fn fstatfs<Fd: AsFd>(fd: Fd) -> io::Result<StatFs> {
 
 /// `fstatvfs(fd)`—Queries filesystem statistics for an open file or
 /// directory, POSIX version.
+///
+/// Compared to [`fstatfs`], this function often provides less information,
+/// but it is more portable. But even so, filesystems are very diverse and not
+/// all the fields are meaningful for every filesystem. And `f_fsid` doesn't
+/// seem to have a clear meaning anywhere.
 ///
 /// # References
 ///  - [POSIX]

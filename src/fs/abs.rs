@@ -15,6 +15,9 @@ use {
 
 /// `statfs`—Queries filesystem metadata.
 ///
+/// Compared to [`statvfs`], this function often provides more information,
+/// though it's less portable.
+///
 /// # References
 ///  - [Linux]
 ///
@@ -31,6 +34,11 @@ pub fn statfs<P: path::Arg>(path: P) -> io::Result<StatFs> {
 }
 
 /// `statvfs`—Queries filesystem metadata, POSIX version.
+///
+/// Compared to [`statfs`], this function often provides less information,
+/// but it is more portable. But even so, filesystems are very diverse and not
+/// all the fields are meaningful for every filesystem. And `f_fsid` doesn't
+/// seem to have a clear meaning anywhere.
 ///
 /// # References
 ///  - [POSIX]
