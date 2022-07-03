@@ -34,9 +34,10 @@ use core::mem::MaybeUninit;
 #[cfg(target_arch = "mips64")]
 use linux_raw_sys::general::stat as linux_stat64;
 use linux_raw_sys::general::{
-    __kernel_timespec, open_how, statx, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW,
-    F_ADD_SEALS, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETPIPE_SZ,
-    F_GETSIG, F_GET_SEALS, F_SETFD, F_SETFL, F_SETPIPE_SZ, SEEK_CUR, SEEK_END, SEEK_SET,
+    __kernel_fsid_t, __kernel_timespec, open_how, statx, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR,
+    AT_SYMLINK_NOFOLLOW, F_ADD_SEALS, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE,
+    F_GETOWN, F_GETPIPE_SZ, F_GETSIG, F_GET_SEALS, F_SETFD, F_SETFL, F_SETPIPE_SZ, SEEK_CUR,
+    SEEK_END, SEEK_SET,
 };
 #[cfg(target_pointer_width = "32")]
 use {
@@ -812,6 +813,9 @@ pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
 }
 
 fn statfs_to_statvfs(statfs: StatFs) -> StatVfs {
+    let __kernel_fsid_t { val } = statfs.f_fsid;
+    let [f_fsid_val0, f_fsid_val1]: [i32; 2] = val;
+
     StatVfs {
         f_bsize: statfs.f_bsize as u64,
         f_frsize: if statfs.f_frsize != 0 {
@@ -825,7 +829,7 @@ fn statfs_to_statvfs(statfs: StatFs) -> StatVfs {
         f_files: statfs.f_files as u64,
         f_ffree: statfs.f_ffree as u64,
         f_favail: statfs.f_ffree as u64,
-        f_fsid: statfs.f_fsid.val[0] as u64,
+        f_fsid: f_fsid_val0 as u32 as u64 | ((f_fsid_val1 as u32 as u64) << 32),
         f_flag: statfs.f_flags as u64,
         f_namemax: statfs.f_namelen as u64,
     }
