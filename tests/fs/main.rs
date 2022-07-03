@@ -35,13 +35,7 @@ mod openat;
 mod openat2;
 mod readdir;
 mod renameat;
-#[cfg(not(any(
-    target_os = "illumos",
-    target_os = "netbsd",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
-// not implemented in libc for netbsd yet
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
 mod statfs;
 mod utimensat;
 mod y2038;

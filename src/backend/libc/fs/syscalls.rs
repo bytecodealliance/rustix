@@ -39,6 +39,8 @@ use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek,
     target_os = "wasi",
 )))]
 use super::super::offset::{libc_fstatfs, libc_statfs};
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+use super::super::offset::{libc_fstatvfs, libc_statvfs};
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
@@ -87,8 +89,9 @@ use crate::fs::SealFlags;
     target_os = "redox",
     target_os = "wasi",
 )))]
-// not implemented in libc for netbsd yet
 use crate::fs::StatFs;
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+use crate::fs::StatVfs;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags};
 #[cfg(not(any(
@@ -206,6 +209,16 @@ pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
     unsafe {
         let mut result = MaybeUninit::<StatFs>::uninit();
         ret(libc_statfs(c_str(filename), result.as_mut_ptr()))?;
+        Ok(result.assume_init())
+    }
+}
+
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+#[inline]
+pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
+    unsafe {
+        let mut result = MaybeUninit::<StatVfs>::uninit();
+        ret(libc_statvfs(c_str(filename), result.as_mut_ptr()))?;
         Ok(result.assume_init())
     }
 }
@@ -947,12 +960,21 @@ fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     target_os = "netbsd",
     target_os = "redox",
     target_os = "wasi",
-)))] // not implemented in libc for netbsd yet
+)))]
 pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
     let mut statfs = MaybeUninit::<StatFs>::uninit();
     unsafe {
         ret(libc_fstatfs(borrowed_fd(fd), statfs.as_mut_ptr()))?;
         Ok(statfs.assume_init())
+    }
+}
+
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
+    let mut statvfs = MaybeUninit::<StatVfs>::uninit();
+    unsafe {
+        ret(libc_fstatvfs(borrowed_fd(fd), statvfs.as_mut_ptr()))?;
+        Ok(statvfs.assume_init())
     }
 }
 

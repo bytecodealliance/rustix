@@ -12,8 +12,10 @@ use crate::fs::{fcntl_getfl, fstat, openat, Mode, OFlags, Stat};
     target_os = "netbsd",
     target_os = "redox",
     target_os = "wasi",
-)))] // not implemented in libc for netbsd yet
+)))]
 use crate::fs::{fstatfs, StatFs};
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+use crate::fs::{fstatvfs, StatVfs};
 use crate::io;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use crate::process::fchdir;
@@ -133,10 +135,17 @@ impl Dir {
         target_os = "netbsd",
         target_os = "redox",
         target_os = "wasi",
-    )))] // not implemented in libc for netbsd yet
+    )))]
     #[inline]
     pub fn statfs(&self) -> io::Result<StatFs> {
         fstatfs(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr())) })
+    }
+
+    /// `fstatvfs(self)`
+    #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+    #[inline]
+    pub fn statvfs(&self) -> io::Result<StatVfs> {
+        fstatvfs(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr())) })
     }
 
     /// `fchdir(self)`

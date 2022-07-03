@@ -858,8 +858,9 @@ pub struct Stat {
     pub st_ino: u64,
 }
 
-/// `struct statfs` for use with [`fstatfs`].
+/// `struct statfs` for use with [`statfs`] and [`fstatfs`].
 ///
+/// [`statfs`]: crate::fs::statfs
 /// [`fstatfs`]: crate::fs::fstatfs
 #[cfg(not(any(
     target_os = "android",
@@ -874,8 +875,9 @@ pub struct Stat {
 #[allow(clippy::module_name_repetitions)]
 pub type StatFs = c::statfs;
 
-/// `struct statfs` for use with [`fstatfs`].
+/// `struct statfs` for use with [`statfs`] and [`fstatfs`].
 ///
+/// [`statfs`]: crate::fs::statfs
 /// [`fstatfs`]: crate::fs::fstatfs
 #[cfg(any(
     target_os = "android",
@@ -884,6 +886,33 @@ pub type StatFs = c::statfs;
     target_os = "l4re",
 ))]
 pub type StatFs = c::statfs64;
+
+/// `struct statvfs` for use with [`statvfs`] and [`fstatvfs`].
+///
+/// [`statvfs`]: crate::fs::statvfs
+/// [`fstatvfs`]: crate::fs::fstatvfs
+#[cfg(not(any(
+    target_os = "android",
+    target_os = "emscripten",
+    target_os = "illumos",
+    target_os = "linux",
+    target_os = "l4re",
+    target_os = "redox",
+    target_os = "wasi",
+)))]
+pub type StatVfs = c::statvfs;
+
+/// `struct statvfs` for use with [`statvfs`] and [`fstatvfs`].
+///
+/// [`statvfs`]: crate::fs::statvfs
+/// [`fstatvfs`]: crate::fs::fstatvfs
+#[cfg(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "emscripten",
+    target_os = "l4re",
+))]
+pub type StatVfs = c::statvfs64;
 
 /// `struct statx` for use with [`statx`].
 ///

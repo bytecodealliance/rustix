@@ -25,7 +25,7 @@ use crate::fd::{BorrowedFd, RawFd};
 use crate::ffi::CStr;
 use crate::fs::{
     Access, Advice, AtFlags, FallocateFlags, FdFlags, FileType, FlockOperation, MemfdFlags, Mode,
-    OFlags, RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatxFlags, Timestamps,
+    OFlags, RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatVfs, StatxFlags, Timestamps,
 };
 use crate::io::{self, OwnedFd, SeekFrom};
 use crate::process::{Gid, Uid};
@@ -774,6 +774,15 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
 }
 
 #[inline]
+pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
+    // Linux doesn't have an `fstatvfs` syscall; we have to do `fstatfs` and
+    // translate the fields as best we can.
+    let statfs = fstatfs(fd)?;
+
+    Ok(statfs_to_statvfs(statfs))
+}
+
+#[inline]
 pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
@@ -790,6 +799,35 @@ pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
     unsafe {
         let mut result = MaybeUninit::<StatFs>::uninit();
         ret(syscall!(__NR_statfs, filename, &mut result)).map(|()| result.assume_init())
+    }
+}
+
+#[inline]
+pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
+    // Linux doesn't have a `statvfs` syscall; we have to do `statfs` and
+    // translate the fields as best we can.
+    let statfs = statfs(filename)?;
+
+    Ok(statfs_to_statvfs(statfs))
+}
+
+fn statfs_to_statvfs(statfs: StatFs) -> StatVfs {
+    StatVfs {
+        f_bsize: statfs.f_bsize as u64,
+        f_frsize: if statfs.f_frsize != 0 {
+            statfs.f_frsize
+        } else {
+            statfs.f_bsize
+        } as u64,
+        f_blocks: statfs.f_blocks,
+        f_bfree: statfs.f_bfree,
+        f_bavail: statfs.f_bavail,
+        f_files: statfs.f_files,
+        f_ffree: statfs.f_ffree,
+        f_favail: statfs.f_ffree,
+        f_fsid: statfs.f_fsid.val[0] as u64,
+        f_flag: statfs.f_flags as u64,
+        f_namemax: statfs.f_namelen as u64,
     }
 }
 

@@ -551,19 +551,31 @@ pub struct Stat {
 #[cfg(all(target_pointer_width = "64", not(target_arch = "mips64")))]
 pub type Stat = linux_raw_sys::general::stat;
 
-/// `struct statfs` for use with [`fstatfs`].
+/// `struct statfs` for use with [`statfs`] and [`fstatfs`].
 ///
+/// [`statfs`]: crate::fs::statfs
 /// [`fstatfs`]: crate::fs::fstatfs
-#[cfg(target_pointer_width = "32")]
 #[allow(clippy::module_name_repetitions)]
 pub type StatFs = linux_raw_sys::general::statfs64;
 
-/// `struct statfs` for use with [`fstatfs`].
+/// `struct statvfs` for use with [`statvfs`] and [`fstatvfs`].
 ///
-/// [`fstatfs`]: crate::fs::fstatfs
-#[cfg(target_pointer_width = "64")]
-#[allow(clippy::module_name_repetitions)]
-pub type StatFs = linux_raw_sys::general::statfs64;
+/// [`statvfs`]: crate::fs::statvfs
+/// [`fstatvfs`]: crate::fs::fstatvfs
+#[allow(missing_docs)]
+pub struct StatVfs {
+    pub f_bsize: u64,
+    pub f_frsize: u64,
+    pub f_blocks: u64,
+    pub f_bfree: u64,
+    pub f_bavail: u64,
+    pub f_files: u64,
+    pub f_ffree: u64,
+    pub f_favail: u64,
+    pub f_fsid: u64,
+    pub f_flag: u64,
+    pub f_namemax: u64,
+}
 
 /// `struct statx` for use with [`statx`].
 ///

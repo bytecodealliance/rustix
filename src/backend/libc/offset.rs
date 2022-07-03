@@ -351,6 +351,17 @@ pub(super) use c::posix_fallocate64 as libc_posix_fallocate;
     target_os = "wasi",
 )))]
 pub(super) use {c::fstatfs as libc_fstatfs, c::statfs as libc_statfs};
+#[cfg(not(any(
+    windows,
+    target_os = "android",
+    target_os = "emscripten",
+    target_os = "illumos",
+    target_os = "linux",
+    target_os = "l4re",
+    target_os = "redox",
+    target_os = "wasi",
+)))]
+pub(super) use {c::fstatvfs as libc_fstatvfs, c::statvfs as libc_statvfs};
 
 #[cfg(any(
     target_os = "android",
@@ -358,4 +369,7 @@ pub(super) use {c::fstatfs as libc_fstatfs, c::statfs as libc_statfs};
     target_os = "emscripten",
     target_os = "l4re",
 ))]
-pub(super) use {c::fstatfs64 as libc_fstatfs, c::statfs64 as libc_statfs};
+pub(super) use {
+    c::fstatfs64 as libc_fstatfs, c::fstatvfs64 as libc_fstatvfs, c::statfs64 as libc_statfs,
+    c::statvfs64 as libc_statvfs,
+};

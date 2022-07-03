@@ -1,6 +1,8 @@
 use crate::fd::{AsFd, BorrowedFd};
 use crate::ffi::{CStr, CString};
-use crate::fs::{fcntl_getfl, fstat, fstatfs, openat, FileType, Mode, OFlags, Stat, StatFs};
+use crate::fs::{
+    fcntl_getfl, fstat, fstatfs, fstatvfs, openat, FileType, Mode, OFlags, Stat, StatFs, StatVfs,
+};
 use crate::io::{self, OwnedFd};
 use crate::process::fchdir;
 use crate::utils::as_ptr;
@@ -160,6 +162,12 @@ impl Dir {
     #[inline]
     pub fn statfs(&self) -> io::Result<StatFs> {
         fstatfs(&self.fd)
+    }
+
+    /// `fstatvfs(self)`
+    #[inline]
+    pub fn statvfs(&self) -> io::Result<StatVfs> {
+        fstatvfs(&self.fd)
     }
 
     /// `fchdir(self)`
