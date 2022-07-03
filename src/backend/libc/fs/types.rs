@@ -778,6 +778,46 @@ bitflags! {
     }
 }
 
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi",)))]
+bitflags! {
+    /// `ST_*` constants for use with [`StatVfs`].
+    pub struct StatVfsMountFlags: u64 {
+        /// `ST_MANDLOCK`
+        #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
+        const MANDLOCK = libc::ST_MANDLOCK as u64;
+
+        /// `ST_NOATIME`
+        #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
+        const NOATIME = libc::ST_NOATIME as u64;
+
+        /// `ST_NODEV`
+        #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
+        const NODEV = libc::ST_NODEV as u64;
+
+        /// `ST_NODIRATIME`
+        #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
+        const NODIRATIME = libc::ST_NODIRATIME as u64;
+
+        /// `ST_NOEXEC`
+        #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
+        const NOEXEC = libc::ST_NOEXEC as u64;
+
+        /// `ST_NOSUID`
+        const NOSUID = libc::ST_NOSUID as u64;
+
+        /// `ST_RDONLY`
+        const RDONLY = libc::ST_RDONLY as u64;
+
+        /// `ST_RELATIME`
+        #[cfg(any(target_os = "android", all(target_os = "linux", target_env = "gnu")))]
+        const RELATIME = libc::ST_RELATIME as u64;
+
+        /// `ST_SYNCHRONOUS`
+        #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
+        const SYNCHRONOUS = libc::ST_SYNCHRONOUS as u64;
+    }
+}
+
 /// `LOCK_*` constants for use with [`flock`]
 ///
 /// [`flock`]: crate::fs::flock
@@ -891,28 +931,21 @@ pub type StatFs = c::statfs64;
 ///
 /// [`statvfs`]: crate::fs::statvfs
 /// [`fstatvfs`]: crate::fs::fstatvfs
-#[cfg(not(any(
-    target_os = "android",
-    target_os = "emscripten",
-    target_os = "illumos",
-    target_os = "linux",
-    target_os = "l4re",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
-pub type StatVfs = c::statvfs;
-
-/// `struct statvfs` for use with [`statvfs`] and [`fstatvfs`].
-///
-/// [`statvfs`]: crate::fs::statvfs
-/// [`fstatvfs`]: crate::fs::fstatvfs
-#[cfg(any(
-    target_os = "android",
-    target_os = "linux",
-    target_os = "emscripten",
-    target_os = "l4re",
-))]
-pub type StatVfs = c::statvfs64;
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi",)))]
+#[allow(missing_docs)]
+pub struct StatVfs {
+    pub f_bsize: u64,
+    pub f_frsize: u64,
+    pub f_blocks: u64,
+    pub f_bfree: u64,
+    pub f_bavail: u64,
+    pub f_files: u64,
+    pub f_ffree: u64,
+    pub f_favail: u64,
+    pub f_fsid: u64,
+    pub f_flag: StatVfsMountFlags,
+    pub f_namemax: u64,
+}
 
 /// `struct statx` for use with [`statx`].
 ///

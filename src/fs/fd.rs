@@ -31,7 +31,7 @@ pub use backend::fs::types::Stat;
 pub use backend::fs::types::StatFs;
 
 #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
-pub use backend::fs::types::StatVfs;
+pub use backend::fs::types::{StatVfs, StatVfsMountFlags};
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use backend::fs::types::FsWord;

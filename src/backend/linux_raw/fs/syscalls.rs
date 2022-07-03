@@ -25,7 +25,8 @@ use crate::fd::{BorrowedFd, RawFd};
 use crate::ffi::CStr;
 use crate::fs::{
     Access, Advice, AtFlags, FallocateFlags, FdFlags, FileType, FlockOperation, MemfdFlags, Mode,
-    OFlags, RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatVfs, StatxFlags, Timestamps,
+    OFlags, RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatVfs, StatVfsMountFlags,
+    StatxFlags, Timestamps,
 };
 use crate::io::{self, OwnedFd, SeekFrom};
 use crate::process::{Gid, Uid};
@@ -830,7 +831,7 @@ fn statfs_to_statvfs(statfs: StatFs) -> StatVfs {
         f_ffree: statfs.f_ffree as u64,
         f_favail: statfs.f_ffree as u64,
         f_fsid: f_fsid_val0 as u32 as u64 | ((f_fsid_val1 as u32 as u64) << 32),
-        f_flag: statfs.f_flags as u64,
+        f_flag: unsafe { StatVfsMountFlags::from_bits_unchecked(statfs.f_flags as u64) },
         f_namemax: statfs.f_namelen as u64,
     }
 }

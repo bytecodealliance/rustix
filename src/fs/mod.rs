@@ -163,7 +163,7 @@ pub use fd::{fstat, fsync, ftruncate, futimens, is_file_read_write, seek, tell, 
 )))]
 pub use fd::{fstatfs, StatFs};
 #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
-pub use fd::{fstatvfs, StatVfs};
+pub use fd::{fstatvfs, StatVfs, StatVfsMountFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use fd::{FsWord, NFS_SUPER_MAGIC, PROC_SUPER_MAGIC};
 pub use file_type::FileType;

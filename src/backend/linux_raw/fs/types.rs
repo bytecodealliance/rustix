@@ -494,6 +494,38 @@ bitflags! {
     }
 }
 
+bitflags! {
+    /// `ST_*` constants for use with [`StatVfs`].
+    pub struct StatVfsMountFlags: u64 {
+        /// `ST_MANDLOCK`
+        const MANDLOCK = linux_raw_sys::general::MS_MANDLOCK as u64;
+
+        /// `ST_NOATIME`
+        const NOATIME = linux_raw_sys::general::MS_NOATIME as u64;
+
+        /// `ST_NODEV`
+        const NODEV = linux_raw_sys::general::MS_NODEV as u64;
+
+        /// `ST_NODIRATIME`
+        const NODIRATIME = linux_raw_sys::general::MS_NODIRATIME as u64;
+
+        /// `ST_NOEXEC`
+        const NOEXEC = linux_raw_sys::general::MS_NOEXEC as u64;
+
+        /// `ST_NOSUID`
+        const NOSUID = linux_raw_sys::general::MS_NOSUID as u64;
+
+        /// `ST_RDONLY`
+        const RDONLY = linux_raw_sys::general::MS_RDONLY as u64;
+
+        /// `ST_RELATIME`
+        const RELATIME = linux_raw_sys::general::MS_RELATIME as u64;
+
+        /// `ST_SYNCHRONOUS`
+        const SYNCHRONOUS = linux_raw_sys::general::MS_SYNCHRONOUS as u64;
+    }
+}
+
 /// `LOCK_*` constants for use with [`flock`]
 ///
 /// [`flock`]: crate::fs::flock
@@ -573,7 +605,7 @@ pub struct StatVfs {
     pub f_ffree: u64,
     pub f_favail: u64,
     pub f_fsid: u64,
-    pub f_flag: u64,
+    pub f_flag: StatVfsMountFlags,
     pub f_namemax: u64,
 }
 

@@ -90,8 +90,6 @@ use crate::fs::SealFlags;
     target_os = "wasi",
 )))]
 use crate::fs::StatFs;
-#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
-use crate::fs::StatVfs;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags};
 #[cfg(not(any(
@@ -102,6 +100,8 @@ use crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags};
 )))]
 use crate::fs::{Dev, FileType};
 use crate::fs::{FdFlags, Mode, OFlags, Stat, Timestamps};
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+use crate::fs::{StatVfs, StatVfsMountFlags};
 use crate::io::{self, OwnedFd, SeekFrom};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
@@ -217,9 +217,9 @@ pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
 #[inline]
 pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
     unsafe {
-        let mut result = MaybeUninit::<StatVfs>::uninit();
+        let mut result = MaybeUninit::<libc_statvfs>::uninit();
         ret(libc_statvfs(c_str(filename), result.as_mut_ptr()))?;
-        Ok(result.assume_init())
+        Ok(libc_statvfs_to_statvfs(result.assume_init()))
     }
 }
 
@@ -971,10 +971,27 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
 
 #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
 pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
-    let mut statvfs = MaybeUninit::<StatVfs>::uninit();
+    let mut statvfs = MaybeUninit::<libc_statvfs>::uninit();
     unsafe {
         ret(libc_fstatvfs(borrowed_fd(fd), statvfs.as_mut_ptr()))?;
-        Ok(statvfs.assume_init())
+        Ok(libc_statvfs_to_statvfs(statvfs.assume_init()))
+    }
+}
+
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+fn libc_statvfs_to_statvfs(from: libc_statvfs) -> StatVfs {
+    StatVfs {
+        f_bsize: from.f_bsize as u64,
+        f_frsize: from.f_frsize as u64,
+        f_blocks: from.f_blocks as u64,
+        f_bfree: from.f_bfree as u64,
+        f_bavail: from.f_bavail as u64,
+        f_files: from.f_files as u64,
+        f_ffree: from.f_ffree as u64,
+        f_favail: from.f_ffree as u64,
+        f_fsid: from.f_fsid as u64,
+        f_flag: unsafe { StatVfsMountFlags::from_bits_unchecked(from.f_flag as u64) },
+        f_namemax: from.f_namemax as u64,
     }
 }
 
