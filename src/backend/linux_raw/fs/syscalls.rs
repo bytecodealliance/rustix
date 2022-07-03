@@ -819,12 +819,12 @@ fn statfs_to_statvfs(statfs: StatFs) -> StatVfs {
         } else {
             statfs.f_bsize
         } as u64,
-        f_blocks: statfs.f_blocks,
-        f_bfree: statfs.f_bfree,
-        f_bavail: statfs.f_bavail,
-        f_files: statfs.f_files,
-        f_ffree: statfs.f_ffree,
-        f_favail: statfs.f_ffree,
+        f_blocks: statfs.f_blocks as u64,
+        f_bfree: statfs.f_bfree as u64,
+        f_bavail: statfs.f_bavail as u64,
+        f_files: statfs.f_files as u64,
+        f_ffree: statfs.f_ffree as u64,
+        f_favail: statfs.f_ffree as u64,
         f_fsid: statfs.f_fsid.val[0] as u64,
         f_flag: statfs.f_flags as u64,
         f_namemax: statfs.f_namelen as u64,
