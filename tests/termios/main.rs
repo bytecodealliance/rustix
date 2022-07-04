@@ -6,5 +6,5 @@
 
 #[cfg(not(windows))]
 mod isatty;
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "fuchsia")))]
 mod ttyname;

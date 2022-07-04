@@ -70,10 +70,15 @@ fn test_file() {
         target_os = "redox",
         target_os = "wasi",
     )))]
-    // not implemented in libc for netbsd yet
     {
         let statfs = rustix::fs::fstatfs(&file).unwrap();
         assert!(statfs.f_blocks > 0);
+    }
+
+    #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+    {
+        let statvfs = rustix::fs::fstatvfs(&file).unwrap();
+        assert!(statvfs.f_frsize > 0);
     }
 
     #[cfg(feature = "net")]

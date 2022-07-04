@@ -25,7 +25,8 @@ use crate::fd::{BorrowedFd, RawFd};
 use crate::ffi::CStr;
 use crate::fs::{
     Access, Advice, AtFlags, FallocateFlags, FdFlags, FileType, FlockOperation, MemfdFlags, Mode,
-    OFlags, RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatxFlags, Timestamps,
+    OFlags, RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatVfs, StatVfsMountFlags,
+    StatxFlags, Timestamps,
 };
 use crate::io::{self, OwnedFd, SeekFrom};
 use crate::process::{Gid, Uid};
@@ -34,9 +35,10 @@ use core::mem::MaybeUninit;
 #[cfg(target_arch = "mips64")]
 use linux_raw_sys::general::stat as linux_stat64;
 use linux_raw_sys::general::{
-    __kernel_timespec, open_how, statx, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW,
-    F_ADD_SEALS, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE, F_GETOWN, F_GETPIPE_SZ,
-    F_GETSIG, F_GET_SEALS, F_SETFD, F_SETFL, F_SETPIPE_SZ, SEEK_CUR, SEEK_END, SEEK_SET,
+    __kernel_fsid_t, __kernel_timespec, open_how, statx, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR,
+    AT_SYMLINK_NOFOLLOW, F_ADD_SEALS, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE,
+    F_GETOWN, F_GETPIPE_SZ, F_GETSIG, F_GET_SEALS, F_SETFD, F_SETFL, F_SETPIPE_SZ, SEEK_CUR,
+    SEEK_END, SEEK_SET,
 };
 #[cfg(target_pointer_width = "32")]
 use {
@@ -774,6 +776,15 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
 }
 
 #[inline]
+pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
+    // Linux doesn't have an `fstatvfs` syscall; we have to do `fstatfs` and
+    // translate the fields as best we can.
+    let statfs = fstatfs(fd)?;
+
+    Ok(statfs_to_statvfs(statfs))
+}
+
+#[inline]
 pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
@@ -790,6 +801,38 @@ pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
     unsafe {
         let mut result = MaybeUninit::<StatFs>::uninit();
         ret(syscall!(__NR_statfs, filename, &mut result)).map(|()| result.assume_init())
+    }
+}
+
+#[inline]
+pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
+    // Linux doesn't have a `statvfs` syscall; we have to do `statfs` and
+    // translate the fields as best we can.
+    let statfs = statfs(filename)?;
+
+    Ok(statfs_to_statvfs(statfs))
+}
+
+fn statfs_to_statvfs(statfs: StatFs) -> StatVfs {
+    let __kernel_fsid_t { val } = statfs.f_fsid;
+    let [f_fsid_val0, f_fsid_val1]: [i32; 2] = val;
+
+    StatVfs {
+        f_bsize: statfs.f_bsize as u64,
+        f_frsize: if statfs.f_frsize != 0 {
+            statfs.f_frsize
+        } else {
+            statfs.f_bsize
+        } as u64,
+        f_blocks: statfs.f_blocks as u64,
+        f_bfree: statfs.f_bfree as u64,
+        f_bavail: statfs.f_bavail as u64,
+        f_files: statfs.f_files as u64,
+        f_ffree: statfs.f_ffree as u64,
+        f_favail: statfs.f_ffree as u64,
+        f_fsid: f_fsid_val0 as u32 as u64 | ((f_fsid_val1 as u32 as u64) << 32),
+        f_flag: unsafe { StatVfsMountFlags::from_bits_unchecked(statfs.f_flags as u64) },
+        f_namemax: statfs.f_namelen as u64,
     }
 }
 

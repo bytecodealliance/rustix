@@ -30,6 +30,9 @@ pub use backend::fs::types::Stat;
 )))]
 pub use backend::fs::types::StatFs;
 
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+pub use backend::fs::types::{StatVfs, StatVfsMountFlags};
+
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use backend::fs::types::FsWord;
 
@@ -146,6 +149,9 @@ pub fn fstat<Fd: AsFd>(fd: Fd) -> io::Result<Stat> {
 
 /// `fstatfs(fd)`—Queries filesystem statistics for an open file or directory.
 ///
+/// Compared to [`fstatvfs`], this function often provides more information,
+/// though it's less portable.
+///
 /// # References
 ///  - [Linux]
 ///
@@ -155,10 +161,30 @@ pub fn fstat<Fd: AsFd>(fd: Fd) -> io::Result<Stat> {
     target_os = "netbsd",
     target_os = "redox",
     target_os = "wasi",
-)))] // not implemented in libc for netbsd yet
+)))]
 #[inline]
 pub fn fstatfs<Fd: AsFd>(fd: Fd) -> io::Result<StatFs> {
     backend::fs::syscalls::fstatfs(fd.as_fd())
+}
+
+/// `fstatvfs(fd)`—Queries filesystem statistics for an open file or
+/// directory, POSIX version.
+///
+/// Compared to [`fstatfs`], this function often provides less information,
+/// but it is more portable. But even so, filesystems are very diverse and not
+/// all the fields are meaningful for every filesystem. And `f_fsid` doesn't
+/// seem to have a clear meaning anywhere.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fstatvfs.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/fstatvfs.2.html
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+#[inline]
+pub fn fstatvfs<Fd: AsFd>(fd: Fd) -> io::Result<StatVfs> {
+    backend::fs::syscalls::fstatvfs(fd.as_fd())
 }
 
 /// `futimens(fd, times)`—Sets timestamps for an open file or directory.

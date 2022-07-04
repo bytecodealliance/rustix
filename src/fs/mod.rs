@@ -62,6 +62,9 @@ mod statx;
 )))]
 #[cfg(feature = "fs")]
 pub use abs::statfs;
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+#[cfg(feature = "fs")]
+pub use abs::statvfs;
 #[cfg(not(any(target_os = "illumos", target_os = "redox")))]
 #[cfg(feature = "fs")]
 pub use at::accessat;
@@ -158,8 +161,9 @@ pub use fd::{fstat, fsync, ftruncate, futimens, is_file_read_write, seek, tell, 
     target_os = "redox",
     target_os = "wasi",
 )))]
-// not implemented in libc for netbsd yet
 pub use fd::{fstatfs, StatFs};
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+pub use fd::{fstatvfs, StatVfs, StatVfsMountFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use fd::{FsWord, NFS_SUPER_MAGIC, PROC_SUPER_MAGIC};
 pub use file_type::FileType;

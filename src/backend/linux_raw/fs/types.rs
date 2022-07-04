@@ -494,6 +494,38 @@ bitflags! {
     }
 }
 
+bitflags! {
+    /// `ST_*` constants for use with [`StatVfs`].
+    pub struct StatVfsMountFlags: u64 {
+        /// `ST_MANDLOCK`
+        const MANDLOCK = linux_raw_sys::general::MS_MANDLOCK as u64;
+
+        /// `ST_NOATIME`
+        const NOATIME = linux_raw_sys::general::MS_NOATIME as u64;
+
+        /// `ST_NODEV`
+        const NODEV = linux_raw_sys::general::MS_NODEV as u64;
+
+        /// `ST_NODIRATIME`
+        const NODIRATIME = linux_raw_sys::general::MS_NODIRATIME as u64;
+
+        /// `ST_NOEXEC`
+        const NOEXEC = linux_raw_sys::general::MS_NOEXEC as u64;
+
+        /// `ST_NOSUID`
+        const NOSUID = linux_raw_sys::general::MS_NOSUID as u64;
+
+        /// `ST_RDONLY`
+        const RDONLY = linux_raw_sys::general::MS_RDONLY as u64;
+
+        /// `ST_RELATIME`
+        const RELATIME = linux_raw_sys::general::MS_RELATIME as u64;
+
+        /// `ST_SYNCHRONOUS`
+        const SYNCHRONOUS = linux_raw_sys::general::MS_SYNCHRONOUS as u64;
+    }
+}
+
 /// `LOCK_*` constants for use with [`flock`]
 ///
 /// [`flock`]: crate::fs::flock
@@ -551,19 +583,31 @@ pub struct Stat {
 #[cfg(all(target_pointer_width = "64", not(target_arch = "mips64")))]
 pub type Stat = linux_raw_sys::general::stat;
 
-/// `struct statfs` for use with [`fstatfs`].
+/// `struct statfs` for use with [`statfs`] and [`fstatfs`].
 ///
+/// [`statfs`]: crate::fs::statfs
 /// [`fstatfs`]: crate::fs::fstatfs
-#[cfg(target_pointer_width = "32")]
 #[allow(clippy::module_name_repetitions)]
 pub type StatFs = linux_raw_sys::general::statfs64;
 
-/// `struct statfs` for use with [`fstatfs`].
+/// `struct statvfs` for use with [`statvfs`] and [`fstatvfs`].
 ///
-/// [`fstatfs`]: crate::fs::fstatfs
-#[cfg(target_pointer_width = "64")]
-#[allow(clippy::module_name_repetitions)]
-pub type StatFs = linux_raw_sys::general::statfs64;
+/// [`statvfs`]: crate::fs::statvfs
+/// [`fstatvfs`]: crate::fs::fstatvfs
+#[allow(missing_docs)]
+pub struct StatVfs {
+    pub f_bsize: u64,
+    pub f_frsize: u64,
+    pub f_blocks: u64,
+    pub f_bfree: u64,
+    pub f_bavail: u64,
+    pub f_files: u64,
+    pub f_ffree: u64,
+    pub f_favail: u64,
+    pub f_fsid: u64,
+    pub f_flag: StatVfsMountFlags,
+    pub f_namemax: u64,
+}
 
 /// `struct statx` for use with [`statx`].
 ///

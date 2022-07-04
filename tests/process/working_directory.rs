@@ -1,6 +1,6 @@
 #![cfg(feature = "fs")]
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "macos")))]
 use rustix::fs::{Mode, OFlags};
 use tempfile::{tempdir, TempDir};
 
@@ -17,6 +17,8 @@ fn test_changing_working_directory() {
     let tmpdir = tmpdir();
 
     let orig_cwd = rustix::process::getcwd(Vec::new()).expect("get the cwd");
+
+    #[cfg(not(target_os = "fuchsia"))]
     let orig_fd_cwd = rustix::fs::openat(rustix::fs::cwd(), ".", OFlags::RDONLY, Mode::empty())
         .expect("get a fd for the current directory");
 
