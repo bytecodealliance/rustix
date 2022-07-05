@@ -40,16 +40,11 @@ fn dir_entries() {
 fn read_entries(dir: &mut Dir) -> HashMap<String, DirEntry> {
     dir.rewind();
     let mut out = HashMap::new();
-    loop {
-        match dir.read() {
-            Some(e) => {
-                let e = e.expect("non-error entry");
-                let name = e.file_name().to_str().expect("utf8 filename").to_owned();
-                if name != "." && name != ".." {
-                    out.insert(name, e);
-                }
-            }
-            None => break,
+    while let Some(err) = dir.read() {
+        let err = err.expect("non-error entry");
+        let name = err.file_name().to_str().expect("utf8 filename").to_owned();
+        if name != "." && name != ".." {
+            out.insert(name, err);
         }
     }
     out

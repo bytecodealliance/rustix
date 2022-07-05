@@ -38,7 +38,7 @@ use backend::fd::{BorrowedFd, FromRawFd, RawFd};
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
 #[doc(alias = "STDIN_FILENO")]
 #[inline]
-pub unsafe fn stdin() -> BorrowedFd<'static> {
+pub const unsafe fn stdin() -> BorrowedFd<'static> {
     BorrowedFd::borrow_raw(backend::io::types::STDIN_FILENO as RawFd)
 }
 
@@ -101,7 +101,7 @@ pub unsafe fn take_stdin() -> OwnedFd {
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
 #[doc(alias = "STDOUT_FILENO")]
 #[inline]
-pub unsafe fn stdout() -> BorrowedFd<'static> {
+pub const unsafe fn stdout() -> BorrowedFd<'static> {
     BorrowedFd::borrow_raw(backend::io::types::STDOUT_FILENO as RawFd)
 }
 
@@ -163,7 +163,7 @@ pub unsafe fn take_stdout() -> OwnedFd {
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
 #[doc(alias = "STDERR_FILENO")]
 #[inline]
-pub unsafe fn stderr() -> BorrowedFd<'static> {
+pub const unsafe fn stderr() -> BorrowedFd<'static> {
     BorrowedFd::borrow_raw(backend::io::types::STDERR_FILENO as RawFd)
 }
 
@@ -215,7 +215,7 @@ pub unsafe fn take_stderr() -> OwnedFd {
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
 #[doc(alias = "STDIN_FILENO")]
 #[inline]
-pub fn raw_stdin() -> RawFd {
+pub const fn raw_stdin() -> RawFd {
     backend::io::types::STDIN_FILENO as RawFd
 }
 
@@ -235,7 +235,7 @@ pub fn raw_stdin() -> RawFd {
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
 #[doc(alias = "STDOUT_FILENO")]
 #[inline]
-pub fn raw_stdout() -> RawFd {
+pub const fn raw_stdout() -> RawFd {
     backend::io::types::STDOUT_FILENO as RawFd
 }
 
@@ -255,6 +255,6 @@ pub fn raw_stdout() -> RawFd {
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
 #[doc(alias = "STDERR_FILENO")]
 #[inline]
-pub fn raw_stderr() -> RawFd {
+pub const fn raw_stderr() -> RawFd {
     backend::io::types::STDERR_FILENO as RawFd
 }

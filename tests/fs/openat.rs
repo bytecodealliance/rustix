@@ -25,7 +25,7 @@ fn test_openat_tmpfile() {
         Err(rustix::io::Errno::OPNOTSUPP)
         | Err(rustix::io::Errno::ISDIR)
         | Err(rustix::io::Errno::NOENT) => Ok(None),
-        Err(e) => Err(e),
+        Err(err) => Err(err),
     };
     if let Some(mut f) = f.unwrap() {
         write!(f, "hello world").unwrap();

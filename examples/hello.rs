@@ -30,7 +30,7 @@ fn main() -> std::io::Result<()> {
 
             // `write` can also fail for external reasons, such as running out
             // of storage space.
-            Err(e) => return Err(e.into()),
+            Err(err) => return Err(err.into()),
         }
     }
 

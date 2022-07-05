@@ -307,8 +307,8 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
             &mut result
         )) {
             Ok(()) => rlimit_from_linux(result.assume_init()),
-            Err(e) => {
-                debug_assert_eq!(e, io::Errno::NOSYS);
+            Err(err) => {
+                debug_assert_eq!(err, io::Errno::NOSYS);
                 getrlimit_old(limit)
             }
         }
@@ -348,7 +348,7 @@ unsafe fn getrlimit_old(limit: Resource) -> Rlimit {
 #[inline]
 pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
     unsafe {
-        let lim = rlimit_to_linux(new.clone())?;
+        let lim = rlimit_to_linux(new.clone());
         match ret(syscall_readonly!(
             __NR_prlimit64,
             c_uint(0),
@@ -358,7 +358,7 @@ pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
         )) {
             Ok(()) => Ok(()),
             Err(io::Errno::NOSYS) => setrlimit_old(limit, new),
-            Err(e) => Err(e),
+            Err(err) => Err(err),
         }
     }
 }
@@ -372,7 +372,7 @@ unsafe fn setrlimit_old(limit: Resource, new: Rlimit) -> io::Result<()> {
 
 #[inline]
 pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Result<Rlimit> {
-    let lim = rlimit_to_linux(new)?;
+    let lim = rlimit_to_linux(new);
     let mut result = MaybeUninit::<rlimit64>::uninit();
     unsafe {
         match ret(syscall!(
@@ -383,7 +383,7 @@ pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Res
             &mut result
         )) {
             Ok(()) => Ok(rlimit_from_linux(result.assume_init())),
-            Err(e) => Err(e),
+            Err(err) => Err(err),
         }
     }
 }
@@ -406,7 +406,7 @@ fn rlimit_from_linux(lim: rlimit64) -> Rlimit {
 
 /// Convert a C `rlimit64` to a Rust `Rlimit`.
 #[inline]
-fn rlimit_to_linux(lim: Rlimit) -> io::Result<rlimit64> {
+fn rlimit_to_linux(lim: Rlimit) -> rlimit64 {
     let rlim_cur = match lim.current {
         Some(r) => r,
         None => RLIM64_INFINITY as _,
@@ -415,7 +415,7 @@ fn rlimit_to_linux(lim: Rlimit) -> io::Result<rlimit64> {
         Some(r) => r,
         None => RLIM64_INFINITY as _,
     };
-    Ok(rlimit64 { rlim_cur, rlim_max })
+    rlimit64 { rlim_cur, rlim_max }
 }
 
 /// Like `rlimit_from_linux` but uses Linux's old 32-bit `rlimit`.

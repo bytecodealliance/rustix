@@ -17,19 +17,13 @@ fn test_sockopts() {
         SocketType::STREAM
     );
     #[cfg(not(windows))]
-    assert_eq!(
-        rustix::net::sockopt::get_socket_broadcast(&s).unwrap(),
-        false
-    );
+    assert!(!rustix::net::sockopt::get_socket_broadcast(&s).unwrap());
     // On a new socket we shouldn't have a linger yet.
     assert!(rustix::net::sockopt::get_socket_linger(&s)
         .unwrap()
         .is_none());
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    assert_eq!(
-        rustix::net::sockopt::get_socket_passcred(&s).unwrap(),
-        false
-    );
+    assert!(!rustix::net::sockopt::get_socket_passcred(&s).unwrap());
     assert_ne!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 0);
     assert_ne!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 77);
     #[cfg(not(any(
@@ -41,10 +35,7 @@ fn test_sockopts() {
         target_os = "netbsd",
         target_os = "openbsd",
     )))]
-    assert_eq!(
-        rustix::net::sockopt::get_ip_multicast_loop(&s).unwrap(),
-        true
-    );
+    assert!(rustix::net::sockopt::get_ip_multicast_loop(&s).unwrap());
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
@@ -55,7 +46,7 @@ fn test_sockopts() {
         target_os = "openbsd",
     )))]
     assert_eq!(rustix::net::sockopt::get_ip_multicast_ttl(&s).unwrap(), 1);
-    assert_eq!(rustix::net::sockopt::get_tcp_nodelay(&s).unwrap(), false);
+    assert!(!rustix::net::sockopt::get_tcp_nodelay(&s).unwrap());
 
     // Set a timeout.
     rustix::net::sockopt::set_socket_timeout(
@@ -98,10 +89,7 @@ fn test_sockopts() {
             target_os = "netbsd",
             target_os = "openbsd",
         )))]
-        assert_eq!(
-            rustix::net::sockopt::get_socket_broadcast(&s).unwrap(),
-            true
-        );
+        assert!(rustix::net::sockopt::get_socket_broadcast(&s).unwrap(),);
     }
 
     // Set a linger.
@@ -121,7 +109,7 @@ fn test_sockopts() {
         rustix::net::sockopt::set_socket_passcred(&s, true).unwrap();
 
         // Check that the passcred flag is set.
-        assert_eq!(rustix::net::sockopt::get_socket_passcred(&s).unwrap(), true);
+        assert!(rustix::net::sockopt::get_socket_passcred(&s).unwrap());
     }
 
     // Set the ip ttl.
@@ -144,15 +132,12 @@ fn test_sockopts() {
         rustix::net::sockopt::set_ip_multicast_loop(&s, false).unwrap();
 
         // Check that the multicast loop flag is set.
-        assert_eq!(
-            rustix::net::sockopt::get_ip_multicast_loop(&s).unwrap(),
-            false
-        );
+        assert!(!rustix::net::sockopt::get_ip_multicast_loop(&s).unwrap());
     }
 
     // Set the nodelay flag;
     rustix::net::sockopt::set_tcp_nodelay(&s, true).unwrap();
 
     // Check that the nodelay flag is set.
-    assert_eq!(rustix::net::sockopt::get_tcp_nodelay(&s).unwrap(), true);
+    assert!(rustix::net::sockopt::get_tcp_nodelay(&s).unwrap());
 }

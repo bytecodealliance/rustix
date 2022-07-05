@@ -40,7 +40,7 @@ fn test_y2038_with_utimensat() {
         #[cfg(target_pointer_width = "32")]
         Err(rustix::io::Errno::OVERFLOW) => return,
 
-        Err(e) => panic!("unexpected error: {:?}", e),
+        Err(err) => panic!("unexpected error: {:?}", err),
     }
 
     // Use `statat` to read back the timestamp.
@@ -115,7 +115,7 @@ fn test_y2038_with_futimens() {
         #[cfg(target_pointer_width = "32")]
         Err(rustix::io::Errno::OVERFLOW) => return,
 
-        Err(e) => panic!("unexpected error: {:?}", e),
+        Err(err) => panic!("unexpected error: {:?}", err),
     }
 
     // Use `statat` to read back the timestamp.
