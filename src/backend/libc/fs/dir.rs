@@ -77,9 +77,9 @@ impl Dir {
             if let Some(libc_dir) = NonNull::new(libc_dir) {
                 Ok(Self(libc_dir))
             } else {
-                let e = io::Errno::last_os_error();
+                let err = io::Errno::last_os_error();
                 let _ = c::close(raw);
-                Err(e)
+                Err(err)
             }
         }
     }

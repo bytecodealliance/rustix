@@ -37,10 +37,10 @@ impl SocketAddrAny {
     #[inline]
     pub const fn address_family(&self) -> AddressFamily {
         match self {
-            SocketAddrAny::V4(_) => AddressFamily::INET,
-            SocketAddrAny::V6(_) => AddressFamily::INET6,
+            Self::V4(_) => AddressFamily::INET,
+            Self::V6(_) => AddressFamily::INET6,
             #[cfg(unix)]
-            SocketAddrAny::Unix(_) => AddressFamily::UNIX,
+            Self::Unix(_) => AddressFamily::UNIX,
         }
     }
 
@@ -72,10 +72,10 @@ impl SocketAddrAny {
 impl fmt::Debug for SocketAddrAny {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            SocketAddrAny::V4(v4) => v4.fmt(fmt),
-            SocketAddrAny::V6(v6) => v6.fmt(fmt),
+            Self::V4(v4) => v4.fmt(fmt),
+            Self::V6(v6) => v6.fmt(fmt),
             #[cfg(unix)]
-            SocketAddrAny::Unix(unix) => unix.fmt(fmt),
+            Self::Unix(unix) => unix.fmt(fmt),
         }
     }
 }

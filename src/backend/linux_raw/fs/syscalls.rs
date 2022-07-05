@@ -415,7 +415,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
         match statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
             Ok(x) => statx_to_stat(x),
             Err(io::Errno::NOSYS) => fstat_old(fd),
-            Err(e) => Err(e),
+            Err(err) => Err(err),
         }
     }
 
@@ -455,7 +455,7 @@ pub(crate) fn stat(filename: &CStr) -> io::Result<Stat> {
         ) {
             Ok(x) => return statx_to_stat(x),
             Err(io::Errno::NOSYS) => stat_old(filename),
-            Err(e) => return Err(e),
+            Err(err) => return Err(err),
         }
     }
 
@@ -509,7 +509,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, filename: &CStr, flags: AtFlags) -> 
         match statx(dirfd, filename, flags, StatxFlags::BASIC_STATS) {
             Ok(x) => return statx_to_stat(x),
             Err(io::Errno::NOSYS) => statat_old(dirfd, filename, flags),
-            Err(e) => return Err(e),
+            Err(err) => return Err(err),
         }
     }
 
@@ -568,7 +568,7 @@ pub(crate) fn lstat(filename: &CStr) -> io::Result<Stat> {
         ) {
             Ok(x) => return statx_to_stat(x),
             Err(io::Errno::NOSYS) => lstat_old(filename),
-            Err(e) => return Err(e),
+            Err(err) => return Err(err),
         }
     }
 

@@ -12,6 +12,7 @@ macro_rules! const_assert {
 }
 
 #[test]
+#[allow(clippy::missing_const_for_fn)]
 fn test_const_assert() {
     const_assert!(true);
 }

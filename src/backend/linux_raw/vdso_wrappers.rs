@@ -242,7 +242,7 @@ unsafe extern "C" fn rustix_clock_gettime_via_syscall(
 ) -> c::c_int {
     match _rustix_clock_gettime_via_syscall(clockid, res) {
         Ok(()) => 0,
-        Err(e) => e.raw_os_error().wrapping_neg(),
+        Err(err) => err.raw_os_error().wrapping_neg(),
     }
 }
 

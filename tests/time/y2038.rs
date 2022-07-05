@@ -62,7 +62,7 @@ fn test_y2038_with_timerfd() {
         #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
         Err(rustix::io::Errno::OVERFLOW) => return,
 
-        Err(e) => panic!("unexpected error: {:?}", e),
+        Err(err) => panic!("unexpected error: {:?}", err),
     };
 
     let new = timerfd_gettime(&fd).unwrap();

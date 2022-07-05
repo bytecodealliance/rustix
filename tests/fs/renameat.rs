@@ -70,8 +70,8 @@ fn test_renameat_with() {
 
     match renameat_with(&dir, "foo", &dir, "red", RenameFlags::empty()) {
         Ok(()) => (),
-        Err(e) if e == rustix::io::Errno::NOSYS => return,
-        Err(e) => unreachable!("unexpected error from renameat_with: {:?}", e),
+        Err(err) if err == rustix::io::Errno::NOSYS => return,
+        Err(err) => unreachable!("unexpected error from renameat_with: {:?}", err),
     }
 
     let renamed = statat(&dir, "red", AtFlags::empty()).unwrap();
