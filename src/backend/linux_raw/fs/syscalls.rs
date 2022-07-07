@@ -233,8 +233,8 @@ pub(crate) fn _seek(fd: BorrowedFd<'_>, offset: i64, whence: c::c_uint) -> io::R
             pass_usize(offset as usize),
             &mut result,
             c_uint(whence)
-        ))
-        .map(|()| result.assume_init())
+        ))?;
+        Ok(result.assume_init())
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
@@ -422,7 +422,8 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     #[cfg(all(target_pointer_width = "64", not(target_arch = "mips64")))]
     unsafe {
         let mut result = MaybeUninit::<Stat>::uninit();
-        ret(syscall!(__NR_fstat, fd, &mut result)).map(|()| result.assume_init())
+        ret(syscall!(__NR_fstat, fd, &mut result))?;
+        Ok(result.assume_init())
     }
 }
 
@@ -468,8 +469,8 @@ pub(crate) fn stat(filename: &CStr) -> io::Result<Stat> {
             filename,
             &mut result,
             c_uint(0)
-        ))
-        .map(|()| result.assume_init())
+        ))?;
+        Ok(result.assume_init())
     }
 }
 
@@ -522,8 +523,8 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, filename: &CStr, flags: AtFlags) -> 
             filename,
             &mut result,
             flags
-        ))
-        .map(|()| result.assume_init())
+        ))?;
+        Ok(result.assume_init())
     }
 }
 
@@ -581,8 +582,8 @@ pub(crate) fn lstat(filename: &CStr) -> io::Result<Stat> {
             filename,
             &mut result,
             c_uint(AT_SYMLINK_NOFOLLOW)
-        ))
-        .map(|()| result.assume_init())
+        ))?;
+        Ok(result.assume_init())
     }
 }
 
@@ -730,8 +731,8 @@ pub(crate) fn statx(
             flags,
             mask,
             &mut statx_buf
-        ))
-        .map(|()| statx_buf.assume_init())
+        ))?;
+        Ok(statx_buf.assume_init())
     }
 }
 
@@ -764,14 +765,15 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
             fd,
             size_of::<StatFs, _>(),
             &mut result
-        ))
-        .map(|()| result.assume_init())
+        ))?;
+        Ok(result.assume_init())
     }
 
     #[cfg(target_pointer_width = "64")]
     unsafe {
         let mut result = MaybeUninit::<StatFs>::uninit();
-        ret(syscall!(__NR_fstatfs, fd, &mut result)).map(|()| result.assume_init())
+        ret(syscall!(__NR_fstatfs, fd, &mut result))?;
+        Ok(result.assume_init())
     }
 }
 
@@ -794,13 +796,14 @@ pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
             filename,
             size_of::<StatFs, _>(),
             &mut result
-        ))
-        .map(|()| result.assume_init())
+        ))?;
+        Ok(result.assume_init())
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
         let mut result = MaybeUninit::<StatFs>::uninit();
-        ret(syscall!(__NR_statfs, filename, &mut result)).map(|()| result.assume_init())
+        ret(syscall!(__NR_statfs, filename, &mut result))?;
+        Ok(result.assume_init())
     }
 }
 

@@ -88,8 +88,8 @@ pub(crate) fn timerfd_settime(
             flags,
             by_ref(new_value),
             &mut result
-        ))
-        .map(|()| result.assume_init())
+        ))?;
+        Ok(result.assume_init())
     }
 
     #[cfg(target_pointer_width = "32")]
@@ -109,8 +109,8 @@ pub(crate) fn timerfd_settime(
             } else {
                 Err(err)
             }
-        })
-        .map(|()| result.assume_init())
+        })?;
+        Ok(result.assume_init())
     }
 }
 
@@ -183,22 +183,22 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
 
     #[cfg(target_pointer_width = "64")]
     unsafe {
-        ret(syscall!(__NR_timerfd_gettime, fd, &mut result)).map(|()| result.assume_init())
+        ret(syscall!(__NR_timerfd_gettime, fd, &mut result))?;
+        Ok(result.assume_init())
     }
 
     #[cfg(target_pointer_width = "32")]
     unsafe {
-        ret(syscall!(__NR_timerfd_gettime64, fd, &mut result))
-            .or_else(|err| {
-                // See the comments in `rustix_clock_gettime_via_syscall` about
-                // emulation.
-                if err == io::Errno::NOSYS {
-                    timerfd_gettime_old(fd, &mut result)
-                } else {
-                    Err(err)
-                }
-            })
-            .map(|()| result.assume_init())
+        ret(syscall!(__NR_timerfd_gettime64, fd, &mut result)).or_else(|err| {
+            // See the comments in `rustix_clock_gettime_via_syscall` about
+            // emulation.
+            if err == io::Errno::NOSYS {
+                timerfd_gettime_old(fd, &mut result)
+            } else {
+                Err(err)
+            }
+        })?;
+        Ok(result.assume_init())
     }
 }
 
