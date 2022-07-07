@@ -30,8 +30,8 @@ fn test_statx_reserved() {
     // value but `statx` should reliably fail with `INVAL`.
     let reserved =
         unsafe { StatxFlags::from_bits_unchecked(linux_raw_sys::general::STATX__RESERVED) };
-    assert_eq!(
-        rustix::fs::statx(&f, "Cargo.toml", AtFlags::empty(), reserved).unwrap_err(),
-        rustix::io::Errno::INVAL
-    );
+    match rustix::fs::statx(&f, "Cargo.toml", AtFlags::empty(), reserved) {
+        Ok(_) => panic!("statx succeeded with `STATX__RESERVED`"),
+        Err(err) => assert_eq!(err, rustix::io::Errno::INVAL),
+    }
 }
