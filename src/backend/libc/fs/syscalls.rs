@@ -1456,6 +1456,24 @@ pub(crate) fn statx(
     flags: AtFlags,
     mask: StatxFlags,
 ) -> io::Result<Statx> {
+    // If a future Linux kernel adds more fields to `struct statx` and users
+    // passing flags unknown to rustix in `StatxFlags`, we could end up
+    // writing outside of the buffer. To prevent this possibility, we mask off
+    // any flags that we don't know about.
+    //
+    // This includes `STATX__RESERVED`, which has a value that we know, but
+    // which could take on arbitrary new meaning in the future. Linux currently
+    // rejects this flag with `EINVAL`, so we do the same.
+    //
+    // This doesn't rely on `STATX_ALL` because [it's deprecated] and already
+    // doesn't represent all the known flags.
+    //
+    // [it's deprecated]: https://patchwork.kernel.org/project/linux-fsdevel/patch/20200505095915.11275-7-mszeredi@redhat.com/
+    if (mask.bits() & libc::STATX__RESERVED as u32) == libc::STATX__RESERVED as u32 {
+        return Err(io::Errno::INVAL);
+    }
+    let mask = mask & StatxFlags::all();
+
     let mut statx_buf = MaybeUninit::<Statx>::uninit();
     unsafe {
         ret(sys::statx(

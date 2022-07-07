@@ -37,5 +37,6 @@ mod readdir;
 mod renameat;
 #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
 mod statfs;
+mod statx;
 mod utimensat;
 mod y2038;
