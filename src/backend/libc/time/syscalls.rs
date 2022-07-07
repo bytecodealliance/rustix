@@ -259,8 +259,8 @@ pub(crate) fn timerfd_settime(
                 flags.bits(),
                 &new_value.clone().into(),
                 result.as_mut_ptr(),
-            ))
-            .map(|()| result.assume_init().into())
+            ))?;
+            Ok(result.assume_init().into())
         } else {
             timerfd_settime_old(fd, flags, new_value)
         }
@@ -276,8 +276,8 @@ pub(crate) fn timerfd_settime(
             flags.bits(),
             new_value,
             result.as_mut_ptr(),
-        ))
-        .map(|()| result.assume_init())
+        ))?;
+        Ok(result.assume_init())
     }
 }
 
@@ -363,8 +363,8 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
     ))]
     unsafe {
         if let Some(libc_timerfd_gettime) = __timerfd_gettime64.get() {
-            ret(libc_timerfd_gettime(borrowed_fd(fd), result.as_mut_ptr()))
-                .map(|()| result.assume_init().into())
+            ret(libc_timerfd_gettime(borrowed_fd(fd), result.as_mut_ptr()))?;
+            Ok(result.assume_init().into())
         } else {
             timerfd_gettime_old(fd)
         }
@@ -375,7 +375,8 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
         target_env = "gnu",
     )))]
     unsafe {
-        ret(c::timerfd_gettime(borrowed_fd(fd), result.as_mut_ptr())).map(|()| result.assume_init())
+        ret(c::timerfd_gettime(borrowed_fd(fd), result.as_mut_ptr()))?;
+        Ok(result.assume_init())
     }
 }
 

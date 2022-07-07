@@ -21,7 +21,8 @@ use libc_errno::errno;
 pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     let mut result = MaybeUninit::<Termios>::uninit();
     unsafe {
-        ret(c::tcgetattr(borrowed_fd(fd), result.as_mut_ptr())).map(|()| result.assume_init())
+        ret(c::tcgetattr(borrowed_fd(fd), result.as_mut_ptr()))?;
+        Ok(result.assume_init())
     }
 }
 

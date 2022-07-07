@@ -27,8 +27,8 @@ use linux_raw_sys::ioctl::{
 pub(crate) fn tcgetwinsize(fd: BorrowedFd<'_>) -> io::Result<Winsize> {
     unsafe {
         let mut result = MaybeUninit::<Winsize>::uninit();
-        ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGWINSZ), &mut result))
-            .map(|()| result.assume_init())
+        ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGWINSZ), &mut result))?;
+        Ok(result.assume_init())
     }
 }
 
@@ -36,7 +36,8 @@ pub(crate) fn tcgetwinsize(fd: BorrowedFd<'_>) -> io::Result<Winsize> {
 pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     unsafe {
         let mut result = MaybeUninit::<Termios>::uninit();
-        ret(syscall!(__NR_ioctl, fd, c_uint(TCGETS), &mut result)).map(|()| result.assume_init())
+        ret(syscall!(__NR_ioctl, fd, c_uint(TCGETS), &mut result))?;
+        Ok(result.assume_init())
     }
 }
 
@@ -44,11 +45,10 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
 pub(crate) fn tcgetpgrp(fd: BorrowedFd<'_>) -> io::Result<Pid> {
     unsafe {
         let mut result = MaybeUninit::<__kernel_pid_t>::uninit();
-        ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGPGRP), &mut result)).map(|()| {
-            let pid = result.assume_init();
-            debug_assert!(pid > 0);
-            Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid as u32))
-        })
+        ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGPGRP), &mut result))?;
+        let pid = result.assume_init();
+        debug_assert!(pid > 0);
+        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid as u32)))
     }
 }
 
@@ -113,11 +113,10 @@ pub(crate) fn tcflow(fd: BorrowedFd, action: Action) -> io::Result<()> {
 pub(crate) fn tcgetsid(fd: BorrowedFd) -> io::Result<Pid> {
     unsafe {
         let mut result = MaybeUninit::<__kernel_pid_t>::uninit();
-        ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGSID), &mut result)).map(|()| {
-            let pid = result.assume_init();
-            debug_assert!(pid > 0);
-            Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid as u32))
-        })
+        ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGSID), &mut result))?;
+        let pid = result.assume_init();
+        debug_assert!(pid > 0);
+        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid as u32)))
     }
 }
 

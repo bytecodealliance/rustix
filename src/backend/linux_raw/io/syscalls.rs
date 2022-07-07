@@ -301,8 +301,8 @@ pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> 
 pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
     unsafe {
         let mut result = MaybeUninit::<c::c_int>::uninit();
-        ret(syscall!(__NR_ioctl, fd, c_uint(FIONREAD), &mut result))
-            .map(|()| result.assume_init() as u64)
+        ret(syscall!(__NR_ioctl, fd, c_uint(FIONREAD), &mut result))?;
+        Ok(result.assume_init() as u64)
     }
 }
 
@@ -333,8 +333,8 @@ pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd<'_>) -> io::Result<()> {
 pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
     let mut result = MaybeUninit::<c::c_uint>::uninit();
     unsafe {
-        ret(syscall!(__NR_ioctl, fd, c_uint(BLKSSZGET), &mut result))
-            .map(|()| result.assume_init() as u32)
+        ret(syscall!(__NR_ioctl, fd, c_uint(BLKSSZGET), &mut result))?;
+        Ok(result.assume_init() as u32)
     }
 }
 
@@ -342,8 +342,8 @@ pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
 pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
     let mut result = MaybeUninit::<c::c_uint>::uninit();
     unsafe {
-        ret(syscall!(__NR_ioctl, fd, c_uint(BLKPBSZGET), &mut result))
-            .map(|()| result.assume_init() as u32)
+        ret(syscall!(__NR_ioctl, fd, c_uint(BLKPBSZGET), &mut result))?;
+        Ok(result.assume_init() as u32)
     }
 }
 

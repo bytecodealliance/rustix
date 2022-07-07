@@ -102,11 +102,9 @@ pub(crate) fn socketpair(
             (type_, flags),
             protocol,
             &mut result
-        ))
-        .map(|()| {
-            let [fd0, fd1] = result.assume_init();
-            (fd0, fd1)
-        })
+        ))?;
+        let [fd0, fd1] = result.assume_init();
+        Ok((fd0, fd1))
     }
     #[cfg(target_arch = "x86")]
     unsafe {
@@ -120,11 +118,9 @@ pub(crate) fn socketpair(
                 protocol.into(),
                 (&mut result).into(),
             ])
-        ))
-        .map(|()| {
-            let [fd0, fd1] = result.assume_init();
-            (fd0, fd1)
-        })
+        ))?;
+        let [fd0, fd1] = result.assume_init();
+        Ok((fd0, fd1))
     }
 }
 

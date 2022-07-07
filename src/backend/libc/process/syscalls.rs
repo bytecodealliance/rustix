@@ -302,8 +302,8 @@ pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Res
             limit as _,
             &lim,
             result.as_mut_ptr(),
-        ))
-        .map(|()| rlimit_from_libc(result.assume_init()))
+        ))?;
+        Ok(rlimit_from_libc(result.assume_init()))
     }
 }
 
