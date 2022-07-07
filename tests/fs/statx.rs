@@ -1,4 +1,3 @@
-#[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn test_statx_unknown_flags() {
     use rustix::fs::{AtFlags, StatxFlags};
@@ -21,7 +20,6 @@ fn test_statx_unknown_flags() {
     assert_eq!(result.stx_mask & !StatxFlags::all().bits(), 0);
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn test_statx_reserved() {
     use rustix::fs::{AtFlags, StatxFlags};
