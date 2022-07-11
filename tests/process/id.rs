@@ -67,11 +67,36 @@ fn test_getppid() {
 #[test]
 fn test_getpgid() {
     assert_eq!(process::getpgid(None), process::getpgid(None));
+    assert_eq!(
+        process::getpgid(Some(process::getpid())),
+        process::getpgid(Some(process::getpid()))
+    );
     unsafe {
         assert_eq!(
-            process::getpgid(None).as_raw_nonzero().get() as libc::pid_t,
+            process::getpgid(None).unwrap().as_raw_nonzero().get() as libc::pid_t,
             libc::getpgid(0)
         );
-        assert_eq!(process::getpgid(None).is_init(), libc::getpgid(0) == 1);
+        assert_eq!(
+            process::getpgid(None).unwrap().is_init(),
+            libc::getpgid(0) == 1
+        );
+        assert_eq!(
+            process::getpgid(Some(process::getpid()))
+                .unwrap()
+                .as_raw_nonzero()
+                .get() as libc::pid_t,
+            libc::getpgid(libc::getpid())
+        );
+    }
+}
+
+#[test]
+fn test_getpgrp() {
+    assert_eq!(process::getpgrp(), process::getpgrp());
+    unsafe {
+        assert_eq!(
+            process::getpgrp().as_raw_nonzero().get() as libc::pid_t,
+            libc::getpgrp()
+        );
     }
 }

@@ -3,6 +3,8 @@
 use super::super::c;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use super::super::conv::borrowed_fd;
+#[cfg(not(target_os = "wasi"))]
+use super::super::conv::ret_pid_t;
 use super::super::conv::{c_str, ret, ret_c_int, ret_discarded_char_ptr};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::{syscall_ret, syscall_ret_u32};
@@ -148,9 +150,20 @@ pub(crate) fn getppid() -> Option<Pid> {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
-pub(crate) fn getpgid(pid: Option<Pid>) -> Pid {
+pub(crate) fn getpgid(pid: Option<Pid>) -> io::Result<Pid> {
     unsafe {
-        let pgid = c::getpgid(Pid::as_raw(pid) as _);
+        let pgid = ret_pid_t(c::getpgid(Pid::as_raw(pid) as _))?;
+        debug_assert_ne!(pgid, 0);
+        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pgid)))
+    }
+}
+
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+#[must_use]
+pub(crate) fn getpgrp() -> Pid {
+    unsafe {
+        let pgid = c::getpgrp();
         debug_assert_ne!(pgid, 0);
         Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pgid))
     }

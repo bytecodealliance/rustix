@@ -21,6 +21,7 @@ use crate::process::{
 };
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
+use core::num::NonZeroU32;
 use core::ptr::{null, null_mut};
 use linux_raw_sys::general::{
     __kernel_gid_t, __kernel_pid_t, __kernel_uid_t, membarrier_cmd, membarrier_cmd_flag, rlimit,
@@ -100,11 +101,20 @@ pub(crate) fn getppid() -> Option<Pid> {
 }
 
 #[inline]
-pub(crate) fn getpgid(pid: Option<Pid>) -> Pid {
+pub(crate) fn getpgid(pid: Option<Pid>) -> io::Result<Pid> {
     unsafe {
         let pgid: i32 =
-            ret_usize_infallible(syscall_readonly!(__NR_getpgid, c_uint(Pid::as_raw(pid))))
-                as __kernel_pid_t;
+            ret_usize(syscall_readonly!(__NR_getpgid, c_uint(Pid::as_raw(pid))))? as __kernel_pid_t;
+        Ok(Pid::from_raw_nonzero(NonZeroU32::new_unchecked(
+            pgid as u32,
+        )))
+    }
+}
+
+#[inline]
+pub(crate) fn getpgrp() -> Pid {
+    unsafe {
+        let pgid: i32 = ret_usize_infallible(syscall_readonly!(__NR_getpgrp)) as __kernel_pid_t;
         debug_assert!(pgid > 0);
         Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pgid as u32))
     }

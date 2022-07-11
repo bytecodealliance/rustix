@@ -39,7 +39,7 @@ pub use exit::{EXIT_FAILURE, EXIT_SUCCESS};
 pub use id::Cpuid;
 #[cfg(not(target_os = "wasi"))]
 pub use id::{
-    getegid, geteuid, getgid, getpgid, getpid, getppid, getuid, setsid, Gid, Pid, RawGid,
+    getegid, geteuid, getgid, getpgid, getpgrp, getpid, getppid, getuid, setsid, Gid, Pid, RawGid,
     RawNonZeroPid, RawPid, RawUid, Uid,
 };
 #[cfg(not(target_os = "wasi"))]
