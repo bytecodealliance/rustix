@@ -267,7 +267,7 @@ pub fn getppid() -> Option<Pid> {
     backend::process::syscalls::getppid()
 }
 
-/// `getpgid()`—Returns the process group ID of the given process.
+/// `getpgid(pid)`—Returns the process group ID of the given process.
 ///
 /// # References
 ///  - [POSIX]
