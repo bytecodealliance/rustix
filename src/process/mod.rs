@@ -39,8 +39,8 @@ pub use exit::{EXIT_FAILURE, EXIT_SUCCESS};
 pub use id::Cpuid;
 #[cfg(not(target_os = "wasi"))]
 pub use id::{
-    getegid, geteuid, getgid, getpid, getppid, getuid, setsid, Gid, Pid, RawGid, RawNonZeroPid,
-    RawPid, RawUid, Uid,
+    getegid, geteuid, getgid, getpgid, getpid, getppid, getuid, setsid, Gid, Pid, RawGid,
+    RawNonZeroPid, RawPid, RawUid, Uid,
 };
 #[cfg(not(target_os = "wasi"))]
 pub use kill::{kill_current_process_group, kill_process, kill_process_group, Signal};

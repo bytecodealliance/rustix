@@ -63,3 +63,15 @@ fn test_getppid() {
         }
     }
 }
+
+#[test]
+fn test_getpgid() {
+    assert_eq!(process::getpgid(None), process::getpgid(None));
+    unsafe {
+        assert_eq!(
+            process::getpgid(None).as_raw_nonzero().get() as libc::pid_t,
+            libc::getpgid(0)
+        );
+        assert_eq!(process::getpgid(None).is_init(), libc::getpgid(0) == 1);
+    }
+}
