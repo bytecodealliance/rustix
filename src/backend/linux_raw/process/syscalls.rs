@@ -100,6 +100,17 @@ pub(crate) fn getppid() -> Option<Pid> {
 }
 
 #[inline]
+pub(crate) fn getpgid(pid: Option<Pid>) -> Pid {
+    unsafe {
+        let pgid: i32 =
+            ret_usize_infallible(syscall_readonly!(__NR_getpgid, c_uint(Pid::as_raw(pid))))
+                as __kernel_pid_t;
+        debug_assert!(pgid > 0);
+        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pgid as u32))
+    }
+}
+
+#[inline]
 pub(crate) fn getgid() -> Gid {
     #[cfg(any(target_arch = "x86", target_arch = "sparc", target_arch = "arm"))]
     unsafe {

@@ -145,6 +145,17 @@ pub(crate) fn getppid() -> Option<Pid> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+#[must_use]
+pub(crate) fn getpgid(pid: Option<Pid>) -> Pid {
+    unsafe {
+        let pgid = c::getpgid(Pid::as_raw(pid) as _);
+        debug_assert_ne!(pgid, 0);
+        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pgid))
+    }
+}
+
 #[cfg(any(
     target_os = "android",
     target_os = "dragonfly",
