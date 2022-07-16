@@ -1,6 +1,10 @@
 //! The ELF ABI.
 
 #![allow(non_snake_case)]
+#![cfg_attr(
+    all(not(target_vendor = "mustang"), feature = "use-libc-auxv"),
+    allow(dead_code)
+)]
 
 pub(super) const SELFMAG: usize = 4;
 pub(super) const ELFMAG: [u8; SELFMAG] = [0x7f, b'E', b'L', b'F'];

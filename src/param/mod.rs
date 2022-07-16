@@ -7,10 +7,7 @@
 
 #[cfg(feature = "param")]
 mod auxv;
-#[cfg(any(
-    target_vendor = "mustang",
-    not(any(target_env = "gnu", target_env = "musl")),
-))]
+#[cfg(target_vendor = "mustang")]
 mod init;
 
 #[cfg(feature = "param")]
@@ -30,8 +27,5 @@ pub use auxv::page_size;
     )
 ))]
 pub use auxv::{linux_execfn, linux_hwcap};
-#[cfg(any(
-    target_vendor = "mustang",
-    not(any(target_env = "gnu", target_env = "musl")),
-))]
+#[cfg(target_vendor = "mustang")]
 pub use init::init;

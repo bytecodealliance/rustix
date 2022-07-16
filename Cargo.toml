@@ -100,7 +100,13 @@ targets = [
 ]
 
 [features]
-default = ["std"]
+
+# By default, use `std` and use libc for aux values.
+#
+# It turns out to be bizarrely awkward to obtain the aux values reliably and
+# efficiently on Linux from anywhere other than libc. We can do it, but most
+# users are better served by just using libc for this.
+default = ["std", "use-libc-auxv"]
 
 # This enables use of std. Disabling this enables `#![no_std], and requires
 # nightly Rust.
@@ -169,6 +175,11 @@ all-apis = [
     "thread",
     "time",
 ]
+
+# When using the linux_raw backend, and not using Mustang, should we use libc
+# for reading the aux vectors, instead of reading them ourselves from
+# /proc/self/auxv?
+use-libc-auxv = ["libc"]
 
 # Expose io-lifetimes' features for third-party crate impls.
 async-std = ["io-lifetimes/async-std"]
