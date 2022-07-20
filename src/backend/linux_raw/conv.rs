@@ -369,7 +369,7 @@ impl<'a, Num: ArgNumber> From<crate::io::epoll::CreateFlags> for ArgReg<'a, Num>
     }
 }
 
-#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+#[cfg(feature = "mm")]
 impl<'a, Num: ArgNumber> From<crate::backend::mm::types::ProtFlags> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::backend::mm::types::ProtFlags) -> Self {
@@ -377,7 +377,7 @@ impl<'a, Num: ArgNumber> From<crate::backend::mm::types::ProtFlags> for ArgReg<'
     }
 }
 
-#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+#[cfg(feature = "mm")]
 impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MsyncFlags> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::backend::mm::types::MsyncFlags) -> Self {
@@ -385,7 +385,7 @@ impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MsyncFlags> for ArgReg<
     }
 }
 
-#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+#[cfg(feature = "mm")]
 impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MremapFlags> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::backend::mm::types::MremapFlags) -> Self {
@@ -393,7 +393,7 @@ impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MremapFlags> for ArgReg
     }
 }
 
-#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+#[cfg(feature = "mm")]
 impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MlockFlags> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::backend::mm::types::MlockFlags) -> Self {
@@ -401,7 +401,7 @@ impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MlockFlags> for ArgReg<
     }
 }
 
-#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+#[cfg(feature = "mm")]
 impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MapFlags> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::backend::mm::types::MapFlags) -> Self {
@@ -409,7 +409,7 @@ impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MapFlags> for ArgReg<'a
     }
 }
 
-#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+#[cfg(feature = "mm")]
 impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MprotectFlags> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::backend::mm::types::MprotectFlags) -> Self {
@@ -417,7 +417,7 @@ impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MprotectFlags> for ArgR
     }
 }
 
-#[cfg(any(feature = "mm", feature = "time", target_arch = "x86"))] // vdso.rs uses `madvise`
+#[cfg(feature = "mm")]
 impl<'a, Num: ArgNumber> From<crate::backend::mm::types::UserfaultfdFlags> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::backend::mm::types::UserfaultfdFlags) -> Self {
