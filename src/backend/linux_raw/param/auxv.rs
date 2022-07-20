@@ -12,6 +12,7 @@ use crate::ffi::CStr;
 use crate::fs::{Mode, OFlags};
 use crate::io::OwnedFd;
 use crate::utils::check_raw_pointer;
+use alloc::vec::Vec;
 use core::ffi::c_void;
 use core::mem::size_of;
 use core::ptr::{null_mut, read_unaligned};
