@@ -214,6 +214,7 @@ type ClockGettimeType = unsafe extern "C" fn(c::c_int, *mut Timespec) -> c::c_in
 #[cfg(target_arch = "x86")]
 pub(super) type SyscallType = unsafe extern "C" fn();
 
+/// Initialize `CLOCK_GETTIME` and return its value.
 fn init_clock_gettime() -> ClockGettimeType {
     init();
     // Safety: Load the function address from static storage that we
@@ -221,6 +222,7 @@ fn init_clock_gettime() -> ClockGettimeType {
     unsafe { transmute(CLOCK_GETTIME.load(Relaxed)) }
 }
 
+/// Initialize `SYSCALL` and return its value.
 #[cfg(target_arch = "x86")]
 fn init_syscall() -> SyscallType {
     init();

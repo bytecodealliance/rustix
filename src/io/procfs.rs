@@ -333,7 +333,7 @@ fn new_static_fd(fd: OwnedFd, stat: Stat) -> (OwnedFd, Stat) {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 fn proc_self_fdinfo() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
-    static PROC_SELF_FDINFO: OnceCell<(OwnedFd, Stat)> = OnceCell::new();
+    static PROC_SELF_FDINFO: StaticFd = StaticFd::new();
 
     PROC_SELF_FDINFO
         .get_or_try_init(|| {
