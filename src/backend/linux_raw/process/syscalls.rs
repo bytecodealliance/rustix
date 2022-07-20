@@ -113,8 +113,19 @@ pub(crate) fn getpgid(pid: Option<Pid>) -> io::Result<Pid> {
 
 #[inline]
 pub(crate) fn getpgrp() -> Pid {
+    // Use the `getpgrp` syscall if available.
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
     unsafe {
         let pgid: i32 = ret_usize_infallible(syscall_readonly!(__NR_getpgrp)) as __kernel_pid_t;
+        debug_assert!(pgid > 0);
+        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pgid as u32))
+    }
+
+    // Otherwise use `getpgrp` and pass it zero.
+    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+    unsafe {
+        let pgid: i32 =
+            ret_usize_infallible(syscall_readonly!(__NR_getpgrp), c_uint(0)) as __kernel_pid_t;
         debug_assert!(pgid > 0);
         Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pgid as u32))
     }
