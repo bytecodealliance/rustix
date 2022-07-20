@@ -284,7 +284,7 @@ unsafe fn check_vdso_base<'vdso>(base: *const Elf_Ehdr) -> Option<&'vdso Elf_Ehd
 impl Vdso {
     /// Parse the vDSO.
     ///
-    /// Returns None if the vDSO can't be located or if it doesn't conform
+    /// Returns `None` if the vDSO can't be located or if it doesn't conform
     /// to our expectations.
     #[inline]
     pub(super) fn new() -> Option<Self> {

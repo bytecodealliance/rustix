@@ -9,6 +9,7 @@ use super::super::c;
 use super::super::elf::{Elf_Ehdr, Elf_Phdr};
 #[cfg(feature = "param")]
 use crate::ffi::CStr;
+use core::ffi::c_void;
 use core::mem::size_of;
 use core::ptr::null;
 #[cfg(feature = "runtime")]
@@ -199,5 +200,5 @@ struct Elf_auxv_t {
     // Some of the values in the auxv array are pointers, so we make `a_val` a
     // pointer, in order to preserve their provenance. For the values which are
     // integers, we cast this to `usize`.
-    a_val: *const (),
+    a_val: *const c_void,
 }
