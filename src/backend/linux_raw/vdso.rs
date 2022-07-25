@@ -82,7 +82,7 @@ fn init_from_sysinfo_ehdr() -> Option<Vdso> {
         };
 
         let hdr = &*hdr;
-        let pt = check_raw_pointer::<Elf_Phdr>(vdso.base_plus(hdr.e_phoff)?)?;
+        let pt = check_raw_pointer::<Elf_Phdr>(vdso.base_plus(hdr.e_phoff)? as *mut _)?.as_ptr();
         let mut dyn_: *const Elf_Dyn = null();
         let mut num_dyn = 0;
 
@@ -113,7 +113,8 @@ fn init_from_sysinfo_ehdr() -> Option<Vdso> {
                     return None;
                 }
 
-                dyn_ = check_raw_pointer::<Elf_Dyn>(vdso.base_plus(phdr.p_offset)?)?;
+                dyn_ = check_raw_pointer::<Elf_Dyn>(vdso.base_plus(phdr.p_offset)? as *mut _)?
+                    .as_ptr();
                 num_dyn = phdr.p_memsz / size_of::<Elf_Dyn>();
             } else if phdr.p_type == PT_INTERP || phdr.p_type == PT_GNU_RELRO {
                 // Don't trust any ELF image that has an "interpreter" or that uses
@@ -141,19 +142,26 @@ fn init_from_sysinfo_ehdr() -> Option<Vdso> {
             let d = &*dyn_.add(i);
             match d.d_tag {
                 DT_STRTAB => {
-                    vdso.symstrings = check_raw_pointer::<u8>(vdso.addr_from_elf(d.d_val)?)?;
+                    vdso.symstrings =
+                        check_raw_pointer::<u8>(vdso.addr_from_elf(d.d_val)? as *mut _)?.as_ptr();
                 }
                 DT_SYMTAB => {
-                    vdso.symtab = check_raw_pointer::<Elf_Sym>(vdso.addr_from_elf(d.d_val)?)?;
+                    vdso.symtab =
+                        check_raw_pointer::<Elf_Sym>(vdso.addr_from_elf(d.d_val)? as *mut _)?
+                            .as_ptr();
                 }
                 DT_HASH => {
-                    hash = check_raw_pointer::<u32>(vdso.addr_from_elf(d.d_val)?)?;
+                    hash =
+                        check_raw_pointer::<u32>(vdso.addr_from_elf(d.d_val)? as *mut _)?.as_ptr();
                 }
                 DT_VERSYM => {
-                    vdso.versym = check_raw_pointer::<u16>(vdso.addr_from_elf(d.d_val)?)?;
+                    vdso.versym =
+                        check_raw_pointer::<u16>(vdso.addr_from_elf(d.d_val)? as *mut _)?.as_ptr();
                 }
                 DT_VERDEF => {
-                    vdso.verdef = check_raw_pointer::<Elf_Verdef>(vdso.addr_from_elf(d.d_val)?)?;
+                    vdso.verdef =
+                        check_raw_pointer::<Elf_Verdef>(vdso.addr_from_elf(d.d_val)? as *mut _)?
+                            .as_ptr();
                 }
                 DT_SYMENT => {
                     if d.d_val != size_of::<Elf_Sym>() {
@@ -165,9 +173,8 @@ fn init_from_sysinfo_ehdr() -> Option<Vdso> {
             }
             i = i.checked_add(1)?;
         }
-        if vdso.symstrings.is_null() || vdso.symtab.is_null() || hash.is_null() {
-            return None; // Failed
-        }
+        // The upstream code checks `symstrings`, `symtab`, and `hash` for null;
+        // here, `check_raw_pointer` has already done that.
 
         if vdso.verdef.is_null() {
             vdso.versym = null();
