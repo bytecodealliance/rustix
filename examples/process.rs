@@ -10,6 +10,13 @@ fn main() -> io::Result<()> {
 
     println!("Pid: {}", getpid().as_raw_nonzero());
     println!("Parent Pid: {}", Pid::as_raw(getppid()));
+    println!("Group Pid: {}", getpgrp().as_raw_nonzero());
+    if let Some(ppid) = getppid() {
+        println!(
+            "Parent Group Pid: {}",
+            getpgid(Some(ppid)).unwrap().as_raw_nonzero()
+        );
+    }
     println!("Uid: {}", getuid().as_raw());
     println!("Gid: {}", getgid().as_raw());
     #[cfg(any(

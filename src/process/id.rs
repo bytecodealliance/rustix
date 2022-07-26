@@ -277,8 +277,22 @@ pub fn getppid() -> Option<Pid> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/getpgid.2.html
 #[inline]
 #[must_use]
-pub fn getpgid(pid: Option<Pid>) -> Pid {
+pub fn getpgid(pid: Option<Pid>) -> io::Result<Pid> {
     backend::process::syscalls::getpgid(pid)
+}
+
+/// `getpgrp()`—Returns the process' group ID.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getpgrp.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/getpgrp.2.html
+#[inline]
+#[must_use]
+pub fn getpgrp() -> Pid {
+    backend::process::syscalls::getpgrp()
 }
 
 /// `setsid()`—Create a new session.
