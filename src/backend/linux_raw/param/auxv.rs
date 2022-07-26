@@ -206,7 +206,7 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) -> Option<()> {
             AT_PHENT => phent = a_val as usize,
             AT_EXECFN => execfn = check_raw_pointer::<c::c_char>(a_val as *mut _)?.as_ptr(),
             AT_BASE => check_interpreter_base(a_val.cast())?,
-            AT_SYSINFO_EHDR => sysinfo_ehdr = check_vdso_base(a_val.cast() as *mut _)?.as_ptr(),
+            AT_SYSINFO_EHDR => sysinfo_ehdr = check_vdso_base(a_val.cast())?,
             AT_NULL => break,
             _ => (),
         }
