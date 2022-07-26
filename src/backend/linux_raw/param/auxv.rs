@@ -11,10 +11,12 @@ use super::super::elf::*;
 use crate::ffi::CStr;
 use crate::fs::{Mode, OFlags};
 use crate::io::OwnedFd;
+use crate::utils::as_ptr;
 use crate::utils::check_raw_pointer;
 use alloc::vec::Vec;
 use core::ffi::c_void;
 use core::mem::size_of;
+use core::ptr::NonNull;
 use core::ptr::{null_mut, read_unaligned};
 #[cfg(feature = "runtime")]
 use core::slice;
@@ -206,7 +208,7 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) -> Option<()> {
             AT_PHENT => phent = a_val as usize,
             AT_EXECFN => execfn = check_raw_pointer::<c::c_char>(a_val as *mut _)?.as_ptr(),
             AT_BASE => check_interpreter_base(a_val.cast())?,
-            AT_SYSINFO_EHDR => sysinfo_ehdr = check_vdso_base(a_val.cast())?,
+            AT_SYSINFO_EHDR => sysinfo_ehdr = check_vdso_base(a_val as *mut _)?.as_ptr(),
             AT_NULL => break,
             _ => (),
         }
@@ -244,7 +246,7 @@ unsafe fn check_interpreter_base(base: *const Elf_Ehdr) -> Option<()> {
 /// `base` is some value we got from a `AT_SYSINFO_EHDR` aux record somewhere,
 /// which hopefully holds the value of the kernel-provided vDSO in memory. Do a
 /// series of checks to be as sure as we can that it's safe to use.
-unsafe fn check_vdso_base(base: *const Elf_Ehdr) -> Option<*const Elf_Ehdr> {
+unsafe fn check_vdso_base(base: *const Elf_Ehdr) -> Option<NonNull<Elf_Ehdr>> {
     // In theory, we could check that we're not attempting to parse our own ELF
     // image, as an additional check. However, older Linux toolchains don't
     // support this, and Rust's `#[linkage = "extern_weak"]` isn't stable yet,
@@ -293,7 +295,7 @@ unsafe fn check_vdso_base(base: *const Elf_Ehdr) -> Option<*const Elf_Ehdr> {
 }
 
 /// Check that `base` is a valid pointer to an ELF image.
-unsafe fn check_elf_base(base: *const Elf_Ehdr) -> Option<*const Elf_Ehdr> {
+unsafe fn check_elf_base(base: *const Elf_Ehdr) -> Option<NonNull<Elf_Ehdr>> {
     // If we're reading a 64-bit auxv on a 32-bit platform, we'll see
     // a zero `a_val` because `AT_*` values are never greater than
     // `u32::MAX`. Zero is used by libc's `getauxval` to indicate
@@ -302,12 +304,12 @@ unsafe fn check_elf_base(base: *const Elf_Ehdr) -> Option<*const Elf_Ehdr> {
         return None;
     }
 
-    let hdr = match check_raw_pointer::<Elf_Ehdr>(base.cast()) {
+    let hdr = match check_raw_pointer::<Elf_Ehdr>(base as *mut _) {
         Some(hdr) => hdr,
         None => return None,
     };
 
-    let hdr = &*hdr;
+    let hdr = hdr.as_ref();
     if hdr.e_ident[..SELFMAG] != ELFMAG {
         return None; // Wrong ELF magic
     }
@@ -353,7 +355,7 @@ unsafe fn check_elf_base(base: *const Elf_Ehdr) -> Option<*const Elf_Ehdr> {
         return None; // Wrong machine type
     }
 
-    Some(hdr)
+    Some(NonNull::new_unchecked(as_ptr(hdr) as *mut _))
 }
 
 // ELF ABI
