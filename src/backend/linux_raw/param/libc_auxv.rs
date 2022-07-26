@@ -5,6 +5,7 @@
 //! This uses raw pointers to locate and read the kernel-provided auxv array.
 #![allow(unsafe_code)]
 
+#[cfg(any(feature = "param", feature = "runtime"))]
 use super::super::c;
 use super::super::elf::*;
 #[cfg(feature = "param")]
