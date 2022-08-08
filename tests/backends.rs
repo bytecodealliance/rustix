@@ -7,10 +7,6 @@ fn test_backends() {
     #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
     {
         assert!(
-            !has_dependency("test-crates/use-default", &[], &[], &["RUSTFLAGS"], "libc"),
-            "use-default depends on libc"
-        );
-        assert!(
             has_dependency(
                 "test-crates/use-default",
                 &[],
@@ -19,6 +15,32 @@ fn test_backends() {
                 "linux-raw-sys"
             ),
             "use-default does not depend on linux-raw-sys"
+        );
+    }
+
+    // Pick an arbitrary platform where linux_raw is enabled by default and
+    // ensure that the use-rustix-auxv crate uses it, and does not use libc.
+    #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
+    {
+        assert!(
+            !has_dependency(
+                "test-crates/use-rustix-auxv",
+                &[],
+                &[],
+                &["RUSTFLAGS"],
+                "libc"
+            ),
+            "use-rustix-auxv depends on libc"
+        );
+        assert!(
+            has_dependency(
+                "test-crates/use-rustix-auxv",
+                &[],
+                &[],
+                &["RUSTFLAGS"],
+                "linux-raw-sys"
+            ),
+            "use-rustix-auxv does not depend on linux-raw-sys"
         );
     }
 

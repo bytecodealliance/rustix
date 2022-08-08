@@ -1,0 +1,9 @@
+[package]
+name = "use-rustix-auxv"
+version = "0.0.0"
+edition = "2018"
+publish = false
+
+[dependencies]
+# Request that rustix use the default backend, and disable use-libc-auxv.
+rustix = { path = "../..", default-features = false, features = ["std"] }

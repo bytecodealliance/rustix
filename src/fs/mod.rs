@@ -3,7 +3,14 @@
 #[cfg(feature = "fs")]
 mod abs;
 #[cfg(not(target_os = "redox"))]
-#[cfg(any(feature = "fs", feature = "procfs"))]
+#[cfg(any(
+    feature = "fs",
+    feature = "param",
+    feature = "procfs",
+    feature = "runtime",
+    feature = "time",
+    target_arch = "x86"
+))]
 mod at;
 mod constants;
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -86,7 +93,14 @@ pub use at::renameat_with;
 #[cfg(feature = "fs")]
 pub use at::{chmodat, chownat};
 #[cfg(not(target_os = "redox"))]
-#[cfg(any(feature = "fs", feature = "procfs"))]
+#[cfg(any(
+    feature = "fs",
+    feature = "param",
+    feature = "procfs",
+    feature = "runtime",
+    feature = "time",
+    target_arch = "x86"
+))]
 pub use at::{
     linkat, mkdirat, openat, readlinkat, renameat, statat, symlinkat, unlinkat, utimensat, RawMode,
     UTIME_NOW, UTIME_OMIT,
