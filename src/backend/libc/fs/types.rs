@@ -31,6 +31,7 @@ bitflags! {
     }
 }
 
+/*
 #[cfg(not(target_os = "redox"))]
 bitflags! {
     /// `AT_*` constants for use with [`openat`], [`statat`], and other `*at`
@@ -73,6 +74,7 @@ bitflags! {
         const STATX_DONT_SYNC = c::AT_STATX_DONT_SYNC;
     }
 }
+*/
 
 bitflags! {
     /// `S_I*` constants for use with [`openat`], [`chmodat`], and [`fchmod`].
@@ -204,8 +206,10 @@ bitflags! {
         ))]
         const FSYNC = c::O_FSYNC;
 
+        /*
         /// `O_NOFOLLOW`
         const NOFOLLOW = c::O_NOFOLLOW;
+        */
 
         /// `O_NONBLOCK`
         const NONBLOCK = c::O_NONBLOCK;
@@ -456,6 +460,7 @@ impl FileType {
     }
 }
 
+/*
 /// `POSIX_FADV_*` constants for use with [`fadvise`].
 ///
 /// [`fadvise`]: crate::fs::fadvise
@@ -489,6 +494,7 @@ pub enum Advice {
     /// `POSIX_FADV_DONTNEED`
     DontNeed = c::POSIX_FADV_DONTNEED as c::c_uint,
 }
+*/
 
 #[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 bitflags! {
@@ -680,6 +686,7 @@ bitflags! {
     }
 }
 
+/*
 #[cfg(not(any(
     target_os = "illumos",
     target_os = "netbsd",
@@ -777,7 +784,9 @@ bitflags! {
         const UNSHARE_RANGE = c::FALLOC_FL_UNSHARE_RANGE;
     }
 }
+*/
 
+/*
 #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi",)))]
 bitflags! {
     /// `ST_*` constants for use with [`StatVfs`].
@@ -838,6 +847,7 @@ pub enum FlockOperation {
     /// `LOCK_UN | LOCK_NB`
     NonBlockingUnlock = c::LOCK_UN | c::LOCK_NB,
 }
+*/
 
 /// `struct stat` for use with [`statat`] and [`fstat`].
 ///
@@ -943,7 +953,7 @@ pub struct StatVfs {
     pub f_ffree: u64,
     pub f_favail: u64,
     pub f_fsid: u64,
-    pub f_flag: StatVfsMountFlags,
+    /*pub f_flag: StatVfsMountFlags, */
     pub f_namemax: u64,
 }
 
@@ -1055,8 +1065,10 @@ pub type FsWord = u64;
 #[cfg(all(target_os = "linux", target_arch = "s390x"))]
 pub type FsWord = u32;
 
+/*
 #[cfg(not(target_os = "redox"))]
 pub use c::{UTIME_NOW, UTIME_OMIT};
+*/
 
 /// `PROC_SUPER_MAGIC`—The magic number for the procfs filesystem.
 #[cfg(all(

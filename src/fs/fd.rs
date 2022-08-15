@@ -8,6 +8,7 @@ use crate::process::{Gid, Uid};
 use crate::{backend, io};
 use backend::fd::{AsFd, BorrowedFd};
 
+/*
 #[cfg(not(target_os = "wasi"))]
 pub use backend::fs::types::FlockOperation;
 
@@ -19,6 +20,7 @@ pub use backend::fs::types::FlockOperation;
     target_os = "redox",
 )))]
 pub use backend::fs::types::FallocateFlags;
+*/
 
 pub use backend::fs::types::Stat;
 
@@ -30,8 +32,10 @@ pub use backend::fs::types::Stat;
 )))]
 pub use backend::fs::types::StatFs;
 
+/*
 #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
 pub use backend::fs::types::{StatVfs, StatVfsMountFlags};
+*/
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use backend::fs::types::FsWord;
@@ -68,6 +72,7 @@ pub const PROC_SUPER_MAGIC: FsWord = backend::fs::types::PROC_SUPER_MAGIC;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub const NFS_SUPER_MAGIC: FsWord = backend::fs::types::NFS_SUPER_MAGIC;
 
+/*
 /// `lseek(fd, offset, whence)`—Repositions a file descriptor within a file.
 ///
 /// # References
@@ -80,6 +85,7 @@ pub const NFS_SUPER_MAGIC: FsWord = backend::fs::types::NFS_SUPER_MAGIC;
 pub fn seek<Fd: AsFd>(fd: Fd, pos: SeekFrom) -> io::Result<u64> {
     backend::fs::syscalls::seek(fd.as_fd(), pos)
 }
+*/
 
 /// `lseek(fd, 0, SEEK_CUR)`—Returns the current position within a file.
 ///
@@ -167,6 +173,7 @@ pub fn fstatfs<Fd: AsFd>(fd: Fd) -> io::Result<StatFs> {
     backend::fs::syscalls::fstatfs(fd.as_fd())
 }
 
+/*
 /// `fstatvfs(fd)`—Queries filesystem statistics for an open file or
 /// directory, POSIX version.
 ///
@@ -186,6 +193,7 @@ pub fn fstatfs<Fd: AsFd>(fd: Fd) -> io::Result<StatFs> {
 pub fn fstatvfs<Fd: AsFd>(fd: Fd) -> io::Result<StatVfs> {
     backend::fs::syscalls::fstatvfs(fd.as_fd())
 }
+*/
 
 /// `futimens(fd, times)`—Sets timestamps for an open file or directory.
 ///
@@ -200,6 +208,7 @@ pub fn futimens<Fd: AsFd>(fd: Fd, times: &Timestamps) -> io::Result<()> {
     backend::fs::syscalls::futimens(fd.as_fd(), times)
 }
 
+/*
 /// `fallocate(fd, mode, offset, len)`—Adjusts file allocation.
 ///
 /// This is a more general form of `posix_fallocate`, adding a `mode` argument
@@ -227,6 +236,7 @@ pub fn futimens<Fd: AsFd>(fd: Fd, times: &Timestamps) -> io::Result<()> {
 pub fn fallocate<Fd: AsFd>(fd: Fd, mode: FallocateFlags, offset: u64, len: u64) -> io::Result<()> {
     backend::fs::syscalls::fallocate(fd.as_fd(), mode, offset, len)
 }
+*/
 
 /// `fcntl(fd, F_GETFL) & O_ACCMODE`
 ///
@@ -314,6 +324,7 @@ pub fn ftruncate<Fd: AsFd>(fd: Fd, length: u64) -> io::Result<()> {
     backend::fs::syscalls::ftruncate(fd.as_fd(), length)
 }
 
+/*
 /// `flock(fd, operation)`—Acquire or release an advisory lock on an open file.
 ///
 /// # References
@@ -325,3 +336,4 @@ pub fn ftruncate<Fd: AsFd>(fd: Fd, length: u64) -> io::Result<()> {
 pub fn flock<Fd: AsFd>(fd: Fd, operation: FlockOperation) -> io::Result<()> {
     backend::fs::syscalls::flock(fd.as_fd(), operation)
 }
+*/

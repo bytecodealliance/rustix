@@ -60,6 +60,7 @@ pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {
     backend::io::syscalls::dup2(fd.as_fd(), new)
 }
 
+/*
 /// `dup3(fd, new, flags)`—Changes the [file description] of a file
 /// descriptor, with flags.
 ///
@@ -78,3 +79,4 @@ pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {
 pub fn dup3<Fd: AsFd>(fd: Fd, new: &mut OwnedFd, flags: DupFlags) -> io::Result<()> {
     backend::io::syscalls::dup3(fd.as_fd(), new, flags)
 }
+*/

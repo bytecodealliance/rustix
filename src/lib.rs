@@ -93,7 +93,7 @@
 //! [`Result`]: https://docs.rs/rustix/latest/rustix/io/type.Result.html
 //! [`Arg`]: https://docs.rs/rustix/latest/rustix/path/trait.Arg.html
 
-#![deny(missing_docs)]
+/*#![deny(missing_docs)]*/
 #![allow(stable_features)]
 #![cfg_attr(linux_raw, deny(unsafe_code))]
 #![cfg_attr(rustc_attrs, feature(rustc_attrs))]

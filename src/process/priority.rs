@@ -1,6 +1,7 @@
 use crate::process::{Pid, Uid};
 use crate::{backend, io};
 
+/*
 /// `nice()`—Adjust the scheduling priority of the current process.
 ///
 /// # References
@@ -129,3 +130,4 @@ pub fn setpriority_pgrp(pgid: Option<Pid>, priority: i32) -> io::Result<()> {
 pub fn setpriority_process(pid: Option<Pid>, priority: i32) -> io::Result<()> {
     backend::process::syscalls::setpriority_process(pid, priority)
 }
+*/

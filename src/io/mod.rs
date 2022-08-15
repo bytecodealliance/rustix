@@ -29,19 +29,23 @@ mod stdio;
 pub use crate::backend::io::epoll;
 pub use close::close;
 #[cfg(not(any(windows, target_os = "wasi")))]
-pub use dup::{dup, dup2, dup3, DupFlags};
+pub use dup::{dup, dup2, /*dup3, DupFlags*/};
 pub use errno::{retry_on_intr, Errno, Result};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use eventfd::{eventfd, EventfdFlags};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use ioctl::ioctl_fioclex;
+/*
 pub use ioctl::ioctl_fionbio;
 #[cfg(not(target_os = "redox"))]
 pub use ioctl::ioctl_fionread;
+*/
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use ioctl::{ioctl_blkpbszget, ioctl_blksszget};
+/*
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub use ioctl::{ioctl_tiocexcl, ioctl_tiocnxcl};
+*/
 #[cfg(not(any(windows, target_os = "redox")))]
 #[cfg(feature = "net")]
 pub use is_read_write::is_read_write;
@@ -55,8 +59,10 @@ pub use pipe::pipe;
     target_os = "wasi",
 )))]
 pub use pipe::PIPE_BUF;
+/*
 #[cfg(not(any(windows, target_os = "ios", target_os = "macos", target_os = "wasi")))]
 pub use pipe::{pipe_with, PipeFlags};
+*/
 pub use poll::{poll, PollFd, PollFlags};
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
 pub use procfs::{proc_self_fd, proc_self_fdinfo_fd, proc_self_maps, proc_self_pagemap};

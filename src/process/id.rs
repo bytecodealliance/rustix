@@ -197,6 +197,7 @@ pub fn getuid() -> Uid {
     backend::process::syscalls::getuid()
 }
 
+/*
 /// `geteuid()`—Returns the process' effective user ID.
 ///
 /// # References
@@ -210,6 +211,7 @@ pub fn getuid() -> Uid {
 pub fn geteuid() -> Uid {
     backend::process::syscalls::geteuid()
 }
+*/
 
 /// `getgid()`—Returns the process' real group ID.
 ///
@@ -225,6 +227,7 @@ pub fn getgid() -> Gid {
     backend::process::syscalls::getgid()
 }
 
+/*
 /// `getegid()`—Returns the process' effective group ID.
 ///
 /// # References
@@ -238,6 +241,7 @@ pub fn getgid() -> Gid {
 pub fn getegid() -> Gid {
     backend::process::syscalls::getegid()
 }
+*/
 
 /// `getpid()`—Returns the process' ID.
 ///
@@ -267,6 +271,7 @@ pub fn getppid() -> Option<Pid> {
     backend::process::syscalls::getppid()
 }
 
+/*
 /// `getpgid(pid)`—Returns the process group ID of the given process.
 ///
 /// # References
@@ -307,19 +312,20 @@ pub fn getpgrp() -> Pid {
 pub fn setsid() -> io::Result<Pid> {
     backend::process::syscalls::setsid()
 }
+*/
 
 // translate_fchown_args returns the raw value of the IDs. In case of `None`
 // it returns `u32::MAX` since it has the same bit pattern as `-1` indicating
 // no change to the owner/group ID.
-pub(crate) fn translate_fchown_args(owner: Option<Uid>, group: Option<Gid>) -> (u32, u32) {
+pub(crate) fn translate_fchown_args(owner: Option<Uid>, group: Option<Gid>) -> (i16, i16) {
     let ow = match owner {
         Some(o) => o.as_raw(),
-        None => u32::MAX,
+        None => i16::MAX,
     };
 
     let gr = match group {
         Some(g) => g.as_raw(),
-        None => u32::MAX,
+        None => i16::MAX,
     };
 
     (ow, gr)

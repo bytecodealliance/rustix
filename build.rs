@@ -40,7 +40,7 @@ fn main() {
 
     // Check for `--features=use-libc`. This allows crate users to enable the
     // libc backend.
-    let feature_use_libc = var("CARGO_FEATURE_USE_LIBC").is_ok();
+    let feature_use_libc = true; // For now, always enable this on the NuttX branch.
 
     // Check for `--features=rustc-dep-of-std`. This is used when rustix is
     // being used to build std, in which case `can_compile` doesn't work

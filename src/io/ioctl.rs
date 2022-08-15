@@ -6,6 +6,7 @@
 use crate::{backend, io};
 use backend::fd::AsFd;
 
+/*
 /// `ioctl(fd, TIOCEXCL)`—Enables exclusive mode on a terminal.
 ///
 /// # References
@@ -31,6 +32,7 @@ pub fn ioctl_tiocexcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     backend::io::syscalls::ioctl_tiocnxcl(fd.as_fd())
 }
+*/
 
 /// `ioctl(fd, FIOCLEX)`—Set the close-on-exec flag.
 ///
@@ -50,6 +52,7 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     backend::io::syscalls::ioctl_fioclex(fd.as_fd())
 }
 
+/*
 /// `ioctl(fd, FIONBIO, &value)`—Enables or disables non-blocking mode.
 ///
 /// # References
@@ -81,6 +84,7 @@ pub fn ioctl_fionbio<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 pub fn ioctl_fionread<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
     backend::io::syscalls::ioctl_fionread(fd.as_fd())
 }
+*/
 
 /// `ioctl(fd, BLKSSZGET)`—Returns the logical block size of a block device.
 #[cfg(any(target_os = "android", target_os = "linux"))]

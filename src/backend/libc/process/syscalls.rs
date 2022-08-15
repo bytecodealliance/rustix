@@ -23,8 +23,10 @@ use core::mem::MaybeUninit;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use {
     super::super::conv::ret_infallible,
-    super::super::offset::{libc_getrlimit, libc_rlimit, libc_setrlimit, LIBC_RLIM_INFINITY},
+    /*
+      super::super::offset::{libc_getrlimit, libc_rlimit, libc_setrlimit, LIBC_RLIM_INFINITY},
     crate::process::{Resource, Rlimit},
+    */
     core::convert::TryInto,
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -35,18 +37,27 @@ use {
 #[cfg(not(target_os = "wasi"))]
 use {
     super::types::RawUname,
-    crate::process::{Gid, Pid, RawNonZeroPid, RawPid, Signal, Uid, WaitOptions, WaitStatus},
+    crate::process::{Gid, Pid, RawNonZeroPid, RawPid, /*Signal,*/ Uid, /*WaitOptions, WaitStatus*/},
 };
+
+mod libc_errno {
+    pub(crate) fn set_errno(e: Errno) {
+        unsafe { *super::c::__errno() = e.0; }
+    }
+    pub(crate) struct Errno(pub(crate) i32);
+}
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn chdir(path: &CStr) -> io::Result<()> {
     unsafe { ret(c::chdir(c_str(path))) }
 }
 
+/*
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 pub(crate) fn fchdir(dirfd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::fchdir(borrowed_fd(dirfd))) }
 }
+*/
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<()> {
@@ -96,6 +107,7 @@ pub(crate) fn getuid() -> Uid {
     }
 }
 
+/*
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
@@ -105,6 +117,7 @@ pub(crate) fn geteuid() -> Uid {
         Uid::from_raw(uid)
     }
 }
+*/
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
@@ -116,6 +129,7 @@ pub(crate) fn getgid() -> Gid {
     }
 }
 
+/*
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
@@ -125,6 +139,7 @@ pub(crate) fn getegid() -> Gid {
         Gid::from_raw(gid)
     }
 }
+*/
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
@@ -147,6 +162,7 @@ pub(crate) fn getppid() -> Option<Pid> {
     }
 }
 
+/*
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
@@ -168,6 +184,7 @@ pub(crate) fn getpgrp() -> Pid {
         Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pgid))
     }
 }
+*/
 
 #[cfg(any(
     target_os = "android",
@@ -220,6 +237,7 @@ pub(crate) fn uname() -> RawUname {
     }
 }
 
+/*
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 #[inline]
 pub(crate) fn nice(inc: i32) -> io::Result<i32> {
@@ -297,7 +315,9 @@ pub(crate) fn setpriority_process(pid: Option<Pid>, priority: i32) -> io::Result
         ))
     }
 }
+*/
 
+/*
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
@@ -361,7 +381,9 @@ fn rlimit_to_libc(lim: Rlimit) -> io::Result<libc_rlimit> {
     };
     Ok(libc_rlimit { rlim_cur, rlim_max })
 }
+*/
 
+/*
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
@@ -394,6 +416,7 @@ pub(crate) fn _waitpid(
         }))
     }
 }
+*/
 
 #[inline]
 pub(crate) fn exit_group(code: c::c_int) -> ! {
@@ -403,12 +426,13 @@ pub(crate) fn exit_group(code: c::c_int) -> ! {
     unsafe {
         c::_Exit(code)
     }
-    #[cfg(unix)]
+    /*#[cfg(unix)]*/
     unsafe {
         c::_exit(code)
     }
 }
 
+/*
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) fn setsid() -> io::Result<Pid> {
@@ -441,3 +465,4 @@ pub(crate) fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
 pub(crate) fn kill_current_process_group(sig: Signal) -> io::Result<()> {
     unsafe { ret(c::kill(0, sig as i32)) }
 }
+*/

@@ -36,6 +36,7 @@ pub fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     backend::io::syscalls::pipe()
 }
 
+/*
 /// `pipe2(flags)`—Creates a pipe, with flags.
 ///
 /// This function creates a pipe and returns two file descriptors, for the
@@ -51,3 +52,4 @@ pub fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
 pub fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     backend::io::syscalls::pipe_with(flags)
 }
+*/

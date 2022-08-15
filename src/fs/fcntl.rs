@@ -108,6 +108,7 @@ pub fn fcntl_add_seals<Fd: AsFd>(fd: Fd, seals: SealFlags) -> io::Result<()> {
     backend::fs::syscalls::fcntl_add_seals(fd.as_fd(), seals)
 }
 
+/*
 /// `fcntl(fd, F_DUPFD_CLOEXEC)`—Creates a new `OwnedFd` instance, with value
 /// at least `min`, that has `O_CLOEXEC` set and that shares the same
 /// underlying [file description] as `fd`.
@@ -129,3 +130,4 @@ pub fn fcntl_add_seals<Fd: AsFd>(fd: Fd, seals: SealFlags) -> io::Result<()> {
 pub fn fcntl_dupfd_cloexec<Fd: AsFd>(fd: Fd, min: RawFd) -> io::Result<OwnedFd> {
     backend::fs::syscalls::fcntl_dupfd_cloexec(fd.as_fd(), min)
 }
+*/

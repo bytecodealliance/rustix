@@ -18,6 +18,7 @@ pub fn chdir<P: path::Arg>(path: P) -> io::Result<()> {
     path.into_with_c_str(backend::process::syscalls::chdir)
 }
 
+/*
 /// `fchdir(fd)`—Change the current working directory.
 ///
 /// # References
@@ -31,6 +32,7 @@ pub fn chdir<P: path::Arg>(path: P) -> io::Result<()> {
 pub fn fchdir<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     backend::process::syscalls::fchdir(fd.as_fd())
 }
+*/
 
 /// `getcwd()`—Return the current working directory.
 ///

@@ -1,3 +1,4 @@
+/*
 #[cfg(not(target_os = "redox"))]
 #[cfg(any(feature = "fs", feature = "procfs"))]
 pub(crate) mod dir;
@@ -13,6 +14,7 @@ pub(crate) mod dir;
     target_os = "wasi",
 )))]
 pub(crate) mod makedev;
+*/
 #[cfg(not(windows))]
 pub(crate) mod syscalls;
 pub(crate) mod types;

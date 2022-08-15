@@ -84,6 +84,7 @@ impl BorrowedFd<'_> {
 }
 
 impl OwnedFd {
+    /*
     /// Creates a new `OwnedFd` instance that shares the same underlying file handle
     /// as the existing `OwnedFd` instance.
     #[cfg(not(target_arch = "wasm32"))]
@@ -103,6 +104,7 @@ impl OwnedFd {
 
         Ok(fd.into())
     }
+    */
 
     #[cfg(target_arch = "wasm32")]
     pub fn try_clone(&self) -> crate::io::Result<Self> {

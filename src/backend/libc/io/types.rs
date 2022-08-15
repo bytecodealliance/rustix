@@ -79,8 +79,10 @@ bitflags! {
 #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
 pub const PIPE_BUF: usize = c::PIPE_BUF;
 
+/*
 #[cfg(not(any(windows, target_os = "redox")))]
 pub(crate) const AT_FDCWD: c::c_int = c::AT_FDCWD;
+*/
 #[cfg(not(windows))]
 pub(crate) const STDIN_FILENO: c::c_int = c::STDIN_FILENO;
 #[cfg(not(windows))]

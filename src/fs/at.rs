@@ -104,6 +104,7 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::R
     }
 }
 
+/*
 /// `mkdirat(fd, path, mode)`—Creates a directory.
 ///
 /// # References
@@ -116,6 +117,7 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::R
 pub fn mkdirat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, mode: Mode) -> io::Result<()> {
     path.into_with_c_str(|path| backend::fs::syscalls::mkdirat(dirfd.as_fd(), path, mode))
 }
+*/
 
 /// `linkat(old_dirfd, old_path, new_dirfd, new_path, flags)`—Creates a hard
 /// link.

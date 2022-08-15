@@ -6,6 +6,7 @@ use super::super::conv::{
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t};
+/*
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 use super::super::offset::libc_fallocate;
 #[cfg(not(any(
@@ -31,7 +32,8 @@ use super::super::offset::libc_posix_fadvise;
     target_os = "redox",
 )))]
 use super::super::offset::libc_posix_fallocate;
-use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek, libc_off_t};
+*/
+use super::super::offset::{libc_fstat, /*libc_fstatat,*/ libc_ftruncate, libc_lseek, libc_off_t};
 #[cfg(not(any(
     target_os = "illumos",
     target_os = "netbsd",
@@ -39,8 +41,10 @@ use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek,
     target_os = "wasi",
 )))]
 use super::super::offset::{libc_fstatfs, libc_statfs};
+/*
 #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
 use super::super::offset::{libc_fstatvfs, libc_statvfs};
+*/
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
@@ -54,6 +58,7 @@ use crate::ffi::CStr;
 use crate::ffi::CString;
 #[cfg(not(target_os = "illumos"))]
 use crate::fs::Access;
+/*
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "illumos",
@@ -74,6 +79,7 @@ use crate::fs::Advice;
 use crate::fs::FallocateFlags;
 #[cfg(not(target_os = "wasi"))]
 use crate::fs::FlockOperation;
+*/
 #[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 use crate::fs::MemfdFlags;
 #[cfg(any(
@@ -100,8 +106,10 @@ use crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags};
 )))]
 use crate::fs::{Dev, FileType};
 use crate::fs::{FdFlags, Mode, OFlags, Stat, Timestamps};
+/*
 #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
 use crate::fs::{StatVfs, StatVfsMountFlags};
+*/
 use crate::io::{self, OwnedFd, SeekFrom};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
@@ -133,6 +141,7 @@ use {
     super::super::conv::nonnegative_ret,
     crate::fs::{copyfile_state_t, CloneFlags, CopyfileFlags},
 };
+/*
 #[cfg(not(target_os = "redox"))]
 use {super::super::offset::libc_openat, crate::fs::AtFlags};
 
@@ -197,6 +206,7 @@ pub(crate) fn openat(
         ))
     }
 }
+*/
 
 #[cfg(not(any(
     target_os = "illumos",
@@ -213,6 +223,7 @@ pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
     }
 }
 
+/*
 #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
@@ -806,6 +817,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice)
         Err(io::Errno(err))
     }
 }
+*/
 
 pub(crate) fn fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<FdFlags> {
     unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GETFD)).map(FdFlags::from_bits_truncate) }
@@ -846,6 +858,7 @@ pub(crate) fn fcntl_add_seals(fd: BorrowedFd<'_>, seals: SealFlags) -> io::Resul
     unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_ADD_SEALS, seals.bits())) }
 }
 
+/*
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::fcntl(borrowed_fd(fd), c::F_DUPFD_CLOEXEC, min)) }
@@ -864,6 +877,7 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
     let offset = unsafe { ret_off_t(libc_lseek(borrowed_fd(fd), offset, whence))? };
     Ok(offset as u64)
 }
+*/
 
 pub(crate) fn tell(fd: BorrowedFd<'_>) -> io::Result<u64> {
     let offset = unsafe { ret_off_t(libc_lseek(borrowed_fd(fd), 0, c::SEEK_CUR))? };
@@ -910,10 +924,12 @@ pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>)
     }
 }
 
+/*
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result<()> {
     unsafe { ret(c::flock(borrowed_fd(fd), operation as c::c_int)) }
 }
+*/
 
 pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     // 32-bit and mips64 Linux: `struct stat64` is not y2038 compatible; use
@@ -969,6 +985,7 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
     }
 }
 
+/*
 #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
 pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
     let mut statvfs = MaybeUninit::<libc_statvfs>::uninit();
@@ -994,6 +1011,7 @@ fn libc_statvfs_to_statvfs(from: libc_statvfs) -> StatVfs {
         f_namemax: from.f_namemax as u64,
     }
 }
+*/
 
 pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()> {
     // 32-bit gnu version: libc has `futimens` but it is not y2038 safe by default.
@@ -1096,6 +1114,7 @@ unsafe fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
     ret(c::futimens(borrowed_fd(fd), old_times.as_ptr()))
 }
 
+/*
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "illumos",
@@ -1133,6 +1152,7 @@ pub(crate) fn fallocate(
         }
     }
 }
+*/
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub(crate) fn fallocate(
@@ -1174,7 +1194,7 @@ pub(crate) fn fsync(fd: BorrowedFd<'_>) -> io::Result<()> {
     target_os = "redox",
 )))]
 pub(crate) fn fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { ret(c::fdatasync(borrowed_fd(fd))) }
+    unsafe { ret(c::fsync(borrowed_fd(fd))) }
 }
 
 pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {

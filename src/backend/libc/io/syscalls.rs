@@ -12,10 +12,12 @@ use super::super::offset::{libc_preadv, libc_pwritev};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::super::offset::{libc_preadv2, libc_pwritev2};
 use crate::fd::{AsFd, BorrowedFd, RawFd};
+/*
 #[cfg(not(target_os = "wasi"))]
 use crate::io::DupFlags;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 use crate::io::PipeFlags;
+*/
 use crate::io::{self, IoSlice, IoSliceMut, OwnedFd, PollFd};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::io::{EventfdFlags, ReadWriteFlags};
@@ -58,7 +60,7 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Resu
             borrowed_fd(fd),
             buf.as_mut_ptr().cast(),
             len,
-            offset,
+            offset as _,
         ))?
     };
     Ok(nread as usize)
@@ -75,7 +77,7 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<
             borrowed_fd(fd),
             buf.as_ptr().cast(),
             len,
-            offset,
+            offset as _,
         ))?
     };
     Ok(nwritten as usize)
@@ -116,7 +118,7 @@ pub(crate) fn preadv(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), max_iov()) as c::c_int,
-            offset,
+            offset as _,
         ))?
     };
     Ok(nread as usize)
@@ -131,7 +133,7 @@ pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), max_iov()) as c::c_int,
-            offset,
+            offset as _,
         ))?
     };
     Ok(nwritten as usize)
@@ -294,6 +296,7 @@ pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
     }
 }
 
+/*
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
     let mut nread = MaybeUninit::<c::c_int>::uninit();
@@ -312,6 +315,7 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
         ret(c::ioctl(borrowed_fd(fd), c::FIONBIO, &data))
     }
 }
+*/
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[cfg(feature = "net")]
@@ -376,6 +380,7 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
     unsafe { ret_discarded_fd(c::dup2(borrowed_fd(fd), borrowed_fd(new.as_fd()))) }
 }
 
+/*
 #[cfg(not(any(
     target_os = "android",
     target_os = "dragonfly",
@@ -408,12 +413,14 @@ pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, _flags: DupFlags) -> i
     // have an `&mut OwnedFd` which means `fd` doesn't alias it.
     dup2(fd, new)
 }
+*/
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub(crate) fn ioctl_fioclex(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::FIOCLEX)) }
 }
 
+/*
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCEXCL as _)) }
@@ -423,6 +430,7 @@ pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd) -> io::Result<()> {
 pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCNXCL as _)) }
 }
+*/
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
@@ -434,6 +442,7 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     }
 }
 
+/*
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
@@ -443,6 +452,7 @@ pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
         Ok((p0, p1))
     }
 }
+*/
 
 #[inline]
 pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usize> {

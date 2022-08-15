@@ -99,8 +99,11 @@ impl<'fd> PollFd<'fd> {
         Self {
             pollfd: c::pollfd {
                 fd: borrowed_fd(fd),
-                events: events.bits(),
+                events: events.bits() as _,
                 revents: 0,
+                r#priv: core::ptr::null_mut(),
+                sem: c::sem_t { semcount: 0 },
+                ptr: core::ptr::null_mut(),
             },
             _phantom: PhantomData,
         }
@@ -111,7 +114,7 @@ impl<'fd> PollFd<'fd> {
     pub fn revents(&self) -> PollFlags {
         // Use `unwrap()` here because in theory we know we know all the bits
         // the OS might set here, but OS's have added extensions in the past.
-        PollFlags::from_bits(self.pollfd.revents).unwrap()
+        PollFlags::from_bits(self.pollfd.revents as _).unwrap()
     }
 }
 

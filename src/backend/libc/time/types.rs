@@ -132,6 +132,7 @@ pub enum ClockId {
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "redox",
+        target_os = "none",
     )))]
     ProcessCPUTime = c::CLOCK_PROCESS_CPUTIME_ID,
 
@@ -141,6 +142,7 @@ pub enum ClockId {
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "redox",
+        target_os = "none",
     )))]
     ThreadCPUTime = c::CLOCK_THREAD_CPUTIME_ID,
 

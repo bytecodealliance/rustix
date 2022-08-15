@@ -11,9 +11,11 @@
 // one platform where it's redundant on another.
 #![allow(clippy::useless_conversion)]
 
+/*
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[macro_use]
 mod weak;
+*/
 
 mod conv;
 mod offset;
@@ -53,12 +55,13 @@ pub(crate) mod fd {
 #[path = "winsock_c.rs"]
 pub(crate) mod c;
 #[cfg(not(windows))]
-pub(crate) use libc as c;
+pub(crate) use nuttx_sys as c;
 
 #[cfg(not(windows))]
 // #[cfg(feature = "fs")] // TODO: Enable this once `OwnedFd` moves out of the tree.
 pub(crate) mod fs;
 pub(crate) mod io;
+/*
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[cfg(feature = "io_uring")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "io_uring")))]
@@ -77,8 +80,10 @@ pub(crate) mod net;
     target_arch = "x86",
 ))]
 pub(crate) mod param;
+*/
 #[cfg(not(windows))]
 pub(crate) mod process;
+/*
 #[cfg(not(windows))]
 #[cfg(feature = "rand")]
 pub(crate) mod rand;
@@ -88,9 +93,11 @@ pub(crate) mod termios;
 #[cfg(not(windows))]
 #[cfg(feature = "thread")]
 pub(crate) mod thread;
+*/
 #[cfg(not(windows))]
 pub(crate) mod time;
 
+/*
 /// If the host libc is glibc, return `true` if it is less than version 2.25.
 ///
 /// To restate and clarify, this function returning true does not mean the libc
@@ -109,3 +116,4 @@ pub(crate) fn if_glibc_is_less_than_2_25() -> bool {
     // this function. But, there are likely other libc versions which have it.
     getrandom.get().is_none()
 }
+*/

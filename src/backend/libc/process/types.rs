@@ -35,6 +35,7 @@ pub enum MembarrierCommand {
     RegisterPrivateExpeditedRseq = 256,
 }
 
+/*
 /// A resource value for use with [`getrlimit`], [`setrlimit`], and
 /// [`prlimit`].
 ///
@@ -145,7 +146,9 @@ impl Resource {
     #[allow(non_upper_case_globals)]
     pub const Rss: Self = Self::As;
 }
+*/
 
+/*
 /// A signal number for use with [`kill_process`], [`kill_process_group`],
 /// and [`kill_current_process_group`].
 ///
@@ -306,11 +309,14 @@ impl Signal {
         }
     }
 }
+*/
 
 pub const EXIT_SUCCESS: c::c_int = c::EXIT_SUCCESS;
 pub const EXIT_FAILURE: c::c_int = c::EXIT_FAILURE;
+/*
 #[cfg(not(target_os = "wasi"))]
 pub const EXIT_SIGNALED_SIGABRT: c::c_int = 128 + c::SIGABRT;
+*/
 
 /// A process identifier as a raw integer.
 #[cfg(not(target_os = "wasi"))]

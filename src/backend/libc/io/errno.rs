@@ -4,7 +4,12 @@
 //! `errno` value.
 
 use super::super::c;
+/*
 use libc_errno::errno;
+*/
+fn errno() -> Errno {
+    unsafe { Errno(*nuttx_sys::__errno()) }
+}
 
 /// The error type for `rustix` APIs.
 ///
@@ -245,6 +250,7 @@ impl Errno {
     pub const HOSTDOWN: Self = Self(c::EHOSTDOWN);
     /// `EHOSTUNREACH`
     pub const HOSTUNREACH: Self = Self(c::EHOSTUNREACH);
+    /*
     /// `EHWPOISON`
     #[cfg(not(any(
         windows,
@@ -260,6 +266,7 @@ impl Errno {
         target_os = "wasi",
     )))]
     pub const HWPOISON: Self = Self(c::EHWPOISON);
+    */
     /// `EIDRM`
     #[cfg(not(windows))]
     pub const IDRM: Self = Self(c::EIDRM);
@@ -291,6 +298,7 @@ impl Errno {
     /// `EISDIR`
     #[cfg(not(windows))]
     pub const ISDIR: Self = Self(c::EISDIR);
+    /*
     /// `EISNAM`
     #[cfg(not(any(
         windows,
@@ -343,6 +351,7 @@ impl Errno {
         target_os = "wasi",
     )))]
     pub const KEYREVOKED: Self = Self(c::EKEYREVOKED);
+    */
     /// `EL2HLT`
     #[cfg(not(any(
         windows,
@@ -465,6 +474,7 @@ impl Errno {
     pub const LNRNG: Self = Self(c::ELNRNG);
     /// `ELOOP`
     pub const LOOP: Self = Self(c::ELOOP);
+    /*
     /// `EMEDIUMTYPE`
     #[cfg(not(any(
         windows,
@@ -478,6 +488,7 @@ impl Errno {
         target_os = "wasi",
     )))]
     pub const MEDIUMTYPE: Self = Self(c::EMEDIUMTYPE);
+    */
     /// `EMFILE`
     pub const MFILE: Self = Self(c::EMFILE);
     /// `EMLINK`
@@ -490,6 +501,7 @@ impl Errno {
     pub const MULTIHOP: Self = Self(c::EMULTIHOP);
     /// `ENAMETOOLONG`
     pub const NAMETOOLONG: Self = Self(c::ENAMETOOLONG);
+    /*
     /// `ENAVAIL`
     #[cfg(not(any(
         windows,
@@ -503,6 +515,7 @@ impl Errno {
         target_os = "wasi",
     )))]
     pub const NAVAIL: Self = Self(c::ENAVAIL);
+    */
     /// `ENEEDAUTH`
     #[cfg(any(
         target_os = "dragonfly",
@@ -576,6 +589,7 @@ impl Errno {
     /// `ENOEXEC`
     #[cfg(not(windows))]
     pub const NOEXEC: Self = Self(c::ENOEXEC);
+    /*
     /// `ENOKEY`
     #[cfg(not(any(
         windows,
@@ -589,6 +603,7 @@ impl Errno {
         target_os = "wasi",
     )))]
     pub const NOKEY: Self = Self(c::ENOKEY);
+    */
     /// `ENOLCK`
     #[cfg(not(windows))]
     pub const NOLCK: Self = Self(c::ENOLCK);
@@ -680,6 +695,7 @@ impl Errno {
     pub const NOTDIR: Self = Self(c::ENOTDIR);
     /// `ENOTEMPTY`
     pub const NOTEMPTY: Self = Self(c::ENOTEMPTY);
+    /*
     /// `ENOTNAM`
     #[cfg(not(any(
         windows,
@@ -693,6 +709,7 @@ impl Errno {
         target_os = "wasi",
     )))]
     pub const NOTNAM: Self = Self(c::ENOTNAM);
+    */
     /// `ENOTRECOVERABLE`
     #[cfg(not(any(windows, target_os = "dragonfly", target_os = "netbsd")))]
     pub const NOTRECOVERABLE: Self = Self(c::ENOTRECOVERABLE);
@@ -807,6 +824,7 @@ impl Errno {
     /// `EREMOTE`
     #[cfg(not(target_os = "wasi"))]
     pub const REMOTE: Self = Self(c::EREMOTE);
+    /*
     /// `EREMOTEIO`
     #[cfg(not(any(
         windows,
@@ -847,6 +865,7 @@ impl Errno {
         target_os = "wasi",
     )))]
     pub const RFKILL: Self = Self(c::ERFKILL);
+    */
     /// `EROFS`
     #[cfg(not(windows))]
     pub const ROFS: Self = Self(c::EROFS);
@@ -919,6 +938,7 @@ impl Errno {
     /// `ETXTBSY`
     #[cfg(not(windows))]
     pub const TXTBSY: Self = Self(c::ETXTBSY);
+    /*
     /// `EUCLEAN`
     #[cfg(not(any(
         windows,
@@ -932,6 +952,7 @@ impl Errno {
         target_os = "wasi",
     )))]
     pub const UCLEAN: Self = Self(c::EUCLEAN);
+    */
     /// `EUNATCH`
     #[cfg(not(any(
         windows,

@@ -11,7 +11,7 @@ use super::c;
     target_os = "l4re",
 )))]
 pub(super) use c::{
-    fstat as libc_fstat, fstatat as libc_fstatat, ftruncate as libc_ftruncate, lseek as libc_lseek,
+    fstat as libc_fstat, /*fstatat as libc_fstatat,*/ ftruncate as libc_ftruncate, lseek as libc_lseek,
     off_t as libc_off_t,
 };
 
@@ -37,6 +37,7 @@ pub(super) use c::{
 #[cfg(feature = "mm")]
 pub(super) use c::mmap as libc_mmap;
 
+/*
 #[cfg(not(any(
     windows,
     target_os = "android",
@@ -76,6 +77,7 @@ pub(super) const LIBC_RLIM_INFINITY: u64 = !0_u64;
     target_os = "l4re",
 ))]
 pub(super) use c::{getrlimit64 as libc_getrlimit, setrlimit64 as libc_setrlimit};
+*/
 
 #[cfg(any(
     target_os = "android",
@@ -142,6 +144,7 @@ pub(super) unsafe fn libc_prlimit(
     prlimit64(pid, resource, new_limit, old_limit)
 }
 
+/*
 #[cfg(not(any(
     windows,
     target_os = "android",
@@ -158,7 +161,9 @@ pub(super) use c::openat as libc_openat;
     target_os = "l4re",
 ))]
 pub(super) use c::openat64 as libc_openat;
+*/
 
+/*
 #[cfg(target_os = "fuchsia")]
 pub(super) use c::fallocate as libc_fallocate;
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -185,6 +190,7 @@ pub(super) use c::posix_fadvise as libc_posix_fadvise;
     target_os = "l4re",
 ))]
 pub(super) use c::posix_fadvise64 as libc_posix_fadvise;
+*/
 
 #[cfg(all(not(any(
     windows,
@@ -322,6 +328,7 @@ pub(super) use c::{preadv64v2 as libc_preadv2, pwritev64v2 as libc_pwritev2};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
 
+/*
 #[cfg(not(any(
     windows,
     target_os = "android",
@@ -350,7 +357,9 @@ pub(super) use c::posix_fallocate64 as libc_posix_fallocate;
     target_os = "redox",
     target_os = "wasi",
 )))]
+*/
 pub(super) use {c::fstatfs as libc_fstatfs, c::statfs as libc_statfs};
+/*
 #[cfg(not(any(
     windows,
     target_os = "android",
@@ -373,3 +382,4 @@ pub(super) use {
     c::fstatfs64 as libc_fstatfs, c::fstatvfs64 as libc_fstatvfs, c::statfs64 as libc_statfs,
     c::statvfs64 as libc_statvfs,
 };
+*/
