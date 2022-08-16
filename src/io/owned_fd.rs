@@ -202,6 +202,7 @@ impl From<OwnedFd> for crate::backend::fd::OwnedFd {
     }
 }
 
+#[cfg(feature = "std")]
 impl From<OwnedFd> for std::fs::File {
     fn from(owned: OwnedFd) -> Self {
         let owned: crate::backend::fd::OwnedFd = owned.into();
@@ -209,6 +210,7 @@ impl From<OwnedFd> for std::fs::File {
     }
 }
 
+#[cfg(feature = "std")]
 impl From<OwnedFd> for std::net::TcpListener {
     fn from(owned: OwnedFd) -> Self {
         let owned: crate::backend::fd::OwnedFd = owned.into();
@@ -216,6 +218,7 @@ impl From<OwnedFd> for std::net::TcpListener {
     }
 }
 
+#[cfg(feature = "std")]
 impl From<OwnedFd> for std::net::TcpStream {
     fn from(owned: OwnedFd) -> Self {
         let owned: crate::backend::fd::OwnedFd = owned.into();
@@ -223,6 +226,7 @@ impl From<OwnedFd> for std::net::TcpStream {
     }
 }
 
+#[cfg(feature = "std")]
 impl From<OwnedFd> for std::net::UdpSocket {
     fn from(owned: OwnedFd) -> Self {
         let owned: crate::backend::fd::OwnedFd = owned.into();
@@ -231,6 +235,7 @@ impl From<OwnedFd> for std::net::UdpSocket {
 }
 
 #[cfg(unix)]
+#[cfg(feature = "std")]
 impl From<OwnedFd> for std::os::unix::net::UnixStream {
     fn from(owned: OwnedFd) -> Self {
         let owned: crate::backend::fd::OwnedFd = owned.into();
@@ -239,6 +244,7 @@ impl From<OwnedFd> for std::os::unix::net::UnixStream {
 }
 
 #[cfg(unix)]
+#[cfg(feature = "std")]
 impl From<OwnedFd> for std::os::unix::net::UnixListener {
     fn from(owned: OwnedFd) -> Self {
         let owned: crate::backend::fd::OwnedFd = owned.into();
@@ -247,6 +253,7 @@ impl From<OwnedFd> for std::os::unix::net::UnixListener {
 }
 
 #[cfg(unix)]
+#[cfg(feature = "std")]
 impl From<OwnedFd> for std::os::unix::net::UnixDatagram {
     fn from(owned: OwnedFd) -> Self {
         let owned: crate::backend::fd::OwnedFd = owned.into();
