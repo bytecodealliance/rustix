@@ -75,35 +75,3 @@ impl<T: AsSocket> AsFd for T {
         self.as_socket()
     }
 }
-
-/// A version of [`IntoFd`] for use with Winsock2 API.
-///
-/// [`IntoFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.IntoFd.html
-pub trait IntoFd {
-    /// A version of [`into_fd`] for use with Winsock2 API.
-    ///
-    /// [`into_fd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.IntoFd.html#tymethod.into_fd
-    fn into_fd(self) -> OwnedFd;
-}
-impl<T: IntoSocket> IntoFd for T {
-    #[inline]
-    fn into_fd(self) -> OwnedFd {
-        self.into_socket()
-    }
-}
-
-/// A version of [`FromFd`] for use with Winsock2 API.
-///
-/// [`FromFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.FromFd.html
-pub trait FromFd {
-    /// A version of [`from_fd`] for use with Winsock2 API.
-    ///
-    /// [`from_fd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.FromFd.html#tymethod.from_fd
-    fn from_fd(fd: OwnedFd) -> Self;
-}
-impl<T: FromSocket> FromFd for T {
-    #[inline]
-    fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_socket(fd)
-    }
-}
