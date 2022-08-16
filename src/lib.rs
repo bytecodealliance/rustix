@@ -149,8 +149,6 @@ pub mod fd {
     pub use backend::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
     #[cfg(windows)]
     pub use backend::fd::{AsSocket, FromSocket, IntoSocket};
-    #[cfg(feature = "std")]
-    pub use backend::fd::{FromFd, IntoFd};
 }
 
 // The public API modules.

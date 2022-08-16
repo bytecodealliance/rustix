@@ -12,8 +12,6 @@
 #![allow(unsafe_code)]
 
 use crate::backend::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, RawFd};
-#[cfg(all(not(io_lifetimes_use_std), feature = "std"))]
-use crate::backend::fd::{FromFd, IntoFd};
 use crate::io::close;
 use core::fmt;
 use core::mem::{forget, ManuallyDrop};
@@ -170,34 +168,10 @@ impl From<OwnedFd> for crate::backend::fd::OwnedFd {
     }
 }
 
-#[cfg(not(any(io_lifetimes_use_std, not(feature = "std"))))]
-impl IntoFd for OwnedFd {
-    #[inline]
-    fn into_fd(self) -> crate::backend::fd::OwnedFd {
-        let raw_fd = self.inner.as_fd().as_raw_fd();
-        forget(self);
-
-        // Safety: We use `as_fd().as_raw_fd()` to extract the raw file
-        // descriptor from `self.inner`, and then `forget` `self` so
-        // that they remain valid until the new `OwnedFd` acquires them.
-        unsafe { crate::backend::fd::OwnedFd::from_raw_fd(raw_fd) }
-    }
-}
-
 #[cfg(any(io_lifetimes_use_std, not(feature = "std")))]
 impl From<crate::backend::fd::OwnedFd> for OwnedFd {
     #[inline]
     fn from(owned_fd: crate::backend::fd::OwnedFd) -> Self {
-        Self {
-            inner: ManuallyDrop::new(owned_fd),
-        }
-    }
-}
-
-#[cfg(all(not(io_lifetimes_use_std), feature = "std"))]
-impl FromFd for OwnedFd {
-    #[inline]
-    fn from_fd(owned_fd: crate::backend::fd::OwnedFd) -> Self {
         Self {
             inner: ManuallyDrop::new(owned_fd),
         }
@@ -225,6 +199,58 @@ impl From<OwnedFd> for crate::backend::fd::OwnedFd {
         // descriptor from `self.inner`, and then `forget` `self` so
         // that they remain valid until the new `OwnedFd` acquires them.
         unsafe { Self::from_raw_fd(raw_fd) }
+    }
+}
+
+impl From<OwnedFd> for std::fs::File {
+    fn from(owned: OwnedFd) -> Self {
+        let owned: crate::backend::fd::OwnedFd = owned.into();
+        Self::from(owned)
+    }
+}
+
+impl From<OwnedFd> for std::net::TcpListener {
+    fn from(owned: OwnedFd) -> Self {
+        let owned: crate::backend::fd::OwnedFd = owned.into();
+        Self::from(owned)
+    }
+}
+
+impl From<OwnedFd> for std::net::TcpStream {
+    fn from(owned: OwnedFd) -> Self {
+        let owned: crate::backend::fd::OwnedFd = owned.into();
+        Self::from(owned)
+    }
+}
+
+impl From<OwnedFd> for std::net::UdpSocket {
+    fn from(owned: OwnedFd) -> Self {
+        let owned: crate::backend::fd::OwnedFd = owned.into();
+        Self::from(owned)
+    }
+}
+
+#[cfg(unix)]
+impl From<OwnedFd> for std::os::unix::net::UnixStream {
+    fn from(owned: OwnedFd) -> Self {
+        let owned: crate::backend::fd::OwnedFd = owned.into();
+        Self::from(owned)
+    }
+}
+
+#[cfg(unix)]
+impl From<OwnedFd> for std::os::unix::net::UnixListener {
+    fn from(owned: OwnedFd) -> Self {
+        let owned: crate::backend::fd::OwnedFd = owned.into();
+        Self::from(owned)
+    }
+}
+
+#[cfg(unix)]
+impl From<OwnedFd> for std::os::unix::net::UnixDatagram {
+    fn from(owned: OwnedFd) -> Self {
+        let owned: crate::backend::fd::OwnedFd = owned.into();
+        Self::from(owned)
     }
 }
 
