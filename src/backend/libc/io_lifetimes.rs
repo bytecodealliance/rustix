@@ -9,7 +9,7 @@ pub use std::os::windows::io::RawSocket as RawFd;
 pub(crate) use windows_sys::Win32::Networking::WinSock::SOCKET as LibcFd;
 
 // Re-export the `Socket` traits so that users can implement them.
-pub use io_lifetimes::{AsSocket, FromSocket, IntoSocket};
+pub use io_lifetimes::AsSocket;
 
 /// A version of [`AsRawFd`] for use with Winsock2 API.
 ///
