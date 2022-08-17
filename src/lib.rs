@@ -146,11 +146,9 @@ mod backend;
 /// [`rustix::io::OwnedFd`]: crate::io::OwnedFd
 pub mod fd {
     use super::backend;
-    pub use backend::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
     #[cfg(windows)]
-    pub use backend::fd::{AsSocket, FromSocket, IntoSocket};
-    #[cfg(feature = "std")]
-    pub use backend::fd::{FromFd, IntoFd};
+    pub use backend::fd::AsSocket;
+    pub use backend::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
 }
 
 // The public API modules.

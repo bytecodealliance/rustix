@@ -61,7 +61,7 @@ use super::super::c;
 use super::super::conv::{ret, ret_owned_fd, ret_u32};
 use crate::fd::{AsFd, AsRawFd, BorrowedFd, RawFd};
 #[cfg(not(feature = "rustc-dep-of-std"))]
-use crate::fd::{FromFd, FromRawFd, IntoFd, IntoRawFd};
+use crate::fd::{FromRawFd, IntoRawFd};
 use crate::io::{self, OwnedFd};
 use alloc::vec::Vec;
 use bitflags::bitflags;
@@ -207,17 +207,17 @@ impl<'a> Context for Borrowing<'a> {
 }
 
 /// A type implementing [`Context`] where the `Data` type is `T`, a type
-/// implementing `IntoFd` and `FromFd`.
+/// implementing `From<OwnedFd>` and `From<T> for OwnedFd`.
 ///
 /// This may be used with [`OwnedFd`], or higher-level types like
 /// [`std::fs::File`] or [`std::net::TcpStream`].
 #[cfg(not(feature = "rustc-dep-of-std"))]
-pub struct Owning<'context, T: IntoFd + FromFd> {
+pub struct Owning<'context, T: Into<OwnedFd> + From<OwnedFd>> {
     _phantom: PhantomData<&'context T>,
 }
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
-impl<'context, T: IntoFd + FromFd> Owning<'context, T> {
+impl<'context, T: Into<OwnedFd> + From<OwnedFd>> Owning<'context, T> {
     /// Creates a new empty `Owning`.
     #[allow(clippy::new_without_default)] // This is a specialized type that doesn't need to be generically constructible.
     #[inline]
@@ -229,16 +229,17 @@ impl<'context, T: IntoFd + FromFd> Owning<'context, T> {
 }
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
-impl<'context, T: AsFd + IntoFd + FromFd> Context for Owning<'context, T> {
+impl<'context, T: AsFd + Into<OwnedFd> + From<OwnedFd>> Context for Owning<'context, T> {
     type Data = T;
     type Target = BorrowedFd<'context>;
 
     #[inline]
     fn acquire<'call>(&self, data: Self::Data) -> Ref<'call, Self::Target> {
-        let raw_fd = data.into_fd().into_raw_fd();
+        let fd: OwnedFd = data.into();
+        let raw_fd = fd.into_raw_fd();
         // Safety: `epoll` will assign ownership of the file descriptor to the
-        // kernel epoll object. We use `IntoFd`+`IntoRawFd` to consume the
-        // `Data` and extract the raw file descriptor and then "borrow" it
+        // kernel epoll object. We use `Into<OwnedFd>`+`IntoRawFd` to consume
+        // the `Data` and extract the raw file descriptor and then "borrow" it
         // with `borrow_raw` knowing that the borrow won't outlive the
         // kernel epoll object.
         unsafe { Ref::new(BorrowedFd::<'context>::borrow_raw(raw_fd)) }
@@ -260,7 +261,7 @@ impl<'context, T: AsFd + IntoFd + FromFd> Context for Owning<'context, T> {
         // being released, so we can create a new `OwnedFd` that assumes
         // ownership.
         let raw_fd = target.consume().as_raw_fd();
-        unsafe { T::from_fd(io_lifetimes::OwnedFd::from_raw_fd(raw_fd)) }
+        unsafe { T::from(io_lifetimes::OwnedFd::from_raw_fd(raw_fd).into()) }
     }
 }
 
@@ -396,21 +397,21 @@ impl<Context: self::Context> Epoll<Context> {
 }
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
-impl<'context, T: AsFd + IntoFd + FromFd> AsRawFd for Epoll<Owning<'context, T>> {
+impl<'context, T: AsFd + Into<OwnedFd> + From<OwnedFd>> AsRawFd for Epoll<Owning<'context, T>> {
     fn as_raw_fd(&self) -> RawFd {
         self.epoll_fd.as_raw_fd()
     }
 }
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
-impl<'context, T: AsFd + IntoFd + FromFd> IntoRawFd for Epoll<Owning<'context, T>> {
+impl<'context, T: AsFd + Into<OwnedFd> + From<OwnedFd>> IntoRawFd for Epoll<Owning<'context, T>> {
     fn into_raw_fd(self) -> RawFd {
         self.epoll_fd.into_raw_fd()
     }
 }
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
-impl<'context, T: AsFd + IntoFd + FromFd> FromRawFd for Epoll<Owning<'context, T>> {
+impl<'context, T: AsFd + Into<OwnedFd> + From<OwnedFd>> FromRawFd for Epoll<Owning<'context, T>> {
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
         Self {
             epoll_fd: OwnedFd::from_raw_fd(fd),
@@ -420,21 +421,25 @@ impl<'context, T: AsFd + IntoFd + FromFd> FromRawFd for Epoll<Owning<'context, T
 }
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
-impl<'context, T: AsFd + IntoFd + FromFd> AsFd for Epoll<Owning<'context, T>> {
+impl<'context, T: AsFd + Into<OwnedFd> + From<OwnedFd>> AsFd for Epoll<Owning<'context, T>> {
     fn as_fd(&self) -> BorrowedFd<'_> {
         self.epoll_fd.as_fd()
     }
 }
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
-impl<'context, T: AsFd + IntoFd + FromFd> From<Epoll<Owning<'context, T>>> for OwnedFd {
+impl<'context, T: AsFd + Into<OwnedFd> + From<OwnedFd>> From<Epoll<Owning<'context, T>>>
+    for OwnedFd
+{
     fn from(epoll: Epoll<Owning<'context, T>>) -> Self {
         epoll.epoll_fd
     }
 }
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
-impl<'context, T: AsFd + IntoFd + FromFd> From<OwnedFd> for Epoll<Owning<'context, T>> {
+impl<'context, T: AsFd + Into<OwnedFd> + From<OwnedFd>> From<OwnedFd>
+    for Epoll<Owning<'context, T>>
+{
     fn from(fd: OwnedFd) -> Self {
         Self {
             epoll_fd: fd,

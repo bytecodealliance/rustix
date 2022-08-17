@@ -1,7 +1,6 @@
 #[cfg(feature = "fs")]
 #[test]
 fn test_seals() {
-    use rustix::fd::FromFd;
     use rustix::fs::{
         fcntl_add_seals, fcntl_get_seals, ftruncate, memfd_create, MemfdFlags, SealFlags,
     };
@@ -13,7 +12,7 @@ fn test_seals() {
         Err(rustix::io::Errno::NOSYS) => return,
         Err(err) => Err(err).unwrap(),
     };
-    let mut file = File::from_fd(fd.into());
+    let mut file = File::from(fd);
 
     let old = fcntl_get_seals(&file).unwrap();
     assert_eq!(old, SealFlags::empty());
