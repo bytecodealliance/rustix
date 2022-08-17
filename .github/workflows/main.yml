@@ -71,6 +71,7 @@ jobs:
         armv5te-unknown-linux-gnueabi
         s390x-unknown-linux-gnu
         arm-linux-androideabi
+        aarch64-linux-android
         aarch64-apple-ios
     - name: Install cross-compilation tools
       run: |
@@ -80,6 +81,7 @@ jobs:
     - run: cargo check --workspace --release -vv
     - run: cargo check --workspace --release -vv --features=all-apis
     - run: cargo check --workspace --release -vv --features=use-libc,all-apis
+    - run: cargo check --workspace --release -vv --target=aarch64-linux-android
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl --features=all-apis
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl --features=use-libc,all-apis
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-gnux32 --features=all-apis
@@ -105,6 +107,7 @@ jobs:
     - run: cargo check --workspace --release -vv --target=s390x-unknown-linux-gnu --features=all-apis
     - run: cargo check --workspace --release -vv --target=arm-linux-androideabi --features=all-apis
     - run: cargo check --workspace --release -vv --target=aarch64-apple-ios --features=all-apis
+    - run: cargo check --workspace --release -vv --target=aarch64-linux-android --features=all-apis
 
   check_no_default_features:
     name: Check --no-default-features
