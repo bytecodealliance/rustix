@@ -203,6 +203,7 @@ impl From<OwnedFd> for crate::backend::fd::OwnedFd {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(unix, target_os = "wasi"))]
 impl From<OwnedFd> for std::fs::File {
     fn from(owned: OwnedFd) -> Self {
         let owned: crate::backend::fd::OwnedFd = owned.into();
