@@ -46,9 +46,9 @@ use super::super::offset::{libc_fstatvfs, libc_statvfs};
     target_env = "gnu",
 ))]
 use super::super::time::types::LibcTimespec;
-use crate::fd::{BorrowedFd, OwnedFd};
 #[cfg(not(target_os = "wasi"))]
 use crate::fd::RawFd;
+use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use crate::ffi::CString;

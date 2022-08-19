@@ -5,7 +5,7 @@
 #![allow(dead_code)]
 
 use super::c;
-use super::fd::{AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, LibcFd, RawFd, OwnedFd};
+use super::fd::{AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, LibcFd, OwnedFd, RawFd};
 #[cfg(not(windows))]
 use super::offset::libc_off_t;
 #[cfg(not(windows))]

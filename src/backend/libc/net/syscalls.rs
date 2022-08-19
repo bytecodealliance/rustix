@@ -15,7 +15,7 @@ use super::send_recv::{RecvFlags, SendFlags};
 use super::types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
-use crate::fd::{OwnedFd, BorrowedFd};
+use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::utils::as_ptr;

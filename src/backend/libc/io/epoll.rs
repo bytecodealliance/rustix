@@ -59,7 +59,7 @@
 
 use super::super::c;
 use super::super::conv::{ret, ret_owned_fd, ret_u32};
-use crate::fd::{AsFd, AsRawFd, BorrowedFd, RawFd, OwnedFd};
+use crate::fd::{AsFd, AsRawFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(feature = "rustc-dep-of-std"))]
 use crate::fd::{FromRawFd, IntoRawFd};
 use crate::io;
