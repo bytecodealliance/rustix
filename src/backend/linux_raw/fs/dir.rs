@@ -1,9 +1,9 @@
-use crate::fd::{AsFd, BorrowedFd};
+use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::ffi::{CStr, CString};
 use crate::fs::{
     fcntl_getfl, fstat, fstatfs, fstatvfs, openat, FileType, Mode, OFlags, Stat, StatFs, StatVfs,
 };
-use crate::io::{self, OwnedFd};
+use crate::io;
 use crate::process::fchdir;
 use crate::utils::as_ptr;
 use alloc::borrow::ToOwned;

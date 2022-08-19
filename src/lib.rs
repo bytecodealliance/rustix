@@ -139,11 +139,6 @@ mod backend;
 ///
 /// Users can use this to avoid needing to import anything else to use the same
 /// versions of these types and traits.
-///
-/// Rustix APIs that use `OwnedFd` use [`rustix::io::OwnedFd`] instead, which
-/// allows rustix to implement `close` for them.
-///
-/// [`rustix::io::OwnedFd`]: crate::io::OwnedFd
 pub mod fd {
     use super::backend;
     #[cfg(windows)]

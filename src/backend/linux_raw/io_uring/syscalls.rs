@@ -7,9 +7,8 @@
 #![allow(clippy::undocumented_unsafe_blocks)]
 
 use super::super::conv::{by_mut, c_uint, pass_usize, ret, ret_c_uint, ret_owned_fd};
-use crate::fd::BorrowedFd;
+use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
-use crate::io::OwnedFd;
 use crate::io_uring::{io_uring_params, IoringEnterFlags, IoringRegisterOp};
 use core::ffi::c_void;
 

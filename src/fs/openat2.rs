@@ -1,4 +1,5 @@
-use crate::io::{self, OwnedFd};
+use crate::fd::OwnedFd;
+use crate::io;
 use crate::{backend, path};
 use backend::fd::AsFd;
 use backend::fs::types::{Mode, OFlags, ResolveFlags};

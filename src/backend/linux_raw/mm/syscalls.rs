@@ -14,8 +14,8 @@ use super::types::{
     Advice, MapFlags, MlockFlags, MprotectFlags, MremapFlags, MsyncFlags, ProtFlags,
     UserfaultfdFlags,
 };
-use crate::fd::BorrowedFd;
-use crate::io::{self, OwnedFd};
+use crate::fd::{BorrowedFd, OwnedFd};
+use crate::io;
 #[cfg(target_pointer_width = "32")]
 use core::convert::TryInto;
 use linux_raw_sys::general::MAP_ANONYMOUS;

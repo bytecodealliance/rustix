@@ -12,7 +12,6 @@ mod ioctl;
 #[cfg(not(any(windows, target_os = "redox")))]
 #[cfg(feature = "net")]
 mod is_read_write;
-mod owned_fd;
 #[cfg(not(any(windows, target_os = "wasi")))]
 mod pipe;
 mod poll;
@@ -45,7 +44,6 @@ pub use ioctl::{ioctl_tiocexcl, ioctl_tiocnxcl};
 #[cfg(not(any(windows, target_os = "redox")))]
 #[cfg(feature = "net")]
 pub use is_read_write::is_read_write;
-pub use owned_fd::OwnedFd;
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use pipe::pipe;
 #[cfg(not(any(

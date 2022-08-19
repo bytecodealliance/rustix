@@ -12,9 +12,9 @@ use super::super::conv::{ret, ret_infallible};
 use super::types::ClockId;
 #[cfg(feature = "time")]
 use crate::fd::BorrowedFd;
-use crate::io;
 #[cfg(feature = "time")]
-use crate::io::OwnedFd;
+use crate::fd::OwnedFd;
+use crate::io;
 #[cfg(feature = "time")]
 use crate::time::{Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags};
 use core::mem::MaybeUninit;

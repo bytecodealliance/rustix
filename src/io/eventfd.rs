@@ -1,5 +1,6 @@
 use crate::backend;
-use crate::io::{self, OwnedFd};
+use crate::fd::OwnedFd;
+use crate::io;
 
 pub use backend::io::types::EventfdFlags;
 
