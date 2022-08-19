@@ -215,7 +215,7 @@ impl From<OwnedFd> for std::fs::File {
 #[cfg(any(unix, target_os = "wasi"))]
 impl From<std::fs::File> for OwnedFd {
     fn from(file: std::fs::File) -> Self {
-        let owned: io_lifetimes::OwnedFd = file.into();
+        let owned: crate::backend::fd::OwnedFd = file.into();
         Self::from(owned)
     }
 }
@@ -231,7 +231,7 @@ impl From<OwnedFd> for std::net::TcpListener {
 #[cfg(feature = "std")]
 impl From<std::net::TcpListener> for OwnedFd {
     fn from(listener: std::net::TcpListener) -> Self {
-        let owned: io_lifetimes::OwnedFd = listener.into();
+        let owned: crate::backend::fd::OwnedFd = listener.into();
         Self::from(owned)
     }
 }
@@ -247,7 +247,7 @@ impl From<OwnedFd> for std::net::TcpStream {
 #[cfg(feature = "std")]
 impl From<std::net::TcpStream> for OwnedFd {
     fn from(stream: std::net::TcpStream) -> Self {
-        let owned: io_lifetimes::OwnedFd = stream.into();
+        let owned: crate::backend::fd::OwnedFd = stream.into();
         Self::from(owned)
     }
 }
@@ -263,7 +263,7 @@ impl From<OwnedFd> for std::net::UdpSocket {
 #[cfg(feature = "std")]
 impl From<std::net::UdpSocket> for OwnedFd {
     fn from(socket: std::net::UdpSocket) -> Self {
-        let owned: io_lifetimes::OwnedFd = socket.into();
+        let owned: crate::backend::fd::OwnedFd = socket.into();
         Self::from(owned)
     }
 }
@@ -281,7 +281,7 @@ impl From<OwnedFd> for std::os::unix::net::UnixStream {
 #[cfg(feature = "std")]
 impl From<std::os::unix::net::UnixStream> for OwnedFd {
     fn from(stream: std::os::unix::net::UnixStream) -> Self {
-        let owned: io_lifetimes::OwnedFd = stream.into();
+        let owned: crate::backend::fd::OwnedFd = stream.into();
         Self::from(owned)
     }
 }
@@ -299,7 +299,7 @@ impl From<OwnedFd> for std::os::unix::net::UnixListener {
 #[cfg(feature = "std")]
 impl From<std::os::unix::net::UnixListener> for OwnedFd {
     fn from(listener: std::os::unix::net::UnixListener) -> Self {
-        let owned: io_lifetimes::OwnedFd = listener.into();
+        let owned: crate::backend::fd::OwnedFd = listener.into();
         Self::from(owned)
     }
 }
@@ -317,7 +317,7 @@ impl From<OwnedFd> for std::os::unix::net::UnixDatagram {
 #[cfg(feature = "std")]
 impl From<std::os::unix::net::UnixDatagram> for OwnedFd {
     fn from(datagram: std::os::unix::net::UnixDatagram) -> Self {
-        let owned: io_lifetimes::OwnedFd = datagram.into();
+        let owned: crate::backend::fd::OwnedFd = datagram.into();
         Self::from(owned)
     }
 }
