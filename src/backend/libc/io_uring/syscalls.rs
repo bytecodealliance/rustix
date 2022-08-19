@@ -2,8 +2,8 @@
 
 use super::super::c;
 use super::super::conv::{borrowed_fd, syscall_ret, syscall_ret_owned_fd, syscall_ret_u32};
-use crate::fd::BorrowedFd;
-use crate::io::{self, OwnedFd};
+use crate::fd::{BorrowedFd, OwnedFd};
+use crate::io;
 use crate::io_uring::{io_uring_params, IoringEnterFlags, IoringRegisterOp};
 use linux_raw_sys::general::{__NR_io_uring_enter, __NR_io_uring_register, __NR_io_uring_setup};
 

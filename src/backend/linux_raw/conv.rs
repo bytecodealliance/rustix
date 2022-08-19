@@ -747,9 +747,7 @@ pub(super) unsafe fn ret_usize_infallible(raw: RetReg<R0>) -> usize {
 #[inline]
 pub(super) unsafe fn ret_owned_fd(raw: RetReg<R0>) -> io::Result<OwnedFd> {
     let raw_fd = try_decode_raw_fd(raw)?;
-    Ok(crate::backend::fd::OwnedFd::from_raw_fd(
-        raw_fd,
-    ))
+    Ok(crate::backend::fd::OwnedFd::from_raw_fd(raw_fd))
 }
 
 /// Convert the return value of `dup2` and `dup3`.
