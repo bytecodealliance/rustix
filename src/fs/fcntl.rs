@@ -4,8 +4,8 @@
 //! can have dedicated static type signatures.
 
 use crate::backend;
-use crate::io::{self, OwnedFd};
-use backend::fd::{AsFd, RawFd};
+use crate::io;
+use backend::fd::{AsFd, OwnedFd, RawFd};
 use backend::fs::types::{FdFlags, OFlags};
 
 /// `fcntl(fd, F_GETFD)`—Returns a file descriptor's flags.

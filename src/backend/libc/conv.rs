@@ -5,12 +5,12 @@
 #![allow(dead_code)]
 
 use super::c;
-use super::fd::{AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, LibcFd, RawFd};
+use super::fd::{AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, LibcFd, OwnedFd, RawFd};
 #[cfg(not(windows))]
 use super::offset::libc_off_t;
 #[cfg(not(windows))]
 use crate::ffi::CStr;
-use crate::io::{self, OwnedFd};
+use crate::io;
 #[cfg(windows)]
 use core::convert::TryInto;
 

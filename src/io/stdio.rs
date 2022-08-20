@@ -9,7 +9,7 @@
 #![allow(unsafe_code)]
 
 use crate::backend;
-use crate::io::OwnedFd;
+use crate::fd::OwnedFd;
 use backend::fd::{BorrowedFd, FromRawFd, RawFd};
 
 /// `STDIN_FILENO`—Standard input, borrowed.
@@ -69,9 +69,7 @@ pub const unsafe fn stdin() -> BorrowedFd<'static> {
 #[doc(alias = "STDIN_FILENO")]
 #[inline]
 pub unsafe fn take_stdin() -> OwnedFd {
-    OwnedFd::from(backend::fd::OwnedFd::from_raw_fd(
-        backend::io::types::STDIN_FILENO as RawFd,
-    ))
+    backend::fd::OwnedFd::from_raw_fd(backend::io::types::STDIN_FILENO as RawFd)
 }
 
 /// `STDOUT_FILENO`—Standard output, borrowed.
@@ -132,9 +130,7 @@ pub const unsafe fn stdout() -> BorrowedFd<'static> {
 #[doc(alias = "STDOUT_FILENO")]
 #[inline]
 pub unsafe fn take_stdout() -> OwnedFd {
-    OwnedFd::from(backend::fd::OwnedFd::from_raw_fd(
-        backend::io::types::STDOUT_FILENO as RawFd,
-    ))
+    backend::fd::OwnedFd::from_raw_fd(backend::io::types::STDOUT_FILENO as RawFd)
 }
 
 /// `STDERR_FILENO`—Standard error, borrowed.
@@ -194,9 +190,7 @@ pub const unsafe fn stderr() -> BorrowedFd<'static> {
 #[doc(alias = "STDERR_FILENO")]
 #[inline]
 pub unsafe fn take_stderr() -> OwnedFd {
-    OwnedFd::from(backend::fd::OwnedFd::from_raw_fd(
-        backend::io::types::STDERR_FILENO as RawFd,
-    ))
+    backend::fd::OwnedFd::from_raw_fd(backend::io::types::STDERR_FILENO as RawFd)
 }
 
 /// `STDIN_FILENO`—Standard input, raw.

@@ -15,8 +15,7 @@ use core::mem::MaybeUninit;
 #[cfg(feature = "time")]
 use {
     super::super::conv::{borrowed_fd, ret_owned_fd},
-    crate::fd::BorrowedFd,
-    crate::io::OwnedFd,
+    crate::fd::{BorrowedFd, OwnedFd},
     crate::time::{Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags},
 };
 

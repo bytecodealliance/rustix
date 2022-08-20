@@ -16,13 +16,13 @@
 //! namespace. So with the checking here, they may fail, but they won't be able
 //! to succeed with bogus results.
 
-use crate::fd::{AsFd, BorrowedFd};
+use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::fs::{
     cwd, fstat, fstatfs, major, openat, renameat, Dir, FileType, Mode, OFlags, Stat,
     PROC_SUPER_MAGIC,
 };
-use crate::io::{self, OwnedFd};
+use crate::io;
 use crate::path::DecInt;
 use crate::process::{getgid, getpid, getuid, Gid, RawGid, RawUid, Uid};
 #[cfg(feature = "rustc-dep-of-std")]

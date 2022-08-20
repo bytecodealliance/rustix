@@ -46,9 +46,9 @@ use super::super::offset::{libc_fstatvfs, libc_statvfs};
     target_env = "gnu",
 ))]
 use super::super::time::types::LibcTimespec;
-use crate::fd::BorrowedFd;
 #[cfg(not(target_os = "wasi"))]
 use crate::fd::RawFd;
+use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use crate::ffi::CString;
@@ -102,7 +102,7 @@ use crate::fs::{Dev, FileType};
 use crate::fs::{FdFlags, Mode, OFlags, Stat, Timestamps};
 #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
 use crate::fs::{StatVfs, StatVfsMountFlags};
-use crate::io::{self, OwnedFd, SeekFrom};
+use crate::io::{self, SeekFrom};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
 #[cfg(not(all(

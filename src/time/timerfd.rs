@@ -1,6 +1,6 @@
 use crate::backend;
-use crate::fd::AsFd;
-use crate::io::{self, OwnedFd};
+use crate::fd::{AsFd, OwnedFd};
+use crate::io;
 
 pub use backend::time::types::{Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags};
 

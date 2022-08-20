@@ -15,8 +15,8 @@ use super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, 
 use super::send_recv::{RecvFlags, SendFlags};
 use super::types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
-use crate::fd::BorrowedFd;
-use crate::io::{self, OwnedFd};
+use crate::fd::{BorrowedFd, OwnedFd};
+use crate::io;
 use crate::net::{SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use c::{sockaddr, sockaddr_in, sockaddr_in6, socklen_t};
 use core::convert::TryInto;

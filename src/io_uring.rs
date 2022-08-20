@@ -20,8 +20,8 @@
 #![allow(unsafe_code)]
 
 use crate::backend;
-use crate::fd::{AsFd, BorrowedFd, RawFd};
-use crate::io::{self, OwnedFd};
+use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
+use crate::io;
 use core::ffi::c_void;
 use core::ptr::null_mut;
 use linux_raw_sys::general as sys;

@@ -21,14 +21,14 @@ use super::super::conv::{loff_t, loff_t_from_u64, ret_u64};
     target_pointer_width = "32",
 ))]
 use crate::fd::AsFd;
-use crate::fd::{BorrowedFd, RawFd};
+use crate::fd::{BorrowedFd, OwnedFd, RawFd};
 use crate::ffi::CStr;
 use crate::fs::{
     Access, Advice, AtFlags, FallocateFlags, FdFlags, FileType, FlockOperation, MemfdFlags, Mode,
     OFlags, RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatVfs, StatVfsMountFlags,
     StatxFlags, Timestamps,
 };
-use crate::io::{self, OwnedFd, SeekFrom};
+use crate::io::{self, SeekFrom};
 use crate::process::{Gid, Uid};
 use core::convert::TryInto;
 use core::mem::MaybeUninit;

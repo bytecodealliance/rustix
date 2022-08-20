@@ -15,10 +15,9 @@ use super::super::conv::{
 };
 #[cfg(target_pointer_width = "32")]
 use super::super::conv::{hi, lo};
-use crate::fd::{AsFd, BorrowedFd, RawFd};
+use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 use crate::io::{
-    self, epoll, DupFlags, EventfdFlags, IoSlice, IoSliceMut, OwnedFd, PipeFlags, PollFd,
-    ReadWriteFlags,
+    self, epoll, DupFlags, EventfdFlags, IoSlice, IoSliceMut, PipeFlags, PollFd, ReadWriteFlags,
 };
 #[cfg(feature = "net")]
 use crate::net::{RecvFlags, SendFlags};

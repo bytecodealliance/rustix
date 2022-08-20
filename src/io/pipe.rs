@@ -1,5 +1,6 @@
 use crate::backend;
-use crate::io::{self, OwnedFd};
+use crate::fd::OwnedFd;
+use crate::io;
 
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
 pub use backend::io::types::PipeFlags;

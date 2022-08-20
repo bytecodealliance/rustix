@@ -61,10 +61,10 @@
 
 use super::super::c;
 use crate::backend::io::syscalls::{epoll_add, epoll_create, epoll_del, epoll_mod, epoll_wait};
-use crate::fd::{AsFd, AsRawFd, BorrowedFd, RawFd};
+use crate::fd::{AsFd, AsRawFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(feature = "std")]
 use crate::fd::{FromRawFd, IntoRawFd};
-use crate::io::{self, OwnedFd};
+use crate::io;
 use alloc::vec::Vec;
 use bitflags::bitflags;
 use core::fmt;
@@ -261,7 +261,7 @@ impl<'context, T: AsFd + Into<OwnedFd> + From<OwnedFd>> Context for Owning<'cont
         // Safety: The file descriptor was held by the kernel epoll object and
         // is now being released, so we can create a new `OwnedFd` that assumes
         // ownership.
-        unsafe { T::from(io_lifetimes::OwnedFd::from_raw_fd(raw_fd).into()) }
+        unsafe { T::from(io_lifetimes::OwnedFd::from_raw_fd(raw_fd)) }
     }
 }
 

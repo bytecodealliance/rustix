@@ -11,12 +11,12 @@ use super::super::offset::{libc_pread, libc_pwrite};
 use super::super::offset::{libc_preadv, libc_pwritev};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::super::offset::{libc_preadv2, libc_pwritev2};
-use crate::fd::{AsFd, BorrowedFd, RawFd};
+use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(target_os = "wasi"))]
 use crate::io::DupFlags;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
 use crate::io::PipeFlags;
-use crate::io::{self, IoSlice, IoSliceMut, OwnedFd, PollFd};
+use crate::io::{self, IoSlice, IoSliceMut, PollFd};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::io::{EventfdFlags, ReadWriteFlags};
 use core::cmp::min;

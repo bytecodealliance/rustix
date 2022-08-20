@@ -1,8 +1,6 @@
-use rustix::fd::AsFd;
+use rustix::fd::{AsFd, AsRawFd, OwnedFd};
 use rustix::fs::{cwd, mkdirat, openat, openat2, symlinkat, Mode, OFlags, ResolveFlags};
-use rustix::io::OwnedFd;
 use rustix::{io, path};
-use std::os::unix::io::AsRawFd;
 
 /// Like `openat2`, but keep retrying until it fails or succeeds.
 fn openat2_more<Fd: AsFd, P: path::Arg>(

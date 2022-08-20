@@ -7,10 +7,10 @@
 
 use super::super::c;
 use super::super::elf::*;
+use crate::fd::OwnedFd;
 #[cfg(feature = "param")]
 use crate::ffi::CStr;
 use crate::fs::{Mode, OFlags};
-use crate::io::OwnedFd;
 use crate::utils::as_ptr;
 use crate::utils::check_raw_pointer;
 use alloc::vec::Vec;
