@@ -15,6 +15,8 @@ mod cpu_set;
 mod id;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod membarrier;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+mod prctl;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))] // WASI doesn't have [gs]etpriority.
 mod priority;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]

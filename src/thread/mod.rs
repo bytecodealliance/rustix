@@ -6,6 +6,8 @@ mod clock;
 mod futex;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod id;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+mod prctl;
 
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -24,3 +26,5 @@ pub use clock::{nanosleep, NanosleepRelativeResult, Timespec};
 pub use futex::{futex, FutexFlags, FutexOperation};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use id::gettid;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use prctl::*;

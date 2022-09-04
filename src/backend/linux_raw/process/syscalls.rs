@@ -547,3 +547,14 @@ pub(crate) fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
 pub(crate) fn kill_current_process_group(sig: Signal) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_kill, pass_usize(0), sig)) }
 }
+
+#[inline]
+pub(crate) unsafe fn prctl(
+    option: c::c_int,
+    arg2: *mut c::c_void,
+    arg3: *mut c::c_void,
+    arg4: *mut c::c_void,
+    arg5: *mut c::c_void,
+) -> io::Result<c::c_int> {
+    ret_c_int(syscall!(__NR_prctl, c_int(option), arg2, arg3, arg4, arg5))
+}
