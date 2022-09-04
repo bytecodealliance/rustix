@@ -9,6 +9,8 @@ mod id;
 mod kill;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod membarrier;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+mod prctl;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))] // WASI doesn't have [gs]etpriority.
 mod priority;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
@@ -48,6 +50,8 @@ pub use kill::{kill_current_process_group, kill_process, kill_process_group, Sig
 pub use membarrier::{
     membarrier, membarrier_cpu, membarrier_query, MembarrierCommand, MembarrierQuery,
 };
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use prctl::*;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 pub use priority::nice;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
