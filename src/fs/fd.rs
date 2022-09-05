@@ -8,7 +8,7 @@ use crate::process::{Gid, Uid};
 use crate::{backend, io};
 use backend::fd::{AsFd, BorrowedFd};
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "solaris", target_os = "wasi")))]
 pub use backend::fs::types::FlockOperation;
 
 #[cfg(not(any(
@@ -17,6 +17,7 @@ pub use backend::fs::types::FlockOperation;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::fs::types::FallocateFlags;
 
@@ -26,11 +27,17 @@ pub use backend::fs::types::Stat;
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi",
 )))]
 pub use backend::fs::types::StatFs;
 
-#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "redox",
+    target_os = "solaris",
+    target_os = "wasi",
+)))]
 pub use backend::fs::types::{StatVfs, StatVfsMountFlags};
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -160,6 +167,7 @@ pub fn fstat<Fd: AsFd>(fd: Fd) -> io::Result<Stat> {
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi",
 )))]
 #[inline]
@@ -181,7 +189,12 @@ pub fn fstatfs<Fd: AsFd>(fd: Fd) -> io::Result<StatFs> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fstatvfs.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fstatvfs.2.html
-#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "redox",
+    target_os = "solaris",
+    target_os = "wasi",
+)))]
 #[inline]
 pub fn fstatvfs<Fd: AsFd>(fd: Fd) -> io::Result<StatVfs> {
     backend::fs::syscalls::fstatvfs(fd.as_fd())
@@ -221,6 +234,7 @@ pub fn futimens<Fd: AsFd>(fd: Fd, times: &Timestamps) -> io::Result<()> {
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))] // not implemented in libc for netbsd yet
 #[inline]
 #[doc(alias = "posix_fallocate")]
@@ -320,7 +334,7 @@ pub fn ftruncate<Fd: AsFd>(fd: Fd, length: u64) -> io::Result<()> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/flock.2.html
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "solaris", target_os = "wasi")))]
 #[inline]
 pub fn flock<Fd: AsFd>(fd: Fd, operation: FlockOperation) -> io::Result<()> {
     backend::fs::syscalls::flock(fd.as_fd(), operation)

@@ -42,9 +42,13 @@ fn main() -> io::Result<()> {
     println!("Data Limit: {:?}", getrlimit(Resource::Data));
     println!("Stack Limit: {:?}", getrlimit(Resource::Stack));
     println!("Core Limit: {:?}", getrlimit(Resource::Core));
+    #[cfg(not(target_os = "solaris"))]
     println!("Rss Limit: {:?}", getrlimit(Resource::Rss));
+    #[cfg(not(target_os = "solaris"))]
     println!("Nproc Limit: {:?}", getrlimit(Resource::Nproc));
+    #[cfg(not(target_os = "solaris"))]
     println!("Nofile Limit: {:?}", getrlimit(Resource::Nofile));
+    #[cfg(not(target_os = "solaris"))]
     println!("Memlock Limit: {:?}", getrlimit(Resource::Memlock));
     #[cfg(not(target_os = "openbsd"))]
     println!("As Limit: {:?}", getrlimit(Resource::As));
@@ -54,6 +58,7 @@ fn main() -> io::Result<()> {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     println!("Locks Limit: {:?}", getrlimit(Resource::Locks));
     #[cfg(not(any(
@@ -62,6 +67,7 @@ fn main() -> io::Result<()> {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     println!("Sigpending Limit: {:?}", getrlimit(Resource::Sigpending));
     #[cfg(not(any(
@@ -70,6 +76,7 @@ fn main() -> io::Result<()> {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     println!("Msgqueue Limit: {:?}", getrlimit(Resource::Msgqueue));
     #[cfg(not(any(
@@ -78,6 +85,7 @@ fn main() -> io::Result<()> {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     println!("Nice Limit: {:?}", getrlimit(Resource::Nice));
     #[cfg(not(any(
@@ -86,6 +94,7 @@ fn main() -> io::Result<()> {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     println!("Rtprio Limit: {:?}", getrlimit(Resource::Rtprio));
     #[cfg(not(any(
@@ -96,6 +105,7 @@ fn main() -> io::Result<()> {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     println!("Rttime Limit: {:?}", getrlimit(Resource::Rttime));
     #[cfg(any(

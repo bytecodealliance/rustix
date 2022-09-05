@@ -56,15 +56,20 @@ pub enum Resource {
     /// `RLIMIT_CORE`
     Core = c::RLIMIT_CORE as c::c_int,
     /// `RLIMIT_RSS`
-    #[cfg(not(any(target_os = "illumos", target_os = "ios", target_os = "macos")))]
+    #[cfg(not(any(
+        target_os = "illumos",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "solaris",
+    )))]
     Rss = c::RLIMIT_RSS as c::c_int,
     /// `RLIMIT_NPROC`
-    #[cfg(not(target_os = "illumos"))]
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
     Nproc = c::RLIMIT_NPROC as c::c_int,
     /// `RLIMIT_NOFILE`
     Nofile = c::RLIMIT_NOFILE as c::c_int,
     /// `RLIMIT_MEMLOCK`
-    #[cfg(not(target_os = "illumos"))]
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
     Memlock = c::RLIMIT_MEMLOCK as c::c_int,
     /// `RLIMIT_AS`
     #[cfg(not(target_os = "openbsd"))]
@@ -78,6 +83,7 @@ pub enum Resource {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     Locks = c::RLIMIT_LOCKS as c::c_int,
     /// `RLIMIT_SIGPENDING`
@@ -89,6 +95,7 @@ pub enum Resource {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     Sigpending = c::RLIMIT_SIGPENDING as c::c_int,
     /// `RLIMIT_MSGQUEUE`
@@ -100,6 +107,7 @@ pub enum Resource {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     Msgqueue = c::RLIMIT_MSGQUEUE as c::c_int,
     /// `RLIMIT_NICE`
@@ -111,6 +119,7 @@ pub enum Resource {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     Nice = c::RLIMIT_NICE as c::c_int,
     /// `RLIMIT_RTPRIO`
@@ -122,6 +131,7 @@ pub enum Resource {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     Rtprio = c::RLIMIT_RTPRIO as c::c_int,
     /// `RLIMIT_RTTIME`
@@ -135,6 +145,7 @@ pub enum Resource {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     Rttime = c::RLIMIT_RTTIME as c::c_int,
 }
@@ -197,6 +208,7 @@ pub enum Signal {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
         all(
             any(target_os = "android", target_os = "linux"),
             any(target_arch = "mips", target_arch = "mips64"),
@@ -274,6 +286,7 @@ impl Signal {
                 target_os = "macos",
                 target_os = "netbsd",
                 target_os = "openbsd",
+                target_os = "solaris",
                 all(
                     any(target_os = "android", target_os = "linux"),
                     any(target_arch = "mips", target_arch = "mips64"),
