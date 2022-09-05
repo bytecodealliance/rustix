@@ -16,6 +16,7 @@ pub use backend::io::types::PipeFlags;
     windows,
     target_os = "illumos",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi",
 )))]
 pub const PIPE_BUF: usize = backend::io::types::PIPE_BUF;

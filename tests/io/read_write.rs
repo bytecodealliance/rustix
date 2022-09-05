@@ -2,6 +2,7 @@
 use std::io::{IoSlice, IoSliceMut};
 
 #[cfg(feature = "fs")]
+#[cfg(not(target_os = "solaris"))] // no preadv/pwritev
 #[test]
 fn test_readwrite_pv() {
     use rustix::fs::{cwd, openat, Mode, OFlags};

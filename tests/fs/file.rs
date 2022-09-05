@@ -1,7 +1,7 @@
 #[cfg(not(target_os = "redox"))]
 #[test]
 fn test_file() {
-    #[cfg(not(target_os = "illumos"))]
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
     rustix::fs::accessat(
         rustix::fs::cwd(),
         "Cargo.toml",
@@ -48,6 +48,7 @@ fn test_file() {
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "redox",
+        target_os = "solaris",
     )))]
     rustix::fs::fadvise(&file, 0, 10, rustix::fs::Advice::Normal).unwrap();
 
@@ -68,6 +69,7 @@ fn test_file() {
         target_os = "illumos",
         target_os = "netbsd",
         target_os = "redox",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     {
@@ -75,7 +77,12 @@ fn test_file() {
         assert!(statfs.f_blocks > 0);
     }
 
-    #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+    #[cfg(not(any(
+        target_os = "illumos",
+        target_os = "redox",
+        target_os = "solaris",
+        target_os = "wasi",
+    )))]
     {
         let statvfs = rustix::fs::fstatvfs(&file).unwrap();
         assert!(statvfs.f_frsize > 0);

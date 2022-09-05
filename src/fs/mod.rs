@@ -28,6 +28,7 @@ mod dir;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 mod fadvise;
 pub(crate) mod fcntl;
@@ -48,6 +49,7 @@ mod getpath;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi",
 )))]
 mod makedev;
@@ -65,14 +67,20 @@ mod statx;
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi",
 )))]
 #[cfg(feature = "fs")]
 pub use abs::statfs;
-#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "redox",
+    target_os = "solaris",
+    target_os = "wasi",
+)))]
 #[cfg(feature = "fs")]
 pub use abs::statvfs;
-#[cfg(not(any(target_os = "illumos", target_os = "redox")))]
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "solaris",)))]
 #[cfg(feature = "fs")]
 pub use at::accessat;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
@@ -132,6 +140,7 @@ pub use dir::{Dir, DirEntry};
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use fadvise::{fadvise, Advice};
 #[cfg(not(target_os = "wasi"))]
@@ -164,19 +173,28 @@ pub use fd::fdatasync;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use fd::{fallocate, FallocateFlags};
 #[cfg(not(target_os = "wasi"))]
-pub use fd::{fchmod, fchown, flock, FlockOperation};
+pub use fd::{fchmod, fchown};
+#[cfg(not(any(target_os = "solaris", target_os = "wasi")))]
+pub use fd::{flock, FlockOperation};
 pub use fd::{fstat, fsync, ftruncate, futimens, is_file_read_write, seek, tell, Stat, Timestamps};
 #[cfg(not(any(
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi",
 )))]
 pub use fd::{fstatfs, StatFs};
-#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "redox",
+    target_os = "solaris",
+    target_os = "wasi",
+)))]
 pub use fd::{fstatvfs, StatVfs, StatVfsMountFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use fd::{FsWord, NFS_SUPER_MAGIC, PROC_SUPER_MAGIC};
@@ -192,6 +210,7 @@ pub use getpath::getpath;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi",
 )))]
 pub use makedev::{major, makedev, minor};

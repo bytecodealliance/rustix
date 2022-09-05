@@ -14,6 +14,7 @@ bitflags! {
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
+            target_os = "solaris",
         )))]
         const CONFIRM = c::MSG_CONFIRM;
         /// `MSG_DONTROUTE`
@@ -34,6 +35,7 @@ bitflags! {
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
+            target_os = "solaris",
         )))]
         const MORE = c::MSG_MORE;
         #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
@@ -47,7 +49,7 @@ bitflags! {
 bitflags! {
     /// `MSG_*`
     pub struct RecvFlags: i32 {
-        #[cfg(not(any(windows, target_os = "illumos", target_os = "ios", target_os = "macos")))]
+        #[cfg(not(any(windows, target_os = "illumos", target_os = "ios", target_os = "macos", target_os = "solaris")))]
         /// `MSG_CMSG_CLOEXEC`
         const CMSG_CLOEXEC = c::MSG_CMSG_CLOEXEC;
         /// `MSG_DONTWAIT`
@@ -63,6 +65,7 @@ bitflags! {
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
+            target_os = "solaris",
         )))]
         const ERRQUEUE = c::MSG_ERRQUEUE;
         /// `MSG_OOB`

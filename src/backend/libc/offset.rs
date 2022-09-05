@@ -176,6 +176,7 @@ pub(super) use c::fallocate64 as libc_fallocate;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub(super) use c::posix_fadvise as libc_posix_fadvise;
 #[cfg(any(
@@ -292,6 +293,7 @@ mod readwrite_pv64 {
     target_os = "linux",
     target_os = "macos",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub(super) use c::{preadv as libc_preadv, pwritev as libc_pwritev};
 #[cfg(target_os = "android")]
@@ -335,6 +337,7 @@ pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub(super) use c::posix_fallocate as libc_posix_fallocate;
 #[cfg(any(target_os = "l4re"))]
@@ -348,6 +351,7 @@ pub(super) use c::posix_fallocate64 as libc_posix_fallocate;
     target_os = "l4re",
     target_os = "netbsd",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi",
 )))]
 pub(super) use {c::fstatfs as libc_fstatfs, c::statfs as libc_statfs};
@@ -359,6 +363,7 @@ pub(super) use {c::fstatfs as libc_fstatfs, c::statfs as libc_statfs};
     target_os = "linux",
     target_os = "l4re",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi",
 )))]
 pub(super) use {c::fstatvfs as libc_fstatvfs, c::statvfs as libc_statvfs};

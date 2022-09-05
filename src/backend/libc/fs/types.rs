@@ -438,7 +438,7 @@ impl FileType {
     }
 
     /// Construct a `FileType` from the `d_type` field of a `c::dirent`.
-    #[cfg(not(any(target_os = "illumos", target_os = "redox")))]
+    #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "solaris")))]
     pub(crate) const fn from_dirent_d_type(d_type: u8) -> Self {
         match d_type {
             c::DT_REG => Self::RegularFile,
@@ -467,6 +467,7 @@ impl FileType {
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
@@ -685,6 +686,7 @@ bitflags! {
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 bitflags! {
     /// `FALLOC_FL_*` constants for use with [`fallocate`].
@@ -778,7 +780,12 @@ bitflags! {
     }
 }
 
-#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi",)))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "redox",
+    target_os = "solaris",
+    target_os = "wasi",
+)))]
 bitflags! {
     /// `ST_*` constants for use with [`StatVfs`].
     pub struct StatVfsMountFlags: u64 {
@@ -821,7 +828,7 @@ bitflags! {
 /// `LOCK_*` constants for use with [`flock`]
 ///
 /// [`flock`]: crate::fs::flock
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "solaris", target_os = "wasi")))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(i32)]
 pub enum FlockOperation {
@@ -910,6 +917,7 @@ pub struct Stat {
     target_os = "l4re",
     target_os = "netbsd",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi",
 )))]
 #[allow(clippy::module_name_repetitions)]
@@ -931,7 +939,12 @@ pub type StatFs = c::statfs64;
 ///
 /// [`statvfs`]: crate::fs::statvfs
 /// [`fstatvfs`]: crate::fs::fstatvfs
-#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi",)))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "redox",
+    target_os = "solaris",
+    target_os = "wasi",
+)))]
 #[allow(missing_docs)]
 pub struct StatVfs {
     pub f_bsize: u64,

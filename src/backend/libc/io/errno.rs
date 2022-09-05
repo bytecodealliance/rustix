@@ -216,6 +216,7 @@ impl Errno {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const DOTDOT: Self = Self(c::EDOTDOT);
@@ -257,6 +258,7 @@ impl Errno {
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "redox",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const HWPOISON: Self = Self(c::EHWPOISON);
@@ -301,6 +303,7 @@ impl Errno {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const ISNAM: Self = Self(c::EISNAM);
@@ -314,6 +317,7 @@ impl Errno {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const KEYEXPIRED: Self = Self(c::EKEYEXPIRED);
@@ -327,6 +331,7 @@ impl Errno {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const KEYREJECTED: Self = Self(c::EKEYREJECTED);
@@ -340,6 +345,7 @@ impl Errno {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const KEYREVOKED: Self = Self(c::EKEYREVOKED);
@@ -475,6 +481,7 @@ impl Errno {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const MEDIUMTYPE: Self = Self(c::EMEDIUMTYPE);
@@ -500,6 +507,7 @@ impl Errno {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const NAVAIL: Self = Self(c::ENAVAIL);
@@ -586,6 +594,7 @@ impl Errno {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const NOKEY: Self = Self(c::ENOKEY);
@@ -605,6 +614,7 @@ impl Errno {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const NOMEDIUM: Self = Self(c::ENOMEDIUM);
@@ -690,6 +700,7 @@ impl Errno {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const NOTNAM: Self = Self(c::ENOTNAM);
@@ -817,6 +828,7 @@ impl Errno {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const REMOTEIO: Self = Self(c::EREMOTEIO);
@@ -844,6 +856,7 @@ impl Errno {
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "redox",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const RFKILL: Self = Self(c::ERFKILL);
@@ -929,6 +942,7 @@ impl Errno {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const UCLEAN: Self = Self(c::EUCLEAN);
