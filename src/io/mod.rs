@@ -50,6 +50,7 @@ pub use pipe::pipe;
     windows,
     target_os = "illumos",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi",
 )))]
 pub use pipe::PIPE_BUF;
@@ -60,7 +61,7 @@ pub use poll::{poll, PollFd, PollFlags};
 pub use procfs::{proc_self_fd, proc_self_fdinfo_fd, proc_self_maps, proc_self_pagemap};
 #[cfg(not(windows))]
 pub use read_write::{pread, pwrite, read, readv, write, writev, IoSlice, IoSliceMut};
-#[cfg(not(any(windows, target_os = "redox")))]
+#[cfg(not(any(windows, target_os = "redox", target_os = "solaris")))]
 pub use read_write::{preadv, pwritev};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use read_write::{preadv2, pwritev2, ReadWriteFlags};

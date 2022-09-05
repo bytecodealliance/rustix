@@ -12,7 +12,7 @@ fn test_mknodat() {
     let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     // Create a regular file. Not supported on FreeBSD or OpenBSD.
-    #[cfg(not(any(target_os = "freebsd", target_os = "openbsd")))]
+    #[cfg(not(any(target_os = "freebsd", target_os = "openbsd", target_os = "solaris")))]
     {
         mknodat(&dir, "foo", FileType::RegularFile, Mode::empty(), 0).unwrap();
         let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();

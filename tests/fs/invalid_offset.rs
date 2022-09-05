@@ -38,6 +38,7 @@ fn invalid_offset_seek() {
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 #[test]
 fn invalid_offset_fallocate() {
@@ -66,6 +67,7 @@ fn invalid_offset_fallocate() {
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 #[test]
 fn invalid_offset_fadvise() {
