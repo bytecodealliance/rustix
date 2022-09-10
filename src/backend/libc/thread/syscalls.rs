@@ -2,7 +2,11 @@
 
 use super::super::c;
 use super::super::conv::ret;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use super::super::conv::{borrowed_fd, ret_c_int};
 use super::super::time::types::LibcTimespec;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use crate::fd::BorrowedFd;
 use crate::io;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::process::{Pid, RawNonZeroPid};
@@ -279,4 +283,10 @@ pub(crate) fn gettid() -> Pid {
         debug_assert_ne!(tid, 0);
         Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(tid))
     }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub(crate) fn setns(fd: BorrowedFd, nstype: c::c_int) -> io::Result<c::c_int> {
+    unsafe { ret_c_int(c::setns(borrowed_fd(fd), nstype)) }
 }

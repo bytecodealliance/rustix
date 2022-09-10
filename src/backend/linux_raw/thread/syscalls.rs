@@ -6,7 +6,11 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use super::super::conv::{by_ref, c_int, c_uint, ret, ret_usize, ret_usize_infallible, zero};
+use super::super::c;
+use super::super::conv::{
+    by_ref, c_int, c_uint, ret, ret_c_int, ret_usize, ret_usize_infallible, zero,
+};
+use crate::fd::BorrowedFd;
 use crate::io;
 use crate::process::{Pid, RawNonZeroPid};
 use crate::thread::{ClockId, FutexFlags, FutexOperation, NanosleepRelativeResult, Timespec};
@@ -277,4 +281,10 @@ unsafe fn futex_old(
         uaddr2,
         c_uint(val3)
     ))
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub(crate) fn setns(fd: BorrowedFd, nstype: c::c_int) -> io::Result<c::c_int> {
+    unsafe { ret_c_int(syscall_readonly!(__NR_setns, fd, c_int(nstype))) }
 }
