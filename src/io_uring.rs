@@ -552,7 +552,6 @@ pub const IORING_OFF_SQES: u64 = sys::IORING_OFF_SQES as _;
 /// `IORING_REGISTER_FILES_SKIP`
 #[inline]
 #[doc(alias = "IORING_REGISTER_FILES_SKIP")]
-#[allow(unsafe_code)]
 pub const fn io_uring_register_files_skip() -> BorrowedFd<'static> {
     let files_skip = sys::IORING_REGISTER_FILES_SKIP as RawFd;
 
