@@ -124,6 +124,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 target_os = "netbsd",
                 target_os = "openbsd",
                 target_os = "redox",
+                target_os = "solaris",
             )))]
             if (term.c_iflag & IUTF8) != 0 {
                 print!(" IUTF8");
@@ -193,6 +194,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 target_os = "netbsd",
                 target_os = "openbsd",
                 target_os = "redox",
+                target_os = "solaris",
             )))]
             if (term.c_oflag & NLDLY) != 0 {
                 print!(" NLDLY");
@@ -206,6 +208,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 target_os = "netbsd",
                 target_os = "openbsd",
                 target_os = "redox",
+                target_os = "solaris",
             )))]
             if (term.c_oflag & CRDLY) != 0 {
                 print!(" CRDLY");
@@ -217,6 +220,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 target_os = "openbsd",
                 target_os = "illumos",
                 target_os = "redox",
+                target_os = "solaris",
             )))]
             if (term.c_oflag & TABDLY) != 0 {
                 print!(" TABDLY");
@@ -230,6 +234,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 target_os = "netbsd",
                 target_os = "openbsd",
                 target_os = "redox",
+                target_os = "solaris",
             )))]
             if (term.c_oflag & BSDLY) != 0 {
                 print!(" BSDLY");
@@ -244,6 +249,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 target_os = "netbsd",
                 target_os = "openbsd",
                 target_os = "redox",
+                target_os = "solaris",
             )))]
             if (term.c_oflag & VTDLY) != 0 {
                 print!(" VTDLY");
@@ -258,6 +264,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 target_os = "netbsd",
                 target_os = "openbsd",
                 target_os = "redox",
+                target_os = "solaris",
             )))]
             if (term.c_oflag & FFDLY) != 0 {
                 print!(" FFDLY");
@@ -286,6 +293,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 target_os = "netbsd",
                 target_os = "openbsd",
                 target_os = "redox",
+                target_os = "solaris",
             )))]
             if (term.c_cflag & CBAUDEX) != 0 {
                 print!(" CBAUDEX");
@@ -339,6 +347,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 target_os = "netbsd",
                 target_os = "openbsd",
                 target_os = "redox",
+                target_os = "solaris",
             )))]
             if (term.c_cflag & CMSPAR) != 0 {
                 print!(" CMSPAR");

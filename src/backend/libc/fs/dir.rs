@@ -1,6 +1,6 @@
 use super::super::c;
 use super::super::conv::owned_fd;
-#[cfg(not(target_os = "illumos"))]
+#[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
 use super::types::FileType;
 use crate::fd::{AsFd, BorrowedFd};
 use crate::ffi::CStr;
@@ -11,10 +11,16 @@ use crate::fs::{fcntl_getfl, fstat, openat, Mode, OFlags, Stat};
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi",
 )))]
 use crate::fs::{fstatfs, StatFs};
-#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "redox",
+    target_os = "solaris",
+    target_os = "wasi",
+)))]
 use crate::fs::{fstatvfs, StatVfs};
 use crate::io;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
@@ -134,6 +140,7 @@ impl Dir {
         target_os = "illumos",
         target_os = "netbsd",
         target_os = "redox",
+        target_os = "solaris",
         target_os = "wasi",
     )))]
     #[inline]
@@ -142,7 +149,12 @@ impl Dir {
     }
 
     /// `fstatvfs(self)`
-    #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+    #[cfg(not(any(
+        target_os = "illumos",
+        target_os = "redox",
+        target_os = "solaris",
+        target_os = "wasi",
+    )))]
     #[inline]
     pub fn statvfs(&self) -> io::Result<StatVfs> {
         fstatvfs(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr())) })
@@ -160,7 +172,7 @@ impl Dir {
 // struct, as the name is NUL-terminated and memory may not be allocated for
 // the full extent of the struct. Copy the fields one at a time.
 unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
-    #[cfg(not(target_os = "illumos"))]
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
     let d_type = input.d_type;
 
     #[cfg(not(any(
@@ -204,7 +216,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     // whole `d_name` field, which may not be entirely allocated.
     #[cfg_attr(target_os = "wasi", allow(unused_mut))]
     let mut dirent = libc_dirent {
-        #[cfg(not(target_os = "illumos"))]
+        #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
         d_type,
         #[cfg(not(any(
             target_os = "dragonfly",
@@ -315,7 +327,7 @@ impl DirEntry {
     }
 
     /// Returns the type of this directory entry.
-    #[cfg(not(target_os = "illumos"))]
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
     #[inline]
     pub fn file_type(&self) -> FileType {
         FileType::from_dirent_d_type(self.dirent.d_type)

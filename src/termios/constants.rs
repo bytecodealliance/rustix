@@ -6,6 +6,7 @@ use crate::backend;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::B1000000;
 #[cfg(not(any(
@@ -15,6 +16,7 @@ pub use backend::termios::types::B1000000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::B1152000;
 #[cfg(not(any(
@@ -24,6 +26,7 @@ pub use backend::termios::types::B1152000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::B1500000;
 #[cfg(not(any(
@@ -33,6 +36,7 @@ pub use backend::termios::types::B1500000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::B2000000;
 #[cfg(not(any(
@@ -42,6 +46,7 @@ pub use backend::termios::types::B2000000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::B2500000;
 #[cfg(not(any(
@@ -51,6 +56,7 @@ pub use backend::termios::types::B2500000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::B3000000;
 #[cfg(not(any(
@@ -60,6 +66,7 @@ pub use backend::termios::types::B3000000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::B3500000;
 #[cfg(not(any(
@@ -69,6 +76,7 @@ pub use backend::termios::types::B3500000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::B4000000;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
@@ -81,6 +89,7 @@ pub use backend::termios::types::B460800;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::B500000;
 #[cfg(not(any(
@@ -91,6 +100,7 @@ pub use backend::termios::types::B500000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::B576000;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
@@ -107,6 +117,7 @@ pub use backend::termios::types::BRKINT;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::BS0;
 #[cfg(not(any(
@@ -121,6 +132,7 @@ pub use backend::termios::types::BS0;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::BS1;
 #[cfg(not(any(
@@ -132,6 +144,7 @@ pub use backend::termios::types::BS1;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::BSDLY;
 #[cfg(not(any(
@@ -153,6 +166,7 @@ pub use backend::termios::types::CBAUD;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::CBAUDEX;
 #[cfg(not(any(
@@ -178,6 +192,7 @@ pub use backend::termios::types::CLOCAL;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::CMSPAR;
 #[cfg(not(any(
@@ -190,6 +205,7 @@ pub use backend::termios::types::CMSPAR;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::CR0;
 #[cfg(not(any(
@@ -204,6 +220,7 @@ pub use backend::termios::types::CR0;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::CR1;
 #[cfg(not(any(
@@ -218,6 +235,7 @@ pub use backend::termios::types::CR1;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::CR2;
 #[cfg(not(any(
@@ -232,6 +250,7 @@ pub use backend::termios::types::CR2;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::CR3;
 #[cfg(not(any(
@@ -243,6 +262,7 @@ pub use backend::termios::types::CR3;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::CRDLY;
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
@@ -281,6 +301,7 @@ pub use backend::termios::types::ECHOPRT;
     target_os = "ios",
     target_os = "macos",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::EXTA;
 #[cfg(not(any(
@@ -289,6 +310,7 @@ pub use backend::termios::types::EXTA;
     target_os = "ios",
     target_os = "macos",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::EXTB;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
@@ -303,6 +325,7 @@ pub use backend::termios::types::EXTPROC;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::FF0;
 #[cfg(not(any(
@@ -317,6 +340,7 @@ pub use backend::termios::types::FF0;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::FF1;
 #[cfg(not(any(
@@ -329,6 +353,7 @@ pub use backend::termios::types::FF1;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::FFDLY;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
@@ -373,6 +398,7 @@ pub use backend::termios::types::IUCLC;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::IUTF8;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
@@ -391,6 +417,7 @@ pub use backend::termios::types::IXON;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::NL0;
 #[cfg(not(any(
@@ -403,6 +430,7 @@ pub use backend::termios::types::NL0;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::NL1;
 #[cfg(not(any(
@@ -414,6 +442,7 @@ pub use backend::termios::types::NL1;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::NLDLY;
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
@@ -471,6 +500,7 @@ pub use backend::termios::types::PENDIN;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::TAB0;
 #[cfg(not(any(
@@ -485,6 +515,7 @@ pub use backend::termios::types::TAB0;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::TAB1;
 #[cfg(not(any(
@@ -499,6 +530,7 @@ pub use backend::termios::types::TAB1;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::TAB2;
 #[cfg(not(any(
@@ -511,6 +543,7 @@ pub use backend::termios::types::TAB2;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::TAB3;
 #[cfg(not(any(
@@ -520,6 +553,7 @@ pub use backend::termios::types::TAB3;
     target_os = "openbsd",
     target_os = "illumos",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::TABDLY;
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
@@ -532,6 +566,7 @@ pub use backend::termios::types::TOSTOP;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::VSWTC;
 #[cfg(not(any(
@@ -544,6 +579,7 @@ pub use backend::termios::types::VSWTC;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::VT0;
 #[cfg(not(any(
@@ -558,6 +594,7 @@ pub use backend::termios::types::VT0;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::VT1;
 #[cfg(not(any(
@@ -570,6 +607,7 @@ pub use backend::termios::types::VT1;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::VTDLY;
 #[cfg(any(linux_raw, all(libc, any(target_arch = "s390x", target_os = "haiku"))))]
@@ -583,6 +621,7 @@ pub use backend::termios::types::XCASE;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub use backend::termios::types::XTABS;
 pub use backend::termios::types::{
@@ -628,6 +667,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
+            target_os = "solaris",
         )))]
         backend::termios::types::B500000 => Some(500_000),
         #[cfg(not(any(
@@ -638,6 +678,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
+            target_os = "solaris",
         )))]
         backend::termios::types::B576000 => Some(576_000),
         #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
@@ -649,6 +690,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
+            target_os = "solaris",
         )))]
         backend::termios::types::B1000000 => Some(1_000_000),
         #[cfg(not(any(
@@ -658,6 +700,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
+            target_os = "solaris",
         )))]
         backend::termios::types::B1152000 => Some(1_152_000),
         #[cfg(not(any(
@@ -667,6 +710,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
+            target_os = "solaris",
         )))]
         backend::termios::types::B1500000 => Some(1_500_000),
         #[cfg(not(any(
@@ -676,6 +720,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
+            target_os = "solaris",
         )))]
         backend::termios::types::B2000000 => Some(2_000_000),
         #[cfg(not(any(
@@ -685,6 +730,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
+            target_os = "solaris",
         )))]
         backend::termios::types::B2500000 => Some(2_500_000),
         #[cfg(not(any(
@@ -694,6 +740,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
+            target_os = "solaris",
         )))]
         backend::termios::types::B3000000 => Some(3_000_000),
         #[cfg(not(any(
@@ -703,6 +750,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
+            target_os = "solaris",
         )))]
         backend::termios::types::B3500000 => Some(3_500_000),
         #[cfg(not(any(
@@ -712,6 +760,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
+            target_os = "solaris",
         )))]
         backend::termios::types::B4000000 => Some(4_000_000),
         _ => None,

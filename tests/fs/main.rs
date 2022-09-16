@@ -24,6 +24,7 @@ mod long_paths;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi",
 )))]
 mod makedev;
@@ -35,7 +36,12 @@ mod openat;
 mod openat2;
 mod readdir;
 mod renameat;
-#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "redox",
+    target_os = "solaris",
+    target_os = "wasi",
+)))]
 mod statfs;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod statx;

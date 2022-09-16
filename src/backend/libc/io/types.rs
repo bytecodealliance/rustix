@@ -53,7 +53,12 @@ bitflags! {
         /// `O_CLOEXEC`
         const CLOEXEC = c::O_CLOEXEC;
         /// `O_DIRECT`
-        #[cfg(not(any(target_os = "illumos", target_os = "openbsd", target_os = "redox")))]
+        #[cfg(not(any(
+            target_os = "illumos",
+            target_os = "openbsd",
+            target_os = "redox",
+            target_os = "solaris",
+        )))]
         const DIRECT = c::O_DIRECT;
         /// `O_NONBLOCK`
         const NONBLOCK = c::O_NONBLOCK;
@@ -76,7 +81,12 @@ bitflags! {
 }
 
 /// `PIPE_BUF`—The maximum size of a write to a pipe guaranteed to be atomic.
-#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "redox",
+    target_os = "solaris",
+    target_os = "wasi",
+)))]
 pub const PIPE_BUF: usize = c::PIPE_BUF;
 
 #[cfg(not(any(windows, target_os = "redox")))]

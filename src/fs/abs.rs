@@ -4,10 +4,16 @@
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi",
 )))]
 use crate::fs::StatFs;
-#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "redox",
+    target_os = "solaris",
+    target_os = "wasi",
+)))]
 use {
     crate::fs::StatVfs,
     crate::{backend, io, path},
@@ -26,6 +32,7 @@ use {
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi",
 )))]
 #[inline]
@@ -46,7 +53,12 @@ pub fn statfs<P: path::Arg>(path: P) -> io::Result<StatFs> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/statvfs.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/statvfs.2.html
-#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "illumos",
+    target_os = "redox",
+    target_os = "solaris",
+    target_os = "wasi",
+)))]
 #[inline]
 pub fn statvfs<P: path::Arg>(path: P) -> io::Result<StatVfs> {
     path.into_with_c_str(backend::fs::syscalls::statvfs)

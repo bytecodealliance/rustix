@@ -69,6 +69,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const NETLINK: Self = Self(c::AF_NETLINK as _);
     /// `AF_UNIX`, aka `AF_LOCAL`
@@ -84,6 +85,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const AX25: Self = Self(c::AF_AX25 as _);
     /// `AF_IPX`
@@ -100,6 +102,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const NETROM: Self = Self(c::AF_NETROM as _);
     /// `AF_BRIDGE`
@@ -112,6 +115,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const BRIDGE: Self = Self(c::AF_BRIDGE as _);
     /// `AF_ATMPVC`
@@ -124,6 +128,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const ATMPVC: Self = Self(c::AF_ATMPVC as _);
     /// `AF_X25`
@@ -147,6 +152,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const ROSE: Self = Self(c::AF_ROSE as _);
     /// `AF_DECnet`
@@ -162,6 +168,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const NETBEUI: Self = Self(c::AF_NETBEUI as _);
     /// `AF_SECURITY`
@@ -174,6 +181,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const SECURITY: Self = Self(c::AF_SECURITY as _);
     /// `AF_KEY`
@@ -208,6 +216,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const ASH: Self = Self(c::AF_ASH as _);
     /// `AF_ECONET`
@@ -220,6 +229,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const ECONET: Self = Self(c::AF_ECONET as _);
     /// `AF_ATMSVC`
@@ -232,6 +242,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const ATMSVC: Self = Self(c::AF_ATMSVC as _);
     /// `AF_RDS`
@@ -244,6 +255,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const RDS: Self = Self(c::AF_RDS as _);
     /// `AF_SNA`
@@ -257,6 +269,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const IRDA: Self = Self(c::AF_IRDA as _);
     /// `AF_PPPOX`
@@ -269,6 +282,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const PPPOX: Self = Self(c::AF_PPPOX as _);
     /// `AF_WANPIPE`
@@ -281,6 +295,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const WANPIPE: Self = Self(c::AF_WANPIPE as _);
     /// `AF_LLC`
@@ -293,6 +308,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const LLC: Self = Self(c::AF_LLC as _);
     /// `AF_CAN`
@@ -305,6 +321,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const CAN: Self = Self(c::AF_CAN as _);
     /// `AF_TIPC`
@@ -317,10 +334,11 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const TIPC: Self = Self(c::AF_TIPC as _);
     /// `AF_BLUETOOTH`
-    #[cfg(not(any(windows, target_os = "illumos", target_os = "ios", target_os = "macos")))]
+    #[cfg(not(any(windows, target_os = "illumos", target_os = "ios", target_os = "macos", target_os = "solaris")))]
     pub const BLUETOOTH: Self = Self(c::AF_BLUETOOTH as _);
     /// `AF_IUCV`
     #[cfg(not(any(
@@ -332,6 +350,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const IUCV: Self = Self(c::AF_IUCV as _);
     /// `AF_RXRPC`
@@ -344,10 +363,11 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const RXRPC: Self = Self(c::AF_RXRPC as _);
     /// `AF_ISDN`
-    #[cfg(not(any(windows, target_os = "illumos")))]
+    #[cfg(not(any(windows, target_os = "illumos", target_os = "solaris")))]
     pub const ISDN: Self = Self(c::AF_ISDN as _);
     /// `AF_PHONET`
     #[cfg(not(any(
@@ -359,6 +379,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const PHONET: Self = Self(c::AF_PHONET as _);
     /// `AF_IEEE802154`
@@ -371,6 +392,7 @@ impl AddressFamily {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const IEEE802154: Self = Self(c::AF_IEEE802154 as _);
 
@@ -403,26 +425,26 @@ impl Protocol {
     /// `IPPROTO_ICMP`
     pub const ICMP: Self = Self(c::IPPROTO_ICMP as _);
     /// `IPPROTO_IGMP`
-    #[cfg(not(target_os = "illumos"))]
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
     pub const IGMP: Self = Self(c::IPPROTO_IGMP as _);
     /// `IPPROTO_IPIP`
-    #[cfg(not(any(windows, target_os = "illumos")))]
+    #[cfg(not(any(windows, target_os = "illumos", target_os = "solaris")))]
     pub const IPIP: Self = Self(c::IPPROTO_IPIP as _);
     /// `IPPROTO_TCP`
     pub const TCP: Self = Self(c::IPPROTO_TCP as _);
     /// `IPPROTO_EGP`
-    #[cfg(not(target_os = "illumos"))]
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
     pub const EGP: Self = Self(c::IPPROTO_EGP as _);
     /// `IPPROTO_PUP`
-    #[cfg(not(target_os = "illumos"))]
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
     pub const PUP: Self = Self(c::IPPROTO_PUP as _);
     /// `IPPROTO_UDP`
     pub const UDP: Self = Self(c::IPPROTO_UDP as _);
     /// `IPPROTO_IDP`
-    #[cfg(not(target_os = "illumos"))]
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
     pub const IDP: Self = Self(c::IPPROTO_IDP as _);
     /// `IPPROTO_TP`
-    #[cfg(not(any(windows, target_os = "illumos")))]
+    #[cfg(not(any(windows, target_os = "illumos", target_os = "solaris")))]
     pub const TP: Self = Self(c::IPPROTO_TP as _);
     /// `IPPROTO_DCCP`
     #[cfg(not(any(
@@ -432,21 +454,22 @@ impl Protocol {
         target_os = "ios",
         target_os = "macos",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const DCCP: Self = Self(c::IPPROTO_DCCP as _);
     /// `IPPROTO_IPV6`
     pub const IPV6: Self = Self(c::IPPROTO_IPV6 as _);
     /// `IPPROTO_RSVP`
-    #[cfg(not(any(windows, target_os = "illumos")))]
+    #[cfg(not(any(windows, target_os = "illumos", target_os = "solaris")))]
     pub const RSVP: Self = Self(c::IPPROTO_RSVP as _);
     /// `IPPROTO_GRE`
-    #[cfg(not(any(windows, target_os = "illumos")))]
+    #[cfg(not(any(windows, target_os = "illumos", target_os = "solaris")))]
     pub const GRE: Self = Self(c::IPPROTO_GRE as _);
     /// `IPPROTO_ESP`
-    #[cfg(not(target_os = "illumos"))]
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
     pub const ESP: Self = Self(c::IPPROTO_ESP as _);
     /// `IPPROTO_AH`
-    #[cfg(not(target_os = "illumos"))]
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
     pub const AH: Self = Self(c::IPPROTO_AH as _);
     /// `IPPROTO_MTP`
     #[cfg(not(any(
@@ -454,6 +477,7 @@ impl Protocol {
         target_os = "illumos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const MTP: Self = Self(c::IPPROTO_MTP as _);
     /// `IPPROTO_BEETPH`
@@ -466,13 +490,14 @@ impl Protocol {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const BEETPH: Self = Self(c::IPPROTO_BEETPH as _);
     /// `IPPROTO_ENCAP`
-    #[cfg(not(any(windows, target_os = "illumos")))]
+    #[cfg(not(any(windows, target_os = "illumos", target_os = "solaris")))]
     pub const ENCAP: Self = Self(c::IPPROTO_ENCAP as _);
     /// `IPPROTO_PIM`
-    #[cfg(not(target_os = "illumos"))]
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
     pub const PIM: Self = Self(c::IPPROTO_PIM as _);
     /// `IPPROTO_COMP`
     #[cfg(not(any(
@@ -484,10 +509,11 @@ impl Protocol {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const COMP: Self = Self(c::IPPROTO_COMP as _);
     /// `IPPROTO_SCTP`
-    #[cfg(not(any(target_os = "dragonfly", target_os = "illumos", target_os = "openbsd")))]
+    #[cfg(not(any(target_os = "dragonfly", target_os = "illumos", target_os = "openbsd", target_os = "solaris")))]
     pub const SCTP: Self = Self(c::IPPROTO_SCTP as _);
     /// `IPPROTO_UDPLITE`
     #[cfg(not(any(
@@ -498,6 +524,7 @@ impl Protocol {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const UDPLITE: Self = Self(c::IPPROTO_UDPLITE as _);
     /// `IPPROTO_MPLS`
@@ -508,6 +535,7 @@ impl Protocol {
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
+        target_os = "solaris",
     )))]
     pub const MPLS: Self = Self(c::IPPROTO_MPLS as _);
     /// `IPPROTO_RAW`
@@ -525,10 +553,11 @@ impl Protocol {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const MPTCP: Self = Self(c::IPPROTO_MPTCP as _);
     /// `IPPROTO_FRAGMENT`
-    #[cfg(not(target_os = "illumos"))]
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
     pub const FRAGMENT: Self = Self(c::IPPROTO_FRAGMENT as _);
     /// `IPPROTO_ICMPV6`
     pub const ICMPV6: Self = Self(c::IPPROTO_ICMPV6 as _);
@@ -541,10 +570,11 @@ impl Protocol {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "solaris",
     )))]
     pub const MH: Self = Self(c::IPPROTO_MH as _);
     /// `IPPROTO_ROUTING`
-    #[cfg(not(target_os = "illumos"))]
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
     pub const ROUTING: Self = Self(c::IPPROTO_ROUTING as _);
 
     /// Constructs a `Protocol` from a raw integer.

@@ -4,8 +4,6 @@
 //!
 //! See the `rustix::backend::syscalls` module documentation for details.
 
-#![allow(unsafe_code)]
-
 use super::super::c;
 use super::super::conv::{borrowed_fd, ret, ret_pid_t};
 use crate::fd::BorrowedFd;

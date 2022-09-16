@@ -100,6 +100,7 @@ pub const VMIN: usize = c::VMIN as usize;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub const VSWTC: usize = c::VSWTC as usize;
 
@@ -197,6 +198,7 @@ pub const IMAXBEL: c::c_uint = c::IMAXBEL;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const IUTF8: c::c_uint = c::IUTF8;
 
@@ -263,6 +265,7 @@ pub const OFDEL: c::c_uint = c::OFDEL;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const NLDLY: c::c_uint = c::NLDLY;
 
@@ -277,6 +280,7 @@ pub const NLDLY: c::c_uint = c::NLDLY;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const NL0: c::c_uint = c::NL0;
 
@@ -291,6 +295,7 @@ pub const NL0: c::c_uint = c::NL0;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const NL1: c::c_uint = c::NL1;
 
@@ -304,6 +309,7 @@ pub const NL1: c::c_uint = c::NL1;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const CRDLY: c::c_uint = c::CRDLY;
 
@@ -318,6 +324,7 @@ pub const CRDLY: c::c_uint = c::CRDLY;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const CR0: c::c_uint = c::CR0;
 
@@ -334,6 +341,7 @@ pub const CR0: c::c_uint = c::CR0;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const CR1: c::c_uint = c::CR1;
 
@@ -350,6 +358,7 @@ pub const CR1: c::c_uint = c::CR1;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const CR2: c::c_uint = c::CR2;
 
@@ -366,6 +375,7 @@ pub const CR2: c::c_uint = c::CR2;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const CR3: c::c_uint = c::CR3;
 
@@ -377,6 +387,7 @@ pub const CR3: c::c_uint = c::CR3;
     target_os = "openbsd",
     target_os = "illumos",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const TABDLY: c::c_uint = c::TABDLY;
 
@@ -389,6 +400,7 @@ pub const TABDLY: c::c_uint = c::TABDLY;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const TAB0: c::c_uint = c::TAB0;
 
@@ -405,6 +417,7 @@ pub const TAB0: c::c_uint = c::TAB0;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const TAB1: c::c_uint = c::TAB1;
 
@@ -421,6 +434,7 @@ pub const TAB1: c::c_uint = c::TAB1;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const TAB2: c::c_uint = c::TAB2;
 
@@ -435,6 +449,7 @@ pub const TAB2: c::c_uint = c::TAB2;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const TAB3: c::c_uint = c::TAB3;
 
@@ -448,6 +463,7 @@ pub const TAB3: c::c_uint = c::TAB3;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const BSDLY: c::c_uint = c::BSDLY;
 
@@ -462,6 +478,7 @@ pub const BSDLY: c::c_uint = c::BSDLY;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const BS0: c::c_uint = c::BS0;
 
@@ -478,6 +495,7 @@ pub const BS0: c::c_uint = c::BS0;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const BS1: c::c_uint = c::BS1;
 
@@ -492,6 +510,7 @@ pub const BS1: c::c_uint = c::BS1;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const FFDLY: c::c_uint = c::FFDLY;
 
@@ -506,6 +525,7 @@ pub const FFDLY: c::c_uint = c::FFDLY;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const FF0: c::c_uint = c::FF0;
 
@@ -522,6 +542,7 @@ pub const FF0: c::c_uint = c::FF0;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const FF1: c::c_uint = c::FF1;
 
@@ -536,6 +557,7 @@ pub const FF1: c::c_uint = c::FF1;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const VTDLY: c::c_uint = c::VTDLY;
 
@@ -550,6 +572,7 @@ pub const VTDLY: c::c_uint = c::VTDLY;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const VT0: c::c_uint = c::VT0;
 
@@ -566,6 +589,7 @@ pub const VT0: c::c_uint = c::VT0;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const VT1: c::c_uint = c::VT1;
 
@@ -639,6 +663,7 @@ pub const B460800: Speed = c::B460800;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub const B500000: Speed = c::B500000;
 
@@ -651,6 +676,7 @@ pub const B500000: Speed = c::B500000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub const B576000: Speed = c::B576000;
 
@@ -666,6 +692,7 @@ pub const B921600: Speed = c::B921600;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub const B1000000: Speed = c::B1000000;
 
@@ -677,6 +704,7 @@ pub const B1000000: Speed = c::B1000000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub const B1152000: Speed = c::B1152000;
 
@@ -688,6 +716,7 @@ pub const B1152000: Speed = c::B1152000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub const B1500000: Speed = c::B1500000;
 
@@ -699,6 +728,7 @@ pub const B1500000: Speed = c::B1500000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub const B2000000: Speed = c::B2000000;
 
@@ -710,6 +740,7 @@ pub const B2000000: Speed = c::B2000000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub const B2500000: Speed = c::B2500000;
 
@@ -721,6 +752,7 @@ pub const B2500000: Speed = c::B2500000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub const B3000000: Speed = c::B3000000;
 
@@ -732,6 +764,7 @@ pub const B3000000: Speed = c::B3000000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub const B3500000: Speed = c::B3500000;
 
@@ -743,6 +776,7 @@ pub const B3500000: Speed = c::B3500000;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
+    target_os = "solaris",
 )))]
 pub const B4000000: Speed = c::B4000000;
 
@@ -833,6 +867,7 @@ pub const IEXTEN: c::c_uint = c::IEXTEN;
     target_os = "ios",
     target_os = "macos",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const EXTA: c::c_uint = c::EXTA;
 
@@ -843,6 +878,7 @@ pub const EXTA: c::c_uint = c::EXTA;
     target_os = "ios",
     target_os = "macos",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const EXTB: c::c_uint = c::EXTB;
 
@@ -868,6 +904,7 @@ pub const CBAUD: c::c_uint = c::CBAUD;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const CBAUDEX: c::c_uint = c::CBAUDEX;
 
@@ -902,6 +939,7 @@ pub const CIBAUD: c::tcflag_t = 0o77600000;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const CMSPAR: c::c_uint = c::CMSPAR;
 
@@ -947,5 +985,6 @@ pub const EXTPROC: c::c_uint = c::EXTPROC;
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 pub const XTABS: c::c_uint = c::XTABS;
