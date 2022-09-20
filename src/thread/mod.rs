@@ -8,6 +8,8 @@ mod futex;
 mod id;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod prctl;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+mod setns;
 
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -28,3 +30,5 @@ pub use futex::{futex, FutexFlags, FutexOperation};
 pub use id::gettid;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use prctl::*;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use setns::*;

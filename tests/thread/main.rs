@@ -9,3 +9,5 @@ mod clocks;
 mod id;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod prctl;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+mod setns;
