@@ -1132,6 +1132,24 @@ pub(crate) mod sockopt {
     }
 
     #[inline]
+    pub(crate) fn set_ipv6_multicast_hops(
+        fd: BorrowedFd<'_>,
+        multicast_hops: u32,
+    ) -> io::Result<()> {
+        setsockopt(
+            fd,
+            c::IPPROTO_IP as _,
+            c::IPV6_MULTICAST_LOOP,
+            multicast_hops,
+        )
+    }
+
+    #[inline]
+    pub(crate) fn get_ipv6_multicast_hops(fd: BorrowedFd<'_>) -> io::Result<u32> {
+        getsockopt(fd, c::IPPROTO_IP as _, c::IPV6_MULTICAST_LOOP)
+    }
+
+    #[inline]
     pub(crate) fn set_ip_add_membership(
         fd: BorrowedFd<'_>,
         multiaddr: &Ipv4Addr,
