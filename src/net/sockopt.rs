@@ -445,6 +445,50 @@ pub fn get_ipv6_multicast_loop<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::syscalls::sockopt::get_ipv6_multicast_loop(fd.as_fd())
 }
 
+/// `setsockopt(fd, IPPROTO_IP, IPV6_MULTICAST_HOPS, multicast_hops)`
+///
+/// # References
+///  - [POSIX `setsockopt`]
+///  - [POSIX `netinet/in.h`]
+///  - [Linux `setsockopt`]
+///  - [Linux `ipv6`]
+///  - [Winsock2 `setsockopt`]
+///  - [Winsock2 `IPPROTO_IPV6` options]
+///
+/// [POSIX `setsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/setsockopt.html
+/// [POSIX `netinet/in.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_in.h.html
+/// [Linux `setsockopt`]: https://man7.org/linux/man-pages/man2/setsockopt.2.html
+/// [Linux `ipv6`]: https://man7.org/linux/man-pages/man7/ipv6.7.html
+/// [Winsock2 `setsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-setsockopt
+/// [Winsock2 `IPPROTO_IPV6` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ipv6-socket-options
+#[inline]
+#[doc(alias = "IP_MULTICAST_TTL")]
+pub fn set_ipv6_multicast_hops<Fd: AsFd>(fd: Fd, multicast_hops: u32) -> io::Result<()> {
+    backend::net::syscalls::sockopt::set_ipv6_multicast_hops(fd.as_fd(), multicast_hops)
+}
+
+/// `getsockopt(fd, IPPROTO_IP, IPV6_MULTICAST_HOPS)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `netinet/in.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `ipv6`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `IPPROTO_IPV6` options]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `netinet/in.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_in.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `ipv6`]: https://man7.org/linux/man-pages/man7/ipv6.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `IPPROTO_IPV6` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ipv6-socket-options
+#[inline]
+#[doc(alias = "IP_MULTICAST_TTL")]
+pub fn get_ipv6_multicast_hops<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
+    backend::net::syscalls::sockopt::get_ipv6_multicast_hops(fd.as_fd())
+}
+
 /// `setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, multiaddr, interface)`
 ///
 /// # References
