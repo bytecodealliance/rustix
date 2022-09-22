@@ -27,6 +27,21 @@ bitflags! {
     }
 }
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    /// `SPLICE_F_*` constants for use with [`splice`] and [`vmsplice`].
+    pub struct SpliceFlags: c::c_uint {
+        /// `SPLICE_F_MOVE`
+        const MOVE = c::SPLICE_F_MOVE;
+        /// `SPLICE_F_NONBLOCK`
+        const NONBLOCK = c::SPLICE_F_NONBLOCK;
+        /// `SPLICE_F_MORE`
+        const MORE = c::SPLICE_F_MORE;
+        /// `SPLICE_F_GIFT`
+        const GIFT = c::SPLICE_F_GIFT;
+    }
+}
+
 #[cfg(not(target_os = "wasi"))]
 bitflags! {
     /// `O_*` constants for use with [`dup2`].

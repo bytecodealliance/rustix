@@ -18,10 +18,11 @@ use crate::io::DupFlags;
 use crate::io::PipeFlags;
 use crate::io::{self, IoSlice, IoSliceMut, PollFd};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::io::{EventfdFlags, ReadWriteFlags};
+use crate::io::{EventfdFlags, ReadWriteFlags, SpliceFlags};
 use core::cmp::min;
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
+use core::ptr;
 #[cfg(feature = "net")]
 use libc_errno::errno;
 
@@ -453,4 +454,37 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
 
     ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast(), nfds, timeout) })
         .map(|nready| nready as usize)
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub fn splice(
+    fd_in: BorrowedFd,
+    mut off_in: Option<u64>,
+    fd_out: BorrowedFd,
+    mut off_out: Option<u64>,
+    len: usize,
+    flags: SpliceFlags,
+) -> io::Result<usize> {
+    let off_in = off_in
+        .as_mut()
+        .map(|off| (off as *mut u64).cast())
+        .unwrap_or(ptr::null_mut());
+
+    let off_out = off_out
+        .as_mut()
+        .map(|off| (off as *mut u64).cast())
+        .unwrap_or(ptr::null_mut());
+
+    ret_ssize_t(unsafe {
+        c::splice(
+            borrowed_fd(fd_in),
+            off_in,
+            borrowed_fd(fd_out),
+            off_out,
+            len,
+            flags.bits(),
+        )
+    })
+    .map(|spliced| spliced as usize)
 }
