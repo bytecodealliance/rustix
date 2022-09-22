@@ -21,6 +21,7 @@ use super::super::offset::libc_fallocate;
 )))]
 use super::super::offset::libc_posix_fadvise;
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "android",
     target_os = "dragonfly",
     target_os = "fuchsia",
