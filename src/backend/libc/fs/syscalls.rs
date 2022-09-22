@@ -78,6 +78,7 @@ use crate::fs::Access;
 )))]
 use crate::fs::Advice;
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "illumos",
     target_os = "netbsd",
@@ -1148,6 +1149,7 @@ unsafe fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
 }
 
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "illumos",
     target_os = "ios",

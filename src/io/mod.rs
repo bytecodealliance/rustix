@@ -27,7 +27,7 @@ mod stdio;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use crate::backend::io::epoll;
 pub use close::close;
-#[cfg(not(any(windows, target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "aix", target_os = "wasi")))]
 pub use dup::{dup, dup2, dup3, DupFlags};
 pub use errno::{retry_on_intr, Errno, Result};
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -57,6 +57,7 @@ pub use pipe::pipe;
 pub use pipe::PIPE_BUF;
 #[cfg(not(any(
     windows,
+    target_os = "aix",
     target_os = "haiku",
     target_os = "ios",
     target_os = "macos",

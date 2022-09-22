@@ -71,13 +71,14 @@ pub enum Resource {
     /// `RLIMIT_NOFILE`
     Nofile = c::RLIMIT_NOFILE as c::c_int,
     /// `RLIMIT_MEMLOCK`
-    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "aix",target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     Memlock = c::RLIMIT_MEMLOCK as c::c_int,
     /// `RLIMIT_AS`
     #[cfg(not(target_os = "openbsd"))]
     As = c::RLIMIT_AS as c::c_int,
     /// `RLIMIT_LOCKS`
     #[cfg(not(any(
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -91,6 +92,7 @@ pub enum Resource {
     Locks = c::RLIMIT_LOCKS as c::c_int,
     /// `RLIMIT_SIGPENDING`
     #[cfg(not(any(
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -104,6 +106,7 @@ pub enum Resource {
     Sigpending = c::RLIMIT_SIGPENDING as c::c_int,
     /// `RLIMIT_MSGQUEUE`
     #[cfg(not(any(
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -117,6 +120,7 @@ pub enum Resource {
     Msgqueue = c::RLIMIT_MSGQUEUE as c::c_int,
     /// `RLIMIT_NICE`
     #[cfg(not(any(
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -130,6 +134,7 @@ pub enum Resource {
     Nice = c::RLIMIT_NICE as c::c_int,
     /// `RLIMIT_RTPRIO`
     #[cfg(not(any(
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -143,6 +148,7 @@ pub enum Resource {
     Rtprio = c::RLIMIT_RTPRIO as c::c_int,
     /// `RLIMIT_RTTIME`
     #[cfg(not(any(
+        target_os = "aix",
         target_os = "android",
         target_os = "dragonfly",
         target_os = "emscripten",
@@ -210,6 +216,7 @@ pub enum Signal {
     Term = c::SIGTERM,
     /// `SIGSTKFLT`
     #[cfg(not(any(
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -293,6 +300,7 @@ impl Signal {
             c::SIGALRM => Some(Self::Alarm),
             c::SIGTERM => Some(Self::Term),
             #[cfg(not(any(
+                target_os = "aix",
                 target_os = "dragonfly",
                 target_os = "freebsd",
                 target_os = "haiku",

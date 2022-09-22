@@ -74,7 +74,7 @@ pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {
 ///
 /// [file description]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_258
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup3.2.html
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 #[inline]
 pub fn dup3<Fd: AsFd>(fd: Fd, new: &mut OwnedFd, flags: DupFlags) -> io::Result<()> {
     backend::io::syscalls::dup3(fd.as_fd(), new, flags)
