@@ -461,6 +461,7 @@ impl FileType {
 /// [`fadvise`]: crate::fs::fadvise
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -697,6 +698,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -708,6 +710,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -719,6 +722,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "linux",
             target_os = "macos",
@@ -733,6 +737,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -745,6 +750,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -757,6 +763,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -769,6 +776,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -781,6 +789,7 @@ bitflags! {
 }
 
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "redox",
     target_os = "solaris",
@@ -912,6 +921,7 @@ pub struct Stat {
 #[cfg(not(any(
     target_os = "android",
     target_os = "emscripten",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "linux",
     target_os = "l4re",
@@ -940,6 +950,7 @@ pub type StatFs = c::statfs64;
 /// [`statvfs`]: crate::fs::statvfs
 /// [`fstatvfs`]: crate::fs::fstatvfs
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "redox",
     target_os = "solaris",

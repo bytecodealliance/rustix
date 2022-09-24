@@ -39,7 +39,7 @@ pub use ioctl::ioctl_fionbio;
 pub use ioctl::ioctl_fionread;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use ioctl::{ioctl_blkpbszget, ioctl_blksszget};
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub use ioctl::{ioctl_tiocexcl, ioctl_tiocnxcl};
 #[cfg(not(any(windows, target_os = "redox")))]
 #[cfg(feature = "net")]
@@ -48,20 +48,21 @@ pub use is_read_write::is_read_write;
 pub use pipe::pipe;
 #[cfg(not(any(
     windows,
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "redox",
     target_os = "solaris",
     target_os = "wasi",
 )))]
 pub use pipe::PIPE_BUF;
-#[cfg(not(any(windows, target_os = "ios", target_os = "macos", target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "haiku", target_os = "ios", target_os = "macos", target_os = "wasi")))]
 pub use pipe::{pipe_with, PipeFlags};
 pub use poll::{poll, PollFd, PollFlags};
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
 pub use procfs::{proc_self_fd, proc_self_fdinfo_fd, proc_self_maps, proc_self_pagemap};
 #[cfg(not(windows))]
 pub use read_write::{pread, pwrite, read, readv, write, writev, IoSlice, IoSliceMut};
-#[cfg(not(any(windows, target_os = "redox", target_os = "solaris")))]
+#[cfg(not(any(windows, target_os = "haiku", target_os = "redox", target_os = "solaris")))]
 pub use read_write::{preadv, pwritev};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use read_write::{preadv2, pwritev2, ReadWriteFlags};

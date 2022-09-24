@@ -28,6 +28,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -56,6 +57,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -70,6 +72,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -85,6 +88,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -107,6 +111,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -119,6 +124,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -131,6 +137,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -154,6 +161,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -166,6 +174,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -188,6 +197,7 @@ impl Errno {
         target_os = "android",
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -211,6 +221,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -252,6 +263,7 @@ impl Errno {
         target_os = "android",
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -298,6 +310,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -312,6 +325,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -326,6 +340,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -340,6 +355,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -354,6 +370,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -366,6 +383,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -378,6 +396,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -390,6 +409,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -402,6 +422,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -414,6 +435,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -426,6 +448,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -438,6 +461,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -450,6 +474,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -462,6 +487,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -476,6 +502,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -502,6 +529,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -535,6 +563,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -546,6 +575,7 @@ impl Errno {
     #[cfg(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -559,6 +589,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -571,6 +602,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "openbsd",
         target_os = "wasi",
     )))]
@@ -589,6 +621,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -609,6 +642,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -632,6 +666,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -644,6 +679,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -661,6 +697,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "openbsd",
         target_os = "wasi",
     )))]
@@ -670,6 +707,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "openbsd",
         target_os = "wasi",
     )))]
@@ -678,7 +716,7 @@ impl Errno {
     #[cfg(not(windows))]
     pub const NOSYS: Self = Self(c::ENOSYS);
     /// `ENOTBLK`
-    #[cfg(not(any(windows, target_os = "wasi")))]
+    #[cfg(not(any(windows, target_os = "haiku", target_os = "wasi")))]
     pub const NOTBLK: Self = Self(c::ENOTBLK);
     /// `ENOTCAPABLE`
     #[cfg(any(target_os = "freebsd", target_os = "wasi"))]
@@ -695,6 +733,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -705,12 +744,12 @@ impl Errno {
     )))]
     pub const NOTNAM: Self = Self(c::ENOTNAM);
     /// `ENOTRECOVERABLE`
-    #[cfg(not(any(windows, target_os = "dragonfly", target_os = "netbsd")))]
+    #[cfg(not(any(windows, target_os = "dragonfly", target_os = "haiku", target_os = "netbsd")))]
     pub const NOTRECOVERABLE: Self = Self(c::ENOTRECOVERABLE);
     /// `ENOTSOCK`
     pub const NOTSOCK: Self = Self(c::ENOTSOCK);
     /// `ENOTSUP`
-    #[cfg(not(any(windows, target_os = "redox")))]
+    #[cfg(not(any(windows, target_os = "haiku", target_os = "redox")))]
     pub const NOTSUP: Self = Self(c::ENOTSUP);
     /// `ENOTTY`
     #[cfg(not(windows))]
@@ -720,6 +759,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -736,7 +776,7 @@ impl Errno {
     #[cfg(not(windows))]
     pub const OVERFLOW: Self = Self(c::EOVERFLOW);
     /// `EOWNERDEAD`
-    #[cfg(not(any(windows, target_os = "dragonfly", target_os = "netbsd")))]
+    #[cfg(not(any(windows, target_os = "haiku", target_os = "dragonfly", target_os = "netbsd")))]
     pub const OWNERDEAD: Self = Self(c::EOWNERDEAD);
     /// `EPERM`
     #[cfg(not(windows))]
@@ -808,6 +848,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -816,13 +857,14 @@ impl Errno {
     )))]
     pub const REMCHG: Self = Self(c::EREMCHG);
     /// `EREMOTE`
-    #[cfg(not(target_os = "wasi"))]
+    #[cfg(not(any(target_os = "haiku", target_os = "wasi")))]
     pub const REMOTE: Self = Self(c::EREMOTE);
     /// `EREMOTEIO`
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -837,6 +879,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -850,6 +893,7 @@ impl Errno {
         target_os = "android",
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -877,7 +921,7 @@ impl Errno {
     #[cfg(not(target_os = "wasi"))]
     pub const SHUTDOWN: Self = Self(c::ESHUTDOWN);
     /// `ESOCKTNOSUPPORT`
-    #[cfg(not(target_os = "wasi"))]
+    #[cfg(not(any(target_os = "haiku", target_os = "wasi")))]
     pub const SOCKTNOSUPPORT: Self = Self(c::ESOCKTNOSUPPORT);
     /// `ESPIPE`
     #[cfg(not(windows))]
@@ -890,6 +934,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -904,6 +949,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -927,7 +973,7 @@ impl Errno {
     #[doc(alias = "2BIG")]
     pub const TOOBIG: Self = Self(c::E2BIG);
     /// `ETOOMANYREFS`
-    #[cfg(not(target_os = "wasi"))]
+    #[cfg(not(any(target_os = "haiku", target_os = "wasi")))]
     pub const TOOMANYREFS: Self = Self(c::ETOOMANYREFS);
     /// `ETXTBSY`
     #[cfg(not(windows))]
@@ -937,6 +983,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -951,6 +998,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -959,7 +1007,7 @@ impl Errno {
     )))]
     pub const UNATCH: Self = Self(c::EUNATCH);
     /// `EUSERS`
-    #[cfg(not(target_os = "wasi"))]
+    #[cfg(not(any(target_os = "haiku", target_os = "wasi")))]
     pub const USERS: Self = Self(c::EUSERS);
     /// `EWOULDBLOCK`
     pub const WOULDBLOCK: Self = Self(c::EWOULDBLOCK);
@@ -971,6 +1019,7 @@ impl Errno {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
