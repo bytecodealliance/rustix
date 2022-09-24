@@ -744,7 +744,12 @@ impl Errno {
     )))]
     pub const NOTNAM: Self = Self(c::ENOTNAM);
     /// `ENOTRECOVERABLE`
-    #[cfg(not(any(windows, target_os = "dragonfly", target_os = "haiku", target_os = "netbsd")))]
+    #[cfg(not(any(
+        windows,
+        target_os = "dragonfly",
+        target_os = "haiku",
+        target_os = "netbsd"
+    )))]
     pub const NOTRECOVERABLE: Self = Self(c::ENOTRECOVERABLE);
     /// `ENOTSOCK`
     pub const NOTSOCK: Self = Self(c::ENOTSOCK);
@@ -776,7 +781,12 @@ impl Errno {
     #[cfg(not(windows))]
     pub const OVERFLOW: Self = Self(c::EOVERFLOW);
     /// `EOWNERDEAD`
-    #[cfg(not(any(windows, target_os = "haiku", target_os = "dragonfly", target_os = "netbsd")))]
+    #[cfg(not(any(
+        windows,
+        target_os = "haiku",
+        target_os = "dragonfly",
+        target_os = "netbsd"
+    )))]
     pub const OWNERDEAD: Self = Self(c::EOWNERDEAD);
     /// `EPERM`
     #[cfg(not(windows))]

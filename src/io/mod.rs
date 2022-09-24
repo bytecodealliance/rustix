@@ -55,14 +55,25 @@ pub use pipe::pipe;
     target_os = "wasi",
 )))]
 pub use pipe::PIPE_BUF;
-#[cfg(not(any(windows, target_os = "haiku", target_os = "ios", target_os = "macos", target_os = "wasi")))]
+#[cfg(not(any(
+    windows,
+    target_os = "haiku",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "wasi"
+)))]
 pub use pipe::{pipe_with, PipeFlags};
 pub use poll::{poll, PollFd, PollFlags};
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
 pub use procfs::{proc_self_fd, proc_self_fdinfo_fd, proc_self_maps, proc_self_pagemap};
 #[cfg(not(windows))]
 pub use read_write::{pread, pwrite, read, readv, write, writev, IoSlice, IoSliceMut};
-#[cfg(not(any(windows, target_os = "haiku", target_os = "redox", target_os = "solaris")))]
+#[cfg(not(any(
+    windows,
+    target_os = "haiku",
+    target_os = "redox",
+    target_os = "solaris"
+)))]
 pub use read_write::{preadv, pwritev};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use read_write::{preadv2, pwritev2, ReadWriteFlags};

@@ -41,7 +41,12 @@ pub enum MembarrierCommand {
 /// [`getrlimit`]: crate::process::getrlimit
 /// [`setrlimit`]: crate::process::setrlimit
 /// [`prlimit`]: crate::process::prlimit
-#[cfg(not(any(target_os = "fuchsia", target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "fuchsia",
+    target_os = "haiku",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(i32)]
 pub enum Resource {

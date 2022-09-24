@@ -14,7 +14,12 @@ use super::super::offset::{libc_preadv2, libc_pwritev2};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(target_os = "wasi"))]
 use crate::io::DupFlags;
-#[cfg(not(any(target_os = "haiku", target_os = "ios", target_os = "macos", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "haiku",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "wasi"
+)))]
 use crate::io::PipeFlags;
 use crate::io::{self, IoSlice, IoSliceMut, PollFd};
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -436,7 +441,12 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     }
 }
 
-#[cfg(not(any(target_os = "haiku", target_os = "ios", target_os = "macos", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "haiku",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "wasi"
+)))]
 pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
