@@ -87,7 +87,12 @@ pub use constants::B3500000;
     target_os = "solaris",
 )))]
 pub use constants::B4000000;
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
+#[cfg(not(any(
+    target_os = "dragonfly",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "openbsd"
+)))]
 pub use constants::B460800;
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -111,7 +116,12 @@ pub use constants::B500000;
     target_os = "solaris",
 )))]
 pub use constants::B576000;
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
+#[cfg(not(any(
+    target_os = "dragonfly",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "openbsd"
+)))]
 pub use constants::B921600;
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
 pub use constants::BRKINT;
@@ -501,6 +511,7 @@ pub use constants::PARODD;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
 pub use constants::PENDIN;
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "fuchsia",
     target_os = "illumos",
     target_os = "ios",
@@ -543,6 +554,7 @@ pub use constants::TAB1;
 pub use constants::TAB2;
 #[cfg(not(any(
     all(libc, target_env = "musl"),
+    target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "fuchsia",
     target_os = "illumos",
@@ -555,6 +567,7 @@ pub use constants::TAB2;
 )))]
 pub use constants::TAB3;
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",

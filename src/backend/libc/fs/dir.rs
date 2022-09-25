@@ -193,13 +193,19 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     )))]
     let d_ino = input.d_ino;
 
-    #[cfg(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))]
+    #[cfg(any(
+        target_os = "dragonfly",
+        target_os = "freebsd",
+        target_os = "netbsd",
+        target_os = "openbsd"
+    ))]
     let d_fileno = input.d_fileno;
 
-    #[cfg(not(target_os = "wasi"))]
+    #[cfg(not(any(target_os = "dragonfly", target_os = "wasi")))]
     let d_reclen = input.d_reclen;
 
     #[cfg(any(
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "netbsd",
         target_os = "openbsd",
@@ -215,11 +221,11 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     // with a field that we missed here. And we can avoid blindly copying the
     // whole `d_name` field, which may not be entirely allocated.
     #[cfg_attr(target_os = "wasi", allow(unused_mut))]
+    #[cfg(not(target_os = "dragonfly"))]
     let mut dirent = libc_dirent {
         #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
         d_type,
         #[cfg(not(any(
-            target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "ios",
             target_os = "macos",
@@ -227,12 +233,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
             target_os = "wasi",
         )))]
         d_off,
-        #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        )))]
+        #[cfg(not(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd")))]
         d_ino,
         #[cfg(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))]
         d_fileno,
@@ -260,6 +261,17 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
         d_name: zeroed(),
         #[cfg(target_os = "openbsd")]
         __d_padding: zeroed(),
+    };
+
+    // On dragonfly, `dirent` has some non-public padding fields so we can't
+    // directly initialize it.
+    #[cfg(target_os = "dragonfly")]
+    let mut dirent = unsafe {
+        let mut dirent: libc_dirent = zeroed();
+        dirent.d_fileno = d_fileno;
+        dirent.d_namlen = d_namlen;
+        dirent.d_type = d_type;
+        dirent
     };
 
     // Copy from d_name, reading up to and including the first NUL.
