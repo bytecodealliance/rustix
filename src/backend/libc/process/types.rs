@@ -41,7 +41,12 @@ pub enum MembarrierCommand {
 /// [`getrlimit`]: crate::process::getrlimit
 /// [`setrlimit`]: crate::process::setrlimit
 /// [`prlimit`]: crate::process::prlimit
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "fuchsia",
+    target_os = "haiku",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(i32)]
 pub enum Resource {
@@ -204,6 +209,7 @@ pub enum Signal {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -244,11 +250,13 @@ pub enum Signal {
     Winch = c::SIGWINCH,
     /// `SIGIO`, aka `SIGPOLL`
     #[doc(alias = "Poll")]
+    #[cfg(not(target_os = "haiku"))]
     Io = c::SIGIO,
     /// `SIGPWR`
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -284,6 +292,7 @@ impl Signal {
             #[cfg(not(any(
                 target_os = "dragonfly",
                 target_os = "freebsd",
+                target_os = "haiku",
                 target_os = "illumos",
                 target_os = "ios",
                 target_os = "macos",
@@ -308,10 +317,12 @@ impl Signal {
             c::SIGVTALRM => Some(Self::Vtalarm),
             c::SIGPROF => Some(Self::Prof),
             c::SIGWINCH => Some(Self::Winch),
+            #[cfg(not(target_os = "haiku"))]
             c::SIGIO => Some(Self::Io),
             #[cfg(not(any(
                 target_os = "dragonfly",
                 target_os = "freebsd",
+                target_os = "haiku",
                 target_os = "ios",
                 target_os = "macos",
                 target_os = "netbsd",

@@ -3,6 +3,7 @@
 pub(crate) mod dir;
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "freebsd",
     target_os = "illumos",
     target_os = "ios",

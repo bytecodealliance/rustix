@@ -54,6 +54,7 @@ bitflags! {
         const CLOEXEC = c::O_CLOEXEC;
         /// `O_DIRECT`
         #[cfg(not(any(
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "openbsd",
             target_os = "redox",
@@ -82,6 +83,7 @@ bitflags! {
 
 /// `PIPE_BUF`—The maximum size of a write to a pipe guaranteed to be atomic.
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "redox",
     target_os = "solaris",

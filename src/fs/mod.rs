@@ -22,6 +22,7 @@ mod cwd;
 mod dir;
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -43,6 +44,7 @@ mod getpath;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -134,6 +136,7 @@ pub use cwd::cwd;
 pub use dir::{Dir, DirEntry};
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -162,6 +165,7 @@ pub use fcopyfile::{
 };
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "redox",
@@ -182,6 +186,7 @@ pub use fd::{fchmod, fchown};
 pub use fd::{flock, FlockOperation};
 pub use fd::{fstat, fsync, ftruncate, futimens, is_file_read_write, seek, tell, Stat, Timestamps};
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
@@ -190,6 +195,7 @@ pub use fd::{fstat, fsync, ftruncate, futimens, is_file_read_write, seek, tell, 
 )))]
 pub use fd::{fstatfs, StatFs};
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "redox",
     target_os = "solaris",
@@ -204,6 +210,7 @@ pub use getpath::getpath;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",

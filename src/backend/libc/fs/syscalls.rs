@@ -10,6 +10,7 @@ use super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t}
 use super::super::offset::libc_fallocate;
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -35,6 +36,7 @@ use super::super::offset::libc_posix_fadvise;
 use super::super::offset::libc_posix_fallocate;
 use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek, libc_off_t};
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
@@ -43,6 +45,7 @@ use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek,
 )))]
 use super::super::offset::{libc_fstatfs, libc_statfs};
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "redox",
     target_os = "solaris",
@@ -64,6 +67,7 @@ use crate::ffi::CString;
 use crate::fs::Access;
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -94,6 +98,7 @@ use crate::fs::MemfdFlags;
 ))]
 use crate::fs::SealFlags;
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
@@ -112,6 +117,7 @@ use crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags};
 use crate::fs::{Dev, FileType};
 use crate::fs::{FdFlags, Mode, OFlags, Stat, Timestamps};
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "redox",
     target_os = "solaris",
@@ -215,6 +221,7 @@ pub(crate) fn openat(
 }
 
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
@@ -231,6 +238,7 @@ pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
 }
 
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "redox",
     target_os = "solaris",
@@ -797,6 +805,7 @@ pub(crate) fn copy_file_range(
 
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -984,6 +993,7 @@ fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 }
 
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
@@ -999,6 +1009,7 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
 }
 
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "redox",
     target_os = "solaris",
@@ -1013,6 +1024,7 @@ pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
 }
 
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "redox",
     target_os = "solaris",
@@ -1209,6 +1221,7 @@ pub(crate) fn fsync(fd: BorrowedFd<'_>) -> io::Result<()> {
 
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "redox",
