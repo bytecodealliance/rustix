@@ -202,6 +202,7 @@ pub enum Signal {
     Term = c::SIGTERM,
     /// `SIGSTKFLT`
     #[cfg(not(any(
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "illumos",
         target_os = "ios",
@@ -246,6 +247,7 @@ pub enum Signal {
     Io = c::SIGIO,
     /// `SIGPWR`
     #[cfg(not(any(
+        target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "ios",
         target_os = "macos",
@@ -280,6 +282,7 @@ impl Signal {
             c::SIGALRM => Some(Self::Alarm),
             c::SIGTERM => Some(Self::Term),
             #[cfg(not(any(
+                target_os = "dragonfly",
                 target_os = "freebsd",
                 target_os = "illumos",
                 target_os = "ios",
@@ -307,6 +310,7 @@ impl Signal {
             c::SIGWINCH => Some(Self::Winch),
             c::SIGIO => Some(Self::Io),
             #[cfg(not(any(
+                target_os = "dragonfly",
                 target_os = "freebsd",
                 target_os = "ios",
                 target_os = "macos",
@@ -365,10 +369,7 @@ pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
     set
 }
 
-#[cfg(any(
-    target_os = "android",
-    target_os = "dragonfly",
-    target_os = "fuchsia",
-    target_os = "linux",
-))]
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux",))]
 pub(crate) const CPU_SETSIZE: usize = c::CPU_SETSIZE as usize;
+#[cfg(target_os = "dragonfly")]
+pub(crate) const CPU_SETSIZE: usize = 256;
