@@ -89,7 +89,7 @@ fn test_sockopts() {
             target_os = "netbsd",
             target_os = "openbsd",
         )))]
-        assert!(rustix::net::sockopt::get_socket_broadcast(&s).unwrap(),);
+        assert!(rustix::net::sockopt::get_socket_broadcast(&s).unwrap());
     }
 
     // Set a linger.
