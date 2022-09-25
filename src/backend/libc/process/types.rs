@@ -380,7 +380,7 @@ pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
     set
 }
 
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux",))]
+#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 pub(crate) const CPU_SETSIZE: usize = c::CPU_SETSIZE as usize;
 #[cfg(target_os = "dragonfly")]
 pub(crate) const CPU_SETSIZE: usize = 256;

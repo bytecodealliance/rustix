@@ -79,7 +79,12 @@ pub use backend::termios::types::B3500000;
     target_os = "solaris",
 )))]
 pub use backend::termios::types::B4000000;
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
+#[cfg(not(any(
+    target_os = "dragonfly",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "openbsd"
+)))]
 pub use backend::termios::types::B460800;
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -103,7 +108,12 @@ pub use backend::termios::types::B500000;
     target_os = "solaris",
 )))]
 pub use backend::termios::types::B576000;
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
+#[cfg(not(any(
+    target_os = "dragonfly",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "openbsd"
+)))]
 pub use backend::termios::types::B921600;
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
 pub use backend::termios::types::BRKINT;
@@ -493,6 +503,7 @@ pub use backend::termios::types::PARODD;
 #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
 pub use backend::termios::types::PENDIN;
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "fuchsia",
     target_os = "illumos",
     target_os = "ios",
@@ -535,6 +546,7 @@ pub use backend::termios::types::TAB1;
 pub use backend::termios::types::TAB2;
 #[cfg(not(any(
     all(libc, target_env = "musl"),
+    target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "fuchsia",
     target_os = "illumos",
@@ -547,6 +559,7 @@ pub use backend::termios::types::TAB2;
 )))]
 pub use backend::termios::types::TAB3;
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -657,7 +670,12 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         backend::termios::types::B57600 => Some(57600),
         backend::termios::types::B115200 => Some(115_200),
         backend::termios::types::B230400 => Some(230_400),
-        #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "openbsd"
+        )))]
         backend::termios::types::B460800 => Some(460_800),
         #[cfg(not(any(
             target_os = "dragonfly",
@@ -681,7 +699,12 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
             target_os = "solaris",
         )))]
         backend::termios::types::B576000 => Some(576_000),
-        #[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "openbsd"
+        )))]
         backend::termios::types::B921600 => Some(921_600),
         #[cfg(not(any(
             target_os = "dragonfly",

@@ -214,6 +214,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 print!(" CRDLY");
             }
             #[cfg(not(any(
+                target_os = "dragonfly",
                 target_os = "ios",
                 target_os = "macos",
                 target_os = "netbsd",

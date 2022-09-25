@@ -82,7 +82,7 @@ pub use abs::statfs;
 )))]
 #[cfg(feature = "fs")]
 pub use abs::statvfs;
-#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "solaris",)))]
+#[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "solaris")))]
 #[cfg(feature = "fs")]
 pub use at::accessat;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
