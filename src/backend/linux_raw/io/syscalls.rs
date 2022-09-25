@@ -10,12 +10,14 @@ use super::super::c;
 #[cfg(target_pointer_width = "64")]
 use super::super::conv::loff_t_from_u64;
 use super::super::conv::{
-    by_ref, c_int, c_uint, pass_usize, raw_fd, ret, ret_discarded_fd, ret_owned_fd, ret_usize,
-    slice, slice_mut, zero,
+    by_ref, c_int, c_uint, opt_mut, pass_usize, raw_fd, ret, ret_discarded_fd, ret_owned_fd,
+    ret_usize, slice, slice_mut, zero,
 };
 #[cfg(target_pointer_width = "32")]
 use super::super::conv::{hi, lo};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use crate::io::SpliceFlags;
 use crate::io::{
     self, epoll, DupFlags, EventfdFlags, IoSlice, IoSliceMut, PipeFlags, PollFd, ReadWriteFlags,
 };
@@ -554,6 +556,29 @@ pub(crate) fn epoll_wait(
             pass_usize(num_events),
             c_int(timeout),
             zero()
+        ))
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub fn splice(
+    fd_in: BorrowedFd,
+    mut off_in: Option<u64>,
+    fd_out: BorrowedFd,
+    mut off_out: Option<u64>,
+    len: usize,
+    flags: SpliceFlags,
+) -> io::Result<usize> {
+    unsafe {
+        ret_usize(syscall!(
+            __NR_splice,
+            fd_in,
+            opt_mut(off_in.as_mut()),
+            fd_out,
+            opt_mut(off_out.as_mut()),
+            pass_usize(len),
+            c_uint(flags.bits())
         ))
     }
 }
