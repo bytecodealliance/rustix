@@ -1,4 +1,5 @@
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
     target_os = "ios",
@@ -48,6 +49,7 @@ fn test_invalid_nanosleep() {
 }
 
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
     target_os = "ios",
@@ -101,6 +103,7 @@ fn test_invalid_nanosleep_absolute() {
 }
 
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
     target_os = "ios",
@@ -166,6 +169,7 @@ fn test_zero_nanosleep() {
 }
 
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
     target_os = "ios",
@@ -189,6 +193,7 @@ fn test_zero_nanosleep_absolute() {
 }
 
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
     target_os = "ios",

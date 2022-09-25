@@ -381,6 +381,7 @@ pub const CR3: c::c_uint = c::CR3;
 
 /// `TABDLY`
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -393,6 +394,7 @@ pub const TABDLY: c::c_uint = c::TABDLY;
 
 /// `TAB0`
 #[cfg(not(any(
+    target_os = "dragonfly",
     target_os = "fuchsia",
     target_os = "illumos",
     target_os = "ios",
@@ -441,6 +443,7 @@ pub const TAB2: c::c_uint = c::TAB2;
 /// `TAB3`
 #[cfg(not(any(
     target_env = "musl",
+    target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "fuchsia",
     target_os = "illumos",
@@ -651,7 +654,12 @@ pub const B115200: Speed = c::B115200;
 pub const B230400: Speed = c::B230400;
 
 /// `B460800`
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
+#[cfg(not(any(
+    target_os = "dragonfly",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "openbsd"
+)))]
 pub const B460800: Speed = c::B460800;
 
 /// `B500000`
@@ -681,7 +689,12 @@ pub const B500000: Speed = c::B500000;
 pub const B576000: Speed = c::B576000;
 
 /// `B921600`
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "openbsd")))]
+#[cfg(not(any(
+    target_os = "dragonfly",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "openbsd"
+)))]
 pub const B921600: Speed = c::B921600;
 
 /// `B1000000`
