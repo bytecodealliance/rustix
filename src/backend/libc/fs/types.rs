@@ -438,7 +438,12 @@ impl FileType {
     }
 
     /// Construct a `FileType` from the `d_type` field of a `c::dirent`.
-    #[cfg(not(any(target_os = "illumos", target_os = "redox", target_os = "solaris")))]
+    #[cfg(not(any(
+        target_os = "haiku",
+        target_os = "illumos",
+        target_os = "redox",
+        target_os = "solaris"
+    )))]
     pub(crate) const fn from_dirent_d_type(d_type: u8) -> Self {
         match d_type {
             c::DT_REG => Self::RegularFile,

@@ -18,6 +18,7 @@ mod long_paths;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -37,6 +38,7 @@ mod openat2;
 mod readdir;
 mod renameat;
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "redox",
     target_os = "solaris",

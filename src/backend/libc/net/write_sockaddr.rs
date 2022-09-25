@@ -26,6 +26,7 @@ pub(crate) unsafe fn encode_sockaddr_v4(v4: &SocketAddrV4) -> c::sockaddr_in {
         #[cfg(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -35,7 +36,10 @@ pub(crate) unsafe fn encode_sockaddr_v4(v4: &SocketAddrV4) -> c::sockaddr_in {
         sin_family: c::AF_INET as _,
         sin_port: u16::to_be(v4.port()),
         sin_addr: in_addr_new(u32::from_ne_bytes(v4.ip().octets())),
+        #[cfg(not(target_os = "haiku"))]
         sin_zero: [0; 8_usize],
+        #[cfg(target_os = "haiku")]
+        sin_zero: [0; 24_usize],
     }
 }
 
@@ -49,6 +53,7 @@ pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> c::sockaddr_in6 {
     #[cfg(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -67,6 +72,7 @@ pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> c::sockaddr_in6 {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",

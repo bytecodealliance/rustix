@@ -66,6 +66,7 @@ mod sendfile;
 mod statx;
 
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
@@ -75,6 +76,7 @@ mod statx;
 #[cfg(feature = "fs")]
 pub use abs::statfs;
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "redox",
     target_os = "solaris",

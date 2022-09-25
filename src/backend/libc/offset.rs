@@ -6,9 +6,9 @@ use super::c;
 #[cfg(not(any(
     windows,
     target_os = "android",
-    target_os = "linux",
     target_os = "emscripten",
     target_os = "l4re",
+    target_os = "linux",
 )))]
 pub(super) use c::{
     fstat as libc_fstat, fstatat as libc_fstatat, ftruncate as libc_ftruncate, lseek as libc_lseek,
@@ -17,9 +17,9 @@ pub(super) use c::{
 
 #[cfg(any(
     target_os = "android",
-    target_os = "linux",
     target_os = "emscripten",
     target_os = "l4re",
+    target_os = "linux",
 ))]
 pub(super) use c::{
     fstat64 as libc_fstat, fstatat64 as libc_fstatat, ftruncate64 as libc_ftruncate,
@@ -29,9 +29,9 @@ pub(super) use c::{
 #[cfg(not(any(
     windows,
     target_os = "android",
-    target_os = "linux",
     target_os = "emscripten",
     target_os = "l4re",
+    target_os = "linux",
     target_os = "wasi",
 )))]
 #[cfg(feature = "mm")]
@@ -40,11 +40,10 @@ pub(super) use c::mmap as libc_mmap;
 #[cfg(not(any(
     windows,
     target_os = "android",
-    target_os = "linux",
     target_os = "emscripten",
     target_os = "fuchsia",
-    target_os = "haiku",
     target_os = "l4re",
+    target_os = "linux",
     target_os = "redox",
     target_os = "wasi",
 )))]
@@ -55,7 +54,6 @@ pub(super) use c::{rlimit as libc_rlimit, RLIM_INFINITY as LIBC_RLIM_INFINITY};
     target_os = "android",
     target_os = "fuchsia",
     target_os = "emscripten",
-    target_os = "haiku",
     target_os = "l4re",
     target_os = "linux",
     target_os = "wasi",

@@ -56,6 +56,7 @@ bitflags! {
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
@@ -71,6 +72,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
@@ -89,6 +91,7 @@ bitflags! {
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
@@ -102,6 +105,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
@@ -115,6 +119,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
@@ -131,6 +136,7 @@ bitflags! {
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
@@ -147,6 +153,7 @@ bitflags! {
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
@@ -160,6 +167,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
@@ -176,6 +184,7 @@ bitflags! {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
@@ -188,6 +197,7 @@ bitflags! {
         /// `MAP_STACK`
         #[cfg(not(any(
             target_os = "dragonfly",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
@@ -203,6 +213,7 @@ bitflags! {
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
@@ -273,43 +284,43 @@ bitflags! {
 #[non_exhaustive]
 pub enum Advice {
     /// `POSIX_MADV_NORMAL`
-    #[cfg(not(target_os = "android"))]
+    #[cfg(not(any(target_os = "android", target_os = "haiku")))]
     Normal = c::POSIX_MADV_NORMAL,
 
     /// `POSIX_MADV_NORMAL`
-    #[cfg(target_os = "android")]
+    #[cfg(any(target_os = "android", target_os = "haiku"))]
     Normal = c::MADV_NORMAL,
 
     /// `POSIX_MADV_SEQUENTIAL`
-    #[cfg(not(target_os = "android"))]
+    #[cfg(not(any(target_os = "android", target_os = "haiku")))]
     Sequential = c::POSIX_MADV_SEQUENTIAL,
 
     /// `POSIX_MADV_SEQUENTIAL`
-    #[cfg(target_os = "android")]
+    #[cfg(any(target_os = "android", target_os = "haiku"))]
     Sequential = c::MADV_SEQUENTIAL,
 
     /// `POSIX_MADV_RANDOM`
-    #[cfg(not(target_os = "android"))]
+    #[cfg(not(any(target_os = "android", target_os = "haiku")))]
     Random = c::POSIX_MADV_RANDOM,
 
     /// `POSIX_MADV_RANDOM`
-    #[cfg(target_os = "android")]
+    #[cfg(any(target_os = "android", target_os = "haiku"))]
     Random = c::MADV_RANDOM,
 
     /// `POSIX_MADV_WILLNEED`
-    #[cfg(not(target_os = "android"))]
+    #[cfg(not(any(target_os = "android", target_os = "haiku")))]
     WillNeed = c::POSIX_MADV_WILLNEED,
 
     /// `POSIX_MADV_WILLNEED`
-    #[cfg(target_os = "android")]
+    #[cfg(any(target_os = "android", target_os = "haiku"))]
     WillNeed = c::MADV_WILLNEED,
 
     /// `POSIX_MADV_DONTNEED`
-    #[cfg(not(any(target_os = "android", target_os = "emscripten")))]
+    #[cfg(not(any(target_os = "android", target_os = "emscripten", target_os = "haiku")))]
     DontNeed = c::POSIX_MADV_DONTNEED,
 
     /// `POSIX_MADV_DONTNEED`
-    #[cfg(target_os = "android")]
+    #[cfg(any(target_os = "android", target_os = "haiku"))]
     DontNeed = i32::MAX - 1,
 
     /// `MADV_DONTNEED`
