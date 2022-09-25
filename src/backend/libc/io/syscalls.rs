@@ -7,14 +7,19 @@ use super::super::conv::{
     borrowed_fd, ret, ret_c_int, ret_discarded_fd, ret_owned_fd, ret_ssize_t,
 };
 use super::super::offset::{libc_pread, libc_pwrite};
-#[cfg(not(any(target_os = "redox", target_os = "solaris")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "solaris")))]
 use super::super::offset::{libc_preadv, libc_pwritev};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::super::offset::{libc_preadv2, libc_pwritev2};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(target_os = "wasi"))]
 use crate::io::DupFlags;
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "haiku",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "wasi"
+)))]
 use crate::io::PipeFlags;
 use crate::io::{self, IoSlice, IoSliceMut, PollFd};
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -103,7 +108,7 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> 
     Ok(nwritten as usize)
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "solaris")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "solaris")))]
 pub(crate) fn preadv(
     fd: BorrowedFd<'_>,
     bufs: &mut [IoSliceMut],
@@ -122,7 +127,7 @@ pub(crate) fn preadv(
     Ok(nread as usize)
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "solaris")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "solaris")))]
 pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
@@ -379,6 +384,7 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
 #[cfg(not(any(
     target_os = "android",
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "redox",
@@ -397,6 +403,7 @@ pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, flags: DupFlags) -> io
 #[cfg(any(
     target_os = "android",
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "redox",
@@ -414,12 +421,12 @@ pub(crate) fn ioctl_fioclex(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::FIOCLEX)) }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCEXCL as _)) }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCNXCL as _)) }
 }
@@ -434,7 +441,12 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     }
 }
 
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "haiku",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "wasi"
+)))]
 pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
