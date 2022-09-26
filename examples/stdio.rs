@@ -111,13 +111,14 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_iflag & IXOFF) != 0 {
                 print!(" IXOFF");
             }
-            #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+            #[cfg(not(any(target_os = "haiku", target_os = "ios", target_os = "macos")))]
             if (term.c_iflag & IMAXBEL) != 0 {
                 print!(" IMAXBEL");
             }
             #[cfg(not(any(
                 target_os = "dragonfly",
                 target_os = "freebsd",
+                target_os = "haiku",
                 target_os = "illumos",
                 target_os = "ios",
                 target_os = "macos",
@@ -276,6 +277,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             #[cfg(not(any(
                 target_os = "dragonfly",
                 target_os = "freebsd",
+                target_os = "haiku",
                 target_os = "ios",
                 target_os = "macos",
                 target_os = "netbsd",
@@ -288,6 +290,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             #[cfg(not(any(
                 target_os = "dragonfly",
                 target_os = "freebsd",
+                target_os = "haiku",
                 target_os = "illumos",
                 target_os = "ios",
                 target_os = "macos",
@@ -330,6 +333,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             #[cfg(not(any(
                 target_os = "dragonfly",
                 target_os = "freebsd",
+                target_os = "haiku",
                 target_os = "ios",
                 target_os = "macos",
                 target_os = "netbsd",
@@ -342,6 +346,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             #[cfg(not(any(
                 target_os = "dragonfly",
                 target_os = "freebsd",
+                target_os = "haiku",
                 target_os = "illumos",
                 target_os = "ios",
                 target_os = "macos",
@@ -432,20 +437,25 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 term.c_cc[VMIN]
             );
             println!(
-                "         START={} STOP={} SUSP={} EOL={} REPRINT={} DISCARD={}",
+                "         START={} STOP={} SUSP={} EOL={}",
                 key(term.c_cc[VSTART]),
                 key(term.c_cc[VSTOP]),
                 key(term.c_cc[VSUSP]),
                 key(term.c_cc[VEOL]),
+            );
+            #[cfg(not(target_os = "haiku"))]
+            println!(
+                "         REPRINT={} DISCARD={}",
                 key(term.c_cc[VREPRINT]),
                 key(term.c_cc[VDISCARD])
             );
+            #[cfg(not(target_os = "haiku"))]
             println!(
-                "         WERASE={} LNEXT={} EOL2={}",
+                "         WERASE={} VLNEXT={}",
                 key(term.c_cc[VWERASE]),
                 key(term.c_cc[VLNEXT]),
-                key(term.c_cc[VEOL2])
             );
+            println!("         EOL2={}", key(term.c_cc[VEOL2]));
         }
     } else {
         println!(" - is not a tty");

@@ -49,6 +49,7 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
         #[cfg(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -58,6 +59,7 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
         #[cfg(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -67,13 +69,17 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
         )))]
         sa_family: 0_u16,
+        #[cfg(not(target_os = "haiku"))]
         sa_data: [0; 14],
+        #[cfg(target_os = "haiku")]
+        sa_data: [0; 30],
     };
 
     (*storage.cast::<sockaddr_header>()).ss_family.into()

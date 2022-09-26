@@ -41,20 +41,22 @@ fn main() -> io::Result<()> {
     println!("Fsize Limit: {:?}", getrlimit(Resource::Fsize));
     println!("Data Limit: {:?}", getrlimit(Resource::Data));
     println!("Stack Limit: {:?}", getrlimit(Resource::Stack));
+    #[cfg(not(target_os = "haiku"))]
     println!("Core Limit: {:?}", getrlimit(Resource::Core));
-    #[cfg(not(target_os = "solaris"))]
+    #[cfg(not(any(target_os = "haiku", target_os = "solaris")))]
     println!("Rss Limit: {:?}", getrlimit(Resource::Rss));
-    #[cfg(not(target_os = "solaris"))]
+    #[cfg(not(any(target_os = "haiku", target_os = "solaris")))]
     println!("Nproc Limit: {:?}", getrlimit(Resource::Nproc));
     #[cfg(not(target_os = "solaris"))]
     println!("Nofile Limit: {:?}", getrlimit(Resource::Nofile));
-    #[cfg(not(target_os = "solaris"))]
+    #[cfg(not(any(target_os = "haiku", target_os = "solaris")))]
     println!("Memlock Limit: {:?}", getrlimit(Resource::Memlock));
     #[cfg(not(target_os = "openbsd"))]
     println!("As Limit: {:?}", getrlimit(Resource::As));
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -65,6 +67,7 @@ fn main() -> io::Result<()> {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -75,6 +78,7 @@ fn main() -> io::Result<()> {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -85,6 +89,7 @@ fn main() -> io::Result<()> {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -95,6 +100,7 @@ fn main() -> io::Result<()> {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -107,6 +113,7 @@ fn main() -> io::Result<()> {
         target_os = "dragonfly",
         target_os = "emscripten",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",

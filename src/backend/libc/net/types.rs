@@ -27,6 +27,7 @@ impl SocketType {
     pub const RAW: Self = Self(c::SOCK_RAW as u32);
 
     /// `SOCK_RDM`
+    #[cfg(not(target_os = "haiku"))]
     pub const RDM: Self = Self(c::SOCK_RDM as u32);
 
     /// Constructs a `SocketType` from a raw integer.
@@ -64,6 +65,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -80,6 +82,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -97,6 +100,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -110,6 +114,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -123,6 +128,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -136,6 +142,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -147,6 +154,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -157,12 +165,14 @@ impl AddressFamily {
     pub const ROSE: Self = Self(c::AF_ROSE as _);
     /// `AF_DECnet`
     #[allow(non_upper_case_globals)]
+    #[cfg(not(target_os = "haiku"))]
     pub const DECnet: Self = Self(c::AF_DECnet as _);
     /// `AF_NETBEUI`
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -176,6 +186,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -189,6 +200,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -200,6 +212,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -211,6 +224,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -224,6 +238,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -237,6 +252,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -250,6 +266,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -259,11 +276,13 @@ impl AddressFamily {
     )))]
     pub const RDS: Self = Self(c::AF_RDS as _);
     /// `AF_SNA`
+    #[cfg(not(target_os = "haiku"))]
     pub const SNA: Self = Self(c::AF_SNA as _);
     /// `AF_IRDA`
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -277,6 +296,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -290,6 +310,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -303,6 +324,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -316,6 +338,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -329,6 +352,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -345,6 +369,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -358,6 +383,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -367,13 +393,14 @@ impl AddressFamily {
     )))]
     pub const RXRPC: Self = Self(c::AF_RXRPC as _);
     /// `AF_ISDN`
-    #[cfg(not(any(windows, target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(windows, target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     pub const ISDN: Self = Self(c::AF_ISDN as _);
     /// `AF_PHONET`
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -387,6 +414,7 @@ impl AddressFamily {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -425,31 +453,32 @@ impl Protocol {
     /// `IPPROTO_ICMP`
     pub const ICMP: Self = Self(c::IPPROTO_ICMP as _);
     /// `IPPROTO_IGMP`
-    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     pub const IGMP: Self = Self(c::IPPROTO_IGMP as _);
     /// `IPPROTO_IPIP`
-    #[cfg(not(any(windows, target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(windows, target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     pub const IPIP: Self = Self(c::IPPROTO_IPIP as _);
     /// `IPPROTO_TCP`
     pub const TCP: Self = Self(c::IPPROTO_TCP as _);
     /// `IPPROTO_EGP`
-    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     pub const EGP: Self = Self(c::IPPROTO_EGP as _);
     /// `IPPROTO_PUP`
-    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     pub const PUP: Self = Self(c::IPPROTO_PUP as _);
     /// `IPPROTO_UDP`
     pub const UDP: Self = Self(c::IPPROTO_UDP as _);
     /// `IPPROTO_IDP`
-    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     pub const IDP: Self = Self(c::IPPROTO_IDP as _);
     /// `IPPROTO_TP`
-    #[cfg(not(any(windows, target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(windows, target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     pub const TP: Self = Self(c::IPPROTO_TP as _);
     /// `IPPROTO_DCCP`
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -460,20 +489,21 @@ impl Protocol {
     /// `IPPROTO_IPV6`
     pub const IPV6: Self = Self(c::IPPROTO_IPV6 as _);
     /// `IPPROTO_RSVP`
-    #[cfg(not(any(windows, target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(windows, target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     pub const RSVP: Self = Self(c::IPPROTO_RSVP as _);
     /// `IPPROTO_GRE`
-    #[cfg(not(any(windows, target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(windows, target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     pub const GRE: Self = Self(c::IPPROTO_GRE as _);
     /// `IPPROTO_ESP`
-    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     pub const ESP: Self = Self(c::IPPROTO_ESP as _);
     /// `IPPROTO_AH`
-    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     pub const AH: Self = Self(c::IPPROTO_AH as _);
     /// `IPPROTO_MTP`
     #[cfg(not(any(
         windows,
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "netbsd",
         target_os = "openbsd",
@@ -485,6 +515,7 @@ impl Protocol {
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -494,16 +525,17 @@ impl Protocol {
     )))]
     pub const BEETPH: Self = Self(c::IPPROTO_BEETPH as _);
     /// `IPPROTO_ENCAP`
-    #[cfg(not(any(windows, target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(windows, target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     pub const ENCAP: Self = Self(c::IPPROTO_ENCAP as _);
     /// `IPPROTO_PIM`
-    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     pub const PIM: Self = Self(c::IPPROTO_PIM as _);
     /// `IPPROTO_COMP`
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -513,12 +545,13 @@ impl Protocol {
     )))]
     pub const COMP: Self = Self(c::IPPROTO_COMP as _);
     /// `IPPROTO_SCTP`
-    #[cfg(not(any(target_os = "dragonfly", target_os = "illumos", target_os = "openbsd", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "dragonfly", target_os = "haiku", target_os = "illumos", target_os = "openbsd", target_os = "solaris")))]
     pub const SCTP: Self = Self(c::IPPROTO_SCTP as _);
     /// `IPPROTO_UDPLITE`
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -531,6 +564,7 @@ impl Protocol {
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -548,6 +582,7 @@ impl Protocol {
         target_os = "emscripten",
         target_os = "freebsd",
         target_os = "fuchsia",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -557,7 +592,7 @@ impl Protocol {
     )))]
     pub const MPTCP: Self = Self(c::IPPROTO_MPTCP as _);
     /// `IPPROTO_FRAGMENT`
-    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     pub const FRAGMENT: Self = Self(c::IPPROTO_FRAGMENT as _);
     /// `IPPROTO_ICMPV6`
     pub const ICMPV6: Self = Self(c::IPPROTO_ICMPV6 as _);
@@ -565,6 +600,7 @@ impl Protocol {
     #[cfg(not(any(
         windows,
         target_os = "dragonfly",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -574,7 +610,7 @@ impl Protocol {
     )))]
     pub const MH: Self = Self(c::IPPROTO_MH as _);
     /// `IPPROTO_ROUTING`
-    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     pub const ROUTING: Self = Self(c::IPPROTO_ROUTING as _);
 
     /// Constructs a `Protocol` from a raw integer.
@@ -611,11 +647,11 @@ bitflags! {
     /// [`acceptfrom_with`]: crate::net::acceptfrom_with
     pub struct AcceptFlags: c::c_int {
         /// `SOCK_NONBLOCK`
-        #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
+        #[cfg(not(any(windows, target_os = "haiku", target_os = "ios", target_os = "macos")))]
         const NONBLOCK = c::SOCK_NONBLOCK;
 
         /// `SOCK_CLOEXEC`
-        #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
+        #[cfg(not(any(windows, target_os = "haiku", target_os = "ios", target_os = "macos")))]
         const CLOEXEC = c::SOCK_CLOEXEC;
     }
 }
@@ -626,11 +662,11 @@ bitflags! {
     /// [`socket`]: crate::net::socket
     pub struct SocketFlags: c::c_int {
         /// `SOCK_NONBLOCK`
-        #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
+        #[cfg(not(any(windows, target_os = "haiku", target_os = "ios", target_os = "macos")))]
         const NONBLOCK = c::SOCK_NONBLOCK;
 
         /// `SOCK_CLOEXEC`
-        #[cfg(not(any(windows, target_os = "ios", target_os = "macos")))]
+        #[cfg(not(any(windows, target_os = "haiku", target_os = "ios", target_os = "macos")))]
         const CLOEXEC = c::SOCK_CLOEXEC;
     }
 }

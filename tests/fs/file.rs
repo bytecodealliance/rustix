@@ -42,6 +42,7 @@ fn test_file() {
 
     #[cfg(not(any(
         target_os = "dragonfly",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -66,6 +67,7 @@ fn test_file() {
     assert!(stat.st_blocks > 0);
 
     #[cfg(not(any(
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "netbsd",
         target_os = "redox",
@@ -78,6 +80,7 @@ fn test_file() {
     }
 
     #[cfg(not(any(
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "redox",
         target_os = "solaris",

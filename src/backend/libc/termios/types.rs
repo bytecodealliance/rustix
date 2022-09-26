@@ -95,6 +95,7 @@ pub const VMIN: usize = c::VMIN as usize;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -117,15 +118,19 @@ pub const VSUSP: usize = c::VSUSP as usize;
 pub const VEOL: usize = c::VEOL as usize;
 
 /// `VREPRINT`
+#[cfg(not(target_os = "haiku"))]
 pub const VREPRINT: usize = c::VREPRINT as usize;
 
 /// `VDISCARD`
+#[cfg(not(target_os = "haiku"))]
 pub const VDISCARD: usize = c::VDISCARD as usize;
 
 /// `VWERASE`
+#[cfg(not(target_os = "haiku"))]
 pub const VWERASE: usize = c::VWERASE as usize;
 
 /// `VLNEXT`
+#[cfg(not(target_os = "haiku"))]
 pub const VLNEXT: usize = c::VLNEXT as usize;
 
 /// `VEOL2`
@@ -184,7 +189,12 @@ pub const IXANY: c::c_uint = c::IXANY;
 pub const IXOFF: c::c_uint = c::IXOFF;
 
 /// `IMAXBEL`
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "haiku",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "redox"
+)))]
 pub const IMAXBEL: c::c_uint = c::IMAXBEL;
 
 /// `IUTF8`
@@ -192,6 +202,7 @@ pub const IMAXBEL: c::c_uint = c::IMAXBEL;
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -656,6 +667,7 @@ pub const B230400: Speed = c::B230400;
 /// `B460800`
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "openbsd"
@@ -666,6 +678,7 @@ pub const B460800: Speed = c::B460800;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -679,6 +692,7 @@ pub const B500000: Speed = c::B500000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -691,6 +705,7 @@ pub const B576000: Speed = c::B576000;
 /// `B921600`
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "openbsd"
@@ -701,6 +716,7 @@ pub const B921600: Speed = c::B921600;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -713,6 +729,7 @@ pub const B1000000: Speed = c::B1000000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -725,6 +742,7 @@ pub const B1152000: Speed = c::B1152000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -737,6 +755,7 @@ pub const B1500000: Speed = c::B1500000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -749,6 +768,7 @@ pub const B2000000: Speed = c::B2000000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -761,6 +781,7 @@ pub const B2500000: Speed = c::B2500000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -773,6 +794,7 @@ pub const B3000000: Speed = c::B3000000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -785,6 +807,7 @@ pub const B3500000: Speed = c::B3500000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -876,6 +899,7 @@ pub const IEXTEN: c::c_uint = c::IEXTEN;
 /// `EXTA`
 #[cfg(not(any(
     target_os = "emscripten",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -887,6 +911,7 @@ pub const EXTA: c::c_uint = c::EXTA;
 /// `EXTB`
 #[cfg(not(any(
     target_os = "emscripten",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -899,6 +924,7 @@ pub const EXTB: c::c_uint = c::EXTB;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -911,6 +937,7 @@ pub const CBAUD: c::c_uint = c::CBAUD;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -926,6 +953,7 @@ pub const CBAUDEX: c::c_uint = c::CBAUDEX;
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -946,6 +974,7 @@ pub const CIBAUD: c::tcflag_t = 0o77600000;
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -985,13 +1014,19 @@ pub const FLUSHO: c::c_uint = c::FLUSHO;
 pub const PENDIN: c::c_uint = c::PENDIN;
 
 /// `EXTPROC`
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "haiku",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "redox"
+)))]
 pub const EXTPROC: c::c_uint = c::EXTPROC;
 
 /// `XTABS`
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",

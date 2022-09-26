@@ -252,6 +252,7 @@ pub(crate) fn accept(sockfd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 
 #[cfg(not(any(
     windows,
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "redox",
@@ -288,6 +289,7 @@ pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<
 
 #[cfg(not(any(
     windows,
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "redox",
@@ -315,14 +317,14 @@ pub(crate) fn acceptfrom_with(
 
 /// Darwin lacks `accept4`, but does have `accept`. We define
 /// `AcceptFlags` to have no flags, so we can discard it here.
-#[cfg(any(windows, target_os = "ios", target_os = "macos"))]
+#[cfg(any(windows, target_os = "haiku", target_os = "ios", target_os = "macos"))]
 pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, _flags: AcceptFlags) -> io::Result<OwnedFd> {
     accept(sockfd)
 }
 
 /// Darwin lacks `accept4`, but does have `accept`. We define
 /// `AcceptFlags` to have no flags, so we can discard it here.
-#[cfg(any(windows, target_os = "ios", target_os = "macos"))]
+#[cfg(any(windows, target_os = "haiku", target_os = "ios", target_os = "macos"))]
 pub(crate) fn acceptfrom_with(
     sockfd: BorrowedFd<'_>,
     _flags: AcceptFlags,

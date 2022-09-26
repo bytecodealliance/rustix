@@ -20,12 +20,7 @@ use crate::fd::BorrowedFd;
 use crate::ffi::CStr;
 use crate::io;
 use core::mem::MaybeUninit;
-#[cfg(not(any(
-    target_os = "fuchsia",
-    target_os = "haiku",
-    target_os = "redox",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use {
     super::super::conv::ret_infallible,
     super::super::offset::{libc_getrlimit, libc_rlimit, libc_setrlimit, LIBC_RLIM_INFINITY},
@@ -303,12 +298,7 @@ pub(crate) fn setpriority_process(pid: Option<Pid>, priority: i32) -> io::Result
     }
 }
 
-#[cfg(not(any(
-    target_os = "fuchsia",
-    target_os = "haiku",
-    target_os = "redox",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
     let mut result = MaybeUninit::<libc_rlimit>::uninit();
@@ -318,12 +308,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
     }
 }
 
-#[cfg(not(any(
-    target_os = "fuchsia",
-    target_os = "haiku",
-    target_os = "redox",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
     let lim = rlimit_to_libc(new)?;
@@ -347,12 +332,7 @@ pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Res
 }
 
 /// Convert a Rust [`Rlimit`] to a C `libc_rlimit`.
-#[cfg(not(any(
-    target_os = "fuchsia",
-    target_os = "haiku",
-    target_os = "redox",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 fn rlimit_from_libc(lim: libc_rlimit) -> Rlimit {
     let current = if lim.rlim_cur == LIBC_RLIM_INFINITY {
         None
@@ -368,12 +348,7 @@ fn rlimit_from_libc(lim: libc_rlimit) -> Rlimit {
 }
 
 /// Convert a C `libc_rlimit` to a Rust `Rlimit`.
-#[cfg(not(any(
-    target_os = "fuchsia",
-    target_os = "haiku",
-    target_os = "redox",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 fn rlimit_to_libc(lim: Rlimit) -> io::Result<libc_rlimit> {
     let Rlimit { current, maximum } = lim;
     let rlim_cur = match current {
