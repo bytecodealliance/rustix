@@ -9,6 +9,7 @@ bitflags! {
             windows,
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
@@ -30,6 +31,7 @@ bitflags! {
             windows,
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
@@ -49,7 +51,7 @@ bitflags! {
 bitflags! {
     /// `MSG_*`
     pub struct RecvFlags: i32 {
-        #[cfg(not(any(windows, target_os = "illumos", target_os = "ios", target_os = "macos", target_os = "solaris")))]
+        #[cfg(not(any(windows, target_os = "haiku", target_os = "illumos", target_os = "ios", target_os = "macos", target_os = "solaris")))]
         /// `MSG_CMSG_CLOEXEC`
         const CMSG_CLOEXEC = c::MSG_CMSG_CLOEXEC;
         /// `MSG_DONTWAIT`
@@ -60,6 +62,7 @@ bitflags! {
             windows,
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",

@@ -109,6 +109,7 @@ impl SocketAddrUnix {
             #[cfg(any(
                 target_os = "dragonfly",
                 target_os = "freebsd",
+                target_os = "haiku",
                 target_os = "ios",
                 target_os = "macos",
                 target_os = "netbsd",
@@ -128,12 +129,15 @@ impl SocketAddrUnix {
             #[cfg(not(any(
                 target_os = "dragonfly",
                 target_os = "freebsd",
+                target_os = "haiku",
                 target_os = "ios",
                 target_os = "macos",
                 target_os = "netbsd",
                 target_os = "openbsd",
             )))]
             sun_path: [0; 108],
+            #[cfg(target_os = "haiku")]
+            sun_path: [0; 126],
         }
     }
 
@@ -273,6 +277,7 @@ pub(crate) fn offsetof_sun_path() -> usize {
         #[cfg(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -282,6 +287,7 @@ pub(crate) fn offsetof_sun_path() -> usize {
         #[cfg(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -291,6 +297,7 @@ pub(crate) fn offsetof_sun_path() -> usize {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -309,12 +316,15 @@ pub(crate) fn offsetof_sun_path() -> usize {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
         )))]
         sun_path: [0; 108],
+        #[cfg(target_os = "haiku")]
+        sun_path: [0; 126],
     };
     (crate::utils::as_ptr(&z.sun_path) as usize) - (crate::utils::as_ptr(&z) as usize)
 }

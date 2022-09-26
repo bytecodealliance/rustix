@@ -1,6 +1,6 @@
 use super::super::c;
 use super::super::conv::owned_fd;
-#[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+#[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
 use super::types::FileType;
 use crate::fd::{AsFd, BorrowedFd};
 use crate::ffi::CStr;
@@ -8,6 +8,7 @@ use crate::ffi::CStr;
 use crate::ffi::CString;
 use crate::fs::{fcntl_getfl, fstat, openat, Mode, OFlags, Stat};
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
@@ -16,6 +17,7 @@ use crate::fs::{fcntl_getfl, fstat, openat, Mode, OFlags, Stat};
 )))]
 use crate::fs::{fstatfs, StatFs};
 #[cfg(not(any(
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "redox",
     target_os = "solaris",
@@ -137,6 +139,7 @@ impl Dir {
 
     /// `fstatfs(self)`
     #[cfg(not(any(
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "netbsd",
         target_os = "redox",
@@ -150,6 +153,7 @@ impl Dir {
 
     /// `fstatvfs(self)`
     #[cfg(not(any(
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "redox",
         target_os = "solaris",
@@ -172,12 +176,13 @@ impl Dir {
 // struct, as the name is NUL-terminated and memory may not be allocated for
 // the full extent of the struct. Copy the fields one at a time.
 unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
-    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     let d_type = input.d_type;
 
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -217,16 +222,24 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     #[cfg(any(target_os = "ios", target_os = "macos"))]
     let d_seekoff = input.d_seekoff;
 
+    #[cfg(target_os = "haiku")]
+    let d_dev = input.d_dev;
+    #[cfg(target_os = "haiku")]
+    let d_pdev = input.d_pdev;
+    #[cfg(target_os = "haiku")]
+    let d_pino = input.d_pino;
+
     // Construct the input. Rust will give us an error if any OS has a input
     // with a field that we missed here. And we can avoid blindly copying the
     // whole `d_name` field, which may not be entirely allocated.
     #[cfg_attr(target_os = "wasi", allow(unused_mut))]
     #[cfg(not(target_os = "dragonfly"))]
     let mut dirent = libc_dirent {
-        #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+        #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
         d_type,
         #[cfg(not(any(
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -261,7 +274,19 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
         d_name: zeroed(),
         #[cfg(target_os = "openbsd")]
         __d_padding: zeroed(),
+        #[cfg(target_os = "haiku")]
+        d_dev,
+        #[cfg(target_os = "haiku")]
+        d_pdev,
+        #[cfg(target_os = "haiku")]
+        d_pino,
     };
+    /*
+    pub d_ino: ino_t,
+    pub d_pino: i64,
+    pub d_reclen: ::c_ushort,
+    pub d_name: [::c_char; 1024], // Max length is _POSIX_PATH_MAX
+                                  // */
 
     // On dragonfly, `dirent` has some non-public padding fields so we can't
     // directly initialize it.
@@ -339,7 +364,7 @@ impl DirEntry {
     }
 
     /// Returns the type of this directory entry.
-    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     #[inline]
     pub fn file_type(&self) -> FileType {
         FileType::from_dirent_d_type(self.dirent.d_type)
@@ -354,7 +379,7 @@ impl DirEntry {
     )))]
     #[inline]
     pub fn ino(&self) -> u64 {
-        self.dirent.d_ino
+        self.dirent.d_ino as u64
     }
 
     /// Return the inode number of this directory entry.

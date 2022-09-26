@@ -61,6 +61,7 @@ fn invalid_offset_fallocate() {
 
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",

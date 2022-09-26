@@ -11,12 +11,7 @@ mod kill;
 mod membarrier;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))] // WASI doesn't have [gs]etpriority.
 mod priority;
-#[cfg(not(any(
-    target_os = "fuchsia",
-    target_os = "haiku",
-    target_os = "redox",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 mod rlimit;
 #[cfg(any(
     target_os = "android",
@@ -62,12 +57,7 @@ pub use priority::{
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use rlimit::prlimit;
-#[cfg(not(any(
-    target_os = "fuchsia",
-    target_os = "haiku",
-    target_os = "redox",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 pub use rlimit::{getrlimit, setrlimit, Resource, Rlimit};
 #[cfg(any(
     target_os = "android",
