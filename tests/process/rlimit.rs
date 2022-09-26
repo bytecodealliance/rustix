@@ -1,4 +1,6 @@
-use rustix::process::{Resource, Rlimit};
+use rustix::process::Resource;
+#[cfg(not(target_os = "haiku"))] // No `Core` on Haiku.
+use rustix::process::Rlimit;
 
 #[test]
 fn test_getrlimit() {
@@ -7,6 +9,7 @@ fn test_getrlimit() {
     assert_ne!(lim.maximum, Some(0));
 }
 
+#[cfg(not(target_os = "haiku"))] // No `Core` on Haiku.
 #[test]
 fn test_setrlimit() {
     let old = rustix::process::getrlimit(Resource::Core);

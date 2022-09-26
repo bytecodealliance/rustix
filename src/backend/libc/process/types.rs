@@ -41,12 +41,7 @@ pub enum MembarrierCommand {
 /// [`getrlimit`]: crate::process::getrlimit
 /// [`setrlimit`]: crate::process::setrlimit
 /// [`prlimit`]: crate::process::prlimit
-#[cfg(not(any(
-    target_os = "fuchsia",
-    target_os = "haiku",
-    target_os = "redox",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(i32)]
 pub enum Resource {
@@ -59,9 +54,11 @@ pub enum Resource {
     /// `RLIMIT_STACK`
     Stack = c::RLIMIT_STACK as c::c_int,
     /// `RLIMIT_CORE`
+    #[cfg(not(target_os = "haiku"))]
     Core = c::RLIMIT_CORE as c::c_int,
     /// `RLIMIT_RSS`
     #[cfg(not(any(
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -69,12 +66,12 @@ pub enum Resource {
     )))]
     Rss = c::RLIMIT_RSS as c::c_int,
     /// `RLIMIT_NPROC`
-    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     Nproc = c::RLIMIT_NPROC as c::c_int,
     /// `RLIMIT_NOFILE`
     Nofile = c::RLIMIT_NOFILE as c::c_int,
     /// `RLIMIT_MEMLOCK`
-    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
     Memlock = c::RLIMIT_MEMLOCK as c::c_int,
     /// `RLIMIT_AS`
     #[cfg(not(target_os = "openbsd"))]
@@ -83,6 +80,7 @@ pub enum Resource {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -95,6 +93,7 @@ pub enum Resource {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -107,6 +106,7 @@ pub enum Resource {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -119,6 +119,7 @@ pub enum Resource {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -131,6 +132,7 @@ pub enum Resource {
     #[cfg(not(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
@@ -145,6 +147,7 @@ pub enum Resource {
         target_os = "dragonfly",
         target_os = "emscripten",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "illumos",
         target_os = "ios",
         target_os = "macos",

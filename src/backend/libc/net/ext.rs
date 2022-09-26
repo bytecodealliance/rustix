@@ -148,6 +148,7 @@ pub(crate) const fn sockaddr_in6_new(
     #[cfg(any(
         target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "haiku",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
@@ -164,6 +165,7 @@ pub(crate) const fn sockaddr_in6_new(
         #[cfg(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",

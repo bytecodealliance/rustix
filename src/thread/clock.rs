@@ -30,6 +30,7 @@ pub use backend::time::types::ClockId;
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "openbsd",
@@ -57,6 +58,7 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRel
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "openbsd",

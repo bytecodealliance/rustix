@@ -2,6 +2,7 @@ use crate::backend;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -12,6 +13,7 @@ pub use backend::termios::types::B1000000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -22,6 +24,7 @@ pub use backend::termios::types::B1152000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -32,6 +35,7 @@ pub use backend::termios::types::B1500000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -42,6 +46,7 @@ pub use backend::termios::types::B2000000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -52,6 +57,7 @@ pub use backend::termios::types::B2500000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -62,6 +68,7 @@ pub use backend::termios::types::B3000000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -72,6 +79,7 @@ pub use backend::termios::types::B3500000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -81,6 +89,7 @@ pub use backend::termios::types::B3500000;
 pub use backend::termios::types::B4000000;
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "openbsd"
@@ -89,6 +98,7 @@ pub use backend::termios::types::B460800;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -100,6 +110,7 @@ pub use backend::termios::types::B500000;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -110,6 +121,7 @@ pub use backend::termios::types::B500000;
 pub use backend::termios::types::B576000;
 #[cfg(not(any(
     target_os = "dragonfly",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "openbsd"
@@ -160,6 +172,7 @@ pub use backend::termios::types::BSDLY;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -170,6 +183,7 @@ pub use backend::termios::types::CBAUD;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -183,6 +197,7 @@ pub use backend::termios::types::CBAUDEX;
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
@@ -196,6 +211,7 @@ pub use backend::termios::types::CLOCAL;
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -307,6 +323,7 @@ pub use backend::termios::types::ECHONL;
 pub use backend::termios::types::ECHOPRT;
 #[cfg(not(any(
     target_os = "emscripten",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -316,6 +333,7 @@ pub use backend::termios::types::ECHOPRT;
 pub use backend::termios::types::EXTA;
 #[cfg(not(any(
     target_os = "emscripten",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -323,7 +341,12 @@ pub use backend::termios::types::EXTA;
     target_os = "solaris",
 )))]
 pub use backend::termios::types::EXTB;
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "haiku",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "redox"
+)))]
 pub use backend::termios::types::EXTPROC;
 #[cfg(not(any(
     target_os = "dragonfly",
@@ -380,7 +403,12 @@ pub use backend::termios::types::IGNBRK;
 pub use backend::termios::types::IGNCR;
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
 pub use backend::termios::types::IGNPAR;
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "haiku",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "redox"
+)))]
 pub use backend::termios::types::IMAXBEL;
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
 pub use backend::termios::types::INLCR;
@@ -402,6 +430,7 @@ pub use backend::termios::types::IUCLC;
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -574,6 +603,7 @@ pub use backend::termios::types::TOSTOP;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -628,6 +658,7 @@ pub use backend::termios::types::XCASE;
 #[cfg(not(any(
     target_os = "dragonfly",
     target_os = "freebsd",
+    target_os = "haiku",
     target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
@@ -639,9 +670,11 @@ pub use backend::termios::types::XCASE;
 pub use backend::termios::types::XTABS;
 pub use backend::termios::types::{
     B0, B110, B115200, B1200, B134, B150, B1800, B19200, B200, B230400, B2400, B300, B38400, B4800,
-    B50, B57600, B600, B75, B9600, ICANON, VDISCARD, VEOF, VEOL, VEOL2, VERASE, VINTR, VKILL,
-    VLNEXT, VMIN, VQUIT, VREPRINT, VSTART, VSTOP, VSUSP, VTIME, VWERASE,
+    B50, B57600, B600, B75, B9600, ICANON, VEOF, VEOL, VEOL2, VERASE, VINTR, VKILL, VMIN, VQUIT,
+    VSTART, VSTOP, VSUSP, VTIME,
 };
+#[cfg(not(target_os = "haiku"))]
+pub use backend::termios::types::{VDISCARD, VLNEXT, VREPRINT, VWERASE};
 
 /// Translate from a `Speed` code to a speed value `u32`.
 ///
@@ -672,6 +705,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         backend::termios::types::B230400 => Some(230_400),
         #[cfg(not(any(
             target_os = "dragonfly",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "openbsd"
@@ -680,6 +714,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
@@ -691,6 +726,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "illumos",
             target_os = "ios",
             target_os = "macos",
@@ -701,6 +737,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         backend::termios::types::B576000 => Some(576_000),
         #[cfg(not(any(
             target_os = "dragonfly",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "openbsd"
@@ -709,6 +746,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -719,6 +757,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -729,6 +768,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -739,6 +779,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -749,6 +790,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -759,6 +801,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -769,6 +812,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
@@ -779,6 +823,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         #[cfg(not(any(
             target_os = "dragonfly",
             target_os = "freebsd",
+            target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
             target_os = "netbsd",
