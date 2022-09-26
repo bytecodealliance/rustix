@@ -187,6 +187,8 @@ jobs:
     - run: cargo check -Z build-std --target x86_64-unknown-openbsd --all-targets --features=all-apis
     - run: cargo check -Z build-std --target mips64-openwrt-linux-musl --all-targets --features=all-apis
     - run: cargo check -Z build-std --target x86_64-unknown-dragonfly --all-targets --features=all-apis
+    # Omit --all-targets on haiku because not all the tests build yet.
+    - run: cargo check -Z build-std --target x86_64-unknown-haiku --features=all-apis
     # x86_64-uwp-windows-msvc isn't currently working.
     #- run: cargo check -Z build-std --target x86_64-uwp-windows-msvc --all-targets --features=all-apis
 
