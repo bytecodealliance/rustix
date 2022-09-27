@@ -161,6 +161,7 @@ jobs:
         wasm32-wasi
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-redox --features=all-apis
     - run: cargo check --workspace --release -vv --target=wasm32-wasi --features=all-apis
+    - run: cargo check --workspace --release -vv --target=thumbv7neon-unknown-linux-gnueabihf --features=all-apis
 
   check_tier3:
     name: Check selected Tier 3 platforms
