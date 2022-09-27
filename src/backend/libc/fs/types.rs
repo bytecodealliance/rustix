@@ -820,7 +820,7 @@ bitflags! {
         const NOATIME = libc::ST_NOATIME as u64;
 
         /// `ST_NODEV`
-        #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux", target_os = "aix"))]
+        #[cfg(any(target_os = "aix", target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
         const NODEV = libc::ST_NODEV as u64;
 
         /// `ST_NODIRATIME`
