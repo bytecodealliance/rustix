@@ -221,7 +221,12 @@ pub enum Signal {
         target_os = "solaris",
         all(
             any(target_os = "android", target_os = "linux"),
-            any(target_arch = "mips", target_arch = "mips64"),
+            any(
+                target_arch = "mips",
+                target_arch = "mips64",
+                target_arch = "sparc",
+                target_arch = "sparc64"
+            ),
         )
     )))]
     Stkflt = c::SIGSTKFLT,
@@ -304,7 +309,12 @@ impl Signal {
                 target_os = "solaris",
                 all(
                     any(target_os = "android", target_os = "linux"),
-                    any(target_arch = "mips", target_arch = "mips64"),
+                    any(
+                        target_arch = "mips",
+                        target_arch = "mips64",
+                        target_arch = "sparc",
+                        target_arch = "sparc64"
+                    ),
                 )
             )))]
             c::SIGSTKFLT => Some(Self::Stkflt),
