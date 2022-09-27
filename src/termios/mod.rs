@@ -52,6 +52,8 @@ pub use constants::B1500000;
 )))]
 pub use constants::B2000000;
 #[cfg(not(any(
+    target_arch = "sparc",
+    target_arch = "sparc64",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -63,6 +65,8 @@ pub use constants::B2000000;
 )))]
 pub use constants::B2500000;
 #[cfg(not(any(
+    target_arch = "sparc",
+    target_arch = "sparc64",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -74,6 +78,8 @@ pub use constants::B2500000;
 )))]
 pub use constants::B3000000;
 #[cfg(not(any(
+    target_arch = "sparc",
+    target_arch = "sparc64",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -85,6 +91,8 @@ pub use constants::B3000000;
 )))]
 pub use constants::B3500000;
 #[cfg(not(any(
+    target_arch = "sparc",
+    target_arch = "sparc64",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
