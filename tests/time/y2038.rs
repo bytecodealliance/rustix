@@ -14,6 +14,7 @@
 #[cfg(not(all(target_env = "musl", target_pointer_width = "32")))]
 #[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
 #[cfg(not(all(target_os = "emscripten", target_pointer_width = "32")))]
+#[cfg(not(all(target_os = "linux", target_arch = "sparc")))]
 #[test]
 fn test_y2038() {
     use rustix::time::{Secs, Timespec};
