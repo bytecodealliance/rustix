@@ -26,6 +26,7 @@ impl Errno {
     /// `EADV`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -55,6 +56,7 @@ impl Errno {
     /// `EBADE`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -70,6 +72,7 @@ impl Errno {
     /// `EBADFD`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -86,6 +89,7 @@ impl Errno {
     /// `EBADR`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -109,6 +113,7 @@ impl Errno {
     /// `EBADRQC`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -122,6 +127,7 @@ impl Errno {
     /// `EBADSLT`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -135,6 +141,7 @@ impl Errno {
     /// `EBFONT`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -172,6 +179,7 @@ impl Errno {
     /// `ECOMM`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -194,6 +202,7 @@ impl Errno {
     /// `EDEADLOCK`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "android",
         target_os = "dragonfly",
         target_os = "freebsd",
@@ -219,6 +228,7 @@ impl Errno {
     /// `EDOTDOT`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -260,6 +270,7 @@ impl Errno {
     /// `EHWPOISON`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "android",
         target_os = "dragonfly",
         target_os = "freebsd",
@@ -308,6 +319,7 @@ impl Errno {
     /// `EISNAM`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -323,6 +335,7 @@ impl Errno {
     /// `EKEYEXPIRED`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -338,6 +351,7 @@ impl Errno {
     /// `EKEYREJECTED`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -353,6 +367,7 @@ impl Errno {
     /// `EKEYREVOKED`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -420,6 +435,7 @@ impl Errno {
     /// `ELIBACC`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -433,6 +449,7 @@ impl Errno {
     /// `ELIBBAD`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -446,6 +463,7 @@ impl Errno {
     /// `ELIBEXEC`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -459,6 +477,7 @@ impl Errno {
     /// `ELIBMAX`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -472,6 +491,7 @@ impl Errno {
     /// `ELIBSCN`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -500,6 +520,7 @@ impl Errno {
     /// `EMEDIUMTYPE`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -527,6 +548,7 @@ impl Errno {
     /// `ENAVAIL`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -561,6 +583,7 @@ impl Errno {
     /// `ENOANO`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -619,6 +642,7 @@ impl Errno {
     /// `ENOKEY`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -640,6 +664,7 @@ impl Errno {
     /// `ENOMEDIUM`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -664,6 +689,7 @@ impl Errno {
     /// `ENONET`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -677,6 +703,7 @@ impl Errno {
     /// `ENOPKG`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -731,6 +758,7 @@ impl Errno {
     /// `ENOTNAM`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -762,6 +790,7 @@ impl Errno {
     /// `ENOTUNIQ`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -856,6 +885,7 @@ impl Errno {
     /// `EREMCHG`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -872,6 +902,7 @@ impl Errno {
     /// `EREMOTEIO`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -900,6 +931,7 @@ impl Errno {
     /// `ERFKILL`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "android",
         target_os = "dragonfly",
         target_os = "freebsd",
@@ -942,6 +974,7 @@ impl Errno {
     /// `ESRMNT`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -957,6 +990,7 @@ impl Errno {
     /// `ESTRPIPE`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -991,6 +1025,7 @@ impl Errno {
     /// `EUCLEAN`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -1027,6 +1062,7 @@ impl Errno {
     /// `EXFULL`
     #[cfg(not(any(
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
