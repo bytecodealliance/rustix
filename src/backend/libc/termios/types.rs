@@ -766,6 +766,8 @@ pub const B2000000: Speed = c::B2000000;
 
 /// `B2500000`
 #[cfg(not(any(
+    target_arch = "sparc",
+    target_arch = "sparc64",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -779,6 +781,8 @@ pub const B2500000: Speed = c::B2500000;
 
 /// `B3000000`
 #[cfg(not(any(
+    target_arch = "sparc",
+    target_arch = "sparc64",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -792,6 +796,8 @@ pub const B3000000: Speed = c::B3000000;
 
 /// `B3500000`
 #[cfg(not(any(
+    target_arch = "sparc",
+    target_arch = "sparc64",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -805,6 +811,8 @@ pub const B3500000: Speed = c::B3500000;
 
 /// `B4000000`
 #[cfg(not(any(
+    target_arch = "sparc",
+    target_arch = "sparc64",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
