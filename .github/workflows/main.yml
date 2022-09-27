@@ -159,6 +159,7 @@ jobs:
         rustup target add
         x86_64-unknown-redox
         wasm32-wasi
+        thumbv7neon-unknown-linux-gnueabihf
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-redox --features=all-apis
     - run: cargo check --workspace --release -vv --target=wasm32-wasi --features=all-apis
     - run: cargo check --workspace --release -vv --target=thumbv7neon-unknown-linux-gnueabihf --features=all-apis
