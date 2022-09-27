@@ -174,6 +174,7 @@ pub use fcopyfile::{
 )))]
 pub use fd::fdatasync;
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "illumos",
     target_os = "netbsd",

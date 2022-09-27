@@ -12,6 +12,7 @@ use backend::fd::{AsFd, BorrowedFd};
 pub use backend::fs::types::FlockOperation;
 
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "illumos",
     target_os = "netbsd",
@@ -233,6 +234,7 @@ pub fn futimens<Fd: AsFd>(fd: Fd, times: &Timestamps) -> io::Result<()> {
 /// [Linux `fallocate`]: https://man7.org/linux/man-pages/man2/fallocate.2.html
 /// [Linux `posix_fallocate`]: https://man7.org/linux/man-pages/man3/posix_fallocate.3.html
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "illumos",
     target_os = "netbsd",

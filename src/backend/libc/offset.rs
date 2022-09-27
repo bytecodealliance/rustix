@@ -328,6 +328,7 @@ pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
 
 #[cfg(not(any(
     windows,
+    target_os = "aix",
     target_os = "android",
     target_os = "dragonfly",
     target_os = "fuchsia",
