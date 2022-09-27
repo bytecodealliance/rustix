@@ -12,9 +12,10 @@ use super::super::offset::{libc_preadv, libc_pwritev};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::super::offset::{libc_preadv2, libc_pwritev2};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 use crate::io::DupFlags;
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
@@ -382,6 +383,7 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
 }
 
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "android",
     target_os = "dragonfly",
     target_os = "haiku",
@@ -442,6 +444,7 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
 }
 
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "haiku",
     target_os = "ios",
     target_os = "macos",

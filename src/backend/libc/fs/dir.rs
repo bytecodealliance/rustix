@@ -176,10 +176,16 @@ impl Dir {
 // struct, as the name is NUL-terminated and memory may not be allocated for
 // the full extent of the struct. Copy the fields one at a time.
 unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
-    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(
+        target_os = "aix",
+        target_os = "haiku",
+        target_os = "illumos",
+        target_os = "solaris"
+    )))]
     let d_type = input.d_type;
 
     #[cfg(not(any(
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
@@ -189,6 +195,9 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
         target_os = "wasi",
     )))]
     let d_off = input.d_off;
+
+    #[cfg(target_os = "aix")]
+    let d_offset = input.d_offset;
 
     #[cfg(not(any(
         target_os = "dragonfly",
@@ -235,9 +244,15 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     #[cfg_attr(target_os = "wasi", allow(unused_mut))]
     #[cfg(not(target_os = "dragonfly"))]
     let mut dirent = libc_dirent {
-        #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
+        #[cfg(not(any(
+            target_os = "aix",
+            target_os = "haiku",
+            target_os = "illumos",
+            target_os = "solaris"
+        )))]
         d_type,
         #[cfg(not(any(
+            target_os = "aix",
             target_os = "freebsd",
             target_os = "haiku",
             target_os = "ios",
@@ -246,6 +261,8 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
             target_os = "wasi",
         )))]
         d_off,
+        #[cfg(target_os = "aix")]
+        d_offset,
         #[cfg(not(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd")))]
         d_ino,
         #[cfg(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))]
@@ -253,6 +270,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
         #[cfg(not(target_os = "wasi"))]
         d_reclen,
         #[cfg(any(
+            target_os = "aix",
             target_os = "freebsd",
             target_os = "ios",
             target_os = "macos",
@@ -364,7 +382,12 @@ impl DirEntry {
     }
 
     /// Returns the type of this directory entry.
-    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(
+        target_os = "aix",
+        target_os = "haiku",
+        target_os = "illumos",
+        target_os = "solaris"
+    )))]
     #[inline]
     pub fn file_type(&self) -> FileType {
         FileType::from_dirent_d_type(self.dirent.d_type)
