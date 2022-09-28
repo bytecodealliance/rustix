@@ -174,10 +174,13 @@ fn can_compile(code: &str) -> bool {
     use std::process::Stdio;
     let out_dir = var("OUT_DIR").unwrap();
     let rustc = var("RUSTC").unwrap();
+    let target = var("TARGET").unwrap();
 
     let mut child = std::process::Command::new(rustc)
         .arg("--crate-type=rlib") // Don't require `main`.
         .arg("--emit=metadata") // Do as little as possible but still parse.
+        .arg("--target")
+        .arg(target)
         .arg("--out-dir")
         .arg(out_dir) // Put the output somewhere inconsequential.
         .arg("-") // Read from stdin.
