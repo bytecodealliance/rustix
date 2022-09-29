@@ -101,6 +101,11 @@ fn main() {
         }
     }
 
+    // Detect whether the compiler requires us to use thumb mode on ARM.
+    if arch == "arm" && use_thumb_mode() {
+        use_feature("thumb_mode");
+    }
+
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM");
 }
 
@@ -149,6 +154,11 @@ fn link_in_librustix_outline(arch: &str, asm_name: &str) {
             );
         }
     }
+}
+
+fn use_thumb_mode() -> bool {
+    // In thumb mode, r7 is reserved.
+    !can_compile("pub unsafe fn f() { core::arch::asm!(\"udf #16\", in(\"r7\") 0); }")
 }
 
 fn use_feature_or_nothing(feature: &str) {
