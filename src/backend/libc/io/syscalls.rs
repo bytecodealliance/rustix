@@ -22,6 +22,7 @@ use crate::io::{EventfdFlags, ReadWriteFlags, SpliceFlags};
 use core::cmp::min;
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
+#[cfg(any(target_os = "android", target_os = "linux"))]
 use core::ptr;
 #[cfg(feature = "net")]
 use libc_errno::errno;

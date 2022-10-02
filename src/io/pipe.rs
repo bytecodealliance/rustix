@@ -1,6 +1,7 @@
 use crate::backend;
 use crate::fd::OwnedFd;
 use crate::io;
+#[cfg(any(target_os = "android", target_os = "linux"))]
 use backend::fd::AsFd;
 
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
