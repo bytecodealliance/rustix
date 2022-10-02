@@ -58,7 +58,22 @@ pub fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     backend::io::syscalls::pipe_with(flags)
 }
 
-/// splice
+/// `splice(fd_in, off_in, fd_out, off_out, len, flags)`—Splice data to/from a pipe.
+///
+/// This function transfers up to `len` bytes of data from the file descriptor `fd_in`
+/// to the file descriptor `fd_out`, where one of the file descriptors
+/// must refer to a pipe.
+///
+/// `off_*` must be `None` if the corresponding fd refers to a pipe.
+/// Otherwise its value is the starting offset to the file,
+/// from which the data is read/written.
+/// passing `None` causes the read/write to start from the file offset,
+/// and the file offset is adjusted appropriately.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/splice.2.html
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub fn splice<FdIn: AsFd, FdOut: AsFd>(
