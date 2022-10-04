@@ -37,8 +37,6 @@ bitflags! {
         const NONBLOCK = c::SPLICE_F_NONBLOCK;
         /// `SPLICE_F_MORE`
         const MORE = c::SPLICE_F_MORE;
-        /// `SPLICE_F_GIFT`
-        const GIFT = c::SPLICE_F_GIFT;
     }
 }
 
