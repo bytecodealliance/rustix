@@ -19,7 +19,8 @@ use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::io::SpliceFlags;
 use crate::io::{
-    self, epoll, DupFlags, EventfdFlags, IoSlice, IoSliceMut, PipeFlags, PollFd, ReadWriteFlags,
+    self, epoll, DupFlags, EventfdFlags, IoSlice, IoSliceMut, IoSliceRaw, PipeFlags, PollFd,
+    ReadWriteFlags,
 };
 #[cfg(feature = "net")]
 use crate::net::{RecvFlags, SendFlags};
@@ -581,4 +582,21 @@ pub fn splice(
             c_uint(flags.bits())
         ))
     }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub unsafe fn vmsplice(
+    fd: BorrowedFd,
+    bufs: &[IoSliceRaw],
+    flags: SpliceFlags,
+) -> io::Result<usize> {
+    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
+    ret_usize(syscall!(
+        __NR_vmsplice,
+        fd,
+        bufs_addr,
+        bufs_len,
+        c_uint(flags.bits())
+    ))
 }
