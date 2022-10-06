@@ -30,6 +30,8 @@ bitflags! {
         const NONBLOCK = linux_raw_sys::general::SPLICE_F_NONBLOCK;
         /// `SPLICE_F_MORE`
         const MORE = linux_raw_sys::general::SPLICE_F_MORE;
+        /// `SPLICE_F_GIFT`
+        const GIFT = linux_raw_sys::general::SPLICE_F_GIFT;
     }
 }
 
