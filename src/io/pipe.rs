@@ -61,7 +61,7 @@ pub fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     backend::io::syscalls::pipe_with(flags)
 }
 
-/// `splice(fd_in, off_in, fd_out, off_out, len, flags)`—Splice data to/from a pipe.
+/// `splice(fd_in, off_in, fd_out, off_out, len, flags)`—Transfer data between a file and a pipe.
 ///
 /// This function transfers up to `len` bytes of data from the file descriptor `fd_in`
 /// to the file descriptor `fd_out`, where one of the file descriptors
