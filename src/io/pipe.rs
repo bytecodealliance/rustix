@@ -90,7 +90,21 @@ pub fn splice<FdIn: AsFd, FdOut: AsFd>(
     backend::io::syscalls::splice(fd_in.as_fd(), off_in, fd_out.as_fd(), off_out, len, flags)
 }
 
-/// vmsplice
+/// `vmsplice(fd, bufs, flags)`—Transfer data between memory and a pipe.
+///
+/// If `fd` is the write end of the pipe,
+/// the function maps the memory pointer at by `bufs` to the pipe.
+///
+/// If `fd` is the read end of the pipe,
+/// the function writes data from the pipe to said memory.
+///
+/// # Safety
+/// if the memory must not be mutated (such as when `bufs` were originally immutable slices),
+/// it is up to the caller to ensure that the write end of the pipe is placed in `fd`.
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/vmsplice.2.html
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub unsafe fn vmsplice<PipeFd: AsFd>(
