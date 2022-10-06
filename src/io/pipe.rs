@@ -99,8 +99,15 @@ pub fn splice<FdIn: AsFd, FdOut: AsFd>(
 /// the function writes data from the pipe to said memory.
 ///
 /// # Safety
-/// if the memory must not be mutated (such as when `bufs` were originally immutable slices),
+///
+/// If the memory must not be mutated (such as when `bufs` were originally immutable slices),
 /// it is up to the caller to ensure that the write end of the pipe is placed in `fd`.
+///
+/// Additionally if `SpliceFlags::GIFT` is set, the caller must also ensure
+/// that the contents of `bufs` in never modified following the call,
+/// and that all of the pointers in `bufs` are page aligned,
+/// and the lengths are multiples of a page size in bytes.
+///
 /// # References
 ///  - [Linux]
 ///
