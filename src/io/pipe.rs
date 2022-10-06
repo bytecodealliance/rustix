@@ -1,3 +1,5 @@
+#![allow(unsafe_code)]
+
 use crate::backend;
 use crate::fd::OwnedFd;
 use crate::io;
@@ -86,4 +88,15 @@ pub fn splice<FdIn: AsFd, FdOut: AsFd>(
     flags: SpliceFlags,
 ) -> io::Result<usize> {
     backend::io::syscalls::splice(fd_in.as_fd(), off_in, fd_out.as_fd(), off_out, len, flags)
+}
+
+/// vmsplice
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub unsafe fn vmsplice<PipeFd: AsFd>(
+    fd: PipeFd,
+    bufs: &[io::IoSliceRaw],
+    flags: SpliceFlags,
+) -> io::Result<usize> {
+    backend::io::syscalls::vmsplice(fd.as_fd(), bufs, flags)
 }
