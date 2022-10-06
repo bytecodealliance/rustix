@@ -57,7 +57,7 @@ pub use pipe::PIPE_BUF;
 #[cfg(not(any(windows, target_os = "ios", target_os = "macos", target_os = "wasi")))]
 pub use pipe::{pipe_with, PipeFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use pipe::{splice, IoSliceRaw, SpliceFlags};
+pub use pipe::{splice, vmsplice, IoSliceRaw, SpliceFlags};
 pub use poll::{poll, PollFd, PollFlags};
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
 pub use procfs::{proc_self_fd, proc_self_fdinfo_fd, proc_self_maps, proc_self_pagemap};
