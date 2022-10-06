@@ -60,3 +60,45 @@ fn test_splice_pipe2pipe() {
 
     assert_eq!(&buff, b"hello");
 }
+
+#[cfg(feature = "fs")]
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[test]
+fn test_vmsplice_write() {
+    use rustix::io::{pipe, read, vmsplice, IoSliceRaw, SpliceFlags};
+
+    let (read_p, write_p) = pipe().unwrap();
+    let mut output = [0; 11];
+    let input = [
+        IoSliceRaw::from_slice(b"hello"),
+        IoSliceRaw::from_slice(b" "),
+        IoSliceRaw::from_slice(b"world"),
+    ];
+
+    unsafe { vmsplice(&write_p, &input, SpliceFlags::empty()).unwrap() };
+    read(&read_p, &mut output).unwrap();
+
+    assert_eq!(&output, b"hello world");
+}
+
+#[cfg(feature = "fs")]
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[test]
+fn test_vmsplice_read() {
+    use rustix::io::{pipe, vmsplice, write, IoSliceRaw, SpliceFlags};
+
+    let (read_p, write_p) = pipe().unwrap();
+    let mut outputs = ([0; 5], [0; 1], [0; 5]);
+    let outputs_slices = [
+        IoSliceRaw::from_slice_mut(&mut outputs.0),
+        IoSliceRaw::from_slice_mut(&mut outputs.1),
+        IoSliceRaw::from_slice_mut(&mut outputs.2),
+    ];
+
+    write(&write_p, b"hello world").unwrap();
+    unsafe { vmsplice(&read_p, &outputs_slices, SpliceFlags::empty()).unwrap() };
+
+    assert_eq!(&outputs.0, b"hello");
+    assert_eq!(&outputs.1, b" ");
+    assert_eq!(&outputs.2, b"world");
+}
