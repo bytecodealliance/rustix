@@ -18,7 +18,7 @@ use crate::io::DupFlags;
 use crate::io::PipeFlags;
 use crate::io::{self, IoSlice, IoSliceMut, PollFd};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::io::{EventfdFlags, ReadWriteFlags, SpliceFlags};
+use crate::io::{EventfdFlags, IoSliceRaw, ReadWriteFlags, SpliceFlags};
 use core::cmp::min;
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
@@ -487,5 +487,21 @@ pub fn splice(
             flags.bits(),
         )
     })
+    .map(|spliced| spliced as usize)
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub unsafe fn vmsplice(
+    fd: BorrowedFd,
+    bufs: &[IoSliceRaw],
+    flags: SpliceFlags,
+) -> io::Result<usize> {
+    ret_ssize_t(c::vmsplice(
+        borrowed_fd(fd),
+        bufs.as_ptr().cast::<c::iovec>(),
+        min(bufs.len(), max_iov()),
+        flags.bits(),
+    ))
     .map(|spliced| spliced as usize)
 }
