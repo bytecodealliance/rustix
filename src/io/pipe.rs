@@ -8,7 +8,7 @@ use backend::fd::AsFd;
 pub use backend::io::types::PipeFlags;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use backend::io::types::SpliceFlags;
+pub use backend::io::types::{IoSliceRaw, SpliceFlags};
 
 /// `PIPE_BUF`—The maximum length at which writes to a pipe are atomic.
 ///
