@@ -110,3 +110,30 @@ pub(crate) const STDIN_FILENO: c::c_int = c::STDIN_FILENO;
 pub(crate) const STDOUT_FILENO: c::c_int = c::STDOUT_FILENO;
 #[cfg(not(windows))]
 pub(crate) const STDERR_FILENO: c::c_int = c::STDERR_FILENO;
+
+/// A buffer type used with `vmsplice`.
+/// It is guaranteed to be ABI compatible with the iovec type on Unix platforms and WSABUF on Windows.
+/// Unlike `IoSlice` and `IoSliceMut` it is semantically like a raw pointer,
+/// and therefore can be shared or mutated as needed.
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[repr(transparent)]
+pub struct IoSliceRaw(c::iovec);
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+impl IoSliceRaw {
+    /// Creates a new IoSlice wrapping a byte slice.
+    pub fn from_slice(buf: &[u8]) -> Self {
+        IoSliceRaw(c::iovec {
+            iov_base: buf.as_ptr() as *mut u8 as *mut c::c_void,
+            iov_len: buf.len() as _,
+        })
+    }
+
+    /// Creates a new IoSlice wrapping a mutable byte slice.
+    pub fn from_slice_mut(buf: &mut [u8]) -> Self {
+        IoSliceRaw(c::iovec {
+            iov_base: buf.as_mut_ptr() as *mut c::c_void,
+            iov_len: buf.len() as _,
+        })
+    }
+}
