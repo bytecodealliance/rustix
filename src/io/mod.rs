@@ -68,7 +68,9 @@ pub use pipe::PIPE_BUF;
 pub use pipe::{pipe_with, PipeFlags};
 pub use poll::{poll, PollFd, PollFlags};
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
-pub use procfs::{proc_self_fd, proc_self_fdinfo_fd, proc_self_maps, proc_self_pagemap};
+pub use procfs::{
+    proc_self_fd, proc_self_fdinfo_fd, proc_self_maps, proc_self_pagemap, proc_self_status,
+};
 #[cfg(not(windows))]
 pub use read_write::{pread, pwrite, read, readv, write, writev, IoSlice, IoSliceMut};
 #[cfg(not(any(

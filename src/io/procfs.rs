@@ -410,6 +410,21 @@ pub fn proc_self_maps() -> io::Result<OwnedFd> {
     proc_self_file(cstr!("maps"))
 }
 
+/// Returns a handle to a Linux `/proc/self/status` file.
+///
+/// This ensures that `/proc/self/status` is `procfs`, that nothing is
+/// mounted on top of it, and that it looks normal.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
+#[inline]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
+pub fn proc_self_status() -> io::Result<OwnedFd> {
+    proc_self_file(cstr!("status"))
+}
+
 /// Open a file under `/proc/self`.
 fn proc_self_file(name: &CStr) -> io::Result<OwnedFd> {
     let (proc_self, proc_self_stat) = proc_self()?;
