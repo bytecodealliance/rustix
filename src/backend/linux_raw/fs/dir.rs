@@ -136,15 +136,19 @@ impl Dir {
     }
 
     fn read_more(&mut self) -> Option<io::Result<()>> {
+        let og_len = self.buf.len();
         // Capacity increment currently chosen by wild guess.
         self.buf
             .resize(self.buf.capacity() + 32 * size_of::<linux_dirent64>(), 0);
-        self.pos = 0;
         let nread = match crate::backend::fs::syscalls::getdents(self.fd.as_fd(), &mut self.buf) {
             Ok(nread) => nread,
-            Err(err) => return Some(Err(err)),
+            Err(err) => {
+                self.buf.resize(og_len, 0);
+                return Some(Err(err));
+            }
         };
         self.buf.resize(nread, 0);
+        self.pos = 0;
         if nread == 0 {
             None
         } else {
