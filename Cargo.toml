@@ -109,7 +109,7 @@ targets = [
 default = ["std", "use-libc-auxv"]
 
 # This enables use of std. Disabling this enables `#![no_std], and requires
-# nightly Rust.
+# Rust 1.64 or newer.
 std = ["io-lifetimes"]
 
 # This is used in the port of std to rustix.
