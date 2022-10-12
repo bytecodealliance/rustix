@@ -1,5 +1,6 @@
 use super::super::c;
 use bitflags::bitflags;
+use core::marker::PhantomData;
 
 bitflags! {
     /// `RWF_*` constants for use with [`preadv2`] and [`pwritev2`].
@@ -86,22 +87,31 @@ pub(crate) const STDERR_FILENO: c::c_uint = linux_raw_sys::general::STDERR_FILEN
 /// Unlike `IoSlice` and `IoSliceMut` it is semantically like a raw pointer,
 /// and therefore can be shared or mutated as needed.
 #[repr(transparent)]
-pub struct IoSliceRaw(c::iovec);
+pub struct IoSliceRaw<'a> {
+    _buf: c::iovec,
+    _lifetime: PhantomData<&'a ()>,
+}
 
-impl IoSliceRaw {
+impl<'a> IoSliceRaw<'a> {
     /// Creates a new IoSlice wrapping a byte slice.
-    pub fn from_slice(buf: &[u8]) -> Self {
-        IoSliceRaw(c::iovec {
-            iov_base: buf.as_ptr() as *mut u8 as *mut c::c_void,
-            iov_len: buf.len() as _,
-        })
+    pub fn from_slice(buf: &'a [u8]) -> Self {
+        IoSliceRaw {
+            _buf: c::iovec {
+                iov_base: buf.as_ptr() as *mut u8 as *mut c::c_void,
+                iov_len: buf.len() as _,
+            },
+            _lifetime: PhantomData,
+        }
     }
 
     /// Creates a new IoSlice wrapping a mutable byte slice.
-    pub fn from_slice_mut(buf: &mut [u8]) -> Self {
-        IoSliceRaw(c::iovec {
-            iov_base: buf.as_mut_ptr() as *mut c::c_void,
-            iov_len: buf.len() as _,
-        })
+    pub fn from_slice_mut(buf: &'a mut [u8]) -> Self {
+        IoSliceRaw {
+            _buf: c::iovec {
+                iov_base: buf.as_mut_ptr() as *mut c::c_void,
+                iov_len: buf.len() as _,
+            },
+            _lifetime: PhantomData,
+        }
     }
 }

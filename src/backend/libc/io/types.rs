@@ -1,6 +1,8 @@
 use super::super::c;
 #[cfg(not(target_os = "wasi"))]
 use bitflags::bitflags;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use core::marker::PhantomData;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
@@ -119,23 +121,32 @@ pub(crate) const STDERR_FILENO: c::c_int = c::STDERR_FILENO;
 /// and therefore can be shared or mutated as needed.
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[repr(transparent)]
-pub struct IoSliceRaw(c::iovec);
+pub struct IoSliceRaw<'a> {
+    _buf: c::iovec,
+    _lifetime: PhantomData<&'a ()>,
+}
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
-impl IoSliceRaw {
+impl<'a> IoSliceRaw<'a> {
     /// Creates a new IoSlice wrapping a byte slice.
-    pub fn from_slice(buf: &[u8]) -> Self {
-        IoSliceRaw(c::iovec {
-            iov_base: buf.as_ptr() as *mut u8 as *mut c::c_void,
-            iov_len: buf.len() as _,
-        })
+    pub fn from_slice(buf: &'a [u8]) -> Self {
+        IoSliceRaw {
+            _buf: c::iovec {
+                iov_base: buf.as_ptr() as *mut u8 as *mut c::c_void,
+                iov_len: buf.len() as _,
+            },
+            _lifetime: PhantomData,
+        }
     }
 
     /// Creates a new IoSlice wrapping a mutable byte slice.
-    pub fn from_slice_mut(buf: &mut [u8]) -> Self {
-        IoSliceRaw(c::iovec {
-            iov_base: buf.as_mut_ptr() as *mut c::c_void,
-            iov_len: buf.len() as _,
-        })
+    pub fn from_slice_mut(buf: &'a mut [u8]) -> Self {
+        IoSliceRaw {
+            _buf: c::iovec {
+                iov_base: buf.as_mut_ptr() as *mut c::c_void,
+                iov_len: buf.len() as _,
+            },
+            _lifetime: PhantomData,
+        }
     }
 }
