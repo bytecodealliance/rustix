@@ -461,19 +461,17 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
 #[inline]
 pub fn splice(
     fd_in: BorrowedFd,
-    mut off_in: Option<u64>,
+    off_in: Option<&mut u64>,
     fd_out: BorrowedFd,
-    mut off_out: Option<u64>,
+    off_out: Option<&mut u64>,
     len: usize,
     flags: SpliceFlags,
 ) -> io::Result<usize> {
     let off_in = off_in
-        .as_mut()
         .map(|off| (off as *mut u64).cast())
         .unwrap_or(ptr::null_mut());
 
     let off_out = off_out
-        .as_mut()
         .map(|off| (off as *mut u64).cast())
         .unwrap_or(ptr::null_mut());
 

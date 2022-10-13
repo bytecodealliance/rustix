@@ -68,8 +68,10 @@ pub fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
 /// must refer to a pipe.
 ///
 /// `off_*` must be `None` if the corresponding fd refers to a pipe.
-/// Otherwise its value is the starting offset to the file,
+/// Otherwise its value points to the starting offset to the file,
 /// from which the data is read/written.
+/// on success the number of bytes read/written is added to the offset.
+///
 /// passing `None` causes the read/write to start from the file offset,
 /// and the file offset is adjusted appropriately.
 ///
@@ -81,9 +83,9 @@ pub fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
 #[inline]
 pub fn splice<FdIn: AsFd, FdOut: AsFd>(
     fd_in: FdIn,
-    off_in: Option<u64>,
+    off_in: Option<&mut u64>,
     fd_out: FdOut,
-    off_out: Option<u64>,
+    off_out: Option<&mut u64>,
     len: usize,
     flags: SpliceFlags,
 ) -> io::Result<usize> {

@@ -34,14 +34,34 @@ fn test_splice_offset() {
     let mut dest = tempfile::tempfile().unwrap();
     let (read_p, write_p) = pipe().unwrap();
     let mut buff = vec![];
+    let mut off_w = 0;
+    let mut off_r = 0;
 
     writeln!(src, "hello world").unwrap();
 
-    splice(&src, Some(0), &write_p, None, 5, SpliceFlags::empty()).unwrap();
-    splice(&read_p, None, &dest, Some(0), 5, SpliceFlags::empty()).unwrap();
+    splice(
+        &src,
+        Some(&mut off_w),
+        &write_p,
+        None,
+        5,
+        SpliceFlags::empty(),
+    )
+    .unwrap();
+    splice(
+        &read_p,
+        None,
+        &dest,
+        Some(&mut off_r),
+        5,
+        SpliceFlags::empty(),
+    )
+    .unwrap();
 
     dest.read_to_end(&mut buff).unwrap();
     assert_eq!(buff, b"hello");
+    assert_eq!(off_w, 5);
+    assert_eq!(off_r, 5);
 }
 
 #[cfg(feature = "fs")]

@@ -565,9 +565,9 @@ pub(crate) fn epoll_wait(
 #[inline]
 pub fn splice(
     fd_in: BorrowedFd,
-    mut off_in: Option<u64>,
+    off_in: Option<&mut u64>,
     fd_out: BorrowedFd,
-    mut off_out: Option<u64>,
+    off_out: Option<&mut u64>,
     len: usize,
     flags: SpliceFlags,
 ) -> io::Result<usize> {
@@ -575,9 +575,9 @@ pub fn splice(
         ret_usize(syscall!(
             __NR_splice,
             fd_in,
-            opt_mut(off_in.as_mut()),
+            opt_mut(off_in),
             fd_out,
-            opt_mut(off_out.as_mut()),
+            opt_mut(off_out),
             pass_usize(len),
             c_uint(flags.bits())
         ))
