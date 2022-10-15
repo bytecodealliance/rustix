@@ -381,6 +381,8 @@ pub type RawUid = c::uid_t;
 /// A CPU identifier as a raw integer.
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub type RawCpuid = u32;
+#[cfg(target_os = "freebsd")]
+pub type RawId = c::id_t;
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) type RawUname = c::utsname;

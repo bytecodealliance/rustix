@@ -19,6 +19,8 @@ mod membarrier;
 mod prctl;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))] // WASI doesn't have [gs]etpriority.
 mod priority;
+#[cfg(target_os = "freebsd")]
+mod procctl;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 mod rlimit;
 mod sched_yield;
