@@ -127,21 +127,6 @@ pub(crate) fn sockaddr_in6_sin6_scope_id(addr: c::sockaddr_in6) -> u32 {
     addr.sin6_scope_id
 }
 
-#[cfg(not(feature = "std"))]
-#[cfg(not(windows))]
-#[inline]
-pub(crate) fn sockaddr_in6_sin6_scope_id_mut(addr: &mut c::sockaddr_in6) -> &mut u32 {
-    &mut addr.sin6_scope_id
-}
-
-#[cfg(not(feature = "std"))]
-#[cfg(windows)]
-#[inline]
-pub(crate) fn sockaddr_in6_sin6_scope_id_mut(addr: &mut c::sockaddr_in6) -> &mut u32 {
-    let addr: &mut sockaddr_in6 = unsafe { core::mem::transmute(addr) };
-    &mut addr.sin6_scope_id
-}
-
 #[cfg(not(windows))]
 #[inline]
 pub(crate) const fn sockaddr_in6_new(
