@@ -1,5 +1,6 @@
 use super::super::c;
 use bitflags::bitflags;
+use core::marker::PhantomData;
 
 bitflags! {
     /// `RWF_*` constants for use with [`preadv2`] and [`pwritev2`].
@@ -17,6 +18,21 @@ bitflags! {
         const NOWAIT = linux_raw_sys::general::RWF_NOWAIT;
         /// `RWF_APPEND` (since Linux 4.16)
         const APPEND = linux_raw_sys::general::RWF_APPEND;
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    /// `SPLICE_F_*` constants for use with [`splice`] and [`vmsplice`].
+    pub struct SpliceFlags: c::c_uint {
+        /// `SPLICE_F_MOVE`
+        const MOVE = linux_raw_sys::general::SPLICE_F_MOVE;
+        /// `SPLICE_F_NONBLOCK`
+        const NONBLOCK = linux_raw_sys::general::SPLICE_F_NONBLOCK;
+        /// `SPLICE_F_MORE`
+        const MORE = linux_raw_sys::general::SPLICE_F_MORE;
+        /// `SPLICE_F_GIFT`
+        const GIFT = linux_raw_sys::general::SPLICE_F_GIFT;
     }
 }
 
@@ -65,3 +81,37 @@ pub(crate) const AT_FDCWD: c::c_int = linux_raw_sys::general::AT_FDCWD;
 pub(crate) const STDIN_FILENO: c::c_uint = linux_raw_sys::general::STDIN_FILENO;
 pub(crate) const STDOUT_FILENO: c::c_uint = linux_raw_sys::general::STDOUT_FILENO;
 pub(crate) const STDERR_FILENO: c::c_uint = linux_raw_sys::general::STDERR_FILENO;
+
+/// A buffer type used with `vmsplice`.
+/// It is guaranteed to be ABI compatible with the iovec type on Unix platforms and WSABUF on Windows.
+/// Unlike `IoSlice` and `IoSliceMut` it is semantically like a raw pointer,
+/// and therefore can be shared or mutated as needed.
+#[repr(transparent)]
+pub struct IoSliceRaw<'a> {
+    _buf: c::iovec,
+    _lifetime: PhantomData<&'a ()>,
+}
+
+impl<'a> IoSliceRaw<'a> {
+    /// Creates a new IoSlice wrapping a byte slice.
+    pub fn from_slice(buf: &'a [u8]) -> Self {
+        IoSliceRaw {
+            _buf: c::iovec {
+                iov_base: buf.as_ptr() as *mut u8 as *mut c::c_void,
+                iov_len: buf.len() as _,
+            },
+            _lifetime: PhantomData,
+        }
+    }
+
+    /// Creates a new IoSlice wrapping a mutable byte slice.
+    pub fn from_slice_mut(buf: &'a mut [u8]) -> Self {
+        IoSliceRaw {
+            _buf: c::iovec {
+                iov_base: buf.as_mut_ptr() as *mut c::c_void,
+                iov_len: buf.len() as _,
+            },
+            _lifetime: PhantomData,
+        }
+    }
+}

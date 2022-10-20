@@ -20,6 +20,7 @@ mod eventfd;
 mod from_into;
 #[cfg(not(target_os = "redox"))]
 mod ioctl;
+mod pipe;
 mod poll;
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
 mod procfs;

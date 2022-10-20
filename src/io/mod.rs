@@ -64,6 +64,8 @@ pub use pipe::PIPE_BUF;
     target_os = "wasi"
 )))]
 pub use pipe::{pipe_with, PipeFlags};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use pipe::{splice, vmsplice, IoSliceRaw, SpliceFlags};
 pub use poll::{poll, PollFd, PollFlags};
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
 pub use procfs::{
