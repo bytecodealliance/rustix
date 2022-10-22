@@ -59,7 +59,7 @@ pub(crate) const SHUT_WR: i32 = WinSock::SD_SEND as _;
 pub(crate) use WinSock::{
     closesocket as close, ioctlsocket as ioctl, WSAPoll as poll, ADDRESS_FAMILY as sa_family_t,
     ADDRINFOA as addrinfo, IN6_ADDR as in6_addr, IN_ADDR as in_addr, IPV6_MREQ as ipv6_mreq,
-    IP_MREQ as ip_mreq, SOCKADDR as sockaddr, SOCKADDR_IN as sockaddr_in,
+    IP_MREQ as ip_mreq, LINGER as linger, SOCKADDR as sockaddr, SOCKADDR_IN as sockaddr_in,
     SOCKADDR_IN6 as sockaddr_in6, SOCKADDR_STORAGE as sockaddr_storage, WSAEACCES as EACCES,
     WSAEADDRINUSE as EADDRINUSE, WSAEADDRNOTAVAIL as EADDRNOTAVAIL,
     WSAEAFNOSUPPORT as EAFNOSUPPORT, WSAEALREADY as EALREADY, WSAEBADF as EBADF,
