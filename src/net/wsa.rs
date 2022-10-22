@@ -1,6 +1,6 @@
 use crate::io;
 use core::mem::MaybeUninit;
-use windows_sys::Win32::Networking::WinSock::{WSACleanup, WSAData, WSAGetLastError, WSAStartup};
+use windows_sys::Win32::Networking::WinSock::{WSACleanup, WSAGetLastError, WSAStartup, WSADATA};
 
 /// `WSAStartup()`—Initialize process-wide Windows support for sockets.
 ///
@@ -11,7 +11,7 @@ use windows_sys::Win32::Networking::WinSock::{WSACleanup, WSAData, WSAGetLastErr
 ///  - [Winsock2]
 ///
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsastartup
-pub fn wsa_startup() -> io::Result<WSAData> {
+pub fn wsa_startup() -> io::Result<WSADATA> {
     // Request version 2.2, which has been the latest version since far older
     // versions of Windows than we support here. For more information about
     // the version, see [here].
