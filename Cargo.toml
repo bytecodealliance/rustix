@@ -20,7 +20,7 @@ cc = { version = "1.0.68", optional = true }
 [dependencies]
 bitflags = "1.2.1"
 itoa = { version = "1.0.1", default-features = false, optional = true }
-io-lifetimes = { version = "1.0.0-rc1", default-features = false, optional = true }
+io-lifetimes = { version = "1.0.0-rc2", default-features = false, optional = true }
 
 # Special dependencies used in rustc-dep-of-std mode.
 core = { version = "1.0.0", optional = true, package = "rustc-std-workspace-core" }
