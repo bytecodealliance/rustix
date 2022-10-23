@@ -447,15 +447,40 @@ impl SocketAddrV6 {
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[must_use]
     pub fn new(ip: Ipv6Addr, port: u16, flowinfo: u32, scope_id: u32) -> SocketAddrV6 {
-        SocketAddrV6 {
-            inner: sockaddr_in6_new(
-                c::AF_INET6 as c::sa_family_t,
-                port.to_be(),
-                flowinfo,
-                ip.inner,
-                scope_id,
-            ),
-        }
+        #[cfg(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "haiku",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+        ))]
+        let inner = sockaddr_in6_new(
+            core::mem::size_of::<c::sockaddr_in6>() as u8,
+            c::AF_INET6 as c::sa_family_t,
+            port.to_be(),
+            flowinfo,
+            ip.inner,
+            scope_id,
+        );
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "haiku",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+        )))]
+        let inner = sockaddr_in6_new(
+            c::AF_INET6 as c::sa_family_t,
+            port.to_be(),
+            flowinfo,
+            ip.inner,
+            scope_id,
+        );
+        SocketAddrV6 { inner }
     }
 
     /// Returns the IP address associated with this socket address.

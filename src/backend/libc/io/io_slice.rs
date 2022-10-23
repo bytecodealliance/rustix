@@ -2,6 +2,8 @@
 //! library/std/src/sys/unix/io.rs
 //! dca3f1b786efd27be3b325ed1e01e247aa589c3b.
 
+#![allow(missing_docs)]
+
 use super::super::c;
 use core::marker::PhantomData;
 use core::slice;

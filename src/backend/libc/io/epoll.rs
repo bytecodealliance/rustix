@@ -261,7 +261,7 @@ impl<'context, T: AsFd + Into<OwnedFd> + From<OwnedFd>> Context for Owning<'cont
         // being released, so we can create a new `OwnedFd` that assumes
         // ownership.
         let raw_fd = target.consume().as_raw_fd();
-        unsafe { T::from(io_lifetimes::OwnedFd::from_raw_fd(raw_fd).into()) }
+        unsafe { T::from(OwnedFd::from_raw_fd(raw_fd).into()) }
     }
 }
 
