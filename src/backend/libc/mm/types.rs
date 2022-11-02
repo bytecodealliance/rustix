@@ -177,9 +177,15 @@ bitflags! {
             target_os = "solaris",
         )))]
         const LOCKED = c::MAP_LOCKED;
+        /// `MAP_NOCORE`
+        #[cfg(any(target_os = "dragonfly", target_os = "freebsd"))]
+        const NOCORE = c::MAP_NOCORE;
         /// `MAP_NORESERVE`
         #[cfg(not(any(target_os = "dragonfly", target_os = "freebsd", target_os = "redox")))]
         const NORESERVE = c::MAP_NORESERVE;
+        /// `MAP_NOSYNC`
+        #[cfg(any(target_os = "dragonfly", target_os = "freebsd"))]
+        const NOSYNC = c::MAP_NOSYNC;
         /// `MAP_POPULATE`
         #[cfg(not(any(
             target_os = "dragonfly",
@@ -206,6 +212,9 @@ bitflags! {
             target_os = "solaris",
         )))]
         const STACK = c::MAP_STACK;
+        /// `MAP_PREFAULT_READ`
+        #[cfg(target_os = "freebsd")]
+        const PREFAULT_READ = c::MAP_PREFAULT_READ;
         /// `MAP_SYNC`
         #[cfg(not(any(
             target_os = "android",
