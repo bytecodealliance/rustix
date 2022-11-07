@@ -1,6 +1,8 @@
 //! The following is derived from Rust's
-//! library/std/src/net/ip.rs at revision
-//! dca3f1b786efd27be3b325ed1e01e247aa589c3b.
+//! library/std/src/net/ip_addr.rs at revision
+//! 14230a7f8e117aa049d3ae661fa00ded7edefc68.
+//!
+//! All code in this file is licensed MIT or Apache 2.0 at your option.
 //!
 //! This defines `IpAddr`, `Ipv4Addr`, and `Ipv6Addr`. Ideally, these should be
 //! defined in `core`. See [RFC 2832].
@@ -9,19 +11,13 @@
 
 #![allow(unsafe_code)]
 
-use crate::backend::c;
-use crate::backend::net::ext::{in6_addr_new, in6_addr_s6_addr, in_addr_new, in_addr_s_addr};
 use core::cmp::Ordering;
-use core::hash;
 use core::mem::transmute;
 
 /// An IP address, either IPv4 or IPv6.
 ///
 /// This enum can contain either an [`Ipv4Addr`] or an [`Ipv6Addr`], see their
 /// respective documentation for more details.
-///
-/// The size of an `IpAddr` instance may vary depending on the target operating
-/// system.
 ///
 /// # Examples
 ///
@@ -55,9 +51,6 @@ pub enum IpAddr {
 ///
 /// See [`IpAddr`] for a type encompassing both IPv4 and IPv6 addresses.
 ///
-/// The size of an `Ipv4Addr` struct may vary depending on the target operating
-/// system.
-///
 /// [IETF RFC 791]: https://tools.ietf.org/html/rfc791
 ///
 /// # Textual representation
@@ -82,19 +75,16 @@ pub enum IpAddr {
 /// assert!("0000000.0.0.0".parse::<Ipv4Addr>().is_err()); // first octet is a zero in octal
 /// assert!("0xcb.0x0.0x71.0x00".parse::<Ipv4Addr>().is_err()); // all octets are in hex
 /// ```
-#[derive(Copy)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
 pub struct Ipv4Addr {
-    pub(crate) inner: c::in_addr,
+    octets: [u8; 4],
 }
 
 /// An IPv6 address.
 ///
 /// IPv6 addresses are defined as 128-bit integers in [IETF RFC 4291].
 /// They are usually represented as eight 16-bit segments.
-///
-/// The size of an `Ipv6Addr` struct may vary depending on the target operating
-/// system.
 ///
 /// [IETF RFC 4291]: https://tools.ietf.org/html/rfc4291
 ///
@@ -143,6 +133,8 @@ pub struct Ipv4Addr {
 ///
 /// To convert from an IPv4 address to an IPv4-mapped IPv6 address, use [`Ipv4Addr::to_ipv6_mapped`].
 /// Use [`Ipv6Addr::to_ipv4`] to convert an IPv4-mapped IPv6 address to the canonical IPv4 address.
+/// Note that this will also convert the IPv6 loopback address `::1` to `0.0.0.1`. Use
+/// [`Ipv6Addr::to_ipv4_mapped`] to avoid this.
 ///
 /// [IETF RFC 4291 Section 2.5.5.2]: https://datatracker.ietf.org/doc/html/rfc4291#section-2.5.5.2
 ///
@@ -165,10 +157,10 @@ pub struct Ipv4Addr {
 /// assert_eq!("::1".parse(), Ok(localhost));
 /// assert_eq!(localhost.is_loopback(), true);
 /// ```
-#[derive(Copy)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
 pub struct Ipv6Addr {
-    pub(crate) inner: c::in6_addr,
+    octets: [u8; 16],
 }
 
 /// Scope of an [IPv6 multicast address] as defined in [IETF RFC 7346 section 2].
@@ -240,7 +232,10 @@ impl IpAddr {
     /// assert_eq!(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)).is_unspecified(), true);
     /// assert_eq!(IpAddr::V6(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0)).is_unspecified(), true);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ip", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(feature = "ip_shared", since = "1.12.0"))]
     #[must_use]
     #[inline]
@@ -264,7 +259,10 @@ impl IpAddr {
     /// assert_eq!(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)).is_loopback(), true);
     /// assert_eq!(IpAddr::V6(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0x1)).is_loopback(), true);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ip", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(feature = "ip_shared", since = "1.12.0"))]
     #[must_use]
     #[inline]
@@ -317,7 +315,10 @@ impl IpAddr {
     /// assert_eq!(IpAddr::V4(Ipv4Addr::new(224, 254, 0, 0)).is_multicast(), true);
     /// assert_eq!(IpAddr::V6(Ipv6Addr::new(0xff00, 0, 0, 0, 0, 0, 0, 0)).is_multicast(), true);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ip", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(feature = "ip_shared", since = "1.12.0"))]
     #[must_use]
     #[inline]
@@ -398,7 +399,10 @@ impl IpAddr {
     /// assert_eq!(IpAddr::V4(Ipv4Addr::new(203, 0, 113, 6)).is_ipv4(), true);
     /// assert_eq!(IpAddr::V6(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0)).is_ipv4(), false);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ip", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(feature = "ipaddr_checker", since = "1.16.0"))]
     #[must_use]
     #[inline]
@@ -419,7 +423,10 @@ impl IpAddr {
     /// assert_eq!(IpAddr::V4(Ipv4Addr::new(203, 0, 113, 6)).is_ipv6(), false);
     /// assert_eq!(IpAddr::V6(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0)).is_ipv6(), true);
     /// ```
-    #[cfg_attr(staged_api, rustc_const_stable(feature = "const_ip", since = "1.50.0"))]
+    #[cfg_attr(
+        staged_api,
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
+    )]
     #[cfg_attr(staged_api, stable(feature = "ipaddr_checker", since = "1.16.0"))]
     #[must_use]
     #[inline]
@@ -470,16 +477,14 @@ impl Ipv4Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv4", since = "1.32.0")
+        rustc_const_stable(feature = "const_ip_32", since = "1.32.0")
     )]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[must_use]
     #[inline]
     pub const fn new(a: u8, b: u8, c: u8, d: u8) -> Ipv4Addr {
-        // `s_addr` is stored as BE on all machine and the array is in BE order.
-        // So the native endian conversion method is used so that it's never swapped.
         Ipv4Addr {
-            inner: in_addr_new(u32::from_ne_bytes([a, b, c, d])),
+            octets: [a, b, c, d],
         }
     }
 
@@ -537,14 +542,13 @@ impl Ipv4Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
     )]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[must_use]
     #[inline]
     pub const fn octets(&self) -> [u8; 4] {
-        // This returns the order we want because s_addr is stored in big-endian.
-        in_addr_s_addr(self.inner).to_ne_bytes()
+        self.octets
     }
 
     /// Returns [`true`] for the special 'unspecified' address (`0.0.0.0`).
@@ -564,13 +568,13 @@ impl Ipv4Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv4", since = "1.32.0")
+        rustc_const_stable(feature = "const_ip_32", since = "1.32.0")
     )]
     #[cfg_attr(staged_api, stable(feature = "ip_shared", since = "1.12.0"))]
     #[must_use]
     #[inline]
     pub const fn is_unspecified(&self) -> bool {
-        in_addr_s_addr(self.inner) == 0
+        u32::from_be_bytes(self.octets) == 0
     }
 
     /// Returns [`true`] if this is a loopback address (`127.0.0.0/8`).
@@ -589,7 +593,7 @@ impl Ipv4Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
     )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
@@ -623,7 +627,7 @@ impl Ipv4Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
     )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
@@ -654,7 +658,7 @@ impl Ipv4Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
     )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
@@ -663,25 +667,31 @@ impl Ipv4Addr {
         matches!(self.octets(), [169, 254, ..])
     }
 
-    /// Returns [`true`] if the address appears to be globally routable.
-    /// See [iana-ipv4-special-registry][ipv4-sr].
+    /// Returns [`true`] if the address appears to be globally reachable
+    /// as specified by the [IANA IPv4 Special-Purpose Address Registry].
+    /// Whether or not an address is practically reachable will depend on your network configuration.
     ///
-    /// The following return [`false`]:
+    /// Most IPv4 addresses are globally reachable;
+    /// unless they are specifically defined as *not* globally reachable.
     ///
-    /// - private addresses (see [`Ipv4Addr::is_private()`])
-    /// - the loopback address (see [`Ipv4Addr::is_loopback()`])
-    /// - the link-local address (see [`Ipv4Addr::is_link_local()`])
-    /// - the broadcast address (see [`Ipv4Addr::is_broadcast()`])
-    /// - addresses used for documentation (see [`Ipv4Addr::is_documentation()`])
-    /// - the unspecified address (see [`Ipv4Addr::is_unspecified()`]), and the whole
-    ///   `0.0.0.0/8` block
-    /// - addresses reserved for future protocols, except
-    /// `192.0.0.9/32` and `192.0.0.10/32` which are globally routable
-    /// - addresses reserved for future use (see [`Ipv4Addr::is_reserved()`]
-    /// - addresses reserved for networking devices benchmarking (see
-    /// [`Ipv4Addr::is_benchmarking()`])
+    /// Non-exhaustive list of notable addresses that are not globally reachable:
     ///
-    /// [ipv4-sr]: https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml
+    /// - The [unspecified address] ([`is_unspecified`](Ipv4Addr::is_unspecified))
+    /// - Addresses reserved for private use ([`is_private`](Ipv4Addr::is_private))
+    /// - Addresses in the shared address space ([`is_shared`](Ipv4Addr::is_shared))
+    /// - Loopback addresses ([`is_loopback`](Ipv4Addr::is_loopback))
+    /// - Link-local addresses ([`is_link_local`](Ipv4Addr::is_link_local))
+    /// - Addresses reserved for documentation ([`is_documentation`](Ipv4Addr::is_documentation))
+    /// - Addresses reserved for benchmarking ([`is_benchmarking`](Ipv4Addr::is_benchmarking))
+    /// - Reserved addresses ([`is_reserved`](Ipv4Addr::is_reserved))
+    /// - The [broadcast address] ([`is_broadcast`](Ipv4Addr::is_broadcast))
+    ///
+    /// For the complete overview of which addresses are globally reachable, see the table at the [IANA IPv4 Special-Purpose Address Registry].
+    ///
+    /// [IANA IPv4 Special-Purpose Address Registry]: https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml
+    /// [unspecified address]: Ipv4Addr::UNSPECIFIED
+    /// [broadcast address]: Ipv4Addr::BROADCAST
+
     ///
     /// # Examples
     ///
@@ -690,46 +700,44 @@ impl Ipv4Addr {
     ///
     /// use std::net::Ipv4Addr;
     ///
-    /// // private addresses are not global
+    /// // Most IPv4 addresses are globally reachable:
+    /// assert_eq!(Ipv4Addr::new(80, 9, 12, 3).is_global(), true);
+    ///
+    /// // However some addresses have been assigned a special meaning
+    /// // that makes them not globally reachable. Some examples are:
+    ///
+    /// // The unspecified address (`0.0.0.0`)
+    /// assert_eq!(Ipv4Addr::UNSPECIFIED.is_global(), false);
+    ///
+    /// // Addresses reserved for private use (`10.0.0.0/8`, `172.16.0.0/12`, 192.168.0.0/16)
     /// assert_eq!(Ipv4Addr::new(10, 254, 0, 0).is_global(), false);
     /// assert_eq!(Ipv4Addr::new(192, 168, 10, 65).is_global(), false);
     /// assert_eq!(Ipv4Addr::new(172, 16, 10, 65).is_global(), false);
     ///
-    /// // the 0.0.0.0/8 block is not global
-    /// assert_eq!(Ipv4Addr::new(0, 1, 2, 3).is_global(), false);
-    /// // in particular, the unspecified address is not global
-    /// assert_eq!(Ipv4Addr::new(0, 0, 0, 0).is_global(), false);
+    /// // Addresses in the shared address space (`100.64.0.0/10`)
+    /// assert_eq!(Ipv4Addr::new(100, 100, 0, 0).is_global(), false);
     ///
-    /// // the loopback address is not global
-    /// assert_eq!(Ipv4Addr::new(127, 0, 0, 1).is_global(), false);
+    /// // The loopback addresses (`127.0.0.0/8`)
+    /// assert_eq!(Ipv4Addr::LOCALHOST.is_global(), false);
     ///
-    /// // link local addresses are not global
+    /// // Link-local addresses (`169.254.0.0/16`)
     /// assert_eq!(Ipv4Addr::new(169, 254, 45, 1).is_global(), false);
     ///
-    /// // the broadcast address is not global
-    /// assert_eq!(Ipv4Addr::new(255, 255, 255, 255).is_global(), false);
-    ///
-    /// // the address space designated for documentation is not global
+    /// // Addresses reserved for documentation (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`)
     /// assert_eq!(Ipv4Addr::new(192, 0, 2, 255).is_global(), false);
     /// assert_eq!(Ipv4Addr::new(198, 51, 100, 65).is_global(), false);
     /// assert_eq!(Ipv4Addr::new(203, 0, 113, 6).is_global(), false);
     ///
-    /// // shared addresses are not global
-    /// assert_eq!(Ipv4Addr::new(100, 100, 0, 0).is_global(), false);
-    ///
-    /// // addresses reserved for protocol assignment are not global
-    /// assert_eq!(Ipv4Addr::new(192, 0, 0, 0).is_global(), false);
-    /// assert_eq!(Ipv4Addr::new(192, 0, 0, 255).is_global(), false);
-    ///
-    /// // addresses reserved for future use are not global
-    /// assert_eq!(Ipv4Addr::new(250, 10, 20, 30).is_global(), false);
-    ///
-    /// // addresses reserved for network devices benchmarking are not global
+    /// // Addresses reserved for benchmarking (`198.18.0.0/15`)
     /// assert_eq!(Ipv4Addr::new(198, 18, 0, 0).is_global(), false);
     ///
-    /// // All the other addresses are global
-    /// assert_eq!(Ipv4Addr::new(1, 1, 1, 1).is_global(), true);
-    /// assert_eq!(Ipv4Addr::new(80, 9, 12, 3).is_global(), true);
+    /// // Reserved addresses (`240.0.0.0/4`)
+    /// assert_eq!(Ipv4Addr::new(250, 10, 20, 30).is_global(), false);
+    ///
+    /// // The broadcast address (`255.255.255.255`)
+    /// assert_eq!(Ipv4Addr::BROADCAST.is_global(), false);
+    ///
+    /// // For a complete overview see the IANA IPv4 Special-Purpose Address Registry.
     /// ```
     #[cfg_attr(
         staged_api,
@@ -739,25 +747,17 @@ impl Ipv4Addr {
     #[must_use]
     #[inline]
     pub const fn is_global(&self) -> bool {
-        // check if this address is 192.0.0.9 or 192.0.0.10. These addresses are the only two
-        // globally routable addresses in the 192.0.0.0/24 range.
-        if u32::from_be_bytes(self.octets()) == 0xc0000009
-            || u32::from_be_bytes(self.octets()) == 0xc000000a
-        {
-            return true;
-        }
-        !self.is_private()
-            && !self.is_loopback()
-            && !self.is_link_local()
-            && !self.is_broadcast()
-            && !self.is_documentation()
-            && !self.is_shared()
+        !(self.octets()[0] == 0 // "This network"
+            || self.is_private()
+            || self.is_shared()
+            || self.is_loopback()
+            || self.is_link_local()
             // addresses reserved for future protocols (`192.0.0.0/24`)
-            && !(self.octets()[0] == 192 && self.octets()[1] == 0 && self.octets()[2] == 0)
-            && !self.is_reserved()
-            && !self.is_benchmarking()
-            // Make sure the address is not in 0.0.0.0/8
-            && self.octets()[0] != 0
+            ||(self.octets()[0] == 192 && self.octets()[1] == 0 && self.octets()[2] == 0)
+            || self.is_documentation()
+            || self.is_benchmarking()
+            || self.is_reserved()
+            || self.is_broadcast())
     }
 
     /// Returns [`true`] if this address is part of the Shared Address Space defined in
@@ -871,7 +871,7 @@ impl Ipv4Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
     )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
@@ -896,7 +896,7 @@ impl Ipv4Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
     )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
@@ -927,18 +927,16 @@ impl Ipv4Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
     )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
     #[inline]
     pub const fn is_documentation(&self) -> bool {
-        match self.octets() {
-            [192, 0, 2, _] => true,
-            [198, 51, 100, _] => true,
-            [203, 0, 113, _] => true,
-            _ => false,
-        }
+        matches!(
+            self.octets(),
+            [192, 0, 2, _] | [198, 51, 100, _] | [203, 0, 113, _]
+        )
     }
 
     /// Converts this address to an [IPv4-compatible] [`IPv6` address].
@@ -963,7 +961,7 @@ impl Ipv4Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
     )]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[must_use = "this returns the result of the operation, \
@@ -972,7 +970,7 @@ impl Ipv4Addr {
     pub const fn to_ipv6_compatible(&self) -> Ipv6Addr {
         let [a, b, c, d] = self.octets();
         Ipv6Addr {
-            inner: in6_addr_new([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, a, b, c, d]),
+            octets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, a, b, c, d],
         }
     }
 
@@ -993,7 +991,7 @@ impl Ipv4Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv4", since = "1.50.0")
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
     )]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[must_use = "this returns the result of the operation, \
@@ -1002,7 +1000,7 @@ impl Ipv4Addr {
     pub const fn to_ipv6_mapped(&self) -> Ipv6Addr {
         let [a, b, c, d] = self.octets();
         Ipv6Addr {
-            inner: in6_addr_new([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, a, b, c, d]),
+            octets: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, a, b, c, d],
         }
     }
 }
@@ -1051,22 +1049,6 @@ impl From<Ipv6Addr> for IpAddr {
     }
 }
 
-#[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-impl Clone for Ipv4Addr {
-    #[inline]
-    fn clone(&self) -> Ipv4Addr {
-        *self
-    }
-}
-
-#[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-impl PartialEq for Ipv4Addr {
-    #[inline]
-    fn eq(&self, other: &Ipv4Addr) -> bool {
-        in_addr_s_addr(self.inner) == in_addr_s_addr(other.inner)
-    }
-}
-
 #[cfg_attr(staged_api, stable(feature = "ip_cmp", since = "1.16.0"))]
 impl PartialEq<Ipv4Addr> for IpAddr {
     #[inline]
@@ -1086,21 +1068,6 @@ impl PartialEq<IpAddr> for Ipv4Addr {
             IpAddr::V4(v4) => self == v4,
             IpAddr::V6(_) => false,
         }
-    }
-}
-
-#[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-impl Eq for Ipv4Addr {}
-
-#[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-impl hash::Hash for Ipv4Addr {
-    #[inline]
-    fn hash<H: hash::Hasher>(&self, s: &mut H) {
-        // NOTE:
-        // * hash in big endian order
-        // * in netbsd, `in_addr` has `repr(packed)`, we need to
-        //   copy `s_addr` to avoid unsafe borrowing
-        { in_addr_s_addr(self.inner) }.hash(s)
     }
 }
 
@@ -1138,8 +1105,7 @@ impl PartialOrd<IpAddr> for Ipv4Addr {
 impl Ord for Ipv4Addr {
     #[inline]
     fn cmp(&self, other: &Ipv4Addr) -> Ordering {
-        // Compare as native endian
-        u32::from_be(in_addr_s_addr(self.inner)).cmp(&u32::from_be(in_addr_s_addr(other.inner)))
+        self.octets.cmp(&other.octets)
     }
 }
 
@@ -1152,13 +1118,12 @@ impl From<Ipv4Addr> for u32 {
     /// ```
     /// use std::net::Ipv4Addr;
     ///
-    /// let addr = Ipv4Addr::new(0xca, 0xfe, 0xba, 0xbe);
-    /// assert_eq!(0xcafebabe, u32::from(addr));
+    /// let addr = Ipv4Addr::new(0x12, 0x34, 0x56, 0x78);
+    /// assert_eq!(0x12345678, u32::from(addr));
     /// ```
     #[inline]
     fn from(ip: Ipv4Addr) -> u32 {
-        let ip = ip.octets();
-        u32::from_be_bytes(ip)
+        u32::from_be_bytes(ip.octets)
     }
 }
 
@@ -1171,12 +1136,14 @@ impl From<u32> for Ipv4Addr {
     /// ```
     /// use std::net::Ipv4Addr;
     ///
-    /// let addr = Ipv4Addr::from(0xcafebabe);
-    /// assert_eq!(Ipv4Addr::new(0xca, 0xfe, 0xba, 0xbe), addr);
+    /// let addr = Ipv4Addr::from(0x12345678);
+    /// assert_eq!(Ipv4Addr::new(0x12, 0x34, 0x56, 0x78), addr);
     /// ```
     #[inline]
     fn from(ip: u32) -> Ipv4Addr {
-        Ipv4Addr::from(ip.to_be_bytes())
+        Ipv4Addr {
+            octets: ip.to_be_bytes(),
+        }
     }
 }
 
@@ -1194,7 +1161,7 @@ impl From<[u8; 4]> for Ipv4Addr {
     /// ```
     #[inline]
     fn from(octets: [u8; 4]) -> Ipv4Addr {
-        Ipv4Addr::new(octets[0], octets[1], octets[2], octets[3])
+        Ipv4Addr { octets }
     }
 }
 
@@ -1230,7 +1197,7 @@ impl Ipv6Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv6", since = "1.32.0")
+        rustc_const_stable(feature = "const_ip_32", since = "1.32.0")
     )]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[must_use]
@@ -1249,9 +1216,7 @@ impl Ipv6Addr {
         Ipv6Addr {
             // All elements in `addr16` are big endian.
             // SAFETY: `[u16; 8]` is always safe to transmute to `[u8; 16]`.
-            // rustc_allow_const_fn_unstable: the transmute could be written as stable const
-            // code, but that leads to worse code generation (#75085)
-            inner: in6_addr_new(unsafe { transmute::<_, [u8; 16]>(addr16) }),
+            octets: unsafe { transmute::<_, [u8; 16]>(addr16) },
         }
     }
 
@@ -1293,18 +1258,15 @@ impl Ipv6Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv6", since = "1.50.0")
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
     )]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[must_use]
     #[inline]
     pub const fn segments(&self) -> [u16; 8] {
-        // All elements in `s6_addr` must be big endian.
+        // All elements in `self.octets` must be big endian.
         // SAFETY: `[u8; 16]` is always safe to transmute to `[u16; 8]`.
-        // rustc_allow_const_fn_unstable: the transmute could be written as stable const code, but
-        // that leads to worse code generation (#75085)
-        let [a, b, c, d, e, f, g, h] =
-            unsafe { transmute::<_, [u16; 8]>(in6_addr_s6_addr(self.inner)) };
+        let [a, b, c, d, e, f, g, h] = unsafe { transmute::<_, [u16; 8]>(self.octets) };
         // We want native endian u16
         [
             u16::from_be(a),
@@ -1334,7 +1296,7 @@ impl Ipv6Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv6", since = "1.50.0")
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
     )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
@@ -1361,7 +1323,7 @@ impl Ipv6Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv6", since = "1.50.0")
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
     )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
@@ -1370,13 +1332,33 @@ impl Ipv6Addr {
         u128::from_be_bytes(self.octets()) == u128::from_be_bytes(Ipv6Addr::LOCALHOST.octets())
     }
 
-    /// Returns [`true`] if the address appears to be globally routable.
+    /// Returns [`true`] if the address appears to be globally reachable
+    /// as specified by the [IANA IPv6 Special-Purpose Address Registry].
+    /// Whether or not an address is practically reachable will depend on your network configuration.
     ///
-    /// The following return [`false`]:
+    /// Most IPv6 addresses are globally reachable;
+    /// unless they are specifically defined as *not* globally reachable.
     ///
-    /// - the loopback address
-    /// - link-local and unique local unicast addresses
-    /// - interface-, link-, realm-, admin- and site-local multicast addresses
+    /// Non-exhaustive list of notable addresses that are not globally reachable:
+    /// - The [unspecified address] ([`is_unspecified`](Ipv6Addr::is_unspecified))
+    /// - The [loopback address] ([`is_loopback`](Ipv6Addr::is_loopback))
+    /// - IPv4-mapped addresses
+    /// - Addresses reserved for benchmarking
+    /// - Addresses reserved for documentation ([`is_documentation`](Ipv6Addr::is_documentation))
+    /// - Unique local addresses ([`is_unique_local`](Ipv6Addr::is_unique_local))
+    /// - Unicast addresses with link-local scope ([`is_unicast_link_local`](Ipv6Addr::is_unicast_link_local))
+    ///
+    /// For the complete overview of which addresses are globally reachable, see the table at the [IANA IPv6 Special-Purpose Address Registry].
+    ///
+    /// Note that an address having global scope is not the same as being globally reachable,
+    /// and there is no direct relation between the two concepts: There exist addresses with global scope
+    /// that are not globally reachable (for example unique local addresses),
+    /// and addresses that are globally reachable without having global scope
+    /// (multicast addresses with non-global scope).
+    ///
+    /// [IANA IPv6 Special-Purpose Address Registry]: https://www.iana.org/assignments/iana-ipv6-special-registry/iana-ipv6-special-registry.xhtml
+    /// [unspecified address]: Ipv6Addr::UNSPECIFIED
+    /// [loopback address]: Ipv6Addr::LOCALHOST
     ///
     /// # Examples
     ///
@@ -1385,9 +1367,34 @@ impl Ipv6Addr {
     ///
     /// use std::net::Ipv6Addr;
     ///
-    /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff).is_global(), true);
-    /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0x1).is_global(), false);
-    /// assert_eq!(Ipv6Addr::new(0, 0, 0x1c9, 0, 0, 0xafc8, 0, 0x1).is_global(), true);
+    /// // Most IPv6 addresses are globally reachable:
+    /// assert_eq!(Ipv6Addr::new(0x26, 0, 0x1c9, 0, 0, 0xafc8, 0x10, 0x1).is_global(), true);
+    ///
+    /// // However some addresses have been assigned a special meaning
+    /// // that makes them not globally reachable. Some examples are:
+    ///
+    /// // The unspecified address (`::`)
+    /// assert_eq!(Ipv6Addr::UNSPECIFIED.is_global(), false);
+    ///
+    /// // The loopback address (`::1`)
+    /// assert_eq!(Ipv6Addr::LOCALHOST.is_global(), false);
+    ///
+    /// // IPv4-mapped addresses (`::ffff:0:0/96`)
+    /// assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0xffff, 0xc00a, 0x2ff).is_global(), false);
+    ///
+    /// // Addresses reserved for benchmarking (`2001:2::/48`)
+    /// assert_eq!(Ipv6Addr::new(0x2001, 2, 0, 0, 0, 0, 0, 1,).is_global(), false);
+    ///
+    /// // Addresses reserved for documentation (`2001:db8::/32`)
+    /// assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1).is_global(), false);
+    ///
+    /// // Unique local addresses (`fc00::/7`)
+    /// assert_eq!(Ipv6Addr::new(0xfc02, 0, 0, 0, 0, 0, 0, 1).is_global(), false);
+    ///
+    /// // Unicast addresses with link-local scope (`fe80::/10`)
+    /// assert_eq!(Ipv6Addr::new(0xfe81, 0, 0, 0, 0, 0, 0, 1).is_global(), false);
+    ///
+    /// // For a complete overview see the IANA IPv6 Special-Purpose Address Registry.
     /// ```
     #[cfg_attr(
         staged_api,
@@ -1397,11 +1404,31 @@ impl Ipv6Addr {
     #[must_use]
     #[inline]
     pub const fn is_global(&self) -> bool {
-        match self.multicast_scope() {
-            Some(Ipv6MulticastScope::Global) => true,
-            None => self.is_unicast_global(),
-            _ => false,
-        }
+        !(self.is_unspecified()
+            || self.is_loopback()
+            // IPv4-mapped Address (`::ffff:0:0/96`)
+            || matches!(self.segments(), [0, 0, 0, 0, 0, 0xffff, _, _])
+            // IPv4-IPv6 Translat. (`64:ff9b:1::/48`)
+            || matches!(self.segments(), [0x64, 0xff9b, 1, _, _, _, _, _])
+            // Discard-Only Address Block (`100::/64`)
+            || matches!(self.segments(), [0x100, 0, 0, 0, _, _, _, _])
+            // IETF Protocol Assignments (`2001::/23`)
+            || (matches!(self.segments(), [0x2001, b, _, _, _, _, _, _] if b < 0x200)
+                && !(
+                    // Port Control Protocol Anycast (`2001:1::1`)
+                    u128::from_be_bytes(self.octets()) == 0x2001_0001_0000_0000_0000_0000_0000_0001
+                    // Traversal Using Relays around NAT Anycast (`2001:1::2`)
+                    || u128::from_be_bytes(self.octets()) == 0x2001_0001_0000_0000_0000_0000_0000_0002
+                    // AMT (`2001:3::/32`)
+                    || matches!(self.segments(), [0x2001, 3, _, _, _, _, _, _])
+                    // AS112-v6 (`2001:4:112::/48`)
+                    || matches!(self.segments(), [0x2001, 4, 0x112, _, _, _, _, _])
+                    // ORCHIDv2 (`2001:20::/28`)
+                    || matches!(self.segments(), [0x2001, b, _, _, _, _, _, _] if b >= 0x20 && b <= 0x2F)
+                ))
+            || self.is_documentation()
+            || self.is_unique_local()
+            || self.is_unicast_link_local())
     }
 
     /// Returns [`true`] if this is a unique local address (`fc00::/7`).
@@ -1613,6 +1640,7 @@ impl Ipv6Addr {
             && !self.is_unique_local()
             && !self.is_unspecified()
             && !self.is_documentation()
+            && !self.is_benchmarking()
     }
 
     /// Returns the address's multicast scope if the address is multicast.
@@ -1670,7 +1698,7 @@ impl Ipv6Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv6", since = "1.50.0")
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
     )]
     #[cfg_attr(staged_api, stable(since = "1.7.0", feature = "ip_17"))]
     #[must_use]
@@ -1692,8 +1720,6 @@ impl Ipv6Addr {
     /// # Examples
     ///
     /// ```
-    /// #![feature(ip)]
-    ///
     /// use std::net::{Ipv4Addr, Ipv6Addr};
     ///
     /// assert_eq!(Ipv6Addr::new(0xff00, 0, 0, 0, 0, 0, 0, 0).to_ipv4_mapped(), None);
@@ -1705,7 +1731,7 @@ impl Ipv6Addr {
         staged_api,
         rustc_const_unstable(feature = "const_ipv6", issue = "76205")
     )]
-    #[cfg_attr(staged_api, unstable(feature = "ip", issue = "27709"))]
+    #[cfg_attr(staged_api, stable(feature = "ipv6_to_ipv4_mapped", since = "1.63.0"))]
     #[must_use = "this returns the result of the operation, \
                   without modifying the original"]
     #[inline]
@@ -1723,7 +1749,10 @@ impl Ipv6Addr {
     /// or an [IPv4-mapped] address as defined in [IETF RFC 4291 section 2.5.5.2],
     /// otherwise returns [`None`].
     ///
-    /// `::a.b.c.d` and `::ffff:a.b.c.d` become `a.b.c.d`
+    /// Note that this will return an [`IPv4` address] for the IPv6 loopback address `::1`. Use
+    /// [`Ipv6Addr::to_ipv4_mapped`] to avoid this.
+    ///
+    /// `::a.b.c.d` and `::ffff:a.b.c.d` become `a.b.c.d`. `::1` becomes `0.0.0.1`.
     /// All addresses *not* starting with either all zeroes or `::ffff` will return `None`.
     ///
     /// [`IPv4` address]: Ipv4Addr
@@ -1745,7 +1774,7 @@ impl Ipv6Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv6", since = "1.50.0")
+        rustc_const_stable(feature = "const_ip_50", since = "1.50.0")
     )]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     #[must_use = "this returns the result of the operation, \
@@ -1798,29 +1827,13 @@ impl Ipv6Addr {
     /// ```
     #[cfg_attr(
         staged_api,
-        rustc_const_stable(feature = "const_ipv6", since = "1.32.0")
+        rustc_const_stable(feature = "const_ip_32", since = "1.32.0")
     )]
     #[cfg_attr(staged_api, stable(feature = "ipv6_to_octets", since = "1.12.0"))]
     #[must_use]
     #[inline]
     pub const fn octets(&self) -> [u8; 16] {
-        in6_addr_s6_addr(self.inner)
-    }
-}
-
-#[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-impl Clone for Ipv6Addr {
-    #[inline]
-    fn clone(&self) -> Ipv6Addr {
-        *self
-    }
-}
-
-#[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-impl PartialEq for Ipv6Addr {
-    #[inline]
-    fn eq(&self, other: &Ipv6Addr) -> bool {
-        in6_addr_s6_addr(self.inner) == in6_addr_s6_addr(other.inner)
+        self.octets
     }
 }
 
@@ -1843,17 +1856,6 @@ impl PartialEq<Ipv6Addr> for IpAddr {
             IpAddr::V4(_) => false,
             IpAddr::V6(v6) => v6 == other,
         }
-    }
-}
-
-#[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-impl Eq for Ipv6Addr {}
-
-#[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
-impl hash::Hash for Ipv6Addr {
-    #[inline]
-    fn hash<H: hash::Hasher>(&self, s: &mut H) {
-        in6_addr_s6_addr(self.inner).hash(s)
     }
 }
 
@@ -1912,8 +1914,7 @@ impl From<Ipv6Addr> for u128 {
     /// ```
     #[inline]
     fn from(ip: Ipv6Addr) -> u128 {
-        let ip = ip.octets();
-        u128::from_be_bytes(ip)
+        u128::from_be_bytes(ip.octets)
     }
 }
 #[cfg_attr(staged_api, stable(feature = "i128", since = "1.26.0"))]
@@ -1964,9 +1965,7 @@ impl From<[u8; 16]> for Ipv6Addr {
     /// ```
     #[inline]
     fn from(octets: [u8; 16]) -> Ipv6Addr {
-        Ipv6Addr {
-            inner: in6_addr_new(octets),
-        }
+        Ipv6Addr { octets }
     }
 }
 
