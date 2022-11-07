@@ -1,3 +1,8 @@
+//! Bindings for the Linux `prctl` system call.
+//!
+//! There are similarities (but also differences) with FreeBSD's `procctl` system call, whose
+//! interface is located in the `procctl.rs` file.
+
 #![allow(unsafe_code)]
 
 use core::convert::{TryFrom, TryInto};
@@ -67,9 +72,11 @@ const PR_GET_PDEATHSIG: c_int = 2;
 /// Get the current value of the parent process death signal.
 ///
 /// # References
-/// - [`prctl(PR_GET_PDEATHSIG,...)`]
+/// - [Linux: `prctl(PR_GET_PDEATHSIG,...)`]
+/// - [FreeBSD: `procctl(PROC_PDEATHSIG_STATUS,...)`]
 ///
-/// [`prctl(PR_GET_PDEATHSIG,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
+/// [Linux: `prctl(PR_GET_PDEATHSIG,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
+/// [FreeBSD: `procctl(PROC_PDEATHSIG_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn parent_process_death_signal() -> io::Result<Option<Signal>> {
     unsafe { prctl_get_at_arg2_optional::<c_int>(PR_GET_PDEATHSIG) }.map(Signal::from_raw)
@@ -80,9 +87,11 @@ const PR_SET_PDEATHSIG: c_int = 1;
 /// Set the parent-death signal of the calling process.
 ///
 /// # References
-/// - [`prctl(PR_SET_PDEATHSIG,...)`]
+/// - [Linux: `prctl(PR_SET_PDEATHSIG,...)`]
+/// - [FreeBSD: `procctl(PROC_PDEATHSIG_CTL,...)`]
 ///
-/// [`prctl(PR_SET_PDEATHSIG,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
+/// [Linux: `prctl(PR_SET_PDEATHSIG,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
+/// [FreeBSD: `procctl(PROC_PDEATHSIG_CTL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn set_parent_process_death_signal(signal: Option<Signal>) -> io::Result<()> {
     let signal = signal.map_or(0_usize, |signal| signal as usize);
@@ -137,9 +146,13 @@ pub fn dumpable_behavior() -> io::Result<DumpableBehavior> {
 
 const PR_SET_DUMPABLE: c_int = 4;
 
-/// Set the state of the `dumpable` attribute, which determines whether core dumps are produced
-/// for the calling process upon delivery of a signal whose default behavior is to produce
-/// a core dump.
+/// Set the state of the `dumpable` attribute, which determines whether the process can be traced
+/// and whether core dumps are produced for the calling process upon delivery of a signal whose
+/// default behavior is to produce a core dump.
+///
+/// A similar function with the same name is available on FreeBSD (as part of the `procctl`
+/// interface), but it has an extra argument which allows to select a process other then the
+/// current process.
 ///
 /// # References
 /// - [`prctl(PR_SET_DUMPABLE,...)`]

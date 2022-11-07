@@ -13,6 +13,8 @@ mod membarrier;
 mod prctl;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))] // WASI doesn't have [gs]etpriority.
 mod priority;
+#[cfg(target_os = "freebsd")]
+mod procctl;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 mod rlimit;
 #[cfg(any(
@@ -59,6 +61,8 @@ pub use priority::{
     getpriority_pgrp, getpriority_process, getpriority_user, setpriority_pgrp, setpriority_process,
     setpriority_user,
 };
+#[cfg(target_os = "freebsd")]
+pub use procctl::*;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use rlimit::prlimit;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]

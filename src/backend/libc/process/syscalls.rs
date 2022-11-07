@@ -453,3 +453,14 @@ pub(crate) unsafe fn prctl(
 ) -> io::Result<c::c_int> {
     ret_c_int(c::prctl(option, arg2, arg3, arg4, arg5))
 }
+
+#[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
+#[inline]
+pub(crate) unsafe fn procctl(
+    idtype: c::idtype_t,
+    id: c::id_t,
+    option: c::c_int,
+    data: *mut c::c_void,
+) -> io::Result<()> {
+    ret(c::procctl(idtype, id, option, data))
+}
