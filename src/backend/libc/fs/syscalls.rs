@@ -1637,7 +1637,7 @@ pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<CString> {
     // `F_GETPATH` in terms of `MAXPATHLEN`, and there are no
     // alternatives. If a better method is invented, it should be used
     // instead.
-    let mut buf = vec![0; c::PATH_MAX as usize];
+    let mut buf = alloc::vec![0; c::PATH_MAX as usize];
 
     // From the [macOS `fcntl` man page]:
     // `F_GETPATH` - Get the path of the file descriptor `Fildes`. The argument
