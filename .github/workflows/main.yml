@@ -12,7 +12,7 @@ jobs:
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -41,7 +41,7 @@ jobs:
       # -D warnings is commented out in our install-rust action; re-add it here.
       RUSTFLAGS: -D warnings
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -133,7 +133,7 @@ jobs:
       # -D warnings is commented out in our install-rust action; re-add it here.
       RUSTFLAGS: -D warnings
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -153,7 +153,7 @@ jobs:
             rust: nightly
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -180,7 +180,7 @@ jobs:
             rust: nightly
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -370,7 +370,7 @@ jobs:
             os: windows-2019
             rust: nightly
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -517,7 +517,7 @@ jobs:
       RUSTFLAGS: -D warnings
       QEMU_BUILD_VERSION: 7.0.0
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -626,7 +626,7 @@ jobs:
       CARGO_TARGET_MIPS64EL_UNKNOWN_LINUX_GNUABI64_RUSTFLAGS: --cfg rustix_use_experimental_asm
       QEMU_BUILD_VERSION: 7.0.0
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
