@@ -183,10 +183,13 @@ all-apis = [
 use-libc-auxv = ["libc"]
 
 # Expose io-lifetimes' features for third-party crate impls.
-async-std = ["io-lifetimes/async-std"]
-tokio = ["io-lifetimes/tokio"]
+# Some of these are temporarily disabled, until the upstream creates add the
+# needed trait implementations.
+#async-std = ["io-lifetimes/async-std"]
+#tokio = ["io-lifetimes/tokio"]
 os_pipe = ["io-lifetimes/os_pipe"]
-socket2 = ["io-lifetimes/socket2"]
-mio = ["io-lifetimes/mio"]
+#socket2 = ["io-lifetimes/socket2"]
+#mio = ["io-lifetimes/mio"]
 fs-err = ["io-lifetimes/fs-err"]
-all-impls = ["async-std", "tokio", "os_pipe", "socket2", "mio", "fs-err"]
+#all-impls = ["async-std", "tokio", "os_pipe", "socket2", "mio", "fs-err"]
+all-impls = ["os_pipe", "fs-err"]
