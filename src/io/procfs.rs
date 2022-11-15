@@ -75,7 +75,16 @@ fn check_proc_entry_with_stat(
     // Check the ownership of the directory. We can't do that for the toplevel
     // "/proc" though, because in e.g. a user namespace scenario, root outside
     // the container may be mapped to another uid like `nobody`.
-    if !matches!(kind, Kind::Proc) && (entry_stat.st_uid, entry_stat.st_gid) != (uid, gid) {
+    //
+    // In addition to allowing the expected uid:gid, also allow root:root, as
+    // some files in procfs can change [to root:root] when a process is marked
+    // as non-dumpable.
+    //
+    // [to root:root]: https://man7.org/linux/man-pages/man5/proc.5.html
+    if !matches!(kind, Kind::Proc)
+        && (entry_stat.st_uid, entry_stat.st_gid) != (uid, gid)
+        && (entry_stat.st_uid, entry_stat.st_gid) != (Uid::ROOT.as_raw(), Gid::ROOT.as_raw())
+    {
         return Err(io::Errno::NOTSUP);
     }
 
@@ -207,6 +216,7 @@ fn is_mountpoint(file: BorrowedFd<'_>) -> bool {
 /// Open a directory in `/proc`, mapping all errors to `io::Errno::NOTSUP`.
 fn proc_opendirat<P: crate::path::Arg, Fd: AsFd>(dirfd: Fd, path: P) -> io::Result<OwnedFd> {
     // We could add `PATH`|`NOATIME` here but Linux 2.6.32 doesn't support it.
+    // Also for `NOATIME` see the comment in `open_and_check_file`.
     let oflags = OFlags::NOFOLLOW | OFlags::DIRECTORY | OFlags::CLOEXEC | OFlags::NOCTTY;
     openat(dirfd, path, oflags, Mode::empty()).map_err(|_err| io::Errno::NOTSUP)
 }
@@ -435,8 +445,13 @@ fn proc_self_file(name: &CStr) -> io::Result<OwnedFd> {
 fn open_and_check_file(dir: BorrowedFd, dir_stat: &Stat, name: &CStr) -> io::Result<OwnedFd> {
     let (_, proc_stat) = proc()?;
 
-    let oflags =
-        OFlags::RDONLY | OFlags::CLOEXEC | OFlags::NOFOLLOW | OFlags::NOCTTY | OFlags::NOATIME;
+    // Don't use `NOATIME`, because it [requires us to own the file], and when
+    // a process sets itself non-dumpable Linux changes the user:group of its
+    // `/proc/<pid>` files [to root:root].
+    //
+    // [requires us to own the file]: https://man7.org/linux/man-pages/man2/openat.2.html
+    // [to root:root]: https://man7.org/linux/man-pages/man5/proc.5.html
+    let oflags = OFlags::RDONLY | OFlags::CLOEXEC | OFlags::NOFOLLOW | OFlags::NOCTTY;
     let file = openat(&dir, name, oflags, Mode::empty()).map_err(|_err| io::Errno::NOTSUP)?;
     let file_stat = fstat(&file)?;
 
