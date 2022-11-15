@@ -91,7 +91,7 @@ fn test_file() {
         assert!(statvfs.f_frsize > 0);
     }
 
-    #[cfg(feature = "net")]
+    #[cfg(all(feature = "fs", feature = "net"))]
     assert_eq!(rustix::io::is_read_write(&file).unwrap(), (true, false));
 
     assert_ne!(rustix::io::ioctl_fionread(&file).unwrap(), 0);

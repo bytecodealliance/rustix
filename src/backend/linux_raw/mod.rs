@@ -24,14 +24,7 @@ mod vdso;
 #[cfg(any(feature = "time", target_arch = "x86"))]
 mod vdso_wrappers;
 
-#[cfg(any(
-    feature = "param",
-    feature = "runtime",
-    feature = "time",
-    target_arch = "x86",
-))]
-pub(crate) mod param;
-// #[cfg(feature = "fs")] // TODO: Enable once `OwnedFd` moves out of the tree.
+#[cfg(feature = "fs")]
 pub(crate) mod fs;
 pub(crate) mod io;
 #[cfg(feature = "io_uring")]
@@ -41,6 +34,13 @@ pub(crate) mod io_uring;
 pub(crate) mod mm;
 #[cfg(feature = "net")]
 pub(crate) mod net;
+#[cfg(any(
+    feature = "param",
+    feature = "runtime",
+    feature = "time",
+    target_arch = "x86",
+))]
+pub(crate) mod param;
 pub(crate) mod process;
 #[cfg(feature = "rand")]
 pub(crate) mod rand;

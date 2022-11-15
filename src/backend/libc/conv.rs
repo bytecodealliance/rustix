@@ -7,6 +7,7 @@
 use super::c;
 use super::fd::{AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, LibcFd, OwnedFd, RawFd};
 #[cfg(not(windows))]
+#[cfg(feature = "fs")]
 use super::offset::libc_off_t;
 #[cfg(not(windows))]
 use crate::ffi::CStr;
@@ -120,6 +121,7 @@ pub(super) fn syscall_ret_u32(raw: c::c_long) -> io::Result<u32> {
 }
 
 #[cfg(not(windows))]
+#[cfg(feature = "fs")]
 #[inline]
 pub(super) fn ret_off_t(raw: libc_off_t) -> io::Result<libc_off_t> {
     if raw == -1 {

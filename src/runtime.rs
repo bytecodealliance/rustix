@@ -23,12 +23,14 @@ use crate::backend;
 #[cfg(linux_raw)]
 use crate::ffi::CStr;
 #[cfg(linux_raw)]
+#[cfg(feature = "fs")]
 use crate::fs::AtFlags;
 #[cfg(linux_raw)]
 use crate::io;
 #[cfg(linux_raw)]
 use crate::process::Pid;
 #[cfg(linux_raw)]
+#[cfg(feature = "fs")]
 use backend::fd::AsFd;
 #[cfg(linux_raw)]
 use core::ffi::c_void;
@@ -236,6 +238,8 @@ pub unsafe fn fork() -> io::Result<Option<Pid>> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/execveat.2.html
 #[cfg(linux_raw)]
 #[inline]
+#[cfg(feature = "fs")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "fs")))]
 pub unsafe fn execveat<Fd: AsFd>(
     dirfd: Fd,
     path: &CStr,

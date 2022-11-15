@@ -56,7 +56,7 @@ pub(crate) mod c;
 pub(crate) use libc as c;
 
 #[cfg(not(windows))]
-// #[cfg(feature = "fs")] // TODO: Enable this once `OwnedFd` moves out of the tree.
+#[cfg(feature = "fs")]
 pub(crate) mod fs;
 pub(crate) mod io;
 #[cfg(any(target_os = "android", target_os = "linux"))]

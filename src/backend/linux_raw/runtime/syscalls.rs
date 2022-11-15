@@ -10,8 +10,10 @@ use super::super::c;
 #[cfg(target_arch = "x86")]
 use super::super::conv::by_mut;
 use super::super::conv::{c_int, c_uint, ret, ret_c_uint, ret_error, ret_usize_infallible, zero};
+#[cfg(feature = "fs")]
 use crate::fd::BorrowedFd;
 use crate::ffi::CStr;
+#[cfg(feature = "fs")]
 use crate::fs::AtFlags;
 use crate::io;
 use crate::process::{Pid, RawNonZeroPid};
@@ -32,6 +34,7 @@ pub(crate) unsafe fn fork() -> io::Result<Option<Pid>> {
     Ok(Pid::from_raw(pid))
 }
 
+#[cfg(feature = "fs")]
 pub(crate) unsafe fn execveat(
     dirfd: BorrowedFd<'_>,
     path: &CStr,

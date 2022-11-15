@@ -147,7 +147,7 @@ time = []
 param = []
 
 # Enable this to enable `rustix::io::proc_self_*` (on Linux) and `ttyname`.
-procfs = ["once_cell", "itoa"]
+procfs = ["once_cell", "itoa", "fs"]
 
 # Enable `rustix::termios::*`.
 termios = []
