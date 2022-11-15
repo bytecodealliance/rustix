@@ -24,7 +24,7 @@ use crate::fs::{
 };
 use crate::io;
 use crate::path::DecInt;
-use crate::process::{getgid, getpid, getuid, Gid, RawGid, RawUid, Uid};
+use crate::process::getpid;
 #[cfg(feature = "rustc-dep-of-std")]
 use core::lazy::OnceCell;
 #[cfg(not(feature = "rustc-dep-of-std"))]
@@ -47,11 +47,9 @@ fn check_proc_entry(
     kind: Kind,
     entry: BorrowedFd<'_>,
     proc_stat: Option<&Stat>,
-    uid: RawUid,
-    gid: RawGid,
 ) -> io::Result<Stat> {
     let entry_stat = fstat(entry)?;
-    check_proc_entry_with_stat(kind, entry, entry_stat, proc_stat, uid, gid)
+    check_proc_entry_with_stat(kind, entry, entry_stat, proc_stat)
 }
 
 /// Check a subdirectory of "/proc" for anomalies, using the provided `Stat`.
@@ -60,8 +58,6 @@ fn check_proc_entry_with_stat(
     entry: BorrowedFd<'_>,
     entry_stat: Stat,
     proc_stat: Option<&Stat>,
-    uid: RawUid,
-    gid: RawGid,
 ) -> io::Result<Stat> {
     // Check the filesystem magic.
     check_procfs(entry)?;
@@ -70,22 +66,6 @@ fn check_proc_entry_with_stat(
         Kind::Proc => check_proc_root(entry, &entry_stat)?,
         Kind::Pid | Kind::Fd => check_proc_subdir(entry, &entry_stat, proc_stat)?,
         Kind::File => check_proc_file(&entry_stat, proc_stat)?,
-    }
-
-    // Check the ownership of the directory. We can't do that for the toplevel
-    // "/proc" though, because in e.g. a user namespace scenario, root outside
-    // the container may be mapped to another uid like `nobody`.
-    //
-    // In addition to allowing the expected uid:gid, also allow root:root, as
-    // some files in procfs can change [to root:root] when a process is marked
-    // as non-dumpable.
-    //
-    // [to root:root]: https://man7.org/linux/man-pages/man5/proc.5.html
-    if !matches!(kind, Kind::Proc)
-        && (entry_stat.st_uid, entry_stat.st_gid) != (uid, gid)
-        && (entry_stat.st_uid, entry_stat.st_gid) != (Uid::ROOT.as_raw(), Gid::ROOT.as_raw())
-    {
-        return Err(io::Errno::NOTSUP);
     }
 
     // "/proc" directories are typically mounted r-xr-xr-x.
@@ -239,14 +219,8 @@ fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     PROC.get_or_try_init(|| {
         // Open "/proc".
         let proc = proc_opendirat(cwd(), cstr!("/proc"))?;
-        let proc_stat = check_proc_entry(
-            Kind::Proc,
-            proc.as_fd(),
-            None,
-            Uid::ROOT.as_raw(),
-            Gid::ROOT.as_raw(),
-        )
-        .map_err(|_err| io::Errno::NOTSUP)?;
+        let proc_stat =
+            check_proc_entry(Kind::Proc, proc.as_fd(), None).map_err(|_err| io::Errno::NOTSUP)?;
 
         Ok(new_static_fd(proc, proc_stat))
     })
@@ -270,19 +244,13 @@ fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
         .get_or_try_init(|| {
             let (proc, proc_stat) = proc()?;
 
-            let (uid, gid, pid) = (getuid(), getgid(), getpid());
+            let pid = getpid();
 
             // Open "/proc/self". Use our pid to compute the name rather than literally
             // using "self", as "self" is a symlink.
             let proc_self = proc_opendirat(proc, DecInt::new(pid.as_raw_nonzero().get()))?;
-            let proc_self_stat = check_proc_entry(
-                Kind::Pid,
-                proc_self.as_fd(),
-                Some(proc_stat),
-                uid.as_raw(),
-                gid.as_raw(),
-            )
-            .map_err(|_err| io::Errno::NOTSUP)?;
+            let proc_self_stat = check_proc_entry(Kind::Pid, proc_self.as_fd(), Some(proc_stat))
+                .map_err(|_err| io::Errno::NOTSUP)?;
 
             Ok(new_static_fd(proc_self, proc_self_stat))
         })
@@ -307,18 +275,13 @@ pub fn proc_self_fd() -> io::Result<BorrowedFd<'static>> {
         .get_or_try_init(|| {
             let (_, proc_stat) = proc()?;
 
-            let (proc_self, proc_self_stat) = proc_self()?;
+            let (proc_self, _proc_self_stat) = proc_self()?;
 
             // Open "/proc/self/fd".
             let proc_self_fd = proc_opendirat(proc_self, cstr!("fd"))?;
-            let proc_self_fd_stat = check_proc_entry(
-                Kind::Fd,
-                proc_self_fd.as_fd(),
-                Some(proc_stat),
-                proc_self_stat.st_uid,
-                proc_self_stat.st_gid,
-            )
-            .map_err(|_err| io::Errno::NOTSUP)?;
+            let proc_self_fd_stat =
+                check_proc_entry(Kind::Fd, proc_self_fd.as_fd(), Some(proc_stat))
+                    .map_err(|_err| io::Errno::NOTSUP)?;
 
             Ok(new_static_fd(proc_self_fd, proc_self_fd_stat))
         })
@@ -349,18 +312,13 @@ fn proc_self_fdinfo() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
         .get_or_try_init(|| {
             let (_, proc_stat) = proc()?;
 
-            let (proc_self, proc_self_stat) = proc_self()?;
+            let (proc_self, _proc_self_stat) = proc_self()?;
 
             // Open "/proc/self/fdinfo".
             let proc_self_fdinfo = proc_opendirat(proc_self, cstr!("fdinfo"))?;
-            let proc_self_fdinfo_stat = check_proc_entry(
-                Kind::Fd,
-                proc_self_fdinfo.as_fd(),
-                Some(proc_stat),
-                proc_self_stat.st_uid,
-                proc_self_stat.st_gid,
-            )
-            .map_err(|_err| io::Errno::NOTSUP)?;
+            let proc_self_fdinfo_stat =
+                check_proc_entry(Kind::Fd, proc_self_fdinfo.as_fd(), Some(proc_stat))
+                    .map_err(|_err| io::Errno::NOTSUP)?;
 
             Ok((proc_self_fdinfo, proc_self_fdinfo_stat))
         })
@@ -485,14 +443,8 @@ fn open_and_check_file(dir: BorrowedFd, dir_stat: &Stat, name: &CStr) -> io::Res
             && entry.file_name() == name
         {
             // We found the file. Proceed to check the file handle.
-            let _ = check_proc_entry_with_stat(
-                Kind::File,
-                file.as_fd(),
-                file_stat,
-                Some(proc_stat),
-                dir_stat.st_uid,
-                dir_stat.st_gid,
-            )?;
+            let _ =
+                check_proc_entry_with_stat(Kind::File, file.as_fd(), file_stat, Some(proc_stat))?;
 
             found_file = true;
         } else if entry.ino() == dir_stat.st_ino
