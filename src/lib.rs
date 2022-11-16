@@ -207,9 +207,6 @@ pub mod runtime;
 // that they're not public, but still available for internal use.
 
 #[cfg(not(windows))]
-#[cfg(not(feature = "fs"))]
-pub(crate) mod fs;
-#[cfg(not(windows))]
 #[cfg(all(
     not(feature = "param"),
     any(feature = "runtime", feature = "time", target_arch = "x86"),

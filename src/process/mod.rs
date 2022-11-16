@@ -81,4 +81,5 @@ pub use uname::{uname, Uname};
 pub use wait::{wait, waitpid, WaitOptions, WaitStatus};
 
 #[cfg(not(target_os = "wasi"))]
+#[cfg(feature = "fs")]
 pub(crate) use id::translate_fchown_args;

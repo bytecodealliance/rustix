@@ -10,6 +10,7 @@ use super::c;
     target_os = "l4re",
     target_os = "linux",
 )))]
+#[cfg(feature = "fs")]
 pub(super) use c::{
     fstat as libc_fstat, fstatat as libc_fstatat, ftruncate as libc_ftruncate, lseek as libc_lseek,
     off_t as libc_off_t,
@@ -21,10 +22,19 @@ pub(super) use c::{
     target_os = "l4re",
     target_os = "linux",
 ))]
+#[cfg(feature = "fs")]
 pub(super) use c::{
     fstat64 as libc_fstat, fstatat64 as libc_fstatat, ftruncate64 as libc_ftruncate,
-    lseek64 as libc_lseek, off64_t as libc_off_t, rlimit64 as libc_rlimit,
+    lseek64 as libc_lseek, off64_t as libc_off_t,
 };
+
+#[cfg(any(
+    target_os = "android",
+    target_os = "emscripten",
+    target_os = "l4re",
+    target_os = "linux",
+))]
+pub(super) use c::rlimit64 as libc_rlimit;
 
 #[cfg(not(any(
     windows,
@@ -150,6 +160,7 @@ pub(super) unsafe fn libc_prlimit(
     target_os = "l4re",
     target_os = "redox",
 )))]
+#[cfg(feature = "fs")]
 pub(super) use c::openat as libc_openat;
 #[cfg(any(
     target_os = "android",
@@ -157,11 +168,14 @@ pub(super) use c::openat as libc_openat;
     target_os = "emscripten",
     target_os = "l4re",
 ))]
+#[cfg(feature = "fs")]
 pub(super) use c::openat64 as libc_openat;
 
 #[cfg(target_os = "fuchsia")]
+#[cfg(feature = "fs")]
 pub(super) use c::fallocate as libc_fallocate;
 #[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(feature = "fs")]
 pub(super) use c::fallocate64 as libc_fallocate;
 #[cfg(not(any(
     windows,
@@ -179,6 +193,7 @@ pub(super) use c::fallocate64 as libc_fallocate;
     target_os = "redox",
     target_os = "solaris",
 )))]
+#[cfg(feature = "fs")]
 pub(super) use c::posix_fadvise as libc_posix_fadvise;
 #[cfg(any(
     target_os = "android",
@@ -186,6 +201,7 @@ pub(super) use c::posix_fadvise as libc_posix_fadvise;
     target_os = "linux",
     target_os = "l4re",
 ))]
+#[cfg(feature = "fs")]
 pub(super) use c::posix_fadvise64 as libc_posix_fadvise;
 
 #[cfg(all(not(any(
@@ -342,8 +358,10 @@ pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
     target_os = "redox",
     target_os = "solaris",
 )))]
+#[cfg(feature = "fs")]
 pub(super) use c::posix_fallocate as libc_posix_fallocate;
 #[cfg(any(target_os = "l4re"))]
+#[cfg(feature = "fs")]
 pub(super) use c::posix_fallocate64 as libc_posix_fallocate;
 #[cfg(not(any(
     windows,
@@ -358,6 +376,7 @@ pub(super) use c::posix_fallocate64 as libc_posix_fallocate;
     target_os = "solaris",
     target_os = "wasi",
 )))]
+#[cfg(feature = "fs")]
 pub(super) use {c::fstatfs as libc_fstatfs, c::statfs as libc_statfs};
 #[cfg(not(any(
     windows,
@@ -371,6 +390,7 @@ pub(super) use {c::fstatfs as libc_fstatfs, c::statfs as libc_statfs};
     target_os = "solaris",
     target_os = "wasi",
 )))]
+#[cfg(feature = "fs")]
 pub(super) use {c::fstatvfs as libc_fstatvfs, c::statvfs as libc_statvfs};
 
 #[cfg(any(
@@ -379,6 +399,7 @@ pub(super) use {c::fstatvfs as libc_fstatvfs, c::statvfs as libc_statvfs};
     target_os = "emscripten",
     target_os = "l4re",
 ))]
+#[cfg(feature = "fs")]
 pub(super) use {
     c::fstatfs64 as libc_fstatfs, c::fstatvfs64 as libc_fstatvfs, c::statfs64 as libc_statfs,
     c::statvfs64 as libc_statvfs,

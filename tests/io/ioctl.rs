@@ -5,7 +5,7 @@
 fn test_ioctls() {
     let file = std::fs::File::open("Cargo.toml").unwrap();
 
-    #[cfg(feature = "net")]
+    #[cfg(all(feature = "fs", feature = "net"))]
     assert_eq!(rustix::io::is_read_write(&file).unwrap(), (true, false));
 
     assert_eq!(
