@@ -15,7 +15,9 @@ use alloc::borrow::Cow;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+use core::mem::MaybeUninit;
 use core::str;
+use core::{ptr, slice};
 #[cfg(feature = "std")]
 use std::ffi::{OsStr, OsString};
 #[cfg(feature = "std")]
@@ -931,6 +933,7 @@ impl Arg for DecInt {
 }
 
 /// Runs a closure with `bytes` passed in as a `&CStr`.
+#[allow(unsafe_code)]
 #[inline]
 fn with_c_str<T, F>(bytes: &[u8], f: F) -> io::Result<T>
 where
@@ -946,10 +949,26 @@ where
     if bytes.len() >= SMALL_PATH_BUFFER_SIZE {
         return with_c_str_slow_path(bytes, f);
     }
-    let mut buffer: [u8; SMALL_PATH_BUFFER_SIZE] = [0_u8; SMALL_PATH_BUFFER_SIZE];
-    // Copy the bytes in; the buffer already has zeros for the trailing NUL.
-    buffer[..bytes.len()].copy_from_slice(bytes);
-    f(CStr::from_bytes_with_nul(&buffer[..=bytes.len()]).map_err(|_cstr_err| io::Errno::INVAL)?)
+
+    // Taken from
+    // https://github.com/rust-lang/rust/blob/a00f8ba7fcac1b27341679c51bf5a3271fa82df3/library/std/src/sys/common/small_c_string.rs
+    let mut buf = MaybeUninit::<[u8; SMALL_PATH_BUFFER_SIZE]>::uninit();
+    let buf_ptr = buf.as_mut_ptr() as *mut u8;
+
+    // SAFETY: bytes.len() < SMALL_PATH_BUFFER_SIZE which means we have space for
+    // bytes.len() + 1 u8s:
+    debug_assert!(bytes.len() + 1 <= SMALL_PATH_BUFFER_SIZE);
+    unsafe {
+        ptr::copy_nonoverlapping(bytes.as_ptr(), buf_ptr, bytes.len());
+        buf_ptr.add(bytes.len()).write(0);
+    }
+
+    // SAFETY: we just wrote the bytes above and they will remain valid for the
+    // duration of f b/c buf doesn't get dropped until the end of the function.
+    match CStr::from_bytes_with_nul(unsafe { slice::from_raw_parts(buf_ptr, bytes.len() + 1) }) {
+        Ok(s) => f(s),
+        Err(_) => Err(io::Errno::INVAL),
+    }
 }
 
 /// The slow path which handles any length. In theory OS's only support up
