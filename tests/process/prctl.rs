@@ -3,6 +3,7 @@ use std::os::raw::c_int;
 use std::{fs, io};
 
 use rustix::process::*;
+#[cfg(feature = "thread")]
 use rustix::thread::Capability;
 
 #[test]
@@ -79,6 +80,7 @@ fn test_speculative_feature_state() {
     );
 }
 
+#[cfg(feature = "thread")]
 #[test]
 fn test_is_io_flusher() {
     if !thread_has_capability(Capability::SystemResource).unwrap() {
@@ -89,6 +91,7 @@ fn test_is_io_flusher() {
     dbg!(is_io_flusher().unwrap());
 }
 
+#[cfg(feature = "thread")]
 #[test]
 fn test_virtual_memory_map_config_struct_size() {
     if !thread_has_capability(Capability::SystemResource).unwrap() {
@@ -116,6 +119,7 @@ fn test_floating_point_emulation_control() {
  * Helper functions.
  */
 
+#[cfg(feature = "thread")]
 pub(crate) fn thread_has_capability(capability: Capability) -> io::Result<bool> {
     const _LINUX_CAPABILITY_VERSION_3: u32 = 0x20080522;
 
