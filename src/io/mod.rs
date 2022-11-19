@@ -6,6 +6,8 @@ mod dup;
 mod errno;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod eventfd;
+#[cfg(not(windows))]
+mod fcntl;
 #[cfg(not(feature = "std"))]
 pub(crate) mod fd;
 mod ioctl;
@@ -31,6 +33,10 @@ pub use dup::{dup, dup2, dup3, DupFlags};
 pub use errno::{retry_on_intr, Errno, Result};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use eventfd::{eventfd, EventfdFlags};
+#[cfg(not(any(windows, target_os = "wasi")))]
+pub use fcntl::fcntl_dupfd_cloexec;
+#[cfg(not(windows))]
+pub use fcntl::{fcntl_getfd, fcntl_setfd, FdFlags};
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use ioctl::ioctl_fioclex;
 pub use ioctl::ioctl_fionbio;

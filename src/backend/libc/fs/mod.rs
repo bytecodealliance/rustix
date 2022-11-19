@@ -1,5 +1,4 @@
 #[cfg(not(target_os = "redox"))]
-#[cfg(any(feature = "fs", feature = "procfs"))]
 pub(crate) mod dir;
 #[cfg(not(any(
     target_os = "dragonfly",

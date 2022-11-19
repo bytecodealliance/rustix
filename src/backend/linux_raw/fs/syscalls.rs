@@ -21,12 +21,12 @@ use super::super::conv::{loff_t, loff_t_from_u64, ret_u64};
     target_pointer_width = "32",
 ))]
 use crate::fd::AsFd;
-use crate::fd::{BorrowedFd, OwnedFd, RawFd};
+use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::fs::{
-    Access, Advice, AtFlags, FallocateFlags, FdFlags, FileType, FlockOperation, MemfdFlags, Mode,
-    OFlags, RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatVfs, StatVfsMountFlags,
-    StatxFlags, Timestamps,
+    Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, MemfdFlags, Mode, OFlags,
+    RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatVfs, StatVfsMountFlags, StatxFlags,
+    Timestamps,
 };
 use crate::io::{self, SeekFrom};
 use crate::process::{Gid, Uid};
@@ -36,9 +36,8 @@ use core::mem::MaybeUninit;
 use linux_raw_sys::general::stat as linux_stat64;
 use linux_raw_sys::general::{
     __kernel_fsid_t, __kernel_timespec, open_how, statx, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR,
-    AT_SYMLINK_NOFOLLOW, F_ADD_SEALS, F_DUPFD, F_DUPFD_CLOEXEC, F_GETFD, F_GETFL, F_GETLEASE,
-    F_GETOWN, F_GETPIPE_SZ, F_GETSIG, F_GET_SEALS, F_SETFD, F_SETFL, F_SETPIPE_SZ, SEEK_CUR,
-    SEEK_END, SEEK_SET, STATX__RESERVED,
+    AT_SYMLINK_NOFOLLOW, F_ADD_SEALS, F_GETFL, F_GETLEASE, F_GETOWN, F_GETPIPE_SZ, F_GETSIG,
+    F_GET_SEALS, F_SETFL, F_SETPIPE_SZ, SEEK_CUR, SEEK_END, SEEK_SET, STATX__RESERVED,
 };
 #[cfg(target_pointer_width = "32")]
 use {
@@ -882,76 +881,6 @@ pub(crate) fn readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, buf: &mut [u8]) -> 
             buf_addr_mut,
             buf_len
         ))
-    }
-}
-
-#[inline]
-pub(crate) fn fcntl_dupfd(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
-    #[cfg(target_pointer_width = "32")]
-    unsafe {
-        ret_owned_fd(syscall_readonly!(
-            __NR_fcntl64,
-            fd,
-            c_uint(F_DUPFD),
-            raw_fd(min)
-        ))
-    }
-    #[cfg(target_pointer_width = "64")]
-    unsafe {
-        ret_owned_fd(syscall_readonly!(
-            __NR_fcntl,
-            fd,
-            c_uint(F_DUPFD),
-            raw_fd(min)
-        ))
-    }
-}
-
-#[inline]
-pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
-    #[cfg(target_pointer_width = "32")]
-    unsafe {
-        ret_owned_fd(syscall_readonly!(
-            __NR_fcntl64,
-            fd,
-            c_uint(F_DUPFD_CLOEXEC),
-            raw_fd(min)
-        ))
-    }
-    #[cfg(target_pointer_width = "64")]
-    unsafe {
-        ret_owned_fd(syscall_readonly!(
-            __NR_fcntl,
-            fd,
-            c_uint(F_DUPFD_CLOEXEC),
-            raw_fd(min)
-        ))
-    }
-}
-
-#[inline]
-pub(crate) fn fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<FdFlags> {
-    #[cfg(target_pointer_width = "32")]
-    unsafe {
-        ret_c_uint(syscall_readonly!(__NR_fcntl64, fd, c_uint(F_GETFD)))
-            .map(FdFlags::from_bits_truncate)
-    }
-    #[cfg(target_pointer_width = "64")]
-    unsafe {
-        ret_c_uint(syscall_readonly!(__NR_fcntl, fd, c_uint(F_GETFD)))
-            .map(FdFlags::from_bits_truncate)
-    }
-}
-
-#[inline]
-pub(crate) fn fcntl_setfd(fd: BorrowedFd<'_>, flags: FdFlags) -> io::Result<()> {
-    #[cfg(target_pointer_width = "32")]
-    unsafe {
-        ret(syscall_readonly!(__NR_fcntl64, fd, c_uint(F_SETFD), flags))
-    }
-    #[cfg(target_pointer_width = "64")]
-    unsafe {
-        ret(syscall_readonly!(__NR_fcntl, fd, c_uint(F_SETFD), flags))
     }
 }
 

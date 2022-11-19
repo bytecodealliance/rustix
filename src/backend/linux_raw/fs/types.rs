@@ -2,17 +2,6 @@ use super::super::c;
 use bitflags::bitflags;
 
 bitflags! {
-    /// `FD_*` constants for use with [`fcntl_getfd`] and [`fcntl_setfd`].
-    ///
-    /// [`fcntl_getfd`]: crate::fs::fcntl_getfd
-    /// [`fcntl_setfd`]: crate::fs::fcntl_setfd
-    pub struct FdFlags: c::c_uint {
-        /// `FD_CLOEXEC`
-        const CLOEXEC = linux_raw_sys::general::FD_CLOEXEC;
-    }
-}
-
-bitflags! {
     /// `*_OK` constants for use with [`accessat`].
     ///
     /// [`accessat`]: fn.accessat.html

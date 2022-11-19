@@ -54,8 +54,8 @@ fn test_file() {
     rustix::fs::fadvise(&file, 0, 10, rustix::fs::Advice::Normal).unwrap();
 
     assert_eq!(
-        rustix::fs::fcntl_getfd(&file).unwrap(),
-        rustix::fs::FdFlags::empty()
+        rustix::io::fcntl_getfd(&file).unwrap(),
+        rustix::io::FdFlags::empty()
     );
     assert_eq!(
         rustix::fs::fcntl_getfl(&file).unwrap(),

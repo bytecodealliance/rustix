@@ -2,7 +2,8 @@
 
 use crate::backend;
 
-pub use backend::fs::types::{Access, FdFlags, Mode, OFlags};
+pub use crate::io::FdFlags;
+pub use backend::fs::types::{Access, Mode, OFlags};
 
 #[cfg(not(target_os = "redox"))]
 pub use backend::fs::types::AtFlags;

@@ -24,7 +24,7 @@ pub use backend::io::types::DupFlags;
 ///  - [Apple]
 ///
 /// [file description]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_258
-/// [`fcntl_dupfd_cloexec`]: crate::fs::fcntl_dupfd_cloexec
+/// [`fcntl_dupfd_cloexec`]: crate::io::fcntl_dupfd_cloexec
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/dup.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/dup.2.html
@@ -51,7 +51,7 @@ pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 ///  - [Apple]
 ///
 /// [file description]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_258
-/// [`fcntl_dupfd_cloexec`]: crate::fs::fcntl_dupfd_cloexec
+/// [`fcntl_dupfd_cloexec`]: crate::io::fcntl_dupfd_cloexec
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/dup2.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup2.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/dup2.2.html

@@ -337,10 +337,9 @@ impl<'a, Num: ArgNumber> From<crate::fs::StatxFlags> for ArgReg<'a, Num> {
     }
 }
 
-#[cfg(feature = "fs")]
-impl<'a, Num: ArgNumber> From<crate::fs::FdFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::io::FdFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::fs::FdFlags) -> Self {
+    fn from(flags: crate::io::FdFlags) -> Self {
         c_uint(flags.bits())
     }
 }
