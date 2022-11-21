@@ -933,7 +933,7 @@ impl Arg for DecInt {
 }
 
 /// Runs a closure with `bytes` passed in as a `&CStr`.
-#[allow(unsafe_code)]
+#[allow(unsafe_code, clippy::int_plus_one)]
 #[inline]
 fn with_c_str<T, F>(bytes: &[u8], f: F) -> io::Result<T>
 where
