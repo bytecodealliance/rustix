@@ -75,8 +75,8 @@ impl Dir {
         // file description state, which would cause Undefined Behavior after
         // our call to `fdopendir`. To prevent this, we obtain an independent
         // `OwnedFd`.
-        let flags = fcntl_getfl(&fd)?;
-        let fd_for_dir = openat(&fd, cstr!("."), flags | OFlags::CLOEXEC, Mode::empty())?;
+        let flags = fcntl_getfl(fd)?;
+        let fd_for_dir = openat(fd, cstr!("."), flags | OFlags::CLOEXEC, Mode::empty())?;
 
         let raw = owned_fd(fd_for_dir);
         unsafe {

@@ -394,9 +394,9 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
     ))]
     {
         match statx(dirfd, path, flags, StatxFlags::BASIC_STATS) {
-            Ok(x) => return statx_to_stat(x),
+            Ok(x) => statx_to_stat(x),
             Err(io::Errno::NOSYS) => statat_old(dirfd, path, flags),
-            Err(err) => return Err(err),
+            Err(err) => Err(err),
         }
     }
 
@@ -963,9 +963,9 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     ))]
     {
         match statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
-            Ok(x) => return statx_to_stat(x),
+            Ok(x) => statx_to_stat(x),
             Err(io::Errno::NOSYS) => fstat_old(fd),
-            Err(err) => return Err(err),
+            Err(err) => Err(err),
         }
     }
 
@@ -1201,7 +1201,7 @@ pub(crate) fn fallocate(
 
     assert!(mode.is_empty());
 
-    let new_len = offset.checked_add(len).ok_or_else(|| io::Errno::FBIG)?;
+    let new_len = offset.checked_add(len).ok_or(io::Errno::FBIG)?;
     let mut store = c::fstore_t {
         fst_flags: c::F_ALLOCATECONTIG,
         fst_posmode: c::F_PEOFPOSMODE,

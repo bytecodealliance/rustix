@@ -230,7 +230,7 @@ pub(super) fn opt_mut<T: Sized, Num: ArgNumber>(t: Option<&mut T>) -> ArgReg<Num
 /// syscall.
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 #[inline]
-pub(super) fn opt_ref<'a, T: Sized, Num: ArgNumber>(t: Option<&'a T>) -> ArgReg<'a, Num> {
+pub(super) fn opt_ref<T: Sized, Num: ArgNumber>(t: Option<&T>) -> ArgReg<Num> {
     // This optimizes into the equivalent of `transmute(t)`, and has the
     // advantage of not requiring `unsafe`.
     match t {

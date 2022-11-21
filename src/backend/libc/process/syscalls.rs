@@ -149,7 +149,6 @@ pub(crate) fn getppid() -> Option<Pid> {
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-#[must_use]
 pub(crate) fn getpgid(pid: Option<Pid>) -> io::Result<Pid> {
     unsafe {
         let pgid = ret_pid_t(c::getpgid(Pid::as_raw(pid) as _))?;
