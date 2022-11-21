@@ -454,9 +454,9 @@ pub(crate) fn stat(filename: &CStr) -> io::Result<Stat> {
             AtFlags::empty(),
             StatxFlags::BASIC_STATS,
         ) {
-            Ok(x) => return statx_to_stat(x),
+            Ok(x) => statx_to_stat(x),
             Err(io::Errno::NOSYS) => stat_old(filename),
-            Err(err) => return Err(err),
+            Err(err) => Err(err),
         }
     }
 
@@ -508,9 +508,9 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, filename: &CStr, flags: AtFlags) -> 
     #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
     {
         match statx(dirfd, filename, flags, StatxFlags::BASIC_STATS) {
-            Ok(x) => return statx_to_stat(x),
+            Ok(x) => statx_to_stat(x),
             Err(io::Errno::NOSYS) => statat_old(dirfd, filename, flags),
-            Err(err) => return Err(err),
+            Err(err) => Err(err),
         }
     }
 
@@ -567,9 +567,9 @@ pub(crate) fn lstat(filename: &CStr) -> io::Result<Stat> {
             AtFlags::SYMLINK_NOFOLLOW,
             StatxFlags::BASIC_STATS,
         ) {
-            Ok(x) => return statx_to_stat(x),
+            Ok(x) => statx_to_stat(x),
             Err(io::Errno::NOSYS) => lstat_old(filename),
-            Err(err) => return Err(err),
+            Err(err) => Err(err),
         }
     }
 

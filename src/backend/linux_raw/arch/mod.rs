@@ -15,6 +15,8 @@
 
 #![allow(unsafe_code)]
 #![cfg_attr(not(feature = "all-apis"), allow(unused_imports))]
+// We'll use as many arguments as syscalls need.
+#![allow(clippy::too_many_arguments)]
 
 // When inline asm is available, use it. Otherwise, use out-of-line asm. These
 // functions always use the machine's syscall instruction, even when it isn't

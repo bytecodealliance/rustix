@@ -61,7 +61,7 @@ pub(crate) unsafe fn mmap(
             fd,
             (offset / 4096)
                 .try_into()
-                .map(|scaled_offset| pass_usize(scaled_offset))
+                .map(pass_usize)
                 .map_err(|_| io::Errno::INVAL)?
         ))
     }

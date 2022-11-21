@@ -410,7 +410,7 @@ fn open_and_check_file(dir: BorrowedFd, dir_stat: &Stat, name: &CStr) -> io::Res
     // [requires us to own the file]: https://man7.org/linux/man-pages/man2/openat.2.html
     // [to root:root]: https://man7.org/linux/man-pages/man5/proc.5.html
     let oflags = OFlags::RDONLY | OFlags::CLOEXEC | OFlags::NOFOLLOW | OFlags::NOCTTY;
-    let file = openat(&dir, name, oflags, Mode::empty()).map_err(|_err| io::Errno::NOTSUP)?;
+    let file = openat(dir, name, oflags, Mode::empty()).map_err(|_err| io::Errno::NOTSUP)?;
     let file_stat = fstat(&file)?;
 
     // `is_mountpoint` only works on directory mount points, not file mount

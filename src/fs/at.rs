@@ -338,7 +338,7 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
     flags: CloneFlags,
 ) -> io::Result<()> {
     dst.into_with_c_str(|dst| {
-        backend::fs::syscalls::fclonefileat(src.as_fd(), dst_dir.as_fd(), &dst, flags)
+        backend::fs::syscalls::fclonefileat(src.as_fd(), dst_dir.as_fd(), dst, flags)
     })
 }
 

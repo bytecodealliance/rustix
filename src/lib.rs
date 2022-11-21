@@ -117,6 +117,12 @@
 )]
 #![cfg_attr(asm_experimental_arch, feature(asm_experimental_arch))]
 #![cfg_attr(not(feature = "all-apis"), allow(dead_code))]
+// Clamp depends on Rust 1.50 which is newer than our MSRV.
+#![allow(clippy::manual_clamp)]
+// It is common in linux and libc APIs for types to vary between platforms.
+#![allow(clippy::unnecessary_cast)]
+// It is common in linux and libc APIs for types to vary between platforms.
+#![allow(clippy::useless_conversion)]
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
