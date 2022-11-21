@@ -1,5 +1,3 @@
-use core::cmp::max;
-use core::convert::TryFrom;
 use core::mem::MaybeUninit;
 use core::slice;
 use linux_raw_sys::general::linux_dirent64;
@@ -141,7 +139,7 @@ impl<'buf, Fd: AsFd> Iterator for RawDir<'buf, Fd> {
                 // - Assumption: the kernel uses proper alignment.
                 let dirent = unsafe { &*dirent_ptr.cast::<linux_dirent64>() };
 
-                self.offset += usize::try_from(dirent.d_reclen).unwrap();
+                self.offset += usize::from(dirent.d_reclen);
 
                 return Some(Ok(RawDirEntry {
                     file_type: dirent.d_type,
@@ -149,38 +147,37 @@ impl<'buf, Fd: AsFd> Iterator for RawDir<'buf, Fd> {
                     next_entry_cookie: dirent.d_off,
                     file_name: {
                         let name_start = dirent.d_name.as_ptr().cast::<u8>();
-                        let mut name_end = {
+                        let mut name_len = {
                             // On 32-bit platforms, the kernel continues to use 8 byte alignment,
-                            // so we just hardcode that knowledge in.
-                            const ALIGNMENT_MASK: usize = !(8 - 1);
+                            // so cannot rely on size_of or align_of and must instead hardcode
+                            // that knowledge in.
+                            const ALIGNMENT: usize = 8;
+                            const DIRENT64_PACKED_SIZE: usize = 19;
 
                             // Find the last non-padding byte of the file name so we can
                             // start searching for NUL bytes. If we started searching
                             // directly from the back, we would run into garbage left over
                             // from previous iterations.
-                            // TODO use .map_addr() and .addr() once strict_provenance is stable
-                            let addr = max(
-                                name_start as usize,
-                                self.buf[self.offset - 1..].as_ptr() as usize & ALIGNMENT_MASK,
-                            );
-                            addr as *const u8
+                            usize::from(dirent.d_reclen)
+                                .saturating_sub(DIRENT64_PACKED_SIZE + ALIGNMENT)
                         };
 
-                        unsafe {
-                            // SAFETY:
-                            // - We start searching from within the dirent AND before the padding bytes.
-                            // - The kernel guarantees a NUL terminated name.
-                            while *name_end != 0 {
-                                name_end = name_end.add(1);
-                            }
+                        // SAFETY:
+                        // - We start searching from within the dirent AND before the padding bytes.
+                        // - The kernel guarantees a NUL terminated name.
+                        while unsafe { *name_start.add(name_len) } != 0 {
+                            name_len += 1;
+                        }
+                        // Add 1 for the NUL byte
+                        name_len += 1;
 
-                            // SAFETY: We found the NUL byte and length above.
-                            CStr::from_bytes_with_nul_unchecked(slice::from_raw_parts(
-                                name_start,
-                                // Add 1 for the NUL byte
-                                // TODO use .addr() once strict_provenance is stable
-                                name_end as usize - name_start as usize + 1,
-                            ))
+                        // SAFETY: We found the NUL byte and length above.
+                        unsafe {
+                            let file_name = CStr::from_bytes_with_nul_unchecked(
+                                slice::from_raw_parts(name_start, name_len),
+                            );
+                            debug_assert_eq!(file_name, CStr::from_ptr(name_start.cast()));
+                            file_name
                         }
                     },
                 }));
