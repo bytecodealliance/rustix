@@ -16,11 +16,10 @@ use crate::fs::FileType;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::RenameFlags;
 use crate::fs::{AtFlags, Mode, OFlags, Stat, Timestamps};
-use crate::io;
 use crate::path::SMALL_PATH_BUFFER_SIZE;
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
-use crate::{backend, path};
+use crate::{backend, io, path};
 use alloc::vec::Vec;
 use backend::fd::{AsFd, BorrowedFd};
 use backend::time::types::Nsecs;

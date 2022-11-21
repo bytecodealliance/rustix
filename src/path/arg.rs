@@ -16,8 +16,7 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::mem::MaybeUninit;
-use core::str;
-use core::{ptr, slice};
+use core::{ptr, slice, str};
 #[cfg(feature = "std")]
 use std::ffi::{OsStr, OsString};
 #[cfg(feature = "std")]

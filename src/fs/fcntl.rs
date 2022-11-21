@@ -3,8 +3,7 @@
 //! a type-safe API, rustix makes them all separate functions so that they
 //! can have dedicated static type signatures.
 
-use crate::backend;
-use crate::io;
+use crate::{backend, io};
 use backend::fd::AsFd;
 use backend::fs::types::OFlags;
 

@@ -1,8 +1,7 @@
 #![allow(unsafe_code)]
 
-use crate::backend;
 use crate::fd::OwnedFd;
-use crate::io;
+use crate::{backend, io};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use backend::fd::AsFd;
 
