@@ -1,7 +1,6 @@
-use crate::backend;
 use crate::fd::OwnedFd;
-use crate::io;
 use crate::net::{AddressFamily, Protocol, SocketFlags, SocketType};
+use crate::{backend, io};
 
 /// `socketpair(domain, type_ | accept_flags, protocol)`
 ///

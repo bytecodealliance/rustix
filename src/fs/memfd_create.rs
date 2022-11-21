@@ -1,6 +1,5 @@
 use crate::fd::OwnedFd;
-use crate::io;
-use crate::{backend, path};
+use crate::{backend, io, path};
 
 pub use backend::fs::types::MemfdFlags;
 

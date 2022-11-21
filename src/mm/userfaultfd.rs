@@ -6,9 +6,8 @@
 //! observe and manipulate process memory in magical ways.
 #![allow(unsafe_code)]
 
-use crate::backend;
 use crate::fd::OwnedFd;
-use crate::io;
+use crate::{backend, io};
 
 pub use backend::mm::types::UserfaultfdFlags;
 

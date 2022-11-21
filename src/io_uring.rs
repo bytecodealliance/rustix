@@ -19,9 +19,8 @@
 //! [io_uring]: https://en.wikipedia.org/wiki/Io_uring
 #![allow(unsafe_code)]
 
-use crate::backend;
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
-use crate::io;
+use crate::{backend, io};
 use core::ffi::c_void;
 use core::ptr::null_mut;
 use linux_raw_sys::general as sys;

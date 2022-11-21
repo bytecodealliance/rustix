@@ -1,8 +1,7 @@
 //! Functions which duplicate file descriptors.
 
-use crate::backend;
 use crate::fd::OwnedFd;
-use crate::io;
+use crate::{backend, io};
 use backend::fd::AsFd;
 
 #[cfg(not(target_os = "wasi"))]
