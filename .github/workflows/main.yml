@@ -139,6 +139,7 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
+    - run: cargo check --workspace --release --no-default-features -vv
     - run: cargo check --workspace --release --no-default-features --features all-apis -vv
 
   check_nightly:

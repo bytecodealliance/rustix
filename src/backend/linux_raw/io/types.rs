@@ -3,6 +3,17 @@ use bitflags::bitflags;
 use core::marker::PhantomData;
 
 bitflags! {
+    /// `FD_*` constants for use with [`fcntl_getfd`] and [`fcntl_setfd`].
+    ///
+    /// [`fcntl_getfd`]: crate::io::fcntl_getfd
+    /// [`fcntl_setfd`]: crate::io::fcntl_setfd
+    pub struct FdFlags: c::c_uint {
+        /// `FD_CLOEXEC`
+        const CLOEXEC = linux_raw_sys::general::FD_CLOEXEC;
+    }
+}
+
+bitflags! {
     /// `RWF_*` constants for use with [`preadv2`] and [`pwritev2`].
     ///
     /// [`preadv2`]: crate::io::preadv2

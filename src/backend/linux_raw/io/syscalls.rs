@@ -10,8 +10,8 @@ use super::super::c;
 #[cfg(target_pointer_width = "64")]
 use super::super::conv::loff_t_from_u64;
 use super::super::conv::{
-    by_ref, c_int, c_uint, opt_mut, pass_usize, raw_fd, ret, ret_discarded_fd, ret_owned_fd,
-    ret_usize, slice, slice_mut, zero,
+    by_ref, c_int, c_uint, opt_mut, pass_usize, raw_fd, ret, ret_c_uint, ret_discarded_fd,
+    ret_owned_fd, ret_usize, slice, slice_mut, zero,
 };
 #[cfg(target_pointer_width = "32")]
 use super::super::conv::{hi, lo};
@@ -19,15 +19,18 @@ use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::io::SpliceFlags;
 use crate::io::{
-    self, epoll, DupFlags, EventfdFlags, IoSlice, IoSliceMut, IoSliceRaw, PipeFlags, PollFd,
-    ReadWriteFlags,
+    self, epoll, DupFlags, EventfdFlags, FdFlags, IoSlice, IoSliceMut, IoSliceRaw, PipeFlags,
+    PollFd, ReadWriteFlags,
 };
 #[cfg(all(feature = "fs", feature = "net"))]
 use crate::net::{RecvFlags, SendFlags};
 use core::cmp;
 use core::mem::MaybeUninit;
+#[cfg(target_os = "espidf")]
+use linux_raw_sys::general::F_DUPFD;
 use linux_raw_sys::general::{
-    epoll_event, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, UIO_MAXIOV,
+    epoll_event, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, F_DUPFD_CLOEXEC, F_GETFD, F_SETFD,
+    UIO_MAXIOV,
 };
 use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET, FIONBIO, FIONREAD, TIOCEXCL, TIOCNXCL};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
@@ -416,6 +419,77 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
 #[inline]
 pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, flags: DupFlags) -> io::Result<()> {
     unsafe { ret_discarded_fd(syscall_readonly!(__NR_dup3, fd, new.as_fd(), flags)) }
+}
+
+#[inline]
+pub(crate) fn fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<FdFlags> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_c_uint(syscall_readonly!(__NR_fcntl64, fd, c_uint(F_GETFD)))
+            .map(FdFlags::from_bits_truncate)
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret_c_uint(syscall_readonly!(__NR_fcntl, fd, c_uint(F_GETFD)))
+            .map(FdFlags::from_bits_truncate)
+    }
+}
+
+#[inline]
+pub(crate) fn fcntl_setfd(fd: BorrowedFd<'_>, flags: FdFlags) -> io::Result<()> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret(syscall_readonly!(__NR_fcntl64, fd, c_uint(F_SETFD), flags))
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret(syscall_readonly!(__NR_fcntl, fd, c_uint(F_SETFD), flags))
+    }
+}
+
+#[cfg(target_os = "espidf")]
+#[inline]
+pub(crate) fn fcntl_dupfd(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_owned_fd(syscall_readonly!(
+            __NR_fcntl64,
+            fd,
+            c_uint(F_DUPFD),
+            raw_fd(min)
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret_owned_fd(syscall_readonly!(
+            __NR_fcntl,
+            fd,
+            c_uint(F_DUPFD),
+            raw_fd(min)
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret_owned_fd(syscall_readonly!(
+            __NR_fcntl64,
+            fd,
+            c_uint(F_DUPFD_CLOEXEC),
+            raw_fd(min)
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret_owned_fd(syscall_readonly!(
+            __NR_fcntl,
+            fd,
+            c_uint(F_DUPFD_CLOEXEC),
+            raw_fd(min)
+        ))
+    }
 }
 
 #[inline]

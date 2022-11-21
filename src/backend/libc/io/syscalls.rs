@@ -22,7 +22,7 @@ use crate::io::DupFlags;
     target_os = "wasi"
 )))]
 use crate::io::PipeFlags;
-use crate::io::{self, IoSlice, IoSliceMut, PollFd};
+use crate::io::{self, FdFlags, IoSlice, IoSliceMut, PollFd};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::io::{EventfdFlags, IoSliceRaw, ReadWriteFlags, SpliceFlags};
 use core::cmp::min;
@@ -372,6 +372,19 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
 #[cfg(all(feature = "fs", feature = "net"))]
 pub(crate) fn is_read_write(_fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
     todo!("Implement is_read_write for WASI in terms of fd_fdstat_get");
+}
+
+pub(crate) fn fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<FdFlags> {
+    unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GETFD)).map(FdFlags::from_bits_truncate) }
+}
+
+pub(crate) fn fcntl_setfd(fd: BorrowedFd<'_>, flags: FdFlags) -> io::Result<()> {
+    unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_SETFD, flags.bits())) }
+}
+
+#[cfg(not(target_os = "wasi"))]
+pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(c::fcntl(borrowed_fd(fd), c::F_DUPFD_CLOEXEC, min)) }
 }
 
 #[cfg(not(target_os = "wasi"))]

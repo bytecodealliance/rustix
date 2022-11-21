@@ -1,8 +1,18 @@
 use super::super::c;
-#[cfg(not(target_os = "wasi"))]
 use bitflags::bitflags;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use core::marker::PhantomData;
+
+bitflags! {
+    /// `FD_*` constants for use with [`fcntl_getfd`] and [`fcntl_setfd`].
+    ///
+    /// [`fcntl_getfd`]: crate::io::fcntl_getfd
+    /// [`fcntl_setfd`]: crate::io::fcntl_setfd
+    pub struct FdFlags: c::c_int {
+        /// `FD_CLOEXEC`
+        const CLOEXEC = c::FD_CLOEXEC;
+    }
+}
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {

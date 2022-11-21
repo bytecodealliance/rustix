@@ -58,8 +58,6 @@ use super::super::offset::{libc_fstatvfs, libc_statvfs};
     target_env = "gnu",
 ))]
 use super::super::time::types::LibcTimespec;
-#[cfg(not(target_os = "wasi"))]
-use crate::fd::RawFd;
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
@@ -117,7 +115,7 @@ use crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags};
     target_os = "wasi",
 )))]
 use crate::fs::{Dev, FileType};
-use crate::fs::{FdFlags, Mode, OFlags, Stat, Timestamps};
+use crate::fs::{Mode, OFlags, Stat, Timestamps};
 #[cfg(not(any(
     target_os = "haiku",
     target_os = "illumos",
@@ -846,14 +844,6 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice)
     }
 }
 
-pub(crate) fn fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<FdFlags> {
-    unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GETFD)).map(FdFlags::from_bits_truncate) }
-}
-
-pub(crate) fn fcntl_setfd(fd: BorrowedFd<'_>, flags: FdFlags) -> io::Result<()> {
-    unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_SETFD, flags.bits())) }
-}
-
 pub(crate) fn fcntl_getfl(fd: BorrowedFd<'_>) -> io::Result<OFlags> {
     unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GETFL)).map(OFlags::from_bits_truncate) }
 }
@@ -883,11 +873,6 @@ pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<SealFlags> {
 ))]
 pub(crate) fn fcntl_add_seals(fd: BorrowedFd<'_>, seals: SealFlags) -> io::Result<()> {
     unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_ADD_SEALS, seals.bits())) }
-}
-
-#[cfg(not(target_os = "wasi"))]
-pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(c::fcntl(borrowed_fd(fd), c::F_DUPFD_CLOEXEC, min)) }
 }
 
 pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
