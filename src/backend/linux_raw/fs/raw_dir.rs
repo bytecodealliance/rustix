@@ -17,13 +17,10 @@ pub const DIR_BUF_LEN: usize = 8192;
 
 /// A directory iterator implemented with getdents.
 ///
-/// This implementation:
-/// - Excludes deleted inodes (with ID 0).
-/// - Does not handle growing the buffer. If this functionality is necessary,
-///   you'll need to drop the current iterator, resize the buffer, and then
-///   re-create the iterator. The iterator is guaranteed to continue where it
-///   left off provided the file descriptor isn't changed. See the example in
-///   [`RawDir::new`].
+/// Note: This implementation does not handle growing the buffer. If this functionality is
+/// necessary, you'll need to drop the current iterator, resize the buffer, and then
+/// re-create the iterator. The iterator is guaranteed to continue where it left off provided
+/// the file descriptor isn't changed. See the example in [`RawDir::new`].
 pub struct RawDir<'buf, Fd: AsFd> {
     fd: Fd,
     buf: &'buf mut [MaybeUninit<u8>],
@@ -117,8 +114,8 @@ impl<'a> RawDirEntry<'a> {
 
     /// Returns the inode number of this directory entry.
     #[inline]
-    #[doc(alias = "ino")]
-    pub fn inode_number(&self) -> u64 {
+    #[doc(alias = "inode_number")]
+    pub fn ino(&self) -> u64 {
         self.inode_number
     }
 
@@ -145,9 +142,6 @@ impl<'buf, Fd: AsFd> Iterator for RawDir<'buf, Fd> {
                 let dirent = unsafe { &*dirent_ptr.cast::<linux_dirent64>() };
 
                 self.offset += usize::try_from(dirent.d_reclen).unwrap();
-                if dirent.d_ino == 0 {
-                    continue;
-                }
 
                 return Some(Ok(RawDirEntry {
                     file_type: dirent.d_type,
