@@ -207,7 +207,7 @@ pub use openat2::openat2;
 #[cfg(linux_raw)]
 #[cfg(not(target_os = "redox"))]
 #[cfg(all(linux_raw, feature = "fs"))]
-pub use raw_dir::{RawDir, RawDirEntry, DIR_BUF_LEN};
+pub use raw_dir::{RawDir, RawDirEntry};
 #[cfg(target_os = "linux")]
 pub use sendfile::sendfile;
 #[cfg(any(target_os = "android", target_os = "linux"))]

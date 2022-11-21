@@ -58,7 +58,7 @@ fn raw_dir_entries() {
     use std::io::{Seek, SeekFrom};
 
     use rustix::fd::AsFd;
-    use rustix::fs::{RawDir, RawDirEntry, DIR_BUF_LEN};
+    use rustix::fs::{RawDir, RawDirEntry};
 
     fn read_raw_entries<'a, Fd: AsFd>(
         dir: &'a mut RawDir<'_, Fd>,
@@ -80,7 +80,7 @@ fn raw_dir_entries() {
 
     let tmpdir = tempfile::tempdir().expect("construct tempdir");
     let mut dirfd = File::open(tmpdir.path()).expect("open tempdir as file");
-    let mut buf = Vec::with_capacity(DIR_BUF_LEN);
+    let mut buf = Vec::with_capacity(8192);
     let mut dir = RawDir::new(dirfd.try_clone().unwrap(), buf.spare_capacity_mut());
 
     let entries = read_raw_entries(&mut dir);

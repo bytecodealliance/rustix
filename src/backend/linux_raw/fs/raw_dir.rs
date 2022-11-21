@@ -8,11 +8,6 @@ use crate::ffi::CStr;
 use crate::fs::FileType;
 use crate::io;
 
-/// Suggested buffer size for use in [`RawDir::new`]. There is no requirement to
-/// use this buffer size, but it was found to be a good tradeoff between memory
-/// use and syscall count.
-pub const DIR_BUF_LEN: usize = 8192;
-
 /// A directory iterator implemented with getdents.
 ///
 /// Note: This implementation does not handle growing the buffer. If this functionality is
@@ -31,6 +26,23 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     ///
     /// # Examples
     ///
+    /// Using the heap:
+    ///
+    /// ```
+    /// # use std::mem::MaybeUninit;
+    /// # use rustix::fs::{cwd, Mode, OFlags, openat, RawDir};
+    ///
+    /// let fd = openat(cwd(), ".", OFlags::RDONLY | OFlags::DIRECTORY, Mode::empty()).unwrap();
+    ///
+    /// let mut buf = Vec::with_capacity(8192);
+    /// for entry in RawDir::new(fd, buf.spare_capacity_mut()) {
+    ///     let entry = entry.unwrap();
+    ///     dbg!(&entry);
+    /// }
+    /// ```
+    ///
+    /// Using the stack:
+    ///
     /// ```
     /// # use std::mem::MaybeUninit;
     /// # use rustix::fs::{cwd, Mode, OFlags, openat, RawDir};
@@ -44,20 +56,16 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// }
     /// ```
     ///
-    /// Contrived example that demonstrates reading entries with arbitrarily large file paths:
+    /// When reading directory entries with arbitrarily large file names is required:
     ///
     /// ```
-    /// # use std::cmp::max;
     /// # use std::mem::MaybeUninit;
     /// # use rustix::fs::{cwd, Mode, OFlags, openat, RawDir};
     /// # use rustix::io::Errno;
     ///
     /// let fd = openat(cwd(), ".", OFlags::RDONLY | OFlags::DIRECTORY, Mode::empty()).unwrap();
     ///
-    /// // DO NOT DO THIS. Use `Vec::with_capacity(DIR_BUF_LEN)` to at least start the buffer
-    /// // off with *some* space.
-    /// let mut buf = Vec::new();
-    ///
+    /// let mut buf = Vec::with_capacity(8192);
     /// 'read: loop {
     ///     'resize: {
     ///         for entry in RawDir::new(&fd, buf.spare_capacity_mut()) {
@@ -70,12 +78,10 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     ///         break 'read;
     ///     }
     ///
-    ///     let new_capacity = max(buf.capacity() * 2, 1);
+    ///     let new_capacity = buf.capacity() * 2;
     ///     buf.reserve(new_capacity);
     /// }
     /// ```
-    ///
-    /// Note that this is horribly inefficient as we'll most likely end up doing ~1 syscall per file.
     pub fn new(fd: Fd, buf: &'buf mut [MaybeUninit<u8>]) -> Self {
         Self {
             fd,
