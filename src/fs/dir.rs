@@ -1,4 +1,4 @@
-//! `Dir` and `Entry`.
+//! `Dir` and `DirEntry`.
 
 use crate::backend;
 

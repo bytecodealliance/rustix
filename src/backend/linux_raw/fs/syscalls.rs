@@ -1196,6 +1196,16 @@ pub(crate) fn getdents(fd: BorrowedFd<'_>, dirent: &mut [u8]) -> io::Result<usiz
 }
 
 #[inline]
+pub(crate) fn getdents_uninit(
+    fd: BorrowedFd<'_>,
+    dirent: &mut [MaybeUninit<u8>],
+) -> io::Result<usize> {
+    let (dirent_addr_mut, dirent_len) = slice_mut(dirent);
+
+    unsafe { ret_usize(syscall!(__NR_getdents64, fd, dirent_addr_mut, dirent_len)) }
+}
+
+#[inline]
 pub(crate) fn utimensat(
     dirfd: BorrowedFd<'_>,
     pathname: &CStr,
