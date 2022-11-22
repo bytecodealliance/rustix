@@ -2,8 +2,10 @@
 
 use std::collections::HashMap;
 use std::fs::File;
+use std::io::{Seek, SeekFrom};
 
-use rustix::fs::{Dir, DirEntry};
+use rustix::fd::AsFd;
+use rustix::fs::{Dir, DirEntry, RawDir, RawDirEntry};
 
 #[test]
 fn dir_entries() {
@@ -53,31 +55,7 @@ fn read_entries(dir: &mut Dir) -> HashMap<String, DirEntry> {
 }
 
 #[test]
-#[cfg(linux_raw)]
 fn raw_dir_entries() {
-    use std::io::{Seek, SeekFrom};
-
-    use rustix::fd::AsFd;
-    use rustix::fs::{RawDir, RawDirEntry};
-
-    fn read_raw_entries<'a, Fd: AsFd>(
-        dir: &'a mut RawDir<'_, Fd>,
-    ) -> HashMap<String, RawDirEntry<'a>> {
-        let mut out = HashMap::new();
-        for entry in dir {
-            let entry = entry.expect("non-error entry");
-            let name = entry
-                .file_name()
-                .to_str()
-                .expect("utf8 filename")
-                .to_owned();
-            if name != "." && name != ".." {
-                out.insert(name, entry);
-            }
-        }
-        out
-    }
-
     let tmpdir = tempfile::tempdir().expect("construct tempdir");
     let mut dirfd = File::open(tmpdir.path()).expect("open tempdir as file");
     let mut buf = Vec::with_capacity(8192);
@@ -111,6 +89,22 @@ fn raw_dir_entries() {
         entries
     );
     assert_eq!(entries.len(), 2);
+}
+
+fn read_raw_entries<'a, Fd: AsFd>(dir: &'a mut RawDir<'_, Fd>) -> HashMap<String, RawDirEntry<'a>> {
+    let mut out = HashMap::new();
+    for entry in dir {
+        let entry = entry.expect("non-error entry");
+        let name = entry
+            .file_name()
+            .to_str()
+            .expect("utf8 filename")
+            .to_owned();
+        if name != "." && name != ".." {
+            out.insert(name, entry);
+        }
+    }
+    out
 }
 
 #[test]

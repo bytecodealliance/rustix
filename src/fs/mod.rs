@@ -50,7 +50,7 @@ mod memfd_create;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod openat2;
 #[cfg(not(target_os = "redox"))]
-#[cfg(all(linux_raw, feature = "fs"))]
+#[cfg(feature = "fs")]
 mod raw_dir;
 #[cfg(target_os = "linux")]
 mod sendfile;
@@ -204,9 +204,8 @@ pub use makedev::{major, makedev, minor};
 pub use memfd_create::{memfd_create, MemfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use openat2::openat2;
-#[cfg(linux_raw)]
 #[cfg(not(target_os = "redox"))]
-#[cfg(all(linux_raw, feature = "fs"))]
+#[cfg(feature = "fs")]
 pub use raw_dir::{RawDir, RawDirEntry};
 #[cfg(target_os = "linux")]
 pub use sendfile::sendfile;
