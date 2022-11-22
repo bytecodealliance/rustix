@@ -278,7 +278,7 @@ pub(crate) fn mkdirat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Res
     }
 }
 
-#[inline]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn getdents_uninit(
     fd: BorrowedFd<'_>,
     buf: &mut [MaybeUninit<u8>],
