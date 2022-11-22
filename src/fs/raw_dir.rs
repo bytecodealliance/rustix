@@ -146,8 +146,8 @@ impl<'a> RawDirEntry<'a> {
     /// Returns the seek cookie to the next directory entry.
     #[inline]
     #[doc(alias = "off")]
-    pub fn next_entry_cookie(&self) -> i64 {
-        self.next_entry_cookie
+    pub fn next_entry_cookie(&self) -> u64 {
+        self.next_entry_cookie as u64
     }
 }
 
