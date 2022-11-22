@@ -2,7 +2,6 @@
 
 use core::fmt;
 use core::mem::MaybeUninit;
-use core::slice;
 use linux_raw_sys::general::linux_dirent64;
 
 use crate::backend::fs::syscalls::getdents_uninit;
@@ -172,41 +171,8 @@ impl<'buf, Fd: AsFd> Iterator for RawDir<'buf, Fd> {
                     file_type: dirent.d_type,
                     inode_number: dirent.d_ino,
                     next_entry_cookie: dirent.d_off,
-                    file_name: {
-                        let name_start = dirent.d_name.as_ptr().cast::<u8>();
-                        let mut name_len = {
-                            // On 32-bit platforms, the kernel continues to use 8 byte alignment,
-                            // so cannot rely on size_of or align_of and must instead hardcode
-                            // that knowledge in.
-                            const ALIGNMENT: usize = 8;
-                            const DIRENT64_PACKED_SIZE: usize = 19;
-
-                            // Find the last non-padding byte of the file name so we can
-                            // start searching for NUL bytes. If we started searching
-                            // directly from the back, we would run into garbage left over
-                            // from previous iterations.
-                            usize::from(dirent.d_reclen)
-                                .saturating_sub(DIRENT64_PACKED_SIZE + ALIGNMENT)
-                        };
-
-                        // SAFETY:
-                        // - We start searching from within the dirent AND before the padding bytes.
-                        // - The kernel guarantees a NUL terminated name.
-                        while unsafe { *name_start.add(name_len) } != 0 {
-                            name_len += 1;
-                        }
-                        // Add 1 for the NUL byte
-                        name_len += 1;
-
-                        // SAFETY: We found the NUL byte and length above.
-                        unsafe {
-                            let file_name = CStr::from_bytes_with_nul_unchecked(
-                                slice::from_raw_parts(name_start, name_len),
-                            );
-                            debug_assert_eq!(file_name, CStr::from_ptr(name_start.cast()));
-                            file_name
-                        }
-                    },
+                    // SAFETY: the kernel guarantees a NUL terminated string.
+                    file_name: unsafe { CStr::from_ptr(dirent.d_name.as_ptr().cast()) },
                 }));
             }
             self.initialized = 0;
