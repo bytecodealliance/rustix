@@ -29,6 +29,11 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     ///
     /// # Examples
     ///
+    /// ## Simple but non-portable
+    ///
+    /// These examples are non-portable, because file systems may not have a maximum file name
+    /// length. If you can make assumptions that bound this length, then these examples may suffice.
+    ///
     /// Using the heap:
     ///
     /// ```
@@ -59,7 +64,10 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// }
     /// ```
     ///
-    /// When reading directory entries with arbitrarily large file names is required:
+    /// ## Portable
+    ///
+    /// Heap allocated growing buffer for supporting directory entries with arbitrarily
+    /// large file names:
     ///
     /// ```
     /// # use std::mem::MaybeUninit;
