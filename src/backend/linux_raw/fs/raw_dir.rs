@@ -1,3 +1,4 @@
+use core::fmt;
 use core::mem::MaybeUninit;
 use core::slice;
 use linux_raw_sys::general::linux_dirent64;
@@ -95,12 +96,22 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
 /// A raw directory entry, similar to `std::fs::DirEntry`.
 ///
 /// Note that unlike the std version, this may represent the `.` or `..` entries.
-#[derive(Debug)]
 pub struct RawDirEntry<'a> {
     file_name: &'a CStr,
     file_type: u8,
     inode_number: u64,
     next_entry_cookie: i64,
+}
+
+impl<'a> fmt::Debug for RawDirEntry<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut f = f.debug_struct("RawDirEntry");
+        f.field("file_name", &self.file_name());
+        f.field("file_type", &self.file_type());
+        f.field("ino", &self.ino());
+        f.field("next_entry_cookie", &self.next_entry_cookie());
+        f.finish()
+    }
 }
 
 impl<'a> RawDirEntry<'a> {
