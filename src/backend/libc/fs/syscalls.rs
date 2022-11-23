@@ -278,6 +278,22 @@ pub(crate) fn mkdirat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Res
     }
 }
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) fn getdents_uninit(
+    fd: BorrowedFd<'_>,
+    buf: &mut [MaybeUninit<u8>],
+) -> io::Result<usize> {
+    unsafe {
+        syscall_ret_ssize_t(c::syscall(
+            c::SYS_getdents64,
+            fd,
+            buf.as_mut_ptr().cast::<c::c_char>(),
+            buf.len(),
+        ))
+    }
+    .map(|nread| nread as usize)
+}
+
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn linkat(
     old_dirfd: BorrowedFd<'_>,
