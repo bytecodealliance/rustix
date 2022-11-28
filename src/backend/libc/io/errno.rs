@@ -158,7 +158,7 @@ impl Errno {
     /// `ECANCELED`
     pub const CANCELED: Self = Self(c::ECANCELED);
     /// `ECAPMODE`
-    #[cfg(any(target_os = "freebsd"))]
+    #[cfg(target_os = "freebsd")]
     pub const CAPMODE: Self = Self(c::ECAPMODE);
     /// `ECHILD`
     #[cfg(not(windows))]

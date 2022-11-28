@@ -360,7 +360,7 @@ pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
 )))]
 #[cfg(feature = "fs")]
 pub(super) use c::posix_fallocate as libc_posix_fallocate;
-#[cfg(any(target_os = "l4re"))]
+#[cfg(target_os = "l4re")]
 #[cfg(feature = "fs")]
 pub(super) use c::posix_fallocate64 as libc_posix_fallocate;
 #[cfg(not(any(

@@ -338,19 +338,19 @@ pub const B1500000: Speed = linux_raw_sys::general::B1500000;
 pub const B2000000: Speed = linux_raw_sys::general::B2000000;
 
 /// `B2500000`
-#[cfg(not(any(target_arch = "sparc", target_arch = "sparc64",)))]
+#[cfg(not(any(target_arch = "sparc", target_arch = "sparc64")))]
 pub const B2500000: Speed = linux_raw_sys::general::B2500000;
 
 /// `B3000000`
-#[cfg(not(any(target_arch = "sparc", target_arch = "sparc64",)))]
+#[cfg(not(any(target_arch = "sparc", target_arch = "sparc64")))]
 pub const B3000000: Speed = linux_raw_sys::general::B3000000;
 
 /// `B3500000`
-#[cfg(not(any(target_arch = "sparc", target_arch = "sparc64",)))]
+#[cfg(not(any(target_arch = "sparc", target_arch = "sparc64")))]
 pub const B3500000: Speed = linux_raw_sys::general::B3500000;
 
 /// `B4000000`
-#[cfg(not(any(target_arch = "sparc", target_arch = "sparc64",)))]
+#[cfg(not(any(target_arch = "sparc", target_arch = "sparc64")))]
 pub const B4000000: Speed = linux_raw_sys::general::B4000000;
 
 /// `CSIZE`

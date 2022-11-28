@@ -3,7 +3,7 @@ use crate::{backend, io};
 pub use backend::time::types::{Nsecs, Secs, Timespec};
 
 /// `clockid_t`
-#[cfg(any(not(target_os = "wasi")))]
+#[cfg(not(target_os = "wasi"))]
 pub use backend::time::types::{ClockId, DynamicClockId};
 
 /// `clock_getres(id)`—Returns the resolution of a clock.
