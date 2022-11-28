@@ -8,8 +8,7 @@
 //!
 //! [`io`]: crate::io
 
-use crate::backend;
-use crate::io;
+use crate::{backend, io};
 use backend::fd::{AsFd, OwnedFd, RawFd};
 
 pub use backend::io::types::FdFlags;
