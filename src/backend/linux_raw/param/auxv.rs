@@ -10,6 +10,7 @@ use super::super::elf::*;
 use crate::fd::OwnedFd;
 #[cfg(feature = "param")]
 use crate::ffi::CStr;
+#[cfg(not(target_vendor = "mustang"))]
 use crate::fs::{Mode, OFlags};
 use crate::utils::{as_ptr, check_raw_pointer};
 use alloc::vec::Vec;
@@ -130,6 +131,7 @@ static PHNUM: AtomicUsize = AtomicUsize::new(0);
 static EXECFN: AtomicPtr<c::c_char> = AtomicPtr::new(null_mut());
 
 /// On non-Mustang platforms, we read the aux vector from /proc/self/auxv.
+#[cfg(not(target_vendor = "mustang"))]
 fn init_from_proc_self_auxv() {
     // Open "/proc/self/auxv", either because we trust "/proc", or because
     // we're running inside QEMU and `proc_self_auxv`'s extra checking foils
@@ -144,6 +146,11 @@ fn init_from_proc_self_auxv() {
     .unwrap();
 
     let _ = init_from_auxv_file(file);
+}
+
+#[cfg(target_vendor = "mustang")]
+fn init_from_proc_self_auxv() {
+    panic!("mustang should have initialized the auxv values");
 }
 
 /// Process auxv entries from the open file `auxv`.
