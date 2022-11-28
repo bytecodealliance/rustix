@@ -188,7 +188,7 @@ pub mod process;
 #[cfg(feature = "rand")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "rand")))]
 pub mod rand;
-#[cfg(not(any(windows, target_os = "wasi")))]
+#[cfg(not(windows))]
 #[cfg(feature = "termios")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "termios")))]
 pub mod termios;

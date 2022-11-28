@@ -78,7 +78,7 @@ serial_test = "0.6"
 memoffset = "0.7.1"
 flate2 = "1.0"
 
-[target.'cfg(not(target_os = "emscripten"))'.dev-dependencies]
+[target.'cfg(not(any(target_os = "emscripten", target_os = "wasi")))'.dev-dependencies]
 criterion = "0.4"
 
 [target.'cfg(windows)'.dev-dependencies]
