@@ -5,7 +5,6 @@ use crate::backend;
     all(linux_raw, feature = "procfs"),
     all(libc, not(any(target_os = "fuchsia", target_os = "wasi"))),
 ))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 use crate::io;
 use backend::fd::AsFd;
 #[cfg(any(

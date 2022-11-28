@@ -38,13 +38,13 @@ fn test_capability_is_in_ambient_capability_set() {
     dbg!(capability_is_in_ambient_capability_set(Capability::ChangeOwnership).unwrap());
 }
 
-#[cfg(any(target_arch = "aarch64"))]
+#[cfg(target_arch = "aarch64")]
 #[test]
 fn test_sve_vector_length_configuration() {
     dbg!(sve_vector_length_configuration().unwrap());
 }
 
-#[cfg(any(target_arch = "aarch64"))]
+#[cfg(target_arch = "aarch64")]
 #[test]
 fn test_current_tagged_address_mode() {
     dbg!(current_tagged_address_mode().unwrap());

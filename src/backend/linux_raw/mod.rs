@@ -28,7 +28,6 @@ mod vdso_wrappers;
 pub(crate) mod fs;
 pub(crate) mod io;
 #[cfg(feature = "io_uring")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "io_uring")))]
 pub(crate) mod io_uring;
 #[cfg(feature = "mm")]
 pub(crate) mod mm;
