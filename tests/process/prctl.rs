@@ -26,37 +26,37 @@ fn test_machine_check_memory_corruption_kill_policy() {
     dbg!(machine_check_memory_corruption_kill_policy().unwrap());
 }
 
-#[cfg(any(target_arch = "x86"))]
+#[cfg(target_arch = "x86")]
 #[test]
 fn test_time_stamp_counter_readability() {
     dbg!(time_stamp_counter_readability().unwrap());
 }
 
-#[cfg(any(target_arch = "powerpc"))]
+#[cfg(target_arch = "powerpc")]
 #[test]
 fn test_unaligned_access_control() {
     dbg!(unaligned_access_control().unwrap());
 }
 
-#[cfg(any(target_arch = "powerpc"))]
+#[cfg(target_arch = "powerpc")]
 #[test]
 fn test_floating_point_exception_mode() {
     dbg!(floating_point_exception_mode().unwrap());
 }
 
-#[cfg(any(target_arch = "powerpc"))]
+#[cfg(target_arch = "powerpc")]
 #[test]
 fn test_endian_mode() {
     dbg!(endian_mode().unwrap());
 }
 
-#[cfg(any(target_arch = "mips"))]
+#[cfg(target_arch = "mips")]
 #[test]
 fn test_floating_point_mode() {
     dbg!(floating_point_mode().unwrap());
 }
 
-#[cfg(any(target_arch = "aarch64"))]
+#[cfg(target_arch = "aarch64")]
 #[test]
 #[ignore = "Only on ARMv8.3 and later"]
 fn test_enabled_pointer_authentication_keys() {

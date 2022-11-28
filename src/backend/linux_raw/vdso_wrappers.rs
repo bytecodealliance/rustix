@@ -364,7 +364,7 @@ fn init() {
 
         // On all 64-bit platforms, the 64-bit `clock_gettime` symbols are
         // always available.
-        #[cfg(any(target_pointer_width = "64"))]
+        #[cfg(target_pointer_width = "64")]
         let ok = true;
 
         // On some 32-bit platforms, the 64-bit `clock_gettime` symbols are not

@@ -61,7 +61,6 @@ pub(crate) mod fs;
 pub(crate) mod io;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[cfg(feature = "io_uring")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "io_uring")))]
 pub(crate) mod io_uring;
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[cfg(feature = "mm")]
