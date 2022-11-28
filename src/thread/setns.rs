@@ -2,8 +2,8 @@
 
 use bitflags::bitflags;
 use linux_raw_sys::general::{
-    CLONE_NEWCGROUP, CLONE_NEWIPC, CLONE_NEWNET, CLONE_NEWNS, CLONE_NEWPID, CLONE_NEWTIME,
-    CLONE_NEWUSER, CLONE_NEWUTS,
+    CLONE_FILES, CLONE_FS, CLONE_NEWCGROUP, CLONE_NEWIPC, CLONE_NEWNET, CLONE_NEWNS, CLONE_NEWPID,
+    CLONE_NEWTIME, CLONE_NEWUSER, CLONE_NEWUTS, CLONE_SYSVSEM,
 };
 
 use crate::backend::c::c_int;
@@ -55,6 +55,32 @@ pub enum LinkNameSpaceType {
     Network = CLONE_NEWNET,
 }
 
+bitflags! {
+    /// `CLONE_*` for use with [`unshare`].
+    pub struct UnshareFlags: u32 {
+        /// `CLONE_FILES`.
+        const FILES = CLONE_FILES;
+        /// `CLONE_FS`.
+        const FS = CLONE_FS;
+        /// `CLONE_NEWCGROUP`.
+        const NWCGROUP = CLONE_NEWCGROUP;
+        /// `CLONE_NEWIPC`.
+        const NEWIPC = CLONE_NEWIPC;
+        /// `CLONE_NEWNET`.
+        const NEWNET = CLONE_NEWNET;
+        /// `CLONE_NEWNS`.
+        const NEWNS = CLONE_NEWNS;
+        /// `CLONE_NEWPID`.
+        const NEWPID = CLONE_NEWPID;
+        /// `CLONE_NEWTIME`.
+        const NEWTIME = CLONE_NEWTIME;
+        /// `CLONE_NEWUSER`.
+        const NEWUSER = CLONE_NEWUSER;
+        /// `CLONE_SYSVSEM`.
+        const SYSVSEM = CLONE_SYSVSEM;
+    }
+}
+
 /// Reassociate the calling thread with the namespace associated with link referred to by `fd`.
 ///
 /// `fd` must refer to one of the magic links in a `/proc/[pid]/ns/` directory, or a bind mount
@@ -86,4 +112,15 @@ pub fn move_into_thread_name_spaces(
     allowed_types: ThreadNameSpaceType,
 ) -> io::Result<()> {
     syscalls::setns(fd, allowed_types.bits() as c_int).map(|_r| ())
+}
+
+/// `unshare(flags)`—Disassociate parts of the current thread's execution
+/// context with other threads.
+///
+/// # References
+/// - [`unshare`]
+///
+/// [`unshare`]: https://man7.org/linux/man-pages/man2/unshare.2.html
+pub fn unshare(flags: UnshareFlags) -> io::Result<()> {
+    syscalls::unshare(flags)
 }
