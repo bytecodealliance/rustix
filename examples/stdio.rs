@@ -38,9 +38,17 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     if isatty(fd) {
         #[cfg(feature = "procfs")]
         println!(" - ttyname: {}", ttyname(fd, Vec::new())?.to_string_lossy());
+
+        #[cfg(target_os = "wasi")]
+        println!(" - is a tty");
+
+        #[cfg(not(target_os = "wasi"))]
         println!(" - process group: {:?}", rustix::termios::tcgetpgrp(fd)?);
+
+        #[cfg(not(target_os = "wasi"))]
         println!(" - winsize: {:?}", rustix::termios::tcgetwinsize(fd)?);
 
+        #[cfg(not(target_os = "wasi"))]
         {
             use rustix::termios::*;
             let term = tcgetattr(fd)?;

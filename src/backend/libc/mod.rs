@@ -81,7 +81,7 @@ pub(crate) mod process;
 #[cfg(not(windows))]
 #[cfg(feature = "rand")]
 pub(crate) mod rand;
-#[cfg(not(any(windows, target_os = "wasi")))]
+#[cfg(not(windows))]
 #[cfg(feature = "termios")]
 pub(crate) mod termios;
 #[cfg(not(windows))]
