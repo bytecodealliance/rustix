@@ -37,7 +37,8 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     ///
     /// Using the heap:
     ///
-    /// ```
+    /// ```notrust
+    /// # // The `notrust` above can be removed when we can depend on Rust 1.60.
     /// # use std::mem::MaybeUninit;
     /// # use rustix::fs::{cwd, Mode, OFlags, openat, RawDir};
     ///
@@ -70,7 +71,8 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// Heap allocated growing buffer for supporting directory entries with arbitrarily
     /// large file names:
     ///
-    /// ```
+    /// ```notrust
+    /// # // The `notrust` above can be removed when we can depend on Rust 1.60.
     /// # use std::mem::MaybeUninit;
     /// # use rustix::fs::{cwd, Mode, OFlags, openat, RawDir};
     /// # use rustix::io::Errno;
