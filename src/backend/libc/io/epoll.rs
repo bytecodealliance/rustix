@@ -70,7 +70,7 @@ use core::marker::PhantomData;
 use core::ptr::{null, null_mut};
 
 #[doc(inline)]
-pub use crate::utils::context::*;
+pub use crate::io::context::*;
 
 bitflags! {
     /// `EPOLL_*` for use with [`Epoll::new`].
