@@ -2,6 +2,7 @@
 
 use std::collections::HashMap;
 use std::fs::File;
+use std::mem::MaybeUninit;
 
 use rustix::fs::{Dir, DirEntry};
 
@@ -52,9 +53,8 @@ fn read_entries(dir: &mut Dir) -> HashMap<String, DirEntry> {
     out
 }
 
-#[test]
 #[cfg(any(target_os = "android", target_os = "linux"))]
-fn raw_dir_entries() {
+fn test_raw_dir(buf: &mut [MaybeUninit<u8>]) {
     use std::io::{Seek, SeekFrom};
 
     use rustix::fd::AsFd;
@@ -80,8 +80,7 @@ fn raw_dir_entries() {
 
     let tmpdir = tempfile::tempdir().expect("construct tempdir");
     let mut dirfd = File::open(tmpdir.path()).expect("open tempdir as file");
-    let mut buf = Vec::with_capacity(8192);
-    let mut dir = RawDir::new(dirfd.try_clone().unwrap(), buf.spare_capacity_mut());
+    let mut dir = RawDir::new(dirfd.try_clone().unwrap(), buf);
 
     let entries = read_raw_entries(&mut dir);
     assert_eq!(entries.len(), 0, "no files in directory");
@@ -111,6 +110,31 @@ fn raw_dir_entries() {
         entries
     );
     assert_eq!(entries.len(), 2);
+}
+
+#[test]
+#[cfg(any(target_os = "android", target_os = "linux"))]
+fn raw_dir_entries_heap() {
+    let mut buf = Vec::with_capacity(8192);
+    test_raw_dir(buf.spare_capacity_mut());
+}
+
+#[test]
+#[cfg(any(target_os = "android", target_os = "linux"))]
+fn raw_dir_entries_stack() {
+    let mut buf = [MaybeUninit::uninit(); 2048];
+    test_raw_dir(&mut buf);
+}
+
+#[test]
+#[cfg(any(target_os = "android", target_os = "linux"))]
+fn raw_dir_entries_unaligned() {
+    let mut buf = [MaybeUninit::uninit(); 2048];
+    let buf = &mut buf[1..];
+
+    assert!(!(buf.as_ptr() as usize).is_power_of_two());
+
+    test_raw_dir(buf);
 }
 
 #[test]

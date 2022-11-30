@@ -1,7 +1,7 @@
 //! `RawDir` and `RawDirEntry`.
 
 use core::fmt;
-use core::mem::MaybeUninit;
+use core::mem::{align_of, MaybeUninit};
 use linux_raw_sys::general::linux_dirent64;
 
 use crate::backend::fs::syscalls::getdents_uninit;
@@ -25,6 +25,8 @@ pub struct RawDir<'buf, Fd: AsFd> {
 
 impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// Create a new iterator from the given file descriptor and buffer.
+    ///
+    /// Note: the buffer size may be trimmed to accommodate alignment requirements.
     ///
     /// # Examples
     ///
@@ -95,7 +97,14 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     pub fn new(fd: Fd, buf: &'buf mut [MaybeUninit<u8>]) -> Self {
         Self {
             fd,
-            buf,
+            buf: {
+                let offset = buf.as_ptr().align_offset(align_of::<linux_dirent64>());
+                if offset < buf.len() {
+                    &mut buf[offset..]
+                } else {
+                    &mut []
+                }
+            },
             initialized: 0,
             offset: 0,
         }
@@ -162,7 +171,8 @@ impl<'buf, Fd: AsFd> Iterator for RawDir<'buf, Fd> {
                 // SAFETY:
                 // - This data is initialized by the check above.
                 //   - Assumption: the kernel will not give us partial structs.
-                // - Assumption: the kernel uses proper alignment.
+                // - Assumption: the kernel uses proper alignment between structs.
+                // - The starting pointer is aligned (performed in RawDir::new)
                 let dirent = unsafe { &*dirent_ptr.cast::<linux_dirent64>() };
 
                 self.offset += usize::from(dirent.d_reclen);
