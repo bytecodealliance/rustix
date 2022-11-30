@@ -66,9 +66,7 @@ use crate::io;
 use alloc::vec::Vec;
 use bitflags::bitflags;
 use core::convert::TryInto;
-use core::fmt;
 use core::marker::PhantomData;
-use core::ops::Deref;
 use core::ptr::{null, null_mut};
 
 #[doc(inline)]

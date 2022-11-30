@@ -28,8 +28,15 @@ pub(crate) fn check_raw_pointer<T>(value: *mut core::ffi::c_void) -> Option<core
     core::ptr::NonNull::new(value.cast())
 }
 
+#[allow(unsafe_code)]
 #[cfg(any(target_os = "linux", target_os = "android"))]
 pub(crate) mod context {
+    use crate::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
+
+    use core::fmt;
+    use core::marker::PhantomData;
+    use core::ops::Deref;
+
     /// A reference to a `T`.
     pub struct Ref<'a, T> {
         t: T,

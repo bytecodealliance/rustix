@@ -67,9 +67,7 @@ use crate::fd::{FromRawFd, IntoRawFd};
 use crate::io;
 use alloc::vec::Vec;
 use bitflags::bitflags;
-use core::fmt;
 use core::marker::PhantomData;
-use core::ops::Deref;
 use core::ptr::null;
 
 #[doc(inline)]
