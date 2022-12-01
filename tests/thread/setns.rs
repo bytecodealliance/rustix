@@ -1,6 +1,9 @@
 use std::fs::File;
 
-use rustix::fd::{AsFd, FromRawFd, OwnedFd, RawFd};
+use rustix::fd::AsFd;
+#[cfg(not(target_os = "android"))]
+use rustix::fd::{FromRawFd, OwnedFd, RawFd};
+#[cfg(not(target_os = "android"))]
 use rustix::thread::*;
 
 #[test]
@@ -17,6 +20,7 @@ fn test_move_into_link_name_space() {
 
 #[test]
 #[ignore = "Requires CAP_SYS_ADMIN capability"]
+#[cfg(not(target_os = "android"))] // Android libc bindings don't have `SYS_pidfd_open` yet.
 fn test_move_into_thread_name_spaces() {
     let fd = unsafe { libc::syscall(libc::SYS_pidfd_open, std::process::id() as usize, 0_usize) };
     if fd == -1 {

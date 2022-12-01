@@ -30,97 +30,109 @@ fn main() -> io::Result<()> {
     println!("Page size: {}", page_size());
     println!("Clock ticks/sec: {}", clock_ticks_per_second());
     println!("Uname: {:?}", uname());
-    println!("Process group priority: {}", getpriority_pgrp(None)?);
-    println!("Process priority: {}", getpriority_process(None)?);
-    println!("User priority: {}", getpriority_user(Uid::ROOT)?);
+    #[cfg(not(target_os = "fuchsia"))]
+    {
+        println!("Process group priority: {}", getpriority_pgrp(None)?);
+        println!("Process priority: {}", getpriority_process(None)?);
+        println!("User priority: {}", getpriority_user(Uid::ROOT)?);
+    }
     println!(
         "Current working directory: {}",
         getcwd(Vec::new())?.to_string_lossy()
     );
-    println!("Cpu Limit: {:?}", getrlimit(Resource::Cpu));
-    println!("Fsize Limit: {:?}", getrlimit(Resource::Fsize));
-    println!("Data Limit: {:?}", getrlimit(Resource::Data));
-    println!("Stack Limit: {:?}", getrlimit(Resource::Stack));
-    #[cfg(not(target_os = "haiku"))]
-    println!("Core Limit: {:?}", getrlimit(Resource::Core));
-    #[cfg(not(any(target_os = "haiku", target_os = "solaris")))]
-    println!("Rss Limit: {:?}", getrlimit(Resource::Rss));
-    #[cfg(not(any(target_os = "haiku", target_os = "solaris")))]
-    println!("Nproc Limit: {:?}", getrlimit(Resource::Nproc));
-    #[cfg(not(target_os = "solaris"))]
-    println!("Nofile Limit: {:?}", getrlimit(Resource::Nofile));
-    #[cfg(not(any(target_os = "haiku", target_os = "solaris")))]
-    println!("Memlock Limit: {:?}", getrlimit(Resource::Memlock));
-    #[cfg(not(target_os = "openbsd"))]
-    println!("As Limit: {:?}", getrlimit(Resource::As));
-    #[cfg(not(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "solaris",
-    )))]
-    println!("Locks Limit: {:?}", getrlimit(Resource::Locks));
-    #[cfg(not(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "solaris",
-    )))]
-    println!("Sigpending Limit: {:?}", getrlimit(Resource::Sigpending));
-    #[cfg(not(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "solaris",
-    )))]
-    println!("Msgqueue Limit: {:?}", getrlimit(Resource::Msgqueue));
-    #[cfg(not(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "solaris",
-    )))]
-    println!("Nice Limit: {:?}", getrlimit(Resource::Nice));
-    #[cfg(not(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "solaris",
-    )))]
-    println!("Rtprio Limit: {:?}", getrlimit(Resource::Rtprio));
-    #[cfg(not(any(
-        target_os = "android",
-        target_os = "dragonfly",
-        target_os = "emscripten",
-        target_os = "freebsd",
-        target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "solaris",
-    )))]
-    println!("Rttime Limit: {:?}", getrlimit(Resource::Rttime));
+    #[cfg(not(target_os = "fuchsia"))]
+    {
+        println!("Cpu Limit: {:?}", getrlimit(Resource::Cpu));
+        println!("Fsize Limit: {:?}", getrlimit(Resource::Fsize));
+        println!("Data Limit: {:?}", getrlimit(Resource::Data));
+        println!("Stack Limit: {:?}", getrlimit(Resource::Stack));
+        #[cfg(not(target_os = "haiku"))]
+        println!("Core Limit: {:?}", getrlimit(Resource::Core));
+        #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
+        println!("Rss Limit: {:?}", getrlimit(Resource::Rss));
+        #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
+        println!("Nproc Limit: {:?}", getrlimit(Resource::Nproc));
+        #[cfg(not(target_os = "solaris"))]
+        println!("Nofile Limit: {:?}", getrlimit(Resource::Nofile));
+        #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
+        println!("Memlock Limit: {:?}", getrlimit(Resource::Memlock));
+        #[cfg(not(target_os = "openbsd"))]
+        println!("As Limit: {:?}", getrlimit(Resource::As));
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "haiku",
+            target_os = "illumos",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "solaris",
+        )))]
+        println!("Locks Limit: {:?}", getrlimit(Resource::Locks));
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "haiku",
+            target_os = "illumos",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "solaris",
+        )))]
+        println!("Sigpending Limit: {:?}", getrlimit(Resource::Sigpending));
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "haiku",
+            target_os = "illumos",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "solaris",
+        )))]
+        println!("Msgqueue Limit: {:?}", getrlimit(Resource::Msgqueue));
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "haiku",
+            target_os = "illumos",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "solaris",
+        )))]
+        println!("Nice Limit: {:?}", getrlimit(Resource::Nice));
+        #[cfg(not(any(
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "haiku",
+            target_os = "illumos",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "solaris",
+        )))]
+        println!("Rtprio Limit: {:?}", getrlimit(Resource::Rtprio));
+        #[cfg(not(any(
+            target_os = "android",
+            target_os = "dragonfly",
+            target_os = "emscripten",
+            target_os = "freebsd",
+            target_os = "haiku",
+            target_os = "illumos",
+            target_os = "ios",
+            target_os = "macos",
+            target_os = "netbsd",
+            target_os = "openbsd",
+            target_os = "solaris",
+        )))]
+        println!("Rttime Limit: {:?}", getrlimit(Resource::Rttime));
+    }
     #[cfg(any(
         all(target_os = "android", target_pointer_width = "64"),
         target_os = "linux"
