@@ -66,7 +66,11 @@ fn test_fstatfs() {
 fn test_statfs_procfs() {
     let statfs = rustix::fs::statfs("/proc/self/maps").unwrap();
 
-    assert_eq!(statfs.f_type, rustix::fs::PROC_SUPER_MAGIC);
+    // Do the field access outside the assert to work around Rust 1.48 thinking
+    // that this is otherwise a packed field borrow.
+    let f_type = statfs.f_type;
+
+    assert_eq!(f_type, rustix::fs::PROC_SUPER_MAGIC);
 }
 
 #[test]

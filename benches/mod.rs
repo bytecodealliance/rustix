@@ -1,4 +1,13 @@
+/// Benchmarks for rustix.
+///
+/// To enable these benchmarks, add `--cfg=criterion` to RUSTFLAGS and enable
+/// the "fs", "time", and "process" cargo features.
+
 #[cfg(any(
+    not(criterion),
+    not(feature = "fs"),
+    not(feature = "process"),
+    not(feature = "time"),
     windows,
     target_os = "emscripten",
     target_os = "redox",
@@ -9,6 +18,10 @@ fn main() {
 }
 
 #[cfg(not(any(
+    not(criterion),
+    not(feature = "fs"),
+    not(feature = "process"),
+    not(feature = "time"),
     windows,
     target_os = "emscripten",
     target_os = "redox",
@@ -17,6 +30,10 @@ fn main() {
 use criterion::{criterion_group, criterion_main};
 
 #[cfg(not(any(
+    not(criterion),
+    not(feature = "fs"),
+    not(feature = "process"),
+    not(feature = "time"),
     windows,
     target_os = "emscripten",
     target_os = "redox",
@@ -132,6 +149,10 @@ mod suite {
 }
 
 #[cfg(not(any(
+    not(criterion),
+    not(feature = "fs"),
+    not(feature = "process"),
+    not(feature = "time"),
     windows,
     target_os = "emscripten",
     target_os = "redox",
@@ -149,6 +170,10 @@ criterion_group!(
     suite::simple_getpid_libc
 );
 #[cfg(not(any(
+    not(criterion),
+    not(feature = "fs"),
+    not(feature = "process"),
+    not(feature = "time"),
     windows,
     target_os = "emscripten",
     target_os = "redox",

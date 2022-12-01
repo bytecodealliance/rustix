@@ -2,6 +2,7 @@
 
 use std::collections::HashMap;
 use std::fs::File;
+#[cfg(any(target_os = "android", target_os = "linux"))]
 use std::mem::MaybeUninit;
 
 use rustix::fs::{Dir, DirEntry};
@@ -115,8 +116,13 @@ fn test_raw_dir(buf: &mut [MaybeUninit<u8>]) {
 #[test]
 #[cfg(any(target_os = "android", target_os = "linux"))]
 fn raw_dir_entries_heap() {
+    // When we can depend on Rust 1.60, we can use the spare_capacity_mut version instead.
+    /*
     let mut buf = Vec::with_capacity(8192);
     test_raw_dir(buf.spare_capacity_mut());
+    */
+    let mut buf = [MaybeUninit::new(0); 8192];
+    test_raw_dir(&mut buf);
 }
 
 #[test]

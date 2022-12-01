@@ -7,5 +7,5 @@ fn test_parent_process_death_signal() {
 
 #[test]
 fn test_trace_status() {
-    dbg!(trace_status().unwrap());
+    dbg!(trace_status(None).unwrap());
 }
