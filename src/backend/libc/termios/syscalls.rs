@@ -10,13 +10,13 @@ use crate::fd::BorrowedFd;
 #[cfg(feature = "procfs")]
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use crate::ffi::CStr;
+#[cfg(not(target_os = "wasi"))]
 use crate::io;
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Pid, RawNonZeroPid};
 #[cfg(not(target_os = "wasi"))]
 use crate::termios::{Action, OptionalActions, QueueSelector, Speed, Termios, Winsize};
 use core::mem::MaybeUninit;
-use libc_errno::errno;
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
@@ -142,26 +142,12 @@ pub(crate) fn cfsetspeed(termios: &mut Termios, speed: Speed) -> io::Result<()> 
 }
 
 pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
-    let res = unsafe { c::isatty(borrowed_fd(fd)) };
-    if res == 0 {
-        match errno().0 {
-            #[cfg(not(any(target_os = "android", target_os = "linux")))]
-            c::ENOTTY => false,
-
-            // Old Linux versions reportedly return `EINVAL`.
-            // <https://man7.org/linux/man-pages/man3/isatty.3.html#ERRORS>
-            #[cfg(any(target_os = "android", target_os = "linux"))]
-            c::ENOTTY | c::EINVAL => false,
-
-            // Darwin mysteriously returns `EOPNOTSUPP` sometimes.
-            #[cfg(any(target_os = "ios", target_os = "macos"))]
-            c::EOPNOTSUPP => false,
-
-            err => panic!("unexpected error from isatty: {:?}", err),
-        }
-    } else {
-        true
-    }
+    // Use the return value of `isatty` alone. We don't check `errno` because
+    // we return `bool` rather than `io::Result<bool>`, because we assume
+    // `BorrrowedFd` protects us from `EBADF`, and any other reasonably
+    // anticipated errno value would end up interpreted as "assume it's not a
+    // terminal" anyway.
+    unsafe { c::isatty(borrowed_fd(fd)) != 0 }
 }
 
 #[cfg(feature = "procfs")]
