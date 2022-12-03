@@ -159,3 +159,64 @@ impl<'context, T: AsFd + Into<OwnedFd> + From<OwnedFd>> Context for Owning<'cont
         unsafe { T::from(OwnedFd::from_raw_fd(raw_fd).into()) }
     }
 }
+
+/// A type implementing [`Context`] where the `Data` type is `RawFd`
+/// 
+/// # Safety
+/// 
+/// This is intended to be used for non-safe I/O types. Care must be taken to
+/// ensure that the device is not closed while it is still in use by the kernel.
+pub struct Raw {
+    _private: (),
+}
+
+impl Raw {
+    /// Create a new `Raw` context.
+    /// 
+    /// # Safety
+    /// 
+    /// See the safety requirements of [`Raw`].
+    #[inline]
+    pub unsafe fn new() -> Self {
+        Self { _private: () }
+    }
+}
+
+impl Context for Raw {
+    type Data = RawFd;
+    type Target = ValidFd;
+
+    fn acquire<'call>(&self, data: Self::Data) -> Ref<'call, Self::Target> {
+        // Safety: `data` is a raw file descriptor that is assumed to be valid.
+        Ref::new(ValidFd(data))
+    }
+
+    fn encode(&self, target: Ref<'_, Self::Target>) -> u64 {
+        target.0 as u64
+    }
+
+    unsafe fn decode<'call>(&self, raw: u64) -> Ref<'call, Self::Target> {
+        // Safety: `raw` is a raw file descriptor that is assumed to be valid.
+        Ref::new(ValidFd(raw as RawFd))
+    }
+
+    fn release(&self, target: Ref<'_, Self::Target>) -> Self::Data {
+        target.consume().0
+    }
+}
+
+/// Implements `AsFd` for `RawFd`.
+/// 
+/// # Safety
+/// 
+/// This is only instantiated by the `Raw` context, which is unsafe.
+#[doc(hidden)]
+pub struct ValidFd(RawFd);
+
+impl AsFd for ValidFd {
+    #[inline]
+    fn as_fd(&self) -> BorrowedFd<'_> {
+        // SAFETY: The user has assured as that this file descriptor is valid.
+        unsafe { BorrowedFd::borrow_raw(self.0) }
+    }
+}
