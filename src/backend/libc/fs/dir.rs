@@ -242,7 +242,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     // with a field that we missed here. And we can avoid blindly copying the
     // whole `d_name` field, which may not be entirely allocated.
     #[cfg_attr(target_os = "wasi", allow(unused_mut))]
-    #[cfg(not(target_os = "dragonfly"))]
+    #[cfg(not(any(target_os = "freebsd", target_os = "dragonfly")))]
     let mut dirent = libc_dirent {
         #[cfg(not(any(
             target_os = "aix",
@@ -253,7 +253,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
         d_type,
         #[cfg(not(any(
             target_os = "aix",
-            target_os = "freebsd",
+            target_os = "freebsd",  // Until FreeBSD 12
             target_os = "haiku",
             target_os = "ios",
             target_os = "macos",
@@ -306,14 +306,18 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     pub d_name: [::c_char; 1024], // Max length is _POSIX_PATH_MAX
                                   // */
 
-    // On dragonfly, `dirent` has some non-public padding fields so we can't
-    // directly initialize it.
-    #[cfg(target_os = "dragonfly")]
-    let mut dirent = unsafe {
+    // On dragonfly and FreeBSD 12, `dirent` has some non-public padding fields
+    // so we can't directly initialize it.
+    #[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
+    let mut dirent = {
         let mut dirent: libc_dirent = zeroed();
         dirent.d_fileno = d_fileno;
         dirent.d_namlen = d_namlen;
         dirent.d_type = d_type;
+        #[cfg(target_os = "freebsd")]
+        {
+            dirent.d_reclen = d_reclen;
+        }
         dirent
     };
 
