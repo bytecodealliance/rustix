@@ -161,9 +161,9 @@ impl<'context, T: AsFd + Into<OwnedFd> + From<OwnedFd>> Context for Owning<'cont
 }
 
 /// A type implementing [`Context`] where the `Data` type is `RawFd`
-/// 
+///
 /// # Safety
-/// 
+///
 /// This is intended to be used for non-safe I/O types. Care must be taken to
 /// ensure that the device is not closed while it is still in use by the kernel.
 pub struct Raw {
@@ -172,9 +172,9 @@ pub struct Raw {
 
 impl Raw {
     /// Create a new `Raw` context.
-    /// 
+    ///
     /// # Safety
-    /// 
+    ///
     /// See the safety requirements of [`Raw`].
     #[inline]
     pub unsafe fn new() -> Self {
@@ -206,9 +206,9 @@ impl Context for Raw {
 }
 
 /// Implements `AsFd` for `RawFd`.
-/// 
+///
 /// # Safety
-/// 
+///
 /// This is only instantiated by the `Raw` context, which is unsafe.
 #[doc(hidden)]
 pub struct ValidFd(RawFd);
