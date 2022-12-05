@@ -45,7 +45,8 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// let fd = openat(cwd(), ".", OFlags::RDONLY | OFlags::DIRECTORY, Mode::empty()).unwrap();
     ///
     /// let mut buf = Vec::with_capacity(8192);
-    /// for entry in RawDir::new(fd, buf.spare_capacity_mut()) {
+    /// let mut iter = RawDir::new(fd, buf.spare_capacity_mut());
+    /// while let Some(entry) = iter.next() {
     ///     let entry = entry.unwrap();
     ///     dbg!(&entry);
     /// }
@@ -60,7 +61,8 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// let fd = openat(cwd(), ".", OFlags::RDONLY | OFlags::DIRECTORY, Mode::empty()).unwrap();
     ///
     /// let mut buf = [MaybeUninit::uninit(); 2048];
-    /// for entry in RawDir::new(fd, &mut buf) {
+    /// let mut iter = RawDir::new(fd, &mut buf);
+    /// while let Some(entry) = iter.next() {
     ///     let entry = entry.unwrap();
     ///     dbg!(&entry);
     /// }
@@ -82,7 +84,8 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// let mut buf = Vec::with_capacity(8192);
     /// 'read: loop {
     ///     'resize: {
-    ///         for entry in RawDir::new(&fd, buf.spare_capacity_mut()) {
+    ///         let mut iter = RawDir::new(&fd, buf.spare_capacity_mut());
+    ///         while let Some(entry) = iter.next() {
     ///             let entry = match entry {
     ///                 Err(Errno::INVAL) => break 'resize,
     ///                 r => r.unwrap(),
@@ -162,11 +165,13 @@ impl<'a> RawDirEntry<'a> {
     }
 }
 
-impl<'buf, Fd: AsFd> Iterator for RawDir<'buf, Fd> {
-    type Item = io::Result<RawDirEntry<'buf>>;
-
+impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
+    /// Identical to [Iterator::next] except that [Iterator::Item] borrows from self.
+    ///
+    /// Note: this interface will be broken to implement a stdlib iterator API with
+    /// GAT support once one becomes available.
     #[allow(unsafe_code)]
-    fn next(&mut self) -> Option<Self::Item> {
+    pub fn next(&mut self) -> Option<io::Result<RawDirEntry>> {
         loop {
             if self.offset < self.initialized {
                 let dirent_ptr = self.buf[self.offset..].as_ptr();

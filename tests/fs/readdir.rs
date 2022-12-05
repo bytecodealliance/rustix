@@ -56,16 +56,15 @@ fn read_entries(dir: &mut Dir) -> HashMap<String, DirEntry> {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 fn test_raw_dir(buf: &mut [MaybeUninit<u8>]) {
+    use std::collections::HashSet;
     use std::io::{Seek, SeekFrom};
 
     use rustix::fd::AsFd;
-    use rustix::fs::{RawDir, RawDirEntry};
+    use rustix::fs::RawDir;
 
-    fn read_raw_entries<'a, Fd: AsFd>(
-        dir: &'a mut RawDir<'_, Fd>,
-    ) -> HashMap<String, RawDirEntry<'a>> {
-        let mut out = HashMap::new();
-        for entry in dir {
+    fn read_raw_entries<Fd: AsFd>(dir: &mut RawDir<Fd>) -> HashSet<String> {
+        let mut out = HashSet::new();
+        while let Some(entry) = dir.next() {
             let entry = entry.expect("non-error entry");
             let name = entry
                 .file_name()
@@ -73,7 +72,7 @@ fn test_raw_dir(buf: &mut [MaybeUninit<u8>]) {
                 .expect("utf8 filename")
                 .to_owned();
             if name != "." && name != ".." {
-                out.insert(name, entry);
+                out.insert(name);
             }
         }
         out
