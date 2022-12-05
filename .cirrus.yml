@@ -13,7 +13,7 @@ task:
     - rustup default stable
   test_script:
     - . $HOME/.cargo/env
-    - cargo test --workspace
+    - cargo test --workspace --features=all-apis
 
 task:
   name: stable x86_64-unknown-freebsd-12
@@ -27,4 +27,4 @@ task:
     - rustup default stable
   test_script:
     - . $HOME/.cargo/env
-    - cargo test --workspace
+    - cargo test --workspace --features=all-apis
