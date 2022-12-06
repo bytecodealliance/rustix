@@ -26,10 +26,14 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         backend::termios::types::B9600 => Some(9600),
         backend::termios::types::B19200 => Some(19200),
         backend::termios::types::B38400 => Some(38400),
+        #[cfg(not(target_os = "aix"))]
         backend::termios::types::B57600 => Some(57600),
+        #[cfg(not(target_os = "aix"))]
         backend::termios::types::B115200 => Some(115_200),
+        #[cfg(not(target_os = "aix"))]
         backend::termios::types::B230400 => Some(230_400),
         #[cfg(not(any(
+            target_os = "aix",
             target_os = "dragonfly",
             target_os = "haiku",
             target_os = "ios",
@@ -38,6 +42,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         )))]
         backend::termios::types::B460800 => Some(460_800),
         #[cfg(not(any(
+            target_os = "aix",
             target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "haiku",
@@ -50,6 +55,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         )))]
         backend::termios::types::B500000 => Some(500_000),
         #[cfg(not(any(
+            target_os = "aix",
             target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "haiku",
@@ -62,6 +68,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         )))]
         backend::termios::types::B576000 => Some(576_000),
         #[cfg(not(any(
+            target_os = "aix",
             target_os = "dragonfly",
             target_os = "haiku",
             target_os = "ios",
@@ -70,6 +77,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         )))]
         backend::termios::types::B921600 => Some(921_600),
         #[cfg(not(any(
+            target_os = "aix",
             target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "haiku",
@@ -81,6 +89,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         )))]
         backend::termios::types::B1000000 => Some(1_000_000),
         #[cfg(not(any(
+            target_os = "aix",
             target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "haiku",
@@ -92,6 +101,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         )))]
         backend::termios::types::B1152000 => Some(1_152_000),
         #[cfg(not(any(
+            target_os = "aix",
             target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "haiku",
@@ -103,6 +113,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         )))]
         backend::termios::types::B1500000 => Some(1_500_000),
         #[cfg(not(any(
+            target_os = "aix",
             target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "haiku",
@@ -116,6 +127,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         #[cfg(not(any(
             target_arch = "sparc",
             target_arch = "sparc64",
+            target_os = "aix",
             target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "haiku",
@@ -129,6 +141,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         #[cfg(not(any(
             target_arch = "sparc",
             target_arch = "sparc64",
+            target_os = "aix",
             target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "haiku",
@@ -142,6 +155,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         #[cfg(not(any(
             target_arch = "sparc",
             target_arch = "sparc64",
+            target_os = "aix",
             target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "haiku",
@@ -155,6 +169,7 @@ pub fn speed_value(speed: backend::termios::types::Speed) -> Option<u32> {
         #[cfg(not(any(
             target_arch = "sparc",
             target_arch = "sparc64",
+            target_os = "aix",
             target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "haiku",
