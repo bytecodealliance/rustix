@@ -45,6 +45,8 @@ impl<'a, T: fmt::Debug> fmt::Debug for Ref<'a, T> {
 }
 
 /// A trait for data stored within an [`Epoll`] instance.
+///
+/// [`Epoll`]: crate::io::epoll::Epoll
 pub trait Context {
     /// The type of an element owned by this context.
     type Data;
