@@ -87,6 +87,7 @@ pub const NFS_SUPER_MAGIC: FsWord = backend::fs::types::NFS_SUPER_MAGIC;
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/lseek.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/lseek.2.html
 #[inline]
+#[doc(alias = "lseek")]
 pub fn seek<Fd: AsFd>(fd: Fd, pos: SeekFrom) -> io::Result<u64> {
     backend::fs::syscalls::seek(fd.as_fd(), pos)
 }
@@ -104,6 +105,7 @@ pub fn seek<Fd: AsFd>(fd: Fd, pos: SeekFrom) -> io::Result<u64> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/lseek.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/lseek.2.html
 #[inline]
+#[doc(alias = "lseek")]
 pub fn tell<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
     backend::fs::syscalls::tell(fd.as_fd())
 }

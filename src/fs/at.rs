@@ -374,6 +374,7 @@ pub fn mknodat<P: path::Arg, Fd: AsFd>(
 /// [Linux]: https://man7.org/linux/man-pages/man2/fchownat.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
+#[doc(alias = "fchownat")]
 pub fn chownat<P: path::Arg, Fd: AsFd>(
     dirfd: Fd,
     path: P,
