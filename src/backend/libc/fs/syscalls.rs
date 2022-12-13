@@ -900,6 +900,8 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         }
         SeekFrom::End(offset) => (c::SEEK_END, offset),
         SeekFrom::Current(offset) => (c::SEEK_CUR, offset),
+        SeekFrom::Data(offset) => (c::SEEK_DATA, offset),
+        SeekFrom::Hole(offset) => (c::SEEK_HOLE, offset),
     };
     let offset = unsafe { ret_off_t(libc_lseek(borrowed_fd(fd), offset, whence))? };
     Ok(offset as u64)
