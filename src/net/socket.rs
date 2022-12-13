@@ -22,6 +22,8 @@ impl Default for Protocol {
 /// however it is not safe in general to rely on this, as file descriptors
 /// may be unexpectedly allocated on other threads or in libraries.
 ///
+/// To pass extra flags such as [`SocketFlags::CLOEXEC`], use [`socket_with`].
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
