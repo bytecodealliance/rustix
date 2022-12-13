@@ -158,7 +158,7 @@ fn net_v6_connect() -> std::io::Result<()> {
 #[test]
 fn net_v4_bind_any() -> std::io::Result<()> {
     let localhost = Ipv4Addr::LOCALHOST;
-    let addr = SocketAddrAny::V4(SocketAddrV4::new(localhost, 0));
+    let addr = SocketAddrV4::new(localhost, 0).into();
     let listener =
         rustix::net::socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
     rustix::net::bind_any(&listener, &addr).expect("bind");

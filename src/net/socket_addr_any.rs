@@ -32,6 +32,28 @@ pub enum SocketAddrAny {
     Unix(SocketAddrUnix),
 }
 
+impl From<SocketAddrV4> for SocketAddrAny {
+    #[inline]
+    fn from(from: SocketAddrV4) -> Self {
+        Self::V4(from)
+    }
+}
+
+impl From<SocketAddrV6> for SocketAddrAny {
+    #[inline]
+    fn from(from: SocketAddrV6) -> Self {
+        Self::V6(from)
+    }
+}
+
+#[cfg(unix)]
+impl From<SocketAddrUnix> for SocketAddrAny {
+    #[inline]
+    fn from(from: SocketAddrUnix) -> Self {
+        Self::Unix(from)
+    }
+}
+
 impl SocketAddrAny {
     /// Return the address family of this socket address.
     #[inline]
