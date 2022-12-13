@@ -16,7 +16,7 @@ pub type Timespec = c::timespec;
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct Timespec {
     /// Seconds.
