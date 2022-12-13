@@ -27,4 +27,22 @@ pub enum SeekFrom {
     /// to seek before byte 0.
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
     Current(#[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))] i64),
+
+    /// Sets the offset to next location in the file greater than or equal to the
+    /// specified number of bytes that contains data.
+    ///
+    /// If the offset points to data, the file offset is set to it.
+    #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
+    Data(#[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))] i64),
+
+    /// Sets the offset to the next hole in the file greater than or equal to the
+    /// specified number of bytes.
+    ///
+    /// If offset points into the middle of a hole, then the file offset is set to
+    /// offset.
+    ///
+    /// If there is no hole past offset, then the file offset is adjusted to the end
+    /// of the file (i.e., there is an implicit hole at the end of any file).
+    #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
+    Hole(#[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))] i64),
 }
