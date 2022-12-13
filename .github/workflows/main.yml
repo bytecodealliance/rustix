@@ -211,20 +211,20 @@ jobs:
         build: [ubuntu, ubuntu-18.04, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, ubuntu-1.48, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, mipsel-linux-stable, mips64el-linux-stable, powerpc64le-linux-stable, arm-linux-stable, ubuntu-1.48, i686-linux-1.48, aarch64-linux-1.48, riscv64-linux-1.48, s390x-linux-1.48, mipsel-linux-1.48, mips64el-linux-1.48, powerpc64le-linux-1.48, arm-linux-1.48, macos-latest, macos-10.15, windows, windows-2019]
         include:
           - build: ubuntu
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: nightly
           - build: ubuntu-18.04
             os: ubuntu-18.04
             rust: nightly
           - build: i686-linux
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: nightly
             target: i686-unknown-linux-gnu
             gcc_package: gcc-i686-linux-gnu
             gcc: i686-linux-gnu-gcc
             libc_package: libc-dev-i386-cross
           - build: aarch64-linux
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: nightly
             target: aarch64-unknown-linux-gnu
             gcc_package: gcc-aarch64-linux-gnu
@@ -233,7 +233,7 @@ jobs:
             qemu_args: -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
           - build: powerpc64le-linux
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: nightly
             target: powerpc64le-unknown-linux-gnu
             gcc_package: gcc-powerpc64le-linux-gnu
@@ -242,7 +242,7 @@ jobs:
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
           - build: mips64el-linux
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: nightly
             target: mips64el-unknown-linux-gnuabi64
             gcc_package: gcc-mips64el-linux-gnuabi64
@@ -251,7 +251,7 @@ jobs:
             qemu_args: -L /usr/mips64el-linux-gnuabi64
             qemu_target: mips64el-linux-user
           - build: mipsel-linux
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: nightly
             target: mipsel-unknown-linux-gnu
             gcc_package: gcc-mipsel-linux-gnu
@@ -260,7 +260,7 @@ jobs:
             qemu_args: -L /usr/mipsel-linux-gnu
             qemu_target: mipsel-linux-user
           - build: riscv64-linux
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: nightly
             target: riscv64gc-unknown-linux-gnu
             gcc_package: gcc-riscv64-linux-gnu
@@ -269,7 +269,7 @@ jobs:
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
           - build: s390x-linux
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: nightly
             target: s390x-unknown-linux-gnu
             gcc_package: gcc-s390x-linux-gnu
@@ -278,7 +278,7 @@ jobs:
             qemu_args: -L /usr/s390x-linux-gnu
             qemu_target: s390x-linux-user
           - build: arm-linux
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: nightly
             target: armv5te-unknown-linux-gnueabi
             gcc_package: gcc-arm-linux-gnueabi
@@ -287,17 +287,17 @@ jobs:
             qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
           - build: ubuntu-stable
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: stable
           - build: i686-linux-stable
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: stable
             target: i686-unknown-linux-gnu
             gcc_package: gcc-i686-linux-gnu
             gcc: i686-linux-gnu-gcc
             libc_package: libc-dev-i386-cross
           - build: aarch64-linux-stable
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: stable
             target: aarch64-unknown-linux-gnu
             gcc_package: gcc-aarch64-linux-gnu
@@ -306,7 +306,7 @@ jobs:
             qemu_args: -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
           - build: riscv64-linux-stable
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: stable
             target: riscv64gc-unknown-linux-gnu
             gcc_package: gcc-riscv64-linux-gnu
@@ -315,7 +315,7 @@ jobs:
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
           - build: s390x-linux-stable
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: stable
             target: s390x-unknown-linux-gnu
             gcc_package: gcc-s390x-linux-gnu
@@ -324,7 +324,7 @@ jobs:
             qemu_args: -L /usr/s390x-linux-gnu
             qemu_target: s390x-linux-user
           - build: powerpc64le-linux-stable
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: stable
             target: powerpc64le-unknown-linux-gnu
             gcc_package: gcc-powerpc64le-linux-gnu
@@ -333,7 +333,7 @@ jobs:
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
           - build: mips64el-linux-stable
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: stable
             target: mips64el-unknown-linux-gnuabi64
             gcc_package: gcc-mips64el-linux-gnuabi64
@@ -342,7 +342,7 @@ jobs:
             qemu_args: -L /usr/mips64el-linux-gnuabi64
             qemu_target: mips64el-linux-user
           - build: mipsel-linux-stable
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: stable
             target: mipsel-unknown-linux-gnu
             gcc_package: gcc-mipsel-linux-gnu
@@ -351,7 +351,7 @@ jobs:
             qemu_args: -L /usr/mipsel-linux-gnu
             qemu_target: mipsel-linux-user
           - build: arm-linux-stable
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: stable
             target: armv5te-unknown-linux-gnueabi
             gcc_package: gcc-arm-linux-gnueabi
@@ -360,17 +360,17 @@ jobs:
             qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
           - build: ubuntu-1.48
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: 1.48
           - build: i686-linux-1.48
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: 1.48
             target: i686-unknown-linux-gnu
             gcc_package: gcc-i686-linux-gnu
             gcc: i686-linux-gnu-gcc
             libc_package: libc-dev-i386-cross
           - build: aarch64-linux-1.48
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: 1.48
             target: aarch64-unknown-linux-gnu
             gcc_package: gcc-aarch64-linux-gnu
@@ -379,7 +379,7 @@ jobs:
             qemu_args: -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
           - build: riscv64-linux-1.48
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: 1.48
             target: riscv64gc-unknown-linux-gnu
             gcc_package: gcc-riscv64-linux-gnu
@@ -388,7 +388,7 @@ jobs:
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
           - build: s390x-linux-1.48
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: 1.48
             target: s390x-unknown-linux-gnu
             gcc_package: gcc-s390x-linux-gnu
@@ -397,7 +397,7 @@ jobs:
             qemu_args: -L /usr/s390x-linux-gnu
             qemu_target: s390x-linux-user
           - build: powerpc64le-linux-1.48
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: 1.48
             target: powerpc64le-unknown-linux-gnu
             gcc_package: gcc-powerpc64le-linux-gnu
@@ -406,7 +406,7 @@ jobs:
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
           - build: mips64el-linux-1.48
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: 1.48
             target: mips64el-unknown-linux-gnuabi64
             gcc_package: gcc-mips64el-linux-gnuabi64
@@ -415,7 +415,7 @@ jobs:
             qemu_args: -L /usr/mips64el-linux-gnuabi64
             qemu_target: mips64el-linux-user
           - build: mipsel-linux-1.48
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: 1.48
             target: mipsel-unknown-linux-gnu
             gcc_package: gcc-mipsel-linux-gnu
@@ -424,7 +424,7 @@ jobs:
             qemu_args: -L /usr/mipsel-linux-gnu
             qemu_target: mipsel-linux-user
           - build: arm-linux-1.48
-            os: ubuntu-latest
+            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: 1.48
             target: armv5te-unknown-linux-gnueabi
             gcc_package: gcc-arm-linux-gnueabi
@@ -462,7 +462,7 @@ jobs:
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
-      if: matrix.target != '' && matrix.os == 'ubuntu-latest'
+      if: matrix.target != '' && matrix.os == 'ubuntu-20.04' # TODO: remove pin when fixed (#483)
 
     - name: Install cross-compilation tools
       run: |
@@ -471,14 +471,14 @@ jobs:
         sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
         upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
         echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
-      if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'
+      if: matrix.gcc_package != '' && matrix.os == 'ubuntu-20.04' # TODO: remove pin when fixed (#483)
 
     - name: Install cross-compilation libraries
       run: |
         set -ex
         sudo apt-get update
         sudo apt-get install -y ${{ matrix.libc_package }}
-      if: matrix.libc_package != '' && matrix.os == 'ubuntu-latest'
+      if: matrix.libc_package != '' && matrix.os == 'ubuntu-20.04' # TODO: remove pin when fixed (#483)
 
     - name: Install qemu
       run: |
@@ -504,7 +504,7 @@ jobs:
         patch -p1 < $GITHUB_WORKSPACE/ci/s390x-stat-have-nsec.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
-      if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
+      if: matrix.qemu != '' && matrix.os == 'ubuntu-20.04' # TODO: remove pin when fixed (#483)
 
     - name: Use specific dependency versions for Rust 1.48 compatibility.
       if: matrix.rust == '1.48'
