@@ -33,6 +33,18 @@ use core::ptr;
 #[cfg(all(feature = "fs", feature = "net"))]
 use libc_errno::errno;
 
+#[cfg(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos",
+    target_os = "freebsd",
+    target_os = "dragonfly",
+    target_os = "openbsd",
+    target_os = "netbsd"
+))]
+use crate::io::kqueue::Event;
+
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     let nread = unsafe {
         ret_ssize_t(c::read(
@@ -468,6 +480,46 @@ pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd) -> io::Result<()> {
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCNXCL as _)) }
+}
+
+#[cfg(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos",
+    target_os = "freebsd",
+    target_os = "dragonfly",
+    target_os = "openbsd",
+    target_os = "netbsd"
+))]
+pub(crate) fn kqueue() -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(c::kqueue()) }
+}
+
+#[cfg(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos",
+    target_os = "freebsd",
+    target_os = "dragonfly",
+    target_os = "openbsd",
+    target_os = "netbsd"
+))]
+pub(crate) unsafe fn kevent(
+    kq: BorrowedFd<'_>,
+    changelist: &[Event],
+    eventlist: &mut [MaybeUninit<Event>],
+    timeout: Option<&c::timespec>,
+) -> io::Result<c::c_int> {
+    ret_c_int(c::kevent(
+        borrowed_fd(kq),
+        changelist.as_ptr() as *const _,
+        changelist.len() as _,
+        eventlist.as_mut_ptr() as *mut _,
+        eventlist.len() as _,
+        timeout.map_or(core::ptr::null(), |t| t as *const _),
+    ))
 }
 
 #[cfg(not(target_os = "wasi"))]
