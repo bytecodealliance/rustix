@@ -1,8 +1,6 @@
 //! I/O operations.
 
 mod close;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-pub(crate) mod context;
 #[cfg(not(windows))]
 mod dup;
 mod errno;
