@@ -22,7 +22,6 @@ mod poll;
 mod procfs;
 #[cfg(not(windows))]
 mod read_write;
-#[cfg(not(windows))]
 mod seek_from;
 #[cfg(not(windows))]
 mod stdio;
