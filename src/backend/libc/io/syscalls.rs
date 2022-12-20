@@ -553,3 +553,42 @@ pub unsafe fn vmsplice(
     ))
     .map(|spliced| spliced as usize)
 }
+
+#[cfg(any(target_os = "solaris", target_os = "illumos",))]
+pub fn port_create() -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(c::port_create()) }
+}
+
+#[cfg(any(target_os = "solaris", target_os = "illumos",))]
+pub unsafe fn port_associate(
+    port: BorrowedFd<'_>,
+    source: c::c_int,
+    object: c::uintptr_t,
+    events: c::c_int,
+    user: *mut c::c_void,
+) -> io::Result<()> {
+    unsafe {
+        ret(c::port_associate(
+            borrowed_fd(port),
+            source,
+            object,
+            events,
+            user,
+        ))
+    }
+}
+
+#[cfg(any(target_os = "solaris", target_os = "illumos",))]
+pub unsafe fn port_dissociate(
+    port: BorrowedFd<'_>,
+    source: c::c_int,
+    object: c::uintptr_t,
+) -> io::Result<()> {
+    unsafe { ret(c::port_dissociate(borrowed_fd(port), source, object)) }
+}
+
+#[cfg(any(target_os = "solaris", target_os = "illumos",))]
+pub unsafe fn port_get(
+    port: BorrowedFd<'_>,
+    timeout: Option<&c::timespec>,
+) -> io::Result<Option<
