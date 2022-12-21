@@ -900,9 +900,19 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         }
         SeekFrom::End(offset) => (c::SEEK_END, offset),
         SeekFrom::Current(offset) => (c::SEEK_CUR, offset),
-        #[cfg(target_os = "linux")]
+        #[cfg(any(
+            target_os = "linux",
+            target_os = "solaris",
+            target_os = "freebsd",
+            target_os = "dragonfly",
+        ))]
         SeekFrom::Data(offset) => (c::SEEK_DATA, offset),
-        #[cfg(target_os = "linux")]
+        #[cfg(any(
+            target_os = "linux",
+            target_os = "solaris",
+            target_os = "freebsd",
+            target_os = "dragonfly",
+        ))]
         SeekFrom::Hole(offset) => (c::SEEK_HOLE, offset),
     };
     let offset = unsafe { ret_off_t(libc_lseek(borrowed_fd(fd), offset, whence))? };

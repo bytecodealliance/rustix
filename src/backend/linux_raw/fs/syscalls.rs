@@ -215,9 +215,19 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         }
         SeekFrom::End(offset) => (SEEK_END, offset),
         SeekFrom::Current(offset) => (SEEK_CUR, offset),
-        #[cfg(target_os = "linux")]
+        #[cfg(any(
+            target_os = "linux",
+            target_os = "solaris",
+            target_os = "freebsd",
+            target_os = "dragonfly",
+        ))]
         SeekFrom::Data(offset) => (SEEK_DATA, offset),
-        #[cfg(target_os = "linux")]
+        #[cfg(any(
+            target_os = "linux",
+            target_os = "solaris",
+            target_os = "freebsd",
+            target_os = "dragonfly",
+        ))]
         SeekFrom::Hole(offset) => (SEEK_HOLE, offset),
     };
     _seek(fd, offset, whence)

@@ -32,7 +32,12 @@ pub enum SeekFrom {
     /// specified number of bytes that contains data.
     ///
     /// If the offset points to data, the file offset is set to it.
-    #[cfg(target_os = "linux")]
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "solaris",
+        target_os = "freebsd",
+        target_os = "dragonfly",
+    ))]
     Data(i64),
 
     /// Sets the offset to the next hole in the file greater than or equal to the
@@ -43,6 +48,11 @@ pub enum SeekFrom {
     ///
     /// If there is no hole past offset, then the file offset is adjusted to the end
     /// of the file (i.e., there is an implicit hole at the end of any file).
-    #[cfg(target_os = "linux")]
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "solaris",
+        target_os = "freebsd",
+        target_os = "dragonfly",
+    ))]
     Hole(i64),
 }
