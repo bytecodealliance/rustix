@@ -30,7 +30,7 @@ pub enum SeekFrom {
 
     /// Sets the offset to the current position plus the specified number of bytes,
     /// plus the distance to the next byte which is not in a hole.
-    /// 
+    ///
     /// If the offset is in a hole at the end of the file, the seek will produce
     /// an `NXIO` error.
     #[cfg(any(
@@ -43,7 +43,7 @@ pub enum SeekFrom {
 
     /// Sets the offset to the current position plus the specified number of bytes,
     /// plus the distance to the next byte which is in a hole.
-    /// 
+    ///
     /// If there is no hole past the offset, it will be set to the end of the file
     /// i.e. there is an implicit hole at the end of any file.
     #[cfg(any(
