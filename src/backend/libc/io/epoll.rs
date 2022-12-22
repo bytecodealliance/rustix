@@ -11,7 +11,7 @@
 //! # #[cfg(feature = "net")]
 //! # fn main() -> std::io::Result<()> {
 //! use io_lifetimes::AsFd;
-//! use rustix::io::epoll::{self, Epoll};
+//! use rustix::io::epoll;
 //! use rustix::io::{ioctl_fionbio, read, write};
 //! use rustix::net::{
 //!     accept, bind_v4, listen, socket, AddressFamily, Ipv4Addr, Protocol, SocketAddrV4,
@@ -27,10 +27,10 @@
 //!
 //! // Create an epoll object. Using `Owning` here means the epoll object will
 //! // take ownership of the file descriptors registered with it.
-//! let epoll = Epoll::new(epoll::CreateFlags::CLOEXEC)?;
+//! let epoll = epoll::epoll_create(epoll::CreateFlags::CLOEXEC)?;
 //!
 //! // Register the socket with the epoll object.
-//! epoll.add(&listen_sock, 1, epoll::EventFlags::IN)?;
+//! epoll::epoll_add(&epoll, &listen_sock, 1, epoll::EventFlags::IN)?;
 //!
 //! // Keep track of the sockets we've opened.
 //! let mut next_id = 2;
@@ -39,14 +39,14 @@
 //! // Process events.
 //! let mut event_list = epoll::EventVec::with_capacity(4);
 //! loop {
-//!     epoll.wait(&mut event_list, -1)?;
+//!     epoll::epoll_wait(&epoll, &mut event_list, -1)?;
 //!     for (_event_flags, target) in &event_list {
 //!         if target == 1 {
 //!             // Accept a new connection, set it to non-blocking, and
 //!             // register to be notified when it's ready to write to.
 //!             let conn_sock = accept(&listen_sock)?;
 //!             ioctl_fionbio(&conn_sock, true)?;
-//!             epoll.add(&conn_sock, next_id, epoll::EventFlags::OUT | epoll::EventFlags::ET)?;
+//!             epoll::epoll_add(&epoll, &conn_sock, next_id, epoll::EventFlags::OUT | epoll::EventFlags::ET)?;
 //!             
 //!             // Keep track of the socket.
 //!             sockets.insert(next_id, conn_sock);
@@ -55,7 +55,7 @@
 //!             // Write a message to the stream and then unregister it.
 //!             let target = sockets.remove(&target).unwrap();
 //!             write(&target, b"hello\n")?;
-//!             let _ = epoll.del(&target)?;
+//!             let _ = epoll::epoll_del(&epoll, &target)?;
 //!         }
 //!     }
 //! }
@@ -66,9 +66,7 @@
 
 use super::super::c;
 use super::super::conv::{ret, ret_owned_fd, ret_u32};
-use crate::fd::{AsFd, AsRawFd, BorrowedFd, OwnedFd, RawFd};
-#[cfg(not(feature = "rustc-dep-of-std"))]
-use crate::fd::{FromRawFd, IntoRawFd};
+use crate::fd::{AsFd, AsRawFd, OwnedFd};
 use crate::io;
 use alloc::vec::Vec;
 use bitflags::bitflags;
@@ -117,160 +115,112 @@ bitflags! {
     }
 }
 
-/// An "epoll", an interface to an OS object allowing one to repeatedly wait
-/// for events from a set of file descriptors efficiently.
-pub struct Epoll {
-    epoll_fd: OwnedFd,
+/// `epoll_create1(flags)`—Creates a new `Epoll`.
+///
+/// Use the [`CreateFlags::CLOEXEC`] flag to prevent the resulting file
+/// descriptor from being implicitly passed across `exec` boundaries.
+#[inline]
+#[doc(alias = "epoll_create1")]
+pub fn epoll_create(flags: CreateFlags) -> io::Result<OwnedFd> {
+    // Safety: We're calling `epoll_create1` via FFI and we know how it
+    // behaves.
+    unsafe { ret_owned_fd(c::epoll_create1(flags.bits())) }
 }
 
-impl Epoll {
-    /// `epoll_create1(flags)`—Creates a new `Epoll`.
-    ///
-    /// Use the [`CreateFlags::CLOEXEC`] flag to prevent the resulting file
-    /// descriptor from being implicitly passed across `exec` boundaries.
-    #[inline]
-    #[doc(alias = "epoll_create1")]
-    pub fn new(flags: CreateFlags) -> io::Result<Self> {
-        // Safety: We're calling `epoll_create1` via FFI and we know how it
-        // behaves.
-        unsafe {
-            Ok(Self {
-                epoll_fd: ret_owned_fd(c::epoll_create1(flags.bits()))?,
-            })
-        }
-    }
-
-    /// `epoll_ctl(self, EPOLL_CTL_ADD, data, event)`—Adds an element to an
-    /// `Epoll`.
-    ///
-    /// This registers interest in any of the events set in `events` occurring
-    /// on the file descriptor associated with `data`.
-    #[doc(alias = "epoll_ctl")]
-    pub fn add(&self, source: &impl AsFd, data: u64, event_flags: EventFlags) -> io::Result<()> {
-        // Safety: We're calling `epoll_ctl` via FFI and we know how it
-        // behaves.
-        unsafe {
-            let raw_fd = source.as_fd().as_raw_fd();
-            ret(c::epoll_ctl(
-                self.epoll_fd.as_fd().as_raw_fd(),
-                c::EPOLL_CTL_ADD,
-                raw_fd,
-                &mut c::epoll_event {
-                    events: event_flags.bits(),
-                    r#u64: data,
-                },
-            ))
-        }
-    }
-
-    /// `epoll_ctl(self, EPOLL_CTL_MOD, target, event)`—Modifies an element in
-    /// this `Epoll`.
-    ///
-    /// This sets the events of interest with `target` to `events`.
-    #[doc(alias = "epoll_ctl")]
-    pub fn mod_(&self, source: &impl AsFd, data: u64, event_flags: EventFlags) -> io::Result<()> {
+/// `epoll_ctl(self, EPOLL_CTL_ADD, data, event)`—Adds an element to an
+/// `Epoll`.
+#[doc(alias = "epoll_ctl")]
+pub fn epoll_add(
+    epoll: impl AsFd,
+    source: impl AsFd,
+    data: u64,
+    event_flags: EventFlags,
+) -> io::Result<()> {
+    // Safety: We're calling `epoll_ctl` via FFI and we know how it
+    // behaves.
+    unsafe {
         let raw_fd = source.as_fd().as_raw_fd();
-
-        // Safety: We're calling `epoll_ctl` via FFI and we know how it
-        // behaves.
-        unsafe {
-            ret(c::epoll_ctl(
-                self.epoll_fd.as_fd().as_raw_fd(),
-                c::EPOLL_CTL_MOD,
-                raw_fd,
-                &mut c::epoll_event {
-                    events: event_flags.bits(),
-                    r#u64: data,
-                },
-            ))
-        }
-    }
-
-    /// `epoll_ctl(self, EPOLL_CTL_DEL, target, NULL)`—Removes an element in
-    /// this `Epoll`.
-    ///
-    /// This also returns the owning `Data`.
-    #[doc(alias = "epoll_ctl")]
-    pub fn del(&self, source: &impl AsFd) -> io::Result<()> {
-        // Safety: We're calling `epoll_ctl` via FFI and we know how it
-        // behaves.
-        unsafe {
-            let raw_fd = source.as_fd().as_raw_fd();
-            ret(c::epoll_ctl(
-                self.epoll_fd.as_fd().as_raw_fd(),
-                c::EPOLL_CTL_DEL,
-                raw_fd,
-                null_mut(),
-            ))
-        }
-    }
-
-    /// `epoll_wait(self, events, timeout)`—Waits for registered events of
-    /// interest.
-    ///
-    /// For each event of interest, an element is written to `events`. On
-    /// success, this returns the number of written elements.
-    #[doc(alias = "epoll_wait")]
-    pub fn wait(&self, event_list: &mut EventVec, timeout: c::c_int) -> io::Result<()> {
-        // Safety: We're calling `epoll_wait` via FFI and we know how it
-        // behaves.
-        unsafe {
-            event_list.events.set_len(0);
-            let nfds = ret_u32(c::epoll_wait(
-                self.epoll_fd.as_fd().as_raw_fd(),
-                event_list.events.as_mut_ptr().cast::<c::epoll_event>(),
-                event_list.events.capacity().try_into().unwrap_or(i32::MAX),
-                timeout,
-            ))?;
-            event_list.events.set_len(nfds as usize);
-        }
-
-        Ok(())
+        ret(c::epoll_ctl(
+            epoll.as_fd().as_raw_fd(),
+            c::EPOLL_CTL_ADD,
+            raw_fd,
+            &mut c::epoll_event {
+                events: event_flags.bits(),
+                r#u64: data,
+            },
+        ))
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
-impl AsRawFd for Epoll {
-    fn as_raw_fd(&self) -> RawFd {
-        self.epoll_fd.as_raw_fd()
+/// `epoll_ctl(self, EPOLL_CTL_MOD, target, event)`—Modifies an element in
+/// this `Epoll`.
+///
+/// This sets the events of interest with `target` to `events`.
+#[doc(alias = "epoll_ctl")]
+pub fn epoll_mod(
+    epoll: impl AsFd,
+    source: impl AsFd,
+    data: u64,
+    event_flags: EventFlags,
+) -> io::Result<()> {
+    let raw_fd = source.as_fd().as_raw_fd();
+
+    // Safety: We're calling `epoll_ctl` via FFI and we know how it
+    // behaves.
+    unsafe {
+        ret(c::epoll_ctl(
+            epoll.as_fd().as_raw_fd(),
+            c::EPOLL_CTL_MOD,
+            raw_fd,
+            &mut c::epoll_event {
+                events: event_flags.bits(),
+                r#u64: data,
+            },
+        ))
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
-impl IntoRawFd for Epoll {
-    fn into_raw_fd(self) -> RawFd {
-        self.epoll_fd.into_raw_fd()
+/// `epoll_ctl(self, EPOLL_CTL_DEL, target, NULL)`—Removes an element in
+/// this `Epoll`.
+#[doc(alias = "epoll_ctl")]
+pub fn epoll_del(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
+    // Safety: We're calling `epoll_ctl` via FFI and we know how it
+    // behaves.
+    unsafe {
+        let raw_fd = source.as_fd().as_raw_fd();
+        ret(c::epoll_ctl(
+            epoll.as_fd().as_raw_fd(),
+            c::EPOLL_CTL_DEL,
+            raw_fd,
+            null_mut(),
+        ))
     }
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
-impl FromRawFd for Epoll {
-    unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self {
-            epoll_fd: OwnedFd::from_raw_fd(fd),
-        }
+/// `epoll_wait(self, events, timeout)`—Waits for registered events of
+/// interest.
+///
+/// For each event of interest, an element is written to `events`. On
+/// success, this returns the number of written elements.
+pub fn epoll_wait(
+    epoll: impl AsFd,
+    event_list: &mut EventVec,
+    timeout: c::c_int,
+) -> io::Result<()> {
+    // Safety: We're calling `epoll_wait` via FFI and we know how it
+    // behaves.
+    unsafe {
+        event_list.events.set_len(0);
+        let nfds = ret_u32(c::epoll_wait(
+            epoll.as_fd().as_raw_fd(),
+            event_list.events.as_mut_ptr().cast::<c::epoll_event>(),
+            event_list.events.capacity().try_into().unwrap_or(i32::MAX),
+            timeout,
+        ))?;
+        event_list.events.set_len(nfds as usize);
     }
-}
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
-impl AsFd for Epoll {
-    fn as_fd(&self) -> BorrowedFd<'_> {
-        self.epoll_fd.as_fd()
-    }
-}
-
-#[cfg(not(feature = "rustc-dep-of-std"))]
-impl From<Epoll> for OwnedFd {
-    fn from(epoll: Epoll) -> Self {
-        epoll.epoll_fd
-    }
-}
-
-#[cfg(not(feature = "rustc-dep-of-std"))]
-impl From<OwnedFd> for Epoll {
-    fn from(fd: OwnedFd) -> Self {
-        Self { epoll_fd: fd }
-    }
+    Ok(())
 }
 
 /// An iterator over the `Event`s in an `EventVec`.
@@ -287,7 +237,7 @@ impl<'a> Iterator for Iter<'a> {
         // context because `wait` sets both.
         self.iter
             .next()
-            .map(|event| (event.event_flags, event.encoded))
+            .map(|event| (event.event_flags, event.data))
     }
 }
 
@@ -309,7 +259,7 @@ struct Event {
     // the full union; `Context` implementations will simply need to deal with
     // casting the value into and out of the `u64` themselves.
     event_flags: EventFlags,
-    encoded: u64,
+    data: u64,
 }
 
 /// A vector of `Event`s, plus context for interpreting them.

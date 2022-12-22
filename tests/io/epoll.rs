@@ -1,14 +1,12 @@
 #![cfg(any(target_os = "android", target_os = "linux"))]
 
-use rustix::fd::OwnedFd;
-use rustix::io::epoll::{self, Epoll};
+use rustix::io::epoll;
 use rustix::io::{ioctl_fionbio, read, write};
 use rustix::net::{
     accept, bind_v4, connect_v4, getsockname, listen, socket, AddressFamily, Ipv4Addr, Protocol,
     SocketAddrAny, SocketAddrV4, SocketType,
 };
 use std::collections::HashMap;
-use std::os::unix::io::{FromRawFd, IntoRawFd, RawFd};
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 
@@ -31,39 +29,33 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
         cvar.notify_all();
     }
 
-    let epoll = Epoll::new(epoll::CreateFlags::CLOEXEC).unwrap();
+    let epoll = epoll::epoll_create(epoll::CreateFlags::CLOEXEC).unwrap();
 
-    // Test into conversions.
-    let fd: OwnedFd = epoll.into();
-    let epoll: Epoll = fd.into();
-    let fd: RawFd = epoll.into_raw_fd();
-    let epoll = unsafe { Epoll::from_raw_fd(fd) };
-
-    epoll.add(&listen_sock, 1, epoll::EventFlags::IN).unwrap();
+    epoll::epoll_add(&epoll, &listen_sock, 1, epoll::EventFlags::IN).unwrap();
 
     let mut next_data = 2;
     let mut targets = HashMap::new();
 
     let mut event_list = epoll::EventVec::with_capacity(4);
     loop {
-        epoll.wait(&mut event_list, -1).unwrap();
+        epoll::epoll_wait(&epoll, &mut event_list, -1).unwrap();
         for (_event_flags, target) in &event_list {
             if target == 1 {
                 let conn_sock = accept(&listen_sock).unwrap();
                 ioctl_fionbio(&conn_sock, true).unwrap();
-                epoll
-                    .add(
-                        &conn_sock,
-                        next_data,
-                        epoll::EventFlags::OUT | epoll::EventFlags::ET,
-                    )
-                    .unwrap();
+                epoll::epoll_add(
+                    &epoll,
+                    &conn_sock,
+                    next_data,
+                    epoll::EventFlags::OUT | epoll::EventFlags::ET,
+                )
+                .unwrap();
                 targets.insert(next_data, conn_sock);
                 next_data += 1;
             } else {
                 let target = targets.remove(&target).unwrap();
                 write(&target, b"hello\n").unwrap();
-                epoll.del(&target).unwrap();
+                epoll::epoll_del(&epoll, &target).unwrap();
             }
         }
     }
