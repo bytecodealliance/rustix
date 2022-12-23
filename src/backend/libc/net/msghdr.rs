@@ -1,0 +1,121 @@
+//! Utilities for dealing with message headers.
+//!
+//! These take closures rather than returning a `c::msghdr` directly because the
+//! message headers may reference stack-local data.
+
+use super::super::c;
+use super::super::conv::{msg_control_len, msg_iov_len};
+use super::super::net::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
+
+use crate::io;
+use crate::net::{SocketAddrV4, SocketAddrV6};
+use crate::utils::as_ptr;
+
+use core::mem::{size_of, zeroed, MaybeUninit};
+use core::ptr::null_mut;
+
+/// Create a message header intended to receive a datagram.
+pub(crate) fn with_recv_msghdr<R>(
+    name: &mut MaybeUninit<c::sockaddr_storage>,
+    iov: &mut [io::IoSliceMut<'_>],
+    control: &mut crate::net::RecvAncillaryBuffer<'_>,
+    f: impl FnOnce(c::msghdr) -> R,
+) -> R {
+    let namelen = size_of::<c::sockaddr_storage>() as c::socklen_t;
+
+    f(c::msghdr {
+        msg_name: name.as_mut_ptr().cast(),
+        msg_namelen: namelen,
+        msg_iov: iov.as_mut_ptr().cast(),
+        msg_iovlen: msg_iov_len(iov.len()),
+        msg_control: control.as_control_ptr().cast(),
+        msg_controllen: msg_control_len(control.control_len()),
+
+        // Zero-initialize any padding bytes.
+        ..unsafe { zeroed() }
+    })
+}
+
+/// Create a message header intended to send without an address.
+pub(crate) fn with_noaddr_msghdr<R>(
+    iov: &[io::IoSlice<'_>],
+    control: &mut crate::net::SendAncillaryBuffer<'_, '_, '_>,
+    f: impl FnOnce(c::msghdr) -> R,
+) -> R {
+    f(c::msghdr {
+        msg_name: null_mut(),
+        msg_namelen: 0,
+        msg_iov: iov.as_ptr() as _,
+        msg_iovlen: msg_iov_len(iov.len()),
+        msg_control: control.as_control_ptr().cast(),
+        msg_controllen: msg_control_len(control.control_len()),
+
+        // Zero-initialize any padding bytes.
+        ..unsafe { zeroed() }
+    })
+}
+
+/// Create a message header intended to send with an IPv4 address.
+pub(crate) fn with_v4_msghdr<R>(
+    addr: &SocketAddrV4,
+    iov: &[io::IoSlice<'_>],
+    control: &mut crate::net::SendAncillaryBuffer<'_, '_, '_>,
+    f: impl FnOnce(c::msghdr) -> R,
+) -> R {
+    let encoded = unsafe { encode_sockaddr_v4(addr) };
+
+    f(c::msghdr {
+        msg_name: as_ptr(&encoded) as _,
+        msg_namelen: size_of::<SocketAddrV4>() as _,
+        msg_iov: iov.as_ptr() as _,
+        msg_iovlen: msg_iov_len(iov.len()),
+        msg_control: control.as_control_ptr().cast(),
+        msg_controllen: msg_control_len(control.control_len()),
+
+        // Zero-initialize any padding bytes.
+        ..unsafe { zeroed() }
+    })
+}
+
+/// Create a message header intended to send with an IPv6 address.
+pub(crate) fn with_v6_msghdr<R>(
+    addr: &SocketAddrV6,
+    iov: &[io::IoSlice<'_>],
+    control: &mut crate::net::SendAncillaryBuffer<'_, '_, '_>,
+    f: impl FnOnce(c::msghdr) -> R,
+) -> R {
+    let encoded = unsafe { encode_sockaddr_v6(addr) };
+
+    f(c::msghdr {
+        msg_name: as_ptr(&encoded) as _,
+        msg_namelen: size_of::<SocketAddrV6>() as _,
+        msg_iov: iov.as_ptr() as _,
+        msg_iovlen: msg_iov_len(iov.len()),
+        msg_control: control.as_control_ptr().cast(),
+        msg_controllen: msg_control_len(control.control_len()),
+
+        // Zero-initialize any padding bytes.
+        ..unsafe { zeroed() }
+    })
+}
+
+/// Create a message header intended to send with a Unix address.
+#[cfg(all(unix, not(target_os = "redox")))]
+pub(crate) fn with_unix_msghdr<R>(
+    addr: &crate::net::SocketAddrUnix,
+    iov: &[io::IoSlice<'_>],
+    control: &mut crate::net::SendAncillaryBuffer<'_, '_, '_>,
+    f: impl FnOnce(c::msghdr) -> R,
+) -> R {
+    f(c::msghdr {
+        msg_name: as_ptr(addr) as _,
+        msg_namelen: addr.addr_len(),
+        msg_iov: iov.as_ptr() as _,
+        msg_iovlen: msg_iov_len(iov.len()),
+        msg_control: control.as_control_ptr().cast(),
+        msg_controllen: msg_control_len(control.control_len()),
+
+        // Zero-initialize any padding bytes.
+        ..unsafe { zeroed() }
+    })
+}

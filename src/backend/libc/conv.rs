@@ -222,3 +222,45 @@ pub(super) fn ret_send_recv(len: isize) -> io::Result<usize> {
 pub(super) fn ret_send_recv(len: i32) -> io::Result<usize> {
     ret_usize(len as isize)
 }
+
+/// Convert the value to the `msg_iovlen` field of a `msghdr` struct.
+#[cfg(all(
+    not(any(windows, target_os = "wasm32")),
+    any(
+        target_os = "android",
+        all(target_os = "linux", not(target_env = "musl"))
+    )
+))]
+#[inline]
+pub(super) fn msg_iov_len(len: usize) -> c::size_t {
+    len
+}
+
+/// Convert the value to the `msg_iovlen` field of a `msghdr` struct.
+#[cfg(all(
+    not(any(windows, target_os = "wasm32")),
+    not(any(
+        target_os = "android",
+        all(target_os = "linux", not(target_env = "musl"))
+    ))
+))]
+#[inline]
+pub(super) fn msg_iov_len(len: usize) -> c::c_int {
+    use core::convert::TryInto;
+    len.try_into().unwrap_or(c::c_int::MAX)
+}
+
+/// Convert the value to a `socklen_t`.
+#[cfg(not(any(windows, target_os = "wasm32", target_os = "android")))]
+#[inline]
+pub(super) fn msg_control_len(len: usize) -> c::socklen_t {
+    use core::convert::TryInto;
+    len.try_into().unwrap_or(c::socklen_t::MAX)
+}
+
+/// Convert the value to a `size_t`.
+#[cfg(target_os = "android")]
+#[inline]
+pub(super) fn msg_control_len(len: usize) -> c::size_t {
+    len
+}
