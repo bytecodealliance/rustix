@@ -118,3 +118,83 @@ fn test_readwrite() {
     read(&foo, &mut buf).unwrap();
     assert_eq!(&buf, b"world");
 }
+
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
+#[test]
+fn test_rwf_values() {
+    // We use the kernel's values for these flags; check that libc doesn't
+    // have different values.
+    assert_eq!(
+        rustix::io::ReadWriteFlags::APPEND.bits() as i32,
+        libc::RWF_APPEND
+    );
+    assert_eq!(
+        rustix::io::ReadWriteFlags::DSYNC.bits() as i32,
+        libc::RWF_DSYNC
+    );
+    assert_eq!(
+        rustix::io::ReadWriteFlags::HIPRI.bits() as i32,
+        libc::RWF_HIPRI
+    );
+    assert_eq!(
+        rustix::io::ReadWriteFlags::NOWAIT.bits() as i32,
+        libc::RWF_NOWAIT
+    );
+    assert_eq!(
+        rustix::io::ReadWriteFlags::SYNC.bits() as i32,
+        libc::RWF_SYNC
+    );
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(feature = "fs")]
+#[test]
+fn test_pwritev2() {
+    use rustix::fs::{cwd, openat, seek, Mode, OFlags};
+    use rustix::io::{preadv2, pwritev2, writev, ReadWriteFlags, SeekFrom};
+
+    let tmp = tempfile::tempdir().unwrap();
+    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let foo = openat(
+        &dir,
+        "foo",
+        OFlags::RDWR | OFlags::CREATE | OFlags::TRUNC,
+        Mode::RUSR | Mode::WUSR,
+    )
+    .unwrap();
+
+    writev(&foo, &[IoSlice::new(b"hello")]).unwrap();
+    seek(&foo, SeekFrom::Start(0)).unwrap();
+
+    // pwritev2 to append with a 0 offset: don't update the current position.
+    match pwritev2(&foo, &[IoSlice::new(b"world")], 0, ReadWriteFlags::APPEND) {
+        Ok(_) => {}
+        // Skip the rest of the test if we don't have `pwritev2` and `RWF_APPEND`.
+        Err(rustix::io::Errno::NOSYS) | Err(rustix::io::Errno::NOTSUP) => return,
+        Err(err) => Err(err).unwrap(),
+    }
+    assert_eq!(seek(&foo, SeekFrom::Current(0)).unwrap(), 0);
+
+    // pwritev2 to append with a !0 offset: do update the current position.
+    pwritev2(&foo, &[IoSlice::new(b"world")], !0, ReadWriteFlags::APPEND).unwrap();
+    assert_eq!(seek(&foo, SeekFrom::Current(0)).unwrap(), 15);
+
+    seek(&foo, SeekFrom::Start(0)).unwrap();
+    let mut buf = [0_u8; 5];
+    preadv2(
+        &foo,
+        &mut [IoSliceMut::new(&mut buf)],
+        0,
+        ReadWriteFlags::empty(),
+    )
+    .unwrap();
+    assert_eq!(&buf, b"hello");
+    preadv2(
+        &foo,
+        &mut [IoSliceMut::new(&mut buf)],
+        5,
+        ReadWriteFlags::empty(),
+    )
+    .unwrap();
+    assert_eq!(&buf, b"world");
+}

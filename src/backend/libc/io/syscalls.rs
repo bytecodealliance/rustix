@@ -167,7 +167,7 @@ pub(crate) fn preadv2(
 }
 
 /// At present, `libc` only has `preadv2` defined for glibc. On other
-/// ABIs, `ReadWriteFlags` has no flags defined, and we use plain `preadv`.
+/// ABIs, use `libc::syscall`.
 #[cfg(any(
     target_os = "android",
     all(target_os = "linux", not(target_env = "gnu")),
@@ -179,8 +179,19 @@ pub(crate) fn preadv2(
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    assert!(flags.is_empty());
-    preadv(fd, bufs, offset)
+    // Silently cast; we'll get `EINVAL` if the value is negative.
+    let offset = offset as i64;
+    let nread = unsafe {
+        ret_ssize_t(libc::syscall(
+            libc::SYS_preadv2,
+            borrowed_fd(fd),
+            bufs.as_ptr().cast::<c::iovec>(),
+            min(bufs.len(), max_iov()) as c::c_int,
+            offset,
+            flags.bits(),
+        ) as c::ssize_t)?
+    };
+    Ok(nread as usize)
 }
 
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
@@ -205,7 +216,7 @@ pub(crate) fn pwritev2(
 }
 
 /// At present, `libc` only has `pwritev2` defined for glibc. On other
-/// ABIs, `ReadWriteFlags` has no flags defined, and we use plain `pwritev`.
+/// ABIs, use `libc::syscall`.
 #[cfg(any(
     target_os = "android",
     all(target_os = "linux", not(target_env = "gnu")),
@@ -217,8 +228,19 @@ pub(crate) fn pwritev2(
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    assert!(flags.is_empty());
-    pwritev(fd, bufs, offset)
+    // Silently cast; we'll get `EINVAL` if the value is negative.
+    let offset = offset as i64;
+    let nwritten = unsafe {
+        ret_ssize_t(libc::syscall(
+            libc::SYS_pwritev2,
+            borrowed_fd(fd),
+            bufs.as_ptr().cast::<c::iovec>(),
+            min(bufs.len(), max_iov()) as c::c_int,
+            offset,
+            flags.bits(),
+        ) as c::ssize_t)?
+    };
+    Ok(nwritten as usize)
 }
 
 // These functions are derived from Rust's library/std/src/sys/unix/fd.rs at
