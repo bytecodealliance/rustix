@@ -22,20 +22,15 @@ bitflags! {
     /// [`pwritev2`]: crate::io::pwritev
     pub struct ReadWriteFlags: c::c_int {
         /// `RWF_DSYNC` (since Linux 4.7)
-        #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const DSYNC = c::RWF_DSYNC;
+        const DSYNC = linux_raw_sys::general::RWF_DSYNC as c::c_int;
         /// `RWF_HIPRI` (since Linux 4.6)
-        #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const HIPRI = c::RWF_HIPRI;
+        const HIPRI = linux_raw_sys::general::RWF_HIPRI as c::c_int;
         /// `RWF_SYNC` (since Linux 4.7)
-        #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const SYNC = c::RWF_SYNC;
+        const SYNC = linux_raw_sys::general::RWF_SYNC as c::c_int;
         /// `RWF_NOWAIT` (since Linux 4.14)
-        #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const NOWAIT = c::RWF_NOWAIT;
+        const NOWAIT = linux_raw_sys::general::RWF_NOWAIT as c::c_int;
         /// `RWF_APPEND` (since Linux 4.16)
-        #[cfg(all(target_os = "linux", target_env = "gnu"))]
-        const APPEND = c::RWF_APPEND;
+        const APPEND = linux_raw_sys::general::RWF_APPEND as c::c_int;
     }
 }
 
