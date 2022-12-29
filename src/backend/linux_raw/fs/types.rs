@@ -644,3 +644,86 @@ pub const PROC_SUPER_MAGIC: FsWord = linux_raw_sys::general::PROC_SUPER_MAGIC as
 
 /// `NFS_SUPER_MAGIC`—The magic number for the NFS filesystem.
 pub const NFS_SUPER_MAGIC: FsWord = linux_raw_sys::general::NFS_SUPER_MAGIC as FsWord;
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    /// `MS_*` constants for use with [`mount`][crate::fs::mount].
+    pub struct MountFlags: c::c_uint {
+        /// `MS_BIND`
+        const BIND = linux_raw_sys::general::MS_BIND;
+
+        /// `MS_DIRSYNC`
+        const DIRSYNC = linux_raw_sys::general::MS_DIRSYNC;
+
+        /// `MS_LAZYTIME`
+        const LAZYTIME = linux_raw_sys::general::MS_LAZYTIME;
+
+        /// `MS_MANDLOCK`
+        #[doc(alias = "MANDLOCK")]
+        const PERMIT_MANDATORY_FILE_LOCKING = linux_raw_sys::general::MS_MANDLOCK;
+
+        /// `MS_NOATIME`
+        const NOATIME = linux_raw_sys::general::MS_NOATIME;
+
+        /// `MS_NODEV`
+        const NODEV = linux_raw_sys::general::MS_NODEV;
+
+        /// `MS_NODIRATIME`
+        const NODIRATIME = linux_raw_sys::general::MS_NODIRATIME;
+
+        /// `MS_NOEXEC`
+        const NOEXEC = linux_raw_sys::general::MS_NOEXEC;
+
+        /// `MS_NOSUID`
+        const NOSUID = linux_raw_sys::general::MS_NOSUID;
+
+        /// `MS_RDONLY`
+        const RDONLY = linux_raw_sys::general::MS_RDONLY;
+
+        /// `MS_REC`
+        const REC = linux_raw_sys::general::MS_REC;
+
+        /// `MS_RELATIME`
+        const RELATIME = linux_raw_sys::general::MS_RELATIME;
+
+        /// `MS_SILENT`
+        const SILENT = linux_raw_sys::general::MS_SILENT;
+
+        /// `MS_STRICTATIME`
+        const STRICTATIME = linux_raw_sys::general::MS_STRICTATIME;
+
+        /// `MS_SYNCHRONOUS`
+        const SYNCHRONOUS = linux_raw_sys::general::MS_SYNCHRONOUS;
+
+        /// `MS_NOSYMFOLLOW`
+        const NOSYMFOLLOW = linux_raw_sys::general::MS_NOSYMFOLLOW;
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    /// `MS_*` constants for use with [`change_mount`][crate::fs::mount::change_mount].
+    pub struct MountPropagationFlags: c::c_uint {
+        /// `MS_SHARED`
+        const SHARED = linux_raw_sys::general::MS_SHARED;
+        /// `MS_PRIVATE`
+        const PRIVATE = linux_raw_sys::general::MS_PRIVATE;
+        /// `MS_SLAVE`
+        const SLAVE = linux_raw_sys::general::MS_SLAVE;
+        /// `MS_UNBINDABLE`
+        const UNBINDABLE = linux_raw_sys::general::MS_UNBINDABLE;
+        /// `MS_REC`
+        const REC = linux_raw_sys::general::MS_REC;
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    pub(crate) struct InternalMountFlags: c::c_uint {
+        const REMOUNT = linux_raw_sys::general::MS_REMOUNT;
+        const MOVE = linux_raw_sys::general::MS_MOVE;
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) struct MountFlagsArg(pub(crate) c::c_uint);
