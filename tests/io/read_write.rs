@@ -96,8 +96,8 @@ fn test_readwrite_v() {
 #[test]
 fn test_readwrite() {
     use rustix::fs::{cwd, openat, seek, Mode, OFlags};
+    use rustix::io::SeekFrom;
     use rustix::io::{read, write};
-    use std::io::SeekFrom;
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();

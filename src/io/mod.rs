@@ -20,7 +20,6 @@ mod poll;
 mod procfs;
 #[cfg(not(windows))]
 mod read_write;
-#[cfg(not(feature = "std"))]
 mod seek_from;
 #[cfg(not(windows))]
 mod stdio;
@@ -87,10 +86,7 @@ pub use read_write::{pread, pwrite, read, readv, write, writev, IoSlice, IoSlice
 pub use read_write::{preadv, pwritev};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use read_write::{preadv2, pwritev2, ReadWriteFlags};
-#[cfg(not(feature = "std"))]
 pub use seek_from::SeekFrom;
-#[cfg(feature = "std")]
-pub use std::io::SeekFrom;
 #[cfg(not(windows))]
 pub use stdio::{
     raw_stderr, raw_stdin, raw_stdout, stderr, stdin, stdout, take_stderr, take_stdin, take_stdout,

@@ -37,7 +37,8 @@ use linux_raw_sys::general::stat as linux_stat64;
 use linux_raw_sys::general::{
     __kernel_fsid_t, __kernel_timespec, open_how, statx, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR,
     AT_SYMLINK_NOFOLLOW, F_ADD_SEALS, F_GETFL, F_GETLEASE, F_GETOWN, F_GETPIPE_SZ, F_GETSIG,
-    F_GET_SEALS, F_SETFL, F_SETPIPE_SZ, SEEK_CUR, SEEK_END, SEEK_SET, STATX__RESERVED,
+    F_GET_SEALS, F_SETFL, F_SETPIPE_SZ, SEEK_CUR, SEEK_DATA, SEEK_END, SEEK_HOLE, SEEK_SET,
+    STATX__RESERVED,
 };
 #[cfg(target_pointer_width = "32")]
 use {
@@ -214,6 +215,20 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         }
         SeekFrom::End(offset) => (SEEK_END, offset),
         SeekFrom::Current(offset) => (SEEK_CUR, offset),
+        #[cfg(any(
+            target_os = "linux",
+            target_os = "solaris",
+            target_os = "freebsd",
+            target_os = "dragonfly",
+        ))]
+        SeekFrom::Data(offset) => (SEEK_DATA, offset),
+        #[cfg(any(
+            target_os = "linux",
+            target_os = "solaris",
+            target_os = "freebsd",
+            target_os = "dragonfly",
+        ))]
+        SeekFrom::Hole(offset) => (SEEK_HOLE, offset),
     };
     _seek(fd, offset, whence)
 }
