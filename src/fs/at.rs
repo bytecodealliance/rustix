@@ -222,7 +222,7 @@ pub fn renameat_with<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
     })
 }
 
-/// `symlinkat(old_dirfd, old_path, new_dirfd, new_path)`—Creates a symlink.
+/// `symlinkat(old_path, new_dirfd, new_path)`—Creates a symlink.
 ///
 /// # References
 ///  - [POSIX]
