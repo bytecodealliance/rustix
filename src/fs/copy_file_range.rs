@@ -14,7 +14,7 @@ pub fn copy_file_range<InFd: AsFd, OutFd: AsFd>(
     off_in: Option<&mut u64>,
     fd_out: OutFd,
     off_out: Option<&mut u64>,
-    len: u64,
-) -> io::Result<u64> {
+    len: usize,
+) -> io::Result<usize> {
     backend::fs::syscalls::copy_file_range(fd_in.as_fd(), off_in, fd_out.as_fd(), off_out, len)
 }
