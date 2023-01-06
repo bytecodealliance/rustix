@@ -273,7 +273,8 @@ pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
 }
 
 #[cfg(feature = "procfs")]
-pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
+#[allow(unsafe_code)]
+pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
     let fd_stat = crate::backend::fs::syscalls::fstat(fd)?;
 
     // Quick check: if `fd` isn't a character device, it's not a tty.
@@ -300,14 +301,18 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     if r == buf.len() {
         return Err(io::Errno::RANGE);
     }
-    buf[r] = b'\0';
+    // SAFETY: readlinkat returns the number of bytes placed in the buffer
+    buf[r].write(b'\0');
 
     // Check that the path we read refers to the same file as `fd`.
-    let path = CStr::from_bytes_with_nul(&buf[..=r]).unwrap();
+    {
+        // SAFETY: We just wrote the NUL byte above
+        let path = unsafe { CStr::from_ptr(buf.as_ptr().cast()) };
 
-    let path_stat = crate::backend::fs::syscalls::stat(path)?;
-    if path_stat.st_dev != fd_stat.st_dev || path_stat.st_ino != fd_stat.st_ino {
-        return Err(io::Errno::NODEV);
+        let path_stat = crate::backend::fs::syscalls::stat(path)?;
+        if path_stat.st_dev != fd_stat.st_dev || path_stat.st_ino != fd_stat.st_ino {
+            return Err(io::Errno::NODEV);
+        }
     }
 
     Ok(r)

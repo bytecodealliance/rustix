@@ -64,7 +64,7 @@ pub fn openat<P: path::Arg, Fd: AsFd>(
 
 /// `readlinkat(fd, path)`—Reads the contents of a symlink.
 ///
-/// If `reuse` is non-empty, reuse its buffer to store the result if possible.
+/// If `reuse` already has available capacity, reuse it if possible.
 ///
 /// # References
 ///  - [POSIX]
@@ -81,24 +81,38 @@ pub fn readlinkat<P: path::Arg, Fd: AsFd, B: Into<Vec<u8>>>(
     path.into_with_c_str(|path| _readlinkat(dirfd.as_fd(), path, reuse.into()))
 }
 
+#[allow(unsafe_code)]
 fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::Result<CString> {
-    // This code would benefit from having a better way to read into
-    // uninitialized memory, but that requires `unsafe`.
     buffer.clear();
     buffer.reserve(SMALL_PATH_BUFFER_SIZE);
-    buffer.resize(buffer.capacity(), 0_u8);
 
     loop {
-        let nread = backend::fs::syscalls::readlinkat(dirfd.as_fd(), path, &mut buffer)?;
+        let nread =
+            backend::fs::syscalls::readlinkat(dirfd.as_fd(), path, buffer.spare_capacity_mut())?;
 
-        let nread = nread as usize;
-        assert!(nread <= buffer.len());
-        if nread < buffer.len() {
-            buffer.resize(nread, 0_u8);
-            return Ok(CString::new(buffer).unwrap());
+        debug_assert!(nread <= buffer.capacity());
+        if nread < buffer.capacity() {
+            // SAFETY from the man page:
+            // "On success, these calls return the number of bytes placed in buf."
+            unsafe {
+                buffer.set_len(nread);
+            }
+
+            // SAFETY:
+            // - "readlink places the contents of the symbolic link pathname in the buffer buf"
+            // - POSIX definition 3.271 Pathname (https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_271
+            //   "A string that is used to identify a file."
+            //   POSIX definition 3.375: String (https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_375)
+            //   "A contiguous sequence of bytes terminated by and including the first null byte."
+            // - "readlink does not append a terminating null byte to buf."
+            //
+            // Thus, there will be no NUL bytes in the string.
+            unsafe {
+                return Ok(CString::from_vec_unchecked(buffer));
+            }
         }
-        buffer.reserve(1); // use `Vec` reallocation strategy to grow capacity exponentially
-        buffer.resize(buffer.capacity(), 0_u8);
+
+        buffer.reserve(buffer.capacity() + 1); // use `Vec` reallocation strategy to grow capacity exponentially
     }
 }
 
