@@ -779,8 +779,8 @@ pub(crate) fn copy_file_range(
     off_in: Option<&mut u64>,
     fd_out: BorrowedFd<'_>,
     off_out: Option<&mut u64>,
-    len: u64,
-) -> io::Result<u64> {
+    len: usize,
+) -> io::Result<usize> {
     assert_eq!(size_of::<c::loff_t>(), size_of::<u64>());
 
     let mut off_in_val: c::loff_t = 0;
@@ -798,7 +798,6 @@ pub(crate) fn copy_file_range(
     } else {
         null_mut()
     };
-    let len: usize = len.try_into().unwrap_or(usize::MAX);
     let copied = unsafe {
         syscall_ret_ssize_t(c::syscall(
             c::SYS_copy_file_range,
@@ -816,7 +815,7 @@ pub(crate) fn copy_file_range(
     if let Some(off_out) = off_out {
         *off_out = off_out_val as u64;
     }
-    Ok(copied as u64)
+    Ok(copied as usize)
 }
 
 #[cfg(not(any(

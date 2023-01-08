@@ -30,6 +30,7 @@ use crate::fs::{
 };
 use crate::io::{self, SeekFrom};
 use crate::process::{Gid, Uid};
+#[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
 #[cfg(target_arch = "mips64")]
@@ -1346,20 +1347,7 @@ pub(crate) fn copy_file_range(
     off_in: Option<&mut u64>,
     fd_out: BorrowedFd<'_>,
     off_out: Option<&mut u64>,
-    len: u64,
-) -> io::Result<u64> {
-    let len: usize = len.try_into().unwrap_or(usize::MAX);
-    _copy_file_range(fd_in, off_in, fd_out, off_out, len, 0).map(|result| result as u64)
-}
-
-#[inline]
-fn _copy_file_range(
-    fd_in: BorrowedFd<'_>,
-    off_in: Option<&mut u64>,
-    fd_out: BorrowedFd<'_>,
-    off_out: Option<&mut u64>,
     len: usize,
-    flags: c::c_uint,
 ) -> io::Result<usize> {
     unsafe {
         ret_usize(syscall!(
@@ -1369,7 +1357,7 @@ fn _copy_file_range(
             fd_out,
             opt_mut(off_out),
             pass_usize(len),
-            c_uint(flags)
+            c_uint(0)
         ))
     }
 }
