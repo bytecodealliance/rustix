@@ -178,6 +178,24 @@ pub enum IoringRegisterOp {
 
     /// `IORING_REGISTER_IOWQ_MAX_WORKERS`
     RegisterIowqMaxWorkers = sys::IORING_REGISTER_IOWQ_MAX_WORKERS as _,
+
+    /// `IORING_REGISTER_RING_FDS`
+    RegisterRingFds = sys::IORING_REGISTER_RING_FDS as _,
+
+    /// `IORING_UNREGISTER_RING_FDS`
+    UnregisterRingFds = sys::IORING_UNREGISTER_RING_FDS as _,
+
+    /// `IORING_REGISTER_PBUF_RING`
+    RegisterPbufRing = sys::IORING_REGISTER_PBUF_RING as _,
+
+    /// `IORING_UNREGISTER_PBUF_RING`
+    UnregisterPbufRing = sys::IORING_UNREGISTER_PBUF_RING as _,
+
+    /// `IORING_REGISTER_SYNC_CANCEL`
+    RegisterSyncCancel = sys::IORING_REGISTER_SYNC_CANCEL as _,
+
+    /// `IORING_REGISTER_FILE_ALLOC_RANGE`
+    RegisterFileAllocRange = sys::IORING_REGISTER_FILE_ALLOC_RANGE as _,
 }
 
 /// `IORING_OP_*` constants for use with [`io_uring_sqe`].
@@ -186,124 +204,151 @@ pub enum IoringRegisterOp {
 #[non_exhaustive]
 pub enum IoringOp {
     /// `IORING_OP_NOP`
-    Nop = sys::IORING_OP_NOP as _,
+    Nop = sys::io_uring_op::IORING_OP_NOP as _,
 
     /// `IORING_OP_ACCEPT`
-    Accept = sys::IORING_OP_ACCEPT as _,
+    Accept = sys::io_uring_op::IORING_OP_ACCEPT as _,
 
     /// `IORING_OP_ASYNC_CANCEL`
-    AsyncCancel = sys::IORING_OP_ASYNC_CANCEL as _,
+    AsyncCancel = sys::io_uring_op::IORING_OP_ASYNC_CANCEL as _,
 
     /// `IORING_OP_CLOSE`
-    Close = sys::IORING_OP_CLOSE as _,
+    Close = sys::io_uring_op::IORING_OP_CLOSE as _,
 
     /// `IORING_OP_CONNECT`
-    Connect = sys::IORING_OP_CONNECT as _,
+    Connect = sys::io_uring_op::IORING_OP_CONNECT as _,
 
     /// `IORING_OP_EPOLL_CTL`
-    EpollCtl = sys::IORING_OP_EPOLL_CTL as _,
+    EpollCtl = sys::io_uring_op::IORING_OP_EPOLL_CTL as _,
 
     /// `IORING_OP_FADVISE`
-    Fadvise = sys::IORING_OP_FADVISE as _,
+    Fadvise = sys::io_uring_op::IORING_OP_FADVISE as _,
 
     /// `IORING_OP_FALLOCATE`
-    Fallocate = sys::IORING_OP_FALLOCATE as _,
+    Fallocate = sys::io_uring_op::IORING_OP_FALLOCATE as _,
 
     /// `IORING_OP_FILES_UPDATE`
-    FilesUpdate = sys::IORING_OP_FILES_UPDATE as _,
+    FilesUpdate = sys::io_uring_op::IORING_OP_FILES_UPDATE as _,
 
     /// `IORING_OP_FSYNC`
-    Fsync = sys::IORING_OP_FSYNC as _,
+    Fsync = sys::io_uring_op::IORING_OP_FSYNC as _,
 
     /// `IORING_OP_LINKAT`
-    Linkat = sys::IORING_OP_LINKAT as _,
+    Linkat = sys::io_uring_op::IORING_OP_LINKAT as _,
 
     /// `IORING_OP_LINK_TIMEOUT`
-    LinkTimeout = sys::IORING_OP_LINK_TIMEOUT as _,
+    LinkTimeout = sys::io_uring_op::IORING_OP_LINK_TIMEOUT as _,
 
     /// `IORING_OP_MADVISE`
-    Madvise = sys::IORING_OP_MADVISE as _,
+    Madvise = sys::io_uring_op::IORING_OP_MADVISE as _,
 
     /// `IORING_OP_MKDIRAT`
-    Mkdirat = sys::IORING_OP_MKDIRAT as _,
+    Mkdirat = sys::io_uring_op::IORING_OP_MKDIRAT as _,
 
     /// `IORING_OP_OPENAT`
-    Openat = sys::IORING_OP_OPENAT as _,
+    Openat = sys::io_uring_op::IORING_OP_OPENAT as _,
 
     /// `IORING_OP_OPENAT2`
-    Openat2 = sys::IORING_OP_OPENAT2 as _,
+    Openat2 = sys::io_uring_op::IORING_OP_OPENAT2 as _,
 
     /// `IORING_OP_POLL_ADD`
-    PollAdd = sys::IORING_OP_POLL_ADD as _,
+    PollAdd = sys::io_uring_op::IORING_OP_POLL_ADD as _,
 
     /// `IORING_OP_POLL_REMOVE`
-    PollRemove = sys::IORING_OP_POLL_REMOVE as _,
+    PollRemove = sys::io_uring_op::IORING_OP_POLL_REMOVE as _,
 
     /// `IORING_OP_PROVIDE_BUFFERS`
-    ProvideBuffers = sys::IORING_OP_PROVIDE_BUFFERS as _,
+    ProvideBuffers = sys::io_uring_op::IORING_OP_PROVIDE_BUFFERS as _,
 
     /// `IORING_OP_READ`
-    Read = sys::IORING_OP_READ as _,
+    Read = sys::io_uring_op::IORING_OP_READ as _,
 
     /// `IORING_OP_READV`
-    Readv = sys::IORING_OP_READV as _,
+    Readv = sys::io_uring_op::IORING_OP_READV as _,
 
     /// `IORING_OP_READ_FIXED`
-    ReadFixed = sys::IORING_OP_READ_FIXED as _,
+    ReadFixed = sys::io_uring_op::IORING_OP_READ_FIXED as _,
 
     /// `IORING_OP_RECV`
-    Recv = sys::IORING_OP_RECV as _,
+    Recv = sys::io_uring_op::IORING_OP_RECV as _,
 
     /// `IORING_OP_RECVMSG`
-    Recvmsg = sys::IORING_OP_RECVMSG as _,
+    Recvmsg = sys::io_uring_op::IORING_OP_RECVMSG as _,
 
     /// `IORING_OP_REMOVE_BUFFERS`
-    RemoveBuffers = sys::IORING_OP_REMOVE_BUFFERS as _,
+    RemoveBuffers = sys::io_uring_op::IORING_OP_REMOVE_BUFFERS as _,
 
     /// `IORING_OP_RENAMEAT`
-    Renameat = sys::IORING_OP_RENAMEAT as _,
+    Renameat = sys::io_uring_op::IORING_OP_RENAMEAT as _,
 
     /// `IORING_OP_SEND`
-    Send = sys::IORING_OP_SEND as _,
+    Send = sys::io_uring_op::IORING_OP_SEND as _,
 
     /// `IORING_OP_SENDMSG`
-    Sendmsg = sys::IORING_OP_SENDMSG as _,
+    Sendmsg = sys::io_uring_op::IORING_OP_SENDMSG as _,
 
     /// `IORING_OP_SHUTDOWN`
-    Shutdown = sys::IORING_OP_SHUTDOWN as _,
+    Shutdown = sys::io_uring_op::IORING_OP_SHUTDOWN as _,
 
     /// `IORING_OP_SPLICE`
-    Splice = sys::IORING_OP_SPLICE as _,
+    Splice = sys::io_uring_op::IORING_OP_SPLICE as _,
 
     /// `IORING_OP_STATX`
-    Statx = sys::IORING_OP_STATX as _,
+    Statx = sys::io_uring_op::IORING_OP_STATX as _,
 
     /// `IORING_OP_SYMLINKAT`
-    Symlinkat = sys::IORING_OP_SYMLINKAT as _,
+    Symlinkat = sys::io_uring_op::IORING_OP_SYMLINKAT as _,
 
     /// `IORING_OP_SYNC_FILE_RANGE`
-    SyncFileRange = sys::IORING_OP_SYNC_FILE_RANGE as _,
+    SyncFileRange = sys::io_uring_op::IORING_OP_SYNC_FILE_RANGE as _,
 
     /// `IORING_OP_TEE`
-    Tee = sys::IORING_OP_TEE as _,
+    Tee = sys::io_uring_op::IORING_OP_TEE as _,
 
     /// `IORING_OP_TIMEOUT`
-    Timeout = sys::IORING_OP_TIMEOUT as _,
+    Timeout = sys::io_uring_op::IORING_OP_TIMEOUT as _,
 
     /// `IORING_OP_TIMEOUT_REMOVE`
-    TimeoutRemove = sys::IORING_OP_TIMEOUT_REMOVE as _,
+    TimeoutRemove = sys::io_uring_op::IORING_OP_TIMEOUT_REMOVE as _,
 
     /// `IORING_OP_UNLINKAT`
-    Unlinkat = sys::IORING_OP_UNLINKAT as _,
+    Unlinkat = sys::io_uring_op::IORING_OP_UNLINKAT as _,
 
     /// `IORING_OP_WRITE`
-    Write = sys::IORING_OP_WRITE as _,
+    Write = sys::io_uring_op::IORING_OP_WRITE as _,
 
     /// `IORING_OP_WRITEV`
-    Writev = sys::IORING_OP_WRITEV as _,
+    Writev = sys::io_uring_op::IORING_OP_WRITEV as _,
 
     /// `IORING_OP_WRITE_FIXED`
-    WriteFixed = sys::IORING_OP_WRITE_FIXED as _,
+    WriteFixed = sys::io_uring_op::IORING_OP_WRITE_FIXED as _,
+
+    /// `IORING_OP_MSG_RING`
+    MsgRing = sys::io_uring_op::IORING_OP_MSG_RING as _,
+
+    /// `IORING_OP_FSETXATTR`
+    Fsetxattr = sys::io_uring_op::IORING_OP_FSETXATTR as _,
+
+    /// `IORING_OP_SETXATTR`
+    Setxattr = sys::io_uring_op::IORING_OP_SETXATTR as _,
+
+    /// `IORING_OP_FGETXATTR`
+    Fgetxattr = sys::io_uring_op::IORING_OP_FGETXATTR as _,
+
+    /// `IORING_OP_GETXATTR`
+    Getxattr = sys::io_uring_op::IORING_OP_GETXATTR as _,
+
+    /// `IORING_OP_SOCKET`
+    Socket = sys::io_uring_op::IORING_OP_SOCKET as _,
+
+    /// `IORING_OP_URING_CMD`
+    UringCmd = sys::io_uring_op::IORING_OP_URING_CMD as _,
+
+    /// `IORING_OP_SEND_ZC`
+    SendZc = sys::io_uring_op::IORING_OP_SEND_ZC as _,
+
+    /// `IORING_OP_SENDMSG_ZC`
+    SendmsgZc = sys::io_uring_op::IORING_OP_SENDMSG_ZC as _,
 }
 
 impl Default for IoringOp {
@@ -362,6 +407,27 @@ bitflags::bitflags! {
 
         /// `IORING_SETUP_SQ_AFF`
         const SQ_AFF = sys::IORING_SETUP_SQ_AFF;
+
+        /// `IORING_SETUP_SQE128`
+        const SQE128 = sys::IORING_SETUP_SQE128;
+
+        /// `IORING_SETUP_CQE32`
+        const CQE32 = sys::IORING_SETUP_CQE32;
+
+        /// `IORING_SETUP_SUBMIT_ALL`
+        const SUBMIT_ALL = sys::IORING_SETUP_SUBMIT_ALL;
+
+        /// `IORING_SETUP_COOP_TRASKRUN`
+        const COOP_TASKRUN = sys::IORING_SETUP_COOP_TASKRUN;
+
+        /// `IORING_SETUP_TASKRUN_FLAG`
+        const TASKRUN_FLAG = sys::IORING_SETUP_TASKRUN_FLAG;
+
+        /// `IORING_SETUP_SINGLE_ISSUER`
+        const SETUP_SINGLE_ISSUER = sys::IORING_SETUP_SINGLE_ISSUER;
+
+        /// `IORING_SETUP_DEFER_TASKRUN`
+        const SETUP_DEFER_TASKRUN = sys::IORING_SETUP_DEFER_TASKRUN;
     }
 }
 
@@ -386,6 +452,9 @@ bitflags::bitflags! {
 
         /// `1 << IOSQE_IO_LINK_BIT`
         const IO_LINK = 1 << sys::IOSQE_IO_LINK_BIT as u8;
+
+        /// `1 << IOSQE_CQE_SKIP_SUCCESS_BIT`
+        const CQE_SKIP_SUCCESS = 1 << sys::IOSQE_CQE_SKIP_SUCCESS_BIT as u8;
     }
 }
 
@@ -498,6 +567,15 @@ bitflags::bitflags! {
     pub struct IoringOpFlags: u16 {
         /// `IO_URING_OP_SUPPORTED`
         const SUPPORTED = sys::IO_URING_OP_SUPPORTED as _;
+    }
+}
+
+bitflags::bitflags! {
+    /// `IORING_RSRC_*` flags for use with [`io_uring_rsrc_register`].
+    #[derive(Default)]
+    pub struct IoringRsrcFlags: u32 {
+        /// `IORING_RSRC_REGISTER_SPARSE`
+        const REGISTER_SPARSE = sys::IORING_RSRC_REGISTER_SPARSE as _;
     }
 }
 
@@ -689,7 +767,23 @@ pub struct io_uring_sqe {
     pub buf: buf_union,
     pub personality: u16,
     pub splice_fd_in_or_file_index: splice_fd_in_or_file_index_union,
-    pub __pad2: [u64; 2],
+    pub addr3_or_cmd: addr3_or_cmd_union,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union addr3_or_cmd_union {
+    pub addr3: addr3_struct,
+    pub cmd: [u8; 0],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Copy, Clone, Default)]
+pub struct addr3_struct {
+    pub addr3: u64,
+    pub __pad2: [u64; 1],
 }
 
 #[allow(missing_docs)]
@@ -698,6 +792,15 @@ pub struct io_uring_sqe {
 pub union off_or_addr2_union {
     pub off: u64,
     pub addr2: io_uring_ptr,
+    pub cmd_op: cmd_op_struct,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct cmd_op_struct {
+    pub cmd_op: u32,
+    pub __pad1: u32,
 }
 
 #[allow(missing_docs)]
@@ -861,7 +964,7 @@ pub struct io_uring_files_update {
 #[derive(Debug, Copy, Clone, Default)]
 pub struct io_uring_rsrc_register {
     pub nr: u32,
-    pub resv: u32,
+    pub flags: IoringRsrcFlags,
     pub resv2: u64,
     pub data: u64,
     pub tags: u64,
@@ -923,6 +1026,27 @@ pub struct open_how {
     pub resolve: crate::fs::ResolveFlags,
 }
 
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+pub struct io_uring_buf_reg {
+    pub ring_addr: u64,
+    pub ring_entries: u32,
+    pub bgid: u16,
+    pub pad: u16,
+    pub resv: [u64; 3usize],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+pub struct io_uring_buf {
+    pub addr: u64,
+    pub len: u32,
+    pub bid: u16,
+    pub resv: u16,
+}
+
 impl Default for off_or_addr2_union {
     #[inline]
     fn default() -> Self {
@@ -936,6 +1060,18 @@ impl Default for off_or_addr2_union {
 }
 
 impl Default for addr_or_splice_off_in_union {
+    #[inline]
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        // Safety: All of Linux's io_uring structs may be zero-initialized.
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+
+impl Default for addr3_or_cmd_union {
     #[inline]
     fn default() -> Self {
         let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
@@ -1012,9 +1148,9 @@ fn io_uring_layouts() {
         };
     }
 
-    // The same as `check_type`, but for unions we've renamed to avoid having
-    // types like "bindgen_ty_1" in the API.
-    macro_rules! check_renamed_union {
+    // The same as `check_type`, but for unions and anonymous structs we've
+    // renamed to avoid having types like "bindgen_ty_1" in the API.
+    macro_rules! check_renamed_type {
         ($to:ident, $from:ident) => {
             assert_eq!(
                 (size_of::<$to>(), align_of::<$to>()),
@@ -1035,9 +1171,9 @@ fn io_uring_layouts() {
         };
     }
 
-    // The same as `check_struct_field`, but for unions we've renamed to avoid
-    // having types like "bindgen_ty_1" in the API.
-    macro_rules! check_struct_renamed_union_field {
+    // The same as `check_struct_field`, but for unions and anonymous structs
+    // we've renamed to avoid having types like "bindgen_ty_1" in the API.
+    macro_rules! check_struct_renamed_field {
         ($struct:ident, $to:ident, $from:ident) => {
             assert_eq!(offset_of!($struct, $to), offset_of!(sys::$struct, $from));
             assert_eq!(span_of!($struct, $to), span_of!(sys::$struct, $from));
@@ -1061,34 +1197,38 @@ fn io_uring_layouts() {
         };
     }
 
-    check_renamed_union!(off_or_addr2_union, io_uring_sqe__bindgen_ty_1);
-    check_renamed_union!(addr_or_splice_off_in_union, io_uring_sqe__bindgen_ty_2);
-    check_renamed_union!(op_flags_union, io_uring_sqe__bindgen_ty_3);
-    check_renamed_union!(buf_union, io_uring_sqe__bindgen_ty_4);
-    check_renamed_union!(splice_fd_in_or_file_index_union, io_uring_sqe__bindgen_ty_5);
-    check_renamed_union!(
+    check_renamed_type!(off_or_addr2_union, io_uring_sqe__bindgen_ty_1);
+    check_renamed_type!(addr_or_splice_off_in_union, io_uring_sqe__bindgen_ty_2);
+    check_renamed_type!(addr3_or_cmd_union, io_uring_sqe__bindgen_ty_6);
+    check_renamed_type!(op_flags_union, io_uring_sqe__bindgen_ty_3);
+    check_renamed_type!(buf_union, io_uring_sqe__bindgen_ty_4);
+    check_renamed_type!(splice_fd_in_or_file_index_union, io_uring_sqe__bindgen_ty_5);
+    check_renamed_type!(
         register_or_sqe_op_or_sqe_flags_union,
         io_uring_restriction__bindgen_ty_1
     );
+
+    check_renamed_type!(addr3_struct, io_uring_sqe__bindgen_ty_6__bindgen_ty_1);
+    check_renamed_type!(cmd_op_struct, io_uring_sqe__bindgen_ty_1__bindgen_ty_1);
 
     check_type!(io_uring_sqe);
     check_struct_field!(io_uring_sqe, opcode);
     check_struct_field!(io_uring_sqe, flags);
     check_struct_field!(io_uring_sqe, ioprio);
     check_struct_field!(io_uring_sqe, fd);
-    check_struct_renamed_union_field!(io_uring_sqe, off_or_addr2, __bindgen_anon_1);
-    check_struct_renamed_union_field!(io_uring_sqe, addr_or_splice_off_in, __bindgen_anon_2);
+    check_struct_renamed_field!(io_uring_sqe, off_or_addr2, __bindgen_anon_1);
+    check_struct_renamed_field!(io_uring_sqe, addr_or_splice_off_in, __bindgen_anon_2);
     check_struct_field!(io_uring_sqe, len);
-    check_struct_renamed_union_field!(io_uring_sqe, op_flags, __bindgen_anon_3);
+    check_struct_renamed_field!(io_uring_sqe, op_flags, __bindgen_anon_3);
     check_struct_field!(io_uring_sqe, user_data);
-    check_struct_renamed_union_field!(io_uring_sqe, buf, __bindgen_anon_4);
+    check_struct_renamed_field!(io_uring_sqe, buf, __bindgen_anon_4);
     check_struct_field!(io_uring_sqe, personality);
-    check_struct_renamed_union_field!(io_uring_sqe, splice_fd_in_or_file_index, __bindgen_anon_5);
-    check_struct_field!(io_uring_sqe, __pad2);
+    check_struct_renamed_field!(io_uring_sqe, splice_fd_in_or_file_index, __bindgen_anon_5);
+    check_struct_renamed_field!(io_uring_sqe, addr3_or_cmd, __bindgen_anon_6);
 
     check_type!(io_uring_restriction);
     check_struct_field!(io_uring_restriction, opcode);
-    check_struct_renamed_union_field!(
+    check_struct_renamed_field!(
         io_uring_restriction,
         register_or_sqe_op_or_sqe_flags,
         __bindgen_anon_1
@@ -1137,10 +1277,12 @@ fn io_uring_layouts() {
     check_struct!(io_uring_probe, last_op, ops_len, resv, resv2, ops);
     check_struct!(io_uring_probe_op, op, resv, flags, resv2);
     check_struct!(io_uring_files_update, offset, resv, fds);
-    check_struct!(io_uring_rsrc_register, nr, resv, resv2, data, tags);
+    check_struct!(io_uring_rsrc_register, nr, flags, resv2, data, tags);
     check_struct!(io_uring_rsrc_update, offset, resv, data);
     check_struct!(io_uring_rsrc_update2, offset, resv, data, tags, nr, resv2);
     check_struct!(io_uring_getevents_arg, sigmask, sigmask_sz, pad, ts);
     check_struct!(iovec, iov_base, iov_len);
     check_struct!(open_how, flags, mode, resolve);
+    check_struct!(io_uring_buf_reg, ring_addr, ring_entries, bgid, pad, resv);
+    check_struct!(io_uring_buf, addr, len, bid, resv);
 }
