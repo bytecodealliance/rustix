@@ -1114,3 +1114,83 @@ pub const NFS_SUPER_MAGIC: FsWord = 0x0000_6969;
 #[repr(transparent)]
 #[derive(Copy, Clone)]
 pub struct copyfile_state_t(pub(crate) *mut c::c_void);
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    /// `MS_*` constants for use with [`mount`][crate::fs::mount].
+    pub struct MountFlags: c::c_ulong {
+        /// `MS_BIND`
+        const BIND = c::MS_BIND;
+
+        /// `MS_DIRSYNC`
+        const DIRSYNC = c::MS_DIRSYNC;
+
+        /// `MS_LAZYTIME`
+        const LAZYTIME = c::MS_LAZYTIME;
+
+        /// `MS_MANDLOCK`
+        #[doc(alias = "MANDLOCK")]
+        const PERMIT_MANDATORY_FILE_LOCKING = c::MS_MANDLOCK;
+
+        /// `MS_NOATIME`
+        const NOATIME = c::MS_NOATIME;
+
+        /// `MS_NODEV`
+        const NODEV = c::MS_NODEV;
+
+        /// `MS_NODIRATIME`
+        const NODIRATIME = c::MS_NODIRATIME;
+
+        /// `MS_NOEXEC`
+        const NOEXEC = c::MS_NOEXEC;
+
+        /// `MS_NOSUID`
+        const NOSUID = c::MS_NOSUID;
+
+        /// `MS_RDONLY`
+        const RDONLY = c::MS_RDONLY;
+
+        /// `MS_REC`
+        const REC = c::MS_REC;
+
+        /// `MS_RELATIME`
+        const RELATIME = c::MS_RELATIME;
+
+        /// `MS_SILENT`
+        const SILENT = c::MS_SILENT;
+
+        /// `MS_STRICTATIME`
+        const STRICTATIME = c::MS_STRICTATIME;
+
+        /// `MS_SYNCHRONOUS`
+        const SYNCHRONOUS = c::MS_SYNCHRONOUS;
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    /// `MS_*` constants for use with [`change_mount`][crate::fs::mount::change_mount].
+    pub struct MountPropagationFlags: c::c_ulong {
+        /// `MS_SHARED`
+        const SHARED = c::MS_SHARED;
+        /// `MS_PRIVATE`
+        const PRIVATE = c::MS_PRIVATE;
+        /// `MS_SLAVE`
+        const SLAVE = c::MS_SLAVE;
+        /// `MS_UNBINDABLE`
+        const UNBINDABLE = c::MS_UNBINDABLE;
+        /// `MS_REC`
+        const REC = c::MS_REC;
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    pub(crate) struct InternalMountFlags: c::c_ulong {
+        const REMOUNT = c::MS_REMOUNT;
+        const MOVE = c::MS_MOVE;
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) struct MountFlagsArg(pub(crate) c::c_ulong);
