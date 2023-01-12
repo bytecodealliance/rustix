@@ -1395,3 +1395,24 @@ pub(crate) fn sendfile(
         ))
     }
 }
+
+#[inline]
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) fn mount(
+    source: Option<&CStr>,
+    target: &CStr,
+    file_system_type: Option<&CStr>,
+    flags: super::types::MountFlagsArg,
+    data: Option<&CStr>,
+) -> io::Result<()> {
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_mount,
+            source,
+            target,
+            file_system_type,
+            flags,
+            data
+        ))
+    }
+}

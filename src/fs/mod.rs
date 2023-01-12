@@ -48,8 +48,9 @@ mod makedev;
 #[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 mod memfd_create;
 #[cfg(any(target_os = "android", target_os = "linux"))]
+mod mount;
+#[cfg(any(target_os = "android", target_os = "linux"))]
 mod openat2;
-#[cfg(feature = "fs")]
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod raw_dir;
 #[cfg(target_os = "linux")]
@@ -99,13 +100,11 @@ pub use constants::CloneFlags;
 /// `copyfile_flags_t`
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 pub use constants::CopyfileFlags;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-pub use constants::RenameFlags;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-pub use constants::ResolveFlags;
 pub use constants::{Access, FdFlags, Mode, Nsecs, OFlags, Secs, Timespec};
 #[cfg(not(target_os = "redox"))]
 pub use constants::{AtFlags, Dev};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use constants::{MountFlags, MountPropagationFlags, RenameFlags, ResolveFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use copy_file_range::copy_file_range;
 #[cfg(not(target_os = "redox"))]
@@ -203,8 +202,9 @@ pub use makedev::{major, makedev, minor};
 #[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 pub use memfd_create::{memfd_create, MemfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
+pub use mount::{bind_mount, change_mount, mount, move_mount, recursive_bind_mount, remount};
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub use openat2::openat2;
-#[cfg(feature = "fs")]
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use raw_dir::{RawDir, RawDirEntry};
 #[cfg(target_os = "linux")]
