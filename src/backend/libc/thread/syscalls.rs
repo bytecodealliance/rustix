@@ -319,3 +319,17 @@ pub(crate) fn capset(
     let header: *mut _ = header;
     unsafe { syscall_ret(c::syscall(c::SYS_capset, header, data.as_ptr())) }
 }
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+#[must_use]
+pub(crate) fn setuid_thread(uid: crate::process::Uid) -> io::Result<()> {
+    unsafe { syscall_ret(c::syscall(c::SYS_setuid, uid.as_raw())) }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+#[must_use]
+pub(crate) fn setgid_thread(gid: crate::process::Gid) -> io::Result<()> {
+    unsafe { syscall_ret(c::syscall(c::SYS_setgid, gid.as_raw())) }
+}

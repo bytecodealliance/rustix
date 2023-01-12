@@ -683,6 +683,20 @@ impl<'a, Num: ArgNumber> From<crate::backend::fs::types::UnmountFlags> for ArgRe
     }
 }
 
+impl<'a, Num: ArgNumber> From<crate::process::Uid> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(t: crate::process::Uid) -> Self {
+        c_uint(t.as_raw())
+    }
+}
+
+impl<'a, Num: ArgNumber> From<crate::process::Gid> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(t: crate::process::Gid) -> Self {
+        c_uint(t.as_raw())
+    }
+}
+
 /// Convert a `usize` returned from a syscall that effectively returns `()` on
 /// success.
 ///
