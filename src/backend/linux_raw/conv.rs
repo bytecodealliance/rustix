@@ -665,6 +665,15 @@ impl<'a, Num: ArgNumber, T> From<&'a mut MaybeUninit<T>> for ArgReg<'a, Num> {
     }
 }
 
+#[cfg(feature = "fs")]
+#[cfg(any(target_os = "android", target_os = "linux"))]
+impl<'a, Num: ArgNumber> From<crate::backend::fs::types::MountFlagsArg> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::backend::fs::types::MountFlagsArg) -> Self {
+        c_uint(flags.0)
+    }
+}
+
 /// Convert a `usize` returned from a syscall that effectively returns `()` on
 /// success.
 ///

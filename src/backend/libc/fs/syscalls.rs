@@ -1786,3 +1786,22 @@ struct Attrlist {
     fileattr: Attrgroup,
     forkattr: Attrgroup,
 }
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) fn mount(
+    source: Option<&CStr>,
+    target: &CStr,
+    file_system_type: Option<&CStr>,
+    flags: super::types::MountFlagsArg,
+    data: Option<&CStr>,
+) -> io::Result<()> {
+    unsafe {
+        ret(c::mount(
+            source.map_or_else(null, CStr::as_ptr),
+            target.as_ptr(),
+            file_system_type.map_or_else(null, CStr::as_ptr),
+            flags.0,
+            data.map_or_else(null, CStr::as_ptr).cast(),
+        ))
+    }
+}
