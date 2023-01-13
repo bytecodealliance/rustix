@@ -6,8 +6,8 @@ use crate::io;
 
 use core::convert::TryFrom;
 use core::marker::PhantomData;
-use core::mem::size_of;
-use core::ptr::NonNull;
+use core::mem::{self, size_of};
+use core::ptr::{self, NonNull};
 
 use super::{RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 
@@ -34,9 +34,9 @@ impl SendAncillaryMessage<'_, '_> {
 
 /// Ancillary message for `recvmsg`.
 #[non_exhaustive]
-pub enum RecvAncillaryMessage {
+pub enum RecvAncillaryMessage<'a> {
     /// Received one or more file descriptors.
-    ScmRights(Vec<OwnedFd>),
+    ScmRights(AncillaryIter<'a, OwnedFd>),
 }
 
 /// Buffer for sending ancillary messages.
@@ -226,10 +226,10 @@ pub struct AncillaryDrain<'buf> {
     read: &'buf mut usize,
 }
 
-impl AncillaryDrain<'_> {
+impl<'buf> AncillaryDrain<'buf> {
     /// A closure that converts a message into a `RecvAncillaryMessage`.
     #[allow(unsafe_code)]
-    fn cvt_msg(read: &mut usize, msg: NonNull<c::cmsghdr>) -> Option<RecvAncillaryMessage> {
+    fn cvt_msg(read: &mut usize, msg: NonNull<c::cmsghdr>) -> Option<RecvAncillaryMessage<'buf>> {
         unsafe {
             let msg = msg.as_ref();
 
@@ -241,19 +241,15 @@ impl AncillaryDrain<'_> {
             let payload = c::CMSG_DATA(msg as *const _ as *const _);
             let payload_len = msg.cmsg_len as usize - c::CMSG_LEN(0) as usize;
 
+            // Get a mutable slice of the payload.
+            let payload: &'buf mut [u8] = core::slice::from_raw_parts_mut(payload, payload_len);
+
             // Determine what type it is.
             let (level, msg_type) = (msg.cmsg_level, msg.cmsg_type);
             match (level as _, msg_type as _) {
                 (c::SOL_SOCKET, c::SCM_RIGHTS) => {
-                    // Create a buffer for FDs and copy the data.
-                    let fd_size = core::mem::size_of::<OwnedFd>();
-                    let mut fds = Vec::with_capacity(payload_len / fd_size);
-
-                    core::ptr::copy_nonoverlapping(
-                        payload as *const u8,
-                        fds.as_mut_ptr() as *mut _,
-                        payload_len,
-                    );
+                    // Create an iterator that reads out the file descriptors.
+                    let fds = AncillaryIter::new(payload);
 
                     Some(RecvAncillaryMessage::ScmRights(fds))
                 }
@@ -263,8 +259,8 @@ impl AncillaryDrain<'_> {
     }
 }
 
-impl Iterator for AncillaryDrain<'_> {
-    type Item = RecvAncillaryMessage;
+impl<'buf> Iterator for AncillaryDrain<'buf> {
+    type Item = RecvAncillaryMessage<'buf>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let read = &mut self.read;
@@ -405,6 +401,146 @@ pub struct RecvMsgResult {
 
     /// The address of the socket we received from, if any.
     pub address: Option<SocketAddrAny>,
+}
+
+/// An iterator over data in an ancillary buffer.
+pub struct AncillaryIter<'data, T> {
+    /// The data we're iterating over.
+    data: &'data mut [u8],
+
+    /// The raw data we're removing.
+    _marker: PhantomData<T>,
+}
+
+#[allow(unsafe_code)]
+impl<'data, T> AncillaryIter<'data, T> {
+    /// Create a new iterator over data in an ancillary buffer.
+    ///
+    /// # Safety
+    ///
+    /// This can only be called if we are sure that the data is contained in a
+    /// valid ancillary buffer.
+    unsafe fn new(data: &'data mut [u8]) -> Self {
+        assert_eq!(data.len() % size_of::<T>(), 0);
+
+        Self {
+            data,
+            _marker: PhantomData,
+        }
+    }
+
+    /// Drop `n` items from this iterator.
+    unsafe fn drop_items(&mut self, n: usize) {
+        /// On drop, move the slice forward by `size_of<T>()`.
+        struct MoveForward<'a, 'b, T>(&'a mut &'b mut [u8], PhantomData<T>);
+
+        impl<T> Drop for MoveForward<'_, '_, T> {
+            fn drop(&mut self) {
+                // Move slice forward.
+                let slice = mem::take(self.0);
+                *self.0 = &mut slice[size_of::<T>()..];
+            }
+        }
+
+        if !mem::needs_drop::<T>() {
+            return;
+        }
+
+        for _ in 0..n {
+            // See if there is a `T` left.
+            if self.data.len() < size_of::<T>() {
+                return;
+            }
+
+            // Move forward by one after drop, even on panic.
+            let move_forward = MoveForward::<'_, '_, T>(&mut self.data, PhantomData);
+
+            // Drop the `T`.
+            drop(ptr::read_unaligned(move_forward.0.as_ptr() as *const T));
+        }
+    }
+}
+
+#[allow(unsafe_code)]
+impl<'data, T> Drop for AncillaryIter<'data, T> {
+    fn drop(&mut self) {
+        unsafe {
+            self.drop_items(self.len());
+        }
+    }
+}
+
+#[allow(unsafe_code)]
+impl<T> Iterator for AncillaryIter<'_, T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // See if there is a next item.
+        if self.data.len() < size_of::<T>() {
+            return None;
+        }
+
+        // Get the next item.
+        let item = unsafe { ptr::read_unaligned(self.data.as_ptr() as *const T) };
+
+        // Move forward.
+        let data = mem::take(&mut self.data);
+        self.data = &mut data[size_of::<T>()..];
+
+        Some(item)
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.len();
+        (len, Some(len))
+    }
+
+    fn count(self) -> usize {
+        self.len()
+    }
+
+    fn last(mut self) -> Option<Self::Item> {
+        self.next_back()
+    }
+
+    fn nth(&mut self, n: usize) -> Option<Self::Item> {
+        unsafe {
+            self.drop_items(n);
+        }
+
+        self.next()
+    }
+}
+
+impl<T> core::iter::FusedIterator for AncillaryIter<'_, T> {}
+
+impl<T> ExactSizeIterator for AncillaryIter<'_, T> {
+    fn len(&self) -> usize {
+        self.data.len() / size_of::<T>()
+    }
+}
+
+#[allow(unsafe_code)]
+impl<T> DoubleEndedIterator for AncillaryIter<'_, T> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        // See if there is a next item.
+        if self.data.len() < size_of::<T>() {
+            return None;
+        }
+
+        // Get the next item.
+        let item = unsafe {
+            let ptr = self.data.as_ptr().add(self.data.len() - size_of::<T>());
+            ptr::read(ptr as *const T)
+        };
+
+        // Move forward.
+        let len = self.data.len();
+        let data = mem::take(&mut self.data);
+        self.data = &mut data[..len - size_of::<T>()];
+
+        Some(item)
+    }
 }
 
 #[allow(unsafe_code)]
