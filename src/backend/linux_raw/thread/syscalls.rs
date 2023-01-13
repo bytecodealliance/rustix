@@ -294,3 +294,23 @@ pub(crate) fn setns(fd: BorrowedFd, nstype: c::c_int) -> io::Result<c::c_int> {
 pub(crate) fn unshare(flags: crate::thread::UnshareFlags) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_unshare, c_uint(flags.bits()))) }
 }
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub(crate) fn capget(
+    header: &mut linux_raw_sys::general::__user_cap_header_struct,
+    data: &mut [MaybeUninit<linux_raw_sys::general::__user_cap_data_struct>],
+) -> io::Result<()> {
+    let header: *mut _ = header;
+    unsafe { ret(syscall!(__NR_capget, header, data.as_mut_ptr())) }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub(crate) fn capset(
+    header: &mut linux_raw_sys::general::__user_cap_header_struct,
+    data: &[linux_raw_sys::general::__user_cap_data_struct],
+) -> io::Result<()> {
+    let header: *mut _ = header;
+    unsafe { ret(syscall!(__NR_capset, header, data.as_ptr())) }
+}

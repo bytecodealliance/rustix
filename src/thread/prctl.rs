@@ -159,81 +159,39 @@ pub fn set_secure_computing_mode(mode: SecureComputingMode) -> io::Result<()> {
 
 const PR_CAPBSET_READ: c_int = 23;
 
-const CAP_CHOWN: u32 = 0;
-const CAP_DAC_OVERRIDE: u32 = 1;
-const CAP_DAC_READ_SEARCH: u32 = 2;
-const CAP_FOWNER: u32 = 3;
-const CAP_FSETID: u32 = 4;
-const CAP_KILL: u32 = 5;
-const CAP_SETGID: u32 = 6;
-const CAP_SETUID: u32 = 7;
-const CAP_SETPCAP: u32 = 8;
-const CAP_LINUX_IMMUTABLE: u32 = 9;
-const CAP_NET_BIND_SERVICE: u32 = 10;
-const CAP_NET_BROADCAST: u32 = 11;
-const CAP_NET_ADMIN: u32 = 12;
-const CAP_NET_RAW: u32 = 13;
-const CAP_IPC_LOCK: u32 = 14;
-const CAP_IPC_OWNER: u32 = 15;
-const CAP_SYS_MODULE: u32 = 16;
-const CAP_SYS_RAWIO: u32 = 17;
-const CAP_SYS_CHROOT: u32 = 18;
-const CAP_SYS_PTRACE: u32 = 19;
-const CAP_SYS_PACCT: u32 = 20;
-const CAP_SYS_ADMIN: u32 = 21;
-const CAP_SYS_BOOT: u32 = 22;
-const CAP_SYS_NICE: u32 = 23;
-const CAP_SYS_RESOURCE: u32 = 24;
-const CAP_SYS_TIME: u32 = 25;
-const CAP_SYS_TTY_CONFIG: u32 = 26;
-const CAP_MKNOD: u32 = 27;
-const CAP_LEASE: u32 = 28;
-const CAP_AUDIT_WRITE: u32 = 29;
-const CAP_AUDIT_CONTROL: u32 = 30;
-const CAP_SETFCAP: u32 = 31;
-const CAP_MAC_OVERRIDE: u32 = 32;
-const CAP_MAC_ADMIN: u32 = 33;
-const CAP_SYSLOG: u32 = 34;
-const CAP_WAKE_ALARM: u32 = 35;
-const CAP_BLOCK_SUSPEND: u32 = 36;
-const CAP_AUDIT_READ: u32 = 37;
-const CAP_PERFMON: u32 = 38;
-const CAP_BPF: u32 = 39;
-const CAP_CHECKPOINT_RESTORE: u32 = 40;
-
 /// Linux per-thread capability.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(u32)]
 pub enum Capability {
     /// In a system with the `_POSIX_CHOWN_RESTRICTED` option defined, this overrides
     /// the restriction of changing file ownership and group ownership.
-    ChangeOwnership = CAP_CHOWN,
+    ChangeOwnership = linux_raw_sys::general::CAP_CHOWN,
     /// Override all DAC access, including ACL execute access if `_POSIX_ACL` is defined.
     /// Excluding DAC access covered by [`Capability::LinuxImmutable`].
-    DACOverride = CAP_DAC_OVERRIDE,
+    DACOverride = linux_raw_sys::general::CAP_DAC_OVERRIDE,
     /// Overrides all DAC restrictions regarding read and search on files and directories,
     /// including ACL restrictions if `_POSIX_ACL` is defined. Excluding DAC access covered
     /// by [`Capability::LinuxImmutable`].
-    DACReadSearch = CAP_DAC_READ_SEARCH,
+    DACReadSearch = linux_raw_sys::general::CAP_DAC_READ_SEARCH,
     /// Overrides all restrictions about allowed operations on files, where file owner ID must be
     /// equal to the user ID, except where [`Capability::FileSetID`] is applicable.
     /// It doesn't override MAC and DAC restrictions.
-    FileOwner = CAP_FOWNER,
+    FileOwner = linux_raw_sys::general::CAP_FOWNER,
     /// Overrides the following restrictions that the effective user ID shall match the file owner
     /// ID when setting the `S_ISUID` and `S_ISGID` bits on that file; that the effective group ID
     /// (or one of the supplementary group IDs) shall match the file owner ID when setting the
     /// `S_ISGID` bit on that file; that the `S_ISUID` and `S_ISGID` bits are cleared on successful
     /// return from `chown` (not implemented).
-    FileSetID = CAP_FSETID,
+    FileSetID = linux_raw_sys::general::CAP_FSETID,
     /// Overrides the restriction that the real or effective user ID of a process sending a signal
     /// must match the real or effective user ID of the process receiving the signal.
-    Kill = CAP_KILL,
+    Kill = linux_raw_sys::general::CAP_KILL,
     /// Allows `setgid` manipulation. Allows `setgroups`. Allows forged gids on socket
     /// credentials passing.
-    SetGroupID = CAP_SETGID,
+    SetGroupID = linux_raw_sys::general::CAP_SETGID,
     /// Allows `set*uid` manipulation (including fsuid). Allows forged pids on socket
     /// credentials passing.
-    SetUserID = CAP_SETUID,
+    SetUserID = linux_raw_sys::general::CAP_SETUID,
     /// Without VFS support for capabilities:
     /// - Transfer any capability in your permitted set to any pid.
     /// - remove any capability in your permitted set from any pid.
@@ -242,13 +200,13 @@ pub enum Capability {
     ///   inheritable set.
     /// - Allow taking bits out of capability bounding set.
     /// - Allow modification of the securebits for a process.
-    SetPermittedCapabilities = CAP_SETPCAP,
+    SetPermittedCapabilities = linux_raw_sys::general::CAP_SETPCAP,
     /// Allow modification of `S_IMMUTABLE` and `S_APPEND` file attributes.
-    LinuxImmutable = CAP_LINUX_IMMUTABLE,
+    LinuxImmutable = linux_raw_sys::general::CAP_LINUX_IMMUTABLE,
     /// Allows binding to TCP/UDP sockets below 1024. Allows binding to ATM VCIs below 32.
-    NetBindService = CAP_NET_BIND_SERVICE,
+    NetBindService = linux_raw_sys::general::CAP_NET_BIND_SERVICE,
     /// Allow broadcasting, listen to multicast.
-    NetBroadcast = CAP_NET_BROADCAST,
+    NetBroadcast = linux_raw_sys::general::CAP_NET_BROADCAST,
     /// Allow interface configuration. Allow administration of IP firewall, masquerading and
     /// accounting. Allow setting debug option on sockets. Allow modification of routing tables.
     /// Allow setting arbitrary process / process group ownership on sockets. Allow binding to any
@@ -256,25 +214,25 @@ pub enum Capability {
     /// (type of service). Allow setting promiscuous mode. Allow clearing driver statistics.
     /// Allow multicasting. Allow read/write of device-specific registers. Allow activation of ATM
     /// control sockets.
-    NetAdmin = CAP_NET_ADMIN,
+    NetAdmin = linux_raw_sys::general::CAP_NET_ADMIN,
     /// Allow use of `RAW` sockets. Allow use of `PACKET` sockets. Allow binding to any address for
     /// transparent proxying (also via [`Capability::NetAdmin`]).
-    NetRaw = CAP_NET_RAW,
+    NetRaw = linux_raw_sys::general::CAP_NET_RAW,
     /// Allow locking of shared memory segments. Allow mlock and mlockall (which doesn't really have
     /// anything to do with IPC).
-    IPCLock = CAP_IPC_LOCK,
+    IPCLock = linux_raw_sys::general::CAP_IPC_LOCK,
     /// Override IPC ownership checks.
-    IPCOwner = CAP_IPC_OWNER,
+    IPCOwner = linux_raw_sys::general::CAP_IPC_OWNER,
     /// Insert and remove kernel modules - modify kernel without limit.
-    SystemModule = CAP_SYS_MODULE,
+    SystemModule = linux_raw_sys::general::CAP_SYS_MODULE,
     /// Allow ioperm/iopl access. Allow sending USB messages to any device via `/dev/bus/usb`.
-    SystemRawIO = CAP_SYS_RAWIO,
+    SystemRawIO = linux_raw_sys::general::CAP_SYS_RAWIO,
     /// Allow use of `chroot`.
-    SystemChangeRoot = CAP_SYS_CHROOT,
+    SystemChangeRoot = linux_raw_sys::general::CAP_SYS_CHROOT,
     /// Allow `ptrace` of any process.
-    SystemProcessTrace = CAP_SYS_PTRACE,
+    SystemProcessTrace = linux_raw_sys::general::CAP_SYS_PTRACE,
     /// Allow configuration of process accounting.
-    SystemProcessAccounting = CAP_SYS_PACCT,
+    SystemProcessAccounting = linux_raw_sys::general::CAP_SYS_PACCT,
     /// Allow configuration of the secure attention key. Allow administration of the random device.
     /// Allow examination and configuration of disk quotas. Allow setting the domainname.
     /// Allow setting the hostname. Allow `mount` and `umount`, setting up new smb connection.
@@ -295,56 +253,56 @@ pub enum Capability {
     /// Allow setting zone reclaim policy. Allow everything under
     /// [`Capability::BerkeleyPacketFilters`] and [`Capability::PerformanceMonitoring`] for backward
     /// compatibility.
-    SystemAdmin = CAP_SYS_ADMIN,
+    SystemAdmin = linux_raw_sys::general::CAP_SYS_ADMIN,
     /// Allow use of `reboot`.
-    SystemBoot = CAP_SYS_BOOT,
+    SystemBoot = linux_raw_sys::general::CAP_SYS_BOOT,
     /// Allow raising priority and setting priority on other (different UID) processes. Allow use of
     /// FIFO and round-robin (realtime) scheduling on own processes and setting the scheduling
     /// algorithm used by another process. Allow setting cpu affinity on other processes.
     /// Allow setting realtime ioprio class. Allow setting ioprio class on other processes.
-    SystemNice = CAP_SYS_NICE,
+    SystemNice = linux_raw_sys::general::CAP_SYS_NICE,
     /// Override resource limits. Set resource limits. Override quota limits. Override reserved
     /// space on ext2 filesystem. Modify data journaling mode on ext3 filesystem (uses journaling
     /// resources). NOTE: ext2 honors fsuid when checking for resource overrides, so you can
     /// override using fsuid too. Override size restrictions on IPC message queues. Allow more than
     /// 64hz interrupts from the real-time clock. Override max number of consoles on console
     /// allocation. Override max number of keymaps. Control memory reclaim behavior.
-    SystemResource = CAP_SYS_RESOURCE,
+    SystemResource = linux_raw_sys::general::CAP_SYS_RESOURCE,
     /// Allow manipulation of system clock. Allow `irix_stime` on mips. Allow setting the real-time
     /// clock.
-    SystemTime = CAP_SYS_TIME,
+    SystemTime = linux_raw_sys::general::CAP_SYS_TIME,
     /// Allow configuration of tty devices. Allow `vhangup` of tty.
-    SystemTTYConfig = CAP_SYS_TTY_CONFIG,
+    SystemTTYConfig = linux_raw_sys::general::CAP_SYS_TTY_CONFIG,
     /// Allow the privileged aspects of `mknod`.
-    MakeNode = CAP_MKNOD,
+    MakeNode = linux_raw_sys::general::CAP_MKNOD,
     /// Allow taking of leases on files.
-    Lease = CAP_LEASE,
+    Lease = linux_raw_sys::general::CAP_LEASE,
     /// Allow writing the audit log via unicast netlink socket.
-    AuditWrite = CAP_AUDIT_WRITE,
+    AuditWrite = linux_raw_sys::general::CAP_AUDIT_WRITE,
     /// Allow configuration of audit via unicast netlink socket.
-    AuditControl = CAP_AUDIT_CONTROL,
+    AuditControl = linux_raw_sys::general::CAP_AUDIT_CONTROL,
     /// Set or remove capabilities on files. Map `uid=0` into a child user namespace.
-    SetFileCapabilities = CAP_SETFCAP,
+    SetFileCapabilities = linux_raw_sys::general::CAP_SETFCAP,
     /// Override MAC access. The base kernel enforces no MAC policy. An LSM may enforce a MAC
     /// policy, and if it does and it chooses to implement capability based overrides of that
     /// policy, this is the capability it should use to do so.
-    MACOverride = CAP_MAC_OVERRIDE,
+    MACOverride = linux_raw_sys::general::CAP_MAC_OVERRIDE,
     /// Allow MAC configuration or state changes. The base kernel requires no MAC configuration.
     /// An LSM may enforce a MAC policy, and if it does and it chooses to implement capability based
     /// checks on modifications to that policy or the data required to maintain it, this is the
     /// capability it should use to do so.
-    MACAdmin = CAP_MAC_ADMIN,
+    MACAdmin = linux_raw_sys::general::CAP_MAC_ADMIN,
     /// Allow configuring the kernel's `syslog` (`printk` behaviour).
-    SystemLog = CAP_SYSLOG,
+    SystemLog = linux_raw_sys::general::CAP_SYSLOG,
     /// Allow triggering something that will wake the system.
-    WakeAlarm = CAP_WAKE_ALARM,
+    WakeAlarm = linux_raw_sys::general::CAP_WAKE_ALARM,
     /// Allow preventing system suspends.
-    BlockSuspend = CAP_BLOCK_SUSPEND,
+    BlockSuspend = linux_raw_sys::general::CAP_BLOCK_SUSPEND,
     /// Allow reading the audit log via multicast netlink socket.
-    AuditRead = CAP_AUDIT_READ,
+    AuditRead = linux_raw_sys::general::CAP_AUDIT_READ,
     /// Allow system performance and observability privileged operations using `perf_events`,
     /// `i915_perf` and other kernel subsystems.
-    PerformanceMonitoring = CAP_PERFMON,
+    PerformanceMonitoring = linux_raw_sys::general::CAP_PERFMON,
     /// This capability allows the following BPF operations:
     /// - Creating all types of BPF maps
     /// - Advanced verifier features
@@ -374,10 +332,10 @@ pub enum Capability {
     /// to load tracing programs.
     /// [`Capability::NetAdmin`] and [`Capability::BerkeleyPacketFilters`] are required to load
     /// networking programs.
-    BerkeleyPacketFilters = CAP_BPF,
+    BerkeleyPacketFilters = linux_raw_sys::general::CAP_BPF,
     /// Allow checkpoint/restore related operations. Allow PID selection during `clone3`.
     /// Allow writing to `ns_last_pid`.
-    CheckpointRestore = CAP_CHECKPOINT_RESTORE,
+    CheckpointRestore = linux_raw_sys::general::CAP_CHECKPOINT_RESTORE,
 }
 
 /// Check if the specified capability is in the calling thread's capability bounding set.

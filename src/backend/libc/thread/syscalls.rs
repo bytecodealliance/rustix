@@ -3,7 +3,7 @@
 use super::super::c;
 use super::super::conv::ret;
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use super::super::conv::{borrowed_fd, ret_c_int};
+use super::super::conv::{borrowed_fd, ret_c_int, syscall_ret};
 use super::super::time::types::LibcTimespec;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fd::BorrowedFd;
@@ -298,4 +298,24 @@ pub(crate) fn setns(fd: BorrowedFd, nstype: c::c_int) -> io::Result<c::c_int> {
 #[inline]
 pub(crate) fn unshare(flags: crate::thread::UnshareFlags) -> io::Result<()> {
     unsafe { ret(c::unshare(flags.bits() as i32)) }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub(crate) fn capget(
+    header: &mut linux_raw_sys::general::__user_cap_header_struct,
+    data: &mut [MaybeUninit<linux_raw_sys::general::__user_cap_data_struct>],
+) -> io::Result<()> {
+    let header: *mut _ = header;
+    unsafe { syscall_ret(c::syscall(c::SYS_capget, header, data.as_mut_ptr())) }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub(crate) fn capset(
+    header: &mut linux_raw_sys::general::__user_cap_header_struct,
+    data: &[linux_raw_sys::general::__user_cap_data_struct],
+) -> io::Result<()> {
+    let header: *mut _ = header;
+    unsafe { syscall_ret(c::syscall(c::SYS_capset, header, data.as_ptr())) }
 }
