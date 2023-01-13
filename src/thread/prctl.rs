@@ -387,7 +387,7 @@ pub enum Capability {
 ///
 /// [`prctl(PR_CAPBSET_READ,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
-pub fn is_in_capability_bounding_set(capability: Capability) -> io::Result<bool> {
+pub fn capability_is_in_bounding_set(capability: Capability) -> io::Result<bool> {
     unsafe { prctl_2args(PR_CAPBSET_READ, capability as usize as *mut _) }.map(|r| r != 0)
 }
 
@@ -401,7 +401,7 @@ const PR_CAPBSET_DROP: c_int = 24;
 ///
 /// [`prctl(PR_CAPBSET_DROP,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
-pub fn remove_capability_from_capability_bounding_set(capability: Capability) -> io::Result<()> {
+pub fn remove_capability_from_bounding_set(capability: Capability) -> io::Result<()> {
     unsafe { prctl_2args(PR_CAPBSET_DROP, capability as usize as *mut _) }.map(|_r| ())
 }
 
@@ -588,7 +588,7 @@ const PR_CAP_AMBIENT_IS_SET: usize = 1;
 ///
 /// [`prctl(PR_CAP_AMBIENT,PR_CAP_AMBIENT_IS_SET,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
-pub fn capability_is_in_ambient_capability_set(capability: Capability) -> io::Result<bool> {
+pub fn capability_is_in_ambient_set(capability: Capability) -> io::Result<bool> {
     let cap = capability as usize as *mut _;
     unsafe { prctl_3args(PR_CAP_AMBIENT, PR_CAP_AMBIENT_IS_SET as *mut _, cap) }.map(|r| r != 0)
 }
@@ -616,10 +616,7 @@ const PR_CAP_AMBIENT_LOWER: usize = 3;
 ///
 /// [`prctl(PR_CAP_AMBIENT,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
-pub fn configure_capability_in_ambient_capability_set(
-    capability: Capability,
-    enable: bool,
-) -> io::Result<()> {
+pub fn configure_capability_in_ambient_set(capability: Capability, enable: bool) -> io::Result<()> {
     let sub_operation = if enable {
         PR_CAP_AMBIENT_RAISE
     } else {
