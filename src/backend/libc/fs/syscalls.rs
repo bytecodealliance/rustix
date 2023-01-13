@@ -1818,3 +1818,8 @@ pub(crate) fn mount(
         ))
     }
 }
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) fn unmount(target: &CStr, flags: super::types::UnmountFlags) -> io::Result<()> {
+    unsafe { ret(c::umount2(target.as_ptr(), flags.bits())) }
+}

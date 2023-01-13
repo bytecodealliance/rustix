@@ -1,7 +1,7 @@
 //! Linux `mount`.
 
 use crate::backend::fs::types::{
-    InternalMountFlags, MountFlags, MountFlagsArg, MountPropagationFlags,
+    InternalMountFlags, MountFlags, MountFlagsArg, MountPropagationFlags, UnmountFlags,
 };
 use crate::{backend, io, path};
 
@@ -43,6 +43,7 @@ pub fn mount<Source: path::Arg, Target: path::Arg, Fs: path::Arg, Data: path::Ar
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mount.2.html
 #[inline]
+#[doc(alias = "mount")]
 pub fn remount<Target: path::Arg, Data: path::Arg>(
     target: Target,
     flags: MountFlags,
@@ -68,6 +69,7 @@ pub fn remount<Target: path::Arg, Data: path::Arg>(
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mount.2.html
 #[inline]
+#[doc(alias = "mount")]
 pub fn bind_mount<Source: path::Arg, Target: path::Arg>(
     source: Source,
     target: Target,
@@ -92,6 +94,7 @@ pub fn bind_mount<Source: path::Arg, Target: path::Arg>(
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mount.2.html
 #[inline]
+#[doc(alias = "mount")]
 pub fn recursive_bind_mount<Source: path::Arg, Target: path::Arg>(
     source: Source,
     target: Target,
@@ -116,6 +119,7 @@ pub fn recursive_bind_mount<Source: path::Arg, Target: path::Arg>(
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mount.2.html
 #[inline]
+#[doc(alias = "mount")]
 pub fn change_mount<Target: path::Arg>(
     target: Target,
     flags: MountPropagationFlags,
@@ -132,6 +136,7 @@ pub fn change_mount<Target: path::Arg>(
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mount.2.html
 #[inline]
+#[doc(alias = "mount")]
 pub fn move_mount<Source: path::Arg, Target: path::Arg>(
     source: Source,
     target: Target,
@@ -147,4 +152,15 @@ pub fn move_mount<Source: path::Arg, Target: path::Arg>(
             )
         })
     })
+}
+
+/// `umount2(target, flags)`
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/umount.2.html
+#[doc(alias = "umount", alias = "umount2")]
+pub fn unmount<Target: path::Arg>(target: Target, flags: UnmountFlags) -> io::Result<()> {
+    target.into_with_c_str(|target| backend::fs::syscalls::unmount(target, flags))
 }

@@ -674,6 +674,15 @@ impl<'a, Num: ArgNumber> From<crate::backend::fs::types::MountFlagsArg> for ArgR
     }
 }
 
+#[cfg(feature = "fs")]
+#[cfg(any(target_os = "android", target_os = "linux"))]
+impl<'a, Num: ArgNumber> From<crate::backend::fs::types::UnmountFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::backend::fs::types::UnmountFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
 /// Convert a `usize` returned from a syscall that effectively returns `()` on
 /// success.
 ///

@@ -1194,3 +1194,18 @@ bitflags! {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) struct MountFlagsArg(pub(crate) c::c_ulong);
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+bitflags! {
+    /// `MNT_*` constants for use with [`unmount`][crate::fs::mount::unmount].
+    pub struct UnmountFlags: c::c_int {
+        /// `MNT_FORCE`
+        const FORCE = c::MNT_FORCE;
+        /// `MNT_DETACH`
+        const DETACH = c::MNT_DETACH;
+        /// `MNT_EXPIRE`
+        const EXPIRE = c::MNT_EXPIRE;
+        /// `UMOUNT_NOFOLLOW`
+        const NOFOLLOW = c::UMOUNT_NOFOLLOW;
+    }
+}

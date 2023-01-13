@@ -104,7 +104,7 @@ pub use constants::{Access, FdFlags, Mode, Nsecs, OFlags, Secs, Timespec};
 #[cfg(not(target_os = "redox"))]
 pub use constants::{AtFlags, Dev};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use constants::{MountFlags, MountPropagationFlags, RenameFlags, ResolveFlags};
+pub use constants::{MountFlags, MountPropagationFlags, RenameFlags, ResolveFlags, UnmountFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use copy_file_range::copy_file_range;
 #[cfg(not(target_os = "redox"))]
@@ -202,7 +202,9 @@ pub use makedev::{major, makedev, minor};
 #[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 pub use memfd_create::{memfd_create, MemfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use mount::{bind_mount, change_mount, mount, move_mount, recursive_bind_mount, remount};
+pub use mount::{
+    bind_mount, change_mount, mount, move_mount, recursive_bind_mount, remount, unmount,
+};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use openat2::openat2;
 #[cfg(any(target_os = "android", target_os = "linux"))]

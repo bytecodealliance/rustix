@@ -12,7 +12,9 @@ pub use backend::fs::types::AtFlags;
 pub use backend::fs::types::{CloneFlags, CopyfileFlags};
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use backend::fs::types::{MountFlags, MountPropagationFlags, RenameFlags, ResolveFlags};
+pub use backend::fs::types::{
+    MountFlags, MountPropagationFlags, RenameFlags, ResolveFlags, UnmountFlags,
+};
 
 #[cfg(not(target_os = "redox"))]
 pub use backend::fs::types::Dev;
