@@ -1416,3 +1416,9 @@ pub(crate) fn mount(
         ))
     }
 }
+
+#[inline]
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) fn unmount(target: &CStr, flags: super::types::UnmountFlags) -> io::Result<()> {
+    unsafe { ret(syscall_readonly!(__NR_umount2, target, flags)) }
+}
