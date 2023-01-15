@@ -172,34 +172,33 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// GAT support once one becomes available.
     #[allow(unsafe_code)]
     pub fn next(&mut self) -> Option<io::Result<RawDirEntry>> {
-        loop {
-            if self.offset < self.initialized {
-                let dirent_ptr = self.buf[self.offset..].as_ptr();
-                // SAFETY:
-                // - This data is initialized by the check above.
-                //   - Assumption: the kernel will not give us partial structs.
-                // - Assumption: the kernel uses proper alignment between structs.
-                // - The starting pointer is aligned (performed in RawDir::new)
-                let dirent = unsafe { &*dirent_ptr.cast::<linux_dirent64>() };
-
-                self.offset += usize::from(dirent.d_reclen);
-
-                return Some(Ok(RawDirEntry {
-                    file_type: dirent.d_type,
-                    inode_number: dirent.d_ino,
-                    next_entry_cookie: dirent.d_off,
-                    // SAFETY: the kernel guarantees a NUL terminated string.
-                    file_name: unsafe { CStr::from_ptr(dirent.d_name.as_ptr().cast()) },
-                }));
-            }
-            self.initialized = 0;
-            self.offset = 0;
-
+        if self.offset >= self.initialized {
             match getdents_uninit(self.fd.as_fd(), self.buf) {
                 Ok(bytes_read) if bytes_read == 0 => return None,
-                Ok(bytes_read) => self.initialized = bytes_read,
+                Ok(bytes_read) => {
+                    self.initialized = bytes_read;
+                    self.offset = 0;
+                }
                 Err(e) => return Some(Err(e)),
             }
         }
+
+        let dirent_ptr = self.buf[self.offset..].as_ptr();
+        // SAFETY:
+        // - This data is initialized by the check above.
+        //   - Assumption: the kernel will not give us partial structs.
+        // - Assumption: the kernel uses proper alignment between structs.
+        // - The starting pointer is aligned (performed in RawDir::new)
+        let dirent = unsafe { &*dirent_ptr.cast::<linux_dirent64>() };
+
+        self.offset += usize::from(dirent.d_reclen);
+
+        Some(Ok(RawDirEntry {
+            file_type: dirent.d_type,
+            inode_number: dirent.d_ino,
+            next_entry_cookie: dirent.d_off,
+            // SAFETY: the kernel guarantees a NUL terminated string.
+            file_name: unsafe { CStr::from_ptr(dirent.d_name.as_ptr().cast()) },
+        }))
     }
 }
