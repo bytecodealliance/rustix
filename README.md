@@ -104,7 +104,7 @@ features for `rustix`.
 
 `rustix` has its own code for making direct syscalls, similar to the [`sc`] and
 [`scall`] crates, though `rustix` can use either the Rust `asm!` macro or
-out-of-line `.s` files so it supports Rust versions from 1.48 though Nightly.
+out-of-line `.s` files so it supports Rust versions from 1.48 through Nightly.
 `rustix` can also use Linux's vDSO mechanism to optimize Linux `clock_gettime`
 on all architectures, and all Linux system calls on x86. And `rustix`'s
 syscalls report errors using an optimized `Errno` type.
