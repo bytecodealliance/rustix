@@ -122,9 +122,7 @@ pub unsafe fn take_stdin() -> OwnedFd {
 pub const fn stdout() -> BorrowedFd<'static> {
     // Safety: When "std" is enabled, the standard library assumes that the stdio
     // file descriptors are all valid.
-    unsafe {
-        BorrowedFd::borrow_raw(backend::io::types::STDOUT_FILENO as RawFd)
-    }
+    unsafe { BorrowedFd::borrow_raw(backend::io::types::STDOUT_FILENO as RawFd) }
 }
 
 /// `STDOUT_FILENO`—Standard output, borrowed.
@@ -204,9 +202,7 @@ pub unsafe fn take_stdout() -> OwnedFd {
 pub const fn stderr() -> BorrowedFd<'static> {
     // Safety: When "std" is enabled, the standard library assumes that the stdio
     // file descriptors are all valid.
-    unsafe {
-        BorrowedFd::borrow_raw(backend::io::types::STDERR_FILENO as RawFd)
-    }
+    unsafe { BorrowedFd::borrow_raw(backend::io::types::STDERR_FILENO as RawFd) }
 }
 
 /// `STDERR_FILENO`—Standard error, borrowed.
