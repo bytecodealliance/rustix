@@ -555,11 +555,7 @@ pub(crate) mod sockopt {
                     return Err(io::Errno::INVAL);
                 }
 
-                let tv_sec = timeout.as_secs().try_into();
-                #[cfg(not(all(target_arch = "x86_64", target_pointer_width = "32")))]
-                let tv_sec = tv_sec.unwrap_or(c::c_long::MAX);
-                #[cfg(all(target_arch = "x86_64", target_pointer_width = "32"))]
-                let tv_sec = tv_sec.unwrap_or(i64::MAX);
+                let tv_sec = timeout.as_secs().try_into().unwrap_or(c::time_t::MAX);
 
                 // `subsec_micros` rounds down, so we use `subsec_nanos` and
                 // manually round up.
