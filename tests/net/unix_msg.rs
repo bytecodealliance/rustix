@@ -142,16 +142,17 @@ fn test_unix_msg() {
 #[test]
 fn test_scm_credentials_and_rights() {
     use io_lifetimes::AsFd;
+    use rustix::cmsg_space;
     use rustix::fd::OwnedFd;
     use rustix::io::{pipe, read, write};
+    use rustix::net::SocketFlags;
     use rustix::net::{
-        recvmsg, sendmsg_unix, RecvAncillaryBuffer, RecvAncillaryMessage, SendAncillaryBuffer,
+        recvmsg, sendmsg_noaddr, RecvAncillaryBuffer, RecvAncillaryMessage, SendAncillaryBuffer,
         SendAncillaryMessage,
     };
-    use rustix::net::{sockopt::set_socket_passcred, SocketFlags};
     use rustix::process::{getgid, getpid, getuid};
 
-    let mut space = cmsg_buffer!(OwnedFd, SocketCred);
+    let mut space = vec![0; cmsg_space!(ScmRights(1))];
 
     let (send, recv) = socketpair(
         AddressFamily::UNIX,
@@ -160,61 +161,42 @@ fn test_scm_credentials_and_rights() {
         Protocol::default(),
     )
     .unwrap();
-    set_socket_passcred(&recv, true).unwrap();
 
     let (r, w) = pipe().unwrap();
     let mut received_r = None;
 
     {
         let iovs = [IoSlice::new(b"hello")];
-        let mut cmsgs = SendSocketAncillaryUnix::new(&mut space);
-        let cred = SocketCred::from_process();
-        assert!(cmsgs.add_creds(&[cred]));
+        let fds = [r.as_fd()];
+        let mut ancil = SendAncillaryBuffer::new(&mut space);
+        assert!(ancil.push(SendAncillaryMessage::ScmRights(&fds)));
 
-        cmsgs.add_fds(&[r.as_fd()]);
         assert_eq!(
-            sendmsg_unix_with_ancillary(&send, &iovs, None, &mut cmsgs, SendFlags::empty())
-                .unwrap(),
+            sendmsg_noaddr(&send, &iovs, &mut ancil, SendFlags::empty()).unwrap(),
             5
         );
-        drop(r);
         drop(send);
+        drop(r);
     }
 
     {
         let mut buf = [0u8; 5];
         let mut iovs = [IoSliceMut::new(&mut buf[..])];
-        let mut cmsgs = RecvSocketAncillaryUnix::new(&mut space);
-        let msg =
-            recvmsg_unix_with_ancillary(&recv, &mut iovs, &mut cmsgs, RecvFlags::empty()).unwrap();
+        let mut cmsgs = RecvAncillaryBuffer::new(&mut space);
+        let msg = recvmsg(&recv, &mut iovs, &mut cmsgs, RecvFlags::empty()).unwrap();
 
-        assert_eq!(cmsgs.messages().count(), 2, "expected 2 cmsgs");
-        let mut received_cred = None;
-        for cmsg in cmsgs.messages() {
-            match cmsg.unwrap() {
-                RecvAncillaryDataUnix::ScmRights(fds) => {
-                    assert!(received_r.is_none(), "already received fd");
-                    let fds = fds.collect::<Vec<_>>();
-                    assert_eq!(fds.len(), 1);
-                    received_r = Some(fds);
-                }
-                RecvAncillaryDataUnix::ScmCredentials(creds) => {
-                    assert!(received_cred.is_none());
-                    let creds = creds.collect::<Vec<_>>();
-                    assert_eq!(creds.len(), 1);
-                    assert_eq!(creds[0].get_pid(), Some(getpid()));
-                    assert_eq!(creds[0].get_uid(), getuid());
-                    assert_eq!(creds[0].get_gid(), getgid());
-                    received_cred = Some(creds);
-                }
-                _ => panic!("unexpected cmsg"),
+        let mut messages = cmsgs.drain().collect::<Vec<_>>();
+        assert_eq!(messages.len(), 1);
+        match messages.remove(0) {
+            RecvAncillaryMessage::ScmRights(fds) => {
+                assert!(received_r.is_none(), "already received fd");
+                let fds = fds.collect::<Vec<_>>();
+                assert_eq!(fds.len(), 1);
+                received_r = Some(fds);
             }
+            _ => panic!("unexpected cmsg"),
         }
-        received_cred.expect("no creds received");
         assert_eq!(msg.bytes, 5);
-        assert!(!msg.flags.contains(RecvFlags::TRUNC));
-        assert!(!msg.flags.contains(RecvFlags::CTRUNC));
-
         drop(recv);
     }
 

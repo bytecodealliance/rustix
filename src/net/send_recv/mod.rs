@@ -8,13 +8,13 @@ use backend::fd::{AsFd, BorrowedFd};
 
 pub use backend::net::send_recv::{RecvFlags, SendFlags};
 
-#[cfg(not(any(windows, target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 mod msg;
 
-#[cfg(not(any(windows, target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub use msg::{
     recvmsg, sendmsg_any, sendmsg_noaddr, sendmsg_v4, sendmsg_v6, RecvAncillaryBuffer,
-    RecvAncillaryMessage, RecvMsgResult, SendAncillaryBuffer, SendAncillaryMessage,
+    RecvAncillaryMessage, RecvMsgResult, SendAncillaryBuffer, SendAncillaryMessage, __cmsg_len,
 };
 
 #[cfg(unix)]

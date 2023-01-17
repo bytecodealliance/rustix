@@ -11,6 +11,31 @@ use core::ptr::{self, NonNull};
 
 use super::{RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 
+/// Macro for defining the amount of space used by CMSGs.
+#[macro_export]
+macro_rules! cmsg_space {
+    // Base Rules
+    (ScmRights($len:expr)) => {
+        $crate::net::__cmsg_len(
+            $len * ::core::mem::size_of::<$crate::fd::BorrowedFd<'static>>(),
+        )
+    };
+
+    // Combo Rules
+    (($($($x:tt)*),+)) => {
+        $(
+            cmsg_space!($($x)*) +
+        )+
+        0
+    };
+}
+
+#[allow(unsafe_code)]
+#[doc(hidden)]
+pub fn __cmsg_len(len: usize) -> usize {
+    unsafe { c::CMSG_LEN(len as _) as usize }
+}
+
 /// Ancillary message for `sendmsg`.
 #[non_exhaustive]
 pub enum SendAncillaryMessage<'slice, 'fd> {
