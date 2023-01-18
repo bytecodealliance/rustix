@@ -1,6 +1,6 @@
 [package]
 name = "rustix"
-version = "0.36.6"
+version = "0.36.7"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
     "Jakub Konka <kubkon@jakubkonka.com>",
