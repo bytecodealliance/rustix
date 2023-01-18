@@ -70,6 +70,8 @@ pub(super) const EM_CURRENT: u16 = 62; // EM_X86_64
 pub(super) const EM_CURRENT: u16 = 183; // EM_AARCH64
 #[cfg(target_arch = "riscv64")]
 pub(super) const EM_CURRENT: u16 = 243; // EM_RISCV
+#[cfg(target_arch = "loongarch64")]
+pub(super) const EM_CURRENT: u16 = 258; // EM_LOONGARCH
 
 #[inline]
 pub(super) const fn ELF_ST_VISIBILITY(o: u8) -> u8 {

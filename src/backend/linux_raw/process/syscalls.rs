@@ -115,7 +115,11 @@ pub(crate) fn getpgid(pid: Option<Pid>) -> io::Result<Pid> {
 #[inline]
 pub(crate) fn getpgrp() -> Pid {
     // Use the `getpgrp` syscall if available.
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+    #[cfg(not(any(
+        target_arch = "aarch64",
+        target_arch = "loongarch64",
+        target_arch = "riscv64"
+    )))]
     unsafe {
         let pgid: i32 = ret_usize_infallible(syscall_readonly!(__NR_getpgrp)) as __kernel_pid_t;
         debug_assert!(pgid > 0);
@@ -123,7 +127,11 @@ pub(crate) fn getpgrp() -> Pid {
     }
 
     // Otherwise use `getpgrp` and pass it zero.
-    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+    #[cfg(any(
+        target_arch = "aarch64",
+        target_arch = "loongarch64",
+        target_arch = "riscv64"
+    ))]
     unsafe {
         let pgid: i32 =
             ret_usize_infallible(syscall_readonly!(__NR_getpgid, c_uint(0))) as __kernel_pid_t;
@@ -328,6 +336,7 @@ pub(crate) fn setpriority_process(pid: Option<Pid>, priority: i32) -> io::Result
     }
 }
 
+#[cfg(not(target_arch = "loongarch64"))]
 #[inline]
 pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
     let mut result = MaybeUninit::<rlimit64>::uninit();
@@ -350,6 +359,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
 
 /// The old 32-bit-only `getrlimit` syscall, for when we lack the new
 /// `prlimit64`.
+#[cfg(not(target_arch = "loongarch64"))]
 unsafe fn getrlimit_old(limit: Resource) -> Rlimit {
     let mut result = MaybeUninit::<rlimit>::uninit();
 
@@ -367,6 +377,7 @@ unsafe fn getrlimit_old(limit: Resource) -> Rlimit {
     // On these platforms, it's just `__NR_getrlimit`.
     #[cfg(not(any(
         target_arch = "arm",
+        target_arch = "loongarch64",
         target_arch = "powerpc",
         target_arch = "powerpc64",
         target_arch = "x86",
@@ -378,6 +389,7 @@ unsafe fn getrlimit_old(limit: Resource) -> Rlimit {
     rlimit_from_linux_old(result.assume_init())
 }
 
+#[cfg(not(target_arch = "loongarch64"))]
 #[inline]
 pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
     unsafe {
@@ -398,6 +410,7 @@ pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
 
 /// The old 32-bit-only `setrlimit` syscall, for when we lack the new
 /// `prlimit64`.
+#[cfg(not(target_arch = "loongarch64"))]
 unsafe fn setrlimit_old(limit: Resource, new: Rlimit) -> io::Result<()> {
     let lim = rlimit_to_linux_old(new)?;
     ret(syscall_readonly!(__NR_setrlimit, limit, by_ref(&lim)))

@@ -33,7 +33,11 @@ use linux_raw_sys::general::{
     UIO_MAXIOV,
 };
 use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET, FIONBIO, FIONREAD, TIOCEXCL, TIOCNXCL};
-#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+#[cfg(any(
+    target_arch = "aarch64",
+    target_arch = "loongarch64",
+    target_arch = "riscv64"
+))]
 use {
     super::super::conv::{opt_ref, size_of},
     linux_raw_sys::general::{__kernel_timespec, sigset_t},
@@ -402,7 +406,11 @@ pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 
 #[inline]
 pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
-    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+    #[cfg(any(
+        target_arch = "aarch64",
+        target_arch = "loongarch64",
+        target_arch = "riscv64"
+    ))]
     {
         // We don't need to worry about the difference between `dup2` and
         // `dup3` when the file descriptors are equal because we have an
@@ -410,7 +418,11 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
         dup3(fd, new, DupFlags::empty())
     }
 
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+    #[cfg(not(any(
+        target_arch = "aarch64",
+        target_arch = "loongarch64",
+        target_arch = "riscv64"
+    )))]
     unsafe {
         ret_discarded_fd(syscall_readonly!(__NR_dup2, fd, new.as_fd()))
     }
@@ -509,6 +521,7 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     // wrapping infrastructure at this time.
     #[cfg(any(
         target_arch = "aarch64",
+        target_arch = "loongarch64",
         target_arch = "mips",
         target_arch = "mips64",
         target_arch = "riscv64",
@@ -518,6 +531,7 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     }
     #[cfg(not(any(
         target_arch = "aarch64",
+        target_arch = "loongarch64",
         target_arch = "mips",
         target_arch = "mips64",
         target_arch = "riscv64",
@@ -534,7 +548,11 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
 pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usize> {
     let (fds_addr_mut, fds_len) = slice_mut(fds);
 
-    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+    #[cfg(any(
+        target_arch = "aarch64",
+        target_arch = "loongarch64",
+        target_arch = "riscv64"
+    ))]
     unsafe {
         let timeout = if timeout >= 0 {
             Some(__kernel_timespec {
@@ -553,7 +571,11 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
             size_of::<sigset_t, _>()
         ))
     }
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+    #[cfg(not(any(
+        target_arch = "aarch64",
+        target_arch = "loongarch64",
+        target_arch = "riscv64"
+    )))]
     unsafe {
         ret_usize(syscall!(__NR_poll, fds_addr_mut, fds_len, c_int(timeout)))
     }
@@ -612,7 +634,11 @@ pub(crate) fn epoll_wait(
     num_events: usize,
     timeout: c::c_int,
 ) -> io::Result<usize> {
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+    #[cfg(not(any(
+        target_arch = "aarch64",
+        target_arch = "loongarch64",
+        target_arch = "riscv64"
+    )))]
     unsafe {
         ret_usize(syscall!(
             __NR_epoll_wait,
@@ -622,7 +648,11 @@ pub(crate) fn epoll_wait(
             c_int(timeout)
         ))
     }
-    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+    #[cfg(any(
+        target_arch = "aarch64",
+        target_arch = "loongarch64",
+        target_arch = "riscv64"
+    ))]
     unsafe {
         ret_usize(syscall!(
             __NR_epoll_pwait,

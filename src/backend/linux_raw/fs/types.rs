@@ -573,7 +573,10 @@ pub struct Stat {
 ///
 /// [`statat`]: crate::fs::statat
 /// [`fstat`]: crate::fs::fstat
-#[cfg(all(target_pointer_width = "64", not(target_arch = "mips64")))]
+#[cfg(all(
+    target_pointer_width = "64",
+    not(any(target_arch = "mips64", target_arch = "loongarch64"))
+))]
 pub type Stat = linux_raw_sys::general::stat;
 
 /// `struct statfs` for use with [`statfs`] and [`fstatfs`].

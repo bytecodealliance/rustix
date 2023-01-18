@@ -20,6 +20,7 @@ pub use backend::fs::types::FlockOperation;
 )))]
 pub use backend::fs::types::FallocateFlags;
 
+#[cfg(not(target_arch = "loongarch64"))]
 pub use backend::fs::types::Stat;
 
 #[cfg(not(any(
@@ -145,6 +146,7 @@ pub fn fchown<Fd: AsFd>(fd: Fd, owner: Option<Uid>, group: Option<Gid>) -> io::R
 /// [Linux]: https://man7.org/linux/man-pages/man2/fstat.2.html
 /// [`Mode::from_raw_mode`]: crate::fs::Mode::from_raw_mode
 /// [`FileType::from_raw_mode`]: crate::fs::FileType::from_raw_mode
+#[cfg(not(target_arch = "loongarch64"))]
 #[inline]
 pub fn fstat<Fd: AsFd>(fd: Fd) -> io::Result<Stat> {
     backend::fs::syscalls::fstat(fd.as_fd())

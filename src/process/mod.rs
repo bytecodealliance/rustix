@@ -49,8 +49,17 @@ pub use prctl::*;
 pub use priority::*;
 #[cfg(target_os = "freebsd")]
 pub use procctl::*;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use rlimit::prlimit;
+#[cfg(not(any(
+    target_os = "fuchsia",
+    target_os = "redox",
+    target_os = "wasi",
+    target_arch = "loongarch64"
+)))]
+pub use rlimit::{getrlimit, setrlimit};
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-pub use rlimit::*;
+pub use rlimit::{Resource, Rlimit};
 #[cfg(any(
     target_os = "android",
     target_os = "dragonfly",

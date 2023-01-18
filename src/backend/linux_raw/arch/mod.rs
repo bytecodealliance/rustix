@@ -30,6 +30,7 @@ pub(in crate::backend) mod asm;
 #[cfg(any(
     target_arch = "arm",
     target_arch = "aarch64",
+    target_arch = "loongarch64",
     target_arch = "mips",
     target_arch = "mips64",
     target_arch = "powerpc64",

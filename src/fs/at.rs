@@ -15,7 +15,9 @@ use crate::fs::CloneFlags;
 use crate::fs::FileType;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::RenameFlags;
-use crate::fs::{AtFlags, Mode, OFlags, Stat, Timestamps};
+#[cfg(not(target_arch = "loongarch64"))]
+use crate::fs::Stat;
+use crate::fs::{AtFlags, Mode, OFlags, Timestamps};
 use crate::path::SMALL_PATH_BUFFER_SIZE;
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
@@ -256,6 +258,7 @@ pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsFd>(
 /// [Linux]: https://man7.org/linux/man-pages/man2/fstatat.2.html
 /// [`Mode::from_raw_mode`]: crate::fs::Mode::from_raw_mode
 /// [`FileType::from_raw_mode`]: crate::fs::FileType::from_raw_mode
+#[cfg(not(target_arch = "loongarch64"))]
 #[inline]
 #[doc(alias = "fstatat")]
 pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> io::Result<Stat> {

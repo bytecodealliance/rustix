@@ -7,6 +7,7 @@
 #[cfg_attr(target_arch = "aarch64", path = "aarch64.rs")]
 #[cfg_attr(all(target_arch = "arm", not(thumb_mode)), path = "arm.rs")]
 #[cfg_attr(all(target_arch = "arm", thumb_mode), path = "thumb.rs")]
+#[cfg_attr(target_arch = "loongarch64", path = "loongarch64.rs")]
 #[cfg_attr(target_arch = "mips", path = "mips.rs")]
 #[cfg_attr(target_arch = "mips64", path = "mips64.rs")]
 #[cfg_attr(target_arch = "powerpc64", path = "powerpc64.rs")]
