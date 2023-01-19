@@ -648,6 +648,9 @@ bitflags! {
         /// `STATX_MNT_ID` (since Linux 5.8)
         const MNT_ID = c::STATX_MNT_ID;
 
+        /// `STATX_DIOALIGN` (since Linux 6.1)
+        const DIOALIGN = c::STATX_DIOALIGN;
+
         /// `STATX_ALL`
         const ALL = c::STATX_ALL;
     }
