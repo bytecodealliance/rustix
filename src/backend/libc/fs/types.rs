@@ -30,14 +30,22 @@ bitflags! {
     /// [`statat`]: crate::fs::statat
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct AtFlags: c::c_int {
+        /// `AT_SYMLINK_NOFOLLOW`
+        const SYMLINK_NOFOLLOW = c::AT_SYMLINK_NOFOLLOW;
+
+        /// `AT_EACCESS`
+        #[cfg(not(any(target_os = "emscripten", target_os = "android")))]
+        const EACCESS = c::AT_EACCESS;
+
         /// `AT_REMOVEDIR`
         const REMOVEDIR = c::AT_REMOVEDIR;
 
         /// `AT_SYMLINK_FOLLOW`
         const SYMLINK_FOLLOW = c::AT_SYMLINK_FOLLOW;
 
-        /// `AT_SYMLINK_NOFOLLOW`
-        const SYMLINK_NOFOLLOW = c::AT_SYMLINK_NOFOLLOW;
+        /// `AT_NO_AUTOMOUNT`
+        #[cfg(all(target_os = "linux", target_env = "gnu"))]
+        const NO_AUTOMOUNT = c::AT_NO_AUTOMOUNT;
 
         /// `AT_EMPTY_PATH`
         #[cfg(any(
@@ -50,10 +58,6 @@ bitflags! {
         /// `AT_RESOLVE_BENEATH`
         #[cfg(target_os = "freebsd")]
         const RESOLVE_BENEATH = c::AT_RESOLVE_BENEATH;
-
-        /// `AT_EACCESS`
-        #[cfg(not(any(target_os = "emscripten", target_os = "android")))]
-        const EACCESS = c::AT_EACCESS;
 
         /// `AT_STATX_SYNC_AS_STAT`
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
