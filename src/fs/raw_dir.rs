@@ -172,7 +172,7 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// GAT support once one becomes available.
     #[allow(unsafe_code)]
     pub fn next(&mut self) -> Option<io::Result<RawDirEntry>> {
-        if self.offset >= self.initialized {
+        if self.is_buffer_empty() {
             match getdents_uninit(self.fd.as_fd(), self.buf) {
                 Ok(bytes_read) if bytes_read == 0 => return None,
                 Ok(bytes_read) => {
@@ -200,5 +200,11 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
             // SAFETY: the kernel guarantees a NUL terminated string.
             file_name: unsafe { CStr::from_ptr(dirent.d_name.as_ptr().cast()) },
         }))
+    }
+
+    /// Returns true if the internal buffer is empty and will be refilled when calling
+    /// [`next`][Self::next].
+    pub fn is_buffer_empty(&self) -> bool {
+        self.offset >= self.initialized
     }
 }
