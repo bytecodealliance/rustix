@@ -15,6 +15,8 @@ use super::super::conv::{
 };
 #[cfg(target_pointer_width = "32")]
 use super::super::conv::{hi, lo};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use crate::backend::io::types::IFlags;
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::io::SpliceFlags;
@@ -33,6 +35,10 @@ use linux_raw_sys::general::{
     UIO_MAXIOV,
 };
 use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET, FIONBIO, FIONREAD, TIOCEXCL, TIOCNXCL};
+#[cfg(target_pointer_width = "32")]
+use linux_raw_sys::ioctl::{FS_IOC32_GETFLAGS, FS_IOC32_SETFLAGS};
+#[cfg(target_pointer_width = "64")]
+use linux_raw_sys::ioctl::{FS_IOC_GETFLAGS, FS_IOC_SETFLAGS};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use {
     super::super::conv::{opt_ref, size_of},
@@ -349,6 +355,53 @@ pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
     unsafe {
         ret(syscall!(__NR_ioctl, fd, c_uint(BLKPBSZGET), &mut result))?;
         Ok(result.assume_init() as u32)
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_get_flags(fd: BorrowedFd) -> io::Result<IFlags> {
+    let mut result = MaybeUninit::<IFlags>::uninit();
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret(syscall!(
+            __NR_ioctl,
+            fd,
+            c_uint(FS_IOC32_GETFLAGS),
+            &mut result
+        ))?;
+        Ok(result.assume_init() as IFlags)
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret(syscall!(
+            __NR_ioctl,
+            fd,
+            c_uint(FS_IOC_GETFLAGS),
+            &mut result
+        ))?;
+        Ok(result.assume_init() as IFlags)
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_set_flags(fd: BorrowedFd, flags: IFlags) -> io::Result<()> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_ioctl,
+            fd,
+            c_uint(FS_IOC32_SETFLAGS),
+            flags
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_ioctl,
+            fd,
+            c_uint(FS_IOC_SETFLAGS),
+            flags
+        ))
     }
 }
 

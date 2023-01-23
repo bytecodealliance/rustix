@@ -14,6 +14,8 @@ use super::super::offset::{libc_preadv2, libc_pwritev2};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 use crate::io::DupFlags;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use crate::io::IFlags;
 #[cfg(not(any(
     target_os = "aix",
     target_os = "haiku",
@@ -321,6 +323,47 @@ pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
             result.as_mut_ptr(),
         ))?;
         Ok(result.assume_init() as u32)
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub(crate) fn ioctl_get_flags(fd: BorrowedFd) -> io::Result<IFlags> {
+    let mut result = MaybeUninit::<IFlags>::uninit();
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret(c::ioctl(
+            borrowed_fd(fd),
+            c::FS_IOC32_GETFLAGS,
+            result.as_mut_ptr(),
+        ))?;
+        Ok(result.assume_init() as IFlags)
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret(c::ioctl(
+            borrowed_fd(fd),
+            c::FS_IOC_GETFLAGS,
+            result.as_mut_ptr(),
+        ))?;
+        Ok(result.assume_init() as IFlags)
+    }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub(crate) fn ioctl_set_flags(fd: BorrowedFd, flags: IFlags) -> io::Result<()> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret(c::ioctl(
+            borrowed_fd(fd),
+            c::FS_IOC32_SETFLAGS,
+            flags.bits(),
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret(c::ioctl(borrowed_fd(fd), c::FS_IOC_SETFLAGS, flags.bits()))
     }
 }
 

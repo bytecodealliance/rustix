@@ -97,3 +97,23 @@ pub fn ioctl_blksszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 pub fn ioctl_blkpbszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
     backend::io::syscalls::ioctl_blkpbszget(fd.as_fd())
 }
+
+/// `ioctl(fd, FS_IOC_GETFLAGS)`—Returns the [inode flags] attributes
+///
+/// [inode flags]: https://man7.org/linux/man-pages/man2/ioctl_iflags.2.html
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+#[doc(alias = "FS_IOC_GETFLAGS")]
+pub fn ioctl_getflags<Fd: AsFd>(fd: Fd) -> io::Result<backend::io::types::IFlags> {
+    backend::io::syscalls::ioctl_get_flags(fd.as_fd())
+}
+
+/// `ioctl(fd, FS_IOC_SETFLAGS)`—Modify the [inode flags] attributes
+///
+/// [inode flags]: https://man7.org/linux/man-pages/man2/ioctl_iflags.2.html
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+#[doc(alias = "FS_IOC_GETFLAGS")]
+pub fn ioctl_setflags<Fd: AsFd>(fd: Fd, flags: backend::io::types::IFlags) -> io::Result<()> {
+    backend::io::syscalls::ioctl_set_flags(fd.as_fd(), flags)
+}

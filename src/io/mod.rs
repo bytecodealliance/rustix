@@ -42,7 +42,7 @@ pub use ioctl::ioctl_fionbio;
 #[cfg(not(target_os = "redox"))]
 pub use ioctl::ioctl_fionread;
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use ioctl::{ioctl_blkpbszget, ioctl_blksszget};
+pub use ioctl::{ioctl_blkpbszget, ioctl_blksszget, ioctl_getflags, ioctl_setflags};
 #[cfg(not(any(windows, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub use ioctl::{ioctl_tiocexcl, ioctl_tiocnxcl};
 #[cfg(not(any(windows, target_os = "redox")))]
