@@ -142,6 +142,8 @@ bitflags! {
         const JOURNALING = linux_raw_sys::general::FS_JOURNAL_DATA_FL;
         /// `FS_NOATIME_FL`
         const NOATIME = linux_raw_sys::general::FS_NOATIME_FL;
+        /// `FS_NOCOW_FL`
+        const NOCOW = linux_raw_sys::general::FS_NOCOW_FL;
         /// `FS_NODUMP_FL`
         const NODUMP = linux_raw_sys::general::FS_NODUMP_FL;
         /// `FS_NOTAIL_FL`

@@ -174,6 +174,8 @@ bitflags! {
         const JOURNALING = c::FS_JOURNAL_DATA_FL;
         /// `FS_NOATIME_FL`
         const NOATIME = c::FS_NOATIME_FL;
+        /// `FS_NOCOW_FL`
+        const NOCOW = c::FS_NOCOW_FL;
         /// `FS_NODUMP_FL`
         const NODUMP = c::FS_NODUMP_FL;
         /// `FS_NOTAIL_FL`
