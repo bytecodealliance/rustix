@@ -5,6 +5,8 @@
 
 use crate::{backend, io};
 use backend::fd::AsFd;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use backend::io::types::IFlags;
 
 /// `ioctl(fd, TIOCEXCL)`—Enables exclusive mode on a terminal.
 ///
@@ -104,7 +106,7 @@ pub fn ioctl_blkpbszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 #[doc(alias = "FS_IOC_GETFLAGS")]
-pub fn ioctl_getflags<Fd: AsFd>(fd: Fd) -> io::Result<backend::io::types::IFlags> {
+pub fn ioctl_getflags<Fd: AsFd>(fd: Fd) -> io::Result<IFlags> {
     backend::io::syscalls::ioctl_get_flags(fd.as_fd())
 }
 
@@ -114,6 +116,6 @@ pub fn ioctl_getflags<Fd: AsFd>(fd: Fd) -> io::Result<backend::io::types::IFlags
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 #[doc(alias = "FS_IOC_GETFLAGS")]
-pub fn ioctl_setflags<Fd: AsFd>(fd: Fd, flags: backend::io::types::IFlags) -> io::Result<()> {
+pub fn ioctl_setflags<Fd: AsFd>(fd: Fd, flags: IFlags) -> io::Result<()> {
     backend::io::syscalls::ioctl_set_flags(fd.as_fd(), flags)
 }

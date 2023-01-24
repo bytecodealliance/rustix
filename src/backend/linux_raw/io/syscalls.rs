@@ -385,13 +385,15 @@ pub(crate) fn ioctl_get_flags(fd: BorrowedFd) -> io::Result<IFlags> {
 
 #[inline]
 pub(crate) fn ioctl_set_flags(fd: BorrowedFd, flags: IFlags) -> io::Result<()> {
+    // ioctl expect a *const c_uint, we thus need to convert it and pass it by reference
+    let attr = flags.bits();
     #[cfg(target_pointer_width = "32")]
     unsafe {
         ret(syscall_readonly!(
             __NR_ioctl,
             fd,
             c_uint(FS_IOC32_SETFLAGS),
-            flags
+            by_ref(&attr)
         ))
     }
     #[cfg(target_pointer_width = "64")]
@@ -400,7 +402,7 @@ pub(crate) fn ioctl_set_flags(fd: BorrowedFd, flags: IFlags) -> io::Result<()> {
             __NR_ioctl,
             fd,
             c_uint(FS_IOC_SETFLAGS),
-            flags
+            by_ref(&attr)
         ))
     }
 }
