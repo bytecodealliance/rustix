@@ -198,6 +198,9 @@ bitflags! {
 
         /// `O_NOATIME`
         const NOATIME = linux_raw_sys::general::O_NOATIME;
+
+        /// `O_DIRECT`
+        const DIRECT = linux_raw_sys::general::O_DIRECT;
     }
 }
 
