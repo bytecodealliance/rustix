@@ -259,6 +259,17 @@ bitflags! {
             target_os = "linux",
         ))]
         const NOATIME = c::O_NOATIME;
+
+        /// `O_DIRECT`
+        #[cfg(any(
+            target_os = "android",
+            target_os = "emscripten",
+            target_os = "freebsd",
+            target_os = "fuchsia",
+            target_os = "linux",
+            target_os = "netbsd",
+        ))]
+        const DIRECT = c::O_DIRECT;
     }
 }
 
