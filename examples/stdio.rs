@@ -19,7 +19,7 @@ use rustix::termios::ttyname;
 
 #[cfg(not(windows))]
 fn main() -> io::Result<()> {
-    let (stdin, stdout, stderr) = unsafe { (stdin(), stdout(), stderr()) };
+    let (stdin, stdout, stderr) = (stdin(), stdout(), stderr());
 
     println!("Stdin:");
     show(&stdin)?;

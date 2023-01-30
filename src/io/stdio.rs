@@ -14,21 +14,15 @@ use backend::fd::{BorrowedFd, FromRawFd, RawFd};
 
 /// `STDIN_FILENO`—Standard input, borrowed.
 ///
-/// # Safety
+/// In `std`-using configurations, this is a safe function, because the
+/// standard library already assumes that the stdin file descriptor is always
+/// valid. In `no_std` configurations, it is `unsafe`.
 ///
-/// This function must be called from code which knows how the process'
-/// standard input is being used. Often, this will be the `main` function or
-/// code that knows its relationship with the `main` function.
+/// # Warning
 ///
-/// The stdin file descriptor can be closed, potentially on other threads, in
-/// which case the file descriptor index value could be dynamically reused for
-/// other purposes, potentially on different threads.
-///
-/// # Other hazards
-///
-/// Stdin could be redirected from arbitrary input sources, and unless one
-/// knows how the process' standard input is being used, one could consume
-/// bytes that are expected to be consumed by other parts of the process.
+/// This function allows reading directly from stdin without coordinating
+/// with the buffering performed by [`std::io::Stdin`], so it could cause
+/// corrupted input.
 ///
 /// # References
 ///  - [POSIX]
@@ -36,6 +30,41 @@ use backend::fd::{BorrowedFd, FromRawFd, RawFd};
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
+#[cfg(feature = "std")]
+#[doc(alias = "STDIN_FILENO")]
+#[inline]
+pub const fn stdin() -> BorrowedFd<'static> {
+    // Safety: When "std" is enabled, the standard library assumes that the stdio
+    // file descriptors are all valid.
+    unsafe { BorrowedFd::borrow_raw(backend::io::types::STDIN_FILENO as RawFd) }
+}
+
+/// `STDIN_FILENO`—Standard input, borrowed.
+///
+/// In `std`-using configurations, this is a safe function, because the
+/// standard library already assumes that the stdin file descriptor is always
+/// valid. In `no_std` configurations, it is `unsafe`.
+///
+/// # Safety
+///
+/// In `no_std` configurations, the stdin file descriptor can be closed,
+/// potentially on other threads, in which case the file descriptor index
+/// value could be dynamically reused for other purposes, potentially on
+/// different threads.
+///
+/// # Warning
+///
+/// This function allows reading directly from stdin without coordinating
+/// with the buffering performed by [`std::io::Stdin`], so it could cause
+/// corrupted input.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
+#[cfg(not(feature = "std"))]
 #[doc(alias = "STDIN_FILENO")]
 #[inline]
 pub const unsafe fn stdin() -> BorrowedFd<'static> {
@@ -49,16 +78,13 @@ pub const unsafe fn stdin() -> BorrowedFd<'static> {
 ///
 /// # Safety
 ///
-/// This is unsafe for the same reasons as [`stdin`].
+/// Safe `std`-using Rust code is permitted to assume that the stdin file
+/// descriptor is always valid. This function returns an `OwnedFd` which will
+/// close the stdin file descriptor when dropped.
 ///
-/// # Other hazards
+/// # Warning
 ///
 /// This has the same hazards as [`stdin`].
-///
-/// And, when the `OwnedFd` is dropped, subsequent newly created file
-/// descriptors may unknowingly reuse the stdin file descriptor number, which
-/// may break common assumptions, so it should typically only be dropped at the
-/// end of a program when no more file descriptors will be created.
 ///
 /// # References
 ///  - [POSIX]
@@ -74,22 +100,15 @@ pub unsafe fn take_stdin() -> OwnedFd {
 
 /// `STDOUT_FILENO`—Standard output, borrowed.
 ///
-/// # Safety
+/// In `std`-using configurations, this is a safe function, because the
+/// standard library already assumes that the stdout file descriptor is always
+/// valid. In `no_std` configurations, it is `unsafe`.
 ///
-/// This function must be called from code which knows how the process'
-/// standard output is being used. Often, this will be the `main` function or
-/// code that knows its relationship with the `main` function.
+/// # Warning
 ///
-/// The stdout file descriptor can be closed, potentially on other threads, in
-/// which case the file descriptor index value could be dynamically reused for
-/// other purposes, potentially on different threads.
-///
-/// # Other hazards
-///
-/// Stdout could be redirected to arbitrary output sinks, and unless one
-/// knows how the process' standard output is being used, one could
-/// unexpectedly inject bytes into a stream being written by another part of
-/// the process.
+/// This function allows reading directly from stdout without coordinating
+/// with the buffering performed by [`std::io::Stdout`], so it could cause
+/// corrupted input.
 ///
 /// # References
 ///  - [POSIX]
@@ -97,6 +116,41 @@ pub unsafe fn take_stdin() -> OwnedFd {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
+#[cfg(feature = "std")]
+#[doc(alias = "STDOUT_FILENO")]
+#[inline]
+pub const fn stdout() -> BorrowedFd<'static> {
+    // Safety: When "std" is enabled, the standard library assumes that the stdio
+    // file descriptors are all valid.
+    unsafe { BorrowedFd::borrow_raw(backend::io::types::STDOUT_FILENO as RawFd) }
+}
+
+/// `STDOUT_FILENO`—Standard output, borrowed.
+///
+/// In `std`-using configurations, this is a safe function, because the
+/// standard library already assumes that the stdin file descriptor is always
+/// valid. In `no_std` configurations, it is `unsafe`.
+///
+/// # Safety
+///
+/// In `no_std` configurations, the stdout file descriptor can be closed,
+/// potentially on other threads, in which case the file descriptor index
+/// value could be dynamically reused for other purposes, potentially on
+/// different threads.
+///
+/// # Warning
+///
+/// This function allows reading directly from stdout without coordinating
+/// with the buffering performed by [`std::io::Stdout`], so it could cause
+/// corrupted input.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
+#[cfg(not(feature = "std"))]
 #[doc(alias = "STDOUT_FILENO")]
 #[inline]
 pub const unsafe fn stdout() -> BorrowedFd<'static> {
@@ -110,16 +164,13 @@ pub const unsafe fn stdout() -> BorrowedFd<'static> {
 ///
 /// # Safety
 ///
-/// This is unsafe for the same reasons as [`stdout`].
+/// Safe `std`-using Rust code is permitted to assume that the stdout file
+/// descriptor is always valid. This function returns an `OwnedFd` which will
+/// close the stdout file descriptor when dropped.
 ///
-/// # Other hazards
+/// # Warning
 ///
 /// This has the same hazards as [`stdout`].
-///
-/// And, when the `OwnedFd` is dropped, subsequent newly created file
-/// descriptors may unknowingly reuse the stdout file descriptor number, which
-/// may break common assumptions, so it should typically only be dropped at the
-/// end of a program when no more file descriptors will be created.
 ///
 /// # References
 ///  - [POSIX]
@@ -135,21 +186,9 @@ pub unsafe fn take_stdout() -> OwnedFd {
 
 /// `STDERR_FILENO`—Standard error, borrowed.
 ///
-/// # Safety
-///
-/// This function must be called from code which knows how the process'
-/// standard error is being used. Often, this will be the `main` function or
-/// code that knows its relationship with the `main` function.
-///
-/// The stderr file descriptor can be closed, potentially on other threads, in
-/// which case the file descriptor index value could be dynamically reused for
-/// other purposes, potentially on different threads.
-///
-/// # Other hazards
-///
-/// Stderr could be redirected to arbitrary output sinks, and unless one
-/// knows how the process' standard error is being used, one could unexpectedly
-/// inject bytes into a stream being written by another part of the process.
+/// In `std`-using configurations, this is a safe function, because the
+/// standard library already assumes that the stderr file descriptor is always
+/// valid. In `no_std` configurations, it is `unsafe`.
 ///
 /// # References
 ///  - [POSIX]
@@ -157,6 +196,35 @@ pub unsafe fn take_stdout() -> OwnedFd {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
+#[cfg(feature = "std")]
+#[doc(alias = "STDERR_FILENO")]
+#[inline]
+pub const fn stderr() -> BorrowedFd<'static> {
+    // Safety: When "std" is enabled, the standard library assumes that the stdio
+    // file descriptors are all valid.
+    unsafe { BorrowedFd::borrow_raw(backend::io::types::STDERR_FILENO as RawFd) }
+}
+
+/// `STDERR_FILENO`—Standard error, borrowed.
+///
+/// In `std`-using configurations, this is a safe function, because the
+/// standard library already assumes that the stderr file descriptor is always
+/// valid. In `no_std` configurations, it is `unsafe`.
+///
+/// # Safety
+///
+/// In `no_std` configurations, the stderr file descriptor can be closed,
+/// potentially on other threads, in which case the file descriptor index
+/// value could be dynamically reused for other purposes, potentially on
+/// different threads.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
+#[cfg(not(feature = "std"))]
 #[doc(alias = "STDERR_FILENO")]
 #[inline]
 pub const unsafe fn stderr() -> BorrowedFd<'static> {
@@ -170,7 +238,9 @@ pub const unsafe fn stderr() -> BorrowedFd<'static> {
 ///
 /// # Safety
 ///
-/// This is unsafe for the same reasons as [`stderr`].
+/// Safe std-using Rust code is permitted to assume that the stderr file
+/// descriptor is always valid. This function returns an `OwnedFd` which will
+/// close the stderr file descriptor when dropped.
 ///
 /// # Other hazards
 ///
