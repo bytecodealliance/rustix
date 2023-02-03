@@ -7,7 +7,7 @@ use super::super::conv::borrowed_fd;
 use super::super::conv::ret_pid_t;
 use super::super::conv::{c_str, ret, ret_c_int, ret_discarded_char_ptr};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_u32};
+use super::super::conv::{syscall_ret, syscall_ret_u32};
 #[cfg(any(
     target_os = "android",
     target_os = "dragonfly",
@@ -17,7 +17,7 @@ use super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_u32};
 use super::types::RawCpuSet;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use crate::fd::BorrowedFd;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(target_os = "linux")]
 use crate::fd::{AsRawFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::io;
@@ -32,15 +32,23 @@ use {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use {
     super::super::offset::libc_prlimit,
-    crate::process::{Cpuid, MembarrierCommand, MembarrierQuery, PidfdFlags},
+    crate::process::{Cpuid, MembarrierCommand, MembarrierQuery},
+};
+#[cfg(target_os = "linux")]
+use {
+    crate::process::PidfdFlags,
+    super::super::conv::syscall_ret_owned_fd,
 };
 #[cfg(not(target_os = "wasi"))]
 use {
     super::types::RawUname,
     crate::process::{
-        Gid, Pid, RawNonZeroPid, RawPid, Signal, Uid, WaitId, WaitOptions, WaitStatus,
-        WaitidOptions, WaitidStatus,
+        Gid, Pid, RawNonZeroPid, RawPid, Signal, Uid, WaitOptions, WaitStatus,
     },
+};
+#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+use crate::process::{
+    WaitId, WaitidOptions, WaitidStatus
 };
 
 #[cfg(not(target_os = "wasi"))]
@@ -399,21 +407,21 @@ pub(crate) fn _waitpid(
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
 #[inline]
 pub(crate) fn waitid(id: WaitId<'_>, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
     // Get the id to wait on.
     match id {
         WaitId::All => _waitid_all(options),
         WaitId::Pid(pid) => _waitid_pid(pid, options),
-        #[cfg(any(target_os = "linux", target_os = "android"))]
+        #[cfg(target_os = "linux")]
         WaitId::PidFd(fd) => _waitid_pidfd(fd, options),
-        #[cfg(not(any(target_os = "linux", target_os = "android")))]
+        #[cfg(not(target_os = "linux"))]
         WaitId::__EatLifetime(_) => unreachable!(),
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
 #[inline]
 fn _waitid_all(options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
     let mut status = MaybeUninit::<c::siginfo_t>::uninit();
@@ -429,7 +437,7 @@ fn _waitid_all(options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
     Ok(unsafe { cvt_waitid_status(status) })
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
 #[inline]
 fn _waitid_pid(pid: Pid, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
     let mut status = MaybeUninit::<c::siginfo_t>::uninit();
@@ -445,7 +453,7 @@ fn _waitid_pid(pid: Pid, options: WaitidOptions) -> io::Result<Option<WaitidStat
     Ok(unsafe { cvt_waitid_status(status) })
 }
 
-#[cfg(any(target_os = "linux", target_os = "android"))]
+#[cfg(target_os = "linux")]
 #[inline]
 fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
     let mut status = MaybeUninit::<c::siginfo_t>::uninit();
@@ -467,7 +475,7 @@ fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitidOptions) -> io::Result<Optio
 ///
 /// The caller must ensure that `status` is initialized and that `waitid` returned
 /// successfully.
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
 #[inline]
 unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitidStatus> {
     let status = status.assume_init();
@@ -548,7 +556,7 @@ pub(crate) unsafe fn procctl(
     ret(c::procctl(idtype, id, option, data))
 }
 
-#[cfg(any(target_os = "linux", target_os = "android"))]
+#[cfg(target_os = "linux")]
 pub(crate) fn pidfd_open(pid: Pid, flags: PidfdFlags) -> io::Result<OwnedFd> {
     unsafe {
         syscall_ret_owned_fd(libc::syscall(

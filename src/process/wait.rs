@@ -1,7 +1,9 @@
-use crate::fd::BorrowedFd;
 use crate::process::Pid;
 use crate::{backend, io};
 use bitflags::bitflags;
+
+#[cfg(target_os = "linux")]
+use crate::fd::BorrowedFd;
 
 bitflags! {
     /// Options for modifying the behavior of wait/waitpid
@@ -96,10 +98,11 @@ impl WaitStatus {
 
 /// The status of a process after calling [`waitid`].
 #[derive(Clone, Copy)]
+#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
 pub struct WaitidStatus(pub(crate) backend::c::siginfo_t);
 
 /// The identifier to wait on in a call to [`waitid`].
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub enum WaitId<'a> {
@@ -110,12 +113,12 @@ pub enum WaitId<'a> {
     Pid(Pid),
 
     /// Wait for a specific process file descriptor.
-    #[cfg(any(target_os = "linux", target_os = "android"))]
+    #[cfg(target_os = "linux")]
     PidFd(BorrowedFd<'a>),
 
     /// Eat the lifetime for non-Linux platforms.
     #[doc(hidden)]
-    #[cfg(not(any(target_os = "linux", target_os = "android")))]
+    #[cfg(not(target_os = "linux"))]
     __EatLifetime(std::marker::PhantomData<&'a ()>),
     // TODO(notgull): Once this crate has the concept of PGIDs, add a WaitId::Pgid
 }
@@ -172,7 +175,7 @@ pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
 }
 
 /// `waitid(_, _, _, opts)`-Wait for the specified child process to change state.
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
 #[inline]
 pub fn waitid<'a>(
     id: impl Into<WaitId<'a>>,

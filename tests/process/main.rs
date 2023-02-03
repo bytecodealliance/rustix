@@ -15,7 +15,7 @@ mod cpu_set;
 mod id;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod membarrier;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(target_os = "linux")]
 mod pidfd;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod prctl;

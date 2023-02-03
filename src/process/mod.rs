@@ -9,7 +9,7 @@ mod id;
 mod kill;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod membarrier;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(target_os = "linux")]
 mod pidfd;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod prctl;
@@ -54,7 +54,7 @@ pub use kill::{kill_current_process_group, kill_process, kill_process_group, Sig
 pub use membarrier::{
     membarrier, membarrier_cpu, membarrier_query, MembarrierCommand, MembarrierQuery,
 };
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(target_os = "linux")]
 pub use pidfd::{pidfd_open, PidfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use prctl::*;
@@ -83,7 +83,11 @@ pub use sched_yield::sched_yield;
 pub use uname::{uname, Uname};
 #[cfg(not(target_os = "wasi"))]
 pub use wait::{
-    wait, waitid, waitpid, WaitId, WaitOptions, WaitStatus, WaitidOptions, WaitidStatus,
+    wait, waitpid, WaitOptions, WaitStatus,
+};
+#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+pub use wait::{
+    waitid, WaitId, WaitidOptions, WaitidStatus
 };
 
 #[cfg(not(target_os = "wasi"))]
