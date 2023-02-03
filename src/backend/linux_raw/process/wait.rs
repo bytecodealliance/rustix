@@ -1,7 +1,9 @@
 // The functions replacing the C macros use the same names as in libc.
 #![allow(non_snake_case)]
 
-pub(crate) use linux_raw_sys::general::{WCONTINUED, WNOHANG, WUNTRACED};
+pub(crate) use linux_raw_sys::general::{
+    WCONTINUED, WEXITED, WNOHANG, WNOWAIT, WSTOPPED, WUNTRACED,
+};
 
 #[inline]
 pub(crate) fn WIFSTOPPED(status: u32) -> bool {

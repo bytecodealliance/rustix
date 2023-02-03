@@ -1,3 +1,4 @@
+use crate::fd::BorrowedFd;
 use crate::process::Pid;
 use crate::{backend, io};
 use bitflags::bitflags;
@@ -11,6 +12,22 @@ bitflags! {
         const UNTRACED = backend::process::wait::WUNTRACED as _;
         /// Return if a stopped child has been resumed by delivery of `SIGCONT`
         const CONTINUED = backend::process::wait::WCONTINUED as _;
+    }
+}
+
+bitflags! {
+    /// Options for modifying the behavior of waitid
+    pub struct WaitidOptions: u32 {
+        /// Return immediately if no child has exited.
+        const NOHANG = backend::process::wait::WNOHANG as _;
+        /// Return if a stopped child has been resumed by delivery of `SIGCONT`
+        const CONTINUED = backend::process::wait::WCONTINUED as _;
+        /// Wait for processed that have exited.
+        const EXITED = backend::process::wait::WEXITED as _;
+        /// Keep processed in a waitable state.
+        const NOWAIT = backend::process::wait::WNOWAIT as _;
+        /// Wait for processes that have been stopped.
+        const STOPPED = backend::process::wait::WSTOPPED as _;
     }
 }
 
@@ -77,6 +94,32 @@ impl WaitStatus {
     }
 }
 
+/// The status of a process after calling [`waitid`].
+#[derive(Clone, Copy)]
+pub struct WaitidStatus(pub(crate) backend::c::siginfo_t);
+
+/// The identifier to wait on in a call to [`waitid`].
+#[cfg(not(target_os = "wasi"))]
+#[derive(Debug, Clone)]
+#[non_exhaustive]
+pub enum WaitId<'a> {
+    /// Wait on all processes.
+    All,
+
+    /// Wait for a specific process ID.
+    Pid(Pid),
+
+    /// Wait for a specific process file descriptor.
+    #[cfg(any(target_os = "linux", target_os = "android"))]
+    PidFd(BorrowedFd<'a>),
+
+    /// Eat the lifetime for non-Linux platforms.
+    #[doc(hidden)]
+    #[cfg(not(any(target_os = "linux", target_os = "android")))]
+    __EatLifetime(std::marker::PhantomData<&'a ()>),
+    // TODO(notgull): Once this crate has the concept of PGIDs, add a WaitId::Pgid
+}
+
 /// `waitpid(pid, waitopts)`—Wait for a specific process to change state.
 ///
 /// If the pid is `None`, the call will wait for any child process whose
@@ -126,4 +169,14 @@ pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<Wai
 #[inline]
 pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
     backend::process::syscalls::wait(waitopts)
+}
+
+/// `waitid(_, _, _, opts)`-Wait for the specified child process to change state.
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn waitid<'a>(
+    id: impl Into<WaitId<'a>>,
+    options: WaitidOptions,
+) -> io::Result<Option<WaitidStatus>> {
+    backend::process::syscalls::waitid(id.into(), options)
 }
