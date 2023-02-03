@@ -21,6 +21,8 @@ use crate::fd::BorrowedFd;
 use crate::fd::{AsRawFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::io;
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
+use crate::process::{WaitId, WaitidOptions, WaitidStatus};
 use core::mem::MaybeUninit;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use {
@@ -29,26 +31,17 @@ use {
     crate::process::{Resource, Rlimit},
     core::convert::TryInto,
 };
+#[cfg(target_os = "linux")]
+use {super::super::conv::syscall_ret_owned_fd, crate::process::PidfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use {
     super::super::offset::libc_prlimit,
     crate::process::{Cpuid, MembarrierCommand, MembarrierQuery},
 };
-#[cfg(target_os = "linux")]
-use {
-    crate::process::PidfdFlags,
-    super::super::conv::syscall_ret_owned_fd,
-};
 #[cfg(not(target_os = "wasi"))]
 use {
     super::types::RawUname,
-    crate::process::{
-        Gid, Pid, RawNonZeroPid, RawPid, Signal, Uid, WaitOptions, WaitStatus,
-    },
-};
-#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
-use crate::process::{
-    WaitId, WaitidOptions, WaitidStatus
+    crate::process::{Gid, Pid, RawNonZeroPid, RawPid, Signal, Uid, WaitOptions, WaitStatus},
 };
 
 #[cfg(not(target_os = "wasi"))]
@@ -407,7 +400,7 @@ pub(crate) fn _waitpid(
     }
 }
 
-#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 #[inline]
 pub(crate) fn waitid(id: WaitId<'_>, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
     // Get the id to wait on.
@@ -421,7 +414,7 @@ pub(crate) fn waitid(id: WaitId<'_>, options: WaitidOptions) -> io::Result<Optio
     }
 }
 
-#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 #[inline]
 fn _waitid_all(options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
     let mut status = MaybeUninit::<c::siginfo_t>::uninit();
@@ -437,7 +430,7 @@ fn _waitid_all(options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
     Ok(unsafe { cvt_waitid_status(status) })
 }
 
-#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 #[inline]
 fn _waitid_pid(pid: Pid, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
     let mut status = MaybeUninit::<c::siginfo_t>::uninit();
@@ -475,7 +468,7 @@ fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitidOptions) -> io::Result<Optio
 ///
 /// The caller must ensure that `status` is initialized and that `waitid` returned
 /// successfully.
-#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 #[inline]
 unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitidStatus> {
     let status = status.assume_init();

@@ -17,6 +17,7 @@ bitflags! {
     }
 }
 
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 bitflags! {
     /// Options for modifying the behavior of waitid
     pub struct WaitidOptions: u32 {
@@ -98,11 +99,11 @@ impl WaitStatus {
 
 /// The status of a process after calling [`waitid`].
 #[derive(Clone, Copy)]
-#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 pub struct WaitidStatus(pub(crate) backend::c::siginfo_t);
 
 /// The identifier to wait on in a call to [`waitid`].
-#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub enum WaitId<'a> {
@@ -175,7 +176,7 @@ pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
 }
 
 /// `waitid(_, _, _, opts)`-Wait for the specified child process to change state.
-#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 #[inline]
 pub fn waitid<'a>(
     id: impl Into<WaitId<'a>>,

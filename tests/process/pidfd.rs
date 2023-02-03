@@ -46,7 +46,14 @@ fn test_pidfd_poll() {
 
     // Create a pidfd for the child process.
     let pid = unsafe { process::Pid::from_raw(child.id() as _) }.unwrap();
-    let pidfd = process::pidfd_open(pid, process::PidfdFlags::NONBLOCK).unwrap();
+    let pidfd = match process::pidfd_open(pid, process::PidfdFlags::NONBLOCK) {
+        Ok(pidfd) => pidfd,
+        Err(e) if e == rustix::io::Errno::NOSYS => {
+            // The kernel does not support pidfds.
+            return;
+        }
+        Err(e) => panic!("failed to open pidfd: {}", e),
+    };
 
     // The child process should not have exited yet.
     match process::waitid(

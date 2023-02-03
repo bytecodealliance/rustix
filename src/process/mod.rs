@@ -82,13 +82,9 @@ pub use sched_yield::sched_yield;
 #[cfg(not(target_os = "wasi"))]
 pub use uname::{uname, Uname};
 #[cfg(not(target_os = "wasi"))]
-pub use wait::{
-    wait, waitpid, WaitOptions, WaitStatus,
-};
-#[cfg(not(any(target_os = "wasi", target_os = "redox")))]
-pub use wait::{
-    waitid, WaitId, WaitidOptions, WaitidStatus
-};
+pub use wait::{wait, waitpid, WaitOptions, WaitStatus};
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
+pub use wait::{waitid, WaitId, WaitidOptions, WaitidStatus};
 
 #[cfg(not(target_os = "wasi"))]
 #[cfg(feature = "fs")]
