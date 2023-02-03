@@ -24,6 +24,7 @@ fn test_waitpid() {
     assert!(status.stopped());
 }
 
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 #[test]
 #[serial]
 fn test_waitid() {
