@@ -642,3 +642,63 @@ pub fn set_tcp_nodelay<Fd: AsFd>(fd: Fd, nodelay: bool) -> io::Result<()> {
 pub fn get_tcp_nodelay<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::syscalls::sockopt::get_tcp_nodelay(fd.as_fd())
 }
+
+/// `getsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `netinet/tcp.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `tcp`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `IPPROTO_TCP` options]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `netinet/tcp.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_tcp.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
+/// [Winsock2 `setsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-setsockopt
+/// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
+#[cfg(any(
+    target_os = "freebsd",
+    target_os = "netbsd",
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos"
+))]
+#[doc(alias = "SO_NOSIGPIPE")]
+#[inline]
+pub fn getsockopt_nosigpipe<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::syscalls::sockopt::getsockopt_nosigpipe(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, val)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `netinet/tcp.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `tcp`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `IPPROTO_TCP` options]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `netinet/tcp.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_tcp.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
+/// [Winsock2 `setsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-setsockopt
+/// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
+#[cfg(any(
+    target_os = "freebsd",
+    target_os = "netbsd",
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos"
+))]
+#[doc(alias = "SO_NOSIGPIPE")]
+#[inline]
+pub fn setsockopt_nosigpipe<Fd: AsFd>(fd: Fd, val: bool) -> io::Result<()> {
+    backend::net::syscalls::sockopt::setsockopt_nosigpipe(fd.as_fd(), val)
+}
