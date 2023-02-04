@@ -636,6 +636,30 @@ pub(crate) mod sockopt {
         }
     }
 
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "tvos",
+        target_os = "watchos"
+    ))]
+    #[inline]
+    pub(crate) fn getsockopt_nosigpipe(fd: BorrowedFd<'_>) -> io::Result<bool> {
+        getsockopt(fd, c::SOL_SOCKET, c::SO_NOSIGPIPE).map(to_bool)
+    }
+
+    #[cfg(any(
+        target_os = "freebsd",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "tvos",
+        target_os = "watchos"
+    ))]
+    #[inline]
+    pub(crate) fn setsockopt_nosigpipe(fd: BorrowedFd<'_>, val: bool) -> io::Result<()> {
+        setsockopt(fd, c::SOL_SOCKET, c::SO_NOSIGPIPE, from_bool(val))
+    }
+
     #[inline]
     pub(crate) fn set_ip_ttl(fd: BorrowedFd<'_>, ttl: u32) -> io::Result<()> {
         setsockopt(fd, c::IPPROTO_IP as _, c::IP_TTL, ttl)
