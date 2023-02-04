@@ -638,7 +638,6 @@ pub(crate) mod sockopt {
 
     #[cfg(any(
         target_os = "freebsd",
-        target_os = "netbsd",
         target_os = "macos",
         target_os = "ios",
         target_os = "tvos",
@@ -651,7 +650,6 @@ pub(crate) mod sockopt {
 
     #[cfg(any(
         target_os = "freebsd",
-        target_os = "netbsd",
         target_os = "macos",
         target_os = "ios",
         target_os = "tvos",

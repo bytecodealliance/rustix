@@ -661,7 +661,6 @@ pub fn get_tcp_nodelay<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 /// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
 #[cfg(any(
     target_os = "freebsd",
-    target_os = "netbsd",
     target_os = "macos",
     target_os = "ios",
     target_os = "tvos",
@@ -691,7 +690,6 @@ pub fn getsockopt_nosigpipe<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 /// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
 #[cfg(any(
     target_os = "freebsd",
-    target_os = "netbsd",
     target_os = "macos",
     target_os = "ios",
     target_os = "tvos",
