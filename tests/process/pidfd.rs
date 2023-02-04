@@ -55,8 +55,8 @@ fn test_pidfd_poll() {
     let pid = unsafe { process::Pid::from_raw(child.id() as _) }.unwrap();
     let pidfd = match process::pidfd_open(pid, process::PidfdFlags::NONBLOCK) {
         Ok(pidfd) => pidfd,
-        Err(e) if e == rustix::io::Errno::NOSYS => {
-            // The kernel does not support pidfds.
+        Err(e) if e == rustix::io::Errno::NOSYS || e == rustix::io::Errno::INVAL => {
+            // The kernel does not support non-blocking pidfds.
             return;
         }
         Err(e) => panic!("failed to open pidfd: {}", e),
