@@ -314,6 +314,22 @@ impl<'a, Num: ArgNumber> From<crate::fs::AtFlags> for ArgReg<'a, Num> {
 }
 
 #[cfg(feature = "fs")]
+impl<'a, Num: ArgNumber> From<crate::fs::inotify::CreateFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::fs::inotify::CreateFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(feature = "fs")]
+impl<'a, Num: ArgNumber> From<crate::fs::inotify::WatchFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::fs::inotify::WatchFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(feature = "fs")]
 impl<'a, Num: ArgNumber> From<crate::fs::MemfdFlags> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::fs::MemfdFlags) -> Self {

@@ -23,6 +23,7 @@ use super::super::conv::{loff_t, loff_t_from_u64, ret_u64};
 use crate::fd::AsFd;
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
+use crate::fs::inotify;
 use crate::fs::{
     Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, MemfdFlags, Mode, OFlags,
     RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatVfs, StatVfsMountFlags, StatxFlags,
@@ -1421,4 +1422,23 @@ pub(crate) fn mount(
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn unmount(target: &CStr, flags: super::types::UnmountFlags) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_umount2, target, flags)) }
+}
+
+#[inline]
+pub(crate) fn inotify_init1(flags: inotify::CreateFlags) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(syscall_readonly!(__NR_inotify_init1, flags)) }
+}
+
+#[inline]
+pub(crate) fn inotify_add_watch(
+    infd: BorrowedFd<'_>,
+    path: &CStr,
+    flags: inotify::WatchFlags,
+) -> io::Result<i32> {
+    unsafe { ret_c_int(syscall_readonly!(__NR_inotify_add_watch, infd, path, flags)) }
+}
+
+#[inline]
+pub(crate) fn inotify_rm_watch(infd: BorrowedFd<'_>, wfd: i32) -> io::Result<()> {
+    unsafe { ret(syscall_readonly!(__NR_inotify_rm_watch, infd, c_int(wfd))) }
 }

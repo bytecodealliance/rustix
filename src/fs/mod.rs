@@ -58,6 +58,8 @@ mod sendfile;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod statx;
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use crate::backend::fs::inotify;
 #[cfg(not(any(
     target_os = "haiku",
     target_os = "illumos",
