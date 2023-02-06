@@ -314,3 +314,13 @@ pub(crate) fn capset(
     let header: *mut _ = header;
     unsafe { ret(syscall!(__NR_capset, header, data.as_ptr())) }
 }
+
+#[inline]
+pub(crate) fn setuid_thread(uid: crate::process::Uid) -> io::Result<()> {
+    unsafe { ret(syscall_readonly!(__NR_setuid, uid)) }
+}
+
+#[inline]
+pub(crate) fn setgid_thread(gid: crate::process::Gid) -> io::Result<()> {
+    unsafe { ret(syscall_readonly!(__NR_setgid, gid)) }
+}

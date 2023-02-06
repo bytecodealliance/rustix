@@ -30,7 +30,7 @@ pub use clock::{nanosleep, NanosleepRelativeResult, Timespec};
 #[cfg(linux_raw)]
 pub use futex::{futex, FutexFlags, FutexOperation};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use id::gettid;
+pub use id::{gettid, set_thread_gid, set_thread_uid};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use libcap::{capabilities, set_capabilities, CapabilityFlags, CapabilitySets};
 #[cfg(any(target_os = "android", target_os = "linux"))]
