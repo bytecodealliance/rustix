@@ -5,13 +5,14 @@
 //! This uses raw pointers to locate and read the kernel-provided auxv array.
 #![allow(unsafe_code)]
 
-#[cfg(any(feature = "param", feature = "runtime"))]
-use super::super::c;
 use super::super::elf::*;
 #[cfg(feature = "param")]
 use crate::ffi::CStr;
 #[cfg(feature = "runtime")]
 use core::slice;
+
+// `getauxval` wasn't supported in glibc until 2.16.
+weak!(fn getauxval(libc::c_ulong) -> *mut libc::c_void);
 
 #[cfg(feature = "param")]
 #[inline]
@@ -22,35 +23,39 @@ pub(crate) fn page_size() -> usize {
 #[cfg(feature = "param")]
 #[inline]
 pub(crate) fn clock_ticks_per_second() -> u64 {
-    unsafe { libc::getauxval(libc::AT_CLKTCK) as u64 }
+    unsafe { libc::sysconf(libc::_SC_CLK_TCK) as u64 }
 }
 
 #[cfg(feature = "param")]
 #[inline]
 pub(crate) fn linux_hwcap() -> (usize, usize) {
-    unsafe {
-        (
-            libc::getauxval(libc::AT_HWCAP) as usize,
-            libc::getauxval(libc::AT_HWCAP2) as usize,
-        )
+    if let Some(libc_getauxval) = getauxval.get() {
+        unsafe {
+            let hwcap = libc_getauxval(libc::AT_HWCAP) as usize;
+            let hwcap2 = libc_getauxval(libc::AT_HWCAP2) as usize;
+            (hwcap, hwcap2)
+        }
+    } else {
+        (0, 0)
     }
 }
 
 #[cfg(feature = "param")]
 #[inline]
 pub(crate) fn linux_execfn() -> &'static CStr {
-    unsafe {
-        let execfn = libc::getauxval(libc::AT_EXECFN) as *const c::c_char;
-        CStr::from_ptr(execfn.cast())
+    if let Some(libc_getauxval) = getauxval.get() {
+        unsafe { CStr::from_ptr(libc_getauxval(libc::AT_EXECFN).cast()) }
+    } else {
+        cstr!("")
     }
 }
 
 #[cfg(feature = "runtime")]
 #[inline]
-pub(crate) fn exe_phdrs() -> (*const c::c_void, usize) {
+pub(crate) fn exe_phdrs() -> (*const libc::c_void, usize) {
     unsafe {
         (
-            libc::getauxval(libc::AT_PHDR) as *const c::c_void,
+            libc::getauxval(libc::AT_PHDR) as *const libc::c_void,
             libc::getauxval(libc::AT_PHNUM) as usize,
         )
     }
@@ -70,5 +75,9 @@ pub(in super::super) fn exe_phdrs_slice() -> &'static [Elf_Phdr] {
 /// so if we don't see it, this function returns a null pointer.
 #[inline]
 pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
-    unsafe { libc::getauxval(linux_raw_sys::general::AT_SYSINFO_EHDR.into()) as *const Elf_Ehdr }
+    if let Some(libc_getauxval) = getauxval.get() {
+        unsafe { libc_getauxval(linux_raw_sys::general::AT_SYSINFO_EHDR.into()) as *const Elf_Ehdr }
+    } else {
+        core::ptr::null()
+    }
 }
