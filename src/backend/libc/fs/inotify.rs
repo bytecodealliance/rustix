@@ -7,7 +7,9 @@ use crate::io;
 use bitflags::bitflags;
 
 bitflags! {
-    /// `IN_*` for use with [`Inotify::new`].
+    /// `IN_*` for use with [`inotify_init`].
+    ///
+    /// [`inotify_init`]: crate::fs::inotify::inotify_init
     pub struct CreateFlags: c::c_int {
         /// `IN_CLOEXEC`
         const CLOEXEC = c::IN_CLOEXEC;
@@ -17,7 +19,9 @@ bitflags! {
 }
 
 bitflags! {
-    /// `IN*` for use with [`Inotify::add_watch`].
+    /// `IN*` for use with [`inotify_add_watch`].
+    ///
+    /// [`inotify_add_watch`]: crate::fs::inotify::inotify_add_watch
     #[derive(Default)]
     pub struct WatchFlags: u32 {
         /// `IN_ACCESS`
@@ -67,7 +71,7 @@ bitflags! {
     }
 }
 
-/// `inotify_init1(flags)`—Creates a new `Inotify`.
+/// `inotify_init1(flags)`—Creates a new inotify object.
 ///
 /// Use the [`CreateFlags::CLOEXEC`] flag to prevent the resulting file
 /// descriptor from being implicitly passed across `exec` boundaries.
