@@ -126,6 +126,10 @@ pub enum ClockId {
     /// `CLOCK_MONOTONIC`
     Monotonic = c::CLOCK_MONOTONIC,
 
+    /// `CLOCK_UPTIME`
+    #[cfg(any(freebsdlike))]
+    Uptime = c::CLOCK_UPTIME,
+
     /// `CLOCK_PROCESS_CPUTIME_ID`
     #[cfg(not(any(netbsdlike, solarish, target_os = "redox")))]
     ProcessCPUTime = c::CLOCK_PROCESS_CPUTIME_ID,
@@ -135,11 +139,11 @@ pub enum ClockId {
     ThreadCPUTime = c::CLOCK_THREAD_CPUTIME_ID,
 
     /// `CLOCK_REALTIME_COARSE`
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(any(target_os = "android", target_os = "linux", target_os = "freebsd"))]
     RealtimeCoarse = c::CLOCK_REALTIME_COARSE,
 
     /// `CLOCK_MONOTONIC_COARSE`
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(any(target_os = "android", target_os = "linux", target_os = "freebsd"))]
     MonotonicCoarse = c::CLOCK_MONOTONIC_COARSE,
 
     /// `CLOCK_MONOTONIC_RAW`

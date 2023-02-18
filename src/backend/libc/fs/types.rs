@@ -40,10 +40,15 @@ bitflags! {
         /// `AT_EMPTY_PATH`
         #[cfg(any(
             target_os = "android",
+            target_os = "freebsd",
             target_os = "fuchsia",
             target_os = "linux",
         ))]
         const EMPTY_PATH = c::AT_EMPTY_PATH;
+
+        /// `AT_RESOLVE_BENEATH`
+        #[cfg(target_os = "freebsd")]
+        const RESOLVE_BENEATH = c::AT_RESOLVE_BENEATH;
 
         /// `AT_EACCESS`
         #[cfg(not(any(target_os = "emscripten", target_os = "android")))]
@@ -175,7 +180,7 @@ bitflags! {
         const DIRECTORY = c::O_DIRECTORY;
 
         /// `O_DSYNC`
-        #[cfg(not(any(freebsdlike, target_os = "redox")))]
+        #[cfg(not(any(target_os = "dragonfly", target_os = "redox")))]
         const DSYNC = c::O_DSYNC;
 
         /// `O_EXCL`
@@ -228,6 +233,7 @@ bitflags! {
         #[cfg(any(
             target_os = "android",
             target_os = "emscripten",
+            target_os = "freebsd",
             target_os = "fuchsia",
             target_os = "linux",
             target_os = "redox",
@@ -264,6 +270,14 @@ bitflags! {
             target_os = "netbsd",
         ))]
         const DIRECT = c::O_DIRECT;
+
+        /// `O_RESOLVE_BENEATH`
+        #[cfg(target_os = "freebsd")]
+        const RESOLVE_BENEATH = c::O_RESOLVE_BENEATH;
+
+        /// `O_EMPTY_PATH`
+        #[cfg(target_os = "freebsd")]
+        const EMPTY_PATH = c::O_EMPTY_PATH;
     }
 }
 
@@ -499,40 +513,28 @@ bitflags! {
         const HUGETLB = c::MFD_HUGETLB;
 
         /// `MFD_HUGE_64KB`
-        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_64KB = c::MFD_HUGE_64KB;
         /// `MFD_HUGE_512JB`
-        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_512KB = c::MFD_HUGE_512KB;
         /// `MFD_HUGE_1MB`
-        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_1MB = c::MFD_HUGE_1MB;
         /// `MFD_HUGE_2MB`
-        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_2MB = c::MFD_HUGE_2MB;
         /// `MFD_HUGE_8MB`
-        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_8MB = c::MFD_HUGE_8MB;
         /// `MFD_HUGE_16MB`
-        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_16MB = c::MFD_HUGE_16MB;
         /// `MFD_HUGE_32MB`
-        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_32MB = c::MFD_HUGE_32MB;
         /// `MFD_HUGE_256MB`
-        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_256MB = c::MFD_HUGE_256MB;
         /// `MFD_HUGE_512MB`
-        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_512MB = c::MFD_HUGE_512MB;
         /// `MFD_HUGE_1GB`
-        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_1GB = c::MFD_HUGE_1GB;
         /// `MFD_HUGE_2GB`
-        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_2GB = c::MFD_HUGE_2GB;
         /// `MFD_HUGE_16GB`
-        #[cfg(any(target_os = "android", target_os = "linux"))]
         const HUGE_16GB = c::MFD_HUGE_16GB;
     }
 }
