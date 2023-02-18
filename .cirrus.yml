@@ -1,22 +1,16 @@
 # Implementation derived from `.cirrus.yml` in Rust's libc bindings
 # at revision 7f4774e76bd5cb9ccb7140d71ef9be9c16009cdf.
 
-# Disable FreeBSD testing for now, as we currently hit this error:
-#
-# [4/4] Extracting curl-7.87.0_1: .......... done
-# curl https://sh.rustup.rs -sSf --output rustup.sh
-# ld-elf.so.1: /usr/local/lib/libcurl.so.4: Undefined symbol "nghttp2_option_set_no_rfc9113_leading_and_trailing_ws_validation"
-
-#task:
-#  name: stable x86_64-unknown-freebsd-13
-#  freebsd_instance:
-#    image_family: freebsd-13-0-snap
-#  setup_script:
-#    - pkg install -y curl
-#    - curl https://sh.rustup.rs -sSf --output rustup.sh
-#    - sh rustup.sh --default-toolchain stable -y --profile=minimal
-#    - . $HOME/.cargo/env
-#    - rustup default stable
-#  test_script:
-#    - . $HOME/.cargo/env
-#    - cargo test --workspace --features=all-apis
+task:
+  name: stable x86_64-unknown-freebsd-13
+  freebsd_instance:
+    image_family: freebsd-13-1
+  setup_script:
+    - pkg install -y curl
+    - curl https://sh.rustup.rs -sSf --output rustup.sh
+    - sh rustup.sh --default-toolchain stable -y --profile=minimal
+    - . $HOME/.cargo/env
+    - rustup default stable
+  test_script:
+    - . $HOME/.cargo/env
+    - cargo test --workspace --features=all-apis
