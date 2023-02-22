@@ -22,6 +22,20 @@ pub use tc::{
     tcsetpgrp, tcsetwinsize, Action, OptionalActions, QueueSelector, Speed, Tcflag, Termios,
     Winsize,
 };
+#[cfg(all(
+    any(target_os = "android", target_os = "linux"),
+    any(
+        target_arch = "x86",
+        target_arch = "x86_64",
+        target_arch = "x32",
+        target_arch = "riscv64",
+        target_arch = "aarch64",
+        target_arch = "arm",
+        target_arch = "mips",
+        target_arch = "mips64",
+    )
+))]
+pub use tc::{tcgetattr2, tcsetattr2, Termios2};
 #[cfg(not(windows))]
 pub use tty::isatty;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
