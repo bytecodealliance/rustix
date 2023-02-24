@@ -107,6 +107,44 @@ fn main() {
     }
 
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM");
+    println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_LIBC");
+
+    // Rerun this script if any of our features or configuration flags change,
+    // or if the toolchain we used for feature detection changes.
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_USE_LIBC");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_USE_LIBC_AUXV");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_LIBC");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_RUSTC_DEP_OF_STD");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_DEFAULT");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_STD");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_CC");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_ITOA");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_ONCE_CELL");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_IO_LIFETIMES");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_ERRNO");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_LIBC_ERRNO");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_FS");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_IO_URING");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_NET");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_THREAD");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_PROCESS");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_TIME");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_PARAM");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_PROCFS");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_TERMIOS");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_MM");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_RAND");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_RUNTIME");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_ALL_APIS");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_OS_PIPE");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_FS_ERR");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_ALL_IMPLS");
+    println!("cargo:rerun-if-env-changed=CARGO_CFG_MIRI");
+    println!("cargo:rerun-if-env-changed=CARGO_ENCODED_RUSTFLAGS");
+    println!("cargo:rerun-if-env-changed=RUSTC");
+    println!("cargo:rerun-if-env-changed=TARGET");
+    println!("cargo:rerun-if-env-changed=CARGO_RUSTC_WRAPPER");
+    println!("cargo:rerun-if-env-changed=PROFILE");
 }
 
 /// Link in the desired version of librustix_outline_{arch}.a, containing the
