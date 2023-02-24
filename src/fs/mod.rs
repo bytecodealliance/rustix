@@ -162,7 +162,7 @@ pub use fd::fdatasync;
 pub use fd::{fallocate, FallocateFlags};
 #[cfg(not(target_os = "wasi"))]
 pub use fd::{fchmod, fchown};
-#[cfg(not(any(target_os = "solaris", target_os = "wasi")))]
+#[cfg(not(target_os = "wasi"))]
 pub use fd::{flock, FlockOperation};
 pub use fd::{fstat, fsync, ftruncate, futimens, is_file_read_write, seek, tell, Stat, Timestamps};
 #[cfg(not(any(

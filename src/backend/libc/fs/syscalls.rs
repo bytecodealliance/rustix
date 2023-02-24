@@ -86,7 +86,7 @@ use crate::fs::Advice;
     target_os = "solaris",
 )))]
 use crate::fs::FallocateFlags;
-#[cfg(not(any(target_os = "solaris", target_os = "wasi")))]
+#[cfg(not(target_os = "wasi"))]
 use crate::fs::FlockOperation;
 #[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 use crate::fs::MemfdFlags;
@@ -966,6 +966,37 @@ pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>)
 #[cfg(not(any(target_os = "solaris", target_os = "wasi")))]
 pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result<()> {
     unsafe { ret(c::flock(borrowed_fd(fd), operation as c::c_int)) }
+}
+
+#[cfg(target_os = "solaris")]
+pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result<()> {
+    // Solaris lacks flock(), so try to emulate using fcntl()
+    let flag = operation as c::c_int;
+    let mut flock = c::flock {
+        l_type: 0,
+        l_whence: 0,
+        l_start: 0,
+        l_len: 0,
+        l_sysid: 0,
+        l_pid: 0,
+        l_pad: [0, 0, 0, 0],
+    };
+    flock.l_type = if flag & libc::LOCK_UN != 0 {
+        libc::F_UNLCK
+    } else if flag & libc::LOCK_EX != 0 {
+        libc::F_WRLCK
+    } else if flag & libc::LOCK_SH != 0 {
+        libc::F_RDLCK
+    } else {
+        panic!("unexpected flock() operation")
+    };
+
+    let mut cmd = libc::F_SETLKW;
+    if (flag & libc::LOCK_NB) != 0 {
+        cmd = libc::F_SETLK;
+    }
+
+    unsafe { ret(c::fcntl(borrowed_fd(fd), cmd, &flock)) }
 }
 
 pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
