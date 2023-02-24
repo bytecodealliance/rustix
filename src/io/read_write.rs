@@ -11,7 +11,6 @@ pub use backend::io::io_slice::{IoSlice, IoSliceMut};
 #[cfg(feature = "std")]
 pub use std::io::{IoSlice, IoSliceMut};
 
-/// `RWF_*` constants for use with [`preadv2`] and [`pwritev2`].
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use backend::io::types::ReadWriteFlags;
 
