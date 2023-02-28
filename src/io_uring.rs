@@ -56,7 +56,7 @@ pub unsafe fn io_uring_register<Fd: AsFd>(
     opcode: IoringRegisterOp,
     arg: *const c_void,
     nr_args: u32,
-) -> io::Result<()> {
+) -> io::Result<u32> {
     backend::io_uring::syscalls::io_uring_register(fd.as_fd(), opcode, arg, nr_args)
 }
 
@@ -467,6 +467,12 @@ bitflags::bitflags! {
 
         /// `IORING_CQE_F_MORE`
         const MORE = sys::IORING_CQE_F_MORE as _;
+
+        /// `IORING_CQE_F_SOCK_NONEMPTY`
+        const SOCK_NONEMPTY = sys::IORING_CQE_F_SOCK_NONEMPTY as _;
+
+        /// `IORING_CQE_F_NOTIF`
+        const NOTIF = sys::IORING_CQE_F_NOTIF as _;
     }
 }
 
@@ -558,6 +564,9 @@ bitflags::bitflags! {
 
         /// `IORING_FEAT_SUBMIT_STABLE`
         const SUBMIT_STABLE = sys::IORING_FEAT_SUBMIT_STABLE;
+
+        /// `IORING_FEAT_LINKED_FILE`
+        const LINKED_FILE = sys::IORING_FEAT_LINKED_FILE;
     }
 }
 
@@ -588,6 +597,9 @@ bitflags::bitflags! {
 
         /// `IORING_SQ_CQ_OVERFLOW`
         const CQ_OVERFLOW = sys::IORING_SQ_CQ_OVERFLOW;
+
+        /// `IORING_SQ_TASKRUN`
+        const TASKRUN = sys::IORING_SQ_TASKRUN;
     }
 }
 
@@ -612,11 +624,61 @@ bitflags::bitflags! {
 
         /// `IORING_POLL_UPDATE_USER_DATA`
         const UPDATE_USER_DATA = sys::IORING_POLL_UPDATE_USER_DATA;
+
+        /// `IORING_POLL_ADD_LEVEL`
+        const ADD_LEVEL = sys::IORING_POLL_ADD_LEVEL;
+    }
+}
+
+bitflags::bitflags! {
+    /// send/sendmsg & recv/recvmsg flags (`sqe.ioprio`)
+    #[derive(Default)]
+    pub struct IoringRecvSendFlags: u16 {
+        /// `IORING_RECVSEND_POLL_FIRST`
+        const POLL_FIRST = sys::IORING_RECVSEND_POLL_FIRST as _;
+
+        /// `IORING_RECV_MULTISHOT`
+        const MULTISHOT = sys::IORING_RECV_MULTISHOT as _;
+
+        /// `IORING_RECVSEND_FIXED_BUF`
+        const FIXED_BUF = sys::IORING_RECVSEND_FIXED_BUF as _;
+    }
+}
+
+bitflags::bitflags! {
+    /// accept flags (`sqe.ioprio`)
+    #[derive(Default)]
+    pub struct IoringAcceptFlags: u16 {
+        /// `IORING_ACCEPT_MULTISHOT`
+        const MULTISHOT = sys::IORING_ACCEPT_MULTISHOT as _;
+    }
+}
+
+bitflags::bitflags! {
+    /// recvmsg out flags
+    #[derive(Default)]
+    pub struct RecvmsgOutFlags: u32 {
+        /// `MSG_EOR`
+        const EOR = sys::MSG_EOR;
+
+        /// `MSG_TRUNC`
+        const TRUNC = sys::MSG_TRUNC;
+
+        /// `MSG_CTRUNC`
+        const CTRUNC = sys::MSG_CTRUNC;
+
+        /// `MSG_OOB`
+        const OOB = sys::MSG_OOB;
+
+        /// `MSG_ERRQUEUE`
+        const ERRQUEUE = sys::MSG_ERRQUEUE;
     }
 }
 
 #[allow(missing_docs)]
 pub const IORING_CQE_BUFFER_SHIFT: u32 = sys::IORING_CQE_BUFFER_SHIFT as _;
+#[allow(missing_docs)]
+pub const IORING_FILE_INDEX_ALLOC: i32 = sys::IORING_FILE_INDEX_ALLOC as _;
 
 // Re-export these as `u64`, which is the `offset` type in `rustix::io::mmap`.
 #[allow(missing_docs)]
@@ -757,7 +819,7 @@ impl core::fmt::Debug for io_uring_user_data {
 pub struct io_uring_sqe {
     pub opcode: IoringOp,
     pub flags: IoringSqeFlags,
-    pub ioprio: u16,
+    pub ioprio_or_flags: ioprio_or_flags_union,
     pub fd: RawFd,
     pub off_or_addr2: off_or_addr2_union,
     pub addr_or_splice_off_in: addr_or_splice_off_in_union,
@@ -768,6 +830,15 @@ pub struct io_uring_sqe {
     pub personality: u16,
     pub splice_fd_in_or_file_index: splice_fd_in_or_file_index_union,
     pub addr3_or_cmd: addr3_or_cmd_union,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union ioprio_or_flags_union {
+    pub recvsend: IoringRecvSendFlags,
+    pub accept: IoringAcceptFlags,
+    pub ioprio: u16,
 }
 
 #[allow(missing_docs)]
@@ -1003,6 +1074,16 @@ pub struct io_uring_getevents_arg {
 
 #[allow(missing_docs)]
 #[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct io_uring_recvmsg_out {
+    pub namelen: u32,
+    pub controllen: u32,
+    pub payloadlen: u32,
+    pub flags: RecvmsgOutFlags,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct iovec {
     pub iov_base: *mut c_void,
@@ -1047,87 +1128,67 @@ pub struct io_uring_buf {
     pub resv: u16,
 }
 
+impl Default for ioprio_or_flags_union {
+    #[inline]
+    fn default() -> Self {
+        // Safety: All of Linux's io_uring structs may be zero-initialized.
+        unsafe { ::core::mem::zeroed::<Self>() }
+    }
+}
+
 impl Default for off_or_addr2_union {
     #[inline]
     fn default() -> Self {
-        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
         // Safety: All of Linux's io_uring structs may be zero-initialized.
-        unsafe {
-            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
+        unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
 
 impl Default for addr_or_splice_off_in_union {
     #[inline]
     fn default() -> Self {
-        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
         // Safety: All of Linux's io_uring structs may be zero-initialized.
-        unsafe {
-            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
+        unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
 
 impl Default for addr3_or_cmd_union {
     #[inline]
     fn default() -> Self {
-        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
         // Safety: All of Linux's io_uring structs may be zero-initialized.
-        unsafe {
-            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
+        unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
 
 impl Default for op_flags_union {
     #[inline]
     fn default() -> Self {
-        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
         // Safety: All of Linux's io_uring structs may be zero-initialized.
-        unsafe {
-            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
+        unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
 
 impl Default for buf_union {
     #[inline]
     fn default() -> Self {
-        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
         // Safety: All of Linux's io_uring structs may be zero-initialized.
-        unsafe {
-            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
+        unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
 
 impl Default for splice_fd_in_or_file_index_union {
     #[inline]
     fn default() -> Self {
-        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
         // Safety: All of Linux's io_uring structs may be zero-initialized.
-        unsafe {
-            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
+        unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
 
 impl Default for register_or_sqe_op_or_sqe_flags_union {
     #[inline]
     fn default() -> Self {
-        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
         // Safety: All of Linux's io_uring structs may be zero-initialized.
-        unsafe {
-            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
+        unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
 
@@ -1214,7 +1275,7 @@ fn io_uring_layouts() {
     check_type!(io_uring_sqe);
     check_struct_field!(io_uring_sqe, opcode);
     check_struct_field!(io_uring_sqe, flags);
-    check_struct_field!(io_uring_sqe, ioprio);
+    check_struct_renamed_field!(io_uring_sqe, ioprio_or_flags, ioprio);
     check_struct_field!(io_uring_sqe, fd);
     check_struct_renamed_field!(io_uring_sqe, off_or_addr2, __bindgen_anon_1);
     check_struct_renamed_field!(io_uring_sqe, addr_or_splice_off_in, __bindgen_anon_2);
@@ -1274,6 +1335,7 @@ fn io_uring_layouts() {
         resv1,
         resv2
     );
+    check_struct!(io_uring_recvmsg_out, namelen, controllen, payloadlen, flags);
     check_struct!(io_uring_probe, last_op, ops_len, resv, resv2, ops);
     check_struct!(io_uring_probe_op, op, resv, flags, resv2);
     check_struct!(io_uring_files_update, offset, resv, fds);
