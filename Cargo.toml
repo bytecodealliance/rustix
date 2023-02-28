@@ -194,3 +194,11 @@ os_pipe = ["io-lifetimes/os_pipe"]
 fs-err = ["io-lifetimes/fs-err"]
 #all-impls = ["async-std", "tokio", "os_pipe", "socket2", "mio", "fs-err"]
 all-impls = ["os_pipe", "fs-err"]
+
+# OS compatability features
+
+# Optimize for Linux 4.11 or later
+linux_4_11 = []
+
+# Enable all optimizations for the latest Linux versions.
+linux_latest = ["linux_4_11"]
