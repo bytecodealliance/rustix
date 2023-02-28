@@ -1,7 +1,7 @@
 //! libc syscalls supporting `rustix::io_uring`.
 
 use super::super::c;
-use super::super::conv::{borrowed_fd, syscall_ret, syscall_ret_owned_fd, syscall_ret_u32};
+use super::super::conv::{borrowed_fd, syscall_ret_owned_fd, syscall_ret_u32};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
 use crate::io_uring::{io_uring_params, IoringEnterFlags, IoringRegisterOp};
@@ -24,8 +24,8 @@ pub(crate) unsafe fn io_uring_register(
     opcode: IoringRegisterOp,
     arg: *const c::c_void,
     nr_args: u32,
-) -> io::Result<()> {
-    syscall_ret(c::syscall(
+) -> io::Result<u32> {
+    syscall_ret_u32(c::syscall(
         __NR_io_uring_register as _,
         borrowed_fd(fd),
         opcode as u32 as usize,
