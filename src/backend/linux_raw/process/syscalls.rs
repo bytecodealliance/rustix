@@ -12,12 +12,13 @@ use super::super::conv::{
     ret_infallible, ret_usize, ret_usize_infallible, size_of, slice_just_addr, slice_mut, zero,
 };
 use super::types::{RawCpuSet, RawUname};
-use crate::fd::BorrowedFd;
+use crate::backend::conv::ret_owned_fd;
+use crate::fd::{AsRawFd, BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::io;
 use crate::process::{
-    Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, RawNonZeroPid, RawPid, Resource, Rlimit,
-    Signal, Uid, WaitOptions, WaitStatus,
+    Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, PidfdFlags, RawNonZeroPid, RawPid,
+    Resource, Rlimit, Signal, Uid, WaitId, WaitOptions, WaitStatus, WaitidOptions, WaitidStatus,
 };
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
@@ -516,6 +517,83 @@ pub(crate) fn _waitpid(
     }
 }
 
+#[inline]
+pub(crate) fn waitid(id: WaitId<'_>, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
+    // Get the id to wait on.
+    match id {
+        WaitId::All => _waitid_all(options),
+        WaitId::Pid(pid) => _waitid_pid(pid, options),
+        WaitId::PidFd(fd) => _waitid_pidfd(fd, options),
+    }
+}
+
+#[inline]
+fn _waitid_all(options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
+    let mut status = MaybeUninit::<c::siginfo_t>::uninit();
+    unsafe {
+        ret(syscall!(
+            __NR_waitid,
+            c_uint(c::P_ALL),
+            c_uint(0),
+            by_mut(&mut status),
+            c_int(options.bits() as _),
+            zero()
+        ))?
+    };
+
+    Ok(unsafe { cvt_waitid_status(status) })
+}
+
+#[inline]
+fn _waitid_pid(pid: Pid, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
+    let mut status = MaybeUninit::<c::siginfo_t>::uninit();
+    unsafe {
+        ret(syscall!(
+            __NR_waitid,
+            c_uint(c::P_PID),
+            c_uint(Pid::as_raw(Some(pid))),
+            by_mut(&mut status),
+            c_int(options.bits() as _),
+            zero()
+        ))?
+    };
+
+    Ok(unsafe { cvt_waitid_status(status) })
+}
+
+#[inline]
+fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
+    let mut status = MaybeUninit::<c::siginfo_t>::uninit();
+    unsafe {
+        ret(syscall!(
+            __NR_waitid,
+            c_uint(c::P_PIDFD),
+            c_uint(fd.as_raw_fd() as _),
+            by_mut(&mut status),
+            c_int(options.bits() as _),
+            zero()
+        ))?
+    };
+
+    Ok(unsafe { cvt_waitid_status(status) })
+}
+
+/// Convert a `siginfo_t` to a `WaitidStatus`.
+///
+/// # Safety
+///
+/// The caller must ensure that `status` is initialized and that `waitid` returned
+/// successfully.
+#[inline]
+unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitidStatus> {
+    let status = status.assume_init();
+    if status.__bindgen_anon_1.__bindgen_anon_1.si_signo == 0 {
+        None
+    } else {
+        Some(WaitidStatus(status))
+    }
+}
+
 #[cfg(feature = "runtime")]
 #[inline]
 pub(crate) fn exit_group(code: c::c_int) -> ! {
@@ -557,4 +635,15 @@ pub(crate) unsafe fn prctl(
     arg5: *mut c::c_void,
 ) -> io::Result<c::c_int> {
     ret_c_int(syscall!(__NR_prctl, c_int(option), arg2, arg3, arg4, arg5))
+}
+
+#[inline]
+pub(crate) fn pidfd_open(pid: Pid, flags: PidfdFlags) -> io::Result<OwnedFd> {
+    unsafe {
+        ret_owned_fd(syscall_readonly!(
+            __NR_pidfd_open,
+            pid,
+            c_int(flags.bits() as _)
+        ))
+    }
 }

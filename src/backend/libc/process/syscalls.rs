@@ -17,8 +17,12 @@ use super::super::conv::{syscall_ret, syscall_ret_u32};
 use super::types::RawCpuSet;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use crate::fd::BorrowedFd;
+#[cfg(target_os = "linux")]
+use crate::fd::{AsRawFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::io;
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
+use crate::process::{WaitId, WaitidOptions, WaitidStatus};
 use core::mem::MaybeUninit;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use {
@@ -27,6 +31,8 @@ use {
     crate::process::{Resource, Rlimit},
     core::convert::TryInto,
 };
+#[cfg(target_os = "linux")]
+use {super::super::conv::syscall_ret_owned_fd, crate::process::PidfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use {
     super::super::offset::libc_prlimit,
@@ -394,6 +400,85 @@ pub(crate) fn _waitpid(
     }
 }
 
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
+#[inline]
+pub(crate) fn waitid(id: WaitId<'_>, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
+    // Get the id to wait on.
+    match id {
+        WaitId::All => _waitid_all(options),
+        WaitId::Pid(pid) => _waitid_pid(pid, options),
+        #[cfg(target_os = "linux")]
+        WaitId::PidFd(fd) => _waitid_pidfd(fd, options),
+        #[cfg(not(target_os = "linux"))]
+        WaitId::__EatLifetime(_) => unreachable!(),
+    }
+}
+
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
+#[inline]
+fn _waitid_all(options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
+    let mut status = MaybeUninit::<c::siginfo_t>::uninit();
+    unsafe {
+        ret(c::waitid(
+            c::P_ALL,
+            0,
+            status.as_mut_ptr(),
+            options.bits() as _,
+        ))?
+    };
+
+    Ok(unsafe { cvt_waitid_status(status) })
+}
+
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
+#[inline]
+fn _waitid_pid(pid: Pid, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
+    let mut status = MaybeUninit::<c::siginfo_t>::uninit();
+    unsafe {
+        ret(c::waitid(
+            c::P_PID,
+            Pid::as_raw(Some(pid)) as _,
+            status.as_mut_ptr(),
+            options.bits() as _,
+        ))?
+    };
+
+    Ok(unsafe { cvt_waitid_status(status) })
+}
+
+#[cfg(target_os = "linux")]
+#[inline]
+fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
+    let mut status = MaybeUninit::<c::siginfo_t>::uninit();
+    unsafe {
+        ret(c::waitid(
+            c::P_PIDFD,
+            fd.as_raw_fd() as _,
+            status.as_mut_ptr(),
+            options.bits() as _,
+        ))?
+    };
+
+    Ok(unsafe { cvt_waitid_status(status) })
+}
+
+/// Convert a `siginfo_t` to a `WaitidStatus`.
+///
+/// # Safety
+///
+/// The caller must ensure that `status` is initialized and that `waitid` returned
+/// successfully.
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
+#[inline]
+unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitidStatus> {
+    let status = status.assume_init();
+    if status.si_signo == 0 {
+        None
+    } else {
+        Some(WaitidStatus(status))
+    }
+}
+
 #[inline]
 pub(crate) fn exit_group(code: c::c_int) -> ! {
     // `_exit` and `_Exit` are the same; it's just a matter of which ones
@@ -462,4 +547,15 @@ pub(crate) unsafe fn procctl(
     data: *mut c::c_void,
 ) -> io::Result<()> {
     ret(c::procctl(idtype, id, option, data))
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn pidfd_open(pid: Pid, flags: PidfdFlags) -> io::Result<OwnedFd> {
+    unsafe {
+        syscall_ret_owned_fd(libc::syscall(
+            c::SYS_pidfd_open,
+            pid.as_raw_nonzero().get(),
+            flags.bits(),
+        ))
+    }
 }

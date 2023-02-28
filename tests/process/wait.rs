@@ -23,3 +23,26 @@ fn test_waitpid() {
         .unwrap();
     assert!(status.stopped());
 }
+
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
+#[test]
+#[serial]
+fn test_waitid() {
+    let child = Command::new("yes")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .expect("failed to execute child");
+    unsafe { kill(child.id() as _, SIGSTOP) };
+
+    let pid = unsafe { process::Pid::from_raw(child.id() as _) };
+    let status = process::waitid(
+        process::WaitId::Pid(pid.unwrap()),
+        process::WaitidOptions::STOPPED,
+    )
+    .expect("failed to wait")
+    .unwrap();
+
+    // TODO
+    let _ = status;
+}
