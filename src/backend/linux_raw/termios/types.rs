@@ -52,10 +52,27 @@ pub enum Action {
     IOn = linux_raw_sys::general::TCION,
 }
 
-/// `struct termios` for use with [`tcgetattr`].
+/// `struct termios` for use with [`tcgetattr`] and [`tcsetattr`].
 ///
 /// [`tcgetattr`]: crate::termios::tcgetattr
+/// [`tcsetattr`]: crate::termios::tcsetattr
 pub type Termios = linux_raw_sys::general::termios;
+
+/// `struct termios2` for use with [`tcgetattr2`] and [`tcsetattr2`].
+///
+/// [`tcgetattr2`]: crate::termios::tcgetattr2
+/// [`tcsetattr2`]: crate::termios::tcsetattr2
+#[cfg(any(
+    target_arch = "x86",
+    target_arch = "x86_64",
+    target_arch = "x32",
+    target_arch = "riscv64",
+    target_arch = "aarch64",
+    target_arch = "arm",
+    target_arch = "mips",
+    target_arch = "mips64",
+))]
+pub type Termios2 = linux_raw_sys::general::termios2;
 
 /// `struct winsize` for use with [`tcgetwinsize`].
 ///
@@ -352,6 +369,9 @@ pub const B3500000: Speed = linux_raw_sys::general::B3500000;
 /// `B4000000`
 #[cfg(not(any(target_arch = "sparc", target_arch = "sparc64")))]
 pub const B4000000: Speed = linux_raw_sys::general::B4000000;
+
+/// `BOTHER`
+pub const BOTHER: c::c_uint = linux_raw_sys::general::BOTHER;
 
 /// `CSIZE`
 pub const CSIZE: c::c_uint = linux_raw_sys::general::CSIZE;

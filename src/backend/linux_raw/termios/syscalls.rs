@@ -42,6 +42,30 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
 }
 
 #[inline]
+#[cfg(any(
+    target_arch = "x86",
+    target_arch = "x86_64",
+    target_arch = "x32",
+    target_arch = "riscv64",
+    target_arch = "aarch64",
+    target_arch = "arm",
+    target_arch = "mips",
+    target_arch = "mips64",
+))]
+pub(crate) fn tcgetattr2(fd: BorrowedFd<'_>) -> io::Result<crate::termios::Termios2> {
+    unsafe {
+        let mut result = MaybeUninit::<crate::termios::Termios2>::uninit();
+        ret(syscall!(
+            __NR_ioctl,
+            fd,
+            c_uint(linux_raw_sys::ioctl::TCGETS2),
+            &mut result
+        ))?;
+        Ok(result.assume_init())
+    }
+}
+
+#[inline]
 pub(crate) fn tcgetpgrp(fd: BorrowedFd<'_>) -> io::Result<Pid> {
     unsafe {
         let mut result = MaybeUninit::<__kernel_pid_t>::uninit();
@@ -72,6 +96,32 @@ pub(crate) fn tcsetattr(
             __NR_ioctl,
             fd,
             c_uint(request as u32),
+            by_ref(termios)
+        ))
+    }
+}
+
+#[inline]
+#[cfg(any(
+    target_arch = "x86",
+    target_arch = "x86_64",
+    target_arch = "x32",
+    target_arch = "riscv64",
+    target_arch = "aarch64",
+    target_arch = "arm",
+    target_arch = "mips",
+    target_arch = "mips64",
+))]
+pub(crate) fn tcsetattr2(
+    fd: BorrowedFd,
+    optional_actions: OptionalActions,
+    termios: &crate::termios::Termios2,
+) -> io::Result<()> {
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_ioctl,
+            fd,
+            c_uint(linux_raw_sys::ioctl::TCSETS2 + optional_actions as u32),
             by_ref(termios)
         ))
     }
