@@ -14,9 +14,11 @@
 //!
 //! # References
 //!  - [Linux]
+//!  - [io_uring header]
 //!
 //! [Linux]: https://man.archlinux.org/man/io_uring.7.en
 //! [io_uring]: https://en.wikipedia.org/wiki/Io_uring
+//! [io_uring header]: https://github.com/torvalds/linux/blob/master/include/uapi/linux/io_uring.h
 #![allow(unsafe_code)]
 
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
@@ -383,6 +385,18 @@ impl Default for IoringRestrictionOp {
     }
 }
 
+/// `IORING_MSG_*` constants which represent commands for use with [`IoringOp::Msgring`], (`seq.addr`)
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[repr(u64)]
+#[non_exhaustive]
+pub enum IoringMsgringCmds {
+    /// `IORING_MSG_DATA`
+    Data = sys::IORING_MSG_DATA as _,
+
+    /// `IORING_MSG_SEND_FD`
+    SendFd = sys::IORING_MSG_SEND_FD as _,
+}
+
 bitflags::bitflags! {
     /// `IORING_SETUP_*` flags for use with [`io_uring_params`].
     #[derive(Default)]
@@ -526,6 +540,33 @@ bitflags::bitflags! {
 }
 
 bitflags::bitflags! {
+    /// `IORING_MSG_RING_*` flags for use with [`io_uring_sqe`].
+    #[derive(Default)]
+    pub struct IoringMsgringFlags: u32 {
+        /// `IORING_MSG_RING_CQE_SKIP`
+        const CQE_SKIP = sys::IORING_MSG_RING_CQE_SKIP;
+    }
+}
+
+bitflags::bitflags! {
+    /// `IORING_ASYNC_CANCEL_*` flags for use with [`io_uring_sqe`].
+    #[derive(Default)]
+    pub struct IoringAsyncCancelFlags: u32 {
+        /// `IORING_ASYNC_CANCEL_ALL`
+        const ALL = sys::IORING_ASYNC_CANCEL_ALL;
+
+        /// `IORING_ASYNC_CANCEL_FD`
+        const FD = sys::IORING_ASYNC_CANCEL_FD;
+
+        /// `IORING_ASYNC_CANCEL_FD`
+        const ANY = sys::IORING_ASYNC_CANCEL_ANY;
+
+        /// `IORING_ASYNC_CANCEL_FD`
+        const FD_FIXED = sys::IORING_ASYNC_CANCEL_FD_FIXED;
+    }
+}
+
+bitflags::bitflags! {
     /// `IORING_FEAT_*` flags for use with [`io_uring_params`].
     #[derive(Default)]
     pub struct IoringFeatureFlags: u32 {
@@ -633,7 +674,7 @@ bitflags::bitflags! {
 bitflags::bitflags! {
     /// send/sendmsg & recv/recvmsg flags (`sqe.ioprio`)
     #[derive(Default)]
-    pub struct IoringRecvSendFlags: u16 {
+    pub struct IoringRecvsendFlags: u16 {
         /// `IORING_RECVSEND_POLL_FIRST`
         const POLL_FIRST = sys::IORING_RECVSEND_POLL_FIRST as _;
 
@@ -819,11 +860,11 @@ impl core::fmt::Debug for io_uring_user_data {
 pub struct io_uring_sqe {
     pub opcode: IoringOp,
     pub flags: IoringSqeFlags,
-    pub ioprio_or_flags: ioprio_or_flags_union,
+    pub ioprio: ioprio_union,
     pub fd: RawFd,
     pub off_or_addr2: off_or_addr2_union,
     pub addr_or_splice_off_in: addr_or_splice_off_in_union,
-    pub len: u32,
+    pub len: len_union,
     pub op_flags: op_flags_union,
     pub user_data: io_uring_user_data,
     pub buf: buf_union,
@@ -835,10 +876,18 @@ pub struct io_uring_sqe {
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub union ioprio_or_flags_union {
-    pub recvsend: IoringRecvSendFlags,
-    pub accept: IoringAcceptFlags,
+pub union ioprio_union {
+    pub recvsend_flags: IoringRecvsendFlags,
+    pub accept_flags: IoringAcceptFlags,
     pub ioprio: u16,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union len_union {
+    pub poll_flags: IoringPollFlags,
+    pub len: u32,
 }
 
 #[allow(missing_docs)]
@@ -864,6 +913,7 @@ pub union off_or_addr2_union {
     pub off: u64,
     pub addr2: io_uring_ptr,
     pub cmd_op: cmd_op_struct,
+    pub user_data: io_uring_user_data,
 }
 
 #[allow(missing_docs)]
@@ -880,6 +930,8 @@ pub struct cmd_op_struct {
 pub union addr_or_splice_off_in_union {
     pub addr: io_uring_ptr,
     pub splice_off_in: u64,
+    pub msgring_cmd: IoringMsgringCmds,
+    pub user_data: io_uring_user_data,
 }
 
 #[allow(missing_docs)]
@@ -899,14 +951,15 @@ pub union op_flags_union {
     pub recv_flags: crate::net::RecvFlags,
     pub timeout_flags: IoringTimeoutFlags,
     pub accept_flags: crate::net::AcceptFlags,
-    pub cancel_flags: u32,
-    pub open_flags: crate::fs::AtFlags,
+    pub cancel_flags: IoringAsyncCancelFlags,
+    pub open_flags: crate::fs::OFlags,
     pub statx_flags: crate::fs::AtFlags,
     pub fadvise_advice: crate::fs::Advice,
     pub splice_flags: SpliceFlags,
     pub rename_flags: crate::fs::RenameFlags,
     pub unlink_flags: crate::fs::AtFlags,
     pub hardlink_flags: crate::fs::AtFlags,
+    pub msg_ring_flags: IoringMsgringFlags,
 }
 
 #[allow(missing_docs)]
@@ -1128,7 +1181,15 @@ pub struct io_uring_buf {
     pub resv: u16,
 }
 
-impl Default for ioprio_or_flags_union {
+impl Default for ioprio_union {
+    #[inline]
+    fn default() -> Self {
+        // Safety: All of Linux's io_uring structs may be zero-initialized.
+        unsafe { ::core::mem::zeroed::<Self>() }
+    }
+}
+
+impl Default for len_union {
     #[inline]
     fn default() -> Self {
         // Safety: All of Linux's io_uring structs may be zero-initialized.
@@ -1275,7 +1336,7 @@ fn io_uring_layouts() {
     check_type!(io_uring_sqe);
     check_struct_field!(io_uring_sqe, opcode);
     check_struct_field!(io_uring_sqe, flags);
-    check_struct_renamed_field!(io_uring_sqe, ioprio_or_flags, ioprio);
+    check_struct_field!(io_uring_sqe, ioprio);
     check_struct_field!(io_uring_sqe, fd);
     check_struct_renamed_field!(io_uring_sqe, off_or_addr2, __bindgen_anon_1);
     check_struct_renamed_field!(io_uring_sqe, addr_or_splice_off_in, __bindgen_anon_2);
