@@ -41,13 +41,11 @@ fn test_file() {
     );
 
     #[cfg(not(any(
+        apple,
+        netbsdlike,
         solarish,
         target_os = "dragonfly",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
         target_os = "redox",
     )))]
     rustix::fs::fadvise(&file, 0, 10, rustix::fs::Advice::Normal).unwrap();
@@ -66,11 +64,10 @@ fn test_file() {
     assert!(stat.st_blocks > 0);
 
     #[cfg(not(any(
+        solarish,
         target_os = "haiku",
-        target_os = "illumos",
         target_os = "netbsd",
         target_os = "redox",
-        target_os = "solaris",
         target_os = "wasi",
     )))]
     {
@@ -78,13 +75,7 @@ fn test_file() {
         assert!(statfs.f_blocks > 0);
     }
 
-    #[cfg(not(any(
-        target_os = "haiku",
-        target_os = "illumos",
-        target_os = "redox",
-        target_os = "solaris",
-        target_os = "wasi",
-    )))]
+    #[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
     {
         let statvfs = rustix::fs::fstatvfs(&file).unwrap();
         assert!(statvfs.f_frsize > 0);

@@ -51,130 +51,82 @@ bitflags! {
         const SHARED = c::MAP_SHARED;
         /// `MAP_SHARED_VALIDATE`
         #[cfg(not(any(
+            bsd,
+            solarish,
             target_os = "android",
-            target_os = "dragonfly",
             target_os = "emscripten",
-            target_os = "freebsd",
             target_os = "fuchsia",
             target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "redox",
-            target_os = "solaris",
         )))]
         const SHARED_VALIDATE = c::MAP_SHARED_VALIDATE;
         /// `MAP_PRIVATE`
         const PRIVATE = c::MAP_PRIVATE;
         /// `MAP_DENYWRITE`
         #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
+            bsd,
+            solarish,
             target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "redox",
-            target_os = "solaris",
         )))]
         const DENYWRITE = c::MAP_DENYWRITE;
         /// `MAP_FIXED`
         const FIXED = c::MAP_FIXED;
         /// `MAP_FIXED_NOREPLACE`
         #[cfg(not(any(
+            bsd,
+            solarish,
             target_os = "android",
-            target_os = "dragonfly",
             target_os = "emscripten",
-            target_os = "freebsd",
             target_os = "fuchsia",
             target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "redox",
-            target_os = "solaris",
         )))]
         const FIXED_NOREPLACE = c::MAP_FIXED_NOREPLACE;
         /// `MAP_GROWSDOWN`
         #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
+            bsd,
+            solarish,
             target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "redox",
-            target_os = "solaris",
         )))]
         const GROWSDOWN = c::MAP_GROWSDOWN;
         /// `MAP_HUGETLB`
         #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
+            bsd,
+            solarish,
             target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "redox",
-            target_os = "solaris",
         )))]
         const HUGETLB = c::MAP_HUGETLB;
         /// `MAP_HUGE_2MB`
         #[cfg(not(any(
+            bsd,
+            solarish,
             target_os = "android",
-            target_os = "dragonfly",
             target_os = "emscripten",
-            target_os = "freebsd",
             target_os = "fuchsia",
             target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "redox",
-            target_os = "solaris",
         )))]
         const HUGE_2MB = c::MAP_HUGE_2MB;
         /// `MAP_HUGE_1GB`
         #[cfg(not(any(
+            bsd,
+            solarish,
             target_os = "android",
-            target_os = "dragonfly",
             target_os = "emscripten",
-            target_os = "freebsd",
             target_os = "fuchsia",
             target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "redox",
-            target_os = "solaris",
         )))]
         const HUGE_1GB = c::MAP_HUGE_1GB;
         /// `MAP_LOCKED`
         #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
+            bsd,
+            solarish,
             target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "redox",
-            target_os = "solaris",
         )))]
         const LOCKED = c::MAP_LOCKED;
         /// `MAP_NOCORE`

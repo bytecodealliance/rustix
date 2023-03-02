@@ -33,21 +33,14 @@ use super::super::offset::libc_posix_fadvise;
 use super::super::offset::libc_posix_fallocate;
 use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek, libc_off_t};
 #[cfg(not(any(
+    solarish,
     target_os = "haiku",
-    target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "solaris",
     target_os = "wasi",
 )))]
 use super::super::offset::{libc_fstatfs, libc_statfs};
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use super::super::offset::{libc_fstatvfs, libc_statvfs};
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
@@ -61,25 +54,20 @@ use crate::ffi::CString;
 #[cfg(not(solarish))]
 use crate::fs::Access;
 #[cfg(not(any(
+    apple,
+    netbsdlike,
+    solarish,
     target_os = "dragonfly",
     target_os = "haiku",
-    target_os = "illumos",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 use crate::fs::Advice;
 #[cfg(not(any(
+    netbsdlike,
+    solarish,
     target_os = "aix",
     target_os = "dragonfly",
-    target_os = "illumos",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 use crate::fs::FallocateFlags;
 #[cfg(not(any(target_os = "solaris", target_os = "wasi")))]
@@ -94,31 +82,19 @@ use crate::fs::MemfdFlags;
 ))]
 use crate::fs::SealFlags;
 #[cfg(not(any(
+    solarish,
     target_os = "haiku",
-    target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "solaris",
     target_os = "wasi",
 )))]
 use crate::fs::StatFs;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags};
-#[cfg(not(any(
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(apple, target_os = "redox", target_os = "wasi")))]
 use crate::fs::{Dev, FileType};
 use crate::fs::{Mode, OFlags, Stat, Timestamps};
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use crate::fs::{StatVfs, StatVfsMountFlags};
 use crate::io::{self, SeekFrom};
 #[cfg(not(target_os = "wasi"))]
@@ -129,22 +105,12 @@ use crate::process::{Gid, Uid};
 )))]
 use crate::utils::as_ptr;
 use core::convert::TryInto;
-#[cfg(any(
-    target_os = "android",
-    target_os = "ios",
-    target_os = "linux",
-    target_os = "macos",
-))]
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
 use core::mem::size_of;
 use core::mem::MaybeUninit;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use core::ptr::null;
-#[cfg(any(
-    target_os = "android",
-    target_os = "ios",
-    target_os = "linux",
-    target_os = "macos",
-))]
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
 use core::ptr::null_mut;
 #[cfg(apple)]
 use {
@@ -217,11 +183,10 @@ pub(crate) fn openat(
 }
 
 #[cfg(not(any(
+    solarish,
     target_os = "haiku",
-    target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "solaris",
     target_os = "wasi",
 )))]
 #[inline]
@@ -233,13 +198,7 @@ pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
     }
 }
 
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
     unsafe {
@@ -445,12 +404,7 @@ fn statat_old(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<
     }
 }
 
-#[cfg(not(any(
-    target_os = "emscripten",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-)))]
+#[cfg(not(any(solarish, target_os = "emscripten", target_os = "redox")))]
 pub(crate) fn accessat(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
@@ -511,8 +465,7 @@ pub(crate) fn utimensat(
     // Main version: libc is y2038 safe and has `utimensat`. Or, the platform
     // is not y2038 safe and there's nothing practical we can do.
     #[cfg(not(any(
-        target_os = "ios",
-        target_os = "macos",
+        apple,
         all(
             any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
             target_env = "gnu",
@@ -746,12 +699,7 @@ pub(crate) fn chownat(
     }
 }
 
-#[cfg(not(any(
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(apple, target_os = "redox", target_os = "wasi")))]
 pub(crate) fn mknodat(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
@@ -815,15 +763,12 @@ pub(crate) fn copy_file_range(
 }
 
 #[cfg(not(any(
+    apple,
+    netbsdlike,
+    solarish,
     target_os = "dragonfly",
     target_os = "haiku",
-    target_os = "illumos",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
     let offset = offset as i64;
@@ -1005,11 +950,10 @@ fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 }
 
 #[cfg(not(any(
+    solarish,
     target_os = "haiku",
-    target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "solaris",
     target_os = "wasi",
 )))]
 pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
@@ -1020,13 +964,7 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
     }
 }
 
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
     let mut statvfs = MaybeUninit::<libc_statvfs>::uninit();
     unsafe {
@@ -1035,13 +973,7 @@ pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
     }
 }
 
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 fn libc_statvfs_to_statvfs(from: libc_statvfs) -> StatVfs {
     StatVfs {
         f_bsize: from.f_bsize as u64,
@@ -1080,8 +1012,7 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
     // Main version: libc is y2038 safe and has `futimens`. Or, the platform
     // is not y2038 safe and there's nothing practical we can do.
     #[cfg(not(any(
-        target_os = "ios",
-        target_os = "macos",
+        apple,
         all(
             any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
             target_env = "gnu",
@@ -1160,15 +1091,12 @@ unsafe fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
 }
 
 #[cfg(not(any(
+    apple,
+    netbsdlike,
+    solarish,
     target_os = "aix",
     target_os = "dragonfly",
-    target_os = "illumos",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 pub(crate) fn fallocate(
     fd: BorrowedFd<'_>,
@@ -1233,10 +1161,9 @@ pub(crate) fn fsync(fd: BorrowedFd<'_>) -> io::Result<()> {
 }
 
 #[cfg(not(any(
+    apple,
     target_os = "dragonfly",
     target_os = "haiku",
-    target_os = "ios",
-    target_os = "macos",
     target_os = "redox",
 )))]
 pub(crate) fn fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {

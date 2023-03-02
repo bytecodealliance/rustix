@@ -15,13 +15,7 @@ mod flock;
 mod futimens;
 mod invalid_offset;
 mod long_paths;
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 mod makedev;
 mod mkdirat;
 mod mknodat;
@@ -31,13 +25,7 @@ mod openat;
 mod openat2;
 mod readdir;
 mod renameat;
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 mod statfs;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod statx;

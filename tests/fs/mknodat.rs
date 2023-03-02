@@ -1,9 +1,4 @@
-#[cfg(not(any(
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(apple, target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_mknodat() {
     use rustix::fs::{cwd, mknodat, openat, statat, unlinkat, AtFlags, FileType, Mode, OFlags};
