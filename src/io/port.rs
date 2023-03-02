@@ -1,6 +1,7 @@
 //! Solaris/Illumos event ports.
 
-use crate::backend::{c, io::syscalls};
+use crate::backend::c;
+use crate::backend::io::syscalls;
 use crate::fd::{AsFd, AsRawFd, OwnedFd};
 use crate::io;
 
@@ -48,9 +49,9 @@ pub fn port_create() -> io::Result<OwnedFd> {
 ///
 /// # Safety
 ///
-/// Any `object`s passed into the `port` must be valid for the lifetime of the `port`.
-/// Logically, `port` keeps a borrowed reference to the `object` until it is
-/// removed via `port_dissociate_fd`.
+/// Any `object`s passed into the `port` must be valid for the lifetime of the
+/// `port`. Logically, `port` keeps a borrowed reference to the `object` until
+/// it is removed via `port_dissociate_fd`.
 ///
 /// # References
 ///
@@ -111,7 +112,8 @@ pub fn port_get(port: impl AsFd, timeout: Option<Duration>) -> io::Result<Event>
     syscalls::port_get(port.as_fd(), timeout.as_mut())
 }
 
-/// `port_getn(port, events, min_events, timeout)`- Gets multiple events from a port.
+/// `port_getn(port, events, min_events, timeout)`- Gets multiple events from a
+/// port.
 ///
 /// # References
 ///

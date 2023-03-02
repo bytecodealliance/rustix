@@ -1,8 +1,7 @@
 //! An API for interfacing with `kqueue`.
 
-use crate::backend;
 use crate::fd::{AsFd, AsRawFd, OwnedFd, RawFd};
-use crate::io;
+use crate::{backend, io};
 
 use backend::c::{self, kevent as kevent_t, uintptr_t};
 use backend::io::syscalls;
@@ -334,8 +333,8 @@ pub fn kqueue() -> io::Result<OwnedFd> {
 ///
 /// # Safety
 ///
-/// The file descriptors referred to by the `Event` structs must be valid for the lifetime
-/// of the `kqueue` file descriptor.
+/// The file descriptors referred to by the `Event` structs must be valid for
+/// the lifetime of the `kqueue` file descriptor.
 ///
 /// # References
 ///
