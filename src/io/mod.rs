@@ -27,6 +27,8 @@ pub mod kqueue;
 #[cfg(not(any(windows, target_os = "wasi")))]
 mod pipe;
 mod poll;
+#[cfg(any(target_os = "illumos", target_os = "solaris"))]
+pub mod port;
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
 mod procfs;
 #[cfg(not(windows))]

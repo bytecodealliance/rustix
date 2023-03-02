@@ -12,6 +12,8 @@ use super::super::offset::{libc_preadv, libc_pwritev};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::super::offset::{libc_preadv2, libc_pwritev2};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
+#[cfg(any(target_os = "solaris", target_os = "illumos"))]
+use crate::io::port::Event;
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 use crate::io::DupFlags;
 #[cfg(not(any(apple, target_os = "aix", target_os = "haiku", target_os = "wasi")))]
@@ -578,4 +580,86 @@ pub unsafe fn vmsplice(
         flags.bits(),
     ))
     .map(|spliced| spliced as usize)
+}
+
+#[cfg(any(target_os = "illumos", target_os = "solaris"))]
+pub(crate) fn port_create() -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(c::port_create()) }
+}
+
+#[cfg(any(target_os = "illumos", target_os = "solaris"))]
+pub(crate) unsafe fn port_associate(
+    port: BorrowedFd<'_>,
+    source: c::c_int,
+    object: c::uintptr_t,
+    events: c::c_int,
+    user: *mut c::c_void,
+) -> io::Result<()> {
+    ret(c::port_associate(
+        borrowed_fd(port),
+        source,
+        object,
+        events,
+        user,
+    ))
+}
+
+#[cfg(any(target_os = "illumos", target_os = "solaris"))]
+pub(crate) unsafe fn port_dissociate(
+    port: BorrowedFd<'_>,
+    source: c::c_int,
+    object: c::uintptr_t,
+) -> io::Result<()> {
+    ret(c::port_dissociate(borrowed_fd(port), source, object))
+}
+
+#[cfg(any(target_os = "illumos", target_os = "solaris"))]
+pub(crate) fn port_get(
+    port: BorrowedFd<'_>,
+    timeout: Option<&mut c::timespec>,
+) -> io::Result<Event> {
+    let mut event = MaybeUninit::<c::port_event>::uninit();
+    let timeout = timeout.map_or(core::ptr::null_mut(), |t| t as *mut _);
+
+    unsafe {
+        ret(c::port_get(borrowed_fd(port), event.as_mut_ptr(), timeout))?;
+    }
+
+    // If we're done, initialize the event and return it.
+    Ok(Event(unsafe { event.assume_init() }))
+}
+
+#[cfg(any(target_os = "illumos", target_os = "solaris"))]
+pub(crate) fn port_getn(
+    port: BorrowedFd<'_>,
+    timeout: Option<&mut c::timespec>,
+    events: &mut Vec<Event>,
+    mut nget: u32,
+) -> io::Result<()> {
+    let timeout = timeout.map_or(core::ptr::null_mut(), |t| t as *mut _);
+    unsafe {
+        ret(c::port_getn(
+            borrowed_fd(port),
+            events.as_mut_ptr().cast(),
+            events.len().try_into().unwrap(),
+            &mut nget,
+            timeout,
+        ))?;
+    }
+
+    // Update the vector length.
+    unsafe {
+        events.set_len(nget.try_into().unwrap());
+    }
+
+    Ok(())
+}
+
+#[cfg(any(target_os = "illumos", target_os = "solaris"))]
+pub(crate) fn port_send(
+    port: BorrowedFd<'_>,
+    events: c::c_int,
+    userdata: *mut c::c_void,
+) -> io::Result<()> {
+    unsafe { ret(c::port_send(borrowed_fd(port), events, userdata)) }
 }
