@@ -106,7 +106,7 @@ pub use getpath::getpath;
     target_os = "redox",
     target_os = "wasi",
 )))]
-pub use makedev::{major, makedev, minor};
+pub use makedev::*;
 #[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 pub use memfd_create::{memfd_create, MemfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]

@@ -2,7 +2,12 @@
 use super::super::c;
 use crate::fs::Dev;
 
-#[cfg(not(any(target_os = "android", target_os = "emscripten")))]
+#[cfg(not(any(
+    apple,
+    target_os = "aix",
+    target_os = "android",
+    target_os = "emscripten",
+)))]
 #[inline]
 pub(crate) fn makedev(maj: u32, min: u32) -> Dev {
     c::makedev(maj, min)
@@ -11,7 +16,6 @@ pub(crate) fn makedev(maj: u32, min: u32) -> Dev {
 #[cfg(all(target_os = "android", not(target_pointer_width = "32")))]
 #[inline]
 pub(crate) fn makedev(maj: u32, min: u32) -> Dev {
-    // Android's `makedev` oddly has signed argument types.
     c::makedev(maj, min)
 }
 
@@ -33,7 +37,27 @@ pub(crate) fn makedev(maj: u32, min: u32) -> Dev {
     Dev::from(c::makedev(maj, min))
 }
 
-#[cfg(not(any(target_os = "android", target_os = "emscripten")))]
+#[cfg(apple)]
+#[inline]
+pub(crate) fn makedev(maj: u32, min: u32) -> Dev {
+    // Apple's `makedev` oddly has signed argument types and is `unsafe`.
+    unsafe { c::makedev(maj as i32, min as i32) }
+}
+
+#[cfg(target_os = "aix")]
+#[inline]
+pub(crate) fn makedev(maj: u32, min: u32) -> Dev {
+    // AIX's `makedev` oddly is `unsafe`.
+    unsafe { c::makedev(maj, min) }
+}
+
+#[cfg(not(any(
+    apple,
+    freebsdlike,
+    netbsdlike,
+    target_os = "android",
+    target_os = "emscripten",
+)))]
 #[inline]
 pub(crate) fn major(dev: Dev) -> u32 {
     unsafe { c::major(dev) }
@@ -61,7 +85,13 @@ pub(crate) fn major(dev: Dev) -> u32 {
     unsafe { c::major(dev as u32) }
 }
 
-#[cfg(not(any(target_os = "android", target_os = "emscripten")))]
+#[cfg(not(any(
+    apple,
+    freebsdlike,
+    netbsdlike,
+    target_os = "android",
+    target_os = "emscripten",
+)))]
 #[inline]
 pub(crate) fn minor(dev: Dev) -> u32 {
     unsafe { c::minor(dev) }
