@@ -13,7 +13,6 @@ mod tty;
 pub use cf::{cfgetispeed, cfgetospeed, cfmakeraw, cfsetispeed, cfsetospeed, cfsetspeed};
 
 #[cfg(not(target_os = "wasi"))]
-#[allow(unused_imports)]
 pub use constants::*;
 
 #[cfg(not(target_os = "wasi"))]

@@ -386,7 +386,7 @@ impl Default for IoringRestrictionOp {
 }
 
 /// `IORING_MSG_*` constants which represent commands for use with
-/// [`IoringOp::Msgring`], (`seq.addr`)
+/// [`IoringOp::MsgRing`], (`seq.addr`)
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(u64)]
 #[non_exhaustive]
