@@ -22,11 +22,11 @@ pub fn gettid() -> Pid {
 ///
 /// This is not the setxid you are looking for... POSIX requires xids to be
 /// process granular, but on Linux they are per-thread. Thus, this call only
-/// changes the xid for the current *thread*, not the entire process even though
-/// that is in violation of the POSIX standard.
+/// changes the xid for the current *thread*, not the entire process even
+/// though that is in violation of the POSIX standard.
 ///
-/// For details on this distinction, see the C library vs. kernel differences in
-/// the [man page][linux_notes]. This call implements the kernel behavior.
+/// For details on this distinction, see the C library vs. kernel differences
+/// in the [man page][linux_notes]. This call implements the kernel behavior.
 ///
 /// # References
 ///  - [POSIX]
@@ -36,7 +36,6 @@ pub fn gettid() -> Pid {
 /// [Linux]: https://man7.org/linux/man-pages/man2/setuid.2.html
 /// [linux_notes]: https://man7.org/linux/man-pages/man2/setuid.2.html#NOTES
 #[inline]
-#[must_use]
 pub fn set_thread_uid(uid: Uid) -> io::Result<()> {
     backend::thread::syscalls::setuid_thread(uid)
 }
@@ -47,11 +46,11 @@ pub fn set_thread_uid(uid: Uid) -> io::Result<()> {
 ///
 /// This is not the setxid you are looking for... POSIX requires xids to be
 /// process granular, but on Linux they are per-thread. Thus, this call only
-/// changes the xid for the current *thread*, not the entire process even though
-/// that is in violation of the POSIX standard.
+/// changes the xid for the current *thread*, not the entire process even
+/// though that is in violation of the POSIX standard.
 ///
-/// For details on this distinction, see the C library vs. kernel differences in
-/// the [man page][linux_notes]. This call implements the kernel behavior.
+/// For details on this distinction, see the C library vs. kernel differences
+/// in the [man page][linux_notes]. This call implements the kernel behavior.
 ///
 /// # References
 ///  - [POSIX]
@@ -61,7 +60,6 @@ pub fn set_thread_uid(uid: Uid) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/setgid.2.html
 /// [linux_notes]: https://man7.org/linux/man-pages/man2/setgid.2.html#NOTES
 #[inline]
-#[must_use]
 pub fn set_thread_gid(gid: Gid) -> io::Result<()> {
     backend::thread::syscalls::setgid_thread(gid)
 }

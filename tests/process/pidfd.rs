@@ -1,7 +1,8 @@
 //! Tests for the `pidfd` type.
 
 use libc::{kill, SIGSTOP};
-use rustix::{fd::AsFd, io, process};
+use rustix::fd::AsFd;
+use rustix::{io, process};
 use serial_test::serial;
 use std::process::Command;
 

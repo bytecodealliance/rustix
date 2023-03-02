@@ -116,9 +116,10 @@ pub(crate) const STDOUT_FILENO: c::c_int = c::STDOUT_FILENO;
 pub(crate) const STDERR_FILENO: c::c_int = c::STDERR_FILENO;
 
 /// A buffer type used with `vmsplice`.
-/// It is guaranteed to be ABI compatible with the iovec type on Unix platforms and WSABUF on Windows.
-/// Unlike `IoSlice` and `IoSliceMut` it is semantically like a raw pointer,
-/// and therefore can be shared or mutated as needed.
+/// It is guaranteed to be ABI compatible with the iovec type on Unix platforms
+/// and `WSABUF` on Windows. Unlike `IoSlice` and `IoSliceMut` it is
+/// semantically like a raw pointer, and therefore can be shared or mutated as
+/// needed.
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[repr(transparent)]
 pub struct IoSliceRaw<'a> {

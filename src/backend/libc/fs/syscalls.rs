@@ -1137,6 +1137,8 @@ pub(crate) fn fallocate(
     };
     unsafe {
         if c::fcntl(borrowed_fd(fd), c::F_PREALLOCATE, &store) == -1 {
+            // Unable to allocate contiguous disk space; attempt to allocate
+            // non-contiguously.
             store.fst_flags = c::F_ALLOCATEALL;
             let _ = ret_c_int(c::fcntl(borrowed_fd(fd), c::F_PREALLOCATE, &store))?;
         }

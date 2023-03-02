@@ -582,8 +582,8 @@ fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitidOptions) -> io::Result<Optio
 ///
 /// # Safety
 ///
-/// The caller must ensure that `status` is initialized and that `waitid` returned
-/// successfully.
+/// The caller must ensure that `status` is initialized and that `waitid`
+/// returned successfully.
 #[inline]
 unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitidStatus> {
     let status = status.assume_init();

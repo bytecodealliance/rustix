@@ -81,10 +81,11 @@ bitflags! {
     }
 }
 
-/// Reassociate the calling thread with the namespace associated with link referred to by `fd`.
+/// Reassociate the calling thread with the namespace associated with link
+/// referred to by `fd`.
 ///
-/// `fd` must refer to one of the magic links in a `/proc/[pid]/ns/` directory, or a bind mount
-/// to such a link.
+/// `fd` must refer to one of the magic links in a `/proc/[pid]/ns/` directory,
+/// or a bind mount to such a link.
 ///
 /// # References
 /// - [`setns`]
@@ -98,8 +99,8 @@ pub fn move_into_link_name_space(
     syscalls::setns(fd, allowed_type).map(|_r| ())
 }
 
-/// Atomically move the calling thread into one or more of the same namespaces as the thread
-/// referred to by `fd`.
+/// Atomically move the calling thread into one or more of the same namespaces
+/// as the thread referred to by `fd`.
 ///
 /// `fd` must refer to a thread ID. See: `pidfd_open` and `clone`.
 ///

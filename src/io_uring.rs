@@ -385,7 +385,8 @@ impl Default for IoringRestrictionOp {
     }
 }
 
-/// `IORING_MSG_*` constants which represent commands for use with [`IoringOp::Msgring`], (`seq.addr`)
+/// `IORING_MSG_*` constants which represent commands for use with
+/// [`IoringOp::MsgRing`], (`seq.addr`)
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(u64)]
 #[non_exhaustive]
@@ -1168,7 +1169,7 @@ pub struct io_uring_buf_reg {
     pub ring_entries: u32,
     pub bgid: u16,
     pub pad: u16,
-    pub resv: [u64; 3usize],
+    pub resv: [u64; 3_usize],
 }
 
 #[allow(missing_docs)]

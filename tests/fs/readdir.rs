@@ -115,7 +115,8 @@ fn test_raw_dir(buf: &mut [MaybeUninit<u8>]) {
 #[test]
 #[cfg(any(target_os = "android", target_os = "linux"))]
 fn raw_dir_entries_heap() {
-    // When we can depend on Rust 1.60, we can use the spare_capacity_mut version instead.
+    // When we can depend on Rust 1.60, we can use the spare_capacity_mut version
+    // instead.
     /*
     let mut buf = Vec::with_capacity(8192);
     test_raw_dir(buf.spare_capacity_mut());

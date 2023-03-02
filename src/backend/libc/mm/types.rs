@@ -180,7 +180,7 @@ bitflags! {
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "emscripten", target_os = "linux"))]
 bitflags! {
     /// `MREMAP_*` flags for use with [`mremap`].
     ///

@@ -11,8 +11,7 @@
 //! # #[cfg(feature = "net")]
 //! # fn main() -> std::io::Result<()> {
 //! use io_lifetimes::AsFd;
-//! use rustix::io::epoll;
-//! use rustix::io::{ioctl_fionbio, read, write};
+//! use rustix::io::{epoll, ioctl_fionbio, read, write};
 //! use rustix::net::{
 //!     accept, bind_v4, listen, socket, AddressFamily, Ipv4Addr, Protocol, SocketAddrV4,
 //!     SocketType,
@@ -46,8 +45,13 @@
 //!             // register to be notified when it's ready to write to.
 //!             let conn_sock = accept(&listen_sock)?;
 //!             ioctl_fionbio(&conn_sock, true)?;
-//!             epoll::epoll_add(&epoll, &conn_sock, next_id, epoll::EventFlags::OUT | epoll::EventFlags::ET)?;
-//!             
+//!             epoll::epoll_add(
+//!                 &epoll,
+//!                 &conn_sock,
+//!                 next_id,
+//!                 epoll::EventFlags::OUT | epoll::EventFlags::ET,
+//!             )?;
+//!
 //!             // Keep track of the socket.
 //!             sockets.insert(next_id, conn_sock);
 //!             next_id += 1;

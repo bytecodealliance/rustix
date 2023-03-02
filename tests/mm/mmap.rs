@@ -113,15 +113,16 @@ fn test_mlock() {
                 Ok(()) => munlock(addr, 8192).unwrap(),
             }
 
-            #[cfg(linux_raw)] // libc doesn't expose `MLOCK_UNFAULT` yet.
-            {
-                match mlock_with(addr, 8192, MlockFlags::ONFAULT) {
-                    Err(rustix::io::Errno::NOSYS) => (),
-                    Err(err) => Err(err).unwrap(),
-                    Ok(()) => munlock(addr, 8192).unwrap(),
-                }
-                munlock(addr, 8192).unwrap();
+            match mlock_with(addr, 8192, MlockFlags::ONFAULT) {
+                // Linux versions that lack `mlock` return this.
+                Err(rustix::io::Errno::NOSYS) => (),
+                // Linux versions that don't recognize `ONFAULT` return this.
+                Err(rustix::io::Errno::INVAL) => (),
+                Err(err) => Err(err).unwrap(),
+                Ok(()) => munlock(addr, 8192).unwrap(),
             }
+
+            munlock(addr, 8192).unwrap();
         }
 
         munmap(addr, 8192).unwrap();

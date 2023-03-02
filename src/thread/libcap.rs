@@ -115,7 +115,8 @@ pub fn capabilities(pid: Option<Pid>) -> io::Result<CapabilitySets> {
     capget(pid)
 }
 
-/// `capset(_LINUX_CAPABILITY_VERSION_3, pid, effective, permitted, inheritable)`
+/// `capset(_LINUX_CAPABILITY_VERSION_3, pid, effective, permitted,
+/// inheritable)`
 ///
 /// # References
 ///  - [Linux]
@@ -139,7 +140,8 @@ fn capget(pid: Option<Pid>) -> io::Result<CapabilitySets> {
         };
 
         backend::thread::syscalls::capget(&mut header, &mut data)?;
-        // SAFETY: v3 is a 64-bit implementation, so the kernel filled in both data structs.
+        // SAFETY: v3 is a 64-bit implementation, so the kernel filled in both data
+        // structs.
         unsafe { (data[0].assume_init(), data[1].assume_init()) }
     };
 

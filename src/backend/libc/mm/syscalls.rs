@@ -7,7 +7,7 @@ use super::super::conv::{borrowed_fd, no_fd, ret};
 use super::super::offset::libc_mmap;
 #[cfg(not(target_os = "redox"))]
 use super::types::Advice;
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "emscripten", target_os = "linux"))]
 use super::types::MremapFlags;
 use super::types::{MapFlags, MprotectFlags, MsyncFlags, ProtFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -130,7 +130,7 @@ pub(crate) unsafe fn munmap(ptr: *mut c::c_void, len: usize) -> io::Result<()> {
 ///
 /// `mremap` is primarily unsafe due to the `old_address` parameter, as
 /// anything working with memory pointed to by raw pointers is unsafe.
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "emscripten", target_os = "linux"))]
 pub(crate) unsafe fn mremap(
     old_address: *mut c::c_void,
     old_size: usize,
@@ -150,7 +150,7 @@ pub(crate) unsafe fn mremap(
 /// `mremap_fixed` is primarily unsafe due to the `old_address` and
 /// `new_address` parameters, as anything working with memory pointed to by raw
 /// pointers is unsafe.
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "emscripten", target_os = "linux"))]
 pub(crate) unsafe fn mremap_fixed(
     old_address: *mut c::c_void,
     old_size: usize,

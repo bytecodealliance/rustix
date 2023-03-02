@@ -36,7 +36,7 @@ pub fn mount<Source: path::Arg, Target: path::Arg, Fs: path::Arg, Data: path::Ar
     })
 }
 
-/// `mount(null, target, null, MS_REMOUNT | mountflags, data)`
+/// `mount(NULL, target, NULL, MS_REMOUNT | mountflags, data)`
 ///
 /// # References
 ///  - [Linux]
@@ -62,7 +62,7 @@ pub fn remount<Target: path::Arg, Data: path::Arg>(
     })
 }
 
-/// `mount(source, target, null, MS_BIND, null)`
+/// `mount(source, target, NULL, MS_BIND, NULL)`
 ///
 /// # References
 ///  - [Linux]
@@ -87,7 +87,7 @@ pub fn bind_mount<Source: path::Arg, Target: path::Arg>(
     })
 }
 
-/// `mount(source, target, null, MS_BIND | MS_REC, null)`
+/// `mount(source, target, NULL, MS_BIND | MS_REC, NULL)`
 ///
 /// # References
 ///  - [Linux]
@@ -112,7 +112,7 @@ pub fn recursive_bind_mount<Source: path::Arg, Target: path::Arg>(
     })
 }
 
-/// `mount(null, target, null, mountflags, null)`
+/// `mount(NULL, target, NULL, mountflags, NULL)`
 ///
 /// # References
 ///  - [Linux]
@@ -129,7 +129,7 @@ pub fn change_mount<Target: path::Arg>(
     })
 }
 
-/// `mount(source, target, null, MS_MOVE, null)`
+/// `mount(source, target, NULL, MS_MOVE, NULL)`
 ///
 /// # References
 ///  - [Linux]

@@ -1,7 +1,7 @@
 use crate::process::{Pid, Uid};
 use crate::{backend, io};
 
-/// `nice()`—Adjust the scheduling priority of the current process.
+/// `nice(inc)`—Adjust the scheduling priority of the current process.
 ///
 /// # References
 ///  - [POSIX]

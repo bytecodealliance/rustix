@@ -1,7 +1,7 @@
 //! Bindings for the FreeBSD `procctl` system call.
 //!
-//! There are similarities (but also differences) with Linux's `prctl` system call, whose interface
-//! is located in the `prctl.rs` file.
+//! There are similarities (but also differences) with Linux's `prctl` system
+//! call, whose interface is located in the `prctl.rs` file.
 
 #![allow(unsafe_code)]
 
@@ -28,9 +28,10 @@ pub enum IdType {
 
 /// A process selector for use with the `procctl` interface.
 ///
-/// `None` represents the current process. `Some((IdType::Pid, pid))` represents the process
-/// with pid `pid`. `Some((IdType::Pgid, pgid))` represents the control processes belonging to
-/// the process group with id `pgid`.
+/// `None` represents the current process. `Some((IdType::Pid, pid))`
+/// represents the process with pid `pid`. `Some((IdType::Pgid, pgid))`
+/// represents the control processes belonging to the process group with id
+/// `pgid`.
 pub type ProcSelector = Option<(IdType, Pid)>;
 fn proc_selector_to_raw(selector: ProcSelector) -> (IdType, RawPid) {
     match selector {
@@ -125,13 +126,15 @@ pub enum DumpableBehavior {
     NotDumpableExecPreserved = PROC_TRACE_CTL_DISABLE_EXEC,
 }
 
-/// Set the state of the `dumpable` attribute for the process indicated by `idtype` and `id`.
-/// This determines whether the process can be traced and whether core dumps are produced for
-/// the process upon delivery of a signal whose default behavior is to produce a core dump.
+/// Set the state of the `dumpable` attribute for the process indicated by
+/// `idtype` and `id`. This determines whether the process can be traced and
+/// whether core dumps are produced for the process upon delivery of a signal
+/// whose default behavior is to produce a core dump.
 ///
-/// This is similar to `set_dumpable_behavior` on Linux, with the exception that on FreeBSD
-/// there is an extra argument `process`. When `process` is set to `None`, the operation is
-/// performed for the current process, like on Linux.
+/// This is similar to `set_dumpable_behavior` on Linux, with the exception
+/// that on FreeBSD there is an extra argument `process`. When `process` is set
+/// to `None`, the operation is performed for the current process, like on
+/// Linux.
 ///
 /// # References
 /// - [`procctl(PROC_TRACE_CTL,...)`]
@@ -153,10 +156,11 @@ const PROC_TRACE_STATUS: c_int = 8;
 pub enum TracingStatus {
     /// Tracing is disabled for the process.
     NotTraceble,
-    /// Tracing is not disabled for the process, but not debugger/tracer is attached.
+    /// Tracing is not disabled for the process, but not debugger/tracer is
+    /// attached.
     Tracable,
-    /// The process is being traced by the process whose pid is stored in the first
-    /// component of this variant.
+    /// The process is being traced by the process whose pid is stored in the
+    /// first component of this variant.
     BeingTraced(Pid),
 }
 

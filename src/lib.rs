@@ -86,11 +86,10 @@
 //! [`io-streams`]: https://crates.io/crates/io-streams
 //! [`getrandom`]: https://crates.io/crates/getrandom
 //! [`bitflags`]: https://crates.io/crates/bitflags
-//! [`AsFd`]: https://doc.rust-lang.org/stable/std/os/unix/io/trait.AsFd.html
-//! [`OwnedFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/struct.OwnedFd.html
-//! [io-lifetimes crate]: https://crates.io/crates/io-lifetimes
+//! [`AsFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.AsFd.html
+//! [`OwnedFd`]: https://doc.rust-lang.org/stable/std/os/fd/struct.OwnedFd.html
 //! [I/O-safe]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
-//! [`Result`]: https://docs.rs/rustix/latest/rustix/io/type.Result.html
+//! [`Result`]: https://doc.rust-lang.org/stable/std/result/enum.Result.html
 //! [`Arg`]: https://docs.rs/rustix/latest/rustix/path/trait.Arg.html
 
 #![deny(missing_docs)]

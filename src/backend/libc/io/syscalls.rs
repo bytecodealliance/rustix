@@ -12,7 +12,9 @@ use super::super::offset::{libc_preadv, libc_pwritev};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::super::offset::{libc_preadv2, libc_pwritev2};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
-#[cfg(any(target_os = "solaris", target_os = "illumos"))]
+#[cfg(bsd)]
+use crate::io::kqueue::Event;
+#[cfg(solarish)]
 use crate::io::port::Event;
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 use crate::io::DupFlags;
@@ -28,18 +30,6 @@ use core::mem::MaybeUninit;
 use core::ptr;
 #[cfg(all(feature = "fs", feature = "net"))]
 use libc_errno::errno;
-
-#[cfg(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "tvos",
-    target_os = "watchos",
-    target_os = "freebsd",
-    target_os = "dragonfly",
-    target_os = "openbsd",
-    target_os = "netbsd"
-))]
-use crate::io::kqueue::Event;
 
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     let nread = unsafe {
@@ -464,30 +454,12 @@ pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCNXCL as _)) }
 }
 
-#[cfg(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "tvos",
-    target_os = "watchos",
-    target_os = "freebsd",
-    target_os = "dragonfly",
-    target_os = "openbsd",
-    target_os = "netbsd"
-))]
+#[cfg(bsd)]
 pub(crate) fn kqueue() -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::kqueue()) }
 }
 
-#[cfg(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "tvos",
-    target_os = "watchos",
-    target_os = "freebsd",
-    target_os = "dragonfly",
-    target_os = "openbsd",
-    target_os = "netbsd"
-))]
+#[cfg(bsd)]
 pub(crate) unsafe fn kevent(
     kq: BorrowedFd<'_>,
     changelist: &[Event],
@@ -582,12 +554,12 @@ pub unsafe fn vmsplice(
     .map(|spliced| spliced as usize)
 }
 
-#[cfg(any(target_os = "illumos", target_os = "solaris"))]
+#[cfg(solarish)]
 pub(crate) fn port_create() -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::port_create()) }
 }
 
-#[cfg(any(target_os = "illumos", target_os = "solaris"))]
+#[cfg(solarish)]
 pub(crate) unsafe fn port_associate(
     port: BorrowedFd<'_>,
     source: c::c_int,
@@ -604,7 +576,7 @@ pub(crate) unsafe fn port_associate(
     ))
 }
 
-#[cfg(any(target_os = "illumos", target_os = "solaris"))]
+#[cfg(solarish)]
 pub(crate) unsafe fn port_dissociate(
     port: BorrowedFd<'_>,
     source: c::c_int,
@@ -613,7 +585,7 @@ pub(crate) unsafe fn port_dissociate(
     ret(c::port_dissociate(borrowed_fd(port), source, object))
 }
 
-#[cfg(any(target_os = "illumos", target_os = "solaris"))]
+#[cfg(solarish)]
 pub(crate) fn port_get(
     port: BorrowedFd<'_>,
     timeout: Option<&mut c::timespec>,
@@ -629,7 +601,7 @@ pub(crate) fn port_get(
     Ok(Event(unsafe { event.assume_init() }))
 }
 
-#[cfg(any(target_os = "illumos", target_os = "solaris"))]
+#[cfg(solarish)]
 pub(crate) fn port_getn(
     port: BorrowedFd<'_>,
     timeout: Option<&mut c::timespec>,
@@ -655,7 +627,7 @@ pub(crate) fn port_getn(
     Ok(())
 }
 
-#[cfg(any(target_os = "illumos", target_os = "solaris"))]
+#[cfg(solarish)]
 pub(crate) fn port_send(
     port: BorrowedFd<'_>,
     events: c::c_int,

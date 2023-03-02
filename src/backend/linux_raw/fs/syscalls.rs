@@ -23,11 +23,10 @@ use super::super::conv::{loff_t, loff_t_from_u64, ret_u64};
 use crate::fd::AsFd;
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
-use crate::fs::inotify;
 use crate::fs::{
-    Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, MemfdFlags, Mode, OFlags,
-    RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatVfs, StatVfsMountFlags, StatxFlags,
-    Timestamps,
+    inotify, Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, MemfdFlags, Mode,
+    OFlags, RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatVfs, StatVfsMountFlags,
+    StatxFlags, Timestamps,
 };
 use crate::io::{self, SeekFrom};
 use crate::process::{Gid, Uid};

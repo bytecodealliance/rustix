@@ -1,7 +1,7 @@
 //! Bindings for the Linux `prctl` system call.
 //!
-//! There are similarities (but also differences) with FreeBSD's `procctl` system call, whose
-//! interface is located in the `procctl.rs` file.
+//! There are similarities (but also differences) with FreeBSD's `procctl`
+//! system call, whose interface is located in the `procctl.rs` file.
 
 #![allow(unsafe_code)]
 
@@ -146,13 +146,14 @@ pub fn dumpable_behavior() -> io::Result<DumpableBehavior> {
 
 const PR_SET_DUMPABLE: c_int = 4;
 
-/// Set the state of the `dumpable` attribute, which determines whether the process can be traced
-/// and whether core dumps are produced for the calling process upon delivery of a signal whose
-/// default behavior is to produce a core dump.
+/// Set the state of the `dumpable` attribute, which determines whether the
+/// process can be traced and whether core dumps are produced for the calling
+/// process upon delivery of a signal whose default behavior is to produce a
+/// core dump.
 ///
-/// A similar function with the same name is available on FreeBSD (as part of the `procctl`
-/// interface), but it has an extra argument which allows to select a process other then the
-/// current process.
+/// A similar function with the same name is available on FreeBSD (as part of
+/// the `procctl` interface), but it has an extra argument which allows to
+/// select a process other then the current process.
 ///
 /// # References
 /// - [`prctl(PR_SET_DUMPABLE,...)`]
@@ -350,8 +351,8 @@ pub fn timing_method() -> io::Result<TimingMethod> {
 
 const PR_SET_TIMING: c_int = 14;
 
-/// Set whether to use (normal, traditional) statistical process timing or accurate
-/// timestamp-based process timing.
+/// Set whether to use (normal, traditional) statistical process timing or
+/// accurate timestamp-based process timing.
 ///
 /// # References
 /// - [`prctl(PR_SET_TIMING,...)`]
@@ -470,7 +471,8 @@ pub fn time_stamp_counter_readability() -> io::Result<TimeStampCounterReadabilit
 
 const PR_SET_TSC: c_int = 26;
 
-/// Set the state of the flag determining if the timestamp counter can be read by the process.
+/// Set the state of the flag determining if the timestamp counter can be read
+/// by the process.
 ///
 /// # References
 /// - [`prctl(PR_SET_TSC,...)`]
@@ -611,13 +613,16 @@ pub enum VirtualMemoryMapAddress {
     CodeStart = PR_SET_MM_START_CODE,
     /// Set the address below which the program text can run.
     CodeEnd = PR_SET_MM_END_CODE,
-    /// Set the address above which initialized and uninitialized (bss) data are placed.
+    /// Set the address above which initialized and uninitialized (bss) data
+    /// are placed.
     DataStart = PR_SET_MM_START_DATA,
-    /// Set the address below which initialized and uninitialized (bss) data are placed.
+    /// Set the address below which initialized and uninitialized (bss) data
+    /// are placed.
     DataEnd = PR_SET_MM_END_DATA,
     /// Set the start address of the stack.
     StackStart = PR_SET_MM_START_STACK,
-    /// Set the address above which the program heap can be expanded with `brk` call.
+    /// Set the address above which the program heap can be expanded with `brk`
+    /// call.
     BrkStart = PR_SET_MM_START_BRK,
     /// Set the current `brk` value.
     BrkCurrent = PR_SET_MM_BRK,
@@ -631,7 +636,8 @@ pub enum VirtualMemoryMapAddress {
     EnvironmentEnd = PR_SET_MM_ENV_END,
 }
 
-/// Modify certain kernel memory map descriptor addresses of the calling process.
+/// Modify certain kernel memory map descriptor addresses of the calling
+/// process.
 ///
 /// # References
 /// - [`prctl(PR_SET_MM,...)`]
@@ -651,7 +657,8 @@ pub unsafe fn set_virtual_memory_map_address(
     prctl_3args(PR_SET_MM, option as usize as *mut _, address).map(|_r| ())
 }
 
-/// Supersede the `/proc/pid/exe` symbolic link with a new one pointing to a new executable file.
+/// Supersede the `/proc/pid/exe` symbolic link with a new one pointing to a
+/// new executable file.
 ///
 /// # References
 /// - [`prctl(PR_SET_MM,PR_SET_MM_EXE_FILE,...)`]
@@ -700,8 +707,8 @@ pub fn virtual_memory_map_config_struct_size() -> io::Result<usize> {
     Ok(value as usize)
 }
 
-/// This structure provides new memory descriptor map which mostly modifies `/proc/pid/stat[m]`
-/// output for a task.
+/// This structure provides new memory descriptor map which mostly modifies
+/// `/proc/pid/stat[m]` output for a task.
 /// This mostly done in a sake of checkpoint/restore functionality.
 #[repr(C)]
 #[derive(Debug, Clone)]
@@ -732,11 +739,13 @@ pub struct PrctlMmMap {
     pub auxv: *mut u64,
     /// Auxiliary vector size.
     pub auxv_size: u32,
-    /// File descriptor of executable file that was used to create this process.
+    /// File descriptor of executable file that was used to create this
+    /// process.
     pub exe_fd: u32,
 }
 
-/// Provides one-shot access to all the addresses by passing in a [`PrctlMmMap`].
+/// Provides one-shot access to all the addresses by passing in a
+/// [`PrctlMmMap`].
 ///
 /// # References
 /// - [`prctl(PR_SET_MM,PR_SET_MM_MAP,...)`]
@@ -778,8 +787,8 @@ pub enum PTracer {
     ProcessID(Pid),
 }
 
-/// Declare that the ptracer process can `ptrace` the calling process as if it were a direct
-/// process ancestor.
+/// Declare that the ptracer process can `ptrace` the calling process as if it
+/// were a direct process ancestor.
 ///
 /// # References
 /// - [`prctl(PR_SET_PTRACER,...)`]
@@ -1002,8 +1011,8 @@ pub fn is_io_flusher() -> io::Result<bool> {
 
 const PR_SET_IO_FLUSHER: c_int = 57;
 
-/// Put the process in the `IO_FLUSHER` state, allowing it to make progress when
-/// allocating memory.
+/// Put the process in the `IO_FLUSHER` state, allowing it to make progress
+/// when allocating memory.
 ///
 /// # References
 /// - [`prctl(PR_SET_IO_FLUSHER,...)`]

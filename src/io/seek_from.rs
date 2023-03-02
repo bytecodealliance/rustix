@@ -5,6 +5,8 @@
 /// Enumeration of possible methods to seek within an I/O object.
 ///
 /// It is used by the [`Seek`] trait.
+///
+/// [`Seek`]: std::io::Seek
 #[derive(Copy, PartialEq, Eq, Clone, Debug)]
 #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
 pub enum SeekFrom {
