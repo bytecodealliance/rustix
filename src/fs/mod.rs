@@ -29,9 +29,6 @@ mod file_type;
 #[cfg(apple)]
 mod getpath;
 #[cfg(not(any(
-    apple,
-    freebsdlike,
-    netbsdlike,
     solarish,
     target_os = "haiku",
     target_os = "redox",
@@ -98,9 +95,6 @@ pub use file_type::FileType;
 #[cfg(apple)]
 pub use getpath::getpath;
 #[cfg(not(any(
-    apple,
-    freebsdlike,
-    netbsdlike,
     solarish,
     target_os = "haiku",
     target_os = "redox",
