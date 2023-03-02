@@ -62,16 +62,10 @@ impl AddressFamily {
     pub const INET6: Self = Self(c::AF_INET6 as _);
     /// `AF_NETLINK`
     #[cfg(not(any(
+        bsd,
+        solarish,
         windows,
-        target_os = "dragonfly",
-        target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "solaris",
     )))]
     pub const NETLINK: Self = Self(c::AF_NETLINK as _);
     /// `AF_UNIX`, aka `AF_LOCAL`
@@ -79,16 +73,10 @@ impl AddressFamily {
     pub const UNIX: Self = Self(c::AF_UNIX as _);
     /// `AF_AX25`
     #[cfg(not(any(
+        bsd,
+        solarish,
         windows,
-        target_os = "dragonfly",
-        target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "solaris",
     )))]
     pub const AX25: Self = Self(c::AF_AX25 as _);
     /// `AF_IPX`

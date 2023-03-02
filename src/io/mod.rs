@@ -36,15 +36,7 @@ pub use eventfd::{eventfd, EventfdFlags};
 pub use fcntl::fcntl_dupfd_cloexec;
 #[cfg(not(windows))]
 pub use fcntl::{fcntl_getfd, fcntl_setfd, FdFlags};
-#[cfg(any(target_os = "ios", target_os = "macos"))]
-pub use ioctl::ioctl_fioclex;
-pub use ioctl::ioctl_fionbio;
-#[cfg(not(target_os = "redox"))]
-pub use ioctl::ioctl_fionread;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-pub use ioctl::{ioctl_blkpbszget, ioctl_blksszget};
-#[cfg(not(any(windows, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
-pub use ioctl::{ioctl_tiocexcl, ioctl_tiocnxcl};
+pub use ioctl::*;
 #[cfg(not(any(windows, target_os = "redox")))]
 #[cfg(all(feature = "fs", feature = "net"))]
 pub use is_read_write::is_read_write;
@@ -60,11 +52,10 @@ pub use pipe::pipe;
 )))]
 pub use pipe::PIPE_BUF;
 #[cfg(not(any(
+    apple,
     windows,
     target_os = "aix",
     target_os = "haiku",
-    target_os = "ios",
-    target_os = "macos",
     target_os = "wasi"
 )))]
 pub use pipe::{pipe_with, PipeFlags};
@@ -72,11 +63,9 @@ pub use pipe::{pipe_with, PipeFlags};
 pub use pipe::{splice, vmsplice, IoSliceRaw, SpliceFlags};
 pub use poll::{poll, PollFd, PollFlags};
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
-pub use procfs::{
-    proc_self_fd, proc_self_fdinfo_fd, proc_self_maps, proc_self_pagemap, proc_self_status,
-};
+pub use procfs::*;
 #[cfg(not(windows))]
-pub use read_write::{pread, pwrite, read, readv, write, writev, IoSlice, IoSliceMut};
+pub use read_write::*;
 #[cfg(not(any(
     windows,
     target_os = "haiku",
@@ -88,6 +77,4 @@ pub use read_write::{preadv, pwritev};
 pub use read_write::{preadv2, pwritev2, ReadWriteFlags};
 pub use seek_from::SeekFrom;
 #[cfg(not(windows))]
-pub use stdio::{
-    raw_stderr, raw_stdin, raw_stdout, stderr, stdin, stdout, take_stderr, take_stdin, take_stdout,
-};
+pub use stdio::*;

@@ -26,7 +26,7 @@ fn main() {
     let arch = var("CARGO_CFG_TARGET_ARCH").unwrap();
     let asm_name = format!("{}/{}.s", OUTLINE_PATH, arch);
     let asm_name_present = std::fs::metadata(&asm_name).is_ok();
-    let os_name = var("CARGO_CFG_TARGET_OS").unwrap();
+    let target_os = var("CARGO_CFG_TARGET_OS").unwrap();
     let pointer_width = var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap();
     let endian = var("CARGO_CFG_TARGET_ENDIAN").unwrap();
 
@@ -69,7 +69,7 @@ fn main() {
     // install the toolchain for it.
     if feature_use_libc
         || cfg_use_libc
-        || os_name != "linux"
+        || target_os != "linux"
         || !asm_name_present
         || is_unsupported_abi
         || miri
@@ -104,6 +104,39 @@ fn main() {
     // Detect whether the compiler requires us to use thumb mode on ARM.
     if arch == "arm" && use_thumb_mode() {
         use_feature("thumb_mode");
+    }
+
+    // Rust's libc crate groups some OS's together which have similar APIs;
+    // create similarly-named features to make `cfg` tests more concise.
+    if target_os == "freebsd" || target_os == "dragonfly" {
+        use_feature("freebsdlike");
+    }
+    if target_os == "openbsd" || target_os == "netbsd" {
+        use_feature("netbsdlike");
+    }
+    if target_os == "macos" || target_os == "ios" || target_os == "tvos" || target_os == "watchos" {
+        use_feature("apple");
+    }
+    if target_os == "linux"
+        || target_os == "l4re"
+        || target_os == "android"
+        || target_os == "emscripten"
+    {
+        use_feature("linux_like");
+    }
+    if target_os == "solaris" || target_os == "illumos" {
+        use_feature("solarish");
+    }
+    if target_os == "macos"
+        || target_os == "ios"
+        || target_os == "tvos"
+        || target_os == "watchos"
+        || target_os == "freebsd"
+        || target_os == "dragonfly"
+        || target_os == "openbsd"
+        || target_os == "netbsd"
+    {
+        use_feature("bsd");
     }
 
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM");

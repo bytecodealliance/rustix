@@ -16,40 +16,18 @@ use crate::fs::{fcntl_getfl, fstat, openat, Mode, OFlags, Stat};
     target_os = "wasi",
 )))]
 use crate::fs::{fstatfs, StatFs};
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use crate::fs::{fstatvfs, StatVfs};
 use crate::io;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use crate::process::fchdir;
 #[cfg(target_os = "wasi")]
 use alloc::borrow::ToOwned;
-#[cfg(not(any(
-    target_os = "android",
-    target_os = "emscripten",
-    target_os = "l4re",
-    target_os = "linux",
-    target_os = "openbsd",
-)))]
+#[cfg(not(any(linux_like, target_os = "openbsd")))]
 use c::dirent as libc_dirent;
-#[cfg(not(any(
-    target_os = "android",
-    target_os = "emscripten",
-    target_os = "l4re",
-    target_os = "linux",
-)))]
+#[cfg(not(linux_like))]
 use c::readdir as libc_readdir;
-#[cfg(any(
-    target_os = "android",
-    target_os = "emscripten",
-    target_os = "l4re",
-    target_os = "linux",
-))]
+#[cfg(linux_like)]
 use c::{dirent64 as libc_dirent, readdir64 as libc_readdir};
 use core::fmt;
 use core::mem::zeroed;

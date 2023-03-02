@@ -14,13 +14,7 @@ use super::super::offset::{libc_preadv2, libc_pwritev2};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 use crate::io::DupFlags;
-#[cfg(not(any(
-    target_os = "aix",
-    target_os = "haiku",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(apple, target_os = "aix", target_os = "haiku", target_os = "wasi")))]
 use crate::io::PipeFlags;
 use crate::io::{self, FdFlags, IoSlice, IoSliceMut, PollFd};
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -260,10 +254,9 @@ const READ_LIMIT: usize = c::c_int::MAX as usize - 1;
 const READ_LIMIT: usize = c::ssize_t::MAX as usize;
 
 #[cfg(any(
+    apple,
     target_os = "dragonfly",
     target_os = "freebsd",
-    target_os = "ios",
-    target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
 ))]
@@ -277,15 +270,13 @@ const fn max_iov() -> usize {
 }
 
 #[cfg(not(any(
+    apple,
+    netbsdlike,
     target_os = "android",
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
-    target_os = "ios",
     target_os = "linux",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
 )))]
 const fn max_iov() -> usize {
     16 // The minimum value required by POSIX.
@@ -420,12 +411,11 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
 }
 
 #[cfg(not(any(
+    apple,
     target_os = "aix",
     target_os = "android",
     target_os = "dragonfly",
     target_os = "haiku",
-    target_os = "ios",
-    target_os = "macos",
     target_os = "redox",
     target_os = "wasi",
 )))]
@@ -440,11 +430,10 @@ pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, flags: DupFlags) -> io
 }
 
 #[cfg(any(
+    apple,
     target_os = "android",
     target_os = "dragonfly",
     target_os = "haiku",
-    target_os = "ios",
-    target_os = "macos",
     target_os = "redox",
 ))]
 pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, _flags: DupFlags) -> io::Result<()> {
@@ -455,7 +444,7 @@ pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, _flags: DupFlags) -> i
     dup2(fd, new)
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 pub(crate) fn ioctl_fioclex(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::FIOCLEX)) }
 }
@@ -480,13 +469,7 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     }
 }
 
-#[cfg(not(any(
-    target_os = "aix",
-    target_os = "haiku",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(apple, target_os = "aix", target_os = "haiku", target_os = "wasi")))]
 pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();

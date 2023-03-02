@@ -872,12 +872,7 @@ pub enum FlockOperation {
 ///
 /// [`statat`]: crate::fs::statat
 /// [`fstat`]: crate::fs::fstat
-#[cfg(not(any(
-    target_os = "android",
-    target_os = "linux",
-    target_os = "emscripten",
-    target_os = "l4re",
-)))]
+#[cfg(not(linux_like))]
 pub type Stat = c::stat;
 
 /// `struct stat` for use with [`statat`] and [`fstat`].
@@ -932,15 +927,11 @@ pub struct Stat {
 /// [`statfs`]: crate::fs::statfs
 /// [`fstatfs`]: crate::fs::fstatfs
 #[cfg(not(any(
-    target_os = "android",
-    target_os = "emscripten",
+    linux_like,
+    solarish,
     target_os = "haiku",
-    target_os = "illumos",
-    target_os = "linux",
-    target_os = "l4re",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "solaris",
     target_os = "wasi",
 )))]
 #[allow(clippy::module_name_repetitions)]
@@ -950,25 +941,14 @@ pub type StatFs = c::statfs;
 ///
 /// [`statfs`]: crate::fs::statfs
 /// [`fstatfs`]: crate::fs::fstatfs
-#[cfg(any(
-    target_os = "android",
-    target_os = "linux",
-    target_os = "emscripten",
-    target_os = "l4re",
-))]
+#[cfg(linux_like)]
 pub type StatFs = c::statfs64;
 
 /// `struct statvfs` for use with [`statvfs`] and [`fstatvfs`].
 ///
 /// [`statvfs`]: crate::fs::statvfs
 /// [`fstatvfs`]: crate::fs::fstatvfs
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 #[allow(missing_docs)]
 pub struct StatVfs {
     pub f_bsize: u64,

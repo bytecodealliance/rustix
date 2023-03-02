@@ -42,7 +42,7 @@ pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/ioctl.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-ioctlsocket
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 #[inline]
 #[doc(alias = "FIOCLEX")]
 #[doc(alias = "FD_CLOEXEC")]

@@ -14,12 +14,11 @@ use crate::process::{Pid, RawNonZeroPid};
 use crate::thread::{NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
 #[cfg(not(any(
+    apple,
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
     target_os = "haiku",
-    target_os = "ios",
-    target_os = "macos",
     target_os = "openbsd",
     target_os = "redox",
     target_os = "wasi",
@@ -38,12 +37,11 @@ weak!(fn __clock_nanosleep_time64(c::clockid_t, c::c_int, *const LibcTimespec, *
 weak!(fn __nanosleep64(*const LibcTimespec, *mut LibcTimespec) -> c::c_int);
 
 #[cfg(not(any(
+    apple,
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "haiku",
-    target_os = "ios",
-    target_os = "macos",
     target_os = "openbsd",
     target_os = "redox",
     target_os = "wasi",

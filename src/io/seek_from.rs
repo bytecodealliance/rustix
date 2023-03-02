@@ -33,12 +33,7 @@ pub enum SeekFrom {
     ///
     /// If the offset is in a hole at the end of the file, the seek will produce
     /// an `NXIO` error.
-    #[cfg(any(
-        target_os = "linux",
-        target_os = "solaris",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-    ))]
+    #[cfg(any(freebsdlike, target_os = "linux", target_os = "solaris"))]
     Data(i64),
 
     /// Sets the offset to the current position plus the specified number of bytes,

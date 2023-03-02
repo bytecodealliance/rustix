@@ -59,77 +59,28 @@ fn main() -> io::Result<()> {
         #[cfg(not(target_os = "openbsd"))]
         println!("As Limit: {:?}", getrlimit(Resource::As));
         #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
+            apple,
+            freebsdlike,
+            solarish,
             target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
-            target_os = "solaris",
         )))]
         println!("Locks Limit: {:?}", getrlimit(Resource::Locks));
-        #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-            target_os = "solaris",
-        )))]
+        #[cfg(not(any(bsd, solarish, target_os = "haiku")))]
         println!("Sigpending Limit: {:?}", getrlimit(Resource::Sigpending));
-        #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-            target_os = "solaris",
-        )))]
+        #[cfg(not(any(bsd, solarish, target_os = "haiku")))]
         println!("Msgqueue Limit: {:?}", getrlimit(Resource::Msgqueue));
-        #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-            target_os = "solaris",
-        )))]
+        #[cfg(not(any(bsd, solarish, target_os = "haiku")))]
         println!("Nice Limit: {:?}", getrlimit(Resource::Nice));
-        #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-            target_os = "solaris",
-        )))]
+        #[cfg(not(any(bsd, solarish, target_os = "haiku")))]
         println!("Rtprio Limit: {:?}", getrlimit(Resource::Rtprio));
         #[cfg(not(any(
+            bsd,
+            solarish,
             target_os = "android",
-            target_os = "dragonfly",
             target_os = "emscripten",
-            target_os = "freebsd",
             target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-            target_os = "solaris",
         )))]
         println!("Rttime Limit: {:?}", getrlimit(Resource::Rttime));
     }

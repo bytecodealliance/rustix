@@ -5,7 +5,7 @@ use crate::{backend, io};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use backend::fd::AsFd;
 
-#[cfg(not(any(target_os = "ios", target_os = "macos")))]
+#[cfg(not(apple))]
 pub use backend::io::types::PipeFlags;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -54,12 +54,7 @@ pub fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/pipe2.2.html
-#[cfg(not(any(
-    target_os = "aix",
-    target_os = "haiku",
-    target_os = "ios",
-    target_os = "macos"
-)))]
+#[cfg(not(any(apple, target_os = "aix", target_os = "haiku")))]
 #[inline]
 #[doc(alias = "pipe2")]
 pub fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {

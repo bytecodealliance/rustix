@@ -162,7 +162,7 @@ pub(crate) const fn sockaddr_in6_new(
         sin6_flowinfo,
         sin6_addr,
         sin6_scope_id,
-        #[cfg(any(target_os = "illumos", target_os = "solaris"))]
+        #[cfg(solarish)]
         __sin6_src_id: 0,
     }
 }

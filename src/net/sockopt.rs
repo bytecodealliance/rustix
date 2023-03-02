@@ -659,13 +659,7 @@ pub fn get_tcp_nodelay<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 /// [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
 /// [Winsock2 `setsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-setsockopt
 /// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
-#[cfg(any(
-    target_os = "freebsd",
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "tvos",
-    target_os = "watchos"
-))]
+#[cfg(any(apple, target_os = "freebsd"))]
 #[doc(alias = "SO_NOSIGPIPE")]
 #[inline]
 pub fn getsockopt_nosigpipe<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
@@ -688,13 +682,7 @@ pub fn getsockopt_nosigpipe<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 /// [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
 /// [Winsock2 `setsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-setsockopt
 /// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
-#[cfg(any(
-    target_os = "freebsd",
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "tvos",
-    target_os = "watchos"
-))]
+#[cfg(any(apple, target_os = "freebsd"))]
 #[doc(alias = "SO_NOSIGPIPE")]
 #[inline]
 pub fn setsockopt_nosigpipe<Fd: AsFd>(fd: Fd, val: bool) -> io::Result<()> {
