@@ -28,3 +28,4 @@ pub(crate) use linux_raw_sys::general::{
     SO_PASSCRED, SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_REUSEADDR, SO_SNDTIMEO_NEW, SO_SNDTIMEO_OLD,
     SO_TYPE, TCP_NODELAY,
 };
+pub(crate) use linux_raw_sys::general::{NFS_SUPER_MAGIC, PROC_SUPER_MAGIC, UTIME_NOW, UTIME_OMIT};

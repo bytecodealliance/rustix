@@ -30,13 +30,13 @@ pub use backend::fs::types::{Dev, RawMode};
 ///
 /// [`utimensat`]: crate::fs::utimensat
 #[cfg(not(target_os = "redox"))]
-pub const UTIME_NOW: Nsecs = backend::fs::types::UTIME_NOW as Nsecs;
+pub const UTIME_NOW: Nsecs = backend::c::UTIME_NOW as Nsecs;
 
 /// `UTIME_OMIT` for use with [`utimensat`].
 ///
 /// [`utimensat`]: crate::fs::utimensat
 #[cfg(not(target_os = "redox"))]
-pub const UTIME_OMIT: Nsecs = backend::fs::types::UTIME_OMIT as Nsecs;
+pub const UTIME_OMIT: Nsecs = backend::c::UTIME_OMIT as Nsecs;
 
 /// `openat(dirfd, path, oflags, mode)`—Opens a file.
 ///

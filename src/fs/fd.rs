@@ -67,7 +67,7 @@ pub struct Timestamps {
 ///
 /// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub const PROC_SUPER_MAGIC: FsWord = backend::fs::types::PROC_SUPER_MAGIC;
+pub const PROC_SUPER_MAGIC: FsWord = backend::c::PROC_SUPER_MAGIC as FsWord;
 
 /// The filesystem magic number for NFS.
 ///
@@ -75,7 +75,7 @@ pub const PROC_SUPER_MAGIC: FsWord = backend::fs::types::PROC_SUPER_MAGIC;
 ///
 /// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub const NFS_SUPER_MAGIC: FsWord = backend::fs::types::NFS_SUPER_MAGIC;
+pub const NFS_SUPER_MAGIC: FsWord = backend::c::NFS_SUPER_MAGIC as FsWord;
 
 /// `lseek(fd, offset, whence)`—Repositions a file descriptor within a file.
 ///
