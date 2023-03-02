@@ -125,6 +125,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             #[cfg(not(any(
                 bsd,
                 solarish,
+                target_os = "aix",
                 target_os = "emscripten",
                 target_os = "haiku",
                 target_os = "redox",
@@ -139,7 +140,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_oflag & OPOST) != 0 {
                 print!(" OPOST");
             }
-            #[cfg(not(any(bsd, target_os = "redox")))]
+            #[cfg(not(any(bsd, target_os = "aix", target_os = "redox")))]
             if (term.c_oflag & OLCUC) != 0 {
                 print!(" OLCUC");
             }
@@ -171,7 +172,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_oflag & NLDLY) != 0 {
                 print!(" NLDLY");
             }
-            #[cfg(not(any(bsd, solarish, target_os = "redox")))]
+            #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "redox")))]
             if (term.c_oflag & CRDLY) != 0 {
                 print!(" CRDLY");
             }
@@ -204,7 +205,13 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_cflag & CBAUD) != 0 {
                 print!(" CBAUD");
             }
-            #[cfg(not(any(bsd, solarish, target_os = "haiku", target_os = "redox")))]
+            #[cfg(not(any(
+                bsd,
+                solarish,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "redox"
+            )))]
             if (term.c_cflag & CBAUDEX) != 0 {
                 print!(" CBAUDEX");
             }

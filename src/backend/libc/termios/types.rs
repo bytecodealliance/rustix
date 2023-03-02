@@ -113,6 +113,7 @@ pub const VMIN: usize = c::VMIN as usize;
 
 /// `VSWTC`
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -142,11 +143,11 @@ pub const VEOL: usize = c::VEOL as usize;
 pub const VREPRINT: usize = c::VREPRINT as usize;
 
 /// `VDISCARD`
-#[cfg(not(target_os = "haiku"))]
+#[cfg(not(any(target_os = "aix", target_os = "haiku")))]
 pub const VDISCARD: usize = c::VDISCARD as usize;
 
 /// `VWERASE`
-#[cfg(not(target_os = "haiku"))]
+#[cfg(not(any(target_os = "aix", target_os = "haiku")))]
 pub const VWERASE: usize = c::VWERASE as usize;
 
 /// `VLNEXT`
@@ -219,6 +220,7 @@ pub const IMAXBEL: c::c_uint = c::IMAXBEL;
 
 /// `IUTF8`
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
@@ -239,6 +241,7 @@ pub const OPOST: c::c_uint = c::OPOST;
 
 /// `OLCUC`
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "ios",
@@ -676,16 +679,20 @@ pub const B19200: Speed = c::B19200;
 pub const B38400: Speed = c::B38400;
 
 /// `B57600`
+#[cfg(not(target_os = "aix"))]
 pub const B57600: Speed = c::B57600;
 
 /// `B115200`
+#[cfg(not(target_os = "aix"))]
 pub const B115200: Speed = c::B115200;
 
 /// `B230400`
+#[cfg(not(target_os = "aix"))]
 pub const B230400: Speed = c::B230400;
 
 /// `B460800`
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "haiku",
     target_os = "ios",
@@ -696,6 +703,7 @@ pub const B460800: Speed = c::B460800;
 
 /// `B500000`
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -710,6 +718,7 @@ pub const B500000: Speed = c::B500000;
 
 /// `B576000`
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -724,6 +733,7 @@ pub const B576000: Speed = c::B576000;
 
 /// `B921600`
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "haiku",
     target_os = "ios",
@@ -734,6 +744,7 @@ pub const B921600: Speed = c::B921600;
 
 /// `B1000000`
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -741,12 +752,13 @@ pub const B921600: Speed = c::B921600;
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
-    target_os = "solaris",
+    target_os = "solaris"
 )))]
 pub const B1000000: Speed = c::B1000000;
 
 /// `B1152000`
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -760,6 +772,7 @@ pub const B1152000: Speed = c::B1152000;
 
 /// `B1500000`
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -773,6 +786,7 @@ pub const B1500000: Speed = c::B1500000;
 
 /// `B2000000`
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -788,6 +802,7 @@ pub const B2000000: Speed = c::B2000000;
 #[cfg(not(any(
     target_arch = "sparc",
     target_arch = "sparc64",
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -803,6 +818,7 @@ pub const B2500000: Speed = c::B2500000;
 #[cfg(not(any(
     target_arch = "sparc",
     target_arch = "sparc64",
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -818,6 +834,7 @@ pub const B3000000: Speed = c::B3000000;
 #[cfg(not(any(
     target_arch = "sparc",
     target_arch = "sparc64",
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -833,6 +850,7 @@ pub const B3500000: Speed = c::B3500000;
 #[cfg(not(any(
     target_arch = "sparc",
     target_arch = "sparc64",
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -967,6 +985,7 @@ pub const CBAUD: c::c_uint = c::CBAUD;
 
 /// `CBAUDEX`
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",
@@ -1003,6 +1022,7 @@ pub const CIBAUD: c::tcflag_t = 0o77600000;
 
 /// `CMSPAR`
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd",
@@ -1018,7 +1038,12 @@ pub const CIBAUD: c::tcflag_t = 0o77600000;
 pub const CMSPAR: c::c_uint = c::CMSPAR;
 
 /// `CRTSCTS`
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "aix",
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "redox",
+)))]
 pub const CRTSCTS: c::c_uint = c::CRTSCTS;
 
 /// `XCASE`
@@ -1047,6 +1072,7 @@ pub const PENDIN: c::c_uint = c::PENDIN;
 
 /// `EXTPROC`
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "haiku",
     target_os = "ios",
     target_os = "macos",
@@ -1056,6 +1082,7 @@ pub const EXTPROC: c::c_uint = c::EXTPROC;
 
 /// `XTABS`
 #[cfg(not(any(
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "freebsd",
     target_os = "haiku",

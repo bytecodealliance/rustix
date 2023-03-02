@@ -58,6 +58,7 @@ bitflags! {
         /// `O_CLOEXEC`
         #[cfg(not(any(
             apple,
+            target_os = "aix",
             target_os = "android",
             target_os = "redox",
         )))] // Android 5.0 has dup3, but libc doesn't have bindings

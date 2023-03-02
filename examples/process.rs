@@ -54,23 +54,24 @@ fn main() -> io::Result<()> {
         println!("Nproc Limit: {:?}", getrlimit(Resource::Nproc));
         #[cfg(not(target_os = "solaris"))]
         println!("Nofile Limit: {:?}", getrlimit(Resource::Nofile));
-        #[cfg(not(any(solarish, target_os = "haiku")))]
+        #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku")))]
         println!("Memlock Limit: {:?}", getrlimit(Resource::Memlock));
         #[cfg(not(target_os = "openbsd"))]
         println!("As Limit: {:?}", getrlimit(Resource::As));
-        #[cfg(not(any(bsd, solarish, target_os = "haiku")))]
+        #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
         println!("Locks Limit: {:?}", getrlimit(Resource::Locks));
-        #[cfg(not(any(bsd, solarish, target_os = "haiku")))]
+        #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
         println!("Sigpending Limit: {:?}", getrlimit(Resource::Sigpending));
-        #[cfg(not(any(bsd, solarish, target_os = "haiku")))]
+        #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
         println!("Msgqueue Limit: {:?}", getrlimit(Resource::Msgqueue));
-        #[cfg(not(any(bsd, solarish, target_os = "haiku")))]
+        #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
         println!("Nice Limit: {:?}", getrlimit(Resource::Nice));
-        #[cfg(not(any(bsd, solarish, target_os = "haiku")))]
+        #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
         println!("Rtprio Limit: {:?}", getrlimit(Resource::Rtprio));
         #[cfg(not(any(
             bsd,
             solarish,
+            target_os = "aix",
             target_os = "android",
             target_os = "emscripten",
             target_os = "haiku",
