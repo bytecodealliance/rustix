@@ -93,7 +93,7 @@ pub unsafe fn port_dissociate_fd(port: impl AsFd, object: impl AsRawFd) -> io::R
     syscalls::port_dissociate(port.as_fd(), c::PORT_SOURCE_FD, object.as_raw_fd() as _)
 }
 
-/// `port_get()`- Gets an event from a port.
+/// `port_get(port, timeout)`- Gets an event from a port.
 ///
 /// # References
 ///
@@ -111,7 +111,7 @@ pub fn port_get(port: impl AsFd, timeout: Option<Duration>) -> io::Result<Event>
     syscalls::port_get(port.as_fd(), timeout.as_mut())
 }
 
-/// `port_getn()`- Gets multiple events from a port.
+/// `port_getn(port, events, min_events, timeout)`- Gets multiple events from a port.
 ///
 /// # References
 ///
@@ -141,7 +141,7 @@ pub fn port_getn(
     )
 }
 
-/// `port_send()`- Sends an event to a port.
+/// `port_send(port, events, userdata)`- Sends an event to a port.
 ///
 /// # References
 ///

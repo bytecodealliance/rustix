@@ -7,13 +7,7 @@ use crate::io;
 use backend::c::{self, kevent as kevent_t, uintptr_t};
 use backend::io::syscalls;
 
-#[cfg(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "watchos",
-    target_os = "dragonfly",
-    target_os = "freebsd",
-))]
+#[cfg(any(apple, freebsdlike))]
 use backend::c::intptr_t;
 
 use alloc::vec::Vec;
@@ -44,13 +38,7 @@ impl Event {
                 c::EVFILT_PROC,
                 flags.bits(),
             ),
-            #[cfg(any(
-                target_os = "macos",
-                target_os = "ios",
-                target_os = "tvos",
-                target_os = "watchos",
-                target_os = "freebsd",
-            ))]
+            #[cfg(any(apple, target_os = "freebsd"))]
             EventFilter::Timer(timer) => {
                 let (data, fflags) = match timer {
                     Some(timer) => {
@@ -67,13 +55,7 @@ impl Event {
 
                 (data, c::EVFILT_TIMER, fflags)
             }
-            #[cfg(any(
-                target_os = "macos",
-                target_os = "ios",
-                target_os = "watchos",
-                target_os = "dragonfly",
-                target_os = "freebsd",
-            ))]
+            #[cfg(any(apple, freebsdlike))]
             EventFilter::User {
                 ident,
                 flags,
@@ -126,13 +108,7 @@ impl Event {
                 pid: unsafe { crate::process::Pid::from_raw(self.inner.ident as _) }.unwrap(),
                 flags: ProcessEvents::from_bits_truncate(self.inner.fflags),
             },
-            #[cfg(any(
-                target_os = "macos",
-                target_os = "ios",
-                target_os = "tvos",
-                target_os = "watchos",
-                target_os = "freebsd",
-            ))]
+            #[cfg(any(apple, target_os = "freebsd"))]
             c::EVFILT_TIMER => EventFilter::Timer({
                 let (data, fflags) = (self.inner.data, self.inner.fflags);
                 match fflags as _ {
@@ -145,13 +121,7 @@ impl Event {
                     }
                 }
             }),
-            #[cfg(any(
-                target_os = "macos",
-                target_os = "ios",
-                target_os = "watchos",
-                target_os = "dragonfly",
-                target_os = "freebsd",
-            ))]
+            #[cfg(any(apple, freebsdlike))]
             c::EVFILT_USER => EventFilter::User {
                 ident: self.inner.ident as _,
                 flags: UserFlags::from_bits_truncate(self.inner.fflags),
@@ -163,13 +133,7 @@ impl Event {
 }
 
 /// Bottom 24 bits of a u32.
-#[cfg(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "watchos",
-    target_os = "dragonfly",
-    target_os = "freebsd",
-))]
+#[cfg(any(apple, freebsdlike))]
 const EVFILT_USER_FLAGS: u32 = 0x00ff_ffff;
 
 /// The possible filters for a `kqueue`.
@@ -202,23 +166,11 @@ pub enum EventFilter {
     },
 
     /// A timer filter.
-    #[cfg(any(
-        target_os = "macos",
-        target_os = "ios",
-        target_os = "tvos",
-        target_os = "watchos",
-        target_os = "freebsd",
-    ))]
+    #[cfg(any(apple, target_os = "freebsd"))]
     Timer(Option<Duration>),
 
     /// A user filter.
-    #[cfg(any(
-        target_os = "macos",
-        target_os = "ios",
-        target_os = "watchos",
-        target_os = "dragonfly",
-        target_os = "freebsd",
-    ))]
+    #[cfg(any(apple, freebsdlike))]
     User {
         /// The identifier for this event.
         ident: intptr_t,
@@ -311,13 +263,7 @@ bitflags::bitflags! {
     }
 }
 
-#[cfg(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "watchos",
-    target_os = "dragonfly",
-    target_os = "freebsd",
-))]
+#[cfg(any(apple, freebsdlike))]
 bitflags::bitflags! {
     /// The flags for a user event.
     pub struct UserFlags : u32 {
@@ -348,23 +294,11 @@ bitflags::bitflags! {
 ///
 /// Only the lower 24 bits are used in this struct.
 #[repr(transparent)]
-#[cfg(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "watchos",
-    target_os = "dragonfly",
-    target_os = "freebsd",
-))]
+#[cfg(any(apple, freebsdlike))]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct UserDefinedFlags(u32);
 
-#[cfg(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "watchos",
-    target_os = "dragonfly",
-    target_os = "freebsd",
-))]
+#[cfg(any(apple, freebsdlike))]
 impl UserDefinedFlags {
     /// Create a new `UserDefinedFlags` from a `u32`.
     pub fn new(flags: u32) -> Self {

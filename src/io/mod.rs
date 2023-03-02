@@ -13,21 +13,12 @@ pub(crate) mod fd;
 mod ioctl;
 #[cfg(not(any(windows, target_os = "redox")))]
 mod is_read_write;
-#[cfg(any(
-    target_os = "macos",
-    target_os = "ios",
-    target_os = "tvos",
-    target_os = "watchos",
-    target_os = "freebsd",
-    target_os = "dragonfly",
-    target_os = "openbsd",
-    target_os = "netbsd"
-))]
+#[cfg(bsd)]
 pub mod kqueue;
 #[cfg(not(any(windows, target_os = "wasi")))]
 mod pipe;
 mod poll;
-#[cfg(any(target_os = "illumos", target_os = "solaris"))]
+#[cfg(solarish)]
 pub mod port;
 #[cfg(all(feature = "procfs", any(target_os = "android", target_os = "linux")))]
 mod procfs;
