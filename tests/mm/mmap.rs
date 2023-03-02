@@ -114,7 +114,10 @@ fn test_mlock() {
             }
 
             match mlock_with(addr, 8192, MlockFlags::ONFAULT) {
+                // Linux versions that lack `mlock` return this.
                 Err(rustix::io::Errno::NOSYS) => (),
+                // Linux versions that don't recognize `ONFAULT` return this.
+                Err(rustix::io::Errno::INVAL) => (),
                 Err(err) => Err(err).unwrap(),
                 Ok(()) => munlock(addr, 8192).unwrap(),
             }
