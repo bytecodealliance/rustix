@@ -47,7 +47,7 @@
 //!             let conn_sock = accept(&listen_sock)?;
 //!             ioctl_fionbio(&conn_sock, true)?;
 //!             epoll::epoll_add(&epoll, &conn_sock, next_id, epoll::EventFlags::OUT | epoll::EventFlags::ET)?;
-//!             
+//!
 //!             // Keep track of the socket.
 //!             sockets.insert(next_id, conn_sock);
 //!             next_id += 1;

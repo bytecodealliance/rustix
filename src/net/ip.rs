@@ -1200,6 +1200,7 @@ impl Ipv6Addr {
         rustc_const_stable(feature = "const_ip_32", since = "1.32.0")
     )]
     #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
+    #[allow(clippy::too_many_arguments)]
     #[must_use]
     #[inline]
     pub const fn new(a: u16, b: u16, c: u16, d: u16, e: u16, f: u16, g: u16, h: u16) -> Ipv6Addr {

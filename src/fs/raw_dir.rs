@@ -171,6 +171,7 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// Note: this interface will be broken to implement a stdlib iterator API with
     /// GAT support once one becomes available.
     #[allow(unsafe_code)]
+    #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> Option<io::Result<RawDirEntry>> {
         if self.is_buffer_empty() {
             match getdents_uninit(self.fd.as_fd(), self.buf) {

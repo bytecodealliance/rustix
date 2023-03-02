@@ -104,7 +104,7 @@ pub struct IoSliceRaw<'a> {
 }
 
 impl<'a> IoSliceRaw<'a> {
-    /// Creates a new IoSlice wrapping a byte slice.
+    /// Creates a new `IoSlice` wrapping a byte slice.
     pub fn from_slice(buf: &'a [u8]) -> Self {
         IoSliceRaw {
             _buf: c::iovec {
@@ -115,7 +115,7 @@ impl<'a> IoSliceRaw<'a> {
         }
     }
 
-    /// Creates a new IoSlice wrapping a mutable byte slice.
+    /// Creates a new `IoSlice` wrapping a mutable byte slice.
     pub fn from_slice_mut(buf: &'a mut [u8]) -> Self {
         IoSliceRaw {
             _buf: c::iovec {

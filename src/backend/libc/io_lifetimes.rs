@@ -13,11 +13,11 @@ pub use io_lifetimes::AsSocket;
 
 /// A version of [`AsRawFd`] for use with Winsock2 API.
 ///
-/// [`AsRawFd`]: https://doc.rust-lang.org/stable/std/os/unix/io/trait.AsRawFd.html
+/// [`AsRawFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.AsRawFd.html
 pub trait AsRawFd {
     /// A version of [`as_raw_fd`] for use with Winsock2 API.
     ///
-    /// [`as_raw_fd`]: https://doc.rust-lang.org/stable/std/os/unix/io/trait.FromRawFd.html#tymethod.as_raw_fd
+    /// [`as_raw_fd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html#tymethod.as_raw_fd
     fn as_raw_fd(&self) -> RawFd;
 }
 #[cfg(feature = "std")]
@@ -30,11 +30,11 @@ impl<T: std::os::windows::io::AsRawSocket> AsRawFd for T {
 
 /// A version of [`IntoRawFd`] for use with Winsock2 API.
 ///
-/// [`IntoRawFd`]: https://doc.rust-lang.org/stable/std/os/unix/io/trait.IntoRawFd.html
+/// [`IntoRawFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.IntoRawFd.html
 pub trait IntoRawFd {
     /// A version of [`into_raw_fd`] for use with Winsock2 API.
     ///
-    /// [`into_raw_fd`]: https://doc.rust-lang.org/stable/std/os/unix/io/trait.FromRawFd.html#tymethod.into_raw_fd
+    /// [`into_raw_fd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html#tymethod.into_raw_fd
     fn into_raw_fd(self) -> RawFd;
 }
 #[cfg(feature = "std")]
@@ -47,11 +47,16 @@ impl<T: std::os::windows::io::IntoRawSocket> IntoRawFd for T {
 
 /// A version of [`FromRawFd`] for use with Winsock2 API.
 ///
-/// [`FromRawFd`]: https://doc.rust-lang.org/stable/std/os/unix/io/trait.FromRawFd.html
+/// [`FromRawFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html
 pub trait FromRawFd {
     /// A version of [`from_raw_fd`] for use with Winsock2 API.
     ///
-    /// [`from_raw_fd`]: https://doc.rust-lang.org/stable/std/os/unix/io/trait.FromRawFd.html#tymethod.from_raw_fd
+    /// # Safety
+    ///
+    /// See the [safety requirements] for [`from_raw_fd`].
+    ///
+    /// [`from_raw_fd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html#tymethod.from_raw_fd
+    /// [safety requirements]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html#safety
     unsafe fn from_raw_fd(raw_fd: RawFd) -> Self;
 }
 #[cfg(feature = "std")]
@@ -64,7 +69,7 @@ impl<T: std::os::windows::io::FromRawSocket> FromRawFd for T {
 
 /// A version of [`AsFd`] for use with Winsock2 API.
 ///
-/// [`AsFd`]: https://doc.rust-lang.org/stable/std/os/unix/io/trait.AsFd.html
+/// [`AsFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.AsFd.html
 pub trait AsFd {
     /// An `as_fd` function for Winsock2, where a `Fd` is a `Socket`.
     fn as_fd(&self) -> BorrowedFd;

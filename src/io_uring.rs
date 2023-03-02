@@ -1168,7 +1168,7 @@ pub struct io_uring_buf_reg {
     pub ring_entries: u32,
     pub bgid: u16,
     pub pad: u16,
-    pub resv: [u64; 3usize],
+    pub resv: [u64; 3_usize],
 }
 
 #[allow(missing_docs)]

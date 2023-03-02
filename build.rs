@@ -218,7 +218,7 @@ fn use_feature(feature: &str) {
 
 /// Test whether the rustc at `var("RUSTC")` supports the given feature.
 fn has_feature(feature: &str) -> bool {
-    can_compile(&format!(
+    can_compile(format!(
         "#![allow(stable_features)]\n#![feature({})]",
         feature
     ))

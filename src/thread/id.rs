@@ -36,7 +36,6 @@ pub fn gettid() -> Pid {
 /// [Linux]: https://man7.org/linux/man-pages/man2/setuid.2.html
 /// [linux_notes]: https://man7.org/linux/man-pages/man2/setuid.2.html#NOTES
 #[inline]
-#[must_use]
 pub fn set_thread_uid(uid: Uid) -> io::Result<()> {
     backend::thread::syscalls::setuid_thread(uid)
 }
@@ -61,7 +60,6 @@ pub fn set_thread_uid(uid: Uid) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/setgid.2.html
 /// [linux_notes]: https://man7.org/linux/man-pages/man2/setgid.2.html#NOTES
 #[inline]
-#[must_use]
 pub fn set_thread_gid(gid: Gid) -> io::Result<()> {
     backend::thread::syscalls::setgid_thread(gid)
 }

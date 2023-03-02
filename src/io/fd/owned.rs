@@ -168,7 +168,7 @@ impl Drop for OwnedFd {
             // the file descriptor was closed or not, and if we retried (for
             // something like EINTR), we might close another valid file
             // descriptor opened after we closed ours.
-            let _ = close(self.fd as _);
+            close(self.fd as _);
         }
     }
 }
