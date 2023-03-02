@@ -28,15 +28,7 @@ pub(crate) mod fd;
 mod file_type;
 #[cfg(apple)]
 mod getpath;
-#[cfg(not(any(
-    apple,
-    freebsdlike,
-    netbsdlike,
-    solarish,
-    target_os = "haiku",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 mod makedev;
 #[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 mod memfd_create;
@@ -97,16 +89,8 @@ pub use fd::*;
 pub use file_type::FileType;
 #[cfg(apple)]
 pub use getpath::getpath;
-#[cfg(not(any(
-    apple,
-    freebsdlike,
-    netbsdlike,
-    solarish,
-    target_os = "haiku",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
-pub use makedev::{major, makedev, minor};
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+pub use makedev::*;
 #[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 pub use memfd_create::{memfd_create, MemfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
