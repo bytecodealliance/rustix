@@ -7,7 +7,7 @@ use super::super::conv::{borrowed_fd, no_fd, ret};
 use super::super::offset::libc_mmap;
 #[cfg(not(target_os = "redox"))]
 use super::types::Advice;
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "emscripten", target_os = "linux"))]
 use super::types::MremapFlags;
 use super::types::{MapFlags, MprotectFlags, MsyncFlags, ProtFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
