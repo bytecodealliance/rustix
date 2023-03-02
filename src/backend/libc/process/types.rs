@@ -57,119 +57,47 @@ pub enum Resource {
     #[cfg(not(target_os = "haiku"))]
     Core = c::RLIMIT_CORE as c::c_int,
     /// `RLIMIT_RSS`
-    #[cfg(not(any(
-        target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "solaris",
-    )))]
+    #[cfg(not(any(apple, solarish, target_os = "haiku")))]
     Rss = c::RLIMIT_RSS as c::c_int,
     /// `RLIMIT_NPROC`
-    #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(solarish, target_os = "haiku")))]
     Nproc = c::RLIMIT_NPROC as c::c_int,
     /// `RLIMIT_NOFILE`
     Nofile = c::RLIMIT_NOFILE as c::c_int,
     /// `RLIMIT_MEMLOCK`
-    #[cfg(not(any(
-        target_os = "aix",
-        target_os = "haiku",
-        target_os = "illumos",
-        target_os = "solaris"
-    )))]
+    #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku")))]
     Memlock = c::RLIMIT_MEMLOCK as c::c_int,
     /// `RLIMIT_AS`
     #[cfg(not(target_os = "openbsd"))]
     As = c::RLIMIT_AS as c::c_int,
     /// `RLIMIT_LOCKS`
-    #[cfg(not(any(
-        target_os = "aix",
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "solaris",
-    )))]
+    #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
     Locks = c::RLIMIT_LOCKS as c::c_int,
     /// `RLIMIT_SIGPENDING`
-    #[cfg(not(any(
-        target_os = "aix",
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "solaris",
-    )))]
+    #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
     Sigpending = c::RLIMIT_SIGPENDING as c::c_int,
     /// `RLIMIT_MSGQUEUE`
-    #[cfg(not(any(
-        target_os = "aix",
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "solaris",
-    )))]
+    #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
     Msgqueue = c::RLIMIT_MSGQUEUE as c::c_int,
     /// `RLIMIT_NICE`
-    #[cfg(not(any(
-        target_os = "aix",
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "solaris",
-    )))]
+    #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
     Nice = c::RLIMIT_NICE as c::c_int,
     /// `RLIMIT_RTPRIO`
-    #[cfg(not(any(
-        target_os = "aix",
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "solaris",
-    )))]
+    #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
     Rtprio = c::RLIMIT_RTPRIO as c::c_int,
     /// `RLIMIT_RTTIME`
     #[cfg(not(any(
+        bsd,
+        solarish,
         target_os = "aix",
         target_os = "android",
-        target_os = "dragonfly",
         target_os = "emscripten",
-        target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "solaris",
     )))]
     Rttime = c::RLIMIT_RTTIME as c::c_int,
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 impl Resource {
     /// `RLIMIT_RSS`
     #[allow(non_upper_case_globals)]
@@ -221,16 +149,10 @@ pub enum Signal {
     Term = c::SIGTERM,
     /// `SIGSTKFLT`
     #[cfg(not(any(
+        bsd,
+        solarish,
         target_os = "aix",
-        target_os = "dragonfly",
-        target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-        target_os = "solaris",
         all(
             any(target_os = "android", target_os = "linux"),
             any(
@@ -273,15 +195,7 @@ pub enum Signal {
     #[cfg(not(target_os = "haiku"))]
     Io = c::SIGIO,
     /// `SIGPWR`
-    #[cfg(not(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    )))]
+    #[cfg(not(any(bsd, target_os = "haiku")))]
     #[doc(alias = "Pwr")]
     Power = c::SIGPWR,
     /// `SIGSYS`, aka `SIGUNUSED`
@@ -310,16 +224,10 @@ impl Signal {
             c::SIGALRM => Some(Self::Alarm),
             c::SIGTERM => Some(Self::Term),
             #[cfg(not(any(
+                bsd,
+                solarish,
                 target_os = "aix",
-                target_os = "dragonfly",
-                target_os = "freebsd",
                 target_os = "haiku",
-                target_os = "illumos",
-                target_os = "ios",
-                target_os = "macos",
-                target_os = "netbsd",
-                target_os = "openbsd",
-                target_os = "solaris",
                 all(
                     any(target_os = "android", target_os = "linux"),
                     any(
@@ -345,15 +253,7 @@ impl Signal {
             c::SIGWINCH => Some(Self::Winch),
             #[cfg(not(target_os = "haiku"))]
             c::SIGIO => Some(Self::Io),
-            #[cfg(not(any(
-                target_os = "dragonfly",
-                target_os = "freebsd",
-                target_os = "haiku",
-                target_os = "ios",
-                target_os = "macos",
-                target_os = "netbsd",
-                target_os = "openbsd",
-            )))]
+            #[cfg(not(any(bsd, target_os = "haiku")))]
             c::SIGPWR => Some(Self::Power),
             c::SIGSYS => Some(Self::Sys),
             _ => None,

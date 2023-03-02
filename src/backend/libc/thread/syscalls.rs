@@ -15,9 +15,8 @@ use crate::thread::{NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
 #[cfg(not(any(
     apple,
-    target_os = "dragonfly",
+    freebsdlike,
     target_os = "emscripten",
-    target_os = "freebsd",
     target_os = "haiku",
     target_os = "openbsd",
     target_os = "redox",
@@ -130,12 +129,11 @@ unsafe fn clock_nanosleep_relative_old(id: ClockId, request: &Timespec) -> Nanos
 }
 
 #[cfg(not(any(
+    apple,
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "haiku",
-    target_os = "ios",
-    target_os = "macos",
     target_os = "openbsd",
     target_os = "redox",
     target_os = "wasi",

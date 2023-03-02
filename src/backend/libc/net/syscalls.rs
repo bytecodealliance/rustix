@@ -251,10 +251,9 @@ pub(crate) fn accept(sockfd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 }
 
 #[cfg(not(any(
+    apple,
     windows,
     target_os = "haiku",
-    target_os = "ios",
-    target_os = "macos",
     target_os = "redox",
     target_os = "wasi",
 )))]
@@ -288,10 +287,9 @@ pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<
 }
 
 #[cfg(not(any(
+    apple,
     windows,
     target_os = "haiku",
-    target_os = "ios",
-    target_os = "macos",
     target_os = "redox",
     target_os = "wasi",
 )))]
@@ -317,14 +315,14 @@ pub(crate) fn acceptfrom_with(
 
 /// Darwin lacks `accept4`, but does have `accept`. We define
 /// `AcceptFlags` to have no flags, so we can discard it here.
-#[cfg(any(windows, target_os = "haiku", target_os = "ios", target_os = "macos"))]
+#[cfg(any(apple, windows, target_os = "haiku"))]
 pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, _flags: AcceptFlags) -> io::Result<OwnedFd> {
     accept(sockfd)
 }
 
 /// Darwin lacks `accept4`, but does have `accept`. We define
 /// `AcceptFlags` to have no flags, so we can discard it here.
-#[cfg(any(windows, target_os = "haiku", target_os = "ios", target_os = "macos"))]
+#[cfg(any(apple, windows, target_os = "haiku"))]
 pub(crate) fn acceptfrom_with(
     sockfd: BorrowedFd<'_>,
     _flags: AcceptFlags,
@@ -748,29 +746,9 @@ pub(crate) mod sockopt {
         multiaddr: &Ipv6Addr,
         interface: u32,
     ) -> io::Result<()> {
-        #[cfg(not(any(
-            apple,
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "illumos",
-            target_os = "l4re",
-            target_os = "netbsd",
-            target_os = "openbsd",
-            target_os = "solaris",
-        )))]
+        #[cfg(not(any(bsd, solarish, target_os = "haiku", target_os = "l4re")))]
         use c::IPV6_ADD_MEMBERSHIP;
-        #[cfg(any(
-            apple,
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "illumos",
-            target_os = "l4re",
-            target_os = "netbsd",
-            target_os = "openbsd",
-            target_os = "solaris",
-        ))]
+        #[cfg(any(bsd, solarish, target_os = "haiku", target_os = "l4re"))]
         use c::IPV6_JOIN_GROUP as IPV6_ADD_MEMBERSHIP;
 
         let mreq = to_ipv6mr(multiaddr, interface);
@@ -793,29 +771,9 @@ pub(crate) mod sockopt {
         multiaddr: &Ipv6Addr,
         interface: u32,
     ) -> io::Result<()> {
-        #[cfg(not(any(
-            apple,
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "illumos",
-            target_os = "l4re",
-            target_os = "netbsd",
-            target_os = "openbsd",
-            target_os = "solaris",
-        )))]
+        #[cfg(not(any(bsd, solarish, target_os = "haiku", target_os = "l4re")))]
         use c::IPV6_DROP_MEMBERSHIP;
-        #[cfg(any(
-            apple,
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "illumos",
-            target_os = "l4re",
-            target_os = "netbsd",
-            target_os = "openbsd",
-            target_os = "solaris",
-        ))]
+        #[cfg(any(bsd, solarish, target_os = "haiku", target_os = "l4re"))]
         use c::IPV6_LEAVE_GROUP as IPV6_DROP_MEMBERSHIP;
 
         let mreq = to_ipv6mr(multiaddr, interface);

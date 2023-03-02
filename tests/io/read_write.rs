@@ -20,12 +20,12 @@ fn test_readwrite_pv() {
     .unwrap();
 
     // For most targets, just call `pwritev`.
-    #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+    #[cfg(not(apple))]
     {
         pwritev(&foo, &[IoSlice::new(b"hello")], 200).unwrap();
     }
     // macOS only has pwritev in newer versions; allow it to fail with `ENOSYS`.
-    #[cfg(any(target_os = "ios", target_os = "macos"))]
+    #[cfg(apple)]
     {
         match pwritev(&foo, &[IoSlice::new(b"hello")], 200) {
             Ok(_) => (),

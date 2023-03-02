@@ -23,15 +23,7 @@ pub(crate) unsafe fn write_sockaddr(
 
 pub(crate) unsafe fn encode_sockaddr_v4(v4: &SocketAddrV4) -> c::sockaddr_in {
     c::sockaddr_in {
-        #[cfg(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        ))]
+        #[cfg(any(bsd, target_os = "haiku"))]
         sin_len: size_of::<c::sockaddr_in>() as _,
         sin_family: c::AF_INET as _,
         sin_port: u16::to_be(v4.port()),
@@ -50,15 +42,7 @@ unsafe fn write_sockaddr_v4(v4: &SocketAddrV4, storage: *mut SocketAddrStorage) 
 }
 
 pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> c::sockaddr_in6 {
-    #[cfg(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    ))]
+    #[cfg(any(bsd, target_os = "haiku"))]
     {
         sockaddr_in6_new(
             size_of::<c::sockaddr_in6>() as _,
@@ -69,15 +53,7 @@ pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> c::sockaddr_in6 {
             v6.scope_id(),
         )
     }
-    #[cfg(not(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    )))]
+    #[cfg(not(any(bsd, target_os = "haiku")))]
     {
         sockaddr_in6_new(
             c::AF_INET6 as _,

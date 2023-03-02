@@ -9,49 +9,36 @@ use super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t}
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 use super::super::offset::libc_fallocate;
 #[cfg(not(any(
+    apple,
+    netbsdlike,
+    solarish,
     target_os = "dragonfly",
     target_os = "haiku",
-    target_os = "illumos",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 use super::super::offset::libc_posix_fadvise;
 #[cfg(not(any(
+    apple,
+    netbsdlike,
+    solarish,
     target_os = "aix",
     target_os = "android",
     target_os = "dragonfly",
     target_os = "fuchsia",
-    target_os = "illumos",
-    target_os = "ios",
     target_os = "linux",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 use super::super::offset::libc_posix_fallocate;
 use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek, libc_off_t};
 #[cfg(not(any(
+    solarish,
     target_os = "haiku",
-    target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "solaris",
     target_os = "wasi",
 )))]
 use super::super::offset::{libc_fstatfs, libc_statfs};
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use super::super::offset::{libc_fstatvfs, libc_statvfs};
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
@@ -60,30 +47,25 @@ use super::super::offset::{libc_fstatvfs, libc_statvfs};
 use super::super::time::types::LibcTimespec;
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 use crate::ffi::CString;
 #[cfg(not(solarish))]
 use crate::fs::Access;
 #[cfg(not(any(
+    apple,
+    netbsdlike,
+    solarish,
     target_os = "dragonfly",
     target_os = "haiku",
-    target_os = "illumos",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 use crate::fs::Advice;
 #[cfg(not(any(
+    netbsdlike,
+    solarish,
     target_os = "aix",
     target_os = "dragonfly",
-    target_os = "illumos",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 use crate::fs::FallocateFlags;
 #[cfg(not(any(target_os = "solaris", target_os = "wasi")))]
@@ -98,31 +80,19 @@ use crate::fs::MemfdFlags;
 ))]
 use crate::fs::SealFlags;
 #[cfg(not(any(
+    solarish,
     target_os = "haiku",
-    target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "solaris",
     target_os = "wasi",
 )))]
 use crate::fs::StatFs;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags};
-#[cfg(not(any(
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(apple, target_os = "redox", target_os = "wasi")))]
 use crate::fs::{Dev, FileType};
 use crate::fs::{Mode, OFlags, Stat, Timestamps};
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use crate::fs::{StatVfs, StatVfsMountFlags};
 use crate::io::{self, SeekFrom};
 #[cfg(not(target_os = "wasi"))]
@@ -133,24 +103,14 @@ use crate::process::{Gid, Uid};
 )))]
 use crate::utils::as_ptr;
 use core::convert::TryInto;
-#[cfg(any(
-    target_os = "android",
-    target_os = "ios",
-    target_os = "linux",
-    target_os = "macos",
-))]
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
 use core::mem::size_of;
 use core::mem::MaybeUninit;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use core::ptr::null;
-#[cfg(any(
-    target_os = "android",
-    target_os = "ios",
-    target_os = "linux",
-    target_os = "macos",
-))]
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
 use core::ptr::null_mut;
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 use {
     super::super::conv::nonnegative_ret,
     crate::fs::{copyfile_state_t, CloneFlags, CopyfileFlags},
@@ -221,11 +181,10 @@ pub(crate) fn openat(
 }
 
 #[cfg(not(any(
+    solarish,
     target_os = "haiku",
-    target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "solaris",
     target_os = "wasi",
 )))]
 #[inline]
@@ -237,13 +196,7 @@ pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
     }
 }
 
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
     unsafe {
@@ -449,12 +402,7 @@ fn statat_old(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<
     }
 }
 
-#[cfg(not(any(
-    target_os = "emscripten",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-)))]
+#[cfg(not(any(solarish, target_os = "emscripten", target_os = "redox")))]
 pub(crate) fn accessat(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
@@ -515,8 +463,7 @@ pub(crate) fn utimensat(
     // Main version: libc is y2038 safe and has `utimensat`. Or, the platform
     // is not y2038 safe and there's nothing practical we can do.
     #[cfg(not(any(
-        target_os = "ios",
-        target_os = "macos",
+        apple,
         all(
             any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
             target_env = "gnu",
@@ -535,7 +482,7 @@ pub(crate) fn utimensat(
     }
 
     // `utimensat` was introduced in macOS 10.13.
-    #[cfg(any(target_os = "ios", target_os = "macos"))]
+    #[cfg(apple)]
     unsafe {
         // ABI details
         weak! {
@@ -711,7 +658,7 @@ pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Res
     }
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 pub(crate) fn fclonefileat(
     srcfd: BorrowedFd<'_>,
     dst_dirfd: BorrowedFd<'_>,
@@ -750,12 +697,7 @@ pub(crate) fn chownat(
     }
 }
 
-#[cfg(not(any(
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(apple, target_os = "redox", target_os = "wasi")))]
 pub(crate) fn mknodat(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
@@ -819,15 +761,12 @@ pub(crate) fn copy_file_range(
 }
 
 #[cfg(not(any(
+    apple,
+    netbsdlike,
+    solarish,
     target_os = "dragonfly",
     target_os = "haiku",
-    target_os = "illumos",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
     let offset = offset as i64;
@@ -899,19 +838,9 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         }
         SeekFrom::End(offset) => (c::SEEK_END, offset),
         SeekFrom::Current(offset) => (c::SEEK_CUR, offset),
-        #[cfg(any(
-            target_os = "linux",
-            target_os = "solaris",
-            target_os = "freebsd",
-            target_os = "dragonfly",
-        ))]
+        #[cfg(any(freebsdlike, target_os = "linux", target_os = "solaris"))]
         SeekFrom::Data(offset) => (c::SEEK_DATA, offset),
-        #[cfg(any(
-            target_os = "linux",
-            target_os = "solaris",
-            target_os = "freebsd",
-            target_os = "dragonfly",
-        ))]
+        #[cfg(any(freebsdlike, target_os = "linux", target_os = "solaris"))]
         SeekFrom::Hole(offset) => (c::SEEK_HOLE, offset),
     };
     let offset = unsafe { ret_off_t(libc_lseek(borrowed_fd(fd), offset, whence))? };
@@ -1009,11 +938,10 @@ fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 }
 
 #[cfg(not(any(
+    solarish,
     target_os = "haiku",
-    target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "solaris",
     target_os = "wasi",
 )))]
 pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
@@ -1024,13 +952,7 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
     }
 }
 
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
     let mut statvfs = MaybeUninit::<libc_statvfs>::uninit();
     unsafe {
@@ -1039,13 +961,7 @@ pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
     }
 }
 
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 fn libc_statvfs_to_statvfs(from: libc_statvfs) -> StatVfs {
     StatVfs {
         f_bsize: from.f_bsize as u64,
@@ -1084,8 +1000,7 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
     // Main version: libc is y2038 safe and has `futimens`. Or, the platform
     // is not y2038 safe and there's nothing practical we can do.
     #[cfg(not(any(
-        target_os = "ios",
-        target_os = "macos",
+        apple,
         all(
             any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
             target_env = "gnu",
@@ -1099,7 +1014,7 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
     }
 
     // `futimens` was introduced in macOS 10.13.
-    #[cfg(any(target_os = "ios", target_os = "macos"))]
+    #[cfg(apple)]
     unsafe {
         // ABI details.
         weak! {
@@ -1164,15 +1079,12 @@ unsafe fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
 }
 
 #[cfg(not(any(
+    apple,
+    netbsdlike,
+    solarish,
     target_os = "aix",
     target_os = "dragonfly",
-    target_os = "illumos",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 pub(crate) fn fallocate(
     fd: BorrowedFd<'_>,
@@ -1203,7 +1115,7 @@ pub(crate) fn fallocate(
     }
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 pub(crate) fn fallocate(
     fd: BorrowedFd<'_>,
     mode: FallocateFlags,
@@ -1237,10 +1149,9 @@ pub(crate) fn fsync(fd: BorrowedFd<'_>) -> io::Result<()> {
 }
 
 #[cfg(not(any(
+    apple,
     target_os = "dragonfly",
     target_os = "haiku",
-    target_os = "ios",
-    target_os = "macos",
     target_os = "redox",
 )))]
 pub(crate) fn fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
@@ -1574,7 +1485,7 @@ pub(crate) fn is_statx_available() -> bool {
     }
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 pub(crate) unsafe fn fcopyfile(
     from: BorrowedFd<'_>,
     to: BorrowedFd<'_>,
@@ -1598,7 +1509,7 @@ pub(crate) unsafe fn fcopyfile(
     ))
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 pub(crate) fn copyfile_state_alloc() -> io::Result<copyfile_state_t> {
     extern "C" {
         fn copyfile_state_alloc() -> copyfile_state_t;
@@ -1612,7 +1523,7 @@ pub(crate) fn copyfile_state_alloc() -> io::Result<copyfile_state_t> {
     }
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 pub(crate) unsafe fn copyfile_state_free(state: copyfile_state_t) -> io::Result<()> {
     extern "C" {
         fn copyfile_state_free(state: copyfile_state_t) -> c::c_int;
@@ -1621,17 +1532,17 @@ pub(crate) unsafe fn copyfile_state_free(state: copyfile_state_t) -> io::Result<
     nonnegative_ret(copyfile_state_free(state))
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 const COPYFILE_STATE_COPIED: u32 = 8;
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 pub(crate) unsafe fn copyfile_state_get_copied(state: copyfile_state_t) -> io::Result<u64> {
     let mut copied = MaybeUninit::<u64>::uninit();
     copyfile_state_get(state, COPYFILE_STATE_COPIED, copied.as_mut_ptr().cast())?;
     Ok(copied.assume_init())
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 pub(crate) unsafe fn copyfile_state_get(
     state: copyfile_state_t,
     flag: u32,
@@ -1644,7 +1555,7 @@ pub(crate) unsafe fn copyfile_state_get(
     nonnegative_ret(copyfile_state_get(state, flag, dst))
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<CString> {
     // The use of PATH_MAX is generally not encouraged, but it
     // is inevitable in this case because macOS defines `fcntl` with
@@ -1672,7 +1583,7 @@ pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<CString> {
     Ok(CString::new(buf).unwrap())
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 pub(crate) fn fcntl_rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
     // From the [macOS `fcntl` man page]:
     // `F_RDADVISE` - Issue an advisory read async with no copy to user.
@@ -1709,14 +1620,14 @@ pub(crate) fn fcntl_rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::R
     }
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 pub(crate) fn fcntl_fullfsync(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_FULLFSYNC)) }
 }
 
 /// Convert `times` from a `futimens`/`utimensat` argument into `setattrlist`
 /// arguments.
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 fn times_to_attrlist(times: &Timestamps) -> (c::size_t, [c::timespec; 2], Attrlist) {
     // ABI details.
     const ATTR_CMN_MODTIME: u32 = 0x0000_0400;
@@ -1784,11 +1695,11 @@ fn times_to_attrlist(times: &Timestamps) -> (c::size_t, [c::timespec; 2], Attrli
 }
 
 /// Support type for `Attrlist`.
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 type Attrgroup = u32;
 
 /// Attribute list for use with `setattrlist`.
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 #[repr(C)]
 struct Attrlist {
     bitmapcount: u16,

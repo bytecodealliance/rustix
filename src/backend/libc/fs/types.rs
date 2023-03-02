@@ -175,7 +175,7 @@ bitflags! {
         const DIRECTORY = c::O_DIRECTORY;
 
         /// `O_DSYNC`
-        #[cfg(not(any(target_os = "dragonfly", target_os = "freebsd", target_os = "redox")))]
+        #[cfg(not(any(freebsdlike, target_os = "redox")))]
         const DSYNC = c::O_DSYNC;
 
         /// `O_EXCL`
@@ -183,13 +183,8 @@ bitflags! {
 
         /// `O_FSYNC`
         #[cfg(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "ios",
+            bsd,
             all(target_os = "linux", not(target_env = "musl")),
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
         ))]
         const FSYNC = c::O_FSYNC;
 
@@ -214,11 +209,10 @@ bitflags! {
 
         /// `O_RSYNC`
         #[cfg(any(
+            netbsdlike,
             target_os = "android",
             target_os = "emscripten",
             target_os = "linux",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "wasi",
         ))]
         const RSYNC = c::O_RSYNC;
@@ -273,7 +267,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 bitflags! {
     /// `CLONE_*` constants for use with [`fclonefileat`].
     ///
@@ -287,7 +281,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 mod copyfile {
     pub(super) const ACL: u32 = 1 << 0;
     pub(super) const STAT: u32 = 1 << 1;
@@ -298,7 +292,7 @@ mod copyfile {
     pub(super) const ALL: u32 = METADATA | DATA;
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 bitflags! {
     /// `COPYFILE_*` constants.
     pub struct CopyfileFlags: c::c_uint {
@@ -438,12 +432,7 @@ impl FileType {
     }
 
     /// Construct a `FileType` from the `d_type` field of a `c::dirent`.
-    #[cfg(not(any(
-        target_os = "haiku",
-        target_os = "illumos",
-        target_os = "redox",
-        target_os = "solaris"
-    )))]
+    #[cfg(not(any(solarish, target_os = "haiku", target_os = "redox")))]
     pub(crate) const fn from_dirent_d_type(d_type: u8) -> Self {
         match d_type {
             c::DT_REG => Self::RegularFile,
@@ -465,15 +454,12 @@ impl FileType {
 ///
 /// [`fadvise`]: crate::fs::fadvise
 #[cfg(not(any(
+    apple,
+    netbsdlike,
+    solarish,
     target_os = "dragonfly",
     target_os = "haiku",
-    target_os = "illumos",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
@@ -687,14 +673,7 @@ bitflags! {
     }
 }
 
-#[cfg(not(any(
-    target_os = "aix",
-    target_os = "illumos",
-    target_os = "netbsd",
-    target_os = "openbsd",
-    target_os = "redox",
-    target_os = "solaris",
-)))]
+#[cfg(not(any(netbsdlike, solarish, target_os = "aix", target_os = "redox")))]
 bitflags! {
     /// `FALLOC_FL_*` constants for use with [`fallocate`].
     ///
@@ -702,41 +681,26 @@ bitflags! {
     pub struct FallocateFlags: i32 {
         /// `FALLOC_FL_KEEP_SIZE`
         #[cfg(not(any(
+            bsd,
             target_os = "aix",
-            target_os = "dragonfly",
-            target_os = "freebsd",
             target_os = "haiku",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "wasi",
         )))]
         const KEEP_SIZE = c::FALLOC_FL_KEEP_SIZE;
         /// `FALLOC_FL_PUNCH_HOLE`
         #[cfg(not(any(
+            bsd,
             target_os = "aix",
-            target_os = "dragonfly",
-            target_os = "freebsd",
             target_os = "haiku",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "wasi",
         )))]
         const PUNCH_HOLE = c::FALLOC_FL_PUNCH_HOLE;
         /// `FALLOC_FL_NO_HIDE_STALE`
         #[cfg(not(any(
+            bsd,
             target_os = "aix",
-            target_os = "dragonfly",
-            target_os = "freebsd",
             target_os = "haiku",
-            target_os = "ios",
             target_os = "linux",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "emscripten",
             target_os = "fuchsia",
             target_os = "wasi",
@@ -744,56 +708,36 @@ bitflags! {
         const NO_HIDE_STALE = c::FALLOC_FL_NO_HIDE_STALE;
         /// `FALLOC_FL_COLLAPSE_RANGE`
         #[cfg(not(any(
+            bsd,
             target_os = "aix",
-            target_os = "dragonfly",
-            target_os = "freebsd",
             target_os = "haiku",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "emscripten",
             target_os = "wasi",
         )))]
         const COLLAPSE_RANGE = c::FALLOC_FL_COLLAPSE_RANGE;
         /// `FALLOC_FL_ZERO_RANGE`
         #[cfg(not(any(
+            bsd,
             target_os = "aix",
-            target_os = "dragonfly",
-            target_os = "freebsd",
             target_os = "haiku",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "emscripten",
             target_os = "wasi",
         )))]
         const ZERO_RANGE = c::FALLOC_FL_ZERO_RANGE;
         /// `FALLOC_FL_INSERT_RANGE`
         #[cfg(not(any(
+            bsd,
             target_os = "aix",
-            target_os = "dragonfly",
-            target_os = "freebsd",
             target_os = "haiku",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "emscripten",
             target_os = "wasi",
         )))]
         const INSERT_RANGE = c::FALLOC_FL_INSERT_RANGE;
         /// `FALLOC_FL_UNSHARE_RANGE`
         #[cfg(not(any(
+            bsd,
             target_os = "aix",
-            target_os = "dragonfly",
-            target_os = "freebsd",
             target_os = "haiku",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "emscripten",
             target_os = "wasi",
         )))]
@@ -801,13 +745,7 @@ bitflags! {
     }
 }
 
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 bitflags! {
     /// `ST_*` constants for use with [`StatVfs`].
     pub struct StatVfsMountFlags: u64 {
@@ -1075,7 +1013,7 @@ pub type FsWord = u32;
 /// `copyfile_state_t`—State for use with [`fcopyfile`].
 ///
 /// [`fcopyfile`]: crate::fs::fcopyfile
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 #[allow(non_camel_case_types)]
 #[repr(transparent)]
 #[derive(Copy, Clone)]

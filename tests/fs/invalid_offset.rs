@@ -32,14 +32,7 @@ fn invalid_offset_seek() {
     seek(&file, SeekFrom::Current(i64::MIN)).unwrap_err();
 }
 
-#[cfg(not(any(
-    target_os = "dragonfly",
-    target_os = "illumos",
-    target_os = "netbsd",
-    target_os = "openbsd",
-    target_os = "redox",
-    target_os = "solaris",
-)))]
+#[cfg(not(any(netbsdlike, solarish, target_os = "dragonfly", target_os = "redox")))]
 #[test]
 fn invalid_offset_fallocate() {
     use rustix::fs::{cwd, fallocate, openat, FallocateFlags, Mode, OFlags};
@@ -60,15 +53,12 @@ fn invalid_offset_fallocate() {
 }
 
 #[cfg(not(any(
+    apple,
+    netbsdlike,
+    solarish,
     target_os = "dragonfly",
     target_os = "haiku",
-    target_os = "illumos",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 #[test]
 fn invalid_offset_fadvise() {
@@ -120,7 +110,7 @@ fn invalid_offset_pread() {
     pread(&file, &mut buf, i64::MAX as u64 + 1).unwrap_err();
 }
 
-#[cfg(not(any(target_os = "ios", target_os = "macos")))]
+#[cfg(not(apple))]
 #[test]
 fn invalid_offset_pwrite() {
     use rustix::fs::{cwd, openat, Mode, OFlags};

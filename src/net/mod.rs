@@ -21,14 +21,8 @@ mod wsa;
 
 pub mod sockopt;
 
-pub use send_recv::{
-    recv, recvfrom, send, sendto, sendto_any, sendto_v4, sendto_v6, RecvFlags, SendFlags,
-};
-pub use socket::{
-    accept, accept_with, acceptfrom, acceptfrom_with, bind, bind_any, bind_v4, bind_v6, connect,
-    connect_any, connect_v4, connect_v6, getpeername, getsockname, listen, shutdown, socket,
-    socket_with, AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType,
-};
+pub use send_recv::*;
+pub use socket::*;
 pub use socket_addr_any::{SocketAddrAny, SocketAddrStorage};
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use socketpair::socketpair;

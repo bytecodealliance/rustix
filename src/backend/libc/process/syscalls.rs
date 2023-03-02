@@ -538,7 +538,7 @@ pub(crate) unsafe fn prctl(
     ret_c_int(c::prctl(option, arg2, arg3, arg4, arg5))
 }
 
-#[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
+#[cfg(freebsdlike)]
 #[inline]
 pub(crate) unsafe fn procctl(
     idtype: c::idtype_t,

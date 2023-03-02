@@ -20,11 +20,10 @@ pub use backend::io::types::{IoSliceRaw, SpliceFlags};
 /// [Linux]: https://man7.org/linux/man-pages/man7/pipe.7.html
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/write.html
 #[cfg(not(any(
+    solarish,
     windows,
     target_os = "haiku",
-    target_os = "illumos",
     target_os = "redox",
-    target_os = "solaris",
     target_os = "wasi",
 )))]
 pub const PIPE_BUF: usize = backend::io::types::PIPE_BUF;

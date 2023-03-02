@@ -26,25 +26,9 @@ fn test_sockopts() {
     assert!(!rustix::net::sockopt::get_socket_passcred(&s).unwrap());
     assert_ne!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 0);
     assert_ne!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 77);
-    #[cfg(not(any(
-        windows,
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    )))]
+    #[cfg(not(any(bsd, windows)))]
     assert!(rustix::net::sockopt::get_ip_multicast_loop(&s).unwrap());
-    #[cfg(not(any(
-        windows,
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    )))]
+    #[cfg(not(any(bsd, windows)))]
     assert_eq!(rustix::net::sockopt::get_ip_multicast_ttl(&s).unwrap(), 1);
     assert!(!rustix::net::sockopt::get_tcp_nodelay(&s).unwrap());
 
@@ -81,14 +65,7 @@ fn test_sockopts() {
 
         // Check that the broadcast flag is set. This has no effect on stream
         // sockets, and not all platforms even remember the value.
-        #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        )))]
+        #[cfg(not(bsd))]
         assert!(rustix::net::sockopt::get_socket_broadcast(&s).unwrap());
     }
 
@@ -118,15 +95,7 @@ fn test_sockopts() {
     // Check the ip ttl.
     assert_eq!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 77);
 
-    #[cfg(not(any(
-        windows,
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    )))]
+    #[cfg(not(any(bsd, windows)))]
     {
         // Set the multicast loop flag;
         rustix::net::sockopt::set_ip_multicast_loop(&s, false).unwrap();
