@@ -129,9 +129,8 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 print!(" IMAXBEL");
             }
             #[cfg(not(any(
-                target_os = "dragonfly",
+                freebsdlike,
                 target_os = "emscripten",
-                target_os = "freebsd",
                 target_os = "haiku",
                 target_os = "illumos",
                 target_os = "ios",
@@ -151,14 +150,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_oflag & OPOST) != 0 {
                 print!(" OPOST");
             }
-            #[cfg(not(any(
-                target_os = "dragonfly",
-                target_os = "freebsd",
-                target_os = "ios",
-                target_os = "macos",
-                target_os = "netbsd",
-                target_os = "redox",
-            )))]
+            #[cfg(not(any(apple, freebsdlike, target_os = "netbsd", target_os = "redox")))]
             if (term.c_oflag & OLCUC) != 0 {
                 print!(" OLCUC");
             }
@@ -178,14 +170,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_oflag & ONLRET) != 0 {
                 print!(" ONLRET");
             }
-            #[cfg(not(any(
-                target_os = "dragonfly",
-                target_os = "freebsd",
-                target_os = "ios",
-                target_os = "macos",
-                target_os = "netbsd",
-                target_os = "openbsd",
-            )))]
+            #[cfg(not(bsd))]
             if (term.c_oflag & OFILL) != 0 {
                 print!(" OFILL");
             }
@@ -200,57 +185,33 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_oflag & OFDEL) != 0 {
                 print!(" OFDEL");
             }
-            #[cfg(not(any(
-                target_os = "dragonfly",
-                target_os = "freebsd",
-                target_os = "illumos",
-                target_os = "ios",
-                target_os = "macos",
-                target_os = "netbsd",
-                target_os = "openbsd",
-                target_os = "redox",
-                target_os = "solaris",
-            )))]
+            #[cfg(not(any(bsd, solarish, target_os = "redox")))]
             if (term.c_oflag & NLDLY) != 0 {
                 print!(" NLDLY");
             }
-            #[cfg(not(any(
-                target_os = "dragonfly",
-                target_os = "freebsd",
-                target_os = "illumos",
-                target_os = "ios",
-                target_os = "macos",
-                target_os = "netbsd",
-                target_os = "openbsd",
-                target_os = "redox",
-                target_os = "solaris",
-            )))]
+            #[cfg(not(any(bsd, solarish, target_os = "redox")))]
             if (term.c_oflag & CRDLY) != 0 {
                 print!(" CRDLY");
             }
             #[cfg(not(any(
+                apple,
+                netbsdlike,
+                solarish,
                 target_os = "dragonfly",
-                target_os = "ios",
-                target_os = "macos",
-                target_os = "netbsd",
-                target_os = "openbsd",
-                target_os = "illumos",
                 target_os = "redox",
-                target_os = "solaris",
             )))]
             if (term.c_oflag & TABDLY) != 0 {
                 print!(" TABDLY");
             }
             #[cfg(not(any(
+                solarish,
                 target_os = "dragonfly",
                 target_os = "freebsd",
-                target_os = "illumos",
                 target_os = "ios",
                 target_os = "macos",
                 target_os = "netbsd",
                 target_os = "openbsd",
                 target_os = "redox",
-                target_os = "solaris",
             )))]
             if (term.c_oflag & BSDLY) != 0 {
                 print!(" BSDLY");

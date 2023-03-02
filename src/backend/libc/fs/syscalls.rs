@@ -62,7 +62,7 @@ use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 use crate::ffi::CString;
-#[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+#[cfg(not(solarish))]
 use crate::fs::Access;
 #[cfg(not(any(
     target_os = "dragonfly",

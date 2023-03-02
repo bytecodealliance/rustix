@@ -636,25 +636,13 @@ pub(crate) mod sockopt {
         }
     }
 
-    #[cfg(any(
-        target_os = "freebsd",
-        target_os = "macos",
-        target_os = "ios",
-        target_os = "tvos",
-        target_os = "watchos"
-    ))]
+    #[cfg(any(apple, target_os = "freebsd"))]
     #[inline]
     pub(crate) fn getsockopt_nosigpipe(fd: BorrowedFd<'_>) -> io::Result<bool> {
         getsockopt(fd, c::SOL_SOCKET, c::SO_NOSIGPIPE).map(to_bool)
     }
 
-    #[cfg(any(
-        target_os = "freebsd",
-        target_os = "macos",
-        target_os = "ios",
-        target_os = "tvos",
-        target_os = "watchos"
-    ))]
+    #[cfg(any(apple, target_os = "freebsd"))]
     #[inline]
     pub(crate) fn setsockopt_nosigpipe(fd: BorrowedFd<'_>, val: bool) -> io::Result<()> {
         setsockopt(fd, c::SOL_SOCKET, c::SO_NOSIGPIPE, from_bool(val))
@@ -761,26 +749,24 @@ pub(crate) mod sockopt {
         interface: u32,
     ) -> io::Result<()> {
         #[cfg(not(any(
+            apple,
             target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "haiku",
             target_os = "illumos",
-            target_os = "ios",
             target_os = "l4re",
-            target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
             target_os = "solaris",
         )))]
         use c::IPV6_ADD_MEMBERSHIP;
         #[cfg(any(
+            apple,
             target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "haiku",
             target_os = "illumos",
-            target_os = "ios",
             target_os = "l4re",
-            target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
             target_os = "solaris",
@@ -808,26 +794,24 @@ pub(crate) mod sockopt {
         interface: u32,
     ) -> io::Result<()> {
         #[cfg(not(any(
+            apple,
             target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "haiku",
             target_os = "illumos",
-            target_os = "ios",
             target_os = "l4re",
-            target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
             target_os = "solaris",
         )))]
         use c::IPV6_DROP_MEMBERSHIP;
         #[cfg(any(
+            apple,
             target_os = "dragonfly",
             target_os = "freebsd",
             target_os = "haiku",
             target_os = "illumos",
-            target_os = "ios",
             target_os = "l4re",
-            target_os = "macos",
             target_os = "netbsd",
             target_os = "openbsd",
             target_os = "solaris",

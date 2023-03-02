@@ -872,12 +872,7 @@ pub enum FlockOperation {
 ///
 /// [`statat`]: crate::fs::statat
 /// [`fstat`]: crate::fs::fstat
-#[cfg(not(any(
-    target_os = "android",
-    target_os = "linux",
-    target_os = "emscripten",
-    target_os = "l4re",
-)))]
+#[cfg(not(linux_like))]
 pub type Stat = c::stat;
 
 /// `struct stat` for use with [`statat`] and [`fstat`].
@@ -932,15 +927,11 @@ pub struct Stat {
 /// [`statfs`]: crate::fs::statfs
 /// [`fstatfs`]: crate::fs::fstatfs
 #[cfg(not(any(
-    target_os = "android",
-    target_os = "emscripten",
+    linux_like,
+    solarish,
     target_os = "haiku",
-    target_os = "illumos",
-    target_os = "linux",
-    target_os = "l4re",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "solaris",
     target_os = "wasi",
 )))]
 #[allow(clippy::module_name_repetitions)]
@@ -950,25 +941,14 @@ pub type StatFs = c::statfs;
 ///
 /// [`statfs`]: crate::fs::statfs
 /// [`fstatfs`]: crate::fs::fstatfs
-#[cfg(any(
-    target_os = "android",
-    target_os = "linux",
-    target_os = "emscripten",
-    target_os = "l4re",
-))]
+#[cfg(linux_like)]
 pub type StatFs = c::statfs64;
 
 /// `struct statvfs` for use with [`statvfs`] and [`fstatvfs`].
 ///
 /// [`statvfs`]: crate::fs::statvfs
 /// [`fstatvfs`]: crate::fs::fstatvfs
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 #[allow(missing_docs)]
 pub struct StatVfs {
     pub f_bsize: u64,
@@ -1091,31 +1071,6 @@ pub type FsWord = u64;
 // s390x uses `u32` for `statfs` entries, even though `__fsword_t` is `u64`.
 #[cfg(all(target_os = "linux", target_arch = "s390x"))]
 pub type FsWord = u32;
-
-#[cfg(not(target_os = "redox"))]
-pub use c::{UTIME_NOW, UTIME_OMIT};
-
-/// `PROC_SUPER_MAGIC`—The magic number for the procfs filesystem.
-#[cfg(all(
-    any(target_os = "android", target_os = "linux"),
-    not(target_env = "musl"),
-))]
-pub const PROC_SUPER_MAGIC: FsWord = c::PROC_SUPER_MAGIC as FsWord;
-
-/// `NFS_SUPER_MAGIC`—The magic number for the NFS filesystem.
-#[cfg(all(
-    any(target_os = "android", target_os = "linux"),
-    not(target_env = "musl"),
-))]
-pub const NFS_SUPER_MAGIC: FsWord = c::NFS_SUPER_MAGIC as FsWord;
-
-/// `PROC_SUPER_MAGIC`—The magic number for the procfs filesystem.
-#[cfg(all(any(target_os = "android", target_os = "linux"), target_env = "musl"))]
-pub const PROC_SUPER_MAGIC: FsWord = 0x0000_9fa0;
-
-/// `NFS_SUPER_MAGIC`—The magic number for the NFS filesystem.
-#[cfg(all(any(target_os = "android", target_os = "linux"), target_env = "musl"))]
-pub const NFS_SUPER_MAGIC: FsWord = 0x0000_6969;
 
 /// `copyfile_state_t`—State for use with [`fcopyfile`].
 ///

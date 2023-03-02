@@ -49,11 +49,8 @@ pub(crate) mod fd {
 
 // On Windows we emulate selected libc-compatible interfaces. On non-Windows,
 // we just use libc here, since this is the libc backend.
-#[cfg(windows)]
-#[path = "winsock_c.rs"]
+#[cfg_attr(windows, path = "winsock_c.rs")]
 pub(crate) mod c;
-#[cfg(not(windows))]
-pub(crate) use libc as c;
 
 #[cfg(not(windows))]
 #[cfg(feature = "fs")]

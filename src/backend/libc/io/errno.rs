@@ -25,13 +25,12 @@ impl Errno {
     pub const ADDRNOTAVAIL: Self = Self(c::EADDRNOTAVAIL);
     /// `EADV`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -44,26 +43,17 @@ impl Errno {
     /// `EALREADY`
     pub const ALREADY: Self = Self(c::EALREADY);
     /// `EAUTH`
-    #[cfg(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    ))]
+    #[cfg(any(apple, netbsdlike, target_os = "dragonfly", target_os = "freebsd"))]
     pub const AUTH: Self = Self(c::EAUTH);
     /// `EBADE`
     #[cfg(not(any(
+        apple,
+        netbsdlike,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
         target_os = "wasi",
     )))]
     pub const BADE: Self = Self(c::EBADE);
@@ -71,15 +61,13 @@ impl Errno {
     pub const BADF: Self = Self(c::EBADF);
     /// `EBADFD`
     #[cfg(not(any(
+        apple,
+        netbsdlike,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
         target_os = "wasi",
     )))]
     pub const BADFD: Self = Self(c::EBADFD);
@@ -88,15 +76,13 @@ impl Errno {
     pub const BADMSG: Self = Self(c::EBADMSG);
     /// `EBADR`
     #[cfg(not(any(
+        apple,
+        netbsdlike,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
         target_os = "wasi",
     )))]
     pub const BADR: Self = Self(c::EBADR);

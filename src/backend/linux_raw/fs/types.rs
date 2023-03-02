@@ -640,14 +640,6 @@ pub type FsWord = linux_raw_sys::general::__fsword_t;
 #[cfg(target_arch = "mips64")]
 pub type FsWord = i64;
 
-pub use linux_raw_sys::general::{UTIME_NOW, UTIME_OMIT};
-
-/// `PROC_SUPER_MAGIC`—The magic number for the procfs filesystem.
-pub const PROC_SUPER_MAGIC: FsWord = linux_raw_sys::general::PROC_SUPER_MAGIC as FsWord;
-
-/// `NFS_SUPER_MAGIC`—The magic number for the NFS filesystem.
-pub const NFS_SUPER_MAGIC: FsWord = linux_raw_sys::general::NFS_SUPER_MAGIC as FsWord;
-
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
     /// `MS_*` constants for use with [`mount`][crate::fs::mount].

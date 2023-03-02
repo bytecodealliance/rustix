@@ -7,11 +7,11 @@
 
 use crate::fd::OwnedFd;
 use crate::ffi::{CStr, CString};
-#[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+#[cfg(not(solarish))]
 use crate::fs::Access;
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 use crate::fs::CloneFlags;
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
+#[cfg(not(any(apple, target_os = "wasi")))]
 use crate::fs::FileType;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::RenameFlags;
@@ -30,13 +30,13 @@ pub use backend::fs::types::{Dev, RawMode};
 ///
 /// [`utimensat`]: crate::fs::utimensat
 #[cfg(not(target_os = "redox"))]
-pub const UTIME_NOW: Nsecs = backend::fs::types::UTIME_NOW as Nsecs;
+pub const UTIME_NOW: Nsecs = backend::c::UTIME_NOW as Nsecs;
 
 /// `UTIME_OMIT` for use with [`utimensat`].
 ///
 /// [`utimensat`]: crate::fs::utimensat
 #[cfg(not(target_os = "redox"))]
-pub const UTIME_OMIT: Nsecs = backend::fs::types::UTIME_OMIT as Nsecs;
+pub const UTIME_OMIT: Nsecs = backend::c::UTIME_OMIT as Nsecs;
 
 /// `openat(dirfd, path, oflags, mode)`—Opens a file.
 ///
@@ -271,7 +271,7 @@ pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> io:
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/faccessat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/faccessat.2.html
-#[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+#[cfg(not(solarish))]
 #[inline]
 #[doc(alias = "faccessat")]
 pub fn accessat<P: path::Arg, Fd: AsFd>(
@@ -328,7 +328,7 @@ pub fn chmodat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, mode: Mode) -> io::Re
 ///  - [Apple]
 ///
 /// [Apple]: https://opensource.apple.com/source/xnu/xnu-3789.21.4/bsd/man/man2/clonefile.2.auto.html
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 #[inline]
 pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
     src: Fd,
@@ -349,7 +349,7 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mknodat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mknodat.2.html
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "wasi")))]
+#[cfg(not(any(apple, target_os = "wasi")))]
 #[inline]
 pub fn mknodat<P: path::Arg, Fd: AsFd>(
     dirfd: Fd,

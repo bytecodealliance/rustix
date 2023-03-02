@@ -5,5 +5,5 @@ pub(crate) use c::{
     WTERMSIG, WUNTRACED,
 };
 
-#[cfg(not(any(target_os = "openbsd", target_os = "redox", target_os = "wasi",)))]
+#[cfg(not(any(target_os = "openbsd", target_os = "redox", target_os = "wasi")))]
 pub(crate) use c::{WEXITED, WNOWAIT, WSTOPPED};

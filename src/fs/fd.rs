@@ -12,13 +12,12 @@ use backend::fd::{AsFd, BorrowedFd};
 pub use backend::fs::types::FlockOperation;
 
 #[cfg(not(any(
+    solarish,
     target_os = "aix",
     target_os = "dragonfly",
-    target_os = "illumos",
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 pub use backend::fs::types::FallocateFlags;
 
@@ -68,7 +67,7 @@ pub struct Timestamps {
 ///
 /// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub const PROC_SUPER_MAGIC: FsWord = backend::fs::types::PROC_SUPER_MAGIC;
+pub const PROC_SUPER_MAGIC: FsWord = backend::c::PROC_SUPER_MAGIC as FsWord;
 
 /// The filesystem magic number for NFS.
 ///
@@ -76,7 +75,7 @@ pub const PROC_SUPER_MAGIC: FsWord = backend::fs::types::PROC_SUPER_MAGIC;
 ///
 /// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub const NFS_SUPER_MAGIC: FsWord = backend::fs::types::NFS_SUPER_MAGIC;
+pub const NFS_SUPER_MAGIC: FsWord = backend::c::NFS_SUPER_MAGIC as FsWord;
 
 /// `lseek(fd, offset, whence)`—Repositions a file descriptor within a file.
 ///
@@ -313,10 +312,9 @@ pub fn fsync<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fdatasync.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fdatasync.2.html
 #[cfg(not(any(
+    apple,
     target_os = "dragonfly",
     target_os = "haiku",
-    target_os = "ios",
-    target_os = "macos",
     target_os = "redox",
 )))]
 #[inline]
