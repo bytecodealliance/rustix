@@ -1,7 +1,6 @@
 #![cfg(any(target_os = "android", target_os = "linux"))]
 
-use rustix::io::epoll;
-use rustix::io::{ioctl_fionbio, read, write};
+use rustix::io::{epoll, ioctl_fionbio, read, write};
 use rustix::net::{
     accept, bind_v4, connect_v4, getsockname, listen, socket, AddressFamily, Ipv4Addr, Protocol,
     SocketAddrAny, SocketAddrV4, SocketType,

@@ -22,11 +22,11 @@ pub fn gettid() -> Pid {
 ///
 /// This is not the setxid you are looking for... POSIX requires xids to be
 /// process granular, but on Linux they are per-thread. Thus, this call only
-/// changes the xid for the current *thread*, not the entire process even though
-/// that is in violation of the POSIX standard.
+/// changes the xid for the current *thread*, not the entire process even
+/// though that is in violation of the POSIX standard.
 ///
-/// For details on this distinction, see the C library vs. kernel differences in
-/// the [man page][linux_notes]. This call implements the kernel behavior.
+/// For details on this distinction, see the C library vs. kernel differences
+/// in the [man page][linux_notes]. This call implements the kernel behavior.
 ///
 /// # References
 ///  - [POSIX]
@@ -46,11 +46,11 @@ pub fn set_thread_uid(uid: Uid) -> io::Result<()> {
 ///
 /// This is not the setxid you are looking for... POSIX requires xids to be
 /// process granular, but on Linux they are per-thread. Thus, this call only
-/// changes the xid for the current *thread*, not the entire process even though
-/// that is in violation of the POSIX standard.
+/// changes the xid for the current *thread*, not the entire process even
+/// though that is in violation of the POSIX standard.
 ///
-/// For details on this distinction, see the C library vs. kernel differences in
-/// the [man page][linux_notes]. This call implements the kernel behavior.
+/// For details on this distinction, see the C library vs. kernel differences
+/// in the [man page][linux_notes]. This call implements the kernel behavior.
 ///
 /// # References
 ///  - [POSIX]

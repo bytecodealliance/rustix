@@ -12,10 +12,11 @@ use crate::io;
 
 /// A directory iterator implemented with getdents.
 ///
-/// Note: This implementation does not handle growing the buffer. If this functionality is
-/// necessary, you'll need to drop the current iterator, resize the buffer, and then
-/// re-create the iterator. The iterator is guaranteed to continue where it left off provided
-/// the file descriptor isn't changed. See the example in [`RawDir::new`].
+/// Note: This implementation does not handle growing the buffer. If this
+/// functionality is necessary, you'll need to drop the current iterator,
+/// resize the buffer, and then re-create the iterator. The iterator is
+/// guaranteed to continue where it left off provided the file descriptor isn't
+/// changed. See the example in [`RawDir::new`].
 pub struct RawDir<'buf, Fd: AsFd> {
     fd: Fd,
     buf: &'buf mut [MaybeUninit<u8>],
@@ -26,14 +27,16 @@ pub struct RawDir<'buf, Fd: AsFd> {
 impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// Create a new iterator from the given file descriptor and buffer.
     ///
-    /// Note: the buffer size may be trimmed to accommodate alignment requirements.
+    /// Note: the buffer size may be trimmed to accommodate alignment
+    /// requirements.
     ///
     /// # Examples
     ///
     /// ## Simple but non-portable
     ///
-    /// These examples are non-portable, because file systems may not have a maximum file name
-    /// length. If you can make assumptions that bound this length, then these examples may suffice.
+    /// These examples are non-portable, because file systems may not have a
+    /// maximum file name length. If you can make assumptions that bound
+    /// this length, then these examples may suffice.
     ///
     /// Using the heap:
     ///
@@ -58,7 +61,13 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// # use std::mem::MaybeUninit;
     /// # use rustix::fs::{cwd, Mode, OFlags, openat, RawDir};
     ///
-    /// let fd = openat(cwd(), ".", OFlags::RDONLY | OFlags::DIRECTORY, Mode::empty()).unwrap();
+    /// let fd = openat(
+    ///     cwd(),
+    ///     ".",
+    ///     OFlags::RDONLY | OFlags::DIRECTORY,
+    ///     Mode::empty(),
+    /// )
+    /// .unwrap();
     ///
     /// let mut buf = [MaybeUninit::uninit(); 2048];
     /// let mut iter = RawDir::new(fd, &mut buf);
@@ -70,8 +79,8 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     ///
     /// ## Portable
     ///
-    /// Heap allocated growing buffer for supporting directory entries with arbitrarily
-    /// large file names:
+    /// Heap allocated growing buffer for supporting directory entries with
+    /// arbitrarily large file names:
     ///
     /// ```notrust
     /// # // The `notrust` above can be removed when we can depend on Rust 1.60.
@@ -118,7 +127,8 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
 
 /// A raw directory entry, similar to `std::fs::DirEntry`.
 ///
-/// Note that unlike the std version, this may represent the `.` or `..` entries.
+/// Note that unlike the std version, this may represent the `.` or `..`
+/// entries.
 pub struct RawDirEntry<'a> {
     file_name: &'a CStr,
     file_type: u8,
@@ -166,10 +176,11 @@ impl<'a> RawDirEntry<'a> {
 }
 
 impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
-    /// Identical to [Iterator::next] except that [Iterator::Item] borrows from self.
+    /// Identical to [Iterator::next] except that [Iterator::Item] borrows from
+    /// self.
     ///
-    /// Note: this interface will be broken to implement a stdlib iterator API with
-    /// GAT support once one becomes available.
+    /// Note: this interface will be broken to implement a stdlib iterator API
+    /// with GAT support once one becomes available.
     #[allow(unsafe_code)]
     #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> Option<io::Result<RawDirEntry>> {
@@ -203,8 +214,8 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
         }))
     }
 
-    /// Returns true if the internal buffer is empty and will be refilled when calling
-    /// [`next`][Self::next].
+    /// Returns true if the internal buffer is empty and will be refilled when
+    /// calling [`next`][Self::next].
     pub fn is_buffer_empty(&self) -> bool {
         self.offset >= self.initialized
     }

@@ -60,10 +60,11 @@ pub fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     backend::io::syscalls::pipe_with(flags)
 }
 
-/// `splice(fd_in, off_in, fd_out, off_out, len, flags)`—Transfer data between a file and a pipe.
+/// `splice(fd_in, off_in, fd_out, off_out, len, flags)`—Transfer data between
+/// a file and a pipe.
 ///
-/// This function transfers up to `len` bytes of data from the file descriptor `fd_in`
-/// to the file descriptor `fd_out`, where one of the file descriptors
+/// This function transfers up to `len` bytes of data from the file descriptor
+/// `fd_in` to the file descriptor `fd_out`, where one of the file descriptors
 /// must refer to a pipe.
 ///
 /// `off_*` must be `None` if the corresponding fd refers to a pipe.
@@ -101,8 +102,9 @@ pub fn splice<FdIn: AsFd, FdOut: AsFd>(
 ///
 /// # Safety
 ///
-/// If the memory must not be mutated (such as when `bufs` were originally immutable slices),
-/// it is up to the caller to ensure that the write end of the pipe is placed in `fd`.
+/// If the memory must not be mutated (such as when `bufs` were originally
+/// immutable slices), it is up to the caller to ensure that the write end of
+/// the pipe is placed in `fd`.
 ///
 /// Additionally if `SpliceFlags::GIFT` is set, the caller must also ensure
 /// that the contents of `bufs` in never modified following the call,

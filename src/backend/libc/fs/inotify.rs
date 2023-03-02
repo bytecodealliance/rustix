@@ -96,7 +96,8 @@ pub fn inotify_add_watch<P: crate::path::Arg>(
     flags: WatchFlags,
 ) -> io::Result<i32> {
     let path = path.as_cow_c_str().unwrap();
-    // Safety: The fd and path we are passing is guranteed valid by the type system.
+    // Safety: The fd and path we are passing is guranteed valid by the type
+    // system.
     unsafe {
         ret_c_int(c::inotify_add_watch(
             borrowed_fd(inot),
