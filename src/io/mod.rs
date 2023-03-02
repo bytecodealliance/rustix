@@ -13,6 +13,17 @@ pub(crate) mod fd;
 mod ioctl;
 #[cfg(not(any(windows, target_os = "redox")))]
 mod is_read_write;
+#[cfg(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos",
+    target_os = "freebsd",
+    target_os = "dragonfly",
+    target_os = "openbsd",
+    target_os = "netbsd"
+))]
+pub mod kqueue;
 #[cfg(not(any(windows, target_os = "wasi")))]
 mod pipe;
 mod poll;
