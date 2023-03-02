@@ -15,9 +15,8 @@ use crate::thread::{NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
 #[cfg(not(any(
     apple,
-    target_os = "dragonfly",
+    freebsdlike,
     target_os = "emscripten",
-    target_os = "freebsd",
     target_os = "haiku",
     target_os = "openbsd",
     target_os = "redox",

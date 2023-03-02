@@ -58,14 +58,7 @@ fn main() -> io::Result<()> {
         println!("Memlock Limit: {:?}", getrlimit(Resource::Memlock));
         #[cfg(not(target_os = "openbsd"))]
         println!("As Limit: {:?}", getrlimit(Resource::As));
-        #[cfg(not(any(
-            apple,
-            freebsdlike,
-            solarish,
-            target_os = "haiku",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        )))]
+        #[cfg(not(any(bsd, solarish, target_os = "haiku")))]
         println!("Locks Limit: {:?}", getrlimit(Resource::Locks));
         #[cfg(not(any(bsd, solarish, target_os = "haiku")))]
         println!("Sigpending Limit: {:?}", getrlimit(Resource::Sigpending));
