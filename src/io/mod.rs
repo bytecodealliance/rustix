@@ -31,10 +31,8 @@ mod stdio;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use crate::backend::io::epoll;
 pub use close::close;
-#[cfg(not(any(windows, target_os = "wasi")))]
-pub use dup::{dup, dup2};
-#[cfg(not(any(windows, target_os = "aix", target_os = "wasi")))]
-pub use dup::{dup3, DupFlags};
+#[cfg(not(windows))]
+pub use dup::*;
 pub use errno::{retry_on_intr, Errno, Result};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use eventfd::{eventfd, EventfdFlags};
