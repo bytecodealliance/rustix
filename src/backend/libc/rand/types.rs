@@ -1,9 +1,9 @@
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::c;
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 use bitflags::bitflags;
 
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
     /// `GRND_*` flags for use with [`getrandom`].
     ///
