@@ -273,7 +273,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 bitflags! {
     /// `CLONE_*` constants for use with [`fclonefileat`].
     ///
@@ -287,7 +287,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 mod copyfile {
     pub(super) const ACL: u32 = 1 << 0;
     pub(super) const STAT: u32 = 1 << 1;
@@ -298,7 +298,7 @@ mod copyfile {
     pub(super) const ALL: u32 = METADATA | DATA;
 }
 
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 bitflags! {
     /// `COPYFILE_*` constants.
     pub struct CopyfileFlags: c::c_uint {
@@ -438,12 +438,7 @@ impl FileType {
     }
 
     /// Construct a `FileType` from the `d_type` field of a `c::dirent`.
-    #[cfg(not(any(
-        target_os = "haiku",
-        target_os = "illumos",
-        target_os = "redox",
-        target_os = "solaris"
-    )))]
+    #[cfg(not(any(solarish, target_os = "haiku", target_os = "redox")))]
     pub(crate) const fn from_dirent_d_type(d_type: u8) -> Self {
         match d_type {
             c::DT_REG => Self::RegularFile,
@@ -465,15 +460,14 @@ impl FileType {
 ///
 /// [`fadvise`]: crate::fs::fadvise
 #[cfg(not(any(
+    solarish,
     target_os = "dragonfly",
     target_os = "haiku",
-    target_os = "illumos",
     target_os = "ios",
     target_os = "macos",
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
@@ -688,12 +682,11 @@ bitflags! {
 }
 
 #[cfg(not(any(
+    solarish,
     target_os = "aix",
-    target_os = "illumos",
     target_os = "netbsd",
     target_os = "openbsd",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 bitflags! {
     /// `FALLOC_FL_*` constants for use with [`fallocate`].
@@ -801,13 +794,7 @@ bitflags! {
     }
 }
 
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 bitflags! {
     /// `ST_*` constants for use with [`StatVfs`].
     pub struct StatVfsMountFlags: u64 {
@@ -1075,7 +1062,7 @@ pub type FsWord = u32;
 /// `copyfile_state_t`—State for use with [`fcopyfile`].
 ///
 /// [`fcopyfile`]: crate::fs::fcopyfile
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 #[allow(non_camel_case_types)]
 #[repr(transparent)]
 #[derive(Copy, Clone)]

@@ -41,15 +41,14 @@ fn test_file() {
     );
 
     #[cfg(not(any(
+        solarish,
         target_os = "dragonfly",
         target_os = "haiku",
-        target_os = "illumos",
         target_os = "ios",
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "redox",
-        target_os = "solaris",
     )))]
     rustix::fs::fadvise(&file, 0, 10, rustix::fs::Advice::Normal).unwrap();
 

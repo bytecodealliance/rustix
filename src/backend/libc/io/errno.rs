@@ -88,23 +88,21 @@ impl Errno {
     pub const BADR: Self = Self(c::EBADR);
     /// `EBADRPC`
     #[cfg(any(
+        apple,
         target_os = "dragonfly",
         target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
     ))]
     pub const BADRPC: Self = Self(c::EBADRPC);
     /// `EBADRQC`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -112,13 +110,12 @@ impl Errno {
     pub const BADRQC: Self = Self(c::EBADRQC);
     /// `EBADSLT`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -126,13 +123,12 @@ impl Errno {
     pub const BADSLT: Self = Self(c::EBADSLT);
     /// `EBFONT`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -151,12 +147,11 @@ impl Errno {
     pub const CHILD: Self = Self(c::ECHILD);
     /// `ECHRNG`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -164,13 +159,12 @@ impl Errno {
     pub const CHRNG: Self = Self(c::ECHRNG);
     /// `ECOMM`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -187,14 +181,13 @@ impl Errno {
     pub const DEADLK: Self = Self(c::EDEADLK);
     /// `EDEADLOCK`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "android",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -213,17 +206,15 @@ impl Errno {
     pub const DOOFUS: Self = Self(c::EDOOFUS);
     /// `EDOTDOT`
     #[cfg(not(any(
+        apple,
+        solarish,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const DOTDOT: Self = Self(c::EDOTDOT);
@@ -239,11 +230,10 @@ impl Errno {
     pub const FBIG: Self = Self(c::EFBIG);
     /// `EFTYPE`
     #[cfg(any(
+        apple,
         target_env = "newlib",
         target_os = "dragonfly",
         target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
     ))]
@@ -255,19 +245,17 @@ impl Errno {
     pub const HOSTUNREACH: Self = Self(c::EHOSTUNREACH);
     /// `EHWPOISON`
     #[cfg(not(any(
+        apple,
+        solarish,
         windows,
         target_os = "aix",
         target_os = "android",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "redox",
-        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const HWPOISON: Self = Self(c::EHWPOISON);
@@ -304,76 +292,67 @@ impl Errno {
     pub const ISDIR: Self = Self(c::EISDIR);
     /// `EISNAM`
     #[cfg(not(any(
+        apple,
+        solarish,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const ISNAM: Self = Self(c::EISNAM);
     /// `EKEYEXPIRED`
     #[cfg(not(any(
+        apple,
+        solarish,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const KEYEXPIRED: Self = Self(c::EKEYEXPIRED);
     /// `EKEYREJECTED`
     #[cfg(not(any(
+        apple,
+        solarish,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const KEYREJECTED: Self = Self(c::EKEYREJECTED);
     /// `EKEYREVOKED`
     #[cfg(not(any(
+        apple,
+        solarish,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const KEYREVOKED: Self = Self(c::EKEYREVOKED);
     /// `EL2HLT`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -381,12 +360,11 @@ impl Errno {
     pub const L2HLT: Self = Self(c::EL2HLT);
     /// `EL2NSYNC`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -394,12 +372,11 @@ impl Errno {
     pub const L2NSYNC: Self = Self(c::EL2NSYNC);
     /// `EL3HLT`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -407,12 +384,11 @@ impl Errno {
     pub const L3HLT: Self = Self(c::EL3HLT);
     /// `EL3RST`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -420,13 +396,12 @@ impl Errno {
     pub const L3RST: Self = Self(c::EL3RST);
     /// `ELIBACC`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -434,13 +409,12 @@ impl Errno {
     pub const LIBACC: Self = Self(c::ELIBACC);
     /// `ELIBBAD`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -448,13 +422,12 @@ impl Errno {
     pub const LIBBAD: Self = Self(c::ELIBBAD);
     /// `ELIBEXEC`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -462,13 +435,12 @@ impl Errno {
     pub const LIBEXEC: Self = Self(c::ELIBEXEC);
     /// `ELIBMAX`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -476,13 +448,12 @@ impl Errno {
     pub const LIBMAX: Self = Self(c::ELIBMAX);
     /// `ELIBSCN`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -490,12 +461,11 @@ impl Errno {
     pub const LIBSCN: Self = Self(c::ELIBSCN);
     /// `ELNRNG`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -505,17 +475,15 @@ impl Errno {
     pub const LOOP: Self = Self(c::ELOOP);
     /// `EMEDIUMTYPE`
     #[cfg(not(any(
+        apple,
+        solarish,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const MEDIUMTYPE: Self = Self(c::EMEDIUMTYPE);
@@ -533,26 +501,23 @@ impl Errno {
     pub const NAMETOOLONG: Self = Self(c::ENAMETOOLONG);
     /// `ENAVAIL`
     #[cfg(not(any(
+        apple,
+        solarish,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const NAVAIL: Self = Self(c::ENAVAIL);
     /// `ENEEDAUTH`
     #[cfg(any(
+        apple,
         target_os = "dragonfly",
         target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
     ))]
@@ -568,13 +533,12 @@ impl Errno {
     pub const NFILE: Self = Self(c::ENFILE);
     /// `ENOANO`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -582,11 +546,10 @@ impl Errno {
     pub const NOANO: Self = Self(c::ENOANO);
     /// `ENOATTR`
     #[cfg(any(
+        apple,
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
     ))]
@@ -595,12 +558,11 @@ impl Errno {
     pub const NOBUFS: Self = Self(c::ENOBUFS);
     /// `ENOCSI`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -627,17 +589,15 @@ impl Errno {
     pub const NOEXEC: Self = Self(c::ENOEXEC);
     /// `ENOKEY`
     #[cfg(not(any(
+        solarish,
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const NOKEY: Self = Self(c::ENOKEY);
@@ -649,17 +609,15 @@ impl Errno {
     pub const NOLINK: Self = Self(c::ENOLINK);
     /// `ENOMEDIUM`
     #[cfg(not(any(
+        apple,
+        solarish,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const NOMEDIUM: Self = Self(c::ENOMEDIUM);
@@ -674,13 +632,12 @@ impl Errno {
     pub const NOMSG: Self = Self(c::ENOMSG);
     /// `ENONET`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -688,13 +645,12 @@ impl Errno {
     pub const NONET: Self = Self(c::ENONET);
     /// `ENOPKG`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -743,17 +699,15 @@ impl Errno {
     pub const NOTEMPTY: Self = Self(c::ENOTEMPTY);
     /// `ENOTNAM`
     #[cfg(not(any(
+        apple,
+        solarish,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const NOTNAM: Self = Self(c::ENOTNAM);
@@ -775,13 +729,12 @@ impl Errno {
     pub const NOTTY: Self = Self(c::ENOTTY);
     /// `ENOTUNIQ`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -814,40 +767,36 @@ impl Errno {
     pub const PIPE: Self = Self(c::EPIPE);
     /// `EPROCLIM`
     #[cfg(any(
+        apple,
         target_os = "dragonfly",
         target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
     ))]
     pub const PROCLIM: Self = Self(c::EPROCLIM);
     /// `EPROCUNAVAIL`
     #[cfg(any(
+        apple,
         target_os = "dragonfly",
         target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
     ))]
     pub const PROCUNAVAIL: Self = Self(c::EPROCUNAVAIL);
     /// `EPROGMISMATCH`
     #[cfg(any(
+        apple,
         target_os = "dragonfly",
         target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
     ))]
     pub const PROGMISMATCH: Self = Self(c::EPROGMISMATCH);
     /// `EPROGUNAVAIL`
     #[cfg(any(
+        apple,
         target_os = "dragonfly",
         target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
     ))]
@@ -870,13 +819,12 @@ impl Errno {
     pub const REFUSED: Self = Self(c::EREFUSED);
     /// `EREMCHG`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -887,28 +835,25 @@ impl Errno {
     pub const REMOTE: Self = Self(c::EREMOTE);
     /// `EREMOTEIO`
     #[cfg(not(any(
+        apple,
+        solarish,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const REMOTEIO: Self = Self(c::EREMOTEIO);
     /// `ERESTART`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -916,19 +861,17 @@ impl Errno {
     pub const RESTART: Self = Self(c::ERESTART);
     /// `ERFKILL`
     #[cfg(not(any(
+        apple,
+        solarish,
         windows,
         target_os = "aix",
         target_os = "android",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "redox",
-        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const RFKILL: Self = Self(c::ERFKILL);
@@ -937,10 +880,9 @@ impl Errno {
     pub const ROFS: Self = Self(c::EROFS);
     /// `ERPCMISMATCH`
     #[cfg(any(
+        apple,
         target_os = "dragonfly",
         target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
     ))]
@@ -959,13 +901,12 @@ impl Errno {
     pub const SRCH: Self = Self(c::ESRCH);
     /// `ESRMNT`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -975,13 +916,12 @@ impl Errno {
     pub const STALE: Self = Self(c::ESTALE);
     /// `ESTRPIPE`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -1010,28 +950,25 @@ impl Errno {
     pub const TXTBSY: Self = Self(c::ETXTBSY);
     /// `EUCLEAN`
     #[cfg(not(any(
+        apple,
+        solarish,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "illumos",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "solaris",
         target_os = "wasi",
     )))]
     pub const UCLEAN: Self = Self(c::EUCLEAN);
     /// `EUNATCH`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",
@@ -1047,13 +984,12 @@ impl Errno {
     pub const XDEV: Self = Self(c::EXDEV);
     /// `EXFULL`
     #[cfg(not(any(
+        apple,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
         target_os = "freebsd",
         target_os = "haiku",
-        target_os = "ios",
-        target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
         target_os = "wasi",

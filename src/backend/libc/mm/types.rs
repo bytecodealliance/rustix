@@ -178,38 +178,30 @@ bitflags! {
         )))]
         const LOCKED = c::MAP_LOCKED;
         /// `MAP_NOCORE`
-        #[cfg(any(target_os = "dragonfly", target_os = "freebsd"))]
+        #[cfg(freebsdlike)]
         const NOCORE = c::MAP_NOCORE;
         /// `MAP_NORESERVE`
-        #[cfg(not(any(target_os = "dragonfly", target_os = "freebsd", target_os = "redox")))]
+        #[cfg(not(any(freebsdlike, target_os = "redox")))]
         const NORESERVE = c::MAP_NORESERVE;
         /// `MAP_NOSYNC`
-        #[cfg(any(target_os = "dragonfly", target_os = "freebsd"))]
+        #[cfg(freebsdlike)]
         const NOSYNC = c::MAP_NOSYNC;
         /// `MAP_POPULATE`
         #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
+            bsd,
+            solarish,
             target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "redox",
-            target_os = "solaris",
         )))]
         const POPULATE = c::MAP_POPULATE;
         /// `MAP_STACK`
         #[cfg(not(any(
+            apple,
+            solarish,
             target_os = "dragonfly",
             target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
             target_os = "netbsd",
             target_os = "redox",
-            target_os = "solaris",
         )))]
         const STACK = c::MAP_STACK;
         /// `MAP_PREFAULT_READ`
@@ -217,19 +209,13 @@ bitflags! {
         const PREFAULT_READ = c::MAP_PREFAULT_READ;
         /// `MAP_SYNC`
         #[cfg(not(any(
+            bsd,
+            solarish,
             target_os = "android",
-            target_os = "dragonfly",
             target_os = "emscripten",
-            target_os = "freebsd",
             target_os = "fuchsia",
             target_os = "haiku",
-            target_os = "illumos",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "redox",
-            target_os = "solaris",
             all(
                 any(target_os = "android", target_os = "linux"),
                 any(target_arch = "mips", target_arch = "mips64"),

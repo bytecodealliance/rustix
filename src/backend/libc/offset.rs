@@ -244,7 +244,7 @@ pub(super) use c::{preadv as libc_preadv, pwritev as libc_pwritev};
 #[cfg(target_os = "android")]
 pub(super) use readwrite_pv64::{preadv64 as libc_preadv, pwritev64 as libc_pwritev};
 // macOS added preadv and pwritev in version 11.0
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 mod readwrite_pv {
     use super::c;
 
@@ -266,23 +266,21 @@ mod readwrite_pv {
 }
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 pub(super) use c::{preadv64v2 as libc_preadv2, pwritev64v2 as libc_pwritev2};
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(apple)]
 pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
 
 #[cfg(not(any(
-    windows,
+    apple,
     netbsdlike,
+    solarish,
+    windows,
     target_os = "aix",
     target_os = "android",
     target_os = "dragonfly",
     target_os = "fuchsia",
-    target_os = "illumos",
-    target_os = "ios",
     target_os = "linux",
     target_os = "l4re",
-    target_os = "macos",
     target_os = "redox",
-    target_os = "solaris",
 )))]
 #[cfg(feature = "fs")]
 pub(super) use c::posix_fallocate as libc_posix_fallocate;
@@ -291,12 +289,11 @@ pub(super) use c::posix_fallocate as libc_posix_fallocate;
 pub(super) use c::posix_fallocate64 as libc_posix_fallocate;
 #[cfg(not(any(
     linux_like,
+    solarish,
     windows,
     target_os = "haiku",
-    target_os = "illumos",
     target_os = "netbsd",
     target_os = "redox",
-    target_os = "solaris",
     target_os = "wasi",
 )))]
 #[cfg(feature = "fs")]

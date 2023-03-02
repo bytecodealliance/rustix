@@ -20,14 +20,7 @@ use core::slice;
 #[doc(alias = "sockaddr_un")]
 pub struct SocketAddrUnix {
     pub(crate) unix: c::sockaddr_un,
-    #[cfg(not(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    )))]
+    #[cfg(not(any(bsd, target_os = "haiku")))]
     len: c::socklen_t,
 }
 
@@ -50,28 +43,14 @@ impl SocketAddrUnix {
             unix.sun_path[i] = *b as c::c_char;
         }
 
-        #[cfg(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        ))]
+        #[cfg(any(bsd, target_os = "haiku"))]
         {
             unix.sun_len = (offsetof_sun_path() + bytes.len()).try_into().unwrap();
         }
 
         Ok(Self {
             unix,
-            #[cfg(not(any(
-                target_os = "dragonfly",
-                target_os = "freebsd",
-                target_os = "ios",
-                target_os = "macos",
-                target_os = "netbsd",
-                target_os = "openbsd",
-            )))]
+            #[cfg(not(any(bsd, target_os = "haiku")))]
             len: (offsetof_sun_path() + bytes.len()).try_into().unwrap(),
         })
     }
@@ -92,49 +71,19 @@ impl SocketAddrUnix {
         let len = len.try_into().unwrap();
         Ok(Self {
             unix,
-            #[cfg(not(any(
-                target_os = "dragonfly",
-                target_os = "freebsd",
-                target_os = "ios",
-                target_os = "macos",
-                target_os = "netbsd",
-                target_os = "openbsd",
-            )))]
+            #[cfg(not(any(bsd, target_os = "haiku")))]
             len,
         })
     }
 
     fn init() -> c::sockaddr_un {
         c::sockaddr_un {
-            #[cfg(any(
-                target_os = "dragonfly",
-                target_os = "freebsd",
-                target_os = "haiku",
-                target_os = "ios",
-                target_os = "macos",
-                target_os = "netbsd",
-                target_os = "openbsd",
-            ))]
+            #[cfg(any(bsd, target_os = "haiku"))]
             sun_len: 0,
             sun_family: c::AF_UNIX as _,
-            #[cfg(any(
-                target_os = "dragonfly",
-                target_os = "freebsd",
-                target_os = "ios",
-                target_os = "macos",
-                target_os = "netbsd",
-                target_os = "openbsd",
-            ))]
+            #[cfg(bsd)]
             sun_path: [0; 104],
-            #[cfg(not(any(
-                target_os = "dragonfly",
-                target_os = "freebsd",
-                target_os = "haiku",
-                target_os = "ios",
-                target_os = "macos",
-                target_os = "netbsd",
-                target_os = "openbsd",
-            )))]
+            #[cfg(not(any(bsd, target_os = "haiku")))]
             sun_path: [0; 108],
             #[cfg(target_os = "haiku")]
             sun_path: [0; 126],
@@ -178,25 +127,11 @@ impl SocketAddrUnix {
 
     #[inline]
     pub(crate) fn addr_len(&self) -> c::socklen_t {
-        #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        )))]
+        #[cfg(not(any(bsd, target_os = "haiku")))]
         {
             self.len
         }
-        #[cfg(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        ))]
+        #[cfg(any(bsd, target_os = "haiku"))]
         {
             c::socklen_t::from(self.unix.sun_len)
         }
@@ -274,54 +209,15 @@ pub type SocketAddrStorage = c::sockaddr_storage;
 #[inline]
 pub(crate) fn offsetof_sun_path() -> usize {
     let z = c::sockaddr_un {
-        #[cfg(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        ))]
+        #[cfg(any(bsd, target_os = "haiku"))]
         sun_len: 0_u8,
-        #[cfg(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        ))]
+        #[cfg(any(bsd, target_os = "haiku"))]
         sun_family: 0_u8,
-        #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        )))]
+        #[cfg(not(any(bsd, target_os = "haiku")))]
         sun_family: 0_u16,
-        #[cfg(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        ))]
+        #[cfg(bsd)]
         sun_path: [0; 104],
-        #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        )))]
+        #[cfg(not(any(bsd, target_os = "haiku")))]
         sun_path: [0; 108],
         #[cfg(target_os = "haiku")]
         sun_path: [0; 126],

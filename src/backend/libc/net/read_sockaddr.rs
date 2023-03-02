@@ -13,32 +13,11 @@ use core::mem::size_of;
 // This must match the header of `sockaddr`.
 #[repr(C)]
 struct sockaddr_header {
-    #[cfg(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    ))]
+    #[cfg(any(bsd, target_os = "haiku"))]
     sa_len: u8,
-    #[cfg(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    ))]
+    #[cfg(any(bsd, target_os = "haiku"))]
     ss_family: u8,
-    #[cfg(not(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "ios",
-        target_os = "macos",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    )))]
+    #[cfg(not(any(bsd, target_os = "haiku")))]
     ss_family: u16,
 }
 
@@ -46,35 +25,11 @@ struct sockaddr_header {
 unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
     // Assert that we know the layout of `sockaddr`.
     let _ = c::sockaddr {
-        #[cfg(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        ))]
+        #[cfg(any(bsd, target_os = "haiku"))]
         sa_len: 0_u8,
-        #[cfg(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        ))]
+        #[cfg(any(bsd, target_os = "haiku"))]
         sa_family: 0_u8,
-        #[cfg(not(any(
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "ios",
-            target_os = "macos",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        )))]
+        #[cfg(not(any(bsd, target_os = "haiku")))]
         sa_family: 0_u16,
         #[cfg(not(target_os = "haiku"))]
         sa_data: [0; 14],

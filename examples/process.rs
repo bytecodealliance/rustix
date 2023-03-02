@@ -48,13 +48,13 @@ fn main() -> io::Result<()> {
         println!("Stack Limit: {:?}", getrlimit(Resource::Stack));
         #[cfg(not(target_os = "haiku"))]
         println!("Core Limit: {:?}", getrlimit(Resource::Core));
-        #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
+        #[cfg(not(any(solarish, target_os = "haiku")))]
         println!("Rss Limit: {:?}", getrlimit(Resource::Rss));
-        #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
+        #[cfg(not(any(solarish, target_os = "haiku")))]
         println!("Nproc Limit: {:?}", getrlimit(Resource::Nproc));
         #[cfg(not(target_os = "solaris"))]
         println!("Nofile Limit: {:?}", getrlimit(Resource::Nofile));
-        #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
+        #[cfg(not(any(solarish, target_os = "haiku")))]
         println!("Memlock Limit: {:?}", getrlimit(Resource::Memlock));
         #[cfg(not(target_os = "openbsd"))]
         println!("As Limit: {:?}", getrlimit(Resource::As));

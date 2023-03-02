@@ -120,7 +120,7 @@ fn invalid_offset_pread() {
     pread(&file, &mut buf, i64::MAX as u64 + 1).unwrap_err();
 }
 
-#[cfg(not(any(target_os = "ios", target_os = "macos")))]
+#[cfg(not(apple))]
 #[test]
 fn invalid_offset_pwrite() {
     use rustix::fs::{cwd, openat, Mode, OFlags};

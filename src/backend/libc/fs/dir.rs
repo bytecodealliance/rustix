@@ -1,6 +1,6 @@
 use super::super::c;
 use super::super::conv::owned_fd;
-#[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "solaris")))]
+#[cfg(not(any(solarish, target_os = "haiku")))]
 use super::types::FileType;
 use crate::fd::{AsFd, BorrowedFd};
 use crate::ffi::CStr;
@@ -206,7 +206,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     ))]
     let d_namlen = input.d_namlen;
 
-    #[cfg(any(target_os = "ios", target_os = "macos"))]
+    #[cfg(apple)]
     let d_seekoff = input.d_seekoff;
 
     #[cfg(target_os = "haiku")]
@@ -256,7 +256,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
             target_os = "openbsd",
         ))]
         d_namlen,
-        #[cfg(any(target_os = "ios", target_os = "macos"))]
+        #[cfg(apple)]
         d_seekoff,
         // The `d_name` field is NUL-terminated, and we need to be careful not
         // to read bytes past the NUL, even though they're within the nominal

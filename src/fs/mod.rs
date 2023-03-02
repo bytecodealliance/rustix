@@ -45,23 +45,7 @@ mod statx;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use crate::backend::fs::inotify;
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "netbsd",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
-pub use abs::statfs;
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "illumos",
-    target_os = "redox",
-    target_os = "solaris",
-    target_os = "wasi",
-)))]
-pub use abs::statvfs;
+pub use abs::*;
 #[cfg(not(target_os = "redox"))]
 pub use at::*;
 pub use constants::*;
