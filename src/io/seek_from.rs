@@ -41,11 +41,6 @@ pub enum SeekFrom {
     ///
     /// If there is no hole past the offset, it will be set to the end of the file
     /// i.e. there is an implicit hole at the end of any file.
-    #[cfg(any(
-        target_os = "linux",
-        target_os = "solaris",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-    ))]
+    #[cfg(any(freebsdlike, target_os = "linux", target_os = "solaris"))]
     Hole(i64),
 }

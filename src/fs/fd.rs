@@ -12,11 +12,10 @@ use backend::fd::{AsFd, BorrowedFd};
 pub use backend::fs::types::FlockOperation;
 
 #[cfg(not(any(
+    netbsdlike,
     solarish,
     target_os = "aix",
     target_os = "dragonfly",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
 )))]
 pub use backend::fs::types::FallocateFlags;
@@ -221,11 +220,10 @@ pub fn futimens<Fd: AsFd>(fd: Fd, times: &Timestamps) -> io::Result<()> {
 /// [Linux `fallocate`]: https://man7.org/linux/man-pages/man2/fallocate.2.html
 /// [Linux `posix_fallocate`]: https://man7.org/linux/man-pages/man3/posix_fallocate.3.html
 #[cfg(not(any(
+    netbsdlike,
     solarish,
     target_os = "aix",
     target_os = "dragonfly",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
 )))] // not implemented in libc for netbsd yet
 #[inline]

@@ -253,13 +253,7 @@ const READ_LIMIT: usize = c::c_int::MAX as usize - 1;
 #[cfg(not(target_os = "macos"))]
 const READ_LIMIT: usize = c::ssize_t::MAX as usize;
 
-#[cfg(any(
-    apple,
-    target_os = "dragonfly",
-    target_os = "freebsd",
-    target_os = "netbsd",
-    target_os = "openbsd",
-))]
+#[cfg(bsd)]
 const fn max_iov() -> usize {
     c::IOV_MAX as usize
 }
@@ -270,12 +264,9 @@ const fn max_iov() -> usize {
 }
 
 #[cfg(not(any(
-    apple,
-    netbsdlike,
+    bsd,
     target_os = "android",
-    target_os = "dragonfly",
     target_os = "emscripten",
-    target_os = "freebsd",
     target_os = "linux",
 )))]
 const fn max_iov() -> usize {

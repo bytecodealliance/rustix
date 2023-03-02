@@ -149,14 +149,10 @@ pub enum Signal {
     Term = c::SIGTERM,
     /// `SIGSTKFLT`
     #[cfg(not(any(
-        apple,
+        bsd,
         solarish,
         target_os = "aix",
-        target_os = "dragonfly",
-        target_os = "freebsd",
         target_os = "haiku",
-        target_os = "netbsd",
-        target_os = "openbsd",
         all(
             any(target_os = "android", target_os = "linux"),
             any(
@@ -199,14 +195,7 @@ pub enum Signal {
     #[cfg(not(target_os = "haiku"))]
     Io = c::SIGIO,
     /// `SIGPWR`
-    #[cfg(not(any(
-        apple,
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "haiku",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    )))]
+    #[cfg(not(any(bsd, target_os = "haiku")))]
     #[doc(alias = "Pwr")]
     Power = c::SIGPWR,
     /// `SIGSYS`, aka `SIGUNUSED`

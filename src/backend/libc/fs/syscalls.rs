@@ -10,24 +10,22 @@ use super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t}
 use super::super::offset::libc_fallocate;
 #[cfg(not(any(
     apple,
+    netbsdlike,
     solarish,
     target_os = "dragonfly",
     target_os = "haiku",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
 )))]
 use super::super::offset::libc_posix_fadvise;
 #[cfg(not(any(
     apple,
+    netbsdlike,
     solarish,
     target_os = "aix",
     target_os = "android",
     target_os = "dragonfly",
     target_os = "fuchsia",
     target_os = "linux",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
 )))]
 use super::super::offset::libc_posix_fallocate;
@@ -840,19 +838,9 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         }
         SeekFrom::End(offset) => (c::SEEK_END, offset),
         SeekFrom::Current(offset) => (c::SEEK_CUR, offset),
-        #[cfg(any(
-            target_os = "linux",
-            target_os = "solaris",
-            target_os = "freebsd",
-            target_os = "dragonfly",
-        ))]
+        #[cfg(any(freebsdlike, target_os = "linux", target_os = "solaris"))]
         SeekFrom::Data(offset) => (c::SEEK_DATA, offset),
-        #[cfg(any(
-            target_os = "linux",
-            target_os = "solaris",
-            target_os = "freebsd",
-            target_os = "dragonfly",
-        ))]
+        #[cfg(any(freebsdlike, target_os = "linux", target_os = "solaris"))]
         SeekFrom::Hole(offset) => (c::SEEK_HOLE, offset),
     };
     let offset = unsafe { ret_off_t(libc_lseek(borrowed_fd(fd), offset, whence))? };

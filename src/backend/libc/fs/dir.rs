@@ -151,9 +151,8 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
 
     #[cfg(not(any(
         apple,
+        freebsdlike,
         target_os = "aix",
-        target_os = "dragonfly",
-        target_os = "freebsd",
         target_os = "haiku",
         target_os = "netbsd",
         target_os = "wasi",
@@ -163,32 +162,16 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     #[cfg(target_os = "aix")]
     let d_offset = input.d_offset;
 
-    #[cfg(not(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    )))]
+    #[cfg(not(any(freebsdlike, netbsdlike)))]
     let d_ino = input.d_ino;
 
-    #[cfg(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "netbsd",
-        target_os = "openbsd"
-    ))]
+    #[cfg(any(freebsdlike, netbsdlike))]
     let d_fileno = input.d_fileno;
 
     #[cfg(not(any(target_os = "dragonfly", target_os = "wasi")))]
     let d_reclen = input.d_reclen;
 
-    #[cfg(any(
-        apple,
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    ))]
+    #[cfg(bsd)]
     let d_namlen = input.d_namlen;
 
     #[cfg(apple)]
@@ -205,7 +188,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     // with a field that we missed here. And we can avoid blindly copying the
     // whole `d_name` field, which may not be entirely allocated.
     #[cfg_attr(target_os = "wasi", allow(unused_mut))]
-    #[cfg(not(any(target_os = "freebsd", target_os = "dragonfly")))]
+    #[cfg(not(freebsdlike))]
     let mut dirent = libc_dirent {
         #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku")))]
         d_type,
@@ -220,9 +203,9 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
         d_off,
         #[cfg(target_os = "aix")]
         d_offset,
-        #[cfg(not(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd")))]
+        #[cfg(not(any(netbsdlike, target_os = "freebsd")))]
         d_ino,
-        #[cfg(any(target_os = "freebsd", target_os = "netbsd", target_os = "openbsd"))]
+        #[cfg(any(netbsdlike, target_os = "freebsd"))]
         d_fileno,
         #[cfg(not(target_os = "wasi"))]
         d_reclen,
@@ -258,7 +241,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
 
     // On dragonfly and FreeBSD 12, `dirent` has some non-public padding fields
     // so we can't directly initialize it.
-    #[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
+    #[cfg(freebsdlike)]
     let mut dirent = {
         let mut dirent: libc_dirent = zeroed();
         dirent.d_fileno = d_fileno;
@@ -343,24 +326,14 @@ impl DirEntry {
     }
 
     /// Return the inode number of this directory entry.
-    #[cfg(not(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    )))]
+    #[cfg(not(any(freebsdlike, netbsdlike)))]
     #[inline]
     pub fn ino(&self) -> u64 {
         self.dirent.d_ino as u64
     }
 
     /// Return the inode number of this directory entry.
-    #[cfg(any(
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "netbsd",
-        target_os = "openbsd",
-    ))]
+    #[cfg(any(freebsdlike, netbsdlike))]
     #[inline]
     pub fn ino(&self) -> u64 {
         #[allow(clippy::useless_conversion)]

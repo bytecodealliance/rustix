@@ -746,27 +746,9 @@ pub(crate) mod sockopt {
         multiaddr: &Ipv6Addr,
         interface: u32,
     ) -> io::Result<()> {
-        #[cfg(not(any(
-            apple,
-            solarish,
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "l4re",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        )))]
+        #[cfg(not(any(bsd, solarish, target_os = "haiku", target_os = "l4re")))]
         use c::IPV6_ADD_MEMBERSHIP;
-        #[cfg(any(
-            apple,
-            solarish,
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "haiku",
-            target_os = "l4re",
-            target_os = "netbsd",
-            target_os = "openbsd",
-        ))]
+        #[cfg(any(bsd, solarish, target_os = "haiku", target_os = "l4re"))]
         use c::IPV6_JOIN_GROUP as IPV6_ADD_MEMBERSHIP;
 
         let mreq = to_ipv6mr(multiaddr, interface);
