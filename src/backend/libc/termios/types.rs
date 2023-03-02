@@ -367,6 +367,7 @@ pub const TAB2: c::c_uint = c::TAB2;
     bsd,
     solarish,
     target_os = "emscripten",
+    target_os = "fuchsia",
     target_os = "redox",
 )))]
 pub const TAB3: c::c_uint = c::TAB3;
