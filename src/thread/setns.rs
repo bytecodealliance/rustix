@@ -1,5 +1,3 @@
-#![allow(unsafe_code)]
-
 use bitflags::bitflags;
 use linux_raw_sys::general::{
     CLONE_FILES, CLONE_FS, CLONE_NEWCGROUP, CLONE_NEWIPC, CLONE_NEWNET, CLONE_NEWNS, CLONE_NEWPID,
