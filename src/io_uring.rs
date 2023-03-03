@@ -686,7 +686,7 @@ bitflags::bitflags! {
         /// See also [`IoringRecvFlags::FIXED_BUF`].
         const FIXED_BUF = sys::IORING_RECVSEND_FIXED_BUF as _;
 
-        /// `IORING_SEND_ZC_REPORT_USAGE`
+        /// `IORING_SEND_ZC_REPORT_USAGE` (since Linux 6.2)
         const ZC_REPORT_USAGE = sys::IORING_SEND_ZC_REPORT_USAGE as _;
     }
 }
@@ -765,7 +765,7 @@ pub const fn io_uring_register_files_skip() -> BorrowedFd<'static> {
     unsafe { BorrowedFd::<'static>::borrow_raw(files_skip) }
 }
 
-/// `IORING_NOTIF_USAGE_ZC_COPIED`
+/// `IORING_NOTIF_USAGE_ZC_COPIED` (since Linux 6.2)
 pub const IORING_NOTIF_USAGE_ZC_COPIED: i32 = sys::IORING_NOTIF_USAGE_ZC_COPIED as _;
 
 /// A pointer in the io_uring API.
