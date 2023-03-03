@@ -31,4 +31,5 @@ mod uname;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have waitpid.
 mod wait;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(feature = "fs")]
 mod working_directory;

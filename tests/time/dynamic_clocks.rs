@@ -1,5 +1,3 @@
-#![cfg(not(any(target_os = "redox", target_os = "wasi")))]
-
 use rustix::fd::AsFd;
 use rustix::time::{clock_gettime_dynamic, ClockId, DynamicClockId};
 

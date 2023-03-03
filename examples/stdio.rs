@@ -22,13 +22,13 @@ fn main() -> io::Result<()> {
     let (stdin, stdout, stderr) = (stdin(), stdout(), stderr());
 
     println!("Stdin:");
-    show(&stdin)?;
+    show(stdin)?;
 
     println!("Stdout:");
-    show(&stdout)?;
+    show(stdout)?;
 
     println!("Stderr:");
-    show(&stderr)?;
+    show(stderr)?;
 
     Ok(())
 }

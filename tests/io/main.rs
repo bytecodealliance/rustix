@@ -8,9 +8,8 @@
 #[cfg(not(target_os = "wasi"))]
 mod dup2_to_replace_stdio;
 #[cfg(not(feature = "rustc-dep-of-std"))] // TODO
-#[cfg(not(windows))]
 #[cfg(feature = "net")]
-#[cfg(not(target_os = "wasi"))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 mod epoll;
 mod error;
 #[cfg(not(windows))]

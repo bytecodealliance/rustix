@@ -1,3 +1,9 @@
+//! `pipe` and related APIs.
+//!
+//! # Safety
+//!
+//! `vmsplice` is an unsafe function.
+
 #![allow(unsafe_code)]
 
 use crate::fd::OwnedFd;

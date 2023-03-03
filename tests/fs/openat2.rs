@@ -86,7 +86,7 @@ fn test_openat2() {
     .unwrap();
     let _ = openat2_more(
         &dir,
-        &format!("/proc/self/fd/{}", test.as_fd().as_raw_fd()),
+        format!("/proc/self/fd/{}", test.as_fd().as_raw_fd()),
         OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::empty(),
@@ -94,7 +94,7 @@ fn test_openat2() {
     .unwrap();
     let _ = openat2_more(
         &dir,
-        &format!("/proc/self/fd/{}", test.as_fd().as_raw_fd()),
+        format!("/proc/self/fd/{}", test.as_fd().as_raw_fd()),
         OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::NO_SYMLINKS,
@@ -102,7 +102,7 @@ fn test_openat2() {
     .unwrap_err();
     let _ = openat2_more(
         &dir,
-        &format!("/proc/self/fd/{}", test.as_fd().as_raw_fd()),
+        format!("/proc/self/fd/{}", test.as_fd().as_raw_fd()),
         OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
         ResolveFlags::NO_MAGICLINKS,

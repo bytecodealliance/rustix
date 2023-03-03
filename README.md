@@ -26,8 +26,8 @@ conveniences.
 
 `rustix` is low-level and, and while the `net` API supports Winsock2 on
 Windows, the rest of the APIs do not support Windows; for higher-level and more
-portable APIs built on this functionality, see the [`system-interface`],
-[`cap-std`], and [`fs-set-times`] crates, for example.
+portable APIs built on this functionality, see the [`cap-std`], [`memfd`],
+[`timerfd`], and [`io-streams`] crates, for example.
 
 `rustix` currently has two backends available:
 
@@ -114,14 +114,14 @@ provides them as free functions rather than associated functions of a `Dir`
 type. `rustix`'s `cwd()` function exposes the special `AT_FDCWD` value in a safe
 way, so users don't need to open `.` to get a current-directory handle.
 
-`rustix`'s `openat2` function is similar to the [`openat2`] crate, but uses
-I/O safety types rather than `RawFd`. `rustix` does not provide dynamic feature
+`rustix`'s `openat2` function is similar to the [`openat2`] crate, but uses I/O
+safety types rather than `RawFd`. `rustix` does not provide dynamic feature
 detection, so users must handle the [`NOSYS`] error themselves.
 
-`rustix`'s `termios` module is similar to the [`termios`] crate, but uses
-I/O safety types rather than `RawFd`, and the flags parameters to functions
-such as `tcsetattr` are `enum`s rather than bare integers. And, rustix calls
-its `tcgetattr` function `tcgetattr`, rather than `Termios::from_fd`.
+`rustix`'s `termios` module is similar to the [`termios`] crate, but uses I/O
+safety types rather than `RawFd`, and the flags parameters to functions such as
+`tcsetattr` are `enum`s rather than bare integers. And, rustix calls its
+`tcgetattr` function `tcgetattr`, rather than `Termios::from_fd`.
 
 ## Minimum Supported Rust Version (MSRV)
 
@@ -140,7 +140,6 @@ version of this crate.
 [`syscall`]: https://crates.io/crates/syscall
 [`sc`]: https://crates.io/crates/sc
 [`scall`]: https://crates.io/crates/scall
-[`system-interface`]: https://crates.io/crates/system-interface
 [`openat`]: https://crates.io/crates/openat
 [`openat2`]: https://crates.io/crates/openat2
 [`fs-set-times`]: https://crates.io/crates/fs-set-times
@@ -149,6 +148,9 @@ version of this crate.
 [`libc`]: https://crates.io/crates/libc
 [`windows-sys`]: https://crates.io/crates/windows-sys
 [`cap-std`]: https://crates.io/crates/cap-std
+[`memfd`]: https://crates.io/crates/memfd
+[`timerfd`]: https://crates.io/crates/timerfd
+[`io-streams`]: https://crates.io/crates/io-streams
 [`bitflags`]: https://crates.io/crates/bitflags
 [`Arg`]: https://docs.rs/rustix/latest/rustix/path/trait.Arg.html
 [I/O-safe]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md

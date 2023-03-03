@@ -1,7 +1,11 @@
-/// Benchmarks for rustix.
-///
-/// To enable these benchmarks, add `--cfg=criterion` to RUSTFLAGS and enable
-/// the "fs", "time", and "process" cargo features.
+//! Benchmarks for rustix.
+//!
+//! To enable these benchmarks, add `--cfg=criterion` to RUSTFLAGS and enable
+//! the "fs", "time", and "process" cargo features.
+//!
+//! ```sh
+//! RUSTFLAGS=--cfg=criterion cargo bench --features=fs,time,process
+//! ```
 
 #[cfg(any(
     not(criterion),
@@ -14,7 +18,7 @@
     target_os = "wasi",
 ))]
 fn main() {
-    unimplemented!()
+    unimplemented!("Add --cfg=criterion to RUSTFLAGS and enable the \"fs\", \"time\", and \"process\" cargo features.")
 }
 
 #[cfg(not(any(

@@ -1,3 +1,5 @@
+//! Rust implementation of the `CPU_*` macro API.
+
 #![allow(non_snake_case)]
 
 use super::super::c;
