@@ -12,7 +12,7 @@ repository = "https://github.com/bytecodealliance/rustix"
 edition = "2018"
 keywords = ["api", "file", "network", "safe", "syscall"]
 categories = ["os::unix-apis", "date-and-time", "filesystem", "network-programming"]
-include = ["src", "build.rs", "Cargo.toml", "COPYRIGHT", "LICENSE*", "/*.md"]
+include = ["src", "build.rs", "Cargo.toml", "COPYRIGHT", "LICENSE*", "/*.md", "benches"]
 rust-version = "1.48"
 
 [build-dependencies]
