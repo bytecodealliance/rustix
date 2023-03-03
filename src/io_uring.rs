@@ -439,10 +439,10 @@ bitflags::bitflags! {
         const TASKRUN_FLAG = sys::IORING_SETUP_TASKRUN_FLAG;
 
         /// `IORING_SETUP_SINGLE_ISSUER`
-        const SETUP_SINGLE_ISSUER = sys::IORING_SETUP_SINGLE_ISSUER;
+        const SINGLE_ISSUER = sys::IORING_SETUP_SINGLE_ISSUER;
 
         /// `IORING_SETUP_DEFER_TASKRUN`
-        const SETUP_DEFER_TASKRUN = sys::IORING_SETUP_DEFER_TASKRUN;
+        const DEFER_TASKRUN = sys::IORING_SETUP_DEFER_TASKRUN;
     }
 }
 
@@ -673,16 +673,39 @@ bitflags::bitflags! {
 }
 
 bitflags::bitflags! {
-    /// send/sendmsg & recv/recvmsg flags (`sqe.ioprio`)
+    /// send/sendmsg flags (`sqe.ioprio`)
     #[derive(Default)]
-    pub struct IoringRecvsendFlags: u16 {
+    pub struct IoringSendFlags: u16 {
+        /// `IORING_RECVSEND_POLL_FIRST`.
+        ///
+        /// See also [`IoringRecvFlags::POLL_FIRST`].
+        const POLL_FIRST = sys::IORING_RECVSEND_POLL_FIRST as _;
+
+        /// `IORING_RECVSEND_FIXED_BUF`
+        ///
+        /// See also [`IoringRecvFlags::FIXED_BUF`].
+        const FIXED_BUF = sys::IORING_RECVSEND_FIXED_BUF as _;
+
+        /// `IORING_SEND_ZC_REPORT_USAGE`
+        const ZC_REPORT_USAGE = sys::IORING_SEND_ZC_REPORT_USAGE as _;
+    }
+}
+
+bitflags::bitflags! {
+    /// recv/recvmsg flags (`sqe.ioprio`)
+    #[derive(Default)]
+    pub struct IoringRecvFlags: u16 {
         /// `IORING_RECVSEND_POLL_FIRST`
+        ///
+        /// See also [`IoringSendFlags::POLL_FIRST`].
         const POLL_FIRST = sys::IORING_RECVSEND_POLL_FIRST as _;
 
         /// `IORING_RECV_MULTISHOT`
         const MULTISHOT = sys::IORING_RECV_MULTISHOT as _;
 
         /// `IORING_RECVSEND_FIXED_BUF`
+        ///
+        /// See also [`IoringSendFlags::FIXED_BUF`].
         const FIXED_BUF = sys::IORING_RECVSEND_FIXED_BUF as _;
     }
 }
@@ -741,6 +764,9 @@ pub const fn io_uring_register_files_skip() -> BorrowedFd<'static> {
     // `'static`.
     unsafe { BorrowedFd::<'static>::borrow_raw(files_skip) }
 }
+
+/// `IORING_NOTIF_USAGE_ZC_COPIED`
+pub const IORING_NOTIF_USAGE_ZC_COPIED: i32 = sys::IORING_NOTIF_USAGE_ZC_COPIED as _;
 
 /// A pointer in the io_uring API.
 ///
@@ -878,7 +904,8 @@ pub struct io_uring_sqe {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union ioprio_union {
-    pub recvsend_flags: IoringRecvsendFlags,
+    pub recv_flags: IoringRecvFlags,
+    pub send_flags: IoringSendFlags,
     pub accept_flags: IoringAcceptFlags,
     pub ioprio: u16,
 }
