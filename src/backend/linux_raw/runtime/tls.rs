@@ -1,3 +1,9 @@
+//! TLS utilities.
+//!
+//! # Safety
+//!
+//! This file contains code that reads the raw phdr array pointed to by the
+//! kernel-provided AUXV values.
 #![allow(unsafe_code)]
 
 use super::super::c;

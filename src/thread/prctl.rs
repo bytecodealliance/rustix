@@ -1,3 +1,12 @@
+//! Linux `prctl` wrappers.
+//!
+//! Rustix wraps variadic/dynamic-dispatch functions like `prctl` in
+//! type-safe wrappers.
+//!
+//! # Safety
+//!
+//! The inner `prctl` calls are dynamically typed and must be called
+//! correctly.
 #![allow(unsafe_code)]
 
 use core::convert::TryFrom;
