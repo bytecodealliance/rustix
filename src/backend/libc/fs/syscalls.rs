@@ -1422,7 +1422,7 @@ mod sys {
 
     weak_or_syscall! {
         pub(super) fn statx(
-            pirfd: BorrowedFd<'_>,
+            dirfd_: BorrowedFd<'_>,
             path: *const c::c_char,
             flags: c::c_int,
             mask: c::c_uint,
