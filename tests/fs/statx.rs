@@ -11,7 +11,11 @@ fn test_statx_unknown_flags() {
         unsafe { StatxFlags::from_bits_unchecked(!0 & !linux_raw_sys::general::STATX__RESERVED) };
 
     // It's also ok to pass such flags to `statx`.
-    let result = rustix::fs::statx(&f, "Cargo.toml", AtFlags::empty(), too_many_flags).unwrap();
+    let result = match rustix::fs::statx(&f, "Cargo.toml", AtFlags::empty(), too_many_flags) {
+        // If we don't have `statx` at all, skip the rest of this test.
+        Err(rustix::io::Errno::NOSYS) => return,
+        otherwise => otherwise.unwrap(),
+    };
 
     // But, rustix should mask off bits it doesn't recognize, because these
     // extra flags may tell future kernels to set extra fields beyond the
