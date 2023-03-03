@@ -113,7 +113,7 @@ unsafe fn fetch(name: &str) -> *mut c_void {
         Ok(c_str) => c_str,
         Err(..) => return null_mut(),
     };
-    libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr().cast())
+    libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr())
 }
 
 #[cfg(not(any(target_os = "android", target_os = "linux")))]
