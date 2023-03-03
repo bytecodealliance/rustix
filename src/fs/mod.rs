@@ -21,7 +21,7 @@ mod dir;
 mod fadvise;
 pub(crate) mod fcntl;
 #[cfg(apple)]
-mod fcntl_darwin;
+mod fcntl_apple;
 #[cfg(apple)]
 mod fcopyfile;
 pub(crate) mod fd;
@@ -66,7 +66,7 @@ pub use dir::{Dir, DirEntry};
 pub use fadvise::{fadvise, Advice};
 pub use fcntl::*;
 #[cfg(apple)]
-pub use fcntl_darwin::{fcntl_fullfsync, fcntl_rdadvise};
+pub use fcntl_apple::{fcntl_fullfsync, fcntl_rdadvise};
 #[cfg(apple)]
 pub use fcopyfile::*;
 pub use fd::*;

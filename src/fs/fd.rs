@@ -8,7 +8,7 @@ use crate::process::{Gid, Uid};
 use crate::{backend, io};
 use backend::fd::{AsFd, BorrowedFd};
 
-#[cfg(not(any(target_os = "solaris", target_os = "wasi")))]
+#[cfg(not(target_os = "wasi"))]
 pub use backend::fs::types::FlockOperation;
 
 #[cfg(not(any(

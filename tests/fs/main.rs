@@ -9,6 +9,13 @@
 mod cwd;
 mod dir;
 mod fcntl;
+#[cfg(not(any(
+    target_os = "emscripten",
+    target_os = "fuchsia",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
+mod fcntl_lock;
 mod file;
 #[cfg(not(target_os = "wasi"))]
 mod flock;

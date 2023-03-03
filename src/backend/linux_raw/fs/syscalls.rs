@@ -1023,6 +1023,52 @@ pub(crate) fn fcntl_add_seals(fd: BorrowedFd<'_>, seals: SealFlags) -> io::Resul
 }
 
 #[inline]
+pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result<()> {
+    #[cfg(target_pointer_width = "64")]
+    use linux_raw_sys::general::{flock, F_SETLK, F_SETLKW};
+    #[cfg(target_pointer_width = "32")]
+    use linux_raw_sys::general::{flock64 as flock, F_SETLK64 as F_SETLK, F_SETLKW64 as F_SETLKW};
+    use linux_raw_sys::general::{F_RDLCK, F_UNLCK, F_WRLCK};
+
+    let (cmd, l_type) = match operation {
+        FlockOperation::LockShared => (F_SETLKW, F_RDLCK),
+        FlockOperation::LockExclusive => (F_SETLKW, F_WRLCK),
+        FlockOperation::Unlock => (F_SETLKW, F_UNLCK),
+        FlockOperation::NonBlockingLockShared => (F_SETLK, F_RDLCK),
+        FlockOperation::NonBlockingLockExclusive => (F_SETLK, F_WRLCK),
+        FlockOperation::NonBlockingUnlock => (F_SETLK, F_UNLCK),
+    };
+
+    unsafe {
+        let lock = flock {
+            l_type: l_type as _,
+            l_whence: 0,
+            l_start: 0,
+            l_len: 0,
+            ..core::mem::zeroed()
+        };
+        #[cfg(target_pointer_width = "32")]
+        {
+            ret(syscall_readonly!(
+                __NR_fcntl64,
+                fd,
+                c_uint(cmd),
+                by_ref(&lock)
+            ))
+        }
+        #[cfg(target_pointer_width = "64")]
+        {
+            ret(syscall_readonly!(
+                __NR_fcntl,
+                fd,
+                c_uint(cmd),
+                by_ref(&lock)
+            ))
+        }
+    }
+}
+
+#[inline]
 pub(crate) fn rename(oldname: &CStr, newname: &CStr) -> io::Result<()> {
     #[cfg(target_arch = "riscv64")]
     unsafe {
