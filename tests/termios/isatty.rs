@@ -27,21 +27,21 @@ fn stdout_stderr_terminals() {
     }
 
     // Compare `isatty` against `libc::isatty`.
-    assert_eq!(isatty(&std::io::stdout()), unsafe {
+    assert_eq!(isatty(std::io::stdout()), unsafe {
         libc::isatty(std::io::stdout().as_raw_fd()) != 0
     });
-    assert_eq!(isatty(&std::io::stderr()), unsafe {
+    assert_eq!(isatty(std::io::stderr()), unsafe {
         libc::isatty(std::io::stderr().as_raw_fd()) != 0
     });
 
     // Compare `isatty` against `tcgetwinsize`.
     assert_eq!(
-        isatty(&std::io::stdout()),
-        tcgetwinsize(&std::io::stdout()).is_ok()
+        isatty(std::io::stdout()),
+        tcgetwinsize(std::io::stdout()).is_ok()
     );
     assert_eq!(
-        isatty(&std::io::stderr()),
-        tcgetwinsize(&std::io::stderr()).is_ok()
+        isatty(std::io::stderr()),
+        tcgetwinsize(std::io::stderr()).is_ok()
     );
 }
 

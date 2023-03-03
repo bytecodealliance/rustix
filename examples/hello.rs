@@ -15,7 +15,7 @@ fn main() -> std::io::Result<()> {
     let stdout = rustix::io::stdout();
 
     while !bytes.is_empty() {
-        match rustix::io::write(&stdout, bytes) {
+        match rustix::io::write(stdout, bytes) {
             // `write` can write fewer bytes than requested. In that case,
             // continue writing with the remainder of the bytes.
             Ok(n) => bytes = &bytes[n..],
