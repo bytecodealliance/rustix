@@ -1,5 +1,3 @@
-#![cfg(not(target_os = "wasi"))]
-
 use std::env;
 use std::process::Command;
 

@@ -1,5 +1,3 @@
-#![cfg(not(target_os = "wasi"))]
-
 #[cfg(feature = "fs")]
 #[cfg(not(target_os = "redox"))]
 #[test]

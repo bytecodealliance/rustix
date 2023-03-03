@@ -3,7 +3,7 @@ use rustix::fd::{AsFd, AsRawFd, FromRawFd, IntoRawFd, OwnedFd};
 use rustix::io::{poll, retry_on_intr};
 use rustix::io::{PollFd, PollFlags};
 
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "wasi")))]
 #[test]
 fn test_poll() {
     use rustix::io::{pipe, read, write};

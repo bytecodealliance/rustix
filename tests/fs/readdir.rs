@@ -1,5 +1,3 @@
-#![cfg(not(target_os = "redox"))]
-
 use std::collections::HashMap;
 use std::fs::File;
 #[cfg(any(target_os = "android", target_os = "linux"))]
