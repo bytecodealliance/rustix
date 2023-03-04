@@ -1028,7 +1028,7 @@ pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::R
     use linux_raw_sys::general::{flock, F_SETLK, F_SETLKW};
     #[cfg(target_pointer_width = "32")]
     use linux_raw_sys::general::{flock64 as flock, F_SETLK64 as F_SETLK, F_SETLKW64 as F_SETLKW};
-    use linux_raw_sys::general::{F_RDLCK, F_UNLCK, F_WRLCK};
+    use linux_raw_sys::general::{F_RDLCK, F_UNLCK, F_WRLCK, SEEK_SET};
 
     let (cmd, l_type) = match operation {
         FlockOperation::LockShared => (F_SETLKW, F_RDLCK),
@@ -1042,11 +1042,17 @@ pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::R
     unsafe {
         let lock = flock {
             l_type: l_type as _,
-            l_whence: 0,
+
+            // When `l_len` is zero, this locks all the bytes from
+            // `l_whence`/`l_start` to the end of the file, even as the
+            // file grows dynamically.
+            l_whence: SEEK_SET,
             l_start: 0,
             l_len: 0,
+
             ..core::mem::zeroed()
         };
+
         #[cfg(target_pointer_width = "32")]
         {
             ret(syscall_readonly!(

@@ -837,7 +837,7 @@ pub(crate) fn fcntl_add_seals(fd: BorrowedFd<'_>, seals: SealFlags) -> io::Resul
 )))]
 #[inline]
 pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result<()> {
-    use c::{flock, F_RDLCK, F_SETLK, F_SETLKW, F_UNLCK, F_WRLCK};
+    use c::{flock, F_RDLCK, F_SETLK, F_SETLKW, F_UNLCK, F_WRLCK, SEEK_SET};
 
     let (cmd, l_type) = match operation {
         FlockOperation::LockShared => (F_SETLKW, F_RDLCK),
@@ -851,9 +851,14 @@ pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::R
     unsafe {
         let mut lock: flock = core::mem::zeroed();
         lock.l_type = l_type as _;
-        lock.l_whence = 0;
+
+        // When `l_len` is zero, this locks all the bytes from
+        // `l_whence`/`l_start` to the end of the file, even as the
+        // file grows dynamically.
+        lock.l_whence = SEEK_SET;
         lock.l_start = 0;
         lock.l_len = 0;
+
         ret(c::fcntl(borrowed_fd(fd), cmd, &lock))
     }
 }
