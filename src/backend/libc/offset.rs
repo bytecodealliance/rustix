@@ -141,8 +141,20 @@ pub(super) use c::posix_fadvise64 as libc_posix_fadvise;
 pub(super) use c::{pread as libc_pread, pwrite as libc_pwrite};
 #[cfg(any(target_os = "android", target_os = "linux", target_os = "emscripten"))]
 pub(super) use c::{pread64 as libc_pread, pwrite64 as libc_pwrite};
+#[cfg(not(any(
+    apple,
+    windows,
+    target_os = "android",
+    target_os = "emscripten",
+    target_os = "haiku",
+    target_os = "linux",
+    target_os = "redox",
+    target_os = "solaris",
+)))]
+pub(super) use c::{preadv as libc_preadv, pwritev as libc_pwritev};
 #[cfg(any(target_os = "linux", target_os = "emscripten"))]
 pub(super) use c::{preadv64 as libc_preadv, pwritev64 as libc_pwritev};
+
 #[cfg(target_os = "android")]
 mod readwrite_pv64 {
     use super::c;
@@ -230,19 +242,9 @@ mod readwrite_pv64 {
         }
     }
 }
-#[cfg(not(any(
-    apple,
-    windows,
-    target_os = "android",
-    target_os = "emscripten",
-    target_os = "haiku",
-    target_os = "linux",
-    target_os = "redox",
-    target_os = "solaris",
-)))]
-pub(super) use c::{preadv as libc_preadv, pwritev as libc_pwritev};
 #[cfg(target_os = "android")]
 pub(super) use readwrite_pv64::{preadv64 as libc_preadv, pwritev64 as libc_pwritev};
+
 // macOS added preadv and pwritev in version 11.0
 #[cfg(apple)]
 mod readwrite_pv {
@@ -264,10 +266,103 @@ mod readwrite_pv {
         ) -> c::ssize_t
     }
 }
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
-pub(super) use c::{preadv64v2 as libc_preadv2, pwritev64v2 as libc_pwritev2};
 #[cfg(apple)]
 pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
+
+// GLIBC added `preadv64v2` and `pwritev64v2` in version 2.26.
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
+mod readwrite_pv64v2 {
+    use super::c;
+
+    // 64-bit offsets on 32-bit platforms are passed in endianness-specific
+    // lo/hi pairs. See src/backend/linux_raw/conv.rs for details.
+    #[cfg(all(target_endian = "little", target_pointer_width = "32"))]
+    fn lo(x: u64) -> usize {
+        (x >> 32) as usize
+    }
+    #[cfg(all(target_endian = "little", target_pointer_width = "32"))]
+    fn hi(x: u64) -> usize {
+        (x & 0xffff_ffff) as usize
+    }
+    #[cfg(all(target_endian = "big", target_pointer_width = "32"))]
+    fn lo(x: u64) -> usize {
+        (x & 0xffff_ffff) as usize
+    }
+    #[cfg(all(target_endian = "big", target_pointer_width = "32"))]
+    fn hi(x: u64) -> usize {
+        (x >> 32) as usize
+    }
+
+    pub(in super::super) unsafe fn preadv64v2(
+        fd: c::c_int,
+        iov: *const c::iovec,
+        iovcnt: c::c_int,
+        offset: c::off64_t,
+        flags: c::c_int,
+    ) -> c::ssize_t {
+        // Older GLIBC lacks `preadv64v2`, so use the `weak!` mechanism to
+        // test for it, and call back to `c::syscall`. We don't use
+        // `weak_or_syscall` here because we need to pass the 64-bit offset
+        // specially.
+        weak! {
+            fn preadv64v2(c::c_int, *const c::iovec, c::c_int, c::off64_t, c::c_int) -> c::ssize_t
+        }
+        if let Some(fun) = preadv64v2.get() {
+            fun(fd, iov, iovcnt, offset, flags)
+        } else {
+            #[cfg(target_pointer_width = "32")]
+            {
+                c::syscall(
+                    c::SYS_preadv,
+                    fd,
+                    iov,
+                    iovcnt,
+                    hi(offset as u64),
+                    lo(offset as u64),
+                    flags,
+                ) as c::ssize_t
+            }
+            #[cfg(target_pointer_width = "64")]
+            {
+                c::syscall(c::SYS_preadv2, fd, iov, iovcnt, offset, flags) as c::ssize_t
+            }
+        }
+    }
+    pub(in super::super) unsafe fn pwritev64v2(
+        fd: c::c_int,
+        iov: *const c::iovec,
+        iovcnt: c::c_int,
+        offset: c::off64_t,
+        flags: c::c_int,
+    ) -> c::ssize_t {
+        // See the comments in `preadv64v2`.
+        weak! {
+            fn pwritev64v2(c::c_int, *const c::iovec, c::c_int, c::off64_t, c::c_int) -> c::ssize_t
+        }
+        if let Some(fun) = pwritev64v2.get() {
+            fun(fd, iov, iovcnt, offset, flags)
+        } else {
+            #[cfg(target_pointer_width = "32")]
+            {
+                c::syscall(
+                    c::SYS_pwritev,
+                    fd,
+                    iov,
+                    iovcnt,
+                    hi(offset as u64),
+                    lo(offset as u64),
+                    flags,
+                ) as c::ssize_t
+            }
+            #[cfg(target_pointer_width = "64")]
+            {
+                c::syscall(c::SYS_pwritev2, fd, iov, iovcnt, offset, flags) as c::ssize_t
+            }
+        }
+    }
+}
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
+pub(super) use readwrite_pv64v2::{preadv64v2 as libc_preadv2, pwritev64v2 as libc_pwritev2};
 
 #[cfg(not(any(
     apple,
