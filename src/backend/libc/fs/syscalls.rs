@@ -855,7 +855,7 @@ pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::R
         // When `l_len` is zero, this locks all the bytes from
         // `l_whence`/`l_start` to the end of the file, even as the
         // file grows dynamically.
-        lock.l_whence = SEEK_SET;
+        lock.l_whence = SEEK_SET as _;
         lock.l_start = 0;
         lock.l_len = 0;
 
