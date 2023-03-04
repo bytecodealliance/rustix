@@ -141,8 +141,6 @@ pub(super) use c::posix_fadvise64 as libc_posix_fadvise;
 pub(super) use c::{pread as libc_pread, pwrite as libc_pwrite};
 #[cfg(any(target_os = "android", target_os = "linux", target_os = "emscripten"))]
 pub(super) use c::{pread64 as libc_pread, pwrite64 as libc_pwrite};
-#[cfg(any(target_os = "linux", target_os = "emscripten"))]
-pub(super) use c::{preadv64 as libc_preadv, pwritev64 as libc_pwritev};
 #[cfg(not(any(
     apple,
     windows,
@@ -154,6 +152,8 @@ pub(super) use c::{preadv64 as libc_preadv, pwritev64 as libc_pwritev};
     target_os = "solaris",
 )))]
 pub(super) use c::{preadv as libc_preadv, pwritev as libc_pwritev};
+#[cfg(any(target_os = "linux", target_os = "emscripten"))]
+pub(super) use c::{preadv64 as libc_preadv, pwritev64 as libc_pwritev};
 
 #[cfg(target_os = "android")]
 mod readwrite_pv64 {
