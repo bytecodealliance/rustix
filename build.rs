@@ -175,7 +175,15 @@ fn link_in_librustix_outline(arch: &str, asm_name: &str) {
     #[cfg(feature = "cc")]
     {
         let out_dir = var("OUT_DIR").unwrap();
-        Build::new().file(&asm_name).compile(&name);
+        // Add `-gdwarf-3` so that we always get the same output, regardless of
+        // the Rust version we're using. DWARF3 is the version used in
+        // Rust 1.48 and is entirely adequate for our simple needs here.
+        let mut build = Build::new();
+        if profile == "debug" {
+            build.flag("-gdwarf-3");
+        }
+        build.file(&asm_name);
+        build.compile(&name);
         println!("cargo:rerun-if-changed={}", asm_name);
         if std::fs::metadata(".git").is_ok() {
             let from = format!("{}/lib{}.a", out_dir, name);
