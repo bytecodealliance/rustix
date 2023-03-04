@@ -105,7 +105,7 @@ impl Gid {
 impl Pid {
     /// A `Pid` corresponding to the init process (pid 1).
     pub const INIT: Self = Self(
-        // Safety: The init process' pid is always valid.
+        // SAFETY: The init process' pid is always valid.
         unsafe { RawNonZeroPid::new_unchecked(1) },
     );
 
@@ -140,7 +140,7 @@ impl Pid {
         let id = child.id();
         debug_assert_ne!(id, 0);
 
-        // Safety: We know the returned ID is valid because it came directly
+        // SAFETY: We know the returned ID is valid because it came directly
         // from an OS API.
         unsafe { Self::from_raw_nonzero(RawNonZeroPid::new_unchecked(id as _)) }
     }

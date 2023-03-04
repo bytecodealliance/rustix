@@ -27,7 +27,7 @@ use linux_raw_sys::general::{__kernel_clockid_t, __kernel_timespec};
 
 #[inline]
 pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
-    // Safety: `CLOCK_GETTIME` contains either null or the address of a
+    // SAFETY: `CLOCK_GETTIME` contains either null or the address of a
     // function with an ABI like libc `clock_gettime`, and calling it has
     // the side effect of writing to the result buffer, and no others.
     unsafe {
@@ -64,7 +64,7 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Resu
         }
     };
 
-    // Safety: `CLOCK_GETTIME` contains either null or the address of a
+    // SAFETY: `CLOCK_GETTIME` contains either null or the address of a
     // function with an ABI like libc `clock_gettime`, and calling it has
     // the side effect of writing to the result buffer, and no others.
     unsafe {
@@ -217,7 +217,7 @@ pub(super) type SyscallType = unsafe extern "C" fn();
 /// Initialize `CLOCK_GETTIME` and return its value.
 fn init_clock_gettime() -> ClockGettimeType {
     init();
-    // Safety: Load the function address from static storage that we
+    // SAFETY: Load the function address from static storage that we
     // just initialized.
     unsafe { transmute(CLOCK_GETTIME.load(Relaxed)) }
 }
@@ -226,7 +226,7 @@ fn init_clock_gettime() -> ClockGettimeType {
 #[cfg(target_arch = "x86")]
 fn init_syscall() -> SyscallType {
     init();
-    // Safety: Load the function address from static storage that we
+    // SAFETY: Load the function address from static storage that we
     // just initialized.
     unsafe { transmute(SYSCALL.load(Relaxed)) }
 }
@@ -309,7 +309,7 @@ extern "C" {
 }
 
 fn minimal_init() {
-    // Safety: Store default function addresses in static storage so that if we
+    // SAFETY: Store default function addresses in static storage so that if we
     // end up making any system calls while we read the vDSO, they'll work.
     // If the memory happens to already be initialized, this is redundant, but
     // not harmful.
@@ -375,7 +375,7 @@ fn init() {
         if ok {
             assert!(!ptr.is_null());
 
-            // Safety: Store the computed function addresses in static storage
+            // SAFETY: Store the computed function addresses in static storage
             // so that we don't need to compute it again (but if we do, it doesn't
             // hurt anything).
             unsafe {
@@ -389,7 +389,7 @@ fn init() {
             let ptr = vdso.sym(cstr!("LINUX_2.5"), cstr!("__kernel_vsyscall"));
             assert!(!ptr.is_null());
 
-            // Safety: As above, store the computed function addresses in
+            // SAFETY: As above, store the computed function addresses in
             // static storage.
             unsafe {
                 SYSCALL.store(ptr.cast(), Relaxed);

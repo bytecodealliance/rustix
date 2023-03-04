@@ -69,7 +69,7 @@ impl Errno {
         // TODO: Use Range::contains, once that's `const`.
         const_assert!(encoded >= 0xf001);
 
-        // Safety: Linux syscalls return negated error values in the range
+        // SAFETY: Linux syscalls return negated error values in the range
         // `-4095..0`, which we just asserted.
         unsafe { Self(encoded) }
     }
@@ -82,7 +82,7 @@ pub(in crate::backend) fn try_decode_c_int<Num: RetNumber>(
     raw: RetReg<Num>,
 ) -> io::Result<c::c_int> {
     if raw.is_in_range(-4095..0) {
-        // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
+        // SAFETY: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
         return Err(unsafe { Errno(raw.decode_error_code()) });
     }
@@ -97,7 +97,7 @@ pub(in crate::backend) fn try_decode_c_uint<Num: RetNumber>(
     raw: RetReg<Num>,
 ) -> io::Result<c::c_uint> {
     if raw.is_in_range(-4095..0) {
-        // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
+        // SAFETY: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
         return Err(unsafe { Errno(raw.decode_error_code()) });
     }
@@ -110,7 +110,7 @@ pub(in crate::backend) fn try_decode_c_uint<Num: RetNumber>(
 #[inline]
 pub(in crate::backend) fn try_decode_usize<Num: RetNumber>(raw: RetReg<Num>) -> io::Result<usize> {
     if raw.is_in_range(-4095..0) {
-        // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
+        // SAFETY: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
         return Err(unsafe { Errno(raw.decode_error_code()) });
     }
@@ -125,7 +125,7 @@ pub(in crate::backend) fn try_decode_void_star<Num: RetNumber>(
     raw: RetReg<Num>,
 ) -> io::Result<*mut c::c_void> {
     if raw.is_in_range(-4095..0) {
-        // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
+        // SAFETY: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
         return Err(unsafe { Errno(raw.decode_error_code()) });
     }
@@ -139,7 +139,7 @@ pub(in crate::backend) fn try_decode_void_star<Num: RetNumber>(
 #[inline]
 pub(in crate::backend) fn try_decode_u64<Num: RetNumber>(raw: RetReg<Num>) -> io::Result<u64> {
     if raw.is_in_range(-4095..0) {
-        // Safety: `raw` must be in `-4095..0`, and we just checked that raw is
+        // SAFETY: `raw` must be in `-4095..0`, and we just checked that raw is
         // in that range.
         return Err(unsafe { Errno(raw.decode_error_code()) });
     }

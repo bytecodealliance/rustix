@@ -66,7 +66,7 @@ pub(crate) fn exe_phdrs() -> (*const libc::c_void, usize) {
 pub(in super::super) fn exe_phdrs_slice() -> &'static [Elf_Phdr] {
     let (phdr, phnum) = exe_phdrs();
 
-    // Safety: We assume the `AT_PHDR` and `AT_PHNUM` values provided by the
+    // SAFETY: We assume the `AT_PHDR` and `AT_PHNUM` values provided by the
     // kernel form a valid slice.
     unsafe { slice::from_raw_parts(phdr.cast(), phnum) }
 }

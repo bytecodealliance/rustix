@@ -126,7 +126,7 @@ bitflags! {
 #[inline]
 #[doc(alias = "epoll_create1")]
 pub fn epoll_create(flags: CreateFlags) -> io::Result<OwnedFd> {
-    // Safety: We're calling `epoll_create1` via FFI and we know how it
+    // SAFETY: We're calling `epoll_create1` via FFI and we know how it
     // behaves.
     unsafe { ret_owned_fd(c::epoll_create1(flags.bits())) }
 }
@@ -147,7 +147,7 @@ pub fn epoll_add(
     data: u64,
     event_flags: EventFlags,
 ) -> io::Result<()> {
-    // Safety: We're calling `epoll_ctl` via FFI and we know how it
+    // SAFETY: We're calling `epoll_ctl` via FFI and we know how it
     // behaves.
     unsafe {
         let raw_fd = source.as_fd().as_raw_fd();
@@ -176,7 +176,7 @@ pub fn epoll_mod(
 ) -> io::Result<()> {
     let raw_fd = source.as_fd().as_raw_fd();
 
-    // Safety: We're calling `epoll_ctl` via FFI and we know how it
+    // SAFETY: We're calling `epoll_ctl` via FFI and we know how it
     // behaves.
     unsafe {
         ret(c::epoll_ctl(
@@ -195,7 +195,7 @@ pub fn epoll_mod(
 /// this `Epoll`.
 #[doc(alias = "epoll_ctl")]
 pub fn epoll_del(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
-    // Safety: We're calling `epoll_ctl` via FFI and we know how it
+    // SAFETY: We're calling `epoll_ctl` via FFI and we know how it
     // behaves.
     unsafe {
         let raw_fd = source.as_fd().as_raw_fd();
@@ -218,7 +218,7 @@ pub fn epoll_wait(
     event_list: &mut EventVec,
     timeout: c::c_int,
 ) -> io::Result<()> {
-    // Safety: We're calling `epoll_wait` via FFI and we know how it
+    // SAFETY: We're calling `epoll_wait` via FFI and we know how it
     // behaves.
     unsafe {
         event_list.events.set_len(0);
@@ -243,7 +243,7 @@ impl<'a> Iterator for Iter<'a> {
     type Item = (EventFlags, u64);
 
     fn next(&mut self) -> Option<Self::Item> {
-        // Safety: `self.context` is guaranteed to be valid because we hold
+        // SAFETY: `self.context` is guaranteed to be valid because we hold
         // `'context` for it. And we know this event is associated with this
         // context because `wait` sets both.
         self.iter

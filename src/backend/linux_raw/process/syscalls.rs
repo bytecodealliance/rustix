@@ -54,7 +54,7 @@ pub(crate) fn membarrier_query() -> MembarrierQuery {
             c_uint(0)
         )) {
             Ok(query) => {
-                // Safety: The safety of `from_bits_unchecked` is discussed
+                // SAFETY: The safety of `from_bits_unchecked` is discussed
                 // [here]. Our "source of truth" is Linux, and here, the
                 // `query` value is coming from Linux, so we know it only
                 // contains "source of truth" valid bits.

@@ -22,28 +22,28 @@ use linux_raw_sys::general::{
 #[cfg(feature = "param")]
 #[inline]
 pub(crate) fn page_size() -> usize {
-    // Safety: This is initialized during program startup.
+    // SAFETY: This is initialized during program startup.
     unsafe { PAGE_SIZE }
 }
 
 #[cfg(feature = "param")]
 #[inline]
 pub(crate) fn clock_ticks_per_second() -> u64 {
-    // Safety: This is initialized during program startup.
+    // SAFETY: This is initialized during program startup.
     unsafe { CLOCK_TICKS_PER_SECOND as u64 }
 }
 
 #[cfg(feature = "param")]
 #[inline]
 pub(crate) fn linux_hwcap() -> (usize, usize) {
-    // Safety: This is initialized during program startup.
+    // SAFETY: This is initialized during program startup.
     unsafe { (HWCAP, HWCAP2) }
 }
 
 #[cfg(feature = "param")]
 #[inline]
 pub(crate) fn linux_execfn() -> &'static CStr {
-    // Safety: This is initialized during program startup. And we
+    // SAFETY: This is initialized during program startup. And we
     // assume it's a valid pointer to a NUL-terminated string.
     unsafe { CStr::from_ptr(EXECFN.0.cast()) }
 }
@@ -51,7 +51,7 @@ pub(crate) fn linux_execfn() -> &'static CStr {
 #[cfg(feature = "runtime")]
 #[inline]
 pub(crate) fn exe_phdrs() -> (*const c_void, usize) {
-    // Safety: This is initialized during program startup.
+    // SAFETY: This is initialized during program startup.
     unsafe { (PHDR.0.cast(), PHNUM) }
 }
 
@@ -60,7 +60,7 @@ pub(crate) fn exe_phdrs() -> (*const c_void, usize) {
 pub(in super::super) fn exe_phdrs_slice() -> &'static [Elf_Phdr] {
     let (phdr, phnum) = exe_phdrs();
 
-    // Safety: We assume the `AT_PHDR` and `AT_PHNUM` values provided by the
+    // SAFETY: We assume the `AT_PHDR` and `AT_PHNUM` values provided by the
     // kernel form a valid slice.
     unsafe { slice::from_raw_parts(phdr.cast(), phnum) }
 }
@@ -69,7 +69,7 @@ pub(in super::super) fn exe_phdrs_slice() -> &'static [Elf_Phdr] {
 /// so if we don't see it, this function returns a null pointer.
 #[inline]
 pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
-    // Safety: This is initialized during program startup.
+    // SAFETY: This is initialized during program startup.
     unsafe { SYSINFO_EHDR.0 }
 }
 

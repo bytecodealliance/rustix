@@ -244,7 +244,7 @@ impl AsFd for BorrowedFd<'_> {
 impl AsFd for OwnedFd {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
-        // Safety: `OwnedFd` and `BorrowedFd` have the same validity
+        // SAFETY: `OwnedFd` and `BorrowedFd` have the same validity
         // invariants, and the `BorrowedFd` is bounded by the lifetime
         // of `&self`.
         unsafe { BorrowedFd::borrow_raw(self.as_raw_fd()) }
