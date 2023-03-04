@@ -287,6 +287,12 @@ pub(crate) fn gettid() -> Pid {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub(crate) fn setns(fd: BorrowedFd, nstype: c::c_int) -> io::Result<c::c_int> {
+    // `setns` wasn't supported in glibc until 2.14, and musl until 0.9.5,
+    // so use `syscall`.
+    weak_or_syscall! {
+        fn setns(fd: c::c_int, nstype: c::c_int) via SYS_setns -> c::c_int
+    }
+
     unsafe { ret_c_int(c::setns(borrowed_fd(fd), nstype)) }
 }
 
