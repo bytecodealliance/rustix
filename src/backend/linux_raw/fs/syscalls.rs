@@ -1028,7 +1028,7 @@ pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::R
     use linux_raw_sys::general::{flock, F_SETLK, F_SETLKW};
     #[cfg(target_pointer_width = "32")]
     use linux_raw_sys::general::{flock64 as flock, F_SETLK64 as F_SETLK, F_SETLKW64 as F_SETLKW};
-    use linux_raw_sys::general::{F_RDLCK, F_UNLCK, F_WRLCK, SEEK_SET};
+    use linux_raw_sys::general::{F_RDLCK, F_UNLCK, F_WRLCK};
 
     let (cmd, l_type) = match operation {
         FlockOperation::LockShared => (F_SETLKW, F_RDLCK),
