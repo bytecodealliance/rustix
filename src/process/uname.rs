@@ -65,7 +65,7 @@ impl Uname {
 
     #[inline]
     fn to_cstr<'a>(ptr: *const u8) -> &'a CStr {
-        // Safety: Strings returned from the kernel are always NUL-terminated.
+        // SAFETY: Strings returned from the kernel are always NUL-terminated.
         unsafe { CStr::from_ptr(ptr.cast()) }
     }
 }

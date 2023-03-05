@@ -147,7 +147,7 @@ pub fn epoll_add(
     data: u64,
     event_flags: EventFlags,
 ) -> io::Result<()> {
-    // Safety: We're calling `epoll_ctl` via FFI and we know how it
+    // SAFETY: We're calling `epoll_ctl` via FFI and we know how it
     // behaves.
     unsafe {
         syscalls::epoll_add(
@@ -172,7 +172,7 @@ pub fn epoll_mod(
     data: u64,
     event_flags: EventFlags,
 ) -> io::Result<()> {
-    // Safety: We're calling `epoll_ctl` via FFI and we know how it
+    // SAFETY: We're calling `epoll_ctl` via FFI and we know how it
     // behaves.
     unsafe {
         let raw_fd = source.as_fd().as_raw_fd();
@@ -193,7 +193,7 @@ pub fn epoll_mod(
 /// This also returns the owning `Data`.
 #[doc(alias = "epoll_ctl")]
 pub fn epoll_del(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
-    // Safety: We're calling `epoll_ctl` via FFI and we know how it
+    // SAFETY: We're calling `epoll_ctl` via FFI and we know how it
     // behaves.
     unsafe {
         let raw_fd = source.as_fd().as_raw_fd();
@@ -211,7 +211,7 @@ pub fn epoll_wait(
     event_list: &mut EventVec,
     timeout: c::c_int,
 ) -> io::Result<()> {
-    // Safety: We're calling `epoll_wait` via FFI and we know how it
+    // SAFETY: We're calling `epoll_wait` via FFI and we know how it
     // behaves.
     unsafe {
         event_list.events.set_len(0);

@@ -70,7 +70,7 @@ impl DecInt {
     /// Return the raw byte buffer as a `&str`.
     #[inline]
     pub fn as_str(&self) -> &str {
-        // Safety: `DecInt` always holds a formatted decimal number, so it's
+        // SAFETY: `DecInt` always holds a formatted decimal number, so it's
         // always valid UTF-8.
         unsafe { core::str::from_utf8_unchecked(self.as_bytes()) }
     }
@@ -81,7 +81,7 @@ impl DecInt {
         let bytes_with_nul = &self.buf[..=self.len];
         debug_assert!(CStr::from_bytes_with_nul(bytes_with_nul).is_ok());
 
-        // Safety: `self.buf` holds a single decimal ASCII representation and
+        // SAFETY: `self.buf` holds a single decimal ASCII representation and
         // at least one extra NUL byte.
         unsafe { CStr::from_bytes_with_nul_unchecked(bytes_with_nul) }
     }

@@ -759,7 +759,7 @@ pub const IORING_OFF_SQES: u64 = sys::IORING_OFF_SQES as _;
 pub const fn io_uring_register_files_skip() -> BorrowedFd<'static> {
     let files_skip = sys::IORING_REGISTER_FILES_SKIP as RawFd;
 
-    // Safety: `IORING_REGISTER_FILES_SKIP` is a reserved value that is never
+    // SAFETY: `IORING_REGISTER_FILES_SKIP` is a reserved value that is never
     // dynamically allocated, so it'll remain valid for the duration of
     // `'static`.
     unsafe { BorrowedFd::<'static>::borrow_raw(files_skip) }
@@ -834,7 +834,7 @@ impl io_uring_user_data {
     /// Return the `u64` value.
     #[inline]
     pub fn u64_(self) -> u64 {
-        // Safety: All the fields have the same underlying representation.
+        // SAFETY: All the fields have the same underlying representation.
         unsafe { self.u64_ }
     }
 
@@ -847,7 +847,7 @@ impl io_uring_user_data {
     /// Return the `ptr` pointer value.
     #[inline]
     pub fn ptr(self) -> *mut c_void {
-        // Safety: All the fields have the same underlying representation.
+        // SAFETY: All the fields have the same underlying representation.
         unsafe { self.ptr }.ptr
     }
 
@@ -864,7 +864,7 @@ impl Default for io_uring_user_data {
     #[inline]
     fn default() -> Self {
         let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
-        // Safety: All of Linux's io_uring structs may be zero-initialized.
+        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
         unsafe {
             ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
             s.assume_init()
@@ -874,7 +874,7 @@ impl Default for io_uring_user_data {
 
 impl core::fmt::Debug for io_uring_user_data {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        // Safety: Just format as a `u64`, since formatting doesn't preserve
+        // SAFETY: Just format as a `u64`, since formatting doesn't preserve
         // provenance, and we don't have a discriminant.
         unsafe { self.u64_.fmt(fmt) }
     }
@@ -1212,7 +1212,7 @@ pub struct io_uring_buf {
 impl Default for ioprio_union {
     #[inline]
     fn default() -> Self {
-        // Safety: All of Linux's io_uring structs may be zero-initialized.
+        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
         unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
@@ -1220,7 +1220,7 @@ impl Default for ioprio_union {
 impl Default for len_union {
     #[inline]
     fn default() -> Self {
-        // Safety: All of Linux's io_uring structs may be zero-initialized.
+        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
         unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
@@ -1228,7 +1228,7 @@ impl Default for len_union {
 impl Default for off_or_addr2_union {
     #[inline]
     fn default() -> Self {
-        // Safety: All of Linux's io_uring structs may be zero-initialized.
+        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
         unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
@@ -1236,7 +1236,7 @@ impl Default for off_or_addr2_union {
 impl Default for addr_or_splice_off_in_union {
     #[inline]
     fn default() -> Self {
-        // Safety: All of Linux's io_uring structs may be zero-initialized.
+        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
         unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
@@ -1244,7 +1244,7 @@ impl Default for addr_or_splice_off_in_union {
 impl Default for addr3_or_cmd_union {
     #[inline]
     fn default() -> Self {
-        // Safety: All of Linux's io_uring structs may be zero-initialized.
+        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
         unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
@@ -1252,7 +1252,7 @@ impl Default for addr3_or_cmd_union {
 impl Default for op_flags_union {
     #[inline]
     fn default() -> Self {
-        // Safety: All of Linux's io_uring structs may be zero-initialized.
+        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
         unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
@@ -1260,7 +1260,7 @@ impl Default for op_flags_union {
 impl Default for buf_union {
     #[inline]
     fn default() -> Self {
-        // Safety: All of Linux's io_uring structs may be zero-initialized.
+        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
         unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
@@ -1268,7 +1268,7 @@ impl Default for buf_union {
 impl Default for splice_fd_in_or_file_index_union {
     #[inline]
     fn default() -> Self {
-        // Safety: All of Linux's io_uring structs may be zero-initialized.
+        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
         unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
@@ -1276,7 +1276,7 @@ impl Default for splice_fd_in_or_file_index_union {
 impl Default for register_or_sqe_op_or_sqe_flags_union {
     #[inline]
     fn default() -> Self {
-        // Safety: All of Linux's io_uring structs may be zero-initialized.
+        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
         unsafe { ::core::mem::zeroed::<Self>() }
     }
 }
@@ -1338,7 +1338,7 @@ fn io_uring_layouts() {
 
             // Check that we have all the fields.
             let _test = $name {
-                // Safety: All of io_uring's types can be zero-initialized.
+                // SAFETY: All of io_uring's types can be zero-initialized.
                 $($field: unsafe { core::mem::zeroed() }),*
             };
 

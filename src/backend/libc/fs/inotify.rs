@@ -77,7 +77,7 @@ bitflags! {
 /// descriptor from being implicitly passed across `exec` boundaries.
 #[doc(alias = "inotify_init1")]
 pub fn inotify_init(flags: CreateFlags) -> io::Result<OwnedFd> {
-    // Safety: `inotify_init1` has no safety preconditions.
+    // SAFETY: `inotify_init1` has no safety preconditions.
     unsafe { ret_owned_fd(c::inotify_init1(flags.bits())) }
 }
 
@@ -96,7 +96,7 @@ pub fn inotify_add_watch<P: crate::path::Arg>(
     flags: WatchFlags,
 ) -> io::Result<i32> {
     let path = path.as_cow_c_str().unwrap();
-    // Safety: The fd and path we are passing is guranteed valid by the type
+    // SAFETY: The fd and path we are passing is guranteed valid by the type
     // system.
     unsafe {
         ret_c_int(c::inotify_add_watch(
@@ -116,6 +116,6 @@ pub fn inotify_remove_watch(inot: BorrowedFd<'_>, wd: i32) -> io::Result<()> {
     // Android's `inotify_rm_watch` takes u32 despite `inotify_add_watch` is i32.
     #[cfg(target_os = "android")]
     let wd = wd as u32;
-    // Safety: The fd is valid and closing an arbitrary wd is valid.
+    // SAFETY: The fd is valid and closing an arbitrary wd is valid.
     unsafe { ret(c::inotify_rm_watch(borrowed_fd(inot), wd)) }
 }

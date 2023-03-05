@@ -77,7 +77,7 @@ pub(crate) fn linux_execfn() -> &'static CStr {
         execfn = EXECFN.load(Relaxed);
     }
 
-    // Safety: We assume the `AT_EXECFN` value provided by the kernel is a
+    // SAFETY: We assume the `AT_EXECFN` value provided by the kernel is a
     // valid pointer to a valid NUL-terminated array of bytes.
     unsafe { CStr::from_ptr(execfn.cast()) }
 }
@@ -102,7 +102,7 @@ pub(crate) fn exe_phdrs() -> (*const c::c_void, usize) {
 pub(in super::super) fn exe_phdrs_slice() -> &'static [Elf_Phdr] {
     let (phdr, phnum) = exe_phdrs();
 
-    // Safety: We assume the `AT_PHDR` and `AT_PHNUM` values provided by the
+    // SAFETY: We assume the `AT_PHDR` and `AT_PHNUM` values provided by the
     // kernel form a valid slice.
     unsafe { slice::from_raw_parts(phdr.cast(), phnum) }
 }
@@ -177,7 +177,7 @@ fn init_from_auxv_file(auxv: OwnedFd) -> Option<()> {
         buffer.resize(cur + n, 0_u8);
     }
 
-    // Safety: We loaded from an auxv file into the buffer.
+    // SAFETY: We loaded from an auxv file into the buffer.
     unsafe { init_from_auxp(buffer.as_ptr().cast()) }
 }
 
