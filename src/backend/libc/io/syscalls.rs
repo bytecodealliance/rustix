@@ -469,9 +469,15 @@ pub(crate) unsafe fn kevent(
     ret_c_int(c::kevent(
         borrowed_fd(kq),
         changelist.as_ptr() as *const _,
-        changelist.len() as _,
+        changelist
+            .len()
+            .try_into()
+            .map_err(|_| io::Errno::OVERFLOW)?,
         eventlist.as_mut_ptr() as *mut _,
-        eventlist.len() as _,
+        eventlist
+            .len()
+            .try_into()
+            .map_err(|_| io::Errno::OVERFLOW)?,
         timeout.map_or(core::ptr::null(), |t| t as *const _),
     ))
 }
