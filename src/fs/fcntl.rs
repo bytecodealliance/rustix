@@ -3,6 +3,13 @@
 //! a type-safe API, rustix makes them all separate functions so that they
 //! can have dedicated static type signatures.
 
+#[cfg(not(any(
+    target_os = "emscripten",
+    target_os = "fuchsia",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
+use crate::fs::FlockOperation;
 use crate::{backend, io};
 use backend::fd::AsFd;
 use backend::fs::types::OFlags;
@@ -84,4 +91,33 @@ pub use backend::fs::types::SealFlags;
 #[doc(alias = "F_ADD_SEALS")]
 pub fn fcntl_add_seals<Fd: AsFd>(fd: Fd, seals: SealFlags) -> io::Result<()> {
     backend::fs::syscalls::fcntl_add_seals(fd.as_fd(), seals)
+}
+
+/// `fcntl(fd, F_SETLK)`—Acquire or release an `fcntl`-style lock.
+///
+/// This function doesn't currently have an offset or len; it currently always
+/// sets the `l_len` field to 0, which is a special case that means the entire
+/// file should be locked.
+///
+/// Unlike `flock`-style locks, `fcntl`-style locks are process-associated,
+/// meaning that they don't guard against being acquired by two threads in
+/// the same process.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
+#[cfg(not(any(
+    target_os = "emscripten",
+    target_os = "fuchsia",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
+#[inline]
+#[doc(alias = "F_SETLK")]
+#[doc(alias = "F_SETLKW")]
+pub fn fcntl_lock<Fd: AsFd>(fd: Fd, operation: FlockOperation) -> io::Result<()> {
+    backend::fs::syscalls::fcntl_lock(fd.as_fd(), operation)
 }

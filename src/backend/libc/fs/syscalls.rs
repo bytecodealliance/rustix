@@ -68,7 +68,7 @@ use crate::fs::Advice;
     target_os = "redox",
 )))]
 use crate::fs::FallocateFlags;
-#[cfg(not(any(target_os = "solaris", target_os = "wasi")))]
+#[cfg(not(target_os = "wasi"))]
 use crate::fs::FlockOperation;
 #[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 use crate::fs::MemfdFlags;
@@ -827,6 +827,40 @@ pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<SealFlags> {
 ))]
 pub(crate) fn fcntl_add_seals(fd: BorrowedFd<'_>, seals: SealFlags) -> io::Result<()> {
     unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_ADD_SEALS, seals.bits())) }
+}
+
+#[cfg(not(any(
+    target_os = "emscripten",
+    target_os = "fuchsia",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
+#[inline]
+pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result<()> {
+    use c::{flock, F_RDLCK, F_SETLK, F_SETLKW, F_UNLCK, F_WRLCK, SEEK_SET};
+
+    let (cmd, l_type) = match operation {
+        FlockOperation::LockShared => (F_SETLKW, F_RDLCK),
+        FlockOperation::LockExclusive => (F_SETLKW, F_WRLCK),
+        FlockOperation::Unlock => (F_SETLKW, F_UNLCK),
+        FlockOperation::NonBlockingLockShared => (F_SETLK, F_RDLCK),
+        FlockOperation::NonBlockingLockExclusive => (F_SETLK, F_WRLCK),
+        FlockOperation::NonBlockingUnlock => (F_SETLK, F_UNLCK),
+    };
+
+    unsafe {
+        let mut lock: flock = core::mem::zeroed();
+        lock.l_type = l_type as _;
+
+        // When `l_len` is zero, this locks all the bytes from
+        // `l_whence`/`l_start` to the end of the file, even as the
+        // file grows dynamically.
+        lock.l_whence = SEEK_SET as _;
+        lock.l_start = 0;
+        lock.l_len = 0;
+
+        ret(c::fcntl(borrowed_fd(fd), cmd, &lock))
+    }
 }
 
 pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {

@@ -785,10 +785,11 @@ bitflags! {
     }
 }
 
-/// `LOCK_*` constants for use with [`flock`]
+/// `LOCK_*` constants for use with [`flock`] and [`fcntl_lock`].
 ///
 /// [`flock`]: crate::fs::flock
-#[cfg(not(any(target_os = "solaris", target_os = "wasi")))]
+/// [`fcntl_lock`]: crate::fs::fcntl_lock
+#[cfg(not(target_os = "wasi"))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(i32)]
 pub enum FlockOperation {
