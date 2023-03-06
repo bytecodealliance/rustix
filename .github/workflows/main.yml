@@ -211,6 +211,8 @@ jobs:
     - run: cargo check -Z build-std --target x86_64-unknown-dragonfly --all-targets --features=all-apis
     - run: cargo check -Z build-std --target sparc-unknown-linux-gnu --all-targets --features=all-apis
     - run: cargo check -Z build-std --target armv7-unknown-freebsd --all-targets --features=all-apis
+    # Omit --all-targets on gnu_ilp32 because dev-dependency tempfile depends on an older rustix
+    - run: cargo check -Z build-std --target aarch64-unknown-linux-gnu_ilp32 --features=all-apis
     # Omit --all-targets on haiku because not all the tests build yet.
     - run: cargo check -Z build-std --target x86_64-unknown-haiku --features=all-apis
     # x86_64-uwp-windows-msvc isn't currently working.
