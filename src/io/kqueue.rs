@@ -310,7 +310,7 @@ impl UserDefinedFlags {
     }
 }
 
-/// `kqueue()`- Create a new `kqueue` file descriptor.
+/// `kqueue()`—Create a new `kqueue` file descriptor.
 ///
 /// # References
 ///
@@ -329,7 +329,8 @@ pub fn kqueue() -> io::Result<OwnedFd> {
     syscalls::kqueue()
 }
 
-/// `kevent()`- Wait for events on a `kqueue`.
+/// `kevent(kqueue, changelist, eventlist, timeout)`—Wait for events on a
+/// `kqueue`.
 ///
 /// # Safety
 ///

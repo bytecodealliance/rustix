@@ -242,7 +242,7 @@ pub(crate) fn pwritev2(
 }
 
 // These functions are derived from Rust's library/std/src/sys/unix/fd.rs at
-// revision a77da2d454e6caa227a85b16410b95f93495e7e0.
+// revision 326ef470a8b379a180d6dc4bbef08990698a737a.
 
 // The maximum read limit on most POSIX-like systems is `SSIZE_MAX`, with the
 // man page quoting that if the count of bytes to read is greater than
@@ -262,7 +262,12 @@ const fn max_iov() -> usize {
     c::IOV_MAX as usize
 }
 
-#[cfg(any(target_os = "android", target_os = "emscripten", target_os = "linux"))]
+#[cfg(any(
+    target_os = "android",
+    target_os = "emscripten",
+    target_os = "linux",
+    target_os = "nto"
+))]
 const fn max_iov() -> usize {
     c::UIO_MAXIOV as usize
 }
@@ -272,6 +277,8 @@ const fn max_iov() -> usize {
     target_os = "android",
     target_os = "emscripten",
     target_os = "linux",
+    target_os = "nto",
+    target_os = "horizon",
 )))]
 const fn max_iov() -> usize {
     16 // The minimum value required by POSIX.

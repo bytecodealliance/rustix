@@ -70,20 +70,20 @@ by default. The rest of the API is conditional with cargo feature flags:
 |            |
 | `use-libc` | Enable the libc backend.
 
-[`rustix::fs`]: https://docs.rs/rustix/latest/rustix/fs/index.html
-[`rustix::io_uring`]: https://docs.rs/rustix/latest/rustix/io_uring/index.html
-[`rustix::mm`]: https://docs.rs/rustix/latest/rustix/mm/index.html
-[`rustix::net`]: https://docs.rs/rustix/latest/rustix/net/index.html
-[`rustix::param`]: https://docs.rs/rustix/latest/rustix/param/index.html
-[`rustix::process`]: https://docs.rs/rustix/latest/rustix/process/index.html
-[`rustix::rand`]: https://docs.rs/rustix/latest/rustix/rand/index.html
-[`rustix::termios`]: https://docs.rs/rustix/latest/rustix/termios/index.html
-[`rustix::thread`]: https://docs.rs/rustix/latest/rustix/thread/index.html
-[`rustix::time`]: https://docs.rs/rustix/latest/rustix/time/index.html
-[`rustix::io`]: https://docs.rs/rustix/latest/rustix/io/index.html
-[`rustix::fd`]: https://docs.rs/rustix/latest/rustix/fd/index.html
-[`rustix::ffi`]: https://docs.rs/rustix/latest/rustix/ffi/index.html
-[`rustix::path`]: https://docs.rs/rustix/latest/rustix/path/index.html
+[`rustix::fs`]: https://docs.rs/rustix/*/rustix/fs/index.html
+[`rustix::io_uring`]: https://docs.rs/rustix/*/rustix/io_uring/index.html
+[`rustix::mm`]: https://docs.rs/rustix/*/rustix/mm/index.html
+[`rustix::net`]: https://docs.rs/rustix/*/rustix/net/index.html
+[`rustix::param`]: https://docs.rs/rustix/*/rustix/param/index.html
+[`rustix::process`]: https://docs.rs/rustix/*/rustix/process/index.html
+[`rustix::rand`]: https://docs.rs/rustix/*/rustix/rand/index.html
+[`rustix::termios`]: https://docs.rs/rustix/*/rustix/termios/index.html
+[`rustix::thread`]: https://docs.rs/rustix/*/rustix/thread/index.html
+[`rustix::time`]: https://docs.rs/rustix/*/rustix/time/index.html
+[`rustix::io`]: https://docs.rs/rustix/*/rustix/io/index.html
+[`rustix::fd`]: https://docs.rs/rustix/*/rustix/fd/index.html
+[`rustix::ffi`]: https://docs.rs/rustix/*/rustix/ffi/index.html
+[`rustix::path`]: https://docs.rs/rustix/*/rustix/path/index.html
 
 ## Similar crates
 
@@ -152,10 +152,10 @@ version of this crate.
 [`timerfd`]: https://crates.io/crates/timerfd
 [`io-streams`]: https://crates.io/crates/io-streams
 [`bitflags`]: https://crates.io/crates/bitflags
-[`Arg`]: https://docs.rs/rustix/latest/rustix/path/trait.Arg.html
+[`Arg`]: https://docs.rs/rustix/*/rustix/path/trait.Arg.html
 [I/O-safe]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
 [I/O safety]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
 [provenance]: https://github.com/rust-lang/rust/issues/95228
-[`OwnedFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/struct.OwnedFd.html
-[`AsFd`]: https://docs.rs/io-lifetimes/latest/io_lifetimes/trait.AsFd.html
-[`NOSYS`]: https://docs.rs/rustix/latest/rustix/io/struct.Errno.html#associatedconstant.NOSYS
+[`OwnedFd`]: https://docs.rs/io-lifetimes/*/io_lifetimes/struct.OwnedFd.html
+[`AsFd`]: https://docs.rs/io-lifetimes/*/io_lifetimes/trait.AsFd.html
+[`NOSYS`]: https://docs.rs/rustix/*/rustix/io/struct.Errno.html#associatedconstant.NOSYS

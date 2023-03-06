@@ -7,7 +7,7 @@ fn tmpdir() -> TempDir {
     tempdir().expect("expected to be able to create a temporary directory")
 }
 
-/// Disable this test on macos because GHA has a weird system folder structure
+/// Disable this test on macOS because GHA has a weird system folder structure
 /// that makes this test fail.
 #[cfg(not(target_os = "macos"))]
 #[test]

@@ -81,7 +81,7 @@ pub fn inotify_init(flags: CreateFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::inotify_init1(flags.bits())) }
 }
 
-/// `inotify_add_watch(self, path, flags)`-Adds a watch to inotify
+/// `inotify_add_watch(self, path, flags)`—Adds a watch to inotify
 ///
 /// This registers or updates a watch for the filesystem path `path`
 /// and returns a watch descriptor corresponding to this watch.
@@ -96,7 +96,7 @@ pub fn inotify_add_watch<P: crate::path::Arg>(
     flags: WatchFlags,
 ) -> io::Result<i32> {
     let path = path.as_cow_c_str().unwrap();
-    // SAFETY: The fd and path we are passing is guranteed valid by the type
+    // SAFETY: The fd and path we are passing is guaranteed valid by the type
     // system.
     unsafe {
         ret_c_int(c::inotify_add_watch(
@@ -107,7 +107,7 @@ pub fn inotify_add_watch<P: crate::path::Arg>(
     }
 }
 
-/// `inotify_rm_watch(self, wd)`-Removes a watch from this inotify
+/// `inotify_rm_watch(self, wd)`—Removes a watch from this inotify
 ///
 /// The watch descriptor provided should have previously been returned
 /// by [`inotify_add_watch`] and not previously have been removed.

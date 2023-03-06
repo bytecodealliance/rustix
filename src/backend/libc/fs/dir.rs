@@ -237,7 +237,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     pub d_pino: i64,
     pub d_reclen: ::c_ushort,
     pub d_name: [::c_char; 1024], // Max length is _POSIX_PATH_MAX
-                                  // */
+    */
 
     // On dragonfly and FreeBSD 12, `dirent` has some non-public padding fields
     // so we can't directly initialize it.

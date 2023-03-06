@@ -8,9 +8,9 @@ pub use backend::process::types::Resource;
 /// [`setrlimit`], and [`prlimit`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Rlimit {
-    /// Current effective, "soft", limit.
+    /// Current effective, “soft”, limit.
     pub current: Option<u64>,
-    /// Maximum, "hard", value that `current` may be dynamically increased to.
+    /// Maximum, “hard”, value that `current` may be dynamically increased to.
     pub maximum: Option<u64>,
 }
 
