@@ -207,8 +207,8 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
 
         Some(Ok(RawDirEntry {
             file_type: dirent.d_type,
-            inode_number: dirent.d_ino,
-            next_entry_cookie: dirent.d_off,
+            inode_number: dirent.d_ino.into(),
+            next_entry_cookie: dirent.d_off.into(),
             // SAFETY: the kernel guarantees a NUL terminated string.
             file_name: unsafe { CStr::from_ptr(dirent.d_name.as_ptr().cast()) },
         }))
