@@ -162,7 +162,7 @@ pub(crate) fn openat(
     mode: Mode,
 ) -> io::Result<OwnedFd> {
     // Work around <https://sourceware.org/bugzilla/show_bug.cgi?id=17523>.
-    // Basically old glibc versions don't handle O_TMPFILE correctly.
+    // GLIBC versions before 2.25 don't handle `O_TMPFILE` correctly.
     #[cfg(all(unix, target_env = "gnu"))]
     if oflags.contains(OFlags::TMPFILE) && crate::backend::if_glibc_is_less_than_2_25() {
         return openat_via_syscall(dirfd, path, oflags, mode);
@@ -1593,7 +1593,7 @@ pub(crate) unsafe fn copyfile_state_get(
 
 #[cfg(apple)]
 pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<CString> {
-    // The use of PATH_MAX is generally not encouraged, but it
+    // The use of `PATH_MAX` is generally not encouraged, but it
     // is inevitable in this case because macOS defines `fcntl` with
     // `F_GETPATH` in terms of `MAXPATHLEN`, and there are no
     // alternatives. If a better method is invented, it should be used

@@ -175,7 +175,7 @@ pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
     backend::process::syscalls::wait(waitopts)
 }
 
-/// `waitid(_, _, _, opts)`-Wait for the specified child process to change
+/// `waitid(_, _, _, opts)`—Wait for the specified child process to change
 /// state.
 #[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 #[inline]

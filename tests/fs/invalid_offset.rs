@@ -4,7 +4,7 @@
 //! Rust APIs tend to use `u64`. Test that extreme `u64` values in APIs that
 //! take file offsets are properly diagnosed.
 //!
-//! These tests are disabled on ios/macos since those platforms kill the
+//! These tests are disabled on iOS/macOS since those platforms kill the
 //! process with `SIGXFSZ` instead of returning an error.
 
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]

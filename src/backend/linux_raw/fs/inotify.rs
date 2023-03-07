@@ -80,7 +80,7 @@ pub fn inotify_init(flags: CreateFlags) -> io::Result<OwnedFd> {
     syscalls::inotify_init1(flags)
 }
 
-/// `inotify_add_watch(self, path, flags)`-Adds a watch to inotify
+/// `inotify_add_watch(self, path, flags)`—Adds a watch to inotify
 ///
 /// This registers or updates a watch for the filesystem path `path`
 /// and returns a watch descriptor corresponding to this watch.
@@ -98,7 +98,7 @@ pub fn inotify_add_watch<P: crate::path::Arg>(
     syscalls::inotify_add_watch(inot, &path, flags)
 }
 
-/// `inotify_rm_watch(self, wd)`-Removes a watch from this inotify
+/// `inotify_rm_watch(self, wd)`—Removes a watch from this inotify
 ///
 /// The watch descriptor provided should have previously been returned
 /// by [`inotify_add_watch`] and not previously have been removed.

@@ -38,7 +38,7 @@ fn main() {
     drop(reader);
     drop(writer);
 
-    // Now we can print to "stdout" in the usual way, and it'll go to our pipe.
+    // Now we can print to “stdout” in the usual way, and it'll go to our pipe.
     println!("hello, world!");
 
     // And we can read from stdin, and it'll read from our pipe. It's a little

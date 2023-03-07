@@ -4,8 +4,8 @@
 //! of these APIs. [`wsa_cleanup`] may be used in the process if these APIs are
 //! no longer needed.
 //!
-//! [`wsa_startup`]: https://docs.rs/rustix/latest/x86_64-pc-windows-msvc/rustix/net/fn.wsa_startup.html
-//! [`wsa_cleanup`]: https://docs.rs/rustix/latest/x86_64-pc-windows-msvc/rustix/net/fn.wsa_cleanup.html
+//! [`wsa_startup`]: https://docs.rs/rustix/*/x86_64-pc-windows-msvc/rustix/net/fn.wsa_startup.html
+//! [`wsa_cleanup`]: https://docs.rs/rustix/*/x86_64-pc-windows-msvc/rustix/net/fn.wsa_cleanup.html
 
 #[cfg(not(feature = "std"))]
 mod addr;

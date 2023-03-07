@@ -115,9 +115,9 @@ fn test_floating_point_emulation_control() {
     dbg!(floating_point_emulation_control().unwrap());
 }
 
-/*
- * Helper functions.
- */
+//
+// Helper functions.
+//
 
 #[cfg(feature = "thread")]
 pub(crate) fn thread_has_capability(capability: Capability) -> io::Result<bool> {

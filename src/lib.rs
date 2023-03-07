@@ -90,7 +90,7 @@
 //! [`OwnedFd`]: https://doc.rust-lang.org/stable/std/os/fd/struct.OwnedFd.html
 //! [I/O-safe]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
 //! [`Result`]: https://doc.rust-lang.org/stable/std/result/enum.Result.html
-//! [`Arg`]: https://docs.rs/rustix/latest/rustix/path/trait.Arg.html
+//! [`Arg`]: https://docs.rs/rustix/*/rustix/path/trait.Arg.html
 
 #![deny(missing_docs)]
 #![allow(stable_features)]

@@ -105,9 +105,9 @@ fn test_core_scheduling_cookie() {
     }
 }
 
-/*
- * Helper functions.
- */
+//
+// Helper functions.
+//
 
 fn load_linux_kernel_config() -> io::Result<Vec<u8>> {
     if let Ok(compressed_bytes) = fs::read("/proc/config.gz") {
