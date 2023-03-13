@@ -28,6 +28,8 @@ impl Event {
         let (ident, filter, fflags) = match filter {
             EventFilter::Read(fd) => (fd.as_raw_fd() as uintptr_t, c::EVFILT_READ, 0),
             EventFilter::Write(fd) => (fd.as_raw_fd() as _, c::EVFILT_WRITE, 0),
+            #[cfg(target_os = "freebsd")]
+            EventFilter::Empty(fd) => (fd.as_raw_fd() as _, c::EVFILT_EMPTY, 0),
             EventFilter::Vnode { vnode, flags } => {
                 (vnode.as_raw_fd() as _, c::EVFILT_VNODE, flags.bits())
             }
@@ -37,8 +39,8 @@ impl Event {
                 c::EVFILT_PROC,
                 flags.bits(),
             ),
-            #[cfg(any(apple, target_os = "freebsd"))]
             EventFilter::Timer(timer) => {
+                #[cfg(any(apple, target_os = "freebsd", target_os = "netbsd"))]
                 let (data, fflags) = match timer {
                     Some(timer) => {
                         if timer.subsec_millis() == 0 {
@@ -50,6 +52,11 @@ impl Event {
                         }
                     }
                     None => (uintptr_t::MAX, c::NOTE_SECONDS),
+                };
+                #[cfg(any(target_os = "dragonfly", target_os = "openbsd"))]
+                let (data, fflags) = match timer {
+                    Some(timer) => (timer.as_millis() as _, 0),
+                    None => (uintptr_t::MAX, 0),
                 };
 
                 (data, c::EVFILT_TIMER, fflags)
@@ -98,6 +105,8 @@ impl Event {
         match self.inner.filter as _ {
             c::EVFILT_READ => EventFilter::Read(self.inner.ident as _),
             c::EVFILT_WRITE => EventFilter::Write(self.inner.ident as _),
+            #[cfg(target_os = "freebsd")]
+            c::EVFILT_EMPTY => EventFilter::Empty(self.inner.ident as _),
             c::EVFILT_VNODE => EventFilter::Vnode {
                 vnode: self.inner.ident as _,
                 flags: VnodeEvents::from_bits_truncate(self.inner.fflags),
@@ -107,9 +116,9 @@ impl Event {
                 pid: unsafe { crate::process::Pid::from_raw(self.inner.ident as _) }.unwrap(),
                 flags: ProcessEvents::from_bits_truncate(self.inner.fflags),
             },
-            #[cfg(any(apple, target_os = "freebsd"))]
             c::EVFILT_TIMER => EventFilter::Timer({
                 let (data, fflags) = (self.inner.data, self.inner.fflags);
+                #[cfg(any(apple, target_os = "freebsd", target_os = "netbsd"))]
                 match fflags as _ {
                     c::NOTE_SECONDS => Some(Duration::from_secs(data as _)),
                     c::NOTE_USECONDS => Some(Duration::from_micros(data as _)),
@@ -119,6 +128,8 @@ impl Event {
                         None
                     }
                 }
+                #[cfg(any(target_os = "dragonfly", target_os = "openbsd"))]
+                Some(Duration::from_millis(data as _))
             }),
             #[cfg(any(apple, freebsdlike))]
             c::EVFILT_USER => EventFilter::User {
@@ -145,6 +156,10 @@ pub enum EventFilter {
     /// A write filter.
     Write(RawFd),
 
+    /// An empty filter.
+    #[cfg(target_os = "freebsd")]
+    Empty(RawFd),
+
     /// A VNode filter.
     Vnode {
         /// The file descriptor we looked for events in.
@@ -165,7 +180,6 @@ pub enum EventFilter {
     },
 
     /// A timer filter.
-    #[cfg(any(apple, target_os = "freebsd"))]
     Timer(Option<Duration>),
 
     /// A user filter.
@@ -241,6 +255,9 @@ bitflags::bitflags! {
 
         /// Access to the file was revoked.
         const REVOKE = c::NOTE_REVOKE;
+
+        /// The link count of the file has changed.
+        const LINK = c::NOTE_LINK;
     }
 }
 
@@ -257,8 +274,11 @@ bitflags::bitflags! {
         /// The process executed a new process.
         const EXEC = c::NOTE_EXEC;
 
-        /// TODO
+        /// Follow the process through fork() calls (write only).
         const TRACK = c::NOTE_TRACK;
+
+        /// An error has occurred with following the process.
+        const TRACKERR = c::NOTE_TRACKERR;
     }
 }
 
