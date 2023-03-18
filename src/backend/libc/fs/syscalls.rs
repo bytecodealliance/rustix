@@ -1485,13 +1485,20 @@ fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
 mod sys {
     use super::{c, BorrowedFd, Statx};
 
+    // Some versions of the libc bindings don't have these, so provide
+    // our own definitions (which may become unused when libc gains
+    // bindings for them).
     #[cfg(all(target_os = "android", target_arch = "arm"))]
+    #[allow(dead_code)]
     const SYS_statx: c::c_long = 397;
     #[cfg(all(target_os = "android", target_arch = "x86"))]
+    #[allow(dead_code)]
     const SYS_statx: c::c_long = 383;
     #[cfg(all(target_os = "android", target_arch = "aarch64"))]
+    #[allow(dead_code)]
     const SYS_statx: c::c_long = 291;
     #[cfg(all(target_os = "android", target_arch = "x86_64"))]
+    #[allow(dead_code)]
     const SYS_statx: c::c_long = 332;
 
     weak_or_syscall! {
