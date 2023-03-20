@@ -240,6 +240,9 @@ fn can_compile<T: AsRef<str>>(test: T) -> bool {
     let rustc = var("RUSTC").unwrap();
     let target = var("TARGET").unwrap();
 
+    // Use `RUSTC_WRAPPER` if it's set, unless it's set to an empty string,
+    // as documented [here].
+    // [here]: https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-reads
     let wrapper = var("RUSTC_WRAPPER")
         .ok()
         .and_then(|w| if w.is_empty() { None } else { Some(w) });
