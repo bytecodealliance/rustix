@@ -85,6 +85,13 @@ by default. The rest of the API is conditional with cargo feature flags:
 [`rustix::ffi`]: https://docs.rs/rustix/*/rustix/ffi/index.html
 [`rustix::path`]: https://docs.rs/rustix/*/rustix/path/index.html
 
+## 64-bit Large File Support (LFS) and Year 2038 (y2038) support
+
+`rustix` automatically uses 64-bit APIs when available, and avoids exposing
+32-bit APIs that would have the year-2038 problem or fail to support large
+files. For instance, `rustix::fstatvfs` calls `fstatvfs64`, and returns a
+struct that's 64-bit even on 32-bit platforms.
+
 ## Similar crates
 
 `rustix` is similar to [`nix`], [`simple_libc`], [`unix`], [`nc`], and
