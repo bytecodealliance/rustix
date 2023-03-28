@@ -331,8 +331,9 @@ pub const fn raw_stderr() -> RawFd {
 /// Utility function to safely `dup2` over stdin (fd 0).
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[inline]
-#[allow(unsafe_code)]
 pub fn dup2_stdin<Fd: AsFd>(fd: Fd) -> io::Result<()> {
+    // SAFETY: We pass the returned `OwnedFd` to `forget` so that it isn't
+    // dropped.
     let mut target = unsafe { io::take_stdin() };
     backend::io::syscalls::dup2(fd.as_fd(), &mut target)?;
     core::mem::forget(target);
@@ -342,8 +343,9 @@ pub fn dup2_stdin<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 /// Utility function to safely `dup2` over stdout (fd 1).
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[inline]
-#[allow(unsafe_code)]
 pub fn dup2_stdout<Fd: AsFd>(fd: Fd) -> io::Result<()> {
+    // SAFETY: We pass the returned `OwnedFd` to `forget` so that it isn't
+    // dropped.
     let mut target = unsafe { io::take_stdout() };
     backend::io::syscalls::dup2(fd.as_fd(), &mut target)?;
     core::mem::forget(target);
@@ -353,8 +355,9 @@ pub fn dup2_stdout<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 /// Utility function to safely `dup2` over stderr (fd 2).
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[inline]
-#[allow(unsafe_code)]
 pub fn dup2_stderr<Fd: AsFd>(fd: Fd) -> io::Result<()> {
+    // SAFETY: We pass the returned `OwnedFd` to `forget` so that it isn't
+    // dropped.
     let mut target = unsafe { io::take_stderr() };
     backend::io::syscalls::dup2(fd.as_fd(), &mut target)?;
     core::mem::forget(target);
