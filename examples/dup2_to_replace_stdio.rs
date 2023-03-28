@@ -3,35 +3,19 @@
 
 #[cfg(not(windows))]
 fn main() {
-    use rustix::io::{dup2, pipe};
+    use rustix::io::{dup2_stdin, dup2_stdout, pipe};
     use std::io::{BufRead, BufReader};
-    use std::mem::forget;
 
     // Create some new file descriptors that we'll use to replace stdio's file
     // descriptors with.
     let (reader, writer) = pipe().unwrap();
 
-    // Acquire `OwnedFd` instances for stdin and stdout. These APIs are `unsafe`
-    // because in general, with low-level APIs like this, libraries can't assume
-    // that stdin and stdout will be open or safe to use. It's ok here, because
-    // we're directly inside `main`, so we know that stdin and stdout haven't
-    // been closed and aren't being used for other purposes.
-    let (mut stdin, mut stdout) = unsafe { (rustix::io::take_stdin(), rustix::io::take_stdout()) };
-
     // Use `dup2` to copy our new file descriptors over the stdio file descriptors.
     //
-    // These take their second argument as an `&mut OwnedFd` rather than the
-    // usual `impl AsFd` because they conceptually do a `close` on the original
-    // file descriptor, which one shouldn't be able to do with just a
-    // `BorrowedFd`.
-    dup2(&reader, &mut stdin).unwrap();
-    dup2(&writer, &mut stdout).unwrap();
-
-    // Then, forget the stdio `OwnedFd`s, because actually dropping them would
-    // close them. Here, we want stdin and stdout to remain open for the rest
-    // of the program.
-    forget(stdin);
-    forget(stdout);
+    // Rustix has a plain `dup2` function too, but it requires a `&mut OwnedFd`,
+    // so these helper functions make it easier to use when replacing stdio fds.
+    dup2_stdin(&reader).unwrap();
+    dup2_stdout(&writer).unwrap();
 
     // We can also drop the original file descriptors now, since `dup2` creates
     // new file descriptors with independent lifetimes.
