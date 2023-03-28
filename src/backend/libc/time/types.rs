@@ -300,7 +300,7 @@ bitflags! {
 
         /// `TFD_TIMER_CANCEL_ON_SET`
         #[cfg(any(target_os = "android", target_os = "linux"))]
-        const CANCEL_ON_SET = 2; // TODO: upstream TFD_TIMER_CANCEL_ON_SET
+        const CANCEL_ON_SET = c::TFD_TIMER_CANCEL_ON_SET;
     }
 }
 
