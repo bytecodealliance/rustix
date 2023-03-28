@@ -12,6 +12,11 @@ use crate::backend;
 use crate::fd::OwnedFd;
 use backend::fd::{BorrowedFd, FromRawFd, RawFd};
 
+#[cfg(not(any(windows, target_os = "wasi")))]
+use crate::io;
+#[cfg(not(any(windows, target_os = "wasi")))]
+use backend::fd::AsFd;
+
 /// `STDIN_FILENO`—Standard input, borrowed.
 ///
 /// In `std`-using configurations, this is a safe function, because the
@@ -321,4 +326,37 @@ pub const fn raw_stdout() -> RawFd {
 #[inline]
 pub const fn raw_stderr() -> RawFd {
     backend::io::types::STDERR_FILENO as RawFd
+}
+
+/// Utility function to safely `dup2` over stdin (fd 0).
+#[cfg(not(any(windows, target_os = "wasi")))]
+#[inline]
+#[allow(unsafe_code)]
+pub fn dup2_stdin<Fd: AsFd>(fd: Fd) -> io::Result<()> {
+    let mut target = unsafe { io::take_stdin() };
+    backend::io::syscalls::dup2(fd.as_fd(), &mut target)?;
+    core::mem::forget(target);
+    Ok(())
+}
+
+/// Utility function to safely `dup2` over stdout (fd 1).
+#[cfg(not(any(windows, target_os = "wasi")))]
+#[inline]
+#[allow(unsafe_code)]
+pub fn dup2_stdout<Fd: AsFd>(fd: Fd) -> io::Result<()> {
+    let mut target = unsafe { io::take_stdout() };
+    backend::io::syscalls::dup2(fd.as_fd(), &mut target)?;
+    core::mem::forget(target);
+    Ok(())
+}
+
+/// Utility function to safely `dup2` over stderr (fd 2).
+#[cfg(not(any(windows, target_os = "wasi")))]
+#[inline]
+#[allow(unsafe_code)]
+pub fn dup2_stderr<Fd: AsFd>(fd: Fd) -> io::Result<()> {
+    let mut target = unsafe { io::take_stderr() };
+    backend::io::syscalls::dup2(fd.as_fd(), &mut target)?;
+    core::mem::forget(target);
+    Ok(())
 }
