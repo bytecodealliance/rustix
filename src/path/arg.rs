@@ -954,9 +954,11 @@ where
     let mut buf = MaybeUninit::<[u8; SMALL_PATH_BUFFER_SIZE]>::uninit();
     let buf_ptr = buf.as_mut_ptr() as *mut u8;
 
+    // This helps test our safety condition below.
+    debug_assert!(bytes.len() + 1 <= SMALL_PATH_BUFFER_SIZE);
+
     // SAFETY: bytes.len() < SMALL_PATH_BUFFER_SIZE which means we have space for
     // bytes.len() + 1 u8s:
-    debug_assert!(bytes.len() + 1 <= SMALL_PATH_BUFFER_SIZE);
     unsafe {
         ptr::copy_nonoverlapping(bytes.as_ptr(), buf_ptr, bytes.len());
         buf_ptr.add(bytes.len()).write(0);
