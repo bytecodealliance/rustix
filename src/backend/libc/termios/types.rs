@@ -7,13 +7,16 @@ use super::super::c;
 #[repr(i32)]
 pub enum OptionalActions {
     /// `TCSANOW`—Make the change immediately.
+    #[doc(alias = "TCSANOW")]
     Now = c::TCSANOW,
 
     /// `TCSADRAIN`—Make the change after all output has been transmitted.
+    #[doc(alias = "TCSADRAIN")]
     Drain = c::TCSADRAIN,
 
     /// `TCSAFLUSH`—Discard any pending input and then make the change
     /// after all output has been transmitted.
+    #[doc(alias = "TCSAFLUSH")]
     Flush = c::TCSAFLUSH,
 }
 
@@ -24,12 +27,15 @@ pub enum OptionalActions {
 #[repr(i32)]
 pub enum QueueSelector {
     /// `TCIFLUSH`—Flush data received but not read.
+    #[doc(alias = "TCIFLUSH")]
     IFlush = c::TCIFLUSH,
 
     /// `TCOFLUSH`—Flush data written but not transmitted.
+    #[doc(alias = "TCOFLUSH")]
     OFlush = c::TCOFLUSH,
 
     /// `TCIOFLUSH`—`IFlush` and `OFlush` combined.
+    #[doc(alias = "TCIOFLUSH")]
     IOFlush = c::TCIOFLUSH,
 }
 
@@ -40,15 +46,19 @@ pub enum QueueSelector {
 #[repr(i32)]
 pub enum Action {
     /// `TCOOFF`—Suspend output.
+    #[doc(alias = "TCOOFF")]
     OOff = c::TCOOFF,
 
     /// `TCOON`—Restart suspended output.
+    #[doc(alias = "TCOON")]
     OOn = c::TCOON,
 
     /// `TCIOFF`—Transmits a STOP byte.
+    #[doc(alias = "TCIOFF")]
     IOff = c::TCIOFF,
 
     /// `TCION`—Transmits a START byte.
+    #[doc(alias = "TCION")]
     IOn = c::TCION,
 }
 
@@ -56,6 +66,7 @@ pub enum Action {
 ///
 /// [`tcgetattr`]: crate::termios::tcgetattr
 /// [`tcsetattr`]: crate::termios::tcsetattr
+#[doc(alias = "termios")]
 pub type Termios = c::termios;
 
 /// `struct termios2` for use with [`tcgetattr2`] and [`tcsetattr2`].
@@ -75,19 +86,23 @@ pub type Termios = c::termios;
         target_arch = "mips64",
     )
 ))]
+#[doc(alias = "termios2")]
 pub type Termios2 = c::termios2;
 
 /// `struct winsize` for use with [`tcgetwinsize`].
 ///
 /// [`tcgetwinsize`]: crate::termios::tcgetwinsize
+#[doc(alias = "winsize")]
 pub type Winsize = c::winsize;
 
 /// `tcflag_t`—A type for the flags fields of [`Termios`].
+#[doc(alias = "tcflag_t")]
 pub type Tcflag = c::tcflag_t;
 
 /// `speed_t`—A return type for [`cfsetspeed`] and similar.
 ///
 /// [`cfsetspeed`]: crate::termios::cfsetspeed
+#[doc(alias = "speed_t")]
 pub type Speed = c::speed_t;
 
 /// `VINTR`

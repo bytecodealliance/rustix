@@ -7,13 +7,16 @@ use super::super::c;
 #[repr(u32)]
 pub enum OptionalActions {
     /// `TCSANOW`—Make the change immediately.
+    #[doc(alias = "TCSANOW")]
     Now = linux_raw_sys::general::TCSANOW,
 
     /// `TCSADRAIN`—Make the change after all output has been transmitted.
+    #[doc(alias = "TCSADRAIN")]
     Drain = linux_raw_sys::general::TCSADRAIN,
 
     /// `TCSAFLUSH`—Discard any pending input and then make the change
     /// after all output has been transmitted.
+    #[doc(alias = "TCSAFLUSH")]
     Flush = linux_raw_sys::general::TCSAFLUSH,
 }
 
@@ -24,12 +27,15 @@ pub enum OptionalActions {
 #[repr(u32)]
 pub enum QueueSelector {
     /// `TCIFLUSH`—Flush data received but not read.
+    #[doc(alias = "TCIFLUSH")]
     IFlush = linux_raw_sys::general::TCIFLUSH,
 
     /// `TCOFLUSH`—Flush data written but not transmitted.
+    #[doc(alias = "TCOFLUSH")]
     OFlush = linux_raw_sys::general::TCOFLUSH,
 
     /// `TCIOFLUSH`—`IFlush` and `OFlush` combined.
+    #[doc(alias = "TCIOFLUSH")]
     IOFlush = linux_raw_sys::general::TCIOFLUSH,
 }
 
@@ -40,15 +46,19 @@ pub enum QueueSelector {
 #[repr(u32)]
 pub enum Action {
     /// `TCOOFF`—Suspend output.
+    #[doc(alias = "TCOOFF")]
     OOff = linux_raw_sys::general::TCOOFF,
 
     /// `TCOON`—Restart suspended output.
+    #[doc(alias = "TCOON")]
     OOn = linux_raw_sys::general::TCOON,
 
     /// `TCIOFF`—Transmits a STOP byte.
+    #[doc(alias = "TCIOFF")]
     IOff = linux_raw_sys::general::TCIOFF,
 
     /// `TCION`—Transmits a START byte.
+    #[doc(alias = "TCION")]
     IOn = linux_raw_sys::general::TCION,
 }
 
@@ -56,6 +66,7 @@ pub enum Action {
 ///
 /// [`tcgetattr`]: crate::termios::tcgetattr
 /// [`tcsetattr`]: crate::termios::tcsetattr
+#[doc(alias = "termios")]
 pub type Termios = linux_raw_sys::general::termios;
 
 /// `struct termios2` for use with [`tcgetattr2`] and [`tcsetattr2`].
@@ -72,19 +83,23 @@ pub type Termios = linux_raw_sys::general::termios;
     target_arch = "mips",
     target_arch = "mips64",
 ))]
+#[doc(alias = "termios2")]
 pub type Termios2 = linux_raw_sys::general::termios2;
 
 /// `struct winsize` for use with [`tcgetwinsize`].
 ///
 /// [`tcgetwinsize`]: crate::termios::tcgetwinsize
+#[doc(alias = "winsize")]
 pub type Winsize = linux_raw_sys::general::winsize;
 
 /// `tcflag_t`—A type for the flags fields of [`Termios`].
+#[doc(alias = "tcflag_t")]
 pub type Tcflag = linux_raw_sys::general::tcflag_t;
 
 /// `speed_t`—A return type for [`cfsetspeed`] and similar.
 ///
 /// [`cfsetspeed`]: crate::termios::cfsetspeed
+#[doc(alias = "speed_t")]
 pub type Speed = linux_raw_sys::general::speed_t;
 
 /// `VINTR`

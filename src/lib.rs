@@ -60,8 +60,8 @@
 //!  - Multiplexed functions (eg. `fcntl`, `ioctl`, etc.) are de-multiplexed.
 //!  - Variadic functions (eg. `openat`, etc.) are presented as non-variadic.
 //!  - Functions and types which need `l` prefixes or `64` suffixes to enable
-//!    large-file support are used automatically, and file sizes and offsets
-//!    are presented as `u64` and `i64`.
+//!    large-file support (LFS) are used automatically. File sizes and offsets
+//!    are always presented as `u64` and `i64`.
 //!  - Behaviors that depend on the sizes of C types like `long` are hidden.
 //!  - In some places, more human-friendly and less historical-accident names
 //!    are used (and documentation aliases are used so that the original names
