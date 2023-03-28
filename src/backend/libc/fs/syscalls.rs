@@ -645,6 +645,11 @@ pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Res
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
     // Linux's `fchmodat` does not have a flags argument.
+    //
+    // Use `c::syscall` rather than `c::fchmodat` because some libc
+    // implementations, such as musl, add extra logic to `fchmod` to emulate
+    // support for `O_PATH`, which uses `/proc` outside our control and
+    // interferes with our own use of `O_PATH`.
     unsafe {
         // Pass `mode` as a `c_uint` even if `mode_t` is narrower, since
         // `libc_openat` is declared as a variadic function and narrower
