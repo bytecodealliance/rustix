@@ -171,7 +171,7 @@ unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
     #[cfg(not(any(target_os = "dragonfly", target_os = "wasi")))]
     let d_reclen = input.d_reclen;
 
-    #[cfg(bsd)]
+    #[cfg(bsd, target_os = "aix")]
     let d_namlen = input.d_namlen;
 
     #[cfg(apple)]
