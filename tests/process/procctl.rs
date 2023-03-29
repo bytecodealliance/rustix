@@ -26,3 +26,12 @@ fn test_reaper_status() {
 fn test_reaper_pids() {
     dbg!(get_reaper_pids(None).unwrap());
 }
+
+#[test]
+fn test_trapcap() {
+    assert_eq!(trap_cap_behavior(None).unwrap(), TrapCapBehavior::Disable);
+    set_trap_cap_behavior(None, TrapCapBehavior::Enable).unwrap();
+    assert_eq!(trap_cap_behavior(None).unwrap(), TrapCapBehavior::Enable);
+    set_trap_cap_behavior(None, TrapCapBehavior::Disable).unwrap();
+    assert_eq!(trap_cap_behavior(None).unwrap(), TrapCapBehavior::Disable);
+}

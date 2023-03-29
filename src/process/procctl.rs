@@ -415,3 +415,56 @@ pub fn reaper_kill(
         },
     })
 }
+
+//
+// PROC_TRAPCAP_STATUS/PROC_TRAPCAP_CTL
+//
+
+const PROC_TRAPCAP_CTL: c_int = 9;
+
+const PROC_TRAPCAP_CTL_ENABLE: i32 = 1;
+const PROC_TRAPCAP_CTL_DISABLE: i32 = 2;
+
+/// `PROC_TRAPCAP_CTL_*`.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[repr(i32)]
+pub enum TrapCapBehavior {
+    /// Disable the SIGTRAP signal delivery on capability mode access violations.
+    Disable = PROC_TRAPCAP_CTL_DISABLE,
+    /// Enable the SIGTRAP signal delivery on capability mode access violations.
+    Enable = PROC_TRAPCAP_CTL_ENABLE,
+}
+
+/// Set the current value of the capability mode violation trapping behavior.
+/// If this behavior is enabled, the kernel would deliver a SIGTRAP signal on any
+/// return from a system call that would result in a `ENOTCAPABLE` or `ECAPMODE` error.
+///
+/// This behavior is inherited by the children of the process and is kept across `execve` calls.
+///
+/// # References
+/// - [FreeBSD: `procctl(PROC_TRAPCAP_CTL,...)`]
+///
+/// [FreeBSD: `procctl(PROC_TRAPCAP_CTL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+#[inline]
+pub fn set_trap_cap_behavior(process: ProcSelector, config: TrapCapBehavior) -> io::Result<()> {
+    let config = config as c_int;
+    unsafe { procctl_set::<c_int>(PROC_TRAPCAP_CTL, process, &config) }
+}
+
+const PROC_TRAPCAP_STATUS: c_int = 10;
+
+/// Get the current value of the capability mode violation trapping behavior.
+///
+/// # References
+/// - [FreeBSD: `procctl(PROC_TRAPCAP_STATUS,...)`]
+///
+/// [FreeBSD: `procctl(PROC_TRAPCAP_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+#[inline]
+pub fn trap_cap_behavior(process: ProcSelector) -> io::Result<TrapCapBehavior> {
+    let val = unsafe { procctl_get_optional::<c_int>(PROC_TRAPCAP_STATUS, process) }?;
+    match val {
+        PROC_TRAPCAP_CTL_DISABLE => Ok(TrapCapBehavior::Disable),
+        PROC_TRAPCAP_CTL_ENABLE => Ok(TrapCapBehavior::Enable),
+        _ => Err(io::Errno::RANGE),
+    }
+}
