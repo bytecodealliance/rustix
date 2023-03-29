@@ -31,6 +31,8 @@ fn test_sockopts() {
     #[cfg(not(any(bsd, windows)))]
     assert_eq!(rustix::net::sockopt::get_ip_multicast_ttl(&s).unwrap(), 1);
     assert!(!rustix::net::sockopt::get_tcp_nodelay(&s).unwrap());
+    // On a new socket we shouldn't have an error yet.
+    assert_eq!(rustix::net::sockopt::get_socket_error(&s).unwrap(), Ok(()));
 
     // Set a timeout.
     rustix::net::sockopt::set_socket_timeout(

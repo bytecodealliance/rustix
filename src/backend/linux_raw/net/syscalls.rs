@@ -1066,6 +1066,16 @@ pub(crate) mod sockopt {
     }
 
     #[inline]
+    pub(crate) fn get_socket_error(fd: BorrowedFd<'_>) -> io::Result<Result<(), crate::io::Errno>> {
+        let err: c::c_int = getsockopt(fd, c::SOL_SOCKET as _, c::SO_ERROR)?;
+        Ok(if err == 0 {
+            Ok(())
+        } else {
+            Err(crate::io::Errno::from_raw_os_error(err))
+        })
+    }
+
+    #[inline]
     pub(crate) fn set_ip_ttl(fd: BorrowedFd<'_>, ttl: u32) -> io::Result<()> {
         setsockopt(fd, c::IPPROTO_IP as _, c::IP_TTL, ttl)
     }
