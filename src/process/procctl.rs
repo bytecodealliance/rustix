@@ -6,6 +6,9 @@
 #![allow(unsafe_code)]
 
 use core::mem::MaybeUninit;
+use core::ptr;
+
+use bitflags::bitflags;
 
 use crate::backend::c::{c_int, c_uint, c_void};
 use crate::backend::process::syscalls;
@@ -181,4 +184,234 @@ pub fn trace_status(process: ProcSelector) -> io::Result<TracingStatus> {
             Ok(TracingStatus::BeingTraced(pid))
         }
     }
+}
+
+//
+// PROC_REAP_*
+//
+
+const PROC_REAP_ACQUIRE: c_int = 2;
+const PROC_REAP_RELEASE: c_int = 3;
+
+/// Acquire or release the reaper status of the calling process.
+///
+/// # References
+/// - [FreeBSD: `procctl(PROC_REAP_ACQUIRE/RELEASE,...)`]
+///
+/// [FreeBSD: `procctl(PROC_REAP_ACQUIRE/RELEASE,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+#[inline]
+pub fn set_reaper_status(reaper: bool) -> io::Result<()> {
+    unsafe {
+        procctl(
+            if reaper {
+                PROC_REAP_ACQUIRE
+            } else {
+                PROC_REAP_RELEASE
+            },
+            None,
+            ptr::null_mut(),
+        )
+    }
+}
+
+const PROC_REAP_STATUS: c_int = 4;
+
+bitflags! {
+    /// `REAPER_STATUS_*`.
+    pub struct ReaperStatusFlags: c_uint {
+        /// The process has acquired reaper status.
+        const OWNED = 1;
+        /// The process is the root of the reaper tree (pid 1).
+        const REALINIT = 2;
+    }
+}
+
+#[repr(C)]
+struct procctl_reaper_status {
+    rs_flags: c_uint,
+    rs_children: c_uint,
+    rs_descendants: c_uint,
+    rs_reaper: RawPid,
+    rs_pid: RawPid,
+    rs_pad0: [c_uint; 15],
+}
+
+/// Reaper status as returned by [`get_reaper_status`].
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct ReaperStatus {
+    /// The flags.
+    pub flags: ReaperStatusFlags,
+    /// The number of children of the reaper among the descendants.
+    pub children: usize,
+    /// The total number of descendants of the reaper(s), not counting descendants of the reaper in the subtree.
+    pub descendants: usize,
+    /// The pid of the reaper for the specified process id.
+    pub reaper: Pid,
+    /// The pid of one reaper child if there are any descendants.
+    pub pid: Pid,
+}
+
+/// Get information about the reaper of the specified process (or the process itself if it is a reaper).
+///
+/// # References
+/// - [FreeBSD: `procctl(PROC_REAP_STATUS,...)`]
+///
+/// [FreeBSD: `procctl(PROC_REAP_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+#[inline]
+pub fn get_reaper_status(process: ProcSelector) -> io::Result<ReaperStatus> {
+    let raw = unsafe { procctl_get_optional::<procctl_reaper_status>(PROC_REAP_STATUS, process) }?;
+    Ok(ReaperStatus {
+        flags: ReaperStatusFlags::from_bits_truncate(raw.rs_flags),
+        children: raw.rs_children as _,
+        descendants: raw.rs_descendants as _,
+        reaper: unsafe { Pid::from_raw(raw.rs_reaper) }.ok_or(io::Errno::RANGE)?,
+        pid: unsafe { Pid::from_raw(raw.rs_pid) }.ok_or(io::Errno::RANGE)?,
+    })
+}
+
+const PROC_REAP_GETPIDS: c_int = 5;
+
+bitflags! {
+    /// `REAPER_PIDINFO_*`.
+    pub struct PidInfoFlags: c_uint {
+        /// This structure was filled by the kernel.
+        const VALID = 1;
+        /// The pid field identifies a direct child of the reaper.
+        const CHILD = 2;
+        /// The reported process is itself a reaper. Descendants of a subordinate reaper are not reported.
+        const REAPER = 4;
+    }
+}
+
+#[repr(C)]
+#[derive(Default, Clone)]
+struct procctl_reaper_pidinfo {
+    pi_pid: RawPid,
+    pi_subtree: RawPid,
+    pi_flags: c_uint,
+    pi_pad0: [c_uint; 15],
+}
+
+#[repr(C)]
+struct procctl_reaper_pids {
+    rp_count: c_uint,
+    rp_pad0: [c_uint; 15],
+    rp_pids: *mut procctl_reaper_pidinfo,
+}
+
+/// A child process of a reaper.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct PidInfo {
+    /// The flags of the process.
+    pub flags: PidInfoFlags,
+    /// The pid of the process.
+    pub pid: Pid,
+    /// The pid of the child of the reaper which is the (grand-..)parent of the process.
+    pub subtree: Pid,
+}
+
+/// Get the list of descendants of the specified reaper process.
+///
+/// # References
+/// - [FreeBSD: `procctl(PROC_REAP_GETPIDS,...)`]
+///
+/// [FreeBSD: `procctl(PROC_REAP_GETPIDS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+pub fn get_reaper_pids(process: ProcSelector) -> io::Result<Vec<PidInfo>> {
+    // Sadly no better way to guarantee that we get all the results than to allocate ~8MB of memory..
+    const PID_MAX: usize = 99999;
+    let mut pids: Vec<procctl_reaper_pidinfo> = vec![Default::default(); PID_MAX];
+    let mut pinfo = procctl_reaper_pids {
+        rp_count: PID_MAX as _,
+        rp_pad0: [0; 15],
+        rp_pids: pids.as_mut_slice().as_mut_ptr(),
+    };
+    unsafe {
+        procctl(
+            PROC_REAP_GETPIDS,
+            process,
+            (&mut pinfo as *mut procctl_reaper_pids).cast(),
+        )?
+    };
+    let mut result = Vec::new();
+    for raw in pids.into_iter() {
+        let flags = PidInfoFlags::from_bits_truncate(raw.pi_flags);
+        if !flags.contains(PidInfoFlags::VALID) {
+            break;
+        }
+        result.push(PidInfo {
+            flags,
+            subtree: unsafe { Pid::from_raw(raw.pi_subtree) }.ok_or(io::Errno::RANGE)?,
+            pid: unsafe { Pid::from_raw(raw.pi_pid) }.ok_or(io::Errno::RANGE)?,
+        });
+    }
+    Ok(result)
+}
+
+const PROC_REAP_KILL: c_int = 6;
+
+bitflags! {
+    /// `REAPER_KILL_*`.
+    struct KillFlags: c_uint {
+        const CHILDREN = 1;
+        const SUBTREE = 2;
+    }
+}
+
+#[repr(C)]
+struct procctl_reaper_kill {
+    rk_sig: c_int,
+    rk_flags: c_uint,
+    rk_subtree: RawPid,
+    rk_killed: c_uint,
+    rk_fpid: RawPid,
+    rk_pad0: [c_uint; 15],
+}
+
+/// Reaper status as returned by [`get_reaper_status`].
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct KillResult {
+    /// The number of processes that were signalled.
+    pub killed: usize,
+    /// The pid of the first process that wasn't successfully signalled.
+    pub first_failed: Option<Pid>,
+}
+
+/// Deliver a signal to some subset of
+///
+/// # References
+/// - [FreeBSD: `procctl(PROC_REAP_KILL,...)`]
+///
+/// [FreeBSD: `procctl(PROC_REAP_KILL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+pub fn reaper_kill(
+    process: ProcSelector,
+    signal: Signal,
+    direct_children: bool,
+    subtree: Option<Pid>,
+) -> io::Result<KillResult> {
+    let mut flags = KillFlags::empty();
+    flags.set(KillFlags::CHILDREN, direct_children);
+    flags.set(KillFlags::SUBTREE, subtree.is_some());
+    let mut req = procctl_reaper_kill {
+        rk_sig: signal as c_int,
+        rk_flags: flags.bits(),
+        rk_subtree: subtree.map(|p| p.as_raw_nonzero().into()).unwrap_or(0),
+        rk_killed: 0,
+        rk_fpid: 0,
+        rk_pad0: [0; 15],
+    };
+    unsafe {
+        procctl(
+            PROC_REAP_KILL,
+            process,
+            (&mut req as *mut procctl_reaper_kill).cast(),
+        )?
+    };
+    Ok(KillResult {
+        killed: req.rk_killed as _,
+        first_failed: if req.rk_fpid == -1 {
+            None
+        } else {
+            unsafe { Pid::from_raw(req.rk_fpid) }
+        },
+    })
 }
