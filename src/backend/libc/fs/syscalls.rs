@@ -638,18 +638,41 @@ unsafe fn utimensat_old(
     target_os = "redox",
     target_os = "wasi",
 )))]
-pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
-    unsafe { ret(c::fchmodat(borrowed_fd(dirfd), c_str(path), mode.bits(), 0)) }
+pub(crate) fn chmodat(
+    dirfd: BorrowedFd<'_>,
+    path: &CStr,
+    mode: Mode,
+    flags: AtFlags,
+) -> io::Result<()> {
+    unsafe {
+        ret(c::fchmodat(
+            borrowed_fd(dirfd),
+            c_str(path),
+            mode.bits() as c::mode_t,
+            flags.bits(),
+        ))
+    }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Result<()> {
+pub(crate) fn chmodat(
+    dirfd: BorrowedFd<'_>,
+    path: &CStr,
+    mode: Mode,
+    flags: AtFlags,
+) -> io::Result<()> {
     // Linux's `fchmodat` does not have a flags argument.
     //
     // Use `c::syscall` rather than `c::fchmodat` because some libc
     // implementations, such as musl, add extra logic to `fchmod` to emulate
     // support for `O_PATH`, which uses `/proc` outside our control and
     // interferes with our own use of `O_PATH`.
+    if flags == AtFlags::SYMLINK_NOFOLLOW {
+        return Err(io::Errno::OPNOTSUPP);
+    }
+    if !flags.is_empty() {
+        return Err(io::Errno::INVAL);
+    }
     unsafe {
         // Pass `mode` as a `c_uint` even if `mode_t` is narrower, since
         // `libc_openat` is declared as a variadic function and narrower

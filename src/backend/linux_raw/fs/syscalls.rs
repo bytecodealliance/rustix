@@ -138,7 +138,18 @@ pub(crate) fn chmod(filename: &CStr, mode: Mode) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn chmodat(dirfd: BorrowedFd<'_>, filename: &CStr, mode: Mode) -> io::Result<()> {
+pub(crate) fn chmodat(
+    dirfd: BorrowedFd<'_>,
+    filename: &CStr,
+    mode: Mode,
+    flags: AtFlags,
+) -> io::Result<()> {
+    if flags == AtFlags::SYMLINK_NOFOLLOW {
+        return Err(io::Errno::OPNOTSUPP);
+    }
+    if !flags.is_empty() {
+        return Err(io::Errno::INVAL);
+    }
     unsafe { ret(syscall_readonly!(__NR_fchmodat, dirfd, filename, mode)) }
 }
 

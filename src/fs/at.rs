@@ -303,11 +303,7 @@ pub fn utimensat<P: path::Arg, Fd: AsFd>(
 
 /// `fchmodat(dirfd, path, mode, 0)`—Sets file or directory permissions.
 ///
-/// The flags argument is fixed to 0, so `AT_SYMLINK_NOFOLLOW` is not
-/// supported. <details>Platform support for this flag varies widely.</details>
-///
-/// This implementation does not support `O_PATH` file descriptors, even on
-/// platforms where the host libc emulates it.
+/// See `fchmodat_with` for a version that does take flags.
 ///
 /// # References
 ///  - [POSIX]
@@ -319,7 +315,30 @@ pub fn utimensat<P: path::Arg, Fd: AsFd>(
 #[inline]
 #[doc(alias = "fchmodat")]
 pub fn chmodat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, mode: Mode) -> io::Result<()> {
-    path.into_with_c_str(|path| backend::fs::syscalls::chmodat(dirfd.as_fd(), path, mode))
+    chmodat_with(dirfd, path, mode, AtFlags::empty())
+}
+
+/// `fchmodat(dirfd, path, mode, flags)`—Sets file or directory permissions.
+///
+/// Platform support for flags varies widely, for example on Linux `AT_SYMLINK_NOFOLLOW`
+/// is not implemented and therefore `io::Errno::OPNOTSUPP` will be returned.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fchmodat.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/fchmodat.2.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+#[doc(alias = "fchmodat_with")]
+pub fn chmodat_with<P: path::Arg, Fd: AsFd>(
+    dirfd: Fd,
+    path: P,
+    mode: Mode,
+    flags: AtFlags,
+) -> io::Result<()> {
+    path.into_with_c_str(|path| backend::fs::syscalls::chmodat(dirfd.as_fd(), path, mode, flags))
 }
 
 /// `fclonefileat(src, dst_dir, dst, flags)`—Efficiently copies between files.
