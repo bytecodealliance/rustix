@@ -104,6 +104,24 @@ bitflags! {
         /// `EPOLLHUP`
         const HUP = c::EPOLLHUP as u32;
 
+        /// `EPOLLRDNORM`
+        const RDNORM = c::EPOLLRDNORM as u32;
+
+        /// `EPOLLRDBAND`
+        const RDBAND = c::EPOLLRDBAND as u32;
+
+        /// `EPOLLWRNORM`
+        const WRNORM = c::EPOLLWRNORM as u32;
+
+        /// `EPOLLWRBAND`
+        const WRBAND = c::EPOLLWRBAND as u32;
+
+        /// `EPOLLMSG`
+        const MSG = c::EPOLLMSG as u32;
+
+        /// `EPOLLRDHUP`
+        const RDHUP = c::EPOLLRDHUP as u32;
+
         /// `EPOLLET`
         const ET = c::EPOLLET as u32;
 
