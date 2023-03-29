@@ -468,3 +468,45 @@ pub fn trap_cap_behavior(process: ProcSelector) -> io::Result<TrapCapBehavior> {
         _ => Err(io::Errno::RANGE),
     }
 }
+
+//
+// PROC_NO_NEW_PRIVS_STATUS/PROC_NO_NEW_PRIVS_CTL
+//
+
+const PROC_NO_NEW_PRIVS_CTL: c_int = 19;
+
+const PROC_NO_NEW_PRIVS_ENABLE: c_int = 1;
+
+/// Enable the `no_new_privs` mode that ignores SUID and SGID bits
+/// on `execve` in the specified process and its future descendants.
+///
+/// This is similar to `set_no_new_privs` on Linux, with the exception
+/// that on FreeBSD there is no argument `no_new_privs` argument as it's
+/// only possible to enable this mode and there's no going back.
+///
+/// # References
+/// - [Linux: `prctl(PR_SET_NO_NEW_PRIVS,...)`]
+/// - [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_CTL,...)`]
+///
+/// [Linux: `prctl(PR_SET_NO_NEW_PRIVS,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
+/// [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_CTL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+#[inline]
+pub fn set_no_new_privs(process: ProcSelector) -> io::Result<()> {
+    unsafe { procctl_set::<c_int>(PROC_NO_NEW_PRIVS_CTL, process, &PROC_NO_NEW_PRIVS_ENABLE) }
+}
+
+const PROC_NO_NEW_PRIVS_STATUS: c_int = 20;
+
+/// Check the `no_new_privs` mode of the specified process.
+///
+/// # References
+/// - [Linux: `prctl(PR_GET_NO_NEW_PRIVS,...)`]
+/// - [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_STATUS,...)`]
+///
+/// [Linux: `prctl(PR_GET_NO_NEW_PRIVS,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
+/// [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+#[inline]
+pub fn no_new_privs(process: ProcSelector) -> io::Result<bool> {
+    unsafe { procctl_get_optional::<c_int>(PROC_NO_NEW_PRIVS_STATUS, process) }
+        .map(|x| x == PROC_NO_NEW_PRIVS_ENABLE)
+}

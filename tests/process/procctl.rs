@@ -35,3 +35,11 @@ fn test_trapcap() {
     set_trap_cap_behavior(None, TrapCapBehavior::Disable).unwrap();
     assert_eq!(trap_cap_behavior(None).unwrap(), TrapCapBehavior::Disable);
 }
+
+#[test]
+fn test_no_new_privs() {
+    assert!(!no_new_privs(None).unwrap());
+    set_no_new_privs(None).unwrap();
+    assert!(no_new_privs(None).unwrap());
+    // No going back but, well, we're not gonna execute SUID binaries from the test suite.
+}
