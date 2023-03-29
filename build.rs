@@ -147,11 +147,6 @@ fn main() {
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_USE_LIBC");
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_RUSTC_DEP_OF_STD");
     println!("cargo:rerun-if-env-changed=CARGO_CFG_MIRI");
-    println!("cargo:rerun-if-env-changed=CARGO_ENCODED_RUSTFLAGS");
-    println!("cargo:rerun-if-env-changed=RUSTC");
-    println!("cargo:rerun-if-env-changed=TARGET");
-    println!("cargo:rerun-if-env-changed=RUSTC_WRAPPER");
-    println!("cargo:rerun-if-env-changed=PROFILE");
 }
 
 /// Link in the desired version of librustix_outline_{arch}.a, containing the
