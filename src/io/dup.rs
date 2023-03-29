@@ -44,8 +44,8 @@ pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 /// set `O_CLOEXEC`, use [`dup3`] with [`DupFlags::CLOEXEC`] on platforms which
 /// support it, or [`fcntl_dupfd_cloexec`]
 ///
-/// For `dup2` to stdin, stdout, and stderr, see [`crate::io::stdio::dup2_stdin`],
-/// [`crate::io::stdio::dup2_stdout`], and [`crate::io::stdio::dup2_stderr`].
+/// For `dup2` to stdin, stdout, and stderr, see [`io::dup2_stdin`],
+/// [`io::dup2_stdout`], and [`io::dup2_stderr`].
 ///
 /// # References
 ///  - [POSIX]

@@ -265,9 +265,7 @@ impl<'a> Iterator for Iter<'a> {
 #[cfg_attr(target_arch = "x86_64", repr(packed))]
 struct Event {
     // Match the layout of `linux_raw_sys::general::epoll_event`. We just use a
-    // `u64` instead of the full union; `Context` implementations will simply
-    // need to deal with casting the value into and out of the `u64`
-    // themselves.
+    // `u64` instead of the full union.
     event_flags: EventFlags,
     data: u64,
 }
