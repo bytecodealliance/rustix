@@ -24,6 +24,7 @@ pub(crate) const SO_LINGER: i32 = WinSock::SO_LINGER as _;
 pub(crate) const SOL_SOCKET: i32 = WinSock::SOL_SOCKET as _;
 pub(crate) const SO_RCVTIMEO: i32 = WinSock::SO_RCVTIMEO as _;
 pub(crate) const SO_SNDTIMEO: i32 = WinSock::SO_SNDTIMEO as _;
+pub(crate) const SO_ERROR: i32 = WinSock::SO_ERROR as _;
 pub(crate) const IP_TTL: i32 = WinSock::IP_TTL as _;
 pub(crate) const TCP_NODELAY: i32 = WinSock::TCP_NODELAY as _;
 pub(crate) const IP_ADD_MEMBERSHIP: i32 = WinSock::IP_ADD_MEMBERSHIP as _;

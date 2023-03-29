@@ -226,6 +226,28 @@ pub fn get_socket_timeout<Fd: AsFd>(fd: Fd, id: Timeout) -> io::Result<Option<Du
     backend::net::syscalls::sockopt::get_socket_timeout(fd.as_fd(), id)
 }
 
+/// `getsockopt(fd, SOL_SOCKET, SO_ERROR)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `sys/socket.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `socket`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `SOL_SOCKET` options]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `sys/socket.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_socket.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `socket`]: https://man7.org/linux/man-pages/man7/socket.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
+#[inline]
+#[doc(alias = "SO_ERROR")]
+pub fn get_socket_error<Fd: AsFd>(fd: Fd) -> io::Result<Result<(), crate::io::Errno>> {
+    backend::net::syscalls::sockopt::get_socket_error(fd.as_fd())
+}
+
 /// `setsockopt(fd, IPPROTO_IP, IP_TTL, ttl)`
 ///
 /// # References
