@@ -39,6 +39,8 @@ impl Event {
                 c::EVFILT_PROC,
                 flags.bits(),
             ),
+            #[cfg(feature = "process")]
+            EventFilter::Signal { signal, times: _ } => (signal as _, c::EVFILT_SIGNAL, 0),
             EventFilter::Timer(timer) => {
                 #[cfg(any(apple, target_os = "freebsd", target_os = "netbsd"))]
                 let (data, fflags) = match timer {
@@ -116,6 +118,11 @@ impl Event {
                 pid: unsafe { crate::process::Pid::from_raw(self.inner.ident as _) }.unwrap(),
                 flags: ProcessEvents::from_bits_truncate(self.inner.fflags),
             },
+            #[cfg(feature = "process")]
+            c::EVFILT_SIGNAL => EventFilter::Signal {
+                signal: crate::process::Signal::from_raw(self.inner.ident as _).unwrap(),
+                times: self.inner.data as _,
+            },
             c::EVFILT_TIMER => EventFilter::Timer({
                 let (data, fflags) = (self.inner.data, self.inner.fflags);
                 #[cfg(any(apple, target_os = "freebsd", target_os = "netbsd"))]
@@ -177,6 +184,17 @@ pub enum EventFilter {
 
         /// The flags for this event.
         flags: ProcessEvents,
+    },
+
+    /// A signal filter.
+    #[cfg(feature = "process")]
+    Signal {
+        /// The signal number we waited on.
+        signal: crate::process::Signal,
+
+        /// The number of times the signal has been
+        /// received since the last call to kevent.
+        times: usize,
     },
 
     /// A timer filter.
@@ -351,6 +369,9 @@ pub fn kqueue() -> io::Result<OwnedFd> {
 
 /// `kevent(kqueue, changelist, eventlist, timeout)`—Wait for events on a
 /// `kqueue`.
+///
+/// Note: in order to receive events, make sure to allocate capacity in the eventlist!
+/// Otherwise, the function will return immediately.
 ///
 /// # Safety
 ///
