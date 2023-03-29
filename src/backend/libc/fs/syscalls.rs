@@ -665,8 +665,8 @@ pub(crate) fn chmodat(
     //
     // Use `c::syscall` rather than `c::fchmodat` because some libc
     // implementations, such as musl, add extra logic to `fchmod` to emulate
-    // support for `O_PATH`, which uses `/proc` outside our control and
-    // interferes with our own use of `O_PATH`.
+    // support for `AT_SYMLINK_NOFOLLOW`, which uses `/proc` outside our
+    // control.
     if flags == AtFlags::SYMLINK_NOFOLLOW {
         return Err(io::Errno::OPNOTSUPP);
     }

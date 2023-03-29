@@ -320,8 +320,9 @@ pub fn chmodat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, mode: Mode) -> io::Re
 
 /// `fchmodat(dirfd, path, mode, flags)`—Sets file or directory permissions.
 ///
-/// Platform support for flags varies widely, for example on Linux `AT_SYMLINK_NOFOLLOW`
-/// is not implemented and therefore `io::Errno::OPNOTSUPP` will be returned.
+/// Platform support for flags varies widely, for example on Linux
+/// [`AtFlags::SYMLINK_NOFOLLOW`] is not implemented and therefore
+/// [`io::Errno::OPNOTSUPP`] will be returned.
 ///
 /// # References
 ///  - [POSIX]

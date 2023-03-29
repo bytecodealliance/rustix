@@ -285,8 +285,7 @@ impl<'a> Iterator for Iter<'a> {
 )]
 struct Event {
     // Match the layout of `c::epoll_event`. We just use a `u64` instead of
-    // the full union; `Context` implementations will simply need to deal with
-    // casting the value into and out of the `u64` themselves.
+    // the full union.
     event_flags: EventFlags,
     data: u64,
 }
