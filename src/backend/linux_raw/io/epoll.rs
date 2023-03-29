@@ -100,6 +100,24 @@ bitflags! {
         /// `EPOLLHUP`
         const HUP = linux_raw_sys::general::EPOLLHUP as u32;
 
+        /// `EPOLLRDNORM`
+        const RDNORM = linux_raw_sys::general::EPOLLRDNORM as u32;
+
+        /// `EPOLLRDBAND`
+        const RDBAND = linux_raw_sys::general::EPOLLRDBAND as u32;
+
+        /// `EPOLLWRNORM`
+        const WRNORM = linux_raw_sys::general::EPOLLWRNORM as u32;
+
+        /// `EPOLLWRBAND`
+        const WRBAND = linux_raw_sys::general::EPOLLWRBAND as u32;
+
+        /// `EPOLLMSG`
+        const MSG = linux_raw_sys::general::EPOLLMSG as u32;
+
+        /// `EPOLLRDHUP`
+        const RDHUP = linux_raw_sys::general::EPOLLRDHUP as u32;
+
         /// `EPOLLET`
         const ET = linux_raw_sys::general::EPOLLET as u32;
 
