@@ -32,7 +32,7 @@ use linux_raw_sys::general::{
     epoll_event, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, F_DUPFD_CLOEXEC, F_GETFD, F_SETFD,
     UIO_MAXIOV,
 };
-use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET, FIONBIO, FIONREAD, TIOCEXCL, TIOCNXCL};
+use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET, FICLONE, FIONBIO, FIONREAD, TIOCEXCL, TIOCNXCL};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use {
     super::super::conv::{opt_ref, size_of},
@@ -350,6 +350,11 @@ pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
         ret(syscall!(__NR_ioctl, fd, c_uint(BLKPBSZGET), &mut result))?;
         Ok(result.assume_init() as u32)
     }
+}
+
+#[inline]
+pub(crate) fn ioctl_ficlone(fd: BorrowedFd<'_>, src_fd: BorrowedFd<'_>) -> io::Result<()> {
+    unsafe { ret(syscall_readonly!(__NR_ioctl, fd, c_uint(FICLONE), src_fd)) }
 }
 
 #[cfg(all(feature = "fs", feature = "net"))]

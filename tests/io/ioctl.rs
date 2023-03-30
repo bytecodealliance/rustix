@@ -13,3 +13,15 @@ fn test_ioctls() {
         file.metadata().unwrap().len()
     );
 }
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[test]
+fn test_ioctl_fioclone() {
+    let src = std::fs::File::open("Cargo.toml").unwrap();
+    let dest = tempfile::tempfile().unwrap();
+    rustix::io::ioctl_ficlone(&dest, &dest).unwrap_err();
+    rustix::io::ioctl_ficlone(&src, &src).unwrap_err();
+
+    // Not all filesystems support this, so we can't assert that it passes.
+    rustix::io::ioctl_ficlone(&dest, &src).ok();
+}
