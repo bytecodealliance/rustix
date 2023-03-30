@@ -237,7 +237,11 @@ unsafe fn clock_gettime_dynamic_old(id: c::clockid_t) -> io::Result<Timespec> {
     })
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "redox",
+    target_os = "wasi",
+    all(apple, not(target_os = "macos"))
+)))]
 #[inline]
 pub(crate) fn clock_settime(id: ClockId, timespec: Timespec) -> io::Result<()> {
     #[cfg(all(
@@ -264,6 +268,11 @@ pub(crate) fn clock_settime(id: ClockId, timespec: Timespec) -> io::Result<()> {
     }
 }
 
+#[cfg(not(any(
+    target_os = "redox",
+    target_os = "wasi",
+    all(apple, not(target_os = "macos"))
+)))]
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",

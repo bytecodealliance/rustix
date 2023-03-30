@@ -9,7 +9,11 @@
 mod dynamic_clocks;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 mod monotonic;
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "redox",
+    target_os = "wasi",
+    all(apple, not(target_os = "macos"))
+)))]
 mod settime;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod timerfd;

@@ -14,7 +14,7 @@ pub use backend::time::types::{ClockId, DynamicClockId};
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_getres.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/clock_getres.2.html
-#[cfg(any(not(any(target_os = "redox", target_os = "wasi"))))]
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[inline]
 #[must_use]
 pub fn clock_getres(id: ClockId) -> Timespec {
@@ -67,7 +67,11 @@ pub fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timespec> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_settime.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/clock_settime.2.html
-#[cfg(any(not(any(target_os = "redox", target_os = "wasi"))))]
+#[cfg(not(any(
+    target_os = "redox",
+    target_os = "wasi",
+    all(apple, not(target_os = "macos"))
+)))]
 #[inline]
 #[must_use]
 pub fn clock_settime(id: ClockId, timespec: Timespec) -> io::Result<()> {
