@@ -67,6 +67,47 @@ unsafe fn clock_getres_old(which_clock: ClockId, result: &mut MaybeUninit<__kern
 
 #[cfg(feature = "time")]
 #[inline]
+pub(crate) fn clock_settime(which_clock: ClockId, timespec: __kernel_timespec) -> io::Result<()> {
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        match ret(syscall_readonly!(
+            __NR_clock_settime64,
+            which_clock,
+            by_ref(&timespec)
+        )) {
+            Err(io::Errno::NOSYS) => clock_settime_old(which_clock, timespec),
+            otherwise => otherwise,
+        }
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_clock_settime,
+            which_clock,
+            by_ref(&timespec)
+        ))
+    }
+}
+
+#[cfg(feature = "time")]
+#[cfg(target_pointer_width = "32")]
+unsafe fn clock_settime_old(which_clock: ClockId, timespec: __kernel_timespec) -> io::Result<()> {
+    let old_timespec = __kernel_old_timespec {
+        tv_sec: timespec
+            .tv_sec
+            .try_into()
+            .map_err(|_| io::Errno::OVERFLOW)?,
+        tv_nsec: timespec.tv_nsec as _,
+    };
+    ret(syscall_readonly!(
+        __NR_clock_settime,
+        which_clock,
+        by_ref(&old_timespec)
+    ))
+}
+
+#[cfg(feature = "time")]
+#[inline]
 pub(crate) fn timerfd_create(clockid: TimerfdClockId, flags: TimerfdFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(syscall!(__NR_timerfd_create, clockid, flags)) }
 }

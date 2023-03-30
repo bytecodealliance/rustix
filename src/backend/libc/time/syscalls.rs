@@ -28,6 +28,11 @@ weak!(fn __clock_gettime64(c::clockid_t, *mut LibcTimespec) -> c::c_int);
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
+weak!(fn __clock_settime64(c::clockid_t, *const LibcTimespec) -> c::c_int);
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu",
+))]
 weak!(fn __clock_getres64(c::clockid_t, *mut LibcTimespec) -> c::c_int);
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
@@ -230,6 +235,59 @@ unsafe fn clock_gettime_dynamic_old(id: c::clockid_t) -> io::Result<Timespec> {
         tv_sec: old_timespec.tv_sec.into(),
         tv_nsec: old_timespec.tv_nsec.into(),
     })
+}
+
+#[cfg(not(any(
+    target_os = "redox",
+    target_os = "wasi",
+    all(apple, not(target_os = "macos"))
+)))]
+#[inline]
+pub(crate) fn clock_settime(id: ClockId, timespec: Timespec) -> io::Result<()> {
+    #[cfg(all(
+        any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+        target_env = "gnu",
+    ))]
+    unsafe {
+        if let Some(libc_clock_settime) = __clock_settime64.get() {
+            let mut new_timespec = core::mem::zeroed::<LibcTimespec>();
+            new_timespec.tv_sec = timespec.tv_sec;
+            new_timespec.tv_nsec = timespec.tv_nsec as _;
+            ret(libc_clock_settime(id as c::clockid_t, &new_timespec))
+        } else {
+            clock_settime_old(id, timespec)
+        }
+    }
+
+    #[cfg(not(all(
+        any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+        target_env = "gnu",
+    )))]
+    unsafe {
+        ret(c::clock_settime(id as c::clockid_t, &timespec))
+    }
+}
+
+#[cfg(not(any(
+    target_os = "redox",
+    target_os = "wasi",
+    all(apple, not(target_os = "macos"))
+)))]
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu",
+))]
+#[must_use]
+unsafe fn clock_settime_old(id: ClockId, timespec: Timespec) -> io::Result<()> {
+    use core::convert::TryInto;
+    let old_timespec = c::timespec {
+        tv_sec: timespec
+            .tv_sec
+            .try_into()
+            .map_err(|_| io::Errno::OVERFLOW)?,
+        tv_nsec: timespec.tv_nsec as _,
+    };
+    ret(c::clock_settime(id as c::clockid_t, &old_timespec))
 }
 
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
