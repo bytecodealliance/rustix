@@ -329,3 +329,15 @@ pub fn ftruncate<Fd: AsFd>(fd: Fd, length: u64) -> io::Result<()> {
 pub fn flock<Fd: AsFd>(fd: Fd, operation: FlockOperation) -> io::Result<()> {
     backend::fs::syscalls::flock(fd.as_fd(), operation)
 }
+
+/// `syncfs(fd)`—Flush cached filesystem data.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/syncfs.2.html
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub fn syncfs<Fd: AsFd>(fd: Fd) -> io::Result<()> {
+    backend::fs::syscalls::syncfs(fd.as_fd())
+}
