@@ -40,6 +40,29 @@ pub fn set_thread_uid(uid: Uid) -> io::Result<()> {
     backend::thread::syscalls::setuid_thread(uid)
 }
 
+/// `setresuid(ruid, euid, suid)`
+///
+/// # Warning
+///
+/// This is not the setresxid you are looking for... POSIX requires xids to be
+/// process granular, but on Linux they are per-thread. Thus, this call only
+/// changes the xid for the current *thread*, not the entire process even
+/// though that is in violation of the POSIX standard.
+///
+/// For details on this distinction, see the C library vs. kernel differences
+/// in the [man page][linux_notes] and the notes in [`set_thread_uid`]. This
+/// call implements the kernel behavior.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/setresuid.2.html
+/// [linux_notes]: https://man7.org/linux/man-pages/man2/setresuid.2.html#NOTES
+#[inline]
+pub fn set_thread_res_uid(ruid: Uid, euid: Uid, suid: Uid) -> io::Result<()> {
+    backend::thread::syscalls::setresuid_thread(ruid, euid, suid)
+}
+
 /// `setgid(gid)`
 ///
 /// # Warning
@@ -62,4 +85,27 @@ pub fn set_thread_uid(uid: Uid) -> io::Result<()> {
 #[inline]
 pub fn set_thread_gid(gid: Gid) -> io::Result<()> {
     backend::thread::syscalls::setgid_thread(gid)
+}
+
+/// `setresgid(rgid, egid, sgid)`
+///
+/// # Warning
+///
+/// This is not the setresxid you are looking for... POSIX requires xids to be
+/// process granular, but on Linux they are per-thread. Thus, this call only
+/// changes the xid for the current *thread*, not the entire process even
+/// though that is in violation of the POSIX standard.
+///
+/// For details on this distinction, see the C library vs. kernel differences
+/// in the [man page][linux_notes] and the notes in [`set_thread_gid`]. This
+/// call implements the kernel behavior.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/setresgid.2.html
+/// [linux_notes]: https://man7.org/linux/man-pages/man2/setresgid.2.html#NOTES
+#[inline]
+pub fn set_thread_res_gid(rgid: Gid, egid: Gid, sgid: Gid) -> io::Result<()> {
+    backend::thread::syscalls::setresgid_thread(rgid, egid, sgid)
 }
