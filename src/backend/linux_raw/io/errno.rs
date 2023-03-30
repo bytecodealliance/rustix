@@ -236,6 +236,13 @@ pub(in crate::backend) fn decode_usize_infallible<Num: RetNumber>(raw: RetReg<Nu
     raw.decode_usize()
 }
 
+/// Return the contained `c_int` value.
+#[cfg(not(debug_assertions))]
+#[inline]
+pub(in crate::backend) fn decode_c_uint_infallible<Num: RetNumber>(raw: RetReg<Num>) -> c::c_uint {
+    raw.decode_c_uint()
+}
+
 impl Errno {
     /// `EACCES`
     #[doc(alias = "ACCES")]

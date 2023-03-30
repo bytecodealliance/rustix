@@ -15,12 +15,12 @@
 
 use super::c;
 use super::fd::{AsRawFd, BorrowedFd, FromRawFd, RawFd};
-#[cfg(not(debug_assertions))]
-use super::io::errno::decode_usize_infallible;
 #[cfg(feature = "runtime")]
 use super::io::errno::try_decode_error;
 #[cfg(target_pointer_width = "64")]
 use super::io::errno::try_decode_u64;
+#[cfg(not(debug_assertions))]
+use super::io::errno::{decode_c_uint_infallible, decode_usize_infallible};
 use super::io::errno::{
     try_decode_c_int, try_decode_c_uint, try_decode_raw_fd, try_decode_usize, try_decode_void,
     try_decode_void_star,
@@ -799,6 +799,25 @@ pub(super) unsafe fn ret_usize_infallible(raw: RetReg<R0>) -> usize {
     #[cfg(not(debug_assertions))]
     {
         decode_usize_infallible(raw)
+    }
+}
+
+/// Convert a `c_uint` returned from a syscall that effectively always
+/// returns a `c_uint`.
+///
+/// # Safety
+///
+/// This function must only be used with return values from infallible
+/// syscalls.
+#[inline]
+pub(super) unsafe fn ret_c_uint_infallible(raw: RetReg<R0>) -> c::c_uint {
+    #[cfg(debug_assertions)]
+    {
+        try_decode_c_uint(raw).unwrap()
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        decode_c_uint_infallible(raw)
     }
 }
 
