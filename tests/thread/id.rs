@@ -11,6 +11,18 @@ fn test_setuid() {
 }
 
 #[test]
+fn test_setresuid() {
+    let uid = process::getuid();
+    thread::set_thread_res_uid(uid, uid, uid).unwrap();
+}
+
+#[test]
 fn test_setgid() {
     thread::set_thread_gid(process::getgid()).unwrap();
+}
+
+#[test]
+fn test_setresgid() {
+    let gid = process::getgid();
+    thread::set_thread_res_gid(gid, gid, gid).unwrap();
 }

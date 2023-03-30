@@ -18,7 +18,7 @@ pub use clock::*;
 #[cfg(linux_raw)]
 pub use futex::{futex, FutexFlags, FutexOperation};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-pub use id::{gettid, set_thread_gid, set_thread_uid};
+pub use id::{gettid, set_thread_gid, set_thread_res_gid, set_thread_res_uid, set_thread_uid};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use libcap::{capabilities, set_capabilities, CapabilityFlags, CapabilitySets};
 #[cfg(any(target_os = "android", target_os = "linux"))]

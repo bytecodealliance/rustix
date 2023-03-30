@@ -321,6 +321,38 @@ pub(crate) fn setuid_thread(uid: crate::process::Uid) -> io::Result<()> {
 }
 
 #[inline]
+pub(crate) fn setresuid_thread(
+    ruid: crate::process::Uid,
+    euid: crate::process::Uid,
+    suid: crate::process::Uid,
+) -> io::Result<()> {
+    #[cfg(any(target_arch = "x86", target_arch = "arm", target_arch = "sparc"))]
+    unsafe {
+        ret(syscall_readonly!(__NR_setresuid32, ruid, euid, suid))
+    }
+    #[cfg(not(any(target_arch = "x86", target_arch = "arm", target_arch = "sparc")))]
+    unsafe {
+        ret(syscall_readonly!(__NR_setresuid, ruid, euid, suid))
+    }
+}
+
+#[inline]
 pub(crate) fn setgid_thread(gid: crate::process::Gid) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_setgid, gid)) }
+}
+
+#[inline]
+pub(crate) fn setresgid_thread(
+    rgid: crate::process::Gid,
+    egid: crate::process::Gid,
+    sgid: crate::process::Gid,
+) -> io::Result<()> {
+    #[cfg(any(target_arch = "x86", target_arch = "arm", target_arch = "sparc"))]
+    unsafe {
+        ret(syscall_readonly!(__NR_setresgid32, rgid, egid, sgid))
+    }
+    #[cfg(not(any(target_arch = "x86", target_arch = "arm", target_arch = "sparc")))]
+    unsafe {
+        ret(syscall_readonly!(__NR_setresgid, rgid, egid, sgid))
+    }
 }
