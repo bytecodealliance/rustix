@@ -3,9 +3,9 @@
 use super::super::c;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use super::super::conv::borrowed_fd;
-#[cfg(not(target_os = "wasi"))]
-use super::super::conv::ret_pid_t;
 use super::super::conv::{c_str, ret, ret_c_int, ret_discarded_char_ptr};
+#[cfg(not(target_os = "wasi"))]
+use super::super::conv::{ret_infallible, ret_pid_t};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::{syscall_ret, syscall_ret_u32};
 #[cfg(any(
@@ -20,23 +20,24 @@ use crate::fd::BorrowedFd;
 #[cfg(target_os = "linux")]
 use crate::fd::{AsRawFd, OwnedFd};
 use crate::ffi::CStr;
+#[cfg(feature = "fs")]
+use crate::fs::Mode;
 use crate::io;
 #[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 use crate::process::{WaitId, WaitidOptions, WaitidStatus};
 use core::mem::MaybeUninit;
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-use {
-    super::super::conv::ret_infallible,
-    super::super::offset::{libc_getrlimit, libc_rlimit, libc_setrlimit, LIBC_RLIM_INFINITY},
-    crate::process::{Resource, Rlimit},
-    core::convert::TryInto,
-};
 #[cfg(target_os = "linux")]
 use {super::super::conv::syscall_ret_owned_fd, crate::process::PidfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use {
     super::super::offset::libc_prlimit,
     crate::process::{Cpuid, MembarrierCommand, MembarrierQuery},
+};
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+use {
+    super::super::offset::{libc_getrlimit, libc_rlimit, libc_setrlimit, LIBC_RLIM_INFINITY},
+    crate::process::{Resource, Rlimit},
+    core::convert::TryInto,
 };
 #[cfg(not(target_os = "wasi"))]
 use {
@@ -220,9 +221,17 @@ pub(crate) fn sched_yield() {
 pub(crate) fn uname() -> RawUname {
     let mut uname = MaybeUninit::<RawUname>::uninit();
     unsafe {
-        ret(c::uname(uname.as_mut_ptr())).unwrap();
+        ret_infallible(c::uname(uname.as_mut_ptr()));
         uname.assume_init()
     }
+}
+
+#[cfg(not(target_os = "wasi"))]
+#[cfg(feature = "fs")]
+#[inline]
+pub(crate) fn umask(mask: Mode) -> Mode {
+    // TODO: Use `from_bits_retain` when we switch to bitflags 2.0.
+    unsafe { Mode::from_bits_truncate(c::umask(mask.bits() as _) as _) }
 }
 
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]

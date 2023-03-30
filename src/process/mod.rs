@@ -27,6 +27,8 @@ mod rlimit;
 ))]
 mod sched;
 mod sched_yield;
+#[cfg(not(target_os = "wasi"))] // WASI doesn't have umask.
+mod umask;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.
 mod uname;
 #[cfg(not(target_os = "wasi"))]
@@ -59,6 +61,8 @@ pub use rlimit::*;
 ))]
 pub use sched::*;
 pub use sched_yield::sched_yield;
+#[cfg(not(target_os = "wasi"))]
+pub use umask::*;
 #[cfg(not(target_os = "wasi"))]
 pub use uname::{uname, Uname};
 #[cfg(not(target_os = "wasi"))]

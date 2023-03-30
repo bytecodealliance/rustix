@@ -28,6 +28,9 @@ use linux_raw_sys::general::{
     __kernel_gid_t, __kernel_pid_t, __kernel_uid_t, membarrier_cmd, membarrier_cmd_flag, rlimit,
     rlimit64, PRIO_PGRP, PRIO_PROCESS, PRIO_USER, RLIM64_INFINITY, RLIM_INFINITY,
 };
+#[cfg(not(target_os = "wasi"))]
+#[cfg(feature = "fs")]
+use {super::super::conv::ret_c_uint_infallible, crate::fs::Mode};
 
 #[inline]
 pub(crate) fn chdir(filename: &CStr) -> io::Result<()> {
@@ -236,8 +239,17 @@ pub(crate) fn sched_yield() {
 pub(crate) fn uname() -> RawUname {
     let mut uname = MaybeUninit::<RawUname>::uninit();
     unsafe {
-        ret(syscall!(__NR_uname, &mut uname)).unwrap();
+        ret_infallible(syscall!(__NR_uname, &mut uname));
         uname.assume_init()
+    }
+}
+
+#[cfg(feature = "fs")]
+#[inline]
+pub(crate) fn umask(mode: Mode) -> Mode {
+    unsafe {
+        // TODO: Use `from_bits_retain` when we switch to bitflags 2.0.
+        Mode::from_bits_truncate(ret_c_uint_infallible(syscall_readonly!(__NR_umask, mode)))
     }
 }
 
