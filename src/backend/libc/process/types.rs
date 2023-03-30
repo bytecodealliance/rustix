@@ -201,6 +201,19 @@ pub enum Signal {
     /// `SIGSYS`, aka `SIGUNUSED`
     #[doc(alias = "Unused")]
     Sys = c::SIGSYS,
+    /// `SIGEMT`
+    #[cfg(bsd)]
+    Emt = c::SIGEMT,
+    /// `SIGINFO`
+    #[cfg(bsd)]
+    Info = c::SIGINFO,
+    /// `SIGTHR`
+    #[cfg(target_os = "freebsd")]
+    #[doc(alias = "Lwp")]
+    Thr = c::SIGTHR,
+    /// `SIGLIBRT`
+    #[cfg(target_os = "freebsd")]
+    Librt = c::SIGLIBRT,
 }
 
 #[cfg(not(target_os = "wasi"))]
@@ -256,6 +269,14 @@ impl Signal {
             #[cfg(not(any(bsd, target_os = "haiku")))]
             c::SIGPWR => Some(Self::Power),
             c::SIGSYS => Some(Self::Sys),
+            #[cfg(bsd)]
+            c::SIGEMT => Some(Self::Emt),
+            #[cfg(bsd)]
+            c::SIGINFO => Some(Self::Info),
+            #[cfg(target_os = "freebsd")]
+            c::SIGTHR => Some(Self::Thr),
+            #[cfg(target_os = "freebsd")]
+            c::SIGLIBRT => Some(Self::Librt),
             _ => None,
         }
     }
