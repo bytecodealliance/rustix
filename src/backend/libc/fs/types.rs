@@ -152,6 +152,32 @@ impl Mode {
     }
 }
 
+impl From<RawMode> for Mode {
+    /// Support conversions from raw mode values to `Mode`.
+    ///
+    /// ```
+    /// use rustix::fs::{RawMode, Mode};
+    /// assert_eq!(Mode::from(0o700), Mode::RWXU);
+    /// ```
+    #[inline]
+    fn from(st_mode: RawMode) -> Self {
+        Self::from_raw_mode(st_mode)
+    }
+}
+
+impl From<Mode> for RawMode {
+    /// Support conversions from `Mode to raw mode values.
+    ///
+    /// ```
+    /// use rustix::fs::{RawMode, Mode};
+    /// assert_eq!(RawMode::from(Mode::RWXU), 0o700);
+    /// ```
+    #[inline]
+    fn from(mode: Mode) -> Self {
+        mode.as_raw_mode()
+    }
+}
+
 bitflags! {
     /// `O_*` constants for use with [`openat`].
     ///
