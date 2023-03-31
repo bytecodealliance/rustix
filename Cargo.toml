@@ -193,7 +193,7 @@ all-apis = [
 use-libc-auxv = ["libc"]
 
 # Expose io-lifetimes' features for third-party crate impls.
-# Some of these are temporarily disabled, until the upstream creates add the
+# Some of these are temporarily disabled, until the upstream crates add the
 # needed trait implementations.
 #async-std = ["io-lifetimes/async-std"]
 #tokio = ["io-lifetimes/tokio"]

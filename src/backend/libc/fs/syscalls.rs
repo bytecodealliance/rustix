@@ -959,6 +959,25 @@ pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result
     unsafe { ret(c::flock(borrowed_fd(fd), operation as c::c_int)) }
 }
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) fn syncfs(fd: BorrowedFd<'_>) -> io::Result<()> {
+    unsafe { ret(c::syncfs(borrowed_fd(fd))) }
+}
+
+#[cfg(not(any(solarish, target_os = "redox", target_os = "wasi")))]
+pub(crate) fn sync() {
+    // TODO: Remove this when upstream libc adds `sync`.
+    #[cfg(target_os = "android")]
+    unsafe {
+        syscall_ret(c::syscall(c::SYS_sync)).ok();
+    }
+
+    #[cfg(not(target_os = "android"))]
+    unsafe {
+        c::sync()
+    }
+}
+
 pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     // 32-bit and mips64 Linux: `struct stat64` is not y2038 compatible; use
     // `statx`.

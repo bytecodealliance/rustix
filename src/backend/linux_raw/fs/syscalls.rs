@@ -10,7 +10,7 @@
 use super::super::c;
 use super::super::conv::{
     by_ref, c_int, c_uint, dev_t, oflags_for_open_how, opt_mut, pass_usize, raw_fd, ret, ret_c_int,
-    ret_c_uint, ret_owned_fd, ret_usize, size_of, slice_mut, zero,
+    ret_c_uint, ret_infallible, ret_owned_fd, ret_usize, size_of, slice_mut, zero,
 };
 #[cfg(target_pointer_width = "64")]
 use super::super::conv::{loff_t, loff_t_from_u64, ret_u64};
@@ -421,7 +421,23 @@ pub(crate) fn fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
 
 #[inline]
 pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result<()> {
-    unsafe { ret(syscall!(__NR_flock, fd, c_uint(operation as c::c_uint))) }
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_flock,
+            fd,
+            c_uint(operation as c::c_uint)
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn syncfs(fd: BorrowedFd<'_>) -> io::Result<()> {
+    unsafe { ret(syscall_readonly!(__NR_syncfs, fd)) }
+}
+
+#[inline]
+pub(crate) fn sync() {
+    unsafe { ret_infallible(syscall_readonly!(__NR_sync)) }
 }
 
 #[inline]
