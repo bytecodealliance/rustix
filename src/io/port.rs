@@ -34,9 +34,8 @@ impl Event {
 /// `port_create()`—Creates a new port.
 ///
 /// # References
-///
-/// - [OpenSolaris]
-/// - [illumos]
+///  - [OpenSolaris]
+///  - [illumos]
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_create/
 /// [illumos]: https://illumos.org/man/3C/port_create
@@ -54,9 +53,8 @@ pub fn port_create() -> io::Result<OwnedFd> {
 /// it is removed via `port_dissociate_fd`.
 ///
 /// # References
-///
-/// - [OpenSolaris]
-/// - [illumos]
+///  - [OpenSolaris]
+///  - [illumos]
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_associate/
 /// [illumos]: https://illumos.org/man/3C/port_associate
@@ -84,9 +82,8 @@ pub unsafe fn port_associate_fd(
 /// associated with the port via [`port_associate_fd`].
 ///
 /// # References
-///
-/// - [OpenSolaris]
-/// - [illumos]
+///  - [OpenSolaris]
+///  - [illumos]
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_dissociate
 /// [illumos]: https://illumos.org/man/3C/port_dissociate
@@ -97,9 +94,8 @@ pub unsafe fn port_dissociate_fd(port: impl AsFd, object: impl AsRawFd) -> io::R
 /// `port_get(port, timeout)`—Gets an event from a port.
 ///
 /// # References
-///
-/// - [OpenSolaris]
-/// - [illumos]
+///  - [OpenSolaris]
+///  - [illumos]
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_get/
 /// [illumos]: https://illumos.org/man/3C/port_get
@@ -116,9 +112,8 @@ pub fn port_get(port: impl AsFd, timeout: Option<Duration>) -> io::Result<Event>
 /// port.
 ///
 /// # References
-///
-/// - [OpenSolaris]
-/// - [illumos]
+///  - [OpenSolaris]
+///  - [illumos]
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_getn/
 /// [illumos]: https://illumos.org/man/3C/port_getn
@@ -146,9 +141,8 @@ pub fn port_getn(
 /// `port_send(port, events, userdata)`—Sends an event to a port.
 ///
 /// # References
-///
-/// - [OpenSolaris]
-/// - [illumos]
+///  - [OpenSolaris]
+///  - [illumos]
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_send/
 /// [illumos]: https://illumos.org/man/3C/port_send

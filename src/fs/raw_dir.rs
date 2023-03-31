@@ -215,7 +215,9 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     }
 
     /// Returns true if the internal buffer is empty and will be refilled when
-    /// calling [`next`][Self::next].
+    /// calling [`next`].
+    ///
+    /// [`next`]: Self::next
     pub fn is_buffer_empty(&self) -> bool {
         self.offset >= self.initialized
     }

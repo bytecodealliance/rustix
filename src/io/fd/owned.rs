@@ -198,7 +198,7 @@ pub trait AsFd {
     ///
     /// # Example
     ///
-    /// ```rust,no_run
+    /// ```no_run
     /// # #![feature(io_safety)]
     /// use std::fs::File;
     /// # use std::io;

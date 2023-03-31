@@ -36,7 +36,7 @@ const PR_GET_KEEPCAPS: c_int = 7;
 /// Get the current state of the calling thread's `keep capabilities` flag.
 ///
 /// # References
-/// - [`prctl(PR_GET_KEEPCAPS,...)`]
+///  - [`prctl(PR_GET_KEEPCAPS,...)`]
 ///
 /// [`prctl(PR_GET_KEEPCAPS,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -49,7 +49,7 @@ const PR_SET_KEEPCAPS: c_int = 8;
 /// Set the state of the calling thread's `keep capabilities` flag.
 ///
 /// # References
-/// - [`prctl(PR_SET_KEEPCAPS,...)`]
+///  - [`prctl(PR_SET_KEEPCAPS,...)`]
 ///
 /// [`prctl(PR_SET_KEEPCAPS,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -66,7 +66,7 @@ const PR_GET_NAME: c_int = 16;
 /// Get the name of the calling thread.
 ///
 /// # References
-/// - [`prctl(PR_GET_NAME,...)`]
+///  - [`prctl(PR_GET_NAME,...)`]
 ///
 /// [`prctl(PR_GET_NAME,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -83,7 +83,7 @@ const PR_SET_NAME: c_int = 15;
 /// Set the name of the calling thread.
 ///
 /// # References
-/// - [`prctl(PR_SET_NAME,...)`]
+///  - [`prctl(PR_SET_NAME,...)`]
 ///
 /// [`prctl(PR_SET_NAME,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -140,7 +140,7 @@ impl TryFrom<i32> for SecureComputingMode {
 /// of obtaining the same information, without the risk that the process is killed; see `proc(5)`.
 ///
 /// # References
-/// - [`prctl(PR_GET_SECCOMP,...)`]
+///  - [`prctl(PR_GET_SECCOMP,...)`]
 ///
 /// [`prctl(PR_GET_SECCOMP,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -155,7 +155,7 @@ const PR_SET_SECCOMP: c_int = 22;
 /// available system calls.
 ///
 /// # References
-/// - [`prctl(PR_SET_SECCOMP,...)`]
+///  - [`prctl(PR_SET_SECCOMP,...)`]
 ///
 /// [`prctl(PR_SET_SECCOMP,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -208,13 +208,13 @@ pub enum Capability {
     /// socket credentials passing.
     SetUserID = linux_raw_sys::general::CAP_SETUID,
     /// Without VFS support for capabilities:
-    /// - Transfer any capability in your permitted set to any pid.
-    /// - remove any capability in your permitted set from any pid. With VFS
-    ///   support for capabilities (neither of above, but)
-    /// - Add any capability from current's capability bounding set to the
-    ///   current process' inheritable set.
-    /// - Allow taking bits out of capability bounding set.
-    /// - Allow modification of the securebits for a process.
+    ///  - Transfer any capability in your permitted set to any pid.
+    ///  - remove any capability in your permitted set from any pid. With VFS
+    ///    support for capabilities (neither of above, but)
+    ///  - Add any capability from current's capability bounding set to the
+    ///    current process' inheritable set.
+    ///  - Allow taking bits out of capability bounding set.
+    ///  - Allow modification of the securebits for a process.
     SetPermittedCapabilities = linux_raw_sys::general::CAP_SETPCAP,
     /// Allow modification of `S_IMMUTABLE` and `S_APPEND` file attributes.
     LinuxImmutable = linux_raw_sys::general::CAP_LINUX_IMMUTABLE,
@@ -337,25 +337,25 @@ pub enum Capability {
     /// `perf_events`, `i915_perf` and other kernel subsystems.
     PerformanceMonitoring = linux_raw_sys::general::CAP_PERFMON,
     /// This capability allows the following BPF operations:
-    /// - Creating all types of BPF maps
-    /// - Advanced verifier features
-    ///   - Indirect variable access
-    ///   - Bounded loops
-    ///   - BPF to BPF function calls
-    ///   - Scalar precision tracking
-    ///   - Larger complexity limits
-    ///   - Dead code elimination
-    ///   - And potentially other features
-    /// - Loading BPF Type Format (BTF) data
-    /// - Retrieve `xlated` and JITed code of BPF programs
-    /// - Use `bpf_spin_lock` helper
+    ///  - Creating all types of BPF maps
+    ///  - Advanced verifier features
+    ///     - Indirect variable access
+    ///     - Bounded loops
+    ///     - BPF to BPF function calls
+    ///     - Scalar precision tracking
+    ///     - Larger complexity limits
+    ///     - Dead code elimination
+    ///     - And potentially other features
+    ///  - Loading BPF Type Format (BTF) data
+    ///  - Retrieve `xlated` and JITed code of BPF programs
+    ///  - Use `bpf_spin_lock` helper
     ///
     /// [`Capability::PerformanceMonitoring`] relaxes the verifier checks
     /// further:
-    /// - BPF progs can use of pointer-to-integer conversions
-    /// - speculation attack hardening measures are bypassed
-    /// - `bpf_probe_read` to read arbitrary kernel memory is allowed
-    /// - `bpf_trace_printk` to print kernel memory is allowed
+    ///  - BPF progs can use of pointer-to-integer conversions
+    ///  - speculation attack hardening measures are bypassed
+    ///  - `bpf_probe_read` to read arbitrary kernel memory is allowed
+    ///  - `bpf_trace_printk` to print kernel memory is allowed
     ///
     /// [`Capability::SystemAdmin`] is required to use bpf_probe_write_user.
     ///
@@ -377,7 +377,7 @@ pub enum Capability {
 /// bounding set.
 ///
 /// # References
-/// - [`prctl(PR_CAPBSET_READ,...)`]
+///  - [`prctl(PR_CAPBSET_READ,...)`]
 ///
 /// [`prctl(PR_CAPBSET_READ,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -392,7 +392,7 @@ const PR_CAPBSET_DROP: c_int = 24;
 /// from the thread's capability bounding set.
 ///
 /// # References
-/// - [`prctl(PR_CAPBSET_DROP,...)`]
+///  - [`prctl(PR_CAPBSET_DROP,...)`]
 ///
 /// [`prctl(PR_CAPBSET_DROP,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -437,7 +437,7 @@ bitflags! {
 /// Get the `securebits` flags of the calling thread.
 ///
 /// # References
-/// - [`prctl(PR_GET_SECUREBITS,...)`]
+///  - [`prctl(PR_GET_SECUREBITS,...)`]
 ///
 /// [`prctl(PR_GET_SECUREBITS,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -451,7 +451,7 @@ const PR_SET_SECUREBITS: c_int = 28;
 /// Set the `securebits` flags of the calling thread.
 ///
 /// # References
-/// - [`prctl(PR_SET_SECUREBITS,...)`]
+///  - [`prctl(PR_SET_SECUREBITS,...)`]
 ///
 /// [`prctl(PR_SET_SECUREBITS,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -468,7 +468,7 @@ const PR_GET_TIMERSLACK: c_int = 30;
 /// Get the `current` timer slack value of the calling thread.
 ///
 /// # References
-/// - [`prctl(PR_GET_TIMERSLACK,...)`]
+///  - [`prctl(PR_GET_TIMERSLACK,...)`]
 ///
 /// [`prctl(PR_GET_TIMERSLACK,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -481,7 +481,7 @@ const PR_SET_TIMERSLACK: c_int = 29;
 /// Sets the `current` timer slack value for the calling thread.
 ///
 /// # References
-/// - [`prctl(PR_SET_TIMERSLACK,...)`]
+///  - [`prctl(PR_SET_TIMERSLACK,...)`]
 ///
 /// [`prctl(PR_SET_TIMERSLACK,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -499,7 +499,7 @@ const PR_GET_NO_NEW_PRIVS: c_int = 39;
 /// Get the value of the `no_new_privs` attribute for the calling thread.
 ///
 /// # References
-/// - [`prctl(PR_GET_NO_NEW_PRIVS,...)`]
+///  - [`prctl(PR_GET_NO_NEW_PRIVS,...)`]
 ///
 /// [`prctl(PR_GET_NO_NEW_PRIVS,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -512,7 +512,7 @@ const PR_SET_NO_NEW_PRIVS: c_int = 38;
 /// Set the calling thread's `no_new_privs` attribute.
 ///
 /// # References
-/// - [`prctl(PR_SET_NO_NEW_PRIVS,...)`]
+///  - [`prctl(PR_SET_NO_NEW_PRIVS,...)`]
 ///
 /// [`prctl(PR_SET_NO_NEW_PRIVS,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -530,7 +530,7 @@ const PR_GET_TID_ADDRESS: c_int = 40;
 /// and `clone`'s `CLONE_CHILD_CLEARTID` flag.
 ///
 /// # References
-/// - [`prctl(PR_GET_TID_ADDRESS,...)`]
+///  - [`prctl(PR_GET_TID_ADDRESS,...)`]
 ///
 /// [`prctl(PR_GET_TID_ADDRESS,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -547,7 +547,7 @@ const PR_GET_THP_DISABLE: c_int = 42;
 /// Get the current setting of the `THP disable` flag for the calling thread.
 ///
 /// # References
-/// - [`prctl(PR_GET_THP_DISABLE,...)`]
+///  - [`prctl(PR_GET_THP_DISABLE,...)`]
 ///
 /// [`prctl(PR_GET_THP_DISABLE,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -560,7 +560,7 @@ const PR_SET_THP_DISABLE: c_int = 41;
 /// Set the state of the `THP disable` flag for the calling thread.
 ///
 /// # References
-/// - [`prctl(PR_SET_THP_DISABLE,...)`]
+///  - [`prctl(PR_SET_THP_DISABLE,...)`]
 ///
 /// [`prctl(PR_SET_THP_DISABLE,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -579,7 +579,7 @@ const PR_CAP_AMBIENT_IS_SET: usize = 1;
 /// Check if the specified capability is in the ambient set.
 ///
 /// # References
-/// - [`prctl(PR_CAP_AMBIENT,PR_CAP_AMBIENT_IS_SET,...)`]
+///  - [`prctl(PR_CAP_AMBIENT,PR_CAP_AMBIENT_IS_SET,...)`]
 ///
 /// [`prctl(PR_CAP_AMBIENT,PR_CAP_AMBIENT_IS_SET,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -593,7 +593,7 @@ const PR_CAP_AMBIENT_CLEAR_ALL: usize = 4;
 /// Remove all capabilities from the ambient set.
 ///
 /// # References
-/// - [`prctl(PR_CAP_AMBIENT,PR_CAP_AMBIENT_CLEAR_ALL,...)`]
+///  - [`prctl(PR_CAP_AMBIENT,PR_CAP_AMBIENT_CLEAR_ALL,...)`]
 ///
 /// [`prctl(PR_CAP_AMBIENT,PR_CAP_AMBIENT_CLEAR_ALL,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -607,7 +607,7 @@ const PR_CAP_AMBIENT_LOWER: usize = 3;
 /// Add or remove the specified capability to the ambient set.
 ///
 /// # References
-/// - [`prctl(PR_CAP_AMBIENT,...)`]
+///  - [`prctl(PR_CAP_AMBIENT,...)`]
 ///
 /// [`prctl(PR_CAP_AMBIENT,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -643,7 +643,7 @@ pub struct SVEVectorLengthConfig {
 /// Get the thread's current SVE vector length configuration.
 ///
 /// # References
-/// - [`prctl(PR_SVE_GET_VL,...)`]
+///  - [`prctl(PR_SVE_GET_VL,...)`]
 ///
 /// [`prctl(PR_SVE_GET_VL,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -662,7 +662,7 @@ const PR_SVE_SET_VL_ONEXEC: u32 = 1_u32 << 18;
 /// Configure the thread's vector length of Scalable Vector Extension.
 ///
 /// # References
-/// - [`prctl(PR_SVE_SET_VL,...)`]
+///  - [`prctl(PR_SVE_SET_VL,...)`]
 ///
 /// # Safety
 ///
@@ -702,7 +702,7 @@ const PR_PAC_RESET_KEYS: c_int = 54;
 /// values generated by the kernel.
 ///
 /// # References
-/// - [`prctl(PR_PAC_RESET_KEYS,...)`]
+///  - [`prctl(PR_PAC_RESET_KEYS,...)`]
 ///
 /// # Safety
 ///
@@ -742,7 +742,7 @@ bitflags! {
 /// Get the current tagged address mode for the calling thread.
 ///
 /// # References
-/// - [`prctl(PR_GET_TAGGED_ADDR_CTRL,...)`]
+///  - [`prctl(PR_GET_TAGGED_ADDR_CTRL,...)`]
 ///
 /// [`prctl(PR_GET_TAGGED_ADDR_CTRL,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -758,7 +758,7 @@ const PR_SET_TAGGED_ADDR_CTRL: c_int = 55;
 /// Controls support for passing tagged user-space addresses to the kernel.
 ///
 /// # References
-/// - [`prctl(PR_SET_TAGGED_ADDR_CTRL,...)`]
+///  - [`prctl(PR_SET_TAGGED_ADDR_CTRL,...)`]
 ///
 /// # Safety
 ///
@@ -787,7 +787,7 @@ const PR_SYS_DISPATCH_OFF: usize = 0;
 /// Disable Syscall User Dispatch mechanism.
 ///
 /// # References
-/// - [`prctl(PR_SET_SYSCALL_USER_DISPATCH,PR_SYS_DISPATCH_OFF,...)`]
+///  - [`prctl(PR_SET_SYSCALL_USER_DISPATCH,PR_SYS_DISPATCH_OFF,...)`]
 ///
 /// # Safety
 ///
@@ -833,7 +833,7 @@ impl TryFrom<u8> for SysCallUserDispatchFastSwitch {
 /// Enable Syscall User Dispatch mechanism.
 ///
 /// # References
-/// - [`prctl(PR_SET_SYSCALL_USER_DISPATCH,PR_SYS_DISPATCH_ON,...)`]
+///  - [`prctl(PR_SET_SYSCALL_USER_DISPATCH,PR_SYS_DISPATCH_ON,...)`]
 ///
 /// # Safety
 ///
@@ -897,7 +897,7 @@ impl TryFrom<u32> for CoreSchedulingScope {
 /// Get core scheduling cookie of a process.
 ///
 /// # References
-/// - [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_GET,...)`]
+///  - [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_GET,...)`]
 ///
 /// [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_GET,...)`]: https://www.kernel.org/doc/html/v5.18/admin-guide/hw-vuln/core-scheduling.html
 #[inline]
@@ -920,7 +920,7 @@ const PR_SCHED_CORE_CREATE: usize = 1;
 /// Create unique core scheduling cookie.
 ///
 /// # References
-/// - [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_CREATE,...)`]
+///  - [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_CREATE,...)`]
 ///
 /// [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_CREATE,...)`]: https://www.kernel.org/doc/html/v5.18/admin-guide/hw-vuln/core-scheduling.html
 #[inline]
@@ -942,7 +942,7 @@ const PR_SCHED_CORE_SHARE_TO: usize = 2;
 /// Push core scheduling cookie to a process.
 ///
 /// # References
-/// - [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_SHARE_TO,...)`]
+///  - [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_SHARE_TO,...)`]
 ///
 /// [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_SHARE_TO,...)`]: https://www.kernel.org/doc/html/v5.18/admin-guide/hw-vuln/core-scheduling.html
 #[inline]
@@ -964,7 +964,7 @@ const PR_SCHED_CORE_SHARE_FROM: usize = 3;
 /// Pull core scheduling cookie from a process.
 ///
 /// # References
-/// - [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_SHARE_FROM,...)`]
+///  - [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_SHARE_FROM,...)`]
 ///
 /// [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_SHARE_FROM,...)`]: https://www.kernel.org/doc/html/v5.18/admin-guide/hw-vuln/core-scheduling.html
 #[inline]

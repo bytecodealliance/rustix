@@ -156,7 +156,7 @@ impl From<RawMode> for Mode {
     /// Support conversions from raw mode values to `Mode`.
     ///
     /// ```
-    /// use rustix::fs::{RawMode, Mode};
+    /// use rustix::fs::{Mode, RawMode};
     /// assert_eq!(Mode::from(0o700), Mode::RWXU);
     /// ```
     #[inline]
@@ -169,7 +169,7 @@ impl From<Mode> for RawMode {
     /// Support conversions from `Mode to raw mode values.
     ///
     /// ```
-    /// use rustix::fs::{RawMode, Mode};
+    /// use rustix::fs::{Mode, RawMode};
     /// assert_eq!(RawMode::from(Mode::RWXU), 0o700);
     /// ```
     #[inline]
@@ -1050,7 +1050,9 @@ pub struct copyfile_state_t(pub(crate) *mut c::c_void);
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
-    /// `MS_*` constants for use with [`mount`][crate::fs::mount].
+    /// `MS_*` constants for use with [`mount`].
+    ///
+    /// [`mount`]: crate::fs::mount
     pub struct MountFlags: c::c_ulong {
         /// `MS_BIND`
         const BIND = c::MS_BIND;
@@ -1102,7 +1104,9 @@ bitflags! {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
-    /// `MS_*` constants for use with [`change_mount`][crate::fs::mount::change_mount].
+    /// `MS_*` constants for use with [`change_mount`].
+    ///
+    /// [`change_mount`]: crate::fs::mount::change_mount.
     pub struct MountPropagationFlags: c::c_ulong {
         /// `MS_SHARED`
         const SHARED = c::MS_SHARED;
@@ -1130,7 +1134,9 @@ pub(crate) struct MountFlagsArg(pub(crate) c::c_ulong);
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
-    /// `MNT_*` constants for use with [`unmount`][crate::fs::mount::unmount].
+    /// `MNT_*` constants for use with [`unmount`].
+    ///
+    /// [`unmount`]: crate::fs::mount::unmount
     pub struct UnmountFlags: c::c_int {
         /// `MNT_FORCE`
         const FORCE = c::MNT_FORCE;

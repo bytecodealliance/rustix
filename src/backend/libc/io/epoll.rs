@@ -6,7 +6,7 @@
 //!
 //! # Examples
 //!
-//! ```rust,no_run
+//! ```no_run
 //! # #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 //! # #[cfg(feature = "net")]
 //! # fn main() -> std::io::Result<()> {

@@ -86,9 +86,9 @@ bitflags! {
 /// or a bind mount to such a link.
 ///
 /// # References
-/// - [`setns`]
+///  - [Linux]
 ///
-/// [`setns`]: https://man7.org/linux/man-pages/man2/setns.2.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/setns.2.html
 pub fn move_into_link_name_space(
     fd: BorrowedFd,
     allowed_type: Option<LinkNameSpaceType>,
@@ -103,9 +103,9 @@ pub fn move_into_link_name_space(
 /// `fd` must refer to a thread ID. See: `pidfd_open` and `clone`.
 ///
 /// # References
-/// - [`setns`]
+///  - [Linux]
 ///
-/// [`setns`]: https://man7.org/linux/man-pages/man2/setns.2.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/setns.2.html
 pub fn move_into_thread_name_spaces(
     fd: BorrowedFd,
     allowed_types: ThreadNameSpaceType,
@@ -117,9 +117,9 @@ pub fn move_into_thread_name_spaces(
 /// context with other threads.
 ///
 /// # References
-/// - [`unshare`]
+///  - [Linux]
 ///
-/// [`unshare`]: https://man7.org/linux/man-pages/man2/unshare.2.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/unshare.2.html
 pub fn unshare(flags: UnshareFlags) -> io::Result<()> {
     syscalls::unshare(flags)
 }

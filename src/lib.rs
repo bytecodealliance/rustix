@@ -4,7 +4,7 @@
 //!
 //! With rustix, you can write code like this:
 //!
-//! ```rust
+//! ```
 //! # #[cfg(feature = "net")]
 //! # fn read(sock: std::net::TcpStream, buf: &mut [u8]) -> std::io::Result<()> {
 //! # use rustix::net::RecvFlags;
@@ -16,7 +16,7 @@
 //!
 //! instead of like this:
 //!
-//! ```rust
+//! ```
 //! # #[cfg(feature = "net")]
 //! # fn read(sock: std::net::TcpStream, buf: &mut [u8]) -> std::io::Result<()> {
 //! # use std::convert::TryInto;

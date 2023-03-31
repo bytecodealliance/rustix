@@ -19,8 +19,8 @@ impl Default for Protocol {
 /// `socket(domain, type_, protocol)`—Creates a socket.
 ///
 /// POSIX guarantees that `socket` will use the lowest unused file descriptor,
-/// however it is not safe in general to rely on this, as file descriptors
-/// may be unexpectedly allocated on other threads or in libraries.
+/// however it is not safe in general to rely on this, as file descriptors may
+/// be unexpectedly allocated on other threads or in libraries.
 ///
 /// To pass extra flags such as [`SocketFlags::CLOEXEC`], use [`socket_with`].
 ///
@@ -43,8 +43,8 @@ pub fn socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> i
 /// flags.
 ///
 /// POSIX guarantees that `socket` will use the lowest unused file descriptor,
-/// however it is not safe in general to rely on this, as file descriptors
-/// may be unexpectedly allocated on other threads or in libraries.
+/// however it is not safe in general to rely on this, as file descriptors may
+/// be unexpectedly allocated on other threads or in libraries.
 ///
 /// `socket_with` is the same as [`socket`] but adds an additional flags
 /// operand.

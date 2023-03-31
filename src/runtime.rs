@@ -65,7 +65,7 @@ pub unsafe fn set_tid_address(data: *mut c_void) -> Pid {
 /// `prctl(PR_SET_NAME, name)`
 ///
 /// # References
-///  - [Linux]: https://man7.org/linux/man-pages/man2/prctl.2.html
+///  - [Linux]
 ///
 /// # Safety
 ///

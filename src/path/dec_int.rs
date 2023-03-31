@@ -30,7 +30,7 @@ use std::path::Path;
 ///
 /// # Example
 ///
-/// ```rust
+/// ```
 /// # #[cfg(feature = "path")]
 /// use rustix::path::DecInt;
 ///

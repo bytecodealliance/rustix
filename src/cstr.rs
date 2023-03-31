@@ -9,7 +9,7 @@
 ///
 /// # Examples
 ///
-/// ```rust,no_run
+/// ```no_run
 /// # #[cfg(feature = "fs")]
 /// # fn main() -> rustix::io::Result<()> {
 /// use rustix::cstr;

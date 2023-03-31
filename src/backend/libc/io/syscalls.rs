@@ -339,7 +339,8 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn ioctl_ficlone(fd: BorrowedFd<'_>, src_fd: BorrowedFd<'_>) -> io::Result<()> {
     // TODO: Enable `ioctl_ficlone` for android when upstream is updated.
-    // TODO: Enable `ioctl_ficlone` for more architectures when upstream is updated.
+    // TODO: Enable `ioctl_ficlone` for more architectures when upstream is
+    // updated.
     #[cfg(all(
         target_os = "linux",
         any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")

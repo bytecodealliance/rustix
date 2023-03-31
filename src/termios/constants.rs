@@ -4,7 +4,7 @@ pub use backend::termios::types::*;
 
 /// Translate from a `Speed` code to a speed value `u32`.
 ///
-/// ```rust
+/// ```
 /// let speed = rustix::termios::speed_value(rustix::termios::B57600);
 /// assert_eq!(speed, Some(57600));
 /// ```

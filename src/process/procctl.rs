@@ -81,8 +81,8 @@ const PROC_PDEATHSIG_STATUS: c_int = 12;
 /// Get the current value of the parent process death signal.
 ///
 /// # References
-/// - [Linux: `prctl(PR_GET_PDEATHSIG,...)`]
-/// - [FreeBSD: `procctl(PROC_PDEATHSIG_STATUS,...)`]
+///  - [Linux: `prctl(PR_GET_PDEATHSIG,...)`]
+///  - [FreeBSD: `procctl(PROC_PDEATHSIG_STATUS,...)`]
 ///
 /// [Linux: `prctl(PR_GET_PDEATHSIG,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 /// [FreeBSD: `procctl(PROC_PDEATHSIG_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
@@ -96,8 +96,8 @@ const PROC_PDEATHSIG_CTL: c_int = 11;
 /// Set the parent-death signal of the calling process.
 ///
 /// # References
-/// - [Linux: `prctl(PR_SET_PDEATHSIG,...)`]
-/// - [FreeBSD: `procctl(PROC_PDEATHSIG_CTL,...)`]
+///  - [Linux: `prctl(PR_SET_PDEATHSIG,...)`]
+///  - [FreeBSD: `procctl(PROC_PDEATHSIG_CTL,...)`]
 ///
 /// [Linux: `prctl(PR_SET_PDEATHSIG,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 /// [FreeBSD: `procctl(PROC_PDEATHSIG_CTL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
@@ -140,7 +140,7 @@ pub enum DumpableBehavior {
 /// Linux.
 ///
 /// # References
-/// - [`procctl(PROC_TRACE_CTL,...)`]
+///  - [`procctl(PROC_TRACE_CTL,...)`]
 ///
 /// [`procctl(PROC_TRACE_CTL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
@@ -170,7 +170,7 @@ pub enum TracingStatus {
 /// Get the tracing status of the process indicated by `idtype` and `id`.
 ///
 /// # References
-/// - [`procctl(PROC_TRACE_STATUS,...)`]
+///  - [`procctl(PROC_TRACE_STATUS,...)`]
 ///
 /// [`procctl(PROC_TRACE_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
@@ -196,7 +196,7 @@ const PROC_REAP_RELEASE: c_int = 3;
 /// Acquire or release the reaper status of the calling process.
 ///
 /// # References
-/// - [FreeBSD: `procctl(PROC_REAP_ACQUIRE/RELEASE,...)`]
+///  - [FreeBSD: `procctl(PROC_REAP_ACQUIRE/RELEASE,...)`]
 ///
 /// [FreeBSD: `procctl(PROC_REAP_ACQUIRE/RELEASE,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
@@ -243,7 +243,8 @@ pub struct ReaperStatus {
     pub flags: ReaperStatusFlags,
     /// The number of children of the reaper among the descendants.
     pub children: usize,
-    /// The total number of descendants of the reaper(s), not counting descendants of the reaper in the subtree.
+    /// The total number of descendants of the reaper(s), not counting
+    /// descendants of the reaper in the subtree.
     pub descendants: usize,
     /// The pid of the reaper for the specified process id.
     pub reaper: Pid,
@@ -251,10 +252,11 @@ pub struct ReaperStatus {
     pub pid: Pid,
 }
 
-/// Get information about the reaper of the specified process (or the process itself if it is a reaper).
+/// Get information about the reaper of the specified process (or the process
+/// itself if it is a reaper).
 ///
 /// # References
-/// - [FreeBSD: `procctl(PROC_REAP_STATUS,...)`]
+///  - [FreeBSD: `procctl(PROC_REAP_STATUS,...)`]
 ///
 /// [FreeBSD: `procctl(PROC_REAP_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
@@ -306,18 +308,20 @@ pub struct PidInfo {
     pub flags: PidInfoFlags,
     /// The pid of the process.
     pub pid: Pid,
-    /// The pid of the child of the reaper which is the (grand-..)parent of the process.
+    /// The pid of the child of the reaper which is the (grand-..)parent of the
+    /// process.
     pub subtree: Pid,
 }
 
 /// Get the list of descendants of the specified reaper process.
 ///
 /// # References
-/// - [FreeBSD: `procctl(PROC_REAP_GETPIDS,...)`]
+///  - [FreeBSD: `procctl(PROC_REAP_GETPIDS,...)`]
 ///
 /// [FreeBSD: `procctl(PROC_REAP_GETPIDS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 pub fn get_reaper_pids(process: ProcSelector) -> io::Result<Vec<PidInfo>> {
-    // Sadly no better way to guarantee that we get all the results than to allocate ~8MB of memory..
+    // Sadly no better way to guarantee that we get all the results than to
+    // allocate ~8MB of memory..
     const PID_MAX: usize = 99999;
     let mut pids: Vec<procctl_reaper_pidinfo> = vec![Default::default(); PID_MAX];
     let mut pinfo = procctl_reaper_pids {
@@ -379,7 +383,7 @@ pub struct KillResult {
 /// Deliver a signal to some subset of
 ///
 /// # References
-/// - [FreeBSD: `procctl(PROC_REAP_KILL,...)`]
+///  - [FreeBSD: `procctl(PROC_REAP_KILL,...)`]
 ///
 /// [FreeBSD: `procctl(PROC_REAP_KILL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 pub fn reaper_kill(
@@ -429,20 +433,24 @@ const PROC_TRAPCAP_CTL_DISABLE: i32 = 2;
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(i32)]
 pub enum TrapCapBehavior {
-    /// Disable the SIGTRAP signal delivery on capability mode access violations.
+    /// Disable the SIGTRAP signal delivery on capability mode access
+    /// violations.
     Disable = PROC_TRAPCAP_CTL_DISABLE,
-    /// Enable the SIGTRAP signal delivery on capability mode access violations.
+    /// Enable the SIGTRAP signal delivery on capability mode access
+    /// violations.
     Enable = PROC_TRAPCAP_CTL_ENABLE,
 }
 
 /// Set the current value of the capability mode violation trapping behavior.
-/// If this behavior is enabled, the kernel would deliver a SIGTRAP signal on any
-/// return from a system call that would result in a `ENOTCAPABLE` or `ECAPMODE` error.
+/// If this behavior is enabled, the kernel would deliver a SIGTRAP signal on
+/// any return from a system call that would result in a `ENOTCAPABLE` or
+/// `ECAPMODE` error.
 ///
-/// This behavior is inherited by the children of the process and is kept across `execve` calls.
+/// This behavior is inherited by the children of the process and is kept
+/// across `execve` calls.
 ///
 /// # References
-/// - [FreeBSD: `procctl(PROC_TRAPCAP_CTL,...)`]
+///  - [FreeBSD: `procctl(PROC_TRAPCAP_CTL,...)`]
 ///
 /// [FreeBSD: `procctl(PROC_TRAPCAP_CTL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
@@ -456,7 +464,7 @@ const PROC_TRAPCAP_STATUS: c_int = 10;
 /// Get the current value of the capability mode violation trapping behavior.
 ///
 /// # References
-/// - [FreeBSD: `procctl(PROC_TRAPCAP_STATUS,...)`]
+///  - [FreeBSD: `procctl(PROC_TRAPCAP_STATUS,...)`]
 ///
 /// [FreeBSD: `procctl(PROC_TRAPCAP_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
@@ -485,8 +493,8 @@ const PROC_NO_NEW_PRIVS_ENABLE: c_int = 1;
 /// only possible to enable this mode and there's no going back.
 ///
 /// # References
-/// - [Linux: `prctl(PR_SET_NO_NEW_PRIVS,...)`]
-/// - [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_CTL,...)`]
+///  - [Linux: `prctl(PR_SET_NO_NEW_PRIVS,...)`]
+///  - [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_CTL,...)`]
 ///
 /// [Linux: `prctl(PR_SET_NO_NEW_PRIVS,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 /// [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_CTL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
@@ -500,8 +508,8 @@ const PROC_NO_NEW_PRIVS_STATUS: c_int = 20;
 /// Check the `no_new_privs` mode of the specified process.
 ///
 /// # References
-/// - [Linux: `prctl(PR_GET_NO_NEW_PRIVS,...)`]
-/// - [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_STATUS,...)`]
+///  - [Linux: `prctl(PR_GET_NO_NEW_PRIVS,...)`]
+///  - [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_STATUS,...)`]
 ///
 /// [Linux: `prctl(PR_GET_NO_NEW_PRIVS,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 /// [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2

@@ -41,7 +41,7 @@ use std::path::{Component, Components, Iter, Path, PathBuf};
 ///
 /// # Example
 ///
-/// ```rust
+/// ```
 /// # #[cfg(any(feature = "fs", feature = "net"))]
 /// use rustix::ffi::CStr;
 /// use rustix::io;

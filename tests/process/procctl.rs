@@ -41,5 +41,6 @@ fn test_no_new_privs() {
     assert!(!no_new_privs(None).unwrap());
     set_no_new_privs(None).unwrap();
     assert!(no_new_privs(None).unwrap());
-    // No going back but, well, we're not gonna execute SUID binaries from the test suite.
+    // No going back but, well, we're not gonna execute SUID binaries from the
+    // test suite.
 }
