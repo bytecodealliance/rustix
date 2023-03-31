@@ -964,7 +964,7 @@ pub(crate) fn syncfs(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::syncfs(borrowed_fd(fd))) }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(solarish, target_os = "redox", target_os = "wasi")))]
 pub(crate) fn sync() {
     // TODO: Remove this when upstream libc adds `sync`.
     #[cfg(target_os = "android")]
