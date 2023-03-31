@@ -14,7 +14,10 @@ fn test_ioctls() {
     );
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+// TODO: Enable `ioctl_ficlone` for android when upstream is updated.
+// TODO: Enable `ioctl_ficlone` for more architectures when upstream is updated.
+#[cfg(any(target_os = "linux"))]
+#[cfg(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64"))]
 #[test]
 fn test_ioctl_fioclone() {
     let src = std::fs::File::open("Cargo.toml").unwrap();
