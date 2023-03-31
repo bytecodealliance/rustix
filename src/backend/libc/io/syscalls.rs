@@ -336,6 +336,32 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     }
 }
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) fn ioctl_ficlone(fd: BorrowedFd<'_>, src_fd: BorrowedFd<'_>) -> io::Result<()> {
+    // TODO: Enable `ioctl_ficlone` for android when upstream is updated.
+    // TODO: Enable `ioctl_ficlone` for more architectures when upstream is updated.
+    #[cfg(all(
+        target_os = "linux",
+        any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
+    ))]
+    unsafe {
+        ret(c::ioctl(
+            borrowed_fd(fd),
+            c::FICLONE as _,
+            borrowed_fd(src_fd),
+        ))
+    }
+    #[cfg(not(all(
+        target_os = "linux",
+        any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
+    )))]
+    {
+        let _ = fd;
+        let _ = src_fd;
+        Err(io::Errno::NOSYS)
+    }
+}
+
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[cfg(all(feature = "fs", feature = "net"))]
 pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
