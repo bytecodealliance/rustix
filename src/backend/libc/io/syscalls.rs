@@ -336,7 +336,7 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(target_os = "linux"))]
 pub(crate) fn ioctl_ficlone(fd: BorrowedFd<'_>, src_fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::FICLONE, borrowed_fd(src_fd))) }
 }

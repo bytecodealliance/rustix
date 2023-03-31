@@ -104,7 +104,8 @@ pub fn ioctl_blkpbszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/ioctl_ficlone.2.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+// TODO: Enable `ioctl_ficlone` for android when upstream is updated.
+#[cfg(any(target_os = "linux"))]
 #[inline]
 #[doc(alias = "FICLONE")]
 pub fn ioctl_ficlone<Fd: AsFd, SrcFd: AsFd>(fd: Fd, src_fd: SrcFd) -> io::Result<()> {
