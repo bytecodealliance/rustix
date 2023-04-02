@@ -5,6 +5,9 @@ use bitflags::bitflags;
 #[cfg(target_os = "linux")]
 use crate::fd::BorrowedFd;
 
+#[cfg(linux_raw)]
+use crate::backend::process::wait::SiginfoExt;
+
 bitflags! {
     /// Options for modifying the behavior of wait/waitpid
     pub struct WaitOptions: u32 {
@@ -34,12 +37,13 @@ bitflags! {
     }
 }
 
-/// the status of the child processes the caller waited on
+/// The status of a child process after calling [`wait`]/[`waitpid`].
 #[derive(Debug, Clone, Copy)]
+#[repr(transparent)]
 pub struct WaitStatus(u32);
 
 impl WaitStatus {
-    /// create a `WaitStatus` out of an integer.
+    /// Creates a `WaitStatus` out of an integer.
     #[inline]
     pub(crate) fn new(status: u32) -> Self {
         Self(status)
@@ -55,6 +59,18 @@ impl WaitStatus {
     #[inline]
     pub fn stopped(self) -> bool {
         backend::process::wait::WIFSTOPPED(self.0 as _)
+    }
+
+    /// Returns whether the process has exited normally.
+    #[inline]
+    pub fn exited(self) -> bool {
+        backend::process::wait::WIFEXITED(self.0 as _)
+    }
+
+    /// Returns whether the process was terminated by a signal.
+    #[inline]
+    pub fn signaled(self) -> bool {
+        backend::process::wait::WIFSIGNALED(self.0 as _)
     }
 
     /// Returns whether the process has continued from a job control stop.
@@ -78,7 +94,7 @@ impl WaitStatus {
     /// if it exited normally.
     #[inline]
     pub fn exit_status(self) -> Option<u32> {
-        if backend::process::wait::WIFEXITED(self.0 as _) {
+        if self.exited() {
             Some(backend::process::wait::WEXITSTATUS(self.0 as _) as _)
         } else {
             None
@@ -89,7 +105,7 @@ impl WaitStatus {
     /// if the process was terminated by a signal.
     #[inline]
     pub fn terminating_signal(self) -> Option<u32> {
-        if backend::process::wait::WIFSIGNALED(self.0 as _) {
+        if self.signaled() {
             Some(backend::process::wait::WTERMSIG(self.0 as _) as _)
         } else {
             None
@@ -99,8 +115,120 @@ impl WaitStatus {
 
 /// The status of a process after calling [`waitid`].
 #[derive(Clone, Copy)]
+#[repr(transparent)]
 #[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 pub struct WaitidStatus(pub(crate) backend::c::siginfo_t);
+
+#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
+impl WaitidStatus {
+    /// Returns whether the process is currently stopped.
+    #[inline]
+    pub fn stopped(&self) -> bool {
+        self.si_code() == backend::c::CLD_STOPPED
+    }
+
+    /// Returns whether the process is currently trapped.
+    #[inline]
+    pub fn trapped(&self) -> bool {
+        self.si_code() == backend::c::CLD_TRAPPED
+    }
+
+    /// Returns whether the process has exited normally.
+    #[inline]
+    pub fn exited(&self) -> bool {
+        self.si_code() == backend::c::CLD_EXITED
+    }
+
+    /// Returns whether the process was terminated by a signal
+    /// and did not create a core file.
+    #[inline]
+    pub fn killed(&self) -> bool {
+        self.si_code() == backend::c::CLD_KILLED
+    }
+
+    /// Returns whether the process was terminated by a signal
+    /// and did create a core file.
+    #[inline]
+    pub fn dumped(&self) -> bool {
+        self.si_code() == backend::c::CLD_DUMPED
+    }
+
+    /// Returns whether the process has continued from a job control stop.
+    #[inline]
+    pub fn continued(&self) -> bool {
+        self.si_code() == backend::c::CLD_CONTINUED
+    }
+
+    /// Returns the number of the signal that stopped the process,
+    /// if the process was stopped by a signal.
+    #[inline]
+    #[cfg(not(any(target_os = "netbsd", target_os = "fuchsia", target_os = "emscripten")))]
+    pub fn stopping_signal(&self) -> Option<u32> {
+        if self.stopped() {
+            Some(self.si_status() as _)
+        } else {
+            None
+        }
+    }
+
+    /// Returns the number of the signal that trapped the process,
+    /// if the process was trapped by a signal.
+    #[inline]
+    #[cfg(not(any(target_os = "netbsd", target_os = "fuchsia", target_os = "emscripten")))]
+    pub fn trapping_signal(&self) -> Option<u32> {
+        if self.trapped() {
+            Some(self.si_status() as _)
+        } else {
+            None
+        }
+    }
+
+    /// Returns the exit status number returned by the process,
+    /// if it exited normally.
+    #[inline]
+    #[cfg(not(any(target_os = "netbsd", target_os = "fuchsia", target_os = "emscripten")))]
+    pub fn exit_status(&self) -> Option<u32> {
+        if self.exited() {
+            Some(self.si_status() as _)
+        } else {
+            None
+        }
+    }
+
+    /// Returns the number of the signal that terminated the process,
+    /// if the process was terminated by a signal.
+    #[inline]
+    #[cfg(not(any(target_os = "netbsd", target_os = "fuchsia", target_os = "emscripten")))]
+    pub fn terminating_signal(&self) -> Option<u32> {
+        if self.killed() || self.dumped() {
+            Some(self.si_status() as _)
+        } else {
+            None
+        }
+    }
+
+    /// Returns a reference to the raw platform-specific `siginfo_t` struct.
+    #[inline]
+    pub const fn as_raw(&self) -> &backend::c::siginfo_t {
+        &self.0
+    }
+
+    #[cfg(linux_raw)]
+    fn si_code(&self) -> u32 {
+        self.0.si_code() as u32 // CLD_ consts are unsigned
+    }
+
+    #[cfg(not(linux_raw))]
+    fn si_code(&self) -> backend::c::c_int {
+        self.0.si_code
+    }
+
+    #[cfg(not(any(target_os = "netbsd", target_os = "fuchsia", target_os = "emscripten")))]
+    #[allow(unsafe_code)]
+    fn si_status(&self) -> backend::c::c_int {
+        unsafe { self.0.si_status() }
+    }
+}
 
 /// The identifier to wait on in a call to [`waitid`].
 #[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]

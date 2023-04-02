@@ -1,8 +1,9 @@
 // The functions replacing the C macros use the same names as in libc.
-#![allow(non_snake_case)]
+#![allow(non_snake_case, unsafe_code)]
 
+use linux_raw_sys::ctypes::c_int;
 pub(crate) use linux_raw_sys::general::{
-    WCONTINUED, WEXITED, WNOHANG, WNOWAIT, WSTOPPED, WUNTRACED,
+    siginfo_t, WCONTINUED, WEXITED, WNOHANG, WNOWAIT, WSTOPPED, WUNTRACED,
 };
 
 #[inline]
@@ -38,4 +39,24 @@ pub(crate) fn WIFEXITED(status: u32) -> bool {
 #[inline]
 pub(crate) fn WEXITSTATUS(status: u32) -> u32 {
     (status >> 8) & 0xff
+}
+
+pub(crate) trait SiginfoExt {
+    fn si_code(&self) -> c_int;
+    unsafe fn si_status(&self) -> c_int;
+}
+
+impl SiginfoExt for siginfo_t {
+    #[inline]
+    fn si_code(&self) -> c_int {
+        // Technically union access, but only a union with padding
+        unsafe { self.__bindgen_anon_1.__bindgen_anon_1.si_code }
+    }
+
+    // Unsafe due to union access (it's like this in the libc crate too)
+    #[inline]
+    #[rustfmt::skip]
+    unsafe fn si_status(&self) -> c_int {
+        self.__bindgen_anon_1.__bindgen_anon_1._sifields._sigchld._status
+    }
 }

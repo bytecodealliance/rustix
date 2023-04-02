@@ -541,7 +541,8 @@ pub(crate) fn waitid(id: WaitId<'_>, options: WaitidOptions) -> io::Result<Optio
 
 #[inline]
 fn _waitid_all(options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
-    let mut status = MaybeUninit::<c::siginfo_t>::uninit();
+    // waitid can return successfully without initializing the struct (no children found when using WNOHANG)
+    let mut status = MaybeUninit::<c::siginfo_t>::zeroed();
     unsafe {
         ret(syscall!(
             __NR_waitid,
@@ -558,7 +559,8 @@ fn _waitid_all(options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
 
 #[inline]
 fn _waitid_pid(pid: Pid, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
-    let mut status = MaybeUninit::<c::siginfo_t>::uninit();
+    // waitid can return successfully without initializing the struct (no children found when using WNOHANG)
+    let mut status = MaybeUninit::<c::siginfo_t>::zeroed();
     unsafe {
         ret(syscall!(
             __NR_waitid,
@@ -575,7 +577,8 @@ fn _waitid_pid(pid: Pid, options: WaitidOptions) -> io::Result<Option<WaitidStat
 
 #[inline]
 fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
-    let mut status = MaybeUninit::<c::siginfo_t>::uninit();
+    // waitid can return successfully without initializing the struct (no children found when using WNOHANG)
+    let mut status = MaybeUninit::<c::siginfo_t>::zeroed();
     unsafe {
         ret(syscall!(
             __NR_waitid,
@@ -597,9 +600,10 @@ fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitidOptions) -> io::Result<Optio
 /// The caller must ensure that `status` is initialized and that `waitid`
 /// returned successfully.
 #[inline]
+#[rustfmt::skip]
 unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitidStatus> {
     let status = status.assume_init();
-    if status.__bindgen_anon_1.__bindgen_anon_1.si_signo == 0 {
+    if status.__bindgen_anon_1.__bindgen_anon_1._sifields._sigchld._pid == 0 {
         None
     } else {
         Some(WaitidStatus(status))
