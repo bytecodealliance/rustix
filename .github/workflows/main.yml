@@ -133,7 +133,9 @@ jobs:
     - run: cargo check --workspace --release -vv --target=sparcv9-sun-solaris --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=aarch64-apple-ios --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=aarch64-linux-android --features=all-apis --all-targets
-    - run: cargo check --workspace --release -vv --target=wasm32-wasi --features=all-apis --all-targets
+    # Omit --all-targets for WASI until all the dev-dependencies support WASI
+    # on stable.
+    - run: cargo check --workspace --release -vv --target=wasm32-wasi --features=all-apis
 
   check_no_default_features:
     name: Check --no-default-features
