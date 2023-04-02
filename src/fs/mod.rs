@@ -98,5 +98,5 @@ pub use sync::sync;
 #[cfg(unix)]
 pub use std::os::unix::fs::{DirEntryExt, FileExt, FileTypeExt, MetadataExt, OpenOptionsExt};
 #[cfg(feature = "std")]
-#[cfg(target_os = "wasi")]
+#[cfg(all(wasi_ext, target_os = "wasi"))]
 pub use std::os::wasi::fs::{DirEntryExt, FileExt, FileTypeExt, MetadataExt, OpenOptionsExt};
