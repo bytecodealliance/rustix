@@ -138,6 +138,9 @@ fn main() {
     {
         use_feature("bsd");
     }
+    if target_os == "wasi" {
+        use_feature_or_nothing("wasi_ext");
+    }
 
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM");
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_LIBC");

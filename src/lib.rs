@@ -97,7 +97,7 @@
 #![cfg_attr(linux_raw, deny(unsafe_code))]
 #![cfg_attr(rustc_attrs, feature(rustc_attrs))]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
-#![cfg_attr(all(target_os = "wasi", feature = "std"), feature(wasi_ext))]
+#![cfg_attr(all(wasi_ext, target_os = "wasi", feature = "std"), feature(wasi_ext))]
 #![cfg_attr(
     all(linux_raw, naked_functions, target_arch = "x86"),
     feature(naked_functions)
@@ -122,6 +122,9 @@
 #![allow(clippy::unnecessary_cast)]
 // It is common in linux and libc APIs for types to vary between platforms.
 #![allow(clippy::useless_conversion)]
+// Redox and WASI have enough differences that it isn't worth
+// precisely conditionallizing all the `use`s for them.
+#![cfg_attr(any(target_os = "redox", target_os = "wasi"), allow(unused_imports))]
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
