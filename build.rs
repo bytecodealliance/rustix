@@ -26,7 +26,7 @@ fn main() {
     let arch = var("CARGO_CFG_TARGET_ARCH").unwrap();
     let asm_name = format!("{}/{}.s", OUTLINE_PATH, arch);
     let asm_name_present = std::fs::metadata(&asm_name).is_ok();
-    let os_name = var("CARGO_CFG_TARGET_OS").unwrap();
+    let target_os = var("CARGO_CFG_TARGET_OS").unwrap();
     let pointer_width = var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap();
     let endian = var("CARGO_CFG_TARGET_ENDIAN").unwrap();
 
@@ -69,7 +69,7 @@ fn main() {
     // install the toolchain for it.
     if feature_use_libc
         || cfg_use_libc
-        || os_name != "linux"
+        || target_os != "linux"
         || !asm_name_present
         || is_unsupported_abi
         || miri
@@ -106,6 +106,9 @@ fn main() {
         use_feature("thumb_mode");
     }
 
+    if target_os == "wasi" {
+        use_feature_or_nothing("wasi_ext");
+    }
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM");
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_LIBC");
 
