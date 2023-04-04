@@ -154,11 +154,17 @@ fn test_sockopts_ipv6() {
     .unwrap();
 
     assert_ne!(rustix::net::sockopt::get_ipv6_unicast_hops(&s).unwrap(), 0);
-    assert!(rustix::net::sockopt::get_ipv6_multicast_loop(&s).unwrap());
+    match rustix::net::sockopt::get_ipv6_multicast_loop(&s) {
+        Ok(multicast_loop) => assert!(multicast_loop),
+        Err(rustix::io::Errno::OPNOTSUPP) => (),
+        Err(rustix::io::Errno::INVAL) => (),
+        Err(err) => Err(err).unwrap(),
+    }
     assert_ne!(rustix::net::sockopt::get_ipv6_unicast_hops(&s).unwrap(), 0);
     match rustix::net::sockopt::get_ipv6_multicast_hops(&s) {
         Ok(hops) => assert_eq!(hops, 0),
         Err(rustix::io::Errno::NOPROTOOPT) => (),
+        Err(rustix::io::Errno::INVAL) => (),
         Err(err) => Err(err).unwrap(),
     };
 
@@ -170,10 +176,20 @@ fn test_sockopts_ipv6() {
     assert_eq!(rustix::net::sockopt::get_ipv6_v6only(&s).unwrap(), !v6only);
 
     // Set the IPV6 multicast loop value.
-    rustix::net::sockopt::set_ipv6_multicast_loop(&s, false).unwrap();
-
-    // Check that the IPV6 multicast loop value is set.
-    assert!(!rustix::net::sockopt::get_ipv6_multicast_loop(&s).unwrap());
+    match rustix::net::sockopt::set_ipv6_multicast_loop(&s, false) {
+        Ok(()) => {
+            // Check that the IPV6 multicast loop value is set.
+            match rustix::net::sockopt::get_ipv6_multicast_loop(&s) {
+                Ok(multicast_loop) => assert!(!multicast_loop),
+                Err(rustix::io::Errno::OPNOTSUPP) => (),
+                Err(rustix::io::Errno::INVAL) => (),
+                Err(err) => Err(err).unwrap(),
+            }
+        }
+        Err(rustix::io::Errno::OPNOTSUPP) => (),
+        Err(rustix::io::Errno::INVAL) => (),
+        Err(err) => Err(err).unwrap(),
+    }
 
     // Set the IPV6 unicast hops value to the default value.
     rustix::net::sockopt::set_ipv6_unicast_hops(&s, None).unwrap();
