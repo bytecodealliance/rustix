@@ -673,7 +673,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn set_socket_recv_buffer_size(fd: BorrowedFd<'_>, size: usize) -> io::Result<()> {
-        let size: c::c_int = size.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+        let size: c::c_int = size.try_into().map_err(|_| io::Errno::INVAL)?;
         setsockopt(fd, c::SOL_SOCKET as _, c::SO_RCVBUF, size)
     }
 
@@ -684,7 +684,7 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn set_socket_send_buffer_size(fd: BorrowedFd<'_>, size: usize) -> io::Result<()> {
-        let size: c::c_int = size.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+        let size: c::c_int = size.try_into().map_err(|_| io::Errno::INVAL)?;
         setsockopt(fd, c::SOL_SOCKET as _, c::SO_SNDBUF, size)
     }
 
