@@ -248,6 +248,184 @@ pub fn get_socket_error<Fd: AsFd>(fd: Fd) -> io::Result<Result<(), crate::io::Er
     backend::net::syscalls::sockopt::get_socket_error(fd.as_fd())
 }
 
+/// `getsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `netinet/tcp.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `tcp`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `IPPROTO_TCP` options]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `netinet/tcp.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_tcp.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
+/// [Winsock2 `setsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-setsockopt
+/// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
+#[cfg(any(apple, target_os = "freebsd"))]
+#[doc(alias = "SO_NOSIGPIPE")]
+#[inline]
+pub fn getsockopt_nosigpipe<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::syscalls::sockopt::getsockopt_nosigpipe(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, val)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `netinet/tcp.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `tcp`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `IPPROTO_TCP` options]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `netinet/tcp.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_tcp.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
+/// [Winsock2 `setsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-setsockopt
+/// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
+#[cfg(any(apple, target_os = "freebsd"))]
+#[doc(alias = "SO_NOSIGPIPE")]
+#[inline]
+pub fn setsockopt_nosigpipe<Fd: AsFd>(fd: Fd, val: bool) -> io::Result<()> {
+    backend::net::syscalls::sockopt::setsockopt_nosigpipe(fd.as_fd(), val)
+}
+
+/// `setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, keepalive)`
+///
+/// # References
+///  - [POSIX `setsockopt`]
+///  - [POSIX `sys/socket.h`]
+///  - [Linux `setsockopt`]
+///  - [Linux `socket`]
+///  - [Winsock2 `setsockopt`]
+///  - [Winsock2 `SOL_SOCKET` options]
+///
+/// [POSIX `setsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/setsockopt.html
+/// [POSIX `sys/socket.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_socket.h.html
+/// [Linux `setsockopt`]: https://man7.org/linux/man-pages/man2/setsockopt.2.html
+/// [Linux `socket`]: https://man7.org/linux/man-pages/man7/socket.7.html
+/// [Winsock2 `setsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-setsockopt
+/// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
+#[inline]
+#[doc(alias = "SO_KEEPALIVE")]
+pub fn set_socket_keepalive<Fd: AsFd>(fd: Fd, keepalive: bool) -> io::Result<()> {
+    backend::net::syscalls::sockopt::set_socket_keepalive(fd.as_fd(), keepalive)
+}
+
+/// `getsockopt(fd, SOL_SOCKET, SO_KEEPALIVE)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `sys/socket.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `socket`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `SOL_SOCKET` options]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `sys/socket.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_socket.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `socket`]: https://man7.org/linux/man-pages/man7/socket.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
+#[inline]
+#[doc(alias = "SO_KEEPALIVE")]
+pub fn get_socket_keepalive<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::syscalls::sockopt::get_socket_keepalive(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_SOCKET, SO_RCVBUF, size)`
+///
+/// # References
+///  - [POSIX `setsockopt`]
+///  - [POSIX `sys/socket.h`]
+///  - [Linux `setsockopt`]
+///  - [Linux `socket`]
+///  - [Winsock2 `setsockopt`]
+///  - [Winsock2 `SOL_SOCKET` options]
+///
+/// [POSIX `setsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/setsockopt.html
+/// [POSIX `sys/socket.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_socket.h.html
+/// [Linux `setsockopt`]: https://man7.org/linux/man-pages/man2/setsockopt.2.html
+/// [Linux `socket`]: https://man7.org/linux/man-pages/man7/socket.7.html
+/// [Winsock2 `setsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-setsockopt
+/// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
+#[inline]
+#[doc(alias = "SO_RCVBUF")]
+pub fn set_socket_recv_buffer_size<Fd: AsFd>(fd: Fd, size: usize) -> io::Result<()> {
+    backend::net::syscalls::sockopt::set_socket_recv_buffer_size(fd.as_fd(), size)
+}
+
+/// `getsockopt(fd, SOL_SOCKET, SO_RCVBUF)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `sys/socket.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `socket`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `SOL_SOCKET` options]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `sys/socket.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_socket.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `socket`]: https://man7.org/linux/man-pages/man7/socket.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
+#[inline]
+#[doc(alias = "SO_RCVBUF")]
+pub fn get_socket_recv_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
+    backend::net::syscalls::sockopt::get_socket_recv_buffer_size(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_SOCKET, SO_SNDBUF, size)`
+///
+/// # References
+///  - [POSIX `setsockopt`]
+///  - [POSIX `sys/socket.h`]
+///  - [Linux `setsockopt`]
+///  - [Linux `socket`]
+///  - [Winsock2 `setsockopt`]
+///  - [Winsock2 `SOL_SOCKET` options]
+///
+/// [POSIX `setsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/setsockopt.html
+/// [POSIX `sys/socket.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_socket.h.html
+/// [Linux `setsockopt`]: https://man7.org/linux/man-pages/man2/setsockopt.2.html
+/// [Linux `socket`]: https://man7.org/linux/man-pages/man7/socket.7.html
+/// [Winsock2 `setsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-setsockopt
+/// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
+#[inline]
+#[doc(alias = "SO_SNDBUF")]
+pub fn set_socket_send_buffer_size<Fd: AsFd>(fd: Fd, size: usize) -> io::Result<()> {
+    backend::net::syscalls::sockopt::set_socket_send_buffer_size(fd.as_fd(), size)
+}
+
+/// `getsockopt(fd, SOL_SOCKET, SO_SNDBUF)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `sys/socket.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `socket`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `SOL_SOCKET` options]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `sys/socket.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_socket.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `socket`]: https://man7.org/linux/man-pages/man7/socket.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
+#[inline]
+#[doc(alias = "SO_SNDBUF")]
+pub fn get_socket_send_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
+    backend::net::syscalls::sockopt::get_socket_send_buffer_size(fd.as_fd())
+}
+
 /// `setsockopt(fd, IPPROTO_IP, IP_TTL, ttl)`
 ///
 /// # References
@@ -489,6 +667,50 @@ pub fn set_ipv6_multicast_hops<Fd: AsFd>(fd: Fd, multicast_hops: u32) -> io::Res
     backend::net::syscalls::sockopt::set_ipv6_multicast_hops(fd.as_fd(), multicast_hops)
 }
 
+/// `getsockopt(fd, IPPROTO_IP, IPV6_UNICAST_HOPS)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `netinet/in.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `ipv6`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `IPPROTO_IPV6` options]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `netinet/in.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_in.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `ipv6`]: https://man7.org/linux/man-pages/man7/ipv6.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `IPPROTO_IPV6` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ipv6-socket-options
+#[inline]
+#[doc(alias = "IPV6_UNICAST_HOPS")]
+pub fn get_ipv6_unicast_hops<Fd: AsFd>(fd: Fd) -> io::Result<u8> {
+    backend::net::syscalls::sockopt::get_ipv6_unicast_hops(fd.as_fd())
+}
+
+/// `setsockopt(fd, IPPROTO_IP, IPV6_UNICAST_HOPS, unicast_hops)`
+///
+/// # References
+///  - [POSIX `setsockopt`]
+///  - [POSIX `netinet/in.h`]
+///  - [Linux `setsockopt`]
+///  - [Linux `ipv6`]
+///  - [Winsock2 `setsockopt`]
+///  - [Winsock2 `IPPROTO_IPV6` options]
+///
+/// [POSIX `setsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/setsockopt.html
+/// [POSIX `netinet/in.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_in.h.html
+/// [Linux `setsockopt`]: https://man7.org/linux/man-pages/man2/setsockopt.2.html
+/// [Linux `ipv6`]: https://man7.org/linux/man-pages/man7/ipv6.7.html
+/// [Winsock2 `setsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-setsockopt
+/// [Winsock2 `IPPROTO_IPV6` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ipv6-socket-options
+#[inline]
+#[doc(alias = "IPV6_UNICAST_HOPS")]
+pub fn set_ipv6_unicast_hops<Fd: AsFd>(fd: Fd, unicast_hops: Option<u8>) -> io::Result<()> {
+    backend::net::syscalls::sockopt::set_ipv6_unicast_hops(fd.as_fd(), unicast_hops)
+}
+
 /// `getsockopt(fd, IPPROTO_IP, IPV6_MULTICAST_HOPS)`
 ///
 /// # References
@@ -663,50 +885,4 @@ pub fn set_tcp_nodelay<Fd: AsFd>(fd: Fd, nodelay: bool) -> io::Result<()> {
 #[doc(alias = "TCP_NODELAY")]
 pub fn get_tcp_nodelay<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::syscalls::sockopt::get_tcp_nodelay(fd.as_fd())
-}
-
-/// `getsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE)`
-///
-/// # References
-///  - [POSIX `getsockopt`]
-///  - [POSIX `netinet/tcp.h`]
-///  - [Linux `getsockopt`]
-///  - [Linux `tcp`]
-///  - [Winsock2 `getsockopt`]
-///  - [Winsock2 `IPPROTO_TCP` options]
-///
-/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
-/// [POSIX `netinet/tcp.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_tcp.h.html
-/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
-/// [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
-/// [Winsock2 `setsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-setsockopt
-/// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
-#[cfg(any(apple, target_os = "freebsd"))]
-#[doc(alias = "SO_NOSIGPIPE")]
-#[inline]
-pub fn getsockopt_nosigpipe<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
-    backend::net::syscalls::sockopt::getsockopt_nosigpipe(fd.as_fd())
-}
-
-/// `setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, val)`
-///
-/// # References
-///  - [POSIX `getsockopt`]
-///  - [POSIX `netinet/tcp.h`]
-///  - [Linux `getsockopt`]
-///  - [Linux `tcp`]
-///  - [Winsock2 `getsockopt`]
-///  - [Winsock2 `IPPROTO_TCP` options]
-///
-/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
-/// [POSIX `netinet/tcp.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_tcp.h.html
-/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
-/// [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
-/// [Winsock2 `setsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-setsockopt
-/// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
-#[cfg(any(apple, target_os = "freebsd"))]
-#[doc(alias = "SO_NOSIGPIPE")]
-#[inline]
-pub fn setsockopt_nosigpipe<Fd: AsFd>(fd: Fd, val: bool) -> io::Result<()> {
-    backend::net::syscalls::sockopt::setsockopt_nosigpipe(fd.as_fd(), val)
 }
