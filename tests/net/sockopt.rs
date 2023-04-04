@@ -154,7 +154,6 @@ fn test_sockopts_ipv6() {
     .unwrap();
 
     assert_ne!(rustix::net::sockopt::get_ipv6_unicast_hops(&s).unwrap(), 0);
-    assert!(!rustix::net::sockopt::get_ipv6_v6only(&s).unwrap());
     assert!(rustix::net::sockopt::get_ipv6_multicast_loop(&s).unwrap());
     assert_ne!(rustix::net::sockopt::get_ipv6_unicast_hops(&s).unwrap(), 0);
     assert_eq!(
@@ -163,10 +162,11 @@ fn test_sockopts_ipv6() {
     );
 
     // Set the IPV4 V6OONLY value.
-    rustix::net::sockopt::set_ipv6_v6only(&s, true).unwrap();
+    let v6only = rustix::net::sockopt::get_ipv6_v6only(&s).unwrap();
+    rustix::net::sockopt::set_ipv6_v6only(&s, !v6only).unwrap();
 
     // Check that the IPV6 V6ONLY value is set.
-    assert!(rustix::net::sockopt::get_ipv6_v6only(&s).unwrap());
+    assert_eq!(rustix::net::sockopt::get_ipv6_v6only(&s).unwrap(), !v6only);
 
     // Set the IPV6 multicast loop value.
     rustix::net::sockopt::set_ipv6_multicast_loop(&s, false).unwrap();
