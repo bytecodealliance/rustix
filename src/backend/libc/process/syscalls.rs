@@ -561,7 +561,7 @@ pub(crate) unsafe fn procctl(
 #[cfg(target_os = "linux")]
 pub(crate) fn pidfd_open(pid: Pid, flags: PidfdFlags) -> io::Result<OwnedFd> {
     unsafe {
-        syscall_ret_owned_fd(libc::syscall(
+        syscall_ret_owned_fd(c::syscall(
             c::SYS_pidfd_open,
             pid.as_raw_nonzero().get(),
             flags.bits(),

@@ -288,6 +288,7 @@ pub enum FileType {
     Symlink = linux_raw_sys::general::S_IFLNK as isize,
 
     /// `S_IFIFO`
+    #[doc(alias = "IFO")]
     Fifo = linux_raw_sys::general::S_IFIFO as isize,
 
     /// `S_IFSOCK`
@@ -335,7 +336,7 @@ impl FileType {
         }
     }
 
-    /// Construct a `FileType` from the `d_type` field of a `dirent`.
+    /// Construct a `FileType` from the `d_type` field of a `c::dirent`.
     #[inline]
     pub(crate) const fn from_dirent_d_type(d_type: u8) -> Self {
         match d_type as u32 {
@@ -645,7 +646,7 @@ pub type StatxTimestamp = linux_raw_sys::general::statx_timestamp;
 )))]
 pub type RawMode = linux_raw_sys::general::__kernel_mode_t;
 
-/// `mode_t
+/// `mode_t`
 #[cfg(any(
     target_arch = "x86",
     target_arch = "sparc",

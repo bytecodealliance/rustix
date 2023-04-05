@@ -1066,12 +1066,12 @@ pub(crate) mod sockopt {
     }
 
     #[inline]
-    pub(crate) fn get_socket_error(fd: BorrowedFd<'_>) -> io::Result<Result<(), crate::io::Errno>> {
+    pub(crate) fn get_socket_error(fd: BorrowedFd<'_>) -> io::Result<Result<(), io::Errno>> {
         let err: c::c_int = getsockopt(fd, c::SOL_SOCKET as _, c::SO_ERROR)?;
         Ok(if err == 0 {
             Ok(())
         } else {
-            Err(crate::io::Errno::from_raw_os_error(err))
+            Err(io::Errno::from_raw_os_error(err))
         })
     }
 

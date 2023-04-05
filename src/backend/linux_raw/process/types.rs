@@ -78,10 +78,12 @@ pub enum Resource {
     Rttime = linux_raw_sys::general::RLIMIT_RTTIME,
 }
 
-/// A signal number for use with [`kill_process`] and [`kill_process_group`].
+/// A signal number for use with [`kill_process`], [`kill_process_group`],
+/// and [`kill_current_process_group`].
 ///
 /// [`kill_process`]: crate::process::kill_process
 /// [`kill_process_group`]: crate::process::kill_process_group
+/// [`kill_current_process_group`]: crate::process::kill_current_process_group
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(u32)]
 pub enum Signal {
