@@ -83,7 +83,7 @@ flate2 = "1.0"
 criterion = "0.4"
 
 [target.'cfg(windows)'.dev-dependencies]
-ctor = "0.1.21"
+ctor = "0.2.0"
 
 # Add Criterion configuration, as described here:
 # <https://bheisler.github.io/criterion.rs/book/getting_started.html#step-1---add-dependency-to-cargotoml>
