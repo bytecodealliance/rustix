@@ -1,5 +1,5 @@
 #[test]
-fn test_sockopts() {
+fn test_sockopts_ipv4() {
     use rustix::net::{AddressFamily, Protocol, SocketType};
     use std::time::Duration;
 
@@ -33,6 +33,15 @@ fn test_sockopts() {
     assert!(!rustix::net::sockopt::get_tcp_nodelay(&s).unwrap());
     // On a new socket we shouldn't have an error yet.
     assert_eq!(rustix::net::sockopt::get_socket_error(&s).unwrap(), Ok(()));
+    assert!(!rustix::net::sockopt::get_socket_keepalive(&s).unwrap());
+    assert_ne!(
+        rustix::net::sockopt::get_socket_recv_buffer_size(&s).unwrap(),
+        0
+    );
+    assert_ne!(
+        rustix::net::sockopt::get_socket_send_buffer_size(&s).unwrap(),
+        0
+    );
 
     // Set a timeout.
     rustix::net::sockopt::set_socket_timeout(
@@ -70,6 +79,12 @@ fn test_sockopts() {
         #[cfg(not(bsd))]
         assert!(rustix::net::sockopt::get_socket_broadcast(&s).unwrap());
     }
+
+    // Set the keepalive flag;
+    rustix::net::sockopt::set_socket_keepalive(&s, true).unwrap();
+
+    // Check that the keepalive flag is set.
+    assert!(rustix::net::sockopt::get_socket_keepalive(&s).unwrap());
 
     // Set a linger.
     rustix::net::sockopt::set_socket_linger(&s, Some(Duration::new(1, 1))).unwrap();
@@ -111,4 +126,80 @@ fn test_sockopts() {
 
     // Check that the nodelay flag is set.
     assert!(rustix::net::sockopt::get_tcp_nodelay(&s).unwrap());
+
+    // Set the receive buffer size.
+    let size = rustix::net::sockopt::get_socket_recv_buffer_size(&s).unwrap();
+    rustix::net::sockopt::set_socket_recv_buffer_size(&s, size * 2).unwrap();
+
+    // Check that the receive buffer size is set.
+    assert!(rustix::net::sockopt::get_socket_recv_buffer_size(&s).unwrap() >= size * 2);
+
+    // Set the send buffer size.
+    let size = rustix::net::sockopt::get_socket_send_buffer_size(&s).unwrap();
+    rustix::net::sockopt::set_socket_send_buffer_size(&s, size * 4).unwrap();
+
+    // Check that the send buffer size is set.
+    assert!(rustix::net::sockopt::get_socket_send_buffer_size(&s).unwrap() >= size * 4);
+}
+
+#[test]
+fn test_sockopts_ipv6() {
+    use rustix::net::{AddressFamily, Protocol, SocketType};
+
+    let s = rustix::net::socket(
+        AddressFamily::INET6,
+        SocketType::STREAM,
+        Protocol::default(),
+    )
+    .unwrap();
+
+    assert_ne!(rustix::net::sockopt::get_ipv6_unicast_hops(&s).unwrap(), 0);
+    match rustix::net::sockopt::get_ipv6_multicast_loop(&s) {
+        Ok(multicast_loop) => assert!(multicast_loop),
+        Err(rustix::io::Errno::OPNOTSUPP) => (),
+        Err(rustix::io::Errno::INVAL) => (),
+        Err(err) => Err(err).unwrap(),
+    }
+    assert_ne!(rustix::net::sockopt::get_ipv6_unicast_hops(&s).unwrap(), 0);
+    match rustix::net::sockopt::get_ipv6_multicast_hops(&s) {
+        Ok(hops) => assert_eq!(hops, 0),
+        Err(rustix::io::Errno::NOPROTOOPT) => (),
+        Err(rustix::io::Errno::INVAL) => (),
+        Err(err) => Err(err).unwrap(),
+    };
+
+    // Set the IPV4 V6OONLY value.
+    let v6only = rustix::net::sockopt::get_ipv6_v6only(&s).unwrap();
+    rustix::net::sockopt::set_ipv6_v6only(&s, !v6only).unwrap();
+
+    // Check that the IPV6 V6ONLY value is set.
+    assert_eq!(rustix::net::sockopt::get_ipv6_v6only(&s).unwrap(), !v6only);
+
+    // Set the IPV6 multicast loop value.
+    match rustix::net::sockopt::set_ipv6_multicast_loop(&s, false) {
+        Ok(()) => {
+            // Check that the IPV6 multicast loop value is set.
+            match rustix::net::sockopt::get_ipv6_multicast_loop(&s) {
+                Ok(multicast_loop) => assert!(!multicast_loop),
+                Err(rustix::io::Errno::OPNOTSUPP) => (),
+                Err(rustix::io::Errno::INVAL) => (),
+                Err(err) => Err(err).unwrap(),
+            }
+        }
+        Err(rustix::io::Errno::OPNOTSUPP) => (),
+        Err(rustix::io::Errno::INVAL) => (),
+        Err(err) => Err(err).unwrap(),
+    }
+
+    // Set the IPV6 unicast hops value to the default value.
+    rustix::net::sockopt::set_ipv6_unicast_hops(&s, None).unwrap();
+
+    // Check that the IPV6 unicast hops value is set.
+    assert_ne!(rustix::net::sockopt::get_ipv6_unicast_hops(&s).unwrap(), 0);
+
+    // Set the IPV6 unicast hops value to a specific value.
+    rustix::net::sockopt::set_ipv6_unicast_hops(&s, Some(8)).unwrap();
+
+    // Check that the IPV6 unicast hops value is set.
+    assert_eq!(rustix::net::sockopt::get_ipv6_unicast_hops(&s).unwrap(), 8);
 }

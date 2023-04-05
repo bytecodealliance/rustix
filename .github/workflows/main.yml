@@ -91,12 +91,6 @@ jobs:
       if: matrix.rust == '1.48'
       run: |
         cargo update --package=once_cell --precise 1.14.0
-        cargo update --package=io-lifetimes --precise 1.0.6
-        for crate in test-crates/*; do
-            cd $crate
-            cargo update --package=io-lifetimes --precise 1.0.6
-            cd - >/dev/null
-        done
 
     - run: cargo check --workspace --release -vv --all-targets
     - run: cargo check --workspace --release -vv --features=all-apis --all-targets
@@ -532,12 +526,6 @@ jobs:
       if: matrix.rust == '1.48'
       run: |
         cargo update --package=once_cell --precise 1.14.0
-        cargo update --package=io-lifetimes --precise 1.0.6
-        for crate in test-crates/*; do
-            cd $crate
-            cargo update --package=io-lifetimes --precise 1.0.6
-            cd - >/dev/null
-        done
 
     - run: |
         # Run the tests, and check the prebuilt release libraries.
