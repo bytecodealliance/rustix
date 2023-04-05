@@ -129,7 +129,7 @@ pub struct IoSliceRaw<'a> {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 impl<'a> IoSliceRaw<'a> {
-    /// Creates a new IoSlice wrapping a byte slice.
+    /// Creates a new `IoSlice` wrapping a byte slice.
     pub fn from_slice(buf: &'a [u8]) -> Self {
         IoSliceRaw {
             _buf: c::iovec {
@@ -140,7 +140,7 @@ impl<'a> IoSliceRaw<'a> {
         }
     }
 
-    /// Creates a new IoSlice wrapping a mutable byte slice.
+    /// Creates a new `IoSlice` wrapping a mutable byte slice.
     pub fn from_slice_mut(buf: &'a mut [u8]) -> Self {
         IoSliceRaw {
             _buf: c::iovec {

@@ -165,7 +165,7 @@ pub(crate) fn preadv2(
 }
 
 /// At present, `libc` only has `preadv2` defined for glibc. On other
-/// ABIs, use `libc::syscall`.
+/// ABIs, use `c::syscall`.
 #[cfg(any(
     target_os = "android",
     all(target_os = "linux", not(target_env = "gnu")),
@@ -180,8 +180,8 @@ pub(crate) fn preadv2(
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     let nread = unsafe {
-        ret_ssize_t(libc::syscall(
-            libc::SYS_preadv2,
+        ret_ssize_t(c::syscall(
+            c::SYS_preadv2,
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), max_iov()) as c::c_int,
@@ -214,7 +214,7 @@ pub(crate) fn pwritev2(
 }
 
 /// At present, `libc` only has `pwritev2` defined for glibc. On other
-/// ABIs, use `libc::syscall`.
+/// ABIs, use `c::syscall`.
 #[cfg(any(
     target_os = "android",
     all(target_os = "linux", not(target_env = "gnu")),
@@ -229,8 +229,8 @@ pub(crate) fn pwritev2(
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     let nwritten = unsafe {
-        ret_ssize_t(libc::syscall(
-            libc::SYS_pwritev2,
+        ret_ssize_t(c::syscall(
+            c::SYS_pwritev2,
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), max_iov()) as c::c_int,

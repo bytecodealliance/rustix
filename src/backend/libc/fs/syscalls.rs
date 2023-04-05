@@ -1525,7 +1525,7 @@ pub(crate) fn statx(
     //
     // [it's deprecated]: https://patchwork.kernel.org/project/linux-fsdevel/patch/20200505095915.11275-7-mszeredi@redhat.com/
     #[cfg(not(any(target_os = "android", target_env = "musl")))]
-    const STATX__RESERVED: u32 = libc::STATX__RESERVED as u32;
+    const STATX__RESERVED: u32 = c::STATX__RESERVED as u32;
     #[cfg(any(target_os = "android", target_env = "musl"))]
     const STATX__RESERVED: u32 = linux_raw_sys::general::STATX__RESERVED;
     if (mask.bits() & STATX__RESERVED) == STATX__RESERVED {

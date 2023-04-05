@@ -269,7 +269,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
 
     // Quick check: if `fd` isn't a character device, it's not a tty.
     if FileType::from_raw_mode(fd_stat.st_mode) != FileType::CharacterDevice {
-        return Err(crate::io::Errno::NOTTY);
+        return Err(io::Errno::NOTTY);
     }
 
     // Check that `fd` is really a tty.
@@ -295,7 +295,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
 
     let path_stat = super::super::fs::syscalls::stat(path)?;
     if path_stat.st_dev != fd_stat.st_dev || path_stat.st_ino != fd_stat.st_ino {
-        return Err(crate::io::Errno::NODEV);
+        return Err(io::Errno::NODEV);
     }
 
     Ok(r)

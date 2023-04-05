@@ -138,8 +138,8 @@ bitflags! {
 }
 
 impl Mode {
-    /// Construct a `Mode` from the mode bits of the `st_mode` field of
-    /// a `Stat`.
+    /// Construct a `Mode` from the mode bits of the `st_mode` field of a
+    /// `Stat`.
     #[inline]
     pub const fn from_raw_mode(st_mode: RawMode) -> Self {
         Self::from_bits_truncate(st_mode)
@@ -440,6 +440,7 @@ pub enum FileType {
 impl FileType {
     /// Construct a `FileType` from the `S_IFMT` bits of the `st_mode` field of
     /// a `Stat`.
+    #[inline]
     pub const fn from_raw_mode(st_mode: RawMode) -> Self {
         match (st_mode as c::mode_t) & c::S_IFMT {
             c::S_IFREG => Self::RegularFile,
@@ -456,6 +457,7 @@ impl FileType {
     }
 
     /// Construct an `st_mode` value from `Stat`.
+    #[inline]
     pub const fn as_raw_mode(self) -> RawMode {
         match self {
             Self::RegularFile => c::S_IFREG as RawMode,
@@ -473,6 +475,7 @@ impl FileType {
 
     /// Construct a `FileType` from the `d_type` field of a `c::dirent`.
     #[cfg(not(any(solarish, target_os = "haiku", target_os = "redox")))]
+    #[inline]
     pub(crate) const fn from_dirent_d_type(d_type: u8) -> Self {
         match d_type {
             c::DT_REG => Self::RegularFile,
@@ -779,37 +782,37 @@ bitflags! {
     pub struct StatVfsMountFlags: u64 {
         /// `ST_MANDLOCK`
         #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
-        const MANDLOCK = libc::ST_MANDLOCK as u64;
+        const MANDLOCK = c::ST_MANDLOCK as u64;
 
         /// `ST_NOATIME`
         #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
-        const NOATIME = libc::ST_NOATIME as u64;
+        const NOATIME = c::ST_NOATIME as u64;
 
         /// `ST_NODEV`
         #[cfg(any(target_os = "aix", target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
-        const NODEV = libc::ST_NODEV as u64;
+        const NODEV = c::ST_NODEV as u64;
 
         /// `ST_NODIRATIME`
         #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
-        const NODIRATIME = libc::ST_NODIRATIME as u64;
+        const NODIRATIME = c::ST_NODIRATIME as u64;
 
         /// `ST_NOEXEC`
         #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
-        const NOEXEC = libc::ST_NOEXEC as u64;
+        const NOEXEC = c::ST_NOEXEC as u64;
 
         /// `ST_NOSUID`
-        const NOSUID = libc::ST_NOSUID as u64;
+        const NOSUID = c::ST_NOSUID as u64;
 
         /// `ST_RDONLY`
-        const RDONLY = libc::ST_RDONLY as u64;
+        const RDONLY = c::ST_RDONLY as u64;
 
         /// `ST_RELATIME`
         #[cfg(any(target_os = "android", all(target_os = "linux", target_env = "gnu")))]
-        const RELATIME = libc::ST_RELATIME as u64;
+        const RELATIME = c::ST_RELATIME as u64;
 
         /// `ST_SYNCHRONOUS`
         #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
-        const SYNCHRONOUS = libc::ST_SYNCHRONOUS as u64;
+        const SYNCHRONOUS = c::ST_SYNCHRONOUS as u64;
     }
 }
 
@@ -1106,7 +1109,7 @@ bitflags! {
 bitflags! {
     /// `MS_*` constants for use with [`change_mount`].
     ///
-    /// [`change_mount`]: crate::fs::mount::change_mount.
+    /// [`change_mount`]: crate::fs::mount::change_mount
     pub struct MountPropagationFlags: c::c_ulong {
         /// `MS_SHARED`
         const SHARED = c::MS_SHARED;

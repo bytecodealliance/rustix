@@ -232,7 +232,7 @@ impl Protocol {
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(u32)]
 pub enum Shutdown {
-    /// `SHUT_WR`—Disable further read operations.
+    /// `SHUT_RD`—Disable further read operations.
     Read = c::SHUT_RD,
     /// `SHUT_WR`—Disable further write operations.
     Write = c::SHUT_WR,

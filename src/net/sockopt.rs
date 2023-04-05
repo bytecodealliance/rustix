@@ -244,7 +244,7 @@ pub fn get_socket_timeout<Fd: AsFd>(fd: Fd, id: Timeout) -> io::Result<Option<Du
 /// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
 #[inline]
 #[doc(alias = "SO_ERROR")]
-pub fn get_socket_error<Fd: AsFd>(fd: Fd) -> io::Result<Result<(), crate::io::Errno>> {
+pub fn get_socket_error<Fd: AsFd>(fd: Fd) -> io::Result<Result<(), io::Errno>> {
     backend::net::syscalls::sockopt::get_socket_error(fd.as_fd())
 }
 
