@@ -95,6 +95,7 @@ impl Dir {
                 check_dirent_layout(dirent);
 
                 let result = DirEntry {
+                    #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku")))]
                     d_type: dirent.d_type,
 
                     #[cfg(not(any(freebsdlike, netbsdlike)))]
