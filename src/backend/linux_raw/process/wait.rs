@@ -49,11 +49,17 @@ pub(crate) trait SiginfoExt {
 impl SiginfoExt for siginfo_t {
     #[inline]
     fn si_code(&self) -> c_int {
-        // Technically union access, but only a union with padding
+        // SAFETY: This is technically a union access, but it's only a union
+        // with padding.
         unsafe { self.__bindgen_anon_1.__bindgen_anon_1.si_code }
     }
 
-    // Unsafe due to union access (it's like this in the libc crate too)
+    /// Return the exit status or signal number recorded in a `siginfo_t`.
+    ///
+    /// # Safety
+    ///
+    /// The `si_code` and `si_signo` fields must indicate that the `si_status`
+    /// field holds a valid value.
     #[inline]
     #[rustfmt::skip]
     unsafe fn si_status(&self) -> c_int {
