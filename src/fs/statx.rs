@@ -15,7 +15,7 @@ use compat::statx as _statx;
 ///
 /// This function returns [`io::Errno::NOSYS`] if `statx` is not available on
 /// the platform, such as Linux before 4.11. This also includes older Docker
-/// versions where the actual syscall fails with different error codes; Rustix
+/// versions where the actual syscall fails with different error codes; rustix
 /// handles this and translates them into `NOSYS`.
 ///
 /// # References

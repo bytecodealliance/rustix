@@ -433,18 +433,18 @@ const PROC_TRAPCAP_CTL_DISABLE: i32 = 2;
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(i32)]
 pub enum TrapCapBehavior {
-    /// Disable the SIGTRAP signal delivery on capability mode access
+    /// Disable the [`Signal::Trap`] signal delivery on capability mode access
     /// violations.
     Disable = PROC_TRAPCAP_CTL_DISABLE,
-    /// Enable the SIGTRAP signal delivery on capability mode access
+    /// Enable the [`Signal::Trap`] signal delivery on capability mode access
     /// violations.
     Enable = PROC_TRAPCAP_CTL_ENABLE,
 }
 
 /// Set the current value of the capability mode violation trapping behavior.
-/// If this behavior is enabled, the kernel would deliver a SIGTRAP signal on
-/// any return from a system call that would result in a `ENOTCAPABLE` or
-/// `ECAPMODE` error.
+/// If this behavior is enabled, the kernel would deliver a [`Signal::Trap`]
+/// signal on any return from a system call that would result in a
+/// [`io::Errno::NOTCAPABLE`]` or [`io::Errno::CAPMODE`] error.
 ///
 /// This behavior is inherited by the children of the process and is kept
 /// across `execve` calls.

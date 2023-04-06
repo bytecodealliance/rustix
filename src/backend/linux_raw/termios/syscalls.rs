@@ -207,9 +207,9 @@ pub(crate) fn cfgetispeed(termios: &Termios) -> u32 {
 
 #[inline]
 pub(crate) fn cfmakeraw(termios: &mut Termios) {
-    // From the Linux [`cfmakeraw` man page]:
+    // From the Linux [`cfmakeraw` manual page]:
     //
-    // [`cfmakeraw` man page]: https://man7.org/linux/man-pages/man3/cfmakeraw.3.html
+    // [`cfmakeraw` manual page]: https://man7.org/linux/man-pages/man3/cfmakeraw.3.html
     termios.c_iflag &= !(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
     termios.c_oflag &= !OPOST;
     termios.c_lflag &= !(ECHO | ECHONL | ICANON | ISIG | IEXTEN);

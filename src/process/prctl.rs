@@ -175,7 +175,7 @@ bitflags! {
     pub struct UnalignedAccessControl: u32 {
         /// Silently fix up unaligned user accesses.
         const NO_PRINT = 1;
-        /// Generate `SIGBUS` on unaligned user access.
+        /// Generate a [`Signal::Bus`] signal on unaligned user access.
         const SIGBUS = 2;
     }
 }
@@ -216,7 +216,8 @@ bitflags! {
     pub struct FloatingPointEmulationControl: u32 {
         /// Silently emulate floating point operations accesses.
         const NO_PRINT = 1;
-        /// Don't emulate floating point operations, send `SIGFPE` instead.
+        /// Don't emulate floating point operations, send a [`Signal::Fpe`]
+        /// signal instead.
         const SIGFPE = 2;
     }
 }
@@ -442,7 +443,7 @@ const PR_TSC_SIGSEGV: u32 = 2;
 pub enum TimeStampCounterReadability {
     /// Allow the use of the timestamp counter.
     Readable = PR_TSC_ENABLE,
-    /// Throw a `SIGSEGV` instead of reading the TSC.
+    /// Throw a [`Signal::Segv`] signal instead of reading the TSC.
     RaiseSIGSEGV = PR_TSC_SIGSEGV,
 }
 
@@ -721,9 +722,9 @@ pub struct PrctlMmMap {
     pub start_data: u64,
     /// Data section end address.
     pub end_data: u64,
-    /// brk() start address.
+    /// `brk` start address.
     pub start_brk: u64,
-    /// brk() current address.
+    /// `brk` current address.
     pub brk: u64,
     /// Stack start address.
     pub start_stack: u64,

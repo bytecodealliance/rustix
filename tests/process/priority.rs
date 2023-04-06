@@ -2,7 +2,10 @@ use rustix::process::nice;
 #[cfg(not(target_os = "redox"))]
 use rustix::process::{getpriority_process, setpriority_process};
 
-#[cfg(not(target_os = "freebsd"))] // FreeBSD's nice(3) doesn't return the old value.
+// FreeBSD's [`nice`] doesn't return the old value.
+//
+// [`nice`]: https://man.freebsd.org/cgi/man.cgi?query=nice&sektion=3
+#[cfg(not(target_os = "freebsd"))]
 #[test]
 fn test_priorities() {
     let old = nice(0).unwrap();

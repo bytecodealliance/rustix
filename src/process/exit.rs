@@ -24,11 +24,13 @@ pub const EXIT_SUCCESS: i32 = backend::process::types::EXIT_SUCCESS;
 /// [Linux]: https://man7.org/linux/man-pages/man3/exit.3.html
 pub const EXIT_FAILURE: i32 = backend::process::types::EXIT_FAILURE;
 
-/// The exit status used by a process terminated with `SIGABRT` signal.
+/// The exit status used by a process terminated with a [`Signal::Abort`]
+/// signal.
 ///
 /// # References
 ///  - [Linux]
 ///
 /// [Linux]: https://tldp.org/LDP/abs/html/exitcodes.html
+/// [`Signal::Abort`]: crate::process::Signal::Abort
 #[cfg(not(target_os = "wasi"))]
 pub const EXIT_SIGNALED_SIGABRT: i32 = backend::process::types::EXIT_SIGNALED_SIGABRT;

@@ -117,7 +117,7 @@ fn init_from_sysinfo_ehdr() -> Option<Vdso> {
                     .as_ptr();
                 num_dyn = phdr.p_memsz / size_of::<Elf_Dyn>();
             } else if phdr.p_type == PT_INTERP || phdr.p_type == PT_GNU_RELRO {
-                // Don't trust any ELF image that has an "interpreter" or that uses
+                // Don't trust any ELF image that has an “interpreter” or that uses
                 // RELRO, which is likely to be a user ELF image rather and not the
                 // kernel vDSO.
                 return None;

@@ -208,7 +208,7 @@ impl Signal {
 pub const EXIT_SUCCESS: c::c_int = 0;
 /// `EXIT_FAILURE`
 pub const EXIT_FAILURE: c::c_int = 1;
-/// The status value of a child terminated with `SIGABRT`.
+/// The status value of a child terminated with a [`Signal::Abort`] signal.
 pub const EXIT_SIGNALED_SIGABRT: c::c_int = 128 + linux_raw_sys::general::SIGABRT as i32;
 
 /// A process identifier as a raw integer.

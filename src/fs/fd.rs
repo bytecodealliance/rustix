@@ -55,17 +55,17 @@ pub struct Timestamps {
 
 /// The filesystem magic number for procfs.
 ///
-/// See [the `fstatfs` man page] for more information.
+/// See [the `fstatfs` manual page] for more information.
 ///
-/// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
+/// [the `fstatfs` manual page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub const PROC_SUPER_MAGIC: FsWord = backend::c::PROC_SUPER_MAGIC as FsWord;
 
 /// The filesystem magic number for NFS.
 ///
-/// See [the `fstatfs` man page] for more information.
+/// See [the `fstatfs` manual page] for more information.
 ///
-/// [the `fstatfs` man page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
+/// [the `fstatfs` manual page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub const NFS_SUPER_MAGIC: FsWord = backend::c::NFS_SUPER_MAGIC as FsWord;
 

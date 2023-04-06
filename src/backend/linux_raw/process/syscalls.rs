@@ -541,7 +541,8 @@ pub(crate) fn waitid(id: WaitId<'_>, options: WaitidOptions) -> io::Result<Optio
 
 #[inline]
 fn _waitid_all(options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
-    // waitid can return successfully without initializing the struct (no children found when using WNOHANG)
+    // `waitid` can return successfully without initializing the struct (no
+    // children found when using `WNOHANG`)
     let mut status = MaybeUninit::<c::siginfo_t>::zeroed();
     unsafe {
         ret(syscall!(
@@ -559,7 +560,8 @@ fn _waitid_all(options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
 
 #[inline]
 fn _waitid_pid(pid: Pid, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
-    // waitid can return successfully without initializing the struct (no children found when using WNOHANG)
+    // `waitid` can return successfully without initializing the struct (no
+    // children found when using `WNOHANG`)
     let mut status = MaybeUninit::<c::siginfo_t>::zeroed();
     unsafe {
         ret(syscall!(
@@ -577,7 +579,8 @@ fn _waitid_pid(pid: Pid, options: WaitidOptions) -> io::Result<Option<WaitidStat
 
 #[inline]
 fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
-    // waitid can return successfully without initializing the struct (no children found when using WNOHANG)
+    // `waitid` can return successfully without initializing the struct (no
+    // children found when using `WNOHANG`)
     let mut status = MaybeUninit::<c::siginfo_t>::zeroed();
     unsafe {
         ret(syscall!(

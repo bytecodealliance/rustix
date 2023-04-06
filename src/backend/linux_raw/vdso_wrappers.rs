@@ -293,7 +293,7 @@ unsafe fn _rustix_clock_gettime_via_syscall(
     ret(syscall!(__NR_clock_gettime, c_int(clockid), res))
 }
 
-/// A symbol pointing to an `int 0x80` instruction. This "function" is only
+/// A symbol pointing to an `int 0x80` instruction. This “function” is only
 /// called from assembly, and only with the x86 syscall calling convention,
 /// so its signature here is not its true signature.
 #[cfg(all(asm, target_arch = "x86"))]

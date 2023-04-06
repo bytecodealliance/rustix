@@ -13,9 +13,12 @@ bitflags! {
     pub struct WaitOptions: u32 {
         /// Return immediately if no child has exited.
         const NOHANG = backend::process::wait::WNOHANG as _;
-        /// Return if a child has stopped (but not traced via `ptrace(2)`)
+        /// Return if a child has stopped (but not traced via [`ptrace`])
+        ///
+        /// [`ptrace`]: https://man7.org/linux/man-pages/man2/ptrace.2.html
         const UNTRACED = backend::process::wait::WUNTRACED as _;
-        /// Return if a stopped child has been resumed by delivery of `SIGCONT`
+        /// Return if a stopped child has been resumed by delivery of
+        /// [`Signal::Cont`].
         const CONTINUED = backend::process::wait::WCONTINUED as _;
     }
 }
@@ -26,7 +29,8 @@ bitflags! {
     pub struct WaitidOptions: u32 {
         /// Return immediately if no child has exited.
         const NOHANG = backend::process::wait::WNOHANG as _;
-        /// Return if a stopped child has been resumed by delivery of `SIGCONT`
+        /// Return if a stopped child has been resumed by delivery of
+        /// [`Signal::Cont`]
         const CONTINUED = backend::process::wait::WCONTINUED as _;
         /// Wait for processed that have exited.
         const EXITED = backend::process::wait::WEXITED as _;
