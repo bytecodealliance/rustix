@@ -292,7 +292,7 @@ bitflags::bitflags! {
         /// The process executed a new process.
         const EXEC = c::NOTE_EXEC;
 
-        /// Follow the process through fork() calls (write only).
+        /// Follow the process through `fork()` calls (write only).
         const TRACK = c::NOTE_TRACK;
 
         /// An error has occurred with following the process.
@@ -307,13 +307,13 @@ bitflags::bitflags! {
         /// Ignore the user input flags.
         const NOINPUT = c::NOTE_FFNOP;
 
-        /// Bitwise AND fflags.
+        /// Bitwise AND `fflags`.
         const AND = c::NOTE_FFAND;
 
-        /// Bitwise OR fflags.
+        /// Bitwise OR `fflags`.
         const OR = c::NOTE_FFOR;
 
-        /// Copy fflags.
+        /// Copy `fflags`.
         const COPY = c::NOTE_FFCOPY;
 
         /// Control mask for operations.

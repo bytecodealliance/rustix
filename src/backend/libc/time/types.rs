@@ -328,7 +328,7 @@ bitflags! {
 #[repr(i32)]
 #[non_exhaustive]
 pub enum TimerfdClockId {
-    /// `CLOCK_REALTIME`—A clock that tells the "real" time.
+    /// `CLOCK_REALTIME`—A clock that tells the “real” time.
     ///
     /// This is a clock that tells the amount of time elapsed since the
     /// Unix epoch, 1970-01-01T00:00:00Z. The clock is externally settable, so

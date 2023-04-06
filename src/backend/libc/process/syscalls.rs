@@ -426,7 +426,8 @@ pub(crate) fn waitid(id: WaitId<'_>, options: WaitidOptions) -> io::Result<Optio
 #[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 #[inline]
 fn _waitid_all(options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
-    // waitid can return successfully without initializing the struct (no children found when using WNOHANG)
+    // `waitid` can return successfully without initializing the struct (no
+    // children found when using `WNOHANG`)
     let mut status = MaybeUninit::<c::siginfo_t>::zeroed();
     unsafe {
         ret(c::waitid(
@@ -443,7 +444,8 @@ fn _waitid_all(options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
 #[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 #[inline]
 fn _waitid_pid(pid: Pid, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
-    // waitid can return successfully without initializing the struct (no children found when using WNOHANG)
+    // `waitid` can return successfully without initializing the struct (no
+    // children found when using `WNOHANG`)
     let mut status = MaybeUninit::<c::siginfo_t>::zeroed();
     unsafe {
         ret(c::waitid(
@@ -460,7 +462,8 @@ fn _waitid_pid(pid: Pid, options: WaitidOptions) -> io::Result<Option<WaitidStat
 #[cfg(target_os = "linux")]
 #[inline]
 fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
-    // waitid can return successfully without initializing the struct (no children found when using WNOHANG)
+    // `waitid` can return successfully without initializing the struct (no
+    // children found when using `WNOHANG`)
     let mut status = MaybeUninit::<c::siginfo_t>::zeroed();
     unsafe {
         ret(c::waitid(
@@ -484,10 +487,13 @@ fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitidOptions) -> io::Result<Optio
 #[inline]
 unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitidStatus> {
     let status = status.assume_init();
-    // si_pid is supposedly the better way to check that the struct has been filled, e.g. the Linux manpage says
-    // about the WNOHANG case "zero out the si_pid field before the call and check for a nonzero value".
-    // But e.g. NetBSD/OpenBSD don't have it exposed in the libc crate for now, and some platforms don't have it at all.
-    // For simplicity, always check si_signo. We have zero-initialized the whole struct, and all kernels should set SIGCHLD here.
+    // `si_pid` is supposedly the better way to check that the struct has been
+    // filled, e.g. the Linux manpage says about the `WNOHANG` case “zero out
+    // the si_pid field before the call and check for a nonzero value”.
+    // But e.g. NetBSD/OpenBSD don't have it exposed in the libc crate for now, and
+    // some platforms don't have it at all. For simplicity, always check
+    // `si_signo`. We have zero-initialized the whole struct, and all kernels
+    // should set `SIGCHLD` here.
     if status.si_signo == 0 {
         None
     } else {

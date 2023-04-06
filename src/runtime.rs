@@ -211,7 +211,7 @@ pub use backend::runtime::tls::StartupTlsInfo;
 /// > It is better you
 /// > Do not.
 ///
-/// - "Rules", by Karla Kuskin
+/// - “Rules”, by Karla Kuskin
 ///
 /// [`MAP_SHARED`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mmap.html
 /// [not considered unsafe]: https://doc.rust-lang.org/reference/behavior-not-considered-unsafe.html#deadlocks

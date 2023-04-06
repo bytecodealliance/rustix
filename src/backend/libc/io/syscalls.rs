@@ -245,8 +245,8 @@ pub(crate) fn pwritev2(
 // revision 326ef470a8b379a180d6dc4bbef08990698a737a.
 
 // The maximum read limit on most POSIX-like systems is `SSIZE_MAX`, with the
-// man page quoting that if the count of bytes to read is greater than
-// `SSIZE_MAX` the result is "unspecified".
+// manual page quoting that if the count of bytes to read is greater than
+// `SSIZE_MAX` the result is “unspecified”.
 //
 // On macOS, however, apparently the 64-bit libc is either buggy or
 // intentionally showing odd behavior by rejecting any read with a size larger

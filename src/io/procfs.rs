@@ -181,10 +181,10 @@ fn check_procfs(file: BorrowedFd<'_>) -> io::Result<()> {
     Ok(())
 }
 
-/// Check whether the given directory handle is a mount point. We use a
-/// `renameat` call that would otherwise fail, but which fails with `EXDEV`
-/// first if it would cross a mount point.
+/// Check whether the given directory handle is a mount point.
 fn is_mountpoint(file: BorrowedFd<'_>) -> bool {
+    // We use a `renameat` call that would otherwise fail, but which fails with
+    // `XDEV` first if it would cross a mount point.
     let err = renameat(file, cstr!("../."), file, cstr!(".")).unwrap_err();
     match err {
         io::Errno::XDEV => true,  // the rename failed due to crossing a mount point

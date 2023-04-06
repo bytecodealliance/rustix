@@ -26,7 +26,8 @@ pub fn gettid() -> Pid {
 /// though that is in violation of the POSIX standard.
 ///
 /// For details on this distinction, see the C library vs. kernel differences
-/// in the [man page][linux_notes]. This call implements the kernel behavior.
+/// in the [manual page][linux_notes]. This call implements the kernel
+/// behavior.
 ///
 /// # References
 ///  - [POSIX]
@@ -50,7 +51,7 @@ pub fn set_thread_uid(uid: Uid) -> io::Result<()> {
 /// though that is in violation of the POSIX standard.
 ///
 /// For details on this distinction, see the C library vs. kernel differences
-/// in the [man page][linux_notes] and the notes in [`set_thread_uid`]. This
+/// in the [manual page][linux_notes] and the notes in [`set_thread_uid`]. This
 /// call implements the kernel behavior.
 ///
 /// # References
@@ -73,7 +74,8 @@ pub fn set_thread_res_uid(ruid: Uid, euid: Uid, suid: Uid) -> io::Result<()> {
 /// though that is in violation of the POSIX standard.
 ///
 /// For details on this distinction, see the C library vs. kernel differences
-/// in the [man page][linux_notes]. This call implements the kernel behavior.
+/// in the [manual page][linux_notes]. This call implements the kernel
+/// behavior.
 ///
 /// # References
 ///  - [POSIX]
@@ -97,7 +99,7 @@ pub fn set_thread_gid(gid: Gid) -> io::Result<()> {
 /// though that is in violation of the POSIX standard.
 ///
 /// For details on this distinction, see the C library vs. kernel differences
-/// in the [man page][linux_notes] and the notes in [`set_thread_gid`]. This
+/// in the [manual page][linux_notes] and the notes in [`set_thread_gid`]. This
 /// call implements the kernel behavior.
 ///
 /// # References

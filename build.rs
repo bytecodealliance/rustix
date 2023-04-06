@@ -3,7 +3,7 @@ use cc::Build;
 use std::env::var;
 use std::io::Write;
 
-/// The directory for out-of-line ("outline") libraries.
+/// The directory for out-of-line (“outline”) libraries.
 const OUTLINE_PATH: &str = "src/backend/linux_raw/arch/outline";
 
 fn main() {

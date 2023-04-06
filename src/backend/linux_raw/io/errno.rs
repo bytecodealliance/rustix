@@ -60,7 +60,7 @@ impl Errno {
         Self::from_errno(raw as u32)
     }
 
-    /// Convert from a C errno value (which is positive) to an `Errno`.
+    /// Convert from a C `errno` value (which is positive) to an `Errno`.
     const fn from_errno(raw: u32) -> Self {
         // We store error values in negated form, so that we don't have to negate
         // them after every syscall.

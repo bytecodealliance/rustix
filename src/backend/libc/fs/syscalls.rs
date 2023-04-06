@@ -549,7 +549,7 @@ pub(crate) fn utimensat(
                     flags_arg,
                 ) != 0
                 {
-                    // Translate expected errno codes into ad-hoc integer
+                    // Translate expected `errno` codes into ad-hoc integer
                     // values suitable for exit statuses.
                     let code = match libc_errno::errno().0 {
                         c::EACCES => 2,
@@ -573,7 +573,8 @@ pub(crate) fn utimensat(
                 let mut wstatus = 0;
                 let _ = ret_c_int(c::waitpid(child_pid, &mut wstatus, 0))?;
                 if c::WIFEXITED(wstatus) {
-                    // Translate our ad-hoc exit statuses back to errno codes.
+                    // Translate our ad-hoc exit statuses back to `errno`
+                    // codes.
                     match c::WEXITSTATUS(wstatus) {
                         0 => Ok(()),
                         2 => Err(io::Errno::ACCESS),
@@ -1638,11 +1639,11 @@ pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<CString> {
     // instead.
     let mut buf = alloc::vec![0; c::PATH_MAX as usize];
 
-    // From the [macOS `fcntl` man page]:
+    // From the [macOS `fcntl` manual page]:
     // `F_GETPATH` - Get the path of the file descriptor `Fildes`. The argument
     //               must be a buffer of size `MAXPATHLEN` or greater.
     //
-    // [macOS `fcntl` man page]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
+    // [macOS `fcntl` manual page]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
     unsafe {
         ret(c::fcntl(borrowed_fd(fd), c::F_GETPATH, buf.as_mut_ptr()))?;
     }
@@ -1659,7 +1660,7 @@ pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<CString> {
 
 #[cfg(apple)]
 pub(crate) fn fcntl_rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::Result<()> {
-    // From the [macOS `fcntl` man page]:
+    // From the [macOS `fcntl` manual page]:
     // `F_RDADVISE` - Issue an advisory read async with no copy to user.
     //
     // The `F_RDADVISE` command operates on the following structure which holds
@@ -1672,7 +1673,7 @@ pub(crate) fn fcntl_rdadvise(fd: BorrowedFd<'_>, offset: u64, len: u64) -> io::R
     // };
     // ```
     //
-    // [macOS `fcntl` man page]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
+    // [macOS `fcntl` manual page]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
     let ra_offset = match offset.try_into() {
         Ok(len) => len,
         // If this conversion fails, the user is providing an offset outside

@@ -129,20 +129,23 @@ impl TryFrom<i32> for SecureComputingMode {
 /*
 /// Get the secure computing mode of the calling thread.
 ///
-/// If the caller is not in secure computing mode, this returns [`SecureComputingMode::Disabled`].
-/// If the caller is in strict secure computing mode, then this call will cause a `SIGKILL` signal
-/// to be sent to the process.
-/// If the caller is in filter mode, and this system call is allowed by the seccomp filters,
-/// it returns [`SecureComputingMode::Filter`]; otherwise, the process is killed with
-/// a `SIGKILL` signal.
+/// If the caller is not in secure computing mode, this returns
+/// [`SecureComputingMode::Disabled`]. If the caller is in strict secure
+/// computing mode, then this call will cause a [`Signal::Kill`] signal to be
+/// sent to the process. If the caller is in filter mode, and this system call
+/// is allowed by the seccomp filters, it returns
+/// [`SecureComputingMode::Filter`]; otherwise, the process is killed with
+/// a [`Signal::Kill`] signal.
 ///
-/// Since Linux 3.8, the Seccomp field of the `/proc/[pid]/status` file provides a method
-/// of obtaining the same information, without the risk that the process is killed; see `proc(5)`.
+/// Since Linux 3.8, the Seccomp field of the `/proc/[pid]/status` file
+/// provides a method of obtaining the same information, without the risk that
+/// the process is killed; see [the `proc` manual page].
 ///
 /// # References
 ///  - [`prctl(PR_GET_SECCOMP,...)`]
 ///
 /// [`prctl(PR_GET_SECCOMP,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
+/// [the `proc` manual page]: https://man7.org/linux/man-pages/man5/proc.5.html
 #[inline]
 pub fn secure_computing_mode() -> io::Result<SecureComputingMode> {
     unsafe { prctl_1arg(PR_GET_SECCOMP) }.and_then(TryInto::try_into)
