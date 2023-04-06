@@ -1,11 +1,10 @@
 use super::super::c;
 use super::super::conv::owned_fd;
+use super::super::offset::libc_ino_t;
 #[cfg(not(any(solarish, target_os = "haiku")))]
 use super::types::FileType;
 use crate::fd::{AsFd, BorrowedFd};
-use crate::ffi::CStr;
-#[cfg(target_os = "wasi")]
-use crate::ffi::CString;
+use crate::ffi::{CStr, CString};
 use crate::fs::{fcntl_getfl, fstat, openat, Mode, OFlags, Stat};
 #[cfg(not(any(
     solarish,
@@ -22,14 +21,11 @@ use crate::io;
 use crate::process::fchdir;
 #[cfg(target_os = "wasi")]
 use alloc::borrow::ToOwned;
-#[cfg(not(any(linux_like, target_os = "openbsd")))]
-use c::dirent as libc_dirent;
 #[cfg(not(linux_like))]
 use c::readdir as libc_readdir;
 #[cfg(linux_like)]
-use c::{dirent64 as libc_dirent, readdir64 as libc_readdir};
+use c::readdir64 as libc_readdir;
 use core::fmt;
-use core::mem::zeroed;
 use core::ptr::NonNull;
 use libc_errno::{errno, set_errno, Errno};
 
@@ -91,16 +87,24 @@ impl Dir {
         } else {
             // We successfully read an entry.
             unsafe {
+                let dirent = &*dirent_ptr;
+
                 // We have our own copy of OpenBSD's dirent; check that the
                 // layout minimally matches libc's.
                 #[cfg(target_os = "openbsd")]
-                check_dirent_layout(&*dirent_ptr);
+                check_dirent_layout(dirent);
 
                 let result = DirEntry {
-                    dirent: read_dirent(&*dirent_ptr.cast()),
+                    #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku")))]
+                    d_type: dirent.d_type,
 
-                    #[cfg(target_os = "wasi")]
-                    name: CStr::from_ptr((*dirent_ptr).d_name.as_ptr()).to_owned(),
+                    #[cfg(not(any(freebsdlike, netbsdlike)))]
+                    d_ino: dirent.d_ino,
+
+                    #[cfg(any(freebsdlike, netbsdlike))]
+                    d_fileno: dirent.d_fileno,
+
+                    name: CStr::from_ptr(dirent.d_name.as_ptr()).to_owned(),
                 };
 
                 Some(Ok(result))
@@ -142,130 +146,6 @@ impl Dir {
     }
 }
 
-// A `dirent` pointer returned from `readdir` may not point to a full `dirent`
-// struct, as the name is NUL-terminated and memory may not be allocated for
-// the full extent of the struct. Copy the fields one at a time.
-unsafe fn read_dirent(input: &libc_dirent) -> libc_dirent {
-    #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku")))]
-    let d_type = input.d_type;
-
-    #[cfg(not(any(
-        apple,
-        freebsdlike,
-        target_os = "aix",
-        target_os = "haiku",
-        target_os = "netbsd",
-        target_os = "wasi",
-    )))]
-    let d_off = input.d_off;
-
-    #[cfg(target_os = "aix")]
-    let d_offset = input.d_offset;
-
-    #[cfg(not(any(freebsdlike, netbsdlike)))]
-    let d_ino = input.d_ino;
-
-    #[cfg(any(freebsdlike, netbsdlike))]
-    let d_fileno = input.d_fileno;
-
-    #[cfg(not(any(target_os = "dragonfly", target_os = "wasi")))]
-    let d_reclen = input.d_reclen;
-
-    #[cfg(any(bsd, target_os = "aix"))]
-    let d_namlen = input.d_namlen;
-
-    #[cfg(apple)]
-    let d_seekoff = input.d_seekoff;
-
-    #[cfg(target_os = "haiku")]
-    let d_dev = input.d_dev;
-    #[cfg(target_os = "haiku")]
-    let d_pdev = input.d_pdev;
-    #[cfg(target_os = "haiku")]
-    let d_pino = input.d_pino;
-
-    // Construct the input. Rust will give us an error if any OS has a input
-    // with a field that we missed here. And we can avoid blindly copying the
-    // whole `d_name` field, which may not be entirely allocated.
-    #[cfg_attr(target_os = "wasi", allow(unused_mut))]
-    #[cfg(not(freebsdlike))]
-    let mut dirent = libc_dirent {
-        #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku")))]
-        d_type,
-        #[cfg(not(any(
-            apple,
-            target_os = "aix",
-            target_os = "freebsd",  // Until FreeBSD 12
-            target_os = "haiku",
-            target_os = "netbsd",
-            target_os = "wasi",
-        )))]
-        d_off,
-        #[cfg(target_os = "aix")]
-        d_offset,
-        #[cfg(not(any(netbsdlike, target_os = "freebsd")))]
-        d_ino,
-        #[cfg(any(netbsdlike, target_os = "freebsd"))]
-        d_fileno,
-        #[cfg(not(target_os = "wasi"))]
-        d_reclen,
-        #[cfg(any(apple, netbsdlike, target_os = "aix", target_os = "freebsd"))]
-        d_namlen,
-        #[cfg(apple)]
-        d_seekoff,
-        // The `d_name` field is NUL-terminated, and we need to be careful not
-        // to read bytes past the NUL, even though they're within the nominal
-        // extent of the `struct dirent`, because they may not be allocated. So
-        // don't read it from `dirent_ptr`.
-        //
-        // In theory this could use `MaybeUninit::uninit().assume_init()`, but
-        // that [invokes undefined behavior].
-        //
-        // [invokes undefined behavior]: https://doc.rust-lang.org/stable/core/mem/union.MaybeUninit.html#initialization-invariant
-        d_name: zeroed(),
-        #[cfg(target_os = "openbsd")]
-        __d_padding: zeroed(),
-        #[cfg(target_os = "haiku")]
-        d_dev,
-        #[cfg(target_os = "haiku")]
-        d_pdev,
-        #[cfg(target_os = "haiku")]
-        d_pino,
-    };
-    /*
-    pub d_ino: ino_t,
-    pub d_pino: i64,
-    pub d_reclen: ::c_ushort,
-    pub d_name: [::c_char; 1024], // Max length is _POSIX_PATH_MAX
-    */
-
-    // On dragonfly and FreeBSD 12, `dirent` has some non-public padding fields
-    // so we can't directly initialize it.
-    #[cfg(freebsdlike)]
-    let mut dirent = {
-        let mut dirent: libc_dirent = zeroed();
-        dirent.d_fileno = d_fileno;
-        dirent.d_namlen = d_namlen;
-        dirent.d_type = d_type;
-        #[cfg(target_os = "freebsd")]
-        {
-            dirent.d_reclen = d_reclen;
-        }
-        dirent
-    };
-
-    // Copy from d_name, reading up to and including the first NUL.
-    #[cfg(not(target_os = "wasi"))]
-    {
-        let name_len = CStr::from_ptr(input.d_name.as_ptr())
-            .to_bytes_with_nul()
-            .len();
-        dirent.d_name[..name_len].copy_from_slice(&input.d_name[..name_len]);
-    }
-
-    dirent
-}
-
 /// `Dir` implements `Send` but not `Sync`, because we use `readdir` which is
 /// not guaranteed to be thread-safe. Users can wrap this in a `Mutex` if they
 /// need `Sync`, which is effectively what'd need to do to implement `Sync`
@@ -299,9 +179,15 @@ impl fmt::Debug for Dir {
 /// `struct dirent`
 #[derive(Debug)]
 pub struct DirEntry {
-    dirent: libc_dirent,
+    #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku")))]
+    d_type: u8,
 
-    #[cfg(target_os = "wasi")]
+    #[cfg(not(any(freebsdlike, netbsdlike)))]
+    d_ino: libc_ino_t,
+
+    #[cfg(any(freebsdlike, netbsdlike))]
+    d_fileno: libc_ino_t,
+
     name: CString,
 }
 
@@ -309,12 +195,6 @@ impl DirEntry {
     /// Returns the file name of this directory entry.
     #[inline]
     pub fn file_name(&self) -> &CStr {
-        #[cfg(not(target_os = "wasi"))]
-        unsafe {
-            CStr::from_ptr(self.dirent.d_name.as_ptr())
-        }
-
-        #[cfg(target_os = "wasi")]
         &self.name
     }
 
@@ -322,14 +202,14 @@ impl DirEntry {
     #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku")))]
     #[inline]
     pub fn file_type(&self) -> FileType {
-        FileType::from_dirent_d_type(self.dirent.d_type)
+        FileType::from_dirent_d_type(self.d_type)
     }
 
     /// Return the inode number of this directory entry.
     #[cfg(not(any(freebsdlike, netbsdlike)))]
     #[inline]
     pub fn ino(&self) -> u64 {
-        self.dirent.d_ino as u64
+        self.d_ino as u64
     }
 
     /// Return the inode number of this directory entry.
@@ -337,7 +217,7 @@ impl DirEntry {
     #[inline]
     pub fn ino(&self) -> u64 {
         #[allow(clippy::useless_conversion)]
-        self.dirent.d_fileno.into()
+        self.d_fileno.into()
     }
 }
 

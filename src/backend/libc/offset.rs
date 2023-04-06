@@ -6,15 +6,15 @@ use super::c;
 #[cfg(not(any(linux_like, windows)))]
 #[cfg(feature = "fs")]
 pub(super) use c::{
-    fstat as libc_fstat, fstatat as libc_fstatat, ftruncate as libc_ftruncate, lseek as libc_lseek,
-    off_t as libc_off_t,
+    fstat as libc_fstat, fstatat as libc_fstatat, ftruncate as libc_ftruncate, ino_t as libc_ino_t,
+    lseek as libc_lseek, off_t as libc_off_t,
 };
 
 #[cfg(linux_like)]
 #[cfg(feature = "fs")]
 pub(super) use c::{
     fstat64 as libc_fstat, fstatat64 as libc_fstatat, ftruncate64 as libc_ftruncate,
-    lseek64 as libc_lseek, off64_t as libc_off_t,
+    ino64_t as libc_ino_t, lseek64 as libc_lseek, off64_t as libc_off_t,
 };
 
 #[cfg(linux_like)]
