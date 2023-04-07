@@ -58,8 +58,8 @@ impl SiginfoExt for siginfo_t {
     ///
     /// # Safety
     ///
-    /// The `si_code` and `si_signo` fields must indicate that the `si_status`
-    /// field holds a valid value.
+    /// `si_signo` must equal `SIGCHLD` (as it is guaranteed to do after a
+    /// `waitid` call).
     #[inline]
     #[rustfmt::skip]
     unsafe fn si_status(&self) -> c_int {
