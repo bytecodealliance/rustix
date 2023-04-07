@@ -355,13 +355,13 @@ impl UserDefinedFlags {
 ///  - [FreeBSD]
 ///  - [OpenBSD]
 ///  - [NetBSD]
-///  - [DragonflyBSD]
+///  - [DragonFly BSD]
 ///
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/kqueue.2.html
 /// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=kqueue&sektion=2
 /// [OpenBSD]: https://man.openbsd.org/kqueue.2
 /// [NetBSD]: https://man.netbsd.org/kqueue.2
-/// [DragonflyBSD]: https://www.dragonflybsd.org/cgi/web-man/?command=kqueue
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=kqueue&section=2
 pub fn kqueue() -> io::Result<OwnedFd> {
     syscalls::kqueue()
 }
@@ -382,13 +382,13 @@ pub fn kqueue() -> io::Result<OwnedFd> {
 ///  - [FreeBSD]
 ///  - [OpenBSD]
 ///  - [NetBSD]
-///  - [DragonflyBSD]
+///  - [DragonFly BSD]
 ///
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/kevent.2.html
 /// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=kevent&sektion=2
 /// [OpenBSD]: https://man.openbsd.org/kevent.2
 /// [NetBSD]: https://man.netbsd.org/kevent.2
-/// [DragonflyBSD]: https://www.dragonflybsd.org/cgi/web-man/?command=kevent
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=kevent&section=2
 pub unsafe fn kevent(
     kqueue: impl AsFd,
     changelist: &[Event],

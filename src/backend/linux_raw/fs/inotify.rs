@@ -80,7 +80,7 @@ pub fn inotify_init(flags: CreateFlags) -> io::Result<OwnedFd> {
     syscalls::inotify_init1(flags)
 }
 
-/// `inotify_add_watch(self, path, flags)`—Adds a watch to inotify
+/// `inotify_add_watch(self, path, flags)`—Adds a watch to inotify.
 ///
 /// This registers or updates a watch for the filesystem path `path`
 /// and returns a watch descriptor corresponding to this watch.

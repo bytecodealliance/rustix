@@ -269,7 +269,7 @@ mod readwrite_pv {
 #[cfg(apple)]
 pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
 
-// GLIBC added `preadv64v2` and `pwritev64v2` in version 2.26.
+// glibc added `preadv64v2` and `pwritev64v2` in version 2.26.
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 mod readwrite_pv64v2 {
     use super::c;
@@ -300,7 +300,7 @@ mod readwrite_pv64v2 {
         offset: c::off64_t,
         flags: c::c_int,
     ) -> c::ssize_t {
-        // Older GLIBC lacks `preadv64v2`, so use the `weak!` mechanism to
+        // Older glibc lacks `preadv64v2`, so use the `weak!` mechanism to
         // test for it, and call back to `c::syscall`. We don't use
         // `weak_or_syscall` here because we need to pass the 64-bit offset
         // specially.

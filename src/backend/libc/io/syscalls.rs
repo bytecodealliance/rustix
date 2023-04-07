@@ -475,7 +475,13 @@ pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, _flags: DupFlags) -> i
 
 #[cfg(apple)]
 pub(crate) fn ioctl_fioclex(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { ret(c::ioctl(borrowed_fd(fd), c::FIOCLEX)) }
+    unsafe {
+        ret(c::ioctl(
+            borrowed_fd(fd),
+            c::FIOCLEX,
+            core::ptr::null_mut::<u8>(),
+        ))
+    }
 }
 
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]

@@ -722,7 +722,7 @@ pub const CBAUDEX: c::c_uint = c::CBAUDEX;
 pub const CIBAUD: c::tcflag_t = c::CIBAUD;
 
 /// `CIBAUD`
-// GLIBC on powerpc lacks a definition for `CIBAUD`, even though the Linux
+// glibc on powerpc lacks a definition for `CIBAUD`, even though the Linux
 // headers and Musl on powerpc both have one. So define it manually.
 #[cfg(any(target_arch = "powerpc", target_arch = "powerpc64"))]
 pub const CIBAUD: c::tcflag_t = 0o77600000;

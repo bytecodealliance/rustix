@@ -162,7 +162,7 @@ pub(crate) fn openat(
     mode: Mode,
 ) -> io::Result<OwnedFd> {
     // Work around <https://sourceware.org/bugzilla/show_bug.cgi?id=17523>.
-    // GLIBC versions before 2.25 don't handle `O_TMPFILE` correctly.
+    // glibc versions before 2.25 don't handle `O_TMPFILE` correctly.
     #[cfg(all(unix, target_env = "gnu"))]
     if oflags.contains(OFlags::TMPFILE) && crate::backend::if_glibc_is_less_than_2_25() {
         return openat_via_syscall(dirfd, path, oflags, mode);

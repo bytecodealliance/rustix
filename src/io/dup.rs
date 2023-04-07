@@ -21,12 +21,24 @@ pub use backend::io::types::DupFlags;
 ///  - [POSIX]
 ///  - [Linux]
 ///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [file description]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_258
 /// [`fcntl_dupfd_cloexec`]: crate::io::fcntl_dupfd_cloexec
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/dup.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/dup.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=dup&sektion=2
+/// [NetBSD]: https://man.netbsd.org/dup.2
+/// [OpenBSD]: http://man.openbsd.org/dup.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=dup&section=2
+/// [illumos]: https://illumos.org/man/2/dup
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Duplicating-Descriptors.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
@@ -51,12 +63,24 @@ pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 ///  - [POSIX]
 ///  - [Linux]
 ///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [file description]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_258
 /// [`fcntl_dupfd_cloexec`]: crate::io::fcntl_dupfd_cloexec
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/dup2.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup2.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/dup2.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=dup2&sektion=2
+/// [NetBSD]: https://man.netbsd.org/dup2.2
+/// [OpenBSD]: http://man.openbsd.org/dup2.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=dup2&section=2
+/// [illumos]: https://illumos.org/man/2/dup
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Duplicating-Descriptors.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {
@@ -73,9 +97,17 @@ pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {
 ///
 /// # References
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
 ///
 /// [file description]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_258
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup3.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=dup3&sektion=3
+/// [NetBSD]: https://man.netbsd.org/dup3.2
+/// [OpenBSD]: http://man.openbsd.org/dup3.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=dup3&section=3
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 #[inline]
 pub fn dup3<Fd: AsFd>(fd: Fd, new: &mut OwnedFd, flags: DupFlags) -> io::Result<()> {
