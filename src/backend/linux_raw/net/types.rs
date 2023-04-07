@@ -241,22 +241,12 @@ pub enum Shutdown {
 }
 
 bitflags! {
-    /// `SOCK_*` constants for use with [`accept_with`] and [`acceptfrom_with`].
+    /// `SOCK_*` constants for use with [`socket_with`], [`accept_with`] and
+    /// [`acceptfrom_with`].
     ///
+    /// [`socket_with`]: crate::net::socket_with
     /// [`accept_with`]: crate::net::accept_with
     /// [`acceptfrom_with`]: crate::net::acceptfrom_with
-    pub struct AcceptFlags: c::c_uint {
-        /// `SOCK_NONBLOCK`
-        const NONBLOCK = c::O_NONBLOCK;
-        /// `SOCK_CLOEXEC`
-        const CLOEXEC = c::O_CLOEXEC;
-    }
-}
-
-bitflags! {
-    /// `SOCK_*` constants for use with [`socket`].
-    ///
-    /// [`socket`]: crate::net::socket
     pub struct SocketFlags: c::c_uint {
         /// `SOCK_NONBLOCK`
         const NONBLOCK = c::O_NONBLOCK;

@@ -5,9 +5,10 @@ use backend::fd::{AsFd, BorrowedFd};
 
 #[cfg(unix)]
 pub use backend::net::addr::SocketAddrUnix;
-pub use backend::net::types::{
-    AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType,
-};
+pub use backend::net::types::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
+
+/// Compatibility alias for `SocketFlags`. Use `SocketFlags` instead of this.
+pub type AcceptFlags = SocketFlags;
 
 impl Default for Protocol {
     #[inline]
@@ -342,7 +343,7 @@ pub fn accept<Fd: AsFd>(sockfd: Fd) -> io::Result<OwnedFd> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/accept4.2.html
 #[inline]
 #[doc(alias = "accept4")]
-pub fn accept_with<Fd: AsFd>(sockfd: Fd, flags: AcceptFlags) -> io::Result<OwnedFd> {
+pub fn accept_with<Fd: AsFd>(sockfd: Fd, flags: SocketFlags) -> io::Result<OwnedFd> {
     backend::net::syscalls::accept_with(sockfd.as_fd(), flags)
 }
 
@@ -383,7 +384,7 @@ pub fn acceptfrom<Fd: AsFd>(sockfd: Fd) -> io::Result<(OwnedFd, Option<SocketAdd
 #[doc(alias = "accept4")]
 pub fn acceptfrom_with<Fd: AsFd>(
     sockfd: Fd,
-    flags: AcceptFlags,
+    flags: SocketFlags,
 ) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     backend::net::syscalls::acceptfrom_with(sockfd.as_fd(), flags)
 }

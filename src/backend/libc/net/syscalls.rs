@@ -12,7 +12,7 @@ use super::read_sockaddr::{maybe_read_sockaddr_os, read_sockaddr_os};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::send_recv::{RecvFlags, SendFlags};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-use super::types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
+use super::types::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 use crate::fd::{BorrowedFd, OwnedFd};
@@ -257,7 +257,7 @@ pub(crate) fn accept(sockfd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     target_os = "redox",
     target_os = "wasi",
 )))]
-pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<OwnedFd> {
+pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, flags: SocketFlags) -> io::Result<OwnedFd> {
     unsafe {
         let owned_fd = ret_owned_fd(c::accept4(
             borrowed_fd(sockfd),
@@ -295,7 +295,7 @@ pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<
 )))]
 pub(crate) fn acceptfrom_with(
     sockfd: BorrowedFd<'_>,
-    flags: AcceptFlags,
+    flags: SocketFlags,
 ) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     unsafe {
         let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
@@ -314,18 +314,18 @@ pub(crate) fn acceptfrom_with(
 }
 
 /// Darwin lacks `accept4`, but does have `accept`. We define
-/// `AcceptFlags` to have no flags, so we can discard it here.
+/// `SocketFlags` to have no flags, so we can discard it here.
 #[cfg(any(apple, windows, target_os = "haiku"))]
-pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, _flags: AcceptFlags) -> io::Result<OwnedFd> {
+pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, _flags: SocketFlags) -> io::Result<OwnedFd> {
     accept(sockfd)
 }
 
 /// Darwin lacks `accept4`, but does have `accept`. We define
-/// `AcceptFlags` to have no flags, so we can discard it here.
+/// `SocketFlags` to have no flags, so we can discard it here.
 #[cfg(any(apple, windows, target_os = "haiku"))]
 pub(crate) fn acceptfrom_with(
     sockfd: BorrowedFd<'_>,
-    _flags: AcceptFlags,
+    _flags: SocketFlags,
 ) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     acceptfrom(sockfd)
 }
