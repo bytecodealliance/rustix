@@ -978,7 +978,7 @@ pub union op_flags_union {
     #[doc(alias = "msg_flags")]
     pub recv_flags: crate::net::RecvFlags,
     pub timeout_flags: IoringTimeoutFlags,
-    pub accept_flags: crate::net::AcceptFlags,
+    pub accept_flags: crate::net::SocketFlags,
     pub cancel_flags: IoringAsyncCancelFlags,
     pub open_flags: crate::fs::OFlags,
     pub statx_flags: crate::fs::AtFlags,

@@ -615,9 +615,9 @@ impl<'a, Num: ArgNumber> From<crate::net::SendFlags> for ArgReg<'a, Num> {
 }
 
 #[cfg(feature = "net")]
-impl<'a, Num: ArgNumber> From<crate::net::AcceptFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::net::SocketFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::net::AcceptFlags) -> Self {
+    fn from(flags: crate::net::SocketFlags) -> Self {
         c_uint(flags.bits())
     }
 }

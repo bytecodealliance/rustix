@@ -13,7 +13,7 @@ use super::super::conv::{
 };
 use super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr_os};
 use super::send_recv::{RecvFlags, SendFlags};
-use super::types::{AcceptFlags, AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
+use super::types::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
@@ -143,7 +143,7 @@ pub(crate) fn accept(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 }
 
 #[inline]
-pub(crate) fn accept_with(fd: BorrowedFd<'_>, flags: AcceptFlags) -> io::Result<OwnedFd> {
+pub(crate) fn accept_with(fd: BorrowedFd<'_>, flags: SocketFlags) -> io::Result<OwnedFd> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         let fd = ret_owned_fd(syscall_readonly!(__NR_accept4, fd, zero(), zero(), flags))?;
@@ -200,7 +200,7 @@ pub(crate) fn acceptfrom(fd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<Sock
 #[inline]
 pub(crate) fn acceptfrom_with(
     fd: BorrowedFd<'_>,
-    flags: AcceptFlags,
+    flags: SocketFlags,
 ) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
