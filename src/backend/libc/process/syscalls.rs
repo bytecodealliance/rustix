@@ -62,7 +62,7 @@ pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<()> {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn membarrier_query() -> MembarrierQuery {
-    // GLIBC does not have a wrapper for `membarrier`; [the documentation]
+    // glibc does not have a wrapper for `membarrier`; [the documentation]
     // says to use `syscall`.
     //
     // [the documentation]: https://man7.org/linux/man-pages/man2/membarrier.2.html#NOTES

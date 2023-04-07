@@ -140,9 +140,9 @@ pub enum DumpableBehavior {
 /// Linux.
 ///
 /// # References
-///  - [`procctl(PROC_TRACE_CTL,...)`]
+///  - [FreeBSD `procctl(PROC_TRACE_CTL,...)`]
 ///
-/// [`procctl(PROC_TRACE_CTL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD `procctl(PROC_TRACE_CTL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn set_dumpable_behavior(process: ProcSelector, config: DumpableBehavior) -> io::Result<()> {
     unsafe { procctl(PROC_TRACE_CTL, process, config as usize as *mut _) }
@@ -170,9 +170,9 @@ pub enum TracingStatus {
 /// Get the tracing status of the process indicated by `idtype` and `id`.
 ///
 /// # References
-///  - [`procctl(PROC_TRACE_STATUS,...)`]
+///  - [FreeBSD `procctl(PROC_TRACE_STATUS,...)`]
 ///
-/// [`procctl(PROC_TRACE_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD `procctl(PROC_TRACE_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn trace_status(process: ProcSelector) -> io::Result<TracingStatus> {
     let val = unsafe { procctl_get_optional::<c_int>(PROC_TRACE_STATUS, process) }?;

@@ -10,8 +10,14 @@ use backend::fd::AsFd;
 ///
 /// # References
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=tty&sektion=4
+/// [NetBSD]: https://man.netbsd.org/tty.4
+/// [OpenBSD]: https://man.openbsd.org/tty.4
 #[cfg(not(any(windows, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 #[inline]
 #[doc(alias = "TIOCEXCL")]
@@ -23,8 +29,14 @@ pub fn ioctl_tiocexcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 ///
 /// # References
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=tty&sektion=4
+/// [NetBSD]: https://man.netbsd.org/tty.4
+/// [OpenBSD]: https://man.openbsd.org/tty.4
 #[cfg(not(any(windows, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 #[inline]
 #[doc(alias = "TIOCNXCL")]
@@ -32,16 +44,18 @@ pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     backend::io::syscalls::ioctl_tiocnxcl(fd.as_fd())
 }
 
-/// `ioctl(fd, FIOCLEX)`—Set the close-on-exec flag.
+/// `ioctl(fd, FIOCLEX, NULL)`—Set the close-on-exec flag.
 ///
 /// Also known as `fcntl(fd, F_SETFD, FD_CLOEXEC)`.
 ///
 /// # References
-///  - [Linux]
 ///  - [Winsock2]
+///  - [NetBSD]
+///  - [OpenBSD]
 ///
-/// [Linux]: https://man7.org/linux/man-pages/man2/ioctl.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-ioctlsocket
+/// [NetBSD]: https://man.netbsd.org/ioctl.2#GENERIC%20IOCTLS
+/// [OpenBSD]: https://man.openbsd.org/ioctl.2#GENERIC_IOCTLS
 #[cfg(apple)]
 #[inline]
 #[doc(alias = "FIOCLEX")]
@@ -53,11 +67,13 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 /// `ioctl(fd, FIONBIO, &value)`—Enables or disables non-blocking mode.
 ///
 /// # References
-///  - [Linux]
 ///  - [Winsock2]
+///  - [NetBSD]
+///  - [OpenBSD]
 ///
-/// [Linux]: https://man7.org/linux/man-pages/man2/ioctl.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/winsock/winsock-ioctls#unix-ioctl-codes
+/// [NetBSD]: https://man.netbsd.org/ioctl.2#GENERIC%20IOCTLS
+/// [OpenBSD]: https://man.openbsd.org/ioctl.2#GENERIC_IOCTLS
 #[inline]
 #[doc(alias = "FIONBIO")]
 pub fn ioctl_fionbio<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
@@ -72,9 +88,15 @@ pub fn ioctl_fionbio<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 /// # References
 ///  - [Linux]
 ///  - [Winsock2]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/ioctl_tty.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/winsock/winsock-ioctls#unix-ioctl-codes
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=ioctl&sektion=2#GENERIC%09IOCTLS
+/// [NetBSD]: https://man.netbsd.org/ioctl.2#GENERIC%20IOCTLS
+/// [OpenBSD]: https://man.openbsd.org/ioctl.2#GENERIC_IOCTLS
 #[cfg(not(target_os = "redox"))]
 #[inline]
 #[doc(alias = "FIONREAD")]
@@ -83,6 +105,10 @@ pub fn ioctl_fionread<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
 }
 
 /// `ioctl(fd, BLKSSZGET)`—Returns the logical block size of a block device.
+///
+/// This is mentioned in the [Linux `openat` manual page].
+///
+/// [Linux `openat` manual page]: https://man7.org/linux/man-pages/man2/openat.2.html
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 #[doc(alias = "BLKSSZGET")]
