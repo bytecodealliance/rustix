@@ -18,7 +18,12 @@ use crate::io::kqueue::Event;
 use crate::io::port::Event;
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 use crate::io::DupFlags;
-#[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
+#[cfg(any(
+    target_os = "android",
+    target_os = "freebsd",
+    target_os = "illumos",
+    target_os = "linux"
+))]
 use crate::io::EventfdFlags;
 #[cfg(not(any(apple, target_os = "aix", target_os = "haiku", target_os = "wasi")))]
 use crate::io::PipeFlags;
@@ -295,7 +300,7 @@ pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> 
     unsafe { syscall_ret_owned_fd(c::syscall(c::SYS_eventfd2, initval, flags.bits())) }
 }
 
-#[cfg(target_os = "freebsd")]
+#[cfg(any(target_os = "freebsd", target_os = "illumos"))]
 pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::eventfd(initval, flags.bits())) }
 }
