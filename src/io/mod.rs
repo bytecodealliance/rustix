@@ -4,7 +4,7 @@ mod close;
 #[cfg(not(windows))]
 mod dup;
 mod errno;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 mod eventfd;
 #[cfg(not(windows))]
 mod fcntl;
@@ -34,7 +34,7 @@ pub use close::close;
 #[cfg(not(windows))]
 pub use dup::*;
 pub use errno::{retry_on_intr, Errno, Result};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 pub use eventfd::{eventfd, EventfdFlags};
 #[cfg(not(windows))]
 pub use fcntl::*;

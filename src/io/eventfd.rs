@@ -8,8 +8,10 @@ pub use backend::io::types::EventfdFlags;
 ///
 /// # References
 ///  - [Linux]
+///  - [FreeBSD]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/eventfd.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?eventfd
 #[inline]
 pub fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
     backend::io::syscalls::eventfd(initval, flags)
