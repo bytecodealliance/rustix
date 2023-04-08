@@ -3,11 +3,8 @@
 use crate::fd::{AsFd, AsRawFd, OwnedFd, RawFd};
 use crate::{backend, io};
 
-use backend::c::{self, kevent as kevent_t, uintptr_t};
+use backend::c::{self, intptr_t, kevent as kevent_t, uintptr_t};
 use backend::io::syscalls;
-
-#[cfg(any(apple, freebsdlike))]
-use backend::c::intptr_t;
 
 use alloc::vec::Vec;
 use core::ptr::slice_from_raw_parts_mut;
@@ -25,23 +22,24 @@ impl Event {
     /// Create a new `Event`.
     #[allow(clippy::needless_update)]
     pub fn new(filter: EventFilter, flags: EventFlags, udata: isize) -> Event {
-        let (ident, filter, fflags) = match filter {
-            EventFilter::Read(fd) => (fd.as_raw_fd() as uintptr_t, c::EVFILT_READ, 0),
-            EventFilter::Write(fd) => (fd.as_raw_fd() as _, c::EVFILT_WRITE, 0),
+        let (ident, data, filter, fflags) = match filter {
+            EventFilter::Read(fd) => (fd.as_raw_fd() as uintptr_t, 0, c::EVFILT_READ, 0),
+            EventFilter::Write(fd) => (fd.as_raw_fd() as _, 0, c::EVFILT_WRITE, 0),
             #[cfg(target_os = "freebsd")]
-            EventFilter::Empty(fd) => (fd.as_raw_fd() as _, c::EVFILT_EMPTY, 0),
+            EventFilter::Empty(fd) => (fd.as_raw_fd() as _, 0, c::EVFILT_EMPTY, 0),
             EventFilter::Vnode { vnode, flags } => {
-                (vnode.as_raw_fd() as _, c::EVFILT_VNODE, flags.bits())
+                (vnode.as_raw_fd() as _, 0, c::EVFILT_VNODE, flags.bits())
             }
             #[cfg(feature = "process")]
             EventFilter::Proc { pid, flags } => (
                 crate::process::Pid::as_raw(Some(pid)) as _,
+                0,
                 c::EVFILT_PROC,
                 flags.bits(),
             ),
             #[cfg(feature = "process")]
-            EventFilter::Signal { signal, times: _ } => (signal as _, c::EVFILT_SIGNAL, 0),
-            EventFilter::Timer(timer) => {
+            EventFilter::Signal { signal, times: _ } => (signal as _, 0, c::EVFILT_SIGNAL, 0),
+            EventFilter::Timer { ident, timer } => {
                 #[cfg(any(apple, target_os = "freebsd", target_os = "netbsd"))]
                 let (data, fflags) = match timer {
                     Some(timer) => {
@@ -53,22 +51,22 @@ impl Event {
                             (timer.as_nanos() as _, c::NOTE_NSECONDS)
                         }
                     }
-                    None => (uintptr_t::MAX, c::NOTE_SECONDS),
+                    None => (intptr_t::MAX, c::NOTE_SECONDS),
                 };
                 #[cfg(any(target_os = "dragonfly", target_os = "openbsd"))]
                 let (data, fflags) = match timer {
                     Some(timer) => (timer.as_millis() as _, 0),
-                    None => (uintptr_t::MAX, 0),
+                    None => (intptr_t::MAX, 0),
                 };
 
-                (data, c::EVFILT_TIMER, fflags)
+                (ident as _, data, c::EVFILT_TIMER, fflags)
             }
             #[cfg(any(apple, freebsdlike))]
             EventFilter::User {
                 ident,
                 flags,
                 user_flags,
-            } => (ident as _, c::EVFILT_USER, flags.bits() | user_flags.0),
+            } => (ident as _, 0, c::EVFILT_USER, flags.bits() | user_flags.0),
             EventFilter::Unknown => panic!("unknown filter"),
         };
 
@@ -78,7 +76,10 @@ impl Event {
                 filter: filter as _,
                 flags: flags.bits() as _,
                 fflags,
-                data: 0,
+                data: {
+                    // On openbsd, data is an i64 and not an isize
+                    data as _
+                },
                 udata: {
                     // On netbsd, udata is an isize and not a pointer.
                     // TODO: Strict provenance, prevent int-to-ptr cast.
@@ -123,21 +124,24 @@ impl Event {
                 signal: crate::process::Signal::from_raw(self.inner.ident as _).unwrap(),
                 times: self.inner.data as _,
             },
-            c::EVFILT_TIMER => EventFilter::Timer({
-                let (data, fflags) = (self.inner.data, self.inner.fflags);
-                #[cfg(any(apple, target_os = "freebsd", target_os = "netbsd"))]
-                match fflags as _ {
-                    c::NOTE_SECONDS => Some(Duration::from_secs(data as _)),
-                    c::NOTE_USECONDS => Some(Duration::from_micros(data as _)),
-                    c::NOTE_NSECONDS => Some(Duration::from_nanos(data as _)),
-                    _ => {
-                        // Unknown timer flags.
-                        None
+            c::EVFILT_TIMER => EventFilter::Timer {
+                ident: self.inner.ident as _,
+                timer: {
+                    let (data, fflags) = (self.inner.data, self.inner.fflags);
+                    #[cfg(any(apple, target_os = "freebsd", target_os = "netbsd"))]
+                    match fflags as _ {
+                        c::NOTE_SECONDS => Some(Duration::from_secs(data as _)),
+                        c::NOTE_USECONDS => Some(Duration::from_micros(data as _)),
+                        c::NOTE_NSECONDS => Some(Duration::from_nanos(data as _)),
+                        _ => {
+                            // Unknown timer flags.
+                            None
+                        }
                     }
-                }
-                #[cfg(any(target_os = "dragonfly", target_os = "openbsd"))]
-                Some(Duration::from_millis(data as _))
-            }),
+                    #[cfg(any(target_os = "dragonfly", target_os = "openbsd"))]
+                    Some(Duration::from_millis(data as _))
+                },
+            },
             #[cfg(any(apple, freebsdlike))]
             c::EVFILT_USER => EventFilter::User {
                 ident: self.inner.ident as _,
@@ -198,7 +202,13 @@ pub enum EventFilter {
     },
 
     /// A timer filter.
-    Timer(Option<Duration>),
+    Timer {
+        /// The identifier for this event.
+        ident: intptr_t,
+
+        /// The duration for this event.
+        timer: Option<Duration>,
+    },
 
     /// A user filter.
     #[cfg(any(apple, freebsdlike))]
