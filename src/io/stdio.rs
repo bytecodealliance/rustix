@@ -32,9 +32,21 @@ use backend::fd::AsFd;
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdin&sektion=4
+/// [NetBSD]: https://man.netbsd.org/stdin.4
+/// [OpenBSD]: https://man.openbsd.org/stdin.4
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=stdin&section=4
+/// [illumos]: https://illumos.org/man/4FS/stdin
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html#index-stdin
 #[cfg(feature = "std")]
 #[doc(alias = "STDIN_FILENO")]
 #[inline]
@@ -66,9 +78,21 @@ pub const fn stdin() -> BorrowedFd<'static> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdin&sektion=4
+/// [NetBSD]: https://man.netbsd.org/stdin.4
+/// [OpenBSD]: https://man.openbsd.org/stdin.4
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=stdin&section=4
+/// [illumos]: https://illumos.org/man/4FS/stdin
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html#index-stdin
 #[cfg(not(feature = "std"))]
 #[doc(alias = "STDIN_FILENO")]
 #[inline]
@@ -94,9 +118,21 @@ pub const unsafe fn stdin() -> BorrowedFd<'static> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdin&sektion=4
+/// [NetBSD]: https://man.netbsd.org/stdin.4
+/// [OpenBSD]: https://man.openbsd.org/stdin.4
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=stdin&section=4
+/// [illumos]: https://illumos.org/man/4FS/stdin
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html#index-stdin
 #[doc(alias = "STDIN_FILENO")]
 #[inline]
 pub unsafe fn take_stdin() -> OwnedFd {
@@ -118,9 +154,21 @@ pub unsafe fn take_stdin() -> OwnedFd {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdout&sektion=4
+/// [NetBSD]: https://man.netbsd.org/stdout.4
+/// [OpenBSD]: https://man.openbsd.org/stdout.4
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=stdout&section=4
+/// [illumos]: https://illumos.org/man/4FS/stdout
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html#index-stdout
 #[cfg(feature = "std")]
 #[doc(alias = "STDOUT_FILENO")]
 #[inline]
@@ -133,7 +181,7 @@ pub const fn stdout() -> BorrowedFd<'static> {
 /// `STDOUT_FILENO`—Standard output, borrowed.
 ///
 /// In `std`-using configurations, this is a safe function, because the
-/// standard library already assumes that the stdin file descriptor is always
+/// standard library already assumes that the stdout file descriptor is always
 /// valid. In `no_std` configurations, it is `unsafe`.
 ///
 /// # Safety
@@ -152,9 +200,21 @@ pub const fn stdout() -> BorrowedFd<'static> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdout&sektion=4
+/// [NetBSD]: https://man.netbsd.org/stdout.4
+/// [OpenBSD]: https://man.openbsd.org/stdout.4
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=stdout&section=4
+/// [illumos]: https://illumos.org/man/4FS/stdout
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html#index-stdout
 #[cfg(not(feature = "std"))]
 #[doc(alias = "STDOUT_FILENO")]
 #[inline]
@@ -180,9 +240,21 @@ pub const unsafe fn stdout() -> BorrowedFd<'static> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdout&sektion=4
+/// [NetBSD]: https://man.netbsd.org/stdout.4
+/// [OpenBSD]: https://man.openbsd.org/stdout.4
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=stdout&section=4
+/// [illumos]: https://illumos.org/man/4FS/stdout
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html#index-stdout
 #[doc(alias = "STDOUT_FILENO")]
 #[inline]
 pub unsafe fn take_stdout() -> OwnedFd {
@@ -198,9 +270,21 @@ pub unsafe fn take_stdout() -> OwnedFd {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stderr&sektion=4
+/// [NetBSD]: https://man.netbsd.org/stderr.4
+/// [OpenBSD]: https://man.openbsd.org/stderr.4
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=stderr&section=4
+/// [illumos]: https://illumos.org/man/4FS/stderr
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html#index-stderr
 #[cfg(feature = "std")]
 #[doc(alias = "STDERR_FILENO")]
 #[inline]
@@ -226,9 +310,21 @@ pub const fn stderr() -> BorrowedFd<'static> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stderr&sektion=4
+/// [NetBSD]: https://man.netbsd.org/stderr.4
+/// [OpenBSD]: https://man.openbsd.org/stderr.4
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=stderr&section=4
+/// [illumos]: https://illumos.org/man/4FS/stderr
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html#index-stderr
 #[cfg(not(feature = "std"))]
 #[doc(alias = "STDERR_FILENO")]
 #[inline]
@@ -238,7 +334,7 @@ pub const unsafe fn stderr() -> BorrowedFd<'static> {
 
 /// `STDERR_FILENO`—Standard error, owned.
 ///
-/// This is similar to [`stdout`], however it returns an `OwnedFd` which closes
+/// This is similar to [`stderr`], however it returns an `OwnedFd` which closes
 /// standard output when it is dropped.
 ///
 /// # Safety
@@ -259,9 +355,21 @@ pub const unsafe fn stderr() -> BorrowedFd<'static> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stderr&sektion=4
+/// [NetBSD]: https://man.netbsd.org/stderr.4
+/// [OpenBSD]: https://man.openbsd.org/stderr.4
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=stderr&section=4
+/// [illumos]: https://illumos.org/man/4FS/stderr
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html#index-stderr
 #[doc(alias = "STDERR_FILENO")]
 #[inline]
 pub unsafe fn take_stderr() -> OwnedFd {
@@ -279,9 +387,21 @@ pub unsafe fn take_stderr() -> OwnedFd {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdin&sektion=4
+/// [NetBSD]: https://man.netbsd.org/stdin.4
+/// [OpenBSD]: https://man.openbsd.org/stdin.4
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=stdin&section=4
+/// [illumos]: https://illumos.org/man/4FS/stdin
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html#index-stdin
 #[doc(alias = "STDIN_FILENO")]
 #[inline]
 pub const fn raw_stdin() -> RawFd {
@@ -299,9 +419,21 @@ pub const fn raw_stdin() -> RawFd {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdout&sektion=4
+/// [NetBSD]: https://man.netbsd.org/stdout.4
+/// [OpenBSD]: https://man.openbsd.org/stdout.4
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=stdout&section=4
+/// [illumos]: https://illumos.org/man/4FS/stdout
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html#index-stdout
 #[doc(alias = "STDOUT_FILENO")]
 #[inline]
 pub const fn raw_stdout() -> RawFd {
@@ -319,9 +451,21 @@ pub const fn raw_stdout() -> RawFd {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stderr&sektion=4
+/// [NetBSD]: https://man.netbsd.org/stderr.4
+/// [OpenBSD]: https://man.openbsd.org/stderr.4
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=stderr&section=4
+/// [illumos]: https://illumos.org/man/4FS/stderr
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html#index-stderr
 #[doc(alias = "STDERR_FILENO")]
 #[inline]
 pub const fn raw_stderr() -> RawFd {

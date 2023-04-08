@@ -38,7 +38,7 @@ use backend::fd::RawFd;
 /// [Linux]: https://man7.org/linux/man-pages/man2/close.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/close.2.html#//apple_ref/doc/man/2/close
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-closesocket
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=close&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=close&sektion=2
 /// [NetBSD]: https://man.netbsd.org/close.2
 /// [OpenBSD]: https://man.openbsd.org/close.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=close&section=2

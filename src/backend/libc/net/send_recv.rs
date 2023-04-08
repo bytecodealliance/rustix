@@ -2,7 +2,10 @@ use super::super::c;
 use bitflags::bitflags;
 
 bitflags! {
-    /// `MSG_*`
+    /// `MSG_* flags for use with [`send`], [`send_to`], and related functions.
+    ///
+    /// [`send`]: crate::net::send
+    /// [`sendto`]: crate::net::sendto
     pub struct SendFlags: i32 {
         /// `MSG_CONFIRM`
         #[cfg(not(any(
@@ -37,7 +40,10 @@ bitflags! {
 }
 
 bitflags! {
-    /// `MSG_*`
+    /// `MSG_* flags for use with [`recv`], [`recvfrom`], and related functions.
+    ///
+    /// [`recv`]: crate::net::recv
+    /// [`recvfrom`]: crate::net::recvfrom
     pub struct RecvFlags: i32 {
         #[cfg(not(any(apple, solarish, windows, target_os = "haiku")))]
         /// `MSG_CMSG_CLOEXEC`

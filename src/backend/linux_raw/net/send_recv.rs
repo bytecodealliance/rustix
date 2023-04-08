@@ -2,7 +2,10 @@ use super::super::c;
 use bitflags::bitflags;
 
 bitflags! {
-    /// `MSG_*`
+    /// `MSG_* flags for use with [`send`], [`send_to`], and related functions.
+    ///
+    /// [`send`]: crate::net::send
+    /// [`sendto`]: crate::net::sendto
     pub struct SendFlags: u32 {
         /// `MSG_CONFIRM`
         const CONFIRM = c::MSG_CONFIRM;
@@ -22,7 +25,10 @@ bitflags! {
 }
 
 bitflags! {
-    /// `MSG_*`
+    /// `MSG_* flags for use with [`recv`], [`recvfrom`], and related functions.
+    ///
+    /// [`recv`]: crate::net::recv
+    /// [`recvfrom`]: crate::net::recvfrom
     pub struct RecvFlags: u32 {
         /// `MSG_CMSG_CLOEXEC`
         const CMSG_CLOEXEC = c::MSG_CMSG_CLOEXEC;
