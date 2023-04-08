@@ -38,7 +38,7 @@ use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek,
     target_os = "wasi",
 )))]
 use super::super::offset::{libc_fstatfs, libc_statfs};
-#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use super::super::offset::{libc_fstatvfs, libc_statvfs};
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
@@ -92,7 +92,7 @@ use crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags};
 #[cfg(not(any(apple, target_os = "redox", target_os = "wasi")))]
 use crate::fs::{Dev, FileType};
 use crate::fs::{Mode, OFlags, Stat, Timestamps};
-#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use crate::fs::{StatVfs, StatVfsMountFlags};
 use crate::io::{self, SeekFrom};
 #[cfg(not(target_os = "wasi"))]
@@ -196,7 +196,7 @@ pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
     }
 }
 
-#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
     unsafe {
@@ -1034,7 +1034,7 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
     }
 }
 
-#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
     let mut statvfs = MaybeUninit::<libc_statvfs>::uninit();
     unsafe {
@@ -1043,7 +1043,7 @@ pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
     }
 }
 
-#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 fn libc_statvfs_to_statvfs(from: libc_statvfs) -> StatVfs {
     StatVfs {
         f_bsize: from.f_bsize as u64,

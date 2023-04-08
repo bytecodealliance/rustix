@@ -33,7 +33,7 @@ mod openat2;
 #[cfg(not(target_os = "redox"))]
 mod readdir;
 mod renameat;
-#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 mod statfs;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod statx;

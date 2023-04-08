@@ -31,7 +31,7 @@ pub use backend::fs::types::Stat;
 )))]
 pub use backend::fs::types::StatFs;
 
-#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub use backend::fs::types::{StatVfs, StatVfsMountFlags};
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -185,7 +185,7 @@ pub fn fstatfs<Fd: AsFd>(fd: Fd) -> io::Result<StatFs> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fstatvfs.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fstatvfs.2.html
-#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub fn fstatvfs<Fd: AsFd>(fd: Fd) -> io::Result<StatVfs> {
     backend::fs::syscalls::fstatvfs(fd.as_fd())
