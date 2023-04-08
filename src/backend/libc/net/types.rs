@@ -294,7 +294,10 @@ impl AddressFamily {
 #[doc(hidden)]
 pub type RawProtocol = i32;
 
-/// `IPPROTO_*`
+/// `IPPROTO_*` constants for use with [`socket`] and [`socket_with`].
+///
+/// [`socket`]: crate::net::socket
+/// [`socket_with`]: crate::net::socket_with
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(transparent)]
 pub struct Protocol(pub(crate) RawProtocol);

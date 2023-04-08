@@ -76,7 +76,7 @@ const PR_GET_PDEATHSIG: c_int = 2;
 ///  - [FreeBSD: `procctl(PROC_PDEATHSIG_STATUS,...)`]
 ///
 /// [Linux: `prctl(PR_GET_PDEATHSIG,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
-/// [FreeBSD: `procctl(PROC_PDEATHSIG_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD: `procctl(PROC_PDEATHSIG_STATUS,...)`]: https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn parent_process_death_signal() -> io::Result<Option<Signal>> {
     unsafe { prctl_get_at_arg2_optional::<c_int>(PR_GET_PDEATHSIG) }.map(Signal::from_raw)
@@ -91,7 +91,7 @@ const PR_SET_PDEATHSIG: c_int = 1;
 ///  - [FreeBSD: `procctl(PROC_PDEATHSIG_CTL,...)`]
 ///
 /// [Linux: `prctl(PR_SET_PDEATHSIG,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
-/// [FreeBSD: `procctl(PROC_PDEATHSIG_CTL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD: `procctl(PROC_PDEATHSIG_CTL,...)`]: https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn set_parent_process_death_signal(signal: Option<Signal>) -> io::Result<()> {
     let signal = signal.map_or(0_usize, |signal| signal as usize);

@@ -85,7 +85,7 @@ const PROC_PDEATHSIG_STATUS: c_int = 12;
 ///  - [FreeBSD: `procctl(PROC_PDEATHSIG_STATUS,...)`]
 ///
 /// [Linux: `prctl(PR_GET_PDEATHSIG,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
-/// [FreeBSD: `procctl(PROC_PDEATHSIG_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD: `procctl(PROC_PDEATHSIG_STATUS,...)`]: https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn parent_process_death_signal() -> io::Result<Option<Signal>> {
     unsafe { procctl_get_optional::<c_int>(PROC_PDEATHSIG_STATUS, None) }.map(Signal::from_raw)
@@ -100,7 +100,7 @@ const PROC_PDEATHSIG_CTL: c_int = 11;
 ///  - [FreeBSD: `procctl(PROC_PDEATHSIG_CTL,...)`]
 ///
 /// [Linux: `prctl(PR_SET_PDEATHSIG,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
-/// [FreeBSD: `procctl(PROC_PDEATHSIG_CTL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD: `procctl(PROC_PDEATHSIG_CTL,...)`]: https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn set_parent_process_death_signal(signal: Option<Signal>) -> io::Result<()> {
     let signal = signal.map_or(0, |signal| signal as c_int);
@@ -142,7 +142,7 @@ pub enum DumpableBehavior {
 /// # References
 ///  - [FreeBSD `procctl(PROC_TRACE_CTL,...)`]
 ///
-/// [FreeBSD `procctl(PROC_TRACE_CTL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD `procctl(PROC_TRACE_CTL,...)`]: https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn set_dumpable_behavior(process: ProcSelector, config: DumpableBehavior) -> io::Result<()> {
     unsafe { procctl(PROC_TRACE_CTL, process, config as usize as *mut _) }
@@ -172,7 +172,7 @@ pub enum TracingStatus {
 /// # References
 ///  - [FreeBSD `procctl(PROC_TRACE_STATUS,...)`]
 ///
-/// [FreeBSD `procctl(PROC_TRACE_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD `procctl(PROC_TRACE_STATUS,...)`]: https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn trace_status(process: ProcSelector) -> io::Result<TracingStatus> {
     let val = unsafe { procctl_get_optional::<c_int>(PROC_TRACE_STATUS, process) }?;
@@ -198,7 +198,7 @@ const PROC_REAP_RELEASE: c_int = 3;
 /// # References
 ///  - [FreeBSD: `procctl(PROC_REAP_ACQUIRE/RELEASE,...)`]
 ///
-/// [FreeBSD: `procctl(PROC_REAP_ACQUIRE/RELEASE,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD: `procctl(PROC_REAP_ACQUIRE/RELEASE,...)`]: https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn set_reaper_status(reaper: bool) -> io::Result<()> {
     unsafe {
@@ -258,7 +258,7 @@ pub struct ReaperStatus {
 /// # References
 ///  - [FreeBSD: `procctl(PROC_REAP_STATUS,...)`]
 ///
-/// [FreeBSD: `procctl(PROC_REAP_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD: `procctl(PROC_REAP_STATUS,...)`]: https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn get_reaper_status(process: ProcSelector) -> io::Result<ReaperStatus> {
     let raw = unsafe { procctl_get_optional::<procctl_reaper_status>(PROC_REAP_STATUS, process) }?;
@@ -318,7 +318,7 @@ pub struct PidInfo {
 /// # References
 ///  - [FreeBSD: `procctl(PROC_REAP_GETPIDS,...)`]
 ///
-/// [FreeBSD: `procctl(PROC_REAP_GETPIDS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD: `procctl(PROC_REAP_GETPIDS,...)`]: https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 pub fn get_reaper_pids(process: ProcSelector) -> io::Result<Vec<PidInfo>> {
     // Sadly no better way to guarantee that we get all the results than to
     // allocate ~8MB of memory..
@@ -385,7 +385,7 @@ pub struct KillResult {
 /// # References
 ///  - [FreeBSD: `procctl(PROC_REAP_KILL,...)`]
 ///
-/// [FreeBSD: `procctl(PROC_REAP_KILL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD: `procctl(PROC_REAP_KILL,...)`]: https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 pub fn reaper_kill(
     process: ProcSelector,
     signal: Signal,
@@ -452,7 +452,7 @@ pub enum TrapCapBehavior {
 /// # References
 ///  - [FreeBSD: `procctl(PROC_TRAPCAP_CTL,...)`]
 ///
-/// [FreeBSD: `procctl(PROC_TRAPCAP_CTL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD: `procctl(PROC_TRAPCAP_CTL,...)`]: https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn set_trap_cap_behavior(process: ProcSelector, config: TrapCapBehavior) -> io::Result<()> {
     let config = config as c_int;
@@ -466,7 +466,7 @@ const PROC_TRAPCAP_STATUS: c_int = 10;
 /// # References
 ///  - [FreeBSD: `procctl(PROC_TRAPCAP_STATUS,...)`]
 ///
-/// [FreeBSD: `procctl(PROC_TRAPCAP_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD: `procctl(PROC_TRAPCAP_STATUS,...)`]: https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn trap_cap_behavior(process: ProcSelector) -> io::Result<TrapCapBehavior> {
     let val = unsafe { procctl_get_optional::<c_int>(PROC_TRAPCAP_STATUS, process) }?;
@@ -497,7 +497,7 @@ const PROC_NO_NEW_PRIVS_ENABLE: c_int = 1;
 ///  - [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_CTL,...)`]
 ///
 /// [Linux: `prctl(PR_SET_NO_NEW_PRIVS,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
-/// [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_CTL,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_CTL,...)`]: https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn set_no_new_privs(process: ProcSelector) -> io::Result<()> {
     unsafe { procctl_set::<c_int>(PROC_NO_NEW_PRIVS_CTL, process, &PROC_NO_NEW_PRIVS_ENABLE) }
@@ -512,7 +512,7 @@ const PROC_NO_NEW_PRIVS_STATUS: c_int = 20;
 ///  - [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_STATUS,...)`]
 ///
 /// [Linux: `prctl(PR_GET_NO_NEW_PRIVS,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
-/// [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_STATUS,...)`]: https://www.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+/// [FreeBSD: `procctl(PROC_NO_NEW_PRIVS_STATUS,...)`]: https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
 #[inline]
 pub fn no_new_privs(process: ProcSelector) -> io::Result<bool> {
     unsafe { procctl_get_optional::<c_int>(PROC_NO_NEW_PRIVS_STATUS, process) }

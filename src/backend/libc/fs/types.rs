@@ -334,7 +334,9 @@ mod copyfile {
 
 #[cfg(apple)]
 bitflags! {
-    /// `COPYFILE_*` constants.
+    /// `COPYFILE_*` constants for use with [`fcopyfile`].
+    ///
+    /// [`fcopyfile`]: crate::fs::fcopyfile
     pub struct CopyfileFlags: c::c_uint {
         /// `COPYFILE_ACL`
         const ACL = copyfile::ACL;

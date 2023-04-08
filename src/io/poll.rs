@@ -21,7 +21,7 @@ pub use backend::io::poll_fd::{PollFd, PollFlags};
 /// [Linux]: https://man7.org/linux/man-pages/man2/poll.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/poll.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsapoll
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=poll&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=poll&sektion=2
 /// [NetBSD]: https://man.netbsd.org/poll.2
 /// [OpenBSD]: https://man.openbsd.org/poll.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=poll&section=2

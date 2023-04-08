@@ -358,7 +358,7 @@ impl UserDefinedFlags {
 ///  - [DragonFly BSD]
 ///
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/kqueue.2.html
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=kqueue&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=kqueue&sektion=2
 /// [OpenBSD]: https://man.openbsd.org/kqueue.2
 /// [NetBSD]: https://man.netbsd.org/kqueue.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=kqueue&section=2
@@ -385,7 +385,7 @@ pub fn kqueue() -> io::Result<OwnedFd> {
 ///  - [DragonFly BSD]
 ///
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/kevent.2.html
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=kevent&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=kevent&sektion=2
 /// [OpenBSD]: https://man.openbsd.org/kevent.2
 /// [NetBSD]: https://man.netbsd.org/kevent.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=kevent&section=2

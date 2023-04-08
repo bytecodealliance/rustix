@@ -43,7 +43,7 @@ impl Default for Protocol {
 /// [Linux]: https://man7.org/linux/man-pages/man2/socket.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/socket.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-socket
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=socket&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=socket&sektion=2
 /// [NetBSD]: https://man.netbsd.org/socket.2
 /// [OpenBSD]: https://man.openbsd.org/socket.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=socket&section=2
@@ -82,7 +82,7 @@ pub fn socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> i
 /// [Linux]: https://man7.org/linux/man-pages/man2/socket.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/socket.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-socket
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=socket&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=socket&sektion=2
 /// [NetBSD]: https://man.netbsd.org/socket.2
 /// [OpenBSD]: https://man.openbsd.org/socket.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=socket&section=2
@@ -118,7 +118,7 @@ pub fn socket_with(
 /// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/bind.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-bind
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=bind&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=bind&sektion=2
 /// [NetBSD]: https://man.netbsd.org/bind.2
 /// [OpenBSD]: https://man.openbsd.org/bind.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=bind&section=2
@@ -155,7 +155,7 @@ fn _bind(sockfd: BorrowedFd<'_>, addr: &SocketAddr) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/bind.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-bind
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=bind&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=bind&sektion=2
 /// [NetBSD]: https://man.netbsd.org/bind.2
 /// [OpenBSD]: https://man.openbsd.org/bind.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=bind&section=2
@@ -196,7 +196,7 @@ fn _bind_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/bind.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-bind
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=bind&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=bind&sektion=2
 /// [NetBSD]: https://man.netbsd.org/bind.2
 /// [OpenBSD]: https://man.openbsd.org/bind.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=bind&section=2
@@ -229,7 +229,7 @@ pub fn bind_v4<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/bind.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-bind
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=bind&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=bind&sektion=2
 /// [NetBSD]: https://man.netbsd.org/bind.2
 /// [OpenBSD]: https://man.openbsd.org/bind.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=bind&section=2
@@ -262,7 +262,7 @@ pub fn bind_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/bind.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/bind.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-bind
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=bind&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=bind&sektion=2
 /// [NetBSD]: https://man.netbsd.org/bind.2
 /// [OpenBSD]: https://man.openbsd.org/bind.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=bind&section=2
@@ -295,7 +295,7 @@ pub fn bind_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> 
 /// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/connect.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=connect&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=connect&sektion=2
 /// [NetBSD]: https://man.netbsd.org/connect.2
 /// [OpenBSD]: https://man.openbsd.org/connect.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=connect&section=2
@@ -332,7 +332,7 @@ fn _connect(sockfd: BorrowedFd<'_>, addr: &SocketAddr) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/connect.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=connect&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=connect&sektion=2
 /// [NetBSD]: https://man.netbsd.org/connect.2
 /// [OpenBSD]: https://man.openbsd.org/connect.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=connect&section=2
@@ -373,7 +373,7 @@ fn _connect_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> 
 /// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/connect.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=connect&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=connect&sektion=2
 /// [NetBSD]: https://man.netbsd.org/connect.2
 /// [OpenBSD]: https://man.openbsd.org/connect.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=connect&section=2
@@ -406,7 +406,7 @@ pub fn connect_v4<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/connect.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=connect&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=connect&sektion=2
 /// [NetBSD]: https://man.netbsd.org/connect.2
 /// [OpenBSD]: https://man.openbsd.org/connect.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=connect&section=2
@@ -439,7 +439,7 @@ pub fn connect_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/connect.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=connect&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=connect&sektion=2
 /// [NetBSD]: https://man.netbsd.org/connect.2
 /// [OpenBSD]: https://man.openbsd.org/connect.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=connect&section=2
@@ -472,7 +472,7 @@ pub fn connect_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<(
 /// [Linux]: https://man7.org/linux/man-pages/man2/listen.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/listen.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-listen
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=listen&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=listen&sektion=2
 /// [NetBSD]: https://man.netbsd.org/listen.2
 /// [OpenBSD]: https://man.openbsd.org/listen.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=listen&section=2
@@ -509,14 +509,13 @@ pub fn listen<Fd: AsFd>(sockfd: Fd, backlog: i32) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/accept.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/accept.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-accept
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=accept&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=accept&sektion=2
 /// [NetBSD]: https://man.netbsd.org/accept.2
 /// [OpenBSD]: https://man.openbsd.org/accept.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=accept&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/accept
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Accepting-Connections.html
 #[inline]
-#[doc(alias = "accept4")]
 pub fn accept<Fd: AsFd>(sockfd: Fd) -> io::Result<OwnedFd> {
     backend::net::syscalls::accept(sockfd.as_fd())
 }
@@ -535,8 +534,18 @@ pub fn accept<Fd: AsFd>(sockfd: Fd) -> io::Result<OwnedFd> {
 ///
 /// # References
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/accept4.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=accept4&sektion=2
+/// [NetBSD]: https://man.netbsd.org/accept4.2
+/// [OpenBSD]: https://man.openbsd.org/accept4.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=accept4&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/accept4
 #[inline]
 #[doc(alias = "accept4")]
 pub fn accept_with<Fd: AsFd>(sockfd: Fd, flags: SocketFlags) -> io::Result<OwnedFd> {
@@ -566,14 +575,14 @@ pub fn accept_with<Fd: AsFd>(sockfd: Fd, flags: SocketFlags) -> io::Result<Owned
 /// [Linux]: https://man7.org/linux/man-pages/man2/accept.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/accept.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-accept
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=accept&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=accept&sektion=2
 /// [NetBSD]: https://man.netbsd.org/accept.2
 /// [OpenBSD]: https://man.openbsd.org/accept.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=accept&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/accept
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Accepting-Connections.html
 #[inline]
-#[doc(alias = "accept4")]
+#[doc(alias = "accept")]
 pub fn acceptfrom<Fd: AsFd>(sockfd: Fd) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     backend::net::syscalls::acceptfrom(sockfd.as_fd())
 }
@@ -588,8 +597,18 @@ pub fn acceptfrom<Fd: AsFd>(sockfd: Fd) -> io::Result<(OwnedFd, Option<SocketAdd
 ///
 /// # References
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/accept4.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=accept4&sektion=2
+/// [NetBSD]: https://man.netbsd.org/accept4.2
+/// [OpenBSD]: https://man.openbsd.org/accept4.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=accept4&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/accept4
 #[inline]
 #[doc(alias = "accept4")]
 pub fn acceptfrom_with<Fd: AsFd>(
@@ -619,7 +638,7 @@ pub fn acceptfrom_with<Fd: AsFd>(
 /// [Linux]: https://man7.org/linux/man-pages/man2/shutdown.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/shutdown.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-shutdown
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=shutdown&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=shutdown&sektion=2
 /// [NetBSD]: https://man.netbsd.org/shutdown.2
 /// [OpenBSD]: https://man.openbsd.org/shutdown.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=shutdown&section=2
@@ -648,7 +667,7 @@ pub fn shutdown<Fd: AsFd>(sockfd: Fd, how: Shutdown) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/getsockname.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getsockname.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockname
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=getsockname&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=getsockname&sektion=2
 /// [NetBSD]: https://man.netbsd.org/getsockname.2
 /// [OpenBSD]: https://man.openbsd.org/getsockname.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=getsockname&section=2
@@ -680,7 +699,7 @@ pub fn getsockname<Fd: AsFd>(sockfd: Fd) -> io::Result<SocketAddrAny> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/getpeername.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getpeername.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getpeername
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=getpeername&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=getpeername&sektion=2
 /// [NetBSD]: https://man.netbsd.org/getpeername.2
 /// [OpenBSD]: https://man.openbsd.org/getpeername.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=getpeername&section=2

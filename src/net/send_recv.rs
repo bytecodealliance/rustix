@@ -28,7 +28,7 @@ pub use backend::net::send_recv::{RecvFlags, SendFlags};
 /// [Linux]: https://man7.org/linux/man-pages/man2/recv.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/recv.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recv
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=recv&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=recv&sektion=2
 /// [NetBSD]: https://man.netbsd.org/recv.2
 /// [OpenBSD]: https://man.openbsd.org/recv.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=recv&section=2
@@ -59,7 +59,7 @@ pub fn recv<Fd: AsFd>(fd: Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<us
 /// [Linux]: https://man7.org/linux/man-pages/man2/send.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/send.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-send
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=send&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=send&sektion=2
 /// [NetBSD]: https://man.netbsd.org/send.2
 /// [OpenBSD]: https://man.openbsd.org/send.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=send&section=2
@@ -91,7 +91,7 @@ pub fn send<Fd: AsFd>(fd: Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize>
 /// [Linux]: https://man7.org/linux/man-pages/man2/recvfrom.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/recvfrom.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recvfrom
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=recvfrom&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=recvfrom&sektion=2
 /// [NetBSD]: https://man.netbsd.org/recvfrom.2
 /// [OpenBSD]: https://man.openbsd.org/recvfrom.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=recvfrom&section=2
@@ -127,7 +127,7 @@ pub fn recvfrom<Fd: AsFd>(
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendto.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=sendto&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendto&sektion=2
 /// [NetBSD]: https://man.netbsd.org/sendto.2
 /// [OpenBSD]: https://man.openbsd.org/sendto.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendto&section=2
@@ -175,7 +175,7 @@ fn _sendto(
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendto.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=sendto&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendto&sektion=2
 /// [NetBSD]: https://man.netbsd.org/sendto.2
 /// [OpenBSD]: https://man.openbsd.org/sendto.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendto&section=2
@@ -225,7 +225,7 @@ fn _sendto_any(
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendto.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=sendto&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendto&sektion=2
 /// [NetBSD]: https://man.netbsd.org/sendto.2
 /// [OpenBSD]: https://man.openbsd.org/sendto.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendto&section=2
@@ -263,7 +263,7 @@ pub fn sendto_v4<Fd: AsFd>(
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendto.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=sendto&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendto&sektion=2
 /// [NetBSD]: https://man.netbsd.org/sendto.2
 /// [OpenBSD]: https://man.openbsd.org/sendto.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendto&section=2
@@ -301,7 +301,7 @@ pub fn sendto_v6<Fd: AsFd>(
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendto.2.html
 /// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
-/// [FreeBSD]: https://www.freebsd.org/cgi/man.cgi?query=sendto&sektion=2
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendto&sektion=2
 /// [NetBSD]: https://man.netbsd.org/sendto.2
 /// [OpenBSD]: https://man.openbsd.org/sendto.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendto&section=2

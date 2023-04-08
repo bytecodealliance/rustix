@@ -29,9 +29,23 @@ pub use backend::mm::types::{MapFlags, MprotectFlags, ProtFlags};
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mmap.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mmap.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/mmap.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=mmap&sektion=2
+/// [NetBSD]: https://man.netbsd.org/mmap.2
+/// [OpenBSD]: https://man.openbsd.org/mmap.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=mmap&section=2
+/// [illumos]: https://illumos.org/man/2/mmap
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Memory_002dmapped-I_002fO.html#index-mmap
 #[inline]
 pub unsafe fn mmap<Fd: AsFd>(
     ptr: *mut c_void,
@@ -56,9 +70,23 @@ pub unsafe fn mmap<Fd: AsFd>(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mmap.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mmap.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/mmap.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=mmap&sektion=2
+/// [NetBSD]: https://man.netbsd.org/mmap.2
+/// [OpenBSD]: https://man.openbsd.org/mmap.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=mmap&section=2
+/// [illumos]: https://illumos.org/man/2/mmap
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Memory_002dmapped-I_002fO.html#index-mmap
 #[inline]
 #[doc(alias = "mmap")]
 pub unsafe fn mmap_anonymous(
@@ -70,7 +98,7 @@ pub unsafe fn mmap_anonymous(
     backend::mm::syscalls::mmap_anonymous(ptr, len, prot, flags)
 }
 
-/// `munmap(ptr, len)`
+/// `munmap(ptr, len)`—Remove a memory mapping.
 ///
 /// # Safety
 ///
@@ -79,9 +107,23 @@ pub unsafe fn mmap_anonymous(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/munmap.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/munmap.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/munmap.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=munmap&sektion=2
+/// [NetBSD]: https://man.netbsd.org/munmap.2
+/// [OpenBSD]: https://man.openbsd.org/munmap.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=munmap&section=2
+/// [illumos]: https://illumos.org/man/2/munmap
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Memory_002dmapped-I_002fO.html#index-munmap
 #[inline]
 pub unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
     backend::mm::syscalls::munmap(ptr, len)
@@ -139,7 +181,8 @@ pub unsafe fn mremap_fixed(
     backend::mm::syscalls::mremap_fixed(old_address, old_size, new_size, flags, new_address)
 }
 
-/// `mprotect(ptr, len, flags)`
+/// `mprotect(ptr, len, flags)`—Change the protection flags of a region of
+/// memory.
 ///
 /// # Safety
 ///
@@ -148,9 +191,21 @@ pub unsafe fn mremap_fixed(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mprotect.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mprotect.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/mprotect.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=mprotect&sektion=2
+/// [NetBSD]: https://man.netbsd.org/mprotect.2
+/// [OpenBSD]: https://man.openbsd.org/mprotect.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=mprotect&section=2
+/// [illumos]: https://illumos.org/man/2/mprotect
 #[inline]
 pub unsafe fn mprotect(ptr: *mut c_void, len: usize, flags: MprotectFlags) -> io::Result<()> {
     backend::mm::syscalls::mprotect(ptr, len, flags)
@@ -172,9 +227,23 @@ pub unsafe fn mprotect(ptr: *mut c_void, len: usize, flags: MprotectFlags) -> io
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mlock.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mlock.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/mlock.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=mlock&sektion=2
+/// [NetBSD]: https://man.netbsd.org/mlock.2
+/// [OpenBSD]: https://man.openbsd.org/mlock.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=mlock&section=2
+/// [illumos]: https://illumos.org/man/3C/mlock
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Page-Lock-Functions.html#index-mlock
 #[inline]
 pub unsafe fn mlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
     backend::mm::syscalls::mlock(ptr, len)
@@ -197,8 +266,10 @@ pub unsafe fn mlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
 ///
 /// # References
 ///  - [Linux]
+///  - [glibc]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mlock2.2.html
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Page-Lock-Functions.html#index-mlock2
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 #[doc(alias = "mlock2")]
@@ -221,9 +292,23 @@ pub unsafe fn mlock_with(ptr: *mut c_void, len: usize, flags: MlockFlags) -> io:
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/munlock.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/munlock.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/munlock.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=munlock&sektion=2
+/// [NetBSD]: https://man.netbsd.org/munlock.2
+/// [OpenBSD]: https://man.openbsd.org/munlock.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=munlock&section=2
+/// [illumos]: https://illumos.org/man/3C/munlock
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Page-Lock-Functions.html#index-munlock
 #[inline]
 pub unsafe fn munlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
     backend::mm::syscalls::munlock(ptr, len)
