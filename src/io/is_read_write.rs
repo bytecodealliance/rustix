@@ -1,4 +1,6 @@
 //! The [`is_read_write`] function.
+//!
+//! [`is_read_write`]: https://docs.rs/rustix/*/rustix/io/fn.is_read_write.html
 
 #[cfg(all(feature = "fs", feature = "net"))]
 use crate::{backend, io};
