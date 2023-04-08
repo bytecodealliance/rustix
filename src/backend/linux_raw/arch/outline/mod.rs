@@ -1,9 +1,13 @@
 //! Declare functions defined in out-of-line ("outline") asm files.
 //!
-//! Kernel calling conventions differ from userspace calling conventions,
-//! so we also define inline function wrappers which reorder the arguments
-//! so that they match with the kernel convention as closely as possible,
-//! to minimize the amount of out-of-line code we need.
+//! Kernel calling conventions differ from userspace calling conventions, so we
+//! also define inline function wrappers which reorder the arguments so that
+//! they match with the kernel convention as closely as possible, to minimize
+//! the amount of out-of-line code we need.
+//!
+//! This is needed in order to support our MSRV of 1.48, which doesn't support
+//! inline asm. When using newer Rust versions, inline asm code is used instead
+//! and these outline libraries are unused.
 
 #[cfg(target_arch = "x86")]
 mod x86;
