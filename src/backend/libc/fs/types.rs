@@ -776,7 +776,7 @@ bitflags! {
     }
 }
 
-#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 bitflags! {
     /// `ST_*` constants for use with [`StatVfs`].
     pub struct StatVfsMountFlags: u64 {
@@ -918,7 +918,7 @@ pub type StatFs = c::statfs64;
 ///
 /// [`statvfs`]: crate::fs::statvfs
 /// [`fstatvfs`]: crate::fs::fstatvfs
-#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 #[allow(missing_docs)]
 pub struct StatVfs {
     pub f_bsize: u64,

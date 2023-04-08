@@ -395,7 +395,6 @@ pub(super) use c::posix_fallocate64 as libc_posix_fallocate;
 pub(super) use {c::fstatfs as libc_fstatfs, c::statfs as libc_statfs};
 #[cfg(not(any(
     linux_like,
-    solarish,
     windows,
     target_os = "haiku",
     target_os = "redox",

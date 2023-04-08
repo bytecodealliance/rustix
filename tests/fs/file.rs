@@ -75,7 +75,7 @@ fn test_file() {
         assert!(statfs.f_blocks > 0);
     }
 
-    #[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
     {
         let statvfs = rustix::fs::fstatvfs(&file).unwrap();
         assert!(statvfs.f_frsize > 0);
