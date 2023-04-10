@@ -87,7 +87,12 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(
+    target_os = "android",
+    target_os = "freebsd",
+    target_os = "illumos",
+    target_os = "linux"
+))]
 bitflags! {
     /// `EFD_*` flags for use with [`eventfd`].
     ///

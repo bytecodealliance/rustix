@@ -18,11 +18,18 @@ use crate::io::kqueue::Event;
 use crate::io::port::Event;
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 use crate::io::DupFlags;
+#[cfg(any(
+    target_os = "android",
+    target_os = "freebsd",
+    target_os = "illumos",
+    target_os = "linux"
+))]
+use crate::io::EventfdFlags;
 #[cfg(not(any(apple, target_os = "aix", target_os = "haiku", target_os = "wasi")))]
 use crate::io::PipeFlags;
 use crate::io::{self, FdFlags, IoSlice, IoSliceMut, PollFd};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::io::{EventfdFlags, IoSliceRaw, ReadWriteFlags, SpliceFlags};
+use crate::io::{IoSliceRaw, ReadWriteFlags, SpliceFlags};
 use core::cmp::min;
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
@@ -291,6 +298,11 @@ pub(crate) unsafe fn close(raw_fd: RawFd) {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
     unsafe { syscall_ret_owned_fd(c::syscall(c::SYS_eventfd2, initval, flags.bits())) }
+}
+
+#[cfg(any(target_os = "freebsd", target_os = "illumos"))]
+pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(c::eventfd(initval, flags.bits())) }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]

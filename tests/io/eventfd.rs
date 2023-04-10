@@ -1,4 +1,9 @@
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(
+    target_os = "android",
+    target_os = "freebsd",
+    target_os = "illumos",
+    target_os = "linux"
+))]
 #[test]
 fn test_eventfd() {
     use rustix::io::{eventfd, read, write, EventfdFlags};
