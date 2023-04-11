@@ -30,8 +30,19 @@ fn main() -> std::io::Result<()> {
             0,
         ),
         Event::new(
-            EventFilter::Timer(Some(core::time::Duration::from_secs(1))),
+            EventFilter::Timer {
+                ident: 0,
+                timer: Some(core::time::Duration::from_secs(1)),
+            },
             EventFlags::ADD,
+            0,
+        ),
+        Event::new(
+            EventFilter::Timer {
+                ident: 1,
+                timer: Some(core::time::Duration::from_secs(2)),
+            },
+            EventFlags::ADD | EventFlags::ONESHOT,
             0,
         ),
     ];
@@ -54,7 +65,10 @@ fn main() -> std::io::Result<()> {
                 EventFilter::Vnode { vnode: _, flags } => {
                     eprintln!("Current directory was touched ({:?})", flags)
                 }
-                EventFilter::Timer(_) => eprintln!("Second timer ticked"),
+                EventFilter::Timer { ident: 0, timer: _ } => eprintln!("Second timer ticked"),
+                EventFilter::Timer { ident: 1, timer: _ } => {
+                    eprintln!("One-shot two second timer ticked")
+                }
                 _ => eprintln!("Unknown event"),
             }
         }
