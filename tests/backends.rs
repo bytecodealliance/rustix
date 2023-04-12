@@ -61,15 +61,6 @@ fn test_backends() {
     #[cfg(any(unix, target_os = "wasi"))]
     let libc_dep = "libc";
 
-    // FIXME: Temporarily disable the subsequent tests on Windows until
-    // rust-errno updates to windows-sys 0.48.
-    #[cfg(windows)]
-    {
-        if true {
-            return;
-        }
-    }
-
     // Test the use-libc crate, which enables the "use-libc" cargo feature.
     assert!(
         has_dependency("test-crates/use-libc", &[], &[], &["RUSTFLAGS"], libc_dep),

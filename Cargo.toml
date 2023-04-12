@@ -40,7 +40,7 @@ once_cell = { version = "1.5.2", optional = true }
 # `RUSTFLAGS` or enabling the `use-libc` cargo feature.
 [target.'cfg(all(not(rustix_use_libc), not(miri), target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"), all(target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64")))))'.dependencies]
 linux-raw-sys = { version = "0.3.0", default-features = false, features = ["general", "errno", "ioctl", "no_std"] }
-libc_errno = { package = "errno", version = "0.3.0", default-features = false, optional = true }
+libc_errno = { package = "errno", version = "0.3.1", default-features = false, optional = true }
 libc = { version = "0.2.141", features = ["extra_traits"], optional = true }
 
 # Dependencies for platforms where only libc is supported:
