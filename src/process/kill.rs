@@ -49,3 +49,33 @@ pub fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
 pub fn kill_current_process_group(sig: Signal) -> io::Result<()> {
     backend::process::syscalls::kill_current_process_group(sig)
 }
+
+/// `kill(pid, 0)`—Check validity of pid and permissions to send signals to
+/// the process, without actually send signals.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/kill.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/kill.2.html
+#[inline]
+#[doc(alias = "kill")]
+pub fn test_kill_process(pid: Pid) -> io::Result<()> {
+    backend::process::syscalls::test_kill_process(pid)
+}
+
+/// `kill(-pid, 0)`—Check validity of pid and permissions to send signals to
+/// all processes in the process group, without actually send signals.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/kill.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/kill.2.html
+#[inline]
+#[doc(alias = "kill")]
+pub fn test_kill_process_group(pid: Pid) -> io::Result<()> {
+    backend::process::syscalls::test_kill_process_group(pid)
+}
