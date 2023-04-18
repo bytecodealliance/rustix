@@ -3,9 +3,12 @@
 use super::super::c;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::syscall_ret_owned_fd;
-use super::super::conv::{
-    borrowed_fd, ret, ret_c_int, ret_discarded_fd, ret_owned_fd, ret_ssize_t,
-};
+#[cfg(any(
+    target_os = "android",
+    all(target_os = "linux", not(target_env = "gnu")),
+))]
+use super::super::conv::syscall_ret_usize;
+use super::super::conv::{borrowed_fd, ret, ret_c_int, ret_discarded_fd, ret_owned_fd, ret_usize};
 use super::super::offset::{libc_pread, libc_pwrite};
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "solaris")))]
 use super::super::offset::{libc_preadv, libc_pwritev};
@@ -39,25 +42,23 @@ use core::ptr;
 use libc_errno::errno;
 
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
-    let nread = unsafe {
-        ret_ssize_t(c::read(
+    unsafe {
+        ret_usize(c::read(
             borrowed_fd(fd),
             buf.as_mut_ptr().cast(),
             min(buf.len(), READ_LIMIT),
-        ))?
-    };
-    Ok(nread as usize)
+        ))
+    }
 }
 
 pub(crate) fn write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
-    let nwritten = unsafe {
-        ret_ssize_t(c::write(
+    unsafe {
+        ret_usize(c::write(
             borrowed_fd(fd),
             buf.as_ptr().cast(),
             min(buf.len(), READ_LIMIT),
-        ))?
-    };
-    Ok(nwritten as usize)
+        ))
+    }
 }
 
 pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Result<usize> {
@@ -66,15 +67,14 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Resu
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
 
-    let nread = unsafe {
-        ret_ssize_t(libc_pread(
+    unsafe {
+        ret_usize(libc_pread(
             borrowed_fd(fd),
             buf.as_mut_ptr().cast(),
             len,
             offset,
-        ))?
-    };
-    Ok(nread as usize)
+        ))
+    }
 }
 
 pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<usize> {
@@ -83,37 +83,34 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
 
-    let nwritten = unsafe {
-        ret_ssize_t(libc_pwrite(
+    unsafe {
+        ret_usize(libc_pwrite(
             borrowed_fd(fd),
             buf.as_ptr().cast(),
             len,
             offset,
-        ))?
-    };
-    Ok(nwritten as usize)
+        ))
+    }
 }
 
 pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut]) -> io::Result<usize> {
-    let nread = unsafe {
-        ret_ssize_t(c::readv(
+    unsafe {
+        ret_usize(c::readv(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), max_iov()) as c::c_int,
-        ))?
-    };
-    Ok(nread as usize)
+        ))
+    }
 }
 
 pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> {
-    let nwritten = unsafe {
-        ret_ssize_t(c::writev(
+    unsafe {
+        ret_usize(c::writev(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), max_iov()) as c::c_int,
-        ))?
-    };
-    Ok(nwritten as usize)
+        ))
+    }
 }
 
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "solaris")))]
@@ -124,30 +121,28 @@ pub(crate) fn preadv(
 ) -> io::Result<usize> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
-    let nread = unsafe {
-        ret_ssize_t(libc_preadv(
+    unsafe {
+        ret_usize(libc_preadv(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), max_iov()) as c::c_int,
             offset,
-        ))?
-    };
-    Ok(nread as usize)
+        ))
+    }
 }
 
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "solaris")))]
 pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
-    let nwritten = unsafe {
-        ret_ssize_t(libc_pwritev(
+    unsafe {
+        ret_usize(libc_pwritev(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), max_iov()) as c::c_int,
             offset,
-        ))?
-    };
-    Ok(nwritten as usize)
+        ))
+    }
 }
 
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
@@ -159,16 +154,15 @@ pub(crate) fn preadv2(
 ) -> io::Result<usize> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
-    let nread = unsafe {
-        ret_ssize_t(libc_preadv2(
+    unsafe {
+        ret_usize(libc_preadv2(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), max_iov()) as c::c_int,
             offset,
             flags.bits(),
-        ))?
-    };
-    Ok(nread as usize)
+        ))
+    }
 }
 
 /// At present, `libc` only has `preadv2` defined for glibc. On other
@@ -186,17 +180,16 @@ pub(crate) fn preadv2(
 ) -> io::Result<usize> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
-    let nread = unsafe {
-        ret_ssize_t(c::syscall(
+    unsafe {
+        syscall_ret_usize(c::syscall(
             c::SYS_preadv2,
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), max_iov()) as c::c_int,
             offset,
             flags.bits(),
-        ) as c::ssize_t)?
-    };
-    Ok(nread as usize)
+        ))
+    }
 }
 
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
@@ -208,16 +201,15 @@ pub(crate) fn pwritev2(
 ) -> io::Result<usize> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
-    let nwritten = unsafe {
-        ret_ssize_t(libc_pwritev2(
+    unsafe {
+        ret_usize(libc_pwritev2(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), max_iov()) as c::c_int,
             offset,
             flags.bits(),
-        ))?
-    };
-    Ok(nwritten as usize)
+        ))
+    }
 }
 
 /// At present, `libc` only has `pwritev2` defined for glibc. On other
@@ -235,17 +227,16 @@ pub(crate) fn pwritev2(
 ) -> io::Result<usize> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
-    let nwritten = unsafe {
-        ret_ssize_t(c::syscall(
+    unsafe {
+        syscall_ret_usize(c::syscall(
             c::SYS_pwritev2,
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), max_iov()) as c::c_int,
             offset,
             flags.bits(),
-        ) as c::ssize_t)?
-    };
-    Ok(nwritten as usize)
+        ))
+    }
 }
 
 // These functions are derived from Rust's library/std/src/sys/unix/fd.rs at
@@ -583,17 +574,16 @@ pub fn splice(
         .map(|off| (off as *mut u64).cast())
         .unwrap_or(ptr::null_mut());
 
-    ret_ssize_t(unsafe {
-        c::splice(
+    unsafe {
+        ret_usize(c::splice(
             borrowed_fd(fd_in),
             off_in,
             borrowed_fd(fd_out),
             off_out,
             len,
             flags.bits(),
-        )
-    })
-    .map(|spliced| spliced as usize)
+        ))
+    }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -603,13 +593,12 @@ pub unsafe fn vmsplice(
     bufs: &[IoSliceRaw],
     flags: SpliceFlags,
 ) -> io::Result<usize> {
-    ret_ssize_t(c::vmsplice(
+    ret_usize(c::vmsplice(
         borrowed_fd(fd),
         bufs.as_ptr().cast::<c::iovec>(),
         min(bufs.len(), max_iov()),
         flags.bits(),
     ))
-    .map(|spliced| spliced as usize)
 }
 
 #[cfg(solarish)]
