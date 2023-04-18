@@ -1,11 +1,9 @@
 //! libc syscalls supporting `rustix::fs`.
 
 use super::super::c;
-use super::super::conv::{
-    borrowed_fd, c_str, ret, ret_c_int, ret_off_t, ret_owned_fd, ret_ssize_t,
-};
+use super::super::conv::{borrowed_fd, c_str, ret, ret_c_int, ret_off_t, ret_owned_fd, ret_usize};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_ssize_t};
+use super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_usize};
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 use super::super::offset::libc_fallocate;
 #[cfg(not(any(
@@ -87,6 +85,8 @@ use crate::fs::SealFlags;
     target_os = "wasi",
 )))]
 use crate::fs::StatFs;
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+use crate::fs::XattrFlags;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags};
 #[cfg(not(any(apple, target_os = "redox", target_os = "wasi")))]
@@ -210,13 +210,12 @@ pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
 #[inline]
 pub(crate) fn readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
     unsafe {
-        ret_ssize_t(c::readlinkat(
+        ret_usize(c::readlinkat(
             borrowed_fd(dirfd),
             c_str(path),
             buf.as_mut_ptr().cast::<c::c_char>(),
             buf.len(),
         ))
-        .map(|nread| nread as usize)
     }
 }
 
@@ -237,14 +236,13 @@ pub(crate) fn getdents_uninit(
     buf: &mut [MaybeUninit<u8>],
 ) -> io::Result<usize> {
     unsafe {
-        syscall_ret_ssize_t(c::syscall(
+        syscall_ret_usize(c::syscall(
             c::SYS_getdents64,
             fd,
             buf.as_mut_ptr().cast::<c::c_char>(),
             buf.len(),
         ))
     }
-    .map(|nread| nread as usize)
 }
 
 #[cfg(not(target_os = "redox"))]
@@ -770,7 +768,7 @@ pub(crate) fn copy_file_range(
         null_mut()
     };
     let copied = unsafe {
-        syscall_ret_ssize_t(c::syscall(
+        syscall_ret_usize(c::syscall(
             c::SYS_copy_file_range,
             borrowed_fd(fd_in),
             off_in_ptr,
@@ -786,7 +784,7 @@ pub(crate) fn copy_file_range(
     if let Some(off_out) = off_out {
         *off_out = off_out_val as u64;
     }
-    Ok(copied as usize)
+    Ok(copied)
 }
 
 #[cfg(not(any(
@@ -1323,13 +1321,12 @@ pub(crate) fn sendfile(
     count: usize,
 ) -> io::Result<usize> {
     unsafe {
-        let nsent = ret_ssize_t(c::sendfile64(
+        ret_usize(c::sendfile64(
             borrowed_fd(out_fd),
             borrowed_fd(in_fd),
             offset.map_or(null_mut(), crate::utils::as_mut_ptr).cast(),
             count,
-        ))?;
-        Ok(nsent as usize)
+        ))
     }
 }
 
@@ -1808,4 +1805,274 @@ pub(crate) fn mount(
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn unmount(target: &CStr, flags: super::types::UnmountFlags) -> io::Result<()> {
     unsafe { ret(c::umount2(target.as_ptr(), flags.bits())) }
+}
+
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+pub(crate) fn getxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
+    let value_ptr = value.as_mut_ptr();
+
+    #[cfg(not(apple))]
+    unsafe {
+        ret_usize(c::getxattr(
+            path.as_ptr(),
+            name.as_ptr(),
+            value_ptr.cast::<c::c_void>(),
+            value.len(),
+        ))
+    }
+
+    #[cfg(apple)]
+    unsafe {
+        ret_usize(c::getxattr(
+            path.as_ptr(),
+            name.as_ptr(),
+            value_ptr.cast::<c::c_void>(),
+            value.len(),
+            0,
+            0,
+        ))
+    }
+}
+
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+pub(crate) fn lgetxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
+    let value_ptr = value.as_mut_ptr();
+
+    #[cfg(not(apple))]
+    unsafe {
+        ret_usize(c::lgetxattr(
+            path.as_ptr(),
+            name.as_ptr(),
+            value_ptr.cast::<c::c_void>(),
+            value.len(),
+        ))
+    }
+
+    #[cfg(apple)]
+    unsafe {
+        ret_usize(c::getxattr(
+            path.as_ptr(),
+            name.as_ptr(),
+            value_ptr.cast::<c::c_void>(),
+            value.len(),
+            0,
+            c::XATTR_NOFOLLOW,
+        ))
+    }
+}
+
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+pub(crate) fn fgetxattr(fd: BorrowedFd<'_>, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
+    let value_ptr = value.as_mut_ptr();
+
+    #[cfg(not(apple))]
+    unsafe {
+        ret_usize(c::fgetxattr(
+            borrowed_fd(fd),
+            name.as_ptr(),
+            value_ptr.cast::<c::c_void>(),
+            value.len(),
+        ))
+    }
+
+    #[cfg(apple)]
+    unsafe {
+        ret_usize(c::fgetxattr(
+            borrowed_fd(fd),
+            name.as_ptr(),
+            value_ptr.cast::<c::c_void>(),
+            value.len(),
+            0,
+            0,
+        ))
+    }
+}
+
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+pub(crate) fn setxattr(
+    path: &CStr,
+    name: &CStr,
+    value: &[u8],
+    flags: XattrFlags,
+) -> io::Result<()> {
+    #[cfg(not(apple))]
+    unsafe {
+        ret(c::setxattr(
+            path.as_ptr(),
+            name.as_ptr(),
+            value.as_ptr().cast::<c::c_void>(),
+            value.len(),
+            flags.bits() as i32,
+        ))
+    }
+
+    #[cfg(apple)]
+    unsafe {
+        ret(c::setxattr(
+            path.as_ptr(),
+            name.as_ptr(),
+            value.as_ptr().cast::<c::c_void>(),
+            value.len(),
+            0,
+            flags.bits() as i32,
+        ))
+    }
+}
+
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+pub(crate) fn lsetxattr(
+    path: &CStr,
+    name: &CStr,
+    value: &[u8],
+    flags: XattrFlags,
+) -> io::Result<()> {
+    #[cfg(not(apple))]
+    unsafe {
+        ret(c::lsetxattr(
+            path.as_ptr(),
+            name.as_ptr(),
+            value.as_ptr().cast::<c::c_void>(),
+            value.len(),
+            flags.bits() as i32,
+        ))
+    }
+
+    #[cfg(apple)]
+    unsafe {
+        ret(c::setxattr(
+            path.as_ptr(),
+            name.as_ptr(),
+            value.as_ptr().cast::<c::c_void>(),
+            value.len(),
+            0,
+            flags.bits() as i32 | c::XATTR_NOFOLLOW,
+        ))
+    }
+}
+
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+pub(crate) fn fsetxattr(
+    fd: BorrowedFd<'_>,
+    name: &CStr,
+    value: &[u8],
+    flags: XattrFlags,
+) -> io::Result<()> {
+    #[cfg(not(apple))]
+    unsafe {
+        ret(c::fsetxattr(
+            borrowed_fd(fd),
+            name.as_ptr(),
+            value.as_ptr().cast::<c::c_void>(),
+            value.len(),
+            flags.bits() as i32,
+        ))
+    }
+
+    #[cfg(apple)]
+    unsafe {
+        ret(c::fsetxattr(
+            borrowed_fd(fd),
+            name.as_ptr(),
+            value.as_ptr().cast::<c::c_void>(),
+            value.len(),
+            0,
+            flags.bits() as i32,
+        ))
+    }
+}
+
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+pub(crate) fn listxattr(path: &CStr, list: &mut [c::c_char]) -> io::Result<usize> {
+    #[cfg(not(apple))]
+    unsafe {
+        ret_usize(c::listxattr(path.as_ptr(), list.as_mut_ptr(), list.len()))
+    }
+
+    #[cfg(apple)]
+    unsafe {
+        ret_usize(c::listxattr(
+            path.as_ptr(),
+            list.as_mut_ptr(),
+            list.len(),
+            0,
+        ))
+    }
+}
+
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+pub(crate) fn llistxattr(path: &CStr, list: &mut [c::c_char]) -> io::Result<usize> {
+    #[cfg(not(apple))]
+    unsafe {
+        ret_usize(c::llistxattr(path.as_ptr(), list.as_mut_ptr(), list.len()))
+    }
+
+    #[cfg(apple)]
+    unsafe {
+        ret_usize(c::listxattr(
+            path.as_ptr(),
+            list.as_mut_ptr(),
+            list.len(),
+            c::XATTR_NOFOLLOW,
+        ))
+    }
+}
+
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+pub(crate) fn flistxattr(fd: BorrowedFd<'_>, list: &mut [c::c_char]) -> io::Result<usize> {
+    let fd = borrowed_fd(fd);
+
+    #[cfg(not(apple))]
+    unsafe {
+        ret_usize(c::flistxattr(fd, list.as_mut_ptr(), list.len()))
+    }
+
+    #[cfg(apple)]
+    unsafe {
+        ret_usize(c::flistxattr(fd, list.as_mut_ptr(), list.len(), 0))
+    }
+}
+
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+pub(crate) fn removexattr(path: &CStr, name: &CStr) -> io::Result<()> {
+    #[cfg(not(apple))]
+    unsafe {
+        ret(c::removexattr(path.as_ptr(), name.as_ptr()))
+    }
+
+    #[cfg(apple)]
+    unsafe {
+        ret(c::removexattr(path.as_ptr(), name.as_ptr(), 0))
+    }
+}
+
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+pub(crate) fn lremovexattr(path: &CStr, name: &CStr) -> io::Result<()> {
+    #[cfg(not(apple))]
+    unsafe {
+        ret(c::lremovexattr(path.as_ptr(), name.as_ptr()))
+    }
+
+    #[cfg(apple)]
+    unsafe {
+        ret(c::removexattr(
+            path.as_ptr(),
+            name.as_ptr(),
+            c::XATTR_NOFOLLOW,
+        ))
+    }
+}
+
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+pub(crate) fn fremovexattr(fd: BorrowedFd<'_>, name: &CStr) -> io::Result<()> {
+    let fd = borrowed_fd(fd);
+
+    #[cfg(not(apple))]
+    unsafe {
+        ret(c::fremovexattr(fd, name.as_ptr()))
+    }
+
+    #[cfg(apple)]
+    unsafe {
+        ret(c::fremovexattr(fd, name.as_ptr(), 0))
+    }
 }

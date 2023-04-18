@@ -45,6 +45,8 @@ mod statx;
 // TODO: Enable `sync` for solarish when upstream is updated.
 #[cfg(not(any(solarish, target_os = "redox", target_os = "wasi")))]
 mod sync;
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+mod xattr;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use crate::backend::fs::inotify;
@@ -92,6 +94,8 @@ pub use sendfile::sendfile;
 pub use statx::{statx, Statx, StatxFlags, StatxTimestamp};
 #[cfg(not(any(solarish, target_os = "redox", target_os = "wasi")))]
 pub use sync::sync;
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+pub use xattr::*;
 
 /// Re-export types common to POSIX-ish platforms.
 #[cfg(feature = "std")]

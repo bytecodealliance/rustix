@@ -38,4 +38,6 @@ mod statfs;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod statx;
 mod utimensat;
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+mod xattr;
 mod y2038;

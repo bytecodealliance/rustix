@@ -88,20 +88,22 @@ pub(super) fn ret_u32(raw: c::c_int) -> io::Result<u32> {
 }
 
 #[inline]
-pub(super) fn ret_ssize_t(raw: c::ssize_t) -> io::Result<c::ssize_t> {
+pub(super) fn ret_usize(raw: c::ssize_t) -> io::Result<usize> {
     if raw == -1 {
         Err(io::Errno::last_os_error())
     } else {
-        Ok(raw)
+        debug_assert!(raw >= 0);
+        Ok(raw as usize)
     }
 }
 
 #[inline]
-pub(super) fn syscall_ret_ssize_t(raw: c::c_long) -> io::Result<c::ssize_t> {
+pub(super) fn syscall_ret_usize(raw: c::c_long) -> io::Result<usize> {
     if raw == -1 {
         Err(io::Errno::last_os_error())
     } else {
-        Ok(raw as c::ssize_t)
+        debug_assert!(raw >= 0);
+        Ok(raw as c::ssize_t as usize)
     }
 }
 
@@ -210,13 +212,13 @@ pub(super) fn send_recv_len(len: usize) -> i32 {
 /// Convert the return value of a `send` or `recv` call.
 #[cfg(not(windows))]
 #[inline]
-pub(super) fn ret_send_recv(len: isize) -> io::Result<c::ssize_t> {
-    ret_ssize_t(len)
+pub(super) fn ret_send_recv(len: isize) -> io::Result<usize> {
+    ret_usize(len)
 }
 
 /// Convert the return value of a `send` or `recv` call.
 #[cfg(windows)]
 #[inline]
-pub(super) fn ret_send_recv(len: i32) -> io::Result<c::ssize_t> {
-    ret_ssize_t(len as isize)
+pub(super) fn ret_send_recv(len: i32) -> io::Result<usize> {
+    ret_usize(len as isize)
 }

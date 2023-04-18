@@ -26,28 +26,26 @@ use core::ptr::null_mut;
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
-    let nrecv = unsafe {
+    unsafe {
         ret_send_recv(c::recv(
             borrowed_fd(fd),
             buf.as_mut_ptr().cast(),
             send_recv_len(buf.len()),
             flags.bits(),
-        ))?
-    };
-    Ok(nrecv as usize)
+        ))
+    }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Result<usize> {
-    let nwritten = unsafe {
+    unsafe {
         ret_send_recv(c::send(
             borrowed_fd(fd),
             buf.as_ptr().cast(),
             send_recv_len(buf.len()),
             flags.bits(),
-        ))?
-    };
-    Ok(nwritten as usize)
+        ))
+    }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
@@ -65,18 +63,20 @@ pub(crate) fn recvfrom(
         // `AF_UNSPEC` so that we can detect this case.
         initialize_family_to_unspec(storage.as_mut_ptr());
 
-        let nread = ret_send_recv(c::recvfrom(
+        ret_send_recv(c::recvfrom(
             borrowed_fd(fd),
             buf.as_mut_ptr().cast(),
             send_recv_len(buf.len()),
             flags.bits(),
             storage.as_mut_ptr().cast(),
             &mut len,
-        ))?;
-        Ok((
-            nread as usize,
-            maybe_read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()),
         ))
+        .map(|nread| {
+            (
+                nread,
+                maybe_read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()),
+            )
+        })
     }
 }
 
@@ -87,7 +87,7 @@ pub(crate) fn sendto_v4(
     flags: SendFlags,
     addr: &SocketAddrV4,
 ) -> io::Result<usize> {
-    let nwritten = unsafe {
+    unsafe {
         ret_send_recv(c::sendto(
             borrowed_fd(fd),
             buf.as_ptr().cast(),
@@ -95,9 +95,8 @@ pub(crate) fn sendto_v4(
             flags.bits(),
             as_ptr(&encode_sockaddr_v4(addr)).cast::<c::sockaddr>(),
             size_of::<SocketAddrV4>() as _,
-        ))?
-    };
-    Ok(nwritten as usize)
+        ))
+    }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
@@ -107,7 +106,7 @@ pub(crate) fn sendto_v6(
     flags: SendFlags,
     addr: &SocketAddrV6,
 ) -> io::Result<usize> {
-    let nwritten = unsafe {
+    unsafe {
         ret_send_recv(c::sendto(
             borrowed_fd(fd),
             buf.as_ptr().cast(),
@@ -115,9 +114,8 @@ pub(crate) fn sendto_v6(
             flags.bits(),
             as_ptr(&encode_sockaddr_v6(addr)).cast::<c::sockaddr>(),
             size_of::<SocketAddrV6>() as _,
-        ))?
-    };
-    Ok(nwritten as usize)
+        ))
+    }
 }
 
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
@@ -127,7 +125,7 @@ pub(crate) fn sendto_unix(
     flags: SendFlags,
     addr: &SocketAddrUnix,
 ) -> io::Result<usize> {
-    let nwritten = unsafe {
+    unsafe {
         ret_send_recv(c::sendto(
             borrowed_fd(fd),
             buf.as_ptr().cast(),
@@ -135,9 +133,8 @@ pub(crate) fn sendto_unix(
             flags.bits(),
             as_ptr(&addr.unix).cast(),
             addr.addr_len(),
-        ))?
-    };
-    Ok(nwritten as usize)
+        ))
+    }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
