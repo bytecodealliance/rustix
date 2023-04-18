@@ -95,9 +95,9 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
     /// Returns a pointer to the message data.
     pub(crate) fn as_control_ptr(&mut self) -> *mut u8 {
         if self.length > 0 {
-            core::ptr::null_mut()
-        } else {
             self.buffer.as_mut_ptr()
+        } else {
+            core::ptr::null_mut()
         }
     }
 
