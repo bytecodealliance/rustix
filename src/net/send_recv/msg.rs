@@ -82,6 +82,12 @@ impl<'buf> From<&'buf mut [u8]> for SendAncillaryBuffer<'buf, '_, '_> {
     }
 }
 
+impl Default for SendAncillaryBuffer<'_, '_, '_> {
+    fn default() -> Self {
+        Self::new(&mut [])
+    }
+}
+
 impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
     /// Create a new, empty `SendAncillaryBuffer` from a raw byte buffer.
     pub fn new(buffer: &'buf mut [u8]) -> Self {
@@ -200,6 +206,12 @@ pub struct RecvAncillaryBuffer<'buf> {
 impl<'buf> From<&'buf mut [u8]> for RecvAncillaryBuffer<'buf> {
     fn from(buffer: &'buf mut [u8]) -> Self {
         Self::new(buffer)
+    }
+}
+
+impl Default for RecvAncillaryBuffer<'_> {
+    fn default() -> Self {
+        Self::new(&mut [])
     }
 }
 

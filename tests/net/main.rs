@@ -15,9 +15,6 @@ mod unix;
 mod v4;
 mod v6;
 
-#[cfg(unix)]
-mod unix_msg;
-
 /// Windows requires us to call a setup function before using any of the
 /// socket APIs.
 #[cfg(windows)]
