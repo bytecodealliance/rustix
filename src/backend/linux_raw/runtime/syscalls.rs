@@ -20,7 +20,7 @@ use crate::fs::AtFlags;
 use crate::io;
 use crate::process::{Pid, RawNonZeroPid, Signal};
 use crate::runtime::{Sigaction, Stack};
-use linux_raw_sys::general::{__kernel_pid_t, sigset_t, PR_SET_NAME, SIGCHLD};
+use linux_raw_sys::general::{__kernel_pid_t, kernel_sigset_t, PR_SET_NAME, SIGCHLD};
 #[cfg(target_arch = "x86_64")]
 use {super::super::conv::ret_infallible, linux_raw_sys::general::ARCH_SET_FS};
 
@@ -121,7 +121,7 @@ pub(crate) unsafe fn sigaction(signal: Signal, new: Option<Sigaction>) -> io::Re
         signal,
         new,
         old.as_mut_ptr(),
-        size_of::<sigset_t, _>()
+        size_of::<kernel_sigset_t, _>()
     ))?;
     Ok(old.assume_init())
 }

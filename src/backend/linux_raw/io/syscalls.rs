@@ -36,7 +36,7 @@ use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET, FICLONE, FIONBIO, FIONREAD, TI
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use {
     super::super::conv::{opt_ref, size_of},
-    linux_raw_sys::general::{__kernel_timespec, sigset_t},
+    linux_raw_sys::general::{__kernel_timespec, kernel_sigset_t},
 };
 
 #[inline]
@@ -555,7 +555,7 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
             fds_len,
             opt_ref(timeout.as_ref()),
             zero(),
-            size_of::<sigset_t, _>()
+            size_of::<kernel_sigset_t, _>()
         ))
     }
     #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]

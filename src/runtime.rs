@@ -37,7 +37,7 @@ use core::ffi::c_void;
 
 /// `sigaction`
 #[cfg(linux_raw)]
-pub type Sigaction = linux_raw_sys::general::sigaction;
+pub type Sigaction = linux_raw_sys::general::kernel_sigaction;
 
 /// `stack_t`
 #[cfg(linux_raw)]
