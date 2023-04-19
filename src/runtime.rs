@@ -28,12 +28,20 @@ use crate::fs::AtFlags;
 #[cfg(linux_raw)]
 use crate::io;
 #[cfg(linux_raw)]
-use crate::process::Pid;
+use crate::process::{Pid, Signal};
 #[cfg(linux_raw)]
 #[cfg(feature = "fs")]
 use backend::fd::AsFd;
 #[cfg(linux_raw)]
 use core::ffi::c_void;
+
+/// `sigaction`
+#[cfg(linux_raw)]
+pub type Sigaction = linux_raw_sys::general::sigaction;
+
+/// `stack_t`
+#[cfg(linux_raw)]
+pub type Stack = linux_raw_sys::general::stack_t;
 
 #[cfg(linux_raw)]
 #[cfg(target_arch = "x86")]
@@ -266,4 +274,42 @@ pub unsafe fn execveat<Fd: AsFd>(
 #[inline]
 pub unsafe fn execve(path: &CStr, argv: *const *const u8, envp: *const *const u8) -> io::Errno {
     backend::runtime::syscalls::execve(path, argv, envp)
+}
+
+/// `sigaction(signal, &new, &old)`—Modify or query a signal handler.
+///
+/// # Safety
+///
+/// You're on your own. And on top of all the troubles with signal handlers,
+/// this implementation is highly experimental.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sigaction.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/sigaction.2.html
+#[cfg(linux_raw)]
+#[inline]
+pub unsafe fn sigaction(signal: Signal, new: Option<Sigaction>) -> io::Result<Sigaction> {
+    backend::runtime::syscalls::sigaction(signal, new)
+}
+
+/// `sigaltstack(new, old)`—Modify or query a signal stack.
+///
+/// # Safety
+///
+/// You're on your own. And on top of all the troubles with signal handlers,
+/// this implementation is highly experimental.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sigaltstack.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/sigaltstack.2.html
+#[cfg(linux_raw)]
+#[inline]
+pub unsafe fn sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
+    backend::runtime::syscalls::sigaltstack(new)
 }

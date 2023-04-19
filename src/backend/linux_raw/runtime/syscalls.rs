@@ -9,15 +9,18 @@
 use super::super::c;
 #[cfg(target_arch = "x86")]
 use super::super::conv::by_mut;
-use super::super::conv::{c_int, c_uint, ret, ret_c_uint, ret_error, ret_usize_infallible, zero};
+use super::super::conv::{
+    c_int, c_uint, ret, ret_c_uint, ret_error, ret_usize_infallible, size_of, zero,
+};
 #[cfg(feature = "fs")]
 use crate::fd::BorrowedFd;
 use crate::ffi::CStr;
 #[cfg(feature = "fs")]
 use crate::fs::AtFlags;
 use crate::io;
-use crate::process::{Pid, RawNonZeroPid};
-use linux_raw_sys::general::{__kernel_pid_t, PR_SET_NAME, SIGCHLD};
+use crate::process::{Pid, RawNonZeroPid, Signal};
+use crate::runtime::{Sigaction, Stack};
+use linux_raw_sys::general::{__kernel_pid_t, sigset_t, PR_SET_NAME, SIGCHLD};
 #[cfg(target_arch = "x86_64")]
 use {super::super::conv::ret_infallible, linux_raw_sys::general::ARCH_SET_FS};
 
@@ -104,4 +107,32 @@ pub(crate) mod tls {
     pub(crate) fn exit_thread(code: c::c_int) -> ! {
         unsafe { syscall_noreturn!(__NR_exit, c_int(code)) }
     }
+}
+
+#[inline]
+pub(crate) unsafe fn sigaction(signal: Signal, new: Option<Sigaction>) -> io::Result<Sigaction> {
+    let mut old = core::mem::MaybeUninit::<Sigaction>::uninit();
+    let new: *const Sigaction = match new {
+        Some(new) => &new,
+        None => core::ptr::null(),
+    };
+    ret(syscall!(
+        __NR_rt_sigaction,
+        signal,
+        new,
+        old.as_mut_ptr(),
+        size_of::<sigset_t, _>()
+    ))?;
+    Ok(old.assume_init())
+}
+
+#[inline]
+pub(crate) unsafe fn sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
+    let mut old = core::mem::MaybeUninit::<Stack>::uninit();
+    let new: *const Stack = match new {
+        Some(new) => &new,
+        None => core::ptr::null(),
+    };
+    ret(syscall!(__NR_sigaltstack, new, old.as_mut_ptr()))?;
+    Ok(old.assume_init())
 }
