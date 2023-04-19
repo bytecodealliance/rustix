@@ -560,6 +560,12 @@ pub(crate) fn test_kill_process_group(pid: Pid) -> io::Result<()> {
     unsafe { ret(c::kill(pid.as_raw_nonzero().get().wrapping_neg(), 0)) }
 }
 
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub(crate) fn test_kill_current_process_group() -> io::Result<()> {
+    unsafe { ret(c::kill(0, 0)) }
+}
+
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub(crate) unsafe fn prctl(
