@@ -313,3 +313,20 @@ pub unsafe fn sigaction(signal: Signal, new: Option<Sigaction>) -> io::Result<Si
 pub unsafe fn sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
     backend::runtime::syscalls::sigaltstack(new)
 }
+
+/// `tkill(tid, sig)`—Send a signal to a thread.
+///
+/// # Safety
+///
+/// You're on your own. And on top of all the troubles with signal handlers,
+/// this implementation is highly experimental.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/tkill.2.html
+#[cfg(linux_raw)]
+#[inline]
+pub unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
+    backend::runtime::syscalls::tkill(tid, sig)
+}
