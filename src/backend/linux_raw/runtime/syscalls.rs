@@ -136,3 +136,8 @@ pub(crate) unsafe fn sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
     ret(syscall!(__NR_sigaltstack, new, old.as_mut_ptr()))?;
     Ok(old.assume_init())
 }
+
+#[inline]
+pub(crate) unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
+    ret(syscall_readonly!(__NR_tkill, tid, sig))
+}
