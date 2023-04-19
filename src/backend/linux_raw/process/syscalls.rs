@@ -662,6 +662,11 @@ pub(crate) fn test_kill_process_group(pid: Pid) -> io::Result<()> {
 }
 
 #[inline]
+pub(crate) fn test_kill_current_process_group() -> io::Result<()> {
+    unsafe { ret(syscall_readonly!(__NR_kill, pass_usize(0), pass_usize(0))) }
+}
+
+#[inline]
 pub(crate) unsafe fn prctl(
     option: c::c_int,
     arg2: *mut c::c_void,
