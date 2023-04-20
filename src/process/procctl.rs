@@ -282,6 +282,12 @@ bitflags! {
         const CHILD = 2;
         /// The reported process is itself a reaper. Descendants of a subordinate reaper are not reported.
         const REAPER = 4;
+        /// The reported process is in the zombie state.
+        const ZOMBIE = 8;
+        /// The reported process is stopped by SIGSTOP/SIGTSTP.
+        const STOPPED = 16;
+        /// The reported process is in the process of exiting.
+        const EXITING = 32;
     }
 }
 
