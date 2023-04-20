@@ -10,7 +10,7 @@ use super::super::c;
 #[cfg(target_arch = "x86")]
 use super::super::conv::by_mut;
 use super::super::conv::{
-    c_int, c_uint, ret, ret_c_uint, ret_error, ret_usize_infallible, size_of, zero,
+    by_ref, c_int, c_uint, ret, ret_c_uint, ret_error, ret_usize_infallible, size_of, zero,
 };
 #[cfg(feature = "fs")]
 use crate::fd::BorrowedFd;
@@ -19,7 +19,7 @@ use crate::ffi::CStr;
 use crate::fs::AtFlags;
 use crate::io;
 use crate::process::{Pid, RawNonZeroPid, Signal};
-use crate::runtime::{Sigaction, Stack};
+use crate::runtime::{How, Sigaction, Sigset, Stack};
 use linux_raw_sys::general::{__kernel_pid_t, kernel_sigset_t, PR_SET_NAME, SIGCHLD};
 #[cfg(target_arch = "x86_64")]
 use {super::super::conv::ret_infallible, linux_raw_sys::general::ARCH_SET_FS};
@@ -140,4 +140,16 @@ pub(crate) unsafe fn sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
 #[inline]
 pub(crate) unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
     ret(syscall_readonly!(__NR_tkill, tid, sig))
+}
+
+#[inline]
+pub(crate) unsafe fn sigprocmask(how: How, set: Sigset) -> io::Result<Sigset> {
+    let mut old = core::mem::MaybeUninit::<Sigset>::uninit();
+    ret(syscall_readonly!(
+        __NR_rt_sigprocmask,
+        how,
+        by_ref(&set),
+        &mut old
+    ))?;
+    Ok(old.assume_init())
 }

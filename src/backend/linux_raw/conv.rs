@@ -728,6 +728,14 @@ impl<'a, Num: ArgNumber> From<crate::process::Gid> for ArgReg<'a, Num> {
     }
 }
 
+#[cfg(feature = "runtime")]
+impl<'a, Num: ArgNumber> From<crate::runtime::How> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::runtime::How) -> Self {
+        c_uint(flags as u32)
+    }
+}
+
 /// Convert a `usize` returned from a syscall that effectively returns `()` on
 /// success.
 ///

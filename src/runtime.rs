@@ -43,6 +43,24 @@ pub type Sigaction = linux_raw_sys::general::kernel_sigaction;
 #[cfg(linux_raw)]
 pub type Stack = linux_raw_sys::general::stack_t;
 
+/// `sigset_t`
+#[cfg(linux_raw)]
+pub type Sigset = linux_raw_sys::general::kernel_sigset_t;
+
+/// `SIG_*` constants for use with [`sigprocmask`].
+#[cfg(linux_raw)]
+#[repr(u32)]
+pub enum How {
+    /// `SIG_BLOCK`
+    BLOCK = linux_raw_sys::general::SIG_BLOCK,
+
+    /// `SIG_UNBLOCK`
+    UNBLOCK = linux_raw_sys::general::SIG_UNBLOCK,
+
+    /// `SIG_SETMASK`
+    SETMASK = linux_raw_sys::general::SIG_SETMASK,
+}
+
 #[cfg(linux_raw)]
 #[cfg(target_arch = "x86")]
 #[inline]
@@ -329,4 +347,24 @@ pub unsafe fn sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
 #[inline]
 pub unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
     backend::runtime::syscalls::tkill(tid, sig)
+}
+
+/// `sigprocmask(how, set, oldset)`—Adjust the process signal mask.
+///
+/// # Safety
+///
+/// You're on your own. And on top of all the troubles with signal handlers,
+/// this implementation is highly experimental.
+///
+/// # References
+///  - [Linux `sigprocmask`]
+///  - [Linux `pthread_sigmask`]
+///
+/// [Linux `sigprocmask`]: https://man7.org/linux/man-pages/man2/sigprocmask.2.html
+/// [Linux `pthread_sigmask`]: https://man7.org/linux/man-pages/man3/pthread_sigmask.3.html
+#[cfg(linux_raw)]
+#[inline]
+#[doc(alias = "pthread_sigmask")]
+pub unsafe fn sigprocmask(how: How, set: Sigset) -> io::Result<Sigset> {
+    backend::runtime::syscalls::sigprocmask(how, set)
 }
