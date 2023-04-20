@@ -302,7 +302,7 @@ pub(crate) fn capget(
     data: &mut [MaybeUninit<linux_raw_sys::general::__user_cap_data_struct>],
 ) -> io::Result<()> {
     let header: *mut _ = header;
-    unsafe { ret(syscall!(__NR_capget, header, data.as_mut_ptr())) }
+    unsafe { ret(syscall!(__NR_capget, header, data)) }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
