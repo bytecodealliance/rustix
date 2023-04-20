@@ -346,9 +346,9 @@ pub enum Advice {
 }
 
 #[cfg(target_os = "emscripten")]
+#[allow(non_upper_case_globals)]
 impl Advice {
     /// `POSIX_MADV_DONTNEED`
-    #[allow(non_upper_case_globals)]
     pub const DontNeed: Self = Self::Normal;
 }
 
