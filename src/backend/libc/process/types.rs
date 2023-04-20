@@ -98,9 +98,9 @@ pub enum Resource {
 }
 
 #[cfg(apple)]
+#[allow(non_upper_case_globals)]
 impl Resource {
     /// `RLIMIT_RSS`
-    #[allow(non_upper_case_globals)]
     pub const Rss: Self = Self::As;
 }
 
