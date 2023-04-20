@@ -689,6 +689,13 @@ impl<'a, Num: ArgNumber, T> From<&'a mut MaybeUninit<T>> for ArgReg<'a, Num> {
     }
 }
 
+impl<'a, Num: ArgNumber, T> From<&'a mut [MaybeUninit<T>]> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(t: &'a mut [MaybeUninit<T>]) -> Self {
+        raw_arg(t.as_mut_ptr().cast())
+    }
+}
+
 #[cfg(feature = "fs")]
 #[cfg(any(target_os = "android", target_os = "linux"))]
 impl<'a, Num: ArgNumber> From<crate::backend::fs::types::MountFlagsArg> for ArgReg<'a, Num> {

@@ -120,7 +120,7 @@ pub(crate) unsafe fn sigaction(signal: Signal, new: Option<Sigaction>) -> io::Re
         __NR_rt_sigaction,
         signal,
         new,
-        old.as_mut_ptr(),
+        &mut old,
         size_of::<kernel_sigset_t, _>()
     ))?;
     Ok(old.assume_init())
@@ -133,7 +133,7 @@ pub(crate) unsafe fn sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
         Some(new) => &new,
         None => core::ptr::null(),
     };
-    ret(syscall!(__NR_sigaltstack, new, old.as_mut_ptr()))?;
+    ret(syscall!(__NR_sigaltstack, new, &mut old))?;
     Ok(old.assume_init())
 }
 
