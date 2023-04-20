@@ -52,6 +52,7 @@ pub type RawAddressFamily = c::sa_family_t;
 pub struct AddressFamily(pub(crate) RawAddressFamily);
 
 #[rustfmt::skip]
+#[allow(non_upper_case_globals)]
 impl AddressFamily {
     /// `AF_UNSPEC`
     pub const UNSPEC: Self = Self(c::AF_UNSPEC as _);
@@ -81,7 +82,6 @@ impl AddressFamily {
     /// `AF_ROSE`
     pub const ROSE: Self = Self(c::AF_ROSE as _);
     /// `AF_DECnet`
-    #[allow(non_upper_case_globals)]
     pub const DECnet: Self = Self(c::AF_DECnet as _);
     /// `AF_NETBEUI`
     pub const NETBEUI: Self = Self(c::AF_NETBEUI as _);

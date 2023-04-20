@@ -197,12 +197,12 @@ pub enum Advice {
     LinuxPopulateWrite = linux_raw_sys::general::MADV_POPULATE_WRITE,
 }
 
+#[allow(non_upper_case_globals)]
 impl Advice {
     /// `POSIX_MADV_DONTNEED`
     ///
     /// On Linux, this is mapped to `POSIX_MADV_NORMAL` because
     /// Linux's `MADV_DONTNEED` differs from `POSIX_MADV_DONTNEED`. See
     /// `LinuxDontNeed` for the Linux behavior.
-    #[allow(non_upper_case_globals)]
     pub const DontNeed: Self = Self::Normal;
 }
