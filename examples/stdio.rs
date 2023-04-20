@@ -66,39 +66,30 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             }
 
             print!(" - in flags:");
-            #[cfg(not(apple))]
             if (term.c_iflag & IGNBRK) != 0 {
                 print!(" IGNBRK");
             }
-            #[cfg(not(apple))]
             if (term.c_iflag & BRKINT) != 0 {
                 print!(" BRKINT");
             }
-            #[cfg(not(apple))]
             if (term.c_iflag & IGNPAR) != 0 {
                 print!(" IGNPAR");
             }
-            #[cfg(not(apple))]
             if (term.c_iflag & PARMRK) != 0 {
                 print!(" PARMRK");
             }
-            #[cfg(not(apple))]
             if (term.c_iflag & INPCK) != 0 {
                 print!(" INPCK");
             }
-            #[cfg(not(apple))]
             if (term.c_iflag & ISTRIP) != 0 {
                 print!(" ISTRIP");
             }
-            #[cfg(not(apple))]
             if (term.c_iflag & INLCR) != 0 {
                 print!(" INLCR");
             }
-            #[cfg(not(apple))]
             if (term.c_iflag & IGNCR) != 0 {
                 print!(" IGNCR");
             }
-            #[cfg(not(apple))]
             if (term.c_iflag & ICRNL) != 0 {
                 print!(" ICRNL");
             }
@@ -106,19 +97,16 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_iflag & IUCLC) != 0 {
                 print!(" IUCLC");
             }
-            #[cfg(not(apple))]
             if (term.c_iflag & IXON) != 0 {
                 print!(" IXON");
             }
-            #[cfg(not(apple))]
             if (term.c_iflag & IXANY) != 0 {
                 print!(" IXANY");
             }
-            #[cfg(not(apple))]
             if (term.c_iflag & IXOFF) != 0 {
                 print!(" IXOFF");
             }
-            #[cfg(not(any(apple, target_os = "haiku")))]
+            #[cfg(not(target_os = "haiku"))]
             if (term.c_iflag & IMAXBEL) != 0 {
                 print!(" IMAXBEL");
             }
@@ -136,7 +124,6 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             println!();
 
             print!(" - out flags:");
-            #[cfg(not(apple))]
             if (term.c_oflag & OPOST) != 0 {
                 print!(" OPOST");
             }
@@ -144,19 +131,15 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_oflag & OLCUC) != 0 {
                 print!(" OLCUC");
             }
-            #[cfg(not(apple))]
             if (term.c_oflag & ONLCR) != 0 {
                 print!(" ONLCR");
             }
-            #[cfg(not(apple))]
             if (term.c_oflag & OCRNL) != 0 {
                 print!(" OCRNL");
             }
-            #[cfg(not(apple))]
             if (term.c_oflag & ONOCR) != 0 {
                 print!(" ONOCR");
             }
-            #[cfg(not(apple))]
             if (term.c_oflag & ONLRET) != 0 {
                 print!(" ONLRET");
             }
@@ -176,13 +159,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_oflag & CRDLY) != 0 {
                 print!(" CRDLY");
             }
-            #[cfg(not(any(
-                apple,
-                netbsdlike,
-                solarish,
-                target_os = "dragonfly",
-                target_os = "redox",
-            )))]
+            #[cfg(not(any(netbsdlike, solarish, target_os = "dragonfly", target_os = "redox",)))]
             if (term.c_oflag & TABDLY) != 0 {
                 print!(" TABDLY");
             }
@@ -215,31 +192,24 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_cflag & CBAUDEX) != 0 {
                 print!(" CBAUDEX");
             }
-            #[cfg(not(apple))]
             if (term.c_cflag & CSIZE) != 0 {
                 print!(" CSIZE");
             }
-            #[cfg(not(apple))]
             if (term.c_cflag & CSTOPB) != 0 {
                 print!(" CSTOPB");
             }
-            #[cfg(not(apple))]
             if (term.c_cflag & CREAD) != 0 {
                 print!(" CREAD");
             }
-            #[cfg(not(apple))]
             if (term.c_cflag & PARENB) != 0 {
                 print!(" PARENB");
             }
-            #[cfg(not(apple))]
             if (term.c_cflag & PARODD) != 0 {
                 print!(" PARODD");
             }
-            #[cfg(not(apple))]
             if (term.c_cflag & HUPCL) != 0 {
                 print!(" HUPCL");
             }
-            #[cfg(not(apple))]
             if (term.c_cflag & CLOCAL) != 0 {
                 print!(" CLOCAL");
             }
@@ -262,14 +232,12 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_cflag & CMSPAR) != 0 {
                 print!(" CMSPAR");
             }
-            #[cfg(not(apple))]
             if (term.c_cflag & CRTSCTS) != 0 {
                 print!(" CRTSCTS");
             }
             println!();
 
             print!(" - local flags:");
-            #[cfg(not(apple))]
             if (term.c_lflag & ISIG) != 0 {
                 print!(" ISIG");
             }
@@ -280,51 +248,39 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_lflag & XCASE) != 0 {
                 print!(" XCASE");
             }
-            #[cfg(not(apple))]
             if (term.c_lflag & ECHO) != 0 {
                 print!(" ECHO");
             }
-            #[cfg(not(apple))]
             if (term.c_lflag & ECHOE) != 0 {
                 print!(" ECHOE");
             }
-            #[cfg(not(apple))]
             if (term.c_lflag & ECHOK) != 0 {
                 print!(" ECHOK");
             }
-            #[cfg(not(apple))]
             if (term.c_lflag & ECHONL) != 0 {
                 print!(" ECHONL");
             }
-            #[cfg(not(apple))]
             if (term.c_lflag & ECHOCTL) != 0 {
                 print!(" ECHOCTL");
             }
-            #[cfg(not(apple))]
             if (term.c_lflag & ECHOPRT) != 0 {
                 print!(" ECHOPRT");
             }
-            #[cfg(not(apple))]
             if (term.c_lflag & ECHOKE) != 0 {
                 print!(" ECHOKE");
             }
-            #[cfg(not(apple))]
             if (term.c_lflag & FLUSHO) != 0 {
                 print!(" FLUSHO");
             }
-            #[cfg(not(apple))]
             if (term.c_lflag & NOFLSH) != 0 {
                 print!(" NOFLSH");
             }
-            #[cfg(not(apple))]
             if (term.c_lflag & TOSTOP) != 0 {
                 print!(" TOSTOP");
             }
-            #[cfg(not(apple))]
             if (term.c_lflag & PENDIN) != 0 {
                 print!(" PENDIN");
             }
-            #[cfg(not(apple))]
             if (term.c_lflag & IEXTEN) != 0 {
                 print!(" IEXTEN");
             }

@@ -171,39 +171,30 @@ pub const VLNEXT: usize = c::VLNEXT as usize;
 pub const VEOL2: usize = c::VEOL2 as usize;
 
 /// `IGNBRK`
-#[cfg(not(apple))]
 pub const IGNBRK: c::c_uint = c::IGNBRK;
 
 /// `BRKINT`
-#[cfg(not(apple))]
 pub const BRKINT: c::c_uint = c::BRKINT;
 
 /// `IGNPAR`
-#[cfg(not(apple))]
 pub const IGNPAR: c::c_uint = c::IGNPAR;
 
 /// `PARMRK`
-#[cfg(not(apple))]
 pub const PARMRK: c::c_uint = c::PARMRK;
 
 /// `INPCK`
-#[cfg(not(apple))]
 pub const INPCK: c::c_uint = c::INPCK;
 
 /// `ISTRIP`
-#[cfg(not(apple))]
 pub const ISTRIP: c::c_uint = c::ISTRIP;
 
 /// `INLCR`
-#[cfg(not(apple))]
 pub const INLCR: c::c_uint = c::INLCR;
 
 /// `IGNCR`
-#[cfg(not(apple))]
 pub const IGNCR: c::c_uint = c::IGNCR;
 
 /// `ICRNL`
-#[cfg(not(apple))]
 pub const ICRNL: c::c_uint = c::ICRNL;
 
 /// `IUCLC`
@@ -211,24 +202,21 @@ pub const ICRNL: c::c_uint = c::ICRNL;
 pub const IUCLC: c::c_uint = c::IUCLC;
 
 /// `IXON`
-#[cfg(not(apple))]
 pub const IXON: c::c_uint = c::IXON;
 
 /// `IXANY`
-#[cfg(not(any(apple, target_os = "redox")))]
+#[cfg(not(target_os = "redox"))]
 pub const IXANY: c::c_uint = c::IXANY;
 
 /// `IXOFF`
-#[cfg(not(apple))]
 pub const IXOFF: c::c_uint = c::IXOFF;
 
 /// `IMAXBEL`
-#[cfg(not(any(apple, target_os = "haiku", target_os = "redox")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox")))]
 pub const IMAXBEL: c::c_uint = c::IMAXBEL;
 
 /// `IUTF8`
 #[cfg(not(any(
-    apple,
     solarish,
     target_os = "aix",
     target_os = "dragonfly",
@@ -242,7 +230,6 @@ pub const IMAXBEL: c::c_uint = c::IMAXBEL;
 pub const IUTF8: c::c_uint = c::IUTF8;
 
 /// `OPOST`
-#[cfg(not(apple))]
 pub const OPOST: c::c_uint = c::OPOST;
 
 /// `OLCUC`
@@ -257,19 +244,15 @@ pub const OPOST: c::c_uint = c::OPOST;
 pub const OLCUC: c::c_uint = c::OLCUC;
 
 /// `ONLCR`
-#[cfg(not(apple))]
 pub const ONLCR: c::c_uint = c::ONLCR;
 
 /// `OCRNL`
-#[cfg(not(apple))]
 pub const OCRNL: c::c_uint = c::OCRNL;
 
 /// `ONOCR`
-#[cfg(not(apple))]
 pub const ONOCR: c::c_uint = c::ONOCR;
 
 /// `ONLRET`
-#[cfg(not(apple))]
 pub const ONLRET: c::c_uint = c::ONLRET;
 
 /// `OFILL`
@@ -334,18 +317,11 @@ pub const CR2: c::c_uint = c::CR2;
 pub const CR3: c::c_uint = c::CR3;
 
 /// `TABDLY`
-#[cfg(not(any(
-    apple,
-    netbsdlike,
-    solarish,
-    target_os = "dragonfly",
-    target_os = "redox",
-)))]
+#[cfg(not(any(netbsdlike, solarish, target_os = "dragonfly", target_os = "redox",)))]
 pub const TABDLY: c::c_uint = c::TABDLY;
 
 /// `TAB0`
 #[cfg(not(any(
-    apple,
     netbsdlike,
     solarish,
     target_os = "dragonfly",
@@ -597,51 +573,39 @@ pub const B4000000: Speed = c::B4000000;
 pub const BOTHER: c::c_uint = c::BOTHER;
 
 /// `CSIZE`
-#[cfg(not(apple))]
 pub const CSIZE: c::c_uint = c::CSIZE;
 
 /// `CS5`
-#[cfg(not(apple))]
 pub const CS5: c::c_uint = c::CS5;
 
 /// `CS6`
-#[cfg(not(apple))]
 pub const CS6: c::c_uint = c::CS6;
 
 /// `CS7`
-#[cfg(not(apple))]
 pub const CS7: c::c_uint = c::CS7;
 
 /// `CS8`
-#[cfg(not(apple))]
 pub const CS8: c::c_uint = c::CS8;
 
 /// `CSTOPB`
-#[cfg(not(apple))]
 pub const CSTOPB: c::c_uint = c::CSTOPB;
 
 /// `CREAD`
-#[cfg(not(apple))]
 pub const CREAD: c::c_uint = c::CREAD;
 
 /// `PARENB`
-#[cfg(not(apple))]
 pub const PARENB: c::c_uint = c::PARENB;
 
 /// `PARODD`
-#[cfg(not(apple))]
 pub const PARODD: c::c_uint = c::PARODD;
 
 /// `HUPCL`
-#[cfg(not(apple))]
 pub const HUPCL: c::c_uint = c::HUPCL;
 
 /// `CLOCAL`
-#[cfg(not(apple))]
 pub const CLOCAL: c::c_uint = c::CLOCAL;
 
 /// `ISIG`
-#[cfg(not(apple))]
 pub const ISIG: c::c_uint = c::ISIG;
 
 /// `ICANON`—A flag for the `c_lflag` field of [`Termios`] indicating
@@ -649,36 +613,28 @@ pub const ISIG: c::c_uint = c::ISIG;
 pub const ICANON: Tcflag = c::ICANON;
 
 /// `ECHO`
-#[cfg(not(apple))]
 pub const ECHO: c::c_uint = c::ECHO;
 
 /// `ECHOE`
-#[cfg(not(apple))]
 pub const ECHOE: c::c_uint = c::ECHOE;
 
 /// `ECHOK`
-#[cfg(not(apple))]
 pub const ECHOK: c::c_uint = c::ECHOK;
 
 /// `ECHONL`
-#[cfg(not(apple))]
 pub const ECHONL: c::c_uint = c::ECHONL;
 
 /// `NOFLSH`
-#[cfg(not(apple))]
 pub const NOFLSH: c::c_uint = c::NOFLSH;
 
 /// `TOSTOP`
-#[cfg(not(apple))]
 pub const TOSTOP: c::c_uint = c::TOSTOP;
 
 /// `IEXTEN`
-#[cfg(not(apple))]
 pub const IEXTEN: c::c_uint = c::IEXTEN;
 
 /// `EXTA`
 #[cfg(not(any(
-    apple,
     solarish,
     target_os = "emscripten",
     target_os = "haiku",
@@ -688,7 +644,6 @@ pub const EXTA: c::c_uint = c::EXTA;
 
 /// `EXTB`
 #[cfg(not(any(
-    apple,
     solarish,
     target_os = "emscripten",
     target_os = "haiku",
@@ -739,7 +694,7 @@ pub const CIBAUD: c::tcflag_t = 0o77600000;
 pub const CMSPAR: c::c_uint = c::CMSPAR;
 
 /// `CRTSCTS`
-#[cfg(not(any(apple, target_os = "aix", target_os = "redox")))]
+#[cfg(not(any(target_os = "aix", target_os = "redox")))]
 pub const CRTSCTS: c::c_uint = c::CRTSCTS;
 
 /// `XCASE`
@@ -747,27 +702,27 @@ pub const CRTSCTS: c::c_uint = c::CRTSCTS;
 pub const XCASE: c::c_uint = c::XCASE;
 
 /// `ECHOCTL`
-#[cfg(not(any(apple, target_os = "redox")))]
+#[cfg(not(any(target_os = "redox")))]
 pub const ECHOCTL: c::c_uint = c::ECHOCTL;
 
 /// `ECHOPRT`
-#[cfg(not(any(apple, target_os = "redox")))]
+#[cfg(not(any(target_os = "redox")))]
 pub const ECHOPRT: c::c_uint = c::ECHOPRT;
 
 /// `ECHOKE`
-#[cfg(not(any(apple, target_os = "redox")))]
+#[cfg(not(any(target_os = "redox")))]
 pub const ECHOKE: c::c_uint = c::ECHOKE;
 
 /// `FLUSHO`
-#[cfg(not(any(apple, target_os = "redox")))]
+#[cfg(not(any(target_os = "redox")))]
 pub const FLUSHO: c::c_uint = c::FLUSHO;
 
 /// `PENDIN`
-#[cfg(not(any(apple, target_os = "redox")))]
+#[cfg(not(any(target_os = "redox")))]
 pub const PENDIN: c::c_uint = c::PENDIN;
 
 /// `EXTPROC`
-#[cfg(not(any(apple, target_os = "aix", target_os = "haiku", target_os = "redox")))]
+#[cfg(not(any(target_os = "aix", target_os = "haiku", target_os = "redox")))]
 pub const EXTPROC: c::c_uint = c::EXTPROC;
 
 /// `XTABS`
