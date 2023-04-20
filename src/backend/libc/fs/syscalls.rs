@@ -960,7 +960,16 @@ pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn syncfs(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { ret(c::syncfs(borrowed_fd(fd))) }
+    // Some versions of Android libc lack a `syncfs` function.
+    #[cfg(target_os = "android")]
+    unsafe {
+        syscall_ret(c::syscall(c::SYS_syncfs, borrowed_fd(fd)))
+    }
+
+    #[cfg(not(target_os = "android"))]
+    unsafe {
+        ret(c::syncfs(borrowed_fd(fd)))
+    }
 }
 
 #[cfg(not(any(solarish, target_os = "redox", target_os = "wasi")))]

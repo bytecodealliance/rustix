@@ -37,6 +37,8 @@ mod renameat;
 mod statfs;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod statx;
+#[cfg(not(any(solarish, target_os = "redox", target_os = "wasi")))]
+mod sync;
 mod utimensat;
 #[cfg(any(apple, target_os = "android", target_os = "linux"))]
 mod xattr;
