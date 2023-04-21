@@ -47,6 +47,12 @@ pub type Stack = linux_raw_sys::general::stack_t;
 #[cfg(linux_raw)]
 pub type Sigset = linux_raw_sys::general::kernel_sigset_t;
 
+/// `siginfo_t`
+#[cfg(linux_raw)]
+pub type Siginfo = linux_raw_sys::general::siginfo_t;
+
+pub use backend::time::types::{Nsecs, Secs, Timespec};
+
 /// `SIG_*` constants for use with [`sigprocmask`].
 #[cfg(linux_raw)]
 #[repr(u32)]
@@ -365,6 +371,42 @@ pub unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
 #[cfg(linux_raw)]
 #[inline]
 #[doc(alias = "pthread_sigmask")]
-pub unsafe fn sigprocmask(how: How, set: Sigset) -> io::Result<Sigset> {
+pub unsafe fn sigprocmask(how: How, set: &Sigset) -> io::Result<Sigset> {
     backend::runtime::syscalls::sigprocmask(how, set)
+}
+
+/// `sigwait(set)`—Wait for signals.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man3/sigwait.3.html
+#[cfg(linux_raw)]
+#[inline]
+pub fn sigwait(set: &Sigset) -> io::Result<Signal> {
+    backend::runtime::syscalls::sigwait(set)
+}
+
+/// `sigwait(set)`—Wait for signals, returning a [`Siginfo`].
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/sigwaitinfo.2.html
+#[cfg(linux_raw)]
+#[inline]
+pub fn sigwaitinfo(set: &Sigset) -> io::Result<Siginfo> {
+    backend::runtime::syscalls::sigwaitinfo(set)
+}
+
+/// `sigtimedwait(set)`—Wait for signals, optionally with a timeout.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/sigtimedwait.2.html
+#[cfg(linux_raw)]
+#[inline]
+pub fn sigtimedwait(set: &Sigset, timeout: Option<Timespec>) -> io::Result<Siginfo> {
+    backend::runtime::syscalls::sigtimedwait(set, timeout)
 }
