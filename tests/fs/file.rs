@@ -1,7 +1,6 @@
 #[cfg(not(target_os = "redox"))]
 #[test]
 fn test_file() {
-    #[cfg(not(solarish))]
     rustix::fs::accessat(
         rustix::fs::cwd(),
         "Cargo.toml",

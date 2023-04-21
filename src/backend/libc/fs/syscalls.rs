@@ -47,8 +47,6 @@ use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 #[cfg(apple)]
 use crate::ffi::CString;
-#[cfg(not(solarish))]
-use crate::fs::Access;
 #[cfg(not(any(
     apple,
     netbsdlike,
@@ -91,7 +89,7 @@ use crate::fs::XattrFlags;
 use crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags};
 #[cfg(not(any(apple, target_os = "redox", target_os = "wasi")))]
 use crate::fs::{Dev, FileType};
-use crate::fs::{Mode, OFlags, Stat, Timestamps};
+use crate::fs::{Mode, OFlags, Stat, Timestamps, Access};
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use crate::fs::{StatVfs, StatVfsMountFlags};
 use crate::io::{self, SeekFrom};
@@ -400,7 +398,7 @@ fn statat_old(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<
     }
 }
 
-#[cfg(not(any(solarish, target_os = "emscripten", target_os = "redox")))]
+#[cfg(not(any(target_os = "emscripten", target_os = "redox")))]
 pub(crate) fn accessat(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
