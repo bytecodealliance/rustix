@@ -36,12 +36,11 @@ pub(super) use c::{rlimit as libc_rlimit, RLIM_INFINITY as LIBC_RLIM_INFINITY};
 #[cfg(not(any(linux_like, windows, target_os = "fuchsia", target_os = "wasi")))]
 pub(super) use c::{getrlimit as libc_getrlimit, setrlimit as libc_setrlimit};
 
-// TODO: Add `RLIM64_INFINITY` to upstream libc.
 #[cfg(linux_like)]
-pub(super) const LIBC_RLIM_INFINITY: u64 = !0_u64;
-
-#[cfg(linux_like)]
-pub(super) use c::{getrlimit64 as libc_getrlimit, setrlimit64 as libc_setrlimit};
+pub(super) use c::{
+    getrlimit64 as libc_getrlimit, setrlimit64 as libc_setrlimit,
+    RLIM64_INFINITY as LIBC_RLIM_INFINITY,
+};
 
 #[cfg(linux_like)]
 #[cfg(feature = "mm")]

@@ -7,8 +7,6 @@ use super::super::c;
 /// [`membarrier`]: crate::process::membarrier
 /// [`membarrier_cpu`]: crate::process::membarrier_cpu
 /// [`membarrier_query`]: crate::process::membarrier_query
-// TODO: These are not yet exposed through libc, so we define the
-// constants ourselves.
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 #[repr(u32)]
@@ -16,23 +14,24 @@ pub enum MembarrierCommand {
     /// `MEMBARRIER_CMD_GLOBAL`
     #[doc(alias = "Shared")]
     #[doc(alias = "MEMBARRIER_CMD_SHARED")]
-    Global = 1,
+    Global = c::MEMBARRIER_CMD_GLOBAL as u32,
     /// `MEMBARRIER_CMD_GLOBAL_EXPEDITED`
-    GlobalExpedited = 2,
+    GlobalExpedited = c::MEMBARRIER_CMD_GLOBAL_EXPEDITED as u32,
     /// `MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED`
-    RegisterGlobalExpedited = 4,
+    RegisterGlobalExpedited = c::MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED as u32,
     /// `MEMBARRIER_CMD_PRIVATE_EXPEDITED`
-    PrivateExpedited = 8,
+    PrivateExpedited = c::MEMBARRIER_CMD_PRIVATE_EXPEDITED as u32,
     /// `MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED`
-    RegisterPrivateExpedited = 16,
+    RegisterPrivateExpedited = c::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED as u32,
     /// `MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE`
-    PrivateExpeditedSyncCore = 32,
+    PrivateExpeditedSyncCore = c::MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE as u32,
     /// `MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE`
-    RegisterPrivateExpeditedSyncCore = 64,
+    RegisterPrivateExpeditedSyncCore =
+        c::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE as u32,
     /// `MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ` (since Linux 5.10)
-    PrivateExpeditedRseq = 128,
+    PrivateExpeditedRseq = c::MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ as u32,
     /// `MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_RSEQ` (since Linux 5.10)
-    RegisterPrivateExpeditedRseq = 256,
+    RegisterPrivateExpeditedRseq = c::MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_RSEQ as u32,
 }
 
 /// A resource value for use with [`getrlimit`], [`setrlimit`], and
