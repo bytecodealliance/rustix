@@ -9,6 +9,20 @@ fn test_file() {
     )
     .unwrap();
 
+    #[allow(unreachable_patterns)]
+    match rustix::fs::accessat(
+        rustix::fs::cwd(),
+        "Cargo.toml",
+        rustix::fs::Access::READ_OK,
+        rustix::fs::AtFlags::EACCESS,
+    ) {
+        Ok(()) => (),
+        Err(rustix::io::Errno::NOSYS)
+        | Err(rustix::io::Errno::NOTSUP)
+        | Err(rustix::io::Errno::OPNOTSUPP) => (),
+        Err(err) => Err(err).unwrap(),
+    }
+
     assert_eq!(
         rustix::fs::openat(
             rustix::fs::cwd(),

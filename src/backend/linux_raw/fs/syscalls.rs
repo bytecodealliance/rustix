@@ -1392,6 +1392,23 @@ pub(crate) fn accessat(
     access: Access,
     flags: AtFlags,
 ) -> io::Result<()> {
+    // Linux's `faccessat` syscall doesn't have a flags argument, so if we have
+    // any flags, use the newer `faccessat2` which does. Unless we're on
+    // Android where using newer system calls can cause seccomp to abort the
+    // process.
+    #[cfg(not(target_os = "android"))]
+    if !flags.is_empty() {
+        return unsafe {
+            ret(syscall_readonly!(
+                __NR_faccessat2,
+                dirfd,
+                path,
+                access,
+                flags
+            ))
+        };
+    }
+
     // Linux's `faccessat` doesn't have a flags parameter. If we have
     // `AT_EACCESS` and we're not setuid or setgid, we can emulate it.
     if flags.is_empty()
