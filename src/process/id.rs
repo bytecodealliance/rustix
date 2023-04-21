@@ -280,6 +280,19 @@ pub fn getpgid(pid: Option<Pid>) -> io::Result<Pid> {
     backend::process::syscalls::getpgid(pid)
 }
 
+/// `setpgid(pid, pgid)`—Sets the process group ID of the given process.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/setpgid.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/setpgid.2.html
+#[inline]
+pub fn setpgid(pid: Option<Pid>, pgid: Option<Pid>) -> io::Result<()> {
+    backend::process::syscalls::setpgid(pid, pgid)
+}
+
 /// `getpgrp()`—Returns the process' group ID.
 ///
 /// # References

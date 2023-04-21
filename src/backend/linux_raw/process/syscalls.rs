@@ -116,6 +116,17 @@ pub(crate) fn getpgid(pid: Option<Pid>) -> io::Result<Pid> {
 }
 
 #[inline]
+pub(crate) fn setpgid(pid: Option<Pid>, pgid: Option<Pid>) -> io::Result<()> {
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_setpgid,
+            c_uint(Pid::as_raw(pid)),
+            c_uint(Pid::as_raw(pgid))
+        ))
+    }
+}
+
+#[inline]
 pub(crate) fn getpgrp() -> Pid {
     // Use the `getpgrp` syscall if available.
     #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]

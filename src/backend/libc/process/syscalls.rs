@@ -166,6 +166,12 @@ pub(crate) fn getpgid(pid: Option<Pid>) -> io::Result<Pid> {
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
+pub(crate) fn setpgid(pid: Option<Pid>, pgid: Option<Pid>) -> io::Result<()> {
+    unsafe { ret(c::setpgid(Pid::as_raw(pid) as _, Pid::as_raw(pgid) as _)) }
+}
+
+#[cfg(not(target_os = "wasi"))]
+#[inline]
 #[must_use]
 pub(crate) fn getpgrp() -> Pid {
     unsafe {
