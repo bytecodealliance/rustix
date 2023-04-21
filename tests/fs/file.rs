@@ -24,6 +24,16 @@ fn test_file() {
     }
 
     assert_eq!(
+        rustix::fs::accessat(
+            rustix::fs::cwd(),
+            "Cargo.toml",
+            rustix::fs::Access::READ_OK,
+            rustix::fs::AtFlags::SYMLINK_FOLLOW,
+        ),
+        Err(rustix::io::Errno::INVAL)
+    );
+
+    assert_eq!(
         rustix::fs::openat(
             rustix::fs::cwd(),
             "Cagro.motl",

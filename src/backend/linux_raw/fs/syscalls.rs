@@ -1419,11 +1419,13 @@ pub(crate) fn accessat(
         return unsafe { ret(syscall_readonly!(__NR_faccessat, dirfd, path, access)) };
     }
 
-    if flags.bits() != AT_EACCESS {
+    if !flags
+        .difference(AtFlags::EACCESS | AtFlags::SYMLINK_NOFOLLOW)
+        .is_empty()
+    {
         return Err(io::Errno::INVAL);
     }
 
-    // TODO: Use faccessat2 in newer Linux versions.
     Err(io::Errno::NOSYS)
 }
 

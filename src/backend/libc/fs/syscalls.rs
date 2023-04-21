@@ -87,9 +87,9 @@ use crate::fs::StatFs;
 use crate::fs::XattrFlags;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags};
+use crate::fs::{Access, Mode, OFlags, Stat, Timestamps};
 #[cfg(not(any(apple, target_os = "redox", target_os = "wasi")))]
 use crate::fs::{Dev, FileType};
-use crate::fs::{Mode, OFlags, Stat, Timestamps, Access};
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use crate::fs::{StatVfs, StatVfsMountFlags};
 use crate::io::{self, SeekFrom};

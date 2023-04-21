@@ -13,7 +13,7 @@ use crate::fs::CloneFlags;
 use crate::fs::FileType;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::RenameFlags;
-use crate::fs::{AtFlags, Mode, OFlags, Stat, Timestamps, Access};
+use crate::fs::{Access, AtFlags, Mode, OFlags, Stat, Timestamps};
 use crate::path::SMALL_PATH_BUFFER_SIZE;
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
