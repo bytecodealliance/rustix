@@ -9,6 +9,7 @@ fn test_file() {
     )
     .unwrap();
 
+    #[cfg(not(any(target_os = "emscripten", target_os = "android")))]
     #[allow(unreachable_patterns)]
     match rustix::fs::accessat(
         rustix::fs::cwd(),
