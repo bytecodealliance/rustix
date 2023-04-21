@@ -1392,6 +1392,13 @@ pub(crate) fn accessat(
     access: Access,
     flags: AtFlags,
 ) -> io::Result<()> {
+    if !flags
+        .difference(AtFlags::EACCESS | AtFlags::SYMLINK_NOFOLLOW)
+        .is_empty()
+    {
+        return Err(io::Errno::INVAL);
+    }
+
     // Linux's `faccessat` syscall doesn't have a flags argument, so if we have
     // any flags, use the newer `faccessat2` which does. Unless we're on
     // Android where using newer system calls can cause seccomp to abort the
@@ -1417,13 +1424,6 @@ pub(crate) fn accessat(
             && crate::process::getgid() == crate::process::getegid())
     {
         return unsafe { ret(syscall_readonly!(__NR_faccessat, dirfd, path, access)) };
-    }
-
-    if !flags
-        .difference(AtFlags::EACCESS | AtFlags::SYMLINK_NOFOLLOW)
-        .is_empty()
-    {
-        return Err(io::Errno::INVAL);
     }
 
     Err(io::Errno::NOSYS)
