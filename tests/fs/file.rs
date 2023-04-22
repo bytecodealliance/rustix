@@ -1,7 +1,6 @@
 #[cfg(not(target_os = "redox"))]
 #[test]
 fn test_file() {
-    #[cfg(not(solarish))]
     rustix::fs::accessat(
         rustix::fs::cwd(),
         "Cargo.toml",
@@ -9,6 +8,31 @@ fn test_file() {
         rustix::fs::AtFlags::empty(),
     )
     .unwrap();
+
+    #[cfg(not(any(target_os = "emscripten", target_os = "android")))]
+    #[allow(unreachable_patterns)]
+    match rustix::fs::accessat(
+        rustix::fs::cwd(),
+        "Cargo.toml",
+        rustix::fs::Access::READ_OK,
+        rustix::fs::AtFlags::EACCESS,
+    ) {
+        Ok(()) => (),
+        Err(rustix::io::Errno::NOSYS)
+        | Err(rustix::io::Errno::NOTSUP)
+        | Err(rustix::io::Errno::OPNOTSUPP) => (),
+        Err(err) => Err(err).unwrap(),
+    }
+
+    assert_eq!(
+        rustix::fs::accessat(
+            rustix::fs::cwd(),
+            "Cargo.toml",
+            rustix::fs::Access::READ_OK,
+            rustix::fs::AtFlags::SYMLINK_FOLLOW,
+        ),
+        Err(rustix::io::Errno::INVAL)
+    );
 
     assert_eq!(
         rustix::fs::openat(

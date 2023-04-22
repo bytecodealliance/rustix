@@ -7,15 +7,13 @@
 
 use crate::fd::OwnedFd;
 use crate::ffi::{CStr, CString};
-#[cfg(not(solarish))]
-use crate::fs::Access;
 #[cfg(apple)]
 use crate::fs::CloneFlags;
 #[cfg(not(any(apple, target_os = "wasi")))]
 use crate::fs::FileType;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::RenameFlags;
-use crate::fs::{AtFlags, Mode, OFlags, Stat, Timestamps};
+use crate::fs::{Access, AtFlags, Mode, OFlags, Stat, Timestamps};
 use crate::path::SMALL_PATH_BUFFER_SIZE;
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Uid};
@@ -271,7 +269,6 @@ pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> io:
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/faccessat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/faccessat.2.html
-#[cfg(not(solarish))]
 #[inline]
 #[doc(alias = "faccessat")]
 pub fn accessat<P: path::Arg, Fd: AsFd>(
