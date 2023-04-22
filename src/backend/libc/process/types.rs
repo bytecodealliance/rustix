@@ -1,5 +1,9 @@
 use super::super::c;
 
+/// `sysinfo`
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub type Sysinfo = c::sysinfo;
+
 /// A command for use with [`membarrier`] and [`membarrier_cpu`].
 ///
 /// For `MEMBARRIER_CMD_QUERY`, see [`membarrier_query`].

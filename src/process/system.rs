@@ -1,4 +1,4 @@
-//! Uname support.
+//! Uname and other system-level functions.
 //!
 //! # Safety
 //!
@@ -8,10 +8,22 @@
 
 use crate::backend;
 use crate::ffi::CStr;
+#[cfg(not(target_os = "emscripten"))]
+use crate::io;
 use core::fmt;
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use backend::process::types::Sysinfo;
 
 /// `uname()`—Returns high-level information about the runtime OS and
 /// hardware.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/uname.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/uname.2.html
 #[inline]
 pub fn uname() -> Uname {
     Uname(backend::process::syscalls::uname())
@@ -98,4 +110,28 @@ impl fmt::Debug for Uname {
             )
         }
     }
+}
+
+/// `sysinfo()`—Returns status information about the runtime OS.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/uname.2.html
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+pub fn sysinfo() -> Sysinfo {
+    backend::process::syscalls::sysinfo()
+}
+
+/// `sethostname(name)—Sets the system host name.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/sethostname.2.html
+#[cfg(not(any(target_os = "emscripten", target_os = "redox", target_os = "wasi")))]
+#[inline]
+pub fn sethostname(name: &[u8]) -> io::Result<()> {
+    backend::process::syscalls::sethostname(name)
 }

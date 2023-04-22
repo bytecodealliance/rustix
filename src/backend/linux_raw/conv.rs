@@ -190,6 +190,11 @@ pub(super) fn slice_just_addr<T: Sized, Num: ArgNumber>(v: &[T]) -> ArgReg<Num> 
 }
 
 #[inline]
+pub(super) fn slice_just_addr_mut<T: Sized, Num: ArgNumber>(v: &mut [T]) -> ArgReg<Num> {
+    raw_arg(v.as_mut_ptr().cast())
+}
+
+#[inline]
 pub(super) fn slice<T: Sized, Num0: ArgNumber, Num1: ArgNumber>(
     v: &[T],
 ) -> (ArgReg<Num0>, ArgReg<Num1>) {
@@ -725,6 +730,14 @@ impl<'a, Num: ArgNumber> From<crate::process::Gid> for ArgReg<'a, Num> {
     #[inline]
     fn from(t: crate::process::Gid) -> Self {
         c_uint(t.as_raw())
+    }
+}
+
+#[cfg(feature = "runtime")]
+impl<'a, Num: ArgNumber> From<crate::runtime::How> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::runtime::How) -> Self {
+        c_uint(flags as u32)
     }
 }
 

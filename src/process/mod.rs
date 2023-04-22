@@ -2,6 +2,8 @@
 
 #[cfg(not(target_os = "wasi"))]
 mod chdir;
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+mod chroot;
 mod exit;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;
@@ -27,15 +29,17 @@ mod rlimit;
 ))]
 mod sched;
 mod sched_yield;
+#[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.
+mod system;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have umask.
 mod umask;
-#[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.
-mod uname;
 #[cfg(not(target_os = "wasi"))]
 mod wait;
 
 #[cfg(not(target_os = "wasi"))]
 pub use chdir::*;
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+pub use chroot::*;
 pub use exit::*;
 #[cfg(not(target_os = "wasi"))]
 pub use id::*;
@@ -62,9 +66,9 @@ pub use rlimit::*;
 pub use sched::*;
 pub use sched_yield::sched_yield;
 #[cfg(not(target_os = "wasi"))]
-pub use umask::*;
+pub use system::*;
 #[cfg(not(target_os = "wasi"))]
-pub use uname::{uname, Uname};
+pub use umask::*;
 #[cfg(not(target_os = "wasi"))]
 pub use wait::*;
 

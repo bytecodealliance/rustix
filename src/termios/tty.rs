@@ -42,6 +42,7 @@ pub fn isatty<Fd: AsFd>(fd: Fd) -> bool {
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 #[cfg(feature = "procfs")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
+#[doc(alias = "ttyname_r")]
 #[inline]
 pub fn ttyname<Fd: AsFd, B: Into<Vec<u8>>>(dirfd: Fd, reuse: B) -> io::Result<CString> {
     _ttyname(dirfd.as_fd(), reuse.into())

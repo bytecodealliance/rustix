@@ -1,6 +1,9 @@
 use super::super::c;
 use linux_raw_sys::general::membarrier_cmd;
 
+/// `sysinfo`
+pub type Sysinfo = linux_raw_sys::general::sysinfo;
+
 /// A command for use with [`membarrier`] and [`membarrier_cpu`].
 ///
 /// For `MEMBARRIER_CMD_QUERY`, see [`membarrier_query`].
