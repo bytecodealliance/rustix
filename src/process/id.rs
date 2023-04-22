@@ -8,6 +8,7 @@
 #![allow(unsafe_code)]
 
 use crate::{backend, io};
+use alloc::vec::Vec;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use backend::process::types::RawCpuid;
 
@@ -320,9 +321,39 @@ pub fn setsid() -> io::Result<Pid> {
     backend::process::syscalls::setsid()
 }
 
-// translate_fchown_args returns the raw value of the IDs. In case of `None`
-// it returns `u32::MAX` since it has the same bit pattern as `-1` indicating
-// no change to the owner/group ID.
+/// `getgroups()`—Return a list of the current user's groups.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getgroups.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/getgroups.2.html
+pub fn getgroups() -> io::Result<Vec<Gid>> {
+    let mut buffer = Vec::new();
+
+    // This code would benefit from having a better way to read into
+    // uninitialized memory, but that requires `unsafe`.
+    buffer.reserve(8);
+    buffer.resize(buffer.capacity(), Gid::ROOT);
+
+    loop {
+        let ngroups = backend::process::syscalls::getgroups(&mut buffer)?;
+
+        let ngroups = ngroups as usize;
+        assert!(ngroups <= buffer.len());
+        if ngroups < buffer.len() {
+            buffer.resize(ngroups, Gid::ROOT);
+            return Ok(buffer);
+        }
+        buffer.reserve(1); // use `Vec` reallocation strategy to grow capacity exponentially
+        buffer.resize(buffer.capacity(), Gid::ROOT);
+    }
+}
+
+// Return the raw value of the IDs. In case of `None` it returns `u32::MAX`
+// since it has the same bit pattern as `-1` indicating no change to the
+// owner/group ID.
 pub(crate) fn translate_fchown_args(owner: Option<Uid>, group: Option<Gid>) -> (u32, u32) {
     let ow = match owner {
         Some(o) => o.as_raw(),

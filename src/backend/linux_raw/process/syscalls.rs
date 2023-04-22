@@ -9,7 +9,8 @@
 use super::super::c;
 use super::super::conv::{
     by_mut, by_ref, c_int, c_uint, negative_pid, pass_usize, ret, ret_c_int, ret_c_uint,
-    ret_infallible, ret_usize, ret_usize_infallible, size_of, slice_just_addr, slice_mut, zero,
+    ret_infallible, ret_usize, ret_usize_infallible, size_of, slice, slice_just_addr,
+    slice_just_addr_mut, slice_mut, zero,
 };
 use super::types::{RawCpuSet, RawUname};
 use crate::backend::conv::ret_owned_fd;
@@ -18,7 +19,8 @@ use crate::ffi::CStr;
 use crate::io;
 use crate::process::{
     Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, PidfdFlags, RawNonZeroPid, RawPid,
-    Resource, Rlimit, Signal, Uid, WaitId, WaitOptions, WaitStatus, WaitidOptions, WaitidStatus,
+    Resource, Rlimit, Signal, Sysinfo, Uid, WaitId, WaitOptions, WaitStatus, WaitidOptions,
+    WaitidStatus,
 };
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
@@ -697,4 +699,32 @@ pub(crate) fn pidfd_open(pid: Pid, flags: PidfdFlags) -> io::Result<OwnedFd> {
             c_int(flags.bits() as _)
         ))
     }
+}
+
+#[inline]
+pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
+    let len = buf.len().try_into().map_err(|_| io::Errno::NOMEM)?;
+
+    unsafe {
+        ret_usize(syscall!(
+            __NR_getgroups,
+            c_int(len),
+            slice_just_addr_mut(buf)
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn sysinfo() -> Sysinfo {
+    let mut info = MaybeUninit::<Sysinfo>::uninit();
+    unsafe {
+        ret_infallible(syscall!(__NR_sysinfo, &mut info));
+        info.assume_init()
+    }
+}
+
+#[inline]
+pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
+    let (ptr, len) = slice(name);
+    unsafe { ret(syscall_readonly!(__NR_sethostname, ptr, len)) }
 }

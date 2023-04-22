@@ -5,7 +5,7 @@ use super::super::c;
 use super::super::conv::borrowed_fd;
 use super::super::conv::{c_str, ret, ret_c_int, ret_discarded_char_ptr};
 #[cfg(not(target_os = "wasi"))]
-use super::super::conv::{ret_infallible, ret_pid_t};
+use super::super::conv::{ret_infallible, ret_pid_t, ret_usize};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::{syscall_ret, syscall_ret_u32};
 #[cfg(any(
@@ -23,6 +23,8 @@ use crate::ffi::CStr;
 #[cfg(feature = "fs")]
 use crate::fs::Mode;
 use crate::io;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use crate::process::Sysinfo;
 #[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 use crate::process::{WaitId, WaitidOptions, WaitidStatus};
 use core::mem::MaybeUninit;
@@ -37,12 +39,12 @@ use {
 use {
     super::super::offset::{libc_getrlimit, libc_rlimit, libc_setrlimit, LIBC_RLIM_INFINITY},
     crate::process::{Resource, Rlimit},
-    core::convert::TryInto,
 };
 #[cfg(not(target_os = "wasi"))]
 use {
     super::types::RawUname,
     crate::process::{Gid, Pid, RawNonZeroPid, RawPid, Signal, Uid, WaitOptions, WaitStatus},
+    core::convert::TryInto,
 };
 
 #[cfg(not(target_os = "wasi"))]
@@ -602,6 +604,32 @@ pub(crate) fn pidfd_open(pid: Pid, flags: PidfdFlags) -> io::Result<OwnedFd> {
             c::SYS_pidfd_open,
             pid.as_raw_nonzero().get(),
             flags.bits(),
+        ))
+    }
+}
+
+#[cfg(not(target_os = "wasi"))]
+pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
+    let len = buf.len().try_into().map_err(|_| io::Errno::NOMEM)?;
+
+    unsafe { ret_usize(c::getgroups(len, buf.as_mut_ptr().cast()) as isize) }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) fn sysinfo() -> Sysinfo {
+    let mut info = MaybeUninit::<Sysinfo>::uninit();
+    unsafe {
+        ret_infallible(c::sysinfo(info.as_mut_ptr()));
+        info.assume_init()
+    }
+}
+
+#[cfg(not(any(target_os = "emscripten", target_os = "redox", target_os = "wasi")))]
+pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
+    unsafe {
+        ret(c::sethostname(
+            name.as_ptr().cast(),
+            name.len().try_into().map_err(|_| io::Errno::INVAL)?,
         ))
     }
 }

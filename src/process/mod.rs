@@ -64,7 +64,7 @@ pub use sched_yield::sched_yield;
 #[cfg(not(target_os = "wasi"))]
 pub use umask::*;
 #[cfg(not(target_os = "wasi"))]
-pub use uname::{uname, Uname};
+pub use uname::*;
 #[cfg(not(target_os = "wasi"))]
 pub use wait::*;
 

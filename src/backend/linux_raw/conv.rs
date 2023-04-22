@@ -190,6 +190,11 @@ pub(super) fn slice_just_addr<T: Sized, Num: ArgNumber>(v: &[T]) -> ArgReg<Num> 
 }
 
 #[inline]
+pub(super) fn slice_just_addr_mut<T: Sized, Num: ArgNumber>(v: &mut [T]) -> ArgReg<Num> {
+    raw_arg(v.as_mut_ptr().cast())
+}
+
+#[inline]
 pub(super) fn slice<T: Sized, Num0: ArgNumber, Num1: ArgNumber>(
     v: &[T],
 ) -> (ArgReg<Num0>, ArgReg<Num1>) {
