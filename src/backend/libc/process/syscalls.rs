@@ -57,6 +57,11 @@ pub(crate) fn fchdir(dirfd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::fchdir(borrowed_fd(dirfd))) }
 }
 
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+pub(crate) fn chroot(path: &CStr) -> io::Result<()> {
+    unsafe { ret(c::chroot(c_str(path))) }
+}
+
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<()> {
     unsafe { ret_discarded_char_ptr(c::getcwd(buf.as_mut_ptr().cast(), buf.len())) }

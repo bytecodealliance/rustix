@@ -45,6 +45,11 @@ pub(crate) fn fchdir(fd: BorrowedFd<'_>) -> io::Result<()> {
 }
 
 #[inline]
+pub(crate) fn chroot(filename: &CStr) -> io::Result<()> {
+    unsafe { ret(syscall_readonly!(__NR_chroot, filename)) }
+}
+
+#[inline]
 pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<usize> {
     let (buf_addr_mut, buf_len) = slice_mut(buf);
     unsafe { ret_usize(syscall!(__NR_getcwd, buf_addr_mut, buf_len)) }

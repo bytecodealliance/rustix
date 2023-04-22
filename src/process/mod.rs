@@ -2,6 +2,8 @@
 
 #[cfg(not(target_os = "wasi"))]
 mod chdir;
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+mod chroot;
 mod exit;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;
@@ -36,6 +38,8 @@ mod wait;
 
 #[cfg(not(target_os = "wasi"))]
 pub use chdir::*;
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+pub use chroot::*;
 pub use exit::*;
 #[cfg(not(target_os = "wasi"))]
 pub use id::*;
