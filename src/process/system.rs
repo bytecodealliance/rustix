@@ -1,4 +1,4 @@
-//! Uname support.
+//! Uname and other system-level functions.
 //!
 //! # Safety
 //!
@@ -6,8 +6,10 @@
 //! kernel into `&str` references, which assumes that they're NUL-terminated.
 #![allow(unsafe_code)]
 
+use crate::backend;
 use crate::ffi::CStr;
-use crate::{backend, io};
+#[cfg(not(target_os = "emscripten"))]
+use crate::io;
 use core::fmt;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
