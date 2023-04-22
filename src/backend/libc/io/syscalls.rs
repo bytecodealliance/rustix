@@ -341,13 +341,15 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn ioctl_ficlone(fd: BorrowedFd<'_>, src_fd: BorrowedFd<'_>) -> io::Result<()> {
-    // TODO: Enable `ioctl_ficlone` for android when upstream is updated.
-    // TODO: Enable `ioctl_ficlone` for more architectures when upstream is
-    // updated.
-    #[cfg(all(
-        target_os = "linux",
-        any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
-    ))]
+    // TODO: Enable this on mips and power once libc is updated.
+    #[cfg(not(any(
+        target_arch = "mips",
+        target_arch = "mips64",
+        target_arch = "powerpc",
+        target_arch = "powerpc64",
+        target_arch = "sparc",
+        target_arch = "sparc64"
+    )))]
     unsafe {
         ret(c::ioctl(
             borrowed_fd(fd),
@@ -355,10 +357,15 @@ pub(crate) fn ioctl_ficlone(fd: BorrowedFd<'_>, src_fd: BorrowedFd<'_>) -> io::R
             borrowed_fd(src_fd),
         ))
     }
-    #[cfg(not(all(
-        target_os = "linux",
-        any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
-    )))]
+
+    #[cfg(any(
+        target_arch = "mips",
+        target_arch = "mips64",
+        target_arch = "powerpc",
+        target_arch = "powerpc64",
+        target_arch = "sparc",
+        target_arch = "sparc64"
+    ))]
     {
         let _ = fd;
         let _ = src_fd;

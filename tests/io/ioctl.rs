@@ -14,11 +14,16 @@ fn test_ioctls() {
     );
 }
 
-// TODO: Enable `ioctl_ficlone` for android when upstream is updated.
-// TODO: Enable `ioctl_ficlone` for more architectures when upstream is
-// updated.
-#[cfg(any(target_os = "linux"))]
-#[cfg(any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64"))]
+// TODO: Enable this on mips and power once libc is updated.
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(not(any(
+    target_arch = "mips",
+    target_arch = "mips64",
+    target_arch = "powerpc",
+    target_arch = "powerpc64",
+    target_arch = "sparc",
+    target_arch = "sparc64"
+)))]
 #[test]
 fn test_ioctl_fioclone() {
     let src = std::fs::File::open("Cargo.toml").unwrap();

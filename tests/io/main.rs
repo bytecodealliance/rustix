@@ -1,6 +1,5 @@
 //! Tests for [`rustix::io`].
 
-#![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
@@ -27,5 +26,5 @@ mod procfs;
 #[cfg(not(target_os = "redox"))] // redox doesn't have cwd/openat
 #[cfg(not(target_os = "wasi"))] // wasi support for `S_IRUSR` etc. submitted to libc in #2264
 mod read_write;
-#[cfg(any(target_os = "linux", target_os = "freebsd", target_os = "android"))]
+#[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
 mod seals;
