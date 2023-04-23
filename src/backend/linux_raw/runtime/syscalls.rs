@@ -21,6 +21,7 @@ use crate::fs::AtFlags;
 use crate::io;
 use crate::process::{Pid, RawNonZeroPid, Signal};
 use crate::runtime::{How, Sigaction, Siginfo, Sigset, Stack, Timespec};
+use crate::utils::optional_as_ptr;
 #[cfg(target_pointer_width = "32")]
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
@@ -118,10 +119,7 @@ pub(crate) mod tls {
 #[inline]
 pub(crate) unsafe fn sigaction(signal: Signal, new: Option<Sigaction>) -> io::Result<Sigaction> {
     let mut old = MaybeUninit::<Sigaction>::uninit();
-    let new: *const Sigaction = match new {
-        Some(new) => &new,
-        None => core::ptr::null(),
-    };
+    let new = optional_as_ptr(new.as_ref());
     ret(syscall!(
         __NR_rt_sigaction,
         signal,
@@ -135,10 +133,7 @@ pub(crate) unsafe fn sigaction(signal: Signal, new: Option<Sigaction>) -> io::Re
 #[inline]
 pub(crate) unsafe fn sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
     let mut old = MaybeUninit::<Stack>::uninit();
-    let new: *const Stack = match new {
-        Some(new) => &new,
-        None => core::ptr::null(),
-    };
+    let new = optional_as_ptr(new.as_ref());
     ret(syscall!(__NR_sigaltstack, new, &mut old))?;
     Ok(old.assume_init())
 }
@@ -195,11 +190,7 @@ pub(crate) fn sigwaitinfo(set: &Sigset) -> io::Result<Siginfo> {
 #[inline]
 pub(crate) fn sigtimedwait(set: &Sigset, timeout: Option<Timespec>) -> io::Result<Siginfo> {
     let mut info = MaybeUninit::<Siginfo>::uninit();
-
-    let timeout_ptr = match timeout {
-        Some(timeout) => crate::utils::as_ptr(&timeout),
-        None => core::ptr::null(),
-    };
+    let timeout_ptr = optional_as_ptr(timeout.as_ref());
 
     #[cfg(target_pointer_width = "32")]
     unsafe {
@@ -237,17 +228,14 @@ unsafe fn sigtimedwait_old(
     info: &mut MaybeUninit<Siginfo>,
 ) -> io::Result<()> {
     let old_timeout = match timeout {
-        None => None,
         Some(timeout) => Some(__kernel_old_timespec {
             tv_sec: timeout.tv_sec.try_into().map_err(|_| io::Errno::OVERFLOW)?,
             tv_nsec: timeout.tv_nsec as _,
         }),
+        None => None,
     };
 
-    let old_timeout_ptr = match old_timeout {
-        Some(old_timeout) => crate::utils::as_ptr(&old_timeout),
-        None => core::ptr::null(),
-    };
+    let old_timeout_ptr = optional_as_ptr(old_timeout.as_ref());
 
     let _signum = ret_c_int(syscall!(
         __NR_rt_sigtimedwait,
