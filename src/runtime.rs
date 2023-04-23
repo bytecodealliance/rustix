@@ -141,7 +141,7 @@ pub unsafe fn exit_thread(status: i32) -> ! {
 ///
 /// [POSIX `_Exit`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/_Exit.html
 /// [Linux `exit_group`]: https://man7.org/linux/man-pages/man2/exit_group.2.html
-/// [Linux `_Exit`]: https://man7.org/linux/man-pages/man2/exit.2.html
+/// [Linux `_Exit`]: https://man7.org/linux/man-pages/man2/_Exit.2.html
 #[doc(alias = "_exit")]
 #[doc(alias = "_Exit")]
 #[inline]

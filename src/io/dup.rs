@@ -35,7 +35,7 @@ pub use backend::io::types::DupFlags;
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/dup.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=dup&sektion=2
 /// [NetBSD]: https://man.netbsd.org/dup.2
-/// [OpenBSD]: http://man.openbsd.org/dup.2
+/// [OpenBSD]: https://man.openbsd.org/dup.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=dup&section=2
 /// [illumos]: https://illumos.org/man/2/dup
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Duplicating-Descriptors.html
@@ -77,7 +77,7 @@ pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/dup2.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=dup2&sektion=2
 /// [NetBSD]: https://man.netbsd.org/dup2.2
-/// [OpenBSD]: http://man.openbsd.org/dup2.2
+/// [OpenBSD]: https://man.openbsd.org/dup2.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=dup2&section=2
 /// [illumos]: https://illumos.org/man/2/dup
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Duplicating-Descriptors.html
@@ -106,7 +106,7 @@ pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup3.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=dup3&sektion=3
 /// [NetBSD]: https://man.netbsd.org/dup3.2
-/// [OpenBSD]: http://man.openbsd.org/dup3.2
+/// [OpenBSD]: https://man.openbsd.org/dup3.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=dup3&section=3
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 #[inline]
