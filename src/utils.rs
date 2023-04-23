@@ -12,6 +12,26 @@ pub(crate) fn as_mut_ptr<T>(t: &mut T) -> *mut T {
     t
 }
 
+/// Convert an `Option<&T>` into a possibly-null `*const T`.
+#[inline]
+#[allow(dead_code)]
+pub(crate) const fn optional_as_ptr<T>(t: Option<&T>) -> *const T {
+    match t {
+        Some(t) => t,
+        None => core::ptr::null(),
+    }
+}
+
+/// Convert an `Option<&mut T>` into a possibly-null `*mut T`.
+#[inline]
+#[allow(dead_code)]
+pub(crate) fn optional_as_mut_ptr<T>(t: Option<&mut T>) -> *mut T {
+    match t {
+        Some(t) => t,
+        None => core::ptr::null_mut(),
+    }
+}
+
 /// Convert a `*mut c_void` to a `*mut T`, checking that it is not null,
 /// misaligned, or pointing to a region of memory that wraps around the address
 /// space.
