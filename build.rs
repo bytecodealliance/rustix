@@ -24,6 +24,7 @@ fn main() {
 
     // Gather target information.
     let arch = var("CARGO_CFG_TARGET_ARCH").unwrap();
+    let vendor = var("CARGO_CFG_TARGET_VENDOR").unwrap();
     let asm_name = format!("{}/{}.s", OUTLINE_PATH, arch);
     let asm_name_present = std::fs::metadata(&asm_name).is_ok();
     let target_os = var("CARGO_CFG_TARGET_OS").unwrap();
@@ -84,7 +85,7 @@ fn main() {
         // Use inline asm if we have it, or outline asm otherwise. On PowerPC
         // and MIPS, Rust's inline asm is considered experimental, so only use
         // it if `--cfg=rustix_use_experimental_asm` is given.
-        if (feature_rustc_dep_of_std || can_compile("use std::arch::asm;"))
+        if (feature_rustc_dep_of_std || vendor == "mustang" || can_compile("use std::arch::asm;"))
             && (arch != "x86" || has_feature("naked_functions"))
             && ((arch != "powerpc64" && arch != "mips" && arch != "mips64")
                 || rustix_use_experimental_asm)
