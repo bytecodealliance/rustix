@@ -638,6 +638,17 @@ pub(crate) fn exit_group(code: c::c_int) -> ! {
 }
 
 #[inline]
+pub(crate) fn getsid(pid: Option<Pid>) -> io::Result<Pid> {
+    unsafe {
+        let pid = ret_usize(syscall_readonly!(__NR_getsid, c_uint(Pid::as_raw(pid))))?;
+        debug_assert!(pid > 0);
+        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(
+            pid as u32,
+        )))
+    }
+}
+
+#[inline]
 pub(crate) fn setsid() -> io::Result<Pid> {
     unsafe {
         let pid = ret_usize(syscall_readonly!(__NR_setsid))?;

@@ -528,6 +528,16 @@ pub(crate) fn exit_group(code: c::c_int) -> ! {
     }
 }
 
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[inline]
+pub(crate) fn getsid(pid: Option<Pid>) -> io::Result<Pid> {
+    unsafe {
+        let pid = ret_pid_t(c::getsid(Pid::as_raw(pid) as _))?;
+        debug_assert_ne!(pid, 0);
+        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid)))
+    }
+}
+
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) fn setsid() -> io::Result<Pid> {
