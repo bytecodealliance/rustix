@@ -100,3 +100,11 @@ fn test_getpgrp() {
         );
     }
 }
+
+#[test]
+fn test_getsid() {
+    assert_eq!(
+        process::getsid(None),
+        process::getsid(Some(process::getpid()))
+    );
+}
