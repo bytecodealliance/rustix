@@ -5,10 +5,20 @@
 
 use windows_sys::Win32::Networking::WinSock;
 
-pub(crate) use libc::{
-    c_char, c_int, c_long, c_longlong, c_schar, c_short, c_uchar, c_uint, c_ulong, c_ulonglong,
-    c_ushort, c_void, ssize_t,
-};
+// Define the basic C types. With Rust 1.64, we can use these from `core::ffi`.
+pub(crate) type c_schar = i8;
+pub(crate) type c_uchar = u8;
+pub(crate) type c_short = i16;
+pub(crate) type c_ushort = u16;
+pub(crate) type c_int = i32;
+pub(crate) type c_uint = u32;
+pub(crate) type c_longlong = i64;
+pub(crate) type c_ulonglong = u64;
+pub(crate) type ssize_t = isize;
+pub(crate) type c_char = i8;
+pub(crate) type c_long = i32;
+pub(crate) type c_ulong = u32;
+pub(crate) use core::ffi::c_void;
 
 // windows-sys declares these constants as u16. For better compatibility
 // with Unix-family APIs, redeclare them as u32.

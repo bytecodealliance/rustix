@@ -93,6 +93,13 @@ fn test_backends() {
         "use-default with --features=rustix/use-libc does not depend on {}",
         libc_dep
     );
+
+    // Test that the windows crate does not depend on libc.
+    #[cfg(windows)]
+    assert!(
+        !has_dependency("test-crates/use-default", &[], &[], &[], "libc"),
+        "use-default depends on libc on windows",
+    );
 }
 
 /// Test whether the crate at directory `dir` has a dependency on `dependency`,
