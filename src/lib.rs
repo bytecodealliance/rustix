@@ -137,6 +137,18 @@ pub(crate) mod cstr;
 pub(crate) mod const_assert;
 pub(crate) mod utils;
 
+// linux_raw: Weak symbols are used by the use-libc-auxv feature for
+// glibc 2.15 support.
+//
+// libc: Weak symbols are used to call various functions available in some
+// versions of libc and not others.
+#[cfg(any(
+    all(linux_raw, feature = "use-libc-auxv"),
+    all(libc, not(any(windows, target_os = "wasi")))
+))]
+#[macro_use]
+mod weak;
+
 // Pick the backend implementation to use.
 #[cfg_attr(libc, path = "backend/libc/mod.rs")]
 #[cfg_attr(linux_raw, path = "backend/linux_raw/mod.rs")]

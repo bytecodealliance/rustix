@@ -36,9 +36,9 @@ const NULL: *mut c_void = null_mut();
 const INVALID: *mut c_void = 1 as *mut c_void;
 
 macro_rules! weak {
-    (fn $name:ident($($t:ty),*) -> $ret:ty) => (
+    ($vis:vis fn $name:ident($($t:ty),*) -> $ret:ty) => (
         #[allow(non_upper_case_globals)]
-        static $name: $crate::weak::Weak<unsafe extern fn($($t),*) -> $ret> =
+        $vis static $name: $crate::weak::Weak<unsafe extern fn($($t),*) -> $ret> =
             $crate::weak::Weak::new(concat!(stringify!($name), '\0'));
     )
 }
@@ -116,7 +116,7 @@ unsafe fn fetch(name: &str) -> *mut c_void {
 
 #[cfg(not(any(target_os = "android", target_os = "linux")))]
 macro_rules! syscall {
-    (fn $name:ident($($arg_name:ident: $t:ty),*) -> $ret:ty) => (
+    (fn $name:ident($($arg_name:ident: $t:ty),*) via $_sys_name:ident -> $ret:ty) => (
         unsafe fn $name($($arg_name: $t),*) -> $ret {
             weak! { fn $name($($t),*) -> $ret }
 
@@ -132,7 +132,7 @@ macro_rules! syscall {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 macro_rules! syscall {
-    (fn $name:ident($($arg_name:ident: $t:ty),*) -> $ret:ty) => (
+    (fn $name:ident($($arg_name:ident: $t:ty),*) via $sys_name:ident -> $ret:ty) => (
         unsafe fn $name($($arg_name:$t),*) -> $ret {
             // This looks like a hack, but concat_idents only accepts idents
             // (not paths).
@@ -140,23 +140,23 @@ macro_rules! syscall {
 
             trait AsSyscallArg {
                 type SyscallArgType;
-                fn as_syscall_arg(self) -> Self::SyscallArgType;
+                fn into_syscall_arg(self) -> Self::SyscallArgType;
             }
 
             // Pass pointer types as pointers, to preserve provenance.
             impl<T> AsSyscallArg for *mut T {
                 type SyscallArgType = *mut T;
-                fn as_syscall_arg(self) -> Self::SyscallArgType { self }
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self }
             }
             impl<T> AsSyscallArg for *const T {
                 type SyscallArgType = *const T;
-                fn as_syscall_arg(self) -> Self::SyscallArgType { self }
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self }
             }
 
             // Pass `BorrowedFd` values as the integer value.
             impl AsSyscallArg for $crate::fd::BorrowedFd<'_> {
                 type SyscallArgType = c::c_long;
-                fn as_syscall_arg(self) -> Self::SyscallArgType {
+                fn into_syscall_arg(self) -> Self::SyscallArgType {
                     $crate::fd::AsRawFd::as_raw_fd(&self) as _
                 }
             }
@@ -164,21 +164,27 @@ macro_rules! syscall {
             // Coerce integer values into `c_long`.
             impl AsSyscallArg for i32 {
                 type SyscallArgType = c::c_long;
-                fn as_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
             }
             impl AsSyscallArg for u32 {
                 type SyscallArgType = c::c_long;
-                fn as_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
             }
             impl AsSyscallArg for usize {
                 type SyscallArgType = c::c_long;
-                fn as_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
             }
 
+            // `concat_idents is unstable, so we take an extra `sys_name`
+            // parameter and have our users do the concat for us for now.
+            /*
             syscall(
                 concat_idents!(SYS_, $name),
-                $($arg_name.as_syscall_arg()),*
+                $($arg_name.into_syscall_arg()),*
             ) as $ret
+            */
+
+            syscall($sys_name, $($arg_name.into_syscall_arg()),*) as $ret
         }
     )
 }
@@ -195,6 +201,25 @@ macro_rules! weakcall {
             } else {
                 errno::set_errno(errno::Errno(libc::ENOSYS));
                 -1
+            }
+        }
+    )
+}
+
+/// A combination of `weakcall` and `syscall`. Use the libc function if it's
+/// available, and fall back to `libc::syscall` otherwise.
+macro_rules! weak_or_syscall {
+    ($vis:vis fn $name:ident($($arg_name:ident: $t:ty),*) via $sys_name:ident -> $ret:ty) => (
+        $vis unsafe fn $name($($arg_name: $t),*) -> $ret {
+            weak! { fn $name($($t),*) -> $ret }
+
+            // Use a weak symbol from libc when possible, allowing `LD_PRELOAD`
+            // interposition, but if it's not found just fail.
+            if let Some(fun) = $name.get() {
+                fun($($arg_name),*)
+            } else {
+                syscall! { fn $name($($arg_name: $t),*) via $sys_name -> $ret }
+                $name($($arg_name),*)
             }
         }
     )
