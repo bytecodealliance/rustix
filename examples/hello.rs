@@ -2,8 +2,8 @@
 
 #[cfg(all(feature = "std", not(windows)))]
 fn main() -> std::io::Result<()> {
-    // The message to print. It includes an explicit newline because we're
-    // not using `println!`, so we have to include the newline manually.
+    // The message to print. It includes an explicit newline because we're not
+    // using `println!`, so we have to include the newline manually.
     let message = "Hello, world!\n";
 
     // The bytes to print. The `write` syscall operates on byte buffers and

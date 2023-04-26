@@ -11,10 +11,6 @@
 // one platform where it's redundant on another.
 #![allow(clippy::useless_conversion)]
 
-#[cfg(not(any(windows, target_os = "wasi")))]
-#[macro_use]
-mod weak;
-
 mod conv;
 mod offset;
 

@@ -14,11 +14,6 @@
 //! such as which pointers are array slices, out parameters, or in-out
 //! parameters, which integers are owned or borrowed file descriptors, etc.
 
-// Weak symbols used by the use-libc-auxv feature for glibc 2.15 support.
-#[cfg(feature = "use-libc-auxv")]
-#[macro_use]
-mod weak;
-
 #[macro_use]
 mod arch;
 mod conv;

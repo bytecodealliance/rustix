@@ -7,8 +7,8 @@
 ///
 /// 32-bit Android is [not y2038 compatible]. In theory we could use
 /// `libc::syscall` and call the new syscalls ourselves, however that doesn't
-/// seem worth the effort on a platform that will likely never support add
-/// such support itself.
+/// seem worth the effort on a platform that will likely never add such support
+/// itself.
 ///
 /// [not y2038 compatible]: https://android.googlesource.com/platform/bionic/+/refs/heads/master/docs/32-bit-abi.md#is-32_bit-on-lp32-y2038
 #[cfg(not(all(target_env = "musl", target_pointer_width = "32")))]
