@@ -47,7 +47,7 @@ libc = { version = "0.2.142", features = ["extra_traits"], optional = true }
 #
 # On all other Unix-family platforms, and under Miri, we always use the libc
 # backend, so enable its dependencies unconditionally.
-[target.'cfg(any(rustix_use_libc, miri, not(all(target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"), all(target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64")))))))'.dependencies]
+[target.'cfg(all(not(windows), any(rustix_use_libc, miri, not(all(target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"), all(target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64"))))))))'.dependencies]
 libc_errno = { package = "errno", version = "0.3.0", default-features = false }
 libc = { version = "0.2.142", features = ["extra_traits"] }
 
@@ -67,6 +67,13 @@ features = [
     "Win32_NetworkManagement_IpHelper",
     "Win32_System_Threading"
 ]
+
+# For the libc backend on Windows, also use the errno crate, which has Windows
+# support.
+[target.'cfg(windows)'.dependencies.libc_errno]
+version = "0.3.1"
+package = "errno"
+default-features = false
 
 [dev-dependencies]
 tempfile = "3.4.0"
