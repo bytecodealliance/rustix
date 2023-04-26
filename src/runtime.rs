@@ -371,7 +371,7 @@ pub unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
 #[cfg(linux_raw)]
 #[inline]
 #[doc(alias = "pthread_sigmask")]
-pub unsafe fn sigprocmask(how: How, set: &Sigset) -> io::Result<Sigset> {
+pub unsafe fn sigprocmask(how: How, set: Option<&Sigset>) -> io::Result<Sigset> {
     backend::runtime::syscalls::sigprocmask(how, set)
 }
 
