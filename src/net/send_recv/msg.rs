@@ -158,7 +158,13 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
         }
 
         // Fill the new part of the buffer with zeroes.
-        self.buffer[self.length..new_length].fill(0);
+        // TODO: Use fill() when it's stable.
+        unsafe {
+            self.buffer
+                .as_mut_ptr()
+                .add(self.length)
+                .write_bytes(0, new_length);
+        }
         self.length = new_length;
 
         // Get the last header in the buffer.

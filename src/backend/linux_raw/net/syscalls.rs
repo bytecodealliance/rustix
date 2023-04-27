@@ -30,8 +30,8 @@ use {
     super::super::reg::{ArgReg, SocketArg},
     linux_raw_sys::general::{
         SYS_ACCEPT, SYS_ACCEPT4, SYS_BIND, SYS_CONNECT, SYS_GETPEERNAME, SYS_GETSOCKNAME,
-        SYS_GETSOCKOPT, SYS_LISTEN, SYS_RECV, SYS_RECVFROM, SYS_SEND, SYS_SENDTO, SYS_SETSOCKOPT,
-        SYS_SHUTDOWN, SYS_SOCKET, SYS_SOCKETPAIR,
+        SYS_GETSOCKOPT, SYS_LISTEN, SYS_RECV, SYS_RECVFROM, SYS_RECVMSG, SYS_SEND, SYS_SENDMSG,
+        SYS_SENDTO, SYS_SETSOCKOPT, SYS_SHUTDOWN, SYS_SOCKET, SYS_SOCKETPAIR,
     },
 };
 
@@ -269,7 +269,7 @@ pub(crate) fn recvmsg(
                 x86_sys(SYS_RECVMSG),
                 slice_just_addr::<ArgReg<SocketArg>, _>(&[
                     sockfd.into(),
-                    (&mut msghdr).into(),
+                    by_mut(&mut msghdr),
                     c_uint(msg_flags.bits()).into(),
                 ])
             ))
@@ -308,7 +308,7 @@ pub(crate) fn sendmsg_noaddr(
         };
 
         #[cfg(target_arch = "x86")]
-        let result = {
+        let result = unsafe {
             ret_usize(syscall!(
                 __NR_socketcall,
                 x86_sys(SYS_SENDMSG),
