@@ -12,7 +12,6 @@ use crate::net::{SocketAddrV4, SocketAddrV6};
 use crate::utils::as_ptr;
 
 use core::mem::{size_of, zeroed, MaybeUninit};
-use core::ptr::null_mut;
 
 /// Create a message header intended to receive a datagram.
 pub(crate) fn with_recv_msghdr<R>(
@@ -23,16 +22,15 @@ pub(crate) fn with_recv_msghdr<R>(
 ) -> R {
     let namelen = size_of::<c::sockaddr_storage>() as c::socklen_t;
 
-    f(c::msghdr {
-        msg_name: name.as_mut_ptr().cast(),
-        msg_namelen: namelen,
-        msg_iov: iov.as_mut_ptr().cast(),
-        msg_iovlen: msg_iov_len(iov.len()),
-        msg_control: control.as_control_ptr().cast(),
-        msg_controllen: msg_control_len(control.control_len()),
-
-        // Zero-initialize any padding bytes.
-        ..unsafe { zeroed() }
+    f({
+        let mut h: c::msghdr = unsafe { zeroed() };
+        h.msg_name = name.as_mut_ptr().cast();
+        h.msg_namelen = namelen;
+        h.msg_iov = iov.as_mut_ptr().cast();
+        h.msg_iovlen = msg_iov_len(iov.len());
+        h.msg_control = control.as_control_ptr().cast();
+        h.msg_controllen = msg_control_len(control.control_len());
+        h
     })
 }
 
@@ -42,16 +40,13 @@ pub(crate) fn with_noaddr_msghdr<R>(
     control: &mut crate::net::SendAncillaryBuffer<'_, '_, '_>,
     f: impl FnOnce(c::msghdr) -> R,
 ) -> R {
-    f(c::msghdr {
-        msg_name: null_mut(),
-        msg_namelen: 0,
-        msg_iov: iov.as_ptr() as _,
-        msg_iovlen: msg_iov_len(iov.len()),
-        msg_control: control.as_control_ptr().cast(),
-        msg_controllen: msg_control_len(control.control_len()),
-
-        // Zero-initialize any padding bytes.
-        ..unsafe { zeroed() }
+    f({
+        let mut h: c::msghdr = unsafe { zeroed() };
+        h.msg_iov = iov.as_ptr() as _;
+        h.msg_iovlen = msg_iov_len(iov.len());
+        h.msg_control = control.as_control_ptr().cast();
+        h.msg_controllen = msg_control_len(control.control_len());
+        h
     })
 }
 
@@ -64,16 +59,15 @@ pub(crate) fn with_v4_msghdr<R>(
 ) -> R {
     let encoded = unsafe { encode_sockaddr_v4(addr) };
 
-    f(c::msghdr {
-        msg_name: as_ptr(&encoded) as _,
-        msg_namelen: size_of::<SocketAddrV4>() as _,
-        msg_iov: iov.as_ptr() as _,
-        msg_iovlen: msg_iov_len(iov.len()),
-        msg_control: control.as_control_ptr().cast(),
-        msg_controllen: msg_control_len(control.control_len()),
-
-        // Zero-initialize any padding bytes.
-        ..unsafe { zeroed() }
+    f({
+        let mut h: c::msghdr = unsafe { zeroed() };
+        h.msg_name = as_ptr(&encoded) as _;
+        h.msg_namelen = size_of::<SocketAddrV4>() as _;
+        h.msg_iov = iov.as_ptr() as _;
+        h.msg_iovlen = msg_iov_len(iov.len());
+        h.msg_control = control.as_control_ptr().cast();
+        h.msg_controllen = msg_control_len(control.control_len());
+        h
     })
 }
 
@@ -86,16 +80,15 @@ pub(crate) fn with_v6_msghdr<R>(
 ) -> R {
     let encoded = unsafe { encode_sockaddr_v6(addr) };
 
-    f(c::msghdr {
-        msg_name: as_ptr(&encoded) as _,
-        msg_namelen: size_of::<SocketAddrV6>() as _,
-        msg_iov: iov.as_ptr() as _,
-        msg_iovlen: msg_iov_len(iov.len()),
-        msg_control: control.as_control_ptr().cast(),
-        msg_controllen: msg_control_len(control.control_len()),
-
-        // Zero-initialize any padding bytes.
-        ..unsafe { zeroed() }
+    f({
+        let mut h: c::msghdr = unsafe { zeroed() };
+        h.msg_name = as_ptr(&encoded) as _;
+        h.msg_namelen = size_of::<SocketAddrV6>() as _;
+        h.msg_iov = iov.as_ptr() as _;
+        h.msg_iovlen = msg_iov_len(iov.len());
+        h.msg_control = control.as_control_ptr().cast();
+        h.msg_controllen = msg_control_len(control.control_len());
+        h
     })
 }
 
@@ -107,15 +100,14 @@ pub(crate) fn with_unix_msghdr<R>(
     control: &mut crate::net::SendAncillaryBuffer<'_, '_, '_>,
     f: impl FnOnce(c::msghdr) -> R,
 ) -> R {
-    f(c::msghdr {
-        msg_name: as_ptr(addr) as _,
-        msg_namelen: addr.addr_len(),
-        msg_iov: iov.as_ptr() as _,
-        msg_iovlen: msg_iov_len(iov.len()),
-        msg_control: control.as_control_ptr().cast(),
-        msg_controllen: msg_control_len(control.control_len()),
-
-        // Zero-initialize any padding bytes.
-        ..unsafe { zeroed() }
+    f({
+        let mut h: c::msghdr = unsafe { zeroed() };
+        h.msg_name = as_ptr(addr) as _;
+        h.msg_namelen = addr.addr_len();
+        h.msg_iov = iov.as_ptr() as _;
+        h.msg_iovlen = msg_iov_len(iov.len());
+        h.msg_control = control.as_control_ptr().cast();
+        h.msg_controllen = msg_control_len(control.control_len());
+        h
     })
 }

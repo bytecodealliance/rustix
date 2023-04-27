@@ -609,10 +609,11 @@ mod messages {
     impl<'buf> Messages<'buf> {
         /// Create a new iterator over messages from a byte buffer.
         pub(super) fn new(buf: &'buf mut [u8], len: usize) -> Self {
-            let msghdr = c::msghdr {
-                msg_control: buf.as_mut_ptr() as *mut _,
-                msg_controllen: len as _,
-                ..unsafe { core::mem::zeroed() }
+            let msghdr = {
+                let mut h: c::msghdr = unsafe { core::mem::zeroed() };
+                h.msg_control = buf.as_mut_ptr() as *mut _;
+                h.msg_controllen = len as _;
+                h
             };
 
             // Get the first header.
