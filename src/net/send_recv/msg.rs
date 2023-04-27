@@ -33,7 +33,7 @@ macro_rules! cmsg_space {
 #[allow(unsafe_code)]
 #[doc(hidden)]
 pub fn __cmsg_len(len: usize) -> usize {
-    unsafe { c::CMSG_LEN(len as _) as usize }
+    unsafe { c::CMSG_SPACE(len as _) as usize }
 }
 
 /// Ancillary message for `sendmsg`.
@@ -53,7 +53,7 @@ impl SendAncillaryMessage<'_, '_> {
             Self::ScmRights(slice) => slice.len() * size_of::<BorrowedFd<'static>>(),
         };
 
-        unsafe { c::CMSG_LEN(total_bytes as _) as usize }
+        unsafe { c::CMSG_SPACE(total_bytes as _) as usize }
     }
 }
 
@@ -163,7 +163,7 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
             self.buffer
                 .as_mut_ptr()
                 .add(self.length)
-                .write_bytes(0, new_length);
+                .write_bytes(0, new_length - self.length);
         }
         self.length = new_length;
 
@@ -238,7 +238,7 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
 
     /// Returns the length of the message data.
     pub(crate) fn control_len(&self) -> usize {
-        self.length
+        self.buffer.len()
     }
 
     /// Drain all messages from the buffer.
