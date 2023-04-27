@@ -1405,15 +1405,19 @@ pub(crate) fn accessat(
     // process.
     #[cfg(not(target_os = "android"))]
     if !flags.is_empty() {
-        return unsafe {
-            ret(syscall_readonly!(
+        unsafe {
+            match ret(syscall_readonly!(
                 __NR_faccessat2,
                 dirfd,
                 path,
                 access,
                 flags
-            ))
-        };
+            )) {
+                Ok(()) => return Ok(()),
+                Err(io::Errno::NOSYS) => {}
+                Err(other) => return Err(other),
+            }
+        }
     }
 
     // Linux's `faccessat` doesn't have a flags parameter. If we have
