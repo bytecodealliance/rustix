@@ -263,6 +263,7 @@ pub(super) fn msg_iov_len(len: usize) -> c::c_int {
     target_os = "solaris",
     target_os = "illumos",
     target_os = "haiku",
+    target_os = "fuchsia"
 ))]
 #[inline]
 pub(super) fn msg_control_len(len: usize) -> c::socklen_t {
@@ -283,17 +284,10 @@ pub(super) fn msg_control_len(len: usize) -> c::socklen_t {
     target_os = "solaris",
     target_os = "illumos",
     target_os = "haiku",
+    target_os = "fuchsia",
     windows,
     target_os = "wasm32",
-    target_os = "android"
 )))]
-#[inline]
-pub(super) fn msg_control_len(len: usize) -> c::size_t {
-    len
-}
-
-/// Convert the value to a `size_t`.
-#[cfg(target_os = "android")]
 #[inline]
 pub(super) fn msg_control_len(len: usize) -> c::size_t {
     len
