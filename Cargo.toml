@@ -85,7 +85,6 @@ io-lifetimes = { version = "1.0.10", default-features = false, features = ["clos
 serial_test = "0.6"
 memoffset = "0.8.0"
 flate2 = "1.0"
-cfg-if = "1.0.0"
 
 [target.'cfg(all(criterion, not(any(target_os = "emscripten", target_os = "wasi"))))'.dev-dependencies]
 criterion = "0.4"
@@ -132,7 +131,13 @@ default = ["std", "use-libc-auxv"]
 std = ["io-lifetimes"]
 
 # This is used in the port of std to rustix.
-rustc-dep-of-std = ["core", "alloc", "compiler_builtins", "linux-raw-sys/rustc-dep-of-std", "bitflags/rustc-dep-of-std"]
+rustc-dep-of-std = [
+    "core",
+    "alloc",
+    "compiler_builtins",
+    "linux-raw-sys/rustc-dep-of-std",
+    "bitflags/rustc-dep-of-std",
+]
 
 # Enable this to request the libc backend.
 use-libc = ["libc_errno", "libc"]
@@ -174,7 +179,20 @@ rand = []
 runtime = []
 
 # Enable all API features.
-all-apis = ["fs", "io_uring", "mm", "net", "param", "process", "procfs", "rand", "runtime", "termios", "thread", "time"]
+all-apis = [
+    "fs",
+    "io_uring",
+    "mm",
+    "net",
+    "param",
+    "process",
+    "procfs",
+    "rand",
+    "runtime",
+    "termios",
+    "thread",
+    "time",
+]
 
 # When using the linux_raw backend, and not using Mustang, should we use libc
 # for reading the aux vectors, instead of reading them ourselves from

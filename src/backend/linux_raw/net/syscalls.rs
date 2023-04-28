@@ -251,13 +251,13 @@ pub(crate) fn recvmsg(
 ) -> io::Result<crate::net::RecvMsgResult> {
     let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
 
-    with_recv_msghdr(&mut storage, iov, control, |mut msghdr| {
+    with_recv_msghdr(&mut storage, iov, control, |msghdr| {
         #[cfg(not(target_arch = "x86"))]
         let result = unsafe {
             ret_usize(syscall!(
                 __NR_recvmsg,
                 sockfd,
-                by_mut(&mut msghdr),
+                by_mut(msghdr),
                 c_uint(msg_flags.bits())
             ))
         };
@@ -269,7 +269,7 @@ pub(crate) fn recvmsg(
                 x86_sys(SYS_RECVMSG),
                 slice_just_addr::<ArgReg<SocketArg>, _>(&[
                     sockfd.into(),
-                    by_mut(&mut msghdr),
+                    by_mut(msghdr),
                     c_uint(msg_flags.bits()).into(),
                 ])
             ))

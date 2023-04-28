@@ -7,7 +7,7 @@ use crate::io;
 use core::convert::TryFrom;
 use core::marker::PhantomData;
 use core::mem::{self, size_of};
-use core::ptr::{self, NonNull};
+use core::ptr;
 
 use super::{RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 
@@ -103,7 +103,7 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
         if self.length > 0 {
             self.buffer.as_mut_ptr()
         } else {
-            core::ptr::null_mut()
+            ptr::null_mut()
         }
     }
 
@@ -172,7 +172,6 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
 
         // Set the header fields.
         unsafe {
-            let last_header = last_header.as_mut();
             last_header.cmsg_len = c::CMSG_LEN(source_len) as _;
             last_header.cmsg_level = cmsg_level;
             last_header.cmsg_type = cmsg_type;
@@ -180,8 +179,8 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
 
         // Get the pointer to the payload and copy the data.
         unsafe {
-            let payload = c::CMSG_DATA(last_header.as_ptr());
-            core::ptr::copy_nonoverlapping(source.as_ptr(), payload, source_len as _);
+            let payload = c::CMSG_DATA(last_header);
+            ptr::copy_nonoverlapping(source.as_ptr(), payload, source_len as _);
         }
 
         true
@@ -241,6 +240,16 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
         self.buffer.len()
     }
 
+    /// Set the length of the message data.
+    ///
+    /// # Safety
+    ///
+    /// The buffer must be filled with valid message data.
+    #[allow(unsafe_code)]
+    pub(crate) unsafe fn set_control_len(&mut self, len: usize) {
+        self.length = len;
+    }
+
     /// Drain all messages from the buffer.
     #[allow(unsafe_code)]
     pub fn drain(&mut self) -> AncillaryDrain<'_> {
@@ -272,10 +281,8 @@ pub struct AncillaryDrain<'buf> {
 impl<'buf> AncillaryDrain<'buf> {
     /// A closure that converts a message into a `RecvAncillaryMessage`.
     #[allow(unsafe_code)]
-    fn cvt_msg(read: &mut usize, msg: NonNull<c::cmsghdr>) -> Option<RecvAncillaryMessage<'buf>> {
+    fn cvt_msg(read: &mut usize, msg: &c::cmsghdr) -> Option<RecvAncillaryMessage<'buf>> {
         unsafe {
-            let msg = msg.as_ref();
-
             // Advance the "read" pointer.
             let msg_len = msg.cmsg_len as usize;
             *read += msg_len;
@@ -524,7 +531,7 @@ impl<T> Iterator for AncillaryIter<'_, T> {
         }
 
         // Get the next item.
-        let item = unsafe { ptr::read_unaligned(self.data.as_ptr() as *const T) };
+        let item = unsafe { ptr::read_unaligned(self.data.as_ptr().cast::<T>()) };
 
         // Move forward.
         let data = mem::take(&mut self.data);
@@ -574,7 +581,7 @@ impl<T> DoubleEndedIterator for AncillaryIter<'_, T> {
         // Get the next item.
         let item = unsafe {
             let ptr = self.data.as_ptr().add(self.data.len() - size_of::<T>());
-            ptr::read(ptr as *const T)
+            ptr::read_unaligned(ptr.cast::<T>())
         };
 
         // Move forward.
@@ -627,8 +634,8 @@ mod messages {
         }
     }
 
-    impl Iterator for Messages<'_> {
-        type Item = NonNull<c::cmsghdr>;
+    impl<'a> Iterator for Messages<'a> {
+        type Item = &'a mut c::cmsghdr;
 
         #[inline]
         fn next(&mut self) -> Option<Self::Item> {
@@ -643,7 +650,10 @@ mod messages {
                 self.header = None;
             }
 
-            Some(header)
+            Some(unsafe {
+                // SAFETY: The lifetime of `header` is tied to this.
+                &mut *header.as_ptr()
+            })
         }
 
         fn size_hint(&self) -> (usize, Option<usize>) {

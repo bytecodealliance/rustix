@@ -12,6 +12,7 @@ use crate::io;
 use crate::net::{SocketAddrV4, SocketAddrV6};
 use crate::utils::as_ptr;
 
+use core::convert::TryInto;
 use core::mem::{size_of, zeroed, MaybeUninit};
 use core::ptr::null_mut;
 
@@ -30,11 +31,10 @@ pub(crate) fn with_recv_msghdr<R>(
     name: &mut MaybeUninit<c::sockaddr_storage>,
     iov: &mut [io::IoSliceMut<'_>],
     control: &mut crate::net::RecvAncillaryBuffer<'_>,
-    f: impl FnOnce(c::msghdr) -> R,
+    f: impl FnOnce(&mut c::msghdr) -> R,
 ) -> R {
     let namelen = size_of::<c::sockaddr_storage>() as c::c_int;
-
-    f(c::msghdr {
+    let mut msghdr = c::msghdr {
         msg_name: name.as_mut_ptr().cast(),
         msg_namelen: namelen,
         msg_iov: iov.as_mut_ptr().cast(),
@@ -44,7 +44,16 @@ pub(crate) fn with_recv_msghdr<R>(
 
         // Zero-initialize any padding bytes.
         ..unsafe { zeroed() }
-    })
+    };
+
+    let res = f(&mut msghdr);
+
+    // Reset the control length.
+    unsafe {
+        control.set_control_len(msghdr.msg_controllen.try_into().unwrap_or(usize::MAX));
+    }
+
+    res
 }
 
 /// Create a message header intended to send without an address.

@@ -258,14 +258,9 @@ pub(crate) fn recvmsg(
 ) -> io::Result<crate::net::RecvMsgResult> {
     let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
 
-    with_recv_msghdr(&mut storage, iov, control, |mut msghdr| {
-        let result = unsafe {
-            ret_send_recv(c::recvmsg(
-                borrowed_fd(sockfd),
-                &mut msghdr,
-                msg_flags.bits(),
-            ))
-        };
+    with_recv_msghdr(&mut storage, iov, control, |msghdr| {
+        let result =
+            unsafe { ret_send_recv(c::recvmsg(borrowed_fd(sockfd), msghdr, msg_flags.bits())) };
 
         result.map(|bytes| {
             // Get the address of the sender, if any.
