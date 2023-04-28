@@ -36,8 +36,8 @@ portable APIs built on this functionality, see the [`cap-std`], [`memfd`],
    arm (v5 onwards), mipsel, and mips64el, with stable, nightly, and 1.48 Rust.
     - By being implemented entirely in Rust, avoiding `libc`, `errno`, and pthread
       cancellation, and employing some specialized optimizations, most functions
-      compile down to very efficient code. On nightly Rust, they can often be
-      fully inlined into user code.
+      compile down to very efficient code, which can often be fully inlined into
+      user code.
     - Most functions in `linux_raw` preserve memory, I/O safety, and pointer
       provenance all the way down to the syscalls.
 

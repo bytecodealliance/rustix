@@ -1,8 +1,8 @@
 //! Architecture-specific syscall code.
 //!
 //! `rustix` has inline assembly sequences using `asm!`, but that requires
-//! nightly Rust, so it also has out-of-line ("outline") assembly sequences
-//! in .s files. And 32-bit x86 is special (see comments below).
+//! Rust 1.59, so it also has out-of-line ("outline") assembly sequences in .s
+//! files. And 32-bit x86 is special (see comments below).
 //!
 //! This module also has a `choose` submodule which chooses a scheme and is
 //! what most of the `rustix` syscalls use.

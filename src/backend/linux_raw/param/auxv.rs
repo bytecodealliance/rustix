@@ -140,7 +140,7 @@ fn init_from_proc_self_auxv() {
     let file = crate::fs::openat(
         crate::fs::cwd(),
         "/proc/self/auxv",
-        OFlags::empty(),
+        OFlags::RDONLY,
         Mode::empty(),
     )
     .unwrap();
