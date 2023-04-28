@@ -133,6 +133,85 @@ macro_rules! syscall {
     };
 }
 
+// Macro to invoke a syscall that always uses direct assembly, rather than the vdso. Useful when
+// still finding the vdso.
+#[allow(unused_macros)]
+macro_rules! syscall_always_asm {
+    ($nr:ident) => {
+        $crate::backend::arch::asm::syscall0($crate::backend::reg::nr(linux_raw_sys::general::$nr))
+    };
+
+    ($nr:ident, $a0:expr) => {
+        $crate::backend::arch::asm::syscall1(
+            $crate::backend::reg::nr(linux_raw_sys::general::$nr),
+            $a0.into(),
+        )
+    };
+
+    ($nr:ident, $a0:expr, $a1:expr) => {
+        $crate::backend::arch::asm::syscall2(
+            $crate::backend::reg::nr(linux_raw_sys::general::$nr),
+            $a0.into(),
+            $a1.into(),
+        )
+    };
+
+    ($nr:ident, $a0:expr, $a1:expr, $a2:expr) => {
+        $crate::backend::arch::asm::syscall3(
+            $crate::backend::reg::nr(linux_raw_sys::general::$nr),
+            $a0.into(),
+            $a1.into(),
+            $a2.into(),
+        )
+    };
+
+    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr) => {
+        $crate::backend::arch::asm::syscall4(
+            $crate::backend::reg::nr(linux_raw_sys::general::$nr),
+            $a0.into(),
+            $a1.into(),
+            $a2.into(),
+            $a3.into(),
+        )
+    };
+
+    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr) => {
+        $crate::backend::arch::asm::syscall5(
+            $crate::backend::reg::nr(linux_raw_sys::general::$nr),
+            $a0.into(),
+            $a1.into(),
+            $a2.into(),
+            $a3.into(),
+            $a4.into(),
+        )
+    };
+
+    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr) => {
+        $crate::backend::arch::asm::syscall6(
+            $crate::backend::reg::nr(linux_raw_sys::general::$nr),
+            $a0.into(),
+            $a1.into(),
+            $a2.into(),
+            $a3.into(),
+            $a4.into(),
+            $a5.into(),
+        )
+    };
+
+    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr) => {
+        $crate::backend::arch::asm::syscall7(
+            $crate::backend::reg::nr(linux_raw_sys::general::$nr),
+            $a0.into(),
+            $a1.into(),
+            $a2.into(),
+            $a3.into(),
+            $a4.into(),
+            $a5.into(),
+            $a6.into(),
+        )
+    };
+}
+
 /// Like `syscall`, but adds the `readonly` attribute to the inline asm, which
 /// indicates that the syscall does not mutate any memory.
 macro_rules! syscall_readonly {
