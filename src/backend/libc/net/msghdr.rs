@@ -1,7 +1,7 @@
 //! Utilities for dealing with message headers.
 //!
-//! These take closures rather than returning a `c::msghdr` directly because the
-//! message headers may reference stack-local data.
+//! These take closures rather than returning a `c::msghdr` directly because
+//! the message headers may reference stack-local data.
 
 use super::super::c;
 use super::super::conv::{msg_control_len, msg_iov_len};

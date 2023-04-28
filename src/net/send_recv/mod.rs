@@ -330,5 +330,3 @@ pub fn sendto_unix<Fd: AsFd>(
 ) -> io::Result<usize> {
     backend::net::syscalls::sendto_unix(fd.as_fd(), buf, flags, addr)
 }
-
-// TODO: `recvmsg`, `sendmsg`

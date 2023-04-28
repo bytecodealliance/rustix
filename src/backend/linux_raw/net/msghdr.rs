@@ -1,7 +1,7 @@
 //! Utilities for dealing with message headers.
 //!
-//! These take closures rather than returning a `c::msghdr` directly because the
-//! message headers may reference stack-local data.
+//! These take closures rather than returning a `c::msghdr` directly because
+//! the message headers may reference stack-local data.
 
 #![allow(unsafe_code)]
 
