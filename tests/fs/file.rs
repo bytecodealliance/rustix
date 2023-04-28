@@ -20,7 +20,14 @@ fn test_file() {
         Ok(()) => (),
         Err(rustix::io::Errno::NOSYS)
         | Err(rustix::io::Errno::NOTSUP)
-        | Err(rustix::io::Errno::OPNOTSUPP) => (),
+        | Err(rustix::io::Errno::OPNOTSUPP) => {
+            #[cfg(feature = "process")]
+            if rustix::process::getuid() == rustix::process::geteuid()
+                && rustix::process::getgid() == rustix::process::getegid()
+            {
+                panic!("accessat with EACCESS should always work when the effective uid/gid match the real uid/gid")
+            }
+        }
         Err(err) => Err(err).unwrap(),
     }
 
