@@ -65,3 +65,6 @@ pub(crate) use crate::io::fd;
 // The linux_raw backend doesn't use actual libc, so we define selected
 // libc-like definitions in a module called `c`.
 pub(crate) mod c;
+
+#[cfg(feature = "net")]
+pub(crate) use net::msghdr::msg_control_len;

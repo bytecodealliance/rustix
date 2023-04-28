@@ -21,7 +21,7 @@ fn msg_iov_len(len: usize) -> c::size_t {
     len as c::size_t
 }
 
-fn msg_control_len(len: usize) -> c::size_t {
+pub(crate) fn msg_control_len(len: usize) -> c::size_t {
     // Same as above.
     len as c::size_t
 }

@@ -245,7 +245,7 @@ pub(super) fn msg_iov_len(len: usize) -> c::size_t {
     ))
 ))]
 #[inline]
-pub(super) fn msg_iov_len(len: usize) -> c::c_int {
+pub(crate) fn msg_iov_len(len: usize) -> c::c_int {
     use core::convert::TryInto;
     len.try_into().unwrap_or(c::c_int::MAX)
 }
@@ -260,7 +260,7 @@ pub(super) fn msg_iov_len(len: usize) -> c::c_int {
     target_os = "fuchsia"
 ))]
 #[inline]
-pub(super) fn msg_control_len(len: usize) -> c::socklen_t {
+pub(crate) fn msg_control_len(len: usize) -> c::socklen_t {
     use core::convert::TryInto;
     len.try_into().unwrap_or(c::socklen_t::MAX)
 }
@@ -277,6 +277,6 @@ pub(super) fn msg_control_len(len: usize) -> c::socklen_t {
     target_os = "wasi"
 )))]
 #[inline]
-pub(super) fn msg_control_len(len: usize) -> c::size_t {
+pub(crate) fn msg_control_len(len: usize) -> c::size_t {
     len
 }

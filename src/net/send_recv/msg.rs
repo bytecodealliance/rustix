@@ -6,7 +6,7 @@ use crate::backend::{self, c};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::io;
 
-use core::convert::TryFrom;
+use core::convert::{TryFrom, TryInto};
 use core::marker::PhantomData;
 use core::mem::{self, size_of};
 use core::ptr;
@@ -34,7 +34,7 @@ macro_rules! cmsg_space {
 
 #[doc(hidden)]
 pub fn __cmsg_space(len: usize) -> usize {
-    unsafe { c::CMSG_SPACE(len as _) as usize }
+    unsafe { c::CMSG_SPACE(len.try_into().expect("CMSG_SPACE size overflow")) as usize }
 }
 
 /// Ancillary message for `sendmsg`.
@@ -53,7 +53,13 @@ impl SendAncillaryMessage<'_, '_> {
             Self::ScmRights(slice) => slice.len() * size_of::<BorrowedFd<'static>>(),
         };
 
-        unsafe { c::CMSG_SPACE(total_bytes as _) as usize }
+        unsafe {
+            c::CMSG_SPACE(
+                total_bytes
+                    .try_into()
+                    .expect("size too large for CMSG_SPACE"),
+            ) as usize
+        }
     }
 }
 
@@ -151,14 +157,12 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
         // Calculate the new length of the buffer.
         let additional_space = unsafe { c::CMSG_SPACE(source_len) };
         let new_length = leap!(self.length.checked_add(additional_space as usize));
-        if new_length > self.buffer.len() {
-            return false;
-        }
+        let buffer = leap!(self.buffer.get_mut(..new_length));
 
         // Fill the new part of the buffer with zeroes.
         // TODO: Use fill() when it's stable.
         unsafe {
-            self.buffer
+            buffer
                 .as_mut_ptr()
                 .add(self.length)
                 .write_bytes(0, new_length - self.length);
@@ -166,7 +170,7 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
         self.length = new_length;
 
         // Get the last header in the buffer.
-        let mut last_header = leap!(messages::Messages::new(self.buffer, self.length).last());
+        let mut last_header = leap!(messages::Messages::new(buffer).last());
 
         // Set the header fields.
         unsafe {
@@ -251,10 +255,7 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
     /// Drain all messages from the buffer.
     pub fn drain(&mut self) -> AncillaryDrain<'_> {
         AncillaryDrain {
-            messages: messages::Messages::new(
-                &mut self.buffer[self.read..][..self.length],
-                self.length,
-            ),
+            messages: messages::Messages::new(&mut self.buffer[self.read..][..self.length]),
             read: &mut self.read,
             length: &mut self.length,
         }
@@ -583,11 +584,11 @@ mod messages {
 
     impl<'buf> Messages<'buf> {
         /// Create a new iterator over messages from a byte buffer.
-        pub(super) fn new(buf: &'buf mut [u8], len: usize) -> Self {
+        pub(super) fn new(buf: &'buf mut [u8]) -> Self {
             let msghdr = {
                 let mut h: c::msghdr = unsafe { core::mem::zeroed() };
                 h.msg_control = buf.as_mut_ptr().cast();
-                h.msg_controllen = len as _;
+                h.msg_controllen = crate::backend::msg_control_len(buf.len());
                 h
             };
 
