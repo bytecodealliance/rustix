@@ -396,13 +396,9 @@ fn test_unix_msg_with_scm_rights() {
 
             unlinkat(cwd(), path, AtFlags::empty()).unwrap();
 
-            println!("Writing to pipe...");
-
             // Once we're done, send a message along the pipe.
             let pipe = pipe_end.unwrap();
             write(&pipe, b"pipe message!").unwrap();
-
-            println!("Writing to pipe... Done!");
         }
     };
 
@@ -489,11 +485,9 @@ fn test_unix_msg_with_scm_rights() {
         .unwrap();
 
         // Read a value from the pipe.
-        println!("Reading from pipe...");
         let mut buffer = [0u8; 13];
         read(&read_end, &mut buffer).unwrap();
         assert_eq!(&buffer, b"pipe message!".as_ref());
-        println!("done reading");
     };
 
     let server = thread::Builder::new()

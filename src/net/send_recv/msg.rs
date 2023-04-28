@@ -247,7 +247,6 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
     /// The buffer must be filled with valid message data.
     #[allow(unsafe_code)]
     pub(crate) unsafe fn set_control_len(&mut self, len: usize) {
-        std::println!("Setting len: {len}");
         self.length = len;
         self.read = 0;
     }
@@ -255,7 +254,6 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
     /// Drain all messages from the buffer.
     #[allow(unsafe_code)]
     pub fn drain(&mut self) -> AncillaryDrain<'_> {
-        std::println!("Setting buffer: {}, {}", self.read, self.length);
         AncillaryDrain {
             messages: messages::Messages::new(
                 &mut self.buffer[self.read..self.read + self.length],
