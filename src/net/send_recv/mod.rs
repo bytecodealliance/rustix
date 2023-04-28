@@ -14,7 +14,7 @@ mod msg;
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub use msg::{
     recvmsg, sendmsg_any, sendmsg_noaddr, sendmsg_v4, sendmsg_v6, RecvAncillaryBuffer,
-    RecvAncillaryMessage, RecvMsgResult, SendAncillaryBuffer, SendAncillaryMessage, __cmsg_len,
+    RecvAncillaryMessage, RecvMsgReturn, SendAncillaryBuffer, SendAncillaryMessage, __cmsg_space,
 };
 
 #[cfg(unix)]

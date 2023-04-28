@@ -225,7 +225,7 @@ pub(super) fn ret_send_recv(len: i32) -> io::Result<usize> {
 
 /// Convert the value to the `msg_iovlen` field of a `msghdr` struct.
 #[cfg(all(
-    not(any(windows, target_os = "wasm32")),
+    not(any(windows, target_os = "wasi")),
     any(
         target_os = "android",
         all(target_os = "linux", not(target_env = "musl"))
@@ -238,7 +238,7 @@ pub(super) fn msg_iov_len(len: usize) -> c::size_t {
 
 /// Convert the value to the `msg_iovlen` field of a `msghdr` struct.
 #[cfg(all(
-    not(any(windows, target_os = "wasm32")),
+    not(any(windows, target_os = "wasi")),
     not(any(
         target_os = "android",
         all(target_os = "linux", not(target_env = "musl"))
@@ -252,16 +252,10 @@ pub(super) fn msg_iov_len(len: usize) -> c::c_int {
 
 /// Convert the value to a `socklen_t`.
 #[cfg(any(
-    target_os = "freebsd",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
-    target_os = "dragonfly",
+    bsd,
+    solarish,
     target_env = "musl",
     target_os = "emscripten",
-    target_os = "solaris",
-    target_os = "illumos",
     target_os = "haiku",
     target_os = "fuchsia"
 ))]
@@ -273,20 +267,14 @@ pub(super) fn msg_control_len(len: usize) -> c::socklen_t {
 
 /// Convert the value to a `size_t`.
 #[cfg(not(any(
-    target_os = "freebsd",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd",
-    target_os = "dragonfly",
+    bsd,
+    solarish,
     target_env = "musl",
     target_os = "emscripten",
-    target_os = "solaris",
-    target_os = "illumos",
     target_os = "haiku",
     target_os = "fuchsia",
     windows,
-    target_os = "wasm32",
+    target_os = "wasi"
 )))]
 #[inline]
 pub(super) fn msg_control_len(len: usize) -> c::size_t {

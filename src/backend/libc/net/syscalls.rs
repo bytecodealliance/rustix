@@ -25,6 +25,11 @@ use core::convert::TryInto;
 use core::mem::{size_of, MaybeUninit};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use core::ptr::null_mut;
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+use {
+    crate::io::{IoSlice, IoSliceMut},
+    crate::net::{RecvAncillaryBuffer, RecvMsgReturn, SendAncillaryBuffer},
+};
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
@@ -252,10 +257,10 @@ pub(crate) fn accept(sockfd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub(crate) fn recvmsg(
     sockfd: BorrowedFd<'_>,
-    iov: &mut [io::IoSliceMut<'_>],
-    control: &mut crate::net::RecvAncillaryBuffer<'_>,
+    iov: &mut [IoSliceMut<'_>],
+    control: &mut RecvAncillaryBuffer<'_>,
     msg_flags: RecvFlags,
-) -> io::Result<crate::net::RecvMsgResult> {
+) -> io::Result<RecvMsgReturn> {
     let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
 
     with_recv_msghdr(&mut storage, iov, control, |msghdr| {
@@ -267,7 +272,7 @@ pub(crate) fn recvmsg(
             let addr =
                 unsafe { maybe_read_sockaddr_os(msghdr.msg_name as _, msghdr.msg_namelen as _) };
 
-            crate::net::RecvMsgResult {
+            RecvMsgReturn {
                 bytes: bytes as usize,
                 address: addr,
                 flags: RecvFlags::from_bits_truncate(msghdr.msg_flags),
@@ -279,8 +284,8 @@ pub(crate) fn recvmsg(
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub(crate) fn sendmsg_noaddr(
     sockfd: BorrowedFd<'_>,
-    iov: &[io::IoSlice<'_>],
-    control: &mut crate::net::SendAncillaryBuffer<'_, '_, '_>,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
     with_noaddr_msghdr(iov, control, |msghdr| {
@@ -294,8 +299,8 @@ pub(crate) fn sendmsg_noaddr(
 pub(crate) fn sendmsg_v4(
     sockfd: BorrowedFd<'_>,
     addr: &SocketAddrV4,
-    iov: &[io::IoSlice<'_>],
-    control: &mut crate::net::SendAncillaryBuffer<'_, '_, '_>,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
     with_v4_msghdr(addr, iov, control, |msghdr| {
@@ -309,8 +314,8 @@ pub(crate) fn sendmsg_v4(
 pub(crate) fn sendmsg_v6(
     sockfd: BorrowedFd<'_>,
     addr: &SocketAddrV6,
-    iov: &[io::IoSlice<'_>],
-    control: &mut crate::net::SendAncillaryBuffer<'_, '_, '_>,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
     with_v6_msghdr(addr, iov, control, |msghdr| {
@@ -324,8 +329,8 @@ pub(crate) fn sendmsg_v6(
 pub(crate) fn sendmsg_unix(
     sockfd: BorrowedFd<'_>,
     addr: &SocketAddrUnix,
-    iov: &[io::IoSlice<'_>],
-    control: &mut crate::net::SendAncillaryBuffer<'_, '_, '_>,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
     super::msghdr::with_unix_msghdr(addr, iov, control, |msghdr| {

@@ -1,5 +1,7 @@
 //! `recvmsg` and `sendmsg` functions.
 
+#![allow(unsafe_code)]
+
 use crate::backend::{self, c};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::io;
@@ -16,7 +18,7 @@ use super::{RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 macro_rules! cmsg_space {
     // Base Rules
     (ScmRights($len:expr)) => {
-        $crate::net::__cmsg_len(
+        $crate::net::__cmsg_space(
             $len * ::core::mem::size_of::<$crate::fd::BorrowedFd<'static>>(),
         )
     };
@@ -30,16 +32,15 @@ macro_rules! cmsg_space {
     };
 }
 
-#[allow(unsafe_code)]
 #[doc(hidden)]
-pub fn __cmsg_len(len: usize) -> usize {
+pub fn __cmsg_space(len: usize) -> usize {
     unsafe { c::CMSG_SPACE(len as _) as usize }
 }
 
 /// Ancillary message for `sendmsg`.
 #[non_exhaustive]
 pub enum SendAncillaryMessage<'slice, 'fd> {
-    /// Send one or more file descriptors.
+    /// Send file descriptors.
     ScmRights(&'slice [BorrowedFd<'fd>]),
 }
 
@@ -47,7 +48,6 @@ impl SendAncillaryMessage<'_, '_> {
     /// Get the maximum size of an ancillary message.
     ///
     /// This can be helpful in determining the size of the buffer you allocate.
-    #[allow(unsafe_code)]
     pub fn size(&self) -> usize {
         let total_bytes = match self {
             Self::ScmRights(slice) => slice.len() * size_of::<BorrowedFd<'static>>(),
@@ -60,7 +60,7 @@ impl SendAncillaryMessage<'_, '_> {
 /// Ancillary message for `recvmsg`.
 #[non_exhaustive]
 pub enum RecvAncillaryMessage<'a> {
-    /// Received one or more file descriptors.
+    /// Received file descriptors.
     ScmRights(AncillaryIter<'a, OwnedFd>),
 }
 
@@ -120,13 +120,12 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
     /// Add an ancillary message to the buffer.
     ///
     /// Returns `true` if the message was added successfully.
-    #[allow(unsafe_code)]
     pub fn push(&mut self, msg: SendAncillaryMessage<'slice, 'fd>) -> bool {
         match msg {
             SendAncillaryMessage::ScmRights(fds) => {
                 let fds_bytes = unsafe {
                     core::slice::from_raw_parts(
-                        fds.as_ptr() as *const u8,
+                        fds.as_ptr().cast::<u8>(),
                         fds.len() * core::mem::size_of::<c::c_int>(),
                     )
                 };
@@ -136,7 +135,6 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
     }
 
     /// Pushes an ancillary message to the buffer.
-    #[allow(unsafe_code)]
     fn push_ancillary(&mut self, source: &[u8], cmsg_level: c::c_int, cmsg_type: c::c_int) -> bool {
         macro_rules! leap {
             ($e:expr) => {{
@@ -245,18 +243,16 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
     /// # Safety
     ///
     /// The buffer must be filled with valid message data.
-    #[allow(unsafe_code)]
     pub(crate) unsafe fn set_control_len(&mut self, len: usize) {
         self.length = len;
         self.read = 0;
     }
 
     /// Drain all messages from the buffer.
-    #[allow(unsafe_code)]
     pub fn drain(&mut self) -> AncillaryDrain<'_> {
         AncillaryDrain {
             messages: messages::Messages::new(
-                &mut self.buffer[self.read..self.read + self.length],
+                &mut self.buffer[self.read..][..self.length],
                 self.length,
             ),
             read: &mut self.read,
@@ -285,7 +281,6 @@ pub struct AncillaryDrain<'buf> {
 
 impl<'buf> AncillaryDrain<'buf> {
     /// A closure that converts a message into a `RecvAncillaryMessage`.
-    #[allow(unsafe_code)]
     fn cvt_msg(
         read: &mut usize,
         length: &mut usize,
@@ -298,7 +293,7 @@ impl<'buf> AncillaryDrain<'buf> {
             *length -= msg_len;
 
             // Get a pointer to the payload.
-            let payload = c::CMSG_DATA(msg as *const _ as *const _);
+            let payload = c::CMSG_DATA(msg);
             let payload_len = msg.cmsg_len as usize - c::CMSG_LEN(0) as usize;
 
             // Get a mutable slice of the payload.
@@ -379,6 +374,7 @@ impl<'buf> Iterator for AncillaryDrain<'buf> {
 impl core::iter::FusedIterator for AncillaryDrain<'_> {}
 
 /// `sendmsg(msghdr)`- Sends a message on a socket.
+#[inline]
 pub fn sendmsg_noaddr(
     socket: impl AsFd,
     iov: &[io::IoSlice<'_>],
@@ -389,6 +385,7 @@ pub fn sendmsg_noaddr(
 }
 
 /// `sendmsg(msghdr)`- Sends a message on a socket.
+#[inline]
 pub fn sendmsg_v4(
     socket: impl AsFd,
     addr: &SocketAddrV4,
@@ -400,6 +397,7 @@ pub fn sendmsg_v4(
 }
 
 /// `sendmsg(msghdr)`- Sends a message on a socket.
+#[inline]
 pub fn sendmsg_v6(
     socket: impl AsFd,
     addr: &SocketAddrV6,
@@ -411,6 +409,7 @@ pub fn sendmsg_v6(
 }
 
 /// `sendmsg(msghdr)`- Sends a message on a socket.
+#[inline]
 #[cfg(unix)]
 pub fn sendmsg_unix(
     socket: impl AsFd,
@@ -423,6 +422,7 @@ pub fn sendmsg_unix(
 }
 
 /// `sendmsg(msghdr)`- Sends a message on a socket.
+#[inline]
 pub fn sendmsg_any(
     socket: impl AsFd,
     addr: Option<&SocketAddrAny>,
@@ -446,18 +446,19 @@ pub fn sendmsg_any(
 }
 
 /// `recvmsg(msghdr)`- Receives a message from a socket.
+#[inline]
 pub fn recvmsg(
     socket: impl AsFd,
     iov: &mut [io::IoSliceMut<'_>],
     control: &mut RecvAncillaryBuffer<'_>,
     flags: RecvFlags,
-) -> io::Result<RecvMsgResult> {
+) -> io::Result<RecvMsgReturn> {
     backend::net::syscalls::recvmsg(socket.as_fd(), iov, control, flags)
 }
 
 /// The result of a `recvmsg` call.
 #[non_exhaustive]
-pub struct RecvMsgResult {
+pub struct RecvMsgReturn {
     /// The number of bytes received.
     pub bytes: usize,
 
@@ -477,14 +478,12 @@ pub struct AncillaryIter<'data, T> {
     _marker: PhantomData<T>,
 }
 
-#[allow(unsafe_code)]
 impl<'data, T> AncillaryIter<'data, T> {
     /// Create a new iterator over data in an ancillary buffer.
     ///
     /// # Safety
     ///
-    /// This can only be called if we are sure that the data is contained in a
-    /// valid ancillary buffer.
+    /// The buffer must contain valid ancillary data.
     unsafe fn new(data: &'data mut [u8]) -> Self {
         assert_eq!(data.len() % size_of::<T>(), 0);
 
@@ -493,49 +492,14 @@ impl<'data, T> AncillaryIter<'data, T> {
             _marker: PhantomData,
         }
     }
-
-    /// Drop `n` items from this iterator.
-    unsafe fn drop_items(&mut self, n: usize) {
-        /// On drop, move the slice forward by `size_of<T>()`.
-        struct MoveForward<'a, 'b, T>(&'a mut &'b mut [u8], PhantomData<T>);
-
-        impl<T> Drop for MoveForward<'_, '_, T> {
-            fn drop(&mut self) {
-                // Move slice forward.
-                let slice = mem::take(self.0);
-                *self.0 = &mut slice[size_of::<T>()..];
-            }
-        }
-
-        if !mem::needs_drop::<T>() {
-            return;
-        }
-
-        for _ in 0..n {
-            // See if there is a `T` left.
-            if self.data.len() < size_of::<T>() {
-                return;
-            }
-
-            // Move forward by one after drop, even on panic.
-            let move_forward = MoveForward::<'_, '_, T>(&mut self.data, PhantomData);
-
-            // Drop the `T`.
-            drop(ptr::read_unaligned(move_forward.0.as_ptr() as *const T));
-        }
-    }
 }
 
-#[allow(unsafe_code)]
 impl<'data, T> Drop for AncillaryIter<'data, T> {
     fn drop(&mut self) {
-        unsafe {
-            self.drop_items(self.len());
-        }
+        self.for_each(drop);
     }
 }
 
-#[allow(unsafe_code)]
 impl<T> Iterator for AncillaryIter<'_, T> {
     type Item = T;
 
@@ -567,14 +531,6 @@ impl<T> Iterator for AncillaryIter<'_, T> {
     fn last(mut self) -> Option<Self::Item> {
         self.next_back()
     }
-
-    fn nth(&mut self, n: usize) -> Option<Self::Item> {
-        unsafe {
-            self.drop_items(n);
-        }
-
-        self.next()
-    }
 }
 
 impl<T> core::iter::FusedIterator for AncillaryIter<'_, T> {}
@@ -585,7 +541,6 @@ impl<T> ExactSizeIterator for AncillaryIter<'_, T> {
     }
 }
 
-#[allow(unsafe_code)]
 impl<T> DoubleEndedIterator for AncillaryIter<'_, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
         // See if there is a next item.
@@ -608,7 +563,6 @@ impl<T> DoubleEndedIterator for AncillaryIter<'_, T> {
     }
 }
 
-#[allow(unsafe_code)]
 mod messages {
     use crate::backend::c;
     use core::marker::PhantomData;
@@ -633,7 +587,7 @@ mod messages {
         pub(super) fn new(buf: &'buf mut [u8], len: usize) -> Self {
             let msghdr = {
                 let mut h: c::msghdr = unsafe { core::mem::zeroed() };
-                h.msg_control = buf.as_mut_ptr() as *mut _;
+                h.msg_control = buf.as_mut_ptr().cast();
                 h.msg_controllen = len as _;
                 h
             };
