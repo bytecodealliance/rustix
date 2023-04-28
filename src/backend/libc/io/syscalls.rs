@@ -376,13 +376,14 @@ pub(crate) fn ioctl_ficlone(fd: BorrowedFd<'_>, src_fd: BorrowedFd<'_>) -> io::R
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[inline]
 pub(crate) fn ext4_ioc_resize_fs(fd: BorrowedFd<'_>, blocks: u64) -> io::Result<()> {
-    unsafe {
-        ret(c::ioctl(
-            borrowed_fd(fd),
-            linux_raw_sys::ioctl::EXT4_IOC_RESIZE_FS as _,
-            &blocks,
-        ))
-    }
+    // TODO: Fix linux-raw-sys to define ioctl codes for sparc.
+    #[cfg(any(target_arch = "sparc", target_arch = "sparc64"))]
+    const EXT4_IOC_RESIZE_FS: u32 = 0x8008_6610;
+
+    #[cfg(not(any(target_arch = "sparc", target_arch = "sparc64")))]
+    use linux_raw_sys::ioctl::EXT4_IOC_RESIZE_FS;
+
+    unsafe { ret(c::ioctl(borrowed_fd(fd), EXT4_IOC_RESIZE_FS as _, &blocks)) }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
