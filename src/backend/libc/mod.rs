@@ -101,9 +101,3 @@ pub(crate) fn if_glibc_is_less_than_2_25() -> bool {
     // this function. But, there are likely other libc versions which have it.
     getrandom.get().is_none()
 }
-
-#[cfg(all(
-    feature = "net",
-    not(any(windows, target_os = "redox", target_os = "wasi"))
-))]
-pub(crate) use conv::msg_control_len;

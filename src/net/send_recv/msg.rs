@@ -565,6 +565,7 @@ impl<T> DoubleEndedIterator for AncillaryIter<'_, T> {
 
 mod messages {
     use crate::backend::c;
+    use core::convert::TryInto;
     use core::marker::PhantomData;
     use core::ptr::NonNull;
 
@@ -588,7 +589,7 @@ mod messages {
             let msghdr = {
                 let mut h: c::msghdr = unsafe { core::mem::zeroed() };
                 h.msg_control = buf.as_mut_ptr().cast();
-                h.msg_controllen = crate::backend::msg_control_len(buf.len());
+                h.msg_controllen = buf.len().try_into().expect("buffer too large for msghdr");
                 h
             };
 
