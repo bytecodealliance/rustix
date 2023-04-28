@@ -146,7 +146,7 @@ pub(crate) unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
 #[inline]
 pub(crate) unsafe fn sigprocmask(how: How, new: Option<&Sigset>) -> io::Result<Sigset> {
     let mut old = MaybeUninit::<Sigset>::uninit();
-    let new = optional_as_ptr(new.as_ref());
+    let new = optional_as_ptr(new);
     ret(syscall!(
         __NR_rt_sigprocmask,
         how,
