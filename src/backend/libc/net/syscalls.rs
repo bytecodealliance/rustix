@@ -5,6 +5,8 @@ use super::super::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_rec
 #[cfg(unix)]
 use super::addr::SocketAddrUnix;
 use super::ext::{in6_addr_new, in_addr_new};
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+use super::msghdr::{with_noaddr_msghdr, with_recv_msghdr, with_v4_msghdr, with_v6_msghdr};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use super::read_sockaddr::initialize_family_to_unspec;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
@@ -23,6 +25,11 @@ use core::convert::TryInto;
 use core::mem::{size_of, MaybeUninit};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use core::ptr::null_mut;
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+use {
+    crate::io::{IoSlice, IoSliceMut},
+    crate::net::{RecvAncillaryBuffer, RecvMsgReturn, SendAncillaryBuffer},
+};
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
@@ -245,6 +252,92 @@ pub(crate) fn accept(sockfd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
         let owned_fd = ret_owned_fd(c::accept(borrowed_fd(sockfd), null_mut(), null_mut()))?;
         Ok(owned_fd)
     }
+}
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+pub(crate) fn recvmsg(
+    sockfd: BorrowedFd<'_>,
+    iov: &mut [IoSliceMut<'_>],
+    control: &mut RecvAncillaryBuffer<'_>,
+    msg_flags: RecvFlags,
+) -> io::Result<RecvMsgReturn> {
+    let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
+
+    with_recv_msghdr(&mut storage, iov, control, |msghdr| {
+        let result =
+            unsafe { ret_send_recv(c::recvmsg(borrowed_fd(sockfd), msghdr, msg_flags.bits())) };
+
+        result.map(|bytes| {
+            // Get the address of the sender, if any.
+            let addr =
+                unsafe { maybe_read_sockaddr_os(msghdr.msg_name as _, msghdr.msg_namelen as _) };
+
+            RecvMsgReturn {
+                bytes: bytes as usize,
+                address: addr,
+                flags: RecvFlags::from_bits_truncate(msghdr.msg_flags),
+            }
+        })
+    })
+}
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+pub(crate) fn sendmsg_noaddr(
+    sockfd: BorrowedFd<'_>,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
+    msg_flags: SendFlags,
+) -> io::Result<usize> {
+    with_noaddr_msghdr(iov, control, |msghdr| {
+        let len =
+            unsafe { ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))? };
+        Ok(len as usize)
+    })
+}
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+pub(crate) fn sendmsg_v4(
+    sockfd: BorrowedFd<'_>,
+    addr: &SocketAddrV4,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
+    msg_flags: SendFlags,
+) -> io::Result<usize> {
+    with_v4_msghdr(addr, iov, control, |msghdr| {
+        let len =
+            unsafe { ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))? };
+        Ok(len as usize)
+    })
+}
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+pub(crate) fn sendmsg_v6(
+    sockfd: BorrowedFd<'_>,
+    addr: &SocketAddrV6,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
+    msg_flags: SendFlags,
+) -> io::Result<usize> {
+    with_v6_msghdr(addr, iov, control, |msghdr| {
+        let len =
+            unsafe { ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))? };
+        Ok(len as usize)
+    })
+}
+
+#[cfg(all(unix, not(target_os = "redox")))]
+pub(crate) fn sendmsg_unix(
+    sockfd: BorrowedFd<'_>,
+    addr: &SocketAddrUnix,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
+    msg_flags: SendFlags,
+) -> io::Result<usize> {
+    super::msghdr::with_unix_msghdr(addr, iov, control, |msghdr| {
+        let len =
+            unsafe { ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))? };
+        Ok(len as usize)
+    })
 }
 
 #[cfg(not(any(
