@@ -91,6 +91,7 @@ jobs:
       if: matrix.rust == '1.48'
       run: |
         cargo update --package=once_cell --precise 1.14.0
+        cargo update --package=flate2 --precise=1.0.25
 
     - run: cargo check --workspace --release -vv --all-targets
     - run: cargo check --workspace --release -vv --features=all-apis --all-targets
@@ -526,6 +527,7 @@ jobs:
       if: matrix.rust == '1.48'
       run: |
         cargo update --package=once_cell --precise 1.14.0
+        cargo update --package=flate2 --precise=1.0.25
 
     - run: |
         # Run the tests, and check the prebuilt release libraries.
