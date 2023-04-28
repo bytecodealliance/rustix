@@ -247,18 +247,22 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
     /// The buffer must be filled with valid message data.
     #[allow(unsafe_code)]
     pub(crate) unsafe fn set_control_len(&mut self, len: usize) {
+        std::println!("Setting len: {len}");
         self.length = len;
+        self.read = 0;
     }
 
     /// Drain all messages from the buffer.
     #[allow(unsafe_code)]
     pub fn drain(&mut self) -> AncillaryDrain<'_> {
+        std::println!("Setting buffer: {}, {}", self.read, self.length);
         AncillaryDrain {
             messages: messages::Messages::new(
                 &mut self.buffer[self.read..self.read + self.length],
                 self.length,
             ),
             read: &mut self.read,
+            length: &mut self.length,
         }
     }
 }
@@ -276,16 +280,24 @@ pub struct AncillaryDrain<'buf> {
 
     /// Increment the number of messages we've read.
     read: &'buf mut usize,
+
+    /// Decrement the total length.
+    length: &'buf mut usize,
 }
 
 impl<'buf> AncillaryDrain<'buf> {
     /// A closure that converts a message into a `RecvAncillaryMessage`.
     #[allow(unsafe_code)]
-    fn cvt_msg(read: &mut usize, msg: &c::cmsghdr) -> Option<RecvAncillaryMessage<'buf>> {
+    fn cvt_msg(
+        read: &mut usize,
+        length: &mut usize,
+        msg: &c::cmsghdr,
+    ) -> Option<RecvAncillaryMessage<'buf>> {
         unsafe {
             // Advance the "read" pointer.
             let msg_len = msg.cmsg_len as usize;
             *read += msg_len;
+            *length -= msg_len;
 
             // Get a pointer to the payload.
             let payload = c::CMSG_DATA(msg as *const _ as *const _);
@@ -314,7 +326,8 @@ impl<'buf> Iterator for AncillaryDrain<'buf> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let read = &mut self.read;
-        self.messages.find_map(|ev| Self::cvt_msg(read, ev))
+        let length = &mut self.length;
+        self.messages.find_map(|ev| Self::cvt_msg(read, length, ev))
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -328,15 +341,17 @@ impl<'buf> Iterator for AncillaryDrain<'buf> {
         F: FnMut(B, Self::Item) -> B,
     {
         let read = &mut self.read;
+        let length = &mut self.length;
         self.messages
-            .filter_map(|ev| Self::cvt_msg(read, ev))
+            .filter_map(|ev| Self::cvt_msg(read, length, ev))
             .fold(init, f)
     }
 
     fn count(mut self) -> usize {
         let read = &mut self.read;
+        let length = &mut self.length;
         self.messages
-            .filter_map(|ev| Self::cvt_msg(read, ev))
+            .filter_map(|ev| Self::cvt_msg(read, length, ev))
             .count()
     }
 
@@ -345,8 +360,9 @@ impl<'buf> Iterator for AncillaryDrain<'buf> {
         Self: Sized,
     {
         let read = &mut self.read;
+        let length = &mut self.length;
         self.messages
-            .filter_map(|ev| Self::cvt_msg(read, ev))
+            .filter_map(|ev| Self::cvt_msg(read, length, ev))
             .last()
     }
 
@@ -355,8 +371,9 @@ impl<'buf> Iterator for AncillaryDrain<'buf> {
         Self: Sized,
     {
         let read = &mut self.read;
+        let length = &mut self.length;
         self.messages
-            .filter_map(|ev| Self::cvt_msg(read, ev))
+            .filter_map(|ev| Self::cvt_msg(read, length, ev))
             .collect()
     }
 }
