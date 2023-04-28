@@ -1,4 +1,4 @@
-//! `recvmsg` and `sendmsg` functions.
+//! [`recvmsg`] and [`sendmsg`] functions.
 
 #![allow(unsafe_code)]
 
@@ -8,7 +8,7 @@ use crate::io;
 
 use core::convert::{TryFrom, TryInto};
 use core::marker::PhantomData;
-use core::mem::{self, size_of};
+use core::mem::{self, size_of, size_of_val};
 use core::ptr;
 
 use super::{RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketAddrV6};
@@ -37,7 +37,7 @@ pub fn __cmsg_space(len: usize) -> usize {
     unsafe { c::CMSG_SPACE(len.try_into().expect("CMSG_SPACE size overflow")) as usize }
 }
 
-/// Ancillary message for `sendmsg`.
+/// Ancillary message for [`sendmsg`].
 #[non_exhaustive]
 pub enum SendAncillaryMessage<'slice, 'fd> {
     /// Send file descriptors.
@@ -50,7 +50,7 @@ impl SendAncillaryMessage<'_, '_> {
     /// This can be helpful in determining the size of the buffer you allocate.
     pub fn size(&self) -> usize {
         let total_bytes = match self {
-            Self::ScmRights(slice) => slice.len() * size_of::<BorrowedFd<'static>>(),
+            Self::ScmRights(slice) => size_of_val(*slice),
         };
 
         unsafe {
@@ -63,7 +63,7 @@ impl SendAncillaryMessage<'_, '_> {
     }
 }
 
-/// Ancillary message for `recvmsg`.
+/// Ancillary message for [`recvmsg`].
 #[non_exhaustive]
 pub enum RecvAncillaryMessage<'a> {
     /// Received file descriptors.
@@ -130,10 +130,7 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
         match msg {
             SendAncillaryMessage::ScmRights(fds) => {
                 let fds_bytes = unsafe {
-                    core::slice::from_raw_parts(
-                        fds.as_ptr().cast::<u8>(),
-                        fds.len() * core::mem::size_of::<c::c_int>(),
-                    )
+                    core::slice::from_raw_parts(fds.as_ptr().cast::<u8>(), size_of_val(fds))
                 };
                 self.push_ancillary(fds_bytes, c::SOL_SOCKET as _, c::SCM_RIGHTS as _)
             }
@@ -160,7 +157,7 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
         let buffer = leap!(self.buffer.get_mut(..new_length));
 
         // Fill the new part of the buffer with zeroes.
-        // TODO: Use fill() when it's stable.
+        // TODO: In Rust 1.50 we can use `fill` here.
         unsafe {
             buffer
                 .as_mut_ptr()
@@ -374,7 +371,26 @@ impl<'buf> Iterator for AncillaryDrain<'buf> {
 
 impl core::iter::FusedIterator for AncillaryDrain<'_> {}
 
-/// `sendmsg(msghdr)`- Sends a message on a socket.
+/// `sendmsg(msghdr)`—Sends a message on a socket.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
+/// [NetBSD]: https://man.netbsd.org/sendmsg.2
+/// [OpenBSD]: https://man.openbsd.org/sendmsg.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
 #[inline]
 pub fn sendmsg_noaddr(
     socket: impl AsFd,
@@ -385,7 +401,26 @@ pub fn sendmsg_noaddr(
     backend::net::syscalls::sendmsg_noaddr(socket.as_fd(), iov, control, flags)
 }
 
-/// `sendmsg(msghdr)`- Sends a message on a socket.
+/// `sendmsg(msghdr)`—Sends a message on a socket to a specific IPv4 address.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
+/// [NetBSD]: https://man.netbsd.org/sendmsg.2
+/// [OpenBSD]: https://man.openbsd.org/sendmsg.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
 #[inline]
 pub fn sendmsg_v4(
     socket: impl AsFd,
@@ -397,7 +432,26 @@ pub fn sendmsg_v4(
     backend::net::syscalls::sendmsg_v4(socket.as_fd(), addr, iov, control, flags)
 }
 
-/// `sendmsg(msghdr)`- Sends a message on a socket.
+/// `sendmsg(msghdr)`—Sends a message on a socket to a specific IPv6 address.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
+/// [NetBSD]: https://man.netbsd.org/sendmsg.2
+/// [OpenBSD]: https://man.openbsd.org/sendmsg.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
 #[inline]
 pub fn sendmsg_v6(
     socket: impl AsFd,
@@ -409,7 +463,27 @@ pub fn sendmsg_v6(
     backend::net::syscalls::sendmsg_v6(socket.as_fd(), addr, iov, control, flags)
 }
 
-/// `sendmsg(msghdr)`- Sends a message on a socket.
+/// `sendmsg(msghdr)`—Sends a message on a socket to a specific Unix-domain
+/// address.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
+/// [NetBSD]: https://man.netbsd.org/sendmsg.2
+/// [OpenBSD]: https://man.openbsd.org/sendmsg.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
 #[inline]
 #[cfg(unix)]
 pub fn sendmsg_unix(
@@ -422,7 +496,26 @@ pub fn sendmsg_unix(
     backend::net::syscalls::sendmsg_unix(socket.as_fd(), addr, iov, control, flags)
 }
 
-/// `sendmsg(msghdr)`- Sends a message on a socket.
+/// `sendmsg(msghdr)`—Sends a message on a socket to a specific address.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
+/// [NetBSD]: https://man.netbsd.org/sendmsg.2
+/// [OpenBSD]: https://man.openbsd.org/sendmsg.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
 #[inline]
 pub fn sendmsg_any(
     socket: impl AsFd,
@@ -446,7 +539,26 @@ pub fn sendmsg_any(
     }
 }
 
-/// `recvmsg(msghdr)`- Receives a message from a socket.
+/// `recvmsg(msghdr)`—Receives a message from a socket.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/recvmsg.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/recvmsg.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/recvmsg.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=recvmsg&sektion=2
+/// [NetBSD]: https://man.netbsd.org/recvmsg.2
+/// [OpenBSD]: https://man.openbsd.org/recvmsg.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=recvmsg&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/recvmsg
 #[inline]
 pub fn recvmsg(
     socket: impl AsFd,
@@ -457,7 +569,7 @@ pub fn recvmsg(
     backend::net::syscalls::recvmsg(socket.as_fd(), iov, control, flags)
 }
 
-/// The result of a `recvmsg` call.
+/// The result of a successful [`recvmsg`] call.
 pub struct RecvMsgReturn {
     /// The number of bytes received.
     pub bytes: usize,
@@ -620,10 +732,8 @@ mod messages {
                 self.header = None;
             }
 
-            Some(unsafe {
-                // SAFETY: The lifetime of `header` is tied to this.
-                &mut *header.as_ptr()
-            })
+            // SAFETY: The lifetime of `header` is tied to this.
+            Some(unsafe { &mut *header.as_ptr() })
         }
 
         fn size_hint(&self) -> (usize, Option<usize>) {

@@ -273,7 +273,7 @@ pub(crate) fn recvmsg(
                 unsafe { maybe_read_sockaddr_os(msghdr.msg_name as _, msghdr.msg_namelen as _) };
 
             RecvMsgReturn {
-                bytes: bytes as usize,
+                bytes,
                 address: addr,
                 flags: RecvFlags::from_bits_truncate(msghdr.msg_flags),
             }
@@ -288,10 +288,8 @@ pub(crate) fn sendmsg_noaddr(
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
-    with_noaddr_msghdr(iov, control, |msghdr| {
-        let len =
-            unsafe { ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))? };
-        Ok(len as usize)
+    with_noaddr_msghdr(iov, control, |msghdr| unsafe {
+        ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))
     })
 }
 
@@ -303,10 +301,8 @@ pub(crate) fn sendmsg_v4(
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
-    with_v4_msghdr(addr, iov, control, |msghdr| {
-        let len =
-            unsafe { ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))? };
-        Ok(len as usize)
+    with_v4_msghdr(addr, iov, control, |msghdr| unsafe {
+        ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))
     })
 }
 
@@ -318,10 +314,8 @@ pub(crate) fn sendmsg_v6(
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
-    with_v6_msghdr(addr, iov, control, |msghdr| {
-        let len =
-            unsafe { ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))? };
-        Ok(len as usize)
+    with_v6_msghdr(addr, iov, control, |msghdr| unsafe {
+        ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))
     })
 }
 
@@ -333,10 +327,8 @@ pub(crate) fn sendmsg_unix(
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
-    super::msghdr::with_unix_msghdr(addr, iov, control, |msghdr| {
-        let len =
-            unsafe { ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))? };
-        Ok(len as usize)
+    super::msghdr::with_unix_msghdr(addr, iov, control, |msghdr| unsafe {
+        ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))
     })
 }
 
