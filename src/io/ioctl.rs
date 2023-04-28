@@ -136,3 +136,11 @@ pub fn ioctl_blkpbszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 pub fn ioctl_ficlone<Fd: AsFd, SrcFd: AsFd>(fd: Fd, src_fd: SrcFd) -> io::Result<()> {
     backend::io::syscalls::ioctl_ficlone(fd.as_fd(), src_fd.as_fd())
 }
+
+/// `ioctl(fd, EXT4_IOC_RESIZE_FS, blocks)`—Resize ext4 filesystem on fd.
+#[cfg(any(target_os = "android", target_os = "linux"))]
+#[inline]
+#[doc(alias = "EXT4_IOC_RESIZE_FS")]
+pub fn ext4_ioc_resize_fs<Fd: AsFd>(fd: Fd, blocks: u64) -> io::Result<()> {
+    backend::io::syscalls::ext4_ioc_resize_fs(fd.as_fd(), blocks)
+}
