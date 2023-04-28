@@ -1186,14 +1186,14 @@ pub(crate) mod sockopt {
         setsockopt(
             fd,
             c::IPPROTO_IP as _,
-            c::IPV6_MULTICAST_LOOP,
+            c::IPV6_MULTICAST_HOPS,
             multicast_hops,
         )
     }
 
     #[inline]
     pub(crate) fn get_ipv6_multicast_hops(fd: BorrowedFd<'_>) -> io::Result<u32> {
-        getsockopt(fd, c::IPPROTO_IP as _, c::IPV6_MULTICAST_LOOP)
+        getsockopt(fd, c::IPPROTO_IP as _, c::IPV6_MULTICAST_HOPS)
     }
 
     #[inline]
