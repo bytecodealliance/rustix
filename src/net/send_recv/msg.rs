@@ -457,7 +457,6 @@ pub fn recvmsg(
 }
 
 /// The result of a `recvmsg` call.
-#[non_exhaustive]
 pub struct RecvMsgReturn {
     /// The number of bytes received.
     pub bytes: usize,
