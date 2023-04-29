@@ -1,3 +1,7 @@
+//! A test that compiles the test crates in the `test-crates` directories in
+//! various configurations, including backend configurations, and tests that
+//! they behave as expected.
+
 use std::process::Command;
 
 #[test]

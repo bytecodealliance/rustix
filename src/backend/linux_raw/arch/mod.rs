@@ -133,6 +133,8 @@ macro_rules! syscall {
     };
 }
 
+/// Like `syscall`, but adds the `readonly` attribute to the inline asm, which
+/// indicates that the syscall does not mutate any memory.
 macro_rules! syscall_readonly {
     ($nr:ident) => {
         $crate::backend::arch::choose::syscall0_readonly($crate::backend::reg::nr(
@@ -211,6 +213,7 @@ macro_rules! syscall_readonly {
     };
 }
 
+/// Like `syscall`, but indicates that the syscall does not return.
 #[cfg(feature = "runtime")]
 macro_rules! syscall_noreturn {
     ($nr:ident, $a0:expr) => {

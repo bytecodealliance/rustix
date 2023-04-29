@@ -37,7 +37,8 @@ pub fn __cmsg_space(len: usize) -> usize {
     unsafe { c::CMSG_SPACE(len.try_into().expect("CMSG_SPACE size overflow")) as usize }
 }
 
-/// Ancillary message for [`sendmsg`].
+/// Ancillary message for [`sendmsg_noaddr`], [`sendmsg_v4`], [`sendmsg_v6`],
+/// [`sendmsg_unix`], and [`sendmsg_any`].
 #[non_exhaustive]
 pub enum SendAncillaryMessage<'slice, 'fd> {
     /// Send file descriptors.

@@ -317,7 +317,7 @@ pub const CR2: Tcflag = c::CR2;
 pub const CR3: Tcflag = c::CR3;
 
 /// `TABDLY`
-#[cfg(not(any(netbsdlike, solarish, target_os = "dragonfly", target_os = "redox",)))]
+#[cfg(not(any(netbsdlike, solarish, target_os = "dragonfly", target_os = "redox")))]
 pub const TABDLY: Tcflag = c::TABDLY;
 
 /// `TAB0`

@@ -1,3 +1,5 @@
+//! A simple example of the BSD `kqueue` API.
+
 #[cfg(bsd)]
 fn main() -> std::io::Result<()> {
     use rustix::io::kqueue::*;

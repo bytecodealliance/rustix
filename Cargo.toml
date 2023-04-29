@@ -175,7 +175,8 @@ mm = []
 # Enable `rustix::rand::*`.
 rand = []
 
-# Enable `rustix::runtime::*`. This API is undocumented and unstable.
+# Enable `rustix::runtime::*`. This API is undocumented and unstable and
+# experimental and not intended for general-purpose use.
 runtime = []
 
 # Enable all API features.

@@ -159,7 +159,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_oflag & CRDLY) != 0 {
                 print!(" CRDLY");
             }
-            #[cfg(not(any(netbsdlike, solarish, target_os = "dragonfly", target_os = "redox",)))]
+            #[cfg(not(any(netbsdlike, solarish, target_os = "dragonfly", target_os = "redox")))]
             if (term.c_oflag & TABDLY) != 0 {
                 print!(" TABDLY");
             }

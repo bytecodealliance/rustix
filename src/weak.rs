@@ -136,7 +136,7 @@ macro_rules! syscall {
 macro_rules! syscall {
     (fn $name:ident($($arg_name:ident: $t:ty),*) via $sys_name:ident -> $ret:ty) => (
         unsafe fn $name($($arg_name:$t),*) -> $ret {
-            // This looks like a hack, but concat_idents only accepts idents
+            // This looks like a hack, but `concat_idents` only accepts idents
             // (not paths).
             use libc::*;
 
@@ -177,8 +177,10 @@ macro_rules! syscall {
                 fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
             }
 
-            // `concat_idents is unstable, so we take an extra `sys_name`
+            // `concat_idents` is [unstable], so we take an extra `sys_name`
             // parameter and have our users do the concat for us for now.
+            //
+            // [unstable]: https://github.com/rust-lang/rust/issues/29599
             /*
             syscall(
                 concat_idents!(SYS_, $name),

@@ -1,6 +1,10 @@
 //! Low-level implementation details for libc-like runtime libraries such as
 //! [origin].
 //!
+//! Do not use the functions in this module unless you've read all of their
+//! code, *and* you know all the relevant internal implementation details of
+//! any libc in the process they'll be used.
+//!
 //! These functions are for implementing thread-local storage (TLS), managing
 //! threads, loaded libraries, and other process-wide resources. Most of
 //! `rustix` doesn't care about what other libraries are linked into the
@@ -305,7 +309,8 @@ pub unsafe fn execve(path: &CStr, argv: *const *const u8, envp: *const *const u8
 /// # Safety
 ///
 /// You're on your own. And on top of all the troubles with signal handlers,
-/// this implementation is highly experimental.
+/// this implementation is highly experimental. Even further, it differs from
+/// the libc `sigaction` in several non-obvious and unsafe ways.
 ///
 /// # References
 ///  - [POSIX]
@@ -343,7 +348,8 @@ pub unsafe fn sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
 /// # Safety
 ///
 /// You're on your own. And on top of all the troubles with signal handlers,
-/// this implementation is highly experimental.
+/// this implementation is highly experimental. The warning about the hazard
+/// of recycled thread ID's applies.
 ///
 /// # References
 ///  - [Linux]
@@ -360,7 +366,8 @@ pub unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
 /// # Safety
 ///
 /// You're on your own. And on top of all the troubles with signal handlers,
-/// this implementation is highly experimental.
+/// this implementation is highly experimental. Even further, it differs from
+/// the libc `sigprocmask` in several non-obvious and unsafe ways.
 ///
 /// # References
 ///  - [Linux `sigprocmask`]
