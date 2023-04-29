@@ -960,14 +960,17 @@ pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result
 pub(crate) fn syncfs(fd: BorrowedFd<'_>) -> io::Result<()> {
     // Some versions of Android libc lack a `syncfs` function.
     #[cfg(target_os = "android")]
-    unsafe {
-        syscall_ret(c::syscall(c::SYS_syncfs, borrowed_fd(fd)))
+    syscall! {
+        fn syncfs(fd: c::c_int) via SYS_syncfs -> c::c_int
     }
 
+    // `syncfs` was added to GLIBC in 2.20.
     #[cfg(not(target_os = "android"))]
-    unsafe {
-        ret(c::syncfs(borrowed_fd(fd)))
+    weak_or_syscall! {
+        fn syncfs(fd: c::c_int) via SYS_syncfs -> c::c_int
     }
+
+    unsafe { ret(syncfs(borrowed_fd(fd))) }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
