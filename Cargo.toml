@@ -56,7 +56,7 @@ libc = { version = "0.2.142", features = ["extra_traits"] }
 # Some syscalls do not have libc wrappers, such as in `io_uring`. For these,
 # the libc backend uses the linux-raw-sys ABI and `libc::syscall`.
 [target.'cfg(all(any(target_os = "android", target_os = "linux"), any(rustix_use_libc, miri, not(all(target_os = "linux", any(target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"), all(target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64"))))))))'.dependencies]
-linux-raw-sys = { version = "0.3.6", default-features = false, features = ["general", "no_std"] }
+linux-raw-sys = { version = "0.3.6", default-features = false, features = ["general", "ioctl", "no_std"] }
 
 # For the libc backend on Windows, use the Winsock2 API in windows-sys.
 [target.'cfg(windows)'.dependencies.windows-sys]
