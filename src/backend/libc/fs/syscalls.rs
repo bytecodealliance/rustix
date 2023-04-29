@@ -964,7 +964,7 @@ pub(crate) fn syncfs(fd: BorrowedFd<'_>) -> io::Result<()> {
         fn syncfs(fd: c::c_int) via SYS_syncfs -> c::c_int
     }
 
-    // `syncfs` was added to GLIBC in 2.20.
+    // `syncfs` was added to glibc in 2.20.
     #[cfg(not(target_os = "android"))]
     weak_or_syscall! {
         fn syncfs(fd: c::c_int) via SYS_syncfs -> c::c_int
