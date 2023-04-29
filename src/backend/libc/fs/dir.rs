@@ -19,7 +19,6 @@ use crate::fs::{fstatvfs, StatVfs};
 use crate::io;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use crate::process::fchdir;
-#[cfg(target_os = "wasi")]
 use alloc::borrow::ToOwned;
 #[cfg(not(linux_like))]
 use c::readdir as libc_readdir;
