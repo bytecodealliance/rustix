@@ -168,14 +168,12 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
         self.length = new_length;
 
         // Get the last header in the buffer.
-        let mut last_header = leap!(messages::Messages::new(buffer).last());
+        let last_header = leap!(messages::Messages::new(buffer).last());
 
         // Set the header fields.
-        unsafe {
-            last_header.cmsg_len = c::CMSG_LEN(source_len) as _;
-            last_header.cmsg_level = cmsg_level;
-            last_header.cmsg_type = cmsg_type;
-        }
+        last_header.cmsg_len = unsafe { c::CMSG_LEN(source_len) } as _;
+        last_header.cmsg_level = cmsg_level;
+        last_header.cmsg_type = cmsg_type;
 
         // Get the pointer to the payload and copy the data.
         unsafe {
