@@ -256,7 +256,7 @@ pub enum WaitId<'a> {
     /// Eat the lifetime for non-Linux platforms.
     #[doc(hidden)]
     #[cfg(not(target_os = "linux"))]
-    __EatLifetime(std::marker::PhantomData<&'a ()>),
+    __EatLifetime(core::marker::PhantomData<&'a ()>),
     // TODO(notgull): Once this crate has the concept of PGIDs, add a WaitId::Pgid
 }
 
