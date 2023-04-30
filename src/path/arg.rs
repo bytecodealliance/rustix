@@ -19,17 +19,13 @@ use core::mem::MaybeUninit;
 use core::{ptr, slice, str};
 #[cfg(feature = "std")]
 use std::ffi::{OsStr, OsString};
-#[cfg(feature = "std")]
-#[cfg(target_os = "hermit")]
+#[cfg(all(feature = "std", target_os = "hermit"))]
 use std::os::hermit::ext::ffi::{OsStrExt, OsStringExt};
-#[cfg(feature = "std")]
-#[cfg(unix)]
+#[cfg(all(feature = "std", unix))]
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
-#[cfg(feature = "std")]
-#[cfg(target_os = "vxworks")]
+#[cfg(all(feature = "std", target_os = "vxworks"))]
 use std::os::vxworks::ext::ffi::{OsStrExt, OsStringExt};
-#[cfg(feature = "std")]
-#[cfg(target_os = "wasi")]
+#[cfg(all(feature = "std", target_os = "wasi"))]
 use std::os::wasi::ffi::{OsStrExt, OsStringExt};
 #[cfg(feature = "std")]
 use std::path::{Component, Components, Iter, Path, PathBuf};

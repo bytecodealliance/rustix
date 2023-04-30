@@ -100,8 +100,7 @@ impl Dir {
             .iter()
             .position(|x| *x == b'\0')
             .unwrap();
-        let name =
-            CStr::from_bytes_with_nul(&self.buf[name_start..name_start + name_len + 1]).unwrap();
+        let name = CStr::from_bytes_with_nul(&self.buf[name_start..][..name_len + 1]).unwrap();
         let name = name.to_owned();
         assert!(name.as_bytes().len() <= self.buf.len() - name_start);
 

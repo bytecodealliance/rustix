@@ -61,8 +61,8 @@ pub use cwd::cwd;
 pub use dir::{Dir, DirEntry};
 #[cfg(not(any(
     apple,
-    solarish,
     netbsdlike,
+    solarish,
     target_os = "dragonfly",
     target_os = "haiku",
     target_os = "redox",

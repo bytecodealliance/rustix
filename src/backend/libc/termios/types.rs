@@ -127,16 +127,7 @@ pub const VTIME: usize = c::VTIME as usize;
 pub const VMIN: usize = c::VMIN as usize;
 
 /// `VSWTC`
-#[cfg(not(any(
-    apple,
-    solarish,
-    target_os = "aix",
-    target_os = "dragonfly",
-    target_os = "freebsd",
-    target_os = "haiku",
-    target_os = "netbsd",
-    target_os = "openbsd",
-)))]
+#[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
 pub const VSWTC: usize = c::VSWTC as usize;
 
 /// `VSTART`
@@ -217,14 +208,12 @@ pub const IMAXBEL: Tcflag = c::IMAXBEL;
 
 /// `IUTF8`
 #[cfg(not(any(
+    freebsdlike,
+    netbsdlike,
     solarish,
     target_os = "aix",
-    target_os = "dragonfly",
     target_os = "emscripten",
-    target_os = "freebsd",
     target_os = "haiku",
-    target_os = "netbsd",
-    target_os = "openbsd",
     target_os = "redox",
 )))]
 pub const IUTF8: Tcflag = c::IUTF8;
@@ -235,9 +224,8 @@ pub const OPOST: Tcflag = c::OPOST;
 /// `OLCUC`
 #[cfg(not(any(
     apple,
+    freebsdlike,
     target_os = "aix",
-    target_os = "dragonfly",
-    target_os = "freebsd",
     target_os = "netbsd",
     target_os = "redox",
 )))]

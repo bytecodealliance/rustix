@@ -111,7 +111,8 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 print!(" IMAXBEL");
             }
             #[cfg(not(any(
-                bsd,
+                freebsdlike,
+                netbsdlike,
                 solarish,
                 target_os = "aix",
                 target_os = "emscripten",
@@ -127,7 +128,13 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_oflag & OPOST) != 0 {
                 print!(" OPOST");
             }
-            #[cfg(not(any(bsd, target_os = "aix", target_os = "redox")))]
+            #[cfg(not(any(
+                apple,
+                freebsdlike,
+                target_os = "aix",
+                target_os = "netbsd",
+                target_os = "redox"
+            )))]
             if (term.c_oflag & OLCUC) != 0 {
                 print!(" OLCUC");
             }

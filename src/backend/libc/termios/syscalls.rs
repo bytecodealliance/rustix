@@ -10,13 +10,13 @@ use crate::fd::BorrowedFd;
 #[cfg(feature = "procfs")]
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use crate::ffi::CStr;
-#[cfg(not(target_os = "wasi"))]
-use crate::io;
-#[cfg(not(target_os = "wasi"))]
-use crate::process::{Pid, RawNonZeroPid};
-#[cfg(not(target_os = "wasi"))]
-use crate::termios::{Action, OptionalActions, QueueSelector, Speed, Termios, Winsize};
 use core::mem::MaybeUninit;
+#[cfg(not(target_os = "wasi"))]
+use {
+    crate::io,
+    crate::process::{Pid, RawNonZeroPid},
+    crate::termios::{Action, OptionalActions, QueueSelector, Speed, Termios, Winsize},
+};
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {

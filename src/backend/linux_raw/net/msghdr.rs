@@ -8,8 +8,8 @@
 use super::super::c;
 use super::super::net::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 
-use crate::io;
-use crate::net::{SocketAddrV4, SocketAddrV6};
+use crate::io::{IoSlice, IoSliceMut};
+use crate::net::{RecvAncillaryBuffer, SendAncillaryBuffer, SocketAddrV4, SocketAddrV6};
 use crate::utils::as_ptr;
 
 use core::convert::TryInto;
@@ -29,8 +29,8 @@ pub(crate) fn msg_control_len(len: usize) -> c::size_t {
 /// Create a message header intended to receive a datagram.
 pub(crate) fn with_recv_msghdr<R>(
     name: &mut MaybeUninit<c::sockaddr_storage>,
-    iov: &mut [io::IoSliceMut<'_>],
-    control: &mut crate::net::RecvAncillaryBuffer<'_>,
+    iov: &mut [IoSliceMut<'_>],
+    control: &mut RecvAncillaryBuffer<'_>,
     f: impl FnOnce(&mut c::msghdr) -> R,
 ) -> R {
     let namelen = size_of::<c::sockaddr_storage>() as c::c_int;
@@ -58,8 +58,8 @@ pub(crate) fn with_recv_msghdr<R>(
 
 /// Create a message header intended to send without an address.
 pub(crate) fn with_noaddr_msghdr<R>(
-    iov: &[io::IoSlice<'_>],
-    control: &mut crate::net::SendAncillaryBuffer<'_, '_, '_>,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
     f: impl FnOnce(c::msghdr) -> R,
 ) -> R {
     f(c::msghdr {
@@ -78,8 +78,8 @@ pub(crate) fn with_noaddr_msghdr<R>(
 /// Create a message header intended to send with an IPv4 address.
 pub(crate) fn with_v4_msghdr<R>(
     addr: &SocketAddrV4,
-    iov: &[io::IoSlice<'_>],
-    control: &mut crate::net::SendAncillaryBuffer<'_, '_, '_>,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
     f: impl FnOnce(c::msghdr) -> R,
 ) -> R {
     let encoded = unsafe { encode_sockaddr_v4(addr) };
@@ -100,8 +100,8 @@ pub(crate) fn with_v4_msghdr<R>(
 /// Create a message header intended to send with an IPv6 address.
 pub(crate) fn with_v6_msghdr<R>(
     addr: &SocketAddrV6,
-    iov: &[io::IoSlice<'_>],
-    control: &mut crate::net::SendAncillaryBuffer<'_, '_, '_>,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
     f: impl FnOnce(c::msghdr) -> R,
 ) -> R {
     let encoded = unsafe { encode_sockaddr_v6(addr) };
@@ -122,8 +122,8 @@ pub(crate) fn with_v6_msghdr<R>(
 /// Create a message header intended to send with a Unix address.
 pub(crate) fn with_unix_msghdr<R>(
     addr: &crate::net::SocketAddrUnix,
-    iov: &[io::IoSlice<'_>],
-    control: &mut crate::net::SendAncillaryBuffer<'_, '_, '_>,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
     f: impl FnOnce(c::msghdr) -> R,
 ) -> R {
     f(c::msghdr {

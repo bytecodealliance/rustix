@@ -8,20 +8,14 @@
 
 use crate::backend::fd::{AsFd, AsRawFd};
 use crate::ffi::CStr;
-#[cfg(feature = "std")]
-use core::fmt;
 use core::fmt::Write;
 use itoa::{Buffer, Integer};
-#[cfg(feature = "std")]
-use std::ffi::OsStr;
-#[cfg(feature = "std")]
-#[cfg(unix)]
+#[cfg(all(feature = "std", unix))]
 use std::os::unix::ffi::OsStrExt;
-#[cfg(feature = "std")]
-#[cfg(target_os = "wasi")]
+#[cfg(all(feature = "std", target_os = "wasi"))]
 use std::os::wasi::ffi::OsStrExt;
 #[cfg(feature = "std")]
-use std::path::Path;
+use {core::fmt, std::ffi::OsStr, std::path::Path};
 
 /// Format an integer into a decimal `Path` component, without constructing a
 /// temporary `PathBuf` or `String`.

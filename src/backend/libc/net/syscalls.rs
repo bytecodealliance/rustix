@@ -5,30 +5,25 @@ use super::super::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_rec
 #[cfg(unix)]
 use super::addr::SocketAddrUnix;
 use super::ext::{in6_addr_new, in_addr_new};
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
-use super::msghdr::{with_noaddr_msghdr, with_recv_msghdr, with_v4_msghdr, with_v6_msghdr};
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-use super::read_sockaddr::initialize_family_to_unspec;
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-use super::read_sockaddr::{maybe_read_sockaddr_os, read_sockaddr_os};
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-use super::send_recv::{RecvFlags, SendFlags};
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-use super::types::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::utils::as_ptr;
 use core::convert::TryInto;
 use core::mem::{size_of, MaybeUninit};
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-use core::ptr::null_mut;
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 use {
+    super::msghdr::{with_noaddr_msghdr, with_recv_msghdr, with_v4_msghdr, with_v6_msghdr},
     crate::io::{IoSlice, IoSliceMut},
     crate::net::{RecvAncillaryBuffer, RecvMsgReturn, SendAncillaryBuffer},
+};
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+use {
+    super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr_os},
+    super::send_recv::{RecvFlags, SendFlags},
+    super::types::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType},
+    super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6},
+    core::ptr::null_mut,
 };
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]

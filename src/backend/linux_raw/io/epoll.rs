@@ -76,6 +76,7 @@ use crate::fd::{AsFd, AsRawFd, OwnedFd};
 use crate::io;
 use alloc::vec::Vec;
 use bitflags::bitflags;
+use core::slice;
 
 bitflags! {
     /// `EPOLL_*` for use with [`Epoll::new`].
@@ -247,7 +248,7 @@ pub fn epoll_wait(
 
 /// An iterator over the `Event`s in an `EventVec`.
 pub struct Iter<'a> {
-    iter: core::slice::Iter<'a, Event>,
+    iter: slice::Iter<'a, Event>,
 }
 
 impl<'a> Iterator for Iter<'a> {

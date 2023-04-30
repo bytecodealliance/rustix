@@ -1,12 +1,15 @@
 //! An API for interfacing with `kqueue`.
 
 use crate::fd::{AsFd, AsRawFd, OwnedFd, RawFd};
+#[cfg(feature = "process")]
+use crate::process::{Pid, Signal};
 use crate::{backend, io};
 
 use backend::c::{self, intptr_t, kevent as kevent_t, uintptr_t};
 use backend::io::syscalls;
 
 use alloc::vec::Vec;
+use core::mem::zeroed;
 use core::ptr::slice_from_raw_parts_mut;
 use core::time::Duration;
 
@@ -31,12 +34,9 @@ impl Event {
                 (vnode.as_raw_fd() as _, 0, c::EVFILT_VNODE, flags.bits())
             }
             #[cfg(feature = "process")]
-            EventFilter::Proc { pid, flags } => (
-                crate::process::Pid::as_raw(Some(pid)) as _,
-                0,
-                c::EVFILT_PROC,
-                flags.bits(),
-            ),
+            EventFilter::Proc { pid, flags } => {
+                (Pid::as_raw(Some(pid)) as _, 0, c::EVFILT_PROC, flags.bits())
+            }
             #[cfg(feature = "process")]
             EventFilter::Signal { signal, times: _ } => (signal as _, 0, c::EVFILT_SIGNAL, 0),
             EventFilter::Timer { ident, timer } => {
@@ -85,7 +85,7 @@ impl Event {
                     // TODO: Strict provenance, prevent int-to-ptr cast.
                     udata as _
                 },
-                ..unsafe { core::mem::zeroed() }
+                ..unsafe { zeroed() }
             },
         }
     }
@@ -116,12 +116,12 @@ impl Event {
             },
             #[cfg(feature = "process")]
             c::EVFILT_PROC => EventFilter::Proc {
-                pid: unsafe { crate::process::Pid::from_raw(self.inner.ident as _) }.unwrap(),
+                pid: unsafe { Pid::from_raw(self.inner.ident as _) }.unwrap(),
                 flags: ProcessEvents::from_bits_truncate(self.inner.fflags),
             },
             #[cfg(feature = "process")]
             c::EVFILT_SIGNAL => EventFilter::Signal {
-                signal: crate::process::Signal::from_raw(self.inner.ident as _).unwrap(),
+                signal: Signal::from_raw(self.inner.ident as _).unwrap(),
                 times: self.inner.data as _,
             },
             c::EVFILT_TIMER => EventFilter::Timer {
@@ -184,7 +184,7 @@ pub enum EventFilter {
     #[cfg(feature = "process")]
     Proc {
         /// The process ID we waited on.
-        pid: crate::process::Pid,
+        pid: Pid,
 
         /// The flags for this event.
         flags: ProcessEvents,
@@ -194,7 +194,7 @@ pub enum EventFilter {
     #[cfg(feature = "process")]
     Signal {
         /// The signal number we waited on.
-        signal: crate::process::Signal,
+        signal: Signal,
 
         /// The number of times the signal has been
         /// received since the last call to kevent.
@@ -405,15 +405,14 @@ pub unsafe fn kevent(
     eventlist: &mut Vec<Event>,
     timeout: Option<Duration>,
 ) -> io::Result<usize> {
-    let timeout = timeout.map(|timeout| crate::backend::c::timespec {
+    let timeout = timeout.map(|timeout| backend::c::timespec {
         tv_sec: timeout.as_secs() as _,
         tv_nsec: timeout.subsec_nanos() as _,
     });
 
     // Populate the event list with events.
     eventlist.set_len(0);
-    let out_slice =
-        slice_from_raw_parts_mut(eventlist.as_mut_ptr() as *mut _, eventlist.capacity());
+    let out_slice = slice_from_raw_parts_mut(eventlist.as_mut_ptr().cast(), eventlist.capacity());
     let res = syscalls::kevent(
         kqueue.as_fd(),
         changelist,

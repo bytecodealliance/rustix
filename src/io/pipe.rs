@@ -149,7 +149,7 @@ pub fn splice<FdIn: AsFd, FdOut: AsFd>(
 #[inline]
 pub unsafe fn vmsplice<PipeFd: AsFd>(
     fd: PipeFd,
-    bufs: &[io::IoSliceRaw],
+    bufs: &[IoSliceRaw],
     flags: SpliceFlags,
 ) -> io::Result<usize> {
     backend::io::syscalls::vmsplice(fd.as_fd(), bufs, flags)

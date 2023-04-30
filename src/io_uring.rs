@@ -5,6 +5,8 @@
 //! `Result`, `OwnedFd`, `AsFd`, `RawFd`, and `*mut c_void` in place of plain
 //! integers.
 //!
+//! For a higher-level API built on top of this, see the [rustix-uring] crate.
+//!
 //! # Safety
 //!
 //! io_uring operates on raw pointers and raw file descriptors. Rustix does not
@@ -19,12 +21,14 @@
 //! [Linux]: https://man.archlinux.org/man/io_uring.7.en
 //! [io_uring]: https://en.wikipedia.org/wiki/Io_uring
 //! [io_uring header]: https://github.com/torvalds/linux/blob/master/include/uapi/linux/io_uring.h
+//! [rustix-uring]: https://crates.io/crates/rustix-uring
 #![allow(unsafe_code)]
 
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 use crate::{backend, io};
 use core::ffi::c_void;
-use core::ptr::null_mut;
+use core::mem::{zeroed, MaybeUninit};
+use core::ptr::{null_mut, write_bytes};
 use linux_raw_sys::general as sys;
 
 /// `io_uring_setup(entries, params)`—Setup a context for performing
@@ -863,10 +867,10 @@ impl io_uring_user_data {
 impl Default for io_uring_user_data {
     #[inline]
     fn default() -> Self {
-        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        let mut s = MaybeUninit::<Self>::uninit();
         // SAFETY: All of Linux's io_uring structs may be zero-initialized.
         unsafe {
-            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            write_bytes(s.as_mut_ptr(), 0, 1);
             s.assume_init()
         }
     }
@@ -1213,7 +1217,7 @@ impl Default for ioprio_union {
     #[inline]
     fn default() -> Self {
         // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { ::core::mem::zeroed::<Self>() }
+        unsafe { zeroed::<Self>() }
     }
 }
 
@@ -1221,7 +1225,7 @@ impl Default for len_union {
     #[inline]
     fn default() -> Self {
         // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { ::core::mem::zeroed::<Self>() }
+        unsafe { zeroed::<Self>() }
     }
 }
 
@@ -1229,7 +1233,7 @@ impl Default for off_or_addr2_union {
     #[inline]
     fn default() -> Self {
         // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { ::core::mem::zeroed::<Self>() }
+        unsafe { zeroed::<Self>() }
     }
 }
 
@@ -1237,7 +1241,7 @@ impl Default for addr_or_splice_off_in_union {
     #[inline]
     fn default() -> Self {
         // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { ::core::mem::zeroed::<Self>() }
+        unsafe { zeroed::<Self>() }
     }
 }
 
@@ -1245,7 +1249,7 @@ impl Default for addr3_or_cmd_union {
     #[inline]
     fn default() -> Self {
         // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { ::core::mem::zeroed::<Self>() }
+        unsafe { zeroed::<Self>() }
     }
 }
 
@@ -1253,7 +1257,7 @@ impl Default for op_flags_union {
     #[inline]
     fn default() -> Self {
         // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { ::core::mem::zeroed::<Self>() }
+        unsafe { zeroed::<Self>() }
     }
 }
 
@@ -1261,7 +1265,7 @@ impl Default for buf_union {
     #[inline]
     fn default() -> Self {
         // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { ::core::mem::zeroed::<Self>() }
+        unsafe { zeroed::<Self>() }
     }
 }
 
@@ -1269,7 +1273,7 @@ impl Default for splice_fd_in_or_file_index_union {
     #[inline]
     fn default() -> Self {
         // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { ::core::mem::zeroed::<Self>() }
+        unsafe { zeroed::<Self>() }
     }
 }
 
@@ -1277,7 +1281,7 @@ impl Default for register_or_sqe_op_or_sqe_flags_union {
     #[inline]
     fn default() -> Self {
         // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { ::core::mem::zeroed::<Self>() }
+        unsafe { zeroed::<Self>() }
     }
 }
 

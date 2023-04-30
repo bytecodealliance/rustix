@@ -1,8 +1,6 @@
 //! libc syscalls supporting `rustix::io`.
 
 use super::super::c;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use super::super::conv::syscall_ret_owned_fd;
 #[cfg(any(
     target_os = "android",
     all(target_os = "linux", not(target_env = "gnu")),
@@ -15,10 +13,6 @@ use super::super::offset::{libc_preadv, libc_pwritev};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use super::super::offset::{libc_preadv2, libc_pwritev2};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
-#[cfg(bsd)]
-use crate::io::kqueue::Event;
-#[cfg(solarish)]
-use crate::io::port::Event;
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 use crate::io::DupFlags;
 #[cfg(any(
@@ -31,15 +25,21 @@ use crate::io::EventfdFlags;
 #[cfg(not(any(apple, target_os = "aix", target_os = "haiku", target_os = "wasi")))]
 use crate::io::PipeFlags;
 use crate::io::{self, FdFlags, IoSlice, IoSliceMut, PollFd};
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::io::{IoSliceRaw, ReadWriteFlags, SpliceFlags};
 use core::cmp::min;
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use core::ptr;
 #[cfg(all(feature = "fs", feature = "net"))]
 use libc_errno::errno;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use {
+    super::super::conv::syscall_ret_owned_fd,
+    crate::io::{IoSliceRaw, ReadWriteFlags, SpliceFlags},
+    core::ptr,
+};
+#[cfg(bsd)]
+use {crate::io::kqueue::Event, crate::utils::as_ptr, core::ptr::null};
+#[cfg(solarish)]
+use {crate::io::port::Event, crate::utils::as_mut_ptr, core::ptr::null_mut};
 
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     unsafe {
@@ -531,17 +531,17 @@ pub(crate) unsafe fn kevent(
 ) -> io::Result<c::c_int> {
     ret_c_int(c::kevent(
         borrowed_fd(kq),
-        changelist.as_ptr() as *const _,
+        changelist.as_ptr().cast(),
         changelist
             .len()
             .try_into()
             .map_err(|_| io::Errno::OVERFLOW)?,
-        eventlist.as_mut_ptr() as *mut _,
+        eventlist.as_mut_ptr().cast(),
         eventlist
             .len()
             .try_into()
             .map_err(|_| io::Errno::OVERFLOW)?,
-        timeout.map_or(core::ptr::null(), |t| t as *const _),
+        timeout.map_or(null(), as_ptr),
     ))
 }
 
@@ -658,7 +658,7 @@ pub(crate) fn port_get(
     timeout: Option<&mut c::timespec>,
 ) -> io::Result<Event> {
     let mut event = MaybeUninit::<c::port_event>::uninit();
-    let timeout = timeout.map_or(core::ptr::null_mut(), |t| t as *mut _);
+    let timeout = timeout.map_or(null_mut(), as_mut_ptr);
 
     unsafe {
         ret(c::port_get(borrowed_fd(port), event.as_mut_ptr(), timeout))?;
@@ -675,7 +675,7 @@ pub(crate) fn port_getn(
     events: &mut Vec<Event>,
     mut nget: u32,
 ) -> io::Result<()> {
-    let timeout = timeout.map_or(core::ptr::null_mut(), |t| t as *mut _);
+    let timeout = timeout.map_or(null_mut(), as_mut_ptr);
     unsafe {
         ret(c::port_getn(
             borrowed_fd(port),
