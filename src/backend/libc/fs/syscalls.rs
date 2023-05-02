@@ -251,6 +251,28 @@ pub(crate) fn linkat(
     new_path: &CStr,
     flags: AtFlags,
 ) -> io::Result<()> {
+    // macOS <= 10.9 lacks `linkat`.
+    #[cfg(target_os = "macos")]
+    unsafe {
+        syscall! {
+            fn linkat(
+                olddirfd: c::c_int,
+                oldpath: *const c::c_char,
+                newdirfd: c::c_int,
+                newpath: *const c::c_char,
+                flags: c::c_int
+            ) via SYS_linkat -> c::c_int
+        }
+        ret(linkat(
+            borrowed_fd(old_dirfd),
+            c_str(old_path),
+            borrowed_fd(new_dirfd),
+            c_str(new_path),
+            flags.bits(),
+        ))
+    }
+
+    #[cfg(not(target_os = "macos"))]
     unsafe {
         ret(c::linkat(
             borrowed_fd(old_dirfd),
@@ -264,7 +286,23 @@ pub(crate) fn linkat(
 
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<()> {
-    unsafe { ret(c::unlinkat(borrowed_fd(dirfd), c_str(path), flags.bits())) }
+    // macOS <= 10.9 lacks `unlinkat`.
+    #[cfg(target_os = "macos")]
+    unsafe {
+        syscall! {
+            fn unlinkat(
+                dirfd: c::c_int,
+                pathname: *const c::c_char,
+                flags: c::c_int
+            ) via SYS_unlinkat -> c::c_int
+        }
+        ret(unlinkat(borrowed_fd(dirfd), c_str(path), flags.bits()))
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    unsafe {
+        ret(c::unlinkat(borrowed_fd(dirfd), c_str(path), flags.bits()))
+    }
 }
 
 #[cfg(not(target_os = "redox"))]
@@ -274,6 +312,26 @@ pub(crate) fn renameat(
     new_dirfd: BorrowedFd<'_>,
     new_path: &CStr,
 ) -> io::Result<()> {
+    // macOS <= 10.9 lacks `renameat`.
+    #[cfg(target_os = "macos")]
+    unsafe {
+        syscall! {
+            fn renameat(
+                olddirfd: c::c_int,
+                oldpath: *const c::c_char,
+                newdirfd: c::c_int,
+                newpath: *const c::c_char
+            ) via SYS_linkat -> c::c_int
+        }
+        ret(renameat(
+            borrowed_fd(old_dirfd),
+            c_str(old_path),
+            borrowed_fd(new_dirfd),
+            c_str(new_path),
+        ))
+    }
+
+    #[cfg(not(target_os = "macos"))]
     unsafe {
         ret(c::renameat(
             borrowed_fd(old_dirfd),
