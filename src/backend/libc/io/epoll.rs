@@ -79,6 +79,8 @@ use core::ptr::null_mut;
 
 bitflags! {
     /// `EPOLL_*` for use with [`Epoll::new`].
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct CreateFlags: c::c_int {
         /// `EPOLL_CLOEXEC`
         const CLOEXEC = c::EPOLL_CLOEXEC;
@@ -87,7 +89,8 @@ bitflags! {
 
 bitflags! {
     /// `EPOLL*` for use with [`Epoll::add`].
-    #[derive(Default)]
+    #[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct EventFlags: u32 {
         /// `EPOLLIN`
         const IN = c::EPOLLIN as u32;

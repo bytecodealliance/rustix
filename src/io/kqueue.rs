@@ -233,6 +233,8 @@ pub enum EventFilter {
 
 bitflags::bitflags! {
     /// The flags for a `kqueue` event.
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct EventFlags: u16 {
         /// Add the event to the `kqueue`.
         const ADD = c::EV_ADD as _;
@@ -265,6 +267,8 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// The flags for a virtual node event.
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct VnodeEvents: u32 {
         /// The file was deleted.
         const DELETE = c::NOTE_DELETE;
@@ -292,6 +296,8 @@ bitflags::bitflags! {
 #[cfg(feature = "process")]
 bitflags::bitflags! {
     /// The flags for a process event.
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct ProcessEvents: u32 {
         /// The process exited.
         const EXIT = c::NOTE_EXIT;
@@ -313,6 +319,8 @@ bitflags::bitflags! {
 #[cfg(any(apple, freebsdlike))]
 bitflags::bitflags! {
     /// The flags for a user event.
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct UserFlags: u32 {
         /// Ignore the user input flags.
         const NOINPUT = c::NOTE_FFNOP;

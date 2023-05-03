@@ -17,6 +17,8 @@ pub struct CapabilitySets {
 
 bitflags! {
     /// `CAP_*` constants.
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct CapabilityFlags: u64 {
         /// `CAP_CHOWN`
         const CHOWN = 1 << linux_raw_sys::general::CAP_CHOWN;
@@ -152,11 +154,10 @@ fn capget(pid: Option<Pid>) -> io::Result<CapabilitySets> {
         let permitted = u64::from(data.0.permitted) | (u64::from(data.1.permitted) << BITS);
         let inheritable = u64::from(data.0.inheritable) | (u64::from(data.1.inheritable) << BITS);
 
-        // SAFETY: the kernel returns a partitioned bitset that we just combined above
         Ok(CapabilitySets {
-            effective: unsafe { CapabilityFlags::from_bits_unchecked(effective) },
-            permitted: unsafe { CapabilityFlags::from_bits_unchecked(permitted) },
-            inheritable: unsafe { CapabilityFlags::from_bits_unchecked(inheritable) },
+            effective: CapabilityFlags::from_bits_retain(effective),
+            permitted: CapabilityFlags::from_bits_retain(permitted),
+            inheritable: CapabilityFlags::from_bits_retain(inheritable),
         })
     }
 }

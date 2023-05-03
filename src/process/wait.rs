@@ -10,6 +10,8 @@ use crate::backend::process::wait::SiginfoExt;
 
 bitflags! {
     /// Options for modifying the behavior of wait/waitpid
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct WaitOptions: u32 {
         /// Return immediately if no child has exited.
         const NOHANG = backend::process::wait::WNOHANG as _;
@@ -26,6 +28,8 @@ bitflags! {
 #[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 bitflags! {
     /// Options for modifying the behavior of waitid
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct WaitidOptions: u32 {
         /// Return immediately if no child has exited.
         const NOHANG = backend::process::wait::WNOHANG as _;

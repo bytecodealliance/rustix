@@ -64,13 +64,10 @@ pub(crate) fn membarrier_query() -> MembarrierQuery {
             c_uint(0)
         )) {
             Ok(query) => {
-                // SAFETY: The safety of `from_bits_unchecked` is discussed
-                // [here]. Our "source of truth" is Linux, and here, the
-                // `query` value is coming from Linux, so we know it only
-                // contains "source of truth" valid bits.
-                //
-                // [here]: https://github.com/bitflags/bitflags/pull/207#issuecomment-671668662
-                MembarrierQuery::from_bits_unchecked(query)
+                // Our "source of truth" is Linux, and here, the `query` value
+                // is coming from Linux, so we know it only contains "source of
+                // truth" valid bits.
+                MembarrierQuery::from_bits_retain(query)
             }
             Err(_) => MembarrierQuery::empty(),
         }

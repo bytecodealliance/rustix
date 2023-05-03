@@ -5,6 +5,8 @@ bitflags! {
     /// `*_OK` constants for use with [`accessat`].
     ///
     /// [`accessat`]: fn.accessat.html
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct Access: c::c_uint {
         /// `R_OK`
         const READ_OK = linux_raw_sys::general::R_OK;
@@ -26,6 +28,8 @@ bitflags! {
     ///
     /// [`openat`]: crate::fs::openat
     /// [`statat`]: crate::fs::statat
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct AtFlags: c::c_uint {
         /// `AT_REMOVEDIR`
         const REMOVEDIR = linux_raw_sys::general::AT_REMOVEDIR;
@@ -59,6 +63,8 @@ bitflags! {
     /// [`openat`]: crate::fs::openat
     /// [`chmodat`]: crate::fs::chmodat
     /// [`fchmod`]: crate::fs::fchmod
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct Mode: RawMode {
         /// `S_IRWXU`
         const RWXU = linux_raw_sys::general::S_IRWXU;
@@ -152,6 +158,8 @@ bitflags! {
     /// `O_*` constants for use with [`openat`].
     ///
     /// [`openat`]: crate::fs::openat
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct OFlags: c::c_uint {
         /// `O_ACCMODE`
         const ACCMODE = linux_raw_sys::general::O_ACCMODE;
@@ -234,7 +242,8 @@ bitflags! {
     /// `RESOLVE_*` constants for use with [`openat2`].
     ///
     /// [`openat2`]: crate::fs::openat2
-    #[derive(Default)]
+    #[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct ResolveFlags: u64 {
         /// `RESOLVE_NO_XDEV`
         const NO_XDEV = linux_raw_sys::general::RESOLVE_NO_XDEV as u64;
@@ -260,6 +269,8 @@ bitflags! {
     /// `RENAME_*` constants for use with [`renameat_with`].
     ///
     /// [`renameat_with`]: crate::fs::renameat_with
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct RenameFlags: c::c_uint {
         /// `RENAME_EXCHANGE`
         const EXCHANGE = linux_raw_sys::general::RENAME_EXCHANGE;
@@ -382,6 +393,8 @@ bitflags! {
     /// `MFD_*` constants for use with [`memfd_create`].
     ///
     /// [`memfd_create`]: crate::fs::memfd_create
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct MemfdFlags: c::c_uint {
         /// `MFD_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::MFD_CLOEXEC;
@@ -425,6 +438,8 @@ bitflags! {
     ///
     /// [`fcntl_add_seals`]: crate::fs::fcntl_add_seals
     /// [`fcntl_get_seals`]: crate::fs::fcntl_get_seals
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct SealFlags: u32 {
        /// `F_SEAL_SEAL`.
        const SEAL = linux_raw_sys::general::F_SEAL_SEAL;
@@ -443,6 +458,8 @@ bitflags! {
     /// `STATX_*` constants for use with [`statx`].
     ///
     /// [`statx`]: crate::fs::statx
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct StatxFlags: u32 {
         /// `STATX_TYPE`
         const TYPE = linux_raw_sys::general::STATX_TYPE;
@@ -495,6 +512,8 @@ bitflags! {
     /// `FALLOC_FL_*` constants for use with [`fallocate`].
     ///
     /// [`fallocate`]: crate::fs::fallocate
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct FallocateFlags: u32 {
         /// `FALLOC_FL_KEEP_SIZE`
         const KEEP_SIZE = linux_raw_sys::general::FALLOC_FL_KEEP_SIZE;
@@ -515,6 +534,8 @@ bitflags! {
 
 bitflags! {
     /// `ST_*` constants for use with [`StatVfs`].
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct StatVfsMountFlags: u64 {
         /// `ST_MANDLOCK`
         const MANDLOCK = linux_raw_sys::general::MS_MANDLOCK as u64;
@@ -673,6 +694,8 @@ bitflags! {
     /// `MS_*` constants for use with [`mount`].
     ///
     /// [`mount`]: crate::fs::mount
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct MountFlags: c::c_uint {
         /// `MS_BIND`
         const BIND = linux_raw_sys::general::MS_BIND;
@@ -730,6 +753,8 @@ bitflags! {
     /// `MS_*` constants for use with [`change_mount`].
     ///
     /// [`change_mount`]: crate::fs::mount::change_mount
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct MountPropagationFlags: c::c_uint {
         /// `MS_SHARED`
         const SHARED = linux_raw_sys::general::MS_SHARED;
@@ -746,6 +771,8 @@ bitflags! {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub(crate) struct InternalMountFlags: c::c_uint {
         const REMOUNT = linux_raw_sys::general::MS_REMOUNT;
         const MOVE = linux_raw_sys::general::MS_MOVE;
@@ -760,6 +787,8 @@ bitflags! {
     /// `MNT_*` constants for use with [`unmount`].
     ///
     /// [`unmount`]: crate::fs::mount::unmount
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct UnmountFlags: c::c_uint {
         /// `MNT_FORCE`
         const FORCE = linux_raw_sys::general::MNT_FORCE;

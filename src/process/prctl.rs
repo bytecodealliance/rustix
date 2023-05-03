@@ -172,6 +172,8 @@ const PR_GET_UNALIGN: c_int = 5;
 
 bitflags! {
     /// `PR_UNALIGN_*`.
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct UnalignedAccessControl: u32 {
         /// Silently fix up unaligned user accesses.
         const NO_PRINT = 1;
@@ -213,6 +215,8 @@ const PR_GET_FPEMU: c_int = 9;
 
 bitflags! {
     /// `PR_FPEMU_*`.
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct FloatingPointEmulationControl: u32 {
         /// Silently emulate floating point operations accesses.
         const NO_PRINT = 1;
@@ -257,6 +261,8 @@ const PR_GET_FPEXC: c_int = 11;
 
 bitflags! {
     /// Zero means floating point exceptions are disabled.
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct FloatingPointExceptionMode: u32 {
         /// Async non-recoverable exception mode.
         const NONRECOV = 1;
@@ -933,6 +939,8 @@ impl TryFrom<u32> for SpeculationFeature {
 
 bitflags! {
     /// `PR_SPEC_*`.
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct SpeculationFeatureControl: u32 {
         /// The speculation feature is enabled, mitigation is disabled.
         const ENABLE = 1_u32 << 1;
@@ -947,6 +955,8 @@ bitflags! {
 
 bitflags! {
     /// Zero means the processors are not vulnerable.
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct SpeculationFeatureState: u32 {
         /// Mitigation can be controlled per thread by `PR_SET_SPECULATION_CTRL`.
         const PRCTL = 1_u32 << 0;
@@ -1032,6 +1042,8 @@ const PR_PAC_GET_ENABLED_KEYS: c_int = 61;
 
 bitflags! {
     /// `PR_PAC_AP*`.
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct PointerAuthenticationKeys: u32 {
         /// Instruction authentication key `A`.
         const INSTRUCTION_AUTHENTICATION_KEY_A = 1_u32 << 0;

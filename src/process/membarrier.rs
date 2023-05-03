@@ -17,6 +17,8 @@ bitflags::bitflags! {
     ///
     /// These flags correspond to values of [`MembarrierCommand`] which are
     /// supported in the OS.
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct MembarrierQuery: u32 {
        /// `MEMBARRIER_CMD_GLOBAL`
        #[doc(alias = "SHARED")]
@@ -46,9 +48,9 @@ impl MembarrierQuery {
     /// Test whether this query result contains the given command.
     #[inline]
     pub fn contains_command(self, cmd: MembarrierCommand) -> bool {
-        // SAFETY: `MembarrierCommand` is an enum that only contains values
-        // also valid in `MembarrierQuery`.
-        self.contains(unsafe { Self::from_bits_unchecked(cmd as _) })
+        // `MembarrierCommand` is an enum that only contains values also valid
+        // in `MembarrierQuery`.
+        self.contains(Self::from_bits_retain(cmd as _))
     }
 }
 

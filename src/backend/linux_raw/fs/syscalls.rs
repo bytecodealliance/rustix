@@ -884,7 +884,7 @@ fn statfs_to_statvfs(statfs: StatFs) -> StatVfs {
         f_ffree: statfs.f_ffree as u64,
         f_favail: statfs.f_ffree as u64,
         f_fsid: f_fsid_val0 as u32 as u64 | ((f_fsid_val1 as u32 as u64) << 32),
-        f_flag: unsafe { StatVfsMountFlags::from_bits_unchecked(statfs.f_flags as u64) },
+        f_flag: StatVfsMountFlags::from_bits_retain(statfs.f_flags as u64),
         f_namemax: statfs.f_namelen as u64,
     }
 }
@@ -1018,12 +1018,12 @@ pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<SealFlags> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         ret_c_int(syscall_readonly!(__NR_fcntl64, fd, c_uint(F_GET_SEALS)))
-            .map(|seals| SealFlags::from_bits_unchecked(seals as u32))
+            .map(|seals| SealFlags::from_bits_retain(seals as u32))
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_c_int(syscall_readonly!(__NR_fcntl, fd, c_uint(F_GET_SEALS)))
-            .map(|seals| SealFlags::from_bits_unchecked(seals as u32))
+            .map(|seals| SealFlags::from_bits_retain(seals as u32))
     }
 }
 

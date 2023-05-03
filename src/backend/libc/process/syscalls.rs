@@ -76,7 +76,7 @@ pub(crate) fn membarrier_query() -> MembarrierQuery {
     const MEMBARRIER_CMD_QUERY: u32 = 0;
     unsafe {
         match syscall_ret_u32(c::syscall(c::SYS_membarrier, MEMBARRIER_CMD_QUERY, 0)) {
-            Ok(query) => MembarrierQuery::from_bits_unchecked(query),
+            Ok(query) => MembarrierQuery::from_bits_retain(query),
             Err(_) => MembarrierQuery::empty(),
         }
     }

@@ -12,6 +12,8 @@ bitflags! {
     /// `POLL*` flags for use with [`poll`].
     ///
     /// [`poll`]: crate::io::poll
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct PollFlags: c::c_short {
         /// `POLLIN`
         const IN = c::POLLIN;

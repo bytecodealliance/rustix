@@ -5,6 +5,8 @@ bitflags! {
     /// `POLL*` flags for use with [`poll`].
     ///
     /// [`poll`]: crate::io::poll
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct PollFlags: u16 {
         /// `POLLIN`
         const IN = linux_raw_sys::general::POLLIN as u16;

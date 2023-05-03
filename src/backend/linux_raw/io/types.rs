@@ -7,6 +7,8 @@ bitflags! {
     ///
     /// [`fcntl_getfd`]: crate::io::fcntl_getfd
     /// [`fcntl_setfd`]: crate::io::fcntl_setfd
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct FdFlags: c::c_uint {
         /// `FD_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::FD_CLOEXEC;
@@ -18,6 +20,8 @@ bitflags! {
     ///
     /// [`preadv2`]: crate::io::preadv2
     /// [`pwritev2`]: crate::io::pwritev
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct ReadWriteFlags: c::c_uint {
         /// `RWF_DSYNC` (since Linux 4.7)
         const DSYNC = linux_raw_sys::general::RWF_DSYNC;
@@ -35,6 +39,8 @@ bitflags! {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 bitflags! {
     /// `SPLICE_F_*` constants for use with [`splice`] and [`vmsplice`].
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct SpliceFlags: c::c_uint {
         /// `SPLICE_F_MOVE`
         const MOVE = linux_raw_sys::general::SPLICE_F_MOVE;
@@ -51,6 +57,8 @@ bitflags! {
     /// `O_*` constants for use with [`dup2`].
     ///
     /// [`dup2`]: crate::io::dup2
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct DupFlags: c::c_uint {
         /// `O_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
@@ -61,6 +69,8 @@ bitflags! {
     /// `O_*` constants for use with [`pipe_with`].
     ///
     /// [`pipe_with`]: crate::io::pipe_with
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct PipeFlags: c::c_uint {
         /// `O_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
@@ -75,6 +85,8 @@ bitflags! {
     /// `EFD_*` flags for use with [`eventfd`].
     ///
     /// [`eventfd`]: crate::io::eventfd
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct EventfdFlags: c::c_uint {
         /// `EFD_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::EFD_CLOEXEC;

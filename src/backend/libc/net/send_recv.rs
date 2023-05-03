@@ -6,6 +6,8 @@ bitflags! {
     ///
     /// [`send`]: crate::net::send
     /// [`sendto`]: crate::net::sendto
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct SendFlags: i32 {
         /// `MSG_CONFIRM`
         #[cfg(not(any(
@@ -44,6 +46,8 @@ bitflags! {
     ///
     /// [`recv`]: crate::net::recv
     /// [`recvfrom`]: crate::net::recvfrom
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct RecvFlags: i32 {
         #[cfg(not(any(apple, solarish, windows, target_os = "haiku")))]
         /// `MSG_CMSG_CLOEXEC`

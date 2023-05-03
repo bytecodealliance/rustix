@@ -7,6 +7,8 @@ bitflags! {
     /// For `PROT_NONE`, use `ProtFlags::empty()`.
     ///
     /// [`mmap`]: crate::io::mmap
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct ProtFlags: c::c_int {
         /// `PROT_READ`
         const READ = c::PROT_READ;
@@ -23,6 +25,8 @@ bitflags! {
     /// For `PROT_NONE`, use `MprotectFlags::empty()`.
     ///
     /// [`mprotect`]: crate::io::mprotect
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct MprotectFlags: c::c_int {
         /// `PROT_READ`
         const READ = c::PROT_READ;
@@ -46,6 +50,8 @@ bitflags! {
     ///
     /// [`mmap`]: crate::io::mmap
     /// [`mmap_anonymous`]: crates::io::mmap_anonymous
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct MapFlags: c::c_int {
         /// `MAP_SHARED`
         const SHARED = c::MAP_SHARED;
@@ -188,6 +194,8 @@ bitflags! {
     ///
     /// [`mremap`]: crate::io::mremap
     /// [`mremap_fixed`]: crate::io::mremap_fixed
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct MremapFlags: i32 {
         /// `MREMAP_MAYMOVE`
         const MAYMOVE = c::MREMAP_MAYMOVE;
@@ -198,6 +206,8 @@ bitflags! {
     /// `MS_*` flags for use with [`msync`].
     ///
     /// [`msync`]: crate::io::msync
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct MsyncFlags: i32 {
         /// `MS_SYNC`—Requests an update and waits for it to complete.
         const SYNC = c::MS_SYNC;
@@ -216,6 +226,8 @@ bitflags! {
     /// `MLOCK_*` flags for use with [`mlock_with`].
     ///
     /// [`mlock_with`]: crate::io::mlock_with
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct MlockFlags: i32 {
         /// `MLOCK_ONFAULT`
         const ONFAULT = c::MLOCK_ONFAULT as _;
@@ -357,6 +369,8 @@ bitflags! {
     /// `O_*` flags for use with [`userfaultfd`].
     ///
     /// [`userfaultfd`]: crate::io::userfaultfd
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct UserfaultfdFlags: c::c_int {
         /// `O_CLOEXEC`
         const CLOEXEC = c::O_CLOEXEC;

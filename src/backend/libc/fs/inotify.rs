@@ -10,6 +10,8 @@ bitflags! {
     /// `IN_*` for use with [`inotify_init`].
     ///
     /// [`inotify_init`]: crate::fs::inotify::inotify_init
+    #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct CreateFlags: c::c_int {
         /// `IN_CLOEXEC`
         const CLOEXEC = c::IN_CLOEXEC;
@@ -22,7 +24,8 @@ bitflags! {
     /// `IN*` for use with [`inotify_add_watch`].
     ///
     /// [`inotify_add_watch`]: crate::fs::inotify::inotify_add_watch
-    #[derive(Default)]
+    #[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
     pub struct WatchFlags: u32 {
         /// `IN_ACCESS`
         const ACCESS = c::IN_ACCESS;
