@@ -8,6 +8,7 @@
 use super::super::elf::*;
 #[cfg(feature = "param")]
 use crate::ffi::CStr;
+use core::ptr::null;
 #[cfg(feature = "runtime")]
 use core::slice;
 
@@ -78,6 +79,6 @@ pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
     if let Some(libc_getauxval) = getauxval.get() {
         unsafe { libc_getauxval(linux_raw_sys::general::AT_SYSINFO_EHDR.into()) as *const Elf_Ehdr }
     } else {
-        core::ptr::null()
+        null()
     }
 }

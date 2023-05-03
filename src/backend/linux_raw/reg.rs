@@ -16,6 +16,7 @@
 use super::c;
 use super::fd::RawFd;
 use core::marker::PhantomData;
+use core::ops::Range;
 
 pub(super) trait ToAsm: private::Sealed {
     /// Convert `self` to a `usize` ready to be passed to a syscall
@@ -188,7 +189,7 @@ impl<Num: RetNumber> RetReg<Num> {
     }
 
     #[inline]
-    pub(super) fn is_in_range(&self, range: core::ops::Range<isize>) -> bool {
+    pub(super) fn is_in_range(&self, range: Range<isize>) -> bool {
         range.contains(&(self.raw as isize))
     }
 }

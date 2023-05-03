@@ -32,7 +32,7 @@ use crate::io::{self, SeekFrom};
 use crate::process::{Gid, Uid};
 #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
 use core::convert::TryInto;
-use core::mem::MaybeUninit;
+use core::mem::{transmute, zeroed, MaybeUninit};
 #[cfg(target_arch = "mips64")]
 use linux_raw_sys::general::stat as linux_stat64;
 use linux_raw_sys::general::{
@@ -1077,7 +1077,7 @@ pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::R
             l_start: 0,
             l_len: 0,
 
-            ..core::mem::zeroed()
+            ..zeroed()
         };
 
         #[cfg(target_pointer_width = "32")]
@@ -1308,7 +1308,7 @@ fn _utimensat(
     flags: AtFlags,
 ) -> io::Result<()> {
     // Assert that `Timestamps` has the expected layout.
-    let _ = unsafe { core::mem::transmute::<Timestamps, [__kernel_timespec; 2]>(times.clone()) };
+    let _ = unsafe { transmute::<Timestamps, [__kernel_timespec; 2]>(times.clone()) };
 
     #[cfg(target_pointer_width = "32")]
     unsafe {

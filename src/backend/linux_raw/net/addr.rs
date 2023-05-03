@@ -1,14 +1,17 @@
-//! IPv4, IPv6, and Socket addresses.
+//! Socket address utilities.
 //!
 //! # Safety
 //!
-//! Linux's IPv6 type contains a union.
+//! This file casts between `&[c_char]` used in C APIs and `&[u8]` used in Rust
+//! APIs.
 #![allow(unsafe_code)]
 
 use super::super::c;
 use crate::ffi::CStr;
 use crate::{io, path};
+use core::cmp::Ordering;
 use core::convert::TryInto;
+use core::hash::{Hash, Hasher};
 use core::{fmt, slice};
 
 /// `struct sockaddr_un`
@@ -122,7 +125,7 @@ impl Eq for SocketAddrUnix {}
 
 impl PartialOrd for SocketAddrUnix {
     #[inline]
-    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         let self_len = self.len() - offsetof_sun_path();
         let other_len = other.len() - offsetof_sun_path();
         self.unix.sun_path[..self_len].partial_cmp(&other.unix.sun_path[..other_len])
@@ -131,16 +134,16 @@ impl PartialOrd for SocketAddrUnix {
 
 impl Ord for SocketAddrUnix {
     #[inline]
-    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+    fn cmp(&self, other: &Self) -> Ordering {
         let self_len = self.len() - offsetof_sun_path();
         let other_len = other.len() - offsetof_sun_path();
         self.unix.sun_path[..self_len].cmp(&other.unix.sun_path[..other_len])
     }
 }
 
-impl core::hash::Hash for SocketAddrUnix {
+impl Hash for SocketAddrUnix {
     #[inline]
-    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+    fn hash<H: Hasher>(&self, state: &mut H) {
         let self_len = self.len() - offsetof_sun_path();
         self.unix.sun_path[..self_len].hash(state)
     }

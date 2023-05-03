@@ -2,17 +2,17 @@
 
 use super::super::c;
 use super::super::conv::ret;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use super::super::conv::{borrowed_fd, ret_c_int, syscall_ret};
 use super::super::time::types::LibcTimespec;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::fd::BorrowedFd;
 use crate::io;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::process::{Pid, RawNonZeroPid};
 #[cfg(not(target_os = "redox"))]
 use crate::thread::{NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use {
+    super::super::conv::{borrowed_fd, ret_c_int, syscall_ret},
+    crate::fd::BorrowedFd,
+    crate::process::{Pid, RawNonZeroPid},
+};
 #[cfg(not(any(
     apple,
     freebsdlike,

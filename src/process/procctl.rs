@@ -5,7 +5,7 @@
 
 #![allow(unsafe_code)]
 
-use alloc::vec::Vec;
+use alloc::{vec, vec::Vec};
 use core::mem::MaybeUninit;
 use core::ptr;
 
@@ -330,7 +330,7 @@ pub fn get_reaper_pids(process: ProcSelector) -> io::Result<Vec<PidInfo>> {
     // Sadly no better way to guarantee that we get all the results than to
     // allocate ~8MB of memory..
     const PID_MAX: usize = 99999;
-    let mut pids: Vec<procctl_reaper_pidinfo> = alloc::vec![Default::default(); PID_MAX];
+    let mut pids: Vec<procctl_reaper_pidinfo> = vec![Default::default(); PID_MAX];
     let mut pinfo = procctl_reaper_pids {
         rp_count: PID_MAX as _,
         rp_pad0: [0; 15],

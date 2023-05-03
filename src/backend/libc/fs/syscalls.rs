@@ -2,8 +2,6 @@
 
 use super::super::c;
 use super::super::conv::{borrowed_fd, c_str, ret, ret_c_int, ret_off_t, ret_owned_fd, ret_usize};
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_usize};
 #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
 use super::super::offset::libc_fallocate;
 #[cfg(not(any(
@@ -83,10 +81,6 @@ use crate::fs::SealFlags;
     target_os = "wasi",
 )))]
 use crate::fs::StatFs;
-#[cfg(any(apple, target_os = "android", target_os = "linux"))]
-use crate::fs::XattrFlags;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags};
 use crate::fs::{Access, Mode, OFlags, Stat, Timestamps};
 #[cfg(not(any(apple, target_os = "redox", target_os = "wasi")))]
 use crate::fs::{Dev, FileType};
@@ -100,21 +94,25 @@ use crate::process::{Gid, Uid};
     target_env = "gnu",
 )))]
 use crate::utils::as_ptr;
+#[cfg(apple)]
+use alloc::vec;
 use core::convert::TryInto;
-#[cfg(any(apple, target_os = "android", target_os = "linux"))]
-use core::mem::size_of;
 use core::mem::MaybeUninit;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use core::ptr::null;
-#[cfg(any(apple, target_os = "android", target_os = "linux"))]
-use core::ptr::null_mut;
 #[cfg(apple)]
 use {
     super::super::conv::nonnegative_ret,
     crate::fs::{copyfile_state_t, CloneFlags, CopyfileFlags},
 };
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use {
+    super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_usize},
+    crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags},
+    core::ptr::null,
+};
 #[cfg(not(target_os = "redox"))]
 use {super::super::offset::libc_openat, crate::fs::AtFlags};
+#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+use {crate::fs::XattrFlags, core::mem::size_of, core::ptr::null_mut};
 
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
@@ -1764,7 +1762,7 @@ pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<CString> {
     // `F_GETPATH` in terms of `MAXPATHLEN`, and there are no
     // alternatives. If a better method is invented, it should be used
     // instead.
-    let mut buf = alloc::vec![0; c::PATH_MAX as usize];
+    let mut buf = vec![0; c::PATH_MAX as usize];
 
     // From the [macOS `fcntl` manual page]:
     // `F_GETPATH` - Get the path of the file descriptor `Fildes`. The argument
