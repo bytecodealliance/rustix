@@ -536,6 +536,8 @@ jobs:
         cargo test --verbose --features=all-impls,all-apis,cc --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: full
+        MACOSX_DEPLOYMENT_TARGET: 10.7
+        MACOSX_SDK_VERSION: 10.7
       if: matrix.rust != '1.48'
 
     - run: |
@@ -545,6 +547,8 @@ jobs:
         cargo test --verbose --features=fs-err,all-apis,cc --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: full
+        MACOSX_DEPLOYMENT_TARGET: 10.7
+        MACOSX_SDK_VERSION: 10.7
       if: matrix.rust == '1.48'
 
     - run: |
@@ -552,6 +556,8 @@ jobs:
         cargo check --features=all-impls,all-apis,cc
       env:
         RUST_BACKTRACE: full
+        MACOSX_DEPLOYMENT_TARGET: 10.7
+        MACOSX_SDK_VERSION: 10.7
       if: matrix.rust != '1.48'
 
     - run: |
@@ -561,6 +567,8 @@ jobs:
         cargo check --features=fs-err,all-apis,cc
       env:
         RUST_BACKTRACE: full
+        MACOSX_DEPLOYMENT_TARGET: 10.7
+        MACOSX_SDK_VERSION: 10.7
       if: matrix.rust == '1.48'
 
   test_use_libc:
