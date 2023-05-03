@@ -33,7 +33,7 @@ portable APIs built on this functionality, see the [`cap-std`], [`memfd`],
 
  * linux_raw, which uses raw Linux system calls and vDSO calls, and is
    supported on Linux on x86-64, x86, aarch64, riscv64gc, powerpc64le,
-   arm (v5 onwards), mipsel, and mips64el, with stable, nightly, and 1.48 Rust.
+   arm (v5 onwards), mipsel, and mips64el, with stable, nightly, and 1.56 Rust.
     - By being implemented entirely in Rust, avoiding `libc`, `errno`, and pthread
       cancellation, and employing some specialized optimizations, most functions
       compile down to very efficient code, which can often be fully inlined into
@@ -111,7 +111,7 @@ features for `rustix`.
 
 `rustix` has its own code for making direct syscalls, similar to the [`sc`] and
 [`scall`] crates, though `rustix` can use either the Rust `asm!` macro or
-out-of-line `.s` files so it supports Rust versions from 1.48 through Nightly.
+out-of-line `.s` files so it supports Rust versions from 1.56 through Nightly.
 `rustix` can also use Linux's vDSO mechanism to optimize Linux `clock_gettime`
 on all architectures, and all Linux system calls on x86. And `rustix`'s
 syscalls report errors using an optimized `Errno` type.
