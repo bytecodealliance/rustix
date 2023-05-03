@@ -1,7 +1,9 @@
 #[cfg(not(any(apple, target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_mknodat() {
-    use rustix::fs::{cwd, mknodat, openat, statat, unlinkat, AtFlags, FileType, Mode, OFlags};
+    use rustix::fs::{
+        accessat, cwd, mknodat, openat, statat, unlinkat, Access, AtFlags, FileType, Mode, OFlags,
+    };
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -18,5 +20,6 @@ fn test_mknodat() {
     mknodat(&dir, "foo", FileType::Fifo, Mode::empty(), 0).unwrap();
     let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
     assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::Fifo);
+    accessat(&dir, "foo", Access::EXISTS, AtFlags::empty()).unwrap();
     unlinkat(&dir, "foo", AtFlags::empty()).unwrap();
 }
