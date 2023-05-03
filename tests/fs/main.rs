@@ -5,6 +5,7 @@
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 #![cfg_attr(core_c_str, feature(core_c_str))]
 
+mod chmodat;
 mod cwd;
 mod dir;
 mod fcntl;
@@ -20,6 +21,7 @@ mod file;
 mod flock;
 mod futimens;
 mod invalid_offset;
+mod linkat;
 mod long_paths;
 #[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 mod makedev;
@@ -31,11 +33,13 @@ mod openat;
 mod openat2;
 #[cfg(not(target_os = "redox"))]
 mod readdir;
+mod readlinkat;
 mod renameat;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 mod statfs;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 mod statx;
+mod symlinkat;
 #[cfg(not(any(solarish, target_os = "redox", target_os = "wasi")))]
 mod sync;
 mod utimensat;
