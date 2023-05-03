@@ -277,8 +277,11 @@ pub(crate) fn linkat(
         if borrowed_fd(old_dirfd) != c::AT_FDCWD || borrowed_fd(new_dirfd) != c::AT_FDCWD {
             return Err(io::Errno::NOSYS);
         }
-        if !flags.is_empty() {
+        if flags.intersects(!AtFlags::SYMLINK_FOLLOW) {
             return Err(io::Errno::INVAL);
+        }
+        if !flags.is_empty() {
+            return Err(io::Errno::OPNOTSUPP);
         }
         ret(c::link(c_str(old_path), c_str(new_path)))
     }
@@ -497,6 +500,40 @@ pub(crate) fn accessat(
     access: Access,
     flags: AtFlags,
 ) -> io::Result<()> {
+    // macOS <= 10.9 lacks `faccessat`.
+    #[cfg(target_os = "macos")]
+    unsafe {
+        weak! {
+            fn faccessat(
+                c::c_int,
+                *const c::c_char,
+                c::c_int,
+                c::c_int
+            ) -> c::c_int
+        }
+        // If we have `faccessat`, use it.
+        if let Some(libc_faccessat) = faccessat.get() {
+            return ret(libc_faccessat(
+                borrowed_fd(dirfd),
+                c_str(path),
+                access.bits(),
+                flags.bits(),
+            ));
+        }
+        // Otherwise, see if we can emulate the `AT_FDCWD` case.
+        if borrowed_fd(dirfd) != c::AT_FDCWD {
+            return Err(io::Errno::NOSYS);
+        }
+        if flags.intersects(!(AtFlags::EACCESS | AtFlags::SYMLINK_NOFOLLOW)) {
+            return Err(io::Errno::INVAL);
+        }
+        if !flags.is_empty() {
+            return Err(io::Errno::OPNOTSUPP);
+        }
+        ret(c::access(c_str(path), access.bits()))
+    }
+
+    #[cfg(not(target_os = "macos"))]
     unsafe {
         ret(c::faccessat(
             borrowed_fd(dirfd),
