@@ -9,7 +9,7 @@ fn same(a: &Stat, b: &Stat) -> bool {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn test_renameat() {
-    use rustix::fs::{cwd, openat, renameat, statat, AtFlags, Mode, OFlags};
+    use rustix::fs::{accessat, cwd, openat, renameat, statat, Access, AtFlags, Mode, OFlags};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
@@ -22,9 +22,16 @@ fn test_renameat() {
 
     let _ = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
     let before = statat(&dir, "foo", AtFlags::empty()).unwrap();
+
+    accessat(&dir, "foo", Access::EXISTS, AtFlags::empty()).unwrap();
+    accessat(&dir, "bar", Access::EXISTS, AtFlags::empty()).unwrap_err();
+
     renameat(&dir, "foo", &dir, "bar").unwrap();
     let renamed = statat(&dir, "bar", AtFlags::empty()).unwrap();
     assert!(same(&before, &renamed));
+
+    accessat(&dir, "foo", Access::EXISTS, AtFlags::empty()).unwrap_err();
+    accessat(&dir, "bar", Access::EXISTS, AtFlags::empty()).unwrap();
 }
 
 /// Like `test_renameat` but the file already exists, so `renameat`

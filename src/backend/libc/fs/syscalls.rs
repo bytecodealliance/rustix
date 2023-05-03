@@ -251,6 +251,42 @@ pub(crate) fn linkat(
     new_path: &CStr,
     flags: AtFlags,
 ) -> io::Result<()> {
+    // macOS <= 10.9 lacks `linkat`.
+    #[cfg(target_os = "macos")]
+    unsafe {
+        weak! {
+            fn linkat(
+                c::c_int,
+                *const c::c_char,
+                c::c_int,
+                *const c::c_char,
+                c::c_int
+            ) -> c::c_int
+        }
+        // If we have `linkat`, use it.
+        if let Some(libc_linkat) = linkat.get() {
+            return ret(libc_linkat(
+                borrowed_fd(old_dirfd),
+                c_str(old_path),
+                borrowed_fd(new_dirfd),
+                c_str(new_path),
+                flags.bits(),
+            ));
+        }
+        // Otherwise, see if we can emulate the `AT_FDCWD` case.
+        if borrowed_fd(old_dirfd) != c::AT_FDCWD || borrowed_fd(new_dirfd) != c::AT_FDCWD {
+            return Err(io::Errno::NOSYS);
+        }
+        if flags.intersects(!AtFlags::SYMLINK_FOLLOW) {
+            return Err(io::Errno::INVAL);
+        }
+        if !flags.is_empty() {
+            return Err(io::Errno::OPNOTSUPP);
+        }
+        ret(c::link(c_str(old_path), c_str(new_path)))
+    }
+
+    #[cfg(not(target_os = "macos"))]
     unsafe {
         ret(c::linkat(
             borrowed_fd(old_dirfd),
@@ -264,7 +300,38 @@ pub(crate) fn linkat(
 
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<()> {
-    unsafe { ret(c::unlinkat(borrowed_fd(dirfd), c_str(path), flags.bits())) }
+    // macOS <= 10.9 lacks `unlinkat`.
+    #[cfg(target_os = "macos")]
+    unsafe {
+        weak! {
+            fn unlinkat(
+                c::c_int,
+                *const c::c_char,
+                c::c_int
+            ) -> c::c_int
+        }
+        // If we have `unlinkat`, use it.
+        if let Some(libc_unlinkat) = unlinkat.get() {
+            return ret(libc_unlinkat(borrowed_fd(dirfd), c_str(path), flags.bits()));
+        }
+        // Otherwise, see if we can emulate the `AT_FDCWD` case.
+        if borrowed_fd(dirfd) != c::AT_FDCWD {
+            return Err(io::Errno::NOSYS);
+        }
+        if flags.intersects(!AtFlags::REMOVEDIR) {
+            return Err(io::Errno::INVAL);
+        }
+        if flags.contains(AtFlags::REMOVEDIR) {
+            ret(c::rmdir(c_str(path)))
+        } else {
+            ret(c::unlink(c_str(path)))
+        }
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    unsafe {
+        ret(c::unlinkat(borrowed_fd(dirfd), c_str(path), flags.bits()))
+    }
 }
 
 #[cfg(not(target_os = "redox"))]
@@ -274,6 +341,34 @@ pub(crate) fn renameat(
     new_dirfd: BorrowedFd<'_>,
     new_path: &CStr,
 ) -> io::Result<()> {
+    // macOS <= 10.9 lacks `renameat`.
+    #[cfg(target_os = "macos")]
+    unsafe {
+        weak! {
+            fn renameat(
+                c::c_int,
+                *const c::c_char,
+                c::c_int,
+                *const c::c_char
+            ) -> c::c_int
+        }
+        // If we have `renameat`, use it.
+        if let Some(libc_renameat) = renameat.get() {
+            return ret(libc_renameat(
+                borrowed_fd(old_dirfd),
+                c_str(old_path),
+                borrowed_fd(new_dirfd),
+                c_str(new_path),
+            ));
+        }
+        // Otherwise, see if we can emulate the `AT_FDCWD` case.
+        if borrowed_fd(old_dirfd) != c::AT_FDCWD || borrowed_fd(new_dirfd) != c::AT_FDCWD {
+            return Err(io::Errno::NOSYS);
+        }
+        ret(c::rename(c_str(old_path), c_str(new_path)))
+    }
+
+    #[cfg(not(target_os = "macos"))]
     unsafe {
         ret(c::renameat(
             borrowed_fd(old_dirfd),
@@ -405,6 +500,40 @@ pub(crate) fn accessat(
     access: Access,
     flags: AtFlags,
 ) -> io::Result<()> {
+    // macOS <= 10.9 lacks `faccessat`.
+    #[cfg(target_os = "macos")]
+    unsafe {
+        weak! {
+            fn faccessat(
+                c::c_int,
+                *const c::c_char,
+                c::c_int,
+                c::c_int
+            ) -> c::c_int
+        }
+        // If we have `faccessat`, use it.
+        if let Some(libc_faccessat) = faccessat.get() {
+            return ret(libc_faccessat(
+                borrowed_fd(dirfd),
+                c_str(path),
+                access.bits(),
+                flags.bits(),
+            ));
+        }
+        // Otherwise, see if we can emulate the `AT_FDCWD` case.
+        if borrowed_fd(dirfd) != c::AT_FDCWD {
+            return Err(io::Errno::NOSYS);
+        }
+        if flags.intersects(!(AtFlags::EACCESS | AtFlags::SYMLINK_NOFOLLOW)) {
+            return Err(io::Errno::INVAL);
+        }
+        if !flags.is_empty() {
+            return Err(io::Errno::OPNOTSUPP);
+        }
+        ret(c::access(c_str(path), access.bits()))
+    }
+
+    #[cfg(not(target_os = "macos"))]
     unsafe {
         ret(c::faccessat(
             borrowed_fd(dirfd),
