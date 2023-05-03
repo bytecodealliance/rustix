@@ -254,22 +254,33 @@ pub(crate) fn linkat(
     // macOS <= 10.9 lacks `linkat`.
     #[cfg(target_os = "macos")]
     unsafe {
-        syscall! {
+        weak! {
             fn linkat(
-                olddirfd: c::c_int,
-                oldpath: *const c::c_char,
-                newdirfd: c::c_int,
-                newpath: *const c::c_char,
-                flags: c::c_int
-            ) via SYS_linkat -> c::c_int
+                c::c_int,
+                *const c::c_char,
+                c::c_int,
+                *const c::c_char,
+                c::c_int
+            ) -> c::c_int
         }
-        ret(linkat(
-            borrowed_fd(old_dirfd),
-            c_str(old_path),
-            borrowed_fd(new_dirfd),
-            c_str(new_path),
-            flags.bits(),
-        ))
+        // If we have `linkat`, use it.
+        if let Some(libc_linkat) = linkat.get() {
+            return ret(libc_linkat(
+                borrowed_fd(old_dirfd),
+                c_str(old_path),
+                borrowed_fd(new_dirfd),
+                c_str(new_path),
+                flags.bits(),
+            ));
+        }
+        // Otherwise, see if we can emulate the `AT_FDCWD` case.
+        if borrowed_fd(old_dirfd) != c::AT_FDCWD || borrowed_fd(new_dirfd) != c::AT_FDCWD {
+            return Err(io::Errno::NOSYS);
+        }
+        if !flags.is_empty() {
+            return Err(io::Errno::INVAL);
+        }
+        ret(c::link(c_str(old_path), c_str(new_path)))
     }
 
     #[cfg(not(target_os = "macos"))]
@@ -289,14 +300,29 @@ pub(crate) fn unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io
     // macOS <= 10.9 lacks `unlinkat`.
     #[cfg(target_os = "macos")]
     unsafe {
-        syscall! {
+        weak! {
             fn unlinkat(
-                dirfd: c::c_int,
-                pathname: *const c::c_char,
-                flags: c::c_int
-            ) via SYS_unlinkat -> c::c_int
+                c::c_int,
+                *const c::c_char,
+                c::c_int
+            ) -> c::c_int
         }
-        ret(unlinkat(borrowed_fd(dirfd), c_str(path), flags.bits()))
+        // If we have `unlinkat`, use it.
+        if let Some(libc_unlinkat) = unlinkat.get() {
+            return ret(libc_unlinkat(borrowed_fd(dirfd), c_str(path), flags.bits()));
+        }
+        // Otherwise, see if we can emulate the `AT_FDCWD` case.
+        if borrowed_fd(dirfd) != c::AT_FDCWD {
+            return Err(io::Errno::NOSYS);
+        }
+        if flags.intersects(!AtFlags::REMOVEDIR) {
+            return Err(io::Errno::INVAL);
+        }
+        if flags.contains(AtFlags::REMOVEDIR) {
+            ret(c::rmdir(c_str(path)))
+        } else {
+            ret(c::unlink(c_str(path)))
+        }
     }
 
     #[cfg(not(target_os = "macos"))]
@@ -315,20 +341,28 @@ pub(crate) fn renameat(
     // macOS <= 10.9 lacks `renameat`.
     #[cfg(target_os = "macos")]
     unsafe {
-        syscall! {
+        weak! {
             fn renameat(
-                olddirfd: c::c_int,
-                oldpath: *const c::c_char,
-                newdirfd: c::c_int,
-                newpath: *const c::c_char
-            ) via SYS_linkat -> c::c_int
+                c::c_int,
+                *const c::c_char,
+                c::c_int,
+                *const c::c_char
+            ) -> c::c_int
         }
-        ret(renameat(
-            borrowed_fd(old_dirfd),
-            c_str(old_path),
-            borrowed_fd(new_dirfd),
-            c_str(new_path),
-        ))
+        // If we have `renameat`, use it.
+        if let Some(libc_renameat) = renameat.get() {
+            return ret(libc_renameat(
+                borrowed_fd(old_dirfd),
+                c_str(old_path),
+                borrowed_fd(new_dirfd),
+                c_str(new_path),
+            ));
+        }
+        // Otherwise, see if we can emulate the `AT_FDCWD` case.
+        if borrowed_fd(old_dirfd) != c::AT_FDCWD || borrowed_fd(new_dirfd) != c::AT_FDCWD {
+            return Err(io::Errno::NOSYS);
+        }
+        ret(c::rename(c_str(old_path), c_str(new_path)))
     }
 
     #[cfg(not(target_os = "macos"))]
