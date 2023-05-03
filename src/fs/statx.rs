@@ -42,8 +42,8 @@ mod compat {
 
     use backend::fs::types::{Statx, StatxFlags};
 
-    // Linux kernel prior to 4.11 old versions of Docker don't support `statx`. We
-    // store the availability in a global to avoid unnecessary syscalls.
+    // Linux kernel prior to 4.11 old versions of Docker don't support `statx`.
+    // We store the availability in a global to avoid unnecessary syscalls.
     //
     // 0: Unknown
     // 1: Not available
@@ -92,9 +92,9 @@ mod compat {
     /// The first `statx` call failed with `PERM`.
     #[cold]
     fn statx_error_perm() -> io::Result<Statx> {
-        // Some old versions of Docker have `statx` fail with `PERM` when it isn't
-        // recognized. Check whether `statx` really is available, and if so, fail
-        // with `PERM`, and if not, treat it like `NOSYS`.
+        // Some old versions of Docker have `statx` fail with `PERM` when it
+        // isn't recognized. Check whether `statx` really is available, and if
+        // so, fail with `PERM`, and if not, treat it like `NOSYS`.
         if backend::fs::syscalls::is_statx_available() {
             STATX_STATE.store(2, Ordering::Relaxed);
             Err(io::Errno::PERM)

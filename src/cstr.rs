@@ -40,9 +40,9 @@ macro_rules! cstr {
 
         #[allow(unsafe_code, unused_unsafe)]
         {
-            // Now that we know the string doesn't have embedded NULs, we can call
-            // `from_bytes_with_nul_unchecked`, which as of this writing is defined
-            // as `#[inline]` and completely optimizes away.
+            // Now that we know the string doesn't have embedded NULs, we can
+            // call `from_bytes_with_nul_unchecked`, which as of this writing
+            // is defined as `#[inline]` and completely optimizes away.
             //
             // SAFETY: We have manually checked that the string does not contain
             // embedded NULs above, and we append or own NUL terminator here.

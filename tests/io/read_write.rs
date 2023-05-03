@@ -168,7 +168,8 @@ fn test_pwritev2() {
     // pwritev2 to append with a 0 offset: don't update the current position.
     match pwritev2(&foo, &[IoSlice::new(b"world")], 0, ReadWriteFlags::APPEND) {
         Ok(_) => {}
-        // Skip the rest of the test if we don't have `pwritev2` and `RWF_APPEND`.
+        // Skip the rest of the test if we don't have `pwritev2` and
+        // `RWF_APPEND`.
         Err(rustix::io::Errno::NOSYS) | Err(rustix::io::Errno::NOTSUP) => return,
         Err(err) => Err(err).unwrap(),
     }

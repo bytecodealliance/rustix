@@ -49,8 +49,8 @@ use {crate::io, backend::fd::AsFd, core::mem::forget};
 #[doc(alias = "STDIN_FILENO")]
 #[inline]
 pub const fn stdin() -> BorrowedFd<'static> {
-    // SAFETY: When "std" is enabled, the standard library assumes that the stdio
-    // file descriptors are all valid.
+    // SAFETY: When "std" is enabled, the standard library assumes that the
+    // stdio file descriptors are all valid.
     unsafe { BorrowedFd::borrow_raw(backend::io::types::STDIN_FILENO as RawFd) }
 }
 
@@ -171,8 +171,8 @@ pub unsafe fn take_stdin() -> OwnedFd {
 #[doc(alias = "STDOUT_FILENO")]
 #[inline]
 pub const fn stdout() -> BorrowedFd<'static> {
-    // SAFETY: When "std" is enabled, the standard library assumes that the stdio
-    // file descriptors are all valid.
+    // SAFETY: When "std" is enabled, the standard library assumes that the
+    // stdio file descriptors are all valid.
     unsafe { BorrowedFd::borrow_raw(backend::io::types::STDOUT_FILENO as RawFd) }
 }
 
@@ -287,8 +287,8 @@ pub unsafe fn take_stdout() -> OwnedFd {
 #[doc(alias = "STDERR_FILENO")]
 #[inline]
 pub const fn stderr() -> BorrowedFd<'static> {
-    // SAFETY: When "std" is enabled, the standard library assumes that the stdio
-    // file descriptors are all valid.
+    // SAFETY: When "std" is enabled, the standard library assumes that the
+    // stdio file descriptors are all valid.
     unsafe { BorrowedFd::borrow_raw(backend::io::types::STDERR_FILENO as RawFd) }
 }
 

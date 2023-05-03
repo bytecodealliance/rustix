@@ -113,7 +113,8 @@ pub fn inotify_add_watch<P: crate::path::Arg>(
 /// by [`inotify_add_watch`] and not previously have been removed.
 #[doc(alias = "inotify_rm_watch")]
 pub fn inotify_remove_watch(inot: BorrowedFd<'_>, wd: i32) -> io::Result<()> {
-    // Android's `inotify_rm_watch` takes u32 despite `inotify_add_watch` is i32.
+    // Android's `inotify_rm_watch` takes `u32` despite that
+    // `inotify_add_watch` expects a `i32`.
     #[cfg(target_os = "android")]
     let wd = wd as u32;
     // SAFETY: The fd is valid and closing an arbitrary wd is valid.

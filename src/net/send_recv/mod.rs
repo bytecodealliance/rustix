@@ -12,13 +12,7 @@ pub use backend::net::send_recv::{RecvFlags, SendFlags};
 mod msg;
 
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
-pub use msg::{
-    recvmsg, sendmsg_any, sendmsg_noaddr, sendmsg_v4, sendmsg_v6, RecvAncillaryBuffer,
-    RecvAncillaryMessage, RecvMsgReturn, SendAncillaryBuffer, SendAncillaryMessage, __cmsg_space,
-};
-
-#[cfg(unix)]
-pub use msg::sendmsg_unix;
+pub use msg::*;
 
 /// `recv(fd, buf, flags)`—Reads data from a socket.
 ///

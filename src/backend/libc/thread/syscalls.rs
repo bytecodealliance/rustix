@@ -50,8 +50,8 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
     let mut remain = MaybeUninit::<LibcTimespec>::uninit();
     let flags = 0;
 
-    // 32-bit gnu version: libc has `clock_nanosleep` but it is not y2038 safe by
-    // default.
+    // 32-bit gnu version: libc has `clock_nanosleep` but it is not y2038 safe
+    // by default.
     #[cfg(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
         target_env = "gnu",
@@ -142,8 +142,8 @@ unsafe fn clock_nanosleep_relative_old(id: ClockId, request: &Timespec) -> Nanos
 pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::Result<()> {
     let flags = c::TIMER_ABSTIME;
 
-    // 32-bit gnu version: libc has `clock_nanosleep` but it is not y2038 safe by
-    // default.
+    // 32-bit gnu version: libc has `clock_nanosleep` but it is not y2038 safe
+    // by default.
     #[cfg(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
         target_env = "gnu",

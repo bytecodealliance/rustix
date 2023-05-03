@@ -503,8 +503,8 @@ unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitidS
     // `si_pid` is supposedly the better way to check that the struct has been
     // filled, e.g. the Linux manpage says about the `WNOHANG` case “zero out
     // the si_pid field before the call and check for a nonzero value”.
-    // But e.g. NetBSD/OpenBSD don't have it exposed in the libc crate for now, and
-    // some platforms don't have it at all. For simplicity, always check
+    // But e.g. NetBSD/OpenBSD don't have it exposed in the libc crate for now,
+    // and some platforms don't have it at all. For simplicity, always check
     // `si_signo`. We have zero-initialized the whole struct, and all kernels
     // should set `SIGCHLD` here.
     if status.si_signo == 0 {

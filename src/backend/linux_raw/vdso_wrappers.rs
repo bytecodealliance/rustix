@@ -376,8 +376,8 @@ fn init() {
             assert!(!ptr.is_null());
 
             // SAFETY: Store the computed function addresses in static storage
-            // so that we don't need to compute it again (but if we do, it doesn't
-            // hurt anything).
+            // so that we don't need to compute it again (but if we do, it
+            // doesn't hurt anything).
             unsafe {
                 CLOCK_GETTIME.store(ptr.cast(), Relaxed);
             }

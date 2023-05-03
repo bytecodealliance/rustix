@@ -1,6 +1,10 @@
 // Implementation derived from `weak` in Rust's
 // library/std/src/sys/unix/weak.rs at revision
 // fd0cb0cdc21dd9c06025277d772108f8d42cb25f.
+//
+// Ideally we should update to a newer version which doesn't need `dlsym`,
+// however that depends on the `extern_weak` feature which is currrently
+// unstable.
 
 #![cfg_attr(linux_raw, allow(unsafe_code))]
 

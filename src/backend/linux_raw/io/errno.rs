@@ -62,8 +62,8 @@ impl Errno {
 
     /// Convert from a C `errno` value (which is positive) to an `Errno`.
     const fn from_errno(raw: u32) -> Self {
-        // We store error values in negated form, so that we don't have to negate
-        // them after every syscall.
+        // We store error values in negated form, so that we don't have to
+        // negate them after every syscall.
         let encoded = raw.wrapping_neg() as u16;
 
         // TODO: Use Range::contains, once that's `const`.
