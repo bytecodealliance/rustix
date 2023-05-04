@@ -78,14 +78,16 @@ fn check_proc_entry_with_stat(
 
     match kind {
         Kind::Fd => {
-            // Check that the "/proc/self/fd" directory doesn't have any extraneous
-            // links into it (which might include unexpected subdirectories).
+            // Check that the "/proc/self/fd" directory doesn't have any
+            // extraneous links into it (which might include unexpected
+            // subdirectories).
             if entry_stat.st_nlink != 2 {
                 return Err(io::Errno::NOTSUP);
             }
         }
         Kind::Pid | Kind::Proc => {
-            // Check that the "/proc" and "/proc/self" directories aren't empty.
+            // Check that the "/proc" and "/proc/self" directories aren't
+            // empty.
             if entry_stat.st_nlink <= 2 {
                 return Err(io::Errno::NOTSUP);
             }
@@ -246,8 +248,8 @@ fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 
             let pid = getpid();
 
-            // Open "/proc/self". Use our pid to compute the name rather than literally
-            // using "self", as "self" is a symlink.
+            // Open "/proc/self". Use our pid to compute the name rather than
+            // literally using "self", as "self" is a symlink.
             let proc_self = proc_opendirat(proc, DecInt::new(pid.as_raw_nonzero().get()))?;
             let proc_self_stat = check_proc_entry(Kind::Pid, proc_self.as_fd(), Some(proc_stat))
                 .map_err(|_err| io::Errno::NOTSUP)?;

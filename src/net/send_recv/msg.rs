@@ -1,4 +1,4 @@
-//! [`recvmsg`] and [`sendmsg`] functions.
+//! [`recvmsg`], [`sendmsg_noaddr`], and related functions.
 
 #![allow(unsafe_code)]
 
@@ -739,7 +739,8 @@ mod messages {
 
         fn size_hint(&self) -> (usize, Option<usize>) {
             if self.header.is_some() {
-                // The remaining buffer *could* be filled with zero-length messages.
+                // The remaining buffer *could* be filled with zero-length
+                // messages.
                 let max_size = unsafe { c::CMSG_LEN(0) } as usize;
                 let remaining_count = self.msghdr.msg_controllen as usize / max_size;
                 (1, Some(remaining_count))

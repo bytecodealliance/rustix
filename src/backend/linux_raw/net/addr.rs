@@ -74,8 +74,9 @@ impl SocketAddrUnix {
         if len != 0 && self.unix.sun_path[0] != b'\0' as c::c_char {
             let end = len as usize - offsetof_sun_path();
             let bytes = &self.unix.sun_path[..end];
-            // SAFETY: `from_raw_parts` to convert from `&[c_char]` to `&[u8]`. And
-            // `from_bytes_with_nul_unchecked` since the string is NUL-terminated.
+            // SAFETY: `from_raw_parts` to convert from `&[c_char]` to `&[u8]`.
+            // And `from_bytes_with_nul_unchecked` since the string is
+            // NUL-terminated.
             unsafe {
                 Some(CStr::from_bytes_with_nul_unchecked(slice::from_raw_parts(
                     bytes.as_ptr().cast(),

@@ -3,7 +3,7 @@
 //! The `dirfd` argument to these functions may be a file descriptor for a
 //! directory, or the special value returned by [`cwd`].
 //!
-//! [`cwd`]: crate::fs::cwd
+//! [`cwd`]: crate::fs::cwd::cwd
 
 use crate::fd::OwnedFd;
 use crate::ffi::{CStr, CString};

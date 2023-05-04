@@ -5,7 +5,8 @@
 
 #![allow(unsafe_code)]
 
-use alloc::{vec, vec::Vec};
+use alloc::vec;
+use alloc::vec::Vec;
 use core::mem::MaybeUninit;
 use core::ptr;
 
@@ -281,7 +282,8 @@ bitflags! {
         const VALID = 1;
         /// The pid field identifies a direct child of the reaper.
         const CHILD = 2;
-        /// The reported process is itself a reaper. Descendants of a subordinate reaper are not reported.
+        /// The reported process is itself a reaper. Descendants of a
+        /// subordinate reaper are not reported.
         const REAPER = 4;
         /// The reported process is in the zombie state.
         const ZOMBIE = 8;

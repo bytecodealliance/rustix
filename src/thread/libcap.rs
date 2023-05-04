@@ -140,8 +140,8 @@ fn capget(pid: Option<Pid>) -> io::Result<CapabilitySets> {
         };
 
         backend::thread::syscalls::capget(&mut header, &mut data)?;
-        // SAFETY: v3 is a 64-bit implementation, so the kernel filled in both data
-        // structs.
+        // SAFETY: v3 is a 64-bit implementation, so the kernel filled in both
+        // data structs.
         unsafe { (data[0].assume_init(), data[1].assume_init()) }
     };
 
@@ -152,7 +152,8 @@ fn capget(pid: Option<Pid>) -> io::Result<CapabilitySets> {
         let permitted = u64::from(data.0.permitted) | (u64::from(data.1.permitted) << BITS);
         let inheritable = u64::from(data.0.inheritable) | (u64::from(data.1.inheritable) << BITS);
 
-        // SAFETY: the kernel returns a partitioned bitset that we just combined above
+        // SAFETY: The kernel returns a partitioned bitset that we just
+        // combined above.
         Ok(CapabilitySets {
             effective: unsafe { CapabilityFlags::from_bits_unchecked(effective) },
             permitted: unsafe { CapabilityFlags::from_bits_unchecked(permitted) },

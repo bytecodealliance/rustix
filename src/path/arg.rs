@@ -953,8 +953,8 @@ where
     // This helps test our safety condition below.
     debug_assert!(bytes.len() + 1 <= SMALL_PATH_BUFFER_SIZE);
 
-    // SAFETY: `bytes.len() < SMALL_PATH_BUFFER_SIZE` which means we have space for
-    // `bytes.len() + 1` u8s:
+    // SAFETY: `bytes.len() < SMALL_PATH_BUFFER_SIZE` which means we have space
+    // for `bytes.len() + 1` u8s:
     unsafe {
         ptr::copy_nonoverlapping(bytes.as_ptr(), buf_ptr, bytes.len());
         buf_ptr.add(bytes.len()).write(0);

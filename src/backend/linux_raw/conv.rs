@@ -143,9 +143,9 @@ impl<'a, Num: ArgNumber> From<Option<&'a CStr>> for ArgReg<'a, Num> {
 impl<'a, Num: ArgNumber> From<BorrowedFd<'a>> for ArgReg<'a, Num> {
     #[inline]
     fn from(fd: BorrowedFd<'a>) -> Self {
-        // SAFETY: `BorrowedFd` ensures that the file descriptor is valid, and the
-        // lifetime parameter on the resulting `ArgReg` ensures that the result is
-        // bounded by the `BorrowedFd`'s lifetime.
+        // SAFETY: `BorrowedFd` ensures that the file descriptor is valid, and
+        // the lifetime parameter on the resulting `ArgReg` ensures that the
+        // result is bounded by the `BorrowedFd`'s lifetime.
         unsafe { raw_fd(fd.as_raw_fd()) }
     }
 }
