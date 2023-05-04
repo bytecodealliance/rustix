@@ -17,6 +17,7 @@ use crate::backend::process::syscalls;
 use crate::backend::process::types::{RawId, Signal};
 use crate::io;
 use crate::process::{Pid, RawPid};
+use crate::utils::{as_mut_ptr, as_ptr};
 
 //
 // Helper functions.
@@ -61,7 +62,7 @@ pub(crate) unsafe fn procctl_set<P>(
     process: ProcSelector,
     data: &P,
 ) -> io::Result<()> {
-    procctl(option, process, (data as *const P as *mut P).cast())
+    procctl(option, process, (as_ptr(data) as *mut P).cast())
 }
 
 #[inline]
@@ -338,13 +339,7 @@ pub fn get_reaper_pids(process: ProcSelector) -> io::Result<Vec<PidInfo>> {
         rp_pad0: [0; 15],
         rp_pids: pids.as_mut_slice().as_mut_ptr(),
     };
-    unsafe {
-        procctl(
-            PROC_REAP_GETPIDS,
-            process,
-            (&mut pinfo as *mut procctl_reaper_pids).cast(),
-        )?
-    };
+    unsafe { procctl(PROC_REAP_GETPIDS, process, as_mut_ptr(&mut pinfo).cast())? };
     let mut result = Vec::new();
     for raw in pids.into_iter() {
         let flags = PidInfoFlags::from_bits_truncate(raw.pi_flags);
@@ -412,13 +407,7 @@ pub fn reaper_kill(
         rk_fpid: 0,
         rk_pad0: [0; 15],
     };
-    unsafe {
-        procctl(
-            PROC_REAP_KILL,
-            process,
-            (&mut req as *mut procctl_reaper_kill).cast(),
-        )?
-    };
+    unsafe { procctl(PROC_REAP_KILL, process, as_mut_ptr(&mut req).cast())? };
     Ok(KillResult {
         killed: req.rk_killed as _,
         first_failed: if req.rk_fpid == -1 {

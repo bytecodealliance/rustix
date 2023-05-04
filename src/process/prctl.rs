@@ -18,6 +18,7 @@ use crate::fd::{AsRawFd, BorrowedFd};
 use crate::ffi::CStr;
 use crate::io;
 use crate::process::{Pid, RawPid};
+use crate::utils::{as_mut_ptr, as_ptr};
 
 //
 // Helper functions.
@@ -58,7 +59,7 @@ where
     T: TryFrom<P, Error = io::Errno>,
 {
     let mut value: P = Default::default();
-    prctl_2args(option, ((&mut value) as *mut P).cast())?;
+    prctl_2args(option, as_mut_ptr(&mut value).cast())?;
     TryFrom::try_from(value)
 }
 
@@ -702,7 +703,7 @@ pub unsafe fn set_auxiliary_vector(auxv: &[*const c_void]) -> io::Result<()> {
 #[inline]
 pub fn virtual_memory_map_config_struct_size() -> io::Result<usize> {
     let mut value: c_uint = 0;
-    let value_ptr = (&mut value) as *mut c_uint;
+    let value_ptr = as_mut_ptr(&mut value);
     unsafe { prctl_3args(PR_SET_MM, PR_SET_MM_MAP_SIZE as *mut _, value_ptr.cast())? };
     Ok(value as usize)
 }
@@ -761,7 +762,7 @@ pub unsafe fn configure_virtual_memory_map(config: &PrctlMmMap) -> io::Result<()
     syscalls::prctl(
         PR_SET_MM,
         PR_SET_MM_MAP as *mut _,
-        config as *const PrctlMmMap as *mut _,
+        as_ptr(config) as *mut _,
         size_of::<PrctlMmMap>() as *mut _,
         null_mut(),
     )

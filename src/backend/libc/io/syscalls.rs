@@ -34,7 +34,7 @@ use libc_errno::errno;
 use {
     super::super::conv::syscall_ret_owned_fd,
     crate::io::{IoSliceRaw, ReadWriteFlags, SpliceFlags},
-    core::ptr,
+    crate::utils::optional_as_mut_ptr,
 };
 #[cfg(bsd)]
 use {crate::io::kqueue::Event, crate::utils::as_ptr, core::ptr::null};
@@ -586,13 +586,8 @@ pub fn splice(
     len: usize,
     flags: SpliceFlags,
 ) -> io::Result<usize> {
-    let off_in = off_in
-        .map(|off| (off as *mut u64).cast())
-        .unwrap_or(ptr::null_mut());
-
-    let off_out = off_out
-        .map(|off| (off as *mut u64).cast())
-        .unwrap_or(ptr::null_mut());
+    let off_in = optional_as_mut_ptr(off_in).cast();
+    let off_out = optional_as_mut_ptr(off_out).cast();
 
     unsafe {
         ret_usize(c::splice(
