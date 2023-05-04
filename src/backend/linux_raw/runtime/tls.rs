@@ -29,7 +29,7 @@ pub(crate) fn startup_tls_info() -> StartupTlsInfo {
     unsafe {
         for phdr in phdrs {
             match phdr.p_type {
-                PT_PHDR => base = phdrs.as_ptr().cast::<u8>().offset(-(phdr.p_vaddr as isize)),
+                PT_PHDR => base = phdrs.as_ptr().cast::<u8>().sub(phdr.p_vaddr),
                 PT_TLS => tls_phdr = phdr,
                 PT_GNU_STACK => stack_size = phdr.p_memsz,
                 _ => {}
