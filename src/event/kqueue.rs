@@ -113,7 +113,7 @@ impl Event {
                 flags: VnodeEvents::from_bits_truncate(self.inner.fflags),
             },
             c::EVFILT_PROC => EventFilter::Proc {
-                pid: unsafe { Pid::from_raw(self.inner.ident as _) }.unwrap(),
+                pid: Pid::from_raw(self.inner.ident as _).unwrap(),
                 flags: ProcessEvents::from_bits_truncate(self.inner.fflags),
             },
             c::EVFILT_SIGNAL => EventFilter::Signal {
