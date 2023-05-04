@@ -32,14 +32,14 @@ impl Pid {
     /// This is always safe because a `Pid` is a number without any guarantees for the kernel.
     /// Non-child `Pid`s are always racy for any syscalls, but can only cause logic errors. If you
     /// want race-free access or control to non-child processes, please consider other mechanisms
-    /// like [`pidfd`] on Linux.
+    /// like [pidfd] on Linux.
+    ///
+    /// [pidfd]: https://man7.org/linux/man-pages/man2/pidfd_open.2.html
     #[inline]
     pub const fn from_raw(raw: RawPid) -> Option<Self> {
         if raw > 0 {
-            match RawNonZeroPid::new(raw) {
-                Some(pid) => Some(Self(pid)),
-                None => None,
-            }
+            // SAFETY: raw > 0.
+            unsafe { Some(Self::from_raw_unchecked(raw)) }
         } else {
             None
         }
@@ -78,7 +78,7 @@ impl Pid {
         pid.map_or(0, |pid| pid.0.get())
     }
 
-    /// Test whether this pid represents the init process (pid 0).
+    /// Test whether this pid represents the init process (pid 1).
     #[inline]
     pub const fn is_init(self) -> bool {
         self.0.get() == Self::INIT.0.get()
