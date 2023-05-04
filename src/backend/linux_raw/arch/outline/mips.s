@@ -186,8 +186,6 @@ rustix_syscall6_nr_last:
     .end        rustix_syscall6_nr_last
     .size       rustix_syscall6_nr_last, .-rustix_syscall6_nr_last
 
-    .section .note.GNU-stack,"",@progbits
-
     .section    .text.rustix_syscall7_nr_last,"ax",@progbits
     .p2align    2
     .weak       rustix_syscall7_nr_last

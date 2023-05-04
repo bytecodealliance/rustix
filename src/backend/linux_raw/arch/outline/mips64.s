@@ -7,7 +7,7 @@
 # outline.rs takes care of reordering the nr argument to the end for us,
 # so we only need to move nr into v0.
 
-    .file       "mips.s"
+    .file       "mips64.s"
     .section    .mdebug.abi64
     .previous
     .abicalls
