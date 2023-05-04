@@ -33,7 +33,7 @@ pub use crate::ugid::{Gid, Uid};
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 pub struct Cpuid(RawCpuid);
 
-#[cfg(linux_kernel)]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 impl Cpuid {
     /// Converts a `RawCpuid` into a `Cpuid`.
     ///

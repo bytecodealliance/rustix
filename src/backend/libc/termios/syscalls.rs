@@ -14,7 +14,7 @@ use core::mem::MaybeUninit;
 #[cfg(not(target_os = "wasi"))]
 use {
     crate::io,
-    crate::pid::{Pid, RawNonZeroPid},
+    crate::pid::Pid,
     crate::termios::{Action, OptionalActions, QueueSelector, Speed, Termios, Winsize},
 };
 
@@ -52,8 +52,7 @@ pub(crate) fn tcgetattr2(fd: BorrowedFd<'_>) -> io::Result<crate::termios::Termi
 pub(crate) fn tcgetpgrp(fd: BorrowedFd<'_>) -> io::Result<Pid> {
     unsafe {
         let pid = ret_pid_t(c::tcgetpgrp(borrowed_fd(fd)))?;
-        debug_assert_ne!(pid, 0);
-        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid)))
+        Ok(Pid::from_raw_unchecked(pid))
     }
 }
 
@@ -128,8 +127,7 @@ pub(crate) fn tcflow(fd: BorrowedFd, action: Action) -> io::Result<()> {
 pub(crate) fn tcgetsid(fd: BorrowedFd) -> io::Result<Pid> {
     unsafe {
         let pid = ret_pid_t(c::tcgetsid(borrowed_fd(fd)))?;
-        debug_assert_ne!(pid, 0);
-        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid)))
+        Ok(Pid::from_raw_unchecked(pid))
     }
 }
 

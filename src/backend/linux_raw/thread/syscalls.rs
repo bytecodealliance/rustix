@@ -13,7 +13,7 @@ use crate::backend::conv::{
 };
 use crate::fd::BorrowedFd;
 use crate::io;
-use crate::pid::{Pid, RawNonZeroPid};
+use crate::pid::Pid;
 use crate::thread::{ClockId, FutexFlags, FutexOperation, NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
 #[cfg(target_pointer_width = "32")]
@@ -201,7 +201,7 @@ pub(crate) fn gettid() -> Pid {
     unsafe {
         let tid = ret_c_int_infallible(syscall_readonly!(__NR_gettid));
         debug_assert_ne!(tid, 0);
-        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(tid))
+        Pid::from_raw_unchecked(tid)
     }
 }
 

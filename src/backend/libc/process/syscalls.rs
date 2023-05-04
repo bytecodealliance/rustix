@@ -26,7 +26,7 @@ use crate::process::Uid;
 #[cfg(linux_kernel)]
 use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "wasi"))]
-use crate::process::{Gid, Pid, RawNonZeroPid, RawPid, Signal, WaitOptions, WaitStatus};
+use crate::process::{Gid, Pid, RawPid, Signal, WaitOptions, WaitStatus};
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use crate::process::{Resource, Rlimit};
 #[cfg(not(any(target_os = "redox", target_os = "openbsd", target_os = "wasi")))]
@@ -109,8 +109,7 @@ pub(crate) fn getppid() -> Option<Pid> {
 pub(crate) fn getpgid(pid: Option<Pid>) -> io::Result<Pid> {
     unsafe {
         let pgid = ret_pid_t(c::getpgid(Pid::as_raw(pid) as _))?;
-        debug_assert_ne!(pgid, 0);
-        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pgid)))
+        Ok(Pid::from_raw_unchecked(pgid))
     }
 }
 
@@ -126,8 +125,7 @@ pub(crate) fn setpgid(pid: Option<Pid>, pgid: Option<Pid>) -> io::Result<()> {
 pub(crate) fn getpgrp() -> Pid {
     unsafe {
         let pgid = c::getpgrp();
-        debug_assert_ne!(pgid, 0);
-        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pgid))
+        Pid::from_raw_unchecked(pgid)
     }
 }
 
@@ -336,12 +334,7 @@ pub(crate) fn _waitpid(
     unsafe {
         let mut status: c::c_int = 0;
         let pid = ret_c_int(c::waitpid(pid as _, &mut status, waitopts.bits() as _))?;
-        Ok(RawNonZeroPid::new(pid).map(|non_zero| {
-            (
-                Pid::from_raw_nonzero(non_zero),
-                WaitStatus::new(status as _),
-            )
-        }))
+        Ok(Pid::from_raw(pid).map(|pid| (pid, WaitStatus::new(status as _))))
     }
 }
 
@@ -442,8 +435,7 @@ unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitidS
 pub(crate) fn getsid(pid: Option<Pid>) -> io::Result<Pid> {
     unsafe {
         let pid = ret_pid_t(c::getsid(Pid::as_raw(pid) as _))?;
-        debug_assert_ne!(pid, 0);
-        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid)))
+        Ok(Pid::from_raw_unchecked(pid))
     }
 }
 
@@ -452,8 +444,7 @@ pub(crate) fn getsid(pid: Option<Pid>) -> io::Result<Pid> {
 pub(crate) fn setsid() -> io::Result<Pid> {
     unsafe {
         let pid = ret_c_int(c::setsid())?;
-        debug_assert_ne!(pid, 0);
-        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid)))
+        Ok(Pid::from_raw_unchecked(pid))
     }
 }
 

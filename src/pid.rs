@@ -19,32 +19,41 @@ pub struct Pid(RawNonZeroPid);
 impl Pid {
     /// A `Pid` corresponding to the init process (pid 1).
     pub const INIT: Self = Self(
-        // SAFETY: The init process' pid is always valid.
+        // SAFETY: One is non-zero.
         unsafe { RawNonZeroPid::new_unchecked(1) },
     );
 
     /// Converts a `RawPid` into a `Pid`.
     ///
+    /// Returns `Some` for strictly positive `RawPid`s. Otherwise, returns `None`.
+    ///
     /// # Safety
     ///
-    /// `raw` must be the value of a valid Unix process ID, or zero.
+    /// This is always safe because a `Pid` is a number without any guarantees for the kernel.
+    /// Non-child `Pid`s are always racy for any syscalls, but can only cause logic errors. If you
+    /// want race-free access or control to non-child processes, please consider other mechanisms
+    /// like [`pidfd`] on Linux.
     #[inline]
-    pub const unsafe fn from_raw(raw: RawPid) -> Option<Self> {
-        match RawNonZeroPid::new(raw) {
-            Some(pid) => Some(Self(pid)),
-            None => None,
+    pub const fn from_raw(raw: RawPid) -> Option<Self> {
+        if raw > 0 {
+            match RawNonZeroPid::new(raw) {
+                Some(pid) => Some(Self(pid)),
+                None => None,
+            }
+        } else {
+            None
         }
     }
 
-    /// Converts a known non-zero `RawPid` into a `Pid`.
+    /// Converts a known strictly positive `RawPid` into a `Pid`.
     ///
     /// # Safety
     ///
-    /// `raw` must be the value of a valid Unix process ID. It must not be
-    /// zero.
+    /// The caller must guarantee `raw` is strictly positive.
     #[inline]
-    pub const unsafe fn from_raw_nonzero(raw: RawNonZeroPid) -> Self {
-        Self(raw)
+    pub const unsafe fn from_raw_unchecked(raw: RawPid) -> Self {
+        debug_assert!(raw > 0);
+        Self(RawNonZeroPid::new_unchecked(raw))
     }
 
     /// Creates a `Pid` holding the ID of the given child process.
@@ -52,11 +61,9 @@ impl Pid {
     #[inline]
     pub fn from_child(child: &std::process::Child) -> Self {
         let id = child.id();
-        debug_assert_ne!(id, 0);
-
         // SAFETY: We know the returned ID is valid because it came directly
         // from an OS API.
-        unsafe { Self::from_raw_nonzero(RawNonZeroPid::new_unchecked(id as _)) }
+        unsafe { Self::from_raw_unchecked(id as i32) }
     }
 
     /// Converts a `Pid` into a `RawNonZeroPid`.

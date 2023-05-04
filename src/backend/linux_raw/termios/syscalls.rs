@@ -10,7 +10,7 @@ use crate::backend::c;
 use crate::backend::conv::{by_ref, c_uint, ret};
 use crate::fd::BorrowedFd;
 use crate::io;
-use crate::pid::{Pid, RawNonZeroPid};
+use crate::pid::Pid;
 #[cfg(feature = "procfs")]
 use crate::procfs;
 use crate::termios::{
@@ -75,7 +75,7 @@ pub(crate) fn tcgetpgrp(fd: BorrowedFd<'_>) -> io::Result<Pid> {
         ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGPGRP), &mut result))?;
         let pid = result.assume_init();
         debug_assert!(pid > 0);
-        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid)))
+        Ok(Pid::from_raw_unchecked(pid))
     }
 }
 
@@ -169,7 +169,7 @@ pub(crate) fn tcgetsid(fd: BorrowedFd) -> io::Result<Pid> {
         ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGSID), &mut result))?;
         let pid = result.assume_init();
         debug_assert!(pid > 0);
-        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid)))
+        Ok(Pid::from_raw_unchecked(pid))
     }
 }
 
