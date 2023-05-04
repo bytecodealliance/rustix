@@ -26,6 +26,7 @@ use crate::process::{
     prctl_1arg, prctl_2args, prctl_3args, prctl_get_at_arg2_optional, Pid,
     PointerAuthenticationKeys,
 };
+use crate::utils::as_ptr;
 
 //
 // PR_GET_KEEPCAPS/PR_SET_KEEPCAPS
@@ -854,7 +855,7 @@ pub unsafe fn enable_syscall_user_dispatch(
         PR_SYS_DISPATCH_ON as *mut _,
         always_allowed_region.as_ptr() as *mut _,
         always_allowed_region.len() as *mut _,
-        fast_switch_flag as *const AtomicU8 as *mut _,
+        as_ptr(fast_switch_flag) as *mut _,
     )
     .map(|_r| ())
 }

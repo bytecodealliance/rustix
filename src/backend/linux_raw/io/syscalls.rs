@@ -366,7 +366,7 @@ pub(crate) fn ext4_ioc_resize_fs(fd: BorrowedFd<'_>, blocks: u64) -> io::Result<
             __NR_ioctl,
             fd,
             c_uint(EXT4_IOC_RESIZE_FS),
-            &blocks as *const u64
+            by_ref(&blocks)
         ))
     }
 }

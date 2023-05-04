@@ -22,6 +22,7 @@ use crate::process::{
     Resource, Rlimit, Signal, Sysinfo, Uid, WaitId, WaitOptions, WaitStatus, WaitidOptions,
     WaitidStatus,
 };
+use crate::utils::as_mut_ptr;
 use core::convert::TryInto;
 use core::mem::MaybeUninit;
 use core::num::NonZeroU32;
@@ -224,7 +225,7 @@ pub(crate) fn sched_getaffinity(pid: Option<Pid>, cpuset: &mut RawCpuSet) -> io:
             size_of::<RawCpuSet, _>(),
             by_mut(&mut cpuset.bits)
         ))?;
-        let bytes = (cpuset as *mut RawCpuSet).cast::<u8>();
+        let bytes = as_mut_ptr(cpuset).cast::<u8>();
         let rest = bytes.wrapping_add(size);
         // Zero every byte in the cpuset not set by the kernel.
         rest.write_bytes(0, core::mem::size_of::<RawCpuSet>() - size);
