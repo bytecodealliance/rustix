@@ -25,12 +25,24 @@ fn test_ioctls() {
     target_arch = "sparc64"
 )))]
 #[test]
-fn test_ioctl_fioclone() {
+fn test_ioctl_ficlone() {
+    use rustix::io;
+
     let src = std::fs::File::open("Cargo.toml").unwrap();
     let dest = tempfile::tempfile().unwrap();
-    rustix::io::ioctl_ficlone(&dest, &dest).unwrap_err();
-    rustix::io::ioctl_ficlone(&src, &src).unwrap_err();
+    let dir = tempfile::tempdir().unwrap();
+    let dir = std::fs::File::open(dir.path()).unwrap();
 
-    // Not all filesystems support this, so we can't assert that it passes.
-    rustix::io::ioctl_ficlone(&dest, &src).ok();
+    // `src` isn't opened for writing, so passing it as the output fails.
+    assert_eq!(rustix::io::ioctl_ficlone(&src, &src), Err(io::Errno::BADF));
+
+    // `FICLONE` operates on regular files, not directories.
+    assert_eq!(rustix::io::ioctl_ficlone(&dir, &dir), Err(io::Errno::ISDIR));
+
+    // Now try something that might succeed, though be prepared for filesystems
+    // that don't support this.
+    match rustix::io::ioctl_ficlone(&dest, &src) {
+        Ok(()) | Err(io::Errno::OPNOTSUPP) => (),
+        Err(err) => Err(err).unwrap(),
+    }
 }
