@@ -142,28 +142,19 @@ fn test_unix() {
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-#[test]
-fn test_unix_msg() {
+fn do_test_unix_msg(addr: SocketAddrUnix) {
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{recvmsg, sendmsg_noaddr, RecvFlags, SendFlags};
-    use std::string::ToString;
-
-    let tmpdir = tempfile::tempdir().unwrap();
-    let path = tmpdir.path().join("scp_4804");
-
-    let connection_socket = socket(
-        AddressFamily::UNIX,
-        SocketType::SEQPACKET,
-        Protocol::default(),
-    )
-    .unwrap();
-
-    let name = SocketAddrUnix::new(&path).unwrap();
-    bind_unix(&connection_socket, &name).unwrap();
-    listen(&connection_socket, 1).unwrap();
 
     let server = {
-        let path = path.clone();
+        let connection_socket = socket(
+            AddressFamily::UNIX,
+            SocketType::SEQPACKET,
+            Protocol::default(),
+        )
+        .unwrap();
+        bind_unix(&connection_socket, &addr).unwrap();
+        listen(&connection_socket, 1).unwrap();
 
         move || {
             let mut buffer = vec![0; BUFFER_SIZE];
@@ -199,13 +190,10 @@ fn test_unix_msg() {
                 )
                 .unwrap();
             }
-
-            unlinkat(cwd(), path, AtFlags::empty()).unwrap();
         }
     };
 
     let client = move || {
-        let addr = SocketAddrUnix::new(path).unwrap();
         let mut buffer = vec![0; BUFFER_SIZE];
         let runs: &[(&[&str], i32)] = &[
             (&["1", "2"], 3),
@@ -286,6 +274,30 @@ fn test_unix_msg() {
 
     client.join().unwrap();
     server.join().unwrap();
+}
+
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[test]
+fn test_unix_msg() {
+    let tmpdir = tempfile::tempdir().unwrap();
+    let path = tmpdir.path().join("scp_4804");
+
+    let name = SocketAddrUnix::new(&path).unwrap();
+    do_test_unix_msg(name);
+
+    unlinkat(cwd(), path, AtFlags::empty()).unwrap();
+}
+
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[test]
+fn test_abstract_unix_msg() {
+    use std::os::unix::ffi::OsStrExt;
+
+    let tmpdir = tempfile::tempdir().unwrap();
+    let path = tmpdir.path().join("scp_4804");
+
+    let name = SocketAddrUnix::new_abstract_name(path.as_os_str().as_bytes()).unwrap();
+    do_test_unix_msg(name);
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
