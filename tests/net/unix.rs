@@ -289,7 +289,7 @@ fn test_unix_msg() {
     unlinkat(cwd(), path, AtFlags::empty()).unwrap();
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 #[test]
 fn test_abstract_unix_msg() {
     use std::os::unix::ffi::OsStrExt;
