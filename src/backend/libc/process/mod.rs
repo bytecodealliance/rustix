@@ -5,6 +5,8 @@
     target_os = "linux",
 ))]
 pub(crate) mod cpu_set;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) mod sigset;
 #[cfg(not(windows))]
 pub(crate) mod syscalls;
 pub(crate) mod types;

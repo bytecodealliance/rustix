@@ -29,6 +29,8 @@ mod rlimit;
 ))]
 mod sched;
 mod sched_yield;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+mod signalfd;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.
 mod system;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have umask.
@@ -65,6 +67,8 @@ pub use rlimit::*;
 ))]
 pub use sched::*;
 pub use sched_yield::sched_yield;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub use signalfd::*;
 #[cfg(not(target_os = "wasi"))]
 pub use system::*;
 #[cfg(not(target_os = "wasi"))]

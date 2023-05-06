@@ -8,7 +8,7 @@
 
 use super::super::c;
 use super::super::conv::{
-    by_mut, by_ref, c_int, c_uint, negative_pid, pass_usize, ret, ret_c_int, ret_c_uint,
+    by_mut, by_ref, c_int, c_uint, negative_pid, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint,
     ret_infallible, ret_usize, ret_usize_infallible, size_of, slice, slice_just_addr,
     slice_just_addr_mut, slice_mut, zero,
 };
@@ -19,8 +19,8 @@ use crate::ffi::CStr;
 use crate::io;
 use crate::process::{
     Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, PidfdFlags, RawNonZeroPid, RawPid,
-    Resource, Rlimit, Signal, Sysinfo, Uid, WaitId, WaitOptions, WaitStatus, WaitidOptions,
-    WaitidStatus,
+    Resource, Rlimit, SigSet, Signal, SignalfdFlags, Sysinfo, Uid, WaitId, WaitOptions, WaitStatus,
+    WaitidOptions, WaitidStatus,
 };
 use crate::utils::as_mut_ptr;
 use core::convert::TryInto;
@@ -744,4 +744,34 @@ pub(crate) fn sysinfo() -> Sysinfo {
 pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
     let (ptr, len) = slice(name);
     unsafe { ret(syscall_readonly!(__NR_sethostname, ptr, len)) }
+}
+
+#[inline]
+pub(crate) fn signalfd_create(mask: &SigSet, flags: SignalfdFlags) -> io::Result<OwnedFd> {
+    unsafe {
+        ret_owned_fd(syscall_readonly!(
+            __NR_signalfd4,
+            raw_fd(-1),
+            by_ref(&mask.0),
+            size_of::<c::sigset_t, _>(),
+            c_int(flags.bits() as _)
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn signalfd_modify(
+    fd: BorrowedFd<'_>,
+    mask: &SigSet,
+    flags: SignalfdFlags,
+) -> io::Result<()> {
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_signalfd4,
+            fd,
+            by_ref(&mask.0),
+            size_of::<c::sigset_t, _>(),
+            c_int(flags.bits() as _)
+        ))
+    }
 }

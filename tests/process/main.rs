@@ -21,6 +21,8 @@ mod procctl;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 mod rlimit;
 mod sched_yield;
+#[cfg(any(target_os = "android", target_os = "linux"))]
+mod signalfd;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have umask.
 mod umask;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.

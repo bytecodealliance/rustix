@@ -28,13 +28,14 @@ use crate::process::Sysinfo;
 #[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 use crate::process::{WaitId, WaitidOptions, WaitidStatus};
 use core::mem::MaybeUninit;
-#[cfg(target_os = "linux")]
-use {super::super::conv::syscall_ret_owned_fd, crate::process::PidfdFlags};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use {
+    super::super::conv::ret_owned_fd,
     super::super::offset::libc_prlimit,
-    crate::process::{Cpuid, MembarrierCommand, MembarrierQuery},
+    crate::process::{Cpuid, MembarrierCommand, MembarrierQuery, SigSet, SignalfdFlags},
 };
+#[cfg(target_os = "linux")]
+use {super::super::conv::syscall_ret_owned_fd, crate::process::PidfdFlags};
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use {
     super::super::offset::{libc_getrlimit, libc_rlimit, libc_setrlimit, LIBC_RLIM_INFINITY},
@@ -647,4 +648,18 @@ pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
             name.len().try_into().map_err(|_| io::Errno::INVAL)?,
         ))
     }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) fn signalfd_create(mask: &SigSet, flags: SignalfdFlags) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(c::signalfd(-1, &mask.0, flags.bits())) }
+}
+
+#[cfg(any(target_os = "android", target_os = "linux"))]
+pub(crate) fn signalfd_modify(
+    fd: BorrowedFd<'_>,
+    mask: &SigSet,
+    flags: SignalfdFlags,
+) -> io::Result<()> {
+    unsafe { ret(c::signalfd(fd.as_raw_fd(), &mask.0, flags.bits())) }
 }
