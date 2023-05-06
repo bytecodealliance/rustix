@@ -187,22 +187,35 @@ unsafe fn inner_read_sockaddr_os(
                 SocketAddrAny::Unix(SocketAddrUnix::new(&[][..]).unwrap())
             } else {
                 let decode = *storage.cast::<c::sockaddr_un>();
-                assert_eq!(
-                    decode.sun_path[len - 1 - offsetof_sun_path],
-                    b'\0' as c::c_char
-                );
-                let path_bytes = &decode.sun_path[..len - 1 - offsetof_sun_path];
-
-                // FreeBSD sometimes sets the length to longer than the length
-                // of the NUL-terminated string. Find the NUL and truncate the
-                // string accordingly.
-                #[cfg(target_os = "freebsd")]
-                let path_bytes = &path_bytes[..path_bytes.iter().position(|b| *b == 0).unwrap()];
-
-                SocketAddrAny::Unix(
-                    SocketAddrUnix::new(path_bytes.iter().map(|c| *c as u8).collect::<Vec<u8>>())
+                if decode.sun_path[0] == 0 {
+                    let address_bytes = &decode.sun_path[1..len - offsetof_sun_path];
+                    SocketAddrAny::Unix(
+                        SocketAddrUnix::new_abstract_name(
+                            &address_bytes.iter().map(|c| *c as u8).collect::<Vec<u8>>(),
+                        )
                         .unwrap(),
-                )
+                    )
+                } else {
+                    assert_eq!(
+                        decode.sun_path[len - 1 - offsetof_sun_path],
+                        b'\0' as c::c_char
+                    );
+                    let path_bytes = &decode.sun_path[..len - 1 - offsetof_sun_path];
+
+                    // FreeBSD sometimes sets the length to longer than the length
+                    // of the NUL-terminated string. Find the NUL and truncate the
+                    // string accordingly.
+                    #[cfg(target_os = "freebsd")]
+                    let path_bytes =
+                        &path_bytes[..path_bytes.iter().position(|b| *b == 0).unwrap()];
+
+                    SocketAddrAny::Unix(
+                        SocketAddrUnix::new(
+                            path_bytes.iter().map(|c| *c as u8).collect::<Vec<u8>>(),
+                        )
+                        .unwrap(),
+                    )
+                }
             }
         }
         other => unimplemented!("{:?}", other),
