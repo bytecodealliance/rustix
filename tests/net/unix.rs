@@ -150,31 +150,22 @@ fn test_unix_msg() {
 
     let tmpdir = tempfile::tempdir().unwrap();
     let path = tmpdir.path().join("scp_4804");
-    let ready = Arc::new((Mutex::new(false), Condvar::new()));
+
+    let connection_socket = socket(
+        AddressFamily::UNIX,
+        SocketType::SEQPACKET,
+        Protocol::default(),
+    )
+    .unwrap();
+
+    let name = SocketAddrUnix::new(&path).unwrap();
+    bind_unix(&connection_socket, &name).unwrap();
+    listen(&connection_socket, 1).unwrap();
 
     let server = {
-        let ready = ready.clone();
         let path = path.clone();
 
         move || {
-            let connection_socket = socket(
-                AddressFamily::UNIX,
-                SocketType::SEQPACKET,
-                Protocol::default(),
-            )
-            .unwrap();
-
-            let name = SocketAddrUnix::new(&path).unwrap();
-            bind_unix(&connection_socket, &name).unwrap();
-            listen(&connection_socket, 1).unwrap();
-
-            {
-                let (lock, cvar) = &*ready;
-                let mut started = lock.lock().unwrap();
-                *started = true;
-                cvar.notify_all();
-            }
-
             let mut buffer = vec![0; BUFFER_SIZE];
             'exit: loop {
                 let data_socket = accept(&connection_socket).unwrap();
@@ -214,14 +205,6 @@ fn test_unix_msg() {
     };
 
     let client = move || {
-        {
-            let (lock, cvar) = &*ready;
-            let mut started = lock.lock().unwrap();
-            while !*started {
-                started = cvar.wait(started).unwrap();
-            }
-        }
-
         let addr = SocketAddrUnix::new(path).unwrap();
         let mut buffer = vec![0; BUFFER_SIZE];
         let runs: &[(&[&str], i32)] = &[
@@ -318,31 +301,23 @@ fn test_unix_msg_with_scm_rights() {
 
     let tmpdir = tempfile::tempdir().unwrap();
     let path = tmpdir.path().join("scp_4804");
-    let ready = Arc::new((Mutex::new(false), Condvar::new()));
 
     let server = {
-        let ready = ready.clone();
         let path = path.clone();
 
+        let connection_socket = socket(
+            AddressFamily::UNIX,
+            SocketType::SEQPACKET,
+            Protocol::default(),
+        )
+        .unwrap();
+
+        let name = SocketAddrUnix::new(&path).unwrap();
+        bind_unix(&connection_socket, &name).unwrap();
+        listen(&connection_socket, 1).unwrap();
+
         move || {
-            let connection_socket = socket(
-                AddressFamily::UNIX,
-                SocketType::SEQPACKET,
-                Protocol::default(),
-            )
-            .unwrap();
             let mut pipe_end = None;
-
-            let name = SocketAddrUnix::new(&path).unwrap();
-            bind_unix(&connection_socket, &name).unwrap();
-            listen(&connection_socket, 1).unwrap();
-
-            {
-                let (lock, cvar) = &*ready;
-                let mut started = lock.lock().unwrap();
-                *started = true;
-                cvar.notify_all();
-            }
 
             let mut buffer = vec![0; BUFFER_SIZE];
             let mut cmsg_space = vec![0; rustix::cmsg_space!(ScmRights(1))];
@@ -403,14 +378,6 @@ fn test_unix_msg_with_scm_rights() {
     };
 
     let client = move || {
-        {
-            let (lock, cvar) = &*ready;
-            let mut started = lock.lock().unwrap();
-            while !*started {
-                started = cvar.wait(started).unwrap();
-            }
-        }
-
         let addr = SocketAddrUnix::new(path).unwrap();
         let (read_end, write_end) = pipe().unwrap();
         let mut buffer = vec![0; BUFFER_SIZE];
