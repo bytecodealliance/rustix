@@ -144,7 +144,7 @@ fn test_unix() {
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 fn do_test_unix_msg(addr: SocketAddrUnix) {
     use rustix::io::{IoSlice, IoSliceMut};
-    use rustix::net::{recvmsg, sendmsg_noaddr, RecvFlags, SendFlags};
+    use rustix::net::{recvmsg, sendmsg_noaddr, RecvFlags, SendFlags, SocketAddrAny};
 
     let server = {
         let connection_socket = socket(
@@ -228,18 +228,19 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
             )
             .unwrap();
 
-            let nread = recvmsg(
+            let result = recvmsg(
                 &data_socket,
                 &mut [IoSliceMut::new(&mut buffer)],
                 &mut Default::default(),
                 RecvFlags::empty(),
             )
-            .unwrap()
-            .bytes;
+            .unwrap();
+            let nread = result.bytes;
             assert_eq!(
                 i32::from_str(&String::from_utf8_lossy(&buffer[..nread])).unwrap(),
                 *sum
             );
+            assert_eq!(Some(SocketAddrAny::Unix(addr.clone())), result.address);
         }
 
         let data_socket = socket(
