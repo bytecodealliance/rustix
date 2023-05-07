@@ -5,7 +5,6 @@
 use super::super::c;
 use crate::io;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
-use alloc::vec::Vec;
 use core::mem::size_of;
 
 // This must match the header of `sockaddr`.
@@ -89,15 +88,22 @@ pub(crate) unsafe fn read_sockaddr(
                 Ok(SocketAddrAny::Unix(SocketAddrUnix::new(&[][..])?))
             } else {
                 let decode = *storage.cast::<c::sockaddr_un>();
-                assert_eq!(
-                    decode.sun_path[len - 1 - offsetof_sun_path],
-                    b'\0' as c::c_char
-                );
+
+                // On Linux check for Linux's [abstract namespace].
+                //
+                // [abstract namespace]: https://man7.org/linux/man-pages/man7/unix.7.html
+                #[cfg(any(target_os = "android", target_os = "linux"))]
+                if decode.sun_path[0] == 0 {
+                    return SocketAddrUnix::new_abstract_name(
+                        &decode.sun_path[1..len - offsetof_sun_path],
+                    )
+                    .map(SocketAddrAny::Unix);
+                }
+
+                // Otherwise we expect a NUL-terminated filesystem path.
+                assert_eq!(decode.sun_path[len - 1 - offsetof_sun_path], 0);
                 Ok(SocketAddrAny::Unix(SocketAddrUnix::new(
-                    decode.sun_path[..len - 1 - offsetof_sun_path]
-                        .iter()
-                        .map(|c| *c as u8)
-                        .collect::<Vec<u8>>(),
+                    &decode.sun_path[..len - 1 - offsetof_sun_path],
                 )?))
             }
         }
@@ -155,31 +161,25 @@ pub(crate) unsafe fn read_sockaddr_os(storage: *const c::sockaddr, len: usize) -
                 SocketAddrAny::Unix(SocketAddrUnix::new(&[][..]).unwrap())
             } else {
                 let decode = *storage.cast::<c::sockaddr_un>();
+
+                // On Linux check for Linux's [abstract namespace].
+                //
+                // [abstract namespace]: https://man7.org/linux/man-pages/man7/unix.7.html
+                #[cfg(any(target_os = "android", target_os = "linux"))]
                 if decode.sun_path[0] == 0 {
-                    SocketAddrAny::Unix(
+                    return SocketAddrAny::Unix(
                         SocketAddrUnix::new_abstract_name(
-                            &decode.sun_path[1..len - offsetof_sun_path]
-                                .iter()
-                                .map(|c| *c as u8)
-                                .collect::<Vec<u8>>(),
+                            &decode.sun_path[1..len - offsetof_sun_path],
                         )
                         .unwrap(),
-                    )
-                } else {
-                    assert_eq!(
-                        decode.sun_path[len - 1 - offsetof_sun_path],
-                        b'\0' as c::c_char
                     );
-                    SocketAddrAny::Unix(
-                        SocketAddrUnix::new(
-                            decode.sun_path[..len - 1 - offsetof_sun_path]
-                                .iter()
-                                .map(|c| *c as u8)
-                                .collect::<Vec<u8>>(),
-                        )
-                        .unwrap(),
-                    )
                 }
+
+                // Otherwise we expect a NUL-terminated filesystem path.
+                assert_eq!(decode.sun_path[len - 1 - offsetof_sun_path], 0);
+                SocketAddrAny::Unix(
+                    SocketAddrUnix::new(&decode.sun_path[..len - 1 - offsetof_sun_path]).unwrap(),
+                )
             }
         }
         other => unimplemented!("{:?}", other),
