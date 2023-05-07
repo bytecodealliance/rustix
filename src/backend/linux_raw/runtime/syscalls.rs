@@ -193,6 +193,9 @@ pub(crate) fn sigtimedwait(set: &Sigset, timeout: Option<Timespec>) -> io::Resul
     let mut info = MaybeUninit::<Siginfo>::uninit();
     let timeout_ptr = optional_as_ptr(timeout.as_ref());
 
+    // `rt_sigtimedwait_time64` was introduced in Linux 5.1. The old
+    // `rt_sigtimedwait` syscall is not y2038-compatible on 32-bit
+    // architectures.
     #[cfg(target_pointer_width = "32")]
     unsafe {
         match ret_c_int(syscall!(
