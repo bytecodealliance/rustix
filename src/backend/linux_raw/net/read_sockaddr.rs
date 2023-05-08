@@ -155,19 +155,31 @@ pub(crate) unsafe fn read_sockaddr_os(storage: *const c::sockaddr, len: usize) -
                 SocketAddrAny::Unix(SocketAddrUnix::new(&[][..]).unwrap())
             } else {
                 let decode = *storage.cast::<c::sockaddr_un>();
-                assert_eq!(
-                    decode.sun_path[len - 1 - offsetof_sun_path],
-                    b'\0' as c::c_char
-                );
-                SocketAddrAny::Unix(
-                    SocketAddrUnix::new(
-                        decode.sun_path[..len - 1 - offsetof_sun_path]
-                            .iter()
-                            .map(|c| *c as u8)
-                            .collect::<Vec<u8>>(),
+                if decode.sun_path[0] == 0 {
+                    SocketAddrAny::Unix(
+                        SocketAddrUnix::new_abstract_name(
+                            &decode.sun_path[1..len - offsetof_sun_path]
+                                .iter()
+                                .map(|c| *c as u8)
+                                .collect::<Vec<u8>>(),
+                        )
+                        .unwrap(),
                     )
-                    .unwrap(),
-                )
+                } else {
+                    assert_eq!(
+                        decode.sun_path[len - 1 - offsetof_sun_path],
+                        b'\0' as c::c_char
+                    );
+                    SocketAddrAny::Unix(
+                        SocketAddrUnix::new(
+                            decode.sun_path[..len - 1 - offsetof_sun_path]
+                                .iter()
+                                .map(|c| *c as u8)
+                                .collect::<Vec<u8>>(),
+                        )
+                        .unwrap(),
+                    )
+                }
             }
         }
         other => unimplemented!("{:?}", other),

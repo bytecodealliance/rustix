@@ -186,23 +186,51 @@ unsafe fn inner_read_sockaddr_os(
             if len == offsetof_sun_path {
                 SocketAddrAny::Unix(SocketAddrUnix::new(&[][..]).unwrap())
             } else {
+                #[cfg(not(any(target_os = "android", target_os = "linux")))]
+                fn try_decode_abstract_socket(
+                    _sockaddr: &c::sockaddr_un,
+                    _len: usize,
+                ) -> Option<SocketAddrUnix> {
+                    None
+                }
+                #[cfg(any(target_os = "android", target_os = "linux"))]
+                fn try_decode_abstract_socket(
+                    decode: &c::sockaddr_un,
+                    len: usize,
+                ) -> Option<SocketAddrUnix> {
+                    if decode.sun_path[0] != 0 {
+                        None
+                    } else {
+                        let offsetof_sun_path = super::addr::offsetof_sun_path();
+                        let address_bytes = &decode.sun_path[1..len - offsetof_sun_path];
+                        Some(
+                            SocketAddrUnix::new_abstract_name(
+                                &address_bytes.iter().map(|c| *c as u8).collect::<Vec<u8>>(),
+                            )
+                            .unwrap(),
+                        )
+                    }
+                }
+
                 let decode = *storage.cast::<c::sockaddr_un>();
-                assert_eq!(
-                    decode.sun_path[len - 1 - offsetof_sun_path],
-                    b'\0' as c::c_char
-                );
-                let path_bytes = &decode.sun_path[..len - 1 - offsetof_sun_path];
+                let result = try_decode_abstract_socket(&decode, len).unwrap_or_else(|| {
+                    assert_eq!(
+                        decode.sun_path[len - 1 - offsetof_sun_path],
+                        b'\0' as c::c_char
+                    );
+                    let path_bytes = &decode.sun_path[..len - 1 - offsetof_sun_path];
 
-                // FreeBSD sometimes sets the length to longer than the length
-                // of the NUL-terminated string. Find the NUL and truncate the
-                // string accordingly.
-                #[cfg(target_os = "freebsd")]
-                let path_bytes = &path_bytes[..path_bytes.iter().position(|b| *b == 0).unwrap()];
+                    // FreeBSD sometimes sets the length to longer than the length
+                    // of the NUL-terminated string. Find the NUL and truncate the
+                    // string accordingly.
+                    #[cfg(target_os = "freebsd")]
+                    let path_bytes =
+                        &path_bytes[..path_bytes.iter().position(|b| *b == 0).unwrap()];
 
-                SocketAddrAny::Unix(
                     SocketAddrUnix::new(path_bytes.iter().map(|c| *c as u8).collect::<Vec<u8>>())
-                        .unwrap(),
-                )
+                        .unwrap()
+                });
+                SocketAddrAny::Unix(result)
             }
         }
         other => unimplemented!("{:?}", other),
