@@ -259,7 +259,7 @@ pub(crate) fn nice(inc: i32) -> io::Result<i32> {
     }
 }
 
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 #[inline]
 pub(crate) fn getpriority_user(uid: Uid) -> io::Result<i32> {
     libc_errno::set_errno(libc_errno::Errno(0));
@@ -271,7 +271,7 @@ pub(crate) fn getpriority_user(uid: Uid) -> io::Result<i32> {
     }
 }
 
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 #[inline]
 pub(crate) fn getpriority_pgrp(pgid: Option<Pid>) -> io::Result<i32> {
     libc_errno::set_errno(libc_errno::Errno(0));
@@ -283,7 +283,7 @@ pub(crate) fn getpriority_pgrp(pgid: Option<Pid>) -> io::Result<i32> {
     }
 }
 
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 #[inline]
 pub(crate) fn getpriority_process(pid: Option<Pid>) -> io::Result<i32> {
     libc_errno::set_errno(libc_errno::Errno(0));
@@ -295,13 +295,13 @@ pub(crate) fn getpriority_process(pid: Option<Pid>) -> io::Result<i32> {
     }
 }
 
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 #[inline]
 pub(crate) fn setpriority_user(uid: Uid, priority: i32) -> io::Result<()> {
     unsafe { ret(c::setpriority(c::PRIO_USER, uid.as_raw() as _, priority)) }
 }
 
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 #[inline]
 pub(crate) fn setpriority_pgrp(pgid: Option<Pid>, priority: i32) -> io::Result<()> {
     unsafe {
@@ -313,7 +313,7 @@ pub(crate) fn setpriority_pgrp(pgid: Option<Pid>, priority: i32) -> io::Result<(
     }
 }
 
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 #[inline]
 pub(crate) fn setpriority_process(pid: Option<Pid>, priority: i32) -> io::Result<()> {
     unsafe {

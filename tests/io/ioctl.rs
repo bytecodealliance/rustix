@@ -14,16 +14,11 @@ fn test_ioctls() {
     );
 }
 
-// TODO: Enable this on mips and power once libc is updated.
-#[cfg(any(target_os = "android", target_os = "linux"))]
-#[cfg(not(any(
-    target_arch = "mips",
-    target_arch = "mips64",
-    target_arch = "powerpc",
-    target_arch = "powerpc64",
-    target_arch = "sparc",
-    target_arch = "sparc64"
-)))]
+// Sparc lacks `FICLONE`.
+#[cfg(all(
+    not(any(target_arch = "sparc", target_arch = "sparc64")),
+    any(target_os = "android", target_os = "linux"),
+))]
 #[test]
 fn test_ioctl_ficlone() {
     use rustix::io;

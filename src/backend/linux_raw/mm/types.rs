@@ -195,6 +195,8 @@ pub enum Advice {
     LinuxPopulateRead = linux_raw_sys::general::MADV_POPULATE_READ,
     /// `MADV_POPULATE_WRITE` (since Linux 5.14)
     LinuxPopulateWrite = linux_raw_sys::general::MADV_POPULATE_WRITE,
+    /// `MADV_DONTNEED_LOCKED` (since Linux 5.18)
+    LinuxDontneedLocked = linux_raw_sys::general::MADV_DONTNEED_LOCKED,
 }
 
 #[allow(non_upper_case_globals)]

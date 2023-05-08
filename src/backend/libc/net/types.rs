@@ -414,7 +414,6 @@ impl Protocol {
         bsd,
         solarish,
         windows,
-        target_os = "android",
         target_os = "emscripten",
         target_os = "fuchsia",
         target_os = "haiku",
