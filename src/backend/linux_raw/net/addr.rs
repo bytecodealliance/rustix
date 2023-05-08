@@ -2,8 +2,8 @@
 //!
 //! # Safety
 //!
-//! This file casts between `&[c_char]` used in C APIs and `&[u8]` used in Rust
-//! APIs.
+//! This file uses `CStr::from_bytes_with_nul_unchecked` on a string it knows
+//! to be NUL-terminated.
 #![allow(unsafe_code)]
 
 use super::super::c;
@@ -11,8 +11,8 @@ use crate::ffi::CStr;
 use crate::{io, path};
 use core::cmp::Ordering;
 use core::convert::TryInto;
+use core::fmt;
 use core::hash::{Hash, Hasher};
-use core::{fmt, slice};
 
 /// `struct sockaddr_un`
 #[derive(Clone)]
@@ -37,7 +37,7 @@ impl SocketAddrUnix {
             return Err(io::Errno::NAMETOOLONG);
         }
         for (i, b) in bytes.iter().enumerate() {
-            unix.sun_path[i] = *b as c::c_char;
+            unix.sun_path[i] = *b;
         }
         let len = offsetof_sun_path() + bytes.len();
         let len = len.try_into().unwrap();
@@ -48,16 +48,15 @@ impl SocketAddrUnix {
     #[inline]
     pub fn new_abstract_name(name: &[u8]) -> io::Result<Self> {
         let mut unix = Self::init();
-        if 1 + name.len() > unix.sun_path.len() {
+        let id = &mut unix.sun_path[1..];
+        if let Some(id) = id.get_mut(..name.len()) {
+            id.copy_from_slice(name);
+            let len = offsetof_sun_path() + 1 + name.len();
+            let len = len.try_into().unwrap();
+            Ok(Self { unix, len })
+        } else {
             return Err(io::Errno::NAMETOOLONG);
         }
-        unix.sun_path[0] = b'\0' as c::c_char;
-        for (i, b) in name.iter().enumerate() {
-            unix.sun_path[1 + i] = *b as c::c_char;
-        }
-        let len = offsetof_sun_path() + 1 + name.len();
-        let len = len.try_into().unwrap();
-        Ok(Self { unix, len })
     }
 
     fn init() -> c::sockaddr_un {
@@ -71,18 +70,12 @@ impl SocketAddrUnix {
     #[inline]
     pub fn path(&self) -> Option<&CStr> {
         let len = self.len();
-        if len != 0 && self.unix.sun_path[0] != b'\0' as c::c_char {
+        if len != 0 && self.unix.sun_path[0] != b'\0' {
             let end = len as usize - offsetof_sun_path();
             let bytes = &self.unix.sun_path[..end];
-            // SAFETY: `from_raw_parts` to convert from `&[c_char]` to `&[u8]`.
-            // And `from_bytes_with_nul_unchecked` since the string is
+            // SAFETY: `from_bytes_with_nul_unchecked` since the string is
             // NUL-terminated.
-            unsafe {
-                Some(CStr::from_bytes_with_nul_unchecked(slice::from_raw_parts(
-                    bytes.as_ptr().cast(),
-                    bytes.len(),
-                )))
-            }
+            unsafe { Some(CStr::from_bytes_with_nul_unchecked(bytes)) }
         } else {
             None
         }
@@ -92,11 +85,9 @@ impl SocketAddrUnix {
     #[inline]
     pub fn abstract_name(&self) -> Option<&[u8]> {
         let len = self.len();
-        if len != 0 && self.unix.sun_path[0] == b'\0' as c::c_char {
+        if len != 0 && self.unix.sun_path[0] == b'\0' {
             let end = len as usize - offsetof_sun_path();
-            let bytes = &self.unix.sun_path[1..end];
-            // SAFETY: `from_raw_parts` to convert from `&[c_char]` to `&[u8]`.
-            unsafe { Some(slice::from_raw_parts(bytes.as_ptr().cast(), bytes.len())) }
+            Some(&self.unix.sun_path[1..end])
         } else {
             None
         }

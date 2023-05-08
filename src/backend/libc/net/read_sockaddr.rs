@@ -6,8 +6,6 @@ use super::ext::{in6_addr_s6_addr, in_addr_s_addr, sockaddr_in6_sin6_scope_id};
 use crate::ffi::CStr;
 use crate::io;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
-#[cfg(not(windows))]
-use alloc::vec::Vec;
 use core::mem::size_of;
 
 // This must match the header of `sockaddr`.
@@ -61,7 +59,7 @@ pub(crate) unsafe fn read_sockaddr(
             if len < size_of::<c::sockaddr_in>() {
                 return Err(io::Errno::INVAL);
             }
-            let decode = *storage.cast::<c::sockaddr_in>();
+            let decode = &*storage.cast::<c::sockaddr_in>();
             Ok(SocketAddrAny::V4(SocketAddrV4::new(
                 Ipv4Addr::from(u32::from_be(in_addr_s_addr(decode.sin_addr))),
                 u16::from_be(decode.sin_port),
@@ -71,7 +69,7 @@ pub(crate) unsafe fn read_sockaddr(
             if len < size_of::<c::sockaddr_in6>() {
                 return Err(io::Errno::INVAL);
             }
-            let decode = *storage.cast::<c::sockaddr_in6>();
+            let decode = &*storage.cast::<c::sockaddr_in6>();
             #[cfg(not(windows))]
             let s6_addr = decode.sin6_addr.s6_addr;
             #[cfg(windows)]
@@ -93,20 +91,40 @@ pub(crate) unsafe fn read_sockaddr(
                 return Err(io::Errno::INVAL);
             }
             if len == offsetof_sun_path {
-                Ok(SocketAddrAny::Unix(SocketAddrUnix::new(&[][..]).unwrap()))
+                SocketAddrUnix::new(&[][..]).map(SocketAddrAny::Unix)
             } else {
-                let decode = *storage.cast::<c::sockaddr_un>();
+                let decode = &*storage.cast::<c::sockaddr_un>();
+
+                // On Linux check for Linux's [abstract namespace].
+                //
+                // [abstract namespace]: https://man7.org/linux/man-pages/man7/unix.7.html
+                #[cfg(any(target_os = "android", target_os = "linux"))]
+                if decode.sun_path[0] == 0 {
+                    return SocketAddrUnix::new_abstract_name(core::mem::transmute::<
+                        &[c::c_char],
+                        &[u8],
+                    >(
+                        &decode.sun_path[1..len - offsetof_sun_path],
+                    ))
+                    .map(SocketAddrAny::Unix);
+                }
+
+                // Otherwise we expect a NUL-terminated filesystem path.
 
                 // Trim off unused bytes from the end of `path_bytes`.
                 let path_bytes = if cfg!(target_os = "freebsd") {
                     // FreeBSD sometimes sets the length to longer than the length
                     // of the NUL-terminated string. Find the NUL and truncate the
                     // string accordingly.
-                    &decode.sun_path[..decode.sun_path.iter().position(|b| *b == 0).unwrap()]
+                    &decode.sun_path[..decode
+                        .sun_path
+                        .iter()
+                        .position(|b| *b == 0)
+                        .ok_or(io::Errno::INVAL)?]
                 } else {
                     // Otherwise, use the provided length.
                     let provided_len = len - 1 - offsetof_sun_path;
-                    if decode.sun_path[provided_len] != b'\0' as c::c_char {
+                    if decode.sun_path[provided_len] != 0 {
                         return Err(io::Errno::INVAL);
                     }
                     debug_assert_eq!(
@@ -116,10 +134,8 @@ pub(crate) unsafe fn read_sockaddr(
                     &decode.sun_path[..provided_len]
                 };
 
-                Ok(SocketAddrAny::Unix(
-                    SocketAddrUnix::new(path_bytes.iter().map(|c| *c as u8).collect::<Vec<u8>>())
-                        .unwrap(),
-                ))
+                SocketAddrUnix::new(core::mem::transmute::<&[c::c_char], &[u8]>(path_bytes))
+                    .map(SocketAddrAny::Unix)
             }
         }
         _ => Err(io::Errno::INVAL),
@@ -164,7 +180,7 @@ unsafe fn inner_read_sockaddr_os(
     match family {
         c::AF_INET => {
             assert!(len >= size_of::<c::sockaddr_in>());
-            let decode = *storage.cast::<c::sockaddr_in>();
+            let decode = &*storage.cast::<c::sockaddr_in>();
             SocketAddrAny::V4(SocketAddrV4::new(
                 Ipv4Addr::from(u32::from_be(in_addr_s_addr(decode.sin_addr))),
                 u16::from_be(decode.sin_port),
@@ -172,7 +188,7 @@ unsafe fn inner_read_sockaddr_os(
         }
         c::AF_INET6 => {
             assert!(len >= size_of::<c::sockaddr_in6>());
-            let decode = *storage.cast::<c::sockaddr_in6>();
+            let decode = &*storage.cast::<c::sockaddr_in6>();
             SocketAddrAny::V6(SocketAddrV6::new(
                 Ipv6Addr::from(in6_addr_s6_addr(decode.sin6_addr)),
                 u16::from_be(decode.sin6_port),
@@ -186,51 +202,38 @@ unsafe fn inner_read_sockaddr_os(
             if len == offsetof_sun_path {
                 SocketAddrAny::Unix(SocketAddrUnix::new(&[][..]).unwrap())
             } else {
-                #[cfg(not(any(target_os = "android", target_os = "linux")))]
-                fn try_decode_abstract_socket(
-                    _sockaddr: &c::sockaddr_un,
-                    _len: usize,
-                ) -> Option<SocketAddrUnix> {
-                    None
-                }
+                let decode = &*storage.cast::<c::sockaddr_un>();
+
+                // On Linux check for Linux's [abstract namespace].
+                //
+                // [abstract namespace]: https://man7.org/linux/man-pages/man7/unix.7.html
                 #[cfg(any(target_os = "android", target_os = "linux"))]
-                fn try_decode_abstract_socket(
-                    decode: &c::sockaddr_un,
-                    len: usize,
-                ) -> Option<SocketAddrUnix> {
-                    if decode.sun_path[0] != 0 {
-                        None
-                    } else {
-                        let offsetof_sun_path = super::addr::offsetof_sun_path();
-                        let address_bytes = &decode.sun_path[1..len - offsetof_sun_path];
-                        Some(
-                            SocketAddrUnix::new_abstract_name(
-                                &address_bytes.iter().map(|c| *c as u8).collect::<Vec<u8>>(),
-                            )
-                            .unwrap(),
-                        )
-                    }
+                if decode.sun_path[0] == 0 {
+                    return SocketAddrAny::Unix(
+                        SocketAddrUnix::new_abstract_name(core::mem::transmute::<
+                            &[c::c_char],
+                            &[u8],
+                        >(
+                            &decode.sun_path[1..len - offsetof_sun_path],
+                        ))
+                        .unwrap(),
+                    );
                 }
 
-                let decode = *storage.cast::<c::sockaddr_un>();
-                let result = try_decode_abstract_socket(&decode, len).unwrap_or_else(|| {
-                    assert_eq!(
-                        decode.sun_path[len - 1 - offsetof_sun_path],
-                        b'\0' as c::c_char
-                    );
-                    let path_bytes = &decode.sun_path[..len - 1 - offsetof_sun_path];
+                // Otherwise we expect a NUL-terminated filesystem path.
+                assert_eq!(decode.sun_path[len - 1 - offsetof_sun_path], 0);
+                let path_bytes = &decode.sun_path[..len - 1 - offsetof_sun_path];
 
-                    // FreeBSD sometimes sets the length to longer than the length
-                    // of the NUL-terminated string. Find the NUL and truncate the
-                    // string accordingly.
-                    #[cfg(target_os = "freebsd")]
-                    let path_bytes =
-                        &path_bytes[..path_bytes.iter().position(|b| *b == 0).unwrap()];
+                // FreeBSD sometimes sets the length to longer than the length
+                // of the NUL-terminated string. Find the NUL and truncate the
+                // string accordingly.
+                #[cfg(target_os = "freebsd")]
+                let path_bytes = &path_bytes[..path_bytes.iter().position(|b| *b == 0).unwrap()];
 
-                    SocketAddrUnix::new(path_bytes.iter().map(|c| *c as u8).collect::<Vec<u8>>())
-                        .unwrap()
-                });
-                SocketAddrAny::Unix(result)
+                SocketAddrAny::Unix(
+                    SocketAddrUnix::new(core::mem::transmute::<&[c::c_char], &[u8]>(path_bytes))
+                        .unwrap(),
+                )
             }
         }
         other => unimplemented!("{:?}", other),
