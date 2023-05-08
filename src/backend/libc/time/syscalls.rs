@@ -181,7 +181,7 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
             #[cfg(any(target_os = "android", target_os = "linux"))]
             DynamicClockId::Tai => c::CLOCK_TAI,
 
-            #[cfg(any(target_os = "android", target_os = "linux"))]
+            #[cfg(any(target_os = "android", target_os = "linux", target_os = "openbsd"))]
             DynamicClockId::Boottime => c::CLOCK_BOOTTIME,
 
             #[cfg(any(target_os = "android", target_os = "linux"))]

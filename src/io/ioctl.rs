@@ -126,11 +126,16 @@ pub fn ioctl_blkpbszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 
 /// `ioctl(fd, FICLONE, src_fd)`—Share data between open files.
 ///
+/// This ioctl is not available on Sparc platforms
+///
 /// # References
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/ioctl_ficlone.2.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(all(
+    not(any(target_arch = "sparc", target_arch = "sparc64")),
+    any(target_os = "android", target_os = "linux"),
+))]
 #[inline]
 #[doc(alias = "FICLONE")]
 pub fn ioctl_ficlone<Fd: AsFd, SrcFd: AsFd>(fd: Fd, src_fd: SrcFd) -> io::Result<()> {

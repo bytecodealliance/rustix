@@ -33,16 +33,12 @@ pub(crate) const AF_UNSPEC: i32 = WinSock::AF_UNSPEC as _;
 // `WSAECANCELLED` will be removed in the future.
 // <https://docs.microsoft.com/en-us/windows/win32/api/ws2spi/nc-ws2spi-lpnsplookupserviceend#remarks>
 pub(crate) use WinSock::{
-    closesocket as close, ioctlsocket as ioctl, socklen_t, WSAPoll as poll,
-    ADDRESS_FAMILY as sa_family_t, ADDRINFOA as addrinfo, IN6_ADDR as in6_addr, IN_ADDR as in_addr,
-    IPV6_ADD_MEMBERSHIP, IPV6_DROP_MEMBERSHIP, IPV6_MREQ as ipv6_mreq, IPV6_MULTICAST_LOOP,
-    IPV6_V6ONLY, IP_ADD_MEMBERSHIP, IP_DROP_MEMBERSHIP, IP_MREQ as ip_mreq, IP_MULTICAST_LOOP,
-    IP_MULTICAST_TTL, IP_TTL, LINGER as linger, POLLERR, POLLHUP, POLLIN, POLLNVAL, POLLOUT,
-    POLLPRI, POLLRDBAND, POLLRDNORM, POLLWRBAND, POLLWRNORM, SD_BOTH as SHUT_RDWR,
-    SD_RECEIVE as SHUT_RD, SD_SEND as SHUT_WR, SOCKADDR as sockaddr, SOCKADDR_IN as sockaddr_in,
-    SOCKADDR_IN6 as sockaddr_in6, SOCKADDR_STORAGE as sockaddr_storage, SOL_SOCKET, SO_BROADCAST,
-    SO_ERROR, SO_LINGER, SO_RCVTIMEO, SO_REUSEADDR, SO_SNDTIMEO, SO_TYPE, TCP_NODELAY,
-    WSAEACCES as EACCES, WSAEADDRINUSE as EADDRINUSE, WSAEADDRNOTAVAIL as EADDRNOTAVAIL,
+    closesocket as close, ioctlsocket as ioctl, WSAPoll as poll, ADDRESS_FAMILY as sa_family_t,
+    ADDRINFOA as addrinfo, IN6_ADDR as in6_addr, IN_ADDR as in_addr, IPV6_MREQ as ipv6_mreq,
+    IP_MREQ as ip_mreq, LINGER as linger, SD_BOTH as SHUT_RDWR, SD_RECEIVE as SHUT_RD,
+    SD_SEND as SHUT_WR, SOCKADDR as sockaddr, SOCKADDR_IN as sockaddr_in,
+    SOCKADDR_IN6 as sockaddr_in6, SOCKADDR_STORAGE as sockaddr_storage, WSAEACCES as EACCES,
+    WSAEADDRINUSE as EADDRINUSE, WSAEADDRNOTAVAIL as EADDRNOTAVAIL,
     WSAEAFNOSUPPORT as EAFNOSUPPORT, WSAEALREADY as EALREADY, WSAEBADF as EBADF,
     WSAECONNABORTED as ECONNABORTED, WSAECONNREFUSED as ECONNREFUSED, WSAECONNRESET as ECONNRESET,
     WSAEDESTADDRREQ as EDESTADDRREQ, WSAEDISCON as EDISCON, WSAEDQUOT as EDQUOT,

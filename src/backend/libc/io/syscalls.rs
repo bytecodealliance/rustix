@@ -339,37 +339,18 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+// Sparc lacks `FICLONE`.
+#[cfg(all(
+    not(any(target_arch = "sparc", target_arch = "sparc64")),
+    any(target_os = "android", target_os = "linux"),
+))]
 pub(crate) fn ioctl_ficlone(fd: BorrowedFd<'_>, src_fd: BorrowedFd<'_>) -> io::Result<()> {
-    // TODO: Enable this on mips and power once libc is updated.
-    #[cfg(not(any(
-        target_arch = "mips",
-        target_arch = "mips64",
-        target_arch = "powerpc",
-        target_arch = "powerpc64",
-        target_arch = "sparc",
-        target_arch = "sparc64"
-    )))]
     unsafe {
         ret(c::ioctl(
             borrowed_fd(fd),
             c::FICLONE as _,
             borrowed_fd(src_fd),
         ))
-    }
-
-    #[cfg(any(
-        target_arch = "mips",
-        target_arch = "mips64",
-        target_arch = "powerpc",
-        target_arch = "powerpc64",
-        target_arch = "sparc",
-        target_arch = "sparc64"
-    ))]
-    {
-        let _ = fd;
-        let _ = src_fd;
-        Err(io::Errno::NOSYS)
     }
 }
 

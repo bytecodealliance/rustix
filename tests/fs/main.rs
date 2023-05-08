@@ -23,7 +23,7 @@ mod futimens;
 mod invalid_offset;
 mod linkat;
 mod long_paths;
-#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 mod makedev;
 mod mkdirat;
 mod mknodat;

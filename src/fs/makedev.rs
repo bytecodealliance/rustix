@@ -18,7 +18,6 @@ pub fn makedev(maj: u32, min: u32) -> Dev {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man3/minor.3.html
-#[cfg(not(bsd))]
 #[inline]
 pub fn minor(dev: Dev) -> u32 {
     backend::fs::makedev::minor(dev)
@@ -30,7 +29,6 @@ pub fn minor(dev: Dev) -> u32 {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man3/major.3.html
-#[cfg(not(bsd))]
 #[inline]
 pub fn major(dev: Dev) -> u32 {
     backend::fs::makedev::major(dev)

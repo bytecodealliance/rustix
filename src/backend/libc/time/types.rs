@@ -127,15 +127,15 @@ pub enum ClockId {
     Monotonic = c::CLOCK_MONOTONIC,
 
     /// `CLOCK_UPTIME`
-    #[cfg(any(freebsdlike))]
+    #[cfg(any(freebsdlike, target_os = "openbsd"))]
     Uptime = c::CLOCK_UPTIME,
 
     /// `CLOCK_PROCESS_CPUTIME_ID`
-    #[cfg(not(any(netbsdlike, solarish, target_os = "redox")))]
+    #[cfg(not(any(solarish, target_os = "netbsd", target_os = "redox")))]
     ProcessCPUTime = c::CLOCK_PROCESS_CPUTIME_ID,
 
     /// `CLOCK_THREAD_CPUTIME_ID`
-    #[cfg(not(any(netbsdlike, solarish, target_os = "redox")))]
+    #[cfg(not(any(solarish, target_os = "netbsd", target_os = "redox")))]
     ThreadCPUTime = c::CLOCK_THREAD_CPUTIME_ID,
 
     /// `CLOCK_REALTIME_COARSE`
@@ -201,7 +201,7 @@ pub enum DynamicClockId<'a> {
     Tai,
 
     /// `CLOCK_BOOTTIME`, available on Linux >= 2.6.39
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(any(target_os = "android", target_os = "linux", target_os = "openbsd"))]
     Boottime,
 
     /// `CLOCK_BOOTTIME_ALARM`, available on Linux >= 2.6.39
