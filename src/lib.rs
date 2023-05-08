@@ -71,7 +71,8 @@
 //!    running under seccomp.
 //!
 //! Things they don't do include:
-//!  - Detecting whether functions are supported at runtime.
+//!  - Detecting whether functions are supported at runtime, except in specific
+//!    cases where new interfaces need to be detected to support y2038 and LFS.
 //!  - Hiding significant differences between platforms.
 //!  - Restricting ambient authorities.
 //!  - Imposing sandboxing features such as filesystem path or network address

@@ -442,9 +442,15 @@ pub(crate) fn sync() {
 
 #[inline]
 pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
+    // 32-bit and mips64 Linux: `struct stat64` is not y2038 compatible; use
+    // `statx`.
+    //
+    // And, some old platforms don't support `statx`, and some fail with a
+    // confusing error code, so we call `crate::fs::statx` to handle that. If
+    // `statx` isn't available, fall back to the buggy system call.
     #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
     {
-        match statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
+        match crate::fs::statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
             Ok(x) => statx_to_stat(x),
             Err(io::Errno::NOSYS) => fstat_old(fd),
             Err(err) => Err(err),
@@ -478,9 +484,10 @@ fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 
 #[inline]
 pub(crate) fn stat(filename: &CStr) -> io::Result<Stat> {
+    // See the comments in `fstat` about using `crate::fs::statx` here.
     #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
     {
-        match statx(
+        match crate::fs::statx(
             crate::fs::cwd().as_fd(),
             filename,
             AtFlags::empty(),
@@ -537,9 +544,10 @@ fn stat_old(filename: &CStr) -> io::Result<Stat> {
 
 #[inline]
 pub(crate) fn statat(dirfd: BorrowedFd<'_>, filename: &CStr, flags: AtFlags) -> io::Result<Stat> {
+    // See the comments in `fstat` about using `crate::fs::statx` here.
     #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
     {
-        match statx(dirfd, filename, flags, StatxFlags::BASIC_STATS) {
+        match crate::fs::statx(dirfd, filename, flags, StatxFlags::BASIC_STATS) {
             Ok(x) => statx_to_stat(x),
             Err(io::Errno::NOSYS) => statat_old(dirfd, filename, flags),
             Err(err) => Err(err),
@@ -591,9 +599,10 @@ fn statat_old(dirfd: BorrowedFd<'_>, filename: &CStr, flags: AtFlags) -> io::Res
 
 #[inline]
 pub(crate) fn lstat(filename: &CStr) -> io::Result<Stat> {
+    // See the comments in `fstat` about using `crate::fs::statx` here.
     #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
     {
-        match statx(
+        match crate::fs::statx(
             crate::fs::cwd().as_fd(),
             filename,
             AtFlags::SYMLINK_NOFOLLOW,
@@ -1310,6 +1319,8 @@ fn _utimensat(
     // Assert that `Timestamps` has the expected layout.
     let _ = unsafe { transmute::<Timestamps, [__kernel_timespec; 2]>(times.clone()) };
 
+    // `utimensat_time64` was introduced in Linux 5.1. The old `utimensat`
+    // syscall is not y2038-compatible on 32-bit architectures.
     #[cfg(target_pointer_width = "32")]
     unsafe {
         match ret(syscall_readonly!(
@@ -1400,9 +1411,9 @@ pub(crate) fn accessat(
     }
 
     // Linux's `faccessat` syscall doesn't have a flags argument, so if we have
-    // any flags, use the newer `faccessat2` which does. Unless we're on
-    // Android where using newer system calls can cause seccomp to abort the
-    // process.
+    // any flags, use the newer `faccessat2` introduced in Linux 5.8 which
+    // does. Unless we're on Android where using newer system calls can cause
+    // seccomp to abort the process.
     #[cfg(not(target_os = "android"))]
     if !flags.is_empty() {
         unsafe {

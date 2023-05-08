@@ -63,6 +63,8 @@ unsafe fn clock_getres_old(which_clock: ClockId, result: &mut MaybeUninit<__kern
 #[cfg(feature = "time")]
 #[inline]
 pub(crate) fn clock_settime(which_clock: ClockId, timespec: __kernel_timespec) -> io::Result<()> {
+    // `clock_settime64` was introduced in Linux 5.1. The old `clock_settime`
+    // syscall is not y2038-compatible on 32-bit architectures.
     #[cfg(target_pointer_width = "32")]
     unsafe {
         match ret(syscall_readonly!(

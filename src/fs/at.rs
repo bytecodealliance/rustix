@@ -263,6 +263,13 @@ pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> io:
 /// `faccessat(dirfd, path, access, flags)`—Tests permissions for a file or
 /// directory.
 ///
+/// On Linux before 5.8, this function uses the `faccessat` system call which
+/// doesn't support any flags. This function emulates support for the
+/// [`AtFlags::EACCESS`] flag by checking whether the uid and gid of the
+/// process match the effective uid and gid, in which case the `EACCESS` flag
+/// can be ignored. In Linux 5.8 and beyond `faccessat2` is used, which
+/// supports flags.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]

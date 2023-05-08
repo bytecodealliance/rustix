@@ -385,7 +385,7 @@ pub(crate) fn renameat2(
     new_path: &CStr,
     flags: RenameFlags,
 ) -> io::Result<()> {
-    // `getrandom` wasn't supported in glibc until 2.28.
+    // `renameat2` wasn't supported in glibc until 2.28.
     weak_or_syscall! {
         fn renameat2(
             olddirfd: c::c_int,
@@ -442,14 +442,13 @@ pub(crate) fn symlinkat(
 
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
-    // 32-bit and mips64 Linux: `struct stat64` is not y2038 compatible; use
-    // `statx`.
+    // See the comments in `fstat` about using `crate::fs::statx` here.
     #[cfg(all(
         any(target_os = "android", target_os = "linux"),
         any(target_pointer_width = "32", target_arch = "mips64"),
     ))]
     {
-        match statx(dirfd, path, flags, StatxFlags::BASIC_STATS) {
+        match crate::fs::statx(dirfd, path, flags, StatxFlags::BASIC_STATS) {
             Ok(x) => statx_to_stat(x),
             Err(io::Errno::NOSYS) => statat_old(dirfd, path, flags),
             Err(err) => Err(err),
@@ -1108,12 +1107,16 @@ pub(crate) fn sync() {
 pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     // 32-bit and mips64 Linux: `struct stat64` is not y2038 compatible; use
     // `statx`.
+    //
+    // And, some old platforms don't support `statx`, and some fail with a
+    // confusing error code, so we call `crate::fs::statx` to handle that. If
+    // `statx` isn't available, fall back to the buggy system call.
     #[cfg(all(
         any(target_os = "android", target_os = "linux"),
         any(target_pointer_width = "32", target_arch = "mips64"),
     ))]
     {
-        match statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
+        match crate::fs::statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
             Ok(x) => statx_to_stat(x),
             Err(io::Errno::NOSYS) => fstat_old(fd),
             Err(err) => Err(err),
