@@ -55,7 +55,7 @@ impl SocketAddrUnix {
             let len = len.try_into().unwrap();
             Ok(Self { unix, len })
         } else {
-            return Err(io::Errno::NAMETOOLONG);
+            Err(io::Errno::NAMETOOLONG)
         }
     }
 

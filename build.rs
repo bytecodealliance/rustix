@@ -82,9 +82,10 @@ fn main() {
         use_feature("linux_raw");
         use_feature_or_nothing("core_intrinsics");
 
-        // Use inline asm if we have it, or outline asm otherwise. On PowerPC
-        // and MIPS, Rust's inline asm is considered experimental, so only use
-        // it if `--cfg=rustix_use_experimental_asm` is given.
+        // Use inline asm if we have it, or outline asm otherwise. On 32-bit
+        // x86 our asm support requires naked functions. On PowerPC and MIPS,
+        // Rust's inline asm is considered experimental, so only use it if
+        // `--cfg=rustix_use_experimental_asm` is given.
         if (feature_rustc_dep_of_std || vendor == "mustang" || can_compile("use std::arch::asm;"))
             && (arch != "x86" || has_feature("naked_functions"))
             && ((arch != "powerpc64" && arch != "mips" && arch != "mips64")

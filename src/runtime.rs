@@ -85,6 +85,12 @@ pub unsafe fn arm_set_tls(data: *mut c_void) -> io::Result<()> {
     backend::runtime::syscalls::tls::arm_set_tls(data)
 }
 
+/// `prctl(PR_SET_FS, data)`—Set the x86_64 `fs` register.
+///
+/// # Safety
+///
+/// This is a very low-level feature for implementing threading libraries.
+/// See the references links above.
 #[cfg(linux_raw)]
 #[cfg(target_arch = "x86_64")]
 #[inline]
@@ -92,6 +98,12 @@ pub unsafe fn set_fs(data: *mut c_void) {
     backend::runtime::syscalls::tls::set_fs(data)
 }
 
+/// Set the x86_64 thread ID address.
+///
+/// # Safety
+///
+/// This is a very low-level feature for implementing threading libraries.
+/// See the references links above.
 #[cfg(linux_raw)]
 #[inline]
 pub unsafe fn set_tid_address(data: *mut c_void) -> Pid {

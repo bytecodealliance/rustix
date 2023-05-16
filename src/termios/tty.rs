@@ -1,18 +1,11 @@
 //! Functions which operate on file descriptors which might be terminals.
 
 use crate::backend;
-#[cfg(any(
-    all(linux_raw, feature = "procfs"),
-    all(libc, not(any(target_os = "fuchsia", target_os = "wasi"))),
-))]
-use crate::io;
 use backend::fd::AsFd;
-#[cfg(any(
-    all(linux_raw, feature = "procfs"),
-    all(libc, not(any(target_os = "fuchsia", target_os = "wasi"))),
-))]
+#[cfg(feature = "procfs")]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use {
-    crate::ffi::CString, crate::path::SMALL_PATH_BUFFER_SIZE, alloc::vec::Vec,
+    crate::ffi::CString, crate::io, crate::path::SMALL_PATH_BUFFER_SIZE, alloc::vec::Vec,
     backend::fd::BorrowedFd,
 };
 
