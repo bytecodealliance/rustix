@@ -41,6 +41,8 @@ pub(crate) mod net;
 ))]
 pub(crate) mod param;
 pub(crate) mod process;
+#[cfg(feature = "pty")]
+pub(crate) mod pty;
 #[cfg(feature = "rand")]
 pub(crate) mod rand;
 #[cfg(feature = "runtime")]

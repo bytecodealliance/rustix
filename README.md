@@ -63,6 +63,7 @@ by default. The rest of the API is conditional with cargo feature flags:
 | `net`      | [`rustix::net`] and [`rustix::path`]—Network-related operations.
 | `param`    | [`rustix::param`]—Process parameters.
 | `process`  | [`rustix::process`]—Process-associated operations.
+| `pty`      | [`rustix::pty`]—Pseduoterminal operations.
 | `rand`     | [`rustix::rand`]—Random-related operations.
 | `termios`  | [`rustix::termios`]—Terminal I/O stream operations.
 | `thread`   | [`rustix::thread`]—Thread-associated operations.
@@ -76,6 +77,7 @@ by default. The rest of the API is conditional with cargo feature flags:
 [`rustix::net`]: https://docs.rs/rustix/*/rustix/net/index.html
 [`rustix::param`]: https://docs.rs/rustix/*/rustix/param/index.html
 [`rustix::process`]: https://docs.rs/rustix/*/rustix/process/index.html
+[`rustix::pty`]: https://docs.rs/rustix/*/rustix/pty/index.html
 [`rustix::rand`]: https://docs.rs/rustix/*/rustix/rand/index.html
 [`rustix::termios`]: https://docs.rs/rustix/*/rustix/termios/index.html
 [`rustix::thread`]: https://docs.rs/rustix/*/rustix/thread/index.html

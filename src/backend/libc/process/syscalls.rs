@@ -1,11 +1,9 @@
 //! libc syscalls supporting `rustix::process`.
 
 use super::super::c;
-#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
-use super::super::conv::borrowed_fd;
-use super::super::conv::{c_str, ret, ret_c_int, ret_discarded_char_ptr};
 #[cfg(not(target_os = "wasi"))]
-use super::super::conv::{ret_infallible, ret_pid_t, ret_usize};
+use super::super::conv::{borrowed_fd, ret_infallible, ret_pid_t, ret_usize};
+use super::super::conv::{c_str, ret, ret_c_int, ret_discarded_char_ptr};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use super::super::conv::{syscall_ret, syscall_ret_u32};
 #[cfg(any(
@@ -15,7 +13,7 @@ use super::super::conv::{syscall_ret, syscall_ret_u32};
     target_os = "linux",
 ))]
 use super::types::RawCpuSet;
-#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
+#[cfg(not(target_os = "wasi"))]
 use crate::fd::BorrowedFd;
 #[cfg(target_os = "linux")]
 use crate::fd::{AsRawFd, OwnedFd};
@@ -647,4 +645,10 @@ pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
             name.len().try_into().map_err(|_| io::Errno::INVAL)?,
         ))
     }
+}
+
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[inline]
+pub(crate) fn ioctl_tiocsctty(fd: BorrowedFd<'_>) -> io::Result<()> {
+    unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCSCTTY as _, &0_u32)) }
 }
