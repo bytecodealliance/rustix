@@ -93,6 +93,7 @@ jobs:
         cargo update --package=once_cell --precise 1.14.0
         cargo update --package=tempfile --precise=3.4.0
         cargo update --package=io-lifetimes --precise 1.0.6
+        cargo update --package=flate2 --precise=1.0.25
         for crate in test-crates/*; do
             cd $crate
             cargo update --package=io-lifetimes --precise 1.0.6
@@ -535,6 +536,7 @@ jobs:
         cargo update --package=once_cell --precise 1.14.0
         cargo update --package=tempfile --precise=3.4.0
         cargo update --package=io-lifetimes --precise 1.0.6
+        cargo update --package=flate2 --precise=1.0.25
         for crate in test-crates/*; do
             cd $crate
             cargo update --package=io-lifetimes --precise 1.0.6
