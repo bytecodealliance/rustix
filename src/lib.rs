@@ -59,6 +59,8 @@
 //!  - Constants use `enum`s and [`bitflags`] types.
 //!  - Multiplexed functions (eg. `fcntl`, `ioctl`, etc.) are de-multiplexed.
 //!  - Variadic functions (eg. `openat`, etc.) are presented as non-variadic.
+//!  - Functions that return strings automatically allocate sufficient memory
+//!    and retry the syscall as needed to determine the needed length.
 //!  - Functions and types which need `l` prefixes or `64` suffixes to enable
 //!    large-file support (LFS) are used automatically. File sizes and offsets
 //!    are always presented as `u64` and `i64`.
@@ -109,10 +111,9 @@
 #![cfg_attr(alloc_c_string, feature(alloc_ffi))]
 #![cfg_attr(alloc_c_string, feature(alloc_c_string))]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(feature = "rustc-dep-of-std", feature(core_intrinsics))]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(ip))]
 #![cfg_attr(
-    all(not(feature = "rustc-dep-of-std"), core_intrinsics),
+    any(feature = "rustc-dep-of-std", core_intrinsics),
     feature(core_intrinsics)
 )]
 #![cfg_attr(asm_experimental_arch, feature(asm_experimental_arch))]

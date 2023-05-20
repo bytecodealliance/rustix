@@ -104,6 +104,14 @@ pub enum Signal {
     #[doc(alias = "Iot")]
     #[doc(alias = "Abrt")]
     Abort = linux_raw_sys::general::SIGABRT,
+    /// `SIGEMT`
+    #[cfg(any(
+        target_arch = "mips",
+        target_arch = "mips64",
+        target_arch = "sparc",
+        target_arch = "sparc64"
+    ))]
+    Emt = linux_raw_sys::general::SIGEMT,
     /// `SIGBUS`
     Bus = linux_raw_sys::general::SIGBUS,
     /// `SIGFPE`

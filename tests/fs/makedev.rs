@@ -2,7 +2,7 @@ use rustix::fs::{major, makedev, minor};
 
 #[test]
 fn makedev_roundtrip() {
-    // Apple's, FreeBSD 11's, and Dragonfly's `makedev` doesn't handle extra
+    // Apple's, FreeBSD 11's, and DragonFly's `makedev` doesn't handle extra
     // bits set.
     #[cfg(freebsdlike)]
     let (maj, min) = (0x0000_0026, 0x6564_0061);

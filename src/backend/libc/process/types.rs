@@ -205,8 +205,19 @@ pub enum Signal {
     #[doc(alias = "Unused")]
     Sys = c::SIGSYS,
     /// `SIGEMT`
-    #[cfg(bsd)]
+    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "hermit",))]
     Emt = c::SIGEMT,
+    /// `SIGEMT`
+    #[cfg(all(
+        any(target_os = "android", target_os = "linux"),
+        any(
+            target_arch = "mips",
+            target_arch = "mips64",
+            target_arch = "sparc",
+            target_arch = "sparc64"
+        )
+    ))]
+    Emt = linux_raw_sys::general::SIGEMT as i32,
     /// `SIGINFO`
     #[cfg(bsd)]
     Info = c::SIGINFO,

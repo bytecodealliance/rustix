@@ -10,7 +10,12 @@ fn main() -> std::io::Result<()> {
     let mut out = Vec::with_capacity(10);
 
     #[cfg(feature = "fs")]
-    let dir = fs::openat(fs::cwd(), ".", fs::OFlags::DIRECTORY, fs::Mode::empty())?;
+    let dir = fs::openat(
+        fs::cwd(),
+        ".",
+        fs::OFlags::RDONLY | fs::OFlags::DIRECTORY | fs::OFlags::CLOEXEC,
+        fs::Mode::empty(),
+    )?;
 
     let subs = [
         #[cfg(feature = "process")]

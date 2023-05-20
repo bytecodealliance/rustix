@@ -240,8 +240,8 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
                 i32::from_str(&String::from_utf8_lossy(&buffer[..nread])).unwrap(),
                 *sum
             );
-            // Don't ask me why, but this was seen to fail on FreeBSD. SocketAddrUnix::path()
-            // returned None for some reason.
+            // Don't ask me why, but this was seen to fail on FreeBSD.
+            // `SocketAddrUnix::path()` returned `None` for some reason.
             #[cfg(not(target_os = "freebsd"))]
             assert_eq!(
                 Some(rustix::net::SocketAddrAny::Unix(addr.clone())),
