@@ -200,6 +200,11 @@ pub mod path;
 #[cfg_attr(doc_cfg, doc(cfg(feature = "process")))]
 pub mod process;
 #[cfg(not(windows))]
+#[cfg(not(target_os = "wasi"))]
+#[cfg(feature = "pty")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "pty")))]
+pub mod pty;
+#[cfg(not(windows))]
 #[cfg(feature = "rand")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "rand")))]
 pub mod rand;

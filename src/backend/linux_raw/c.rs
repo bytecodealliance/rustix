@@ -32,4 +32,5 @@ pub(crate) use linux_raw_sys::general::{
     SO_SNDTIMEO_NEW, SO_SNDTIMEO_OLD, SO_TYPE, TCP_NODELAY,
 };
 pub(crate) use linux_raw_sys::general::{NFS_SUPER_MAGIC, PROC_SUPER_MAGIC, UTIME_NOW, UTIME_OMIT};
+pub(crate) use linux_raw_sys::general::{O_NOCTTY, O_RDWR};
 pub(crate) use linux_raw_sys::general::{XATTR_CREATE, XATTR_REPLACE};

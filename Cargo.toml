@@ -166,6 +166,9 @@ param = ["fs"]
 # Enable this to enable `rustix::io::proc_self_*` (on Linux) and `ttyname`.
 procfs = ["once_cell", "itoa", "fs"]
 
+# Enable `rustix::pty::*`.
+pty = ["itoa", "fs"]
+
 # Enable `rustix::termios::*`.
 termios = []
 
@@ -188,6 +191,7 @@ all-apis = [
     "param",
     "process",
     "procfs",
+    "pty",
     "rand",
     "runtime",
     "termios",

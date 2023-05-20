@@ -72,6 +72,10 @@ pub(crate) mod param;
 #[cfg(not(windows))]
 pub(crate) mod process;
 #[cfg(not(windows))]
+#[cfg(not(target_os = "wasi"))]
+#[cfg(feature = "pty")]
+pub(crate) mod pty;
+#[cfg(not(windows))]
 #[cfg(feature = "rand")]
 pub(crate) mod rand;
 #[cfg(not(windows))]

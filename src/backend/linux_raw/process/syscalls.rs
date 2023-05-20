@@ -31,6 +31,7 @@ use linux_raw_sys::general::{
     __kernel_gid_t, __kernel_pid_t, __kernel_uid_t, membarrier_cmd, membarrier_cmd_flag, rlimit,
     rlimit64, PRIO_PGRP, PRIO_PROCESS, PRIO_USER, RLIM64_INFINITY, RLIM_INFINITY,
 };
+use linux_raw_sys::ioctl::TIOCSCTTY;
 #[cfg(not(target_os = "wasi"))]
 #[cfg(feature = "fs")]
 use {super::super::conv::ret_c_uint_infallible, crate::fs::Mode};
@@ -744,4 +745,16 @@ pub(crate) fn sysinfo() -> Sysinfo {
 pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
     let (ptr, len) = slice(name);
     unsafe { ret(syscall_readonly!(__NR_sethostname, ptr, len)) }
+}
+
+#[inline]
+pub(crate) fn ioctl_tiocsctty(fd: BorrowedFd<'_>) -> io::Result<()> {
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_ioctl,
+            fd,
+            c_uint(TIOCSCTTY),
+            by_ref(&0_u32)
+        ))
+    }
 }
