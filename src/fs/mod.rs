@@ -4,7 +4,7 @@ mod abs;
 #[cfg(not(target_os = "redox"))]
 mod at;
 mod constants;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 mod copy_file_range;
 #[cfg(not(target_os = "redox"))]
 mod cwd;
@@ -30,30 +30,30 @@ mod file_type;
 mod getpath;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 mod makedev;
-#[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "freebsd"))]
 mod memfd_create;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 mod mount;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 mod openat2;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 mod raw_dir;
 #[cfg(target_os = "linux")]
 mod sendfile;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 mod statx;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 mod sync;
-#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+#[cfg(any(apple, linux_kernel))]
 mod xattr;
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use crate::backend::fs::inotify;
 pub use abs::*;
 #[cfg(not(target_os = "redox"))]
 pub use at::*;
 pub use constants::*;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use copy_file_range::copy_file_range;
 #[cfg(not(target_os = "redox"))]
 pub use cwd::cwd;
@@ -79,21 +79,21 @@ pub use file_type::FileType;
 pub use getpath::getpath;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub use makedev::*;
-#[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "freebsd"))]
 pub use memfd_create::{memfd_create, MemfdFlags};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use mount::*;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use openat2::openat2;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use raw_dir::{RawDir, RawDirEntry};
 #[cfg(target_os = "linux")]
 pub use sendfile::sendfile;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use statx::{statx, Statx, StatxFlags, StatxTimestamp};
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub use sync::sync;
-#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+#[cfg(any(apple, linux_kernel))]
 pub use xattr::*;
 
 /// Re-export types common to POSIX-ish platforms.

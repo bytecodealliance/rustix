@@ -11,7 +11,7 @@ pub use backend::fs::types::AtFlags;
 #[cfg(apple)]
 pub use backend::fs::types::{CloneFlags, CopyfileFlags};
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use backend::fs::types::*;
 
 pub use backend::time::types::{Nsecs, Secs, Timespec};

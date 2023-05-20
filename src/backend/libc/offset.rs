@@ -112,7 +112,7 @@ pub(super) use c::openat64 as libc_openat;
 #[cfg(target_os = "fuchsia")]
 #[cfg(feature = "fs")]
 pub(super) use c::fallocate as libc_fallocate;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[cfg(feature = "fs")]
 pub(super) use c::fallocate64 as libc_fallocate;
 #[cfg(not(any(
@@ -131,22 +131,16 @@ pub(super) use c::posix_fadvise as libc_posix_fadvise;
 #[cfg(feature = "fs")]
 pub(super) use c::posix_fadvise64 as libc_posix_fadvise;
 
-#[cfg(all(not(any(
-    windows,
-    target_os = "android",
-    target_os = "linux",
-    target_os = "emscripten",
-))))]
+#[cfg(all(not(any(linux_kernel, windows, target_os = "emscripten"))))]
 pub(super) use c::{pread as libc_pread, pwrite as libc_pwrite};
-#[cfg(any(target_os = "android", target_os = "linux", target_os = "emscripten"))]
+#[cfg(any(linux_kernel, target_os = "emscripten"))]
 pub(super) use c::{pread64 as libc_pread, pwrite64 as libc_pwrite};
 #[cfg(not(any(
     apple,
+    linux_kernel,
     windows,
-    target_os = "android",
     target_os = "emscripten",
     target_os = "haiku",
-    target_os = "linux",
     target_os = "redox",
     target_os = "solaris",
 )))]
@@ -365,14 +359,13 @@ pub(super) use readwrite_pv64v2::{preadv64v2 as libc_preadv2, pwritev64v2 as lib
 
 #[cfg(not(any(
     apple,
+    linux_kernel,
     netbsdlike,
     solarish,
     windows,
     target_os = "aix",
-    target_os = "android",
     target_os = "dragonfly",
     target_os = "fuchsia",
-    target_os = "linux",
     target_os = "l4re",
     target_os = "redox",
 )))]

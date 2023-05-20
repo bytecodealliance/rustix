@@ -1,12 +1,12 @@
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use rustix::fs::Stat;
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 fn same(a: &Stat, b: &Stat) -> bool {
     a.st_ino == b.st_ino && a.st_dev == b.st_dev
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_renameat() {
     use rustix::fs::{accessat, cwd, openat, renameat, statat, Access, AtFlags, Mode, OFlags};
@@ -36,7 +36,7 @@ fn test_renameat() {
 
 /// Like `test_renameat` but the file already exists, so `renameat`
 /// overwrites it.
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_renameat_overwrite() {
     use rustix::fs::{cwd, openat, renameat, statat, AtFlags, Mode, OFlags};
@@ -58,7 +58,7 @@ fn test_renameat_overwrite() {
     assert!(same(&before, &renamed));
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_renameat_with() {
     use rustix::fs::{cwd, openat, renameat_with, statat, AtFlags, Mode, OFlags, RenameFlags};

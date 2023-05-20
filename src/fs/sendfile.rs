@@ -7,7 +7,7 @@ use backend::fd::AsFd;
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendfile.2.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub fn sendfile<OutFd: AsFd, InFd: AsFd>(
     out_fd: OutFd,

@@ -23,7 +23,7 @@ fn test_setrlimit() {
     let lim = rustix::process::getrlimit(Resource::Core);
     assert_eq!(lim, new);
 
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     {
         let new = Rlimit {
             current: Some(0),

@@ -7,19 +7,9 @@ use std::io::{Read, Write};
 #[test]
 fn openpty_basic() -> io::Result<()> {
     // Use `CLOEXEC` if we can.
-    #[cfg(any(
-        target_os = "android",
-        target_os = "freebsd",
-        target_os = "linux",
-        target_os = "netbsd"
-    ))]
+    #[cfg(any(linux_kernel, target_os = "freebsd", target_os = "netbsd"))]
     let flags = OpenptFlags::RDWR | OpenptFlags::NOCTTY | OpenptFlags::CLOEXEC;
-    #[cfg(not(any(
-        target_os = "android",
-        target_os = "freebsd",
-        target_os = "linux",
-        target_os = "netbsd"
-    )))]
+    #[cfg(not(any(linux_kernel, target_os = "freebsd", target_os = "netbsd")))]
     let flags = OpenptFlags::RDWR | OpenptFlags::NOCTTY;
 
     let controller = openpt(flags)?;
@@ -53,19 +43,9 @@ fn openpty_basic() -> io::Result<()> {
 #[test]
 fn openpty_get_peer() -> io::Result<()> {
     // Use `CLOEXEC` if we can.
-    #[cfg(any(
-        target_os = "android",
-        target_os = "freebsd",
-        target_os = "linux",
-        target_os = "netbsd"
-    ))]
+    #[cfg(any(linux_kernel, target_os = "freebsd", target_os = "netbsd"))]
     let flags = OpenptFlags::RDWR | OpenptFlags::NOCTTY | OpenptFlags::CLOEXEC;
-    #[cfg(not(any(
-        target_os = "android",
-        target_os = "freebsd",
-        target_os = "linux",
-        target_os = "netbsd"
-    )))]
+    #[cfg(not(any(linux_kernel, target_os = "freebsd", target_os = "netbsd")))]
     let flags = OpenptFlags::RDWR | OpenptFlags::NOCTTY;
 
     let controller = openpt(flags)?;

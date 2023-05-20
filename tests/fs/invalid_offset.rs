@@ -130,7 +130,7 @@ fn invalid_offset_pwrite() {
     pwrite(&file, &buf, i64::MAX as u64 + 1).unwrap_err();
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn invalid_offset_copy_file_range() {
     use rustix::fs::{copy_file_range, cwd, openat, Mode, OFlags};

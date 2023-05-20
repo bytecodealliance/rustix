@@ -35,7 +35,7 @@ pub use backend::fs::types::StatFs;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub use backend::fs::types::{StatVfs, StatVfsMountFlags};
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use backend::fs::types::FsWord;
 
 /// Timestamps used by [`utimensat`] and [`futimens`].
@@ -59,7 +59,7 @@ pub struct Timestamps {
 /// See [the `fstatfs` manual page] for more information.
 ///
 /// [the `fstatfs` manual page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub const PROC_SUPER_MAGIC: FsWord = backend::c::PROC_SUPER_MAGIC as FsWord;
 
 /// The filesystem magic number for NFS.
@@ -67,7 +67,7 @@ pub const PROC_SUPER_MAGIC: FsWord = backend::c::PROC_SUPER_MAGIC as FsWord;
 /// See [the `fstatfs` manual page] for more information.
 ///
 /// [the `fstatfs` manual page]: https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub const NFS_SUPER_MAGIC: FsWord = backend::c::NFS_SUPER_MAGIC as FsWord;
 
 /// `lseek(fd, offset, whence)`—Repositions a file descriptor within a file.
@@ -248,12 +248,7 @@ pub(crate) fn _is_file_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)
     let mode = backend::fs::syscalls::fcntl_getfl(fd)?;
 
     // Check for `O_PATH`.
-    #[cfg(any(
-        target_os = "android",
-        target_os = "fuchsia",
-        target_os = "linux",
-        target_os = "emscripten",
-    ))]
+    #[cfg(any(linux_kernel, target_os = "fuchsia", target_os = "emscripten"))]
     if mode.contains(OFlags::PATH) {
         return Ok((false, false));
     }
@@ -337,7 +332,7 @@ pub fn flock<Fd: AsFd>(fd: Fd, operation: FlockOperation) -> io::Result<()> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/syncfs.2.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub fn syncfs<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     backend::fs::syscalls::syncfs(fd.as_fd())

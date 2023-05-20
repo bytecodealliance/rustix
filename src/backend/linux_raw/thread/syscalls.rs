@@ -275,19 +275,19 @@ unsafe fn futex_old(
     ))
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn setns(fd: BorrowedFd, nstype: c::c_int) -> io::Result<c::c_int> {
     unsafe { ret_c_int(syscall_readonly!(__NR_setns, fd, c_int(nstype))) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn unshare(flags: crate::thread::UnshareFlags) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_unshare, c_uint(flags.bits()))) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn capget(
     header: &mut linux_raw_sys::general::__user_cap_header_struct,
@@ -297,7 +297,7 @@ pub(crate) fn capget(
     unsafe { ret(syscall!(__NR_capget, header, data)) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn capset(
     header: &mut linux_raw_sys::general::__user_cap_header_struct,

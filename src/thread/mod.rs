@@ -4,24 +4,24 @@
 mod clock;
 #[cfg(linux_raw)]
 mod futex;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 mod id;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 mod libcap;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 mod prctl;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 mod setns;
 
 #[cfg(not(target_os = "redox"))]
 pub use clock::*;
 #[cfg(linux_raw)]
 pub use futex::{futex, FutexFlags, FutexOperation};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use id::{gettid, set_thread_gid, set_thread_res_gid, set_thread_res_uid, set_thread_uid};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use libcap::{capabilities, set_capabilities, CapabilityFlags, CapabilitySets};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use prctl::*;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use setns::*;

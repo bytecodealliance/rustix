@@ -3,7 +3,7 @@ use crate::process::Pid;
 use crate::{backend, io};
 
 #[cfg(all(
-    any(target_os = "android", target_os = "linux"),
+    linux_kernel,
     any(
         target_arch = "x86",
         target_arch = "x86_64",
@@ -54,7 +54,7 @@ pub fn tcgetattr<Fd: AsFd>(fd: Fd) -> io::Result<Termios> {
 #[inline]
 #[doc(alias = "TCGETS2")]
 #[cfg(all(
-    any(target_os = "android", target_os = "linux"),
+    linux_kernel,
     any(
         target_arch = "x86",
         target_arch = "x86_64",
@@ -156,7 +156,7 @@ pub fn tcsetattr<Fd: AsFd>(
 #[inline]
 #[doc(alias = "TCSETS2")]
 #[cfg(all(
-    any(target_os = "android", target_os = "linux"),
+    linux_kernel,
     any(
         target_arch = "x86",
         target_arch = "x86_64",

@@ -93,7 +93,7 @@ fn test_mprotect() {
 #[test]
 fn test_mlock() {
     use rustix::mm::{mlock, mmap_anonymous, munlock, munmap, MapFlags, ProtFlags};
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     use rustix::mm::{mlock_with, MlockFlags};
     use std::ptr::null_mut;
 
@@ -103,7 +103,7 @@ fn test_mlock() {
         mlock(addr, 8192).unwrap();
         munlock(addr, 8192).unwrap();
 
-        #[cfg(any(target_os = "android", target_os = "linux"))]
+        #[cfg(linux_kernel)]
         {
             match mlock_with(addr, 8192, MlockFlags::empty()) {
                 Err(rustix::io::Errno::NOSYS) => (),
@@ -139,7 +139,7 @@ fn test_madvise() {
         madvise(addr, 8192, Advice::Normal).unwrap();
         madvise(addr, 8192, Advice::DontNeed).unwrap();
 
-        #[cfg(any(target_os = "android", target_os = "linux"))]
+        #[cfg(linux_kernel)]
         madvise(addr, 8192, Advice::LinuxDontNeed).unwrap();
 
         munmap(addr, 8192).unwrap();

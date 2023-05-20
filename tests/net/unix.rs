@@ -295,7 +295,7 @@ fn test_unix_msg() {
     unlinkat(cwd(), path, AtFlags::empty()).unwrap();
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_abstract_unix_msg() {
     use std::os::unix::ffi::OsStrExt;

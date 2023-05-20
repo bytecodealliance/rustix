@@ -20,7 +20,7 @@ fn test_mlock() {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_mlock_with() {
     let mut buf = vec![0_u8; 4096];
@@ -42,7 +42,7 @@ fn test_mlock_with() {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_mlock_with_onfault() {
     // With glibc, `mlock2` with `MLOCK_ONFAULT` returns `EINVAL` if the

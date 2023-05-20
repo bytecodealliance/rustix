@@ -16,7 +16,7 @@ use super::super::conv::{
 #[cfg(target_pointer_width = "32")]
 use super::super::conv::{hi, lo};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use crate::io::SpliceFlags;
 use crate::io::{
     self, epoll, DupFlags, EventfdFlags, FdFlags, IoSlice, IoSliceMut, IoSliceRaw, PipeFlags,
@@ -654,7 +654,7 @@ pub(crate) fn epoll_wait(
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub fn splice(
     fd_in: BorrowedFd,
@@ -677,7 +677,7 @@ pub fn splice(
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub unsafe fn vmsplice(
     fd: BorrowedFd,

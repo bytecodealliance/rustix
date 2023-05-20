@@ -11,7 +11,7 @@ pub use backend::io::io_slice::{IoSlice, IoSliceMut};
 #[cfg(feature = "std")]
 pub use std::io::{IoSlice, IoSliceMut};
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use backend::io::types::ReadWriteFlags;
 
 /// `read(fd, buf)`—Reads from a stream.
@@ -230,7 +230,7 @@ pub fn pwritev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>], offset: u64) -> io::Resul
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/preadv2.2.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub fn preadv2<Fd: AsFd>(
     fd: Fd,
@@ -249,7 +249,7 @@ pub fn preadv2<Fd: AsFd>(
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/pwritev2.2.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub fn pwritev2<Fd: AsFd>(
     fd: Fd,

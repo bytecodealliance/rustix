@@ -15,10 +15,7 @@ fn test_ioctls() {
 }
 
 // Sparc lacks `FICLONE`.
-#[cfg(all(
-    not(any(target_arch = "sparc", target_arch = "sparc64")),
-    any(target_os = "android", target_os = "linux"),
-))]
+#[cfg(all(linux_kernel, not(any(target_arch = "sparc", target_arch = "sparc64"))))]
 #[test]
 fn test_ioctl_ficlone() {
     use rustix::io;

@@ -10,7 +10,7 @@ use crate::{backend, io};
 use backend::fd::AsFd;
 use core::ffi::c_void;
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use backend::mm::types::MlockFlags;
 #[cfg(any(target_os = "emscripten", target_os = "linux"))]
 pub use backend::mm::types::MremapFlags;
@@ -270,7 +270,7 @@ pub unsafe fn mlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mlock2.2.html
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Page-Lock-Functions.html#index-mlock2
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 #[doc(alias = "mlock2")]
 pub unsafe fn mlock_with(ptr: *mut c_void, len: usize, flags: MlockFlags) -> io::Result<()> {

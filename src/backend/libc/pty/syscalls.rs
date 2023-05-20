@@ -14,7 +14,7 @@ use {
     alloc::vec::Vec,
 };
 
-#[cfg(not(any(target_os = "android", target_os = "linux")))]
+#[cfg(not(linux_kernel))]
 #[inline]
 pub(crate) fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::posix_openpt(flags.bits() as _)) }
@@ -74,7 +74,7 @@ pub(crate) fn unlockpt(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::unlockpt(borrowed_fd(fd))) }
 }
 
-#[cfg(not(any(target_os = "android", target_os = "linux")))]
+#[cfg(not(linux_kernel))]
 #[inline]
 pub(crate) fn grantpt(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::grantpt(borrowed_fd(fd))) }

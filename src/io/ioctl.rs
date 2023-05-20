@@ -109,7 +109,7 @@ pub fn ioctl_fionread<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
 /// This is mentioned in the [Linux `openat` manual page].
 ///
 /// [Linux `openat` manual page]: https://man7.org/linux/man-pages/man2/openat.2.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 #[doc(alias = "BLKSSZGET")]
 pub fn ioctl_blksszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
@@ -117,7 +117,7 @@ pub fn ioctl_blksszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 }
 
 /// `ioctl(fd, BLKPBSZGET)`—Returns the physical block size of a block device.
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 #[doc(alias = "BLKPBSZGET")]
 pub fn ioctl_blkpbszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
@@ -132,10 +132,7 @@ pub fn ioctl_blkpbszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/ioctl_ficlone.2.html
-#[cfg(all(
-    not(any(target_arch = "sparc", target_arch = "sparc64")),
-    any(target_os = "android", target_os = "linux"),
-))]
+#[cfg(all(linux_kernel, not(any(target_arch = "sparc", target_arch = "sparc64"))))]
 #[inline]
 #[doc(alias = "FICLONE")]
 pub fn ioctl_ficlone<Fd: AsFd, SrcFd: AsFd>(fd: Fd, src_fd: SrcFd) -> io::Result<()> {
@@ -143,7 +140,7 @@ pub fn ioctl_ficlone<Fd: AsFd, SrcFd: AsFd>(fd: Fd, src_fd: SrcFd) -> io::Result
 }
 
 /// `ioctl(fd, EXT4_IOC_RESIZE_FS, blocks)`—Resize ext4 filesystem on fd.
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 #[doc(alias = "EXT4_IOC_RESIZE_FS")]
 pub fn ext4_ioc_resize_fs<Fd: AsFd>(fd: Fd, blocks: u64) -> io::Result<()> {

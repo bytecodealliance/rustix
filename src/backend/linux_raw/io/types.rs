@@ -32,7 +32,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags! {
     /// `SPLICE_F_*` constants for use with [`splice`] and [`vmsplice`].
     pub struct SpliceFlags: c::c_uint {

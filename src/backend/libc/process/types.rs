@@ -1,7 +1,7 @@
 use super::super::c;
 
 /// `sysinfo`
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub type Sysinfo = c::sysinfo;
 
 /// A command for use with [`membarrier`] and [`membarrier_cpu`].
@@ -11,7 +11,7 @@ pub type Sysinfo = c::sysinfo;
 /// [`membarrier`]: crate::process::membarrier
 /// [`membarrier_cpu`]: crate::process::membarrier_cpu
 /// [`membarrier_query`]: crate::process::membarrier_query
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 #[repr(u32)]
 pub enum MembarrierCommand {
@@ -157,7 +157,7 @@ pub enum Signal {
         target_os = "aix",
         target_os = "haiku",
         all(
-            any(target_os = "android", target_os = "linux"),
+            linux_kernel,
             any(
                 target_arch = "mips",
                 target_arch = "mips64",
@@ -205,11 +205,11 @@ pub enum Signal {
     #[doc(alias = "Unused")]
     Sys = c::SIGSYS,
     /// `SIGEMT`
-    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "hermit",))]
+    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "hermit"))]
     Emt = c::SIGEMT,
     /// `SIGEMT`
     #[cfg(all(
-        any(target_os = "android", target_os = "linux"),
+        linux_kernel,
         any(
             target_arch = "mips",
             target_arch = "mips64",
@@ -256,7 +256,7 @@ impl Signal {
                 target_os = "aix",
                 target_os = "haiku",
                 all(
-                    any(target_os = "android", target_os = "linux"),
+                    linux_kernel,
                     any(
                         target_arch = "mips",
                         target_arch = "mips64",
@@ -314,7 +314,7 @@ pub type RawGid = c::gid_t;
 #[cfg(not(target_os = "wasi"))]
 pub type RawUid = c::uid_t;
 /// A CPU identifier as a raw integer.
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub type RawCpuid = u32;
 #[cfg(target_os = "freebsd")]
 pub type RawId = c::id_t;
@@ -322,20 +322,10 @@ pub type RawId = c::id_t;
 #[cfg(not(target_os = "wasi"))]
 pub(crate) type RawUname = c::utsname;
 
-#[cfg(any(
-    target_os = "android",
-    target_os = "dragonfly",
-    target_os = "fuchsia",
-    target_os = "linux",
-))]
+#[cfg(any(linux_kernel, target_os = "dragonfly", target_os = "fuchsia"))]
 pub(crate) type RawCpuSet = c::cpu_set_t;
 
-#[cfg(any(
-    target_os = "android",
-    target_os = "dragonfly",
-    target_os = "fuchsia",
-    target_os = "linux",
-))]
+#[cfg(any(linux_kernel, target_os = "dragonfly", target_os = "fuchsia"))]
 #[inline]
 pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
     let mut set = unsafe { core::mem::zeroed() };
@@ -343,7 +333,7 @@ pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
     set
 }
 
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 pub(crate) const CPU_SETSIZE: usize = c::CPU_SETSIZE as usize;
 #[cfg(target_os = "dragonfly")]
 pub(crate) const CPU_SETSIZE: usize = 256;

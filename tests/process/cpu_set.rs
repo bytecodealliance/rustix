@@ -1,4 +1,4 @@
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_cpu_set() {
     let set = rustix::process::sched_getaffinity(None).unwrap();

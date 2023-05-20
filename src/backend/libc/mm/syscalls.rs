@@ -1,7 +1,7 @@
 //! libc syscalls supporting `rustix::mm`.
 
 use super::super::c;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use super::super::conv::syscall_ret_owned_fd;
 use super::super::conv::{borrowed_fd, no_fd, ret};
 use super::super::offset::libc_mmap;
@@ -10,10 +10,10 @@ use super::types::Advice;
 #[cfg(any(target_os = "emscripten", target_os = "linux"))]
 use super::types::MremapFlags;
 use super::types::{MapFlags, MprotectFlags, MsyncFlags, ProtFlags};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use super::types::{MlockFlags, UserfaultfdFlags};
 use crate::fd::BorrowedFd;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use crate::fd::OwnedFd;
 use crate::io;
 
@@ -185,7 +185,7 @@ pub(crate) unsafe fn mlock(addr: *mut c::c_void, length: usize) -> io::Result<()
 ///
 /// `mlock_with` operates on raw pointers and may round out to the nearest page
 /// boundaries.
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) unsafe fn mlock_with(
     addr: *mut c::c_void,
@@ -212,7 +212,7 @@ pub(crate) unsafe fn munlock(addr: *mut c::c_void, length: usize) -> io::Result<
     ret(c::munlock(addr, length))
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
     syscall_ret_owned_fd(c::syscall(c::SYS_userfaultfd, flags.bits()))
 }

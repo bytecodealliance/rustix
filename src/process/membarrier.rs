@@ -11,7 +11,7 @@ use crate::{backend, io};
 
 pub use backend::process::types::MembarrierCommand;
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags::bitflags! {
     /// A result from [`membarrier_query`].
     ///
@@ -41,7 +41,7 @@ bitflags::bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 impl MembarrierQuery {
     /// Test whether this query result contains the given command.
     #[inline]

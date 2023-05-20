@@ -55,24 +55,14 @@ pub fn fcntl_setfl<Fd: AsFd>(fd: Fd, flags: OFlags) -> io::Result<()> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
-#[cfg(any(
-    target_os = "android",
-    target_os = "freebsd",
-    target_os = "fuchsia",
-    target_os = "linux",
-))]
+#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
 #[inline]
 #[doc(alias = "F_GET_SEALS")]
 pub fn fcntl_get_seals<Fd: AsFd>(fd: Fd) -> io::Result<SealFlags> {
     backend::fs::syscalls::fcntl_get_seals(fd.as_fd())
 }
 
-#[cfg(any(
-    target_os = "android",
-    target_os = "freebsd",
-    target_os = "fuchsia",
-    target_os = "linux",
-))]
+#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
 pub use backend::fs::types::SealFlags;
 
 /// `fcntl(fd, F_ADD_SEALS)`
@@ -81,12 +71,7 @@ pub use backend::fs::types::SealFlags;
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
-#[cfg(any(
-    target_os = "android",
-    target_os = "freebsd",
-    target_os = "fuchsia",
-    target_os = "linux",
-))]
+#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
 #[inline]
 #[doc(alias = "F_ADD_SEALS")]
 pub fn fcntl_add_seals<Fd: AsFd>(fd: Fd, seals: SealFlags) -> io::Result<()> {

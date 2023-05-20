@@ -9,7 +9,7 @@
 
 use crate::{backend, io};
 use alloc::vec::Vec;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use backend::process::types::RawCpuid;
 
 /// The raw integer value of a Unix user ID.
@@ -44,7 +44,7 @@ pub struct Gid(RawGid);
 pub struct Pid(RawNonZeroPid);
 
 /// A Linux CPU ID.
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[repr(transparent)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 pub struct Cpuid(RawCpuid);
@@ -165,7 +165,7 @@ impl Pid {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 impl Cpuid {
     /// Converts a `RawCpuid` into a `Cpuid`.
     ///

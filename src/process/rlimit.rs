@@ -1,4 +1,4 @@
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use crate::process::Pid;
 use crate::{backend, io};
 
@@ -46,7 +46,7 @@ pub fn setrlimit(resource: Resource, new: Rlimit) -> io::Result<()> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/prlimit.2.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub fn prlimit(pid: Option<Pid>, resource: Resource, new: Rlimit) -> io::Result<Rlimit> {
     backend::process::syscalls::prlimit(pid, resource, new)

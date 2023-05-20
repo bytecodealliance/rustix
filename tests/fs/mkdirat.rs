@@ -18,7 +18,7 @@ fn test_mkdirat() {
     unlinkat(&dir, "foo", AtFlags::REMOVEDIR).unwrap();
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_mkdirat_with_o_path() {
     use rustix::fs::{

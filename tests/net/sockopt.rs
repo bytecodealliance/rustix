@@ -22,7 +22,7 @@ fn test_sockopts_ipv4() {
     assert!(rustix::net::sockopt::get_socket_linger(&s)
         .unwrap()
         .is_none());
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     assert!(!rustix::net::sockopt::get_socket_passcred(&s).unwrap());
     assert_ne!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 0);
     assert_ne!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 77);
@@ -97,7 +97,7 @@ fn test_sockopts_ipv4() {
             >= Duration::new(1, 1)
     );
 
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     {
         // Set the passcred flag;
         rustix::net::sockopt::set_socket_passcred(&s, true).unwrap();

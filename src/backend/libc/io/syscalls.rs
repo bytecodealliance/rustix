@@ -15,12 +15,7 @@ use super::super::offset::{libc_preadv2, libc_pwritev2};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 use crate::io::DupFlags;
-#[cfg(any(
-    target_os = "android",
-    target_os = "freebsd",
-    target_os = "illumos",
-    target_os = "linux"
-))]
+#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "illumos"))]
 use crate::io::EventfdFlags;
 #[cfg(not(any(apple, target_os = "aix", target_os = "haiku", target_os = "wasi")))]
 use crate::io::PipeFlags;
@@ -30,7 +25,7 @@ use core::convert::TryInto;
 use core::mem::MaybeUninit;
 #[cfg(all(feature = "fs", feature = "net"))]
 use libc_errno::errno;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use {
     super::super::conv::syscall_ret_owned_fd,
     crate::io::{IoSliceRaw, ReadWriteFlags, SpliceFlags},
@@ -260,21 +255,15 @@ const fn max_iov() -> usize {
     c::IOV_MAX as usize
 }
 
-#[cfg(any(
-    target_os = "android",
-    target_os = "emscripten",
-    target_os = "linux",
-    target_os = "nto"
-))]
+#[cfg(any(linux_kernel, target_os = "emscripten", target_os = "nto"))]
 const fn max_iov() -> usize {
     c::UIO_MAXIOV as usize
 }
 
 #[cfg(not(any(
     bsd,
-    target_os = "android",
+    linux_kernel,
     target_os = "emscripten",
-    target_os = "linux",
     target_os = "nto",
     target_os = "horizon",
 )))]
@@ -286,7 +275,7 @@ pub(crate) unsafe fn close(raw_fd: RawFd) {
     let _ = c::close(raw_fd as c::c_int);
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
     unsafe { syscall_ret_owned_fd(c::syscall(c::SYS_eventfd2, initval, flags.bits())) }
 }
@@ -296,7 +285,7 @@ pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> 
     unsafe { ret_owned_fd(c::eventfd(initval, flags.bits())) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
     let mut result = MaybeUninit::<c::c_uint>::uninit();
@@ -306,7 +295,7 @@ pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
     let mut result = MaybeUninit::<c::c_uint>::uninit();
@@ -340,10 +329,7 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
 }
 
 // Sparc lacks `FICLONE`.
-#[cfg(all(
-    not(any(target_arch = "sparc", target_arch = "sparc64")),
-    any(target_os = "android", target_os = "linux"),
-))]
+#[cfg(all(linux_kernel, not(any(target_arch = "sparc", target_arch = "sparc64"))))]
 pub(crate) fn ioctl_ficlone(fd: BorrowedFd<'_>, src_fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe {
         ret(c::ioctl(
@@ -354,7 +340,7 @@ pub(crate) fn ioctl_ficlone(fd: BorrowedFd<'_>, src_fd: BorrowedFd<'_>) -> io::R
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn ext4_ioc_resize_fs(fd: BorrowedFd<'_>, blocks: u64) -> io::Result<()> {
     // TODO: Fix linux-raw-sys to define ioctl codes for sparc.
@@ -557,7 +543,7 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
         .map(|nready| nready as usize)
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub fn splice(
     fd_in: BorrowedFd,
@@ -582,7 +568,7 @@ pub fn splice(
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub unsafe fn vmsplice(
     fd: BorrowedFd,
