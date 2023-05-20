@@ -45,7 +45,13 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// # use std::mem::MaybeUninit;
     /// # use rustix::fs::{cwd, Mode, OFlags, openat, RawDir};
     ///
-    /// let fd = openat(cwd(), ".", OFlags::RDONLY | OFlags::DIRECTORY, Mode::empty()).unwrap();
+    /// let fd = openat(
+    ///     cwd(),
+    ///     ".",
+    ///     OFlags::RDONLY | OFlags::DIRECTORY | OFlags::CLOEXEC,
+    ///     Mode::empty(),
+    /// )
+    /// .unwrap();
     ///
     /// let mut buf = Vec::with_capacity(8192);
     /// let mut iter = RawDir::new(fd, buf.spare_capacity_mut());
@@ -64,7 +70,7 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// let fd = openat(
     ///     cwd(),
     ///     ".",
-    ///     OFlags::RDONLY | OFlags::DIRECTORY,
+    ///     OFlags::RDONLY | OFlags::DIRECTORY | OFlags::CLOEXEC,
     ///     Mode::empty(),
     /// )
     /// .unwrap();
@@ -88,7 +94,13 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// # use rustix::fs::{cwd, Mode, OFlags, openat, RawDir};
     /// # use rustix::io::Errno;
     ///
-    /// let fd = openat(cwd(), ".", OFlags::RDONLY | OFlags::DIRECTORY, Mode::empty()).unwrap();
+    /// let fd = openat(
+    ///     cwd(),
+    ///     ".",
+    ///     OFlags::RDONLY | OFlags::DIRECTORY | OFlags::CLOEXEC,
+    ///     Mode::empty(),
+    /// )
+    /// .unwrap();
     ///
     /// let mut buf = Vec::with_capacity(8192);
     /// 'read: loop {
