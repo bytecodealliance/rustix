@@ -396,17 +396,29 @@ pub unsafe fn sigprocmask(how: How, set: Option<&Sigset>) -> io::Result<Sigset> 
 
 /// `sigwait(set)`—Wait for signals.
 ///
+/// # Safety
+///
+/// If code elsewhere in the process is depending on delivery of a signal to
+/// prevent it from executing some code, this could cause it to miss that
+/// signal and execute that code.
+///
 /// # References
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man3/sigwait.3.html
 #[cfg(linux_raw)]
 #[inline]
-pub fn sigwait(set: &Sigset) -> io::Result<Signal> {
+pub unsafe fn sigwait(set: &Sigset) -> io::Result<Signal> {
     backend::runtime::syscalls::sigwait(set)
 }
 
 /// `sigwait(set)`—Wait for signals, returning a [`Siginfo`].
+///
+/// # Safety
+///
+/// If code elsewhere in the process is depending on delivery of a signal to
+/// prevent it from executing some code, this could cause it to miss that
+/// signal and execute that code.
 ///
 /// # References
 ///  - [Linux]
@@ -414,11 +426,17 @@ pub fn sigwait(set: &Sigset) -> io::Result<Signal> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/sigwaitinfo.2.html
 #[cfg(linux_raw)]
 #[inline]
-pub fn sigwaitinfo(set: &Sigset) -> io::Result<Siginfo> {
+pub unsafe fn sigwaitinfo(set: &Sigset) -> io::Result<Siginfo> {
     backend::runtime::syscalls::sigwaitinfo(set)
 }
 
 /// `sigtimedwait(set)`—Wait for signals, optionally with a timeout.
+///
+/// # Safety
+///
+/// If code elsewhere in the process is depending on delivery of a signal to
+/// prevent it from executing some code, this could cause it to miss that
+/// signal and execute that code.
 ///
 /// # References
 ///  - [Linux]
@@ -426,6 +444,6 @@ pub fn sigwaitinfo(set: &Sigset) -> io::Result<Siginfo> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/sigtimedwait.2.html
 #[cfg(linux_raw)]
 #[inline]
-pub fn sigtimedwait(set: &Sigset, timeout: Option<Timespec>) -> io::Result<Siginfo> {
+pub unsafe fn sigtimedwait(set: &Sigset, timeout: Option<Timespec>) -> io::Result<Siginfo> {
     backend::runtime::syscalls::sigtimedwait(set, timeout)
 }
