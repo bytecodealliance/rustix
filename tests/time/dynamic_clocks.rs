@@ -13,7 +13,7 @@ fn test_dynamic_clocks() {
     clock_gettime_dynamic(DynamicClockId::Dynamic(file.as_fd())).unwrap_err();
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_conditional_clocks() {
     let _ = clock_gettime_dynamic(DynamicClockId::Tai);

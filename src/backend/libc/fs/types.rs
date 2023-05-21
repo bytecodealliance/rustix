@@ -361,7 +361,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags! {
     /// `RESOLVE_*` constants for use with [`openat2`].
     ///
@@ -388,7 +388,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags! {
     /// `RENAME_*` constants for use with [`renameat_with`].
     ///
@@ -592,7 +592,7 @@ bitflags! {
        /// `F_SEAL_WRITE`.
        const WRITE = c::F_SEAL_WRITE;
        /// `F_SEAL_FUTURE_WRITE` (since Linux 5.1)
-       #[cfg(any(target_os = "android", target_os = "linux"))]
+       #[cfg(linux_kernel)]
        const FUTURE_WRITE = c::F_SEAL_FUTURE_WRITE;
     }
 }
@@ -852,10 +852,7 @@ pub type Stat = c::stat;
 /// [`statat`]: crate::fs::statat
 /// [`fstat`]: crate::fs::fstat
 #[cfg(any(
-    all(
-        any(target_os = "android", target_os = "linux"),
-        target_pointer_width = "64",
-    ),
+    all(linux_kernel, target_pointer_width = "64"),
     target_os = "emscripten",
     target_os = "l4re",
 ))]
@@ -868,10 +865,7 @@ pub type Stat = c::stat64;
 // On 32-bit, Linux's `struct stat64` has a 32-bit `st_mtime` and friends, so
 // we use our own struct, populated from `statx` where possible, to avoid the
 // y2038 bug.
-#[cfg(all(
-    any(target_os = "android", target_os = "linux"),
-    target_pointer_width = "32",
-))]
+#[cfg(all(linux_kernel, target_pointer_width = "32"))]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 #[allow(missing_docs)]
@@ -1053,7 +1047,7 @@ pub type FsWord = u32;
 #[derive(Copy, Clone)]
 pub struct copyfile_state_t(pub(crate) *mut c::c_void);
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags! {
     /// `MS_*` constants for use with [`mount`].
     ///
@@ -1107,7 +1101,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags! {
     /// `MS_*` constants for use with [`change_mount`].
     ///
@@ -1126,7 +1120,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags! {
     pub(crate) struct InternalMountFlags: c::c_ulong {
         const REMOUNT = c::MS_REMOUNT;
@@ -1134,10 +1128,10 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub(crate) struct MountFlagsArg(pub(crate) c::c_ulong);
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags! {
     /// `MNT_*` constants for use with [`unmount`].
     ///

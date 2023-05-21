@@ -1,6 +1,6 @@
 use super::super::c;
 use bitflags::bitflags;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use core::marker::PhantomData;
 
 bitflags! {
@@ -14,7 +14,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags! {
     /// `RWF_*` constants for use with [`preadv2`] and [`pwritev2`].
     ///
@@ -34,7 +34,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags! {
     /// `SPLICE_F_*` constants for use with [`splice`] and [`vmsplice`].
     pub struct SpliceFlags: c::c_uint {
@@ -87,12 +87,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(
-    target_os = "android",
-    target_os = "freebsd",
-    target_os = "illumos",
-    target_os = "linux"
-))]
+#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "illumos"))]
 bitflags! {
     /// `EFD_*` flags for use with [`eventfd`].
     ///
@@ -125,14 +120,14 @@ pub(crate) const STDERR_FILENO: c::c_int = c::STDERR_FILENO;
 /// and `WSABUF` on Windows. Unlike `IoSlice` and `IoSliceMut` it is
 /// semantically like a raw pointer, and therefore can be shared or mutated as
 /// needed.
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[repr(transparent)]
 pub struct IoSliceRaw<'a> {
     _buf: c::iovec,
     _lifetime: PhantomData<&'a ()>,
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 impl<'a> IoSliceRaw<'a> {
     /// Creates a new `IoSlice` wrapping a byte slice.
     pub fn from_slice(buf: &'a [u8]) -> Self {

@@ -8,6 +8,6 @@ fn test_uname() {
     assert!(!name.version().to_bytes().is_empty());
     assert!(!name.machine().to_bytes().is_empty());
 
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     assert!(!name.domainname().to_bytes().is_empty());
 }

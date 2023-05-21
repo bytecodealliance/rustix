@@ -1,9 +1,9 @@
 //! libc syscalls supporting `rustix::rand`.
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use {super::super::c, super::super::conv::ret_usize, crate::io, crate::rand::GetRandomFlags};
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub(crate) fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
     // `getrandom` wasn't supported in glibc until 2.25.
     weak_or_syscall! {

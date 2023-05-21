@@ -3,7 +3,7 @@
 use super::super::c;
 use super::super::conv::ret;
 #[cfg(feature = "time")]
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 use super::super::time::types::LibcItimerspec;
 use super::super::time::types::LibcTimespec;
 use super::types::Timespec;
@@ -11,7 +11,7 @@ use super::types::Timespec;
 use super::types::{ClockId, DynamicClockId};
 use crate::io;
 use core::mem::MaybeUninit;
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(feature = "time")]
 use {
     super::super::conv::{borrowed_fd, ret_owned_fd},
@@ -162,29 +162,29 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
         let id: c::clockid_t = match id {
             DynamicClockId::Known(id) => id as c::clockid_t,
 
-            #[cfg(any(target_os = "android", target_os = "linux"))]
+            #[cfg(linux_kernel)]
             DynamicClockId::Dynamic(fd) => {
                 use crate::fd::AsRawFd;
                 const CLOCKFD: i32 = 3;
                 (!fd.as_raw_fd() << 3) | CLOCKFD
             }
 
-            #[cfg(not(any(target_os = "android", target_os = "linux")))]
+            #[cfg(not(linux_kernel))]
             DynamicClockId::Dynamic(_fd) => {
                 // Dynamic clocks are not supported on this platform.
                 return Err(io::Errno::INVAL);
             }
 
-            #[cfg(any(target_os = "android", target_os = "linux"))]
+            #[cfg(linux_kernel)]
             DynamicClockId::RealtimeAlarm => c::CLOCK_REALTIME_ALARM,
 
-            #[cfg(any(target_os = "android", target_os = "linux"))]
+            #[cfg(linux_kernel)]
             DynamicClockId::Tai => c::CLOCK_TAI,
 
-            #[cfg(any(target_os = "android", target_os = "linux", target_os = "openbsd"))]
+            #[cfg(any(linux_kernel, target_os = "openbsd"))]
             DynamicClockId::Boottime => c::CLOCK_BOOTTIME,
 
-            #[cfg(any(target_os = "android", target_os = "linux"))]
+            #[cfg(linux_kernel)]
             DynamicClockId::BoottimeAlarm => c::CLOCK_BOOTTIME_ALARM,
         };
 
@@ -290,13 +290,13 @@ unsafe fn clock_settime_old(id: ClockId, timespec: Timespec) -> io::Result<()> {
     ret(c::clock_settime(id as c::clockid_t, &old_timespec))
 }
 
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(feature = "time")]
 pub(crate) fn timerfd_create(id: TimerfdClockId, flags: TimerfdFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::timerfd_create(id as c::clockid_t, flags.bits())) }
 }
 
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(feature = "time")]
 pub(crate) fn timerfd_settime(
     fd: BorrowedFd<'_>,
@@ -338,7 +338,7 @@ pub(crate) fn timerfd_settime(
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
@@ -409,7 +409,7 @@ unsafe fn timerfd_settime_old(
     })
 }
 
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(feature = "time")]
 pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
     let mut result = MaybeUninit::<LibcItimerspec>::uninit();
@@ -437,7 +437,7 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",

@@ -55,7 +55,7 @@ fn test_unix_addr() {
     SocketAddrUnix::new("/foo\0/bar").unwrap_err();
     assert!(SocketAddrUnix::new("").unwrap().path().is_none());
 
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     {
         assert!(SocketAddrUnix::new("foo")
             .unwrap()

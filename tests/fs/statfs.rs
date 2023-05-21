@@ -1,4 +1,4 @@
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_statfs_abi() {
     use rustix::fs::{FsWord, StatFs, NFS_SUPER_MAGIC, PROC_SUPER_MAGIC};
@@ -61,7 +61,7 @@ fn test_fstatfs() {
 }
 
 /// Test that files in procfs are in a filesystem with `PROC_SUPER_MAGIC`.
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_statfs_procfs() {
     let statfs = rustix::fs::statfs("/proc/self/maps").unwrap();

@@ -181,7 +181,7 @@ pub fn startup_tls_info() -> StartupTlsInfo {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man3/getauxval.3.html
 #[cfg(linux_raw)]
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub fn exe_phdrs() -> (*const c_void, usize) {
     backend::param::auxv::exe_phdrs()

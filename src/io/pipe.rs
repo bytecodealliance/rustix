@@ -8,13 +8,13 @@
 
 use crate::fd::OwnedFd;
 use crate::{backend, io};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use backend::fd::AsFd;
 
 #[cfg(not(apple))]
 pub use backend::io::types::PipeFlags;
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use backend::io::types::{IoSliceRaw, SpliceFlags};
 
 /// `PIPE_BUF`—The maximum length at which writes to a pipe are atomic.
@@ -109,7 +109,7 @@ pub fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/splice.2.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub fn splice<FdIn: AsFd, FdOut: AsFd>(
     fd_in: FdIn,
@@ -145,7 +145,7 @@ pub fn splice<FdIn: AsFd, FdOut: AsFd>(
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/vmsplice.2.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub unsafe fn vmsplice<PipeFd: AsFd>(
     fd: PipeFd,

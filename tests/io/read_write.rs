@@ -145,7 +145,7 @@ fn test_rwf_values() {
     );
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[cfg(feature = "fs")]
 #[test]
 fn test_pwritev2() {

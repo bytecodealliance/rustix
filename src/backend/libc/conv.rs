@@ -107,7 +107,7 @@ pub(super) fn syscall_ret_usize(raw: c::c_long) -> io::Result<usize> {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(super) fn syscall_ret_u32(raw: c::c_long) -> io::Result<u32> {
     if raw == -1 {

@@ -23,7 +23,7 @@ fn test_y2038() {
     let _ = Timespec { tv_sec, tv_nsec: 0 };
     let _: Secs = tv_sec;
 
-    #[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+    #[cfg(any(linux_kernel, target_os = "fuchsia"))]
     {
         use rustix::time::Itimerspec;
 
@@ -34,7 +34,7 @@ fn test_y2038() {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[test]
 fn test_y2038_with_timerfd() {
     use rustix::time::{

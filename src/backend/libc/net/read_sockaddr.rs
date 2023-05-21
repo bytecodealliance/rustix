@@ -98,7 +98,7 @@ pub(crate) unsafe fn read_sockaddr(
                 // On Linux check for Linux's [abstract namespace].
                 //
                 // [abstract namespace]: https://man7.org/linux/man-pages/man7/unix.7.html
-                #[cfg(any(target_os = "android", target_os = "linux"))]
+                #[cfg(linux_kernel)]
                 if decode.sun_path[0] == 0 {
                     return SocketAddrUnix::new_abstract_name(core::mem::transmute::<
                         &[c::c_char],
@@ -207,7 +207,7 @@ unsafe fn inner_read_sockaddr_os(
                 // On Linux check for Linux's [abstract namespace].
                 //
                 // [abstract namespace]: https://man7.org/linux/man-pages/man7/unix.7.html
-                #[cfg(any(target_os = "android", target_os = "linux"))]
+                #[cfg(linux_kernel)]
                 if decode.sun_path[0] == 0 {
                     return SocketAddrAny::Unix(
                         SocketAddrUnix::new_abstract_name(core::mem::transmute::<

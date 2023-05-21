@@ -4,14 +4,9 @@ use super::super::c;
 #[cfg(not(target_os = "wasi"))]
 use super::super::conv::{borrowed_fd, ret_infallible, ret_pid_t, ret_usize};
 use super::super::conv::{c_str, ret, ret_c_int, ret_discarded_char_ptr};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use super::super::conv::{syscall_ret, syscall_ret_u32};
-#[cfg(any(
-    target_os = "android",
-    target_os = "dragonfly",
-    target_os = "fuchsia",
-    target_os = "linux",
-))]
+#[cfg(any(linux_kernel, target_os = "dragonfly", target_os = "fuchsia"))]
 use super::types::RawCpuSet;
 #[cfg(not(target_os = "wasi"))]
 use crate::fd::BorrowedFd;
@@ -21,14 +16,14 @@ use crate::ffi::CStr;
 #[cfg(feature = "fs")]
 use crate::fs::Mode;
 use crate::io;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use crate::process::Sysinfo;
 #[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 use crate::process::{WaitId, WaitidOptions, WaitidStatus};
 use core::mem::MaybeUninit;
 #[cfg(target_os = "linux")]
 use {super::super::conv::syscall_ret_owned_fd, crate::process::PidfdFlags};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use {
     super::super::offset::libc_prlimit,
     crate::process::{Cpuid, MembarrierCommand, MembarrierQuery},
@@ -65,7 +60,7 @@ pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<()> {
     unsafe { ret_discarded_char_ptr(c::getcwd(buf.as_mut_ptr().cast(), buf.len())) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub(crate) fn membarrier_query() -> MembarrierQuery {
     // glibc does not have a wrapper for `membarrier`; [the documentation]
     // says to use `syscall`.
@@ -80,12 +75,12 @@ pub(crate) fn membarrier_query() -> MembarrierQuery {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub(crate) fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
     unsafe { syscall_ret(c::syscall(c::SYS_membarrier, cmd as u32, 0)) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<()> {
     const MEMBARRIER_CMD_FLAG_CPU: u32 = 1;
     unsafe {
@@ -186,12 +181,7 @@ pub(crate) fn getpgrp() -> Pid {
     }
 }
 
-#[cfg(any(
-    target_os = "android",
-    target_os = "dragonfly",
-    target_os = "fuchsia",
-    target_os = "linux",
-))]
+#[cfg(any(linux_kernel, target_os = "dragonfly", target_os = "fuchsia"))]
 #[inline]
 pub(crate) fn sched_getaffinity(pid: Option<Pid>, cpuset: &mut RawCpuSet) -> io::Result<()> {
     unsafe {
@@ -203,12 +193,7 @@ pub(crate) fn sched_getaffinity(pid: Option<Pid>, cpuset: &mut RawCpuSet) -> io:
     }
 }
 
-#[cfg(any(
-    target_os = "android",
-    target_os = "dragonfly",
-    target_os = "fuchsia",
-    target_os = "linux",
-))]
+#[cfg(any(linux_kernel, target_os = "dragonfly", target_os = "fuchsia"))]
 #[inline]
 pub(crate) fn sched_setaffinity(pid: Option<Pid>, cpuset: &RawCpuSet) -> io::Result<()> {
     unsafe {
@@ -340,7 +325,7 @@ pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
     unsafe { ret(libc_setrlimit(limit as _, &lim)) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Result<Rlimit> {
     let lim = rlimit_to_libc(new)?;
@@ -587,7 +572,7 @@ pub(crate) fn test_kill_current_process_group() -> io::Result<()> {
     unsafe { ret(c::kill(0, 0)) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) unsafe fn prctl(
     option: c::c_int,
@@ -628,7 +613,7 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
     unsafe { ret_usize(c::getgroups(len, buf.as_mut_ptr().cast()) as isize) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub(crate) fn sysinfo() -> Sysinfo {
     let mut info = MaybeUninit::<Sysinfo>::uninit();
     unsafe {

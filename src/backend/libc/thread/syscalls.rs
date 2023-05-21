@@ -7,7 +7,7 @@ use crate::io;
 #[cfg(not(target_os = "redox"))]
 use crate::thread::{NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use {
     super::super::conv::{borrowed_fd, ret_c_int, syscall_ret},
     crate::fd::BorrowedFd,
@@ -266,7 +266,7 @@ unsafe fn nanosleep_old(request: &Timespec) -> NanosleepRelativeResult {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 #[must_use]
 pub(crate) fn gettid() -> Pid {
@@ -284,7 +284,7 @@ pub(crate) fn gettid() -> Pid {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn setns(fd: BorrowedFd, nstype: c::c_int) -> io::Result<c::c_int> {
     // `setns` wasn't supported in glibc until 2.14, and musl until 0.9.5,
@@ -296,13 +296,13 @@ pub(crate) fn setns(fd: BorrowedFd, nstype: c::c_int) -> io::Result<c::c_int> {
     unsafe { ret_c_int(setns(borrowed_fd(fd), nstype)) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn unshare(flags: crate::thread::UnshareFlags) -> io::Result<()> {
     unsafe { ret(c::unshare(flags.bits() as i32)) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn capget(
     header: &mut linux_raw_sys::general::__user_cap_header_struct,
@@ -312,7 +312,7 @@ pub(crate) fn capget(
     unsafe { syscall_ret(c::syscall(c::SYS_capget, header, data.as_mut_ptr())) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn capset(
     header: &mut linux_raw_sys::general::__user_cap_header_struct,
@@ -322,13 +322,13 @@ pub(crate) fn capset(
     unsafe { syscall_ret(c::syscall(c::SYS_capset, header, data.as_ptr())) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn setuid_thread(uid: crate::process::Uid) -> io::Result<()> {
     unsafe { syscall_ret(c::syscall(c::SYS_setuid, uid.as_raw())) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn setresuid_thread(
     ruid: crate::process::Uid,
@@ -342,13 +342,13 @@ pub(crate) fn setresuid_thread(
     unsafe { syscall_ret(c::syscall(SYS, ruid.as_raw(), euid.as_raw(), suid.as_raw())) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn setgid_thread(gid: crate::process::Gid) -> io::Result<()> {
     unsafe { syscall_ret(c::syscall(c::SYS_setgid, gid.as_raw())) }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn setresgid_thread(
     rgid: crate::process::Gid,

@@ -52,7 +52,7 @@ pub(crate) mod c;
 #[cfg(feature = "fs")]
 pub(crate) mod fs;
 pub(crate) mod io;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[cfg(feature = "io_uring")]
 pub(crate) mod io_uring;
 #[cfg(not(any(windows, target_os = "wasi")))]

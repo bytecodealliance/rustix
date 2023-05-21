@@ -668,7 +668,7 @@ pub type FsWord = linux_raw_sys::general::__fsword_t;
 #[cfg(target_arch = "mips64")]
 pub type FsWord = i64;
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags! {
     /// `MS_*` constants for use with [`mount`].
     ///
@@ -725,7 +725,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags! {
     /// `MS_*` constants for use with [`change_mount`].
     ///
@@ -744,7 +744,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags! {
     pub(crate) struct InternalMountFlags: c::c_uint {
         const REMOUNT = linux_raw_sys::general::MS_REMOUNT;
@@ -752,10 +752,10 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub(crate) struct MountFlagsArg(pub(crate) c::c_uint);
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags! {
     /// `MNT_*` constants for use with [`unmount`].
     ///

@@ -12,7 +12,7 @@ use crate::ffi::CStr;
 use crate::io;
 use core::fmt;
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use backend::process::types::Sysinfo;
 
 /// `uname()`—Returns high-level information about the runtime OS and
@@ -69,7 +69,7 @@ impl Uname {
     }
 
     /// `domainname`—NIS or YP domain identifier
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     #[inline]
     pub fn domainname(&self) -> &CStr {
         Self::to_cstr(self.0.domainname.as_ptr().cast())
@@ -84,7 +84,7 @@ impl Uname {
 
 impl fmt::Debug for Uname {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        #[cfg(not(any(target_os = "android", target_os = "linux")))]
+        #[cfg(not(linux_kernel))]
         {
             write!(
                 fmt,
@@ -96,7 +96,7 @@ impl fmt::Debug for Uname {
                 self.machine().to_string_lossy(),
             )
         }
-        #[cfg(any(target_os = "android", target_os = "linux"))]
+        #[cfg(linux_kernel)]
         {
             write!(
                 fmt,
@@ -118,7 +118,7 @@ impl fmt::Debug for Uname {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/uname.2.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub fn sysinfo() -> Sysinfo {
     backend::process::syscalls::sysinfo()

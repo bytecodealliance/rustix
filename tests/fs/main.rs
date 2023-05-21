@@ -27,9 +27,9 @@ mod long_paths;
 mod makedev;
 mod mkdirat;
 mod mknodat;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 mod openat;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 mod openat2;
 #[cfg(not(target_os = "redox"))]
 mod readdir;
@@ -37,12 +37,12 @@ mod readlinkat;
 mod renameat;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 mod statfs;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 mod statx;
 mod symlinkat;
 #[cfg(not(any(solarish, target_os = "redox", target_os = "wasi")))]
 mod sync;
 mod utimensat;
-#[cfg(any(apple, target_os = "android", target_os = "linux"))]
+#[cfg(any(apple, linux_kernel))]
 mod xattr;
 mod y2038;

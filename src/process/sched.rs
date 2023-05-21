@@ -55,7 +55,7 @@ impl CpuSet {
     }
 
     /// Count the number of CPUs set in the `CpuSet`.
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     #[inline]
     pub fn count(&self) -> u32 {
         backend::process::cpu_set::CPU_COUNT(&self.cpu_set)

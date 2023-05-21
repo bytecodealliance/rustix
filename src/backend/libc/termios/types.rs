@@ -74,7 +74,7 @@ pub type Termios = c::termios;
 /// [`tcgetattr2`]: crate::termios::tcgetattr2
 /// [`tcsetattr2`]: crate::termios::tcsetattr2
 #[cfg(all(
-    any(target_os = "android", target_os = "linux"),
+    linux_kernel,
     any(
         target_arch = "x86",
         target_arch = "x86_64",
@@ -557,7 +557,7 @@ pub const B3500000: Speed = c::B3500000;
 pub const B4000000: Speed = c::B4000000;
 
 /// `BOTHER`
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub const BOTHER: Speed = c::BOTHER;
 
 /// `CSIZE`

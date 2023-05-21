@@ -11,7 +11,7 @@ use crate::ffi::{CStr, CString};
 use crate::fs::CloneFlags;
 #[cfg(not(any(apple, target_os = "wasi")))]
 use crate::fs::FileType;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use crate::fs::RenameFlags;
 use crate::fs::{Access, AtFlags, Mode, OFlags, Stat, Timestamps};
 use crate::path::SMALL_PATH_BUFFER_SIZE;
@@ -197,7 +197,7 @@ pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/renameat2.2.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 #[doc(alias = "renameat2")]
 pub fn renameat_with<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(

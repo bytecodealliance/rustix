@@ -1,7 +1,7 @@
 use super::super::c;
 #[cfg(not(target_os = "wasi"))]
 use crate::fd::BorrowedFd;
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 use bitflags::bitflags;
 
 /// `struct timespec`
@@ -139,15 +139,15 @@ pub enum ClockId {
     ThreadCPUTime = c::CLOCK_THREAD_CPUTIME_ID,
 
     /// `CLOCK_REALTIME_COARSE`
-    #[cfg(any(target_os = "android", target_os = "linux", target_os = "freebsd"))]
+    #[cfg(any(linux_kernel, target_os = "freebsd"))]
     RealtimeCoarse = c::CLOCK_REALTIME_COARSE,
 
     /// `CLOCK_MONOTONIC_COARSE`
-    #[cfg(any(target_os = "android", target_os = "linux", target_os = "freebsd"))]
+    #[cfg(any(linux_kernel, target_os = "freebsd"))]
     MonotonicCoarse = c::CLOCK_MONOTONIC_COARSE,
 
     /// `CLOCK_MONOTONIC_RAW`
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     MonotonicRaw = c::CLOCK_MONOTONIC_RAW,
 }
 
@@ -193,19 +193,19 @@ pub enum DynamicClockId<'a> {
     Dynamic(BorrowedFd<'a>),
 
     /// `CLOCK_REALTIME_ALARM`, available on Linux >= 3.0
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     RealtimeAlarm,
 
     /// `CLOCK_TAI`, available on Linux >= 3.10
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     Tai,
 
     /// `CLOCK_BOOTTIME`, available on Linux >= 2.6.39
-    #[cfg(any(target_os = "android", target_os = "linux", target_os = "openbsd"))]
+    #[cfg(any(linux_kernel, target_os = "openbsd"))]
     Boottime,
 
     /// `CLOCK_BOOTTIME_ALARM`, available on Linux >= 2.6.39
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     BoottimeAlarm,
 }
 
@@ -214,7 +214,7 @@ pub enum DynamicClockId<'a> {
 ///
 /// [`timerfd_gettime`]: crate::time::timerfd_gettime
 /// [`timerfd_settime`]: crate::time::timerfd_settime
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(not(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
@@ -226,7 +226,7 @@ pub type Itimerspec = c::itimerspec;
 ///
 /// [`timerfd_gettime`]: crate::time::timerfd_gettime
 /// [`timerfd_settime`]: crate::time::timerfd_settime
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
@@ -240,7 +240,7 @@ pub struct Itimerspec {
 }
 
 /// On most platforms, `LibcItimerspec` is just `Itimerspec`.
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(not(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
@@ -249,7 +249,7 @@ pub(crate) type LibcItimerspec = Itimerspec;
 
 /// On 32-bit glibc platforms, `LibcTimespec` differs from `Timespec`, so we
 /// define our own struct, with bidirectional `From` impls.
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
@@ -261,7 +261,7 @@ pub(crate) struct LibcItimerspec {
     pub it_value: LibcTimespec,
 }
 
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
@@ -276,7 +276,7 @@ impl From<LibcItimerspec> for Itimerspec {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
@@ -291,7 +291,7 @@ impl From<Itimerspec> for LibcItimerspec {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 bitflags! {
     /// `TFD_*` flags for use with [`timerfd_create`].
     ///
@@ -305,7 +305,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 bitflags! {
     /// `TFD_TIMER_*` flags for use with [`timerfd_settime`].
     ///
@@ -315,7 +315,7 @@ bitflags! {
         const ABSTIME = c::TFD_TIMER_ABSTIME;
 
         /// `TFD_TIMER_CANCEL_ON_SET`
-        #[cfg(any(target_os = "android", target_os = "linux"))]
+        #[cfg(linux_kernel)]
         const CANCEL_ON_SET = c::TFD_TIMER_CANCEL_ON_SET;
     }
 }
@@ -323,7 +323,7 @@ bitflags! {
 /// `CLOCK_*` constants for use with [`timerfd_create`].
 ///
 /// [`timerfd_create`]: crate::time::timerfd_create
-#[cfg(any(target_os = "android", target_os = "fuchsia", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(i32)]
 #[non_exhaustive]

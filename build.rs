@@ -140,6 +140,12 @@ fn main() {
     {
         use_feature("bsd");
     }
+
+    // Add some additional common target combinations.
+    if target_os == "android" || target_os == "linux" {
+        use_feature("linux_kernel");
+    }
+
     if target_os == "wasi" {
         use_feature_or_nothing("wasi_ext");
     }

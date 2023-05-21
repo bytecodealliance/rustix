@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::fs::File;
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use std::mem::MaybeUninit;
 
 use rustix::fs::{Dir, DirEntry};
@@ -52,7 +52,7 @@ fn read_entries(dir: &mut Dir) -> HashMap<String, DirEntry> {
     out
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 fn test_raw_dir(buf: &mut [MaybeUninit<u8>]) {
     use std::collections::HashSet;
     use std::io::{Seek, SeekFrom};
@@ -111,7 +111,7 @@ fn test_raw_dir(buf: &mut [MaybeUninit<u8>]) {
 }
 
 #[test]
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 fn raw_dir_entries_heap() {
     // When we can depend on Rust 1.60, we can use the spare_capacity_mut
     // version instead.
@@ -124,14 +124,14 @@ fn raw_dir_entries_heap() {
 }
 
 #[test]
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 fn raw_dir_entries_stack() {
     let mut buf = [MaybeUninit::uninit(); 2048];
     test_raw_dir(&mut buf);
 }
 
 #[test]
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 fn raw_dir_entries_unaligned() {
     let mut buf = [MaybeUninit::uninit(); 2048];
     let buf = &mut buf[1..];

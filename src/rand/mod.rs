@@ -1,7 +1,7 @@
 //! Random-related operations.
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 mod getrandom;
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use getrandom::{getrandom, GetRandomFlags};

@@ -28,7 +28,7 @@ bitflags::bitflags! {
         ///
         /// The standard `posix_openpt` function doesn't support `CLOEXEC`, but
         /// rustix supports it on Linux, and FreeBSD and NetBSD support it.
-        #[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux", target_os = "netbsd"))]
+        #[cfg(any(linux_kernel, target_os = "freebsd", target_os = "netbsd"))]
         const CLOEXEC = c::O_CLOEXEC as c::c_uint;
     }
 }
@@ -76,7 +76,7 @@ impl From<OpenptFlags> for OFlags {
 #[doc(alias = "posix_openpt")]
 pub fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
     // On Linux, open the device ourselves so that we can support `CLOEXEC`.
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     {
         use crate::fs::{cwd, openat, Mode};
         match openat(cwd(), cstr!("/dev/ptmx"), flags.into(), Mode::empty()) {
@@ -87,7 +87,7 @@ pub fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
     }
 
     // On all other platforms, use `openpt`.
-    #[cfg(not(any(target_os = "android", target_os = "linux")))]
+    #[cfg(not(linux_kernel))]
     {
         backend::pty::syscalls::openpt(flags)
     }
@@ -142,14 +142,14 @@ pub fn unlockpt<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Allocation.html#index-grantpt
 #[inline]
 pub fn grantpt<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    #[cfg(not(any(target_os = "android", target_os = "linux")))]
+    #[cfg(not(linux_kernel))]
     {
         backend::pty::syscalls::grantpt(fd.as_fd())
     }
 
     // On Linux, we assume the kernel has already granted the needed
     // permissions to the user side of the pseudoterminal.
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     {
         let _ = fd;
         Ok(())

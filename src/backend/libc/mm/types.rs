@@ -31,10 +31,10 @@ bitflags! {
         /// `PROT_EXEC`
         const EXEC = c::PROT_EXEC;
         /// `PROT_GROWSUP`
-        #[cfg(any(target_os = "android", target_os = "linux"))]
+        #[cfg(linux_kernel)]
         const GROWSUP = c::PROT_GROWSUP;
         /// `PROT_GROWSDOWN`
-        #[cfg(any(target_os = "android", target_os = "linux"))]
+        #[cfg(linux_kernel)]
         const GROWSDOWN = c::PROT_GROWSDOWN;
     }
 }
@@ -169,7 +169,7 @@ bitflags! {
             target_os = "haiku",
             target_os = "redox",
             all(
-                any(target_os = "android", target_os = "linux"),
+                linux_kernel,
                 any(target_arch = "mips", target_arch = "mips64"),
             )
         )))]
@@ -211,7 +211,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags! {
     /// `MLOCK_*` flags for use with [`mlock_with`].
     ///
@@ -281,64 +281,61 @@ pub enum Advice {
     #[cfg(target_os = "android")]
     LinuxDontNeed = c::MADV_DONTNEED,
     /// `MADV_FREE`
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxFree = c::MADV_FREE,
     /// `MADV_REMOVE`
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxRemove = c::MADV_REMOVE,
     /// `MADV_DONTFORK`
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxDontFork = c::MADV_DONTFORK,
     /// `MADV_DOFORK`
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxDoFork = c::MADV_DOFORK,
     /// `MADV_HWPOISON`
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxHwPoison = c::MADV_HWPOISON,
     /// `MADV_SOFT_OFFLINE`
-    #[cfg(all(
-        any(target_os = "android", target_os = "linux"),
-        not(any(target_arch = "mips", target_arch = "mips64")),
-    ))]
+    #[cfg(all(linux_kernel, not(any(target_arch = "mips", target_arch = "mips64"))))]
     LinuxSoftOffline = c::MADV_SOFT_OFFLINE,
     /// `MADV_MERGEABLE`
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxMergeable = c::MADV_MERGEABLE,
     /// `MADV_UNMERGEABLE`
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxUnmergeable = c::MADV_UNMERGEABLE,
     /// `MADV_HUGEPAGE` (since Linux 2.6.38)
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxHugepage = c::MADV_HUGEPAGE,
     /// `MADV_NOHUGEPAGE` (since Linux 2.6.38)
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxNoHugepage = c::MADV_NOHUGEPAGE,
     /// `MADV_DONTDUMP` (since Linux 3.4)
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxDontDump = c::MADV_DONTDUMP,
     /// `MADV_DODUMP` (since Linux 3.4)
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxDoDump = c::MADV_DODUMP,
     /// `MADV_WIPEONFORK` (since Linux 4.14)
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxWipeOnFork = libc::MADV_WIPEONFORK as i32,
     /// `MADV_KEEPONFORK` (since Linux 4.14)
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxKeepOnFork = libc::MADV_KEEPONFORK as i32,
     /// `MADV_COLD` (since Linux 5.4)
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxCold = libc::MADV_COLD as i32,
     /// `MADV_PAGEOUT` (since Linux 5.4)
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxPageOut = libc::MADV_PAGEOUT as i32,
     /// `MADV_POPULATE_READ` (since Linux 5.14)
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxPopulateRead = libc::MADV_POPULATE_READ as i32,
     /// `MADV_POPULATE_WRITE` (since Linux 5.14)
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxPopulateWrite = libc::MADV_POPULATE_WRITE as i32,
     /// `MADV_DONTNEED_LOCKED` (since Linux 5.18)
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(linux_kernel)]
     LinuxDontneedLocked = libc::MADV_DONTNEED_LOCKED as i32,
 }
 
@@ -349,7 +346,7 @@ impl Advice {
     pub const DontNeed: Self = Self::Normal;
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 bitflags! {
     /// `O_*` flags for use with [`userfaultfd`].
     ///

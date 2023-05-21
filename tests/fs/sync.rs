@@ -3,7 +3,7 @@ fn test_sync() {
     rustix::fs::sync();
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_syncfs() {
     let f = std::fs::File::open("Cargo.toml").unwrap();

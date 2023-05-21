@@ -28,7 +28,7 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
 }
 
 #[cfg(all(
-    any(target_os = "android", target_os = "linux"),
+    linux_kernel,
     any(
         target_arch = "x86",
         target_arch = "x86_64",
@@ -78,7 +78,7 @@ pub(crate) fn tcsetattr(
 }
 
 #[cfg(all(
-    any(target_os = "android", target_os = "linux"),
+    linux_kernel,
     any(
         target_arch = "x86",
         target_arch = "x86_64",

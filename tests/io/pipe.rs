@@ -1,5 +1,5 @@
 #[cfg(feature = "fs")]
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_splice_cursor() {
     use rustix::io::{pipe, splice, SpliceFlags};
@@ -25,7 +25,7 @@ fn test_splice_cursor() {
 }
 
 #[cfg(feature = "fs")]
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_splice_offset() {
     use rustix::io::{pipe, splice, SpliceFlags};
@@ -66,7 +66,7 @@ fn test_splice_offset() {
 }
 
 #[cfg(feature = "fs")]
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_splice_pipe2pipe() {
     use rustix::io::{pipe, read, splice, write, SpliceFlags};
@@ -83,7 +83,7 @@ fn test_splice_pipe2pipe() {
 }
 
 #[cfg(feature = "fs")]
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_vmsplice_write() {
     use rustix::io::{pipe, read, vmsplice, IoSliceRaw, SpliceFlags};
@@ -103,7 +103,7 @@ fn test_vmsplice_write() {
 }
 
 #[cfg(feature = "fs")]
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[test]
 fn test_vmsplice_read() {
     use rustix::io::{pipe, vmsplice, write, IoSliceRaw, SpliceFlags};

@@ -120,7 +120,7 @@ unsafe fn fetch(name: &str) -> *mut c_void {
     libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr())
 }
 
-#[cfg(not(any(target_os = "android", target_os = "linux")))]
+#[cfg(not(linux_kernel))]
 macro_rules! syscall {
     (fn $name:ident($($arg_name:ident: $t:ty),*) via $_sys_name:ident -> $ret:ty) => (
         unsafe fn $name($($arg_name: $t),*) -> $ret {
@@ -136,7 +136,7 @@ macro_rules! syscall {
     )
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 macro_rules! syscall {
     (fn $name:ident($($arg_name:ident: $t:ty),*) via $sys_name:ident -> $ret:ty) => (
         unsafe fn $name($($arg_name:$t),*) -> $ret {

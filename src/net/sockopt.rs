@@ -249,7 +249,7 @@ pub fn get_socket_linger<Fd: AsFd>(fd: Fd) -> io::Result<Option<Duration>> {
 ///
 /// [Linux `setsockopt`]: https://man7.org/linux/man-pages/man2/setsockopt.2.html
 /// [Linux `socket`]: https://man7.org/linux/man-pages/man7/socket.7.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 #[doc(alias = "SO_PASSCRED")]
 pub fn set_socket_passcred<Fd: AsFd>(fd: Fd, passcred: bool) -> io::Result<()> {
@@ -264,7 +264,7 @@ pub fn set_socket_passcred<Fd: AsFd>(fd: Fd, passcred: bool) -> io::Result<()> {
 ///
 /// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
 /// [Linux `socket`]: https://man7.org/linux/man-pages/man7/socket.7.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 #[doc(alias = "SO_PASSCRED")]
 pub fn get_socket_passcred<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
