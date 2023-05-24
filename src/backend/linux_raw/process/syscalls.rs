@@ -267,15 +267,12 @@ pub(crate) fn umask(mode: Mode) -> Mode {
 
 #[inline]
 pub(crate) fn nice(inc: i32) -> io::Result<i32> {
-    let priority = if inc > -40 && inc < 40 {
+    let priority = (if inc > -40 && inc < 40 {
         inc + getpriority_process(None)?
     } else {
         inc
-    }
-    // TODO: With Rust 1.50, use `.clamp` instead of `.min` and `.max`.
-    //.clamp(-20, 19);
-    .min(19)
-    .max(-20);
+    })
+    .clamp(-20, 19);
     setpriority_process(None, priority)?;
     Ok(priority)
 }

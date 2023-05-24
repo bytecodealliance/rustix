@@ -135,8 +135,6 @@ extern crate alloc;
 #[cfg(not(windows))]
 #[macro_use]
 pub(crate) mod cstr;
-#[macro_use]
-pub(crate) mod const_assert;
 pub(crate) mod utils;
 
 // linux_raw: Weak symbols are used by the use-libc-auxv feature for

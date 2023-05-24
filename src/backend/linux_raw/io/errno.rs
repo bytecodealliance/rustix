@@ -67,7 +67,7 @@ impl Errno {
         let encoded = raw.wrapping_neg() as u16;
 
         // TODO: Use Range::contains, once that's `const`.
-        const_assert!(encoded >= 0xf001);
+        assert!(encoded >= 0xf001);
 
         // SAFETY: Linux syscalls return negated error values in the range
         // `-4095..0`, which we just asserted.
