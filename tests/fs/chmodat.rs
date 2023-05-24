@@ -1,5 +1,34 @@
 #[cfg(not(target_os = "wasi"))]
 #[test]
+fn test_chmod() {
+    use rustix::fs::{chmod, open, stat, symlink, Mode, OFlags};
+
+    let tmp = tempfile::tempdir().unwrap();
+
+    let _ = open(
+        tmp.path().join("foo"),
+        OFlags::CREATE | OFlags::WRONLY,
+        Mode::RWXU,
+    )
+    .unwrap();
+    symlink(tmp.path().join("foo"), tmp.path().join("link")).unwrap();
+
+    let before = stat(tmp.path().join("foo")).unwrap();
+    assert_ne!(before.st_mode as u64 & libc::S_IRWXU as u64, 0);
+
+    chmod(tmp.path().join("foo"), Mode::empty()).unwrap();
+
+    let after = stat(tmp.path().join("foo")).unwrap();
+    assert_eq!(after.st_mode as u64 & libc::S_IRWXU as u64, 0);
+
+    chmod(tmp.path().join("foo"), Mode::RWXU).unwrap();
+
+    let reverted = stat(tmp.path().join("foo")).unwrap();
+    assert_ne!(reverted.st_mode as u64 & libc::S_IRWXU as u64, 0);
+}
+
+#[cfg(not(target_os = "wasi"))]
+#[test]
 fn test_chmodat() {
     use rustix::fs::{chmodat, cwd, openat, statat, symlinkat, AtFlags, Mode, OFlags};
 

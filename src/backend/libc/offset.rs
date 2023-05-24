@@ -7,7 +7,7 @@ use super::c;
 #[cfg(feature = "fs")]
 pub(super) use c::{
     fstat as libc_fstat, fstatat as libc_fstatat, ftruncate as libc_ftruncate, ino_t as libc_ino_t,
-    lseek as libc_lseek, off_t as libc_off_t,
+    lseek as libc_lseek, lstat as libc_lstat, off_t as libc_off_t, stat as libc_stat,
 };
 
 #[cfg(linux_like)]
@@ -16,6 +16,11 @@ pub(super) use c::{
     fstat64 as libc_fstat, fstatat64 as libc_fstatat, ftruncate64 as libc_ftruncate,
     ino64_t as libc_ino_t, lseek64 as libc_lseek, off64_t as libc_off_t,
 };
+
+#[cfg(not(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64"))))]
+#[cfg(linux_like)]
+#[cfg(feature = "fs")]
+pub(super) use {c::lstat64 as libc_lstat, c::stat64 as libc_stat};
 
 #[cfg(linux_like)]
 #[cfg(feature = "process")]
@@ -104,12 +109,16 @@ pub(super) unsafe fn libc_prlimit(
     prlimit64(pid, resource, new_limit, old_limit)
 }
 
-#[cfg(not(any(linux_like, windows, target_os = "redox")))]
+#[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+#[cfg(linux_like)]
 #[cfg(feature = "fs")]
-pub(super) use c::openat as libc_openat;
+pub(super) use c::open64 as libc_open;
 #[cfg(linux_like)]
 #[cfg(feature = "fs")]
 pub(super) use c::openat64 as libc_openat;
+#[cfg(not(any(linux_like, windows, target_os = "redox")))]
+#[cfg(feature = "fs")]
+pub(super) use {c::open as libc_open, c::openat as libc_openat};
 
 #[cfg(target_os = "fuchsia")]
 #[cfg(feature = "fs")]

@@ -1,4 +1,21 @@
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[test]
+fn test_mkdir() {
+    use rustix::fs::{access, mkdir, rmdir, stat, unlink, Access, FileType, Mode};
+
+    let tmp = tempfile::tempdir().unwrap();
+
+    mkdir(tmp.path().join("foo"), Mode::RWXU).unwrap();
+    let stat = stat(tmp.path().join("foo")).unwrap();
+    assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::Directory);
+    access(tmp.path().join("foo"), Access::READ_OK).unwrap();
+    access(tmp.path().join("foo"), Access::WRITE_OK).unwrap();
+    access(tmp.path().join("foo"), Access::EXEC_OK).unwrap();
+    access(tmp.path().join("foo"), Access::EXISTS).unwrap();
+    unlink(tmp.path().join("foo")).unwrap_err();
+    rmdir(tmp.path().join("foo")).unwrap();
+}
+
+#[cfg(not(target_os = "redox"))]
 #[test]
 fn test_mkdirat() {
     use rustix::fs::{
@@ -15,6 +32,7 @@ fn test_mkdirat() {
     accessat(&dir, "foo", Access::WRITE_OK, AtFlags::empty()).unwrap();
     accessat(&dir, "foo", Access::EXEC_OK, AtFlags::empty()).unwrap();
     accessat(&dir, "foo", Access::EXISTS, AtFlags::empty()).unwrap();
+    unlinkat(&dir, "foo", AtFlags::empty()).unwrap_err();
     unlinkat(&dir, "foo", AtFlags::REMOVEDIR).unwrap();
 }
 
@@ -38,5 +56,6 @@ fn test_mkdirat_with_o_path() {
     let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
     assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::Directory);
     accessat(&dir, "foo", Access::EXISTS, AtFlags::empty()).unwrap();
+    unlinkat(&dir, "foo", AtFlags::empty()).unwrap_err();
     unlinkat(&dir, "foo", AtFlags::REMOVEDIR).unwrap();
 }
