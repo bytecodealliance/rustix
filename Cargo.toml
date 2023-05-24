@@ -216,7 +216,7 @@ all-apis = [
 # When using the linux_raw backend, and not using Mustang, should we use libc
 # for reading the aux vectors, instead of reading them ourselves from
 # /proc/self/auxv?
-use-libc-auxv = ["libc"]
+use-libc-auxv = []
 
 # OS compatability features
 
