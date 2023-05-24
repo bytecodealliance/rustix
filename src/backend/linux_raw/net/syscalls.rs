@@ -255,14 +255,8 @@ pub(crate) fn recvmsg(
 
     with_recv_msghdr(&mut storage, iov, control, |msghdr| {
         #[cfg(not(target_arch = "x86"))]
-        let result = unsafe {
-            ret_usize(syscall!(
-                __NR_recvmsg,
-                sockfd,
-                by_mut(msghdr),
-                c_uint(msg_flags.bits())
-            ))
-        };
+        let result =
+            unsafe { ret_usize(syscall!(__NR_recvmsg, sockfd, by_mut(msghdr), msg_flags)) };
 
         #[cfg(target_arch = "x86")]
         let result = unsafe {
@@ -272,7 +266,7 @@ pub(crate) fn recvmsg(
                 slice_just_addr::<ArgReg<SocketArg>, _>(&[
                     sockfd.into(),
                     by_mut(msghdr),
-                    c_uint(msg_flags.bits()).into(),
+                    msg_flags.into(),
                 ])
             ))
         };
@@ -300,14 +294,8 @@ pub(crate) fn sendmsg(
 ) -> io::Result<usize> {
     with_noaddr_msghdr(iov, control, |msghdr| {
         #[cfg(not(target_arch = "x86"))]
-        let result = unsafe {
-            ret_usize(syscall!(
-                __NR_sendmsg,
-                sockfd,
-                by_ref(&msghdr),
-                c_uint(msg_flags.bits())
-            ))
-        };
+        let result =
+            unsafe { ret_usize(syscall!(__NR_sendmsg, sockfd, by_ref(&msghdr), msg_flags)) };
 
         #[cfg(target_arch = "x86")]
         let result = unsafe {
@@ -317,7 +305,7 @@ pub(crate) fn sendmsg(
                 slice_just_addr::<ArgReg<SocketArg>, _>(&[
                     sockfd.into(),
                     by_ref(&msghdr),
-                    c_uint(msg_flags.bits())
+                    msg_flags.into()
                 ])
             ))
         };
@@ -336,14 +324,8 @@ pub(crate) fn sendmsg_v4(
 ) -> io::Result<usize> {
     with_v4_msghdr(addr, iov, control, |msghdr| {
         #[cfg(not(target_arch = "x86"))]
-        let result = unsafe {
-            ret_usize(syscall!(
-                __NR_sendmsg,
-                sockfd,
-                by_ref(&msghdr),
-                c_uint(msg_flags.bits())
-            ))
-        };
+        let result =
+            unsafe { ret_usize(syscall!(__NR_sendmsg, sockfd, by_ref(&msghdr), msg_flags)) };
 
         #[cfg(target_arch = "x86")]
         let result = unsafe {
@@ -353,7 +335,7 @@ pub(crate) fn sendmsg_v4(
                 slice_just_addr::<ArgReg<SocketArg>, _>(&[
                     sockfd.into(),
                     by_ref(&msghdr),
-                    c_uint(msg_flags.bits())
+                    msg_flags.into(),
                 ])
             ))
         };
@@ -372,14 +354,8 @@ pub(crate) fn sendmsg_v6(
 ) -> io::Result<usize> {
     with_v6_msghdr(addr, iov, control, |msghdr| {
         #[cfg(not(target_arch = "x86"))]
-        let result = unsafe {
-            ret_usize(syscall!(
-                __NR_sendmsg,
-                sockfd,
-                by_ref(&msghdr),
-                c_uint(msg_flags.bits())
-            ))
-        };
+        let result =
+            unsafe { ret_usize(syscall!(__NR_sendmsg, sockfd, by_ref(&msghdr), msg_flags)) };
 
         #[cfg(target_arch = "x86")]
         let result = unsafe {
@@ -389,7 +365,7 @@ pub(crate) fn sendmsg_v6(
                 slice_just_addr::<ArgReg<SocketArg>, _>(&[
                     sockfd.into(),
                     by_ref(&msghdr),
-                    c_uint(msg_flags.bits())
+                    msg_flags.into()
                 ])
             ))
         };
@@ -408,14 +384,8 @@ pub(crate) fn sendmsg_unix(
 ) -> io::Result<usize> {
     with_unix_msghdr(addr, iov, control, |msghdr| {
         #[cfg(not(target_arch = "x86"))]
-        let result = unsafe {
-            ret_usize(syscall!(
-                __NR_sendmsg,
-                sockfd,
-                by_ref(&msghdr),
-                c_uint(msg_flags.bits())
-            ))
-        };
+        let result =
+            unsafe { ret_usize(syscall!(__NR_sendmsg, sockfd, by_ref(&msghdr), msg_flags)) };
 
         #[cfg(target_arch = "x86")]
         let result = unsafe {
@@ -425,7 +395,7 @@ pub(crate) fn sendmsg_unix(
                 slice_just_addr::<ArgReg<SocketArg>, _>(&[
                     sockfd.into(),
                     by_ref(&msghdr),
-                    c_uint(msg_flags.bits())
+                    msg_flags.into()
                 ])
             ))
         };
