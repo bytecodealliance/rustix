@@ -6,9 +6,9 @@
 //! kernel-provided AUXV values.
 #![allow(unsafe_code)]
 
-use super::super::c;
-use super::super::elf::*;
-use super::super::param::auxv::exe_phdrs_slice;
+use crate::backend::c;
+use crate::backend::elf::*;
+use crate::backend::param::auxv::exe_phdrs_slice;
 use core::ptr::null;
 
 /// For use with [`set_thread_area`].

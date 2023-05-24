@@ -1,5 +1,5 @@
 #[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
-use super::super::c;
+use crate::backend::c;
 use crate::fs::Dev;
 
 #[cfg(not(any(

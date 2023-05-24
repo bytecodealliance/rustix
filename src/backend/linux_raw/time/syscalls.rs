@@ -6,8 +6,8 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use super::super::conv::{ret, ret_infallible};
 use super::types::ClockId;
+use crate::backend::conv::{ret, ret_infallible};
 use crate::io;
 use core::mem::MaybeUninit;
 use linux_raw_sys::general::__kernel_timespec;
@@ -17,7 +17,7 @@ use linux_raw_sys::general::itimerspec as __kernel_old_itimerspec;
 use linux_raw_sys::general::timespec as __kernel_old_timespec;
 #[cfg(feature = "time")]
 use {
-    super::super::conv::{by_ref, ret_owned_fd},
+    crate::backend::conv::{by_ref, ret_owned_fd},
     crate::fd::BorrowedFd,
     crate::fd::OwnedFd,
     crate::time::{Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags},
@@ -25,7 +25,7 @@ use {
 
 // `clock_gettime` has special optimizations via the vDSO.
 #[cfg(feature = "time")]
-pub(crate) use super::super::vdso_wrappers::{clock_gettime, clock_gettime_dynamic};
+pub(crate) use crate::backend::vdso_wrappers::{clock_gettime, clock_gettime_dynamic};
 
 #[inline]
 pub(crate) fn clock_getres(which_clock: ClockId) -> __kernel_timespec {

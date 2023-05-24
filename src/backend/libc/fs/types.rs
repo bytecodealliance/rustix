@@ -1,4 +1,4 @@
-use super::super::c;
+use crate::backend::c;
 use bitflags::bitflags;
 
 bitflags! {
@@ -41,10 +41,9 @@ bitflags! {
 
         /// `AT_EMPTY_PATH`
         #[cfg(any(
-            target_os = "android",
+            linux_kernel,
             target_os = "freebsd",
             target_os = "fuchsia",
-            target_os = "linux",
         ))]
         const EMPTY_PATH = c::AT_EMPTY_PATH;
 
@@ -244,10 +243,9 @@ bitflags! {
 
         /// `O_RSYNC`
         #[cfg(any(
+            linux_kernel,
             netbsdlike,
-            target_os = "android",
             target_os = "emscripten",
-            target_os = "linux",
             target_os = "wasi",
         ))]
         const RSYNC = c::O_RSYNC;
@@ -261,11 +259,10 @@ bitflags! {
 
         /// `O_PATH`
         #[cfg(any(
-            target_os = "android",
+            linux_kernel,
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
-            target_os = "linux",
             target_os = "redox",
         ))]
         const PATH = c::O_PATH;
@@ -275,28 +272,25 @@ bitflags! {
 
         /// `O_TMPFILE`
         #[cfg(any(
-            target_os = "android",
+            linux_kernel,
             target_os = "emscripten",
             target_os = "fuchsia",
-            target_os = "linux",
         ))]
         const TMPFILE = c::O_TMPFILE;
 
         /// `O_NOATIME`
         #[cfg(any(
-            target_os = "android",
+            linux_kernel,
             target_os = "fuchsia",
-            target_os = "linux",
         ))]
         const NOATIME = c::O_NOATIME;
 
         /// `O_DIRECT`
         #[cfg(any(
-            target_os = "android",
+            linux_kernel,
             target_os = "emscripten",
             target_os = "freebsd",
             target_os = "fuchsia",
-            target_os = "linux",
             target_os = "netbsd",
         ))]
         const DIRECT = c::O_DIRECT;
@@ -535,7 +529,7 @@ pub enum Advice {
     DontNeed = c::POSIX_FADV_DONTNEED as c::c_uint,
 }
 
-#[cfg(any(target_os = "android", target_os = "freebsd", target_os = "linux"))]
+#[cfg(any(linux_kernel, target_os = "freebsd"))]
 bitflags! {
     /// `MFD_*` constants for use with [`memfd_create`].
     ///
@@ -578,12 +572,7 @@ bitflags! {
     }
 }
 
-#[cfg(any(
-    target_os = "android",
-    target_os = "freebsd",
-    target_os = "fuchsia",
-    target_os = "linux",
-))]
+#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
 bitflags! {
     /// `F_SEAL_*` constants for use with [`fcntl_add_seals`] and
     /// [`fcntl_get_seals`].
@@ -796,23 +785,28 @@ bitflags! {
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct StatVfsMountFlags: u64 {
         /// `ST_MANDLOCK`
-        #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
+        #[cfg(any(linux_kernel, target_os = "emscripten", target_os = "fuchsia"))]
         const MANDLOCK = c::ST_MANDLOCK as u64;
 
         /// `ST_NOATIME`
-        #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
+        #[cfg(any(linux_kernel, target_os = "emscripten", target_os = "fuchsia"))]
         const NOATIME = c::ST_NOATIME as u64;
 
         /// `ST_NODEV`
-        #[cfg(any(target_os = "aix", target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
+        #[cfg(any(
+            linux_kernel,
+            target_os = "aix",
+            target_os = "emscripten",
+            target_os = "fuchsia"
+        ))]
         const NODEV = c::ST_NODEV as u64;
 
         /// `ST_NODIRATIME`
-        #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
+        #[cfg(any(linux_kernel, target_os = "emscripten", target_os = "fuchsia"))]
         const NODIRATIME = c::ST_NODIRATIME as u64;
 
         /// `ST_NOEXEC`
-        #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
+        #[cfg(any(linux_kernel, target_os = "emscripten", target_os = "fuchsia"))]
         const NOEXEC = c::ST_NOEXEC as u64;
 
         /// `ST_NOSUID`
@@ -826,7 +820,7 @@ bitflags! {
         const RELATIME = c::ST_RELATIME as u64;
 
         /// `ST_SYNCHRONOUS`
-        #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "linux"))]
+        #[cfg(any(linux_kernel, target_os = "emscripten", target_os = "fuchsia"))]
         const SYNCHRONOUS = c::ST_SYNCHRONOUS as u64;
     }
 }

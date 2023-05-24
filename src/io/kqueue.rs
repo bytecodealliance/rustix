@@ -1,8 +1,8 @@
 //! An API for interfacing with `kqueue`.
 
 use crate::fd::{AsFd, AsRawFd, OwnedFd, RawFd};
-#[cfg(feature = "process")]
-use crate::process::{Pid, Signal};
+use crate::pid::Pid;
+use crate::signal::Signal;
 use crate::{backend, io};
 
 use backend::c::{self, intptr_t, kevent as kevent_t, uintptr_t};
@@ -33,11 +33,9 @@ impl Event {
             EventFilter::Vnode { vnode, flags } => {
                 (vnode.as_raw_fd() as _, 0, c::EVFILT_VNODE, flags.bits())
             }
-            #[cfg(feature = "process")]
             EventFilter::Proc { pid, flags } => {
                 (Pid::as_raw(Some(pid)) as _, 0, c::EVFILT_PROC, flags.bits())
             }
-            #[cfg(feature = "process")]
             EventFilter::Signal { signal, times: _ } => (signal as _, 0, c::EVFILT_SIGNAL, 0),
             EventFilter::Timer { ident, timer } => {
                 #[cfg(any(apple, target_os = "freebsd", target_os = "netbsd"))]
@@ -114,12 +112,10 @@ impl Event {
                 vnode: self.inner.ident as _,
                 flags: VnodeEvents::from_bits_truncate(self.inner.fflags),
             },
-            #[cfg(feature = "process")]
             c::EVFILT_PROC => EventFilter::Proc {
                 pid: unsafe { Pid::from_raw(self.inner.ident as _) }.unwrap(),
                 flags: ProcessEvents::from_bits_truncate(self.inner.fflags),
             },
-            #[cfg(feature = "process")]
             c::EVFILT_SIGNAL => EventFilter::Signal {
                 signal: Signal::from_raw(self.inner.ident as _).unwrap(),
                 times: self.inner.data as _,
@@ -181,7 +177,6 @@ pub enum EventFilter {
     },
 
     /// A process filter.
-    #[cfg(feature = "process")]
     Proc {
         /// The process ID we waited on.
         pid: Pid,
@@ -191,7 +186,6 @@ pub enum EventFilter {
     },
 
     /// A signal filter.
-    #[cfg(feature = "process")]
     Signal {
         /// The signal number we waited on.
         signal: Signal,
@@ -291,7 +285,6 @@ bitflags::bitflags! {
     }
 }
 
-#[cfg(feature = "process")]
 bitflags::bitflags! {
     /// The flags for a process event.
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]

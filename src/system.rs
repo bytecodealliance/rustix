@@ -13,7 +13,7 @@ use crate::io;
 use core::fmt;
 
 #[cfg(linux_kernel)]
-pub use backend::process::types::Sysinfo;
+pub use backend::system::types::Sysinfo;
 
 /// `uname()`—Returns high-level information about the runtime OS and
 /// hardware.
@@ -26,12 +26,12 @@ pub use backend::process::types::Sysinfo;
 /// [Linux]: https://man7.org/linux/man-pages/man2/uname.2.html
 #[inline]
 pub fn uname() -> Uname {
-    Uname(backend::process::syscalls::uname())
+    Uname(backend::system::syscalls::uname())
 }
 
 /// `struct utsname`—Return type for [`uname`].
 #[doc(alias = "utsname")]
-pub struct Uname(backend::process::types::RawUname);
+pub struct Uname(backend::system::types::RawUname);
 
 impl Uname {
     /// `sysname`—Operating system release name
@@ -121,7 +121,7 @@ impl fmt::Debug for Uname {
 #[cfg(linux_kernel)]
 #[inline]
 pub fn sysinfo() -> Sysinfo {
-    backend::process::syscalls::sysinfo()
+    backend::system::syscalls::sysinfo()
 }
 
 /// `sethostname(name)`—Sets the system host name.
@@ -133,5 +133,5 @@ pub fn sysinfo() -> Sysinfo {
 #[cfg(not(any(target_os = "emscripten", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub fn sethostname(name: &[u8]) -> io::Result<()> {
-    backend::process::syscalls::sethostname(name)
+    backend::system::syscalls::sethostname(name)
 }

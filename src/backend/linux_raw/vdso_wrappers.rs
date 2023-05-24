@@ -198,6 +198,7 @@ pub(super) mod x86_via_vdso {
 
     // With the indirect call, it isn't meaningful to do a separate
     // `_readonly` optimization.
+    #[allow(unused_imports)]
     pub(in crate::backend) use {
         syscall0 as syscall0_readonly, syscall1 as syscall1_readonly,
         syscall2 as syscall2_readonly, syscall3 as syscall3_readonly,

@@ -1,11 +1,11 @@
 //! libc syscalls supporting `rustix::pty`.
 
-use super::super::c;
-use super::super::conv::{borrowed_fd, ret};
+use crate::backend::c;
+use crate::backend::conv::{borrowed_fd, ret};
 use crate::fd::BorrowedFd;
 use crate::io;
 #[cfg(not(target_os = "android"))]
-use {super::super::conv::ret_owned_fd, crate::fd::OwnedFd, crate::pty::OpenptFlags};
+use {crate::backend::conv::ret_owned_fd, crate::fd::OwnedFd, crate::pty::OpenptFlags};
 #[cfg(any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia"))]
 use {
     crate::ffi::{CStr, CString},

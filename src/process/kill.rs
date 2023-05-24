@@ -1,7 +1,7 @@
 use crate::process::Pid;
 use crate::{backend, io};
 
-pub use backend::process::types::Signal;
+pub use crate::signal::Signal;
 
 /// `kill(pid, sig)`—Sends a signal to a process.
 ///

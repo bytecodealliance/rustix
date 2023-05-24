@@ -1,20 +1,18 @@
 //! libc syscalls supporting `rustix::time`.
 
-use super::super::c;
-use super::super::conv::ret;
-#[cfg(feature = "time")]
-#[cfg(any(linux_kernel, target_os = "fuchsia"))]
-use super::super::time::types::LibcItimerspec;
-use super::super::time::types::LibcTimespec;
 use super::types::Timespec;
 #[cfg(not(target_os = "wasi"))]
 use super::types::{ClockId, DynamicClockId};
+use crate::backend::c;
+use crate::backend::conv::ret;
+use crate::backend::time::types::LibcTimespec;
 use crate::io;
 use core::mem::MaybeUninit;
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(feature = "time")]
 use {
-    super::super::conv::{borrowed_fd, ret_owned_fd},
+    crate::backend::conv::{borrowed_fd, ret_owned_fd},
+    crate::backend::time::types::LibcItimerspec,
     crate::fd::{BorrowedFd, OwnedFd},
     crate::time::{Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags},
 };

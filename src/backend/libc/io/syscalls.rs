@@ -1,17 +1,19 @@
 //! libc syscalls supporting `rustix::io`.
 
-use super::super::c;
+use crate::backend::c;
 #[cfg(any(
     target_os = "android",
     all(target_os = "linux", not(target_env = "gnu")),
 ))]
-use super::super::conv::syscall_ret_usize;
-use super::super::conv::{borrowed_fd, ret, ret_c_int, ret_discarded_fd, ret_owned_fd, ret_usize};
-use super::super::offset::{libc_pread, libc_pwrite};
+use crate::backend::conv::syscall_ret_usize;
+use crate::backend::conv::{
+    borrowed_fd, ret, ret_c_int, ret_discarded_fd, ret_owned_fd, ret_usize,
+};
+use crate::backend::offset::{libc_pread, libc_pwrite};
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "solaris")))]
-use super::super::offset::{libc_preadv, libc_pwritev};
+use crate::backend::offset::{libc_preadv, libc_pwritev};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
-use super::super::offset::{libc_preadv2, libc_pwritev2};
+use crate::backend::offset::{libc_preadv2, libc_pwritev2};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 use crate::io::DupFlags;
@@ -26,7 +28,7 @@ use core::mem::MaybeUninit;
 use libc_errno::errno;
 #[cfg(linux_kernel)]
 use {
-    super::super::conv::syscall_ret_owned_fd,
+    crate::backend::conv::syscall_ret_owned_fd,
     crate::io::{IoSliceRaw, ReadWriteFlags, SpliceFlags},
     crate::utils::optional_as_mut_ptr,
 };

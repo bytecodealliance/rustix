@@ -18,12 +18,12 @@ use core::sync::atomic::AtomicU8;
 use bitflags::bitflags;
 
 use crate::backend::c::{c_int, c_uint, c_void};
-use crate::backend::process::syscalls;
+use crate::backend::prctl::syscalls;
 use crate::ffi::{CStr, CString};
 use crate::io;
-use crate::process::{
-    prctl_1arg, prctl_2args, prctl_3args, prctl_get_at_arg2_optional, Pid,
-    PointerAuthenticationKeys,
+use crate::pid::Pid;
+use crate::prctl::{
+    prctl_1arg, prctl_2args, prctl_3args, prctl_get_at_arg2_optional, PointerAuthenticationKeys,
 };
 use crate::utils::as_ptr;
 
