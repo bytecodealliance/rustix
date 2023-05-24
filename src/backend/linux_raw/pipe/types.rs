@@ -17,7 +17,6 @@ bitflags! {
     }
 }
 
-#[cfg(linux_kernel)]
 bitflags! {
     /// `SPLICE_F_*` constants for use with [`splice`] [`vmsplice`], and
     /// [`tee`].
