@@ -1667,15 +1667,15 @@ pub(crate) fn flistxattr(fd: BorrowedFd<'_>, list: &mut [c::c_char]) -> io::Resu
 
 #[inline]
 pub(crate) fn removexattr(path: &CStr, name: &CStr) -> io::Result<()> {
-    unsafe { ret(syscall!(__NR_removexattr, path, name)) }
+    unsafe { ret(syscall_readonly!(__NR_removexattr, path, name)) }
 }
 
 #[inline]
 pub(crate) fn lremovexattr(path: &CStr, name: &CStr) -> io::Result<()> {
-    unsafe { ret(syscall!(__NR_lremovexattr, path, name)) }
+    unsafe { ret(syscall_readonly!(__NR_lremovexattr, path, name)) }
 }
 
 #[inline]
 pub(crate) fn fremovexattr(fd: BorrowedFd<'_>, name: &CStr) -> io::Result<()> {
-    unsafe { ret(syscall!(__NR_fremovexattr, fd, name)) }
+    unsafe { ret(syscall_readonly!(__NR_fremovexattr, fd, name)) }
 }
