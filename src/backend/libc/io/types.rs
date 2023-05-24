@@ -92,13 +92,6 @@ bitflags! {
     }
 }
 
-/// `PIPE_BUF`—The maximum size of a write to a pipe guaranteed to be atomic.
-#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
-pub const PIPE_BUF: usize = c::PIPE_BUF;
-
-#[cfg(not(any(windows, target_os = "redox")))]
-pub(crate) const AT_FDCWD: c::c_int = c::AT_FDCWD;
-
 /// A buffer type used with `vmsplice`.
 /// It is guaranteed to be ABI compatible with the iovec type on Unix platforms
 /// and `WSABUF` on Windows. Unlike `IoSlice` and `IoSliceMut` it is
