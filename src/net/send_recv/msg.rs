@@ -6,8 +6,7 @@ use crate::backend::{self, c};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
 
-use core::convert::{TryFrom, TryInto};
-use core::iter::{FromIterator, FusedIterator};
+use core::iter::FusedIterator;
 use core::marker::PhantomData;
 use core::mem::{size_of, size_of_val, take};
 use core::{ptr, slice};
@@ -158,13 +157,7 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
         let buffer = leap!(self.buffer.get_mut(..new_length));
 
         // Fill the new part of the buffer with zeroes.
-        // TODO: In Rust 1.50 we can use `fill` here.
-        unsafe {
-            buffer
-                .as_mut_ptr()
-                .add(self.length)
-                .write_bytes(0, new_length - self.length);
-        }
+        buffer[self.length..new_length].fill(0);
         self.length = new_length;
 
         // Get the last header in the buffer.
@@ -676,7 +669,6 @@ impl<T> DoubleEndedIterator for AncillaryIter<'_, T> {
 
 mod messages {
     use crate::backend::c;
-    use core::convert::TryInto;
     use core::iter::FusedIterator;
     use core::marker::PhantomData;
     use core::mem::zeroed;

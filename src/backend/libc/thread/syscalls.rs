@@ -97,7 +97,6 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
     target_env = "gnu",
 ))]
 unsafe fn clock_nanosleep_relative_old(id: ClockId, request: &Timespec) -> NanosleepRelativeResult {
-    use core::convert::TryInto;
     let tv_sec = match request.tv_sec.try_into() {
         Ok(tv_sec) => tv_sec,
         Err(_) => return NanosleepRelativeResult::Err(io::Errno::OVERFLOW),
@@ -183,8 +182,6 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
     target_env = "gnu",
 ))]
 fn clock_nanosleep_absolute_old(id: ClockId, request: &Timespec) -> io::Result<()> {
-    use core::convert::TryInto;
-
     let flags = c::TIMER_ABSTIME;
 
     let old_request = c::timespec {
@@ -241,7 +238,6 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
     target_env = "gnu",
 ))]
 unsafe fn nanosleep_old(request: &Timespec) -> NanosleepRelativeResult {
-    use core::convert::TryInto;
     let tv_sec = match request.tv_sec.try_into() {
         Ok(tv_sec) => tv_sec,
         Err(_) => return NanosleepRelativeResult::Err(io::Errno::OVERFLOW),

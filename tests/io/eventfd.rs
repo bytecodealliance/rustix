@@ -8,7 +8,7 @@ fn test_eventfd() {
     let efd = eventfd(0, EventfdFlags::CLOEXEC).unwrap();
 
     let child = thread::spawn(move || {
-        for u in [1_u64, 3, 6, 11, 5000].iter() {
+        for u in [1_u64, 3, 6, 11, 5000] {
             assert_eq!(write(&efd, &u.to_ne_bytes()).unwrap(), size_of::<u64>());
         }
         efd

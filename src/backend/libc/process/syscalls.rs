@@ -37,7 +37,6 @@ use {
 use {
     super::types::RawUname,
     crate::process::{Gid, Pid, RawNonZeroPid, RawPid, Signal, Uid, WaitOptions, WaitStatus},
-    core::convert::TryInto,
 };
 
 #[cfg(not(target_os = "wasi"))]

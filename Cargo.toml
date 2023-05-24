@@ -9,7 +9,7 @@ description = "Safe Rust bindings to POSIX/Unix/Linux/Winsock2-like syscalls"
 documentation = "https://docs.rs/rustix"
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 repository = "https://github.com/bytecodealliance/rustix"
-edition = "2018"
+edition = "2021"
 keywords = ["api", "file", "network", "safe", "syscall"]
 categories = ["os::unix-apis", "date-and-time", "filesystem", "network-programming"]
 include = ["src", "build.rs", "Cargo.toml", "COPYRIGHT", "LICENSE*", "/*.md", "benches"]
@@ -21,7 +21,7 @@ cc = { version = "1.0.68", optional = true }
 [dependencies]
 bitflags = "2.3.0"
 itoa = { version = "1.0.1", default-features = false, optional = true }
-io-lifetimes = { version = "1.0.10", default-features = false, features = ["close"], optional = true }
+io-lifetimes = { version = "1.1.0-pre.0", default-features = false, optional = true }
 
 # Special dependencies used in rustc-dep-of-std mode.
 core = { version = "1.0.0", optional = true, package = "rustc-std-workspace-core" }
@@ -76,12 +76,12 @@ package = "errno"
 default-features = false
 
 [dev-dependencies]
-tempfile = "3.4.0"
+tempfile = "3.5.0"
 libc = "0.2.144"
 libc_errno = { package = "errno", version = "0.3.1", default-features = false }
-io-lifetimes = { version = "1.0.10", default-features = false, features = ["close"] }
+io-lifetimes = { version = "1.1.0-pre.0", default-features = false }
 serial_test = "2.0.0"
-memoffset = "0.8.0"
+memoffset = "0.9.0"
 flate2 = "1.0"
 
 [target.'cfg(all(criterion, not(any(target_os = "emscripten", target_os = "wasi"))))'.dev-dependencies]
@@ -201,18 +201,6 @@ all-apis = [
 # for reading the aux vectors, instead of reading them ourselves from
 # /proc/self/auxv?
 use-libc-auxv = ["libc"]
-
-# Expose io-lifetimes' features for third-party crate impls.
-# Some of these are temporarily disabled, until the upstream crates add the
-# needed trait implementations.
-#async-std = ["io-lifetimes/async-std"]
-#tokio = ["io-lifetimes/tokio"]
-os_pipe = ["io-lifetimes/os_pipe"]
-#socket2 = ["io-lifetimes/socket2"]
-#mio = ["io-lifetimes/mio"]
-fs-err = ["io-lifetimes/fs-err"]
-#all-impls = ["async-std", "tokio", "os_pipe", "socket2", "mio", "fs-err"]
-all-impls = ["os_pipe", "fs-err"]
 
 # OS compatability features
 

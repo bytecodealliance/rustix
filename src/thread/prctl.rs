@@ -9,7 +9,6 @@
 //! correctly.
 #![allow(unsafe_code)]
 
-use core::convert::TryFrom;
 use core::mem::MaybeUninit;
 use core::num::NonZeroU64;
 use core::ptr;

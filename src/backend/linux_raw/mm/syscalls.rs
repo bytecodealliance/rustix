@@ -16,8 +16,6 @@ use super::types::{
 };
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
-#[cfg(target_pointer_width = "32")]
-use core::convert::TryInto;
 use linux_raw_sys::general::MAP_ANONYMOUS;
 
 #[inline]

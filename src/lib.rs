@@ -19,7 +19,6 @@
 //! ```
 //! # #[cfg(feature = "net")]
 //! # fn read(sock: std::net::TcpStream, buf: &mut [u8]) -> std::io::Result<()> {
-//! # use std::convert::TryInto;
 //! # #[cfg(unix)]
 //! # use std::os::unix::io::AsRawFd;
 //! # #[cfg(target_os = "wasi")]
@@ -118,8 +117,6 @@
 )]
 #![cfg_attr(asm_experimental_arch, feature(asm_experimental_arch))]
 #![cfg_attr(not(feature = "all-apis"), allow(dead_code))]
-// Clamp depends on Rust 1.50 which is newer than our MSRV.
-#![allow(clippy::manual_clamp)]
 // It is common in linux and libc APIs for types to vary between platforms.
 #![allow(clippy::unnecessary_cast)]
 // It is common in linux and libc APIs for types to vary between platforms.

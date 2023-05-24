@@ -10,7 +10,6 @@ fn test_y2038_with_utimensat() {
     use rustix::fs::{
         cwd, fstat, openat, statat, utimensat, AtFlags, Mode, OFlags, Timespec, Timestamps,
     };
-    use std::convert::TryInto;
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -103,7 +102,6 @@ fn test_y2038_with_futimens() {
     use rustix::fs::{
         cwd, fstat, futimens, openat, statat, AtFlags, Mode, OFlags, Timespec, Timestamps,
     };
-    use std::convert::TryInto;
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();

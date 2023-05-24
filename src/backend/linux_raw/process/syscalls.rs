@@ -23,7 +23,6 @@ use crate::process::{
     WaitidStatus,
 };
 use crate::utils::as_mut_ptr;
-use core::convert::TryInto;
 use core::mem::MaybeUninit;
 use core::num::NonZeroU32;
 use core::ptr::{null, null_mut};

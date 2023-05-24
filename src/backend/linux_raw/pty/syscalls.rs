@@ -28,9 +28,8 @@ pub(crate) fn ptsname(fd: BorrowedFd, mut buffer: Vec<u8>) -> io::Result<CString
         buffer.clear();
         buffer.extend_from_slice(b"/dev/pts/");
         buffer.extend_from_slice(DecInt::new(n.assume_init()).as_bytes());
-        // With Rust 1.58 we can append a '\0' ourselves and use
-        // `from_vec_with_nul_unchecked`.
-        Ok(CString::from_vec_unchecked(buffer))
+        buffer.push(b'\0');
+        Ok(CString::from_vec_with_nul_unchecked(buffer))
     }
 }
 
