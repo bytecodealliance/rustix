@@ -7,9 +7,6 @@ use backend::fd::{AsFd, BorrowedFd};
 pub use backend::net::addr::SocketAddrUnix;
 pub use backend::net::types::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 
-/// Compatibility alias for `SocketFlags`. Use `SocketFlags` instead of this.
-pub type AcceptFlags = SocketFlags;
-
 impl Default for Protocol {
     #[inline]
     fn default() -> Self {
