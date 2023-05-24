@@ -1,5 +1,5 @@
 bitflags::bitflags! {
-    /// Flags for use with [`futex`].
+    /// `FUTEX_*` flags for use with [`futex`].
     ///
     /// [`futex`]: crate::thread::futex
     pub struct FutexFlags: u32 {
@@ -10,7 +10,7 @@ bitflags::bitflags! {
     }
 }
 
-/// Operations for use with [`futex`].
+/// `FUTEX_*` operations for use with [`futex`].
 ///
 /// [`futex`]: crate::thread::futex
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
