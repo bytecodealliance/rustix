@@ -144,7 +144,7 @@ fn test_unix() {
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 fn do_test_unix_msg(addr: SocketAddrUnix) {
     use rustix::io::{IoSlice, IoSliceMut};
-    use rustix::net::{recvmsg, sendmsg_noaddr, RecvFlags, SendFlags};
+    use rustix::net::{recvmsg, sendmsg, RecvFlags, SendFlags};
 
     let server = {
         let connection_socket = socket(
@@ -182,7 +182,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
                 }
 
                 let data = sum.to_string();
-                sendmsg_noaddr(
+                sendmsg(
                     &data_socket,
                     &[IoSlice::new(data.as_bytes())],
                     &mut Default::default(),
@@ -212,7 +212,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
             connect_unix(&data_socket, &addr).unwrap();
 
             for arg in *args {
-                sendmsg_noaddr(
+                sendmsg(
                     &data_socket,
                     &[IoSlice::new(arg.as_bytes())],
                     &mut Default::default(),
@@ -220,7 +220,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
                 )
                 .unwrap();
             }
-            sendmsg_noaddr(
+            sendmsg(
                 &data_socket,
                 &[IoSlice::new(b"sum")],
                 &mut Default::default(),
@@ -256,7 +256,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
         )
         .unwrap();
         connect_unix(&data_socket, &addr).unwrap();
-        sendmsg_noaddr(
+        sendmsg(
             &data_socket,
             &[IoSlice::new(b"exit")],
             &mut Default::default(),
@@ -313,7 +313,7 @@ fn test_unix_msg_with_scm_rights() {
     use rustix::fd::AsFd;
     use rustix::io::{pipe, IoSlice, IoSliceMut};
     use rustix::net::{
-        recvmsg, sendmsg_noaddr, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags,
+        recvmsg, sendmsg, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags,
         SendAncillaryBuffer, SendAncillaryMessage, SendFlags,
     };
     use std::string::ToString;
@@ -379,7 +379,7 @@ fn test_unix_msg_with_scm_rights() {
                 }
 
                 let data = sum.to_string();
-                sendmsg_noaddr(
+                sendmsg(
                     &data_socket,
                     &[IoSlice::new(data.as_bytes())],
                     &mut Default::default(),
@@ -417,7 +417,7 @@ fn test_unix_msg_with_scm_rights() {
             connect_unix(&data_socket, &addr).unwrap();
 
             for arg in *args {
-                sendmsg_noaddr(
+                sendmsg(
                     &data_socket,
                     &[IoSlice::new(arg.as_bytes())],
                     &mut Default::default(),
@@ -425,7 +425,7 @@ fn test_unix_msg_with_scm_rights() {
                 )
                 .unwrap();
             }
-            sendmsg_noaddr(
+            sendmsg(
                 &data_socket,
                 &[IoSlice::new(b"sum")],
                 &mut Default::default(),
@@ -462,7 +462,7 @@ fn test_unix_msg_with_scm_rights() {
         assert!(cmsg_buffer.push(msg));
 
         connect_unix(&data_socket, &addr).unwrap();
-        sendmsg_noaddr(
+        sendmsg(
             &data_socket,
             &[IoSlice::new(b"exit")],
             &mut cmsg_buffer,
