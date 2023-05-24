@@ -4,43 +4,6 @@ use crate::backend::c;
 use crate::backend::conv::{
     borrowed_fd, c_str, ret, ret_c_int, ret_off_t, ret_owned_fd, ret_usize,
 };
-#[cfg(any(linux_kernel, target_os = "fuchsia"))]
-use crate::backend::offset::libc_fallocate;
-#[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
-use crate::backend::offset::libc_open;
-#[cfg(not(any(
-    apple,
-    netbsdlike,
-    solarish,
-    target_os = "dragonfly",
-    target_os = "haiku",
-    target_os = "redox",
-)))]
-use crate::backend::offset::libc_posix_fadvise;
-#[cfg(not(any(
-    apple,
-    netbsdlike,
-    solarish,
-    linux_kernel,
-    target_os = "aix",
-    target_os = "dragonfly",
-    target_os = "fuchsia",
-    target_os = "redox",
-)))]
-use crate::backend::offset::libc_posix_fallocate;
-use crate::backend::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek, libc_off_t};
-#[cfg(not(any(
-    solarish,
-    target_os = "haiku",
-    target_os = "netbsd",
-    target_os = "redox",
-    target_os = "wasi",
-)))]
-use crate::backend::offset::{libc_fstatfs, libc_statfs};
-#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
-use crate::backend::offset::{libc_fstatvfs, libc_statvfs};
-#[cfg(not(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64"))))]
-use crate::backend::offset::{libc_lstat, libc_stat};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 #[cfg(apple)]
@@ -54,6 +17,8 @@ use crate::ffi::CString;
     target_os = "redox",
 )))]
 use crate::fs::Advice;
+#[cfg(not(target_os = "redox"))]
+use crate::fs::AtFlags;
 #[cfg(not(any(
     netbsdlike,
     solarish,
@@ -108,8 +73,6 @@ use {
     crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags},
     core::ptr::null,
 };
-#[cfg(not(target_os = "redox"))]
-use {crate::backend::offset::libc_openat, crate::fs::AtFlags};
 #[cfg(any(apple, linux_kernel))]
 use {crate::fs::XattrFlags, core::mem::size_of, core::ptr::null_mut};
 
@@ -158,9 +121,9 @@ pub(crate) fn open(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<OwnedF
     }
     unsafe {
         // Pass `mode` as a `c_ulong` even if `mode_t` is narrower, since
-        // `libc_open` is declared as a variadic function and narrower
+        // `c::open` is declared as a variadic function and narrower
         // arguments are promoted.
-        ret_owned_fd(libc_open(
+        ret_owned_fd(c::open(
             c_str(path),
             oflags.bits(),
             mode.bits() as c::c_ulong,
@@ -207,9 +170,9 @@ pub(crate) fn openat(
     }
     unsafe {
         // Pass `mode` as a `c_ulong` even if `mode_t` is narrower, since
-        // `libc_openat` is declared as a variadic function and narrower
+        // `c::openat` is declared as a variadic function and narrower
         // arguments are promoted.
-        ret_owned_fd(libc_openat(
+        ret_owned_fd(c::openat(
             borrowed_fd(dirfd),
             c_str(path),
             oflags.bits(),
@@ -229,7 +192,7 @@ pub(crate) fn openat(
 pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
     unsafe {
         let mut result = MaybeUninit::<StatFs>::uninit();
-        ret(libc_statfs(c_str(filename), result.as_mut_ptr()))?;
+        ret(c::statfs(c_str(filename), result.as_mut_ptr()))?;
         Ok(result.assume_init())
     }
 }
@@ -238,8 +201,8 @@ pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
 #[inline]
 pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
     unsafe {
-        let mut result = MaybeUninit::<libc_statvfs>::uninit();
-        ret(libc_statvfs(c_str(filename), result.as_mut_ptr()))?;
+        let mut result = MaybeUninit::<c::statvfs>::uninit();
+        ret(c::statvfs(c_str(filename), result.as_mut_ptr()))?;
         Ok(libc_statvfs_to_statvfs(result.assume_init()))
     }
 }
@@ -538,7 +501,7 @@ pub(crate) fn stat(path: &CStr) -> io::Result<Stat> {
     #[cfg(not(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64"))))]
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
-        ret(libc_stat(c_str(path), stat.as_mut_ptr()))?;
+        ret(c::stat(c_str(path), stat.as_mut_ptr()))?;
         Ok(stat.assume_init())
     }
 }
@@ -564,7 +527,7 @@ pub(crate) fn lstat(path: &CStr) -> io::Result<Stat> {
     #[cfg(not(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64"))))]
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
-        ret(libc_lstat(c_str(path), stat.as_mut_ptr()))?;
+        ret(c::lstat(c_str(path), stat.as_mut_ptr()))?;
         Ok(stat.assume_init())
     }
 }
@@ -586,7 +549,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
     #[cfg(not(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64"))))]
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
-        ret(libc_fstatat(
+        ret(c::fstatat(
             borrowed_fd(dirfd),
             c_str(path),
             stat.as_mut_ptr(),
@@ -600,7 +563,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
 fn statat_old(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
     unsafe {
         let mut result = MaybeUninit::<c::stat64>::uninit();
-        ret(libc_fstatat(
+        ret(c::fstatat(
             borrowed_fd(dirfd),
             c_str(path),
             result.as_mut_ptr(),
@@ -928,7 +891,7 @@ pub(crate) fn chmodat(
     }
     unsafe {
         // Pass `mode` as a `c_ulong` even if `mode_t` is narrower, since
-        // `libc_openat` is declared as a variadic function and narrower
+        // `c::syscall` is declared as a variadic function and narrower
         // arguments are promoted.
         syscall_ret(c::syscall(
             c::SYS_fchmodat,
@@ -1069,7 +1032,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice)
         len
     };
 
-    let err = unsafe { libc_posix_fadvise(borrowed_fd(fd), offset, len, advice as c::c_int) };
+    let err = unsafe { c::posix_fadvise(borrowed_fd(fd), offset, len, advice as c::c_int) };
 
     // `posix_fadvise` returns its error status rather than using `errno`.
     if err == 0 {
@@ -1132,7 +1095,7 @@ pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::R
 }
 
 pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
-    let (whence, offset): (c::c_int, libc_off_t) = match pos {
+    let (whence, offset): (c::c_int, c::off_t) = match pos {
         SeekFrom::Start(pos) => {
             let pos: u64 = pos;
             // Silently cast; we'll get `EINVAL` if the value is negative.
@@ -1145,12 +1108,12 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         #[cfg(any(freebsdlike, target_os = "linux", target_os = "solaris"))]
         SeekFrom::Hole(offset) => (c::SEEK_HOLE, offset),
     };
-    let offset = unsafe { ret_off_t(libc_lseek(borrowed_fd(fd), offset, whence))? };
+    let offset = unsafe { ret_off_t(c::lseek(borrowed_fd(fd), offset, whence))? };
     Ok(offset as u64)
 }
 
 pub(crate) fn tell(fd: BorrowedFd<'_>) -> io::Result<u64> {
-    let offset = unsafe { ret_off_t(libc_lseek(borrowed_fd(fd), 0, c::SEEK_CUR))? };
+    let offset = unsafe { ret_off_t(c::lseek(borrowed_fd(fd), 0, c::SEEK_CUR))? };
     Ok(offset as u64)
 }
 
@@ -1242,7 +1205,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     #[cfg(not(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64"))))]
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
-        ret(libc_fstat(borrowed_fd(fd), stat.as_mut_ptr()))?;
+        ret(c::fstat(borrowed_fd(fd), stat.as_mut_ptr()))?;
         Ok(stat.assume_init())
     }
 }
@@ -1251,7 +1214,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     unsafe {
         let mut result = MaybeUninit::<c::stat64>::uninit();
-        ret(libc_fstat(borrowed_fd(fd), result.as_mut_ptr()))?;
+        ret(c::fstat(borrowed_fd(fd), result.as_mut_ptr()))?;
         stat64_to_stat(result.assume_init())
     }
 }
@@ -1266,22 +1229,22 @@ fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
     let mut statfs = MaybeUninit::<StatFs>::uninit();
     unsafe {
-        ret(libc_fstatfs(borrowed_fd(fd), statfs.as_mut_ptr()))?;
+        ret(c::fstatfs(borrowed_fd(fd), statfs.as_mut_ptr()))?;
         Ok(statfs.assume_init())
     }
 }
 
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
-    let mut statvfs = MaybeUninit::<libc_statvfs>::uninit();
+    let mut statvfs = MaybeUninit::<c::statvfs>::uninit();
     unsafe {
-        ret(libc_fstatvfs(borrowed_fd(fd), statvfs.as_mut_ptr()))?;
+        ret(c::fstatvfs(borrowed_fd(fd), statvfs.as_mut_ptr()))?;
         Ok(libc_statvfs_to_statvfs(statvfs.assume_init()))
     }
 }
 
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
-fn libc_statvfs_to_statvfs(from: libc_statvfs) -> StatVfs {
+fn libc_statvfs_to_statvfs(from: c::statvfs) -> StatVfs {
     StatVfs {
         f_bsize: from.f_bsize as u64,
         f_frsize: from.f_frsize as u64,
@@ -1417,13 +1380,13 @@ pub(crate) fn fallocate(
 
     #[cfg(any(linux_kernel, target_os = "fuchsia"))]
     unsafe {
-        ret(libc_fallocate(borrowed_fd(fd), mode.bits(), offset, len))
+        ret(c::fallocate(borrowed_fd(fd), mode.bits(), offset, len))
     }
 
     #[cfg(not(any(linux_kernel, target_os = "fuchsia")))]
     {
         assert!(mode.is_empty());
-        let err = unsafe { libc_posix_fallocate(borrowed_fd(fd), offset, len) };
+        let err = unsafe { c::posix_fallocate(borrowed_fd(fd), offset, len) };
 
         // `posix_fallocate` returns its error status rather than using `errno`.
         if err == 0 {
@@ -1481,7 +1444,7 @@ pub(crate) fn fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
 
 pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
     let length = length.try_into().map_err(|_overflow_err| io::Errno::FBIG)?;
-    unsafe { ret(libc_ftruncate(borrowed_fd(fd), length)) }
+    unsafe { ret(c::ftruncate(borrowed_fd(fd), length)) }
 }
 
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
