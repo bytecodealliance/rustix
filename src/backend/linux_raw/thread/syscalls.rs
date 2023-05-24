@@ -283,7 +283,7 @@ pub(crate) fn setns(fd: BorrowedFd, nstype: c::c_int) -> io::Result<c::c_int> {
 #[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn unshare(flags: crate::thread::UnshareFlags) -> io::Result<()> {
-    unsafe { ret(syscall_readonly!(__NR_unshare, c_uint(flags.bits()))) }
+    unsafe { ret(syscall_readonly!(__NR_unshare, flags)) }
 }
 
 #[cfg(linux_kernel)]

@@ -410,6 +410,30 @@ impl<'a, Num: ArgNumber> From<crate::io::ReadWriteFlags> for ArgReg<'a, Num> {
     }
 }
 
+#[cfg(feature = "process")]
+impl<'a, Num: ArgNumber> From<crate::process::PidfdFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::process::PidfdFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(feature = "pty")]
+impl<'a, Num: ArgNumber> From<crate::pty::OpenptFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::pty::OpenptFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(feature = "thread")]
+impl<'a, Num: ArgNumber> From<crate::thread::UnshareFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::thread::UnshareFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
 #[cfg(feature = "event")]
 impl<'a, Num: ArgNumber> From<crate::event::EventfdFlags> for ArgReg<'a, Num> {
     #[inline]
