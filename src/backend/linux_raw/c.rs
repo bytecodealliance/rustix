@@ -35,8 +35,8 @@ pub(crate) use linux_raw_sys::general::{
 };
 #[cfg(not(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86")))]
 pub(crate) use linux_raw_sys::general::{__kernel_gid_t as gid_t, __kernel_uid_t as uid_t};
+pub(crate) use linux_raw_sys::general::{AT_FDCWD, O_NOCTTY, O_RDWR};
 pub(crate) use linux_raw_sys::general::{NFS_SUPER_MAGIC, PROC_SUPER_MAGIC, UTIME_NOW, UTIME_OMIT};
-pub(crate) use linux_raw_sys::general::{O_NOCTTY, O_RDWR};
 pub(crate) use linux_raw_sys::general::{XATTR_CREATE, XATTR_REPLACE};
 #[cfg(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86"))]
 pub(crate) type uid_t = u32;
@@ -92,3 +92,4 @@ pub(crate) const SIGEMT: c_int = linux_raw_sys::general::SIGEMT as _;
 pub(crate) const STDIN_FILENO: c_int = linux_raw_sys::general::STDIN_FILENO as _;
 pub(crate) const STDOUT_FILENO: c_int = linux_raw_sys::general::STDOUT_FILENO as _;
 pub(crate) const STDERR_FILENO: c_int = linux_raw_sys::general::STDERR_FILENO as _;
+pub(crate) const PIPE_BUF: usize = linux_raw_sys::general::PIPE_BUF as _;

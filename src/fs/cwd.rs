@@ -8,6 +8,7 @@
 #![allow(unsafe_code)]
 
 use crate::backend;
+use backend::c;
 use backend::fd::{BorrowedFd, RawFd};
 
 /// `AT_FDCWD`—Returns a handle representing the current working directory.
@@ -24,7 +25,7 @@ use backend::fd::{BorrowedFd, RawFd};
 #[inline]
 #[doc(alias = "AT_FDCWD")]
 pub const fn cwd() -> BorrowedFd<'static> {
-    let at_fdcwd = backend::io::types::AT_FDCWD as RawFd;
+    let at_fdcwd = c::AT_FDCWD as RawFd;
 
     // SAFETY: `AT_FDCWD` is a reserved value that is never dynamically
     // allocated, so it'll remain valid for the duration of `'static`.
