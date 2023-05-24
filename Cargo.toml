@@ -225,3 +225,7 @@ linux_4_11 = []
 
 # Enable all optimizations for the latest Linux versions.
 linux_latest = ["linux_4_11"]
+
+# FIXME: A temporary hack for rustix recursively depending on itself through tempfile
+[patch.crates-io]
+rustix = { path = "." }
