@@ -179,6 +179,9 @@ mm = []
 # Enable `rustix::rand::*`.
 rand = []
 
+# Enable `rustix::stdio::*`.
+stdio = []
+
 # Enable `rustix::system::*`.
 system = []
 
@@ -200,6 +203,7 @@ all-apis = [
     "rand",
     "runtime",
     "system",
+    "stdio",
     "termios",
     "thread",
     "time",

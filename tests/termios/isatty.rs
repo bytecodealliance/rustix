@@ -46,6 +46,7 @@ fn stdout_stderr_terminals() {
 }
 
 #[test]
+#[cfg(feature = "stdio")]
 fn stdio_descriptors() {
     #[cfg(unix)]
     use std::os::unix::io::AsRawFd;
@@ -53,15 +54,15 @@ fn stdio_descriptors() {
     use std::os::wasi::io::AsRawFd;
 
     assert_eq!(
-        rustix::io::stdin().as_raw_fd(),
+        rustix::stdio::stdin().as_raw_fd(),
         std::io::stdin().as_raw_fd()
     );
     assert_eq!(
-        rustix::io::stdout().as_raw_fd(),
+        rustix::stdio::stdout().as_raw_fd(),
         std::io::stdout().as_raw_fd()
     );
     assert_eq!(
-        rustix::io::stderr().as_raw_fd(),
+        rustix::stdio::stderr().as_raw_fd(),
         std::io::stderr().as_raw_fd()
     );
 }

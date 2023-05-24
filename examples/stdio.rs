@@ -3,12 +3,8 @@
 
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 
-#[cfg(not(windows))]
-use rustix::fd::AsFd;
-#[cfg(not(windows))]
-use rustix::io::{self, stderr, stdin, stdout};
 #[cfg(feature = "termios")]
-#[cfg(not(windows))]
+#[cfg(all(not(windows), feature = "stdio"))]
 use rustix::termios::isatty;
 #[cfg(all(
     not(any(windows, target_os = "fuchsia")),
@@ -16,8 +12,14 @@ use rustix::termios::isatty;
     feature = "procfs"
 ))]
 use rustix::termios::ttyname;
+#[cfg(all(not(windows), feature = "stdio"))]
+use {
+    rustix::fd::AsFd,
+    rustix::io,
+    rustix::stdio::{stderr, stdin, stdout},
+};
 
-#[cfg(not(windows))]
+#[cfg(all(not(windows), feature = "stdio"))]
 fn main() -> io::Result<()> {
     let (stdin, stdout, stderr) = (stdin(), stdout(), stderr());
 
@@ -33,7 +35,7 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(not(windows))]
+#[cfg(all(not(windows), feature = "stdio"))]
 fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     let fd = fd.as_fd();
     println!(" - ready: {:?}", rustix::io::ioctl_fionread(fd)?);
@@ -333,7 +335,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 }
 
 #[cfg(feature = "termios")]
-#[cfg(not(windows))]
+#[cfg(all(not(windows), feature = "stdio"))]
 fn key(b: u8) -> String {
     if b == 0 {
         "<undef>".to_string()
@@ -346,7 +348,7 @@ fn key(b: u8) -> String {
     }
 }
 
-#[cfg(windows)]
+#[cfg(any(windows, not(feature = "stdio")))]
 fn main() {
     unimplemented!()
 }
