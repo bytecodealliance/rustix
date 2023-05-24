@@ -14,9 +14,9 @@ use crate::fs::FileType;
 #[cfg(linux_kernel)]
 use crate::fs::RenameFlags;
 use crate::fs::{Access, AtFlags, Mode, OFlags, Stat, Timestamps};
-use crate::path::SMALL_PATH_BUFFER_SIZE;
 #[cfg(not(target_os = "wasi"))]
-use crate::process::{Gid, Uid};
+use crate::fs::{Gid, Uid};
+use crate::path::SMALL_PATH_BUFFER_SIZE;
 use crate::{backend, io, path};
 use alloc::vec::Vec;
 use backend::fd::{AsFd, BorrowedFd};

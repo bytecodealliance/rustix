@@ -1,17 +1,17 @@
 //! libc syscalls supporting `rustix::thread`.
 
-use super::super::c;
-use super::super::conv::ret;
-use super::super::time::types::LibcTimespec;
+use crate::backend::c;
+use crate::backend::conv::ret;
+use crate::backend::time::types::LibcTimespec;
 use crate::io;
 #[cfg(not(target_os = "redox"))]
 use crate::thread::{NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
 #[cfg(linux_kernel)]
 use {
-    super::super::conv::{borrowed_fd, ret_c_int, syscall_ret},
+    crate::backend::conv::{borrowed_fd, ret_c_int, syscall_ret},
     crate::fd::BorrowedFd,
-    crate::process::{Pid, RawNonZeroPid},
+    crate::pid::{Pid, RawNonZeroPid},
     crate::utils::as_mut_ptr,
 };
 #[cfg(not(any(
@@ -325,16 +325,16 @@ pub(crate) fn capset(
 
 #[cfg(linux_kernel)]
 #[inline]
-pub(crate) fn setuid_thread(uid: crate::process::Uid) -> io::Result<()> {
+pub(crate) fn setuid_thread(uid: crate::ugid::Uid) -> io::Result<()> {
     unsafe { syscall_ret(c::syscall(c::SYS_setuid, uid.as_raw())) }
 }
 
 #[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn setresuid_thread(
-    ruid: crate::process::Uid,
-    euid: crate::process::Uid,
-    suid: crate::process::Uid,
+    ruid: crate::ugid::Uid,
+    euid: crate::ugid::Uid,
+    suid: crate::ugid::Uid,
 ) -> io::Result<()> {
     #[cfg(any(target_arch = "x86", target_arch = "arm", target_arch = "sparc"))]
     const SYS: c::c_long = c::SYS_setresuid32 as c::c_long;
@@ -345,16 +345,16 @@ pub(crate) fn setresuid_thread(
 
 #[cfg(linux_kernel)]
 #[inline]
-pub(crate) fn setgid_thread(gid: crate::process::Gid) -> io::Result<()> {
+pub(crate) fn setgid_thread(gid: crate::ugid::Gid) -> io::Result<()> {
     unsafe { syscall_ret(c::syscall(c::SYS_setgid, gid.as_raw())) }
 }
 
 #[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn setresgid_thread(
-    rgid: crate::process::Gid,
-    egid: crate::process::Gid,
-    sgid: crate::process::Gid,
+    rgid: crate::ugid::Gid,
+    egid: crate::ugid::Gid,
+    sgid: crate::ugid::Gid,
 ) -> io::Result<()> {
     #[cfg(any(target_arch = "x86", target_arch = "arm", target_arch = "sparc"))]
     const SYS: c::c_long = c::SYS_setresgid32 as c::c_long;

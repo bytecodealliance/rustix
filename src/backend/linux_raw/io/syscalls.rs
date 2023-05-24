@@ -6,15 +6,15 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use super::super::c;
+use crate::backend::c;
 #[cfg(target_pointer_width = "64")]
-use super::super::conv::loff_t_from_u64;
-use super::super::conv::{
+use crate::backend::conv::loff_t_from_u64;
+use crate::backend::conv::{
     by_ref, c_int, c_uint, opt_mut, pass_usize, raw_fd, ret, ret_c_uint, ret_discarded_fd,
     ret_owned_fd, ret_usize, slice, slice_mut, zero,
 };
 #[cfg(target_pointer_width = "32")]
-use super::super::conv::{hi, lo};
+use crate::backend::conv::{hi, lo};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(linux_kernel)]
 use crate::io::SpliceFlags;
@@ -37,7 +37,7 @@ use linux_raw_sys::ioctl::{
 };
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use {
-    super::super::conv::{opt_ref, size_of},
+    crate::backend::conv::{opt_ref, size_of},
     linux_raw_sys::general::{__kernel_timespec, kernel_sigset_t},
 };
 
@@ -383,8 +383,11 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // TODO: This code would benefit from having a better way to read into
         // uninitialized memory.
         let mut buf = [0];
-        match super::super::net::syscalls::recv(fd, &mut buf, RecvFlags::PEEK | RecvFlags::DONTWAIT)
-        {
+        match crate::backend::net::syscalls::recv(
+            fd,
+            &mut buf,
+            RecvFlags::PEEK | RecvFlags::DONTWAIT,
+        ) {
             Ok(0) => read = false,
             Err(err) => {
                 #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
@@ -401,7 +404,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // Do a `send` with `DONTWAIT` for 0 bytes. An `EPIPE` indicates
         // the write side is shut down.
         #[allow(unreachable_patterns)] // `EAGAIN` equals `EWOULDBLOCK`
-        match super::super::net::syscalls::send(fd, &[], SendFlags::DONTWAIT) {
+        match crate::backend::net::syscalls::send(fd, &[], SendFlags::DONTWAIT) {
             // TODO or-patterns when we don't need 1.51
             Err(io::Errno::AGAIN) => (),
             Err(io::Errno::WOULDBLOCK) => (),

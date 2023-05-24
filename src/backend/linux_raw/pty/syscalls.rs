@@ -6,8 +6,8 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use super::super::c;
-use super::super::conv::{by_ref, c_uint, ret, ret_owned_fd};
+use crate::backend::c;
+use crate::backend::conv::{by_ref, c_uint, ret, ret_owned_fd};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CString;
 use crate::io;

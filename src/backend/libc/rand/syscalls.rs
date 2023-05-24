@@ -1,7 +1,7 @@
 //! libc syscalls supporting `rustix::rand`.
 
 #[cfg(linux_kernel)]
-use {super::super::c, super::super::conv::ret_usize, crate::io, crate::rand::GetRandomFlags};
+use {crate::backend::c, crate::backend::conv::ret_usize, crate::io, crate::rand::GetRandomFlags};
 
 #[cfg(linux_kernel)]
 pub(crate) fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {

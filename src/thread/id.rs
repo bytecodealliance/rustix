@@ -1,4 +1,5 @@
-use crate::process::{Gid, Pid, Uid};
+use crate::pid::Pid;
+use crate::ugid::{Gid, Uid};
 use crate::{backend, io};
 
 /// `gettid()`—Returns the thread ID.

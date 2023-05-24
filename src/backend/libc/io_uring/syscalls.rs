@@ -1,7 +1,7 @@
 //! libc syscalls supporting `rustix::io_uring`.
 
-use super::super::c;
-use super::super::conv::{borrowed_fd, syscall_ret_owned_fd, syscall_ret_u32};
+use crate::backend::c;
+use crate::backend::conv::{borrowed_fd, syscall_ret_owned_fd, syscall_ret_u32};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
 use crate::io_uring::{io_uring_params, IoringEnterFlags, IoringRegisterOp};

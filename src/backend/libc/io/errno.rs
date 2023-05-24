@@ -3,7 +3,7 @@
 //! This type holds an OS error code, which conceptually corresponds to an
 //! `errno` value.
 
-use super::super::c;
+use crate::backend::c;
 use libc_errno::errno;
 
 /// The error type for `rustix` APIs.

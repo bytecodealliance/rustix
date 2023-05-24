@@ -5,8 +5,8 @@
 //! This uses raw pointers to locate and read the kernel-provided auxv array.
 #![allow(unsafe_code)]
 
-use super::super::c;
-use super::super::elf::*;
+use crate::backend::c;
+use crate::backend::elf::*;
 use crate::fd::OwnedFd;
 #[cfg(feature = "param")]
 use crate::ffi::CStr;
@@ -276,7 +276,7 @@ unsafe fn check_vdso_base(base: *const Elf_Ehdr) -> Option<NonNull<Elf_Ehdr>> {
     // as an arbitrary system call which writes to a buffer and fails with
     // `EFAULT` if the buffer is not writable.
     {
-        use super::super::conv::{c_uint, ret};
+        use crate::backend::conv::{c_uint, ret};
         if ret(syscall!(
             __NR_clock_getres,
             c_uint(linux_raw_sys::general::CLOCK_MONOTONIC),

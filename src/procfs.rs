@@ -16,6 +16,7 @@
 //! namespace. So with the checking here, they may fail, but they won't be able
 //! to succeed with bogus results.
 
+use crate::backend::pid::syscalls::getpid;
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::fs::{
@@ -24,7 +25,6 @@ use crate::fs::{
 };
 use crate::io;
 use crate::path::DecInt;
-use crate::process::getpid;
 #[cfg(feature = "rustc-dep-of-std")]
 use core::lazy::OnceCell;
 #[cfg(not(feature = "rustc-dep-of-std"))]

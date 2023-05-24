@@ -70,7 +70,7 @@
 
 #![allow(unsafe_code)]
 
-use super::super::c;
+use crate::backend::c;
 use crate::backend::io::syscalls;
 use crate::fd::{AsFd, AsRawFd, OwnedFd};
 use crate::io;

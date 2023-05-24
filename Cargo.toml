@@ -176,6 +176,9 @@ mm = []
 # Enable `rustix::rand::*`.
 rand = []
 
+# Enable `rustix::system::*`.
+system = []
+
 # Enable `rustix::runtime::*`. This API is undocumented and unstable and
 # experimental and not intended for general-purpose use.
 runtime = []
@@ -192,6 +195,7 @@ all-apis = [
     "pty",
     "rand",
     "runtime",
+    "system",
     "termios",
     "thread",
     "time",

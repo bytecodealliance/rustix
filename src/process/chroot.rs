@@ -1,3 +1,5 @@
+#[cfg(feature = "fs")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "fs")))]
 use crate::{backend, io, path};
 
 /// `chroot(path)`—Change the process root directory.
@@ -6,6 +8,8 @@ use crate::{backend, io, path};
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/chroot.2.html
+#[cfg(feature = "fs")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "fs")))]
 #[inline]
 pub fn chroot<P: path::Arg>(path: P) -> io::Result<()> {
     path.into_with_c_str(backend::process::syscalls::chroot)

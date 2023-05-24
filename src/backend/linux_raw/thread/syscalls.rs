@@ -6,19 +6,19 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use super::super::c;
-use super::super::conv::{
-    by_mut, by_ref, c_int, c_uint, ret, ret_c_int, ret_usize, ret_usize_infallible,
+use crate::backend::c;
+use crate::backend::conv::{
+    by_mut, by_ref, c_int, c_uint, ret, ret_c_int, ret_c_int_infallible, ret_usize,
     slice_just_addr, slice_just_addr_mut, zero,
 };
 use crate::fd::BorrowedFd;
 use crate::io;
-use crate::process::{Pid, RawNonZeroPid};
+use crate::pid::{Pid, RawNonZeroPid};
 use crate::thread::{ClockId, FutexFlags, FutexOperation, NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
 #[cfg(target_pointer_width = "32")]
 use linux_raw_sys::general::timespec as __kernel_old_timespec;
-use linux_raw_sys::general::{__kernel_pid_t, __kernel_timespec, TIMER_ABSTIME};
+use linux_raw_sys::general::{__kernel_timespec, TIMER_ABSTIME};
 
 #[inline]
 pub(crate) fn clock_nanosleep_relative(
@@ -199,9 +199,9 @@ unsafe fn nanosleep_old(
 #[inline]
 pub(crate) fn gettid() -> Pid {
     unsafe {
-        let tid: i32 = ret_usize_infallible(syscall_readonly!(__NR_gettid)) as __kernel_pid_t;
+        let tid = ret_c_int_infallible(syscall_readonly!(__NR_gettid));
         debug_assert_ne!(tid, 0);
-        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(tid as u32))
+        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(tid))
     }
 }
 
@@ -311,15 +311,15 @@ pub(crate) fn capset(
 }
 
 #[inline]
-pub(crate) fn setuid_thread(uid: crate::process::Uid) -> io::Result<()> {
+pub(crate) fn setuid_thread(uid: crate::ugid::Uid) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_setuid, uid)) }
 }
 
 #[inline]
 pub(crate) fn setresuid_thread(
-    ruid: crate::process::Uid,
-    euid: crate::process::Uid,
-    suid: crate::process::Uid,
+    ruid: crate::ugid::Uid,
+    euid: crate::ugid::Uid,
+    suid: crate::ugid::Uid,
 ) -> io::Result<()> {
     #[cfg(any(target_arch = "x86", target_arch = "arm", target_arch = "sparc"))]
     unsafe {
@@ -332,15 +332,15 @@ pub(crate) fn setresuid_thread(
 }
 
 #[inline]
-pub(crate) fn setgid_thread(gid: crate::process::Gid) -> io::Result<()> {
+pub(crate) fn setgid_thread(gid: crate::ugid::Gid) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_setgid, gid)) }
 }
 
 #[inline]
 pub(crate) fn setresgid_thread(
-    rgid: crate::process::Gid,
-    egid: crate::process::Gid,
-    sgid: crate::process::Gid,
+    rgid: crate::ugid::Gid,
+    egid: crate::ugid::Gid,
+    sgid: crate::ugid::Gid,
 ) -> io::Result<()> {
     #[cfg(any(target_arch = "x86", target_arch = "arm", target_arch = "sparc"))]
     unsafe {

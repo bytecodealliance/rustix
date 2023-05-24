@@ -1,7 +1,7 @@
 //! inotify support for working with inotifies
 
-use super::super::c;
-use super::super::conv::{borrowed_fd, c_str, ret, ret_c_int, ret_owned_fd};
+use crate::backend::c;
+use crate::backend::conv::{borrowed_fd, c_str, ret, ret_c_int, ret_owned_fd};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
 use bitflags::bitflags;

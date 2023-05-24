@@ -1,5 +1,5 @@
 #[cfg(linux_kernel)]
-use super::super::c;
+use crate::backend::c;
 #[cfg(linux_kernel)]
 use bitflags::bitflags;
 

@@ -60,6 +60,7 @@ fn test_transparent_huge_pages_are_disabled() {
 #[test]
 #[ignore = "Might result in SIGKILL"]
 fn test_secure_computing_mode() {
+    #[cfg(feature = "system")]
     if !linux_kernel_config_item_is_enabled("CONFIG_SECCOMP").unwrap_or(false) {
         eprintln!("test_secure_computing_mode: Test skipped due to missing kernel feature: CONFIG_SECCOMP.");
         return;
@@ -71,6 +72,7 @@ fn test_secure_computing_mode() {
 
 #[test]
 fn test_get_clear_child_tid_address() {
+    #[cfg(feature = "system")]
     if !linux_kernel_config_item_is_enabled("CONFIG_CHECKPOINT_RESTORE").unwrap_or(false) {
         eprintln!("test_get_clear_child_tid_address: Test skipped due to missing kernel feature: CONFIG_CHECKPOINT_RESTORE.");
         return;
@@ -89,6 +91,7 @@ fn test_get_clear_child_tid_address() {
 
 #[test]
 fn test_core_scheduling_cookie() {
+    #[cfg(feature = "system")]
     if !linux_kernel_config_item_is_enabled("CONFIG_SCHED_CORE").unwrap_or(false) {
         eprintln!("test_core_scheduling_cookie: Test skipped due to missing kernel feature: CONFIG_SCHED_CORE.");
         return;
@@ -109,6 +112,7 @@ fn test_core_scheduling_cookie() {
 // Helper functions.
 //
 
+#[cfg(feature = "system")]
 fn load_linux_kernel_config() -> io::Result<Vec<u8>> {
     if let Ok(compressed_bytes) = fs::read("/proc/config.gz") {
         let mut decoder = flate2::bufread::GzDecoder::new(compressed_bytes.as_slice());
@@ -117,7 +121,7 @@ fn load_linux_kernel_config() -> io::Result<Vec<u8>> {
         return Ok(bytes);
     }
 
-    let info = rustix::process::uname();
+    let info = rustix::system::uname();
     let release = info
         .release()
         .to_str()
@@ -126,6 +130,7 @@ fn load_linux_kernel_config() -> io::Result<Vec<u8>> {
     fs::read(format!("/boot/config-{}", release))
 }
 
+#[cfg(feature = "system")]
 fn is_linux_kernel_config_item_enabled(config: &[u8], name: &str) -> io::Result<bool> {
     for line in io::Cursor::new(config).lines() {
         let line = line?;
@@ -152,7 +157,8 @@ fn is_linux_kernel_config_item_enabled(config: &[u8], name: &str) -> io::Result<
     Ok(false)
 }
 
-pub(crate) fn linux_kernel_config_item_is_enabled(name: &str) -> io::Result<bool> {
+#[cfg(feature = "system")]
+fn linux_kernel_config_item_is_enabled(name: &str) -> io::Result<bool> {
     let config = load_linux_kernel_config()?;
     is_linux_kernel_config_item_enabled(&config, name)
 }

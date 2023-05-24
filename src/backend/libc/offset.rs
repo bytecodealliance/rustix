@@ -18,6 +18,7 @@ pub(super) use c::{
 };
 
 #[cfg(linux_like)]
+#[cfg(feature = "process")]
 pub(super) use c::rlimit64 as libc_rlimit;
 
 #[cfg(not(any(linux_like, windows, target_os = "wasi")))]
@@ -37,6 +38,7 @@ pub(super) use c::{rlimit as libc_rlimit, RLIM_INFINITY as LIBC_RLIM_INFINITY};
 pub(super) use c::{getrlimit as libc_getrlimit, setrlimit as libc_setrlimit};
 
 #[cfg(linux_like)]
+#[cfg(feature = "process")]
 pub(super) use c::{
     getrlimit64 as libc_getrlimit, setrlimit64 as libc_setrlimit,
     RLIM64_INFINITY as LIBC_RLIM_INFINITY,

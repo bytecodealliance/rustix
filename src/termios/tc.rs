@@ -1,5 +1,5 @@
 use crate::fd::AsFd;
-use crate::process::Pid;
+use crate::pid::Pid;
 use crate::{backend, io};
 
 #[cfg(all(

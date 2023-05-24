@@ -2,10 +2,10 @@
 
 #[cfg(not(target_os = "wasi"))]
 use crate::fs::Mode;
+#[cfg(not(target_os = "wasi"))]
+use crate::fs::{Gid, Uid};
 use crate::fs::{OFlags, Timespec};
 use crate::io::SeekFrom;
-#[cfg(not(target_os = "wasi"))]
-use crate::process::{Gid, Uid};
 use crate::{backend, io};
 use backend::fd::{AsFd, BorrowedFd};
 

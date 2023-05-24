@@ -20,7 +20,9 @@ use super::io::errno::try_decode_error;
 #[cfg(target_pointer_width = "64")]
 use super::io::errno::try_decode_u64;
 #[cfg(not(debug_assertions))]
-use super::io::errno::{decode_c_uint_infallible, decode_usize_infallible};
+use super::io::errno::{
+    decode_c_int_infallible, decode_c_uint_infallible, decode_usize_infallible,
+};
 use super::io::errno::{
     try_decode_c_int, try_decode_c_uint, try_decode_raw_fd, try_decode_usize, try_decode_void,
     try_decode_void_star,
@@ -35,7 +37,12 @@ use crate::ffi::CStr;
 #[cfg(feature = "fs")]
 use crate::fs::{FileType, Mode, OFlags};
 use crate::io;
-use crate::process::{Pid, Resource, Signal};
+#[cfg(any(feature = "process", feature = "runtime", feature = "termios"))]
+use crate::pid::Pid;
+#[cfg(feature = "process")]
+use crate::process::Resource;
+#[cfg(any(feature = "process", feature = "runtime"))]
+use crate::signal::Signal;
 use crate::utils::{as_mut_ptr, as_ptr};
 use core::mem::MaybeUninit;
 use core::ptr::null_mut;
@@ -464,6 +471,7 @@ impl<'a, Num: ArgNumber> From<crate::backend::mm::types::UserfaultfdFlags> for A
     }
 }
 
+#[cfg(feature = "process")]
 impl<'a, Num: ArgNumber> From<crate::backend::process::types::MembarrierCommand>
     for ArgReg<'a, Num>
 {
@@ -473,6 +481,7 @@ impl<'a, Num: ArgNumber> From<crate::backend::process::types::MembarrierCommand>
     }
 }
 
+#[cfg(feature = "process")]
 impl<'a, Num: ArgNumber> From<crate::process::Cpuid> for ArgReg<'a, Num> {
     #[inline]
     fn from(cpuid: crate::process::Cpuid) -> Self {
@@ -536,6 +545,7 @@ impl<'a, Num: ArgNumber> From<crate::fs::FallocateFlags> for ArgReg<'a, Num> {
 }
 
 /// Convert a `Resource` into a syscall argument.
+#[cfg(feature = "process")]
 impl<'a, Num: ArgNumber> From<Resource> for ArgReg<'a, Num> {
     #[inline]
     fn from(resource: Resource) -> Self {
@@ -543,6 +553,7 @@ impl<'a, Num: ArgNumber> From<Resource> for ArgReg<'a, Num> {
     }
 }
 
+#[cfg(any(feature = "process", feature = "runtime", feature = "termios"))]
 impl<'a, Num: ArgNumber> From<Pid> for ArgReg<'a, Num> {
     #[inline]
     fn from(pid: Pid) -> Self {
@@ -550,11 +561,13 @@ impl<'a, Num: ArgNumber> From<Pid> for ArgReg<'a, Num> {
     }
 }
 
+#[cfg(feature = "process")]
 #[inline]
 pub(super) fn negative_pid<'a, Num: ArgNumber>(pid: Pid) -> ArgReg<'a, Num> {
     pass_usize(pid.as_raw_nonzero().get().wrapping_neg() as usize)
 }
 
+#[cfg(any(feature = "process", feature = "runtime"))]
 impl<'a, Num: ArgNumber> From<Signal> for ArgReg<'a, Num> {
     #[inline]
     fn from(sig: Signal) -> Self {
@@ -718,16 +731,18 @@ impl<'a, Num: ArgNumber> From<crate::backend::fs::types::UnmountFlags> for ArgRe
     }
 }
 
-impl<'a, Num: ArgNumber> From<crate::process::Uid> for ArgReg<'a, Num> {
+#[cfg(any(feature = "process", feature = "thread"))]
+impl<'a, Num: ArgNumber> From<crate::ugid::Uid> for ArgReg<'a, Num> {
     #[inline]
-    fn from(t: crate::process::Uid) -> Self {
+    fn from(t: crate::ugid::Uid) -> Self {
         c_uint(t.as_raw())
     }
 }
 
-impl<'a, Num: ArgNumber> From<crate::process::Gid> for ArgReg<'a, Num> {
+#[cfg(any(feature = "process", feature = "thread"))]
+impl<'a, Num: ArgNumber> From<crate::ugid::Gid> for ArgReg<'a, Num> {
     #[inline]
-    fn from(t: crate::process::Gid) -> Self {
+    fn from(t: crate::ugid::Gid) -> Self {
         c_uint(t.as_raw())
     }
 }
@@ -826,6 +841,25 @@ pub(super) unsafe fn ret_usize_infallible(raw: RetReg<R0>) -> usize {
     #[cfg(not(debug_assertions))]
     {
         decode_usize_infallible(raw)
+    }
+}
+
+/// Convert a `c_int` returned from a syscall that effectively always
+/// returns a `c_int`.
+///
+/// # Safety
+///
+/// This function must only be used with return values from infallible
+/// syscalls.
+#[inline]
+pub(super) unsafe fn ret_c_int_infallible(raw: RetReg<R0>) -> c::c_int {
+    #[cfg(debug_assertions)]
+    {
+        try_decode_c_int(raw).unwrap()
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        decode_c_int_infallible(raw)
     }
 }
 

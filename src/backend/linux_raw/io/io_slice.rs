@@ -3,7 +3,7 @@
 //! dca3f1b786efd27be3b325ed1e01e247aa589c3b.
 
 #![allow(unsafe_code)]
-use super::super::c;
+use crate::backend::c;
 use core::marker::PhantomData;
 use core::slice;
 use linux_raw_sys::general::__kernel_size_t;

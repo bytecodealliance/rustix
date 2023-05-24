@@ -25,8 +25,6 @@ mod rlimit;
 #[cfg(any(linux_kernel, target_os = "dragonfly", target_os = "fuchsia"))]
 mod sched;
 mod sched_yield;
-#[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.
-mod system;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have umask.
 mod umask;
 #[cfg(not(target_os = "wasi"))]
@@ -58,12 +56,6 @@ pub use rlimit::*;
 pub use sched::*;
 pub use sched_yield::sched_yield;
 #[cfg(not(target_os = "wasi"))]
-pub use system::*;
-#[cfg(not(target_os = "wasi"))]
 pub use umask::*;
 #[cfg(not(target_os = "wasi"))]
 pub use wait::*;
-
-#[cfg(not(target_os = "wasi"))]
-#[cfg(feature = "fs")]
-pub(crate) use id::translate_fchown_args;

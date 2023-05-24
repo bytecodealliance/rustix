@@ -1,4 +1,4 @@
-use super::super::c;
+use crate::backend::c;
 
 /// `TCSA*` values for use with [`tcsetattr`].
 ///

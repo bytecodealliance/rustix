@@ -1,10 +1,5 @@
 //! libc syscalls supporting `rustix::mm`.
 
-use super::super::c;
-#[cfg(linux_kernel)]
-use super::super::conv::syscall_ret_owned_fd;
-use super::super::conv::{borrowed_fd, no_fd, ret};
-use super::super::offset::libc_mmap;
 #[cfg(not(target_os = "redox"))]
 use super::types::Advice;
 #[cfg(any(target_os = "emscripten", target_os = "linux"))]
@@ -12,6 +7,11 @@ use super::types::MremapFlags;
 use super::types::{MapFlags, MprotectFlags, MsyncFlags, ProtFlags};
 #[cfg(linux_kernel)]
 use super::types::{MlockFlags, UserfaultfdFlags};
+use crate::backend::c;
+#[cfg(linux_kernel)]
+use crate::backend::conv::syscall_ret_owned_fd;
+use crate::backend::conv::{borrowed_fd, no_fd, ret};
+use crate::backend::offset::libc_mmap;
 use crate::fd::BorrowedFd;
 #[cfg(linux_kernel)]
 use crate::fd::OwnedFd;

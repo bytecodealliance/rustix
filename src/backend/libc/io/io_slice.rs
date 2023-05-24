@@ -4,7 +4,7 @@
 
 #![allow(missing_docs)]
 
-use super::super::c;
+use crate::backend::c;
 use core::marker::PhantomData;
 use core::slice;
 
