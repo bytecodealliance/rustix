@@ -67,6 +67,7 @@ by default. The rest of the API is conditional with cargo feature flags:
 | `procfs`   | [`rustix::procfs`]—Utilities for reading `/proc` on Linux.
 | `pty`      | [`rustix::pty`]—Pseduoterminal operations.
 | `rand`     | [`rustix::rand`]—Random-related operations.
+| `stdio`    | [`rustix::stdio`]—Stdio-related operations.
 | `system`   | [`rustix::system`]—System-related operations.
 | `termios`  | [`rustix::termios`]—Terminal I/O stream operations.
 | `thread`   | [`rustix::thread`]—Thread-associated operations.
@@ -84,6 +85,7 @@ by default. The rest of the API is conditional with cargo feature flags:
 [`rustix::procfs`]: https://docs.rs/rustix/*/rustix/procfs/index.html
 [`rustix::pty`]: https://docs.rs/rustix/*/rustix/pty/index.html
 [`rustix::rand`]: https://docs.rs/rustix/*/rustix/rand/index.html
+[`rustix::stdio`]: https://docs.rs/rustix/*/rustix/stdio/index.html
 [`rustix::system`]: https://docs.rs/rustix/*/rustix/system/index.html
 [`rustix::termios`]: https://docs.rs/rustix/*/rustix/termios/index.html
 [`rustix::thread`]: https://docs.rs/rustix/*/rustix/thread/index.html

@@ -10,6 +10,7 @@
 
 use crate::backend;
 use crate::fd::OwnedFd;
+use backend::c;
 use backend::fd::{BorrowedFd, FromRawFd, RawFd};
 
 #[cfg(not(any(windows, target_os = "wasi")))]
@@ -51,7 +52,7 @@ use {crate::io, backend::fd::AsFd, core::mem::forget};
 pub const fn stdin() -> BorrowedFd<'static> {
     // SAFETY: When "std" is enabled, the standard library assumes that the
     // stdio file descriptors are all valid.
-    unsafe { BorrowedFd::borrow_raw(backend::io::types::STDIN_FILENO as RawFd) }
+    unsafe { BorrowedFd::borrow_raw(c::STDIN_FILENO as RawFd) }
 }
 
 /// `STDIN_FILENO`—Standard input, borrowed.
@@ -95,7 +96,7 @@ pub const fn stdin() -> BorrowedFd<'static> {
 #[doc(alias = "STDIN_FILENO")]
 #[inline]
 pub const unsafe fn stdin() -> BorrowedFd<'static> {
-    BorrowedFd::borrow_raw(backend::io::types::STDIN_FILENO as RawFd)
+    BorrowedFd::borrow_raw(c::STDIN_FILENO as RawFd)
 }
 
 /// `STDIN_FILENO`—Standard input, owned.
@@ -134,7 +135,7 @@ pub const unsafe fn stdin() -> BorrowedFd<'static> {
 #[doc(alias = "STDIN_FILENO")]
 #[inline]
 pub unsafe fn take_stdin() -> OwnedFd {
-    backend::fd::OwnedFd::from_raw_fd(backend::io::types::STDIN_FILENO as RawFd)
+    backend::fd::OwnedFd::from_raw_fd(c::STDIN_FILENO as RawFd)
 }
 
 /// `STDOUT_FILENO`—Standard output, borrowed.
@@ -173,7 +174,7 @@ pub unsafe fn take_stdin() -> OwnedFd {
 pub const fn stdout() -> BorrowedFd<'static> {
     // SAFETY: When "std" is enabled, the standard library assumes that the
     // stdio file descriptors are all valid.
-    unsafe { BorrowedFd::borrow_raw(backend::io::types::STDOUT_FILENO as RawFd) }
+    unsafe { BorrowedFd::borrow_raw(c::STDOUT_FILENO as RawFd) }
 }
 
 /// `STDOUT_FILENO`—Standard output, borrowed.
@@ -217,7 +218,7 @@ pub const fn stdout() -> BorrowedFd<'static> {
 #[doc(alias = "STDOUT_FILENO")]
 #[inline]
 pub const unsafe fn stdout() -> BorrowedFd<'static> {
-    BorrowedFd::borrow_raw(backend::io::types::STDOUT_FILENO as RawFd)
+    BorrowedFd::borrow_raw(c::STDOUT_FILENO as RawFd)
 }
 
 /// `STDOUT_FILENO`—Standard output, owned.
@@ -256,7 +257,7 @@ pub const unsafe fn stdout() -> BorrowedFd<'static> {
 #[doc(alias = "STDOUT_FILENO")]
 #[inline]
 pub unsafe fn take_stdout() -> OwnedFd {
-    backend::fd::OwnedFd::from_raw_fd(backend::io::types::STDOUT_FILENO as RawFd)
+    backend::fd::OwnedFd::from_raw_fd(c::STDOUT_FILENO as RawFd)
 }
 
 /// `STDERR_FILENO`—Standard error, borrowed.
@@ -289,7 +290,7 @@ pub unsafe fn take_stdout() -> OwnedFd {
 pub const fn stderr() -> BorrowedFd<'static> {
     // SAFETY: When "std" is enabled, the standard library assumes that the
     // stdio file descriptors are all valid.
-    unsafe { BorrowedFd::borrow_raw(backend::io::types::STDERR_FILENO as RawFd) }
+    unsafe { BorrowedFd::borrow_raw(c::STDERR_FILENO as RawFd) }
 }
 
 /// `STDERR_FILENO`—Standard error, borrowed.
@@ -327,7 +328,7 @@ pub const fn stderr() -> BorrowedFd<'static> {
 #[doc(alias = "STDERR_FILENO")]
 #[inline]
 pub const unsafe fn stderr() -> BorrowedFd<'static> {
-    BorrowedFd::borrow_raw(backend::io::types::STDERR_FILENO as RawFd)
+    BorrowedFd::borrow_raw(c::STDERR_FILENO as RawFd)
 }
 
 /// `STDERR_FILENO`—Standard error, owned.
@@ -371,7 +372,7 @@ pub const unsafe fn stderr() -> BorrowedFd<'static> {
 #[doc(alias = "STDERR_FILENO")]
 #[inline]
 pub unsafe fn take_stderr() -> OwnedFd {
-    backend::fd::OwnedFd::from_raw_fd(backend::io::types::STDERR_FILENO as RawFd)
+    backend::fd::OwnedFd::from_raw_fd(c::STDERR_FILENO as RawFd)
 }
 
 /// `STDIN_FILENO`—Standard input, raw.
@@ -403,7 +404,7 @@ pub unsafe fn take_stderr() -> OwnedFd {
 #[doc(alias = "STDIN_FILENO")]
 #[inline]
 pub const fn raw_stdin() -> RawFd {
-    backend::io::types::STDIN_FILENO as RawFd
+    c::STDIN_FILENO as RawFd
 }
 
 /// `STDOUT_FILENO`—Standard output, raw.
@@ -435,7 +436,7 @@ pub const fn raw_stdin() -> RawFd {
 #[doc(alias = "STDOUT_FILENO")]
 #[inline]
 pub const fn raw_stdout() -> RawFd {
-    backend::io::types::STDOUT_FILENO as RawFd
+    c::STDOUT_FILENO as RawFd
 }
 
 /// `STDERR_FILENO`—Standard error, raw.
@@ -467,7 +468,7 @@ pub const fn raw_stdout() -> RawFd {
 #[doc(alias = "STDERR_FILENO")]
 #[inline]
 pub const fn raw_stderr() -> RawFd {
-    backend::io::types::STDERR_FILENO as RawFd
+    c::STDERR_FILENO as RawFd
 }
 
 /// Utility function to safely `dup2` over stdin (fd 0).
@@ -476,7 +477,7 @@ pub const fn raw_stderr() -> RawFd {
 pub fn dup2_stdin<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     // SAFETY: We pass the returned `OwnedFd` to `forget` so that it isn't
     // dropped.
-    let mut target = unsafe { io::take_stdin() };
+    let mut target = unsafe { take_stdin() };
     backend::io::syscalls::dup2(fd.as_fd(), &mut target)?;
     forget(target);
     Ok(())
@@ -488,7 +489,7 @@ pub fn dup2_stdin<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 pub fn dup2_stdout<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     // SAFETY: We pass the returned `OwnedFd` to `forget` so that it isn't
     // dropped.
-    let mut target = unsafe { io::take_stdout() };
+    let mut target = unsafe { take_stdout() };
     backend::io::syscalls::dup2(fd.as_fd(), &mut target)?;
     forget(target);
     Ok(())
@@ -500,7 +501,7 @@ pub fn dup2_stdout<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 pub fn dup2_stderr<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     // SAFETY: We pass the returned `OwnedFd` to `forget` so that it isn't
     // dropped.
-    let mut target = unsafe { io::take_stderr() };
+    let mut target = unsafe { take_stderr() };
     backend::io::syscalls::dup2(fd.as_fd(), &mut target)?;
     forget(target);
     Ok(())

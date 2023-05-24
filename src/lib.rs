@@ -211,6 +211,10 @@ pub mod pty;
 #[cfg(feature = "rand")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "rand")))]
 pub mod rand;
+#[cfg(not(windows))]
+#[cfg(feature = "stdio")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "stdio")))]
+pub mod stdio;
 #[cfg(feature = "system")]
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "system")))]
