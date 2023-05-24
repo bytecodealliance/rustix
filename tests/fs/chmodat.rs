@@ -1,31 +1,7 @@
 #[cfg(not(target_os = "wasi"))]
 #[test]
 fn test_chmodat() {
-    use rustix::fs::{chmodat, cwd, openat, statat, AtFlags, Mode, OFlags};
-
-    let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::RWXU).unwrap();
-
-    let _ = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::RWXU).unwrap();
-
-    let before = statat(&dir, "foo", AtFlags::empty()).unwrap();
-    assert_ne!(before.st_mode as u64 & libc::S_IRWXU as u64, 0);
-
-    chmodat(&dir, "foo", Mode::empty()).unwrap();
-
-    let after = statat(&dir, "foo", AtFlags::empty()).unwrap();
-    assert_eq!(after.st_mode as u64 & libc::S_IRWXU as u64, 0);
-
-    chmodat(&dir, "foo", Mode::RWXU).unwrap();
-
-    let reverted = statat(&dir, "foo", AtFlags::empty()).unwrap();
-    assert_ne!(reverted.st_mode as u64 & libc::S_IRWXU as u64, 0);
-}
-
-#[cfg(not(target_os = "wasi"))]
-#[test]
-fn test_chmodat_with() {
-    use rustix::fs::{chmodat_with, cwd, openat, statat, symlinkat, AtFlags, Mode, OFlags};
+    use rustix::fs::{chmodat, cwd, openat, statat, symlinkat, AtFlags, Mode, OFlags};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::RWXU).unwrap();
@@ -33,7 +9,7 @@ fn test_chmodat_with() {
     let _ = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::RWXU).unwrap();
     symlinkat("foo", &dir, "link").unwrap();
 
-    match chmodat_with(&dir, "link", Mode::empty(), AtFlags::SYMLINK_NOFOLLOW) {
+    match chmodat(&dir, "link", Mode::empty(), AtFlags::SYMLINK_NOFOLLOW) {
         Ok(()) => (),
         Err(rustix::io::Errno::OPNOTSUPP) => return,
         Err(e) => Err(e).unwrap(),
@@ -42,12 +18,12 @@ fn test_chmodat_with() {
     let before = statat(&dir, "foo", AtFlags::empty()).unwrap();
     assert_ne!(before.st_mode as u64 & libc::S_IRWXU as u64, 0);
 
-    chmodat_with(&dir, "foo", Mode::empty(), AtFlags::empty()).unwrap();
+    chmodat(&dir, "foo", Mode::empty(), AtFlags::empty()).unwrap();
 
     let after = statat(&dir, "foo", AtFlags::empty()).unwrap();
     assert_eq!(after.st_mode as u64 & libc::S_IRWXU as u64, 0);
 
-    chmodat_with(&dir, "foo", Mode::RWXU, AtFlags::empty()).unwrap();
+    chmodat(&dir, "foo", Mode::RWXU, AtFlags::empty()).unwrap();
 
     let reverted = statat(&dir, "foo", AtFlags::empty()).unwrap();
     assert_ne!(reverted.st_mode as u64 & libc::S_IRWXU as u64, 0);
