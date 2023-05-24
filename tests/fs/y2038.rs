@@ -8,11 +8,11 @@
 #[test]
 fn test_y2038_with_utimensat() {
     use rustix::fs::{
-        cwd, fstat, openat, statat, utimensat, AtFlags, Mode, OFlags, Timespec, Timestamps,
+        fstat, openat, statat, utimensat, AtFlags, Mode, OFlags, Timespec, Timestamps, CWD,
     };
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     let m_sec = 1_u64 << 32;
     let m_nsec = 17_u32;
@@ -100,11 +100,11 @@ fn test_y2038_with_utimensat() {
 #[test]
 fn test_y2038_with_futimens() {
     use rustix::fs::{
-        cwd, fstat, futimens, openat, statat, AtFlags, Mode, OFlags, Timespec, Timestamps,
+        fstat, futimens, openat, statat, AtFlags, Mode, OFlags, Timespec, Timestamps, CWD,
     };
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     let m_sec = 1_u64 << 32;
     let m_nsec = 17_u32;

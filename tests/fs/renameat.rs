@@ -32,11 +32,11 @@ fn test_rename() {
 #[cfg(linux_kernel)]
 #[test]
 fn test_renameat() {
-    use rustix::fs::{accessat, cwd, openat, renameat, statat, Access, AtFlags, Mode, OFlags};
+    use rustix::fs::{accessat, openat, renameat, statat, Access, AtFlags, Mode, OFlags, CWD};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
-        cwd(),
+        CWD,
         tmp.path(),
         OFlags::RDONLY | OFlags::PATH,
         Mode::empty(),
@@ -62,11 +62,11 @@ fn test_renameat() {
 #[cfg(linux_kernel)]
 #[test]
 fn test_renameat_overwrite() {
-    use rustix::fs::{cwd, openat, renameat, statat, AtFlags, Mode, OFlags};
+    use rustix::fs::{openat, renameat, statat, AtFlags, Mode, OFlags, CWD};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
-        cwd(),
+        CWD,
         tmp.path(),
         OFlags::RDONLY | OFlags::PATH,
         Mode::empty(),
@@ -84,11 +84,11 @@ fn test_renameat_overwrite() {
 #[cfg(linux_kernel)]
 #[test]
 fn test_renameat_with() {
-    use rustix::fs::{cwd, openat, renameat_with, statat, AtFlags, Mode, OFlags, RenameFlags};
+    use rustix::fs::{openat, renameat_with, statat, AtFlags, Mode, OFlags, RenameFlags, CWD};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
-        cwd(),
+        CWD,
         tmp.path(),
         OFlags::RDONLY | OFlags::PATH,
         Mode::empty(),

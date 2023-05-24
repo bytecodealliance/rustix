@@ -1,4 +1,4 @@
-use rustix::fs::{cwd, openat, Mode, OFlags};
+use rustix::fs::{openat, Mode, OFlags, CWD};
 use rustix::pty::*;
 use std::fs::File;
 use std::io;
@@ -19,7 +19,7 @@ fn openpty_basic() -> io::Result<()> {
 
     let name = ptsname(&controller, Vec::new())?;
     let user = openat(
-        cwd(),
+        CWD,
         name,
         OFlags::RDWR | OFlags::NOCTTY | OFlags::CLOEXEC,
         Mode::empty(),

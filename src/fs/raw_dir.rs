@@ -42,10 +42,10 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     ///
     /// ```
     /// # use std::mem::MaybeUninit;
-    /// # use rustix::fs::{cwd, Mode, OFlags, openat, RawDir};
+    /// # use rustix::fs::{CWD, Mode, OFlags, openat, RawDir};
     ///
     /// let fd = openat(
-    ///     cwd(),
+    ///     CWD,
     ///     ".",
     ///     OFlags::RDONLY | OFlags::DIRECTORY | OFlags::CLOEXEC,
     ///     Mode::empty(),
@@ -64,10 +64,10 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     ///
     /// ```
     /// # use std::mem::MaybeUninit;
-    /// # use rustix::fs::{cwd, Mode, OFlags, openat, RawDir};
+    /// # use rustix::fs::{CWD, Mode, OFlags, openat, RawDir};
     ///
     /// let fd = openat(
-    ///     cwd(),
+    ///     CWD,
     ///     ".",
     ///     OFlags::RDONLY | OFlags::DIRECTORY | OFlags::CLOEXEC,
     ///     Mode::empty(),
@@ -89,11 +89,11 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     ///
     /// ```
     /// # use std::mem::MaybeUninit;
-    /// # use rustix::fs::{cwd, Mode, OFlags, openat, RawDir};
+    /// # use rustix::fs::{CWD, Mode, OFlags, openat, RawDir};
     /// # use rustix::io::Errno;
     ///
     /// let fd = openat(
-    ///     cwd(),
+    ///     CWD,
     ///     ".",
     ///     OFlags::RDONLY | OFlags::DIRECTORY | OFlags::CLOEXEC,
     ///     Mode::empty(),

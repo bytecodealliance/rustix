@@ -13,9 +13,9 @@ use rustix::fs::SeekFrom;
 
 #[test]
 fn invalid_offset_seek() {
-    use rustix::fs::{cwd, openat, seek, Mode, OFlags};
+    use rustix::fs::{openat, seek, Mode, OFlags, CWD};
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
         &dir,
         "foo",
@@ -35,9 +35,9 @@ fn invalid_offset_seek() {
 #[cfg(not(any(netbsdlike, solarish, target_os = "dragonfly", target_os = "redox")))]
 #[test]
 fn invalid_offset_fallocate() {
-    use rustix::fs::{cwd, fallocate, openat, FallocateFlags, Mode, OFlags};
+    use rustix::fs::{fallocate, openat, FallocateFlags, Mode, OFlags, CWD};
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
         &dir,
         "foo",
@@ -62,9 +62,9 @@ fn invalid_offset_fallocate() {
 )))]
 #[test]
 fn invalid_offset_fadvise() {
-    use rustix::fs::{cwd, fadvise, openat, Advice, Mode, OFlags};
+    use rustix::fs::{fadvise, openat, Advice, Mode, OFlags, CWD};
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
         &dir,
         "foo",
@@ -93,10 +93,10 @@ fn invalid_offset_fadvise() {
 
 #[test]
 fn invalid_offset_pread() {
-    use rustix::fs::{cwd, openat, Mode, OFlags};
+    use rustix::fs::{openat, Mode, OFlags, CWD};
     use rustix::io::pread;
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
         &dir,
         "foo",
@@ -113,10 +113,10 @@ fn invalid_offset_pread() {
 #[cfg(not(apple))]
 #[test]
 fn invalid_offset_pwrite() {
-    use rustix::fs::{cwd, openat, Mode, OFlags};
+    use rustix::fs::{openat, Mode, OFlags, CWD};
     use rustix::io::pwrite;
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
         &dir,
         "foo",
@@ -133,10 +133,10 @@ fn invalid_offset_pwrite() {
 #[cfg(linux_kernel)]
 #[test]
 fn invalid_offset_copy_file_range() {
-    use rustix::fs::{copy_file_range, cwd, openat, Mode, OFlags};
+    use rustix::fs::{copy_file_range, openat, Mode, OFlags, CWD};
     use rustix::io::write;
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let foo = openat(
         &dir,
         "foo",

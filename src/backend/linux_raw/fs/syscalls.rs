@@ -23,7 +23,7 @@ use crate::fd::AsFd;
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
-use crate::fs::cwd;
+use crate::fs::CWD;
 use crate::fs::{
     inotify, Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, Gid, MemfdFlags,
     Mode, OFlags, RenameFlags, ResolveFlags, SealFlags, SeekFrom, Stat, StatFs, StatVfs,
@@ -50,7 +50,7 @@ use {
 pub(crate) fn open(path: &CStr, flags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     {
-        openat(cwd().as_fd(), path, flags, mode)
+        openat(CWD.as_fd(), path, flags, mode)
     }
     #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
     unsafe {
@@ -454,7 +454,7 @@ pub(crate) fn stat(path: &CStr) -> io::Result<Stat> {
     #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
     {
         match crate::fs::statx(
-            crate::fs::cwd().as_fd(),
+            crate::fs::CWD.as_fd(),
             path,
             AtFlags::empty(),
             StatxFlags::BASIC_STATS,
@@ -551,7 +551,7 @@ pub(crate) fn lstat(path: &CStr) -> io::Result<Stat> {
     #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
     {
         match crate::fs::statx(
-            crate::fs::cwd().as_fd(),
+            crate::fs::CWD.as_fd(),
             path,
             AtFlags::SYMLINK_NOFOLLOW,
             StatxFlags::BASIC_STATS,
@@ -1279,7 +1279,7 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
 pub(crate) fn access(path: &CStr, access: Access) -> io::Result<()> {
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     {
-        accessat_noflags(cwd().as_fd(), path, access)
+        accessat_noflags(CWD.as_fd(), path, access)
     }
 
     #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]

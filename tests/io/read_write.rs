@@ -6,11 +6,11 @@ use std::io::{IoSlice, IoSliceMut};
 #[cfg(not(target_os = "haiku"))] // no preadv/pwritev
 #[test]
 fn test_readwrite_pv() {
-    use rustix::fs::{cwd, openat, Mode, OFlags};
+    use rustix::fs::{openat, Mode, OFlags, CWD};
     use rustix::io::{preadv, pwritev};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let foo = openat(
         &dir,
         "foo",
@@ -44,11 +44,11 @@ fn test_readwrite_pv() {
 #[cfg(feature = "fs")]
 #[test]
 fn test_readwrite_p() {
-    use rustix::fs::{cwd, openat, Mode, OFlags};
+    use rustix::fs::{openat, Mode, OFlags, CWD};
     use rustix::io::{pread, pwrite};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let foo = openat(
         &dir,
         "foo",
@@ -69,11 +69,11 @@ fn test_readwrite_p() {
 #[cfg(feature = "fs")]
 #[test]
 fn test_readwrite_v() {
-    use rustix::fs::{cwd, openat, seek, Mode, OFlags, SeekFrom};
+    use rustix::fs::{openat, seek, Mode, OFlags, SeekFrom, CWD};
     use rustix::io::{readv, writev};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let foo = openat(
         &dir,
         "foo",
@@ -95,11 +95,11 @@ fn test_readwrite_v() {
 #[cfg(feature = "fs")]
 #[test]
 fn test_readwrite() {
-    use rustix::fs::{cwd, openat, seek, Mode, OFlags, SeekFrom};
+    use rustix::fs::{openat, seek, Mode, OFlags, SeekFrom, CWD};
     use rustix::io::{read, write};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let foo = openat(
         &dir,
         "foo",
@@ -149,11 +149,11 @@ fn test_rwf_values() {
 #[cfg(feature = "fs")]
 #[test]
 fn test_pwritev2() {
-    use rustix::fs::{cwd, openat, seek, Mode, OFlags, SeekFrom};
+    use rustix::fs::{openat, seek, Mode, OFlags, SeekFrom, CWD};
     use rustix::io::{preadv2, pwritev2, writev, ReadWriteFlags};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let foo = openat(
         &dir,
         "foo",
