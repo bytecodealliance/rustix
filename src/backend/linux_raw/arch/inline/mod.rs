@@ -19,4 +19,4 @@
 #[cfg_attr(target_arch = "x86_64", path = "x86_64.rs")]
 mod target_arch;
 
-pub(in crate::backend) use self::target_arch::*;
+pub(in crate::backend) use target_arch::*;

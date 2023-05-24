@@ -17,10 +17,10 @@ use crate::fs::{Access, AtFlags, Mode, OFlags, Stat, Timestamps};
 #[cfg(not(target_os = "wasi"))]
 use crate::fs::{Gid, Uid};
 use crate::path::SMALL_PATH_BUFFER_SIZE;
+use crate::timespec::Nsecs;
 use crate::{backend, io, path};
 use alloc::vec::Vec;
 use backend::fd::{AsFd, BorrowedFd};
-use backend::time::types::Nsecs;
 
 pub use backend::fs::types::{Dev, RawMode};
 

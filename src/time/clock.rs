@@ -1,10 +1,10 @@
 use crate::{backend, io};
 
-pub use backend::time::types::{Nsecs, Secs, Timespec};
+pub use crate::timespec::{Nsecs, Secs, Timespec};
 
 /// `clockid_t`
 #[cfg(not(target_os = "wasi"))]
-pub use backend::time::types::{ClockId, DynamicClockId};
+pub use crate::clockid::{ClockId, DynamicClockId};
 
 /// `clock_getres(id)`—Returns the resolution of a clock.
 ///

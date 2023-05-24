@@ -1,6 +1,6 @@
 use crate::{backend, io};
 
-pub use backend::time::types::Timespec;
+pub use crate::timespec::Timespec;
 
 #[cfg(not(any(
     apple,
@@ -11,7 +11,7 @@ pub use backend::time::types::Timespec;
     target_os = "redox",
     target_os = "wasi",
 )))]
-pub use backend::time::types::ClockId;
+pub use crate::clockid::ClockId;
 
 /// `clock_nanosleep(id, 0, request, remain)`—Sleeps for a duration on a
 /// given clock.
