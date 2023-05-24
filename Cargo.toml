@@ -176,6 +176,9 @@ termios = []
 # Enable `rustix::mm::*`.
 mm = []
 
+# Enable `rustix::pipe::*`.
+pipe = []
+
 # Enable `rustix::rand::*`.
 rand = []
 
@@ -197,6 +200,7 @@ all-apis = [
     "mm",
     "net",
     "param",
+    "pipe",
     "process",
     "procfs",
     "pty",

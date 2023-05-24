@@ -7,7 +7,8 @@ use {rustix::event::poll, rustix::io::retry_on_intr};
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[test]
 fn test_poll() {
-    use rustix::io::{pipe, read, write};
+    use rustix::io::{read, write};
+    use rustix::pipe::pipe;
 
     // Create a pipe.
     let (reader, writer) = pipe().unwrap();

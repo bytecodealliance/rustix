@@ -380,9 +380,18 @@ impl<'a, Num: ArgNumber> From<crate::io::FdFlags> for ArgReg<'a, Num> {
     }
 }
 
-impl<'a, Num: ArgNumber> From<crate::io::PipeFlags> for ArgReg<'a, Num> {
+#[cfg(feature = "pipe")]
+impl<'a, Num: ArgNumber> From<crate::pipe::PipeFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::io::PipeFlags) -> Self {
+    fn from(flags: crate::pipe::PipeFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(feature = "pipe")]
+impl<'a, Num: ArgNumber> From<crate::pipe::SpliceFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::pipe::SpliceFlags) -> Self {
         c_uint(flags.bits())
     }
 }

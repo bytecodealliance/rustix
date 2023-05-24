@@ -11,7 +11,7 @@ fn dup2_to_replace_stdio() {
         .arg("--example")
         .arg("dup2_to_replace_stdio")
         .arg("--features")
-        .arg("stdio")
+        .arg("pipe,stdio")
         .status()
         .unwrap()
         .success());
