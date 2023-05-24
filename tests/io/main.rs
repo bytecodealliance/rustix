@@ -26,5 +26,3 @@ mod procfs;
 #[cfg(not(target_os = "redox"))] // redox doesn't have cwd/openat
 #[cfg(not(target_os = "wasi"))] // wasi support for `S_IRUSR` etc. submitted to libc in #2264
 mod read_write;
-#[cfg(any(linux_kernel, target_os = "freebsd"))]
-mod seals;

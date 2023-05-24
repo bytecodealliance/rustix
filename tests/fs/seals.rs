@@ -1,4 +1,3 @@
-#[cfg(feature = "fs")]
 #[test]
 fn test_seals() {
     use rustix::fs::{

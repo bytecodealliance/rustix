@@ -35,6 +35,8 @@ mod openat2;
 mod readdir;
 mod readlinkat;
 mod renameat;
+#[cfg(any(linux_kernel, target_os = "freebsd"))]
+mod seals;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 mod statfs;
 #[cfg(linux_kernel)]
