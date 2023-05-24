@@ -20,7 +20,7 @@ use crate::backend::pid::syscalls::getpid;
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::fs::{
-    cwd, fstat, fstatfs, major, openat, renameat, Dir, FileType, Mode, OFlags, Stat,
+    fstat, fstatfs, major, openat, renameat, Dir, FileType, Mode, OFlags, Stat, CWD,
     PROC_SUPER_MAGIC,
 };
 use crate::io;
@@ -220,7 +220,7 @@ fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     // has no side effects.
     PROC.get_or_try_init(|| {
         // Open "/proc".
-        let proc = proc_opendirat(cwd(), cstr!("/proc"))?;
+        let proc = proc_opendirat(CWD, cstr!("/proc"))?;
         let proc_stat =
             check_proc_entry(Kind::Proc, proc.as_fd(), None).map_err(|_err| io::Errno::NOTSUP)?;
 

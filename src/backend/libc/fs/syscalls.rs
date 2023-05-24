@@ -70,7 +70,7 @@ use {
 #[cfg(linux_kernel)]
 use {
     crate::backend::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_usize},
-    crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags},
+    crate::fs::{RenameFlags, ResolveFlags, Statx, StatxFlags, CWD},
     core::ptr::null,
 };
 #[cfg(any(apple, linux_kernel))]
@@ -485,13 +485,13 @@ pub(crate) fn stat(path: &CStr) -> io::Result<Stat> {
     #[cfg(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64")))]
     {
         match crate::fs::statx(
-            crate::fs::cwd(),
+            crate::fs::CWD,
             path,
             AtFlags::empty(),
             StatxFlags::BASIC_STATS,
         ) {
             Ok(x) => statx_to_stat(x),
-            Err(io::Errno::NOSYS) => statat_old(crate::fs::cwd(), path, AtFlags::empty()),
+            Err(io::Errno::NOSYS) => statat_old(crate::fs::CWD, path, AtFlags::empty()),
             Err(err) => Err(err),
         }
     }
@@ -511,13 +511,13 @@ pub(crate) fn lstat(path: &CStr) -> io::Result<Stat> {
     #[cfg(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64")))]
     {
         match crate::fs::statx(
-            crate::fs::cwd(),
+            crate::fs::CWD,
             path,
             AtFlags::SYMLINK_NOFOLLOW,
             StatxFlags::BASIC_STATS,
         ) {
             Ok(x) => statx_to_stat(x),
-            Err(io::Errno::NOSYS) => statat_old(crate::fs::cwd(), path, AtFlags::empty()),
+            Err(io::Errno::NOSYS) => statat_old(crate::fs::CWD, path, AtFlags::empty()),
             Err(err) => Err(err),
         }
     }
@@ -1735,7 +1735,7 @@ pub(crate) fn is_statx_available() -> bool {
         // Call `statx` with null pointers so that if it fails for any reason
         // other than `EFAULT`, we know it's not supported.
         matches!(
-            ret(sys::statx(cwd(), null(), 0, 0, null_mut())),
+            ret(sys::statx(CWD, null(), 0, 0, null_mut())),
             Err(io::Errno::FAULT)
         )
     }

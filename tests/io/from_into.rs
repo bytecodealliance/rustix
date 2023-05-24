@@ -5,7 +5,7 @@ fn test_owned() {
     use rustix::fd::{AsFd, AsRawFd, FromRawFd, IntoRawFd};
 
     let file = rustix::fs::openat(
-        rustix::fs::cwd(),
+        rustix::fs::CWD,
         "Cargo.toml",
         rustix::fs::OFlags::RDONLY,
         rustix::fs::Mode::empty(),

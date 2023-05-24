@@ -8,7 +8,7 @@
 #![cfg(feature = "itoa")]
 #![cfg(feature = "fs")]
 
-use rustix::fs::{cwd, unlinkat, AtFlags};
+use rustix::fs::{unlinkat, AtFlags, CWD};
 use rustix::io::{read, write};
 use rustix::net::{
     accept, bind_unix, connect_unix, listen, socket, AddressFamily, Protocol, SocketAddrUnix,
@@ -61,7 +61,7 @@ fn server(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path) {
         write(&data_socket, DecInt::new(sum).as_bytes()).unwrap();
     }
 
-    unlinkat(cwd(), path, AtFlags::empty()).unwrap();
+    unlinkat(CWD, path, AtFlags::empty()).unwrap();
 }
 
 fn client(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path, runs: &[(&[&str], i32)]) {
@@ -292,7 +292,7 @@ fn test_unix_msg() {
     let name = SocketAddrUnix::new(&path).unwrap();
     do_test_unix_msg(name);
 
-    unlinkat(cwd(), path, AtFlags::empty()).unwrap();
+    unlinkat(CWD, path, AtFlags::empty()).unwrap();
 }
 
 #[cfg(linux_kernel)]
@@ -389,7 +389,7 @@ fn test_unix_msg_with_scm_rights() {
                 .unwrap();
             }
 
-            unlinkat(cwd(), path, AtFlags::empty()).unwrap();
+            unlinkat(CWD, path, AtFlags::empty()).unwrap();
 
             // Once we're done, send a message along the pipe.
             let pipe = pipe_end.unwrap();

@@ -2,14 +2,14 @@
 #[cfg(not(target_os = "redox"))]
 #[test]
 fn test_mmap() {
-    use rustix::fs::{cwd, openat, Mode, OFlags};
+    use rustix::fs::{openat, Mode, OFlags, CWD};
     use rustix::io::write;
     use rustix::mm::{mmap, munmap, MapFlags, ProtFlags};
     use std::ptr::null_mut;
     use std::slice;
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     let file = openat(
         &dir,

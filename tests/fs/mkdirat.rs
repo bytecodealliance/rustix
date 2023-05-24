@@ -19,11 +19,11 @@ fn test_mkdir() {
 #[test]
 fn test_mkdirat() {
     use rustix::fs::{
-        accessat, cwd, mkdirat, openat, statat, unlinkat, Access, AtFlags, FileType, Mode, OFlags,
+        accessat, mkdirat, openat, statat, unlinkat, Access, AtFlags, FileType, Mode, OFlags, CWD,
     };
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     mkdirat(&dir, "foo", Mode::RWXU).unwrap();
     let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
@@ -40,12 +40,12 @@ fn test_mkdirat() {
 #[test]
 fn test_mkdirat_with_o_path() {
     use rustix::fs::{
-        accessat, cwd, mkdirat, openat, statat, unlinkat, Access, AtFlags, FileType, Mode, OFlags,
+        accessat, mkdirat, openat, statat, unlinkat, Access, AtFlags, FileType, Mode, OFlags, CWD,
     };
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
-        cwd(),
+        CWD,
         tmp.path(),
         OFlags::RDONLY | OFlags::PATH,
         Mode::empty(),

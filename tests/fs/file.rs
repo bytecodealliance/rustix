@@ -2,7 +2,7 @@
 #[test]
 fn test_file() {
     rustix::fs::accessat(
-        rustix::fs::cwd(),
+        rustix::fs::CWD,
         "Cargo.toml",
         rustix::fs::Access::READ_OK,
         rustix::fs::AtFlags::empty(),
@@ -12,7 +12,7 @@ fn test_file() {
     #[cfg(not(any(target_os = "emscripten", target_os = "android")))]
     #[allow(unreachable_patterns)]
     match rustix::fs::accessat(
-        rustix::fs::cwd(),
+        rustix::fs::CWD,
         "Cargo.toml",
         rustix::fs::Access::READ_OK,
         rustix::fs::AtFlags::EACCESS,
@@ -33,7 +33,7 @@ fn test_file() {
 
     assert_eq!(
         rustix::fs::accessat(
-            rustix::fs::cwd(),
+            rustix::fs::CWD,
             "Cargo.toml",
             rustix::fs::Access::READ_OK,
             rustix::fs::AtFlags::SYMLINK_FOLLOW,
@@ -43,7 +43,7 @@ fn test_file() {
 
     assert_eq!(
         rustix::fs::openat(
-            rustix::fs::cwd(),
+            rustix::fs::CWD,
             "Cagro.motl",
             rustix::fs::OFlags::RDONLY,
             rustix::fs::Mode::empty(),
@@ -53,7 +53,7 @@ fn test_file() {
     );
 
     let file = rustix::fs::openat(
-        rustix::fs::cwd(),
+        rustix::fs::CWD,
         "Cargo.toml",
         rustix::fs::OFlags::RDONLY,
         rustix::fs::Mode::empty(),

@@ -1,9 +1,9 @@
 //! POSIX-style `*at` functions.
 //!
 //! The `dirfd` argument to these functions may be a file descriptor for a
-//! directory, or the special value returned by [`cwd`].
+//! directory, or the special value [`CWD`].
 //!
-//! [`cwd`]: crate::fs::cwd::cwd
+//! [`cwd`]: crate::fs::cwd::CWD
 
 use crate::fd::OwnedFd;
 use crate::ffi::{CStr, CString};
