@@ -8,7 +8,8 @@
 
 use super::super::c;
 use super::super::conv::{
-    by_ref, c_int, c_uint, ret, ret_c_int, ret_usize, ret_usize_infallible, zero,
+    by_mut, by_ref, c_int, c_uint, ret, ret_c_int, ret_usize, ret_usize_infallible,
+    slice_just_addr, slice_just_addr_mut, zero,
 };
 use crate::fd::BorrowedFd;
 use crate::io;
@@ -293,8 +294,13 @@ pub(crate) fn capget(
     header: &mut linux_raw_sys::general::__user_cap_header_struct,
     data: &mut [MaybeUninit<linux_raw_sys::general::__user_cap_data_struct>],
 ) -> io::Result<()> {
-    let header: *mut _ = header;
-    unsafe { ret(syscall!(__NR_capget, header, data)) }
+    unsafe {
+        ret(syscall!(
+            __NR_capget,
+            by_mut(header),
+            slice_just_addr_mut(data)
+        ))
+    }
 }
 
 #[cfg(linux_kernel)]
@@ -303,8 +309,7 @@ pub(crate) fn capset(
     header: &mut linux_raw_sys::general::__user_cap_header_struct,
     data: &[linux_raw_sys::general::__user_cap_data_struct],
 ) -> io::Result<()> {
-    let header: *mut _ = header;
-    unsafe { ret(syscall!(__NR_capset, header, data.as_ptr())) }
+    unsafe { ret(syscall!(__NR_capset, by_mut(header), slice_just_addr(data))) }
 }
 
 #[inline]

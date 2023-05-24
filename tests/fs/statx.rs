@@ -8,7 +8,7 @@ fn test_statx_unknown_flags() {
     // unknown bits. Exclude `STATX__RESERVED` here as that evokes an explicit
     // failure; that's tested separately below.
     let too_many_flags =
-        unsafe { StatxFlags::from_bits_unchecked(!0 & !linux_raw_sys::general::STATX__RESERVED) };
+        unsafe { StatxFlags::from_bits_unchecked(!linux_raw_sys::general::STATX__RESERVED) };
 
     // It's also ok to pass such flags to `statx`.
     let result = match rustix::fs::statx(&f, "Cargo.toml", AtFlags::empty(), too_many_flags) {

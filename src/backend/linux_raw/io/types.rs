@@ -109,7 +109,7 @@ impl<'a> IoSliceRaw<'a> {
     pub fn from_slice(buf: &'a [u8]) -> Self {
         IoSliceRaw {
             _buf: c::iovec {
-                iov_base: buf.as_ptr() as *mut u8 as *mut c::c_void,
+                iov_base: (buf.as_ptr() as *mut u8).cast::<c::c_void>(),
                 iov_len: buf.len() as _,
             },
             _lifetime: PhantomData,
@@ -120,7 +120,7 @@ impl<'a> IoSliceRaw<'a> {
     pub fn from_slice_mut(buf: &'a mut [u8]) -> Self {
         IoSliceRaw {
             _buf: c::iovec {
-                iov_base: buf.as_mut_ptr() as *mut c::c_void,
+                iov_base: buf.as_mut_ptr().cast::<c::c_void>(),
                 iov_len: buf.len() as _,
             },
             _lifetime: PhantomData,

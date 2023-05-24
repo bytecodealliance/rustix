@@ -44,7 +44,7 @@ fn test_priorities() {
         setpriority_process(None, get + 10000).unwrap();
         let now = getpriority_process(None).unwrap();
         // Linux's max is 19; Darwin's max is 20.
-        assert!(now >= 19 && now <= 20);
+        assert!((19..=20).contains(&now));
         // Darwin appears to return `EPERM` on an out of range `nice`.
         if let Ok(again) = nice(1) {
             assert_eq!(now, again);

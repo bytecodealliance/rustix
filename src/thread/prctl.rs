@@ -55,7 +55,7 @@ const PR_SET_KEEPCAPS: c_int = 8;
 /// [`prctl(PR_SET_KEEPCAPS,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn set_keep_capabilities(enable: bool) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_KEEPCAPS, enable as usize as *mut _) }.map(|_r| ())
+    unsafe { prctl_2args(PR_SET_KEEPCAPS, usize::from(enable) as *mut _) }.map(|_r| ())
 }
 
 //
@@ -521,7 +521,7 @@ const PR_SET_NO_NEW_PRIVS: c_int = 38;
 /// [`prctl(PR_SET_NO_NEW_PRIVS,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn set_no_new_privs(no_new_privs: bool) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_NO_NEW_PRIVS, no_new_privs as usize as *mut _) }.map(|_r| ())
+    unsafe { prctl_2args(PR_SET_NO_NEW_PRIVS, usize::from(no_new_privs) as *mut _) }.map(|_r| ())
 }
 
 //
@@ -569,7 +569,7 @@ const PR_SET_THP_DISABLE: c_int = 41;
 /// [`prctl(PR_SET_THP_DISABLE,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn disable_transparent_huge_pages(thp_disable: bool) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_THP_DISABLE, thp_disable as usize as *mut _) }.map(|_r| ())
+    unsafe { prctl_2args(PR_SET_THP_DISABLE, usize::from(thp_disable) as *mut _) }.map(|_r| ())
 }
 
 //

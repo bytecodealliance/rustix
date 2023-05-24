@@ -59,7 +59,7 @@ impl SocketAddrUnix {
         }
     }
 
-    fn init() -> c::sockaddr_un {
+    const fn init() -> c::sockaddr_un {
         c::sockaddr_un {
             sun_family: c::AF_UNIX as _,
             sun_path: [0; 108],

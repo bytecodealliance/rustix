@@ -124,7 +124,7 @@ pub fn sysinfo() -> Sysinfo {
     backend::process::syscalls::sysinfo()
 }
 
-/// `sethostname(name)—Sets the system host name.
+/// `sethostname(name)`—Sets the system host name.
 ///
 /// # References
 ///  - [Linux]

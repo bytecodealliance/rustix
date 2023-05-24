@@ -336,11 +336,11 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 #[cfg(not(windows))]
 fn key(b: u8) -> String {
     if b == 0 {
-        format!("<undef>")
+        "<undef>".to_string()
     } else if b < 0x20 {
         format!("^{}", (b + 0x40) as char)
     } else if b == 0x7f {
-        format!("^?")
+        "^?".to_string()
     } else {
         format!("{}", b as char)
     }

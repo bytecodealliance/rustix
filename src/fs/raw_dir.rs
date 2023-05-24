@@ -188,8 +188,8 @@ impl<'a> RawDirEntry<'a> {
 }
 
 impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
-    /// Identical to [Iterator::next] except that [Iterator::Item] borrows from
-    /// self.
+    /// Identical to [`Iterator::next`] except that [`Iterator::Item`] borrows
+    /// from self.
     ///
     /// Note: this interface will be broken to implement a stdlib iterator API
     /// with GAT support once one becomes available.
