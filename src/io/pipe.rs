@@ -8,6 +8,7 @@
 
 use crate::fd::OwnedFd;
 use crate::{backend, io};
+use backend::c;
 #[cfg(linux_kernel)]
 use backend::fd::AsFd;
 
@@ -32,7 +33,7 @@ pub use backend::io::types::{IoSliceRaw, SpliceFlags};
     target_os = "redox",
     target_os = "wasi",
 )))]
-pub const PIPE_BUF: usize = backend::io::types::PIPE_BUF;
+pub const PIPE_BUF: usize = c::PIPE_BUF;
 
 /// `pipe()`—Creates a pipe.
 ///
