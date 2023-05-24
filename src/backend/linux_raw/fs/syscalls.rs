@@ -1398,7 +1398,6 @@ pub(crate) fn sendfile(
 }
 
 #[inline]
-#[cfg(linux_kernel)]
 pub(crate) fn mount(
     source: Option<&CStr>,
     target: &CStr,
@@ -1419,7 +1418,6 @@ pub(crate) fn mount(
 }
 
 #[inline]
-#[cfg(linux_kernel)]
 pub(crate) fn unmount(target: &CStr, flags: super::types::UnmountFlags) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_umount2, target, flags)) }
 }

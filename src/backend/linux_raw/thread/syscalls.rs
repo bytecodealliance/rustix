@@ -274,19 +274,16 @@ unsafe fn futex_old(
     ))
 }
 
-#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn setns(fd: BorrowedFd, nstype: c::c_int) -> io::Result<c::c_int> {
     unsafe { ret_c_int(syscall_readonly!(__NR_setns, fd, c_int(nstype))) }
 }
 
-#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn unshare(flags: crate::thread::UnshareFlags) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_unshare, flags)) }
 }
 
-#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn capget(
     header: &mut linux_raw_sys::general::__user_cap_header_struct,
@@ -301,7 +298,6 @@ pub(crate) fn capget(
     }
 }
 
-#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn capset(
     header: &mut linux_raw_sys::general::__user_cap_header_struct,

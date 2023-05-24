@@ -749,7 +749,6 @@ impl<'a, Num: ArgNumber, T> From<&'a mut [MaybeUninit<T>]> for ArgReg<'a, Num> {
 }
 
 #[cfg(feature = "fs")]
-#[cfg(linux_kernel)]
 impl<'a, Num: ArgNumber> From<crate::backend::fs::types::MountFlagsArg> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::backend::fs::types::MountFlagsArg) -> Self {
@@ -758,7 +757,6 @@ impl<'a, Num: ArgNumber> From<crate::backend::fs::types::MountFlagsArg> for ArgR
 }
 
 #[cfg(feature = "fs")]
-#[cfg(linux_kernel)]
 impl<'a, Num: ArgNumber> From<crate::backend::fs::types::UnmountFlags> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::backend::fs::types::UnmountFlags) -> Self {
