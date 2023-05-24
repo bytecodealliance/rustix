@@ -17,8 +17,6 @@ mod ioctl;
 #[cfg(not(any(windows, target_os = "redox")))]
 #[cfg(all(feature = "fs", feature = "net"))]
 mod is_read_write;
-#[cfg(not(any(windows, target_os = "wasi")))]
-mod pipe;
 #[cfg(not(windows))]
 mod read_write;
 
@@ -32,7 +30,5 @@ pub use ioctl::*;
 #[cfg(not(any(windows, target_os = "redox")))]
 #[cfg(all(feature = "fs", feature = "net"))]
 pub use is_read_write::*;
-#[cfg(not(any(windows, target_os = "wasi")))]
-pub use pipe::*;
 #[cfg(not(windows))]
 pub use read_write::*;

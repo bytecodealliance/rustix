@@ -194,6 +194,10 @@ pub mod param;
 #[cfg(any(feature = "fs", feature = "net"))]
 #[cfg_attr(doc_cfg, doc(cfg(any(feature = "fs", feature = "net"))))]
 pub mod path;
+#[cfg(feature = "pipe")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "pipe")))]
+#[cfg(not(any(windows, target_os = "wasi")))]
+pub mod pipe;
 #[cfg(not(windows))]
 #[cfg(feature = "process")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "process")))]

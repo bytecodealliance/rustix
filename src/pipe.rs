@@ -8,15 +8,22 @@
 
 use crate::fd::OwnedFd;
 use crate::{backend, io};
+#[cfg(not(any(
+    solarish,
+    windows,
+    target_os = "haiku",
+    target_os = "redox",
+    target_os = "wasi",
+)))]
 use backend::c;
 #[cfg(linux_kernel)]
 use backend::fd::AsFd;
 
 #[cfg(not(apple))]
-pub use backend::io::types::PipeFlags;
+pub use backend::pipe::types::PipeFlags;
 
 #[cfg(linux_kernel)]
-pub use backend::io::types::{IoSliceRaw, SpliceFlags};
+pub use backend::pipe::types::{IoSliceRaw, SpliceFlags};
 
 /// `PIPE_BUF`—The maximum length at which writes to a pipe are atomic.
 ///
@@ -62,7 +69,7 @@ pub const PIPE_BUF: usize = c::PIPE_BUF;
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Creating-a-Pipe.html
 #[inline]
 pub fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
-    backend::io::syscalls::pipe()
+    backend::pipe::syscalls::pipe()
 }
 
 /// `pipe2(flags)`—Creates a pipe, with flags.
@@ -88,7 +95,7 @@ pub fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
 #[inline]
 #[doc(alias = "pipe2")]
 pub fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
-    backend::io::syscalls::pipe_with(flags)
+    backend::pipe::syscalls::pipe_with(flags)
 }
 
 /// `splice(fd_in, off_in, fd_out, off_out, len, flags)`—Transfer data between
@@ -120,7 +127,7 @@ pub fn splice<FdIn: AsFd, FdOut: AsFd>(
     len: usize,
     flags: SpliceFlags,
 ) -> io::Result<usize> {
-    backend::io::syscalls::splice(fd_in.as_fd(), off_in, fd_out.as_fd(), off_out, len, flags)
+    backend::pipe::syscalls::splice(fd_in.as_fd(), off_in, fd_out.as_fd(), off_out, len, flags)
 }
 
 /// `vmsplice(fd, bufs, flags)`—Transfer data between memory and a pipe.
@@ -153,5 +160,50 @@ pub unsafe fn vmsplice<PipeFd: AsFd>(
     bufs: &[IoSliceRaw],
     flags: SpliceFlags,
 ) -> io::Result<usize> {
-    backend::io::syscalls::vmsplice(fd.as_fd(), bufs, flags)
+    backend::pipe::syscalls::vmsplice(fd.as_fd(), bufs, flags)
+}
+
+/// `tee(fd_in, fd_out, len, flags)`—Copy data between pipes without
+/// consuming it.
+///
+/// This reads up to `len` bytes from `in_fd` without consuming them, and
+/// writes them to `out_fd`.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/tee.2.html
+#[cfg(linux_kernel)]
+#[inline]
+pub fn tee<FdIn: AsFd, FdOut: AsFd>(
+    fd_in: FdIn,
+    fd_out: FdOut,
+    len: usize,
+    flags: SpliceFlags,
+) -> io::Result<usize> {
+    backend::pipe::syscalls::tee(fd_in.as_fd(), fd_out.as_fd(), len, flags)
+}
+
+/// `ioctl(fd, F_GETPIPE_SZ)`—Return the buffer capacity of a pipe.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
+#[cfg(linux_kernel)]
+#[inline]
+pub fn fcntl_getpipe_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
+    backend::pipe::syscalls::fcntl_getpipe_sz(fd.as_fd())
+}
+
+/// `ioctl(fd, F_SETPIPE_SZ)`—Set the buffer capacity of a pipe.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
+#[cfg(linux_kernel)]
+#[inline]
+pub fn fcntl_setpipe_size<Fd: AsFd>(fd: Fd, size: usize) -> io::Result<()> {
+    backend::pipe::syscalls::fcntl_setpipe_sz(fd.as_fd(), size)
 }
