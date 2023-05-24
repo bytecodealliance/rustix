@@ -6,21 +6,34 @@
 #![allow(unused_imports)]
 #![allow(non_camel_case_types)]
 
+pub type size_t = usize;
+#[cfg(feature = "net")]
 pub(crate) use linux_raw_sys::cmsg_macros::*;
 pub(crate) use linux_raw_sys::ctypes::*;
 pub(crate) use linux_raw_sys::errno::EINVAL;
 pub(crate) use linux_raw_sys::general::__kernel_pid_t as pid_t;
 pub(crate) use linux_raw_sys::general::__kernel_time64_t as time_t;
 pub(crate) use linux_raw_sys::general::__kernel_timespec as timespec;
+#[cfg(not(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86")))]
+pub(crate) use linux_raw_sys::general::{__kernel_gid_t as gid_t, __kernel_uid_t as uid_t};
 pub(crate) use linux_raw_sys::general::{
+    iovec, siginfo_t, CLD_CONTINUED, CLD_DUMPED, CLD_EXITED, CLD_KILLED, CLD_STOPPED, CLD_TRAPPED,
+    O_CLOEXEC, O_NONBLOCK, O_NONBLOCK as PIDFD_NONBLOCK, P_ALL, P_PID, P_PIDFD,
+};
+pub(crate) use linux_raw_sys::general::{AT_FDCWD, O_NOCTTY, O_RDWR};
+#[cfg(feature = "fs")]
+pub(crate) use linux_raw_sys::general::{NFS_SUPER_MAGIC, PROC_SUPER_MAGIC, UTIME_NOW, UTIME_OMIT};
+#[cfg(feature = "fs")]
+pub(crate) use linux_raw_sys::general::{XATTR_CREATE, XATTR_REPLACE};
+#[cfg(feature = "net")]
+pub(crate) use linux_raw_sys::net::{
     AF_DECnet, __kernel_sa_family_t as sa_family_t, __kernel_sockaddr_storage as sockaddr_storage,
-    cmsghdr, in6_addr, in_addr, iovec, ip_mreq, ipv6_mreq, linger, msghdr, siginfo_t, size_t,
-    sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, AF_APPLETALK, AF_ASH, AF_ATMPVC,
-    AF_ATMSVC, AF_AX25, AF_BLUETOOTH, AF_BRIDGE, AF_CAN, AF_ECONET, AF_IEEE802154, AF_INET,
-    AF_INET6, AF_IPX, AF_IRDA, AF_ISDN, AF_IUCV, AF_KEY, AF_LLC, AF_NETBEUI, AF_NETLINK, AF_NETROM,
-    AF_PACKET, AF_PHONET, AF_PPPOX, AF_RDS, AF_ROSE, AF_RXRPC, AF_SECURITY, AF_SNA, AF_TIPC,
-    AF_UNIX, AF_UNSPEC, AF_WANPIPE, AF_X25, CLD_CONTINUED, CLD_DUMPED, CLD_EXITED, CLD_KILLED,
-    CLD_STOPPED, CLD_TRAPPED, IPPROTO_AH, IPPROTO_BEETPH, IPPROTO_COMP, IPPROTO_DCCP, IPPROTO_EGP,
+    cmsghdr, in6_addr, in_addr, ip_mreq, ipv6_mreq, linger, msghdr, sockaddr, sockaddr_in,
+    sockaddr_in6, sockaddr_un, socklen_t, AF_APPLETALK, AF_ASH, AF_ATMPVC, AF_ATMSVC, AF_AX25,
+    AF_BLUETOOTH, AF_BRIDGE, AF_CAN, AF_ECONET, AF_IEEE802154, AF_INET, AF_INET6, AF_IPX, AF_IRDA,
+    AF_ISDN, AF_IUCV, AF_KEY, AF_LLC, AF_NETBEUI, AF_NETLINK, AF_NETROM, AF_PACKET, AF_PHONET,
+    AF_PPPOX, AF_RDS, AF_ROSE, AF_RXRPC, AF_SECURITY, AF_SNA, AF_TIPC, AF_UNIX, AF_UNSPEC,
+    AF_WANPIPE, AF_X25, IPPROTO_AH, IPPROTO_BEETPH, IPPROTO_COMP, IPPROTO_DCCP, IPPROTO_EGP,
     IPPROTO_ENCAP, IPPROTO_ESP, IPPROTO_ETHERNET, IPPROTO_FRAGMENT, IPPROTO_GRE, IPPROTO_ICMP,
     IPPROTO_ICMPV6, IPPROTO_IDP, IPPROTO_IGMP, IPPROTO_IP, IPPROTO_IPIP, IPPROTO_IPV6, IPPROTO_MH,
     IPPROTO_MPLS, IPPROTO_MPTCP, IPPROTO_MTP, IPPROTO_PIM, IPPROTO_PUP, IPPROTO_RAW,
@@ -29,17 +42,11 @@ pub(crate) use linux_raw_sys::general::{
     IPV6_MULTICAST_LOOP, IPV6_UNICAST_HOPS, IPV6_V6ONLY, IP_ADD_MEMBERSHIP, IP_DROP_MEMBERSHIP,
     IP_MULTICAST_LOOP, IP_MULTICAST_TTL, IP_TTL, MSG_CMSG_CLOEXEC, MSG_CONFIRM, MSG_DONTROUTE,
     MSG_DONTWAIT, MSG_EOR, MSG_ERRQUEUE, MSG_MORE, MSG_NOSIGNAL, MSG_OOB, MSG_PEEK, MSG_TRUNC,
-    MSG_WAITALL, O_CLOEXEC, O_NONBLOCK, O_NONBLOCK as PIDFD_NONBLOCK, P_ALL, P_PID, P_PIDFD,
-    SCM_CREDENTIALS, SCM_RIGHTS, SHUT_RD, SHUT_RDWR, SHUT_WR, SOCK_DGRAM, SOCK_RAW, SOCK_RDM,
-    SOCK_SEQPACKET, SOCK_STREAM, SOL_SOCKET, SO_BROADCAST, SO_ERROR, SO_KEEPALIVE, SO_LINGER,
-    SO_PASSCRED, SO_RCVBUF, SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_REUSEADDR, SO_SNDBUF,
+    MSG_WAITALL, SCM_CREDENTIALS, SCM_RIGHTS, SHUT_RD, SHUT_RDWR, SHUT_WR, SOCK_DGRAM, SOCK_RAW,
+    SOCK_RDM, SOCK_SEQPACKET, SOCK_STREAM, SOL_SOCKET, SO_BROADCAST, SO_ERROR, SO_KEEPALIVE,
+    SO_LINGER, SO_PASSCRED, SO_RCVBUF, SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_REUSEADDR, SO_SNDBUF,
     SO_SNDTIMEO_NEW, SO_SNDTIMEO_OLD, SO_TYPE, TCP_NODELAY,
 };
-#[cfg(not(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86")))]
-pub(crate) use linux_raw_sys::general::{__kernel_gid_t as gid_t, __kernel_uid_t as uid_t};
-pub(crate) use linux_raw_sys::general::{AT_FDCWD, O_NOCTTY, O_RDWR};
-pub(crate) use linux_raw_sys::general::{NFS_SUPER_MAGIC, PROC_SUPER_MAGIC, UTIME_NOW, UTIME_OMIT};
-pub(crate) use linux_raw_sys::general::{XATTR_CREATE, XATTR_REPLACE};
 #[cfg(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86"))]
 pub(crate) type uid_t = u32;
 #[cfg(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86"))]
@@ -94,9 +101,13 @@ pub(crate) const SIGSYS: c_int = linux_raw_sys::general::SIGSYS as _;
 ))]
 pub(crate) const SIGEMT: c_int = linux_raw_sys::general::SIGEMT as _;
 
+#[cfg(feature = "stdio")]
 pub(crate) const STDIN_FILENO: c_int = linux_raw_sys::general::STDIN_FILENO as _;
+#[cfg(feature = "stdio")]
 pub(crate) const STDOUT_FILENO: c_int = linux_raw_sys::general::STDOUT_FILENO as _;
+#[cfg(feature = "stdio")]
 pub(crate) const STDERR_FILENO: c_int = linux_raw_sys::general::STDERR_FILENO as _;
+
 pub(crate) const PIPE_BUF: usize = linux_raw_sys::general::PIPE_BUF as _;
 
 pub(crate) const CLOCK_MONOTONIC: c_int = linux_raw_sys::general::CLOCK_MONOTONIC as _;

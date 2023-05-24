@@ -26,7 +26,8 @@ use crate::utils::optional_as_ptr;
 use core::mem::MaybeUninit;
 #[cfg(target_pointer_width = "32")]
 use linux_raw_sys::general::__kernel_old_timespec;
-use linux_raw_sys::general::{kernel_sigset_t, PR_SET_NAME};
+use linux_raw_sys::general::kernel_sigset_t;
+use linux_raw_sys::prctl::PR_SET_NAME;
 #[cfg(target_arch = "x86_64")]
 use {crate::backend::conv::ret_infallible, linux_raw_sys::general::ARCH_SET_FS};
 

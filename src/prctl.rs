@@ -15,15 +15,15 @@ bitflags! {
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct PointerAuthenticationKeys: u32 {
         /// `PR_PAC_APIAKEY`—Instruction authentication key `A`.
-        const INSTRUCTION_AUTHENTICATION_KEY_A = linux_raw_sys::general::PR_PAC_APIAKEY;
+        const INSTRUCTION_AUTHENTICATION_KEY_A = linux_raw_sys::prctl::PR_PAC_APIAKEY;
         /// `PR_PAC_APIBKEY`—Instruction authentication key `B`.
-        const INSTRUCTION_AUTHENTICATION_KEY_B = linux_raw_sys::general::PR_PAC_APIBKEY;
+        const INSTRUCTION_AUTHENTICATION_KEY_B = linux_raw_sys::prctl::PR_PAC_APIBKEY;
         /// `PR_PAC_APDAKEY`—Data authentication key `A`.
-        const DATA_AUTHENTICATION_KEY_A = linux_raw_sys::general::PR_PAC_APDAKEY;
+        const DATA_AUTHENTICATION_KEY_A = linux_raw_sys::prctl::PR_PAC_APDAKEY;
         /// `PR_PAC_APDBKEY`—Data authentication key `B`.
-        const DATA_AUTHENTICATION_KEY_B = linux_raw_sys::general::PR_PAC_APDBKEY;
+        const DATA_AUTHENTICATION_KEY_B = linux_raw_sys::prctl::PR_PAC_APDBKEY;
         /// `PR_PAC_APGAKEY`—Generic authentication `A` key.
-        const GENERIC_AUTHENTICATION_KEY_A = linux_raw_sys::general::PR_PAC_APGAKEY;
+        const GENERIC_AUTHENTICATION_KEY_A = linux_raw_sys::prctl::PR_PAC_APGAKEY;
     }
 }
 
