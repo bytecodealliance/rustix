@@ -311,11 +311,12 @@ fn test_abstract_unix_msg() {
 #[test]
 fn test_unix_msg_with_scm_rights() {
     use rustix::fd::AsFd;
-    use rustix::io::{pipe, IoSlice, IoSliceMut};
+    use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{
         recvmsg, sendmsg, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags,
         SendAncillaryBuffer, SendAncillaryMessage, SendFlags,
     };
+    use rustix::pipe::pipe;
     use std::string::ToString;
 
     let tmpdir = tempfile::tempdir().unwrap();

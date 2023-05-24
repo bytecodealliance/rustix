@@ -1,6 +1,5 @@
 //! libc syscalls supporting `rustix::io`.
 
-use crate::backend::c;
 #[cfg(any(
     target_os = "android",
     all(target_os = "linux", not(target_env = "gnu")),
@@ -14,21 +13,17 @@ use crate::backend::offset::{libc_pread, libc_pwrite};
 use crate::backend::offset::{libc_preadv, libc_pwritev};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use crate::backend::offset::{libc_preadv2, libc_pwritev2};
+use crate::backend::{c, max_iov};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 use crate::io::DupFlags;
-#[cfg(not(any(apple, target_os = "aix", target_os = "haiku", target_os = "wasi")))]
-use crate::io::PipeFlags;
+#[cfg(linux_kernel)]
+use crate::io::ReadWriteFlags;
 use crate::io::{self, FdFlags, IoSlice, IoSliceMut};
 use core::cmp::min;
 use core::mem::MaybeUninit;
 #[cfg(all(feature = "fs", feature = "net"))]
 use libc_errno::errno;
-#[cfg(linux_kernel)]
-use {
-    crate::io::{IoSliceRaw, ReadWriteFlags, SpliceFlags},
-    crate::utils::optional_as_mut_ptr,
-};
 
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     unsafe {
@@ -244,27 +239,6 @@ const READ_LIMIT: usize = c::c_int::MAX as usize - 1;
 #[cfg(not(target_os = "macos"))]
 const READ_LIMIT: usize = c::ssize_t::MAX as usize;
 
-#[cfg(bsd)]
-const fn max_iov() -> usize {
-    c::IOV_MAX as usize
-}
-
-#[cfg(any(linux_kernel, target_os = "emscripten", target_os = "nto"))]
-const fn max_iov() -> usize {
-    c::UIO_MAXIOV as usize
-}
-
-#[cfg(not(any(
-    bsd,
-    linux_kernel,
-    target_os = "emscripten",
-    target_os = "nto",
-    target_os = "horizon",
-)))]
-const fn max_iov() -> usize {
-    16 // The minimum value required by POSIX.
-}
-
 pub(crate) unsafe fn close(raw_fd: RawFd) {
     let _ = c::close(raw_fd as c::c_int);
 }
@@ -466,64 +440,4 @@ pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd) -> io::Result<()> {
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCNXCL as _)) }
-}
-
-#[cfg(not(target_os = "wasi"))]
-pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
-    unsafe {
-        let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
-        ret(c::pipe(result.as_mut_ptr().cast::<i32>()))?;
-        let [p0, p1] = result.assume_init();
-        Ok((p0, p1))
-    }
-}
-
-#[cfg(not(any(apple, target_os = "aix", target_os = "haiku", target_os = "wasi")))]
-pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
-    unsafe {
-        let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
-        ret(c::pipe2(result.as_mut_ptr().cast::<i32>(), flags.bits()))?;
-        let [p0, p1] = result.assume_init();
-        Ok((p0, p1))
-    }
-}
-
-#[cfg(linux_kernel)]
-#[inline]
-pub fn splice(
-    fd_in: BorrowedFd,
-    off_in: Option<&mut u64>,
-    fd_out: BorrowedFd,
-    off_out: Option<&mut u64>,
-    len: usize,
-    flags: SpliceFlags,
-) -> io::Result<usize> {
-    let off_in = optional_as_mut_ptr(off_in).cast();
-    let off_out = optional_as_mut_ptr(off_out).cast();
-
-    unsafe {
-        ret_usize(c::splice(
-            borrowed_fd(fd_in),
-            off_in,
-            borrowed_fd(fd_out),
-            off_out,
-            len,
-            flags.bits(),
-        ))
-    }
-}
-
-#[cfg(linux_kernel)]
-#[inline]
-pub unsafe fn vmsplice(
-    fd: BorrowedFd,
-    bufs: &[IoSliceRaw],
-    flags: SpliceFlags,
-) -> io::Result<usize> {
-    ret_usize(c::vmsplice(
-        borrowed_fd(fd),
-        bufs.as_ptr().cast::<c::iovec>(),
-        min(bufs.len(), max_iov()),
-        flags.bits(),
-    ))
 }

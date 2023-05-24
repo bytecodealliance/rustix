@@ -72,6 +72,9 @@ pub(crate) mod net;
 ))]
 pub(crate) mod param;
 #[cfg(not(windows))]
+#[cfg(feature = "pipe")]
+pub(crate) mod pipe;
+#[cfg(not(windows))]
 #[cfg(feature = "process")]
 pub(crate) mod process;
 #[cfg(not(windows))]
@@ -121,3 +124,28 @@ pub(crate) mod pid;
 pub(crate) mod prctl;
 #[cfg(any(feature = "fs", feature = "thread", feature = "process"))]
 pub(crate) mod ugid;
+
+#[cfg(bsd)]
+#[inline]
+const fn max_iov() -> usize {
+    c::IOV_MAX as usize
+}
+
+#[cfg(any(linux_kernel, target_os = "emscripten", target_os = "nto"))]
+#[inline]
+const fn max_iov() -> usize {
+    c::UIO_MAXIOV as usize
+}
+
+#[cfg(not(any(
+    bsd,
+    linux_kernel,
+    windows,
+    target_os = "emscripten",
+    target_os = "nto",
+    target_os = "horizon",
+)))]
+#[inline]
+const fn max_iov() -> usize {
+    16 // The minimum value required by POSIX.
+}

@@ -63,6 +63,7 @@ by default. The rest of the API is conditional with cargo feature flags:
 | `mm`       | [`rustix::mm`]—Memory map operations.
 | `net`      | [`rustix::net`] and [`rustix::path`]—Network-related operations.
 | `param`    | [`rustix::param`]—Process parameters.
+| `pipe`     | [`rustix::pipe`]—Pipe operations.
 | `process`  | [`rustix::process`]—Process-associated operations.
 | `procfs`   | [`rustix::procfs`]—Utilities for reading `/proc` on Linux.
 | `pty`      | [`rustix::pty`]—Pseduoterminal operations.
@@ -81,6 +82,7 @@ by default. The rest of the API is conditional with cargo feature flags:
 [`rustix::mm`]: https://docs.rs/rustix/*/rustix/mm/index.html
 [`rustix::net`]: https://docs.rs/rustix/*/rustix/net/index.html
 [`rustix::param`]: https://docs.rs/rustix/*/rustix/param/index.html
+[`rustix::pipe`]: https://docs.rs/rustix/*/rustix/pipe/index.html
 [`rustix::process`]: https://docs.rs/rustix/*/rustix/process/index.html
 [`rustix::procfs`]: https://docs.rs/rustix/*/rustix/procfs/index.html
 [`rustix::pty`]: https://docs.rs/rustix/*/rustix/pty/index.html
