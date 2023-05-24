@@ -5,9 +5,8 @@
 //! they match with the kernel convention as closely as possible, to minimize
 //! the amount of out-of-line code we need.
 //!
-//! This is needed in order to support our MSRV of 1.63, which doesn't support
-//! inline asm on some architectures. When using newer Rust versions, inline
-//! asm code is used instead and these outline libraries are unused.
+//! This is needed because as of our MSRV of 1.63, inline asm and naked
+//! functions are experimental.
 
 #[cfg(target_arch = "x86")]
 mod x86;

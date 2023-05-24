@@ -170,7 +170,7 @@ fn test_pwritev2() {
         Ok(_) => {}
         // Skip the rest of the test if we don't have `pwritev2` and
         // `RWF_APPEND`.
-        Err(rustix::io::Errno::NOSYS) | Err(rustix::io::Errno::NOTSUP) => return,
+        Err(rustix::io::Errno::NOSYS | rustix::io::Errno::NOTSUP) => return,
         Err(err) => Err(err).unwrap(),
     }
     assert_eq!(seek(&foo, SeekFrom::Current(0)).unwrap(), 0);

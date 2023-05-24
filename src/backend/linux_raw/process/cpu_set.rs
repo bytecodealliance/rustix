@@ -14,10 +14,7 @@ pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) {
 
 #[inline]
 pub(crate) fn CPU_ZERO(cpuset: &mut RawCpuSet) {
-    // TODO: With, Rust 1.50, use `cpuset.bits.fill(0)` instead.
-    for element in &mut cpuset.bits {
-        *element = 0;
-    }
+    cpuset.bits.fill(0)
 }
 
 #[inline]

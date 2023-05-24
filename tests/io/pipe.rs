@@ -17,8 +17,7 @@ fn test_splice_cursor() {
     splice(&src, None, &write_p, None, 5, SpliceFlags::empty()).unwrap();
     splice(&read_p, None, &dest, None, 5, SpliceFlags::empty()).unwrap();
 
-    // When we can depend on Rust 1.55, we can use `rewind` here.
-    dest.seek(SeekFrom::Start(0)).unwrap();
+    dest.rewind().unwrap();
 
     dest.read_to_end(&mut buff).unwrap();
     assert_eq!(buff, b"world");

@@ -7,7 +7,6 @@ use crate::io;
 
 use super::PollFlags;
 
-use core::convert::TryInto;
 use core::time::Duration;
 
 /// The structure representing a port event.

@@ -278,7 +278,6 @@ pub(crate) fn clock_settime(id: ClockId, timespec: Timespec) -> io::Result<()> {
     target_env = "gnu",
 ))]
 unsafe fn clock_settime_old(id: ClockId, timespec: Timespec) -> io::Result<()> {
-    use core::convert::TryInto;
     let old_timespec = c::timespec {
         tv_sec: timespec
             .tv_sec
@@ -348,8 +347,6 @@ unsafe fn timerfd_settime_old(
     flags: TimerfdTimerFlags,
     new_value: &Itimerspec,
 ) -> io::Result<Itimerspec> {
-    use core::convert::TryInto;
-
     let mut old_result = MaybeUninit::<c::itimerspec>::uninit();
 
     // Convert `new_value` to the old `itimerspec` format.
@@ -443,8 +440,6 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
 ))]
 #[cfg(feature = "time")]
 unsafe fn timerfd_gettime_old(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
-    use core::convert::TryInto;
-
     let mut old_result = MaybeUninit::<c::itimerspec>::uninit();
 
     ret(c::timerfd_gettime(borrowed_fd(fd), old_result.as_mut_ptr()))?;

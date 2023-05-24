@@ -8,7 +8,7 @@ pub use {
 };
 
 // If we don't have std, we can depend on core and alloc having these features
-// in new versions of Rust.
+// in Rust 1.64+.
 #[cfg(not(feature = "std"))]
 pub use {
     alloc::ffi::{CString, NulError},

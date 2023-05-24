@@ -6,7 +6,6 @@ use super::super::fd::LibcFd;
 use crate::fd::{BorrowedFd, RawFd};
 use crate::io;
 use crate::io::PollFd;
-use core::convert::TryInto;
 use core::mem::MaybeUninit;
 
 pub(crate) unsafe fn close(raw_fd: RawFd) {

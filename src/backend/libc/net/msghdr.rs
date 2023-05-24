@@ -11,7 +11,6 @@ use crate::io::{self, IoSlice, IoSliceMut};
 use crate::net::{RecvAncillaryBuffer, SendAncillaryBuffer, SocketAddrV4, SocketAddrV6};
 use crate::utils::as_ptr;
 
-use core::convert::TryInto;
 use core::mem::{size_of, zeroed, MaybeUninit};
 
 /// Create a message header intended to receive a datagram.
