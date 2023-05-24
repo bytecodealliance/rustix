@@ -29,9 +29,7 @@ use core::mem::MaybeUninit;
 #[cfg(target_os = "espidf")]
 use linux_raw_sys::general::F_DUPFD;
 use linux_raw_sys::general::{F_DUPFD_CLOEXEC, F_GETFD, F_SETFD};
-use linux_raw_sys::ioctl::{
-    BLKPBSZGET, BLKSSZGET, EXT4_IOC_RESIZE_FS, FICLONE, FIONBIO, FIONREAD, TIOCEXCL, TIOCNXCL,
-};
+use linux_raw_sys::ioctl::{FIONBIO, FIONREAD};
 
 #[inline]
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
@@ -303,51 +301,6 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
             fd,
             c_uint(FIONBIO),
             by_ref(&data)
-        ))
-    }
-}
-
-#[inline]
-pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { ret(syscall_readonly!(__NR_ioctl, fd, c_uint(TIOCEXCL))) }
-}
-
-#[inline]
-pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { ret(syscall_readonly!(__NR_ioctl, fd, c_uint(TIOCNXCL))) }
-}
-
-#[inline]
-pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
-    let mut result = MaybeUninit::<c::c_uint>::uninit();
-    unsafe {
-        ret(syscall!(__NR_ioctl, fd, c_uint(BLKSSZGET), &mut result))?;
-        Ok(result.assume_init() as u32)
-    }
-}
-
-#[inline]
-pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
-    let mut result = MaybeUninit::<c::c_uint>::uninit();
-    unsafe {
-        ret(syscall!(__NR_ioctl, fd, c_uint(BLKPBSZGET), &mut result))?;
-        Ok(result.assume_init() as u32)
-    }
-}
-
-#[inline]
-pub(crate) fn ioctl_ficlone(fd: BorrowedFd<'_>, src_fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { ret(syscall_readonly!(__NR_ioctl, fd, c_uint(FICLONE), src_fd)) }
-}
-
-#[inline]
-pub(crate) fn ext4_ioc_resize_fs(fd: BorrowedFd<'_>, blocks: u64) -> io::Result<()> {
-    unsafe {
-        ret(syscall_readonly!(
-            __NR_ioctl,
-            fd,
-            c_uint(EXT4_IOC_RESIZE_FS),
-            by_ref(&blocks)
         ))
     }
 }

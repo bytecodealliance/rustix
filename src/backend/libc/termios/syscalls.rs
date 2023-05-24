@@ -151,6 +151,16 @@ pub(crate) fn tcgetwinsize(fd: BorrowedFd) -> io::Result<Winsize> {
     }
 }
 
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd) -> io::Result<()> {
+    unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCEXCL as _)) }
+}
+
+#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
+    unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCNXCL as _)) }
+}
+
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]

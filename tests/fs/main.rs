@@ -21,6 +21,8 @@ mod file;
 mod flock;
 mod futimens;
 mod invalid_offset;
+#[cfg(not(target_os = "redox"))]
+mod ioctl;
 mod linkat;
 mod long_paths;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
