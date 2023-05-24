@@ -19,23 +19,17 @@ use crate::ffi::CStr;
 #[cfg(feature = "fs")]
 use crate::fs::Mode;
 use crate::io;
+#[cfg(linux_kernel)]
+use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "wasi"))]
 use crate::process::{Gid, Pid, RawNonZeroPid, RawPid, Signal, Uid, WaitOptions, WaitStatus};
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+use crate::process::{Resource, Rlimit};
 #[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 use crate::process::{WaitId, WaitidOptions, WaitidStatus};
 use core::mem::MaybeUninit;
 #[cfg(target_os = "linux")]
 use {crate::backend::conv::syscall_ret_owned_fd, crate::process::PidfdFlags};
-#[cfg(linux_kernel)]
-use {
-    crate::backend::offset::libc_prlimit,
-    crate::process::{Cpuid, MembarrierCommand, MembarrierQuery},
-};
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-use {
-    crate::backend::offset::{libc_getrlimit, libc_rlimit, libc_setrlimit, LIBC_RLIM_INFINITY},
-    crate::process::{Resource, Rlimit},
-};
 
 #[cfg(feature = "fs")]
 #[cfg(not(target_os = "wasi"))]
@@ -250,9 +244,9 @@ pub(crate) fn setpriority_process(pid: Option<Pid>, priority: i32) -> io::Result
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
-    let mut result = MaybeUninit::<libc_rlimit>::uninit();
+    let mut result = MaybeUninit::<c::rlimit>::uninit();
     unsafe {
-        ret_infallible(libc_getrlimit(limit as _, result.as_mut_ptr()));
+        ret_infallible(c::getrlimit(limit as _, result.as_mut_ptr()));
         rlimit_from_libc(result.assume_init())
     }
 }
@@ -261,16 +255,16 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
 #[inline]
 pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
     let lim = rlimit_to_libc(new)?;
-    unsafe { ret(libc_setrlimit(limit as _, &lim)) }
+    unsafe { ret(c::setrlimit(limit as _, &lim)) }
 }
 
 #[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Result<Rlimit> {
     let lim = rlimit_to_libc(new)?;
-    let mut result = MaybeUninit::<libc_rlimit>::uninit();
+    let mut result = MaybeUninit::<c::rlimit>::uninit();
     unsafe {
-        ret(libc_prlimit(
+        ret(c::prlimit(
             Pid::as_raw(pid),
             limit as _,
             &lim,
@@ -280,15 +274,15 @@ pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Res
     }
 }
 
-/// Convert a Rust [`Rlimit`] to a C `libc_rlimit`.
+/// Convert a Rust [`Rlimit`] to a C `c::rlimit`.
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-fn rlimit_from_libc(lim: libc_rlimit) -> Rlimit {
-    let current = if lim.rlim_cur == LIBC_RLIM_INFINITY {
+fn rlimit_from_libc(lim: c::rlimit) -> Rlimit {
+    let current = if lim.rlim_cur == c::RLIM_INFINITY {
         None
     } else {
         Some(lim.rlim_cur.try_into().unwrap())
     };
-    let maximum = if lim.rlim_max == LIBC_RLIM_INFINITY {
+    let maximum = if lim.rlim_max == c::RLIM_INFINITY {
         None
     } else {
         Some(lim.rlim_max.try_into().unwrap())
@@ -296,19 +290,19 @@ fn rlimit_from_libc(lim: libc_rlimit) -> Rlimit {
     Rlimit { current, maximum }
 }
 
-/// Convert a C `libc_rlimit` to a Rust `Rlimit`.
+/// Convert a C `c::rlimit` to a Rust `Rlimit`.
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
-fn rlimit_to_libc(lim: Rlimit) -> io::Result<libc_rlimit> {
+fn rlimit_to_libc(lim: Rlimit) -> io::Result<c::rlimit> {
     let Rlimit { current, maximum } = lim;
     let rlim_cur = match current {
         Some(r) => r.try_into().map_err(|_e| io::Errno::INVAL)?,
-        None => LIBC_RLIM_INFINITY as _,
+        None => c::RLIM_INFINITY as _,
     };
     let rlim_max = match maximum {
         Some(r) => r.try_into().map_err(|_e| io::Errno::INVAL)?,
-        None => LIBC_RLIM_INFINITY as _,
+        None => c::RLIM_INFINITY as _,
     };
-    Ok(libc_rlimit { rlim_cur, rlim_max })
+    Ok(c::rlimit { rlim_cur, rlim_max })
 }
 
 #[cfg(not(target_os = "wasi"))]

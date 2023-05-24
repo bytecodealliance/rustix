@@ -161,7 +161,7 @@ macro_rules! syscall {
 
             // Pass `BorrowedFd` values as the integer value.
             impl AsSyscallArg for $crate::fd::BorrowedFd<'_> {
-                type SyscallArgType = c::c_long;
+                type SyscallArgType = ::libc::c_long;
                 fn into_syscall_arg(self) -> Self::SyscallArgType {
                     $crate::fd::AsRawFd::as_raw_fd(&self) as _
                 }
@@ -169,15 +169,15 @@ macro_rules! syscall {
 
             // Coerce integer values into `c_long`.
             impl AsSyscallArg for i32 {
-                type SyscallArgType = c::c_long;
+                type SyscallArgType = ::libc::c_long;
                 fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
             }
             impl AsSyscallArg for u32 {
-                type SyscallArgType = c::c_long;
+                type SyscallArgType = ::libc::c_long;
                 fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
             }
             impl AsSyscallArg for usize {
-                type SyscallArgType = c::c_long;
+                type SyscallArgType = ::libc::c_long;
                 fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
             }
 
