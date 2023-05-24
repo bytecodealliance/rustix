@@ -412,6 +412,7 @@ const PR_GET_SECUREBITS: c_int = 27;
 
 bitflags! {
     /// `SECBIT_*`.
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct CapabilitiesSecureBits: u32 {
         /// If this bit is set, then the kernel does not grant capabilities when
         /// a `set-user-ID-root` program is executed, or when a process with an effective or real
@@ -733,6 +734,7 @@ const PR_MTE_TAG_MASK: u32 = 0xffff_u32 << PR_MTE_TAG_SHIFT;
 
 bitflags! {
     /// Zero means addresses that are passed for the purpose of being dereferenced by the kernel must be untagged.
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct TaggedAddressMode: u32 {
         /// Addresses that are passed for the purpose of being dereferenced by the kernel may be tagged.
         const ENABLED = 1_u32 << 0;

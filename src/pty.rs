@@ -16,6 +16,7 @@ bitflags::bitflags! {
     /// `O_*` flags for use with [`openpt`] and [`ioctl_tiocgptpeer`].
     ///
     /// [`ioctl_tiocgtpeer`]: https://docs.rs/rustix/*/x86_64-unknown-linux-gnu/rustix/pty/fn.ioctl_tiocgtpeer.html
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct OpenptFlags: u32 {
         /// `O_RDWR`
         const RDWR = c::O_RDWR as c::c_uint;
@@ -36,11 +37,8 @@ bitflags::bitflags! {
 impl From<OpenptFlags> for OFlags {
     #[inline]
     fn from(flags: OpenptFlags) -> Self {
-        // SAFETY: `OpenptFlags` is a subset of `OFlags`.
-        #[allow(unsafe_code)]
-        unsafe {
-            Self::from_bits_unchecked(flags.bits() as _)
-        }
+        // `OpenptFlags` is a subset of `OFlags`.
+        Self::from_bits_retain(flags.bits() as _)
     }
 }
 

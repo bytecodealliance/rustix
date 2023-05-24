@@ -250,6 +250,7 @@ bitflags! {
     /// [`socket_with`]: crate::net::socket_with
     /// [`accept_with`]: crate::net::accept_with
     /// [`acceptfrom_with`]: crate::net::acceptfrom_with
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SocketFlags: c::c_uint {
         /// `SOCK_NONBLOCK`
         const NONBLOCK = c::O_NONBLOCK;

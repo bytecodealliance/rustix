@@ -4,6 +4,7 @@ bitflags! {
     /// `GRND_*` flags for use with [`getrandom`].
     ///
     /// [`getrandom`]: crate::rand::getrandom
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct GetRandomFlags: u32 {
         /// `GRND_RANDOM`
         const RANDOM = linux_raw_sys::general::GRND_RANDOM;

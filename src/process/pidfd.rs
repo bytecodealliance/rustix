@@ -6,6 +6,7 @@ bitflags::bitflags! {
     /// `PIDFD_*` flags for use with [`pidfd_open`].
     ///
     /// [`pidfd_open`]: crate::process::pidfd_open
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct PidfdFlags: backend::c::c_uint {
         /// `PIDFD_NONBLOCK`.
         const NONBLOCK = backend::c::PIDFD_NONBLOCK;
