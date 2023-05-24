@@ -293,7 +293,7 @@ pub(crate) fn recvmsg(
 }
 
 #[inline]
-pub(crate) fn sendmsg_noaddr(
+pub(crate) fn sendmsg(
     sockfd: BorrowedFd<'_>,
     iov: &[IoSlice<'_>],
     control: &mut SendAncillaryBuffer<'_, '_, '_>,

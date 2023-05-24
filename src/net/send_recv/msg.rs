@@ -1,4 +1,4 @@
-//! [`recvmsg`], [`sendmsg_noaddr`], and related functions.
+//! [`recvmsg`], [`sendmsg`], and related functions.
 
 #![allow(unsafe_code)]
 
@@ -38,7 +38,7 @@ pub fn __cmsg_space(len: usize) -> usize {
     unsafe { c::CMSG_SPACE(len.try_into().expect("CMSG_SPACE size overflow")) as usize }
 }
 
-/// Ancillary message for [`sendmsg_noaddr`], [`sendmsg_v4`], [`sendmsg_v6`],
+/// Ancillary message for [`sendmsg`], [`sendmsg_v4`], [`sendmsg_v6`],
 /// [`sendmsg_unix`], and [`sendmsg_any`].
 #[non_exhaustive]
 pub enum SendAncillaryMessage<'slice, 'fd> {
@@ -391,13 +391,13 @@ impl FusedIterator for AncillaryDrain<'_> {}
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
 #[inline]
-pub fn sendmsg_noaddr(
+pub fn sendmsg(
     socket: impl AsFd,
     iov: &[IoSlice<'_>],
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     flags: SendFlags,
 ) -> io::Result<usize> {
-    backend::net::syscalls::sendmsg_noaddr(socket.as_fd(), iov, control, flags)
+    backend::net::syscalls::sendmsg(socket.as_fd(), iov, control, flags)
 }
 
 /// `sendmsg(msghdr)`—Sends a message on a socket to a specific IPv4 address.
@@ -524,7 +524,7 @@ pub fn sendmsg_any(
     flags: SendFlags,
 ) -> io::Result<usize> {
     match addr {
-        None => backend::net::syscalls::sendmsg_noaddr(socket.as_fd(), iov, control, flags),
+        None => backend::net::syscalls::sendmsg(socket.as_fd(), iov, control, flags),
         Some(SocketAddrAny::V4(addr)) => {
             backend::net::syscalls::sendmsg_v4(socket.as_fd(), addr, iov, control, flags)
         }
