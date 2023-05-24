@@ -92,22 +92,6 @@ bitflags! {
     }
 }
 
-#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "illumos"))]
-bitflags! {
-    /// `EFD_*` flags for use with [`eventfd`].
-    ///
-    /// [`eventfd`]: crate::io::eventfd
-    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct EventfdFlags: c::c_int {
-        /// `EFD_CLOEXEC`
-        const CLOEXEC = c::EFD_CLOEXEC;
-        /// `EFD_NONBLOCK`
-        const NONBLOCK = c::EFD_NONBLOCK;
-        /// `EFD_SEMAPHORE`
-        const SEMAPHORE = c::EFD_SEMAPHORE;
-    }
-}
-
 /// `PIPE_BUF`—The maximum size of a write to a pipe guaranteed to be atomic.
 #[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub const PIPE_BUF: usize = c::PIPE_BUF;

@@ -30,6 +30,8 @@ mod vdso;
 #[cfg(any(feature = "time", target_arch = "x86"))]
 mod vdso_wrappers;
 
+#[cfg(feature = "event")]
+pub(crate) mod event;
 #[cfg(feature = "fs")]
 pub(crate) mod fs;
 pub(crate) mod io;

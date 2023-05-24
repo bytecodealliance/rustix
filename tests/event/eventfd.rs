@@ -1,7 +1,8 @@
 #[cfg(any(linux_kernel, target_os = "freebsd", target_os = "illumos"))]
 #[test]
 fn test_eventfd() {
-    use rustix::io::{eventfd, read, write, EventfdFlags};
+    use rustix::event::{eventfd, EventfdFlags};
+    use rustix::io::{read, write};
     use std::mem::size_of;
     use std::thread;
 

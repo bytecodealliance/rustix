@@ -1,6 +1,8 @@
 //! Tests for the `pidfd` type.
 
 use libc::{kill, SIGSTOP};
+#[cfg(feature = "event")]
+use rustix::event;
 use rustix::fd::AsFd;
 use rustix::{io, process};
 use serial_test::serial;
@@ -20,7 +22,7 @@ fn test_pidfd_waitid() {
     let pid = unsafe { process::Pid::from_raw(child.id() as _) }.unwrap();
     let pidfd = match process::pidfd_open(pid, process::PidfdFlags::empty()) {
         Ok(pidfd) => pidfd,
-        Err(e) if e == rustix::io::Errno::NOSYS => {
+        Err(e) if e == io::Errno::NOSYS => {
             // The kernel does not support pidfds.
             return;
         }
@@ -41,6 +43,7 @@ fn test_pidfd_waitid() {
     let _ = status;
 }
 
+#[cfg(feature = "event")]
 #[test]
 #[serial]
 fn test_pidfd_poll() {
@@ -56,7 +59,7 @@ fn test_pidfd_poll() {
     let pid = unsafe { process::Pid::from_raw(child.id() as _) }.unwrap();
     let pidfd = match process::pidfd_open(pid, process::PidfdFlags::NONBLOCK) {
         Ok(pidfd) => pidfd,
-        Err(e) if e == rustix::io::Errno::NOSYS || e == rustix::io::Errno::INVAL => {
+        Err(e) if e == io::Errno::NOSYS || e == io::Errno::INVAL => {
             // The kernel does not support non-blocking pidfds.
             return;
         }
@@ -68,13 +71,13 @@ fn test_pidfd_poll() {
         process::WaitId::PidFd(pidfd.as_fd()),
         process::WaitidOptions::EXITED,
     ) {
-        Err(e) if e == rustix::io::Errno::AGAIN => (),
+        Err(e) if e == io::Errno::AGAIN => (),
         _ => panic!("unexpected result"),
     }
 
     // Wait for the child process to exit.
-    let pfd = io::PollFd::new(&pidfd, io::PollFlags::IN);
-    io::poll(&mut [pfd], -1).unwrap();
+    let pfd = event::PollFd::new(&pidfd, event::PollFlags::IN);
+    event::poll(&mut [pfd], -1).unwrap();
 
     // The child process should have exited.
     let status = process::waitid(

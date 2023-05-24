@@ -11,7 +11,8 @@
 //! # #[cfg(feature = "net")]
 //! # fn main() -> std::io::Result<()> {
 //! use io_lifetimes::AsFd;
-//! use rustix::io::{epoll, ioctl_fionbio, read, write};
+//! use rustix::event::epoll;
+//! use rustix::io::{ioctl_fionbio, read, write};
 //! use rustix::net::{
 //!     accept, bind_v4, listen, socket, AddressFamily, Ipv4Addr, Protocol, SocketAddrV4,
 //!     SocketType,
@@ -71,7 +72,7 @@
 #![allow(unsafe_code)]
 
 use crate::backend::c;
-use crate::backend::io::syscalls;
+use crate::backend::event::syscalls;
 use crate::fd::{AsFd, AsRawFd, OwnedFd};
 use crate::io;
 use alloc::vec::Vec;

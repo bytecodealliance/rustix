@@ -1,8 +1,8 @@
 //! A simple example of the BSD `kqueue` API.
 
-#[cfg(bsd)]
+#[cfg(all(bsd, feature = "event"))]
 fn main() -> std::io::Result<()> {
-    use rustix::io::kqueue::*;
+    use rustix::event::kqueue::*;
     #[cfg(feature = "fs")]
     use rustix::{fd::AsRawFd, fs};
 
@@ -83,7 +83,7 @@ fn main() -> std::io::Result<()> {
     }
 }
 
-#[cfg(not(bsd))]
+#[cfg(not(all(bsd, feature = "event")))]
 fn main() {
     unimplemented!()
 }

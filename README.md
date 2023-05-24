@@ -57,6 +57,7 @@ by default. The rest of the API is conditional with cargo feature flags:
 
 | Name       | Description
 | ---------- | ---------------------
+| `event`    | [`rustix::event`]—Polling and event operations.
 | `fs`       | [`rustix::fs`] and [`rustix::path`]—Filesystem operations.
 | `io_uring` | [`rustix::io_uring`]—Linux io_uring.
 | `mm`       | [`rustix::mm`]—Memory map operations.
@@ -66,12 +67,14 @@ by default. The rest of the API is conditional with cargo feature flags:
 | `procfs`   | [`rustix::procfs`]—Utilities for reading `/proc` on Linux.
 | `pty`      | [`rustix::pty`]—Pseduoterminal operations.
 | `rand`     | [`rustix::rand`]—Random-related operations.
+| `system`   | [`rustix::system`]—System-related operations.
 | `termios`  | [`rustix::termios`]—Terminal I/O stream operations.
 | `thread`   | [`rustix::thread`]—Thread-associated operations.
 | `time`     | [`rustix::time`]—Time-related operations.
 |            |
 | `use-libc` | Enable the libc backend.
 
+[`rustix::event`]: https://docs.rs/rustix/*/rustix/fs/index.html
 [`rustix::fs`]: https://docs.rs/rustix/*/rustix/fs/index.html
 [`rustix::io_uring`]: https://docs.rs/rustix/*/rustix/io_uring/index.html
 [`rustix::mm`]: https://docs.rs/rustix/*/rustix/mm/index.html
@@ -81,6 +84,7 @@ by default. The rest of the API is conditional with cargo feature flags:
 [`rustix::procfs`]: https://docs.rs/rustix/*/rustix/procfs/index.html
 [`rustix::pty`]: https://docs.rs/rustix/*/rustix/pty/index.html
 [`rustix::rand`]: https://docs.rs/rustix/*/rustix/rand/index.html
+[`rustix::system`]: https://docs.rs/rustix/*/rustix/system/index.html
 [`rustix::termios`]: https://docs.rs/rustix/*/rustix/termios/index.html
 [`rustix::thread`]: https://docs.rs/rustix/*/rustix/thread/index.html
 [`rustix::time`]: https://docs.rs/rustix/*/rustix/time/index.html

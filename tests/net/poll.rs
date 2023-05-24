@@ -2,7 +2,7 @@
 
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]
 
-use rustix::io::{poll, PollFd, PollFlags};
+use rustix::event::{poll, PollFd, PollFlags};
 use rustix::net::{
     accept, bind_v6, connect_v6, getsockname, listen, recv, send, socket, AddressFamily, Ipv6Addr,
     Protocol, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV6, SocketType,

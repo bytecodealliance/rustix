@@ -48,7 +48,7 @@ bitflags! {
 
 /// `struct pollfd`—File descriptor and flags for use with [`poll`].
 ///
-/// [`poll`]: crate::io::poll
+/// [`poll`]: crate::event::poll
 #[doc(alias = "pollfd")]
 #[derive(Clone)]
 #[cfg_attr(not(windows), derive(Debug))]
