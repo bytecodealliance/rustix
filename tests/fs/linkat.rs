@@ -1,4 +1,35 @@
 #[test]
+fn test_link() {
+    use rustix::fs::{link, open, readlink, stat, Mode, OFlags};
+
+    let tmp = tempfile::tempdir().unwrap();
+
+    let _ = open(
+        tmp.path().join("foo"),
+        OFlags::CREATE | OFlags::WRONLY,
+        Mode::RUSR,
+    )
+    .unwrap();
+
+    link(tmp.path().join("foo"), tmp.path().join("link")).unwrap();
+
+    readlink(tmp.path().join("foo"), Vec::new()).unwrap_err();
+    readlink(tmp.path().join("link"), Vec::new()).unwrap_err();
+
+    assert_eq!(
+        stat(tmp.path().join("foo")).unwrap().st_ino,
+        stat(tmp.path().join("link")).unwrap().st_ino
+    );
+
+    link(tmp.path().join("link"), tmp.path().join("another")).unwrap();
+
+    assert_eq!(
+        stat(tmp.path().join("foo")).unwrap().st_ino,
+        stat(tmp.path().join("another")).unwrap().st_ino
+    );
+}
+
+#[test]
 fn test_linkat() {
     use rustix::fs::{cwd, linkat, openat, readlinkat, statat, AtFlags, Mode, OFlags};
 

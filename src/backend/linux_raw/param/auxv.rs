@@ -137,13 +137,7 @@ fn init_from_proc_self_auxv() {
     // we're running inside QEMU and `proc_self_auxv`'s extra checking foils
     // QEMU's emulation so we need to do a plain open to get the right
     // auxv records.
-    let file = crate::fs::openat(
-        crate::fs::cwd(),
-        "/proc/self/auxv",
-        OFlags::RDONLY,
-        Mode::empty(),
-    )
-    .unwrap();
+    let file = crate::fs::open("/proc/self/auxv", OFlags::RDONLY, Mode::empty()).unwrap();
 
     let _ = init_from_auxv_file(file);
 }

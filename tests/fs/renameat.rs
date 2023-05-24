@@ -1,9 +1,32 @@
-#[cfg(linux_kernel)]
 use rustix::fs::Stat;
 
-#[cfg(linux_kernel)]
 fn same(a: &Stat, b: &Stat) -> bool {
     a.st_ino == b.st_ino && a.st_dev == b.st_dev
+}
+
+#[test]
+fn test_rename() {
+    use rustix::fs::{access, open, rename, stat, Access, Mode, OFlags};
+
+    let tmp = tempfile::tempdir().unwrap();
+
+    let _ = open(
+        tmp.path().join("foo"),
+        OFlags::CREATE | OFlags::WRONLY,
+        Mode::empty(),
+    )
+    .unwrap();
+    let before = stat(tmp.path().join("foo")).unwrap();
+
+    access(tmp.path().join("foo"), Access::EXISTS).unwrap();
+    access(tmp.path().join("bar"), Access::EXISTS).unwrap_err();
+
+    rename(tmp.path().join("foo"), tmp.path().join("bar")).unwrap();
+    let renamed = stat(tmp.path().join("bar")).unwrap();
+    assert!(same(&before, &renamed));
+
+    access(tmp.path().join("foo"), Access::EXISTS).unwrap_err();
+    access(tmp.path().join("bar"), Access::EXISTS).unwrap();
 }
 
 #[cfg(linux_kernel)]
