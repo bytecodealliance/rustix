@@ -195,6 +195,10 @@ pub mod path;
 #[cfg(feature = "process")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "process")))]
 pub mod process;
+#[cfg(feature = "procfs")]
+#[cfg(linux_kernel)]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
+pub mod procfs;
 #[cfg(not(windows))]
 #[cfg(not(target_os = "wasi"))]
 #[cfg(feature = "pty")]
@@ -204,6 +208,10 @@ pub mod pty;
 #[cfg(feature = "rand")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "rand")))]
 pub mod rand;
+#[cfg(feature = "system")]
+#[cfg(not(any(windows, target_os = "wasi")))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "system")))]
+pub mod system;
 #[cfg(not(windows))]
 #[cfg(feature = "termios")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "termios")))]
@@ -220,23 +228,24 @@ pub mod time;
 // "runtime" is also a public API module, but it's only for libc-like users.
 #[cfg(not(windows))]
 #[cfg(feature = "runtime")]
+#[cfg(linux_raw)]
 #[doc(hidden)]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "runtime")))]
 pub mod runtime;
 
-// We have some internal interdependencies in the API features, so for now,
-// for API features that aren't enabled, declare them as `pub(crate)` so
-// that they're not public, but still available for internal use.
-
-#[cfg(not(windows))]
-#[cfg(all(
-    not(feature = "param"),
-    any(feature = "runtime", feature = "time", target_arch = "x86"),
+// Private modules used by multiple public modules.
+#[cfg(any(
+    feature = "procfs",
+    feature = "process",
+    feature = "runtime",
+    feature = "termios",
+    feature = "thread"
 ))]
-pub(crate) mod param;
-#[cfg(not(windows))]
-#[cfg(not(any(feature = "fs", feature = "net")))]
-pub(crate) mod path;
-#[cfg(not(windows))]
-#[cfg(not(feature = "process"))]
-pub(crate) mod process;
+mod pid;
+#[cfg(any(feature = "process", feature = "thread"))]
+#[cfg(linux_kernel)]
+mod prctl;
+#[cfg(any(feature = "process", feature = "runtime"))]
+mod signal;
+#[cfg(any(feature = "fs", feature = "process", feature = "thread"))]
+mod ugid;

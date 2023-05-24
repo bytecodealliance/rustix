@@ -17,6 +17,12 @@
 #[macro_use]
 mod arch;
 mod conv;
+#[cfg(any(
+    feature = "param",
+    feature = "runtime",
+    feature = "time",
+    target_arch = "x86"
+))]
 mod elf;
 mod reg;
 #[cfg(any(feature = "time", target_arch = "x86"))]
@@ -40,6 +46,7 @@ pub(crate) mod net;
     target_arch = "x86",
 ))]
 pub(crate) mod param;
+#[cfg(feature = "process")]
 pub(crate) mod process;
 #[cfg(feature = "pty")]
 pub(crate) mod pty;
@@ -47,6 +54,8 @@ pub(crate) mod pty;
 pub(crate) mod rand;
 #[cfg(feature = "runtime")]
 pub(crate) mod runtime;
+#[cfg(feature = "system")]
+pub(crate) mod system;
 #[cfg(feature = "termios")]
 pub(crate) mod termios;
 #[cfg(feature = "thread")]
@@ -67,3 +76,11 @@ pub(crate) use crate::io::fd;
 // The linux_raw backend doesn't use actual libc, so we define selected
 // libc-like definitions in a module called `c`.
 pub(crate) mod c;
+
+// Private modules used by multiple public modules.
+#[cfg(any(feature = "procfs", feature = "process", feature = "runtime"))]
+pub(crate) mod pid;
+#[cfg(any(feature = "process", feature = "thread"))]
+pub(crate) mod prctl;
+#[cfg(any(feature = "fs", feature = "thread", feature = "process"))]
+pub(crate) mod ugid;

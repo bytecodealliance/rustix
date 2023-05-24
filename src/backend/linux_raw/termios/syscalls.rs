@@ -6,10 +6,13 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use super::super::conv::{by_ref, c_uint, ret};
+use crate::backend::c;
+use crate::backend::conv::{by_ref, c_uint, ret};
 use crate::fd::BorrowedFd;
 use crate::io;
-use crate::process::{Pid, RawNonZeroPid};
+use crate::pid::{Pid, RawNonZeroPid};
+#[cfg(feature = "procfs")]
+use crate::procfs;
 use crate::termios::{
     Action, OptionalActions, QueueSelector, Termios, Winsize, BRKINT, CBAUD, CS8, CSIZE, ECHO,
     ECHONL, ICANON, ICRNL, IEXTEN, IGNBRK, IGNCR, INLCR, ISIG, ISTRIP, IXON, OPOST, PARENB, PARMRK,
@@ -18,7 +21,6 @@ use crate::termios::{
 #[cfg(feature = "procfs")]
 use crate::{ffi::CStr, fs::FileType, path::DecInt};
 use core::mem::MaybeUninit;
-use linux_raw_sys::general::__kernel_pid_t;
 use linux_raw_sys::ioctl::{
     TCFLSH, TCGETS, TCSBRK, TCSETS, TCXONC, TIOCGPGRP, TIOCGSID, TIOCGWINSZ, TIOCSPGRP, TIOCSWINSZ,
 };
@@ -68,13 +70,11 @@ pub(crate) fn tcgetattr2(fd: BorrowedFd<'_>) -> io::Result<crate::termios::Termi
 #[inline]
 pub(crate) fn tcgetpgrp(fd: BorrowedFd<'_>) -> io::Result<Pid> {
     unsafe {
-        let mut result = MaybeUninit::<__kernel_pid_t>::uninit();
+        let mut result = MaybeUninit::<c::pid_t>::uninit();
         ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGPGRP), &mut result))?;
         let pid = result.assume_init();
         debug_assert!(pid > 0);
-        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(
-            pid as u32,
-        )))
+        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid)))
     }
 }
 
@@ -164,13 +164,11 @@ pub(crate) fn tcflow(fd: BorrowedFd, action: Action) -> io::Result<()> {
 #[inline]
 pub(crate) fn tcgetsid(fd: BorrowedFd) -> io::Result<Pid> {
     unsafe {
-        let mut result = MaybeUninit::<__kernel_pid_t>::uninit();
+        let mut result = MaybeUninit::<c::pid_t>::uninit();
         ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGSID), &mut result))?;
         let pid = result.assume_init();
         debug_assert!(pid > 0);
-        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(
-            pid as u32,
-        )))
+        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid)))
     }
 }
 
@@ -265,7 +263,7 @@ pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
 
 #[cfg(feature = "procfs")]
 pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
-    let fd_stat = super::super::fs::syscalls::fstat(fd)?;
+    let fd_stat = crate::backend::fs::syscalls::fstat(fd)?;
 
     // Quick check: if `fd` isn't a character device, it's not a tty.
     if FileType::from_raw_mode(fd_stat.st_mode) != FileType::CharacterDevice {
@@ -276,11 +274,14 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     tcgetwinsize(fd)?;
 
     // Get a fd to '/proc/self/fd'.
-    let proc_self_fd = io::proc_self_fd()?;
+    let proc_self_fd = procfs::proc_self_fd()?;
 
     // Gather the ttyname by reading the 'fd' file inside 'proc_self_fd'.
-    let r =
-        super::super::fs::syscalls::readlinkat(proc_self_fd, DecInt::from_fd(fd).as_c_str(), buf)?;
+    let r = crate::backend::fs::syscalls::readlinkat(
+        proc_self_fd,
+        DecInt::from_fd(fd).as_c_str(),
+        buf,
+    )?;
 
     // If the number of bytes is equal to the buffer length, truncation may
     // have occurred. This check also ensures that we have enough space for
@@ -293,7 +294,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     // Check that the path we read refers to the same file as `fd`.
     let path = CStr::from_bytes_with_nul(&buf[..=r]).unwrap();
 
-    let path_stat = super::super::fs::syscalls::stat(path)?;
+    let path_stat = crate::backend::fs::syscalls::stat(path)?;
     if path_stat.st_dev != fd_stat.st_dev || path_stat.st_ino != fd_stat.st_ino {
         return Err(io::Errno::NODEV);
     }

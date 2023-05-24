@@ -2,8 +2,8 @@
 
 #![allow(non_snake_case)]
 
-use super::super::c;
 use super::types::{RawCpuSet, CPU_SETSIZE};
+use crate::backend::c;
 
 #[inline]
 pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) {

@@ -21,8 +21,6 @@ mod pipe;
 mod poll;
 #[cfg(solarish)]
 pub mod port;
-#[cfg(all(feature = "procfs", linux_kernel))]
-mod procfs;
 #[cfg(not(windows))]
 mod read_write;
 mod seek_from;
@@ -46,8 +44,6 @@ pub use is_read_write::*;
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use pipe::*;
 pub use poll::{poll, PollFd, PollFlags};
-#[cfg(all(feature = "procfs", linux_kernel))]
-pub use procfs::*;
 #[cfg(not(windows))]
 pub use read_write::*;
 pub use seek_from::SeekFrom;

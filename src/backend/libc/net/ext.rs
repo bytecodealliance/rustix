@@ -1,4 +1,4 @@
-use super::super::c;
+use crate::backend::c;
 
 /// The windows `sockaddr_in6` type is a union with accessor functions which
 /// are not `const fn`. Define our own layout-compatible version so that we

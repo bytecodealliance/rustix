@@ -1,9 +1,11 @@
 //! libc syscalls supporting `rustix::fs`.
 
-use super::super::c;
-use super::super::conv::{borrowed_fd, c_str, ret, ret_c_int, ret_off_t, ret_owned_fd, ret_usize};
+use crate::backend::c;
+use crate::backend::conv::{
+    borrowed_fd, c_str, ret, ret_c_int, ret_off_t, ret_owned_fd, ret_usize,
+};
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
-use super::super::offset::libc_fallocate;
+use crate::backend::offset::libc_fallocate;
 #[cfg(not(any(
     apple,
     netbsdlike,
@@ -12,7 +14,7 @@ use super::super::offset::libc_fallocate;
     target_os = "haiku",
     target_os = "redox",
 )))]
-use super::super::offset::libc_posix_fadvise;
+use crate::backend::offset::libc_posix_fadvise;
 #[cfg(not(any(
     apple,
     netbsdlike,
@@ -23,8 +25,8 @@ use super::super::offset::libc_posix_fadvise;
     target_os = "fuchsia",
     target_os = "redox",
 )))]
-use super::super::offset::libc_posix_fallocate;
-use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek, libc_off_t};
+use crate::backend::offset::libc_posix_fallocate;
+use crate::backend::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek, libc_off_t};
 #[cfg(not(any(
     solarish,
     target_os = "haiku",
@@ -32,14 +34,14 @@ use super::super::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lseek,
     target_os = "redox",
     target_os = "wasi",
 )))]
-use super::super::offset::{libc_fstatfs, libc_statfs};
+use crate::backend::offset::{libc_fstatfs, libc_statfs};
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
-use super::super::offset::{libc_fstatvfs, libc_statvfs};
+use crate::backend::offset::{libc_fstatvfs, libc_statvfs};
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
-use super::super::time::types::LibcTimespec;
+use crate::backend::time::types::LibcTimespec;
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 #[cfg(apple)]
@@ -82,7 +84,7 @@ use crate::fs::{Dev, FileType};
 use crate::fs::{StatVfs, StatVfsMountFlags};
 use crate::io::{self, SeekFrom};
 #[cfg(not(target_os = "wasi"))]
-use crate::process::{Gid, Uid};
+use crate::ugid::{Gid, Uid};
 #[cfg(not(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
@@ -93,17 +95,17 @@ use alloc::vec;
 use core::mem::MaybeUninit;
 #[cfg(apple)]
 use {
-    super::super::conv::nonnegative_ret,
+    crate::backend::conv::nonnegative_ret,
     crate::fs::{copyfile_state_t, CloneFlags, CopyfileFlags},
 };
 #[cfg(linux_kernel)]
 use {
-    super::super::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_usize},
+    crate::backend::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_usize},
     crate::fs::{cwd, RenameFlags, ResolveFlags, Statx, StatxFlags},
     core::ptr::null,
 };
 #[cfg(not(target_os = "redox"))]
-use {super::super::offset::libc_openat, crate::fs::AtFlags};
+use {crate::backend::offset::libc_openat, crate::fs::AtFlags};
 #[cfg(any(apple, linux_kernel))]
 use {crate::fs::XattrFlags, core::mem::size_of, core::ptr::null_mut};
 
@@ -816,7 +818,7 @@ pub(crate) fn chownat(
     flags: AtFlags,
 ) -> io::Result<()> {
     unsafe {
-        let (ow, gr) = crate::process::translate_fchown_args(owner, group);
+        let (ow, gr) = crate::ugid::translate_fchown_args(owner, group);
         ret(c::fchownat(
             borrowed_fd(dirfd),
             c_str(path),
@@ -1030,7 +1032,7 @@ pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>)
     // support for `O_PATH`, which uses `/proc` outside our control and
     // interferes with our own use of `O_PATH`.
     unsafe {
-        let (ow, gr) = crate::process::translate_fchown_args(owner, group);
+        let (ow, gr) = crate::ugid::translate_fchown_args(owner, group);
         syscall_ret(c::syscall(c::SYS_fchown, borrowed_fd(fd), ow, gr))
     }
 }
@@ -1038,7 +1040,7 @@ pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>)
 #[cfg(not(any(linux_kernel, target_os = "wasi")))]
 pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
     unsafe {
-        let (ow, gr) = crate::process::translate_fchown_args(owner, group);
+        let (ow, gr) = crate::ugid::translate_fchown_args(owner, group);
         ret(c::fchown(borrowed_fd(fd), ow, gr))
     }
 }

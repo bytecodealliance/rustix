@@ -28,6 +28,8 @@ pub(crate) mod fd;
 mod file_type;
 #[cfg(apple)]
 mod getpath;
+#[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
+mod id;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 mod makedev;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
@@ -77,6 +79,8 @@ pub use fd::*;
 pub use file_type::FileType;
 #[cfg(apple)]
 pub use getpath::getpath;
+#[cfg(not(target_os = "wasi"))]
+pub use id::*;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub use makedev::*;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]

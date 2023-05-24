@@ -6,11 +6,6 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use super::super::c;
-use super::super::conv::{
-    by_mut, by_ref, c_int, c_uint, ret, ret_owned_fd, ret_usize, size_of, slice, slice_mut,
-    socklen_t, zero,
-};
 use super::msghdr::{
     with_noaddr_msghdr, with_recv_msghdr, with_unix_msghdr, with_v4_msghdr, with_v6_msghdr,
 };
@@ -18,6 +13,11 @@ use super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, 
 use super::send_recv::{RecvFlags, SendFlags};
 use super::types::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
+use crate::backend::c;
+use crate::backend::conv::{
+    by_mut, by_ref, c_int, c_uint, ret, ret_owned_fd, ret_usize, size_of, slice, slice_mut,
+    socklen_t, zero,
+};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
 use crate::net::{
@@ -28,8 +28,8 @@ use c::{sockaddr, sockaddr_in, sockaddr_in6, socklen_t};
 use core::mem::MaybeUninit;
 #[cfg(target_arch = "x86")]
 use {
-    super::super::conv::{slice_just_addr, x86_sys},
-    super::super::reg::{ArgReg, SocketArg},
+    crate::backend::conv::{slice_just_addr, x86_sys},
+    crate::backend::reg::{ArgReg, SocketArg},
     linux_raw_sys::general::{
         SYS_ACCEPT, SYS_ACCEPT4, SYS_BIND, SYS_CONNECT, SYS_GETPEERNAME, SYS_GETSOCKNAME,
         SYS_GETSOCKOPT, SYS_LISTEN, SYS_RECV, SYS_RECVFROM, SYS_RECVMSG, SYS_SEND, SYS_SENDMSG,

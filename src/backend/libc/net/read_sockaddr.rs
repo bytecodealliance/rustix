@@ -1,7 +1,7 @@
-use super::super::c;
 #[cfg(unix)]
 use super::addr::SocketAddrUnix;
 use super::ext::{in6_addr_s6_addr, in_addr_s_addr, sockaddr_in6_sin6_scope_id};
+use crate::backend::c;
 #[cfg(not(windows))]
 use crate::ffi::CStr;
 use crate::io;

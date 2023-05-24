@@ -3,9 +3,9 @@
 //! These take closures rather than returning a `c::msghdr` directly because
 //! the message headers may reference stack-local data.
 
-use super::super::c;
-use super::super::conv::{msg_control_len, msg_iov_len};
-use super::super::net::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
+use crate::backend::c;
+use crate::backend::conv::{msg_control_len, msg_iov_len};
+use crate::backend::net::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 
 use crate::io::{IoSlice, IoSliceMut};
 use crate::net::{RecvAncillaryBuffer, SendAncillaryBuffer, SocketAddrV4, SocketAddrV6};

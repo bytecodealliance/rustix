@@ -1,4 +1,4 @@
-use super::super::c;
+use crate::backend::c;
 
 pub(crate) use c::{
     WCONTINUED, WEXITSTATUS, WIFCONTINUED, WIFEXITED, WIFSIGNALED, WIFSTOPPED, WNOHANG, WSTOPSIG,

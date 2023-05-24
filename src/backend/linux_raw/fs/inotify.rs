@@ -1,6 +1,6 @@
 //! inotify support for working with inotifies
 
-use super::super::c;
+use crate::backend::c;
 use crate::backend::fs::syscalls;
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
