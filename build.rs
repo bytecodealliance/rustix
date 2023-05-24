@@ -6,6 +6,9 @@ use std::io::Write;
 /// The directory for out-of-line (“outline”) libraries.
 const OUTLINE_PATH: &str = "src/backend/linux_raw/arch/outline";
 
+/// The directory for inline asm.
+const INLINE_PATH: &str = "src/backend/linux_raw/arch/inline";
+
 fn main() {
     // Don't rerun this on changes other than build.rs, as we only depend on
     // the rustc version.
@@ -24,9 +27,9 @@ fn main() {
 
     // Gather target information.
     let arch = var("CARGO_CFG_TARGET_ARCH").unwrap();
-    let vendor = var("CARGO_CFG_TARGET_VENDOR").unwrap();
-    let asm_name = format!("{}/{}.s", OUTLINE_PATH, arch);
-    let asm_name_present = std::fs::metadata(&asm_name).is_ok();
+    let outline_asm_name = format!("{}/{}.s", OUTLINE_PATH, arch);
+    let inline_asm_name = format!("{}/{}.rs", INLINE_PATH, arch);
+    let inline_asm_name_present = std::fs::metadata(inline_asm_name).is_ok();
     let target_os = var("CARGO_CFG_TARGET_OS").unwrap();
     let pointer_width = var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap();
     let endian = var("CARGO_CFG_TARGET_ENDIAN").unwrap();
@@ -42,12 +45,6 @@ fn main() {
     // Check for `--features=use-libc`. This allows crate users to enable the
     // libc backend.
     let feature_use_libc = var("CARGO_FEATURE_USE_LIBC").is_ok();
-
-    // Check for `--features=rustc-dep-of-std`. This is used when rustix is
-    // being used to build std, in which case `can_compile` doesn't work
-    // because `core` isn't available yet, but also, we can assume we have a
-    // recent compiler.
-    let feature_rustc_dep_of_std = var("CARGO_FEATURE_RUSTC_DEP_OF_STD").is_ok();
 
     // Check for `RUSTFLAGS=--cfg=rustix_use_libc`. This allows end users to
     // enable the libc backend even if rustix is depended on transitively.
@@ -71,7 +68,7 @@ fn main() {
     if feature_use_libc
         || cfg_use_libc
         || target_os != "linux"
-        || !asm_name_present
+        || !inline_asm_name_present
         || is_unsupported_abi
         || miri
     {
@@ -86,8 +83,7 @@ fn main() {
         // x86 our asm support requires naked functions. On PowerPC and MIPS,
         // Rust's inline asm is considered experimental, so only use it if
         // `--cfg=rustix_use_experimental_asm` is given.
-        if (feature_rustc_dep_of_std || vendor == "mustang" || can_compile("use std::arch::asm;"))
-            && (arch != "x86" || has_feature("naked_functions"))
+        if (arch != "x86" || has_feature("naked_functions"))
             && ((arch != "powerpc64" && arch != "mips" && arch != "mips64")
                 || rustix_use_experimental_asm)
         {
@@ -99,7 +95,7 @@ fn main() {
                 use_feature("asm_experimental_arch");
             }
         } else {
-            link_in_librustix_outline(&arch, &asm_name);
+            link_in_librustix_outline(&arch, &outline_asm_name);
         }
     }
 
