@@ -8,7 +8,7 @@ use core::mem::MaybeUninit;
 #[cfg(linux_kernel)]
 use {
     crate::backend::conv::{borrowed_fd, ret_c_int, ret_usize},
-    crate::backend::max_iov,
+    crate::backend::MAX_IOV,
     crate::fd::BorrowedFd,
     crate::pipe::{IoSliceRaw, SpliceFlags},
     crate::utils::optional_as_mut_ptr,
@@ -70,7 +70,7 @@ pub unsafe fn vmsplice(
     ret_usize(c::vmsplice(
         borrowed_fd(fd),
         bufs.as_ptr().cast::<c::iovec>(),
-        min(bufs.len(), max_iov()),
+        min(bufs.len(), MAX_IOV),
         flags.bits(),
     ))
 }
