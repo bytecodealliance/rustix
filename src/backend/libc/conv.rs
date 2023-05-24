@@ -12,8 +12,6 @@ use super::offset::libc_off_t;
 #[cfg(not(windows))]
 use crate::ffi::CStr;
 use crate::io;
-#[cfg(windows)]
-use core::convert::TryInto;
 
 #[cfg(not(windows))]
 #[inline]
@@ -246,7 +244,6 @@ pub(super) fn msg_iov_len(len: usize) -> c::size_t {
 ))]
 #[inline]
 pub(crate) fn msg_iov_len(len: usize) -> c::c_int {
-    use core::convert::TryInto;
     len.try_into().unwrap_or(c::c_int::MAX)
 }
 
@@ -261,7 +258,6 @@ pub(crate) fn msg_iov_len(len: usize) -> c::c_int {
 ))]
 #[inline]
 pub(crate) fn msg_control_len(len: usize) -> c::socklen_t {
-    use core::convert::TryInto;
     len.try_into().unwrap_or(c::socklen_t::MAX)
 }
 

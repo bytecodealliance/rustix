@@ -74,7 +74,6 @@ use crate::fd::{AsFd, AsRawFd, OwnedFd};
 use crate::io;
 use alloc::vec::Vec;
 use bitflags::bitflags;
-use core::convert::TryInto;
 use core::ptr::null_mut;
 
 bitflags! {

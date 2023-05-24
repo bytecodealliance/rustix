@@ -25,7 +25,6 @@ use crate::net::{
     SocketAddrV4, SocketAddrV6,
 };
 use c::{sockaddr, sockaddr_in, sockaddr_in6, socklen_t};
-use core::convert::TryInto;
 use core::mem::MaybeUninit;
 #[cfg(target_arch = "x86")]
 use {
@@ -950,12 +949,8 @@ pub(crate) mod sockopt {
     use crate::net::sockopt::Timeout;
     use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
     use c::{SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_SNDTIMEO_NEW, SO_SNDTIMEO_OLD};
-    use core::convert::TryInto;
     use core::time::Duration;
     use linux_raw_sys::general::{__kernel_timespec, timeval};
-
-    // TODO: With Rust 1.53 we can use `Duration::ZERO` instead.
-    const DURATION_ZERO: Duration = Duration::from_secs(0);
 
     #[inline]
     fn getsockopt<T: Copy>(fd: BorrowedFd<'_>, level: u32, optname: u32) -> io::Result<T> {
@@ -1106,12 +1101,7 @@ pub(crate) mod sockopt {
     #[inline]
     pub(crate) fn get_socket_linger(fd: BorrowedFd<'_>) -> io::Result<Option<Duration>> {
         let linger: c::linger = getsockopt(fd, c::SOL_SOCKET as _, c::SO_LINGER)?;
-        // TODO: With Rust 1.50, this could use `.then`.
-        Ok(if linger.l_onoff != 0 {
-            Some(Duration::from_secs(linger.l_linger as u64))
-        } else {
-            None
-        })
+        Ok((linger.l_onoff != 0).then(|| Duration::from_secs(linger.l_linger as u64)))
     }
 
     #[inline]
@@ -1216,7 +1206,7 @@ pub(crate) mod sockopt {
     fn duration_to_linux(timeout: Option<Duration>) -> io::Result<__kernel_timespec> {
         Ok(match timeout {
             Some(timeout) => {
-                if timeout == DURATION_ZERO {
+                if timeout == Duration::ZERO {
                     return Err(io::Errno::INVAL);
                 }
                 let mut timeout = __kernel_timespec {
@@ -1239,7 +1229,7 @@ pub(crate) mod sockopt {
     fn duration_to_linux_old(timeout: Option<Duration>) -> io::Result<timeval> {
         Ok(match timeout {
             Some(timeout) => {
-                if timeout == DURATION_ZERO {
+                if timeout == Duration::ZERO {
                     return Err(io::Errno::INVAL);
                 }
 

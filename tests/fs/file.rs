@@ -18,9 +18,9 @@ fn test_file() {
         rustix::fs::AtFlags::EACCESS,
     ) {
         Ok(()) => (),
-        Err(rustix::io::Errno::NOSYS)
-        | Err(rustix::io::Errno::NOTSUP)
-        | Err(rustix::io::Errno::OPNOTSUPP) => {
+        Err(
+            rustix::io::Errno::NOSYS | rustix::io::Errno::NOTSUP | rustix::io::Errno::OPNOTSUPP,
+        ) => {
             #[cfg(feature = "process")]
             if rustix::process::getuid() == rustix::process::geteuid()
                 && rustix::process::getgid() == rustix::process::getegid()

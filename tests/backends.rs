@@ -26,9 +26,6 @@ fn test_backends() {
     // ensure that the use-rustix-auxv crate uses it, and does not use libc.
     #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
     {
-        // TODO: Re-enable this test once io-lifetimes can depend on Rust 1.63
-        // and always use std, so it can drop its libc dependency.
-        /*
         assert!(
             !has_dependency(
                 "test-crates/use-rustix-auxv",
@@ -39,7 +36,6 @@ fn test_backends() {
             ),
             "use-rustix-auxv depends on libc"
         );
-        */
 
         assert!(
             has_dependency(

@@ -30,8 +30,6 @@ use crate::fs::{
 };
 use crate::io::{self, SeekFrom};
 use crate::process::{Gid, Uid};
-#[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
-use core::convert::TryInto;
 use core::mem::{transmute, zeroed, MaybeUninit};
 #[cfg(target_arch = "mips64")]
 use linux_raw_sys::general::stat as linux_stat64;

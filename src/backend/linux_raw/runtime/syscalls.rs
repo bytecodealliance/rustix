@@ -22,8 +22,6 @@ use crate::io;
 use crate::process::{Pid, RawNonZeroPid, Signal};
 use crate::runtime::{How, Sigaction, Siginfo, Sigset, Stack, Timespec};
 use crate::utils::optional_as_ptr;
-#[cfg(target_pointer_width = "32")]
-use core::convert::TryInto;
 use core::mem::MaybeUninit;
 #[cfg(target_pointer_width = "32")]
 use linux_raw_sys::general::__kernel_old_timespec;

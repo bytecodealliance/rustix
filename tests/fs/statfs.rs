@@ -66,7 +66,7 @@ fn test_fstatfs() {
 fn test_statfs_procfs() {
     let statfs = rustix::fs::statfs("/proc/self/maps").unwrap();
 
-    assert_eq!(stats.f_type, rustix::fs::PROC_SUPER_MAGIC);
+    assert_eq!(statfs.f_type, rustix::fs::PROC_SUPER_MAGIC);
 }
 
 #[test]
