@@ -305,23 +305,6 @@ pub fn utimensat<P: path::Arg, Fd: AsFd>(
     path.into_with_c_str(|path| backend::fs::syscalls::utimensat(dirfd.as_fd(), path, times, flags))
 }
 
-/// `fchmodat(dirfd, path, mode, 0)`—Sets file or directory permissions.
-///
-/// See `fchmodat_with` for a version that does take flags.
-///
-/// # References
-///  - [POSIX]
-///  - [Linux]
-///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fchmodat.html
-/// [Linux]: https://man7.org/linux/man-pages/man2/fchmodat.2.html
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-#[doc(alias = "fchmodat")]
-pub fn chmodat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, mode: Mode) -> io::Result<()> {
-    chmodat_with(dirfd, path, mode, AtFlags::empty())
-}
-
 /// `fchmodat(dirfd, path, mode, flags)`—Sets file or directory permissions.
 ///
 /// Platform support for flags varies widely, for example on Linux
@@ -336,8 +319,8 @@ pub fn chmodat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, mode: Mode) -> io::Re
 /// [Linux]: https://man7.org/linux/man-pages/man2/fchmodat.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-#[doc(alias = "fchmodat_with")]
-pub fn chmodat_with<P: path::Arg, Fd: AsFd>(
+#[doc(alias = "fchmodat")]
+pub fn chmodat<P: path::Arg, Fd: AsFd>(
     dirfd: Fd,
     path: P,
     mode: Mode,
