@@ -27,7 +27,7 @@ fn test_chmod() {
     assert_ne!(reverted.st_mode as u64 & libc::S_IRWXU as u64, 0);
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_chmodat() {
     use rustix::fs::{chmodat, openat, statat, symlinkat, AtFlags, Mode, OFlags, CWD};

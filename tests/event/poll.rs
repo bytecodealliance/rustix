@@ -1,6 +1,7 @@
 use rustix::event::{PollFd, PollFlags};
 use rustix::fd::{AsFd, AsRawFd, FromRawFd, IntoRawFd, OwnedFd};
-#[cfg(not(windows))]
+#[cfg(feature = "pipe")]
+#[cfg(not(any(windows, target_os = "wasi")))]
 use {rustix::event::poll, rustix::io::retry_on_intr};
 
 #[cfg(feature = "pipe")]

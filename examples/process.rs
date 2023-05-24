@@ -41,7 +41,7 @@ fn main() -> io::Result<()> {
         "Current working directory: {}",
         getcwd(Vec::new())?.to_string_lossy()
     );
-    #[cfg(not(target_os = "fuchsia"))]
+    #[cfg(not(any(target_os = "fuchsia", target_os = "redox")))]
     {
         println!("Cpu Limit: {:?}", getrlimit(Resource::Cpu));
         println!("Fsize Limit: {:?}", getrlimit(Resource::Fsize));
