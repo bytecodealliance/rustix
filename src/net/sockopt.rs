@@ -427,8 +427,8 @@ pub fn get_socket_error<Fd: AsFd>(fd: Fd) -> io::Result<Result<(), io::Errno>> {
 #[cfg(any(apple, target_os = "freebsd"))]
 #[doc(alias = "SO_NOSIGPIPE")]
 #[inline]
-pub fn getsockopt_nosigpipe<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
-    backend::net::syscalls::sockopt::getsockopt_nosigpipe(fd.as_fd())
+pub fn get_socket_nosigpipe<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::syscalls::sockopt::get_socket_nosigpipe(fd.as_fd())
 }
 
 /// `setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, val)`
@@ -466,8 +466,8 @@ pub fn getsockopt_nosigpipe<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 #[cfg(any(apple, target_os = "freebsd"))]
 #[doc(alias = "SO_NOSIGPIPE")]
 #[inline]
-pub fn setsockopt_nosigpipe<Fd: AsFd>(fd: Fd, val: bool) -> io::Result<()> {
-    backend::net::syscalls::sockopt::setsockopt_nosigpipe(fd.as_fd(), val)
+pub fn set_socket_nosigpipe<Fd: AsFd>(fd: Fd, val: bool) -> io::Result<()> {
+    backend::net::syscalls::sockopt::set_socket_nosigpipe(fd.as_fd(), val)
 }
 
 /// `setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, keepalive)`
