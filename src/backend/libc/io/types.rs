@@ -8,6 +8,7 @@ bitflags! {
     ///
     /// [`fcntl_getfd`]: crate::io::fcntl_getfd
     /// [`fcntl_setfd`]: crate::io::fcntl_setfd
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct FdFlags: c::c_int {
         /// `FD_CLOEXEC`
         const CLOEXEC = c::FD_CLOEXEC;
@@ -20,6 +21,7 @@ bitflags! {
     ///
     /// [`preadv2`]: crate::io::preadv2
     /// [`pwritev2`]: crate::io::pwritev
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct ReadWriteFlags: c::c_int {
         /// `RWF_DSYNC` (since Linux 4.7)
         const DSYNC = linux_raw_sys::general::RWF_DSYNC as c::c_int;
@@ -37,6 +39,7 @@ bitflags! {
 #[cfg(linux_kernel)]
 bitflags! {
     /// `SPLICE_F_*` constants for use with [`splice`] and [`vmsplice`].
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SpliceFlags: c::c_uint {
         /// `SPLICE_F_MOVE`
         const MOVE = c::SPLICE_F_MOVE;
@@ -54,6 +57,7 @@ bitflags! {
     /// `O_*` constants for use with [`dup2`].
     ///
     /// [`dup2`]: crate::io::dup2
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct DupFlags: c::c_int {
         /// `O_CLOEXEC`
         #[cfg(not(any(
@@ -71,6 +75,7 @@ bitflags! {
     /// `O_*` constants for use with [`pipe_with`].
     ///
     /// [`pipe_with`]: crate::io::pipe_with
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct PipeFlags: c::c_int {
         /// `O_CLOEXEC`
         const CLOEXEC = c::O_CLOEXEC;
@@ -92,6 +97,7 @@ bitflags! {
     /// `EFD_*` flags for use with [`eventfd`].
     ///
     /// [`eventfd`]: crate::io::eventfd
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct EventfdFlags: c::c_int {
         /// `EFD_CLOEXEC`
         const CLOEXEC = c::EFD_CLOEXEC;
