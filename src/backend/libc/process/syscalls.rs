@@ -3,8 +3,10 @@
 #[cfg(any(linux_kernel, target_os = "dragonfly", target_os = "fuchsia"))]
 use super::types::RawCpuSet;
 use crate::backend::c;
+#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+use crate::backend::conv::ret_infallible;
 #[cfg(not(target_os = "wasi"))]
-use crate::backend::conv::{borrowed_fd, ret_infallible, ret_pid_t, ret_usize};
+use crate::backend::conv::{borrowed_fd, ret_pid_t, ret_usize};
 #[cfg(feature = "fs")]
 use crate::backend::conv::{c_str, ret_discarded_char_ptr};
 use crate::backend::conv::{ret, ret_c_int};
@@ -19,13 +21,15 @@ use crate::ffi::CStr;
 #[cfg(feature = "fs")]
 use crate::fs::Mode;
 use crate::io;
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+use crate::process::Uid;
 #[cfg(linux_kernel)]
 use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "wasi"))]
-use crate::process::{Gid, Pid, RawNonZeroPid, RawPid, Signal, Uid, WaitOptions, WaitStatus};
+use crate::process::{Gid, Pid, RawNonZeroPid, RawPid, Signal, WaitOptions, WaitStatus};
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use crate::process::{Resource, Rlimit};
-#[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
+#[cfg(not(any(target_os = "redox", target_os = "openbsd", target_os = "wasi")))]
 use crate::process::{WaitId, WaitidOptions, WaitidStatus};
 use core::mem::MaybeUninit;
 #[cfg(target_os = "linux")]

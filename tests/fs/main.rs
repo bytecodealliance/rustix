@@ -7,6 +7,7 @@
 
 mod chmodat;
 mod cwd;
+#[cfg(not(target_os = "redox"))]
 mod dir;
 mod fcntl;
 #[cfg(not(any(

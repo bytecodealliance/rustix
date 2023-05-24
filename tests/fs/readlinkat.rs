@@ -26,6 +26,7 @@ fn test_readlink() {
     assert_eq!(target.to_string_lossy(), "link");
 }
 
+#[cfg(not(target_os = "redox"))]
 #[test]
 fn test_readlinkat() {
     use rustix::fs::{openat, readlinkat, symlinkat, Mode, OFlags, CWD};

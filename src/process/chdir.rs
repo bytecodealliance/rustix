@@ -1,6 +1,7 @@
-use crate::{backend, io};
 #[cfg(not(target_os = "fuchsia"))]
-use backend::fd::AsFd;
+use crate::backend::fd::AsFd;
+#[cfg(any(feature = "fs", not(target_os = "fuchsia")))]
+use crate::{backend, io};
 #[cfg(feature = "fs")]
 use {
     crate::ffi::CString,
