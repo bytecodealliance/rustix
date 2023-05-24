@@ -243,30 +243,6 @@ pub(crate) unsafe fn close(raw_fd: RawFd) {
     let _ = c::close(raw_fd as c::c_int);
 }
 
-#[cfg(linux_kernel)]
-#[inline]
-pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
-    let mut result = MaybeUninit::<c::c_uint>::uninit();
-    unsafe {
-        ret(c::ioctl(borrowed_fd(fd), c::BLKSSZGET, result.as_mut_ptr()))?;
-        Ok(result.assume_init() as u32)
-    }
-}
-
-#[cfg(linux_kernel)]
-#[inline]
-pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
-    let mut result = MaybeUninit::<c::c_uint>::uninit();
-    unsafe {
-        ret(c::ioctl(
-            borrowed_fd(fd),
-            c::BLKPBSZGET,
-            result.as_mut_ptr(),
-        ))?;
-        Ok(result.assume_init() as u32)
-    }
-}
-
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
     let mut nread = MaybeUninit::<c::c_int>::uninit();
@@ -284,31 +260,6 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
         let data = value as c::c_int;
         ret(c::ioctl(borrowed_fd(fd), c::FIONBIO, &data))
     }
-}
-
-// Sparc lacks `FICLONE`.
-#[cfg(all(linux_kernel, not(any(target_arch = "sparc", target_arch = "sparc64"))))]
-pub(crate) fn ioctl_ficlone(fd: BorrowedFd<'_>, src_fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe {
-        ret(c::ioctl(
-            borrowed_fd(fd),
-            c::FICLONE as _,
-            borrowed_fd(src_fd),
-        ))
-    }
-}
-
-#[cfg(linux_kernel)]
-#[inline]
-pub(crate) fn ext4_ioc_resize_fs(fd: BorrowedFd<'_>, blocks: u64) -> io::Result<()> {
-    // TODO: Fix linux-raw-sys to define ioctl codes for sparc.
-    #[cfg(any(target_arch = "sparc", target_arch = "sparc64"))]
-    const EXT4_IOC_RESIZE_FS: u32 = 0x8008_6610;
-
-    #[cfg(not(any(target_arch = "sparc", target_arch = "sparc64")))]
-    use linux_raw_sys::ioctl::EXT4_IOC_RESIZE_FS;
-
-    unsafe { ret(c::ioctl(borrowed_fd(fd), EXT4_IOC_RESIZE_FS as _, &blocks)) }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
@@ -430,14 +381,4 @@ pub(crate) fn ioctl_fioclex(fd: BorrowedFd<'_>) -> io::Result<()> {
             core::ptr::null_mut::<u8>(),
         ))
     }
-}
-
-#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
-pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd) -> io::Result<()> {
-    unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCEXCL as _)) }
-}
-
-#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
-pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
-    unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCNXCL as _)) }
 }

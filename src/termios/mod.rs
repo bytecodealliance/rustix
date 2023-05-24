@@ -5,6 +5,8 @@ mod cf;
 #[cfg(not(target_os = "wasi"))]
 mod constants;
 #[cfg(not(target_os = "wasi"))]
+mod ioctl;
+#[cfg(not(target_os = "wasi"))]
 mod tc;
 #[cfg(not(windows))]
 mod tty;
@@ -13,6 +15,8 @@ mod tty;
 pub use cf::*;
 #[cfg(not(target_os = "wasi"))]
 pub use constants::*;
+#[cfg(not(target_os = "wasi"))]
+pub use ioctl::*;
 #[cfg(not(target_os = "wasi"))]
 pub use tc::*;
 #[cfg(not(windows))]
