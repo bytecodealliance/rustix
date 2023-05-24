@@ -121,16 +121,17 @@ to low-level syscalls. `relibc` also doesn't tend to support features not
 supported on Redox, such as `*at` functions like `openat`, which are important
 features for `rustix`.
 
-`rustix` has its own code for making direct syscalls, similar to the [`sc`] and
-[`scall`] crates, though `rustix` can use either the Rust `asm!` macro or
-out-of-line `.s` files so it supports Rust versions from 1.63 through Nightly.
-`rustix` can also use Linux's vDSO mechanism to optimize Linux `clock_gettime`
-on all architectures, and all Linux system calls on x86. And `rustix`'s
-syscalls report errors using an optimized `Errno` type.
+`rustix` has its own code for making direct syscalls, similar to the
+[`syscall`], [`sc`], and [`scall`] crates, though `rustix` can use either the
+Rust `asm!` macro or out-of-line `.s` files so it supports Rust versions from
+1.63 through Nightly and architectures where Rust's inline asm is not yet
+stable. `rustix` can also use Linux's vDSO mechanism to optimize Linux
+`clock_gettime` on all architectures, and all Linux system calls on x86. And
+`rustix`'s syscalls report errors using an optimized `Errno` type.
 
 `rustix`'s `*at` functions are similar to the [`openat`] crate, but `rustix`
 provides them as free functions rather than associated functions of a `Dir`
-type. `rustix`'s `cwd()` function exposes the special `AT_FDCWD` value in a safe
+type. `rustix`'s `CWD` constant exposes the special `AT_FDCWD` value in a safe
 way, so users don't need to open `.` to get a current-directory handle.
 
 `rustix`'s `openat2` function is similar to the [`openat2`] crate, but uses I/O
@@ -161,7 +162,6 @@ version of this crate.
 [`scall`]: https://crates.io/crates/scall
 [`openat`]: https://crates.io/crates/openat
 [`openat2`]: https://crates.io/crates/openat2
-[`fs-set-times`]: https://crates.io/crates/fs-set-times
 [`io-lifetimes`]: https://crates.io/crates/io-lifetimes
 [`termios`]: https://crates.io/crates/termios
 [`libc`]: https://crates.io/crates/libc
@@ -175,6 +175,6 @@ version of this crate.
 [I/O-safe]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
 [I/O safety]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
 [provenance]: https://github.com/rust-lang/rust/issues/95228
-[`OwnedFd`]: https://docs.rs/io-lifetimes/*/io_lifetimes/struct.OwnedFd.html
-[`AsFd`]: https://docs.rs/io-lifetimes/*/io_lifetimes/trait.AsFd.html
+[`OwnedFd`]: https://doc.rust-lang.org/stable/std/os/fd/struct.OwnedFd.html
+[`AsFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.AsFd.html
 [`NOSYS`]: https://docs.rs/rustix/*/rustix/io/struct.Errno.html#associatedconstant.NOSYS
