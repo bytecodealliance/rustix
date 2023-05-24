@@ -1,11 +1,10 @@
 //! Windows system calls in the `io` module.
 
 use crate::backend::c;
-use crate::backend::conv::{borrowed_fd, ret, ret_c_int};
+use crate::backend::conv::{borrowed_fd, ret};
 use crate::backend::fd::LibcFd;
 use crate::fd::{BorrowedFd, RawFd};
 use crate::io;
-use crate::io::PollFd;
 use core::mem::MaybeUninit;
 
 pub(crate) unsafe fn close(raw_fd: RawFd) {
@@ -25,14 +24,4 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
         let mut data = value as c::c_uint;
         ret(c::ioctl(borrowed_fd(fd), c::FIONBIO, &mut data))
     }
-}
-
-pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usize> {
-    let nfds = fds
-        .len()
-        .try_into()
-        .map_err(|_convert_err| io::Errno::INVAL)?;
-
-    ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast(), nfds, timeout) })
-        .map(|nready| nready as usize)
 }

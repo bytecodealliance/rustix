@@ -1,8 +1,9 @@
+use rustix::event::{PollFd, PollFlags};
 use rustix::fd::{AsFd, AsRawFd, FromRawFd, IntoRawFd, OwnedFd};
 #[cfg(not(windows))]
-use rustix::io::{poll, retry_on_intr};
-use rustix::io::{PollFd, PollFlags};
+use {rustix::event::poll, rustix::io::retry_on_intr};
 
+#[cfg(feature = "pipe")]
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[test]
 fn test_poll() {

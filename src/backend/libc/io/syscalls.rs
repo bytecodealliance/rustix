@@ -17,25 +17,18 @@ use crate::backend::offset::{libc_preadv2, libc_pwritev2};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 use crate::io::DupFlags;
-#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "illumos"))]
-use crate::io::EventfdFlags;
 #[cfg(not(any(apple, target_os = "aix", target_os = "haiku", target_os = "wasi")))]
 use crate::io::PipeFlags;
-use crate::io::{self, FdFlags, IoSlice, IoSliceMut, PollFd};
+use crate::io::{self, FdFlags, IoSlice, IoSliceMut};
 use core::cmp::min;
 use core::mem::MaybeUninit;
 #[cfg(all(feature = "fs", feature = "net"))]
 use libc_errno::errno;
 #[cfg(linux_kernel)]
 use {
-    crate::backend::conv::syscall_ret_owned_fd,
     crate::io::{IoSliceRaw, ReadWriteFlags, SpliceFlags},
     crate::utils::optional_as_mut_ptr,
 };
-#[cfg(bsd)]
-use {crate::io::kqueue::Event, crate::utils::as_ptr, core::ptr::null};
-#[cfg(solarish)]
-use {crate::io::port::Event, crate::utils::as_mut_ptr, core::ptr::null_mut};
 
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     unsafe {
@@ -277,16 +270,6 @@ pub(crate) unsafe fn close(raw_fd: RawFd) {
 }
 
 #[cfg(linux_kernel)]
-pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
-    unsafe { syscall_ret_owned_fd(c::syscall(c::SYS_eventfd2, initval, flags.bits())) }
-}
-
-#[cfg(any(target_os = "freebsd", target_os = "illumos"))]
-pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(c::eventfd(initval, flags.bits())) }
-}
-
-#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
     let mut result = MaybeUninit::<c::c_uint>::uninit();
@@ -485,34 +468,6 @@ pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCNXCL as _)) }
 }
 
-#[cfg(bsd)]
-pub(crate) fn kqueue() -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(c::kqueue()) }
-}
-
-#[cfg(bsd)]
-pub(crate) unsafe fn kevent(
-    kq: BorrowedFd<'_>,
-    changelist: &[Event],
-    eventlist: &mut [MaybeUninit<Event>],
-    timeout: Option<&c::timespec>,
-) -> io::Result<c::c_int> {
-    ret_c_int(c::kevent(
-        borrowed_fd(kq),
-        changelist.as_ptr().cast(),
-        changelist
-            .len()
-            .try_into()
-            .map_err(|_| io::Errno::OVERFLOW)?,
-        eventlist.as_mut_ptr().cast(),
-        eventlist
-            .len()
-            .try_into()
-            .map_err(|_| io::Errno::OVERFLOW)?,
-        timeout.map_or(null(), as_ptr),
-    ))
-}
-
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
@@ -531,17 +486,6 @@ pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
         let [p0, p1] = result.assume_init();
         Ok((p0, p1))
     }
-}
-
-#[inline]
-pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usize> {
-    let nfds = fds
-        .len()
-        .try_into()
-        .map_err(|_convert_err| io::Errno::INVAL)?;
-
-    ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast(), nfds, timeout) })
-        .map(|nready| nready as usize)
 }
 
 #[cfg(linux_kernel)]
@@ -582,86 +526,4 @@ pub unsafe fn vmsplice(
         min(bufs.len(), max_iov()),
         flags.bits(),
     ))
-}
-
-#[cfg(solarish)]
-pub(crate) fn port_create() -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(c::port_create()) }
-}
-
-#[cfg(solarish)]
-pub(crate) unsafe fn port_associate(
-    port: BorrowedFd<'_>,
-    source: c::c_int,
-    object: c::uintptr_t,
-    events: c::c_int,
-    user: *mut c::c_void,
-) -> io::Result<()> {
-    ret(c::port_associate(
-        borrowed_fd(port),
-        source,
-        object,
-        events,
-        user,
-    ))
-}
-
-#[cfg(solarish)]
-pub(crate) unsafe fn port_dissociate(
-    port: BorrowedFd<'_>,
-    source: c::c_int,
-    object: c::uintptr_t,
-) -> io::Result<()> {
-    ret(c::port_dissociate(borrowed_fd(port), source, object))
-}
-
-#[cfg(solarish)]
-pub(crate) fn port_get(
-    port: BorrowedFd<'_>,
-    timeout: Option<&mut c::timespec>,
-) -> io::Result<Event> {
-    let mut event = MaybeUninit::<c::port_event>::uninit();
-    let timeout = timeout.map_or(null_mut(), as_mut_ptr);
-
-    unsafe {
-        ret(c::port_get(borrowed_fd(port), event.as_mut_ptr(), timeout))?;
-    }
-
-    // If we're done, initialize the event and return it.
-    Ok(Event(unsafe { event.assume_init() }))
-}
-
-#[cfg(solarish)]
-pub(crate) fn port_getn(
-    port: BorrowedFd<'_>,
-    timeout: Option<&mut c::timespec>,
-    events: &mut Vec<Event>,
-    mut nget: u32,
-) -> io::Result<()> {
-    let timeout = timeout.map_or(null_mut(), as_mut_ptr);
-    unsafe {
-        ret(c::port_getn(
-            borrowed_fd(port),
-            events.as_mut_ptr().cast(),
-            events.len().try_into().unwrap(),
-            &mut nget,
-            timeout,
-        ))?;
-    }
-
-    // Update the vector length.
-    unsafe {
-        events.set_len(nget.try_into().unwrap());
-    }
-
-    Ok(())
-}
-
-#[cfg(solarish)]
-pub(crate) fn port_send(
-    port: BorrowedFd<'_>,
-    events: c::c_int,
-    userdata: *mut c::c_void,
-) -> io::Result<()> {
-    unsafe { ret(c::port_send(borrowed_fd(port), events, userdata)) }
 }

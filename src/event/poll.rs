@@ -1,6 +1,6 @@
 use crate::{backend, io};
 
-pub use backend::io::poll_fd::{PollFd, PollFlags};
+pub use backend::event::poll_fd::{PollFd, PollFlags};
 
 /// `poll(self.fds, timeout)`
 ///
@@ -28,5 +28,5 @@ pub use backend::io::poll_fd::{PollFd, PollFlags};
 /// [illumos]: https://illumos.org/man/2/poll
 #[inline]
 pub fn poll(fds: &mut [PollFd<'_>], timeout: i32) -> io::Result<usize> {
-    backend::io::syscalls::poll(fds, timeout)
+    backend::event::syscalls::poll(fds, timeout)
 }

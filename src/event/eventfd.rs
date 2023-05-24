@@ -1,7 +1,7 @@
 use crate::fd::OwnedFd;
 use crate::{backend, io};
 
-pub use backend::io::types::EventfdFlags;
+pub use backend::event::types::EventfdFlags;
 
 /// `eventfd(initval, flags)`—Creates a file descriptor for event
 /// notification.
@@ -16,5 +16,5 @@ pub use backend::io::types::EventfdFlags;
 /// [illumos]: https://illumos.org/man/3C/eventfd
 #[inline]
 pub fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
-    backend::io::syscalls::eventfd(initval, flags)
+    backend::event::syscalls::eventfd(initval, flags)
 }
