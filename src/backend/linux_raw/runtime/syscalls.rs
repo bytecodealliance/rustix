@@ -19,8 +19,9 @@ use crate::ffi::CStr;
 use crate::fs::AtFlags;
 use crate::io;
 use crate::pid::{Pid, RawNonZeroPid};
-use crate::runtime::{How, Sigaction, Siginfo, Sigset, Stack, Timespec};
+use crate::runtime::{How, Sigaction, Siginfo, Sigset, Stack};
 use crate::signal::Signal;
+use crate::timespec::Timespec;
 use crate::utils::optional_as_ptr;
 use core::mem::MaybeUninit;
 #[cfg(target_pointer_width = "32")]

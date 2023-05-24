@@ -14,4 +14,4 @@ pub use backend::fs::types::{CloneFlags, CopyfileFlags};
 #[cfg(linux_kernel)]
 pub use backend::fs::types::*;
 
-pub use backend::time::types::{Nsecs, Secs, Timespec};
+pub use crate::timespec::{Nsecs, Secs, Timespec};

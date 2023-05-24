@@ -28,10 +28,10 @@ use super::io::errno::{
     try_decode_void_star,
 };
 use super::reg::{raw_arg, ArgNumber, ArgReg, RetReg, R0};
-#[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
-use super::time::types::ClockId;
 #[cfg(feature = "time")]
 use super::time::types::TimerfdClockId;
+#[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
+use crate::clockid::ClockId;
 use crate::fd::OwnedFd;
 use crate::ffi::CStr;
 #[cfg(feature = "fs")]
