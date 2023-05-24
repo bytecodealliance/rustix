@@ -713,13 +713,13 @@ pub(crate) mod sockopt {
 
     #[cfg(any(apple, target_os = "freebsd"))]
     #[inline]
-    pub(crate) fn getsockopt_nosigpipe(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    pub(crate) fn get_socket_nosigpipe(fd: BorrowedFd<'_>) -> io::Result<bool> {
         getsockopt(fd, c::SOL_SOCKET, c::SO_NOSIGPIPE).map(to_bool)
     }
 
     #[cfg(any(apple, target_os = "freebsd"))]
     #[inline]
-    pub(crate) fn setsockopt_nosigpipe(fd: BorrowedFd<'_>, val: bool) -> io::Result<()> {
+    pub(crate) fn set_socket_nosigpipe(fd: BorrowedFd<'_>, val: bool) -> io::Result<()> {
         setsockopt(fd, c::SOL_SOCKET, c::SO_NOSIGPIPE, from_bool(val))
     }
 
