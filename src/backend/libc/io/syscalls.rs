@@ -8,11 +8,6 @@ use crate::backend::conv::syscall_ret_usize;
 use crate::backend::conv::{
     borrowed_fd, ret, ret_c_int, ret_discarded_fd, ret_owned_fd, ret_usize,
 };
-use crate::backend::offset::{libc_pread, libc_pwrite};
-#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "solaris")))]
-use crate::backend::offset::{libc_preadv, libc_pwritev};
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
-use crate::backend::offset::{libc_preadv2, libc_pwritev2};
 use crate::backend::{c, MAX_IOV};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
@@ -52,7 +47,7 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Resu
     let offset = offset as i64;
 
     unsafe {
-        ret_usize(libc_pread(
+        ret_usize(c::pread(
             borrowed_fd(fd),
             buf.as_mut_ptr().cast(),
             len,
@@ -67,14 +62,7 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
 
-    unsafe {
-        ret_usize(libc_pwrite(
-            borrowed_fd(fd),
-            buf.as_ptr().cast(),
-            len,
-            offset,
-        ))
-    }
+    unsafe { ret_usize(c::pwrite(borrowed_fd(fd), buf.as_ptr().cast(), len, offset)) }
 }
 
 pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut]) -> io::Result<usize> {
@@ -106,7 +94,7 @@ pub(crate) fn preadv(
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     unsafe {
-        ret_usize(libc_preadv(
+        ret_usize(c::preadv(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), MAX_IOV) as c::c_int,
@@ -120,7 +108,7 @@ pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     unsafe {
-        ret_usize(libc_pwritev(
+        ret_usize(c::pwritev(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), MAX_IOV) as c::c_int,
@@ -139,7 +127,7 @@ pub(crate) fn preadv2(
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     unsafe {
-        ret_usize(libc_preadv2(
+        ret_usize(c::preadv2(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), MAX_IOV) as c::c_int,
@@ -186,7 +174,7 @@ pub(crate) fn pwritev2(
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     unsafe {
-        ret_usize(libc_pwritev2(
+        ret_usize(c::pwritev2(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), MAX_IOV) as c::c_int,

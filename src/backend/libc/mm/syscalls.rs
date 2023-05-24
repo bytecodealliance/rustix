@@ -11,7 +11,6 @@ use crate::backend::c;
 #[cfg(linux_kernel)]
 use crate::backend::conv::syscall_ret_owned_fd;
 use crate::backend::conv::{borrowed_fd, no_fd, ret};
-use crate::backend::offset::libc_mmap;
 use crate::fd::BorrowedFd;
 #[cfg(linux_kernel)]
 use crate::fd::OwnedFd;
@@ -74,7 +73,7 @@ pub(crate) unsafe fn mmap(
     fd: BorrowedFd<'_>,
     offset: u64,
 ) -> io::Result<*mut c::c_void> {
-    let res = libc_mmap(
+    let res = c::mmap(
         ptr,
         len,
         prot.bits(),
@@ -99,7 +98,7 @@ pub(crate) unsafe fn mmap_anonymous(
     prot: ProtFlags,
     flags: MapFlags,
 ) -> io::Result<*mut c::c_void> {
-    let res = libc_mmap(
+    let res = c::mmap(
         ptr,
         len,
         prot.bits(),

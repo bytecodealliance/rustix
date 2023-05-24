@@ -12,7 +12,6 @@
 #![allow(clippy::useless_conversion)]
 
 mod conv;
-mod offset;
 
 #[cfg(windows)]
 mod io_lifetimes;

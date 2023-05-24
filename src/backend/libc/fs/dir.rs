@@ -2,7 +2,6 @@
 use super::types::FileType;
 use crate::backend::c;
 use crate::backend::conv::owned_fd;
-use crate::backend::offset::libc_ino_t;
 use crate::fd::{AsFd, BorrowedFd};
 use crate::ffi::{CStr, CString};
 use crate::fs::{fcntl_getfl, fstat, openat, Mode, OFlags, Stat};
@@ -185,10 +184,10 @@ pub struct DirEntry {
     d_type: u8,
 
     #[cfg(not(any(freebsdlike, netbsdlike)))]
-    d_ino: libc_ino_t,
+    d_ino: c::ino_t,
 
     #[cfg(any(freebsdlike, netbsdlike))]
-    d_fileno: libc_ino_t,
+    d_fileno: c::ino_t,
 
     name: CString,
 }
