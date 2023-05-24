@@ -69,8 +69,8 @@ fn test_readwrite_p() {
 #[cfg(feature = "fs")]
 #[test]
 fn test_readwrite_v() {
-    use rustix::fs::{cwd, openat, seek, Mode, OFlags};
-    use rustix::io::{readv, writev, SeekFrom};
+    use rustix::fs::{cwd, openat, seek, Mode, OFlags, SeekFrom};
+    use rustix::io::{readv, writev};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -95,8 +95,8 @@ fn test_readwrite_v() {
 #[cfg(feature = "fs")]
 #[test]
 fn test_readwrite() {
-    use rustix::fs::{cwd, openat, seek, Mode, OFlags};
-    use rustix::io::{read, write, SeekFrom};
+    use rustix::fs::{cwd, openat, seek, Mode, OFlags, SeekFrom};
+    use rustix::io::{read, write};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -149,8 +149,8 @@ fn test_rwf_values() {
 #[cfg(feature = "fs")]
 #[test]
 fn test_pwritev2() {
-    use rustix::fs::{cwd, openat, seek, Mode, OFlags};
-    use rustix::io::{preadv2, pwritev2, writev, ReadWriteFlags, SeekFrom};
+    use rustix::fs::{cwd, openat, seek, Mode, OFlags, SeekFrom};
+    use rustix::io::{preadv2, pwritev2, writev, ReadWriteFlags};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
