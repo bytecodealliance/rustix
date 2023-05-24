@@ -101,6 +101,7 @@ fn test_getpgrp() {
     }
 }
 
+#[cfg(not(target_os = "redox"))]
 #[test]
 fn test_getsid() {
     assert_eq!(

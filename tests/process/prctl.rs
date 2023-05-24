@@ -1,6 +1,9 @@
-use std::io::{BufRead, Read};
-use std::os::raw::c_int;
-use std::{fs, io};
+#[cfg(feature = "system")]
+use {
+    std::io::{BufRead, Read},
+    std::os::raw::c_int,
+    std::{fs, io},
+};
 
 use rustix::process::*;
 #[cfg(feature = "thread")]

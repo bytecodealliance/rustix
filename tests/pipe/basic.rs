@@ -4,6 +4,14 @@ fn test_basic_pipes() {
     use rustix::pipe::pipe;
 
     let message = b"Hello, tee!";
+
+    #[cfg(not(any(
+        solarish,
+        windows,
+        target_os = "haiku",
+        target_os = "redox",
+        target_os = "wasi",
+    )))]
     assert!(message.len() <= rustix::pipe::PIPE_BUF);
 
     let (reader, writer) = pipe().unwrap();
