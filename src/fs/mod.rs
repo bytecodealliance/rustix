@@ -40,6 +40,7 @@ mod mount;
 mod openat2;
 #[cfg(linux_kernel)]
 mod raw_dir;
+mod seek_from;
 #[cfg(target_os = "linux")]
 mod sendfile;
 #[cfg(linux_kernel)]
@@ -91,6 +92,7 @@ pub use mount::*;
 pub use openat2::openat2;
 #[cfg(linux_kernel)]
 pub use raw_dir::{RawDir, RawDirEntry};
+pub use seek_from::SeekFrom;
 #[cfg(target_os = "linux")]
 pub use sendfile::sendfile;
 #[cfg(linux_kernel)]

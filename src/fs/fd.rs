@@ -4,8 +4,7 @@
 use crate::fs::Mode;
 #[cfg(not(target_os = "wasi"))]
 use crate::fs::{Gid, Uid};
-use crate::fs::{OFlags, Timespec};
-use crate::io::SeekFrom;
+use crate::fs::{OFlags, SeekFrom, Timespec};
 use crate::{backend, io};
 use backend::fd::{AsFd, BorrowedFd};
 

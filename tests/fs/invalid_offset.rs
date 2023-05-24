@@ -9,7 +9,7 @@
 
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]
 
-use rustix::io::SeekFrom;
+use rustix::fs::SeekFrom;
 
 #[test]
 fn invalid_offset_seek() {

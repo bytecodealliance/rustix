@@ -77,12 +77,12 @@ use crate::fs::SealFlags;
     target_os = "wasi",
 )))]
 use crate::fs::StatFs;
-use crate::fs::{Access, Mode, OFlags, Stat, Timestamps};
+use crate::fs::{Access, Mode, OFlags, SeekFrom, Stat, Timestamps};
 #[cfg(not(any(apple, target_os = "redox", target_os = "wasi")))]
 use crate::fs::{Dev, FileType};
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use crate::fs::{StatVfs, StatVfsMountFlags};
-use crate::io::{self, SeekFrom};
+use crate::io;
 #[cfg(not(target_os = "wasi"))]
 use crate::ugid::{Gid, Uid};
 #[cfg(not(all(
