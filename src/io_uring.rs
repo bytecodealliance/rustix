@@ -29,7 +29,13 @@ use crate::{backend, io};
 use core::ffi::c_void;
 use core::mem::{zeroed, MaybeUninit};
 use core::ptr::{null_mut, write_bytes};
-use linux_raw_sys::general as sys;
+use linux_raw_sys::net;
+
+mod sys {
+    pub(super) use linux_raw_sys::io_uring::*;
+    #[cfg(test)]
+    pub(super) use {crate::backend::c::iovec, linux_raw_sys::general::open_how};
+}
 
 /// `io_uring_setup(entries, params)`—Setup a context for performing
 /// asynchronous I/O.
@@ -728,19 +734,19 @@ bitflags::bitflags! {
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct RecvmsgOutFlags: u32 {
         /// `MSG_EOR`
-        const EOR = sys::MSG_EOR;
+        const EOR = net::MSG_EOR;
 
         /// `MSG_TRUNC`
-        const TRUNC = sys::MSG_TRUNC;
+        const TRUNC = net::MSG_TRUNC;
 
         /// `MSG_CTRUNC`
-        const CTRUNC = sys::MSG_CTRUNC;
+        const CTRUNC = net::MSG_CTRUNC;
 
         /// `MSG_OOB`
-        const OOB = sys::MSG_OOB;
+        const OOB = net::MSG_OOB;
 
         /// `MSG_ERRQUEUE`
-        const ERRQUEUE = sys::MSG_ERRQUEUE;
+        const ERRQUEUE = net::MSG_ERRQUEUE;
     }
 }
 

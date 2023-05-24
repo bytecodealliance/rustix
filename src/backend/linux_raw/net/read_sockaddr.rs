@@ -23,9 +23,9 @@ unsafe fn read_ss_family(storage: *const c::sockaddr) -> u16 {
     // Assert that we know the layout of `sockaddr`.
     let _ = c::sockaddr {
         __storage: c::sockaddr_storage {
-            __bindgen_anon_1: linux_raw_sys::general::__kernel_sockaddr_storage__bindgen_ty_1 {
+            __bindgen_anon_1: linux_raw_sys::net::__kernel_sockaddr_storage__bindgen_ty_1 {
                 __bindgen_anon_1:
-                    linux_raw_sys::general::__kernel_sockaddr_storage__bindgen_ty_1__bindgen_ty_1 {
+                    linux_raw_sys::net::__kernel_sockaddr_storage__bindgen_ty_1__bindgen_ty_1 {
                         ss_family: 0_u16,
                         __data: [0; 126_usize],
                     },

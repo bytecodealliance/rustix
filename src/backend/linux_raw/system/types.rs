@@ -1,4 +1,4 @@
 /// `sysinfo`
-pub type Sysinfo = linux_raw_sys::general::sysinfo;
+pub type Sysinfo = linux_raw_sys::system::sysinfo;
 
-pub(crate) type RawUname = linux_raw_sys::general::new_utsname;
+pub(crate) type RawUname = linux_raw_sys::system::new_utsname;
