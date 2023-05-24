@@ -30,10 +30,10 @@ fn test_chmod() {
 #[cfg(not(target_os = "wasi"))]
 #[test]
 fn test_chmodat() {
-    use rustix::fs::{chmodat, cwd, openat, statat, symlinkat, AtFlags, Mode, OFlags};
+    use rustix::fs::{chmodat, openat, statat, symlinkat, AtFlags, Mode, OFlags, CWD};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::RWXU).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::RWXU).unwrap();
 
     let _ = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::RWXU).unwrap();
     symlinkat("foo", &dir, "link").unwrap();

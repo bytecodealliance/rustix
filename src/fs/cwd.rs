@@ -11,19 +11,25 @@ use crate::backend;
 use backend::c;
 use backend::fd::{BorrowedFd, RawFd};
 
-/// `AT_FDCWD`—Returns a handle representing the current working directory.
+/// `AT_FDCWD`—A handle representing the current working directory.
 ///
-/// This returns a file descriptor which refers to the process current
-/// directory which can be used as the directory argument in `*at`
-/// functions such as [`openat`].
+/// This is a file descriptor which refers to the process current directory
+/// which can be used as the directory argument in `*at` functions such as
+/// [`openat`].
 ///
 /// # References
 ///  - [POSIX]
 ///
 /// [`openat`]: crate::fs::openat
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/fcntl.h.html
-#[inline]
+// SAFETY: `AT_FDCWD` is a reserved value that is never dynamically
+// allocated, so it'll remain valid for the duration of `'static`.
 #[doc(alias = "AT_FDCWD")]
+pub const CWD: BorrowedFd<'static> =
+    unsafe { BorrowedFd::<'static>::borrow_raw(c::AT_FDCWD as RawFd) };
+
+/// Return the value of [`CWD`].
+#[deprecated(note = "Use `CWD` in place of `cwd()`.")]
 pub const fn cwd() -> BorrowedFd<'static> {
     let at_fdcwd = c::AT_FDCWD as RawFd;
 

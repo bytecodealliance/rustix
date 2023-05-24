@@ -1,7 +1,7 @@
 #[test]
 fn test_dir() {
     let t = rustix::fs::openat(
-        rustix::fs::cwd(),
+        rustix::fs::CWD,
         rustix::cstr!("."),
         rustix::fs::OFlags::RDONLY | rustix::fs::OFlags::CLOEXEC,
         rustix::fs::Mode::empty(),

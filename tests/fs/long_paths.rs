@@ -1,10 +1,10 @@
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_long_paths() {
-    use rustix::fs::{cwd, mkdirat, openat, Mode, OFlags};
+    use rustix::fs::{mkdirat, openat, Mode, OFlags, CWD};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     #[cfg(libc)]
     const PATH_MAX: usize = libc::PATH_MAX as usize;

@@ -141,7 +141,7 @@ fn raw_dir_entries_unaligned() {
 #[test]
 fn dir_from_openat() {
     let dirfd = rustix::fs::openat(
-        rustix::fs::cwd(),
+        rustix::fs::CWD,
         ".",
         rustix::fs::OFlags::RDONLY,
         rustix::fs::Mode::empty(),

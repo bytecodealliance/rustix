@@ -1,5 +1,5 @@
 use rustix::fd::{AsFd, AsRawFd, OwnedFd};
-use rustix::fs::{cwd, mkdirat, openat, openat2, symlinkat, Mode, OFlags, ResolveFlags};
+use rustix::fs::{mkdirat, openat, openat2, symlinkat, Mode, OFlags, ResolveFlags, CWD};
 use rustix::{io, path};
 
 /// Like `openat2`, but keep retrying until it fails or succeeds.
@@ -23,7 +23,7 @@ fn openat2_more<Fd: AsFd, P: path::Arg>(
 #[test]
 fn test_openat2() {
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     // Detect whether `openat2` is available.
     match openat2(

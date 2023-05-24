@@ -1,10 +1,10 @@
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_futimens() {
-    use rustix::fs::{cwd, fstat, futimens, openat, Mode, OFlags, Timespec, Timestamps};
+    use rustix::fs::{fstat, futimens, openat, Mode, OFlags, Timespec, Timestamps, CWD};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     let foo = openat(
         &dir,
