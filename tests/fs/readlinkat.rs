@@ -1,4 +1,32 @@
 #[test]
+fn test_readlink() {
+    use rustix::fs::{open, readlink, symlink, Mode, OFlags};
+
+    let tmp = tempfile::tempdir().unwrap();
+
+    let _ = open(
+        tmp.path().join("foo"),
+        OFlags::CREATE | OFlags::WRONLY,
+        Mode::RUSR,
+    )
+    .unwrap();
+    symlink("foo", tmp.path().join("link")).unwrap();
+
+    readlink(tmp.path().join("absent"), Vec::new()).unwrap_err();
+    readlink(tmp.path().join("foo"), Vec::new()).unwrap_err();
+
+    let target = readlink(tmp.path().join("link"), Vec::new()).unwrap();
+    assert_eq!(target.to_string_lossy(), "foo");
+
+    symlink("link", tmp.path().join("another")).unwrap();
+
+    let target = readlink(tmp.path().join("link"), Vec::new()).unwrap();
+    assert_eq!(target.to_string_lossy(), "foo");
+    let target = readlink(tmp.path().join("another"), Vec::new()).unwrap();
+    assert_eq!(target.to_string_lossy(), "link");
+}
+
+#[test]
 fn test_readlinkat() {
     use rustix::fs::{cwd, openat, readlinkat, symlinkat, Mode, OFlags};
 

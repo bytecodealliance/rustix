@@ -6,6 +6,8 @@ use crate::backend::conv::{
 };
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 use crate::backend::offset::libc_fallocate;
+#[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+use crate::backend::offset::libc_open;
 #[cfg(not(any(
     apple,
     netbsdlike,
@@ -37,6 +39,8 @@ use crate::backend::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lsee
 use crate::backend::offset::{libc_fstatfs, libc_statfs};
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use crate::backend::offset::{libc_fstatvfs, libc_statvfs};
+#[cfg(not(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64"))))]
+use crate::backend::offset::{libc_lstat, libc_stat};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 #[cfg(apple)]
@@ -120,6 +124,50 @@ weak!(fn __utimensat64(c::c_int, *const c::c_char, *const LibcTimespec, c::c_int
 ))]
 weak!(fn __futimens64(c::c_int, *const LibcTimespec) -> c::c_int);
 
+/// Use a direct syscall (via libc) for `open`.
+///
+/// This is only currently necessary as a workaround for old glibc; see below.
+#[cfg(all(unix, target_env = "gnu"))]
+fn open_via_syscall(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
+    // Linux on aarch64 and riscv64 has no `open` syscall so use `openat`.
+    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+    {
+        openat_via_syscall(CWD, path, oflags, mode)
+    }
+
+    // Use the `open` syscall.
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+    unsafe {
+        let path = c_str(path);
+        let oflags = oflags.bits();
+        ret_owned_fd(c::syscall(
+            c::SYS_open,
+            path,
+            c::c_long::from(oflags),
+            mode.bits() as c::c_ulong,
+        ) as c::c_int)
+    }
+}
+
+pub(crate) fn open(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
+    // Work around <https://sourceware.org/bugzilla/show_bug.cgi?id=17523>.
+    // glibc versions before 2.25 don't handle `O_TMPFILE` correctly.
+    #[cfg(all(unix, target_env = "gnu"))]
+    if oflags.contains(OFlags::TMPFILE) && crate::backend::if_glibc_is_less_than_2_25() {
+        return open_via_syscall(path, oflags, mode);
+    }
+    unsafe {
+        // Pass `mode` as a `c_ulong` even if `mode_t` is narrower, since
+        // `libc_open` is declared as a variadic function and narrower
+        // arguments are promoted.
+        ret_owned_fd(libc_open(
+            c_str(path),
+            oflags.bits(),
+            mode.bits() as c::c_ulong,
+        ))
+    }
+}
+
 /// Use a direct syscall (via libc) for `openat`.
 ///
 /// This is only currently necessary as a workaround for old glibc; see below.
@@ -134,13 +182,12 @@ fn openat_via_syscall(
         let dirfd = borrowed_fd(dirfd);
         let path = c_str(path);
         let oflags = oflags.bits();
-        let mode = c::c_uint::from(mode.bits());
         ret_owned_fd(c::syscall(
             c::SYS_openat,
             c::c_long::from(dirfd),
             path,
             c::c_long::from(oflags),
-            mode as c::c_long,
+            mode.bits() as c::c_ulong,
         ) as c::c_int)
     }
 }
@@ -159,14 +206,14 @@ pub(crate) fn openat(
         return openat_via_syscall(dirfd, path, oflags, mode);
     }
     unsafe {
-        // Pass `mode` as a `c_uint` even if `mode_t` is narrower, since
+        // Pass `mode` as a `c_ulong` even if `mode_t` is narrower, since
         // `libc_openat` is declared as a variadic function and narrower
         // arguments are promoted.
         ret_owned_fd(libc_openat(
             borrowed_fd(dirfd),
             c_str(path),
             oflags.bits(),
-            c::c_uint::from(mode.bits()),
+            mode.bits() as c::c_ulong,
         ))
     }
 }
@@ -197,6 +244,17 @@ pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
     }
 }
 
+#[inline]
+pub(crate) fn readlink(path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
+    unsafe {
+        ret_usize(c::readlink(
+            c_str(path),
+            buf.as_mut_ptr().cast::<c::c_char>(),
+            buf.len(),
+        ))
+    }
+}
+
 #[cfg(not(target_os = "redox"))]
 #[inline]
 pub(crate) fn readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
@@ -208,6 +266,10 @@ pub(crate) fn readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, buf: &mut [u8]) -> 
             buf.len(),
         ))
     }
+}
+
+pub(crate) fn mkdir(path: &CStr, mode: Mode) -> io::Result<()> {
+    unsafe { ret(c::mkdir(c_str(path), mode.bits() as c::mode_t)) }
 }
 
 #[cfg(not(target_os = "redox"))]
@@ -234,6 +296,10 @@ pub(crate) fn getdents_uninit(
             buf.len(),
         ))
     }
+}
+
+pub(crate) fn link(old_path: &CStr, new_path: &CStr) -> io::Result<()> {
+    unsafe { ret(c::link(c_str(old_path), c_str(new_path))) }
 }
 
 #[cfg(not(target_os = "redox"))]
@@ -291,6 +357,14 @@ pub(crate) fn linkat(
     }
 }
 
+pub(crate) fn rmdir(path: &CStr) -> io::Result<()> {
+    unsafe { ret(c::rmdir(c_str(path))) }
+}
+
+pub(crate) fn unlink(path: &CStr) -> io::Result<()> {
+    unsafe { ret(c::unlink(c_str(path))) }
+}
+
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<()> {
     // macOS <= 10.9 lacks `unlinkat`.
@@ -325,6 +399,10 @@ pub(crate) fn unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io
     unsafe {
         ret(c::unlinkat(borrowed_fd(dirfd), c_str(path), flags.bits()))
     }
+}
+
+pub(crate) fn rename(old_path: &CStr, new_path: &CStr) -> io::Result<()> {
+    unsafe { ret(c::rename(c_str(old_path), c_str(new_path))) }
 }
 
 #[cfg(not(target_os = "redox"))]
@@ -420,6 +498,10 @@ pub(crate) fn renameat2(
     renameat(old_dirfd, old_path, new_dirfd, new_path)
 }
 
+pub(crate) fn symlink(old_path: &CStr, new_path: &CStr) -> io::Result<()> {
+    unsafe { ret(c::symlink(c_str(old_path), c_str(new_path))) }
+}
+
 #[cfg(not(target_os = "redox"))]
 pub(crate) fn symlinkat(
     old_path: &CStr,
@@ -432,6 +514,58 @@ pub(crate) fn symlinkat(
             borrowed_fd(new_dirfd),
             c_str(new_path),
         ))
+    }
+}
+
+pub(crate) fn stat(path: &CStr) -> io::Result<Stat> {
+    // See the comments in `fstat` about using `crate::fs::statx` here.
+    #[cfg(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64")))]
+    {
+        match crate::fs::statx(
+            crate::fs::cwd(),
+            path,
+            AtFlags::empty(),
+            StatxFlags::BASIC_STATS,
+        ) {
+            Ok(x) => statx_to_stat(x),
+            Err(io::Errno::NOSYS) => statat_old(crate::fs::cwd(), path, AtFlags::empty()),
+            Err(err) => Err(err),
+        }
+    }
+
+    // Main version: libc is y2038 safe. Or, the platform is not y2038 safe and
+    // there's nothing practical we can do.
+    #[cfg(not(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64"))))]
+    unsafe {
+        let mut stat = MaybeUninit::<Stat>::uninit();
+        ret(libc_stat(c_str(path), stat.as_mut_ptr()))?;
+        Ok(stat.assume_init())
+    }
+}
+
+pub(crate) fn lstat(path: &CStr) -> io::Result<Stat> {
+    // See the comments in `fstat` about using `crate::fs::statx` here.
+    #[cfg(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64")))]
+    {
+        match crate::fs::statx(
+            crate::fs::cwd(),
+            path,
+            AtFlags::SYMLINK_NOFOLLOW,
+            StatxFlags::BASIC_STATS,
+        ) {
+            Ok(x) => statx_to_stat(x),
+            Err(io::Errno::NOSYS) => statat_old(crate::fs::cwd(), path, AtFlags::empty()),
+            Err(err) => Err(err),
+        }
+    }
+
+    // Main version: libc is y2038 safe. Or, the platform is not y2038 safe and
+    // there's nothing practical we can do.
+    #[cfg(not(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64"))))]
+    unsafe {
+        let mut stat = MaybeUninit::<Stat>::uninit();
+        ret(libc_lstat(c_str(path), stat.as_mut_ptr()))?;
+        Ok(stat.assume_init())
     }
 }
 
@@ -474,6 +608,11 @@ fn statat_old(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<
         ))?;
         stat64_to_stat(result.assume_init())
     }
+}
+
+#[cfg(not(target_os = "emscripten"))]
+pub(crate) fn access(path: &CStr, access: Access) -> io::Result<()> {
+    unsafe { ret(c::access(c_str(path), access.bits())) }
 }
 
 #[cfg(not(any(target_os = "emscripten", target_os = "redox")))]
@@ -525,6 +664,11 @@ pub(crate) fn accessat(
             flags.bits(),
         ))
     }
+}
+
+#[cfg(target_os = "emscripten")]
+pub(crate) fn access(_path: &CStr, _access: Access) -> io::Result<()> {
+    Ok(())
 }
 
 #[cfg(target_os = "emscripten")]
@@ -741,6 +885,11 @@ unsafe fn utimensat_old(
     ))
 }
 
+#[cfg(not(target_os = "wasi"))]
+pub(crate) fn chmod(path: &CStr, mode: Mode) -> io::Result<()> {
+    unsafe { ret(c::chmod(c_str(path), mode.bits() as c::mode_t)) }
+}
+
 #[cfg(not(any(linux_kernel, target_os = "redox", target_os = "wasi")))]
 pub(crate) fn chmodat(
     dirfd: BorrowedFd<'_>,
@@ -778,14 +927,14 @@ pub(crate) fn chmodat(
         return Err(io::Errno::INVAL);
     }
     unsafe {
-        // Pass `mode` as a `c_uint` even if `mode_t` is narrower, since
+        // Pass `mode` as a `c_ulong` even if `mode_t` is narrower, since
         // `libc_openat` is declared as a variadic function and narrower
         // arguments are promoted.
         syscall_ret(c::syscall(
             c::SYS_fchmodat,
             borrowed_fd(dirfd),
             c_str(path),
-            c::c_uint::from(mode.bits()),
+            mode.bits() as c::c_ulong,
         ))
     }
 }

@@ -76,8 +76,8 @@ pub fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
     // On Linux, open the device ourselves so that we can support `CLOEXEC`.
     #[cfg(linux_kernel)]
     {
-        use crate::fs::{cwd, openat, Mode};
-        match openat(cwd(), cstr!("/dev/ptmx"), flags.into(), Mode::empty()) {
+        use crate::fs::{open, Mode};
+        match open(cstr!("/dev/ptmx"), flags.into(), Mode::empty()) {
             // Match libc `openat` behavior with `ENOSPC`.
             Err(io::Errno::NOSPC) => Err(io::Errno::AGAIN),
             otherwise => otherwise,
