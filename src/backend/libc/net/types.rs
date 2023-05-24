@@ -472,6 +472,7 @@ bitflags! {
     /// [`socket_with`]: crate::net::socket_with
     /// [`accept_with`]: crate::net::accept_with
     /// [`acceptfrom_with`]: crate::net::acceptfrom_with
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SocketFlags: c::c_int {
         /// `SOCK_NONBLOCK`
         #[cfg(not(any(apple, windows, target_os = "haiku")))]

@@ -7,8 +7,7 @@ fn test_statx_unknown_flags() {
     // It's ok (though still unwise) to construct flags values that have
     // unknown bits. Exclude `STATX__RESERVED` here as that evokes an explicit
     // failure; that's tested separately below.
-    let too_many_flags =
-        unsafe { StatxFlags::from_bits_unchecked(!linux_raw_sys::general::STATX__RESERVED) };
+    let too_many_flags = StatxFlags::from_bits_retain(!linux_raw_sys::general::STATX__RESERVED);
 
     // It's also ok to pass such flags to `statx`.
     let result = match rustix::fs::statx(&f, "Cargo.toml", AtFlags::empty(), too_many_flags) {
@@ -32,8 +31,7 @@ fn test_statx_reserved() {
 
     // It's ok (though still unwise) to construct a `STATX__RESERVED` flag
     // value but `statx` should reliably fail with `INVAL`.
-    let reserved =
-        unsafe { StatxFlags::from_bits_unchecked(linux_raw_sys::general::STATX__RESERVED) };
+    let reserved = StatxFlags::from_bits_retain(linux_raw_sys::general::STATX__RESERVED);
     match rustix::fs::statx(&f, "Cargo.toml", AtFlags::empty(), reserved) {
         Ok(_) => panic!("statx succeeded with `STATX__RESERVED`"),
         Err(err) => assert_eq!(err, rustix::io::Errno::INVAL),

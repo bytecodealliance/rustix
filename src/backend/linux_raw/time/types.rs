@@ -85,6 +85,7 @@ bitflags! {
     /// `TFD_*` flags for use with [`timerfd_create`].
     ///
     /// [`timerfd_create`]: crate::time::timerfd_create
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct TimerfdFlags: c::c_uint {
         /// `TFD_NONBLOCK`
         const NONBLOCK = linux_raw_sys::general::TFD_NONBLOCK;
@@ -98,6 +99,7 @@ bitflags! {
     /// `TFD_TIMER_*` flags for use with [`timerfd_settime`].
     ///
     /// [`timerfd_settime`]: crate::time::timerfd_settime
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct TimerfdTimerFlags: c::c_uint {
         /// `TFD_TIMER_ABSTIME`
         const ABSTIME = linux_raw_sys::general::TFD_TIMER_ABSTIME;

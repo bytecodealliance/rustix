@@ -7,6 +7,7 @@ bitflags! {
     /// For `PROT_NONE`, use `ProtFlags::empty()`.
     ///
     /// [`mmap`]: crate::io::mmap
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct ProtFlags: u32 {
         /// `PROT_READ`
         const READ = linux_raw_sys::general::PROT_READ;
@@ -23,6 +24,7 @@ bitflags! {
     /// For `PROT_NONE`, use `MprotectFlags::empty()`.
     ///
     /// [`mprotect`]: crate::io::mprotect
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MprotectFlags: u32 {
         /// `PROT_READ`
         const READ = linux_raw_sys::general::PROT_READ;
@@ -44,6 +46,7 @@ bitflags! {
     ///
     /// [`mmap`]: crate::io::mmap
     /// [`mmap_anonymous`]: crates::io::mmap_anonymous
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MapFlags: u32 {
         /// `MAP_SHARED`
         const SHARED = linux_raw_sys::general::MAP_SHARED;
@@ -89,6 +92,7 @@ bitflags! {
     ///
     /// [`mremap`]: crate::io::mremap
     /// [`mremap_fixed`]: crate::io::mremap_fixed
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MremapFlags: u32 {
         /// `MREMAP_MAYMOVE`
         const MAYMOVE = linux_raw_sys::general::MREMAP_MAYMOVE;
@@ -101,6 +105,7 @@ bitflags! {
     /// `MLOCK_*` flags for use with [`mlock_with`].
     ///
     /// [`mlock_with`]: crate::io::mlock_with
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MlockFlags: u32 {
         /// `MLOCK_ONFAULT`
         const ONFAULT = linux_raw_sys::general::MLOCK_ONFAULT;
@@ -111,6 +116,7 @@ bitflags! {
     /// `MS_*` flags for use with [`msync`].
     ///
     /// [`msync`]: crate::io::msync
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MsyncFlags: u32 {
         /// `MS_SYNC`—Requests an update and waits for it to complete.
         const SYNC = linux_raw_sys::general::MS_SYNC;
@@ -128,6 +134,7 @@ bitflags! {
     /// `O_*` flags for use with [`userfaultfd`].
     ///
     /// [`userfaultfd`]: crate::io::userfaultfd
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct UserfaultfdFlags: c::c_uint {
         /// `O_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;

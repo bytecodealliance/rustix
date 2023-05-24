@@ -939,10 +939,7 @@ pub(crate) fn fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
 
 #[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
 pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<SealFlags> {
-    unsafe {
-        ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GET_SEALS))
-            .map(|flags| SealFlags::from_bits_unchecked(flags))
-    }
+    unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GET_SEALS)).map(SealFlags::from_bits_retain) }
 }
 
 #[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
@@ -1145,7 +1142,7 @@ fn libc_statvfs_to_statvfs(from: libc_statvfs) -> StatVfs {
         f_ffree: from.f_ffree as u64,
         f_favail: from.f_ffree as u64,
         f_fsid: from.f_fsid as u64,
-        f_flag: unsafe { StatVfsMountFlags::from_bits_unchecked(from.f_flag as u64) },
+        f_flag: StatVfsMountFlags::from_bits_retain(from.f_flag as u64),
         f_namemax: from.f_namemax as u64,
     }
 }

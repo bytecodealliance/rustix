@@ -2,6 +2,7 @@ bitflags::bitflags! {
     /// `FUTEX_*` flags for use with [`futex`].
     ///
     /// [`futex`]: crate::thread::futex
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct FutexFlags: u32 {
         /// `FUTEX_PRIVATE_FLAG`
         const PRIVATE = linux_raw_sys::general::FUTEX_PRIVATE_FLAG;

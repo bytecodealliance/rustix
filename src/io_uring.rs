@@ -100,7 +100,7 @@ pub unsafe fn io_uring_enter<Fd: AsFd>(
 
 bitflags::bitflags! {
     /// `IORING_ENTER_*` flags for use with [`io_uring_enter`].
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringEnterFlags: u32 {
         /// `IORING_ENTER_GETEVENTS`
         const GETEVENTS = sys::IORING_ENTER_GETEVENTS;
@@ -404,7 +404,7 @@ pub enum IoringMsgringCmds {
 
 bitflags::bitflags! {
     /// `IORING_SETUP_*` flags for use with [`io_uring_params`].
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringSetupFlags: u32 {
         /// `IORING_SETUP_ATTACH_WQ`
         const ATTACH_WQ = sys::IORING_SETUP_ATTACH_WQ;
@@ -452,7 +452,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// `IOSQE_*` flags for use with [`io_uring_sqe`].
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringSqeFlags: u8 {
         /// `1 << IOSQE_ASYNC_BIT`
         const ASYNC = 1 << sys::IOSQE_ASYNC_BIT as u8;
@@ -479,7 +479,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// `IORING_CQE_F_*` flags for use with [`io_uring_cqe`].
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringCqeFlags: u32 {
         /// `IORING_CQE_F_BUFFER`
         const BUFFER = sys::IORING_CQE_F_BUFFER as _;
@@ -497,7 +497,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// `IORING_FSYNC_*` flags for use with [`io_uring_sqe`].
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringFsyncFlags: u32 {
         /// `IORING_FSYNC_DATASYNC`
         const DATASYNC = sys::IORING_FSYNC_DATASYNC;
@@ -507,7 +507,7 @@ bitflags::bitflags! {
 bitflags::bitflags! {
     /// `IORING_TIMEOUT_*` and `IORING_LINK_TIMEOUT_UPDATE` flags for use with
     /// [`io_uring_sqe`].
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringTimeoutFlags: u32 {
         /// `IORING_TIMEOUT_ABS`
         const ABS = sys::IORING_TIMEOUT_ABS;
@@ -537,7 +537,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// `SPLICE_F_*` flags for use with [`io_uring_sqe`].
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SpliceFlags: u32 {
         /// `SPLICE_F_FD_IN_FIXED`
         const FD_IN_FIXED = sys::SPLICE_F_FD_IN_FIXED;
@@ -546,7 +546,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// `IORING_MSG_RING_*` flags for use with [`io_uring_sqe`].
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringMsgringFlags: u32 {
         /// `IORING_MSG_RING_CQE_SKIP`
         const CQE_SKIP = sys::IORING_MSG_RING_CQE_SKIP;
@@ -555,7 +555,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// `IORING_ASYNC_CANCEL_*` flags for use with [`io_uring_sqe`].
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringAsyncCancelFlags: u32 {
         /// `IORING_ASYNC_CANCEL_ALL`
         const ALL = sys::IORING_ASYNC_CANCEL_ALL;
@@ -573,7 +573,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// `IORING_FEAT_*` flags for use with [`io_uring_params`].
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringFeatureFlags: u32 {
         /// `IORING_FEAT_CQE_SKIP`
         const CQE_SKIP = sys::IORING_FEAT_CQE_SKIP;
@@ -618,7 +618,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// `IO_URING_OP_*` flags for use with [`io_uring_probe_op`].
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringOpFlags: u16 {
         /// `IO_URING_OP_SUPPORTED`
         const SUPPORTED = sys::IO_URING_OP_SUPPORTED as _;
@@ -627,7 +627,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// `IORING_RSRC_*` flags for use with [`io_uring_rsrc_register`].
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringRsrcFlags: u32 {
         /// `IORING_RSRC_REGISTER_SPARSE`
         const REGISTER_SPARSE = sys::IORING_RSRC_REGISTER_SPARSE as _;
@@ -636,7 +636,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// `IORING_SQ_*` flags.
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringSqFlags: u32 {
         /// `IORING_SQ_NEED_WAKEUP`
         const NEED_WAKEUP = sys::IORING_SQ_NEED_WAKEUP;
@@ -651,7 +651,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// `IORING_CQ_*` flags.
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringCqFlags: u32 {
         /// `IORING_CQ_EVENTFD_DISABLED`
         const EVENTFD_DISABLED = sys::IORING_CQ_EVENTFD_DISABLED;
@@ -660,7 +660,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// `IORING_POLL_*` flags.
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringPollFlags: u32 {
         /// `IORING_POLL_ADD_MULTI`
         const ADD_MULTI = sys::IORING_POLL_ADD_MULTI;
@@ -678,7 +678,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// send/sendmsg flags (`sqe.ioprio`)
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringSendFlags: u16 {
         /// `IORING_RECVSEND_POLL_FIRST`.
         ///
@@ -697,7 +697,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// recv/recvmsg flags (`sqe.ioprio`)
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringRecvFlags: u16 {
         /// `IORING_RECVSEND_POLL_FIRST`
         ///
@@ -716,7 +716,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// accept flags (`sqe.ioprio`)
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringAcceptFlags: u16 {
         /// `IORING_ACCEPT_MULTISHOT`
         const MULTISHOT = sys::IORING_ACCEPT_MULTISHOT as _;
@@ -725,7 +725,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// recvmsg out flags
-    #[derive(Default)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct RecvmsgOutFlags: u32 {
         /// `MSG_EOR`
         const EOR = sys::MSG_EOR;

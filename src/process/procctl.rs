@@ -221,6 +221,7 @@ const PROC_REAP_STATUS: c_int = 4;
 
 bitflags! {
     /// `REAPER_STATUS_*`.
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct ReaperStatusFlags: c_uint {
         /// The process has acquired reaper status.
         const OWNED = 1;
@@ -278,6 +279,7 @@ const PROC_REAP_GETPIDS: c_int = 5;
 
 bitflags! {
     /// `REAPER_PIDINFO_*`.
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct PidInfoFlags: c_uint {
         /// This structure was filled by the kernel.
         const VALID = 1;
@@ -359,6 +361,7 @@ const PROC_REAP_KILL: c_int = 6;
 
 bitflags! {
     /// `REAPER_KILL_*`.
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     struct KillFlags: c_uint {
         const CHILDREN = 1;
         const SUBTREE = 2;
