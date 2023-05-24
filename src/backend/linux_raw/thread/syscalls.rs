@@ -16,9 +16,9 @@ use crate::io;
 use crate::process::{Pid, RawNonZeroPid};
 use crate::thread::{ClockId, FutexFlags, FutexOperation, NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
-use linux_raw_sys::general::{__kernel_pid_t, __kernel_timespec, TIMER_ABSTIME};
 #[cfg(target_pointer_width = "32")]
-use {core::convert::TryInto, linux_raw_sys::general::timespec as __kernel_old_timespec};
+use linux_raw_sys::general::timespec as __kernel_old_timespec;
+use linux_raw_sys::general::{__kernel_pid_t, __kernel_timespec, TIMER_ABSTIME};
 
 #[inline]
 pub(crate) fn clock_nanosleep_relative(
@@ -85,8 +85,7 @@ unsafe fn clock_nanosleep_relative_old(
         &mut old_rem
     ))?;
     let old_rem = old_rem.assume_init();
-    // TODO: With Rust 1.55, we can use MaybeUninit::write here.
-    rem.as_mut_ptr().write(__kernel_timespec {
+    rem.write(__kernel_timespec {
         tv_sec: old_rem.tv_sec.into(),
         tv_nsec: old_rem.tv_nsec.into(),
     });
@@ -190,8 +189,7 @@ unsafe fn nanosleep_old(
     let mut old_rem = MaybeUninit::<__kernel_old_timespec>::uninit();
     ret(syscall!(__NR_nanosleep, by_ref(&old_req), &mut old_rem))?;
     let old_rem = old_rem.assume_init();
-    // TODO: With Rust 1.55, we can use MaybeUninit::write here.
-    rem.as_mut_ptr().write(__kernel_timespec {
+    rem.write(__kernel_timespec {
         tv_sec: old_rem.tv_sec.into(),
         tv_nsec: old_rem.tv_nsec.into(),
     });

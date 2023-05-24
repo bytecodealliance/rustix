@@ -46,6 +46,5 @@ pub(crate) fn CPU_ISSET(cpu: usize, cpuset: &RawCpuSet) -> bool {
 #[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
-    use core::convert::TryInto;
     unsafe { c::CPU_COUNT(cpuset).try_into().unwrap() }
 }

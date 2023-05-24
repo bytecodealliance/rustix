@@ -9,7 +9,6 @@ use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::utils::as_ptr;
-use core::convert::TryInto;
 use core::mem::{size_of, MaybeUninit};
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 use {
@@ -471,13 +470,9 @@ pub(crate) mod sockopt {
     use crate::net::sockopt::Timeout;
     use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
     use crate::utils::as_mut_ptr;
-    use core::convert::TryInto;
     use core::time::Duration;
     #[cfg(windows)]
     use windows_sys::Win32::Foundation::BOOL;
-
-    // TODO: With Rust 1.53 we can use `Duration::ZERO` instead.
-    const DURATION_ZERO: Duration = Duration::from_secs(0);
 
     #[inline]
     fn getsockopt<T: Copy>(fd: BorrowedFd<'_>, level: i32, optname: i32) -> io::Result<T> {
@@ -592,12 +587,7 @@ pub(crate) mod sockopt {
     #[inline]
     pub(crate) fn get_socket_linger(fd: BorrowedFd<'_>) -> io::Result<Option<Duration>> {
         let linger: c::linger = getsockopt(fd, c::SOL_SOCKET as _, c::SO_LINGER)?;
-        // TODO: With Rust 1.50, this could use `.then`.
-        Ok(if linger.l_onoff != 0 {
-            Some(Duration::from_secs(linger.l_linger as u64))
-        } else {
-            None
-        })
+        Ok((linger.l_onoff != 0).then(|| Duration::from_secs(linger.l_linger as u64)))
     }
 
     #[cfg(linux_kernel)]
@@ -626,7 +616,7 @@ pub(crate) mod sockopt {
         #[cfg(not(windows))]
         let timeout = match timeout {
             Some(timeout) => {
-                if timeout == DURATION_ZERO {
+                if timeout == Duration::ZERO {
                     return Err(io::Errno::INVAL);
                 }
 
@@ -657,7 +647,7 @@ pub(crate) mod sockopt {
         #[cfg(windows)]
         let timeout: u32 = match timeout {
             Some(timeout) => {
-                if timeout == DURATION_ZERO {
+                if timeout == Duration::ZERO {
                     return Err(io::Errno::INVAL);
                 }
 

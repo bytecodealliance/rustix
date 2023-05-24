@@ -1,8 +1,6 @@
 //! Socket address utilities.
 
 use super::super::c;
-#[cfg(not(windows))]
-use core::convert::TryInto;
 #[cfg(unix)]
 use {
     crate::ffi::CStr,

@@ -21,7 +21,6 @@ use crate::io::EventfdFlags;
 use crate::io::PipeFlags;
 use crate::io::{self, FdFlags, IoSlice, IoSliceMut, PollFd};
 use core::cmp::min;
-use core::convert::TryInto;
 use core::mem::MaybeUninit;
 #[cfg(all(feature = "fs", feature = "net"))]
 use libc_errno::errno;

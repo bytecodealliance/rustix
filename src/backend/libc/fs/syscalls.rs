@@ -90,7 +90,6 @@ use crate::process::{Gid, Uid};
 use crate::utils::as_ptr;
 #[cfg(apple)]
 use alloc::vec;
-use core::convert::TryInto;
 use core::mem::MaybeUninit;
 #[cfg(apple)]
 use {
@@ -1718,9 +1717,6 @@ pub(crate) fn getpath(fd: BorrowedFd<'_>) -> io::Result<CString> {
 
     let l = buf.iter().position(|&c| c == 0).unwrap();
     buf.truncate(l);
-
-    // TODO: On Rust 1.56, we can use `shrink_to` here.
-    //buf.shrink_to(l + 1);
     buf.shrink_to_fit();
 
     Ok(CString::new(buf).unwrap())

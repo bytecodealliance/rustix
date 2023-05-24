@@ -517,7 +517,7 @@ jobs:
 
     - run: |
         # Run the tests, and check the prebuilt release libraries.
-        cargo test --verbose --features=all-impls,all-apis,cc --release --workspace -- --nocapture
+        cargo test --verbose --features=all-apis,cc --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: full
         MACOSX_DEPLOYMENT_TARGET: 10.7
@@ -525,7 +525,7 @@ jobs:
 
     - run: |
         # Check the prebuilt debug libraries too.
-        cargo check --features=all-impls,all-apis,cc
+        cargo check --features=all-apis,cc
       env:
         RUST_BACKTRACE: full
         MACOSX_DEPLOYMENT_TARGET: 10.7
@@ -669,7 +669,7 @@ jobs:
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
-        cargo test --verbose --features=use-libc,all-impls,all-apis --release --workspace -- --nocapture
+        cargo test --verbose --features=use-libc,all-apis --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: full
 
@@ -778,6 +778,6 @@ jobs:
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
-        cargo test --verbose --features=all-impls,all-apis --release --workspace -- --nocapture
+        cargo test --verbose --features=all-apis --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: full
