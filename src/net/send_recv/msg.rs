@@ -325,43 +325,43 @@ impl<'buf> Iterator for AncillaryDrain<'buf> {
         (0, max)
     }
 
-    fn fold<B, F>(mut self, init: B, f: F) -> B
+    fn fold<B, F>(self, init: B, f: F) -> B
     where
         Self: Sized,
         F: FnMut(B, Self::Item) -> B,
     {
-        let read = &mut self.read;
-        let length = &mut self.length;
+        let read = self.read;
+        let length = self.length;
         self.messages
             .filter_map(|ev| Self::cvt_msg(read, length, ev))
             .fold(init, f)
     }
 
-    fn count(mut self) -> usize {
-        let read = &mut self.read;
-        let length = &mut self.length;
+    fn count(self) -> usize {
+        let read = self.read;
+        let length = self.length;
         self.messages
             .filter_map(|ev| Self::cvt_msg(read, length, ev))
             .count()
     }
 
-    fn last(mut self) -> Option<Self::Item>
+    fn last(self) -> Option<Self::Item>
     where
         Self: Sized,
     {
-        let read = &mut self.read;
-        let length = &mut self.length;
+        let read = self.read;
+        let length = self.length;
         self.messages
             .filter_map(|ev| Self::cvt_msg(read, length, ev))
             .last()
     }
 
-    fn collect<B: FromIterator<Self::Item>>(mut self) -> B
+    fn collect<B: FromIterator<Self::Item>>(self) -> B
     where
         Self: Sized,
     {
-        let read = &mut self.read;
-        let length = &mut self.length;
+        let read = self.read;
+        let length = self.length;
         self.messages
             .filter_map(|ev| Self::cvt_msg(read, length, ev))
             .collect()

@@ -1440,7 +1440,7 @@ pub(crate) mod sockopt {
     #[inline]
     pub(crate) fn set_ipv6_unicast_hops(fd: BorrowedFd<'_>, hops: Option<u8>) -> io::Result<()> {
         let hops = match hops {
-            Some(hops) => hops as c::c_int,
+            Some(hops) => hops.into(),
             None => -1,
         };
         setsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_UNICAST_HOPS, hops)

@@ -277,7 +277,6 @@ pub(crate) fn clock_settime(id: ClockId, timespec: Timespec) -> io::Result<()> {
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
-#[must_use]
 unsafe fn clock_settime_old(id: ClockId, timespec: Timespec) -> io::Result<()> {
     use core::convert::TryInto;
     let old_timespec = c::timespec {

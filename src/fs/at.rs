@@ -49,7 +49,7 @@ pub const UTIME_OMIT: Nsecs = backend::c::UTIME_OMIT as Nsecs;
 ///  - [Linux]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/openat.html
-/// [Linux]: https://man7.org/linux/man-pages/man2/open.2.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/openat.2.html
 #[inline]
 pub fn openat<P: path::Arg, Fd: AsFd>(
     dirfd: Fd,

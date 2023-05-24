@@ -1,4 +1,4 @@
-//! The ELF ABI.
+//! The ELF ABI. 🧝
 
 #![allow(non_snake_case)]
 #![cfg_attr(

@@ -160,6 +160,7 @@ pub fn epoll_create(flags: CreateFlags) -> io::Result<OwnedFd> {
 /// is an `Arc<dyn SystemResource>`, then `epoll` can be thought to maintain
 /// a `Weak<dyn SystemResource>` to the file descriptor.
 #[doc(alias = "epoll_ctl")]
+#[inline]
 pub fn epoll_add(
     epoll: impl AsFd,
     source: impl AsFd,
@@ -185,6 +186,7 @@ pub fn epoll_add(
 ///
 /// This sets the events of interest with `target` to `events`.
 #[doc(alias = "epoll_ctl")]
+#[inline]
 pub fn epoll_mod(
     epoll: impl AsFd,
     source: impl AsFd,
@@ -211,6 +213,7 @@ pub fn epoll_mod(
 ///
 /// This also returns the owning `Data`.
 #[doc(alias = "epoll_ctl")]
+#[inline]
 pub fn epoll_del(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
     // SAFETY: We're calling `epoll_ctl` via FFI and we know how it
     // behaves.
@@ -225,6 +228,7 @@ pub fn epoll_del(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
 ///
 /// For each event of interest, an element is written to `events`. On
 /// success, this returns the number of written elements.
+#[inline]
 pub fn epoll_wait(
     epoll: impl AsFd,
     event_list: &mut EventVec,
@@ -254,6 +258,7 @@ pub struct Iter<'a> {
 impl<'a> Iterator for Iter<'a> {
     type Item = (EventFlags, u64);
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.iter
             .next()

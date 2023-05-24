@@ -158,7 +158,7 @@ pub(crate) fn thread_has_capability(capability: Capability) -> io::Result<bool> 
         libc::syscall(
             libc::SYS_capget,
             &header as *const cap_user_header_t,
-            data.as_mut_ptr() as *mut cap_user_data_t,
+            data.as_mut_ptr(),
         )
     };
 

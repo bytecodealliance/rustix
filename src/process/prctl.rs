@@ -1023,7 +1023,7 @@ const PR_SET_IO_FLUSHER: c_int = 57;
 /// [`prctl(PR_SET_IO_FLUSHER,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn configure_io_flusher_behavior(enable: bool) -> io::Result<()> {
-    unsafe { prctl_2args(PR_SET_IO_FLUSHER, enable as usize as *mut _) }.map(|_r| ())
+    unsafe { prctl_2args(PR_SET_IO_FLUSHER, usize::from(enable) as *mut _) }.map(|_r| ())
 }
 
 //

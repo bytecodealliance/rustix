@@ -76,6 +76,7 @@ bitflags! {
 /// Use the [`CreateFlags::CLOEXEC`] flag to prevent the resulting file
 /// descriptor from being implicitly passed across `exec` boundaries.
 #[doc(alias = "inotify_init1")]
+#[inline]
 pub fn inotify_init(flags: CreateFlags) -> io::Result<OwnedFd> {
     syscalls::inotify_init1(flags)
 }
@@ -89,6 +90,7 @@ pub fn inotify_init(flags: CreateFlags) -> io::Result<OwnedFd> {
 /// different paths to this method may result in it returning
 /// the same watch descriptor. An application should keep track of this
 /// externally to avoid logic errors.
+#[inline]
 pub fn inotify_add_watch<P: crate::path::Arg>(
     inot: BorrowedFd<'_>,
     path: P,
@@ -103,6 +105,7 @@ pub fn inotify_add_watch<P: crate::path::Arg>(
 /// The watch descriptor provided should have previously been returned
 /// by [`inotify_add_watch`] and not previously have been removed.
 #[doc(alias = "inotify_rm_watch")]
+#[inline]
 pub fn inotify_remove_watch(inot: BorrowedFd<'_>, wd: i32) -> io::Result<()> {
     syscalls::inotify_rm_watch(inot, wd)
 }
