@@ -21,6 +21,8 @@ pub(crate) fn with_recv_msghdr<R>(
     control: &mut RecvAncillaryBuffer<'_>,
     f: impl FnOnce(&mut c::msghdr) -> io::Result<R>,
 ) -> io::Result<R> {
+    control.clear();
+
     let namelen = size_of::<c::sockaddr_storage>() as c::socklen_t;
     let mut msghdr = {
         let mut h: c::msghdr = unsafe { zeroed() };
