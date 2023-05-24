@@ -277,7 +277,7 @@ pub(crate) fn recvmsg(
 }
 
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
-pub(crate) fn sendmsg_noaddr(
+pub(crate) fn sendmsg(
     sockfd: BorrowedFd<'_>,
     iov: &[IoSlice<'_>],
     control: &mut SendAncillaryBuffer<'_, '_, '_>,

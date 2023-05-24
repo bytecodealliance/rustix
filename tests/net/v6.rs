@@ -98,7 +98,7 @@ fn test_v6() {
 #[test]
 fn test_v6_msg() {
     use rustix::io::{IoSlice, IoSliceMut};
-    use rustix::net::{recvmsg, sendmsg_noaddr};
+    use rustix::net::{recvmsg, sendmsg};
 
     fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
         let connection_socket = socket(
@@ -139,7 +139,7 @@ fn test_v6_msg() {
             "hello, world"
         );
 
-        sendmsg_noaddr(
+        sendmsg(
             &data_socket,
             &[IoSlice::new(b"goodnight, moon")],
             &mut Default::default(),
@@ -169,7 +169,7 @@ fn test_v6_msg() {
         .unwrap();
         connect_v6(&data_socket, &addr).unwrap();
 
-        sendmsg_noaddr(
+        sendmsg(
             &data_socket,
             &[IoSlice::new(b"hello, world")],
             &mut Default::default(),
