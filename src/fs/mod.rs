@@ -61,7 +61,7 @@ pub use constants::*;
 #[cfg(linux_kernel)]
 pub use copy_file_range::copy_file_range;
 #[cfg(not(target_os = "redox"))]
-pub use cwd::cwd;
+pub use cwd::*;
 #[cfg(not(target_os = "redox"))]
 pub use dir::{Dir, DirEntry};
 #[cfg(not(any(

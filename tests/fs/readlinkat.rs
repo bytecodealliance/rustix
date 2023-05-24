@@ -28,10 +28,10 @@ fn test_readlink() {
 
 #[test]
 fn test_readlinkat() {
-    use rustix::fs::{cwd, openat, readlinkat, symlinkat, Mode, OFlags};
+    use rustix::fs::{openat, readlinkat, symlinkat, Mode, OFlags, CWD};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     let _ = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::RUSR).unwrap();
     symlinkat("foo", &dir, "link").unwrap();

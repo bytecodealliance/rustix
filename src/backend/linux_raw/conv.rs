@@ -167,7 +167,7 @@ impl<'a, Num: ArgNumber> From<BorrowedFd<'a>> for ArgReg<'a, Num> {
 pub(super) unsafe fn raw_fd<'a, Num: ArgNumber>(fd: RawFd) -> ArgReg<'a, Num> {
     // Use `no_fd` when passing `-1` is intended.
     #[cfg(feature = "fs")]
-    debug_assert!(fd == crate::fs::cwd().as_raw_fd() || fd >= 0);
+    debug_assert!(fd == crate::fs::CWD.as_raw_fd() || fd >= 0);
 
     // Don't pass the `io_uring_register_files_skip` sentry value this way.
     #[cfg(feature = "io_uring")]

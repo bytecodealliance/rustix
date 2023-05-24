@@ -23,10 +23,10 @@ fn test_symlink() {
 
 #[test]
 fn test_symlinkat() {
-    use rustix::fs::{cwd, openat, readlinkat, statat, symlinkat, AtFlags, Mode, OFlags};
+    use rustix::fs::{openat, readlinkat, statat, symlinkat, AtFlags, Mode, OFlags, CWD};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(cwd(), tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
     let _ = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::RUSR).unwrap();
     symlinkat("foo", &dir, "link").unwrap();

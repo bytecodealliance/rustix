@@ -11,7 +11,7 @@ fn main() -> std::io::Result<()> {
 
     #[cfg(feature = "fs")]
     let dir = fs::openat(
-        fs::cwd(),
+        fs::CWD,
         ".",
         fs::OFlags::RDONLY | fs::OFlags::DIRECTORY | fs::OFlags::CLOEXEC,
         fs::Mode::empty(),

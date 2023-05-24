@@ -1,6 +1,6 @@
 use std::fs::File;
 
-use rustix::fs::{cwd, open, openat, Mode, OFlags};
+use rustix::fs::{open, openat, Mode, OFlags, CWD};
 use std::io::Write;
 
 #[test]
@@ -26,7 +26,7 @@ fn test_open_tmpfile() {
 fn test_openat_tmpfile() {
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
-        cwd(),
+        CWD,
         tmp.path(),
         OFlags::RDONLY | OFlags::CLOEXEC,
         Mode::empty(),
