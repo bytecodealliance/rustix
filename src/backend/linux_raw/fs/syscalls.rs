@@ -25,10 +25,10 @@ use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::fs::{
     inotify, Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, Gid, MemfdFlags,
-    Mode, OFlags, RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatVfs, StatVfsMountFlags,
-    StatxFlags, Timestamps, Uid, XattrFlags,
+    Mode, OFlags, RenameFlags, ResolveFlags, SealFlags, SeekFrom, Stat, StatFs, StatVfs,
+    StatVfsMountFlags, StatxFlags, Timestamps, Uid, XattrFlags,
 };
-use crate::io::{self, SeekFrom};
+use crate::io;
 use core::mem::{transmute, zeroed, MaybeUninit};
 #[cfg(target_arch = "mips64")]
 use linux_raw_sys::general::stat as linux_stat64;
