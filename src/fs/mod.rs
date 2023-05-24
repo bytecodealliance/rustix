@@ -30,6 +30,8 @@ mod file_type;
 mod getpath;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;
+#[cfg(not(target_os = "wasi"))]
+mod ioctl;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 mod makedev;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
@@ -82,6 +84,8 @@ pub use file_type::FileType;
 pub use getpath::getpath;
 #[cfg(not(target_os = "wasi"))]
 pub use id::*;
+#[cfg(not(target_os = "wasi"))]
+pub use ioctl::*;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 pub use makedev::*;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
