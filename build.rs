@@ -182,8 +182,8 @@ fn link_in_librustix_outline(arch: &str, asm_name: &str) {
     {
         let out_dir = var("OUT_DIR").unwrap();
         // Add `-gdwarf-3` so that we always get the same output, regardless of
-        // the Rust version we're using. DWARF3 is the version used in
-        // Rust 1.48 and is entirely adequate for our simple needs here.
+        // the Rust version we're using. DWARF3 is entirely adequate for our
+        // simple needs here.
         let mut build = Build::new();
         if profile == "debug" {
             build.flag("-gdwarf-3");
