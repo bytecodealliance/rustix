@@ -53,7 +53,7 @@ pub(crate) fn ioctl_tiocgptpeer(fd: BorrowedFd, flags: OpenptFlags) -> io::Resul
             __NR_ioctl,
             fd,
             c_uint(TIOCGPTPEER),
-            c_uint(flags.bits())
+            flags
         ))
     }
 }
