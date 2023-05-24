@@ -30,7 +30,7 @@ use core::mem::MaybeUninit;
 use {
     crate::backend::conv::{slice_just_addr, x86_sys},
     crate::backend::reg::{ArgReg, SocketArg},
-    linux_raw_sys::general::{
+    linux_raw_sys::net::{
         SYS_ACCEPT, SYS_ACCEPT4, SYS_BIND, SYS_CONNECT, SYS_GETPEERNAME, SYS_GETSOCKNAME,
         SYS_GETSOCKOPT, SYS_LISTEN, SYS_RECV, SYS_RECVFROM, SYS_RECVMSG, SYS_SEND, SYS_SENDMSG,
         SYS_SENDTO, SYS_SETSOCKOPT, SYS_SHUTDOWN, SYS_SOCKET, SYS_SOCKETPAIR,
@@ -1442,7 +1442,7 @@ pub(crate) mod sockopt {
     #[inline]
     fn to_ipv6mr_multiaddr(multiaddr: &Ipv6Addr) -> c::in6_addr {
         c::in6_addr {
-            in6_u: linux_raw_sys::general::in6_addr__bindgen_ty_1 {
+            in6_u: linux_raw_sys::net::in6_addr__bindgen_ty_1 {
                 u6_addr8: multiaddr.octets(),
             },
         }

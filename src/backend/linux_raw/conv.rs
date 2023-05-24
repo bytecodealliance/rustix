@@ -50,11 +50,11 @@ use core::ptr::null_mut;
 use linux_raw_sys::general::__kernel_clockid_t;
 #[cfg(target_pointer_width = "64")]
 use linux_raw_sys::general::__kernel_loff_t;
-#[cfg(feature = "net")]
-use linux_raw_sys::general::socklen_t;
 #[cfg(target_pointer_width = "32")]
 #[cfg(feature = "fs")]
 use linux_raw_sys::general::O_LARGEFILE;
+#[cfg(feature = "net")]
+use linux_raw_sys::net::socklen_t;
 
 /// Convert `SYS_*` constants for socketcall.
 #[cfg(target_arch = "x86")]
