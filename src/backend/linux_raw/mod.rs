@@ -91,7 +91,4 @@ pub(crate) mod ugid;
 
 /// The maximum number of buffers that can be passed into a vectored I/O system
 /// call on the current platform.
-#[inline]
-const fn max_iov() -> usize {
-    linux_raw_sys::general::UIO_MAXIOV as usize
-}
+const MAX_IOV: usize = linux_raw_sys::general::UIO_MAXIOV as usize;

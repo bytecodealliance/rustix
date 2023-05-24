@@ -7,7 +7,7 @@
 #![allow(clippy::undocumented_unsafe_blocks)]
 
 use crate::backend::conv::{c_int, c_uint, opt_mut, pass_usize, ret, ret_usize, slice};
-use crate::backend::{c, max_iov};
+use crate::backend::{c, MAX_IOV};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
 use crate::pipe::{IoSliceRaw, PipeFlags, SpliceFlags};
@@ -81,7 +81,7 @@ pub unsafe fn vmsplice(
     bufs: &[IoSliceRaw],
     flags: SpliceFlags,
 ) -> io::Result<usize> {
-    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
+    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), MAX_IOV)]);
     ret_usize(syscall!(__NR_vmsplice, fd, bufs_addr, bufs_len, flags))
 }
 
