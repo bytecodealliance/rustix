@@ -57,7 +57,7 @@ pub type Sigset = linux_raw_sys::general::kernel_sigset_t;
 #[cfg(linux_raw)]
 pub type Siginfo = linux_raw_sys::general::siginfo_t;
 
-pub use backend::time::types::{Nsecs, Secs, Timespec};
+pub use crate::timespec::{Nsecs, Secs, Timespec};
 
 /// `SIG_*` constants for use with [`sigprocmask`].
 #[cfg(linux_raw)]

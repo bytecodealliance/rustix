@@ -95,6 +95,7 @@ pub(crate) mod termios;
 #[cfg(feature = "thread")]
 pub(crate) mod thread;
 #[cfg(not(windows))]
+#[cfg(feature = "time")]
 pub(crate) mod time;
 
 /// If the host libc is glibc, return `true` if it is less than version 2.25.
@@ -118,11 +119,13 @@ pub(crate) fn if_glibc_is_less_than_2_25() -> bool {
 
 // Private modules used by multiple public modules.
 #[cfg(any(feature = "procfs", feature = "process", feature = "runtime"))]
+#[cfg(not(windows))]
 pub(crate) mod pid;
 #[cfg(any(feature = "process", feature = "thread"))]
 #[cfg(linux_kernel)]
 pub(crate) mod prctl;
 #[cfg(any(feature = "fs", feature = "thread", feature = "process"))]
+#[cfg(not(any(windows, target_os = "wasi")))]
 pub(crate) mod ugid;
 
 #[cfg(bsd)]

@@ -37,11 +37,6 @@ use crate::backend::offset::{libc_fstat, libc_fstatat, libc_ftruncate, libc_lsee
 use crate::backend::offset::{libc_fstatfs, libc_statfs};
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use crate::backend::offset::{libc_fstatvfs, libc_statvfs};
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
-use crate::backend::time::types::LibcTimespec;
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 #[cfg(apple)]
@@ -83,6 +78,11 @@ use crate::fs::{Dev, FileType};
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use crate::fs::{StatVfs, StatVfsMountFlags};
 use crate::io;
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu",
+))]
+use crate::timespec::LibcTimespec;
 #[cfg(not(target_os = "wasi"))]
 use crate::ugid::{Gid, Uid};
 #[cfg(not(all(

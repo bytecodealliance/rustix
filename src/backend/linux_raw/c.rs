@@ -10,6 +10,8 @@ pub(crate) use linux_raw_sys::cmsg_macros::*;
 pub(crate) use linux_raw_sys::ctypes::*;
 pub(crate) use linux_raw_sys::errno::EINVAL;
 pub(crate) use linux_raw_sys::general::__kernel_pid_t as pid_t;
+pub(crate) use linux_raw_sys::general::__kernel_time64_t as time_t;
+pub(crate) use linux_raw_sys::general::__kernel_timespec as timespec;
 pub(crate) use linux_raw_sys::general::{
     AF_DECnet, __kernel_sa_family_t as sa_family_t, __kernel_sockaddr_storage as sockaddr_storage,
     cmsghdr, in6_addr, in_addr, iovec, ip_mreq, ipv6_mreq, linger, msghdr, siginfo_t, size_t,
@@ -42,6 +44,9 @@ pub(crate) use linux_raw_sys::general::{XATTR_CREATE, XATTR_REPLACE};
 pub(crate) type uid_t = u32;
 #[cfg(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86"))]
 pub(crate) type gid_t = u32;
+
+// Bindgen infers `u32` for many of these macro types which meant to be
+// used with `c_int` in the C APIs, so cast them to `c_int`.
 
 // Convert the signal constants from `u32` to `c_int`.
 pub(crate) const SIGHUP: c_int = linux_raw_sys::general::SIGHUP as _;
@@ -93,3 +98,14 @@ pub(crate) const STDIN_FILENO: c_int = linux_raw_sys::general::STDIN_FILENO as _
 pub(crate) const STDOUT_FILENO: c_int = linux_raw_sys::general::STDOUT_FILENO as _;
 pub(crate) const STDERR_FILENO: c_int = linux_raw_sys::general::STDERR_FILENO as _;
 pub(crate) const PIPE_BUF: usize = linux_raw_sys::general::PIPE_BUF as _;
+
+pub(crate) const CLOCK_MONOTONIC: c_int = linux_raw_sys::general::CLOCK_MONOTONIC as _;
+pub(crate) const CLOCK_REALTIME: c_int = linux_raw_sys::general::CLOCK_REALTIME as _;
+pub(crate) const CLOCK_MONOTONIC_RAW: c_int = linux_raw_sys::general::CLOCK_MONOTONIC_RAW as _;
+pub(crate) const CLOCK_MONOTONIC_COARSE: c_int =
+    linux_raw_sys::general::CLOCK_MONOTONIC_COARSE as _;
+pub(crate) const CLOCK_REALTIME_COARSE: c_int = linux_raw_sys::general::CLOCK_REALTIME_COARSE as _;
+pub(crate) const CLOCK_THREAD_CPUTIME_ID: c_int =
+    linux_raw_sys::general::CLOCK_THREAD_CPUTIME_ID as _;
+pub(crate) const CLOCK_PROCESS_CPUTIME_ID: c_int =
+    linux_raw_sys::general::CLOCK_PROCESS_CPUTIME_ID as _;

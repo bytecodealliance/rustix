@@ -245,18 +245,33 @@ pub mod time;
 pub mod runtime;
 
 // Private modules used by multiple public modules.
+#[cfg(not(windows))]
+#[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
+mod clockid;
+#[cfg(not(windows))]
 #[cfg(any(
     feature = "procfs",
     feature = "process",
     feature = "runtime",
     feature = "termios",
-    feature = "thread"
+    feature = "thread",
+    all(bsd, feature = "event")
 ))]
 mod pid;
 #[cfg(any(feature = "process", feature = "thread"))]
 #[cfg(linux_kernel)]
 mod prctl;
-#[cfg(any(feature = "process", feature = "runtime"))]
+#[cfg(not(any(windows, target_os = "wasi")))]
+#[cfg(any(feature = "process", feature = "runtime", all(bsd, feature = "event")))]
 mod signal;
+#[cfg(not(windows))]
+#[cfg(any(
+    feature = "fs",
+    feature = "runtime",
+    feature = "thread",
+    feature = "time"
+))]
+mod timespec;
+#[cfg(not(any(windows, target_os = "wasi")))]
 #[cfg(any(feature = "fs", feature = "process", feature = "thread"))]
 mod ugid;

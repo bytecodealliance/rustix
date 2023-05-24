@@ -1,12 +1,16 @@
 //! libc syscalls supporting `rustix::time`.
 
-use super::types::Timespec;
-#[cfg(not(target_os = "wasi"))]
-use super::types::{ClockId, DynamicClockId};
 use crate::backend::c;
 use crate::backend::conv::ret;
-use crate::backend::time::types::LibcTimespec;
+#[cfg(not(target_os = "wasi"))]
+use crate::clockid::{ClockId, DynamicClockId};
 use crate::io;
+#[cfg(all(
+    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
+    target_env = "gnu",
+))]
+use crate::timespec::LibcTimespec;
+use crate::timespec::Timespec;
 use core::mem::MaybeUninit;
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(feature = "time")]
@@ -49,8 +53,6 @@ weak!(fn __timerfd_settime64(c::c_int, c::c_int, *const LibcItimerspec, *mut Lib
 #[inline]
 #[must_use]
 pub(crate) fn clock_getres(id: ClockId) -> Timespec {
-    let mut timespec = MaybeUninit::<LibcTimespec>::uninit();
-
     // 32-bit gnu version: libc has `clock_getres` but it is not y2038 safe by
     // default.
     #[cfg(all(
@@ -58,6 +60,8 @@ pub(crate) fn clock_getres(id: ClockId) -> Timespec {
         target_env = "gnu",
     ))]
     unsafe {
+        let mut timespec = MaybeUninit::<LibcTimespec>::uninit();
+
         if let Some(libc_clock_getres) = __clock_getres64.get() {
             ret(libc_clock_getres(id as c::clockid_t, timespec.as_mut_ptr())).unwrap();
             timespec.assume_init().into()
@@ -72,6 +76,7 @@ pub(crate) fn clock_getres(id: ClockId) -> Timespec {
         target_env = "gnu",
     )))]
     unsafe {
+        let mut timespec = MaybeUninit::<Timespec>::uninit();
         let _ = c::clock_getres(id as c::clockid_t, timespec.as_mut_ptr());
         timespec.assume_init()
     }
@@ -100,13 +105,13 @@ unsafe fn clock_getres_old(id: ClockId) -> Timespec {
 #[inline]
 #[must_use]
 pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
-    let mut timespec = MaybeUninit::<LibcTimespec>::uninit();
-
     #[cfg(all(
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
         target_env = "gnu",
     ))]
     unsafe {
+        let mut timespec = MaybeUninit::<LibcTimespec>::uninit();
+
         if let Some(libc_clock_gettime) = __clock_gettime64.get() {
             ret(libc_clock_gettime(
                 id as c::clockid_t,
@@ -128,6 +133,7 @@ pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
         target_env = "gnu",
     )))]
     unsafe {
+        let mut timespec = MaybeUninit::<Timespec>::uninit();
         ret(c::clock_gettime(id as c::clockid_t, timespec.as_mut_ptr())).unwrap();
         timespec.assume_init()
     }
@@ -155,7 +161,6 @@ unsafe fn clock_gettime_old(id: ClockId) -> Timespec {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timespec> {
-    let mut timespec = MaybeUninit::<LibcTimespec>::uninit();
     unsafe {
         let id: c::clockid_t = match id {
             DynamicClockId::Known(id) => id as c::clockid_t,
@@ -191,6 +196,8 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
             target_env = "gnu",
         ))]
         {
+            let mut timespec = MaybeUninit::<LibcTimespec>::uninit();
+
             if let Some(libc_clock_gettime) = __clock_gettime64.get() {
                 ret(libc_clock_gettime(
                     id as c::clockid_t,
@@ -208,6 +215,8 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
             target_env = "gnu",
         )))]
         {
+            let mut timespec = MaybeUninit::<Timespec>::uninit();
+
             ret(c::clock_gettime(id as c::clockid_t, timespec.as_mut_ptr()))?;
 
             Ok(timespec.assume_init())

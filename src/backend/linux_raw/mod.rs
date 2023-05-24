@@ -64,6 +64,7 @@ pub(crate) mod system;
 pub(crate) mod termios;
 #[cfg(feature = "thread")]
 pub(crate) mod thread;
+#[cfg(feature = "time")]
 pub(crate) mod time;
 
 #[cfg(feature = "std")]
