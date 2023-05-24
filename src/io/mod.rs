@@ -1,4 +1,9 @@
 //! I/O operations.
+//!
+//! If you're looking for [`SeekFrom`], that's in the [`fs`] module.
+//!
+//! [`SeekFrom`]: https://docs.rs/rustix/*/rustix/fs/enum.SeekFrom.html
+//! [`fs`]: https://docs.rs/rustix/*/rustix/fs/index.html
 
 mod close;
 #[cfg(not(windows))]
@@ -16,7 +21,6 @@ mod is_read_write;
 mod pipe;
 #[cfg(not(windows))]
 mod read_write;
-mod seek_from;
 #[cfg(not(windows))]
 mod stdio;
 
@@ -34,6 +38,5 @@ pub use is_read_write::*;
 pub use pipe::*;
 #[cfg(not(windows))]
 pub use read_write::*;
-pub use seek_from::SeekFrom;
 #[cfg(not(windows))]
 pub use stdio::*;
