@@ -13,7 +13,7 @@ use crate::backend::offset::{libc_pread, libc_pwrite};
 use crate::backend::offset::{libc_preadv, libc_pwritev};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use crate::backend::offset::{libc_preadv2, libc_pwritev2};
-use crate::backend::{c, max_iov};
+use crate::backend::{c, MAX_IOV};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
 use crate::io::DupFlags;
@@ -82,7 +82,7 @@ pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut]) -> io::Result<u
         ret_usize(c::readv(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
-            min(bufs.len(), max_iov()) as c::c_int,
+            min(bufs.len(), MAX_IOV) as c::c_int,
         ))
     }
 }
@@ -92,7 +92,7 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> 
         ret_usize(c::writev(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
-            min(bufs.len(), max_iov()) as c::c_int,
+            min(bufs.len(), MAX_IOV) as c::c_int,
         ))
     }
 }
@@ -109,7 +109,7 @@ pub(crate) fn preadv(
         ret_usize(libc_preadv(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
-            min(bufs.len(), max_iov()) as c::c_int,
+            min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
         ))
     }
@@ -123,7 +123,7 @@ pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::
         ret_usize(libc_pwritev(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
-            min(bufs.len(), max_iov()) as c::c_int,
+            min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
         ))
     }
@@ -142,7 +142,7 @@ pub(crate) fn preadv2(
         ret_usize(libc_preadv2(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
-            min(bufs.len(), max_iov()) as c::c_int,
+            min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
             flags.bits(),
         ))
@@ -169,7 +169,7 @@ pub(crate) fn preadv2(
             c::SYS_preadv2,
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
-            min(bufs.len(), max_iov()) as c::c_int,
+            min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
             flags.bits(),
         ))
@@ -189,7 +189,7 @@ pub(crate) fn pwritev2(
         ret_usize(libc_pwritev2(
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
-            min(bufs.len(), max_iov()) as c::c_int,
+            min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
             flags.bits(),
         ))
@@ -216,7 +216,7 @@ pub(crate) fn pwritev2(
             c::SYS_pwritev2,
             borrowed_fd(fd),
             bufs.as_ptr().cast::<c::iovec>(),
-            min(bufs.len(), max_iov()) as c::c_int,
+            min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
             flags.bits(),
         ))

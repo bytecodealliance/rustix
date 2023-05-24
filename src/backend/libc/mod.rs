@@ -126,16 +126,10 @@ pub(crate) mod prctl;
 pub(crate) mod ugid;
 
 #[cfg(bsd)]
-#[inline]
-const fn max_iov() -> usize {
-    c::IOV_MAX as usize
-}
+const MAX_IOV: usize = c::IOV_MAX as usize;
 
 #[cfg(any(linux_kernel, target_os = "emscripten", target_os = "nto"))]
-#[inline]
-const fn max_iov() -> usize {
-    c::UIO_MAXIOV as usize
-}
+const MAX_IOV: usize = c::UIO_MAXIOV as usize;
 
 #[cfg(not(any(
     bsd,
@@ -145,7 +139,4 @@ const fn max_iov() -> usize {
     target_os = "nto",
     target_os = "horizon",
 )))]
-#[inline]
-const fn max_iov() -> usize {
-    16 // The minimum value required by POSIX.
-}
+const MAX_IOV: usize = 16; // The minimum value required by POSIX.

@@ -19,7 +19,7 @@ use crate::backend::conv::{
 };
 #[cfg(target_pointer_width = "32")]
 use crate::backend::conv::{hi, lo};
-use crate::backend::{c, max_iov};
+use crate::backend::{c, MAX_IOV};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 use crate::io::{self, DupFlags, FdFlags, IoSlice, IoSliceMut, ReadWriteFlags};
 #[cfg(all(feature = "fs", feature = "net"))]
@@ -86,7 +86,7 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], pos: u64) -> io::Result<
 
 #[inline]
 pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize> {
-    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
+    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), MAX_IOV)]);
 
     unsafe { ret_usize(syscall!(__NR_readv, fd, bufs_addr, bufs_len)) }
 }
@@ -97,7 +97,7 @@ pub(crate) fn preadv(
     bufs: &mut [IoSliceMut<'_>],
     pos: u64,
 ) -> io::Result<usize> {
-    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
+    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), MAX_IOV)]);
 
     #[cfg(target_pointer_width = "32")]
     unsafe {
@@ -129,7 +129,7 @@ pub(crate) fn preadv2(
     pos: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
+    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), MAX_IOV)]);
 
     #[cfg(target_pointer_width = "32")]
     unsafe {
@@ -211,14 +211,14 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], pos: u64) -> io::Result<usi
 
 #[inline]
 pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
-    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
+    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), MAX_IOV)]);
 
     unsafe { ret_usize(syscall_readonly!(__NR_writev, fd, bufs_addr, bufs_len)) }
 }
 
 #[inline]
 pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>], pos: u64) -> io::Result<usize> {
-    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
+    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), MAX_IOV)]);
 
     #[cfg(target_pointer_width = "32")]
     unsafe {
@@ -250,7 +250,7 @@ pub(crate) fn pwritev2(
     pos: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
-    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
+    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), MAX_IOV)]);
 
     #[cfg(target_pointer_width = "32")]
     unsafe {
