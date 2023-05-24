@@ -92,7 +92,6 @@ pub(crate) unsafe fn read_sockaddr(
                 // On Linux check for Linux's [abstract namespace].
                 //
                 // [abstract namespace]: https://man7.org/linux/man-pages/man7/unix.7.html
-                #[cfg(linux_kernel)]
                 if decode.sun_path[0] == 0 {
                     return SocketAddrUnix::new_abstract_name(
                         &decode.sun_path[1..len - offsetof_sun_path],
@@ -165,7 +164,6 @@ pub(crate) unsafe fn read_sockaddr_os(storage: *const c::sockaddr, len: usize) -
                 // On Linux check for Linux's [abstract namespace].
                 //
                 // [abstract namespace]: https://man7.org/linux/man-pages/man7/unix.7.html
-                #[cfg(linux_kernel)]
                 if decode.sun_path[0] == 0 {
                     return SocketAddrAny::Unix(
                         SocketAddrUnix::new_abstract_name(
