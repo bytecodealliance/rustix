@@ -6,7 +6,7 @@ use crate::signal::Signal;
 use crate::{backend, io};
 
 use backend::c::{self, intptr_t, kevent as kevent_t, uintptr_t};
-use backend::io::syscalls;
+use backend::event::syscalls;
 
 use alloc::vec::Vec;
 use core::mem::zeroed;

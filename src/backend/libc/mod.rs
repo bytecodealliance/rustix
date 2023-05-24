@@ -48,6 +48,8 @@ pub(crate) mod fd {
 #[cfg_attr(windows, path = "winsock_c.rs")]
 pub(crate) mod c;
 
+#[cfg(feature = "event")]
+pub(crate) mod event;
 #[cfg(not(windows))]
 #[cfg(feature = "fs")]
 pub(crate) mod fs;

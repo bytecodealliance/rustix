@@ -164,6 +164,9 @@ pub mod fd {
 }
 
 // The public API modules.
+#[cfg(feature = "event")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "event")))]
+pub mod event;
 #[cfg(not(windows))]
 pub mod ffi;
 #[cfg(not(windows))]

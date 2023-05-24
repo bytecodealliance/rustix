@@ -9,9 +9,14 @@
 use crate::backend::c;
 #[cfg(target_pointer_width = "64")]
 use crate::backend::conv::loff_t_from_u64;
+#[cfg(all(
+    target_pointer_width = "32",
+    any(target_arch = "arm", target_arch = "mips", target_arch = "power"),
+))]
+use crate::backend::conv::zero;
 use crate::backend::conv::{
-    by_ref, c_int, c_uint, opt_mut, pass_usize, raw_fd, ret, ret_c_uint, ret_discarded_fd,
-    ret_owned_fd, ret_usize, slice, slice_mut, zero,
+    by_ref, c_uint, opt_mut, pass_usize, raw_fd, ret, ret_c_uint, ret_discarded_fd, ret_owned_fd,
+    ret_usize, slice, slice_mut,
 };
 #[cfg(target_pointer_width = "32")]
 use crate::backend::conv::{hi, lo};
@@ -19,8 +24,7 @@ use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(linux_kernel)]
 use crate::io::SpliceFlags;
 use crate::io::{
-    self, epoll, DupFlags, EventfdFlags, FdFlags, IoSlice, IoSliceMut, IoSliceRaw, PipeFlags,
-    PollFd, ReadWriteFlags,
+    self, DupFlags, FdFlags, IoSlice, IoSliceMut, IoSliceRaw, PipeFlags, ReadWriteFlags,
 };
 #[cfg(all(feature = "fs", feature = "net"))]
 use crate::net::{RecvFlags, SendFlags};
@@ -28,17 +32,9 @@ use core::cmp;
 use core::mem::MaybeUninit;
 #[cfg(target_os = "espidf")]
 use linux_raw_sys::general::F_DUPFD;
-use linux_raw_sys::general::{
-    epoll_event, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD, F_DUPFD_CLOEXEC, F_GETFD, F_SETFD,
-    UIO_MAXIOV,
-};
+use linux_raw_sys::general::{F_DUPFD_CLOEXEC, F_GETFD, F_SETFD, UIO_MAXIOV};
 use linux_raw_sys::ioctl::{
     BLKPBSZGET, BLKSSZGET, EXT4_IOC_RESIZE_FS, FICLONE, FIONBIO, FIONREAD, TIOCEXCL, TIOCNXCL,
-};
-#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
-use {
-    crate::backend::conv::{opt_ref, size_of},
-    linux_raw_sys::general::{__kernel_timespec, kernel_sigset_t},
 };
 
 #[inline]
@@ -300,11 +296,6 @@ pub(crate) unsafe fn close(fd: RawFd) {
 }
 
 #[inline]
-pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(syscall_readonly!(__NR_eventfd2, c_uint(initval), flags)) }
-}
-
-#[inline]
 pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
     unsafe {
         let mut result = MaybeUninit::<c::c_int>::uninit();
@@ -549,111 +540,6 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
         ret(syscall!(__NR_pipe, &mut result))?;
         let [p0, p1] = result.assume_init();
         Ok((p0, p1))
-    }
-}
-
-#[inline]
-pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usize> {
-    let (fds_addr_mut, fds_len) = slice_mut(fds);
-
-    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
-    unsafe {
-        let timeout = if timeout >= 0 {
-            Some(__kernel_timespec {
-                tv_sec: (timeout as i64) / 1000,
-                tv_nsec: (timeout as i64) % 1000 * 1_000_000,
-            })
-        } else {
-            None
-        };
-        ret_usize(syscall!(
-            __NR_ppoll,
-            fds_addr_mut,
-            fds_len,
-            opt_ref(timeout.as_ref()),
-            zero(),
-            size_of::<kernel_sigset_t, _>()
-        ))
-    }
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
-    unsafe {
-        ret_usize(syscall!(__NR_poll, fds_addr_mut, fds_len, c_int(timeout)))
-    }
-}
-
-#[inline]
-pub(crate) fn epoll_create(flags: epoll::CreateFlags) -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(syscall_readonly!(__NR_epoll_create1, flags)) }
-}
-
-#[inline]
-pub(crate) unsafe fn epoll_add(
-    epfd: BorrowedFd<'_>,
-    fd: c::c_int,
-    event: &epoll_event,
-) -> io::Result<()> {
-    ret(syscall_readonly!(
-        __NR_epoll_ctl,
-        epfd,
-        c_uint(EPOLL_CTL_ADD),
-        raw_fd(fd),
-        by_ref(event)
-    ))
-}
-
-#[inline]
-pub(crate) unsafe fn epoll_mod(
-    epfd: BorrowedFd<'_>,
-    fd: c::c_int,
-    event: &epoll_event,
-) -> io::Result<()> {
-    ret(syscall_readonly!(
-        __NR_epoll_ctl,
-        epfd,
-        c_uint(EPOLL_CTL_MOD),
-        raw_fd(fd),
-        by_ref(event)
-    ))
-}
-
-#[inline]
-pub(crate) unsafe fn epoll_del(epfd: BorrowedFd<'_>, fd: c::c_int) -> io::Result<()> {
-    ret(syscall_readonly!(
-        __NR_epoll_ctl,
-        epfd,
-        c_uint(EPOLL_CTL_DEL),
-        raw_fd(fd),
-        zero()
-    ))
-}
-
-#[inline]
-pub(crate) fn epoll_wait(
-    epfd: BorrowedFd<'_>,
-    events: *mut epoll_event,
-    num_events: usize,
-    timeout: c::c_int,
-) -> io::Result<usize> {
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
-    unsafe {
-        ret_usize(syscall!(
-            __NR_epoll_wait,
-            epfd,
-            events,
-            pass_usize(num_events),
-            c_int(timeout)
-        ))
-    }
-    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
-    unsafe {
-        ret_usize(syscall!(
-            __NR_epoll_pwait,
-            epfd,
-            events,
-            pass_usize(num_events),
-            c_int(timeout),
-            zero()
-        ))
     }
 }
 
