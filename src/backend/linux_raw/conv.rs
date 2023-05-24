@@ -401,16 +401,18 @@ impl<'a, Num: ArgNumber> From<crate::io::ReadWriteFlags> for ArgReg<'a, Num> {
     }
 }
 
-impl<'a, Num: ArgNumber> From<crate::io::EventfdFlags> for ArgReg<'a, Num> {
+#[cfg(feature = "event")]
+impl<'a, Num: ArgNumber> From<crate::event::EventfdFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::io::EventfdFlags) -> Self {
+    fn from(flags: crate::event::EventfdFlags) -> Self {
         c_uint(flags.bits())
     }
 }
 
-impl<'a, Num: ArgNumber> From<crate::io::epoll::CreateFlags> for ArgReg<'a, Num> {
+#[cfg(feature = "event")]
+impl<'a, Num: ArgNumber> From<crate::event::epoll::CreateFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::io::epoll::CreateFlags) -> Self {
+    fn from(flags: crate::event::epoll::CreateFlags) -> Self {
         c_uint(flags.bits())
     }
 }

@@ -8,6 +8,7 @@
 
 mod addr;
 mod connect_bind_send;
+#[cfg(feature = "event")]
 mod poll;
 mod sockopt;
 #[cfg(unix)]
