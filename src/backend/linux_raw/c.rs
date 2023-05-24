@@ -88,3 +88,7 @@ pub(crate) const SIGSYS: c_int = linux_raw_sys::general::SIGSYS as _;
     target_arch = "sparc64"
 ))]
 pub(crate) const SIGEMT: c_int = linux_raw_sys::general::SIGEMT as _;
+
+pub(crate) const STDIN_FILENO: c_int = linux_raw_sys::general::STDIN_FILENO as _;
+pub(crate) const STDOUT_FILENO: c_int = linux_raw_sys::general::STDOUT_FILENO as _;
+pub(crate) const STDERR_FILENO: c_int = linux_raw_sys::general::STDERR_FILENO as _;

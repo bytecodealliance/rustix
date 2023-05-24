@@ -56,8 +56,8 @@ pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 /// set `O_CLOEXEC`, use [`dup3`] with [`DupFlags::CLOEXEC`] on platforms which
 /// support it, or [`fcntl_dupfd_cloexec`]
 ///
-/// For `dup2` to stdin, stdout, and stderr, see [`io::dup2_stdin`],
-/// [`io::dup2_stdout`], and [`io::dup2_stderr`].
+/// For `dup2` to stdin, stdout, and stderr, see [`stdio::dup2_stdin`],
+/// [`stdio::dup2_stdout`], and [`stdio::dup2_stderr`].
 ///
 /// # References
 ///  - [POSIX]
@@ -81,6 +81,9 @@ pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=dup2&section=2
 /// [illumos]: https://illumos.org/man/2/dup
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Duplicating-Descriptors.html
+/// [`stdio::dup2_stdin`]: https://docs.rs/rustix/*/rustix/stdio/fn.dup2_stdin.html
+/// [`stdio::dup2_stdout`]: https://docs.rs/rustix/*/rustix/stdio/fn.dup2_stdout.html
+/// [`stdio::dup2_stderr`]: https://docs.rs/rustix/*/rustix/stdio/fn.dup2_stderr.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {

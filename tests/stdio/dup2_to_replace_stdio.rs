@@ -10,6 +10,8 @@ fn dup2_to_replace_stdio() {
         .arg("run")
         .arg("--example")
         .arg("dup2_to_replace_stdio")
+        .arg("--features")
+        .arg("stdio")
         .status()
         .unwrap()
         .success());

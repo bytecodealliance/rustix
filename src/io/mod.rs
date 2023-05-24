@@ -21,8 +21,6 @@ mod is_read_write;
 mod pipe;
 #[cfg(not(windows))]
 mod read_write;
-#[cfg(not(windows))]
-mod stdio;
 
 pub use close::close;
 #[cfg(not(windows))]
@@ -38,5 +36,3 @@ pub use is_read_write::*;
 pub use pipe::*;
 #[cfg(not(windows))]
 pub use read_write::*;
-#[cfg(not(windows))]
-pub use stdio::*;
