@@ -1,7 +1,5 @@
 use crate::backend::c;
 use bitflags::bitflags;
-#[cfg(linux_kernel)]
-use core::marker::PhantomData;
 
 bitflags! {
     /// `FD_*` constants for use with [`fcntl_getfd`] and [`fcntl_setfd`].
@@ -36,22 +34,6 @@ bitflags! {
     }
 }
 
-#[cfg(linux_kernel)]
-bitflags! {
-    /// `SPLICE_F_*` constants for use with [`splice`] and [`vmsplice`].
-    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct SpliceFlags: c::c_uint {
-        /// `SPLICE_F_MOVE`
-        const MOVE = c::SPLICE_F_MOVE;
-        /// `SPLICE_F_NONBLOCK`
-        const NONBLOCK = c::SPLICE_F_NONBLOCK;
-        /// `SPLICE_F_MORE`
-        const MORE = c::SPLICE_F_MORE;
-        /// `SPLICE_F_GIFT`
-        const GIFT = c::SPLICE_F_GIFT;
-    }
-}
-
 #[cfg(not(target_os = "wasi"))]
 bitflags! {
     /// `O_*` constants for use with [`dup2`].
@@ -67,64 +49,5 @@ bitflags! {
             target_os = "redox",
         )))] // Android 5.0 has dup3, but libc doesn't have bindings
         const CLOEXEC = c::O_CLOEXEC;
-    }
-}
-
-#[cfg(not(any(apple, target_os = "wasi")))]
-bitflags! {
-    /// `O_*` constants for use with [`pipe_with`].
-    ///
-    /// [`pipe_with`]: crate::io::pipe_with
-    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct PipeFlags: c::c_int {
-        /// `O_CLOEXEC`
-        const CLOEXEC = c::O_CLOEXEC;
-        /// `O_DIRECT`
-        #[cfg(not(any(
-            solarish,
-            target_os = "haiku",
-            target_os = "openbsd",
-            target_os = "redox",
-        )))]
-        const DIRECT = c::O_DIRECT;
-        /// `O_NONBLOCK`
-        const NONBLOCK = c::O_NONBLOCK;
-    }
-}
-
-/// A buffer type used with `vmsplice`.
-/// It is guaranteed to be ABI compatible with the iovec type on Unix platforms
-/// and `WSABUF` on Windows. Unlike `IoSlice` and `IoSliceMut` it is
-/// semantically like a raw pointer, and therefore can be shared or mutated as
-/// needed.
-#[cfg(linux_kernel)]
-#[repr(transparent)]
-pub struct IoSliceRaw<'a> {
-    _buf: c::iovec,
-    _lifetime: PhantomData<&'a ()>,
-}
-
-#[cfg(linux_kernel)]
-impl<'a> IoSliceRaw<'a> {
-    /// Creates a new `IoSlice` wrapping a byte slice.
-    pub fn from_slice(buf: &'a [u8]) -> Self {
-        IoSliceRaw {
-            _buf: c::iovec {
-                iov_base: buf.as_ptr() as *mut u8 as *mut c::c_void,
-                iov_len: buf.len() as _,
-            },
-            _lifetime: PhantomData,
-        }
-    }
-
-    /// Creates a new `IoSlice` wrapping a mutable byte slice.
-    pub fn from_slice_mut(buf: &'a mut [u8]) -> Self {
-        IoSliceRaw {
-            _buf: c::iovec {
-                iov_base: buf.as_mut_ptr() as *mut c::c_void,
-                iov_len: buf.len() as _,
-            },
-            _lifetime: PhantomData,
-        }
     }
 }

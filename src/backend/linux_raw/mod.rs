@@ -48,6 +48,8 @@ pub(crate) mod net;
     target_arch = "x86",
 ))]
 pub(crate) mod param;
+#[cfg(feature = "pipe")]
+pub(crate) mod pipe;
 #[cfg(feature = "process")]
 pub(crate) mod process;
 #[cfg(feature = "pty")]
@@ -86,3 +88,10 @@ pub(crate) mod pid;
 pub(crate) mod prctl;
 #[cfg(any(feature = "fs", feature = "thread", feature = "process"))]
 pub(crate) mod ugid;
+
+/// The maximum number of buffers that can be passed into a vectored I/O system
+/// call on the current platform.
+#[inline]
+const fn max_iov() -> usize {
+    linux_raw_sys::general::UIO_MAXIOV as usize
+}

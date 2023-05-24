@@ -6,7 +6,6 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::c;
 #[cfg(target_pointer_width = "64")]
 use crate::backend::conv::loff_t_from_u64;
 #[cfg(all(
@@ -15,24 +14,21 @@ use crate::backend::conv::loff_t_from_u64;
 ))]
 use crate::backend::conv::zero;
 use crate::backend::conv::{
-    by_ref, c_uint, opt_mut, pass_usize, raw_fd, ret, ret_c_uint, ret_discarded_fd, ret_owned_fd,
-    ret_usize, slice, slice_mut,
+    by_ref, c_uint, raw_fd, ret, ret_c_uint, ret_discarded_fd, ret_owned_fd, ret_usize, slice,
+    slice_mut,
 };
 #[cfg(target_pointer_width = "32")]
 use crate::backend::conv::{hi, lo};
+use crate::backend::{c, max_iov};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
-#[cfg(linux_kernel)]
-use crate::io::SpliceFlags;
-use crate::io::{
-    self, DupFlags, FdFlags, IoSlice, IoSliceMut, IoSliceRaw, PipeFlags, ReadWriteFlags,
-};
+use crate::io::{self, DupFlags, FdFlags, IoSlice, IoSliceMut, ReadWriteFlags};
 #[cfg(all(feature = "fs", feature = "net"))]
 use crate::net::{RecvFlags, SendFlags};
 use core::cmp;
 use core::mem::MaybeUninit;
 #[cfg(target_os = "espidf")]
 use linux_raw_sys::general::F_DUPFD;
-use linux_raw_sys::general::{F_DUPFD_CLOEXEC, F_GETFD, F_SETFD, UIO_MAXIOV};
+use linux_raw_sys::general::{F_DUPFD_CLOEXEC, F_GETFD, F_SETFD};
 use linux_raw_sys::ioctl::{
     BLKPBSZGET, BLKSSZGET, EXT4_IOC_RESIZE_FS, FICLONE, FIONBIO, FIONREAD, TIOCEXCL, TIOCNXCL,
 };
@@ -283,12 +279,6 @@ pub(crate) fn pwritev2(
     }
 }
 
-/// The maximum number of buffers that can be passed into a vectored I/O system
-/// call on the current platform.
-const fn max_iov() -> usize {
-    UIO_MAXIOV as usize
-}
-
 #[inline]
 pub(crate) unsafe fn close(fd: RawFd) {
     // See the documentation for [`io::close`] for why errors are ignored.
@@ -503,82 +493,4 @@ pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<
             raw_fd(min)
         ))
     }
-}
-
-#[inline]
-pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
-    unsafe {
-        let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
-        ret(syscall!(__NR_pipe2, &mut result, flags))?;
-        let [p0, p1] = result.assume_init();
-        Ok((p0, p1))
-    }
-}
-
-#[inline]
-pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
-    // aarch64 and risc64 omit `__NR_pipe`. On mips, `__NR_pipe` uses a special
-    // calling convention, but using it is not worth complicating our syscall
-    // wrapping infrastructure at this time.
-    #[cfg(any(
-        target_arch = "aarch64",
-        target_arch = "mips",
-        target_arch = "mips64",
-        target_arch = "riscv64",
-    ))]
-    {
-        pipe_with(PipeFlags::empty())
-    }
-    #[cfg(not(any(
-        target_arch = "aarch64",
-        target_arch = "mips",
-        target_arch = "mips64",
-        target_arch = "riscv64",
-    )))]
-    unsafe {
-        let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
-        ret(syscall!(__NR_pipe, &mut result))?;
-        let [p0, p1] = result.assume_init();
-        Ok((p0, p1))
-    }
-}
-
-#[cfg(linux_kernel)]
-#[inline]
-pub fn splice(
-    fd_in: BorrowedFd,
-    off_in: Option<&mut u64>,
-    fd_out: BorrowedFd,
-    off_out: Option<&mut u64>,
-    len: usize,
-    flags: SpliceFlags,
-) -> io::Result<usize> {
-    unsafe {
-        ret_usize(syscall!(
-            __NR_splice,
-            fd_in,
-            opt_mut(off_in),
-            fd_out,
-            opt_mut(off_out),
-            pass_usize(len),
-            c_uint(flags.bits())
-        ))
-    }
-}
-
-#[cfg(linux_kernel)]
-#[inline]
-pub unsafe fn vmsplice(
-    fd: BorrowedFd,
-    bufs: &[IoSliceRaw],
-    flags: SpliceFlags,
-) -> io::Result<usize> {
-    let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), max_iov())]);
-    ret_usize(syscall!(
-        __NR_vmsplice,
-        fd,
-        bufs_addr,
-        bufs_len,
-        c_uint(flags.bits())
-    ))
 }
