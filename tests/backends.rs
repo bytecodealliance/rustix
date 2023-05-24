@@ -6,13 +6,6 @@ use std::process::Command;
 
 #[test]
 fn test_backends() {
-    // Test whether `has_dependency` works. `cargo tree` no longer works in
-    // Rust 1.48 because `cargo tree` pulls in dependencies for all targets,
-    // and hermit-core isn't compatible with Rust 1.48.
-    if !has_dependency(".", &[], &[], &[], "io-lifetimes") {
-        return;
-    }
-
     // Pick an arbitrary platform where linux_raw is enabled by default and
     // ensure that the use-default crate uses it.
     #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
