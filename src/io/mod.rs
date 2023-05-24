@@ -12,6 +12,7 @@ mod fcntl;
 pub(crate) mod fd;
 mod ioctl;
 #[cfg(not(any(windows, target_os = "redox")))]
+#[cfg(all(feature = "fs", feature = "net"))]
 mod is_read_write;
 #[cfg(bsd)]
 pub mod kqueue;
@@ -41,7 +42,7 @@ pub use fcntl::*;
 pub use ioctl::*;
 #[cfg(not(any(windows, target_os = "redox")))]
 #[cfg(all(feature = "fs", feature = "net"))]
-pub use is_read_write::is_read_write;
+pub use is_read_write::*;
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use pipe::*;
 pub use poll::{poll, PollFd, PollFlags};
