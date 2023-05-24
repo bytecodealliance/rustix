@@ -1,8 +1,5 @@
-use super::super::c;
+use crate::backend::c;
 use linux_raw_sys::general::membarrier_cmd;
-
-/// `sysinfo`
-pub type Sysinfo = linux_raw_sys::general::sysinfo;
 
 /// A command for use with [`membarrier`] and [`membarrier_cpu`].
 ///
@@ -81,159 +78,17 @@ pub enum Resource {
     Rttime = linux_raw_sys::general::RLIMIT_RTTIME,
 }
 
-/// A signal number for use with [`kill_process`], [`kill_process_group`],
-/// and [`kill_current_process_group`].
-///
-/// [`kill_process`]: crate::process::kill_process
-/// [`kill_process_group`]: crate::process::kill_process_group
-/// [`kill_current_process_group`]: crate::process::kill_current_process_group
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-#[repr(u32)]
-pub enum Signal {
-    /// `SIGHUP`
-    Hup = linux_raw_sys::general::SIGHUP,
-    /// `SIGINT`
-    Int = linux_raw_sys::general::SIGINT,
-    /// `SIGQUIT`
-    Quit = linux_raw_sys::general::SIGQUIT,
-    /// `SIGILL`
-    Ill = linux_raw_sys::general::SIGILL,
-    /// `SIGTRAP`
-    Trap = linux_raw_sys::general::SIGTRAP,
-    /// `SIGABRT`, aka `SIGIOT`
-    #[doc(alias = "Iot")]
-    #[doc(alias = "Abrt")]
-    Abort = linux_raw_sys::general::SIGABRT,
-    /// `SIGEMT`
-    #[cfg(any(
-        target_arch = "mips",
-        target_arch = "mips64",
-        target_arch = "sparc",
-        target_arch = "sparc64"
-    ))]
-    Emt = linux_raw_sys::general::SIGEMT,
-    /// `SIGBUS`
-    Bus = linux_raw_sys::general::SIGBUS,
-    /// `SIGFPE`
-    Fpe = linux_raw_sys::general::SIGFPE,
-    /// `SIGKILL`
-    Kill = linux_raw_sys::general::SIGKILL,
-    /// `SIGUSR1`
-    Usr1 = linux_raw_sys::general::SIGUSR1,
-    /// `SIGSEGV`
-    Segv = linux_raw_sys::general::SIGSEGV,
-    /// `SIGUSR2`
-    Usr2 = linux_raw_sys::general::SIGUSR2,
-    /// `SIGPIPE`
-    Pipe = linux_raw_sys::general::SIGPIPE,
-    /// `SIGALRM`
-    #[doc(alias = "Alrm")]
-    Alarm = linux_raw_sys::general::SIGALRM,
-    /// `SIGTERM`
-    Term = linux_raw_sys::general::SIGTERM,
-    /// `SIGSTKFLT`
-    #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
-    Stkflt = linux_raw_sys::general::SIGSTKFLT,
-    /// `SIGCHLD`
-    #[doc(alias = "Chld")]
-    Child = linux_raw_sys::general::SIGCHLD,
-    /// `SIGCONT`
-    Cont = linux_raw_sys::general::SIGCONT,
-    /// `SIGSTOP`
-    Stop = linux_raw_sys::general::SIGSTOP,
-    /// `SIGTSTP`
-    Tstp = linux_raw_sys::general::SIGTSTP,
-    /// `SIGTTIN`
-    Ttin = linux_raw_sys::general::SIGTTIN,
-    /// `SIGTTOU`
-    Ttou = linux_raw_sys::general::SIGTTOU,
-    /// `SIGURG`
-    Urg = linux_raw_sys::general::SIGURG,
-    /// `SIGXCPU`
-    Xcpu = linux_raw_sys::general::SIGXCPU,
-    /// `SIGXFSZ`
-    Xfsz = linux_raw_sys::general::SIGXFSZ,
-    /// `SIGVTALRM`
-    #[doc(alias = "Vtalrm")]
-    Vtalarm = linux_raw_sys::general::SIGVTALRM,
-    /// `SIGPROF`
-    Prof = linux_raw_sys::general::SIGPROF,
-    /// `SIGWINCH`
-    Winch = linux_raw_sys::general::SIGWINCH,
-    /// `SIGIO`, aka `SIGPOLL`
-    #[doc(alias = "Poll")]
-    Io = linux_raw_sys::general::SIGIO,
-    /// `SIGPWR`
-    #[doc(alias = "Pwr")]
-    Power = linux_raw_sys::general::SIGPWR,
-    /// `SIGSYS`, aka `SIGUNUSED`
-    #[doc(alias = "Unused")]
-    Sys = linux_raw_sys::general::SIGSYS,
-    /// `SIGRTMIN`
-    Rtmin = linux_raw_sys::general::SIGRTMIN,
-}
-
-impl Signal {
-    /// Convert a raw signal number into a `Signal`, if possible.
-    pub fn from_raw(sig: i32) -> Option<Self> {
-        match sig as _ {
-            linux_raw_sys::general::SIGHUP => Some(Self::Hup),
-            linux_raw_sys::general::SIGINT => Some(Self::Int),
-            linux_raw_sys::general::SIGQUIT => Some(Self::Quit),
-            linux_raw_sys::general::SIGILL => Some(Self::Ill),
-            linux_raw_sys::general::SIGTRAP => Some(Self::Trap),
-            linux_raw_sys::general::SIGABRT => Some(Self::Abort),
-            linux_raw_sys::general::SIGBUS => Some(Self::Bus),
-            linux_raw_sys::general::SIGFPE => Some(Self::Fpe),
-            linux_raw_sys::general::SIGKILL => Some(Self::Kill),
-            linux_raw_sys::general::SIGUSR1 => Some(Self::Usr1),
-            linux_raw_sys::general::SIGSEGV => Some(Self::Segv),
-            linux_raw_sys::general::SIGUSR2 => Some(Self::Usr2),
-            linux_raw_sys::general::SIGPIPE => Some(Self::Pipe),
-            linux_raw_sys::general::SIGALRM => Some(Self::Alarm),
-            linux_raw_sys::general::SIGTERM => Some(Self::Term),
-            #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
-            linux_raw_sys::general::SIGSTKFLT => Some(Self::Stkflt),
-            linux_raw_sys::general::SIGCHLD => Some(Self::Child),
-            linux_raw_sys::general::SIGCONT => Some(Self::Cont),
-            linux_raw_sys::general::SIGSTOP => Some(Self::Stop),
-            linux_raw_sys::general::SIGTSTP => Some(Self::Tstp),
-            linux_raw_sys::general::SIGTTIN => Some(Self::Ttin),
-            linux_raw_sys::general::SIGTTOU => Some(Self::Ttou),
-            linux_raw_sys::general::SIGURG => Some(Self::Urg),
-            linux_raw_sys::general::SIGXCPU => Some(Self::Xcpu),
-            linux_raw_sys::general::SIGXFSZ => Some(Self::Xfsz),
-            linux_raw_sys::general::SIGVTALRM => Some(Self::Vtalarm),
-            linux_raw_sys::general::SIGPROF => Some(Self::Prof),
-            linux_raw_sys::general::SIGWINCH => Some(Self::Winch),
-            linux_raw_sys::general::SIGIO => Some(Self::Io),
-            linux_raw_sys::general::SIGPWR => Some(Self::Power),
-            linux_raw_sys::general::SIGSYS => Some(Self::Sys),
-            linux_raw_sys::general::SIGRTMIN => Some(Self::Rtmin),
-            _ => None,
-        }
-    }
-}
-
 /// `EXIT_SUCCESS`
 pub const EXIT_SUCCESS: c::c_int = 0;
 /// `EXIT_FAILURE`
 pub const EXIT_FAILURE: c::c_int = 1;
 /// The status value of a child terminated with a [`Signal::Abort`] signal.
+///
+/// [`Signal::Abort`]: crate::process::Signal::Abort
 pub const EXIT_SIGNALED_SIGABRT: c::c_int = 128 + linux_raw_sys::general::SIGABRT as i32;
 
-/// A process identifier as a raw integer.
-pub type RawPid = u32;
-/// A non-zero process identifier as a raw non-zero integer.
-pub type RawNonZeroPid = core::num::NonZeroU32;
-/// A group identifier as a raw integer.
-pub type RawGid = u32;
-/// A user identifier as a raw integer.
-pub type RawUid = u32;
 /// A CPU identifier as a raw integer.
 pub type RawCpuid = u32;
-
-pub(crate) type RawUname = linux_raw_sys::general::new_utsname;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]

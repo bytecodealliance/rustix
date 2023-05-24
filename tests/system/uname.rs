@@ -1,6 +1,6 @@
 #[test]
 fn test_uname() {
-    let name: rustix::process::Uname = rustix::process::uname();
+    let name: rustix::system::Uname = rustix::system::uname();
 
     assert!(!name.sysname().to_bytes().is_empty());
     assert!(!name.nodename().to_bytes().is_empty());

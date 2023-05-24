@@ -5,62 +5,20 @@
 
 #![allow(unsafe_code)]
 
-use core::mem::{size_of, MaybeUninit};
+use core::mem::size_of;
 use core::ptr::{null, null_mut, NonNull};
 
 use bitflags::bitflags;
 
 use crate::backend::c::{c_int, c_uint, c_void};
-use crate::backend::process::syscalls;
-use crate::backend::process::types::Signal;
+use crate::backend::prctl::syscalls;
 use crate::fd::{AsRawFd, BorrowedFd};
 use crate::ffi::CStr;
 use crate::io;
+use crate::prctl::*;
 use crate::process::{Pid, RawPid};
+use crate::signal::Signal;
 use crate::utils::{as_mut_ptr, as_ptr};
-
-//
-// Helper functions.
-//
-
-#[inline]
-pub(crate) unsafe fn prctl_1arg(option: c_int) -> io::Result<c_int> {
-    const NULL: *mut c_void = null_mut();
-    syscalls::prctl(option, NULL, NULL, NULL, NULL)
-}
-
-#[inline]
-pub(crate) unsafe fn prctl_2args(option: c_int, arg2: *mut c_void) -> io::Result<c_int> {
-    const NULL: *mut c_void = null_mut();
-    syscalls::prctl(option, arg2, NULL, NULL, NULL)
-}
-
-#[inline]
-pub(crate) unsafe fn prctl_3args(
-    option: c_int,
-    arg2: *mut c_void,
-    arg3: *mut c_void,
-) -> io::Result<c_int> {
-    syscalls::prctl(option, arg2, arg3, null_mut(), null_mut())
-}
-
-#[inline]
-pub(crate) unsafe fn prctl_get_at_arg2_optional<P>(option: i32) -> io::Result<P> {
-    let mut value: MaybeUninit<P> = MaybeUninit::uninit();
-    prctl_2args(option, value.as_mut_ptr().cast())?;
-    Ok(value.assume_init())
-}
-
-#[inline]
-pub(crate) unsafe fn prctl_get_at_arg2<P, T>(option: i32) -> io::Result<T>
-where
-    P: Default,
-    T: TryFrom<P, Error = io::Errno>,
-{
-    let mut value: P = Default::default();
-    prctl_2args(option, as_mut_ptr(&mut value).cast())?;
-    TryFrom::try_from(value)
-}
 
 //
 // PR_GET_PDEATHSIG/PR_SET_PDEATHSIG
@@ -1091,23 +1049,6 @@ pub fn configure_io_flusher_behavior(enable: bool) -> io::Result<()> {
 //
 
 const PR_PAC_GET_ENABLED_KEYS: c_int = 61;
-
-bitflags! {
-    /// `PR_PAC_AP*`.
-    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct PointerAuthenticationKeys: u32 {
-        /// Instruction authentication key `A`.
-        const INSTRUCTION_AUTHENTICATION_KEY_A = 1_u32 << 0;
-        /// Instruction authentication key `B`.
-        const INSTRUCTION_AUTHENTICATION_KEY_B = 1_u32 << 1;
-        /// Data authentication key `A`.
-        const DATA_AUTHENTICATION_KEY_A = 1_u32 << 2;
-        /// Data authentication key `B`.
-        const DATA_AUTHENTICATION_KEY_B = 1_u32 << 3;
-        /// Generic authentication `A` key.
-        const GENERIC_AUTHENTICATION_KEY_A = 1_u32 << 4;
-    }
-}
 
 /// Get enabled pointer authentication keys.
 ///

@@ -14,9 +14,10 @@ use bitflags::bitflags;
 
 use crate::backend::c::{c_int, c_uint, c_void};
 use crate::backend::process::syscalls;
-use crate::backend::process::types::{RawId, Signal};
+use crate::backend::process::types::RawId;
 use crate::io;
 use crate::process::{Pid, RawPid};
+use crate::signal::Signal;
 use crate::utils::{as_mut_ptr, as_ptr};
 
 //

@@ -1,8 +1,8 @@
-use super::super::c;
-use super::super::conv::borrowed_fd;
+use crate::backend::c;
+use crate::backend::conv::borrowed_fd;
 #[cfg(windows)]
-use super::super::fd::RawFd;
-use super::super::fd::{AsFd, AsRawFd, BorrowedFd, LibcFd};
+use crate::backend::fd::RawFd;
+use crate::backend::fd::{AsFd, AsRawFd, BorrowedFd, LibcFd};
 use bitflags::bitflags;
 use core::marker::PhantomData;
 #[cfg(windows)]

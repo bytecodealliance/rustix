@@ -7,6 +7,7 @@ use rustix::io;
 fn main() -> io::Result<()> {
     use rustix::param::*;
     use rustix::process::*;
+    use rustix::system::*;
 
     println!("Pid: {}", getpid().as_raw_nonzero());
     println!("Parent Pid: {}", Pid::as_raw(getppid()));

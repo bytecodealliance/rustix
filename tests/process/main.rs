@@ -23,8 +23,6 @@ mod rlimit;
 mod sched_yield;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have umask.
 mod umask;
-#[cfg(not(target_os = "wasi"))] // WASI doesn't have uname.
-mod uname;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have waitpid.
 mod wait;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]

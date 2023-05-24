@@ -2,7 +2,7 @@
 //! we can interpret the rest of a `sockaddr` produced by the kernel.
 #![allow(unsafe_code)]
 
-use super::super::c;
+use crate::backend::c;
 use crate::io;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use core::mem::size_of;

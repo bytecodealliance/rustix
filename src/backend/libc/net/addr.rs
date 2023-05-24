@@ -1,6 +1,6 @@
 //! Socket address utilities.
 
-use super::super::c;
+use crate::backend::c;
 #[cfg(unix)]
 use {
     crate::ffi::CStr,

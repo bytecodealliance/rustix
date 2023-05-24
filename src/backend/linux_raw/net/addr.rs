@@ -6,7 +6,7 @@
 //! to be NUL-terminated.
 #![allow(unsafe_code)]
 
-use super::super::c;
+use crate::backend::c;
 use crate::ffi::CStr;
 use crate::{io, path};
 use core::cmp::Ordering;

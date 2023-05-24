@@ -70,6 +70,7 @@ pub(crate) mod net;
 ))]
 pub(crate) mod param;
 #[cfg(not(windows))]
+#[cfg(feature = "process")]
 pub(crate) mod process;
 #[cfg(not(windows))]
 #[cfg(not(target_os = "wasi"))]
@@ -78,6 +79,10 @@ pub(crate) mod pty;
 #[cfg(not(windows))]
 #[cfg(feature = "rand")]
 pub(crate) mod rand;
+#[cfg(not(windows))]
+#[cfg(not(target_os = "wasi"))]
+#[cfg(feature = "system")]
+pub(crate) mod system;
 #[cfg(not(windows))]
 #[cfg(feature = "termios")]
 pub(crate) mod termios;
@@ -105,3 +110,12 @@ pub(crate) fn if_glibc_is_less_than_2_25() -> bool {
     // this function. But, there are likely other libc versions which have it.
     getrandom.get().is_none()
 }
+
+// Private modules used by multiple public modules.
+#[cfg(any(feature = "procfs", feature = "process", feature = "runtime"))]
+pub(crate) mod pid;
+#[cfg(any(feature = "process", feature = "thread"))]
+#[cfg(linux_kernel)]
+pub(crate) mod prctl;
+#[cfg(any(feature = "fs", feature = "thread", feature = "process"))]
+pub(crate) mod ugid;

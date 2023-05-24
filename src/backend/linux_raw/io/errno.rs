@@ -10,7 +10,7 @@
 #![allow(unsafe_code)]
 #![cfg_attr(not(rustc_attrs), allow(unused_unsafe))]
 
-use super::super::c;
+use crate::backend::c;
 use crate::backend::fd::RawFd;
 use crate::backend::reg::{RetNumber, RetReg};
 use crate::io;
@@ -237,6 +237,13 @@ pub(in crate::backend) fn decode_usize_infallible<Num: RetNumber>(raw: RetReg<Nu
 }
 
 /// Return the contained `c_int` value.
+#[cfg(not(debug_assertions))]
+#[inline]
+pub(in crate::backend) fn decode_c_int_infallible<Num: RetNumber>(raw: RetReg<Num>) -> c::c_int {
+    raw.decode_c_int()
+}
+
+/// Return the contained `c_uint` value.
 #[cfg(not(debug_assertions))]
 #[inline]
 pub(in crate::backend) fn decode_c_uint_infallible<Num: RetNumber>(raw: RetReg<Num>) -> c::c_uint {

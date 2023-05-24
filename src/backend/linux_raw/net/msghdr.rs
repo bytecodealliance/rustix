@@ -5,8 +5,8 @@
 
 #![allow(unsafe_code)]
 
-use super::super::c;
-use super::super::net::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
+use crate::backend::c;
+use crate::backend::net::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 
 use crate::io::{self, IoSlice, IoSliceMut};
 use crate::net::{RecvAncillaryBuffer, SendAncillaryBuffer, SocketAddrV4, SocketAddrV6};

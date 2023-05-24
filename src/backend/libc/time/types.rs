@@ -1,4 +1,4 @@
-use super::super::c;
+use crate::backend::c;
 #[cfg(not(target_os = "wasi"))]
 use crate::fd::BorrowedFd;
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]

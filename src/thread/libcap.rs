@@ -1,7 +1,7 @@
 use bitflags::bitflags;
 use core::mem::MaybeUninit;
 
-use crate::process::Pid;
+use crate::pid::Pid;
 use crate::{backend, io};
 
 /// `__user_cap_data_struct`

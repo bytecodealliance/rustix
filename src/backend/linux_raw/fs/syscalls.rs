@@ -7,13 +7,13 @@
 #![allow(dead_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use super::super::c;
-use super::super::conv::{
+use crate::backend::c;
+use crate::backend::conv::{
     by_ref, c_int, c_uint, dev_t, oflags_for_open_how, opt_mut, pass_usize, raw_fd, ret, ret_c_int,
     ret_c_uint, ret_infallible, ret_owned_fd, ret_usize, size_of, slice, slice_mut, zero,
 };
 #[cfg(target_pointer_width = "64")]
-use super::super::conv::{loff_t, loff_t_from_u64, ret_u64};
+use crate::backend::conv::{loff_t, loff_t_from_u64, ret_u64};
 #[cfg(any(
     target_arch = "aarch64",
     target_arch = "riscv64",
@@ -24,12 +24,11 @@ use crate::fd::AsFd;
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::fs::{
-    inotify, Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, MemfdFlags, Mode,
-    OFlags, RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatVfs, StatVfsMountFlags,
-    StatxFlags, Timestamps, XattrFlags,
+    inotify, Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, Gid, MemfdFlags,
+    Mode, OFlags, RenameFlags, ResolveFlags, SealFlags, Stat, StatFs, StatVfs, StatVfsMountFlags,
+    StatxFlags, Timestamps, Uid, XattrFlags,
 };
 use crate::io::{self, SeekFrom};
-use crate::process::{Gid, Uid};
 use core::mem::{transmute, zeroed, MaybeUninit};
 #[cfg(target_arch = "mips64")]
 use linux_raw_sys::general::stat as linux_stat64;
@@ -41,7 +40,7 @@ use linux_raw_sys::general::{
 };
 #[cfg(target_pointer_width = "32")]
 use {
-    super::super::conv::{hi, lo, slice_just_addr},
+    crate::backend::conv::{hi, lo, slice_just_addr},
     linux_raw_sys::general::stat64 as linux_stat64,
     linux_raw_sys::general::timespec as __kernel_old_timespec,
 };
@@ -165,7 +164,7 @@ pub(crate) fn chownat(
     flags: AtFlags,
 ) -> io::Result<()> {
     unsafe {
-        let (ow, gr) = crate::process::translate_fchown_args(owner, group);
+        let (ow, gr) = crate::ugid::translate_fchown_args(owner, group);
         ret(syscall_readonly!(
             __NR_fchownat,
             dirfd,
@@ -180,7 +179,7 @@ pub(crate) fn chownat(
 #[inline]
 pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
     unsafe {
-        let (ow, gr) = crate::process::translate_fchown_args(owner, group);
+        let (ow, gr) = crate::ugid::translate_fchown_args(owner, group);
         ret(syscall_readonly!(__NR_fchown, fd, c_uint(ow), c_uint(gr)))
     }
 }
@@ -1433,8 +1432,10 @@ pub(crate) fn accessat(
     // `AT_EACCESS` and we're not setuid or setgid, we can emulate it.
     if flags.is_empty()
         || (flags.bits() == AT_EACCESS
-            && crate::process::getuid() == crate::process::geteuid()
-            && crate::process::getgid() == crate::process::getegid())
+            && crate::backend::ugid::syscalls::getuid()
+                == crate::backend::ugid::syscalls::geteuid()
+            && crate::backend::ugid::syscalls::getgid()
+                == crate::backend::ugid::syscalls::getegid())
     {
         return unsafe { ret(syscall_readonly!(__NR_faccessat, dirfd, path, access)) };
     }

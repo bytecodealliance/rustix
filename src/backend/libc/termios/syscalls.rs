@@ -4,8 +4,8 @@
 //!
 //! See the `rustix::backend::syscalls` module documentation for details.
 
-use super::super::c;
-use super::super::conv::{borrowed_fd, ret, ret_pid_t};
+use crate::backend::c;
+use crate::backend::conv::{borrowed_fd, ret, ret_pid_t};
 use crate::fd::BorrowedFd;
 #[cfg(feature = "procfs")]
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
@@ -14,7 +14,7 @@ use core::mem::MaybeUninit;
 #[cfg(not(target_os = "wasi"))]
 use {
     crate::io,
-    crate::process::{Pid, RawNonZeroPid},
+    crate::pid::{Pid, RawNonZeroPid},
     crate::termios::{Action, OptionalActions, QueueSelector, Speed, Termios, Winsize},
 };
 

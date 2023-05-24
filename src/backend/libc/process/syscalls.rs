@@ -1,44 +1,43 @@
 //! libc syscalls supporting `rustix::process`.
 
-use super::super::c;
-#[cfg(not(target_os = "wasi"))]
-use super::super::conv::{borrowed_fd, ret_infallible, ret_pid_t, ret_usize};
-use super::super::conv::{c_str, ret, ret_c_int, ret_discarded_char_ptr};
-#[cfg(linux_kernel)]
-use super::super::conv::{syscall_ret, syscall_ret_u32};
 #[cfg(any(linux_kernel, target_os = "dragonfly", target_os = "fuchsia"))]
 use super::types::RawCpuSet;
+use crate::backend::c;
+#[cfg(not(target_os = "wasi"))]
+use crate::backend::conv::{borrowed_fd, ret_infallible, ret_pid_t, ret_usize};
+#[cfg(feature = "fs")]
+use crate::backend::conv::{c_str, ret_discarded_char_ptr};
+use crate::backend::conv::{ret, ret_c_int};
+#[cfg(linux_kernel)]
+use crate::backend::conv::{syscall_ret, syscall_ret_u32};
 #[cfg(not(target_os = "wasi"))]
 use crate::fd::BorrowedFd;
 #[cfg(target_os = "linux")]
 use crate::fd::{AsRawFd, OwnedFd};
+#[cfg(feature = "fs")]
 use crate::ffi::CStr;
 #[cfg(feature = "fs")]
 use crate::fs::Mode;
 use crate::io;
-#[cfg(linux_kernel)]
-use crate::process::Sysinfo;
+#[cfg(not(target_os = "wasi"))]
+use crate::process::{Gid, Pid, RawNonZeroPid, RawPid, Signal, Uid, WaitOptions, WaitStatus};
 #[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 use crate::process::{WaitId, WaitidOptions, WaitidStatus};
 use core::mem::MaybeUninit;
 #[cfg(target_os = "linux")]
-use {super::super::conv::syscall_ret_owned_fd, crate::process::PidfdFlags};
+use {crate::backend::conv::syscall_ret_owned_fd, crate::process::PidfdFlags};
 #[cfg(linux_kernel)]
 use {
-    super::super::offset::libc_prlimit,
+    crate::backend::offset::libc_prlimit,
     crate::process::{Cpuid, MembarrierCommand, MembarrierQuery},
 };
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use {
-    super::super::offset::{libc_getrlimit, libc_rlimit, libc_setrlimit, LIBC_RLIM_INFINITY},
+    crate::backend::offset::{libc_getrlimit, libc_rlimit, libc_setrlimit, LIBC_RLIM_INFINITY},
     crate::process::{Resource, Rlimit},
 };
-#[cfg(not(target_os = "wasi"))]
-use {
-    super::types::RawUname,
-    crate::process::{Gid, Pid, RawNonZeroPid, RawPid, Signal, Uid, WaitOptions, WaitStatus},
-};
 
+#[cfg(feature = "fs")]
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn chdir(path: &CStr) -> io::Result<()> {
     unsafe { ret(c::chdir(c_str(path))) }
@@ -49,11 +48,13 @@ pub(crate) fn fchdir(dirfd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::fchdir(borrowed_fd(dirfd))) }
 }
 
+#[cfg(feature = "fs")]
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 pub(crate) fn chroot(path: &CStr) -> io::Result<()> {
     unsafe { ret(c::chroot(c_str(path))) }
 }
 
+#[cfg(feature = "fs")]
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<()> {
     unsafe { ret_discarded_char_ptr(c::getcwd(buf.as_mut_ptr().cast(), buf.len())) }
@@ -89,57 +90,6 @@ pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<(
             MEMBARRIER_CMD_FLAG_CPU,
             cpu.as_raw(),
         ))
-    }
-}
-
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-#[must_use]
-pub(crate) fn getuid() -> Uid {
-    unsafe {
-        let uid = c::getuid();
-        Uid::from_raw(uid)
-    }
-}
-
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-#[must_use]
-pub(crate) fn geteuid() -> Uid {
-    unsafe {
-        let uid = c::geteuid();
-        Uid::from_raw(uid)
-    }
-}
-
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-#[must_use]
-pub(crate) fn getgid() -> Gid {
-    unsafe {
-        let gid = c::getgid();
-        Gid::from_raw(gid)
-    }
-}
-
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-#[must_use]
-pub(crate) fn getegid() -> Gid {
-    unsafe {
-        let gid = c::getegid();
-        Gid::from_raw(gid)
-    }
-}
-
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-#[must_use]
-pub(crate) fn getpid() -> Pid {
-    unsafe {
-        let pid = c::getpid();
-        debug_assert_ne!(pid, 0);
-        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid))
     }
 }
 
@@ -208,16 +158,6 @@ pub(crate) fn sched_setaffinity(pid: Option<Pid>, cpuset: &RawCpuSet) -> io::Res
 pub(crate) fn sched_yield() {
     unsafe {
         let _ = c::sched_yield();
-    }
-}
-
-#[cfg(not(target_os = "wasi"))]
-#[inline]
-pub(crate) fn uname() -> RawUname {
-    let mut uname = MaybeUninit::<RawUname>::uninit();
-    unsafe {
-        ret_infallible(c::uname(uname.as_mut_ptr()));
-        uname.assume_init()
     }
 }
 
@@ -496,20 +436,6 @@ unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitidS
     }
 }
 
-#[inline]
-pub(crate) fn exit_group(code: c::c_int) -> ! {
-    // `_exit` and `_Exit` are the same; it's just a matter of which ones
-    // the libc bindings expose.
-    #[cfg(any(target_os = "wasi", target_os = "solid"))]
-    unsafe {
-        c::_Exit(code)
-    }
-    #[cfg(unix)]
-    unsafe {
-        c::_exit(code)
-    }
-}
-
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn getsid(pid: Option<Pid>) -> io::Result<Pid> {
@@ -571,18 +497,6 @@ pub(crate) fn test_kill_current_process_group() -> io::Result<()> {
     unsafe { ret(c::kill(0, 0)) }
 }
 
-#[cfg(linux_kernel)]
-#[inline]
-pub(crate) unsafe fn prctl(
-    option: c::c_int,
-    arg2: *mut c::c_void,
-    arg3: *mut c::c_void,
-    arg4: *mut c::c_void,
-    arg5: *mut c::c_void,
-) -> io::Result<c::c_int> {
-    ret_c_int(c::prctl(option, arg2, arg3, arg4, arg5))
-}
-
 #[cfg(freebsdlike)]
 #[inline]
 pub(crate) unsafe fn procctl(
@@ -610,25 +524,6 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
     let len = buf.len().try_into().map_err(|_| io::Errno::NOMEM)?;
 
     unsafe { ret_usize(c::getgroups(len, buf.as_mut_ptr().cast()) as isize) }
-}
-
-#[cfg(linux_kernel)]
-pub(crate) fn sysinfo() -> Sysinfo {
-    let mut info = MaybeUninit::<Sysinfo>::uninit();
-    unsafe {
-        ret_infallible(c::sysinfo(info.as_mut_ptr()));
-        info.assume_init()
-    }
-}
-
-#[cfg(not(any(target_os = "emscripten", target_os = "redox", target_os = "wasi")))]
-pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
-    unsafe {
-        ret(c::sethostname(
-            name.as_ptr().cast(),
-            name.len().try_into().map_err(|_| io::Errno::INVAL)?,
-        ))
-    }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]

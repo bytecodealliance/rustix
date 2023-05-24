@@ -68,8 +68,8 @@
 //! # fn main() {}
 //! ```
 
-use super::super::c;
-use super::super::conv::{ret, ret_owned_fd, ret_u32};
+use crate::backend::c;
+use crate::backend::conv::{ret, ret_owned_fd, ret_u32};
 use crate::fd::{AsFd, AsRawFd, OwnedFd};
 use crate::io;
 use alloc::vec::Vec;

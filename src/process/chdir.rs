@@ -1,9 +1,12 @@
-use crate::ffi::CString;
-use crate::path::SMALL_PATH_BUFFER_SIZE;
-use crate::{backend, io, path};
-use alloc::vec::Vec;
+use crate::{backend, io};
 #[cfg(not(target_os = "fuchsia"))]
 use backend::fd::AsFd;
+#[cfg(feature = "fs")]
+use {
+    crate::ffi::CString,
+    crate::path::{self, SMALL_PATH_BUFFER_SIZE},
+    alloc::vec::Vec,
+};
 
 /// `chdir(path)`—Change the current working directory.
 ///
@@ -14,6 +17,8 @@ use backend::fd::AsFd;
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/chdir.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/chdir.2.html
 #[inline]
+#[cfg(feature = "fs")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "fs")))]
 pub fn chdir<P: path::Arg>(path: P) -> io::Result<()> {
     path.into_with_c_str(backend::process::syscalls::chdir)
 }
@@ -42,12 +47,15 @@ pub fn fchdir<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getcwd.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/getcwd.3.html
+#[cfg(feature = "fs")]
 #[cfg(not(target_os = "wasi"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "fs")))]
 #[inline]
 pub fn getcwd<B: Into<Vec<u8>>>(reuse: B) -> io::Result<CString> {
     _getcwd(reuse.into())
 }
 
+#[cfg(feature = "fs")]
 fn _getcwd(mut buffer: Vec<u8>) -> io::Result<CString> {
     // This code would benefit from having a better way to read into
     // uninitialized memory, but that requires `unsafe`.
