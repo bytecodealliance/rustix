@@ -602,13 +602,7 @@ pub(crate) fn test_kill_current_process_group() -> io::Result<()> {
 
 #[inline]
 pub(crate) fn pidfd_open(pid: Pid, flags: PidfdFlags) -> io::Result<OwnedFd> {
-    unsafe {
-        ret_owned_fd(syscall_readonly!(
-            __NR_pidfd_open,
-            pid,
-            c_int(flags.bits() as _)
-        ))
-    }
+    unsafe { ret_owned_fd(syscall_readonly!(__NR_pidfd_open, pid, flags)) }
 }
 
 #[inline]
