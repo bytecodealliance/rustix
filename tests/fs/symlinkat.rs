@@ -21,6 +21,7 @@ fn test_symlink() {
     );
 }
 
+#[cfg(not(target_os = "redox"))]
 #[test]
 fn test_symlinkat() {
     use rustix::fs::{openat, readlinkat, statat, symlinkat, AtFlags, Mode, OFlags, CWD};

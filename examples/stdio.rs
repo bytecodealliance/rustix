@@ -102,13 +102,14 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_iflag & IXON) != 0 {
                 print!(" IXON");
             }
+            #[cfg(not(target_os = "redox"))]
             if (term.c_iflag & IXANY) != 0 {
                 print!(" IXANY");
             }
             if (term.c_iflag & IXOFF) != 0 {
                 print!(" IXOFF");
             }
-            #[cfg(not(target_os = "haiku"))]
+            #[cfg(not(any(target_os = "haiku", target_os = "redox")))]
             if (term.c_iflag & IMAXBEL) != 0 {
                 print!(" IMAXBEL");
             }
@@ -241,6 +242,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_cflag & CMSPAR) != 0 {
                 print!(" CMSPAR");
             }
+            #[cfg(not(any(target_os = "aix", target_os = "redox")))]
             if (term.c_cflag & CRTSCTS) != 0 {
                 print!(" CRTSCTS");
             }
@@ -269,15 +271,19 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_lflag & ECHONL) != 0 {
                 print!(" ECHONL");
             }
+            #[cfg(not(any(target_os = "redox")))]
             if (term.c_lflag & ECHOCTL) != 0 {
                 print!(" ECHOCTL");
             }
+            #[cfg(not(any(target_os = "redox")))]
             if (term.c_lflag & ECHOPRT) != 0 {
                 print!(" ECHOPRT");
             }
+            #[cfg(not(any(target_os = "redox")))]
             if (term.c_lflag & ECHOKE) != 0 {
                 print!(" ECHOKE");
             }
+            #[cfg(not(any(target_os = "redox")))]
             if (term.c_lflag & FLUSHO) != 0 {
                 print!(" FLUSHO");
             }
@@ -287,6 +293,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if (term.c_lflag & TOSTOP) != 0 {
                 print!(" TOSTOP");
             }
+            #[cfg(not(any(target_os = "redox")))]
             if (term.c_lflag & PENDIN) != 0 {
                 print!(" PENDIN");
             }

@@ -29,6 +29,7 @@ fn test_link() {
     );
 }
 
+#[cfg(not(target_os = "redox"))]
 #[test]
 fn test_linkat() {
     use rustix::fs::{linkat, openat, readlinkat, statat, AtFlags, Mode, OFlags, CWD};

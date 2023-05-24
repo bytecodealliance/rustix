@@ -1,5 +1,8 @@
-use std::io::{BufRead, Read};
-use std::{fs, io};
+#[cfg(feature = "system")]
+use {
+    std::io::{BufRead, Read},
+    std::{fs, io},
+};
 
 use rustix::thread::*;
 
