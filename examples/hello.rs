@@ -1,6 +1,6 @@
 //! Hello world, via plain syscalls.
 
-#[cfg(all(feature = "std", not(windows)))]
+#[cfg(all(feature = "stdio", feature = "std", not(windows)))]
 fn main() -> std::io::Result<()> {
     // The message to print. It includes an explicit newline because we're not
     // using `println!`, so we have to include the newline manually.
@@ -12,7 +12,7 @@ fn main() -> std::io::Result<()> {
     let mut bytes = message.as_bytes();
 
     // In a std-using configuration, `stdout` is always open.
-    let stdout = rustix::io::stdout();
+    let stdout = rustix::stdio::stdout();
 
     while !bytes.is_empty() {
         match rustix::io::write(stdout, bytes) {
@@ -33,7 +33,7 @@ fn main() -> std::io::Result<()> {
     Ok(())
 }
 
-#[cfg(any(not(feature = "std"), windows))]
+#[cfg(any(not(feature = "stdio"), not(feature = "std"), windows))]
 fn main() {
     unimplemented!()
 }

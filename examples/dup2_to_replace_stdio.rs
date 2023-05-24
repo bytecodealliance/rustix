@@ -1,9 +1,10 @@
 //! This is an example of how to use `dup2` to replace the stdin and stdout
 //! file descriptors.
 
-#[cfg(not(windows))]
+#[cfg(all(not(windows), feature = "stdio"))]
 fn main() {
-    use rustix::io::{dup2_stdin, dup2_stdout, pipe};
+    use rustix::io::pipe;
+    use rustix::stdio::{dup2_stdin, dup2_stdout};
     use std::io::{BufRead, BufReader};
 
     // Create some new file descriptors that we'll use to replace stdio's file
@@ -33,7 +34,7 @@ fn main() {
     assert_eq!(s, "hello, world!\n");
 }
 
-#[cfg(windows)]
+#[cfg(not(all(not(windows), feature = "stdio")))]
 fn main() {
     unimplemented!()
 }

@@ -80,9 +80,6 @@ bitflags! {
 pub const PIPE_BUF: usize = linux_raw_sys::general::PIPE_BUF as usize;
 
 pub(crate) const AT_FDCWD: c::c_int = linux_raw_sys::general::AT_FDCWD;
-pub(crate) const STDIN_FILENO: c::c_uint = linux_raw_sys::general::STDIN_FILENO;
-pub(crate) const STDOUT_FILENO: c::c_uint = linux_raw_sys::general::STDOUT_FILENO;
-pub(crate) const STDERR_FILENO: c::c_uint = linux_raw_sys::general::STDERR_FILENO;
 
 /// A buffer type used with `vmsplice`.
 /// It is guaranteed to be ABI compatible with the iovec type on Unix platforms
