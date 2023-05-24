@@ -18,7 +18,7 @@ bitflags::bitflags! {
     /// These flags correspond to values of [`MembarrierCommand`] which are
     /// supported in the OS.
     pub struct MembarrierQuery: u32 {
-       /// `MEMBARRIER_CMD_GLOBAL`
+       /// `MEMBARRIER_CMD_GLOBAL` (also known as `MEMBARRIER_CMD_SHARED`)
        #[doc(alias = "SHARED")]
        #[doc(alias = "MEMBARRIER_CMD_SHARED")]
        const GLOBAL = MembarrierCommand::Global as _;

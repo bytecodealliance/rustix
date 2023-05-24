@@ -13,7 +13,7 @@ use crate::{backend, io};
 use {crate::ffi::CString, alloc::vec::Vec};
 
 bitflags::bitflags! {
-    /// Flags for use with [`openpt`] and [`ioctl_tiocgptpeer`].
+    /// `O_*` flags for use with [`openpt`] and [`ioctl_tiocgptpeer`].
     ///
     /// [`ioctl_tiocgtpeer`]: https://docs.rs/rustix/*/x86_64-unknown-linux-gnu/rustix/pty/fn.ioctl_tiocgtpeer.html
     pub struct OpenptFlags: u32 {
@@ -70,7 +70,7 @@ impl From<OpenptFlags> for OFlags {
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=posix_openpt&sektion=2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=posix_openpt&section=3
 /// [NetBSD]: https://man.netbsd.org/posix_openpt.3
-/// [OpenBSD]: http://man.openbsd.org/posix_openpt
+/// [OpenBSD]: https://man.openbsd.org/posix_openpt
 /// [illumos]: https://illumos.org/man/3C/posix_openpt
 #[inline]
 #[doc(alias = "posix_openpt")]
