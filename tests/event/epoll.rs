@@ -37,7 +37,8 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     let mut event_list = epoll::EventVec::with_capacity(4);
     loop {
         epoll::epoll_wait(&epoll, &mut event_list, -1).unwrap();
-        for (_event_flags, target) in &event_list {
+        for event in &event_list {
+            let target = event.data;
             if target == 1 {
                 let conn_sock = accept(&listen_sock).unwrap();
                 ioctl_fionbio(&conn_sock, true).unwrap();
