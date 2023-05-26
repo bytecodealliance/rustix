@@ -1,6 +1,5 @@
 //! Tests for [`rustix::termios`].
 
-#![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 #![cfg(feature = "termios")]
 
 #[cfg(not(windows))]
