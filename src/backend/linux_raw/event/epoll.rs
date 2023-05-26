@@ -9,8 +9,8 @@
 //! ```no_run
 //! # #[cfg(feature = "net")]
 //! # fn main() -> std::io::Result<()> {
-//! use rustix::fd::AsFd;
 //! use rustix::event::epoll;
+//! use rustix::fd::AsFd;
 //! use rustix::io::{ioctl_fionbio, read, write};
 //! use rustix::net::{
 //!     accept, bind_v4, listen, socket, AddressFamily, Ipv4Addr, Protocol, SocketAddrV4,
@@ -39,7 +39,8 @@
 //! let mut event_list = epoll::EventVec::with_capacity(4);
 //! loop {
 //!     epoll::epoll_wait(&epoll, &mut event_list, -1)?;
-//!     for (_event_flags, target) in &event_list {
+//!     for event in &event_list {
+//!         let target = event.data;
 //!         if target == 1 {
 //!             // Accept a new connection, set it to non-blocking, and
 //!             // register to be notified when it's ready to write to.
@@ -257,24 +258,24 @@ pub struct Iter<'a> {
 }
 
 impl<'a> Iterator for Iter<'a> {
-    type Item = (EventFlags, u64);
+    type Item = &'a Event;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter
-            .next()
-            .map(|event| (event.event_flags, event.data))
+        self.iter.next()
     }
 }
 
 /// A record of an event that occurred.
 #[repr(C)]
 #[cfg_attr(target_arch = "x86_64", repr(packed))]
-struct Event {
+pub struct Event {
+    /// Which specific event(s) occurred.
     // Match the layout of `linux_raw_sys::general::epoll_event`. We just use a
     // `u64` instead of the full union.
-    event_flags: EventFlags,
-    data: u64,
+    pub event_flags: EventFlags,
+    /// User data.
+    pub data: u64,
 }
 
 /// A vector of `Event`s, plus context for interpreting them.
@@ -283,6 +284,20 @@ pub struct EventVec {
 }
 
 impl EventVec {
+    /// Constructs an `EventVec` from raw pointer, length, and capacity.
+    ///
+    /// # Safety
+    ///
+    /// This function calls [`Vec::from_raw_parts`] with its arguments.
+    ///
+    /// [`Vec::from_raw_parts`]: https://doc.rust-lang.org/stable/std/vec/struct.Vec.html#method.from_raw_parts
+    #[inline]
+    pub unsafe fn from_raw_parts(ptr: *mut Event, len: usize, capacity: usize) -> Self {
+        Self {
+            events: Vec::from_raw_parts(ptr, len, capacity),
+        }
+    }
+
     /// Constructs an `EventVec` with memory for `capacity` `Event`s.
     #[inline]
     pub fn with_capacity(capacity: usize) -> Self {
@@ -344,7 +359,7 @@ impl EventVec {
 
 impl<'a> IntoIterator for &'a EventVec {
     type IntoIter = Iter<'a>;
-    type Item = (EventFlags, u64);
+    type Item = &'a Event;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
