@@ -1,8 +1,6 @@
 //! A command which prints out information about the standard input,
 //! output, and error streams provided to it.
 
-#![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
-
 #[cfg(feature = "termios")]
 #[cfg(all(not(windows), feature = "stdio"))]
 use rustix::termios::isatty;
