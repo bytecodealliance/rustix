@@ -1,7 +1,6 @@
 //! Tests for [`rustix::event`].
 
 #![cfg(feature = "event")]
-#![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 
 #[cfg(not(feature = "rustc-dep-of-std"))] // TODO
 #[cfg(feature = "net")]

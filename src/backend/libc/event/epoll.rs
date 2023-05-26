@@ -7,10 +7,9 @@
 //! # Examples
 //!
 //! ```no_run
-//! # #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 //! # #[cfg(feature = "net")]
 //! # fn main() -> std::io::Result<()> {
-//! use io_lifetimes::AsFd;
+//! use rustix::fd::AsFd;
 //! use rustix::event::epoll;
 //! use rustix::io::{ioctl_fionbio, read, write};
 //! use rustix::net::{

@@ -104,7 +104,6 @@
     all(linux_raw, naked_functions, target_arch = "x86"),
     feature(naked_functions)
 )]
-#![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 #![cfg_attr(core_ffi_c, feature(core_ffi_c))]
 #![cfg_attr(core_c_str, feature(core_c_str))]
 #![cfg_attr(alloc_c_string, feature(alloc_ffi))]
@@ -158,8 +157,13 @@ mod backend;
 /// versions of these types and traits.
 pub mod fd {
     use super::backend;
+
+    // Re-export `AsSocket` etc. too, as users can't implement `AsFd` etc. on
+    // Windows due to them having blanket impls on Windows, so users must
+    // implement `AsSocket` etc.
     #[cfg(windows)]
-    pub use backend::fd::AsSocket;
+    pub use backend::fd::{AsRawSocket, AsSocket, FromRawSocket, IntoRawSocket};
+
     pub use backend::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
 }
 

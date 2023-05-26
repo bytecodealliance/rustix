@@ -13,8 +13,6 @@
 
 mod conv;
 
-#[cfg(windows)]
-mod io_lifetimes;
 #[cfg(not(windows))]
 #[cfg(not(feature = "std"))]
 pub(crate) mod fd {
@@ -23,13 +21,86 @@ pub(crate) mod fd {
 }
 #[cfg(windows)]
 pub(crate) mod fd {
-    pub use super::io_lifetimes::*;
+    #[cfg(feature = "std")]
+    pub use std::os::windows::io::{
+        AsRawSocket, AsSocket, BorrowedSocket as BorrowedFd, FromRawSocket, IntoRawSocket,
+        OwnedSocket as OwnedFd, RawSocket as RawFd,
+    };
+    pub(crate) use windows_sys::Win32::Networking::WinSock::SOCKET as LibcFd;
+
+    /// A version of [`AsRawFd`] for use with Winsock2 API.
+    ///
+    /// [`AsRawFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.AsRawFd.html
+    pub trait AsRawFd {
+        /// A version of [`as_raw_fd`] for use with Winsock2 API.
+        ///
+        /// [`as_raw_fd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html#tymethod.as_raw_fd
+        fn as_raw_fd(&self) -> RawFd;
+    }
+    #[cfg(feature = "std")]
+    impl<T: AsRawSocket> AsRawFd for T {
+        #[inline]
+        fn as_raw_fd(&self) -> RawFd {
+            self.as_raw_socket()
+        }
+    }
+
+    /// A version of [`IntoRawFd`] for use with Winsock2 API.
+    ///
+    /// [`IntoRawFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.IntoRawFd.html
+    pub trait IntoRawFd {
+        /// A version of [`into_raw_fd`] for use with Winsock2 API.
+        ///
+        /// [`into_raw_fd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html#tymethod.into_raw_fd
+        fn into_raw_fd(self) -> RawFd;
+    }
+    #[cfg(feature = "std")]
+    impl<T: IntoRawSocket> IntoRawFd for T {
+        #[inline]
+        fn into_raw_fd(self) -> RawFd {
+            self.into_raw_socket()
+        }
+    }
+
+    /// A version of [`FromRawFd`] for use with Winsock2 API.
+    ///
+    /// [`FromRawFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html
+    pub trait FromRawFd {
+        /// A version of [`from_raw_fd`] for use with Winsock2 API.
+        ///
+        /// # Safety
+        ///
+        /// See the [safety requirements] for [`from_raw_fd`].
+        ///
+        /// [`from_raw_fd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html#tymethod.from_raw_fd
+        /// [safety requirements]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html#safety
+        unsafe fn from_raw_fd(raw_fd: RawFd) -> Self;
+    }
+    #[cfg(feature = "std")]
+    impl<T: FromRawSocket> FromRawFd for T {
+        #[inline]
+        unsafe fn from_raw_fd(raw_fd: RawFd) -> Self {
+            Self::from_raw_socket(raw_fd)
+        }
+    }
+
+    /// A version of [`AsFd`] for use with Winsock2 API.
+    ///
+    /// [`AsFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.AsFd.html
+    pub trait AsFd {
+        /// An `as_fd` function for Winsock2, where a `Fd` is a `Socket`.
+        fn as_fd(&self) -> BorrowedFd;
+    }
+    impl<T: AsSocket> AsFd for T {
+        #[inline]
+        fn as_fd(&self) -> BorrowedFd {
+            self.as_socket()
+        }
+    }
 }
 #[cfg(not(windows))]
 #[cfg(feature = "std")]
 pub(crate) mod fd {
-    pub use io_lifetimes::*;
-
     #[cfg(target_os = "wasi")]
     #[allow(unused_imports)]
     pub(crate) use super::c::c_int as LibcFd;
@@ -37,9 +108,9 @@ pub(crate) mod fd {
     #[allow(unused_imports)]
     pub(crate) use std::os::unix::io::RawFd as LibcFd;
     #[cfg(unix)]
-    pub use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+    pub use std::os::unix::io::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
     #[cfg(target_os = "wasi")]
-    pub use std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+    pub use std::os::wasi::io::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
 }
 
 // On Windows we emulate selected libc-compatible interfaces. On non-Windows,
