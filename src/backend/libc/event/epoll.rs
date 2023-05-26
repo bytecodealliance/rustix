@@ -39,7 +39,8 @@
 //! let mut event_list = epoll::EventVec::with_capacity(4);
 //! loop {
 //!     epoll::epoll_wait(&epoll, &mut event_list, -1)?;
-//!     for (_event_flags, target) in &event_list {
+//!     for event in &event_list {
+//!         let target = event.data;
 //!         if target == 1 {
 //!             // Accept a new connection, set it to non-blocking, and
 //!             // register to be notified when it's ready to write to.
@@ -258,15 +259,10 @@ pub struct Iter<'a> {
 }
 
 impl<'a> Iterator for Iter<'a> {
-    type Item = (EventFlags, u64);
+    type Item = &'a Event;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // SAFETY: `self.context` is guaranteed to be valid because we hold
-        // `'context` for it. And we know this event is associated with this
-        // context because `wait` sets both.
-        self.iter
-            .next()
-            .map(|event| (event.event_flags, event.data))
+        self.iter.next()
     }
 }
 
@@ -283,11 +279,13 @@ impl<'a> Iterator for Iter<'a> {
     ),
     repr(packed)
 )]
-struct Event {
+pub struct Event {
+    /// Which specific event(s) occurred.
     // Match the layout of `c::epoll_event`. We just use a `u64` instead of
     // the full union.
-    event_flags: EventFlags,
-    data: u64,
+    pub event_flags: EventFlags,
+    /// User data.
+    pub data: u64,
 }
 
 /// A vector of `Event`s, plus context for interpreting them.
@@ -296,6 +294,14 @@ pub struct EventVec {
 }
 
 impl EventVec {
+    /// Constructs an `EventVec` from raw pointer, length, and capacity.
+    #[inline]
+    pub unsafe fn from_raw_parts(ptr: *mut Event, len: usize, capacity: usize) -> Self {
+        Self {
+            events: Vec::from_raw_parts(ptr, len, capacity),
+        }
+    }
+
     /// Constructs an `EventVec` with memory for `capacity` `Event`s.
     #[inline]
     pub fn with_capacity(capacity: usize) -> Self {
@@ -357,7 +363,7 @@ impl EventVec {
 
 impl<'a> IntoIterator for &'a EventVec {
     type IntoIter = Iter<'a>;
-    type Item = (EventFlags, u64);
+    type Item = &'a Event;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
