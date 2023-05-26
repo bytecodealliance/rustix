@@ -1,12 +1,13 @@
 use crate::backend::c;
 use crate::backend::conv::borrowed_fd;
-#[cfg(windows)]
-use crate::backend::fd::RawFd;
 use crate::backend::fd::{AsFd, AsRawFd, BorrowedFd, LibcFd};
 use bitflags::bitflags;
 use core::marker::PhantomData;
 #[cfg(windows)]
-use std::fmt;
+use {
+    crate::backend::fd::{AsSocket, RawFd},
+    std::fmt,
+};
 
 bitflags! {
     /// `POLL*` flags for use with [`poll`].
@@ -125,7 +126,7 @@ impl<'fd> AsFd for PollFd<'fd> {
 }
 
 #[cfg(windows)]
-impl<'fd> io_lifetimes::AsSocket for PollFd<'fd> {
+impl<'fd> AsSocket for PollFd<'fd> {
     #[inline]
     fn as_socket(&self) -> BorrowedFd<'_> {
         // SAFETY: Our constructors and `set_fd` require `pollfd.fd` to be

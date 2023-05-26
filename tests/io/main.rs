@@ -1,7 +1,5 @@
 //! Tests for [`rustix::io`].
 
-#![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
-
 mod error;
 #[cfg(not(windows))]
 mod from_into;
