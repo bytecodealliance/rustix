@@ -15,7 +15,7 @@ use crate::backend::conv::{syscall_ret, syscall_ret_u32};
 #[cfg(not(target_os = "wasi"))]
 use crate::fd::BorrowedFd;
 #[cfg(target_os = "linux")]
-use crate::fd::{AsRawFd, OwnedFd};
+use crate::fd::{AsRawFd, OwnedFd, RawFd};
 #[cfg(feature = "fs")]
 use crate::ffi::CStr;
 #[cfg(feature = "fs")]
@@ -33,7 +33,10 @@ use crate::process::{Resource, Rlimit};
 use crate::process::{WaitId, WaitidOptions, WaitidStatus};
 use core::mem::MaybeUninit;
 #[cfg(target_os = "linux")]
-use {crate::backend::conv::syscall_ret_owned_fd, crate::process::PidfdFlags};
+use {
+    super::super::conv::syscall_ret_owned_fd, crate::process::PidfdFlags,
+    crate::process::PidfdGetfdFlags,
+};
 
 #[cfg(feature = "fs")]
 #[cfg(not(target_os = "wasi"))]
@@ -512,6 +515,22 @@ pub(crate) fn pidfd_open(pid: Pid, flags: PidfdFlags) -> io::Result<OwnedFd> {
         syscall_ret_owned_fd(c::syscall(
             c::SYS_pidfd_open,
             pid.as_raw_nonzero().get(),
+            flags.bits(),
+        ))
+    }
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn pidfd_getfd(
+    pidfd: BorrowedFd<'_>,
+    targetfd: RawFd,
+    flags: PidfdGetfdFlags,
+) -> io::Result<OwnedFd> {
+    unsafe {
+        syscall_ret_owned_fd(c::syscall(
+            c::SYS_pidfd_getfd,
+            pidfd,
+            targetfd,
             flags.bits(),
         ))
     }
