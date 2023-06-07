@@ -1017,13 +1017,17 @@ pub union splice_fd_in_or_file_index_union {
 }
 
 /// An io_uring Completion Queue Entry.
+///
+/// This does not derive `Copy` or `Clone` because the `big_cqe` field is not
+/// automatically copyable.
 #[allow(missing_docs)]
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Default)]
+#[derive(Debug, Default)]
 pub struct io_uring_cqe {
     pub user_data: io_uring_user_data,
     pub res: i32,
     pub flags: IoringCqeFlags,
+    pub big_cqe: sys::__IncompleteArrayField<u64>,
 }
 
 #[allow(missing_docs)]
@@ -1396,7 +1400,7 @@ fn io_uring_layouts() {
     check_struct_field!(io_uring_restriction, resv);
     check_struct_field!(io_uring_restriction, resv2);
 
-    check_struct!(io_uring_cqe, user_data, res, flags);
+    check_struct!(io_uring_cqe, user_data, res, flags, big_cqe);
     check_struct!(
         io_uring_params,
         sq_entries,
