@@ -67,15 +67,11 @@ pub(crate) mod thread;
 #[cfg(feature = "time")]
 pub(crate) mod time;
 
-#[cfg(feature = "std")]
 pub(crate) mod fd {
-    #[allow(unused_imports)]
-    pub(crate) use std::os::unix::io::RawFd as LibcFd;
-    pub use std::os::unix::io::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
+    pub use crate::maybe_polyfill::os::fd::{
+        AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd,
+    };
 }
-
-#[cfg(not(feature = "std"))]
-pub(crate) use crate::io::fd;
 
 // The linux_raw backend doesn't use actual libc, so we define selected
 // libc-like definitions in a module called `c`.

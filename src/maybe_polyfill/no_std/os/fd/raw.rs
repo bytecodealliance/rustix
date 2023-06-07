@@ -2,6 +2,8 @@
 //! library/std/src/os/fd/raw.rs at revision
 //! fa68e73e9947be8ffc5b3b46d899e4953a44e7e9.
 //!
+//! All code in this file is licensed MIT or Apache 2.0 at your option.
+//!
 //! Raw Unix-like file descriptors.
 
 #![cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]

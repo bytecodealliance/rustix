@@ -5,11 +5,7 @@ use backend::fd::AsFd;
 
 // Declare `IoSlice` and `IoSliceMut`.
 #[cfg(not(windows))]
-#[cfg(not(feature = "std"))]
-pub use backend::io::io_slice::{IoSlice, IoSliceMut};
-#[cfg(not(windows))]
-#[cfg(feature = "std")]
-pub use std::io::{IoSlice, IoSliceMut};
+pub use crate::maybe_polyfill::io::{IoSlice, IoSliceMut};
 
 #[cfg(linux_kernel)]
 pub use backend::io::types::ReadWriteFlags;
