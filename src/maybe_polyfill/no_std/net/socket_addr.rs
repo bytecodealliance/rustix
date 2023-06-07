@@ -7,7 +7,7 @@
 //! This defines `SocketAddr`, `SocketAddrV4`, and `SocketAddrV6` in a
 //! platform-independent way. It is not the native representation.
 
-use crate::net::ip::{IpAddr, Ipv4Addr, Ipv6Addr};
+use super::ip_addr::{IpAddr, Ipv4Addr, Ipv6Addr};
 use core::cmp::Ordering;
 use core::hash;
 

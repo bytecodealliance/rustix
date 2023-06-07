@@ -11,8 +11,6 @@ mod dup;
 mod errno;
 #[cfg(not(windows))]
 mod fcntl;
-#[cfg(not(feature = "std"))]
-pub(crate) mod fd;
 mod ioctl;
 #[cfg(not(any(windows, target_os = "redox")))]
 #[cfg(all(feature = "fs", feature = "net"))]

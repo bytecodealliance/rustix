@@ -132,6 +132,10 @@ extern crate alloc;
 #[macro_use]
 pub(crate) mod cstr;
 pub(crate) mod utils;
+// Polyfill for `std` in `no_std` builds.
+#[cfg_attr(feature = "std", path = "maybe_polyfill/std/mod.rs")]
+#[cfg_attr(not(feature = "std"), path = "maybe_polyfill/no_std/mod.rs")]
+pub(crate) mod maybe_polyfill;
 
 // linux_raw: Weak symbols are used by the use-libc-auxv feature for
 // glibc 2.15 support.

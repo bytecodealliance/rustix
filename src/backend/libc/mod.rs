@@ -13,12 +13,6 @@
 
 mod conv;
 
-#[cfg(not(windows))]
-#[cfg(not(feature = "std"))]
-pub(crate) mod fd {
-    pub(crate) use super::c::c_int as LibcFd;
-    pub use crate::io::fd::*;
-}
 #[cfg(windows)]
 pub(crate) mod fd {
     #[cfg(feature = "std")]
@@ -99,18 +93,12 @@ pub(crate) mod fd {
     }
 }
 #[cfg(not(windows))]
-#[cfg(feature = "std")]
 pub(crate) mod fd {
-    #[cfg(target_os = "wasi")]
+    pub use crate::maybe_polyfill::os::fd::{
+        AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd,
+    };
     #[allow(unused_imports)]
-    pub(crate) use super::c::c_int as LibcFd;
-    #[cfg(unix)]
-    #[allow(unused_imports)]
-    pub(crate) use std::os::unix::io::RawFd as LibcFd;
-    #[cfg(unix)]
-    pub use std::os::unix::io::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
-    #[cfg(target_os = "wasi")]
-    pub use std::os::wasi::io::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
+    pub(crate) use RawFd as LibcFd;
 }
 
 // On Windows we emulate selected libc-compatible interfaces. On non-Windows,
