@@ -15,8 +15,7 @@ mod conv;
 
 #[cfg(windows)]
 pub(crate) mod fd {
-    #[cfg(feature = "std")]
-    pub use std::os::windows::io::{
+    pub use crate::maybe_polyfill::os::windows::io::{
         AsRawSocket, AsSocket, BorrowedSocket as BorrowedFd, FromRawSocket, IntoRawSocket,
         OwnedSocket as OwnedFd, RawSocket as RawFd,
     };
@@ -31,7 +30,6 @@ pub(crate) mod fd {
         /// [`as_raw_fd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html#tymethod.as_raw_fd
         fn as_raw_fd(&self) -> RawFd;
     }
-    #[cfg(feature = "std")]
     impl<T: AsRawSocket> AsRawFd for T {
         #[inline]
         fn as_raw_fd(&self) -> RawFd {
@@ -48,7 +46,6 @@ pub(crate) mod fd {
         /// [`into_raw_fd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html#tymethod.into_raw_fd
         fn into_raw_fd(self) -> RawFd;
     }
-    #[cfg(feature = "std")]
     impl<T: IntoRawSocket> IntoRawFd for T {
         #[inline]
         fn into_raw_fd(self) -> RawFd {
@@ -70,7 +67,6 @@ pub(crate) mod fd {
         /// [safety requirements]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html#safety
         unsafe fn from_raw_fd(raw_fd: RawFd) -> Self;
     }
-    #[cfg(feature = "std")]
     impl<T: FromRawSocket> FromRawFd for T {
         #[inline]
         unsafe fn from_raw_fd(raw_fd: RawFd) -> Self {
