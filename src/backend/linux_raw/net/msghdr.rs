@@ -8,7 +8,7 @@
 use super::super::c;
 use super::super::net::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 
-use crate::io::{IoSlice, IoSliceMut};
+use crate::io::{self, IoSlice, IoSliceMut};
 use crate::net::{RecvAncillaryBuffer, SendAncillaryBuffer, SocketAddrV4, SocketAddrV6};
 use crate::utils::as_ptr;
 
@@ -31,8 +31,10 @@ pub(crate) fn with_recv_msghdr<R>(
     name: &mut MaybeUninit<c::sockaddr_storage>,
     iov: &mut [IoSliceMut<'_>],
     control: &mut RecvAncillaryBuffer<'_>,
-    f: impl FnOnce(&mut c::msghdr) -> R,
-) -> R {
+    f: impl FnOnce(&mut c::msghdr) -> io::Result<R>,
+) -> io::Result<R> {
+    control.clear();
+
     let namelen = size_of::<c::sockaddr_storage>() as c::c_int;
     let mut msghdr = c::msghdr {
         msg_name: name.as_mut_ptr().cast(),
@@ -49,8 +51,10 @@ pub(crate) fn with_recv_msghdr<R>(
     let res = f(&mut msghdr);
 
     // Reset the control length.
-    unsafe {
-        control.set_control_len(msghdr.msg_controllen.try_into().unwrap_or(usize::MAX));
+    if res.is_ok() {
+        unsafe {
+            control.set_control_len(msghdr.msg_controllen.try_into().unwrap_or(usize::MAX));
+        }
     }
 
     res

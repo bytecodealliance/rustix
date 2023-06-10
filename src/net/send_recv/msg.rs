@@ -248,6 +248,11 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
         self.read = 0;
     }
 
+    /// Delete all messages from the buffer.
+    pub(crate) fn clear(&mut self) {
+        self.drain().for_each(drop);
+    }
+
     /// Drain all messages from the buffer.
     pub fn drain(&mut self) -> AncillaryDrain<'_> {
         AncillaryDrain {
@@ -260,7 +265,7 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
 
 impl Drop for RecvAncillaryBuffer<'_> {
     fn drop(&mut self) {
-        self.drain().for_each(drop);
+        self.clear();
     }
 }
 
