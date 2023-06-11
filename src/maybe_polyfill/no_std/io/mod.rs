@@ -1,11 +1,16 @@
 //! The following is derived from Rust's
 //! library/std/src/sys/unix/io.rs
 //! dca3f1b786efd27be3b325ed1e01e247aa589c3b.
+//!
+//! All code in this file is licensed MIT or Apache 2.0 at your option.
 
 #![allow(unsafe_code)]
 use crate::backend::c;
+#[cfg(not(linux_raw))]
+use c::size_t as __kernel_size_t;
 use core::marker::PhantomData;
 use core::slice;
+#[cfg(linux_raw)]
 use linux_raw_sys::general::__kernel_size_t;
 
 /// <https://doc.rust-lang.org/stable/std/io/struct.IoSlice.html>
@@ -37,6 +42,8 @@ impl<'a> IoSlice<'a> {
         }
 
         unsafe {
+            // `__kernel_size_t` will always have the same size as `usize`, but it is a `u32` on
+            // 32-bit platforms and `u64` on 64-bit platforms when using `linux_raw` backend
             self.vec.iov_len -= n as __kernel_size_t;
             self.vec.iov_base = self.vec.iov_base.add(n);
         }
@@ -77,6 +84,8 @@ impl<'a> IoSliceMut<'a> {
         }
 
         unsafe {
+            // `__kernel_size_t` will always have the same size as `usize`, but it is a `u32` on
+            // 32-bit platforms and `u64` on 64-bit platforms when using `linux_raw` backend
             self.vec.iov_len -= n as __kernel_size_t;
             self.vec.iov_base = self.vec.iov_base.add(n);
         }
