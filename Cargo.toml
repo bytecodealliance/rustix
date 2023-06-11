@@ -83,7 +83,7 @@ io-lifetimes = { version = "1.0.10", default-features = false, features = ["clos
 # Don't upgrade to serial_test 0.7 for now because it depends on a
 # `parking_lot_core` version which is not compatible with our MSRV of 1.48.
 serial_test = "0.6"
-memoffset = "0.8.0"
+memoffset = "0.9.0"
 flate2 = "1.0"
 
 [target.'cfg(all(criterion, not(any(target_os = "emscripten", target_os = "wasi"))))'.dev-dependencies]
