@@ -131,7 +131,7 @@ pub(super) use c::posix_fadvise as libc_posix_fadvise;
 #[cfg(feature = "fs")]
 pub(super) use c::posix_fadvise64 as libc_posix_fadvise;
 
-#[cfg(all(not(any(linux_kernel, windows, target_os = "emscripten"))))]
+#[cfg(not(any(linux_kernel, windows, target_os = "emscripten")))]
 pub(super) use c::{pread as libc_pread, pwrite as libc_pwrite};
 #[cfg(any(linux_kernel, target_os = "emscripten"))]
 pub(super) use c::{pread64 as libc_pread, pwrite64 as libc_pwrite};
