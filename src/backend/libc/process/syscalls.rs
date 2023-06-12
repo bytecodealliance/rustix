@@ -54,7 +54,7 @@ pub(crate) fn chroot(path: &CStr) -> io::Result<()> {
 
 #[cfg(feature = "fs")]
 #[cfg(not(target_os = "wasi"))]
-pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<()> {
+pub(crate) fn getcwd(buf: &mut [MaybeUninit<u8>]) -> io::Result<()> {
     unsafe { ret_discarded_char_ptr(c::getcwd(buf.as_mut_ptr().cast(), buf.len())) }
 }
 

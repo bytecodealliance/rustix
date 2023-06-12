@@ -56,7 +56,7 @@ pub(crate) fn chroot(filename: &CStr) -> io::Result<()> {
 
 #[cfg(feature = "fs")]
 #[inline]
-pub(crate) fn getcwd(buf: &mut [u8]) -> io::Result<usize> {
+pub(crate) fn getcwd(buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
     let (buf_addr_mut, buf_len) = slice_mut(buf);
     unsafe { ret_usize(syscall!(__NR_getcwd, buf_addr_mut, buf_len)) }
 }
