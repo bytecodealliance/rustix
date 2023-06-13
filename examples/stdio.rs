@@ -36,7 +36,7 @@ fn main() -> io::Result<()> {
 #[cfg(all(not(windows), feature = "stdio"))]
 fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     let fd = fd.as_fd();
-    println!(" - ready: {:?}", rustix::io::ioctl_fionread(fd)?);
+    println!(" - ready bytes: {:?}", rustix::io::ioctl_fionread(fd)?);
 
     #[cfg(feature = "termios")]
     if isatty(fd) {
@@ -58,57 +58,53 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             use rustix::termios::*;
             let term = tcgetattr(fd)?;
 
-            if let Some(speed) = speed_value(cfgetispeed(&term)) {
-                println!(" - ispeed: {}", speed);
-            }
-            if let Some(speed) = speed_value(cfgetospeed(&term)) {
-                println!(" - ospeed: {}", speed);
-            }
+            println!(" - input_speed: {}", term.input_speed());
+            println!(" - output_speed: {}", term.output_speed());
 
             print!(" - in flags:");
-            if (term.c_iflag & IGNBRK) != 0 {
+            if term.input_modes.contains(InputModes::IGNBRK) {
                 print!(" IGNBRK");
             }
-            if (term.c_iflag & BRKINT) != 0 {
+            if term.input_modes.contains(InputModes::BRKINT) {
                 print!(" BRKINT");
             }
-            if (term.c_iflag & IGNPAR) != 0 {
+            if term.input_modes.contains(InputModes::IGNPAR) {
                 print!(" IGNPAR");
             }
-            if (term.c_iflag & PARMRK) != 0 {
+            if term.input_modes.contains(InputModes::PARMRK) {
                 print!(" PARMRK");
             }
-            if (term.c_iflag & INPCK) != 0 {
+            if term.input_modes.contains(InputModes::INPCK) {
                 print!(" INPCK");
             }
-            if (term.c_iflag & ISTRIP) != 0 {
+            if term.input_modes.contains(InputModes::ISTRIP) {
                 print!(" ISTRIP");
             }
-            if (term.c_iflag & INLCR) != 0 {
+            if term.input_modes.contains(InputModes::INLCR) {
                 print!(" INLCR");
             }
-            if (term.c_iflag & IGNCR) != 0 {
+            if term.input_modes.contains(InputModes::IGNCR) {
                 print!(" IGNCR");
             }
-            if (term.c_iflag & ICRNL) != 0 {
+            if term.input_modes.contains(InputModes::ICRNL) {
                 print!(" ICRNL");
             }
-            #[cfg(any(linux_raw, all(libc, any(solarish, target_os = "haiku"))))]
-            if (term.c_iflag & IUCLC) != 0 {
+            #[cfg(any(linux_kernel, solarish, target_os = "haiku"))]
+            if term.input_modes.contains(InputModes::IUCLC) {
                 print!(" IUCLC");
             }
-            if (term.c_iflag & IXON) != 0 {
+            if term.input_modes.contains(InputModes::IXON) {
                 print!(" IXON");
             }
             #[cfg(not(target_os = "redox"))]
-            if (term.c_iflag & IXANY) != 0 {
+            if term.input_modes.contains(InputModes::IXANY) {
                 print!(" IXANY");
             }
-            if (term.c_iflag & IXOFF) != 0 {
+            if term.input_modes.contains(InputModes::IXOFF) {
                 print!(" IXOFF");
             }
             #[cfg(not(any(target_os = "haiku", target_os = "redox")))]
-            if (term.c_iflag & IMAXBEL) != 0 {
+            if term.input_modes.contains(InputModes::IMAXBEL) {
                 print!(" IMAXBEL");
             }
             #[cfg(not(any(
@@ -120,13 +116,13 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 target_os = "haiku",
                 target_os = "redox",
             )))]
-            if (term.c_iflag & IUTF8) != 0 {
+            if term.input_modes.contains(InputModes::IUTF8) {
                 print!(" IUTF8");
             }
             println!();
 
             print!(" - out flags:");
-            if (term.c_oflag & OPOST) != 0 {
+            if term.output_modes.contains(OutputModes::OPOST) {
                 print!(" OPOST");
             }
             #[cfg(not(any(
@@ -136,200 +132,180 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 target_os = "netbsd",
                 target_os = "redox"
             )))]
-            if (term.c_oflag & OLCUC) != 0 {
+            if term.output_modes.contains(OutputModes::OLCUC) {
                 print!(" OLCUC");
             }
-            if (term.c_oflag & ONLCR) != 0 {
+            if term.output_modes.contains(OutputModes::ONLCR) {
                 print!(" ONLCR");
             }
-            if (term.c_oflag & OCRNL) != 0 {
+            if term.output_modes.contains(OutputModes::OCRNL) {
                 print!(" OCRNL");
             }
-            if (term.c_oflag & ONOCR) != 0 {
+            if term.output_modes.contains(OutputModes::ONOCR) {
                 print!(" ONOCR");
             }
-            if (term.c_oflag & ONLRET) != 0 {
+            if term.output_modes.contains(OutputModes::ONLRET) {
                 print!(" ONLRET");
             }
             #[cfg(not(bsd))]
-            if (term.c_oflag & OFILL) != 0 {
+            if term.output_modes.contains(OutputModes::OFILL) {
                 print!(" OFILL");
             }
             #[cfg(not(bsd))]
-            if (term.c_oflag & OFDEL) != 0 {
+            if term.output_modes.contains(OutputModes::OFDEL) {
                 print!(" OFDEL");
             }
             #[cfg(not(any(bsd, solarish, target_os = "redox")))]
-            if (term.c_oflag & NLDLY) != 0 {
+            if term.output_modes.contains(OutputModes::NLDLY) {
                 print!(" NLDLY");
             }
             #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "redox")))]
-            if (term.c_oflag & CRDLY) != 0 {
+            if term.output_modes.contains(OutputModes::CRDLY) {
                 print!(" CRDLY");
             }
             #[cfg(not(any(netbsdlike, solarish, target_os = "dragonfly", target_os = "redox")))]
-            if (term.c_oflag & TABDLY) != 0 {
+            if term.output_modes.contains(OutputModes::TABDLY) {
                 print!(" TABDLY");
             }
             #[cfg(not(any(bsd, solarish, target_os = "redox")))]
-            if (term.c_oflag & BSDLY) != 0 {
+            if term.output_modes.contains(OutputModes::BSDLY) {
                 print!(" BSDLY");
             }
-            #[cfg(not(any(all(libc, target_env = "musl"), bsd, solarish, target_os = "redox")))]
-            if (term.c_oflag & VTDLY) != 0 {
+            #[cfg(not(any(bsd, solarish, target_os = "redox")))]
+            if term.output_modes.contains(OutputModes::VTDLY) {
                 print!(" VTDLY");
             }
-            #[cfg(not(any(all(libc, target_env = "musl"), bsd, solarish, target_os = "redox")))]
-            if (term.c_oflag & FFDLY) != 0 {
+            #[cfg(not(any(bsd, solarish, target_os = "redox")))]
+            if term.output_modes.contains(OutputModes::FFDLY) {
                 print!(" FFDLY");
             }
             println!();
 
             print!(" - control flags:");
-            #[cfg(not(any(bsd, target_os = "haiku", target_os = "redox")))]
-            if (term.c_cflag & CBAUD) != 0 {
-                print!(" CBAUD");
-            }
-            #[cfg(not(any(
-                bsd,
-                solarish,
-                target_os = "aix",
-                target_os = "haiku",
-                target_os = "redox"
-            )))]
-            if (term.c_cflag & CBAUDEX) != 0 {
-                print!(" CBAUDEX");
-            }
-            if (term.c_cflag & CSIZE) != 0 {
+            if term.control_modes.contains(ControlModes::CSIZE) {
                 print!(" CSIZE");
             }
-            if (term.c_cflag & CSTOPB) != 0 {
+            if term.control_modes.contains(ControlModes::CSTOPB) {
                 print!(" CSTOPB");
             }
-            if (term.c_cflag & CREAD) != 0 {
+            if term.control_modes.contains(ControlModes::CREAD) {
                 print!(" CREAD");
             }
-            if (term.c_cflag & PARENB) != 0 {
+            if term.control_modes.contains(ControlModes::PARENB) {
                 print!(" PARENB");
             }
-            if (term.c_cflag & PARODD) != 0 {
+            if term.control_modes.contains(ControlModes::PARODD) {
                 print!(" PARODD");
             }
-            if (term.c_cflag & HUPCL) != 0 {
+            if term.control_modes.contains(ControlModes::HUPCL) {
                 print!(" HUPCL");
             }
-            if (term.c_cflag & CLOCAL) != 0 {
+            if term.control_modes.contains(ControlModes::CLOCAL) {
                 print!(" CLOCAL");
             }
             #[cfg(not(any(
                 bsd,
-                target_os = "emscripten",
-                target_os = "haiku",
-                target_os = "redox",
-            )))]
-            if (term.c_cflag & CIBAUD) != 0 {
-                print!(" CIBAUD");
-            }
-            #[cfg(not(any(
-                bsd,
                 solarish,
                 target_os = "emscripten",
                 target_os = "haiku",
                 target_os = "redox",
             )))]
-            if (term.c_cflag & CMSPAR) != 0 {
+            if term.control_modes.contains(ControlModes::CMSPAR) {
                 print!(" CMSPAR");
             }
             #[cfg(not(any(target_os = "aix", target_os = "redox")))]
-            if (term.c_cflag & CRTSCTS) != 0 {
+            if term.control_modes.contains(ControlModes::CRTSCTS) {
                 print!(" CRTSCTS");
             }
             println!();
 
             print!(" - local flags:");
-            if (term.c_lflag & ISIG) != 0 {
+            if term.local_modes.contains(LocalModes::ISIG) {
                 print!(" ISIG");
             }
-            if (term.c_lflag & ICANON) != 0 {
+            if term.local_modes.contains(LocalModes::ICANON) {
                 print!(" ICANON");
             }
-            #[cfg(any(linux_raw, all(libc, any(target_arch = "s390x", target_os = "haiku"))))]
-            if (term.c_lflag & XCASE) != 0 {
+            #[cfg(any(linux_kernel, target_arch = "s390x", target_os = "haiku"))]
+            if term.local_modes.contains(LocalModes::XCASE) {
                 print!(" XCASE");
             }
-            if (term.c_lflag & ECHO) != 0 {
+            if term.local_modes.contains(LocalModes::ECHO) {
                 print!(" ECHO");
             }
-            if (term.c_lflag & ECHOE) != 0 {
+            if term.local_modes.contains(LocalModes::ECHOE) {
                 print!(" ECHOE");
             }
-            if (term.c_lflag & ECHOK) != 0 {
+            if term.local_modes.contains(LocalModes::ECHOK) {
                 print!(" ECHOK");
             }
-            if (term.c_lflag & ECHONL) != 0 {
+            if term.local_modes.contains(LocalModes::ECHONL) {
                 print!(" ECHONL");
             }
             #[cfg(not(any(target_os = "redox")))]
-            if (term.c_lflag & ECHOCTL) != 0 {
+            if term.local_modes.contains(LocalModes::ECHOCTL) {
                 print!(" ECHOCTL");
             }
             #[cfg(not(any(target_os = "redox")))]
-            if (term.c_lflag & ECHOPRT) != 0 {
+            if term.local_modes.contains(LocalModes::ECHOPRT) {
                 print!(" ECHOPRT");
             }
             #[cfg(not(any(target_os = "redox")))]
-            if (term.c_lflag & ECHOKE) != 0 {
+            if term.local_modes.contains(LocalModes::ECHOKE) {
                 print!(" ECHOKE");
             }
             #[cfg(not(any(target_os = "redox")))]
-            if (term.c_lflag & FLUSHO) != 0 {
+            if term.local_modes.contains(LocalModes::FLUSHO) {
                 print!(" FLUSHO");
             }
-            if (term.c_lflag & NOFLSH) != 0 {
+            if term.local_modes.contains(LocalModes::NOFLSH) {
                 print!(" NOFLSH");
             }
-            if (term.c_lflag & TOSTOP) != 0 {
+            if term.local_modes.contains(LocalModes::TOSTOP) {
                 print!(" TOSTOP");
             }
             #[cfg(not(any(target_os = "redox")))]
-            if (term.c_lflag & PENDIN) != 0 {
+            if term.local_modes.contains(LocalModes::PENDIN) {
                 print!(" PENDIN");
             }
-            if (term.c_lflag & IEXTEN) != 0 {
+            if term.local_modes.contains(LocalModes::IEXTEN) {
                 print!(" IEXTEN");
             }
             println!();
 
             println!(
                 " - keys: INTR={} QUIT={} ERASE={} KILL={} EOF={} TIME={} MIN={} ",
-                key(term.c_cc[VINTR]),
-                key(term.c_cc[VQUIT]),
-                key(term.c_cc[VERASE]),
-                key(term.c_cc[VKILL]),
-                key(term.c_cc[VEOF]),
-                term.c_cc[VTIME],
-                term.c_cc[VMIN]
+                key(term.special_codes[SpecialCodeIndex::VINTR]),
+                key(term.special_codes[SpecialCodeIndex::VQUIT]),
+                key(term.special_codes[SpecialCodeIndex::VERASE]),
+                key(term.special_codes[SpecialCodeIndex::VKILL]),
+                key(term.special_codes[SpecialCodeIndex::VEOF]),
+                term.special_codes[SpecialCodeIndex::VTIME],
+                term.special_codes[SpecialCodeIndex::VMIN]
             );
             println!(
                 "         START={} STOP={} SUSP={} EOL={}",
-                key(term.c_cc[VSTART]),
-                key(term.c_cc[VSTOP]),
-                key(term.c_cc[VSUSP]),
-                key(term.c_cc[VEOL]),
+                key(term.special_codes[SpecialCodeIndex::VSTART]),
+                key(term.special_codes[SpecialCodeIndex::VSTOP]),
+                key(term.special_codes[SpecialCodeIndex::VSUSP]),
+                key(term.special_codes[SpecialCodeIndex::VEOL]),
             );
             #[cfg(not(target_os = "haiku"))]
             println!(
                 "         REPRINT={} DISCARD={}",
-                key(term.c_cc[VREPRINT]),
-                key(term.c_cc[VDISCARD])
+                key(term.special_codes[SpecialCodeIndex::VREPRINT]),
+                key(term.special_codes[SpecialCodeIndex::VDISCARD])
             );
             #[cfg(not(target_os = "haiku"))]
             println!(
                 "         WERASE={} VLNEXT={}",
-                key(term.c_cc[VWERASE]),
-                key(term.c_cc[VLNEXT]),
+                key(term.special_codes[SpecialCodeIndex::VWERASE]),
+                key(term.special_codes[SpecialCodeIndex::VLNEXT]),
             );
-            println!("         EOL2={}", key(term.c_cc[VEOL2]));
+            println!(
+                "         EOL2={}",
+                key(term.special_codes[SpecialCodeIndex::VEOL2])
+            );
         }
     } else {
         println!(" - is not a tty");

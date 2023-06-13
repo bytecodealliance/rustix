@@ -1,28 +1,11 @@
 use crate::fd::AsFd;
 use crate::pid::Pid;
+use crate::termios::{Action, OptionalActions, QueueSelector, Termios, Winsize};
 use crate::{backend, io};
-
-#[cfg(all(
-    linux_kernel,
-    any(
-        target_arch = "x86",
-        target_arch = "x86_64",
-        target_arch = "x32",
-        target_arch = "riscv64",
-        target_arch = "aarch64",
-        target_arch = "arm",
-        target_arch = "mips",
-        target_arch = "mips64",
-    )
-))]
-pub use backend::termios::types::Termios2;
-pub use backend::termios::types::{
-    Action, OptionalActions, QueueSelector, Speed, Tcflag, Termios, Winsize,
-};
 
 /// `tcgetattr(fd)`—Get terminal attributes.
 ///
-/// Also known as the `TCGETS` operation with `ioctl`.
+/// Also known as the `TCGETS` (or `TCGETS2` on Linux) operation with `ioctl`.
 ///
 /// # References
 ///  - [POSIX `tcgetattr`]
@@ -35,39 +18,10 @@ pub use backend::termios::types::{
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[inline]
 #[doc(alias = "TCGETS")]
+#[doc(alias = "TCGETS2")]
+#[doc(alias = "tcgetattr2")]
 pub fn tcgetattr<Fd: AsFd>(fd: Fd) -> io::Result<Termios> {
     backend::termios::syscalls::tcgetattr(fd.as_fd())
-}
-
-/// `tcgetattr2(fd)`—Get terminal attributes.
-///
-/// Also known as the `TCGETS2` operation with `ioctl`.
-///
-/// # References
-///  - [POSIX `tcgetattr`]
-///  - [Linux `ioctl_tty`]
-///  - [Linux `termios`]
-///
-/// [POSIX `tcgetattr`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/tcgetattr.html
-/// [Linux `ioctl_tty`]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
-/// [Linux `termios`]: https://man7.org/linux/man-pages/man3/termios.3.html
-#[inline]
-#[doc(alias = "TCGETS2")]
-#[cfg(all(
-    linux_kernel,
-    any(
-        target_arch = "x86",
-        target_arch = "x86_64",
-        target_arch = "x32",
-        target_arch = "riscv64",
-        target_arch = "aarch64",
-        target_arch = "arm",
-        target_arch = "mips",
-        target_arch = "mips64",
-    )
-))]
-pub fn tcgetattr2<Fd: AsFd>(fd: Fd) -> io::Result<Termios2> {
-    backend::termios::syscalls::tcgetattr2(fd.as_fd())
 }
 
 /// `tcgetwinsize(fd)`—Get the current terminal window size.
@@ -121,7 +75,7 @@ pub fn tcsetpgrp<Fd: AsFd>(fd: Fd, pid: Pid) -> io::Result<()> {
 
 /// `tcsetattr(fd)`—Set terminal attributes.
 ///
-/// Also known as the `TCSETS` operation with `ioctl`.
+/// Also known as the `TCSETS` (or `TCSETS2 on Linux) operation with `ioctl`.
 ///
 /// # References
 ///  - [POSIX `tcsetattr`]
@@ -133,47 +87,14 @@ pub fn tcsetpgrp<Fd: AsFd>(fd: Fd, pid: Pid) -> io::Result<()> {
 /// [Linux `termios`]: https://man7.org/linux/man-pages/man3/termios.3.html
 #[inline]
 #[doc(alias = "TCSETS")]
+#[doc(alias = "TCSETS2")]
+#[doc(alias = "tcsetattr2")]
 pub fn tcsetattr<Fd: AsFd>(
     fd: Fd,
     optional_actions: OptionalActions,
     termios: &Termios,
 ) -> io::Result<()> {
     backend::termios::syscalls::tcsetattr(fd.as_fd(), optional_actions, termios)
-}
-
-/// `tcsetattr2(fd)`—Set terminal attributes.
-///
-/// Also known as the `TCSETS2` operation with `ioctl`.
-///
-/// # References
-///  - [POSIX `tcsetattr`]
-///  - [Linux `ioctl_tty`]
-///  - [Linux `termios`]
-///
-/// [POSIX `tcsetattr`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/tcsetattr.html
-/// [Linux `ioctl_tty`]: https://man7.org/linux/man-pages/man4/tty_ioctl.4.html
-/// [Linux `termios`]: https://man7.org/linux/man-pages/man3/termios.3.html
-#[inline]
-#[doc(alias = "TCSETS2")]
-#[cfg(all(
-    linux_kernel,
-    any(
-        target_arch = "x86",
-        target_arch = "x86_64",
-        target_arch = "x32",
-        target_arch = "riscv64",
-        target_arch = "aarch64",
-        target_arch = "arm",
-        target_arch = "mips",
-        target_arch = "mips64",
-    )
-))]
-pub fn tcsetattr2<Fd: AsFd>(
-    fd: Fd,
-    optional_actions: OptionalActions,
-    termios: &Termios2,
-) -> io::Result<()> {
-    backend::termios::syscalls::tcsetattr2(fd.as_fd(), optional_actions, termios)
 }
 
 /// `tcsendbreak(fd, 0)`—Transmit zero-valued bits.

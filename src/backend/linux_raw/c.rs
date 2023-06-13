@@ -19,6 +19,33 @@ pub(crate) use linux_raw_sys::general::{O_CLOEXEC as SOCK_CLOEXEC, O_NONBLOCK as
 // Replace Linux's old `TIMEO` constants with its new ones.
 #[cfg(not(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86")))]
 pub(crate) use linux_raw_sys::general::{__kernel_gid_t as gid_t, __kernel_uid_t as uid_t};
+
+#[cfg(feature = "termios")]
+pub(crate) use linux_raw_sys::general::{
+    cc_t, speed_t, tcflag_t, termios, winsize, B0, B1000000, B110, B115200, B1152000, B1200, B134,
+    B150, B1500000, B1800, B19200, B200, B2000000, B230400, B2400, B2500000, B300, B3000000,
+    B3500000, B38400, B4000000, B460800, B4800, B50, B500000, B57600, B576000, B600, B75, B921600,
+    B9600, BOTHER, BRKINT, BS0, BS1, BSDLY, CBAUD, CBAUDEX, CIBAUD, CLOCAL, CMSPAR, CR0, CR1, CR2,
+    CR3, CRDLY, CREAD, CRTSCTS, CS5, CS6, CS7, CS8, CSIZE, CSTOPB, ECHO, ECHOCTL, ECHOE, ECHOK,
+    ECHOKE, ECHONL, ECHOPRT, EXTA, EXTB, EXTPROC, FF0, FF1, FFDLY, FLUSHO, HUPCL, IBSHIFT, ICANON,
+    ICRNL, IEXTEN, IGNBRK, IGNCR, IGNPAR, IMAXBEL, INLCR, INPCK, ISIG, ISTRIP, IUCLC, IUTF8, IXANY,
+    IXOFF, IXON, NCCS, NL0, NL1, NLDLY, NOFLSH, OCRNL, OFDEL, OFILL, OLCUC, ONLCR, ONLRET, ONOCR,
+    OPOST, PARENB, PARMRK, PARODD, PENDIN, TAB0, TAB1, TAB2, TAB3, TABDLY, TCIFLUSH, TCIOFF,
+    TCIOFLUSH, TCION, TCOFLUSH, TCOOFF, TCOON, TCSADRAIN, TCSAFLUSH, TCSANOW, TOSTOP, VDISCARD,
+    VEOF, VEOL, VEOL2, VERASE, VINTR, VKILL, VLNEXT, VMIN, VQUIT, VREPRINT, VSTART, VSTOP, VSUSP,
+    VSWTC, VT0, VT1, VTDLY, VTIME, VWERASE, XCASE, XTABS,
+};
+// On PowerPC, the regular `termios` has the `termios2` fields.
+#[cfg(feature = "termios")]
+pub(crate) use {
+    linux_raw_sys::general::termios2,
+    linux_raw_sys::ioctl::{TCGETS2, TCSETS2, TCSETSF2, TCSETSW2},
+};
+// On MIPS, `TCSANOW` et al have `TCSETS` added to them, so we need it to
+// subtract it out.
+#[cfg(all(feature = "termios", any(target_arch = "mips", target_arch = "mips64")))]
+pub(crate) use linux_raw_sys::ioctl::TCSETS;
+
 pub(crate) use linux_raw_sys::general::{
     iovec, siginfo_t, CLD_CONTINUED, CLD_DUMPED, CLD_EXITED, CLD_KILLED, CLD_STOPPED, CLD_TRAPPED,
     O_CLOEXEC, O_NONBLOCK, O_NONBLOCK as PIDFD_NONBLOCK, P_ALL, P_PID, P_PIDFD,

@@ -73,6 +73,26 @@ pub(crate) const ETH_P_MCTP: c_int = linux_raw_sys::if_ether::ETH_P_MCTP as _;
 ))]
 pub(crate) const SIGEMT: c_int = linux_raw_sys::general::SIGEMT as _;
 
+// TODO: Upstream these.
+#[cfg(all(linux_kernel, feature = "termios"))]
+pub(crate) const IUCLC: tcflag_t = linux_raw_sys::general::IUCLC as _;
+#[cfg(all(linux_kernel, feature = "termios"))]
+pub(crate) const XCASE: tcflag_t = linux_raw_sys::general::XCASE as _;
+
+// On PowerPC, the regular `termios` has the `termios2` fields and there is no
+// `termios2`. linux-raw-sys has aliases `termios2` to `termios` to cover this
+// difference, but we still need to manually import it since `libc` doesn't
+// have this.
+#[cfg(all(
+    linux_kernel,
+    feature = "termios",
+    any(target_arch = "powerpc", target_arch = "powerpc64")
+))]
+pub(crate) use {
+    linux_raw_sys::general::{termios2, CIBAUD},
+    linux_raw_sys::ioctl::{TCGETS2, TCSETS2, TCSETSF2, TCSETSW2},
+};
+
 // Automatically enable “large file” support (LFS) features.
 
 #[cfg(target_os = "vxworks")]
