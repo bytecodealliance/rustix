@@ -29,7 +29,7 @@ pub fn socketpair(
     domain: AddressFamily,
     type_: SocketType,
     flags: SocketFlags,
-    protocol: Protocol,
+    protocol: Option<Protocol>,
 ) -> io::Result<(OwnedFd, OwnedFd)> {
     backend::net::syscalls::socketpair(domain, type_, flags, protocol)
 }

@@ -6,7 +6,7 @@
 
 use rustix::net::{
     accept, bind_v4, connect_v4, getsockname, listen, recv, send, socket, AddressFamily, Ipv4Addr,
-    Protocol, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketType,
+    RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketType,
 };
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
@@ -14,8 +14,7 @@ use std::thread;
 const BUFFER_SIZE: usize = 20;
 
 fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
-    let connection_socket =
-        socket(AddressFamily::INET, SocketType::STREAM, Protocol::default()).unwrap();
+    let connection_socket = socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
 
     let name = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 0);
     bind_v4(&connection_socket, &name).unwrap();
@@ -55,7 +54,7 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     let addr = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), port);
     let mut buffer = vec![0; BUFFER_SIZE];
 
-    let data_socket = socket(AddressFamily::INET, SocketType::STREAM, Protocol::default()).unwrap();
+    let data_socket = socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
     connect_v4(&data_socket, &addr).unwrap();
 
     send(&data_socket, b"hello, world", SendFlags::empty()).unwrap();
@@ -92,8 +91,7 @@ fn test_v4_msg() {
     use rustix::net::{recvmsg, sendmsg};
 
     fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
-        let connection_socket =
-            socket(AddressFamily::INET, SocketType::STREAM, Protocol::default()).unwrap();
+        let connection_socket = socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
 
         let name = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 0);
         bind_v4(&connection_socket, &name).unwrap();
@@ -148,8 +146,7 @@ fn test_v4_msg() {
         let addr = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), port);
         let mut buffer = vec![0; BUFFER_SIZE];
 
-        let data_socket =
-            socket(AddressFamily::INET, SocketType::STREAM, Protocol::default()).unwrap();
+        let data_socket = socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
         connect_v4(&data_socket, &addr).unwrap();
 
         sendmsg(

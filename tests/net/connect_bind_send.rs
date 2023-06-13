@@ -1,6 +1,6 @@
 use rustix::net::{
-    AddressFamily, Ipv6Addr, Protocol, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4,
-    SocketAddrV6, SocketType,
+    AddressFamily, Ipv6Addr, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketAddrV6,
+    SocketType,
 };
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
@@ -9,13 +9,12 @@ use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 fn net_v4_connect_any() -> std::io::Result<()> {
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
-    let listener =
-        rustix::net::socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
+    let listener = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None)?;
     rustix::net::bind(&listener, &addr).expect("bind");
     rustix::net::listen(&listener, 1).expect("listen");
 
     let local_addr = rustix::net::getsockname(&listener)?;
-    let sender = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
+    let sender = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None)?;
     rustix::net::connect_any(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");
@@ -41,20 +40,12 @@ fn net_v4_connect_any() -> std::io::Result<()> {
 fn net_v6_connect_any() -> std::io::Result<()> {
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
-    let listener = rustix::net::socket(
-        AddressFamily::INET6,
-        SocketType::STREAM,
-        Protocol::default(),
-    )?;
+    let listener = rustix::net::socket(AddressFamily::INET6, SocketType::STREAM, None)?;
     rustix::net::bind(&listener, &addr).expect("bind");
     rustix::net::listen(&listener, 1).expect("listen");
 
     let local_addr = rustix::net::getsockname(&listener)?;
-    let sender = rustix::net::socket(
-        AddressFamily::INET6,
-        SocketType::STREAM,
-        Protocol::default(),
-    )?;
+    let sender = rustix::net::socket(AddressFamily::INET6, SocketType::STREAM, None)?;
     rustix::net::connect_any(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");
@@ -80,8 +71,7 @@ fn net_v6_connect_any() -> std::io::Result<()> {
 fn net_v4_connect() -> std::io::Result<()> {
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
-    let listener =
-        rustix::net::socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
+    let listener = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None)?;
     rustix::net::bind(&listener, &addr).expect("bind");
     rustix::net::listen(&listener, 1).expect("listen");
 
@@ -90,7 +80,7 @@ fn net_v4_connect() -> std::io::Result<()> {
         SocketAddrAny::V4(v4) => SocketAddr::V4(v4),
         other => panic!("unexpected socket address {:?}", other),
     };
-    let sender = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
+    let sender = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None)?;
     rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");
@@ -116,11 +106,7 @@ fn net_v4_connect() -> std::io::Result<()> {
 fn net_v6_connect() -> std::io::Result<()> {
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
-    let listener = rustix::net::socket(
-        AddressFamily::INET6,
-        SocketType::STREAM,
-        Protocol::default(),
-    )?;
+    let listener = rustix::net::socket(AddressFamily::INET6, SocketType::STREAM, None)?;
     rustix::net::bind(&listener, &addr).expect("bind");
     rustix::net::listen(&listener, 1).expect("listen");
 
@@ -129,11 +115,7 @@ fn net_v6_connect() -> std::io::Result<()> {
         SocketAddrAny::V6(v6) => SocketAddr::V6(v6),
         other => panic!("unexpected socket address {:?}", other),
     };
-    let sender = rustix::net::socket(
-        AddressFamily::INET6,
-        SocketType::STREAM,
-        Protocol::default(),
-    )?;
+    let sender = rustix::net::socket(AddressFamily::INET6, SocketType::STREAM, None)?;
     rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");
@@ -159,13 +141,12 @@ fn net_v6_connect() -> std::io::Result<()> {
 fn net_v4_bind_any() -> std::io::Result<()> {
     let localhost = Ipv4Addr::LOCALHOST;
     let addr = SocketAddrV4::new(localhost, 0).into();
-    let listener =
-        rustix::net::socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
+    let listener = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None)?;
     rustix::net::bind_any(&listener, &addr).expect("bind");
     rustix::net::listen(&listener, 1).expect("listen");
 
     let local_addr = rustix::net::getsockname(&listener)?;
-    let sender = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
+    let sender = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None)?;
     rustix::net::connect_any(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");
@@ -191,20 +172,12 @@ fn net_v4_bind_any() -> std::io::Result<()> {
 fn net_v6_bind_any() -> std::io::Result<()> {
     let localhost = Ipv6Addr::LOCALHOST;
     let addr = SocketAddrAny::V6(SocketAddrV6::new(localhost, 0, 0, 0));
-    let listener = rustix::net::socket(
-        AddressFamily::INET6,
-        SocketType::STREAM,
-        Protocol::default(),
-    )?;
+    let listener = rustix::net::socket(AddressFamily::INET6, SocketType::STREAM, None)?;
     rustix::net::bind_any(&listener, &addr).expect("bind");
     rustix::net::listen(&listener, 1).expect("listen");
 
     let local_addr = rustix::net::getsockname(&listener)?;
-    let sender = rustix::net::socket(
-        AddressFamily::INET6,
-        SocketType::STREAM,
-        Protocol::default(),
-    )?;
+    let sender = rustix::net::socket(AddressFamily::INET6, SocketType::STREAM, None)?;
     rustix::net::connect_any(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");
@@ -230,13 +203,12 @@ fn net_v6_bind_any() -> std::io::Result<()> {
 fn net_v4_sendto() -> std::io::Result<()> {
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
-    let listener =
-        rustix::net::socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
+    let listener = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None)?;
     rustix::net::bind(&listener, &addr).expect("bind");
     rustix::net::listen(&listener, 1).expect("listen");
 
     let local_addr = rustix::net::getsockname(&listener)?;
-    let sender = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
+    let sender = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None)?;
     rustix::net::connect_any(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let local_addr = match local_addr {
@@ -268,20 +240,12 @@ fn net_v4_sendto() -> std::io::Result<()> {
 fn net_v6_sendto() -> std::io::Result<()> {
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
-    let listener = rustix::net::socket(
-        AddressFamily::INET6,
-        SocketType::STREAM,
-        Protocol::default(),
-    )?;
+    let listener = rustix::net::socket(AddressFamily::INET6, SocketType::STREAM, None)?;
     rustix::net::bind(&listener, &addr).expect("bind");
     rustix::net::listen(&listener, 1).expect("listen");
 
     let local_addr = rustix::net::getsockname(&listener)?;
-    let sender = rustix::net::socket(
-        AddressFamily::INET6,
-        SocketType::STREAM,
-        Protocol::default(),
-    )?;
+    let sender = rustix::net::socket(AddressFamily::INET6, SocketType::STREAM, None)?;
     rustix::net::connect_any(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let local_addr = match local_addr {
@@ -313,13 +277,12 @@ fn net_v6_sendto() -> std::io::Result<()> {
 fn net_v4_sendto_any() -> std::io::Result<()> {
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
-    let listener =
-        rustix::net::socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
+    let listener = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None)?;
     rustix::net::bind(&listener, &addr).expect("bind");
     rustix::net::listen(&listener, 1).expect("listen");
 
     let local_addr = rustix::net::getsockname(&listener)?;
-    let sender = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
+    let sender = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None)?;
     rustix::net::connect_any(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n =
@@ -348,20 +311,12 @@ fn net_v4_sendto_any() -> std::io::Result<()> {
 fn net_v6_sendto_any() -> std::io::Result<()> {
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
-    let listener = rustix::net::socket(
-        AddressFamily::INET6,
-        SocketType::STREAM,
-        Protocol::default(),
-    )?;
+    let listener = rustix::net::socket(AddressFamily::INET6, SocketType::STREAM, None)?;
     rustix::net::bind(&listener, &addr).expect("bind");
     rustix::net::listen(&listener, 1).expect("listen");
 
     let local_addr = rustix::net::getsockname(&listener)?;
-    let sender = rustix::net::socket(
-        AddressFamily::INET6,
-        SocketType::STREAM,
-        Protocol::default(),
-    )?;
+    let sender = rustix::net::socket(AddressFamily::INET6, SocketType::STREAM, None)?;
     rustix::net::connect_any(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n =
@@ -390,13 +345,12 @@ fn net_v6_sendto_any() -> std::io::Result<()> {
 fn net_v4_acceptfrom() -> std::io::Result<()> {
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
-    let listener =
-        rustix::net::socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
+    let listener = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None)?;
     rustix::net::bind(&listener, &addr).expect("bind");
     rustix::net::listen(&listener, 1).expect("listen");
 
     let local_addr = rustix::net::getsockname(&listener)?;
-    let sender = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
+    let sender = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None)?;
     rustix::net::connect_any(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");
@@ -437,20 +391,12 @@ fn net_v4_acceptfrom() -> std::io::Result<()> {
 fn net_v6_acceptfrom() -> std::io::Result<()> {
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
-    let listener = rustix::net::socket(
-        AddressFamily::INET6,
-        SocketType::STREAM,
-        Protocol::default(),
-    )?;
+    let listener = rustix::net::socket(AddressFamily::INET6, SocketType::STREAM, None)?;
     rustix::net::bind(&listener, &addr).expect("bind");
     rustix::net::listen(&listener, 1).expect("listen");
 
     let local_addr = rustix::net::getsockname(&listener)?;
-    let sender = rustix::net::socket(
-        AddressFamily::INET6,
-        SocketType::STREAM,
-        Protocol::default(),
-    )?;
+    let sender = rustix::net::socket(AddressFamily::INET6, SocketType::STREAM, None)?;
     rustix::net::connect_any(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");

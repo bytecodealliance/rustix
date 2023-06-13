@@ -1,7 +1,7 @@
 use rustix::event::epoll;
 use rustix::io::{ioctl_fionbio, read, write};
 use rustix::net::{
-    accept, bind_v4, connect_v4, getsockname, listen, socket, AddressFamily, Ipv4Addr, Protocol,
+    accept, bind_v4, connect_v4, getsockname, listen, socket, AddressFamily, Ipv4Addr,
     SocketAddrAny, SocketAddrV4, SocketType,
 };
 use std::collections::HashMap;
@@ -11,7 +11,7 @@ use std::thread;
 const BUFFER_SIZE: usize = 20;
 
 fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
-    let listen_sock = socket(AddressFamily::INET, SocketType::STREAM, Protocol::default()).unwrap();
+    let listen_sock = socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
     bind_v4(&listen_sock, &SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0)).unwrap();
     listen(&listen_sock, 1).unwrap();
 
@@ -74,8 +74,7 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     let mut buffer = vec![0; BUFFER_SIZE];
 
     for _ in 0..16 {
-        let data_socket =
-            socket(AddressFamily::INET, SocketType::STREAM, Protocol::default()).unwrap();
+        let data_socket = socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
         connect_v4(&data_socket, &addr).unwrap();
 
         let nread = read(&data_socket, &mut buffer).unwrap();

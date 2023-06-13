@@ -14,6 +14,9 @@ pub(crate) use linux_raw_sys::errno::EINVAL;
 pub(crate) use linux_raw_sys::general::__kernel_pid_t as pid_t;
 pub(crate) use linux_raw_sys::general::__kernel_time64_t as time_t;
 pub(crate) use linux_raw_sys::general::__kernel_timespec as timespec;
+#[cfg(feature = "net")]
+pub(crate) use linux_raw_sys::general::{O_CLOEXEC as SOCK_CLOEXEC, O_NONBLOCK as SOCK_NONBLOCK};
+// Replace Linux's old `TIMEO` constants with its new ones.
 #[cfg(not(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86")))]
 pub(crate) use linux_raw_sys::general::{__kernel_gid_t as gid_t, __kernel_uid_t as uid_t};
 pub(crate) use linux_raw_sys::general::{
@@ -25,6 +28,8 @@ pub(crate) use linux_raw_sys::general::{AT_FDCWD, O_NOCTTY, O_RDWR};
 pub(crate) use linux_raw_sys::general::{NFS_SUPER_MAGIC, PROC_SUPER_MAGIC, UTIME_NOW, UTIME_OMIT};
 #[cfg(feature = "fs")]
 pub(crate) use linux_raw_sys::general::{XATTR_CREATE, XATTR_REPLACE};
+#[cfg(feature = "net")]
+pub(crate) use linux_raw_sys::if_ether::*;
 #[cfg(feature = "net")]
 pub(crate) use linux_raw_sys::net::{
     AF_DECnet, __kernel_sa_family_t as sa_family_t, __kernel_sockaddr_storage as sockaddr_storage,
@@ -47,6 +52,12 @@ pub(crate) use linux_raw_sys::net::{
     SO_LINGER, SO_PASSCRED, SO_RCVBUF, SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_REUSEADDR, SO_SNDBUF,
     SO_SNDTIMEO_NEW, SO_SNDTIMEO_OLD, SO_TYPE, TCP_NODELAY,
 };
+#[cfg(feature = "net")]
+pub(crate) use linux_raw_sys::net::{
+    SO_RCVTIMEO_NEW as SO_RCVTIMEO, SO_SNDTIMEO_NEW as SO_SNDTIMEO,
+};
+#[cfg(feature = "net")]
+pub(crate) use linux_raw_sys::netlink::*;
 #[cfg(feature = "io_uring")]
 pub(crate) use {linux_raw_sys::general::open_how, linux_raw_sys::io_uring::*};
 #[cfg(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86"))]

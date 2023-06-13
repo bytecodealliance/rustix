@@ -20,8 +20,8 @@ use {
 use {
     super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr_os},
     super::send_recv::{RecvFlags, SendFlags},
-    super::types::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType},
     super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6},
+    crate::net::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType},
     core::ptr::null_mut,
 };
 
@@ -142,13 +142,17 @@ pub(crate) fn sendto_unix(
 pub(crate) fn socket(
     domain: AddressFamily,
     type_: SocketType,
-    protocol: Protocol,
+    protocol: Option<Protocol>,
 ) -> io::Result<OwnedFd> {
+    let raw_protocol = match protocol {
+        Some(p) => p.0.get(),
+        None => 0,
+    };
     unsafe {
         ret_owned_fd(c::socket(
             domain.0 as c::c_int,
             type_.0 as c::c_int,
-            protocol.0,
+            raw_protocol as c::c_int,
         ))
     }
 }
@@ -158,13 +162,17 @@ pub(crate) fn socket_with(
     domain: AddressFamily,
     type_: SocketType,
     flags: SocketFlags,
-    protocol: Protocol,
+    protocol: Option<Protocol>,
 ) -> io::Result<OwnedFd> {
+    let raw_protocol = match protocol {
+        Some(p) => p.0.get(),
+        None => 0,
+    };
     unsafe {
         ret_owned_fd(c::socket(
             domain.0 as c::c_int,
-            type_.0 as c::c_int | flags.bits(),
-            protocol.0,
+            (type_.0 | flags.bits()) as c::c_int,
+            raw_protocol as c::c_int,
         ))
     }
 }
@@ -339,7 +347,7 @@ pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, flags: SocketFlags) -> io::Res
             borrowed_fd(sockfd),
             null_mut(),
             null_mut(),
-            flags.bits(),
+            flags.bits() as c::c_int,
         ))?;
         Ok(owned_fd)
     }
@@ -380,7 +388,7 @@ pub(crate) fn acceptfrom_with(
             borrowed_fd(sockfd),
             storage.as_mut_ptr().cast(),
             &mut len,
-            flags.bits(),
+            flags.bits() as c::c_int,
         ))?;
         Ok((
             owned_fd,
@@ -447,14 +455,18 @@ pub(crate) fn socketpair(
     domain: AddressFamily,
     type_: SocketType,
     flags: SocketFlags,
-    protocol: Protocol,
+    protocol: Option<Protocol>,
 ) -> io::Result<(OwnedFd, OwnedFd)> {
+    let raw_protocol = match protocol {
+        Some(p) => p.0.get(),
+        None => 0,
+    };
     unsafe {
         let mut fds = MaybeUninit::<[OwnedFd; 2]>::uninit();
         ret(c::socketpair(
             c::c_int::from(domain.0),
-            type_.0 as c::c_int | flags.bits(),
-            protocol.0,
+            (type_.0 | flags.bits()) as c::c_int,
+            raw_protocol as c::c_int,
             fds.as_mut_ptr().cast::<c::c_int>(),
         ))?;
 

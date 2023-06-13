@@ -13,14 +13,13 @@
 //! use rustix::fd::AsFd;
 //! use rustix::io::{ioctl_fionbio, read, write};
 //! use rustix::net::{
-//!     accept, bind_v4, listen, socket, AddressFamily, Ipv4Addr, Protocol, SocketAddrV4,
-//!     SocketType,
+//!     accept, bind_v4, listen, socket, AddressFamily, Ipv4Addr, SocketAddrV4, SocketType,
 //! };
 //! use std::collections::HashMap;
 //! use std::os::unix::io::AsRawFd;
 //!
 //! // Create a socket and listen on it.
-//! let listen_sock = socket(AddressFamily::INET, SocketType::STREAM, Protocol::default())?;
+//! let listen_sock = socket(AddressFamily::INET, SocketType::STREAM, None)?;
 //! bind_v4(&listen_sock, &SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0))?;
 //! listen(&listen_sock, 1)?;
 //!

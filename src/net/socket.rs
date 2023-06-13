@@ -3,16 +3,9 @@ use crate::net::{SocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::{backend, io};
 use backend::fd::{AsFd, BorrowedFd};
 
+pub use crate::net::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 #[cfg(unix)]
 pub use backend::net::addr::SocketAddrUnix;
-pub use backend::net::types::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
-
-impl Default for Protocol {
-    #[inline]
-    fn default() -> Self {
-        Self::IP
-    }
-}
 
 /// `socket(domain, type_, protocol)`—Creates a socket.
 ///
@@ -47,7 +40,11 @@ impl Default for Protocol {
 /// [illumos]: https://illumos.org/man/3SOCKET/socket
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Creating-a-Socket.html
 #[inline]
-pub fn socket(domain: AddressFamily, type_: SocketType, protocol: Protocol) -> io::Result<OwnedFd> {
+pub fn socket(
+    domain: AddressFamily,
+    type_: SocketType,
+    protocol: Option<Protocol>,
+) -> io::Result<OwnedFd> {
     backend::net::syscalls::socket(domain, type_, protocol)
 }
 
@@ -90,7 +87,7 @@ pub fn socket_with(
     domain: AddressFamily,
     type_: SocketType,
     flags: SocketFlags,
-    protocol: Protocol,
+    protocol: Option<Protocol>,
 ) -> io::Result<OwnedFd> {
     backend::net::syscalls::socket_with(domain, type_, flags, protocol)
 }

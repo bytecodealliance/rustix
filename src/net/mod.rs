@@ -12,6 +12,7 @@ mod socket;
 mod socket_addr_any;
 #[cfg(not(any(windows, target_os = "wasi")))]
 mod socketpair;
+mod types;
 #[cfg(windows)]
 mod wsa;
 
@@ -25,5 +26,6 @@ pub use socket::*;
 pub use socket_addr_any::{SocketAddrAny, SocketAddrStorage};
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use socketpair::socketpair;
+pub use types::*;
 #[cfg(windows)]
 pub use wsa::{wsa_cleanup, wsa_startup};
