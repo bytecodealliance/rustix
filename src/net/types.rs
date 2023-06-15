@@ -60,10 +60,25 @@ impl AddressFamily {
     /// `AF_UNSPEC`
     pub const UNSPEC: Self = Self(c::AF_UNSPEC as _);
     /// `AF_INET`
+    ///
+    /// # References
+    ///  - [Linux]
+    ///
+    /// [Linux]: https://man7.org/linux/man-pages/man7/ip.7.html>
     pub const INET: Self = Self(c::AF_INET as _);
     /// `AF_INET6`
+    ///
+    /// # References
+    ///  - [Linux]
+    ///
+    /// [Linux]: https://man7.org/linux/man-pages/man7/ipv6.7.html
     pub const INET6: Self = Self(c::AF_INET6 as _);
     /// `AF_NETLINK`
+    ///
+    /// # References
+    ///  - [Linux]
+    ///
+    /// [Linux]: https://man7.org/linux/man-pages/man7/netlink.7.html
     #[cfg(not(any(
         bsd,
         solarish,
@@ -152,6 +167,11 @@ impl AddressFamily {
     )))]
     pub const KEY: Self = Self(c::AF_KEY as _);
     /// `AF_PACKET`
+    ///
+    /// # References
+    ///  - [Linux]
+    ///
+    /// [Linux]: https://man7.org/linux/man-pages/man7/packet.7.html
     #[cfg(not(any(
         bsd,
         windows,
