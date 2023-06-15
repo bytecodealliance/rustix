@@ -28,4 +28,14 @@ pub mod os {
             AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd,
         };
     }
+
+    #[cfg(windows)]
+    pub mod windows {
+        pub mod io {
+            pub use std::os::windows::io::{
+                AsRawSocket, AsSocket, BorrowedSocket, FromRawSocket, IntoRawSocket, OwnedSocket,
+                RawSocket,
+            };
+        }
+    }
 }

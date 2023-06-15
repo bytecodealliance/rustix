@@ -6,7 +6,7 @@ use core::marker::PhantomData;
 #[cfg(windows)]
 use {
     crate::backend::fd::{AsSocket, RawFd},
-    std::fmt,
+    core::fmt,
 };
 
 bitflags! {
