@@ -778,6 +778,11 @@ pub mod netlink {
 }
 
 /// `ETH_P_*` constants.
+///
+// These are translated into 16-bit big-endian form because that's what the
+// `AddressFamily::PACKET` address family [expects].
+//
+// [expects]: https://man7.org/linux/man-pages/man7/packet.7.html
 pub mod eth {
     #[cfg(linux_kernel)]
     use {
@@ -787,361 +792,409 @@ pub mod eth {
 
     /// `ETH_P_LOOP`
     #[cfg(linux_kernel)]
-    pub const LOOP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_LOOP as _) });
+    pub const LOOP: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_LOOP as u16).to_be() as u32) });
     /// `ETH_P_PUP`
     #[cfg(linux_kernel)]
-    pub const PUP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_PUP as _) });
+    pub const PUP: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_PUP as u16).to_be() as u32) });
     /// `ETH_P_PUPAT`
     #[cfg(linux_kernel)]
     pub const PUPAT: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_PUPAT as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_PUPAT as u16).to_be() as u32) });
     /// `ETH_P_TSN`
     #[cfg(linux_kernel)]
-    pub const TSN: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_TSN as _) });
+    pub const TSN: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_TSN as u16).to_be() as u32) });
     /// `ETH_P_ERSPAN2`
     #[cfg(linux_kernel)]
     pub const ERSPAN2: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_ERSPAN2 as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_ERSPAN2 as u16).to_be() as u32) });
     /// `ETH_P_IP`
     #[cfg(linux_kernel)]
-    pub const IP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_IP as _) });
+    pub const IP: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_IP as u16).to_be() as u32) });
     /// `ETH_P_X25`
     #[cfg(linux_kernel)]
-    pub const X25: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_X25 as _) });
+    pub const X25: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_X25 as u16).to_be() as u32) });
     /// `ETH_P_ARP`
     #[cfg(linux_kernel)]
-    pub const ARP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_ARP as _) });
+    pub const ARP: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_ARP as u16).to_be() as u32) });
     /// `ETH_P_BPQ`
     #[cfg(linux_kernel)]
-    pub const BPQ: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_BPQ as _) });
+    pub const BPQ: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_BPQ as u16).to_be() as u32) });
     /// `ETH_P_IEEEPUP`
     #[cfg(linux_kernel)]
     pub const IEEEPUP: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_IEEEPUP as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_IEEEPUP as u16).to_be() as u32) });
     /// `ETH_P_IEEEPUPAT`
     #[cfg(linux_kernel)]
     pub const IEEEPUPAT: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_IEEEPUPAT as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_IEEEPUPAT as u16).to_be() as u32) });
     /// `ETH_P_BATMAN`
     #[cfg(linux_kernel)]
     pub const BATMAN: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_BATMAN as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_BATMAN as u16).to_be() as u32) });
     /// `ETH_P_DEC`
     #[cfg(linux_kernel)]
-    pub const DEC: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_DEC as _) });
+    pub const DEC: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_DEC as u16).to_be() as u32) });
     /// `ETH_P_DNA_DL`
     #[cfg(linux_kernel)]
     pub const DNA_DL: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_DNA_DL as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_DNA_DL as u16).to_be() as u32) });
     /// `ETH_P_DNA_RC`
     #[cfg(linux_kernel)]
     pub const DNA_RC: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_DNA_RC as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_DNA_RC as u16).to_be() as u32) });
     /// `ETH_P_DNA_RT`
     #[cfg(linux_kernel)]
     pub const DNA_RT: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_DNA_RT as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_DNA_RT as u16).to_be() as u32) });
     /// `ETH_P_LAT`
     #[cfg(linux_kernel)]
-    pub const LAT: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_LAT as _) });
+    pub const LAT: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_LAT as u16).to_be() as u32) });
     /// `ETH_P_DIAG`
     #[cfg(linux_kernel)]
-    pub const DIAG: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_DIAG as _) });
+    pub const DIAG: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_DIAG as u16).to_be() as u32) });
     /// `ETH_P_CUST`
     #[cfg(linux_kernel)]
-    pub const CUST: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_CUST as _) });
+    pub const CUST: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_CUST as u16).to_be() as u32) });
     /// `ETH_P_SCA`
     #[cfg(linux_kernel)]
-    pub const SCA: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_SCA as _) });
+    pub const SCA: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_SCA as u16).to_be() as u32) });
     /// `ETH_P_TEB`
     #[cfg(linux_kernel)]
-    pub const TEB: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_TEB as _) });
+    pub const TEB: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_TEB as u16).to_be() as u32) });
     /// `ETH_P_RARP`
     #[cfg(linux_kernel)]
-    pub const RARP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_RARP as _) });
+    pub const RARP: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_RARP as u16).to_be() as u32) });
     /// `ETH_P_ATALK`
     #[cfg(linux_kernel)]
     pub const ATALK: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_ATALK as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_ATALK as u16).to_be() as u32) });
     /// `ETH_P_AARP`
     #[cfg(linux_kernel)]
-    pub const AARP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_AARP as _) });
+    pub const AARP: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_AARP as u16).to_be() as u32) });
     /// `ETH_P_8021Q`
     #[cfg(linux_kernel)]
     pub const P_8021Q: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_8021Q as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_8021Q as u16).to_be() as u32) });
     /// `ETH_P_ERSPAN`
     #[cfg(linux_kernel)]
     pub const ERSPAN: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_ERSPAN as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_ERSPAN as u16).to_be() as u32) });
     /// `ETH_P_IPX`
     #[cfg(linux_kernel)]
-    pub const IPX: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_IPX as _) });
+    pub const IPX: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_IPX as u16).to_be() as u32) });
     /// `ETH_P_IPV6`
     #[cfg(linux_kernel)]
-    pub const IPV6: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_IPV6 as _) });
+    pub const IPV6: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_IPV6 as u16).to_be() as u32) });
     /// `ETH_P_PAUSE`
     #[cfg(linux_kernel)]
     pub const PAUSE: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_PAUSE as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_PAUSE as u16).to_be() as u32) });
     /// `ETH_P_SLOW`
     #[cfg(linux_kernel)]
-    pub const SLOW: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_SLOW as _) });
+    pub const SLOW: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_SLOW as u16).to_be() as u32) });
     /// `ETH_P_WCCP`
     #[cfg(linux_kernel)]
-    pub const WCCP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_WCCP as _) });
+    pub const WCCP: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_WCCP as u16).to_be() as u32) });
     /// `ETH_P_MPLS_UC`
     #[cfg(linux_kernel)]
     pub const MPLS_UC: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_MPLS_UC as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_MPLS_UC as u16).to_be() as u32) });
     /// `ETH_P_MPLS_MC`
     #[cfg(linux_kernel)]
     pub const MPLS_MC: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_MPLS_MC as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_MPLS_MC as u16).to_be() as u32) });
     /// `ETH_P_ATMMPOA`
     #[cfg(linux_kernel)]
     pub const ATMMPOA: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_ATMMPOA as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_ATMMPOA as u16).to_be() as u32) });
     /// `ETH_P_PPP_DISC`
     #[cfg(linux_kernel)]
     pub const PPP_DISC: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_PPP_DISC as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_PPP_DISC as u16).to_be() as u32) });
     /// `ETH_P_PPP_SES`
     #[cfg(linux_kernel)]
     pub const PPP_SES: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_PPP_SES as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_PPP_SES as u16).to_be() as u32) });
     /// `ETH_P_LINK_CTL`
     #[cfg(linux_kernel)]
     pub const LINK_CTL: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_LINK_CTL as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_LINK_CTL as u16).to_be() as u32) });
     /// `ETH_P_ATMFATE`
     #[cfg(linux_kernel)]
     pub const ATMFATE: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_ATMFATE as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_ATMFATE as u16).to_be() as u32) });
     /// `ETH_P_PAE`
     #[cfg(linux_kernel)]
-    pub const PAE: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_PAE as _) });
+    pub const PAE: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_PAE as u16).to_be() as u32) });
     /// `ETH_P_PROFINET`
     #[cfg(linux_kernel)]
     pub const PROFINET: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_PROFINET as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_PROFINET as u16).to_be() as u32) });
     /// `ETH_P_REALTEK`
     #[cfg(linux_kernel)]
     pub const REALTEK: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_REALTEK as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_REALTEK as u16).to_be() as u32) });
     /// `ETH_P_AOE`
     #[cfg(linux_kernel)]
-    pub const AOE: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_AOE as _) });
+    pub const AOE: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_AOE as u16).to_be() as u32) });
     /// `ETH_P_ETHERCAT`
     #[cfg(linux_kernel)]
     pub const ETHERCAT: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_ETHERCAT as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_ETHERCAT as u16).to_be() as u32) });
     /// `ETH_P_8021AD`
     #[cfg(linux_kernel)]
     pub const P_8021AD: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_8021AD as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_8021AD as u16).to_be() as u32) });
     /// `ETH_P_802_EX1`
     #[cfg(linux_kernel)]
     pub const P_802_EX1: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_802_EX1 as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_802_EX1 as u16).to_be() as u32) });
     /// `ETH_P_PREAUTH`
     #[cfg(linux_kernel)]
     pub const PREAUTH: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_PREAUTH as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_PREAUTH as u16).to_be() as u32) });
     /// `ETH_P_TIPC`
     #[cfg(linux_kernel)]
-    pub const TIPC: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_TIPC as _) });
+    pub const TIPC: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_TIPC as u16).to_be() as u32) });
     /// `ETH_P_LLDP`
     #[cfg(linux_kernel)]
-    pub const LLDP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_LLDP as _) });
+    pub const LLDP: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_LLDP as u16).to_be() as u32) });
     /// `ETH_P_MRP`
     #[cfg(linux_kernel)]
-    pub const MRP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_MRP as _) });
+    pub const MRP: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_MRP as u16).to_be() as u32) });
     /// `ETH_P_MACSEC`
     #[cfg(linux_kernel)]
     pub const MACSEC: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_MACSEC as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_MACSEC as u16).to_be() as u32) });
     /// `ETH_P_8021AH`
     #[cfg(linux_kernel)]
     pub const P_8021AH: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_8021AH as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_8021AH as u16).to_be() as u32) });
     /// `ETH_P_MVRP`
     #[cfg(linux_kernel)]
-    pub const MVRP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_MVRP as _) });
+    pub const MVRP: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_MVRP as u16).to_be() as u32) });
     /// `ETH_P_1588`
     #[cfg(linux_kernel)]
     pub const P_1588: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_1588 as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_1588 as u16).to_be() as u32) });
     /// `ETH_P_NCSI`
     #[cfg(linux_kernel)]
-    pub const NCSI: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_NCSI as _) });
+    pub const NCSI: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_NCSI as u16).to_be() as u32) });
     /// `ETH_P_PRP`
     #[cfg(linux_kernel)]
-    pub const PRP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_PRP as _) });
+    pub const PRP: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_PRP as u16).to_be() as u32) });
     /// `ETH_P_CFM`
     #[cfg(linux_kernel)]
-    pub const CFM: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_CFM as _) });
+    pub const CFM: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_CFM as u16).to_be() as u32) });
     /// `ETH_P_FCOE`
     #[cfg(linux_kernel)]
-    pub const FCOE: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_FCOE as _) });
+    pub const FCOE: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_FCOE as u16).to_be() as u32) });
     /// `ETH_P_IBOE`
     #[cfg(linux_kernel)]
-    pub const IBOE: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_IBOE as _) });
+    pub const IBOE: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_IBOE as u16).to_be() as u32) });
     /// `ETH_P_TDLS`
     #[cfg(linux_kernel)]
-    pub const TDLS: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_TDLS as _) });
+    pub const TDLS: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_TDLS as u16).to_be() as u32) });
     /// `ETH_P_FIP`
     #[cfg(linux_kernel)]
-    pub const FIP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_FIP as _) });
+    pub const FIP: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_FIP as u16).to_be() as u32) });
     /// `ETH_P_80221`
     #[cfg(linux_kernel)]
     pub const P_80221: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_80221 as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_80221 as u16).to_be() as u32) });
     /// `ETH_P_HSR`
     #[cfg(linux_kernel)]
-    pub const HSR: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_HSR as _) });
+    pub const HSR: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_HSR as u16).to_be() as u32) });
     /// `ETH_P_NSH`
     #[cfg(linux_kernel)]
-    pub const NSH: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_NSH as _) });
+    pub const NSH: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_NSH as u16).to_be() as u32) });
     /// `ETH_P_LOOPBACK`
     #[cfg(linux_kernel)]
     pub const LOOPBACK: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_LOOPBACK as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_LOOPBACK as u16).to_be() as u32) });
     /// `ETH_P_QINQ1`
     #[cfg(linux_kernel)]
     pub const QINQ1: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_QINQ1 as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_QINQ1 as u16).to_be() as u32) });
     /// `ETH_P_QINQ2`
     #[cfg(linux_kernel)]
     pub const QINQ2: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_QINQ2 as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_QINQ2 as u16).to_be() as u32) });
     /// `ETH_P_QINQ3`
     #[cfg(linux_kernel)]
     pub const QINQ3: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_QINQ3 as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_QINQ3 as u16).to_be() as u32) });
     /// `ETH_P_EDSA`
     #[cfg(linux_kernel)]
-    pub const EDSA: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_EDSA as _) });
+    pub const EDSA: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_EDSA as u16).to_be() as u32) });
     /// `ETH_P_DSA_8021Q`
     #[cfg(linux_kernel)]
     pub const DSA_8021Q: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_DSA_8021Q as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_DSA_8021Q as u16).to_be() as u32) });
     /// `ETH_P_DSA_A5PSW`
     #[cfg(linux_kernel)]
     pub const DSA_A5PSW: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_DSA_A5PSW as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_DSA_A5PSW as u16).to_be() as u32) });
     /// `ETH_P_IFE`
     #[cfg(linux_kernel)]
-    pub const IFE: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_IFE as _) });
+    pub const IFE: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_IFE as u16).to_be() as u32) });
     /// `ETH_P_AF_IUCV`
     #[cfg(linux_kernel)]
     pub const AF_IUCV: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_AF_IUCV as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_AF_IUCV as u16).to_be() as u32) });
     /// `ETH_P_802_3_MIN`
     #[cfg(linux_kernel)]
     pub const P_802_3_MIN: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_802_3_MIN as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_802_3_MIN as u16).to_be() as u32) });
     /// `ETH_P_802_3`
     #[cfg(linux_kernel)]
     pub const P_802_3: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_802_3 as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_802_3 as u16).to_be() as u32) });
     /// `ETH_P_AX25`
     #[cfg(linux_kernel)]
-    pub const AX25: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_AX25 as _) });
+    pub const AX25: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_AX25 as u16).to_be() as u32) });
     /// `ETH_P_ALL`
     #[cfg(linux_kernel)]
-    pub const ALL: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_ALL as _) });
+    pub const ALL: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_ALL as u16).to_be() as u32) });
     /// `ETH_P_802_2`
     #[cfg(linux_kernel)]
     pub const P_802_2: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_802_2 as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_802_2 as u16).to_be() as u32) });
     /// `ETH_P_SNAP`
     #[cfg(linux_kernel)]
-    pub const SNAP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_SNAP as _) });
+    pub const SNAP: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_SNAP as u16).to_be() as u32) });
     /// `ETH_P_DDCMP`
     #[cfg(linux_kernel)]
     pub const DDCMP: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_DDCMP as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_DDCMP as u16).to_be() as u32) });
     /// `ETH_P_WAN_PPP`
     #[cfg(linux_kernel)]
     pub const WAN_PPP: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_WAN_PPP as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_WAN_PPP as u16).to_be() as u32) });
     /// `ETH_P_PPP_MP`
     #[cfg(linux_kernel)]
     pub const PPP_MP: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_PPP_MP as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_PPP_MP as u16).to_be() as u32) });
     /// `ETH_P_LOCALTALK`
     #[cfg(linux_kernel)]
     pub const LOCALTALK: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_LOCALTALK as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_LOCALTALK as u16).to_be() as u32) });
     /// `ETH_P_CAN`
     #[cfg(linux_kernel)]
-    pub const CAN: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_CAN as _) });
+    pub const CAN: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_CAN as u16).to_be() as u32) });
     /// `ETH_P_CANFD`
     #[cfg(linux_kernel)]
     pub const CANFD: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_CANFD as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_CANFD as u16).to_be() as u32) });
     /// `ETH_P_CANXL`
     #[cfg(linux_kernel)]
     pub const CANXL: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_CANXL as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_CANXL as u16).to_be() as u32) });
     /// `ETH_P_PPPTALK`
     #[cfg(linux_kernel)]
     pub const PPPTALK: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_PPPTALK as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_PPPTALK as u16).to_be() as u32) });
     /// `ETH_P_TR_802_2`
     #[cfg(linux_kernel)]
     pub const TR_802_2: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_TR_802_2 as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_TR_802_2 as u16).to_be() as u32) });
     /// `ETH_P_MOBITEX`
     #[cfg(linux_kernel)]
     pub const MOBITEX: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_MOBITEX as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_MOBITEX as u16).to_be() as u32) });
     /// `ETH_P_CONTROL`
     #[cfg(linux_kernel)]
     pub const CONTROL: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_CONTROL as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_CONTROL as u16).to_be() as u32) });
     /// `ETH_P_IRDA`
     #[cfg(linux_kernel)]
-    pub const IRDA: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_IRDA as _) });
+    pub const IRDA: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_IRDA as u16).to_be() as u32) });
     /// `ETH_P_ECONET`
     #[cfg(linux_kernel)]
     pub const ECONET: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_ECONET as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_ECONET as u16).to_be() as u32) });
     /// `ETH_P_HDLC`
     #[cfg(linux_kernel)]
-    pub const HDLC: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_HDLC as _) });
+    pub const HDLC: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_HDLC as u16).to_be() as u32) });
     /// `ETH_P_ARCNET`
     #[cfg(linux_kernel)]
     pub const ARCNET: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_ARCNET as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_ARCNET as u16).to_be() as u32) });
     /// `ETH_P_DSA`
     #[cfg(linux_kernel)]
-    pub const DSA: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_DSA as _) });
+    pub const DSA: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_DSA as u16).to_be() as u32) });
     /// `ETH_P_TRAILER`
     #[cfg(linux_kernel)]
     pub const TRAILER: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_TRAILER as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_TRAILER as u16).to_be() as u32) });
     /// `ETH_P_PHONET`
     #[cfg(linux_kernel)]
     pub const PHONET: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_PHONET as _) });
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_PHONET as u16).to_be() as u32) });
     /// `ETH_P_IEEE802154`
     #[cfg(linux_kernel)]
-    pub const IEEE802154: Protocol =
-        Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_IEEE802154 as _) });
+    pub const IEEE802154: Protocol = Protocol(unsafe {
+        RawProtocol::new_unchecked((c::ETH_P_IEEE802154 as u16).to_be() as u32)
+    });
     /// `ETH_P_CAIF`
     #[cfg(linux_kernel)]
-    pub const CAIF: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_CAIF as _) });
+    pub const CAIF: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_CAIF as u16).to_be() as u32) });
     /// `ETH_P_XDSA`
     #[cfg(linux_kernel)]
-    pub const XDSA: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_XDSA as _) });
+    pub const XDSA: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_XDSA as u16).to_be() as u32) });
     /// `ETH_P_MAP`
     #[cfg(linux_kernel)]
-    pub const MAP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_MAP as _) });
+    pub const MAP: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_MAP as u16).to_be() as u32) });
     /// `ETH_P_MCTP`
     #[cfg(linux_kernel)]
-    pub const MCTP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::ETH_P_MCTP as _) });
+    pub const MCTP: Protocol =
+        Protocol(unsafe { RawProtocol::new_unchecked((c::ETH_P_MCTP as u16).to_be() as u32) });
 }
 
 #[rustfmt::skip]
