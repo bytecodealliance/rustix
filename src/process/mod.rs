@@ -14,6 +14,8 @@ mod kill;
 mod membarrier;
 #[cfg(target_os = "linux")]
 mod pidfd;
+#[cfg(target_os = "linux")]
+mod pidfd_getfd;
 #[cfg(linux_kernel)]
 mod prctl;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))] // WASI doesn't have [gs]etpriority.
@@ -44,6 +46,8 @@ pub use kill::*;
 pub use membarrier::*;
 #[cfg(target_os = "linux")]
 pub use pidfd::*;
+#[cfg(target_os = "linux")]
+pub use pidfd_getfd::*;
 #[cfg(linux_kernel)]
 pub use prctl::*;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]

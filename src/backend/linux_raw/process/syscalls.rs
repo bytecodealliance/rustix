@@ -11,18 +11,18 @@ use crate::backend::c;
 #[cfg(feature = "fs")]
 use crate::backend::conv::slice_mut;
 use crate::backend::conv::{
-    by_mut, by_ref, c_int, c_uint, negative_pid, pass_usize, ret, ret_c_int, ret_c_int_infallible,
-    ret_c_uint, ret_infallible, ret_owned_fd, ret_usize, size_of, slice_just_addr,
-    slice_just_addr_mut, zero,
+    by_mut, by_ref, c_int, c_uint, negative_pid, pass_usize, raw_fd, ret, ret_c_int,
+    ret_c_int_infallible, ret_c_uint, ret_infallible, ret_owned_fd, ret_usize, size_of,
+    slice_just_addr, slice_just_addr_mut, zero,
 };
-use crate::fd::{AsRawFd, BorrowedFd, OwnedFd};
+use crate::fd::{AsRawFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(feature = "fs")]
 use crate::ffi::CStr;
 use crate::io;
 use crate::pid::{RawNonZeroPid, RawPid};
 use crate::process::{
-    Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, PidfdFlags, Resource, Rlimit, Uid, WaitId,
-    WaitOptions, WaitStatus, WaitidOptions, WaitidStatus,
+    Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, PidfdFlags, PidfdGetfdFlags, Resource,
+    Rlimit, Uid, WaitId, WaitOptions, WaitStatus, WaitidOptions, WaitidStatus,
 };
 use crate::signal::Signal;
 use crate::utils::as_mut_ptr;
@@ -598,6 +598,22 @@ pub(crate) fn test_kill_process_group(pid: Pid) -> io::Result<()> {
 #[inline]
 pub(crate) fn test_kill_current_process_group() -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_kill, pass_usize(0), pass_usize(0))) }
+}
+
+#[inline]
+pub(crate) fn pidfd_getfd(
+    pidfd: BorrowedFd<'_>,
+    targetfd: RawFd,
+    flags: PidfdGetfdFlags,
+) -> io::Result<OwnedFd> {
+    unsafe {
+        ret_owned_fd(syscall_readonly!(
+            __NR_pidfd_getfd,
+            pidfd,
+            raw_fd(targetfd),
+            c_int(flags.bits() as _)
+        ))
+    }
 }
 
 #[inline]
