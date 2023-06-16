@@ -254,7 +254,7 @@ pub struct ReaperStatus {
     /// The pid of the reaper for the specified process id.
     pub reaper: Pid,
     /// The pid of one reaper child if there are any descendants.
-    pub pid: Pid,
+    pub pid: Option<Pid>,
 }
 
 /// Get information about the reaper of the specified process (or the process
@@ -272,7 +272,11 @@ pub fn get_reaper_status(process: ProcSelector) -> io::Result<ReaperStatus> {
         children: raw.rs_children as _,
         descendants: raw.rs_descendants as _,
         reaper: Pid::from_raw(raw.rs_reaper).ok_or(io::Errno::RANGE)?,
-        pid: Pid::from_raw(raw.rs_pid).ok_or(io::Errno::RANGE)?,
+        pid: if raw.rs_pid == -1 {
+            None
+        } else {
+            Some(Pid::from_raw(raw.rs_pid).ok_or(io::Errno::RANGE)?)
+        },
     })
 }
 
