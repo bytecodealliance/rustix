@@ -150,8 +150,7 @@ fn capget(pid: Option<Pid>) -> io::Result<CapabilitySets> {
     let permitted = u64::from(data.0.permitted) | (u64::from(data.1.permitted) << u32::BITS);
     let inheritable = u64::from(data.0.inheritable) | (u64::from(data.1.inheritable) << u32::BITS);
 
-    // SAFETY: The kernel returns a partitioned bitset that we just
-    // combined above.
+    // The kernel returns a partitioned bitset that we just combined above.
     Ok(CapabilitySets {
         effective: CapabilityFlags::from_bits_retain(effective),
         permitted: CapabilityFlags::from_bits_retain(permitted),

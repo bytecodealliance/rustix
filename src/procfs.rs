@@ -1,5 +1,7 @@
 //! Utilities for working with `/proc`, where Linux's `procfs` is typically
-//! mounted. `/proc` serves as an adjunct to Linux's main syscall surface area,
+//! mounted.
+//!
+//! `/proc` serves as an adjunct to Linux's main syscall surface area,
 //! providing additional features with an awkward interface.
 //!
 //! This module does a considerable amount of work to determine whether `/proc`

@@ -1,6 +1,6 @@
 use crate::{backend, io};
 
-/// `GRND_*` constants for use with `getrandom`.
+/// `GRND_*` constants for use with [`getrandom`].
 pub use backend::rand::types::GetRandomFlags;
 
 /// `getrandom(buf, flags)`—Reads a sequence of random bytes.

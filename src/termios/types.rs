@@ -597,6 +597,12 @@ bitflags! {
 
 /// Speeds for use with [`Termios::set_input_speed`] and
 /// [`Termios::set_output_speed`].
+///
+/// Unlike in some platforms' libc APIs, these always have the same numerical
+/// value as their names; for example, `B50` has the value `50`, and so on.
+/// Consequently, it's not necessary to use them. They are provided here
+/// because they help identify speeds which are likely to be supported, on
+/// platforms which don't support arbitrary speeds.
 pub mod speed {
     #[cfg(not(bsd))]
     use crate::backend::c;

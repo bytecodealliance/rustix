@@ -70,10 +70,12 @@ fn _getcwd(mut buffer: Vec<u8>) -> io::Result<CString> {
             Ok(_) => {
                 // SAFETY:
                 // - "These functions return a null-terminated string"
-                // - POSIX definition 3.375: String (https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_375)
-                //   "A contiguous sequence of bytes terminated by and including the first null byte."
+                // - [POSIX definition 3.375: String]: "A contiguous sequence of bytes
+                //   terminated by and including the first null byte."
                 //
                 // Thus, there will be a single NUL byte at the end of the string.
+                //
+                // [POSIX definition 3.375: String]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_375
                 unsafe {
                     buffer.set_len(
                         CStr::from_ptr(buffer.as_ptr().cast())

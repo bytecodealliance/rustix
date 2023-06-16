@@ -41,8 +41,8 @@ impl MembarrierQuery {
     /// Test whether this query result contains the given command.
     #[inline]
     pub fn contains_command(self, cmd: MembarrierCommand) -> bool {
-        // SAFETY: `MembarrierCommand` is an enum that only contains values
-        // also valid in `MembarrierQuery`.
+        // `MembarrierCommand` is an enum that only contains values also valid
+        // in `MembarrierQuery`.
         self.contains(Self::from_bits_retain(cmd as _))
     }
 }

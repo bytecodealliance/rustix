@@ -9,7 +9,7 @@ pub type RawSocketType = u32;
 
 /// `SOCK_*` constants for use with [`socket`].
 ///
-/// [`socket`]: crate::net::socket
+/// [`socket`]: crate::net::socket()
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(transparent)]
 pub struct SocketType(pub(crate) RawSocketType);
@@ -451,9 +451,9 @@ pub type RawProtocol = core::num::NonZeroU32;
 /// For the default values, such as `IPPROTO_IP` or `NETLINK_ROUTE`, pass
 /// `None` as the `protocol` argument in these functions.
 ///
-/// [`socket`]: crate::net::socket
+/// [`socket`]: crate::net::socket()
 /// [`socket_with`]: crate::net::socket_with
-/// [`socketpair`]: crate::net::socketpair
+/// [`socketpair`]: crate::net::socketpair()
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(transparent)]
 #[doc(alias = "IPPROTO_IP")]

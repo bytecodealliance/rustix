@@ -17,7 +17,7 @@ macro_rules! check_type {
 }
 
 /// The same as `check_type`, but for unions and anonymous structs we've
-/// renamed to avoid having types like "bindgen_ty_1" in the API.
+/// renamed to avoid having types like `bindgen_ty_1` in the API.
 macro_rules! check_renamed_type {
     ($to:ident, $from:ident) => {
         assert_eq!(
@@ -48,7 +48,7 @@ macro_rules! check_struct_field {
 }
 
 /// The same as `check_struct_field`, but for unions and anonymous structs
-/// we've renamed to avoid having types like "bindgen_ty_1" in the API.
+/// we've renamed to avoid having types like `bindgen_ty_1` in the API.
 macro_rules! check_struct_renamed_field {
     ($struct:ident, $to:ident, $from:ident) => {
         assert_eq!(

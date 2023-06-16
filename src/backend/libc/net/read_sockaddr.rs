@@ -1,3 +1,6 @@
+//! The BSD sockets API requires us to read the `ss_family` field before
+//! we can interpret the rest of a `sockaddr` produced by the kernel.
+
 #[cfg(unix)]
 use super::addr::SocketAddrUnix;
 use super::ext::{in6_addr_s6_addr, in_addr_s_addr, sockaddr_in6_sin6_scope_id};
@@ -44,6 +47,11 @@ pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut c::sockaddr_stora
     (*storage.cast::<sockaddr_header>()).ss_family = c::AF_UNSPEC as _;
 }
 
+/// Read a socket address encoded in a platform-specific format.
+///
+/// # Safety
+///
+/// `storage` must point to valid socket address storage.
 pub(crate) unsafe fn read_sockaddr(
     storage: *const c::sockaddr_storage,
     len: usize,

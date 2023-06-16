@@ -25,13 +25,13 @@ use backend::fd::{BorrowedFd, RawFd};
 // SAFETY: `AT_FDCWD` is a reserved value that is never dynamically
 // allocated, so it'll remain valid for the duration of `'static`.
 #[doc(alias = "AT_FDCWD")]
-#[cfg(not(target_os = "haiku"))] // Haiku needs https://github.com/rust-lang/rust/pull/112371
+#[cfg(not(target_os = "haiku"))] // Haiku needs <https://github.com/rust-lang/rust/pull/112371>
 pub const CWD: BorrowedFd<'static> =
     unsafe { BorrowedFd::<'static>::borrow_raw(c::AT_FDCWD as RawFd) };
 
 /// Return the value of [`CWD`].
 #[deprecated(note = "Use `CWD` in place of `cwd()`.")]
-#[cfg(not(target_os = "haiku"))] // Haiku needs https://github.com/rust-lang/rust/pull/112371
+#[cfg(not(target_os = "haiku"))] // Haiku needs <https://github.com/rust-lang/rust/pull/112371>
 pub const fn cwd() -> BorrowedFd<'static> {
     let at_fdcwd = c::AT_FDCWD as RawFd;
 

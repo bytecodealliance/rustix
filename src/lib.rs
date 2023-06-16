@@ -120,8 +120,8 @@
 #![allow(clippy::unnecessary_cast)]
 // It is common in linux and libc APIs for types to vary between platforms.
 #![allow(clippy::useless_conversion)]
-// Redox and WASI have enough differences that it isn't worth
-// precisely conditionallizing all the `use`s for them.
+// Redox and WASI have enough differences that it isn't worth precisely
+// conditionalizing all the `use`s for them.
 #![cfg_attr(any(target_os = "redox", target_os = "wasi"), allow(unused_imports))]
 
 #[cfg(not(feature = "rustc-dep-of-std"))]

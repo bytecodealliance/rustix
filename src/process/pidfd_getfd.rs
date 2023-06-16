@@ -5,9 +5,10 @@ use backend::fd::{AsFd, RawFd};
 
 /// Raw file descriptor in another process.
 ///
-/// A distinct type alias is used here to inform the user that normal file descriptors from the
-/// calling process should not be used. The provided file descriptor is used by the kernel as the
-/// index into the file descriptor table of an entirely different process.
+/// A distinct type alias is used here to inform the user that normal file
+/// descriptors from the calling process should not be used. The provided file
+/// descriptor is used by the kernel as the index into the file descriptor
+/// table of an entirely different process.
 pub type ForeignRawFd = RawFd;
 
 bitflags::bitflags! {
@@ -23,15 +24,17 @@ bitflags::bitflags! {
 ///
 /// # Warning
 ///
-/// This function is generally safe for the calling process, but it can impact the target process
-/// in unexpected ways. If you want to ensure that Rust I/O safety assumptions continue to hold in
-/// the target process, then the target process must have communicated the file description number
-/// to the calling process from a value of a type that implements AsRawFd, and the target process
-/// must not drop that value until after the calling process has returned from `pidfd_getfd`.
+/// This function is generally safe for the calling process, but it can impact
+/// the target process in unexpected ways. If you want to ensure that Rust I/O
+/// safety assumptions continue to hold in the target process, then the target
+/// process must have communicated the file description number to the calling
+/// process from a value of a type that implements `AsRawFd`, and the target
+/// process must not drop that value until after the calling process has
+/// returned from `pidfd_getfd`.
 ///
-/// When `pidfd_getfd` is used to debug the target, or the target is not a Rust aplication, or
-/// `pidfd_getfd` is used in any other way, then extra care should be taken to avoid unexpected
-/// behaviour or crashes.
+/// When `pidfd_getfd` is used to debug the target, or the target is not a Rust
+/// aplication, or `pidfd_getfd` is used in any other way, then extra care
+/// should be taken to avoid unexpected behaviour or crashes.
 ///
 /// For further details, see the references above.
 ///

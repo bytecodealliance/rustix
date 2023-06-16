@@ -15,7 +15,7 @@ use core::ptr::null;
 use core::slice;
 
 // `getauxval` wasn't supported in glibc until 2.16. Also this lets us use
-// `*mut` as the retrn type to preserve strict provenance.
+// `*mut` as the return type to preserve strict provenance.
 #[cfg(not(feature = "runtime"))]
 weak!(fn getauxval(c::c_ulong) -> *mut c::c_void);
 

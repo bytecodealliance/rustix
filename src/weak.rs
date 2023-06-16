@@ -3,7 +3,7 @@
 // fd0cb0cdc21dd9c06025277d772108f8d42cb25f.
 //
 // Ideally we should update to a newer version which doesn't need `dlsym`,
-// however that depends on the `extern_weak` feature which is currrently
+// however that depends on the `extern_weak` feature which is currently
 // unstable.
 
 #![cfg_attr(linux_raw, allow(unsafe_code))]

@@ -61,12 +61,15 @@ fn _ttyname(dirfd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<CString> {
 
                 // SAFETY:
                 // - "ttyname_r stores this pathname in the buffer buf"
-                // - POSIX definition 3.271 Pathname (https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_271
-                //   "A string that is used to identify a file."
-                //   POSIX definition 3.375: String (https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_375)
-                //   "A contiguous sequence of bytes terminated by and including the first null byte."
+                // - [POSIX definition 3.271: Pathname]: "A string that is used to identify a
+                //   file."
+                // - [POSIX definition 3.375: String]: "A contiguous sequence of bytes
+                //   terminated by and including the first null byte."
                 //
                 // Thus, there will be a single NUL byte at the end of the string.
+                //
+                // [POSIX definition 3.271: Pathname]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_271
+                // [POSIX definition 3.375: String]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_375
                 unsafe {
                     return Ok(CString::from_vec_with_nul_unchecked(buffer));
                 }

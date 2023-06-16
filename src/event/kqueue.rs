@@ -226,7 +226,7 @@ pub enum EventFilter {
 }
 
 bitflags::bitflags! {
-    /// The flags for a `kqueue` event.
+    /// The flags for a `kqueue` event specifying actions to perform.
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct EventFlags: u16 {
         /// Add the event to the `kqueue`.

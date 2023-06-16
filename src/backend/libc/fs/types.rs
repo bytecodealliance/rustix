@@ -172,7 +172,7 @@ impl From<RawMode> for Mode {
 }
 
 impl From<Mode> for RawMode {
-    /// Support conversions from `Mode to raw mode values.
+    /// Support conversions from `Mode` to raw mode values.
     ///
     /// ```
     /// use rustix::fs::{Mode, RawMode};

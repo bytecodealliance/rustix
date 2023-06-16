@@ -1,4 +1,4 @@
-//! `recv` and `send`, and variants.
+//! `recv`, `send`, and variants.
 
 #[cfg(unix)]
 use crate::net::SocketAddrUnix;

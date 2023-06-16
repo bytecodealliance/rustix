@@ -99,20 +99,26 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::R
             }
 
             // SAFETY:
-            // - "readlink places the contents of the symbolic link pathname in the buffer buf"
-            // - POSIX definition 3.271 Pathname (https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_271
-            //   "A string that is used to identify a file."
-            //   POSIX definition 3.375: String (https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_375)
-            //   "A contiguous sequence of bytes terminated by and including the first null byte."
+            // - "readlink places the contents of the symbolic link pathname in the buffer
+            //   buf"
+            // - [POSIX definition 3.271: Pathname]: "A string that is used to identify a
+            //   file."
+            // - [POSIX definition 3.375: String]: "A contiguous sequence of bytes
+            //   terminated by and including the first null byte."
             // - "readlink does not append a terminating null byte to buf."
             //
             // Thus, there will be no NUL bytes in the string.
+            //
+            // [POSIX definition 3.271: Pathname]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_271
+            // [POSIX definition 3.375: String]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_375
             unsafe {
                 return Ok(CString::from_vec_unchecked(buffer));
             }
         }
 
-        buffer.reserve(buffer.capacity() + 1); // use `Vec` reallocation strategy to grow capacity exponentially
+        buffer.reserve(buffer.capacity() + 1); // use `Vec` reallocation
+                                               // strategy to grow capacity
+                                               // exponentially
     }
 }
 
