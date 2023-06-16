@@ -473,6 +473,7 @@ pub const fn raw_stderr() -> RawFd {
 
 /// Utility function to safely `dup2` over stdin (fd 0).
 #[cfg(not(any(windows, target_os = "wasi")))]
+#[allow(clippy::mem_forget)]
 #[inline]
 pub fn dup2_stdin<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     // SAFETY: We pass the returned `OwnedFd` to `forget` so that it isn't
@@ -485,6 +486,7 @@ pub fn dup2_stdin<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 
 /// Utility function to safely `dup2` over stdout (fd 1).
 #[cfg(not(any(windows, target_os = "wasi")))]
+#[allow(clippy::mem_forget)]
 #[inline]
 pub fn dup2_stdout<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     // SAFETY: We pass the returned `OwnedFd` to `forget` so that it isn't
@@ -497,6 +499,7 @@ pub fn dup2_stdout<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 
 /// Utility function to safely `dup2` over stderr (fd 2).
 #[cfg(not(any(windows, target_os = "wasi")))]
+#[allow(clippy::mem_forget)]
 #[inline]
 pub fn dup2_stderr<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     // SAFETY: We pass the returned `OwnedFd` to `forget` so that it isn't

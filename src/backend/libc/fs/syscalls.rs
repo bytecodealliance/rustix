@@ -977,13 +977,13 @@ pub(crate) fn copy_file_range(
     let mut off_out_val: c::loff_t = 0;
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let off_in_ptr = if let Some(off_in) = &off_in {
-        off_in_val = (**off_in) as i64;
+        off_in_val = **off_in as i64;
         &mut off_in_val
     } else {
         null_mut()
     };
     let off_out_ptr = if let Some(off_out) = &off_out {
-        off_out_val = (**off_out) as i64;
+        off_out_val = **off_out as i64;
         &mut off_out_val
     } else {
         null_mut()

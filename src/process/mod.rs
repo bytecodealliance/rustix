@@ -20,7 +20,7 @@ mod pidfd_getfd;
 mod prctl;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))] // WASI doesn't have [gs]etpriority.
 mod priority;
-#[cfg(target_os = "freebsd")]
+#[cfg(freebsdlike)]
 mod procctl;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 mod rlimit;
@@ -52,7 +52,7 @@ pub use pidfd_getfd::*;
 pub use prctl::*;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 pub use priority::*;
-#[cfg(target_os = "freebsd")]
+#[cfg(freebsdlike)]
 pub use procctl::*;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 pub use rlimit::*;

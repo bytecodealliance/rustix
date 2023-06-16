@@ -25,7 +25,10 @@ fn test_file() {
             if rustix::process::getuid() == rustix::process::geteuid()
                 && rustix::process::getgid() == rustix::process::getegid()
             {
-                panic!("accessat with EACCESS should always work when the effective uid/gid match the real uid/gid")
+                panic!(
+                    "accessat with EACCESS should always work when the effective uid/gid match \
+                     the real uid/gid"
+                )
             }
         }
         Err(err) => Err(err).unwrap(),

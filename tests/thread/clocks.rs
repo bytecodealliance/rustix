@@ -62,7 +62,7 @@ fn test_invalid_nanosleep_absolute() {
         ClockId::Monotonic,
         &Timespec {
             tv_sec: 0,
-            tv_nsec: 1000000000,
+            tv_nsec: 1_000_000_000,
         },
     ) {
         Err(io::Errno::INVAL) => (),

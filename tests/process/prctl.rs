@@ -99,14 +99,18 @@ fn test_is_io_flusher() {
 fn test_virtual_memory_map_config_struct_size() {
     if !thread_has_capability(Capability::SystemResource).unwrap() {
         eprintln!(
-            "test_virtual_memory_map_config_struct_size: Test skipped due to missing capability: CAP_SYS_RESOURCE."
+            "test_virtual_memory_map_config_struct_size: Test skipped due to missing capability: \
+             CAP_SYS_RESOURCE."
         );
         return;
     }
 
     #[cfg(feature = "system")]
     if !linux_kernel_config_item_is_enabled("CONFIG_CHECKPOINT_RESTORE").unwrap_or(false) {
-        eprintln!("test_virtual_memory_map_config_struct_size: Test skipped due to missing kernel feature: CONFIG_CHECKPOINT_RESTORE.");
+        eprintln!(
+            "test_virtual_memory_map_config_struct_size: Test skipped due to missing kernel \
+             feature: CONFIG_CHECKPOINT_RESTORE."
+        );
         return;
     }
 

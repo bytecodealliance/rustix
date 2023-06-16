@@ -254,11 +254,14 @@ pub fn wait(epoll: impl AsFd, event_list: &mut EventVec, timeout: c::c_int) -> i
 
 /// An iterator over the `Event`s in an `EventVec`.
 pub struct Iter<'a> {
-    iter: slice::Iter<'a, Event>,
+    /// Use `Copied` to copy the struct, since `Event` is `packed` on some
+    /// platforms, and it's common for users to directly destructure it,
+    /// which would lead to errors about forming references to packed fields.
+    iter: core::iter::Copied<slice::Iter<'a, Event>>,
 }
 
 impl<'a> Iterator for Iter<'a> {
-    type Item = &'a Event;
+    type Item = Event;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -269,6 +272,7 @@ impl<'a> Iterator for Iter<'a> {
 /// A record of an event that occurred.
 #[repr(C)]
 #[cfg_attr(target_arch = "x86_64", repr(packed))]
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Event {
     /// Which specific event(s) occurred.
     pub flags: EventFlags,
@@ -420,7 +424,7 @@ impl EventVec {
     #[inline]
     pub fn iter(&self) -> Iter<'_> {
         Iter {
-            iter: self.events.iter(),
+            iter: self.events.iter().copied(),
         }
     }
 
@@ -439,7 +443,7 @@ impl EventVec {
 
 impl<'a> IntoIterator for &'a EventVec {
     type IntoIter = Iter<'a>;
-    type Item = &'a Event;
+    type Item = Event;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {

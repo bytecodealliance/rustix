@@ -111,7 +111,7 @@ pub const EXIT_SIGNALED_SIGABRT: c::c_int = 128 + c::SIGABRT;
 /// A CPU identifier as a raw integer.
 #[cfg(linux_kernel)]
 pub type RawCpuid = u32;
-#[cfg(target_os = "freebsd")]
+#[cfg(freebsdlike)]
 pub type RawId = c::id_t;
 
 #[cfg(any(linux_kernel, target_os = "dragonfly", target_os = "fuchsia"))]

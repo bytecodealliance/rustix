@@ -62,7 +62,7 @@ pub(crate) unsafe fn read_sockaddr(
             if len < size_of::<c::sockaddr_in>() {
                 return Err(io::Errno::INVAL);
             }
-            let decode = *storage.cast::<c::sockaddr_in>();
+            let decode = &*storage.cast::<c::sockaddr_in>();
             Ok(SocketAddrAny::V4(SocketAddrV4::new(
                 Ipv4Addr::from(u32::from_be(decode.sin_addr.s_addr)),
                 u16::from_be(decode.sin_port),
@@ -72,7 +72,7 @@ pub(crate) unsafe fn read_sockaddr(
             if len < size_of::<c::sockaddr_in6>() {
                 return Err(io::Errno::INVAL);
             }
-            let decode = *storage.cast::<c::sockaddr_in6>();
+            let decode = &*storage.cast::<c::sockaddr_in6>();
             Ok(SocketAddrAny::V6(SocketAddrV6::new(
                 Ipv6Addr::from(decode.sin6_addr.in6_u.u6_addr8),
                 u16::from_be(decode.sin6_port),
@@ -87,7 +87,7 @@ pub(crate) unsafe fn read_sockaddr(
             if len == offsetof_sun_path {
                 Ok(SocketAddrAny::Unix(SocketAddrUnix::new(&[][..])?))
             } else {
-                let decode = *storage.cast::<c::sockaddr_un>();
+                let decode = &*storage.cast::<c::sockaddr_un>();
 
                 // On Linux check for Linux's [abstract namespace].
                 //
@@ -138,7 +138,7 @@ pub(crate) unsafe fn read_sockaddr_os(storage: *const c::sockaddr, len: usize) -
     match read_ss_family(storage).into() {
         c::AF_INET => {
             assert!(len >= size_of::<c::sockaddr_in>());
-            let decode = *storage.cast::<c::sockaddr_in>();
+            let decode = &*storage.cast::<c::sockaddr_in>();
             SocketAddrAny::V4(SocketAddrV4::new(
                 Ipv4Addr::from(u32::from_be(decode.sin_addr.s_addr)),
                 u16::from_be(decode.sin_port),
@@ -146,7 +146,7 @@ pub(crate) unsafe fn read_sockaddr_os(storage: *const c::sockaddr, len: usize) -
         }
         c::AF_INET6 => {
             assert!(len >= size_of::<c::sockaddr_in6>());
-            let decode = *storage.cast::<c::sockaddr_in6>();
+            let decode = &*storage.cast::<c::sockaddr_in6>();
             SocketAddrAny::V6(SocketAddrV6::new(
                 Ipv6Addr::from(decode.sin6_addr.in6_u.u6_addr8),
                 u16::from_be(decode.sin6_port),
@@ -159,7 +159,7 @@ pub(crate) unsafe fn read_sockaddr_os(storage: *const c::sockaddr, len: usize) -
             if len == offsetof_sun_path {
                 SocketAddrAny::Unix(SocketAddrUnix::new(&[][..]).unwrap())
             } else {
-                let decode = *storage.cast::<c::sockaddr_un>();
+                let decode = &*storage.cast::<c::sockaddr_un>();
 
                 // On Linux check for Linux's [abstract namespace].
                 //
