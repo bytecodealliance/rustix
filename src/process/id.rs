@@ -21,9 +21,6 @@ pub use crate::ugid::RawGid;
 /// The raw integer value of a Unix process ID.
 pub use crate::pid::RawPid;
 
-/// The raw integer value of a Unix process ID.
-pub use crate::pid::RawNonZeroPid;
-
 pub use crate::pid::Pid;
 pub use crate::ugid::{Gid, Uid};
 

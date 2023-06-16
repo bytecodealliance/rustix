@@ -1,11 +1,10 @@
 #![allow(unsafe_code)]
 
 use crate::backend::c;
+use core::num::NonZeroI32;
 
 /// A process identifier as a raw integer.
 pub type RawPid = c::pid_t;
-/// A non-zero process identifier as a raw non-zero integer.
-pub type RawNonZeroPid = core::num::NonZeroI32;
 
 /// `pid_t`—A non-zero Unix process ID.
 ///
@@ -14,13 +13,13 @@ pub type RawNonZeroPid = core::num::NonZeroI32;
 /// another, unrelated, process.
 #[repr(transparent)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
-pub struct Pid(RawNonZeroPid);
+pub struct Pid(NonZeroI32);
 
 impl Pid {
     /// A `Pid` corresponding to the init process (pid 1).
     pub const INIT: Self = Self(
         // SAFETY: One is non-zero.
-        unsafe { RawNonZeroPid::new_unchecked(1) },
+        unsafe { NonZeroI32::new_unchecked(1) },
     );
 
     /// Converts a `RawPid` into a `Pid`.
@@ -53,7 +52,7 @@ impl Pid {
     #[inline]
     pub const unsafe fn from_raw_unchecked(raw: RawPid) -> Self {
         debug_assert!(raw > 0);
-        Self(RawNonZeroPid::new_unchecked(raw))
+        Self(NonZeroI32::new_unchecked(raw))
     }
 
     /// Creates a `Pid` holding the ID of the given child process.
@@ -66,9 +65,9 @@ impl Pid {
         unsafe { Self::from_raw_unchecked(id as i32) }
     }
 
-    /// Converts a `Pid` into a `RawNonZeroPid`.
+    /// Converts a `Pid` into a `NonZeroI32`.
     #[inline]
-    pub const fn as_raw_nonzero(self) -> RawNonZeroPid {
+    pub const fn as_raw_nonzero(self) -> NonZeroI32 {
         self.0
     }
 
@@ -89,6 +88,6 @@ impl Pid {
 fn test_sizes() {
     use core::mem::size_of;
 
-    assert_eq!(size_of::<RawPid>(), size_of::<RawNonZeroPid>());
+    assert_eq!(size_of::<RawPid>(), size_of::<NonZeroI32>());
     assert_eq!(size_of::<RawPid>(), size_of::<Pid>());
 }
