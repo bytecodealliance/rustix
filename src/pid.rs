@@ -52,8 +52,7 @@ impl Pid {
     /// The caller must guarantee `raw` is strictly positive.
     #[inline]
     pub const unsafe fn from_raw_unchecked(raw: RawPid) -> Self {
-        // FIXME: `const_panic` is stabilized since Rust 1.57.
-        // debug_assert!(raw > 0);
+        debug_assert!(raw > 0);
         Self(RawNonZeroPid::new_unchecked(raw))
     }
 
