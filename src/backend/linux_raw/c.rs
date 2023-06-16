@@ -51,6 +51,11 @@ pub(crate) use linux_raw_sys::general::{
     O_CLOEXEC, O_NONBLOCK, O_NONBLOCK as PIDFD_NONBLOCK, P_ALL, P_PID, P_PIDFD,
 };
 pub(crate) use linux_raw_sys::general::{AT_FDCWD, O_NOCTTY, O_RDWR};
+
+#[cfg(feature = "event")]
+#[cfg(test)]
+pub(crate) use linux_raw_sys::general::epoll_event;
+
 #[cfg(feature = "fs")]
 pub(crate) use linux_raw_sys::general::{NFS_SUPER_MAGIC, PROC_SUPER_MAGIC, UTIME_NOW, UTIME_OMIT};
 #[cfg(feature = "fs")]

@@ -5,6 +5,7 @@ use rustix::net::{
     SocketAddrAny, SocketAddrV4, SocketType,
 };
 use std::collections::HashMap;
+use std::ffi::c_void;
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 
@@ -27,22 +28,28 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
         cvar.notify_all();
     }
 
-    let epoll = epoll::epoll_create(epoll::CreateFlags::CLOEXEC).unwrap();
+    let epoll = epoll::create(epoll::CreateFlags::CLOEXEC).unwrap();
 
-    epoll::epoll_add(&epoll, &listen_sock, 1, epoll::EventFlags::IN).unwrap();
+    epoll::add(
+        &epoll,
+        &listen_sock,
+        epoll::EventData::new_u64(1),
+        epoll::EventFlags::IN,
+    )
+    .unwrap();
 
-    let mut next_data = 2;
+    let mut next_data = epoll::EventData::new_u64(2);
     let mut targets = HashMap::new();
 
     let mut event_list = epoll::EventVec::with_capacity(4);
     loop {
-        epoll::epoll_wait(&epoll, &mut event_list, -1).unwrap();
+        epoll::wait(&epoll, &mut event_list, -1).unwrap();
         for event in &event_list {
             let target = event.data;
-            if target == 1 {
+            if target.u64() == 1 {
                 let conn_sock = accept(&listen_sock).unwrap();
                 ioctl_fionbio(&conn_sock, true).unwrap();
-                epoll::epoll_add(
+                epoll::add(
                     &epoll,
                     &conn_sock,
                     next_data,
@@ -50,11 +57,11 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
                 )
                 .unwrap();
                 targets.insert(next_data, conn_sock);
-                next_data += 1;
+                next_data = epoll::EventData::new_u64(next_data.u64() + 1);
             } else {
                 let target = targets.remove(&target).unwrap();
                 write(&target, b"hello\n").unwrap();
-                epoll::epoll_del(&epoll, &target).unwrap();
+                epoll::delete(&epoll, &target).unwrap();
             }
         }
     }
@@ -100,4 +107,26 @@ fn test_epoll() {
         })
         .unwrap();
     client.join().unwrap();
+}
+
+#[test]
+fn test_epoll_event_data() {
+    let d = epoll::EventData::new_u64(0);
+    assert_eq!(d.u64(), 0);
+    assert_eq!(d.ptr() as u64, 0);
+    let d = epoll::EventData::new_u64(1);
+    assert_eq!(d.u64(), 1);
+    assert_eq!(d.ptr() as u64, 1);
+    let d = epoll::EventData::new_u64(!5);
+    assert_eq!(d.u64(), !5);
+    assert_eq!(d.ptr() as u64, !5 as *mut c_void as u64);
+    let d = epoll::EventData::new_ptr(core::ptr::null_mut());
+    assert_eq!(d.u64(), 0);
+    assert!(d.ptr().is_null());
+    let d = epoll::EventData::new_ptr(3 as *mut c_void);
+    assert_eq!(d.u64(), 3);
+    assert_eq!(d.ptr() as u64, 3);
+    let d = epoll::EventData::new_ptr(!3 as *mut c_void);
+    assert_eq!(d.u64(), !3 as *mut c_void as u64);
+    assert_eq!(d.ptr() as u64, !3 as *mut c_void as u64);
 }
