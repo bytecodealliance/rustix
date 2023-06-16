@@ -44,7 +44,7 @@ bitflags! {
         const SYMLINK_FOLLOW = c::AT_SYMLINK_FOLLOW;
 
         /// `AT_NO_AUTOMOUNT`
-        #[cfg(all(target_os = "linux", target_env = "gnu"))]
+        #[cfg(any(linux_like, target_os = "fuchsia"))]
         const NO_AUTOMOUNT = c::AT_NO_AUTOMOUNT;
 
         /// `AT_EMPTY_PATH`
