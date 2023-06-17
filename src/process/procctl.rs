@@ -184,7 +184,7 @@ pub fn trace_status(process: ProcSelector) -> io::Result<TracingStatus> {
         -1 => Ok(TracingStatus::NotTraceble),
         0 => Ok(TracingStatus::Tracable),
         pid => {
-            let pid = unsafe { Pid::from_raw(pid as RawPid) }.ok_or(io::Errno::RANGE)?;
+            let pid = Pid::from_raw(pid as RawPid).ok_or(io::Errno::RANGE)?;
             Ok(TracingStatus::BeingTraced(pid))
         }
     }
@@ -254,7 +254,7 @@ pub struct ReaperStatus {
     /// The pid of the reaper for the specified process id.
     pub reaper: Pid,
     /// The pid of one reaper child if there are any descendants.
-    pub pid: Pid,
+    pub pid: Option<Pid>,
 }
 
 /// Get information about the reaper of the specified process (or the process
@@ -271,8 +271,12 @@ pub fn get_reaper_status(process: ProcSelector) -> io::Result<ReaperStatus> {
         flags: ReaperStatusFlags::from_bits_truncate(raw.rs_flags),
         children: raw.rs_children as _,
         descendants: raw.rs_descendants as _,
-        reaper: unsafe { Pid::from_raw(raw.rs_reaper) }.ok_or(io::Errno::RANGE)?,
-        pid: unsafe { Pid::from_raw(raw.rs_pid) }.ok_or(io::Errno::RANGE)?,
+        reaper: Pid::from_raw(raw.rs_reaper).ok_or(io::Errno::RANGE)?,
+        pid: if raw.rs_pid == -1 {
+            None
+        } else {
+            Some(Pid::from_raw(raw.rs_pid).ok_or(io::Errno::RANGE)?)
+        },
     })
 }
 
@@ -351,8 +355,8 @@ pub fn get_reaper_pids(process: ProcSelector) -> io::Result<Vec<PidInfo>> {
         }
         result.push(PidInfo {
             flags,
-            subtree: unsafe { Pid::from_raw(raw.pi_subtree) }.ok_or(io::Errno::RANGE)?,
-            pid: unsafe { Pid::from_raw(raw.pi_pid) }.ok_or(io::Errno::RANGE)?,
+            subtree: Pid::from_raw(raw.pi_subtree).ok_or(io::Errno::RANGE)?,
+            pid: Pid::from_raw(raw.pi_pid).ok_or(io::Errno::RANGE)?,
         });
     }
     Ok(result)
@@ -414,11 +418,7 @@ pub fn reaper_kill(
     unsafe { procctl(PROC_REAP_KILL, process, as_mut_ptr(&mut req).cast())? };
     Ok(KillResult {
         killed: req.rk_killed as _,
-        first_failed: if req.rk_fpid == -1 {
-            None
-        } else {
-            unsafe { Pid::from_raw(req.rk_fpid) }
-        },
+        first_failed: Pid::from_raw(req.rk_fpid),
     })
 }
 

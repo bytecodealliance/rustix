@@ -7,13 +7,13 @@
 #![allow(clippy::undocumented_unsafe_blocks)]
 
 use crate::backend::conv::ret_usize_infallible;
-use crate::pid::{Pid, RawNonZeroPid, RawPid};
+use crate::pid::{Pid, RawPid};
 
 #[inline]
 pub(crate) fn getpid() -> Pid {
     unsafe {
         let pid = ret_usize_infallible(syscall_readonly!(__NR_getpid)) as RawPid;
         debug_assert!(pid > 0);
-        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid as _))
+        Pid::from_raw_unchecked(pid)
     }
 }

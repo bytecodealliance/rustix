@@ -15,7 +15,7 @@ use core::mem::MaybeUninit;
 use {
     crate::backend::conv::{borrowed_fd, ret_c_int, syscall_ret},
     crate::fd::BorrowedFd,
-    crate::pid::{Pid, RawNonZeroPid},
+    crate::pid::Pid,
     crate::utils::as_mut_ptr,
 };
 #[cfg(not(any(
@@ -285,8 +285,7 @@ pub(crate) fn gettid() -> Pid {
 
     unsafe {
         let tid = gettid();
-        debug_assert_ne!(tid, 0);
-        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(tid))
+        Pid::from_raw_unchecked(tid)
     }
 }
 

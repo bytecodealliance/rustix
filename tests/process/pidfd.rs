@@ -19,7 +19,7 @@ fn test_pidfd_waitid() {
         .expect("failed to execute child");
 
     // Create a pidfd for the child process.
-    let pid = unsafe { process::Pid::from_raw(child.id() as _) }.unwrap();
+    let pid = process::Pid::from_child(&child);
     let pidfd = match process::pidfd_open(pid, process::PidfdFlags::empty()) {
         Ok(pidfd) => pidfd,
         Err(e) if e == io::Errno::NOSYS => {
@@ -56,7 +56,7 @@ fn test_pidfd_poll() {
         .expect("failed to execute child");
 
     // Create a pidfd for the child process.
-    let pid = unsafe { process::Pid::from_raw(child.id() as _) }.unwrap();
+    let pid = process::Pid::from_child(&child);
     let pidfd = match process::pidfd_open(pid, process::PidfdFlags::NONBLOCK) {
         Ok(pidfd) => pidfd,
         Err(e) if e == io::Errno::NOSYS || e == io::Errno::INVAL => {

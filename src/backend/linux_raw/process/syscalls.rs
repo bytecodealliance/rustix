@@ -19,7 +19,7 @@ use crate::fd::{AsRawFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(feature = "fs")]
 use crate::ffi::CStr;
 use crate::io;
-use crate::pid::{RawNonZeroPid, RawPid};
+use crate::pid::RawPid;
 use crate::process::{
     Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, PidfdFlags, PidfdGetfdFlags, Resource,
     Rlimit, Uid, WaitId, WaitOptions, WaitStatus, WaitidOptions, WaitidStatus,
@@ -105,7 +105,7 @@ pub(crate) fn getpgid(pid: Option<Pid>) -> io::Result<Pid> {
     unsafe {
         let pgid = ret_c_int(syscall_readonly!(__NR_getpgid, c_int(Pid::as_raw(pid))))?;
         debug_assert!(pgid > 0);
-        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pgid)))
+        Ok(Pid::from_raw_unchecked(pgid))
     }
 }
 
@@ -127,7 +127,7 @@ pub(crate) fn getpgrp() -> Pid {
     unsafe {
         let pgid = ret_c_int_infallible(syscall_readonly!(__NR_getpgrp));
         debug_assert!(pgid > 0);
-        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pgid))
+        Pid::from_raw_unchecked(pgid)
     }
 
     // Otherwise use `getpgrp` and pass it zero.
@@ -135,7 +135,7 @@ pub(crate) fn getpgrp() -> Pid {
     unsafe {
         let pgid = ret_c_int_infallible(syscall_readonly!(__NR_getpgid, c_uint(0)));
         debug_assert!(pgid > 0);
-        Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pgid))
+        Pid::from_raw_unchecked(pgid)
     }
 }
 
@@ -453,12 +453,7 @@ pub(crate) fn _waitpid(
             c_int(waitopts.bits() as _),
             zero()
         ))?;
-        Ok(RawNonZeroPid::new(pid).map(|non_zero| {
-            (
-                Pid::from_raw_nonzero(non_zero),
-                WaitStatus::new(status.assume_init()),
-            )
-        }))
+        Ok(Pid::from_raw(pid).map(|pid| (pid, WaitStatus::new(status.assume_init()))))
     }
 }
 
@@ -551,7 +546,7 @@ pub(crate) fn getsid(pid: Option<Pid>) -> io::Result<Pid> {
     unsafe {
         let pid = ret_c_int(syscall_readonly!(__NR_getsid, c_int(Pid::as_raw(pid))))?;
         debug_assert!(pid > 0);
-        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid)))
+        Ok(Pid::from_raw_unchecked(pid))
     }
 }
 
@@ -560,7 +555,7 @@ pub(crate) fn setsid() -> io::Result<Pid> {
     unsafe {
         let pid = ret_c_int(syscall_readonly!(__NR_setsid))?;
         debug_assert!(pid > 0);
-        Ok(Pid::from_raw_nonzero(RawNonZeroPid::new_unchecked(pid)))
+        Ok(Pid::from_raw_unchecked(pid))
     }
 }
 

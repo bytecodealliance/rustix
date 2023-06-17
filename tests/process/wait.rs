@@ -18,8 +18,8 @@ fn test_waitpid() {
         .expect("failed to execute child");
     unsafe { kill(child.id() as _, SIGSTOP) };
 
-    let pid = unsafe { process::Pid::from_raw(child.id() as _) };
-    let status = process::waitpid(pid, process::WaitOptions::UNTRACED)
+    let pid = process::Pid::from_child(&child);
+    let status = process::waitpid(Some(pid), process::WaitOptions::UNTRACED)
         .expect("failed to wait")
         .unwrap();
     assert!(status.stopped());
@@ -41,13 +41,10 @@ fn test_waitid() {
         .expect("failed to execute child");
     unsafe { kill(child.id() as _, SIGSTOP) };
 
-    let pid = unsafe { process::Pid::from_raw(child.id() as _) };
-    let status = process::waitid(
-        process::WaitId::Pid(pid.unwrap()),
-        process::WaitidOptions::STOPPED,
-    )
-    .expect("failed to wait")
-    .unwrap();
+    let pid = process::Pid::from_child(&child);
+    let status = process::waitid(process::WaitId::Pid(pid), process::WaitidOptions::STOPPED)
+        .expect("failed to wait")
+        .unwrap();
 
     assert!(status.stopped());
     #[cfg(not(any(target_os = "netbsd", target_os = "fuchsia")))]
@@ -55,12 +52,9 @@ fn test_waitid() {
 
     unsafe { kill(child.id() as _, SIGCONT) };
 
-    let status = process::waitid(
-        process::WaitId::Pid(pid.unwrap()),
-        process::WaitidOptions::CONTINUED,
-    )
-    .expect("failed to wait")
-    .unwrap();
+    let status = process::waitid(process::WaitId::Pid(pid), process::WaitidOptions::CONTINUED)
+        .expect("failed to wait")
+        .unwrap();
 
     assert!(status.continued());
 
@@ -75,7 +69,7 @@ fn test_waitid() {
     unsafe { kill(child.id() as _, SIGKILL) };
 
     let status = process::waitid(
-        process::WaitId::Pid(pid.unwrap()),
+        process::WaitId::Pid(pid),
         process::WaitidOptions::EXITED | process::WaitidOptions::NOWAIT,
     )
     .expect("failed to wait")
@@ -85,12 +79,9 @@ fn test_waitid() {
     #[cfg(not(any(target_os = "netbsd", target_os = "fuchsia")))]
     assert_eq!(status.terminating_signal(), Some(SIGKILL as _));
 
-    let status = process::waitid(
-        process::WaitId::Pid(pid.unwrap()),
-        process::WaitidOptions::EXITED,
-    )
-    .expect("failed to wait")
-    .unwrap();
+    let status = process::waitid(process::WaitId::Pid(pid), process::WaitidOptions::EXITED)
+        .expect("failed to wait")
+        .unwrap();
 
     assert!(status.killed());
     #[cfg(not(any(target_os = "netbsd", target_os = "fuchsia")))]
