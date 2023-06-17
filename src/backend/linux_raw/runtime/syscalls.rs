@@ -100,7 +100,6 @@ pub(crate) mod tls {
     #[inline]
     pub(crate) unsafe fn set_tid_address(data: *mut c::c_void) -> Pid {
         let tid: i32 = ret_c_int_infallible(syscall_readonly!(__NR_set_tid_address, data));
-        debug_assert_ne!(tid, 0);
         Pid::from_raw_unchecked(tid)
     }
 

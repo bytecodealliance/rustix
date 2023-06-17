@@ -545,7 +545,6 @@ unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitidS
 pub(crate) fn getsid(pid: Option<Pid>) -> io::Result<Pid> {
     unsafe {
         let pid = ret_c_int(syscall_readonly!(__NR_getsid, c_int(Pid::as_raw(pid))))?;
-        debug_assert!(pid > 0);
         Ok(Pid::from_raw_unchecked(pid))
     }
 }
@@ -554,7 +553,6 @@ pub(crate) fn getsid(pid: Option<Pid>) -> io::Result<Pid> {
 pub(crate) fn setsid() -> io::Result<Pid> {
     unsafe {
         let pid = ret_c_int(syscall_readonly!(__NR_setsid))?;
-        debug_assert!(pid > 0);
         Ok(Pid::from_raw_unchecked(pid))
     }
 }

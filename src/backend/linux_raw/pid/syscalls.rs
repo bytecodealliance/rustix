@@ -13,7 +13,6 @@ use crate::pid::{Pid, RawPid};
 pub(crate) fn getpid() -> Pid {
     unsafe {
         let pid = ret_usize_infallible(syscall_readonly!(__NR_getpid)) as RawPid;
-        debug_assert!(pid > 0);
         Pid::from_raw_unchecked(pid)
     }
 }
