@@ -74,7 +74,6 @@ pub(crate) fn tcgetpgrp(fd: BorrowedFd<'_>) -> io::Result<Pid> {
         let mut result = MaybeUninit::<c::pid_t>::uninit();
         ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGPGRP), &mut result))?;
         let pid = result.assume_init();
-        debug_assert!(pid > 0);
         Ok(Pid::from_raw_unchecked(pid))
     }
 }
@@ -168,7 +167,6 @@ pub(crate) fn tcgetsid(fd: BorrowedFd) -> io::Result<Pid> {
         let mut result = MaybeUninit::<c::pid_t>::uninit();
         ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGSID), &mut result))?;
         let pid = result.assume_init();
-        debug_assert!(pid > 0);
         Ok(Pid::from_raw_unchecked(pid))
     }
 }

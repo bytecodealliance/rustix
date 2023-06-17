@@ -200,7 +200,6 @@ unsafe fn nanosleep_old(
 pub(crate) fn gettid() -> Pid {
     unsafe {
         let tid = ret_c_int_infallible(syscall_readonly!(__NR_gettid));
-        debug_assert_ne!(tid, 0);
         Pid::from_raw_unchecked(tid)
     }
 }
