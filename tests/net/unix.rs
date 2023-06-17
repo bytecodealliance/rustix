@@ -11,8 +11,7 @@
 use rustix::fs::{unlinkat, AtFlags, CWD};
 use rustix::io::{read, write};
 use rustix::net::{
-    accept, bind_unix, connect_unix, listen, socket, AddressFamily, Protocol, SocketAddrUnix,
-    SocketType,
+    accept, bind_unix, connect_unix, listen, socket, AddressFamily, SocketAddrUnix, SocketType,
 };
 use rustix::path::DecInt;
 use std::path::Path;
@@ -23,12 +22,7 @@ use std::thread;
 const BUFFER_SIZE: usize = 20;
 
 fn server(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path) {
-    let connection_socket = socket(
-        AddressFamily::UNIX,
-        SocketType::SEQPACKET,
-        Protocol::default(),
-    )
-    .unwrap();
+    let connection_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
 
     let name = SocketAddrUnix::new(path).unwrap();
     bind_unix(&connection_socket, &name).unwrap();
@@ -77,12 +71,7 @@ fn client(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path, runs: &[(&[&str], i32
     let mut buffer = vec![0; BUFFER_SIZE];
 
     for (args, sum) in runs {
-        let data_socket = socket(
-            AddressFamily::UNIX,
-            SocketType::SEQPACKET,
-            Protocol::default(),
-        )
-        .unwrap();
+        let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
         connect_unix(&data_socket, &addr).unwrap();
 
         for arg in *args {
@@ -97,12 +86,7 @@ fn client(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path, runs: &[(&[&str], i32
         );
     }
 
-    let data_socket = socket(
-        AddressFamily::UNIX,
-        SocketType::SEQPACKET,
-        Protocol::default(),
-    )
-    .unwrap();
+    let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
     connect_unix(&data_socket, &addr).unwrap();
     write(&data_socket, b"exit").unwrap();
 }
@@ -147,12 +131,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
     use rustix::net::{recvmsg, sendmsg, RecvFlags, SendFlags};
 
     let server = {
-        let connection_socket = socket(
-            AddressFamily::UNIX,
-            SocketType::SEQPACKET,
-            Protocol::default(),
-        )
-        .unwrap();
+        let connection_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
         bind_unix(&connection_socket, &addr).unwrap();
         listen(&connection_socket, 1).unwrap();
 
@@ -203,12 +182,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
         ];
 
         for (args, sum) in runs {
-            let data_socket = socket(
-                AddressFamily::UNIX,
-                SocketType::SEQPACKET,
-                Protocol::default(),
-            )
-            .unwrap();
+            let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
             connect_unix(&data_socket, &addr).unwrap();
 
             for arg in *args {
@@ -249,12 +223,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
             );
         }
 
-        let data_socket = socket(
-            AddressFamily::UNIX,
-            SocketType::SEQPACKET,
-            Protocol::default(),
-        )
-        .unwrap();
+        let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
         connect_unix(&data_socket, &addr).unwrap();
         sendmsg(
             &data_socket,
@@ -325,12 +294,7 @@ fn test_unix_msg_with_scm_rights() {
     let server = {
         let path = path.clone();
 
-        let connection_socket = socket(
-            AddressFamily::UNIX,
-            SocketType::SEQPACKET,
-            Protocol::default(),
-        )
-        .unwrap();
+        let connection_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
 
         let name = SocketAddrUnix::new(&path).unwrap();
         bind_unix(&connection_socket, &name).unwrap();
@@ -409,12 +373,7 @@ fn test_unix_msg_with_scm_rights() {
         ];
 
         for (args, sum) in runs {
-            let data_socket = socket(
-                AddressFamily::UNIX,
-                SocketType::SEQPACKET,
-                Protocol::default(),
-            )
-            .unwrap();
+            let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
             connect_unix(&data_socket, &addr).unwrap();
 
             for arg in *args {
@@ -448,12 +407,7 @@ fn test_unix_msg_with_scm_rights() {
             );
         }
 
-        let data_socket = socket(
-            AddressFamily::UNIX,
-            SocketType::SEQPACKET,
-            Protocol::default(),
-        )
-        .unwrap();
+        let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
 
         // Format the CMSG.
         let we = [write_end.as_fd()];

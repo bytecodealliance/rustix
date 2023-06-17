@@ -1,10 +1,9 @@
 #[test]
 fn test_sockopts_ipv4() {
-    use rustix::net::{AddressFamily, Protocol, SocketType};
+    use rustix::net::{AddressFamily, SocketType};
     use std::time::Duration;
 
-    let s =
-        rustix::net::socket(AddressFamily::INET, SocketType::STREAM, Protocol::default()).unwrap();
+    let s = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
 
     // On a new socket we shouldn't have a timeout yet.
     assert!(
@@ -144,14 +143,9 @@ fn test_sockopts_ipv4() {
 
 #[test]
 fn test_sockopts_ipv6() {
-    use rustix::net::{AddressFamily, Protocol, SocketType};
+    use rustix::net::{AddressFamily, SocketType};
 
-    let s = rustix::net::socket(
-        AddressFamily::INET6,
-        SocketType::STREAM,
-        Protocol::default(),
-    )
-    .unwrap();
+    let s = rustix::net::socket(AddressFamily::INET6, SocketType::STREAM, None).unwrap();
 
     assert_ne!(rustix::net::sockopt::get_ipv6_unicast_hops(&s).unwrap(), 0);
     match rustix::net::sockopt::get_ipv6_multicast_loop(&s) {

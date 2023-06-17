@@ -8,10 +8,24 @@
 
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 use crate::{backend, io};
+use backend::c;
 use backend::fd::AsFd;
 use core::time::Duration;
 
-pub use backend::net::types::Timeout;
+/// Timeout identifier for use with [`set_socket_timeout`] and
+/// [`get_socket_timeout`].
+///
+/// [`set_socket_timeout`]: crate::net::sockopt::set_socket_timeout.
+/// [`get_socket_timeout`]: crate::net::sockopt::get_socket_timeout.
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[repr(u32)]
+pub enum Timeout {
+    /// `SO_RCVTIMEO`—Timeout for receiving.
+    Recv = c::SO_RCVTIMEO as _,
+
+    /// `SO_SNDTIMEO`—Timeout for sending.
+    Send = c::SO_SNDTIMEO as _,
+}
 
 /// `getsockopt(fd, SOL_SOCKET, SO_TYPE)`—Returns the type of a socket.
 ///
@@ -1613,4 +1627,14 @@ pub fn set_tcp_nodelay<Fd: AsFd>(fd: Fd, nodelay: bool) -> io::Result<()> {
 #[doc(alias = "TCP_NODELAY")]
 pub fn get_tcp_nodelay<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::syscalls::sockopt::get_tcp_nodelay(fd.as_fd())
+}
+
+#[test]
+fn test_sizes() {
+    use c::c_int;
+    use core::mem::size_of;
+
+    // Backend code needs to cast these to `c_int` so make sure that cast
+    // isn't lossy.
+    assert_eq!(size_of::<Timeout>(), size_of::<c_int>());
 }

@@ -11,7 +11,6 @@ use super::msghdr::{
 };
 use super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr_os};
 use super::send_recv::{RecvFlags, SendFlags};
-use super::types::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 use crate::backend::c;
 use crate::backend::conv::{
@@ -21,8 +20,8 @@ use crate::backend::conv::{
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
 use crate::net::{
-    RecvAncillaryBuffer, RecvMsgReturn, SendAncillaryBuffer, SocketAddrAny, SocketAddrUnix,
-    SocketAddrV4, SocketAddrV6,
+    AddressFamily, Protocol, RecvAncillaryBuffer, RecvMsgReturn, SendAncillaryBuffer, Shutdown,
+    SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6, SocketFlags, SocketType,
 };
 use c::{sockaddr, sockaddr_in, sockaddr_in6, socklen_t};
 use core::mem::MaybeUninit;
@@ -41,7 +40,7 @@ use {
 pub(crate) fn socket(
     family: AddressFamily,
     type_: SocketType,
-    protocol: Protocol,
+    protocol: Option<Protocol>,
 ) -> io::Result<OwnedFd> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
@@ -66,7 +65,7 @@ pub(crate) fn socket_with(
     family: AddressFamily,
     type_: SocketType,
     flags: SocketFlags,
-    protocol: Protocol,
+    protocol: Option<Protocol>,
 ) -> io::Result<OwnedFd> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
@@ -96,7 +95,7 @@ pub(crate) fn socketpair(
     family: AddressFamily,
     type_: SocketType,
     flags: SocketFlags,
-    protocol: Protocol,
+    protocol: Option<Protocol>,
 ) -> io::Result<(OwnedFd, OwnedFd)> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {

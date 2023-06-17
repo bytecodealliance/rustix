@@ -5,7 +5,7 @@
 use rustix::event::{poll, PollFd, PollFlags};
 use rustix::net::{
     accept, bind_v6, connect_v6, getsockname, listen, recv, send, socket, AddressFamily, Ipv6Addr,
-    Protocol, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV6, SocketType,
+    RecvFlags, SendFlags, SocketAddrAny, SocketAddrV6, SocketType,
 };
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
@@ -13,12 +13,7 @@ use std::thread;
 const BUFFER_SIZE: usize = 20;
 
 fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
-    let connection_socket = socket(
-        AddressFamily::INET6,
-        SocketType::STREAM,
-        Protocol::default(),
-    )
-    .unwrap();
+    let connection_socket = socket(AddressFamily::INET6, SocketType::STREAM, None).unwrap();
 
     let name = SocketAddrV6::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 0, 0, 0);
     bind_v6(&connection_socket, &name).unwrap();
@@ -71,12 +66,7 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     let addr = SocketAddrV6::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), port, 0, 0);
     let mut buffer = vec![0; BUFFER_SIZE];
 
-    let data_socket = socket(
-        AddressFamily::INET6,
-        SocketType::STREAM,
-        Protocol::default(),
-    )
-    .unwrap();
+    let data_socket = socket(AddressFamily::INET6, SocketType::STREAM, None).unwrap();
     connect_v6(&data_socket, &addr).unwrap();
 
     let mut fds = [PollFd::new(&data_socket, PollFlags::OUT)];

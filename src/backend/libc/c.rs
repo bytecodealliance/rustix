@@ -12,6 +12,56 @@ pub(crate) const PROC_SUPER_MAGIC: u32 = 0x0000_9fa0;
 #[cfg(all(linux_kernel, target_env = "musl"))]
 pub(crate) const NFS_SUPER_MAGIC: u32 = 0x0000_6969;
 
+// Submitted upstream in https://github.com/rust-lang/libc/pull/3272.
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const IPPROTO_ETHERNET: c_int = linux_raw_sys::net::IPPROTO_ETHERNET as _;
+
+// TODO: Upstream these.
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_TSN: c_int = linux_raw_sys::if_ether::ETH_P_TSN as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_ERSPAN2: c_int = linux_raw_sys::if_ether::ETH_P_ERSPAN2 as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_ERSPAN: c_int = linux_raw_sys::if_ether::ETH_P_ERSPAN as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_PROFINET: c_int = linux_raw_sys::if_ether::ETH_P_PROFINET as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_REALTEK: c_int = linux_raw_sys::if_ether::ETH_P_REALTEK as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_ETHERCAT: c_int = linux_raw_sys::if_ether::ETH_P_ETHERCAT as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_PREAUTH: c_int = linux_raw_sys::if_ether::ETH_P_PREAUTH as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_LLDP: c_int = linux_raw_sys::if_ether::ETH_P_LLDP as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_MRP: c_int = linux_raw_sys::if_ether::ETH_P_MRP as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_NCSI: c_int = linux_raw_sys::if_ether::ETH_P_NCSI as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_CFM: c_int = linux_raw_sys::if_ether::ETH_P_CFM as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_IBOE: c_int = linux_raw_sys::if_ether::ETH_P_IBOE as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_HSR: c_int = linux_raw_sys::if_ether::ETH_P_HSR as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_NSH: c_int = linux_raw_sys::if_ether::ETH_P_NSH as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_DSA_8021Q: c_int = linux_raw_sys::if_ether::ETH_P_DSA_8021Q as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_DSA_A5PSW: c_int = linux_raw_sys::if_ether::ETH_P_DSA_A5PSW as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_IFE: c_int = linux_raw_sys::if_ether::ETH_P_IFE as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_CAN: c_int = linux_raw_sys::if_ether::ETH_P_CAN as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_CANXL: c_int = linux_raw_sys::if_ether::ETH_P_CANXL as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_XDSA: c_int = linux_raw_sys::if_ether::ETH_P_XDSA as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_MAP: c_int = linux_raw_sys::if_ether::ETH_P_MAP as _;
+#[cfg(all(linux_kernel, feature = "net"))]
+pub(crate) const ETH_P_MCTP: c_int = linux_raw_sys::if_ether::ETH_P_MCTP as _;
+
 #[cfg(all(
     linux_kernel,
     any(

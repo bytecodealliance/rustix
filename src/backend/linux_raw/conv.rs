@@ -727,10 +727,13 @@ impl<'a, Num: ArgNumber> From<crate::net::SocketType> for ArgReg<'a, Num> {
 }
 
 #[cfg(feature = "net")]
-impl<'a, Num: ArgNumber> From<crate::net::Protocol> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<Option<crate::net::Protocol>> for ArgReg<'a, Num> {
     #[inline]
-    fn from(protocol: crate::net::Protocol) -> Self {
-        c_uint(protocol.0)
+    fn from(protocol: Option<crate::net::Protocol>) -> Self {
+        c_uint(match protocol {
+            Some(p) => p.0.get(),
+            None => 0,
+        })
     }
 }
 
