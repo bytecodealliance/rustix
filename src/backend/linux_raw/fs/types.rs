@@ -29,20 +29,23 @@ bitflags! {
     /// [`statat`]: crate::fs::statat
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct AtFlags: c::c_uint {
+        /// `AT_SYMLINK_NOFOLLOW`
+        const SYMLINK_NOFOLLOW = linux_raw_sys::general::AT_SYMLINK_NOFOLLOW;
+
+        /// `AT_EACCESS`
+        const EACCESS = linux_raw_sys::general::AT_EACCESS;
+
         /// `AT_REMOVEDIR`
         const REMOVEDIR = linux_raw_sys::general::AT_REMOVEDIR;
 
         /// `AT_SYMLINK_FOLLOW`
         const SYMLINK_FOLLOW = linux_raw_sys::general::AT_SYMLINK_FOLLOW;
 
-        /// `AT_SYMLINK_NOFOLLOW`
-        const SYMLINK_NOFOLLOW = linux_raw_sys::general::AT_SYMLINK_NOFOLLOW;
+        /// `AT_NO_AUTOMOUNT`
+        const NO_AUTOMOUNT = linux_raw_sys::general::AT_NO_AUTOMOUNT;
 
         /// `AT_EMPTY_PATH`
         const EMPTY_PATH = linux_raw_sys::general::AT_EMPTY_PATH;
-
-        /// `AT_EACCESS`
-        const EACCESS = linux_raw_sys::general::AT_EACCESS;
 
         /// `AT_STATX_SYNC_AS_STAT`
         const STATX_SYNC_AS_STAT = linux_raw_sys::general::AT_STATX_SYNC_AS_STAT;
@@ -493,6 +496,9 @@ bitflags! {
 
         /// `STATX_MNT_ID` (since Linux 5.8)
         const MNT_ID = linux_raw_sys::general::STATX_MNT_ID;
+
+        /// `STATX_DIOALIGN` (since Linux 6.1)
+        const DIOALIGN = linux_raw_sys::general::STATX_DIOALIGN;
 
         /// `STATX_ALL`
         const ALL = linux_raw_sys::general::STATX_ALL;
