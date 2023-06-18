@@ -10,36 +10,38 @@ use crate::backend::process::wait::SiginfoExt;
 
 bitflags! {
     /// Options for modifying the behavior of wait/waitpid
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct WaitOptions: u32 {
         /// Return immediately if no child has exited.
-        const NOHANG = backend::process::wait::WNOHANG as _;
+        const NOHANG = bitcast!(backend::process::wait::WNOHANG);
         /// Return if a child has stopped (but not traced via [`ptrace`])
         ///
         /// [`ptrace`]: https://man7.org/linux/man-pages/man2/ptrace.2.html
-        const UNTRACED = backend::process::wait::WUNTRACED as _;
+        const UNTRACED = bitcast!(backend::process::wait::WUNTRACED);
         /// Return if a stopped child has been resumed by delivery of
         /// [`Signal::Cont`].
-        const CONTINUED = backend::process::wait::WCONTINUED as _;
+        const CONTINUED = bitcast!(backend::process::wait::WCONTINUED);
     }
 }
 
 #[cfg(not(any(target_os = "wasi", target_os = "redox", target_os = "openbsd")))]
 bitflags! {
     /// Options for modifying the behavior of waitid
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct WaitidOptions: u32 {
         /// Return immediately if no child has exited.
-        const NOHANG = backend::process::wait::WNOHANG as _;
+        const NOHANG = bitcast!(backend::process::wait::WNOHANG);
         /// Return if a stopped child has been resumed by delivery of
         /// [`Signal::Cont`]
-        const CONTINUED = backend::process::wait::WCONTINUED as _;
+        const CONTINUED = bitcast!(backend::process::wait::WCONTINUED);
         /// Wait for processed that have exited.
-        const EXITED = backend::process::wait::WEXITED as _;
+        const EXITED = bitcast!(backend::process::wait::WEXITED);
         /// Keep processed in a waitable state.
-        const NOWAIT = backend::process::wait::WNOWAIT as _;
+        const NOWAIT = bitcast!(backend::process::wait::WNOWAIT);
         /// Wait for processes that have been stopped.
-        const STOPPED = backend::process::wait::WSTOPPED as _;
+        const STOPPED = bitcast!(backend::process::wait::WSTOPPED);
     }
 }
 

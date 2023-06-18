@@ -132,7 +132,7 @@ pub(crate) fn preadv2(
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
-            flags.bits(),
+            bitflags_bits!(flags),
         ))
     }
 }
@@ -179,7 +179,7 @@ pub(crate) fn pwritev2(
             bufs.as_ptr().cast::<c::iovec>(),
             min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
-            flags.bits(),
+            bitflags_bits!(flags),
         ))
     }
 }
@@ -302,7 +302,8 @@ pub(crate) fn is_read_write(_fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
 }
 
 pub(crate) fn fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<FdFlags> {
-    unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GETFD)).map(FdFlags::from_bits_truncate) }
+    let flags = unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GETFD))? };
+    Ok(FdFlags::from_bits_retain(bitcast!(flags)))
 }
 
 pub(crate) fn fcntl_setfd(fd: BorrowedFd<'_>, flags: FdFlags) -> io::Result<()> {
@@ -338,7 +339,7 @@ pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, flags: DupFlags) -> io
         ret_discarded_fd(c::dup3(
             borrowed_fd(fd),
             borrowed_fd(new.as_fd()),
-            flags.bits(),
+            bitflags_bits!(flags),
         ))
     }
 }

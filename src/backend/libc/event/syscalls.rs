@@ -31,7 +31,7 @@ pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> 
 
     #[cfg(any(target_os = "freebsd", target_os = "illumos"))]
     unsafe {
-        ret_owned_fd(c::eventfd(initval, flags.bits()))
+        ret_owned_fd(c::eventfd(initval, bitflags_bits!(flags)))
     }
 }
 

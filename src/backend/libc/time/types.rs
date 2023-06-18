@@ -101,13 +101,14 @@ bitflags! {
     /// `TFD_*` flags for use with [`timerfd_create`].
     ///
     /// [`timerfd_create`]: crate::time::timerfd_create
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct TimerfdFlags: c::c_int {
+    pub struct TimerfdFlags: u32 {
         /// `TFD_NONBLOCK`
-        const NONBLOCK = c::TFD_NONBLOCK;
+        const NONBLOCK = bitcast!(c::TFD_NONBLOCK);
 
         /// `TFD_CLOEXEC`
-        const CLOEXEC = c::TFD_CLOEXEC;
+        const CLOEXEC = bitcast!(c::TFD_CLOEXEC);
     }
 }
 
@@ -116,14 +117,15 @@ bitflags! {
     /// `TFD_TIMER_*` flags for use with [`timerfd_settime`].
     ///
     /// [`timerfd_settime`]: crate::time::timerfd_settime
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct TimerfdTimerFlags: c::c_int {
+    pub struct TimerfdTimerFlags: u32 {
         /// `TFD_TIMER_ABSTIME`
-        const ABSTIME = c::TFD_TIMER_ABSTIME;
+        const ABSTIME = bitcast!(c::TFD_TIMER_ABSTIME);
 
         /// `TFD_TIMER_CANCEL_ON_SET`
         #[cfg(linux_kernel)]
-        const CANCEL_ON_SET = c::TFD_TIMER_CANCEL_ON_SET;
+        const CANCEL_ON_SET = bitcast!(c::TFD_TIMER_CANCEL_ON_SET);
     }
 }
 
@@ -132,7 +134,7 @@ bitflags! {
 /// [`timerfd_create`]: crate::time::timerfd_create
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-#[repr(i32)]
+#[repr(u32)]
 #[non_exhaustive]
 pub enum TimerfdClockId {
     /// `CLOCK_REALTIME`—A clock that tells the “real” time.
@@ -141,7 +143,7 @@ pub enum TimerfdClockId {
     /// Unix epoch, 1970-01-01T00:00:00Z. The clock is externally settable, so
     /// it is not monotonic. Successive reads may see decreasing times, so it
     /// isn't reliable for measuring durations.
-    Realtime = c::CLOCK_REALTIME,
+    Realtime = bitcast!(c::CLOCK_REALTIME),
 
     /// `CLOCK_MONOTONIC`—A clock that tells an abstract time.
     ///
@@ -151,25 +153,33 @@ pub enum TimerfdClockId {
     ///
     /// This clock does not advance while the system is suspended; see
     /// `Boottime` for a clock that does.
-    Monotonic = c::CLOCK_MONOTONIC,
+    Monotonic = bitcast!(c::CLOCK_MONOTONIC),
 
     /// `CLOCK_BOOTTIME`—Like `Monotonic`, but advances while suspended.
     ///
     /// This clock is similar to `Monotonic`, but does advance while the system
     /// is suspended.
-    Boottime = c::CLOCK_BOOTTIME,
+    Boottime = bitcast!(c::CLOCK_BOOTTIME),
 
     /// `CLOCK_REALTIME_ALARM`—Like `Realtime`, but wakes a suspended system.
     ///
     /// This clock is like `Realtime`, but can wake up a suspended system.
     ///
     /// Use of this clock requires the `CAP_WAKE_ALARM` Linux capability.
-    RealtimeAlarm = c::CLOCK_REALTIME_ALARM,
+    RealtimeAlarm = bitcast!(c::CLOCK_REALTIME_ALARM),
 
     /// `CLOCK_BOOTTIME_ALARM`—Like `Boottime`, but wakes a suspended system.
     ///
     /// This clock is like `Boottime`, but can wake up a suspended system.
     ///
     /// Use of this clock requires the `CAP_WAKE_ALARM` Linux capability.
-    BoottimeAlarm = c::CLOCK_BOOTTIME_ALARM,
+    BoottimeAlarm = bitcast!(c::CLOCK_BOOTTIME_ALARM),
+}
+
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[test]
+fn test_types() {
+    use core::mem::size_of;
+    assert_eq!(size_of::<TimerfdFlags>(), size_of::<c::c_int>());
+    assert_eq!(size_of::<TimerfdTimerFlags>(), size_of::<c::c_int>());
 }

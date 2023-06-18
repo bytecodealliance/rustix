@@ -106,7 +106,7 @@ fn open_via_syscall(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<Owned
         ret_owned_fd(c::syscall(
             c::SYS_open,
             path,
-            c::c_long::from(oflags),
+            c::c_long::from(oflags as i32),
             mode.bits() as c::c_ulong,
         ) as c::c_int)
     }
@@ -125,7 +125,7 @@ pub(crate) fn open(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<OwnedF
         // arguments are promoted.
         ret_owned_fd(c::open(
             c_str(path),
-            oflags.bits(),
+            bitflags_bits!(oflags),
             mode.bits() as c::c_ulong,
         ))
     }
@@ -149,7 +149,7 @@ fn openat_via_syscall(
             c::SYS_openat,
             c::c_long::from(dirfd),
             path,
-            c::c_long::from(oflags),
+            c::c_long::from(oflags as i32),
             mode.bits() as c::c_ulong,
         ) as c::c_int)
     }
@@ -175,7 +175,7 @@ pub(crate) fn openat(
         ret_owned_fd(c::openat(
             borrowed_fd(dirfd),
             c_str(path),
-            oflags.bits(),
+            bitflags_bits!(oflags),
             mode.bits() as c::c_ulong,
         ))
     }
@@ -296,7 +296,7 @@ pub(crate) fn linkat(
                 c_str(old_path),
                 borrowed_fd(new_dirfd),
                 c_str(new_path),
-                flags.bits(),
+                bitflags_bits!(flags),
             ));
         }
         // Otherwise, see if we can emulate the `AT_FDCWD` case.
@@ -319,7 +319,7 @@ pub(crate) fn linkat(
             c_str(old_path),
             borrowed_fd(new_dirfd),
             c_str(new_path),
-            flags.bits(),
+            bitflags_bits!(flags),
         ))
     }
 }
@@ -346,7 +346,11 @@ pub(crate) fn unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io
         }
         // If we have `unlinkat`, use it.
         if let Some(libc_unlinkat) = unlinkat.get() {
-            return ret(libc_unlinkat(borrowed_fd(dirfd), c_str(path), flags.bits()));
+            return ret(libc_unlinkat(
+                borrowed_fd(dirfd),
+                c_str(path),
+                bitflags_bits!(flags),
+            ));
         }
         // Otherwise, see if we can emulate the `AT_FDCWD` case.
         if borrowed_fd(dirfd) != c::AT_FDCWD {
@@ -364,7 +368,11 @@ pub(crate) fn unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io
 
     #[cfg(not(target_os = "macos"))]
     unsafe {
-        ret(c::unlinkat(borrowed_fd(dirfd), c_str(path), flags.bits()))
+        ret(c::unlinkat(
+            borrowed_fd(dirfd),
+            c_str(path),
+            bitflags_bits!(flags),
+        ))
     }
 }
 
@@ -557,7 +565,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
             borrowed_fd(dirfd),
             c_str(path),
             stat.as_mut_ptr(),
-            flags.bits(),
+            bitflags_bits!(flags),
         ))?;
         Ok(stat.assume_init())
     }
@@ -571,7 +579,7 @@ fn statat_old(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<
             borrowed_fd(dirfd),
             c_str(path),
             result.as_mut_ptr(),
-            flags.bits(),
+            bitflags_bits!(flags),
         ))?;
         stat64_to_stat(result.assume_init())
     }
@@ -605,8 +613,8 @@ pub(crate) fn accessat(
             return ret(libc_faccessat(
                 borrowed_fd(dirfd),
                 c_str(path),
-                access.bits(),
-                flags.bits(),
+                bitflags_bits!(access),
+                bitflags_bits!(flags),
             ));
         }
         // Otherwise, see if we can emulate the `AT_FDCWD` case.
@@ -619,7 +627,7 @@ pub(crate) fn accessat(
         if !flags.is_empty() {
             return Err(io::Errno::OPNOTSUPP);
         }
-        ret(c::access(c_str(path), access.bits()))
+        ret(c::access(c_str(path), bitflags_bits!(access)))
     }
 
     #[cfg(not(target_os = "macos"))]
@@ -627,8 +635,8 @@ pub(crate) fn accessat(
         ret(c::faccessat(
             borrowed_fd(dirfd),
             c_str(path),
-            access.bits(),
-            flags.bits(),
+            bitflags_bits!(access),
+            bitflags_bits!(flags),
         ))
     }
 }
@@ -672,7 +680,7 @@ pub(crate) fn utimensat(
                 borrowed_fd(dirfd),
                 c_str(path),
                 libc_times.as_ptr(),
-                flags.bits(),
+                bitflags_bits!(flags),
             ))
         } else {
             utimensat_old(dirfd, path, times, flags)
@@ -696,7 +704,7 @@ pub(crate) fn utimensat(
             borrowed_fd(dirfd),
             c_str(path),
             as_ptr(times).cast(),
-            flags.bits(),
+            bitflags_bits!(flags),
         ))
     }
 
@@ -732,7 +740,7 @@ pub(crate) fn utimensat(
                 borrowed_fd(dirfd),
                 c_str(path),
                 as_ptr(times).cast(),
-                flags.bits(),
+                bitflags_bits!(flags),
             ));
         }
 
@@ -848,7 +856,7 @@ unsafe fn utimensat_old(
         borrowed_fd(dirfd),
         c_str(path),
         old_times.as_ptr(),
-        flags.bits(),
+        bitflags_bits!(flags),
     ))
 }
 
@@ -869,7 +877,7 @@ pub(crate) fn chmodat(
             borrowed_fd(dirfd),
             c_str(path),
             mode.bits() as c::mode_t,
-            flags.bits(),
+            bitflags_bits!(flags),
         ))
     }
 }
@@ -922,7 +930,14 @@ pub(crate) fn fclonefileat(
         ) via SYS_fclonefileat -> c::c_int
     }
 
-    unsafe { ret(fclonefileat(srcfd, dst_dirfd, c_str(dst), flags.bits())) }
+    unsafe {
+        ret(fclonefileat(
+            srcfd,
+            dst_dirfd,
+            c_str(dst),
+            bitflags_bits!(flags),
+        ))
+    }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
@@ -940,7 +955,7 @@ pub(crate) fn chownat(
             c_str(path),
             ow,
             gr,
-            flags.bits(),
+            bitflags_bits!(flags),
         ))
     }
 }
@@ -1047,7 +1062,8 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice)
 }
 
 pub(crate) fn fcntl_getfl(fd: BorrowedFd<'_>) -> io::Result<OFlags> {
-    unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GETFL)).map(OFlags::from_bits_truncate) }
+    let flags = unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GETFL))? };
+    Ok(OFlags::from_bits_retain(bitcast!(flags)))
 }
 
 pub(crate) fn fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
@@ -1056,7 +1072,8 @@ pub(crate) fn fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
 
 #[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
 pub(crate) fn fcntl_get_seals(fd: BorrowedFd<'_>) -> io::Result<SealFlags> {
-    unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GET_SEALS)).map(SealFlags::from_bits_retain) }
+    let flags = unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GET_SEALS))? };
+    Ok(SealFlags::from_bits_retain(bitcast!(flags)))
 }
 
 #[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
@@ -1384,7 +1401,12 @@ pub(crate) fn fallocate(
 
     #[cfg(any(linux_kernel, target_os = "fuchsia"))]
     unsafe {
-        ret(c::fallocate(borrowed_fd(fd), mode.bits(), offset, len))
+        ret(c::fallocate(
+            borrowed_fd(fd),
+            bitflags_bits!(mode),
+            offset,
+            len,
+        ))
     }
 
     #[cfg(not(any(linux_kernel, target_os = "fuchsia")))]
@@ -1469,7 +1491,7 @@ pub(crate) fn memfd_create(path: &CStr, flags: MemfdFlags) -> io::Result<OwnedFd
         ) via SYS_memfd_create -> c::c_int
     }
 
-    unsafe { ret_owned_fd(memfd_create(c_str(path), flags.bits())) }
+    unsafe { ret_owned_fd(memfd_create(c_str(path), bitflags_bits!(flags))) }
 }
 
 #[cfg(linux_kernel)]
@@ -1482,9 +1504,9 @@ pub(crate) fn openat2(
 ) -> io::Result<OwnedFd> {
     use linux_raw_sys::general::open_how;
 
-    let oflags: i32 = oflags.bits();
+    let oflags = oflags.bits();
     let open_how = open_how {
-        flags: u64::from(oflags as u32),
+        flags: u64::from(oflags),
         mode: u64::from(mode.bits()),
         resolve: resolve.bits(),
     };
@@ -1715,7 +1737,7 @@ pub(crate) fn statx(
         ret(sys::statx(
             dirfd,
             c_str(path),
-            flags.bits(),
+            bitflags_bits!(flags),
             mask.bits(),
             statx_buf.as_mut_ptr(),
         ))?;
@@ -1756,7 +1778,7 @@ pub(crate) unsafe fn fcopyfile(
         borrowed_fd(from),
         borrowed_fd(to),
         state,
-        flags.bits(),
+        bitflags_bits!(flags),
     ))
 }
 
@@ -1980,7 +2002,7 @@ pub(crate) fn mount(
 
 #[cfg(linux_kernel)]
 pub(crate) fn unmount(target: &CStr, flags: super::types::UnmountFlags) -> io::Result<()> {
-    unsafe { ret(c::umount2(target.as_ptr(), flags.bits())) }
+    unsafe { ret(c::umount2(target.as_ptr(), bitflags_bits!(flags))) }
 }
 
 #[cfg(any(apple, linux_kernel))]

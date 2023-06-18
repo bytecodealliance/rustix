@@ -32,7 +32,7 @@ pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::
             borrowed_fd(fd),
             buf.as_mut_ptr().cast(),
             send_recv_len(buf.len()),
-            flags.bits(),
+            bitflags_bits!(flags),
         ))
     }
 }
@@ -44,7 +44,7 @@ pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Resu
             borrowed_fd(fd),
             buf.as_ptr().cast(),
             send_recv_len(buf.len()),
-            flags.bits(),
+            bitflags_bits!(flags),
         ))
     }
 }
@@ -68,7 +68,7 @@ pub(crate) fn recvfrom(
             borrowed_fd(fd),
             buf.as_mut_ptr().cast(),
             send_recv_len(buf.len()),
-            flags.bits(),
+            bitflags_bits!(flags),
             storage.as_mut_ptr().cast(),
             &mut len,
         ))
@@ -93,7 +93,7 @@ pub(crate) fn sendto_v4(
             borrowed_fd(fd),
             buf.as_ptr().cast(),
             send_recv_len(buf.len()),
-            flags.bits(),
+            bitflags_bits!(flags),
             as_ptr(&encode_sockaddr_v4(addr)).cast::<c::sockaddr>(),
             size_of::<SocketAddrV4>() as _,
         ))
@@ -112,7 +112,7 @@ pub(crate) fn sendto_v6(
             borrowed_fd(fd),
             buf.as_ptr().cast(),
             send_recv_len(buf.len()),
-            flags.bits(),
+            bitflags_bits!(flags),
             as_ptr(&encode_sockaddr_v6(addr)).cast::<c::sockaddr>(),
             size_of::<SocketAddrV6>() as _,
         ))
@@ -131,7 +131,7 @@ pub(crate) fn sendto_unix(
             borrowed_fd(fd),
             buf.as_ptr().cast(),
             send_recv_len(buf.len()),
-            flags.bits(),
+            bitflags_bits!(flags),
             as_ptr(&addr.unix).cast(),
             addr.addr_len(),
         ))
@@ -266,8 +266,13 @@ pub(crate) fn recvmsg(
     let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
 
     with_recv_msghdr(&mut storage, iov, control, |msghdr| {
-        let result =
-            unsafe { ret_send_recv(c::recvmsg(borrowed_fd(sockfd), msghdr, msg_flags.bits())) };
+        let result = unsafe {
+            ret_send_recv(c::recvmsg(
+                borrowed_fd(sockfd),
+                msghdr,
+                bitflags_bits!(msg_flags),
+            ))
+        };
 
         result.map(|bytes| {
             // Get the address of the sender, if any.
@@ -277,7 +282,7 @@ pub(crate) fn recvmsg(
             RecvMsgReturn {
                 bytes,
                 address: addr,
-                flags: RecvFlags::from_bits_truncate(msghdr.msg_flags),
+                flags: RecvFlags::from_bits_retain(bitcast!(msghdr.msg_flags)),
             }
         })
     })
@@ -291,7 +296,11 @@ pub(crate) fn sendmsg(
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
     with_noaddr_msghdr(iov, control, |msghdr| unsafe {
-        ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))
+        ret_send_recv(c::sendmsg(
+            borrowed_fd(sockfd),
+            &msghdr,
+            bitflags_bits!(msg_flags),
+        ))
     })
 }
 
@@ -304,7 +313,11 @@ pub(crate) fn sendmsg_v4(
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
     with_v4_msghdr(addr, iov, control, |msghdr| unsafe {
-        ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))
+        ret_send_recv(c::sendmsg(
+            borrowed_fd(sockfd),
+            &msghdr,
+            bitflags_bits!(msg_flags),
+        ))
     })
 }
 
@@ -317,7 +330,11 @@ pub(crate) fn sendmsg_v6(
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
     with_v6_msghdr(addr, iov, control, |msghdr| unsafe {
-        ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))
+        ret_send_recv(c::sendmsg(
+            borrowed_fd(sockfd),
+            &msghdr,
+            bitflags_bits!(msg_flags),
+        ))
     })
 }
 
@@ -330,7 +347,11 @@ pub(crate) fn sendmsg_unix(
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
     super::msghdr::with_unix_msghdr(addr, iov, control, |msghdr| unsafe {
-        ret_send_recv(c::sendmsg(borrowed_fd(sockfd), &msghdr, msg_flags.bits()))
+        ret_send_recv(c::sendmsg(
+            borrowed_fd(sockfd),
+            &msghdr,
+            bitflags_bits!(msg_flags),
+        ))
     })
 }
 

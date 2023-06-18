@@ -10,12 +10,13 @@ bitflags! {
     /// `IN_*` for use with [`inotify_init`].
     ///
     /// [`inotify_init`]: crate::fs::inotify::inotify_init
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct CreateFlags: c::c_int {
+    pub struct CreateFlags: u32 {
         /// `IN_CLOEXEC`
-        const CLOEXEC = c::IN_CLOEXEC;
+        const CLOEXEC = bitcast!(c::IN_CLOEXEC);
         /// `IN_NONBLOCK`
-        const NONBLOCK = c::IN_NONBLOCK;
+        const NONBLOCK = bitcast!(c::IN_NONBLOCK);
     }
 }
 
@@ -23,6 +24,7 @@ bitflags! {
     /// `IN*` for use with [`inotify_add_watch`].
     ///
     /// [`inotify_add_watch`]: crate::fs::inotify::inotify_add_watch
+    #[repr(transparent)]
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct WatchFlags: u32 {
         /// `IN_ACCESS`
@@ -79,7 +81,7 @@ bitflags! {
 #[doc(alias = "inotify_init1")]
 pub fn inotify_init(flags: CreateFlags) -> io::Result<OwnedFd> {
     // SAFETY: `inotify_init1` has no safety preconditions.
-    unsafe { ret_owned_fd(c::inotify_init1(flags.bits())) }
+    unsafe { ret_owned_fd(c::inotify_init1(bitflags_bits!(flags))) }
 }
 
 /// `inotify_add_watch(self, path, flags)`—Adds a watch to inotify

@@ -12,6 +12,7 @@ use core::ptr::null_mut;
 
 bitflags! {
     /// `PR_PAC_AP*`.
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct PointerAuthenticationKeys: u32 {
         /// `PR_PAC_APIAKEY`—Instruction authentication key `A`.

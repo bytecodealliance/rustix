@@ -13,6 +13,8 @@ pub type ForeignRawFd = RawFd;
 
 bitflags::bitflags! {
     /// All flags are reserved for future use.
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct PidfdGetfdFlags: backend::c::c_uint {}
 }
 

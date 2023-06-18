@@ -164,8 +164,7 @@ pub(crate) fn sched_yield() {
 #[cfg(feature = "fs")]
 #[inline]
 pub(crate) fn umask(mask: Mode) -> Mode {
-    // TODO: Use `from_bits_retain` when we switch to bitflags 2.0.
-    unsafe { Mode::from_bits_truncate(c::umask(mask.bits() as _) as _) }
+    unsafe { Mode::from_bits_retain(c::umask(mask.bits() as c::mode_t).into()) }
 }
 
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]

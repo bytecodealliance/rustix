@@ -87,62 +87,64 @@ use core::slice;
 
 bitflags! {
     /// `EPOLL_*` for use with [`new`].
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct CreateFlags: c::c_int {
+    pub struct CreateFlags: u32 {
         /// `EPOLL_CLOEXEC`
-        const CLOEXEC = c::EPOLL_CLOEXEC;
+        const CLOEXEC = bitcast!(c::EPOLL_CLOEXEC);
     }
 }
 
 bitflags! {
     /// `EPOLL*` for use with [`add`].
+    #[repr(transparent)]
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct EventFlags: u32 {
         /// `EPOLLIN`
-        const IN = c::EPOLLIN as u32;
+        const IN = bitcast!(c::EPOLLIN);
 
         /// `EPOLLOUT`
-        const OUT = c::EPOLLOUT as u32;
+        const OUT = bitcast!(c::EPOLLOUT);
 
         /// `EPOLLPRI`
-        const PRI = c::EPOLLPRI as u32;
+        const PRI = bitcast!(c::EPOLLPRI);
 
         /// `EPOLLERR`
-        const ERR = c::EPOLLERR as u32;
+        const ERR = bitcast!(c::EPOLLERR);
 
         /// `EPOLLHUP`
-        const HUP = c::EPOLLHUP as u32;
+        const HUP = bitcast!(c::EPOLLHUP);
 
         /// `EPOLLRDNORM`
-        const RDNORM = c::EPOLLRDNORM as u32;
+        const RDNORM = bitcast!(c::EPOLLRDNORM);
 
         /// `EPOLLRDBAND`
-        const RDBAND = c::EPOLLRDBAND as u32;
+        const RDBAND = bitcast!(c::EPOLLRDBAND);
 
         /// `EPOLLWRNORM`
-        const WRNORM = c::EPOLLWRNORM as u32;
+        const WRNORM = bitcast!(c::EPOLLWRNORM);
 
         /// `EPOLLWRBAND`
-        const WRBAND = c::EPOLLWRBAND as u32;
+        const WRBAND = bitcast!(c::EPOLLWRBAND);
 
         /// `EPOLLMSG`
-        const MSG = c::EPOLLMSG as u32;
+        const MSG = bitcast!(c::EPOLLMSG);
 
         /// `EPOLLRDHUP`
-        const RDHUP = c::EPOLLRDHUP as u32;
+        const RDHUP = bitcast!(c::EPOLLRDHUP);
 
         /// `EPOLLET`
-        const ET = c::EPOLLET as u32;
+        const ET = bitcast!(c::EPOLLET);
 
         /// `EPOLLONESHOT`
-        const ONESHOT = c::EPOLLONESHOT as u32;
+        const ONESHOT = bitcast!(c::EPOLLONESHOT);
 
         /// `EPOLLWAKEUP`
-        const WAKEUP = c::EPOLLWAKEUP as u32;
+        const WAKEUP = bitcast!(c::EPOLLWAKEUP);
 
         /// `EPOLLEXCLUSIVE`
         #[cfg(not(target_os = "android"))]
-        const EXCLUSIVE = c::EPOLLEXCLUSIVE as u32;
+        const EXCLUSIVE = bitcast!(c::EPOLLEXCLUSIVE);
     }
 }
 
@@ -155,7 +157,7 @@ bitflags! {
 pub fn create(flags: CreateFlags) -> io::Result<OwnedFd> {
     // SAFETY: We're calling `epoll_create1` via FFI and we know how it
     // behaves.
-    unsafe { ret_owned_fd(c::epoll_create1(flags.bits())) }
+    unsafe { ret_owned_fd(c::epoll_create1(bitflags_bits!(flags))) }
 }
 
 /// `epoll_ctl(self, EPOLL_CTL_ADD, data, event)`—Adds an element to an

@@ -278,7 +278,7 @@ pub(crate) fn recvmsg(
             RecvMsgReturn {
                 bytes,
                 address: addr,
-                flags: RecvFlags::from_bits_truncate(msghdr.msg_flags),
+                flags: RecvFlags::from_bits_retain(msghdr.msg_flags),
             }
         })
     })

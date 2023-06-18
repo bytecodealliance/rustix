@@ -12,6 +12,7 @@ bitflags! {
     /// `TFD_*` flags for use with [`timerfd_create`].
     ///
     /// [`timerfd_create`]: crate::time::timerfd_create
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct TimerfdFlags: c::c_uint {
         /// `TFD_NONBLOCK`
@@ -26,6 +27,7 @@ bitflags! {
     /// `TFD_TIMER_*` flags for use with [`timerfd_settime`].
     ///
     /// [`timerfd_settime`]: crate::time::timerfd_settime
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct TimerfdTimerFlags: c::c_uint {
         /// `TFD_TIMER_ABSTIME`
