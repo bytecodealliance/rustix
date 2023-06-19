@@ -7,91 +7,94 @@
 #![allow(non_camel_case_types)]
 
 pub type size_t = usize;
-#[cfg(feature = "net")]
-pub(crate) use linux_raw_sys::cmsg_macros::*;
 pub(crate) use linux_raw_sys::ctypes::*;
 pub(crate) use linux_raw_sys::errno::EINVAL;
-pub(crate) use linux_raw_sys::general::__kernel_pid_t as pid_t;
-pub(crate) use linux_raw_sys::general::__kernel_time64_t as time_t;
-pub(crate) use linux_raw_sys::general::__kernel_timespec as timespec;
-#[cfg(feature = "net")]
-pub(crate) use linux_raw_sys::general::{O_CLOEXEC as SOCK_CLOEXEC, O_NONBLOCK as SOCK_NONBLOCK};
-// Replace Linux's old `TIMEO` constants with its new ones.
+// Import the kernel's `uid_t` and `gid_t` if they're 32-bit.
 #[cfg(not(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86")))]
 pub(crate) use linux_raw_sys::general::{__kernel_gid_t as gid_t, __kernel_uid_t as uid_t};
-
-#[cfg(feature = "termios")]
 pub(crate) use linux_raw_sys::general::{
-    cc_t, speed_t, tcflag_t, termios, winsize, B0, B1000000, B110, B115200, B1152000, B1200, B134,
-    B150, B1500000, B1800, B19200, B200, B2000000, B230400, B2400, B2500000, B300, B3000000,
-    B3500000, B38400, B4000000, B460800, B4800, B50, B500000, B57600, B576000, B600, B75, B921600,
-    B9600, BOTHER, BRKINT, BS0, BS1, BSDLY, CBAUD, CBAUDEX, CIBAUD, CLOCAL, CMSPAR, CR0, CR1, CR2,
-    CR3, CRDLY, CREAD, CRTSCTS, CS5, CS6, CS7, CS8, CSIZE, CSTOPB, ECHO, ECHOCTL, ECHOE, ECHOK,
-    ECHOKE, ECHONL, ECHOPRT, EXTA, EXTB, EXTPROC, FF0, FF1, FFDLY, FLUSHO, HUPCL, IBSHIFT, ICANON,
-    ICRNL, IEXTEN, IGNBRK, IGNCR, IGNPAR, IMAXBEL, INLCR, INPCK, ISIG, ISTRIP, IUCLC, IUTF8, IXANY,
-    IXOFF, IXON, NCCS, NL0, NL1, NLDLY, NOFLSH, OCRNL, OFDEL, OFILL, OLCUC, ONLCR, ONLRET, ONOCR,
-    OPOST, PARENB, PARMRK, PARODD, PENDIN, TAB0, TAB1, TAB2, TAB3, TABDLY, TCIFLUSH, TCIOFF,
-    TCIOFLUSH, TCION, TCOFLUSH, TCOOFF, TCOON, TCSADRAIN, TCSAFLUSH, TCSANOW, TOSTOP, VDISCARD,
-    VEOF, VEOL, VEOL2, VERASE, VINTR, VKILL, VLNEXT, VMIN, VQUIT, VREPRINT, VSTART, VSTOP, VSUSP,
-    VSWTC, VT0, VT1, VTDLY, VTIME, VWERASE, XCASE, XTABS,
+    __kernel_pid_t as pid_t, __kernel_time64_t as time_t, __kernel_timespec as timespec, iovec,
+    O_CLOEXEC, O_NOCTTY, O_NONBLOCK, O_RDWR,
 };
-// On PowerPC, the regular `termios` has the `termios2` fields.
-#[cfg(feature = "termios")]
-pub(crate) use {
-    linux_raw_sys::general::termios2,
-    linux_raw_sys::ioctl::{TCGETS2, TCSETS2, TCSETSF2, TCSETSW2},
-};
-// On MIPS, `TCSANOW` et al have `TCSETS` added to them, so we need it to
-// subtract it out.
-#[cfg(all(feature = "termios", any(target_arch = "mips", target_arch = "mips64")))]
-pub(crate) use linux_raw_sys::ioctl::TCSETS;
-
-pub(crate) use linux_raw_sys::general::{
-    iovec, siginfo_t, CLD_CONTINUED, CLD_DUMPED, CLD_EXITED, CLD_KILLED, CLD_STOPPED, CLD_TRAPPED,
-    O_CLOEXEC, O_NONBLOCK, O_NONBLOCK as PIDFD_NONBLOCK, P_ALL, P_PID, P_PIDFD,
-};
-pub(crate) use linux_raw_sys::general::{AT_FDCWD, O_NOCTTY, O_RDWR};
 
 #[cfg(feature = "event")]
 #[cfg(test)]
 pub(crate) use linux_raw_sys::general::epoll_event;
 
 #[cfg(feature = "fs")]
-pub(crate) use linux_raw_sys::general::{NFS_SUPER_MAGIC, PROC_SUPER_MAGIC, UTIME_NOW, UTIME_OMIT};
-#[cfg(feature = "fs")]
-pub(crate) use linux_raw_sys::general::{XATTR_CREATE, XATTR_REPLACE};
-#[cfg(feature = "net")]
-pub(crate) use linux_raw_sys::if_ether::*;
-#[cfg(feature = "net")]
-pub(crate) use linux_raw_sys::net::{
-    AF_DECnet, __kernel_sa_family_t as sa_family_t, __kernel_sockaddr_storage as sockaddr_storage,
-    cmsghdr, in6_addr, in_addr, ip_mreq, ipv6_mreq, linger, msghdr, sockaddr, sockaddr_in,
-    sockaddr_in6, sockaddr_un, socklen_t, AF_APPLETALK, AF_ASH, AF_ATMPVC, AF_ATMSVC, AF_AX25,
-    AF_BLUETOOTH, AF_BRIDGE, AF_CAN, AF_ECONET, AF_IEEE802154, AF_INET, AF_INET6, AF_IPX, AF_IRDA,
-    AF_ISDN, AF_IUCV, AF_KEY, AF_LLC, AF_NETBEUI, AF_NETLINK, AF_NETROM, AF_PACKET, AF_PHONET,
-    AF_PPPOX, AF_RDS, AF_ROSE, AF_RXRPC, AF_SECURITY, AF_SNA, AF_TIPC, AF_UNIX, AF_UNSPEC,
-    AF_WANPIPE, AF_X25, IPPROTO_AH, IPPROTO_BEETPH, IPPROTO_COMP, IPPROTO_DCCP, IPPROTO_EGP,
-    IPPROTO_ENCAP, IPPROTO_ESP, IPPROTO_ETHERNET, IPPROTO_FRAGMENT, IPPROTO_GRE, IPPROTO_ICMP,
-    IPPROTO_ICMPV6, IPPROTO_IDP, IPPROTO_IGMP, IPPROTO_IP, IPPROTO_IPIP, IPPROTO_IPV6, IPPROTO_MH,
-    IPPROTO_MPLS, IPPROTO_MPTCP, IPPROTO_MTP, IPPROTO_PIM, IPPROTO_PUP, IPPROTO_RAW,
-    IPPROTO_ROUTING, IPPROTO_RSVP, IPPROTO_SCTP, IPPROTO_TCP, IPPROTO_TP, IPPROTO_UDP,
-    IPPROTO_UDPLITE, IPV6_ADD_MEMBERSHIP, IPV6_DROP_MEMBERSHIP, IPV6_MULTICAST_HOPS,
-    IPV6_MULTICAST_LOOP, IPV6_UNICAST_HOPS, IPV6_V6ONLY, IP_ADD_MEMBERSHIP, IP_DROP_MEMBERSHIP,
-    IP_MULTICAST_LOOP, IP_MULTICAST_TTL, IP_TTL, MSG_CMSG_CLOEXEC, MSG_CONFIRM, MSG_DONTROUTE,
-    MSG_DONTWAIT, MSG_EOR, MSG_ERRQUEUE, MSG_MORE, MSG_NOSIGNAL, MSG_OOB, MSG_PEEK, MSG_TRUNC,
-    MSG_WAITALL, SCM_CREDENTIALS, SCM_RIGHTS, SHUT_RD, SHUT_RDWR, SHUT_WR, SOCK_DGRAM, SOCK_RAW,
-    SOCK_RDM, SOCK_SEQPACKET, SOCK_STREAM, SOL_SOCKET, SO_BROADCAST, SO_ERROR, SO_KEEPALIVE,
-    SO_LINGER, SO_PASSCRED, SO_RCVBUF, SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_REUSEADDR, SO_SNDBUF,
-    SO_SNDTIMEO_NEW, SO_SNDTIMEO_OLD, SO_TYPE, TCP_NODELAY,
+pub(crate) use linux_raw_sys::general::{
+    AT_FDCWD, NFS_SUPER_MAGIC, PROC_SUPER_MAGIC, UTIME_NOW, UTIME_OMIT, XATTR_CREATE, XATTR_REPLACE,
 };
-#[cfg(feature = "net")]
-pub(crate) use linux_raw_sys::net::{
-    SO_RCVTIMEO_NEW as SO_RCVTIMEO, SO_SNDTIMEO_NEW as SO_SNDTIMEO,
-};
-#[cfg(feature = "net")]
-pub(crate) use linux_raw_sys::netlink::*;
+
 #[cfg(feature = "io_uring")]
-pub(crate) use {linux_raw_sys::general::open_how, linux_raw_sys::io_uring::*};
+pub(crate) use linux_raw_sys::{general::open_how, io_uring::*};
+
+#[cfg(feature = "net")]
+pub(crate) use linux_raw_sys::{
+    cmsg_macros::*,
+    general::{O_CLOEXEC as SOCK_CLOEXEC, O_NONBLOCK as SOCK_NONBLOCK},
+    if_ether::*,
+    net::{
+        AF_DECnet, __kernel_sa_family_t as sa_family_t,
+        __kernel_sockaddr_storage as sockaddr_storage, cmsghdr, in6_addr, in_addr, ip_mreq,
+        ipv6_mreq, linger, msghdr, sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t,
+        AF_APPLETALK, AF_ASH, AF_ATMPVC, AF_ATMSVC, AF_AX25, AF_BLUETOOTH, AF_BRIDGE, AF_CAN,
+        AF_ECONET, AF_IEEE802154, AF_INET, AF_INET6, AF_IPX, AF_IRDA, AF_ISDN, AF_IUCV, AF_KEY,
+        AF_LLC, AF_NETBEUI, AF_NETLINK, AF_NETROM, AF_PACKET, AF_PHONET, AF_PPPOX, AF_RDS, AF_ROSE,
+        AF_RXRPC, AF_SECURITY, AF_SNA, AF_TIPC, AF_UNIX, AF_UNSPEC, AF_WANPIPE, AF_X25, IPPROTO_AH,
+        IPPROTO_BEETPH, IPPROTO_COMP, IPPROTO_DCCP, IPPROTO_EGP, IPPROTO_ENCAP, IPPROTO_ESP,
+        IPPROTO_ETHERNET, IPPROTO_FRAGMENT, IPPROTO_GRE, IPPROTO_ICMP, IPPROTO_ICMPV6, IPPROTO_IDP,
+        IPPROTO_IGMP, IPPROTO_IP, IPPROTO_IPIP, IPPROTO_IPV6, IPPROTO_MH, IPPROTO_MPLS,
+        IPPROTO_MPTCP, IPPROTO_MTP, IPPROTO_PIM, IPPROTO_PUP, IPPROTO_RAW, IPPROTO_ROUTING,
+        IPPROTO_RSVP, IPPROTO_SCTP, IPPROTO_TCP, IPPROTO_TP, IPPROTO_UDP, IPPROTO_UDPLITE,
+        IPV6_ADD_MEMBERSHIP, IPV6_DROP_MEMBERSHIP, IPV6_MULTICAST_HOPS, IPV6_MULTICAST_LOOP,
+        IPV6_UNICAST_HOPS, IPV6_V6ONLY, IP_ADD_MEMBERSHIP, IP_DROP_MEMBERSHIP, IP_MULTICAST_LOOP,
+        IP_MULTICAST_TTL, IP_TTL, MSG_CMSG_CLOEXEC, MSG_CONFIRM, MSG_DONTROUTE, MSG_DONTWAIT,
+        MSG_EOR, MSG_ERRQUEUE, MSG_MORE, MSG_NOSIGNAL, MSG_OOB, MSG_PEEK, MSG_TRUNC, MSG_WAITALL,
+        SCM_CREDENTIALS, SCM_RIGHTS, SHUT_RD, SHUT_RDWR, SHUT_WR, SOCK_DGRAM, SOCK_RAW, SOCK_RDM,
+        SOCK_SEQPACKET, SOCK_STREAM, SOL_SOCKET, SO_BROADCAST, SO_ERROR, SO_KEEPALIVE, SO_LINGER,
+        SO_PASSCRED, SO_RCVBUF, SO_RCVTIMEO_NEW, SO_RCVTIMEO_NEW as SO_RCVTIMEO, SO_RCVTIMEO_OLD,
+        SO_REUSEADDR, SO_SNDBUF, SO_SNDTIMEO_NEW, SO_SNDTIMEO_NEW as SO_SNDTIMEO, SO_SNDTIMEO_OLD,
+        SO_TYPE, TCP_NODELAY,
+    },
+    netlink::*,
+};
+
+#[cfg(any(feature = "process", feature = "runtime"))]
+pub(crate) use linux_raw_sys::general::siginfo_t;
+
+#[cfg(feature = "process")]
+pub(crate) use linux_raw_sys::general::{
+    CLD_CONTINUED, CLD_DUMPED, CLD_EXITED, CLD_KILLED, CLD_STOPPED, CLD_TRAPPED,
+    O_NONBLOCK as PIDFD_NONBLOCK, P_ALL, P_PID, P_PIDFD,
+};
+
+#[cfg(feature = "termios")]
+pub(crate) use linux_raw_sys::{
+    general::{
+        cc_t, speed_t, tcflag_t, termios, termios2, winsize, B0, B1000000, B110, B115200, B1152000,
+        B1200, B134, B150, B1500000, B1800, B19200, B200, B2000000, B230400, B2400, B2500000, B300,
+        B3000000, B3500000, B38400, B4000000, B460800, B4800, B50, B500000, B57600, B576000, B600,
+        B75, B921600, B9600, BOTHER, BRKINT, BS0, BS1, BSDLY, CBAUD, CBAUDEX, CIBAUD, CLOCAL,
+        CMSPAR, CR0, CR1, CR2, CR3, CRDLY, CREAD, CRTSCTS, CS5, CS6, CS7, CS8, CSIZE, CSTOPB, ECHO,
+        ECHOCTL, ECHOE, ECHOK, ECHOKE, ECHONL, ECHOPRT, EXTA, EXTB, EXTPROC, FF0, FF1, FFDLY,
+        FLUSHO, HUPCL, IBSHIFT, ICANON, ICRNL, IEXTEN, IGNBRK, IGNCR, IGNPAR, IMAXBEL, INLCR,
+        INPCK, ISIG, ISTRIP, IUCLC, IUTF8, IXANY, IXOFF, IXON, NCCS, NL0, NL1, NLDLY, NOFLSH,
+        OCRNL, OFDEL, OFILL, OLCUC, ONLCR, ONLRET, ONOCR, OPOST, PARENB, PARMRK, PARODD, PENDIN,
+        TAB0, TAB1, TAB2, TAB3, TABDLY, TCIFLUSH, TCIOFF, TCIOFLUSH, TCION, TCOFLUSH, TCOOFF,
+        TCOON, TCSADRAIN, TCSAFLUSH, TCSANOW, TOSTOP, VDISCARD, VEOF, VEOL, VEOL2, VERASE, VINTR,
+        VKILL, VLNEXT, VMIN, VQUIT, VREPRINT, VSTART, VSTOP, VSUSP, VSWTC, VT0, VT1, VTDLY, VTIME,
+        VWERASE, XCASE, XTABS,
+    },
+    ioctl::{TCGETS2, TCSETS2, TCSETSF2, TCSETSW2},
+};
+
+// On MIPS, `TCSANOW` et al have `TCSETS` added to them, so we need it to
+// subtract it out.
+#[cfg(all(feature = "termios", any(target_arch = "mips", target_arch = "mips64")))]
+pub(crate) use linux_raw_sys::ioctl::TCSETS;
+
+// Define our own `uid_t` and `gid_t` if the kernel's versions are not 32-bit.
 #[cfg(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86"))]
 pub(crate) type uid_t = u32;
 #[cfg(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86"))]
