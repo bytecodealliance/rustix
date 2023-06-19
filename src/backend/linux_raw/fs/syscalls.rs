@@ -48,6 +48,9 @@ use {
 
 #[inline]
 pub(crate) fn open(path: &CStr, flags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
+    // Always enable support for large files.
+    let flags = flags | OFlags::from_bits_retain(c::O_LARGEFILE);
+
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     {
         openat(CWD.as_fd(), path, flags, mode)
@@ -65,6 +68,9 @@ pub(crate) fn openat(
     flags: OFlags,
     mode: Mode,
 ) -> io::Result<OwnedFd> {
+    // Always enable support for large files.
+    let flags = flags | OFlags::from_bits_retain(c::O_LARGEFILE);
+
     unsafe { ret_owned_fd(syscall_readonly!(__NR_openat, dirfd, path, flags, mode)) }
 }
 
@@ -76,6 +82,9 @@ pub(crate) fn openat2(
     mode: Mode,
     resolve: ResolveFlags,
 ) -> io::Result<OwnedFd> {
+    // Always enable support for large files.
+    let flags = flags | OFlags::from_bits_retain(c::O_LARGEFILE);
+
     unsafe {
         ret_owned_fd(syscall_readonly!(
             __NR_openat2,
@@ -883,17 +892,19 @@ pub(crate) fn fcntl_getfl(fd: BorrowedFd<'_>) -> io::Result<OFlags> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         ret_c_uint(syscall_readonly!(__NR_fcntl64, fd, c_uint(F_GETFL)))
-            .map(OFlags::from_bits_truncate)
+            .map(OFlags::from_bits_retain)
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
-        ret_c_uint(syscall_readonly!(__NR_fcntl, fd, c_uint(F_GETFL)))
-            .map(OFlags::from_bits_truncate)
+        ret_c_uint(syscall_readonly!(__NR_fcntl, fd, c_uint(F_GETFL))).map(OFlags::from_bits_retain)
     }
 }
 
 #[inline]
 pub(crate) fn fcntl_setfl(fd: BorrowedFd<'_>, flags: OFlags) -> io::Result<()> {
+    // Always enable support for large files.
+    let flags = flags | OFlags::from_bits_retain(c::O_LARGEFILE);
+
     #[cfg(target_pointer_width = "32")]
     unsafe {
         ret(syscall_readonly!(__NR_fcntl64, fd, c_uint(F_SETFL), flags))

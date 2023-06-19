@@ -88,8 +88,9 @@ fn test_file() {
         rustix::io::fcntl_getfd(&file).unwrap(),
         rustix::io::FdFlags::empty()
     );
+    // Use `from_bits_truncate` to ignore `O_LARGEFILE` if present.
     assert_eq!(
-        rustix::fs::fcntl_getfl(&file).unwrap(),
+        rustix::fs::OFlags::from_bits_truncate(rustix::fs::fcntl_getfl(&file).unwrap().bits()),
         rustix::fs::OFlags::empty()
     );
 
@@ -119,4 +120,36 @@ fn test_file() {
     assert_eq!(rustix::io::is_read_write(&file).unwrap(), (true, false));
 
     assert_ne!(rustix::io::ioctl_fionread(&file).unwrap(), 0);
+}
+
+#[test]
+fn test_setfl_append() {
+    use rustix::fs::{Mode, OFlags};
+
+    let tmp = tempfile::tempdir().unwrap();
+
+    // Write some bytes to a file.
+    let file = rustix::fs::open(
+        tmp.path().join("test.file"),
+        OFlags::WRONLY | OFlags::CREATE,
+        Mode::RWXU,
+    )
+    .unwrap();
+    assert_eq!(rustix::io::write(&file, b"abcdefghijklmnop"), Ok(16));
+
+    // Overwite the first few bytes.
+    let file =
+        rustix::fs::open(tmp.path().join("test.file"), OFlags::WRONLY, Mode::empty()).unwrap();
+    assert_eq!(rustix::io::write(&file, b"uvw"), Ok(3));
+
+    // Append a few bytes.
+    rustix::fs::fcntl_setfl(&file, OFlags::APPEND).unwrap();
+    assert_eq!(rustix::io::write(&file, b"xyz"), Ok(3));
+
+    // Check the final contents.
+    let file =
+        rustix::fs::open(tmp.path().join("test.file"), OFlags::RDONLY, Mode::empty()).unwrap();
+    let mut buf = [0_u8; 32];
+    assert_eq!(rustix::io::read(&file, &mut buf), Ok(19));
+    assert_eq!(&buf, b"uvwdefghijklmnopxyz\0\0\0\0\0\0\0\0\0\0\0\0\0");
 }
