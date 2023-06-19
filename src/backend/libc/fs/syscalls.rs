@@ -1480,9 +1480,11 @@ pub(crate) fn openat2(
     mode: Mode,
     resolve: ResolveFlags,
 ) -> io::Result<OwnedFd> {
+    use linux_raw_sys::general::open_how;
+
     let oflags: i32 = oflags.bits();
-    let open_how = OpenHow {
-        oflag: u64::from(oflags as u32),
+    let open_how = open_how {
+        flags: u64::from(oflags as u32),
         mode: u64::from(mode.bits()),
         resolve: resolve.bits(),
     };
@@ -1493,7 +1495,7 @@ pub(crate) fn openat2(
             borrowed_fd(dirfd),
             c_str(path),
             &open_how,
-            SIZEOF_OPEN_HOW,
+            size_of::<open_how>(),
         ))
     }
 }
@@ -1501,17 +1503,6 @@ pub(crate) fn openat2(
 const SYS_OPENAT2: i32 = 437;
 #[cfg(all(linux_kernel, target_pointer_width = "64"))]
 const SYS_OPENAT2: i64 = 437;
-
-#[cfg(linux_kernel)]
-#[repr(C)]
-#[derive(Debug)]
-struct OpenHow {
-    oflag: u64,
-    mode: u64,
-    resolve: u64,
-}
-#[cfg(linux_kernel)]
-const SIZEOF_OPEN_HOW: usize = size_of::<OpenHow>();
 
 #[cfg(target_os = "linux")]
 pub(crate) fn sendfile(
