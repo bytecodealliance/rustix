@@ -18,7 +18,10 @@
     target_os = "wasi",
 ))]
 fn main() {
-    unimplemented!("Add --cfg=criterion to RUSTFLAGS and enable the \"fs\", \"time\", and \"process\" cargo features.")
+    unimplemented!(
+        "Add --cfg=criterion to RUSTFLAGS and enable the \"fs\", \"time\", and \"process\" cargo \
+         features."
+    )
 }
 
 #[cfg(not(any(

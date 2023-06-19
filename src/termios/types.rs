@@ -663,11 +663,11 @@ pub mod speed {
 
     /// `B115200`
     #[cfg(not(target_os = "aix"))]
-    pub const B115200: u32 = 115200;
+    pub const B115200: u32 = 115_200;
 
     /// `B230400`
     #[cfg(not(target_os = "aix"))]
-    pub const B230400: u32 = 230400;
+    pub const B230400: u32 = 230_400;
 
     /// `B460800`
     #[cfg(not(any(
@@ -677,15 +677,15 @@ pub mod speed {
         target_os = "haiku",
         target_os = "openbsd"
     )))]
-    pub const B460800: u32 = 460800;
+    pub const B460800: u32 = 460_800;
 
     /// `B500000`
     #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
-    pub const B500000: u32 = 500000;
+    pub const B500000: u32 = 500_000;
 
     /// `B576000`
     #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
-    pub const B576000: u32 = 576000;
+    pub const B576000: u32 = 576_000;
 
     /// `B921600`
     #[cfg(not(any(
@@ -695,23 +695,23 @@ pub mod speed {
         target_os = "haiku",
         target_os = "openbsd"
     )))]
-    pub const B921600: u32 = 921600;
+    pub const B921600: u32 = 921_600;
 
     /// `B1000000`
     #[cfg(not(any(bsd, target_os = "aix", target_os = "haiku", target_os = "solaris")))]
-    pub const B1000000: u32 = 1000000;
+    pub const B1000000: u32 = 1_000_000;
 
     /// `B1152000`
     #[cfg(not(any(bsd, target_os = "aix", target_os = "haiku", target_os = "solaris")))]
-    pub const B1152000: u32 = 1152000;
+    pub const B1152000: u32 = 1_152_000;
 
     /// `B1500000`
     #[cfg(not(any(bsd, target_os = "aix", target_os = "haiku", target_os = "solaris")))]
-    pub const B1500000: u32 = 1500000;
+    pub const B1500000: u32 = 1_500_000;
 
     /// `B2000000`
     #[cfg(not(any(bsd, target_os = "aix", target_os = "haiku", target_os = "solaris")))]
-    pub const B2000000: u32 = 2000000;
+    pub const B2000000: u32 = 2_000_000;
 
     /// `B2500000`
     #[cfg(not(any(
@@ -722,7 +722,7 @@ pub mod speed {
         target_os = "haiku",
         target_os = "solaris",
     )))]
-    pub const B2500000: u32 = 2500000;
+    pub const B2500000: u32 = 2_500_000;
 
     /// `B3000000`
     #[cfg(not(any(
@@ -733,7 +733,7 @@ pub mod speed {
         target_os = "haiku",
         target_os = "solaris",
     )))]
-    pub const B3000000: u32 = 3000000;
+    pub const B3000000: u32 = 3_000_000;
 
     /// `B3500000`
     #[cfg(not(any(
@@ -744,7 +744,7 @@ pub mod speed {
         target_os = "haiku",
         target_os = "solaris",
     )))]
-    pub const B3500000: u32 = 3500000;
+    pub const B3500000: u32 = 3_500_000;
 
     /// `B4000000`
     #[cfg(not(any(
@@ -755,7 +755,7 @@ pub mod speed {
         target_os = "haiku",
         target_os = "solaris",
     )))]
-    pub const B4000000: u32 = 4000000;
+    pub const B4000000: u32 = 4_000_000;
 
     /// Translate from a `c::speed_t` code to an arbitrary integer speed value
     /// `u32`.

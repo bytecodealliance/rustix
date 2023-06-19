@@ -286,8 +286,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         if unsafe { c::send(borrowed_fd(fd), [].as_ptr(), 0, c::MSG_DONTWAIT) } == -1 {
             #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
             match errno().0 {
-                c::EAGAIN | c::EWOULDBLOCK => (),
-                c::ENOTSOCK => (),
+                c::EAGAIN | c::EWOULDBLOCK | c::ENOTSOCK => (),
                 c::EPIPE => write = false,
                 err => return Err(io::Errno(err)),
             }

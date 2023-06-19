@@ -124,6 +124,8 @@ impl Event {
                 ident: self.inner.ident as _,
                 timer: {
                     let (data, fflags) = (self.inner.data, self.inner.fflags);
+                    #[cfg(not(any(apple, target_os = "freebsd", target_os = "netbsd")))]
+                    let _ = fflags;
                     #[cfg(any(apple, target_os = "freebsd", target_os = "netbsd"))]
                     match fflags as _ {
                         c::NOTE_SECONDS => Some(Duration::from_secs(data as _)),

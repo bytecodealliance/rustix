@@ -65,7 +65,10 @@ fn test_transparent_huge_pages_are_disabled() {
 fn test_secure_computing_mode() {
     #[cfg(feature = "system")]
     if !linux_kernel_config_item_is_enabled("CONFIG_SECCOMP").unwrap_or(false) {
-        eprintln!("test_secure_computing_mode: Test skipped due to missing kernel feature: CONFIG_SECCOMP.");
+        eprintln!(
+            "test_secure_computing_mode: Test skipped due to missing kernel
+            feature: CONFIG_SECCOMP."
+        );
         return;
     }
 
@@ -77,7 +80,10 @@ fn test_secure_computing_mode() {
 fn test_get_clear_child_tid_address() {
     #[cfg(feature = "system")]
     if !linux_kernel_config_item_is_enabled("CONFIG_CHECKPOINT_RESTORE").unwrap_or(false) {
-        eprintln!("test_get_clear_child_tid_address: Test skipped due to missing kernel feature: CONFIG_CHECKPOINT_RESTORE.");
+        eprintln!(
+            "test_get_clear_child_tid_address: Test skipped due to missing kernel feature: \
+             CONFIG_CHECKPOINT_RESTORE."
+        );
         return;
     }
 
@@ -96,7 +102,10 @@ fn test_get_clear_child_tid_address() {
 fn test_core_scheduling_cookie() {
     #[cfg(feature = "system")]
     if !linux_kernel_config_item_is_enabled("CONFIG_SCHED_CORE").unwrap_or(false) {
-        eprintln!("test_core_scheduling_cookie: Test skipped due to missing kernel feature: CONFIG_SCHED_CORE.");
+        eprintln!(
+            "test_core_scheduling_cookie: Test skipped due to missing kernel feature: \
+             CONFIG_SCHED_CORE."
+        );
         return;
     }
 
