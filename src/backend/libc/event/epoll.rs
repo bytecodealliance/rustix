@@ -25,27 +25,32 @@
 //!
 //! // Create an epoll object. Using `Owning` here means the epoll object will
 //! // take ownership of the file descriptors registered with it.
-//! let epoll = epoll::epoll_create(epoll::CreateFlags::CLOEXEC)?;
+//! let epoll = epoll::create(epoll::CreateFlags::CLOEXEC)?;
 //!
 //! // Register the socket with the epoll object.
-//! epoll::epoll_add(&epoll, &listen_sock, 1, epoll::EventFlags::IN)?;
+//! epoll::add(
+//!     &epoll,
+//!     &listen_sock,
+//!     epoll::EventData::new_u64(1),
+//!     epoll::EventFlags::IN,
+//! )?;
 //!
 //! // Keep track of the sockets we've opened.
-//! let mut next_id = 2;
+//! let mut next_id = epoll::EventData::new_u64(2);
 //! let mut sockets = HashMap::new();
 //!
 //! // Process events.
 //! let mut event_list = epoll::EventVec::with_capacity(4);
 //! loop {
-//!     epoll::epoll_wait(&epoll, &mut event_list, -1)?;
+//!     epoll::wait(&epoll, &mut event_list, -1)?;
 //!     for event in &event_list {
 //!         let target = event.data;
-//!         if target == 1 {
+//!         if target.u64() == 1 {
 //!             // Accept a new connection, set it to non-blocking, and
 //!             // register to be notified when it's ready to write to.
 //!             let conn_sock = accept(&listen_sock)?;
 //!             ioctl_fionbio(&conn_sock, true)?;
-//!             epoll::epoll_add(
+//!             epoll::add(
 //!                 &epoll,
 //!                 &conn_sock,
 //!                 next_id,
@@ -54,12 +59,12 @@
 //!
 //!             // Keep track of the socket.
 //!             sockets.insert(next_id, conn_sock);
-//!             next_id += 1;
+//!             next_id = epoll::EventData::new_u64(next_id.u64() + 1);
 //!         } else {
 //!             // Write a message to the stream and then unregister it.
 //!             let target = sockets.remove(&target).unwrap();
 //!             write(&target, b"hello\n")?;
-//!             let _ = epoll::epoll_del(&epoll, &target)?;
+//!             let _ = epoll::delete(&epoll, &target)?;
 //!         }
 //!     }
 //! }
@@ -72,12 +77,16 @@ use crate::backend::c;
 use crate::backend::conv::{ret, ret_owned_fd, ret_u32};
 use crate::fd::{AsFd, AsRawFd, OwnedFd};
 use crate::io;
+use crate::utils::as_mut_ptr;
 use alloc::vec::Vec;
 use bitflags::bitflags;
+use core::ffi::c_void;
+use core::hash::{Hash, Hasher};
 use core::ptr::null_mut;
+use core::slice;
 
 bitflags! {
-    /// `EPOLL_*` for use with [`Epoll::new`].
+    /// `EPOLL_*` for use with [`new`].
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct CreateFlags: c::c_int {
         /// `EPOLL_CLOEXEC`
@@ -86,7 +95,7 @@ bitflags! {
 }
 
 bitflags! {
-    /// `EPOLL*` for use with [`Epoll::add`].
+    /// `EPOLL*` for use with [`add`].
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct EventFlags: u32 {
         /// `EPOLLIN`
@@ -137,82 +146,91 @@ bitflags! {
     }
 }
 
-/// `epoll_create1(flags)`—Creates a new `Epoll`.
+/// `epoll_create1(flags)`—Creates a new epoll object.
 ///
 /// Use the [`CreateFlags::CLOEXEC`] flag to prevent the resulting file
 /// descriptor from being implicitly passed across `exec` boundaries.
 #[inline]
 #[doc(alias = "epoll_create1")]
-pub fn epoll_create(flags: CreateFlags) -> io::Result<OwnedFd> {
+pub fn create(flags: CreateFlags) -> io::Result<OwnedFd> {
     // SAFETY: We're calling `epoll_create1` via FFI and we know how it
     // behaves.
     unsafe { ret_owned_fd(c::epoll_create1(flags.bits())) }
 }
 
 /// `epoll_ctl(self, EPOLL_CTL_ADD, data, event)`—Adds an element to an
-/// `Epoll`.
+/// epoll object.
 ///
-/// If `epoll_del` is not called on the I/O source passed into this function
+/// This registers interest in any of the events set in `events` occurring
+/// on the file descriptor associated with `data`.
+///
+/// If [`delete`] is not called on the I/O source passed into this function
 /// before the I/O source is `close`d, then the `epoll` will act as if the I/O
 /// source is still registered with it. This can lead to spurious events being
-/// returned from `epoll_wait`. If a file descriptor is an
+/// returned from [`wait`]. If a file descriptor is an
 /// `Arc<dyn SystemResource>`, then `epoll` can be thought to maintain a
 /// `Weak<dyn SystemResource>` to the file descriptor.
 #[doc(alias = "epoll_ctl")]
-pub fn epoll_add(
+pub fn add(
     epoll: impl AsFd,
     source: impl AsFd,
-    data: u64,
+    data: EventData,
     event_flags: EventFlags,
 ) -> io::Result<()> {
     // SAFETY: We're calling `epoll_ctl` via FFI and we know how it
-    // behaves.
+    // behaves. We use our own `Event` struct instead of libc's because
+    // ours preserves pointer provenance instead of just using a `u64`,
+    // and we have tests elsehwere for layout equivalence.
     unsafe {
         let raw_fd = source.as_fd().as_raw_fd();
         ret(c::epoll_ctl(
             epoll.as_fd().as_raw_fd(),
             c::EPOLL_CTL_ADD,
             raw_fd,
-            &mut c::epoll_event {
-                events: event_flags.bits(),
-                r#u64: data,
-            },
+            as_mut_ptr(&mut Event {
+                flags: event_flags,
+                data,
+            })
+            .cast(),
         ))
     }
 }
 
 /// `epoll_ctl(self, EPOLL_CTL_MOD, target, event)`—Modifies an element in
-/// this `Epoll`.
+/// a given epoll object.
 ///
 /// This sets the events of interest with `target` to `events`.
 #[doc(alias = "epoll_ctl")]
-pub fn epoll_mod(
+pub fn modify(
     epoll: impl AsFd,
     source: impl AsFd,
-    data: u64,
+    data: EventData,
     event_flags: EventFlags,
 ) -> io::Result<()> {
     let raw_fd = source.as_fd().as_raw_fd();
 
     // SAFETY: We're calling `epoll_ctl` via FFI and we know how it
-    // behaves.
+    // behaves. We use our own `Event` struct instead of libc's because
+    // ours preserves pointer provenance instead of just using a `u64`,
+    // and we have tests elsehwere for layout equivalence.
     unsafe {
         ret(c::epoll_ctl(
             epoll.as_fd().as_raw_fd(),
             c::EPOLL_CTL_MOD,
             raw_fd,
-            &mut c::epoll_event {
-                events: event_flags.bits(),
-                r#u64: data,
-            },
+            as_mut_ptr(&mut Event {
+                flags: event_flags,
+                data,
+            })
+            .cast(),
         ))
     }
 }
 
 /// `epoll_ctl(self, EPOLL_CTL_DEL, target, NULL)`—Removes an element in
-/// this `Epoll`.
+/// a given epoll object.
 #[doc(alias = "epoll_ctl")]
-pub fn epoll_del(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
+pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
     // SAFETY: We're calling `epoll_ctl` via FFI and we know how it
     // behaves.
     unsafe {
@@ -231,11 +249,7 @@ pub fn epoll_del(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
 ///
 /// For each event of interest, an element is written to `events`. On
 /// success, this returns the number of written elements.
-pub fn epoll_wait(
-    epoll: impl AsFd,
-    event_list: &mut EventVec,
-    timeout: c::c_int,
-) -> io::Result<()> {
+pub fn wait(epoll: impl AsFd, event_list: &mut EventVec, timeout: c::c_int) -> io::Result<()> {
     // SAFETY: We're calling `epoll_wait` via FFI and we know how it
     // behaves.
     unsafe {
@@ -254,12 +268,13 @@ pub fn epoll_wait(
 
 /// An iterator over the `Event`s in an `EventVec`.
 pub struct Iter<'a> {
-    iter: core::slice::Iter<'a, Event>,
+    iter: slice::Iter<'a, Event>,
 }
 
 impl<'a> Iterator for Iter<'a> {
     type Item = &'a Event;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.iter.next()
     }
@@ -280,11 +295,91 @@ impl<'a> Iterator for Iter<'a> {
 )]
 pub struct Event {
     /// Which specific event(s) occurred.
-    // Match the layout of `c::epoll_event`. We just use a `u64` instead of
-    // the full union.
-    pub event_flags: EventFlags,
+    pub flags: EventFlags,
     /// User data.
-    pub data: u64,
+    pub data: EventData,
+}
+
+/// Data assocated with an [`Event`]. This can either be a 64-bit integer value
+/// or a pointer which preserves pointer provenance.
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union EventData {
+    /// A 64-bit integer value.
+    as_u64: u64,
+
+    /// A `*mut c_void` which preserves pointer provenance, extended to be
+    /// 64-bit so that if we read the value as a `u64` union field, we don't
+    /// get uninitialized memory.
+    sixty_four_bit_pointer: SixtyFourBitPointer,
+}
+
+impl EventData {
+    /// Construct a new value containing a `u64`.
+    #[inline]
+    pub fn new_u64(value: u64) -> Self {
+        Self { as_u64: value }
+    }
+
+    /// Construct a new value containing a `*mut c_void`.
+    #[inline]
+    pub fn new_ptr(value: *mut c_void) -> Self {
+        Self {
+            sixty_four_bit_pointer: SixtyFourBitPointer {
+                pointer: value,
+                #[cfg(target_pointer_width = "32")]
+                _padding: 0,
+            },
+        }
+    }
+
+    /// Return the value as a `u64`.
+    ///
+    /// If the stored value was a pointer, the pointer is zero-extended to
+    /// a `u64`.
+    #[inline]
+    pub fn u64(self) -> u64 {
+        unsafe { self.as_u64 }
+    }
+
+    /// Return the value as a `*mut c_void`.
+    ///
+    /// If the stored value was a `u64`, the least-significant bits of the
+    /// `u64` are returned as a pointer value.
+    #[inline]
+    pub fn ptr(self) -> *mut c_void {
+        unsafe { self.sixty_four_bit_pointer.pointer }
+    }
+}
+
+impl PartialEq for EventData {
+    #[inline]
+    fn eq(&self, other: &EventData) -> bool {
+        self.u64() == other.u64()
+    }
+}
+
+impl Eq for EventData {}
+
+impl Hash for EventData {
+    #[inline]
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.u64().hash(state)
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+struct SixtyFourBitPointer {
+    #[cfg(target_endian = "big")]
+    #[cfg(target_pointer_width = "32")]
+    _padding: u32,
+
+    pointer: *mut c_void,
+
+    #[cfg(target_endian = "little")]
+    #[cfg(target_pointer_width = "32")]
+    _padding: u32,
 }
 
 /// A vector of `Event`s, plus context for interpreting them.
@@ -374,4 +469,12 @@ impl<'a> IntoIterator for &'a EventVec {
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
+}
+
+#[test]
+fn test_epoll_layouts() {
+    check_renamed_type!(Event, epoll_event);
+    check_renamed_type!(Event, epoll_event);
+    check_renamed_struct_renamed_field!(Event, epoll_event, flags, events);
+    check_renamed_struct_renamed_field!(Event, epoll_event, data, u64);
 }

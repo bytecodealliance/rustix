@@ -13,7 +13,7 @@ use crate::backend::conv::{
 use crate::event::{epoll, EventfdFlags, PollFd};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
-use linux_raw_sys::general::{epoll_event, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD};
+use linux_raw_sys::general::{EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use {
     crate::backend::conv::{opt_ref, size_of},
@@ -58,7 +58,7 @@ pub(crate) fn epoll_create(flags: epoll::CreateFlags) -> io::Result<OwnedFd> {
 pub(crate) unsafe fn epoll_add(
     epfd: BorrowedFd<'_>,
     fd: c::c_int,
-    event: &epoll_event,
+    event: &epoll::Event,
 ) -> io::Result<()> {
     ret(syscall_readonly!(
         __NR_epoll_ctl,
@@ -73,7 +73,7 @@ pub(crate) unsafe fn epoll_add(
 pub(crate) unsafe fn epoll_mod(
     epfd: BorrowedFd<'_>,
     fd: c::c_int,
-    event: &epoll_event,
+    event: &epoll::Event,
 ) -> io::Result<()> {
     ret(syscall_readonly!(
         __NR_epoll_ctl,
@@ -98,7 +98,7 @@ pub(crate) unsafe fn epoll_del(epfd: BorrowedFd<'_>, fd: c::c_int) -> io::Result
 #[inline]
 pub(crate) fn epoll_wait(
     epfd: BorrowedFd<'_>,
-    events: *mut epoll_event,
+    events: *mut epoll::Event,
     num_events: usize,
     timeout: c::c_int,
 ) -> io::Result<usize> {
