@@ -1299,67 +1299,7 @@ impl Default for register_or_sqe_op_or_sqe_flags_union {
 /// kernel's versions.
 #[test]
 fn io_uring_layouts() {
-    use core::mem::{align_of, size_of};
-    use memoffset::{offset_of, span_of};
-
-    // Check that the size and alignment of a type match the `sys` bindings.
-    macro_rules! check_type {
-        ($struct:ident) => {
-            assert_eq!(
-                (size_of::<$struct>(), align_of::<$struct>()),
-                (size_of::<sys::$struct>(), align_of::<sys::$struct>())
-            );
-        };
-    }
-
-    // The same as `check_type`, but for unions and anonymous structs we've
-    // renamed to avoid having types like "bindgen_ty_1" in the API.
-    macro_rules! check_renamed_type {
-        ($to:ident, $from:ident) => {
-            assert_eq!(
-                (size_of::<$to>(), align_of::<$to>()),
-                (size_of::<sys::$from>(), align_of::<sys::$from>())
-            );
-        };
-    }
-
-    // Check that the field of a struct has the same offset as the
-    // corresponding field in the `sys` bindings.
-    macro_rules! check_struct_field {
-        ($struct:ident, $field:ident) => {
-            assert_eq!(
-                offset_of!($struct, $field),
-                offset_of!(sys::$struct, $field)
-            );
-            assert_eq!(span_of!($struct, $field), span_of!(sys::$struct, $field));
-        };
-    }
-
-    // The same as `check_struct_field`, but for unions and anonymous structs
-    // we've renamed to avoid having types like "bindgen_ty_1" in the API.
-    macro_rules! check_struct_renamed_field {
-        ($struct:ident, $to:ident, $from:ident) => {
-            assert_eq!(offset_of!($struct, $to), offset_of!(sys::$struct, $from));
-            assert_eq!(span_of!($struct, $to), span_of!(sys::$struct, $from));
-        };
-    }
-
-    // For the common case of no renaming, check all fields of a struct.
-    macro_rules! check_struct {
-        ($name:ident, $($field:ident),*) => {
-            // Check the size and alignment.
-            check_type!($name);
-
-            // Check that we have all the fields.
-            let _test = $name {
-                // SAFETY: All of io_uring's types can be zero-initialized.
-                $($field: unsafe { core::mem::zeroed() }),*
-            };
-
-            // Check that the fields have the right sizes and offsets.
-            $(check_struct_field!($name, $field));*
-        };
-    }
+    use sys as c;
 
     check_renamed_type!(off_or_addr2_union, io_uring_sqe__bindgen_ty_1);
     check_renamed_type!(addr_or_splice_off_in_union, io_uring_sqe__bindgen_ty_2);

@@ -14,16 +14,16 @@ use crate::pid::Pid;
 #[cfg(feature = "procfs")]
 use crate::procfs;
 use crate::termios::{
-    Action, OptionalActions, QueueSelector, Termios, Winsize, BRKINT, CBAUD, CS8, CSIZE, ECHO,
-    ECHONL, ICANON, ICRNL, IEXTEN, IGNBRK, IGNCR, INLCR, ISIG, ISTRIP, IXON, OPOST, PARENB, PARMRK,
-    VMIN, VTIME,
+    Action, ControlModes, InputModes, LocalModes, OptionalActions, OutputModes, QueueSelector,
+    SpecialCodeIndex, Termios, Winsize,
 };
 #[cfg(feature = "procfs")]
 use crate::{ffi::CStr, fs::FileType, path::DecInt};
 use core::mem::MaybeUninit;
+use linux_raw_sys::general::IBSHIFT;
 use linux_raw_sys::ioctl::{
-    TCFLSH, TCGETS, TCSBRK, TCSETS, TCXONC, TIOCEXCL, TIOCGPGRP, TIOCGSID, TIOCGWINSZ, TIOCNXCL,
-    TIOCSPGRP, TIOCSWINSZ,
+    TCFLSH, TCSBRK, TCXONC, TIOCEXCL, TIOCGPGRP, TIOCGSID, TIOCGWINSZ, TIOCNXCL, TIOCSPGRP,
+    TIOCSWINSZ,
 };
 
 #[inline]
@@ -39,31 +39,7 @@ pub(crate) fn tcgetwinsize(fd: BorrowedFd<'_>) -> io::Result<Winsize> {
 pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     unsafe {
         let mut result = MaybeUninit::<Termios>::uninit();
-        ret(syscall!(__NR_ioctl, fd, c_uint(TCGETS), &mut result))?;
-        Ok(result.assume_init())
-    }
-}
-
-#[inline]
-#[cfg(any(
-    target_arch = "x86",
-    target_arch = "x86_64",
-    target_arch = "x32",
-    target_arch = "riscv64",
-    target_arch = "aarch64",
-    target_arch = "arm",
-    target_arch = "mips",
-    target_arch = "mips64",
-))]
-pub(crate) fn tcgetattr2(fd: BorrowedFd<'_>) -> io::Result<crate::termios::Termios2> {
-    unsafe {
-        let mut result = MaybeUninit::<crate::termios::Termios2>::uninit();
-        ret(syscall!(
-            __NR_ioctl,
-            fd,
-            c_uint(linux_raw_sys::ioctl::TCGETS2),
-            &mut result
-        ))?;
+        ret(syscall!(__NR_ioctl, fd, c_uint(c::TCGETS2), &mut result))?;
         Ok(result.assume_init())
     }
 }
@@ -86,42 +62,17 @@ pub(crate) fn tcsetattr(
 ) -> io::Result<()> {
     // Translate from `optional_actions` into an ioctl request code. On MIPS,
     // `optional_actions` already has `TCGETS` added to it.
-    let request = if cfg!(any(target_arch = "mips", target_arch = "mips64")) {
-        optional_actions as u32
-    } else {
-        TCSETS + optional_actions as u32
-    };
+    let request = linux_raw_sys::ioctl::TCSETS2
+        + if cfg!(any(target_arch = "mips", target_arch = "mips64")) {
+            optional_actions as u32 - linux_raw_sys::ioctl::TCSETS
+        } else {
+            optional_actions as u32
+        };
     unsafe {
         ret(syscall_readonly!(
             __NR_ioctl,
             fd,
-            c_uint(request as u32),
-            by_ref(termios)
-        ))
-    }
-}
-
-#[inline]
-#[cfg(any(
-    target_arch = "x86",
-    target_arch = "x86_64",
-    target_arch = "x32",
-    target_arch = "riscv64",
-    target_arch = "aarch64",
-    target_arch = "arm",
-    target_arch = "mips",
-    target_arch = "mips64",
-))]
-pub(crate) fn tcsetattr2(
-    fd: BorrowedFd,
-    optional_actions: OptionalActions,
-    termios: &crate::termios::Termios2,
-) -> io::Result<()> {
-    unsafe {
-        ret(syscall_readonly!(
-            __NR_ioctl,
-            fd,
-            c_uint(linux_raw_sys::ioctl::TCSETS2 + optional_actions as u32),
+            c_uint(request),
             by_ref(termios)
         ))
     }
@@ -198,18 +149,58 @@ pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_ioctl, fd, c_uint(TIOCNXCL))) }
 }
 
+/// A wrapper around a conceptual `cfsetspeed` which handles an arbitrary
+/// integer speed value.
 #[inline]
-#[must_use]
-#[allow(clippy::missing_const_for_fn)]
-pub(crate) fn cfgetospeed(termios: &Termios) -> u32 {
-    termios.c_cflag & CBAUD
+pub(crate) fn set_speed(termios: &mut Termios, arbitrary_speed: u32) -> io::Result<()> {
+    let encoded_speed = crate::termios::speed::encode(arbitrary_speed).unwrap_or(c::BOTHER);
+
+    debug_assert_eq!(encoded_speed & !c::CBAUD, 0);
+
+    // Use `=` and `-` because `-=` behaves differently.
+    termios.control_modes =
+        termios.control_modes - ControlModes::from_bits_retain(c::CBAUD | c::CIBAUD);
+    termios.control_modes |=
+        ControlModes::from_bits_retain(encoded_speed | (encoded_speed << IBSHIFT));
+
+    termios.input_speed = arbitrary_speed;
+    termios.output_speed = arbitrary_speed;
+
+    Ok(())
 }
 
+/// A wrapper around a conceptual `cfsetospeed` which handles an arbitrary
+/// integer speed value.
 #[inline]
-#[must_use]
-#[allow(clippy::missing_const_for_fn)]
-pub(crate) fn cfgetispeed(termios: &Termios) -> u32 {
-    termios.c_cflag & CBAUD
+pub(crate) fn set_output_speed(termios: &mut Termios, arbitrary_speed: u32) -> io::Result<()> {
+    let encoded_speed = crate::termios::speed::encode(arbitrary_speed).unwrap_or(c::BOTHER);
+
+    debug_assert_eq!(encoded_speed & !c::CBAUD, 0);
+
+    // Use `=` and `-` because `-=` behaves differently.
+    termios.control_modes = termios.control_modes - ControlModes::from_bits_retain(c::CBAUD);
+    termios.control_modes |= ControlModes::from_bits_retain(encoded_speed);
+
+    termios.output_speed = arbitrary_speed;
+
+    Ok(())
+}
+
+/// A wrapper around a conceptual `cfsetispeed` which handles an arbitrary
+/// integer speed value.
+#[inline]
+pub(crate) fn set_input_speed(termios: &mut Termios, arbitrary_speed: u32) -> io::Result<()> {
+    let encoded_speed = crate::termios::speed::encode(arbitrary_speed).unwrap_or(c::BOTHER);
+
+    debug_assert_eq!(encoded_speed & !c::CBAUD, 0);
+
+    // Use `=` and `-` because `-=` behaves differently.
+    termios.control_modes = termios.control_modes - ControlModes::from_bits_retain(c::CIBAUD);
+    termios.control_modes |= ControlModes::from_bits_retain(encoded_speed << IBSHIFT);
+
+    termios.input_speed = arbitrary_speed;
+
+    Ok(())
 }
 
 #[inline]
@@ -217,48 +208,30 @@ pub(crate) fn cfmakeraw(termios: &mut Termios) {
     // From the Linux [`cfmakeraw` manual page]:
     //
     // [`cfmakeraw` manual page]: https://man7.org/linux/man-pages/man3/cfmakeraw.3.html
-    termios.c_iflag &= !(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
-    termios.c_oflag &= !OPOST;
-    termios.c_lflag &= !(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
-    termios.c_cflag &= !(CSIZE | PARENB);
-    termios.c_cflag |= CS8;
+    //
+    // Use `=` and `-` because `-=` behaves differently.
+    termios.input_modes = termios.input_modes
+        - (InputModes::IGNBRK
+            | InputModes::BRKINT
+            | InputModes::PARMRK
+            | InputModes::ISTRIP
+            | InputModes::INLCR
+            | InputModes::IGNCR
+            | InputModes::ICRNL
+            | InputModes::IXON);
+    termios.output_modes = termios.output_modes - OutputModes::OPOST;
+    termios.local_modes = termios.local_modes
+        - (LocalModes::ECHO
+            | LocalModes::ECHONL
+            | LocalModes::ICANON
+            | LocalModes::ISIG
+            | LocalModes::IEXTEN);
+    termios.control_modes = termios.control_modes - (ControlModes::CSIZE | ControlModes::PARENB);
+    termios.control_modes |= ControlModes::CS8;
 
     // Musl and glibc also do these:
-    termios.c_cc[VMIN] = 1;
-    termios.c_cc[VTIME] = 0;
-}
-
-#[inline]
-pub(crate) fn cfsetospeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
-    if (speed & !CBAUD) != 0 {
-        return Err(io::Errno::INVAL);
-    }
-    termios.c_cflag &= !CBAUD;
-    termios.c_cflag |= speed;
-    Ok(())
-}
-
-#[inline]
-pub(crate) fn cfsetispeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
-    if speed == 0 {
-        return Ok(());
-    }
-    if (speed & !CBAUD) != 0 {
-        return Err(io::Errno::INVAL);
-    }
-    termios.c_cflag &= !CBAUD;
-    termios.c_cflag |= speed;
-    Ok(())
-}
-
-#[inline]
-pub(crate) fn cfsetspeed(termios: &mut Termios, speed: u32) -> io::Result<()> {
-    if (speed & !CBAUD) != 0 {
-        return Err(io::Errno::INVAL);
-    }
-    termios.c_cflag &= !CBAUD;
-    termios.c_cflag |= speed;
-    Ok(())
+    termios.special_codes[SpecialCodeIndex::VMIN] = 1;
+    termios.special_codes[SpecialCodeIndex::VTIME] = 0;
 }
 
 #[inline]
@@ -299,7 +272,9 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Re
     if r == buf.len() {
         return Err(io::Errno::RANGE);
     }
-    // SAFETY: readlinkat returns the number of bytes placed in the buffer
+
+    // `readlinkat` returns the number of bytes placed in the buffer.
+    // NUL-terminate the string at that offset.
     buf[r].write(b'\0');
 
     // Check that the path we read refers to the same file as `fd`.
