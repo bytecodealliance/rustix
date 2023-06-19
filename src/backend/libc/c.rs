@@ -339,7 +339,7 @@ mod readwrite_pv64v2 {
             #[cfg(target_pointer_width = "32")]
             {
                 libc::syscall(
-                    libc::SYS_preadv,
+                    libc::SYS_preadv2,
                     fd,
                     iov,
                     iovcnt,

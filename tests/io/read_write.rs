@@ -198,3 +198,44 @@ fn test_pwritev2() {
     .unwrap();
     assert_eq!(&buf, b"world");
 }
+
+#[cfg(linux_kernel)]
+#[cfg(all(feature = "net", feature = "pipe"))]
+#[test]
+fn test_preadv2_nowait() {
+    use rustix::io::{preadv2, ReadWriteFlags};
+    use rustix::net::{socketpair, AddressFamily, SocketFlags, SocketType};
+    use rustix::pipe::pipe;
+
+    let mut buf = [0_u8; 5];
+
+    let (reader, _writer) = socketpair(
+        AddressFamily::UNIX,
+        SocketType::STREAM,
+        SocketFlags::CLOEXEC,
+        None,
+    )
+    .unwrap();
+    match preadv2(
+        &reader,
+        &mut [IoSliceMut::new(&mut buf)],
+        u64::MAX,
+        ReadWriteFlags::NOWAIT,
+    ) {
+        Err(rustix::io::Errno::OPNOTSUPP | rustix::io::Errno::NOSYS) => {}
+        Ok(_) => panic!("preadv2 unexpectedly succeeded"),
+        Err(e) => panic!("preadv2 failed with an unexpected error: {:?}", e),
+    }
+
+    let (reader, _writer) = pipe().unwrap();
+    match preadv2(
+        &reader,
+        &mut [IoSliceMut::new(&mut buf)],
+        u64::MAX,
+        ReadWriteFlags::NOWAIT,
+    ) {
+        Err(rustix::io::Errno::OPNOTSUPP | rustix::io::Errno::NOSYS) => {}
+        Ok(_) => panic!("preadv2 unexpectedly succeeded"),
+        Err(e) => panic!("preadv2 failed with an unexpected error: {:?}", e),
+    }
+}
