@@ -52,7 +52,7 @@ fn test_mlock_with_onfault() {
     // syscall directly to test for `ENOSYS`, before running the main
     // test below.
     unsafe {
-        if libc::syscall(libc::SYS_mlock2, 0, 0) == -1 && libc_errno::errno().0 == libc::ENOSYS {
+        if libc::syscall(libc::SYS_mlock2, 0, 0, 0) == -1 && libc_errno::errno().0 == libc::ENOSYS {
             return;
         }
     }

@@ -2,12 +2,8 @@
 
 use crate::backend::c;
 use crate::backend::conv::ret_c_int;
-#[cfg(any(bsd, solarish, target_os = "illumos"))]
+#[cfg(any(apple, netbsdlike, target_os = "dragonfly", target_os = "solaris"))]
 use crate::backend::conv::ret_owned_fd;
-#[cfg(linux_kernel)]
-use crate::backend::conv::syscall_ret_owned_fd;
-#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "illumos"))]
-use crate::event::EventfdFlags;
 use crate::event::PollFd;
 #[cfg(any(linux_kernel, bsd, solarish))]
 use crate::fd::OwnedFd;
@@ -19,6 +15,8 @@ use {
     crate::backend::conv::ret, crate::event::port::Event, crate::utils::as_mut_ptr,
     core::ptr::null_mut,
 };
+#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "illumos"))]
+use {crate::backend::conv::ret_owned_fd, crate::event::EventfdFlags};
 #[cfg(bsd)]
 use {crate::event::kqueue::Event, crate::utils::as_ptr, core::ptr::null};
 
@@ -26,7 +24,13 @@ use {crate::event::kqueue::Event, crate::utils::as_ptr, core::ptr::null};
 pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
     #[cfg(linux_kernel)]
     unsafe {
-        syscall_ret_owned_fd(c::syscall(c::SYS_eventfd2, initval, flags.bits()))
+        syscall! {
+            fn eventfd2(
+                initval: c::c_uint,
+                flags: c::c_int
+            ) via SYS_eventfd2 -> c::c_int
+        }
+        ret_owned_fd(eventfd2(initval, bitflags_bits!(flags)))
     }
 
     #[cfg(any(target_os = "freebsd", target_os = "illumos"))]

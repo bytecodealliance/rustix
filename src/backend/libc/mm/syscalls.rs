@@ -9,7 +9,7 @@ use super::types::{MapFlags, MprotectFlags, MsyncFlags, ProtFlags};
 use super::types::{MlockFlags, UserfaultfdFlags};
 use crate::backend::c;
 #[cfg(linux_kernel)]
-use crate::backend::conv::syscall_ret_owned_fd;
+use crate::backend::conv::ret_owned_fd;
 use crate::backend::conv::{borrowed_fd, no_fd, ret};
 use crate::fd::BorrowedFd;
 #[cfg(linux_kernel)]
@@ -213,5 +213,10 @@ pub(crate) unsafe fn munlock(addr: *mut c::c_void, length: usize) -> io::Result<
 
 #[cfg(linux_kernel)]
 pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
-    syscall_ret_owned_fd(c::syscall(c::SYS_userfaultfd, flags.bits()))
+    syscall! {
+        fn userfaultfd(
+            flags: libc::c_int
+        ) via SYS_userfaultfd -> c::c_int
+    }
+    ret_owned_fd(userfaultfd(bitflags_bits!(flags)))
 }
