@@ -301,131 +301,168 @@ impl AddressFamily {
     /// `AF_802`
     #[cfg(solarish)]
     pub const EIGHT_ZERO_TWO: Self = Self(c::AF_802 as _);
-    /* // fixme
+    #[cfg(target_os = "fuchsia")]
     /// `AF_ALG`
     pub const ALG: Self = Self(c::AF_ALG as _);
+    #[cfg(any(target_os = "freebsd", target_os = "netbsd", target_os = "nto"))]
     /// `AF_ARP`
     pub const ARP: Self = Self(c::AF_ARP as _);
     /// `AF_ATM`
+    #[cfg(freebsdlike)]
     pub const ATM: Self = Self(c::AF_ATM as _);
     /// `AF_CAIF`
+    #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia"))]
     pub const CAIF: Self = Self(c::AF_CAIF as _);
     /// `AF_CCITT`
+    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "nto"))]
     pub const CCITT: Self = Self(c::AF_CCITT as _);
     /// `AF_CHAOS`
+    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "nto"))]
     pub const CHAOS: Self = Self(c::AF_CHAOS as _);
     /// `AF_CNT`
+    #[cfg(any(bsd, target_os = "nto"))]
     pub const CNT: Self = Self(c::AF_CNT as _);
     /// `AF_COIP`
+    #[cfg(any(bsd, target_os = "nto"))]
     pub const COIP: Self = Self(c::AF_COIP as _);
     /// `AF_DATAKIT`
+    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "nto"))]
     pub const DATAKIT: Self = Self(c::AF_DATAKIT as _);
     /// `AF_DLI`
+    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "haiku", target_os = "nto"))]
     pub const DLI: Self = Self(c::AF_DLI as _);
     /// `AF_E164`
+    #[cfg(any(bsd, target_os = "nto"))]
     pub const E164: Self = Self(c::AF_E164 as _);
     /// `AF_ECMA`
+    #[cfg(any(apple, freebsdlike, solarish, target_os = "aix", target_os = "nto", target_os = "openbsd"))]
     pub const ECMA: Self = Self(c::AF_ECMA as _);
     /// `AF_ENCAP`
+    #[cfg(target_os = "openbsd")]
     pub const ENCAP: Self = Self(c::AF_ENCAP as _);
     /// `AF_FILE`
+    #[cfg(solarish)]
     pub const FILE: Self = Self(c::AF_FILE as _);
     /// `AF_GOSIP`
+    #[cfg(solarish)]
     pub const GOSIP: Self = Self(c::AF_GOSIP as _);
     /// `AF_HYLINK`
+    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "nto"))]
     pub const HYLINK: Self = Self(c::AF_HYLINK as _);
     /// `AF_IB`
+    #[cfg(any(target_os = "emscripten", target_os = "fuchsia"))]
     pub const IB: Self = Self(c::AF_IB as _);
     /// `AF_IMPLINK`
+    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "nto"))]
     pub const IMPLINK: Self = Self(c::AF_IMPLINK as _);
     /// `AF_IEEE80211`
+    #[cfg(any(apple, freebsdlike, linuxlike, target_os = "netbsd"))]
     pub const IEEE80211: Self = Self(c::AF_IEEE80211 as _);
     /// `AF_INET6_SDP`
+    #[cfg(target_os = "freebsd")]
     pub const INET6_SDP: Self = Self(c::AF_INET6_SDP as _);
     /// `AF_INET_OFFLOAD`
+    #[cfg(solarish)]
     pub const INET_OFFLOAD: Self = Self(c::AF_INET_OFFLOAD as _);
     /// `AF_INET_SDP`
+    #[cfg(target_os = "freebsd")]
     pub const INET_SDP: Self = Self(c::AF_INET_SDP as _);
     /// `AF_INTF`
+    #[cfg(target_os = "aix")]
     pub const INTF: Self = Self(c::AF_INTF as _);
     /// `AF_ISO`
+    #[cfg(any(bsd, target_os = "aix", target_os = "nto"))]
     pub const ISO: Self = Self(c::AF_ISO as _);
-    /// `AF_KCM`
-    pub const KCM: Self = Self(c::AF_KCM as _);
     /// `AF_LAT`
+    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "nto"))]
     pub const LAT: Self = Self(c::AF_LAT as _);
     /// `AF_LINK`
+    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "haiku", target_os = "nto"))]
     pub const LINK: Self = Self(c::AF_LINK as _);
-    /// `AF_LOCAL`
-    pub const LOCAL: Self = Self(c::AF_LOCAL as _);
-    /// `AF_MIPC`
-    pub const MIPC: Self = Self(c::AF_MIPC as _);
-    /// `AF_MIPC_SAFE`
-    pub const MIPC_SAFE: Self = Self(c::AF_MIPC_SAFE as _);
     /// `AF_MPLS`
+    #[cfg(any(netbsdlike, target_os = "dragonfly", target_os = "emscripten", target_os = "fuchsia"))]
     pub const MPLS: Self = Self(c::AF_MPLS as _);
     /// `AF_NATM`
+    #[cfg(any(bsd, target_os = "aix", target_os = "nto"))]
     pub const NATM: Self = Self(c::AF_NATM as _);
     /// `AF_NBS`
+    #[cfg(solarish)]
     pub const NBS: Self = Self(c::AF_NBS as _);
     /// `AF_NCA`
+    #[cfg(solarish)]
     pub const NCA: Self = Self(c::AF_NCA as _);
     /// `AF_NDD`
+    #[cfg(target_os = "aix")]
     pub const NDD: Self = Self(c::AF_NDD as _);
     /// `AF_NDRV`
+    #[cfg(apple)]
     pub const NDRV: Self = Self(c::AF_NDRV as _);
     /// `AF_NETBIOS`
+    #[cfg(any(apple, freebsdlike))]
     pub const NETBIOS: Self = Self(c::AF_NETBIOS as _);
     /// `AF_NETGRAPH`
+    #[cfg(freebsdlike)]
     pub const NETGRAPH: Self = Self(c::AF_NETGRAPH as _);
     /// `AF_NIT`
+    #[cfg(solarish)]
     pub const NIT: Self = Self(c::AF_NIT as _);
     /// `AF_NOTIFY`
+    #[cfg(target_os = "haiku")]
     pub const NOTIFY: Self = Self(c::AF_NOTIFY as _);
     /// `AF_NFC`
+    #[cfg(any(target_os = "emscripten", target_os = "fuchsia"))]
     pub const NFC: Self = Self(c::AF_NFC as _);
     /// `AF_NS`
+    #[cfg(any(apple, solarish, netbsdlike, target_os = "aix", target_os = "nto"))]
     pub const NS: Self = Self(c::AF_NS as _);
     /// `AF_OROUTE`
+    #[cfg(target_os = "netbsd")]
     pub const OROUTE: Self = Self(c::AF_OROUTE as _);
     /// `AF_OSI`
+    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "nto"))]
     pub const OSI: Self = Self(c::AF_OSI as _);
     /// `AF_OSINET`
+    #[cfg(solarish)]
     pub const OSINET: Self = Self(c::AF_OSINET as _);
     /// `AF_POLICY`
+    #[cfg(solarish)]
     pub const POLICY: Self = Self(c::AF_POLICY as _);
     /// `AF_PPP`
+    #[cfg(apple)]
     pub const PPP: Self = Self(c::AF_PPP as _);
     /// `AF_PUP`
+    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "nto"))]
     pub const PUP: Self = Self(c::AF_PUP as _);
-    /// `AF_QIPCRTR`
-    pub const QIPCRTR: Self = Self(c::AF_QIPCRTR as _);
     /// `AF_RIF`
+    #[cfg(target_os = "aix")]
     pub const RIF: Self = Self(c::AF_RIF as _);
     /// `AF_ROUTE`
+    #[cfg(any(bsd, solarish, target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "haiku", target_os = "nto"))]
     pub const ROUTE: Self = Self(c::AF_ROUTE as _);
     /// `AF_SCLUSTER`
+    #[cfg(target_os = "freebsd")]
     pub const SCLUSTER: Self = Self(c::AF_SCLUSTER as _);
     /// `AF_SIP`
+    #[cfg(any(apple, target_os = "freebsd", target_os = "opensbd"))]
     pub const SIP: Self = Self(c::AF_SIP as _);
     /// `AF_SLOW`
+    #[cfg(target_os = "freebsd")]
     pub const SLOW: Self = Self(c::AF_SLOW as _);
-    /// `AF_SOCKDEV`
-    pub const SOCKDEV: Self = Self(c::AF_SOCKDEV as _);
     /// `AF_SYS_CONTROL`
+    #[cfg(apple)]
     pub const SYS_CONTROL: Self = Self(c::AF_SYS_CONTROL as _);
     /// `AF_SYSTEM`
+    #[cfg(apple)]
     pub const SYSTEM: Self = Self(c::AF_SYSTEM as _);
     /// `AF_TRILL`
+    #[cfg(solarish)]
     pub const TRILL: Self = Self(c::AF_TRILL as _);
     /// `AF_UTUN`
+    #[cfg(apple)]
     pub const UTUN: Self = Self(c::AF_UTUN as _);
     /// `AF_VSOCK`
+    #[cfg(any(apple, target_os = "emscripten", target_os = "fuchsia"))]
     pub const VSOCK: Self = Self(c::AF_VSOCK as _);
-    /// `AF_XDP`
-    pub const XDP: Self = Self(c::AF_XDP as _);
-    */
-
 
     /// Constructs a `AddressFamily` from a raw integer.
     #[inline]
