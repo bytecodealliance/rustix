@@ -1,10 +1,5 @@
 //! libc syscalls supporting `rustix::io`.
 
-#[cfg(any(
-    target_os = "android",
-    all(target_os = "linux", not(target_env = "gnu")),
-))]
-use crate::backend::conv::syscall_ret_usize;
 use crate::backend::conv::{
     borrowed_fd, ret, ret_c_int, ret_discarded_fd, ret_owned_fd, ret_usize,
 };
@@ -117,7 +112,7 @@ pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::
     }
 }
 
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
+#[cfg(linux_kernel)]
 pub(crate) fn preadv2(
     fd: BorrowedFd<'_>,
     bufs: &mut [IoSliceMut],
@@ -137,34 +132,7 @@ pub(crate) fn preadv2(
     }
 }
 
-/// At present, `libc` only has `preadv2` defined for glibc. On other
-/// ABIs, use `c::syscall`.
-#[cfg(any(
-    target_os = "android",
-    all(target_os = "linux", not(target_env = "gnu")),
-))]
-#[inline]
-pub(crate) fn preadv2(
-    fd: BorrowedFd<'_>,
-    bufs: &mut [IoSliceMut],
-    offset: u64,
-    flags: ReadWriteFlags,
-) -> io::Result<usize> {
-    // Silently cast; we'll get `EINVAL` if the value is negative.
-    let offset = offset as i64;
-    unsafe {
-        syscall_ret_usize(c::syscall(
-            c::SYS_preadv2,
-            borrowed_fd(fd),
-            bufs.as_ptr().cast::<c::iovec>(),
-            min(bufs.len(), MAX_IOV) as c::c_int,
-            offset,
-            flags.bits(),
-        ))
-    }
-}
-
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
+#[cfg(linux_kernel)]
 pub(crate) fn pwritev2(
     fd: BorrowedFd<'_>,
     bufs: &[IoSlice],
@@ -180,33 +148,6 @@ pub(crate) fn pwritev2(
             min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
             bitflags_bits!(flags),
-        ))
-    }
-}
-
-/// At present, `libc` only has `pwritev2` defined for glibc. On other
-/// ABIs, use `c::syscall`.
-#[cfg(any(
-    target_os = "android",
-    all(target_os = "linux", not(target_env = "gnu")),
-))]
-#[inline]
-pub(crate) fn pwritev2(
-    fd: BorrowedFd<'_>,
-    bufs: &[IoSlice],
-    offset: u64,
-    flags: ReadWriteFlags,
-) -> io::Result<usize> {
-    // Silently cast; we'll get `EINVAL` if the value is negative.
-    let offset = offset as i64;
-    unsafe {
-        syscall_ret_usize(c::syscall(
-            c::SYS_pwritev2,
-            borrowed_fd(fd),
-            bufs.as_ptr().cast::<c::iovec>(),
-            min(bufs.len(), MAX_IOV) as c::c_int,
-            offset,
-            flags.bits(),
         ))
     }
 }

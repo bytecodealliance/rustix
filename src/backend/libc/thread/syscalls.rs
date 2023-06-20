@@ -13,7 +13,7 @@ use crate::timespec::LibcTimespec;
 use core::mem::MaybeUninit;
 #[cfg(linux_kernel)]
 use {
-    crate::backend::conv::{borrowed_fd, ret_c_int, syscall_ret},
+    crate::backend::conv::{borrowed_fd, ret_c_int},
     crate::fd::BorrowedFd,
     crate::pid::Pid,
     crate::utils::as_mut_ptr,
@@ -313,11 +313,18 @@ pub(crate) fn capget(
     header: &mut linux_raw_sys::general::__user_cap_header_struct,
     data: &mut [MaybeUninit<linux_raw_sys::general::__user_cap_data_struct>],
 ) -> io::Result<()> {
+    syscall! {
+        fn capget(
+            hdrp: *mut linux_raw_sys::general::__user_cap_header_struct,
+            data: *mut linux_raw_sys::general::__user_cap_data_struct
+        ) via SYS_capget -> c::c_int
+    }
+
     unsafe {
-        syscall_ret(c::syscall(
-            c::SYS_capget,
+        ret(capget(
             as_mut_ptr(header),
-            data.as_mut_ptr(),
+            data.as_mut_ptr()
+                .cast::<linux_raw_sys::general::__user_cap_data_struct>(),
         ))
     }
 }
@@ -328,13 +335,24 @@ pub(crate) fn capset(
     header: &mut linux_raw_sys::general::__user_cap_header_struct,
     data: &[linux_raw_sys::general::__user_cap_data_struct],
 ) -> io::Result<()> {
-    unsafe { syscall_ret(c::syscall(c::SYS_capset, as_mut_ptr(header), data.as_ptr())) }
+    syscall! {
+        fn capset(
+            hdrp: *mut linux_raw_sys::general::__user_cap_header_struct,
+            data: *const linux_raw_sys::general::__user_cap_data_struct
+        ) via SYS_capset -> c::c_int
+    }
+
+    unsafe { ret(capset(as_mut_ptr(header), data.as_ptr())) }
 }
 
 #[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn setuid_thread(uid: crate::ugid::Uid) -> io::Result<()> {
-    unsafe { syscall_ret(c::syscall(c::SYS_setuid, uid.as_raw())) }
+    syscall! {
+        fn setuid(uid: c::uid_t) via SYS_setuid -> c::c_int
+    }
+
+    unsafe { ret(setuid(uid.as_raw())) }
 }
 
 #[cfg(linux_kernel)]
@@ -348,13 +366,22 @@ pub(crate) fn setresuid_thread(
     const SYS: c::c_long = c::SYS_setresuid32 as c::c_long;
     #[cfg(not(any(target_arch = "x86", target_arch = "arm", target_arch = "sparc")))]
     const SYS: c::c_long = c::SYS_setresuid as c::c_long;
-    unsafe { syscall_ret(c::syscall(SYS, ruid.as_raw(), euid.as_raw(), suid.as_raw())) }
+
+    syscall! {
+        fn setresuid(ruid: c::uid_t, euid: c::uid_t, suid: c::uid_t) via SYS -> c::c_int
+    }
+
+    unsafe { ret(setresuid(ruid.as_raw(), euid.as_raw(), suid.as_raw())) }
 }
 
 #[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn setgid_thread(gid: crate::ugid::Gid) -> io::Result<()> {
-    unsafe { syscall_ret(c::syscall(c::SYS_setgid, gid.as_raw())) }
+    syscall! {
+        fn setgid(gid: c::gid_t) via SYS_setgid -> c::c_int
+    }
+
+    unsafe { ret(setgid(gid.as_raw())) }
 }
 
 #[cfg(linux_kernel)]
@@ -368,5 +395,10 @@ pub(crate) fn setresgid_thread(
     const SYS: c::c_long = c::SYS_setresgid32 as c::c_long;
     #[cfg(not(any(target_arch = "x86", target_arch = "arm", target_arch = "sparc")))]
     const SYS: c::c_long = c::SYS_setresgid as c::c_long;
-    unsafe { syscall_ret(c::syscall(SYS, rgid.as_raw(), egid.as_raw(), sgid.as_raw())) }
+
+    syscall! {
+        fn setresgid(rgid: c::gid_t, egid: c::gid_t, sgid: c::gid_t) via SYS -> c::c_int
+    }
+
+    unsafe { ret(setresgid(rgid.as_raw(), egid.as_raw(), sgid.as_raw())) }
 }

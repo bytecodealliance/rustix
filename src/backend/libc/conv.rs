@@ -42,15 +42,6 @@ pub(super) fn ret(raw: c::c_int) -> io::Result<()> {
 }
 
 #[inline]
-pub(super) fn syscall_ret(raw: c::c_long) -> io::Result<()> {
-    if raw == 0 {
-        Ok(())
-    } else {
-        Err(io::Errno::last_os_error())
-    }
-}
-
-#[inline]
 pub(super) fn nonnegative_ret(raw: c::c_int) -> io::Result<()> {
     if raw >= 0 {
         Ok(())
@@ -89,31 +80,6 @@ pub(super) fn ret_usize(raw: c::ssize_t) -> io::Result<usize> {
     } else {
         debug_assert!(raw >= 0);
         Ok(raw as usize)
-    }
-}
-
-#[inline]
-pub(super) fn syscall_ret_usize(raw: c::c_long) -> io::Result<usize> {
-    if raw == -1 {
-        Err(io::Errno::last_os_error())
-    } else {
-        debug_assert!(raw >= 0);
-        Ok(raw as c::ssize_t as usize)
-    }
-}
-
-#[cfg(linux_kernel)]
-#[inline]
-pub(super) fn syscall_ret_u32(raw: c::c_long) -> io::Result<u32> {
-    if raw == -1 {
-        Err(io::Errno::last_os_error())
-    } else {
-        let r32 = raw as u32;
-
-        // Converting `raw` to `u32` should be lossless.
-        debug_assert_eq!(r32 as c::c_long, raw);
-
-        Ok(r32)
     }
 }
 
@@ -168,22 +134,6 @@ pub(super) fn ret_discarded_char_ptr(raw: *mut c::c_char) -> io::Result<()> {
         Err(io::Errno::last_os_error())
     } else {
         Ok(())
-    }
-}
-
-/// Convert a `c_long` returned from `syscall` to an `OwnedFd`, if valid.
-///
-/// # Safety
-///
-/// The caller must ensure that this is the return value of a `syscall` call
-/// which returns an owned file descriptor.
-#[cfg(not(windows))]
-#[inline]
-pub(super) unsafe fn syscall_ret_owned_fd(raw: c::c_long) -> io::Result<OwnedFd> {
-    if raw == -1 {
-        Err(io::Errno::last_os_error())
-    } else {
-        Ok(OwnedFd::from_raw_fd(raw as RawFd))
     }
 }
 

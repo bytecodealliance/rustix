@@ -67,14 +67,13 @@ use {
     crate::backend::conv::nonnegative_ret,
     crate::fs::{copyfile_state_t, CloneFlags, CopyfileFlags},
 };
+#[cfg(any(apple, linux_kernel))]
+use {crate::fs::XattrFlags, core::mem::size_of, core::ptr::null_mut};
 #[cfg(linux_kernel)]
 use {
-    crate::backend::conv::{syscall_ret, syscall_ret_owned_fd, syscall_ret_usize},
     crate::fs::{RenameFlags, ResolveFlags, Statx, StatxFlags, CWD},
     core::ptr::null,
 };
-#[cfg(any(apple, linux_kernel))]
-use {crate::fs::XattrFlags, core::mem::size_of, core::ptr::null_mut};
 
 #[cfg(all(
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
@@ -101,14 +100,19 @@ fn open_via_syscall(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<Owned
     // Use the `open` syscall.
     #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
     unsafe {
-        let path = c_str(path);
-        let oflags = oflags.bits();
-        ret_owned_fd(c::syscall(
-            c::SYS_open,
-            path,
-            c::c_long::from(oflags as i32),
-            mode.bits() as c::c_ulong,
-        ) as c::c_int)
+        syscall! {
+            fn open(
+                pathname: *const c::c_char,
+                oflags: c::c_int,
+                mode: c::mode_t
+            ) via SYS_open -> c::c_int
+        }
+
+        ret_owned_fd(open(
+            c_str(path),
+            bitflags_bits!(oflags),
+            bitflags_bits!(mode),
+        ))
     }
 }
 
@@ -141,17 +145,22 @@ fn openat_via_syscall(
     oflags: OFlags,
     mode: Mode,
 ) -> io::Result<OwnedFd> {
+    syscall! {
+        fn openat(
+            base_dirfd: c::c_int,
+            pathname: *const c::c_char,
+            oflags: c::c_int,
+            mode: c::mode_t
+        ) via SYS_openat -> c::c_int
+    }
+
     unsafe {
-        let dirfd = borrowed_fd(dirfd);
-        let path = c_str(path);
-        let oflags = oflags.bits();
-        ret_owned_fd(c::syscall(
-            c::SYS_openat,
-            c::c_long::from(dirfd),
-            path,
-            c::c_long::from(oflags as i32),
-            mode.bits() as c::c_ulong,
-        ) as c::c_int)
+        ret_owned_fd(openat(
+            borrowed_fd(dirfd),
+            c_str(path),
+            bitflags_bits!(oflags),
+            bitflags_bits!(mode),
+        ))
     }
 }
 
@@ -255,11 +264,17 @@ pub(crate) fn getdents_uninit(
     fd: BorrowedFd<'_>,
     buf: &mut [MaybeUninit<u8>],
 ) -> io::Result<usize> {
+    syscall! {
+        fn getdents64(
+            fd: c::c_int,
+            dirp: *mut c::c_void,
+            count: usize
+        ) via SYS_getdents64 -> c::ssize_t
+    }
     unsafe {
-        syscall_ret_usize(c::syscall(
-            c::SYS_getdents64,
-            fd,
-            buf.as_mut_ptr().cast::<c::c_char>(),
+        ret_usize(getdents64(
+            borrowed_fd(fd),
+            buf.as_mut_ptr().cast::<c::c_void>(),
             buf.len(),
         ))
     }
@@ -895,6 +910,13 @@ pub(crate) fn chmodat(
     // implementations, such as musl, add extra logic to `fchmod` to emulate
     // support for `AT_SYMLINK_NOFOLLOW`, which uses `/proc` outside our
     // control.
+    syscall! {
+        fn fchmodat(
+            base_dirfd: c::c_int,
+            pathname: *const c::c_char,
+            mode: c::mode_t
+        ) via SYS_fchmodat -> c::c_int
+    }
     if flags == AtFlags::SYMLINK_NOFOLLOW {
         return Err(io::Errno::OPNOTSUPP);
     }
@@ -905,11 +927,10 @@ pub(crate) fn chmodat(
         // Pass `mode` as a `c_ulong` even if `mode_t` is narrower, since
         // `c::syscall` is declared as a variadic function and narrower
         // arguments are promoted.
-        syscall_ret(c::syscall(
-            c::SYS_fchmodat,
+        ret(fchmodat(
             borrowed_fd(dirfd),
             c_str(path),
-            mode.bits() as c::c_ulong,
+            mode.bits() as c::mode_t,
         ))
     }
 }
@@ -986,6 +1007,17 @@ pub(crate) fn copy_file_range(
     off_out: Option<&mut u64>,
     len: usize,
 ) -> io::Result<usize> {
+    syscall! {
+        fn copy_file_range(
+            fd_in: c::c_int,
+            off_in: *mut c::loff_t,
+            fd_out: c::c_int,
+            off_out: *mut c::loff_t,
+            len: usize,
+            flags: c::c_uint
+        ) via SYS_copy_file_range -> c::ssize_t
+    }
+
     assert_eq!(size_of::<c::loff_t>(), size_of::<u64>());
 
     let mut off_in_val: c::loff_t = 0;
@@ -1004,8 +1036,7 @@ pub(crate) fn copy_file_range(
         null_mut()
     };
     let copied = unsafe {
-        syscall_ret_usize(c::syscall(
-            c::SYS_copy_file_range,
+        ret_usize(copy_file_range(
             borrowed_fd(fd_in),
             off_in_ptr,
             borrowed_fd(fd_out),
@@ -1140,7 +1171,7 @@ pub(crate) fn tell(fd: BorrowedFd<'_>) -> io::Result<u64> {
 
 #[cfg(not(any(linux_kernel, target_os = "wasi")))]
 pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
-    unsafe { ret(c::fchmod(borrowed_fd(fd), mode.bits())) }
+    unsafe { ret(c::fchmod(borrowed_fd(fd), bitflags_bits!(mode))) }
 }
 
 #[cfg(linux_kernel)]
@@ -1149,13 +1180,13 @@ pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
     // implementations, such as musl, add extra logic to `fchmod` to emulate
     // support for `O_PATH`, which uses `/proc` outside our control and
     // interferes with our own use of `O_PATH`.
-    unsafe {
-        syscall_ret(c::syscall(
-            c::SYS_fchmod,
-            borrowed_fd(fd),
-            c::c_uint::from(mode.bits()),
-        ))
+    syscall! {
+        fn fchmod(
+            fd: c::c_int,
+            mode: c::mode_t
+        ) via SYS_fchmod -> c::c_int
     }
+    unsafe { ret(fchmod(borrowed_fd(fd), mode.bits() as c::mode_t)) }
 }
 
 #[cfg(linux_kernel)]
@@ -1164,9 +1195,16 @@ pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>)
     // implementations, such as musl, add extra logic to `fchown` to emulate
     // support for `O_PATH`, which uses `/proc` outside our control and
     // interferes with our own use of `O_PATH`.
+    syscall! {
+        fn fchown(
+            fd: c::c_int,
+            owner: c::uid_t,
+            group: c::gid_t
+        ) via SYS_fchown -> c::c_int
+    }
     unsafe {
         let (ow, gr) = crate::ugid::translate_fchown_args(owner, group);
-        syscall_ret(c::syscall(c::SYS_fchown, borrowed_fd(fd), ow, gr))
+        ret(fchown(borrowed_fd(fd), ow, gr))
     }
 }
 
@@ -1504,19 +1542,27 @@ pub(crate) fn openat2(
 ) -> io::Result<OwnedFd> {
     use linux_raw_sys::general::open_how;
 
+    syscall! {
+        fn openat2(
+            base_dirfd: c::c_int,
+            pathname: *const c::c_char,
+            how: *mut open_how,
+            size: usize
+        ) via SYS_OPENAT2 -> c::c_int
+    }
+
     let oflags = oflags.bits();
-    let open_how = open_how {
+    let mut open_how = open_how {
         flags: u64::from(oflags),
         mode: u64::from(mode.bits()),
         resolve: resolve.bits(),
     };
 
     unsafe {
-        syscall_ret_owned_fd(c::syscall(
-            SYS_OPENAT2,
+        ret_owned_fd(openat2(
             borrowed_fd(dirfd),
             c_str(path),
-            &open_how,
+            &mut open_how,
             size_of::<open_how>(),
         ))
     }

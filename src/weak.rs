@@ -191,6 +191,22 @@ macro_rules! syscall {
             }
 
             // Coerce integer values into `c_long`.
+            impl AsSyscallArg for i8 {
+                type SyscallArgType = ::libc::c_long;
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+            }
+            impl AsSyscallArg for u8 {
+                type SyscallArgType = ::libc::c_long;
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+            }
+            impl AsSyscallArg for i16 {
+                type SyscallArgType = ::libc::c_long;
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+            }
+            impl AsSyscallArg for u16 {
+                type SyscallArgType = ::libc::c_long;
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+            }
             impl AsSyscallArg for i32 {
                 type SyscallArgType = ::libc::c_long;
                 fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
@@ -200,6 +216,19 @@ macro_rules! syscall {
                 fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
             }
             impl AsSyscallArg for usize {
+                type SyscallArgType = ::libc::c_long;
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+            }
+
+            // On 64-bit platforms, also coerce `i64` and `u64` since `c_long`
+            // is 64-bit and can hold those values.
+            #[cfg(target_pointer_width = "64")]
+            impl AsSyscallArg for i64 {
+                type SyscallArgType = ::libc::c_long;
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+            }
+            #[cfg(target_pointer_width = "64")]
+            impl AsSyscallArg for u64 {
                 type SyscallArgType = ::libc::c_long;
                 fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
             }

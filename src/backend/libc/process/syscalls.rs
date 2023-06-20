@@ -5,13 +5,13 @@ use super::types::RawCpuSet;
 use crate::backend::c;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 use crate::backend::conv::ret_infallible;
+#[cfg(linux_kernel)]
+use crate::backend::conv::ret_u32;
 #[cfg(not(target_os = "wasi"))]
 use crate::backend::conv::{borrowed_fd, ret_pid_t, ret_usize};
 #[cfg(feature = "fs")]
 use crate::backend::conv::{c_str, ret_discarded_char_ptr};
 use crate::backend::conv::{ret, ret_c_int};
-#[cfg(linux_kernel)]
-use crate::backend::conv::{syscall_ret, syscall_ret_u32};
 #[cfg(not(target_os = "wasi"))]
 use crate::fd::BorrowedFd;
 #[cfg(target_os = "linux")]
@@ -34,8 +34,7 @@ use crate::process::{WaitId, WaitidOptions, WaitidStatus};
 use core::mem::MaybeUninit;
 #[cfg(target_os = "linux")]
 use {
-    super::super::conv::syscall_ret_owned_fd, crate::process::PidfdFlags,
-    crate::process::PidfdGetfdFlags,
+    super::super::conv::ret_owned_fd, crate::process::PidfdFlags, crate::process::PidfdGetfdFlags,
 };
 
 #[cfg(feature = "fs")]
@@ -61,6 +60,16 @@ pub(crate) fn getcwd(buf: &mut [MaybeUninit<u8>]) -> io::Result<()> {
     unsafe { ret_discarded_char_ptr(c::getcwd(buf.as_mut_ptr().cast(), buf.len())) }
 }
 
+// The `membarrier` syscall has a third argument, but it's only used when
+// the `flags` argument is `MEMBARRIER_CMD_FLAG_CPU`.
+#[cfg(linux_kernel)]
+syscall! {
+    fn membarrier_all(
+        cmd: c::c_int,
+        flags: c::c_uint
+    ) via SYS_membarrier -> c::c_int
+}
+
 #[cfg(linux_kernel)]
 pub(crate) fn membarrier_query() -> MembarrierQuery {
     // glibc does not have a wrapper for `membarrier`; [the documentation]
@@ -69,7 +78,7 @@ pub(crate) fn membarrier_query() -> MembarrierQuery {
     // [the documentation]: https://man7.org/linux/man-pages/man2/membarrier.2.html#NOTES
     const MEMBARRIER_CMD_QUERY: u32 = 0;
     unsafe {
-        match syscall_ret_u32(c::syscall(c::SYS_membarrier, MEMBARRIER_CMD_QUERY, 0)) {
+        match ret_u32(membarrier_all(MEMBARRIER_CMD_QUERY as i32, 0)) {
             Ok(query) => MembarrierQuery::from_bits_retain(query),
             Err(_) => MembarrierQuery::empty(),
         }
@@ -78,18 +87,26 @@ pub(crate) fn membarrier_query() -> MembarrierQuery {
 
 #[cfg(linux_kernel)]
 pub(crate) fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
-    unsafe { syscall_ret(c::syscall(c::SYS_membarrier, cmd as u32, 0)) }
+    unsafe { ret(membarrier_all(cmd as i32, 0)) }
 }
 
 #[cfg(linux_kernel)]
 pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<()> {
     const MEMBARRIER_CMD_FLAG_CPU: u32 = 1;
+
+    syscall! {
+        fn membarrier_cpu(
+            cmd: c::c_int,
+            flags: c::c_uint,
+            cpu_id: c::c_int
+        ) via SYS_membarrier -> c::c_int
+    }
+
     unsafe {
-        syscall_ret(c::syscall(
-            c::SYS_membarrier,
-            cmd as u32,
+        ret(membarrier_cpu(
+            cmd as i32,
             MEMBARRIER_CMD_FLAG_CPU,
-            cpu.as_raw(),
+            bitcast!(cpu.as_raw()),
         ))
     }
 }
@@ -501,11 +518,16 @@ pub(crate) unsafe fn procctl(
 
 #[cfg(target_os = "linux")]
 pub(crate) fn pidfd_open(pid: Pid, flags: PidfdFlags) -> io::Result<OwnedFd> {
+    syscall! {
+        fn pidfd_open(
+            pid: c::pid_t,
+            flags: c::c_uint
+        ) via SYS_pidfd_open -> c::c_int
+    }
     unsafe {
-        syscall_ret_owned_fd(c::syscall(
-            c::SYS_pidfd_open,
+        ret_owned_fd(pidfd_open(
             pid.as_raw_nonzero().get(),
-            flags.bits(),
+            bitflags_bits!(flags),
         ))
     }
 }
@@ -516,12 +538,18 @@ pub(crate) fn pidfd_getfd(
     targetfd: RawFd,
     flags: PidfdGetfdFlags,
 ) -> io::Result<OwnedFd> {
+    syscall! {
+        fn pidfd_getfd(
+            pidfd: c::c_int,
+            targetfd: c::c_int,
+            flags: c::c_uint
+        ) via SYS_pidfd_getfd -> c::c_int
+    }
     unsafe {
-        syscall_ret_owned_fd(c::syscall(
-            c::SYS_pidfd_getfd,
-            pidfd,
+        ret_owned_fd(pidfd_getfd(
+            borrowed_fd(pidfd),
             targetfd,
-            flags.bits(),
+            bitflags_bits!(flags),
         ))
     }
 }

@@ -1,21 +1,20 @@
 //! libc syscalls supporting `rustix::io_uring`.
 
 use crate::backend::c;
-use crate::backend::conv::{borrowed_fd, syscall_ret_owned_fd, syscall_ret_u32};
+use crate::backend::conv::{borrowed_fd, ret_owned_fd, ret_u32};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
 use crate::io_uring::{io_uring_params, IoringEnterFlags, IoringRegisterOp};
-use linux_raw_sys::general::{__NR_io_uring_enter, __NR_io_uring_register, __NR_io_uring_setup};
 
 #[inline]
 pub(crate) fn io_uring_setup(entries: u32, params: &mut io_uring_params) -> io::Result<OwnedFd> {
-    unsafe {
-        syscall_ret_owned_fd(c::syscall(
-            __NR_io_uring_setup as _,
-            entries as usize,
-            params,
-        ))
+    syscall! {
+        fn io_uring_setup(
+            entries: u32,
+            params: *mut io_uring_params
+        ) via SYS_io_uring_setup -> c::c_int
     }
+    unsafe { ret_owned_fd(io_uring_setup(entries, params)) }
 }
 
 #[inline]
@@ -25,12 +24,19 @@ pub(crate) unsafe fn io_uring_register(
     arg: *const c::c_void,
     nr_args: u32,
 ) -> io::Result<u32> {
-    syscall_ret_u32(c::syscall(
-        __NR_io_uring_register as _,
-        borrowed_fd(fd),
-        opcode as u32 as usize,
+    syscall! {
+        fn io_uring_register(
+            fd: c::c_uint,
+            opcode: c::c_uint,
+            arg: *const c::c_void,
+            nr_args: c::c_uint
+        ) via SYS_io_uring_register -> c::c_int
+    }
+    ret_u32(io_uring_register(
+        borrowed_fd(fd) as _,
+        opcode as u32,
         arg,
-        nr_args as usize,
+        nr_args,
     ))
 }
 
@@ -43,12 +49,21 @@ pub(crate) unsafe fn io_uring_enter(
     arg: *const c::c_void,
     size: usize,
 ) -> io::Result<u32> {
-    syscall_ret_u32(c::syscall(
-        __NR_io_uring_enter as _,
-        borrowed_fd(fd),
-        to_submit as usize,
-        min_complete as usize,
-        flags.bits() as usize,
+    syscall! {
+        fn io_uring_enter2(
+            fd: c::c_uint,
+            to_submit: c::c_uint,
+            min_complete: c::c_uint,
+            flags: c::c_uint,
+            arg: *const c::c_void,
+            size: usize
+        ) via SYS_io_uring_enter -> c::c_int
+    }
+    ret_u32(io_uring_enter2(
+        borrowed_fd(fd) as _,
+        to_submit,
+        min_complete,
+        bitflags_bits!(flags),
         arg,
         size,
     ))
