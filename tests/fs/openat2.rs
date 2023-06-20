@@ -75,6 +75,16 @@ fn test_openat2() {
     )
     .unwrap_err();
 
+    // Test with `O_PATH`.
+    let _ = openat2_more(
+        &dir,
+        "test.txt",
+        OFlags::RDONLY | OFlags::CLOEXEC | OFlags::PATH,
+        Mode::empty(),
+        ResolveFlags::empty(),
+    )
+    .unwrap();
+
     // Test `NO_MAGICLINKS`.
     let test = openat2_more(
         &dir,

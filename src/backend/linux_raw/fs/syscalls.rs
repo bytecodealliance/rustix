@@ -78,12 +78,15 @@ pub(crate) fn openat(
 pub(crate) fn openat2(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
-    flags: OFlags,
+    mut flags: OFlags,
     mode: Mode,
     resolve: ResolveFlags,
 ) -> io::Result<OwnedFd> {
-    // Always enable support for large files.
-    let flags = flags | OFlags::from_bits_retain(c::O_LARGEFILE);
+    // Enable support for large files, but not with `O_PATH` because
+    // `openat2` doesn't like those flags together.
+    if !flags.contains(OFlags::PATH) {
+        flags = flags | OFlags::from_bits_retain(c::O_LARGEFILE);
+    }
 
     unsafe {
         ret_owned_fd(syscall_readonly!(
