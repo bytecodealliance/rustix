@@ -90,7 +90,7 @@ impl Event {
 
     /// Get the event flags for this event.
     pub fn flags(&self) -> EventFlags {
-        EventFlags::from_bits_truncate(self.inner.flags as _)
+        EventFlags::from_bits_retain(self.inner.flags as _)
     }
 
     /// Get the user data for this event.
@@ -110,11 +110,11 @@ impl Event {
             c::EVFILT_EMPTY => EventFilter::Empty(self.inner.ident as _),
             c::EVFILT_VNODE => EventFilter::Vnode {
                 vnode: self.inner.ident as _,
-                flags: VnodeEvents::from_bits_truncate(self.inner.fflags),
+                flags: VnodeEvents::from_bits_retain(self.inner.fflags),
             },
             c::EVFILT_PROC => EventFilter::Proc {
                 pid: Pid::from_raw(self.inner.ident as _).unwrap(),
-                flags: ProcessEvents::from_bits_truncate(self.inner.fflags),
+                flags: ProcessEvents::from_bits_retain(self.inner.fflags),
             },
             c::EVFILT_SIGNAL => EventFilter::Signal {
                 signal: Signal::from_raw(self.inner.ident as _).unwrap(),
@@ -143,7 +143,7 @@ impl Event {
             #[cfg(any(apple, freebsdlike))]
             c::EVFILT_USER => EventFilter::User {
                 ident: self.inner.ident as _,
-                flags: UserFlags::from_bits_truncate(self.inner.fflags),
+                flags: UserFlags::from_bits_retain(self.inner.fflags),
                 user_flags: UserDefinedFlags(self.inner.fflags & EVFILT_USER_FLAGS),
             },
             _ => EventFilter::Unknown,
@@ -229,6 +229,7 @@ pub enum EventFilter {
 
 bitflags::bitflags! {
     /// The flags for a `kqueue` event specifying actions to perform.
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct EventFlags: u16 {
         /// Add the event to the `kqueue`.
@@ -262,6 +263,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// The flags for a virtual node event.
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct VnodeEvents: u32 {
         /// The file was deleted.
@@ -289,6 +291,7 @@ bitflags::bitflags! {
 
 bitflags::bitflags! {
     /// The flags for a process event.
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct ProcessEvents: u32 {
         /// The process exited.
@@ -311,6 +314,7 @@ bitflags::bitflags! {
 #[cfg(any(apple, freebsdlike))]
 bitflags::bitflags! {
     /// The flags for a user event.
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct UserFlags: u32 {
         /// Ignore the user input flags.

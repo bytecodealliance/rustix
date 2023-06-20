@@ -42,48 +42,48 @@ pub enum MembarrierCommand {
 /// [`prlimit`]: crate::process::prlimit
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-#[repr(i32)]
+#[repr(u32)]
 pub enum Resource {
     /// `RLIMIT_CPU`
-    Cpu = c::RLIMIT_CPU as c::c_int,
+    Cpu = bitcast!(c::RLIMIT_CPU),
     /// `RLIMIT_FSIZE`
-    Fsize = c::RLIMIT_FSIZE as c::c_int,
+    Fsize = bitcast!(c::RLIMIT_FSIZE),
     /// `RLIMIT_DATA`
-    Data = c::RLIMIT_DATA as c::c_int,
+    Data = bitcast!(c::RLIMIT_DATA),
     /// `RLIMIT_STACK`
-    Stack = c::RLIMIT_STACK as c::c_int,
+    Stack = bitcast!(c::RLIMIT_STACK),
     /// `RLIMIT_CORE`
     #[cfg(not(target_os = "haiku"))]
-    Core = c::RLIMIT_CORE as c::c_int,
+    Core = bitcast!(c::RLIMIT_CORE),
     /// `RLIMIT_RSS`
     #[cfg(not(any(apple, solarish, target_os = "haiku")))]
-    Rss = c::RLIMIT_RSS as c::c_int,
+    Rss = bitcast!(c::RLIMIT_RSS),
     /// `RLIMIT_NPROC`
     #[cfg(not(any(solarish, target_os = "haiku")))]
-    Nproc = c::RLIMIT_NPROC as c::c_int,
+    Nproc = bitcast!(c::RLIMIT_NPROC),
     /// `RLIMIT_NOFILE`
-    Nofile = c::RLIMIT_NOFILE as c::c_int,
+    Nofile = bitcast!(c::RLIMIT_NOFILE),
     /// `RLIMIT_MEMLOCK`
     #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku")))]
-    Memlock = c::RLIMIT_MEMLOCK as c::c_int,
+    Memlock = bitcast!(c::RLIMIT_MEMLOCK),
     /// `RLIMIT_AS`
     #[cfg(not(target_os = "openbsd"))]
-    As = c::RLIMIT_AS as c::c_int,
+    As = bitcast!(c::RLIMIT_AS),
     /// `RLIMIT_LOCKS`
     #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
-    Locks = c::RLIMIT_LOCKS as c::c_int,
+    Locks = bitcast!(c::RLIMIT_LOCKS),
     /// `RLIMIT_SIGPENDING`
     #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
-    Sigpending = c::RLIMIT_SIGPENDING as c::c_int,
+    Sigpending = bitcast!(c::RLIMIT_SIGPENDING),
     /// `RLIMIT_MSGQUEUE`
     #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
-    Msgqueue = c::RLIMIT_MSGQUEUE as c::c_int,
+    Msgqueue = bitcast!(c::RLIMIT_MSGQUEUE),
     /// `RLIMIT_NICE`
     #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
-    Nice = c::RLIMIT_NICE as c::c_int,
+    Nice = bitcast!(c::RLIMIT_NICE),
     /// `RLIMIT_RTPRIO`
     #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
-    Rtprio = c::RLIMIT_RTPRIO as c::c_int,
+    Rtprio = bitcast!(c::RLIMIT_RTPRIO),
     /// `RLIMIT_RTTIME`
     #[cfg(not(any(
         bsd,
@@ -93,7 +93,7 @@ pub enum Resource {
         target_os = "emscripten",
         target_os = "haiku",
     )))]
-    Rttime = c::RLIMIT_RTTIME as c::c_int,
+    Rttime = bitcast!(c::RLIMIT_RTTIME),
 }
 
 #[cfg(apple)]

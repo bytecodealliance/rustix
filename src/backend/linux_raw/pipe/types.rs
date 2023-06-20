@@ -6,6 +6,7 @@ bitflags! {
     /// `O_*` constants for use with [`pipe_with`].
     ///
     /// [`pipe_with`]: crate::io::pipe_with
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct PipeFlags: c::c_uint {
         /// `O_CLOEXEC`
@@ -20,6 +21,7 @@ bitflags! {
 bitflags! {
     /// `SPLICE_F_*` constants for use with [`splice`] [`vmsplice`], and
     /// [`tee`].
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SpliceFlags: c::c_uint {
         /// `SPLICE_F_MOVE`

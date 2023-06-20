@@ -183,10 +183,7 @@ pub(crate) fn sched_yield() {
 #[cfg(feature = "fs")]
 #[inline]
 pub(crate) fn umask(mode: Mode) -> Mode {
-    unsafe {
-        // TODO: Use `from_bits_retain` when we switch to bitflags 2.0.
-        Mode::from_bits_truncate(ret_c_uint_infallible(syscall_readonly!(__NR_umask, mode)))
-    }
+    unsafe { Mode::from_bits_retain(ret_c_uint_infallible(syscall_readonly!(__NR_umask, mode))) }
 }
 
 #[inline]

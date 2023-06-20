@@ -17,6 +17,7 @@ pub struct CapabilitySets {
 
 bitflags! {
     /// `CAP_*` constants.
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct CapabilityFlags: u64 {
         /// `CAP_CHOWN`

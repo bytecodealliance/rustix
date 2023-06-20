@@ -29,7 +29,10 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
 pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
-        ret(c::pipe2(result.as_mut_ptr().cast::<i32>(), flags.bits()))?;
+        ret(c::pipe2(
+            result.as_mut_ptr().cast::<i32>(),
+            bitflags_bits!(flags),
+        ))?;
         let [p0, p1] = result.assume_init();
         Ok((p0, p1))
     }

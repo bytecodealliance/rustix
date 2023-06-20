@@ -298,7 +298,7 @@ unsafe fn clock_settime_old(id: ClockId, timespec: Timespec) -> io::Result<()> {
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(feature = "time")]
 pub(crate) fn timerfd_create(id: TimerfdClockId, flags: TimerfdFlags) -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(c::timerfd_create(id as c::clockid_t, flags.bits())) }
+    unsafe { ret_owned_fd(c::timerfd_create(id as c::clockid_t, bitflags_bits!(flags))) }
 }
 
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
@@ -318,7 +318,7 @@ pub(crate) fn timerfd_settime(
         if let Some(libc_timerfd_settime) = __timerfd_settime64.get() {
             ret(libc_timerfd_settime(
                 borrowed_fd(fd),
-                flags.bits(),
+                bitflags_bits!(flags),
                 &new_value.clone().into(),
                 result.as_mut_ptr(),
             ))?;
@@ -335,7 +335,7 @@ pub(crate) fn timerfd_settime(
     unsafe {
         ret(c::timerfd_settime(
             borrowed_fd(fd),
-            flags.bits(),
+            bitflags_bits!(flags),
             new_value,
             result.as_mut_ptr(),
         ))?;
@@ -386,7 +386,7 @@ unsafe fn timerfd_settime_old(
 
     ret(c::timerfd_settime(
         borrowed_fd(fd),
-        flags.bits(),
+        bitflags_bits!(flags),
         &old_new_value,
         old_result.as_mut_ptr(),
     ))?;

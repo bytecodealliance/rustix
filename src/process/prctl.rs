@@ -138,6 +138,7 @@ const PR_GET_UNALIGN: c_int = 5;
 bitflags! {
     /// `PR_UNALIGN_*` flags for use with [`unaligned_access_control`] and
     /// [`set_unaligned_access_control`].
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct UnalignedAccessControl: u32 {
         /// Silently fix up unaligned user accesses.
@@ -186,6 +187,7 @@ const PR_GET_FPEMU: c_int = 9;
 bitflags! {
     /// `PR_FPEMU_*` flags for use with [`floating_point_emulation_control`]
     /// and [`set_floating_point_emulation_control`].
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct FloatingPointEmulationControl: u32 {
         /// Silently emulate floating point operations accesses.
@@ -235,6 +237,7 @@ const PR_GET_FPEXC: c_int = 11;
 
 bitflags! {
     /// Zero means floating point exceptions are disabled.
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct FloatingPointExceptionMode: u32 {
         /// Async non-recoverable exception mode.
@@ -947,6 +950,7 @@ impl TryFrom<u32> for SpeculationFeature {
 
 bitflags! {
     /// `PR_SPEC_*` flags for use with [`control_speculative_feature`].
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SpeculationFeatureControl: u32 {
         /// The speculation feature is enabled, mitigation is disabled.
@@ -962,6 +966,7 @@ bitflags! {
 
 bitflags! {
     /// Zero means the processors are not vulnerable.
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SpeculationFeatureState: u32 {
         /// Mitigation can be controlled per thread by `PR_SET_SPECULATION_CTRL`.

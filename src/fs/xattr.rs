@@ -6,6 +6,7 @@ use bitflags::bitflags;
 bitflags! {
     /// `XATTR_*` constants for use with [`setxattr`], and other `*setxattr`
     /// functions.
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct XattrFlags: c::c_uint {
         /// `XATTR_CREATE`

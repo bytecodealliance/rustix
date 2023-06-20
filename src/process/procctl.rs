@@ -222,6 +222,7 @@ const PROC_REAP_STATUS: c_int = 4;
 
 bitflags! {
     /// `REAPER_STATUS_*`.
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct ReaperStatusFlags: c_uint {
         /// The process has acquired reaper status.
@@ -268,7 +269,7 @@ pub struct ReaperStatus {
 pub fn get_reaper_status(process: ProcSelector) -> io::Result<ReaperStatus> {
     let raw = unsafe { procctl_get_optional::<procctl_reaper_status>(PROC_REAP_STATUS, process) }?;
     Ok(ReaperStatus {
-        flags: ReaperStatusFlags::from_bits_truncate(raw.rs_flags),
+        flags: ReaperStatusFlags::from_bits_retain(raw.rs_flags),
         children: raw.rs_children as _,
         descendants: raw.rs_descendants as _,
         reaper: Pid::from_raw(raw.rs_reaper).ok_or(io::Errno::RANGE)?,
@@ -284,6 +285,7 @@ const PROC_REAP_GETPIDS: c_int = 5;
 
 bitflags! {
     /// `REAPER_PIDINFO_*`.
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct PidInfoFlags: c_uint {
         /// This structure was filled by the kernel.
@@ -349,7 +351,7 @@ pub fn get_reaper_pids(process: ProcSelector) -> io::Result<Vec<PidInfo>> {
     unsafe { procctl(PROC_REAP_GETPIDS, process, as_mut_ptr(&mut pinfo).cast())? };
     let mut result = Vec::new();
     for raw in pids.into_iter() {
-        let flags = PidInfoFlags::from_bits_truncate(raw.pi_flags);
+        let flags = PidInfoFlags::from_bits_retain(raw.pi_flags);
         if !flags.contains(PidInfoFlags::VALID) {
             break;
         }
@@ -366,6 +368,7 @@ const PROC_REAP_KILL: c_int = 6;
 
 bitflags! {
     /// `REAPER_KILL_*`.
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     struct KillFlags: c_uint {
         const CHILDREN = 1;

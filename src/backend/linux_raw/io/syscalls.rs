@@ -382,12 +382,12 @@ pub(crate) fn fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<FdFlags> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         ret_c_uint(syscall_readonly!(__NR_fcntl64, fd, c_uint(F_GETFD)))
-            .map(FdFlags::from_bits_truncate)
+            .map(FdFlags::from_bits_retain)
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
         ret_c_uint(syscall_readonly!(__NR_fcntl, fd, c_uint(F_GETFD)))
-            .map(FdFlags::from_bits_truncate)
+            .map(FdFlags::from_bits_retain)
     }
 }
 

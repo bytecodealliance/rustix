@@ -1270,15 +1270,16 @@ bitflags! {
     /// [`socket_with`]: crate::net::socket_with
     /// [`accept_with`]: crate::net::accept_with
     /// [`acceptfrom_with`]: crate::net::acceptfrom_with
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SocketFlags: c::c_uint {
         /// `SOCK_NONBLOCK`
         #[cfg(not(any(apple, windows, target_os = "haiku")))]
-        const NONBLOCK = c::SOCK_NONBLOCK as _;
+        const NONBLOCK = bitcast!(c::SOCK_NONBLOCK);
 
         /// `SOCK_CLOEXEC`
         #[cfg(not(any(apple, windows, target_os = "haiku")))]
-        const CLOEXEC = c::SOCK_CLOEXEC as _;
+        const CLOEXEC = bitcast!(c::SOCK_CLOEXEC);
     }
 }
 

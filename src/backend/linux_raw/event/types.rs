@@ -5,6 +5,7 @@ bitflags! {
     /// `EFD_*` flags for use with [`eventfd`].
     ///
     /// [`eventfd`]: crate::io::eventfd
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct EventfdFlags: c::c_uint {
         /// `EFD_CLOEXEC`

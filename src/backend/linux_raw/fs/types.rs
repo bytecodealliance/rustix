@@ -5,6 +5,7 @@ bitflags! {
     /// `*_OK` constants for use with [`accessat`].
     ///
     /// [`accessat`]: fn.accessat.html
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct Access: c::c_uint {
         /// `R_OK`
@@ -27,6 +28,7 @@ bitflags! {
     ///
     /// [`openat`]: crate::fs::openat
     /// [`statat`]: crate::fs::statat
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct AtFlags: c::c_uint {
         /// `AT_SYMLINK_NOFOLLOW`
@@ -64,6 +66,7 @@ bitflags! {
     /// [`openat`]: crate::fs::openat
     /// [`chmodat`]: crate::fs::chmodat
     /// [`fchmod`]: crate::fs::fchmod
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct Mode: RawMode {
         /// `S_IRWXU`
@@ -158,6 +161,7 @@ bitflags! {
     /// `O_*` constants for use with [`openat`].
     ///
     /// [`openat`]: crate::fs::openat
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct OFlags: c::c_uint {
         /// `O_ACCMODE`
@@ -241,6 +245,7 @@ bitflags! {
     /// `RESOLVE_*` constants for use with [`openat2`].
     ///
     /// [`openat2`]: crate::fs::openat2
+    #[repr(transparent)]
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct ResolveFlags: u64 {
         /// `RESOLVE_NO_XDEV`
@@ -267,6 +272,7 @@ bitflags! {
     /// `RENAME_*` constants for use with [`renameat_with`].
     ///
     /// [`renameat_with`]: crate::fs::renameat_with
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct RenameFlags: c::c_uint {
         /// `RENAME_EXCHANGE`
@@ -390,6 +396,7 @@ bitflags! {
     /// `MFD_*` constants for use with [`memfd_create`].
     ///
     /// [`memfd_create`]: crate::fs::memfd_create
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MemfdFlags: c::c_uint {
         /// `MFD_CLOEXEC`
@@ -434,6 +441,7 @@ bitflags! {
     ///
     /// [`fcntl_add_seals`]: crate::fs::fcntl_add_seals
     /// [`fcntl_get_seals`]: crate::fs::fcntl_get_seals
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SealFlags: u32 {
        /// `F_SEAL_SEAL`.
@@ -453,6 +461,7 @@ bitflags! {
     /// `STATX_*` constants for use with [`statx`].
     ///
     /// [`statx`]: crate::fs::statx
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct StatxFlags: u32 {
         /// `STATX_TYPE`
@@ -509,6 +518,7 @@ bitflags! {
     /// `FALLOC_FL_*` constants for use with [`fallocate`].
     ///
     /// [`fallocate`]: crate::fs::fallocate
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct FallocateFlags: u32 {
         /// `FALLOC_FL_KEEP_SIZE`
@@ -530,6 +540,7 @@ bitflags! {
 
 bitflags! {
     /// `ST_*` constants for use with [`StatVfs`].
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct StatVfsMountFlags: u64 {
         /// `ST_MANDLOCK`
@@ -688,6 +699,7 @@ bitflags! {
     /// `MS_*` constants for use with [`mount`].
     ///
     /// [`mount`]: crate::fs::mount
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MountFlags: c::c_uint {
         /// `MS_BIND`
@@ -745,6 +757,7 @@ bitflags! {
     /// `MS_*` constants for use with [`change_mount`].
     ///
     /// [`change_mount`]: crate::fs::mount::change_mount
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MountPropagationFlags: c::c_uint {
         /// `MS_SHARED`
@@ -761,18 +774,22 @@ bitflags! {
 }
 
 bitflags! {
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub(crate) struct InternalMountFlags: c::c_uint {
         const REMOUNT = linux_raw_sys::general::MS_REMOUNT;
         const MOVE = linux_raw_sys::general::MS_MOVE;
     }
 }
 
+#[repr(transparent)]
 pub(crate) struct MountFlagsArg(pub(crate) c::c_uint);
 
 bitflags! {
     /// `MNT_*` constants for use with [`unmount`].
     ///
     /// [`unmount`]: crate::fs::mount::unmount
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct UnmountFlags: c::c_uint {
         /// `MNT_FORCE`

@@ -8,10 +8,11 @@ bitflags! {
     /// `O_*` constants for use with [`pipe_with`].
     ///
     /// [`pipe_with`]: crate::io::pipe_with
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct PipeFlags: c::c_int {
+    pub struct PipeFlags: u32 {
         /// `O_CLOEXEC`
-        const CLOEXEC = c::O_CLOEXEC;
+        const CLOEXEC = bitcast!(c::O_CLOEXEC);
         /// `O_DIRECT`
         #[cfg(not(any(
             solarish,
@@ -19,9 +20,9 @@ bitflags! {
             target_os = "openbsd",
             target_os = "redox",
         )))]
-        const DIRECT = c::O_DIRECT;
+        const DIRECT = bitcast!(c::O_DIRECT);
         /// `O_NONBLOCK`
-        const NONBLOCK = c::O_NONBLOCK;
+        const NONBLOCK = bitcast!(c::O_NONBLOCK);
     }
 }
 
@@ -29,6 +30,7 @@ bitflags! {
 bitflags! {
     /// `SPLICE_F_*` constants for use with [`splice`], [`vmsplice`],
     /// and [`tee`].
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SpliceFlags: c::c_uint {
         /// `SPLICE_F_MOVE`
@@ -78,4 +80,14 @@ impl<'a> IoSliceRaw<'a> {
             _lifetime: PhantomData,
         }
     }
+}
+
+#[cfg(not(any(apple, target_os = "wasi")))]
+#[test]
+fn test_types() {
+    use core::mem::size_of;
+    assert_eq!(size_of::<PipeFlags>(), size_of::<c::c_int>());
+
+    #[cfg(linux_kernel)]
+    assert_eq!(size_of::<SpliceFlags>(), size_of::<c::c_int>());
 }

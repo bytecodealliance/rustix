@@ -51,7 +51,7 @@ pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: Advice) -> io::R
 }
 
 pub(crate) unsafe fn msync(addr: *mut c::c_void, len: usize, flags: MsyncFlags) -> io::Result<()> {
-    let err = c::msync(addr, len, flags.bits());
+    let err = c::msync(addr, len, bitflags_bits!(flags));
 
     // `msync` returns its error status rather than using `errno`.
     if err == 0 {
@@ -76,8 +76,8 @@ pub(crate) unsafe fn mmap(
     let res = c::mmap(
         ptr,
         len,
-        prot.bits(),
-        flags.bits(),
+        bitflags_bits!(prot),
+        bitflags_bits!(flags),
         borrowed_fd(fd),
         offset as i64,
     );
@@ -101,8 +101,8 @@ pub(crate) unsafe fn mmap_anonymous(
     let res = c::mmap(
         ptr,
         len,
-        prot.bits(),
-        flags.bits() | c::MAP_ANONYMOUS,
+        bitflags_bits!(prot),
+        bitflags_bits!(flags | MapFlags::from_bits_retain(bitcast!(c::MAP_ANONYMOUS))),
         no_fd(),
         0,
     );
@@ -118,7 +118,7 @@ pub(crate) unsafe fn mprotect(
     len: usize,
     flags: MprotectFlags,
 ) -> io::Result<()> {
-    ret(c::mprotect(ptr, len, flags.bits()))
+    ret(c::mprotect(ptr, len, bitflags_bits!(flags)))
 }
 
 pub(crate) unsafe fn munmap(ptr: *mut c::c_void, len: usize) -> io::Result<()> {
@@ -136,7 +136,7 @@ pub(crate) unsafe fn mremap(
     new_size: usize,
     flags: MremapFlags,
 ) -> io::Result<*mut c::c_void> {
-    let res = c::mremap(old_address, old_size, new_size, flags.bits());
+    let res = c::mremap(old_address, old_size, new_size, bitflags_bits!(flags));
     if res == c::MAP_FAILED {
         Err(io::Errno::last_os_error())
     } else {
@@ -161,7 +161,7 @@ pub(crate) unsafe fn mremap_fixed(
         old_address,
         old_size,
         new_size,
-        flags.bits() | c::MAP_FIXED,
+        bitflags_bits!(flags | MremapFlags::from_bits_retain(bitcast!(c::MAP_FIXED))),
         new_address,
     );
     if res == c::MAP_FAILED {
@@ -199,7 +199,7 @@ pub(crate) unsafe fn mlock_with(
         ) via SYS_mlock2 -> c::c_int
     }
 
-    ret(mlock2(addr, length, flags.bits()))
+    ret(mlock2(addr, length, bitflags_bits!(flags)))
 }
 
 /// # Safety

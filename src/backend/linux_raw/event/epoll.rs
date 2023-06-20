@@ -87,6 +87,7 @@ use core::slice;
 
 bitflags! {
     /// `EPOLL_*` for use with [`new`].
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct CreateFlags: c::c_uint {
         /// `EPOLL_CLOEXEC`
@@ -96,6 +97,7 @@ bitflags! {
 
 bitflags! {
     /// `EPOLL*` for use with [`add`].
+    #[repr(transparent)]
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct EventFlags: u32 {
         /// `EPOLLIN`

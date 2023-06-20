@@ -6,6 +6,7 @@ bitflags! {
     ///
     /// [`fcntl_getfd`]: crate::io::fcntl_getfd
     /// [`fcntl_setfd`]: crate::io::fcntl_setfd
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct FdFlags: c::c_uint {
         /// `FD_CLOEXEC`
@@ -18,6 +19,7 @@ bitflags! {
     ///
     /// [`preadv2`]: crate::io::preadv2
     /// [`pwritev2`]: crate::io::pwritev
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct ReadWriteFlags: c::c_uint {
         /// `RWF_DSYNC` (since Linux 4.7)
@@ -37,6 +39,7 @@ bitflags! {
     /// `O_*` constants for use with [`dup2`].
     ///
     /// [`dup2`]: crate::io::dup2
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct DupFlags: c::c_uint {
         /// `O_CLOEXEC`

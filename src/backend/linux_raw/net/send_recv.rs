@@ -6,6 +6,7 @@ bitflags! {
     ///
     /// [`send`]: crate::net::send
     /// [`sendto`]: crate::net::sendto
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SendFlags: u32 {
         /// `MSG_CONFIRM`
@@ -30,6 +31,7 @@ bitflags! {
     ///
     /// [`recv`]: crate::net::recv
     /// [`recvfrom`]: crate::net::recvfrom
+    #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct RecvFlags: u32 {
         /// `MSG_CMSG_CLOEXEC`
