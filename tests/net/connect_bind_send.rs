@@ -375,6 +375,16 @@ fn net_v4_acceptfrom() -> std::io::Result<()> {
     assert_eq!(from.clone().ip(), local_addr.ip());
     assert_ne!(from.clone().port(), local_addr.port());
 
+    let peer_addr = rustix::net::getpeername(&accepted).expect("getpeername");
+    let peer_addr = peer_addr.expect("peer address should be available");
+    let peer_addr = match peer_addr {
+        SocketAddrAny::V4(v4) => v4,
+        other => panic!("unexpected socket address {:?}", other),
+    };
+
+    assert_eq!(from.clone().ip(), peer_addr.ip());
+    assert_eq!(from.clone().port(), peer_addr.port());
+
     let mut response = [0_u8; 128];
     let n = rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
 
@@ -420,6 +430,16 @@ fn net_v6_acceptfrom() -> std::io::Result<()> {
 
     assert_eq!(from.clone().ip(), local_addr.ip());
     assert_ne!(from.clone().port(), local_addr.port());
+
+    let peer_addr = rustix::net::getpeername(&accepted).expect("getpeername");
+    let peer_addr = peer_addr.expect("peer address should be available");
+    let peer_addr = match peer_addr {
+        SocketAddrAny::V6(v6) => v6,
+        other => panic!("unexpected socket address {:?}", other),
+    };
+
+    assert_eq!(from.clone().ip(), peer_addr.ip());
+    assert_eq!(from.clone().port(), peer_addr.port());
 
     let mut response = [0_u8; 128];
     let n = rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
