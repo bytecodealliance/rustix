@@ -216,7 +216,7 @@ all-apis = [
 # /proc/self/auxv?
 use-libc-auxv = []
 
-# OS compatability features
+# OS compatibility features
 
 # Optimize for Linux 4.11 or later
 linux_4_11 = []
