@@ -1,5 +1,8 @@
 //! Tests for [`rustix::io`].
 
+mod close;
+#[cfg(not(windows))]
+mod dup;
 mod error;
 #[cfg(not(windows))]
 mod from_into;

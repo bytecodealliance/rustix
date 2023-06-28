@@ -84,6 +84,16 @@ fn test_file() {
     )))]
     rustix::fs::fadvise(&file, 0, 10, rustix::fs::Advice::Normal).unwrap();
 
+    rustix::fs::fsync(&file).unwrap();
+
+    #[cfg(not(any(
+        apple,
+        target_os = "dragonfly",
+        target_os = "haiku",
+        target_os = "redox",
+    )))]
+    rustix::fs::fdatasync(&file).unwrap();
+
     assert_eq!(
         rustix::io::fcntl_getfd(&file).unwrap(),
         rustix::io::FdFlags::empty()
