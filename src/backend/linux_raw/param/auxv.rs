@@ -32,7 +32,7 @@ pub(crate) fn page_size() -> usize {
     let mut page_size = PAGE_SIZE.load(Relaxed);
 
     if page_size == 0 {
-        init_from_proc_self_auxv();
+        init_auxv();
         page_size = PAGE_SIZE.load(Relaxed);
     }
 
@@ -45,7 +45,7 @@ pub(crate) fn clock_ticks_per_second() -> u64 {
     let mut ticks = CLOCK_TICKS_PER_SECOND.load(Relaxed);
 
     if ticks == 0 {
-        init_from_proc_self_auxv();
+        init_auxv();
         ticks = CLOCK_TICKS_PER_SECOND.load(Relaxed);
     }
 
@@ -59,7 +59,7 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
     let mut hwcap2 = HWCAP2.load(Relaxed);
 
     if hwcap == 0 || hwcap2 == 0 {
-        init_from_proc_self_auxv();
+        init_auxv();
         hwcap = HWCAP.load(Relaxed);
         hwcap2 = HWCAP2.load(Relaxed);
     }
@@ -73,7 +73,7 @@ pub(crate) fn linux_execfn() -> &'static CStr {
     let mut execfn = EXECFN.load(Relaxed);
 
     if execfn.is_null() {
-        init_from_proc_self_auxv();
+        init_auxv();
         execfn = EXECFN.load(Relaxed);
     }
 
@@ -89,7 +89,7 @@ pub(crate) fn exe_phdrs() -> (*const c::c_void, usize) {
     let mut phnum = PHNUM.load(Relaxed);
 
     if phdr.is_null() || phnum == 0 {
-        init_from_proc_self_auxv();
+        init_auxv();
         phdr = PHDR.load(Relaxed);
         phnum = PHNUM.load(Relaxed);
     }
@@ -114,7 +114,7 @@ pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
     let mut ehdr = SYSINFO_EHDR.load(Relaxed);
 
     if ehdr.is_null() {
-        init_from_proc_self_auxv();
+        init_auxv();
         ehdr = SYSINFO_EHDR.load(Relaxed);
     }
 
@@ -130,9 +130,53 @@ static PHDR: AtomicPtr<Elf_Phdr> = AtomicPtr::new(null_mut());
 static PHNUM: AtomicUsize = AtomicUsize::new(0);
 static EXECFN: AtomicPtr<c::c_char> = AtomicPtr::new(null_mut());
 
-/// On non-Mustang platforms, we read the aux vector from /proc/self/auxv.
 #[cfg(not(target_vendor = "mustang"))]
-fn init_from_proc_self_auxv() {
+fn pr_get_auxv() -> crate::io::Result<Vec<u8>> {
+    use super::super::conv::{c_int, pass_usize, ret_usize};
+    const PR_GET_AUXV: c::c_int = 0x41555856;
+    let mut buffer = alloc::vec![0u8; 512];
+    let len = unsafe {
+        ret_usize(syscall_always_asm!(
+            __NR_prctl,
+            c_int(PR_GET_AUXV),
+            buffer.as_ptr(),
+            pass_usize(buffer.len())
+        ))?
+    };
+    if len <= buffer.len() {
+        buffer.truncate(len);
+        return Ok(buffer);
+    }
+    buffer.resize(len, 0);
+    let len = unsafe {
+        ret_usize(syscall_always_asm!(
+            __NR_prctl,
+            c_int(PR_GET_AUXV),
+            buffer.as_ptr(),
+            pass_usize(buffer.len())
+        ))?
+    };
+    assert_eq!(len, buffer.len());
+    return Ok(buffer);
+}
+
+/// On non-Mustang platforms, we read the aux vector via the prctl PR_GET_AUXV, with a fallback to
+/// /proc/self/auxv for kernels that don't support PR_GET_AUXV.
+#[cfg(not(target_vendor = "mustang"))]
+fn init_auxv() {
+    match pr_get_auxv() {
+        Ok(buffer) => {
+            // SAFETY: We assume the kernel returns a valid auxv.
+            unsafe {
+                init_from_auxp(buffer.as_ptr().cast());
+            }
+            return;
+        }
+        Err(_) => {
+            // Fall back to /proc/self/auxv on error.
+        }
+    }
+
     // Open "/proc/self/auxv", either because we trust "/proc", or because
     // we're running inside QEMU and `proc_self_auxv`'s extra checking foils
     // QEMU's emulation so we need to do a plain open to get the right
@@ -143,7 +187,7 @@ fn init_from_proc_self_auxv() {
 }
 
 #[cfg(target_vendor = "mustang")]
-fn init_from_proc_self_auxv() {
+fn init_auxv() {
     panic!("mustang should have initialized the auxv values");
 }
 
