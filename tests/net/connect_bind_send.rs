@@ -1,6 +1,8 @@
+#[cfg(not(any(apple, windows, target_os = "haiku")))]
+use rustix::net::SocketFlags;
 use rustix::net::{
     AddressFamily, Ipv6Addr, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketAddrV6,
-    SocketFlags, SocketType,
+    SocketType,
 };
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
