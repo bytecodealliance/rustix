@@ -85,7 +85,7 @@ pub(crate) fn openat2(
     // Enable support for large files, but not with `O_PATH` because
     // `openat2` doesn't like those flags together.
     if !flags.contains(OFlags::PATH) {
-        flags = flags | OFlags::from_bits_retain(c::O_LARGEFILE);
+        flags |= OFlags::from_bits_retain(c::O_LARGEFILE);
     }
 
     unsafe {

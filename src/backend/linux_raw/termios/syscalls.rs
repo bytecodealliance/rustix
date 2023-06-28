@@ -157,9 +157,7 @@ pub(crate) fn set_speed(termios: &mut Termios, arbitrary_speed: u32) -> io::Resu
 
     debug_assert_eq!(encoded_speed & !c::CBAUD, 0);
 
-    // Use `=` and `-` because `-=` behaves differently.
-    termios.control_modes =
-        termios.control_modes - ControlModes::from_bits_retain(c::CBAUD | c::CIBAUD);
+    termios.control_modes -= ControlModes::from_bits_retain(c::CBAUD | c::CIBAUD);
     termios.control_modes |=
         ControlModes::from_bits_retain(encoded_speed | (encoded_speed << IBSHIFT));
 
@@ -177,8 +175,7 @@ pub(crate) fn set_output_speed(termios: &mut Termios, arbitrary_speed: u32) -> i
 
     debug_assert_eq!(encoded_speed & !c::CBAUD, 0);
 
-    // Use `=` and `-` because `-=` behaves differently.
-    termios.control_modes = termios.control_modes - ControlModes::from_bits_retain(c::CBAUD);
+    termios.control_modes -= ControlModes::from_bits_retain(c::CBAUD);
     termios.control_modes |= ControlModes::from_bits_retain(encoded_speed);
 
     termios.output_speed = arbitrary_speed;
@@ -194,8 +191,7 @@ pub(crate) fn set_input_speed(termios: &mut Termios, arbitrary_speed: u32) -> io
 
     debug_assert_eq!(encoded_speed & !c::CBAUD, 0);
 
-    // Use `=` and `-` because `-=` behaves differently.
-    termios.control_modes = termios.control_modes - ControlModes::from_bits_retain(c::CIBAUD);
+    termios.control_modes -= ControlModes::from_bits_retain(c::CIBAUD);
     termios.control_modes |= ControlModes::from_bits_retain(encoded_speed << IBSHIFT);
 
     termios.input_speed = arbitrary_speed;
@@ -208,25 +204,21 @@ pub(crate) fn cfmakeraw(termios: &mut Termios) {
     // From the Linux [`cfmakeraw` manual page]:
     //
     // [`cfmakeraw` manual page]: https://man7.org/linux/man-pages/man3/cfmakeraw.3.html
-    //
-    // Use `=` and `-` because `-=` behaves differently.
-    termios.input_modes = termios.input_modes
-        - (InputModes::IGNBRK
-            | InputModes::BRKINT
-            | InputModes::PARMRK
-            | InputModes::ISTRIP
-            | InputModes::INLCR
-            | InputModes::IGNCR
-            | InputModes::ICRNL
-            | InputModes::IXON);
-    termios.output_modes = termios.output_modes - OutputModes::OPOST;
-    termios.local_modes = termios.local_modes
-        - (LocalModes::ECHO
-            | LocalModes::ECHONL
-            | LocalModes::ICANON
-            | LocalModes::ISIG
-            | LocalModes::IEXTEN);
-    termios.control_modes = termios.control_modes - (ControlModes::CSIZE | ControlModes::PARENB);
+    termios.input_modes -= InputModes::IGNBRK
+        | InputModes::BRKINT
+        | InputModes::PARMRK
+        | InputModes::ISTRIP
+        | InputModes::INLCR
+        | InputModes::IGNCR
+        | InputModes::ICRNL
+        | InputModes::IXON;
+    termios.output_modes -= OutputModes::OPOST;
+    termios.local_modes -= LocalModes::ECHO
+        | LocalModes::ECHONL
+        | LocalModes::ICANON
+        | LocalModes::ISIG
+        | LocalModes::IEXTEN;
+    termios.control_modes -= ControlModes::CSIZE | ControlModes::PARENB;
     termios.control_modes |= ControlModes::CS8;
 
     // Musl and glibc also do these:
