@@ -25,6 +25,7 @@ fn test_basic_pipes() {
     assert_eq!(&buf[..n], message);
 }
 
+#[cfg(not(any(apple, target_os = "aix", target_os = "haiku")))]
 #[test]
 fn test_basic_pipes_with() {
     use rustix::io::{read, write};
