@@ -1,3 +1,4 @@
+#[cfg(feature = "fs")]
 #[test]
 fn test_dup() {
     let file = std::fs::File::open("Cargo.toml").unwrap();
