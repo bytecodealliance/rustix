@@ -233,9 +233,7 @@ pub(crate) fn set_speed(termios: &mut Termios, arbitrary_speed: u32) -> io::Resu
 
         debug_assert_eq!(encoded_speed & !c::CBAUD, 0);
 
-        // Use `=` and `-` because `-=` behaves differently.
-        termios.control_modes =
-            termios.control_modes - ControlModes::from_bits_retain(c::CBAUD | c::CIBAUD);
+        termios.control_modes -= ControlModes::from_bits_retain(c::CBAUD | c::CIBAUD);
         termios.control_modes |=
             ControlModes::from_bits_retain(encoded_speed | (encoded_speed << c::IBSHIFT));
 
@@ -277,8 +275,7 @@ pub(crate) fn set_output_speed(termios: &mut Termios, arbitrary_speed: u32) -> i
 
         debug_assert_eq!(encoded_speed & !c::CBAUD, 0);
 
-        // Use `=` and `-` because `-=` behaves differently.
-        termios.control_modes = termios.control_modes - ControlModes::from_bits_retain(c::CBAUD);
+        termios.control_modes -= ControlModes::from_bits_retain(c::CBAUD);
         termios.control_modes |= ControlModes::from_bits_retain(encoded_speed);
 
         termios.output_speed = arbitrary_speed;
@@ -318,8 +315,7 @@ pub(crate) fn set_input_speed(termios: &mut Termios, arbitrary_speed: u32) -> io
 
         debug_assert_eq!(encoded_speed & !c::CBAUD, 0);
 
-        // Use `=` and `-` because `-=` behaves differently.
-        termios.control_modes = termios.control_modes - ControlModes::from_bits_retain(c::CIBAUD);
+        termios.control_modes -= ControlModes::from_bits_retain(c::CIBAUD);
         termios.control_modes |= ControlModes::from_bits_retain(encoded_speed << c::IBSHIFT);
 
         termios.input_speed = arbitrary_speed;
