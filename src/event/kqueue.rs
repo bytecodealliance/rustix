@@ -1,6 +1,6 @@
 //! An API for interfacing with `kqueue`.
 
-use crate::fd::{AsFd, AsRawFd, OwnedFd, RawFd};
+use crate::fd::{AsFd, OwnedFd, RawFd};
 use crate::pid::Pid;
 use crate::signal::Signal;
 use crate::{backend, io};
@@ -26,13 +26,11 @@ impl Event {
     #[allow(clippy::needless_update)]
     pub fn new(filter: EventFilter, flags: EventFlags, udata: isize) -> Event {
         let (ident, data, filter, fflags) = match filter {
-            EventFilter::Read(fd) => (fd.as_raw_fd() as uintptr_t, 0, c::EVFILT_READ, 0),
-            EventFilter::Write(fd) => (fd.as_raw_fd() as _, 0, c::EVFILT_WRITE, 0),
+            EventFilter::Read(fd) => (fd as uintptr_t, 0, c::EVFILT_READ, 0),
+            EventFilter::Write(fd) => (fd as _, 0, c::EVFILT_WRITE, 0),
             #[cfg(target_os = "freebsd")]
-            EventFilter::Empty(fd) => (fd.as_raw_fd() as _, 0, c::EVFILT_EMPTY, 0),
-            EventFilter::Vnode { vnode, flags } => {
-                (vnode.as_raw_fd() as _, 0, c::EVFILT_VNODE, flags.bits())
-            }
+            EventFilter::Empty(fd) => (fd as _, 0, c::EVFILT_EMPTY, 0),
+            EventFilter::Vnode { vnode, flags } => (vnode as _, 0, c::EVFILT_VNODE, flags.bits()),
             EventFilter::Proc { pid, flags } => {
                 (Pid::as_raw(Some(pid)) as _, 0, c::EVFILT_PROC, flags.bits())
             }

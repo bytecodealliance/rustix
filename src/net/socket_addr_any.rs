@@ -1,7 +1,7 @@
 //! A socket address for any kind of socket.
 //!
 //! This is similar to [`std::net::SocketAddr`], but also supports Unix-domain
-//! socket addresses.
+//! socket addresses on Unix.
 //!
 //! # Safety
 //!

@@ -187,26 +187,28 @@ pub(super) unsafe fn prlimit(
     prlimit64(pid, resource, new_limit, old_limit)
 }
 
+// 64-bit offsets on 32-bit platforms are passed in endianness-specific
+// lo/hi pairs. See src/backend/linux_raw/conv.rs for details.
+#[cfg(all(linux_kernel, target_endian = "little", target_pointer_width = "32"))]
+fn lo(x: i64) -> usize {
+    (x >> 32) as usize
+}
+#[cfg(all(linux_kernel, target_endian = "little", target_pointer_width = "32"))]
+fn hi(x: i64) -> usize {
+    x as usize
+}
+#[cfg(all(linux_kernel, target_endian = "big", target_pointer_width = "32"))]
+fn lo(x: i64) -> usize {
+    x as usize
+}
+#[cfg(all(linux_kernel, target_endian = "big", target_pointer_width = "32"))]
+fn hi(x: i64) -> usize {
+    (x >> 32) as usize
+}
+
 #[cfg(target_os = "android")]
 mod readwrite_pv64 {
-    // 64-bit offsets on 32-bit platforms are passed in endianness-specific
-    // lo/hi pairs. See src/backend/linux_raw/conv.rs for details.
-    #[cfg(all(target_endian = "little", target_pointer_width = "32"))]
-    fn lo(x: i64) -> usize {
-        (x >> 32) as usize
-    }
-    #[cfg(all(target_endian = "little", target_pointer_width = "32"))]
-    fn hi(x: i64) -> usize {
-        x as usize
-    }
-    #[cfg(all(target_endian = "big", target_pointer_width = "32"))]
-    fn lo(x: i64) -> usize {
-        x as usize
-    }
-    #[cfg(all(target_endian = "big", target_pointer_width = "32"))]
-    fn hi(x: i64) -> usize {
-        (x >> 32) as usize
-    }
+    use super::*;
 
     pub(in super::super) unsafe fn preadv64(
         fd: libc::c_int,
@@ -320,24 +322,7 @@ pub(super) use readwrite_pv::{preadv, pwritev};
 // glibc added `preadv64v2` and `pwritev64v2` in version 2.26.
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 mod readwrite_pv64v2 {
-    // 64-bit offsets on 32-bit platforms are passed in endianness-specific
-    // lo/hi pairs. See src/backend/linux_raw/conv.rs for details.
-    #[cfg(all(target_endian = "little", target_pointer_width = "32"))]
-    fn lo(x: i64) -> usize {
-        (x >> 32) as usize
-    }
-    #[cfg(all(target_endian = "little", target_pointer_width = "32"))]
-    fn hi(x: i64) -> usize {
-        x as usize
-    }
-    #[cfg(all(target_endian = "big", target_pointer_width = "32"))]
-    fn lo(x: i64) -> usize {
-        x as usize
-    }
-    #[cfg(all(target_endian = "big", target_pointer_width = "32"))]
-    fn hi(x: i64) -> usize {
-        (x >> 32) as usize
-    }
+    use super::*;
 
     pub(in super::super) unsafe fn preadv64v2(
         fd: libc::c_int,
@@ -439,24 +424,7 @@ pub(super) use readwrite_pv64v2::{preadv64v2 as preadv2, pwritev64v2 as pwritev2
     all(target_os = "linux", not(target_env = "gnu")),
 ))]
 mod readwrite_pv64v2 {
-    // 64-bit offsets on 32-bit platforms are passed in endianness-specific
-    // lo/hi pairs. See src/backend/linux_raw/conv.rs for details.
-    #[cfg(all(target_endian = "little", target_pointer_width = "32"))]
-    fn lo(x: i64) -> usize {
-        (x >> 32) as usize
-    }
-    #[cfg(all(target_endian = "little", target_pointer_width = "32"))]
-    fn hi(x: i64) -> usize {
-        x as usize
-    }
-    #[cfg(all(target_endian = "big", target_pointer_width = "32"))]
-    fn lo(x: i64) -> usize {
-        x as usize
-    }
-    #[cfg(all(target_endian = "big", target_pointer_width = "32"))]
-    fn hi(x: i64) -> usize {
-        (x >> 32) as usize
-    }
+    use super::*;
 
     pub(in super::super) unsafe fn preadv64v2(
         fd: libc::c_int,

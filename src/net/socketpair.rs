@@ -2,7 +2,8 @@ use crate::fd::OwnedFd;
 use crate::net::{AddressFamily, Protocol, SocketFlags, SocketType};
 use crate::{backend, io};
 
-/// `socketpair(domain, type_ | accept_flags, protocol)`
+/// `socketpair(domain, type_ | accept_flags, protocol)`—Create a pair of
+/// sockets that are connected to each other.
 ///
 /// # References
 ///  - [POSIX]

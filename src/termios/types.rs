@@ -948,7 +948,7 @@ pub mod speed {
     }
 }
 
-/// An array indexed by `SpecialCodeIndex` indicating the current values
+/// An array indexed by [`SpecialCodeIndex`] indicating the current values
 /// of various special control codes.
 #[repr(transparent)]
 #[derive(Clone, Debug)]
@@ -968,7 +968,7 @@ impl core::ops::IndexMut<SpecialCodeIndex> for SpecialCodes {
     }
 }
 
-/// Indices for use with `Termios::special_codes`.
+/// Indices for use with [`Termios::special_codes`].
 pub struct SpecialCodeIndex(usize);
 
 #[rustfmt::skip]

@@ -1,3 +1,6 @@
+//! `Timespec` and related types, which are used by multiple public API
+//! modules.
+
 use crate::backend::c;
 
 /// `struct timespec`
