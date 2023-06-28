@@ -19,7 +19,7 @@ rust-version = "1.63"
 cc = { version = "1.0.68", optional = true }
 
 [dependencies]
-bitflags = "2.3.3"
+bitflags = { version = "2.3.3", default-features = false }
 itoa = { version = "1.0.1", default-features = false, optional = true }
 
 # Special dependencies used in rustc-dep-of-std mode.
@@ -124,7 +124,7 @@ default = ["std", "use-libc-auxv"]
 
 # This enables use of std. Disabling this enables `#![no_std], and requires
 # Rust 1.64 or newer.
-std = []
+std = ["bitflags/std"]
 
 # This is used in the port of std to rustix.
 rustc-dep-of-std = [
