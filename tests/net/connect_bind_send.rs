@@ -35,6 +35,7 @@ fn net_v4_connect_any() {
 }
 
 /// Test `connect_any` using `accept_with`.
+#[cfg(not(any(apple, windows, target_os = "haiku")))]
 #[test]
 fn net_v4_connect_any_accept_with() {
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
@@ -95,6 +96,7 @@ fn net_v6_connect_any() {
 }
 
 /// Similar, but with V6, using `accept_with`.
+#[cfg(not(any(apple, windows, target_os = "haiku")))]
 #[test]
 fn net_v6_connect_any_accept_with() {
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
