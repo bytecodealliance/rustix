@@ -66,7 +66,7 @@ by default. The rest of the API is conditional with cargo feature flags:
 | `pipe`     | [`rustix::pipe`]—Pipe operations.
 | `process`  | [`rustix::process`]—Process-associated operations.
 | `procfs`   | [`rustix::procfs`]—Utilities for reading `/proc` on Linux.
-| `pty`      | [`rustix::pty`]—Pseduoterminal operations.
+| `pty`      | [`rustix::pty`]—Pseudoterminal operations.
 | `rand`     | [`rustix::rand`]—Random-related operations.
 | `stdio`    | [`rustix::stdio`]—Stdio-related operations.
 | `system`   | [`rustix::system`]—System-related operations.
