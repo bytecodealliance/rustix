@@ -8,9 +8,10 @@
 #![allow(clippy::undocumented_unsafe_blocks)]
 
 use super::super::c;
+use super::super::conv::fs::oflags_for_open_how;
 use super::super::conv::{
-    by_ref, c_int, c_uint, dev_t, oflags_for_open_how, opt_mut, pass_usize, raw_fd, ret, ret_c_int,
-    ret_c_uint, ret_infallible, ret_owned_fd, ret_usize, size_of, slice, slice_mut, zero,
+    by_ref, c_int, c_uint, dev_t, opt_mut, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint,
+    ret_infallible, ret_owned_fd, ret_usize, size_of, slice, slice_mut, zero,
 };
 #[cfg(target_pointer_width = "64")]
 use super::super::conv::{loff_t, loff_t_from_u64, ret_u64};
