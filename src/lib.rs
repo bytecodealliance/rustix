@@ -233,6 +233,20 @@ pub mod runtime;
 // for API features that aren't enabled, declare them as `pub(crate)` so
 // that they're not public, but still available for internal use.
 
+#[cfg(all(
+    linux_raw,
+    not(windows),
+    not(feature = "fs"),
+    not(feature = "use-libc-auxv"),
+    not(target_vendor = "mustang"),
+    any(
+        feature = "param",
+        feature = "runtime",
+        feature = "time",
+        target_arch = "x86",
+    )
+))]
+pub(crate) mod fs;
 #[cfg(not(windows))]
 #[cfg(all(
     not(feature = "param"),

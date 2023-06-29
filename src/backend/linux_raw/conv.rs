@@ -32,8 +32,6 @@ use super::time::types::ClockId;
 use super::time::types::TimerfdClockId;
 use crate::fd::OwnedFd;
 use crate::ffi::CStr;
-#[cfg(feature = "fs")]
-use crate::fs::{FileType, Mode, OFlags};
 use crate::io;
 use crate::process::{Pid, Resource, Signal};
 use crate::utils::{as_mut_ptr, as_ptr};
@@ -45,9 +43,6 @@ use linux_raw_sys::general::__kernel_clockid_t;
 use linux_raw_sys::general::__kernel_loff_t;
 #[cfg(feature = "net")]
 use linux_raw_sys::general::socklen_t;
-#[cfg(target_pointer_width = "32")]
-#[cfg(feature = "fs")]
-use linux_raw_sys::general::O_LARGEFILE;
 
 /// Convert `SYS_*` constants for socketcall.
 #[cfg(target_arch = "x86")]
@@ -294,75 +289,159 @@ pub(super) fn socklen_t<'a, Num: ArgNumber>(i: socklen_t) -> ArgReg<'a, Num> {
     pass_usize(i as usize)
 }
 
-#[cfg(feature = "fs")]
-impl<'a, Num: ArgNumber> From<Mode> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(mode: Mode) -> Self {
-        pass_usize(mode.bits() as usize)
-    }
-}
+#[cfg(any(
+    feature = "fs",
+    all(
+        not(feature = "use-libc-auxv"),
+        not(target_vendor = "mustang"),
+        any(
+            feature = "param",
+            feature = "runtime",
+            feature = "time",
+            target_arch = "x86",
+        )
+    )
+))]
+pub(crate) mod fs {
+    use super::*;
+    use crate::fs::{FileType, Mode, OFlags};
+    #[cfg(target_pointer_width = "32")]
+    use linux_raw_sys::general::O_LARGEFILE;
 
-#[cfg(feature = "fs")]
-impl<'a, Num: ArgNumber> From<(Mode, FileType)> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(pair: (Mode, FileType)) -> Self {
-        pass_usize(pair.0.as_raw_mode() as usize | pair.1.as_raw_mode() as usize)
+    impl<'a, Num: ArgNumber> From<Mode> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(mode: Mode) -> Self {
+            pass_usize(mode.bits() as usize)
+        }
     }
-}
 
-#[cfg(feature = "fs")]
-impl<'a, Num: ArgNumber> From<crate::fs::AtFlags> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(flags: crate::fs::AtFlags) -> Self {
-        c_uint(flags.bits())
+    impl<'a, Num: ArgNumber> From<(Mode, FileType)> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(pair: (Mode, FileType)) -> Self {
+            pass_usize(pair.0.as_raw_mode() as usize | pair.1.as_raw_mode() as usize)
+        }
     }
-}
 
-#[cfg(feature = "fs")]
-impl<'a, Num: ArgNumber> From<crate::fs::XattrFlags> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(flags: crate::fs::XattrFlags) -> Self {
-        c_uint(flags.bits())
+    impl<'a, Num: ArgNumber> From<crate::fs::AtFlags> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(flags: crate::fs::AtFlags) -> Self {
+            c_uint(flags.bits())
+        }
     }
-}
 
-#[cfg(feature = "fs")]
-impl<'a, Num: ArgNumber> From<crate::fs::inotify::CreateFlags> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(flags: crate::fs::inotify::CreateFlags) -> Self {
-        c_uint(flags.bits())
+    impl<'a, Num: ArgNumber> From<crate::fs::XattrFlags> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(flags: crate::fs::XattrFlags) -> Self {
+            c_uint(flags.bits())
+        }
     }
-}
 
-#[cfg(feature = "fs")]
-impl<'a, Num: ArgNumber> From<crate::fs::inotify::WatchFlags> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(flags: crate::fs::inotify::WatchFlags) -> Self {
-        c_uint(flags.bits())
+    impl<'a, Num: ArgNumber> From<crate::fs::inotify::CreateFlags> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(flags: crate::fs::inotify::CreateFlags) -> Self {
+            c_uint(flags.bits())
+        }
     }
-}
 
-#[cfg(feature = "fs")]
-impl<'a, Num: ArgNumber> From<crate::fs::MemfdFlags> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(flags: crate::fs::MemfdFlags) -> Self {
-        c_uint(flags.bits())
+    impl<'a, Num: ArgNumber> From<crate::fs::inotify::WatchFlags> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(flags: crate::fs::inotify::WatchFlags) -> Self {
+            c_uint(flags.bits())
+        }
     }
-}
 
-#[cfg(feature = "fs")]
-impl<'a, Num: ArgNumber> From<crate::fs::RenameFlags> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(flags: crate::fs::RenameFlags) -> Self {
-        c_uint(flags.bits())
+    impl<'a, Num: ArgNumber> From<crate::fs::MemfdFlags> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(flags: crate::fs::MemfdFlags) -> Self {
+            c_uint(flags.bits())
+        }
     }
-}
 
-#[cfg(feature = "fs")]
-impl<'a, Num: ArgNumber> From<crate::fs::StatxFlags> for ArgReg<'a, Num> {
+    impl<'a, Num: ArgNumber> From<crate::fs::RenameFlags> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(flags: crate::fs::RenameFlags) -> Self {
+            c_uint(flags.bits())
+        }
+    }
+
+    impl<'a, Num: ArgNumber> From<crate::fs::StatxFlags> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(flags: crate::fs::StatxFlags) -> Self {
+            c_uint(flags.bits())
+        }
+    }
+
+    #[cfg(target_pointer_width = "32")]
     #[inline]
-    fn from(flags: crate::fs::StatxFlags) -> Self {
-        c_uint(flags.bits())
+    fn oflags_bits(oflags: OFlags) -> c::c_uint {
+        let mut bits = oflags.bits();
+        // Add `O_LARGEFILE`, unless `O_PATH` is set, as Linux returns `EINVAL`
+        // when both are set.
+        if !oflags.contains(OFlags::PATH) {
+            bits |= O_LARGEFILE;
+        }
+        bits
+    }
+
+    #[cfg(target_pointer_width = "64")]
+    #[inline]
+    const fn oflags_bits(oflags: OFlags) -> c::c_uint {
+        oflags.bits()
+    }
+
+    impl<'a, Num: ArgNumber> From<OFlags> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(oflags: OFlags) -> Self {
+            pass_usize(oflags_bits(oflags) as usize)
+        }
+    }
+
+    /// Convert an `OFlags` into a `u64` for use in the `open_how` struct.
+    #[inline]
+    pub(crate) fn oflags_for_open_how(oflags: OFlags) -> u64 {
+        u64::from(oflags_bits(oflags))
+    }
+
+    impl<'a, Num: ArgNumber> From<crate::fs::FallocateFlags> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(flags: crate::fs::FallocateFlags) -> Self {
+            c_uint(flags.bits())
+        }
+    }
+
+    impl<'a, Num: ArgNumber> From<crate::fs::Advice> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(advice: crate::fs::Advice) -> Self {
+            c_uint(advice as c::c_uint)
+        }
+    }
+
+    impl<'a, Num: ArgNumber> From<crate::fs::SealFlags> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(flags: crate::fs::SealFlags) -> Self {
+            c_uint(flags.bits())
+        }
+    }
+
+    impl<'a, Num: ArgNumber> From<crate::fs::Access> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(access: crate::fs::Access) -> Self {
+            c_uint(access.bits())
+        }
+    }
+
+    impl<'a, Num: ArgNumber> From<crate::backend::fs::types::MountFlagsArg> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(flags: crate::backend::fs::types::MountFlagsArg) -> Self {
+            c_uint(flags.0)
+        }
+    }
+
+    impl<'a, Num: ArgNumber> From<crate::backend::fs::types::UnmountFlags> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(flags: crate::backend::fs::types::UnmountFlags) -> Self {
+            c_uint(flags.bits())
+        }
     }
 }
 
@@ -493,49 +572,6 @@ pub(super) fn dev_t<'a, Num: ArgNumber>(dev: u64) -> io::Result<ArgReg<'a, Num>>
     Ok(pass_usize(dev.try_into().map_err(|_err| io::Errno::INVAL)?))
 }
 
-#[cfg(target_pointer_width = "32")]
-#[cfg(feature = "fs")]
-#[inline]
-fn oflags_bits(oflags: OFlags) -> c::c_uint {
-    let mut bits = oflags.bits();
-    // Add `O_LARGEFILE`, unless `O_PATH` is set, as Linux returns `EINVAL`
-    // when both are set.
-    if !oflags.contains(OFlags::PATH) {
-        bits |= O_LARGEFILE;
-    }
-    bits
-}
-
-#[cfg(target_pointer_width = "64")]
-#[cfg(feature = "fs")]
-#[inline]
-const fn oflags_bits(oflags: OFlags) -> c::c_uint {
-    oflags.bits()
-}
-
-#[cfg(feature = "fs")]
-impl<'a, Num: ArgNumber> From<OFlags> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(oflags: OFlags) -> Self {
-        pass_usize(oflags_bits(oflags) as usize)
-    }
-}
-
-/// Convert an `OFlags` into a `u64` for use in the `open_how` struct.
-#[cfg(feature = "fs")]
-#[inline]
-pub(super) fn oflags_for_open_how(oflags: OFlags) -> u64 {
-    u64::from(oflags_bits(oflags))
-}
-
-#[cfg(feature = "fs")]
-impl<'a, Num: ArgNumber> From<crate::fs::FallocateFlags> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(flags: crate::fs::FallocateFlags) -> Self {
-        c_uint(flags.bits())
-    }
-}
-
 /// Convert a `Resource` into a syscall argument.
 impl<'a, Num: ArgNumber> From<Resource> for ArgReg<'a, Num> {
     #[inline]
@@ -560,22 +596,6 @@ impl<'a, Num: ArgNumber> From<Signal> for ArgReg<'a, Num> {
     #[inline]
     fn from(sig: Signal) -> Self {
         pass_usize(sig as usize)
-    }
-}
-
-#[cfg(feature = "fs")]
-impl<'a, Num: ArgNumber> From<crate::fs::Advice> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(advice: crate::fs::Advice) -> Self {
-        c_uint(advice as c::c_uint)
-    }
-}
-
-#[cfg(feature = "fs")]
-impl<'a, Num: ArgNumber> From<crate::fs::SealFlags> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(flags: crate::fs::SealFlags) -> Self {
-        c_uint(flags.bits())
     }
 }
 
@@ -663,14 +683,6 @@ impl<'a, Num: ArgNumber> From<(crate::thread::FutexOperation, crate::thread::Fut
     }
 }
 
-#[cfg(feature = "fs")]
-impl<'a, Num: ArgNumber> From<crate::fs::Access> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(access: crate::fs::Access) -> Self {
-        c_uint(access.bits())
-    }
-}
-
 #[cfg(feature = "net")]
 impl<'a, Num: ArgNumber> From<crate::net::SocketType> for ArgReg<'a, Num> {
     #[inline]
@@ -698,24 +710,6 @@ impl<'a, Num: ArgNumber, T> From<&'a mut [MaybeUninit<T>]> for ArgReg<'a, Num> {
     #[inline]
     fn from(t: &'a mut [MaybeUninit<T>]) -> Self {
         raw_arg(t.as_mut_ptr().cast())
-    }
-}
-
-#[cfg(feature = "fs")]
-#[cfg(linux_kernel)]
-impl<'a, Num: ArgNumber> From<crate::backend::fs::types::MountFlagsArg> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(flags: crate::backend::fs::types::MountFlagsArg) -> Self {
-        c_uint(flags.0)
-    }
-}
-
-#[cfg(feature = "fs")]
-#[cfg(linux_kernel)]
-impl<'a, Num: ArgNumber> From<crate::backend::fs::types::UnmountFlags> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(flags: crate::backend::fs::types::UnmountFlags) -> Self {
-        c_uint(flags.bits())
     }
 }
 

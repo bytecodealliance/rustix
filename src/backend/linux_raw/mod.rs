@@ -24,7 +24,19 @@ mod vdso;
 #[cfg(any(feature = "time", target_arch = "x86"))]
 mod vdso_wrappers;
 
-#[cfg(feature = "fs")]
+#[cfg(any(
+    feature = "fs",
+    all(
+        not(feature = "use-libc-auxv"),
+        not(target_vendor = "mustang"),
+        any(
+            feature = "param",
+            feature = "runtime",
+            feature = "time",
+            target_arch = "x86",
+        )
+    )
+))]
 pub(crate) mod fs;
 pub(crate) mod io;
 #[cfg(feature = "io_uring")]
