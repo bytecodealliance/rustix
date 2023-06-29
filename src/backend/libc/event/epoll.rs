@@ -323,13 +323,13 @@ pub union EventData {
 impl EventData {
     /// Construct a new value containing a `u64`.
     #[inline]
-    pub fn new_u64(value: u64) -> Self {
+    pub const fn new_u64(value: u64) -> Self {
         Self { as_u64: value }
     }
 
     /// Construct a new value containing a `*mut c_void`.
     #[inline]
-    pub fn new_ptr(value: *mut c_void) -> Self {
+    pub const fn new_ptr(value: *mut c_void) -> Self {
         Self {
             sixty_four_bit_pointer: SixtyFourBitPointer {
                 pointer: value,

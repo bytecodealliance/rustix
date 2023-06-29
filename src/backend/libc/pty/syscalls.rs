@@ -32,8 +32,7 @@ pub(crate) fn ptsname(fd: BorrowedFd, mut buffer: Vec<u8>) -> io::Result<CString
     loop {
         // On platforms with `ptsname_r`, use it.
         #[cfg(any(target_os = "freebsd", linux_like, target_os = "fuchsia"))]
-        let r =
-            unsafe { libc::ptsname_r(borrowed_fd(fd), buffer.as_mut_ptr().cast(), buffer.len()) };
+        let r = unsafe { c::ptsname_r(borrowed_fd(fd), buffer.as_mut_ptr().cast(), buffer.len()) };
 
         // MacOS 10.13.4 has `ptsname_r`; use it if we have it, otherwise fall
         // back to calling the underlying ioctl directly.
@@ -46,7 +45,7 @@ pub(crate) fn ptsname(fd: BorrowedFd, mut buffer: Vec<u8>) -> io::Result<CString
             } else {
                 // The size declared in the `TIOCPTYGNAME` macro in sys/ttycom.h is 128.
                 let mut name: [u8; 128] = [0_u8; 128];
-                match libc::ioctl(borrowed_fd(fd), libc::TIOCPTYGNAME as u64, &mut name) {
+                match c::ioctl(borrowed_fd(fd), c::TIOCPTYGNAME as u64, &mut name) {
                     0 => {
                         let len = CStr::from_ptr(name.as_ptr().cast()).to_bytes().len();
                         std::ptr::copy_nonoverlapping(name.as_ptr(), buffer.as_mut_ptr(), len + 1);
@@ -60,7 +59,7 @@ pub(crate) fn ptsname(fd: BorrowedFd, mut buffer: Vec<u8>) -> io::Result<CString
         if r == 0 {
             return Ok(unsafe { CStr::from_ptr(buffer.as_ptr().cast()).to_owned() });
         }
-        if r != libc::ERANGE {
+        if r != c::ERANGE {
             return Err(io::Errno::from_raw_os_error(r));
         }
 

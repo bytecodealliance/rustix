@@ -215,7 +215,7 @@ pub(crate) unsafe fn munlock(addr: *mut c::c_void, length: usize) -> io::Result<
 pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
     syscall! {
         fn userfaultfd(
-            flags: libc::c_int
+            flags: c::c_int
         ) via SYS_userfaultfd -> c::c_int
     }
     ret_owned_fd(userfaultfd(bitflags_bits!(flags)))

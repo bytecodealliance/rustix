@@ -853,7 +853,7 @@ fn statfs_to_statvfs(statfs: StatFs) -> StatVfs {
         f_files: statfs.f_files as u64,
         f_ffree: statfs.f_ffree as u64,
         f_favail: statfs.f_ffree as u64,
-        f_fsid: f_fsid_val0 as u32 as u64 | ((f_fsid_val1 as u32 as u64) << 32),
+        f_fsid: u64::from(f_fsid_val0 as u32) | u64::from(f_fsid_val1 as u32) << 32,
         f_flag: StatVfsMountFlags::from_bits_retain(statfs.f_flags as u64),
         f_namemax: statfs.f_namelen as u64,
     }

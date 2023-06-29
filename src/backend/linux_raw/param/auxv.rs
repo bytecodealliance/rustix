@@ -10,7 +10,6 @@ use crate::backend::elf::*;
 use crate::fd::OwnedFd;
 #[cfg(feature = "param")]
 use crate::ffi::CStr;
-#[cfg(not(target_vendor = "mustang"))]
 use crate::fs::{Mode, OFlags};
 use crate::utils::{as_ptr, check_raw_pointer};
 use alloc::vec::Vec;
@@ -130,7 +129,6 @@ static PHDR: AtomicPtr<Elf_Phdr> = AtomicPtr::new(null_mut());
 static PHNUM: AtomicUsize = AtomicUsize::new(0);
 static EXECFN: AtomicPtr<c::c_char> = AtomicPtr::new(null_mut());
 
-#[cfg(not(target_vendor = "mustang"))]
 fn pr_get_auxv() -> crate::io::Result<Vec<u8>> {
     use super::super::conv::{c_int, pass_usize, ret_usize};
     const PR_GET_AUXV: c::c_int = 0x41555856;
@@ -160,9 +158,9 @@ fn pr_get_auxv() -> crate::io::Result<Vec<u8>> {
     return Ok(buffer);
 }
 
-/// On non-Mustang platforms, we read the aux vector via the prctl PR_GET_AUXV, with a fallback to
-/// /proc/self/auxv for kernels that don't support PR_GET_AUXV.
-#[cfg(not(target_vendor = "mustang"))]
+/// On non-Mustang platforms, we read the aux vector via the `prctl`
+/// `PR_GET_AUXV`, with a fallback to /proc/self/auxv for kernels that don't
+/// support `PR_GET_AUXV`.
 fn init_auxv() {
     match pr_get_auxv() {
         Ok(buffer) => {
@@ -184,11 +182,6 @@ fn init_auxv() {
     let file = crate::fs::open("/proc/self/auxv", OFlags::RDONLY, Mode::empty()).unwrap();
 
     let _ = init_from_auxv_file(file);
-}
-
-#[cfg(target_vendor = "mustang")]
-fn init_auxv() {
-    panic!("mustang should have initialized the auxv values");
 }
 
 /// Process auxv entries from the open file `auxv`.

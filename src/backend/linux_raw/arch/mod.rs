@@ -133,8 +133,8 @@ macro_rules! syscall {
     };
 }
 
-// Macro to invoke a syscall that always uses direct assembly, rather than the vdso. Useful when
-// still finding the vdso.
+// Macro to invoke a syscall that always uses direct assembly, rather than the
+// vDSO. Useful when still finding the vDSO.
 #[allow(unused_macros)]
 macro_rules! syscall_always_asm {
     ($nr:ident) => {
