@@ -123,16 +123,25 @@ pub(crate) fn open(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<OwnedF
     if oflags.contains(OFlags::TMPFILE) && crate::backend::if_glibc_is_less_than_2_25() {
         return open_via_syscall(path, oflags, mode);
     }
-    unsafe {
-        // Pass `mode` as a `c_ulong` even if `mode_t` is narrower, since
-        // `c::open` is declared as a variadic function and narrower
-        // arguments are promoted.
-        ret_owned_fd(c::open(
-            c_str(path),
-            bitflags_bits!(oflags),
-            mode.bits() as c::c_ulong,
-        ))
-    }
+
+    // On these platforms, `mode_t` is `u16` and can't be passed directly to
+    // a variadic function.
+    #[cfg(any(
+        apple,
+        freebsdlike,
+        all(target_os = "android", target_pointer_width = "32")
+    ))]
+    let mode: c::c_uint = mode.bits().into();
+
+    // Otherwise, cast to `mode_t` as that's what `open` is documented to take.
+    #[cfg(not(any(
+        apple,
+        freebsdlike,
+        all(target_os = "android", target_pointer_width = "32")
+    )))]
+    let mode: c::mode_t = mode.bits() as _;
+
+    unsafe { ret_owned_fd(c::open(c_str(path), bitflags_bits!(oflags), mode)) }
 }
 
 /// Use a direct syscall (via libc) for `openat`.
@@ -177,15 +186,30 @@ pub(crate) fn openat(
     if oflags.contains(OFlags::TMPFILE) && crate::backend::if_glibc_is_less_than_2_25() {
         return openat_via_syscall(dirfd, path, oflags, mode);
     }
+
+    // On these platforms, `mode_t` is `u16` and can't be passed directly to
+    // a variadic function.
+    #[cfg(any(
+        apple,
+        freebsdlike,
+        all(target_os = "android", target_pointer_width = "32")
+    ))]
+    let mode: c::c_uint = mode.bits().into();
+
+    // Otherwise, cast to `mode_t` as that's what `open` is documented to take.
+    #[cfg(not(any(
+        apple,
+        freebsdlike,
+        all(target_os = "android", target_pointer_width = "32")
+    )))]
+    let mode: c::mode_t = mode.bits() as _;
+
     unsafe {
-        // Pass `mode` as a `c_ulong` even if `mode_t` is narrower, since
-        // `c::openat` is declared as a variadic function and narrower
-        // arguments are promoted.
         ret_owned_fd(c::openat(
             borrowed_fd(dirfd),
             c_str(path),
             bitflags_bits!(oflags),
-            mode.bits() as c::c_ulong,
+            mode,
         ))
     }
 }
@@ -924,9 +948,6 @@ pub(crate) fn chmodat(
         return Err(io::Errno::INVAL);
     }
     unsafe {
-        // Pass `mode` as a `c_ulong` even if `mode_t` is narrower, since
-        // `c::syscall` is declared as a variadic function and narrower
-        // arguments are promoted.
         ret(fchmodat(
             borrowed_fd(dirfd),
             c_str(path),
