@@ -148,6 +148,10 @@ jobs:
     - run: cargo check --workspace --release --no-default-features --features use-libc -vv
     - run: cargo check --workspace --release --no-default-features --features all-apis -vv
     - run: cargo check --workspace --release --no-default-features --features all-apis,use-libc -vv
+    - run: cargo check --workspace --release --no-default-features --features time -vv
+    - run: cargo check --workspace --release --no-default-features --features time,use-libc -vv
+    - run: rustup component add rust-src
+    - run: cargo check --workspace --release --no-default-features --target=i686-unknown-linux-gnu -Zbuild-std -vv
 
   check_nightly:
     name: Check nightly-only targets

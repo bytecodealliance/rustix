@@ -21,7 +21,19 @@ pub(crate) use linux_raw_sys::general::{
 #[cfg(test)]
 pub(crate) use linux_raw_sys::general::epoll_event;
 
-#[cfg(feature = "fs")]
+#[cfg(any(
+    feature = "fs",
+    all(
+        not(feature = "use-libc-auxv"),
+        not(target_vendor = "mustang"),
+        any(
+            feature = "param",
+            feature = "runtime",
+            feature = "time",
+            target_arch = "x86",
+        )
+    )
+))]
 pub(crate) use linux_raw_sys::general::{
     AT_FDCWD, NFS_SUPER_MAGIC, O_LARGEFILE, PROC_SUPER_MAGIC, UTIME_NOW, UTIME_OMIT, XATTR_CREATE,
     XATTR_REPLACE,

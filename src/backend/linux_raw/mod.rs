@@ -32,7 +32,19 @@ mod vdso_wrappers;
 
 #[cfg(feature = "event")]
 pub(crate) mod event;
-#[cfg(feature = "fs")]
+#[cfg(any(
+    feature = "fs",
+    all(
+        not(feature = "use-libc-auxv"),
+        not(target_vendor = "mustang"),
+        any(
+            feature = "param",
+            feature = "runtime",
+            feature = "time",
+            target_arch = "x86",
+        )
+    )
+))]
 pub(crate) mod fs;
 pub(crate) mod io;
 #[cfg(feature = "io_uring")]
@@ -82,7 +94,21 @@ pub(crate) mod c;
 pub(crate) mod pid;
 #[cfg(any(feature = "process", feature = "thread"))]
 pub(crate) mod prctl;
-#[cfg(any(feature = "fs", feature = "thread", feature = "process"))]
+#[cfg(any(
+    feature = "fs",
+    feature = "process",
+    feature = "thread",
+    all(
+        not(feature = "use-libc-auxv"),
+        not(target_vendor = "mustang"),
+        any(
+            feature = "param",
+            feature = "runtime",
+            feature = "time",
+            target_arch = "x86",
+        )
+    )
+))]
 pub(crate) mod ugid;
 
 /// The maximum number of buffers that can be passed into a vectored I/O system

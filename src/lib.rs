@@ -183,7 +183,20 @@ pub mod event;
 #[cfg(not(windows))]
 pub mod ffi;
 #[cfg(not(windows))]
-#[cfg(feature = "fs")]
+#[cfg(any(
+    feature = "fs",
+    all(
+        linux_raw,
+        not(feature = "use-libc-auxv"),
+        not(target_vendor = "mustang"),
+        any(
+            feature = "param",
+            feature = "runtime",
+            feature = "time",
+            target_arch = "x86",
+        )
+    )
+))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "fs")))]
 pub mod fs;
 pub mod io;
@@ -204,7 +217,21 @@ pub mod net;
 #[cfg_attr(doc_cfg, doc(cfg(feature = "param")))]
 pub mod param;
 #[cfg(not(windows))]
-#[cfg(any(feature = "fs", feature = "net"))]
+#[cfg(any(
+    feature = "fs",
+    feature = "net",
+    all(
+        linux_raw,
+        not(feature = "use-libc-auxv"),
+        not(target_vendor = "mustang"),
+        any(
+            feature = "param",
+            feature = "runtime",
+            feature = "time",
+            target_arch = "x86",
+        )
+    )
+))]
 #[cfg_attr(doc_cfg, doc(cfg(any(feature = "fs", feature = "net"))))]
 pub mod path;
 #[cfg(feature = "pipe")]
@@ -282,9 +309,35 @@ mod signal;
     feature = "fs",
     feature = "runtime",
     feature = "thread",
-    feature = "time"
+    feature = "time",
+    all(
+        linux_raw,
+        not(feature = "use-libc-auxv"),
+        not(target_vendor = "mustang"),
+        any(
+            feature = "param",
+            feature = "runtime",
+            feature = "time",
+            target_arch = "x86",
+        )
+    )
 ))]
 mod timespec;
 #[cfg(not(any(windows, target_os = "wasi")))]
-#[cfg(any(feature = "fs", feature = "process", feature = "thread"))]
+#[cfg(any(
+    feature = "fs",
+    feature = "process",
+    feature = "thread",
+    all(
+        linux_raw,
+        not(feature = "use-libc-auxv"),
+        not(target_vendor = "mustang"),
+        any(
+            feature = "param",
+            feature = "runtime",
+            feature = "time",
+            target_arch = "x86",
+        )
+    )
+))]
 mod ugid;
