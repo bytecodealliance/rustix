@@ -6,7 +6,12 @@ fn test_eventfd() {
     use std::mem::size_of;
     use std::thread;
 
-    let efd = eventfd(0, EventfdFlags::CLOEXEC).unwrap();
+    let efd = match eventfd(0, EventfdFlags::CLOEXEC) {
+        Ok(efd) => efd,
+        #[cfg(target_os = "freebsd")]
+        Err(rustix::io::Errno::NOSYS) => return, // FreeBSD 12 lacks `eventfd`
+        Err(e) => Err(e).unwrap(),
+    };
 
     let child = thread::spawn(move || {
         for u in [1_u64, 3, 6, 11, 5000] {
