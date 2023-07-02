@@ -31,8 +31,21 @@ pub(crate) fn ptsname(fd: BorrowedFd, mut buffer: Vec<u8>) -> io::Result<CString
 
     loop {
         // On platforms with `ptsname_r`, use it.
-        #[cfg(any(target_os = "freebsd", linux_like, target_os = "fuchsia"))]
+        #[cfg(any(linux_like, target_os = "fuchsia"))]
         let r = unsafe { c::ptsname_r(borrowed_fd(fd), buffer.as_mut_ptr().cast(), buffer.len()) };
+
+        // FreeBSD 12 doesn't have `ptsname_r`.
+        #[cfg(target_os = "freebsd")]
+        let r = unsafe {
+            weakcall! {
+                fn ptsname_r(
+                     fildes: c::c_int,
+                     buffer: *mut c::c_char,
+                     buflen: c::size_t
+                ) -> c::c_int
+            }
+            ptsname_r(borrowed_fd(fd), buffer.as_mut_ptr().cast(), buffer.len())
+        };
 
         // MacOS 10.13.4 has `ptsname_r`; use it if we have it, otherwise fall
         // back to calling the underlying ioctl directly.
