@@ -37,14 +37,18 @@ pub(crate) fn ptsname(fd: BorrowedFd, mut buffer: Vec<u8>) -> io::Result<CString
         // FreeBSD 12 doesn't have `ptsname_r`.
         #[cfg(target_os = "freebsd")]
         let r = unsafe {
-            weakcall! {
+            weak! {
                 fn ptsname_r(
-                     fildes: c::c_int,
-                     buffer: *mut c::c_char,
-                     buflen: c::size_t
+                     c::c_int,
+                     *mut c::c_char,
+                     c::size_t
                 ) -> c::c_int
             }
-            ptsname_r(borrowed_fd(fd), buffer.as_mut_ptr().cast(), buffer.len())
+            if let Some(func) = ptsname_r.get() {
+                func(borrowed_fd(fd), buffer.as_mut_ptr().cast(), buffer.len())
+            } else {
+                libc::ENOSYS
+            }
         };
 
         // MacOS 10.13.4 has `ptsname_r`; use it if we have it, otherwise fall
