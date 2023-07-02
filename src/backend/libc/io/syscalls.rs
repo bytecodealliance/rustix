@@ -282,7 +282,22 @@ pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> 
 
 #[cfg(any(target_os = "freebsd", target_os = "illumos"))]
 pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(c::eventfd(initval, flags.bits())) }
+    // `eventfd` was added in FreeBSD 13, so it isn't available on FreeBSD 12.
+    #[cfg(target_os = "freebsd")]
+    unsafe {
+        weakcall! {
+            fn eventfd(
+                initval: c::c_uint,
+                flags: c::c_int
+            ) -> c::c_int
+        }
+        ret_owned_fd(eventfd(initval, flags.bits()))
+    }
+
+    #[cfg(target_os = "illumos")]
+    unsafe {
+        ret_owned_fd(c::eventfd(initval, flags.bits()))
+    }
 }
 
 #[cfg(linux_kernel)]
