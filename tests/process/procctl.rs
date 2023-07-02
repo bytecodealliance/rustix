@@ -13,7 +13,11 @@ fn test_trace_status() {
 
 #[test]
 fn test_reaper_status() {
-    assert_eq!(set_reaper_status(false), Err(io::Errno::INVAL));
+    match set_reaper_status(false).unwrap_err() {
+        io::Errno::INVAL => (),
+        io::Errno::PERM => return, // FreeBSD 12 doesn't support this
+        err => Err(err).unwrap(),
+    };
     set_reaper_status(true).unwrap();
     let status_while_acq = dbg!(get_reaper_status(None).unwrap());
     set_reaper_status(false).unwrap();
@@ -38,7 +42,11 @@ fn test_trapcap() {
 
 #[test]
 fn test_no_new_privs() {
-    assert!(!no_new_privs(None).unwrap());
+    match no_new_privs(None) {
+        Ok(flag) => assert!(!flag),
+        Err(io::Errno::INVAL) => return, // FreeBSD 12 doesn't support this
+        Err(err) => Err(err).unwrap(),
+    };
     set_no_new_privs(None).unwrap();
     assert!(no_new_privs(None).unwrap());
     // No going back but, well, we're not gonna execute SUID binaries from the
