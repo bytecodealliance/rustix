@@ -256,6 +256,11 @@ pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<
     unsafe { ret_owned_fd(c::fcntl(borrowed_fd(fd), c::F_DUPFD_CLOEXEC, min)) }
 }
 
+#[cfg(target_os = "espidf")]
+pub(crate) fn fcntl_dupfd(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(c::fcntl(borrowed_fd(fd), c::F_DUPFD, min)) }
+}
+
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::dup(borrowed_fd(fd))) }

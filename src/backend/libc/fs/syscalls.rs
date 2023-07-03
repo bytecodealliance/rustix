@@ -1135,6 +1135,7 @@ pub(crate) fn fcntl_add_seals(fd: BorrowedFd<'_>, seals: SealFlags) -> io::Resul
 
 #[cfg(not(any(
     target_os = "emscripten",
+    target_os = "espidf",
     target_os = "fuchsia",
     target_os = "redox",
     target_os = "wasi"
