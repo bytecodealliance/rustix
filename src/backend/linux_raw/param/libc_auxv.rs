@@ -41,14 +41,10 @@ extern "C" {
 
 #[cfg(target_os = "android")]
 const _SC_PAGESIZE: c::c_int = 39;
-#[cfg(target_os = "emscripten")]
-const _SC_PAGESIZE: c::c_int = 30;
 #[cfg(target_os = "linux")]
 const _SC_PAGESIZE: c::c_int = 30;
 #[cfg(target_os = "android")]
 const _SC_CLK_TCK: c::c_int = 6;
-#[cfg(target_os = "emscripten")]
-const _SC_CLK_TCK: c::c_int = 2;
 #[cfg(target_os = "linux")]
 const _SC_CLK_TCK: c::c_int = 2;
 

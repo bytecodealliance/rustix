@@ -13,12 +13,10 @@ use crate::ffi::CString;
 use crate::io;
 use crate::path::DecInt;
 use crate::pty::OpenptFlags;
-#[cfg(any(apple, freebsdlike, linux_like, target_os = "fuchsia"))]
 use alloc::vec::Vec;
 use core::mem::MaybeUninit;
 use linux_raw_sys::ioctl::{TIOCGPTN, TIOCGPTPEER, TIOCSPTLCK};
 
-#[cfg(any(apple, freebsdlike, linux_like, target_os = "fuchsia"))]
 #[inline]
 pub(crate) fn ptsname(fd: BorrowedFd, mut buffer: Vec<u8>) -> io::Result<CString> {
     unsafe {
