@@ -12,8 +12,8 @@
 #[cfg(target_arch = "x86")]
 use super::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
 use super::vdso;
-#[cfg(all(asm, target_arch = "x86"))]
-use core::arch::asm;
+#[cfg(target_arch = "x86")]
+use core::arch::global_asm;
 use core::mem::transmute;
 use core::ptr::null_mut;
 use core::sync::atomic::AtomicPtr;
@@ -310,20 +310,33 @@ unsafe fn _rustix_clock_gettime_via_syscall(
     ret(syscall!(__NR_clock_gettime, c_int(clockid), res))
 }
 
-/// A symbol pointing to an `int 0x80` instruction. This “function” is only
-/// called from assembly, and only with the x86 syscall calling convention,
-/// so its signature here is not its true signature.
-#[cfg(all(asm, target_arch = "x86"))]
-#[naked]
-unsafe extern "C" fn rustix_int_0x80() {
-    asm!("int $$0x80", "ret", options(noreturn))
-}
-
-// The outline version of the `rustix_int_0x80` above.
-#[cfg(all(not(asm), target_arch = "x86"))]
+#[cfg(target_arch = "x86")]
 extern "C" {
+    /// A symbol pointing to an `int 0x80` instruction. This “function” is only
+    /// called from assembly, and only with the x86 syscall calling convention.
+    /// so its signature here is not its true signature.
+    ///
+    /// This extern block and the `global_asm!` below can be replaced with
+    /// `#[naked]` if it's stabilized.
     fn rustix_int_0x80();
 }
+
+#[cfg(target_arch = "x86")]
+global_asm!(
+    r#"
+    .section    .text.rustix_int_0x80,"ax",@progbits
+    .p2align    4
+    .weak       rustix_int_0x80
+    .hidden     rustix_int_0x80
+    .type       rustix_int_0x80, @function
+rustix_int_0x80:
+    .cfi_startproc
+    int    0x80
+    ret
+    .cfi_endproc
+    .size rustix_int_0x80, .-rustix_int_0x80
+"#
+);
 
 fn minimal_init() {
     // SAFETY: Store default function addresses in static storage so that if we
