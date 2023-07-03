@@ -5,11 +5,9 @@
 //! they match with the kernel convention as closely as possible, to minimize
 //! the amount of out-of-line code we need.
 //!
-//! This is needed because as of our MSRV of 1.63, inline asm and naked
-//! functions are experimental.
+//! This is needed because as of our MSRV of 1.63, inline asm are experimental
+//! for some architectures.
 
-#[cfg(target_arch = "x86")]
-mod x86;
 // For these architectures, pass the `nr` argument last.
 #[cfg(any(
     target_arch = "mips",
@@ -24,5 +22,3 @@ mod nr_last;
     target_arch = "powerpc64",
 ))]
 pub(in crate::backend) use nr_last::*;
-#[cfg(target_arch = "x86")]
-pub(in crate::backend) use x86::*;
