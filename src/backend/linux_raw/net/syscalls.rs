@@ -430,6 +430,7 @@ pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Resu
     #[cfg(not(any(
         target_arch = "aarch64",
         target_arch = "mips64",
+        target_arch = "mips64r6",
         target_arch = "riscv64",
         target_arch = "x86",
         target_arch = "x86_64",
@@ -440,6 +441,7 @@ pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Resu
     #[cfg(any(
         target_arch = "aarch64",
         target_arch = "mips64",
+        target_arch = "mips64r6",
         target_arch = "riscv64",
         target_arch = "x86_64",
     ))]
@@ -585,6 +587,7 @@ pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::
     #[cfg(not(any(
         target_arch = "aarch64",
         target_arch = "mips64",
+        target_arch = "mips64r6",
         target_arch = "riscv64",
         target_arch = "x86",
         target_arch = "x86_64",
@@ -595,6 +598,7 @@ pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::
     #[cfg(any(
         target_arch = "aarch64",
         target_arch = "mips64",
+        target_arch = "mips64r6",
         target_arch = "riscv64",
         target_arch = "x86_64",
     ))]

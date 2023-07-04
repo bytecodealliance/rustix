@@ -62,7 +62,7 @@ pub(super) const EM_CURRENT: u16 = 40; // EM_ARM
 pub(super) const EM_CURRENT: u16 = 3; // EM_386
 #[cfg(target_arch = "powerpc64")]
 pub(super) const EM_CURRENT: u16 = 21; // EM_PPC64
-#[cfg(any(target_arch = "mips", target_arch = "mips64"))]
+#[cfg(any(target_arch = "mips", target_arch = "mips64", target_arch = "mips64r6"))]
 pub(super) const EM_CURRENT: u16 = 8; // EM_MIPS
 #[cfg(target_arch = "x86_64")]
 pub(super) const EM_CURRENT: u16 = 62; // EM_X86_64

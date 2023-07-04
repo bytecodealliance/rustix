@@ -24,6 +24,7 @@ pub(in crate::backend) mod asm;
     target_arch = "aarch64",
     target_arch = "mips",
     target_arch = "mips64",
+    target_arch = "mips64r6",
     target_arch = "powerpc64",
     target_arch = "riscv64",
     target_arch = "x86_64",

@@ -104,7 +104,10 @@ pub(crate) use linux_raw_sys::{
 
 // On MIPS, `TCSANOW` et al have `TCSETS` added to them, so we need it to
 // subtract it out.
-#[cfg(all(feature = "termios", any(target_arch = "mips", target_arch = "mips64")))]
+#[cfg(all(
+    feature = "termios",
+    any(target_arch = "mips", target_arch = "mips64", target_arch = "mips64r6")
+))]
 pub(crate) use linux_raw_sys::ioctl::TCSETS;
 
 // Define our own `uid_t` and `gid_t` if the kernel's versions are not 32-bit.
@@ -135,6 +138,7 @@ pub(crate) const SIGTERM: c_int = linux_raw_sys::general::SIGTERM as _;
 #[cfg(not(any(
     target_arch = "mips",
     target_arch = "mips64",
+    target_arch = "mips64r6",
     target_arch = "sparc",
     target_arch = "sparc64"
 )))]
@@ -157,6 +161,7 @@ pub(crate) const SIGSYS: c_int = linux_raw_sys::general::SIGSYS as _;
 #[cfg(any(
     target_arch = "mips",
     target_arch = "mips64",
+    target_arch = "mips64r6",
     target_arch = "sparc",
     target_arch = "sparc64"
 ))]

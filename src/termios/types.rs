@@ -1274,6 +1274,7 @@ fn termios_layouts() {
                 any(
                     target_arch = "mips",
                     target_arch = "mips64",
+                    target_arch = "mips64r6",
                     target_arch = "sparc",
                     target_arch = "sparc64"
                 )
@@ -1287,6 +1288,7 @@ fn termios_layouts() {
                 any(
                     target_arch = "mips",
                     target_arch = "mips64",
+                    target_arch = "mips64r6",
                     target_arch = "sparc",
                     target_arch = "sparc64"
                 )
@@ -1388,13 +1390,13 @@ fn termios_ioctl_contiguity() {
     const_assert_eq!(c::TCSAFLUSH - c::TCSANOW, 2);
 
     // MIPS is different here.
-    #[cfg(any(target_arch = "mips", target_arch = "mips64"))]
+    #[cfg(any(target_arch = "mips", target_arch = "mips64", target_arch = "mips64r6"))]
     {
         assert_eq!(i128::from(c::TCSANOW) - i128::from(c::TCSETS), 0);
         assert_eq!(i128::from(c::TCSADRAIN) - i128::from(c::TCSETS), 1);
         assert_eq!(i128::from(c::TCSAFLUSH) - i128::from(c::TCSETS), 2);
     }
-    #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
+    #[cfg(not(any(target_arch = "mips", target_arch = "mips64", target_arch = "mips64r6")))]
     {
         const_assert_eq!(c::TCSANOW, 0);
         const_assert_eq!(c::TCSADRAIN, 1);

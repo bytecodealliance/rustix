@@ -631,7 +631,11 @@ pub enum FlockOperation {
 // On 32-bit, and mips64, Linux's `struct stat64` has a 32-bit `st_mtime` and
 // friends, so we use our own struct, populated from `statx` where possible, to
 // avoid the y2038 bug.
-#[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
+#[cfg(any(
+    target_pointer_width = "32",
+    target_arch = "mips64",
+    target_arch = "mips64r6"
+))]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 #[allow(missing_docs)]
@@ -658,7 +662,11 @@ pub struct Stat {
 ///
 /// [`statat`]: crate::fs::statat
 /// [`fstat`]: crate::fs::fstat
-#[cfg(all(target_pointer_width = "64", not(target_arch = "mips64")))]
+#[cfg(all(
+    target_pointer_width = "64",
+    not(target_arch = "mips64"),
+    not(target_arch = "mips64r6")
+))]
 pub type Stat = linux_raw_sys::general::stat;
 
 /// `struct statfs` for use with [`statfs`] and [`fstatfs`].
@@ -719,11 +727,11 @@ pub type RawMode = c::c_uint;
 pub type Dev = u64;
 
 /// `__fsword_t`
-#[cfg(not(target_arch = "mips64"))]
+#[cfg(not(any(target_arch = "mips64", target_arch = "mips64r6")))]
 pub type FsWord = linux_raw_sys::general::__fsword_t;
 
 /// `__fsword_t`
-#[cfg(target_arch = "mips64")]
+#[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
 pub type FsWord = i64;
 
 bitflags! {

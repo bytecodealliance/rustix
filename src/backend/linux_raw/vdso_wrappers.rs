@@ -401,7 +401,7 @@ fn init() {
             let ptr = vdso.sym(cstr!("LINUX_2.6.15"), cstr!("__kernel_clock_gettime"));
             #[cfg(target_arch = "mips")]
             let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime64"));
-            #[cfg(target_arch = "mips64")]
+            #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
             let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime"));
 
             // On all 64-bit platforms, the 64-bit `clock_gettime` symbols are
