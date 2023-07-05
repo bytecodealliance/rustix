@@ -6,7 +6,6 @@ task:
   freebsd_instance:
     image_family: freebsd-13-0-snap
   setup_script:
-    - pkg install -y curl
     - curl https://sh.rustup.rs -sSf --output rustup.sh
     - sh rustup.sh --default-toolchain stable -y --profile=minimal
     - . $HOME/.cargo/env
@@ -20,7 +19,6 @@ task:
   freebsd_instance:
     image_family: freebsd-12-1
   setup_script:
-    - pkg install -y curl
     - curl https://sh.rustup.rs -sSf --output rustup.sh
     - sh rustup.sh --default-toolchain stable -y --profile=minimal
     - . $HOME/.cargo/env
