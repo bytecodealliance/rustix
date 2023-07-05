@@ -5,7 +5,10 @@
 //! instruction.
 //!
 //! Most `rustix` syscalls use the vsyscall mechanism rather than going using
-//! `int 0x80` sequences.
+//! `int 0x80` sequences, as vsyscall is much faster.
+//!
+//! Syscalls made with `int 0x80` preserve the flags register, while syscalls
+//! made using vsyscall do not.
 
 #![allow(dead_code)]
 
@@ -25,7 +28,6 @@ pub(in crate::backend) unsafe fn indirect_syscall0(
         "call {callee}",
         callee = in(reg) callee,
         inlateout("eax") nr.to_asm() => r0,
-        options(preserves_flags)
     );
     FromAsm::from_asm(r0)
 }
@@ -42,7 +44,6 @@ pub(in crate::backend) unsafe fn indirect_syscall1(
         callee = in(reg) callee,
         inlateout("eax") nr.to_asm() => r0,
         in("ebx") a0.to_asm(),
-        options(preserves_flags)
     );
     FromAsm::from_asm(r0)
 }
@@ -76,7 +77,6 @@ pub(in crate::backend) unsafe fn indirect_syscall2(
         inlateout("eax") nr.to_asm() => r0,
         in("ebx") a0.to_asm(),
         in("ecx") a1.to_asm(),
-        options(preserves_flags)
     );
     FromAsm::from_asm(r0)
 }
@@ -97,7 +97,6 @@ pub(in crate::backend) unsafe fn indirect_syscall3(
         in("ebx") a0.to_asm(),
         in("ecx") a1.to_asm(),
         in("edx") a2.to_asm(),
-        options(preserves_flags)
     );
     FromAsm::from_asm(r0)
 }
@@ -128,7 +127,6 @@ pub(in crate::backend) unsafe fn indirect_syscall4(
         in("ebx") a0.to_asm(),
         in("ecx") a1.to_asm(),
         in("edx") a2.to_asm(),
-        options(preserves_flags)
     );
     FromAsm::from_asm(r0)
 }
@@ -161,7 +159,6 @@ pub(in crate::backend) unsafe fn indirect_syscall5(
         in("ecx") a1.to_asm(),
         in("edx") a2.to_asm(),
         in("edi") a4.to_asm(),
-        options(preserves_flags)
     );
     FromAsm::from_asm(r0)
 }
@@ -203,7 +200,6 @@ pub(in crate::backend) unsafe fn indirect_syscall6(
         in("ecx") a1.to_asm(),
         in("edx") a2.to_asm(),
         in("edi") a4.to_asm(),
-        options(preserves_flags)
     );
     FromAsm::from_asm(r0)
 }
