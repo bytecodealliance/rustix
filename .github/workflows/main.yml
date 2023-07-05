@@ -57,7 +57,6 @@ jobs:
         x86_64-apple-darwin
         x86_64-unknown-freebsd
         x86_64-unknown-netbsd
-        x86_64-fuchsia
         x86_64-unknown-illumos
         i686-unknown-linux-gnu
         i686-unknown-linux-musl
@@ -75,6 +74,11 @@ jobs:
         sparcv9-sun-solaris
         aarch64-linux-android
         aarch64-apple-ios
+    - if: matrix.rust != '1.48'
+      run: rustup target add x86_64-unknown-fuchsia
+    - if: matrix.rust == '1.48'
+      run: rustup target add x86_64-fuchsia
+
     - name: Install cross-compilation tools
       run: |
         set -ex
@@ -97,7 +101,10 @@ jobs:
     - run: cargo check --workspace --release -vv --target=x86_64-apple-darwin --features=all-apis
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-freebsd --features=all-apis
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-netbsd --features=all-apis
-    - run: cargo check --workspace --release -vv --target=x86_64-fuchsia --features=all-apis
+    - if: matrix.rust != '1.48'
+      run: cargo check --workspace --release -vv --target=x86_64-unknown-fuchsia --features=all-apis --all-targets
+    - if: matrix.rust == '1.48'
+      run: cargo check --workspace --release -vv --target=x86_64-fuchsia --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-illumos --features=all-apis
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-gnu --features=all-apis
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-musl --features=all-apis
