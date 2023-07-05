@@ -12,7 +12,7 @@ jobs:
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -41,7 +41,7 @@ jobs:
       # -D warnings is commented out in our install-rust action; re-add it here.
       RUSTFLAGS: -D warnings
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -87,7 +87,9 @@ jobs:
 
     - name: Use specific dependency versions for Rust 1.48 compatibility.
       if: matrix.rust == '1.48'
-      run: cargo update --package=once_cell --precise 1.14.0
+      run: |
+        cargo update --package=once_cell --precise 1.14.0
+        cargo update --package=tempfile --precise=3.3.0
 
     - run: cargo check --workspace --release -vv
     - run: cargo check --workspace --release -vv --features=all-apis
@@ -140,7 +142,7 @@ jobs:
       # -D warnings is commented out in our install-rust action; re-add it here.
       RUSTFLAGS: -D warnings
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -160,7 +162,7 @@ jobs:
             rust: nightly-2023-07-03
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -187,7 +189,7 @@ jobs:
             rust: nightly-2023-07-03
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -377,7 +379,7 @@ jobs:
             os: windows-2019
             rust: nightly-2023-07-03
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -390,7 +392,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -437,6 +439,12 @@ jobs:
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
+
+    - name: Use specific dependency versions for Rust 1.48 compatibility.
+      if: matrix.rust == '1.48'
+      run: |
+        cargo update --package=once_cell --precise 1.14.0
+        cargo update --package=tempfile --precise=3.3.0
 
     - run: |
         # Run the tests.
@@ -523,7 +531,7 @@ jobs:
       RUSTFLAGS: -D warnings
       QEMU_BUILD_VERSION: 7.0.0
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -536,7 +544,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -632,7 +640,7 @@ jobs:
       CARGO_TARGET_MIPS64EL_UNKNOWN_LINUX_GNUABI64_RUSTFLAGS: --cfg rustix_use_experimental_asm
       QEMU_BUILD_VERSION: 7.0.0
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -645,7 +653,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
