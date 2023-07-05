@@ -10,7 +10,11 @@ use rustix::io::{self, stderr, stdin, stdout};
 #[cfg(feature = "termios")]
 #[cfg(not(windows))]
 use rustix::termios::isatty;
-#[cfg(all(not(windows), feature = "termios", feature = "procfs"))]
+#[cfg(all(
+    not(any(windows, target_os = "fuchsia")),
+    feature = "termios",
+    feature = "procfs"
+))]
 use rustix::termios::ttyname;
 
 #[cfg(not(windows))]
@@ -37,10 +41,19 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     #[cfg(feature = "termios")]
     if isatty(fd) {
         #[cfg(feature = "procfs")]
+        #[cfg(not(target_os = "fuchsia"))]
         println!(" - ttyname: {}", ttyname(fd, Vec::new())?.to_string_lossy());
+
+        #[cfg(target_os = "wasi")]
+        println!(" - is a tty");
+
+        #[cfg(not(target_os = "wasi"))]
         println!(" - process group: {:?}", rustix::termios::tcgetpgrp(fd)?);
+
+        #[cfg(not(target_os = "wasi"))]
         println!(" - winsize: {:?}", rustix::termios::tcgetwinsize(fd)?);
 
+        #[cfg(not(target_os = "wasi"))]
         {
             use rustix::termios::*;
             let term = tcgetattr(fd)?;
@@ -117,6 +130,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             }
             #[cfg(not(any(
                 target_os = "dragonfly",
+                target_os = "emscripten",
                 target_os = "freebsd",
                 target_os = "haiku",
                 target_os = "illumos",
@@ -332,6 +346,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             }
             #[cfg(not(any(
                 target_os = "dragonfly",
+                target_os = "emscripten",
                 target_os = "freebsd",
                 target_os = "haiku",
                 target_os = "ios",
@@ -345,6 +360,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             }
             #[cfg(not(any(
                 target_os = "dragonfly",
+                target_os = "emscripten",
                 target_os = "freebsd",
                 target_os = "haiku",
                 target_os = "illumos",
