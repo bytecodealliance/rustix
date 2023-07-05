@@ -511,11 +511,6 @@ jobs:
         upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
         echo CARGO_TARGET_${upcase}_RUNNER=${{ runner.tool_cache }}/qemu/bin/${{ matrix.qemu }} ${{ matrix.qemu_args }} >> $GITHUB_ENV
 
-        # See if qemu is already in the cache
-        if [ -f ${{ runner.tool_cache }}/qemu/bin/${{ matrix.qemu }} ]; then
-          exit 0
-        fi
-
         # Download and build qemu from source since the most recent release is
         # way faster at arm emulation than the current version github actions'
         # ubuntu image uses. Disable as much as we can to get it to build
@@ -693,11 +688,6 @@ jobs:
         upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
         echo CARGO_TARGET_${upcase}_RUNNER=${{ runner.tool_cache }}/qemu/bin/${{ matrix.qemu }} ${{ matrix.qemu_args }} >> $GITHUB_ENV
 
-        # See if qemu is already in the cache
-        if [ -f ${{ runner.tool_cache }}/qemu/bin/${{ matrix.qemu }} ]; then
-          exit 0
-        fi
-
         # Download and build qemu from source since the most recent release is
         # way faster at arm emulation than the current version github actions'
         # ubuntu image uses. Disable as much as we can to get it to build
@@ -801,11 +791,6 @@ jobs:
 
         upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
         echo CARGO_TARGET_${upcase}_RUNNER=${{ runner.tool_cache }}/qemu/bin/${{ matrix.qemu }} ${{ matrix.qemu_args }} >> $GITHUB_ENV
-
-        # See if qemu is already in the cache
-        if [ -f ${{ runner.tool_cache }}/qemu/bin/${{ matrix.qemu }} ]; then
-          exit 0
-        fi
 
         # Download and build qemu from source since the most recent release is
         # way faster at arm emulation than the current version github actions'
