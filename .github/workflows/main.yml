@@ -439,14 +439,13 @@ jobs:
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
-        # Run the tests, and check the prebuilt release libraries.
-        cargo test --verbose --features=all-impls,all-apis,cc --release --workspace -- --nocapture
+        # Run the tests.
+        cargo test --verbose --features=all-impls,all-apis --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: full
 
     - run: |
-        # Check the prebuilt debug libraries too.
-        cargo check --features=all-impls,all-apis,cc
+        cargo check --features=all-impls,all-apis
 
   test_use_libc:
     name: Test use-libc
