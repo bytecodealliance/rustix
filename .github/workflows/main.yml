@@ -215,13 +215,10 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, ubuntu-18.04, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, mipsel-linux-stable, mips64el-linux-stable, powerpc64le-linux-stable, arm-linux-stable, macos-latest, macos-10.15, windows, windows-2019]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, mipsel-linux-stable, mips64el-linux-stable, powerpc64le-linux-stable, arm-linux-stable, macos-latest, macos-10.15, windows, windows-2019]
         include:
           - build: ubuntu
             os: ubuntu-latest
-            rust: nightly-2023-07-03
-          - build: ubuntu-18.04
-            os: ubuntu-18.04
             rust: nightly-2023-07-03
           - build: i686-linux
             os: ubuntu-latest
