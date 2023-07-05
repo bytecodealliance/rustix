@@ -32,7 +32,7 @@ jobs:
             rust: stable
           - build: nightly
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
           - build: 1.48
             os: ubuntu-latest
             rust: 1.48
@@ -142,7 +142,7 @@ jobs:
         include:
           - build: nightly
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
 
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
@@ -172,7 +172,7 @@ jobs:
         include:
           - build: nightly
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
 
     steps:
     - uses: actions/checkout@v3
@@ -199,7 +199,7 @@ jobs:
         include:
           - build: nightly
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
 
     steps:
     - uses: actions/checkout@v3
@@ -235,20 +235,20 @@ jobs:
         include:
           - build: ubuntu
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
           - build: ubuntu-20.04
             os: ubuntu-20.04
-            rust: nightly
+            rust: nightly-2023-07-03
           - build: i686-linux
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
             target: i686-unknown-linux-gnu
             gcc_package: gcc-i686-linux-gnu
             gcc: i686-linux-gnu-gcc
             libc_package: libc-dev-i386-cross
           - build: aarch64-linux
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
             target: aarch64-unknown-linux-gnu
             gcc_package: gcc-aarch64-linux-gnu
             gcc: aarch64-linux-gnu-gcc
@@ -257,7 +257,7 @@ jobs:
             qemu_target: aarch64-linux-user
           - build: powerpc64le-linux
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
             target: powerpc64le-unknown-linux-gnu
             gcc_package: gcc-powerpc64le-linux-gnu
             gcc: powerpc64le-linux-gnu-gcc
@@ -266,7 +266,7 @@ jobs:
             qemu_target: ppc64le-linux-user
           - build: mips64el-linux
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
             target: mips64el-unknown-linux-gnuabi64
             gcc_package: gcc-mips64el-linux-gnuabi64
             gcc: mips64el-linux-gnuabi64-gcc
@@ -275,7 +275,7 @@ jobs:
             qemu_target: mips64el-linux-user
           - build: mipsel-linux
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
             target: mipsel-unknown-linux-gnu
             gcc_package: gcc-mipsel-linux-gnu
             gcc: mipsel-linux-gnu-gcc
@@ -284,7 +284,7 @@ jobs:
             qemu_target: mipsel-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
             target: riscv64gc-unknown-linux-gnu
             gcc_package: gcc-riscv64-linux-gnu
             gcc: riscv64-linux-gnu-gcc
@@ -293,7 +293,7 @@ jobs:
             qemu_target: riscv64-linux-user
           - build: s390x-linux
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
             target: s390x-unknown-linux-gnu
             gcc_package: gcc-s390x-linux-gnu
             gcc: s390x-linux-gnu-gcc
@@ -302,7 +302,7 @@ jobs:
             qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
             target: armv5te-unknown-linux-gnueabi
             gcc_package: gcc-arm-linux-gnueabi
             gcc: arm-linux-gnueabi-gcc
@@ -463,10 +463,10 @@ jobs:
             rust: stable
           - build: windows
             os: windows-latest
-            rust: nightly
+            rust: nightly-2023-07-03
           - build: windows-2019
             os: windows-2019
-            rust: nightly
+            rust: nightly-2023-07-03
     steps:
     - uses: actions/checkout@v3
       with:
@@ -726,7 +726,7 @@ jobs:
         include:
           - build: powerpc64le-linux
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
             target: powerpc64le-unknown-linux-gnu
             gcc_package: gcc-powerpc64le-linux-gnu
             gcc: powerpc64le-linux-gnu-gcc
@@ -735,7 +735,7 @@ jobs:
             qemu_target: ppc64le-linux-user
           - build: mips64el-linux
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
             target: mips64el-unknown-linux-gnuabi64
             gcc_package: gcc-mips64el-linux-gnuabi64
             gcc: mips64el-linux-gnuabi64-gcc
@@ -744,7 +744,7 @@ jobs:
             qemu_target: mips64el-linux-user
           - build: mipsel-linux
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2023-07-03
             target: mipsel-unknown-linux-gnu
             gcc_package: gcc-mipsel-linux-gnu
             gcc: mipsel-linux-gnu-gcc
