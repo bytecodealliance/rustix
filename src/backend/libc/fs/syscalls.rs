@@ -1481,6 +1481,7 @@ fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 #[allow(non_upper_case_globals)]
+#[allow(dead_code)]
 mod sys {
     use super::{c, BorrowedFd, Statx};
 
