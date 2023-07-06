@@ -80,12 +80,6 @@ jobs:
     - if: matrix.rust == '1.63'
       run: rustup target add x86_64-fuchsia
 
-    - name: Install cross-compilation tools
-      run: |
-        set -ex
-        sudo apt-get update
-        sudo apt-get install -y gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu gcc-arm-linux-gnueabi musl-tools
-
     - run: cargo check --workspace --release -vv --all-targets
     - run: cargo check --workspace --release -vv --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --features=use-libc,all-apis --all-targets
@@ -520,16 +514,7 @@ jobs:
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
     - run: |
-        # Run the tests, and check the prebuilt release libraries.
-        cargo test --verbose --features=all-apis,cc --release --workspace -- --nocapture
-      env:
-        RUST_BACKTRACE: full
-        MACOSX_DEPLOYMENT_TARGET: 10.7
-        MACOSX_SDK_VERSION: 10.7
-
-    - run: |
-        # Check the prebuilt debug libraries too.
-        cargo check --features=all-apis,cc
+        cargo test --verbose --features=all-apis --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: full
         MACOSX_DEPLOYMENT_TARGET: 10.7

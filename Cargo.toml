@@ -15,9 +15,6 @@ categories = ["os::unix-apis", "date-and-time", "filesystem", "network-programmi
 include = ["src", "build.rs", "Cargo.toml", "COPYRIGHT", "LICENSE*", "/*.md", "benches"]
 rust-version = "1.63"
 
-[build-dependencies]
-cc = { version = "1.0.68", optional = true }
-
 [dependencies]
 bitflags = { version = "2.3.3", default-features = false }
 itoa = { version = "1.0.1", default-features = false, optional = true }
@@ -37,7 +34,7 @@ once_cell = { version = "1.5.2", optional = true }
 # addition to the libc backend. The linux_raw backend is used by default. The
 # libc backend can be selected via adding `--cfg=rustix_use_libc` to
 # `RUSTFLAGS` or enabling the `use-libc` cargo feature.
-[target.'cfg(all(not(rustix_use_libc), not(miri), target_os = "linux", target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64", target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"))))'.dependencies]
+[target.'cfg(all(not(rustix_use_libc), not(miri), target_os = "linux", target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "riscv64", all(rustix_use_experimental_asm, target_arch = "powerpc64"), all(rustix_use_experimental_asm, target_arch = "mips"), all(rustix_use_experimental_asm, target_arch = "mips64"), target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"))))'.dependencies]
 linux-raw-sys = { version = "0.4.3", default-features = false, features = ["general", "errno", "ioctl", "no_std"] }
 libc_errno = { package = "errno", version = "0.3.1", default-features = false, optional = true }
 libc = { version = "0.2.147", features = ["extra_traits"], optional = true }
@@ -46,7 +43,7 @@ libc = { version = "0.2.147", features = ["extra_traits"], optional = true }
 #
 # On all other Unix-family platforms, and under Miri, we always use the libc
 # backend, so enable its dependencies unconditionally.
-[target.'cfg(all(not(windows), any(rustix_use_libc, miri, not(all(target_os = "linux", target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64", target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64")))))))'.dependencies]
+[target.'cfg(all(not(windows), any(rustix_use_libc, miri, not(all(target_os = "linux", target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "riscv64", all(rustix_use_experimental_asm, target_arch = "powerpc64"), all(rustix_use_experimental_asm, target_arch = "mips"), all(rustix_use_experimental_asm, target_arch = "mips64"), target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64")))))))'.dependencies]
 libc_errno = { package = "errno", version = "0.3.1", default-features = false }
 libc = { version = "0.2.147", features = ["extra_traits"] }
 
@@ -54,7 +51,7 @@ libc = { version = "0.2.147", features = ["extra_traits"] }
 #
 # Some syscalls do not have libc wrappers, such as in `io_uring`. For these,
 # the libc backend uses the linux-raw-sys ABI and `libc::syscall`.
-[target.'cfg(all(any(target_os = "android", target_os = "linux"), any(rustix_use_libc, miri, not(all(target_os = "linux", target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "powerpc64", target_arch = "riscv64", target_arch = "mips", target_arch = "mips64", target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64")))))))'.dependencies]
+[target.'cfg(all(any(target_os = "android", target_os = "linux"), any(rustix_use_libc, miri, not(all(target_os = "linux", target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "riscv64", all(rustix_use_experimental_asm, target_arch = "powerpc64"), all(rustix_use_experimental_asm, target_arch = "mips"), all(rustix_use_experimental_asm, target_arch = "mips64"), target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64")))))))'.dependencies]
 linux-raw-sys = { version = "0.4.3", default-features = false, features = ["general", "ioctl", "no_std"] }
 
 # For the libc backend on Windows, use the Winsock2 API in windows-sys.
@@ -223,3 +220,6 @@ linux_4_11 = []
 
 # Enable all optimizations for the latest Linux versions.
 linux_latest = ["linux_4_11"]
+
+# Obsolete and deprecated.
+cc = []
