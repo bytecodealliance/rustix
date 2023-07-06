@@ -13,7 +13,13 @@ use backend::fd::AsFd;
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=tty&sektion=4
 /// [NetBSD]: https://man.netbsd.org/tty.4
 /// [OpenBSD]: https://man.openbsd.org/tty.4
-#[cfg(not(any(windows, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    windows,
+    target_os = "aix",
+    target_os = "haiku",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 #[inline]
 #[doc(alias = "TIOCSCTTY")]
 pub fn ioctl_tiocsctty<Fd: AsFd>(fd: Fd) -> io::Result<()> {
