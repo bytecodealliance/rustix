@@ -561,7 +561,7 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
     unsafe { ret_usize(c::getgroups(len, buf.as_mut_ptr().cast()) as isize) }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "aix", target_os = "redox", target_os = "wasi")))]
 #[inline]
 pub(crate) fn ioctl_tiocsctty(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCSCTTY as _, &0_u32)) }
