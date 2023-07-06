@@ -12,10 +12,6 @@ pub(crate) const PROC_SUPER_MAGIC: u32 = 0x0000_9fa0;
 #[cfg(all(linux_kernel, target_env = "musl"))]
 pub(crate) const NFS_SUPER_MAGIC: u32 = 0x0000_6969;
 
-// Submitted upstream in <https://github.com/rust-lang/libc/pull/3272>.
-#[cfg(all(linux_kernel, feature = "net"))]
-pub(crate) const IPPROTO_ETHERNET: c_int = linux_raw_sys::net::IPPROTO_ETHERNET as _;
-
 // TODO: Upstream these.
 #[cfg(all(linux_kernel, feature = "net"))]
 pub(crate) const ETH_P_TSN: c_int = linux_raw_sys::if_ether::ETH_P_TSN as _;
