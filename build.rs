@@ -1,13 +1,8 @@
-#[cfg(feature = "cc")]
-use cc::Build;
 use std::env::var;
 use std::io::Write;
 
-/// The directory for out-of-line (“outline”) libraries.
-const OUTLINE_PATH: &str = "src/backend/linux_raw/arch/outline";
-
 /// The directory for inline asm.
-const INLINE_PATH: &str = "src/backend/linux_raw/arch/inline";
+const ASM_PATH: &str = "src/backend/linux_raw/arch/asm";
 
 fn main() {
     // Don't rerun this on changes other than build.rs, as we only depend on
@@ -27,8 +22,7 @@ fn main() {
 
     // Gather target information.
     let arch = var("CARGO_CFG_TARGET_ARCH").unwrap();
-    let outline_asm_name = format!("{}/{}.s", OUTLINE_PATH, arch);
-    let inline_asm_name = format!("{}/{}.rs", INLINE_PATH, arch);
+    let inline_asm_name = format!("{}/{}.rs", ASM_PATH, arch);
     let inline_asm_name_present = std::fs::metadata(inline_asm_name).is_ok();
     let target_os = var("CARGO_CFG_TARGET_OS").unwrap();
     let pointer_width = var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap();
@@ -71,6 +65,8 @@ fn main() {
         || !inline_asm_name_present
         || is_unsupported_abi
         || miri
+        || ((arch == "powerpc64" || arch == "mips" || arch == "mips64")
+            && !rustix_use_experimental_asm)
     {
         // Use the libc backend.
         use_feature("libc");
@@ -78,20 +74,8 @@ fn main() {
         // Use the linux_raw backend.
         use_feature("linux_raw");
         use_feature_or_nothing("core_intrinsics");
-
-        // Use inline asm if we have it, or outline asm otherwise. On 32-bit
-        // x86 our asm support requires naked functions. On PowerPC and MIPS,
-        // Rust's inline asm is considered experimental, so only use it if
-        // `--cfg=rustix_use_experimental_asm` is given.
-        if (arch != "powerpc64" && arch != "mips" && arch != "mips64")
-            || rustix_use_experimental_asm
-        {
-            use_feature("asm");
-            if rustix_use_experimental_asm {
-                use_feature("asm_experimental_arch");
-            }
-        } else {
-            link_in_librustix_outline(&arch, &outline_asm_name);
+        if rustix_use_experimental_asm {
+            use_feature("asm_experimental_arch");
         }
     }
 
@@ -150,61 +134,6 @@ fn main() {
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_USE_LIBC");
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_RUSTC_DEP_OF_STD");
     println!("cargo:rerun-if-env-changed=CARGO_CFG_MIRI");
-}
-
-/// Link in the desired version of librustix_outline_{arch}.a, containing the
-/// outline assembly code for making syscalls.
-fn link_in_librustix_outline(arch: &str, asm_name: &str) {
-    let name = format!("rustix_outline_{}", arch);
-    let profile = var("PROFILE").unwrap();
-    let to = format!("{}/{}/lib{}.a", OUTLINE_PATH, profile, name);
-    println!("cargo:rerun-if-changed={}", to);
-
-    // If "cc" is not enabled, use a pre-built library.
-    #[cfg(not(feature = "cc"))]
-    {
-        let _ = asm_name;
-        println!("cargo:rustc-link-search={}/{}", OUTLINE_PATH, profile);
-        println!("cargo:rustc-link-lib=static={}", name);
-    }
-
-    // If "cc" is enabled, build the library from source, update the pre-built
-    // version, and assert that the pre-built version is checked in.
-    #[cfg(feature = "cc")]
-    {
-        let out_dir = var("OUT_DIR").unwrap();
-        // Add `-gdwarf-3` so that we always get the same output, regardless of
-        // the Rust version we're using. DWARF3 is entirely adequate for our
-        // simple needs here.
-        let mut build = Build::new();
-        if profile == "debug" {
-            build.flag("-gdwarf-3");
-        }
-        build.file(&asm_name);
-        build.compile(&name);
-        println!("cargo:rerun-if-changed={}", asm_name);
-        if std::fs::metadata(".git").is_ok() {
-            let from = format!("{}/lib{}.a", out_dir, name);
-            let prev_metadata = std::fs::metadata(&to);
-            std::fs::copy(&from, &to).unwrap();
-            assert!(
-                prev_metadata.is_ok(),
-                "{} didn't previously exist; please inspect the new file and `git add` it",
-                to
-            );
-            assert!(
-                std::process::Command::new("git")
-                    .arg("diff")
-                    .arg("--quiet")
-                    .arg(&to)
-                    .status()
-                    .unwrap()
-                    .success(),
-                "{} changed; please inspect the change and `git commit` it",
-                to
-            );
-        }
-    }
 }
 
 fn use_thumb_mode() -> bool {

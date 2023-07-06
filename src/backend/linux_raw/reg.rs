@@ -1,9 +1,8 @@
 //! Encapsulation for system call arguments and return values.
 //!
-//! The inline-asm and outline-asm code paths do some amount of reordering
-//! of arguments; to ensure that we don't accidentally misroute an argument
-//! or return value, we use distinct types for each argument index and
-//! return value.
+//! The inline-asm code paths do some amount of reordering of arguments; to
+//! ensure that we don't accidentally misroute an argument or return value,
+//! we use distinct types for each argument index and return value.
 //!
 //! # Safety
 //!

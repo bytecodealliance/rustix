@@ -1,28 +1,20 @@
 //! Architecture-specific syscall code.
 //!
-//! `rustix` has inline assembly sequences using `asm!`, but that requires
-//! Rust 1.59, so it also has out-of-line ("outline") assembly sequences in .s
-//! files. And 32-bit x86 is special (see comments below).
-//!
 //! This module also has a `choose` submodule which chooses a scheme and is
 //! what most of the `rustix` syscalls use.
 //!
 //! # Safety
 //!
 //! This contains the inline `asm` statements performing the syscall
-//! instructions and FFI declarations declaring the out-of-line ("outline")
-//! syscall instructions.
+//! instructions.
 
 #![allow(unsafe_code)]
 #![cfg_attr(not(feature = "all-apis"), allow(unused_imports))]
 // We'll use as many arguments as syscalls need.
 #![allow(clippy::too_many_arguments)]
 
-// When inline asm is available, use it. Otherwise, use out-of-line asm. These
-// functions always use the machine's syscall instruction, even when it isn't
-// the fastest option available.
-#[cfg_attr(asm, path = "inline/mod.rs")]
-#[cfg_attr(not(asm), path = "outline/mod.rs")]
+// These functions always use the machine's syscall instruction, even when it
+// isn't the fastest option available.
 pub(in crate::backend) mod asm;
 
 // On most architectures, the architecture syscall instruction is fast, so use
