@@ -31,8 +31,8 @@ pub struct Termios {
     #[cfg(any(
         linux_like,
         target_env = "newlib",
-        target_os = "haiku",
         target_os = "fuchsia",
+        target_os = "haiku",
         target_os = "redox"
     ))]
     pub line_discipline: c::cc_t,
@@ -180,8 +180,8 @@ impl core::fmt::Debug for Termios {
         #[cfg(any(
             linux_like,
             target_env = "newlib",
-            target_os = "haiku",
             target_os = "fuchsia",
+            target_os = "haiku",
             target_os = "redox"
         ))]
         {
@@ -1156,10 +1156,10 @@ fn termios_layouts() {
         #[cfg(not(all(
             target_env = "gnu",
             any(
-                target_arch = "sparc",
-                target_arch = "sparc64",
                 target_arch = "mips",
-                target_arch = "mips64"
+                target_arch = "mips64",
+                target_arch = "sparc",
+                target_arch = "sparc64"
             )
         )))]
         check_renamed_type!(Termios, termios);
@@ -1170,8 +1170,8 @@ fn termios_layouts() {
         #[cfg(any(
             linux_like,
             target_env = "newlib",
-            target_os = "haiku",
             target_os = "fuchsia",
+            target_os = "haiku",
             target_os = "redox"
         ))]
         check_renamed_struct_renamed_field!(Termios, termios, line_discipline, c_line);
