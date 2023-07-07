@@ -573,7 +573,7 @@ pub mod ipproto {
     #[cfg(not(any(solarish, target_os = "haiku")))]
     pub const PIM: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_PIM as _) });
     /// `IPPROTO_COMP`
-    #[cfg(not(any(bsd, solarish, windows, target_os = "haiku")))]
+    #[cfg(not(any(bsd, solarish, windows, target_os = "espidf", target_os = "haiku")))]
     pub const COMP: Protocol =
         Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_COMP as _) });
     /// `IPPROTO_SCTP`

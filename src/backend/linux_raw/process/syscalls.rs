@@ -33,7 +33,6 @@ use linux_raw_sys::general::{
     RLIM64_INFINITY, RLIM_INFINITY,
 };
 use linux_raw_sys::ioctl::TIOCSCTTY;
-#[cfg(not(target_os = "wasi"))]
 #[cfg(feature = "fs")]
 use {crate::backend::conv::ret_c_uint_infallible, crate::fs::Mode};
 

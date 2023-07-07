@@ -2,8 +2,6 @@
 //! `c_uint`, or libc-specific pointer types. This module provides functions
 //! for converting between rustix's types and libc types.
 
-#![allow(dead_code)]
-
 use super::c;
 use super::fd::{AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, LibcFd, OwnedFd, RawFd};
 #[cfg(not(windows))]
@@ -16,7 +14,7 @@ pub(super) fn c_str(c: &CStr) -> *const c::c_char {
     c.as_ptr()
 }
 
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "wasi")))]
 #[inline]
 pub(super) fn no_fd() -> LibcFd {
     -1
@@ -41,6 +39,7 @@ pub(super) fn ret(raw: c::c_int) -> io::Result<()> {
     }
 }
 
+#[cfg(apple)]
 #[inline]
 pub(super) fn nonnegative_ret(raw: c::c_int) -> io::Result<()> {
     if raw >= 0 {
@@ -50,6 +49,7 @@ pub(super) fn nonnegative_ret(raw: c::c_int) -> io::Result<()> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(super) unsafe fn ret_infallible(raw: c::c_int) {
     debug_assert_eq!(raw, 0, "unexpected error: {:?}", io::Errno::last_os_error());
@@ -64,6 +64,7 @@ pub(super) fn ret_c_int(raw: c::c_int) -> io::Result<c::c_int> {
     }
 }
 
+#[cfg(linux_kernel)]
 #[inline]
 pub(super) fn ret_u32(raw: c::c_int) -> io::Result<u32> {
     if raw == -1 {
@@ -94,7 +95,7 @@ pub(super) fn ret_off_t(raw: c::off_t) -> io::Result<c::off_t> {
     }
 }
 
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "wasi")))]
 #[inline]
 pub(super) fn ret_pid_t(raw: c::pid_t) -> io::Result<c::pid_t> {
     if raw == -1 {
@@ -119,6 +120,7 @@ pub(super) unsafe fn ret_owned_fd(raw: LibcFd) -> io::Result<OwnedFd> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(super) fn ret_discarded_fd(raw: LibcFd) -> io::Result<()> {
     if raw == !0 {
@@ -128,6 +130,7 @@ pub(super) fn ret_discarded_fd(raw: LibcFd) -> io::Result<()> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(super) fn ret_discarded_char_ptr(raw: *mut c::c_char) -> io::Result<()> {
     if raw.is_null() {
@@ -138,7 +141,7 @@ pub(super) fn ret_discarded_char_ptr(raw: *mut c::c_char) -> io::Result<()> {
 }
 
 /// Convert the buffer-length argument value of a `send` or `recv` call.
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "wasi")))]
 #[inline]
 pub(super) fn send_recv_len(len: usize) -> usize {
     len
@@ -155,7 +158,7 @@ pub(super) fn send_recv_len(len: usize) -> i32 {
 }
 
 /// Convert the return value of a `send` or `recv` call.
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "wasi")))]
 #[inline]
 pub(super) fn ret_send_recv(len: isize) -> io::Result<usize> {
     ret_usize(len)

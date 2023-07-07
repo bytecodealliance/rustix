@@ -1,8 +1,8 @@
 //! libc syscalls supporting `rustix::io`.
 
-use crate::backend::conv::{
-    borrowed_fd, ret, ret_c_int, ret_discarded_fd, ret_owned_fd, ret_usize,
-};
+#[cfg(not(target_os = "wasi"))]
+use crate::backend::conv::ret_discarded_fd;
+use crate::backend::conv::{borrowed_fd, ret, ret_c_int, ret_owned_fd, ret_usize};
 use crate::backend::{c, MAX_IOV};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(any(target_os = "aix", target_os = "wasi")))]
@@ -254,6 +254,11 @@ pub(crate) fn fcntl_setfd(fd: BorrowedFd<'_>, flags: FdFlags) -> io::Result<()> 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::fcntl(borrowed_fd(fd), c::F_DUPFD_CLOEXEC, min)) }
+}
+
+#[cfg(target_os = "espidf")]
+pub(crate) fn fcntl_dupfd(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(c::fcntl(borrowed_fd(fd), c::F_DUPFD, min)) }
 }
 
 #[cfg(not(target_os = "wasi"))]
