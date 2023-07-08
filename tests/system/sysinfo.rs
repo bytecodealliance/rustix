@@ -1,4 +1,5 @@
 #[test]
+#[allow(unused_comparisons)]
 fn test_sysinfo() {
     let sysinfo: rustix::system::Sysinfo = rustix::system::sysinfo();
 
