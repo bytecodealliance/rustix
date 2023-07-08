@@ -1286,14 +1286,25 @@ bitflags! {
 #[test]
 fn test_sizes() {
     use c::c_int;
-    use core::mem::size_of;
+    use core::mem::{size_of, transmute};
 
     // Backend code needs to cast these to `c_int` so make sure that cast
     // isn't lossy.
     assert_eq!(size_of::<RawProtocol>(), size_of::<c_int>());
     assert_eq!(size_of::<Protocol>(), size_of::<c_int>());
+    assert_eq!(size_of::<Option<RawProtocol>>(), size_of::<c_int>());
     assert_eq!(size_of::<Option<Protocol>>(), size_of::<c_int>());
     assert_eq!(size_of::<RawSocketType>(), size_of::<c_int>());
     assert_eq!(size_of::<SocketType>(), size_of::<c_int>());
     assert_eq!(size_of::<SocketFlags>(), size_of::<c_int>());
+
+    // Rustix doesn't depend on `Option<Protocol>` matching the ABI of
+    // a raw integer for correctness, but it should work nonetheless.
+    unsafe {
+        let t: Option<Protocol> = None;
+        assert_eq!(0_u32, transmute(t));
+
+        let t: Option<Protocol> = Some(Protocol::from_raw(RawProtocol::new(4567).unwrap()));
+        assert_eq!(4567_u32, transmute(t));
+    }
 }

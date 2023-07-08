@@ -493,3 +493,26 @@ fn net_v6_acceptfrom() {
 
     assert_eq!(request, &response[..n]);
 }
+
+/// Test `shutdown`.
+#[test]
+fn net_shutdown() {
+    let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
+    let addr = SocketAddr::new(localhost, 0);
+    let listener = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
+    rustix::net::bind(&listener, &addr).expect("bind");
+    rustix::net::listen(&listener, 1).expect("listen");
+
+    let local_addr = rustix::net::getsockname(&listener).unwrap();
+
+    let sender = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
+    rustix::net::connect_any(&sender, &local_addr).expect("connect");
+    rustix::net::shutdown(&sender, rustix::net::Shutdown::Write).expect("shutdown");
+
+    let accepted = rustix::net::accept(&listener).expect("accept");
+    let mut response = [0_u8; 128];
+    let n = rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
+    assert_eq!(n, 0);
+
+    drop(sender);
+}

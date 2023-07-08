@@ -10,4 +10,7 @@ fn test_uname() {
 
     #[cfg(linux_kernel)]
     assert!(!name.domainname().to_bytes().is_empty());
+
+    #[cfg(linux_kernel)]
+    assert_eq!(name.sysname(), rustix::cstr!("Linux"));
 }
