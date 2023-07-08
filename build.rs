@@ -14,10 +14,10 @@ fn main() {
     // Features only used in no-std configurations.
     #[cfg(not(feature = "std"))]
     {
-        use_feature_or_nothing("const_raw_ptr_deref");
-        use_feature_or_nothing("core_ffi_c");
         use_feature_or_nothing("core_c_str");
+        use_feature_or_nothing("core_ffi_c");
         use_feature_or_nothing("alloc_c_string");
+        use_feature_or_nothing("alloc_ffi");
     }
 
     // Gather target information.
@@ -167,8 +167,8 @@ fn can_compile<T: AsRef<str>>(test: T) -> bool {
     let rustc = var("RUSTC").unwrap();
     let target = var("TARGET").unwrap();
 
-    // Use `RUSTC_WRAPPER` if it's set, unless it's set to an empty string,
-    // as documented [here].
+    // Use `RUSTC_WRAPPER` if it's set, unless it's set to an empty string, as
+    // documented [here].
     // [here]: https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-reads
     let wrapper = var("RUSTC_WRAPPER")
         .ok()

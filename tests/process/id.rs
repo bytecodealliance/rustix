@@ -51,6 +51,7 @@ fn test_getpid() {
 #[test]
 fn test_getppid() {
     assert_eq!(process::getppid(), process::getppid());
+    assert_ne!(process::getppid(), Some(process::getpid()));
     unsafe {
         assert_eq!(
             process::Pid::as_raw(process::getppid()) as libc::pid_t,

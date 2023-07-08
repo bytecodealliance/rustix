@@ -160,3 +160,25 @@ fn test_msync() {
         munmap(addr, 8192).unwrap();
     }
 }
+
+#[cfg(any(target_os = "emscripten", target_os = "linux"))]
+#[test]
+fn test_mremap() {
+    use rustix::mm::{mmap_anonymous, mremap, munmap, MapFlags, MremapFlags, ProtFlags};
+    use std::ptr::null_mut;
+
+    unsafe {
+        let addr = mmap_anonymous(null_mut(), 8192, ProtFlags::READ, MapFlags::PRIVATE).unwrap();
+
+        assert_eq!(
+            mremap(addr, 4096, 16384, MremapFlags::empty()),
+            Err(rustix::io::Errno::NOMEM)
+        );
+        let new = mremap(addr, 4096, 16384, MremapFlags::MAYMOVE).unwrap();
+        assert_ne!(new, addr);
+        assert!(!new.is_null());
+
+        munmap(new, 16384).unwrap();
+        munmap(addr.offset(4096), 4096).unwrap();
+    }
+}
