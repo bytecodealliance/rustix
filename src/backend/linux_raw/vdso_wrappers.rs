@@ -45,6 +45,10 @@ pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
             None => init_clock_gettime(),
         };
         let r0 = callee(which_clock as c::c_int, result.as_mut_ptr());
+        // The `ClockId` enum only contains clocks which never fail. It may be
+        // tempting to change this to `debug_assert_eq`, however they can still
+        // fail on uncommon kernel configs, so we leave this in place to ensure
+        // that we don't execute UB if they ever do fail.
         assert_eq!(r0, 0);
         result.assume_init()
     }
@@ -227,6 +231,7 @@ pub(super) type SyscallType = unsafe extern "C" fn();
 
 /// Initialize `CLOCK_GETTIME` and return its value.
 #[cfg(feature = "time")]
+#[cold]
 fn init_clock_gettime() -> ClockGettimeType {
     init();
     // SAFETY: Load the function address from static storage that we
@@ -236,6 +241,7 @@ fn init_clock_gettime() -> ClockGettimeType {
 
 /// Initialize `SYSCALL` and return its value.
 #[cfg(target_arch = "x86")]
+#[cold]
 fn init_syscall() -> SyscallType {
     init();
     // SAFETY: Load the function address from static storage that we
