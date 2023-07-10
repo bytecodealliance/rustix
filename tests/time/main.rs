@@ -1,7 +1,7 @@
 //! Tests for [`rustix::time`].
 
 #![cfg(feature = "time")]
-#![cfg(not(windows))]
+#![cfg(not(any(windows, target_os = "espidf")))]
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 mod dynamic_clocks;

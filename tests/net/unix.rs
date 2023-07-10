@@ -3,7 +3,7 @@
 //! The client sends lists of integers and the server sends back sums.
 
 // This test uses `AF_UNIX` with `SOCK_SEQPACKET` which is unsupported on macOS.
-#![cfg(not(any(apple, target_os = "redox", target_os = "wasi")))]
+#![cfg(not(any(apple, target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 // This test uses `DecInt`.
 #![cfg(feature = "itoa")]
 #![cfg(feature = "fs")]
@@ -125,7 +125,7 @@ fn test_unix() {
     server.join().unwrap();
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 fn do_test_unix_msg(addr: SocketAddrUnix) {
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{recvmsg, sendmsg, RecvFlags, SendFlags};
@@ -252,7 +252,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
     server.join().unwrap();
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_unix_msg() {
     let tmpdir = tempfile::tempdir().unwrap();

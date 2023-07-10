@@ -16,7 +16,9 @@ bitflags! {
         /// `O_DIRECT`
         #[cfg(not(any(
             solarish,
+            target_os = "espidf",
             target_os = "haiku",
+            target_os = "nto",
             target_os = "openbsd",
             target_os = "redox",
         )))]

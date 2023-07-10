@@ -36,6 +36,8 @@ fn main() -> io::Result<()> {
 #[cfg(all(not(windows), feature = "stdio"))]
 fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     let fd = fd.as_fd();
+
+    #[cfg(not(target_os = "espidf"))]
     println!(" - ready bytes: {:?}", rustix::io::ioctl_fionread(fd)?);
 
     #[cfg(feature = "termios")]
@@ -50,10 +52,10 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
         #[cfg(not(target_os = "wasi"))]
         println!(" - process group: {:?}", rustix::termios::tcgetpgrp(fd)?);
 
-        #[cfg(not(target_os = "wasi"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
         println!(" - winsize: {:?}", rustix::termios::tcgetwinsize(fd)?);
 
-        #[cfg(not(target_os = "wasi"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
         {
             use rustix::termios::*;
             let term = tcgetattr(fd)?;
@@ -316,7 +318,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 }
 
 #[cfg(feature = "termios")]
-#[cfg(all(not(windows), feature = "stdio"))]
+#[cfg(all(not(target_os = "espidf"), not(windows), feature = "stdio"))]
 fn key(b: u8) -> String {
     if b == 0 {
         "<undef>".to_string()

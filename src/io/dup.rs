@@ -111,7 +111,12 @@ pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {
 /// [NetBSD]: https://man.netbsd.org/dup3.2
 /// [OpenBSD]: https://man.openbsd.org/dup3.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=dup3&section=3
-#[cfg(not(any(target_os = "aix", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "aix",
+    target_os = "espidf",
+    target_os = "nto",
+    target_os = "wasi"
+)))]
 #[inline]
 pub fn dup3<Fd: AsFd>(fd: Fd, new: &mut OwnedFd, flags: DupFlags) -> io::Result<()> {
     backend::io::syscalls::dup3(fd.as_fd(), new, flags)

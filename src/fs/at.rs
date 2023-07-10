@@ -9,31 +9,35 @@ use crate::fd::OwnedFd;
 use crate::ffi::{CStr, CString};
 #[cfg(apple)]
 use crate::fs::CloneFlags;
-#[cfg(not(any(apple, target_os = "wasi")))]
+#[cfg(not(any(apple, target_os = "espidf", target_os = "wasi")))]
 use crate::fs::FileType;
 #[cfg(linux_kernel)]
 use crate::fs::RenameFlags;
-use crate::fs::{Access, AtFlags, Mode, OFlags, Stat, Timestamps};
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 use crate::fs::{Gid, Uid};
+use crate::fs::{Mode, OFlags};
 use crate::path::SMALL_PATH_BUFFER_SIZE;
-use crate::timespec::Nsecs;
 use crate::{backend, io, path};
 use alloc::vec::Vec;
 use backend::fd::{AsFd, BorrowedFd};
+#[cfg(not(target_os = "espidf"))]
+use {
+    crate::fs::{Access, AtFlags, Stat, Timestamps},
+    crate::timespec::Nsecs,
+};
 
 pub use backend::fs::types::{Dev, RawMode};
 
 /// `UTIME_NOW` for use with [`utimensat`].
 ///
 /// [`utimensat`]: crate::fs::utimensat
-#[cfg(not(target_os = "redox"))]
+#[cfg(not(any(target_os = "espidf", target_os = "redox")))]
 pub const UTIME_NOW: Nsecs = backend::c::UTIME_NOW as Nsecs;
 
 /// `UTIME_OMIT` for use with [`utimensat`].
 ///
 /// [`utimensat`]: crate::fs::utimensat
-#[cfg(not(target_os = "redox"))]
+#[cfg(not(any(target_os = "espidf", target_os = "redox")))]
 pub const UTIME_OMIT: Nsecs = backend::c::UTIME_OMIT as Nsecs;
 
 /// `openat(dirfd, path, oflags, mode)`—Opens a file.
@@ -144,6 +148,7 @@ pub fn mkdirat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, mode: Mode) -> io::Re
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/linkat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/linkat.2.html
+#[cfg(not(target_os = "espidf"))]
 #[inline]
 pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
     old_dirfd: PFd,
@@ -177,6 +182,7 @@ pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
 /// [`REMOVEDIR`]: AtFlags::REMOVEDIR
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/unlinkat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/unlinkat.2.html
+#[cfg(not(target_os = "espidf"))]
 #[inline]
 pub fn unlinkat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> io::Result<()> {
     path.into_with_c_str(|path| backend::fs::syscalls::unlinkat(dirfd.as_fd(), path, flags))
@@ -274,6 +280,7 @@ pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsFd>(
 /// [Linux]: https://man7.org/linux/man-pages/man2/fstatat.2.html
 /// [`Mode::from_raw_mode`]: crate::fs::Mode::from_raw_mode
 /// [`FileType::from_raw_mode`]: crate::fs::FileType::from_raw_mode
+#[cfg(not(target_os = "espidf"))]
 #[inline]
 #[doc(alias = "fstatat")]
 pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> io::Result<Stat> {
@@ -296,6 +303,7 @@ pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> io:
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/faccessat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/faccessat.2.html
+#[cfg(not(target_os = "espidf"))]
 #[inline]
 #[doc(alias = "faccessat")]
 pub fn accessat<P: path::Arg, Fd: AsFd>(
@@ -315,6 +323,7 @@ pub fn accessat<P: path::Arg, Fd: AsFd>(
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/utimensat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/utimensat.2.html
+#[cfg(not(target_os = "espidf"))]
 #[inline]
 pub fn utimensat<P: path::Arg, Fd: AsFd>(
     dirfd: Fd,
@@ -337,7 +346,7 @@ pub fn utimensat<P: path::Arg, Fd: AsFd>(
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fchmodat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fchmodat.2.html
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 #[inline]
 #[doc(alias = "fchmodat")]
 pub fn chmodat<P: path::Arg, Fd: AsFd>(
@@ -376,7 +385,7 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mknodat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mknodat.2.html
-#[cfg(not(any(apple, target_os = "wasi")))]
+#[cfg(not(any(apple, target_os = "espidf", target_os = "wasi")))]
 #[inline]
 pub fn mknodat<P: path::Arg, Fd: AsFd>(
     dirfd: Fd,
@@ -399,7 +408,7 @@ pub fn mknodat<P: path::Arg, Fd: AsFd>(
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fchownat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fchownat.2.html
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 #[inline]
 #[doc(alias = "fchownat")]
 pub fn chownat<P: path::Arg, Fd: AsFd>(

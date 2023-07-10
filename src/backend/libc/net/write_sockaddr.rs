@@ -23,7 +23,7 @@ pub(crate) unsafe fn write_sockaddr(
 
 pub(crate) unsafe fn encode_sockaddr_v4(v4: &SocketAddrV4) -> c::sockaddr_in {
     c::sockaddr_in {
-        #[cfg(any(bsd, target_os = "haiku"))]
+        #[cfg(any(bsd, target_os = "espidf", target_os = "haiku", target_os = "nto"))]
         sin_len: size_of::<c::sockaddr_in>() as _,
         sin_family: c::AF_INET as _,
         sin_port: u16::to_be(v4.port()),
@@ -42,7 +42,7 @@ unsafe fn write_sockaddr_v4(v4: &SocketAddrV4, storage: *mut SocketAddrStorage) 
 }
 
 pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> c::sockaddr_in6 {
-    #[cfg(any(bsd, target_os = "haiku"))]
+    #[cfg(any(bsd, target_os = "espidf", target_os = "haiku", target_os = "nto"))]
     {
         sockaddr_in6_new(
             size_of::<c::sockaddr_in6>() as _,
@@ -53,7 +53,7 @@ pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> c::sockaddr_in6 {
             v6.scope_id(),
         )
     }
-    #[cfg(not(any(bsd, target_os = "haiku")))]
+    #[cfg(not(any(bsd, target_os = "espidf", target_os = "haiku", target_os = "nto")))]
     {
         sockaddr_in6_new(
             c::AF_INET6 as _,

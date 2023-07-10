@@ -8,7 +8,7 @@
 
 use crate::backend;
 use crate::ffi::CStr;
-#[cfg(not(target_os = "emscripten"))]
+#[cfg(not(any(target_os = "espidf", target_os = "emscripten")))]
 use crate::io;
 use core::fmt;
 
@@ -130,7 +130,12 @@ pub fn sysinfo() -> Sysinfo {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/sethostname.2.html
-#[cfg(not(any(target_os = "emscripten", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "emscripten",
+    target_os = "espidf",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 #[inline]
 pub fn sethostname(name: &[u8]) -> io::Result<()> {
     backend::system::syscalls::sethostname(name)

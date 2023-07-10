@@ -84,7 +84,7 @@ fn test_v4() {
     server.join().unwrap();
 }
 
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_v4_msg() {
     use rustix::io::{IoSlice, IoSliceMut};

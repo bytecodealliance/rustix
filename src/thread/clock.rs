@@ -6,6 +6,7 @@ pub use crate::timespec::Timespec;
     apple,
     target_os = "dragonfly",
     target_os = "emscripten",
+    target_os = "espidf",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "openbsd",
     target_os = "redox",
@@ -29,6 +30,7 @@ pub use crate::clockid::ClockId;
     apple,
     target_os = "dragonfly",
     target_os = "emscripten",
+    target_os = "espidf",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "haiku",
     target_os = "openbsd",
@@ -56,6 +58,7 @@ pub fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> NanosleepRel
     apple,
     target_os = "dragonfly",
     target_os = "emscripten",
+    target_os = "espidf",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "haiku",
     target_os = "openbsd",

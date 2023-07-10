@@ -98,7 +98,7 @@ pub fn fcntl_setfd<Fd: AsFd>(fd: Fd, flags: FdFlags) -> io::Result<()> {
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=fcntl&section=2
 /// [illumos]: https://illumos.org/man/2/fcntl
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Control-Operations.html#index-fcntl-function
-#[cfg(not(any(target_os = "wasi", target_os = "espidf")))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 #[inline]
 #[doc(alias = "F_DUPFD_CLOEXEC")]
 pub fn fcntl_dupfd_cloexec<Fd: AsFd>(fd: Fd, min: RawFd) -> io::Result<OwnedFd> {

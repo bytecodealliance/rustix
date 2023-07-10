@@ -3,10 +3,12 @@
 //! for converting between rustix's types and libc types.
 
 use super::c;
+#[cfg(not(any(windows, target_os = "espidf")))]
+use super::fd::IntoRawFd;
 use super::fd::{AsRawFd, BorrowedFd, FromRawFd, LibcFd, OwnedFd, RawFd};
-use crate::io;
 #[cfg(not(windows))]
-use {super::fd::IntoRawFd, crate::ffi::CStr};
+use crate::ffi::CStr;
+use crate::io;
 
 #[cfg(not(windows))]
 #[inline]
@@ -14,7 +16,7 @@ pub(super) fn c_str(c: &CStr) -> *const c::c_char {
     c.as_ptr()
 }
 
-#[cfg(not(any(windows, target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "espidf", target_os = "wasi")))]
 #[inline]
 pub(super) fn no_fd() -> LibcFd {
     -1
@@ -25,7 +27,7 @@ pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> LibcFd {
     fd.as_raw_fd() as LibcFd
 }
 
-#[cfg(not(any(windows, target_os = "redox")))]
+#[cfg(not(any(windows, target_os = "espidf", target_os = "redox")))]
 #[inline]
 pub(super) fn owned_fd(fd: OwnedFd) -> LibcFd {
     fd.into_raw_fd() as LibcFd
@@ -174,7 +176,7 @@ pub(super) fn ret_send_recv(len: i32) -> io::Result<usize> {
 
 /// Convert the value to the `msg_iovlen` field of a `msghdr` struct.
 #[cfg(all(
-    not(any(windows, target_os = "redox", target_os = "wasi")),
+    not(any(windows, target_os = "espidf", target_os = "redox", target_os = "wasi")),
     any(
         target_os = "android",
         all(target_os = "linux", not(target_env = "musl"))
@@ -187,7 +189,7 @@ pub(super) fn msg_iov_len(len: usize) -> c::size_t {
 
 /// Convert the value to the `msg_iovlen` field of a `msghdr` struct.
 #[cfg(all(
-    not(any(windows, target_os = "redox", target_os = "wasi")),
+    not(any(windows, target_os = "espidf", target_os = "redox", target_os = "wasi")),
     not(any(
         target_os = "android",
         all(target_os = "linux", not(target_env = "musl"))
@@ -206,6 +208,7 @@ pub(crate) fn msg_iov_len(len: usize) -> c::c_int {
     target_os = "emscripten",
     target_os = "fuchsia",
     target_os = "haiku",
+    target_os = "nto",
 ))]
 #[inline]
 pub(crate) fn msg_control_len(len: usize) -> c::socklen_t {
@@ -219,8 +222,10 @@ pub(crate) fn msg_control_len(len: usize) -> c::socklen_t {
     windows,
     target_env = "musl",
     target_os = "emscripten",
+    target_os = "espidf",
     target_os = "fuchsia",
     target_os = "haiku",
+    target_os = "nto",
     target_os = "redox",
     target_os = "wasi",
 )))]

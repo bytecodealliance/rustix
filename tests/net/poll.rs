@@ -40,10 +40,13 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     assert!(fds[0].revents().intersects(PollFlags::IN));
     assert!(!fds[0].revents().intersects(PollFlags::OUT));
 
-    let expected_nread = rustix::io::ioctl_fionread(&data_socket).unwrap();
-    let nread = recv(&data_socket, &mut buffer, RecvFlags::empty()).unwrap();
-    assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "hello, world");
-    assert_eq!(expected_nread, nread as u64);
+    #[cfg(not(target_os = "espidf"))]
+    {
+        let expected_nread = rustix::io::ioctl_fionread(&data_socket).unwrap();
+        let nread = recv(&data_socket, &mut buffer, RecvFlags::empty()).unwrap();
+        assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "hello, world");
+        assert_eq!(expected_nread, nread as u64);
+    }
 
     let mut fds = [PollFd::new(&data_socket, PollFlags::OUT)];
     assert_eq!(poll(&mut fds, -1).unwrap(), 1);
@@ -81,10 +84,13 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     assert!(fds[0].revents().intersects(PollFlags::IN));
     assert!(!fds[0].revents().intersects(PollFlags::OUT));
 
-    let expected_nread = rustix::io::ioctl_fionread(&data_socket).unwrap();
-    let nread = recv(&data_socket, &mut buffer, RecvFlags::empty()).unwrap();
-    assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "goodnight, moon");
-    assert_eq!(expected_nread, nread as u64);
+    #[cfg(not(target_os = "espidf"))]
+    {
+        let expected_nread = rustix::io::ioctl_fionread(&data_socket).unwrap();
+        let nread = recv(&data_socket, &mut buffer, RecvFlags::empty()).unwrap();
+        assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "goodnight, moon");
+        assert_eq!(expected_nread, nread as u64);
+    }
 }
 
 #[test]

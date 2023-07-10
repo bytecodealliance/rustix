@@ -12,16 +12,23 @@ use crate::fd::BorrowedFd;
 #[cfg(feature = "procfs")]
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use crate::ffi::CStr;
+#[cfg(any(
+    not(target_os = "espidf"),
+    all(
+        feature = "procfs",
+        not(any(target_os = "fuchsia", target_os = "wasi"))
+    )
+))]
 use core::mem::MaybeUninit;
 #[cfg(not(target_os = "wasi"))]
+use {crate::io, crate::pid::Pid};
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 use {
-    crate::io,
-    crate::pid::Pid,
     crate::termios::{Action, OptionalActions, QueueSelector, Termios, Winsize},
     crate::utils::as_mut_ptr,
 };
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     // If we have `TCGETS2`, use it, so that we fill in the `c_ispeed` and
     // `c_ospeed` fields.
@@ -34,7 +41,7 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
 
         ret(c::ioctl(
             borrowed_fd(fd),
-            c::TCGETS2.into(),
+            c::TCGETS2 as _,
             termios2.as_mut_ptr(),
         ))?;
 
@@ -79,7 +86,7 @@ pub(crate) fn tcsetpgrp(fd: BorrowedFd<'_>, pid: Pid) -> io::Result<()> {
     unsafe { ret(c::tcsetpgrp(borrowed_fd(fd), pid.as_raw_nonzero().get())) }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 pub(crate) fn tcsetattr(
     fd: BorrowedFd,
     optional_actions: OptionalActions,
@@ -153,17 +160,17 @@ pub(crate) fn tcsendbreak(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::tcsendbreak(borrowed_fd(fd), 0)) }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 pub(crate) fn tcdrain(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::tcdrain(borrowed_fd(fd))) }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 pub(crate) fn tcflush(fd: BorrowedFd, queue_selector: QueueSelector) -> io::Result<()> {
     unsafe { ret(c::tcflush(borrowed_fd(fd), queue_selector as _)) }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 pub(crate) fn tcflow(fd: BorrowedFd, action: Action) -> io::Result<()> {
     unsafe { ret(c::tcflow(borrowed_fd(fd), action as _)) }
 }
@@ -176,12 +183,12 @@ pub(crate) fn tcgetsid(fd: BorrowedFd) -> io::Result<Pid> {
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 pub(crate) fn tcsetwinsize(fd: BorrowedFd, winsize: Winsize) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCSWINSZ, &winsize)) }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 pub(crate) fn tcgetwinsize(fd: BorrowedFd) -> io::Result<Winsize> {
     unsafe {
         let mut buf = MaybeUninit::<Winsize>::uninit();
@@ -194,17 +201,27 @@ pub(crate) fn tcgetwinsize(fd: BorrowedFd) -> io::Result<Winsize> {
     }
 }
 
-#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "haiku",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCEXCL as _)) }
 }
 
-#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "haiku",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCNXCL as _)) }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "nto", target_os = "wasi")))]
 #[inline]
 pub(crate) fn set_speed(termios: &mut Termios, arbitrary_speed: u32) -> io::Result<()> {
     #[cfg(bsd)]
@@ -246,7 +263,7 @@ pub(crate) fn set_speed(termios: &mut Termios, arbitrary_speed: u32) -> io::Resu
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 #[inline]
 pub(crate) fn set_output_speed(termios: &mut Termios, arbitrary_speed: u32) -> io::Result<()> {
     #[cfg(bsd)]
@@ -286,7 +303,7 @@ pub(crate) fn set_output_speed(termios: &mut Termios, arbitrary_speed: u32) -> i
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 #[inline]
 pub(crate) fn set_input_speed(termios: &mut Termios, arbitrary_speed: u32) -> io::Result<()> {
     #[cfg(bsd)]
@@ -326,7 +343,7 @@ pub(crate) fn set_input_speed(termios: &mut Termios, arbitrary_speed: u32) -> io
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "nto", target_os = "wasi")))]
 #[inline]
 pub(crate) fn cfmakeraw(termios: &mut Termios) {
     unsafe { c::cfmakeraw(as_mut_ptr(termios).cast()) }

@@ -7,7 +7,12 @@ use crate::backend::conv::ret_infallible;
 #[cfg(linux_kernel)]
 use crate::system::Sysinfo;
 use core::mem::MaybeUninit;
-#[cfg(not(any(target_os = "emscripten", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "emscripten",
+    target_os = "espidf",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 use {crate::backend::conv::ret, crate::io};
 
 #[cfg(not(target_os = "wasi"))]
@@ -29,7 +34,12 @@ pub(crate) fn sysinfo() -> Sysinfo {
     }
 }
 
-#[cfg(not(any(target_os = "emscripten", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "emscripten",
+    target_os = "espidf",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
     unsafe {
         ret(c::sethostname(

@@ -15,7 +15,7 @@ use crate::{backend, io};
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=tty&sektion=4
 /// [NetBSD]: https://man.netbsd.org/tty.4
 /// [OpenBSD]: https://man.openbsd.org/tty.4
-#[cfg(not(any(windows, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 #[inline]
 #[doc(alias = "TIOCEXCL")]
 pub fn ioctl_tiocexcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
@@ -34,7 +34,7 @@ pub fn ioctl_tiocexcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=tty&sektion=4
 /// [NetBSD]: https://man.netbsd.org/tty.4
 /// [OpenBSD]: https://man.openbsd.org/tty.4
-#[cfg(not(any(windows, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 #[inline]
 #[doc(alias = "TIOCNXCL")]
 pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {

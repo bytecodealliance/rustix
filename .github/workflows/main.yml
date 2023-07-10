@@ -207,6 +207,9 @@ jobs:
     - run: cargo check -Z build-std --target x86_64-unknown-haiku --features=all-apis
     # x86_64-uwp-windows-msvc isn't currently working.
     #- run: cargo check -Z build-std --target x86_64-uwp-windows-msvc --all-targets --features=all-apis
+    - run: cargo check -Z build-std --target=riscv32imc-esp-espidf --features=all-apis
+    - run: cargo check -Z build-std --target=aarch64-unknown-nto-qnx710 --features=all-apis
+    - run: cargo check -Z build-std --target=x86_64-pc-nto-qnx710 --features=all-apis
 
   test:
     name: Test

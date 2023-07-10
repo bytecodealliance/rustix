@@ -40,9 +40,15 @@ pub enum MembarrierCommand {
 /// [`getrlimit`]: crate::process::getrlimit
 /// [`setrlimit`]: crate::process::setrlimit
 /// [`prlimit`]: crate::process::prlimit
-#[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "fuchsia",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-#[repr(u32)]
+#[cfg_attr(not(target_os = "l4re"), repr(u32))]
+#[cfg_attr(target_os = "l4re", repr(u64))]
 pub enum Resource {
     /// `RLIMIT_CPU`
     Cpu = bitcast!(c::RLIMIT_CPU),
@@ -56,7 +62,8 @@ pub enum Resource {
     #[cfg(not(target_os = "haiku"))]
     Core = bitcast!(c::RLIMIT_CORE),
     /// `RLIMIT_RSS`
-    #[cfg(not(any(apple, solarish, target_os = "haiku")))]
+    // "nto" has `RLIMIT_RSS`, but it has the same value as `RLIMIT_AS`.
+    #[cfg(not(any(apple, solarish, target_os = "nto", target_os = "haiku")))]
     Rss = bitcast!(c::RLIMIT_RSS),
     /// `RLIMIT_NPROC`
     #[cfg(not(any(solarish, target_os = "haiku")))]
@@ -70,19 +77,49 @@ pub enum Resource {
     #[cfg(not(target_os = "openbsd"))]
     As = bitcast!(c::RLIMIT_AS),
     /// `RLIMIT_LOCKS`
-    #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+    #[cfg(not(any(
+        bsd,
+        solarish,
+        target_os = "aix",
+        target_os = "haiku",
+        target_os = "nto"
+    )))]
     Locks = bitcast!(c::RLIMIT_LOCKS),
     /// `RLIMIT_SIGPENDING`
-    #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+    #[cfg(not(any(
+        bsd,
+        solarish,
+        target_os = "aix",
+        target_os = "haiku",
+        target_os = "nto"
+    )))]
     Sigpending = bitcast!(c::RLIMIT_SIGPENDING),
     /// `RLIMIT_MSGQUEUE`
-    #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+    #[cfg(not(any(
+        bsd,
+        solarish,
+        target_os = "aix",
+        target_os = "haiku",
+        target_os = "nto"
+    )))]
     Msgqueue = bitcast!(c::RLIMIT_MSGQUEUE),
     /// `RLIMIT_NICE`
-    #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+    #[cfg(not(any(
+        bsd,
+        solarish,
+        target_os = "aix",
+        target_os = "haiku",
+        target_os = "nto"
+    )))]
     Nice = bitcast!(c::RLIMIT_NICE),
     /// `RLIMIT_RTPRIO`
-    #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+    #[cfg(not(any(
+        bsd,
+        solarish,
+        target_os = "aix",
+        target_os = "haiku",
+        target_os = "nto"
+    )))]
     Rtprio = bitcast!(c::RLIMIT_RTPRIO),
     /// `RLIMIT_RTTIME`
     #[cfg(not(any(
@@ -92,6 +129,7 @@ pub enum Resource {
         target_os = "android",
         target_os = "emscripten",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     Rttime = bitcast!(c::RLIMIT_RTTIME),
 }
@@ -105,7 +143,7 @@ impl Resource {
 
 pub const EXIT_SUCCESS: c::c_int = c::EXIT_SUCCESS;
 pub const EXIT_FAILURE: c::c_int = c::EXIT_FAILURE;
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 pub const EXIT_SIGNALED_SIGABRT: c::c_int = 128 + c::SIGABRT;
 
 /// A CPU identifier as a raw integer.

@@ -62,7 +62,7 @@ pub(crate) fn ptsname(fd: BorrowedFd, mut buffer: Vec<u8>) -> io::Result<CString
             } else {
                 // The size declared in the `TIOCPTYGNAME` macro in sys/ttycom.h is 128.
                 let mut name: [u8; 128] = [0_u8; 128];
-                match c::ioctl(borrowed_fd(fd), c::TIOCPTYGNAME as u64, &mut name) {
+                match c::ioctl(borrowed_fd(fd), c::TIOCPTYGNAME as _, &mut name) {
                     0 => {
                         let len = CStr::from_ptr(name.as_ptr().cast()).to_bytes().len();
                         std::ptr::copy_nonoverlapping(name.as_ptr(), buffer.as_mut_ptr(), len + 1);
