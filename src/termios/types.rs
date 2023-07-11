@@ -65,6 +65,7 @@ impl Termios {
     ///
     /// In raw mode, input is available a byte at a time, echoing is disabled,
     /// and special terminal input and output codes are disabled.
+    #[cfg(not(target_os = "nto"))]
     #[doc(alias = "cfmakeraw")]
     #[inline]
     pub fn make_raw(&mut self) {
@@ -123,6 +124,7 @@ impl Termios {
     /// encoded constant value. Not all implementations support all integer
     /// values; use the constants in the [`speed`] module for likely-supported
     /// speeds.
+    #[cfg(not(target_os = "nto"))]
     #[doc(alias = "cfsetspeed")]
     #[doc(alias = "CBAUD")]
     #[doc(alias = "CBAUDEX")]
@@ -516,7 +518,7 @@ bitflags! {
         const CLOCAL = c::CLOCAL;
 
         /// `CRTSCTS`
-        #[cfg(not(any(target_os = "aix", target_os = "redox")))]
+        #[cfg(not(any(target_os = "aix", target_os = "nto", target_os = "redox")))]
         const CRTSCTS = c::CRTSCTS;
 
         /// `CMSPAR`
@@ -526,6 +528,7 @@ bitflags! {
             target_os = "aix",
             target_os = "emscripten",
             target_os = "haiku",
+            target_os = "nto",
             target_os = "redox",
         )))]
         const CMSPAR = c::CMSPAR;
@@ -546,7 +549,7 @@ bitflags! {
         const ECHOCTL = c::ECHOCTL;
 
         /// `ECHOPRT`
-        #[cfg(not(target_os = "redox"))]
+        #[cfg(not(any(target_os = "nto", target_os = "redox")))]
         const ECHOPRT = c::ECHOPRT;
 
         /// `ECHOKE`
@@ -554,15 +557,15 @@ bitflags! {
         const ECHOKE = c::ECHOKE;
 
         /// `FLUSHO`
-        #[cfg(not(target_os = "redox"))]
+        #[cfg(not(any(target_os = "nto", target_os = "redox")))]
         const FLUSHO = c::FLUSHO;
 
         /// `PENDIN`
-        #[cfg(not(target_os = "redox"))]
+        #[cfg(not(any(target_os = "nto", target_os = "redox")))]
         const PENDIN = c::PENDIN;
 
         /// `EXTPROC`
-        #[cfg(not(any(target_os = "aix", target_os = "haiku", target_os = "redox")))]
+        #[cfg(not(any(target_os = "aix", target_os = "haiku", target_os = "nto", target_os = "redox")))]
         const EXTPROC = c::EXTPROC;
 
         /// `ISIG`
@@ -782,35 +785,73 @@ pub mod speed {
             c::B57600 => Some(57600),
             #[cfg(not(target_os = "aix"))]
             c::B115200 => Some(115_200),
-            #[cfg(not(target_os = "aix"))]
+            #[cfg(not(any(target_os = "aix", target_os = "nto")))]
             c::B230400 => Some(230_400),
             #[cfg(not(any(
                 apple,
                 target_os = "aix",
                 target_os = "dragonfly",
                 target_os = "haiku",
+                target_os = "nto",
                 target_os = "openbsd"
             )))]
             c::B460800 => Some(460_800),
-            #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+            #[cfg(not(any(
+                bsd,
+                solarish,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "nto"
+            )))]
             c::B500000 => Some(500_000),
-            #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+            #[cfg(not(any(
+                bsd,
+                solarish,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "nto"
+            )))]
             c::B576000 => Some(576_000),
             #[cfg(not(any(
                 apple,
                 target_os = "aix",
                 target_os = "dragonfly",
                 target_os = "haiku",
+                target_os = "nto",
                 target_os = "openbsd"
             )))]
             c::B921600 => Some(921_600),
-            #[cfg(not(any(bsd, target_os = "aix", target_os = "haiku", target_os = "solaris")))]
+            #[cfg(not(any(
+                bsd,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "nto",
+                target_os = "solaris"
+            )))]
             c::B1000000 => Some(1_000_000),
-            #[cfg(not(any(bsd, target_os = "aix", target_os = "haiku", target_os = "solaris")))]
+            #[cfg(not(any(
+                bsd,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "nto",
+                target_os = "solaris"
+            )))]
             c::B1152000 => Some(1_152_000),
-            #[cfg(not(any(bsd, target_os = "aix", target_os = "haiku", target_os = "solaris")))]
+            #[cfg(not(any(
+                bsd,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "nto",
+                target_os = "solaris"
+            )))]
             c::B1500000 => Some(1_500_000),
-            #[cfg(not(any(bsd, target_os = "aix", target_os = "haiku", target_os = "solaris")))]
+            #[cfg(not(any(
+                bsd,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "nto",
+                target_os = "solaris"
+            )))]
             c::B2000000 => Some(2_000_000),
             #[cfg(not(any(
                 target_arch = "sparc",
@@ -818,6 +859,7 @@ pub mod speed {
                 bsd,
                 target_os = "aix",
                 target_os = "haiku",
+                target_os = "nto",
                 target_os = "solaris",
             )))]
             c::B2500000 => Some(2_500_000),
@@ -827,6 +869,7 @@ pub mod speed {
                 bsd,
                 target_os = "aix",
                 target_os = "haiku",
+                target_os = "nto",
                 target_os = "solaris",
             )))]
             c::B3000000 => Some(3_000_000),
@@ -836,6 +879,7 @@ pub mod speed {
                 bsd,
                 target_os = "aix",
                 target_os = "haiku",
+                target_os = "nto",
                 target_os = "solaris",
             )))]
             c::B3500000 => Some(3_500_000),
@@ -845,6 +889,7 @@ pub mod speed {
                 bsd,
                 target_os = "aix",
                 target_os = "haiku",
+                target_os = "nto",
                 target_os = "solaris",
             )))]
             c::B4000000 => Some(4_000_000),
@@ -877,35 +922,73 @@ pub mod speed {
             57600 => Some(c::B57600),
             #[cfg(not(target_os = "aix"))]
             115_200 => Some(c::B115200),
-            #[cfg(not(target_os = "aix"))]
+            #[cfg(not(any(target_os = "aix", target_os = "nto")))]
             230_400 => Some(c::B230400),
             #[cfg(not(any(
                 apple,
                 target_os = "aix",
                 target_os = "dragonfly",
                 target_os = "haiku",
-                target_os = "openbsd"
+                target_os = "nto",
+                target_os = "openbsd",
             )))]
             460_800 => Some(c::B460800),
-            #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+            #[cfg(not(any(
+                bsd,
+                solarish,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "nto"
+            )))]
             500_000 => Some(c::B500000),
-            #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+            #[cfg(not(any(
+                bsd,
+                solarish,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "nto"
+            )))]
             576_000 => Some(c::B576000),
             #[cfg(not(any(
                 apple,
                 target_os = "aix",
                 target_os = "dragonfly",
                 target_os = "haiku",
+                target_os = "nto",
                 target_os = "openbsd"
             )))]
             921_600 => Some(c::B921600),
-            #[cfg(not(any(bsd, target_os = "aix", target_os = "haiku", target_os = "solaris")))]
+            #[cfg(not(any(
+                bsd,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "nto",
+                target_os = "solaris"
+            )))]
             1_000_000 => Some(c::B1000000),
-            #[cfg(not(any(bsd, target_os = "aix", target_os = "haiku", target_os = "solaris")))]
+            #[cfg(not(any(
+                bsd,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "nto",
+                target_os = "solaris"
+            )))]
             1_152_000 => Some(c::B1152000),
-            #[cfg(not(any(bsd, target_os = "aix", target_os = "haiku", target_os = "solaris")))]
+            #[cfg(not(any(
+                bsd,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "nto",
+                target_os = "solaris"
+            )))]
             1_500_000 => Some(c::B1500000),
-            #[cfg(not(any(bsd, target_os = "aix", target_os = "haiku", target_os = "solaris")))]
+            #[cfg(not(any(
+                bsd,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "nto",
+                target_os = "solaris"
+            )))]
             2_000_000 => Some(c::B2000000),
             #[cfg(not(any(
                 target_arch = "sparc",
@@ -913,6 +996,7 @@ pub mod speed {
                 bsd,
                 target_os = "aix",
                 target_os = "haiku",
+                target_os = "nto",
                 target_os = "solaris",
             )))]
             2_500_000 => Some(c::B2500000),
@@ -922,6 +1006,7 @@ pub mod speed {
                 bsd,
                 target_os = "aix",
                 target_os = "haiku",
+                target_os = "nto",
                 target_os = "solaris",
             )))]
             3_000_000 => Some(c::B3000000),
@@ -931,6 +1016,7 @@ pub mod speed {
                 bsd,
                 target_os = "aix",
                 target_os = "haiku",
+                target_os = "nto",
                 target_os = "solaris",
             )))]
             3_500_000 => Some(c::B3500000),
@@ -940,6 +1026,7 @@ pub mod speed {
                 bsd,
                 target_os = "aix",
                 target_os = "haiku",
+                target_os = "nto",
                 target_os = "solaris",
             )))]
             4_000_000 => Some(c::B4000000),
@@ -1003,6 +1090,7 @@ impl SpecialCodeIndex {
         target_os = "freebsd",
         target_os = "haiku",
         target_os = "netbsd",
+        target_os = "nto",
         target_os = "openbsd",
     )))]
     pub const VSWTC: Self = Self(c::VSWTC as usize);
@@ -1199,7 +1287,7 @@ fn termios_layouts() {
 }
 
 #[test]
-#[cfg(not(any(solarish, target_os = "emscripten")))]
+#[cfg(not(any(solarish, target_os = "emscripten", target_os = "redox")))]
 fn termios_legacy() {
     // Check that our doc aliases above are correct.
     assert_eq!(c::EXTA, c::B19200);

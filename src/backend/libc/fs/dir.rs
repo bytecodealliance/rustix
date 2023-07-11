@@ -1,4 +1,4 @@
-#[cfg(not(any(solarish, target_os = "haiku")))]
+#[cfg(not(any(solarish, target_os = "haiku", target_os = "nto")))]
 use super::types::FileType;
 use crate::backend::c;
 use crate::backend::conv::owned_fd;
@@ -9,6 +9,7 @@ use crate::fs::{fcntl_getfl, fstat, openat, Mode, OFlags, Stat};
     solarish,
     target_os = "haiku",
     target_os = "netbsd",
+    target_os = "nto",
     target_os = "redox",
     target_os = "wasi",
 )))]
@@ -94,7 +95,12 @@ impl Dir {
                 check_dirent_layout(dirent);
 
                 let result = DirEntry {
-                    #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku")))]
+                    #[cfg(not(any(
+                        solarish,
+                        target_os = "aix",
+                        target_os = "haiku",
+                        target_os = "nto"
+                    )))]
                     d_type: dirent.d_type,
 
                     #[cfg(not(any(freebsdlike, netbsdlike)))]
@@ -122,6 +128,7 @@ impl Dir {
         solarish,
         target_os = "haiku",
         target_os = "netbsd",
+        target_os = "nto",
         target_os = "redox",
         target_os = "wasi",
     )))]
@@ -180,7 +187,7 @@ impl fmt::Debug for Dir {
 /// `struct dirent`
 #[derive(Debug)]
 pub struct DirEntry {
-    #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku")))]
+    #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku", target_os = "nto")))]
     d_type: u8,
 
     #[cfg(not(any(freebsdlike, netbsdlike)))]
@@ -200,7 +207,7 @@ impl DirEntry {
     }
 
     /// Returns the type of this directory entry.
-    #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku")))]
+    #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku", target_os = "nto")))]
     #[inline]
     pub fn file_type(&self) -> FileType {
         FileType::from_dirent_d_type(self.d_type)

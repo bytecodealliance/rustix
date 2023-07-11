@@ -178,7 +178,7 @@ fn check_proc_nonroot(stat: &Stat, proc_stat: Option<&Stat>) -> io::Result<()> {
 fn check_procfs(file: BorrowedFd<'_>) -> io::Result<()> {
     let statfs = fstatfs(file)?;
     let f_type = statfs.f_type;
-    if f_type != PROC_SUPER_MAGIC {
+    if f_type != PROC_SUPER_MAGIC.into() {
         return Err(io::Errno::NOTSUP);
     }
 

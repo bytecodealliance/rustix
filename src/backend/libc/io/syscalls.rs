@@ -1,19 +1,28 @@
 //! libc syscalls supporting `rustix::io`.
 
+use crate::backend::c;
 #[cfg(not(target_os = "wasi"))]
 use crate::backend::conv::ret_discarded_fd;
 use crate::backend::conv::{borrowed_fd, ret, ret_c_int, ret_owned_fd, ret_usize};
-use crate::backend::{c, MAX_IOV};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
-#[cfg(not(any(target_os = "aix", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "aix",
+    target_os = "espidf",
+    target_os = "nto",
+    target_os = "wasi"
+)))]
 use crate::io::DupFlags;
 #[cfg(linux_kernel)]
 use crate::io::ReadWriteFlags;
-use crate::io::{self, FdFlags, IoSlice, IoSliceMut};
+use crate::io::{self, FdFlags};
 use core::cmp::min;
-use core::mem::MaybeUninit;
 #[cfg(all(feature = "fs", feature = "net"))]
 use libc_errno::errno;
+#[cfg(not(target_os = "espidf"))]
+use {
+    crate::backend::MAX_IOV,
+    crate::io::{IoSlice, IoSliceMut},
+};
 
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     unsafe {
@@ -41,6 +50,10 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Resu
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
 
+    // ESP-IDF doesn't support 64-bit offsets.
+    #[cfg(target_os = "espidf")]
+    let offset: i32 = offset.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+
     unsafe {
         ret_usize(c::pread(
             borrowed_fd(fd),
@@ -57,9 +70,14 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
 
+    // ESP-IDF doesn't support 64-bit offsets.
+    #[cfg(target_os = "espidf")]
+    let offset: i32 = offset.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+
     unsafe { ret_usize(c::pwrite(borrowed_fd(fd), buf.as_ptr().cast(), len, offset)) }
 }
 
+#[cfg(not(target_os = "espidf"))]
 pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut]) -> io::Result<usize> {
     unsafe {
         ret_usize(c::readv(
@@ -70,6 +88,7 @@ pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut]) -> io::Result<u
     }
 }
 
+#[cfg(not(target_os = "espidf"))]
 pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> {
     unsafe {
         ret_usize(c::writev(
@@ -80,7 +99,13 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> 
     }
 }
 
-#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "solaris")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "haiku",
+    target_os = "nto",
+    target_os = "redox",
+    target_os = "solaris"
+)))]
 pub(crate) fn preadv(
     fd: BorrowedFd<'_>,
     bufs: &mut [IoSliceMut],
@@ -98,7 +123,13 @@ pub(crate) fn preadv(
     }
 }
 
-#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "solaris")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "haiku",
+    target_os = "nto",
+    target_os = "redox",
+    target_os = "solaris"
+)))]
 pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
@@ -172,7 +203,10 @@ pub(crate) unsafe fn close(raw_fd: RawFd) {
     let _ = c::close(raw_fd as c::c_int);
 }
 
+#[cfg(not(target_os = "espidf"))]
 pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
+    use core::mem::MaybeUninit;
+
     let mut nread = MaybeUninit::<c::c_int>::uninit();
     unsafe {
         ret(c::ioctl(borrowed_fd(fd), c::FIONREAD, nread.as_mut_ptr()))?;
@@ -193,6 +227,8 @@ pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[cfg(all(feature = "fs", feature = "net"))]
 pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
+    use core::mem::MaybeUninit;
+
     let (mut read, mut write) = crate::fs::fd::_is_file_read_write(fd)?;
     let mut not_socket = false;
     if read {
@@ -251,7 +287,7 @@ pub(crate) fn fcntl_setfd(fd: BorrowedFd<'_>, flags: FdFlags) -> io::Result<()> 
     unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_SETFD, flags.bits())) }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::fcntl(borrowed_fd(fd), c::F_DUPFD_CLOEXEC, min)) }
 }
@@ -276,7 +312,9 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
     target_os = "aix",
     target_os = "android",
     target_os = "dragonfly",
+    target_os = "espidf",
     target_os = "haiku",
+    target_os = "nto",
     target_os = "redox",
     target_os = "wasi",
 )))]

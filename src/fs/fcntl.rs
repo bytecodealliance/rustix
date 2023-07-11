@@ -5,6 +5,7 @@
 
 #[cfg(not(any(
     target_os = "emscripten",
+    target_os = "espidf",
     target_os = "fuchsia",
     target_os = "redox",
     target_os = "wasi"
@@ -17,7 +18,7 @@ use backend::fs::types::OFlags;
 // These `fcntl` functions like in the `io` module because they're not specific
 // to files, directories, or memfd objects. We re-export them here in the `fs`
 // module because the other the `fcntl` functions are here.
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 pub use crate::io::fcntl_dupfd_cloexec;
 pub use crate::io::{fcntl_getfd, fcntl_setfd};
 
@@ -96,6 +97,7 @@ pub fn fcntl_add_seals<Fd: AsFd>(fd: Fd, seals: SealFlags) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[cfg(not(any(
     target_os = "emscripten",
+    target_os = "espidf",
     target_os = "fuchsia",
     target_os = "redox",
     target_os = "wasi"

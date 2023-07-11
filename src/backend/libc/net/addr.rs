@@ -76,12 +76,12 @@ impl SocketAddrUnix {
 
     fn init() -> c::sockaddr_un {
         c::sockaddr_un {
-            #[cfg(any(bsd, target_os = "haiku"))]
+            #[cfg(any(bsd, target_os = "haiku", target_os = "nto"))]
             sun_len: 0,
             sun_family: c::AF_UNIX as _,
-            #[cfg(bsd)]
+            #[cfg(any(bsd, target_os = "nto"))]
             sun_path: [0; 104],
-            #[cfg(not(any(bsd, target_os = "haiku")))]
+            #[cfg(not(any(bsd, target_os = "haiku", target_os = "nto")))]
             sun_path: [0; 108],
             #[cfg(target_os = "haiku")]
             sun_path: [0; 126],
@@ -208,15 +208,15 @@ pub type SocketAddrStorage = c::sockaddr_storage;
 #[inline]
 pub(crate) fn offsetof_sun_path() -> usize {
     let z = c::sockaddr_un {
-        #[cfg(any(bsd, target_os = "haiku"))]
+        #[cfg(any(bsd, target_os = "haiku", target_os = "nto"))]
         sun_len: 0_u8,
-        #[cfg(any(bsd, target_os = "haiku"))]
+        #[cfg(any(bsd, target_os = "espidf", target_os = "haiku", target_os = "nto"))]
         sun_family: 0_u8,
-        #[cfg(not(any(bsd, target_os = "haiku")))]
+        #[cfg(not(any(bsd, target_os = "espidf", target_os = "haiku", target_os = "nto")))]
         sun_family: 0_u16,
-        #[cfg(bsd)]
+        #[cfg(any(bsd, target_os = "nto"))]
         sun_path: [0; 104],
-        #[cfg(not(any(bsd, target_os = "haiku")))]
+        #[cfg(not(any(bsd, target_os = "haiku", target_os = "nto")))]
         sun_path: [0; 108],
         #[cfg(target_os = "haiku")]
         sun_path: [0; 126],

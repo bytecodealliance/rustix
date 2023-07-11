@@ -2,17 +2,21 @@
 
 use crate::fd::OwnedFd;
 use crate::ffi::{CStr, CString};
+#[cfg(not(target_os = "espidf"))]
+use crate::fs::Access;
 #[cfg(not(any(
     solarish,
+    target_os = "espidf",
     target_os = "haiku",
     target_os = "netbsd",
+    target_os = "nto",
     target_os = "redox",
     target_os = "wasi",
 )))]
 use crate::fs::StatFs;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use crate::fs::StatVfs;
-use crate::fs::{Access, Mode, OFlags, Stat};
+use crate::fs::{Mode, OFlags, Stat};
 use crate::path::SMALL_PATH_BUFFER_SIZE;
 use crate::{backend, io, path};
 use alloc::vec::Vec;
@@ -215,6 +219,7 @@ pub fn mkdir<P: path::Arg>(path: P, mode: Mode) -> io::Result<()> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/access.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/access.2.html
+#[cfg(not(target_os = "espidf"))]
 #[inline]
 pub fn access<P: path::Arg>(path: P, access: Access) -> io::Result<()> {
     path.into_with_c_str(|path| backend::fs::syscalls::access(path, access))
@@ -231,8 +236,10 @@ pub fn access<P: path::Arg>(path: P, access: Access) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/statfs.2.html
 #[cfg(not(any(
     solarish,
+    target_os = "espidf",
     target_os = "haiku",
     target_os = "netbsd",
+    target_os = "nto",
     target_os = "redox",
     target_os = "wasi",
 )))]

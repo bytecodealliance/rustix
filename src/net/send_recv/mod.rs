@@ -8,10 +8,10 @@ use backend::fd::{AsFd, BorrowedFd};
 
 pub use backend::net::send_recv::{RecvFlags, SendFlags};
 
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 mod msg;
 
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 pub use msg::*;
 
 /// `recv(fd, buf, flags)`—Reads data from a socket.

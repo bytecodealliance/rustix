@@ -79,6 +79,7 @@ fn test_file() {
         netbsdlike,
         solarish,
         target_os = "dragonfly",
+        target_os = "espidf",
         target_os = "haiku",
         target_os = "redox",
     )))]
@@ -89,6 +90,7 @@ fn test_file() {
     #[cfg(not(any(
         apple,
         target_os = "dragonfly",
+        target_os = "espidf",
         target_os = "haiku",
         target_os = "redox",
     )))]

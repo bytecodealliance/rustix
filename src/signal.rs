@@ -48,6 +48,7 @@ pub enum Signal {
         solarish,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "nto",
         all(
             linux_kernel,
             any(
@@ -149,6 +150,7 @@ impl Signal {
                 solarish,
                 target_os = "aix",
                 target_os = "haiku",
+                target_os = "nto",
                 all(
                     linux_kernel,
                     any(

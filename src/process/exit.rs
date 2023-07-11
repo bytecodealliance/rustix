@@ -32,5 +32,5 @@ pub const EXIT_FAILURE: i32 = backend::process::types::EXIT_FAILURE;
 ///
 /// [Linux]: https://tldp.org/LDP/abs/html/exitcodes.html
 /// [`Signal::Abort`]: crate::process::Signal::Abort
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 pub const EXIT_SIGNALED_SIGABRT: i32 = backend::process::types::EXIT_SIGNALED_SIGABRT;

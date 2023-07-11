@@ -5,6 +5,7 @@ use rustix::io;
 #[cfg(all(feature = "process", feature = "param"))]
 #[cfg(not(windows))]
 fn main() -> io::Result<()> {
+    #[cfg(not(target_os = "espidf"))]
     use rustix::param::*;
     use rustix::process::*;
     use rustix::system::*;
@@ -28,10 +29,12 @@ fn main() -> io::Result<()> {
         let (a, b) = linux_hwcap();
         println!("Linux hwcap: {:#x}, {:#x}", a, b);
     }
+    #[cfg(not(target_os = "espidf"))]
     println!("Page size: {}", page_size());
+    #[cfg(not(target_os = "espidf"))]
     println!("Clock ticks/sec: {}", clock_ticks_per_second());
     println!("Uname: {:?}", uname());
-    #[cfg(not(target_os = "fuchsia"))]
+    #[cfg(not(any(target_os = "espidf", target_os = "fuchsia")))]
     {
         println!("Process group priority: {}", getpriority_pgrp(None)?);
         println!("Process priority: {}", getpriority_process(None)?);
@@ -41,7 +44,7 @@ fn main() -> io::Result<()> {
         "Current working directory: {}",
         getcwd(Vec::new())?.to_string_lossy()
     );
-    #[cfg(not(any(target_os = "fuchsia", target_os = "redox")))]
+    #[cfg(not(any(target_os = "espidf", target_os = "fuchsia", target_os = "redox")))]
     {
         println!("Cpu Limit: {:?}", getrlimit(Resource::Cpu));
         println!("Fsize Limit: {:?}", getrlimit(Resource::Fsize));

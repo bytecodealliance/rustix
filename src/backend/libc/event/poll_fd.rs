@@ -26,18 +26,20 @@ bitflags! {
         /// `POLLRDNORM`
         const RDNORM = c::POLLRDNORM;
         /// `POLLWRNORM`
+        #[cfg(not(target_os = "l4re"))]
         const WRNORM = c::POLLWRNORM;
         /// `POLLRDBAND`
-        #[cfg(not(target_os = "wasi"))]
+        #[cfg(not(any(target_os = "l4re", target_os = "wasi")))]
         const RDBAND = c::POLLRDBAND;
         /// `POLLWRBAND`
-        #[cfg(not(target_os = "wasi"))]
+        #[cfg(not(any(target_os = "l4re", target_os = "wasi")))]
         const WRBAND = c::POLLWRBAND;
         /// `POLLERR`
         const ERR = c::POLLERR;
         /// `POLLHUP`
         const HUP = c::POLLHUP;
         /// `POLLNVAL`
+        #[cfg(not(target_os = "espidf"))]
         const NVAL = c::POLLNVAL;
         /// `POLLRDHUP`
         #[cfg(all(

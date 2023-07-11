@@ -2,6 +2,7 @@
 use std::io::{IoSlice, IoSliceMut};
 
 #[cfg(feature = "fs")]
+#[cfg(not(target_os = "espidf"))] // no preadv/pwritev
 #[cfg(not(target_os = "solaris"))] // no preadv/pwritev
 #[cfg(not(target_os = "haiku"))] // no preadv/pwritev
 #[test]
@@ -66,6 +67,7 @@ fn test_readwrite_p() {
     assert_eq!(&buf, b"world");
 }
 
+#[cfg(not(target_os = "espidf"))] // no readv/writev
 #[cfg(feature = "fs")]
 #[test]
 fn test_readwrite_v() {

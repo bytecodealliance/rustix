@@ -22,6 +22,7 @@ use {
     apple,
     freebsdlike,
     target_os = "emscripten",
+    target_os = "espidf",
     target_os = "haiku",
     target_os = "openbsd",
     target_os = "redox",
@@ -44,6 +45,7 @@ weak!(fn __nanosleep64(*const LibcTimespec, *mut LibcTimespec) -> c::c_int);
     apple,
     target_os = "dragonfly",
     target_os = "emscripten",
+    target_os = "espidf",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "haiku",
     target_os = "openbsd",
@@ -139,6 +141,7 @@ unsafe fn clock_nanosleep_relative_old(id: ClockId, request: &Timespec) -> Nanos
     apple,
     target_os = "dragonfly",
     target_os = "emscripten",
+    target_os = "espidf",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "haiku",
     target_os = "openbsd",
@@ -178,7 +181,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
         target_env = "gnu",
     )))]
-    match unsafe { c::clock_nanosleep(id as c::clockid_t, flags, request, null_mut()) } {
+    match unsafe { c::clock_nanosleep(id as c::clockid_t, flags as _, request, null_mut()) } {
         0 => Ok(()),
         err => Err(io::Errno(err)),
     }

@@ -23,13 +23,15 @@ impl SocketType {
     pub const DGRAM: Self = Self(c::SOCK_DGRAM as _);
 
     /// `SOCK_SEQPACKET`
+    #[cfg(not(target_os = "espidf"))]
     pub const SEQPACKET: Self = Self(c::SOCK_SEQPACKET as _);
 
     /// `SOCK_RAW`
+    #[cfg(not(target_os = "espidf"))]
     pub const RAW: Self = Self(c::SOCK_RAW as _);
 
     /// `SOCK_RDM`
-    #[cfg(not(target_os = "haiku"))]
+    #[cfg(not(any(target_os = "espidf", target_os = "haiku")))]
     pub const RDM: Self = Self(c::SOCK_RDM as _);
 
     /// Constructs a `SocketType` from a raw integer.
@@ -83,7 +85,9 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const NETLINK: Self = Self(c::AF_NETLINK as _);
     /// `AF_UNIX`, aka `AF_LOCAL`
@@ -94,19 +98,25 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const AX25: Self = Self(c::AF_AX25 as _);
     /// `AF_IPX`
+    #[cfg(not(target_os = "espidf"))]
     pub const IPX: Self = Self(c::AF_IPX as _);
     /// `AF_APPLETALK`
+    #[cfg(not(target_os = "espidf"))]
     pub const APPLETALK: Self = Self(c::AF_APPLETALK as _);
     /// `AF_NETROM`
     #[cfg(not(any(
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const NETROM: Self = Self(c::AF_NETROM as _);
     /// `AF_BRIDGE`
@@ -114,7 +124,9 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const BRIDGE: Self = Self(c::AF_BRIDGE as _);
     /// `AF_ATMPVC`
@@ -122,14 +134,18 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const ATMPVC: Self = Self(c::AF_ATMPVC as _);
     /// `AF_X25`
     #[cfg(not(any(
         bsd,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const X25: Self = Self(c::AF_X25 as _);
     /// `AF_ROSE`
@@ -137,18 +153,22 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const ROSE: Self = Self(c::AF_ROSE as _);
     /// `AF_DECnet`
-    #[cfg(not(target_os = "haiku"))]
+    #[cfg(not(any(target_os = "espidf", target_os = "haiku")))]
     pub const DECnet: Self = Self(c::AF_DECnet as _);
     /// `AF_NETBEUI`
     #[cfg(not(any(
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const NETBEUI: Self = Self(c::AF_NETBEUI as _);
     /// `AF_SECURITY`
@@ -156,14 +176,18 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const SECURITY: Self = Self(c::AF_SECURITY as _);
     /// `AF_KEY`
     #[cfg(not(any(
         bsd,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const KEY: Self = Self(c::AF_KEY as _);
     /// `AF_PACKET`
@@ -175,7 +199,9 @@ impl AddressFamily {
     #[cfg(not(any(
         bsd,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const PACKET: Self = Self(c::AF_PACKET as _);
     /// `AF_ASH`
@@ -183,7 +209,9 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const ASH: Self = Self(c::AF_ASH as _);
     /// `AF_ECONET`
@@ -191,7 +219,9 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const ECONET: Self = Self(c::AF_ECONET as _);
     /// `AF_ATMSVC`
@@ -199,7 +229,9 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const ATMSVC: Self = Self(c::AF_ATMSVC as _);
     /// `AF_RDS`
@@ -207,17 +239,21 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const RDS: Self = Self(c::AF_RDS as _);
     /// `AF_SNA`
-    #[cfg(not(target_os = "haiku"))]
+    #[cfg(not(any(target_os = "espidf", target_os = "haiku")))]
     pub const SNA: Self = Self(c::AF_SNA as _);
     /// `AF_IRDA`
     #[cfg(not(any(
         bsd,
         solarish,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const IRDA: Self = Self(c::AF_IRDA as _);
     /// `AF_PPPOX`
@@ -225,7 +261,9 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const PPPOX: Self = Self(c::AF_PPPOX as _);
     /// `AF_WANPIPE`
@@ -233,7 +271,9 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const WANPIPE: Self = Self(c::AF_WANPIPE as _);
     /// `AF_LLC`
@@ -241,7 +281,9 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const LLC: Self = Self(c::AF_LLC as _);
     /// `AF_CAN`
@@ -249,7 +291,9 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const CAN: Self = Self(c::AF_CAN as _);
     /// `AF_TIPC`
@@ -257,18 +301,22 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const TIPC: Self = Self(c::AF_TIPC as _);
     /// `AF_BLUETOOTH`
-    #[cfg(not(any(apple, solarish, windows)))]
+    #[cfg(not(any(apple, solarish, windows, target_os = "espidf")))]
     pub const BLUETOOTH: Self = Self(c::AF_BLUETOOTH as _);
     /// `AF_IUCV`
     #[cfg(not(any(
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const IUCV: Self = Self(c::AF_IUCV as _);
     /// `AF_RXRPC`
@@ -276,18 +324,22 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const RXRPC: Self = Self(c::AF_RXRPC as _);
     /// `AF_ISDN`
-    #[cfg(not(any(solarish, windows, target_os = "haiku")))]
+    #[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
     pub const ISDN: Self = Self(c::AF_ISDN as _);
     /// `AF_PHONET`
     #[cfg(not(any(
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const PHONET: Self = Self(c::AF_PHONET as _);
     /// `AF_IEEE802154`
@@ -295,7 +347,9 @@ impl AddressFamily {
         bsd,
         solarish,
         windows,
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const IEEE802154: Self = Self(c::AF_IEEE802154 as _);
     /// `AF_802`
@@ -508,28 +562,28 @@ pub mod ipproto {
     pub const ICMP: Protocol =
         Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_ICMP as _) });
     /// `IPPROTO_IGMP`
-    #[cfg(not(any(solarish, target_os = "haiku")))]
+    #[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
     pub const IGMP: Protocol =
         Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_IGMP as _) });
     /// `IPPROTO_IPIP`
-    #[cfg(not(any(solarish, windows, target_os = "haiku")))]
+    #[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
     pub const IPIP: Protocol =
         Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_IPIP as _) });
     /// `IPPROTO_TCP`
     pub const TCP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_TCP as _) });
     /// `IPPROTO_EGP`
-    #[cfg(not(any(solarish, target_os = "haiku")))]
+    #[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
     pub const EGP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_EGP as _) });
     /// `IPPROTO_PUP`
-    #[cfg(not(any(solarish, target_os = "haiku")))]
+    #[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
     pub const PUP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_PUP as _) });
     /// `IPPROTO_UDP`
     pub const UDP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_UDP as _) });
     /// `IPPROTO_IDP`
-    #[cfg(not(any(solarish, target_os = "haiku")))]
+    #[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
     pub const IDP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_IDP as _) });
     /// `IPPROTO_TP`
-    #[cfg(not(any(solarish, windows, target_os = "haiku")))]
+    #[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
     pub const TP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_TP as _) });
     /// `IPPROTO_DCCP`
     #[cfg(not(any(
@@ -537,7 +591,9 @@ pub mod ipproto {
         solarish,
         windows,
         target_os = "dragonfly",
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
         target_os = "openbsd",
     )))]
     pub const DCCP: Protocol =
@@ -546,40 +602,62 @@ pub mod ipproto {
     pub const IPV6: Protocol =
         Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_IPV6 as _) });
     /// `IPPROTO_RSVP`
-    #[cfg(not(any(solarish, windows, target_os = "haiku")))]
+    #[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
     pub const RSVP: Protocol =
         Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_RSVP as _) });
     /// `IPPROTO_GRE`
-    #[cfg(not(any(solarish, windows, target_os = "haiku")))]
+    #[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
     pub const GRE: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_GRE as _) });
     /// `IPPROTO_ESP`
-    #[cfg(not(any(solarish, target_os = "haiku")))]
+    #[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
     pub const ESP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_ESP as _) });
     /// `IPPROTO_AH`
-    #[cfg(not(any(solarish, target_os = "haiku")))]
+    #[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
     pub const AH: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_AH as _) });
     /// `IPPROTO_MTP`
-    #[cfg(not(any(solarish, netbsdlike, windows, target_os = "haiku")))]
+    #[cfg(not(any(
+        solarish,
+        netbsdlike,
+        windows,
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "nto",
+    )))]
     pub const MTP: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_MTP as _) });
     /// `IPPROTO_BEETPH`
-    #[cfg(not(any(bsd, solarish, windows, target_os = "haiku")))]
+    #[cfg(not(any(
+        bsd,
+        solarish,
+        windows,
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "nto"
+    )))]
     pub const BEETPH: Protocol =
         Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_BEETPH as _) });
     /// `IPPROTO_ENCAP`
-    #[cfg(not(any(solarish, windows, target_os = "haiku")))]
+    #[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
     pub const ENCAP: Protocol =
         Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_ENCAP as _) });
     /// `IPPROTO_PIM`
-    #[cfg(not(any(solarish, target_os = "haiku")))]
+    #[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
     pub const PIM: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_PIM as _) });
     /// `IPPROTO_COMP`
-    #[cfg(not(any(bsd, solarish, windows, target_os = "espidf", target_os = "haiku")))]
+    #[cfg(not(any(
+        bsd,
+        solarish,
+        windows,
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "nto"
+    )))]
     pub const COMP: Protocol =
         Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_COMP as _) });
     /// `IPPROTO_SCTP`
     #[cfg(not(any(
         solarish,
         target_os = "dragonfly",
+        target_os = "espidf",
         target_os = "haiku",
         target_os = "openbsd"
     )))]
@@ -592,7 +670,9 @@ pub mod ipproto {
         solarish,
         windows,
         target_os = "dragonfly",
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const UDPLITE: Protocol =
         Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_UDPLITE as _) });
@@ -602,8 +682,10 @@ pub mod ipproto {
         solarish,
         windows,
         target_os = "dragonfly",
+        target_os = "espidf",
         target_os = "haiku",
         target_os = "netbsd",
+        target_os = "nto",
     )))]
     pub const MPLS: Protocol =
         Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_MPLS as _) });
@@ -612,6 +694,7 @@ pub mod ipproto {
     pub const ETHERNET: Protocol =
         Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_ETHERNET as _) });
     /// `IPPROTO_RAW`
+    #[cfg(not(target_os = "espidf"))]
     pub const RAW: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_RAW as _) });
     /// `IPPROTO_MPTCP`
     #[cfg(not(any(
@@ -619,13 +702,15 @@ pub mod ipproto {
         solarish,
         windows,
         target_os = "emscripten",
+        target_os = "espidf",
         target_os = "fuchsia",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const MPTCP: Protocol =
         Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_MPTCP as _) });
     /// `IPPROTO_FRAGMENT`
-    #[cfg(not(any(solarish, target_os = "haiku")))]
+    #[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
     pub const FRAGMENT: Protocol =
         Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_FRAGMENT as _) });
     /// `IPPROTO_ICMPV6`
@@ -638,11 +723,13 @@ pub mod ipproto {
         solarish,
         windows,
         target_os = "dragonfly",
+        target_os = "espidf",
         target_os = "haiku",
+        target_os = "nto",
     )))]
     pub const MH: Protocol = Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_MH as _) });
     /// `IPPROTO_ROUTING`
-    #[cfg(not(any(solarish, target_os = "haiku")))]
+    #[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
     pub const ROUTING: Protocol =
         Protocol(unsafe { RawProtocol::new_unchecked(c::IPPROTO_ROUTING as _) });
 }
@@ -1274,7 +1361,7 @@ bitflags! {
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SocketFlags: c::c_uint {
         /// `SOCK_NONBLOCK`
-        #[cfg(not(any(apple, windows, target_os = "haiku")))]
+        #[cfg(not(any(apple, windows, target_os = "espidf", target_os = "haiku", target_os = "nto")))]
         const NONBLOCK = bitcast!(c::SOCK_NONBLOCK);
 
         /// `SOCK_CLOEXEC`

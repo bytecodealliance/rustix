@@ -145,7 +145,7 @@ pub(crate) mod bitcast;
 // versions of libc and not others.
 #[cfg(any(
     all(linux_raw, feature = "use-libc-auxv"),
-    all(libc, not(any(windows, target_os = "wasi")))
+    all(libc, not(any(windows, target_os = "espidf", target_os = "wasi")))
 ))]
 #[macro_use]
 mod weak;
@@ -200,7 +200,7 @@ pub mod io;
 #[cfg(feature = "io_uring")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "io_uring")))]
 pub mod io_uring;
-#[cfg(not(any(windows, target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "espidf", target_os = "wasi")))]
 #[cfg(feature = "mm")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "mm")))]
 pub mod mm;
@@ -208,7 +208,7 @@ pub mod mm;
 #[cfg(feature = "net")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "net")))]
 pub mod net;
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "espidf")))]
 #[cfg(feature = "param")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "param")))]
 pub mod param;
@@ -267,7 +267,7 @@ pub mod termios;
 #[cfg(feature = "thread")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "thread")))]
 pub mod thread;
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "espidf")))]
 #[cfg(feature = "time")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "time")))]
 pub mod time;
@@ -281,7 +281,7 @@ pub mod time;
 pub mod runtime;
 
 // Private modules used by multiple public modules.
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "espidf")))]
 #[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
 mod clockid;
 #[cfg(not(any(windows, target_os = "wasi")))]
@@ -297,7 +297,7 @@ mod pid;
 #[cfg(any(feature = "process", feature = "thread"))]
 #[cfg(linux_kernel)]
 mod prctl;
-#[cfg(not(any(windows, target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "espidf", target_os = "wasi")))]
 #[cfg(any(feature = "process", feature = "runtime", all(bsd, feature = "event")))]
 mod signal;
 #[cfg(not(windows))]

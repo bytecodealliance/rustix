@@ -1,7 +1,7 @@
 //! A command which prints the current values of the realtime and monotonic
 //! clocks it's given.
 
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "espidf")))]
 #[cfg(feature = "time")]
 fn main() {
     println!(
@@ -14,7 +14,7 @@ fn main() {
     );
 }
 
-#[cfg(any(windows, not(feature = "time")))]
+#[cfg(any(windows, target_os = "espidf", not(feature = "time")))]
 fn main() {
     unimplemented!()
 }
