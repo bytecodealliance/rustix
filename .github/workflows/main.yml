@@ -48,6 +48,11 @@ jobs:
       with:
         toolchain: ${{ matrix.rust }}
 
+    - name: Use specific dependency versions for Rust 1.63 compatibility.
+      if: matrix.rust == '1.63'
+      run: |
+        cargo update --package=dashmap --precise 5.4.0
+
     - run: >
         rustup target add
         x86_64-unknown-linux-musl
@@ -515,6 +520,11 @@ jobs:
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
+
+    - name: Use specific dependency versions for Rust 1.63 compatibility.
+      if: matrix.rust == '1.63'
+      run: |
+        cargo update --package=dashmap --precise 5.4.0
 
     - run: |
         cargo test --verbose --features=all-apis --release --workspace -- --nocapture
