@@ -106,18 +106,6 @@ bitflags! {
 }
 
 bitflags! {
-    /// `MLOCK_*` flags for use with [`mlock_with`].
-    ///
-    /// [`mlock_with`]: crate::io::mlock_with
-    #[repr(transparent)]
-    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct MlockFlags: u32 {
-        /// `MLOCK_ONFAULT`
-        const ONFAULT = linux_raw_sys::general::MLOCK_ONFAULT;
-    }
-}
-
-bitflags! {
     /// `MS_*` flags for use with [`msync`].
     ///
     /// [`msync`]: crate::io::msync
@@ -137,16 +125,14 @@ bitflags! {
 }
 
 bitflags! {
-    /// `O_*` flags for use with [`userfaultfd`].
+    /// `MLOCK_*` flags for use with [`mlock_with`].
     ///
-    /// [`userfaultfd`]: crate::io::userfaultfd
+    /// [`mlock_with`]: crate::io::mlock_with
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct UserfaultfdFlags: c::c_uint {
-        /// `O_CLOEXEC`
-        const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
-        /// `O_NONBLOCK`
-        const NONBLOCK = linux_raw_sys::general::O_NONBLOCK;
+    pub struct MlockFlags: u32 {
+        /// `MLOCK_ONFAULT`
+        const ONFAULT = linux_raw_sys::general::MLOCK_ONFAULT;
     }
 }
 
@@ -221,4 +207,18 @@ impl Advice {
     /// Linux's `MADV_DONTNEED` differs from `POSIX_MADV_DONTNEED`. See
     /// `LinuxDontNeed` for the Linux behavior.
     pub const DontNeed: Self = Self::Normal;
+}
+
+bitflags! {
+    /// `O_*` flags for use with [`userfaultfd`].
+    ///
+    /// [`userfaultfd`]: crate::io::userfaultfd
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct UserfaultfdFlags: c::c_uint {
+        /// `O_CLOEXEC`
+        const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
+        /// `O_NONBLOCK`
+        const NONBLOCK = linux_raw_sys::general::O_NONBLOCK;
+    }
 }
