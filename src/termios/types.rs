@@ -1338,7 +1338,12 @@ fn termios_layouts() {
 }
 
 #[test]
-#[cfg(not(any(solarish, target_os = "emscripten", target_os = "redox")))]
+#[cfg(not(any(
+    solarish,
+    target_os = "emscripten",
+    target_os = "haiku",
+    target_os = "redox"
+)))]
 fn termios_legacy() {
     // Check that our doc aliases above are correct.
     assert_eq!(c::EXTA, c::B19200);
