@@ -93,8 +93,6 @@ pub(crate) fn translate_fchown_args(owner: Option<Uid>, group: Option<Gid>) -> (
 
 #[test]
 fn test_sizes() {
-    use core::mem::size_of;
-
-    assert_eq!(size_of::<RawUid>(), size_of::<u32>());
-    assert_eq!(size_of::<RawGid>(), size_of::<u32>());
+    assert_eq_size!(RawUid, u32);
+    assert_eq_size!(RawGid, u32);
 }
