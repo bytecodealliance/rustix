@@ -249,11 +249,13 @@ struct libc_dirent {
 #[cfg(target_os = "openbsd")]
 fn check_dirent_layout(dirent: &c::dirent) {
     use crate::utils::as_ptr;
-    use core::mem::{align_of, size_of};
 
     // Check that the basic layouts match.
-    assert_eq!(size_of::<libc_dirent>(), size_of::<c::dirent>());
-    assert_eq!(align_of::<libc_dirent>(), align_of::<c::dirent>());
+    #[cfg(test)]
+    {
+        assert_eq_size!(libc_dirent, c::dirent);
+        assert_eq_size!(libc_dirent, c::dirent);
+    }
 
     // Check that the field offsets match.
     assert_eq!(

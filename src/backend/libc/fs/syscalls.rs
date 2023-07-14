@@ -1060,7 +1060,8 @@ pub(crate) fn copy_file_range(
         ) via SYS_copy_file_range -> c::ssize_t
     }
 
-    assert_eq!(size_of::<c::loff_t>(), size_of::<u64>());
+    #[cfg(test)]
+    assert_eq_size!(c::loff_t, u64);
 
     let mut off_in_val: c::loff_t = 0;
     let mut off_out_val: c::loff_t = 0;

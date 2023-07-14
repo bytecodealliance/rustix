@@ -1632,9 +1632,8 @@ pub fn get_tcp_nodelay<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 #[test]
 fn test_sizes() {
     use c::c_int;
-    use core::mem::size_of;
 
     // Backend code needs to cast these to `c_int` so make sure that cast
     // isn't lossy.
-    assert_eq!(size_of::<Timeout>(), size_of::<c_int>());
+    assert_eq_size!(Timeout, c_int);
 }

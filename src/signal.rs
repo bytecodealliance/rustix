@@ -208,7 +208,5 @@ impl Signal {
 
 #[test]
 fn test_sizes() {
-    use core::mem::size_of;
-
-    assert_eq!(size_of::<Signal>(), size_of::<c::c_int>());
+    assert_eq_size!(Signal, c::c_int);
 }

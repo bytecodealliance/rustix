@@ -179,7 +179,6 @@ pub enum TimerfdClockId {
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[test]
 fn test_types() {
-    use core::mem::size_of;
-    assert_eq!(size_of::<TimerfdFlags>(), size_of::<c::c_int>());
-    assert_eq!(size_of::<TimerfdTimerFlags>(), size_of::<c::c_int>());
+    assert_eq_size!(TimerfdFlags, c::c_int);
+    assert_eq_size!(TimerfdTimerFlags, c::c_int);
 }

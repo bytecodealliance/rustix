@@ -86,11 +86,11 @@ impl Pid {
 
 #[test]
 fn test_sizes() {
-    use core::mem::{size_of, transmute};
+    use core::mem::transmute;
 
-    assert_eq!(size_of::<RawPid>(), size_of::<NonZeroI32>());
-    assert_eq!(size_of::<RawPid>(), size_of::<Pid>());
-    assert_eq!(size_of::<RawPid>(), size_of::<Option<Pid>>());
+    assert_eq_size!(RawPid, NonZeroI32);
+    assert_eq_size!(RawPid, Pid);
+    assert_eq_size!(RawPid, Option<Pid>);
 
     // Rustix doesn't depend on `Option<Pid>` matching the ABI of a raw integer
     // for correctness, but it should work nonetheless.

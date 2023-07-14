@@ -123,6 +123,11 @@
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
 
+#[cfg(test)]
+#[macro_use]
+#[allow(unused_imports)]
+extern crate static_assertions;
+
 // Internal utilities.
 #[cfg(not(windows))]
 #[macro_use]

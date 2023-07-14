@@ -87,9 +87,8 @@ impl<'a> IoSliceRaw<'a> {
 #[cfg(not(any(apple, target_os = "wasi")))]
 #[test]
 fn test_types() {
-    use core::mem::size_of;
-    assert_eq!(size_of::<PipeFlags>(), size_of::<c::c_int>());
+    assert_eq_size!(PipeFlags, c::c_int);
 
     #[cfg(linux_kernel)]
-    assert_eq!(size_of::<SpliceFlags>(), size_of::<c::c_int>());
+    assert_eq_size!(SpliceFlags, c::c_int);
 }

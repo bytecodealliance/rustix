@@ -39,7 +39,11 @@ pub struct Termios {
 
     /// How are various special control codes handled?
     #[doc(alias = "c_cc")]
+    #[cfg(not(target_os = "haiku"))]
     pub special_codes: SpecialCodes,
+
+    #[cfg(target_os = "nto")]
+    pub(crate) __reserved: [c::c_uint; 3],
 
     /// Line discipline.
     // On PowerPC, this field comes after `c_cc`.
@@ -51,13 +55,20 @@ pub struct Termios {
     ///
     /// On Linux and BSDs, this is the arbitrary integer speed value. On all
     /// other platforms, this is the encoded speed value.
+    #[cfg(not(any(solarish, all(libc, target_env = "newlib"), target_os = "aix")))]
     pub(crate) input_speed: c::speed_t,
 
     /// See the `output_speed` and `set_output_seed` functions.
     ///
     /// On Linux and BSDs, this is the integer speed value. On all other
     /// platforms, this is the encoded speed value.
+    #[cfg(not(any(solarish, all(libc, target_env = "newlib"), target_os = "aix")))]
     pub(crate) output_speed: c::speed_t,
+
+    /// How are various special control codes handled?
+    #[doc(alias = "c_cc")]
+    #[cfg(target_os = "haiku")]
+    pub special_codes: SpecialCodes,
 }
 
 impl Termios {
@@ -89,8 +100,20 @@ impl Termios {
             self.input_speed as u32
         }
 
+        // On Illumos, `input_speed` is not present.
+        #[cfg(any(solarish, all(libc, target_env = "newlib"), target_os = "aix"))]
+        unsafe {
+            speed::decode(c::cfgetispeed(crate::utils::as_ptr(self).cast())).unwrap()
+        }
+
         // On other platforms, it's the encoded speed.
-        #[cfg(not(any(linux_kernel, bsd)))]
+        #[cfg(not(any(
+            linux_kernel,
+            bsd,
+            solarish,
+            all(libc, target_env = "newlib"),
+            target_os = "aix"
+        )))]
         {
             speed::decode(self.input_speed).unwrap()
         }
@@ -110,8 +133,20 @@ impl Termios {
             self.output_speed as u32
         }
 
+        // On Illumos, `output_speed` is not present.
+        #[cfg(any(solarish, all(libc, target_env = "newlib"), target_os = "aix"))]
+        unsafe {
+            speed::decode(c::cfgetospeed(crate::utils::as_ptr(self).cast())).unwrap()
+        }
+
         // On other platforms, it's the encoded speed.
-        #[cfg(not(any(linux_kernel, bsd)))]
+        #[cfg(not(any(
+            linux_kernel,
+            bsd,
+            solarish,
+            all(libc, target_env = "newlib"),
+            target_os = "aix"
+        )))]
         {
             speed::decode(self.output_speed).unwrap()
         }
@@ -1233,24 +1268,40 @@ fn termios_layouts() {
 
         // On PowerPC, `termios2` is `termios`.
         #[cfg(any(target_arch = "powerpc", target_arch = "powerpc64"))]
-        assert_eq!(
-            core::mem::size_of::<c::termios2>(),
-            core::mem::size_of::<c::termios>()
-        );
+        assert_eq_size!(c::termios2, c::termios);
     }
 
     #[cfg(not(linux_raw))]
     {
-        #[cfg(not(all(
-            target_env = "gnu",
-            any(
-                target_arch = "mips",
-                target_arch = "mips64",
-                target_arch = "sparc",
-                target_arch = "sparc64"
-            )
-        )))]
+        // On Mips, Sparc, and Android, the libc lacks the ospeed and ispeed
+        // fields.
+        #[cfg(all(
+            not(all(
+                target_env = "gnu",
+                any(
+                    target_arch = "mips",
+                    target_arch = "mips64",
+                    target_arch = "sparc",
+                    target_arch = "sparc64"
+                )
+            )),
+            not(all(libc, target_os = "android"))
+        ))]
         check_renamed_type!(Termios, termios);
+        #[cfg(not(all(
+            not(all(
+                target_env = "gnu",
+                any(
+                    target_arch = "mips",
+                    target_arch = "mips64",
+                    target_arch = "sparc",
+                    target_arch = "sparc64"
+                )
+            )),
+            not(all(libc, target_os = "android"))
+        )))]
+        const_assert!(core::mem::size_of::<Termios>() >= core::mem::size_of::<c::termios>());
+
         check_renamed_struct_renamed_field!(Termios, termios, input_modes, c_iflag);
         check_renamed_struct_renamed_field!(Termios, termios, output_modes, c_oflag);
         check_renamed_struct_renamed_field!(Termios, termios, control_modes, c_cflag);
