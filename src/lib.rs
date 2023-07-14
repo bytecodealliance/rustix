@@ -123,10 +123,15 @@
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
 
-#[cfg(test)]
+// Use `static_assertions` macros if we have them, or a polyfill otherwise.
+#[cfg(all(test, static_assertions))]
 #[macro_use]
 #[allow(unused_imports)]
 extern crate static_assertions;
+#[cfg(all(test, not(static_assertions)))]
+#[macro_use]
+#[allow(unused_imports)]
+mod static_assertions;
 
 // Internal utilities.
 #[cfg(not(windows))]
