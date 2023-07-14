@@ -20,7 +20,15 @@ use {crate::backend::conv::ret, crate::io};
 pub(crate) fn uname() -> RawUname {
     let mut uname = MaybeUninit::<RawUname>::uninit();
     unsafe {
-        ret_infallible(c::uname(uname.as_mut_ptr()));
+        let r = c::uname(uname.as_mut_ptr());
+
+        // On POSIX, `uname` is documented to return non-negative on success
+        // instead of the usual 0, though some specific systems do document
+        // that they always use zero allowing us to skip this check.
+        #[cfg(not(any(apple, freebsdlike, linux_like, target_os = "netbsd")))]
+        let r = core::cmp::min(r, 0);
+
+        ret_infallible(r);
         uname.assume_init()
     }
 }
