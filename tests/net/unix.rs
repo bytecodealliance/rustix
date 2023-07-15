@@ -216,7 +216,8 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
             );
             // Don't ask me why, but this was seen to fail on FreeBSD.
             // `SocketAddrUnix::path()` returned `None` for some reason.
-            #[cfg(not(target_os = "freebsd"))]
+            // illumos too.
+            #[cfg(not(any(target_os = "freebsd", target_os = "illumos")))]
             assert_eq!(
                 Some(rustix::net::SocketAddrAny::Unix(addr.clone())),
                 result.address

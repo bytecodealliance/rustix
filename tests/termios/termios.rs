@@ -1,3 +1,6 @@
+// Disable on illumos where `tcgetattr` doesn't appear to support
+// pseudoterminals.
+#[cfg(not(target_os = "illumos"))]
 #[test]
 fn test_termios_speeds() {
     use rustix::pty::*;

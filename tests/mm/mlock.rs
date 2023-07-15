@@ -8,10 +8,16 @@ use std::ffi::c_void;
 #[test]
 fn test_mlock() {
     let mut buf = vec![0_u8; 4096];
+    let ptr = buf.as_mut_ptr();
+
+    // On Linux, `mlock` automatically rounds the address down to the nearest
+    // page size. On other platforms, we need to do it manually.
+    #[cfg(not(linux_kernel))]
+    let ptr = ((ptr as usize) & (-4096_isize) as usize) as *mut u8;
 
     unsafe {
-        match rustix::mm::mlock(buf.as_mut_ptr().cast::<c_void>(), buf.len()) {
-            Ok(()) => rustix::mm::munlock(buf.as_mut_ptr().cast::<c_void>(), buf.len()).unwrap(),
+        match rustix::mm::mlock(ptr.cast::<c_void>(), buf.len()) {
+            Ok(()) => rustix::mm::munlock(ptr.cast::<c_void>(), buf.len()).unwrap(),
             // Tests won't always have enough memory or permissions, and that's ok.
             Err(rustix::io::Errno::PERM | rustix::io::Errno::NOMEM) => {}
             // But they shouldn't fail otherwise.
