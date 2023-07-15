@@ -100,7 +100,7 @@ impl Termios {
             self.input_speed as u32
         }
 
-        // On Illumos, `input_speed` is not present.
+        // On illumos, `input_speed` is not present.
         #[cfg(any(solarish, all(libc, target_env = "newlib"), target_os = "aix"))]
         unsafe {
             speed::decode(c::cfgetispeed(crate::utils::as_ptr(self).cast())).unwrap()
@@ -133,7 +133,7 @@ impl Termios {
             self.output_speed as u32
         }
 
-        // On Illumos, `output_speed` is not present.
+        // On illumos, `output_speed` is not present.
         #[cfg(any(solarish, all(libc, target_env = "newlib"), target_os = "aix"))]
         unsafe {
             speed::decode(c::cfgetospeed(crate::utils::as_ptr(self).cast())).unwrap()
