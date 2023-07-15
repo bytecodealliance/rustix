@@ -5,7 +5,6 @@ pub use crate::timespec::Timespec;
 #[cfg(not(any(
     apple,
     target_os = "dragonfly",
-    target_os = "emscripten",
     target_os = "espidf",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "openbsd",

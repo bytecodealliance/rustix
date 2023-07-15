@@ -5,10 +5,7 @@ use crate::backend::conv::ret;
 use crate::io;
 #[cfg(not(target_os = "redox"))]
 use crate::thread::{NanosleepRelativeResult, Timespec};
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
 use crate::timespec::LibcTimespec;
 use core::mem::MaybeUninit;
 #[cfg(linux_kernel)]
@@ -30,15 +27,10 @@ use {
 )))]
 use {crate::thread::ClockId, core::ptr::null_mut};
 
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
+#[cfg(not(target_os = "emscripten"))]
 weak!(fn __clock_nanosleep_time64(c::clockid_t, c::c_int, *const LibcTimespec, *mut LibcTimespec) -> c::c_int);
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
 weak!(fn __nanosleep64(*const LibcTimespec, *mut LibcTimespec) -> c::c_int);
 
 #[cfg(not(any(
@@ -58,10 +50,7 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
 
     // 32-bit gnu version: libc has `clock_nanosleep` but it is not y2038 safe
     // by default.
-    #[cfg(all(
-        any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu",
-    ))]
+    #[cfg(fix_y2038)]
     unsafe {
         let mut remain = MaybeUninit::<LibcTimespec>::uninit();
 
@@ -84,10 +73,7 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
     }
 
     // Main version: libc is y2038 safe and has `clock_nanosleep`.
-    #[cfg(not(all(
-        any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu",
-    )))]
+    #[cfg(not(fix_y2038))]
     unsafe {
         let mut remain = MaybeUninit::<Timespec>::uninit();
 
@@ -101,10 +87,8 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
     }
 }
 
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
+#[cfg(not(target_os = "emscripten"))]
 unsafe fn clock_nanosleep_relative_old(id: ClockId, request: &Timespec) -> NanosleepRelativeResult {
     let tv_sec = match request.tv_sec.try_into() {
         Ok(tv_sec) => tv_sec,
@@ -154,10 +138,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
 
     // 32-bit gnu version: libc has `clock_nanosleep` but it is not y2038 safe
     // by default.
-    #[cfg(all(
-        any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu",
-    ))]
+    #[cfg(fix_y2038)]
     {
         if let Some(libc_clock_nanosleep) = __clock_nanosleep_time64.get() {
             match unsafe {
@@ -177,20 +158,15 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
     }
 
     // Main version: libc is y2038 safe and has `clock_nanosleep`.
-    #[cfg(not(all(
-        any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu",
-    )))]
+    #[cfg(not(fix_y2038))]
     match unsafe { c::clock_nanosleep(id as c::clockid_t, flags as _, request, null_mut()) } {
         0 => Ok(()),
         err => Err(io::Errno(err)),
     }
 }
 
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
+#[cfg(not(target_os = "emscripten"))]
 fn clock_nanosleep_absolute_old(id: ClockId, request: &Timespec) -> io::Result<()> {
     let flags = c::TIMER_ABSTIME;
 
@@ -209,10 +185,7 @@ fn clock_nanosleep_absolute_old(id: ClockId, request: &Timespec) -> io::Result<(
 pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
     // 32-bit gnu version: libc has `nanosleep` but it is not y2038 safe by
     // default.
-    #[cfg(all(
-        any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu",
-    ))]
+    #[cfg(fix_y2038)]
     unsafe {
         let mut remain = MaybeUninit::<LibcTimespec>::uninit();
 
@@ -230,10 +203,7 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
     }
 
     // Main version: libc is y2038 safe and has `nanosleep`.
-    #[cfg(not(all(
-        any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu",
-    )))]
+    #[cfg(not(fix_y2038))]
     unsafe {
         let mut remain = MaybeUninit::<Timespec>::uninit();
 
@@ -245,10 +215,7 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
     }
 }
 
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
 unsafe fn nanosleep_old(request: &Timespec) -> NanosleepRelativeResult {
     let tv_sec = match request.tv_sec.try_into() {
         Ok(tv_sec) => tv_sec,
