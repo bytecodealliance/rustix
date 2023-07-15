@@ -572,7 +572,7 @@ pub(crate) fn lstat(path: &CStr) -> io::Result<Stat> {
             StatxFlags::BASIC_STATS,
         ) {
             Ok(x) => statx_to_stat(x),
-            Err(io::Errno::NOSYS) => statat_old(crate::fs::CWD, path, AtFlags::empty()),
+            Err(io::Errno::NOSYS) => statat_old(crate::fs::CWD, path, AtFlags::SYMLINK_NOFOLLOW),
             Err(err) => Err(err),
         }
     }
