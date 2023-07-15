@@ -54,17 +54,11 @@ use crate::fs::{Mode, OFlags, SeekFrom, Stat};
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use crate::fs::{StatVfs, StatVfsMountFlags};
 use crate::io;
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
 use crate::timespec::LibcTimespec;
 #[cfg(not(target_os = "wasi"))]
 use crate::ugid::{Gid, Uid};
-#[cfg(not(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-)))]
+#[cfg(not(fix_y2038))]
 #[cfg(not(target_os = "espidf"))]
 use crate::utils::as_ptr;
 #[cfg(apple)]
@@ -83,15 +77,9 @@ use {
     core::ptr::null,
 };
 
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
 weak!(fn __utimensat64(c::c_int, *const c::c_char, *const LibcTimespec, c::c_int) -> c::c_int);
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
 weak!(fn __futimens64(c::c_int, *const LibcTimespec) -> c::c_int);
 
 /// Use a direct syscall (via libc) for `open`.
@@ -720,10 +708,7 @@ pub(crate) fn utimensat(
 ) -> io::Result<()> {
     // 32-bit gnu version: libc has `utimensat` but it is not y2038 safe by
     // default.
-    #[cfg(all(
-        any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu",
-    ))]
+    #[cfg(fix_y2038)]
     unsafe {
         if let Some(libc_utimensat) = __utimensat64.get() {
             let libc_times: [LibcTimespec; 2] = [
@@ -744,13 +729,7 @@ pub(crate) fn utimensat(
 
     // Main version: libc is y2038 safe and has `utimensat`. Or, the platform
     // is not y2038 safe and there's nothing practical we can do.
-    #[cfg(not(any(
-        apple,
-        all(
-            any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-            target_env = "gnu",
-        )
-    )))]
+    #[cfg(not(any(apple, fix_y2038)))]
     unsafe {
         // Assert that `Timestamps` has the expected layout.
         let _ = core::mem::transmute::<Timestamps, [c::timespec; 2]>(times.clone());
@@ -879,10 +858,7 @@ pub(crate) fn utimensat(
     }
 }
 
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
 unsafe fn utimensat_old(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
@@ -1374,10 +1350,7 @@ fn libc_statvfs_to_statvfs(from: c::statvfs) -> StatVfs {
 #[cfg(not(target_os = "espidf"))]
 pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()> {
     // 32-bit gnu version: libc has `futimens` but it is not y2038 safe by default.
-    #[cfg(all(
-        any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-        target_env = "gnu",
-    ))]
+    #[cfg(fix_y2038)]
     unsafe {
         if let Some(libc_futimens) = __futimens64.get() {
             let libc_times: [LibcTimespec; 2] = [
@@ -1393,13 +1366,7 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
 
     // Main version: libc is y2038 safe and has `futimens`. Or, the platform
     // is not y2038 safe and there's nothing practical we can do.
-    #[cfg(not(any(
-        apple,
-        all(
-            any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-            target_env = "gnu",
-        )
-    )))]
+    #[cfg(not(any(apple, fix_y2038)))]
     unsafe {
         // Assert that `Timestamps` has the expected layout.
         let _ = core::mem::transmute::<Timestamps, [c::timespec; 2]>(times.clone());
@@ -1445,10 +1412,7 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
     }
 }
 
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
 unsafe fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()> {
     let old_times = [
         c::timespec {

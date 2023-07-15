@@ -1087,9 +1087,15 @@ pub type FsWord = u32;
 pub type FsWord = u64;
 
 /// `__fsword_t`
-// s390x uses `u32` for `statfs` entries, even though `__fsword_t` is `u64`.
-#[cfg(all(target_os = "linux", target_arch = "s390x"))]
+// s390x uses `u32` for `statfs` entries on glibc, even though `__fsword_t` is
+// `u64`.
+#[cfg(all(target_os = "linux", target_arch = "s390x", target_env = "gnu"))]
 pub type FsWord = u32;
+
+/// `__fsword_t`
+// s390x uses `u64` for `statfs` entries on musl.
+#[cfg(all(target_os = "linux", target_arch = "s390x", target_env = "musl"))]
+pub type FsWord = u64;
 
 /// `copyfile_state_t`—State for use with [`fcopyfile`].
 ///

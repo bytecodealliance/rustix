@@ -1,15 +1,10 @@
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 use crate::backend::c;
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[cfg(fix_y2038)]
 use crate::timespec::LibcTimespec;
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
 use crate::timespec::Timespec;
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 use bitflags::bitflags;
@@ -20,10 +15,7 @@ use bitflags::bitflags;
 /// [`timerfd_gettime`]: crate::time::timerfd_gettime
 /// [`timerfd_settime`]: crate::time::timerfd_settime
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
-#[cfg(not(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-)))]
+#[cfg(not(fix_y2038))]
 pub type Itimerspec = c::itimerspec;
 
 /// `struct itimerspec` for use with [`timerfd_gettime`] and
@@ -32,10 +24,7 @@ pub type Itimerspec = c::itimerspec;
 /// [`timerfd_gettime`]: crate::time::timerfd_gettime
 /// [`timerfd_settime`]: crate::time::timerfd_settime
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Debug, Clone)]
@@ -46,19 +35,13 @@ pub struct Itimerspec {
 
 /// On most platforms, `LibcItimerspec` is just `Itimerspec`.
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
-#[cfg(not(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-)))]
+#[cfg(not(fix_y2038))]
 pub(crate) type LibcItimerspec = Itimerspec;
 
 /// On 32-bit glibc platforms, `LibcTimespec` differs from `Timespec`, so we
 /// define our own struct, with bidirectional `From` impls.
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub(crate) struct LibcItimerspec {
@@ -67,10 +50,7 @@ pub(crate) struct LibcItimerspec {
 }
 
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
 impl From<LibcItimerspec> for Itimerspec {
     #[inline]
     fn from(t: LibcItimerspec) -> Self {
@@ -82,10 +62,7 @@ impl From<LibcItimerspec> for Itimerspec {
 }
 
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
-#[cfg(all(
-    any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
-    target_env = "gnu",
-))]
+#[cfg(fix_y2038)]
 impl From<Itimerspec> for LibcItimerspec {
     #[inline]
     fn from(t: Itimerspec) -> Self {
