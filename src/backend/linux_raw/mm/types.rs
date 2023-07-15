@@ -38,6 +38,20 @@ bitflags! {
         const GROWSUP = linux_raw_sys::general::PROT_GROWSUP;
         /// `PROT_GROWSDOWN`
         const GROWSDOWN = linux_raw_sys::general::PROT_GROWSDOWN;
+        /// `PROT_SEM`
+        const SEM = linux_raw_sys::general::PROT_SEM;
+        /// `PROT_BTI`
+        #[cfg(target_arch = "aarch64")]
+        const BTI = linux_raw_sys::general::PROT_BTI;
+        /// `PROT_MTE`
+        #[cfg(target_arch = "aarch64")]
+        const MTE = linux_raw_sys::general::PROT_MTE;
+        /// `PROT_SAO`
+        #[cfg(any(target_arch = "powerpc", target_arch = "powerpc64"))]
+        const SAO = linux_raw_sys::general::PROT_SAO;
+        /// `PROT_ADI`
+        #[cfg(any(target_arch = "sparc", target_arch = "sparc64"))]
+        const ADI = linux_raw_sys::general::PROT_ADI;
     }
 }
 
