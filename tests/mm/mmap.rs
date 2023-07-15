@@ -100,8 +100,13 @@ fn test_mlock() {
     unsafe {
         let addr = mmap_anonymous(null_mut(), 8192, ProtFlags::READ, MapFlags::PRIVATE).unwrap();
 
-        mlock(addr, 8192).unwrap();
-        munlock(addr, 8192).unwrap();
+        match mlock(addr, 8192) {
+            Ok(()) => munlock(addr, 8192).unwrap(),
+            // Tests won't always have enough memory or permissions, and that's ok.
+            Err(rustix::io::Errno::PERM | rustix::io::Errno::NOMEM) => (),
+            // But they shouldn't fail otherwise.
+            Err(other) => Err(other).unwrap(),
+        }
 
         #[cfg(linux_kernel)]
         {

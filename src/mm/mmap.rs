@@ -222,7 +222,8 @@ pub unsafe fn mprotect(ptr: *mut c_void, len: usize, flags: MprotectFlags) -> io
 ///
 /// Some implementations implicitly round the memory region out to the nearest
 /// page boundaries, so this function may lock more memory than explicitly
-/// requested if the memory isn't page-aligned.
+/// requested if the memory isn't page-aligned. Other implementations fail if
+/// the memory isn't page-aligned.
 ///
 /// # References
 ///  - [POSIX]

@@ -25,9 +25,9 @@ fn test_sockopts_ipv4() {
     assert!(!rustix::net::sockopt::get_socket_passcred(&s).unwrap());
     assert_ne!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 0);
     assert_ne!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 77);
-    #[cfg(not(any(bsd, windows)))]
+    #[cfg(not(any(bsd, windows, target_os = "illumos")))]
     assert!(rustix::net::sockopt::get_ip_multicast_loop(&s).unwrap());
-    #[cfg(not(any(bsd, windows)))]
+    #[cfg(not(any(bsd, windows, target_os = "illumos")))]
     assert_eq!(rustix::net::sockopt::get_ip_multicast_ttl(&s).unwrap(), 1);
     assert!(!rustix::net::sockopt::get_tcp_nodelay(&s).unwrap());
     // On a new socket we shouldn't have an error yet.
@@ -111,7 +111,7 @@ fn test_sockopts_ipv4() {
     // Check the ip ttl.
     assert_eq!(rustix::net::sockopt::get_ip_ttl(&s).unwrap(), 77);
 
-    #[cfg(not(any(bsd, windows)))]
+    #[cfg(not(any(bsd, windows, target_os = "illumos")))]
     {
         // Set the multicast loop flag;
         rustix::net::sockopt::set_ip_multicast_loop(&s, false).unwrap();
@@ -152,6 +152,7 @@ fn test_sockopts_ipv6() {
         Ok(multicast_loop) => assert!(multicast_loop),
         Err(rustix::io::Errno::OPNOTSUPP) => (),
         Err(rustix::io::Errno::INVAL) => (),
+        Err(rustix::io::Errno::NOPROTOOPT) => (),
         Err(err) => Err(err).unwrap(),
     }
     assert_ne!(rustix::net::sockopt::get_ipv6_unicast_hops(&s).unwrap(), 0);
@@ -175,13 +176,12 @@ fn test_sockopts_ipv6() {
             // Check that the IPV6 multicast loop value is set.
             match rustix::net::sockopt::get_ipv6_multicast_loop(&s) {
                 Ok(multicast_loop) => assert!(!multicast_loop),
-                Err(rustix::io::Errno::OPNOTSUPP) => (),
-                Err(rustix::io::Errno::INVAL) => (),
                 Err(err) => Err(err).unwrap(),
             }
         }
         Err(rustix::io::Errno::OPNOTSUPP) => (),
         Err(rustix::io::Errno::INVAL) => (),
+        Err(rustix::io::Errno::NOPROTOOPT) => (),
         Err(err) => Err(err).unwrap(),
     }
 
