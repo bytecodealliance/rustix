@@ -94,11 +94,10 @@ fn test_sizes() {
 
     // Rustix doesn't depend on `Option<Pid>` matching the ABI of a raw integer
     // for correctness, but it should work nonetheless.
-    unsafe {
-        let t: Option<Pid> = None;
-        assert_eq!(0 as RawPid, transmute(t));
-
-        let t: Option<Pid> = Some(Pid::from_raw_unchecked(4567));
-        assert_eq!(4567 as RawPid, transmute(t));
-    }
+    const_assert_eq!(0 as RawPid, unsafe {
+        transmute::<Option<Pid>, RawPid>(None)
+    });
+    const_assert_eq!(4567 as RawPid, unsafe {
+        transmute::<Option<Pid>, RawPid>(Some(Pid::from_raw_unchecked(4567)))
+    });
 }
