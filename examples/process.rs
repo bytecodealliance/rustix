@@ -1,10 +1,8 @@
 //! A command which prints out information about the process it runs in.
 
-use rustix::io;
-
 #[cfg(all(feature = "process", feature = "param"))]
 #[cfg(not(windows))]
-fn main() -> io::Result<()> {
+fn main() -> rustix::io::Result<()> {
     #[cfg(not(target_os = "espidf"))]
     use rustix::param::*;
     use rustix::process::*;
