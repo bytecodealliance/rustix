@@ -16,7 +16,7 @@ fn main() -> io::Result<()> {
     if let Some(ppid) = getppid() {
         println!(
             "Parent Group Pid: {}",
-            getpgid(Some(ppid)).unwrap().as_raw_nonzero()
+            getpgid(Some(ppid))?.as_raw_nonzero()
         );
     }
     println!("Uid: {}", getuid().as_raw());
@@ -91,6 +91,6 @@ fn main() -> io::Result<()> {
 }
 
 #[cfg(any(windows, not(all(feature = "process", feature = "param"))))]
-fn main() -> io::Result<()> {
-    unimplemented!()
+fn main() -> Result<(), &'static str> {
+    Err("This example requires --features=process,param and is not supported on Windows.")
 }

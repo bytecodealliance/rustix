@@ -44,6 +44,6 @@ fn main() {
 }
 
 #[cfg(any(windows, target_os = "espidf", not(feature = "time")))]
-fn main() {
-    unimplemented!()
+fn main() -> Result<(), &'static str> {
+    Err("This example requires --features=time and is not supported on Windows or ESP-IDF.")
 }

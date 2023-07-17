@@ -343,6 +343,6 @@ fn key(b: u8) -> String {
 }
 
 #[cfg(any(windows, not(feature = "stdio")))]
-fn main() {
-    unimplemented!()
+fn main() -> Result<(), &'static str> {
+    Err("This example requires --features=stdio and is not supported on Windows.")
 }
