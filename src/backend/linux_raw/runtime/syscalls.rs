@@ -22,7 +22,7 @@ use crate::pid::Pid;
 use crate::runtime::{How, Sigaction, Siginfo, Sigset, Stack};
 use crate::signal::Signal;
 use crate::timespec::Timespec;
-use crate::utils::optional_as_ptr;
+use crate::utils::option_as_ptr;
 use core::mem::MaybeUninit;
 #[cfg(target_pointer_width = "32")]
 use linux_raw_sys::general::__kernel_old_timespec;
@@ -117,7 +117,7 @@ pub(crate) mod tls {
 #[inline]
 pub(crate) unsafe fn sigaction(signal: Signal, new: Option<Sigaction>) -> io::Result<Sigaction> {
     let mut old = MaybeUninit::<Sigaction>::uninit();
-    let new = optional_as_ptr(new.as_ref());
+    let new = option_as_ptr(new.as_ref());
     ret(syscall!(
         __NR_rt_sigaction,
         signal,
@@ -131,7 +131,7 @@ pub(crate) unsafe fn sigaction(signal: Signal, new: Option<Sigaction>) -> io::Re
 #[inline]
 pub(crate) unsafe fn sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
     let mut old = MaybeUninit::<Stack>::uninit();
-    let new = optional_as_ptr(new.as_ref());
+    let new = option_as_ptr(new.as_ref());
     ret(syscall!(__NR_sigaltstack, new, &mut old))?;
     Ok(old.assume_init())
 }
@@ -144,7 +144,7 @@ pub(crate) unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
 #[inline]
 pub(crate) unsafe fn sigprocmask(how: How, new: Option<&Sigset>) -> io::Result<Sigset> {
     let mut old = MaybeUninit::<Sigset>::uninit();
-    let new = optional_as_ptr(new);
+    let new = option_as_ptr(new);
     ret(syscall!(
         __NR_rt_sigprocmask,
         how,
@@ -189,7 +189,7 @@ pub(crate) fn sigwaitinfo(set: &Sigset) -> io::Result<Siginfo> {
 #[inline]
 pub(crate) fn sigtimedwait(set: &Sigset, timeout: Option<Timespec>) -> io::Result<Siginfo> {
     let mut info = MaybeUninit::<Siginfo>::uninit();
-    let timeout_ptr = optional_as_ptr(timeout.as_ref());
+    let timeout_ptr = option_as_ptr(timeout.as_ref());
 
     // `rt_sigtimedwait_time64` was introduced in Linux 5.1. The old
     // `rt_sigtimedwait` syscall is not y2038-compatible on 32-bit
@@ -237,7 +237,7 @@ unsafe fn sigtimedwait_old(
         None => None,
     };
 
-    let old_timeout_ptr = optional_as_ptr(old_timeout.as_ref());
+    let old_timeout_ptr = option_as_ptr(old_timeout.as_ref());
 
     let _signum = ret_c_int(syscall!(
         __NR_rt_sigtimedwait,

@@ -18,7 +18,7 @@ use {
     crate::backend::MAX_IOV,
     crate::fd::BorrowedFd,
     crate::pipe::{IoSliceRaw, SpliceFlags},
-    crate::utils::optional_as_mut_ptr,
+    crate::utils::option_as_mut_ptr,
     core::cmp::min,
 };
 
@@ -62,8 +62,8 @@ pub fn splice(
     len: usize,
     flags: SpliceFlags,
 ) -> io::Result<usize> {
-    let off_in = optional_as_mut_ptr(off_in).cast();
-    let off_out = optional_as_mut_ptr(off_out).cast();
+    let off_in = option_as_mut_ptr(off_in).cast();
+    let off_out = option_as_mut_ptr(off_out).cast();
 
     unsafe {
         ret_usize(c::splice(

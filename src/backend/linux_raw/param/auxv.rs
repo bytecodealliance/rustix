@@ -161,6 +161,7 @@ fn pr_get_auxv() -> crate::io::Result<Vec<u8>> {
 /// On non-Mustang platforms, we read the aux vector via the `prctl`
 /// `PR_GET_AUXV`, with a fallback to /proc/self/auxv for kernels that don't
 /// support `PR_GET_AUXV`.
+#[cold]
 fn init_auxv() {
     match pr_get_auxv() {
         Ok(buffer) => {
@@ -185,6 +186,7 @@ fn init_auxv() {
 }
 
 /// Process auxv entries from the open file `auxv`.
+#[cold]
 fn init_from_auxv_file(auxv: OwnedFd) -> Option<()> {
     let mut buffer = Vec::<u8>::with_capacity(512);
     loop {
@@ -220,6 +222,7 @@ fn init_from_auxv_file(auxv: OwnedFd) -> Option<()> {
 ///
 /// The buffer contains `Elf_aux_t` elements, though it need not be aligned;
 /// function uses `read_unaligned` to read from it.
+#[cold]
 unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) -> Option<()> {
     let mut pagesz = 0;
     let mut clktck = 0;
@@ -272,6 +275,7 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) -> Option<()> {
 /// `base` is some value we got from a `AT_BASE` aux record somewhere,
 /// which hopefully holds the value of the program interpreter in memory. Do a
 /// series of checks to be as sure as we can that it's safe to use.
+#[cold]
 unsafe fn check_interpreter_base(base: *const Elf_Ehdr) -> Option<()> {
     check_elf_base(base)?;
     Some(())
@@ -282,6 +286,7 @@ unsafe fn check_interpreter_base(base: *const Elf_Ehdr) -> Option<()> {
 /// `base` is some value we got from a `AT_SYSINFO_EHDR` aux record somewhere,
 /// which hopefully holds the value of the kernel-provided vDSO in memory. Do a
 /// series of checks to be as sure as we can that it's safe to use.
+#[cold]
 unsafe fn check_vdso_base(base: *const Elf_Ehdr) -> Option<NonNull<Elf_Ehdr>> {
     // In theory, we could check that we're not attempting to parse our own ELF
     // image, as an additional check. However, older Linux toolchains don't
@@ -331,6 +336,7 @@ unsafe fn check_vdso_base(base: *const Elf_Ehdr) -> Option<NonNull<Elf_Ehdr>> {
 }
 
 /// Check that `base` is a valid pointer to an ELF image.
+#[cold]
 unsafe fn check_elf_base(base: *const Elf_Ehdr) -> Option<NonNull<Elf_Ehdr>> {
     // If we're reading a 64-bit auxv on a 32-bit platform, we'll see
     // a zero `a_val` because `AT_*` values are never greater than

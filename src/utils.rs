@@ -18,7 +18,7 @@ pub(crate) fn as_mut_ptr<T>(t: &mut T) -> *mut T {
 
 /// Convert an `Option<&T>` into a possibly-null `*const T`.
 #[inline]
-pub(crate) const fn optional_as_ptr<T>(t: Option<&T>) -> *const T {
+pub(crate) const fn option_as_ptr<T>(t: Option<&T>) -> *const T {
     match t {
         Some(t) => t,
         None => null(),
@@ -27,7 +27,7 @@ pub(crate) const fn optional_as_ptr<T>(t: Option<&T>) -> *const T {
 
 /// Convert an `Option<&mut T>` into a possibly-null `*mut T`.
 #[inline]
-pub(crate) fn optional_as_mut_ptr<T>(t: Option<&mut T>) -> *mut T {
+pub(crate) fn option_as_mut_ptr<T>(t: Option<&mut T>) -> *mut T {
     match t {
         Some(t) => t,
         None => null_mut(),

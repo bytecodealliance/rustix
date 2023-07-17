@@ -283,14 +283,12 @@ bitflags! {
 
         /// `IUTF8`
         #[cfg(not(any(
+            freebsdlike,
+            netbsdlike,
             solarish,
             target_os = "aix",
-            target_os = "dragonfly",
             target_os = "emscripten",
-            target_os = "freebsd",
             target_os = "haiku",
-            target_os = "netbsd",
-            target_os = "openbsd",
             target_os = "redox",
         )))]
         const IUTF8 = c::IUTF8;
@@ -308,9 +306,8 @@ bitflags! {
         /// `OLCUC`
         #[cfg(not(any(
             apple,
+            freebsdlike,
             target_os = "aix",
-            target_os = "dragonfly",
-            target_os = "freebsd",
             target_os = "netbsd",
             target_os = "redox",
         )))]
@@ -798,7 +795,7 @@ pub mod speed {
     /// Translate from a `c::speed_t` code to an arbitrary integer speed value
     /// `u32`.
     #[cfg(not(any(linux_kernel, bsd)))]
-    pub(crate) fn decode(encoded_speed: c::speed_t) -> Option<u32> {
+    pub(crate) const fn decode(encoded_speed: c::speed_t) -> Option<u32> {
         match encoded_speed {
             c::B0 => Some(0),
             c::B50 => Some(50),
@@ -935,7 +932,7 @@ pub mod speed {
     /// Translate from an arbitrary `u32` arbitrary integer speed value to a
     /// `c::speed_t` code.
     #[cfg(not(bsd))]
-    pub(crate) fn encode(speed: u32) -> Option<c::speed_t> {
+    pub(crate) const fn encode(speed: u32) -> Option<c::speed_t> {
         match speed {
             0 => Some(c::B0),
             50 => Some(c::B50),
@@ -1118,15 +1115,11 @@ impl SpecialCodeIndex {
 
     /// `VSWTC`
     #[cfg(not(any(
-        apple,
+        bsd,
         solarish,
         target_os = "aix",
-        target_os = "dragonfly",
-        target_os = "freebsd",
         target_os = "haiku",
-        target_os = "netbsd",
         target_os = "nto",
-        target_os = "openbsd",
     )))]
     pub const VSWTC: Self = Self(c::VSWTC as usize);
 
@@ -1261,7 +1254,7 @@ fn termios_layouts() {
         // On everything except PowerPC, `termios` matches `termios2` except for
         // the addition of `c_ispeed` and `c_ospeed`.
         #[cfg(not(any(target_arch = "powerpc", target_arch = "powerpc64")))]
-        assert_eq!(
+        const_assert_eq!(
             memoffset::offset_of!(Termios, input_speed),
             core::mem::size_of::<c::termios>()
         );
@@ -1346,8 +1339,8 @@ fn termios_layouts() {
 )))]
 fn termios_legacy() {
     // Check that our doc aliases above are correct.
-    assert_eq!(c::EXTA, c::B19200);
-    assert_eq!(c::EXTB, c::B38400);
+    const_assert_eq!(c::EXTA, c::B19200);
+    const_assert_eq!(c::EXTB, c::B38400);
 }
 
 #[cfg(bsd)]
@@ -1355,10 +1348,10 @@ fn termios_legacy() {
 fn termios_bsd() {
     // On BSD platforms we can assume that the `B*` constants have their
     // arbitrary integer speed value. Confirm this.
-    assert_eq!(c::B0, 0);
-    assert_eq!(c::B50, 50);
-    assert_eq!(c::B19200, 19200);
-    assert_eq!(c::B38400, 38400);
+    const_assert_eq!(c::B0, 0);
+    const_assert_eq!(c::B50, 50);
+    const_assert_eq!(c::B19200, 19200);
+    const_assert_eq!(c::B38400, 38400);
 }
 
 #[test]
@@ -1386,13 +1379,13 @@ fn termios_ioctl_contiguity() {
     // When using `termios2`, we assume that we can add the optional actions
     // value to the ioctl request code. Test this assumption.
 
-    assert_eq!(c::TCSETS2, c::TCSETS2 + 0);
-    assert_eq!(c::TCSETSW2, c::TCSETS2 + 1);
-    assert_eq!(c::TCSETSF2, c::TCSETS2 + 2);
+    const_assert_eq!(c::TCSETS2, c::TCSETS2 + 0);
+    const_assert_eq!(c::TCSETSW2, c::TCSETS2 + 1);
+    const_assert_eq!(c::TCSETSF2, c::TCSETS2 + 2);
 
-    assert_eq!(c::TCSANOW - c::TCSANOW, 0);
-    assert_eq!(c::TCSADRAIN - c::TCSANOW, 1);
-    assert_eq!(c::TCSAFLUSH - c::TCSANOW, 2);
+    const_assert_eq!(c::TCSANOW - c::TCSANOW, 0);
+    const_assert_eq!(c::TCSADRAIN - c::TCSANOW, 1);
+    const_assert_eq!(c::TCSAFLUSH - c::TCSANOW, 2);
 
     // MIPS is different here.
     #[cfg(any(target_arch = "mips", target_arch = "mips64"))]
@@ -1403,9 +1396,9 @@ fn termios_ioctl_contiguity() {
     }
     #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
     {
-        assert_eq!(c::TCSANOW, 0);
-        assert_eq!(c::TCSADRAIN, 1);
-        assert_eq!(c::TCSAFLUSH, 2);
+        const_assert_eq!(c::TCSANOW, 0);
+        const_assert_eq!(c::TCSADRAIN, 1);
+        const_assert_eq!(c::TCSAFLUSH, 2);
     }
 }
 
@@ -1413,5 +1406,5 @@ fn termios_ioctl_contiguity() {
 #[test]
 fn termios_cibaud() {
     // Test an assumption.
-    assert_eq!(c::CIBAUD, c::CBAUD << c::IBSHIFT);
+    const_assert_eq!(c::CIBAUD, c::CBAUD << c::IBSHIFT);
 }
