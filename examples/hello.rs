@@ -34,6 +34,6 @@ fn main() -> std::io::Result<()> {
 }
 
 #[cfg(any(not(feature = "stdio"), not(feature = "std"), windows))]
-fn main() {
-    unimplemented!()
+fn main() -> Result<(), &'static str> {
+    Err("This example requires --features=stdio,std and is not supported on Windows.")
 }

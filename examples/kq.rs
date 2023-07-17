@@ -84,6 +84,6 @@ fn main() -> std::io::Result<()> {
 }
 
 #[cfg(not(all(bsd, feature = "event")))]
-fn main() {
-    unimplemented!()
+fn main() -> Result<(), &'static str> {
+    Err("This example requires --features=event and is only supported on BSD.")
 }

@@ -44,6 +44,6 @@ fn main() -> std::io::Result<()> {
 }
 
 #[cfg(any(windows, not(feature = "termios")))]
-fn main() {
-    unimplemented!()
+fn main() -> Result<(), &'static str> {
+    Err("This example requires --features=termios and is not supported on Windows.")
 }
