@@ -51,7 +51,7 @@ fn test_sockopts_ipv4() {
     .unwrap();
 
     // Check that we have a timeout of at least the time we set.
-    if cfg!(not(target_os = "freebsd")) {
+    if cfg!(not(any(target_os = "freebsd", target_os = "netbsd"))) {
         assert!(
             rustix::net::sockopt::get_socket_timeout(&s, rustix::net::sockopt::Timeout::Recv)
                 .unwrap()
@@ -59,7 +59,7 @@ fn test_sockopts_ipv4() {
                 >= Duration::new(1, 1)
         );
     } else {
-        // On FreeBSD <= 12, it appears the system rounds the timeout down.
+        // On FreeBSD <= 12 and NetBSD, it appears the system rounds the timeout down.
         assert!(
             rustix::net::sockopt::get_socket_timeout(&s, rustix::net::sockopt::Timeout::Recv)
                 .unwrap()
@@ -156,6 +156,10 @@ fn test_sockopts_ipv6() {
         Err(err) => Err(err).unwrap(),
     }
     assert_ne!(rustix::net::sockopt::get_ipv6_unicast_hops(&s).unwrap(), 0);
+
+    // On NetBSD, `get_ipv6_multicasthops` returns 1 here. It's not evident
+    // why it differs from other OS's.
+    #[cfg(not(target_os = "netbsd"))]
     match rustix::net::sockopt::get_ipv6_multicast_hops(&s) {
         Ok(hops) => assert_eq!(hops, 0),
         Err(rustix::io::Errno::NOPROTOOPT) => (),

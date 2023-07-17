@@ -34,6 +34,9 @@ fn test_file() {
         Err(err) => Err(err).unwrap(),
     }
 
+    // Check that `SYMLINK_FOLLOW` is rejected. Except on NetBSD which seems
+    // to permit it.
+    #[cfg(not(target_os = "netbsd"))]
     assert_eq!(
         rustix::fs::accessat(
             rustix::fs::CWD,

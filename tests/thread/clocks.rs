@@ -22,28 +22,28 @@ fn test_invalid_nanosleep() {
         tv_nsec: 1_000_000_000,
     }) {
         NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
-        otherwise => panic!("unexpected resut: {:?}", otherwise),
+        otherwise => panic!("unexpected result: {:?}", otherwise),
     }
     match nanosleep(&Timespec {
         tv_sec: 0,
         tv_nsec: !0,
     }) {
         NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
-        otherwise => panic!("unexpected resut: {:?}", otherwise),
+        otherwise => panic!("unexpected result: {:?}", otherwise),
     }
     match nanosleep(&Timespec {
         tv_sec: !0,
         tv_nsec: 1_000_000_000,
     }) {
         NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
-        otherwise => panic!("unexpected resut: {:?}", otherwise),
+        otherwise => panic!("unexpected result: {:?}", otherwise),
     }
     match nanosleep(&Timespec {
         tv_sec: !0,
         tv_nsec: !0,
     }) {
         NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
-        otherwise => panic!("unexpected resut: {:?}", otherwise),
+        otherwise => panic!("unexpected result: {:?}", otherwise),
     }
 }
 
@@ -56,6 +56,7 @@ fn test_invalid_nanosleep() {
     target_os = "redox",
     target_os = "wasi",
 )))]
+#[cfg(not(target_os = "netbsd"))] // NetBSD doesn't seem to enforce valid timespecs.
 #[test]
 fn test_invalid_nanosleep_absolute() {
     match clock_nanosleep_absolute(
@@ -66,7 +67,7 @@ fn test_invalid_nanosleep_absolute() {
         },
     ) {
         Err(io::Errno::INVAL) => (),
-        otherwise => panic!("unexpected resut: {:?}", otherwise),
+        otherwise => panic!("unexpected result: {:?}", otherwise),
     }
     match clock_nanosleep_absolute(
         ClockId::Monotonic,
@@ -76,7 +77,7 @@ fn test_invalid_nanosleep_absolute() {
         },
     ) {
         Err(io::Errno::INVAL) => (),
-        otherwise => panic!("unexpected resut: {:?}", otherwise),
+        otherwise => panic!("unexpected result: {:?}", otherwise),
     }
     match clock_nanosleep_absolute(
         ClockId::Monotonic,
@@ -86,7 +87,7 @@ fn test_invalid_nanosleep_absolute() {
         },
     ) {
         Err(io::Errno::INVAL) => (),
-        otherwise => panic!("unexpected resut: {:?}", otherwise),
+        otherwise => panic!("unexpected result: {:?}", otherwise),
     }
     match clock_nanosleep_absolute(
         ClockId::Monotonic,
@@ -96,7 +97,7 @@ fn test_invalid_nanosleep_absolute() {
         },
     ) {
         Err(io::Errno::INVAL) => (),
-        otherwise => panic!("unexpected resut: {:?}", otherwise),
+        otherwise => panic!("unexpected result: {:?}", otherwise),
     }
 }
 
@@ -119,7 +120,7 @@ fn test_invalid_nanosleep_relative() {
         },
     ) {
         NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
-        otherwise => panic!("unexpected resut: {:?}", otherwise),
+        otherwise => panic!("unexpected result: {:?}", otherwise),
     }
     match clock_nanosleep_relative(
         ClockId::Monotonic,
@@ -129,7 +130,7 @@ fn test_invalid_nanosleep_relative() {
         },
     ) {
         NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
-        otherwise => panic!("unexpected resut: {:?}", otherwise),
+        otherwise => panic!("unexpected result: {:?}", otherwise),
     }
     match clock_nanosleep_relative(
         ClockId::Monotonic,
@@ -139,7 +140,7 @@ fn test_invalid_nanosleep_relative() {
         },
     ) {
         NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
-        otherwise => panic!("unexpected resut: {:?}", otherwise),
+        otherwise => panic!("unexpected result: {:?}", otherwise),
     }
     match clock_nanosleep_relative(
         ClockId::Monotonic,
@@ -149,7 +150,7 @@ fn test_invalid_nanosleep_relative() {
         },
     ) {
         NanosleepRelativeResult::Err(io::Errno::INVAL) => (),
-        otherwise => panic!("unexpected resut: {:?}", otherwise),
+        otherwise => panic!("unexpected result: {:?}", otherwise),
     }
 }
 
@@ -161,7 +162,7 @@ fn test_zero_nanosleep() {
         tv_nsec: 0,
     }) {
         NanosleepRelativeResult::Ok => (),
-        otherwise => panic!("unexpected resut: {:?}", otherwise),
+        otherwise => panic!("unexpected result: {:?}", otherwise),
     }
 }
 
@@ -184,7 +185,7 @@ fn test_zero_nanosleep_absolute() {
         },
     ) {
         Ok(()) => (),
-        otherwise => panic!("unexpected resut: {:?}", otherwise),
+        otherwise => panic!("unexpected result: {:?}", otherwise),
     }
 }
 
@@ -207,6 +208,6 @@ fn test_zero_nanosleep_relative() {
         },
     ) {
         NanosleepRelativeResult::Ok => (),
-        otherwise => panic!("unexpected resut: {:?}", otherwise),
+        otherwise => panic!("unexpected result: {:?}", otherwise),
     }
 }
