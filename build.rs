@@ -126,6 +126,7 @@ fn main() {
         && (apple
             || os == "android"
             || os == "emscripten"
+            || os == "haiku"
             || env == "gnu"
             || (env == "musl" && arch == "x86"))
     {

@@ -2,10 +2,14 @@
 
 use crate::backend::c;
 use crate::backend::conv::ret;
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[cfg(feature = "time")]
+#[cfg(any(all(target_env = "gnu", fix_y2038), not(fix_y2038)))]
+use crate::backend::time::types::LibcItimerspec;
 #[cfg(not(target_os = "wasi"))]
 use crate::clockid::{ClockId, DynamicClockId};
 use crate::io;
-#[cfg(fix_y2038)]
+#[cfg(all(target_env = "gnu", fix_y2038))]
 use crate::timespec::LibcTimespec;
 use crate::timespec::Timespec;
 use core::mem::MaybeUninit;
@@ -13,42 +17,43 @@ use core::mem::MaybeUninit;
 #[cfg(feature = "time")]
 use {
     crate::backend::conv::{borrowed_fd, ret_owned_fd},
-    crate::backend::time::types::LibcItimerspec,
     crate::fd::{BorrowedFd, OwnedFd},
     crate::time::{Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags},
 };
 
-#[cfg(fix_y2038)]
+#[cfg(all(target_env = "gnu", fix_y2038))]
 weak!(fn __clock_gettime64(c::clockid_t, *mut LibcTimespec) -> c::c_int);
-#[cfg(fix_y2038)]
+#[cfg(all(target_env = "gnu", fix_y2038))]
 weak!(fn __clock_settime64(c::clockid_t, *const LibcTimespec) -> c::c_int);
-#[cfg(fix_y2038)]
+#[cfg(all(target_env = "gnu", fix_y2038))]
 weak!(fn __clock_getres64(c::clockid_t, *mut LibcTimespec) -> c::c_int);
-#[cfg(fix_y2038)]
-#[cfg(feature = "time")]
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[cfg(all(target_env = "gnu", fix_y2038))]
+#[cfg(feature = "time")]
 weak!(fn __timerfd_gettime64(c::c_int, *mut LibcItimerspec) -> c::c_int);
-#[cfg(fix_y2038)]
-#[cfg(feature = "time")]
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[cfg(all(target_env = "gnu", fix_y2038))]
+#[cfg(feature = "time")]
 weak!(fn __timerfd_settime64(c::c_int, c::c_int, *const LibcItimerspec, *mut LibcItimerspec) -> c::c_int);
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[inline]
 #[must_use]
 pub(crate) fn clock_getres(id: ClockId) -> Timespec {
-    // 32-bit gnu version: libc has `clock_getres` but it is not y2038 safe by
-    // default.
+    // Old 32-bit version: libc has `clock_getres` but it is not y2038 safe by
+    // default. But there may be a `__clock_getres64` we can use.
     #[cfg(fix_y2038)]
-    unsafe {
-        let mut timespec = MaybeUninit::<LibcTimespec>::uninit();
-
+    {
+        #[cfg(target_env = "gnu")]
         if let Some(libc_clock_getres) = __clock_getres64.get() {
-            ret(libc_clock_getres(id as c::clockid_t, timespec.as_mut_ptr())).unwrap();
-            timespec.assume_init().into()
-        } else {
-            clock_getres_old(id)
+            let mut timespec = MaybeUninit::<LibcTimespec>::uninit();
+            unsafe {
+                ret(libc_clock_getres(id as c::clockid_t, timespec.as_mut_ptr())).unwrap();
+                return timespec.assume_init().into();
+            }
         }
+
+        clock_getres_old(id)
     }
 
     // Main version: libc is y2038 safe and has `clock_getres`.
@@ -62,14 +67,18 @@ pub(crate) fn clock_getres(id: ClockId) -> Timespec {
 
 #[cfg(fix_y2038)]
 #[must_use]
-unsafe fn clock_getres_old(id: ClockId) -> Timespec {
+fn clock_getres_old(id: ClockId) -> Timespec {
     let mut old_timespec = MaybeUninit::<c::timespec>::uninit();
-    ret(c::clock_getres(
-        id as c::clockid_t,
-        old_timespec.as_mut_ptr(),
-    ))
-    .unwrap();
-    let old_timespec = old_timespec.assume_init();
+
+    let old_timespec = unsafe {
+        ret(c::clock_getres(
+            id as c::clockid_t,
+            old_timespec.as_mut_ptr(),
+        ))
+        .unwrap();
+        old_timespec.assume_init()
+    };
+
     Timespec {
         tv_sec: old_timespec.tv_sec.into(),
         tv_nsec: old_timespec.tv_nsec.into(),
@@ -80,20 +89,24 @@ unsafe fn clock_getres_old(id: ClockId) -> Timespec {
 #[inline]
 #[must_use]
 pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
+    // Old 32-bit version: libc has `clock_gettime` but it is not y2038 safe by
+    // default. But there may be a `__clock_gettime64` we can use.
     #[cfg(fix_y2038)]
-    unsafe {
-        let mut timespec = MaybeUninit::<LibcTimespec>::uninit();
-
+    {
+        #[cfg(target_env = "gnu")]
         if let Some(libc_clock_gettime) = __clock_gettime64.get() {
-            ret(libc_clock_gettime(
-                id as c::clockid_t,
-                timespec.as_mut_ptr(),
-            ))
-            .unwrap();
-            timespec.assume_init().into()
-        } else {
-            clock_gettime_old(id)
+            let mut timespec = MaybeUninit::<LibcTimespec>::uninit();
+            unsafe {
+                ret(libc_clock_gettime(
+                    id as c::clockid_t,
+                    timespec.as_mut_ptr(),
+                ))
+                .unwrap();
+                return timespec.assume_init().into();
+            }
         }
+
+        clock_gettime_old(id)
     }
 
     // Use `unwrap()` here because `clock_getres` can fail if the clock itself
@@ -110,14 +123,18 @@ pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
 
 #[cfg(fix_y2038)]
 #[must_use]
-unsafe fn clock_gettime_old(id: ClockId) -> Timespec {
+fn clock_gettime_old(id: ClockId) -> Timespec {
     let mut old_timespec = MaybeUninit::<c::timespec>::uninit();
-    ret(c::clock_gettime(
-        id as c::clockid_t,
-        old_timespec.as_mut_ptr(),
-    ))
-    .unwrap();
-    let old_timespec = old_timespec.assume_init();
+
+    let old_timespec = unsafe {
+        ret(c::clock_gettime(
+            id as c::clockid_t,
+            old_timespec.as_mut_ptr(),
+        ))
+        .unwrap();
+        old_timespec.assume_init()
+    };
+
     Timespec {
         tv_sec: old_timespec.tv_sec.into(),
         tv_nsec: old_timespec.tv_nsec.into(),
@@ -127,74 +144,80 @@ unsafe fn clock_gettime_old(id: ClockId) -> Timespec {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timespec> {
-    unsafe {
-        let id: c::clockid_t = match id {
-            DynamicClockId::Known(id) => id as c::clockid_t,
+    let id: c::clockid_t = match id {
+        DynamicClockId::Known(id) => id as c::clockid_t,
 
-            #[cfg(linux_kernel)]
-            DynamicClockId::Dynamic(fd) => {
-                use crate::fd::AsRawFd;
-                const CLOCKFD: i32 = 3;
-                (!fd.as_raw_fd() << 3) | CLOCKFD
-            }
+        #[cfg(linux_kernel)]
+        DynamicClockId::Dynamic(fd) => {
+            use crate::fd::AsRawFd;
+            const CLOCKFD: i32 = 3;
+            (!fd.as_raw_fd() << 3) | CLOCKFD
+        }
 
-            #[cfg(not(linux_kernel))]
-            DynamicClockId::Dynamic(_fd) => {
-                // Dynamic clocks are not supported on this platform.
-                return Err(io::Errno::INVAL);
-            }
+        #[cfg(not(linux_kernel))]
+        DynamicClockId::Dynamic(_fd) => {
+            // Dynamic clocks are not supported on this platform.
+            return Err(io::Errno::INVAL);
+        }
 
-            #[cfg(linux_kernel)]
-            DynamicClockId::RealtimeAlarm => c::CLOCK_REALTIME_ALARM,
+        #[cfg(linux_kernel)]
+        DynamicClockId::RealtimeAlarm => c::CLOCK_REALTIME_ALARM,
 
-            #[cfg(linux_kernel)]
-            DynamicClockId::Tai => c::CLOCK_TAI,
+        #[cfg(linux_kernel)]
+        DynamicClockId::Tai => c::CLOCK_TAI,
 
-            #[cfg(any(linux_kernel, target_os = "openbsd"))]
-            DynamicClockId::Boottime => c::CLOCK_BOOTTIME,
+        #[cfg(any(linux_kernel, target_os = "openbsd"))]
+        DynamicClockId::Boottime => c::CLOCK_BOOTTIME,
 
-            #[cfg(linux_kernel)]
-            DynamicClockId::BoottimeAlarm => c::CLOCK_BOOTTIME_ALARM,
-        };
+        #[cfg(linux_kernel)]
+        DynamicClockId::BoottimeAlarm => c::CLOCK_BOOTTIME_ALARM,
+    };
 
-        #[cfg(fix_y2038)]
-        {
+    // Old 32-bit version: libc has `clock_gettime` but it is not y2038
+    // safe by default. But there may be a `__clock_gettime64` we can use.
+    #[cfg(fix_y2038)]
+    {
+        #[cfg(target_env = "gnu")]
+        if let Some(libc_clock_gettime) = __clock_gettime64.get() {
             let mut timespec = MaybeUninit::<LibcTimespec>::uninit();
-
-            if let Some(libc_clock_gettime) = __clock_gettime64.get() {
+            unsafe {
                 ret(libc_clock_gettime(
                     id as c::clockid_t,
                     timespec.as_mut_ptr(),
                 ))?;
 
-                Ok(timespec.assume_init().into())
-            } else {
-                clock_gettime_dynamic_old(id)
+                return Ok(timespec.assume_init().into());
             }
         }
 
-        #[cfg(not(fix_y2038))]
-        {
-            let mut timespec = MaybeUninit::<Timespec>::uninit();
+        clock_gettime_dynamic_old(id)
+    }
 
-            ret(c::clock_gettime(id as c::clockid_t, timespec.as_mut_ptr()))?;
+    // Main version: libc is y2038 safe and has `clock_gettime`.
+    #[cfg(not(fix_y2038))]
+    unsafe {
+        let mut timespec = MaybeUninit::<Timespec>::uninit();
 
-            Ok(timespec.assume_init())
-        }
+        ret(c::clock_gettime(id as c::clockid_t, timespec.as_mut_ptr()))?;
+
+        Ok(timespec.assume_init())
     }
 }
 
 #[cfg(fix_y2038)]
 #[inline]
-unsafe fn clock_gettime_dynamic_old(id: c::clockid_t) -> io::Result<Timespec> {
+fn clock_gettime_dynamic_old(id: c::clockid_t) -> io::Result<Timespec> {
     let mut old_timespec = MaybeUninit::<c::timespec>::uninit();
 
-    ret(c::clock_gettime(
-        id as c::clockid_t,
-        old_timespec.as_mut_ptr(),
-    ))?;
+    let old_timespec = unsafe {
+        ret(c::clock_gettime(
+            id as c::clockid_t,
+            old_timespec.as_mut_ptr(),
+        ))?;
 
-    let old_timespec = old_timespec.assume_init();
+        old_timespec.assume_init()
+    };
+
     Ok(Timespec {
         tv_sec: old_timespec.tv_sec.into(),
         tv_nsec: old_timespec.tv_nsec.into(),
@@ -208,18 +231,24 @@ unsafe fn clock_gettime_dynamic_old(id: c::clockid_t) -> io::Result<Timespec> {
 )))]
 #[inline]
 pub(crate) fn clock_settime(id: ClockId, timespec: Timespec) -> io::Result<()> {
+    // Old 32-bit version: libc has `clock_gettime` but it is not y2038 safe by
+    // default. But there may be a `__clock_settime64` we can use.
     #[cfg(fix_y2038)]
-    unsafe {
+    {
+        #[cfg(target_env = "gnu")]
         if let Some(libc_clock_settime) = __clock_settime64.get() {
-            let mut new_timespec = core::mem::zeroed::<LibcTimespec>();
-            new_timespec.tv_sec = timespec.tv_sec;
-            new_timespec.tv_nsec = timespec.tv_nsec as _;
-            ret(libc_clock_settime(id as c::clockid_t, &new_timespec))
-        } else {
-            clock_settime_old(id, timespec)
+            unsafe {
+                let mut new_timespec = core::mem::zeroed::<LibcTimespec>();
+                new_timespec.tv_sec = timespec.tv_sec;
+                new_timespec.tv_nsec = timespec.tv_nsec as _;
+                return ret(libc_clock_settime(id as c::clockid_t, &new_timespec));
+            }
         }
+
+        clock_settime_old(id, timespec)
     }
 
+    // Main version: libc is y2038 safe and has `clock_settime`.
     #[cfg(not(fix_y2038))]
     unsafe {
         ret(c::clock_settime(id as c::clockid_t, &timespec))
@@ -232,7 +261,7 @@ pub(crate) fn clock_settime(id: ClockId, timespec: Timespec) -> io::Result<()> {
     all(apple, not(target_os = "macos"))
 )))]
 #[cfg(fix_y2038)]
-unsafe fn clock_settime_old(id: ClockId, timespec: Timespec) -> io::Result<()> {
+fn clock_settime_old(id: ClockId, timespec: Timespec) -> io::Result<()> {
     let old_timespec = c::timespec {
         tv_sec: timespec
             .tv_sec
@@ -240,7 +269,8 @@ unsafe fn clock_settime_old(id: ClockId, timespec: Timespec) -> io::Result<()> {
             .map_err(|_| io::Errno::OVERFLOW)?,
         tv_nsec: timespec.tv_nsec as _,
     };
-    ret(c::clock_settime(id as c::clockid_t, &old_timespec))
+
+    unsafe { ret(c::clock_settime(id as c::clockid_t, &old_timespec)) }
 }
 
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
@@ -256,25 +286,30 @@ pub(crate) fn timerfd_settime(
     flags: TimerfdTimerFlags,
     new_value: &Itimerspec,
 ) -> io::Result<Itimerspec> {
-    let mut result = MaybeUninit::<LibcItimerspec>::uninit();
-
+    // Old 32-bit version: libc has `timerfd_settime` but it is not y2038 safe
+    // by default. But there may be a `__timerfd_settime64` we can use.
     #[cfg(fix_y2038)]
-    unsafe {
+    {
+        #[cfg(target_env = "gnu")]
         if let Some(libc_timerfd_settime) = __timerfd_settime64.get() {
-            ret(libc_timerfd_settime(
-                borrowed_fd(fd),
-                bitflags_bits!(flags),
-                &new_value.clone().into(),
-                result.as_mut_ptr(),
-            ))?;
-            Ok(result.assume_init().into())
-        } else {
-            timerfd_settime_old(fd, flags, new_value)
+            let mut result = MaybeUninit::<LibcItimerspec>::uninit();
+            unsafe {
+                ret(libc_timerfd_settime(
+                    borrowed_fd(fd),
+                    bitflags_bits!(flags),
+                    &new_value.clone().into(),
+                    result.as_mut_ptr(),
+                ))?;
+                return Ok(result.assume_init().into());
+            }
         }
+
+        timerfd_settime_old(fd, flags, new_value)
     }
 
     #[cfg(not(fix_y2038))]
     unsafe {
+        let mut result = MaybeUninit::<LibcItimerspec>::uninit();
         ret(c::timerfd_settime(
             borrowed_fd(fd),
             bitflags_bits!(flags),
@@ -288,7 +323,7 @@ pub(crate) fn timerfd_settime(
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(fix_y2038)]
 #[cfg(feature = "time")]
-unsafe fn timerfd_settime_old(
+fn timerfd_settime_old(
     fd: BorrowedFd<'_>,
     flags: TimerfdTimerFlags,
     new_value: &Itimerspec,
@@ -323,14 +358,16 @@ unsafe fn timerfd_settime_old(
         },
     };
 
-    ret(c::timerfd_settime(
-        borrowed_fd(fd),
-        bitflags_bits!(flags),
-        &old_new_value,
-        old_result.as_mut_ptr(),
-    ))?;
+    let old_result = unsafe {
+        ret(c::timerfd_settime(
+            borrowed_fd(fd),
+            bitflags_bits!(flags),
+            &old_new_value,
+            old_result.as_mut_ptr(),
+        ))?;
+        old_result.assume_init()
+    };
 
-    let old_result = old_result.assume_init();
     Ok(Itimerspec {
         it_interval: Timespec {
             tv_sec: old_result
@@ -354,20 +391,25 @@ unsafe fn timerfd_settime_old(
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(feature = "time")]
 pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
-    let mut result = MaybeUninit::<LibcItimerspec>::uninit();
-
+    // Old 32-bit version: libc has `timerfd_gettime` but it is not y2038 safe
+    // by default. But there may be a `__timerfd_gettime64` we can use.
     #[cfg(fix_y2038)]
-    unsafe {
+    {
+        #[cfg(target_env = "gnu")]
         if let Some(libc_timerfd_gettime) = __timerfd_gettime64.get() {
-            ret(libc_timerfd_gettime(borrowed_fd(fd), result.as_mut_ptr()))?;
-            Ok(result.assume_init().into())
-        } else {
-            timerfd_gettime_old(fd)
+            let mut result = MaybeUninit::<LibcItimerspec>::uninit();
+            unsafe {
+                ret(libc_timerfd_gettime(borrowed_fd(fd), result.as_mut_ptr()))?;
+                return Ok(result.assume_init().into());
+            }
         }
+
+        timerfd_gettime_old(fd)
     }
 
     #[cfg(not(fix_y2038))]
     unsafe {
+        let mut result = MaybeUninit::<LibcItimerspec>::uninit();
         ret(c::timerfd_gettime(borrowed_fd(fd), result.as_mut_ptr()))?;
         Ok(result.assume_init())
     }
@@ -376,12 +418,14 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(fix_y2038)]
 #[cfg(feature = "time")]
-unsafe fn timerfd_gettime_old(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
+fn timerfd_gettime_old(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
     let mut old_result = MaybeUninit::<c::itimerspec>::uninit();
 
-    ret(c::timerfd_gettime(borrowed_fd(fd), old_result.as_mut_ptr()))?;
+    let old_result = unsafe {
+        ret(c::timerfd_gettime(borrowed_fd(fd), old_result.as_mut_ptr()))?;
+        old_result.assume_init()
+    };
 
-    let old_result = old_result.assume_init();
     Ok(Itimerspec {
         it_interval: Timespec {
             tv_sec: old_result
