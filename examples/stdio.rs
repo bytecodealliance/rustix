@@ -285,6 +285,17 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
                 term.special_codes[SpecialCodeIndex::VTIME],
                 term.special_codes[SpecialCodeIndex::VMIN]
             );
+            #[cfg(not(any(
+                bsd,
+                solarish,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "nto",
+            )))]
+            println!(
+                "         VSWTC={}",
+                term.special_codes[SpecialCodeIndex::VSWTC]
+            );
             println!(
                 "         START={} STOP={} SUSP={} EOL={}",
                 key(term.special_codes[SpecialCodeIndex::VSTART]),
