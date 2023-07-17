@@ -22,7 +22,7 @@ use crate::backend::pid::syscalls::getpid;
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::fs::{
-    fstat, fstatfs, major, openat, renameat, Dir, FileType, Mode, OFlags, Stat, CWD,
+    fstat, fstatfs, major, openat, renameat, Dir, FileType, FsWord, Mode, OFlags, Stat, CWD,
     PROC_SUPER_MAGIC,
 };
 use crate::io;
@@ -178,7 +178,7 @@ fn check_proc_nonroot(stat: &Stat, proc_stat: Option<&Stat>) -> io::Result<()> {
 fn check_procfs(file: BorrowedFd<'_>) -> io::Result<()> {
     let statfs = fstatfs(file)?;
     let f_type = statfs.f_type;
-    if f_type != PROC_SUPER_MAGIC.into() {
+    if f_type != FsWord::from(PROC_SUPER_MAGIC) {
         return Err(io::Errno::NOTSUP);
     }
 
