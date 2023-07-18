@@ -84,11 +84,12 @@ weak!(fn __futimens64(c::c_int, *const LibcTimespec) -> c::c_int);
 /// This is only currently necessary as a workaround for old glibc; see below.
 #[cfg(all(unix, target_env = "gnu"))]
 fn open_via_syscall(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
-    // Linux on aarch64 and riscv64 has no `open` syscall so use `openat`.
+    // Linux on aarch64, loongarch64 and riscv64 has no `open` syscall so use `openat`.
     #[cfg(any(
         target_arch = "aarch64",
         target_arch = "riscv32",
-        target_arch = "riscv64"
+        target_arch = "riscv64",
+        target_arch = "loongarch64"
     ))]
     {
         openat_via_syscall(CWD, path, oflags, mode)
@@ -98,7 +99,8 @@ fn open_via_syscall(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<Owned
     #[cfg(not(any(
         target_arch = "aarch64",
         target_arch = "riscv32",
-        target_arch = "riscv64"
+        target_arch = "riscv64",
+        target_arch = "loongarch64"
     )))]
     unsafe {
         syscall! {
