@@ -21,7 +21,7 @@ pub fn gettid() -> Pid {
 ///
 /// # Warning
 ///
-/// This is not the setxid you are looking for... POSIX requires xids to be
+/// This is not the setxid you are looking for… POSIX requires xids to be
 /// process granular, but on Linux they are per-thread. Thus, this call only
 /// changes the xid for the current *thread*, not the entire process even
 /// though that is in violation of the POSIX standard.
@@ -46,7 +46,7 @@ pub fn set_thread_uid(uid: Uid) -> io::Result<()> {
 ///
 /// # Warning
 ///
-/// This is not the setresxid you are looking for... POSIX requires xids to be
+/// This is not the setresxid you are looking for… POSIX requires xids to be
 /// process granular, but on Linux they are per-thread. Thus, this call only
 /// changes the xid for the current *thread*, not the entire process even
 /// though that is in violation of the POSIX standard.
