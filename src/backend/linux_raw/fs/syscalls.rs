@@ -1436,13 +1436,11 @@ pub(crate) fn mount(
     }
 }
 
-#[allow(dead_code)]
 #[inline]
 pub(crate) fn fsopen(fs_name: &CStr, flags: super::types::FsOpenFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(syscall_readonly!(__NR_fsopen, fs_name, flags)) }
 }
 
-#[allow(dead_code)]
 #[inline]
 pub(crate) fn fsmount(
     fs_fd: BorrowedFd<'_>,
@@ -1452,7 +1450,6 @@ pub(crate) fn fsmount(
     unsafe { ret(syscall_readonly!(__NR_fsmount, fs_fd, flags, attr_flags)) }
 }
 
-#[allow(dead_code)]
 #[inline]
 pub(crate) fn move_mount(
     from_dfd: BorrowedFd<'_>,
@@ -1473,7 +1470,6 @@ pub(crate) fn move_mount(
     }
 }
 
-#[allow(dead_code)]
 #[inline]
 pub(crate) fn open_tree(
     dfd: BorrowedFd<'_>,
@@ -1483,7 +1479,6 @@ pub(crate) fn open_tree(
     unsafe { ret_owned_fd(syscall_readonly!(__NR_open_tree, dfd, filename, flags)) }
 }
 
-#[allow(dead_code)]
 #[inline]
 pub(crate) fn fspick(
     dfd: BorrowedFd<'_>,
@@ -1493,7 +1488,6 @@ pub(crate) fn fspick(
     unsafe { ret_owned_fd(syscall_readonly!(__NR_fspick, dfd, path, flags)) }
 }
 
-#[allow(dead_code)]
 #[inline]
 pub(crate) fn fsconfig_set_flag(fs_fd: BorrowedFd<'_>, key: &CStr) -> io::Result<()> {
     unsafe {
@@ -1508,7 +1502,6 @@ pub(crate) fn fsconfig_set_flag(fs_fd: BorrowedFd<'_>, key: &CStr) -> io::Result
     }
 }
 
-#[allow(dead_code)]
 #[inline]
 pub(crate) fn fsconfig_set_string(
     fs_fd: BorrowedFd<'_>,
@@ -1527,7 +1520,6 @@ pub(crate) fn fsconfig_set_string(
     }
 }
 
-#[allow(dead_code)]
 #[inline]
 pub(crate) fn fsconfig_set_binary(
     fs_fd: BorrowedFd<'_>,
@@ -1547,7 +1539,6 @@ pub(crate) fn fsconfig_set_binary(
     }
 }
 
-#[allow(dead_code)]
 #[inline]
 pub(crate) fn fsconfig_set_fd(
     fs_fd: BorrowedFd<'_>,
@@ -1566,7 +1557,6 @@ pub(crate) fn fsconfig_set_fd(
     }
 }
 
-#[allow(dead_code)]
 #[inline]
 pub(crate) fn fsconfig_set_path(
     fs_fd: BorrowedFd<'_>,
@@ -1586,7 +1576,6 @@ pub(crate) fn fsconfig_set_path(
     }
 }
 
-#[allow(dead_code)]
 #[inline]
 pub(crate) fn fsconfig_set_path_empty(
     fs_fd: BorrowedFd<'_>,
@@ -1605,7 +1594,6 @@ pub(crate) fn fsconfig_set_path_empty(
     }
 }
 
-#[allow(dead_code)]
 #[inline]
 pub(crate) fn fsconfig_create(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe {
@@ -1620,7 +1608,6 @@ pub(crate) fn fsconfig_create(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
     }
 }
 
-#[allow(dead_code)]
 #[inline]
 pub(crate) fn fsconfig_reconfigure(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe {

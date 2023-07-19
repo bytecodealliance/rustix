@@ -2087,7 +2087,6 @@ pub(crate) fn unmount(target: &CStr, flags: super::types::UnmountFlags) -> io::R
     unsafe { ret(c::umount2(target.as_ptr(), bitflags_bits!(flags))) }
 }
 
-#[allow(dead_code)]
 #[cfg(linux_kernel)]
 pub(crate) fn fsopen(fs_name: &CStr, flags: super::types::FsOpenFlags) -> io::Result<OwnedFd> {
     syscall! {
@@ -2099,7 +2098,6 @@ pub(crate) fn fsopen(fs_name: &CStr, flags: super::types::FsOpenFlags) -> io::Re
     unsafe { ret_owned_fd(fsopen(c_str(fs_name), flags.bits())) }
 }
 
-#[allow(dead_code)]
 #[cfg(linux_kernel)]
 pub(crate) fn fsmount(
     fs_fd: BorrowedFd<'_>,
@@ -2116,7 +2114,6 @@ pub(crate) fn fsmount(
     unsafe { ret(fsmount(borrowed_fd(fs_fd), flags.bits(), attr_flags.bits())) }
 }
 
-#[allow(dead_code)]
 #[cfg(linux_kernel)]
 pub(crate) fn move_mount(
     from_dfd: BorrowedFd<'_>,
@@ -2145,7 +2142,6 @@ pub(crate) fn move_mount(
     }
 }
 
-#[allow(dead_code)]
 #[cfg(linux_kernel)]
 pub(crate) fn open_tree(
     dfd: BorrowedFd<'_>,
@@ -2163,7 +2159,6 @@ pub(crate) fn open_tree(
     unsafe { ret_owned_fd(open_tree(borrowed_fd(dfd), c_str(filename), flags.bits())) }
 }
 
-#[allow(dead_code)]
 #[cfg(linux_kernel)]
 pub(crate) fn fspick(
     dfd: BorrowedFd<'_>,
@@ -2192,7 +2187,6 @@ syscall! {
     ) via SYS_fsconfig -> c::c_int
 }
 
-#[allow(dead_code)]
 #[cfg(linux_kernel)]
 pub(crate) fn fsconfig_set_flag(fs_fd: BorrowedFd<'_>, key: &CStr) -> io::Result<()> {
     unsafe {
@@ -2206,7 +2200,6 @@ pub(crate) fn fsconfig_set_flag(fs_fd: BorrowedFd<'_>, key: &CStr) -> io::Result
     }
 }
 
-#[allow(dead_code)]
 #[cfg(linux_kernel)]
 pub(crate) fn fsconfig_set_string(
     fs_fd: BorrowedFd<'_>,
@@ -2224,7 +2217,6 @@ pub(crate) fn fsconfig_set_string(
     }
 }
 
-#[allow(dead_code)]
 #[cfg(linux_kernel)]
 pub(crate) fn fsconfig_set_binary(
     fs_fd: BorrowedFd<'_>,
@@ -2242,7 +2234,6 @@ pub(crate) fn fsconfig_set_binary(
     }
 }
 
-#[allow(dead_code)]
 #[cfg(linux_kernel)]
 pub(crate) fn fsconfig_set_fd(
     fs_fd: BorrowedFd<'_>,
@@ -2260,7 +2251,6 @@ pub(crate) fn fsconfig_set_fd(
     }
 }
 
-#[allow(dead_code)]
 #[cfg(linux_kernel)]
 pub(crate) fn fsconfig_set_path(
     fs_fd: BorrowedFd<'_>,
@@ -2279,7 +2269,6 @@ pub(crate) fn fsconfig_set_path(
     }
 }
 
-#[allow(dead_code)]
 #[cfg(linux_kernel)]
 pub(crate) fn fsconfig_set_path_empty(
     fs_fd: BorrowedFd<'_>,
@@ -2297,7 +2286,6 @@ pub(crate) fn fsconfig_set_path_empty(
     }
 }
 
-#[allow(dead_code)]
 #[cfg(linux_kernel)]
 pub(crate) fn fsconfig_create(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe {
@@ -2311,7 +2299,6 @@ pub(crate) fn fsconfig_create(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
     }
 }
 
-#[allow(dead_code)]
 #[cfg(linux_kernel)]
 pub(crate) fn fsconfig_reconfigure(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe {
