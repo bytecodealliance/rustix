@@ -392,6 +392,37 @@ pub enum Advice {
     DontNeed = linux_raw_sys::general::POSIX_FADV_DONTNEED,
 }
 
+/// `FSCONFIG_*` constants for use with [`fsconfig`].
+///
+/// [`fsconfig`]: crate::fs::fsconfig
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[repr(u32)]
+pub enum FsConfigCmd {
+    /// `FSCONFIG_SET_FLAG`
+    SetFlag = linux_raw_sys::general::fsconfig_command::FSCONFIG_SET_FLAG as u32,
+
+    /// `FSCONFIG_SET_STRING`
+    SetString = linux_raw_sys::general::fsconfig_command::FSCONFIG_SET_STRING as u32,
+
+    /// `FSCONFIG_SET_BINARY`
+    SetBinary = linux_raw_sys::general::fsconfig_command::FSCONFIG_SET_BINARY as u32,
+
+    /// `FSCONFIG_SET_PATH`
+    SetPath = linux_raw_sys::general::fsconfig_command::FSCONFIG_SET_PATH as u32,
+
+    /// `FSCONFIG_SET_PATH_EMPTY`
+    SetPathEmpty = linux_raw_sys::general::fsconfig_command::FSCONFIG_SET_PATH_EMPTY as u32,
+
+    /// `FSCONFIG_SET_FD`
+    SetFd = linux_raw_sys::general::fsconfig_command::FSCONFIG_SET_FD as u32,
+
+    /// `FSCONFIG_CMD_CREATE`
+    Create = linux_raw_sys::general::fsconfig_command::FSCONFIG_CMD_CREATE as u32,
+
+    /// `FSCONFIG_CMD_RECONFIGURE`
+    Reconfigure = linux_raw_sys::general::fsconfig_command::FSCONFIG_CMD_RECONFIGURE as u32,
+}
+
 bitflags! {
     /// `MFD_*` constants for use with [`memfd_create`].
     ///
@@ -750,6 +781,161 @@ bitflags! {
 
         /// `MS_NOSYMFOLLOW`
         const NOSYMFOLLOW = linux_raw_sys::general::MS_NOSYMFOLLOW;
+    }
+}
+
+bitflags! {
+    /// `FSOPEN_*` constants for use with [`fsopen`].
+    ///
+    /// [`fsopen`]: crate::fs::fsopen
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct FsOpenFlags: c::c_uint {
+
+        /// `FSOPEN_CLOEXEC`
+        const FSOPEN_CLOEXEC = linux_raw_sys::general::FSOPEN_CLOEXEC;
+    }
+}
+
+bitflags! {
+    /// `FSMOUNT_*` constants for use with [`fsmount`].
+    ///
+    /// [`fsmount`]: crate::fs::fsmount
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct FsMountFlags: c::c_uint {
+        /// `FSMOUNT_CLOEXEC`
+        const FSMOUNT_CLOEXEC = linux_raw_sys::general::FSMOUNT_CLOEXEC;
+    }
+}
+
+bitflags! {
+    /// `MOUNT_ATTR_*` constants for use with [`fsmount`].
+    ///
+    /// [`fsmount`]: crate::fs::fsmount
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct MountAttrFlags: c::c_uint {
+        /// `MOUNT_ATTR_RDONLY`
+        const MOUNT_ATTR_RDONLY = linux_raw_sys::general::MOUNT_ATTR_RDONLY;
+
+        /// `MOUNT_ATTR_NOSUID`
+        const MOUNT_ATTR_NOSUID = linux_raw_sys::general::MOUNT_ATTR_NOSUID;
+
+        /// `MOUNT_ATTR_NODEV`
+        const MOUNT_ATTR_NODEV = linux_raw_sys::general::MOUNT_ATTR_NODEV;
+
+        /// `MOUNT_ATTR_NOEXEC`
+        const MOUNT_ATTR_NOEXEC = linux_raw_sys::general::MOUNT_ATTR_NOEXEC;
+
+        /// `MOUNT_ATTR__ATIME`
+        const MOUNT_ATTR__ATIME = linux_raw_sys::general::MOUNT_ATTR__ATIME;
+
+        /// `MOUNT_ATTR_RELATIME`
+        const MOUNT_ATTR_RELATIME = linux_raw_sys::general::MOUNT_ATTR_RELATIME;
+
+        /// `MOUNT_ATTR_NOATIME`
+        const MOUNT_ATTR_NOATIME = linux_raw_sys::general::MOUNT_ATTR_NOATIME;
+
+        /// `MOUNT_ATTR_STRICTATIME`
+        const MOUNT_ATTR_STRICTATIME = linux_raw_sys::general::MOUNT_ATTR_STRICTATIME;
+
+        /// `MOUNT_ATTR_NODIRATIME`
+        const MOUNT_ATTR_NODIRATIME = linux_raw_sys::general::MOUNT_ATTR_NODIRATIME;
+
+        /// `MOUNT_ATTR_NOUSER`
+        const MOUNT_ATTR_IDMAP = linux_raw_sys::general::MOUNT_ATTR_IDMAP;
+
+        /// `MOUNT_ATTR__ATIME_FLAGS`
+        const MOUNT_ATTR_NOSYMFOLLOW = linux_raw_sys::general::MOUNT_ATTR_NOSYMFOLLOW;
+
+        /// `MOUNT_ATTR__ATIME_FLAGS`
+        const MOUNT_ATTR_SIZE_VER0 = linux_raw_sys::general::MOUNT_ATTR_SIZE_VER0;
+    }
+}
+
+bitflags! {
+    /// `MOVE_MOUNT_*` constants for use with [`move_mount`].
+    ///
+    /// [`move_mount`]: crate::fs::move_mount
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct MoveMountFlags: c::c_uint {
+        /// `MOVE_MOUNT_F_EMPTY_PATH`
+        const MOVE_MOUNT_F_SYMLINKS = linux_raw_sys::general::MOVE_MOUNT_F_SYMLINKS;
+
+        /// `MOVE_MOUNT_F_AUTOMOUNTS`
+        const MOVE_MOUNT_F_AUTOMOUNTS = linux_raw_sys::general::MOVE_MOUNT_F_AUTOMOUNTS;
+
+        /// `MOVE_MOUNT_F_EMPTY_PATH`
+        const MOVE_MOUNT_F_EMPTY_PATH = linux_raw_sys::general::MOVE_MOUNT_F_EMPTY_PATH;
+
+        /// `MOVE_MOUNT_T_SYMLINKS`
+        const MOVE_MOUNT_T_SYMLINKS = linux_raw_sys::general::MOVE_MOUNT_T_SYMLINKS;
+
+        /// `MOVE_MOUNT_T_AUTOMOUNTS`
+        const MOVE_MOUNT_T_AUTOMOUNTS = linux_raw_sys::general::MOVE_MOUNT_T_AUTOMOUNTS;
+
+        /// `MOVE_MOUNT_T_EMPTY_PATH`
+        const MOVE_MOUNT_T_EMPTY_PATH = linux_raw_sys::general::MOVE_MOUNT_T_EMPTY_PATH;
+
+        /// `MOVE_MOUNT__MASK`
+        const MOVE_MOUNT_SET_GROUP = linux_raw_sys::general::MOVE_MOUNT_SET_GROUP;
+
+        // TODO: add when linux 6.5 is released
+        // /// `MOVE_MOUNT_BENEATH`
+        // const MOVE_MOUNT_BENEATH = linux_raw_sys::general::MOVE_MOUNT_BENEATH;
+
+        /// `MOVE_MOUNT__MASK`
+        const MOVE_MOUNT__MASK = linux_raw_sys::general::MOVE_MOUNT__MASK;
+    }
+}
+
+bitflags! {
+    /// `OPENTREE_*` constants for use with [`open_tree`].
+    ///
+    /// [`open_tree`]: crate::fs::open_tree
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct OpenTreeFlags: c::c_uint {
+        /// `OPENTREE_CLONE`
+        const OPEN_TREE_CLONE = linux_raw_sys::general::OPEN_TREE_CLONE;
+
+        /// `OPENTREE_CLOEXEC`
+        const OPEN_TREE_CLOEXEC = linux_raw_sys::general::OPEN_TREE_CLOEXEC;
+
+        /// `AT_EMPTY_PATH`
+        const AT_EMPTY_PATH = linux_raw_sys::general::AT_EMPTY_PATH;
+
+        /// `AT_NO_AUTOMOUNT`
+        const AT_NO_AUTOMOUNT = linux_raw_sys::general::AT_NO_AUTOMOUNT;
+
+        /// `AT_RECURSIVE`
+        const AT_RECURSIVE = linux_raw_sys::general::AT_RECURSIVE;
+
+        /// `AT_SYMLINK_NOFOLLOW`
+        const AT_SYMLINK_NOFOLLOW = linux_raw_sys::general::AT_SYMLINK_NOFOLLOW;
+    }
+}
+
+bitflags! {
+    /// `FSPICK_*` constants for use with [`fspick`].
+    ///
+    /// [`fspick`]: crate::fs::fspick
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct FsPickFlags: c::c_uint {
+        /// `FSPICK_CLOEXEC`
+        const FSPICK_CLOEXEC = linux_raw_sys::general::FSPICK_CLOEXEC;
+
+        /// `FSPICK_SYMLINK_NOFOLLOW`
+        const FSPICK_SYMLINK_NOFOLLOW = linux_raw_sys::general::FSPICK_SYMLINK_NOFOLLOW;
+
+        /// `FSPICK_NO_AUTOMOUNT`
+        const FSPICK_NO_AUTOMOUNT = linux_raw_sys::general::FSPICK_NO_AUTOMOUNT;
+
+        /// `FSPICK_EMPTY_PATH`
+        const FSPICK_EMPTY_PATH = linux_raw_sys::general::FSPICK_EMPTY_PATH;
     }
 }
 
