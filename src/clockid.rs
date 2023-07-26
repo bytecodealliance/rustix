@@ -96,10 +96,15 @@ pub enum DynamicClockId<'a> {
     Tai,
 
     /// `CLOCK_BOOTTIME`, available on Linux >= 2.6.39
-    #[cfg(any(linux_kernel, target_os = "openbsd"))]
+    #[cfg(any(
+        freebsdlike,
+        linux_kernel,
+        target_os = "fuchsia",
+        target_os = "openbsd"
+    ))]
     Boottime,
 
     /// `CLOCK_BOOTTIME_ALARM`, available on Linux >= 2.6.39
-    #[cfg(linux_kernel)]
+    #[cfg(any(linux_kernel, target_os = "fuchsia"))]
     BoottimeAlarm,
 }
