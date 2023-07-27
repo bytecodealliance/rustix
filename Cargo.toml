@@ -25,6 +25,7 @@ alloc = { version = "1.0.0", optional = true, package = "rustc-std-workspace-all
 compiler_builtins = { version = '0.1.49', optional = true }
 
 # The procfs feature needs once_cell.
+# With Rust 1.70.0, we can switch to `core::cell::OnceCell`.
 [target.'cfg(any(target_os = "android", target_os = "linux"))'.dependencies]
 once_cell = { version = "1.5.2", optional = true }
 

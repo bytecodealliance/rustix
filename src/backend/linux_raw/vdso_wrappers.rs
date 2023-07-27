@@ -48,7 +48,7 @@ pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
         // The `ClockId` enum only contains clocks which never fail. It may be
         // tempting to change this to `debug_assert_eq`, however they can still
         // fail on uncommon kernel configs, so we leave this in place to ensure
-        // that we don't execute UB if they ever do fail.
+        // that we don't execute undefined behavior if they ever do fail.
         assert_eq!(r0, 0);
         result.assume_init()
     }

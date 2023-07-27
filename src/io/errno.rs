@@ -1,8 +1,8 @@
 //! The `Errno` type, which is a minimal wrapper around an error code.
 //!
-//! We define the error constants as individual `const`s instead of an
-//! enum because we may not know about all of the host's error values
-//! and we don't want unrecognized values to create UB.
+//! We define the error constants as individual `const`s instead of an enum
+//! because we may not know about all of the host's error values and we don't
+//! want unrecognized values to create undefined behavior.
 
 use crate::backend;
 use core::{fmt, result};

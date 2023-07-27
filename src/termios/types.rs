@@ -72,7 +72,7 @@ pub struct Termios {
 }
 
 impl Termios {
-    /// `cfmakeraw(self)`—Set a `Termios` value to the settings for "raw" mode.
+    /// `cfmakeraw(self)`—Set a `Termios` value to the settings for “raw” mode.
     ///
     /// In raw mode, input is available a byte at a time, echoing is disabled,
     /// and special terminal input and output codes are disabled.
@@ -568,7 +568,7 @@ bitflags! {
 }
 
 bitflags! {
-    /// Flags controlling "local" terminal modes.
+    /// Flags controlling “local” terminal modes.
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct LocalModes: c::tcflag_t {

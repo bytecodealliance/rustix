@@ -337,10 +337,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // the write side is shut down.
         #[allow(unreachable_patterns)] // `EAGAIN` equals `EWOULDBLOCK`
         match crate::backend::net::syscalls::send(fd, &[], SendFlags::DONTWAIT) {
-            // TODO or-patterns when we don't need 1.51
-            Err(io::Errno::AGAIN) => (),
-            Err(io::Errno::WOULDBLOCK) => (),
-            Err(io::Errno::NOTSOCK) => (),
+            Err(io::Errno::AGAIN | io::Errno::WOULDBLOCK | io::Errno::NOTSOCK) => (),
             Err(io::Errno::PIPE) => write = false,
             Err(err) => return Err(err),
             Ok(_) => (),
