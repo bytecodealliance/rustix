@@ -166,10 +166,15 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
         #[cfg(linux_kernel)]
         DynamicClockId::Tai => c::CLOCK_TAI,
 
-        #[cfg(any(linux_kernel, target_os = "openbsd"))]
+        #[cfg(any(
+            freebsdlike,
+            linux_kernel,
+            target_os = "fuchsia",
+            target_os = "openbsd"
+        ))]
         DynamicClockId::Boottime => c::CLOCK_BOOTTIME,
 
-        #[cfg(linux_kernel)]
+        #[cfg(any(linux_kernel, target_os = "fuchsia"))]
         DynamicClockId::BoottimeAlarm => c::CLOCK_BOOTTIME_ALARM,
     };
 

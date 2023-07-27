@@ -5,6 +5,29 @@
 #[cfg(not(any(solarish, target_os = "netbsd", target_os = "redox")))]
 use rustix::time::{clock_gettime, ClockId};
 
+/// Attempt to test that the boot clock is monotonic. Time may or may not
+/// advance, but it shouldn't regress.
+#[cfg(any(
+    freebsdlike,
+    linux_kernel,
+    target_os = "fuchsia",
+    target_os = "openbsd"
+))]
+#[test]
+fn test_boottime_clock() {
+    use rustix::time::{clock_gettime_dynamic, DynamicClockId};
+
+    if let Ok(a) = clock_gettime_dynamic(DynamicClockId::Boottime) {
+        if let Ok(b) = clock_gettime_dynamic(DynamicClockId::Boottime) {
+            if b.tv_sec == a.tv_sec {
+                assert!(b.tv_nsec >= a.tv_nsec);
+            } else {
+                assert!(b.tv_sec > a.tv_sec);
+            }
+        }
+    }
+}
+
 /// Attempt to test that the uptime clock is monotonic. Time may or may not
 /// advance, but it shouldn't regress.
 #[cfg(any(freebsdlike, target_os = "openbsd"))]
