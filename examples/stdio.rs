@@ -91,7 +91,13 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if term.input_modes.contains(InputModes::ICRNL) {
                 print!(" ICRNL");
             }
-            #[cfg(any(linux_kernel, solarish, target_os = "haiku"))]
+            #[cfg(any(
+                linux_kernel,
+                solarish,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "nto"
+            ))]
             if term.input_modes.contains(InputModes::IUCLC) {
                 print!(" IUCLC");
             }
