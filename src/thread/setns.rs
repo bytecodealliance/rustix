@@ -65,7 +65,7 @@ bitflags! {
         /// `CLONE_FS`.
         const FS = CLONE_FS;
         /// `CLONE_NEWCGROUP`.
-        const NWCGROUP = CLONE_NEWCGROUP;
+        const NEWCGROUP = CLONE_NEWCGROUP;
         /// `CLONE_NEWIPC`.
         const NEWIPC = CLONE_NEWIPC;
         /// `CLONE_NEWNET`.
@@ -78,6 +78,8 @@ bitflags! {
         const NEWTIME = CLONE_NEWTIME;
         /// `CLONE_NEWUSER`.
         const NEWUSER = CLONE_NEWUSER;
+        /// `CLONE_NEWUTS`
+        const NEWUTS = CLONE_NEWUTS;
         /// `CLONE_SYSVSEM`.
         const SYSVSEM = CLONE_SYSVSEM;
     }
