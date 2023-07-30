@@ -52,6 +52,8 @@ pub enum ClockId {
 /// has to fail with `INVAL` due to an unsupported clock. See
 /// [`DynamicClockId`] for a greater set of clocks, with the caveat that not
 /// all of them are always supported.
+///
+/// [`clock_gettime`]: crate::time::clock_gettime
 #[cfg(apple)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(u32)]

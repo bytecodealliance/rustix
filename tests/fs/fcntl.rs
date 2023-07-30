@@ -15,3 +15,24 @@ fn test_fcntl_dupfd_cloexec() {
     let new = rustix::fs::fcntl_dupfd_cloexec(&file, 700).unwrap();
     assert_eq!(new.as_fd().as_raw_fd(), 700);
 }
+
+#[cfg(apple)]
+#[test]
+fn test_fcntl_apple() {
+    use rustix::fs::{openat, Mode, OFlags, CWD};
+
+    let tmp = tempfile::tempdir().unwrap();
+    let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
+    let foo = openat(
+        &dir,
+        "foo",
+        OFlags::RDWR | OFlags::CREATE | OFlags::TRUNC,
+        Mode::RUSR | Mode::WUSR,
+    )
+    .unwrap();
+
+    rustix::fs::fcntl_rdadvise(&foo, 0, 0).unwrap();
+    rustix::fs::fcntl_fullfsync(&foo).unwrap();
+    rustix::fs::fcntl_nocache(&foo, true).unwrap();
+    rustix::fs::fcntl_global_nocache(&foo, true).unwrap();
+}

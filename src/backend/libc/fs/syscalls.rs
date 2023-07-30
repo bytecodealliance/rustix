@@ -1977,6 +1977,22 @@ pub(crate) fn fcntl_fullfsync(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_FULLFSYNC)) }
 }
 
+#[cfg(apple)]
+pub(crate) fn fcntl_nocache(fd: BorrowedFd, value: bool) -> io::Result<()> {
+    unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_NOCACHE, value as c::c_int)) }
+}
+
+#[cfg(apple)]
+pub(crate) fn fcntl_global_nocache(fd: BorrowedFd, value: bool) -> io::Result<()> {
+    unsafe {
+        ret(c::fcntl(
+            borrowed_fd(fd),
+            c::F_GLOBAL_NOCACHE,
+            value as c::c_int,
+        ))
+    }
+}
+
 /// Convert `times` from a `futimens`/`utimensat` argument into `setattrlist`
 /// arguments.
 #[cfg(apple)]
