@@ -31,6 +31,14 @@ fn test_fcntl_apple() {
     )
     .unwrap();
 
+    // It appears `fsync_rdadvise` at offset 0 length 0 doesn't work if the
+    // file has size zero, so write in some bytes.
+    assert_eq!(
+        rustix::io::write(&foo, b"data").expect("write"),
+        4,
+        "write failed"
+    );
+
     rustix::fs::fcntl_rdadvise(&foo, 0, 0).unwrap();
     rustix::fs::fcntl_fullfsync(&foo).unwrap();
     rustix::fs::fcntl_nocache(&foo, true).unwrap();
