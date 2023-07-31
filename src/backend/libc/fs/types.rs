@@ -554,6 +554,38 @@ pub enum Advice {
     DontNeed = c::POSIX_FADV_DONTNEED as c::c_uint,
 }
 
+/// `FSCONFIG_*` constants for use with [`fsconfig`].
+///
+/// [`fsconfig`]: crate::fs::fsconfig
+#[cfg(linux_kernel)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[repr(u32)]
+pub enum FsConfigCmd {
+    /// `FSCONFIG_SET_FLAG`
+    SetFlag = 0,
+
+    /// `FSCONFIG_SET_STRING`
+    SetString = 1,
+
+    /// `FSCONFIG_SET_BINARY`
+    SetBinary = 2,
+
+    /// `FSCONFIG_SET_PATH`
+    SetPath = 3,
+
+    /// `FSCONFIG_SET_PATH_EMPTY`
+    SetPathEmpty = 4,
+
+    /// `FSCONFIG_SET_FD`
+    SetFd = 5,
+
+    /// `FSCONFIG_CMD_CREATE`
+    Create = 6,
+
+    /// `FSCONFIG_CMD_RECONFIGURE`
+    Reconfigure = 7,
+}
+
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 bitflags! {
     /// `MFD_*` constants for use with [`memfd_create`].
@@ -1159,6 +1191,167 @@ bitflags! {
 
         /// `MS_SYNCHRONOUS`
         const SYNCHRONOUS = c::MS_SYNCHRONOUS;
+    }
+}
+
+#[cfg(linux_kernel)]
+bitflags! {
+    /// `FSOPEN_*` constants for use with [`fsopen`].
+    ///
+    /// [`fsopen`]: crate::fs::fsopen
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct FsOpenFlags: c::c_uint {
+
+        /// `FSOPEN_CLOEXEC`
+        const FSOPEN_CLOEXEC = 0x00000001;
+    }
+}
+
+#[cfg(linux_kernel)]
+bitflags! {
+    /// `FSMOUNT_*` constants for use with [`fsmount`].
+    ///
+    /// [`fsmount`]: crate::fs::fsmount
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct FsMountFlags: c::c_uint {
+        /// `FSMOUNT_CLOEXEC`
+        const FSMOUNT_CLOEXEC = 0x00000001;
+    }
+}
+
+#[cfg(linux_kernel)]
+bitflags! {
+    /// `MOUNT_ATTR_*` constants for use with [`fsmount`].
+    ///
+    /// [`fsmount`]: crate::fs::fsmount
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct MountAttrFlags: c::c_uint {
+        /// `MOUNT_ATTR_RDONLY`
+        const MOUNT_ATTR_RDONLY = 0x00000001;
+
+        /// `MOUNT_ATTR_NOSUID`
+        const MOUNT_ATTR_NOSUID = 0x00000002;
+
+        /// `MOUNT_ATTR_NODEV`
+        const MOUNT_ATTR_NODEV = 0x00000004;
+
+        /// `MOUNT_ATTR_NOEXEC`
+        const MOUNT_ATTR_NOEXEC = 0x00000008;
+
+        /// `MOUNT_ATTR__ATIME`
+        const MOUNT_ATTR__ATIME = 0x00000070;
+
+        /// `MOUNT_ATTR_RELATIME`
+        const MOUNT_ATTR_RELATIME = 0x00000000;
+
+        /// `MOUNT_ATTR_NOATIME`
+        const MOUNT_ATTR_NOATIME = 0x00000010;
+
+        /// `MOUNT_ATTR_STRICTATIME`
+        const MOUNT_ATTR_STRICTATIME = 0x00000020;
+
+        /// `MOUNT_ATTR_NODIRATIME`
+        const MOUNT_ATTR_NODIRATIME = 0x00000080;
+
+        /// `MOUNT_ATTR_NOUSER`
+        const MOUNT_ATTR_IDMAP = 0x00100000;
+
+        /// `MOUNT_ATTR__ATIME_FLAGS`
+        const MOUNT_ATTR_NOSYMFOLLOW = 0x00200000;
+
+        /// `MOUNT_ATTR__ATIME_FLAGS`
+        const MOUNT_ATTR_SIZE_VER0 = 32;
+    }
+}
+
+#[cfg(linux_kernel)]
+bitflags! {
+    /// `MOVE_MOUNT_*` constants for use with [`move_mount`].
+    ///
+    /// [`move_mount`]: crate::fs::move_mount
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct MoveMountFlags: c::c_uint {
+        /// `MOVE_MOUNT_F_EMPTY_PATH`
+        const MOVE_MOUNT_F_SYMLINKS = 0x00000001;
+
+        /// `MOVE_MOUNT_F_AUTOMOUNTS`
+        const MOVE_MOUNT_F_AUTOMOUNTS = 0x00000002;
+
+        /// `MOVE_MOUNT_F_EMPTY_PATH`
+        const MOVE_MOUNT_F_EMPTY_PATH = 0x00000004;
+
+        /// `MOVE_MOUNT_T_SYMLINKS`
+        const MOVE_MOUNT_T_SYMLINKS = 0x00000010;
+
+        /// `MOVE_MOUNT_T_AUTOMOUNTS`
+        const MOVE_MOUNT_T_AUTOMOUNTS = 0x00000020;
+
+        /// `MOVE_MOUNT_T_EMPTY_PATH`
+        const MOVE_MOUNT_T_EMPTY_PATH = 0x00000040;
+
+        /// `MOVE_MOUNT__MASK`
+        const MOVE_MOUNT_SET_GROUP = 0x00000100;
+
+        // TODO: add when linux 6.5 is released
+        // /// `MOVE_MOUNT_BENEATH`
+        // const MOVE_MOUNT_BENEATH = 0x00000200;
+
+        /// `MOVE_MOUNT__MASK`
+        const MOVE_MOUNT__MASK = 0x00000377;
+    }
+}
+
+#[cfg(linux_kernel)]
+bitflags! {
+    /// `OPENTREE_*` constants for use with [`open_tree`].
+    ///
+    /// [`open_tree`]: crate::fs::open_tree
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct OpenTreeFlags: c::c_uint {
+        /// `OPENTREE_CLONE`
+        const OPEN_TREE_CLONE = 1;
+
+        /// `OPENTREE_CLOEXEC`
+        const OPEN_TREE_CLOEXEC = c::O_CLOEXEC as c::c_uint;
+
+        /// `AT_EMPTY_PATH`
+        const AT_EMPTY_PATH = c::AT_EMPTY_PATH as c::c_uint;
+
+        /// `AT_NO_AUTOMOUNT`
+        const AT_NO_AUTOMOUNT = c::AT_NO_AUTOMOUNT as c::c_uint;
+
+        /// `AT_RECURSIVE`
+        const AT_RECURSIVE = c::AT_RECURSIVE as c::c_uint;
+
+        /// `AT_SYMLINK_NOFOLLOW`
+        const AT_SYMLINK_NOFOLLOW = c::AT_SYMLINK_NOFOLLOW as c::c_uint;
+    }
+}
+
+#[cfg(linux_kernel)]
+bitflags! {
+    /// `FSPICK_*` constants for use with [`fspick`].
+    ///
+    /// [`fspick`]: crate::fs::fspick
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct FsPickFlags: c::c_uint {
+        /// `FSPICK_CLOEXEC`
+        const FSPICK_CLOEXEC = 0x00000001;
+
+        /// `FSPICK_SYMLINK_NOFOLLOW`
+        const FSPICK_SYMLINK_NOFOLLOW = 0x00000002;
+
+        /// `FSPICK_NO_AUTOMOUNT`
+        const FSPICK_NO_AUTOMOUNT = 0x00000004;
+
+        /// `FSPICK_EMPTY_PATH`
+        const FSPICK_EMPTY_PATH = 0x00000008;
     }
 }
 
