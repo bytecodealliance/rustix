@@ -84,7 +84,7 @@ pub use dir::{Dir, DirEntry};
 pub use fadvise::{fadvise, Advice};
 pub use fcntl::*;
 #[cfg(apple)]
-pub use fcntl_apple::{fcntl_fullfsync, fcntl_rdadvise};
+pub use fcntl_apple::*;
 #[cfg(apple)]
 pub use fcopyfile::*;
 pub use fd::*;
