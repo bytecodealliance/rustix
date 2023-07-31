@@ -61,6 +61,7 @@ by default. The rest of the API is conditional with cargo feature flags:
 | `fs`       | [`rustix::fs`] and [`rustix::path`]—Filesystem operations.
 | `io_uring` | [`rustix::io_uring`]—Linux io_uring.
 | `mm`       | [`rustix::mm`]—Memory map operations.
+| `mount`    | [`rustix::mount`]—Linux mount API.
 | `net`      | [`rustix::net`] and [`rustix::path`]—Network-related operations.
 | `param`    | [`rustix::param`]—Process parameters.
 | `pipe`     | [`rustix::pipe`]—Pipe operations.
@@ -80,6 +81,7 @@ by default. The rest of the API is conditional with cargo feature flags:
 [`rustix::fs`]: https://docs.rs/rustix/*/rustix/fs/index.html
 [`rustix::io_uring`]: https://docs.rs/rustix/*/rustix/io_uring/index.html
 [`rustix::mm`]: https://docs.rs/rustix/*/rustix/mm/index.html
+[`rustix::mount`]: https://docs.rs/rustix/*/rustix/mount/index.html
 [`rustix::net`]: https://docs.rs/rustix/*/rustix/net/index.html
 [`rustix::param`]: https://docs.rs/rustix/*/rustix/param/index.html
 [`rustix::pipe`]: https://docs.rs/rustix/*/rustix/pipe/index.html

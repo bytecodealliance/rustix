@@ -214,6 +214,10 @@ pub mod io_uring;
 #[cfg(feature = "mm")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "mm")))]
 pub mod mm;
+#[cfg(linux_kernel)]
+#[cfg(feature = "mount")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "mount")))]
+pub mod mount;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[cfg(feature = "net")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "net")))]
@@ -289,6 +293,25 @@ pub mod time;
 #[doc(hidden)]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "runtime")))]
 pub mod runtime;
+
+// Temporarily provide some mount functions for use in the fs module for
+// backwards compatibility.
+#[cfg(linux_kernel)]
+#[cfg(all(
+    all(
+        linux_raw,
+        not(feature = "use-libc-auxv"),
+        not(target_vendor = "mustang"),
+        any(
+            feature = "param",
+            feature = "runtime",
+            feature = "time",
+            target_arch = "x86",
+        )
+    ),
+    not(feature = "mount")
+))]
+pub(crate) mod mount;
 
 // Private modules used by multiple public modules.
 #[cfg(not(any(windows, target_os = "espidf")))]
