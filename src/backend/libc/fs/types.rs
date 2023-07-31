@@ -1170,6 +1170,8 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MountPropagationFlags: c::c_ulong {
+        /// `MS_SILENT`
+        const SILENT = c::MS_SILENT;
         /// `MS_SHARED`
         const SHARED = c::MS_SHARED;
         /// `MS_PRIVATE`

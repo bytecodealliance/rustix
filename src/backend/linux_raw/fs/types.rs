@@ -760,6 +760,8 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MountPropagationFlags: c::c_uint {
+        /// `MS_SILENT`
+        const SILENT = linux_raw_sys::general::MS_SILENT;
         /// `MS_SHARED`
         const SHARED = linux_raw_sys::general::MS_SHARED;
         /// `MS_PRIVATE`
