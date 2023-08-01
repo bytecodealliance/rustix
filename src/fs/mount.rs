@@ -2,8 +2,22 @@
 //!
 //! These have been moved to a new `rustix::mount` module.
 
-#[deprecated(note = "These functions have moved to `rustix::mount`.")]
-pub use crate::mount::{mount, unmount};
+#[deprecated(note = "rustix::fs::UnmountFlags` moved to `rustix::mount::UnmountFlags`.")]
+pub use crate::mount::UnmountFlags;
+
+#[deprecated(note = "rustix::fs::MountFlags` moved to `rustix::mount::MountFlags`.")]
+pub use crate::mount::MountFlags;
+
+#[deprecated(
+    note = "rustix::fs::MountPropagationFlags` moved to `rustix::mount::MountPropagationFlags`."
+)]
+pub use crate::mount::MountPropagationFlags;
+
+#[deprecated(note = "`rustix::fs::mount` moved to `rustix::mount::mount`.")]
+pub use crate::mount::mount;
+
+#[deprecated(note = "`rustix::fs::unmount` moved to `rustix::mount::unmount`.")]
+pub use crate::mount::unmount;
 
 #[deprecated(
     note = "`rustix::fs::remount` is renamed and moved to `rustix::mount::mount_remount`."

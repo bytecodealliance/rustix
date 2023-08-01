@@ -229,6 +229,7 @@ pub mod param;
 #[cfg(not(windows))]
 #[cfg(any(
     feature = "fs",
+    feature = "mount",
     feature = "net",
     all(
         linux_raw,
@@ -242,7 +243,10 @@ pub mod param;
         )
     )
 ))]
-#[cfg_attr(doc_cfg, doc(cfg(any(feature = "fs", feature = "net"))))]
+#[cfg_attr(
+    doc_cfg,
+    doc(cfg(any(feature = "fs", feature = "mount", feature = "net")))
+)]
 pub mod path;
 #[cfg(feature = "pipe")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "pipe")))]
@@ -297,20 +301,7 @@ pub mod runtime;
 // Temporarily provide some mount functions for use in the fs module for
 // backwards compatibility.
 #[cfg(linux_kernel)]
-#[cfg(all(
-    all(
-        linux_raw,
-        not(feature = "use-libc-auxv"),
-        not(target_vendor = "mustang"),
-        any(
-            feature = "param",
-            feature = "runtime",
-            feature = "time",
-            target_arch = "x86",
-        )
-    ),
-    not(feature = "mount")
-))]
+#[cfg(all(feature = "fs", not(feature = "mount")))]
 pub(crate) mod mount;
 
 // Private modules used by multiple public modules.

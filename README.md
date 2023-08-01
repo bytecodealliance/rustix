@@ -58,11 +58,11 @@ by default. The rest of the API is conditional with cargo feature flags:
 | Name       | Description
 | ---------- | ---------------------
 | `event`    | [`rustix::event`]—Polling and event operations.
-| `fs`       | [`rustix::fs`] and [`rustix::path`]—Filesystem operations.
+| `fs`       | [`rustix::fs`]—Filesystem operations.
 | `io_uring` | [`rustix::io_uring`]—Linux io_uring.
 | `mm`       | [`rustix::mm`]—Memory map operations.
 | `mount`    | [`rustix::mount`]—Linux mount API.
-| `net`      | [`rustix::net`] and [`rustix::path`]—Network-related operations.
+| `net`      | [`rustix::net`]—Network-related operations.
 | `param`    | [`rustix::param`]—Process parameters.
 | `pipe`     | [`rustix::pipe`]—Pipe operations.
 | `process`  | [`rustix::process`]—Process-associated operations.
@@ -97,7 +97,6 @@ by default. The rest of the API is conditional with cargo feature flags:
 [`rustix::io`]: https://docs.rs/rustix/*/rustix/io/index.html
 [`rustix::fd`]: https://docs.rs/rustix/*/rustix/fd/index.html
 [`rustix::ffi`]: https://docs.rs/rustix/*/rustix/ffi/index.html
-[`rustix::path`]: https://docs.rs/rustix/*/rustix/path/index.html
 
 ## 64-bit Large File Support (LFS) and Year 2038 (y2038) support
 

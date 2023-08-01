@@ -1,6 +1,6 @@
 //! `fsopen` and related functions in Linux's `mount` API.
 
-use crate::backend::fs::types::{
+use crate::backend::mount::types::{
     FsMountFlags, FsOpenFlags, FsPickFlags, MountAttrFlags, MoveMountFlags, OpenTreeFlags,
 };
 use crate::fd::{BorrowedFd, OwnedFd};
@@ -14,7 +14,7 @@ use crate::{backend, io, path};
 /// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/fsopen.md
 #[inline]
 pub fn fsopen<Fs: path::Arg>(fs_name: Fs, flags: FsOpenFlags) -> io::Result<OwnedFd> {
-    fs_name.into_with_c_str(|fs_name| backend::fs::syscalls::fsopen(fs_name, flags))
+    fs_name.into_with_c_str(|fs_name| backend::mount::syscalls::fsopen(fs_name, flags))
 }
 
 /// `fsmount(fs_fd, flags, attr_flags)`
@@ -29,7 +29,7 @@ pub fn fsmount(
     flags: FsMountFlags,
     attr_flags: MountAttrFlags,
 ) -> io::Result<()> {
-    backend::fs::syscalls::fsmount(fs_fd, flags, attr_flags)
+    backend::mount::syscalls::fsmount(fs_fd, flags, attr_flags)
 }
 
 /// `move_mount(from_dfd, from_pathname, to_dfd, to_pathname, flags)`
@@ -51,7 +51,13 @@ pub fn move_mount<From: path::Arg, To: path::Arg>(
 ) -> io::Result<()> {
     from_pathname.into_with_c_str(|from_pathname| {
         to_pathname.into_with_c_str(|to_pathname| {
-            backend::fs::syscalls::move_mount(from_dfd, from_pathname, to_dfd, to_pathname, flags)
+            backend::mount::syscalls::move_mount(
+                from_dfd,
+                from_pathname,
+                to_dfd,
+                to_pathname,
+                flags,
+            )
         })
     })
 }
@@ -68,7 +74,7 @@ pub fn open_tree<Path: path::Arg>(
     filename: Path,
     flags: OpenTreeFlags,
 ) -> io::Result<OwnedFd> {
-    filename.into_with_c_str(|filename| backend::fs::syscalls::open_tree(dfd, filename, flags))
+    filename.into_with_c_str(|filename| backend::mount::syscalls::open_tree(dfd, filename, flags))
 }
 
 /// `fspick(dfd, path, flags)`
@@ -83,7 +89,7 @@ pub fn fspick<Path: path::Arg>(
     path: Path,
     flags: FsPickFlags,
 ) -> io::Result<OwnedFd> {
-    path.into_with_c_str(|path| backend::fs::syscalls::fspick(dfd, path, flags))
+    path.into_with_c_str(|path| backend::mount::syscalls::fspick(dfd, path, flags))
 }
 
 /// `fsconfig(fs_fd, FSCONFIG_SET_FLAG, key, NULL, 0)`
@@ -95,7 +101,7 @@ pub fn fspick<Path: path::Arg>(
 #[inline]
 #[doc(alias = "fsconfig")]
 pub fn fsconfig_set_flag<Key: path::Arg>(fs_fd: BorrowedFd<'_>, key: Key) -> io::Result<()> {
-    key.into_with_c_str(|key| backend::fs::syscalls::fsconfig_set_flag(fs_fd, key))
+    key.into_with_c_str(|key| backend::mount::syscalls::fsconfig_set_flag(fs_fd, key))
 }
 
 /// `fsconfig(fs_fd, FSCONFIG_SET_STRING, key, value, 0)`
@@ -112,7 +118,9 @@ pub fn fsconfig_set_string<Key: path::Arg, Value: path::Arg>(
     value: Value,
 ) -> io::Result<()> {
     key.into_with_c_str(|key| {
-        value.into_with_c_str(|value| backend::fs::syscalls::fsconfig_set_string(fs_fd, key, value))
+        value.into_with_c_str(|value| {
+            backend::mount::syscalls::fsconfig_set_string(fs_fd, key, value)
+        })
     })
 }
 
@@ -129,7 +137,7 @@ pub fn fsconfig_set_binary<Key: path::Arg>(
     key: Key,
     value: &[u8],
 ) -> io::Result<()> {
-    key.into_with_c_str(|key| backend::fs::syscalls::fsconfig_set_binary(fs_fd, key, value))
+    key.into_with_c_str(|key| backend::mount::syscalls::fsconfig_set_binary(fs_fd, key, value))
 }
 
 /// `fsconfig(fs_fd, FSCONFIG_SET_PATH, key, path, fd)`
@@ -147,7 +155,9 @@ pub fn fsconfig_set_path<Key: path::Arg, Path: path::Arg>(
     fd: BorrowedFd<'_>,
 ) -> io::Result<()> {
     key.into_with_c_str(|key| {
-        path.into_with_c_str(|path| backend::fs::syscalls::fsconfig_set_path(fs_fd, key, path, fd))
+        path.into_with_c_str(|path| {
+            backend::mount::syscalls::fsconfig_set_path(fs_fd, key, path, fd)
+        })
     })
 }
 
@@ -164,7 +174,7 @@ pub fn fsconfig_set_path_empty<Key: path::Arg>(
     key: Key,
     fd: BorrowedFd<'_>,
 ) -> io::Result<()> {
-    key.into_with_c_str(|key| backend::fs::syscalls::fsconfig_set_path_empty(fs_fd, key, fd))
+    key.into_with_c_str(|key| backend::mount::syscalls::fsconfig_set_path_empty(fs_fd, key, fd))
 }
 
 /// `fsconfig(fs_fd, FSCONFIG_SET_FD, key, NULL, fd)`
@@ -180,7 +190,7 @@ pub fn fsconfig_set_fd<Key: path::Arg>(
     key: Key,
     fd: BorrowedFd<'_>,
 ) -> io::Result<()> {
-    key.into_with_c_str(|key| backend::fs::syscalls::fsconfig_set_fd(fs_fd, key, fd))
+    key.into_with_c_str(|key| backend::mount::syscalls::fsconfig_set_fd(fs_fd, key, fd))
 }
 
 /// `fsconfig(fs_fd, FSCONFIG_CMD_CREATE, key, NULL, 0)`
@@ -192,7 +202,7 @@ pub fn fsconfig_set_fd<Key: path::Arg>(
 #[inline]
 #[doc(alias = "fsconfig")]
 pub fn fsconfig_create(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
-    backend::fs::syscalls::fsconfig_create(fs_fd)
+    backend::mount::syscalls::fsconfig_create(fs_fd)
 }
 
 /// `fsconfig(fs_fd, FSCONFIG_CMD_RECONFIGURE, key, NULL, 0)`
@@ -204,5 +214,5 @@ pub fn fsconfig_create(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
 #[inline]
 #[doc(alias = "fsconfig")]
 pub fn fsconfig_reconfigure(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
-    backend::fs::syscalls::fsconfig_reconfigure(fs_fd)
+    backend::mount::syscalls::fsconfig_reconfigure(fs_fd)
 }

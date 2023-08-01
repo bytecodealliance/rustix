@@ -1,6 +1,6 @@
 //! Linux `mount`.
 
-use crate::backend::fs::types::{
+use crate::backend::mount::types::{
     InternalMountFlags, MountFlags, MountFlagsArg, MountPropagationFlags, UnmountFlags,
 };
 use crate::{backend, io, path};
@@ -23,7 +23,7 @@ pub fn mount<Source: path::Arg, Target: path::Arg, Fs: path::Arg, Data: path::Ar
         target.into_with_c_str(|target| {
             file_system_type.into_with_c_str(|file_system_type| {
                 data.into_with_c_str(|data| {
-                    backend::fs::syscalls::mount(
+                    backend::mount::syscalls::mount(
                         Some(source),
                         target,
                         Some(file_system_type),
@@ -52,7 +52,7 @@ pub fn mount_remount<Target: path::Arg, Data: path::Arg>(
 ) -> io::Result<()> {
     target.into_with_c_str(|target| {
         data.into_with_c_str(|data| {
-            backend::fs::syscalls::mount(
+            backend::mount::syscalls::mount(
                 None,
                 target,
                 None,
@@ -78,7 +78,7 @@ pub fn mount_bind<Source: path::Arg, Target: path::Arg>(
 ) -> io::Result<()> {
     source.into_with_c_str(|source| {
         target.into_with_c_str(|target| {
-            backend::fs::syscalls::mount(
+            backend::mount::syscalls::mount(
                 Some(source),
                 target,
                 None,
@@ -104,7 +104,7 @@ pub fn mount_recursive_bind<Source: path::Arg, Target: path::Arg>(
 ) -> io::Result<()> {
     source.into_with_c_str(|source| {
         target.into_with_c_str(|target| {
-            backend::fs::syscalls::mount(
+            backend::mount::syscalls::mount(
                 Some(source),
                 target,
                 None,
@@ -128,7 +128,7 @@ pub fn mount_change<Target: path::Arg>(
     flags: MountPropagationFlags,
 ) -> io::Result<()> {
     target.into_with_c_str(|target| {
-        backend::fs::syscalls::mount(None, target, None, MountFlagsArg(flags.bits()), None)
+        backend::mount::syscalls::mount(None, target, None, MountFlagsArg(flags.bits()), None)
     })
 }
 
@@ -150,7 +150,7 @@ pub fn mount_move<Source: path::Arg, Target: path::Arg>(
 ) -> io::Result<()> {
     source.into_with_c_str(|source| {
         target.into_with_c_str(|target| {
-            backend::fs::syscalls::mount(
+            backend::mount::syscalls::mount(
                 Some(source),
                 target,
                 None,
@@ -170,5 +170,5 @@ pub fn mount_move<Source: path::Arg, Target: path::Arg>(
 #[inline]
 #[doc(alias = "umount", alias = "umount2")]
 pub fn unmount<Target: path::Arg>(target: Target, flags: UnmountFlags) -> io::Result<()> {
-    target.into_with_c_str(|target| backend::fs::syscalls::unmount(target, flags))
+    target.into_with_c_str(|target| backend::mount::syscalls::unmount(target, flags))
 }

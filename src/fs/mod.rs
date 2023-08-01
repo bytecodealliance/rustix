@@ -44,6 +44,7 @@ mod makedev;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 mod memfd_create;
 #[cfg(linux_kernel)]
+#[cfg(feature = "fs")]
 mod mount;
 #[cfg(linux_kernel)]
 mod openat2;
