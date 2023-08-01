@@ -408,33 +408,33 @@ pub(crate) mod fs {
     pub(crate) fn oflags_for_open_how(oflags: OFlags) -> u64 {
         u64::from(oflags_bits(oflags))
     }
-}
 
-impl<'a, Num: ArgNumber> From<crate::fs::FallocateFlags> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(flags: crate::fs::FallocateFlags) -> Self {
-        c_uint(flags.bits())
+    impl<'a, Num: ArgNumber> From<crate::fs::FallocateFlags> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(flags: crate::fs::FallocateFlags) -> Self {
+            c_uint(flags.bits())
+        }
     }
-}
 
-impl<'a, Num: ArgNumber> From<crate::fs::Advice> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(advice: crate::fs::Advice) -> Self {
-        c_uint(advice as c::c_uint)
+    impl<'a, Num: ArgNumber> From<crate::fs::Advice> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(advice: crate::fs::Advice) -> Self {
+            c_uint(advice as c::c_uint)
+        }
     }
-}
 
-impl<'a, Num: ArgNumber> From<crate::fs::SealFlags> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(flags: crate::fs::SealFlags) -> Self {
-        c_uint(flags.bits())
+    impl<'a, Num: ArgNumber> From<crate::fs::SealFlags> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(flags: crate::fs::SealFlags) -> Self {
+            c_uint(flags.bits())
+        }
     }
-}
 
-impl<'a, Num: ArgNumber> From<crate::fs::Access> for ArgReg<'a, Num> {
-    #[inline]
-    fn from(access: crate::fs::Access) -> Self {
-        c_uint(access.bits())
+    impl<'a, Num: ArgNumber> From<crate::fs::Access> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(access: crate::fs::Access) -> Self {
+            c_uint(access.bits())
+        }
     }
 }
 
