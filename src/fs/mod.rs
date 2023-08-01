@@ -106,6 +106,7 @@ pub use makedev::*;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 pub use memfd_create::{memfd_create, MemfdFlags};
 #[cfg(linux_kernel)]
+#[cfg(feature = "fs")]
 pub use mount::*;
 #[cfg(linux_kernel)]
 pub use openat2::openat2;

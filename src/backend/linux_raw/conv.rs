@@ -408,96 +408,107 @@ pub(crate) mod fs {
     pub(crate) fn oflags_for_open_how(oflags: OFlags) -> u64 {
         u64::from(oflags_bits(oflags))
     }
+}
 
-    impl<'a, Num: ArgNumber> From<crate::fs::FallocateFlags> for ArgReg<'a, Num> {
-        #[inline]
-        fn from(flags: crate::fs::FallocateFlags) -> Self {
-            c_uint(flags.bits())
-        }
+impl<'a, Num: ArgNumber> From<crate::fs::FallocateFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::fs::FallocateFlags) -> Self {
+        c_uint(flags.bits())
     }
+}
 
-    impl<'a, Num: ArgNumber> From<crate::fs::Advice> for ArgReg<'a, Num> {
-        #[inline]
-        fn from(advice: crate::fs::Advice) -> Self {
-            c_uint(advice as c::c_uint)
-        }
+impl<'a, Num: ArgNumber> From<crate::fs::Advice> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(advice: crate::fs::Advice) -> Self {
+        c_uint(advice as c::c_uint)
     }
+}
 
-    impl<'a, Num: ArgNumber> From<crate::fs::SealFlags> for ArgReg<'a, Num> {
-        #[inline]
-        fn from(flags: crate::fs::SealFlags) -> Self {
-            c_uint(flags.bits())
-        }
+impl<'a, Num: ArgNumber> From<crate::fs::SealFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::fs::SealFlags) -> Self {
+        c_uint(flags.bits())
     }
+}
 
-    impl<'a, Num: ArgNumber> From<crate::fs::Access> for ArgReg<'a, Num> {
-        #[inline]
-        fn from(access: crate::fs::Access) -> Self {
-            c_uint(access.bits())
-        }
+impl<'a, Num: ArgNumber> From<crate::fs::Access> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(access: crate::fs::Access) -> Self {
+        c_uint(access.bits())
     }
+}
 
-    impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MountFlagsArg> for ArgReg<'a, Num> {
-        #[inline]
-        fn from(flags: crate::backend::mount::types::MountFlagsArg) -> Self {
-            c_uint(flags.0)
-        }
+#[cfg(feature = "mount")]
+impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MountFlagsArg> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::backend::mount::types::MountFlagsArg) -> Self {
+        c_uint(flags.0)
     }
+}
 
-    impl<'a, Num: ArgNumber> From<crate::backend::mount::types::UnmountFlags> for ArgReg<'a, Num> {
-        #[inline]
-        fn from(flags: crate::backend::mount::types::UnmountFlags) -> Self {
-            c_uint(flags.bits())
-        }
+// When the deprecated "fs" aliases are removed, we can remove the "fs"
+// here too.
+#[cfg(any(feature = "fs", feature = "mount"))]
+impl<'a, Num: ArgNumber> From<crate::backend::mount::types::UnmountFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::backend::mount::types::UnmountFlags) -> Self {
+        c_uint(flags.bits())
     }
+}
 
-    impl<'a, Num: ArgNumber> From<crate::mount::FsConfigCmd> for ArgReg<'a, Num> {
-        #[inline]
-        fn from(cmd: crate::mount::FsConfigCmd) -> Self {
-            c_uint(cmd as c::c_uint)
-        }
+#[cfg(feature = "mount")]
+impl<'a, Num: ArgNumber> From<crate::mount::FsConfigCmd> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(cmd: crate::mount::FsConfigCmd) -> Self {
+        c_uint(cmd as c::c_uint)
     }
+}
 
-    impl<'a, Num: ArgNumber> From<crate::backend::mount::types::FsOpenFlags> for ArgReg<'a, Num> {
-        #[inline]
-        fn from(flags: crate::backend::mount::types::FsOpenFlags) -> Self {
-            c_uint(flags.bits())
-        }
+#[cfg(feature = "mount")]
+impl<'a, Num: ArgNumber> From<crate::backend::mount::types::FsOpenFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::backend::mount::types::FsOpenFlags) -> Self {
+        c_uint(flags.bits())
     }
+}
 
-    impl<'a, Num: ArgNumber> From<crate::backend::mount::types::FsMountFlags> for ArgReg<'a, Num> {
-        #[inline]
-        fn from(flags: crate::backend::mount::types::FsMountFlags) -> Self {
-            c_uint(flags.bits())
-        }
+#[cfg(feature = "mount")]
+impl<'a, Num: ArgNumber> From<crate::backend::mount::types::FsMountFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::backend::mount::types::FsMountFlags) -> Self {
+        c_uint(flags.bits())
     }
+}
 
-    impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MountAttrFlags> for ArgReg<'a, Num> {
-        #[inline]
-        fn from(flags: crate::backend::mount::types::MountAttrFlags) -> Self {
-            c_uint(flags.bits())
-        }
+#[cfg(feature = "mount")]
+impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MountAttrFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::backend::mount::types::MountAttrFlags) -> Self {
+        c_uint(flags.bits())
     }
+}
 
-    impl<'a, Num: ArgNumber> From<crate::backend::mount::types::OpenTreeFlags> for ArgReg<'a, Num> {
-        #[inline]
-        fn from(flags: crate::backend::mount::types::OpenTreeFlags) -> Self {
-            c_uint(flags.bits())
-        }
+#[cfg(feature = "mount")]
+impl<'a, Num: ArgNumber> From<crate::backend::mount::types::OpenTreeFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::backend::mount::types::OpenTreeFlags) -> Self {
+        c_uint(flags.bits())
     }
+}
 
-    impl<'a, Num: ArgNumber> From<crate::backend::mount::types::FsPickFlags> for ArgReg<'a, Num> {
-        #[inline]
-        fn from(flags: crate::backend::mount::types::FsPickFlags) -> Self {
-            c_uint(flags.bits())
-        }
+#[cfg(feature = "mount")]
+impl<'a, Num: ArgNumber> From<crate::backend::mount::types::FsPickFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::backend::mount::types::FsPickFlags) -> Self {
+        c_uint(flags.bits())
     }
+}
 
-    impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MoveMountFlags> for ArgReg<'a, Num> {
-        #[inline]
-        fn from(flags: crate::backend::mount::types::MoveMountFlags) -> Self {
-            c_uint(flags.bits())
-        }
+#[cfg(feature = "mount")]
+impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MoveMountFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::backend::mount::types::MoveMountFlags) -> Self {
+        c_uint(flags.bits())
     }
 }
 
