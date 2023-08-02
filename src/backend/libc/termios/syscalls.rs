@@ -117,6 +117,7 @@ pub(crate) fn tcsetattr(
         let request = TCSETS2
             + if cfg!(any(
                 target_arch = "mips",
+                target_arch = "mips32r6",
                 target_arch = "mips64",
                 target_arch = "mips64r6"
             )) {

@@ -65,6 +65,7 @@ pub(crate) fn tcsetattr(
     let request = linux_raw_sys::ioctl::TCSETS2
         + if cfg!(any(
             target_arch = "mips",
+            target_arch = "mips32r6",
             target_arch = "mips64",
             target_arch = "mips64r6"
         )) {

@@ -106,7 +106,12 @@ pub(crate) use linux_raw_sys::{
 // subtract it out.
 #[cfg(all(
     feature = "termios",
-    any(target_arch = "mips", target_arch = "mips64", target_arch = "mips64r6")
+    any(
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6"
+    )
 ))]
 pub(crate) use linux_raw_sys::ioctl::TCSETS;
 
@@ -137,6 +142,7 @@ pub(crate) const SIGALRM: c_int = linux_raw_sys::general::SIGALRM as _;
 pub(crate) const SIGTERM: c_int = linux_raw_sys::general::SIGTERM as _;
 #[cfg(not(any(
     target_arch = "mips",
+    target_arch = "mips32r6",
     target_arch = "mips64",
     target_arch = "mips64r6",
     target_arch = "sparc",
@@ -160,6 +166,7 @@ pub(crate) const SIGPWR: c_int = linux_raw_sys::general::SIGPWR as _;
 pub(crate) const SIGSYS: c_int = linux_raw_sys::general::SIGSYS as _;
 #[cfg(any(
     target_arch = "mips",
+    target_arch = "mips32r6",
     target_arch = "mips64",
     target_arch = "mips64r6",
     target_arch = "sparc",

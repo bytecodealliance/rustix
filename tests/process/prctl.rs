@@ -53,7 +53,7 @@ fn test_endian_mode() {
     dbg!(endian_mode().unwrap());
 }
 
-#[cfg(target_arch = "mips")]
+#[cfg(any(target_arch = "mips", target_arch = "mips32r6"))]
 #[test]
 fn test_floating_point_mode() {
     dbg!(floating_point_mode().unwrap());

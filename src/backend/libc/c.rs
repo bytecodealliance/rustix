@@ -62,6 +62,7 @@ pub(crate) const ETH_P_MCTP: c_int = linux_raw_sys::if_ether::ETH_P_MCTP as _;
     linux_kernel,
     any(
         target_arch = "mips",
+        target_arch = "mips32r6",
         target_arch = "mips64",
         target_arch = "mips64r6",
         target_arch = "sparc",

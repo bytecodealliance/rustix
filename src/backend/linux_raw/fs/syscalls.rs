@@ -253,7 +253,12 @@ pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
     // <https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L81-L83>
     #[cfg(all(
         target_pointer_width = "32",
-        any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc"),
+        any(
+            target_arch = "arm",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "powerpc"
+        ),
     ))]
     unsafe {
         ret(syscall_readonly!(
@@ -266,7 +271,12 @@ pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
     }
     #[cfg(all(
         target_pointer_width = "32",
-        not(any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc")),
+        not(any(
+            target_arch = "arm",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "powerpc"
+        )),
     ))]
     unsafe {
         ret(syscall_readonly!(
@@ -349,7 +359,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) ->
     }
     // On mips, the arguments are not reordered, and padding is inserted
     // instead to ensure alignment.
-    #[cfg(target_arch = "mips")]
+    #[cfg(any(target_arch = "mips", target_arch = "mips32r6"))]
     unsafe {
         ret(syscall_readonly!(
             __NR_fadvise64,
@@ -364,7 +374,12 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) ->
     }
     #[cfg(all(
         target_pointer_width = "32",
-        not(any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc")),
+        not(any(
+            target_arch = "arm",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "powerpc"
+        )),
     ))]
     unsafe {
         ret(syscall_readonly!(

@@ -201,7 +201,7 @@ bitflags! {
             target_os = "redox",
             all(
                 linux_kernel,
-                any(target_arch = "mips", target_arch = "mips64", target_arch = "mips64r6"),
+                any(target_arch = "mips", target_arch = "mips32r6", target_arch = "mips64", target_arch = "mips64r6"),
             )
         )))]
         const SYNC = bitcast!(c::MAP_SYNC);
@@ -335,7 +335,12 @@ pub enum Advice {
     /// `MADV_SOFT_OFFLINE`
     #[cfg(all(
         linux_kernel,
-        not(any(target_arch = "mips", target_arch = "mips64", target_arch = "mips64r6"))
+        not(any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6"
+        ))
     ))]
     LinuxSoftOffline = bitcast!(c::MADV_SOFT_OFFLINE),
     /// `MADV_MERGEABLE`
