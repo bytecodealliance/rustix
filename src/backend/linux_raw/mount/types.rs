@@ -290,7 +290,6 @@ bitflags! {
     }
 }
 
-#[cfg(feature = "mount")]
 bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -300,6 +299,5 @@ bitflags! {
     }
 }
 
-#[cfg(feature = "mount")]
 #[repr(transparent)]
 pub(crate) struct MountFlagsArg(pub(crate) c::c_uint);
