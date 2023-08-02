@@ -62,7 +62,9 @@ pub(crate) const ETH_P_MCTP: c_int = linux_raw_sys::if_ether::ETH_P_MCTP as _;
     linux_kernel,
     any(
         target_arch = "mips",
+        target_arch = "mips32r6",
         target_arch = "mips64",
+        target_arch = "mips64r6",
         target_arch = "sparc",
         target_arch = "sparc64"
     )
@@ -123,7 +125,14 @@ pub(super) use libc::{
     host_info64_t as host_info_t, host_statistics64 as host_statistics,
     vm_statistics64_t as vm_statistics_t,
 };
-#[cfg(not(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64"))))]
+#[cfg(not(all(
+    linux_kernel,
+    any(
+        target_pointer_width = "32",
+        target_arch = "mips64",
+        target_arch = "mips64r6"
+    )
+)))]
 #[cfg(any(linux_like, target_os = "aix"))]
 pub(super) use libc::{lstat64 as lstat, stat64 as stat};
 #[cfg(any(linux_kernel, target_os = "aix", target_os = "emscripten"))]

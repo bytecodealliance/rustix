@@ -10,7 +10,12 @@
 use crate::backend::conv::loff_t_from_u64;
 #[cfg(all(
     target_pointer_width = "32",
-    any(target_arch = "arm", target_arch = "mips", target_arch = "power"),
+    any(
+        target_arch = "arm",
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "power"
+    ),
 ))]
 use crate::backend::conv::zero;
 use crate::backend::conv::{
@@ -43,7 +48,12 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], pos: u64) -> io::Result<
     // <https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L75>
     #[cfg(all(
         target_pointer_width = "32",
-        any(target_arch = "arm", target_arch = "mips", target_arch = "power"),
+        any(
+            target_arch = "arm",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "power"
+        ),
     ))]
     unsafe {
         ret_usize(syscall!(
@@ -58,7 +68,12 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], pos: u64) -> io::Result<
     }
     #[cfg(all(
         target_pointer_width = "32",
-        not(any(target_arch = "arm", target_arch = "mips", target_arch = "power")),
+        not(any(
+            target_arch = "arm",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "power"
+        )),
     ))]
     unsafe {
         ret_usize(syscall!(
@@ -168,7 +183,12 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], pos: u64) -> io::Result<usi
     // <https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L81-L83>
     #[cfg(all(
         target_pointer_width = "32",
-        any(target_arch = "arm", target_arch = "mips", target_arch = "power"),
+        any(
+            target_arch = "arm",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "power"
+        ),
     ))]
     unsafe {
         ret_usize(syscall_readonly!(
@@ -183,7 +203,12 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], pos: u64) -> io::Result<usi
     }
     #[cfg(all(
         target_pointer_width = "32",
-        not(any(target_arch = "arm", target_arch = "mips", target_arch = "power")),
+        not(any(
+            target_arch = "arm",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "power"
+        )),
     ))]
     unsafe {
         ret_usize(syscall_readonly!(

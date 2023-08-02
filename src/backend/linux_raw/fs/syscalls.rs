@@ -18,6 +18,7 @@ use crate::backend::conv::{loff_t, loff_t_from_u64, ret_u64};
     target_arch = "aarch64",
     target_arch = "riscv64",
     target_arch = "mips64",
+    target_arch = "mips64r6",
     target_pointer_width = "32",
 ))]
 use crate::fd::AsFd;
@@ -32,7 +33,7 @@ use crate::fs::{
 };
 use crate::io;
 use core::mem::{transmute, zeroed, MaybeUninit};
-#[cfg(target_arch = "mips64")]
+#[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
 use linux_raw_sys::general::stat as linux_stat64;
 use linux_raw_sys::general::{
     __kernel_fsid_t, __kernel_timespec, open_how, statx, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR,
@@ -252,7 +253,12 @@ pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
     // <https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L81-L83>
     #[cfg(all(
         target_pointer_width = "32",
-        any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc"),
+        any(
+            target_arch = "arm",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "powerpc"
+        ),
     ))]
     unsafe {
         ret(syscall_readonly!(
@@ -265,7 +271,12 @@ pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
     }
     #[cfg(all(
         target_pointer_width = "32",
-        not(any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc")),
+        not(any(
+            target_arch = "arm",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "powerpc"
+        )),
     ))]
     unsafe {
         ret(syscall_readonly!(
@@ -348,7 +359,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) ->
     }
     // On mips, the arguments are not reordered, and padding is inserted
     // instead to ensure alignment.
-    #[cfg(target_arch = "mips")]
+    #[cfg(any(target_arch = "mips", target_arch = "mips32r6"))]
     unsafe {
         ret(syscall_readonly!(
             __NR_fadvise64,
@@ -363,7 +374,12 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) ->
     }
     #[cfg(all(
         target_pointer_width = "32",
-        not(any(target_arch = "arm", target_arch = "mips", target_arch = "powerpc")),
+        not(any(
+            target_arch = "arm",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "powerpc"
+        )),
     ))]
     unsafe {
         ret(syscall_readonly!(
@@ -427,7 +443,11 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     // And, some old platforms don't support `statx`, and some fail with a
     // confusing error code, so we call `crate::fs::statx` to handle that. If
     // `statx` isn't available, fall back to the buggy system call.
-    #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
+    #[cfg(any(
+        target_pointer_width = "32",
+        target_arch = "mips64",
+        target_arch = "mips64r6"
+    ))]
     {
         match crate::fs::statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
             Ok(x) => statx_to_stat(x),
@@ -436,7 +456,11 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
         }
     }
 
-    #[cfg(all(target_pointer_width = "64", not(target_arch = "mips64")))]
+    #[cfg(all(
+        target_pointer_width = "64",
+        not(target_arch = "mips64"),
+        not(target_arch = "mips64r6")
+    ))]
     unsafe {
         let mut result = MaybeUninit::<Stat>::uninit();
         ret(syscall!(__NR_fstat, fd, &mut result))?;
@@ -444,11 +468,15 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     }
 }
 
-#[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
+#[cfg(any(
+    target_pointer_width = "32",
+    target_arch = "mips64",
+    target_arch = "mips64r6",
+))]
 fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     let mut result = MaybeUninit::<linux_stat64>::uninit();
 
-    #[cfg(target_arch = "mips64")]
+    #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
     unsafe {
         ret(syscall!(__NR_fstat, fd, &mut result))?;
         stat_to_stat(result.assume_init())
@@ -464,7 +492,11 @@ fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 #[inline]
 pub(crate) fn stat(path: &CStr) -> io::Result<Stat> {
     // See the comments in `fstat` about using `crate::fs::statx` here.
-    #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
+    #[cfg(any(
+        target_pointer_width = "32",
+        target_arch = "mips64",
+        target_arch = "mips64r6"
+    ))]
     {
         match crate::fs::statx(
             crate::fs::CWD.as_fd(),
@@ -478,7 +510,11 @@ pub(crate) fn stat(path: &CStr) -> io::Result<Stat> {
         }
     }
 
-    #[cfg(all(target_pointer_width = "64", not(target_arch = "mips64")))]
+    #[cfg(all(
+        target_pointer_width = "64",
+        not(target_arch = "mips64"),
+        not(target_arch = "mips64r6"),
+    ))]
     unsafe {
         let mut result = MaybeUninit::<Stat>::uninit();
         ret(syscall!(
@@ -492,11 +528,15 @@ pub(crate) fn stat(path: &CStr) -> io::Result<Stat> {
     }
 }
 
-#[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
+#[cfg(any(
+    target_pointer_width = "32",
+    target_arch = "mips64",
+    target_arch = "mips64r6"
+))]
 fn stat_old(path: &CStr) -> io::Result<Stat> {
     let mut result = MaybeUninit::<linux_stat64>::uninit();
 
-    #[cfg(target_arch = "mips64")]
+    #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
     unsafe {
         ret(syscall!(
             __NR_newfstatat,
@@ -524,7 +564,11 @@ fn stat_old(path: &CStr) -> io::Result<Stat> {
 #[inline]
 pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
     // See the comments in `fstat` about using `crate::fs::statx` here.
-    #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
+    #[cfg(any(
+        target_pointer_width = "32",
+        target_arch = "mips64",
+        target_arch = "mips64r6"
+    ))]
     {
         match crate::fs::statx(dirfd, path, flags, StatxFlags::BASIC_STATS) {
             Ok(x) => statx_to_stat(x),
@@ -533,7 +577,11 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
         }
     }
 
-    #[cfg(all(target_pointer_width = "64", not(target_arch = "mips64")))]
+    #[cfg(all(
+        target_pointer_width = "64",
+        not(target_arch = "mips64"),
+        not(target_arch = "mips64r6"),
+    ))]
     unsafe {
         let mut result = MaybeUninit::<Stat>::uninit();
         ret(syscall!(__NR_newfstatat, dirfd, path, &mut result, flags))?;
@@ -541,11 +589,15 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
     }
 }
 
-#[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
+#[cfg(any(
+    target_pointer_width = "32",
+    target_arch = "mips64",
+    target_arch = "mips64r6"
+))]
 fn statat_old(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
     let mut result = MaybeUninit::<linux_stat64>::uninit();
 
-    #[cfg(target_arch = "mips64")]
+    #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
     unsafe {
         ret(syscall!(__NR_newfstatat, dirfd, path, &mut result, flags))?;
         stat_to_stat(result.assume_init())
@@ -593,7 +645,7 @@ pub(crate) fn lstat(path: &CStr) -> io::Result<Stat> {
 fn lstat_old(path: &CStr) -> io::Result<Stat> {
     let mut result = MaybeUninit::<linux_stat64>::uninit();
 
-    #[cfg(target_arch = "mips64")]
+    #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
     unsafe {
         ret(syscall!(
             __NR_newfstatat,
@@ -619,7 +671,11 @@ fn lstat_old(path: &CStr) -> io::Result<Stat> {
 }
 
 /// Convert from a Linux `statx` value to rustix's `Stat`.
-#[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
+#[cfg(any(
+    target_pointer_width = "32",
+    target_arch = "mips64",
+    target_arch = "mips64r6"
+))]
 fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
     Ok(Stat {
         st_dev: crate::fs::makedev(x.stx_dev_major, x.stx_dev_minor),
@@ -686,7 +742,7 @@ fn stat_to_stat(s64: linux_raw_sys::general::stat64) -> io::Result<Stat> {
 }
 
 /// Convert from a Linux `stat` value to rustix's `Stat`.
-#[cfg(target_arch = "mips64")]
+#[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
 fn stat_to_stat(s: linux_raw_sys::general::stat) -> io::Result<Stat> {
     Ok(Stat {
         st_dev: s.st_dev.try_into().map_err(|_| io::Errno::OVERFLOW)?,

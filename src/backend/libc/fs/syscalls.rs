@@ -536,7 +536,14 @@ pub(crate) fn symlinkat(
 
 pub(crate) fn stat(path: &CStr) -> io::Result<Stat> {
     // See the comments in `fstat` about using `crate::fs::statx` here.
-    #[cfg(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64")))]
+    #[cfg(all(
+        linux_kernel,
+        any(
+            target_pointer_width = "32",
+            target_arch = "mips64",
+            target_arch = "mips64r6"
+        )
+    ))]
     {
         match crate::fs::statx(
             crate::fs::CWD,
@@ -552,7 +559,14 @@ pub(crate) fn stat(path: &CStr) -> io::Result<Stat> {
 
     // Main version: libc is y2038 safe. Or, the platform is not y2038 safe and
     // there's nothing practical we can do.
-    #[cfg(not(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64"))))]
+    #[cfg(not(all(
+        linux_kernel,
+        any(
+            target_pointer_width = "32",
+            target_arch = "mips64",
+            target_arch = "mips64r6"
+        )
+    )))]
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
         ret(c::stat(c_str(path), stat.as_mut_ptr()))?;
@@ -562,7 +576,14 @@ pub(crate) fn stat(path: &CStr) -> io::Result<Stat> {
 
 pub(crate) fn lstat(path: &CStr) -> io::Result<Stat> {
     // See the comments in `fstat` about using `crate::fs::statx` here.
-    #[cfg(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64")))]
+    #[cfg(all(
+        linux_kernel,
+        any(
+            target_pointer_width = "32",
+            target_arch = "mips64",
+            target_arch = "mips64r6"
+        )
+    ))]
     {
         match crate::fs::statx(
             crate::fs::CWD,
@@ -578,7 +599,14 @@ pub(crate) fn lstat(path: &CStr) -> io::Result<Stat> {
 
     // Main version: libc is y2038 safe. Or, the platform is not y2038 safe and
     // there's nothing practical we can do.
-    #[cfg(not(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64"))))]
+    #[cfg(not(all(
+        linux_kernel,
+        any(
+            target_pointer_width = "32",
+            target_arch = "mips64",
+            target_arch = "mips64r6"
+        )
+    )))]
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
         ret(c::lstat(c_str(path), stat.as_mut_ptr()))?;
@@ -589,7 +617,14 @@ pub(crate) fn lstat(path: &CStr) -> io::Result<Stat> {
 #[cfg(not(any(target_os = "espidf", target_os = "redox")))]
 pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
     // See the comments in `fstat` about using `crate::fs::statx` here.
-    #[cfg(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64")))]
+    #[cfg(all(
+        linux_kernel,
+        any(
+            target_pointer_width = "32",
+            target_arch = "mips64",
+            target_arch = "mips64r6"
+        )
+    ))]
     {
         match crate::fs::statx(dirfd, path, flags, StatxFlags::BASIC_STATS) {
             Ok(x) => statx_to_stat(x),
@@ -600,7 +635,14 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
 
     // Main version: libc is y2038 safe. Or, the platform is not y2038 safe and
     // there's nothing practical we can do.
-    #[cfg(not(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64"))))]
+    #[cfg(not(all(
+        linux_kernel,
+        any(
+            target_pointer_width = "32",
+            target_arch = "mips64",
+            target_arch = "mips64r6"
+        )
+    )))]
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
         ret(c::fstatat(
@@ -613,7 +655,14 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
     }
 }
 
-#[cfg(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64")))]
+#[cfg(all(
+    linux_kernel,
+    any(
+        target_pointer_width = "32",
+        target_arch = "mips64",
+        target_arch = "mips64r6"
+    )
+))]
 fn statat_old(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
     unsafe {
         let mut result = MaybeUninit::<c::stat64>::uninit();
@@ -1284,7 +1333,14 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     // And, some old platforms don't support `statx`, and some fail with a
     // confusing error code, so we call `crate::fs::statx` to handle that. If
     // `statx` isn't available, fall back to the buggy system call.
-    #[cfg(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64")))]
+    #[cfg(all(
+        linux_kernel,
+        any(
+            target_pointer_width = "32",
+            target_arch = "mips64",
+            target_arch = "mips64r6"
+        )
+    ))]
     {
         match crate::fs::statx(fd, cstr!(""), AtFlags::EMPTY_PATH, StatxFlags::BASIC_STATS) {
             Ok(x) => statx_to_stat(x),
@@ -1295,7 +1351,14 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 
     // Main version: libc is y2038 safe. Or, the platform is not y2038 safe and
     // there's nothing practical we can do.
-    #[cfg(not(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64"))))]
+    #[cfg(not(all(
+        linux_kernel,
+        any(
+            target_pointer_width = "32",
+            target_arch = "mips64",
+            target_arch = "mips64r6"
+        )
+    )))]
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
         ret(c::fstat(borrowed_fd(fd), stat.as_mut_ptr()))?;
@@ -1303,7 +1366,14 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     }
 }
 
-#[cfg(all(linux_kernel, any(target_pointer_width = "32", target_arch = "mips64")))]
+#[cfg(all(
+    linux_kernel,
+    any(
+        target_pointer_width = "32",
+        target_arch = "mips64",
+        target_arch = "mips64r6"
+    )
+))]
 fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     unsafe {
         let mut result = MaybeUninit::<c::stat64>::uninit();
@@ -1663,7 +1733,7 @@ fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
 /// Convert from a Linux `statx` value to rustix's `Stat`.
 ///
 /// mips64' `struct stat64` in libc has private fields, and `stx_blocks`
-#[cfg(all(linux_kernel, target_arch = "mips64"))]
+#[cfg(all(linux_kernel, any(target_arch = "mips64", target_arch = "mips64r6")))]
 fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
     let mut result: Stat = unsafe { core::mem::zeroed() };
 
@@ -1735,7 +1805,7 @@ fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
 ///
 /// mips64' `struct stat64` in libc has private fields, and `st_blocks` has
 /// type `i64`.
-#[cfg(all(linux_kernel, target_arch = "mips64"))]
+#[cfg(all(linux_kernel, any(target_arch = "mips64", target_arch = "mips64r6")))]
 fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
     let mut result: Stat = unsafe { core::mem::zeroed() };
 

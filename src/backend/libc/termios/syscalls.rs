@@ -115,7 +115,12 @@ pub(crate) fn tcsetattr(
         // Translate from `optional_actions` into an ioctl request code. On MIPS,
         // `optional_actions` already has `TCGETS` added to it.
         let request = TCSETS2
-            + if cfg!(any(target_arch = "mips", target_arch = "mips64")) {
+            + if cfg!(any(
+                target_arch = "mips",
+                target_arch = "mips32r6",
+                target_arch = "mips64",
+                target_arch = "mips64r6"
+            )) {
                 optional_actions as u32 - TCSETS
             } else {
                 optional_actions as u32
