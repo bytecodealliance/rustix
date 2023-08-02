@@ -114,6 +114,12 @@ pub(crate) mod io_uring;
 #[cfg(not(any(windows, target_os = "espidf", target_os = "wasi")))]
 #[cfg(feature = "mm")]
 pub(crate) mod mm;
+#[cfg(linux_kernel)]
+#[cfg(feature = "mount")]
+pub(crate) mod mount;
+#[cfg(linux_kernel)]
+#[cfg(all(feature = "fs", not(feature = "mount")))]
+pub(crate) mod mount; // for deprecated mount functions in "fs"
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[cfg(feature = "net")]
 pub(crate) mod net;

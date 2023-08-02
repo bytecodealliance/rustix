@@ -146,6 +146,9 @@ fs = []
 # Enable `rustix::io_uring::*` (on platforms that support it).
 io_uring = ["fs", "net", "linux-raw-sys/io_uring"]
 
+# Enable `rustix::mount::*`.
+mount = []
+
 # Enable `rustix::net::*`.
 net = ["linux-raw-sys/net", "linux-raw-sys/netlink", "linux-raw-sys/if_ether"]
 
@@ -195,6 +198,7 @@ all-apis = [
     "fs",
     "io_uring",
     "mm",
+    "mount",
     "net",
     "param",
     "pipe",

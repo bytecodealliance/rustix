@@ -214,6 +214,10 @@ pub mod io_uring;
 #[cfg(feature = "mm")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "mm")))]
 pub mod mm;
+#[cfg(linux_kernel)]
+#[cfg(feature = "mount")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "mount")))]
+pub mod mount;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[cfg(feature = "net")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "net")))]
@@ -225,6 +229,7 @@ pub mod param;
 #[cfg(not(windows))]
 #[cfg(any(
     feature = "fs",
+    feature = "mount",
     feature = "net",
     all(
         linux_raw,
@@ -238,7 +243,10 @@ pub mod param;
         )
     )
 ))]
-#[cfg_attr(doc_cfg, doc(cfg(any(feature = "fs", feature = "net"))))]
+#[cfg_attr(
+    doc_cfg,
+    doc(cfg(any(feature = "fs", feature = "mount", feature = "net")))
+)]
 pub mod path;
 #[cfg(feature = "pipe")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "pipe")))]
@@ -289,6 +297,12 @@ pub mod time;
 #[doc(hidden)]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "runtime")))]
 pub mod runtime;
+
+// Temporarily provide some mount functions for use in the fs module for
+// backwards compatibility.
+#[cfg(linux_kernel)]
+#[cfg(all(feature = "fs", not(feature = "mount")))]
+pub(crate) mod mount;
 
 // Private modules used by multiple public modules.
 #[cfg(not(any(windows, target_os = "espidf")))]

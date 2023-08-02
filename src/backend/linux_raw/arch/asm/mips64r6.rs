@@ -1,13 +1,14 @@
 //! mipsisa64r6el Linux system calls.
 //!
-//! On mipsisa64r6el, Linux indicates success or failure using `$a3` (`$7`) rather
-//! than by returning a negative error code as most other architectures do.
+//! On mipsisa64r6el, Linux indicates success or failure using `$a3` (`$7`)
+//! rather than by returning a negative error code as most other architectures
+//! do.
 //!
 //! Mips-family platforms have a special calling convention for `__NR_pipe`,
 //! however we use `__NR_pipe2` instead to avoid having to implement it.
 //!
-//! Note that MIPS R6 inline assembly currently doesn't differ from MIPS, because
-//! no explicit call of R6-only or R2-only instructions exist here.
+//! Note that MIPS R6 inline assembly currently doesn't differ from MIPS,
+//! because no explicit call of R6-only or R2-only instructions exist here.
 
 use crate::backend::reg::{
     ArgReg, FromAsm, RetReg, SyscallNumber, ToAsm, A0, A1, A2, A3, A4, A5, R0,
