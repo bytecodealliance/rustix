@@ -40,6 +40,7 @@ pub fn fsmount(
 /// # References
 ///  - [Unfinished draft]
 ///
+/// [`mount_move`]: crate::mount::mount_move
 /// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/move_mount.md
 #[inline]
 pub fn move_mount<From: path::Arg, To: path::Arg>(

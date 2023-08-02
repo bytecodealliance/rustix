@@ -140,6 +140,7 @@ pub fn mount_change<Target: path::Arg>(
 /// # References
 ///  - [Linux]
 ///
+/// [`move_mount`]: crate::mount::move_mount
 /// [Linux]: https://man7.org/linux/man-pages/man2/mount.2.html
 #[inline]
 #[doc(alias = "mount")]

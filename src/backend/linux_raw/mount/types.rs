@@ -4,7 +4,7 @@ use bitflags::bitflags;
 bitflags! {
     /// `MS_*` constants for use with [`mount`].
     ///
-    /// [`mount`]: crate::fs::mount
+    /// [`mount`]: crate::mount::mount
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MountFlags: c::c_uint {
@@ -62,7 +62,7 @@ bitflags! {
 bitflags! {
     /// `MNT_*` constants for use with [`unmount`].
     ///
-    /// [`unmount`]: crate::fs::mount::unmount
+    /// [`unmount`]: crate::mount::unmount
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct UnmountFlags: c::c_uint {
@@ -81,7 +81,7 @@ bitflags! {
 bitflags! {
     /// `FSOPEN_*` constants for use with [`fsopen`].
     ///
-    /// [`fsopen`]: crate::fs::fsopen
+    /// [`fsopen`]: crate::mount::fsopen
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct FsOpenFlags: c::c_uint {
@@ -95,7 +95,7 @@ bitflags! {
 bitflags! {
     /// `FSMOUNT_*` constants for use with [`fsmount`].
     ///
-    /// [`fsmount`]: crate::fs::fsmount
+    /// [`fsmount`]: crate::mount::fsmount
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct FsMountFlags: c::c_uint {
@@ -104,13 +104,11 @@ bitflags! {
     }
 }
 
-/// `FSCONFIG_*` constants for use with [`fsconfig`].
-///
-/// [`fsconfig`]: crate::fs::fsconfig
+/// `FSCONFIG_*` constants for use with the `fsconfig` syscall.
 #[cfg(feature = "mount")]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
-pub enum FsConfigCmd {
+pub(crate) enum FsConfigCmd {
     /// `FSCONFIG_SET_FLAG`
     SetFlag = linux_raw_sys::general::fsconfig_command::FSCONFIG_SET_FLAG as u32,
 
@@ -140,7 +138,7 @@ pub enum FsConfigCmd {
 bitflags! {
     /// `MOUNT_ATTR_*` constants for use with [`fsmount`].
     ///
-    /// [`fsmount`]: crate::fs::fsmount
+    /// [`fsmount`]: crate::mount::fsmount
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MountAttrFlags: c::c_uint {
@@ -186,7 +184,7 @@ bitflags! {
 bitflags! {
     /// `MOVE_MOUNT_*` constants for use with [`move_mount`].
     ///
-    /// [`move_mount`]: crate::fs::move_mount
+    /// [`move_mount`]: crate::mount::move_mount
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MoveMountFlags: c::c_uint {
@@ -224,7 +222,7 @@ bitflags! {
 bitflags! {
     /// `OPENTREE_*` constants for use with [`open_tree`].
     ///
-    /// [`open_tree`]: crate::fs::open_tree
+    /// [`open_tree`]: crate::mount::open_tree
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct OpenTreeFlags: c::c_uint {
@@ -252,7 +250,7 @@ bitflags! {
 bitflags! {
     /// `FSPICK_*` constants for use with [`fspick`].
     ///
-    /// [`fspick`]: crate::fs::fspick
+    /// [`fspick`]: crate::mount::fspick
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct FsPickFlags: c::c_uint {
@@ -273,7 +271,7 @@ bitflags! {
 bitflags! {
     /// `MS_*` constants for use with [`change_mount`].
     ///
-    /// [`change_mount`]: crate::fs::mount::change_mount
+    /// [`change_mount`]: crate::mount::change_mount
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MountPropagationFlags: c::c_uint {
