@@ -6,7 +6,10 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::conv::{ret, ret_owned_fd, slice, zero};
+use crate::backend::conv::ret;
+#[cfg(feature = "mount")]
+use crate::backend::conv::{ret_owned_fd, slice, zero};
+#[cfg(feature = "mount")]
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::io;
@@ -205,6 +208,7 @@ pub(crate) fn fsconfig_set_path_empty(
     }
 }
 
+#[cfg(feature = "mount")]
 #[inline]
 pub(crate) fn fsconfig_create(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe {
@@ -219,6 +223,7 @@ pub(crate) fn fsconfig_create(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
     }
 }
 
+#[cfg(feature = "mount")]
 #[inline]
 pub(crate) fn fsconfig_reconfigure(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe {
