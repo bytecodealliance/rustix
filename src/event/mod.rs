@@ -1,6 +1,11 @@
 //! Event operations.
 
-#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "illumos"))]
+#[cfg(any(
+    linux_kernel,
+    target_os = "freebsd",
+    target_os = "illumos",
+    target_os = "espidf"
+))]
 mod eventfd;
 #[cfg(bsd)]
 pub mod kqueue;
@@ -10,6 +15,11 @@ pub mod port;
 
 #[cfg(linux_kernel)]
 pub use crate::backend::event::epoll;
-#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "illumos"))]
+#[cfg(any(
+    linux_kernel,
+    target_os = "freebsd",
+    target_os = "illumos",
+    target_os = "espidf"
+))]
 pub use eventfd::{eventfd, EventfdFlags};
 pub use poll::{poll, PollFd, PollFlags};
