@@ -109,6 +109,13 @@ fn test_file() {
         rustix::fs::OFlags::empty()
     );
 
+    // Test `fcntl_setfd`.
+    rustix::io::fcntl_setfd(&file, rustix::io::FdFlags::CLOEXEC).unwrap();
+    assert_eq!(
+        rustix::io::fcntl_getfd(&file).unwrap(),
+        rustix::io::FdFlags::CLOEXEC
+    );
+
     let stat = rustix::fs::fstat(&file).unwrap();
     assert!(stat.st_size > 0);
     assert!(stat.st_blocks > 0);
