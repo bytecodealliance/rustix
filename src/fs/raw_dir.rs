@@ -136,7 +136,7 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     }
 }
 
-/// A raw directory entry, similar to `std::fs::DirEntry`.
+/// A raw directory entry, similar to [`std::fs::DirEntry`].
 ///
 /// Unlike the std version, this may represent the `.` or `..` entries.
 pub struct RawDirEntry<'a> {

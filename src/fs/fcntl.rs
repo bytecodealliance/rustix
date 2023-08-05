@@ -15,7 +15,7 @@ use crate::{backend, io};
 use backend::fd::AsFd;
 use backend::fs::types::OFlags;
 
-// These `fcntl` functions like in the `io` module because they're not specific
+// These `fcntl` functions live in the `io` module because they're not specific
 // to files, directories, or memfd objects. We re-export them here in the `fs`
 // module because the other the `fcntl` functions are here.
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
