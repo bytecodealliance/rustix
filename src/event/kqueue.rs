@@ -100,8 +100,8 @@ impl Event {
     }
 
     /// Get the raw data for this event.
-    pub fn data(&self) -> isize {
-        // On openbsd, data is an i64 and not an isize
+    pub fn data(&self) -> i64 {
+        // On some bsds, data is an isize and not an i64
         self.inner.data as _
     }
 
