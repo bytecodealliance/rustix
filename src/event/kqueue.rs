@@ -99,6 +99,12 @@ impl Event {
         self.inner.udata as _
     }
 
+    /// Get the raw data for this event.
+    pub fn data(&self) -> i64 {
+        // On some bsds, data is an isize and not an i64
+        self.inner.data as _
+    }
+
     /// Get the filter of this event.
     pub fn filter(&self) -> EventFilter {
         match self.inner.filter as _ {
