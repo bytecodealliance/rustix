@@ -170,12 +170,21 @@ pub fn rmdir<P: path::Arg>(path: P) -> io::Result<()> {
 
 /// `link(old_path, new_path)`—Creates a hard link.
 ///
+/// POSIX leaves it implementation-defined whether `link` follows a symlink in
+/// `old_path`, or creates a new link to the symbolic link itself. On platforms
+/// which have it, [`linkat`] avoids this problem since it has an [`AtFlags`]
+/// paramter and the [`AtFlags::SYMLINK_FOLLOW`] flag determines whether
+/// symlinks should be followed.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/link.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/link.2.html
+/// [`linkat`]: crate::fs::linkat
+/// [`AtFlags`]: crate::fs::AtFlags
+/// [`AtFlags::SYMLINK_FOLLOW`]: crate::fs::AtFlags::SYMLINK_FOLLOW
 #[inline]
 pub fn link<P: path::Arg, Q: path::Arg>(old_path: P, new_path: Q) -> io::Result<()> {
     old_path.into_with_c_str(|old_path| {
