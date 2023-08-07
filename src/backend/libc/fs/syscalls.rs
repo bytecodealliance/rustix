@@ -1234,9 +1234,9 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         }
         SeekFrom::End(offset) => (c::SEEK_END, offset),
         SeekFrom::Current(offset) => (c::SEEK_CUR, offset),
-        #[cfg(any(freebsdlike, target_os = "linux", target_os = "solaris"))]
+        #[cfg(any(apple, freebsdlike, linux_kernel, solarish))]
         SeekFrom::Data(offset) => (c::SEEK_DATA, offset),
-        #[cfg(any(freebsdlike, target_os = "linux", target_os = "solaris"))]
+        #[cfg(any(apple, freebsdlike, linux_kernel, solarish))]
         SeekFrom::Hole(offset) => (c::SEEK_HOLE, offset),
     };
 

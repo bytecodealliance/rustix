@@ -39,6 +39,7 @@ mod readlinkat;
 mod renameat;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 mod seals;
+mod seek;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 mod statfs;
 #[cfg(linux_kernel)]
