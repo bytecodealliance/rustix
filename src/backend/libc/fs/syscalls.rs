@@ -128,8 +128,8 @@ pub(crate) fn open(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<OwnedF
         return open_via_syscall(path, oflags, mode);
     }
 
-    // On these platforms, `mode_t` is `u16` and can't be passed directly to
-    // a variadic function.
+    // On these platforms, `mode_t` is `u16` and can't be passed directly to a
+    // variadic function.
     #[cfg(any(
         apple,
         freebsdlike,
@@ -191,8 +191,8 @@ pub(crate) fn openat(
         return openat_via_syscall(dirfd, path, oflags, mode);
     }
 
-    // On these platforms, `mode_t` is `u16` and can't be passed directly to
-    // a variadic function.
+    // On these platforms, `mode_t` is `u16` and can't be passed directly to a
+    // variadic function.
     #[cfg(any(
         apple,
         freebsdlike,

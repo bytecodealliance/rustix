@@ -1,3 +1,5 @@
+//! Libc and supplemental types and constants.
+
 #![allow(unused_imports)]
 
 // Import everything from libc, but we'll add some stuff and override some

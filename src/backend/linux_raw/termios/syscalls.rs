@@ -256,7 +256,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Re
     // Get a fd to '/proc/self/fd'.
     let proc_self_fd = procfs::proc_self_fd()?;
 
-    // Gather the ttyname by reading the 'fd' file inside 'proc_self_fd'.
+    // Gather the ttyname by reading the "fd" file inside `proc_self_fd`.
     let r = crate::backend::fs::syscalls::readlinkat(
         proc_self_fd,
         DecInt::from_fd(fd).as_c_str(),

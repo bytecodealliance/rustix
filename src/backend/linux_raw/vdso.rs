@@ -194,8 +194,8 @@ fn init_from_sysinfo_ehdr() -> Option<Vdso> {
 impl Vdso {
     /// Parse the vDSO.
     ///
-    /// Returns `None` if the vDSO can't be located or if it doesn't conform
-    /// to our expectations.
+    /// Returns `None` if the vDSO can't be located or if it doesn't conform to
+    /// our expectations.
     #[inline]
     pub(super) fn new() -> Option<Self> {
         init_from_sysinfo_ehdr()

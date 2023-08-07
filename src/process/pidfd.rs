@@ -14,8 +14,8 @@ bitflags::bitflags! {
     }
 }
 
-/// `syscall(SYS_pidfd_open, pid, flags)`—Creates a file descriptor for
-/// a process.
+/// `syscall(SYS_pidfd_open, pid, flags)`—Creates a file descriptor for a
+/// process.
 ///
 /// # References
 ///  - [Linux]

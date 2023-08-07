@@ -107,8 +107,8 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
 
     /// Returns a pointer to the message data.
     pub(crate) fn as_control_ptr(&mut self) -> *mut u8 {
-        // When the length is zero, we may be using a `&[]` address, which
-        // may be an invalid but non-null pointer, and on some platforms, that
+        // When the length is zero, we may be using a `&[]` address, which may
+        // be an invalid but non-null pointer, and on some platforms, that
         // causes `sendmsg` to fail with `EFAULT` or `EINVAL`
         #[cfg(not(linux_kernel))]
         if self.length == 0 {
@@ -227,8 +227,8 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
 
     /// Returns a pointer to the message data.
     pub(crate) fn as_control_ptr(&mut self) -> *mut u8 {
-        // When the length is zero, we may be using a `&[]` address, which
-        // may be an invalid but non-null pointer, and on some platforms, that
+        // When the length is zero, we may be using a `&[]` address, which may
+        // be an invalid but non-null pointer, and on some platforms, that
         // causes `sendmsg` to fail with `EFAULT` or `EINVAL`
         #[cfg(not(linux_kernel))]
         if self.buffer.is_empty() {

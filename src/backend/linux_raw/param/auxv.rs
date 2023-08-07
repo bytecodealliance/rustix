@@ -106,8 +106,8 @@ pub(in super::super) fn exe_phdrs_slice() -> &'static [Elf_Phdr] {
     unsafe { slice::from_raw_parts(phdr.cast(), phnum) }
 }
 
-/// `AT_SYSINFO_EHDR` isn't present on all platforms in all configurations,
-/// so if we don't see it, this function returns a null pointer.
+/// `AT_SYSINFO_EHDR` isn't present on all platforms in all configurations, so
+/// if we don't see it, this function returns a null pointer.
 #[inline]
 pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
     let mut ehdr = SYSINFO_EHDR.load(Relaxed);
@@ -338,10 +338,10 @@ unsafe fn check_vdso_base(base: *const Elf_Ehdr) -> Option<NonNull<Elf_Ehdr>> {
 /// Check that `base` is a valid pointer to an ELF image.
 #[cold]
 unsafe fn check_elf_base(base: *const Elf_Ehdr) -> Option<NonNull<Elf_Ehdr>> {
-    // If we're reading a 64-bit auxv on a 32-bit platform, we'll see
-    // a zero `a_val` because `AT_*` values are never greater than
-    // `u32::MAX`. Zero is used by libc's `getauxval` to indicate
-    // errors, so it should never be a valid value.
+    // If we're reading a 64-bit auxv on a 32-bit platform, we'll see a zero
+    // `a_val` because `AT_*` values are never greater than `u32::MAX`. Zero is
+    // used by libc's `getauxval` to indicate errors, so it should never be a
+    // valid value.
     if base.is_null() {
         return None;
     }

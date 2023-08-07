@@ -249,6 +249,8 @@ bitflags! {
         const WRONLY = bitcast!(c::O_WRONLY);
 
         /// `O_RDWR`
+        ///
+        /// This is not equal to `RDONLY | WRONLY`. It's a distinct flag.
         const RDWR = bitcast!(c::O_RDWR);
 
         /// `O_NOCTTY`

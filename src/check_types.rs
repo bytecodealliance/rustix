@@ -1,3 +1,5 @@
+//! Macros for checking that types have the same layout as other types.
+
 #![allow(unused_macros)]
 
 /// Check that the size and alignment of a type match the `sys` bindings.

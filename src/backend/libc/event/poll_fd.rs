@@ -112,7 +112,7 @@ impl<'fd> PollFd<'fd> {
     /// Returns the ready events.
     #[inline]
     pub fn revents(&self) -> PollFlags {
-        // Use `unwrap()` here because in theory we know we know all the bits
+        // Use `.unwrap()` here because in theory we know we know all the bits
         // the OS might set here, but OS's have added extensions in the past.
         PollFlags::from_bits(self.pollfd.revents).unwrap()
     }
@@ -123,7 +123,7 @@ impl<'fd> AsFd for PollFd<'fd> {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
         // SAFETY: Our constructors and `set_fd` require `pollfd.fd` to be
-        // valid for the `fd lifetime.
+        // valid for the `'fd` lifetime.
         unsafe { BorrowedFd::borrow_raw(self.pollfd.fd) }
     }
 }
@@ -133,7 +133,7 @@ impl<'fd> AsSocket for PollFd<'fd> {
     #[inline]
     fn as_socket(&self) -> BorrowedFd<'_> {
         // SAFETY: Our constructors and `set_fd` require `pollfd.fd` to be
-        // valid for the `fd lifetime.
+        // valid for the `'fd` lifetime.
         unsafe { BorrowedFd::borrow_raw(self.pollfd.fd as RawFd) }
     }
 }

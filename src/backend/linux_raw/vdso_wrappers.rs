@@ -287,11 +287,10 @@ unsafe fn _rustix_clock_gettime_via_syscall_old(
     clockid: c::c_int,
     res: *mut Timespec,
 ) -> io::Result<()> {
-    // Ordinarily `rustix` doesn't like to emulate system calls, but in
-    // the case of time APIs, it's specific to Linux, specific to
-    // 32-bit architectures *and* specific to old kernel versions, and
-    // it's not that hard to fix up here, so that no other code needs
-    // to worry about this.
+    // Ordinarily `rustix` doesn't like to emulate system calls, but in the
+    // case of time APIs, it's specific to Linux, specific to 32-bit
+    // architectures *and* specific to old kernel versions, and it's not that
+    // hard to fix up here, so that no other code needs to worry about this.
     let mut old_result = MaybeUninit::<__kernel_old_timespec>::uninit();
     let r0 = syscall!(__NR_clock_gettime, c_int(clockid), &mut old_result);
     match ret(r0) {

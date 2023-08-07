@@ -307,7 +307,7 @@ bitflags::bitflags! {
         /// The process executed a new process.
         const EXEC = c::NOTE_EXEC;
 
-        /// Follow the process through `fork()` calls (write only).
+        /// Follow the process through `fork` calls (write only).
         const TRACK = c::NOTE_TRACK;
 
         /// An error has occurred with following the process.

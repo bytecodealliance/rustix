@@ -51,9 +51,9 @@ impl MembarrierQuery {
 /// `membarrier(MEMBARRIER_CMD_QUERY, 0, 0)`—Query the supported `membarrier`
 /// commands.
 ///
-/// This function doesn't return a `Result` because it always succeeds; if
-/// the underlying OS doesn't support the `membarrier` syscall, it returns
-/// an empty `MembarrierQuery` value.
+/// This function doesn't return a `Result` because it always succeeds; if the
+/// underlying OS doesn't support the `membarrier` syscall, it returns an empty
+/// `MembarrierQuery` value.
 ///
 /// # References
 ///  - [Linux]

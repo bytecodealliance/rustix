@@ -1,3 +1,5 @@
+//! Types and constants for `rustix::net`.
+
 use crate::backend::c;
 use bitflags::bitflags;
 
@@ -49,7 +51,8 @@ impl SocketType {
 #[doc(hidden)]
 pub type RawAddressFamily = c::sa_family_t;
 
-/// `AF_*` constants.
+/// `AF_*` constants for use with [`socket`], [`socket_with`], and
+/// [`socketpair`].
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(transparent)]
 pub struct AddressFamily(pub(crate) RawAddressFamily);
@@ -859,9 +862,8 @@ pub mod netlink {
 }
 
 /// `ETH_P_*` constants.
-///
 // These are translated into 16-bit big-endian form because that's what the
-// `AddressFamily::PACKET` address family [expects].
+// [`AddressFamily::PACKET`] address family [expects].
 //
 // [expects]: https://man7.org/linux/man-pages/man7/packet.7.html
 pub mod eth {
@@ -1274,8 +1276,8 @@ fn test_sizes() {
     use c::c_int;
     use core::mem::transmute;
 
-    // Backend code needs to cast these to `c_int` so make sure that cast
-    // isn't lossy.
+    // Backend code needs to cast these to `c_int` so make sure that cast isn't
+    // lossy.
     assert_eq_size!(RawProtocol, c_int);
     assert_eq_size!(Protocol, c_int);
     assert_eq_size!(Option<RawProtocol>, c_int);
@@ -1284,8 +1286,8 @@ fn test_sizes() {
     assert_eq_size!(SocketType, c_int);
     assert_eq_size!(SocketFlags, c_int);
 
-    // Rustix doesn't depend on `Option<Protocol>` matching the ABI of
-    // a raw integer for correctness, but it should work nonetheless.
+    // Rustix doesn't depend on `Option<Protocol>` matching the ABI of a raw
+    // integer for correctness, but it should work nonetheless.
     #[allow(unsafe_code)]
     unsafe {
         let t: Option<Protocol> = None;
