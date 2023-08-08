@@ -14,6 +14,7 @@ bitflags! {
             bsd,
             solarish,
             windows,
+            target_os = "aix",
             target_os = "espidf",
             target_os = "nto",
             target_os = "haiku",
@@ -22,7 +23,10 @@ bitflags! {
         /// `MSG_DONTROUTE`
         const DONTROUTE = bitcast!(c::MSG_DONTROUTE);
         /// `MSG_DONTWAIT`
-        #[cfg(not(windows))]
+        #[cfg(not(any(
+            windows,
+            target_os = "aix",
+        )))]
         const DONTWAIT = bitcast!(c::MSG_DONTWAIT);
         /// `MSG_EOR`
         #[cfg(not(windows))]
@@ -32,6 +36,7 @@ bitflags! {
             bsd,
             solarish,
             windows,
+            target_os = "aix",
             target_os = "haiku",
             target_os = "nto",
         )))]
@@ -55,17 +60,29 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct RecvFlags: u32 {
-        #[cfg(not(any(apple, solarish, windows, target_os = "espidf", target_os = "haiku", target_os = "nto")))]
+        #[cfg(not(any(
+            apple,
+            solarish,
+            windows,
+            target_os = "aix",
+            target_os = "espidf",
+            target_os = "haiku",
+            target_os = "nto",
+        )))]
         /// `MSG_CMSG_CLOEXEC`
         const CMSG_CLOEXEC = bitcast!(c::MSG_CMSG_CLOEXEC);
         /// `MSG_DONTWAIT`
-        #[cfg(not(windows))]
+        #[cfg(not(any(
+            windows,
+            target_os = "aix",
+        )))]
         const DONTWAIT = bitcast!(c::MSG_DONTWAIT);
         /// `MSG_ERRQUEUE`
         #[cfg(not(any(
             bsd,
             solarish,
             windows,
+            target_os = "aix",
             target_os = "espidf",
             target_os = "haiku",
             target_os = "nto",

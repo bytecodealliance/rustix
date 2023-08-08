@@ -26,11 +26,29 @@ struct sockaddr_header {
 unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
     // Assert that we know the layout of `sockaddr`.
     let _ = c::sockaddr {
-        #[cfg(any(bsd, target_os = "espidf", target_os = "haiku", target_os = "nto"))]
+        #[cfg(any(
+            bsd,
+            target_os = "aix",
+            target_os = "espidf",
+            target_os = "haiku",
+            target_os = "nto"
+        ))]
         sa_len: 0_u8,
-        #[cfg(any(bsd, target_os = "espidf", target_os = "haiku", target_os = "nto"))]
+        #[cfg(any(
+            bsd,
+            target_os = "aix",
+            target_os = "espidf",
+            target_os = "haiku",
+            target_os = "nto"
+        ))]
         sa_family: 0_u8,
-        #[cfg(not(any(bsd, target_os = "espidf", target_os = "haiku", target_os = "nto")))]
+        #[cfg(not(any(
+            bsd,
+            target_os = "aix",
+            target_os = "espidf",
+            target_os = "haiku",
+            target_os = "nto"
+        )))]
         sa_family: 0_u16,
         #[cfg(not(target_os = "haiku"))]
         sa_data: [0; 14],

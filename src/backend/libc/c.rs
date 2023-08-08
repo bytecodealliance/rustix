@@ -108,11 +108,8 @@ pub(super) use libc::posix_fallocate64 as posix_fallocate;
 pub(super) use libc::{blkcnt64_t as blkcnt_t, rlim64_t as rlim_t};
 #[cfg(target_os = "aix")]
 pub(super) use libc::{
-    blksize64_t as blksize_t, fstat64 as fstat, fstatat, fstatfs64 as fstatfs,
-    fstatvfs64 as fstatvfs, ftruncate64 as ftruncate, getrlimit64 as getrlimit, ino_t,
-    lseek64 as lseek, mmap, off64_t as off_t, openat, posix_fadvise64 as posix_fadvise, preadv,
-    pwritev, rlimit64 as rlimit, setrlimit64 as setrlimit, statfs64 as statfs,
-    statvfs64 as statvfs, RLIM_INFINITY,
+    blksize_t, fstat, fstatat, fstatfs, fstatvfs, ftruncate, getrlimit, ino_t, lseek, mmap, off_t,
+    openat, posix_fadvise, preadv, pwritev, rlimit, setrlimit, statfs, statvfs, RLIM_INFINITY,
 };
 #[cfg(linux_like)]
 pub(super) use libc::{
@@ -135,7 +132,7 @@ pub(super) use libc::{
         target_arch = "mips64r6"
     )
 )))]
-#[cfg(any(linux_like, target_os = "aix"))]
+#[cfg(linux_like)]
 pub(super) use libc::{lstat64 as lstat, stat64 as stat};
 #[cfg(any(linux_kernel, target_os = "aix", target_os = "emscripten"))]
 pub(super) use libc::{pread64 as pread, pwrite64 as pwrite};
