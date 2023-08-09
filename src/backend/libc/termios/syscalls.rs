@@ -99,7 +99,6 @@ pub(crate) fn tcsetattr(
     #[cfg(linux_kernel)]
     unsafe {
         use crate::termios::speed;
-        use core::mem::zeroed;
         use linux_raw_sys::general::{termios2, BOTHER, CBAUD, IBSHIFT};
 
         #[cfg(not(any(target_arch = "sparc", target_arch = "sparc64")))]
@@ -134,7 +133,7 @@ pub(crate) fn tcsetattr(
             c_cflag: termios.control_modes.bits(),
             c_lflag: termios.local_modes.bits(),
             c_line: termios.line_discipline,
-            c_cc: zeroed(),
+            c_cc: zerocopy::FromBytes::new_zeroed(),
             c_ispeed: input_speed,
             c_ospeed: output_speed,
         };

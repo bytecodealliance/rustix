@@ -17,6 +17,7 @@ rust-version = "1.63"
 
 [dependencies]
 bitflags = { version = "2.3.3", default-features = false }
+zerocopy = { version = "0.6.3" }
 itoa = { version = "1.0.1", default-features = false, optional = true }
 
 # Special dependencies used in rustc-dep-of-std mode.
