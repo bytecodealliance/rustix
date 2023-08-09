@@ -41,6 +41,22 @@ fn test_sockopts_ipv4() {
         rustix::net::sockopt::get_socket_send_buffer_size(&s).unwrap(),
         0
     );
+    #[cfg(not(any(
+        apple,
+        solarish,
+        windows,
+        target_os = "dragonfly",
+        target_os = "emscripten",
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "netbsd",
+        target_os = "nto",
+        target_os = "openbsd"
+    )))]
+    assert_eq!(
+        rustix::net::sockopt::get_socket_domain(&s).unwrap(),
+        AddressFamily::INET
+    );
 
     // Set a timeout.
     rustix::net::sockopt::set_socket_timeout(

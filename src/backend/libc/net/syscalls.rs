@@ -517,6 +517,19 @@ pub(crate) mod sockopt {
     use super::{c, in6_addr_new, in_addr_new, BorrowedFd};
     use crate::io;
     use crate::net::sockopt::Timeout;
+    #[cfg(not(any(
+        apple,
+        solarish,
+        windows,
+        target_os = "dragonfly",
+        target_os = "emscripten",
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "netbsd",
+        target_os = "nto",
+        target_os = "openbsd"
+    )))]
+    use crate::net::AddressFamily;
     use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
     use crate::utils::as_mut_ptr;
     use core::time::Duration;
@@ -807,6 +820,26 @@ pub(crate) mod sockopt {
     #[inline]
     pub(crate) fn get_socket_send_buffer_size(fd: BorrowedFd<'_>) -> io::Result<usize> {
         getsockopt(fd, c::SOL_SOCKET as _, c::SO_SNDBUF).map(|size: u32| size as usize)
+    }
+
+    #[inline]
+    #[cfg(not(any(
+        apple,
+        solarish,
+        windows,
+        target_os = "dragonfly",
+        target_os = "emscripten",
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "netbsd",
+        target_os = "nto",
+        target_os = "openbsd"
+    )))]
+    pub(crate) fn get_socket_domain(fd: BorrowedFd<'_>) -> io::Result<AddressFamily> {
+        let domain: c::c_int = getsockopt(fd, c::SOL_SOCKET as _, c::SO_DOMAIN)?;
+        Ok(AddressFamily(
+            domain.try_into().map_err(|_| io::Errno::OPNOTSUPP)?,
+        ))
     }
 
     #[inline]
