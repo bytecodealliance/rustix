@@ -32,7 +32,7 @@ use crate::fs::{
     StatVfsMountFlags, StatxFlags, Timestamps, Uid, XattrFlags,
 };
 use crate::io;
-use core::mem::{zeroed, MaybeUninit};
+use core::mem::MaybeUninit;
 #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
 use linux_raw_sys::general::stat as linux_stat64;
 use linux_raw_sys::general::{
@@ -1026,38 +1026,37 @@ pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::R
         FlockOperation::NonBlockingUnlock => (F_SETLK, F_UNLCK),
     };
 
+    let lock = flock {
+        l_type: l_type as _,
+
+        // When `l_len` is zero, this locks all the bytes from
+        // `l_whence`/`l_start` to the end of the file, even as the
+        // file grows dynamically.
+        l_whence: SEEK_SET as _,
+        l_start: 0,
+        l_len: 0,
+
+        // Unused.
+        l_pid: 0,
+    };
+
+    #[cfg(target_pointer_width = "32")]
     unsafe {
-        let lock = flock {
-            l_type: l_type as _,
-
-            // When `l_len` is zero, this locks all the bytes from
-            // `l_whence`/`l_start` to the end of the file, even as the
-            // file grows dynamically.
-            l_whence: SEEK_SET as _,
-            l_start: 0,
-            l_len: 0,
-
-            ..zeroed()
-        };
-
-        #[cfg(target_pointer_width = "32")]
-        {
-            ret(syscall_readonly!(
-                __NR_fcntl64,
-                fd,
-                c_uint(cmd),
-                by_ref(&lock)
-            ))
-        }
-        #[cfg(target_pointer_width = "64")]
-        {
-            ret(syscall_readonly!(
-                __NR_fcntl,
-                fd,
-                c_uint(cmd),
-                by_ref(&lock)
-            ))
-        }
+        ret(syscall_readonly!(
+            __NR_fcntl64,
+            fd,
+            c_uint(cmd),
+            by_ref(&lock)
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_fcntl,
+            fd,
+            c_uint(cmd),
+            by_ref(&lock)
+        ))
     }
 }
 
