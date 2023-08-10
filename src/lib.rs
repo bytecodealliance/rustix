@@ -137,6 +137,7 @@ mod static_assertions;
 #[cfg(not(windows))]
 #[macro_use]
 pub(crate) mod cstr;
+#[macro_use]
 pub(crate) mod utils;
 // Polyfill for `std` in `no_std` builds.
 #[cfg_attr(feature = "std", path = "maybe_polyfill/std/mod.rs")]
