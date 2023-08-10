@@ -69,7 +69,7 @@ pub(crate) fn with_v4_msghdr<R>(
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     f: impl FnOnce(c::msghdr) -> R,
 ) -> R {
-    let encoded = unsafe { encode_sockaddr_v4(addr) };
+    let encoded = encode_sockaddr_v4(addr);
 
     f({
         let mut h: c::msghdr = unsafe { zeroed() };
@@ -90,7 +90,7 @@ pub(crate) fn with_v6_msghdr<R>(
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     f: impl FnOnce(c::msghdr) -> R,
 ) -> R {
-    let encoded = unsafe { encode_sockaddr_v6(addr) };
+    let encoded = encode_sockaddr_v6(addr);
 
     f({
         let mut h: c::msghdr = unsafe { zeroed() };
