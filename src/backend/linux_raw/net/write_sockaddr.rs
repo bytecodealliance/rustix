@@ -17,7 +17,7 @@ pub(crate) unsafe fn write_sockaddr(
     }
 }
 
-pub(crate) unsafe fn encode_sockaddr_v4(v4: &SocketAddrV4) -> c::sockaddr_in {
+pub(crate) fn encode_sockaddr_v4(v4: &SocketAddrV4) -> c::sockaddr_in {
     c::sockaddr_in {
         sin_family: c::AF_INET as _,
         sin_port: u16::to_be(v4.port()),
@@ -34,7 +34,7 @@ unsafe fn write_sockaddr_v4(v4: &SocketAddrV4, storage: *mut SocketAddrStorage) 
     size_of::<c::sockaddr_in>()
 }
 
-pub(crate) unsafe fn encode_sockaddr_v6(v6: &SocketAddrV6) -> c::sockaddr_in6 {
+pub(crate) fn encode_sockaddr_v6(v6: &SocketAddrV6) -> c::sockaddr_in6 {
     c::sockaddr_in6 {
         sin6_family: c::AF_INET6 as _,
         sin6_port: u16::to_be(v6.port()),
