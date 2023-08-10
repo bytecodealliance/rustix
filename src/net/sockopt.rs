@@ -6,6 +6,19 @@
 #![doc(alias = "getsockopt")]
 #![doc(alias = "setsockopt")]
 
+#[cfg(not(any(
+    apple,
+    solarish,
+    windows,
+    target_os = "dragonfly",
+    target_os = "emscripten",
+    target_os = "espidf",
+    target_os = "haiku",
+    target_os = "netbsd",
+    target_os = "nto",
+    target_os = "openbsd"
+)))]
+use crate::net::AddressFamily;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 use crate::{backend, io};
 use backend::c;
@@ -710,6 +723,57 @@ pub fn set_socket_send_buffer_size<Fd: AsFd>(fd: Fd, size: usize) -> io::Result<
 #[doc(alias = "SO_SNDBUF")]
 pub fn get_socket_send_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
     backend::net::syscalls::sockopt::get_socket_send_buffer_size(fd.as_fd())
+}
+
+/// `getsockopt(fd, SOL_SOCKET, SO_DOMAIN)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `sys/socket.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `socket`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `SOL_SOCKET` options]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc `getsockopt`]
+///  - [glibc `SOL_SOCKET` Options]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `sys/socket.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_socket.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `socket`]: https://man7.org/linux/man-pages/man7/socket.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getsockopt.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=getsockopt&sektion=2
+/// [NetBSD]: https://man.netbsd.org/getsockopt.2
+/// [OpenBSD]: https://man.openbsd.org/getsockopt.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=getsockopt&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/getsockopt
+/// [glibc `getsockopt`]: https://www.gnu.org/software/libc/manual/html_node/Socket-Option-Functions.html
+/// [glibc `SOL_SOCKET` options]: https://www.gnu.org/software/libc/manual/html_node/Socket_002dLevel-Options.html
+// TODO: OpenBSD and Solarish support submitted upstream: https://github.com/rust-lang/libc/pull/3316
+#[cfg(not(any(
+    apple,
+    solarish,
+    windows,
+    target_os = "dragonfly",
+    target_os = "emscripten",
+    target_os = "espidf",
+    target_os = "haiku",
+    target_os = "netbsd",
+    target_os = "nto",
+    target_os = "openbsd"
+)))]
+#[inline]
+#[doc(alias = "SO_DOMAIN")]
+pub fn get_socket_domain<Fd: AsFd>(fd: Fd) -> io::Result<AddressFamily> {
+    backend::net::syscalls::sockopt::get_socket_domain(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_TTL, ttl)`

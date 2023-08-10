@@ -920,7 +920,7 @@ pub(crate) mod sockopt {
     use super::{c, BorrowedFd};
     use crate::io;
     use crate::net::sockopt::Timeout;
-    use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
+    use crate::net::{AddressFamily, Ipv4Addr, Ipv6Addr, SocketType};
     use c::{SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_SNDTIMEO_NEW, SO_SNDTIMEO_OLD};
     use core::time::Duration;
     use linux_raw_sys::general::{__kernel_timespec, timeval};
@@ -1269,6 +1269,14 @@ pub(crate) mod sockopt {
     #[inline]
     pub(crate) fn get_socket_send_buffer_size(fd: BorrowedFd<'_>) -> io::Result<usize> {
         getsockopt(fd, c::SOL_SOCKET as _, c::SO_SNDBUF).map(|size: u32| size as usize)
+    }
+
+    #[inline]
+    pub(crate) fn get_socket_domain(fd: BorrowedFd<'_>) -> io::Result<AddressFamily> {
+        let domain: c::c_int = getsockopt(fd, c::SOL_SOCKET as _, c::SO_DOMAIN)?;
+        Ok(AddressFamily(
+            domain.try_into().map_err(|_| io::Errno::OPNOTSUPP)?,
+        ))
     }
 
     #[inline]
