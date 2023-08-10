@@ -17,10 +17,10 @@ pub struct Pid(NonZeroI32);
 
 impl Pid {
     /// A `Pid` corresponding to the init process (pid 1).
-    pub const INIT: Self = Self(
-        // SAFETY: One is non-zero.
-        unsafe { NonZeroI32::new_unchecked(1) },
-    );
+    pub const INIT: Self = Self(match NonZeroI32::new(1) {
+        Some(n) => n,
+        None => panic!("unreachable"),
+    });
 
     /// Converts a `RawPid` into a `Pid`.
     ///
