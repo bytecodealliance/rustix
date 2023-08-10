@@ -685,10 +685,9 @@ impl<T> DoubleEndedIterator for AncillaryIter<'_, T> {
 }
 
 mod messages {
-    use crate::backend::c;
+    use crate::backend::{c, net::msghdr};
     use core::iter::FusedIterator;
     use core::marker::PhantomData;
-    use core::mem::zeroed;
     use core::ptr::NonNull;
 
     /// An iterator over the messages in an ancillary buffer.
@@ -709,7 +708,7 @@ mod messages {
         /// Create a new iterator over messages from a byte buffer.
         pub(super) fn new(buf: &'buf mut [u8]) -> Self {
             let msghdr = {
-                let mut h: c::msghdr = unsafe { zeroed() };
+                let mut h = msghdr::zero_msghdr();
                 h.msg_control = buf.as_mut_ptr().cast();
                 h.msg_controllen = buf.len().try_into().expect("buffer too large for msghdr");
                 h

@@ -32,13 +32,13 @@ use crate::fs::{
     StatVfsMountFlags, StatxFlags, Timestamps, Uid, XattrFlags,
 };
 use crate::io;
-use core::mem::{transmute, zeroed, MaybeUninit};
+use core::mem::MaybeUninit;
 #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
 use linux_raw_sys::general::stat as linux_stat64;
 use linux_raw_sys::general::{
-    __kernel_fsid_t, __kernel_timespec, open_how, statx, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR,
-    AT_SYMLINK_NOFOLLOW, F_ADD_SEALS, F_GETFL, F_GET_SEALS, F_SETFL, SEEK_CUR, SEEK_DATA, SEEK_END,
-    SEEK_HOLE, SEEK_SET, STATX__RESERVED,
+    __kernel_fsid_t, open_how, statx, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW,
+    F_ADD_SEALS, F_GETFL, F_GET_SEALS, F_SETFL, SEEK_CUR, SEEK_DATA, SEEK_END, SEEK_HOLE, SEEK_SET,
+    STATX__RESERVED,
 };
 use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET, EXT4_IOC_RESIZE_FS, FICLONE};
 #[cfg(target_pointer_width = "32")]
@@ -1026,38 +1026,37 @@ pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::R
         FlockOperation::NonBlockingUnlock => (F_SETLK, F_UNLCK),
     };
 
+    let lock = flock {
+        l_type: l_type as _,
+
+        // When `l_len` is zero, this locks all the bytes from
+        // `l_whence`/`l_start` to the end of the file, even as the
+        // file grows dynamically.
+        l_whence: SEEK_SET as _,
+        l_start: 0,
+        l_len: 0,
+
+        // Unused.
+        l_pid: 0,
+    };
+
+    #[cfg(target_pointer_width = "32")]
     unsafe {
-        let lock = flock {
-            l_type: l_type as _,
-
-            // When `l_len` is zero, this locks all the bytes from
-            // `l_whence`/`l_start` to the end of the file, even as the
-            // file grows dynamically.
-            l_whence: SEEK_SET as _,
-            l_start: 0,
-            l_len: 0,
-
-            ..zeroed()
-        };
-
-        #[cfg(target_pointer_width = "32")]
-        {
-            ret(syscall_readonly!(
-                __NR_fcntl64,
-                fd,
-                c_uint(cmd),
-                by_ref(&lock)
-            ))
-        }
-        #[cfg(target_pointer_width = "64")]
-        {
-            ret(syscall_readonly!(
-                __NR_fcntl,
-                fd,
-                c_uint(cmd),
-                by_ref(&lock)
-            ))
-        }
+        ret(syscall_readonly!(
+            __NR_fcntl64,
+            fd,
+            c_uint(cmd),
+            by_ref(&lock)
+        ))
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_fcntl,
+            fd,
+            c_uint(cmd),
+            by_ref(&lock)
+        ))
     }
 }
 
@@ -1267,9 +1266,6 @@ fn _utimensat(
     times: &Timestamps,
     flags: AtFlags,
 ) -> io::Result<()> {
-    // Assert that `Timestamps` has the expected layout.
-    let _ = unsafe { transmute::<Timestamps, [__kernel_timespec; 2]>(times.clone()) };
-
     // `utimensat_time64` was introduced in Linux 5.1. The old `utimensat`
     // syscall is not y2038-compatible on 32-bit architectures.
     #[cfg(target_pointer_width = "32")]
@@ -1657,4 +1653,12 @@ pub(crate) fn ext4_ioc_resize_fs(fd: BorrowedFd<'_>, blocks: u64) -> io::Result<
             by_ref(&blocks)
         ))
     }
+}
+
+#[test]
+fn test_sizes() {
+    assert_eq_size!(linux_raw_sys::general::__kernel_loff_t, u64);
+
+    // Assert that `Timestamps` has the expected layout.
+    assert_eq_size!([linux_raw_sys::general::__kernel_timespec; 2], Timestamps);
 }

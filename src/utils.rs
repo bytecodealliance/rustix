@@ -1,6 +1,7 @@
 //! Miscellaneous minor utilities.
 
 #![allow(dead_code)]
+#![allow(unused_macros)]
 
 use core::ffi::c_void;
 use core::mem::{align_of, size_of};
@@ -47,4 +48,35 @@ pub(crate) fn check_raw_pointer<T>(value: *mut c_void) -> Option<NonNull<T>> {
     }
 
     NonNull::new(value.cast())
+}
+
+/// Create an array value containing all default values, inferring the type.
+#[inline]
+pub(crate) fn default_array<T: Default + Copy, const N: usize>() -> [T; N] {
+    [T::default(); N]
+}
+
+/// Create a union value containing a default value in one of its arms.
+///
+/// The field names a union field which must have the same size as the union
+/// itself.
+macro_rules! default_union {
+    ($union:ident, $field:ident) => {{
+        let u = $union {
+            $field: Default::default(),
+        };
+
+        // Assert that the given field initializes the whole union.
+        #[cfg(test)]
+        unsafe {
+            let field_value = u.$field;
+            assert_eq!(
+                core::mem::size_of_val(&u),
+                core::mem::size_of_val(&field_value)
+            );
+            const_assert_eq!(memoffset::offset_of_union!($union, $field), 0);
+        }
+
+        u
+    }};
 }

@@ -79,9 +79,9 @@ macro_rules! check_struct {
 
         // Check that we have all the fields.
         if false {
+            #[allow(unreachable_code)]
             let _test = $name {
-                // SAFETY: This code is guarded by `if false`.
-                $($field: unsafe { core::mem::zeroed() }),*
+                $($field: panic!()),*
             };
         }
 

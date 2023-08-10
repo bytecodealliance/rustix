@@ -27,7 +27,7 @@
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 use crate::{backend, io};
 use core::ffi::c_void;
-use core::mem::{zeroed, MaybeUninit};
+use core::mem::MaybeUninit;
 use core::ptr::{null_mut, write_bytes};
 use linux_raw_sys::net;
 
@@ -1245,72 +1245,63 @@ pub struct io_uring_buf {
 impl Default for ioprio_union {
     #[inline]
     fn default() -> Self {
-        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { zeroed::<Self>() }
+        default_union!(ioprio_union, ioprio)
     }
 }
 
 impl Default for len_union {
     #[inline]
     fn default() -> Self {
-        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { zeroed::<Self>() }
+        default_union!(len_union, len)
     }
 }
 
 impl Default for off_or_addr2_union {
     #[inline]
     fn default() -> Self {
-        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { zeroed::<Self>() }
+        default_union!(off_or_addr2_union, off)
     }
 }
 
 impl Default for addr_or_splice_off_in_union {
     #[inline]
     fn default() -> Self {
-        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { zeroed::<Self>() }
+        default_union!(addr_or_splice_off_in_union, splice_off_in)
     }
 }
 
 impl Default for addr3_or_cmd_union {
     #[inline]
     fn default() -> Self {
-        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { zeroed::<Self>() }
+        default_union!(addr3_or_cmd_union, addr3)
     }
 }
 
 impl Default for op_flags_union {
     #[inline]
     fn default() -> Self {
-        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { zeroed::<Self>() }
+        default_union!(op_flags_union, sync_range_flags)
     }
 }
 
 impl Default for buf_union {
     #[inline]
     fn default() -> Self {
-        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { zeroed::<Self>() }
+        default_union!(buf_union, buf_index)
     }
 }
 
 impl Default for splice_fd_in_or_file_index_union {
     #[inline]
     fn default() -> Self {
-        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { zeroed::<Self>() }
+        default_union!(splice_fd_in_or_file_index_union, splice_fd_in)
     }
 }
 
 impl Default for register_or_sqe_op_or_sqe_flags_union {
     #[inline]
     fn default() -> Self {
-        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe { zeroed::<Self>() }
+        default_union!(register_or_sqe_op_or_sqe_flags_union, sqe_flags)
     }
 }
 

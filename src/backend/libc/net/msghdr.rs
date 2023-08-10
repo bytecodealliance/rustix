@@ -24,7 +24,7 @@ pub(crate) fn with_recv_msghdr<R>(
 
     let namelen = size_of::<c::sockaddr_storage>() as c::socklen_t;
     let mut msghdr = {
-        let mut h: c::msghdr = unsafe { zeroed() };
+        let mut h = zero_msghdr();
         h.msg_name = name.as_mut_ptr().cast();
         h.msg_namelen = namelen;
         h.msg_iov = iov.as_mut_ptr().cast();
@@ -53,7 +53,7 @@ pub(crate) fn with_noaddr_msghdr<R>(
     f: impl FnOnce(c::msghdr) -> R,
 ) -> R {
     f({
-        let mut h: c::msghdr = unsafe { zeroed() };
+        let mut h = zero_msghdr();
         h.msg_iov = iov.as_ptr() as _;
         h.msg_iovlen = msg_iov_len(iov.len());
         h.msg_control = control.as_control_ptr().cast();
@@ -72,7 +72,7 @@ pub(crate) fn with_v4_msghdr<R>(
     let encoded = encode_sockaddr_v4(addr);
 
     f({
-        let mut h: c::msghdr = unsafe { zeroed() };
+        let mut h = zero_msghdr();
         h.msg_name = as_ptr(&encoded) as _;
         h.msg_namelen = size_of::<SocketAddrV4>() as _;
         h.msg_iov = iov.as_ptr() as _;
@@ -93,7 +93,7 @@ pub(crate) fn with_v6_msghdr<R>(
     let encoded = encode_sockaddr_v6(addr);
 
     f({
-        let mut h: c::msghdr = unsafe { zeroed() };
+        let mut h = zero_msghdr();
         h.msg_name = as_ptr(&encoded) as _;
         h.msg_namelen = size_of::<SocketAddrV6>() as _;
         h.msg_iov = iov.as_ptr() as _;
@@ -113,7 +113,7 @@ pub(crate) fn with_unix_msghdr<R>(
     f: impl FnOnce(c::msghdr) -> R,
 ) -> R {
     f({
-        let mut h: c::msghdr = unsafe { zeroed() };
+        let mut h = zero_msghdr();
         h.msg_name = as_ptr(addr) as _;
         h.msg_namelen = addr.addr_len();
         h.msg_iov = iov.as_ptr() as _;
@@ -122,4 +122,13 @@ pub(crate) fn with_unix_msghdr<R>(
         h.msg_controllen = msg_control_len(control.control_len());
         h
     })
+}
+
+/// Create a zero-initialized message header struct value.
+#[cfg(all(unix, not(target_os = "redox")))]
+pub(crate) fn zero_msghdr() -> c::msghdr {
+    // SAFETY: We can't initialize all the fields by value because on some
+    // platforms the `msghdr` struct in the libc crate contains private padding
+    // fields. But it is still a C type that's meant to be zero-initializable.
+    unsafe { zeroed() }
 }
