@@ -217,7 +217,7 @@ fn is_linux_kernel_config_item_enabled(config: &[u8], name: &str) -> io::Result<
                 if let Some(mut value) = iter.next().map(str::trim) {
                     if value.starts_with('"') && value.ends_with('"') {
                         // Just remove the quotes, but don't bother unescaping the inner string
-                        // because we are only trying to find out if the option is an true boolean.
+                        // because we are only trying to find out if the option is a true boolean.
                         value = &value[1..(value.len() - 2)];
                     }
 

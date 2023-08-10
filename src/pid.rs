@@ -1,3 +1,5 @@
+//! The `Pid` type.
+
 #![allow(unsafe_code)]
 
 use crate::backend::c;
@@ -27,11 +29,11 @@ impl Pid {
     /// Returns `Some` for strictly positive `RawPid`s. Otherwise, returns
     /// `None`.
     ///
-    /// This is always safe because a `Pid` is a number without any guarantees
-    /// for the kernel. Non-child `Pid`s are always racy for any syscalls,
-    /// but can only cause logic errors. If you want race-free access or
-    /// control to non-child processes, please consider other mechanisms
-    /// like [pidfd] on Linux.
+    /// This is safe because a `Pid` is a number without any guarantees for the
+    /// kernel. Non-child `Pid`s are always racy for any syscalls, but can only
+    /// cause logic errors. If you want race-free access to or control of
+    /// non-child processes, please consider other mechanisms like [pidfd] on
+    /// Linux.
     ///
     /// [pidfd]: https://man7.org/linux/man-pages/man2/pidfd_open.2.html
     #[inline]

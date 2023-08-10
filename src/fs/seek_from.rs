@@ -4,9 +4,12 @@
 
 /// Enumeration of possible methods to seek within an I/O object.
 ///
-/// It is used by the [`Seek`] trait.
+/// It is used by the [`seek`] function.
 ///
-/// [`Seek`]: std::io::Seek
+/// This is similar to [`std::io::SeekFrom`], however it adds platform-specific
+/// seek options.
+///
+/// [`seek`]: crate::fs::seek
 #[derive(Copy, PartialEq, Eq, Clone, Debug)]
 #[cfg_attr(staged_api, stable(feature = "rust1", since = "1.0.0"))]
 pub enum SeekFrom {
@@ -33,8 +36,8 @@ pub enum SeekFrom {
     /// Sets the offset to the current position plus the specified number of
     /// bytes, plus the distance to the next byte which is not in a hole.
     ///
-    /// If the offset is in a hole at the end of the file, the seek will
-    /// fail with [`Errno::NXIO`].
+    /// If the offset is in a hole at the end of the file, the seek will fail
+    /// with [`Errno::NXIO`].
     ///
     /// [`Errno::NXIO`]: crate::io::Errno::NXIO
     #[cfg(any(apple, freebsdlike, linux_kernel, solarish))]

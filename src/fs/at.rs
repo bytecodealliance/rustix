@@ -96,8 +96,10 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::R
 
         debug_assert!(nread <= buffer.capacity());
         if nread < buffer.capacity() {
-            // SAFETY from the man page:
+            // SAFETY: From the [documentation]:
             // "On success, these calls return the number of bytes placed in buf."
+            //
+            // [documentation]: https://man7.org/linux/man-pages/man2/readlinkat.2.html
             unsafe {
                 buffer.set_len(nread);
             }

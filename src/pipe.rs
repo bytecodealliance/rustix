@@ -106,20 +106,20 @@ pub fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     backend::pipe::syscalls::pipe_with(flags)
 }
 
-/// `splice(fd_in, off_in, fd_out, off_out, len, flags)`—Transfer data between
-/// a file and a pipe.
+/// `splice(fd_in, off_in, fd_out, off_out, len, flags)`—Transfer data
+/// between a file and a pipe.
 ///
 /// This function transfers up to `len` bytes of data from the file descriptor
 /// `fd_in` to the file descriptor `fd_out`, where one of the file descriptors
 /// must refer to a pipe.
 ///
 /// `off_*` must be `None` if the corresponding fd refers to a pipe.
-/// Otherwise its value points to the starting offset to the file,
-/// from which the data is read/written.
-/// on success the number of bytes read/written is added to the offset.
+/// Otherwise its value points to the starting offset to the file, from which
+/// the data is read/written. On success, the number of bytes read/written is
+/// added to the offset.
 ///
-/// passing `None` causes the read/write to start from the file offset,
-/// and the file offset is adjusted appropriately.
+/// Passing `None` causes the read/write to start from the file offset, and the
+/// file offset is adjusted appropriately.
 ///
 /// # References
 ///  - [Linux]

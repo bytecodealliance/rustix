@@ -5,16 +5,17 @@
 fn main() -> std::io::Result<()> {
     use rustix::pipe::pipe;
     use rustix::stdio::{dup2_stdin, dup2_stdout};
-    use std::io::{BufRead, BufReader};
 
     // Create some new file descriptors that we'll use to replace stdio's file
     // descriptors with.
     let (reader, writer) = pipe()?;
 
-    // Use `dup2` to copy our new file descriptors over the stdio file descriptors.
+    // Use `dup2` to copy our new file descriptors over the stdio file
+    // descriptors.
     //
-    // Rustix has a plain `dup2` function too, but it requires a `&mut OwnedFd`,
-    // so these helper functions make it easier to use when replacing stdio fds.
+    // Rustix has a plain `dup2` function too, but it requires a
+    // `&mut OwnedFd`, so these helper functions make it easier to use when
+    // replacing stdio fds.
     dup2_stdin(&reader)?;
     dup2_stdout(&writer)?;
 
@@ -28,9 +29,9 @@ fn main() -> std::io::Result<()> {
 
     // And we can read from stdin, and it'll read from our pipe. It's a little
     // silly that we connected our stdout to our own stdin, but it's just an
-    // example :-).
+    // example 😀.
     let mut s = String::new();
-    BufReader::new(std::io::stdin()).read_line(&mut s)?;
+    std::io::stdin().read_line(&mut s)?;
     assert_eq!(s, "hello, world!\n");
 
     Ok(())

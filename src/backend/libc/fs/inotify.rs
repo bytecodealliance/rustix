@@ -112,8 +112,8 @@ pub fn inotify_add_watch<P: crate::path::Arg>(
 
 /// `inotify_rm_watch(self, wd)`—Removes a watch from this inotify
 ///
-/// The watch descriptor provided should have previously been returned
-/// by [`inotify_add_watch`] and not previously have been removed.
+/// The watch descriptor provided should have previously been returned by
+/// [`inotify_add_watch`] and not previously have been removed.
 #[doc(alias = "inotify_rm_watch")]
 pub fn inotify_remove_watch(inot: BorrowedFd<'_>, wd: i32) -> io::Result<()> {
     // Android's `inotify_rm_watch` takes `u32` despite that

@@ -81,7 +81,7 @@ impl<'fd> PollFd<'fd> {
     /// Returns the ready events.
     #[inline]
     pub fn revents(&self) -> PollFlags {
-        // Use `unwrap()` here because in theory we know we know all the bits
+        // Use `.unwrap()` here because in theory we know we know all the bits
         // the OS might set here, but OS's have added extensions in the past.
         PollFlags::from_bits(self.revents).unwrap()
     }

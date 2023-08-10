@@ -1,3 +1,5 @@
+//! The [`pidfd_getfd`] function and supporting types.
+
 #![allow(unsafe_code)]
 use crate::fd::OwnedFd;
 use crate::{backend, io};
@@ -19,7 +21,7 @@ bitflags::bitflags! {
 }
 
 /// `syscall(SYS_pidfd_getfd, pidfd, flags)`—Obtain a duplicate of another
-/// process's file descriptor.
+/// process' file descriptor.
 ///
 /// # References
 ///  - [Linux]

@@ -19,8 +19,8 @@ use core::slice;
 #[cfg(not(feature = "runtime"))]
 weak!(fn getauxval(c::c_ulong) -> *mut c::c_void);
 
-// With the "runtime" feature, go ahead and depend on `getauxval` existing
-// so that we never fail.
+// With the "runtime" feature, go ahead and depend on `getauxval` existing so
+// that we never fail.
 #[cfg(feature = "runtime")]
 extern "C" {
     fn getauxval(type_: c::c_ulong) -> *mut c::c_void;
@@ -33,8 +33,8 @@ const AT_HWCAP2: c::c_ulong = 26;
 const AT_EXECFN: c::c_ulong = 31;
 const AT_SYSINFO_EHDR: c::c_ulong = 33;
 
-// Declare `sysconf` ourselves so that we don't depend on all of libc
-// just for this.
+// Declare `sysconf` ourselves so that we don't depend on all of libc just for
+// this.
 extern "C" {
     fn sysconf(name: c::c_int) -> c::c_long;
 }

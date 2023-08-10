@@ -418,10 +418,10 @@ fn open_and_check_file(dir: BorrowedFd, dir_stat: &Stat, name: &CStr) -> io::Res
     let file_stat = fstat(&file)?;
 
     // `is_mountpoint` only works on directory mount points, not file mount
-    // points. To detect file mount points, scan the parent directory to see
-    // if we can find a regular file with an inode and name that matches the
-    // file we just opened. If we can't find it, there could be a file bind
-    // mount on top of the file we want.
+    // points. To detect file mount points, scan the parent directory to see if
+    // we can find a regular file with an inode and name that matches the file
+    // we just opened. If we can't find it, there could be a file bind mount on
+    // top of the file we want.
     //
     // As we scan, we also check for ".", to make sure it's the same directory
     // as our original directory, to detect mount points, since

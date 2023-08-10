@@ -96,7 +96,7 @@ impl TryFrom<i32> for DumpableBehavior {
     }
 }
 
-/// Get the current state of the calling process's `dumpable` attribute.
+/// Get the current state of the calling process' `dumpable` attribute.
 ///
 /// # References
 ///  - [`prctl(PR_GET_DUMPABLE,...)`]

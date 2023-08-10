@@ -72,8 +72,8 @@ pub unsafe fn port_associate_fd(
     )
 }
 
-/// `port_dissociate(_, PORT_SOURCE_FD, _)`—Dissociates a file descriptor from
-/// a port.
+/// `port_dissociate(_, PORT_SOURCE_FD, _)`—Dissociates a file descriptor
+/// from a port.
 ///
 /// # Safety
 ///

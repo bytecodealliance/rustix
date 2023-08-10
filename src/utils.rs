@@ -1,3 +1,5 @@
+//! Miscellaneous minor utilities.
+
 #![allow(dead_code)]
 
 use core::ffi::c_void;

@@ -1653,7 +1653,7 @@ impl Ipv6Addr {
             && !self.is_benchmarking()
     }
 
-    /// Returns the address's multicast scope if the address is multicast.
+    /// Returns the address' multicast scope if the address is multicast.
     ///
     /// # Examples
     ///

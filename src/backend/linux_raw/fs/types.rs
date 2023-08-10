@@ -210,6 +210,8 @@ bitflags! {
         const WRONLY = linux_raw_sys::general::O_WRONLY;
 
         /// `O_RDWR`
+        ///
+        /// This is not equal to `RDONLY | WRONLY`. It's a distinct flag.
         const RDWR = linux_raw_sys::general::O_RDWR;
 
         /// `O_NOCTTY`

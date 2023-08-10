@@ -134,8 +134,8 @@ impl TryFrom<i32> for SecureComputingMode {
 /// computing mode, then this call will cause a [`Signal::Kill`] signal to be
 /// sent to the process. If the caller is in filter mode, and this system call
 /// is allowed by the seccomp filters, it returns
-/// [`SecureComputingMode::Filter`]; otherwise, the process is killed with
-/// a [`Signal::Kill`] signal.
+/// [`SecureComputingMode::Filter`]; otherwise, the process is killed with a
+/// [`Signal::Kill`] signal.
 ///
 /// Since Linux 3.8, the Seccomp field of the `/proc/[pid]/status` file
 /// provides a method of obtaining the same information, without the risk that
@@ -414,25 +414,27 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct CapabilitiesSecureBits: u32 {
-        /// If this bit is set, then the kernel does not grant capabilities when
-        /// a `set-user-ID-root` program is executed, or when a process with an effective or real
-        /// UID of 0 calls `execve`.
+        /// If this bit is set, then the kernel does not grant capabilities
+        /// when a `set-user-ID-root` program is executed, or when a process
+        /// with an effective or real UID of 0 calls `execve`.
         const NO_ROOT = 1_u32 << 0;
         /// Set [`NO_ROOT`] irreversibly.
         const NO_ROOT_LOCKED = 1_u32 << 1;
-        /// Setting this flag stops the kernel from adjusting the process's permitted, effective,
-        /// and ambient capability sets when the thread's effective and filesystem UIDs are switched
-        /// between zero and nonzero values.
+        /// Setting this flag stops the kernel from adjusting the process'
+        /// permitted, effective, and ambient capability sets when the thread's
+        /// effective and filesystem UIDs are switched between zero and nonzero
+        /// values.
         const NO_SETUID_FIXUP = 1_u32 << 2;
         /// Set [`NO_SETUID_FIXUP`] irreversibly.
         const NO_SETUID_FIXUP_LOCKED = 1_u32 << 3;
-        /// Setting this flag allows a thread that has one or more 0 UIDs to retain capabilities in
-        /// its permitted set when it switches all of its UIDs to nonzero values.
+        /// Setting this flag allows a thread that has one or more 0 UIDs to
+        /// retain capabilities in its permitted set when it switches all of
+        /// its UIDs to nonzero values.
         const KEEP_CAPS = 1_u32 << 4;
         /// Set [`KEEP_CAPS`] irreversibly.
         const KEEP_CAPS_LOCKED = 1_u32 << 5;
-        /// Setting this flag disallows raising ambient capabilities via the `prctl`'s
-        /// `PR_CAP_AMBIENT_RAISE` operation.
+        /// Setting this flag disallows raising ambient capabilities via the
+        /// `prctl`'s `PR_CAP_AMBIENT_RAISE` operation.
         const NO_CAP_AMBIENT_RAISE = 1_u32 << 6;
         /// Set [`NO_CAP_AMBIENT_RAISE`] irreversibly.
         const NO_CAP_AMBIENT_RAISE_LOCKED = 1_u32 << 7;

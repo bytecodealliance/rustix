@@ -160,11 +160,11 @@ pub fn create(flags: CreateFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::epoll_create1(bitflags_bits!(flags))) }
 }
 
-/// `epoll_ctl(self, EPOLL_CTL_ADD, data, event)`—Adds an element to an
-/// epoll object.
+/// `epoll_ctl(self, EPOLL_CTL_ADD, data, event)`—Adds an element to an epoll
+/// object.
 ///
-/// This registers interest in any of the events set in `events` occurring
-/// on the file descriptor associated with `data`.
+/// This registers interest in any of the events set in `events` occurring on
+/// the file descriptor associated with `data`.
 ///
 /// If [`delete`] is not called on the I/O source passed into this function
 /// before the I/O source is `close`d, then the `epoll` will act as if the I/O
@@ -198,8 +198,8 @@ pub fn add(
     }
 }
 
-/// `epoll_ctl(self, EPOLL_CTL_MOD, target, event)`—Modifies an element in
-/// a given epoll object.
+/// `epoll_ctl(self, EPOLL_CTL_MOD, target, event)`—Modifies an element in a
+/// given epoll object.
 ///
 /// This sets the events of interest with `target` to `events`.
 #[doc(alias = "epoll_ctl")]
@@ -229,8 +229,8 @@ pub fn modify(
     }
 }
 
-/// `epoll_ctl(self, EPOLL_CTL_DEL, target, NULL)`—Removes an element in
-/// a given epoll object.
+/// `epoll_ctl(self, EPOLL_CTL_DEL, target, NULL)`—Removes an element in a
+/// given epoll object.
 #[doc(alias = "epoll_ctl")]
 pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
     // SAFETY: We're calling `epoll_ctl` via FFI and we know how it
@@ -341,8 +341,8 @@ impl EventData {
 
     /// Return the value as a `u64`.
     ///
-    /// If the stored value was a pointer, the pointer is zero-extended to
-    /// a `u64`.
+    /// If the stored value was a pointer, the pointer is zero-extended to a
+    /// `u64`.
     #[inline]
     pub fn u64(self) -> u64 {
         unsafe { self.as_u64 }
