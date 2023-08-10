@@ -131,3 +131,16 @@ pub(crate) fn with_unix_msghdr<R>(
         msg_flags: 0,
     })
 }
+
+/// Create a zero-initialized message header struct value.
+pub(crate) fn zero_msghdr() -> c::msghdr {
+    c::msghdr {
+        msg_name: null_mut(),
+        msg_namelen: 0,
+        msg_iov: null_mut(),
+        msg_iovlen: 0,
+        msg_control: null_mut(),
+        msg_controllen: 0,
+        msg_flags: 0,
+    }
+}
