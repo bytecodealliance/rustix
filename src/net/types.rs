@@ -1291,9 +1291,9 @@ fn test_sizes() {
     #[allow(unsafe_code)]
     unsafe {
         let t: Option<Protocol> = None;
-        assert_eq!(0_u32, transmute(t));
+        assert_eq!(0_u32, transmute::<Option<Protocol>, u32>(t));
 
         let t: Option<Protocol> = Some(Protocol::from_raw(RawProtocol::new(4567).unwrap()));
-        assert_eq!(4567_u32, transmute(t));
+        assert_eq!(4567_u32, transmute::<Option<Protocol>, u32>(t));
     }
 }
