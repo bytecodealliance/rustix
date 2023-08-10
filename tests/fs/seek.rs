@@ -17,23 +17,44 @@ fn test_seek_holes() {
     let mut foo = std::fs::File::from(foo);
 
     let stat = fstat(&foo).unwrap();
-    let blksize = stat.st_blksize as u64;
+    let hole_size = stat.st_blksize as u64;
+
+    #[cfg(any(solarish, freebsdlike, netbsdlike))]
+    let hole_size = unsafe {
+        use std::os::unix::io::AsRawFd;
+
+        let r = libc::fpathconf(foo.as_raw_fd(), libc::_PC_MIN_HOLE_SIZE);
+
+        if r < 0 {
+            // Holes not supported.
+            return;
+        }
+
+        // Holes are supported.
+        core::cmp::max(hole_size, r as u64)
+    };
 
     foo.write_all(b"prefix").unwrap();
-    assert_eq!(seek(&foo, SeekFrom::Start(blksize * 2)), Ok(blksize * 2));
+    assert_eq!(
+        seek(&foo, SeekFrom::Start(hole_size * 2)),
+        Ok(hole_size * 2)
+    );
     foo.write_all(b"suffix").unwrap();
     assert_eq!(seek(&foo, SeekFrom::Start(0)), Ok(0));
     assert_eq!(seek(&foo, SeekFrom::Current(0)), Ok(0));
-    assert_eq!(seek(&foo, SeekFrom::Hole(0)), Ok(blksize));
-    assert_eq!(seek(&foo, SeekFrom::Hole(blksize as i64)), Ok(blksize));
+    assert_eq!(seek(&foo, SeekFrom::Hole(0)), Ok(hole_size));
+    assert_eq!(seek(&foo, SeekFrom::Hole(hole_size as i64)), Ok(hole_size));
     assert_eq!(
-        seek(&foo, SeekFrom::Hole(blksize as i64 * 2)),
-        Ok(blksize * 2 + 6)
+        seek(&foo, SeekFrom::Hole(hole_size as i64 * 2)),
+        Ok(hole_size * 2 + 6)
     );
     assert_eq!(seek(&foo, SeekFrom::Data(0)), Ok(0));
-    assert_eq!(seek(&foo, SeekFrom::Data(blksize as i64)), Ok(blksize * 2));
     assert_eq!(
-        seek(&foo, SeekFrom::Data(blksize as i64 * 2)),
-        Ok(blksize * 2)
+        seek(&foo, SeekFrom::Data(hole_size as i64)),
+        Ok(hole_size * 2)
+    );
+    assert_eq!(
+        seek(&foo, SeekFrom::Data(hole_size as i64 * 2)),
+        Ok(hole_size * 2)
     );
 }
