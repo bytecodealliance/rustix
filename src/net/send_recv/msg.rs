@@ -685,7 +685,8 @@ impl<T> DoubleEndedIterator for AncillaryIter<'_, T> {
 }
 
 mod messages {
-    use crate::backend::{c, net::msghdr};
+    use crate::backend::c;
+    use crate::backend::net::msghdr;
     use core::iter::FusedIterator;
     use core::marker::PhantomData;
     use core::ptr::NonNull;
