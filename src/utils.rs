@@ -48,3 +48,9 @@ pub(crate) fn check_raw_pointer<T>(value: *mut c_void) -> Option<NonNull<T>> {
 
     NonNull::new(value.cast())
 }
+
+/// Create an array containing all default values, inferring the type.
+#[inline]
+pub(crate) fn default_array<T: Default + Copy, const N: usize>() -> [T; N] {
+    [T::default(); N]
+}
