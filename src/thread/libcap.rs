@@ -102,6 +102,9 @@ bitflags! {
         const BPF = 1 << linux_raw_sys::general::CAP_BPF;
         /// `CAP_CHECKPOINT_RESTORE`
         const CHECKPOINT_RESTORE = 1 << linux_raw_sys::general::CAP_CHECKPOINT_RESTORE;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

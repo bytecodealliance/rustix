@@ -30,6 +30,9 @@ bitflags! {
         const PROCESS_ID = CLONE_NEWPID;
         /// Network name space.
         const NETWORK = CLONE_NEWNET;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -82,6 +85,9 @@ bitflags! {
         const NEWUTS = CLONE_NEWUTS;
         /// `CLONE_SYSVSEM`.
         const SYSVSEM = CLONE_SYSVSEM;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

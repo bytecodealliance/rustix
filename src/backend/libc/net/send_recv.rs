@@ -41,6 +41,9 @@ bitflags! {
         const NOSIGNAL = bitcast!(c::MSG_NOSIGNAL);
         /// `MSG_OOB`
         const OOB = bitcast!(c::MSG_OOB);
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -76,5 +79,8 @@ bitflags! {
         const TRUNC = bitcast!(c::MSG_TRUNC);
         /// `MSG_WAITALL`
         const WAITALL = bitcast!(c::MSG_WAITALL);
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }

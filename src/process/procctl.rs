@@ -229,6 +229,9 @@ bitflags! {
         const OWNED = 1;
         /// The process is the root of the reaper tree (pid 1).
         const REALINIT = 2;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

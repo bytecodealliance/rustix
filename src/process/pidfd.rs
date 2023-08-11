@@ -11,6 +11,9 @@ bitflags::bitflags! {
     pub struct PidfdFlags: backend::c::c_uint {
         /// `PIDFD_NONBLOCK`.
         const NONBLOCK = backend::c::PIDFD_NONBLOCK;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

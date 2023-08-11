@@ -9,6 +9,9 @@ bitflags::bitflags! {
         const PRIVATE = linux_raw_sys::general::FUTEX_PRIVATE_FLAG;
         /// `FUTEX_CLOCK_REALTIME`
         const CLOCK_REALTIME = linux_raw_sys::general::FUTEX_CLOCK_REALTIME;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

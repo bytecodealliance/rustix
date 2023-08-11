@@ -22,6 +22,9 @@ bitflags! {
         /// Return if a stopped child has been resumed by delivery of
         /// [`Signal::Cont`].
         const CONTINUED = bitcast!(backend::process::wait::WCONTINUED);
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -42,6 +45,9 @@ bitflags! {
         const NOWAIT = bitcast!(backend::process::wait::WNOWAIT);
         /// Wait for processes that have been stopped.
         const STOPPED = bitcast!(backend::process::wait::WSTOPPED);
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

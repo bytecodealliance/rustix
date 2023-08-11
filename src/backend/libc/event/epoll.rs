@@ -92,6 +92,9 @@ bitflags! {
     pub struct CreateFlags: u32 {
         /// `EPOLL_CLOEXEC`
         const CLOEXEC = bitcast!(c::EPOLL_CLOEXEC);
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -145,6 +148,9 @@ bitflags! {
         /// `EPOLLEXCLUSIVE`
         #[cfg(not(target_os = "android"))]
         const EXCLUSIVE = bitcast!(c::EPOLLEXCLUSIVE);
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

@@ -16,7 +16,7 @@ include = ["src", "build.rs", "Cargo.toml", "COPYRIGHT", "LICENSE*", "/*.md", "b
 rust-version = "1.63"
 
 [dependencies]
-bitflags = { version = "2.3.3", default-features = false }
+bitflags = { version = "2.4.0", default-features = false }
 itoa = { version = "1.0.1", default-features = false, optional = true }
 
 # Special dependencies used in rustc-dep-of-std mode.

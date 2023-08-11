@@ -55,7 +55,8 @@
 //!  - Path arguments use [`Arg`], so they accept any string type.
 //!  - File descriptors are passed and returned via [`AsFd`] and [`OwnedFd`]
 //!    instead of bare integers, ensuring I/O safety.
-//!  - Constants use `enum`s and [`bitflags`] types.
+//!  - Constants use `enum`s and [`bitflags`] types, and enable
+//!    [support for externally defined flags].
 //!  - Multiplexed functions (eg. `fcntl`, `ioctl`, etc.) are de-multiplexed.
 //!  - Variadic functions (eg. `openat`, etc.) are presented as non-variadic.
 //!  - Functions that return strings automatically allocate sufficient memory
@@ -93,6 +94,7 @@
 //! [I/O-safe]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
 //! [`Result`]: https://doc.rust-lang.org/stable/std/result/enum.Result.html
 //! [`Arg`]: https://docs.rs/rustix/*/rustix/path/trait.Arg.html
+//! [support for externally defined flags]: https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags
 
 #![deny(missing_docs)]
 #![allow(stable_features)]

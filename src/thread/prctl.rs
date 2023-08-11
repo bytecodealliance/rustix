@@ -438,6 +438,9 @@ bitflags! {
         const NO_CAP_AMBIENT_RAISE = 1_u32 << 6;
         /// Set [`NO_CAP_AMBIENT_RAISE`] irreversibly.
         const NO_CAP_AMBIENT_RAISE_LOCKED = 1_u32 << 7;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -745,6 +748,9 @@ bitflags! {
         const TCF_SYNC = 1_u32 << 1;
         /// Asynchronous tag check fault mode.
         const TCF_ASYNC = 1_u32 << 2;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

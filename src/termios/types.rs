@@ -292,6 +292,9 @@ bitflags! {
             target_os = "redox",
         )))]
         const IUTF8 = c::IUTF8;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -504,6 +507,9 @@ bitflags! {
             target_os = "redox",
         )))]
         const VT1 = c::VT1;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -564,6 +570,9 @@ bitflags! {
             target_os = "redox",
         )))]
         const CMSPAR = c::CMSPAR;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -627,6 +636,9 @@ bitflags! {
 
         /// `IEXTEN`
         const IEXTEN = c::IEXTEN;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

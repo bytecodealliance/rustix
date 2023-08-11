@@ -19,6 +19,9 @@ bitflags! {
 
         /// `F_OK`
         const EXISTS = linux_raw_sys::general::F_OK;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -57,6 +60,9 @@ bitflags! {
 
         /// `AT_STATX_DONT_SYNC`
         const STATX_DONT_SYNC = linux_raw_sys::general::AT_STATX_DONT_SYNC;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -113,6 +119,9 @@ bitflags! {
 
         /// `S_ISVTX`
         const SVTX = linux_raw_sys::general::S_ISVTX;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -240,6 +249,9 @@ bitflags! {
 
         /// `O_DIRECT`
         const DIRECT = linux_raw_sys::general::O_DIRECT;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -267,6 +279,9 @@ bitflags! {
 
         /// `RESOLVE_CACHED` (since Linux 5.12)
         const CACHED = linux_raw_sys::general::RESOLVE_CACHED as u64;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -285,6 +300,9 @@ bitflags! {
 
         /// `RENAME_WHITEOUT`
         const WHITEOUT = linux_raw_sys::general::RENAME_WHITEOUT;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -434,6 +452,9 @@ bitflags! {
         const HUGE_2GB = linux_raw_sys::general::MFD_HUGE_2GB;
         /// `MFD_HUGE_16GB`
         const HUGE_16GB = linux_raw_sys::general::MFD_HUGE_16GB;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -446,16 +467,19 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SealFlags: u32 {
-       /// `F_SEAL_SEAL`.
-       const SEAL = linux_raw_sys::general::F_SEAL_SEAL;
-       /// `F_SEAL_SHRINK`.
-       const SHRINK = linux_raw_sys::general::F_SEAL_SHRINK;
-       /// `F_SEAL_GROW`.
-       const GROW = linux_raw_sys::general::F_SEAL_GROW;
-       /// `F_SEAL_WRITE`.
-       const WRITE = linux_raw_sys::general::F_SEAL_WRITE;
-       /// `F_SEAL_FUTURE_WRITE` (since Linux 5.1)
-       const FUTURE_WRITE = linux_raw_sys::general::F_SEAL_FUTURE_WRITE;
+        /// `F_SEAL_SEAL`.
+        const SEAL = linux_raw_sys::general::F_SEAL_SEAL;
+        /// `F_SEAL_SHRINK`.
+        const SHRINK = linux_raw_sys::general::F_SEAL_SHRINK;
+        /// `F_SEAL_GROW`.
+        const GROW = linux_raw_sys::general::F_SEAL_GROW;
+        /// `F_SEAL_WRITE`.
+        const WRITE = linux_raw_sys::general::F_SEAL_WRITE;
+        /// `F_SEAL_FUTURE_WRITE` (since Linux 5.1)
+        const FUTURE_WRITE = linux_raw_sys::general::F_SEAL_FUTURE_WRITE;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -513,6 +537,9 @@ bitflags! {
 
         /// `STATX_ALL`
         const ALL = linux_raw_sys::general::STATX_ALL;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -537,6 +564,9 @@ bitflags! {
         const INSERT_RANGE = linux_raw_sys::general::FALLOC_FL_INSERT_RANGE;
         /// `FALLOC_FL_UNSHARE_RANGE`
         const UNSHARE_RANGE = linux_raw_sys::general::FALLOC_FL_UNSHARE_RANGE;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -571,6 +601,9 @@ bitflags! {
 
         /// `ST_SYNCHRONOUS`
         const SYNCHRONOUS = linux_raw_sys::general::MS_SYNCHRONOUS as u64;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

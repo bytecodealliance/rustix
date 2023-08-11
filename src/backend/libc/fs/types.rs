@@ -20,6 +20,9 @@ bitflags! {
 
         /// `F_OK`
         const EXISTS = c::F_OK;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -73,6 +76,9 @@ bitflags! {
         /// `AT_STATX_DONT_SYNC`
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
         const STATX_DONT_SYNC = bitcast!(c::AT_STATX_DONT_SYNC);
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -144,6 +150,9 @@ bitflags! {
         /// `S_ISVTX`
         #[cfg(not(any(target_os = "espidf", target_os = "wasi")))] // WASI doesn't have Unix-style mode flags.
         const SVTX = c::S_ISVTX as RawMode;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -318,6 +327,9 @@ bitflags! {
         /// `O_EMPTY_PATH`
         #[cfg(target_os = "freebsd")]
         const EMPTY_PATH = bitcast!(c::O_EMPTY_PATH);
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -334,6 +346,9 @@ bitflags! {
 
         /// `CLONE_NOOWNERCOPY`
         const NOOWNERCOPY = 2;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -376,6 +391,9 @@ bitflags! {
 
         /// `COPYFILE_ALL`
         const ALL = copyfile::ALL;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -404,6 +422,9 @@ bitflags! {
 
         /// `RESOLVE_CACHED` (since Linux 5.12)
         const CACHED = 0x20;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -423,6 +444,9 @@ bitflags! {
 
         /// `RENAME_WHITEOUT`
         const WHITEOUT = bitcast!(c::RENAME_WHITEOUT);
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -597,6 +621,9 @@ bitflags! {
         const HUGE_2GB = c::MFD_HUGE_2GB;
         /// `MFD_HUGE_16GB`
         const HUGE_16GB = c::MFD_HUGE_16GB;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -610,17 +637,20 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SealFlags: u32 {
-       /// `F_SEAL_SEAL`.
-       const SEAL = bitcast!(c::F_SEAL_SEAL);
-       /// `F_SEAL_SHRINK`.
-       const SHRINK = bitcast!(c::F_SEAL_SHRINK);
-       /// `F_SEAL_GROW`.
-       const GROW = bitcast!(c::F_SEAL_GROW);
-       /// `F_SEAL_WRITE`.
-       const WRITE = bitcast!(c::F_SEAL_WRITE);
-       /// `F_SEAL_FUTURE_WRITE` (since Linux 5.1)
-       #[cfg(linux_kernel)]
-       const FUTURE_WRITE = bitcast!(c::F_SEAL_FUTURE_WRITE);
+        /// `F_SEAL_SEAL`.
+        const SEAL = bitcast!(c::F_SEAL_SEAL);
+        /// `F_SEAL_SHRINK`.
+        const SHRINK = bitcast!(c::F_SEAL_SHRINK);
+        /// `F_SEAL_GROW`.
+        const GROW = bitcast!(c::F_SEAL_GROW);
+        /// `F_SEAL_WRITE`.
+        const WRITE = bitcast!(c::F_SEAL_WRITE);
+        /// `F_SEAL_FUTURE_WRITE` (since Linux 5.1)
+        #[cfg(linux_kernel)]
+        const FUTURE_WRITE = bitcast!(c::F_SEAL_FUTURE_WRITE);
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -679,6 +709,9 @@ bitflags! {
 
         /// `STATX_ALL`
         const ALL = c::STATX_ALL;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -737,6 +770,9 @@ bitflags! {
 
         /// `STATX_ALL`
         const ALL = 0xfff;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -819,6 +855,9 @@ bitflags! {
             target_os = "wasi",
         )))]
         const UNSHARE_RANGE = bitcast!(c::FALLOC_FL_UNSHARE_RANGE);
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -868,6 +907,9 @@ bitflags! {
         /// `ST_SYNCHRONOUS`
         #[cfg(any(linux_kernel, target_os = "emscripten", target_os = "fuchsia"))]
         const SYNCHRONOUS = c::ST_SYNCHRONOUS as u64;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

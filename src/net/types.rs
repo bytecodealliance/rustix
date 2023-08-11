@@ -53,6 +53,10 @@ pub type RawAddressFamily = c::sa_family_t;
 
 /// `AF_*` constants for use with [`socket`], [`socket_with`], and
 /// [`socketpair`].
+///
+/// [`socket`]: crate::net::socket()
+/// [`socket_with`]: crate::net::socket_with
+/// [`socketpair`]: crate::net::socketpair()
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(transparent)]
 pub struct AddressFamily(pub(crate) RawAddressFamily);
@@ -1268,6 +1272,9 @@ bitflags! {
         /// `SOCK_CLOEXEC`
         #[cfg(not(any(apple, windows, target_os = "haiku")))]
         const CLOEXEC = bitcast!(c::SOCK_CLOEXEC);
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

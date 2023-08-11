@@ -30,5 +30,8 @@ bitflags! {
         /// `EFD_SEMAPHORE`
         #[cfg(not(target_os = "espidf"))]
         const SEMAPHORE = bitcast!(c::EFD_SEMAPHORE);
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }

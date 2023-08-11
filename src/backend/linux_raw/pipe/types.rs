@@ -15,6 +15,9 @@ bitflags! {
         const DIRECT = linux_raw_sys::general::O_DIRECT;
         /// `O_NONBLOCK`
         const NONBLOCK = linux_raw_sys::general::O_NONBLOCK;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -32,6 +35,9 @@ bitflags! {
         const MORE = linux_raw_sys::general::SPLICE_F_MORE;
         /// `SPLICE_F_GIFT`
         const GIFT = linux_raw_sys::general::SPLICE_F_GIFT;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

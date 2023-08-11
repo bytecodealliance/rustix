@@ -11,6 +11,9 @@ bitflags! {
     pub struct FdFlags: c::c_uint {
         /// `FD_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::FD_CLOEXEC;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -32,6 +35,9 @@ bitflags! {
         const NOWAIT = linux_raw_sys::general::RWF_NOWAIT;
         /// `RWF_APPEND` (since Linux 4.16)
         const APPEND = linux_raw_sys::general::RWF_APPEND;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -44,5 +50,8 @@ bitflags! {
     pub struct DupFlags: c::c_uint {
         /// `O_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
