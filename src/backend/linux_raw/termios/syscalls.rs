@@ -22,8 +22,7 @@ use crate::{ffi::CStr, fs::FileType, path::DecInt};
 use core::mem::MaybeUninit;
 use linux_raw_sys::general::IBSHIFT;
 use linux_raw_sys::ioctl::{
-    TCFLSH, TCSBRK, TCXONC, TIOCEXCL, TIOCGPGRP, TIOCGSID, TIOCGWINSZ, TIOCNXCL, TIOCSPGRP,
-    TIOCSWINSZ,
+    TCFLSH, TCSBRK, TCXONC, TIOCGPGRP, TIOCGSID, TIOCGWINSZ, TIOCSPGRP, TIOCSWINSZ,
 };
 
 #[inline]

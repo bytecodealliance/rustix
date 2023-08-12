@@ -31,7 +31,7 @@ unsafe impl ioctl::Ioctl for Tiocsctty {
     const IS_MUTATING: bool = false;
 
     fn as_ptr(&mut self) -> *mut c::c_void {
-        core::ptr::null_mut()
+        (&0u32) as *const u32 as *mut c::c_void
     }
 
     unsafe fn output_from_ptr(

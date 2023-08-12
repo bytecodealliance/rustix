@@ -95,6 +95,9 @@ pub(crate) use linux_raw_sys::{
     ioctl::TIOCSCTTY,
 };
 
+#[cfg(feature = "pty")]
+pub(crate) use linux_raw_sys::ioctl::TIOCGPTPEER;
+
 #[cfg(feature = "termios")]
 pub(crate) use linux_raw_sys::{
     general::{
