@@ -15,6 +15,7 @@ use crate::io::DupFlags;
 #[cfg(linux_kernel)]
 use crate::io::ReadWriteFlags;
 use crate::io::{self, FdFlags};
+use crate::ioctl::{IoctlOutput, RawOpcode};
 use core::cmp::min;
 #[cfg(all(feature = "fs", feature = "net"))]
 use libc_errno::errno;
@@ -203,25 +204,22 @@ pub(crate) unsafe fn close(raw_fd: RawFd) {
     let _ = c::close(raw_fd as c::c_int);
 }
 
-#[cfg(not(target_os = "espidf"))]
-pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
-    use core::mem::MaybeUninit;
-
-    let mut nread = MaybeUninit::<c::c_int>::uninit();
-    unsafe {
-        ret(c::ioctl(borrowed_fd(fd), c::FIONREAD, nread.as_mut_ptr()))?;
-        // `FIONREAD` returns the number of bytes silently casted to a `c_int`,
-        // even when this is lossy. The best we can do is convert it back to a
-        // `u64` without sign-extending it back first.
-        Ok(u64::from(nread.assume_init() as c::c_uint))
-    }
+#[inline]
+pub(crate) unsafe fn ioctl(
+    fd: BorrowedFd<'_>,
+    request: RawOpcode,
+    arg: *mut c::c_void,
+) -> io::Result<IoctlOutput> {
+    ret_c_int(c::ioctl(borrowed_fd(fd), request, arg))
 }
 
-pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
-    unsafe {
-        let data = value as c::c_int;
-        ret(c::ioctl(borrowed_fd(fd), c::FIONBIO, &data))
-    }
+#[inline]
+pub(crate) unsafe fn ioctl_readonly(
+    fd: BorrowedFd<'_>,
+    request: RawOpcode,
+    arg: *mut c::c_void,
+) -> io::Result<IoctlOutput> {
+    ioctl(fd, request, arg)
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
@@ -341,15 +339,4 @@ pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, _flags: DupFlags) -> i
     // `dup2` and `dup3` when the file descriptors are equal because we
     // have an `&mut OwnedFd` which means `fd` doesn't alias it.
     dup2(fd, new)
-}
-
-#[cfg(apple)]
-pub(crate) fn ioctl_fioclex(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe {
-        ret(c::ioctl(
-            borrowed_fd(fd),
-            c::FIOCLEX,
-            core::ptr::null_mut::<u8>(),
-        ))
-    }
 }

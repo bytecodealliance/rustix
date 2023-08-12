@@ -19,7 +19,7 @@ use crate::backend::conv::loff_t_from_u64;
 ))]
 use crate::backend::conv::zero;
 use crate::backend::conv::{
-    by_ref, c_uint, raw_fd, ret, ret_c_uint, ret_discarded_fd, ret_owned_fd, ret_usize, slice,
+    c_uint, raw_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd, ret_usize, slice,
     slice_mut,
 };
 #[cfg(target_pointer_width = "32")]
@@ -27,12 +27,11 @@ use crate::backend::conv::{hi, lo};
 use crate::backend::{c, MAX_IOV};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 use crate::io::{self, DupFlags, FdFlags, IoSlice, IoSliceMut, ReadWriteFlags};
+use crate::ioctl::{IoctlOutput, RawOpcode};
 #[cfg(all(feature = "fs", feature = "net"))]
 use crate::net::{RecvFlags, SendFlags};
 use core::cmp;
-use core::mem::MaybeUninit;
 use linux_raw_sys::general::{F_DUPFD_CLOEXEC, F_GETFD, F_SETFD};
-use linux_raw_sys::ioctl::{FIONBIO, FIONREAD};
 
 #[inline]
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
@@ -307,25 +306,21 @@ pub(crate) unsafe fn close(fd: RawFd) {
 }
 
 #[inline]
-pub(crate) fn ioctl_fionread(fd: BorrowedFd<'_>) -> io::Result<u64> {
-    unsafe {
-        let mut result = MaybeUninit::<c::c_int>::uninit();
-        ret(syscall!(__NR_ioctl, fd, c_uint(FIONREAD), &mut result))?;
-        Ok(result.assume_init() as u64)
-    }
+pub(crate) unsafe fn ioctl(
+    fd: BorrowedFd<'_>,
+    request: RawOpcode,
+    arg: *mut c::c_void,
+) -> io::Result<IoctlOutput> {
+    ret_c_int(syscall!(__NR_ioctl, fd, c_uint(request), arg))
 }
 
 #[inline]
-pub(crate) fn ioctl_fionbio(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
-    unsafe {
-        let data = c::c_int::from(value);
-        ret(syscall_readonly!(
-            __NR_ioctl,
-            fd,
-            c_uint(FIONBIO),
-            by_ref(&data)
-        ))
-    }
+pub(crate) unsafe fn ioctl_readonly(
+    fd: BorrowedFd<'_>,
+    request: RawOpcode,
+    arg: *mut c::c_void,
+) -> io::Result<IoctlOutput> {
+    ret_c_int(syscall_readonly!(__NR_ioctl, fd, c_uint(request), arg))
 }
 
 #[cfg(all(feature = "fs", feature = "net"))]

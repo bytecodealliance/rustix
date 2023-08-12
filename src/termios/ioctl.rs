@@ -1,7 +1,8 @@
 //! Terminal-related `ioctl` functions.
 
 use crate::fd::AsFd;
-use crate::{backend, io};
+use crate::{backend, io, ioctl};
+use backend::c;
 
 /// `ioctl(fd, TIOCEXCL)`—Enables exclusive mode on a terminal.
 ///
@@ -19,7 +20,7 @@ use crate::{backend, io};
 #[inline]
 #[doc(alias = "TIOCEXCL")]
 pub fn ioctl_tiocexcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    backend::termios::syscalls::ioctl_tiocexcl(fd.as_fd())
+    ioctl::ioctl(fd, Tiocexcl)
 }
 
 /// `ioctl(fd, TIOCNXCL)`—Disables exclusive mode on a terminal.
@@ -38,5 +39,49 @@ pub fn ioctl_tiocexcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 #[inline]
 #[doc(alias = "TIOCNXCL")]
 pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    backend::termios::syscalls::ioctl_tiocnxcl(fd.as_fd())
+    ioctl::ioctl(fd, Tiocnxcl)
+}
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+struct Tiocexcl;
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+#[allow(unsafe_code)]
+unsafe impl ioctl::Ioctl for Tiocexcl {
+    type Output = ();
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::TIOCEXCL as ioctl::RawOpcode);
+    const IS_MUTATING: bool = false;
+
+    fn as_ptr(&mut self) -> *mut c::c_void {
+        core::ptr::null_mut()
+    }
+
+    unsafe fn output_from_ptr(
+        _: ioctl::IoctlOutput,
+        _: *mut c::c_void,
+    ) -> io::Result<Self::Output> {
+        Ok(())
+    }
+}
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+struct Tiocnxcl;
+
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+#[allow(unsafe_code)]
+unsafe impl ioctl::Ioctl for Tiocnxcl {
+    type Output = ();
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::TIOCNXCL as ioctl::RawOpcode);
+    const IS_MUTATING: bool = false;
+
+    fn as_ptr(&mut self) -> *mut c::c_void {
+        core::ptr::null_mut()
+    }
+
+    unsafe fn output_from_ptr(
+        _: ioctl::IoctlOutput,
+        _: *mut c::c_void,
+    ) -> io::Result<Self::Output> {
+        Ok(())
+    }
 }

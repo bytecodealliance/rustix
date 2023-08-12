@@ -6,8 +6,10 @@
 //! Some ioctls, such as those related to filesystems, terminals, and
 //! processes, live in other top-level API modules.
 
-use crate::{backend, io};
-use backend::fd::AsFd;
+use crate::{backend, io, ioctl};
+use backend::{c, fd::AsFd};
+
+use core::mem::MaybeUninit;
 
 /// `ioctl(fd, FIOCLEX, NULL)`—Set the close-on-exec flag.
 ///
@@ -26,7 +28,7 @@ use backend::fd::AsFd;
 #[doc(alias = "FIOCLEX")]
 #[doc(alias = "FD_CLOEXEC")]
 pub fn ioctl_fioclex<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    backend::io::syscalls::ioctl_fioclex(fd.as_fd())
+    ioctl::ioctl(fd, Fioclex)
 }
 
 /// `ioctl(fd, FIONBIO, &value)`—Enables or disables non-blocking mode.
@@ -42,7 +44,7 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 #[inline]
 #[doc(alias = "FIONBIO")]
 pub fn ioctl_fionbio<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
-    backend::io::syscalls::ioctl_fionbio(fd.as_fd(), value)
+    ioctl::ioctl(fd, Fionbio(c::c_int::from(value)))
 }
 
 /// `ioctl(fd, FIONREAD)`—Returns the number of bytes ready to be read.
@@ -66,5 +68,69 @@ pub fn ioctl_fionbio<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 #[inline]
 #[doc(alias = "FIONREAD")]
 pub fn ioctl_fionread<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
-    backend::io::syscalls::ioctl_fionread(fd.as_fd())
+    ioctl::ioctl(fd, Fionread(MaybeUninit::uninit()))
+}
+
+#[cfg(apple)]
+struct Fioclex;
+
+#[cfg(apple)]
+#[allow(unsafe_code)]
+unsafe impl ioctl::Ioctl for Fioclex {
+    type Output = ();
+
+    const IS_MUTATING: bool = false;
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::FIOCLEX);
+
+    fn as_ptr(&mut self) -> *mut c::c_void {
+        core::ptr::null_mut()
+    }
+
+    unsafe fn output_from_ptr(
+        _: ioctl::IoctlOutput,
+        _: *mut c::c_void,
+    ) -> io::Result<Self::Output> {
+        Ok(())
+    }
+}
+
+struct Fionbio(c::c_int);
+
+#[allow(unsafe_code)]
+unsafe impl ioctl::Ioctl for Fionbio {
+    type Output = ();
+
+    const IS_MUTATING: bool = false;
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::FIONBIO);
+
+    fn as_ptr(&mut self) -> *mut c::c_void {
+        (&mut self.0 as *mut c::c_int).cast()
+    }
+
+    unsafe fn output_from_ptr(
+        _: ioctl::IoctlOutput,
+        _: *mut c::c_void,
+    ) -> io::Result<Self::Output> {
+        Ok(())
+    }
+}
+
+struct Fionread(MaybeUninit<c::c_int>);
+
+#[allow(unsafe_code)]
+unsafe impl ioctl::Ioctl for Fionread {
+    type Output = u64;
+    const IS_MUTATING: bool = true;
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::FIONREAD);
+
+    fn as_ptr(&mut self) -> *mut c::c_void {
+        self.0.as_mut_ptr().cast()
+    }
+
+    unsafe fn output_from_ptr(
+        _: ioctl::IoctlOutput,
+        ptr: *mut c::c_void,
+    ) -> io::Result<Self::Output> {
+        Ok(ptr.cast::<c::c_int>().read() as u64)
+    }
 }

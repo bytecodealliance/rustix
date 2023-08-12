@@ -9,6 +9,7 @@
 pub type size_t = usize;
 pub(crate) use linux_raw_sys::ctypes::*;
 pub(crate) use linux_raw_sys::errno::EINVAL;
+pub(crate) use linux_raw_sys::ioctl::{FIONBIO, FIONREAD};
 // Import the kernel's `uid_t` and `gid_t` if they're 32-bit.
 #[cfg(not(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86")))]
 pub(crate) use linux_raw_sys::general::{__kernel_gid_t as gid_t, __kernel_uid_t as uid_t};
@@ -38,6 +39,15 @@ pub(crate) use linux_raw_sys::general::{
     AT_FDCWD, NFS_SUPER_MAGIC, O_LARGEFILE, PROC_SUPER_MAGIC, UTIME_NOW, UTIME_OMIT, XATTR_CREATE,
     XATTR_REPLACE,
 };
+
+#[cfg(feature = "fs")]
+pub(crate) use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET};
+
+#[cfg(all(
+    feature = "fs",
+    not(any(target_arch = "sparc", target_arch = "sparc64"))
+))]
+pub(crate) use linux_raw_sys::ioctl::FICLONE;
 
 #[cfg(feature = "io_uring")]
 pub(crate) use linux_raw_sys::{general::open_how, io_uring::*};
@@ -77,9 +87,12 @@ pub(crate) use linux_raw_sys::{
 pub(crate) use linux_raw_sys::general::siginfo_t;
 
 #[cfg(feature = "process")]
-pub(crate) use linux_raw_sys::general::{
-    CLD_CONTINUED, CLD_DUMPED, CLD_EXITED, CLD_KILLED, CLD_STOPPED, CLD_TRAPPED,
-    O_NONBLOCK as PIDFD_NONBLOCK, P_ALL, P_PID, P_PIDFD,
+pub(crate) use linux_raw_sys::{
+    general::{
+        CLD_CONTINUED, CLD_DUMPED, CLD_EXITED, CLD_KILLED, CLD_STOPPED, CLD_TRAPPED,
+        O_NONBLOCK as PIDFD_NONBLOCK, P_ALL, P_PID, P_PIDFD,
+    },
+    ioctl::TIOCSCTTY,
 };
 
 #[cfg(feature = "termios")]
@@ -99,7 +112,7 @@ pub(crate) use linux_raw_sys::{
         VKILL, VLNEXT, VMIN, VQUIT, VREPRINT, VSTART, VSTOP, VSUSP, VSWTC, VT0, VT1, VTDLY, VTIME,
         VWERASE, XCASE, XTABS,
     },
-    ioctl::{TCGETS2, TCSETS2, TCSETSF2, TCSETSW2},
+    ioctl::{TCGETS2, TCSETS2, TCSETSF2, TCSETSW2, TIOCEXCL, TIOCNXCL},
 };
 
 // On MIPS, `TCSANOW` et al have `TCSETS` added to them, so we need it to
