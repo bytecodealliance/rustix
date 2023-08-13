@@ -62,7 +62,7 @@ struct Blksszget(MaybeUninit<c::c_uint>);
 unsafe impl ioctl::Ioctl for Blksszget {
     type Output = u32;
 
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::BLKSSZGET);
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(c::BLKSSZGET);
     const IS_MUTATING: bool = true;
 
     fn as_ptr(&mut self) -> *mut c::c_void {
@@ -87,7 +87,7 @@ struct Blkpbszget(MaybeUninit<c::c_uint>);
 unsafe impl ioctl::Ioctl for Blkpbszget {
     type Output = u32;
 
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::BLKPBSZGET);
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(c::BLKPBSZGET);
     const IS_MUTATING: bool = true;
 
     fn as_ptr(&mut self) -> *mut c::c_void {
@@ -112,7 +112,7 @@ struct Ficlone<'a>(BorrowedFd<'a>);
 unsafe impl ioctl::Ioctl for Ficlone<'_> {
     type Output = ();
 
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::FICLONE as ioctl::RawOpcode);
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(c::FICLONE as ioctl::RawOpcode);
     const IS_MUTATING: bool = false;
 
     fn as_ptr(&mut self) -> *mut c::c_void {
@@ -135,7 +135,7 @@ struct Ext4IocResizeFs(u64);
 unsafe impl ioctl::Ioctl for Ext4IocResizeFs {
     type Output = ();
 
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(backend::fs::EXT4_IOC_RESIZE_FS);
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(backend::fs::EXT4_IOC_RESIZE_FS);
     const IS_MUTATING: bool = false;
 
     fn as_ptr(&mut self) -> *mut c::c_void {

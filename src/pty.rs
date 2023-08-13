@@ -179,7 +179,7 @@ struct Tiocgptpeer(OpenptFlags);
 #[allow(unsafe_code)]
 unsafe impl ioctl::Ioctl for Tiocgptpeer {
     type Output = OwnedFd;
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::TIOCGPTPEER as ioctl::RawOpcode);
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(c::TIOCGPTPEER as ioctl::RawOpcode);
     const IS_MUTATING: bool = false;
 
     fn as_ptr(&mut self) -> *mut c::c_void {

@@ -81,7 +81,7 @@ unsafe impl ioctl::Ioctl for Fioclex {
     type Output = ();
 
     const IS_MUTATING: bool = false;
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::FIOCLEX);
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(c::FIOCLEX);
 
     fn as_ptr(&mut self) -> *mut c::c_void {
         core::ptr::null_mut()
@@ -102,7 +102,7 @@ unsafe impl ioctl::Ioctl for Fionbio {
     type Output = ();
 
     const IS_MUTATING: bool = false;
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::FIONBIO);
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(c::FIONBIO);
 
     fn as_ptr(&mut self) -> *mut c::c_void {
         (&mut self.0 as *mut c::c_int).cast()
@@ -124,7 +124,7 @@ struct Fionread(MaybeUninit<c::c_int>);
 unsafe impl ioctl::Ioctl for Fionread {
     type Output = u64;
     const IS_MUTATING: bool = true;
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::FIONREAD);
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(c::FIONREAD);
 
     fn as_ptr(&mut self) -> *mut c::c_void {
         self.0.as_mut_ptr().cast()

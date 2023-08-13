@@ -49,7 +49,7 @@ struct Tiocexcl;
 #[allow(unsafe_code)]
 unsafe impl ioctl::Ioctl for Tiocexcl {
     type Output = ();
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::TIOCEXCL as ioctl::RawOpcode);
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(c::TIOCEXCL as ioctl::RawOpcode);
     const IS_MUTATING: bool = false;
 
     fn as_ptr(&mut self) -> *mut c::c_void {
@@ -71,7 +71,7 @@ struct Tiocnxcl;
 #[allow(unsafe_code)]
 unsafe impl ioctl::Ioctl for Tiocnxcl {
     type Output = ();
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::TIOCNXCL as ioctl::RawOpcode);
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(c::TIOCNXCL as ioctl::RawOpcode);
     const IS_MUTATING: bool = false;
 
     fn as_ptr(&mut self) -> *mut c::c_void {

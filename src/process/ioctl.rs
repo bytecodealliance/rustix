@@ -27,7 +27,7 @@ struct Tiocsctty;
 #[cfg(not(any(windows, target_os = "aix", target_os = "redox", target_os = "wasi")))]
 unsafe impl ioctl::Ioctl for Tiocsctty {
     type Output = ();
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::TIOCSCTTY as ioctl::RawOpcode);
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(c::TIOCSCTTY as ioctl::RawOpcode);
     const IS_MUTATING: bool = false;
 
     fn as_ptr(&mut self) -> *mut c::c_void {
