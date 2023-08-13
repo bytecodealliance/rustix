@@ -2,11 +2,14 @@
 
 #[cfg(linux_kernel)]
 use {
-    crate::fd::{AsFd, AsRawFd, BorrowedFd},
+    crate::fd::AsFd,
     crate::{backend, io, ioctl},
     backend::c,
     core::mem::MaybeUninit,
 };
+
+#[cfg(all(linux_kernel, not(any(target_arch = "sparc", target_arch = "sparc64"))))]
+use crate::fd::{AsRawFd, BorrowedFd};
 
 /// `ioctl(fd, BLKSSZGET)`—Returns the logical block size of a block device.
 ///
@@ -109,7 +112,7 @@ struct Ficlone<'a>(BorrowedFd<'a>);
 unsafe impl ioctl::Ioctl for Ficlone<'_> {
     type Output = ();
 
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::FICLONE);
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::Bad(c::FICLONE as ioctl::RawOpcode);
     const IS_MUTATING: bool = false;
 
     fn as_ptr(&mut self) -> *mut c::c_void {

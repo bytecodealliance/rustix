@@ -13,6 +13,9 @@ use {
 };
 
 #[cfg(not(linux_kernel))]
+use crate::{backend::conv::ret_owned_fd, fd::OwnedFd, pty::OpenptFlags};
+
+#[cfg(not(linux_kernel))]
 #[inline]
 pub(crate) fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::posix_openpt(flags.bits() as _)) }

@@ -9,6 +9,7 @@
 use crate::{backend, io, ioctl};
 use backend::{c, fd::AsFd};
 
+#[cfg(not(target_os = "espidf"))]
 use core::mem::MaybeUninit;
 
 /// `ioctl(fd, FIOCLEX, NULL)`—Set the close-on-exec flag.
@@ -115,8 +116,10 @@ unsafe impl ioctl::Ioctl for Fionbio {
     }
 }
 
+#[cfg(not(target_os = "espidf"))]
 struct Fionread(MaybeUninit<c::c_int>);
 
+#[cfg(not(target_os = "espidf"))]
 #[allow(unsafe_code)]
 unsafe impl ioctl::Ioctl for Fionread {
     type Output = u64;

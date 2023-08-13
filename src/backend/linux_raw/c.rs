@@ -40,14 +40,8 @@ pub(crate) use linux_raw_sys::general::{
     XATTR_REPLACE,
 };
 
-#[cfg(feature = "fs")]
-pub(crate) use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET};
-
-#[cfg(all(
-    feature = "fs",
-    not(any(target_arch = "sparc", target_arch = "sparc64"))
-))]
-pub(crate) use linux_raw_sys::ioctl::FICLONE;
+#[allow(unused)]
+pub(crate) use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET, FICLONE};
 
 #[cfg(feature = "io_uring")]
 pub(crate) use linux_raw_sys::{general::open_how, io_uring::*};

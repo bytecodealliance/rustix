@@ -3,6 +3,8 @@
 #[cfg(any(linux_kernel, target_os = "dragonfly", target_os = "fuchsia"))]
 use super::types::RawCpuSet;
 use crate::backend::c;
+#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
+use crate::backend::conv::borrowed_fd;
 #[cfg(feature = "fs")]
 use crate::backend::conv::c_str;
 #[cfg(all(feature = "fs", not(target_os = "wasi")))]
@@ -16,10 +18,11 @@ use crate::backend::conv::ret_discarded_char_ptr;
 use crate::backend::conv::ret_infallible;
 #[cfg(linux_kernel)]
 use crate::backend::conv::ret_u32;
-#[cfg(not(target_os = "wasi"))]
-use crate::backend::conv::{borrowed_fd, ret_pid_t, ret_usize};
+#[cfg(not(target_os = "fucshia"))]
 use crate::backend::conv::{ret, ret_c_int};
 #[cfg(not(target_os = "wasi"))]
+use crate::backend::conv::{ret_pid_t, ret_usize};
+#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use crate::fd::BorrowedFd;
 #[cfg(target_os = "linux")]
 use crate::fd::{AsRawFd, OwnedFd, RawFd};

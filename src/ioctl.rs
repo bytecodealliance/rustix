@@ -107,9 +107,9 @@ type _RawOpcode = c::c_uint;
 #[cfg(all(not(linux_raw), target_os = "linux", target_env = "gnu"))]
 type _RawOpcode = c::c_ulong;
 
-// Musl uses a c_uint
+// Musl uses a c_int
 #[cfg(all(not(linux_raw), target_os = "linux", not(target_env = "gnu")))]
-type _RawOpcode = c::c_uint;
+type _RawOpcode = c::c_int;
 
 // Android uses c_int
 #[cfg(all(not(linux_raw), target_os = "android"))]
@@ -119,13 +119,19 @@ type _RawOpcode = c::c_int;
 #[cfg(any(apple, bsd, target_os = "redox", target_os = "haiku"))]
 type _RawOpcode = c::c_ulong;
 
-// Solaris, illumos, WASI and fuchsia use an int.
+// Solaris, Fuchsia, Emscripten and WASI use an int
 #[cfg(any(
     target_os = "solaris",
     target_os = "illumos",
     target_os = "fuchsia",
-    target_os = "wasi"
+    target_os = "emscripten",
+    target_os = "wasi",
+    target_os = "nto"
 ))]
+type _RawOpcode = c::c_int;
+
+// ESP-IDF uses a c_uint
+#[cfg(target_os = "espidf")]
 type _RawOpcode = c::c_uint;
 
 // Windows has ioctlsocket, which uses i32
