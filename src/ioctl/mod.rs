@@ -16,6 +16,7 @@ use crate::backend::c;
 use crate::fd::{AsFd, BorrowedFd};
 use crate::io::Result;
 
+#[cfg(any(linux_kernel, apple, bsd))]
 use core::mem;
 
 pub use patterns::*;
