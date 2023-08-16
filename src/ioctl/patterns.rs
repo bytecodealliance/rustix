@@ -162,29 +162,37 @@ impl<const OPCODE: RawOpcode> CompileTimeOpcode for BadOpcode<OPCODE> {
 }
 
 /// Provides a read code at compile time.
+#[cfg(any(linux_kernel, apple, bsd))]
 pub struct ReadOpcode<const GROUP: u8, const NUM: u8, Data>(Data);
 
+#[cfg(any(linux_kernel, apple, bsd))]
 impl<const GROUP: u8, const NUM: u8, Data> CompileTimeOpcode for ReadOpcode<GROUP, NUM, Data> {
     const OPCODE: Opcode = Opcode::read::<Data>(GROUP, NUM);
 }
 
 /// Provides a write code at compile time.
+#[cfg(any(linux_kernel, apple, bsd))]
 pub struct WriteOpcode<const GROUP: u8, const NUM: u8, Data>(Data);
 
+#[cfg(any(linux_kernel, apple, bsd))]
 impl<const GROUP: u8, const NUM: u8, Data> CompileTimeOpcode for WriteOpcode<GROUP, NUM, Data> {
     const OPCODE: Opcode = Opcode::write::<Data>(GROUP, NUM);
 }
 
 /// Provides a read/write code at compile time.
+#[cfg(any(linux_kernel, apple, bsd))]
 pub struct ReadWriteOpcode<const GROUP: u8, const NUM: u8, Data>(Data);
 
+#[cfg(any(linux_kernel, apple, bsd))]
 impl<const GROUP: u8, const NUM: u8, Data> CompileTimeOpcode for ReadWriteOpcode<GROUP, NUM, Data> {
     const OPCODE: Opcode = Opcode::read_write::<Data>(GROUP, NUM);
 }
 
 /// Provides a `None` code at compile time.
+#[cfg(any(linux_kernel, apple, bsd))]
 pub struct NoneOpcode<const GROUP: u8, const NUM: u8, Data>(Data);
 
+#[cfg(any(linux_kernel, apple, bsd))]
 impl<const GROUP: u8, const NUM: u8, Data> CompileTimeOpcode for NoneOpcode<GROUP, NUM, Data> {
     const OPCODE: Opcode = Opcode::none::<Data>(GROUP, NUM);
 }

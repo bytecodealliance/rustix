@@ -22,7 +22,7 @@ use backend::c;
 pub fn ioctl_tiocexcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     // SAFETY: TIOCEXCL is a no-argument setter opcode.
     #[allow(unsafe_code)]
-    let ctl = unsafe { ioctl::NoArg::<ioctl::BadOpcode<{ c::TIOCEXCL }>>::new() };
+    let ctl = unsafe { ioctl::NoArg::<ioctl::BadOpcode<{ c::TIOCEXCL as _ }>>::new() };
     ioctl::ioctl(fd, ctl)
 }
 
@@ -44,6 +44,6 @@ pub fn ioctl_tiocexcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     // SAFETY: TIOCNXCL is a no-argument setter opcode.
     #[allow(unsafe_code)]
-    let ctl = unsafe { ioctl::NoArg::<ioctl::BadOpcode<{ c::TIOCNXCL }>>::new() };
+    let ctl = unsafe { ioctl::NoArg::<ioctl::BadOpcode<{ c::TIOCNXCL as _ }>>::new() };
     ioctl::ioctl(fd, ctl)
 }
