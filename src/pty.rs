@@ -183,7 +183,7 @@ unsafe impl ioctl::Ioctl for Tiocgptpeer {
     const IS_MUTATING: bool = false;
 
     fn as_ptr(&mut self) -> *mut c::c_void {
-        &mut self.0 as *mut OpenptFlags as *mut c::c_void
+        self.0.bits() as *mut c::c_void
     }
 
     unsafe fn output_from_ptr(
