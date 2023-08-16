@@ -190,7 +190,7 @@ unsafe impl ioctl::Ioctl for Tiocgptpeer {
         _: ioctl::IoctlOutput,
         arg: *mut c::c_void,
     ) -> io::Result<Self::Output> {
-        let fd = (arg as *mut crate::fd::RawFd).read();
+        let fd = (arg as *mut u32).read() as crate::fd::RawFd;
         Ok(OwnedFd::from_raw_fd(fd))
     }
 }

@@ -20,7 +20,10 @@ use backend::c;
 #[inline]
 #[doc(alias = "TIOCEXCL")]
 pub fn ioctl_tiocexcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    ioctl::ioctl(fd, Tiocexcl)
+    // SAFETY: TIOCEXCL is a no-argument setter opcode.
+    #[allow(unsafe_code)]
+    let ctl = unsafe { ioctl::NoArg::<ioctl::BadOpcode<{ c::TIOCEXCL }>>::new() };
+    ioctl::ioctl(fd, ctl)
 }
 
 /// `ioctl(fd, TIOCNXCL)`—Disables exclusive mode on a terminal.
@@ -39,49 +42,8 @@ pub fn ioctl_tiocexcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 #[inline]
 #[doc(alias = "TIOCNXCL")]
 pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    ioctl::ioctl(fd, Tiocnxcl)
-}
-
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
-struct Tiocexcl;
-
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
-#[allow(unsafe_code)]
-unsafe impl ioctl::Ioctl for Tiocexcl {
-    type Output = ();
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(c::TIOCEXCL as ioctl::RawOpcode);
-    const IS_MUTATING: bool = false;
-
-    fn as_ptr(&mut self) -> *mut c::c_void {
-        core::ptr::null_mut()
-    }
-
-    unsafe fn output_from_ptr(
-        _: ioctl::IoctlOutput,
-        _: *mut c::c_void,
-    ) -> io::Result<Self::Output> {
-        Ok(())
-    }
-}
-
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
-struct Tiocnxcl;
-
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
-#[allow(unsafe_code)]
-unsafe impl ioctl::Ioctl for Tiocnxcl {
-    type Output = ();
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(c::TIOCNXCL as ioctl::RawOpcode);
-    const IS_MUTATING: bool = false;
-
-    fn as_ptr(&mut self) -> *mut c::c_void {
-        core::ptr::null_mut()
-    }
-
-    unsafe fn output_from_ptr(
-        _: ioctl::IoctlOutput,
-        _: *mut c::c_void,
-    ) -> io::Result<Self::Output> {
-        Ok(())
-    }
+    // SAFETY: TIOCNXCL is a no-argument setter opcode.
+    #[allow(unsafe_code)]
+    let ctl = unsafe { ioctl::NoArg::<ioctl::BadOpcode<{ c::TIOCNXCL }>>::new() };
+    ioctl::ioctl(fd, ctl)
 }

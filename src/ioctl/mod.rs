@@ -16,6 +16,12 @@ use crate::backend::c;
 use crate::fd::{AsFd, BorrowedFd};
 use crate::io::Result;
 
+use core::mem;
+
+pub use patterns::*;
+
+mod patterns;
+
 #[cfg(linux_kernel)]
 mod linux;
 
@@ -27,9 +33,6 @@ use linux as platform;
 
 #[cfg(any(apple, bsd))]
 use bsd as platform;
-
-#[cfg(any(linux_kernel, apple, bsd))]
-use core::mem;
 
 /// Perform an `ioctl` call.
 ///
