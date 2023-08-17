@@ -90,6 +90,7 @@ fn open_via_syscall(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<Owned
         target_arch = "aarch64",
         target_arch = "riscv32",
         target_arch = "riscv64",
+        target_arch = "csky",
         target_arch = "loongarch64"
     ))]
     {
@@ -101,6 +102,7 @@ fn open_via_syscall(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<Owned
         target_arch = "aarch64",
         target_arch = "riscv32",
         target_arch = "riscv64",
+        target_arch = "csky",
         target_arch = "loongarch64"
     )))]
     unsafe {
