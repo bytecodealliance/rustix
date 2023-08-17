@@ -47,6 +47,9 @@ bitflags! {
             not(any(target_arch = "sparc", target_arch = "sparc64"))),
         )]
         const RDHUP = c::POLLRDHUP;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

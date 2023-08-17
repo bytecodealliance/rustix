@@ -148,6 +148,9 @@ bitflags! {
         /// Generate a [`Signal::Bus`] signal on unaligned user access.
         #[doc(alias = "PR_UNALIGN_SIGBUS")]
         const SIGBUS = 2;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

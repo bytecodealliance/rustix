@@ -14,26 +14,29 @@ bitflags::bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MembarrierQuery: u32 {
-       /// `MEMBARRIER_CMD_GLOBAL` (also known as `MEMBARRIER_CMD_SHARED`)
-       #[doc(alias = "SHARED")]
-       #[doc(alias = "MEMBARRIER_CMD_SHARED")]
-       const GLOBAL = MembarrierCommand::Global as _;
-       /// `MEMBARRIER_CMD_GLOBAL_EXPEDITED`
-       const GLOBAL_EXPEDITED = MembarrierCommand::GlobalExpedited as _;
-       /// `MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED`
-       const REGISTER_GLOBAL_EXPEDITED = MembarrierCommand::RegisterGlobalExpedited as _;
-       /// `MEMBARRIER_CMD_PRIVATE_EXPEDITED`
-       const PRIVATE_EXPEDITED = MembarrierCommand::PrivateExpedited as _;
-       /// `MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED`
-       const REGISTER_PRIVATE_EXPEDITED = MembarrierCommand::RegisterPrivateExpedited as _;
-       /// `MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE`
-       const PRIVATE_EXPEDITED_SYNC_CORE = MembarrierCommand::PrivateExpeditedSyncCore as _;
-       /// `MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE`
-       const REGISTER_PRIVATE_EXPEDITED_SYNC_CORE = MembarrierCommand::RegisterPrivateExpeditedSyncCore as _;
-       /// `MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ` (since Linux 5.10)
-       const PRIVATE_EXPEDITED_RSEQ = MembarrierCommand::PrivateExpeditedRseq as _;
-       /// `MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_RSEQ` (since Linux 5.10)
-       const REGISTER_PRIVATE_EXPEDITED_RSEQ = MembarrierCommand::RegisterPrivateExpeditedRseq as _;
+        /// `MEMBARRIER_CMD_GLOBAL` (also known as `MEMBARRIER_CMD_SHARED`)
+        #[doc(alias = "SHARED")]
+        #[doc(alias = "MEMBARRIER_CMD_SHARED")]
+        const GLOBAL = MembarrierCommand::Global as _;
+        /// `MEMBARRIER_CMD_GLOBAL_EXPEDITED`
+        const GLOBAL_EXPEDITED = MembarrierCommand::GlobalExpedited as _;
+        /// `MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED`
+        const REGISTER_GLOBAL_EXPEDITED = MembarrierCommand::RegisterGlobalExpedited as _;
+        /// `MEMBARRIER_CMD_PRIVATE_EXPEDITED`
+        const PRIVATE_EXPEDITED = MembarrierCommand::PrivateExpedited as _;
+        /// `MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED`
+        const REGISTER_PRIVATE_EXPEDITED = MembarrierCommand::RegisterPrivateExpedited as _;
+        /// `MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE`
+        const PRIVATE_EXPEDITED_SYNC_CORE = MembarrierCommand::PrivateExpeditedSyncCore as _;
+        /// `MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE`
+        const REGISTER_PRIVATE_EXPEDITED_SYNC_CORE = MembarrierCommand::RegisterPrivateExpeditedSyncCore as _;
+        /// `MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ` (since Linux 5.10)
+        const PRIVATE_EXPEDITED_RSEQ = MembarrierCommand::PrivateExpeditedRseq as _;
+        /// `MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_RSEQ` (since Linux 5.10)
+        const REGISTER_PRIVATE_EXPEDITED_RSEQ = MembarrierCommand::RegisterPrivateExpeditedRseq as _;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

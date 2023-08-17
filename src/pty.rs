@@ -32,6 +32,9 @@ bitflags::bitflags! {
         /// rustix supports it on Linux, and FreeBSD and NetBSD support it.
         #[cfg(any(linux_kernel, target_os = "freebsd", target_os = "netbsd"))]
         const CLOEXEC = c::O_CLOEXEC as c::c_uint;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

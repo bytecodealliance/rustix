@@ -17,6 +17,9 @@ bitflags! {
         const CLOEXEC = linux_raw_sys::general::IN_CLOEXEC;
         /// `IN_NONBLOCK`
         const NONBLOCK = linux_raw_sys::general::IN_NONBLOCK;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -71,6 +74,9 @@ bitflags! {
         const ONESHOT = linux_raw_sys::general::IN_ONESHOT;
         /// `IN_ONLYDIR`
         const ONLYDIR = linux_raw_sys::general::IN_ONLYDIR;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

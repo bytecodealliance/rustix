@@ -99,15 +99,21 @@ fn test_file() {
     )))]
     rustix::fs::fdatasync(&file).unwrap();
 
+    // Test `fcntl_getfd`.
     assert_eq!(
         rustix::io::fcntl_getfd(&file).unwrap(),
         rustix::io::FdFlags::empty()
     );
-    // Use `from_bits_truncate` to ignore `O_LARGEFILE` if present.
-    assert_eq!(
-        rustix::fs::OFlags::from_bits_truncate(rustix::fs::fcntl_getfl(&file).unwrap().bits()),
-        rustix::fs::OFlags::empty()
-    );
+
+    // Test `fcntl_getfl`.
+    let fl = rustix::fs::fcntl_getfl(&file).unwrap();
+
+    // On Linux, rustix automatically sets `O_LARGEFILE`, so clear it here so
+    // that we can test that no other bits are present.
+    #[cfg(linux_kernel)]
+    let fl = fl - rustix::fs::OFlags::from_bits_retain(linux_raw_sys::general::O_LARGEFILE);
+
+    assert_eq!(fl, rustix::fs::OFlags::empty());
 
     // Test `fcntl_setfd`.
     rustix::io::fcntl_setfd(&file, rustix::io::FdFlags::CLOEXEC).unwrap();

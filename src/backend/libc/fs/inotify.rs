@@ -17,6 +17,9 @@ bitflags! {
         const CLOEXEC = bitcast!(c::IN_CLOEXEC);
         /// `IN_NONBLOCK`
         const NONBLOCK = bitcast!(c::IN_NONBLOCK);
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -71,6 +74,9 @@ bitflags! {
         const ONESHOT = c::IN_ONESHOT;
         /// `IN_ONLYDIR`
         const ONLYDIR = c::IN_ONLYDIR;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

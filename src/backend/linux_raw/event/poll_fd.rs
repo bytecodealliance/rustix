@@ -30,6 +30,9 @@ bitflags! {
         const NVAL = linux_raw_sys::general::POLLNVAL as u16;
         /// `POLLRDHUP`
         const RDHUP = linux_raw_sys::general::POLLRDHUP as u16;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

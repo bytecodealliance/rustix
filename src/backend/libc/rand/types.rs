@@ -17,5 +17,8 @@ bitflags! {
         const NONBLOCK = c::GRND_NONBLOCK;
         /// `GRND_INSECURE`
         const INSECURE = c::GRND_INSECURE;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }

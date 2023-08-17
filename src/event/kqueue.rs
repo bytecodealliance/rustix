@@ -262,6 +262,9 @@ bitflags::bitflags! {
 
         /// TODO
         const ERROR = c::EV_ERROR as _;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -290,6 +293,9 @@ bitflags::bitflags! {
 
         /// The link count of the file has changed.
         const LINK = c::NOTE_LINK;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -312,6 +318,9 @@ bitflags::bitflags! {
 
         /// An error has occurred with following the process.
         const TRACKERR = c::NOTE_TRACKERR;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -341,6 +350,9 @@ bitflags::bitflags! {
 
         /// Trigger the event.
         const TRIGGER = c::NOTE_TRIGGER;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 

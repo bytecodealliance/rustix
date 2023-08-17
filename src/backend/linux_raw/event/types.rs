@@ -14,5 +14,8 @@ bitflags! {
         const NONBLOCK = linux_raw_sys::general::EFD_NONBLOCK;
         /// `EFD_SEMAPHORE`
         const SEMAPHORE = linux_raw_sys::general::EFD_SEMAPHORE;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }

@@ -23,6 +23,9 @@ bitflags! {
         const NOSIGNAL = c::MSG_NOSIGNAL;
         /// `MSG_OOB`
         const OOB = c::MSG_OOB;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -48,5 +51,8 @@ bitflags! {
         const TRUNC = c::MSG_TRUNC;
         /// `MSG_WAITALL`
         const WAITALL = c::MSG_WAITALL;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }

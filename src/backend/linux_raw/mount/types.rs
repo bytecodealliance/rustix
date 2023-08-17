@@ -56,6 +56,9 @@ bitflags! {
 
         /// `MS_NOSYMFOLLOW`
         const NOSYMFOLLOW = linux_raw_sys::general::MS_NOSYMFOLLOW;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -74,6 +77,9 @@ bitflags! {
         const EXPIRE = linux_raw_sys::general::MNT_EXPIRE;
         /// `UMOUNT_NOFOLLOW`
         const NOFOLLOW = linux_raw_sys::general::UMOUNT_NOFOLLOW;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -85,9 +91,11 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct FsOpenFlags: c::c_uint {
-
         /// `FSOPEN_CLOEXEC`
         const FSOPEN_CLOEXEC = linux_raw_sys::general::FSOPEN_CLOEXEC;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -101,6 +109,9 @@ bitflags! {
     pub struct FsMountFlags: c::c_uint {
         /// `FSMOUNT_CLOEXEC`
         const FSMOUNT_CLOEXEC = linux_raw_sys::general::FSMOUNT_CLOEXEC;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -177,6 +188,9 @@ bitflags! {
 
         /// `MOUNT_ATTR__ATIME_FLAGS`
         const MOUNT_ATTR_SIZE_VER0 = linux_raw_sys::general::MOUNT_ATTR_SIZE_VER0;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -215,6 +229,9 @@ bitflags! {
 
         /// `MOVE_MOUNT__MASK`
         const MOVE_MOUNT__MASK = linux_raw_sys::general::MOVE_MOUNT__MASK;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -243,6 +260,9 @@ bitflags! {
 
         /// `AT_SYMLINK_NOFOLLOW`
         const AT_SYMLINK_NOFOLLOW = linux_raw_sys::general::AT_SYMLINK_NOFOLLOW;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -265,6 +285,9 @@ bitflags! {
 
         /// `FSPICK_EMPTY_PATH`
         const FSPICK_EMPTY_PATH = linux_raw_sys::general::FSPICK_EMPTY_PATH;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -287,6 +310,9 @@ bitflags! {
         const UNBINDABLE = linux_raw_sys::general::MS_UNBINDABLE;
         /// `MS_REC`
         const REC = linux_raw_sys::general::MS_REC;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
@@ -296,6 +322,9 @@ bitflags! {
     pub(crate) struct InternalMountFlags: c::c_uint {
         const REMOUNT = linux_raw_sys::general::MS_REMOUNT;
         const MOVE = linux_raw_sys::general::MS_MOVE;
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
     }
 }
 
