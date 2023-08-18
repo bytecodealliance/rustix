@@ -71,6 +71,11 @@ fn main() {
         use_feature("static_assertions");
     }
 
+    // WASI support can utilize wasi_ext if present.
+    if os == "wasi" {
+        use_feature_or_nothing("wasi_ext");
+    }
+
     // If the libc backend is requested, or if we're not on a platform for
     // which we have linux_raw support, use the libc backend.
     //
