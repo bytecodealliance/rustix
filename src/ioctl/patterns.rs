@@ -5,9 +5,8 @@ use super::{Ioctl, IoctlOutput, Opcode, RawOpcode};
 use crate::backend::c;
 use crate::io::Result;
 
-use core::fmt;
 use core::marker::PhantomData;
-use core::mem;
+use core::{fmt, mem};
 
 /// Implements an `ioctl` with no real arguments.
 pub struct NoArg<Opcode> {
@@ -38,8 +37,8 @@ impl<Opcode: CompileTimeOpcode> NoArg<Opcode> {
 unsafe impl<Opcode: CompileTimeOpcode> Ioctl for NoArg<Opcode> {
     type Output = ();
 
-    const OPCODE: self::Opcode = Opcode::OPCODE;
     const IS_MUTATING: bool = false;
+    const OPCODE: self::Opcode = Opcode::OPCODE;
 
     fn as_ptr(&mut self) -> *mut c::c_void {
         core::ptr::null_mut()
@@ -52,8 +51,8 @@ unsafe impl<Opcode: CompileTimeOpcode> Ioctl for NoArg<Opcode> {
 
 /// Implements the traditional "getter" pattern for `ioctl`s.
 ///
-/// Some `ioctl`s just read data into the userspace. As this is a popular pattern this structure
-/// implements it.
+/// Some `ioctl`s just read data into the userspace. As this is a popular
+/// pattern this structure implements it.
 pub struct Getter<Opcode, Output> {
     /// The output data.
     output: mem::MaybeUninit<Output>,
@@ -74,7 +73,8 @@ impl<Opcode: CompileTimeOpcode, Output> Getter<Opcode, Output> {
     /// # Safety
     ///
     /// - `Opcode` must provide a valid opcode.
-    /// - For this opcode, `Output` must be the type that the kernel expects to write into.
+    /// - For this opcode, `Output` must be the type that the kernel expects to
+    ///   write into.
     #[inline]
     pub unsafe fn new() -> Self {
         Self {
@@ -87,8 +87,8 @@ impl<Opcode: CompileTimeOpcode, Output> Getter<Opcode, Output> {
 unsafe impl<Opcode: CompileTimeOpcode, Output> Ioctl for Getter<Opcode, Output> {
     type Output = Output;
 
-    const OPCODE: self::Opcode = Opcode::OPCODE;
     const IS_MUTATING: bool = true;
+    const OPCODE: self::Opcode = Opcode::OPCODE;
 
     fn as_ptr(&mut self) -> *mut c::c_void {
         self.output.as_mut_ptr().cast()
@@ -99,7 +99,8 @@ unsafe impl<Opcode: CompileTimeOpcode, Output> Ioctl for Getter<Opcode, Output> 
     }
 }
 
-/// Implements the pattern for `ioctl`s where a pointer argument is given to the `ioctl`.
+/// Implements the pattern for `ioctl`s where a pointer argument is given to
+/// the `ioctl`.
 ///
 /// The opcode must be read-only.
 pub struct Setter<Opcode, Input> {
@@ -125,7 +126,8 @@ impl<Opcode: CompileTimeOpcode, Input> Setter<Opcode, Input> {
     /// # Safety
     ///
     /// - `Opcode` must provide a valid opcode.
-    /// - For this opcode, `Input` must be the type that the kernel expects to get.
+    /// - For this opcode, `Input` must be the type that the kernel expects to
+    ///   get.
     #[inline]
     pub unsafe fn new(input: Input) -> Self {
         Self {
@@ -138,8 +140,8 @@ impl<Opcode: CompileTimeOpcode, Input> Setter<Opcode, Input> {
 unsafe impl<Opcode: CompileTimeOpcode, Input> Ioctl for Setter<Opcode, Input> {
     type Output = ();
 
-    const OPCODE: self::Opcode = Opcode::OPCODE;
     const IS_MUTATING: bool = false;
+    const OPCODE: self::Opcode = Opcode::OPCODE;
 
     fn as_ptr(&mut self) -> *mut c::c_void {
         &mut self.input as *mut Input as *mut c::c_void

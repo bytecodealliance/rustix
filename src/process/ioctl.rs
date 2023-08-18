@@ -1,7 +1,8 @@
 #![allow(unsafe_code)]
 
 use crate::{backend, io, ioctl};
-use backend::{c, fd::AsFd};
+use backend::c;
+use backend::fd::AsFd;
 
 /// `ioctl(fd, TIOCSCTTY, 0)`—Sets the controlling terminal for the processs.
 ///
@@ -28,8 +29,9 @@ struct Tiocsctty;
 #[cfg(not(any(windows, target_os = "aix", target_os = "redox", target_os = "wasi")))]
 unsafe impl ioctl::Ioctl for Tiocsctty {
     type Output = ();
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::old(c::TIOCSCTTY as ioctl::RawOpcode);
+
     const IS_MUTATING: bool = false;
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::old(c::TIOCSCTTY as ioctl::RawOpcode);
 
     fn as_ptr(&mut self) -> *mut c::c_void {
         (&0u32) as *const u32 as *mut c::c_void

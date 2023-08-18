@@ -11,7 +11,7 @@ pub(super) const fn compose_opcode(
     size: RawOpcode,
 ) -> RawOpcode {
     macro_rules! shift_and_mask {
-        ($val:expr, $shift: expr, $mask:expr) => {{
+        ($val:expr, $shift:expr, $mask:expr) => {{
             ($val << $shift) & $mask
         }};
     }

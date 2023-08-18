@@ -13,7 +13,8 @@ pub use backend::net::addr::SocketAddrUnix;
 /// however it is not safe in general to rely on this, as file descriptors may
 /// be unexpectedly allocated on other threads or in libraries.
 ///
-/// To pass extra flags such as [`SocketFlags::CLOEXEC`], use [`socket_with`].
+/// To pass extra flags such as [`SocketFlags::CLOEXEC`] or
+/// [`SocketFlags::NONBLOCK`], use [`socket_with`].
 ///
 /// # References
 ///  - [Beej's Guide to Network Programming]
@@ -82,6 +83,7 @@ pub fn socket(
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=socket&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/socket
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Creating-a-Socket.html
+#[doc(alias("socket"))]
 #[inline]
 pub fn socket_with(
     domain: AddressFamily,
@@ -271,6 +273,10 @@ pub fn bind_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> 
 
 /// `connect(sockfd, addr)`—Initiates a connection to an IP address.
 ///
+/// On Windows, a non-blocking socket returns [`Errno::WOULDBLOCK`] if the
+/// connection cannot be completed immediately, rather than
+/// `Errno::INPROGRESS`.
+///
 /// # References
 ///  - [Beej's Guide to Network Programming]
 ///  - [POSIX]
@@ -295,6 +301,7 @@ pub fn bind_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> 
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=connect&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/connect
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Connecting.html
+/// [`Errno::WOULDBLOCK`]: io::Errno::WOULDBLOCK
 pub fn connect<Fd: AsFd>(sockfd: Fd, addr: &SocketAddr) -> io::Result<()> {
     _connect(sockfd.as_fd(), addr)
 }
