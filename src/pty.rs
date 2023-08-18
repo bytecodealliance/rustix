@@ -5,6 +5,8 @@
 //!
 //! [rustix-openpty crate]: https://crates.io/crates/rustix-openpty
 
+#![allow(unsafe_code)]
+
 use crate::backend::c;
 use crate::fd::{AsFd, OwnedFd};
 use crate::fs::OFlags;
@@ -169,14 +171,13 @@ pub fn grantpt<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 #[cfg(target_os = "linux")]
 #[inline]
 pub fn ioctl_tiocgptpeer<Fd: AsFd>(fd: Fd, flags: OpenptFlags) -> io::Result<OwnedFd> {
-    ioctl::ioctl(fd, Tiocgptpeer(flags))
+    unsafe { ioctl::ioctl(fd, Tiocgptpeer(flags)) }
 }
 
 #[cfg(target_os = "linux")]
 struct Tiocgptpeer(OpenptFlags);
 
 #[cfg(target_os = "linux")]
-#[allow(unsafe_code)]
 unsafe impl ioctl::Ioctl for Tiocgptpeer {
     type Output = OwnedFd;
     const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(c::TIOCGPTPEER as ioctl::RawOpcode);

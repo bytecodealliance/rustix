@@ -1,3 +1,5 @@
+#![allow(unsafe_code)]
+
 use crate::{backend, io, ioctl};
 use backend::{c, fd::AsFd};
 
@@ -17,13 +19,12 @@ use backend::{c, fd::AsFd};
 #[inline]
 #[doc(alias = "TIOCSCTTY")]
 pub fn ioctl_tiocsctty<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    ioctl::ioctl(fd, Tiocsctty)
+    unsafe { ioctl::ioctl(fd, Tiocsctty) }
 }
 
 #[cfg(not(any(windows, target_os = "aix", target_os = "redox", target_os = "wasi")))]
 struct Tiocsctty;
 
-#[allow(unsafe_code)]
 #[cfg(not(any(windows, target_os = "aix", target_os = "redox", target_os = "wasi")))]
 unsafe impl ioctl::Ioctl for Tiocsctty {
     type Output = ();

@@ -1,11 +1,10 @@
 //! Unsafe `ioctl` API.
 //!
-//! Unix systems expose a number of `ioctl`'s. Although they were originally meant to modify the
-//! behavior of files, they've now been adopted as a general purpose system call for making calls
-//! into the kernel. In addition to the wide variety of system calls that are included by default
-//! in the kernel, many drivers expose their own `ioctl`'s for controlling their behavior, some
-//! of which are proprietary.  Therefore it is impossible to make a safe interface for every `ioctl`
-//! call, as they all have wildly varying semantics.
+//! Unix systems expose a number of `ioctl`'s. `ioctl`s have been adopted as a general purpose system
+//! call for making calls into the kernel. In addition to the wide variety of system calls that are
+//! included by default in the kernel, many drivers expose their own `ioctl`'s for controlling their
+//! behavior, some of which are proprietary.  Therefore it is impossible to make a safe interface for
+//! every `ioctl` call, as they all have wildly varying semantics.
 //!
 //! This module provides an unsafe interface to write your own `ioctl` API. To start, create a type
 //! that implements [`Ioctl`]. Then, pass it to [`ioctl`] to make the `ioctl` call.
@@ -49,6 +48,13 @@ use bsd as platform;
 ///
 /// See documentation for [`Ioctl`] for more information.
 ///
+/// # Safety
+///
+/// While [`Ioctl`] takes much of the unsafety out of `ioctl` calls, it is still unsafe to call
+/// this code with arbitrary device drivers, as it is up to the device driver to implement the
+/// `ioctl` call correctly. It is on the onus of the protocol between the user and the driver to
+/// ensure that the `ioctl` call is safe to make.
+///
 /// # References
 ///
 /// - [Linux]
@@ -69,20 +75,20 @@ use bsd as platform;
 /// [Solaris]: https://docs.oracle.com/cd/E23824_01/html/821-1463/ioctl-2.html
 /// [illumos]: https://illumos.org/man/2/ioctl
 #[inline]
-pub fn ioctl<F: AsFd, I: Ioctl>(fd: F, mut ioctl: I) -> Result<I::Output> {
+pub unsafe fn ioctl<F: AsFd, I: Ioctl>(fd: F, mut ioctl: I) -> Result<I::Output> {
     let fd = fd.as_fd();
     let request = I::OPCODE.raw();
     let arg = ioctl.as_ptr();
 
     // SAFETY: The variant of `Ioctl` asserts that this is a valid IOCTL call to make.
     let output = if I::IS_MUTATING {
-        unsafe { _ioctl(fd, request, arg) }?
+        _ioctl(fd, request, arg)?
     } else {
-        unsafe { _ioctl_readonly(fd, request, arg) }?
+        _ioctl_readonly(fd, request, arg)?
     };
 
     // SAFETY: The variant of `Ioctl` asserts that this is a valid pointer to the output data.
-    unsafe { I::output_from_ptr(output, arg) }
+    I::output_from_ptr(output, arg)
 }
 
 unsafe fn _ioctl(

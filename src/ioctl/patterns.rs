@@ -100,7 +100,9 @@ unsafe impl<Opcode: CompileTimeOpcode, Output> Ioctl for Getter<Opcode, Output> 
 }
 
 /// Implements the pattern for `ioctl`s where a pointer argument is given to the `ioctl`.
-pub struct PtrSetter<Opcode, Input> {
+///
+/// The opcode must be read-only.
+pub struct Setter<Opcode, Input> {
     /// The input data.
     input: Input,
 
@@ -108,16 +110,16 @@ pub struct PtrSetter<Opcode, Input> {
     _opcode: PhantomData<Opcode>,
 }
 
-impl<Opcode: CompileTimeOpcode, Input: fmt::Debug> fmt::Debug for PtrSetter<Opcode, Input> {
+impl<Opcode: CompileTimeOpcode, Input: fmt::Debug> fmt::Debug for Setter<Opcode, Input> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("PtrSetter")
+        f.debug_tuple("Setter")
             .field(&Opcode::OPCODE)
             .field(&self.input)
             .finish()
     }
 }
 
-impl<Opcode: CompileTimeOpcode, Input> PtrSetter<Opcode, Input> {
+impl<Opcode: CompileTimeOpcode, Input> Setter<Opcode, Input> {
     /// Create a new pointer setter-style `ioctl` object.
     ///
     /// # Safety
@@ -133,7 +135,7 @@ impl<Opcode: CompileTimeOpcode, Input> PtrSetter<Opcode, Input> {
     }
 }
 
-unsafe impl<Opcode: CompileTimeOpcode, Input> Ioctl for PtrSetter<Opcode, Input> {
+unsafe impl<Opcode: CompileTimeOpcode, Input> Ioctl for Setter<Opcode, Input> {
     type Output = ();
 
     const OPCODE: self::Opcode = Opcode::OPCODE;
