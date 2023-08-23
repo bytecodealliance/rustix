@@ -158,9 +158,9 @@ fn pr_get_auxv() -> crate::io::Result<Vec<u8>> {
     return Ok(buffer);
 }
 
-/// On non-Mustang platforms, we read the aux vector via the `prctl`
-/// `PR_GET_AUXV`, with a fallback to /proc/self/auxv for kernels that don't
-/// support `PR_GET_AUXV`.
+/// If we don't have "use-explicitly-provided-auxv" or "use-libc-auxv", we
+/// read the aux vector via the `prctl` `PR_GET_AUXV`, with a fallback to
+/// /proc/self/auxv for kernels that don't support `PR_GET_AUXV`.
 #[cold]
 fn init_auxv() {
     match pr_get_auxv() {

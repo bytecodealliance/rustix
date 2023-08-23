@@ -2,7 +2,10 @@
 
 #![allow(non_snake_case)]
 #![cfg_attr(
-    all(not(target_vendor = "mustang"), feature = "use-libc-auxv"),
+    all(
+        not(feature = "use-explicitly-provided-auxv"),
+        feature = "use-libc-auxv"
+    ),
     allow(dead_code)
 )]
 

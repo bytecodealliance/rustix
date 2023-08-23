@@ -25,7 +25,7 @@ pub(crate) use linux_raw_sys::general::epoll_event;
     feature = "fs",
     all(
         not(feature = "use-libc-auxv"),
-        not(target_vendor = "mustang"),
+        not(feature = "use-explicitly-provided-auxv"),
         any(
             feature = "param",
             feature = "runtime",

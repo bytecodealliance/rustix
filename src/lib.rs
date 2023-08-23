@@ -286,7 +286,7 @@ pub(crate) mod mount;
 #[cfg(all(
     linux_raw,
     not(feature = "use-libc-auxv"),
-    not(target_vendor = "mustang"),
+    not(feature = "use-explicitly-provided-auxv"),
     any(
         feature = "param",
         feature = "runtime",
@@ -303,7 +303,7 @@ pub(crate) mod fs;
 #[cfg(all(
     linux_raw,
     not(feature = "use-libc-auxv"),
-    not(target_vendor = "mustang"),
+    not(feature = "use-explicitly-provided-auxv"),
     any(
         feature = "param",
         feature = "runtime",
@@ -342,7 +342,7 @@ mod signal;
     all(
         linux_raw,
         not(feature = "use-libc-auxv"),
-        not(target_vendor = "mustang"),
+        not(feature = "use-explicitly-provided-auxv"),
         any(
             feature = "param",
             feature = "runtime",
@@ -360,7 +360,7 @@ mod timespec;
     all(
         linux_raw,
         not(feature = "use-libc-auxv"),
-        not(target_vendor = "mustang"),
+        not(feature = "use-explicitly-provided-auxv"),
         any(
             feature = "param",
             feature = "runtime",

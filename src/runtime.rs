@@ -14,7 +14,7 @@
 //! The API for these functions is not stable, and this module is
 //! `doc(hidden)`.
 //!
-//! [origin]: https://github.com/sunfishcode/mustang/tree/main/origin
+//! [origin]: https://github.com/sunfishcode/origin
 //!
 //! # Safety
 //!

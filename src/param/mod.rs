@@ -6,9 +6,9 @@
 //! between different processes on the same system.
 
 mod auxv;
-#[cfg(target_vendor = "mustang")]
+#[cfg(feature = "use-explicitly-provided-auxv")]
 mod init;
 
 pub use auxv::*;
-#[cfg(target_vendor = "mustang")]
+#[cfg(feature = "use-explicitly-provided-auxv")]
 pub use init::init;

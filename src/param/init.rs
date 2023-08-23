@@ -2,8 +2,8 @@
 //!
 //! # Safety
 //!
-//! On mustang, or on any non-glibc non-musl platform, the `init` function must
-//! be called before any other function in this module. It is unsafe because it
+//! When "use-explicitly-provided-auxv" is enabled, the `init` function must be
+//! called before any other function in this module. It is unsafe because it
 //! operates on raw pointers.
 #![allow(unsafe_code)]
 
