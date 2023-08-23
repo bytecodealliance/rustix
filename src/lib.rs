@@ -192,20 +192,7 @@ pub mod event;
 #[cfg(not(windows))]
 pub mod ffi;
 #[cfg(not(windows))]
-#[cfg(any(
-    feature = "fs",
-    all(
-        linux_raw,
-        not(feature = "use-libc-auxv"),
-        not(target_vendor = "mustang"),
-        any(
-            feature = "param",
-            feature = "runtime",
-            feature = "time",
-            target_arch = "x86",
-        )
-    )
-))]
+#[cfg(feature = "fs")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "fs")))]
 pub mod fs;
 pub mod io;
@@ -230,22 +217,7 @@ pub mod net;
 #[cfg_attr(doc_cfg, doc(cfg(feature = "param")))]
 pub mod param;
 #[cfg(not(windows))]
-#[cfg(any(
-    feature = "fs",
-    feature = "mount",
-    feature = "net",
-    all(
-        linux_raw,
-        not(feature = "use-libc-auxv"),
-        not(target_vendor = "mustang"),
-        any(
-            feature = "param",
-            feature = "runtime",
-            feature = "time",
-            target_arch = "x86",
-        )
-    )
-))]
+#[cfg(any(feature = "fs", feature = "mount", feature = "net"))]
 #[cfg_attr(
     doc_cfg,
     doc(cfg(any(feature = "fs", feature = "mount", feature = "net")))
@@ -306,6 +278,40 @@ pub mod runtime;
 #[cfg(linux_kernel)]
 #[cfg(all(feature = "fs", not(feature = "mount")))]
 pub(crate) mod mount;
+
+// Declare "fs" as a non-public module if "fs" isn't enabled but we need it for
+// reading procfs.
+#[cfg(not(windows))]
+#[cfg(not(feature = "fs"))]
+#[cfg(all(
+    linux_raw,
+    not(feature = "use-libc-auxv"),
+    not(target_vendor = "mustang"),
+    any(
+        feature = "param",
+        feature = "runtime",
+        feature = "time",
+        target_arch = "x86",
+    )
+))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "fs")))]
+pub(crate) mod fs;
+
+// Similarly, declare `path` as a non-public module if needed.
+#[cfg(not(windows))]
+#[cfg(not(any(feature = "fs", feature = "mount", feature = "net")))]
+#[cfg(all(
+    linux_raw,
+    not(feature = "use-libc-auxv"),
+    not(target_vendor = "mustang"),
+    any(
+        feature = "param",
+        feature = "runtime",
+        feature = "time",
+        target_arch = "x86",
+    )
+))]
+pub(crate) mod path;
 
 // Private modules used by multiple public modules.
 #[cfg(not(any(windows, target_os = "espidf")))]
