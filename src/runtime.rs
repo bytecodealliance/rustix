@@ -164,7 +164,7 @@ pub fn exit_group(status: i32) -> ! {
 /// Return fields from the main executable segment headers ("phdrs") relevant
 /// to initializing TLS provided to the program at startup.
 #[inline]
-pub fn startup_tls_info() -> StartupTlsInfo {
+pub fn startup_tls_info() -> Option<StartupTlsInfo> {
     backend::runtime::tls::startup_tls_info()
 }
 
