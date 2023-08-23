@@ -36,7 +36,7 @@ pub(crate) mod event;
     feature = "fs",
     all(
         not(feature = "use-libc-auxv"),
-        not(target_vendor = "mustang"),
+        not(feature = "use-explicitly-provided-auxv"),
         any(
             feature = "param",
             feature = "runtime",
@@ -104,7 +104,7 @@ pub(crate) mod prctl;
     feature = "thread",
     all(
         not(feature = "use-libc-auxv"),
-        not(target_vendor = "mustang"),
+        not(feature = "use-explicitly-provided-auxv"),
         any(
             feature = "param",
             feature = "runtime",
