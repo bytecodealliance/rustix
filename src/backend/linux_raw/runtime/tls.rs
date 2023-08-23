@@ -17,7 +17,7 @@ use core::ptr::null;
 #[cfg(target_arch = "x86")]
 pub type UserDesc = linux_raw_sys::general::user_desc;
 
-pub(crate) fn startup_tls_info() -> StartupTlsInfo {
+pub(crate) fn startup_tls_info() -> Option<StartupTlsInfo> {
     let mut base = null();
     let mut tls_phdr = null();
     let mut stack_size = 0;
@@ -36,13 +36,17 @@ pub(crate) fn startup_tls_info() -> StartupTlsInfo {
             }
         }
 
-        StartupTlsInfo {
+        if tls_phdr.is_null() {
+            return None;
+        }
+
+        Some(StartupTlsInfo {
             addr: base.cast::<u8>().add((*tls_phdr).p_vaddr).cast(),
             mem_size: (*tls_phdr).p_memsz,
             file_size: (*tls_phdr).p_filesz,
             align: (*tls_phdr).p_align,
             stack_size,
-        }
+        })
     }
 }
 
