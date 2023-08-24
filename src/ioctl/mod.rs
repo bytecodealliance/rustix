@@ -162,8 +162,13 @@ pub unsafe trait Ioctl {
     ///
     /// # Safety
     ///
-    /// The `ptr` must be the resulting value after a successful `ioctl` call.
-    unsafe fn output_from_ptr(out: IoctlOutput, ptr: *mut c::c_void) -> Result<Self::Output>;
+    /// The `extract_output` value must be the resulting value after a successful `ioctl` call, and
+    /// `out` is the direct return value of an `ioctl` call that did not fail. In this case
+    /// `extract_output` is the pointer that was passed to the `ioctl` call.
+    unsafe fn output_from_ptr(
+        out: IoctlOutput,
+        extract_output: *mut c::c_void,
+    ) -> Result<Self::Output>;
 }
 
 /// The opcode used by an `Ioctl`.
@@ -174,9 +179,13 @@ pub struct Opcode {
 }
 
 impl Opcode {
-    /// Create a new bad `Opcode` from a raw opcode.
+    /// Create a new old `Opcode` from a raw opcode.
+    ///
+    /// Rather than being a composition of several attributes, old opcodes are just numbers. In
+    /// general most drivers follow stricter conventions, but older drivers may still use this
+    /// strategy.
     #[inline]
-    pub const fn bad(raw: RawOpcode) -> Self {
+    pub const fn old(raw: RawOpcode) -> Self {
         Self { raw }
     }
 
@@ -193,7 +202,7 @@ impl Opcode {
             panic!("data size is too large");
         }
 
-        Self::bad(platform::compose_opcode(
+        Self::old(platform::compose_opcode(
             direction,
             group as RawOpcode,
             number as RawOpcode,

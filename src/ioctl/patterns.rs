@@ -160,7 +160,7 @@ pub trait CompileTimeOpcode {
 pub struct BadOpcode<const OPCODE: RawOpcode>;
 
 impl<const OPCODE: RawOpcode> CompileTimeOpcode for BadOpcode<OPCODE> {
-    const OPCODE: Opcode = Opcode::bad(OPCODE);
+    const OPCODE: Opcode = Opcode::old(OPCODE);
 }
 
 /// Provides a read code at compile time.

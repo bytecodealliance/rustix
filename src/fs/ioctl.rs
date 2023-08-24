@@ -76,7 +76,7 @@ struct Ficlone<'a>(BorrowedFd<'a>);
 unsafe impl ioctl::Ioctl for Ficlone<'_> {
     type Output = ();
 
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(c::FICLONE as ioctl::RawOpcode);
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::old(c::FICLONE as ioctl::RawOpcode);
     const IS_MUTATING: bool = false;
 
     fn as_ptr(&mut self) -> *mut c::c_void {

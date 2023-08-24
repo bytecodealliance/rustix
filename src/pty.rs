@@ -180,7 +180,7 @@ struct Tiocgptpeer(OpenptFlags);
 #[cfg(target_os = "linux")]
 unsafe impl ioctl::Ioctl for Tiocgptpeer {
     type Output = OwnedFd;
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::bad(c::TIOCGPTPEER as ioctl::RawOpcode);
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::old(c::TIOCGPTPEER as ioctl::RawOpcode);
     const IS_MUTATING: bool = false;
 
     fn as_ptr(&mut self) -> *mut c::c_void {
