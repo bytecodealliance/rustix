@@ -23,10 +23,7 @@ bitflags! {
         /// `MSG_DONTROUTE`
         const DONTROUTE = bitcast!(c::MSG_DONTROUTE);
         /// `MSG_DONTWAIT`
-        #[cfg(not(any(
-            windows,
-            target_os = "aix",
-        )))]
+        #[cfg(not(windows))]
         const DONTWAIT = bitcast!(c::MSG_DONTWAIT);
         /// `MSG_EOR`
         #[cfg(not(windows))]
@@ -72,10 +69,7 @@ bitflags! {
         /// `MSG_CMSG_CLOEXEC`
         const CMSG_CLOEXEC = bitcast!(c::MSG_CMSG_CLOEXEC);
         /// `MSG_DONTWAIT`
-        #[cfg(not(any(
-            windows,
-            target_os = "aix",
-        )))]
+        #[cfg(not(windows))]
         const DONTWAIT = bitcast!(c::MSG_DONTWAIT);
         /// `MSG_ERRQUEUE`
         #[cfg(not(any(

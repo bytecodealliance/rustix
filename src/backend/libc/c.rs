@@ -79,6 +79,9 @@ pub(crate) const IUCLC: tcflag_t = linux_raw_sys::general::IUCLC as _;
 #[cfg(all(linux_kernel, feature = "termios"))]
 pub(crate) const XCASE: tcflag_t = linux_raw_sys::general::XCASE as _;
 
+#[cfg(target_os = "aix")]
+pub(crate) const MSG_DONTWAIT: c_int = libc::MSG_NONBLOCK;
+
 // On PowerPC, the regular `termios` has the `termios2` fields and there is no
 // `termios2`. linux-raw-sys has aliases `termios2` to `termios` to cover this
 // difference, but we still need to manually import it since `libc` doesn't

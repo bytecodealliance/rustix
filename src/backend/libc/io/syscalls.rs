@@ -231,10 +231,6 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
 
     let (mut read, mut write) = crate::fs::fd::_is_file_read_write(fd)?;
     let mut not_socket = false;
-    #[cfg(target_os = "aix")]
-    let nowait = c::MSG_NONBLOCK;
-    #[cfg(not(target_os = "aix"))]
-    let nowait = c::MSG_DONTWAIT;
     if read {
         // Do a `recv` with `PEEK` and `DONTWAIT` for 1 byte. A 0 indicates
         // the read side is shut down; an `EWOULDBLOCK` indicates the read
@@ -246,7 +242,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
                     .as_mut_ptr()
                     .cast::<c::c_void>(),
                 1,
-                c::MSG_PEEK | nowait,
+                c::MSG_PEEK | c::MSG_DONTWAIT,
             )
         } {
             0 => read = false,
@@ -264,7 +260,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
     if write && !not_socket {
         // Do a `send` with `DONTWAIT` for 0 bytes. An `EPIPE` indicates
         // the write side is shut down.
-        if unsafe { c::send(borrowed_fd(fd), [].as_ptr(), 0, nowait) } == -1 {
+        if unsafe { c::send(borrowed_fd(fd), [].as_ptr(), 0, c::MSG_DONTWAIT) } == -1 {
             #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
             match errno().0 {
                 c::EAGAIN | c::EWOULDBLOCK | c::ENOTSOCK => (),
