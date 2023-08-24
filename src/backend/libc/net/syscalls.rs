@@ -831,6 +831,7 @@ pub(crate) mod sockopt {
         apple,
         solarish,
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "emscripten",
         target_os = "espidf",

@@ -762,6 +762,7 @@ pub fn get_socket_send_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
     apple,
     solarish,
     windows,
+    target_os = "aix",
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "espidf",
