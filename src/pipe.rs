@@ -192,7 +192,7 @@ pub fn tee<FdIn: AsFd, FdOut: AsFd>(
     backend::pipe::syscalls::tee(fd_in.as_fd(), fd_out.as_fd(), len, flags)
 }
 
-/// `ioctl(fd, F_GETPIPE_SZ)`—Return the buffer capacity of a pipe.
+/// `fnctl(fd, F_GETPIPE_SZ)`—Return the buffer capacity of a pipe.
 ///
 /// # References
 ///  - [Linux]
@@ -204,7 +204,7 @@ pub fn fcntl_getpipe_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
     backend::pipe::syscalls::fcntl_getpipe_sz(fd.as_fd())
 }
 
-/// `ioctl(fd, F_SETPIPE_SZ)`—Set the buffer capacity of a pipe.
+/// `fnctl(fd, F_SETPIPE_SZ)`—Set the buffer capacity of a pipe.
 ///
 /// # References
 ///  - [Linux]

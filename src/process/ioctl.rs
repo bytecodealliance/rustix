@@ -1,5 +1,7 @@
-use crate::{backend, io};
-use backend::fd::AsFd;
+#![allow(unsafe_code)]
+
+use crate::{backend, io, ioctl};
+use backend::{c, fd::AsFd};
 
 /// `ioctl(fd, TIOCSCTTY, 0)`—Sets the controlling terminal for the processs.
 ///
@@ -17,5 +19,26 @@ use backend::fd::AsFd;
 #[inline]
 #[doc(alias = "TIOCSCTTY")]
 pub fn ioctl_tiocsctty<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    backend::process::syscalls::ioctl_tiocsctty(fd.as_fd())
+    unsafe { ioctl::ioctl(fd, Tiocsctty) }
+}
+
+#[cfg(not(any(windows, target_os = "aix", target_os = "redox", target_os = "wasi")))]
+struct Tiocsctty;
+
+#[cfg(not(any(windows, target_os = "aix", target_os = "redox", target_os = "wasi")))]
+unsafe impl ioctl::Ioctl for Tiocsctty {
+    type Output = ();
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::old(c::TIOCSCTTY as ioctl::RawOpcode);
+    const IS_MUTATING: bool = false;
+
+    fn as_ptr(&mut self) -> *mut c::c_void {
+        (&0u32) as *const u32 as *mut c::c_void
+    }
+
+    unsafe fn output_from_ptr(
+        _: ioctl::IoctlOutput,
+        _: *mut c::c_void,
+    ) -> io::Result<Self::Output> {
+        Ok(())
+    }
 }

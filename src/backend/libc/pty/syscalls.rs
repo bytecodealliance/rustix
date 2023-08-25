@@ -4,8 +4,6 @@ use crate::backend::c;
 use crate::backend::conv::{borrowed_fd, ret};
 use crate::fd::BorrowedFd;
 use crate::io;
-#[cfg(not(target_os = "android"))]
-use {crate::backend::conv::ret_owned_fd, crate::fd::OwnedFd, crate::pty::OpenptFlags};
 #[cfg(any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia"))]
 use {
     crate::ffi::{CStr, CString},
@@ -13,6 +11,9 @@ use {
     alloc::borrow::ToOwned,
     alloc::vec::Vec,
 };
+
+#[cfg(not(linux_kernel))]
+use crate::{backend::conv::ret_owned_fd, fd::OwnedFd, pty::OpenptFlags};
 
 #[cfg(not(linux_kernel))]
 #[inline]
@@ -94,10 +95,4 @@ pub(crate) fn unlockpt(fd: BorrowedFd) -> io::Result<()> {
 #[inline]
 pub(crate) fn grantpt(fd: BorrowedFd) -> io::Result<()> {
     unsafe { ret(c::grantpt(borrowed_fd(fd))) }
-}
-
-#[cfg(target_os = "linux")]
-#[inline]
-pub(crate) fn ioctl_tiocgptpeer(fd: BorrowedFd, flags: OpenptFlags) -> io::Result<OwnedFd> {
-    unsafe { ret_owned_fd(c::ioctl(borrowed_fd(fd), c::TIOCGPTPEER, flags.bits())) }
 }

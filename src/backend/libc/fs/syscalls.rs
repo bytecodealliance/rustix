@@ -2407,55 +2407,6 @@ pub(crate) fn fremovexattr(fd: BorrowedFd<'_>, name: &CStr) -> io::Result<()> {
     }
 }
 
-#[cfg(linux_kernel)]
-#[inline]
-pub(crate) fn ioctl_blksszget(fd: BorrowedFd) -> io::Result<u32> {
-    let mut result = MaybeUninit::<c::c_uint>::uninit();
-    unsafe {
-        ret(c::ioctl(borrowed_fd(fd), c::BLKSSZGET, result.as_mut_ptr()))?;
-        Ok(result.assume_init() as u32)
-    }
-}
-
-#[cfg(linux_kernel)]
-#[inline]
-pub(crate) fn ioctl_blkpbszget(fd: BorrowedFd) -> io::Result<u32> {
-    let mut result = MaybeUninit::<c::c_uint>::uninit();
-    unsafe {
-        ret(c::ioctl(
-            borrowed_fd(fd),
-            c::BLKPBSZGET,
-            result.as_mut_ptr(),
-        ))?;
-        Ok(result.assume_init() as u32)
-    }
-}
-
-// Sparc lacks `FICLONE`.
-#[cfg(all(linux_kernel, not(any(target_arch = "sparc", target_arch = "sparc64"))))]
-pub(crate) fn ioctl_ficlone(fd: BorrowedFd<'_>, src_fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe {
-        ret(c::ioctl(
-            borrowed_fd(fd),
-            c::FICLONE as _,
-            borrowed_fd(src_fd),
-        ))
-    }
-}
-
-#[cfg(linux_kernel)]
-#[inline]
-pub(crate) fn ext4_ioc_resize_fs(fd: BorrowedFd<'_>, blocks: u64) -> io::Result<()> {
-    // TODO: Fix linux-raw-sys to define ioctl codes for sparc.
-    #[cfg(any(target_arch = "sparc", target_arch = "sparc64"))]
-    const EXT4_IOC_RESIZE_FS: u32 = 0x8008_6610;
-
-    #[cfg(not(any(target_arch = "sparc", target_arch = "sparc64")))]
-    use linux_raw_sys::ioctl::EXT4_IOC_RESIZE_FS;
-
-    unsafe { ret(c::ioctl(borrowed_fd(fd), EXT4_IOC_RESIZE_FS as _, &blocks)) }
-}
-
 #[test]
 fn test_sizes() {
     #[cfg(linux_kernel)]

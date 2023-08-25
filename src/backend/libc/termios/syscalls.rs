@@ -210,26 +210,6 @@ pub(crate) fn tcgetwinsize(fd: BorrowedFd) -> io::Result<Winsize> {
     }
 }
 
-#[cfg(not(any(
-    target_os = "espidf",
-    target_os = "haiku",
-    target_os = "redox",
-    target_os = "wasi"
-)))]
-pub(crate) fn ioctl_tiocexcl(fd: BorrowedFd) -> io::Result<()> {
-    unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCEXCL as _)) }
-}
-
-#[cfg(not(any(
-    target_os = "espidf",
-    target_os = "haiku",
-    target_os = "redox",
-    target_os = "wasi"
-)))]
-pub(crate) fn ioctl_tiocnxcl(fd: BorrowedFd) -> io::Result<()> {
-    unsafe { ret(c::ioctl(borrowed_fd(fd), c::TIOCNXCL as _)) }
-}
-
 #[cfg(not(any(target_os = "espidf", target_os = "nto", target_os = "wasi")))]
 #[inline]
 pub(crate) fn set_speed(termios: &mut Termios, arbitrary_speed: u32) -> io::Result<()> {

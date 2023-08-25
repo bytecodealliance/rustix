@@ -5,12 +5,17 @@
 //!
 //! [rustix-openpty crate]: https://crates.io/crates/rustix-openpty
 
+#![allow(unsafe_code)]
+
 use crate::backend::c;
 use crate::fd::{AsFd, OwnedFd};
 use crate::fs::OFlags;
 use crate::{backend, io};
 #[cfg(any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia"))]
 use {crate::ffi::CString, alloc::vec::Vec};
+
+#[cfg(target_os = "linux")]
+use crate::{fd::FromRawFd, ioctl};
 
 bitflags::bitflags! {
     /// `O_*` flags for use with [`openpt`] and [`ioctl_tiocgptpeer`].
@@ -169,5 +174,26 @@ pub fn grantpt<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 #[cfg(target_os = "linux")]
 #[inline]
 pub fn ioctl_tiocgptpeer<Fd: AsFd>(fd: Fd, flags: OpenptFlags) -> io::Result<OwnedFd> {
-    backend::pty::syscalls::ioctl_tiocgptpeer(fd.as_fd(), flags)
+    unsafe { ioctl::ioctl(fd, Tiocgptpeer(flags)) }
+}
+
+#[cfg(target_os = "linux")]
+struct Tiocgptpeer(OpenptFlags);
+
+#[cfg(target_os = "linux")]
+unsafe impl ioctl::Ioctl for Tiocgptpeer {
+    type Output = OwnedFd;
+    const OPCODE: ioctl::Opcode = ioctl::Opcode::old(c::TIOCGPTPEER as ioctl::RawOpcode);
+    const IS_MUTATING: bool = false;
+
+    fn as_ptr(&mut self) -> *mut c::c_void {
+        self.0.bits() as *mut c::c_void
+    }
+
+    unsafe fn output_from_ptr(
+        ret: ioctl::IoctlOutput,
+        _arg: *mut c::c_void,
+    ) -> io::Result<Self::Output> {
+        Ok(OwnedFd::from_raw_fd(ret))
+    }
 }

@@ -32,7 +32,6 @@ use linux_raw_sys::general::{
     membarrier_cmd, membarrier_cmd_flag, rlimit, rlimit64, PRIO_PGRP, PRIO_PROCESS, PRIO_USER,
     RLIM64_INFINITY, RLIM_INFINITY,
 };
-use linux_raw_sys::ioctl::TIOCSCTTY;
 #[cfg(feature = "fs")]
 use {crate::backend::conv::ret_c_uint_infallible, crate::fs::Mode};
 
@@ -619,18 +618,6 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
             __NR_getgroups,
             c_int(len),
             slice_just_addr_mut(buf)
-        ))
-    }
-}
-
-#[inline]
-pub(crate) fn ioctl_tiocsctty(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe {
-        ret(syscall_readonly!(
-            __NR_ioctl,
-            fd,
-            c_uint(TIOCSCTTY),
-            by_ref(&0_u32)
         ))
     }
 }

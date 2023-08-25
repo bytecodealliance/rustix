@@ -1,7 +1,10 @@
 //! Terminal-related `ioctl` functions.
 
+#![allow(unsafe_code)]
+
 use crate::fd::AsFd;
-use crate::{backend, io};
+use crate::{backend, io, ioctl};
+use backend::c;
 
 /// `ioctl(fd, TIOCEXCL)`—Enables exclusive mode on a terminal.
 ///
@@ -19,7 +22,11 @@ use crate::{backend, io};
 #[inline]
 #[doc(alias = "TIOCEXCL")]
 pub fn ioctl_tiocexcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    backend::termios::syscalls::ioctl_tiocexcl(fd.as_fd())
+    // SAFETY: TIOCEXCL is a no-argument setter opcode.
+    unsafe {
+        let ctl = ioctl::NoArg::<ioctl::BadOpcode<{ c::TIOCEXCL as _ }>>::new();
+        ioctl::ioctl(fd, ctl)
+    }
 }
 
 /// `ioctl(fd, TIOCNXCL)`—Disables exclusive mode on a terminal.
@@ -38,5 +45,9 @@ pub fn ioctl_tiocexcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 #[inline]
 #[doc(alias = "TIOCNXCL")]
 pub fn ioctl_tiocnxcl<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    backend::termios::syscalls::ioctl_tiocnxcl(fd.as_fd())
+    // SAFETY: TIOCNXCL is a no-argument setter opcode.
+    unsafe {
+        let ctl = ioctl::NoArg::<ioctl::BadOpcode<{ c::TIOCNXCL as _ }>>::new();
+        ioctl::ioctl(fd, ctl)
+    }
 }

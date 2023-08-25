@@ -6,8 +6,10 @@
 //! Some ioctls, such as those related to filesystems, terminals, and
 //! processes, live in other top-level API modules.
 
-use crate::{backend, io};
-use backend::fd::AsFd;
+#![allow(unsafe_code)]
+
+use crate::{backend, io, ioctl};
+use backend::{c, fd::AsFd};
 
 /// `ioctl(fd, FIOCLEX, NULL)`—Set the close-on-exec flag.
 ///
@@ -26,7 +28,11 @@ use backend::fd::AsFd;
 #[doc(alias = "FIOCLEX")]
 #[doc(alias = "FD_CLOEXEC")]
 pub fn ioctl_fioclex<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    backend::io::syscalls::ioctl_fioclex(fd.as_fd())
+    // SAFETY: FIOCLEX is a no-argument setter opcode.
+    unsafe {
+        let ctl = ioctl::NoArg::<ioctl::BadOpcode<{ c::FIOCLEX }>>::new();
+        ioctl::ioctl(fd, ctl)
+    }
 }
 
 /// `ioctl(fd, FIONBIO, &value)`—Enables or disables non-blocking mode.
@@ -42,7 +48,11 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 #[inline]
 #[doc(alias = "FIONBIO")]
 pub fn ioctl_fionbio<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
-    backend::io::syscalls::ioctl_fionbio(fd.as_fd(), value)
+    // SAFETY: FIONBIO is a pointer setter opcode.
+    unsafe {
+        let ctl = ioctl::Setter::<ioctl::BadOpcode<{ c::FIONBIO }>, c::c_int>::new(value.into());
+        ioctl::ioctl(fd, ctl)
+    }
 }
 
 /// `ioctl(fd, FIONREAD)`—Returns the number of bytes ready to be read.
@@ -66,5 +76,9 @@ pub fn ioctl_fionbio<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 #[inline]
 #[doc(alias = "FIONREAD")]
 pub fn ioctl_fionread<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
-    backend::io::syscalls::ioctl_fionread(fd.as_fd())
+    // SAFETY: FIONREAD is a getter opcode that gets a c_int.
+    unsafe {
+        let ctl = ioctl::Getter::<ioctl::BadOpcode<{ c::FIONREAD }>, c::c_int>::new();
+        ioctl::ioctl(fd, ctl).map(|n| n as u64)
+    }
 }
