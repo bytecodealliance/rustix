@@ -14,6 +14,7 @@ bitflags! {
             bsd,
             solarish,
             windows,
+            target_os = "aix",
             target_os = "espidf",
             target_os = "nto",
             target_os = "haiku",
@@ -32,6 +33,7 @@ bitflags! {
             bsd,
             solarish,
             windows,
+            target_os = "aix",
             target_os = "haiku",
             target_os = "nto",
         )))]
@@ -55,7 +57,15 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct RecvFlags: u32 {
-        #[cfg(not(any(apple, solarish, windows, target_os = "espidf", target_os = "haiku", target_os = "nto")))]
+        #[cfg(not(any(
+            apple,
+            solarish,
+            windows,
+            target_os = "aix",
+            target_os = "espidf",
+            target_os = "haiku",
+            target_os = "nto",
+        )))]
         /// `MSG_CMSG_CLOEXEC`
         const CMSG_CLOEXEC = bitcast!(c::MSG_CMSG_CLOEXEC);
         /// `MSG_DONTWAIT`
@@ -66,6 +76,7 @@ bitflags! {
             bsd,
             solarish,
             windows,
+            target_os = "aix",
             target_os = "espidf",
             target_os = "haiku",
             target_os = "nto",

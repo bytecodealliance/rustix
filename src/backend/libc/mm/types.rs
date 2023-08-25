@@ -80,6 +80,7 @@ bitflags! {
         #[cfg(not(any(
             bsd,
             solarish,
+            target_os = "aix",
             target_os = "android",
             target_os = "emscripten",
             target_os = "fuchsia",
@@ -94,6 +95,7 @@ bitflags! {
         #[cfg(not(any(
             bsd,
             solarish,
+            target_os = "aix",
             target_os = "haiku",
             target_os = "nto",
             target_os = "redox",
@@ -105,6 +107,7 @@ bitflags! {
         #[cfg(not(any(
             bsd,
             solarish,
+            target_os = "aix",
             target_os = "android",
             target_os = "emscripten",
             target_os = "fuchsia",
@@ -117,6 +120,7 @@ bitflags! {
         #[cfg(not(any(
             bsd,
             solarish,
+            target_os = "aix",
             target_os = "haiku",
             target_os = "nto",
             target_os = "redox",
@@ -126,6 +130,7 @@ bitflags! {
         #[cfg(not(any(
             bsd,
             solarish,
+            target_os = "aix",
             target_os = "haiku",
             target_os = "nto",
             target_os = "redox",
@@ -135,6 +140,7 @@ bitflags! {
         #[cfg(not(any(
             bsd,
             solarish,
+            target_os = "aix",
             target_os = "android",
             target_os = "emscripten",
             target_os = "fuchsia",
@@ -147,6 +153,7 @@ bitflags! {
         #[cfg(not(any(
             bsd,
             solarish,
+            target_os = "aix",
             target_os = "android",
             target_os = "emscripten",
             target_os = "fuchsia",
@@ -159,6 +166,7 @@ bitflags! {
         #[cfg(not(any(
             bsd,
             solarish,
+            target_os = "aix",
             target_os = "haiku",
             target_os = "nto",
             target_os = "redox",
@@ -168,7 +176,12 @@ bitflags! {
         #[cfg(freebsdlike)]
         const NOCORE = bitcast!(c::MAP_NOCORE);
         /// `MAP_NORESERVE`
-        #[cfg(not(any(freebsdlike, target_os = "nto", target_os = "redox")))]
+        #[cfg(not(any(
+            freebsdlike,
+            target_os = "aix",
+            target_os = "nto",
+            target_os = "redox",
+        )))]
         const NORESERVE = bitcast!(c::MAP_NORESERVE);
         /// `MAP_NOSYNC`
         #[cfg(freebsdlike)]
@@ -177,6 +190,7 @@ bitflags! {
         #[cfg(not(any(
             bsd,
             solarish,
+            target_os = "aix",
             target_os = "haiku",
             target_os = "nto",
             target_os = "redox",
@@ -186,6 +200,7 @@ bitflags! {
         #[cfg(not(any(
             apple,
             solarish,
+            target_os = "aix",
             target_os = "dragonfly",
             target_os = "haiku",
             target_os = "netbsd",
@@ -199,6 +214,7 @@ bitflags! {
         #[cfg(not(any(
             bsd,
             solarish,
+            target_os = "aix",
             target_os = "android",
             target_os = "emscripten",
             target_os = "fuchsia",

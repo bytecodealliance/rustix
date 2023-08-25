@@ -358,6 +358,7 @@ pub(crate) fn sendmsg_unix(
 #[cfg(not(any(
     apple,
     windows,
+    target_os = "aix",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "redox",
@@ -396,6 +397,7 @@ pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<
 #[cfg(not(any(
     apple,
     windows,
+    target_os = "aix",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "nto",
@@ -427,6 +429,7 @@ pub(crate) fn acceptfrom_with(
 #[cfg(any(
     apple,
     windows,
+    target_os = "aix",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "nto"
@@ -440,6 +443,7 @@ pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, _flags: SocketFlags) -> io::Re
 #[cfg(any(
     apple,
     windows,
+    target_os = "aix",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "nto"
@@ -827,6 +831,7 @@ pub(crate) mod sockopt {
         apple,
         solarish,
         windows,
+        target_os = "aix",
         target_os = "dragonfly",
         target_os = "emscripten",
         target_os = "espidf",
