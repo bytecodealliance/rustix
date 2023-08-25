@@ -9,7 +9,8 @@
 #![allow(unsafe_code)]
 
 use crate::{backend, io, ioctl};
-use backend::{c, fd::AsFd};
+use backend::c;
+use backend::fd::AsFd;
 
 /// `ioctl(fd, FIOCLEX, NULL)`—Set the close-on-exec flag.
 ///
