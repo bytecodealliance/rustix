@@ -32,7 +32,7 @@ jobs:
             rust: stable
           - build: nightly
             os: ubuntu-latest
-            rust: nightly-2023-07-03
+            rust: nightly
           - build: 1.48
             os: ubuntu-latest
             rust: 1.48
@@ -65,8 +65,6 @@ jobs:
         aarch64-unknown-linux-gnu
         aarch64-unknown-linux-musl
         powerpc64le-unknown-linux-gnu
-        mipsel-unknown-linux-gnu
-        mips64el-unknown-linux-gnuabi64
         armv5te-unknown-linux-gnueabi
         s390x-unknown-linux-gnu
         arm-linux-androideabi
@@ -117,8 +115,6 @@ jobs:
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl --features=all-apis
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl --features=use-libc,all-apis
     - run: cargo check --workspace --release -vv --target=powerpc64le-unknown-linux-gnu --features=all-apis
-    - run: cargo check --workspace --release -vv --target=mipsel-unknown-linux-gnu --features=all-apis
-    - run: cargo check --workspace --release -vv --target=mips64el-unknown-linux-gnuabi64 --features=all-apis
     - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi --features=all-apis
     - run: cargo check --workspace --release -vv --target=s390x-unknown-linux-gnu --features=all-apis
     - run: cargo check --workspace --release -vv --target=arm-linux-androideabi --features=all-apis
@@ -136,7 +132,7 @@ jobs:
         include:
           - build: nightly
             os: ubuntu-latest
-            rust: nightly-2023-07-03
+            rust: nightly
 
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
@@ -159,7 +155,7 @@ jobs:
         include:
           - build: nightly
             os: ubuntu-latest
-            rust: nightly-2023-07-03
+            rust: nightly
 
     steps:
     - uses: actions/checkout@v3
@@ -186,7 +182,7 @@ jobs:
         include:
           - build: nightly
             os: ubuntu-latest
-            rust: nightly-2023-07-03
+            rust: nightly
 
     steps:
     - uses: actions/checkout@v3
@@ -215,7 +211,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, mipsel-linux-stable, mips64el-linux-stable, powerpc64le-linux-stable, arm-linux-stable, macos-latest, macos-10.15, windows, windows-2019]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, powerpc64le-linux-stable, arm-linux-stable, macos-latest, macos-10.15, windows, windows-2019]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -245,24 +241,6 @@ jobs:
             qemu: qemu-ppc64le
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
-          - build: mips64el-linux
-            os: ubuntu-latest
-            rust: nightly-2023-07-03
-            target: mips64el-unknown-linux-gnuabi64
-            gcc_package: gcc-mips64el-linux-gnuabi64
-            gcc: mips64el-linux-gnuabi64-gcc
-            qemu: qemu-mips64el
-            qemu_args: -L /usr/mips64el-linux-gnuabi64
-            qemu_target: mips64el-linux-user
-          - build: mipsel-linux
-            os: ubuntu-latest
-            rust: nightly-2023-07-03
-            target: mipsel-unknown-linux-gnu
-            gcc_package: gcc-mipsel-linux-gnu
-            gcc: mipsel-linux-gnu-gcc
-            qemu: qemu-mipsel
-            qemu_args: -L /usr/mipsel-linux-gnu
-            qemu_target: mipsel-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
             rust: nightly-2023-07-03
@@ -336,24 +314,6 @@ jobs:
             qemu: qemu-ppc64le
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
-          - build: mips64el-linux-stable
-            os: ubuntu-latest
-            rust: stable
-            target: mips64el-unknown-linux-gnuabi64
-            gcc_package: gcc-mips64el-linux-gnuabi64
-            gcc: mips64el-linux-gnuabi64-gcc
-            qemu: qemu-mips64el
-            qemu_args: -L /usr/mips64el-linux-gnuabi64
-            qemu_target: mips64el-linux-user
-          - build: mipsel-linux-stable
-            os: ubuntu-latest
-            rust: stable
-            target: mipsel-unknown-linux-gnu
-            gcc_package: gcc-mipsel-linux-gnu
-            gcc: mipsel-linux-gnu-gcc
-            qemu: qemu-mipsel
-            qemu_args: -L /usr/mipsel-linux-gnu
-            qemu_target: mipsel-linux-user
           - build: arm-linux-stable
             os: ubuntu-latest
             rust: stable
@@ -371,10 +331,10 @@ jobs:
             rust: stable
           - build: windows
             os: windows-latest
-            rust: nightly-2023-07-03
+            rust: nightly
           - build: windows-2019
             os: windows-2019
-            rust: nightly-2023-07-03
+            rust: nightly
     steps:
     - uses: actions/checkout@v3
       with:
@@ -457,7 +417,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, mips64el-linux, mipsel-linux, riscv64-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -487,24 +447,6 @@ jobs:
             qemu: qemu-ppc64le
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
-          - build: mips64el-linux
-            os: ubuntu-latest
-            rust: stable
-            target: mips64el-unknown-linux-gnuabi64
-            gcc_package: gcc-mips64el-linux-gnuabi64
-            gcc: mips64el-linux-gnuabi64-gcc
-            qemu: qemu-mips64el
-            qemu_args: -L /usr/mips64el-linux-gnuabi64
-            qemu_target: mips64el-linux-user
-          - build: mipsel-linux
-            os: ubuntu-latest
-            rust: stable
-            target: mipsel-unknown-linux-gnu
-            gcc_package: gcc-mipsel-linux-gnu
-            gcc: mipsel-linux-gnu-gcc
-            qemu: qemu-mipsel
-            qemu_args: -L /usr/mipsel-linux-gnu
-            qemu_target: mipsel-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
             rust: stable
@@ -599,42 +541,22 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [powerpc64le-linux, mipsel-linux, mips64el-linux]
+        build: [powerpc64le-linux]
         include:
           - build: powerpc64le-linux
             os: ubuntu-latest
-            rust: nightly-2023-07-03
+            rust: nightly
             target: powerpc64le-unknown-linux-gnu
             gcc_package: gcc-powerpc64le-linux-gnu
             gcc: powerpc64le-linux-gnu-gcc
             qemu: qemu-ppc64le
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
-          - build: mips64el-linux
-            os: ubuntu-latest
-            rust: nightly-2023-07-03
-            target: mips64el-unknown-linux-gnuabi64
-            gcc_package: gcc-mips64el-linux-gnuabi64
-            gcc: mips64el-linux-gnuabi64-gcc
-            qemu: qemu-mips64el
-            qemu_args: -L /usr/mips64el-linux-gnuabi64
-            qemu_target: mips64el-linux-user
-          - build: mipsel-linux
-            os: ubuntu-latest
-            rust: nightly-2023-07-03
-            target: mipsel-unknown-linux-gnu
-            gcc_package: gcc-mipsel-linux-gnu
-            gcc: mipsel-linux-gnu-gcc
-            qemu: qemu-mipsel
-            qemu_args: -L /usr/mipsel-linux-gnu
-            qemu_target: mipsel-linux-user
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
       RUSTFLAGS: --cfg rustix_use_experimental_asm -D warnings
       RUSTDOCFLAGS: --cfg rustix_use_experimental_asm
       CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_experimental_asm
-      CARGO_TARGET_MIPSEL_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_experimental_asm
-      CARGO_TARGET_MIPS64EL_UNKNOWN_LINUX_GNUABI64_RUSTFLAGS: --cfg rustix_use_experimental_asm
       QEMU_BUILD_VERSION: 7.0.0
     steps:
     - uses: actions/checkout@v3
