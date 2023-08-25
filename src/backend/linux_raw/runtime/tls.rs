@@ -37,21 +37,21 @@ pub(crate) fn startup_tls_info() -> StartupTlsInfo {
         }
 
         if tls_phdr.is_null() {
-        StartupTlsInfo {
-            addr: null(),
-            mem_size: 0,
-            file_size: 0,
-            align: 1,
-            stack_size: 0,
-        }
+            StartupTlsInfo {
+                addr: null(),
+                mem_size: 0,
+                file_size: 0,
+                align: 1,
+                stack_size: 0,
+            }
         } else {
-        StartupTlsInfo {
-            addr: base.cast::<u8>().add((*tls_phdr).p_vaddr).cast(),
-            mem_size: (*tls_phdr).p_memsz,
-            file_size: (*tls_phdr).p_filesz,
-            align: (*tls_phdr).p_align,
-            stack_size,
-        }
+            StartupTlsInfo {
+                addr: base.cast::<u8>().add((*tls_phdr).p_vaddr).cast(),
+                mem_size: (*tls_phdr).p_memsz,
+                file_size: (*tls_phdr).p_filesz,
+                align: (*tls_phdr).p_align,
+                stack_size,
+            }
         }
     }
 }
