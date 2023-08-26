@@ -163,6 +163,10 @@ pub fn exit_group(status: i32) -> ! {
 
 /// Return fields from the main executable segment headers ("phdrs") relevant
 /// to initializing TLS provided to the program at startup.
+///
+/// `addr` will always be non-null, even when the TLS data is absent, ao that
+/// the `addr` and `file_size` parameters are suitable for creating a slice
+/// with `slice::from_raw_parts`.
 #[inline]
 pub fn startup_tls_info() -> StartupTlsInfo {
     backend::runtime::tls::startup_tls_info()

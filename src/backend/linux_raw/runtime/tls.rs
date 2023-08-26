@@ -9,7 +9,7 @@
 use crate::backend::c;
 use crate::backend::elf::*;
 use crate::backend::param::auxv::exe_phdrs_slice;
-use core::ptr::null;
+use core::ptr::{null, NonNull};
 
 /// For use with [`set_thread_area`].
 ///
@@ -38,7 +38,7 @@ pub(crate) fn startup_tls_info() -> StartupTlsInfo {
 
         if tls_phdr.is_null() {
             StartupTlsInfo {
-                addr: null(),
+                addr: NonNull::dangling().as_ptr(),
                 mem_size: 0,
                 file_size: 0,
                 align: 1,
