@@ -34,12 +34,13 @@ use crate::io;
 #[cfg(linux_raw)]
 use crate::pid::Pid;
 #[cfg(linux_raw)]
-use crate::signal::Signal;
-#[cfg(linux_raw)]
 #[cfg(feature = "fs")]
 use backend::fd::AsFd;
 #[cfg(linux_raw)]
 use core::ffi::c_void;
+
+#[cfg(linux_raw)]
+pub use crate::signal::Signal;
 
 /// `sigaction`
 #[cfg(linux_raw)]
