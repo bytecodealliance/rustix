@@ -12,6 +12,7 @@ use crate::fd::OwnedFd;
 use crate::ffi::CStr;
 use crate::fs::{Mode, OFlags};
 use crate::utils::{as_ptr, check_raw_pointer};
+#[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 use core::ffi::c_void;
 use core::mem::size_of;
@@ -129,6 +130,7 @@ static PHDR: AtomicPtr<Elf_Phdr> = AtomicPtr::new(null_mut());
 static PHNUM: AtomicUsize = AtomicUsize::new(0);
 static EXECFN: AtomicPtr<c::c_char> = AtomicPtr::new(null_mut());
 
+#[cfg(feature = "alloc")]
 fn pr_get_auxv() -> crate::io::Result<Vec<u8>> {
     use super::super::conv::{c_int, pass_usize, ret_usize};
     const PR_GET_AUXV: c::c_int = 0x41555856;
@@ -163,16 +165,19 @@ fn pr_get_auxv() -> crate::io::Result<Vec<u8>> {
 /// /proc/self/auxv for kernels that don't support `PR_GET_AUXV`.
 #[cold]
 fn init_auxv() {
-    match pr_get_auxv() {
-        Ok(buffer) => {
-            // SAFETY: We assume the kernel returns a valid auxv.
-            unsafe {
-                init_from_auxp(buffer.as_ptr().cast());
+    #[cfg(feature = "alloc")]
+    {
+        match pr_get_auxv() {
+            Ok(buffer) => {
+                // SAFETY: We assume the kernel returns a valid auxv.
+                unsafe {
+                    init_from_aux_iter(AuxPointer(buffer.as_ptr().cast()));
+                }
+                return;
             }
-            return;
-        }
-        Err(_) => {
-            // Fall back to /proc/self/auxv on error.
+            Err(_) => {
+                // Fall back to /proc/self/auxv on error.
+            }
         }
     }
 
@@ -182,10 +187,17 @@ fn init_auxv() {
     // auxv records.
     let file = crate::fs::open("/proc/self/auxv", OFlags::RDONLY, Mode::empty()).unwrap();
 
-    let _ = init_from_auxv_file(file);
+    #[cfg(feature = "alloc")]
+    init_from_auxv_file(file).unwrap();
+
+    #[cfg(not(feature = "alloc"))]
+    unsafe {
+        init_from_aux_iter(AuxFile(file)).unwrap();
+    }
 }
 
 /// Process auxv entries from the open file `auxv`.
+#[cfg(feature = "alloc")]
 #[cold]
 fn init_from_auxv_file(auxv: OwnedFd) -> Option<()> {
     let mut buffer = Vec::<u8>::with_capacity(512);
@@ -211,7 +223,7 @@ fn init_from_auxv_file(auxv: OwnedFd) -> Option<()> {
     }
 
     // SAFETY: We loaded from an auxv file into the buffer.
-    unsafe { init_from_auxp(buffer.as_ptr().cast()) }
+    unsafe { init_from_aux_iter(AuxPointer(buffer.as_ptr().cast())) }
 }
 
 /// Process auxv entries from the auxv array pointed to by `auxp`.
@@ -223,7 +235,7 @@ fn init_from_auxv_file(auxv: OwnedFd) -> Option<()> {
 /// The buffer contains `Elf_aux_t` elements, though it need not be aligned;
 /// function uses `read_unaligned` to read from it.
 #[cold]
-unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) -> Option<()> {
+unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Option<()> {
     let mut pagesz = 0;
     let mut clktck = 0;
     let mut hwcap = 0;
@@ -234,9 +246,7 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) -> Option<()> {
     let mut sysinfo_ehdr = null_mut();
     let mut phent = 0;
 
-    loop {
-        let Elf_auxv_t { a_type, a_val } = read_unaligned(auxp);
-
+    for Elf_auxv_t { a_type, a_val } in aux_iter {
         match a_type as _ {
             AT_PAGESZ => pagesz = a_val as usize,
             AT_CLKTCK => clktck = a_val as usize,
@@ -251,7 +261,6 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) -> Option<()> {
             AT_NULL => break,
             _ => (),
         }
-        auxp = auxp.add(1);
     }
 
     assert_eq!(phent, size_of::<Elf_Phdr>());
@@ -411,4 +420,48 @@ struct Elf_auxv_t {
     // pointer, in order to preserve their provenance. For the values which are
     // integers, we cast this to `usize`.
     a_val: *const c_void,
+}
+
+// Aux reading utilities
+
+// Read auxv records from an array in memory.
+struct AuxPointer(*const Elf_auxv_t);
+
+impl Iterator for AuxPointer {
+    type Item = Elf_auxv_t;
+
+    #[cold]
+    fn next(&mut self) -> Option<Self::Item> {
+        unsafe {
+            let value = read_unaligned(self.0);
+            self.0 = self.0.add(1);
+            Some(value)
+        }
+    }
+}
+
+// Read auxv records from a file.
+#[cfg(not(feature = "alloc"))]
+struct AuxFile(OwnedFd);
+
+#[cfg(not(feature = "alloc"))]
+impl Iterator for AuxFile {
+    type Item = Elf_auxv_t;
+
+    // This implementation does lots of `read`s and it isn't amazing, but
+    // hopefully we won't use it often.
+    #[cold]
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut buf = [0_u8; size_of::<Self::Item>()];
+        let mut slice = &mut buf[..];
+        while !slice.is_empty() {
+            match crate::io::read(&self.0, slice) {
+                Ok(0) => panic!("unexpected end of auxv file"),
+                Ok(n) => slice = &mut slice[n..],
+                Err(crate::io::Errno::INTR) => continue,
+                Err(err) => Err(err).unwrap(),
+            }
+        }
+        Some(unsafe { read_unaligned(buf.as_ptr().cast()) })
+    }
 }
