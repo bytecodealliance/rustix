@@ -19,7 +19,8 @@ pub use clock::*;
 pub use futex::{futex, FutexFlags, FutexOperation};
 #[cfg(linux_kernel)]
 pub use id::{
-    gettid, set_thread_gid, set_thread_res_gid, set_thread_res_uid, set_thread_uid, Gid, Pid, Uid,
+    gettid, set_thread_gid, set_thread_res_gid, set_thread_res_uid, set_thread_uid, Gid, Pid,
+    RawGid, RawPid, RawUid, Uid,
 };
 #[cfg(linux_kernel)]
 pub use libcap::{capabilities, set_capabilities, CapabilityFlags, CapabilitySets};
