@@ -7,7 +7,7 @@
     target_os = "espidf"
 ))]
 mod eventfd;
-#[cfg(bsd)]
+#[cfg(all(feature = "alloc", bsd))]
 pub mod kqueue;
 mod poll;
 #[cfg(solarish)]

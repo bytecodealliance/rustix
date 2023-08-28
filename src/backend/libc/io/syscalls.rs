@@ -300,11 +300,13 @@ pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::dup(borrowed_fd(fd))) }
 }
 
+#[allow(clippy::needless_pass_by_ref_mut)]
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
     unsafe { ret_discarded_fd(c::dup2(borrowed_fd(fd), borrowed_fd(new.as_fd()))) }
 }
 
+#[allow(clippy::needless_pass_by_ref_mut)]
 #[cfg(not(any(
     apple,
     target_os = "aix",

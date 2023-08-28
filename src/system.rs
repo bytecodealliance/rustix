@@ -102,25 +102,25 @@ impl fmt::Debug for Uname {
         {
             write!(
                 fmt,
-                "{} {} {} {} {}",
-                self.sysname().to_string_lossy(),
-                self.nodename().to_string_lossy(),
-                self.release().to_string_lossy(),
-                self.version().to_string_lossy(),
-                self.machine().to_string_lossy(),
+                "{:?} {:?} {:?} {:?} {:?}",
+                self.sysname(),
+                self.nodename(),
+                self.release(),
+                self.version(),
+                self.machine(),
             )
         }
         #[cfg(linux_kernel)]
         {
             write!(
                 fmt,
-                "{} {} {} {} {} {}",
-                self.sysname().to_string_lossy(),
-                self.nodename().to_string_lossy(),
-                self.release().to_string_lossy(),
-                self.version().to_string_lossy(),
-                self.machine().to_string_lossy(),
-                self.domainname().to_string_lossy(),
+                "{:?} {:?} {:?} {:?} {:?} {:?}",
+                self.sysname(),
+                self.nodename(),
+                self.release(),
+                self.version(),
+                self.machine(),
+                self.domainname(),
             )
         }
     }

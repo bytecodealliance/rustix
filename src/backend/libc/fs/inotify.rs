@@ -110,7 +110,7 @@ pub fn inotify_add_watch<P: crate::path::Arg>(
         unsafe {
             ret_c_int(c::inotify_add_watch(
                 borrowed_fd(inot),
-                c_str(&path),
+                c_str(path),
                 flags.bits(),
             ))
         }

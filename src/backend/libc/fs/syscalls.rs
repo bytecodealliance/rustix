@@ -1,9 +1,9 @@
 //! libc syscalls supporting `rustix::fs`.
 
 use crate::backend::c;
-use crate::backend::conv::{
-    borrowed_fd, c_str, ret, ret_c_int, ret_off_t, ret_owned_fd, ret_usize,
-};
+#[cfg(any(apple, linux_kernel, feature = "alloc"))]
+use crate::backend::conv::ret_usize;
+use crate::backend::conv::{borrowed_fd, c_str, ret, ret_c_int, ret_off_t, ret_owned_fd};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 #[cfg(apple)]

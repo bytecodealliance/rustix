@@ -22,7 +22,7 @@ use {
     target_os = "espidf"
 ))]
 use {crate::backend::conv::ret_owned_fd, crate::event::EventfdFlags};
-#[cfg(bsd)]
+#[cfg(all(feature = "alloc", bsd))]
 use {crate::event::kqueue::Event, crate::utils::as_ptr, core::ptr::null};
 
 #[cfg(any(
@@ -61,12 +61,12 @@ pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> 
     }
 }
 
-#[cfg(bsd)]
+#[cfg(all(feature = "alloc", bsd))]
 pub(crate) fn kqueue() -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::kqueue()) }
 }
 
-#[cfg(bsd)]
+#[cfg(all(feature = "alloc", bsd))]
 pub(crate) unsafe fn kevent(
     kq: BorrowedFd<'_>,
     changelist: &[Event],
@@ -147,7 +147,7 @@ pub(crate) fn port_get(
     Ok(Event(unsafe { event.assume_init() }))
 }
 
-#[cfg(solarish)]
+#[cfg(all(feature = "alloc", solarish))]
 pub(crate) fn port_getn(
     port: BorrowedFd<'_>,
     timeout: Option<&mut c::timespec>,
