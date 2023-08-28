@@ -9,7 +9,7 @@
 use crate::thread::Timespec;
 use crate::{backend, io};
 
-pub use backend::thread::{FutexFlags, FutexOperation};
+pub use backend::thread::futex::{FutexFlags, FutexOperation};
 
 /// `futex(uaddr, op, val, utime, uaddr2, val3)`
 ///

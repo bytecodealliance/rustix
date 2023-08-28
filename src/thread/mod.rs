@@ -2,7 +2,7 @@
 
 #[cfg(not(target_os = "redox"))]
 mod clock;
-#[cfg(linux_raw)]
+#[cfg(linux_kernel)]
 mod futex;
 #[cfg(linux_kernel)]
 mod id;
@@ -15,7 +15,7 @@ mod setns;
 
 #[cfg(not(target_os = "redox"))]
 pub use clock::*;
-#[cfg(linux_raw)]
+#[cfg(linux_kernel)]
 pub use futex::{futex, FutexFlags, FutexOperation};
 #[cfg(linux_kernel)]
 pub use id::{

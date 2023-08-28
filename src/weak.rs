@@ -184,7 +184,7 @@ macro_rules! syscall {
 
             // Pass `BorrowedFd` values as the integer value.
             impl AsSyscallArg for $crate::fd::BorrowedFd<'_> {
-                type SyscallArgType = ::libc::c_long;
+                type SyscallArgType = ::libc::c_int;
                 fn into_syscall_arg(self) -> Self::SyscallArgType {
                     $crate::fd::AsRawFd::as_raw_fd(&self) as _
                 }
@@ -192,31 +192,31 @@ macro_rules! syscall {
 
             // Coerce integer values into `c_long`.
             impl AsSyscallArg for i8 {
-                type SyscallArgType = ::libc::c_long;
-                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+                type SyscallArgType = ::libc::c_int;
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self.into() }
             }
             impl AsSyscallArg for u8 {
-                type SyscallArgType = ::libc::c_long;
-                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+                type SyscallArgType = ::libc::c_int;
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self.into() }
             }
             impl AsSyscallArg for i16 {
-                type SyscallArgType = ::libc::c_long;
-                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+                type SyscallArgType = ::libc::c_int;
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self.into() }
             }
             impl AsSyscallArg for u16 {
-                type SyscallArgType = ::libc::c_long;
-                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+                type SyscallArgType = ::libc::c_int;
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self.into() }
             }
             impl AsSyscallArg for i32 {
-                type SyscallArgType = ::libc::c_long;
-                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+                type SyscallArgType = ::libc::c_int;
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self }
             }
             impl AsSyscallArg for u32 {
-                type SyscallArgType = ::libc::c_long;
-                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+                type SyscallArgType = ::libc::c_uint;
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self }
             }
             impl AsSyscallArg for usize {
-                type SyscallArgType = ::libc::c_long;
+                type SyscallArgType = ::libc::c_ulong;
                 fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
             }
 
@@ -225,12 +225,12 @@ macro_rules! syscall {
             #[cfg(target_pointer_width = "64")]
             impl AsSyscallArg for i64 {
                 type SyscallArgType = ::libc::c_long;
-                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self }
             }
             #[cfg(target_pointer_width = "64")]
             impl AsSyscallArg for u64 {
-                type SyscallArgType = ::libc::c_long;
-                fn into_syscall_arg(self) -> Self::SyscallArgType { self as _ }
+                type SyscallArgType = ::libc::c_ulong;
+                fn into_syscall_arg(self) -> Self::SyscallArgType { self }
             }
 
             // `concat_idents` is [unstable], so we take an extra `sys_name`
