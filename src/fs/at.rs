@@ -17,7 +17,7 @@ use crate::fs::{Gid, Uid};
 use crate::fs::{Mode, OFlags};
 use crate::{backend, io, path};
 use backend::fd::AsFd;
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 use {
     crate::ffi::{CStr, CString},
     crate::path::SMALL_PATH_BUFFER_SIZE,
@@ -80,7 +80,7 @@ pub fn openat<P: path::Arg, Fd: AsFd>(
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/readlinkat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/readlinkat.2.html
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn readlinkat<P: path::Arg, Fd: AsFd, B: Into<Vec<u8>>>(
     dirfd: Fd,
@@ -90,7 +90,7 @@ pub fn readlinkat<P: path::Arg, Fd: AsFd, B: Into<Vec<u8>>>(
     path.into_with_c_str(|path| _readlinkat(dirfd.as_fd(), path, reuse.into()))
 }
 
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 #[allow(unsafe_code)]
 fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::Result<CString> {
     buffer.clear();

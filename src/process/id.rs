@@ -8,7 +8,7 @@
 #![allow(unsafe_code)]
 
 use crate::{backend, io};
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 #[cfg(linux_kernel)]
 use backend::process::types::RawCpuid;
@@ -209,7 +209,7 @@ pub fn setsid() -> io::Result<Pid> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getgroups.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/getgroups.2.html
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 pub fn getgroups() -> io::Result<Vec<Gid>> {
     let mut buffer = Vec::new();
 

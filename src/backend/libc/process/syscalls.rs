@@ -7,7 +7,7 @@ use crate::backend::c;
 use crate::backend::conv::borrowed_fd;
 #[cfg(feature = "fs")]
 use crate::backend::conv::c_str;
-#[cfg(all(feature = "global-allocator", feature = "fs", not(target_os = "wasi")))]
+#[cfg(all(feature = "alloc", feature = "fs", not(target_os = "wasi")))]
 use crate::backend::conv::ret_discarded_char_ptr;
 #[cfg(not(any(
     target_os = "espidf",
@@ -20,7 +20,7 @@ use crate::backend::conv::ret_infallible;
 use crate::backend::conv::ret_pid_t;
 #[cfg(linux_kernel)]
 use crate::backend::conv::ret_u32;
-#[cfg(all(feature = "global-allocator", not(target_os = "wasi")))]
+#[cfg(all(feature = "alloc", not(target_os = "wasi")))]
 use crate::backend::conv::ret_usize;
 #[cfg(not(target_os = "fucshia"))]
 use crate::backend::conv::{ret, ret_c_int};
@@ -33,7 +33,7 @@ use crate::ffi::CStr;
 #[cfg(feature = "fs")]
 use crate::fs::Mode;
 use crate::io;
-#[cfg(all(feature = "global-allocator", not(target_os = "wasi")))]
+#[cfg(all(feature = "alloc", not(target_os = "wasi")))]
 use crate::process::Gid;
 #[cfg(not(target_os = "wasi"))]
 use crate::process::Pid;
@@ -80,7 +80,7 @@ pub(crate) fn chroot(path: &CStr) -> io::Result<()> {
     unsafe { ret(c::chroot(c_str(path))) }
 }
 
-#[cfg(all(feature = "global-allocator", feature = "fs"))]
+#[cfg(all(feature = "alloc", feature = "fs"))]
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn getcwd(buf: &mut [MaybeUninit<u8>]) -> io::Result<()> {
     unsafe { ret_discarded_char_ptr(c::getcwd(buf.as_mut_ptr().cast(), buf.len())) }
@@ -619,7 +619,7 @@ pub(crate) fn pidfd_getfd(
     }
 }
 
-#[cfg(all(feature = "global-allocator", not(target_os = "wasi")))]
+#[cfg(all(feature = "alloc", not(target_os = "wasi")))]
 pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
     let len = buf.len().try_into().map_err(|_| io::Errno::NOMEM)?;
 

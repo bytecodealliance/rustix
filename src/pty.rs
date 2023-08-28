@@ -12,7 +12,7 @@ use crate::fd::{AsFd, OwnedFd};
 use crate::fs::OFlags;
 use crate::{backend, io};
 #[cfg(all(
-    feature = "global-allocator",
+    feature = "alloc",
     any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia")
 ))]
 use {crate::ffi::CString, alloc::vec::Vec};
@@ -114,7 +114,7 @@ pub fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
 /// [Linux]: https://man7.org/linux/man-pages/man3/ptsname.3.html
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Allocation.html#index-ptsname
 #[cfg(all(
-    feature = "global-allocator",
+    feature = "alloc",
     any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia")
 ))]
 #[inline]

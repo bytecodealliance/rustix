@@ -8,7 +8,7 @@
 
 use super::types::RawCpuSet;
 use crate::backend::c;
-#[cfg(all(feature = "global-allocator", feature = "fs"))]
+#[cfg(all(feature = "alloc", feature = "fs"))]
 use crate::backend::conv::slice_mut;
 use crate::backend::conv::{
     by_mut, by_ref, c_int, c_uint, negative_pid, pass_usize, raw_fd, ret, ret_c_int,
@@ -34,7 +34,7 @@ use linux_raw_sys::general::{
 };
 #[cfg(feature = "fs")]
 use {crate::backend::conv::ret_c_uint_infallible, crate::fs::Mode};
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 use {crate::backend::conv::slice_just_addr_mut, crate::process::Gid};
 
 #[cfg(feature = "fs")]
@@ -54,7 +54,7 @@ pub(crate) fn chroot(filename: &CStr) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_chroot, filename)) }
 }
 
-#[cfg(all(feature = "global-allocator", feature = "fs"))]
+#[cfg(all(feature = "alloc", feature = "fs"))]
 #[inline]
 pub(crate) fn getcwd(buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
     let (buf_addr_mut, buf_len) = slice_mut(buf);
@@ -611,7 +611,7 @@ pub(crate) fn pidfd_open(pid: Pid, flags: PidfdFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(syscall_readonly!(__NR_pidfd_open, pid, flags)) }
 }
 
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 #[inline]
 pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
     let len = buf.len().try_into().map_err(|_| io::Errno::NOMEM)?;

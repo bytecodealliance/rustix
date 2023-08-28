@@ -30,7 +30,7 @@ use crate::path::DecInt;
 use core::lazy::OnceCell;
 #[cfg(not(feature = "rustc-dep-of-std"))]
 use once_cell::sync::OnceCell;
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 use {crate::ffi::CStr, crate::fs::Dir};
 
 /// Linux's procfs always uses inode 1 for its root directory.
@@ -42,7 +42,7 @@ enum Kind {
     Proc,
     Pid,
     Fd,
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     File,
 }
 
@@ -69,7 +69,7 @@ fn check_proc_entry_with_stat(
     match kind {
         Kind::Proc => check_proc_root(entry, &entry_stat)?,
         Kind::Pid | Kind::Fd => check_proc_subdir(entry, &entry_stat, proc_stat)?,
-        #[cfg(feature = "global-allocator")]
+        #[cfg(feature = "alloc")]
         Kind::File => check_proc_file(&entry_stat, proc_stat)?,
     }
 
@@ -97,7 +97,7 @@ fn check_proc_entry_with_stat(
                 return Err(io::Errno::NOTSUP);
             }
         }
-        #[cfg(feature = "global-allocator")]
+        #[cfg(feature = "alloc")]
         Kind::File => {
             // Check that files in procfs don't have extraneous hard links to
             // them (which might indicate hard links to other things).
@@ -153,7 +153,7 @@ fn check_proc_subdir(
     Ok(())
 }
 
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 fn check_proc_file(stat: &Stat, proc_stat: Option<&Stat>) -> io::Result<()> {
     // Check that we have a regular file.
     if FileType::from_raw_mode(stat.st_mode) != FileType::RegularFile {
@@ -314,7 +314,7 @@ fn new_static_fd(fd: OwnedFd, stat: Stat) -> (OwnedFd, Stat) {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 fn proc_self_fdinfo() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     static PROC_SELF_FDINFO: StaticFd = StaticFd::new();
 
@@ -344,14 +344,14 @@ fn proc_self_fdinfo() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 #[inline]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 pub fn proc_self_fdinfo_fd<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
     _proc_self_fdinfo(fd.as_fd())
 }
 
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 fn _proc_self_fdinfo(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     let (proc_self_fdinfo, proc_self_fdinfo_stat) = proc_self_fdinfo()?;
     let fd_str = DecInt::from_fd(fd);
@@ -369,7 +369,7 @@ fn _proc_self_fdinfo(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 /// [Linux pagemap]: https://www.kernel.org/doc/Documentation/vm/pagemap.txt
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 #[inline]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 pub fn proc_self_pagemap() -> io::Result<OwnedFd> {
@@ -385,7 +385,7 @@ pub fn proc_self_pagemap() -> io::Result<OwnedFd> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 #[inline]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 pub fn proc_self_maps() -> io::Result<OwnedFd> {
@@ -401,7 +401,7 @@ pub fn proc_self_maps() -> io::Result<OwnedFd> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 #[inline]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 pub fn proc_self_status() -> io::Result<OwnedFd> {
@@ -409,14 +409,14 @@ pub fn proc_self_status() -> io::Result<OwnedFd> {
 }
 
 /// Open a file under `/proc/self`.
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 fn proc_self_file(name: &CStr) -> io::Result<OwnedFd> {
     let (proc_self, proc_self_stat) = proc_self()?;
     open_and_check_file(proc_self, proc_self_stat, name)
 }
 
 /// Open a procfs file within in `dir` and check it for bind mounts.
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 fn open_and_check_file(dir: BorrowedFd, dir_stat: &Stat, name: &CStr) -> io::Result<OwnedFd> {
     let (_, proc_stat) = proc()?;
 

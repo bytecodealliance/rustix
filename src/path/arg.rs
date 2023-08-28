@@ -10,7 +10,7 @@ use crate::io;
 #[cfg(feature = "itoa")]
 use crate::path::DecInt;
 use crate::path::SMALL_PATH_BUFFER_SIZE;
-#[cfg(all(feature = "global-allocator", feature = "itoa"))]
+#[cfg(all(feature = "alloc", feature = "itoa"))]
 use alloc::borrow::ToOwned;
 use core::mem::MaybeUninit;
 use core::{ptr, slice, str};
@@ -26,9 +26,9 @@ use std::os::vxworks::ext::ffi::{OsStrExt, OsStringExt};
 use std::os::wasi::ffi::{OsStrExt, OsStringExt};
 #[cfg(feature = "std")]
 use std::path::{Component, Components, Iter, Path, PathBuf};
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 use {crate::ffi::CString, alloc::borrow::Cow};
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 use {alloc::string::String, alloc::vec::Vec};
 
 /// A trait for passing path arguments.
@@ -68,16 +68,16 @@ pub trait Arg {
 
     /// Returns a potentially-lossy rendering of this string as a
     /// `Cow<'_, str>`.
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     fn to_string_lossy(&self) -> Cow<'_, str>;
 
     /// Returns a view of this string as a maybe-owned [`CStr`].
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>>;
 
     /// Consumes `self` and returns a view of this string as a maybe-owned
     /// [`CStr`].
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
         Self: 'b;
@@ -95,13 +95,13 @@ impl Arg for &str {
         Ok(self)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         Cow::Borrowed(self)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -109,7 +109,7 @@ impl Arg for &str {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -130,20 +130,20 @@ impl Arg for &str {
     }
 }
 
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 impl Arg for &String {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         Ok(self)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         Cow::Borrowed(self)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -151,7 +151,7 @@ impl Arg for &String {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -170,20 +170,20 @@ impl Arg for &String {
     }
 }
 
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 impl Arg for String {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         Ok(self)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         Cow::Borrowed(self)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -191,7 +191,7 @@ impl Arg for String {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -219,13 +219,13 @@ impl Arg for &OsStr {
         self.to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         OsStr::to_string_lossy(self)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -233,7 +233,7 @@ impl Arg for &OsStr {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -261,13 +261,13 @@ impl Arg for &OsString {
         OsString::as_os_str(self).to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_os_str().to_string_lossy()
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -276,7 +276,7 @@ impl Arg for &OsString {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -302,13 +302,13 @@ impl Arg for OsString {
         self.as_os_str().to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_os_str().to_string_lossy()
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -316,7 +316,7 @@ impl Arg for OsString {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -344,13 +344,13 @@ impl Arg for &Path {
         self.as_os_str().to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         Path::to_string_lossy(self)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -358,7 +358,7 @@ impl Arg for &Path {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -389,13 +389,13 @@ impl Arg for &PathBuf {
             .ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_path().to_string_lossy()
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -404,7 +404,7 @@ impl Arg for &PathBuf {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -430,13 +430,13 @@ impl Arg for PathBuf {
         self.as_os_str().to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_os_str().to_string_lossy()
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -444,7 +444,7 @@ impl Arg for PathBuf {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -474,19 +474,19 @@ impl Arg for &CStr {
         self.to_str().map_err(|_utf8_err| io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         CStr::to_string_lossy(self)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Borrowed(self))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -505,26 +505,26 @@ impl Arg for &CStr {
     }
 }
 
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 impl Arg for &CString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         unimplemented!()
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         unimplemented!()
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Borrowed(self))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -543,26 +543,26 @@ impl Arg for &CString {
     }
 }
 
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 impl Arg for CString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.to_str().map_err(|_utf8_err| io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         CStr::to_string_lossy(self)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Borrowed(self))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -581,20 +581,20 @@ impl Arg for CString {
     }
 }
 
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 impl<'a> Arg for Cow<'a, str> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         Ok(self)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         Cow::Borrowed(self)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -602,7 +602,7 @@ impl<'a> Arg for Cow<'a, str> {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -628,20 +628,20 @@ impl<'a> Arg for Cow<'a, str> {
 }
 
 #[cfg(feature = "std")]
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 impl<'a> Arg for Cow<'a, OsStr> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         (**self).to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         (**self).to_string_lossy()
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -649,7 +649,7 @@ impl<'a> Arg for Cow<'a, OsStr> {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -674,27 +674,27 @@ impl<'a> Arg for Cow<'a, OsStr> {
     }
 }
 
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 impl<'a> Arg for Cow<'a, CStr> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.to_str().map_err(|_utf8_err| io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         let borrow: &CStr = core::borrow::Borrow::borrow(self);
         borrow.to_string_lossy()
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Borrowed(self))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -720,13 +720,13 @@ impl<'a> Arg for Component<'a> {
         self.as_os_str().to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_os_str().to_string_lossy()
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -734,7 +734,7 @@ impl<'a> Arg for Component<'a> {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -762,13 +762,13 @@ impl<'a> Arg for Components<'a> {
         self.as_path().to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_path().to_string_lossy()
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -777,7 +777,7 @@ impl<'a> Arg for Components<'a> {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -806,13 +806,13 @@ impl<'a> Arg for Iter<'a> {
         self.as_path().to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_path().to_string_lossy()
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -821,7 +821,7 @@ impl<'a> Arg for Iter<'a> {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -849,13 +849,13 @@ impl Arg for &[u8] {
         str::from_utf8(self).map_err(|_utf8_err| io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         String::from_utf8_lossy(self)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -863,7 +863,7 @@ impl Arg for &[u8] {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -884,20 +884,20 @@ impl Arg for &[u8] {
     }
 }
 
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 impl Arg for &Vec<u8> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         str::from_utf8(self).map_err(|_utf8_err| io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         String::from_utf8_lossy(self)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -905,7 +905,7 @@ impl Arg for &Vec<u8> {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -926,20 +926,20 @@ impl Arg for &Vec<u8> {
     }
 }
 
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 impl Arg for Vec<u8> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         str::from_utf8(self).map_err(|_utf8_err| io::Errno::INVAL)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         String::from_utf8_lossy(self)
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -947,7 +947,7 @@ impl Arg for Vec<u8> {
         ))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -975,19 +975,19 @@ impl Arg for DecInt {
         Ok(self.as_str())
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         Cow::Borrowed(self.as_str())
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Borrowed(self.as_c_str()))
     }
 
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -1056,12 +1056,12 @@ fn with_c_str_slow_path<T, F>(bytes: &[u8], f: F) -> io::Result<T>
 where
     F: FnOnce(&CStr) -> io::Result<T>,
 {
-    #[cfg(feature = "global-allocator")]
+    #[cfg(feature = "alloc")]
     {
         f(&CString::new(bytes).map_err(|_cstr_err| io::Errno::INVAL)?)
     }
 
-    #[cfg(not(feature = "global-allocator"))]
+    #[cfg(not(feature = "alloc"))]
     {
         #[cfg(libc)]
         const LARGE_PATH_BUFFER_SIZE: usize = libc::PATH_MAX as usize;

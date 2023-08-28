@@ -1,4 +1,4 @@
-#[cfg(feature = "global-allocator")]
+#[cfg(feature = "alloc")]
 pub(crate) mod dir;
 pub mod inotify;
 pub(crate) mod makedev;

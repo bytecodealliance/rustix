@@ -3,7 +3,7 @@
 //! for converting between rustix's types and libc types.
 
 use super::c;
-#[cfg(all(feature = "global-allocator", not(any(windows, target_os = "espidf"))))]
+#[cfg(all(feature = "alloc", not(any(windows, target_os = "espidf"))))]
 use super::fd::IntoRawFd;
 use super::fd::{AsRawFd, BorrowedFd, FromRawFd, LibcFd, OwnedFd, RawFd};
 #[cfg(not(windows))]
@@ -28,7 +28,7 @@ pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> LibcFd {
 }
 
 #[cfg(all(
-    feature = "global-allocator",
+    feature = "alloc",
     not(any(windows, target_os = "espidf", target_os = "redox"))
 ))]
 #[inline]
@@ -136,7 +136,7 @@ pub(super) fn ret_discarded_fd(raw: LibcFd) -> io::Result<()> {
     }
 }
 
-#[cfg(all(feature = "global-allocator", not(any(windows, target_os = "wasi"))))]
+#[cfg(all(feature = "alloc", not(any(windows, target_os = "wasi"))))]
 #[inline]
 pub(super) fn ret_discarded_char_ptr(raw: *mut c::c_char) -> io::Result<()> {
     if raw.is_null() {

@@ -4,7 +4,7 @@ use crate::backend::fd::AsFd;
 use crate::path;
 #[cfg(any(feature = "fs", not(target_os = "fuchsia")))]
 use crate::{backend, io};
-#[cfg(all(feature = "global-allocator", feature = "fs"))]
+#[cfg(all(feature = "alloc", feature = "fs"))]
 use {
     crate::ffi::{CStr, CString},
     crate::path::SMALL_PATH_BUFFER_SIZE,
@@ -50,7 +50,7 @@ pub fn fchdir<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getcwd.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/getcwd.3.html
-#[cfg(all(feature = "global-allocator", feature = "fs"))]
+#[cfg(all(feature = "alloc", feature = "fs"))]
 #[cfg(not(target_os = "wasi"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "fs")))]
 #[inline]
@@ -58,7 +58,7 @@ pub fn getcwd<B: Into<Vec<u8>>>(reuse: B) -> io::Result<CString> {
     _getcwd(reuse.into())
 }
 
-#[cfg(all(feature = "global-allocator", feature = "fs"))]
+#[cfg(all(feature = "alloc", feature = "fs"))]
 #[allow(unsafe_code)]
 fn _getcwd(mut buffer: Vec<u8>) -> io::Result<CString> {
     buffer.clear();

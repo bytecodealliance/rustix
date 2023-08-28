@@ -5,7 +5,7 @@ use crate::backend::conv::{borrowed_fd, ret};
 use crate::fd::BorrowedFd;
 use crate::io;
 #[cfg(all(
-    feature = "global-allocator",
+    feature = "alloc",
     any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia")
 ))]
 use {
@@ -25,7 +25,7 @@ pub(crate) fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
 }
 
 #[cfg(all(
-    feature = "global-allocator",
+    feature = "alloc",
     any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia")
 ))]
 #[inline]

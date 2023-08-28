@@ -143,8 +143,8 @@ jobs:
     - run: cargo check --workspace --release --no-default-features --features use-libc -vv
     - run: cargo check --workspace --release --no-default-features --features all-apis -vv
     - run: cargo check --workspace --release --no-default-features --features all-apis,use-libc -vv
-    - run: cargo check --workspace --release --no-default-features --features all-apis,global-allocator -vv
-    - run: cargo check --workspace --release --no-default-features --features all-apis,use-libc,global-allocator -vv
+    - run: cargo check --workspace --release --no-default-features --features all-apis,alloc -vv
+    - run: cargo check --workspace --release --no-default-features --features all-apis,use-libc,alloc -vv
     - run: cargo check --workspace --release --no-default-features --features time -vv
     - run: cargo check --workspace --release --no-default-features --features time,use-libc -vv
     - run: rustup component add rust-src
