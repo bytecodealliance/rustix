@@ -123,7 +123,7 @@ default = ["std", "use-libc-auxv"]
 
 # This enables use of std. Disabling this enables `#![no_std], and requires
 # Rust 1.64 or newer.
-std = ["bitflags/std"]
+std = ["bitflags/std", "global-allocator"]
 
 # This is used in the port of std to rustix.
 rustc-dep-of-std = [
@@ -231,6 +231,10 @@ linux_4_11 = []
 
 # Enable all optimizations for the latest Linux versions.
 linux_latest = ["linux_4_11"]
+
+# Enable features which depend on the Rust global allocator, such as functions
+# that return owned strings or `Vec`s.
+global-allocator = []
 
 # Obsolete and deprecated.
 cc = []

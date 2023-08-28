@@ -912,6 +912,7 @@ fn statfs_to_statvfs(statfs: StatFs) -> StatVfs {
     }
 }
 
+#[cfg(feature = "global-allocator")]
 #[inline]
 pub(crate) fn readlink(path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
     let (buf_addr_mut, buf_len) = slice_mut(buf);
@@ -926,6 +927,7 @@ pub(crate) fn readlink(path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
     }
 }
 
+#[cfg(feature = "global-allocator")]
 #[inline]
 pub(crate) fn readlinkat(
     dirfd: BorrowedFd<'_>,
@@ -1231,6 +1233,7 @@ pub(crate) fn mkdirat(dirfd: BorrowedFd<'_>, path: &CStr, mode: Mode) -> io::Res
     unsafe { ret(syscall_readonly!(__NR_mkdirat, dirfd, path, mode)) }
 }
 
+#[cfg(feature = "global-allocator")]
 #[inline]
 pub(crate) fn getdents(fd: BorrowedFd<'_>, dirent: &mut [u8]) -> io::Result<usize> {
     let (dirent_addr_mut, dirent_len) = slice_mut(dirent);

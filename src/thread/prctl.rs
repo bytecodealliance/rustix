@@ -19,7 +19,9 @@ use bitflags::bitflags;
 
 use crate::backend::c::{c_int, c_uint, c_void};
 use crate::backend::prctl::syscalls;
-use crate::ffi::{CStr, CString};
+use crate::ffi::CStr;
+#[cfg(feature = "global-allocator")]
+use crate::ffi::CString;
 use crate::io;
 use crate::pid::Pid;
 use crate::prctl::{
@@ -61,6 +63,7 @@ pub fn set_keep_capabilities(enable: bool) -> io::Result<()> {
 // PR_GET_NAME/PR_SET_NAME
 //
 
+#[cfg(feature = "global-allocator")]
 const PR_GET_NAME: c_int = 16;
 
 /// Get the name of the calling thread.
@@ -70,6 +73,7 @@ const PR_GET_NAME: c_int = 16;
 ///
 /// [`prctl(PR_GET_NAME,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
+#[cfg(feature = "global-allocator")]
 pub fn name() -> io::Result<CString> {
     let mut buffer = [0_u8; 16];
     unsafe { prctl_2args(PR_GET_NAME, buffer.as_mut_ptr().cast())? };

@@ -104,16 +104,17 @@ pub fn inotify_add_watch<P: crate::path::Arg>(
     path: P,
     flags: WatchFlags,
 ) -> io::Result<i32> {
-    let path = path.as_cow_c_str().unwrap();
-    // SAFETY: The fd and path we are passing is guaranteed valid by the type
-    // system.
-    unsafe {
-        ret_c_int(c::inotify_add_watch(
-            borrowed_fd(inot),
-            c_str(&path),
-            flags.bits(),
-        ))
-    }
+    path.into_with_c_str(|path| {
+        // SAFETY: The fd and path we are passing is guaranteed valid by the type
+        // system.
+        unsafe {
+            ret_c_int(c::inotify_add_watch(
+                borrowed_fd(inot),
+                c_str(&path),
+                flags.bits(),
+            ))
+        }
+    })
 }
 
 /// `inotify_rm_watch(self, wd)`—Removes a watch from this inotify

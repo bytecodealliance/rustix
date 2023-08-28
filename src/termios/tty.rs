@@ -2,7 +2,7 @@
 
 use crate::backend;
 use backend::fd::AsFd;
-#[cfg(feature = "procfs")]
+#[cfg(all(feature = "global-allocator", feature = "procfs"))]
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use {
     crate::ffi::CString, crate::io, crate::path::SMALL_PATH_BUFFER_SIZE, alloc::vec::Vec,
@@ -33,7 +33,7 @@ pub fn isatty<Fd: AsFd>(fd: Fd) -> bool {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/ttyname.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/ttyname.3.html
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
-#[cfg(feature = "procfs")]
+#[cfg(all(feature = "global-allocator", feature = "procfs"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 #[doc(alias = "ttyname_r")]
 #[inline]
@@ -42,7 +42,7 @@ pub fn ttyname<Fd: AsFd, B: Into<Vec<u8>>>(dirfd: Fd, reuse: B) -> io::Result<CS
 }
 
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
-#[cfg(feature = "procfs")]
+#[cfg(all(feature = "global-allocator", feature = "procfs"))]
 #[allow(unsafe_code)]
 fn _ttyname(dirfd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<CString> {
     buffer.clear();
