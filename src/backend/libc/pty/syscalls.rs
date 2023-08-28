@@ -4,7 +4,10 @@ use crate::backend::c;
 use crate::backend::conv::{borrowed_fd, ret};
 use crate::fd::BorrowedFd;
 use crate::io;
-#[cfg(any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(all(
+    feature = "alloc",
+    any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia")
+))]
 use {
     crate::ffi::{CStr, CString},
     crate::path::SMALL_PATH_BUFFER_SIZE,
@@ -21,7 +24,10 @@ pub(crate) fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::posix_openpt(flags.bits() as _)) }
 }
 
-#[cfg(any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(all(
+    feature = "alloc",
+    any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia")
+))]
 #[inline]
 pub(crate) fn ptsname(fd: BorrowedFd, mut buffer: Vec<u8>) -> io::Result<CString> {
     // This code would benefit from having a better way to read into

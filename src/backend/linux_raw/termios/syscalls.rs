@@ -11,13 +11,13 @@ use crate::backend::conv::{by_ref, c_uint, ret};
 use crate::fd::BorrowedFd;
 use crate::io;
 use crate::pid::Pid;
-#[cfg(feature = "procfs")]
+#[cfg(all(feature = "alloc", feature = "procfs"))]
 use crate::procfs;
 use crate::termios::{
     Action, ControlModes, InputModes, LocalModes, OptionalActions, OutputModes, QueueSelector,
     SpecialCodeIndex, Termios, Winsize,
 };
-#[cfg(feature = "procfs")]
+#[cfg(all(feature = "alloc", feature = "procfs"))]
 use crate::{ffi::CStr, fs::FileType, path::DecInt};
 use core::mem::MaybeUninit;
 use linux_raw_sys::general::IBSHIFT;
@@ -229,7 +229,7 @@ pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
     tcgetwinsize(fd).is_ok()
 }
 
-#[cfg(feature = "procfs")]
+#[cfg(all(feature = "alloc", feature = "procfs"))]
 #[allow(unsafe_code)]
 pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
     let fd_stat = crate::backend::fs::syscalls::fstat(fd)?;

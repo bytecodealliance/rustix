@@ -1,7 +1,6 @@
 //! POSIX-style filesystem functions which operate on bare paths.
 
 use crate::fd::OwnedFd;
-use crate::ffi::{CStr, CString};
 #[cfg(not(target_os = "espidf"))]
 use crate::fs::Access;
 #[cfg(not(any(
@@ -17,9 +16,13 @@ use crate::fs::StatFs;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use crate::fs::StatVfs;
 use crate::fs::{Mode, OFlags, Stat};
-use crate::path::SMALL_PATH_BUFFER_SIZE;
 use crate::{backend, io, path};
-use alloc::vec::Vec;
+#[cfg(feature = "alloc")]
+use {
+    crate::ffi::{CStr, CString},
+    crate::path::SMALL_PATH_BUFFER_SIZE,
+    alloc::vec::Vec,
+};
 
 /// `open(path, oflags, mode)`—Opens a file.
 ///
@@ -101,11 +104,13 @@ pub fn lstat<P: path::Arg>(path: P) -> io::Result<Stat> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/readlink.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/readlink.2.html
+#[cfg(feature = "alloc")]
 #[inline]
 pub fn readlink<P: path::Arg, B: Into<Vec<u8>>>(path: P, reuse: B) -> io::Result<CString> {
     path.into_with_c_str(|path| _readlink(path, reuse.into()))
 }
 
+#[cfg(feature = "alloc")]
 fn _readlink(path: &CStr, mut buffer: Vec<u8>) -> io::Result<CString> {
     // This code would benefit from having a better way to read into
     // uninitialized memory, but that requires `unsafe`.

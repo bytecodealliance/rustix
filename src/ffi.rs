@@ -9,8 +9,7 @@ pub use {
 
 // If we don't have std, we can depend on core and alloc having these features
 // in Rust 1.64+.
+#[cfg(all(feature = "alloc", not(feature = "std")))]
+pub use alloc::ffi::{CString, NulError};
 #[cfg(not(feature = "std"))]
-pub use {
-    alloc::ffi::{CString, NulError},
-    core::ffi::{c_char, CStr, FromBytesWithNulError},
-};
+pub use core::ffi::{c_char, CStr, FromBytesWithNulError};

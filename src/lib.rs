@@ -104,8 +104,8 @@
 #![cfg_attr(all(wasi_ext, target_os = "wasi", feature = "std"), feature(wasi_ext))]
 #![cfg_attr(core_ffi_c, feature(core_ffi_c))]
 #![cfg_attr(core_c_str, feature(core_c_str))]
-#![cfg_attr(alloc_c_string, feature(alloc_c_string))]
-#![cfg_attr(alloc_ffi, feature(alloc_ffi))]
+#![cfg_attr(all(feature = "alloc", alloc_c_string), feature(alloc_c_string))]
+#![cfg_attr(all(feature = "alloc", alloc_ffi), feature(alloc_ffi))]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(ip))]
 #![cfg_attr(
@@ -122,7 +122,7 @@
 // conditionalizing all the `use`s for them.
 #![cfg_attr(any(target_os = "redox", target_os = "wasi"), allow(unused_imports))]
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(all(feature = "alloc", not(feature = "rustc-dep-of-std")))]
 extern crate alloc;
 
 // Use `static_assertions` macros if we have them, or a polyfill otherwise.

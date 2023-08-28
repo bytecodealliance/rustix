@@ -11,7 +11,10 @@ use crate::backend::c;
 use crate::fd::{AsFd, OwnedFd};
 use crate::fs::OFlags;
 use crate::{backend, io};
-#[cfg(any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(all(
+    feature = "alloc",
+    any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia")
+))]
 use {crate::ffi::CString, alloc::vec::Vec};
 
 #[cfg(target_os = "linux")]
@@ -110,9 +113,12 @@ pub fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/ptsname.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/ptsname.3.html
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Allocation.html#index-ptsname
+#[cfg(all(
+    feature = "alloc",
+    any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia")
+))]
 #[inline]
 #[doc(alias = "ptsname_r")]
-#[cfg(any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia"))]
 pub fn ptsname<Fd: AsFd, B: Into<Vec<u8>>>(fd: Fd, reuse: B) -> io::Result<CString> {
     backend::pty::syscalls::ptsname(fd.as_fd(), reuse.into())
 }

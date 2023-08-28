@@ -105,8 +105,7 @@ pub fn inotify_add_watch<P: crate::path::Arg>(
     path: P,
     flags: WatchFlags,
 ) -> io::Result<i32> {
-    let path = path.as_cow_c_str().unwrap();
-    syscalls::inotify_add_watch(inot, &path, flags)
+    path.into_with_c_str(|path| syscalls::inotify_add_watch(inot, path, flags))
 }
 
 /// `inotify_rm_watch(self, wd)`—Removes a watch from this inotify

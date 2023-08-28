@@ -8,12 +8,12 @@
 
 use super::types::RawCpuSet;
 use crate::backend::c;
-#[cfg(feature = "fs")]
+#[cfg(all(feature = "alloc", feature = "fs"))]
 use crate::backend::conv::slice_mut;
 use crate::backend::conv::{
     by_mut, by_ref, c_int, c_uint, negative_pid, pass_usize, raw_fd, ret, ret_c_int,
     ret_c_int_infallible, ret_c_uint, ret_infallible, ret_owned_fd, ret_usize, size_of,
-    slice_just_addr, slice_just_addr_mut, zero,
+    slice_just_addr, zero,
 };
 use crate::fd::{AsRawFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(feature = "fs")]
@@ -21,8 +21,8 @@ use crate::ffi::CStr;
 use crate::io;
 use crate::pid::RawPid;
 use crate::process::{
-    Cpuid, Gid, MembarrierCommand, MembarrierQuery, Pid, PidfdFlags, PidfdGetfdFlags, Resource,
-    Rlimit, Uid, WaitId, WaitOptions, WaitStatus, WaitidOptions, WaitidStatus,
+    Cpuid, MembarrierCommand, MembarrierQuery, Pid, PidfdFlags, PidfdGetfdFlags, Resource, Rlimit,
+    Uid, WaitId, WaitOptions, WaitStatus, WaitidOptions, WaitidStatus,
 };
 use crate::signal::Signal;
 use crate::utils::as_mut_ptr;
@@ -34,6 +34,8 @@ use linux_raw_sys::general::{
 };
 #[cfg(feature = "fs")]
 use {crate::backend::conv::ret_c_uint_infallible, crate::fs::Mode};
+#[cfg(feature = "alloc")]
+use {crate::backend::conv::slice_just_addr_mut, crate::process::Gid};
 
 #[cfg(feature = "fs")]
 #[inline]
@@ -52,7 +54,7 @@ pub(crate) fn chroot(filename: &CStr) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_chroot, filename)) }
 }
 
-#[cfg(feature = "fs")]
+#[cfg(all(feature = "alloc", feature = "fs"))]
 #[inline]
 pub(crate) fn getcwd(buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
     let (buf_addr_mut, buf_len) = slice_mut(buf);
@@ -609,6 +611,7 @@ pub(crate) fn pidfd_open(pid: Pid, flags: PidfdFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(syscall_readonly!(__NR_pidfd_open, pid, flags)) }
 }
 
+#[cfg(feature = "alloc")]
 #[inline]
 pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
     let len = buf.len().try_into().map_err(|_| io::Errno::NOMEM)?;

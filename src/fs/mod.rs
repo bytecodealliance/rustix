@@ -9,7 +9,7 @@ mod copy_file_range;
 #[cfg(not(any(target_os = "espidf", target_os = "redox")))]
 #[cfg(not(target_os = "haiku"))] // Haiku needs <https://github.com/rust-lang/rust/pull/112371>
 mod cwd;
-#[cfg(not(any(target_os = "espidf", target_os = "redox")))]
+#[cfg(all(feature = "alloc", not(any(target_os = "espidf", target_os = "redox"))))]
 mod dir;
 #[cfg(not(any(
     apple,
@@ -71,7 +71,7 @@ pub use copy_file_range::copy_file_range;
 #[cfg(not(any(target_os = "espidf", target_os = "redox")))]
 #[cfg(not(target_os = "haiku"))] // Haiku needs <https://github.com/rust-lang/rust/pull/112371>
 pub use cwd::*;
-#[cfg(not(any(target_os = "espidf", target_os = "redox")))]
+#[cfg(all(feature = "alloc", not(any(target_os = "espidf", target_os = "redox"))))]
 pub use dir::{Dir, DirEntry};
 #[cfg(not(any(
     apple,
