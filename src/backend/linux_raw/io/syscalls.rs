@@ -371,6 +371,7 @@ pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(syscall_readonly!(__NR_dup, fd)) }
 }
 
+#[allow(clippy::needless_pass_by_ref_mut)]
 #[inline]
 pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
@@ -387,6 +388,7 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
     }
 }
 
+#[allow(clippy::needless_pass_by_ref_mut)]
 #[inline]
 pub(crate) fn dup3(fd: BorrowedFd<'_>, new: &mut OwnedFd, flags: DupFlags) -> io::Result<()> {
     unsafe { ret_discarded_fd(syscall_readonly!(__NR_dup3, fd, new.as_fd(), flags)) }

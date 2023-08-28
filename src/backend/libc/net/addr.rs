@@ -161,9 +161,7 @@ impl Eq for SocketAddrUnix {}
 impl PartialOrd for SocketAddrUnix {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        let self_len = self.len() - offsetof_sun_path();
-        let other_len = other.len() - offsetof_sun_path();
-        self.unix.sun_path[..self_len].partial_cmp(&other.unix.sun_path[..other_len])
+        Some(self.cmp(other))
     }
 }
 

@@ -196,7 +196,7 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     pub fn next(&mut self) -> Option<io::Result<RawDirEntry>> {
         if self.is_buffer_empty() {
             match getdents_uninit(self.fd.as_fd(), self.buf) {
-                Ok(bytes_read) if bytes_read == 0 => return None,
+                Ok(0) => return None,
                 Ok(bytes_read) => {
                     self.initialized = bytes_read;
                     self.offset = 0;
