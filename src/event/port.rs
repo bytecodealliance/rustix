@@ -116,6 +116,7 @@ pub fn port_get(port: impl AsFd, timeout: Option<Duration>) -> io::Result<Event>
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_getn/
 /// [illumos]: https://illumos.org/man/3C/port_getn
+#[cfg(feature = "alloc")]
 pub fn port_getn(
     port: impl AsFd,
     events: &mut Vec<Event>,
