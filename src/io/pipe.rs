@@ -29,6 +29,7 @@ pub use backend::io::types::{IoSliceRaw, SpliceFlags};
     solarish,
     windows,
     target_os = "haiku",
+    target_os = "hurd",
     target_os = "redox",
     target_os = "wasi",
 )))]

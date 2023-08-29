@@ -274,6 +274,7 @@ bitflags! {
             target_os = "android",
             target_os = "emscripten",
             target_os = "fuchsia",
+            target_os = "hurd",
             target_os = "linux",
         ))]
         const TMPFILE = c::O_TMPFILE;
@@ -717,6 +718,7 @@ bitflags! {
             bsd,
             target_os = "aix",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "wasi",
         )))]
         const KEEP_SIZE = c::FALLOC_FL_KEEP_SIZE;
@@ -725,6 +727,7 @@ bitflags! {
             bsd,
             target_os = "aix",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "wasi",
         )))]
         const PUNCH_HOLE = c::FALLOC_FL_PUNCH_HOLE;
@@ -733,6 +736,7 @@ bitflags! {
             bsd,
             target_os = "aix",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "linux",
             target_os = "emscripten",
             target_os = "fuchsia",
@@ -744,6 +748,7 @@ bitflags! {
             bsd,
             target_os = "aix",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "emscripten",
             target_os = "wasi",
         )))]
@@ -753,6 +758,7 @@ bitflags! {
             bsd,
             target_os = "aix",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "emscripten",
             target_os = "wasi",
         )))]
@@ -762,6 +768,7 @@ bitflags! {
             bsd,
             target_os = "aix",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "emscripten",
             target_os = "wasi",
         )))]
@@ -771,6 +778,7 @@ bitflags! {
             bsd,
             target_os = "aix",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "emscripten",
             target_os = "wasi",
         )))]
@@ -844,7 +852,7 @@ pub enum FlockOperation {
 ///
 /// [`statat`]: crate::fs::statat
 /// [`fstat`]: crate::fs::fstat
-#[cfg(not(linux_like))]
+#[cfg(not(any(linux_like, target_os = "hurd")))]
 pub type Stat = c::stat;
 
 /// `struct stat` for use with [`statat`] and [`fstat`].
@@ -853,6 +861,7 @@ pub type Stat = c::stat;
 /// [`fstat`]: crate::fs::fstat
 #[cfg(any(
     all(linux_kernel, target_pointer_width = "64"),
+    target_os = "hurd",
     target_os = "emscripten",
     target_os = "l4re",
 ))]

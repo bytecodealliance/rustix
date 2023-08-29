@@ -29,6 +29,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const ADV: Self = Self(c::EADV);
@@ -47,6 +48,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const BADE: Self = Self(c::EBADE);
@@ -58,6 +60,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const BADFD: Self = Self(c::EBADFD);
@@ -70,6 +73,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const BADR: Self = Self(c::EBADR);
@@ -82,6 +86,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const BADRQC: Self = Self(c::EBADRQC);
@@ -91,6 +96,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const BADSLT: Self = Self(c::EBADSLT);
@@ -100,6 +106,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const BFONT: Self = Self(c::EBFONT);
@@ -115,7 +122,13 @@ impl Errno {
     #[cfg(not(windows))]
     pub const CHILD: Self = Self(c::ECHILD);
     /// `ECHRNG`
-    #[cfg(not(any(bsd, windows, target_os = "haiku", target_os = "wasi")))]
+    #[cfg(not(any(
+        bsd,
+        windows,
+        target_os = "haiku",
+        target_os = "hurd",
+        target_os = "wasi",
+    )))]
     pub const CHRNG: Self = Self(c::ECHRNG);
     /// `ECOMM`
     #[cfg(not(any(
@@ -123,6 +136,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const COMM: Self = Self(c::ECOMM);
@@ -142,6 +156,7 @@ impl Errno {
         target_os = "aix",
         target_os = "android",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const DEADLOCK: Self = Self(c::EDEADLOCK);
@@ -163,6 +178,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const DOTDOT: Self = Self(c::EDOTDOT);
@@ -192,6 +208,7 @@ impl Errno {
         target_os = "aix",
         target_os = "android",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "redox",
         target_os = "wasi",
     )))]
@@ -234,6 +251,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const ISNAM: Self = Self(c::EISNAM);
@@ -244,6 +262,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const KEYEXPIRED: Self = Self(c::EKEYEXPIRED);
@@ -254,6 +273,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const KEYREJECTED: Self = Self(c::EKEYREJECTED);
@@ -264,20 +284,45 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const KEYREVOKED: Self = Self(c::EKEYREVOKED);
     /// `EL2HLT`
-    #[cfg(not(any(bsd, windows, target_os = "haiku", target_os = "wasi")))]
+    #[cfg(not(any(
+        bsd,
+        windows,
+        target_os = "haiku",
+        target_os = "hurd",
+        target_os = "wasi",
+    )))]
     pub const L2HLT: Self = Self(c::EL2HLT);
     /// `EL2NSYNC`
-    #[cfg(not(any(bsd, windows, target_os = "haiku", target_os = "wasi")))]
+    #[cfg(not(any(
+        bsd,
+        windows,
+        target_os = "haiku",
+        target_os = "hurd",
+        target_os = "wasi",
+    )))]
     pub const L2NSYNC: Self = Self(c::EL2NSYNC);
     /// `EL3HLT`
-    #[cfg(not(any(bsd, windows, target_os = "haiku", target_os = "wasi")))]
+    #[cfg(not(any(
+        bsd,
+        windows,
+        target_os = "haiku",
+        target_os = "hurd",
+        target_os = "wasi",
+    )))]
     pub const L3HLT: Self = Self(c::EL3HLT);
     /// `EL3RST`
-    #[cfg(not(any(bsd, windows, target_os = "haiku", target_os = "wasi")))]
+    #[cfg(not(any(
+        bsd,
+        windows,
+        target_os = "haiku",
+        target_os = "hurd",
+        target_os = "wasi",
+    )))]
     pub const L3RST: Self = Self(c::EL3RST);
     /// `ELIBACC`
     #[cfg(not(any(
@@ -285,6 +330,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const LIBACC: Self = Self(c::ELIBACC);
@@ -294,6 +340,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const LIBBAD: Self = Self(c::ELIBBAD);
@@ -312,6 +359,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const LIBMAX: Self = Self(c::ELIBMAX);
@@ -321,11 +369,18 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const LIBSCN: Self = Self(c::ELIBSCN);
     /// `ELNRNG`
-    #[cfg(not(any(bsd, windows, target_os = "haiku", target_os = "wasi")))]
+    #[cfg(not(any(
+        bsd,
+        windows,
+        target_os = "haiku",
+        target_os = "hurd",
+        target_os = "wasi",
+    )))]
     pub const LNRNG: Self = Self(c::ELNRNG);
     /// `ELOOP`
     pub const LOOP: Self = Self(c::ELOOP);
@@ -336,6 +391,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const MEDIUMTYPE: Self = Self(c::EMEDIUMTYPE);
@@ -358,6 +414,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const NAVAIL: Self = Self(c::ENAVAIL);
@@ -379,6 +436,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const NOANO: Self = Self(c::ENOANO);
@@ -388,7 +446,13 @@ impl Errno {
     /// `ENOBUFS`
     pub const NOBUFS: Self = Self(c::ENOBUFS);
     /// `ENOCSI`
-    #[cfg(not(any(bsd, windows, target_os = "haiku", target_os = "wasi")))]
+    #[cfg(not(any(
+        bsd,
+        windows,
+        target_os = "haiku",
+        target_os = "hurd",
+        target_os = "wasi",
+    )))]
     pub const NOCSI: Self = Self(c::ENOCSI);
     /// `ENODATA`
     #[cfg(not(any(
@@ -415,6 +479,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const NOKEY: Self = Self(c::ENOKEY);
@@ -431,6 +496,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const NOMEDIUM: Self = Self(c::ENOMEDIUM);
@@ -449,6 +515,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const NONET: Self = Self(c::ENONET);
@@ -458,6 +525,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const NOPKG: Self = Self(c::ENOPKG);
@@ -507,6 +575,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const NOTNAM: Self = Self(c::ENOTNAM);
@@ -527,6 +596,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const NOTUNIQ: Self = Self(c::ENOTUNIQ);
@@ -584,6 +654,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const REMCHG: Self = Self(c::EREMCHG);
@@ -597,11 +668,18 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const REMOTEIO: Self = Self(c::EREMOTEIO);
     /// `ERESTART`
-    #[cfg(not(any(bsd, windows, target_os = "haiku", target_os = "wasi")))]
+    #[cfg(not(any(
+        bsd,
+        windows,
+        target_os = "haiku",
+        target_os = "hurd",
+        target_os = "wasi",
+    )))]
     pub const RESTART: Self = Self(c::ERESTART);
     /// `ERFKILL`
     #[cfg(not(any(
@@ -611,6 +689,7 @@ impl Errno {
         target_os = "aix",
         target_os = "android",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "redox",
         target_os = "wasi",
     )))]
@@ -639,6 +718,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const SRMNT: Self = Self(c::ESRMNT);
@@ -650,6 +730,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const STRPIPE: Self = Self(c::ESTRPIPE);
@@ -675,11 +756,18 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const UCLEAN: Self = Self(c::EUCLEAN);
     /// `EUNATCH`
-    #[cfg(not(any(bsd, windows, target_os = "haiku", target_os = "wasi")))]
+    #[cfg(not(any(
+        bsd,
+        windows,
+        target_os = "haiku",
+        target_os = "hurd",
+        target_os = "wasi",
+    )))]
     pub const UNATCH: Self = Self(c::EUNATCH);
     /// `EUSERS`
     #[cfg(not(any(target_os = "haiku", target_os = "wasi")))]
@@ -695,6 +783,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const XFULL: Self = Self(c::EXFULL);

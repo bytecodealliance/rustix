@@ -20,9 +20,9 @@ use crate::io;
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use crate::process::fchdir;
 use alloc::borrow::ToOwned;
-#[cfg(not(linux_like))]
+#[cfg(not(any(linux_like, target_os = "hurd")))]
 use c::readdir as libc_readdir;
-#[cfg(linux_like)]
+#[cfg(any(linux_like, target_os = "hurd"))]
 use c::readdir64 as libc_readdir;
 use core::fmt;
 use core::ptr::NonNull;

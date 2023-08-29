@@ -127,7 +127,13 @@ pub const VTIME: usize = c::VTIME as usize;
 pub const VMIN: usize = c::VMIN as usize;
 
 /// `VSWTC`
-#[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+#[cfg(not(any(
+    bsd,
+    solarish,
+    target_os = "aix",
+    target_os = "haiku",
+    target_os = "hurd",
+)))]
 pub const VSWTC: usize = c::VSWTC as usize;
 
 /// `VSTART`
@@ -214,6 +220,7 @@ pub const IMAXBEL: Tcflag = c::IMAXBEL;
     target_os = "aix",
     target_os = "emscripten",
     target_os = "haiku",
+    target_os = "hurd",
     target_os = "redox",
 )))]
 pub const IUTF8: Tcflag = c::IUTF8;
@@ -640,7 +647,7 @@ pub const EXTA: Speed = c::EXTA;
 pub const EXTB: Speed = c::EXTB;
 
 /// `CBAUD`
-#[cfg(not(any(bsd, target_os = "haiku", target_os = "redox")))]
+#[cfg(not(any(bsd, target_os = "haiku", target_os = "hurd", target_os = "redox")))]
 pub const CBAUD: Tcflag = c::CBAUD;
 
 /// `CBAUDEX`
@@ -649,6 +656,7 @@ pub const CBAUD: Tcflag = c::CBAUD;
     solarish,
     target_os = "aix",
     target_os = "haiku",
+    target_os = "hurd",
     target_os = "redox",
 )))]
 pub const CBAUDEX: Tcflag = c::CBAUDEX;
@@ -660,6 +668,7 @@ pub const CBAUDEX: Tcflag = c::CBAUDEX;
     bsd,
     target_os = "emscripten",
     target_os = "haiku",
+    target_os = "hurd",
     target_os = "redox",
 )))]
 pub const CIBAUD: Tcflag = c::CIBAUD;
@@ -677,6 +686,7 @@ pub const CIBAUD: Tcflag = 0o77600000;
     target_os = "aix",
     target_os = "emscripten",
     target_os = "haiku",
+    target_os = "hurd",
     target_os = "redox",
 )))]
 pub const CMSPAR: Tcflag = c::CMSPAR;
