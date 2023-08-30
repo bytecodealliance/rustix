@@ -259,11 +259,15 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
     let mut clktck = 0;
     let mut hwcap = 0;
     let mut hwcap2 = 0;
-    let mut phdr = null_mut();
-    let mut phnum = 0;
     let mut execfn = null_mut();
     let mut sysinfo_ehdr = null_mut();
+    #[cfg(feature = "runtime")]
+    let mut phdr = null_mut();
+    #[cfg(feature = "runtime")]
+    let mut phnum = 0;
+    #[cfg(feature = "runtime")]
     let mut phent = 0;
+    #[cfg(feature = "runtime")]
     let mut entry = 0;
 
     for Elf_auxv_t { a_type, a_val } in aux_iter {
