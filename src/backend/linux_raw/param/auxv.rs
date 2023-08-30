@@ -277,9 +277,11 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
             AT_HWCAP => hwcap = a_val as usize,
             AT_HWCAP2 => hwcap2 = a_val as usize,
             AT_EXECFN => execfn = check_raw_pointer::<c::c_char>(a_val as *mut _)?.as_ptr(),
-            AT_SYSINFO_EHDR => sysinfo_ehdr = check_vdso_base(a_val as *mut _)?.as_ptr(),
+            AT_SYSINFO_EHDR => sysinfo_ehdr = check_elf_base(a_val as *mut _)?.as_ptr(),
 
-            AT_BASE => check_interpreter_base(a_val.cast())?,
+            AT_BASE => {
+                let _ = check_elf_base(a_val.cast())?;
+            }
 
             #[cfg(feature = "runtime")]
             AT_PHDR => phdr = check_raw_pointer::<Elf_Phdr>(a_val as *mut _)?.as_ptr(),
@@ -316,72 +318,11 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
     Some(())
 }
 
-/// Check that `base` is a valid pointer to the program interpreter.
-///
-/// `base` is some value we got from a `AT_BASE` aux record somewhere,
-/// which hopefully holds the value of the program interpreter in memory. Do a
-/// series of checks to be as sure as we can that it's safe to use.
-#[cold]
-unsafe fn check_interpreter_base(base: *const Elf_Ehdr) -> Option<()> {
-    check_elf_base(base)?;
-    Some(())
-}
-
 /// Check that `base` is a valid pointer to the kernel-provided vDSO.
 ///
 /// `base` is some value we got from a `AT_SYSINFO_EHDR` aux record somewhere,
 /// which hopefully holds the value of the kernel-provided vDSO in memory. Do a
 /// series of checks to be as sure as we can that it's safe to use.
-#[cold]
-unsafe fn check_vdso_base(base: *const Elf_Ehdr) -> Option<NonNull<Elf_Ehdr>> {
-    // In theory, we could check that we're not attempting to parse our own ELF
-    // image, as an additional check. However, older Linux toolchains don't
-    // support this, and Rust's `#[linkage = "extern_weak"]` isn't stable yet,
-    // so just disable this for now.
-    /*
-    {
-        extern "C" {
-            static __ehdr_start: c::c_void;
-        }
-
-        let ehdr_start: *const c::c_void = &__ehdr_start;
-        if base == ehdr_start {
-            return None;
-        }
-    }
-    */
-
-    let hdr = check_elf_base(base)?;
-
-    // Check that the ELF is not writable, since that would indicate that this
-    // isn't the ELF we think it is. Here we're just using `clock_getres` just
-    // as an arbitrary system call which writes to a buffer and fails with
-    // `EFAULT` if the buffer is not writable.
-    {
-        use crate::backend::conv::{c_uint, ret};
-        if ret(syscall!(
-            __NR_clock_getres,
-            c_uint(linux_raw_sys::general::CLOCK_MONOTONIC),
-            base
-        )) != Err(crate::io::Errno::FAULT)
-        {
-            // We can't gracefully fail here because we would seem to have just
-            // mutated some unknown memory.
-            #[cfg(feature = "std")]
-            {
-                std::process::abort();
-            }
-            #[cfg(all(not(feature = "std"), feature = "rustc-dep-of-std"))]
-            {
-                core::intrinsics::abort();
-            }
-        }
-    }
-
-    Some(hdr)
-}
-
-/// Check that `base` is a valid pointer to an ELF image.
 #[cold]
 unsafe fn check_elf_base(base: *const Elf_Ehdr) -> Option<NonNull<Elf_Ehdr>> {
     // If we're reading a 64-bit auxv on a 32-bit platform, we'll see a zero
