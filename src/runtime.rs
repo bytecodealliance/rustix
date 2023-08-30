@@ -187,6 +187,15 @@ pub fn exe_phdrs() -> (*const c_void, usize) {
 
 /// `getauxval(AT_ENTRY)`—Returns the address of the program entrypoint.
 ///
+/// Most code interested in the program entrypoint address should instead use a
+/// symbol reference to `_start`. That will be properly PC-relative or
+/// relocated if needed, and will come with appropriate pointer type and
+/// pointer provenance.
+///
+/// This function is intended only for use in code that implements those
+/// relocations, to compute the ASLR offset. It has type `usize`, so it doesn't
+/// carry any provenance, and it shouldn't be used to dereference memory.
+///
 /// # References
 ///  - [Linux]
 ///
