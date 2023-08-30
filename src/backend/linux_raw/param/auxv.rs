@@ -299,10 +299,13 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
     CLOCK_TICKS_PER_SECOND.store(clktck, Relaxed);
     HWCAP.store(hwcap, Relaxed);
     HWCAP2.store(hwcap2, Relaxed);
-    PHDR.store(phdr, Relaxed);
-    PHNUM.store(phnum, Relaxed);
     EXECFN.store(execfn, Relaxed);
     SYSINFO_EHDR.store(sysinfo_ehdr, Relaxed);
+    #[cfg(feature = "runtime")]
+    PHDR.store(phdr, Relaxed);
+    #[cfg(feature = "runtime")]
+    PHNUM.store(phnum, Relaxed);
+    #[cfg(feature = "runtime")]
     ENTRY.store(entry, Relaxed);
 
     Some(())
