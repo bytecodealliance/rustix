@@ -295,6 +295,7 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
         }
     }
 
+    #[cfg(feature = "runtime")]
     assert_eq!(phent, size_of::<Elf_Phdr>());
 
     // The base and sysinfo_ehdr (if present) matches our platform. Accept
