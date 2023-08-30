@@ -1,4 +1,3 @@
-use crate::backend::c;
 use linux_raw_sys::general::membarrier_cmd;
 
 /// A command for use with [`membarrier`] and [`membarrier_cpu`].
@@ -77,15 +76,6 @@ pub enum Resource {
     /// `RLIMIT_RTTIME`
     Rttime = linux_raw_sys::general::RLIMIT_RTTIME,
 }
-
-/// `EXIT_SUCCESS`
-pub const EXIT_SUCCESS: c::c_int = 0;
-/// `EXIT_FAILURE`
-pub const EXIT_FAILURE: c::c_int = 1;
-/// The status value of a child terminated with a [`Signal::Abort`] signal.
-///
-/// [`Signal::Abort`]: crate::process::Signal::Abort
-pub const EXIT_SIGNALED_SIGABRT: c::c_int = 128 + linux_raw_sys::general::SIGABRT as i32;
 
 /// A CPU identifier as a raw integer.
 pub type RawCpuid = u32;

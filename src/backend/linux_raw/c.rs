@@ -80,6 +80,13 @@ pub(crate) use linux_raw_sys::{
 #[cfg(any(feature = "process", feature = "runtime"))]
 pub(crate) use linux_raw_sys::general::siginfo_t;
 
+#[cfg(any(feature = "process", feature = "runtime"))]
+pub(crate) const EXIT_SUCCESS: c_int = 0;
+#[cfg(any(feature = "process", feature = "runtime"))]
+pub(crate) const EXIT_FAILURE: c_int = 1;
+#[cfg(feature = "process")]
+pub(crate) const EXIT_SIGNALED_SIGABRT: c_int = 128 + linux_raw_sys::general::SIGABRT as c_int;
+
 #[cfg(feature = "process")]
 pub(crate) use linux_raw_sys::{
     general::{
