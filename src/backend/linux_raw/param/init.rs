@@ -10,17 +10,13 @@ use crate::backend::elf::*;
 #[cfg(feature = "param")]
 use crate::ffi::CStr;
 use core::ffi::c_void;
-use core::mem::size_of;
 use core::ptr::{null_mut, read, NonNull};
 use core::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
 use linux_raw_sys::general::{
     AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_SYSINFO_EHDR,
 };
 #[cfg(feature = "runtime")]
-use {
-    core::slice,
-    linux_raw_sys::general::{AT_ENTRY, AT_PHDR, AT_PHENT, AT_PHNUM},
-};
+use linux_raw_sys::general::{AT_ENTRY, AT_PHDR, AT_PHENT, AT_PHNUM};
 
 #[cfg(feature = "param")]
 #[inline]
@@ -57,23 +53,14 @@ pub(crate) fn linux_execfn() -> &'static CStr {
 
 #[cfg(feature = "runtime")]
 #[inline]
-pub(crate) fn exe_phdrs() -> (*const c_void, usize) {
+pub(crate) fn exe_phdrs() -> (*const c_void, usize, usize) {
     unsafe {
         (
             PHDR.load(Ordering::Relaxed).cast(),
+            PHENT.load(Ordering::Relaxed),
             PHNUM.load(Ordering::Relaxed),
         )
     }
-}
-
-#[cfg(feature = "runtime")]
-#[inline]
-pub(in super::super) fn exe_phdrs_slice() -> &'static [Elf_Phdr] {
-    let (phdr, phnum) = exe_phdrs();
-
-    // SAFETY: We assume the `AT_PHDR` and `AT_PHNUM` values provided by the
-    // kernel form a valid slice.
-    unsafe { slice::from_raw_parts(phdr.cast(), phnum) }
 }
 
 /// `AT_SYSINFO_EHDR` isn't present on all platforms in all configurations, so
@@ -97,9 +84,11 @@ static mut SYSINFO_EHDR: AtomicPtr<Elf_Ehdr> = AtomicPtr::new(null_mut());
 // Initialize `EXECFN` to a valid `CStr` pointer so that we don't need to check
 // for null on every `execfn` call.
 static mut EXECFN: AtomicPtr<c::c_char> = AtomicPtr::new(b"\0".as_ptr() as _);
-// Use `dangling` so that we can always pass it to `slice::from_raw_parts`.
+// Use `dangling` so that we can always treat it like an empty slice.
 #[cfg(feature = "runtime")]
 static mut PHDR: AtomicPtr<Elf_Phdr> = AtomicPtr::new(NonNull::dangling().as_ptr());
+#[cfg(feature = "runtime")]
+static mut PHENT: AtomicUsize = AtomicUsize::new(0);
 #[cfg(feature = "runtime")]
 static mut PHNUM: AtomicUsize = AtomicUsize::new(0);
 #[cfg(feature = "runtime")]
@@ -148,7 +137,7 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) {
             #[cfg(feature = "runtime")]
             AT_PHNUM => PHNUM.store(a_val as usize, Ordering::Relaxed),
             #[cfg(feature = "runtime")]
-            AT_PHENT => assert_eq!(a_val as usize, size_of::<Elf_Phdr>()),
+            AT_PHENT => PHENT.store(a_val as usize, Ordering::Relaxed),
             #[cfg(feature = "runtime")]
             AT_ENTRY => ENTRY.store(a_val as usize, Ordering::Relaxed),
 

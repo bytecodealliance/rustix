@@ -8,7 +8,7 @@
 
 use crate::backend::c;
 use crate::backend::elf::*;
-use crate::backend::param::auxv::exe_phdrs_slice;
+use crate::backend::param::auxv::exe_phdrs;
 use core::ptr::{null, NonNull};
 
 /// For use with [`set_thread_area`].
@@ -22,14 +22,19 @@ pub(crate) fn startup_tls_info() -> StartupTlsInfo {
     let mut tls_phdr = null();
     let mut stack_size = 0;
 
-    let phdrs = exe_phdrs_slice();
+    let (phdrs_ptr, phent, phnum) = exe_phdrs();
+    let mut phdrs_ptr = phdrs_ptr.cast::<Elf_Phdr>();
 
     // SAFETY: We assume the phdr array pointer and length the kernel provided
     // to the process describe a valid phdr array.
     unsafe {
-        for phdr in phdrs {
+        let phdrs_end = phdrs_ptr.cast::<u8>().add(phnum * phent).cast();
+        while phdrs_ptr != phdrs_end {
+            let phdr = &*phdrs_ptr;
+            phdrs_ptr = phdrs_ptr.cast::<u8>().add(phent).cast();
+
             match phdr.p_type {
-                PT_PHDR => base = phdrs.as_ptr().cast::<u8>().sub(phdr.p_vaddr),
+                PT_PHDR => base = phdrs_ptr.cast::<u8>().sub(phdr.p_vaddr),
                 PT_TLS => tls_phdr = phdr,
                 PT_GNU_STACK => stack_size = phdr.p_memsz,
                 _ => {}
