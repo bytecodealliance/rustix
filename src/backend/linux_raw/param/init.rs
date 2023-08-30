@@ -12,12 +12,14 @@ use crate::ffi::CStr;
 use core::ffi::c_void;
 use core::mem::size_of;
 use core::ptr::{null_mut, read, NonNull};
-#[cfg(feature = "runtime")]
-use core::slice;
 use core::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
 use linux_raw_sys::general::{
-    AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT, AT_PHNUM,
-    AT_SYSINFO_EHDR,
+    AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_SYSINFO_EHDR,
+};
+#[cfg(feature = "runtime")]
+use {
+    core::slice,
+    linux_raw_sys::general::{AT_ENTRY, AT_PHDR, AT_PHENT, AT_PHNUM},
 };
 
 #[cfg(feature = "param")]
@@ -85,15 +87,25 @@ pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
     unsafe { SYSINFO_EHDR.load(Ordering::Relaxed) }
 }
 
+#[cfg(feature = "runtime")]
+#[inline]
+pub(crate) fn entry() -> usize {
+    unsafe { ENTRY.load(Ordering::Relaxed) }
+}
+
 static mut PAGE_SIZE: AtomicUsize = AtomicUsize::new(0);
 static mut CLOCK_TICKS_PER_SECOND: AtomicUsize = AtomicUsize::new(0);
 static mut HWCAP: AtomicUsize = AtomicUsize::new(0);
 static mut HWCAP2: AtomicUsize = AtomicUsize::new(0);
 static mut SYSINFO_EHDR: AtomicPtr<Elf_Ehdr> = AtomicPtr::new(null_mut());
-// Use `dangling` so that we can always pass it to `slice::from_raw_parts`.
-static mut PHDR: AtomicPtr<Elf_Phdr> = AtomicPtr::new(NonNull::dangling().as_ptr());
-static mut PHNUM: AtomicUsize = AtomicUsize::new(0);
 static mut EXECFN: AtomicPtr<c::c_char> = AtomicPtr::new(null_mut());
+// Use `dangling` so that we can always pass it to `slice::from_raw_parts`.
+#[cfg(feature = "runtime")]
+static mut PHDR: AtomicPtr<Elf_Phdr> = AtomicPtr::new(NonNull::dangling().as_ptr());
+#[cfg(feature = "runtime")]
+static mut PHNUM: AtomicUsize = AtomicUsize::new(0);
+#[cfg(feature = "runtime")]
+static mut ENTRY: AtomicUsize = AtomicUsize::new(0);
 
 /// When "use-explicitly-provided-auxv" is enabled, we export a function to be
 /// called during initialization, and passed a pointer to the original
@@ -130,11 +142,18 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) {
             AT_CLKTCK => CLOCK_TICKS_PER_SECOND.store(a_val as usize, Ordering::Relaxed),
             AT_HWCAP => HWCAP.store(a_val as usize, Ordering::Relaxed),
             AT_HWCAP2 => HWCAP2.store(a_val as usize, Ordering::Relaxed),
-            AT_PHDR => PHDR.store(a_val.cast::<Elf_Phdr>(), Ordering::Relaxed),
-            AT_PHNUM => PHNUM.store(a_val as usize, Ordering::Relaxed),
-            AT_PHENT => assert_eq!(a_val as usize, size_of::<Elf_Phdr>()),
             AT_EXECFN => EXECFN.store(a_val.cast::<c::c_char>(), Ordering::Relaxed),
             AT_SYSINFO_EHDR => SYSINFO_EHDR.store(a_val.cast::<Elf_Ehdr>(), Ordering::Relaxed),
+
+            #[cfg(feature = "runtime")]
+            AT_PHDR => PHDR.store(a_val.cast::<Elf_Phdr>(), Ordering::Relaxed),
+            #[cfg(feature = "runtime")]
+            AT_PHNUM => PHNUM.store(a_val as usize, Ordering::Relaxed),
+            #[cfg(feature = "runtime")]
+            AT_PHENT => assert_eq!(a_val as usize, size_of::<Elf_Phdr>()),
+            #[cfg(feature = "runtime")]
+            AT_ENTRY => ENTRY.store(a_val as usize, Ordering::Relaxed),
+
             AT_NULL => break,
             _ => (),
         }

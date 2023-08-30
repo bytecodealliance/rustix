@@ -26,8 +26,12 @@ extern "C" {
     fn getauxval(type_: c::c_ulong) -> *mut c::c_void;
 }
 
+#[cfg(feature = "runtime")]
 const AT_PHDR: c::c_ulong = 3;
+#[cfg(feature = "runtime")]
 const AT_PHNUM: c::c_ulong = 5;
+#[cfg(feature = "runtime")]
+const AT_ENTRY: c::c_ulong = 9;
 const AT_HWCAP: c::c_ulong = 16;
 const AT_HWCAP2: c::c_ulong = 26;
 const AT_EXECFN: c::c_ulong = 31;
@@ -52,12 +56,16 @@ const _SC_CLK_TCK: c::c_int = 2;
 fn test_abi() {
     const_assert_eq!(self::_SC_PAGESIZE, ::libc::_SC_PAGESIZE);
     const_assert_eq!(self::_SC_CLK_TCK, ::libc::_SC_CLK_TCK);
-    const_assert_eq!(self::AT_PHDR, ::libc::AT_PHDR);
-    const_assert_eq!(self::AT_PHNUM, ::libc::AT_PHNUM);
     const_assert_eq!(self::AT_HWCAP, ::libc::AT_HWCAP);
     const_assert_eq!(self::AT_HWCAP2, ::libc::AT_HWCAP2);
     const_assert_eq!(self::AT_EXECFN, ::libc::AT_EXECFN);
     const_assert_eq!(self::AT_SYSINFO_EHDR, ::libc::AT_SYSINFO_EHDR);
+    #[cfg(feature = "runtime")]
+    const_assert_eq!(self::AT_PHDR, ::libc::AT_PHDR);
+    #[cfg(feature = "runtime")]
+    const_assert_eq!(self::AT_PHNUM, ::libc::AT_PHNUM);
+    #[cfg(feature = "runtime")]
+    const_assert_eq!(self::AT_ENTRY, ::libc::AT_ENTRY);
 }
 
 #[cfg(feature = "param")]
@@ -149,4 +157,10 @@ pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
     unsafe {
         getauxval(AT_SYSINFO_EHDR) as *const Elf_Ehdr
     }
+}
+
+#[cfg(feature = "runtime")]
+#[inline]
+pub(crate) fn entry() -> usize {
+    unsafe { getauxval(AT_ENTRY) as usize }
 }

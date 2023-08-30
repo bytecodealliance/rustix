@@ -17,13 +17,15 @@ use alloc::vec::Vec;
 use core::ffi::c_void;
 use core::mem::size_of;
 use core::ptr::{null_mut, read_unaligned, NonNull};
-#[cfg(feature = "runtime")]
-use core::slice;
 use core::sync::atomic::Ordering::Relaxed;
 use core::sync::atomic::{AtomicPtr, AtomicUsize};
 use linux_raw_sys::general::{
-    AT_BASE, AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_PHDR, AT_PHENT,
-    AT_PHNUM, AT_SYSINFO_EHDR,
+    AT_BASE, AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_SYSINFO_EHDR,
+};
+#[cfg(feature = "runtime")]
+use {
+    core::slice,
+    linux_raw_sys::general::{AT_ENTRY, AT_PHDR, AT_PHENT, AT_PHNUM},
 };
 
 #[cfg(feature = "param")]
@@ -121,14 +123,31 @@ pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
     ehdr
 }
 
+#[cfg(feature = "runtime")]
+#[inline]
+pub(crate) fn entry() -> usize {
+    let mut entry = ENTRY.load(Relaxed);
+
+    if entry == 0 {
+        init_auxv();
+        entry = ENTRY.load(Relaxed);
+    }
+
+    entry
+}
+
 static PAGE_SIZE: AtomicUsize = AtomicUsize::new(0);
 static CLOCK_TICKS_PER_SECOND: AtomicUsize = AtomicUsize::new(0);
 static HWCAP: AtomicUsize = AtomicUsize::new(0);
 static HWCAP2: AtomicUsize = AtomicUsize::new(0);
-static SYSINFO_EHDR: AtomicPtr<Elf_Ehdr> = AtomicPtr::new(null_mut());
-static PHDR: AtomicPtr<Elf_Phdr> = AtomicPtr::new(null_mut());
-static PHNUM: AtomicUsize = AtomicUsize::new(0);
 static EXECFN: AtomicPtr<c::c_char> = AtomicPtr::new(null_mut());
+static SYSINFO_EHDR: AtomicPtr<Elf_Ehdr> = AtomicPtr::new(null_mut());
+#[cfg(feature = "runtime")]
+static PHDR: AtomicPtr<Elf_Phdr> = AtomicPtr::new(null_mut());
+#[cfg(feature = "runtime")]
+static PHNUM: AtomicUsize = AtomicUsize::new(0);
+#[cfg(feature = "runtime")]
+static ENTRY: AtomicUsize = AtomicUsize::new(0);
 
 #[cfg(feature = "alloc")]
 fn pr_get_auxv() -> crate::io::Result<Vec<u8>> {
@@ -245,6 +264,7 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
     let mut execfn = null_mut();
     let mut sysinfo_ehdr = null_mut();
     let mut phent = 0;
+    let mut entry = 0;
 
     for Elf_auxv_t { a_type, a_val } in aux_iter {
         match a_type as _ {
@@ -252,12 +272,20 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
             AT_CLKTCK => clktck = a_val as usize,
             AT_HWCAP => hwcap = a_val as usize,
             AT_HWCAP2 => hwcap2 = a_val as usize,
-            AT_PHDR => phdr = check_raw_pointer::<Elf_Phdr>(a_val as *mut _)?.as_ptr(),
-            AT_PHNUM => phnum = a_val as usize,
-            AT_PHENT => phent = a_val as usize,
             AT_EXECFN => execfn = check_raw_pointer::<c::c_char>(a_val as *mut _)?.as_ptr(),
-            AT_BASE => check_interpreter_base(a_val.cast())?,
             AT_SYSINFO_EHDR => sysinfo_ehdr = check_vdso_base(a_val as *mut _)?.as_ptr(),
+
+            AT_BASE => check_interpreter_base(a_val.cast())?,
+
+            #[cfg(feature = "runtime")]
+            AT_PHDR => phdr = check_raw_pointer::<Elf_Phdr>(a_val as *mut _)?.as_ptr(),
+            #[cfg(feature = "runtime")]
+            AT_PHNUM => phnum = a_val as usize,
+            #[cfg(feature = "runtime")]
+            AT_PHENT => phent = a_val as usize,
+            #[cfg(feature = "runtime")]
+            AT_ENTRY => entry = a_val as usize,
+
             AT_NULL => break,
             _ => (),
         }
@@ -275,6 +303,7 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
     PHNUM.store(phnum, Relaxed);
     EXECFN.store(execfn, Relaxed);
     SYSINFO_EHDR.store(sysinfo_ehdr, Relaxed);
+    ENTRY.store(entry, Relaxed);
 
     Some(())
 }

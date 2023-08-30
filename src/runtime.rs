@@ -185,6 +185,17 @@ pub fn exe_phdrs() -> (*const c_void, usize) {
     backend::param::auxv::exe_phdrs()
 }
 
+/// `getauxval(AT_ENTRY)`—Returns the address of the program entrypoint.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man3/getauxval.3.html
+#[inline]
+pub fn entry() -> usize {
+    backend::param::auxv::entry()
+}
+
 #[cfg(linux_raw)]
 pub use backend::runtime::tls::StartupTlsInfo;
 
