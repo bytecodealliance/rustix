@@ -141,11 +141,6 @@ impl Resource {
     pub const Rss: Self = Self::As;
 }
 
-pub const EXIT_SUCCESS: c::c_int = c::EXIT_SUCCESS;
-pub const EXIT_FAILURE: c::c_int = c::EXIT_FAILURE;
-#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
-pub const EXIT_SIGNALED_SIGABRT: c::c_int = 128 + c::SIGABRT;
-
 /// A CPU identifier as a raw integer.
 #[cfg(linux_kernel)]
 pub type RawCpuid = u32;

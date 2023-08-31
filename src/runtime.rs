@@ -162,6 +162,26 @@ pub fn exit_group(status: i32) -> ! {
     backend::runtime::syscalls::exit_group(status)
 }
 
+/// `EXIT_SUCCESS` for use with [`exit_group`].
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/stdlib.h.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/exit.3.html
+pub const EXIT_SUCCESS: i32 = backend::c::EXIT_SUCCESS;
+
+/// `EXIT_FAILURE` for use with [`exit_group`].
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/stdlib.h.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/exit.3.html
+pub const EXIT_FAILURE: i32 = backend::c::EXIT_FAILURE;
+
 /// Return fields from the main executable segment headers ("phdrs") relevant
 /// to initializing TLS provided to the program at startup.
 ///
