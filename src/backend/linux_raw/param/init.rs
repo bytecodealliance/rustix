@@ -50,12 +50,8 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
 pub(crate) fn linux_execfn() -> &'static CStr {
     let execfn = unsafe { EXECFN.load(Ordering::Relaxed) };
 
-    // The user should have called `rustix::param::init` before calling this
-    // function.
-    assert!(!execfn.is_null());
-
-    // SAFETY: We assume the `AT_EXECFN` value provided by the kernel points
-    // to a valid C string.
+    // SAFETY: We initialize `EXECFN` to a valid `CStr` pointer, and we assume
+    // the `AT_EXECFN` value provided by the kernel points to a valid C string.
     unsafe { CStr::from_ptr(execfn.cast()) }
 }
 
@@ -98,7 +94,9 @@ static mut CLOCK_TICKS_PER_SECOND: AtomicUsize = AtomicUsize::new(0);
 static mut HWCAP: AtomicUsize = AtomicUsize::new(0);
 static mut HWCAP2: AtomicUsize = AtomicUsize::new(0);
 static mut SYSINFO_EHDR: AtomicPtr<Elf_Ehdr> = AtomicPtr::new(null_mut());
-static mut EXECFN: AtomicPtr<c::c_char> = AtomicPtr::new(null_mut());
+// Initialize `EXECFN` to a valid `CStr` pointer so that we don't need to check
+// for null on every `execfn` call.
+static mut EXECFN: AtomicPtr<c::c_char> = AtomicPtr::new(b"\0".as_ptr() as _);
 // Use `dangling` so that we can always pass it to `slice::from_raw_parts`.
 #[cfg(feature = "runtime")]
 static mut PHDR: AtomicPtr<Elf_Phdr> = AtomicPtr::new(NonNull::dangling().as_ptr());
