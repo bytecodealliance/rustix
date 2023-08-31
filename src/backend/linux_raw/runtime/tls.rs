@@ -22,19 +22,19 @@ pub(crate) fn startup_tls_info() -> StartupTlsInfo {
     let mut tls_phdr = null();
     let mut stack_size = 0;
 
-    let (phdrs_ptr, phent, phnum) = exe_phdrs();
-    let mut phdrs_ptr = phdrs_ptr.cast::<Elf_Phdr>();
+    let (first_phdr, phent, phnum) = exe_phdrs();
+    let mut current_phdr = first_phdr.cast::<Elf_Phdr>();
 
     // SAFETY: We assume the phdr array pointer and length the kernel provided
     // to the process describe a valid phdr array.
     unsafe {
-        let phdrs_end = phdrs_ptr.cast::<u8>().add(phnum * phent).cast();
-        while phdrs_ptr != phdrs_end {
-            let phdr = &*phdrs_ptr;
-            phdrs_ptr = phdrs_ptr.cast::<u8>().add(phent).cast();
+        let phdrs_end = current_phdr.cast::<u8>().add(phnum * phent).cast();
+        while current_phdr != phdrs_end {
+            let phdr = &*current_phdr;
+            current_phdr = current_phdr.cast::<u8>().add(phent).cast();
 
             match phdr.p_type {
-                PT_PHDR => base = phdrs_ptr.cast::<u8>().sub(phdr.p_vaddr),
+                PT_PHDR => base = first_phdr.cast::<u8>().sub(phdr.p_vaddr),
                 PT_TLS => tls_phdr = phdr,
                 PT_GNU_STACK => stack_size = phdr.p_memsz,
                 _ => {}
