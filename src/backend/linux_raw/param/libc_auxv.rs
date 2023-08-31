@@ -11,8 +11,6 @@ use crate::backend::elf::*;
 use crate::ffi::CStr;
 #[cfg(not(feature = "runtime"))]
 use core::ptr::null;
-#[cfg(feature = "runtime")]
-use core::slice;
 
 // `getauxval` wasn't supported in glibc until 2.16. Also this lets us use
 // `*mut` as the return type to preserve strict provenance.
@@ -28,6 +26,8 @@ extern "C" {
 
 #[cfg(feature = "runtime")]
 const AT_PHDR: c::c_ulong = 3;
+#[cfg(feature = "runtime")]
+const AT_PHENT: c::c_ulong = 4;
 #[cfg(feature = "runtime")]
 const AT_PHNUM: c::c_ulong = 5;
 #[cfg(feature = "runtime")]
@@ -122,22 +122,13 @@ pub(crate) fn linux_execfn() -> &'static CStr {
 
 #[cfg(feature = "runtime")]
 #[inline]
-pub(crate) fn exe_phdrs() -> (*const c::c_void, usize) {
+pub(crate) fn exe_phdrs() -> (*const c::c_void, usize, usize) {
     unsafe {
         let phdr = getauxval(AT_PHDR) as *const c::c_void;
+        let phent = getauxval(AT_PHENT) as usize;
         let phnum = getauxval(AT_PHNUM) as usize;
-        (phdr, phnum)
+        (phdr, phent, phnum)
     }
-}
-
-#[cfg(feature = "runtime")]
-#[inline]
-pub(in super::super) fn exe_phdrs_slice() -> &'static [Elf_Phdr] {
-    let (phdr, phnum) = exe_phdrs();
-
-    // SAFETY: We assume the `AT_PHDR` and `AT_PHNUM` values provided by the
-    // kernel form a valid slice.
-    unsafe { slice::from_raw_parts(phdr.cast(), phnum) }
 }
 
 /// `AT_SYSINFO_EHDR` isn't present on all platforms in all configurations,

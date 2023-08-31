@@ -193,15 +193,16 @@ pub fn startup_tls_info() -> StartupTlsInfo {
     backend::runtime::tls::startup_tls_info()
 }
 
-/// `(getauxval(AT_PHDR), getauxval(AT_PHNUM))`—Returns the address and
-/// number of ELF segment headers for the main executable.
+/// `(getauxval(AT_PHDR), getauxval(AT_PHENT), getauxval(AT_PHNUM))`—Returns
+/// the address, ELF segment header size, and number of ELF segment headers for
+/// the main executable.
 ///
 /// # References
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man3/getauxval.3.html
 #[inline]
-pub fn exe_phdrs() -> (*const c_void, usize) {
+pub fn exe_phdrs() -> (*const c_void, usize, usize) {
     backend::param::auxv::exe_phdrs()
 }
 

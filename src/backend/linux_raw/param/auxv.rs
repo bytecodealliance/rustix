@@ -23,10 +23,7 @@ use linux_raw_sys::general::{
     AT_BASE, AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_SYSINFO_EHDR,
 };
 #[cfg(feature = "runtime")]
-use {
-    core::slice,
-    linux_raw_sys::general::{AT_ENTRY, AT_PHDR, AT_PHENT, AT_PHNUM},
-};
+use linux_raw_sys::general::{AT_ENTRY, AT_PHDR, AT_PHENT, AT_PHNUM};
 
 #[cfg(feature = "param")]
 #[inline]
@@ -86,27 +83,19 @@ pub(crate) fn linux_execfn() -> &'static CStr {
 
 #[cfg(feature = "runtime")]
 #[inline]
-pub(crate) fn exe_phdrs() -> (*const c::c_void, usize) {
+pub(crate) fn exe_phdrs() -> (*const c::c_void, usize, usize) {
     let mut phdr = PHDR.load(Relaxed);
+    let mut phent = PHENT.load(Relaxed);
     let mut phnum = PHNUM.load(Relaxed);
 
     if phdr.is_null() || phnum == 0 {
         init_auxv();
         phdr = PHDR.load(Relaxed);
+        phent = PHENT.load(Relaxed);
         phnum = PHNUM.load(Relaxed);
     }
 
-    (phdr.cast(), phnum)
-}
-
-#[cfg(feature = "runtime")]
-#[inline]
-pub(in super::super) fn exe_phdrs_slice() -> &'static [Elf_Phdr] {
-    let (phdr, phnum) = exe_phdrs();
-
-    // SAFETY: We assume the `AT_PHDR` and `AT_PHNUM` values provided by the
-    // kernel form a valid slice.
-    unsafe { slice::from_raw_parts(phdr.cast(), phnum) }
+    (phdr.cast(), phent, phnum)
 }
 
 /// `AT_SYSINFO_EHDR` isn't present on all platforms in all configurations, so
@@ -144,6 +133,8 @@ static EXECFN: AtomicPtr<c::c_char> = AtomicPtr::new(null_mut());
 static SYSINFO_EHDR: AtomicPtr<Elf_Ehdr> = AtomicPtr::new(null_mut());
 #[cfg(feature = "runtime")]
 static PHDR: AtomicPtr<Elf_Phdr> = AtomicPtr::new(null_mut());
+#[cfg(feature = "runtime")]
+static PHENT: AtomicUsize = AtomicUsize::new(0);
 #[cfg(feature = "runtime")]
 static PHNUM: AtomicUsize = AtomicUsize::new(0);
 #[cfg(feature = "runtime")]
