@@ -248,7 +248,7 @@ pub(in crate::backend) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: Ar
         "int $$0x80",
         in("eax") nr.to_asm(),
         in("ebx") a0.to_asm(),
-        options(noreturn)
+        options(nostack, noreturn)
     )
 }
 
