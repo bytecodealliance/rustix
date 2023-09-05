@@ -5,11 +5,11 @@
 //! This uses raw pointers to locate and read the kernel-provided auxv array.
 #![allow(unsafe_code)]
 
-use crate::backend::c;
 use crate::fd::OwnedFd;
 #[cfg(feature = "param")]
 use crate::ffi::CStr;
 use crate::fs::{Mode, OFlags};
+use crate::linux_raw::c;
 use crate::utils::{as_ptr, check_raw_pointer};
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;

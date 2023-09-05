@@ -440,9 +440,9 @@ pub(crate) mod fs {
 }
 
 #[cfg(any(feature = "fs", feature = "mount"))]
-impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MountFlagsArg> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::linux_raw::mount::types::MountFlagsArg> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mount::types::MountFlagsArg) -> Self {
+    fn from(flags: crate::linux_raw::mount::types::MountFlagsArg) -> Self {
         c_uint(flags.0)
     }
 }
@@ -450,9 +450,9 @@ impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MountFlagsArg> for A
 // When the deprecated "fs" aliases are removed, we can remove the "fs"
 // here too.
 #[cfg(any(feature = "fs", feature = "mount"))]
-impl<'a, Num: ArgNumber> From<crate::backend::mount::types::UnmountFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::linux_raw::mount::types::UnmountFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mount::types::UnmountFlags) -> Self {
+    fn from(flags: crate::linux_raw::mount::types::UnmountFlags) -> Self {
         c_uint(flags.bits())
     }
 }
@@ -466,49 +466,49 @@ impl<'a, Num: ArgNumber> From<crate::mount::FsConfigCmd> for ArgReg<'a, Num> {
 }
 
 #[cfg(feature = "mount")]
-impl<'a, Num: ArgNumber> From<crate::backend::mount::types::FsOpenFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::linux_raw::mount::types::FsOpenFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mount::types::FsOpenFlags) -> Self {
+    fn from(flags: crate::linux_raw::mount::types::FsOpenFlags) -> Self {
         c_uint(flags.bits())
     }
 }
 
 #[cfg(feature = "mount")]
-impl<'a, Num: ArgNumber> From<crate::backend::mount::types::FsMountFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::linux_raw::mount::types::FsMountFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mount::types::FsMountFlags) -> Self {
+    fn from(flags: crate::linux_raw::mount::types::FsMountFlags) -> Self {
         c_uint(flags.bits())
     }
 }
 
 #[cfg(feature = "mount")]
-impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MountAttrFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::linux_raw::mount::types::MountAttrFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mount::types::MountAttrFlags) -> Self {
+    fn from(flags: crate::linux_raw::mount::types::MountAttrFlags) -> Self {
         c_uint(flags.bits())
     }
 }
 
 #[cfg(feature = "mount")]
-impl<'a, Num: ArgNumber> From<crate::backend::mount::types::OpenTreeFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::linux_raw::mount::types::OpenTreeFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mount::types::OpenTreeFlags) -> Self {
+    fn from(flags: crate::linux_raw::mount::types::OpenTreeFlags) -> Self {
         c_uint(flags.bits())
     }
 }
 
 #[cfg(feature = "mount")]
-impl<'a, Num: ArgNumber> From<crate::backend::mount::types::FsPickFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::linux_raw::mount::types::FsPickFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mount::types::FsPickFlags) -> Self {
+    fn from(flags: crate::linux_raw::mount::types::FsPickFlags) -> Self {
         c_uint(flags.bits())
     }
 }
 
 #[cfg(feature = "mount")]
-impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MoveMountFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::linux_raw::mount::types::MoveMountFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mount::types::MoveMountFlags) -> Self {
+    fn from(flags: crate::linux_raw::mount::types::MoveMountFlags) -> Self {
         c_uint(flags.bits())
     }
 }
@@ -591,33 +591,33 @@ impl<'a, Num: ArgNumber> From<crate::event::epoll::CreateFlags> for ArgReg<'a, N
 }
 
 #[cfg(feature = "mm")]
-impl<'a, Num: ArgNumber> From<crate::backend::mm::types::ProtFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::linux_raw::mm::types::ProtFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mm::types::ProtFlags) -> Self {
+    fn from(flags: crate::linux_raw::mm::types::ProtFlags) -> Self {
         c_uint(flags.bits())
     }
 }
 
 #[cfg(feature = "mm")]
-impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MsyncFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::linux_raw::mm::types::MsyncFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mm::types::MsyncFlags) -> Self {
+    fn from(flags: crate::linux_raw::mm::types::MsyncFlags) -> Self {
         c_uint(flags.bits())
     }
 }
 
 #[cfg(feature = "mm")]
-impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MremapFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::linux_raw::mm::types::MremapFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mm::types::MremapFlags) -> Self {
+    fn from(flags: crate::linux_raw::mm::types::MremapFlags) -> Self {
         c_uint(flags.bits())
     }
 }
 
 #[cfg(feature = "mm")]
-impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MlockFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::linux_raw::mm::types::MlockFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mm::types::MlockFlags) -> Self {
+    fn from(flags: crate::linux_raw::mm::types::MlockFlags) -> Self {
         c_uint(flags.bits())
     }
 }
@@ -625,41 +625,41 @@ impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MlockFlags> for ArgReg<
 #[cfg(feature = "mm")]
 impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MlockAllFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mm::types::MlockAllFlags) -> Self {
+    fn from(flags: crate::linux_raw::mm::types::MlockAllFlags) -> Self {
         c_uint(flags.bits())
     }
 }
 
 #[cfg(feature = "mm")]
-impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MapFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::linux_raw::mm::types::MapFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mm::types::MapFlags) -> Self {
+    fn from(flags: crate::linux_raw::mm::types::MapFlags) -> Self {
         c_uint(flags.bits())
     }
 }
 
 #[cfg(feature = "mm")]
-impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MprotectFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::linux_raw::mm::types::MprotectFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mm::types::MprotectFlags) -> Self {
+    fn from(flags: crate::linux_raw::mm::types::MprotectFlags) -> Self {
         c_uint(flags.bits())
     }
 }
 
 #[cfg(feature = "mm")]
-impl<'a, Num: ArgNumber> From<crate::backend::mm::types::UserfaultfdFlags> for ArgReg<'a, Num> {
+impl<'a, Num: ArgNumber> From<crate::linux_raw::mm::types::UserfaultfdFlags> for ArgReg<'a, Num> {
     #[inline]
-    fn from(flags: crate::backend::mm::types::UserfaultfdFlags) -> Self {
+    fn from(flags: crate::linux_raw::mm::types::UserfaultfdFlags) -> Self {
         c_uint(flags.bits())
     }
 }
 
 #[cfg(feature = "process")]
-impl<'a, Num: ArgNumber> From<crate::backend::process::types::MembarrierCommand>
+impl<'a, Num: ArgNumber> From<crate::linux_raw::process::types::MembarrierCommand>
     for ArgReg<'a, Num>
 {
     #[inline]
-    fn from(cmd: crate::backend::process::types::MembarrierCommand) -> Self {
+    fn from(cmd: crate::linux_raw::process::types::MembarrierCommand) -> Self {
         c_uint(cmd as u32)
     }
 }
@@ -864,7 +864,7 @@ impl<'a, Num: ArgNumber> From<crate::runtime::How> for ArgReg<'a, Num> {
 /// The caller must ensure that this is the return value of a syscall which
 /// just returns 0 on success.
 #[inline]
-pub(super) unsafe fn ret(raw: RetReg<R0>) -> io::Result<()> {
+pub(in super::super) unsafe fn ret(raw: RetReg<R0>) -> io::Result<()> {
     try_decode_void(raw)
 }
 
@@ -991,9 +991,9 @@ pub(super) unsafe fn ret_c_uint_infallible(raw: RetReg<R0>) -> c::c_uint {
 /// The caller must ensure that this is the return value of a syscall which
 /// returns an owned file descriptor.
 #[inline]
-pub(super) unsafe fn ret_owned_fd(raw: RetReg<R0>) -> io::Result<OwnedFd> {
+pub(in super::super) unsafe fn ret_owned_fd(raw: RetReg<R0>) -> io::Result<OwnedFd> {
     let raw_fd = try_decode_raw_fd(raw)?;
-    Ok(crate::backend::fd::OwnedFd::from_raw_fd(raw_fd))
+    Ok(crate::linux_raw::fd::OwnedFd::from_raw_fd(raw_fd))
 }
 
 /// Convert the return value of `dup2` and `dup3`.

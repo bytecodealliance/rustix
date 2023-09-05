@@ -6,18 +6,18 @@
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
 use super::types::RawCpuSet;
-use crate::backend::c;
-#[cfg(all(feature = "alloc", feature = "fs"))]
-use crate::backend::conv::slice_mut;
-use crate::backend::conv::{
-    by_mut, by_ref, c_int, c_uint, negative_pid, pass_usize, raw_fd, ret, ret_c_int,
-    ret_c_int_infallible, ret_c_uint, ret_infallible, ret_owned_fd, ret_usize, size_of,
-    slice_just_addr, zero,
-};
 use crate::fd::{AsRawFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(feature = "fs")]
 use crate::ffi::CStr;
 use crate::io;
+use crate::linux_raw::c;
+#[cfg(all(feature = "alloc", feature = "fs"))]
+use crate::linux_raw::conv::slice_mut;
+use crate::linux_raw::conv::{
+    by_mut, by_ref, c_int, c_uint, negative_pid, pass_usize, raw_fd, ret, ret_c_int,
+    ret_c_int_infallible, ret_c_uint, ret_infallible, ret_owned_fd, ret_usize, size_of,
+    slice_just_addr, zero,
+};
 use crate::pid::RawPid;
 use crate::process::{
     Cpuid, MembarrierCommand, MembarrierQuery, Pid, PidfdFlags, PidfdGetfdFlags, Resource, Rlimit,
@@ -32,9 +32,9 @@ use linux_raw_sys::general::{
     RLIM64_INFINITY,
 };
 #[cfg(feature = "fs")]
-use {crate::backend::conv::ret_c_uint_infallible, crate::fs::Mode};
+use {crate::fs::Mode, crate::linux_raw::conv::ret_c_uint_infallible};
 #[cfg(feature = "alloc")]
-use {crate::backend::conv::slice_just_addr_mut, crate::process::Gid};
+use {crate::linux_raw::conv::slice_just_addr_mut, crate::process::Gid};
 
 // `sched_getcpu` has special optimizations via the vDSO on some architectures.
 #[cfg(any(
@@ -43,7 +43,7 @@ use {crate::backend::conv::slice_just_addr_mut, crate::process::Gid};
     target_arch = "riscv64",
     target_arch = "powerpc64"
 ))]
-pub(crate) use crate::backend::vdso_wrappers::sched_getcpu;
+pub(crate) use crate::linux_raw::vdso_wrappers::sched_getcpu;
 
 // `sched_getcpu` on platforms without a vDSO entry for it.
 #[cfg(not(any(

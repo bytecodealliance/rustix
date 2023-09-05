@@ -6,8 +6,6 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-#[cfg(target_pointer_width = "64")]
-use crate::backend::conv::loff_t_from_u64;
 #[cfg(all(
     target_pointer_width = "32",
     any(target_arch = "arm", target_arch = "mips", target_arch = "mips32r6"),
@@ -17,12 +15,14 @@ use crate::backend::conv::{
     c_uint, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd,
     ret_usize, slice,
 };
-#[cfg(target_pointer_width = "32")]
-use crate::backend::conv::{hi, lo};
-use crate::backend::{c, MAX_IOV};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 use crate::io::{self, DupFlags, FdFlags, IoSlice, IoSliceMut, ReadWriteFlags};
 use crate::ioctl::{IoctlOutput, RawOpcode};
+#[cfg(target_pointer_width = "64")]
+use crate::linux_raw::conv::loff_t_from_u64;
+#[cfg(target_pointer_width = "32")]
+use crate::linux_raw::conv::{hi, lo};
+use crate::linux_raw::{c, MAX_IOV};
 #[cfg(all(feature = "fs", feature = "net"))]
 use crate::net::{RecvFlags, SendFlags};
 use core::cmp;
@@ -269,7 +269,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // side is still open.
         let mut buf = [core::mem::MaybeUninit::<u8>::uninit()];
         match unsafe {
-            crate::backend::net::syscalls::recv(
+            crate::linux_raw::net::syscalls::recv(
                 fd,
                 buf.as_mut_ptr() as *mut u8,
                 1,
@@ -292,7 +292,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // Do a `send` with `DONTWAIT` for 0 bytes. An `EPIPE` indicates
         // the write side is shut down.
         #[allow(unreachable_patterns)] // `EAGAIN` equals `EWOULDBLOCK`
-        match crate::backend::net::syscalls::send(fd, &[], SendFlags::DONTWAIT) {
+        match crate::linux_raw::net::syscalls::send(fd, &[], SendFlags::DONTWAIT) {
             Err(io::Errno::AGAIN | io::Errno::WOULDBLOCK | io::Errno::NOTSOCK) => (),
             Err(io::Errno::PIPE) => write = false,
             Err(err) => return Err(err),

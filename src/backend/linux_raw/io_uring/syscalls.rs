@@ -5,10 +5,10 @@
 //! See the `rustix::backend::syscalls` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::conv::{by_mut, c_uint, pass_usize, ret_c_uint, ret_owned_fd};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
 use crate::io_uring::{io_uring_params, IoringEnterFlags, IoringRegisterOp};
+use crate::linux_raw::conv::{by_mut, c_uint, pass_usize, ret_c_uint, ret_owned_fd};
 use core::ffi::c_void;
 
 #[inline]

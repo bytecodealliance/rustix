@@ -5,12 +5,12 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::c;
-use crate::backend::conv::{by_mut, c_uint, ret, socklen_t};
 use crate::fd::BorrowedFd;
 #[cfg(feature = "alloc")]
 use crate::ffi::CStr;
 use crate::io;
+use crate::linux_raw::c;
+use crate::linux_raw::conv::{by_mut, c_uint, ret, socklen_t};
 use crate::net::sockopt::Timeout;
 use crate::net::{
     AddressFamily, Ipv4Addr, Ipv6Addr, Protocol, RawProtocol, SocketAddrAny, SocketAddrStorage,
@@ -25,8 +25,8 @@ use core::time::Duration;
 use linux_raw_sys::general::{__kernel_old_timeval, __kernel_sock_timeval};
 #[cfg(target_arch = "x86")]
 use {
-    crate::backend::conv::{slice_just_addr, x86_sys},
-    crate::backend::reg::{ArgReg, SocketArg},
+    crate::linux_raw::conv::{slice_just_addr, x86_sys},
+    crate::linux_raw::reg::{ArgReg, SocketArg},
     linux_raw_sys::net::{SYS_GETSOCKOPT, SYS_SETSOCKOPT},
 };
 

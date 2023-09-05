@@ -107,7 +107,7 @@ pub(crate) unsafe fn execve(
 pub(crate) mod tls {
     use super::*;
     #[cfg(target_arch = "x86")]
-    use crate::backend::runtime::tls::UserDesc;
+    use crate::linux_raw::runtime::tls::UserDesc;
 
     #[cfg(target_arch = "x86")]
     #[inline]

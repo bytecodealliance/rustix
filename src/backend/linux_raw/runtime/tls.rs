@@ -6,8 +6,8 @@
 //! kernel-provided AUXV values.
 #![allow(unsafe_code)]
 
-use crate::backend::c;
-use crate::backend::param::auxv::exe_phdrs;
+use crate::linux_raw::c;
+use crate::linux_raw::param::auxv::exe_phdrs;
 use core::arch::global_asm;
 use core::ptr::{null, NonNull};
 use linux_raw_sys::elf::*;

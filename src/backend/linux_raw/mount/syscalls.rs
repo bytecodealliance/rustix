@@ -6,13 +6,13 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::conv::ret;
-#[cfg(feature = "mount")]
-use crate::backend::conv::{ret_owned_fd, slice, zero};
 #[cfg(feature = "mount")]
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::io;
+use crate::linux_raw::conv::ret;
+#[cfg(feature = "mount")]
+use crate::linux_raw::conv::{ret_owned_fd, slice, zero};
 
 #[inline]
 pub(crate) fn mount(

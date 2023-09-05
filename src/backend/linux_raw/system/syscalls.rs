@@ -6,9 +6,9 @@
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
 use super::types::RawUname;
-use crate::backend::c;
-use crate::backend::conv::{c_int, ret, ret_infallible, slice};
 use crate::io;
+use crate::linux_raw::c;
+use crate::linux_raw::conv::{c_int, ret, ret_infallible, slice};
 use crate::system::{RebootCommand, Sysinfo};
 use core::mem::MaybeUninit;
 

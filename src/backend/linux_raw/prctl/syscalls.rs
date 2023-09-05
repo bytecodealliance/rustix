@@ -5,9 +5,9 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::c;
-use crate::backend::conv::{c_int, ret_c_int};
 use crate::io;
+use crate::linux_raw::c;
+use crate::linux_raw::conv::{c_int, ret_c_int};
 
 #[inline]
 pub(crate) unsafe fn prctl(

@@ -6,8 +6,8 @@
 //! to be NUL-terminated.
 #![allow(unsafe_code)]
 
-use crate::backend::c;
 use crate::ffi::CStr;
+use crate::linux_raw::c;
 use crate::{io, path};
 use core::cmp::Ordering;
 use core::fmt;

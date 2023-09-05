@@ -5,10 +5,10 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::c;
-use crate::backend::conv::{by_ref, c_uint, ret};
 use crate::fd::BorrowedFd;
 use crate::io;
+use crate::linux_raw::c;
+use crate::linux_raw::conv::{by_ref, c_uint, ret};
 use crate::pid::Pid;
 #[cfg(all(feature = "alloc", feature = "procfs"))]
 use crate::procfs;
@@ -284,7 +284,7 @@ pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
 
 #[cfg(all(feature = "alloc", feature = "procfs"))]
 pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
-    let fd_stat = crate::backend::fs::syscalls::fstat(fd)?;
+    let fd_stat = crate::linux_raw::fs::syscalls::fstat(fd)?;
 
     // Quick check: if `fd` isn't a character device, it's not a tty.
     if FileType::from_raw_mode(fd_stat.st_mode) != FileType::CharacterDevice {
@@ -298,7 +298,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Re
     let proc_self_fd = procfs::proc_self_fd()?;
 
     // Gather the ttyname by reading the "fd" file inside `proc_self_fd`.
-    let r = crate::backend::fs::syscalls::readlinkat(
+    let r = crate::linux_raw::fs::syscalls::readlinkat(
         proc_self_fd,
         DecInt::from_fd(fd).as_c_str(),
         buf,
@@ -320,7 +320,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Re
         // SAFETY: We just wrote the NUL byte above
         let path = unsafe { CStr::from_ptr(buf.as_ptr().cast()) };
 
-        let path_stat = crate::backend::fs::syscalls::stat(path)?;
+        let path_stat = crate::linux_raw::fs::syscalls::stat(path)?;
         if path_stat.st_dev != fd_stat.st_dev || path_stat.st_ino != fd_stat.st_ino {
             return Err(io::Errno::NODEV);
         }

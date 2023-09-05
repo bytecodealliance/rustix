@@ -33,6 +33,7 @@ pub type Secs = i64;
 #[cfg(any(
     fix_y2038,
     linux_raw,
+    io_uring,
     all(libc, target_arch = "x86_64", target_pointer_width = "32")
 ))]
 pub type Nsecs = i64;

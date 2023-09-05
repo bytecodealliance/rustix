@@ -5,9 +5,9 @@
 //! This uses raw pointers to locate and read the kernel-provided auxv array.
 #![allow(unsafe_code)]
 
-use crate::backend::c;
 #[cfg(feature = "param")]
 use crate::ffi::CStr;
+use crate::linux_raw::c;
 use core::ffi::c_void;
 use core::ptr::{null_mut, read, NonNull};
 #[cfg(feature = "runtime")]

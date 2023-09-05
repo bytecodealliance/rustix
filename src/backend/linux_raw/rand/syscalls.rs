@@ -5,8 +5,8 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::conv::{pass_usize, ret_usize};
 use crate::io;
+use crate::linux_raw::conv::{pass_usize, ret_usize};
 use crate::rand::GetRandomFlags;
 
 #[inline]

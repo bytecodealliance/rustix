@@ -5,19 +5,19 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::c;
-#[cfg(feature = "alloc")]
-use crate::backend::conv::pass_usize;
-use crate::backend::conv::{
-    by_ref, c_int, c_uint, raw_fd, ret, ret_error, ret_owned_fd, ret_usize, slice_mut, zero,
-};
 use crate::event::{epoll, EventfdFlags, PollFd};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
+use crate::linux_raw::c;
+#[cfg(feature = "alloc")]
+use crate::linux_raw::conv::pass_usize;
+use crate::linux_raw::conv::{
+    by_ref, c_int, c_uint, raw_fd, ret, ret_error, ret_owned_fd, ret_usize, slice_mut, zero,
+};
 use linux_raw_sys::general::{EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use {
-    crate::backend::conv::{opt_ref, size_of},
+    crate::linux_raw::conv::{opt_ref, size_of},
     linux_raw_sys::general::{__kernel_timespec, kernel_sigset_t},
 };
 

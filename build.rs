@@ -34,6 +34,9 @@ fn main() {
     // enable the libc backend even if rustix is depended on transitively.
     let cfg_use_libc = var("CARGO_CFG_RUSTIX_USE_LIBC").is_ok();
 
+    // Check for `RUSTFLAGS=--cfg=rustix_use_io_uring`.
+    let cfg_use_io_uring = var("CARGO_CFG_RUSTIX_USE_IO_URING").is_ok();
+
     // Check for `--features=rustc-dep-of-std`.
     let rustc_dep_of_std = var("CARGO_FEATURE_RUSTC_DEP_OF_STD").is_ok();
 
@@ -101,6 +104,9 @@ fn main() {
     } else {
         // Use the linux_raw backend.
         use_feature("linux_raw");
+        if cfg_use_io_uring {
+            use_feature("io_uring");
+        }
         if rustix_use_experimental_asm {
             use_feature("asm_experimental_arch");
         }

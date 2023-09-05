@@ -5,13 +5,13 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::conv::{by_ref, c_uint, ret};
 use crate::fd::BorrowedFd;
 use crate::io;
+use crate::linux_raw::conv::{by_ref, c_uint, ret};
 use linux_raw_sys::ioctl::TIOCSPTLCK;
 #[cfg(feature = "alloc")]
 use {
-    crate::backend::c, crate::ffi::CString, crate::path::DecInt, alloc::vec::Vec,
+    crate::ffi::CString, crate::linux_raw::c, crate::path::DecInt, alloc::vec::Vec,
     core::mem::MaybeUninit, linux_raw_sys::ioctl::TIOCGPTN,
 };
 

@@ -1,9 +1,9 @@
 use crate::ffi::CStr;
 
-use crate::backend::fs::syscalls::{open, unlink};
-use crate::backend::fs::types::{Mode, OFlags};
 use crate::fd::OwnedFd;
 use crate::io;
+use crate::linux_raw::fs::syscalls::{open, unlink};
+use crate::linux_raw::fs::types::{Mode, OFlags};
 use crate::shm::ShmOFlags;
 
 const NAME_MAX: usize = 255;

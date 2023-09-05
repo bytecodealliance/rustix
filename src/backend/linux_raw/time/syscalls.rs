@@ -5,9 +5,9 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::conv::{ret, ret_infallible};
 use crate::clockid::ClockId;
 use crate::io;
+use crate::linux_raw::conv::{ret, ret_infallible};
 use crate::timespec::Timespec;
 use core::mem::MaybeUninit;
 #[cfg(all(feature = "time", target_pointer_width = "32"))]
@@ -16,15 +16,15 @@ use linux_raw_sys::general::itimerspec as __kernel_old_itimerspec;
 use linux_raw_sys::general::timespec as __kernel_old_timespec;
 #[cfg(feature = "time")]
 use {
-    crate::backend::conv::{by_ref, ret_owned_fd},
     crate::fd::BorrowedFd,
     crate::fd::OwnedFd,
+    crate::linux_raw::conv::{by_ref, ret_owned_fd},
     crate::time::{Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags},
 };
 
 // `clock_gettime` has special optimizations via the vDSO.
 #[cfg(feature = "time")]
-pub(crate) use crate::backend::vdso_wrappers::{clock_gettime, clock_gettime_dynamic};
+pub(crate) use crate::linux_raw::vdso_wrappers::{clock_gettime, clock_gettime_dynamic};
 
 #[inline]
 pub(crate) fn clock_getres(which_clock: ClockId) -> Timespec {

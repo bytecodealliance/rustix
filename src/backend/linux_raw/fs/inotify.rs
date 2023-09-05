@@ -1,9 +1,9 @@
 //! inotify support for working with inotifies
 
-use crate::backend::c;
-use crate::backend::fs::syscalls;
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
+use crate::linux_raw::c;
+use crate::linux_raw::fs::syscalls;
 use bitflags::bitflags;
 
 bitflags! {

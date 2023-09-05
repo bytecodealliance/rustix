@@ -29,7 +29,7 @@ pub(super) trait ToAsm: private::Sealed {
     unsafe fn to_asm(self) -> *mut Opaque;
 }
 
-pub(super) trait FromAsm: private::Sealed {
+pub(crate) trait FromAsm: private::Sealed {
     /// Convert `raw` from a value produced by a syscall machine instruction
     /// into a `Self`.
     ///
@@ -45,7 +45,7 @@ pub(super) trait FromAsm: private::Sealed {
 /// pointer types. They need a type to point to, so we define a custom private
 /// type, to prevent it from being used for anything else.
 #[repr(transparent)]
-pub(super) struct Opaque(c::c_void);
+pub(crate) struct Opaque(c::c_void);
 
 // Argument numbers.
 pub(super) struct A0(());
@@ -72,9 +72,9 @@ impl ArgNumber for A6 {}
 impl ArgNumber for SocketArg {}
 
 // Return value numbers.
-pub(super) struct R0(());
+pub(crate) struct R0(());
 
-pub(super) trait RetNumber: private::Sealed {}
+pub(crate) trait RetNumber: private::Sealed {}
 impl RetNumber for R0 {}
 
 /// Syscall arguments use register-sized types. We use a newtype to
@@ -104,7 +104,8 @@ impl<'a, Num: ArgNumber> ToAsm for ArgReg<'a, Num> {
 /// once.
 #[repr(transparent)]
 #[must_use]
-pub(super) struct RetReg<Num: RetNumber> {
+pub(crate) struct RetReg<Num: RetNumber> {
+    // TODO: visibility
     raw: *mut Opaque,
     _phantom: PhantomData<Num>,
 }

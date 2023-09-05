@@ -5,13 +5,13 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::c;
-use crate::backend::conv::{
+use crate::fd::BorrowedFd;
+use crate::io;
+use crate::linux_raw::c;
+use crate::linux_raw::conv::{
     by_mut, by_ref, c_int, c_uint, ret, ret_c_int, ret_c_int_infallible, ret_usize,
     slice_just_addr, slice_just_addr_mut, zero,
 };
-use crate::fd::BorrowedFd;
-use crate::io;
 use crate::pid::Pid;
 use crate::thread::{ClockId, FutexFlags, FutexOperation, NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;

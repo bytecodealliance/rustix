@@ -71,10 +71,10 @@
 
 #![allow(unsafe_code)]
 
-use crate::backend::c;
-use crate::backend::event::syscalls;
 use crate::fd::{AsFd, AsRawFd, OwnedFd};
 use crate::io;
+use crate::linux_raw::c;
+use crate::linux_raw::event::syscalls;
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 use bitflags::bitflags;

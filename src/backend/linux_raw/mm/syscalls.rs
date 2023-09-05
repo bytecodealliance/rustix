@@ -10,12 +10,12 @@ use super::types::{
     Advice, MapFlags, MlockAllFlags, MlockFlags, MprotectFlags, MremapFlags, MsyncFlags, ProtFlags,
     UserfaultfdFlags,
 };
-use crate::backend::c;
-#[cfg(target_pointer_width = "64")]
-use crate::backend::conv::loff_t_from_u64;
-use crate::backend::conv::{c_uint, no_fd, pass_usize, ret, ret_owned_fd, ret_void_star};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
+use crate::linux_raw::c;
+#[cfg(target_pointer_width = "64")]
+use crate::linux_raw::conv::loff_t_from_u64;
+use crate::linux_raw::conv::{c_uint, no_fd, pass_usize, ret, ret_owned_fd, ret_void_star};
 use linux_raw_sys::general::MAP_ANONYMOUS;
 
 #[inline]

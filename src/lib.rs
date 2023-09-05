@@ -171,9 +171,23 @@ mod weak;
 
 // Pick the backend implementation to use.
 #[cfg_attr(libc, path = "backend/libc/mod.rs")]
-#[cfg_attr(linux_raw, path = "backend/linux_raw/mod.rs")]
+#[cfg_attr(all(linux_raw, not(io_uring)), path = "backend/linux_raw/mod.rs")]
 #[cfg_attr(wasi, path = "backend/wasi/mod.rs")]
+#[cfg_attr(io_uring, path = "backend/io_uring/mod.rs")]
 mod backend;
+
+// The io_uring backend uses the linux_raw code.
+#[cfg(io_uring)]
+#[path = "backend/linux_raw/mod.rs"]
+mod linux_raw;
+
+#[cfg(io_uring)]
+mod alluring;
+
+// Alias `backend` as `linux_raw` so that the `linux_raw` backend can refer to
+// itself without knowing which path it lives at.
+#[cfg(all(linux_raw, not(io_uring)))]
+pub(crate) use backend as linux_raw;
 
 /// Export the `*Fd` types and traits that are used in rustix's public API.
 ///

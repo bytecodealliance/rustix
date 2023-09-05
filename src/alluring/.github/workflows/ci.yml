@@ -1,0 +1,99 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - aarch64-unknown-linux-gnu
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          use-cross: true
+          args: --target ${{ matrix.target }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: run
+          use-cross: true
+          # Only run the test package on x86 until we find an ergonomic way
+          # to virtualize aarch64
+          args: --package io-uring-test --features io-uring-test/ci --target x86_64-unknown-linux-gnu
+
+  check-bench:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          components: clippy
+          override: true
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --package io-uring-bench
+
+  check:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        toolchain:
+          - nightly
+          - "1.63"
+        target:
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+          - i686-unknown-linux-gnu
+          - aarch64-unknown-linux-gnu
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+            toolchain: ${{ matrix.toolchain }}
+            target: ${{ matrix.target }}
+            components: clippy
+            override: true
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --target ${{ matrix.target }}
+
+  fmt:
+    name: fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Rust
+        run: rustup update stable
+      - name: Install rustfmt
+        run: rustup component add rustfmt
+
+      - name: "rustfmt --check"
+        run: |
+          if ! rustfmt --check --edition 2021 $(find . -name '*.rs' -print); then
+            printf "Please run \`rustfmt --edition 2021 \$(find . -name '*.rs' -print)\` to fix rustfmt errors.\n" >&2
+            exit 1
+          fi

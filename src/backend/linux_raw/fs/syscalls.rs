@@ -6,22 +6,6 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::c;
-use crate::backend::conv::fs::oflags_for_open_how;
-#[cfg(any(
-    not(feature = "linux_4_11"),
-    target_arch = "aarch64",
-    target_arch = "riscv64",
-    target_arch = "mips",
-    target_arch = "mips32r6",
-))]
-use crate::backend::conv::zero;
-use crate::backend::conv::{
-    by_ref, c_int, c_uint, dev_t, opt_mut, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint,
-    ret_infallible, ret_owned_fd, ret_usize, size_of, slice, slice_mut,
-};
-#[cfg(target_pointer_width = "64")]
-use crate::backend::conv::{loff_t, loff_t_from_u64, ret_u64};
 #[cfg(any(
     target_arch = "aarch64",
     target_arch = "riscv64",
@@ -40,6 +24,22 @@ use crate::fs::{
     StatVfsMountFlags, StatxFlags, Timestamps, Uid, XattrFlags,
 };
 use crate::io;
+use crate::linux_raw::c;
+use crate::linux_raw::conv::fs::oflags_for_open_how;
+#[cfg(any(
+    not(feature = "linux_4_11"),
+    target_arch = "aarch64",
+    target_arch = "riscv64",
+    target_arch = "mips",
+    target_arch = "mips32r6",
+))]
+use crate::linux_raw::conv::zero;
+use crate::linux_raw::conv::{
+    by_ref, c_int, c_uint, dev_t, opt_mut, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint,
+    ret_infallible, ret_owned_fd, ret_usize, size_of, slice, slice_mut,
+};
+#[cfg(target_pointer_width = "64")]
+use crate::linux_raw::conv::{loff_t, loff_t_from_u64, ret_u64};
 use core::mem::MaybeUninit;
 #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
 use linux_raw_sys::general::stat as linux_stat64;
@@ -50,7 +50,7 @@ use linux_raw_sys::general::{
 };
 #[cfg(target_pointer_width = "32")]
 use {
-    crate::backend::conv::{hi, lo, slice_just_addr},
+    crate::linux_raw::conv::{hi, lo, slice_just_addr},
     linux_raw_sys::general::stat64 as linux_stat64,
     linux_raw_sys::general::timespec as __kernel_old_timespec,
 };
@@ -1436,10 +1436,10 @@ pub(crate) fn accessat(
     // `AT_EACCESS` and we're not setuid or setgid, we can emulate it.
     if flags.is_empty()
         || (flags.bits() == AT_EACCESS
-            && crate::backend::ugid::syscalls::getuid()
-                == crate::backend::ugid::syscalls::geteuid()
-            && crate::backend::ugid::syscalls::getgid()
-                == crate::backend::ugid::syscalls::getegid())
+            && crate::linux_raw::ugid::syscalls::getuid()
+                == crate::linux_raw::ugid::syscalls::geteuid()
+            && crate::linux_raw::ugid::syscalls::getgid()
+                == crate::linux_raw::ugid::syscalls::getegid())
     {
         return accessat_noflags(dirfd, path, access);
     }

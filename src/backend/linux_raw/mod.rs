@@ -16,8 +16,8 @@
 
 #[macro_use]
 mod arch;
-mod conv;
-mod reg;
+pub(crate) mod conv; // TODO: visibility
+pub(crate) mod reg; // TODO: visibility
 #[cfg(any(feature = "time", feature = "process", target_arch = "x86"))]
 mod vdso;
 #[cfg(any(feature = "time", feature = "process", target_arch = "x86"))]
