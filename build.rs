@@ -2,7 +2,7 @@ use std::env::var;
 use std::io::Write;
 
 /// The directory for inline asm.
-const ASM_PATH: &str = "src/backend/linux_raw/arch/asm";
+const ASM_PATH: &str = "src/backend/linux_raw/arch";
 
 fn main() {
     // Don't rerun this on changes other than build.rs, as we only depend on
