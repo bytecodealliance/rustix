@@ -6,7 +6,6 @@
 #![allow(unsafe_code)]
 
 use crate::backend::c;
-use crate::backend::elf::*;
 use crate::fd::OwnedFd;
 #[cfg(feature = "param")]
 use crate::ffi::CStr;
@@ -14,11 +13,11 @@ use crate::fs::{Mode, OFlags};
 use crate::utils::{as_ptr, check_raw_pointer};
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
-use core::ffi::c_void;
 use core::mem::size_of;
 use core::ptr::{null_mut, read_unaligned, NonNull};
 use core::sync::atomic::Ordering::Relaxed;
 use core::sync::atomic::{AtomicPtr, AtomicUsize};
+use linux_raw_sys::elf::*;
 use linux_raw_sys::general::{
     AT_BASE, AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_SYSINFO_EHDR,
 };
@@ -380,19 +379,6 @@ unsafe fn check_elf_base(base: *const Elf_Ehdr) -> Option<NonNull<Elf_Ehdr>> {
     }
 
     Some(NonNull::new_unchecked(as_ptr(hdr) as *mut _))
-}
-
-// ELF ABI
-
-#[repr(C)]
-#[derive(Copy, Clone)]
-struct Elf_auxv_t {
-    a_type: usize,
-
-    // Some of the values in the auxv array are pointers, so we make `a_val` a
-    // pointer, in order to preserve their provenance. For the values which are
-    // integers, we cast this to `usize`.
-    a_val: *const c_void,
 }
 
 // Aux reading utilities

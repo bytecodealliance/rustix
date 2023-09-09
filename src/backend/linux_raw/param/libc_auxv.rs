@@ -6,11 +6,11 @@
 #![allow(unsafe_code)]
 
 use crate::backend::c;
-use crate::backend::elf::*;
 #[cfg(feature = "param")]
 use crate::ffi::CStr;
 #[cfg(not(feature = "runtime"))]
 use core::ptr::null;
+use linux_raw_sys::elf::*;
 
 // `getauxval` wasn't supported in glibc until 2.16. Also this lets us use
 // `*mut` as the return type to preserve strict provenance.

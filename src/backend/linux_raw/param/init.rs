@@ -6,12 +6,12 @@
 #![allow(unsafe_code)]
 
 use crate::backend::c;
-use crate::backend::elf::*;
 #[cfg(feature = "param")]
 use crate::ffi::CStr;
 use core::ffi::c_void;
 use core::ptr::{null_mut, read, NonNull};
 use core::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
+use linux_raw_sys::elf::*;
 use linux_raw_sys::general::{
     AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_SYSINFO_EHDR,
 };
@@ -146,17 +146,4 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) {
         }
         auxp = auxp.add(1);
     }
-}
-
-// ELF ABI
-
-#[repr(C)]
-#[derive(Copy, Clone)]
-struct Elf_auxv_t {
-    a_type: usize,
-
-    // Some of the values in the auxv array are pointers, so we make `a_val` a
-    // pointer, in order to preserve their provenance. For the values which are
-    // integers, we cast this to `usize`.
-    a_val: *mut c_void,
 }

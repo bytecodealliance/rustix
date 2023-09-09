@@ -17,13 +17,6 @@
 #[macro_use]
 mod arch;
 mod conv;
-#[cfg(any(
-    feature = "param",
-    feature = "runtime",
-    feature = "time",
-    target_arch = "x86"
-))]
-mod elf;
 mod reg;
 #[cfg(any(feature = "time", target_arch = "x86"))]
 mod vdso;
