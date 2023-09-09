@@ -4,9 +4,9 @@
 //! general purpose system call for making calls into the kernel. In addition
 //! to the wide variety of system calls that are included by default in the
 //! kernel, many drivers expose their own `ioctl`'s for controlling their
-//! behavior, some of which are proprietary.  Therefore it is impossible to
-//! make a safe interface for every `ioctl` call, as they all have wildly
-//! varying semantics.
+//! behavior, some of which are proprietary. Therefore it is impossible to make
+//! a safe interface for every `ioctl` call, as they all have wildly varying
+//! semantics.
 //!
 //! This module provides an unsafe interface to write your own `ioctl` API. To
 //! start, create a type that implements [`Ioctl`]. Then, pass it to [`ioctl`]

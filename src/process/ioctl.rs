@@ -1,3 +1,9 @@
+//! Process-oriented `ioctl`s.
+//!
+//! # Safety
+//!
+//! This module invokes `ioctl`s.
+
 #![allow(unsafe_code)]
 
 use crate::{backend, io, ioctl};
