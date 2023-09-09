@@ -150,7 +150,9 @@ fn pr_get_auxv() -> crate::io::Result<Vec<u8>> {
             __NR_prctl,
             c_int(PR_GET_AUXV),
             buffer.as_ptr(),
-            pass_usize(buffer.len())
+            pass_usize(buffer.len()),
+            pass_usize(0),
+            pass_usize(0)
         ))?
     };
     if len <= buffer.len() {
@@ -163,7 +165,9 @@ fn pr_get_auxv() -> crate::io::Result<Vec<u8>> {
             __NR_prctl,
             c_int(PR_GET_AUXV),
             buffer.as_ptr(),
-            pass_usize(buffer.len())
+            pass_usize(buffer.len()),
+            pass_usize(0),
+            pass_usize(0)
         ))?
     };
     assert_eq!(len, buffer.len());
