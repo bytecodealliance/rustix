@@ -13,12 +13,12 @@
 #![allow(unsafe_code)]
 
 use super::c;
-use super::elf::*;
 use crate::ffi::CStr;
 use crate::utils::check_raw_pointer;
 use core::ffi::c_void;
 use core::mem::size_of;
 use core::ptr::{null, null_mut};
+use linux_raw_sys::elf::*;
 
 pub(super) struct Vdso {
     // Load information
@@ -143,28 +143,31 @@ fn init_from_sysinfo_ehdr() -> Option<Vdso> {
             match d.d_tag {
                 DT_STRTAB => {
                     vdso.symstrings =
-                        check_raw_pointer::<u8>(vdso.addr_from_elf(d.d_val)? as *mut _)?.as_ptr();
+                        check_raw_pointer::<u8>(vdso.addr_from_elf(d.d_un.d_ptr)? as *mut _)?
+                            .as_ptr();
                 }
                 DT_SYMTAB => {
                     vdso.symtab =
-                        check_raw_pointer::<Elf_Sym>(vdso.addr_from_elf(d.d_val)? as *mut _)?
+                        check_raw_pointer::<Elf_Sym>(vdso.addr_from_elf(d.d_un.d_ptr)? as *mut _)?
                             .as_ptr();
                 }
                 DT_HASH => {
-                    hash =
-                        check_raw_pointer::<u32>(vdso.addr_from_elf(d.d_val)? as *mut _)?.as_ptr();
+                    hash = check_raw_pointer::<u32>(vdso.addr_from_elf(d.d_un.d_ptr)? as *mut _)?
+                        .as_ptr();
                 }
                 DT_VERSYM => {
                     vdso.versym =
-                        check_raw_pointer::<u16>(vdso.addr_from_elf(d.d_val)? as *mut _)?.as_ptr();
-                }
-                DT_VERDEF => {
-                    vdso.verdef =
-                        check_raw_pointer::<Elf_Verdef>(vdso.addr_from_elf(d.d_val)? as *mut _)?
+                        check_raw_pointer::<u16>(vdso.addr_from_elf(d.d_un.d_ptr)? as *mut _)?
                             .as_ptr();
                 }
+                DT_VERDEF => {
+                    vdso.verdef = check_raw_pointer::<Elf_Verdef>(
+                        vdso.addr_from_elf(d.d_un.d_ptr)? as *mut _,
+                    )?
+                    .as_ptr();
+                }
                 DT_SYMENT => {
-                    if d.d_val != size_of::<Elf_Sym>() {
+                    if d.d_un.d_val != size_of::<Elf_Sym>() as _ {
                         return None; // Failed
                     }
                 }

@@ -7,9 +7,9 @@
 #![allow(unsafe_code)]
 
 use crate::backend::c;
-use crate::backend::elf::*;
 use crate::backend::param::auxv::exe_phdrs;
 use core::ptr::{null, NonNull};
+use linux_raw_sys::elf::*;
 
 /// For use with [`set_thread_area`].
 ///
