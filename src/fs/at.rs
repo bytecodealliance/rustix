@@ -3,7 +3,7 @@
 //! The `dirfd` argument to these functions may be a file descriptor for a
 //! directory, or the special value [`CWD`].
 //!
-//! [`cwd`]: crate::fs::cwd::CWD
+//! [`cwd`]: crate::fs::CWD
 
 use crate::fd::OwnedFd;
 #[cfg(apple)]
