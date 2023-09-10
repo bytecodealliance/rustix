@@ -417,7 +417,7 @@ fn proc_self_file(name: &CStr) -> io::Result<OwnedFd> {
 
 /// Open a procfs file within in `dir` and check it for bind mounts.
 #[cfg(feature = "alloc")]
-fn open_and_check_file(dir: BorrowedFd, dir_stat: &Stat, name: &CStr) -> io::Result<OwnedFd> {
+fn open_and_check_file(dir: BorrowedFd<'_>, dir_stat: &Stat, name: &CStr) -> io::Result<OwnedFd> {
     let (_, proc_stat) = proc()?;
 
     // Don't use `NOATIME`, because it [requires us to own the file], and when

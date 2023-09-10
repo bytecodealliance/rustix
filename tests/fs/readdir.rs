@@ -60,7 +60,7 @@ fn test_raw_dir(buf: &mut [MaybeUninit<u8>]) {
     use rustix::fd::AsFd;
     use rustix::fs::RawDir;
 
-    fn read_raw_entries<Fd: AsFd>(dir: &mut RawDir<Fd>) -> HashSet<String> {
+    fn read_raw_entries<Fd: AsFd>(dir: &mut RawDir<'_, Fd>) -> HashSet<String> {
         let mut out = HashSet::new();
         while let Some(entry) = dir.next() {
             let entry = entry.expect("non-error entry");

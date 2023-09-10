@@ -186,45 +186,45 @@ pub(super) fn no_fd<'a, Num: ArgNumber>() -> ArgReg<'a, Num> {
 }
 
 #[inline]
-pub(super) fn slice_just_addr<T: Sized, Num: ArgNumber>(v: &[T]) -> ArgReg<Num> {
+pub(super) fn slice_just_addr<T: Sized, Num: ArgNumber>(v: &[T]) -> ArgReg<'_, Num> {
     let mut_ptr = v.as_ptr() as *mut T;
     raw_arg(mut_ptr.cast())
 }
 
 #[inline]
-pub(super) fn slice_just_addr_mut<T: Sized, Num: ArgNumber>(v: &mut [T]) -> ArgReg<Num> {
+pub(super) fn slice_just_addr_mut<T: Sized, Num: ArgNumber>(v: &mut [T]) -> ArgReg<'_, Num> {
     raw_arg(v.as_mut_ptr().cast())
 }
 
 #[inline]
 pub(super) fn slice<T: Sized, Num0: ArgNumber, Num1: ArgNumber>(
     v: &[T],
-) -> (ArgReg<Num0>, ArgReg<Num1>) {
+) -> (ArgReg<'_, Num0>, ArgReg<'_, Num1>) {
     (slice_just_addr(v), pass_usize(v.len()))
 }
 
 #[inline]
 pub(super) fn slice_mut<T: Sized, Num0: ArgNumber, Num1: ArgNumber>(
     v: &mut [T],
-) -> (ArgReg<Num0>, ArgReg<Num1>) {
+) -> (ArgReg<'_, Num0>, ArgReg<'_, Num1>) {
     (raw_arg(v.as_mut_ptr().cast()), pass_usize(v.len()))
 }
 
 #[inline]
-pub(super) fn by_ref<T: Sized, Num: ArgNumber>(t: &T) -> ArgReg<Num> {
+pub(super) fn by_ref<T: Sized, Num: ArgNumber>(t: &T) -> ArgReg<'_, Num> {
     let mut_ptr = as_ptr(t) as *mut T;
     raw_arg(mut_ptr.cast())
 }
 
 #[inline]
-pub(super) fn by_mut<T: Sized, Num: ArgNumber>(t: &mut T) -> ArgReg<Num> {
+pub(super) fn by_mut<T: Sized, Num: ArgNumber>(t: &mut T) -> ArgReg<'_, Num> {
     raw_arg(as_mut_ptr(t).cast())
 }
 
 /// Convert an optional mutable reference into a `usize` for passing to a
 /// syscall.
 #[inline]
-pub(super) fn opt_mut<T: Sized, Num: ArgNumber>(t: Option<&mut T>) -> ArgReg<Num> {
+pub(super) fn opt_mut<T: Sized, Num: ArgNumber>(t: Option<&mut T>) -> ArgReg<'_, Num> {
     // This optimizes into the equivalent of `transmute(t)`, and has the
     // advantage of not requiring `unsafe`.
     match t {
@@ -237,7 +237,7 @@ pub(super) fn opt_mut<T: Sized, Num: ArgNumber>(t: Option<&mut T>) -> ArgReg<Num
 /// syscall.
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 #[inline]
-pub(super) fn opt_ref<T: Sized, Num: ArgNumber>(t: Option<&T>) -> ArgReg<Num> {
+pub(super) fn opt_ref<T: Sized, Num: ArgNumber>(t: Option<&T>) -> ArgReg<'_, Num> {
     // This optimizes into the equivalent of `transmute(t)`, and has the
     // advantage of not requiring `unsafe`.
     match t {

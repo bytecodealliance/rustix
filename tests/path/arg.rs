@@ -63,19 +63,19 @@ fn test_arg() {
     );
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
 
-    let t: Components = Path::new("hello").components();
+    let t: Components<'_> = Path::new("hello").components();
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
 
-    let t: Component = Path::new("hello").components().next().unwrap();
+    let t: Component<'_> = Path::new("hello").components().next().unwrap();
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
 
-    let t: Iter = Path::new("hello").iter();
+    let t: Iter<'_> = Path::new("hello").iter();
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));

@@ -673,7 +673,7 @@ pub unsafe fn set_virtual_memory_map_address(
 #[inline]
 #[doc(alias = "PR_SET_MM")]
 #[doc(alias = "PR_SET_MM_EXE_FILE")]
-pub fn set_executable_file(fd: BorrowedFd) -> io::Result<()> {
+pub fn set_executable_file(fd: BorrowedFd<'_>) -> io::Result<()> {
     let fd = usize::try_from(fd.as_raw_fd()).map_err(|_r| io::Errno::RANGE)?;
     unsafe { prctl_3args(PR_SET_MM, PR_SET_MM_EXE_FILE as *mut _, fd as *mut _) }.map(|_r| ())
 }

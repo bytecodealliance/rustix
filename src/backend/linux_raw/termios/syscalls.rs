@@ -55,7 +55,7 @@ pub(crate) fn tcgetpgrp(fd: BorrowedFd<'_>) -> io::Result<Pid> {
 
 #[inline]
 pub(crate) fn tcsetattr(
-    fd: BorrowedFd,
+    fd: BorrowedFd<'_>,
     optional_actions: OptionalActions,
     termios: &Termios,
 ) -> io::Result<()> {
@@ -83,17 +83,17 @@ pub(crate) fn tcsetattr(
 }
 
 #[inline]
-pub(crate) fn tcsendbreak(fd: BorrowedFd) -> io::Result<()> {
+pub(crate) fn tcsendbreak(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_ioctl, fd, c_uint(TCSBRK), c_uint(0))) }
 }
 
 #[inline]
-pub(crate) fn tcdrain(fd: BorrowedFd) -> io::Result<()> {
+pub(crate) fn tcdrain(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_ioctl, fd, c_uint(TCSBRK), c_uint(1))) }
 }
 
 #[inline]
-pub(crate) fn tcflush(fd: BorrowedFd, queue_selector: QueueSelector) -> io::Result<()> {
+pub(crate) fn tcflush(fd: BorrowedFd<'_>, queue_selector: QueueSelector) -> io::Result<()> {
     unsafe {
         ret(syscall_readonly!(
             __NR_ioctl,
@@ -105,7 +105,7 @@ pub(crate) fn tcflush(fd: BorrowedFd, queue_selector: QueueSelector) -> io::Resu
 }
 
 #[inline]
-pub(crate) fn tcflow(fd: BorrowedFd, action: Action) -> io::Result<()> {
+pub(crate) fn tcflow(fd: BorrowedFd<'_>, action: Action) -> io::Result<()> {
     unsafe {
         ret(syscall_readonly!(
             __NR_ioctl,
@@ -117,7 +117,7 @@ pub(crate) fn tcflow(fd: BorrowedFd, action: Action) -> io::Result<()> {
 }
 
 #[inline]
-pub(crate) fn tcgetsid(fd: BorrowedFd) -> io::Result<Pid> {
+pub(crate) fn tcgetsid(fd: BorrowedFd<'_>) -> io::Result<Pid> {
     unsafe {
         let mut result = MaybeUninit::<c::pid_t>::uninit();
         ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGSID), &mut result))?;
@@ -127,7 +127,7 @@ pub(crate) fn tcgetsid(fd: BorrowedFd) -> io::Result<Pid> {
 }
 
 #[inline]
-pub(crate) fn tcsetwinsize(fd: BorrowedFd, winsize: Winsize) -> io::Result<()> {
+pub(crate) fn tcsetwinsize(fd: BorrowedFd<'_>, winsize: Winsize) -> io::Result<()> {
     unsafe {
         ret(syscall!(
             __NR_ioctl,

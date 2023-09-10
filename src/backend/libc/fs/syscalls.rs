@@ -2040,12 +2040,12 @@ pub(crate) fn fcntl_fullfsync(fd: BorrowedFd<'_>) -> io::Result<()> {
 }
 
 #[cfg(apple)]
-pub(crate) fn fcntl_nocache(fd: BorrowedFd, value: bool) -> io::Result<()> {
+pub(crate) fn fcntl_nocache(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_NOCACHE, value as c::c_int)) }
 }
 
 #[cfg(apple)]
-pub(crate) fn fcntl_global_nocache(fd: BorrowedFd, value: bool) -> io::Result<()> {
+pub(crate) fn fcntl_global_nocache(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     unsafe {
         ret(c::fcntl(
             borrowed_fd(fd),

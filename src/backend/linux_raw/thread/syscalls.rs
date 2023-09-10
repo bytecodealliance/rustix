@@ -274,7 +274,7 @@ unsafe fn futex_old(
 }
 
 #[inline]
-pub(crate) fn setns(fd: BorrowedFd, nstype: c::c_int) -> io::Result<c::c_int> {
+pub(crate) fn setns(fd: BorrowedFd<'_>, nstype: c::c_int) -> io::Result<c::c_int> {
     unsafe { ret_c_int(syscall_readonly!(__NR_setns, fd, c_int(nstype))) }
 }
 

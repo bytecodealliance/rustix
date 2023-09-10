@@ -193,7 +193,7 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// with GAT support once one becomes available.
     #[allow(unsafe_code)]
     #[allow(clippy::should_implement_trait)]
-    pub fn next(&mut self) -> Option<io::Result<RawDirEntry>> {
+    pub fn next(&mut self) -> Option<io::Result<RawDirEntry<'_>>> {
         if self.is_buffer_empty() {
             match getdents_uninit(self.fd.as_fd(), self.buf) {
                 Ok(0) => return None,

@@ -79,7 +79,7 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<
 }
 
 #[cfg(not(target_os = "espidf"))]
-pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut]) -> io::Result<usize> {
+pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize> {
     unsafe {
         ret_usize(c::readv(
             borrowed_fd(fd),
@@ -90,7 +90,7 @@ pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut]) -> io::Result<u
 }
 
 #[cfg(not(target_os = "espidf"))]
-pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> {
+pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
     unsafe {
         ret_usize(c::writev(
             borrowed_fd(fd),
@@ -109,7 +109,7 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice]) -> io::Result<usize> 
 )))]
 pub(crate) fn preadv(
     fd: BorrowedFd<'_>,
-    bufs: &mut [IoSliceMut],
+    bufs: &mut [IoSliceMut<'_>],
     offset: u64,
 ) -> io::Result<usize> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
@@ -131,7 +131,7 @@ pub(crate) fn preadv(
     target_os = "redox",
     target_os = "solaris"
 )))]
-pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
+pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>], offset: u64) -> io::Result<usize> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     unsafe {
@@ -147,7 +147,7 @@ pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice], offset: u64) -> io::
 #[cfg(linux_kernel)]
 pub(crate) fn preadv2(
     fd: BorrowedFd<'_>,
-    bufs: &mut [IoSliceMut],
+    bufs: &mut [IoSliceMut<'_>],
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {
@@ -167,7 +167,7 @@ pub(crate) fn preadv2(
 #[cfg(linux_kernel)]
 pub(crate) fn pwritev2(
     fd: BorrowedFd<'_>,
-    bufs: &[IoSlice],
+    bufs: &[IoSlice<'_>],
     offset: u64,
     flags: ReadWriteFlags,
 ) -> io::Result<usize> {

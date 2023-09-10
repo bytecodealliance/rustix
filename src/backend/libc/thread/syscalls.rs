@@ -280,7 +280,7 @@ pub(crate) fn gettid() -> Pid {
 
 #[cfg(linux_kernel)]
 #[inline]
-pub(crate) fn setns(fd: BorrowedFd, nstype: c::c_int) -> io::Result<c::c_int> {
+pub(crate) fn setns(fd: BorrowedFd<'_>, nstype: c::c_int) -> io::Result<c::c_int> {
     // `setns` wasn't supported in glibc until 2.14, and musl until 0.9.5,
     // so use `syscall`.
     weak_or_syscall! {

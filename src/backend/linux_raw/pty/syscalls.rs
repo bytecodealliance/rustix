@@ -18,7 +18,7 @@ use {
 
 #[cfg(feature = "alloc")]
 #[inline]
-pub(crate) fn ptsname(fd: BorrowedFd, mut buffer: Vec<u8>) -> io::Result<CString> {
+pub(crate) fn ptsname(fd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<CString> {
     unsafe {
         let mut n = MaybeUninit::<c::c_int>::uninit();
         ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGPTN), &mut n))?;
@@ -32,7 +32,7 @@ pub(crate) fn ptsname(fd: BorrowedFd, mut buffer: Vec<u8>) -> io::Result<CString
 }
 
 #[inline]
-pub(crate) fn unlockpt(fd: BorrowedFd) -> io::Result<()> {
+pub(crate) fn unlockpt(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe {
         ret(syscall_readonly!(
             __NR_ioctl,
