@@ -4,7 +4,11 @@ use std::fs::File;
 
 #[test]
 fn test_ttyname_ok() {
-    let file = File::open("/dev/stdin").unwrap();
+    let file = match File::open("/dev/stdin") {
+        Ok(file) => file,
+        Err(err) if err.kind() == std::io::ErrorKind::PermissionDenied => return,
+        Err(err) => Err(err).unwrap(),
+    };
     if isatty(&file) {
         assert!(ttyname(&file, Vec::new())
             .unwrap()
