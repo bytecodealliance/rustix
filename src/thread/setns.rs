@@ -102,7 +102,7 @@ bitflags! {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/setns.2.html
 pub fn move_into_link_name_space(
-    fd: BorrowedFd,
+    fd: BorrowedFd<'_>,
     allowed_type: Option<LinkNameSpaceType>,
 ) -> io::Result<()> {
     let allowed_type = allowed_type.map_or(0, |t| t as c_int);
@@ -119,7 +119,7 @@ pub fn move_into_link_name_space(
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/setns.2.html
 pub fn move_into_thread_name_spaces(
-    fd: BorrowedFd,
+    fd: BorrowedFd<'_>,
     allowed_types: ThreadNameSpaceType,
 ) -> io::Result<()> {
     syscalls::setns(fd, allowed_types.bits() as c_int).map(|_r| ())

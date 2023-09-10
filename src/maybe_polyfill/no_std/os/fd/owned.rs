@@ -115,6 +115,42 @@ impl OwnedFd {
     }
 }
 
+impl BorrowedFd<'_> {
+    /// Creates a new `OwnedFd` instance that shares the same underlying file
+    /// description as the existing `BorrowedFd` instance.
+    #[cfg(not(any(target_arch = "wasm32", target_os = "hermit")))]
+    #[cfg_attr(staged_api, stable(feature = "io_safety", since = "1.63.0"))]
+    pub fn try_clone_to_owned(&self) -> crate::io::Result<OwnedFd> {
+        // Avoid using file descriptors below 3 as they are used for stdio
+
+        // We want to atomically duplicate this file descriptor and set the
+        // CLOEXEC flag, and currently that's done via F_DUPFD_CLOEXEC. This
+        // is a POSIX flag that was added to Linux in 2.6.24.
+        #[cfg(not(target_os = "espidf"))]
+        let fd = crate::io::fcntl_dupfd_cloexec(self, 3)?;
+
+        // For ESP-IDF, F_DUPFD is used instead, because the CLOEXEC semantics
+        // will never be supported, as this is a bare metal framework with
+        // no capabilities for multi-process execution. While F_DUPFD is also
+        // not supported yet, it might be (currently it returns ENOSYS).
+        #[cfg(target_os = "espidf")]
+        let fd = crate::io::fcntl_dupfd(self, 3)?;
+
+        Ok(fd)
+    }
+
+    /// Creates a new `OwnedFd` instance that shares the same underlying file
+    /// description as the existing `BorrowedFd` instance.
+    #[cfg(any(target_arch = "wasm32", target_os = "hermit"))]
+    #[cfg_attr(staged_api, stable(feature = "io_safety", since = "1.63.0"))]
+    pub fn try_clone_to_owned(&self) -> crate::io::Result<OwnedFd> {
+        Err(crate::io::const_io_error!(
+            crate::io::ErrorKind::Unsupported,
+            "operation not supported on WASI yet",
+        ))
+    }
+}
+
 #[cfg_attr(staged_api, unstable(feature = "io_safety", issue = "87074"))]
 impl AsRawFd for BorrowedFd<'_> {
     #[inline]

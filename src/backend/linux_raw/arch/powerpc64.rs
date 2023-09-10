@@ -15,7 +15,7 @@ use crate::backend::reg::{
 use core::arch::asm;
 
 #[inline]
-pub(in crate::backend) unsafe fn syscall0_readonly(nr: SyscallNumber) -> RetReg<R0> {
+pub(in crate::backend) unsafe fn syscall0_readonly(nr: SyscallNumber<'_>) -> RetReg<R0> {
     let r0;
     asm!(
         "sc",

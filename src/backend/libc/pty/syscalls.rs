@@ -29,7 +29,7 @@ pub(crate) fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
     any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia")
 ))]
 #[inline]
-pub(crate) fn ptsname(fd: BorrowedFd, mut buffer: Vec<u8>) -> io::Result<CString> {
+pub(crate) fn ptsname(fd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<CString> {
     // This code would benefit from having a better way to read into
     // uninitialized memory, but that requires `unsafe`.
     buffer.clear();
@@ -93,12 +93,12 @@ pub(crate) fn ptsname(fd: BorrowedFd, mut buffer: Vec<u8>) -> io::Result<CString
 }
 
 #[inline]
-pub(crate) fn unlockpt(fd: BorrowedFd) -> io::Result<()> {
+pub(crate) fn unlockpt(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::unlockpt(borrowed_fd(fd))) }
 }
 
 #[cfg(not(linux_kernel))]
 #[inline]
-pub(crate) fn grantpt(fd: BorrowedFd) -> io::Result<()> {
+pub(crate) fn grantpt(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::grantpt(borrowed_fd(fd))) }
 }

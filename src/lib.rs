@@ -108,6 +108,7 @@
 #![cfg_attr(all(feature = "alloc", alloc_ffi), feature(alloc_ffi))]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(feature = "rustc-dep-of-std", feature(ip))]
+#![cfg_attr(feature = "rustc-dep-of-std", allow(internal_features))]
 #![cfg_attr(
     any(feature = "rustc-dep-of-std", core_intrinsics),
     feature(core_intrinsics)
