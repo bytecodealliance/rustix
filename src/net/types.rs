@@ -455,7 +455,7 @@ impl AddressFamily {
     #[cfg(any(bsd, solarish, target_os = "aix", target_os = "nto"))]
     pub const IMPLINK: Self = Self(c::AF_IMPLINK as _);
     /// `AF_IEEE80211`
-    #[cfg(any(apple, freebsdlike, linuxlike, target_os = "netbsd"))]
+    #[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
     pub const IEEE80211: Self = Self(c::AF_IEEE80211 as _);
     /// `AF_INET6_SDP`
     #[cfg(target_os = "freebsd")]
@@ -542,7 +542,7 @@ impl AddressFamily {
     #[cfg(target_os = "freebsd")]
     pub const SCLUSTER: Self = Self(c::AF_SCLUSTER as _);
     /// `AF_SIP`
-    #[cfg(any(apple, target_os = "freebsd", target_os = "opensbd"))]
+    #[cfg(any(apple, target_os = "freebsd", target_os = "openbsd"))]
     pub const SIP: Self = Self(c::AF_SIP as _);
     /// `AF_SLOW`
     #[cfg(target_os = "freebsd")]

@@ -22,7 +22,6 @@ use crate::backend::conv::ret_pid_t;
 use crate::backend::conv::ret_u32;
 #[cfg(all(feature = "alloc", not(target_os = "wasi")))]
 use crate::backend::conv::ret_usize;
-#[cfg(not(target_os = "fucshia"))]
 use crate::backend::conv::{ret, ret_c_int};
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use crate::fd::BorrowedFd;
