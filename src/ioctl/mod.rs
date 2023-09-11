@@ -160,7 +160,7 @@ pub unsafe trait Ioctl {
     /// making this `false` enables optimizations that can make the call
     /// faster. When in doubt, set this to `true`.
     ///
-    /// # SAFETY
+    /// # Safety
     ///
     /// This should only be set to `false` if the `ioctl` call does not mutate
     /// any data in the userspace. Undefined behavior may occur if this is

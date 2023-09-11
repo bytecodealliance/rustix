@@ -54,7 +54,8 @@ fn _ttyname(dirfd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<CString> {
                 buffer.reserve(buffer.capacity() + 1); // use `Vec` reallocation strategy to grow capacity exponentially
             }
             Ok(len) => {
-                // SAFETY: assume the backend returns the length of the string excluding the NUL.
+                // SAFETY: assume the backend returns the length of the string excluding the
+                // NUL.
                 unsafe {
                     buffer.set_len(len + 1);
                 }
