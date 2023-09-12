@@ -366,12 +366,12 @@ pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Res
 /// Convert a Rust [`Rlimit`] to a C `rlimit64`.
 #[inline]
 fn rlimit_from_linux(lim: rlimit64) -> Rlimit {
-    let current = if lim.rlim_cur == RLIM64_INFINITY as _ {
+    let current = if lim.rlim_cur as u64 == RLIM64_INFINITY as u64 {
         None
     } else {
         Some(lim.rlim_cur)
     };
-    let maximum = if lim.rlim_max == RLIM64_INFINITY as _ {
+    let maximum = if lim.rlim_max as u64 == RLIM64_INFINITY as u64 {
         None
     } else {
         Some(lim.rlim_max)
@@ -396,12 +396,12 @@ fn rlimit_to_linux(lim: Rlimit) -> rlimit64 {
 /// Like `rlimit_from_linux` but uses Linux's old 32-bit `rlimit`.
 #[allow(clippy::useless_conversion)]
 fn rlimit_from_linux_old(lim: rlimit) -> Rlimit {
-    let current = if lim.rlim_cur == RLIM_INFINITY as _ {
+    let current = if lim.rlim_cur as u32 == RLIM_INFINITY as u32 {
         None
     } else {
         Some(lim.rlim_cur.into())
     };
-    let maximum = if lim.rlim_max == RLIM_INFINITY as _ {
+    let maximum = if lim.rlim_max as u32 == RLIM_INFINITY as u32 {
         None
     } else {
         Some(lim.rlim_max.into())

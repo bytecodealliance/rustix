@@ -159,6 +159,30 @@ pub(crate) fn chownat(
 }
 
 #[inline]
+pub(crate) fn chown(path: &CStr, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
+    // Most architectures have a `chown` syscall.
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+    unsafe {
+        let (ow, gr) = crate::ugid::translate_fchown_args(owner, group);
+        ret(syscall_readonly!(__NR_chown, path, c_uint(ow), c_uint(gr)))
+    }
+
+    // Aarch64 and RISC-V don't, so use `fchownat`.
+    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+    unsafe {
+        let (ow, gr) = crate::ugid::translate_fchown_args(owner, group);
+        ret(syscall_readonly!(
+            __NR_fchownat,
+            raw_fd(AT_FDCWD),
+            path,
+            c_uint(ow),
+            c_uint(gr),
+            zero()
+        ))
+    }
+}
+
+#[inline]
 pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
     unsafe {
         let (ow, gr) = crate::ugid::translate_fchown_args(owner, group);

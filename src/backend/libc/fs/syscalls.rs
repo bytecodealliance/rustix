@@ -1267,6 +1267,14 @@ pub(crate) fn fchmod(fd: BorrowedFd<'_>, mode: Mode) -> io::Result<()> {
     unsafe { ret(fchmod(borrowed_fd(fd), mode.bits() as c::mode_t)) }
 }
 
+#[cfg(not(target_os = "wasi"))]
+pub(crate) fn chown(path: &CStr, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
+    unsafe {
+        let (ow, gr) = crate::ugid::translate_fchown_args(owner, group);
+        ret(c::chown(c_str(path), ow, gr))
+    }
+}
+
 #[cfg(linux_kernel)]
 pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
     // Use `c::syscall` rather than `c::fchown` because some libc
