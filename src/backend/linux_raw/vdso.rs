@@ -167,7 +167,7 @@ fn init_from_sysinfo_ehdr() -> Option<Vdso> {
                     .as_ptr();
                 }
                 DT_SYMENT => {
-                    if d.d_un.d_val != size_of::<Elf_Sym>() as _ {
+                    if d.d_un.d_ptr != size_of::<Elf_Sym>() {
                         return None; // Failed
                     }
                 }
