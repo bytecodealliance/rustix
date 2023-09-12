@@ -16,6 +16,8 @@ use crate::fs::StatFs;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use crate::fs::StatVfs;
 use crate::fs::{Mode, OFlags, Stat};
+#[cfg(not(target_os = "wasi"))]
+use crate::ugid::{Gid, Uid};
 use crate::{backend, io, path};
 #[cfg(feature = "alloc")]
 use {
@@ -279,4 +281,18 @@ pub fn statfs<P: path::Arg>(path: P) -> io::Result<StatFs> {
 #[inline]
 pub fn statvfs<P: path::Arg>(path: P) -> io::Result<StatVfs> {
     path.into_with_c_str(backend::fs::syscalls::statvfs)
+}
+
+/// `chown(path, owner, group)`—Sets open file or directory ownership.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/chown.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/chown.2.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn chown<P: path::Arg>(path: P, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
+    path.into_with_c_str(|path| backend::fs::syscalls::chown(path, owner, group))
 }

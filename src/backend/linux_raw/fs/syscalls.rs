@@ -159,6 +159,14 @@ pub(crate) fn chownat(
 }
 
 #[inline]
+pub(crate) fn chown(path: &CStr, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
+    unsafe {
+        let (ow, gr) = crate::ugid::translate_fchown_args(owner, group);
+        ret(syscall_readonly!(__NR_chown, path, c_uint(ow), c_uint(gr)))
+    }
+}
+
+#[inline]
 pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>) -> io::Result<()> {
     unsafe {
         let (ow, gr) = crate::ugid::translate_fchown_args(owner, group);

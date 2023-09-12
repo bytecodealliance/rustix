@@ -9,6 +9,8 @@ fn test_file() {
     )
     .unwrap();
 
+    rustix::fs::chown("Cargo.toml", None, None).unwrap();
+
     #[cfg(not(any(target_os = "emscripten", target_os = "android")))]
     #[allow(unreachable_patterns)]
     match rustix::fs::accessat(
@@ -65,6 +67,8 @@ fn test_file() {
         rustix::fs::Mode::empty(),
     )
     .unwrap();
+
+    rustix::fs::fchown(&file, None, None).unwrap();
 
     assert_eq!(
         rustix::fs::openat(
