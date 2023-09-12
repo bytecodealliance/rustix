@@ -1285,7 +1285,6 @@ pub struct io_uring_buf_reg {
     pub ring_addr: u64,
     pub ring_entries: u32,
     pub bgid: u16,
-    pub pad: u16,
     pub resv: [u64; 3_usize],
 }
 
@@ -1455,6 +1454,6 @@ fn io_uring_layouts() {
     check_struct!(io_uring_getevents_arg, sigmask, sigmask_sz, pad, ts);
     check_struct!(iovec, iov_base, iov_len);
     check_struct!(open_how, flags, mode, resolve);
-    check_struct!(io_uring_buf_reg, ring_addr, ring_entries, bgid, pad, resv);
+    check_struct!(io_uring_buf_reg, ring_addr, ring_entries, bgid, resv);
     check_struct!(io_uring_buf, addr, len, bid, resv);
 }
