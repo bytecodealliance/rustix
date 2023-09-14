@@ -293,12 +293,21 @@ pub type RawOpcode = _RawOpcode;
 #[cfg(linux_raw)]
 type _RawOpcode = c::c_uint;
 
-// On libc Linux with GNU libc, this is an unsigned long.
-#[cfg(all(not(linux_raw), target_os = "linux", target_env = "gnu"))]
+// On libc Linux with GNU libc or uclibc, this is an unsigned long.
+#[cfg(all(
+    not(linux_raw),
+    target_os = "linux",
+    any(target_env = "gnu", target_env = "uclibc")
+))]
 type _RawOpcode = c::c_ulong;
 
 // Musl uses a c_int
-#[cfg(all(not(linux_raw), target_os = "linux", not(target_env = "gnu")))]
+#[cfg(all(
+    not(linux_raw),
+    target_os = "linux",
+    not(target_env = "gnu"),
+    not(target_env = "uclibc")
+))]
 type _RawOpcode = c::c_int;
 
 // Android uses c_int
