@@ -853,6 +853,11 @@ pub(crate) mod sockopt {
     }
 
     #[inline]
+    pub(crate) fn get_socket_acceptconn(fd: BorrowedFd<'_>) -> io::Result<bool> {
+        getsockopt(fd, c::SOL_SOCKET as _, c::SO_ACCEPTCONN).map(to_bool)
+    }
+
+    #[inline]
     pub(crate) fn set_ip_ttl(fd: BorrowedFd<'_>, ttl: u32) -> io::Result<()> {
         setsockopt(fd, c::IPPROTO_IP as _, c::IP_TTL, ttl)
     }

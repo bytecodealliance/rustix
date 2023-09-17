@@ -929,6 +929,7 @@ pub(crate) mod sockopt {
     use c::{SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_SNDTIMEO_NEW, SO_SNDTIMEO_OLD};
     use core::time::Duration;
     use linux_raw_sys::general::{__kernel_timespec, timeval};
+    use linux_raw_sys::net::SO_ACCEPTCONN;
 
     #[inline]
     fn getsockopt<T: Copy>(fd: BorrowedFd<'_>, level: u32, optname: u32) -> io::Result<T> {
@@ -1287,6 +1288,11 @@ pub(crate) mod sockopt {
         Ok(AddressFamily(
             domain.try_into().map_err(|_| io::Errno::OPNOTSUPP)?,
         ))
+    }
+
+    #[inline]
+    pub(crate) fn get_socket_acceptconn(fd: BorrowedFd<'_>) -> io::Result<bool> {
+        getsockopt(fd, c::SOL_SOCKET as _, SO_ACCEPTCONN).map(to_bool)
     }
 
     #[inline]

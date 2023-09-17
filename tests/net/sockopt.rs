@@ -58,6 +58,7 @@ fn test_sockopts_ipv4() {
         rustix::net::sockopt::get_socket_domain(&s).unwrap(),
         AddressFamily::INET
     );
+    assert!(!rustix::net::sockopt::get_socket_acceptconn(&s).unwrap());
 
     // Set a timeout.
     rustix::net::sockopt::set_socket_timeout(
