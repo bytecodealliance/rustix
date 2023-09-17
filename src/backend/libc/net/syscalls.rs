@@ -614,6 +614,11 @@ pub(crate) mod sockopt {
     }
 
     #[inline]
+    pub(crate) fn get_socket_reuseaddr(fd: BorrowedFd<'_>) -> io::Result<bool> {
+        getsockopt(fd, c::SOL_SOCKET as _, c::SO_REUSEADDR).map(to_bool)
+    }
+
+    #[inline]
     pub(crate) fn set_socket_broadcast(fd: BorrowedFd<'_>, broadcast: bool) -> io::Result<()> {
         setsockopt(
             fd,

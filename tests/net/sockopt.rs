@@ -15,6 +15,7 @@ fn test_sockopts_ipv4() {
         rustix::net::sockopt::get_socket_type(&s).unwrap(),
         SocketType::STREAM
     );
+    assert!(!rustix::net::sockopt::get_socket_reuseaddr(&s).unwrap());
     #[cfg(not(windows))]
     assert!(!rustix::net::sockopt::get_socket_broadcast(&s).unwrap());
     // On a new socket we shouldn't have a linger yet.
@@ -83,6 +84,12 @@ fn test_sockopts_ipv4() {
                 >= Duration::new(1, 0)
         );
     }
+
+    // Set the reuse address flag
+    rustix::net::sockopt::set_socket_reuseaddr(&s, true).unwrap();
+
+    // Check that the reuse address flag is set.
+    assert!(rustix::net::sockopt::get_socket_reuseaddr(&s).unwrap());
 
     #[cfg(not(windows))]
     {

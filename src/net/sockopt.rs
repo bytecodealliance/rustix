@@ -116,6 +116,44 @@ pub fn set_socket_reuseaddr<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
     backend::net::syscalls::sockopt::set_socket_reuseaddr(fd.as_fd(), value)
 }
 
+/// `getsockopt(fd, SOL_SOCKET, SO_REUSEADDR)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `sys/socket.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `socket`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `SOL_SOCKET` options]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc `getsockopt`]
+///  - [glibc `SOL_SOCKET` Options]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `sys/socket.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_socket.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `socket`]: https://man7.org/linux/man-pages/man7/socket.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getsockopt.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=getsockopt&sektion=2
+/// [NetBSD]: https://man.netbsd.org/getsockopt.2
+/// [OpenBSD]: https://man.openbsd.org/getsockopt.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=getsockopt&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/getsockopt
+/// [glibc `getsockopt`]: https://www.gnu.org/software/libc/manual/html_node/Socket-Option-Functions.html
+/// [glibc `SOL_SOCKET` options]: https://www.gnu.org/software/libc/manual/html_node/Socket_002dLevel-Options.html
+#[inline]
+#[doc(alias = "SO_REUSEADDR")]
+pub fn get_socket_reuseaddr<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::syscalls::sockopt::get_socket_reuseaddr(fd.as_fd())
+}
+
 /// `setsockopt(fd, SOL_SOCKET, SO_BROADCAST, broadcast)`
 ///
 /// # References
