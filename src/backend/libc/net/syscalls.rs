@@ -536,6 +536,10 @@ pub(crate) mod sockopt {
     use crate::net::AddressFamily;
     use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
     use crate::utils::as_mut_ptr;
+    #[cfg(apple)]
+    use c::TCP_KEEPALIVE as TCP_KEEPIDLE;
+    #[cfg(not(any(apple, target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+    use c::TCP_KEEPIDLE;
     use core::time::Duration;
     #[cfg(windows)]
     use windows_sys::Win32::Foundation::BOOL;
@@ -640,11 +644,7 @@ pub(crate) mod sockopt {
     ) -> io::Result<()> {
         // Convert `linger` to seconds, rounding up.
         let l_linger = if let Some(linger) = linger {
-            let mut l_linger = linger.as_secs();
-            if linger.subsec_nanos() != 0 {
-                l_linger = l_linger.checked_add(1).ok_or(io::Errno::INVAL)?;
-            }
-            l_linger.try_into().map_err(|_e| io::Errno::INVAL)?
+            duration_to_secs(linger)?
         } else {
             0
         };
@@ -1040,6 +1040,46 @@ pub(crate) mod sockopt {
     }
 
     #[inline]
+    #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+    pub(crate) fn set_tcp_keepcnt(fd: BorrowedFd<'_>, count: u32) -> io::Result<()> {
+        setsockopt(fd, c::IPPROTO_TCP as _, c::TCP_KEEPCNT, count)
+    }
+
+    #[inline]
+    #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+    pub(crate) fn get_tcp_keepcnt(fd: BorrowedFd<'_>) -> io::Result<u32> {
+        getsockopt(fd, c::IPPROTO_TCP as _, c::TCP_KEEPCNT)
+    }
+
+    #[inline]
+    #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+    pub(crate) fn set_tcp_keepidle(fd: BorrowedFd<'_>, duration: Duration) -> io::Result<()> {
+        let secs: c::c_uint = duration_to_secs(duration)?;
+        setsockopt(fd, c::IPPROTO_TCP as _, TCP_KEEPIDLE, secs)
+    }
+
+    #[inline]
+    #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+    pub(crate) fn get_tcp_keepidle(fd: BorrowedFd<'_>) -> io::Result<Duration> {
+        let secs: c::c_uint = getsockopt(fd, c::IPPROTO_TCP as _, TCP_KEEPIDLE)?;
+        Ok(Duration::from_secs(secs as u64))
+    }
+
+    #[inline]
+    #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+    pub(crate) fn set_tcp_keepintvl(fd: BorrowedFd<'_>, duration: Duration) -> io::Result<()> {
+        let secs: c::c_uint = duration_to_secs(duration)?;
+        setsockopt(fd, c::IPPROTO_TCP as _, c::TCP_KEEPINTVL, secs)
+    }
+
+    #[inline]
+    #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+    pub(crate) fn get_tcp_keepintvl(fd: BorrowedFd<'_>) -> io::Result<Duration> {
+        let secs: c::c_uint = getsockopt(fd, c::IPPROTO_TCP as _, c::TCP_KEEPINTVL)?;
+        Ok(Duration::from_secs(secs as u64))
+    }
+
+    #[inline]
     fn to_imr(multiaddr: &Ipv4Addr, interface: &Ipv4Addr) -> c::ip_mreq {
         c::ip_mreq {
             imr_multiaddr: to_imr_addr(multiaddr),
@@ -1098,5 +1138,15 @@ pub(crate) mod sockopt {
     #[inline]
     fn to_bool(value: SocketBool) -> bool {
         value.0 != 0
+    }
+
+    /// Convert to seconds, rounding up if necessary.
+    #[inline]
+    fn duration_to_secs<T: TryFrom<u64>>(duration: Duration) -> io::Result<T> {
+        let mut secs = duration.as_secs();
+        if duration.subsec_nanos() != 0 {
+            secs = secs.checked_add(1).ok_or(io::Errno::INVAL)?;
+        }
+        T::try_from(secs).map_err(|_e| io::Errno::INVAL)
     }
 }

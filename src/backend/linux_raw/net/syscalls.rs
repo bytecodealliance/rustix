@@ -929,7 +929,7 @@ pub(crate) mod sockopt {
     use c::{SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_SNDTIMEO_NEW, SO_SNDTIMEO_OLD};
     use core::time::Duration;
     use linux_raw_sys::general::{__kernel_timespec, timeval};
-    use linux_raw_sys::net::SO_ACCEPTCONN;
+    use linux_raw_sys::net::{SO_ACCEPTCONN, TCP_KEEPCNT, TCP_KEEPIDLE, TCP_KEEPINTVL};
 
     #[inline]
     fn getsockopt<T: Copy>(fd: BorrowedFd<'_>, level: u32, optname: u32) -> io::Result<T> {
@@ -1067,11 +1067,7 @@ pub(crate) mod sockopt {
     ) -> io::Result<()> {
         // Convert `linger` to seconds, rounding up.
         let l_linger = if let Some(linger) = linger {
-            let mut l_linger = linger.as_secs();
-            if linger.subsec_nanos() != 0 {
-                l_linger = l_linger.checked_add(1).ok_or(io::Errno::INVAL)?;
-            }
-            l_linger.try_into().map_err(|_e| io::Errno::INVAL)?
+            duration_to_secs(linger)?
         } else {
             0
         };
@@ -1444,6 +1440,40 @@ pub(crate) mod sockopt {
     }
 
     #[inline]
+    pub(crate) fn set_tcp_keepcnt(fd: BorrowedFd<'_>, count: u32) -> io::Result<()> {
+        setsockopt(fd, c::IPPROTO_TCP as _, TCP_KEEPCNT, count)
+    }
+
+    #[inline]
+    pub(crate) fn get_tcp_keepcnt(fd: BorrowedFd<'_>) -> io::Result<u32> {
+        getsockopt(fd, c::IPPROTO_TCP as _, TCP_KEEPCNT)
+    }
+
+    #[inline]
+    pub(crate) fn set_tcp_keepidle(fd: BorrowedFd<'_>, duration: Duration) -> io::Result<()> {
+        let secs: c::c_uint = duration_to_secs(duration)?;
+        setsockopt(fd, c::IPPROTO_TCP as _, TCP_KEEPIDLE, secs)
+    }
+
+    #[inline]
+    pub(crate) fn get_tcp_keepidle(fd: BorrowedFd<'_>) -> io::Result<Duration> {
+        let secs: c::c_uint = getsockopt(fd, c::IPPROTO_TCP as _, TCP_KEEPIDLE)?;
+        Ok(Duration::from_secs(secs as u64))
+    }
+
+    #[inline]
+    pub(crate) fn set_tcp_keepintvl(fd: BorrowedFd<'_>, duration: Duration) -> io::Result<()> {
+        let secs: c::c_uint = duration_to_secs(duration)?;
+        setsockopt(fd, c::IPPROTO_TCP as _, TCP_KEEPINTVL, secs)
+    }
+
+    #[inline]
+    pub(crate) fn get_tcp_keepintvl(fd: BorrowedFd<'_>) -> io::Result<Duration> {
+        let secs: c::c_uint = getsockopt(fd, c::IPPROTO_TCP as _, TCP_KEEPINTVL)?;
+        Ok(Duration::from_secs(secs as u64))
+    }
+
+    #[inline]
     fn to_imr(multiaddr: &Ipv4Addr, interface: &Ipv4Addr) -> c::ip_mreq {
         c::ip_mreq {
             imr_multiaddr: to_imr_addr(multiaddr),
@@ -1488,5 +1518,15 @@ pub(crate) mod sockopt {
     #[inline]
     fn to_bool(value: c::c_uint) -> bool {
         value != 0
+    }
+
+    /// Convert to seconds, rounding up if necessary.
+    #[inline]
+    fn duration_to_secs<T: TryFrom<u64>>(duration: Duration) -> io::Result<T> {
+        let mut secs = duration.as_secs();
+        if duration.subsec_nanos() != 0 {
+            secs = secs.checked_add(1).ok_or(io::Errno::INVAL)?;
+        }
+        T::try_from(secs).map_err(|_e| io::Errno::INVAL)
     }
 }
