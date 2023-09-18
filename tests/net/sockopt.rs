@@ -65,6 +65,8 @@ fn test_sockopts_ipv4() {
         rustix::net::sockopt::get_socket_domain(&s).unwrap(),
         AddressFamily::INET
     );
+
+    #[cfg(not(apple))]
     assert!(!rustix::net::sockopt::get_socket_acceptconn(&s).unwrap());
 
     // Set a timeout.

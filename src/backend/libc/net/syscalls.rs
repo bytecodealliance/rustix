@@ -853,6 +853,7 @@ pub(crate) mod sockopt {
     }
 
     #[inline]
+    #[cfg(not(apple))] // Apple platforms declare the constant, but do not actually implement it.
     pub(crate) fn get_socket_acceptconn(fd: BorrowedFd<'_>) -> io::Result<bool> {
         getsockopt(fd, c::SOL_SOCKET as _, c::SO_ACCEPTCONN).map(to_bool)
     }
