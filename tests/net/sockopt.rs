@@ -15,6 +15,7 @@ fn test_sockopts_ipv4() {
         rustix::net::sockopt::get_socket_type(&s).unwrap(),
         SocketType::STREAM
     );
+    assert!(!rustix::net::sockopt::get_socket_reuseaddr(&s).unwrap());
     #[cfg(not(windows))]
     assert!(!rustix::net::sockopt::get_socket_broadcast(&s).unwrap());
     // On a new socket we shouldn't have a linger yet.
@@ -30,6 +31,13 @@ fn test_sockopts_ipv4() {
     #[cfg(not(any(bsd, windows, target_os = "illumos")))]
     assert_eq!(rustix::net::sockopt::get_ip_multicast_ttl(&s).unwrap(), 1);
     assert!(!rustix::net::sockopt::get_tcp_nodelay(&s).unwrap());
+
+    #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+    {
+        assert!(rustix::net::sockopt::get_tcp_keepcnt(&s).is_ok());
+        assert!(rustix::net::sockopt::get_tcp_keepidle(&s).is_ok());
+        assert!(rustix::net::sockopt::get_tcp_keepintvl(&s).is_ok());
+    }
     // On a new socket we shouldn't have an error yet.
     assert_eq!(rustix::net::sockopt::get_socket_error(&s).unwrap(), Ok(()));
     assert!(!rustix::net::sockopt::get_socket_keepalive(&s).unwrap());
@@ -58,6 +66,9 @@ fn test_sockopts_ipv4() {
         AddressFamily::INET
     );
 
+    #[cfg(not(apple))]
+    assert!(!rustix::net::sockopt::get_socket_acceptconn(&s).unwrap());
+
     // Set a timeout.
     rustix::net::sockopt::set_socket_timeout(
         &s,
@@ -83,6 +94,12 @@ fn test_sockopts_ipv4() {
                 >= Duration::new(1, 0)
         );
     }
+
+    // Set the reuse address flag
+    rustix::net::sockopt::set_socket_reuseaddr(&s, true).unwrap();
+
+    // Check that the reuse address flag is set.
+    assert!(rustix::net::sockopt::get_socket_reuseaddr(&s).unwrap());
 
     #[cfg(not(windows))]
     {
@@ -141,6 +158,25 @@ fn test_sockopts_ipv4() {
 
     // Check that the nodelay flag is set.
     assert!(rustix::net::sockopt::get_tcp_nodelay(&s).unwrap());
+
+    #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+    {
+        // Set keepalive values:
+        rustix::net::sockopt::set_tcp_keepcnt(&s, 42).unwrap();
+        rustix::net::sockopt::set_tcp_keepidle(&s, Duration::from_secs(3601)).unwrap();
+        rustix::net::sockopt::set_tcp_keepintvl(&s, Duration::from_secs(61)).unwrap();
+
+        // Check keepalive values:
+        assert_eq!(rustix::net::sockopt::get_tcp_keepcnt(&s).unwrap(), 42);
+        assert_eq!(
+            rustix::net::sockopt::get_tcp_keepidle(&s).unwrap(),
+            Duration::from_secs(3601)
+        );
+        assert_eq!(
+            rustix::net::sockopt::get_tcp_keepintvl(&s).unwrap(),
+            Duration::from_secs(61)
+        );
+    }
 
     // Set the receive buffer size.
     let size = rustix::net::sockopt::get_socket_recv_buffer_size(&s).unwrap();

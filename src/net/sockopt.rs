@@ -116,6 +116,44 @@ pub fn set_socket_reuseaddr<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
     backend::net::syscalls::sockopt::set_socket_reuseaddr(fd.as_fd(), value)
 }
 
+/// `getsockopt(fd, SOL_SOCKET, SO_REUSEADDR)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `sys/socket.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `socket`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `SOL_SOCKET` options]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc `getsockopt`]
+///  - [glibc `SOL_SOCKET` Options]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `sys/socket.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_socket.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `socket`]: https://man7.org/linux/man-pages/man7/socket.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getsockopt.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=getsockopt&sektion=2
+/// [NetBSD]: https://man.netbsd.org/getsockopt.2
+/// [OpenBSD]: https://man.openbsd.org/getsockopt.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=getsockopt&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/getsockopt
+/// [glibc `getsockopt`]: https://www.gnu.org/software/libc/manual/html_node/Socket-Option-Functions.html
+/// [glibc `SOL_SOCKET` options]: https://www.gnu.org/software/libc/manual/html_node/Socket_002dLevel-Options.html
+#[inline]
+#[doc(alias = "SO_REUSEADDR")]
+pub fn get_socket_reuseaddr<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::syscalls::sockopt::get_socket_reuseaddr(fd.as_fd())
+}
+
 /// `setsockopt(fd, SOL_SOCKET, SO_BROADCAST, broadcast)`
 ///
 /// # References
@@ -775,6 +813,43 @@ pub fn get_socket_send_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
 #[doc(alias = "SO_DOMAIN")]
 pub fn get_socket_domain<Fd: AsFd>(fd: Fd) -> io::Result<AddressFamily> {
     backend::net::syscalls::sockopt::get_socket_domain(fd.as_fd())
+}
+
+/// `getsockopt(fd, SOL_SOCKET, SO_ACCEPTCONN)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `sys/socket.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `socket`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `SOL_SOCKET` options]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc `getsockopt`]
+///  - [glibc `SOL_SOCKET` Options]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `sys/socket.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_socket.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `socket`]: https://man7.org/linux/man-pages/man7/socket.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=getsockopt&sektion=2
+/// [NetBSD]: https://man.netbsd.org/getsockopt.2
+/// [OpenBSD]: https://man.openbsd.org/getsockopt.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=getsockopt&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/getsockopt
+/// [glibc `getsockopt`]: https://www.gnu.org/software/libc/manual/html_node/Socket-Option-Functions.html
+/// [glibc `SOL_SOCKET` options]: https://www.gnu.org/software/libc/manual/html_node/Socket_002dLevel-Options.html
+#[cfg(not(apple))] // Apple platforms declare the constant, but do not actually implement it.
+#[inline]
+#[doc(alias = "SO_ACCEPTCONN")]
+pub fn get_socket_acceptconn<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::syscalls::sockopt::get_socket_acceptconn(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_TTL, ttl)`
@@ -1692,6 +1767,268 @@ pub fn set_tcp_nodelay<Fd: AsFd>(fd: Fd, nodelay: bool) -> io::Result<()> {
 #[doc(alias = "TCP_NODELAY")]
 pub fn get_tcp_nodelay<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::syscalls::sockopt::get_tcp_nodelay(fd.as_fd())
+}
+
+/// `setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, count)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `netinet/tcp.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `tcp`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `IPPROTO_TCP` options]
+///  - [Apple `getsockopt`]
+///  - [Apple `tcp`]
+///  - [FreeBSD `getsockopt`]
+///  - [FreeBSD `tcp`]
+///  - [NetBSD `getsockopt`]
+///  - [NetBSD `tcp`]
+///  - [DragonFly BSD `getsockopt`]
+///  - [DragonFly BSD `tcp`]
+///  - [illumos `getsockopt`]
+///  - [illumos `tcp`]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `netinet/tcp.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_tcp.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
+/// [Apple `getsockopt`]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getsockopt.2.html
+/// [Apple `tcp`]: https://opensource.apple.com/source/xnu/xnu-7195.81.3/bsd/man/man4/tcp.4.auto.html
+/// [FreeBSD `getsockopt`]: https://man.freebsd.org/cgi/man.cgi?query=getsockopt&sektion=2
+/// [FreeBSD `tcp`]: https://man.freebsd.org/cgi/man.cgi?query=tcp&sektion=4
+/// [NetBSD `getsockopt`]: https://man.netbsd.org/getsockopt.2
+/// [NetBSD `tcp`]: https://man.netbsd.org/tcp.4
+/// [DragonFly BSD `getsockopt`]: https://man.dragonflybsd.org/?command=getsockopt&section=2
+/// [DragonFly BSD `tcp`]: https://man.dragonflybsd.org/?command=tcp&section=4
+/// [illumos `getsockopt`]: https://illumos.org/man/3SOCKET/getsockopt
+/// [illumos `tcp`]: https://illumos.org/man/4P/tcp
+#[inline]
+#[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[doc(alias = "TCP_KEEPCNT")]
+pub fn set_tcp_keepcnt<Fd: AsFd>(fd: Fd, count: u32) -> io::Result<()> {
+    backend::net::syscalls::sockopt::set_tcp_keepcnt(fd.as_fd(), count)
+}
+
+/// `getsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `netinet/tcp.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `tcp`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `IPPROTO_TCP` options]
+///  - [Apple `getsockopt`]
+///  - [Apple `tcp`]
+///  - [FreeBSD `getsockopt`]
+///  - [FreeBSD `tcp`]
+///  - [NetBSD `getsockopt`]
+///  - [NetBSD `tcp`]
+///  - [DragonFly BSD `getsockopt`]
+///  - [DragonFly BSD `tcp`]
+///  - [illumos `getsockopt`]
+///  - [illumos `tcp`]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `netinet/tcp.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_tcp.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
+/// [Apple `getsockopt`]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getsockopt.2.html
+/// [Apple `tcp`]: https://opensource.apple.com/source/xnu/xnu-7195.81.3/bsd/man/man4/tcp.4.auto.html
+/// [FreeBSD `getsockopt`]: https://man.freebsd.org/cgi/man.cgi?query=getsockopt&sektion=2
+/// [FreeBSD `tcp`]: https://man.freebsd.org/cgi/man.cgi?query=tcp&sektion=4
+/// [NetBSD `getsockopt`]: https://man.netbsd.org/getsockopt.2
+/// [NetBSD `tcp`]: https://man.netbsd.org/tcp.4
+/// [DragonFly BSD `getsockopt`]: https://man.dragonflybsd.org/?command=getsockopt&section=2
+/// [DragonFly BSD `tcp`]: https://man.dragonflybsd.org/?command=tcp&section=4
+/// [illumos `getsockopt`]: https://illumos.org/man/3SOCKET/getsockopt
+/// [illumos `tcp`]: https://illumos.org/man/4P/tcp
+#[inline]
+#[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[doc(alias = "TCP_KEEPCNT")]
+pub fn get_tcp_keepcnt<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
+    backend::net::syscalls::sockopt::get_tcp_keepcnt(fd.as_fd())
+}
+
+/// `setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, duration)`
+///
+/// `TCP_KEEPALIVE` on Apple platforms.
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `netinet/tcp.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `tcp`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `IPPROTO_TCP` options]
+///  - [Apple `getsockopt`]
+///  - [Apple `tcp`]
+///  - [FreeBSD `getsockopt`]
+///  - [FreeBSD `tcp`]
+///  - [NetBSD `getsockopt`]
+///  - [NetBSD `tcp`]
+///  - [DragonFly BSD `getsockopt`]
+///  - [DragonFly BSD `tcp`]
+///  - [illumos `getsockopt`]
+///  - [illumos `tcp`]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `netinet/tcp.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_tcp.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
+/// [Apple `getsockopt`]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getsockopt.2.html
+/// [Apple `tcp`]: https://opensource.apple.com/source/xnu/xnu-7195.81.3/bsd/man/man4/tcp.4.auto.html
+/// [FreeBSD `getsockopt`]: https://man.freebsd.org/cgi/man.cgi?query=getsockopt&sektion=2
+/// [FreeBSD `tcp`]: https://man.freebsd.org/cgi/man.cgi?query=tcp&sektion=4
+/// [NetBSD `getsockopt`]: https://man.netbsd.org/getsockopt.2
+/// [NetBSD `tcp`]: https://man.netbsd.org/tcp.4
+/// [DragonFly BSD `getsockopt`]: https://man.dragonflybsd.org/?command=getsockopt&section=2
+/// [DragonFly BSD `tcp`]: https://man.dragonflybsd.org/?command=tcp&section=4
+/// [illumos `getsockopt`]: https://illumos.org/man/3SOCKET/getsockopt
+/// [illumos `tcp`]: https://illumos.org/man/4P/tcp
+#[inline]
+#[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[doc(alias = "TCP_KEEPIDLE")]
+pub fn set_tcp_keepidle<Fd: AsFd>(fd: Fd, duration: Duration) -> io::Result<()> {
+    backend::net::syscalls::sockopt::set_tcp_keepidle(fd.as_fd(), duration)
+}
+
+/// `getsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE)`
+///
+/// `TCP_KEEPALIVE` on Apple platforms.
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `netinet/tcp.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `tcp`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `IPPROTO_TCP` options]
+///  - [Apple `getsockopt`]
+///  - [Apple `tcp`]
+///  - [FreeBSD `getsockopt`]
+///  - [FreeBSD `tcp`]
+///  - [NetBSD `getsockopt`]
+///  - [NetBSD `tcp`]
+///  - [DragonFly BSD `getsockopt`]
+///  - [DragonFly BSD `tcp`]
+///  - [illumos `getsockopt`]
+///  - [illumos `tcp`]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `netinet/tcp.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_tcp.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
+/// [Apple `getsockopt`]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getsockopt.2.html
+/// [Apple `tcp`]: https://opensource.apple.com/source/xnu/xnu-7195.81.3/bsd/man/man4/tcp.4.auto.html
+/// [FreeBSD `getsockopt`]: https://man.freebsd.org/cgi/man.cgi?query=getsockopt&sektion=2
+/// [FreeBSD `tcp`]: https://man.freebsd.org/cgi/man.cgi?query=tcp&sektion=4
+/// [NetBSD `getsockopt`]: https://man.netbsd.org/getsockopt.2
+/// [NetBSD `tcp`]: https://man.netbsd.org/tcp.4
+/// [DragonFly BSD `getsockopt`]: https://man.dragonflybsd.org/?command=getsockopt&section=2
+/// [DragonFly BSD `tcp`]: https://man.dragonflybsd.org/?command=tcp&section=4
+/// [illumos `getsockopt`]: https://illumos.org/man/3SOCKET/getsockopt
+/// [illumos `tcp`]: https://illumos.org/man/4P/tcp
+#[inline]
+#[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[doc(alias = "TCP_KEEPIDLE")]
+pub fn get_tcp_keepidle<Fd: AsFd>(fd: Fd) -> io::Result<Duration> {
+    backend::net::syscalls::sockopt::get_tcp_keepidle(fd.as_fd())
+}
+
+/// `setsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL, duration)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `netinet/tcp.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `tcp`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `IPPROTO_TCP` options]
+///  - [Apple `getsockopt`]
+///  - [Apple `tcp`]
+///  - [FreeBSD `getsockopt`]
+///  - [FreeBSD `tcp`]
+///  - [NetBSD `getsockopt`]
+///  - [NetBSD `tcp`]
+///  - [DragonFly BSD `getsockopt`]
+///  - [DragonFly BSD `tcp`]
+///  - [illumos `getsockopt`]
+///  - [illumos `tcp`]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `netinet/tcp.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_tcp.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
+/// [Apple `getsockopt`]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getsockopt.2.html
+/// [Apple `tcp`]: https://opensource.apple.com/source/xnu/xnu-7195.81.3/bsd/man/man4/tcp.4.auto.html
+/// [FreeBSD `getsockopt`]: https://man.freebsd.org/cgi/man.cgi?query=getsockopt&sektion=2
+/// [FreeBSD `tcp`]: https://man.freebsd.org/cgi/man.cgi?query=tcp&sektion=4
+/// [NetBSD `getsockopt`]: https://man.netbsd.org/getsockopt.2
+/// [NetBSD `tcp`]: https://man.netbsd.org/tcp.4
+/// [DragonFly BSD `getsockopt`]: https://man.dragonflybsd.org/?command=getsockopt&section=2
+/// [DragonFly BSD `tcp`]: https://man.dragonflybsd.org/?command=tcp&section=4
+/// [illumos `getsockopt`]: https://illumos.org/man/3SOCKET/getsockopt
+/// [illumos `tcp`]: https://illumos.org/man/4P/tcp
+#[inline]
+#[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[doc(alias = "TCP_KEEPINTVL")]
+pub fn set_tcp_keepintvl<Fd: AsFd>(fd: Fd, duration: Duration) -> io::Result<()> {
+    backend::net::syscalls::sockopt::set_tcp_keepintvl(fd.as_fd(), duration)
+}
+
+/// `getsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL)`
+///
+/// # References
+///  - [POSIX `getsockopt`]
+///  - [POSIX `netinet/tcp.h`]
+///  - [Linux `getsockopt`]
+///  - [Linux `tcp`]
+///  - [Winsock2 `getsockopt`]
+///  - [Winsock2 `IPPROTO_TCP` options]
+///  - [Apple `getsockopt`]
+///  - [Apple `tcp`]
+///  - [FreeBSD `getsockopt`]
+///  - [FreeBSD `tcp`]
+///  - [NetBSD `getsockopt`]
+///  - [NetBSD `tcp`]
+///  - [DragonFly BSD `getsockopt`]
+///  - [DragonFly BSD `tcp`]
+///  - [illumos `getsockopt`]
+///  - [illumos `tcp`]
+///
+/// [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+/// [POSIX `netinet/tcp.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_tcp.h.html
+/// [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
+/// [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
+/// [Winsock2 `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
+/// [Winsock2 `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
+/// [Apple `getsockopt`]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getsockopt.2.html
+/// [Apple `tcp`]: https://opensource.apple.com/source/xnu/xnu-7195.81.3/bsd/man/man4/tcp.4.auto.html
+/// [FreeBSD `getsockopt`]: https://man.freebsd.org/cgi/man.cgi?query=getsockopt&sektion=2
+/// [FreeBSD `tcp`]: https://man.freebsd.org/cgi/man.cgi?query=tcp&sektion=4
+/// [NetBSD `getsockopt`]: https://man.netbsd.org/getsockopt.2
+/// [NetBSD `tcp`]: https://man.netbsd.org/tcp.4
+/// [DragonFly BSD `getsockopt`]: https://man.dragonflybsd.org/?command=getsockopt&section=2
+/// [DragonFly BSD `tcp`]: https://man.dragonflybsd.org/?command=tcp&section=4
+/// [illumos `getsockopt`]: https://illumos.org/man/3SOCKET/getsockopt
+/// [illumos `tcp`]: https://illumos.org/man/4P/tcp
+#[inline]
+#[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[doc(alias = "TCP_KEEPINTVL")]
+pub fn get_tcp_keepintvl<Fd: AsFd>(fd: Fd) -> io::Result<Duration> {
+    backend::net::syscalls::sockopt::get_tcp_keepintvl(fd.as_fd())
 }
 
 #[test]
