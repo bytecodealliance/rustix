@@ -2,8 +2,11 @@
 //! [origin].
 //!
 //! Do not use the functions in this module unless you've read all of their
-//! code, *and* you know all the relevant internal implementation details of
-//! any libc in the process they'll be used.
+//! code. They don't always behave the same way as functions with similar names
+//! in `libc`. Sometimes information about the differences is included in the
+//! Linux documentation under "C library/kernel differences" sections. And, if
+//! there is a libc in the process, these functions may have surprising
+//! interactions with it.
 //!
 //! These functions are for implementing thread-local storage (TLS), managing
 //! threads, loaded libraries, and other process-wide resources. Most of
@@ -143,7 +146,7 @@ pub unsafe fn exit_thread(status: i32) -> ! {
 ///
 /// This is equivalent to `_exit` and `_Exit` in libc.
 ///
-/// This does not all any `__cxa_atexit`, `atexit`, or any other destructors.
+/// This does not call any `__cxa_atexit`, `atexit`, or any other destructors.
 /// Most programs should use [`std::process::exit`] instead of calling this
 /// directly.
 ///
