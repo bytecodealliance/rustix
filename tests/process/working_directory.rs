@@ -15,6 +15,13 @@ fn test_changing_working_directory() {
     let tmpdir = tmpdir();
 
     let orig_cwd = rustix::process::getcwd(Vec::new()).expect("get the cwd");
+    assert!(orig_cwd.to_str().unwrap().starts_with("/"));
+
+    assert_eq!(
+        orig_cwd.to_str().unwrap(),
+        std::env::current_dir().unwrap().display().to_string(),
+        "rustix's cwd doesn't match std's"
+    );
 
     #[cfg(not(target_os = "fuchsia"))]
     let orig_fd_cwd = rustix::fs::openat(rustix::fs::CWD, ".", OFlags::RDONLY, Mode::empty())
