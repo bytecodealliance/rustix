@@ -77,7 +77,7 @@ by default. The rest of the API is conditional with cargo feature flags:
 |            |
 | `use-libc` | Enable the libc backend.
 
-[`rustix::event`]: https://docs.rs/rustix/*/rustix/fs/index.html
+[`rustix::event`]: https://docs.rs/rustix/*/rustix/event/index.html
 [`rustix::fs`]: https://docs.rs/rustix/*/rustix/fs/index.html
 [`rustix::io_uring`]: https://docs.rs/rustix/*/rustix/io_uring/index.html
 [`rustix::mm`]: https://docs.rs/rustix/*/rustix/mm/index.html
