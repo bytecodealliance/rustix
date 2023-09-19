@@ -1,3 +1,4 @@
+use rustix::fs::FileTypeExt;
 use rustix::io;
 use rustix::termios::{isatty, ttyname};
 use std::fs::File;
@@ -10,11 +11,13 @@ fn test_ttyname_ok() {
         Err(err) => Err(err).unwrap(),
     };
     if isatty(&file) {
-        assert!(ttyname(&file, Vec::new())
+        let name = ttyname(&file, Vec::new()).unwrap().into_string().unwrap();
+        assert!(name.starts_with("/dev/"));
+        assert!(!name.ends_with("/"));
+        assert!(std::fs::metadata(&name)
             .unwrap()
-            .into_string()
-            .unwrap()
-            .starts_with("/dev/"));
+            .file_type()
+            .is_char_device());
     }
 }
 
