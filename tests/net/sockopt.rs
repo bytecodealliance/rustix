@@ -51,7 +51,6 @@ fn test_sockopts_ipv4() {
     );
     #[cfg(not(any(
         apple,
-        solarish,
         windows,
         target_os = "dragonfly",
         target_os = "emscripten",
@@ -59,7 +58,6 @@ fn test_sockopts_ipv4() {
         target_os = "haiku",
         target_os = "netbsd",
         target_os = "nto",
-        target_os = "openbsd"
     )))]
     assert_eq!(
         rustix::net::sockopt::get_socket_domain(&s).unwrap(),

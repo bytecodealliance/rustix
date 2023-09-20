@@ -523,7 +523,6 @@ pub(crate) mod sockopt {
     use crate::net::sockopt::Timeout;
     #[cfg(not(any(
         apple,
-        solarish,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
@@ -532,7 +531,6 @@ pub(crate) mod sockopt {
         target_os = "haiku",
         target_os = "netbsd",
         target_os = "nto",
-        target_os = "openbsd"
     )))]
     use crate::net::AddressFamily;
     use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
@@ -835,7 +833,6 @@ pub(crate) mod sockopt {
     #[inline]
     #[cfg(not(any(
         apple,
-        solarish,
         windows,
         target_os = "aix",
         target_os = "dragonfly",
@@ -844,7 +841,6 @@ pub(crate) mod sockopt {
         target_os = "haiku",
         target_os = "netbsd",
         target_os = "nto",
-        target_os = "openbsd"
     )))]
     pub(crate) fn get_socket_domain(fd: BorrowedFd<'_>) -> io::Result<AddressFamily> {
         let domain: c::c_int = getsockopt(fd, c::SOL_SOCKET as _, c::SO_DOMAIN)?;

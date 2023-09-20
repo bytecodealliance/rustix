@@ -125,7 +125,7 @@ mod suite {
             b.iter(|| {
                 let mut s = std::mem::MaybeUninit::<libc::stat>::uninit();
                 unsafe {
-                    assert_eq!(libc::fstat(libc::STDIN_FILENO, s.as_mut_ptr(),), 0);
+                    assert_eq!(libc::fstat(libc::STDIN_FILENO, s.as_mut_ptr()), 0);
                 }
             })
         });

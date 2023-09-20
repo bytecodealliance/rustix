@@ -8,7 +8,6 @@
 
 #[cfg(not(any(
     apple,
-    solarish,
     windows,
     target_os = "aix",
     target_os = "dragonfly",
@@ -17,7 +16,6 @@
     target_os = "haiku",
     target_os = "netbsd",
     target_os = "nto",
-    target_os = "openbsd"
 )))]
 use crate::net::AddressFamily;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
@@ -796,10 +794,8 @@ pub fn get_socket_send_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
 /// [illumos]: https://illumos.org/man/3SOCKET/getsockopt
 /// [glibc `getsockopt`]: https://www.gnu.org/software/libc/manual/html_node/Socket-Option-Functions.html
 /// [glibc `SOL_SOCKET` options]: https://www.gnu.org/software/libc/manual/html_node/Socket_002dLevel-Options.html
-// TODO: OpenBSD and Solarish support submitted upstream: https://github.com/rust-lang/libc/pull/3316
 #[cfg(not(any(
     apple,
-    solarish,
     windows,
     target_os = "aix",
     target_os = "dragonfly",
@@ -808,7 +804,6 @@ pub fn get_socket_send_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
     target_os = "haiku",
     target_os = "netbsd",
     target_os = "nto",
-    target_os = "openbsd"
 )))]
 #[inline]
 #[doc(alias = "SO_DOMAIN")]

@@ -256,7 +256,7 @@ pub(crate) fn _is_file_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)
     let mode = backend::fs::syscalls::fcntl_getfl(fd)?;
 
     // Check for `O_PATH`.
-    #[cfg(any(linux_kernel, target_os = "fuchsia", target_os = "emscripten"))]
+    #[cfg(any(linux_kernel, target_os = "emscripten", target_os = "fuchsia"))]
     if mode.contains(OFlags::PATH) {
         return Ok((false, false));
     }
