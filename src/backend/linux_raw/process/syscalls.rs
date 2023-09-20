@@ -20,6 +20,8 @@ use crate::fd::{AsRawFd, BorrowedFd, OwnedFd, RawFd};
 use crate::ffi::CStr;
 use crate::io;
 use crate::pid::RawPid;
+#[cfg(target_os = "linux")]
+use crate::process::RebootCommand;
 use crate::process::{
     Cpuid, MembarrierCommand, MembarrierQuery, Pid, PidfdFlags, PidfdGetfdFlags, Resource, Rlimit,
     Uid, WaitId, WaitOptions, WaitStatus, WaitidOptions, WaitidStatus,
@@ -623,4 +625,9 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
             slice_just_addr_mut(buf)
         ))
     }
+}
+
+#[inline]
+pub(crate) fn reboot(cmd: RebootCommand) -> io::Result<()> {
+    todo!()
 }

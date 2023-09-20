@@ -36,6 +36,8 @@ use crate::io;
 use crate::process::Gid;
 #[cfg(not(target_os = "wasi"))]
 use crate::process::Pid;
+#[cfg(target_os = "linux")]
+use crate::process::RebootCommand;
 #[cfg(not(any(target_os = "espidf", target_os = "fuchsia", target_os = "wasi")))]
 use crate::process::Uid;
 #[cfg(linux_kernel)]
@@ -623,4 +625,9 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
     let len = buf.len().try_into().map_err(|_| io::Errno::NOMEM)?;
 
     unsafe { ret_usize(c::getgroups(len, buf.as_mut_ptr().cast()) as isize) }
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn reboot(cmd: RebootCommand) -> io::Result<()> {
+    unsafe { ret(c::reboot(cmd as i32)) }
 }
