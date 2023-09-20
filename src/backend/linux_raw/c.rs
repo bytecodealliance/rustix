@@ -40,7 +40,6 @@ pub(crate) use linux_raw_sys::general::{
     XATTR_REPLACE,
 };
 
-#[allow(unused)]
 pub(crate) use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET, FICLONE};
 
 #[cfg(feature = "io_uring")]

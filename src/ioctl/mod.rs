@@ -18,7 +18,7 @@ use crate::backend::c;
 use crate::fd::{AsFd, BorrowedFd};
 use crate::io::Result;
 
-#[cfg(any(linux_kernel, apple, bsd))]
+#[cfg(any(linux_kernel, bsd))]
 use core::mem;
 
 pub use patterns::*;
@@ -28,13 +28,13 @@ mod patterns;
 #[cfg(linux_kernel)]
 mod linux;
 
-#[cfg(any(apple, bsd))]
+#[cfg(bsd)]
 mod bsd;
 
 #[cfg(linux_kernel)]
 use linux as platform;
 
-#[cfg(any(apple, bsd))]
+#[cfg(bsd)]
 use bsd as platform;
 
 /// Perform an `ioctl` call.
@@ -120,8 +120,8 @@ unsafe fn _ioctl_readonly(
 /// Objects implementing this trait can be passed to [`ioctl`] to make an
 /// `ioctl` call. The contents of the object represent the inputs to the
 /// `ioctl` call. The inputs must be convertible to a pointer through the
-/// `as_ptr` method. In most cases, this involves either casting a number to
-/// a pointer, or creating a pointer to the actual data. The latter case is
+/// `as_ptr` method. In most cases, this involves either casting a number to a
+/// pointer, or creating a pointer to the actual data. The latter case is
 /// necessary for `ioctl` calls that modify userspace data.
 ///
 /// # Safety
@@ -163,8 +163,8 @@ pub unsafe trait Ioctl {
     /// # Safety
     ///
     /// This should only be set to `false` if the `ioctl` call does not mutate
-    /// any data in the userspace. Undefined behavior may occur if this is
-    /// set to `false` when it should be `true`.
+    /// any data in the userspace. Undefined behavior may occur if this is set
+    /// to `false` when it should be `true`.
     const IS_MUTATING: bool;
 
     /// Get a pointer to the data to be passed to the `ioctl` command.
@@ -178,8 +178,8 @@ pub unsafe trait Ioctl {
     ///
     /// The `extract_output` value must be the resulting value after a
     /// successful `ioctl` call, and `out` is the direct return value of an
-    /// `ioctl` call that did not fail. In this case `extract_output` is
-    /// the pointer that was passed to the `ioctl` call.
+    /// `ioctl` call that did not fail. In this case `extract_output` is the
+    /// pointer that was passed to the `ioctl` call.
     unsafe fn output_from_ptr(
         out: IoctlOutput,
         extract_output: *mut c::c_void,
@@ -197,15 +197,15 @@ impl Opcode {
     /// Create a new old `Opcode` from a raw opcode.
     ///
     /// Rather than being a composition of several attributes, old opcodes are
-    /// just numbers. In general most drivers follow stricter conventions,
-    /// but older drivers may still use this strategy.
+    /// just numbers. In general most drivers follow stricter conventions, but
+    /// older drivers may still use this strategy.
     #[inline]
     pub const fn old(raw: RawOpcode) -> Self {
         Self { raw }
     }
 
     /// Create a new opcode from a direction, group, number and size.
-    #[cfg(any(linux_kernel, apple, bsd))]
+    #[cfg(any(linux_kernel, bsd))]
     #[inline]
     pub const fn from_components(
         direction: Direction,
@@ -227,7 +227,7 @@ impl Opcode {
 
     /// Create a new non-mutating opcode from a group, a number and the type of
     /// data.
-    #[cfg(any(linux_kernel, apple, bsd))]
+    #[cfg(any(linux_kernel, bsd))]
     #[inline]
     pub const fn none<T>(group: u8, number: u8) -> Self {
         Self::from_components(Direction::None, group, number, mem::size_of::<T>())
@@ -235,7 +235,7 @@ impl Opcode {
 
     /// Create a new reading opcode from a group, a number and the type of
     /// data.
-    #[cfg(any(linux_kernel, apple, bsd))]
+    #[cfg(any(linux_kernel, bsd))]
     #[inline]
     pub const fn read<T>(group: u8, number: u8) -> Self {
         Self::from_components(Direction::Read, group, number, mem::size_of::<T>())
@@ -243,7 +243,7 @@ impl Opcode {
 
     /// Create a new writing opcode from a group, a number and the type of
     /// data.
-    #[cfg(any(linux_kernel, apple, bsd))]
+    #[cfg(any(linux_kernel, bsd))]
     #[inline]
     pub const fn write<T>(group: u8, number: u8) -> Self {
         Self::from_components(Direction::Write, group, number, mem::size_of::<T>())
@@ -251,7 +251,7 @@ impl Opcode {
 
     /// Create a new reading and writing opcode from a group, a number and the
     /// type of data.
-    #[cfg(any(linux_kernel, apple, bsd))]
+    #[cfg(any(linux_kernel, bsd))]
     #[inline]
     pub const fn read_write<T>(group: u8, number: u8) -> Self {
         Self::from_components(Direction::ReadWrite, group, number, mem::size_of::<T>())
@@ -289,11 +289,11 @@ pub type IoctlOutput = c::c_int;
 /// The type used by the `ioctl` to signify the command.
 pub type RawOpcode = _RawOpcode;
 
-// Under raw Linux, this is an unsigned int.
+// Under raw Linux, this is an `unsigned int`.
 #[cfg(linux_raw)]
 type _RawOpcode = c::c_uint;
 
-// On libc Linux with GNU libc or uclibc, this is an unsigned long.
+// On libc Linux with GNU libc or uclibc, this is an `unsigned long`.
 #[cfg(all(
     not(linux_raw),
     target_os = "linux",
@@ -301,7 +301,7 @@ type _RawOpcode = c::c_uint;
 ))]
 type _RawOpcode = c::c_ulong;
 
-// Musl uses a c_int
+// Musl uses `c_int`.
 #[cfg(all(
     not(linux_raw),
     target_os = "linux",
@@ -310,19 +310,18 @@ type _RawOpcode = c::c_ulong;
 ))]
 type _RawOpcode = c::c_int;
 
-// Android uses c_int
+// Android uses `c_int`.
 #[cfg(all(not(linux_raw), target_os = "android"))]
 type _RawOpcode = c::c_int;
 
-// Every BSD I looked at, Haiku and Redox uses an unsigned long.
-#[cfg(any(apple, bsd, target_os = "redox", target_os = "haiku"))]
+// BSD, Haiku, and Redox use `unsigned long`.
+#[cfg(any(bsd, target_os = "redox", target_os = "haiku"))]
 type _RawOpcode = c::c_ulong;
 
-// AIX, Solaris, Fuchsia, Emscripten and WASI use an int
+// AIX, Emscripten, Fuchsia, Solaris, and WASI use a `int`.
 #[cfg(any(
+    solarish,
     target_os = "aix",
-    target_os = "solaris",
-    target_os = "illumos",
     target_os = "fuchsia",
     target_os = "emscripten",
     target_os = "wasi",
@@ -330,10 +329,10 @@ type _RawOpcode = c::c_ulong;
 ))]
 type _RawOpcode = c::c_int;
 
-// ESP-IDF uses a c_uint
+// ESP-IDF uses a `c_uint`.
 #[cfg(target_os = "espidf")]
 type _RawOpcode = c::c_uint;
 
-// Windows has ioctlsocket, which uses i32
+// Windows has `ioctlsocket`, which uses `i32`.
 #[cfg(windows)]
 type _RawOpcode = i32;

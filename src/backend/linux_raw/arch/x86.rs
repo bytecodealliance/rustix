@@ -163,7 +163,6 @@ pub(in crate::backend) unsafe fn indirect_syscall5(
     FromAsm::from_asm(r0)
 }
 
-#[allow(clippy::too_many_arguments)]
 #[inline]
 pub(in crate::backend) unsafe fn indirect_syscall6(
     callee: SyscallType,
