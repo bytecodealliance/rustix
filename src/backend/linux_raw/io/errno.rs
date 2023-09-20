@@ -19,7 +19,7 @@ use linux_raw_sys::errno;
 /// `errno`—An error code.
 ///
 /// The error type for `rustix` APIs. This is similar to [`std::io::Error`],
-//// but only holds an OS error code, and no extra error value.
+/// but only holds an OS error code, and no extra error value.
 ///
 /// # References
 ///  - [POSIX]

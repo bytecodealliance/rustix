@@ -1,5 +1,5 @@
-//! Low-level implementation details for libc-like runtime libraries such as
-//! [origin].
+//! Experimental low-level implementation details for libc-like runtime
+//! libraries such as [Origin].
 //!
 //! Do not use the functions in this module unless you've read all of their
 //! code. They don't always behave the same way as functions with similar names
@@ -17,7 +17,7 @@
 //! The API for these functions is not stable, and this module is
 //! `doc(hidden)`.
 //!
-//! [origin]: https://github.com/sunfishcode/origin
+//! [Origin]: https://github.com/sunfishcode/origin#readme
 //!
 //! # Safety
 //!
@@ -273,13 +273,19 @@ pub use backend::runtime::tls::StartupTlsInfo;
 ///    that could cause undefined behavior. The extent to which this also
 ///    applies to Rust functions is unclear at this time.
 ///
+///  - And more.
+///
 /// # Safety
 ///
 /// The child must avoid accessing any memory shared with the parent in a
 /// way that invokes undefined behavior. It must avoid accessing any threading
 /// runtime functions in a way that invokes undefined behavior. And it must
 /// avoid invoking any undefined behavior through any function that is not
-/// guaranteed to be async-signal-safe.
+/// guaranteed to be async-signal-safe. But, what does async-signal-safe even
+/// mean in a Rust program? This documentation does not have all the answers.
+///
+/// So you're on your own. And on top of all the troubles with `fork` in
+/// general, this wrapper implementation is highly experimental.
 ///
 /// # References
 ///  - [POSIX]

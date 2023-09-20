@@ -271,7 +271,7 @@ pub mod time;
 #[cfg(not(windows))]
 #[cfg(feature = "runtime")]
 #[cfg(linux_raw)]
-#[doc(hidden)]
+#[cfg_attr(not(document_experimental_runtime_api), doc(hidden))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "runtime")))]
 pub mod runtime;
 

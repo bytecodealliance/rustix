@@ -4,7 +4,6 @@ use crate::backend::c;
 use bitflags::bitflags;
 
 /// A type for holding raw integer socket types.
-#[doc(hidden)]
 pub type RawSocketType = u32;
 
 /// `SOCK_*` constants for use with [`socket`].
@@ -48,7 +47,6 @@ impl SocketType {
 }
 
 /// A type for holding raw integer address families.
-#[doc(hidden)]
 pub type RawAddressFamily = c::sa_family_t;
 
 /// `AF_*` constants for use with [`socket`], [`socket_with`], and
@@ -577,7 +575,6 @@ impl AddressFamily {
 }
 
 /// A type for holding raw integer protocols.
-#[doc(hidden)]
 pub type RawProtocol = core::num::NonZeroU32;
 
 const fn new_raw_protocol(u: u32) -> RawProtocol {
