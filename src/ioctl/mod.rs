@@ -318,8 +318,9 @@ type _RawOpcode = c::c_int;
 #[cfg(any(apple, bsd, target_os = "redox", target_os = "haiku"))]
 type _RawOpcode = c::c_ulong;
 
-// Solaris, Fuchsia, Emscripten and WASI use an int
+// AIX, Solaris, Fuchsia, Emscripten and WASI use an int
 #[cfg(any(
+    target_os = "aix",
     target_os = "solaris",
     target_os = "illumos",
     target_os = "fuchsia",
