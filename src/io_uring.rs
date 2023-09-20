@@ -121,6 +121,9 @@ bitflags::bitflags! {
         /// `IORING_ENTER_EXT_ARG`
         const EXT_ARG = sys::IORING_ENTER_EXT_ARG;
 
+        /// `IORING_ENTER_REGISTERED_RING`
+        const REGISTERED_RING = sys::IORING_ENTER_REGISTERED_RING;
+
         /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
         const _ = !0;
     }
