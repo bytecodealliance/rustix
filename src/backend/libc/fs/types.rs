@@ -523,6 +523,7 @@ impl FileType {
     /// Construct a `FileType` from the `d_type` field of a `c::dirent`.
     #[cfg(not(any(
         solarish,
+        target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "nto",

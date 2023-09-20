@@ -12,6 +12,8 @@ use crate::fs::CloneFlags;
 use crate::fs::FileType;
 #[cfg(linux_kernel)]
 use crate::fs::RenameFlags;
+#[cfg(not(any(target_os = "aix", target_os = "espidf")))]
+use crate::fs::Stat;
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 use crate::fs::{Gid, Uid};
 use crate::fs::{Mode, OFlags};
@@ -26,7 +28,7 @@ use {
 };
 #[cfg(not(target_os = "espidf"))]
 use {
-    crate::fs::{Access, AtFlags, Stat, Timestamps},
+    crate::fs::{Access, AtFlags, Timestamps},
     crate::timespec::Nsecs,
 };
 
@@ -288,7 +290,8 @@ pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsFd>(
 /// [Linux]: https://man7.org/linux/man-pages/man2/fstatat.2.html
 /// [`Mode::from_raw_mode`]: crate::fs::Mode::from_raw_mode
 /// [`FileType::from_raw_mode`]: crate::fs::FileType::from_raw_mode
-#[cfg(not(target_os = "espidf"))]
+// TODO: Add `stat64xat` to upstream libc bindings and reenable this for AIX.
+#[cfg(not(any(target_os = "aix", target_os = "espidf")))]
 #[inline]
 #[doc(alias = "fstatat")]
 pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> io::Result<Stat> {

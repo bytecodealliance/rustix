@@ -7,7 +7,7 @@ mod chroot;
 mod exit;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;
-#[cfg(not(target_os = "espidf"))]
+#[cfg(not(any(target_os = "aix", target_os = "espidf")))]
 mod ioctl;
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 mod kill;
@@ -45,7 +45,7 @@ pub use chroot::*;
 pub use exit::*;
 #[cfg(not(target_os = "wasi"))]
 pub use id::*;
-#[cfg(not(target_os = "espidf"))]
+#[cfg(not(any(target_os = "aix", target_os = "espidf")))]
 pub use ioctl::*;
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 pub use kill::*;
