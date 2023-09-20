@@ -225,7 +225,7 @@ jobs:
     name: Test
     runs-on: ${{ matrix.os }}
     env:
-      QEMU_BUILD_VERSION: 8.0.2
+      QEMU_BUILD_VERSION: 8.1.0
       # Enabling testing of experimental features.
       RUSTFLAGS: --cfg rustix_use_experimental_features
     strategy:
@@ -542,7 +542,7 @@ jobs:
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
       RUSTFLAGS: -D warnings -D elided-lifetimes-in-paths
-      QEMU_BUILD_VERSION: 8.0.2
+      QEMU_BUILD_VERSION: 8.1.0
     steps:
     - uses: actions/checkout@v3
       with:
@@ -631,7 +631,7 @@ jobs:
       RUSTFLAGS: --cfg rustix_use_experimental_asm -D warnings -D elided-lifetimes-in-paths
       RUSTDOCFLAGS: --cfg rustix_use_experimental_asm
       CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_experimental_asm
-      QEMU_BUILD_VERSION: 8.0.2
+      QEMU_BUILD_VERSION: 8.1.0
     steps:
     - uses: actions/checkout@v3
       with:
