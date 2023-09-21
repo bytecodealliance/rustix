@@ -21,9 +21,9 @@ use crate::io;
 #[cfg(feature = "process")]
 use crate::process::fchdir;
 use alloc::borrow::ToOwned;
-#[cfg(not(linux_like))]
+#[cfg(not(any(linux_like, target_os = "hurd")))]
 use c::readdir as libc_readdir;
-#[cfg(linux_like)]
+#[cfg(any(linux_like, target_os = "hurd"))]
 use c::readdir64 as libc_readdir;
 use core::fmt;
 use core::ptr::NonNull;

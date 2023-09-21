@@ -314,8 +314,8 @@ type _RawOpcode = c::c_int;
 #[cfg(all(not(linux_raw), target_os = "android"))]
 type _RawOpcode = c::c_int;
 
-// BSD, Haiku, and Redox use `unsigned long`.
-#[cfg(any(bsd, target_os = "redox", target_os = "haiku"))]
+// BSD, Haiku, Hurd, and Redox use `unsigned long`.
+#[cfg(any(bsd, target_os = "redox", target_os = "haiku", target_os = "hurd"))]
 type _RawOpcode = c::c_ulong;
 
 // AIX, Emscripten, Fuchsia, Solaris, and WASI use a `int`.

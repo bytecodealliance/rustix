@@ -289,6 +289,7 @@ bitflags! {
             target_os = "aix",
             target_os = "emscripten",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "redox",
         )))]
         const IUTF8 = c::IUTF8;
@@ -566,6 +567,7 @@ bitflags! {
             target_os = "aix",
             target_os = "emscripten",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "nto",
             target_os = "redox",
         )))]
@@ -1142,6 +1144,7 @@ impl SpecialCodeIndex {
         solarish,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
     )))]
     pub const VSWTC: Self = Self(c::VSWTC as usize);

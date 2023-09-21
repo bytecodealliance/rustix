@@ -39,6 +39,7 @@ pub use backend::pipe::types::{IoSliceRaw, SpliceFlags};
     windows,
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "hurd",
     target_os = "redox",
     target_os = "wasi",
 )))]

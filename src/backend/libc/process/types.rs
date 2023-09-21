@@ -82,6 +82,7 @@ pub enum Resource {
         solarish,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto"
     )))]
     Locks = bitcast!(c::RLIMIT_LOCKS),
@@ -91,6 +92,7 @@ pub enum Resource {
         solarish,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto"
     )))]
     Sigpending = bitcast!(c::RLIMIT_SIGPENDING),
@@ -100,6 +102,7 @@ pub enum Resource {
         solarish,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto"
     )))]
     Msgqueue = bitcast!(c::RLIMIT_MSGQUEUE),
@@ -109,6 +112,7 @@ pub enum Resource {
         solarish,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto"
     )))]
     Nice = bitcast!(c::RLIMIT_NICE),
@@ -118,6 +122,7 @@ pub enum Resource {
         solarish,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto"
     )))]
     Rtprio = bitcast!(c::RLIMIT_RTPRIO),
@@ -129,6 +134,7 @@ pub enum Resource {
         target_os = "android",
         target_os = "emscripten",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
     )))]
     Rttime = bitcast!(c::RLIMIT_RTTIME),
