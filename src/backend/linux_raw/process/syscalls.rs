@@ -20,7 +20,6 @@ use crate::fd::{AsRawFd, BorrowedFd, OwnedFd, RawFd};
 use crate::ffi::CStr;
 use crate::io;
 use crate::pid::RawPid;
-#[cfg(target_os = "linux")]
 use crate::process::{
     Cpuid, MembarrierCommand, MembarrierQuery, Pid, PidfdFlags, PidfdGetfdFlags, Resource, Rlimit,
     Uid, WaitId, WaitOptions, WaitStatus, WaitidOptions, WaitidStatus,
