@@ -470,6 +470,7 @@ jobs:
         patch -p1 < $GITHUB_WORKSPACE/ci/translate-errno.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/getsockopt-timeouts.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/s390x-stat-have-nsec.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/aarch64-o-largefile.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
@@ -601,6 +602,7 @@ jobs:
         patch -p1 < $GITHUB_WORKSPACE/ci/translate-errno.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/getsockopt-timeouts.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/s390x-stat-have-nsec.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/aarch64-o-largefile.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
@@ -690,6 +692,7 @@ jobs:
         patch -p1 < $GITHUB_WORKSPACE/ci/translate-errno.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/getsockopt-timeouts.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/s390x-stat-have-nsec.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/aarch64-o-largefile.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
