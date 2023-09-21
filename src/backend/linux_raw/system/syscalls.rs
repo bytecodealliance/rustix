@@ -12,9 +12,9 @@ use crate::backend::{
     conv::{c_int, ret, ret_infallible, slice},
 };
 use crate::io;
+use crate::system::RebootCommand;
 use crate::system::Sysinfo;
 use core::mem::MaybeUninit;
-use crate::system::RebootCommand;
 
 #[inline]
 pub(crate) fn uname() -> RawUname {
