@@ -70,7 +70,7 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
 
         // QEMU's `TCGETS2` doesn't currently set `input_speed` or
         // `output_speed` on PowerPC, so set them manually if we can.
-        #[cfg(all(linux_kernel, any(target_arch = "powerpc", target_arch = "powerpc64")))]
+        #[cfg(any(target_arch = "powerpc", target_arch = "powerpc64"))]
         {
             use crate::termios::speed;
 
@@ -82,7 +82,11 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
             if result.input_speed == 0
                 && ((termios2.c_cflag & c::CIBAUD) >> c::IBSHIFT) != c::BOTHER
             {
-                if let Some(input_speed) =
+                // For input speeds, `B0` is special-cased to mean the input
+                // speed is the same as the output speed.
+                if ((termios2.c_cflag & c::CIBAUD) >> c::IBSHIFT) == c::B0 {
+                    result.input_speed = result.output_speed;
+                } else if let Some(input_speed) =
                     speed::decode((termios2.c_cflag & c::CIBAUD) >> c::IBSHIFT)
                 {
                     result.input_speed = input_speed;

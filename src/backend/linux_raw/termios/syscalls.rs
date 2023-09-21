@@ -63,7 +63,11 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
             if result.input_speed == 0
                 && ((result.control_modes.bits() & c::CIBAUD) >> c::IBSHIFT) != c::BOTHER
             {
-                if let Some(input_speed) =
+                // For input speeds, `B0` is special-cased to mean the input
+                // speed is the same as the output speed.
+                if ((result.control_modes.bits() & c::CIBAUD) >> c::IBSHIFT) == c::B0 {
+                    result.input_speed = result.output_speed;
+                } else if let Some(input_speed) =
                     speed::decode((result.control_modes.bits() & c::CIBAUD) >> c::IBSHIFT)
                 {
                     result.input_speed = input_speed;
