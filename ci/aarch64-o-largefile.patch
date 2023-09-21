@@ -1,0 +1,17 @@
+From Dan Gohman <dev@sunfishcode.online>
+Subject: [PATCH] Correct the definition of `O_LARGEFILE` on aarch64
+
+This fixes `fcntl` with `F_GETFL` from spuriously returning `O_NOFOLLOW`
+on hosts such as x86_64.
+
+diff -ur a/linux-user/aarch64/target_fcntl.h b/linux-user/aarch64/target_fcntl.h
+--- a/linux-user/aarch64/target_fcntl.h
++++ b/linux-user/aarch64/target_fcntl.h
+@@ -11,6 +11,7 @@
+ #define TARGET_O_DIRECTORY      040000 /* must be a directory */
+ #define TARGET_O_NOFOLLOW      0100000 /* don't follow links */
+ #define TARGET_O_DIRECT        0200000 /* direct disk access hint */
++#define TARGET_O_LARGEFILE     0400000
+ 
+ #include "../generic/fcntl.h"
+ #endif

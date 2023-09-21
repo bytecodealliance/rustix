@@ -32,15 +32,8 @@ fn test_termios_speeds() {
     #[allow(unused_variables)]
     let new_tio = tcgetattr(&pty).unwrap();
 
-    // QEMU appears to have a bug on PowerPC. On PowerPC, there is no
-    // `TCSETS2` ioctl, and the `TCSETS` ioctl has the behavior of
-    // `TCSETS2`. QEMU doesn't appear to know this, and it gives `TCSETS`
-    // the old `TCSETS` behavior.
-    #[cfg(not(all(linux_kernel, any(target_arch = "powerpc", target_arch = "powerpc64"))))]
-    {
-        assert_eq!(new_tio.input_speed(), speed::B50);
-        assert_eq!(new_tio.output_speed(), speed::B50);
-    }
+    assert_eq!(new_tio.input_speed(), speed::B50);
+    assert_eq!(new_tio.output_speed(), speed::B50);
 
     // Set it to 134 with `set_speed`.
     tio.set_speed(speed::B134).unwrap();
@@ -51,11 +44,8 @@ fn test_termios_speeds() {
     #[allow(unused_variables)]
     let new_tio = tcgetattr(&pty).unwrap();
 
-    #[cfg(not(all(linux_kernel, any(target_arch = "powerpc", target_arch = "powerpc64"))))]
-    {
-        assert_eq!(new_tio.input_speed(), speed::B134);
-        assert_eq!(new_tio.output_speed(), speed::B134);
-    }
+    assert_eq!(new_tio.input_speed(), speed::B134);
+    assert_eq!(new_tio.output_speed(), speed::B134);
 
     // These platforms are known to support arbitrary not-pre-defined-by-POSIX
     // speeds.
@@ -70,6 +60,9 @@ fn test_termios_speeds() {
         #[allow(unused_variables)]
         let new_tio = tcgetattr(&pty).unwrap();
 
+        // QEMU's `TCGETS2` doesn't currently set `input_speed` or
+        // `output_speed` on PowerPC, so we can't use them to set
+        // arbitrary speed values.
         #[cfg(not(all(linux_kernel, any(target_arch = "powerpc", target_arch = "powerpc64"))))]
         {
             assert_eq!(new_tio.input_speed(), 51);
@@ -89,10 +82,7 @@ fn test_termios_speeds() {
         #[allow(unused_variables)]
         let new_tio = tcgetattr(&pty).unwrap();
 
-        #[cfg(not(all(linux_kernel, any(target_arch = "powerpc", target_arch = "powerpc64"))))]
-        {
-            assert_eq!(new_tio.input_speed(), speed::B75);
-            assert_eq!(new_tio.output_speed(), speed::B110);
-        }
+        assert_eq!(new_tio.input_speed(), speed::B75);
+        assert_eq!(new_tio.output_speed(), speed::B110);
     }
 }
