@@ -158,6 +158,7 @@ pub fn sethostname(name: &[u8]) -> io::Result<()> {
 /// Reboot command to be used with [`reboot`]
 ///
 /// [`reboot`]: crate::system::reboot
+#[cfg(target_os = "linux")]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(i32)]
 pub enum RebootCommand {
@@ -205,6 +206,7 @@ pub enum RebootCommand {
 /// - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/reboot.2.html
+#[cfg(target_os = "linux")]
 pub fn reboot(cmd: RebootCommand) -> io::Result<()> {
     backend::system::syscalls::reboot(cmd)
 }
