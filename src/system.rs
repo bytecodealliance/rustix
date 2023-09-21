@@ -157,20 +157,54 @@ pub fn sethostname(name: &[u8]) -> io::Result<()> {
 
 /// Reboot command to be used with [`reboot`]
 ///
-/// [`reboot`]: crate::process::reboot
+/// [`reboot`]: crate::system::reboot
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(i32)]
 pub enum RebootCommand {
+    /// CAD is disabled.
+    /// This means that the CAD keystroke will cause a SIGINT signal to be sent to init (process 1),
+    /// whereupon this process may decide upon a proper action (maybe: kill all processes, sync, reboot).
     CadOff = c::LINUX_REBOOT_CMD_CAD_OFF,
+    /// CAD is enabled.
+    /// This means that the CAD keystroke will immediately cause the action associated with LINUX_REBOOT_CMD_RESTART.
     CadOn = c::LINUX_REBOOT_CMD_CAD_ON,
+    /// The message "System halted." is printed, and the system is halted.
+    /// Control is given to the ROM monitor, if there is one.  
+    /// If not preceded by a [`sync`], data will be lost.
+    ///
+    /// [`sync`]: crate::fs::sync
     Halt = c::LINUX_REBOOT_CMD_HALT,
+    /// Execute a kernel that has been loaded earlier with [`kexec_load`].
+    /// This option is available only if the kernel was configured with CONFIG_KEXEC.
+    ///
+    /// [`kexec_load`]: https://man7.org/linux/man-pages/man2/kexec_load.2.html
     Kexec = c::LINUX_REBOOT_CMD_KEXEC,
+    /// The message "Power down." is printed, the system is stopped, and all power is removed from the system, if possible.
+    /// If not preceded by a [`sync`], data will be lost.
+    ///
+    /// [`sync`]: crate::fs::sync
     PowerOff = c::LINUX_REBOOT_CMD_POWER_OFF,
+    /// The message "Restarting system." is printed, and a default restart is performed immediately.
+    /// If not preceded by a [`sync`], data will be lost.
+    ///
+    /// [`sync`]: crate::fs::sync
     Restart = c::LINUX_REBOOT_CMD_RESTART,
+    /// The message "Restarting system with command '%s'" is printed, and a restart (using the command string given in arg) is performed immediately.
+    /// If not preceded by a [`sync`], data will be lost.
+    ///
+    /// [`sync`]: crate::fs::sync
     Restart2 = c::LINUX_REBOOT_CMD_RESTART2,
+    /// The system is suspended (hibernated) to disk.
+    /// This option is available only if the kernel was configured with CONFIG_HIBERNATION.
     SwSuspend = c::LINUX_REBOOT_CMD_SW_SUSPEND,
 }
 
+/// `reboot`—Reboot or enable/disable Ctrl-Alt-Del
+///
+/// # References
+/// - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/reboot.2.html
 pub fn reboot(cmd: RebootCommand) -> io::Result<()> {
     backend::system::syscalls::reboot(cmd)
 }
