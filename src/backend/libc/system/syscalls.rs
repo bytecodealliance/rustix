@@ -4,6 +4,7 @@ use super::types::RawUname;
 use crate::backend::c;
 #[cfg(not(target_os = "wasi"))]
 use crate::backend::conv::ret_infallible;
+#[cfg(target_os = "linux")]
 use crate::system::RebootCommand;
 #[cfg(linux_kernel)]
 use crate::system::Sysinfo;

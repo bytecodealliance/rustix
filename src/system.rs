@@ -6,7 +6,9 @@
 //! kernel into `&str` references, which assumes that they're NUL-terminated.
 #![allow(unsafe_code)]
 
-use crate::backend::{self, c};
+use crate::backend;
+#[cfg(target_os = "linux")]
+use crate::backend::c;
 use crate::ffi::CStr;
 #[cfg(not(any(target_os = "espidf", target_os = "emscripten")))]
 use crate::io;
