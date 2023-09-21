@@ -23,8 +23,6 @@ mod prctl;
 mod priority;
 #[cfg(freebsdlike)]
 mod procctl;
-#[cfg(target_os = "linux")]
-mod reboot;
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "fuchsia",
@@ -63,8 +61,6 @@ pub use prctl::*;
 pub use priority::*;
 #[cfg(freebsdlike)]
 pub use procctl::*;
-#[cfg(target_os = "linux")]
-pub use reboot::*;
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "fuchsia",

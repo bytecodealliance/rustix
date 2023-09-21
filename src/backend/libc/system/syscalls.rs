@@ -4,6 +4,7 @@ use super::types::RawUname;
 use crate::backend::c;
 #[cfg(not(target_os = "wasi"))]
 use crate::backend::conv::ret_infallible;
+use crate::system::RebootCommand;
 #[cfg(linux_kernel)]
 use crate::system::Sysinfo;
 use core::mem::MaybeUninit;
@@ -55,4 +56,9 @@ pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
             name.len().try_into().map_err(|_| io::Errno::INVAL)?,
         ))
     }
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn reboot(cmd: RebootCommand) -> io::Result<()> {
+    unsafe { ret(c::reboot(cmd as i32)) }
 }

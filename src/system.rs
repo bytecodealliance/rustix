@@ -6,7 +6,7 @@
 //! kernel into `&str` references, which assumes that they're NUL-terminated.
 #![allow(unsafe_code)]
 
-use crate::backend;
+use crate::backend::{self, c};
 use crate::ffi::CStr;
 #[cfg(not(any(target_os = "espidf", target_os = "emscripten")))]
 use crate::io;
@@ -153,4 +153,24 @@ pub fn sysinfo() -> Sysinfo {
 #[inline]
 pub fn sethostname(name: &[u8]) -> io::Result<()> {
     backend::system::syscalls::sethostname(name)
+}
+
+/// Reboot command to be used with [`reboot`]
+///
+/// [`reboot`]: crate::process::reboot
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[repr(i32)]
+pub enum RebootCommand {
+    CadOff = c::LINUX_REBOOT_CMD_CAD_OFF,
+    CadOn = c::LINUX_REBOOT_CMD_CAD_ON,
+    Halt = c::LINUX_REBOOT_CMD_HALT,
+    Kexec = c::LINUX_REBOOT_CMD_KEXEC,
+    PowerOff = c::LINUX_REBOOT_CMD_POWER_OFF,
+    Restart = c::LINUX_REBOOT_CMD_RESTART,
+    Restart2 = c::LINUX_REBOOT_CMD_RESTART2,
+    SwSuspend = c::LINUX_REBOOT_CMD_SW_SUSPEND,
+}
+
+pub fn reboot(cmd: RebootCommand) -> io::Result<()> {
+    backend::system::syscalls::reboot(cmd)
 }

@@ -22,8 +22,8 @@ use crate::io;
 use crate::pid::RawPid;
 #[cfg(target_os = "linux")]
 use crate::process::{
-    Cpuid, MembarrierCommand, MembarrierQuery, Pid, PidfdFlags, PidfdGetfdFlags, RebootCommand,
-    Resource, Rlimit, Uid, WaitId, WaitOptions, WaitStatus, WaitidOptions, WaitidStatus,
+    Cpuid, MembarrierCommand, MembarrierQuery, Pid, PidfdFlags, PidfdGetfdFlags, Resource, Rlimit,
+    Uid, WaitId, WaitOptions, WaitStatus, WaitidOptions, WaitidStatus,
 };
 use crate::signal::Signal;
 use crate::utils::as_mut_ptr;
@@ -622,18 +622,6 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
             __NR_getgroups,
             c_int(len),
             slice_just_addr_mut(buf)
-        ))
-    }
-}
-
-#[inline]
-pub(crate) fn reboot(cmd: RebootCommand) -> io::Result<()> {
-    unsafe {
-        ret(syscall_readonly!(
-            __NR_reboot,
-            c_int(c::LINUX_REBOOT_MAGIC1),
-            c_int(c::LINUX_REBOOT_MAGIC2),
-            c_int(cmd as i32)
         ))
     }
 }
