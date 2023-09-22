@@ -16,6 +16,31 @@ pub use backend::mm::types::MlockFlags;
 pub use backend::mm::types::MremapFlags;
 pub use backend::mm::types::{MapFlags, MprotectFlags, ProtFlags};
 
+impl MapFlags {
+    /// Create `MAP_HUGETLB` with provided size of huge page.
+    ///
+    /// Under the hood it computes `MAP_HUGETLB | (huge_page_size_log2 << MAP_HUGE_SHIFT)`.
+    /// `huge_page_size_log2` denotes logarithm of huge page size to use and should be
+    /// between 16 and 63 (inclusively).
+    ///
+    /// ```
+    /// use rustix::mm::MapFlags;
+    ///
+    /// let f = MapFlags::hugetlb_with_size_log2(30).unwrap();
+    /// assert_eq!(f, MapFlags::HUGETLB | MapFlags::HUGE_1GB);
+    /// ```
+    #[cfg(linux_kernel)]
+    pub const fn hugetlb_with_size_log2(huge_page_size_log2: u32) -> Option<Self> {
+        use linux_raw_sys::general::{MAP_HUGETLB, MAP_HUGE_SHIFT};
+        if 16 <= huge_page_size_log2 && huge_page_size_log2 <= 63 {
+            let bits = MAP_HUGETLB | (huge_page_size_log2 << MAP_HUGE_SHIFT);
+            Self::from_bits(bits)
+        } else {
+            None
+        }
+    }
+}
+
 /// `mmap(ptr, len, prot, flags, fd, offset)`—Create a file-backed memory
 /// mapping.
 ///
