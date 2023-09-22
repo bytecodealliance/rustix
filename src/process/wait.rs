@@ -254,20 +254,26 @@ impl WaitidStatus {
 #[non_exhaustive]
 pub enum WaitId<'a> {
     /// Wait on all processes.
+    #[doc(alias = "P_ALL")]
     All,
 
     /// Wait for a specific process ID.
+    #[doc(alias = "P_PID")]
     Pid(Pid),
+
+    /// Wait for a specific process group ID, or the calling process' group ID.
+    #[doc(alias = "P_PGID")]
+    Pgid(Option<Pid>),
 
     /// Wait for a specific process file descriptor.
     #[cfg(target_os = "linux")]
+    #[doc(alias = "P_PIDFD")]
     PidFd(BorrowedFd<'a>),
 
     /// Eat the lifetime for non-Linux platforms.
     #[doc(hidden)]
     #[cfg(not(target_os = "linux"))]
     __EatLifetime(core::marker::PhantomData<&'a ()>),
-    // TODO(notgull): Once this crate has the concept of PGIDs, add a WaitId::Pgid
 }
 
 /// `waitpid(pid, waitopts)`—Wait for a specific process to change state.
@@ -275,18 +281,22 @@ pub enum WaitId<'a> {
 /// If the pid is `None`, the call will wait for any child process whose
 /// process group id matches that of the calling process.
 ///
-/// If the pid is equal to `RawPid::MAX`, the call will wait for any child
-/// process.
-///
-/// Otherwise if the `wrapping_neg` of pid is less than pid, the call will wait
-/// for any child process with a group ID equal to the `wrapping_neg` of `pid`.
-///
 /// Otherwise, the call will wait for the child process with the given pid.
 ///
 /// On Success, returns the status of the selected process.
 ///
 /// If `NOHANG` was specified in the options, and the selected child process
 /// didn't change state, returns `None`.
+///
+/// # Bugs
+///
+/// This function does not currently support waiting for given process group
+/// (the < 0 case of `waitpid`); to do that, currently the [`waitpgid`] or
+/// [`waitid`] function must be used.
+///
+/// This function does not currently support waiting for any process (the
+/// `-1` case of `waitpid`); to do that, currently the [`wait`] function must
+/// be used.
 ///
 /// # References
 ///  - [POSIX]
@@ -298,6 +308,28 @@ pub enum WaitId<'a> {
 #[inline]
 pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<WaitStatus>> {
     Ok(backend::process::syscalls::waitpid(pid, waitopts)?.map(|(_, status)| status))
+}
+
+/// `waitpid(-pgid, waitopts)`—Wait for a process in a specific process group
+/// to change state.
+///
+/// The call will wait for any child process with the given pgid.
+///
+/// On Success, returns the status of the selected process.
+///
+/// If `NOHANG` was specified in the options, and no selected child process
+/// changed state, returns `None`.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/wait.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/waitpid.2.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn waitpgid(pgid: Pid, waitopts: WaitOptions) -> io::Result<Option<WaitStatus>> {
+    Ok(backend::process::syscalls::waitpgid(pgid, waitopts)?.map(|(_, status)| status))
 }
 
 /// `wait(waitopts)`—Wait for any of the children of calling process to

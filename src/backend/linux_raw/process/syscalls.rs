@@ -436,6 +436,11 @@ pub(crate) fn waitpid(
 }
 
 #[inline]
+pub(crate) fn waitpgid(pgid: Pid, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+    _waitpid(-pgid.as_raw_nonzero().get(), waitopts)
+}
+
+#[inline]
 pub(crate) fn _waitpid(
     pid: RawPid,
     waitopts: WaitOptions,
@@ -459,6 +464,7 @@ pub(crate) fn waitid(id: WaitId<'_>, options: WaitidOptions) -> io::Result<Optio
     match id {
         WaitId::All => _waitid_all(options),
         WaitId::Pid(pid) => _waitid_pid(pid, options),
+        WaitId::Pgid(pid) => _waitid_pgid(pid, options),
         WaitId::PidFd(fd) => _waitid_pidfd(fd, options),
     }
 }
@@ -492,6 +498,25 @@ fn _waitid_pid(pid: Pid, options: WaitidOptions) -> io::Result<Option<WaitidStat
             __NR_waitid,
             c_uint(c::P_PID),
             c_int(Pid::as_raw(Some(pid))),
+            by_mut(&mut status),
+            c_int(options.bits() as _),
+            zero()
+        ))?
+    };
+
+    Ok(unsafe { cvt_waitid_status(status) })
+}
+
+#[inline]
+fn _waitid_pgid(pgid: Option<Pid>, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
+    // `waitid` can return successfully without initializing the struct (no
+    // children found when using `WNOHANG`)
+    let mut status = MaybeUninit::<c::siginfo_t>::zeroed();
+    unsafe {
+        ret(syscall!(
+            __NR_waitid,
+            c_uint(c::P_PGID),
+            c_int(Pid::as_raw(pgid)),
             by_mut(&mut status),
             c_int(options.bits() as _),
             zero()
