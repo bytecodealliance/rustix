@@ -43,8 +43,8 @@ pub(crate) fn startup_tls_info() -> StartupTlsInfo {
                 // in the `p_vaddr` fields to the dynamic addresses. We don't
                 // always get a `PT_PHDR` or `PT_DYNAMIC` header, so use
                 // whichever one we get.
-                PT_PHDR => base = first_phdr.cast::<u8>().sub(phdr.p_vaddr),
-                PT_DYNAMIC => base = dynamic_addr.cast::<u8>().sub(phdr.p_vaddr),
+                PT_PHDR => base = first_phdr.cast::<u8>().wrapping_sub(phdr.p_vaddr),
+                PT_DYNAMIC => base = dynamic_addr.cast::<u8>().wrapping_sub(phdr.p_vaddr),
 
                 PT_TLS => tls_phdr = phdr,
                 PT_GNU_STACK => stack_size = phdr.p_memsz,
@@ -62,7 +62,7 @@ pub(crate) fn startup_tls_info() -> StartupTlsInfo {
             }
         } else {
             StartupTlsInfo {
-                addr: base.cast::<u8>().add((*tls_phdr).p_vaddr).cast(),
+                addr: base.cast::<u8>().wrapping_add((*tls_phdr).p_vaddr).cast(),
                 mem_size: (*tls_phdr).p_memsz,
                 file_size: (*tls_phdr).p_filesz,
                 align: (*tls_phdr).p_align,
