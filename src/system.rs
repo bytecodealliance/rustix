@@ -163,6 +163,7 @@ pub fn sethostname(name: &[u8]) -> io::Result<()> {
 #[cfg(target_os = "linux")]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(i32)]
+#[non_exhaustive]
 pub enum RebootCommand {
     /// CAD is disabled.
     /// This means that the CAD keystroke will cause a SIGINT signal to be sent to init (process 1),
@@ -196,6 +197,7 @@ pub enum RebootCommand {
     /// If not preceded by a [`sync`], data will be lost.
     ///
     /// [`sync`]: crate::fs::sync
+    #[doc(hidden)]
     Restart2 = c::LINUX_REBOOT_CMD_RESTART2,
     /// The system is suspended (hibernated) to disk.
     /// This option is available only if the kernel was configured with CONFIG_HIBERNATION.
