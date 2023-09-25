@@ -193,12 +193,6 @@ pub enum RebootCommand {
     ///
     /// [`sync`]: crate::fs::sync
     Restart = c::LINUX_REBOOT_CMD_RESTART,
-    /// The message "Restarting system with command '%s'" is printed, and a restart (using the command string given in arg) is performed immediately.
-    /// If not preceded by a [`sync`], data will be lost.
-    ///
-    /// [`sync`]: crate::fs::sync
-    #[doc(hidden)]
-    Restart2 = c::LINUX_REBOOT_CMD_RESTART2,
     /// The system is suspended (hibernated) to disk.
     /// This option is available only if the kernel was configured with CONFIG_HIBERNATION.
     SwSuspend = c::LINUX_REBOOT_CMD_SW_SUSPEND,
