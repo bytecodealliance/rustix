@@ -388,6 +388,12 @@ pub(crate) fn waitpid(
 
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 #[inline]
+pub(crate) fn waitpgid(pgid: Pid, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+    _waitpid(-pgid.as_raw_nonzero().get(), waitopts)
+}
+
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
+#[inline]
 pub(crate) fn _waitpid(
     pid: RawPid,
     waitopts: WaitOptions,
@@ -411,6 +417,7 @@ pub(crate) fn waitid(id: WaitId<'_>, options: WaitidOptions) -> io::Result<Optio
     match id {
         WaitId::All => _waitid_all(options),
         WaitId::Pid(pid) => _waitid_pid(pid, options),
+        WaitId::Pgid(pgid) => _waitid_pgid(pgid, options),
         #[cfg(target_os = "linux")]
         WaitId::PidFd(fd) => _waitid_pidfd(fd, options),
         #[cfg(not(target_os = "linux"))]
@@ -456,6 +463,29 @@ fn _waitid_pid(pid: Pid, options: WaitidOptions) -> io::Result<Option<WaitidStat
         ret(c::waitid(
             c::P_PID,
             Pid::as_raw(Some(pid)) as _,
+            status.as_mut_ptr(),
+            options.bits() as _,
+        ))?
+    };
+
+    Ok(unsafe { cvt_waitid_status(status) })
+}
+
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "redox",
+    target_os = "openbsd",
+    target_os = "wasi"
+)))]
+#[inline]
+fn _waitid_pgid(pgid: Option<Pid>, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
+    // `waitid` can return successfully without initializing the struct (no
+    // children found when using `WNOHANG`)
+    let mut status = MaybeUninit::<c::siginfo_t>::zeroed();
+    unsafe {
+        ret(c::waitid(
+            c::P_PGID,
+            Pid::as_raw(pgid) as _,
             status.as_mut_ptr(),
             options.bits() as _,
         ))?

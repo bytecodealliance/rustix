@@ -10,7 +10,23 @@ use std::process::{Command, Stdio};
 
 #[test]
 #[serial]
-fn test_waitpid() {
+fn test_waitpid_none() {
+    let child = Command::new("yes")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .expect("failed to execute child");
+    unsafe { kill(child.id() as _, SIGSTOP) };
+
+    let status = process::waitpid(None, process::WaitOptions::UNTRACED)
+        .expect("failed to wait")
+        .unwrap();
+    assert!(status.stopped());
+}
+
+#[test]
+#[serial]
+fn test_waitpid_some() {
     let child = Command::new("yes")
         .stdout(Stdio::null())
         .stderr(Stdio::null())
@@ -20,6 +36,23 @@ fn test_waitpid() {
 
     let pid = process::Pid::from_child(&child);
     let status = process::waitpid(Some(pid), process::WaitOptions::UNTRACED)
+        .expect("failed to wait")
+        .unwrap();
+    assert!(status.stopped());
+}
+
+#[test]
+#[serial]
+fn test_waitpgid() {
+    let child = Command::new("yes")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .expect("failed to execute child");
+    unsafe { kill(child.id() as _, SIGSTOP) };
+
+    let pgid = process::getpgrp();
+    let status = process::waitpgid(pgid, process::WaitOptions::UNTRACED)
         .expect("failed to wait")
         .unwrap();
     assert!(status.stopped());
@@ -39,9 +72,13 @@ fn test_waitid() {
         .stderr(Stdio::null())
         .spawn()
         .expect("failed to execute child");
+    let pid = process::Pid::from_child(&child);
+    let pgid = process::getpgid(Some(pid)).unwrap();
+
+    // Test waiting for the process by pid.
+
     unsafe { kill(child.id() as _, SIGSTOP) };
 
-    let pid = process::Pid::from_child(&child);
     let status = process::waitid(process::WaitId::Pid(pid), process::WaitidOptions::STOPPED)
         .expect("failed to wait")
         .unwrap();
@@ -55,6 +92,32 @@ fn test_waitid() {
     let status = process::waitid(process::WaitId::Pid(pid), process::WaitidOptions::CONTINUED)
         .expect("failed to wait")
         .unwrap();
+
+    assert!(status.continued());
+
+    // Now do the same thing with the pgid.
+
+    unsafe { kill(child.id() as _, SIGSTOP) };
+
+    let status = process::waitid(
+        process::WaitId::Pgid(Some(pgid)),
+        process::WaitidOptions::STOPPED,
+    )
+    .expect("failed to wait")
+    .unwrap();
+
+    assert!(status.stopped());
+    #[cfg(not(any(target_os = "fuchsia", target_os = "netbsd")))]
+    assert_eq!(status.stopping_signal(), Some(SIGSTOP as _));
+
+    unsafe { kill(child.id() as _, SIGCONT) };
+
+    let status = process::waitid(
+        process::WaitId::Pgid(Some(pgid)),
+        process::WaitidOptions::CONTINUED,
+    )
+    .expect("failed to wait")
+    .unwrap();
 
     assert!(status.continued());
 

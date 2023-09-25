@@ -90,7 +90,7 @@ pub(crate) const EXIT_SIGNALED_SIGABRT: c_int = 128 + linux_raw_sys::general::SI
 pub(crate) use linux_raw_sys::{
     general::{
         CLD_CONTINUED, CLD_DUMPED, CLD_EXITED, CLD_KILLED, CLD_STOPPED, CLD_TRAPPED,
-        O_NONBLOCK as PIDFD_NONBLOCK, P_ALL, P_PID, P_PIDFD,
+        O_NONBLOCK as PIDFD_NONBLOCK, P_ALL, P_PGID, P_PID, P_PIDFD,
     },
     ioctl::TIOCSCTTY,
 };
