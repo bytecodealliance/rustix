@@ -52,6 +52,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -74,6 +75,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -87,6 +89,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -101,6 +104,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -115,6 +119,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -126,6 +131,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -137,6 +143,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -159,6 +166,7 @@ impl Errno {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi"
     )))]
@@ -170,6 +178,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -191,6 +200,7 @@ impl Errno {
         target_os = "android",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "wasi",
     )))]
     pub const DEADLOCK: Self = Self(c::EDEADLOCK);
@@ -214,6 +224,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
         target_os = "wasi",
@@ -246,6 +257,7 @@ impl Errno {
         target_os = "android",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
         target_os = "redox",
@@ -293,6 +305,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
         target_os = "wasi",
@@ -306,6 +319,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
         target_os = "wasi",
@@ -319,6 +333,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
         target_os = "wasi",
@@ -332,6 +347,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
         target_os = "wasi",
@@ -343,6 +359,7 @@ impl Errno {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi"
     )))]
@@ -353,6 +370,7 @@ impl Errno {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi"
     )))]
@@ -363,6 +381,7 @@ impl Errno {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi"
     )))]
@@ -373,6 +392,7 @@ impl Errno {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi"
     )))]
@@ -384,6 +404,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -395,6 +416,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -417,6 +439,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -428,6 +451,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -438,6 +462,7 @@ impl Errno {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi"
     )))]
@@ -452,6 +477,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
         target_os = "wasi",
@@ -478,6 +504,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
         target_os = "wasi",
@@ -503,6 +530,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -519,6 +547,7 @@ impl Errno {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi"
     )))]
@@ -549,6 +578,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
         target_os = "wasi",
@@ -568,6 +598,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
         target_os = "wasi",
@@ -589,6 +620,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -600,6 +632,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -654,6 +687,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
         target_os = "wasi",
@@ -684,6 +718,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -751,6 +786,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -771,6 +807,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
         target_os = "wasi",
@@ -782,6 +819,7 @@ impl Errno {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi"
     )))]
@@ -795,6 +833,7 @@ impl Errno {
         target_os = "android",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
         target_os = "redox",
@@ -831,6 +870,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -844,6 +884,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
@@ -877,6 +918,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
         target_os = "wasi",
@@ -888,6 +930,7 @@ impl Errno {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi"
     )))]
@@ -912,6 +955,7 @@ impl Errno {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "l4re",
         target_os = "wasi",
     )))]
