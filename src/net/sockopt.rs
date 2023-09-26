@@ -1346,6 +1346,18 @@ pub fn get_tcp_cork<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::sockopt::get_tcp_cork(fd.as_fd())
 }
 
+/// Get credentials of Unix domain socket peer process
+///
+/// # References
+///  - [Linux `unix`]
+///
+/// [Linux `unix`]: https://man7.org/linux/man-pages/man7/unix.7.html
+#[cfg(linux_kernel)]
+#[doc(alias = "SO_PEERCRED")]
+pub fn get_socket_peercred<Fd: AsFd>(fd: Fd) -> io::Result<super::UCred> {
+    backend::net::sockopt::get_socket_peercred(fd.as_fd())
+}
+
 #[test]
 fn test_sizes() {
     use c::c_int;

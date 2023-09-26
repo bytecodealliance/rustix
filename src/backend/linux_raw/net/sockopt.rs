@@ -12,6 +12,7 @@ use crate::fd::BorrowedFd;
 use crate::ffi::CStr;
 use crate::io;
 use crate::net::sockopt::Timeout;
+use crate::net::UCred;
 use crate::net::{
     AddressFamily, Ipv4Addr, Ipv6Addr, Protocol, RawProtocol, SocketAddrAny, SocketAddrStorage,
     SocketAddrV4, SocketAddrV6, SocketType,
@@ -793,6 +794,12 @@ pub(crate) fn set_tcp_cork(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
 pub(crate) fn get_tcp_cork(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::IPPROTO_TCP, c::TCP_CORK).map(to_bool)
 }
+
+#[inline]
+pub(crate) fn get_socket_peercred(fd: BorrowedFd<'_>) -> io::Result<UCred> {
+    getsockopt(fd, c::SOL_SOCKET as _, linux_raw_sys::net::SO_PEERCRED)
+}
+
 #[inline]
 fn to_ip_mreq(multiaddr: &Ipv4Addr, interface: &Ipv4Addr) -> c::ip_mreq {
     c::ip_mreq {

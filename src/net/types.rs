@@ -1336,6 +1336,25 @@ bitflags! {
     }
 }
 
+/// UNIX credentials of socket peer, for use with [`get_socket_peercred`]
+/// [`SendAncillaryMessage::ScmCredentials`] and
+/// [`RecvAncillaryMessage::ScmCredentials`].
+///
+/// [`get_socket_peercred`]: crate::net::sockopt::get_socket_peercred
+/// [`SendAncillaryMessage::ScmCredentials`]: crate::net::SendAncillaryMessage::ScmCredentials
+/// [`RecvAncillaryMessage::ScmCredentials`]: crate::net::RecvAncillaryMessage::ScmCredentials
+#[cfg(linux_kernel)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[repr(C)]
+pub struct UCred {
+    /// Process ID of peer
+    pub pid: crate::pid::Pid,
+    /// User ID of peer
+    pub uid: crate::ugid::Uid,
+    /// Group ID of peer
+    pub gid: crate::ugid::Gid,
+}
+
 #[test]
 fn test_sizes() {
     use c::c_int;
@@ -1361,4 +1380,7 @@ fn test_sizes() {
         let t: Option<Protocol> = Some(Protocol::from_raw(RawProtocol::new(4567).unwrap()));
         assert_eq!(4567_u32, transmute::<Option<Protocol>, u32>(t));
     }
+
+    #[cfg(linux_kernel)]
+    assert_eq_size!(UCred, libc::ucred);
 }

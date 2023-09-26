@@ -44,11 +44,11 @@ use crate::net::Protocol;
     target_env = "newlib"
 ))]
 use crate::net::RawProtocol;
-#[cfg(linux_kernel)]
-use crate::net::SocketAddrV6;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 use crate::net::{SocketAddrAny, SocketAddrStorage, SocketAddrV4};
+#[cfg(linux_kernel)]
+use crate::net::{SocketAddrV6, UCred};
 use crate::utils::as_mut_ptr;
 #[cfg(feature = "alloc")]
 #[cfg(any(
@@ -946,6 +946,12 @@ pub(crate) fn set_tcp_cork(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
 #[inline]
 pub(crate) fn get_tcp_cork(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::IPPROTO_TCP, c::TCP_CORK).map(to_bool)
+}
+
+#[cfg(linux_kernel)]
+#[inline]
+pub(crate) fn get_socket_peercred(fd: BorrowedFd<'_>) -> io::Result<UCred> {
+    getsockopt(fd, c::SOL_SOCKET as _, c::SO_PEERCRED)
 }
 
 #[inline]

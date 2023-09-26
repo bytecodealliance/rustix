@@ -5,6 +5,8 @@
 use crate::backend::{self, c};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
+#[cfg(linux_kernel)]
+use crate::net::UCred;
 
 use core::iter::FusedIterator;
 use core::marker::PhantomData;
@@ -20,6 +22,11 @@ macro_rules! cmsg_space {
     (ScmRights($len:expr)) => {
         $crate::net::__cmsg_space(
             $len * ::core::mem::size_of::<$crate::fd::BorrowedFd<'static>>(),
+        )
+    };
+    (ScmCredentials($len:expr)) => {
+        $crate::net::__cmsg_space(
+            $len * ::core::mem::size_of::<$crate::net::UCred>(),
         )
     };
 
@@ -43,6 +50,9 @@ pub fn __cmsg_space(len: usize) -> usize {
 pub enum SendAncillaryMessage<'slice, 'fd> {
     /// Send file descriptors.
     ScmRights(&'slice [BorrowedFd<'fd>]),
+    /// Send process credentials.
+    #[cfg(linux_kernel)]
+    ScmCredentials(UCred),
 }
 
 impl SendAncillaryMessage<'_, '_> {
@@ -52,6 +62,8 @@ impl SendAncillaryMessage<'_, '_> {
     pub fn size(&self) -> usize {
         let total_bytes = match self {
             Self::ScmRights(slice) => size_of_val(*slice),
+            #[cfg(linux_kernel)]
+            Self::ScmCredentials(ucred) => size_of_val(ucred),
         };
 
         unsafe {
@@ -69,6 +81,9 @@ impl SendAncillaryMessage<'_, '_> {
 pub enum RecvAncillaryMessage<'a> {
     /// Received file descriptors.
     ScmRights(AncillaryIter<'a, OwnedFd>),
+    /// Received process credentials.
+    #[cfg(linux_kernel)]
+    ScmCredentials(UCred),
 }
 
 /// Buffer for sending ancillary messages with [`sendmsg`], [`sendmsg_v4`],
@@ -138,6 +153,13 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
                 let fds_bytes =
                     unsafe { slice::from_raw_parts(fds.as_ptr().cast::<u8>(), size_of_val(fds)) };
                 self.push_ancillary(fds_bytes, c::SOL_SOCKET as _, c::SCM_RIGHTS as _)
+            }
+            #[cfg(linux_kernel)]
+            SendAncillaryMessage::ScmCredentials(ucred) => {
+                let ucred_bytes = unsafe {
+                    slice::from_raw_parts(&ucred as *const _ as *const u8, size_of_val(&ucred))
+                };
+                self.push_ancillary(ucred_bytes, c::SOL_SOCKET as _, c::SCM_CREDENTIALS as _)
             }
         }
     }
@@ -315,6 +337,15 @@ impl<'buf> AncillaryDrain<'buf> {
                     let fds = AncillaryIter::new(payload);
 
                     Some(RecvAncillaryMessage::ScmRights(fds))
+                }
+                #[cfg(linux_kernel)]
+                (c::SOL_SOCKET, c::SCM_CREDENTIALS) => {
+                    if payload_len >= size_of::<UCred>() {
+                        let ucred = payload.as_ptr().cast::<UCred>().read_unaligned();
+                        Some(RecvAncillaryMessage::ScmCredentials(ucred))
+                    } else {
+                        None
+                    }
                 }
                 _ => None,
             }

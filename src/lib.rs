@@ -335,7 +335,8 @@ mod clockid;
     feature = "runtime",
     feature = "termios",
     feature = "thread",
-    all(bsd, feature = "event")
+    all(bsd, feature = "event"),
+    all(linux_kernel, feature = "net")
 ))]
 mod pid;
 #[cfg(any(feature = "process", feature = "thread"))]
@@ -378,6 +379,7 @@ mod timespec;
             feature = "time",
             target_arch = "x86",
         )
-    )
+    ),
+    all(linux_kernel, feature = "net")
 ))]
 mod ugid;
