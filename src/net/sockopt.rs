@@ -181,7 +181,7 @@ pub enum Timeout {
 #[inline]
 #[doc(alias = "SO_TYPE")]
 pub fn get_socket_type<Fd: AsFd>(fd: Fd) -> io::Result<SocketType> {
-    backend::net::syscalls::sockopt::get_socket_type(fd.as_fd())
+    backend::net::sockopt::get_socket_type(fd.as_fd())
 }
 
 /// `setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, value)`—Set whether local
@@ -193,7 +193,7 @@ pub fn get_socket_type<Fd: AsFd>(fd: Fd) -> io::Result<SocketType> {
 #[inline]
 #[doc(alias = "SO_REUSEADDR")]
 pub fn set_socket_reuseaddr<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_socket_reuseaddr(fd.as_fd(), value)
+    backend::net::sockopt::set_socket_reuseaddr(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_REUSEADDR)`
@@ -204,7 +204,7 @@ pub fn set_socket_reuseaddr<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 #[inline]
 #[doc(alias = "SO_REUSEADDR")]
 pub fn get_socket_reuseaddr<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
-    backend::net::syscalls::sockopt::get_socket_reuseaddr(fd.as_fd())
+    backend::net::sockopt::get_socket_reuseaddr(fd.as_fd())
 }
 
 /// `setsockopt(fd, SOL_SOCKET, SO_BROADCAST, broadcast)`
@@ -215,7 +215,7 @@ pub fn get_socket_reuseaddr<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 #[inline]
 #[doc(alias = "SO_BROADCAST")]
 pub fn set_socket_broadcast<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_socket_broadcast(fd.as_fd(), value)
+    backend::net::sockopt::set_socket_broadcast(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_BROADCAST)`
@@ -226,7 +226,7 @@ pub fn set_socket_broadcast<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 #[inline]
 #[doc(alias = "SO_BROADCAST")]
 pub fn get_socket_broadcast<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
-    backend::net::syscalls::sockopt::get_socket_broadcast(fd.as_fd())
+    backend::net::sockopt::get_socket_broadcast(fd.as_fd())
 }
 
 /// `setsockopt(fd, SOL_SOCKET, SO_LINGER, value)`
@@ -237,7 +237,7 @@ pub fn get_socket_broadcast<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 #[inline]
 #[doc(alias = "SO_LINGER")]
 pub fn set_socket_linger<Fd: AsFd>(fd: Fd, value: Option<Duration>) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_socket_linger(fd.as_fd(), value)
+    backend::net::sockopt::set_socket_linger(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_LINGER)`
@@ -248,7 +248,7 @@ pub fn set_socket_linger<Fd: AsFd>(fd: Fd, value: Option<Duration>) -> io::Resul
 #[inline]
 #[doc(alias = "SO_LINGER")]
 pub fn get_socket_linger<Fd: AsFd>(fd: Fd) -> io::Result<Option<Duration>> {
-    backend::net::syscalls::sockopt::get_socket_linger(fd.as_fd())
+    backend::net::sockopt::get_socket_linger(fd.as_fd())
 }
 
 /// `setsockopt(fd, SOL_SOCKET, SO_PASSCRED, value)`
@@ -260,7 +260,7 @@ pub fn get_socket_linger<Fd: AsFd>(fd: Fd) -> io::Result<Option<Duration>> {
 #[inline]
 #[doc(alias = "SO_PASSCRED")]
 pub fn set_socket_passcred<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_socket_passcred(fd.as_fd(), value)
+    backend::net::sockopt::set_socket_passcred(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_PASSCRED)`
@@ -272,7 +272,7 @@ pub fn set_socket_passcred<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 #[inline]
 #[doc(alias = "SO_PASSCRED")]
 pub fn get_socket_passcred<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
-    backend::net::syscalls::sockopt::get_socket_passcred(fd.as_fd())
+    backend::net::sockopt::get_socket_passcred(fd.as_fd())
 }
 
 /// `setsockopt(fd, SOL_SOCKET, id, timeout)`—Set the sending or receiving
@@ -289,7 +289,7 @@ pub fn set_socket_timeout<Fd: AsFd>(
     id: Timeout,
     timeout: Option<Duration>,
 ) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_socket_timeout(fd.as_fd(), id, timeout)
+    backend::net::sockopt::set_socket_timeout(fd.as_fd(), id, timeout)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, id)`—Get the sending or receiving timeout.
@@ -301,7 +301,7 @@ pub fn set_socket_timeout<Fd: AsFd>(
 #[doc(alias = "SO_RCVTIMEO")]
 #[doc(alias = "SO_SNDTIMEO")]
 pub fn get_socket_timeout<Fd: AsFd>(fd: Fd, id: Timeout) -> io::Result<Option<Duration>> {
-    backend::net::syscalls::sockopt::get_socket_timeout(fd.as_fd(), id)
+    backend::net::sockopt::get_socket_timeout(fd.as_fd(), id)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_ERROR)`
@@ -312,7 +312,7 @@ pub fn get_socket_timeout<Fd: AsFd>(fd: Fd, id: Timeout) -> io::Result<Option<Du
 #[inline]
 #[doc(alias = "SO_ERROR")]
 pub fn get_socket_error<Fd: AsFd>(fd: Fd) -> io::Result<Result<(), io::Errno>> {
-    backend::net::syscalls::sockopt::get_socket_error(fd.as_fd())
+    backend::net::sockopt::get_socket_error(fd.as_fd())
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE)`
@@ -324,7 +324,7 @@ pub fn get_socket_error<Fd: AsFd>(fd: Fd) -> io::Result<Result<(), io::Errno>> {
 #[doc(alias = "SO_NOSIGPIPE")]
 #[inline]
 pub fn get_socket_nosigpipe<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
-    backend::net::syscalls::sockopt::get_socket_nosigpipe(fd.as_fd())
+    backend::net::sockopt::get_socket_nosigpipe(fd.as_fd())
 }
 
 /// `setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, value)`
@@ -336,7 +336,7 @@ pub fn get_socket_nosigpipe<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 #[doc(alias = "SO_NOSIGPIPE")]
 #[inline]
 pub fn set_socket_nosigpipe<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_socket_nosigpipe(fd.as_fd(), value)
+    backend::net::sockopt::set_socket_nosigpipe(fd.as_fd(), value)
 }
 
 /// `setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, value)`
@@ -347,7 +347,7 @@ pub fn set_socket_nosigpipe<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 #[inline]
 #[doc(alias = "SO_KEEPALIVE")]
 pub fn set_socket_keepalive<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_socket_keepalive(fd.as_fd(), value)
+    backend::net::sockopt::set_socket_keepalive(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_KEEPALIVE)`
@@ -358,7 +358,7 @@ pub fn set_socket_keepalive<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 #[inline]
 #[doc(alias = "SO_KEEPALIVE")]
 pub fn get_socket_keepalive<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
-    backend::net::syscalls::sockopt::get_socket_keepalive(fd.as_fd())
+    backend::net::sockopt::get_socket_keepalive(fd.as_fd())
 }
 
 /// `setsockopt(fd, SOL_SOCKET, SO_RCVBUF, value)`
@@ -369,7 +369,7 @@ pub fn get_socket_keepalive<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 #[inline]
 #[doc(alias = "SO_RCVBUF")]
 pub fn set_socket_recv_buffer_size<Fd: AsFd>(fd: Fd, value: usize) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_socket_recv_buffer_size(fd.as_fd(), value)
+    backend::net::sockopt::set_socket_recv_buffer_size(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_RCVBUF)`
@@ -380,7 +380,7 @@ pub fn set_socket_recv_buffer_size<Fd: AsFd>(fd: Fd, value: usize) -> io::Result
 #[inline]
 #[doc(alias = "SO_RCVBUF")]
 pub fn get_socket_recv_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
-    backend::net::syscalls::sockopt::get_socket_recv_buffer_size(fd.as_fd())
+    backend::net::sockopt::get_socket_recv_buffer_size(fd.as_fd())
 }
 
 /// `setsockopt(fd, SOL_SOCKET, SO_SNDBUF, value)`
@@ -391,7 +391,7 @@ pub fn get_socket_recv_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
 #[inline]
 #[doc(alias = "SO_SNDBUF")]
 pub fn set_socket_send_buffer_size<Fd: AsFd>(fd: Fd, value: usize) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_socket_send_buffer_size(fd.as_fd(), value)
+    backend::net::sockopt::set_socket_send_buffer_size(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_SNDBUF)`
@@ -402,7 +402,7 @@ pub fn set_socket_send_buffer_size<Fd: AsFd>(fd: Fd, value: usize) -> io::Result
 #[inline]
 #[doc(alias = "SO_SNDBUF")]
 pub fn get_socket_send_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
-    backend::net::syscalls::sockopt::get_socket_send_buffer_size(fd.as_fd())
+    backend::net::sockopt::get_socket_send_buffer_size(fd.as_fd())
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_DOMAIN)`
@@ -424,7 +424,7 @@ pub fn get_socket_send_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
 #[inline]
 #[doc(alias = "SO_DOMAIN")]
 pub fn get_socket_domain<Fd: AsFd>(fd: Fd) -> io::Result<AddressFamily> {
-    backend::net::syscalls::sockopt::get_socket_domain(fd.as_fd())
+    backend::net::sockopt::get_socket_domain(fd.as_fd())
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_ACCEPTCONN)`
@@ -436,7 +436,7 @@ pub fn get_socket_domain<Fd: AsFd>(fd: Fd) -> io::Result<AddressFamily> {
 #[inline]
 #[doc(alias = "SO_ACCEPTCONN")]
 pub fn get_socket_acceptconn<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
-    backend::net::syscalls::sockopt::get_socket_acceptconn(fd.as_fd())
+    backend::net::sockopt::get_socket_acceptconn(fd.as_fd())
 }
 
 /// `setsockopt(fd, SOL_SOCKET, SO_OOBINLINE, value)`
@@ -447,7 +447,7 @@ pub fn get_socket_acceptconn<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 #[inline]
 #[doc(alias = "SO_OOBINLINE")]
 pub fn set_socket_oobinline<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_socket_oobinline(fd.as_fd(), value)
+    backend::net::sockopt::set_socket_oobinline(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_OOBINLINE)`
@@ -458,7 +458,7 @@ pub fn set_socket_oobinline<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 #[inline]
 #[doc(alias = "SO_OOBINLINE")]
 pub fn get_socket_oobinline<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
-    backend::net::syscalls::sockopt::get_socket_oobinline(fd.as_fd())
+    backend::net::sockopt::get_socket_oobinline(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_TTL, value)`
@@ -469,7 +469,7 @@ pub fn get_socket_oobinline<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 #[inline]
 #[doc(alias = "IP_TTL")]
 pub fn set_ip_ttl<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_ip_ttl(fd.as_fd(), value)
+    backend::net::sockopt::set_ip_ttl(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, IPPROTO_IP, IP_TTL)`
@@ -480,7 +480,7 @@ pub fn set_ip_ttl<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
 #[inline]
 #[doc(alias = "IP_TTL")]
 pub fn get_ip_ttl<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
-    backend::net::syscalls::sockopt::get_ip_ttl(fd.as_fd())
+    backend::net::sockopt::get_ip_ttl(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, only_v6)`
@@ -491,7 +491,7 @@ pub fn get_ip_ttl<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 #[inline]
 #[doc(alias = "IPV6_V6ONLY")]
 pub fn set_ipv6_v6only<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_ipv6_v6only(fd.as_fd(), value)
+    backend::net::sockopt::set_ipv6_v6only(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY)`
@@ -502,7 +502,7 @@ pub fn set_ipv6_v6only<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 #[inline]
 #[doc(alias = "IPV6_V6ONLY")]
 pub fn get_ipv6_v6only<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
-    backend::net::syscalls::sockopt::get_ipv6_v6only(fd.as_fd())
+    backend::net::sockopt::get_ipv6_v6only(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP, value)`
@@ -513,7 +513,7 @@ pub fn get_ipv6_v6only<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 #[inline]
 #[doc(alias = "IP_MULTICAST_LOOP")]
 pub fn set_ip_multicast_loop<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_ip_multicast_loop(fd.as_fd(), value)
+    backend::net::sockopt::set_ip_multicast_loop(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP)`
@@ -524,7 +524,7 @@ pub fn set_ip_multicast_loop<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 #[inline]
 #[doc(alias = "IP_MULTICAST_LOOP")]
 pub fn get_ip_multicast_loop<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
-    backend::net::syscalls::sockopt::get_ip_multicast_loop(fd.as_fd())
+    backend::net::sockopt::get_ip_multicast_loop(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL, value)`
@@ -535,7 +535,7 @@ pub fn get_ip_multicast_loop<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 #[inline]
 #[doc(alias = "IP_MULTICAST_TTL")]
 pub fn set_ip_multicast_ttl<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_ip_multicast_ttl(fd.as_fd(), value)
+    backend::net::sockopt::set_ip_multicast_ttl(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL)`
@@ -546,7 +546,7 @@ pub fn set_ip_multicast_ttl<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
 #[inline]
 #[doc(alias = "IP_MULTICAST_TTL")]
 pub fn get_ip_multicast_ttl<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
-    backend::net::syscalls::sockopt::get_ip_multicast_ttl(fd.as_fd())
+    backend::net::sockopt::get_ip_multicast_ttl(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, value)`
@@ -557,7 +557,7 @@ pub fn get_ip_multicast_ttl<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 #[inline]
 #[doc(alias = "IPV6_MULTICAST_LOOP")]
 pub fn set_ipv6_multicast_loop<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_ipv6_multicast_loop(fd.as_fd(), value)
+    backend::net::sockopt::set_ipv6_multicast_loop(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP)`
@@ -568,7 +568,7 @@ pub fn set_ipv6_multicast_loop<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> 
 #[inline]
 #[doc(alias = "IPV6_MULTICAST_LOOP")]
 pub fn get_ipv6_multicast_loop<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
-    backend::net::syscalls::sockopt::get_ipv6_multicast_loop(fd.as_fd())
+    backend::net::sockopt::get_ipv6_multicast_loop(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, multicast_hops)`
@@ -579,7 +579,7 @@ pub fn get_ipv6_multicast_loop<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 #[inline]
 #[doc(alias = "IP_MULTICAST_TTL")]
 pub fn set_ipv6_multicast_hops<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_ipv6_multicast_hops(fd.as_fd(), value)
+    backend::net::sockopt::set_ipv6_multicast_hops(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, IPPROTO_IPV6, IPV6_UNICAST_HOPS)`
@@ -590,7 +590,7 @@ pub fn set_ipv6_multicast_hops<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
 #[inline]
 #[doc(alias = "IPV6_UNICAST_HOPS")]
 pub fn get_ipv6_unicast_hops<Fd: AsFd>(fd: Fd) -> io::Result<u8> {
-    backend::net::syscalls::sockopt::get_ipv6_unicast_hops(fd.as_fd())
+    backend::net::sockopt::get_ipv6_unicast_hops(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_IPV6, IPV6_UNICAST_HOPS, unicast_hops)`
@@ -601,7 +601,7 @@ pub fn get_ipv6_unicast_hops<Fd: AsFd>(fd: Fd) -> io::Result<u8> {
 #[inline]
 #[doc(alias = "IPV6_UNICAST_HOPS")]
 pub fn set_ipv6_unicast_hops<Fd: AsFd>(fd: Fd, value: Option<u8>) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_ipv6_unicast_hops(fd.as_fd(), value)
+    backend::net::sockopt::set_ipv6_unicast_hops(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS)`
@@ -612,7 +612,7 @@ pub fn set_ipv6_unicast_hops<Fd: AsFd>(fd: Fd, value: Option<u8>) -> io::Result<
 #[inline]
 #[doc(alias = "IP_MULTICAST_TTL")]
 pub fn get_ipv6_multicast_hops<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
-    backend::net::syscalls::sockopt::get_ipv6_multicast_hops(fd.as_fd())
+    backend::net::sockopt::get_ipv6_multicast_hops(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, multiaddr, interface)`
@@ -627,7 +627,7 @@ pub fn set_ip_add_membership<Fd: AsFd>(
     multiaddr: &Ipv4Addr,
     interface: &Ipv4Addr,
 ) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_ip_add_membership(fd.as_fd(), multiaddr, interface)
+    backend::net::sockopt::set_ip_add_membership(fd.as_fd(), multiaddr, interface)
 }
 
 /// `setsockopt(fd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, multiaddr, interface)`
@@ -643,7 +643,7 @@ pub fn set_ipv6_add_membership<Fd: AsFd>(
     multiaddr: &Ipv6Addr,
     interface: u32,
 ) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_ipv6_add_membership(fd.as_fd(), multiaddr, interface)
+    backend::net::sockopt::set_ipv6_add_membership(fd.as_fd(), multiaddr, interface)
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_DROP_MEMBERSHIP, multiaddr, interface)`
@@ -658,7 +658,7 @@ pub fn set_ip_drop_membership<Fd: AsFd>(
     multiaddr: &Ipv4Addr,
     interface: &Ipv4Addr,
 ) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_ip_drop_membership(fd.as_fd(), multiaddr, interface)
+    backend::net::sockopt::set_ip_drop_membership(fd.as_fd(), multiaddr, interface)
 }
 
 /// `setsockopt(fd, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, multiaddr, interface)`
@@ -674,7 +674,7 @@ pub fn set_ipv6_drop_membership<Fd: AsFd>(
     multiaddr: &Ipv6Addr,
     interface: u32,
 ) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_ipv6_drop_membership(fd.as_fd(), multiaddr, interface)
+    backend::net::sockopt::set_ipv6_drop_membership(fd.as_fd(), multiaddr, interface)
 }
 
 /// `setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, value)`
@@ -685,7 +685,7 @@ pub fn set_ipv6_drop_membership<Fd: AsFd>(
 #[inline]
 #[doc(alias = "TCP_NODELAY")]
 pub fn set_tcp_nodelay<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_tcp_nodelay(fd.as_fd(), value)
+    backend::net::sockopt::set_tcp_nodelay(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, IPPROTO_TCP, TCP_NODELAY)`
@@ -696,7 +696,7 @@ pub fn set_tcp_nodelay<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 #[inline]
 #[doc(alias = "TCP_NODELAY")]
 pub fn get_tcp_nodelay<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
-    backend::net::syscalls::sockopt::get_tcp_nodelay(fd.as_fd())
+    backend::net::sockopt::get_tcp_nodelay(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, value)`
@@ -708,7 +708,7 @@ pub fn get_tcp_nodelay<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
 #[doc(alias = "TCP_KEEPCNT")]
 pub fn set_tcp_keepcnt<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_tcp_keepcnt(fd.as_fd(), value)
+    backend::net::sockopt::set_tcp_keepcnt(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT)`
@@ -720,7 +720,7 @@ pub fn set_tcp_keepcnt<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
 #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
 #[doc(alias = "TCP_KEEPCNT")]
 pub fn get_tcp_keepcnt<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
-    backend::net::syscalls::sockopt::get_tcp_keepcnt(fd.as_fd())
+    backend::net::sockopt::get_tcp_keepcnt(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, value)`
@@ -734,7 +734,7 @@ pub fn get_tcp_keepcnt<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
 #[doc(alias = "TCP_KEEPIDLE")]
 pub fn set_tcp_keepidle<Fd: AsFd>(fd: Fd, value: Duration) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_tcp_keepidle(fd.as_fd(), value)
+    backend::net::sockopt::set_tcp_keepidle(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE)`
@@ -748,7 +748,7 @@ pub fn set_tcp_keepidle<Fd: AsFd>(fd: Fd, value: Duration) -> io::Result<()> {
 #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
 #[doc(alias = "TCP_KEEPIDLE")]
 pub fn get_tcp_keepidle<Fd: AsFd>(fd: Fd) -> io::Result<Duration> {
-    backend::net::syscalls::sockopt::get_tcp_keepidle(fd.as_fd())
+    backend::net::sockopt::get_tcp_keepidle(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL, value)`
@@ -760,7 +760,7 @@ pub fn get_tcp_keepidle<Fd: AsFd>(fd: Fd) -> io::Result<Duration> {
 #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
 #[doc(alias = "TCP_KEEPINTVL")]
 pub fn set_tcp_keepintvl<Fd: AsFd>(fd: Fd, value: Duration) -> io::Result<()> {
-    backend::net::syscalls::sockopt::set_tcp_keepintvl(fd.as_fd(), value)
+    backend::net::sockopt::set_tcp_keepintvl(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL)`
@@ -772,7 +772,7 @@ pub fn set_tcp_keepintvl<Fd: AsFd>(fd: Fd, value: Duration) -> io::Result<()> {
 #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
 #[doc(alias = "TCP_KEEPINTVL")]
 pub fn get_tcp_keepintvl<Fd: AsFd>(fd: Fd) -> io::Result<Duration> {
-    backend::net::syscalls::sockopt::get_tcp_keepintvl(fd.as_fd())
+    backend::net::sockopt::get_tcp_keepintvl(fd.as_fd())
 }
 
 #[test]
