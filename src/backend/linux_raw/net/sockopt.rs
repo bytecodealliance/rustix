@@ -14,6 +14,12 @@ use crate::net::{AddressFamily, Ipv4Addr, Ipv6Addr, SocketType};
 use core::mem::MaybeUninit;
 use core::time::Duration;
 use linux_raw_sys::general::{__kernel_old_timeval, __kernel_sock_timeval};
+#[cfg(target_arch = "x86")]
+use {
+    crate::backend::conv::{slice_just_addr, x86_sys},
+    crate::backend::reg::{ArgReg, SocketArg},
+    linux_raw_sys::net::{SYS_GETSOCKOPT, SYS_SETSOCKOPT},
+};
 
 #[inline]
 fn getsockopt<T: Copy>(fd: BorrowedFd<'_>, level: u32, optname: u32) -> io::Result<T> {
