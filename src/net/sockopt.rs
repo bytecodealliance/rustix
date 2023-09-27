@@ -794,6 +794,15 @@ pub fn set_ipv6_drop_membership<Fd: AsFd>(
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[cfg(any(
+    bsd,
+    linux_like,
+    target_os = "aix",
+    target_os = "fuchsia",
+    target_os = "haiku",
+    target_os = "nto",
+    target_env = "newlib"
+))]
 #[inline]
 #[doc(alias = "IP_TOS")]
 pub fn set_ip_tos<Fd: AsFd>(fd: Fd, value: u8) -> io::Result<()> {
@@ -805,6 +814,15 @@ pub fn set_ip_tos<Fd: AsFd>(fd: Fd, value: u8) -> io::Result<()> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[cfg(any(
+    bsd,
+    linux_like,
+    target_os = "aix",
+    target_os = "fuchsia",
+    target_os = "haiku",
+    target_os = "nto",
+    target_env = "newlib"
+))]
 #[inline]
 #[doc(alias = "IP_TOS")]
 pub fn get_ip_tos<Fd: AsFd>(fd: Fd) -> io::Result<u8> {

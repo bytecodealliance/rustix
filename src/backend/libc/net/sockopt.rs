@@ -539,11 +539,29 @@ pub(crate) fn set_ipv6_unicast_hops(fd: BorrowedFd<'_>, hops: Option<u8>) -> io:
     setsockopt(fd, c::IPPROTO_IPV6, c::IPV6_UNICAST_HOPS, hops)
 }
 
+#[cfg(any(
+    bsd,
+    linux_like,
+    target_os = "aix",
+    target_os = "fuchsia",
+    target_os = "haiku",
+    target_os = "nto",
+    target_env = "newlib"
+))]
 #[inline]
 pub(crate) fn set_ip_tos(fd: BorrowedFd<'_>, value: u8) -> io::Result<()> {
     setsockopt(fd, c::IPPROTO_IP, c::IP_TOS, i32::from(value))
 }
 
+#[cfg(any(
+    bsd,
+    linux_like,
+    target_os = "aix",
+    target_os = "fuchsia",
+    target_os = "haiku",
+    target_os = "nto",
+    target_env = "newlib"
+))]
 #[inline]
 pub(crate) fn get_ip_tos(fd: BorrowedFd<'_>) -> io::Result<u8> {
     let value: i32 = getsockopt(fd, c::IPPROTO_IP, c::IP_TOS)?;

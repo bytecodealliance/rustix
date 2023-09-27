@@ -206,7 +206,15 @@ fn test_sockopts_ipv4() {
     }
 
     // Check the initial value of IP TOS, set it, and check it.
-    #[cfg(linux_kernel)]
+    #[cfg(any(
+        bsd,
+        linux_like,
+        target_os = "aix",
+        target_os = "fuchsia",
+        target_os = "haiku",
+        target_os = "nto",
+        target_env = "newlib"
+    ))]
     {
         assert_eq!(sockopt::get_ip_tos(&s).unwrap(), 0);
         sockopt::set_ip_tos(&s, libc::IPTOS_THROUGHPUT).unwrap();
