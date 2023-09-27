@@ -439,6 +439,28 @@ pub fn get_socket_acceptconn<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::syscalls::sockopt::get_socket_acceptconn(fd.as_fd())
 }
 
+/// `setsockopt(fd, SOL_SOCKET, SO_OOBINLINE, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[inline]
+#[doc(alias = "SO_OOBINLINE")]
+pub fn set_socket_oobinline<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::syscalls::sockopt::set_socket_oobinline(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_SOCKET, SO_OOBINLINE)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[inline]
+#[doc(alias = "SO_OOBINLINE")]
+pub fn get_socket_oobinline<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::syscalls::sockopt::get_socket_oobinline(fd.as_fd())
+}
+
 /// `setsockopt(fd, IPPROTO_IP, IP_TTL, value)`
 ///
 /// See the [module-level documentation] for more.

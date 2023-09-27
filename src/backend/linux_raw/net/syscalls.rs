@@ -925,10 +925,8 @@ pub(crate) mod sockopt {
     use crate::io;
     use crate::net::sockopt::Timeout;
     use crate::net::{AddressFamily, Ipv4Addr, Ipv6Addr, SocketType};
-    use c::{SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_SNDTIMEO_NEW, SO_SNDTIMEO_OLD};
     use core::time::Duration;
     use linux_raw_sys::general::{__kernel_old_timeval, __kernel_sock_timeval};
-    use linux_raw_sys::net::{SO_ACCEPTCONN, TCP_KEEPCNT, TCP_KEEPIDLE, TCP_KEEPINTVL};
 
     #[inline]
     fn getsockopt<T: Copy>(fd: BorrowedFd<'_>, level: u32, optname: u32) -> io::Result<T> {
@@ -1101,11 +1099,11 @@ pub(crate) mod sockopt {
     ) -> io::Result<()> {
         let time = duration_to_linux_sock_timeval(timeout)?;
         let optname = match id {
-            Timeout::Recv => SO_RCVTIMEO_NEW,
-            Timeout::Send => SO_SNDTIMEO_NEW,
+            Timeout::Recv => c::SO_RCVTIMEO_NEW,
+            Timeout::Send => c::SO_SNDTIMEO_NEW,
         };
         match setsockopt(fd, c::SOL_SOCKET, optname, time) {
-            Err(io::Errno::NOPROTOOPT) if SO_RCVTIMEO_NEW != SO_RCVTIMEO_OLD => {
+            Err(io::Errno::NOPROTOOPT) if c::SO_RCVTIMEO_NEW != c::SO_RCVTIMEO_OLD => {
                 set_socket_timeout_old(fd, id, timeout)
             }
             otherwise => otherwise,
@@ -1121,8 +1119,8 @@ pub(crate) mod sockopt {
     ) -> io::Result<()> {
         let time = duration_to_linux_old_timeval(timeout)?;
         let optname = match id {
-            Timeout::Recv => SO_RCVTIMEO_OLD,
-            Timeout::Send => SO_SNDTIMEO_OLD,
+            Timeout::Recv => c::SO_RCVTIMEO_OLD,
+            Timeout::Send => c::SO_SNDTIMEO_OLD,
         };
         setsockopt(fd, c::SOL_SOCKET, optname, time)
     }
@@ -1133,11 +1131,11 @@ pub(crate) mod sockopt {
         id: Timeout,
     ) -> io::Result<Option<Duration>> {
         let optname = match id {
-            Timeout::Recv => SO_RCVTIMEO_NEW,
-            Timeout::Send => SO_SNDTIMEO_NEW,
+            Timeout::Recv => c::SO_RCVTIMEO_NEW,
+            Timeout::Send => c::SO_SNDTIMEO_NEW,
         };
         let time: __kernel_sock_timeval = match getsockopt(fd, c::SOL_SOCKET, optname) {
-            Err(io::Errno::NOPROTOOPT) if SO_RCVTIMEO_NEW != SO_RCVTIMEO_OLD => {
+            Err(io::Errno::NOPROTOOPT) if c::SO_RCVTIMEO_NEW != c::SO_RCVTIMEO_OLD => {
                 return get_socket_timeout_old(fd, id)
             }
             otherwise => otherwise?,
@@ -1149,8 +1147,8 @@ pub(crate) mod sockopt {
     /// `__kernel_sock_timeval` and `_OLD` constants instead of `_NEW`.
     fn get_socket_timeout_old(fd: BorrowedFd<'_>, id: Timeout) -> io::Result<Option<Duration>> {
         let optname = match id {
-            Timeout::Recv => SO_RCVTIMEO_OLD,
-            Timeout::Send => SO_SNDTIMEO_OLD,
+            Timeout::Recv => c::SO_RCVTIMEO_OLD,
+            Timeout::Send => c::SO_SNDTIMEO_OLD,
         };
         let time: __kernel_old_timeval = getsockopt(fd, c::SOL_SOCKET, optname)?;
         Ok(duration_from_linux_old_timeval(time))
@@ -1296,7 +1294,17 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn get_socket_acceptconn(fd: BorrowedFd<'_>) -> io::Result<bool> {
-        getsockopt(fd, c::SOL_SOCKET as _, SO_ACCEPTCONN).map(to_bool)
+        getsockopt(fd, c::SOL_SOCKET as _, c::SO_ACCEPTCONN).map(to_bool)
+    }
+
+    #[inline]
+    pub(crate) fn set_socket_oobinline(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+        setsockopt(fd, c::SOL_SOCKET as _, c::SO_OOBINLINE, from_bool(value))
+    }
+
+    #[inline]
+    pub(crate) fn get_socket_oobinline(fd: BorrowedFd<'_>) -> io::Result<bool> {
+        getsockopt(fd, c::SOL_SOCKET as _, c::SO_OOBINLINE).map(to_bool)
     }
 
     #[inline]
@@ -1449,35 +1457,35 @@ pub(crate) mod sockopt {
 
     #[inline]
     pub(crate) fn set_tcp_keepcnt(fd: BorrowedFd<'_>, count: u32) -> io::Result<()> {
-        setsockopt(fd, c::IPPROTO_TCP as _, TCP_KEEPCNT, count)
+        setsockopt(fd, c::IPPROTO_TCP as _, c::TCP_KEEPCNT, count)
     }
 
     #[inline]
     pub(crate) fn get_tcp_keepcnt(fd: BorrowedFd<'_>) -> io::Result<u32> {
-        getsockopt(fd, c::IPPROTO_TCP as _, TCP_KEEPCNT)
+        getsockopt(fd, c::IPPROTO_TCP as _, c::TCP_KEEPCNT)
     }
 
     #[inline]
     pub(crate) fn set_tcp_keepidle(fd: BorrowedFd<'_>, duration: Duration) -> io::Result<()> {
         let secs: c::c_uint = duration_to_secs(duration)?;
-        setsockopt(fd, c::IPPROTO_TCP as _, TCP_KEEPIDLE, secs)
+        setsockopt(fd, c::IPPROTO_TCP as _, c::TCP_KEEPIDLE, secs)
     }
 
     #[inline]
     pub(crate) fn get_tcp_keepidle(fd: BorrowedFd<'_>) -> io::Result<Duration> {
-        let secs: c::c_uint = getsockopt(fd, c::IPPROTO_TCP as _, TCP_KEEPIDLE)?;
+        let secs: c::c_uint = getsockopt(fd, c::IPPROTO_TCP as _, c::TCP_KEEPIDLE)?;
         Ok(Duration::from_secs(secs as u64))
     }
 
     #[inline]
     pub(crate) fn set_tcp_keepintvl(fd: BorrowedFd<'_>, duration: Duration) -> io::Result<()> {
         let secs: c::c_uint = duration_to_secs(duration)?;
-        setsockopt(fd, c::IPPROTO_TCP as _, TCP_KEEPINTVL, secs)
+        setsockopt(fd, c::IPPROTO_TCP as _, c::TCP_KEEPINTVL, secs)
     }
 
     #[inline]
     pub(crate) fn get_tcp_keepintvl(fd: BorrowedFd<'_>) -> io::Result<Duration> {
-        let secs: c::c_uint = getsockopt(fd, c::IPPROTO_TCP as _, TCP_KEEPINTVL)?;
+        let secs: c::c_uint = getsockopt(fd, c::IPPROTO_TCP as _, c::TCP_KEEPINTVL)?;
         Ok(Duration::from_secs(secs as u64))
     }
 
