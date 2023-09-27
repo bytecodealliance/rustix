@@ -214,9 +214,12 @@ fn test_sockopts_ipv4() {
     }
 
     // Check the initial value of IP RECVTOS, set it, and check it.
-    assert!(!sockopt::get_ip_recvtos(&s).unwrap());
-    sockopt::set_ip_recvtos(&s, true).unwrap();
-    assert!(sockopt::get_ip_recvtos(&s).unwrap());
+    #[cfg(any(apple, freebsdlike, linux_like, target_os = "fuchsia"))]
+    {
+        assert!(!sockopt::get_ip_recvtos(&s).unwrap());
+        sockopt::set_ip_recvtos(&s, true).unwrap();
+        assert!(sockopt::get_ip_recvtos(&s).unwrap());
+    }
 
     test_sockopts_tcp(&s);
 }
