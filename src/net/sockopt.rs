@@ -641,6 +641,13 @@ pub fn set_ip_add_membership<Fd: AsFd>(
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[cfg(any(
+    apple,
+    freebsdlike,
+    linux_like,
+    target_os = "fuchsia",
+    target_os = "openbsd"
+))]
 #[inline]
 #[doc(alias = "IP_ADD_MEMBERSHIP")]
 pub fn set_ip_add_membership_with_ifindex<Fd: AsFd>(
@@ -662,6 +669,7 @@ pub fn set_ip_add_membership_with_ifindex<Fd: AsFd>(
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[cfg(any(apple, freebsdlike, linux_like, solarish, target_os = "aix"))]
 #[inline]
 #[doc(alias = "IP_ADD_SOURCE_MEMBERSHIP")]
 pub fn set_ip_add_source_membership<Fd: AsFd>(
@@ -683,6 +691,7 @@ pub fn set_ip_add_source_membership<Fd: AsFd>(
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[cfg(any(apple, freebsdlike, linux_like, solarish, target_os = "aix"))]
 #[inline]
 #[doc(alias = "IP_DROP_SOURCE_MEMBERSHIP")]
 pub fn set_ip_drop_source_membership<Fd: AsFd>(
@@ -741,6 +750,13 @@ pub fn set_ip_drop_membership<Fd: AsFd>(
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[cfg(any(
+    apple,
+    freebsdlike,
+    linux_like,
+    target_os = "fuchsia",
+    target_os = "openbsd"
+))]
 #[inline]
 #[doc(alias = "IP_DROP_MEMBERSHIP")]
 pub fn set_ip_drop_membership_with_ifindex<Fd: AsFd>(
@@ -800,6 +816,7 @@ pub fn get_ip_tos<Fd: AsFd>(fd: Fd) -> io::Result<u8> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[cfg(any(apple, freebsdlike, linux_like, target_os = "fuchsia"))]
 #[inline]
 #[doc(alias = "IP_RECVTOS")]
 pub fn set_ip_recvtos<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
@@ -811,6 +828,7 @@ pub fn set_ip_recvtos<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[cfg(any(apple, freebsdlike, linux_like, target_os = "fuchsia"))]
 #[inline]
 #[doc(alias = "IP_RECVTOS")]
 pub fn get_ip_recvtos<Fd: AsFd>(fd: Fd) -> io::Result<bool> {

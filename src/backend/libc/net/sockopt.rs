@@ -401,6 +401,13 @@ pub(crate) fn set_ip_add_membership(
     setsockopt(fd, c::IPPROTO_IP, c::IP_ADD_MEMBERSHIP, mreq)
 }
 
+#[cfg(any(
+    apple,
+    freebsdlike,
+    linux_like,
+    target_os = "fuchsia",
+    target_os = "openbsd"
+))]
 #[inline]
 pub(crate) fn set_ip_add_membership_with_ifindex(
     fd: BorrowedFd<'_>,
@@ -412,6 +419,7 @@ pub(crate) fn set_ip_add_membership_with_ifindex(
     setsockopt(fd, c::IPPROTO_IP, c::IP_ADD_MEMBERSHIP, mreqn)
 }
 
+#[cfg(any(apple, freebsdlike, linux_like, solarish, target_os = "aix"))]
 #[inline]
 pub(crate) fn set_ip_add_source_membership(
     fd: BorrowedFd<'_>,
@@ -423,6 +431,7 @@ pub(crate) fn set_ip_add_source_membership(
     setsockopt(fd, c::IPPROTO_IP, c::IP_ADD_SOURCE_MEMBERSHIP, mreq_source)
 }
 
+#[cfg(any(apple, freebsdlike, linux_like, solarish, target_os = "aix"))]
 #[inline]
 pub(crate) fn set_ip_drop_source_membership(
     fd: BorrowedFd<'_>,
@@ -471,6 +480,13 @@ pub(crate) fn set_ip_drop_membership(
     setsockopt(fd, c::IPPROTO_IP, c::IP_DROP_MEMBERSHIP, mreq)
 }
 
+#[cfg(any(
+    apple,
+    freebsdlike,
+    linux_like,
+    target_os = "fuchsia",
+    target_os = "openbsd"
+))]
 #[inline]
 pub(crate) fn set_ip_drop_membership_with_ifindex(
     fd: BorrowedFd<'_>,
@@ -534,11 +550,13 @@ pub(crate) fn get_ip_tos(fd: BorrowedFd<'_>) -> io::Result<u8> {
     Ok(value as u8)
 }
 
+#[cfg(any(apple, freebsdlike, linux_like, target_os = "fuchsia"))]
 #[inline]
 pub(crate) fn set_ip_recvtos(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     setsockopt(fd, c::IPPROTO_IP, c::IP_RECVTOS, from_bool(value))
 }
 
+#[cfg(any(apple, freebsdlike, linux_like, target_os = "fuchsia"))]
 #[inline]
 pub(crate) fn get_ip_recvtos(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::IPPROTO_IP, c::IP_RECVTOS).map(to_bool)
@@ -624,6 +642,13 @@ fn to_ip_mreq(multiaddr: &Ipv4Addr, interface: &Ipv4Addr) -> c::ip_mreq {
     }
 }
 
+#[cfg(any(
+    apple,
+    freebsdlike,
+    linux_like,
+    target_os = "fuchsia",
+    target_os = "openbsd"
+))]
 #[inline]
 fn to_ip_mreqn(multiaddr: &Ipv4Addr, address: &Ipv4Addr, ifindex: i32) -> c::ip_mreqn {
     c::ip_mreqn {
@@ -633,6 +658,7 @@ fn to_ip_mreqn(multiaddr: &Ipv4Addr, address: &Ipv4Addr, ifindex: i32) -> c::ip_
     }
 }
 
+#[cfg(any(apple, freebsdlike, linux_like, solarish, target_os = "aix"))]
 #[inline]
 fn to_imr_source(
     multiaddr: &Ipv4Addr,
