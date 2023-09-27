@@ -927,7 +927,7 @@ pub(crate) mod sockopt {
     use crate::net::{AddressFamily, Ipv4Addr, Ipv6Addr, SocketType};
     use c::{SO_RCVTIMEO_NEW, SO_RCVTIMEO_OLD, SO_SNDTIMEO_NEW, SO_SNDTIMEO_OLD};
     use core::time::Duration;
-    use linux_raw_sys::general::{__kernel_timespec, timeval};
+    use linux_raw_sys::general::{__kernel_old_timeval, __kernel_sock_timeval};
     use linux_raw_sys::net::{SO_ACCEPTCONN, TCP_KEEPCNT, TCP_KEEPIDLE, TCP_KEEPINTVL};
 
     #[inline]
@@ -1099,7 +1099,7 @@ pub(crate) mod sockopt {
         id: Timeout,
         timeout: Option<Duration>,
     ) -> io::Result<()> {
-        let time = duration_to_linux(timeout)?;
+        let time = duration_to_linux_sock_timeval(timeout)?;
         let optname = match id {
             Timeout::Recv => SO_RCVTIMEO_NEW,
             Timeout::Send => SO_SNDTIMEO_NEW,
@@ -1112,14 +1112,14 @@ pub(crate) mod sockopt {
         }
     }
 
-    /// Same as `set_socket_timeout` but uses `timeval` instead of
-    /// `__kernel_timespec` and `_OLD` constants instead of `_NEW`.
+    /// Same as `set_socket_timeout` but uses `__kernel_old_timeval` instead of
+    /// `__kernel_sock_timeval` and `_OLD` constants instead of `_NEW`.
     fn set_socket_timeout_old(
         fd: BorrowedFd<'_>,
         id: Timeout,
         timeout: Option<Duration>,
     ) -> io::Result<()> {
-        let time = duration_to_linux_old(timeout)?;
+        let time = duration_to_linux_old_timeval(timeout)?;
         let optname = match id {
             Timeout::Recv => SO_RCVTIMEO_OLD,
             Timeout::Send => SO_SNDTIMEO_OLD,
@@ -1136,40 +1136,29 @@ pub(crate) mod sockopt {
             Timeout::Recv => SO_RCVTIMEO_NEW,
             Timeout::Send => SO_SNDTIMEO_NEW,
         };
-        let time: __kernel_timespec = match getsockopt(fd, c::SOL_SOCKET, optname) {
+        let time: __kernel_sock_timeval = match getsockopt(fd, c::SOL_SOCKET, optname) {
             Err(io::Errno::NOPROTOOPT) if SO_RCVTIMEO_NEW != SO_RCVTIMEO_OLD => {
                 return get_socket_timeout_old(fd, id)
             }
             otherwise => otherwise?,
         };
-        Ok(duration_from_linux(time))
+        Ok(duration_from_linux_sock_timeval(time))
     }
 
-    /// Same as `get_socket_timeout` but uses `timeval` instead of
-    /// `__kernel_timespec` and `_OLD` constants instead of `_NEW`.
+    /// Same as `get_socket_timeout` but uses `__kernel_old_timeval` instead of
+    /// `__kernel_sock_timeval` and `_OLD` constants instead of `_NEW`.
     fn get_socket_timeout_old(fd: BorrowedFd<'_>, id: Timeout) -> io::Result<Option<Duration>> {
         let optname = match id {
             Timeout::Recv => SO_RCVTIMEO_OLD,
             Timeout::Send => SO_SNDTIMEO_OLD,
         };
-        let time: timeval = getsockopt(fd, c::SOL_SOCKET, optname)?;
-        Ok(duration_from_linux_old(time))
+        let time: __kernel_old_timeval = getsockopt(fd, c::SOL_SOCKET, optname)?;
+        Ok(duration_from_linux_old_timeval(time))
     }
 
-    /// Convert a C `timespec` to a Rust `Option<Duration>`.
+    /// Convert a `__linux_sock_timeval` to a Rust `Option<Duration>`.
     #[inline]
-    fn duration_from_linux(time: __kernel_timespec) -> Option<Duration> {
-        if time.tv_sec == 0 && time.tv_nsec == 0 {
-            None
-        } else {
-            Some(
-                Duration::from_secs(time.tv_sec as u64) + Duration::from_nanos(time.tv_nsec as u64),
-            )
-        }
-    }
-
-    /// Like `duration_from_linux` but uses Linux's old 32-bit `timeval`.
-    fn duration_from_linux_old(time: timeval) -> Option<Duration> {
+    fn duration_from_linux_sock_timeval(time: __kernel_sock_timeval) -> Option<Duration> {
         if time.tv_sec == 0 && time.tv_usec == 0 {
             None
         } else {
@@ -1180,32 +1169,52 @@ pub(crate) mod sockopt {
         }
     }
 
-    /// Convert a Rust `Option<Duration>` to a C `timespec`.
+    /// Like `duration_from_linux` but uses Linux's old 32-bit
+    /// `__kernel_old_timeval`.
+    fn duration_from_linux_old_timeval(time: __kernel_old_timeval) -> Option<Duration> {
+        if time.tv_sec == 0 && time.tv_usec == 0 {
+            None
+        } else {
+            Some(
+                Duration::from_secs(time.tv_sec as u64)
+                    + Duration::from_micros(time.tv_usec as u64),
+            )
+        }
+    }
+
+    /// Convert a Rust `Option<Duration>` to a `__kernel_sock_timeval`.
     #[inline]
-    fn duration_to_linux(timeout: Option<Duration>) -> io::Result<__kernel_timespec> {
+    fn duration_to_linux_sock_timeval(
+        timeout: Option<Duration>,
+    ) -> io::Result<__kernel_sock_timeval> {
         Ok(match timeout {
             Some(timeout) => {
                 if timeout == Duration::ZERO {
                     return Err(io::Errno::INVAL);
                 }
-                let mut timeout = __kernel_timespec {
+                // `subsec_micros` rounds down, so we use `subsec_nanos` and
+                // manually round up.
+                let mut timeout = __kernel_sock_timeval {
                     tv_sec: timeout.as_secs().try_into().unwrap_or(i64::MAX),
-                    tv_nsec: timeout.subsec_nanos().into(),
+                    tv_usec: ((timeout.subsec_nanos() + 999) / 1000) as _,
                 };
-                if timeout.tv_sec == 0 && timeout.tv_nsec == 0 {
-                    timeout.tv_nsec = 1;
+                if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
+                    timeout.tv_usec = 1;
                 }
                 timeout
             }
-            None => __kernel_timespec {
+            None => __kernel_sock_timeval {
                 tv_sec: 0,
-                tv_nsec: 0,
+                tv_usec: 0,
             },
         })
     }
 
-    /// Like `duration_to_linux` but uses Linux's old 32-bit `timeval`.
-    fn duration_to_linux_old(timeout: Option<Duration>) -> io::Result<timeval> {
+    /// Like `duration_to_linux` but uses Linux's old 32-bit
+    /// `__kernel_old_timeval`.
+    fn duration_to_linux_old_timeval(
+        timeout: Option<Duration>,
+    ) -> io::Result<__kernel_old_timeval> {
         Ok(match timeout {
             Some(timeout) => {
                 if timeout == Duration::ZERO {
@@ -1214,7 +1223,7 @@ pub(crate) mod sockopt {
 
                 // `subsec_micros` rounds down, so we use `subsec_nanos` and
                 // manually round up.
-                let mut timeout = timeval {
+                let mut timeout = __kernel_old_timeval {
                     tv_sec: timeout.as_secs().try_into().unwrap_or(c::c_long::MAX),
                     tv_usec: ((timeout.subsec_nanos() + 999) / 1000) as _,
                 };
@@ -1223,7 +1232,7 @@ pub(crate) mod sockopt {
                 }
                 timeout
             }
-            None => timeval {
+            None => __kernel_old_timeval {
                 tv_sec: 0,
                 tv_usec: 0,
             },

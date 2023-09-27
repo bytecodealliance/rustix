@@ -93,6 +93,22 @@ fn test_sockopts_ipv4() {
         );
     }
 
+    // Set a timeout with more than a million nanoseconds.
+    rustix::net::sockopt::set_socket_timeout(
+        &s,
+        rustix::net::sockopt::Timeout::Recv,
+        Some(Duration::new(1, 10000000)),
+    )
+    .unwrap();
+
+    // Check that we have a timeout of at least the time we set.
+    assert!(
+        rustix::net::sockopt::get_socket_timeout(&s, rustix::net::sockopt::Timeout::Recv)
+            .unwrap()
+            .unwrap()
+            >= Duration::new(1, 10000000)
+    );
+
     // Set the reuse address flag
     rustix::net::sockopt::set_socket_reuseaddr(&s, true).unwrap();
 
