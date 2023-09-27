@@ -217,8 +217,12 @@ fn test_sockopts_ipv4() {
     ))]
     {
         assert_eq!(sockopt::get_ip_tos(&s).unwrap(), 0);
-        sockopt::set_ip_tos(&s, libc::IPTOS_THROUGHPUT).unwrap();
-        assert_eq!(sockopt::get_ip_tos(&s).unwrap(), libc::IPTOS_THROUGHPUT);
+
+        #[cfg(any(linux_like, target_os = "aix", target_os = "nto"))]
+        {
+            sockopt::set_ip_tos(&s, libc::IPTOS_THROUGHPUT).unwrap();
+            assert_eq!(sockopt::get_ip_tos(&s).unwrap(), libc::IPTOS_THROUGHPUT);
+        }
     }
 
     // Check the initial value of IP RECVTOS, set it, and check it.
