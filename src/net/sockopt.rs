@@ -571,17 +571,6 @@ pub fn get_ipv6_multicast_loop<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::sockopt::get_ipv6_multicast_loop(fd.as_fd())
 }
 
-/// `setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, multicast_hops)`
-///
-/// See the [module-level documentation] for more.
-///
-/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
-#[inline]
-#[doc(alias = "IP_MULTICAST_TTL")]
-pub fn set_ipv6_multicast_hops<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
-    backend::net::sockopt::set_ipv6_multicast_hops(fd.as_fd(), value)
-}
-
 /// `getsockopt(fd, IPPROTO_IPV6, IPV6_UNICAST_HOPS)`
 ///
 /// See the [module-level documentation] for more.
@@ -593,7 +582,7 @@ pub fn get_ipv6_unicast_hops<Fd: AsFd>(fd: Fd) -> io::Result<u8> {
     backend::net::sockopt::get_ipv6_unicast_hops(fd.as_fd())
 }
 
-/// `setsockopt(fd, IPPROTO_IPV6, IPV6_UNICAST_HOPS, unicast_hops)`
+/// `setsockopt(fd, IPPROTO_IPV6, IPV6_UNICAST_HOPS, value)`
 ///
 /// See the [module-level documentation] for more.
 ///
@@ -604,13 +593,24 @@ pub fn set_ipv6_unicast_hops<Fd: AsFd>(fd: Fd, value: Option<u8>) -> io::Result<
     backend::net::sockopt::set_ipv6_unicast_hops(fd.as_fd(), value)
 }
 
+/// `setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[inline]
+#[doc(alias = "IPV6_MULTICAST_HOPS")]
+pub fn set_ipv6_multicast_hops<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
+    backend::net::sockopt::set_ipv6_multicast_hops(fd.as_fd(), value)
+}
+
 /// `getsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS)`
 ///
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
 #[inline]
-#[doc(alias = "IP_MULTICAST_TTL")]
+#[doc(alias = "IPV6_MULTICAST_HOPS")]
 pub fn get_ipv6_multicast_hops<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
     backend::net::sockopt::get_ipv6_multicast_hops(fd.as_fd())
 }
@@ -628,6 +628,27 @@ pub fn set_ip_add_membership<Fd: AsFd>(
     interface: &Ipv4Addr,
 ) -> io::Result<()> {
     backend::net::sockopt::set_ip_add_membership(fd.as_fd(), multiaddr, interface)
+}
+
+/// `setsockopt(fd, IPPROTO_IP, IP_ADD_SOURCE_MEMBERSHIP)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[inline]
+#[doc(alias = "IP_ADD_SOURCE_MEMBERSHIP")]
+pub fn set_ip_add_source_membership<Fd: AsFd>(
+    fd: Fd,
+    multiaddr: &Ipv4Addr,
+    interface: &Ipv4Addr,
+    sourceaddr: &Ipv4Addr,
+) -> io::Result<()> {
+    backend::net::sockopt::set_ip_add_source_membership(
+        fd.as_fd(),
+        multiaddr,
+        interface,
+        sourceaddr,
+    )
 }
 
 /// `setsockopt(fd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, multiaddr, interface)`
@@ -675,6 +696,72 @@ pub fn set_ipv6_drop_membership<Fd: AsFd>(
     interface: u32,
 ) -> io::Result<()> {
     backend::net::sockopt::set_ipv6_drop_membership(fd.as_fd(), multiaddr, interface)
+}
+
+/// `setsockopt(fd, IPPROTO_IP, IP_TOS, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[inline]
+#[doc(alias = "IP_TOS")]
+pub fn set_ip_tos<Fd: AsFd>(fd: Fd, value: u8) -> io::Result<()> {
+    backend::net::sockopt::set_ip_tos(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, IPPROTO_IP, IP_TOS)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[inline]
+#[doc(alias = "IP_TOS")]
+pub fn get_ip_tos<Fd: AsFd>(fd: Fd) -> io::Result<u8> {
+    backend::net::sockopt::get_ip_tos(fd.as_fd())
+}
+
+/// `setsockopt(fd, IPPROTO_IP, IP_RECVTOS, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[inline]
+#[doc(alias = "IP_RECVTOS")]
+pub fn set_ip_recvtos<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::sockopt::set_ip_recvtos(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, IPPROTO_IP, IP_RECVTOS)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[inline]
+#[doc(alias = "IP_RECVTOS")]
+pub fn get_ip_recvtos<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::sockopt::get_ip_recvtos(fd.as_fd())
+}
+
+/// `setsockopt(fd, IPPROTO_IPV6, IPV6_RECVTCLASS, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[inline]
+#[doc(alias = "IPV6_RECVTCLASS")]
+pub fn set_ipv6_recvtclass<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::sockopt::set_ipv6_recvtclass(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, IPPROTO_IPV6, IPV6_RECVTCLASS)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[inline]
+#[doc(alias = "IPV6_RECVTCLASS")]
+pub fn get_ipv6_recvtclass<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::sockopt::get_ipv6_recvtclass(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, value)`
@@ -773,6 +860,30 @@ pub fn set_tcp_keepintvl<Fd: AsFd>(fd: Fd, value: Duration) -> io::Result<()> {
 #[doc(alias = "TCP_KEEPINTVL")]
 pub fn get_tcp_keepintvl<Fd: AsFd>(fd: Fd) -> io::Result<Duration> {
     backend::net::sockopt::get_tcp_keepintvl(fd.as_fd())
+}
+
+/// `setsockopt(fd, IPPROTO_TCP, TCP_USER_TIMEOUT, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
+#[inline]
+#[cfg(any(linux_like, target_os = "fuchsia"))]
+#[doc(alias = "TCP_USER_TIMEOUT")]
+pub fn set_tcp_user_timeout<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
+    backend::net::sockopt::set_tcp_user_timeout(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, IPPROTO_TCP, TCP_USER_TIMEOUT)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
+#[inline]
+#[cfg(any(linux_like, target_os = "fuchsia"))]
+#[doc(alias = "TCP_USER_TIMEOUT")]
+pub fn get_tcp_user_timeout<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
+    backend::net::sockopt::get_tcp_user_timeout(fd.as_fd())
 }
 
 #[test]

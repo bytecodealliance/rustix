@@ -455,6 +455,22 @@ pub(crate) fn set_ip_add_membership(
 }
 
 #[inline]
+pub(crate) fn set_ip_add_source_membership(
+    fd: BorrowedFd<'_>,
+    multiaddr: &Ipv4Addr,
+    interface: &Ipv4Addr,
+    sourceaddr: &Ipv4Addr,
+) -> io::Result<()> {
+    let mreq_source = to_imr_source(multiaddr, interface, sourceaddr);
+    setsockopt(
+        fd,
+        c::IPPROTO_IP as _,
+        c::IP_ADD_SOURCE_MEMBERSHIP,
+        mreq_source,
+    )
+}
+
+#[inline]
 pub(crate) fn set_ipv6_add_membership(
     fd: BorrowedFd<'_>,
     multiaddr: &Ipv6Addr,
@@ -496,6 +512,36 @@ pub(crate) fn set_ipv6_unicast_hops(fd: BorrowedFd<'_>, hops: Option<u8>) -> io:
         None => -1,
     };
     setsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_UNICAST_HOPS, hops)
+}
+
+#[inline]
+pub(crate) fn set_ip_tos(fd: BorrowedFd<'_>, value: u8) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IP as _, c::IP_TOS, value)
+}
+
+#[inline]
+pub(crate) fn get_ip_tos(fd: BorrowedFd<'_>) -> io::Result<u8> {
+    getsockopt(fd, c::IPPROTO_IP as _, c::IP_TOS)
+}
+
+#[inline]
+pub(crate) fn set_ip_recvtos(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IP as _, c::IP_RECVTOS, value)
+}
+
+#[inline]
+pub(crate) fn get_ip_recvtos(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    getsockopt(fd, c::IPPROTO_IP as _, c::IP_RECVTOS).map(|value: i32| value > 0)
+}
+
+#[inline]
+pub(crate) fn set_ipv6_recvtclass(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_RECVTCLASS, value)
+}
+
+#[inline]
+pub(crate) fn get_ipv6_recvtclass(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    getsockopt(fd, c::IPPROTO_IPV6 as _, c::IPV6_RECVTCLASS).map(|value: i32| value > 0)
 }
 
 #[inline]
@@ -543,10 +589,33 @@ pub(crate) fn get_tcp_keepintvl(fd: BorrowedFd<'_>) -> io::Result<Duration> {
 }
 
 #[inline]
+pub(crate) fn set_tcp_user_timeout(fd: BorrowedFd<'_>, value: u32) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_TCP as _, c::TCP_USER_TIMEOUT, value)
+}
+
+#[inline]
+pub(crate) fn get_tcp_user_timeout(fd: BorrowedFd<'_>) -> io::Result<u32> {
+    getsockopt(fd, c::IPPROTO_TCP as _, c::TCP_USER_TIMEOUT)
+}
+
+#[inline]
 fn to_imr(multiaddr: &Ipv4Addr, interface: &Ipv4Addr) -> c::ip_mreq {
     c::ip_mreq {
         imr_multiaddr: to_imr_addr(multiaddr),
         imr_interface: to_imr_addr(interface),
+    }
+}
+
+#[inline]
+fn to_imr_source(
+    multiaddr: &Ipv4Addr,
+    interface: &Ipv4Addr,
+    sourceaddr: &Ipv4Addr,
+) -> c::ip_mreq_source {
+    c::ip_mreq_source {
+        imr_multiaddr: to_imr_addr(multiaddr).s_addr,
+        imr_interface: to_imr_addr(interface).s_addr,
+        imr_sourceaddr: to_imr_addr(sourceaddr).s_addr,
     }
 }
 
