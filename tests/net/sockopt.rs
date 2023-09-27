@@ -312,9 +312,18 @@ fn test_sockopts_ipv6() {
     assert_eq!(sockopt::get_ipv6_unicast_hops(&s).unwrap(), 8);
 
     // Check the initial value of IPV6 RECVTCLASS, set it, and check it.
-    assert!(!sockopt::get_ipv6_recvtclass(&s).unwrap());
-    sockopt::set_ipv6_recvtclass(&s, true).unwrap();
-    assert!(sockopt::get_ipv6_recvtclass(&s).unwrap());
+    #[cfg(any(
+        bsd,
+        linux_like,
+        target_os = "aix",
+        target_os = "fuchsia",
+        target_os = "nto"
+    ))]
+    {
+        assert!(!sockopt::get_ipv6_recvtclass(&s).unwrap());
+        sockopt::set_ipv6_recvtclass(&s, true).unwrap();
+        assert!(sockopt::get_ipv6_recvtclass(&s).unwrap());
+    }
 
     test_sockopts_tcp(&s);
 }

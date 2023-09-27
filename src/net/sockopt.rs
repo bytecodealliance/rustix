@@ -858,6 +858,13 @@ pub fn get_ip_recvtos<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[cfg(any(
+    bsd,
+    linux_like,
+    target_os = "aix",
+    target_os = "fuchsia",
+    target_os = "nto"
+))]
 #[inline]
 #[doc(alias = "IPV6_RECVTCLASS")]
 pub fn set_ipv6_recvtclass<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
@@ -869,6 +876,13 @@ pub fn set_ipv6_recvtclass<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[cfg(any(
+    bsd,
+    linux_like,
+    target_os = "aix",
+    target_os = "fuchsia",
+    target_os = "nto"
+))]
 #[inline]
 #[doc(alias = "IPV6_RECVTCLASS")]
 pub fn get_ipv6_recvtclass<Fd: AsFd>(fd: Fd) -> io::Result<bool> {

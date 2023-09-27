@@ -580,11 +580,25 @@ pub(crate) fn get_ip_recvtos(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::IPPROTO_IP, c::IP_RECVTOS).map(to_bool)
 }
 
+#[cfg(any(
+    bsd,
+    linux_like,
+    target_os = "aix",
+    target_os = "fuchsia",
+    target_os = "nto"
+))]
 #[inline]
 pub(crate) fn set_ipv6_recvtclass(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     setsockopt(fd, c::IPPROTO_IPV6, c::IPV6_RECVTCLASS, from_bool(value))
 }
 
+#[cfg(any(
+    bsd,
+    linux_like,
+    target_os = "aix",
+    target_os = "fuchsia",
+    target_os = "nto"
+))]
 #[inline]
 pub(crate) fn get_ipv6_recvtclass(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_RECVTCLASS).map(to_bool)
