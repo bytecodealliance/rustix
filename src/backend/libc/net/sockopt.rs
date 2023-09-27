@@ -568,13 +568,13 @@ pub(crate) fn get_ip_tos(fd: BorrowedFd<'_>) -> io::Result<u8> {
     Ok(value as u8)
 }
 
-#[cfg(any(apple, freebsdlike, linux_like, target_os = "fuchsia"))]
+#[cfg(any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia"))]
 #[inline]
 pub(crate) fn set_ip_recvtos(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     setsockopt(fd, c::IPPROTO_IP, c::IP_RECVTOS, from_bool(value))
 }
 
-#[cfg(any(apple, freebsdlike, linux_like, target_os = "fuchsia"))]
+#[cfg(any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia"))]
 #[inline]
 pub(crate) fn get_ip_recvtos(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::IPPROTO_IP, c::IP_RECVTOS).map(to_bool)

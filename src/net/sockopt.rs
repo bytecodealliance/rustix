@@ -834,7 +834,7 @@ pub fn get_ip_tos<Fd: AsFd>(fd: Fd) -> io::Result<u8> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
-#[cfg(any(apple, freebsdlike, linux_like, target_os = "fuchsia"))]
+#[cfg(any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia"))]
 #[inline]
 #[doc(alias = "IP_RECVTOS")]
 pub fn set_ip_recvtos<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
@@ -846,7 +846,7 @@ pub fn set_ip_recvtos<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
-#[cfg(any(apple, freebsdlike, linux_like, target_os = "fuchsia"))]
+#[cfg(any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia"))]
 #[inline]
 #[doc(alias = "IP_RECVTOS")]
 pub fn get_ip_recvtos<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
