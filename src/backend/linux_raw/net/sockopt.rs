@@ -430,8 +430,19 @@ pub(crate) fn set_ip_add_membership(
     multiaddr: &Ipv4Addr,
     interface: &Ipv4Addr,
 ) -> io::Result<()> {
-    let mreq = to_imr(multiaddr, interface);
+    let mreq = to_ip_mreq(multiaddr, interface);
     setsockopt(fd, c::IPPROTO_IP, c::IP_ADD_MEMBERSHIP, mreq)
+}
+
+#[inline]
+pub(crate) fn set_ip_add_membership_with_ifindex(
+    fd: BorrowedFd<'_>,
+    multiaddr: &Ipv4Addr,
+    address: &Ipv4Addr,
+    ifindex: i32,
+) -> io::Result<()> {
+    let mreqn = to_ip_mreqn(multiaddr, address, ifindex);
+    setsockopt(fd, c::IPPROTO_IP, c::IP_ADD_MEMBERSHIP, mreqn)
 }
 
 #[inline]
@@ -443,6 +454,17 @@ pub(crate) fn set_ip_add_source_membership(
 ) -> io::Result<()> {
     let mreq_source = to_imr_source(multiaddr, interface, sourceaddr);
     setsockopt(fd, c::IPPROTO_IP, c::IP_ADD_SOURCE_MEMBERSHIP, mreq_source)
+}
+
+#[inline]
+pub(crate) fn set_ip_drop_source_membership(
+    fd: BorrowedFd<'_>,
+    multiaddr: &Ipv4Addr,
+    interface: &Ipv4Addr,
+    sourceaddr: &Ipv4Addr,
+) -> io::Result<()> {
+    let mreq_source = to_imr_source(multiaddr, interface, sourceaddr);
+    setsockopt(fd, c::IPPROTO_IP, c::IP_DROP_SOURCE_MEMBERSHIP, mreq_source)
 }
 
 #[inline]
@@ -461,8 +483,19 @@ pub(crate) fn set_ip_drop_membership(
     multiaddr: &Ipv4Addr,
     interface: &Ipv4Addr,
 ) -> io::Result<()> {
-    let mreq = to_imr(multiaddr, interface);
+    let mreq = to_ip_mreq(multiaddr, interface);
     setsockopt(fd, c::IPPROTO_IP, c::IP_DROP_MEMBERSHIP, mreq)
+}
+
+#[inline]
+pub(crate) fn set_ip_drop_membership_with_ifindex(
+    fd: BorrowedFd<'_>,
+    multiaddr: &Ipv4Addr,
+    address: &Ipv4Addr,
+    ifindex: i32,
+) -> io::Result<()> {
+    let mreqn = to_ip_mreqn(multiaddr, address, ifindex);
+    setsockopt(fd, c::IPPROTO_IP, c::IP_DROP_MEMBERSHIP, mreqn)
 }
 
 #[inline]
@@ -491,32 +524,33 @@ pub(crate) fn set_ipv6_unicast_hops(fd: BorrowedFd<'_>, hops: Option<u8>) -> io:
 
 #[inline]
 pub(crate) fn set_ip_tos(fd: BorrowedFd<'_>, value: u8) -> io::Result<()> {
-    setsockopt(fd, c::IPPROTO_IP, c::IP_TOS, value)
+    setsockopt(fd, c::IPPROTO_IP, c::IP_TOS, i32::from(value))
 }
 
 #[inline]
 pub(crate) fn get_ip_tos(fd: BorrowedFd<'_>) -> io::Result<u8> {
-    getsockopt(fd, c::IPPROTO_IP, c::IP_TOS)
+    let value: i32 = getsockopt(fd, c::IPPROTO_IP, c::IP_TOS)?;
+    Ok(value as u8)
 }
 
 #[inline]
 pub(crate) fn set_ip_recvtos(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
-    setsockopt(fd, c::IPPROTO_IP, c::IP_RECVTOS, value)
+    setsockopt(fd, c::IPPROTO_IP, c::IP_RECVTOS, from_bool(value))
 }
 
 #[inline]
 pub(crate) fn get_ip_recvtos(fd: BorrowedFd<'_>) -> io::Result<bool> {
-    getsockopt(fd, c::IPPROTO_IP, c::IP_RECVTOS).map(|value: i32| value > 0)
+    getsockopt(fd, c::IPPROTO_IP, c::IP_RECVTOS).map(to_bool)
 }
 
 #[inline]
 pub(crate) fn set_ipv6_recvtclass(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
-    setsockopt(fd, c::IPPROTO_IPV6, c::IPV6_RECVTCLASS, value)
+    setsockopt(fd, c::IPPROTO_IPV6, c::IPV6_RECVTCLASS, from_bool(value))
 }
 
 #[inline]
 pub(crate) fn get_ipv6_recvtclass(fd: BorrowedFd<'_>) -> io::Result<bool> {
-    getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_RECVTCLASS).map(|value: i32| value > 0)
+    getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_RECVTCLASS).map(to_bool)
 }
 
 #[inline]
@@ -574,10 +608,19 @@ pub(crate) fn get_tcp_user_timeout(fd: BorrowedFd<'_>) -> io::Result<u32> {
 }
 
 #[inline]
-fn to_imr(multiaddr: &Ipv4Addr, interface: &Ipv4Addr) -> c::ip_mreq {
+fn to_ip_mreq(multiaddr: &Ipv4Addr, interface: &Ipv4Addr) -> c::ip_mreq {
     c::ip_mreq {
         imr_multiaddr: to_imr_addr(multiaddr),
         imr_interface: to_imr_addr(interface),
+    }
+}
+
+#[inline]
+fn to_ip_mreqn(multiaddr: &Ipv4Addr, address: &Ipv4Addr, ifindex: i32) -> c::ip_mreqn {
+    c::ip_mreqn {
+        imr_multiaddr: to_imr_addr(multiaddr),
+        imr_address: to_imr_addr(address),
+        imr_ifindex: ifindex,
     }
 }
 

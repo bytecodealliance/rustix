@@ -617,6 +617,9 @@ pub fn get_ipv6_multicast_hops<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 
 /// `setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, multiaddr, interface)`
 ///
+/// This is similar to [`set_ip_add_membership`] but always sets `ifindex` value
+/// to zero.
+///
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
@@ -628,6 +631,30 @@ pub fn set_ip_add_membership<Fd: AsFd>(
     interface: &Ipv4Addr,
 ) -> io::Result<()> {
     backend::net::sockopt::set_ip_add_membership(fd.as_fd(), multiaddr, interface)
+}
+
+/// `setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, multiaddr, address, ifindex)`
+///
+/// This is similar to [`set_ip_add_membership_with_ifindex`] but additionally
+/// allows a `ifindex` value to be given.
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[inline]
+#[doc(alias = "IP_ADD_MEMBERSHIP")]
+pub fn set_ip_add_membership_with_ifindex<Fd: AsFd>(
+    fd: Fd,
+    multiaddr: &Ipv4Addr,
+    address: &Ipv4Addr,
+    ifindex: i32,
+) -> io::Result<()> {
+    backend::net::sockopt::set_ip_add_membership_with_ifindex(
+        fd.as_fd(),
+        multiaddr,
+        address,
+        ifindex,
+    )
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_ADD_SOURCE_MEMBERSHIP)`
@@ -644,6 +671,27 @@ pub fn set_ip_add_source_membership<Fd: AsFd>(
     sourceaddr: &Ipv4Addr,
 ) -> io::Result<()> {
     backend::net::sockopt::set_ip_add_source_membership(
+        fd.as_fd(),
+        multiaddr,
+        interface,
+        sourceaddr,
+    )
+}
+
+/// `setsockopt(fd, IPPROTO_IP, IP_DROP_SOURCE_MEMBERSHIP)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[inline]
+#[doc(alias = "IP_DROP_SOURCE_MEMBERSHIP")]
+pub fn set_ip_drop_source_membership<Fd: AsFd>(
+    fd: Fd,
+    multiaddr: &Ipv4Addr,
+    interface: &Ipv4Addr,
+    sourceaddr: &Ipv4Addr,
+) -> io::Result<()> {
+    backend::net::sockopt::set_ip_drop_source_membership(
         fd.as_fd(),
         multiaddr,
         interface,
@@ -669,6 +717,9 @@ pub fn set_ipv6_add_membership<Fd: AsFd>(
 
 /// `setsockopt(fd, IPPROTO_IP, IP_DROP_MEMBERSHIP, multiaddr, interface)`
 ///
+/// This is similar to [`set_ip_drop_membership`] but always sets `ifindex` value
+/// to zero.
+///
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
@@ -680,6 +731,30 @@ pub fn set_ip_drop_membership<Fd: AsFd>(
     interface: &Ipv4Addr,
 ) -> io::Result<()> {
     backend::net::sockopt::set_ip_drop_membership(fd.as_fd(), multiaddr, interface)
+}
+
+/// `setsockopt(fd, IPPROTO_IP, IP_DROP_MEMBERSHIP, multiaddr, interface)`
+///
+/// This is similar to [`set_ip_drop_membership_with_ifindex`] but additionally
+/// allows a `ifindex` value to be given.
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[inline]
+#[doc(alias = "IP_DROP_MEMBERSHIP")]
+pub fn set_ip_drop_membership_with_ifindex<Fd: AsFd>(
+    fd: Fd,
+    multiaddr: &Ipv4Addr,
+    address: &Ipv4Addr,
+    ifindex: i32,
+) -> io::Result<()> {
+    backend::net::sockopt::set_ip_drop_membership_with_ifindex(
+        fd.as_fd(),
+        multiaddr,
+        address,
+        ifindex,
+    )
 }
 
 /// `setsockopt(fd, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, multiaddr, interface)`

@@ -51,22 +51,22 @@ pub(crate) use linux_raw_sys::{
     general::{O_CLOEXEC as SOCK_CLOEXEC, O_NONBLOCK as SOCK_NONBLOCK},
     if_ether::*,
     net::{
-        AF_DECnet, __kernel_sa_family_t as sa_family_t,
-        __kernel_sockaddr_storage as sockaddr_storage, cmsghdr, in6_addr, in_addr, ip_mreq,
-        ip_mreq_source, ipv6_mreq, linger, msghdr, sockaddr, sockaddr_in, sockaddr_in6,
-        sockaddr_un, socklen_t, AF_APPLETALK, AF_ASH, AF_ATMPVC, AF_ATMSVC, AF_AX25, AF_BLUETOOTH,
-        AF_BRIDGE, AF_CAN, AF_ECONET, AF_IEEE802154, AF_INET, AF_INET6, AF_IPX, AF_IRDA, AF_ISDN,
-        AF_IUCV, AF_KEY, AF_LLC, AF_NETBEUI, AF_NETLINK, AF_NETROM, AF_PACKET, AF_PHONET, AF_PPPOX,
-        AF_RDS, AF_ROSE, AF_RXRPC, AF_SECURITY, AF_SNA, AF_TIPC, AF_UNIX, AF_UNSPEC, AF_WANPIPE,
-        AF_X25, IPPROTO_FRAGMENT, IPPROTO_ICMPV6, IPPROTO_MH, IPPROTO_ROUTING, IPV6_ADD_MEMBERSHIP,
+        linger, msghdr, sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, AF_DECnet,
+        __kernel_sa_family_t as sa_family_t, __kernel_sockaddr_storage as sockaddr_storage,
+        cmsghdr, in6_addr, in_addr, ip_mreq, ip_mreq_source, ip_mreqn, ipv6_mreq, AF_APPLETALK,
+        AF_ASH, AF_ATMPVC, AF_ATMSVC, AF_AX25, AF_BLUETOOTH, AF_BRIDGE, AF_CAN, AF_ECONET,
+        AF_IEEE802154, AF_INET, AF_INET6, AF_IPX, AF_IRDA, AF_ISDN, AF_IUCV, AF_KEY, AF_LLC,
+        AF_NETBEUI, AF_NETLINK, AF_NETROM, AF_PACKET, AF_PHONET, AF_PPPOX, AF_RDS, AF_ROSE,
+        AF_RXRPC, AF_SECURITY, AF_SNA, AF_TIPC, AF_UNIX, AF_UNSPEC, AF_WANPIPE, AF_X25,
+        IPPROTO_FRAGMENT, IPPROTO_ICMPV6, IPPROTO_MH, IPPROTO_ROUTING, IPV6_ADD_MEMBERSHIP,
         IPV6_DROP_MEMBERSHIP, IPV6_MULTICAST_HOPS, IPV6_MULTICAST_LOOP, IPV6_RECVTCLASS,
         IPV6_UNICAST_HOPS, IPV6_V6ONLY, IP_ADD_MEMBERSHIP, IP_ADD_SOURCE_MEMBERSHIP,
-        IP_DROP_MEMBERSHIP, IP_MULTICAST_LOOP, IP_MULTICAST_TTL, IP_RECVTOS, IP_TOS, IP_TTL,
-        MSG_CMSG_CLOEXEC, MSG_CONFIRM, MSG_DONTROUTE, MSG_DONTWAIT, MSG_EOR, MSG_ERRQUEUE,
-        MSG_MORE, MSG_NOSIGNAL, MSG_OOB, MSG_PEEK, MSG_TRUNC, MSG_WAITALL, SCM_CREDENTIALS,
-        SCM_RIGHTS, SHUT_RD, SHUT_RDWR, SHUT_WR, SOCK_DGRAM, SOCK_RAW, SOCK_RDM, SOCK_SEQPACKET,
-        SOCK_STREAM, SOL_SOCKET, SO_ACCEPTCONN, SO_BROADCAST, SO_DOMAIN, SO_ERROR, SO_KEEPALIVE,
-        SO_LINGER, SO_OOBINLINE, SO_PASSCRED, SO_RCVBUF, SO_RCVTIMEO_NEW,
+        IP_DROP_MEMBERSHIP, IP_DROP_SOURCE_MEMBERSHIP, IP_MULTICAST_LOOP, IP_MULTICAST_TTL,
+        IP_RECVTOS, IP_TOS, IP_TTL, MSG_CMSG_CLOEXEC, MSG_CONFIRM, MSG_DONTROUTE, MSG_DONTWAIT,
+        MSG_EOR, MSG_ERRQUEUE, MSG_MORE, MSG_NOSIGNAL, MSG_OOB, MSG_PEEK, MSG_TRUNC, MSG_WAITALL,
+        SCM_CREDENTIALS, SCM_RIGHTS, SHUT_RD, SHUT_RDWR, SHUT_WR, SOCK_DGRAM, SOCK_RAW, SOCK_RDM,
+        SOCK_SEQPACKET, SOCK_STREAM, SOL_SOCKET, SO_ACCEPTCONN, SO_BROADCAST, SO_DOMAIN, SO_ERROR,
+        SO_KEEPALIVE, SO_LINGER, SO_OOBINLINE, SO_PASSCRED, SO_RCVBUF, SO_RCVTIMEO_NEW,
         SO_RCVTIMEO_NEW as SO_RCVTIMEO, SO_RCVTIMEO_OLD, SO_REUSEADDR, SO_SNDBUF, SO_SNDTIMEO_NEW,
         SO_SNDTIMEO_NEW as SO_SNDTIMEO, SO_SNDTIMEO_OLD, SO_TYPE, TCP_KEEPCNT, TCP_KEEPIDLE,
         TCP_KEEPINTVL, TCP_NODELAY, TCP_USER_TIMEOUT,
@@ -76,32 +76,59 @@ pub(crate) use linux_raw_sys::{
 
 // Cast away bindgen's `enum` type to make these consistent with the other
 // `setsockopt`/`getsockopt` level values.
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_IP: u32 = linux_raw_sys::net::IPPROTO_IP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_ICMP: u32 = linux_raw_sys::net::IPPROTO_ICMP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_IGMP: u32 = linux_raw_sys::net::IPPROTO_IGMP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_IPIP: u32 = linux_raw_sys::net::IPPROTO_IPIP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_TCP: u32 = linux_raw_sys::net::IPPROTO_TCP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_EGP: u32 = linux_raw_sys::net::IPPROTO_EGP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_PUP: u32 = linux_raw_sys::net::IPPROTO_PUP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_UDP: u32 = linux_raw_sys::net::IPPROTO_UDP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_IDP: u32 = linux_raw_sys::net::IPPROTO_IDP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_TP: u32 = linux_raw_sys::net::IPPROTO_TP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_DCCP: u32 = linux_raw_sys::net::IPPROTO_DCCP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_IPV6: u32 = linux_raw_sys::net::IPPROTO_IPV6 as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_RSVP: u32 = linux_raw_sys::net::IPPROTO_RSVP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_GRE: u32 = linux_raw_sys::net::IPPROTO_GRE as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_ESP: u32 = linux_raw_sys::net::IPPROTO_ESP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_AH: u32 = linux_raw_sys::net::IPPROTO_AH as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_MTP: u32 = linux_raw_sys::net::IPPROTO_MTP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_BEETPH: u32 = linux_raw_sys::net::IPPROTO_BEETPH as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_ENCAP: u32 = linux_raw_sys::net::IPPROTO_ENCAP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_PIM: u32 = linux_raw_sys::net::IPPROTO_PIM as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_COMP: u32 = linux_raw_sys::net::IPPROTO_COMP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_SCTP: u32 = linux_raw_sys::net::IPPROTO_SCTP as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_UDPLITE: u32 = linux_raw_sys::net::IPPROTO_UDPLITE as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_MPLS: u32 = linux_raw_sys::net::IPPROTO_MPLS as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_ETHERNET: u32 = linux_raw_sys::net::IPPROTO_ETHERNET as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_RAW: u32 = linux_raw_sys::net::IPPROTO_RAW as _;
+#[cfg(feature = "net")]
 pub(crate) const IPPROTO_MPTCP: u32 = linux_raw_sys::net::IPPROTO_MPTCP as _;
 
 #[cfg(any(feature = "process", feature = "runtime"))]
