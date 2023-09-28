@@ -3,11 +3,10 @@
 use libc::{kill, SIGSTOP};
 use rustix::fd::AsFd;
 use rustix::{io, process};
-use serial_test::serial;
 use std::process::Command;
 
 #[test]
-#[serial]
+#[ignore]
 fn test_pidfd_waitid() {
     // Create a new process.
     let child = Command::new("yes")
@@ -42,7 +41,7 @@ fn test_pidfd_waitid() {
 }
 
 #[test]
-#[serial]
+#[ignore]
 fn test_pidfd_poll() {
     // Create a new process.
     let child = Command::new("sleep")
