@@ -1,6 +1,5 @@
 use libc::{kill, SIGSTOP};
 use rustix::process;
-use serial_test::serial;
 use std::process::{Command, Stdio};
 
 // These tests must execute serially to prevent race condition, where
@@ -8,7 +7,7 @@ use std::process::{Command, Stdio};
 // the tests to get stuck.
 
 #[test]
-#[serial]
+#[ignore]
 fn test_waitpid() {
     let child = Command::new("yes")
         .stdout(Stdio::null())

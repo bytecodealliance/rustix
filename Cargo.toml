@@ -73,23 +73,11 @@ tempfile = "3.2.0"
 libc = "0.2.133"
 libc_errno = { package = "errno", version = "0.3.0", default-features = false }
 io-lifetimes = { version = "1.0.0", default-features = false, features = ["close"] }
-# Don't upgrade to serial_test 0.7 for now because it depends on a
-# `parking_lot_core` version which is not compatible with our MSRV of 1.48.
-serial_test = "0.6"
 memoffset = "0.7.1"
 flate2 = "1.0"
 
-[target.'cfg(all(criterion, not(any(target_os = "emscripten", target_os = "wasi"))))'.dev-dependencies]
-criterion = "0.4"
-
 [target.'cfg(windows)'.dev-dependencies]
 ctor = "0.1.21"
-
-# Add Criterion configuration, as described here:
-# <https://bheisler.github.io/criterion.rs/book/getting_started.html#step-1---add-dependency-to-cargotoml>
-[[bench]]
-name = "mod"
-harness = false
 
 [package.metadata.docs.rs]
 features = ["all-apis"]
