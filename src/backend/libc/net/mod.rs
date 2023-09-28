@@ -4,5 +4,7 @@ pub(crate) mod ext;
 pub(crate) mod msghdr;
 pub(crate) mod read_sockaddr;
 pub(crate) mod send_recv;
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub(crate) mod sockopt;
 pub(crate) mod syscalls;
 pub(crate) mod write_sockaddr;
