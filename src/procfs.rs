@@ -18,10 +18,9 @@
 //! namespace. So with the checking here, they may fail, but they won't be able
 //! to succeed with bogus results.
 
-use crate::backend::pid::syscalls::getpid;
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::fs::{
-    fstat, fstatfs, major, openat, renameat, FileType, FsWord, Mode, OFlags, Stat, CWD,
+    fstat, fstatfs, major, openat, readlinkat, renameat, FileType, FsWord, Mode, OFlags, Stat, CWD,
     PROC_SUPER_MAGIC,
 };
 use crate::io;
@@ -44,6 +43,8 @@ enum Kind {
     Fd,
     #[cfg(feature = "alloc")]
     File,
+    #[cfg(feature = "alloc")]
+    Symlink,
 }
 
 /// Check a subdirectory of "/proc" for anomalies.
@@ -71,14 +72,23 @@ fn check_proc_entry_with_stat(
         Kind::Pid | Kind::Fd => check_proc_subdir(entry, &entry_stat, proc_stat)?,
         #[cfg(feature = "alloc")]
         Kind::File => check_proc_file(&entry_stat, proc_stat)?,
+        #[cfg(feature = "alloc")]
+        Kind::Symlink => check_proc_symlink(&entry_stat, proc_stat)?,
     }
 
     // "/proc" directories are typically mounted r-xr-xr-x.
     // "/proc/self/fd" is r-x------. Allow them to have fewer permissions, but
     // not more.
-    let expected_mode = if let Kind::Fd = kind { 0o500 } else { 0o555 };
-    if entry_stat.st_mode & 0o777 & !expected_mode != 0 {
-        return Err(io::Errno::NOTSUP);
+    match kind {
+        Kind::Symlink => {
+            // On Linux, symlinks don't have their own permissions.
+        }
+        _ => {
+            let expected_mode = if let Kind::Fd = kind { 0o500 } else { 0o555 };
+            if entry_stat.st_mode & 0o777 & !expected_mode != 0 {
+                return Err(io::Errno::NOTSUP);
+            }
+        }
     }
 
     match kind {
@@ -98,7 +108,7 @@ fn check_proc_entry_with_stat(
             }
         }
         #[cfg(feature = "alloc")]
-        Kind::File => {
+        Kind::File | Kind::Symlink => {
             // Check that files in procfs don't have extraneous hard links to
             // them (which might indicate hard links to other things).
             if entry_stat.st_nlink != 1 {
@@ -157,6 +167,18 @@ fn check_proc_subdir(
 fn check_proc_file(stat: &Stat, proc_stat: Option<&Stat>) -> io::Result<()> {
     // Check that we have a regular file.
     if FileType::from_raw_mode(stat.st_mode) != FileType::RegularFile {
+        return Err(io::Errno::NOTSUP);
+    }
+
+    check_proc_nonroot(stat, proc_stat)?;
+
+    Ok(())
+}
+
+#[cfg(feature = "alloc")]
+fn check_proc_symlink(stat: &Stat, proc_stat: Option<&Stat>) -> io::Result<()> {
+    // Check that we have a symbolic link.
+    if FileType::from_raw_mode(stat.st_mode) != FileType::Symlink {
         return Err(io::Errno::NOTSUP);
     }
 
@@ -253,11 +275,15 @@ fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
         .get_or_try_init(|| {
             let (proc, proc_stat) = proc()?;
 
-            let pid = getpid();
+            // `getpid` would return our pid in our own pid namespace, so
+            // instead use `readlink` on the `self` symlink to learn our pid in
+            // the procfs namespace.
+            let self_symlink = open_and_check_file(proc, proc_stat, cstr!("self"), Kind::Symlink)?;
+            let pid = readlinkat(self_symlink, cstr!(""), Vec::new())?;
 
             // Open "/proc/self". Use our pid to compute the name rather than
             // literally using "self", as "self" is a symlink.
-            let proc_self = proc_opendirat(proc, DecInt::new(pid.as_raw_nonzero().get()))?;
+            let proc_self = proc_opendirat(proc, pid)?;
             let proc_self_stat = check_proc_entry(Kind::Pid, proc_self.as_fd(), Some(proc_stat))
                 .map_err(|_err| io::Errno::NOTSUP)?;
 
@@ -355,7 +381,12 @@ pub fn proc_self_fdinfo_fd<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 fn _proc_self_fdinfo(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     let (proc_self_fdinfo, proc_self_fdinfo_stat) = proc_self_fdinfo()?;
     let fd_str = DecInt::from_fd(fd);
-    open_and_check_file(proc_self_fdinfo, proc_self_fdinfo_stat, fd_str.as_c_str())
+    open_and_check_file(
+        proc_self_fdinfo,
+        proc_self_fdinfo_stat,
+        fd_str.as_c_str(),
+        Kind::File,
+    )
 }
 
 /// Returns a handle to a Linux `/proc/self/pagemap` file.
@@ -412,12 +443,17 @@ pub fn proc_self_status() -> io::Result<OwnedFd> {
 #[cfg(feature = "alloc")]
 fn proc_self_file(name: &CStr) -> io::Result<OwnedFd> {
     let (proc_self, proc_self_stat) = proc_self()?;
-    open_and_check_file(proc_self, proc_self_stat, name)
+    open_and_check_file(proc_self, proc_self_stat, name, Kind::File)
 }
 
 /// Open a procfs file within in `dir` and check it for bind mounts.
 #[cfg(feature = "alloc")]
-fn open_and_check_file(dir: BorrowedFd<'_>, dir_stat: &Stat, name: &CStr) -> io::Result<OwnedFd> {
+fn open_and_check_file(
+    dir: BorrowedFd<'_>,
+    dir_stat: &Stat,
+    name: &CStr,
+    kind: Kind,
+) -> io::Result<OwnedFd> {
     let (_, proc_stat) = proc()?;
 
     // Don't use `NOATIME`, because it [requires us to own the file], and when
@@ -426,7 +462,11 @@ fn open_and_check_file(dir: BorrowedFd<'_>, dir_stat: &Stat, name: &CStr) -> io:
     //
     // [requires us to own the file]: https://man7.org/linux/man-pages/man2/openat.2.html
     // [to root:root]: https://man7.org/linux/man-pages/man5/proc.5.html
-    let oflags = OFlags::RDONLY | OFlags::CLOEXEC | OFlags::NOFOLLOW | OFlags::NOCTTY;
+    let mut oflags = OFlags::RDONLY | OFlags::CLOEXEC | OFlags::NOFOLLOW | OFlags::NOCTTY;
+    if let Kind::Symlink = kind {
+        // Open symlinks with `O_PATH`.
+        oflags |= OFlags::PATH;
+    }
     let file = openat(dir, name, oflags, Mode::empty()).map_err(|_err| io::Errno::NOTSUP)?;
     let file_stat = fstat(&file)?;
 
@@ -451,17 +491,22 @@ fn open_and_check_file(dir: BorrowedFd<'_>, dir_stat: &Stat, name: &CStr) -> io:
         return Err(io::Errno::NOTSUP);
     }
 
+    let expected_type = match kind {
+        Kind::File => FileType::RegularFile,
+        Kind::Symlink => FileType::Symlink,
+        _ => unreachable!(),
+    };
+
     let mut found_file = false;
     let mut found_dot = false;
     for entry in dir {
         let entry = entry.map_err(|_err| io::Errno::NOTSUP)?;
         if entry.ino() == file_stat.st_ino
-            && entry.file_type() == FileType::RegularFile
+            && entry.file_type() == expected_type
             && entry.file_name() == name
         {
             // We found the file. Proceed to check the file handle.
-            let _ =
-                check_proc_entry_with_stat(Kind::File, file.as_fd(), file_stat, Some(proc_stat))?;
+            let _ = check_proc_entry_with_stat(kind, file.as_fd(), file_stat, Some(proc_stat))?;
 
             found_file = true;
         } else if entry.ino() == dir_stat.st_ino
