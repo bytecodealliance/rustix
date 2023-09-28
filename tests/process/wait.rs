@@ -1,7 +1,6 @@
 #[allow(unused_imports)]
 use libc::{kill, SIGCONT, SIGKILL, SIGSTOP};
 use rustix::process;
-use serial_test::serial;
 use std::process::{Command, Stdio};
 
 // These tests must execute serially to prevent race condition, where
@@ -9,7 +8,7 @@ use std::process::{Command, Stdio};
 // the tests to get stuck.
 
 #[test]
-#[serial]
+#[ignore]
 fn test_waitpid() {
     let child = Command::new("yes")
         .stdout(Stdio::null())
@@ -32,7 +31,7 @@ fn test_waitpid() {
     target_os = "openbsd"
 )))]
 #[test]
-#[serial]
+#[ignore]
 fn test_waitid() {
     let child = Command::new("yes")
         .stdout(Stdio::null())

@@ -90,6 +90,7 @@ jobs:
       run: |
         cargo update --package=once_cell --precise 1.14.0
         cargo update --package=flate2 --precise=1.0.25
+        cargo update --package=tempfile --precise=3.6.0
 
     - run: cargo check --workspace --release -vv --all-targets
     - run: cargo check --workspace --release -vv --features=all-apis --all-targets
@@ -476,6 +477,7 @@ jobs:
       run: |
         cargo update --package=once_cell --precise 1.14.0
         cargo update --package=flate2 --precise=1.0.25
+        cargo update --package=tempfile --precise=3.6.0
 
     - run: |
         # Run the tests, and check the prebuilt release libraries.
