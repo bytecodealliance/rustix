@@ -97,6 +97,7 @@ jobs:
             cargo update --package=io-lifetimes --precise 1.0.6
             cd - >/dev/null
         done
+        cargo update --package=tempfile --precise=3.6.0
 
     - run: cargo check --workspace --release -vv --all-targets
     - run: cargo check --workspace --release -vv --features=all-apis --all-targets
@@ -479,6 +480,7 @@ jobs:
             cargo update --package=io-lifetimes --precise 1.0.6
             cd - >/dev/null
         done
+        cargo update --package=tempfile --precise=3.6.0
 
     - run: |
         # Run the tests, and check the prebuilt release libraries.
