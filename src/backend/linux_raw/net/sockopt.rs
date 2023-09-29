@@ -8,6 +8,7 @@
 use crate::backend::c;
 use crate::backend::conv::{by_mut, c_uint, ret, socklen_t};
 use crate::fd::BorrowedFd;
+#[cfg(feature = "alloc")]
 use crate::ffi::CStr;
 use crate::io;
 use crate::net::sockopt::Timeout;
@@ -15,6 +16,10 @@ use crate::net::{
     AddressFamily, Ipv4Addr, Ipv6Addr, Protocol, RawProtocol, SocketAddrAny, SocketAddrStorage,
     SocketAddrV4, SocketAddrV6, SocketType,
 };
+#[cfg(feature = "alloc")]
+use alloc::borrow::ToOwned;
+#[cfg(feature = "alloc")]
+use alloc::string::String;
 use core::mem::MaybeUninit;
 use core::time::Duration;
 use linux_raw_sys::general::{__kernel_old_timeval, __kernel_sock_timeval};
@@ -66,7 +71,6 @@ fn getsockopt_raw<T>(
     }
     #[cfg(target_arch = "x86")]
     unsafe {
-        let mut value = MaybeUninit::<T>::uninit();
         ret(syscall!(
             __NR_socketcall,
             x86_sys(SYS_GETSOCKOPT),
@@ -74,8 +78,8 @@ fn getsockopt_raw<T>(
                 fd.into(),
                 c_uint(level),
                 c_uint(optname),
-                (&mut value).into(),
-                by_mut(&mut optlen),
+                value.into(),
+                by_mut(optlen),
             ])
         ))
     }
@@ -119,7 +123,7 @@ fn setsockopt_raw<T>(
                 fd.into(),
                 c_uint(level),
                 c_uint(optname),
-                ptr,
+                ptr.into(),
                 socklen_t(optlen),
             ])
         ))
@@ -749,6 +753,7 @@ pub(crate) fn set_tcp_congestion(fd: BorrowedFd<'_>, value: &str) -> io::Result<
     setsockopt_raw(fd, level, optname, value.as_ptr(), optlen)
 }
 
+#[cfg(feature = "alloc")]
 #[inline]
 pub(crate) fn get_tcp_congestion(fd: BorrowedFd<'_>) -> io::Result<String> {
     let level = c::IPPROTO_TCP;
@@ -760,8 +765,9 @@ pub(crate) fn get_tcp_congestion(fd: BorrowedFd<'_>) -> io::Result<String> {
     unsafe {
         let value = value.assume_init();
         let slice: &[u8] = core::mem::transmute(&value[..optlen as usize]);
+        assert!(slice.iter().any(|b| *b == b'\0'));
         Ok(
-            core::str::from_utf8(CStr::from_bytes_until_nul(slice).unwrap().to_bytes())
+            core::str::from_utf8(CStr::from_ptr(slice.as_ptr().cast()).to_bytes())
                 .unwrap()
                 .to_owned(),
         )

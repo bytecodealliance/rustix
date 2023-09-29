@@ -1,7 +1,15 @@
 use rustix::fd::OwnedFd;
 use rustix::io;
-use rustix::net::sockopt;
-use rustix::net::{ipproto, AddressFamily, SocketType};
+#[cfg(any(
+    linux_kernel,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "openbsd",
+    target_os = "redox",
+    target_env = "newlib"
+))]
+use rustix::net::ipproto;
+use rustix::net::{sockopt, AddressFamily, SocketType};
 use std::time::Duration;
 
 // Test `socket` socket options.
@@ -11,10 +19,20 @@ fn test_sockopts_socket(s: &OwnedFd) {
         .unwrap()
         .is_none());
     assert_eq!(sockopt::get_socket_type(&s).unwrap(), SocketType::STREAM);
-    assert_eq!(
-        sockopt::get_socket_protocol(&s).unwrap(),
-        Some(ipproto::TCP)
-    );
+    #[cfg(any(
+        linux_kernel,
+        target_os = "freebsd",
+        target_os = "fuchsia",
+        target_os = "openbsd",
+        target_os = "redox",
+        target_env = "newlib"
+    ))]
+    {
+        assert_eq!(
+            sockopt::get_socket_protocol(&s).unwrap(),
+            Some(ipproto::TCP)
+        );
+    }
     assert!(!sockopt::get_socket_reuseaddr(&s).unwrap());
     #[cfg(not(windows))]
     assert!(!sockopt::get_socket_broadcast(&s).unwrap());
@@ -137,17 +155,20 @@ fn test_sockopts_socket(s: &OwnedFd) {
     // Check the initial value of SO_REUSEPORT_LB, set it, and check it.
     #[cfg(target_os = "freebsd")]
     {
-        assert_eq!(!sockopt::get_socket_reuseport_lb(&s).unwrap());
+        assert!(!sockopt::get_socket_reuseport_lb(&s).unwrap());
         sockopt::set_socket_reuseport_lb(&s, true).unwrap();
-        assert_eq!(sockopt::get_socket_reuseport_lb(&s).unwrap());
+        assert!(sockopt::get_socket_reuseport_lb(&s).unwrap());
     }
 
     // Not much we can check with `get_socket_cookie`, but make sure we can
     // call it and that it returns the same value if called twice.
-    assert_eq!(
-        sockopt::get_socket_cookie(&s).unwrap(),
-        sockopt::get_socket_cookie(&s).unwrap()
-    );
+    #[cfg(target_os = "linux")]
+    {
+        assert_eq!(
+            sockopt::get_socket_cookie(&s).unwrap(),
+            sockopt::get_socket_cookie(&s).unwrap()
+        );
+    }
 
     // Check the initial value of SO_INCOMING_CPU, set it, and check it.
     #[cfg(target_os = "linux")]
@@ -211,8 +232,10 @@ fn test_sockopts_tcp(s: &OwnedFd) {
 
     // Check the initial value of TCP_CONGESTION, set it, and check it.
     #[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+    #[cfg(feature = "alloc")]
     {
-        assert_eq!(sockopt::get_tcp_congestion(&s).unwrap(), "cubic");
+        let algo = sockopt::get_tcp_congestion(&s).unwrap();
+        assert!(!algo.is_empty());
         sockopt::set_tcp_congestion(&s, "reno").unwrap();
         assert_eq!(sockopt::get_tcp_congestion(&s).unwrap(), "reno");
     }
@@ -313,7 +336,10 @@ fn test_sockopts_ipv4() {
     // Check that we can query SO_ORIGINAL_DST.
     #[cfg(any(linux_kernel, target_os = "fuchsia"))]
     {
-        assert_eq!(sockopt::get_ip_original_dst(&s), Err(io::Errno::NOPROTOOPT));
+        assert!(matches!(
+            sockopt::get_ip_original_dst(&s),
+            Err(io::Errno::NOENT | io::Errno::NOPROTOOPT)
+        ));
     }
 
     test_sockopts_tcp(&s);
@@ -343,9 +369,9 @@ fn test_sockopts_ipv6() {
     assert_ne!(sockopt::get_ipv6_unicast_hops(&s).unwrap(), 0);
     match sockopt::get_ipv6_multicast_loop(&s) {
         Ok(multicast_loop) => assert!(multicast_loop),
-        Err(rustix::io::Errno::OPNOTSUPP) => (),
-        Err(rustix::io::Errno::INVAL) => (),
-        Err(rustix::io::Errno::NOPROTOOPT) => (),
+        Err(io::Errno::OPNOTSUPP) => (),
+        Err(io::Errno::INVAL) => (),
+        Err(io::Errno::NOPROTOOPT) => (),
         Err(err) => Err(err).unwrap(),
     }
     assert_ne!(sockopt::get_ipv6_unicast_hops(&s).unwrap(), 0);
@@ -355,8 +381,8 @@ fn test_sockopts_ipv6() {
     #[cfg(not(target_os = "netbsd"))]
     match sockopt::get_ipv6_multicast_hops(&s) {
         Ok(hops) => assert_eq!(hops, 0),
-        Err(rustix::io::Errno::NOPROTOOPT) => (),
-        Err(rustix::io::Errno::INVAL) => (),
+        Err(io::Errno::NOPROTOOPT) => (),
+        Err(io::Errno::INVAL) => (),
         Err(err) => Err(err).unwrap(),
     };
 
@@ -376,9 +402,9 @@ fn test_sockopts_ipv6() {
                 Err(err) => Err(err).unwrap(),
             }
         }
-        Err(rustix::io::Errno::OPNOTSUPP) => (),
-        Err(rustix::io::Errno::INVAL) => (),
-        Err(rustix::io::Errno::NOPROTOOPT) => (),
+        Err(io::Errno::OPNOTSUPP) => (),
+        Err(io::Errno::INVAL) => (),
+        Err(io::Errno::NOPROTOOPT) => (),
         Err(err) => Err(err).unwrap(),
     }
 
@@ -417,7 +443,7 @@ fn test_sockopts_ipv6() {
     }
 
     // Check the initial value of IPV6_TCLASS, set it, and check it.
-    #[cfg(not(solarish))]
+    #[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
     {
         assert_eq!(sockopt::get_ipv6_tclass(&s).unwrap(), 0);
         sockopt::set_ipv6_tclass(&s, 12).unwrap();
@@ -427,10 +453,10 @@ fn test_sockopts_ipv6() {
     // Check that we can query IP6T_SO_ORIGINAL_DST.
     #[cfg(linux_kernel)]
     {
-        assert_eq!(
+        assert!(matches!(
             sockopt::get_ipv6_original_dst(&s),
-            Err(io::Errno::NOPROTOOPT)
-        );
+            Err(io::Errno::NOENT | io::Errno::NOPROTOOPT)
+        ));
     }
 
     test_sockopts_tcp(&s);

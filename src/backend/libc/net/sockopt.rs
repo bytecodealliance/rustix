@@ -4,6 +4,7 @@ use super::ext::{in6_addr_new, in_addr_new};
 use crate::backend::c;
 use crate::backend::conv::{borrowed_fd, ret};
 use crate::fd::BorrowedFd;
+#[cfg(feature = "alloc")]
 #[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
 use crate::ffi::CStr;
 use crate::io;
@@ -21,7 +22,7 @@ use crate::net::sockopt::Timeout;
 )))]
 use crate::net::AddressFamily;
 #[cfg(any(
-    linux_like,
+    linux_kernel,
     target_os = "freebsd",
     target_os = "fuchsia",
     target_os = "openbsd",
@@ -30,11 +31,12 @@ use crate::net::AddressFamily;
 ))]
 use crate::net::Protocol;
 #[cfg(any(
-    linux_like,
+    linux_kernel,
     target_os = "freebsd",
     target_os = "fuchsia",
     target_os = "openbsd",
-    target_os = "redox"
+    target_os = "redox",
+    target_env = "newlib"
 ))]
 use crate::net::RawProtocol;
 #[cfg(linux_kernel)]
@@ -43,6 +45,12 @@ use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 use crate::net::{SocketAddrAny, SocketAddrStorage, SocketAddrV4};
 use crate::utils::as_mut_ptr;
+#[cfg(feature = "alloc")]
+#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+use alloc::borrow::ToOwned;
+#[cfg(feature = "alloc")]
+#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+use alloc::string::String;
 #[cfg(apple)]
 use c::TCP_KEEPALIVE as TCP_KEEPIDLE;
 #[cfg(not(any(apple, target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
@@ -393,7 +401,7 @@ pub(crate) fn get_socket_reuseport_lb(fd: BorrowedFd<'_>) -> io::Result<bool> {
 }
 
 #[cfg(any(
-    linux_like,
+    linux_kernel,
     target_os = "freebsd",
     target_os = "fuchsia",
     target_os = "openbsd",
@@ -411,7 +419,7 @@ pub(crate) fn get_socket_protocol(fd: BorrowedFd<'_>) -> io::Result<Option<Proto
     })
 }
 
-#[cfg(linux_like)]
+#[cfg(target_os = "linux")]
 #[inline]
 pub(crate) fn get_socket_cookie(fd: BorrowedFd<'_>) -> io::Result<u64> {
     getsockopt(fd, c::SOL_SOCKET, c::SO_COOKIE)
@@ -770,13 +778,13 @@ pub(crate) fn get_ipv6_original_dst(fd: BorrowedFd<'_>) -> io::Result<SocketAddr
     }
 }
 
-#[cfg(not(solarish))]
+#[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
 #[inline]
 pub(crate) fn set_ipv6_tclass(fd: BorrowedFd<'_>, value: u32) -> io::Result<()> {
     setsockopt(fd, c::IPPROTO_IPV6, c::IPV6_TCLASS, value)
 }
 
-#[cfg(not(solarish))]
+#[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
 #[inline]
 pub(crate) fn get_ipv6_tclass(fd: BorrowedFd<'_>) -> io::Result<u32> {
     getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_TCLASS)
@@ -865,6 +873,7 @@ pub(crate) fn set_tcp_congestion(fd: BorrowedFd<'_>, value: &str) -> io::Result<
     setsockopt_raw(fd, level, optname, value.as_ptr(), optlen)
 }
 
+#[cfg(feature = "alloc")]
 #[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
 #[inline]
 pub(crate) fn get_tcp_congestion(fd: BorrowedFd<'_>) -> io::Result<String> {
@@ -877,8 +886,9 @@ pub(crate) fn get_tcp_congestion(fd: BorrowedFd<'_>) -> io::Result<String> {
     unsafe {
         let value = value.assume_init();
         let slice: &[u8] = core::mem::transmute(&value[..optlen as usize]);
+        assert!(slice.iter().any(|b| *b == b'\0'));
         Ok(
-            core::str::from_utf8(CStr::from_bytes_until_nul(slice).unwrap().to_bytes())
+            core::str::from_utf8(CStr::from_ptr(slice.as_ptr().cast()).to_bytes())
                 .unwrap()
                 .to_owned(),
         )

@@ -156,7 +156,7 @@
 )))]
 use crate::net::AddressFamily;
 #[cfg(any(
-    linux_like,
+    linux_kernel,
     target_os = "freebsd",
     target_os = "fuchsia",
     target_os = "openbsd",
@@ -170,6 +170,9 @@ use crate::net::SocketAddrV4;
 use crate::net::SocketAddrV6;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 use crate::{backend, io};
+#[cfg(feature = "alloc")]
+#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+use alloc::string::String;
 use backend::c;
 use backend::fd::AsFd;
 use core::time::Duration;
@@ -529,7 +532,7 @@ pub fn get_socket_reuseport_lb<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 ///
 /// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
 #[cfg(any(
-    linux_like,
+    linux_kernel,
     target_os = "freebsd",
     target_os = "fuchsia",
     target_os = "openbsd",
@@ -547,7 +550,7 @@ pub fn get_socket_protocol<Fd: AsFd>(fd: Fd) -> io::Result<Option<Protocol>> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
-#[cfg(linux_like)]
+#[cfg(target_os = "linux")]
 #[inline]
 #[doc(alias = "SO_COOKIE")]
 pub fn get_socket_cookie<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
@@ -1089,7 +1092,7 @@ pub fn get_ipv6_original_dst<Fd: AsFd>(fd: Fd) -> io::Result<SocketAddrV6> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
-#[cfg(not(solarish))]
+#[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
 #[inline]
 #[doc(alias = "IPV6_TCLASS")]
 pub fn set_ipv6_tclass<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
@@ -1101,7 +1104,7 @@ pub fn set_ipv6_tclass<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
-#[cfg(not(solarish))]
+#[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
 #[inline]
 #[doc(alias = "IPV6_TCLASS")]
 pub fn get_ipv6_tclass<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
@@ -1271,6 +1274,7 @@ pub fn set_tcp_congestion<Fd: AsFd>(fd: Fd, value: &str) -> io::Result<()> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
+#[cfg(feature = "alloc")]
 #[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
 #[inline]
 #[doc(alias = "TCP_CONGESTION")]
