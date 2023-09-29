@@ -149,6 +149,9 @@ thread = ["linux-raw-sys/prctl"]
 # Enable `rustix::process::*`.
 process = ["linux-raw-sys/prctl"]
 
+# Enable `rustix::shm::*`.
+shm = ["fs"]
+
 # Enable `rustix::time::*`.
 time = []
 
@@ -198,6 +201,7 @@ all-apis = [
     "pty",
     "rand",
     "runtime",
+    "shm",
     "system",
     "stdio",
     "termios",

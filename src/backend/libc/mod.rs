@@ -184,6 +184,14 @@ pub(crate) mod pid;
 #[cfg(any(feature = "process", feature = "thread"))]
 #[cfg(linux_kernel)]
 pub(crate) mod prctl;
+#[cfg(not(any(
+    windows,
+    target_os = "android",
+    target_os = "espidf",
+    target_os = "wasi"
+)))]
+#[cfg(feature = "shm")]
+pub(crate) mod shm;
 #[cfg(any(feature = "fs", feature = "thread", feature = "process"))]
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub(crate) mod ugid;
