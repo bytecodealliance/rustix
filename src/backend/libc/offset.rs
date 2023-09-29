@@ -3,14 +3,14 @@
 #[cfg(not(windows))]
 use super::c;
 
-#[cfg(not(any(linux_like, windows)))]
+#[cfg(not(any(linux_like, windows, target_os = "hurd")))]
 #[cfg(feature = "fs")]
 pub(super) use c::{
     fstat as libc_fstat, fstatat as libc_fstatat, ftruncate as libc_ftruncate, ino_t as libc_ino_t,
     lseek as libc_lseek, off_t as libc_off_t,
 };
 
-#[cfg(linux_like)]
+#[cfg(any(linux_like, target_os = "hurd"))]
 #[cfg(feature = "fs")]
 pub(super) use c::{
     fstat64 as libc_fstat, fstatat64 as libc_fstatat, ftruncate64 as libc_ftruncate,
@@ -123,17 +123,18 @@ pub(super) use c::fallocate64 as libc_fallocate;
     windows,
     target_os = "dragonfly",
     target_os = "haiku",
+    target_os = "hurd",
     target_os = "redox",
 )))]
 #[cfg(feature = "fs")]
 pub(super) use c::posix_fadvise as libc_posix_fadvise;
-#[cfg(linux_like)]
+#[cfg(any(linux_like, target_os = "hurd"))]
 #[cfg(feature = "fs")]
 pub(super) use c::posix_fadvise64 as libc_posix_fadvise;
 
-#[cfg(not(any(linux_kernel, windows, target_os = "emscripten")))]
+#[cfg(not(any(linux_kernel, windows, target_os = "emscripten", target_os = "hurd")))]
 pub(super) use c::{pread as libc_pread, pwrite as libc_pwrite};
-#[cfg(any(linux_kernel, target_os = "emscripten"))]
+#[cfg(any(linux_kernel, target_os = "emscripten", target_os = "hurd"))]
 pub(super) use c::{pread64 as libc_pread, pwrite64 as libc_pwrite};
 #[cfg(not(any(
     apple,
@@ -141,11 +142,12 @@ pub(super) use c::{pread64 as libc_pread, pwrite64 as libc_pwrite};
     windows,
     target_os = "emscripten",
     target_os = "haiku",
+    target_os = "hurd",
     target_os = "redox",
     target_os = "solaris",
 )))]
 pub(super) use c::{preadv as libc_preadv, pwritev as libc_pwritev};
-#[cfg(any(target_os = "linux", target_os = "emscripten"))]
+#[cfg(any(target_os = "linux", target_os = "emscripten", target_os = "hurd"))]
 pub(super) use c::{preadv64 as libc_preadv, pwritev64 as libc_pwritev};
 
 #[cfg(target_os = "android")]
@@ -366,12 +368,13 @@ pub(super) use readwrite_pv64v2::{preadv64v2 as libc_preadv2, pwritev64v2 as lib
     target_os = "aix",
     target_os = "dragonfly",
     target_os = "fuchsia",
+    target_os = "hurd",
     target_os = "l4re",
     target_os = "redox",
 )))]
 #[cfg(feature = "fs")]
 pub(super) use c::posix_fallocate as libc_posix_fallocate;
-#[cfg(target_os = "l4re")]
+#[cfg(any(target_os = "l4re", target_os = "hurd"))]
 #[cfg(feature = "fs")]
 pub(super) use c::posix_fallocate64 as libc_posix_fallocate;
 #[cfg(not(any(

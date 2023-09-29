@@ -74,19 +74,49 @@ pub enum Resource {
     #[cfg(not(target_os = "openbsd"))]
     As = c::RLIMIT_AS as c::c_int,
     /// `RLIMIT_LOCKS`
-    #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+    #[cfg(not(any(
+        bsd,
+        solarish,
+        target_os = "aix",
+        target_os = "haiku",
+        target_os = "hurd",
+    )))]
     Locks = c::RLIMIT_LOCKS as c::c_int,
     /// `RLIMIT_SIGPENDING`
-    #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+    #[cfg(not(any(
+        bsd,
+        solarish,
+        target_os = "aix",
+        target_os = "haiku",
+        target_os = "hurd",
+    )))]
     Sigpending = c::RLIMIT_SIGPENDING as c::c_int,
     /// `RLIMIT_MSGQUEUE`
-    #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+    #[cfg(not(any(
+        bsd,
+        solarish,
+        target_os = "aix",
+        target_os = "haiku",
+        target_os = "hurd",
+    )))]
     Msgqueue = c::RLIMIT_MSGQUEUE as c::c_int,
     /// `RLIMIT_NICE`
-    #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+    #[cfg(not(any(
+        bsd,
+        solarish,
+        target_os = "aix",
+        target_os = "haiku",
+        target_os = "hurd",
+    )))]
     Nice = c::RLIMIT_NICE as c::c_int,
     /// `RLIMIT_RTPRIO`
-    #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+    #[cfg(not(any(
+        bsd,
+        solarish,
+        target_os = "aix",
+        target_os = "haiku",
+        target_os = "hurd",
+    )))]
     Rtprio = c::RLIMIT_RTPRIO as c::c_int,
     /// `RLIMIT_RTTIME`
     #[cfg(not(any(
@@ -96,6 +126,7 @@ pub enum Resource {
         target_os = "android",
         target_os = "emscripten",
         target_os = "haiku",
+        target_os = "hurd",
     )))]
     Rttime = c::RLIMIT_RTTIME as c::c_int,
 }
@@ -156,6 +187,7 @@ pub enum Signal {
         solarish,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "hurd",
         all(
             linux_kernel,
             any(
@@ -198,7 +230,7 @@ pub enum Signal {
     #[cfg(not(target_os = "haiku"))]
     Io = c::SIGIO,
     /// `SIGPWR`
-    #[cfg(not(any(bsd, target_os = "haiku")))]
+    #[cfg(not(any(bsd, target_os = "haiku", target_os = "hurd")))]
     #[doc(alias = "Pwr")]
     Power = c::SIGPWR,
     /// `SIGSYS`, aka `SIGUNUSED`
@@ -255,6 +287,7 @@ impl Signal {
                 solarish,
                 target_os = "aix",
                 target_os = "haiku",
+                target_os = "hurd",
                 all(
                     linux_kernel,
                     any(
@@ -280,7 +313,7 @@ impl Signal {
             c::SIGWINCH => Some(Self::Winch),
             #[cfg(not(target_os = "haiku"))]
             c::SIGIO => Some(Self::Io),
-            #[cfg(not(any(bsd, target_os = "haiku")))]
+            #[cfg(not(any(bsd, target_os = "haiku", target_os = "hurd")))]
             c::SIGPWR => Some(Self::Power),
             c::SIGSYS => Some(Self::Sys),
             #[cfg(bsd)]

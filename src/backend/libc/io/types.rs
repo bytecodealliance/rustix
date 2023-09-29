@@ -78,6 +78,7 @@ bitflags! {
         #[cfg(not(any(
             solarish,
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "openbsd",
             target_os = "redox",
         )))]
@@ -103,7 +104,13 @@ bitflags! {
 }
 
 /// `PIPE_BUF`—The maximum size of a write to a pipe guaranteed to be atomic.
-#[cfg(not(any(solarish, target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    solarish,
+    target_os = "haiku",
+    target_os = "hurd",
+    target_os = "redox",
+    target_os = "wasi",
+)))]
 pub const PIPE_BUF: usize = c::PIPE_BUF;
 
 #[cfg(not(any(windows, target_os = "redox")))]
