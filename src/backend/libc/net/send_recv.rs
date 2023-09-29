@@ -2,7 +2,8 @@ use crate::backend::c;
 use bitflags::bitflags;
 
 bitflags! {
-    /// `MSG_* flags for use with [`send`], [`send_to`], and related functions.
+    /// `MSG_*` flags for use with [`send`], [`send_to`], and related
+    /// functions.
     ///
     /// [`send`]: crate::net::send
     /// [`sendto`]: crate::net::sendto
@@ -50,7 +51,8 @@ bitflags! {
 }
 
 bitflags! {
-    /// `MSG_* flags for use with [`recv`], [`recvfrom`], and related functions.
+    /// `MSG_*` flags for use with [`recv`], [`recvfrom`], and related
+    /// functions.
     ///
     /// [`recv`]: crate::net::recv
     /// [`recvfrom`]: crate::net::recvfrom

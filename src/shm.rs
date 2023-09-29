@@ -8,11 +8,12 @@ pub use crate::backend::shm::types::ShmOFlags;
 
 /// `shm_open(name, oflags, mode)`—Opens a shared memory object.
 ///
-/// For portability, `name` should begin with a slash, contain no other slashes,
-/// and be no longer than an implementation-defined limit (255 on Linux).
+/// For portability, `name` should begin with a slash, contain no other
+/// slashes, and be no longer than an implementation-defined limit (255 on
+/// Linux).
 ///
-/// Exactly one of [ShmOFlags::RDONLY] and [ShmOFlags::RDWR] should be passed. The file
-/// descriptor will be opened with `FD_CLOEXEC` set.
+/// Exactly one of [`ShmOFlags::RDONLY`] and [`ShmOFlags::RDWR`] should be
+/// passed. The file descriptor will be opened with `FD_CLOEXEC` set.
 ///
 /// # References
 ///  - [POSIX]

@@ -253,6 +253,7 @@ pub mod rand;
     target_os = "wasi"
 )))]
 #[cfg(feature = "shm")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "shm")))]
 pub mod shm;
 #[cfg(not(windows))]
 #[cfg(feature = "stdio")]
