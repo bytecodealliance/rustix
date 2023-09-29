@@ -155,6 +155,19 @@
     target_os = "nto",
 )))]
 use crate::net::AddressFamily;
+#[cfg(any(
+    linux_like,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "openbsd",
+    target_os = "redox",
+    target_env = "newlib"
+))]
+use crate::net::Protocol;
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+use crate::net::SocketAddrV4;
+#[cfg(linux_kernel)]
+use crate::net::SocketAddrV6;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 use crate::{backend, io};
 use backend::c;
@@ -207,7 +220,7 @@ pub fn get_socket_reuseaddr<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::sockopt::get_socket_reuseaddr(fd.as_fd())
 }
 
-/// `setsockopt(fd, SOL_SOCKET, SO_BROADCAST, broadcast)`
+/// `setsockopt(fd, SOL_SOCKET, SO_BROADCAST, value)`
 ///
 /// See the [module-level documentation] for more.
 ///
@@ -275,7 +288,7 @@ pub fn get_socket_passcred<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::sockopt::get_socket_passcred(fd.as_fd())
 }
 
-/// `setsockopt(fd, SOL_SOCKET, id, timeout)`—Set the sending or receiving
+/// `setsockopt(fd, SOL_SOCKET, id, value)`—Set the sending or receiving
 /// timeout.
 ///
 /// See the [module-level documentation] for more.
@@ -287,9 +300,9 @@ pub fn get_socket_passcred<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 pub fn set_socket_timeout<Fd: AsFd>(
     fd: Fd,
     id: Timeout,
-    timeout: Option<Duration>,
+    value: Option<Duration>,
 ) -> io::Result<()> {
-    backend::net::sockopt::set_socket_timeout(fd.as_fd(), id, timeout)
+    backend::net::sockopt::set_socket_timeout(fd.as_fd(), id, value)
 }
 
 /// `getsockopt(fd, SOL_SOCKET, id)`—Get the sending or receiving timeout.
@@ -461,6 +474,110 @@ pub fn get_socket_oobinline<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::sockopt::get_socket_oobinline(fd.as_fd())
 }
 
+/// `setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[cfg(not(any(solarish, windows)))]
+#[cfg(not(windows))]
+#[inline]
+#[doc(alias = "SO_REUSEPORT")]
+pub fn set_socket_reuseport<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::sockopt::set_socket_reuseport(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_SOCKET, SO_REUSEPORT)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[cfg(not(any(solarish, windows)))]
+#[inline]
+#[doc(alias = "SO_REUSEPORT")]
+pub fn get_socket_reuseport<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::sockopt::get_socket_reuseport(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_SOCKET, SO_REUSEPORT_LB, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[cfg(target_os = "freebsd")]
+#[inline]
+#[doc(alias = "SO_REUSEPORT_LB")]
+pub fn set_socket_reuseport_lb<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::sockopt::set_socket_reuseport_lb(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_SOCKET, SO_REUSEPORT_LB)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[cfg(target_os = "freebsd")]
+#[inline]
+#[doc(alias = "SO_REUSEPORT_LB")]
+pub fn get_socket_reuseport_lb<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::sockopt::get_socket_reuseport_lb(fd.as_fd())
+}
+
+/// `getsockopt(fd, SOL_SOCKET, SO_PROTOCOL)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[cfg(any(
+    linux_like,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "openbsd",
+    target_os = "redox",
+    target_env = "newlib"
+))]
+#[inline]
+#[doc(alias = "SO_PROTOCOL")]
+pub fn get_socket_protocol<Fd: AsFd>(fd: Fd) -> io::Result<Option<Protocol>> {
+    backend::net::sockopt::get_socket_protocol(fd.as_fd())
+}
+
+/// `getsockopt(fd, SOL_SOCKET, SO_COOKIE)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[cfg(linux_like)]
+#[inline]
+#[doc(alias = "SO_COOKIE")]
+pub fn get_socket_cookie<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
+    backend::net::sockopt::get_socket_cookie(fd.as_fd())
+}
+
+/// `getsockopt(fd, SOL_SOCKET, SO_INCOMING_CPU)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[cfg(target_os = "linux")]
+#[inline]
+#[doc(alias = "SO_INCOMING_CPU")]
+pub fn get_socket_incoming_cpu<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
+    backend::net::sockopt::get_socket_incoming_cpu(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_SOCKET, SO_INCOMING_CPU, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[cfg(target_os = "linux")]
+#[inline]
+#[doc(alias = "SO_INCOMING_CPU")]
+pub fn set_socket_incoming_cpu<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
+    backend::net::sockopt::set_socket_incoming_cpu(fd.as_fd(), value)
+}
+
 /// `setsockopt(fd, IPPROTO_IP, IP_TTL, value)`
 ///
 /// See the [module-level documentation] for more.
@@ -483,7 +600,7 @@ pub fn get_ip_ttl<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
     backend::net::sockopt::get_ip_ttl(fd.as_fd())
 }
 
-/// `setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, only_v6)`
+/// `setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, value)`
 ///
 /// See the [module-level documentation] for more.
 ///
@@ -664,7 +781,7 @@ pub fn set_ip_add_membership_with_ifindex<Fd: AsFd>(
     )
 }
 
-/// `setsockopt(fd, IPPROTO_IP, IP_ADD_SOURCE_MEMBERSHIP)`
+/// `setsockopt(fd, IPPROTO_IP, IP_ADD_SOURCE_MEMBERSHIP, value)`
 ///
 /// See the [module-level documentation] for more.
 ///
@@ -686,7 +803,7 @@ pub fn set_ip_add_source_membership<Fd: AsFd>(
     )
 }
 
-/// `setsockopt(fd, IPPROTO_IP, IP_DROP_SOURCE_MEMBERSHIP)`
+/// `setsockopt(fd, IPPROTO_IP, IP_DROP_SOURCE_MEMBERSHIP, value)`
 ///
 /// See the [module-level documentation] for more.
 ///
@@ -889,6 +1006,108 @@ pub fn get_ipv6_recvtclass<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::sockopt::get_ipv6_recvtclass(fd.as_fd())
 }
 
+/// `setsockopt(fd, IPPROTO_IP, IP_FREEBIND, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[inline]
+#[doc(alias = "IP_FREEBIND")]
+pub fn set_ip_freebind<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::sockopt::set_ip_freebind(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, IPPROTO_IP, IP_FREEBIND)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[inline]
+#[doc(alias = "IP_FREEBIND")]
+pub fn get_ip_freebind<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::sockopt::get_ip_freebind(fd.as_fd())
+}
+
+/// `setsockopt(fd, IPPROTO_IPV6, IPV6_FREEBIND, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[cfg(linux_kernel)]
+#[inline]
+#[doc(alias = "IPV6_FREEBIND")]
+pub fn set_ipv6_freebind<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::sockopt::set_ipv6_freebind(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, IPPROTO_IPV6, IPV6_FREEBIND)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[cfg(linux_kernel)]
+#[inline]
+#[doc(alias = "IPV6_FREEBIND")]
+pub fn get_ipv6_freebind<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::sockopt::get_ipv6_freebind(fd.as_fd())
+}
+
+/// `getsockopt(fd, IPPROTO_IP, SO_ORIGINAL_DST)`
+///
+/// Even though this corresponnds to a `SO_*` constant, it is an
+/// `IPPROTO_IP` option.
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[inline]
+#[doc(alias = "SO_ORIGINAL_DST")]
+pub fn get_ip_original_dst<Fd: AsFd>(fd: Fd) -> io::Result<SocketAddrV4> {
+    backend::net::sockopt::get_ip_original_dst(fd.as_fd())
+}
+
+/// `getsockopt(fd, IPPROTO_IPV6, IP6T_SO_ORIGINAL_DST)`
+///
+/// Even though this corresponnds to a `IP6T_*` constant, it is an
+/// `IPPROTO_IPV6` option.
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[cfg(linux_kernel)]
+#[inline]
+#[doc(alias = "IP6T_SO_ORIGINAL_DST")]
+pub fn get_ipv6_original_dst<Fd: AsFd>(fd: Fd) -> io::Result<SocketAddrV6> {
+    backend::net::sockopt::get_ipv6_original_dst(fd.as_fd())
+}
+
+/// `setsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[cfg(not(solarish))]
+#[inline]
+#[doc(alias = "IPV6_TCLASS")]
+pub fn set_ipv6_tclass<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
+    backend::net::sockopt::set_ipv6_tclass(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[cfg(not(solarish))]
+#[inline]
+#[doc(alias = "IPV6_TCLASS")]
+pub fn get_ipv6_tclass<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
+    backend::net::sockopt::get_ipv6_tclass(fd.as_fd())
+}
+
 /// `setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, value)`
 ///
 /// See the [module-level documentation] for more.
@@ -916,8 +1135,8 @@ pub fn get_tcp_nodelay<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
-#[inline]
 #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[inline]
 #[doc(alias = "TCP_KEEPCNT")]
 pub fn set_tcp_keepcnt<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
     backend::net::sockopt::set_tcp_keepcnt(fd.as_fd(), value)
@@ -928,8 +1147,8 @@ pub fn set_tcp_keepcnt<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
-#[inline]
 #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[inline]
 #[doc(alias = "TCP_KEEPCNT")]
 pub fn get_tcp_keepcnt<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
     backend::net::sockopt::get_tcp_keepcnt(fd.as_fd())
@@ -942,8 +1161,8 @@ pub fn get_tcp_keepcnt<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
-#[inline]
 #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[inline]
 #[doc(alias = "TCP_KEEPIDLE")]
 pub fn set_tcp_keepidle<Fd: AsFd>(fd: Fd, value: Duration) -> io::Result<()> {
     backend::net::sockopt::set_tcp_keepidle(fd.as_fd(), value)
@@ -956,8 +1175,8 @@ pub fn set_tcp_keepidle<Fd: AsFd>(fd: Fd, value: Duration) -> io::Result<()> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
-#[inline]
 #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[inline]
 #[doc(alias = "TCP_KEEPIDLE")]
 pub fn get_tcp_keepidle<Fd: AsFd>(fd: Fd) -> io::Result<Duration> {
     backend::net::sockopt::get_tcp_keepidle(fd.as_fd())
@@ -968,8 +1187,8 @@ pub fn get_tcp_keepidle<Fd: AsFd>(fd: Fd) -> io::Result<Duration> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
-#[inline]
 #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[inline]
 #[doc(alias = "TCP_KEEPINTVL")]
 pub fn set_tcp_keepintvl<Fd: AsFd>(fd: Fd, value: Duration) -> io::Result<()> {
     backend::net::sockopt::set_tcp_keepintvl(fd.as_fd(), value)
@@ -980,8 +1199,8 @@ pub fn set_tcp_keepintvl<Fd: AsFd>(fd: Fd, value: Duration) -> io::Result<()> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
-#[inline]
 #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[inline]
 #[doc(alias = "TCP_KEEPINTVL")]
 pub fn get_tcp_keepintvl<Fd: AsFd>(fd: Fd) -> io::Result<Duration> {
     backend::net::sockopt::get_tcp_keepintvl(fd.as_fd())
@@ -992,8 +1211,8 @@ pub fn get_tcp_keepintvl<Fd: AsFd>(fd: Fd) -> io::Result<Duration> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
-#[inline]
 #[cfg(any(linux_like, target_os = "fuchsia"))]
+#[inline]
 #[doc(alias = "TCP_USER_TIMEOUT")]
 pub fn set_tcp_user_timeout<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
     backend::net::sockopt::set_tcp_user_timeout(fd.as_fd(), value)
@@ -1004,11 +1223,107 @@ pub fn set_tcp_user_timeout<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
-#[inline]
 #[cfg(any(linux_like, target_os = "fuchsia"))]
+#[inline]
 #[doc(alias = "TCP_USER_TIMEOUT")]
 pub fn get_tcp_user_timeout<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
     backend::net::sockopt::get_tcp_user_timeout(fd.as_fd())
+}
+
+/// `setsockopt(fd, IPPROTO_TCP, TCP_QUICKACK, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
+#[cfg(any(linux_like, target_os = "fuchsia"))]
+#[inline]
+#[doc(alias = "TCP_QUICKACK")]
+pub fn set_tcp_quickack<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::sockopt::set_tcp_quickack(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, IPPROTO_TCP, TCP_QUICKACK)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
+#[cfg(any(linux_like, target_os = "fuchsia"))]
+#[inline]
+#[doc(alias = "TCP_QUICKACK")]
+pub fn get_tcp_quickack<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::sockopt::get_tcp_quickack(fd.as_fd())
+}
+
+/// `setsockopt(fd, IPPROTO_TCP, TCP_CONGESTION, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
+#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+#[inline]
+#[doc(alias = "TCP_CONGESTION")]
+pub fn set_tcp_congestion<Fd: AsFd>(fd: Fd, value: &str) -> io::Result<()> {
+    backend::net::sockopt::set_tcp_congestion(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, IPPROTO_TCP, TCP_CONGESTION)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
+#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+#[inline]
+#[doc(alias = "TCP_CONGESTION")]
+pub fn get_tcp_congestion<Fd: AsFd>(fd: Fd) -> io::Result<String> {
+    backend::net::sockopt::get_tcp_congestion(fd.as_fd())
+}
+
+/// `setsockopt(fd, IPPROTO_TCP, TCP_THIN_LINEAR_TIMEOUTS, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
+#[cfg(any(linux_like, target_os = "fuchsia"))]
+#[inline]
+#[doc(alias = "TCP_THIN_LINEAR_TIMEOUTS")]
+pub fn set_tcp_thin_linear_timeouts<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::sockopt::set_tcp_thin_linear_timeouts(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, IPPROTO_TCP, TCP_THIN_LINEAR_TIMEOUTS)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
+#[cfg(any(linux_like, target_os = "fuchsia"))]
+#[inline]
+#[doc(alias = "TCP_THIN_LINEAR_TIMEOUTS")]
+pub fn get_tcp_thin_linear_timeouts<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::sockopt::get_tcp_thin_linear_timeouts(fd.as_fd())
+}
+
+/// `setsockopt(fd, IPPROTO_TCP, TCP_CORK, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
+#[cfg(any(linux_like, solarish, target_os = "fuchsia"))]
+#[inline]
+#[doc(alias = "TCP_CORK")]
+pub fn set_tcp_cork<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::sockopt::set_tcp_cork(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, IPPROTO_TCP, TCP_CORK)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
+#[cfg(any(linux_like, solarish, target_os = "fuchsia"))]
+#[inline]
+#[doc(alias = "TCP_CORK")]
+pub fn get_tcp_cork<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::sockopt::get_tcp_cork(fd.as_fd())
 }
 
 #[test]

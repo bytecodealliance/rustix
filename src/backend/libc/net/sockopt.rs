@@ -4,6 +4,8 @@ use super::ext::{in6_addr_new, in_addr_new};
 use crate::backend::c;
 use crate::backend::conv::{borrowed_fd, ret};
 use crate::fd::BorrowedFd;
+#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+use crate::ffi::CStr;
 use crate::io;
 use crate::net::sockopt::Timeout;
 #[cfg(not(any(
@@ -18,13 +20,35 @@ use crate::net::sockopt::Timeout;
     target_os = "nto",
 )))]
 use crate::net::AddressFamily;
+#[cfg(any(
+    linux_like,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "openbsd",
+    target_os = "redox",
+    target_env = "newlib"
+))]
+use crate::net::Protocol;
+#[cfg(any(
+    linux_like,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "openbsd",
+    target_os = "redox"
+))]
+use crate::net::RawProtocol;
+#[cfg(linux_kernel)]
+use crate::net::SocketAddrV6;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
-use crate::utils::{as_mut_ptr, as_ptr};
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+use crate::net::{SocketAddrAny, SocketAddrStorage, SocketAddrV4};
+use crate::utils::as_mut_ptr;
 #[cfg(apple)]
 use c::TCP_KEEPALIVE as TCP_KEEPIDLE;
 #[cfg(not(any(apple, target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
 use c::TCP_KEEPIDLE;
 use core::mem::size_of;
+use core::mem::MaybeUninit;
 use core::time::Duration;
 #[cfg(windows)]
 use windows_sys::Win32::Foundation::BOOL;
@@ -37,25 +61,38 @@ fn getsockopt<T: Copy>(fd: BorrowedFd<'_>, level: i32, optname: i32) -> io::Resu
         "Socket APIs don't ever use `bool` directly"
     );
 
+    let mut value = MaybeUninit::<T>::uninit();
+    getsockopt_raw(fd, level, optname, &mut value, &mut optlen)?;
+
+    // On Windows at least, `getsockopt` has been observed writing 1
+    // byte on at least (`IPPROTO_TCP`, `TCP_NODELAY`), even though
+    // Windows' documentation says that should write a 4-byte `BOOL`.
+    // So, we initialize the memory to zeros above, and just assert
+    // that `getsockopt` doesn't write too many bytes here.
+    assert!(
+        optlen as usize <= size_of::<T>(),
+        "unexpected getsockopt size"
+    );
+
+    unsafe { Ok(value.assume_init()) }
+}
+
+#[inline]
+fn getsockopt_raw<T>(
+    fd: BorrowedFd<'_>,
+    level: i32,
+    optname: i32,
+    value: &mut MaybeUninit<T>,
+    optlen: &mut c::socklen_t,
+) -> io::Result<()> {
     unsafe {
-        let mut value = core::mem::zeroed::<T>();
         ret(c::getsockopt(
             borrowed_fd(fd),
             level,
             optname,
-            as_mut_ptr(&mut value).cast(),
-            &mut optlen,
-        ))?;
-        // On Windows at least, `getsockopt` has been observed writing 1
-        // byte on at least (`IPPROTO_TCP`, `TCP_NODELAY`), even though
-        // Windows' documentation says that should write a 4-byte `BOOL`.
-        // So, we initialize the memory to zeros above, and just assert
-        // that `getsockopt` doesn't write too many bytes here.
-        assert!(
-            optlen as usize <= size_of::<T>(),
-            "unexpected getsockopt size"
-        );
-        Ok(value)
+            as_mut_ptr(value).cast(),
+            optlen,
+        ))
     }
 }
 
@@ -66,13 +103,23 @@ fn setsockopt<T: Copy>(fd: BorrowedFd<'_>, level: i32, optname: i32, value: T) -
         optlen as usize >= core::mem::size_of::<c::c_int>(),
         "Socket APIs don't ever use `bool` directly"
     );
+    setsockopt_raw(fd, level, optname, &value, optlen)
+}
 
+#[inline]
+fn setsockopt_raw<T>(
+    fd: BorrowedFd<'_>,
+    level: i32,
+    optname: i32,
+    ptr: *const T,
+    optlen: c::socklen_t,
+) -> io::Result<()> {
     unsafe {
         ret(c::setsockopt(
             borrowed_fd(fd),
             level,
             optname,
-            as_ptr(&value).cast(),
+            ptr.cast(),
             optlen,
         ))
     }
@@ -319,6 +366,67 @@ pub(crate) fn set_socket_oobinline(fd: BorrowedFd<'_>, value: bool) -> io::Resul
 #[inline]
 pub(crate) fn get_socket_oobinline(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::SOL_SOCKET, c::SO_OOBINLINE).map(to_bool)
+}
+
+#[cfg(not(any(solarish, windows)))]
+#[inline]
+pub(crate) fn set_socket_reuseport(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    setsockopt(fd, c::SOL_SOCKET, c::SO_REUSEPORT, from_bool(value))
+}
+
+#[cfg(not(any(solarish, windows)))]
+#[inline]
+pub(crate) fn get_socket_reuseport(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    getsockopt(fd, c::SOL_SOCKET, c::SO_REUSEPORT).map(to_bool)
+}
+
+#[cfg(target_os = "freebsd")]
+#[inline]
+pub(crate) fn set_socket_reuseport_lb(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    setsockopt(fd, c::SOL_SOCKET, c::SO_REUSEPORT_LB, from_bool(value))
+}
+
+#[cfg(target_os = "freebsd")]
+#[inline]
+pub(crate) fn get_socket_reuseport_lb(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    getsockopt(fd, c::SOL_SOCKET, c::SO_REUSEPORT_LB).map(to_bool)
+}
+
+#[cfg(any(
+    linux_like,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "openbsd",
+    target_os = "redox",
+    target_env = "newlib"
+))]
+#[inline]
+pub(crate) fn get_socket_protocol(fd: BorrowedFd<'_>) -> io::Result<Option<Protocol>> {
+    getsockopt(fd, c::SOL_SOCKET, c::SO_PROTOCOL).map(|raw| {
+        if let Some(raw) = RawProtocol::new(raw) {
+            Some(Protocol::from_raw(raw))
+        } else {
+            None
+        }
+    })
+}
+
+#[cfg(linux_like)]
+#[inline]
+pub(crate) fn get_socket_cookie(fd: BorrowedFd<'_>) -> io::Result<u64> {
+    getsockopt(fd, c::SOL_SOCKET, c::SO_COOKIE)
+}
+
+#[cfg(target_os = "linux")]
+#[inline]
+pub(crate) fn get_socket_incoming_cpu(fd: BorrowedFd<'_>) -> io::Result<u32> {
+    getsockopt(fd, c::SOL_SOCKET, c::SO_INCOMING_CPU)
+}
+
+#[cfg(target_os = "linux")]
+#[inline]
+pub(crate) fn set_socket_incoming_cpu(fd: BorrowedFd<'_>, value: u32) -> io::Result<()> {
+    setsockopt(fd, c::SOL_SOCKET, c::SO_INCOMING_CPU, value)
 }
 
 #[inline]
@@ -604,6 +712,76 @@ pub(crate) fn get_ipv6_recvtclass(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_RECVTCLASS).map(to_bool)
 }
 
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[inline]
+pub(crate) fn set_ip_freebind(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IP, c::IP_FREEBIND, from_bool(value))
+}
+
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[inline]
+pub(crate) fn get_ip_freebind(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    getsockopt(fd, c::IPPROTO_IP, c::IP_FREEBIND).map(to_bool)
+}
+
+#[cfg(linux_kernel)]
+#[inline]
+pub(crate) fn set_ipv6_freebind(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IPV6, c::IPV6_FREEBIND, from_bool(value))
+}
+
+#[cfg(linux_kernel)]
+#[inline]
+pub(crate) fn get_ipv6_freebind(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_FREEBIND).map(to_bool)
+}
+
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[inline]
+pub(crate) fn get_ip_original_dst(fd: BorrowedFd<'_>) -> io::Result<SocketAddrV4> {
+    let level = c::IPPROTO_IP;
+    let optname = c::SO_ORIGINAL_DST;
+    let mut value = MaybeUninit::<SocketAddrStorage>::uninit();
+    let mut optlen = core::mem::size_of_val(&value).try_into().unwrap();
+
+    getsockopt_raw(fd, level, optname, &mut value, &mut optlen)?;
+
+    let any = unsafe { SocketAddrAny::read(value.as_ptr(), optlen as usize)? };
+    match any {
+        SocketAddrAny::V4(v4) => Ok(v4),
+        _ => unreachable!(),
+    }
+}
+
+#[cfg(linux_kernel)]
+#[inline]
+pub(crate) fn get_ipv6_original_dst(fd: BorrowedFd<'_>) -> io::Result<SocketAddrV6> {
+    let level = c::IPPROTO_IPV6;
+    let optname = c::IP6T_SO_ORIGINAL_DST;
+    let mut value = MaybeUninit::<SocketAddrStorage>::uninit();
+    let mut optlen = core::mem::size_of_val(&value).try_into().unwrap();
+
+    getsockopt_raw(fd, level, optname, &mut value, &mut optlen)?;
+
+    let any = unsafe { SocketAddrAny::read(value.as_ptr(), optlen as usize)? };
+    match any {
+        SocketAddrAny::V6(v6) => Ok(v6),
+        _ => unreachable!(),
+    }
+}
+
+#[cfg(not(solarish))]
+#[inline]
+pub(crate) fn set_ipv6_tclass(fd: BorrowedFd<'_>, value: u32) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IPV6, c::IPV6_TCLASS, value)
+}
+
+#[cfg(not(solarish))]
+#[inline]
+pub(crate) fn get_ipv6_tclass(fd: BorrowedFd<'_>) -> io::Result<u32> {
+    getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_TCLASS)
+}
+
 #[inline]
 pub(crate) fn set_tcp_nodelay(fd: BorrowedFd<'_>, nodelay: bool) -> io::Result<()> {
     setsockopt(fd, c::IPPROTO_TCP, c::TCP_NODELAY, from_bool(nodelay))
@@ -664,6 +842,76 @@ pub(crate) fn set_tcp_user_timeout(fd: BorrowedFd<'_>, value: u32) -> io::Result
 #[cfg(any(linux_like, target_os = "fuchsia"))]
 pub(crate) fn get_tcp_user_timeout(fd: BorrowedFd<'_>) -> io::Result<u32> {
     getsockopt(fd, c::IPPROTO_TCP, c::TCP_USER_TIMEOUT)
+}
+
+#[cfg(any(linux_like, target_os = "fuchsia"))]
+#[inline]
+pub(crate) fn set_tcp_quickack(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_TCP, c::TCP_QUICKACK, from_bool(value))
+}
+
+#[cfg(any(linux_like, target_os = "fuchsia"))]
+#[inline]
+pub(crate) fn get_tcp_quickack(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    getsockopt(fd, c::IPPROTO_TCP, c::TCP_QUICKACK).map(to_bool)
+}
+
+#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+#[inline]
+pub(crate) fn set_tcp_congestion(fd: BorrowedFd<'_>, value: &str) -> io::Result<()> {
+    let level = c::IPPROTO_TCP;
+    let optname = c::TCP_CONGESTION;
+    let optlen = value.len().try_into().unwrap();
+    setsockopt_raw(fd, level, optname, value.as_ptr(), optlen)
+}
+
+#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+#[inline]
+pub(crate) fn get_tcp_congestion(fd: BorrowedFd<'_>) -> io::Result<String> {
+    let level = c::IPPROTO_TCP;
+    let optname = c::TCP_CONGESTION;
+    const OPTLEN: c::socklen_t = 16;
+    let mut value = MaybeUninit::<[MaybeUninit<u8>; OPTLEN as usize]>::uninit();
+    let mut optlen = OPTLEN;
+    getsockopt_raw(fd, level, optname, &mut value, &mut optlen)?;
+    unsafe {
+        let value = value.assume_init();
+        let slice: &[u8] = core::mem::transmute(&value[..optlen as usize]);
+        Ok(
+            core::str::from_utf8(CStr::from_bytes_until_nul(slice).unwrap().to_bytes())
+                .unwrap()
+                .to_owned(),
+        )
+    }
+}
+
+#[cfg(any(linux_like, target_os = "fuchsia"))]
+#[inline]
+pub(crate) fn set_tcp_thin_linear_timeouts(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    setsockopt(
+        fd,
+        c::IPPROTO_TCP,
+        c::TCP_THIN_LINEAR_TIMEOUTS,
+        from_bool(value),
+    )
+}
+
+#[cfg(any(linux_like, target_os = "fuchsia"))]
+#[inline]
+pub(crate) fn get_tcp_thin_linear_timeouts(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    getsockopt(fd, c::IPPROTO_TCP, c::TCP_THIN_LINEAR_TIMEOUTS).map(to_bool)
+}
+
+#[cfg(any(linux_like, solarish, target_os = "fuchsia"))]
+#[inline]
+pub(crate) fn set_tcp_cork(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_TCP, c::TCP_CORK, from_bool(value))
+}
+
+#[cfg(any(linux_like, solarish, target_os = "fuchsia"))]
+#[inline]
+pub(crate) fn get_tcp_cork(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    getsockopt(fd, c::IPPROTO_TCP, c::TCP_CORK).map(to_bool)
 }
 
 #[inline]
