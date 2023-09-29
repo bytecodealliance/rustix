@@ -20,7 +20,7 @@
 
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::fs::{
-    fstat, fstatfs, major, openat, readlinkat, renameat, FileType, FsWord, Mode, OFlags, Stat, CWD,
+    fstat, fstatfs, major, openat, renameat, FileType, FsWord, Mode, OFlags, Stat, CWD,
     PROC_SUPER_MAGIC,
 };
 use crate::io;
@@ -267,6 +267,7 @@ fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
+#[allow(unsafe_code)]
 fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     static PROC_SELF: StaticFd = StaticFd::new();
 
@@ -279,7 +280,13 @@ fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
             // instead use `readlink` on the `self` symlink to learn our pid in
             // the procfs namespace.
             let self_symlink = open_and_check_file(proc, proc_stat, cstr!("self"), Kind::Symlink)?;
-            let pid = readlinkat(self_symlink, cstr!(""), Vec::new())?;
+            let mut buf = [core::mem::MaybeUninit::<u8>::uninit(); 20];
+            let len = crate::backend::fs::syscalls::readlinkat(
+                self_symlink.as_fd(),
+                cstr!(""),
+                &mut buf,
+            )?;
+            let pid: &[u8] = unsafe { core::mem::transmute(&buf[..len]) };
 
             // Open "/proc/self". Use our pid to compute the name rather than
             // literally using "self", as "self" is a symlink.
