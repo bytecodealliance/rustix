@@ -258,7 +258,7 @@ pub(crate) fn readlink(path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
     }
 }
 
-#[cfg(all(feature = "alloc", not(target_os = "redox")))]
+#[cfg(all(any(feature = "alloc", feature = "procfs"), not(target_os = "redox")))]
 #[inline]
 pub(crate) fn readlinkat(
     dirfd: BorrowedFd<'_>,
