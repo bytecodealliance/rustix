@@ -1,3 +1,4 @@
+#[cfg(not(target_os = "espidf"))]
 use crate::backend::c;
 
 /// A command for use with [`membarrier`] and [`membarrier_cpu`].

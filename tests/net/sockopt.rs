@@ -1,6 +1,15 @@
 use rustix::fd::OwnedFd;
-use rustix::net::sockopt;
-use rustix::net::{AddressFamily, SocketType};
+use rustix::io;
+#[cfg(any(
+    linux_kernel,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "openbsd",
+    target_os = "redox",
+    target_env = "newlib"
+))]
+use rustix::net::ipproto;
+use rustix::net::{sockopt, AddressFamily, SocketType};
 use std::time::Duration;
 
 // Test `socket` socket options.
@@ -10,6 +19,20 @@ fn test_sockopts_socket(s: &OwnedFd) {
         .unwrap()
         .is_none());
     assert_eq!(sockopt::get_socket_type(&s).unwrap(), SocketType::STREAM);
+    #[cfg(any(
+        linux_kernel,
+        target_os = "freebsd",
+        target_os = "fuchsia",
+        target_os = "openbsd",
+        target_os = "redox",
+        target_env = "newlib"
+    ))]
+    {
+        assert_eq!(
+            sockopt::get_socket_protocol(&s).unwrap(),
+            Some(ipproto::TCP)
+        );
+    }
     assert!(!sockopt::get_socket_reuseaddr(&s).unwrap());
     #[cfg(not(windows))]
     assert!(!sockopt::get_socket_broadcast(&s).unwrap());
@@ -87,7 +110,7 @@ fn test_sockopts_socket(s: &OwnedFd) {
     sockopt::set_socket_linger(&s, Some(Duration::new(1, 1))).unwrap();
 
     // Check that we have a linger of at least the time we set.
-    assert!(dbg!(sockopt::get_socket_linger(&s).unwrap().unwrap()) >= Duration::new(1, 1));
+    assert!(sockopt::get_socket_linger(&s).unwrap().unwrap() >= Duration::new(1, 1));
 
     #[cfg(linux_kernel)]
     {
@@ -120,6 +143,40 @@ fn test_sockopts_socket(s: &OwnedFd) {
 
     // Check that the oobinline flag is set.
     assert!(sockopt::get_socket_oobinline(&s).unwrap());
+
+    // Check the initial value of SO_REUSEPORT, set it, and check it.
+    #[cfg(not(any(solarish, windows)))]
+    {
+        assert!(!sockopt::get_socket_reuseport(&s).unwrap());
+        sockopt::set_socket_reuseport(&s, true).unwrap();
+        assert!(sockopt::get_socket_reuseport(&s).unwrap());
+    }
+
+    // Check the initial value of SO_REUSEPORT_LB, set it, and check it.
+    #[cfg(target_os = "freebsd")]
+    {
+        assert!(!sockopt::get_socket_reuseport_lb(&s).unwrap());
+        sockopt::set_socket_reuseport_lb(&s, true).unwrap();
+        assert!(sockopt::get_socket_reuseport_lb(&s).unwrap());
+    }
+
+    // Not much we can check with `get_socket_cookie`, but make sure we can
+    // call it and that it returns the same value if called twice.
+    #[cfg(target_os = "linux")]
+    {
+        assert_eq!(
+            sockopt::get_socket_cookie(&s).unwrap(),
+            sockopt::get_socket_cookie(&s).unwrap()
+        );
+    }
+
+    // Check the initial value of SO_INCOMING_CPU, set it, and check it.
+    #[cfg(target_os = "linux")]
+    {
+        assert_eq!(sockopt::get_socket_incoming_cpu(&s).unwrap(), u32::MAX);
+        sockopt::set_socket_incoming_cpu(&s, 3).unwrap();
+        assert_eq!(sockopt::get_socket_incoming_cpu(&s).unwrap(), 3);
+    }
 }
 
 // Test `tcp` socket options.
@@ -163,6 +220,53 @@ fn test_sockopts_tcp(s: &OwnedFd) {
             sockopt::get_tcp_keepintvl(&s).unwrap(),
             Duration::from_secs(61)
         );
+    }
+
+    // Check the initial value of TCP_QUICKACK, set it, and check it.
+    #[cfg(any(linux_like, target_os = "fuchsia"))]
+    {
+        assert!(sockopt::get_tcp_quickack(&s).unwrap());
+        sockopt::set_tcp_quickack(&s, false).unwrap();
+        assert!(!sockopt::get_tcp_quickack(&s).unwrap());
+    }
+
+    // Check the initial value of TCP_CONGESTION, set it, and check it.
+    //
+    // Temporarily disable this test on non-x86 as qemu isn't yet aware of
+    // TCP_CONGESTION.
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    #[cfg(any(
+        linux_like,
+        target_os = "freebsd",
+        target_os = "fuchsia",
+        target_os = "illumos"
+    ))]
+    #[cfg(feature = "alloc")]
+    {
+        let algo = sockopt::get_tcp_congestion(&s).unwrap();
+        assert!(!algo.is_empty());
+        #[cfg(linux_like)]
+        {
+            sockopt::set_tcp_congestion(&s, "reno").unwrap();
+            assert_eq!(sockopt::get_tcp_congestion(&s).unwrap(), "reno");
+        }
+    }
+
+    // Check the initial value of TCP_THIN_LINEAR_TIMEOUTS, set it, and check
+    // it.
+    #[cfg(any(linux_like, target_os = "fuchsia"))]
+    {
+        assert!(!sockopt::get_tcp_thin_linear_timeouts(&s).unwrap());
+        sockopt::set_tcp_thin_linear_timeouts(&s, true).unwrap();
+        assert!(sockopt::get_tcp_thin_linear_timeouts(&s).unwrap());
+    }
+
+    // Check the initial value of TCP_CORK, set it, and check it.
+    #[cfg(any(linux_like, solarish, target_os = "fuchsia"))]
+    {
+        assert!(!sockopt::get_tcp_cork(&s).unwrap());
+        sockopt::set_tcp_cork(&s, true).unwrap();
+        assert!(sockopt::get_tcp_cork(&s).unwrap());
     }
 }
 
@@ -233,6 +337,23 @@ fn test_sockopts_ipv4() {
         assert!(sockopt::get_ip_recvtos(&s).unwrap());
     }
 
+    // Check the initial value of IP_FREEBIND, set it, and check it.
+    #[cfg(any(linux_kernel, target_os = "fuchsia"))]
+    {
+        assert!(!sockopt::get_ip_freebind(&s).unwrap());
+        sockopt::set_ip_freebind(&s, true).unwrap();
+        assert!(sockopt::get_ip_freebind(&s).unwrap());
+    }
+
+    // Check that we can query SO_ORIGINAL_DST.
+    #[cfg(any(linux_kernel, target_os = "fuchsia"))]
+    {
+        assert!(matches!(
+            sockopt::get_ip_original_dst(&s),
+            Err(io::Errno::NOENT | io::Errno::NOPROTOOPT)
+        ));
+    }
+
     test_sockopts_tcp(&s);
 }
 
@@ -260,9 +381,9 @@ fn test_sockopts_ipv6() {
     assert_ne!(sockopt::get_ipv6_unicast_hops(&s).unwrap(), 0);
     match sockopt::get_ipv6_multicast_loop(&s) {
         Ok(multicast_loop) => assert!(multicast_loop),
-        Err(rustix::io::Errno::OPNOTSUPP) => (),
-        Err(rustix::io::Errno::INVAL) => (),
-        Err(rustix::io::Errno::NOPROTOOPT) => (),
+        Err(io::Errno::OPNOTSUPP) => (),
+        Err(io::Errno::INVAL) => (),
+        Err(io::Errno::NOPROTOOPT) => (),
         Err(err) => Err(err).unwrap(),
     }
     assert_ne!(sockopt::get_ipv6_unicast_hops(&s).unwrap(), 0);
@@ -272,8 +393,8 @@ fn test_sockopts_ipv6() {
     #[cfg(not(target_os = "netbsd"))]
     match sockopt::get_ipv6_multicast_hops(&s) {
         Ok(hops) => assert_eq!(hops, 0),
-        Err(rustix::io::Errno::NOPROTOOPT) => (),
-        Err(rustix::io::Errno::INVAL) => (),
+        Err(io::Errno::NOPROTOOPT) => (),
+        Err(io::Errno::INVAL) => (),
         Err(err) => Err(err).unwrap(),
     };
 
@@ -293,9 +414,9 @@ fn test_sockopts_ipv6() {
                 Err(err) => Err(err).unwrap(),
             }
         }
-        Err(rustix::io::Errno::OPNOTSUPP) => (),
-        Err(rustix::io::Errno::INVAL) => (),
-        Err(rustix::io::Errno::NOPROTOOPT) => (),
+        Err(io::Errno::OPNOTSUPP) => (),
+        Err(io::Errno::INVAL) => (),
+        Err(io::Errno::NOPROTOOPT) => (),
         Err(err) => Err(err).unwrap(),
     }
 
@@ -323,6 +444,31 @@ fn test_sockopts_ipv6() {
         assert!(!sockopt::get_ipv6_recvtclass(&s).unwrap());
         sockopt::set_ipv6_recvtclass(&s, true).unwrap();
         assert!(sockopt::get_ipv6_recvtclass(&s).unwrap());
+    }
+
+    // Check the initial value of IPV6_FREEBIND, set it, and check it.
+    #[cfg(linux_kernel)]
+    {
+        assert!(!sockopt::get_ipv6_freebind(&s).unwrap());
+        sockopt::set_ipv6_freebind(&s, true).unwrap();
+        assert!(sockopt::get_ipv6_freebind(&s).unwrap());
+    }
+
+    // Check the initial value of IPV6_TCLASS, set it, and check it.
+    #[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
+    {
+        assert_eq!(sockopt::get_ipv6_tclass(&s).unwrap(), 0);
+        sockopt::set_ipv6_tclass(&s, 12).unwrap();
+        assert_eq!(sockopt::get_ipv6_tclass(&s).unwrap(), 12);
+    }
+
+    // Check that we can query IP6T_SO_ORIGINAL_DST.
+    #[cfg(linux_kernel)]
+    {
+        assert!(matches!(
+            sockopt::get_ipv6_original_dst(&s),
+            Err(io::Errno::NOENT | io::Errno::NOPROTOOPT)
+        ));
     }
 
     test_sockopts_tcp(&s);

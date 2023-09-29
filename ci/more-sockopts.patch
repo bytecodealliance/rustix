@@ -1,0 +1,79 @@
+From Dan Gohman <dev@sunfishcode.online>
+Subject: [PATCH] Implement various socket options.
+
+This implements the `SO_INCOMING_CPU`, `SO_COOKIE`, and `SO_PROTOCOL`
+socket options.
+
+diff -ur -x roms -x build a/linux-user/generic/sockbits.h b/linux-user/generic/sockbits.h
+--- a/linux-user/generic/sockbits.h
++++ b/linux-user/generic/sockbits.h
+@@ -60,4 +60,10 @@
+ 
+ #define TARGET_SO_PROTOCOL             38
+ #define TARGET_SO_DOMAIN               39
++#ifndef TARGET_SO_INCOMING_CPU
++#define TARGET_SO_INCOMING_CPU         49
++#endif
++#ifndef TARGET_SO_COOKIE
++#define TARGET_SO_COOKIE               57
++#endif
+ #endif
+diff -ur -x roms -x build a/linux-user/syscall.c b/linux-user/syscall.c
+--- a/linux-user/syscall.c
++++ b/linux-user/syscall.c
+@@ -2476,6 +2476,9 @@
+         case TARGET_SO_RCVLOWAT:
+ 		optname = SO_RCVLOWAT;
+ 		break;
++        case TARGET_SO_INCOMING_CPU:
++		optname = SO_INCOMING_CPU;
++		break;
+         default:
+             goto unimplemented;
+         }
+@@ -2534,6 +2537,7 @@
+ {
+     abi_long ret;
+     int len, val;
++    int64_t val64;
+     socklen_t lv;
+ 
+     switch(level) {
+@@ -2733,6 +2737,27 @@
+         case TARGET_SO_DOMAIN:
+             optname = SO_DOMAIN;
+             goto int_case;
++        case TARGET_SO_INCOMING_CPU:
++            optname = SO_INCOMING_CPU;
++            goto int_case;
++	case TARGET_SO_COOKIE:
++            optname = SO_COOKIE;
++            if (get_user_u32(len, optlen))
++                return -TARGET_EFAULT;
++            if (len < 0)
++                return -TARGET_EINVAL;
++            lv = sizeof(val64);
++            ret = get_errno(getsockopt(sockfd, level, optname, &val64, &lv));
++            if (ret < 0)
++                return ret;
++            if (len > lv)
++                len = lv;
++	    assert(len == 8);
++            if (put_user_u64(val64, optval_addr))
++                return -TARGET_EFAULT;
++            if (put_user_u32(len, optlen))
++                return -TARGET_EFAULT;
++            break;
+         default:
+             goto int_case;
+         }
+@@ -2756,6 +2781,9 @@
+         case SO_ERROR:
+             val = host_to_target_errno(val);
+             break;
++        case SO_PROTOCOL:
++            val = host_to_target_errno(val);
++            break;
+         }
+         if (level == SOL_SOCKET && optname == SO_ERROR) {
+             val = host_to_target_errno(val);
