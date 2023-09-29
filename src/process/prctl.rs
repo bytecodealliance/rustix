@@ -960,9 +960,11 @@ bitflags! {
         const ENABLE = 1_u32 << 1;
         /// The speculation feature is disabled, mitigation is enabled.
         const DISABLE = 1_u32 << 2;
-        /// The speculation feature is disabled, mitigation is enabled, and it cannot be undone.
+        /// The speculation feature is disabled, mitigation is enabled, and it
+        /// cannot be undone.
         const FORCE_DISABLE = 1_u32 << 3;
-        /// The speculation feature is disabled, mitigation is enabled, and the state will be cleared on `execve`.
+        /// The speculation feature is disabled, mitigation is enabled, and the
+        /// state will be cleared on `execve`.
         const DISABLE_NOEXEC = 1_u32 << 4;
     }
 }
@@ -972,15 +974,18 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SpeculationFeatureState: u32 {
-        /// Mitigation can be controlled per thread by `PR_SET_SPECULATION_CTRL`.
+        /// Mitigation can be controlled per thread by
+        /// `PR_SET_SPECULATION_CTRL`.
         const PRCTL = 1_u32 << 0;
         /// The speculation feature is enabled, mitigation is disabled.
         const ENABLE = 1_u32 << 1;
         /// The speculation feature is disabled, mitigation is enabled.
         const DISABLE = 1_u32 << 2;
-        /// The speculation feature is disabled, mitigation is enabled, and it cannot be undone.
+        /// The speculation feature is disabled, mitigation is enabled, and it
+        /// cannot be undone.
         const FORCE_DISABLE = 1_u32 << 3;
-        /// The speculation feature is disabled, mitigation is enabled, and the state will be cleared on `execve`.
+        /// The speculation feature is disabled, mitigation is enabled, and the
+        /// state will be cleared on `execve`.
         const DISABLE_NOEXEC = 1_u32 << 4;
     }
 }

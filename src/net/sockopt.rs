@@ -617,8 +617,8 @@ pub fn get_ipv6_multicast_hops<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 
 /// `setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, multiaddr, interface)`
 ///
-/// This is similar to [`set_ip_add_membership`] but always sets `ifindex` value
-/// to zero.
+/// This is similar to [`set_ip_add_membership`] but always sets `ifindex`
+/// value to zero.
 ///
 /// See the [module-level documentation] for more.
 ///
@@ -726,8 +726,8 @@ pub fn set_ipv6_add_membership<Fd: AsFd>(
 
 /// `setsockopt(fd, IPPROTO_IP, IP_DROP_MEMBERSHIP, multiaddr, interface)`
 ///
-/// This is similar to [`set_ip_drop_membership`] but always sets `ifindex` value
-/// to zero.
+/// This is similar to [`set_ip_drop_membership`] but always sets `ifindex`
+/// value to zero.
 ///
 /// See the [module-level documentation] for more.
 ///

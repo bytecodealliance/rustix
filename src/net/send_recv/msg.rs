@@ -71,7 +71,8 @@ pub enum RecvAncillaryMessage<'a> {
     ScmRights(AncillaryIter<'a, OwnedFd>),
 }
 
-/// Buffer for sending ancillary messages.
+/// Buffer for sending ancillary messages with [`sendmsg`], [`sendmsg_v4`],
+/// [`sendmsg_v6`], [`sendmsg_unix`], and [`sendmsg_any`].
 pub struct SendAncillaryBuffer<'buf, 'slice, 'fd> {
     /// Raw byte buffer for messages.
     buffer: &'buf mut [u8],
@@ -191,7 +192,7 @@ impl<'slice, 'fd> Extend<SendAncillaryMessage<'slice, 'fd>>
     }
 }
 
-/// Buffer for receiving ancillary messages.
+/// Buffer for receiving ancillary messages with [`recvmsg`].
 pub struct RecvAncillaryBuffer<'buf> {
     /// Raw byte buffer for messages.
     buffer: &'buf mut [u8],
@@ -274,7 +275,7 @@ impl Drop for RecvAncillaryBuffer<'_> {
     }
 }
 
-/// An iterator that drains messages from a `RecvAncillaryBuffer`.
+/// An iterator that drains messages from a [`RecvAncillaryBuffer`].
 pub struct AncillaryDrain<'buf> {
     /// Inner iterator over messages.
     messages: messages::Messages<'buf>,
@@ -287,7 +288,7 @@ pub struct AncillaryDrain<'buf> {
 }
 
 impl<'buf> AncillaryDrain<'buf> {
-    /// A closure that converts a message into a `RecvAncillaryMessage`.
+    /// A closure that converts a message into a [`RecvAncillaryMessage`].
     fn cvt_msg(
         read: &mut usize,
         length: &mut usize,

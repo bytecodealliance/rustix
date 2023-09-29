@@ -19,9 +19,10 @@ pub use backend::mm::types::{MapFlags, MprotectFlags, ProtFlags};
 impl MapFlags {
     /// Create `MAP_HUGETLB` with provided size of huge page.
     ///
-    /// Under the hood it computes `MAP_HUGETLB | (huge_page_size_log2 << MAP_HUGE_SHIFT)`.
-    /// `huge_page_size_log2` denotes logarithm of huge page size to use and should be
-    /// between 16 and 63 (inclusively).
+    /// Under the hood it computes
+    /// `MAP_HUGETLB | (huge_page_size_log2 << MAP_HUGE_SHIFT)`.
+    /// `huge_page_size_log2` denotes logarithm of huge page size to use and
+    /// should be between 16 and 63 (inclusive).
     ///
     /// ```
     /// use rustix::mm::MapFlags;

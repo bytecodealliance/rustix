@@ -121,7 +121,7 @@ targets = [
 # users are better served by just using libc for this.
 default = ["std", "use-libc-auxv"]
 
-# This enables use of std. Disabling this enables `#![no_std], and requires
+# This enables use of std. Disabling this enables `#![no_std]`, and requires
 # Rust 1.64 or newer.
 std = ["bitflags/std", "alloc", "libc?/std", "libc_errno?/std"]
 
@@ -202,8 +202,8 @@ all-apis = [
     "rand",
     "runtime",
     "shm",
-    "system",
     "stdio",
+    "system",
     "termios",
     "thread",
     "time",
