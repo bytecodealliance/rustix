@@ -19,18 +19,18 @@
 //! to succeed with bogus results.
 
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
+use crate::ffi::CStr;
 use crate::fs::{
-    fstat, fstatfs, major, openat, renameat, FileType, FsWord, Mode, OFlags, Stat, CWD,
+    fstat, fstatfs, major, openat, renameat, FileType, FsWord, Mode, OFlags, RawDir, Stat, CWD,
     PROC_SUPER_MAGIC,
 };
 use crate::io;
 use crate::path::DecInt;
 #[cfg(feature = "rustc-dep-of-std")]
 use core::lazy::OnceCell;
+use core::mem::MaybeUninit;
 #[cfg(not(feature = "rustc-dep-of-std"))]
 use once_cell::sync::OnceCell;
-#[cfg(feature = "alloc")]
-use {crate::ffi::CStr, crate::fs::Dir};
 
 /// Linux's procfs always uses inode 1 for its root directory.
 const PROC_ROOT_INO: u64 = 1;
@@ -41,9 +41,7 @@ enum Kind {
     Proc,
     Pid,
     Fd,
-    #[cfg(feature = "alloc")]
     File,
-    #[cfg(feature = "alloc")]
     Symlink,
 }
 
@@ -70,9 +68,7 @@ fn check_proc_entry_with_stat(
     match kind {
         Kind::Proc => check_proc_root(entry, &entry_stat)?,
         Kind::Pid | Kind::Fd => check_proc_subdir(entry, &entry_stat, proc_stat)?,
-        #[cfg(feature = "alloc")]
         Kind::File => check_proc_file(&entry_stat, proc_stat)?,
-        #[cfg(feature = "alloc")]
         Kind::Symlink => check_proc_symlink(&entry_stat, proc_stat)?,
     }
 
@@ -107,10 +103,16 @@ fn check_proc_entry_with_stat(
                 return Err(io::Errno::NOTSUP);
             }
         }
-        #[cfg(feature = "alloc")]
-        Kind::File | Kind::Symlink => {
+        Kind::File => {
             // Check that files in procfs don't have extraneous hard links to
             // them (which might indicate hard links to other things).
+            if entry_stat.st_nlink != 1 {
+                return Err(io::Errno::NOTSUP);
+            }
+        }
+        Kind::Symlink => {
+            // Check that symlinks in procfs don't have extraneous hard links
+            // to them (which might indicate hard links to other things).
             if entry_stat.st_nlink != 1 {
                 return Err(io::Errno::NOTSUP);
             }
@@ -163,7 +165,6 @@ fn check_proc_subdir(
     Ok(())
 }
 
-#[cfg(feature = "alloc")]
 fn check_proc_file(stat: &Stat, proc_stat: Option<&Stat>) -> io::Result<()> {
     // Check that we have a regular file.
     if FileType::from_raw_mode(stat.st_mode) != FileType::RegularFile {
@@ -175,7 +176,6 @@ fn check_proc_file(stat: &Stat, proc_stat: Option<&Stat>) -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(feature = "alloc")]
 fn check_proc_symlink(stat: &Stat, proc_stat: Option<&Stat>) -> io::Result<()> {
     // Check that we have a symbolic link.
     if FileType::from_raw_mode(stat.st_mode) != FileType::Symlink {
@@ -280,7 +280,7 @@ fn proc_self() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
             // instead use `readlink` on the `self` symlink to learn our pid in
             // the procfs namespace.
             let self_symlink = open_and_check_file(proc, proc_stat, cstr!("self"), Kind::Symlink)?;
-            let mut buf = [core::mem::MaybeUninit::<u8>::uninit(); 20];
+            let mut buf = [MaybeUninit::<u8>::uninit(); 20];
             let len = crate::backend::fs::syscalls::readlinkat(
                 self_symlink.as_fd(),
                 cstr!(""),
@@ -347,7 +347,6 @@ fn new_static_fd(fd: OwnedFd, stat: Stat) -> (OwnedFd, Stat) {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
-#[cfg(feature = "alloc")]
 fn proc_self_fdinfo() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     static PROC_SELF_FDINFO: StaticFd = StaticFd::new();
 
@@ -377,14 +376,12 @@ fn proc_self_fdinfo() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
-#[cfg(feature = "alloc")]
 #[inline]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 pub fn proc_self_fdinfo_fd<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
     _proc_self_fdinfo(fd.as_fd())
 }
 
-#[cfg(feature = "alloc")]
 fn _proc_self_fdinfo(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     let (proc_self_fdinfo, proc_self_fdinfo_stat) = proc_self_fdinfo()?;
     let fd_str = DecInt::from_fd(fd);
@@ -407,7 +404,6 @@ fn _proc_self_fdinfo(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
 /// [Linux pagemap]: https://www.kernel.org/doc/Documentation/vm/pagemap.txt
-#[cfg(feature = "alloc")]
 #[inline]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 pub fn proc_self_pagemap() -> io::Result<OwnedFd> {
@@ -423,7 +419,6 @@ pub fn proc_self_pagemap() -> io::Result<OwnedFd> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
-#[cfg(feature = "alloc")]
 #[inline]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 pub fn proc_self_maps() -> io::Result<OwnedFd> {
@@ -439,7 +434,6 @@ pub fn proc_self_maps() -> io::Result<OwnedFd> {
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man5/proc.5.html
-#[cfg(feature = "alloc")]
 #[inline]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "procfs")))]
 pub fn proc_self_status() -> io::Result<OwnedFd> {
@@ -447,14 +441,12 @@ pub fn proc_self_status() -> io::Result<OwnedFd> {
 }
 
 /// Open a file under `/proc/self`.
-#[cfg(feature = "alloc")]
 fn proc_self_file(name: &CStr) -> io::Result<OwnedFd> {
     let (proc_self, proc_self_stat) = proc_self()?;
     open_and_check_file(proc_self, proc_self_stat, name, Kind::File)
 }
 
 /// Open a procfs file within in `dir` and check it for bind mounts.
-#[cfg(feature = "alloc")]
 fn open_and_check_file(
     dir: BorrowedFd<'_>,
     dir_stat: &Stat,
@@ -483,20 +475,9 @@ fn open_and_check_file(
     // we just opened. If we can't find it, there could be a file bind mount on
     // top of the file we want.
     //
-    // As we scan, we also check for ".", to make sure it's the same directory
-    // as our original directory, to detect mount points, since
-    // `Dir::read_from` reopens ".".
-    //
     // TODO: With Linux 5.8 we might be able to use `statx` and
     // `STATX_ATTR_MOUNT_ROOT` to detect mountpoints directly instead of doing
     // this scanning.
-    let dir = Dir::read_from(dir).map_err(|_err| io::Errno::NOTSUP)?;
-
-    // Confirm that we got the same inode.
-    let dot_stat = dir.stat().map_err(|_err| io::Errno::NOTSUP)?;
-    if (dot_stat.st_dev, dot_stat.st_ino) != (dir_stat.st_dev, dir_stat.st_ino) {
-        return Err(io::Errno::NOTSUP);
-    }
 
     let expected_type = match kind {
         Kind::File => FileType::RegularFile,
@@ -506,7 +487,10 @@ fn open_and_check_file(
 
     let mut found_file = false;
     let mut found_dot = false;
-    for entry in dir {
+
+    let mut buf = [MaybeUninit::uninit(); 2048];
+    let mut iter = RawDir::new(dir, &mut buf);
+    while let Some(entry) = iter.next() {
         let entry = entry.map_err(|_err| io::Errno::NOTSUP)?;
         if entry.ino() == file_stat.st_ino
             && entry.file_type() == expected_type
