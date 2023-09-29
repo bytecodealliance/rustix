@@ -157,7 +157,9 @@ pub fn sethostname(name: &[u8]) -> io::Result<()> {
     backend::system::syscalls::sethostname(name)
 }
 
-/// Reboot command to be used with [`reboot`]
+/// Reboot command to be used with [`reboot`].
+///
+/// See [`reboot`] documentation for more info
 ///
 /// [`reboot`]: crate::system::reboot
 #[cfg(target_os = "linux")]
@@ -168,37 +170,39 @@ pub enum RebootCommand {
     /// CAD is disabled.
     /// This means that the CAD keystroke will cause a SIGINT signal to be sent to init (process 1),
     /// whereupon this process may decide upon a proper action (maybe: kill all processes, sync, reboot).
-    CadOff = c::LINUX_REBOOT_CMD_CAD_OFF,
-    /// CAD is enabled.
-    /// This means that the CAD keystroke will immediately cause the action associated with LINUX_REBOOT_CMD_RESTART.
-    CadOn = c::LINUX_REBOOT_CMD_CAD_ON,
-    /// The message "System halted." is printed, and the system is halted.
-    /// Control is given to the ROM monitor, if there is one.  
-    /// If not preceded by a [`sync`], data will be lost.
+    /// Disables the Ctrl-Alt-Del keystroke.
     ///
-    /// [`sync`]: crate::fs::sync
+    /// When disabled, the keystroke will send a SIGINT signal to pid 1
+    CadOff = c::LINUX_REBOOT_CMD_CAD_OFF,
+    /// Enables the Ctrl-Alt-Del keystroke.
+    ///
+    /// When enabled, the keystroke will trigger LINUX_REBOOT_CMD_RESTART
+    CadOn = c::LINUX_REBOOT_CMD_CAD_ON,
+    /// Prints the message "System halted" and halts the system
     Halt = c::LINUX_REBOOT_CMD_HALT,
     /// Execute a kernel that has been loaded earlier with [`kexec_load`].
-    /// This option is available only if the kernel was configured with CONFIG_KEXEC.
     ///
     /// [`kexec_load`]: https://man7.org/linux/man-pages/man2/kexec_load.2.html
     Kexec = c::LINUX_REBOOT_CMD_KEXEC,
-    /// The message "Power down." is printed, the system is stopped, and all power is removed from the system, if possible.
-    /// If not preceded by a [`sync`], data will be lost.
-    ///
-    /// [`sync`]: crate::fs::sync
+    /// Prints the message "Power down.", stops the system and tries to remove all power
     PowerOff = c::LINUX_REBOOT_CMD_POWER_OFF,
-    /// The message "Restarting system." is printed, and a default restart is performed immediately.
-    /// If not preceded by a [`sync`], data will be lost.
-    ///
-    /// [`sync`]: crate::fs::sync
+    /// Prints the message "Restarting system." and triggers a restart
     Restart = c::LINUX_REBOOT_CMD_RESTART,
-    /// The system is suspended (hibernated) to disk.
-    /// This option is available only if the kernel was configured with CONFIG_HIBERNATION.
+    /// Hibernate the system by suspending to disk
     SwSuspend = c::LINUX_REBOOT_CMD_SW_SUSPEND,
 }
 
 /// `reboot`—Reboot or enable/disable Ctrl-Alt-Del
+///
+/// The reboot syscall, despite the name, can actually do much more than reboot.
+///
+/// Among other things it can
+/// - Restart, Halt, Power Off and Suspend the system
+/// - Enable and disable the Ctrl-Alt-Del keystroke
+/// - Execute other kernels
+/// - Terminate init inside PID namespaces
+///
+/// It is highly reccomended to carefully read the kernel documentation before calling this function.
 ///
 /// # References
 /// - [Linux]
