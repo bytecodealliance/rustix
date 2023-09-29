@@ -1,7 +1,12 @@
 //! libc syscalls supporting `rustix::fs`.
 
 use crate::backend::c;
-#[cfg(any(apple, linux_kernel, feature = "alloc"))]
+#[cfg(any(
+    apple,
+    linux_kernel,
+    feature = "alloc",
+    all(linux_kernel, feature = "procfs")
+))]
 use crate::backend::conv::ret_usize;
 use crate::backend::conv::{borrowed_fd, c_str, ret, ret_c_int, ret_off_t, ret_owned_fd};
 use crate::fd::{BorrowedFd, OwnedFd};
@@ -258,7 +263,10 @@ pub(crate) fn readlink(path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
     }
 }
 
-#[cfg(all(any(feature = "alloc", feature = "procfs"), not(target_os = "redox")))]
+#[cfg(all(
+    any(feature = "alloc", all(linux_kernel, feature = "procfs")),
+    not(target_os = "redox")
+))]
 #[inline]
 pub(crate) fn readlinkat(
     dirfd: BorrowedFd<'_>,
