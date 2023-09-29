@@ -48,7 +48,7 @@ diff -ur -x roms -x build a/linux-user/syscall.c b/linux-user/syscall.c
 +            goto int_case;
 +	case TARGET_SO_COOKIE:
 +            optname = SO_COOKIE;
-+            if (get_user_u64(len, optlen))
++            if (get_user_u32(len, optlen))
 +                return -TARGET_EFAULT;
 +            if (len < 0)
 +                return -TARGET_EINVAL;

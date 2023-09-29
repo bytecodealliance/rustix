@@ -171,7 +171,12 @@ use crate::net::SocketAddrV6;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 use crate::{backend, io};
 #[cfg(feature = "alloc")]
-#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    linux_like,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos"
+))]
 use alloc::string::String;
 use backend::c;
 use backend::fd::AsFd;
@@ -1092,7 +1097,7 @@ pub fn get_ipv6_original_dst<Fd: AsFd>(fd: Fd) -> io::Result<SocketAddrV6> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
-#[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
+#[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
 #[inline]
 #[doc(alias = "IPV6_TCLASS")]
 pub fn set_ipv6_tclass<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
@@ -1104,7 +1109,7 @@ pub fn set_ipv6_tclass<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
-#[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
+#[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
 #[inline]
 #[doc(alias = "IPV6_TCLASS")]
 pub fn get_ipv6_tclass<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
@@ -1262,7 +1267,12 @@ pub fn get_tcp_quickack<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
-#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    linux_like,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos"
+))]
 #[inline]
 #[doc(alias = "TCP_CONGESTION")]
 pub fn set_tcp_congestion<Fd: AsFd>(fd: Fd, value: &str) -> io::Result<()> {
@@ -1275,7 +1285,12 @@ pub fn set_tcp_congestion<Fd: AsFd>(fd: Fd, value: &str) -> io::Result<()> {
 ///
 /// [module-level documentation]: self#references-for-get_tcp_-and-set_tcp_-functions
 #[cfg(feature = "alloc")]
-#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    linux_like,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos"
+))]
 #[inline]
 #[doc(alias = "TCP_CONGESTION")]
 pub fn get_tcp_congestion<Fd: AsFd>(fd: Fd) -> io::Result<String> {

@@ -235,13 +235,21 @@ fn test_sockopts_tcp(s: &OwnedFd) {
     // Temporarily disable this test on non-x86 as qemu isn't yet aware of
     // TCP_CONGESTION.
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    #[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+    #[cfg(any(
+        linux_like,
+        target_os = "freebsd",
+        target_os = "fuchsia",
+        target_os = "illumos"
+    ))]
     #[cfg(feature = "alloc")]
     {
         let algo = sockopt::get_tcp_congestion(&s).unwrap();
         assert!(!algo.is_empty());
-        sockopt::set_tcp_congestion(&s, "reno").unwrap();
-        assert_eq!(sockopt::get_tcp_congestion(&s).unwrap(), "reno");
+        #[cfg(linux_like)]
+        {
+            sockopt::set_tcp_congestion(&s, "reno").unwrap();
+            assert_eq!(sockopt::get_tcp_congestion(&s).unwrap(), "reno");
+        }
     }
 
     // Check the initial value of TCP_THIN_LINEAR_TIMEOUTS, set it, and check
@@ -447,7 +455,7 @@ fn test_sockopts_ipv6() {
     }
 
     // Check the initial value of IPV6_TCLASS, set it, and check it.
-    #[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
+    #[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
     {
         assert_eq!(sockopt::get_ipv6_tclass(&s).unwrap(), 0);
         sockopt::set_ipv6_tclass(&s, 12).unwrap();

@@ -5,7 +5,12 @@ use crate::backend::c;
 use crate::backend::conv::{borrowed_fd, ret};
 use crate::fd::BorrowedFd;
 #[cfg(feature = "alloc")]
-#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    linux_like,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos"
+))]
 use crate::ffi::CStr;
 use crate::io;
 use crate::net::sockopt::Timeout;
@@ -46,10 +51,20 @@ use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 use crate::net::{SocketAddrAny, SocketAddrStorage, SocketAddrV4};
 use crate::utils::as_mut_ptr;
 #[cfg(feature = "alloc")]
-#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    linux_like,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos"
+))]
 use alloc::borrow::ToOwned;
 #[cfg(feature = "alloc")]
-#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    linux_like,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos"
+))]
 use alloc::string::String;
 #[cfg(apple)]
 use c::TCP_KEEPALIVE as TCP_KEEPIDLE;
@@ -778,13 +793,13 @@ pub(crate) fn get_ipv6_original_dst(fd: BorrowedFd<'_>) -> io::Result<SocketAddr
     }
 }
 
-#[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
+#[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
 #[inline]
 pub(crate) fn set_ipv6_tclass(fd: BorrowedFd<'_>, value: u32) -> io::Result<()> {
     setsockopt(fd, c::IPPROTO_IPV6, c::IPV6_TCLASS, value)
 }
 
-#[cfg(not(any(solarish, target_os = "espidf", target_os = "haiku")))]
+#[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
 #[inline]
 pub(crate) fn get_ipv6_tclass(fd: BorrowedFd<'_>) -> io::Result<u32> {
     getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_TCLASS)
@@ -864,7 +879,12 @@ pub(crate) fn get_tcp_quickack(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::IPPROTO_TCP, c::TCP_QUICKACK).map(to_bool)
 }
 
-#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    linux_like,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos"
+))]
 #[inline]
 pub(crate) fn set_tcp_congestion(fd: BorrowedFd<'_>, value: &str) -> io::Result<()> {
     let level = c::IPPROTO_TCP;
@@ -874,7 +894,12 @@ pub(crate) fn set_tcp_congestion(fd: BorrowedFd<'_>, value: &str) -> io::Result<
 }
 
 #[cfg(feature = "alloc")]
-#[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    linux_like,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos"
+))]
 #[inline]
 pub(crate) fn get_tcp_congestion(fd: BorrowedFd<'_>) -> io::Result<String> {
     let level = c::IPPROTO_TCP;
