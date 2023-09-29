@@ -231,6 +231,10 @@ fn test_sockopts_tcp(s: &OwnedFd) {
     }
 
     // Check the initial value of TCP_CONGESTION, set it, and check it.
+    //
+    // Temporarily disable this test on non-x86 as qemu isn't yet aware of
+    // TCP_CONGESTION.
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     #[cfg(any(linux_like, solarish, target_os = "freebsd", target_os = "fuchsia"))]
     #[cfg(feature = "alloc")]
     {
