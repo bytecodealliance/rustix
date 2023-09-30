@@ -166,6 +166,8 @@ impl<const OPCODE: RawOpcode> CompileTimeOpcode for BadOpcode<OPCODE> {
 }
 
 /// Provides a read code at compile time.
+///
+/// This corresponds to the C macro `_IOR(GROUP, NUM, Data)`.
 #[cfg(any(linux_kernel, bsd))]
 pub struct ReadOpcode<const GROUP: u8, const NUM: u8, Data>(Data);
 
@@ -175,6 +177,8 @@ impl<const GROUP: u8, const NUM: u8, Data> CompileTimeOpcode for ReadOpcode<GROU
 }
 
 /// Provides a write code at compile time.
+///
+/// This corresponds to the C macro `_IOW(GROUP, NUM, Data)`.
 #[cfg(any(linux_kernel, bsd))]
 pub struct WriteOpcode<const GROUP: u8, const NUM: u8, Data>(Data);
 
@@ -184,6 +188,8 @@ impl<const GROUP: u8, const NUM: u8, Data> CompileTimeOpcode for WriteOpcode<GRO
 }
 
 /// Provides a read/write code at compile time.
+///
+/// This corresponds to the C macro `_IOWR(GROUP, NUM, Data)`.
 #[cfg(any(linux_kernel, bsd))]
 pub struct ReadWriteOpcode<const GROUP: u8, const NUM: u8, Data>(Data);
 
@@ -193,6 +199,8 @@ impl<const GROUP: u8, const NUM: u8, Data> CompileTimeOpcode for ReadWriteOpcode
 }
 
 /// Provides a `None` code at compile time.
+///
+/// This corresponds to the C macro `_IO(GROUP, NUM)` when `Data` is zero sized.
 #[cfg(any(linux_kernel, bsd))]
 pub struct NoneOpcode<const GROUP: u8, const NUM: u8, Data>(Data);
 
