@@ -12,7 +12,7 @@ pub(super) const fn compose_opcode(
 ) -> RawOpcode {
     macro_rules! shift_and_mask {
         ($val:expr, $shift:expr, $mask:expr) => {{
-            ($val << $shift) & $mask
+            ($val & $mask) << $shift
         }};
     }
 
@@ -80,4 +80,38 @@ mod consts {
     pub(super) const WRITE: RawOpcode = 4;
     pub(super) const SIZE_BITS: RawOpcode = 13;
     pub(super) const DIR_BITS: RawOpcode = 3;
+}
+
+#[cfg(not(any(
+    // These have no ioctl opcodes defined in linux_raw_sys
+    // so can't use that as a known-good value for this test.
+    target_arch = "sparc",
+    target_arch = "sparc64"
+)))]
+#[test]
+fn check_known_opcodes() {
+    use crate::backend::c::{c_long, c_uint};
+    use core::mem::size_of;
+
+    // _IOR('U', 15, unsigned int)
+    assert_eq!(
+        compose_opcode(
+            Direction::Read,
+            b'U' as RawOpcode,
+            15,
+            size_of::<c_uint>() as RawOpcode
+        ),
+        linux_raw_sys::ioctl::USBDEVFS_CLAIMINTERFACE as RawOpcode
+    );
+
+    // _IOW('v', 2, long)
+    assert_eq!(
+        compose_opcode(
+            Direction::Write,
+            b'v' as RawOpcode,
+            2,
+            size_of::<c_long>() as RawOpcode
+        ),
+        linux_raw_sys::ioctl::FS_IOC_SETVERSION as RawOpcode
+    );
 }
