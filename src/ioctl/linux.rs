@@ -10,7 +10,7 @@ pub(super) const fn compose_opcode(
     num: RawOpcode,
     size: RawOpcode,
 ) -> RawOpcode {
-    macro_rules! shift_and_mask {
+    macro_rules! mask_and_shift {
         ($val:expr, $shift:expr, $mask:expr) => {{
             ($val & $mask) << $shift
         }};
@@ -23,10 +23,10 @@ pub(super) const fn compose_opcode(
         Direction::ReadWrite => READ | WRITE,
     };
 
-    shift_and_mask!(group, GROUP_SHIFT, GROUP_MASK)
-        | shift_and_mask!(num, NUM_SHIFT, NUM_MASK)
-        | shift_and_mask!(size, SIZE_SHIFT, SIZE_MASK)
-        | shift_and_mask!(dir, DIR_SHIFT, DIR_MASK)
+    mask_and_shift!(group, GROUP_SHIFT, GROUP_MASK)
+        | mask_and_shift!(num, NUM_SHIFT, NUM_MASK)
+        | mask_and_shift!(size, SIZE_SHIFT, SIZE_MASK)
+        | mask_and_shift!(dir, DIR_SHIFT, DIR_MASK)
 }
 
 const NUM_BITS: RawOpcode = 8;
