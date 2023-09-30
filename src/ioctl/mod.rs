@@ -205,6 +205,8 @@ impl Opcode {
     }
 
     /// Create a new opcode from a direction, group, number and size.
+    ///
+    /// This corresponds to the C macro `_IOC(direction, group, number, size)`
     #[cfg(any(linux_kernel, bsd))]
     #[inline]
     pub const fn from_components(
@@ -227,6 +229,8 @@ impl Opcode {
 
     /// Create a new non-mutating opcode from a group, a number and the type of
     /// data.
+    ///
+    /// This corresponds to the C macro `_IO(group, number)` when `T` is zero sized.
     #[cfg(any(linux_kernel, bsd))]
     #[inline]
     pub const fn none<T>(group: u8, number: u8) -> Self {
@@ -235,6 +239,8 @@ impl Opcode {
 
     /// Create a new reading opcode from a group, a number and the type of
     /// data.
+    ///
+    /// This corresponds to the C macro `_IOR(group, number, T)`.
     #[cfg(any(linux_kernel, bsd))]
     #[inline]
     pub const fn read<T>(group: u8, number: u8) -> Self {
@@ -243,6 +249,8 @@ impl Opcode {
 
     /// Create a new writing opcode from a group, a number and the type of
     /// data.
+    ///
+    /// This corresponds to the C macro `_IOW(group, number, T)`.
     #[cfg(any(linux_kernel, bsd))]
     #[inline]
     pub const fn write<T>(group: u8, number: u8) -> Self {
@@ -251,6 +259,8 @@ impl Opcode {
 
     /// Create a new reading and writing opcode from a group, a number and the
     /// type of data.
+    ///
+    /// This corresponds to the C macro `_IOWR(group, number, T)`.
     #[cfg(any(linux_kernel, bsd))]
     #[inline]
     pub const fn read_write<T>(group: u8, number: u8) -> Self {
