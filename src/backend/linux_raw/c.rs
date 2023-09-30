@@ -270,3 +270,26 @@ pub(crate) const CLOCK_THREAD_CPUTIME_ID: c_int =
     linux_raw_sys::general::CLOCK_THREAD_CPUTIME_ID as _;
 pub(crate) const CLOCK_PROCESS_CPUTIME_ID: c_int =
     linux_raw_sys::general::CLOCK_PROCESS_CPUTIME_ID as _;
+
+#[allow(overflowing_literals)]
+#[allow(dead_code)]
+mod reboot_symbols {
+    use linux_raw_sys::ctypes::*;
+
+    pub(crate) const LINUX_REBOOT_MAGIC1: c_int = 0xfee1dead;
+    pub(crate) const LINUX_REBOOT_MAGIC2: c_int = 672274793;
+    pub(crate) const LINUX_REBOOT_MAGIC2A: c_int = 85072278;
+    pub(crate) const LINUX_REBOOT_MAGIC2B: c_int = 369367448;
+    pub(crate) const LINUX_REBOOT_MAGIC2C: c_int = 537993216;
+
+    pub(crate) const LINUX_REBOOT_CMD_RESTART: c_int = 0x01234567;
+    pub(crate) const LINUX_REBOOT_CMD_HALT: c_int = 0xCDEF0123;
+    pub(crate) const LINUX_REBOOT_CMD_CAD_ON: c_int = 0x89ABCDEF;
+    pub(crate) const LINUX_REBOOT_CMD_CAD_OFF: c_int = 0x00000000;
+    pub(crate) const LINUX_REBOOT_CMD_POWER_OFF: c_int = 0x4321FEDC;
+    pub(crate) const LINUX_REBOOT_CMD_RESTART2: c_int = 0xA1B2C3D4;
+    pub(crate) const LINUX_REBOOT_CMD_SW_SUSPEND: c_int = 0xD000FCE2;
+    pub(crate) const LINUX_REBOOT_CMD_KEXEC: c_int = 0x45584543;
+}
+
+pub(crate) use reboot_symbols::*;
