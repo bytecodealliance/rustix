@@ -38,7 +38,7 @@ bitflags! {
         const CLOSE_NOWRITE = linux_raw_sys::general::IN_CLOSE_NOWRITE;
         /// `IN_CLOSE_WRITE`
         const CLOSE_WRITE = linux_raw_sys::general::IN_CLOSE_WRITE;
-        /// `IN_CREATE `
+        /// `IN_CREATE`
         const CREATE = linux_raw_sys::general::IN_CREATE;
         /// `IN_DELETE`
         const DELETE = linux_raw_sys::general::IN_DELETE;

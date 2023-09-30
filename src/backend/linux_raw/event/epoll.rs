@@ -288,8 +288,8 @@ pub struct Event {
     pub data: EventData,
 }
 
-/// Data assocated with an [`Event`]. This can either be a 64-bit integer value
-/// or a pointer which preserves pointer provenance.
+/// Data associated with an [`Event`]. This can either be a 64-bit integer
+/// value or a pointer which preserves pointer provenance.
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union EventData {

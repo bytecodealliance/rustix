@@ -139,9 +139,9 @@ pub(crate) unsafe fn read_sockaddr(
 
                 // Trim off unused bytes from the end of `path_bytes`.
                 let path_bytes = if cfg!(target_os = "freebsd") {
-                    // FreeBSD sometimes sets the length to longer than the length
-                    // of the NUL-terminated string. Find the NUL and truncate the
-                    // string accordingly.
+                    // FreeBSD sometimes sets the length to longer than the
+                    // length of the NUL-terminated string. Find the NUL and
+                    // truncate the string accordingly.
                     &decode.sun_path[..decode
                         .sun_path
                         .iter()

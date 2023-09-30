@@ -1277,8 +1277,8 @@ fn termios_layouts() {
         check_renamed_struct_renamed_field!(Termios, termios, local_modes, c_lflag);
         check_renamed_struct_renamed_field!(Termios, termios, special_codes, c_cc);
 
-        // On everything except PowerPC, `termios` matches `termios2` except for
-        // the addition of `c_ispeed` and `c_ospeed`.
+        // On everything except PowerPC, `termios` matches `termios2` except
+        // for the addition of `c_ispeed` and `c_ospeed`.
         #[cfg(not(any(target_arch = "powerpc", target_arch = "powerpc64")))]
         const_assert_eq!(
             memoffset::offset_of!(Termios, input_speed),

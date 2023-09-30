@@ -70,8 +70,7 @@ use alloc::string::String;
 use c::TCP_KEEPALIVE as TCP_KEEPIDLE;
 #[cfg(not(any(apple, target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
 use c::TCP_KEEPIDLE;
-use core::mem::size_of;
-use core::mem::MaybeUninit;
+use core::mem::{size_of, MaybeUninit};
 use core::time::Duration;
 #[cfg(windows)]
 use windows_sys::Win32::Foundation::BOOL;

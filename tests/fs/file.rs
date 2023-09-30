@@ -183,7 +183,7 @@ fn test_setfl_append() {
     rustix::fs::fcntl_setfl(&file, OFlags::APPEND).unwrap();
     assert_eq!(rustix::io::write(&file, b"xyz"), Ok(3));
 
-    // Check the final contents.
+    // Check the resulting contents.
     let file =
         rustix::fs::open(tmp.path().join("test.file"), OFlags::RDONLY, Mode::empty()).unwrap();
     let mut buf = [0_u8; 32];

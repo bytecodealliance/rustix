@@ -107,8 +107,8 @@ pub fn tell<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
 
 /// `fchmod(fd, mode)`—Sets open file or directory permissions.
 ///
-/// This implementation does not support `O_PATH` file descriptors, even on
-/// platforms where the host libc emulates it.
+/// This implementation does not support [`OFlags::PATH`] file descriptors,
+/// even on platforms where the host libc emulates it.
 ///
 /// # References
 ///  - [POSIX]

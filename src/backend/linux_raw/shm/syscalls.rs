@@ -1,9 +1,7 @@
 use crate::ffi::CStr;
 
-use crate::backend::fs::{
-    syscalls::{open, unlink},
-    types::{Mode, OFlags},
-};
+use crate::backend::fs::syscalls::{open, unlink};
+use crate::backend::fs::types::{Mode, OFlags};
 use crate::fd::OwnedFd;
 use crate::io;
 use crate::shm::ShmOFlags;
@@ -18,7 +16,7 @@ fn get_shm_name(name: &CStr) -> io::Result<([u8; NAME_MAX + SHM_DIR.len() + 1], 
         return Err(io::Errno::NAMETOOLONG);
     }
 
-    let num_slashes = name.into_iter().take_while(|x| **x == b'/').count();
+    let num_slashes = name.iter().take_while(|x| **x == b'/').count();
     let after_slashes = &name[num_slashes..];
     if after_slashes.is_empty()
         || after_slashes == b"."

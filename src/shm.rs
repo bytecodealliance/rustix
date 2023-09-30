@@ -36,5 +36,5 @@ pub fn shm_open<P: path::Arg>(name: P, flags: ShmOFlags, mode: Mode) -> io::Resu
 /// [Linux]: https://man7.org/linux/man-pages/man3/shm_unlink.3.html
 #[inline]
 pub fn shm_unlink<P: path::Arg>(name: P) -> io::Result<()> {
-    name.into_with_c_str(|name| backend::shm::syscalls::shm_unlink(name))
+    name.into_with_c_str(backend::shm::syscalls::shm_unlink)
 }

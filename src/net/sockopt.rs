@@ -758,7 +758,8 @@ pub fn set_ip_add_membership<Fd: AsFd>(
     backend::net::sockopt::set_ip_add_membership(fd.as_fd(), multiaddr, interface)
 }
 
-/// `setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, multiaddr, address, ifindex)`
+/// `setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, multiaddr, address,
+/// ifindex)`
 ///
 /// This is similar to [`set_ip_add_membership_with_ifindex`] but additionally
 /// allows a `ifindex` value to be given.

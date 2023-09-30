@@ -6,13 +6,10 @@
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
 use super::types::RawUname;
-use crate::backend::{
-    c,
-    conv::{c_int, ret, ret_infallible, slice},
-};
+use crate::backend::c;
+use crate::backend::conv::{c_int, ret, ret_infallible, slice};
 use crate::io;
-use crate::system::RebootCommand;
-use crate::system::Sysinfo;
+use crate::system::{RebootCommand, Sysinfo};
 use core::mem::MaybeUninit;
 
 #[inline]

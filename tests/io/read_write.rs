@@ -25,7 +25,8 @@ fn test_readwrite_pv() {
     {
         pwritev(&foo, &[IoSlice::new(b"hello")], 200).unwrap();
     }
-    // macOS only has pwritev in newer versions; allow it to fail with `ENOSYS`.
+    // macOS only has `pwritev` in newer versions; allow it to fail with
+    // `Errno::NOSYS`.
     #[cfg(apple)]
     {
         match pwritev(&foo, &[IoSlice::new(b"hello")], 200) {

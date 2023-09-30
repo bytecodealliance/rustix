@@ -86,16 +86,16 @@ pub unsafe fn ioctl<F: AsFd, I: Ioctl>(fd: F, mut ioctl: I) -> Result<I::Output>
     let request = I::OPCODE.raw();
     let arg = ioctl.as_ptr();
 
-    // SAFETY: The variant of `Ioctl` asserts that this is a valid IOCTL call to
-    // make.
+    // SAFETY: The variant of `Ioctl` asserts that this is a valid IOCTL call
+    // to make.
     let output = if I::IS_MUTATING {
         _ioctl(fd, request, arg)?
     } else {
         _ioctl_readonly(fd, request, arg)?
     };
 
-    // SAFETY: The variant of `Ioctl` asserts that this is a valid pointer to the
-    // output data.
+    // SAFETY: The variant of `Ioctl` asserts that this is a valid pointer to
+    // the output data.
     I::output_from_ptr(output, arg)
 }
 
@@ -230,7 +230,8 @@ impl Opcode {
     /// Create a new non-mutating opcode from a group, a number and the type of
     /// data.
     ///
-    /// This corresponds to the C macro `_IO(group, number)` when `T` is zero sized.
+    /// This corresponds to the C macro `_IO(group, number)` when `T` is zero
+    /// sized.
     #[cfg(any(linux_kernel, bsd))]
     #[inline]
     pub const fn none<T>(group: u8, number: u8) -> Self {

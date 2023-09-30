@@ -1,11 +1,9 @@
 #[test]
 #[cfg(feature = "thread")]
 fn test_reboot() {
-    use rustix::{
-        io::Errno,
-        system::{self, RebootCommand},
-        thread::{self, CapabilityFlags},
-    };
+    use rustix::io::Errno;
+    use rustix::system::{self, RebootCommand};
+    use rustix::thread::{self, CapabilityFlags};
 
     let mut capabilities = thread::capabilities(None).expect("Failed to get capabilities");
 
@@ -13,6 +11,7 @@ fn test_reboot() {
 
     thread::set_capabilities(None, capabilities).expect("Failed to set capabilities");
 
-    // The reboot syscall requires the CAP_SYS_BOOT permission to be called, otherwise EPERM is returned
+    // The reboot syscall requires the `CapabilityFlags::SYS_BOOT` permission
+    // to be called, otherwise [`Errno::PERM`] is returned
     assert_eq!(system::reboot(RebootCommand::Restart), Err(Errno::PERM));
 }

@@ -225,7 +225,8 @@ pub fn getgroups() -> io::Result<Vec<Gid>> {
             buffer.resize(ngroups, Gid::ROOT);
             return Ok(buffer);
         }
-        buffer.reserve(1); // use `Vec` reallocation strategy to grow capacity exponentially
+        // Use `Vec` reallocation strategy to grow capacity exponentially.
+        buffer.reserve(1);
         buffer.resize(buffer.capacity(), Gid::ROOT);
     }
 }

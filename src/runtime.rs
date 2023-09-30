@@ -188,7 +188,7 @@ pub const EXIT_FAILURE: i32 = backend::c::EXIT_FAILURE;
 /// Return fields from the main executable segment headers ("phdrs") relevant
 /// to initializing TLS provided to the program at startup.
 ///
-/// `addr` will always be non-null, even when the TLS data is absent, ao that
+/// `addr` will always be non-null, even when the TLS data is absent, so that
 /// the `addr` and `file_size` parameters are suitable for creating a slice
 /// with `slice::from_raw_parts`.
 #[inline]
