@@ -6,7 +6,7 @@
 #![allow(unused_imports)]
 #![allow(non_camel_case_types)]
 
-pub type size_t = usize;
+pub(crate) type size_t = usize;
 pub(crate) use linux_raw_sys::ctypes::*;
 pub(crate) use linux_raw_sys::errno::EINVAL;
 pub(crate) use linux_raw_sys::ioctl::{FIONBIO, FIONREAD};
@@ -58,27 +58,23 @@ pub(crate) use linux_raw_sys::{
         AF_IEEE802154, AF_INET, AF_INET6, AF_IPX, AF_IRDA, AF_ISDN, AF_IUCV, AF_KEY, AF_LLC,
         AF_NETBEUI, AF_NETLINK, AF_NETROM, AF_PACKET, AF_PHONET, AF_PPPOX, AF_RDS, AF_ROSE,
         AF_RXRPC, AF_SECURITY, AF_SNA, AF_TIPC, AF_UNIX, AF_UNSPEC, AF_WANPIPE, AF_X25,
-        IPPROTO_FRAGMENT, IPPROTO_ICMPV6, IPPROTO_MH, IPPROTO_ROUTING, IPV6_ADD_MEMBERSHIP,
-        IPV6_DROP_MEMBERSHIP, IPV6_FREEBIND, IPV6_MULTICAST_HOPS, IPV6_MULTICAST_LOOP,
-        IPV6_RECVTCLASS, IPV6_TCLASS, IPV6_UNICAST_HOPS, IPV6_V6ONLY, IP_ADD_MEMBERSHIP,
-        IP_ADD_SOURCE_MEMBERSHIP, IP_DROP_MEMBERSHIP, IP_DROP_SOURCE_MEMBERSHIP, IP_FREEBIND,
-        IP_MULTICAST_LOOP, IP_MULTICAST_TTL, IP_RECVTOS, IP_TOS, IP_TTL, MSG_CMSG_CLOEXEC,
-        MSG_CONFIRM, MSG_DONTROUTE, MSG_DONTWAIT, MSG_EOR, MSG_ERRQUEUE, MSG_MORE, MSG_NOSIGNAL,
-        MSG_OOB, MSG_PEEK, MSG_TRUNC, MSG_WAITALL, SCM_CREDENTIALS, SCM_RIGHTS, SHUT_RD, SHUT_RDWR,
-        SHUT_WR, SOCK_DGRAM, SOCK_RAW, SOCK_RDM, SOCK_SEQPACKET, SOCK_STREAM, SOL_SOCKET,
-        SO_ACCEPTCONN, SO_BROADCAST, SO_COOKIE, SO_DOMAIN, SO_ERROR, SO_INCOMING_CPU, SO_KEEPALIVE,
-        SO_LINGER, SO_OOBINLINE, SO_PASSCRED, SO_PROTOCOL, SO_RCVBUF, SO_RCVTIMEO_NEW,
-        SO_RCVTIMEO_NEW as SO_RCVTIMEO, SO_RCVTIMEO_OLD, SO_REUSEADDR, SO_REUSEPORT, SO_SNDBUF,
-        SO_SNDTIMEO_NEW, SO_SNDTIMEO_NEW as SO_SNDTIMEO, SO_SNDTIMEO_OLD, SO_TYPE, TCP_CONGESTION,
-        TCP_CORK, TCP_KEEPCNT, TCP_KEEPIDLE, TCP_KEEPINTVL, TCP_NODELAY, TCP_QUICKACK,
-        TCP_THIN_LINEAR_TIMEOUTS, TCP_USER_TIMEOUT,
+        IP6T_SO_ORIGINAL_DST, IPPROTO_FRAGMENT, IPPROTO_ICMPV6, IPPROTO_MH, IPPROTO_ROUTING,
+        IPV6_ADD_MEMBERSHIP, IPV6_DROP_MEMBERSHIP, IPV6_FREEBIND, IPV6_MULTICAST_HOPS,
+        IPV6_MULTICAST_LOOP, IPV6_RECVTCLASS, IPV6_TCLASS, IPV6_UNICAST_HOPS, IPV6_V6ONLY,
+        IP_ADD_MEMBERSHIP, IP_ADD_SOURCE_MEMBERSHIP, IP_DROP_MEMBERSHIP, IP_DROP_SOURCE_MEMBERSHIP,
+        IP_FREEBIND, IP_MULTICAST_LOOP, IP_MULTICAST_TTL, IP_RECVTOS, IP_TOS, IP_TTL,
+        MSG_CMSG_CLOEXEC, MSG_CONFIRM, MSG_DONTROUTE, MSG_DONTWAIT, MSG_EOR, MSG_ERRQUEUE,
+        MSG_MORE, MSG_NOSIGNAL, MSG_OOB, MSG_PEEK, MSG_TRUNC, MSG_WAITALL, SCM_CREDENTIALS,
+        SCM_RIGHTS, SHUT_RD, SHUT_RDWR, SHUT_WR, SOCK_DGRAM, SOCK_RAW, SOCK_RDM, SOCK_SEQPACKET,
+        SOCK_STREAM, SOL_SOCKET, SO_ACCEPTCONN, SO_BROADCAST, SO_COOKIE, SO_DOMAIN, SO_ERROR,
+        SO_INCOMING_CPU, SO_KEEPALIVE, SO_LINGER, SO_OOBINLINE, SO_ORIGINAL_DST, SO_PASSCRED,
+        SO_PROTOCOL, SO_RCVBUF, SO_RCVTIMEO_NEW, SO_RCVTIMEO_NEW as SO_RCVTIMEO, SO_RCVTIMEO_OLD,
+        SO_REUSEADDR, SO_REUSEPORT, SO_SNDBUF, SO_SNDTIMEO_NEW, SO_SNDTIMEO_NEW as SO_SNDTIMEO,
+        SO_SNDTIMEO_OLD, SO_TYPE, TCP_CONGESTION, TCP_CORK, TCP_KEEPCNT, TCP_KEEPIDLE,
+        TCP_KEEPINTVL, TCP_NODELAY, TCP_QUICKACK, TCP_THIN_LINEAR_TIMEOUTS, TCP_USER_TIMEOUT,
     },
     netlink::*,
 };
-
-// TODO: Modify linux-raw-sys to include these.
-pub(crate) const IP6T_SO_ORIGINAL_DST: u32 = 80;
-pub(crate) const SO_ORIGINAL_DST: u32 = 80;
 
 // Cast away bindgen's `enum` type to make these consistent with the other
 // `setsockopt`/`getsockopt` level values.
@@ -271,25 +267,27 @@ pub(crate) const CLOCK_THREAD_CPUTIME_ID: c_int =
 pub(crate) const CLOCK_PROCESS_CPUTIME_ID: c_int =
     linux_raw_sys::general::CLOCK_PROCESS_CPUTIME_ID as _;
 
-#[allow(overflowing_literals)]
-#[allow(dead_code)]
+#[cfg(feature = "system")]
 mod reboot_symbols {
-    use linux_raw_sys::ctypes::*;
+    use super::c_int;
 
-    pub(crate) const LINUX_REBOOT_MAGIC1: c_int = 0xfee1dead;
-    pub(crate) const LINUX_REBOOT_MAGIC2: c_int = 672274793;
-    pub(crate) const LINUX_REBOOT_MAGIC2A: c_int = 85072278;
-    pub(crate) const LINUX_REBOOT_MAGIC2B: c_int = 369367448;
-    pub(crate) const LINUX_REBOOT_MAGIC2C: c_int = 537993216;
+    pub(crate) const LINUX_REBOOT_MAGIC1: c_int = linux_raw_sys::general::LINUX_REBOOT_MAGIC1 as _;
+    pub(crate) const LINUX_REBOOT_MAGIC2: c_int = linux_raw_sys::general::LINUX_REBOOT_MAGIC2 as _;
 
-    pub(crate) const LINUX_REBOOT_CMD_RESTART: c_int = 0x01234567;
-    pub(crate) const LINUX_REBOOT_CMD_HALT: c_int = 0xCDEF0123;
-    pub(crate) const LINUX_REBOOT_CMD_CAD_ON: c_int = 0x89ABCDEF;
-    pub(crate) const LINUX_REBOOT_CMD_CAD_OFF: c_int = 0x00000000;
-    pub(crate) const LINUX_REBOOT_CMD_POWER_OFF: c_int = 0x4321FEDC;
-    pub(crate) const LINUX_REBOOT_CMD_RESTART2: c_int = 0xA1B2C3D4;
-    pub(crate) const LINUX_REBOOT_CMD_SW_SUSPEND: c_int = 0xD000FCE2;
-    pub(crate) const LINUX_REBOOT_CMD_KEXEC: c_int = 0x45584543;
+    pub(crate) const LINUX_REBOOT_CMD_RESTART: c_int =
+        linux_raw_sys::general::LINUX_REBOOT_CMD_RESTART as _;
+    pub(crate) const LINUX_REBOOT_CMD_HALT: c_int =
+        linux_raw_sys::general::LINUX_REBOOT_CMD_HALT as _;
+    pub(crate) const LINUX_REBOOT_CMD_CAD_ON: c_int =
+        linux_raw_sys::general::LINUX_REBOOT_CMD_CAD_ON as _;
+    pub(crate) const LINUX_REBOOT_CMD_CAD_OFF: c_int =
+        linux_raw_sys::general::LINUX_REBOOT_CMD_CAD_OFF as _;
+    pub(crate) const LINUX_REBOOT_CMD_POWER_OFF: c_int =
+        linux_raw_sys::general::LINUX_REBOOT_CMD_POWER_OFF as _;
+    pub(crate) const LINUX_REBOOT_CMD_SW_SUSPEND: c_int =
+        linux_raw_sys::general::LINUX_REBOOT_CMD_SW_SUSPEND as _;
+    pub(crate) const LINUX_REBOOT_CMD_KEXEC: c_int =
+        linux_raw_sys::general::LINUX_REBOOT_CMD_KEXEC as _;
 }
-
+#[cfg(feature = "system")]
 pub(crate) use reboot_symbols::*;
