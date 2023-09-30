@@ -200,7 +200,8 @@ impl<const GROUP: u8, const NUM: u8, Data> CompileTimeOpcode for ReadWriteOpcode
 
 /// Provides a `None` code at compile time.
 ///
-/// This corresponds to the C macro `_IO(GROUP, NUM)` when `Data` is zero sized.
+/// This corresponds to the C macro `_IO(GROUP, NUM)` when `Data` is zero
+/// sized.
 #[cfg(any(linux_kernel, bsd))]
 pub struct NoneOpcode<const GROUP: u8, const NUM: u8, Data>(Data);
 

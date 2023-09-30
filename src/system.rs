@@ -157,26 +157,23 @@ pub fn sethostname(name: &[u8]) -> io::Result<()> {
     backend::system::syscalls::sethostname(name)
 }
 
-/// Reboot command to be used with [`reboot`].
-///
-/// See [`reboot`] documentation for more info
-///
-/// [`reboot`]: crate::system::reboot
+/// Reboot command for use use with [`reboot`].
 #[cfg(target_os = "linux")]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(i32)]
 #[non_exhaustive]
 pub enum RebootCommand {
-    /// CAD is disabled.
-    /// This means that the CAD keystroke will cause a SIGINT signal to be sent to init (process 1),
-    /// whereupon this process may decide upon a proper action (maybe: kill all processes, sync, reboot).
     /// Disables the Ctrl-Alt-Del keystroke.
     ///
-    /// When disabled, the keystroke will send a SIGINT signal to pid 1
+    /// When disabled, the keystroke will send a [`Signal::Int`] to pid 1.
+    ///
+    /// [`Signal::Int`]: crate::process::Signal::Int
     CadOff = c::LINUX_REBOOT_CMD_CAD_OFF,
     /// Enables the Ctrl-Alt-Del keystroke.
     ///
-    /// When enabled, the keystroke will trigger LINUX_REBOOT_CMD_RESTART
+    /// When enabled, the keystroke will trigger a [`Restart`].
+    ///
+    /// [`Restart`]: Self::Restart
     CadOn = c::LINUX_REBOOT_CMD_CAD_ON,
     /// Prints the message "System halted" and halts the system
     Halt = c::LINUX_REBOOT_CMD_HALT,
@@ -184,7 +181,8 @@ pub enum RebootCommand {
     ///
     /// [`kexec_load`]: https://man7.org/linux/man-pages/man2/kexec_load.2.html
     Kexec = c::LINUX_REBOOT_CMD_KEXEC,
-    /// Prints the message "Power down.", stops the system and tries to remove all power
+    /// Prints the message "Power down.", stops the system and tries to remove
+    /// all power
     PowerOff = c::LINUX_REBOOT_CMD_POWER_OFF,
     /// Prints the message "Restarting system." and triggers a restart
     Restart = c::LINUX_REBOOT_CMD_RESTART,
@@ -192,9 +190,10 @@ pub enum RebootCommand {
     SwSuspend = c::LINUX_REBOOT_CMD_SW_SUSPEND,
 }
 
-/// `reboot`—Reboot or enable/disable Ctrl-Alt-Del
+/// `reboot`—Reboot the system or enable/disable Ctrl-Alt-Del
 ///
-/// The reboot syscall, despite the name, can actually do much more than reboot.
+/// The reboot syscall, despite the name, can actually do much more than
+/// reboot.
 ///
 /// Among other things it can
 /// - Restart, Halt, Power Off and Suspend the system
@@ -202,7 +201,8 @@ pub enum RebootCommand {
 /// - Execute other kernels
 /// - Terminate init inside PID namespaces
 ///
-/// It is highly reccomended to carefully read the kernel documentation before calling this function.
+/// It is highly recommended to carefully read the kernel documentation before
+/// calling this function.
 ///
 /// # References
 /// - [Linux]

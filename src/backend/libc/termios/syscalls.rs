@@ -148,8 +148,8 @@ pub(crate) fn tcsetattr(
         #[cfg(any(target_arch = "sparc", target_arch = "sparc64"))]
         const TCSETS2: u32 = 0x802c540d;
 
-        // Translate from `optional_actions` into an ioctl request code. On MIPS,
-        // `optional_actions` already has `TCGETS` added to it.
+        // Translate from `optional_actions` into an ioctl request code. On
+        // MIPS, `optional_actions` already has `TCGETS` added to it.
         let request = TCSETS2
             + if cfg!(any(
                 target_arch = "mips",

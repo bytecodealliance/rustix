@@ -129,7 +129,8 @@ fn _readlink(path: &CStr, mut buffer: Vec<u8>) -> io::Result<CString> {
             buffer.resize(nread, 0_u8);
             return Ok(CString::new(buffer).unwrap());
         }
-        buffer.reserve(1); // use `Vec` reallocation strategy to grow capacity exponentially
+        // Use `Vec` reallocation strategy to grow capacity exponentially.
+        buffer.reserve(1);
         buffer.resize(buffer.capacity(), 0_u8);
     }
 }

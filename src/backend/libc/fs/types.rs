@@ -213,9 +213,9 @@ bitflags! {
         /// Similar to `ACCMODE`, but just includes the read/write flags, and
         /// no other flags.
         ///
-        /// Some implementations include `O_PATH` in `O_ACCMODE`, when
+        /// On some platforms, `PATH` may be included in `ACCMODE`, when
         /// sometimes we really just want the read/write bits. Caution is
-        /// indicated, as the presence of `O_PATH` may mean that the read/write
+        /// indicated, as the presence of `PATH` may mean that the read/write
         /// bits don't have their usual meaning.
         const RWMODE = bitcast!(c::O_RDONLY | c::O_WRONLY | c::O_RDWR);
 
@@ -638,13 +638,13 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SealFlags: u32 {
-        /// `F_SEAL_SEAL`.
+        /// `F_SEAL_SEAL`
         const SEAL = bitcast!(c::F_SEAL_SEAL);
-        /// `F_SEAL_SHRINK`.
+        /// `F_SEAL_SHRINK`
         const SHRINK = bitcast!(c::F_SEAL_SHRINK);
-        /// `F_SEAL_GROW`.
+        /// `F_SEAL_GROW`
         const GROW = bitcast!(c::F_SEAL_GROW);
-        /// `F_SEAL_WRITE`.
+        /// `F_SEAL_WRITE`
         const WRITE = bitcast!(c::F_SEAL_WRITE);
         /// `F_SEAL_FUTURE_WRITE` (since Linux 5.1)
         #[cfg(linux_kernel)]

@@ -36,8 +36,8 @@ use {
 #[inline]
 pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
     // SAFETY: `CLOCK_GETTIME` contains either null or the address of a
-    // function with an ABI like libc `clock_gettime`, and calling it has
-    // the side effect of writing to the result buffer, and no others.
+    // function with an ABI like libc `clock_gettime`, and calling it has the
+    // side effect of writing to the result buffer, and no others.
     unsafe {
         let mut result = MaybeUninit::<__kernel_timespec>::uninit();
         let callee = match transmute(CLOCK_GETTIME.load(Relaxed)) {
@@ -78,8 +78,8 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Resu
     };
 
     // SAFETY: `CLOCK_GETTIME` contains either null or the address of a
-    // function with an ABI like libc `clock_gettime`, and calling it has
-    // the side effect of writing to the result buffer, and no others.
+    // function with an ABI like libc `clock_gettime`, and calling it has the
+    // side effect of writing to the result buffer, and no others.
     unsafe {
         const EINVAL: c::c_int = -(c::EINVAL as c::c_int);
         let mut timespec = MaybeUninit::<Timespec>::uninit();
@@ -234,8 +234,8 @@ pub(super) type SyscallType = unsafe extern "C" fn();
 #[cold]
 fn init_clock_gettime() -> ClockGettimeType {
     init();
-    // SAFETY: Load the function address from static storage that we
-    // just initialized.
+    // SAFETY: Load the function address from static storage that we just
+    // initialized.
     unsafe { transmute(CLOCK_GETTIME.load(Relaxed)) }
 }
 
@@ -244,8 +244,8 @@ fn init_clock_gettime() -> ClockGettimeType {
 #[cold]
 fn init_syscall() -> SyscallType {
     init();
-    // SAFETY: Load the function address from static storage that we
-    // just initialized.
+    // SAFETY: Load the function address from static storage that we just
+    // initialized.
     unsafe { transmute(SYSCALL.load(Relaxed)) }
 }
 
@@ -345,9 +345,9 @@ rustix_int_0x80:
 
 fn minimal_init() {
     // SAFETY: Store default function addresses in static storage so that if we
-    // end up making any system calls while we read the vDSO, they'll work.
-    // If the memory happens to already be initialized, this is redundant, but
-    // not harmful.
+    // end up making any system calls while we read the vDSO, they'll work. If
+    // the memory happens to already be initialized, this is redundant, but not
+    // harmful.
     unsafe {
         #[cfg(feature = "time")]
         {
@@ -381,9 +381,9 @@ fn init() {
     if let Some(vdso) = vdso::Vdso::new() {
         #[cfg(feature = "time")]
         {
-            // Look up the platform-specific `clock_gettime` symbol as documented
-            // [here], except on 32-bit platforms where we look up the
-            // `64`-suffixed variant and fail if we don't find it.
+            // Look up the platform-specific `clock_gettime` symbol as
+            // documented [here], except on 32-bit platforms where we look up
+            // the `64`-suffixed variant and fail if we don't find it.
             //
             // [here]: https://man7.org/linux/man-pages/man7/vdso.7.html
             #[cfg(target_arch = "x86_64")]
@@ -408,8 +408,8 @@ fn init() {
             #[cfg(target_pointer_width = "64")]
             let ok = true;
 
-            // On some 32-bit platforms, the 64-bit `clock_gettime` symbols are not
-            // available on older kernel versions.
+            // On some 32-bit platforms, the 64-bit `clock_gettime` symbols are
+            // not available on older kernel versions.
             #[cfg(any(
                 target_arch = "arm",
                 target_arch = "mips",
@@ -421,9 +421,9 @@ fn init() {
             if ok {
                 assert!(!ptr.is_null());
 
-                // SAFETY: Store the computed function addresses in static storage
-                // so that we don't need to compute it again (but if we do, it
-                // doesn't hurt anything).
+                // SAFETY: Store the computed function addresses in static
+                // storage so that we don't need to compute it again (but if
+                // we do, it doesn't hurt anything).
                 unsafe {
                     CLOCK_GETTIME.store(ptr.cast(), Relaxed);
                 }

@@ -142,8 +142,8 @@ pub fn unlockpt<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 ///
 /// On Linux, calling this function has no effect, as the kernel is expected to
 /// grant the appropriate access. On all other platorms, this function has
-/// unspecified behavior if the calling process has a `SIGCHLD` signal handler
-/// installed.
+/// unspecified behavior if the calling process has a [`Signal::Child`] signal
+/// handler installed.
 ///
 /// # References
 ///  - [POSIX]
@@ -153,6 +153,7 @@ pub fn unlockpt<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/grantpt.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/grantpt.3.html
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Allocation.html#index-grantpt
+/// [`Signal::Child`]: crate::process::Signal::Child
 #[inline]
 pub fn grantpt<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     #[cfg(not(linux_kernel))]

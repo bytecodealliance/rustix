@@ -300,7 +300,8 @@ bitflags! {
         const REAPER = 4;
         /// The reported process is in the zombie state.
         const ZOMBIE = 8;
-        /// The reported process is stopped by SIGSTOP/SIGTSTP.
+        /// The reported process is stopped by
+        /// [`Signal::Stop`]/[`Signal::Tstp`].
         const STOPPED = 16;
         /// The reported process is in the process of exiting.
         const EXITING = 32;

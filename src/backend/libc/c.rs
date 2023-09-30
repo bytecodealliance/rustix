@@ -329,7 +329,7 @@ mod readwrite_pv64 {
 #[cfg(target_os = "android")]
 pub(super) use readwrite_pv64::{preadv64 as preadv, pwritev64 as pwritev};
 
-// macOS added preadv and pwritev in version 11.0
+// macOS added `preadv` and `pwritev` in version 11.0.
 #[cfg(apple)]
 mod readwrite_pv {
     weakcall! {

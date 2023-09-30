@@ -839,8 +839,8 @@ pub(crate) fn utimensat(
             ));
         }
 
-        // `setattrlistat` was introduced in 10.13 along with `utimensat`, so if
-        // we don't have `utimensat`, we don't have `setattrlistat` either.
+        // `setattrlistat` was introduced in 10.13 along with `utimensat`, so
+        // if we don't have `utimensat`, we don't have `setattrlistat` either.
         // Emulate it using `fork`, and `fchdir` and [`setattrlist`].
         //
         // [`setattrlist`]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/setattrlist.2.html
@@ -1565,7 +1565,8 @@ pub(crate) fn fallocate(
         assert!(mode.is_empty());
         let err = unsafe { c::posix_fallocate(borrowed_fd(fd), offset, len) };
 
-        // `posix_fallocate` returns its error status rather than using `errno`.
+        // `posix_fallocate` returns its error status rather than using
+        // `errno`.
         if err == 0 {
             Ok(())
         } else {

@@ -396,13 +396,8 @@ pub(crate) fn get_socket_reuseport(fd: BorrowedFd<'_>) -> io::Result<bool> {
 
 #[inline]
 pub(crate) fn get_socket_protocol(fd: BorrowedFd<'_>) -> io::Result<Option<Protocol>> {
-    getsockopt(fd, c::SOL_SOCKET, c::SO_PROTOCOL).map(|raw: u32| {
-        if let Some(raw) = RawProtocol::new(raw) {
-            Some(Protocol::from_raw(raw))
-        } else {
-            None
-        }
-    })
+    getsockopt(fd, c::SOL_SOCKET, c::SO_PROTOCOL)
+        .map(|raw: u32| RawProtocol::new(raw).map(Protocol::from_raw))
 }
 
 #[inline]

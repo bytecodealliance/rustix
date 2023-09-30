@@ -38,7 +38,7 @@ bitflags! {
         const CLOSE_NOWRITE = c::IN_CLOSE_NOWRITE;
         /// `IN_CLOSE_WRITE`
         const CLOSE_WRITE = c::IN_CLOSE_WRITE;
-        /// `IN_CREATE `
+        /// `IN_CREATE`
         const CREATE = c::IN_CREATE;
         /// `IN_DELETE`
         const DELETE = c::IN_DELETE;
@@ -105,8 +105,8 @@ pub fn inotify_add_watch<P: crate::path::Arg>(
     flags: WatchFlags,
 ) -> io::Result<i32> {
     path.into_with_c_str(|path| {
-        // SAFETY: The fd and path we are passing is guaranteed valid by the type
-        // system.
+        // SAFETY: The fd and path we are passing is guaranteed valid by the
+        // type system.
         unsafe {
             ret_c_int(c::inotify_add_watch(
                 borrowed_fd(inot),

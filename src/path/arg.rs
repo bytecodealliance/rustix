@@ -1039,7 +1039,7 @@ where
         buf_ptr.add(bytes.len()).write(0);
     }
 
-    // SAFETY: we just wrote the bytes above and they will remain valid for the
+    // SAFETY: We just wrote the bytes above and they will remain valid for the
     // duration of `f` b/c buf doesn't get dropped until the end of the
     // function.
     match CStr::from_bytes_with_nul(unsafe { slice::from_raw_parts(buf_ptr, bytes.len() + 1) }) {
@@ -1078,15 +1078,15 @@ where
             return Err(io::Errno::NAMETOOLONG);
         }
 
-        // SAFETY: `bytes.len() < LARGE_PATH_BUFFER_SIZE` which means we have space
-        // for `bytes.len() + 1` u8s:
+        // SAFETY: `bytes.len() < LARGE_PATH_BUFFER_SIZE` which means we have
+        // space for `bytes.len() + 1` u8s:
         unsafe {
             ptr::copy_nonoverlapping(bytes.as_ptr(), buf_ptr, bytes.len());
             buf_ptr.add(bytes.len()).write(0);
         }
 
-        // SAFETY: we just wrote the bytes above and they will remain valid for the
-        // duration of `f` b/c buf doesn't get dropped until the end of the
+        // SAFETY: We just wrote the bytes above and they will remain valid for
+        // the duration of `f` b/c buf doesn't get dropped until the end of the
         // function.
         match CStr::from_bytes_with_nul(unsafe { slice::from_raw_parts(buf_ptr, bytes.len() + 1) })
         {
