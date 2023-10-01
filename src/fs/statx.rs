@@ -72,8 +72,9 @@ mod compat {
 
     use backend::fs::types::{Statx, StatxFlags};
 
-    // Linux kernel prior to 4.11 old versions of Docker don't support `statx`.
-    // We store the availability in a global to avoid unnecessary syscalls.
+    // Linux kernel prior to 4.11 and old versions of Docker don't support
+    // `statx`. We store the availability in a global to avoid unnecessary
+    // syscalls.
     //
     // 0: Unknown
     // 1: Not available
