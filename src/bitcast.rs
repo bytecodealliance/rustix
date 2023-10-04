@@ -1,3 +1,5 @@
+//! The `bitcast` and `bitflags_bits` macros.
+
 #![allow(unused_macros)]
 
 // Ensure that the source and destination types are both primitive integer

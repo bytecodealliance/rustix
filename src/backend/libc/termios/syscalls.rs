@@ -375,7 +375,7 @@ pub(crate) fn cfmakeraw(termios: &mut Termios) {
 pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
     // Use the return value of `isatty` alone. We don't check `errno` because
     // we return `bool` rather than `io::Result<bool>`, because we assume
-    // `BorrrowedFd` protects us from `EBADF`, and any other reasonably
+    // `BorrowedFd` protects us from `EBADF`, and any other reasonably
     // anticipated `errno` value would end up interpreted as “assume it's not a
     // terminal” anyway.
     unsafe { c::isatty(borrowed_fd(fd)) != 0 }

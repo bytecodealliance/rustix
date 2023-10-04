@@ -489,9 +489,9 @@ pub unsafe fn sigtimedwait(set: &Sigset, timeout: Option<Timespec>) -> io::Resul
 /// `getauxval(AT_SECURE)`—Returns the Linux "secure execution" mode.
 ///
 /// Return a boolean value indicating whether "secure execution" mode was
-/// requested, due the the process having elevated privileges. This includes
-/// whether the `AT_SECURE` AUX value is set, and whether the initial real
-/// UID and GID differ from the initial effective UID and GID.
+/// requested, due to the process having elevated privileges. This includes
+/// whether the `AT_SECURE` AUX value is set, and whether the initial real UID
+/// and GID differ from the initial effective UID and GID.
 ///
 /// The meaning of "secure execution" mode is beyond the scope of this comment.
 ///
