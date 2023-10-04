@@ -226,6 +226,7 @@ fn test_preadv2_nowait() {
         ReadWriteFlags::NOWAIT,
     ) {
         Err(rustix::io::Errno::OPNOTSUPP | rustix::io::Errno::NOSYS) => {}
+        Err(rustix::io::Errno::AGAIN) => {}
         Ok(_) => panic!("preadv2 unexpectedly succeeded"),
         Err(e) => panic!("preadv2 failed with an unexpected error: {:?}", e),
     }
