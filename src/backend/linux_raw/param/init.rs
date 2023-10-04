@@ -10,6 +10,8 @@ use crate::backend::c;
 use crate::ffi::CStr;
 use core::ffi::c_void;
 use core::ptr::{null_mut, read, NonNull};
+#[cfg(feature = "runtime")]
+use core::sync::atomic::AtomicBool;
 use core::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
 use linux_raw_sys::elf::*;
 use linux_raw_sys::general::{
@@ -141,7 +143,7 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) {
             AT_SYSINFO_EHDR => SYSINFO_EHDR.store(a_val.cast::<Elf_Ehdr>(), Ordering::Relaxed),
 
             #[cfg(feature = "runtime")]
-            AT_SECURE => SECURE.store(a_val != 0, Ordering::Relaxed),
+            AT_SECURE => SECURE.store(a_val as usize != 0, Ordering::Relaxed),
             #[cfg(feature = "runtime")]
             AT_PHDR => PHDR.store(a_val.cast::<Elf_Phdr>(), Ordering::Relaxed),
             #[cfg(feature = "runtime")]
