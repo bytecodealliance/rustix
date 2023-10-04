@@ -485,3 +485,28 @@ pub unsafe fn sigwaitinfo(set: &Sigset) -> io::Result<Siginfo> {
 pub unsafe fn sigtimedwait(set: &Sigset, timeout: Option<Timespec>) -> io::Result<Siginfo> {
     backend::runtime::syscalls::sigtimedwait(set, timeout)
 }
+
+/// `getauxval(AT_SECURE)`—Returns the Linux "secure execution" mode.
+///
+/// Return a boolean value indicating whether "secure execution" mode was
+/// requested, due the the process having elevated privileges. This includes
+/// whether the `AT_SECURE` AUX value is set, and whether the initial real
+/// UID and GID differ from the initial effective UID and GID.
+///
+/// The meaning of "secure execution" mode is beyond the scope of this comment.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man3/getauxval.3.html
+#[cfg(any(
+    linux_raw,
+    any(
+        all(target_os = "android", target_pointer_width = "64"),
+        target_os = "linux",
+    )
+))]
+#[inline]
+pub fn linux_secure() -> bool {
+    backend::param::auxv::linux_secure()
+}

@@ -34,6 +34,7 @@ const AT_PHNUM: c::c_ulong = 5;
 const AT_ENTRY: c::c_ulong = 9;
 const AT_HWCAP: c::c_ulong = 16;
 const AT_HWCAP2: c::c_ulong = 26;
+const AT_SECURE: c::c_ulong = 23;
 const AT_EXECFN: c::c_ulong = 31;
 const AT_SYSINFO_EHDR: c::c_ulong = 33;
 
@@ -59,6 +60,7 @@ fn test_abi() {
     const_assert_eq!(self::AT_HWCAP, ::libc::AT_HWCAP);
     const_assert_eq!(self::AT_HWCAP2, ::libc::AT_HWCAP2);
     const_assert_eq!(self::AT_EXECFN, ::libc::AT_EXECFN);
+    const_assert_eq!(self::AT_SECURE, ::libc::AT_SECURE);
     const_assert_eq!(self::AT_SYSINFO_EHDR, ::libc::AT_SYSINFO_EHDR);
     #[cfg(feature = "runtime")]
     const_assert_eq!(self::AT_PHDR, ::libc::AT_PHDR);
@@ -118,6 +120,12 @@ pub(crate) fn linux_execfn() -> &'static CStr {
     unsafe {
         CStr::from_ptr(getauxval(AT_EXECFN).cast())
     }
+}
+
+#[cfg(feature = "runtime")]
+#[inline]
+pub(crate) fn linux_secure() -> bool {
+    unsafe { getauxval(AT_SECURE) as usize != 0 }
 }
 
 #[cfg(feature = "runtime")]
