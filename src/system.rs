@@ -157,7 +157,7 @@ pub fn sethostname(name: &[u8]) -> io::Result<()> {
     backend::system::syscalls::sethostname(name)
 }
 
-/// Reboot command for use use with [`reboot`].
+/// Reboot command for use with [`reboot`].
 #[cfg(target_os = "linux")]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(i32)]

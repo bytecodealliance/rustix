@@ -424,13 +424,8 @@ pub(crate) fn get_socket_reuseport_lb(fd: BorrowedFd<'_>) -> io::Result<bool> {
 ))]
 #[inline]
 pub(crate) fn get_socket_protocol(fd: BorrowedFd<'_>) -> io::Result<Option<Protocol>> {
-    getsockopt(fd, c::SOL_SOCKET, c::SO_PROTOCOL).map(|raw| {
-        if let Some(raw) = RawProtocol::new(raw) {
-            Some(Protocol::from_raw(raw))
-        } else {
-            None
-        }
-    })
+    getsockopt(fd, c::SOL_SOCKET, c::SO_PROTOCOL)
+        .map(|raw| RawProtocol::new(raw).map(Protocol::from_raw))
 }
 
 #[cfg(target_os = "linux")]
@@ -951,7 +946,7 @@ pub(crate) fn get_tcp_cork(fd: BorrowedFd<'_>) -> io::Result<bool> {
 #[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn get_socket_peercred(fd: BorrowedFd<'_>) -> io::Result<UCred> {
-    getsockopt(fd, c::SOL_SOCKET as _, c::SO_PEERCRED)
+    getsockopt(fd, c::SOL_SOCKET, c::SO_PEERCRED)
 }
 
 #[inline]
