@@ -301,13 +301,13 @@ pub(crate) fn get_socket_timeout(fd: BorrowedFd<'_>, id: Timeout) -> io::Result<
     }
 }
 
-#[cfg(any(apple, target_os = "freebsd"))]
+#[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
 #[inline]
 pub(crate) fn get_socket_nosigpipe(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::SOL_SOCKET, c::SO_NOSIGPIPE).map(to_bool)
 }
 
-#[cfg(any(apple, target_os = "freebsd"))]
+#[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
 #[inline]
 pub(crate) fn set_socket_nosigpipe(fd: BorrowedFd<'_>, val: bool) -> io::Result<()> {
     setsockopt(fd, c::SOL_SOCKET, c::SO_NOSIGPIPE, from_bool(val))

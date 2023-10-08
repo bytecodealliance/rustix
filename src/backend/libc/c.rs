@@ -86,6 +86,11 @@ pub(crate) const XCASE: tcflag_t = linux_raw_sys::general::XCASE as _;
 #[cfg(target_os = "aix")]
 pub(crate) const MSG_DONTWAIT: c_int = libc::MSG_NONBLOCK;
 
+// TODO: Remove once https://github.com/rust-lang/libc/pull/3377 is merged and released.
+#[cfg(target_os = "netbsd")]
+#[cfg(feature = "net")]
+pub(crate) const SO_NOSIGPIPE: c_int = 0x0800;
+
 // On PowerPC, the regular `termios` has the `termios2` fields and there is no
 // `termios2`. linux-raw-sys has aliases `termios2` to `termios` to cover this
 // difference, but we still need to manually import it since `libc` doesn't

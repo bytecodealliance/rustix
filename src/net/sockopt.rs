@@ -341,7 +341,7 @@ pub fn get_socket_error<Fd: AsFd>(fd: Fd) -> io::Result<Result<(), io::Errno>> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
-#[cfg(any(apple, target_os = "freebsd"))]
+#[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
 #[doc(alias = "SO_NOSIGPIPE")]
 #[inline]
 pub fn get_socket_nosigpipe<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
@@ -353,7 +353,7 @@ pub fn get_socket_nosigpipe<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
-#[cfg(any(apple, target_os = "freebsd"))]
+#[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
 #[doc(alias = "SO_NOSIGPIPE")]
 #[inline]
 pub fn set_socket_nosigpipe<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
