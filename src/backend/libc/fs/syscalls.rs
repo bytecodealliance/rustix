@@ -933,7 +933,11 @@ fn utimensat_old(
                 .tv_sec
                 .try_into()
                 .map_err(|_| io::Errno::OVERFLOW)?,
-            tv_nsec: times.last_access.tv_nsec,
+            tv_nsec: times
+                .last_access
+                .tv_nsec
+                .try_into()
+                .map_err(|_| io::Errno::OVERFLOW)?,
         },
         c::timespec {
             tv_sec: times
@@ -941,7 +945,11 @@ fn utimensat_old(
                 .tv_sec
                 .try_into()
                 .map_err(|_| io::Errno::OVERFLOW)?,
-            tv_nsec: times.last_modification.tv_nsec,
+            tv_nsec: times
+                .last_modification
+                .tv_nsec
+                .try_into()
+                .map_err(|_| io::Errno::OVERFLOW)?,
         },
     ];
     unsafe {
@@ -1515,7 +1523,11 @@ fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()> {
                 .tv_sec
                 .try_into()
                 .map_err(|_| io::Errno::OVERFLOW)?,
-            tv_nsec: times.last_access.tv_nsec,
+            tv_nsec: times
+                .last_access
+                .tv_nsec
+                .try_into()
+                .map_err(|_| io::Errno::OVERFLOW)?,
         },
         c::timespec {
             tv_sec: times
@@ -1523,7 +1535,11 @@ fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()> {
                 .tv_sec
                 .try_into()
                 .map_err(|_| io::Errno::OVERFLOW)?,
-            tv_nsec: times.last_modification.tv_nsec,
+            tv_nsec: times
+                .last_modification
+                .tv_nsec
+                .try_into()
+                .map_err(|_| io::Errno::OVERFLOW)?,
         },
     ];
 
