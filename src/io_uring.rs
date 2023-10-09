@@ -31,6 +31,11 @@ use core::mem::MaybeUninit;
 use core::ptr::{null_mut, write_bytes};
 use linux_raw_sys::net;
 
+// Export types used in io_uring APIs.
+pub use crate::fs::{Advice, AtFlags, OFlags, RenameFlags, ResolveFlags, Statx};
+pub use crate::net::{RecvFlags, SendFlags, SocketFlags};
+pub use crate::timespec::Timespec;
+
 mod sys {
     pub(super) use linux_raw_sys::io_uring::*;
     #[cfg(test)]
@@ -1062,20 +1067,20 @@ pub union op_flags_union {
     pub sync_range_flags: u32,
     /// `msg_flags` is split into `send_flags` and `recv_flags`.
     #[doc(alias = "msg_flags")]
-    pub send_flags: crate::net::SendFlags,
+    pub send_flags: SendFlags,
     /// `msg_flags` is split into `send_flags` and `recv_flags`.
     #[doc(alias = "msg_flags")]
-    pub recv_flags: crate::net::RecvFlags,
+    pub recv_flags: RecvFlags,
     pub timeout_flags: IoringTimeoutFlags,
-    pub accept_flags: crate::net::SocketFlags,
+    pub accept_flags: SocketFlags,
     pub cancel_flags: IoringAsyncCancelFlags,
-    pub open_flags: crate::fs::OFlags,
-    pub statx_flags: crate::fs::AtFlags,
-    pub fadvise_advice: crate::fs::Advice,
+    pub open_flags: OFlags,
+    pub statx_flags: AtFlags,
+    pub fadvise_advice: Advice,
     pub splice_flags: SpliceFlags,
-    pub rename_flags: crate::fs::RenameFlags,
-    pub unlink_flags: crate::fs::AtFlags,
-    pub hardlink_flags: crate::fs::AtFlags,
+    pub rename_flags: RenameFlags,
+    pub unlink_flags: AtFlags,
+    pub hardlink_flags: AtFlags,
     pub msg_ring_flags: IoringMsgringFlags,
 }
 
@@ -1087,12 +1092,33 @@ pub union buf_union {
     pub buf_group: u16,
 }
 
+// TODO: Rename this to include `addr_len` when we have a semver bump?
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union splice_fd_in_or_file_index_union {
     pub splice_fd_in: i32,
     pub file_index: u32,
+    pub addr_len: addr_len_struct,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct addr_len_struct {
+    pub addr_len: u16,
+    pub __pad3: [u16; 1],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct io_uring_sync_cancel_reg {
+    pub addr: u64,
+    pub fd: i32,
+    pub flags: IoringAsyncCancelFlags,
+    pub timeout: Timespec,
+    pub pad: [u64; 4],
 }
 
 /// An io_uring Completion Queue Entry.
@@ -1269,16 +1295,12 @@ pub struct iovec {
 #[derive(Debug, Copy, Clone, Default)]
 pub struct open_how {
     /// An [`OFlags`] value represented as a `u64`.
-    ///
-    /// [`OFlags`]: crate::fs::OFlags
     pub flags: u64,
 
     /// A [`Mode`] value represented as a `u64`.
-    ///
-    /// [`Mode`]: crate::fs::Mode
     pub mode: u64,
 
-    pub resolve: crate::fs::ResolveFlags,
+    pub resolve: ResolveFlags,
 }
 
 #[allow(missing_docs)]
@@ -1377,6 +1399,7 @@ fn io_uring_layouts() {
     check_renamed_type!(op_flags_union, io_uring_sqe__bindgen_ty_3);
     check_renamed_type!(buf_union, io_uring_sqe__bindgen_ty_4);
     check_renamed_type!(splice_fd_in_or_file_index_union, io_uring_sqe__bindgen_ty_5);
+    check_renamed_type!(addr_len_struct, io_uring_sqe__bindgen_ty_5__bindgen_ty_1);
     check_renamed_type!(
         register_or_sqe_op_or_sqe_flags_union,
         io_uring_restriction__bindgen_ty_1
@@ -1460,4 +1483,5 @@ fn io_uring_layouts() {
     check_struct!(open_how, flags, mode, resolve);
     check_struct!(io_uring_buf_reg, ring_addr, ring_entries, bgid, pad, resv);
     check_struct!(io_uring_buf, addr, len, bid, resv);
+    check_struct!(io_uring_sync_cancel_reg, addr, fd, flags, timeout, pad);
 }
