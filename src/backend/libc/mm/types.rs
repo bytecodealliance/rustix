@@ -442,3 +442,28 @@ bitflags! {
         const _ = !0;
     }
 }
+
+#[cfg(any(linux_kernel, freebsdlike, netbsdlike))]
+bitflags! {
+    /// `MCL_*` flags for use with [`mlockall`].
+    ///
+    /// [`mlockall`]: crate::mm::mlockall
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct MlockAllFlags: u32 {
+        // libc doesn't define `MCL_ONFAULT` yet.
+        // const ONFAULT = libc::MCL_ONFAULT;
+        /// Lock all pages which will become mapped into the address
+        /// space of the process in the future.  These could be, for
+        /// instance, new pages required by a growing heap and stack
+        /// as well as new memory-mapped files or shared memory
+        /// regions.
+        const FUTURE = bitcast!(libc::MCL_FUTURE);
+        /// Lock all pages which are currently mapped into the address
+        /// space of the process.
+        const CURRENT = bitcast!(libc::MCL_CURRENT);
+
+        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
