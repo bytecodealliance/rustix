@@ -73,10 +73,7 @@ pub type c_char = i8;
 mod sys {
     pub(super) use linux_raw_sys::io_uring::*;
     #[cfg(test)]
-    pub(super) use {
-        crate::backend::c::{iovec, size_t},
-        linux_raw_sys::general::open_how,
-    };
+    pub(super) use {crate::backend::c::iovec, linux_raw_sys::general::open_how};
 }
 
 /// `io_uring_setup(entries, params)`—Setup a context for performing
@@ -1430,7 +1427,7 @@ impl Default for register_or_sqe_op_or_sqe_flags_union {
 fn io_uring_layouts() {
     use sys as c;
 
-    check_renamed_type!(io_uring_ptr, size_t);
+    assert_eq_size!(io_uring_ptr, u64);
 
     check_renamed_type!(off_or_addr2_union, io_uring_sqe__bindgen_ty_1);
     check_renamed_type!(addr_or_splice_off_in_union, io_uring_sqe__bindgen_ty_2);
