@@ -52,6 +52,7 @@ jobs:
       if: matrix.rust == '1.63'
       run: |
         cargo update --package=dashmap --precise 5.4.0
+        cargo update --package=regex --precise=1.9.0
 
     - run: >
         rustup target add
@@ -481,6 +482,7 @@ jobs:
       if: matrix.rust == '1.63'
       run: |
         cargo update --package=dashmap --precise 5.4.0
+        cargo update --package=regex --precise=1.9.0
 
     - run: |
         cargo test --verbose --features=all-apis --release --workspace -- --nocapture
