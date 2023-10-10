@@ -35,11 +35,48 @@ use linux_raw_sys::net;
 pub use crate::fs::{Advice, AtFlags, OFlags, RenameFlags, ResolveFlags, Statx};
 pub use crate::net::{RecvFlags, SendFlags, SocketFlags};
 pub use crate::timespec::Timespec;
+pub use linux_raw_sys::general::sigset_t;
+
+pub use net::{__kernel_sockaddr_storage as sockaddr_storage, msghdr, sockaddr, socklen_t};
+
+// Declare the `c_char` type for use with entries that take pointers
+// to C strings. Define it as unsigned or signed according to the platform
+// so that we match what Rust's `CStr` uses.
+//
+// When we can update to linux-raw-sys 0.5, we can remove this, as its
+// `c_char` type will declare this.
+/// The C `char` type.
+#[cfg(any(
+    target_arch = "aarch64",
+    target_arch = "arm",
+    target_arch = "msp430",
+    target_arch = "powerpc",
+    target_arch = "powerpc64",
+    target_arch = "riscv32",
+    target_arch = "riscv64",
+    target_arch = "s390x",
+))]
+#[allow(non_camel_case_types)]
+pub type c_char = u8;
+/// The C `char` type.
+#[cfg(any(
+    target_arch = "mips",
+    target_arch = "mips64",
+    target_arch = "sparc64",
+    target_arch = "x86",
+    target_arch = "x86_64",
+    target_arch = "xtensa",
+))]
+#[allow(non_camel_case_types)]
+pub type c_char = i8;
 
 mod sys {
     pub(super) use linux_raw_sys::io_uring::*;
     #[cfg(test)]
-    pub(super) use {crate::backend::c::iovec, linux_raw_sys::general::open_how};
+    pub(super) use {
+        crate::backend::c::{iovec, size_t},
+        linux_raw_sys::general::open_how,
+    };
 }
 
 /// `io_uring_setup(entries, params)`—Setup a context for performing
@@ -1392,6 +1429,8 @@ impl Default for register_or_sqe_op_or_sqe_flags_union {
 #[test]
 fn io_uring_layouts() {
     use sys as c;
+
+    check_renamed_type!(io_uring_ptr, size_t);
 
     check_renamed_type!(off_or_addr2_union, io_uring_sqe__bindgen_ty_1);
     check_renamed_type!(addr_or_splice_off_in_union, io_uring_sqe__bindgen_ty_2);

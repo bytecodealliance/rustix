@@ -378,6 +378,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) ->
             lo(len)
         ))
     }
+
     // On mips, the arguments are not reordered, and padding is inserted
     // instead to ensure alignment.
     #[cfg(any(target_arch = "mips", target_arch = "mips32r6"))]
@@ -393,6 +394,9 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) ->
             advice
         ))
     }
+
+    // For all other 32-bit architectures, use `fadvise64_64` so that we get a
+    // 64-bit length.
     #[cfg(all(
         target_pointer_width = "32",
         not(any(
@@ -413,6 +417,8 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) ->
             advice
         ))
     }
+
+    // On 64-bit architectures, use `fadvise64` which is sufficient.
     #[cfg(target_pointer_width = "64")]
     unsafe {
         ret(syscall_readonly!(
