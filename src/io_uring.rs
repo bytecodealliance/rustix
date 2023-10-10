@@ -32,7 +32,9 @@ use core::ptr::{null_mut, write_bytes};
 use linux_raw_sys::net;
 
 // Export types used in io_uring APIs.
-pub use crate::event::epoll::Event as EpollEvent;
+pub use crate::event::epoll::{
+    Event as EpollEvent, EventData as EpollEventData, EventFlags as EpollEventFlags,
+};
 pub use crate::fs::{Advice, AtFlags, Mode, OFlags, RenameFlags, ResolveFlags, Statx, StatxFlags};
 pub use crate::io::ReadWriteFlags;
 pub use crate::net::{RecvFlags, SendFlags, SocketFlags};

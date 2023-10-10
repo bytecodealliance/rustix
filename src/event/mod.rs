@@ -13,7 +13,7 @@ mod poll;
 #[cfg(solarish)]
 pub mod port;
 
-#[cfg(all(feature = "alloc", linux_kernel))]
+#[cfg(linux_kernel)]
 pub use crate::backend::event::epoll;
 #[cfg(any(
     linux_kernel,

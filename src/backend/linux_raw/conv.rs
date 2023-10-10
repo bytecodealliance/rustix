@@ -581,7 +581,7 @@ impl<'a, Num: ArgNumber> From<crate::event::EventfdFlags> for ArgReg<'a, Num> {
     }
 }
 
-#[cfg(all(feature = "alloc", feature = "event"))]
+#[cfg(feature = "event")]
 impl<'a, Num: ArgNumber> From<crate::event::epoll::CreateFlags> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::event::epoll::CreateFlags) -> Self {
