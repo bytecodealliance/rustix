@@ -79,6 +79,7 @@ use crate::backend::c;
 use crate::backend::event::syscalls;
 use crate::fd::{AsFd, AsRawFd, OwnedFd};
 use crate::io;
+#[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 use bitflags::bitflags;
 use core::ffi::c_void;
@@ -242,6 +243,8 @@ pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
 ///
 /// For each event of interest, an element is written to `events`. On
 /// success, this returns the number of written elements.
+#[cfg(feature = "alloc")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
 #[inline]
 pub fn wait(epoll: impl AsFd, event_list: &mut EventVec, timeout: c::c_int) -> io::Result<()> {
     // SAFETY: We're calling `epoll_wait` via FFI and we know how it
@@ -371,10 +374,12 @@ struct SixtyFourBitPointer {
 }
 
 /// A vector of `Event`s, plus context for interpreting them.
+#[cfg(feature = "alloc")]
 pub struct EventVec {
     events: Vec<Event>,
 }
 
+#[cfg(feature = "alloc")]
 impl EventVec {
     /// Constructs an `EventVec` from raw pointer, length, and capacity.
     ///
@@ -449,6 +454,7 @@ impl EventVec {
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'a> IntoIterator for &'a EventVec {
     type IntoIter = Iter<'a>;
     type Item = Event;
