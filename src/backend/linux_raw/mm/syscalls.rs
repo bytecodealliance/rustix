@@ -6,6 +6,8 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
+#[cfg(any(linux_kernel, freebsdlike, netbsdlike))]
+use super::types::MlockAllFlags;
 use super::types::{
     Advice, MapFlags, MlockFlags, MprotectFlags, MremapFlags, MsyncFlags, ProtFlags,
     UserfaultfdFlags,
@@ -209,4 +211,30 @@ pub(crate) unsafe fn munlock(addr: *mut c::c_void, length: usize) -> io::Result<
 #[inline]
 pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
     ret_owned_fd(syscall_readonly!(__NR_userfaultfd, flags))
+}
+
+/// Locks all pages mapped into the address space of the calling process.
+///
+/// This includes the pages of the code, data and stack segment, as well as shared libraries,
+/// user space kernel data, shared memory, and memory-mapped files. All mapped pages are
+/// guaranteed to be resident in RAM when the call returns successfully;
+/// the pages are guaranteed to stay in RAM until later unlocked.
+#[inline]
+#[cfg(any(linux_kernel, freebsdlike, netbsdlike))]
+pub(crate) fn mlockall(flags: MlockAllFlags) -> io::Result<()> {
+    // When `mlockall` is used with `MCL_ONFAULT | MCL_FUTURE`, the ordering
+    // of `mlockall` with respect to arbitrary loads may be significant,
+    // because if a load happens and evokes a fault before the `mlockall`,
+    // the memory doesn't get locked, but if the load and therefore
+    // the fault happens after, then the memory does get locked.
+    // So to be conservative in this regard, we use `syscall` instead
+    // of `syscall_readonly`
+    unsafe { ret(syscall!(__NR_mlockall, flags)) }
+}
+
+/// Unlocks all pages mapped into the address space of the calling process.
+#[inline]
+#[cfg(any(linux_kernel, freebsdlike, netbsdlike))]
+pub(crate) fn munlockall() -> io::Result<()> {
+    unsafe { ret(syscall_readonly!(__NR_munlockall)) }
 }
