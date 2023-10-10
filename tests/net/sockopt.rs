@@ -177,6 +177,14 @@ fn test_sockopts_socket(s: &OwnedFd) {
         sockopt::set_socket_incoming_cpu(&s, 3).unwrap();
         assert_eq!(sockopt::get_socket_incoming_cpu(&s).unwrap(), 3);
     }
+
+    // Check the initial value of SO_NOSIGPIPE, set it, and check it.
+    #[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
+    {
+        assert_eq!(sockopt::get_socket_nosigpipe(&s).unwrap(), false);
+        sockopt::set_socket_nosigpipe(&s, true).unwrap();
+        assert_eq!(sockopt::get_socket_nosigpipe(&s).unwrap(), true);
+    }
 }
 
 // Test `tcp` socket options.
