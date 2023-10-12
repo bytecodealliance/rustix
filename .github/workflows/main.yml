@@ -62,7 +62,6 @@ jobs:
         i686-unknown-linux-gnu
         i686-unknown-linux-musl
         wasm32-unknown-emscripten
-        riscv64gc-unknown-linux-gnu
         aarch64-unknown-linux-gnu
         aarch64-unknown-linux-musl
         powerpc64le-unknown-linux-gnu
@@ -83,7 +82,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu gcc-arm-linux-gnueabi musl-tools
+        sudo apt-get install -y gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi musl-tools
 
     - name: Use specific dependency versions for Rust 1.48 compatibility.
       if: matrix.rust == '1.48'
@@ -120,7 +119,6 @@ jobs:
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-musl --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-musl --features=use-libc,all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=wasm32-unknown-emscripten --features=all-apis --all-targets
-    - run: cargo check --workspace --release -vv --target=riscv64gc-unknown-linux-gnu --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-gnu --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl --features=use-libc,all-apis --all-targets
@@ -229,7 +227,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, ubuntu-20.04, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, ubuntu-1.48, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, powerpc64le-linux-stable, arm-linux-stable, ubuntu-1.48, i686-linux-1.48, aarch64-linux-1.48, riscv64-linux-1.48, s390x-linux-1.48, powerpc64le-linux-1.48, arm-linux-1.48, macos-latest, macos-11, windows, windows-2019]
+        build: [ubuntu, ubuntu-20.04, i686-linux, aarch64-linux, powerpc64le-linux, s390x-linux, arm-linux, ubuntu-stable, ubuntu-1.48, i686-linux-stable, aarch64-linux-stable, s390x-linux-stable, powerpc64le-linux-stable, arm-linux-stable, ubuntu-1.48, i686-linux-1.48, aarch64-linux-1.48, s390x-linux-1.48, powerpc64le-linux-1.48, arm-linux-1.48, macos-latest, macos-11, windows, windows-2019]
         include:
           - build: ubuntu
             os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
@@ -262,15 +260,6 @@ jobs:
             qemu: qemu-ppc64le
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
-          - build: riscv64-linux
-            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
-            rust: nightly
-            target: riscv64gc-unknown-linux-gnu
-            gcc_package: gcc-riscv64-linux-gnu
-            gcc: riscv64-linux-gnu-gcc
-            qemu: qemu-riscv64
-            qemu_args: -L /usr/riscv64-linux-gnu
-            qemu_target: riscv64-linux-user
           - build: s390x-linux
             os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: nightly
@@ -308,15 +297,6 @@ jobs:
             qemu: qemu-aarch64
             qemu_args: -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
-          - build: riscv64-linux-stable
-            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
-            rust: stable
-            target: riscv64gc-unknown-linux-gnu
-            gcc_package: gcc-riscv64-linux-gnu
-            gcc: riscv64-linux-gnu-gcc
-            qemu: qemu-riscv64
-            qemu_args: -L /usr/riscv64-linux-gnu
-            qemu_target: riscv64-linux-user
           - build: s390x-linux-stable
             os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: stable
@@ -363,15 +343,6 @@ jobs:
             qemu: qemu-aarch64
             qemu_args: -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
-          - build: riscv64-linux-1.48
-            os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
-            rust: 1.48
-            target: riscv64gc-unknown-linux-gnu
-            gcc_package: gcc-riscv64-linux-gnu
-            gcc: riscv64-linux-gnu-gcc
-            qemu: qemu-riscv64
-            qemu_args: -L /usr/riscv64-linux-gnu
-            qemu_target: riscv64-linux-user
           - build: s390x-linux-1.48
             os: ubuntu-20.04 # TODO: remove pin when fixed (#483)
             rust: 1.48
@@ -519,7 +490,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -549,15 +520,6 @@ jobs:
             qemu: qemu-ppc64le
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
-          - build: riscv64-linux
-            os: ubuntu-latest
-            rust: stable
-            target: riscv64gc-unknown-linux-gnu
-            gcc_package: gcc-riscv64-linux-gnu
-            gcc: riscv64-linux-gnu-gcc
-            qemu: qemu-riscv64
-            qemu_args: -L /usr/riscv64-linux-gnu
-            qemu_target: riscv64-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: stable
