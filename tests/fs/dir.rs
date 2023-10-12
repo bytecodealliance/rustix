@@ -62,6 +62,20 @@ fn test_dir() {
     assert!(saw_cargo_toml);
 }
 
+// Test that `Dir` silently stops iterating if the directory has been removed.
+//
+// Except on FreeBSD and macOS, where apparently `readdir` just keeps reading.
+#[cfg_attr(
+    any(
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "watchos",
+        target_os = "tvos",
+        target_os = "freebsd",
+        target_os = "dragonflybsd"
+    ),
+    ignore
+)]
 #[test]
 fn dir_iterator_handles_dir_removal() {
     // create a dir, keep the FD, then delete the dir
@@ -83,6 +97,17 @@ fn dir_iterator_handles_dir_removal() {
 
 // Like `dir_iterator_handles_dir_removal`, but close the directory after
 // `Dir::read_from`.
+#[cfg_attr(
+    any(
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "watchos",
+        target_os = "tvos",
+        target_os = "freebsd",
+        target_os = "dragonflybsd"
+    ),
+    ignore
+)]
 #[test]
 fn dir_iterator_handles_dir_removal_after_open() {
     // create a dir, keep the FD, then delete the dir

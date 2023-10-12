@@ -74,6 +74,7 @@ impl Dir {
     }
 
     #[inline]
+    #[allow(unused_mut)]
     fn _read_from(fd: BorrowedFd<'_>) -> io::Result<Self> {
         let mut any_errors = false;
 
@@ -85,6 +86,7 @@ impl Dir {
         let flags = fcntl_getfl(fd)?;
         let fd_for_dir = match openat(fd, cstr!("."), flags | OFlags::CLOEXEC, Mode::empty()) {
             Ok(fd) => fd,
+            #[cfg(not(target_os = "wasi"))]
             Err(io::Errno::NOENT) => {
                 // If "." doesn't exist, it means the directory was removed.
                 // We treat that as iterating through a directory with no
@@ -542,6 +544,20 @@ fn dir_iterator_handles_io_errors() {
         let mut owned_fd: crate::fd::OwnedFd = crate::fd::FromRawFd::from_raw_fd(raw_fd);
         crate::io::dup2(&file_fd, &mut owned_fd).unwrap();
         core::mem::forget(owned_fd);
+    }
+
+    // FreeBSD and macOS seem to read some directory entries before we call
+    // `.next()`.
+    #[cfg(any(
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "watchos",
+        target_os = "tvos",
+        target_os = "freebsd",
+        target_os = "dragonflybsd"
+    ))]
+    {
+        dir.rewind();
     }
 
     assert!(matches!(dir.next(), Some(Err(_))));
