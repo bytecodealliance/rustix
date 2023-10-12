@@ -57,8 +57,13 @@ use core::ptr::NonNull;
 use libc_errno::{errno, set_errno, Errno};
 
 /// `DIR*`
-#[repr(transparent)]
-pub struct Dir(NonNull<c::DIR>);
+pub struct Dir {
+    /// The `libc` `DIR` pointer.
+    libc_dir: NonNull<c::DIR>,
+
+    /// Have we seen any errors in this iteration?
+    any_errors: bool,
+}
 
 impl Dir {
     /// Construct a `Dir` that reads entries from the given directory
@@ -70,20 +75,35 @@ impl Dir {
 
     #[inline]
     fn _read_from(fd: BorrowedFd<'_>) -> io::Result<Self> {
+        let mut any_errors = false;
+
         // Given an arbitrary `OwnedFd`, it's impossible to know whether the
         // user holds a `dup`'d copy which could continue to modify the
         // file description state, which would cause Undefined Behavior after
         // our call to `fdopendir`. To prevent this, we obtain an independent
         // `OwnedFd`.
         let flags = fcntl_getfl(fd)?;
-        let fd_for_dir = openat(fd, cstr!("."), flags | OFlags::CLOEXEC, Mode::empty())?;
+        let fd_for_dir = match openat(fd, cstr!("."), flags | OFlags::CLOEXEC, Mode::empty()) {
+            Ok(fd) => fd,
+            Err(io::Errno::NOENT) => {
+                // If "." doesn't exist, it means the directory was removed.
+                // We treat that as iterating through a directory with no
+                // entries.
+                any_errors = true;
+                crate::io::dup(fd)?
+            }
+            Err(err) => return Err(err),
+        };
 
         let raw = owned_fd(fd_for_dir);
         unsafe {
             let libc_dir = c::fdopendir(raw);
 
             if let Some(libc_dir) = NonNull::new(libc_dir) {
-                Ok(Self(libc_dir))
+                Ok(Self {
+                    libc_dir,
+                    any_errors,
+                })
             } else {
                 let err = io::Errno::last_os_error();
                 let _ = c::close(raw);
@@ -95,13 +115,19 @@ impl Dir {
     /// `rewinddir(self)`
     #[inline]
     pub fn rewind(&mut self) {
-        unsafe { c::rewinddir(self.0.as_ptr()) }
+        self.any_errors = false;
+        unsafe { c::rewinddir(self.libc_dir.as_ptr()) }
     }
 
     /// `readdir(self)`, where `None` means the end of the directory.
     pub fn read(&mut self) -> Option<io::Result<DirEntry>> {
+        // If we've seen errors, don't continue to try to read anyting further.
+        if self.any_errors {
+            return None;
+        }
+
         set_errno(Errno(0));
-        let dirent_ptr = unsafe { libc_readdir(self.0.as_ptr()) };
+        let dirent_ptr = unsafe { libc_readdir(self.libc_dir.as_ptr()) };
         if dirent_ptr.is_null() {
             let curr_errno = errno().0;
             if curr_errno == 0 {
@@ -109,6 +135,7 @@ impl Dir {
                 None
             } else {
                 // `errno` is unknown or non-zero, so an error occurred.
+                self.any_errors = true;
                 Some(Err(io::Errno(curr_errno)))
             }
         } else {
@@ -134,7 +161,7 @@ impl Dir {
     /// `fstat(self)`
     #[inline]
     pub fn stat(&self) -> io::Result<Stat> {
-        fstat(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr())) })
+        fstat(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.libc_dir.as_ptr())) })
     }
 
     /// `fstatfs(self)`
@@ -148,7 +175,7 @@ impl Dir {
     )))]
     #[inline]
     pub fn statfs(&self) -> io::Result<StatFs> {
-        fstatfs(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr())) })
+        fstatfs(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.libc_dir.as_ptr())) })
     }
 
     /// `fstatvfs(self)`
@@ -161,14 +188,14 @@ impl Dir {
     )))]
     #[inline]
     pub fn statvfs(&self) -> io::Result<StatVfs> {
-        fstatvfs(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr())) })
+        fstatvfs(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.libc_dir.as_ptr())) })
     }
 
     /// `fchdir(self)`
     #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
     #[inline]
     pub fn chdir(&self) -> io::Result<()> {
-        fchdir(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.0.as_ptr())) })
+        fchdir(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.libc_dir.as_ptr())) })
     }
 }
 
@@ -342,7 +369,7 @@ unsafe impl Send for Dir {}
 impl Drop for Dir {
     #[inline]
     fn drop(&mut self) {
-        unsafe { c::closedir(self.0.as_ptr()) };
+        unsafe { c::closedir(self.libc_dir.as_ptr()) };
     }
 }
 
@@ -358,7 +385,7 @@ impl Iterator for Dir {
 impl fmt::Debug for Dir {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Dir")
-            .field("fd", unsafe { &c::dirfd(self.0.as_ptr()) })
+            .field("fd", unsafe { &c::dirfd(self.libc_dir.as_ptr()) })
             .finish()
     }
 }
@@ -484,4 +511,39 @@ fn check_dirent_layout(dirent: &c::dirent) {
             )
         }
     );
+}
+
+#[test]
+fn dir_iterator_handles_io_errors() {
+    // create a dir, keep the FD, then delete the dir
+    let tmp = tempfile::tempdir().unwrap();
+    let fd = crate::fs::openat(
+        crate::fs::cwd(),
+        tmp.path(),
+        crate::fs::OFlags::RDONLY | crate::fs::OFlags::CLOEXEC,
+        crate::fs::Mode::empty(),
+    )
+    .unwrap();
+
+    let file_fd = crate::fs::openat(
+        &fd,
+        tmp.path().join("test.txt"),
+        crate::fs::OFlags::WRONLY | crate::fs::OFlags::CREATE,
+        crate::fs::Mode::RWXU,
+    )
+    .unwrap();
+
+    let mut dir = Dir::read_from(&fd).unwrap();
+
+    // Reach inside the `Dir` and replace its directory with a file, which
+    // will cause the subsequent `readdir` to fail.
+    unsafe {
+        let raw_fd = c::dirfd(dir.libc_dir.as_ptr());
+        let mut owned_fd: crate::fd::OwnedFd = crate::fd::FromRawFd::from_raw_fd(raw_fd);
+        crate::io::dup2(&file_fd, &mut owned_fd).unwrap();
+        core::mem::forget(owned_fd);
+    }
+
+    assert!(matches!(dir.next(), Some(Err(_))));
+    assert!(matches!(dir.next(), None));
 }
