@@ -20,6 +20,8 @@ pub use backend::system::types::Sysinfo;
 /// `uname()`—Returns high-level information about the runtime OS and
 /// hardware.
 ///
+/// For `gethostname()`, use [`Uname::nodename`] on the result.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
@@ -40,6 +42,7 @@ pub use backend::system::types::Sysinfo;
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=uname&section=3
 /// [illumos]: https://illumos.org/man/2/uname
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Platform-Type.html
+#[doc(alias = "gethostname")]
 #[inline]
 pub fn uname() -> Uname {
     Uname(backend::system::syscalls::uname())
@@ -61,6 +64,8 @@ impl Uname {
     /// This is intended to be a network name, however it's unable to convey
     /// information about hosts that have multiple names, or any information
     /// about where the names are visible.
+    ///
+    /// This corresponds to the `gethostname` value.
     #[inline]
     pub fn nodename(&self) -> &CStr {
         Self::to_cstr(self.0.nodename.as_ptr().cast())
