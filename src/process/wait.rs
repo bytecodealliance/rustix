@@ -9,7 +9,7 @@ use crate::fd::BorrowedFd;
 use crate::backend::process::wait::SiginfoExt;
 
 bitflags! {
-    /// Options for modifying the behavior of wait/waitpid
+    /// Options for modifying the behavior of [`wait`]/[`waitpid`].
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct WaitOptions: u32 {

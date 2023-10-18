@@ -225,10 +225,11 @@ pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd>
 
 /// Locks all pages mapped into the address space of the calling process.
 ///
-/// This includes the pages of the code, data and stack segment, as well as shared libraries,
-/// user space kernel data, shared memory, and memory-mapped files. All mapped pages are
-/// guaranteed to be resident in RAM when the call returns successfully;
-/// the pages are guaranteed to stay in RAM until later unlocked.
+/// This includes the pages of the code, data and stack segment, as well as
+/// shared libraries, user space kernel data, shared memory, and memory-mapped
+/// files. All mapped pages are guaranteed to be resident in RAM when the call
+/// returns successfully; the pages are guaranteed to stay in RAM until later
+/// unlocked.
 #[inline]
 #[cfg(any(linux_kernel, freebsdlike, netbsdlike))]
 pub(crate) fn mlockall(flags: MlockAllFlags) -> io::Result<()> {
