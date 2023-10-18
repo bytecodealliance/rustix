@@ -210,13 +210,7 @@ pub type SocketAddrStorage = c::sockaddr_storage;
 #[inline]
 pub(crate) fn offsetof_sun_path() -> usize {
     let z = c::sockaddr_un {
-        #[cfg(any(
-            bsd,
-            target_os = "aix",
-            target_os = "espidf",
-            target_os = "haiku",
-            target_os = "nto",
-        ))]
+        #[cfg(any(bsd, target_os = "aix", target_os = "haiku", target_os = "nto"))]
         sun_len: 0_u8,
         #[cfg(target_os = "vita")]
         ss_len: 0,
