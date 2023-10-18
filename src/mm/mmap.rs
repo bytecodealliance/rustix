@@ -345,10 +345,11 @@ pub unsafe fn munlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
 
 /// Locks all pages mapped into the address space of the calling process.
 ///
-/// This includes the pages of the code, data and stack segment, as well as shared libraries,
-/// user space kernel data, shared memory, and memory-mapped files. All mapped pages are
-/// guaranteed to be resident in RAM when the call returns successfully;
-/// the pages are guaranteed to stay in RAM until later unlocked.
+/// This includes the pages of the code, data and stack segment, as well as
+/// shared libraries, user space kernel data, shared memory, and memory-mapped
+/// files. All mapped pages are guaranteed to be resident in RAM when the call
+/// returns successfully; the pages are guaranteed to stay in RAM until later
+/// unlocked.
 ///
 /// # References
 ///  - [POSIX]
@@ -378,9 +379,10 @@ pub fn mlockall(flags: MlockAllFlags) -> io::Result<()> {
 ///
 /// # Warnings
 ///
-/// This function is aware of all the memory pages in the process, as if it were a debugger.
-/// It unlocks all the pages, which could potentially compromise security assumptions made by
-/// code about memory it has encapsulated.
+/// This function is aware of all the memory pages in the process, as if it
+/// were a debugger. It unlocks all the pages, which could potentially
+/// compromise security assumptions made by code about memory it has
+/// encapsulated.
 ///
 /// # References
 ///  - [POSIX]
