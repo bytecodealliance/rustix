@@ -31,7 +31,7 @@ bitflags::bitflags! {
         const RDWR = c::O_RDWR as c::c_uint;
 
         /// `O_NOCTTY`
-        #[cfg(not(any(target_os = "espidf", target_os = "l4re", target_os = "redox")))]
+        #[cfg(not(any(target_os = "espidf", target_os = "l4re", target_os = "redox", target_os = "vita")))]
         const NOCTTY = c::O_NOCTTY as c::c_uint;
 
         /// `O_CLOEXEC`

@@ -16,21 +16,31 @@ use crate::fd::BorrowedFd;
 #[non_exhaustive]
 pub enum ClockId {
     /// `CLOCK_REALTIME`
-    Realtime = c::CLOCK_REALTIME,
+    Realtime = bitcast!(c::CLOCK_REALTIME),
 
     /// `CLOCK_MONOTONIC`
-    Monotonic = c::CLOCK_MONOTONIC,
+    Monotonic = bitcast!(c::CLOCK_MONOTONIC),
 
     /// `CLOCK_UPTIME`
     #[cfg(any(freebsdlike, target_os = "openbsd"))]
     Uptime = c::CLOCK_UPTIME,
 
     /// `CLOCK_PROCESS_CPUTIME_ID`
-    #[cfg(not(any(solarish, target_os = "netbsd", target_os = "redox")))]
+    #[cfg(not(any(
+        solarish,
+        target_os = "netbsd",
+        target_os = "redox",
+        target_os = "vita"
+    )))]
     ProcessCPUTime = c::CLOCK_PROCESS_CPUTIME_ID,
 
     /// `CLOCK_THREAD_CPUTIME_ID`
-    #[cfg(not(any(solarish, target_os = "netbsd", target_os = "redox")))]
+    #[cfg(not(any(
+        solarish,
+        target_os = "netbsd",
+        target_os = "redox",
+        target_os = "vita"
+    )))]
     ThreadCPUTime = c::CLOCK_THREAD_CPUTIME_ID,
 
     /// `CLOCK_REALTIME_COARSE`

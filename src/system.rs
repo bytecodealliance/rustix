@@ -10,7 +10,7 @@ use crate::backend;
 #[cfg(target_os = "linux")]
 use crate::backend::c;
 use crate::ffi::CStr;
-#[cfg(not(any(target_os = "espidf", target_os = "emscripten")))]
+#[cfg(not(any(target_os = "espidf", target_os = "emscripten", target_os = "vita")))]
 use crate::io;
 use core::fmt;
 
@@ -155,6 +155,7 @@ pub fn sysinfo() -> Sysinfo {
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "redox",
+    target_os = "vita",
     target_os = "wasi"
 )))]
 #[inline]

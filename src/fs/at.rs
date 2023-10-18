@@ -6,9 +6,13 @@
 //! [`cwd`]: crate::fs::CWD
 
 use crate::fd::OwnedFd;
+#[cfg(not(any(target_os = "espidf", target_os = "vita")))]
+use crate::fs::Access;
+#[cfg(not(target_os = "espidf"))]
+use crate::fs::AtFlags;
 #[cfg(apple)]
 use crate::fs::CloneFlags;
-#[cfg(not(any(apple, target_os = "espidf", target_os = "wasi")))]
+#[cfg(not(any(apple, target_os = "espidf", target_os = "vita", target_os = "wasi")))]
 use crate::fs::FileType;
 #[cfg(linux_kernel)]
 use crate::fs::RenameFlags;
@@ -26,24 +30,21 @@ use {
     alloc::vec::Vec,
     backend::fd::BorrowedFd,
 };
-#[cfg(not(target_os = "espidf"))]
-use {
-    crate::fs::{Access, AtFlags, Timestamps},
-    crate::timespec::Nsecs,
-};
+#[cfg(not(any(target_os = "espidf", target_os = "vita")))]
+use {crate::fs::Timestamps, crate::timespec::Nsecs};
 
 pub use backend::fs::types::{Dev, RawMode};
 
 /// `UTIME_NOW` for use with [`utimensat`].
 ///
 /// [`utimensat`]: crate::fs::utimensat
-#[cfg(not(any(target_os = "espidf", target_os = "redox")))]
+#[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "vita")))]
 pub const UTIME_NOW: Nsecs = backend::c::UTIME_NOW as Nsecs;
 
 /// `UTIME_OMIT` for use with [`utimensat`].
 ///
 /// [`utimensat`]: crate::fs::utimensat
-#[cfg(not(any(target_os = "espidf", target_os = "redox")))]
+#[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "vita")))]
 pub const UTIME_OMIT: Nsecs = backend::c::UTIME_OMIT as Nsecs;
 
 /// `openat(dirfd, path, oflags, mode)`—Opens a file.
@@ -314,7 +315,7 @@ pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> io:
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/faccessat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/faccessat.2.html
-#[cfg(not(target_os = "espidf"))]
+#[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 #[inline]
 #[doc(alias = "faccessat")]
 pub fn accessat<P: path::Arg, Fd: AsFd>(
@@ -334,7 +335,7 @@ pub fn accessat<P: path::Arg, Fd: AsFd>(
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/utimensat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/utimensat.2.html
-#[cfg(not(target_os = "espidf"))]
+#[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 #[inline]
 pub fn utimensat<P: path::Arg, Fd: AsFd>(
     dirfd: Fd,
@@ -396,7 +397,7 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mknodat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mknodat.2.html
-#[cfg(not(any(apple, target_os = "espidf", target_os = "wasi")))]
+#[cfg(not(any(apple, target_os = "espidf", target_os = "vita", target_os = "wasi")))]
 #[inline]
 pub fn mknodat<P: path::Arg, Fd: AsFd>(
     dirfd: Fd,
