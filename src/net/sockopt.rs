@@ -153,6 +153,7 @@
     target_os = "haiku",
     target_os = "netbsd",
     target_os = "nto",
+    target_os = "vita",
 )))]
 use crate::net::AddressFamily;
 #[cfg(any(
@@ -441,6 +442,7 @@ pub fn get_socket_send_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
     target_os = "haiku",
     target_os = "netbsd",
     target_os = "nto",
+    target_os = "vita",
 )))]
 #[inline]
 #[doc(alias = "SO_DOMAIN")]
@@ -1098,7 +1100,13 @@ pub fn get_ipv6_original_dst<Fd: AsFd>(fd: Fd) -> io::Result<SocketAddrV6> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
-#[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
+#[cfg(not(any(
+    solarish,
+    windows,
+    target_os = "espidf",
+    target_os = "haiku",
+    target_os = "vita"
+)))]
 #[inline]
 #[doc(alias = "IPV6_TCLASS")]
 pub fn set_ipv6_tclass<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
@@ -1110,7 +1118,13 @@ pub fn set_ipv6_tclass<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
-#[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
+#[cfg(not(any(
+    solarish,
+    windows,
+    target_os = "espidf",
+    target_os = "haiku",
+    target_os = "vita"
+)))]
 #[inline]
 #[doc(alias = "IPV6_TCLASS")]
 pub fn get_ipv6_tclass<Fd: AsFd>(fd: Fd) -> io::Result<u32> {

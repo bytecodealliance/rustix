@@ -1,7 +1,7 @@
 use crate::backend::c;
 use bitflags::bitflags;
 
-#[cfg(not(target_os = "espidf"))]
+#[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 bitflags! {
     /// `*_OK` constants for use with [`accessat`].
     ///
@@ -92,63 +92,63 @@ bitflags! {
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct Mode: RawMode {
         /// `S_IRWXU`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const RWXU = c::S_IRWXU as RawMode;
 
         /// `S_IRUSR`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const RUSR = c::S_IRUSR as RawMode;
 
         /// `S_IWUSR`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const WUSR = c::S_IWUSR as RawMode;
 
         /// `S_IXUSR`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const XUSR = c::S_IXUSR as RawMode;
 
         /// `S_IRWXG`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const RWXG = c::S_IRWXG as RawMode;
 
         /// `S_IRGRP`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const RGRP = c::S_IRGRP as RawMode;
 
         /// `S_IWGRP`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const WGRP = c::S_IWGRP as RawMode;
 
         /// `S_IXGRP`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const XGRP = c::S_IXGRP as RawMode;
 
         /// `S_IRWXO`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const RWXO = c::S_IRWXO as RawMode;
 
         /// `S_IROTH`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const ROTH = c::S_IROTH as RawMode;
 
         /// `S_IWOTH`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const WOTH = c::S_IWOTH as RawMode;
 
         /// `S_IXOTH`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const XOTH = c::S_IXOTH as RawMode;
 
         /// `S_ISUID`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const SUID = c::S_ISUID as RawMode;
 
         /// `S_ISGID`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const SGID = c::S_ISGID as RawMode;
 
         /// `S_ISVTX`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const SVTX = c::S_ISVTX as RawMode;
 
         /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
@@ -231,7 +231,7 @@ bitflags! {
         const DIRECTORY = bitcast!(c::O_DIRECTORY);
 
         /// `O_DSYNC`
-        #[cfg(not(any(target_os = "dragonfly", target_os = "espidf", target_os = "l4re", target_os = "redox")))]
+        #[cfg(not(any(target_os = "dragonfly", target_os = "espidf", target_os = "l4re", target_os = "redox", target_os = "vita")))]
         const DSYNC = bitcast!(c::O_DSYNC);
 
         /// `O_EXCL`
@@ -263,7 +263,7 @@ bitflags! {
         const RDWR = bitcast!(c::O_RDWR);
 
         /// `O_NOCTTY`
-        #[cfg(not(any(target_os = "espidf", target_os = "l4re", target_os = "redox")))]
+        #[cfg(not(any(target_os = "espidf", target_os = "l4re", target_os = "redox", target_os = "vita")))]
         const NOCTTY = bitcast!(c::O_NOCTTY);
 
         /// `O_RSYNC`
@@ -527,7 +527,8 @@ impl FileType {
         target_os = "espidf",
         target_os = "haiku",
         target_os = "nto",
-        target_os = "redox"
+        target_os = "redox",
+        target_os = "vita"
     )))]
     #[inline]
     pub(crate) const fn from_dirent_d_type(d_type: u8) -> Self {
@@ -558,6 +559,7 @@ impl FileType {
     target_os = "espidf",
     target_os = "haiku",
     target_os = "redox",
+    target_os = "vita",
 )))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
@@ -783,7 +785,8 @@ bitflags! {
     target_os = "aix",
     target_os = "espidf",
     target_os = "nto",
-    target_os = "redox"
+    target_os = "redox",
+    target_os = "vita"
 )))]
 bitflags! {
     /// `FALLOC_FL_*` constants for use with [`fallocate`].
@@ -901,11 +904,11 @@ bitflags! {
         const NOEXEC = c::ST_NOEXEC as u64;
 
         /// `ST_NOSUID`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const NOSUID = c::ST_NOSUID as u64;
 
         /// `ST_RDONLY`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const RDONLY = c::ST_RDONLY as u64;
 
         /// `ST_RELATIME`
@@ -925,7 +928,7 @@ bitflags! {
 ///
 /// [`flock`]: crate::fs::flock
 /// [`fcntl_lock`]: crate::fs::fcntl_lock
-#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
+#[cfg(not(any(target_os = "espidf", target_os = "vita", target_os = "wasi")))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u32)]
 pub enum FlockOperation {
@@ -1004,6 +1007,7 @@ pub struct Stat {
     target_os = "netbsd",
     target_os = "nto",
     target_os = "redox",
+    target_os = "vita",
     target_os = "wasi",
 )))]
 #[allow(clippy::module_name_repetitions)]

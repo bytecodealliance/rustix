@@ -54,6 +54,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const ADV: Self = Self(c::EADV);
@@ -77,6 +78,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const BADE: Self = Self(c::EBADE);
@@ -91,6 +93,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const BADFD: Self = Self(c::EBADFD);
@@ -106,6 +109,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const BADR: Self = Self(c::EBADR);
@@ -121,6 +125,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const BADRQC: Self = Self(c::EBADRQC);
@@ -133,6 +138,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const BADSLT: Self = Self(c::EBADSLT);
@@ -145,6 +151,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const BFONT: Self = Self(c::EBFONT);
@@ -168,6 +175,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi"
     )))]
     pub const CHRNG: Self = Self(c::ECHRNG);
@@ -180,6 +188,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const COMM: Self = Self(c::ECOMM);
@@ -201,6 +210,7 @@ impl Errno {
         target_os = "espidf",
         target_os = "haiku",
         target_os = "hurd",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const DEADLOCK: Self = Self(c::EDEADLOCK);
@@ -227,6 +237,7 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const DOTDOT: Self = Self(c::EDOTDOT);
@@ -261,6 +272,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "nto",
         target_os = "redox",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const HWPOISON: Self = Self(c::EHWPOISON);
@@ -308,6 +320,7 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const ISNAM: Self = Self(c::EISNAM);
@@ -322,6 +335,7 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const KEYEXPIRED: Self = Self(c::EKEYEXPIRED);
@@ -336,6 +350,7 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const KEYREJECTED: Self = Self(c::EKEYREJECTED);
@@ -350,6 +365,7 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const KEYREVOKED: Self = Self(c::EKEYREVOKED);
@@ -361,6 +377,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi"
     )))]
     pub const L2HLT: Self = Self(c::EL2HLT);
@@ -372,6 +389,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi"
     )))]
     pub const L2NSYNC: Self = Self(c::EL2NSYNC);
@@ -383,6 +401,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi"
     )))]
     pub const L3HLT: Self = Self(c::EL3HLT);
@@ -394,6 +413,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi"
     )))]
     pub const L3RST: Self = Self(c::EL3RST);
@@ -406,6 +426,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const LIBACC: Self = Self(c::ELIBACC);
@@ -418,6 +439,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const LIBBAD: Self = Self(c::ELIBBAD);
@@ -429,6 +451,7 @@ impl Errno {
         target_os = "espidf",
         target_os = "haiku",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const LIBEXEC: Self = Self(c::ELIBEXEC);
@@ -441,6 +464,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const LIBMAX: Self = Self(c::ELIBMAX);
@@ -453,6 +477,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const LIBSCN: Self = Self(c::ELIBSCN);
@@ -464,6 +489,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi"
     )))]
     pub const LNRNG: Self = Self(c::ELNRNG);
@@ -480,6 +506,7 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const MEDIUMTYPE: Self = Self(c::EMEDIUMTYPE);
@@ -507,6 +534,7 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const NAVAIL: Self = Self(c::ENAVAIL);
@@ -532,6 +560,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const NOANO: Self = Self(c::ENOANO);
@@ -549,6 +578,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi"
     )))]
     pub const NOCSI: Self = Self(c::ENOCSI);
@@ -581,6 +611,7 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const NOKEY: Self = Self(c::ENOKEY);
@@ -601,6 +632,7 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const NOMEDIUM: Self = Self(c::ENOMEDIUM);
@@ -622,6 +654,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const NONET: Self = Self(c::ENONET);
@@ -634,6 +667,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const NOPKG: Self = Self(c::ENOPKG);
@@ -667,7 +701,13 @@ impl Errno {
     #[cfg(not(windows))]
     pub const NOSYS: Self = Self(c::ENOSYS);
     /// `ENOTBLK`
-    #[cfg(not(any(windows, target_os = "espidf", target_os = "haiku", target_os = "wasi")))]
+    #[cfg(not(any(
+        windows,
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "vita",
+        target_os = "wasi"
+    )))]
     pub const NOTBLK: Self = Self(c::ENOTBLK);
     /// `ENOTCAPABLE`
     #[cfg(any(target_os = "freebsd", target_os = "wasi"))]
@@ -690,6 +730,7 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const NOTNAM: Self = Self(c::ENOTNAM);
@@ -720,6 +761,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const NOTUNIQ: Self = Self(c::ENOTUNIQ);
@@ -788,6 +830,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const REMCHG: Self = Self(c::EREMCHG);
@@ -796,6 +839,7 @@ impl Errno {
         target_os = "espidf",
         target_os = "haiku",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi"
     )))]
     pub const REMOTE: Self = Self(c::EREMOTE);
@@ -810,6 +854,7 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const REMOTEIO: Self = Self(c::EREMOTEIO);
@@ -821,6 +866,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi"
     )))]
     pub const RESTART: Self = Self(c::ERESTART);
@@ -837,6 +883,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "nto",
         target_os = "redox",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const RFKILL: Self = Self(c::ERFKILL);
@@ -847,13 +894,19 @@ impl Errno {
     #[cfg(bsd)]
     pub const RPCMISMATCH: Self = Self(c::ERPCMISMATCH);
     /// `ESHUTDOWN`
-    #[cfg(not(any(target_os = "espidf", target_os = "l4re", target_os = "wasi")))]
+    #[cfg(not(any(
+        target_os = "espidf",
+        target_os = "l4re",
+        target_os = "vita",
+        target_os = "wasi"
+    )))]
     pub const SHUTDOWN: Self = Self(c::ESHUTDOWN);
     /// `ESOCKTNOSUPPORT`
     #[cfg(not(any(
         target_os = "espidf",
         target_os = "haiku",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi"
     )))]
     pub const SOCKTNOSUPPORT: Self = Self(c::ESOCKTNOSUPPORT);
@@ -872,6 +925,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const SRMNT: Self = Self(c::ESRMNT);
@@ -886,6 +940,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const STRPIPE: Self = Self(c::ESTRPIPE);
@@ -921,6 +976,7 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "nto",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const UCLEAN: Self = Self(c::EUCLEAN);
@@ -932,6 +988,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi"
     )))]
     pub const UNATCH: Self = Self(c::EUNATCH);
@@ -940,6 +997,7 @@ impl Errno {
         target_os = "espidf",
         target_os = "haiku",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi"
     )))]
     pub const USERS: Self = Self(c::EUSERS);
@@ -957,6 +1015,7 @@ impl Errno {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "l4re",
+        target_os = "vita",
         target_os = "wasi",
     )))]
     pub const XFULL: Self = Self(c::EXFULL);

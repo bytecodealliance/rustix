@@ -19,6 +19,7 @@ mod dir;
     target_os = "espidf",
     target_os = "haiku",
     target_os = "redox",
+    target_os = "vita",
 )))]
 mod fadvise;
 pub(crate) mod fcntl;
@@ -38,6 +39,7 @@ mod ioctl;
     target_os = "espidf",
     target_os = "haiku",
     target_os = "redox",
+    target_os = "vita",
     target_os = "wasi"
 )))]
 mod makedev;
@@ -55,7 +57,12 @@ mod seek_from;
 mod sendfile;
 #[cfg(linux_kernel)]
 mod statx;
-#[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "redox",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
 mod sync;
 #[cfg(any(apple, linux_kernel))]
 mod xattr;
@@ -81,6 +88,7 @@ pub use dir::{Dir, DirEntry};
     target_os = "espidf",
     target_os = "haiku",
     target_os = "redox",
+    target_os = "vita",
 )))]
 pub use fadvise::{fadvise, Advice};
 pub use fcntl::*;
@@ -100,6 +108,7 @@ pub use ioctl::*;
     target_os = "espidf",
     target_os = "haiku",
     target_os = "redox",
+    target_os = "vita",
     target_os = "wasi"
 )))]
 pub use makedev::*;
@@ -117,7 +126,12 @@ pub use seek_from::SeekFrom;
 pub use sendfile::sendfile;
 #[cfg(linux_kernel)]
 pub use statx::{statx, Statx, StatxFlags, StatxTimestamp};
-#[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "redox",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
 pub use sync::sync;
 #[cfg(any(apple, linux_kernel))]
 pub use xattr::*;

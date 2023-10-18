@@ -3,7 +3,7 @@
 use crate::backend;
 
 pub use crate::io::FdFlags;
-#[cfg(not(target_os = "espidf"))]
+#[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 pub use backend::fs::types::Access;
 pub use backend::fs::types::{Dev, Mode, OFlags};
 

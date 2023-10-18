@@ -21,6 +21,7 @@ bitflags! {
             target_os = "nto",
             target_os = "openbsd",
             target_os = "redox",
+            target_os = "vita",
         )))]
         const DIRECT = bitcast!(c::O_DIRECT);
         /// `O_NONBLOCK`

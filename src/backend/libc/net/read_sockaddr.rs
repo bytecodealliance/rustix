@@ -14,11 +14,32 @@ use core::mem::size_of;
 // This must match the header of `sockaddr`.
 #[repr(C)]
 struct sockaddr_header {
-    #[cfg(any(bsd, target_os = "haiku"))]
+    #[cfg(any(
+        bsd,
+        target_os = "aix",
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "nto",
+        target_os = "vita"
+    ))]
     sa_len: u8,
-    #[cfg(any(bsd, target_os = "haiku"))]
+    #[cfg(any(
+        bsd,
+        target_os = "aix",
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "nto",
+        target_os = "vita"
+    ))]
     ss_family: u8,
-    #[cfg(not(any(bsd, target_os = "haiku")))]
+    #[cfg(not(any(
+        bsd,
+        target_os = "aix",
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "nto",
+        target_os = "vita"
+    )))]
     ss_family: u16,
 }
 
@@ -31,7 +52,8 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
             target_os = "aix",
             target_os = "espidf",
             target_os = "haiku",
-            target_os = "nto"
+            target_os = "nto",
+            target_os = "vita"
         ))]
         sa_len: 0_u8,
         #[cfg(any(
@@ -39,7 +61,8 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
             target_os = "aix",
             target_os = "espidf",
             target_os = "haiku",
-            target_os = "nto"
+            target_os = "nto",
+            target_os = "vita"
         ))]
         sa_family: 0_u8,
         #[cfg(not(any(
@@ -47,7 +70,8 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
             target_os = "aix",
             target_os = "espidf",
             target_os = "haiku",
-            target_os = "nto"
+            target_os = "nto",
+            target_os = "vita"
         )))]
         sa_family: 0_u16,
         #[cfg(not(target_os = "haiku"))]

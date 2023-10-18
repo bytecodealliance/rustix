@@ -13,6 +13,7 @@ use core::mem::MaybeUninit;
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "redox",
+    target_os = "vita",
     target_os = "wasi"
 )))]
 use {crate::backend::conv::ret, crate::io};
@@ -48,6 +49,7 @@ pub(crate) fn sysinfo() -> Sysinfo {
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "redox",
+    target_os = "vita",
     target_os = "wasi"
 )))]
 pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {

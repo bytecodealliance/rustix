@@ -1,4 +1,4 @@
-#[cfg(not(target_os = "espidf"))]
+#[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 use crate::backend::c;
 
 /// A command for use with [`membarrier`] and [`membarrier_cpu`].
@@ -45,6 +45,7 @@ pub enum MembarrierCommand {
     target_os = "espidf",
     target_os = "fuchsia",
     target_os = "redox",
+    target_os = "vita",
     target_os = "wasi"
 )))]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
