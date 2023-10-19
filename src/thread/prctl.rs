@@ -366,8 +366,9 @@ pub enum Capability {
     ///
     /// [`Capability::SystemAdmin`] is required to use bpf_probe_write_user.
     ///
-    /// [`Capability::SystemAdmin`] is required to iterate system wide loaded
-    /// programs, maps, links, BTFs and convert their IDs to file descriptors.
+    /// [`Capability::SystemAdmin`] is required to iterate system-wide loaded
+    /// programs, maps, links, and BTFs, and convert their IDs to file
+    /// descriptors.
     ///
     /// [`Capability::PerformanceMonitoring`] and
     /// [`Capability::BerkeleyPacketFilters`] are required to load tracing

@@ -115,9 +115,9 @@
 )]
 #![cfg_attr(asm_experimental_arch, feature(asm_experimental_arch))]
 #![cfg_attr(not(feature = "all-apis"), allow(dead_code))]
-// It is common in linux and libc APIs for types to vary between platforms.
+// It is common in Linux and libc APIs for types to vary between platforms.
 #![allow(clippy::unnecessary_cast)]
-// It is common in linux and libc APIs for types to vary between platforms.
+// It is common in Linux and libc APIs for types to vary between platforms.
 #![allow(clippy::useless_conversion)]
 // Redox and WASI have enough differences that it isn't worth precisely
 // conditionalizing all the `use`s for them.

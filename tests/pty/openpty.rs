@@ -33,7 +33,7 @@ fn openpty_basic() {
     let mut controller = File::from(controller);
     let mut user = File::from(user);
 
-    // The '\x04' is Ctrl-D, the default EOF control code.
+    // The `'\x04'` is Ctrl-D, the default EOF control code.
     controller.write_all(b"Hello, world!\n\x04").unwrap();
 
     let mut s = String::new();
@@ -66,7 +66,7 @@ fn openpty_get_peer() {
     let mut controller = File::from(controller);
     let mut user = File::from(user);
 
-    // The '\x04' is Ctrl-D, the default EOF control code.
+    // The `'\x04'` is Ctrl-D, the default EOF control code.
     controller.write_all(b"Hello, world!\n\x04").unwrap();
 
     let mut s = String::new();

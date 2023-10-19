@@ -278,7 +278,7 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Re
     // Check that `fd` is really a tty.
     tcgetwinsize(fd)?;
 
-    // Get a fd to '/proc/self/fd'.
+    // Get a fd to "/proc/self/fd".
     let proc_self_fd = procfs::proc_self_fd()?;
 
     // Gather the ttyname by reading the "fd" file inside `proc_self_fd`.

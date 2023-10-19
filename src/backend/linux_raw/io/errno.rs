@@ -60,7 +60,7 @@ impl Errno {
     #[inline]
     pub fn from_io_error(io_err: &std::io::Error) -> Option<Self> {
         io_err.raw_os_error().and_then(|raw| {
-            // `std::io::Error` could theoretically have arbitrary "OS error"
+            // `std::io::Error` could theoretically have arbitrary OS error
             // values, so check that they're in Linux's range.
             if (1..4096).contains(&raw) {
                 Some(Self::from_errno(raw as u32))

@@ -73,11 +73,11 @@ impl Event {
                 flags: flags.bits() as _,
                 fflags,
                 data: {
-                    // On openbsd, data is an i64 and not an isize
+                    // On OpenBSD, data is an `i64` and not an `isize`.
                     data as _
                 },
                 udata: {
-                    // On netbsd, udata is an isize and not a pointer.
+                    // On NetBSD, udata is an `isize` and not a pointer.
                     // TODO: Strict provenance, prevent int-to-ptr cast.
                     udata as _
                 },
@@ -93,7 +93,7 @@ impl Event {
 
     /// Get the user data for this event.
     pub fn udata(&self) -> isize {
-        // On netbsd, udata is an isize and not a pointer.
+        // On NetBSD, udata is an isize and not a pointer.
         // TODO: Strict provenance, prevent ptr-to-int cast.
 
         self.inner.udata as _
@@ -101,7 +101,7 @@ impl Event {
 
     /// Get the raw data for this event.
     pub fn data(&self) -> i64 {
-        // On some bsds, data is an isize and not an i64
+        // On some BSDs, data is an `isize` and not an `i64`.
         self.inner.data as _
     }
 

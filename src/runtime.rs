@@ -4,7 +4,7 @@
 //! Do not use the functions in this module unless you've read all of their
 //! code. They don't always behave the same way as functions with similar names
 //! in `libc`. Sometimes information about the differences is included in the
-//! Linux documentation under "C library/kernel differences" sections. And, if
+//! Linux documentation under “C library/kernel differences” sections. And, if
 //! there is a libc in the process, these functions may have surprising
 //! interactions with it.
 //!
@@ -486,14 +486,14 @@ pub unsafe fn sigtimedwait(set: &Sigset, timeout: Option<Timespec>) -> io::Resul
     backend::runtime::syscalls::sigtimedwait(set, timeout)
 }
 
-/// `getauxval(AT_SECURE)`—Returns the Linux "secure execution" mode.
+/// `getauxval(AT_SECURE)`—Returns the Linux “secure execution” mode.
 ///
-/// Return a boolean value indicating whether "secure execution" mode was
+/// Return a boolean value indicating whether “secure execution” mode was
 /// requested, due to the process having elevated privileges. This includes
 /// whether the `AT_SECURE` AUX value is set, and whether the initial real UID
 /// and GID differ from the initial effective UID and GID.
 ///
-/// The meaning of "secure execution" mode is beyond the scope of this comment.
+/// The meaning of “secure execution” mode is beyond the scope of this comment.
 ///
 /// # References
 ///  - [Linux]

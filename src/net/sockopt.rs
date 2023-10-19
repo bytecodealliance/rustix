@@ -1067,8 +1067,8 @@ pub fn get_ipv6_freebind<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 
 /// `getsockopt(fd, IPPROTO_IP, SO_ORIGINAL_DST)`
 ///
-/// Even though this corresponnds to a `SO_*` constant, it is an
-/// `IPPROTO_IP` option.
+/// Even though this corresponnds to a `SO_*` constant, it is an `IPPROTO_IP`
+/// option.
 ///
 /// See the [module-level documentation] for more.
 ///

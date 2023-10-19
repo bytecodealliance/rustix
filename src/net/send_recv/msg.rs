@@ -317,7 +317,7 @@ impl<'buf> AncillaryDrain<'buf> {
         msg: &c::cmsghdr,
     ) -> Option<RecvAncillaryMessage<'buf>> {
         unsafe {
-            // Advance the "read" pointer.
+            // Advance the `read` pointer.
             let msg_len = msg.cmsg_len as usize;
             *read += msg_len;
             *length -= msg_len;

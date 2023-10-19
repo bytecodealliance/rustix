@@ -105,8 +105,8 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::R
 
         debug_assert!(nread <= buffer.capacity());
         if nread < buffer.capacity() {
-            // SAFETY: From the [documentation]: "On success, these calls
-            // return the number of bytes placed in buf."
+            // SAFETY: From the [documentation]: “On success, these calls
+            // return the number of bytes placed in buf.”
             //
             // [documentation]: https://man7.org/linux/man-pages/man2/readlinkat.2.html
             unsafe {
@@ -114,13 +114,13 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::R
             }
 
             // SAFETY:
-            // - "readlink places the contents of the symbolic link pathname in the buffer
-            //   buf"
-            // - [POSIX definition 3.271: Pathname]: "A string that is used to identify a
-            //   file."
-            // - [POSIX definition 3.375: String]: "A contiguous sequence of bytes
-            //   terminated by and including the first null byte."
-            // - "readlink does not append a terminating null byte to buf."
+            // - “readlink places the contents of the symbolic link pathname in
+            //   the buffer buf”
+            // - [POSIX definition 3.271: Pathname]: “A string that is used to
+            //   identify a file.”
+            // - [POSIX definition 3.375: String]: “A contiguous sequence of
+            //   bytes terminated by and including the first null byte.”
+            // - “readlink does not append a terminating null byte to buf.”
             //
             // Thus, there will be no NUL bytes in the string.
             //
@@ -131,9 +131,8 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::R
             }
         }
 
-        buffer.reserve(buffer.capacity() + 1); // use `Vec` reallocation
-                                               // strategy to grow capacity
-                                               // exponentially
+        // Use `Vec` reallocation strategy to grow capacity exponentially.
+        buffer.reserve(buffer.capacity() + 1);
     }
 }
 
