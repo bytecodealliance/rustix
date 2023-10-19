@@ -19,8 +19,8 @@ macro_rules! check_renamed_type {
     };
 }
 
-/// Check that the field of a struct has the same offset as the
-/// corresponding field in the `sys` bindings.
+/// Check that the field of a struct has the same offset as the corresponding
+/// field in the `sys` bindings.
 macro_rules! check_struct_field {
     ($struct:ident, $field:ident) => {
         const_assert_eq!(

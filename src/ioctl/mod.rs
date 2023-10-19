@@ -204,7 +204,7 @@ impl Opcode {
         Self { raw }
     }
 
-    /// Create a new opcode from a direction, group, number and size.
+    /// Create a new opcode from a direction, group, number, and size.
     ///
     /// This corresponds to the C macro `_IOC(direction, group, number, size)`
     #[cfg(any(linux_kernel, bsd))]
@@ -227,8 +227,8 @@ impl Opcode {
         ))
     }
 
-    /// Create a new non-mutating opcode from a group, a number and the type of
-    /// data.
+    /// Create a new non-mutating opcode from a group, a number, and the type
+    /// of data.
     ///
     /// This corresponds to the C macro `_IO(group, number)` when `T` is zero
     /// sized.

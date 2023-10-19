@@ -187,7 +187,7 @@ pub enum RebootCommand {
     ///
     /// [`kexec_load`]: https://man7.org/linux/man-pages/man2/kexec_load.2.html
     Kexec = c::LINUX_REBOOT_CMD_KEXEC,
-    /// Prints the message "Power down.", stops the system and tries to remove
+    /// Prints the message "Power down.", stops the system, and tries to remove
     /// all power
     PowerOff = c::LINUX_REBOOT_CMD_POWER_OFF,
     /// Prints the message "Restarting system." and triggers a restart
@@ -201,8 +201,8 @@ pub enum RebootCommand {
 /// The reboot syscall, despite the name, can actually do much more than
 /// reboot.
 ///
-/// Among other things it can
-/// - Restart, Halt, Power Off and Suspend the system
+/// Among other things, it can:
+/// - Restart, Halt, Power Off, and Suspend the system
 /// - Enable and disable the Ctrl-Alt-Del keystroke
 /// - Execute other kernels
 /// - Terminate init inside PID namespaces

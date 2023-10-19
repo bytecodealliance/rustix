@@ -337,7 +337,7 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
     #[cfg(feature = "runtime")]
     assert_eq!(phent, size_of::<Elf_Phdr>());
 
-    // If we're running set-uid or set-gid, enable "secure execution" mode,
+    // If we're running set-uid or set-gid, enable “secure execution” mode,
     // which doesn't do much, but users may be depending on the things that
     // it does do.
     #[cfg(feature = "runtime")]

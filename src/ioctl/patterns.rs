@@ -49,7 +49,7 @@ unsafe impl<Opcode: CompileTimeOpcode> Ioctl for NoArg<Opcode> {
     }
 }
 
-/// Implements the traditional "getter" pattern for `ioctl`s.
+/// Implements the traditional “getter” pattern for `ioctl`s.
 ///
 /// Some `ioctl`s just read data into the userspace. As this is a popular
 /// pattern this structure implements it.

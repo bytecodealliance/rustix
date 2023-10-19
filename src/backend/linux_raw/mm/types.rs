@@ -240,9 +240,9 @@ pub enum Advice {
 impl Advice {
     /// `POSIX_MADV_DONTNEED`
     ///
-    /// On Linux, this is mapped to `POSIX_MADV_NORMAL` because
-    /// Linux's `MADV_DONTNEED` differs from `POSIX_MADV_DONTNEED`. See
-    /// `LinuxDontNeed` for the Linux behavior.
+    /// On Linux, this is mapped to `POSIX_MADV_NORMAL` because Linux's
+    /// `MADV_DONTNEED` differs from `POSIX_MADV_DONTNEED`. See `LinuxDontNeed`
+    /// for the Linux behavior.
     pub const DontNeed: Self = Self::Normal;
 }
 
@@ -271,25 +271,23 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MlockAllFlags: u32 {
-        /// Used together with `MCL_CURRENT`, `MCL_FUTURE`, or both.  Mark
-        /// all current (with `MCL_CURRENT`) or future (with `MCL_FUTURE`)
-        /// mappings to lock pages when they are faulted in.  When
-        /// used with `MCL_CURRENT`, all present pages are locked, but
-        /// `mlockall()` will not fault in non-present pages.  When used
-        /// with `MCL_FUTURE`, all future mappings will be marked to
-        /// lock pages when they are faulted in, but they will not be
-        /// populated by the lock when the mapping is created.
-        /// `MCL_ONFAULT` must be used with either `MCL_CURRENT` or
+        /// Used together with `MCL_CURRENT`, `MCL_FUTURE`, or both. Mark all
+        /// current (with `MCL_CURRENT`) or future (with `MCL_FUTURE`) mappings
+        /// to lock pages when they are faulted in. When used with
+        /// `MCL_CURRENT`, all present pages are locked, but `mlockall` will
+        /// not fault in non-present pages. When used with `MCL_FUTURE`, all
+        /// future mappings will be marked to lock pages when they are faulted
+        /// in, but they will not be populated by the lock when the mapping is
+        /// created. `MCL_ONFAULT` must be used with either `MCL_CURRENT` or
         /// `MCL_FUTURE` or both.
         const ONFAULT = linux_raw_sys::general::MCL_ONFAULT;
-        /// Lock all pages which will become mapped into the address
-        /// space of the process in the future.  These could be, for
-        /// instance, new pages required by a growing heap and stack
-        /// as well as new memory-mapped files or shared memory
-        /// regions.
+        /// Lock all pages which will become mapped into the address space of
+        /// the process in the future. These could be, for instance, new pages
+        /// required by a growing heap and stack as well as new memory-mapped
+        /// files or shared memory regions.
         const FUTURE = linux_raw_sys::general::MCL_FUTURE;
-        /// Lock all pages which are currently mapped into the address
-        /// space of the process.
+        /// Lock all pages which are currently mapped into the address space of
+        /// the process.
         const CURRENT = linux_raw_sys::general::MCL_CURRENT;
 
         /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>

@@ -141,7 +141,7 @@ pub(crate) fn getpgrp() -> Pid {
 #[inline]
 pub(crate) fn sched_getaffinity(pid: Option<Pid>, cpuset: &mut RawCpuSet) -> io::Result<()> {
     unsafe {
-        // The raw linux syscall returns the size (in bytes) of the `cpumask_t`
+        // The raw Linux syscall returns the size (in bytes) of the `cpumask_t`
         // data type that is used internally by the kernel to represent the CPU
         // set bit mask.
         let size = ret_usize(syscall!(
