@@ -115,7 +115,7 @@ pub(crate) fn with_unix_msghdr<R>(
 ) -> R {
     f({
         let mut h: c::msghdr = unsafe { zeroed() };
-        h.msg_name = as_ptr(addr) as _;
+        h.msg_name = as_ptr(&addr.unix) as _;
         h.msg_namelen = addr.addr_len();
         h.msg_iov = iov.as_ptr() as _;
         h.msg_iovlen = msg_iov_len(iov.len());

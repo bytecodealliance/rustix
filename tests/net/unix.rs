@@ -283,6 +283,113 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
     server.join().unwrap();
 }
 
+/// Similar to `do_test_unix_msg` but uses an unconnected socket and
+/// `sendmsg_unix` instead of `sendmsg`.
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+fn do_test_unix_msg_unconnected(addr: SocketAddrUnix) {
+    use rustix::io::{IoSlice, IoSliceMut};
+    use rustix::net::{recvmsg, sendmsg_unix, RecvFlags, SendFlags};
+
+    let server = {
+        let runs: &[i32] = &[3, 184, 187, 0];
+        let data_socket =
+            socket(AddressFamily::UNIX, SocketType::DGRAM, Default::default()).unwrap();
+        bind_unix(&data_socket, &addr).unwrap();
+
+        move || {
+            let mut buffer = vec![0; BUFFER_SIZE];
+            for expected_sum in runs {
+                let mut sum = 0;
+                loop {
+                    let nread = recvmsg(
+                        &data_socket,
+                        &mut [IoSliceMut::new(&mut buffer)],
+                        &mut Default::default(),
+                        RecvFlags::empty(),
+                    )
+                    .unwrap()
+                    .bytes;
+
+                    assert_ne!(&buffer[..nread], b"exit");
+                    if &buffer[..nread] == b"sum" {
+                        break;
+                    }
+
+                    sum += i32::from_str(&String::from_utf8_lossy(&buffer[..nread])).unwrap();
+                }
+
+                assert_eq!(sum, *expected_sum);
+            }
+            let nread = recvmsg(
+                &data_socket,
+                &mut [IoSliceMut::new(&mut buffer)],
+                &mut Default::default(),
+                RecvFlags::empty(),
+            )
+            .unwrap()
+            .bytes;
+
+            assert_eq!(&buffer[..nread], b"exit");
+        }
+    };
+
+    let client = move || {
+        let runs: &[&[&str]] = &[&["1", "2"], &["4", "77", "103"], &["5", "78", "104"], &[]];
+
+        for args in runs {
+            let data_socket =
+                socket(AddressFamily::UNIX, SocketType::DGRAM, Default::default()).unwrap();
+
+            for arg in *args {
+                sendmsg_unix(
+                    &data_socket,
+                    &addr,
+                    &[IoSlice::new(arg.as_bytes())],
+                    &mut Default::default(),
+                    SendFlags::empty(),
+                )
+                .unwrap();
+            }
+            sendmsg_unix(
+                &data_socket,
+                &addr,
+                &[IoSlice::new(b"sum")],
+                &mut Default::default(),
+                SendFlags::empty(),
+            )
+            .unwrap();
+        }
+
+        let data_socket =
+            socket(AddressFamily::UNIX, SocketType::DGRAM, Default::default()).unwrap();
+        sendmsg_unix(
+            &data_socket,
+            &addr,
+            &[IoSlice::new(b"exit")],
+            &mut Default::default(),
+            SendFlags::empty(),
+        )
+        .unwrap();
+    };
+
+    let server = thread::Builder::new()
+        .name("server".to_string())
+        .spawn(move || {
+            server();
+        })
+        .unwrap();
+
+    let client = thread::Builder::new()
+        .name("client".to_string())
+        .spawn(move || {
+            client();
+        })
+        .unwrap();
+
+    client.join().unwrap();
+    server.join().unwrap();
+}
+
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_unix_msg() {
@@ -291,6 +398,19 @@ fn test_unix_msg() {
 
     let name = SocketAddrUnix::new(&path).unwrap();
     do_test_unix_msg(name);
+
+    unlinkat(cwd(), path, AtFlags::empty()).unwrap();
+}
+
+/// Like `test_unix_msg` but tests `do_test_unix_msg_unconnected`.
+#[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
+#[test]
+fn test_unix_msg_unconnected() {
+    let tmpdir = tempfile::tempdir().unwrap();
+    let path = tmpdir.path().join("scp_4804");
+
+    let name = SocketAddrUnix::new(&path).unwrap();
+    do_test_unix_msg_unconnected(name);
 
     unlinkat(cwd(), path, AtFlags::empty()).unwrap();
 }
@@ -305,6 +425,19 @@ fn test_abstract_unix_msg() {
 
     let name = SocketAddrUnix::new_abstract_name(path.as_os_str().as_bytes()).unwrap();
     do_test_unix_msg(name);
+}
+
+/// Like `test_abstract_unix_msg` but tests `do_test_unix_msg_unconnected`.
+#[cfg(linux_kernel)]
+#[test]
+fn test_abstract_unix_msg_unconnected() {
+    use std::os::unix::ffi::OsStrExt;
+
+    let tmpdir = tempfile::tempdir().unwrap();
+    let path = tmpdir.path().join("scp_4804");
+
+    let name = SocketAddrUnix::new_abstract_name(path.as_os_str().as_bytes()).unwrap();
+    do_test_unix_msg_unconnected(name);
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
