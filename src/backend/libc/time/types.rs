@@ -88,7 +88,7 @@ bitflags! {
         /// `TFD_CLOEXEC`
         const CLOEXEC = bitcast!(c::TFD_CLOEXEC);
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -108,7 +108,7 @@ bitflags! {
         #[cfg(linux_kernel)]
         const CANCEL_ON_SET = bitcast!(c::TFD_TIMER_CANCEL_ON_SET);
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }

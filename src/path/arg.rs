@@ -36,7 +36,7 @@ use {alloc::string::String, alloc::vec::Vec};
 /// This is similar to [`AsRef`]`<`[`Path`]`>`, but is implemented for more
 /// kinds of strings and can convert into more kinds of strings.
 ///
-/// # Example
+/// # Examples
 ///
 /// ```
 /// # #[cfg(any(feature = "fs", feature = "net"))]

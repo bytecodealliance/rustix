@@ -94,7 +94,7 @@
 //! [I/O-safe]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
 //! [`Result`]: https://doc.rust-lang.org/stable/std/result/enum.Result.html
 //! [`Arg`]: https://docs.rs/rustix/*/rustix/path/trait.Arg.html
-//! [support for externally defined flags]: https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags
+//! [support for externally defined flags]: https://docs.rs/bitflags/*/bitflags/#externally-defined-flags
 
 #![deny(missing_docs)]
 #![allow(stable_features)]

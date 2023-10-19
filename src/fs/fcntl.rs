@@ -1,7 +1,7 @@
-//! The Unix `fcntl` function is effectively lots of different functions
-//! hidden behind a single dynamic dispatch interface. In order to provide
-//! a type-safe API, rustix makes them all separate functions so that they
-//! can have dedicated static type signatures.
+//! The Unix `fcntl` function is effectively lots of different functions hidden
+//! behind a single dynamic dispatch interface. In order to provide a type-safe
+//! API, rustix makes them all separate functions so that they can have
+//! dedicated static type signatures.
 
 #[cfg(not(any(
     target_os = "emscripten",
@@ -87,8 +87,8 @@ pub fn fcntl_add_seals<Fd: AsFd>(fd: Fd, seals: SealFlags) -> io::Result<()> {
 /// file should be locked.
 ///
 /// Unlike `flock`-style locks, `fcntl`-style locks are process-associated,
-/// meaning that they don't guard against being acquired by two threads in
-/// the same process.
+/// meaning that they don't guard against being acquired by two threads in the
+/// same process.
 ///
 /// # References
 ///  - [POSIX]

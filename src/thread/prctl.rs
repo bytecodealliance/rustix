@@ -205,8 +205,8 @@ pub enum Capability {
     /// cleared on successful return from `chown` (not implemented).
     FileSetID = linux_raw_sys::general::CAP_FSETID,
     /// Overrides the restriction that the real or effective user ID of a
-    /// process sending a signal must match the real or effective user ID
-    /// of the process receiving the signal.
+    /// process sending a signal must match the real or effective user ID of
+    /// the process receiving the signal.
     Kill = linux_raw_sys::general::CAP_KILL,
     /// Allows `setgid` manipulation. Allows `setgroups`. Allows forged gids on
     /// socket credentials passing.
@@ -444,7 +444,7 @@ bitflags! {
         /// Set [`NO_CAP_AMBIENT_RAISE`] irreversibly.
         const NO_CAP_AMBIENT_RAISE_LOCKED = 1_u32 << 7;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -756,7 +756,7 @@ bitflags! {
         /// Asynchronous tag check fault mode.
         const TCF_ASYNC = 1_u32 << 2;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -784,8 +784,8 @@ const PR_SET_TAGGED_ADDR_CTRL: c_int = 55;
 ///
 /// # Safety
 ///
-/// Please ensure the conditions necessary to safely call this function,
-/// as detailed in the references above.
+/// Please ensure the conditions necessary to safely call this function, as
+/// detailed in the references above.
 ///
 /// [`prctl(PR_SET_TAGGED_ADDR_CTRL,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -813,8 +813,8 @@ const PR_SYS_DISPATCH_OFF: usize = 0;
 ///
 /// # Safety
 ///
-/// Please ensure the conditions necessary to safely call this function,
-/// as detailed in the references above.
+/// Please ensure the conditions necessary to safely call this function, as
+/// detailed in the references above.
 ///
 /// [`prctl(PR_SET_SYSCALL_USER_DISPATCH,PR_SYS_DISPATCH_OFF,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
@@ -859,8 +859,8 @@ impl TryFrom<u8> for SysCallUserDispatchFastSwitch {
 ///
 /// # Safety
 ///
-/// Please ensure the conditions necessary to safely call this function,
-/// as detailed in the references above.
+/// Please ensure the conditions necessary to safely call this function, as
+/// detailed in the references above.
 ///
 /// [`prctl(PR_SET_SYSCALL_USER_DISPATCH,PR_SYS_DISPATCH_ON,...)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]

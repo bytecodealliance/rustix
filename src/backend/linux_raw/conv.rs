@@ -2,8 +2,8 @@
 //!
 //! System call arguments and return values are all communicated with inline
 //! asm and FFI as `*mut Opaque`. To protect these raw pointers from escaping
-//! or being accidentally misused as they travel through the code, we wrap
-//! them in [`ArgReg`] and [`RetReg`] structs. This file provides `From`
+//! or being accidentally misused as they travel through the code, we wrap them
+//! in [`ArgReg`] and [`RetReg`] structs. This file provides `From`
 //! implementations and explicit conversion functions for converting values
 //! into and out of these wrapper structs.
 //!

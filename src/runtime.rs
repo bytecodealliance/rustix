@@ -515,7 +515,9 @@ pub fn linux_secure() -> bool {
 ///
 /// # Safety
 ///
-/// Be a good sport and don't break the allocator.
+/// This is not identical to `brk` in libc. libc `brk` may have bookkeeping
+/// that needs to be kept up to date that this doesn't keep up to date, so
+/// don't use it unless you are implementing libc.
 #[cfg(linux_raw)]
 #[inline]
 pub unsafe fn brk(addr: *mut c_void) -> io::Result<*mut c_void> {

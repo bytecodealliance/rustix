@@ -294,7 +294,7 @@ bitflags! {
         )))]
         const IUTF8 = c::IUTF8;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -509,7 +509,7 @@ bitflags! {
         )))]
         const VT1 = c::VT1;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -573,7 +573,7 @@ bitflags! {
         )))]
         const CMSPAR = c::CMSPAR;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -639,7 +639,7 @@ bitflags! {
         /// `IEXTEN`
         const IEXTEN = c::IEXTEN;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }

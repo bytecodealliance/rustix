@@ -48,7 +48,7 @@ bitflags! {
         )]
         const RDHUP = c::POLLRDHUP;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }

@@ -27,7 +27,7 @@ bitflags! {
         /// `O_NONBLOCK`
         const NONBLOCK = bitcast!(c::O_NONBLOCK);
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -48,7 +48,7 @@ bitflags! {
         /// `SPLICE_F_GIFT`
         const GIFT = c::SPLICE_F_GIFT;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }

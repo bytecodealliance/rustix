@@ -139,8 +139,8 @@ pub(crate) fn exe_phdrs() -> (*const c::c_void, usize, usize) {
     }
 }
 
-/// `AT_SYSINFO_EHDR` isn't present on all platforms in all configurations,
-/// so if we don't see it, this function returns a null pointer.
+/// `AT_SYSINFO_EHDR` isn't present on all platforms in all configurations, so
+/// if we don't see it, this function returns a null pointer.
 #[inline]
 pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
     #[cfg(not(feature = "runtime"))]

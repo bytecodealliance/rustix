@@ -180,8 +180,8 @@ pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
 
 /// `unlinkat(fd, path, flags)`—Unlinks a file or remove a directory.
 ///
-/// With the [`REMOVEDIR`] flag, this removes a directory. This is in place
-/// of a `rmdirat` function.
+/// With the [`REMOVEDIR`] flag, this removes a directory. This is in place of
+/// a `rmdirat` function.
 ///
 /// # References
 ///  - [POSIX]

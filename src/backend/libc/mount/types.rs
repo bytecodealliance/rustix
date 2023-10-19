@@ -55,7 +55,7 @@ bitflags! {
         /// `MS_SYNCHRONOUS`
         const SYNCHRONOUS = c::MS_SYNCHRONOUS;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -77,7 +77,7 @@ bitflags! {
         /// `UMOUNT_NOFOLLOW`
         const NOFOLLOW = bitcast!(c::UMOUNT_NOFOLLOW);
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -94,7 +94,7 @@ bitflags! {
         /// `FSOPEN_CLOEXEC`
         const FSOPEN_CLOEXEC = 0x0000_0001;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -111,7 +111,7 @@ bitflags! {
         /// `FSMOUNT_CLOEXEC`
         const FSMOUNT_CLOEXEC = 0x0000_0001;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -192,7 +192,7 @@ bitflags! {
         /// `MOUNT_ATTR__ATIME_FLAGS`
         const MOUNT_ATTR_SIZE_VER0 = 32;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -234,7 +234,7 @@ bitflags! {
         /// `MOVE_MOUNT__MASK`
         const MOVE_MOUNT__MASK = 0x0000_0377;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -266,7 +266,7 @@ bitflags! {
         /// `AT_SYMLINK_NOFOLLOW`
         const AT_SYMLINK_NOFOLLOW = c::AT_SYMLINK_NOFOLLOW as c::c_uint;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -292,7 +292,7 @@ bitflags! {
         /// `FSPICK_EMPTY_PATH`
         const FSPICK_EMPTY_PATH = 0x0000_0008;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -318,7 +318,7 @@ bitflags! {
         /// `MS_REC`
         const REC = c::MS_REC;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -331,7 +331,7 @@ bitflags! {
         const REMOUNT = c::MS_REMOUNT;
         const MOVE = c::MS_MOVE;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }

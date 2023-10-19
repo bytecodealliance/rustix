@@ -318,7 +318,7 @@ unsafe fn _rustix_clock_gettime_via_syscall(
 #[cfg(target_arch = "x86")]
 extern "C" {
     /// A symbol pointing to an `int 0x80` instruction. This “function” is only
-    /// called from assembly, and only with the x86 syscall calling convention.
+    /// called from assembly, and only with the x86 syscall calling convention,
     /// so its signature here is not its true signature.
     ///
     /// This extern block and the `global_asm!` below can be replaced with
