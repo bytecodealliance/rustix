@@ -12,6 +12,8 @@ mod poll;
 mod sockopt;
 #[cfg(unix)]
 mod unix;
+#[cfg(unix)]
+mod unix_alloc;
 mod v4;
 mod v6;
 

@@ -1,6 +1,4 @@
-//! Test a simple Unix-domain socket server and client.
-//!
-//! The client sends lists of integers and the server sends back sums.
+//! Like unix.rs, but uses `Vec`s for the buffers.
 
 // This test uses `AF_UNIX` with `SOCK_SEQPACKET` which is unsupported on macOS.
 #![cfg(not(any(apple, target_os = "espidf", target_os = "redox", target_os = "wasi")))]
@@ -35,7 +33,7 @@ fn server(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path) {
         cvar.notify_all();
     }
 
-    let mut buffer = [0; BUFFER_SIZE];
+    let mut buffer = vec![0; BUFFER_SIZE];
     'exit: loop {
         let data_socket = accept(&connection_socket).unwrap();
         let mut sum = 0;
@@ -68,7 +66,7 @@ fn client(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path, runs: &[(&[&str], i32
     }
 
     let addr = SocketAddrUnix::new(path).unwrap();
-    let mut buffer = [0; BUFFER_SIZE];
+    let mut buffer = vec![0; BUFFER_SIZE];
 
     for (args, sum) in runs {
         let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
@@ -136,7 +134,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
         listen(&connection_socket, 1).unwrap();
 
         move || {
-            let mut buffer = [0; BUFFER_SIZE];
+            let mut buffer = vec![0; BUFFER_SIZE];
             'exit: loop {
                 let data_socket = accept(&connection_socket).unwrap();
                 let mut sum = 0;
@@ -173,7 +171,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
     };
 
     let client = move || {
-        let mut buffer = [0; BUFFER_SIZE];
+        let mut buffer = vec![0; BUFFER_SIZE];
         let runs: &[(&[&str], i32)] = &[
             (&["1", "2"], 3),
             (&["4", "77", "103"], 184),
@@ -266,7 +264,7 @@ fn do_test_unix_msg_unconnected(addr: SocketAddrUnix) {
         bind_unix(&data_socket, &addr).unwrap();
 
         move || {
-            let mut buffer = [0; BUFFER_SIZE];
+            let mut buffer = vec![0; BUFFER_SIZE];
             for expected_sum in runs {
                 let mut sum = 0;
                 loop {
@@ -434,8 +432,8 @@ fn test_unix_msg_with_scm_rights() {
         move || {
             let mut pipe_end = None;
 
-            let mut buffer = [0; BUFFER_SIZE];
-            let mut cmsg_space = [0; rustix::cmsg_space!(ScmRights(1))];
+            let mut buffer = vec![0; BUFFER_SIZE];
+            let mut cmsg_space = vec![0; rustix::cmsg_space!(ScmRights(1))];
 
             'exit: loop {
                 let data_socket = accept(&connection_socket).unwrap();
@@ -495,7 +493,7 @@ fn test_unix_msg_with_scm_rights() {
     let client = move || {
         let addr = SocketAddrUnix::new(path).unwrap();
         let (read_end, write_end) = pipe().unwrap();
-        let mut buffer = [0; BUFFER_SIZE];
+        let mut buffer = vec![0; BUFFER_SIZE];
         let runs: &[(&[&str], i32)] = &[
             (&["1", "2"], 3),
             (&["4", "77", "103"], 184),
@@ -543,7 +541,7 @@ fn test_unix_msg_with_scm_rights() {
         // Format the CMSG.
         let we = [write_end.as_fd()];
         let msg = SendAncillaryMessage::ScmRights(&we);
-        let mut space = [0; rustix::cmsg_space!(ScmRights(1))];
+        let mut space = vec![0; msg.size()];
         let mut cmsg_buffer = SendAncillaryBuffer::new(&mut space);
         assert!(cmsg_buffer.push(msg));
 
@@ -606,7 +604,7 @@ fn test_unix_peercred() {
     assert_eq!(ucred.gid, getgid());
 
     let msg = SendAncillaryMessage::ScmCredentials(ucred);
-    let mut space = [0; rustix::cmsg_space!(ScmCredentials(1))];
+    let mut space = vec![0; msg.size()];
     let mut cmsg_buffer = SendAncillaryBuffer::new(&mut space);
     assert!(cmsg_buffer.push(msg));
 
@@ -618,10 +616,10 @@ fn test_unix_peercred() {
     )
     .unwrap();
 
-    let mut cmsg_space = [0; rustix::cmsg_space!(ScmCredentials(1))];
+    let mut cmsg_space = vec![0; rustix::cmsg_space!(ScmCredentials(1))];
     let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut cmsg_space);
 
-    let mut buffer = [0; BUFFER_SIZE];
+    let mut buffer = vec![0; BUFFER_SIZE];
     recvmsg(
         &recv_sock,
         &mut [IoSliceMut::new(&mut buffer)],
