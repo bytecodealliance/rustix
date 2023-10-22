@@ -9,7 +9,8 @@ use crate::backend::c;
 #[cfg(target_arch = "x86")]
 use crate::backend::conv::by_mut;
 use crate::backend::conv::{
-    by_ref, c_int, c_uint, ret, ret_c_int, ret_c_int_infallible, ret_error, size_of, zero,
+    by_ref, c_int, c_uint, ret, ret_c_int, ret_c_int_infallible, ret_error, ret_void_star, size_of,
+    zero,
 };
 #[cfg(feature = "fs")]
 use crate::fd::BorrowedFd;
@@ -22,6 +23,7 @@ use crate::runtime::{How, Sigaction, Siginfo, Sigset, Stack};
 use crate::signal::Signal;
 use crate::timespec::Timespec;
 use crate::utils::option_as_ptr;
+use core::ffi::c_void;
 use core::mem::MaybeUninit;
 #[cfg(target_pointer_width = "32")]
 use linux_raw_sys::general::__kernel_old_timespec;
@@ -262,4 +264,10 @@ unsafe fn sigtimedwait_old(
 #[inline]
 pub(crate) fn exit_group(code: c::c_int) -> ! {
     unsafe { syscall_noreturn!(__NR_exit_group, c_int(code)) }
+}
+
+#[inline]
+pub(crate) unsafe fn brk(addr: *mut c::c_void) -> io::Result<*mut c_void> {
+    // Don't mark this `readonly`, so that loads don't get reordered past it.
+    ret_void_star(syscall!(__NR_brk, addr))
 }
