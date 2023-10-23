@@ -521,8 +521,6 @@ pub(crate) fn renameat2(
     }
 }
 
-/// At present, `libc` only has `renameat2` defined for glibc. On other
-/// ABIs, `RenameFlags` has no flags defined, and we use plain `renameat`.
 #[cfg(any(
     target_os = "android",
     all(target_os = "linux", not(target_env = "gnu")),
@@ -535,8 +533,32 @@ pub(crate) fn renameat2(
     new_path: &CStr,
     flags: RenameFlags,
 ) -> io::Result<()> {
-    assert!(flags.is_empty());
-    renameat(old_dirfd, old_path, new_dirfd, new_path)
+    // At present, `libc` only has `renameat2` defined for glibc. If we have
+    // no flags, we can use plain `renameat`, but otherwise we use `syscall!`.
+    // to call `renameat2` ourselves.
+    if flags.is_empty() {
+        renameat(old_dirfd, old_path, new_dirfd, new_path)
+    } else {
+        syscall! {
+            fn renameat2(
+                olddirfd: c::c_int,
+                oldpath: *const c::c_char,
+                newdirfd: c::c_int,
+                newpath: *const c::c_char,
+                flags: c::c_uint
+            ) via SYS_renameat2 -> c::c_int
+        }
+
+        unsafe {
+            ret(renameat2(
+                borrowed_fd(old_dirfd),
+                c_str(old_path),
+                borrowed_fd(new_dirfd),
+                c_str(new_path),
+                flags.bits(),
+            ))
+        }
+    }
 }
 
 pub(crate) fn symlink(old_path: &CStr, new_path: &CStr) -> io::Result<()> {
