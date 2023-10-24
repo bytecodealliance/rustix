@@ -28,12 +28,11 @@ mod fcntl_apple;
 #[cfg(apple)]
 mod fcopyfile;
 pub(crate) mod fd;
-mod file_type;
 #[cfg(apple)]
 mod getpath;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;
-#[cfg(not(target_os = "wasi"))]
+#[cfg(linux_kernel)]
 mod ioctl;
 #[cfg(not(any(
     target_os = "espidf",
@@ -90,19 +89,18 @@ pub use dir::{Dir, DirEntry};
     target_os = "redox",
     target_os = "vita",
 )))]
-pub use fadvise::{fadvise, Advice};
+pub use fadvise::fadvise;
 pub use fcntl::*;
 #[cfg(apple)]
 pub use fcntl_apple::*;
 #[cfg(apple)]
 pub use fcopyfile::*;
 pub use fd::*;
-pub use file_type::FileType;
 #[cfg(apple)]
 pub use getpath::getpath;
 #[cfg(not(target_os = "wasi"))]
 pub use id::*;
-#[cfg(not(target_os = "wasi"))]
+#[cfg(linux_kernel)]
 pub use ioctl::*;
 #[cfg(not(any(
     target_os = "espidf",
@@ -113,7 +111,7 @@ pub use ioctl::*;
 )))]
 pub use makedev::*;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
-pub use memfd_create::{memfd_create, MemfdFlags};
+pub use memfd_create::memfd_create;
 #[cfg(linux_kernel)]
 #[cfg(feature = "fs")]
 pub use mount::*;
@@ -125,7 +123,7 @@ pub use seek_from::SeekFrom;
 #[cfg(target_os = "linux")]
 pub use sendfile::sendfile;
 #[cfg(linux_kernel)]
-pub use statx::{statx, Statx, StatxFlags, StatxTimestamp};
+pub use statx::statx;
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "redox",

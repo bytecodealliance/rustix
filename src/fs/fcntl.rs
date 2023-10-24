@@ -65,7 +65,7 @@ pub fn fcntl_get_seals<Fd: AsFd>(fd: Fd) -> io::Result<SealFlags> {
 }
 
 #[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
-pub use backend::fs::types::SealFlags;
+use backend::fs::types::SealFlags;
 
 /// `fcntl(fd, F_ADD_SEALS)`
 ///
