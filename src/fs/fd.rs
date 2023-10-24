@@ -7,10 +7,6 @@ use crate::fs::{Gid, Uid};
 use crate::fs::{OFlags, SeekFrom, Timespec};
 use crate::{backend, io};
 use backend::fd::{AsFd, BorrowedFd};
-
-#[cfg(not(any(target_os = "espidf", target_os = "vita", target_os = "wasi")))]
-pub use backend::fs::types::FlockOperation;
-
 #[cfg(not(any(
     netbsdlike,
     solarish,
@@ -21,10 +17,17 @@ pub use backend::fs::types::FlockOperation;
     target_os = "redox",
     target_os = "vita",
 )))]
-pub use backend::fs::types::FallocateFlags;
-
-pub use backend::fs::types::Stat;
-
+use backend::fs::types::FallocateFlags;
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "solaris",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
+use backend::fs::types::FlockOperation;
+#[cfg(linux_kernel)]
+use backend::fs::types::FsWord;
+use backend::fs::types::Stat;
 #[cfg(not(any(
     solarish,
     target_os = "espidf",
@@ -35,13 +38,9 @@ pub use backend::fs::types::Stat;
     target_os = "vita",
     target_os = "wasi",
 )))]
-pub use backend::fs::types::StatFs;
-
+use backend::fs::types::StatFs;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
-pub use backend::fs::types::{StatVfs, StatVfsMountFlags};
-
-#[cfg(linux_kernel)]
-pub use backend::fs::types::FsWord;
+use backend::fs::types::StatVfs;
 
 /// Timestamps used by [`utimensat`] and [`futimens`].
 ///

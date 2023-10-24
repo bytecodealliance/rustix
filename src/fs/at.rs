@@ -12,12 +12,12 @@ use crate::fs::Access;
 use crate::fs::AtFlags;
 #[cfg(apple)]
 use crate::fs::CloneFlags;
-#[cfg(not(any(apple, target_os = "espidf", target_os = "vita", target_os = "wasi")))]
-use crate::fs::FileType;
 #[cfg(linux_kernel)]
 use crate::fs::RenameFlags;
 #[cfg(not(any(target_os = "aix", target_os = "espidf")))]
 use crate::fs::Stat;
+#[cfg(not(any(apple, target_os = "espidf", target_os = "vita", target_os = "wasi")))]
+use crate::fs::{Dev, FileType};
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 use crate::fs::{Gid, Uid};
 use crate::fs::{Mode, OFlags};
@@ -32,8 +32,6 @@ use {
 };
 #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 use {crate::fs::Timestamps, crate::timespec::Nsecs};
-
-pub use backend::fs::types::{Dev, RawMode};
 
 /// `UTIME_NOW` for use with [`utimensat`].
 ///

@@ -1,7 +1,6 @@
 use crate::fd::OwnedFd;
 use crate::{backend, io, path};
-
-pub use backend::fs::types::MemfdFlags;
+use backend::fs::types::MemfdFlags;
 
 /// `memfd_create(path, flags)`
 ///

@@ -92,7 +92,7 @@ bitflags! {
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct FsOpenFlags: c::c_uint {
         /// `FSOPEN_CLOEXEC`
-        const FSOPEN_CLOEXEC = 0x00000001;
+        const FSOPEN_CLOEXEC = 0x0000_0001;
 
         /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -109,7 +109,7 @@ bitflags! {
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct FsMountFlags: c::c_uint {
         /// `FSMOUNT_CLOEXEC`
-        const FSMOUNT_CLOEXEC = 0x00000001;
+        const FSMOUNT_CLOEXEC = 0x0000_0001;
 
         /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -157,37 +157,37 @@ bitflags! {
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MountAttrFlags: c::c_uint {
         /// `MOUNT_ATTR_RDONLY`
-        const MOUNT_ATTR_RDONLY = 0x00000001;
+        const MOUNT_ATTR_RDONLY = 0x0000_0001;
 
         /// `MOUNT_ATTR_NOSUID`
-        const MOUNT_ATTR_NOSUID = 0x00000002;
+        const MOUNT_ATTR_NOSUID = 0x0000_0002;
 
         /// `MOUNT_ATTR_NODEV`
-        const MOUNT_ATTR_NODEV = 0x00000004;
+        const MOUNT_ATTR_NODEV = 0x0000_0004;
 
         /// `MOUNT_ATTR_NOEXEC`
-        const MOUNT_ATTR_NOEXEC = 0x00000008;
+        const MOUNT_ATTR_NOEXEC = 0x0000_0008;
 
         /// `MOUNT_ATTR__ATIME`
-        const MOUNT_ATTR__ATIME = 0x00000070;
+        const MOUNT_ATTR__ATIME = 0x0000_0070;
 
         /// `MOUNT_ATTR_RELATIME`
-        const MOUNT_ATTR_RELATIME = 0x00000000;
+        const MOUNT_ATTR_RELATIME = 0x0000_0000;
 
         /// `MOUNT_ATTR_NOATIME`
-        const MOUNT_ATTR_NOATIME = 0x00000010;
+        const MOUNT_ATTR_NOATIME = 0x0000_0010;
 
         /// `MOUNT_ATTR_STRICTATIME`
-        const MOUNT_ATTR_STRICTATIME = 0x00000020;
+        const MOUNT_ATTR_STRICTATIME = 0x0000_0020;
 
         /// `MOUNT_ATTR_NODIRATIME`
-        const MOUNT_ATTR_NODIRATIME = 0x00000080;
+        const MOUNT_ATTR_NODIRATIME = 0x0000_0080;
 
         /// `MOUNT_ATTR_NOUSER`
-        const MOUNT_ATTR_IDMAP = 0x00100000;
+        const MOUNT_ATTR_IDMAP = 0x0010_0000;
 
         /// `MOUNT_ATTR__ATIME_FLAGS`
-        const MOUNT_ATTR_NOSYMFOLLOW = 0x00200000;
+        const MOUNT_ATTR_NOSYMFOLLOW = 0x0020_0000;
 
         /// `MOUNT_ATTR__ATIME_FLAGS`
         const MOUNT_ATTR_SIZE_VER0 = 32;
@@ -207,32 +207,32 @@ bitflags! {
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MoveMountFlags: c::c_uint {
         /// `MOVE_MOUNT_F_EMPTY_PATH`
-        const MOVE_MOUNT_F_SYMLINKS = 0x00000001;
+        const MOVE_MOUNT_F_SYMLINKS = 0x0000_0001;
 
         /// `MOVE_MOUNT_F_AUTOMOUNTS`
-        const MOVE_MOUNT_F_AUTOMOUNTS = 0x00000002;
+        const MOVE_MOUNT_F_AUTOMOUNTS = 0x0000_0002;
 
         /// `MOVE_MOUNT_F_EMPTY_PATH`
-        const MOVE_MOUNT_F_EMPTY_PATH = 0x00000004;
+        const MOVE_MOUNT_F_EMPTY_PATH = 0x0000_0004;
 
         /// `MOVE_MOUNT_T_SYMLINKS`
-        const MOVE_MOUNT_T_SYMLINKS = 0x00000010;
+        const MOVE_MOUNT_T_SYMLINKS = 0x0000_0010;
 
         /// `MOVE_MOUNT_T_AUTOMOUNTS`
-        const MOVE_MOUNT_T_AUTOMOUNTS = 0x00000020;
+        const MOVE_MOUNT_T_AUTOMOUNTS = 0x0000_0020;
 
         /// `MOVE_MOUNT_T_EMPTY_PATH`
-        const MOVE_MOUNT_T_EMPTY_PATH = 0x00000040;
+        const MOVE_MOUNT_T_EMPTY_PATH = 0x0000_0040;
 
         /// `MOVE_MOUNT__MASK`
-        const MOVE_MOUNT_SET_GROUP = 0x00000100;
+        const MOVE_MOUNT_SET_GROUP = 0x0000_0100;
 
         // TODO: add when linux 6.5 is released
         // /// `MOVE_MOUNT_BENEATH`
-        // const MOVE_MOUNT_BENEATH = 0x00000200;
+        // const MOVE_MOUNT_BENEATH = 0x0000_0200;
 
         /// `MOVE_MOUNT__MASK`
-        const MOVE_MOUNT__MASK = 0x00000377;
+        const MOVE_MOUNT__MASK = 0x0000_0377;
 
         /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -281,16 +281,16 @@ bitflags! {
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct FsPickFlags: c::c_uint {
         /// `FSPICK_CLOEXEC`
-        const FSPICK_CLOEXEC = 0x00000001;
+        const FSPICK_CLOEXEC = 0x0000_0001;
 
         /// `FSPICK_SYMLINK_NOFOLLOW`
-        const FSPICK_SYMLINK_NOFOLLOW = 0x00000002;
+        const FSPICK_SYMLINK_NOFOLLOW = 0x0000_0002;
 
         /// `FSPICK_NO_AUTOMOUNT`
-        const FSPICK_NO_AUTOMOUNT = 0x00000004;
+        const FSPICK_NO_AUTOMOUNT = 0x0000_0004;
 
         /// `FSPICK_EMPTY_PATH`
-        const FSPICK_EMPTY_PATH = 0x00000008;
+        const FSPICK_EMPTY_PATH = 0x0000_0008;
 
         /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
         const _ = !0;

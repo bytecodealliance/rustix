@@ -11,6 +11,8 @@ use crate::net::UCred;
 use core::iter::FusedIterator;
 use core::marker::PhantomData;
 use core::mem::{align_of, size_of, size_of_val, take};
+#[cfg(linux_kernel)]
+use core::ptr::addr_of;
 use core::{ptr, slice};
 
 use super::{RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketAddrV6};
@@ -165,7 +167,7 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
             #[cfg(linux_kernel)]
             SendAncillaryMessage::ScmCredentials(ucred) => {
                 let ucred_bytes = unsafe {
-                    slice::from_raw_parts(&ucred as *const _ as *const u8, size_of_val(&ucred))
+                    slice::from_raw_parts(addr_of!(ucred).cast::<u8>(), size_of_val(&ucred))
                 };
                 self.push_ancillary(ucred_bytes, c::SOL_SOCKET as _, c::SCM_CREDENTIALS as _)
             }
@@ -223,6 +225,7 @@ impl<'slice, 'fd> Extend<SendAncillaryMessage<'slice, 'fd>>
 }
 
 /// Buffer for receiving ancillary messages with [`recvmsg`].
+#[derive(Default)]
 pub struct RecvAncillaryBuffer<'buf> {
     /// Raw byte buffer for messages.
     buffer: &'buf mut [u8],
@@ -237,16 +240,6 @@ pub struct RecvAncillaryBuffer<'buf> {
 impl<'buf> From<&'buf mut [u8]> for RecvAncillaryBuffer<'buf> {
     fn from(buffer: &'buf mut [u8]) -> Self {
         Self::new(buffer)
-    }
-}
-
-impl Default for RecvAncillaryBuffer<'_> {
-    fn default() -> Self {
-        Self {
-            buffer: &mut [],
-            read: 0,
-            length: 0,
-        }
     }
 }
 

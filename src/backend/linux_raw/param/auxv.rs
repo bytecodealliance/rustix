@@ -165,7 +165,7 @@ static ENTRY: AtomicUsize = AtomicUsize::new(0);
 #[cfg(feature = "alloc")]
 fn pr_get_auxv() -> crate::io::Result<Vec<u8>> {
     use super::super::conv::{c_int, pass_usize, ret_usize};
-    const PR_GET_AUXV: c::c_int = 0x41555856;
+    const PR_GET_AUXV: c::c_int = 0x4155_5856;
     let mut buffer = alloc::vec![0u8; 512];
     let len = unsafe {
         ret_usize(syscall_always_asm!(
