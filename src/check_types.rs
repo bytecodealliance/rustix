@@ -54,8 +54,8 @@ macro_rules! check_struct_renamed_field {
     };
 }
 
-/// The same as `check_struct_renamed_field`, but for when both the struct
-/// and a field are renamed.
+/// The same as `check_struct_renamed_field`, but for when both the struct and
+/// a field are renamed.
 macro_rules! check_renamed_struct_renamed_field {
     ($to_struct:ident, $from_struct:ident, $to:ident, $from:ident) => {
         const_assert_eq!(

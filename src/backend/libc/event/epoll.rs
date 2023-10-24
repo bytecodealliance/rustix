@@ -1,8 +1,4 @@
-//! epoll support.
-//!
-//! This is an experiment, and it isn't yet clear whether epoll is the right
-//! level of abstraction at which to introduce safety. But it works fairly well
-//! in simple examples 🙂.
+//! Linux `epoll` support.
 //!
 //! # Examples
 //!
@@ -96,7 +92,7 @@ bitflags! {
         /// `EPOLL_CLOEXEC`
         const CLOEXEC = bitcast!(c::EPOLL_CLOEXEC);
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -152,7 +148,7 @@ bitflags! {
         #[cfg(not(target_os = "android"))]
         const EXCLUSIVE = bitcast!(c::EPOLLEXCLUSIVE);
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }

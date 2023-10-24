@@ -25,7 +25,7 @@ bitflags! {
         /// `MSG_OOB`
         const OOB = c::MSG_OOB;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -54,7 +54,7 @@ bitflags! {
         /// `MSG_WAITALL`
         const WAITALL = c::MSG_WAITALL;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }

@@ -62,9 +62,11 @@ pub const fn __cmsg_space(len: usize) -> usize {
 #[non_exhaustive]
 pub enum SendAncillaryMessage<'slice, 'fd> {
     /// Send file descriptors.
+    #[doc(alias = "SCM_RIGHTS")]
     ScmRights(&'slice [BorrowedFd<'fd>]),
     /// Send process credentials.
     #[cfg(linux_kernel)]
+    #[doc(alias = "SCM_CREDENTIAL")]
     ScmCredentials(UCred),
 }
 
@@ -85,9 +87,11 @@ impl SendAncillaryMessage<'_, '_> {
 #[non_exhaustive]
 pub enum RecvAncillaryMessage<'a> {
     /// Received file descriptors.
+    #[doc(alias = "SCM_RIGHTS")]
     ScmRights(AncillaryIter<'a, OwnedFd>),
     /// Received process credentials.
     #[cfg(linux_kernel)]
+    #[doc(alias = "SCM_CREDENTIALS")]
     ScmCredentials(UCred),
 }
 
@@ -741,7 +745,7 @@ mod messages {
 
     /// An iterator over the messages in an ancillary buffer.
     pub(super) struct Messages<'buf> {
-        /// The message header we're using to iterator over the messages.
+        /// The message header we're using to iterate over the messages.
         msghdr: c::msghdr,
 
         /// The current pointer to the next message header to return.

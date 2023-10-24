@@ -80,8 +80,8 @@ impl Default for CpuSet {
 /// `pid` is the thread ID to update. If pid is `None`, then the current thread
 /// is updated.
 ///
-/// The `CpuSet` argument specifies the set of CPUs on which the thread will
-/// be eligible to run.
+/// The `CpuSet` argument specifies the set of CPUs on which the thread will be
+/// eligible to run.
 ///
 /// # References
 ///  - [Linux]

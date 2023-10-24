@@ -14,16 +14,8 @@ use backend::fd::AsFd;
 
 /// `ioctl(fd, FIOCLEX, NULL)`—Set the close-on-exec flag.
 ///
-/// Also known as `fcntl(fd, F_SETFD, FD_CLOEXEC)`.
-///
-/// # References
-///  - [Winsock2]
-///  - [NetBSD]
-///  - [OpenBSD]
-///
-/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-ioctlsocket
-/// [NetBSD]: https://man.netbsd.org/ioctl.2#GENERIC%20IOCTLS
-/// [OpenBSD]: https://man.openbsd.org/ioctl.2#GENERIC_IOCTLS
+/// This is similar to `fcntl(fd, F_SETFD, FD_CLOEXEC)`, except that it avoids
+/// clearing any other flags that might be set.
 #[cfg(apple)]
 #[inline]
 #[doc(alias = "FIOCLEX")]
@@ -58,8 +50,8 @@ pub fn ioctl_fionbio<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 
 /// `ioctl(fd, FIONREAD)`—Returns the number of bytes ready to be read.
 ///
-/// The result of this function gets silently coerced into a C `int`
-/// by the OS, so it may contain a wrapped value.
+/// The result of this function gets silently coerced into a C `int` by the OS,
+/// so it may contain a wrapped value.
 ///
 /// # References
 ///  - [Linux]

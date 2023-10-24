@@ -1,8 +1,4 @@
-//! epoll support.
-//!
-//! This is an experiment, and it isn't yet clear whether epoll is the right
-//! level of abstraction at which to introduce safety. But it works fairly well
-//! in simple examples 🙂.
+//! Linx `epoll` support.
 //!
 //! # Examples
 //!
@@ -94,7 +90,7 @@ bitflags! {
         /// `EPOLL_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::EPOLL_CLOEXEC;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -149,7 +145,7 @@ bitflags! {
         /// `EPOLLEXCLUSIVE`
         const EXCLUSIVE = linux_raw_sys::general::EPOLLEXCLUSIVE as u32;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }

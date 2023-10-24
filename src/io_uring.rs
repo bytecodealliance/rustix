@@ -167,7 +167,7 @@ bitflags::bitflags! {
         /// `IORING_ENTER_REGISTERED_RING`
         const REGISTERED_RING = sys::IORING_ENTER_REGISTERED_RING;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -505,7 +505,7 @@ bitflags::bitflags! {
         /// `IORING_SETUP_DEFER_TASKRUN`
         const DEFER_TASKRUN = sys::IORING_SETUP_DEFER_TASKRUN;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -536,7 +536,7 @@ bitflags::bitflags! {
         /// `1 << IOSQE_CQE_SKIP_SUCCESS_BIT`
         const CQE_SKIP_SUCCESS = 1 << sys::IOSQE_CQE_SKIP_SUCCESS_BIT as u8;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -558,7 +558,7 @@ bitflags::bitflags! {
         /// `IORING_CQE_F_NOTIF`
         const NOTIF = bitcast!(sys::IORING_CQE_F_NOTIF);
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -571,7 +571,7 @@ bitflags::bitflags! {
         /// `IORING_FSYNC_DATASYNC`
         const DATASYNC = sys::IORING_FSYNC_DATASYNC;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -606,7 +606,7 @@ bitflags::bitflags! {
         /// `IORING_LINK_TIMEOUT_UPDATE`
         const LINK_TIMEOUT_UPDATE = sys::IORING_LINK_TIMEOUT_UPDATE;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -619,7 +619,7 @@ bitflags::bitflags! {
         /// `SPLICE_F_FD_IN_FIXED`
         const FD_IN_FIXED = sys::SPLICE_F_FD_IN_FIXED;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -632,7 +632,7 @@ bitflags::bitflags! {
         /// `IORING_MSG_RING_CQE_SKIP`
         const CQE_SKIP = sys::IORING_MSG_RING_CQE_SKIP;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -654,7 +654,7 @@ bitflags::bitflags! {
         /// `IORING_ASYNC_CANCEL_FD`
         const FD_FIXED = sys::IORING_ASYNC_CANCEL_FD_FIXED;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -703,7 +703,7 @@ bitflags::bitflags! {
         /// `IORING_FEAT_LINKED_FILE`
         const LINKED_FILE = sys::IORING_FEAT_LINKED_FILE;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -716,7 +716,7 @@ bitflags::bitflags! {
         /// `IO_URING_OP_SUPPORTED`
         const SUPPORTED = sys::IO_URING_OP_SUPPORTED as _;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -729,7 +729,7 @@ bitflags::bitflags! {
         /// `IORING_RSRC_REGISTER_SPARSE`
         const REGISTER_SPARSE = sys::IORING_RSRC_REGISTER_SPARSE as _;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -748,7 +748,7 @@ bitflags::bitflags! {
         /// `IORING_SQ_TASKRUN`
         const TASKRUN = sys::IORING_SQ_TASKRUN;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -761,7 +761,7 @@ bitflags::bitflags! {
         /// `IORING_CQ_EVENTFD_DISABLED`
         const EVENTFD_DISABLED = sys::IORING_CQ_EVENTFD_DISABLED;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -783,7 +783,7 @@ bitflags::bitflags! {
         /// `IORING_POLL_ADD_LEVEL`
         const ADD_LEVEL = sys::IORING_POLL_ADD_LEVEL;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -806,7 +806,7 @@ bitflags::bitflags! {
         /// `IORING_SEND_ZC_REPORT_USAGE` (since Linux 6.2)
         const ZC_REPORT_USAGE = sys::IORING_SEND_ZC_REPORT_USAGE as _;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -829,7 +829,7 @@ bitflags::bitflags! {
         /// See also [`IoringSendFlags::FIXED_BUF`].
         const FIXED_BUF = sys::IORING_RECVSEND_FIXED_BUF as _;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -842,7 +842,7 @@ bitflags::bitflags! {
         /// `IORING_ACCEPT_MULTISHOT`
         const MULTISHOT = sys::IORING_ACCEPT_MULTISHOT as _;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -867,7 +867,7 @@ bitflags::bitflags! {
         /// `MSG_ERRQUEUE`
         const ERRQUEUE = net::MSG_ERRQUEUE;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }

@@ -1,5 +1,5 @@
-//! The BSD sockets API requires us to read the `ss_family` field before
-//! we can interpret the rest of a `sockaddr` produced by the kernel.
+//! The BSD sockets API requires us to read the `ss_family` field before we can
+//! interpret the rest of a `sockaddr` produced by the kernel.
 
 #[cfg(unix)]
 use super::addr::SocketAddrUnix;
@@ -43,6 +43,11 @@ struct sockaddr_header {
     ss_family: u16,
 }
 
+/// Read the `ss_family` field from a socket address returned from the OS.
+///
+/// # Safety
+///
+/// `storage` must point to a valid socket address returned from the OS.
 #[inline]
 unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
     // Assert that we know the layout of `sockaddr`.
@@ -192,6 +197,11 @@ pub(crate) unsafe fn read_sockaddr(
     }
 }
 
+/// Read an optional socket address returned from the OS.
+///
+/// # Safety
+///
+/// `storage` must point to a valid socket address returned from the OS.
 pub(crate) unsafe fn maybe_read_sockaddr_os(
     storage: *const c::sockaddr_storage,
     len: usize,
@@ -209,6 +219,11 @@ pub(crate) unsafe fn maybe_read_sockaddr_os(
     }
 }
 
+/// Read a socket address returned from the OS.
+///
+/// # Safety
+///
+/// `storage` must point to a valid socket address returned from the OS.
 pub(crate) unsafe fn read_sockaddr_os(
     storage: *const c::sockaddr_storage,
     len: usize,

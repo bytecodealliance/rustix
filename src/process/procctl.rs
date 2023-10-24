@@ -230,7 +230,7 @@ bitflags! {
         /// The process is the root of the reaper tree (pid 1).
         const REALINIT = 2;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -494,12 +494,12 @@ const PROC_NO_NEW_PRIVS_CTL: c_int = 19;
 
 const PROC_NO_NEW_PRIVS_ENABLE: c_int = 1;
 
-/// Enable the `no_new_privs` mode that ignores SUID and SGID bits
-/// on `execve` in the specified process and its future descendants.
+/// Enable the `no_new_privs` mode that ignores SUID and SGID bits on `execve`
+/// in the specified process and its future descendants.
 ///
-/// This is similar to `set_no_new_privs` on Linux, with the exception
-/// that on FreeBSD there is no argument `no_new_privs` argument as it's
-/// only possible to enable this mode and there's no going back.
+/// This is similar to `set_no_new_privs` on Linux, with the exception that on
+/// FreeBSD there is no argument `no_new_privs` argument as it's only possible
+/// to enable this mode and there's no going back.
 ///
 /// # References
 ///  - [Linux: `prctl(PR_SET_NO_NEW_PRIVS,...)`]

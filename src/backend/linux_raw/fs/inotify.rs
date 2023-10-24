@@ -18,7 +18,7 @@ bitflags! {
         /// `IN_NONBLOCK`
         const NONBLOCK = linux_raw_sys::general::IN_NONBLOCK;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -75,7 +75,7 @@ bitflags! {
         /// `IN_ONLYDIR`
         const ONLYDIR = linux_raw_sys::general::IN_ONLYDIR;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }

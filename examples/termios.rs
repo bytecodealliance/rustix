@@ -28,7 +28,7 @@ fn main() -> std::io::Result<()> {
 
     tcsetattr(&tty, OptionalActions::Flush, &raw)?;
 
-    print!("Raw settings; press any key...");
+    print!("Raw settings; press any key…");
     std::io::stdout().flush()?;
     let mut buf = [0_u8];
     let _input = std::io::stdin().read(&mut buf)?;

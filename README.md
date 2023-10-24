@@ -55,28 +55,28 @@ building.
 The modules [`rustix::io`], [`rustix::fd`], and [`rustix::ffi`] are enabled
 by default. The rest of the API is conditional with cargo feature flags:
 
-| Name       | Description
-| ---------- | ---------------------
-| `event`    | [`rustix::event`]—Polling and event operations.
-| `fs`       | [`rustix::fs`]—Filesystem operations.
-| `io_uring` | [`rustix::io_uring`]—Linux io_uring.
-| `mm`       | [`rustix::mm`]—Memory map operations.
-| `mount`    | [`rustix::mount`]—Linux mount API.
-| `net`      | [`rustix::net`]—Network-related operations.
-| `param`    | [`rustix::param`]—Process parameters.
-| `pipe`     | [`rustix::pipe`]—Pipe operations.
-| `process`  | [`rustix::process`]—Process-associated operations.
-| `procfs`   | [`rustix::procfs`]—Utilities for reading `/proc` on Linux.
-| `pty`      | [`rustix::pty`]—Pseudoterminal operations.
-| `rand`     | [`rustix::rand`]—Random-related operations.
-| `shm`      | [`rustix::shm`]—POSIX shared memory.
-| `stdio`    | [`rustix::stdio`]—Stdio-related operations.
-| `system`   | [`rustix::system`]—System-related operations.
-| `termios`  | [`rustix::termios`]—Terminal I/O stream operations.
-| `thread`   | [`rustix::thread`]—Thread-associated operations.
-| `time`     | [`rustix::time`]—Time-related operations.
-|            |
-| `use-libc` | Enable the libc backend.
+| Name       | Description                                                    |
+| ---------- | -------------------------------------------------------------- |
+| `event`    | [`rustix::event`]—Polling and event operations.                |
+| `fs`       | [`rustix::fs`]—Filesystem operations.                          |
+| `io_uring` | [`rustix::io_uring`]—Linux io_uring.                           |
+| `mm`       | [`rustix::mm`]—Memory map operations.                          |
+| `mount`    | [`rustix::mount`]—Linux mount API.                             |
+| `net`      | [`rustix::net`]—Network-related operations.                    |
+| `param`    | [`rustix::param`]—Process parameters.                          |
+| `pipe`     | [`rustix::pipe`]—Pipe operations.                              |
+| `process`  | [`rustix::process`]—Process-associated operations.             |
+| `procfs`   | [`rustix::procfs`]—Utilities for reading `/proc` on Linux.     |
+| `pty`      | [`rustix::pty`]—Pseudoterminal operations.                     |
+| `rand`     | [`rustix::rand`]—Random-related operations.                    |
+| `shm`      | [`rustix::shm`]—POSIX shared memory.                           |
+| `stdio`    | [`rustix::stdio`]—Stdio-related operations.                    |
+| `system`   | [`rustix::system`]—System-related operations.                  |
+| `termios`  | [`rustix::termios`]—Terminal I/O stream operations.            |
+| `thread`   | [`rustix::thread`]—Thread-associated operations.               |
+| `time`     | [`rustix::time`]—Time-related operations.                      |
+|            |                                                                |
+| `use-libc` | Enable the libc backend.                                       |
 
 [`rustix::event`]: https://docs.rs/rustix/*/rustix/event/index.html
 [`rustix::fs`]: https://docs.rs/rustix/*/rustix/fs/index.html

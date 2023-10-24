@@ -21,7 +21,7 @@ bitflags! {
         /// `F_OK`
         const EXISTS = c::F_OK;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -77,7 +77,7 @@ bitflags! {
         #[cfg(all(target_os = "linux", target_env = "gnu"))]
         const STATX_DONT_SYNC = bitcast!(c::AT_STATX_DONT_SYNC);
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -151,7 +151,7 @@ bitflags! {
         #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const SVTX = c::S_ISVTX as RawMode;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -328,7 +328,7 @@ bitflags! {
         #[cfg(target_os = "freebsd")]
         const EMPTY_PATH = bitcast!(c::O_EMPTY_PATH);
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -347,7 +347,7 @@ bitflags! {
         /// `CLONE_NOOWNERCOPY`
         const NOOWNERCOPY = 2;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -392,7 +392,7 @@ bitflags! {
         /// `COPYFILE_ALL`
         const ALL = copyfile::ALL;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -423,7 +423,7 @@ bitflags! {
         /// `RESOLVE_CACHED` (since Linux 5.12)
         const CACHED = 0x20;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -445,7 +445,7 @@ bitflags! {
         /// `RENAME_WHITEOUT`
         const WHITEOUT = bitcast!(c::RENAME_WHITEOUT);
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -625,7 +625,7 @@ bitflags! {
         /// `MFD_HUGE_16GB`
         const HUGE_16GB = c::MFD_HUGE_16GB;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -652,7 +652,7 @@ bitflags! {
         #[cfg(linux_kernel)]
         const FUTURE_WRITE = bitcast!(c::F_SEAL_FUTURE_WRITE);
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -713,7 +713,7 @@ bitflags! {
         /// `STATX_ALL`
         const ALL = c::STATX_ALL;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -774,7 +774,7 @@ bitflags! {
         /// `STATX_ALL`
         const ALL = 0xfff;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -867,7 +867,7 @@ bitflags! {
         )))]
         const UNSHARE_RANGE = bitcast!(c::FALLOC_FL_UNSHARE_RANGE);
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -919,7 +919,7 @@ bitflags! {
         #[cfg(any(linux_kernel, target_os = "emscripten", target_os = "fuchsia"))]
         const SYNCHRONOUS = c::ST_SYNCHRONOUS as u64;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }

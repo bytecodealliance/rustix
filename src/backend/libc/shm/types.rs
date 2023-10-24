@@ -24,7 +24,7 @@ bitflags! {
         /// `O_TRUNC`
         const TRUNC = bitcast!(c::O_TRUNC);
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }

@@ -46,12 +46,15 @@ use bsd as platform;
 /// controlling their behavior, some of which are proprietary.
 ///
 /// This crate exposes many other `ioctl` interfaces with safe and idiomatic
-/// wrappers, like [`ioctl_fionbio`](crate::io::ioctl_fionbio) and
-/// [`ioctl_fionread`](crate::io::ioctl_fionread). It is recommended to use
-/// those instead of this function, as they are safer and more idiomatic.
-/// For other cases, implement the [`Ioctl`] API and pass it to this function.
+/// wrappers, like [`ioctl_fionbio`] and [`ioctl_fionread`]. It is recommended
+/// to use those instead of this function, as they are safer and more
+/// idiomatic. For other cases, implement the [`Ioctl`] API and pass it to this
+/// function.
 ///
 /// See documentation for [`Ioctl`] for more information.
+///
+/// [`ioctl_fionbio`]: crate::io::ioctl_fionbio
+/// [`ioctl_fionread`]: crate::io::ioctl_fionread
 ///
 /// # Safety
 ///

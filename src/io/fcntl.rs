@@ -1,10 +1,10 @@
-//! The Unix `fcntl` function is effectively lots of different functions
-//! hidden behind a single dynamic dispatch interface. In order to provide
-//! a type-safe API, rustix makes them all separate functions so that they
-//! can have dedicated static type signatures.
+//! The Unix `fcntl` function is effectively lots of different functions hidden
+//! behind a single dynamic dispatch interface. In order to provide a type-safe
+//! API, rustix makes them all separate functions so that they can have
+//! dedicated static type signatures.
 //!
-//! `fcntl` functions which are not specific to files or directories live
-//! in the [`io`] module instead.
+//! `fcntl` functions which are not specific to files or directories live in
+//! the [`io`] module instead.
 //!
 //! [`io`]: crate::io
 

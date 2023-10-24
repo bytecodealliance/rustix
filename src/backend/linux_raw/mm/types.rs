@@ -17,7 +17,7 @@ bitflags! {
         /// `PROT_EXEC`
         const EXEC = linux_raw_sys::general::PROT_EXEC;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -56,7 +56,7 @@ bitflags! {
         #[cfg(any(target_arch = "sparc", target_arch = "sparc64"))]
         const ADI = linux_raw_sys::general::PROT_ADI;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -106,7 +106,7 @@ bitflags! {
         #[cfg(not(any(target_arch = "mips", target_arch = "mips32r6", target_arch = "mips64", target_arch = "mips64r6")))]
         const UNINITIALIZED = linux_raw_sys::general::MAP_UNINITIALIZED;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -126,7 +126,7 @@ bitflags! {
         /// `MREMAP_DONTUNMAP` (since Linux 5.7)
         const DONTUNMAP = linux_raw_sys::general::MREMAP_DONTUNMAP;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -148,7 +148,7 @@ bitflags! {
         /// written).
         const INVALIDATE = linux_raw_sys::general::MS_INVALIDATE;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -163,7 +163,7 @@ bitflags! {
         /// `MLOCK_ONFAULT`
         const ONFAULT = linux_raw_sys::general::MLOCK_ONFAULT;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -258,7 +258,7 @@ bitflags! {
         /// `O_NONBLOCK`
         const NONBLOCK = linux_raw_sys::general::O_NONBLOCK;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
@@ -290,7 +290,7 @@ bitflags! {
         /// the process.
         const CURRENT = linux_raw_sys::general::MCL_CURRENT;
 
-        /// <https://docs.rs/bitflags/latest/bitflags/#externally-defined-flags>
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
 }
