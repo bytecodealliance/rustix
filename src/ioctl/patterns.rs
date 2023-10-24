@@ -6,6 +6,7 @@ use crate::backend::c;
 use crate::io::Result;
 
 use core::marker::PhantomData;
+use core::ptr::addr_of_mut;
 use core::{fmt, mem};
 
 /// Implements an `ioctl` with no real arguments.
@@ -144,7 +145,7 @@ unsafe impl<Opcode: CompileTimeOpcode, Input> Ioctl for Setter<Opcode, Input> {
     const OPCODE: self::Opcode = Opcode::OPCODE;
 
     fn as_ptr(&mut self) -> *mut c::c_void {
-        &mut self.input as *mut Input as *mut c::c_void
+        addr_of_mut!(self.input).cast::<c::c_void>()
     }
 
     unsafe fn output_from_ptr(_: IoctlOutput, _: *mut c::c_void) -> Result<Self::Output> {

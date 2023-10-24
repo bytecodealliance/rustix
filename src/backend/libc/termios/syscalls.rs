@@ -144,9 +144,9 @@ pub(crate) fn tcsetattr(
         // linux-raw-sys' ioctl-generation script for sparc isn't working yet,
         // so as a temporary workaround, declare these manually.
         #[cfg(any(target_arch = "sparc", target_arch = "sparc64"))]
-        const TCSETS: u32 = 0x80245409;
+        const TCSETS: u32 = 0x8024_5409;
         #[cfg(any(target_arch = "sparc", target_arch = "sparc64"))]
-        const TCSETS2: u32 = 0x802c540d;
+        const TCSETS2: u32 = 0x802c_540d;
 
         // Translate from `optional_actions` into an ioctl request code. On
         // MIPS, `optional_actions` already has `TCGETS` added to it.

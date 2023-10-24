@@ -129,7 +129,7 @@ fn test_floating_point_emulation_control() {
 
 #[cfg(feature = "thread")]
 pub(crate) fn thread_has_capability(capability: Capability) -> io::Result<bool> {
-    const _LINUX_CAPABILITY_VERSION_3: u32 = 0x20080522;
+    const _LINUX_CAPABILITY_VERSION_3: u32 = 0x2008_0522;
 
     #[repr(C)]
     struct cap_user_header_t {
