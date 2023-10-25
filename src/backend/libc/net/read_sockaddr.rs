@@ -289,10 +289,10 @@ unsafe fn inner_read_sockaddr_os(
                 assert_eq!(decode.sun_path[len - 1 - offsetof_sun_path], 0);
                 let path_bytes = &decode.sun_path[..len - 1 - offsetof_sun_path];
 
-                // FreeBSD sometimes sets the length to longer than the length
-                // of the NUL-terminated string. Find the NUL and truncate the
-                // string accordingly.
-                #[cfg(target_os = "freebsd")]
+                // FreeBSD and illumos sometimes set the length to longer than
+                // the length of the NUL-terminated string. Find the NUL and
+                // truncate the string accordingly.
+                #[cfg(any(solarish, target_os = "freebsd"))]
                 let path_bytes = &path_bytes[..path_bytes.iter().position(|b| *b == 0).unwrap()];
 
                 SocketAddrAny::Unix(
