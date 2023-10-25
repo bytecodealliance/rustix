@@ -905,6 +905,34 @@ pub(crate) fn connect_unix(fd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Res
 }
 
 #[inline]
+pub(crate) fn connect_unspec(fd: BorrowedFd<'_>) -> io::Result<()> {
+    debug_assert_eq!(c::AF_UNSPEC, 0);
+    let addr = MaybeUninit::<c::sockaddr_storage>::zeroed();
+
+    #[cfg(not(target_arch = "x86"))]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_connect,
+            fd,
+            by_ref(&addr),
+            size_of::<c::sockaddr_storage, _>()
+        ))
+    }
+    #[cfg(target_arch = "x86")]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_socketcall,
+            x86_sys(SYS_CONNECT),
+            slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
+                fd.into(),
+                by_ref(&addr),
+                size_of::<c::sockaddr_storage, _>(),
+            ])
+        ))
+    }
+}
+
+#[inline]
 pub(crate) fn listen(fd: BorrowedFd<'_>, backlog: c::c_int) -> io::Result<()> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {

@@ -249,6 +249,19 @@ pub(crate) fn connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io:
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub(crate) fn connect_unspec(sockfd: BorrowedFd<'_>) -> io::Result<()> {
+    debug_assert_eq!(c::AF_UNSPEC, 0);
+    let addr = MaybeUninit::<c::sockaddr_storage>::zeroed();
+    unsafe {
+        ret(c::connect(
+            borrowed_fd(sockfd),
+            as_ptr(&addr).cast(),
+            size_of::<c::sockaddr_storage>() as c::socklen_t,
+        ))
+    }
+}
+
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn listen(sockfd: BorrowedFd<'_>, backlog: c::c_int) -> io::Result<()> {
     unsafe { ret(c::listen(borrowed_fd(sockfd), backlog)) }
 }
