@@ -84,7 +84,7 @@ fn getsockopt<T: Copy>(fd: BorrowedFd<'_>, level: i32, optname: i32) -> io::Resu
         "Socket APIs don't ever use `bool` directly"
     );
 
-    let mut value = MaybeUninit::<T>::uninit();
+    let mut value = MaybeUninit::<T>::zeroed();
     getsockopt_raw(fd, level, optname, &mut value, &mut optlen)?;
 
     // On Windows at least, `getsockopt` has been observed writing 1
