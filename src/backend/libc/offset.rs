@@ -232,25 +232,6 @@ pub(super) use c::{preadv64 as libc_preadv, pwritev64 as libc_pwritev};
 mod readwrite_pv64 {
     use super::c;
 
-    // 64-bit offsets on 32-bit platforms are passed in endianness-specific
-    // lo/hi pairs. See src/backend/linux_raw/conv.rs for details.
-    #[cfg(all(target_endian = "little", target_pointer_width = "32"))]
-    fn lo(x: u64) -> usize {
-        (x >> 32) as usize
-    }
-    #[cfg(all(target_endian = "little", target_pointer_width = "32"))]
-    fn hi(x: u64) -> usize {
-        (x & 0xffff_ffff) as usize
-    }
-    #[cfg(all(target_endian = "big", target_pointer_width = "32"))]
-    fn lo(x: u64) -> usize {
-        (x & 0xffff_ffff) as usize
-    }
-    #[cfg(all(target_endian = "big", target_pointer_width = "32"))]
-    fn hi(x: u64) -> usize {
-        (x >> 32) as usize
-    }
-
     pub(in super::super) unsafe fn preadv64(
         fd: c::c_int,
         iov: *const c::iovec,
@@ -267,21 +248,14 @@ mod readwrite_pv64 {
         if let Some(fun) = preadv64.get() {
             fun(fd, iov, iovcnt, offset)
         } else {
-            #[cfg(target_pointer_width = "32")]
-            {
-                c::syscall(
-                    c::SYS_preadv,
-                    fd,
-                    iov,
-                    iovcnt,
-                    hi(offset as u64),
-                    lo(offset as u64),
-                ) as c::ssize_t
-            }
-            #[cfg(target_pointer_width = "64")]
-            {
-                c::syscall(c::SYS_preadv, fd, iov, iovcnt, offset) as c::ssize_t
-            }
+            c::syscall(
+                c::SYS_preadv,
+                fd,
+                iov,
+                iovcnt,
+                offset as usize,
+                (offset >> 32) as usize,
+            ) as c::ssize_t
         }
     }
     pub(in super::super) unsafe fn pwritev64(
@@ -297,21 +271,14 @@ mod readwrite_pv64 {
         if let Some(fun) = pwritev64.get() {
             fun(fd, iov, iovcnt, offset)
         } else {
-            #[cfg(target_pointer_width = "32")]
-            {
-                c::syscall(
-                    c::SYS_pwritev,
-                    fd,
-                    iov,
-                    iovcnt,
-                    hi(offset as u64),
-                    lo(offset as u64),
-                ) as c::ssize_t
-            }
-            #[cfg(target_pointer_width = "64")]
-            {
-                c::syscall(c::SYS_pwritev, fd, iov, iovcnt, offset) as c::ssize_t
-            }
+            c::syscall(
+                c::SYS_pwritev,
+                fd,
+                iov,
+                iovcnt,
+                offset as usize,
+                (offset >> 32) as usize,
+            ) as c::ssize_t
         }
     }
 }
@@ -347,25 +314,6 @@ pub(super) use readwrite_pv::{preadv as libc_preadv, pwritev as libc_pwritev};
 mod readwrite_pv64v2 {
     use super::c;
 
-    // 64-bit offsets on 32-bit platforms are passed in endianness-specific
-    // lo/hi pairs. See src/backend/linux_raw/conv.rs for details.
-    #[cfg(all(target_endian = "little", target_pointer_width = "32"))]
-    fn lo(x: u64) -> usize {
-        (x >> 32) as usize
-    }
-    #[cfg(all(target_endian = "little", target_pointer_width = "32"))]
-    fn hi(x: u64) -> usize {
-        (x & 0xffff_ffff) as usize
-    }
-    #[cfg(all(target_endian = "big", target_pointer_width = "32"))]
-    fn lo(x: u64) -> usize {
-        (x & 0xffff_ffff) as usize
-    }
-    #[cfg(all(target_endian = "big", target_pointer_width = "32"))]
-    fn hi(x: u64) -> usize {
-        (x >> 32) as usize
-    }
-
     pub(in super::super) unsafe fn preadv64v2(
         fd: c::c_int,
         iov: *const c::iovec,
@@ -383,22 +331,15 @@ mod readwrite_pv64v2 {
         if let Some(fun) = preadv64v2.get() {
             fun(fd, iov, iovcnt, offset, flags)
         } else {
-            #[cfg(target_pointer_width = "32")]
-            {
-                c::syscall(
-                    c::SYS_preadv,
-                    fd,
-                    iov,
-                    iovcnt,
-                    hi(offset as u64),
-                    lo(offset as u64),
-                    flags,
-                ) as c::ssize_t
-            }
-            #[cfg(target_pointer_width = "64")]
-            {
-                c::syscall(c::SYS_preadv2, fd, iov, iovcnt, offset, flags) as c::ssize_t
-            }
+            c::syscall(
+                c::SYS_preadv,
+                fd,
+                iov,
+                iovcnt,
+                offset as usize,
+                (offset >> 32) as usize,
+                flags,
+            ) as c::ssize_t
         }
     }
     pub(in super::super) unsafe fn pwritev64v2(
@@ -415,22 +356,15 @@ mod readwrite_pv64v2 {
         if let Some(fun) = pwritev64v2.get() {
             fun(fd, iov, iovcnt, offset, flags)
         } else {
-            #[cfg(target_pointer_width = "32")]
-            {
-                c::syscall(
-                    c::SYS_pwritev,
-                    fd,
-                    iov,
-                    iovcnt,
-                    hi(offset as u64),
-                    lo(offset as u64),
-                    flags,
-                ) as c::ssize_t
-            }
-            #[cfg(target_pointer_width = "64")]
-            {
-                c::syscall(c::SYS_pwritev2, fd, iov, iovcnt, offset, flags) as c::ssize_t
-            }
+            c::syscall(
+                c::SYS_pwritev,
+                fd,
+                iov,
+                iovcnt,
+                offset as usize,
+                (offset >> 32) as usize,
+                flags,
+            ) as c::ssize_t
         }
     }
 }

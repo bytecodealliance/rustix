@@ -126,6 +126,8 @@
 // Redox and WASI have enough differences that it isn't worth
 // precisely conditionallizing all the `use`s for them.
 #![cfg_attr(any(target_os = "redox", target_os = "wasi"), allow(unused_imports))]
+// On the release branch, don't worry about unused-import warnings.
+#![allow(unused_imports)]
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
