@@ -117,6 +117,8 @@
 )]
 #![cfg_attr(asm_experimental_arch, feature(asm_experimental_arch))]
 #![cfg_attr(not(feature = "all-apis"), allow(dead_code))]
+// On the release branch, don't worry about unused-import warnings.
+#![allow(unused_imports)]
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
 extern crate alloc;
