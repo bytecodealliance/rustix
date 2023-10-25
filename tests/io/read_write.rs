@@ -321,17 +321,22 @@ fn test_p_offsets() {
             Ok(_) => panic!("pwrite unexpectedly succeeded"),
             Err(e) => panic!("pwrite failed with an unexpected error: {:?}", e),
         }
-        match preadv(&f, &mut [IoSliceMut::new(&mut buf)], invalid_offset) {
-            Err(rustix::io::Errno::OPNOTSUPP | rustix::io::Errno::NOSYS) => {}
-            Err(rustix::io::Errno::INVAL) => {}
-            Ok(_) => panic!("preadv unexpectedly succeeded"),
-            Err(e) => panic!("preadv failed with an unexpected error: {:?}", e),
-        }
-        match pwritev(&f, &[IoSlice::new(&buf)], invalid_offset) {
-            Err(rustix::io::Errno::OPNOTSUPP | rustix::io::Errno::NOSYS) => {}
-            Err(rustix::io::Errno::INVAL) => {}
-            Ok(_) => panic!("pwritev unexpectedly succeeded"),
-            Err(e) => panic!("pwritev failed with an unexpected error: {:?}", e),
+        // illumos doesn't seem to diagnose a negative offset in
+        // `preadv`/`pwritev`.
+        #[cfg(not(target_os = "illumos"))]
+        {
+            match preadv(&f, &mut [IoSliceMut::new(&mut buf)], invalid_offset) {
+                Err(rustix::io::Errno::OPNOTSUPP | rustix::io::Errno::NOSYS) => {}
+                Err(rustix::io::Errno::INVAL) => {}
+                Ok(_) => panic!("preadv unexpectedly succeeded"),
+                Err(e) => panic!("preadv failed with an unexpected error: {:?}", e),
+            }
+            match pwritev(&f, &[IoSlice::new(&buf)], invalid_offset) {
+                Err(rustix::io::Errno::OPNOTSUPP | rustix::io::Errno::NOSYS) => {}
+                Err(rustix::io::Errno::INVAL) => {}
+                Ok(_) => panic!("pwritev unexpectedly succeeded"),
+                Err(e) => panic!("pwritev failed with an unexpected error: {:?}", e),
+            }
         }
         #[cfg(linux_kernel)]
         {

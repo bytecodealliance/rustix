@@ -216,7 +216,7 @@ fn test_sockopts_tcp(s: &OwnedFd) {
         // Set keepalive values:
         sockopt::set_tcp_keepcnt(&s, 42).unwrap();
         sockopt::set_tcp_keepidle(&s, Duration::from_secs(3601)).unwrap();
-        sockopt::set_tcp_keepintvl(&s, Duration::from_secs(61)).unwrap();
+        sockopt::set_tcp_keepintvl(&s, Duration::from_secs(60)).unwrap();
 
         // Check keepalive values:
         assert_eq!(sockopt::get_tcp_keepcnt(&s).unwrap(), 42);
@@ -226,8 +226,17 @@ fn test_sockopts_tcp(s: &OwnedFd) {
         );
         assert_eq!(
             sockopt::get_tcp_keepintvl(&s).unwrap(),
-            Duration::from_secs(61)
+            Duration::from_secs(60)
         );
+
+        #[cfg(not(target_os = "illumos"))]
+        {
+            sockopt::set_tcp_keepintvl(&s, Duration::from_secs(61)).unwrap();
+            assert_eq!(
+                sockopt::get_tcp_keepintvl(&s).unwrap(),
+                Duration::from_secs(61)
+            );
+        }
     }
 
     // Check the initial value of TCP_QUICKACK, set it, and check it.
