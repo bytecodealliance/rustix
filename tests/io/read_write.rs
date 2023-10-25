@@ -118,3 +118,163 @@ fn test_readwrite() {
     read(&foo, &mut buf).unwrap();
     assert_eq!(&buf, b"world");
 }
+
+#[cfg(linux_kernel)]
+#[cfg(all(feature = "net", feature = "pipe"))]
+#[test]
+fn test_preadv2_nowait() {
+    use rustix::io::{preadv2, ReadWriteFlags};
+    use rustix::net::{socketpair, AddressFamily, SocketFlags, SocketType};
+    use rustix::pipe::pipe;
+
+    let mut buf = [0_u8; 5];
+
+    let (reader, _writer) = socketpair(
+        AddressFamily::UNIX,
+        SocketType::STREAM,
+        SocketFlags::CLOEXEC,
+        None,
+    )
+    .unwrap();
+    match preadv2(
+        &reader,
+        &mut [IoSliceMut::new(&mut buf)],
+        u64::MAX,
+        ReadWriteFlags::NOWAIT,
+    ) {
+        Err(rustix::io::Errno::OPNOTSUPP) | Err(rustix::io::Errno::NOSYS) => {}
+        Err(rustix::io::Errno::AGAIN) => {}
+        Ok(_) => panic!("preadv2 unexpectedly succeeded"),
+        Err(e) => panic!("preadv2 failed with an unexpected error: {:?}", e),
+    }
+
+    let (reader, _writer) = pipe().unwrap();
+    match preadv2(
+        &reader,
+        &mut [IoSliceMut::new(&mut buf)],
+        u64::MAX,
+        ReadWriteFlags::NOWAIT,
+    ) {
+        Err(rustix::io::Errno::OPNOTSUPP) | Err(rustix::io::Errno::NOSYS) => {}
+        Err(rustix::io::Errno::AGAIN) => {}
+        Ok(_) => panic!("preadv2 unexpectedly succeeded"),
+        Err(e) => panic!("preadv2 failed with an unexpected error: {:?}", e),
+    }
+}
+
+#[cfg(feature = "net")]
+#[cfg(not(target_os = "espidf"))] // no preadv/pwritev
+#[cfg(not(target_os = "solaris"))] // no preadv/pwritev
+#[cfg(not(target_os = "haiku"))] // no preadv/pwritev
+#[test]
+fn test_p_offsets() {
+    use rustix::fs::{cwd, openat, Mode, OFlags};
+    use rustix::io::{pread, preadv, pwrite, pwritev};
+    #[cfg(linux_kernel)]
+    use rustix::io::{preadv2, pwritev2, ReadWriteFlags};
+
+    let mut buf = [0_u8; 5];
+
+    let tmp = tempfile::tempdir().unwrap();
+    let f = openat(
+        cwd(),
+        tmp.path().join("file"),
+        OFlags::RDWR | OFlags::CREATE | OFlags::TRUNC,
+        Mode::RUSR | Mode::WUSR,
+    )
+    .unwrap();
+
+    // Test that offset 0 works.
+    match pread(&f, &mut buf, 0_u64) {
+        Err(rustix::io::Errno::OPNOTSUPP) | Err(rustix::io::Errno::NOSYS) => {}
+        Ok(_) => {}
+        Err(e) => panic!("pread failed with an unexpected error: {:?}", e),
+    }
+    match pwrite(&f, &buf, 0_u64) {
+        Err(rustix::io::Errno::OPNOTSUPP) | Err(rustix::io::Errno::NOSYS) => {}
+        Ok(_) => {}
+        Err(e) => panic!("pwrite failed with an unexpected error: {:?}", e),
+    }
+    match preadv(&f, &mut [IoSliceMut::new(&mut buf)], 0_u64) {
+        Err(rustix::io::Errno::OPNOTSUPP) | Err(rustix::io::Errno::NOSYS) => {}
+        Ok(_) => {}
+        Err(e) => panic!("preadv failed with an unexpected error: {:?}", e),
+    }
+    match pwritev(&f, &[IoSlice::new(&buf)], 0_u64) {
+        Err(rustix::io::Errno::OPNOTSUPP) | Err(rustix::io::Errno::NOSYS) => {}
+        Ok(_) => {}
+        Err(e) => panic!("pwritev failed with an unexpected error: {:?}", e),
+    }
+    #[cfg(linux_kernel)]
+    {
+        match preadv2(
+            &f,
+            &mut [IoSliceMut::new(&mut buf)],
+            0_u64,
+            ReadWriteFlags::empty(),
+        ) {
+            Err(rustix::io::Errno::OPNOTSUPP) | Err(rustix::io::Errno::NOSYS) => {}
+            Ok(_) => {}
+            Err(e) => panic!("preadv2 failed with an unexpected error: {:?}", e),
+        }
+        match pwritev2(&f, &[IoSlice::new(&buf)], 0_u64, ReadWriteFlags::empty()) {
+            Err(rustix::io::Errno::OPNOTSUPP) | Err(rustix::io::Errno::NOSYS) => {}
+            Ok(_) => {}
+            Err(e) => panic!("pwritev2 failed with an unexpected error: {:?}", e),
+        }
+    }
+
+    // Test that negative offsets fail with `INVAL`.
+    for invalid_offset in &[i32::MIN as u64, !1 as u64, i64::MIN as u64] {
+        let invalid_offset = *invalid_offset;
+        match pread(&f, &mut buf, invalid_offset) {
+            Err(rustix::io::Errno::OPNOTSUPP) | Err(rustix::io::Errno::NOSYS) => {}
+            Err(rustix::io::Errno::INVAL) => {}
+            Ok(_) => panic!("pread unexpectedly succeeded"),
+            Err(e) => panic!("pread failed with an unexpected error: {:?}", e),
+        }
+        match pwrite(&f, &buf, invalid_offset) {
+            Err(rustix::io::Errno::OPNOTSUPP) | Err(rustix::io::Errno::NOSYS) => {}
+            Err(rustix::io::Errno::INVAL) => {}
+            Ok(_) => panic!("pwrite unexpectedly succeeded"),
+            Err(e) => panic!("pwrite failed with an unexpected error: {:?}", e),
+        }
+        match preadv(&f, &mut [IoSliceMut::new(&mut buf)], invalid_offset) {
+            Err(rustix::io::Errno::OPNOTSUPP) | Err(rustix::io::Errno::NOSYS) => {}
+            Err(rustix::io::Errno::INVAL) => {}
+            Ok(_) => panic!("preadv unexpectedly succeeded"),
+            Err(e) => panic!("preadv failed with an unexpected error: {:?}", e),
+        }
+        match pwritev(&f, &[IoSlice::new(&buf)], invalid_offset) {
+            Err(rustix::io::Errno::OPNOTSUPP) | Err(rustix::io::Errno::NOSYS) => {}
+            Err(rustix::io::Errno::INVAL) => {}
+            Ok(_) => panic!("pwritev unexpectedly succeeded"),
+            Err(e) => panic!("pwritev failed with an unexpected error: {:?}", e),
+        }
+        #[cfg(linux_kernel)]
+        {
+            match preadv2(
+                &f,
+                &mut [IoSliceMut::new(&mut buf)],
+                invalid_offset,
+                ReadWriteFlags::empty(),
+            ) {
+                Err(rustix::io::Errno::OPNOTSUPP) | Err(rustix::io::Errno::NOSYS) => {}
+                Err(rustix::io::Errno::INVAL) => {}
+                Ok(_) => panic!("preadv2 unexpectedly succeeded"),
+                Err(e) => panic!("preadv2 failed with an unexpected error: {:?}", e),
+            }
+            match pwritev2(
+                &f,
+                &[IoSlice::new(&buf)],
+                invalid_offset,
+                ReadWriteFlags::empty(),
+            ) {
+                Err(rustix::io::Errno::OPNOTSUPP) | Err(rustix::io::Errno::NOSYS) => {}
+                Err(rustix::io::Errno::INVAL) => {}
+                Ok(_) => panic!("pwritev2 unexpectedly succeeded"),
+                Err(e) => panic!("pwritev2 failed with an unexpected error: {:?}", e),
+            }
+        }
+    }
+}
