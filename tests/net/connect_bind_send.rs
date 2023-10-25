@@ -194,6 +194,72 @@ fn net_v6_connect() {
     assert_eq!(request, &response[..n]);
 }
 
+/// Test `connect_unspec`.
+#[test]
+fn net_v4_connect_unspec() {
+    const SOME_PORT: u16 = 47;
+    let localhost_addr = SocketAddrV4::new(Ipv4Addr::LOCALHOST, SOME_PORT);
+
+    let socket = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
+
+    rustix::net::connect_v4(&socket, &localhost_addr).expect("connect_v4");
+    let peer = getpeername_v4(&socket).unwrap();
+    assert_eq!(peer.ip().to_owned(), Ipv4Addr::LOCALHOST);
+
+    match rustix::net::connect_unspec(&socket) {
+        #[cfg(apple)]
+        Err(rustix::io::Errno::INVAL) => {} // Apple platforms return an error even when the call succeeded.
+        r => r.expect("connect_unspec"),
+    }
+    let peer_result = getpeername_v4(&socket);
+    assert_eq!(peer_result, Err(rustix::io::Errno::NOTCONN));
+
+    rustix::net::connect_v4(&socket, &localhost_addr).expect("connect_v4");
+    let peer = getpeername_v4(&socket).unwrap();
+    assert_eq!(peer.ip().to_owned(), Ipv4Addr::LOCALHOST);
+
+    fn getpeername_v4<Fd: rustix::fd::AsFd>(sockfd: Fd) -> rustix::io::Result<SocketAddrV4> {
+        match rustix::net::getpeername(sockfd)? {
+            Some(SocketAddrAny::V4(addr_v4)) => Ok(addr_v4),
+            None => Err(rustix::io::Errno::NOTCONN),
+            _ => Err(rustix::io::Errno::AFNOSUPPORT),
+        }
+    }
+}
+
+/// Test `connect_unspec`.
+#[test]
+fn net_v6_connect_unspec() {
+    const SOME_PORT: u16 = 47;
+    let localhost_addr = SocketAddrV6::new(Ipv6Addr::LOCALHOST, SOME_PORT, 0, 0);
+
+    let socket = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
+
+    rustix::net::connect_v6(&socket, &localhost_addr).expect("connect_v6");
+    let peer = getpeername_v6(&socket).unwrap();
+    assert_eq!(peer.ip().to_owned(), Ipv6Addr::LOCALHOST);
+
+    match rustix::net::connect_unspec(&socket) {
+        #[cfg(apple)]
+        Err(rustix::io::Errno::AFNOSUPPORT) => {} // Apple platforms return an error even when the call succeeded.
+        r => r.expect("connect_unspec"),
+    }
+    let peer_result = getpeername_v6(&socket);
+    assert_eq!(peer_result, Err(rustix::io::Errno::NOTCONN));
+
+    rustix::net::connect_v6(&socket, &localhost_addr).expect("connect_v6");
+    let peer = getpeername_v6(&socket).unwrap();
+    assert_eq!(peer.ip().to_owned(), Ipv6Addr::LOCALHOST);
+
+    fn getpeername_v6<Fd: rustix::fd::AsFd>(sockfd: Fd) -> rustix::io::Result<SocketAddrV6> {
+        match rustix::net::getpeername(sockfd)? {
+            Some(SocketAddrAny::V6(addr_v6)) => Ok(addr_v6),
+            None => Err(rustix::io::Errno::NOTCONN),
+            _ => Err(rustix::io::Errno::AFNOSUPPORT),
+        }
+    }
+}
+
 /// Test `bind_any`.
 #[test]
 fn net_v4_bind_any() {

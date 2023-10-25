@@ -453,6 +453,39 @@ pub fn connect_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<(
     backend::net::syscalls::connect_unix(sockfd.as_fd(), addr)
 }
 
+/// `connect(sockfd, {.sa_family = AF_UNSPEC}, sizeof(struct sockaddr))`
+/// — Dissolve the socket's association.
+///
+/// # References
+///  - [Beej's Guide to Network Programming]
+///  - [POSIX]
+///  - [Linux]
+///  - [Apple]
+///  - [Winsock2]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
+///
+/// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html#connect
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/connect.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/connect.2.html
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=connect&sektion=2
+/// [NetBSD]: https://man.netbsd.org/connect.2
+/// [OpenBSD]: https://man.openbsd.org/connect.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=connect&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/connect
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Connecting.html
+#[inline]
+#[doc(alias = "connect")]
+pub fn connect_unspec<Fd: AsFd>(sockfd: Fd) -> io::Result<()> {
+    backend::net::syscalls::connect_unspec(sockfd.as_fd())
+}
+
 /// `listen(fd, backlog)`—Enables listening for incoming connections.
 ///
 /// # References

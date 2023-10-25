@@ -101,3 +101,38 @@ unsafe fn write_sockaddr_unix(unix: &SocketAddrUnix, storage: *mut SocketAddrSto
     core::ptr::write(storage.cast(), unix.unix);
     unix.len()
 }
+
+/// Even though an AF_UNSPEC socket address contains only the family, they're
+/// still required to be at least as big as the socket's regular address structure.
+/// We (ab)use `sockaddr_in6` to push the size up to satisfy both IPv4 and IPv6 sockets.
+pub(crate) fn encode_sockaddr_unspec() -> c::sockaddr_in6 {
+    #[cfg(any(
+        bsd,
+        target_os = "aix",
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "nto",
+        target_os = "vita"
+    ))]
+    {
+        sockaddr_in6_new(
+            size_of::<c::sockaddr_in6>() as _,
+            c::AF_UNSPEC as _,
+            0,
+            0,
+            in6_addr_new([0; 16]),
+            0,
+        )
+    }
+    #[cfg(not(any(
+        bsd,
+        target_os = "aix",
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "nto",
+        target_os = "vita"
+    )))]
+    {
+        sockaddr_in6_new(c::AF_UNSPEC as _, 0, 0, in6_addr_new([0; 16]), 0)
+    }
+}

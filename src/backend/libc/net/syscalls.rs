@@ -25,7 +25,7 @@ use {
 use {
     super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr_os},
     super::send_recv::{RecvFlags, SendFlags},
-    super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6},
+    super::write_sockaddr::{encode_sockaddr_unspec, encode_sockaddr_v4, encode_sockaddr_v6},
     crate::net::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType},
     core::ptr::null_mut,
 };
@@ -244,6 +244,26 @@ pub(crate) fn connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io:
             borrowed_fd(sockfd),
             as_ptr(&addr.unix).cast(),
             addr.addr_len(),
+        ))
+    }
+}
+
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub(crate) fn connect_unspec(sockfd: BorrowedFd<'_>) -> io::Result<()> {
+    #[cfg(bsd)]
+    unsafe {
+        ret(c::connect(
+            borrowed_fd(sockfd),
+            as_ptr(&encode_sockaddr_unspec()).cast(),
+            0,
+        ))
+    }
+    #[cfg(not(bsd))]
+    unsafe {
+        ret(c::connect(
+            borrowed_fd(sockfd),
+            as_ptr(&encode_sockaddr_unspec()).cast(),
+            size_of::<c::sockaddr_in6>() as c::socklen_t,
         ))
     }
 }

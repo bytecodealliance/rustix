@@ -58,3 +58,18 @@ unsafe fn write_sockaddr_unix(unix: &SocketAddrUnix, storage: *mut SocketAddrSto
     core::ptr::write(storage.cast(), unix.unix);
     unix.len()
 }
+
+/// Even though an AF_UNSPEC socket address contains only the family, they're
+/// still required to be at least as big as the socket's regular address structure.
+/// We (ab)use `sockaddr_in6` to push the size up to satisfy both IPv4 and IPv6 sockets.
+pub(crate) fn encode_sockaddr_unspec() -> c::sockaddr_in6 {
+    c::sockaddr_in6 {
+        sin6_family: c::AF_UNSPEC as _,
+        sin6_port: 0,
+        sin6_flowinfo: 0,
+        sin6_addr: c::in6_addr {
+            in6_u: linux_raw_sys::net::in6_addr__bindgen_ty_1 { u6_addr8: [0; 16] },
+        },
+        sin6_scope_id: 0,
+    }
+}

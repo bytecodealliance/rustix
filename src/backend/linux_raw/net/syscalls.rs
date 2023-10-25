@@ -10,7 +10,7 @@ use super::msghdr::{
 };
 use super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr_os};
 use super::send_recv::{RecvFlags, SendFlags};
-use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
+use super::write_sockaddr::{encode_sockaddr_unspec, encode_sockaddr_v4, encode_sockaddr_v6};
 use crate::backend::c;
 use crate::backend::conv::{
     by_mut, by_ref, c_int, c_uint, ret, ret_owned_fd, ret_usize, size_of, slice, slice_mut,
@@ -899,6 +899,31 @@ pub(crate) fn connect_unix(fd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Res
                 fd.into(),
                 by_ref(&addr.unix),
                 socklen_t(addr.addr_len()),
+            ])
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn connect_unspec(fd: BorrowedFd<'_>) -> io::Result<()> {
+    #[cfg(not(target_arch = "x86"))]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_connect,
+            fd,
+            by_ref(&encode_sockaddr_unspec()),
+            size_of::<sockaddr_in6, _>()
+        ))
+    }
+    #[cfg(target_arch = "x86")]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_socketcall,
+            x86_sys(SYS_CONNECT),
+            slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
+                fd.into(),
+                by_ref(&encode_sockaddr_unspec()),
+                size_of::<sockaddr_in6, _>(),
             ])
         ))
     }
