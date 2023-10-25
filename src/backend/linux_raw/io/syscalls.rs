@@ -14,8 +14,8 @@ use crate::backend::conv::loff_t_from_u64;
 ))]
 use crate::backend::conv::zero;
 use crate::backend::conv::{
-    c_uint, raw_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd, ret_usize, slice,
-    slice_mut,
+    c_uint, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd,
+    ret_usize, slice, slice_mut,
 };
 #[cfg(target_pointer_width = "32")]
 use crate::backend::conv::{hi, lo};
@@ -96,25 +96,16 @@ pub(crate) fn preadv(
 ) -> io::Result<usize> {
     let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), MAX_IOV)]);
 
-    #[cfg(target_pointer_width = "32")]
+    // Unlike the plain "p" functions, the "pv" functions pass their offset in
+    // an endian-independent way, and always in two registers.
     unsafe {
         ret_usize(syscall!(
             __NR_preadv,
             fd,
             bufs_addr,
             bufs_len,
-            hi(pos),
-            lo(pos)
-        ))
-    }
-    #[cfg(target_pointer_width = "64")]
-    unsafe {
-        ret_usize(syscall!(
-            __NR_preadv,
-            fd,
-            bufs_addr,
-            bufs_len,
-            loff_t_from_u64(pos)
+            pass_usize(pos as usize),
+            pass_usize((pos >> 32) as usize)
         ))
     }
 }
@@ -128,26 +119,16 @@ pub(crate) fn preadv2(
 ) -> io::Result<usize> {
     let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), MAX_IOV)]);
 
-    #[cfg(target_pointer_width = "32")]
+    // Unlike the plain "p" functions, the "pv" functions pass their offset in
+    // an endian-independent way, and always in two registers.
     unsafe {
         ret_usize(syscall!(
             __NR_preadv2,
             fd,
             bufs_addr,
             bufs_len,
-            hi(pos),
-            lo(pos),
-            flags
-        ))
-    }
-    #[cfg(target_pointer_width = "64")]
-    unsafe {
-        ret_usize(syscall!(
-            __NR_preadv2,
-            fd,
-            bufs_addr,
-            bufs_len,
-            loff_t_from_u64(pos),
+            pass_usize(pos as usize),
+            pass_usize((pos >> 32) as usize),
             flags
         ))
     }
@@ -217,25 +198,16 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>]) -> io::Result<usi
 pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>], pos: u64) -> io::Result<usize> {
     let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), MAX_IOV)]);
 
-    #[cfg(target_pointer_width = "32")]
+    // Unlike the plain "p" functions, the "pv" functions pass their offset in
+    // an endian-independent way, and always in two registers.
     unsafe {
         ret_usize(syscall_readonly!(
             __NR_pwritev,
             fd,
             bufs_addr,
             bufs_len,
-            hi(pos),
-            lo(pos)
-        ))
-    }
-    #[cfg(target_pointer_width = "64")]
-    unsafe {
-        ret_usize(syscall_readonly!(
-            __NR_pwritev,
-            fd,
-            bufs_addr,
-            bufs_len,
-            loff_t_from_u64(pos)
+            pass_usize(pos as usize),
+            pass_usize((pos >> 32) as usize)
         ))
     }
 }
@@ -249,26 +221,16 @@ pub(crate) fn pwritev2(
 ) -> io::Result<usize> {
     let (bufs_addr, bufs_len) = slice(&bufs[..cmp::min(bufs.len(), MAX_IOV)]);
 
-    #[cfg(target_pointer_width = "32")]
+    // Unlike the plain "p" functions, the "pv" functions pass their offset in
+    // an endian-independent way, and always in two registers.
     unsafe {
         ret_usize(syscall_readonly!(
             __NR_pwritev2,
             fd,
             bufs_addr,
             bufs_len,
-            hi(pos),
-            lo(pos),
-            flags
-        ))
-    }
-    #[cfg(target_pointer_width = "64")]
-    unsafe {
-        ret_usize(syscall_readonly!(
-            __NR_pwritev2,
-            fd,
-            bufs_addr,
-            bufs_len,
-            loff_t_from_u64(pos),
+            pass_usize(pos as usize),
+            pass_usize((pos >> 32) as usize),
             flags
         ))
     }

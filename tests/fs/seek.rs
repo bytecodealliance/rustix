@@ -58,3 +58,22 @@ fn test_seek_holes() {
         Ok(hole_size * 2)
     );
 }
+
+#[test]
+fn test_seek_offsets() {
+    use rustix::fs::{openat, seek, Mode, OFlags, SeekFrom, CWD};
+
+    let f = openat(CWD, "Cargo.toml", OFlags::RDONLY, Mode::empty()).unwrap();
+
+    match seek(&f, SeekFrom::Start(0)) {
+        Ok(_) => {}
+        Err(e) => panic!("seek failed with an unexpected error: {:?}", e),
+    }
+    for invalid_offset in [i32::MIN as u64, !1 as u64, i64::MIN as u64] {
+        match seek(&f, SeekFrom::Start(invalid_offset)) {
+            Err(rustix::io::Errno::INVAL) => {}
+            Ok(_) => panic!("seek unexpectedly succeeded"),
+            Err(e) => panic!("seek failed with an unexpected error: {:?}", e),
+        }
+    }
+}
