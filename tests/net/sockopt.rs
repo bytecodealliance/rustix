@@ -205,11 +205,17 @@ fn test_sockopts_tcp(s: &OwnedFd) {
         assert!(sockopt::get_tcp_keepintvl(&s).is_ok());
     }
 
-    // Set the nodelay flag;
+    // Set the nodelay flag.
     sockopt::set_tcp_nodelay(&s, true).unwrap();
 
     // Check that the nodelay flag is set.
     assert!(sockopt::get_tcp_nodelay(&s).unwrap());
+
+    // Clear the nodelay flag.
+    sockopt::set_tcp_nodelay(&s, false).unwrap();
+
+    // Check that the nodelay flag is cleared.
+    assert!(!sockopt::get_tcp_nodelay(&s).unwrap());
 
     #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
     {
