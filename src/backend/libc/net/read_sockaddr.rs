@@ -167,10 +167,10 @@ pub(crate) unsafe fn read_sockaddr(
                 // Otherwise we expect a NUL-terminated filesystem path.
 
                 // Trim off unused bytes from the end of `path_bytes`.
-                let path_bytes = if cfg!(target_os = "freebsd") {
-                    // FreeBSD sometimes sets the length to longer than the
-                    // length of the NUL-terminated string. Find the NUL and
-                    // truncate the string accordingly.
+                let path_bytes = if cfg!(any(solarish, target_os = "freebsd")) {
+                    // FreeBSD and illumos sometimes set the length to longer
+                    // than the length of the NUL-terminated string. Find the
+                    // NUL and truncate the string accordingly.
                     &decode.sun_path[..decode
                         .sun_path
                         .iter()
