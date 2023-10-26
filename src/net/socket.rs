@@ -453,6 +453,80 @@ pub fn connect_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<(
     backend::net::syscalls::connect_unix(sockfd.as_fd(), addr)
 }
 
+/// Disconnect an IPv4 socket.
+///
+/// Equivalent to calling `connect` with an all-zero address with `sin_family`
+/// set to `AF_INET` or `AF_UNSPEC` depending on what the underlying platform requires.
+///
+/// For UDP sockets, BSD platforms report EADDRNOTAVAIL even if the disconnect was successful.
+///
+/// # References
+///  - [Beej's Guide to Network Programming]
+///  - [POSIX]
+///  - [Linux]
+///  - [Apple]
+///  - [Winsock2]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
+///
+/// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html#connect
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/connect.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/connect.2.html
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=connect&sektion=2
+/// [NetBSD]: https://man.netbsd.org/connect.2
+/// [OpenBSD]: https://man.openbsd.org/connect.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=connect&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/connect
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Connecting.html
+#[inline]
+#[doc(alias = "connect")]
+pub fn disconnect_v4<Fd: AsFd>(sockfd: Fd) -> io::Result<()> {
+    backend::net::syscalls::disconnect_v4(sockfd.as_fd())
+}
+
+/// Disconnect an IPv6 socket.
+///
+/// Equivalent to calling `connect` with an all-zero address with `sin6_family`
+/// set to `AF_INET6` or `AF_UNSPEC` depending on what the underlying platform requires.
+///
+/// For UDP sockets, BSD platforms report EADDRNOTAVAIL even if the disconnect was successful.
+///
+/// # References
+///  - [Beej's Guide to Network Programming]
+///  - [POSIX]
+///  - [Linux]
+///  - [Apple]
+///  - [Winsock2]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
+///
+/// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html#connect
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/connect.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/connect.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/connect.2.html
+/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=connect&sektion=2
+/// [NetBSD]: https://man.netbsd.org/connect.2
+/// [OpenBSD]: https://man.openbsd.org/connect.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=connect&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/connect
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Connecting.html
+#[inline]
+#[doc(alias = "connect")]
+pub fn disconnect_v6<Fd: AsFd>(sockfd: Fd) -> io::Result<()> {
+    backend::net::syscalls::disconnect_v6(sockfd.as_fd())
+}
+
 /// `listen(fd, backlog)`—Enables listening for incoming connections.
 ///
 /// # References

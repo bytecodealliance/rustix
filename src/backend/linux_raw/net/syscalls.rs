@@ -19,8 +19,9 @@ use crate::backend::conv::{
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
 use crate::net::{
-    AddressFamily, Protocol, RecvAncillaryBuffer, RecvMsgReturn, SendAncillaryBuffer, Shutdown,
-    SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6, SocketFlags, SocketType,
+    AddressFamily, Ipv4Addr, Ipv6Addr, Protocol, RecvAncillaryBuffer, RecvMsgReturn,
+    SendAncillaryBuffer, Shutdown, SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6,
+    SocketFlags, SocketType,
 };
 use c::{sockaddr, sockaddr_in, sockaddr_in6, socklen_t};
 use core::mem::MaybeUninit;
@@ -831,12 +832,24 @@ pub(crate) fn bind_unix(fd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result
 
 #[inline]
 pub(crate) fn connect_v4(fd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
+    _connect_v4(fd, &encode_sockaddr_v4(addr))
+}
+
+#[inline]
+pub(crate) fn disconnect_v4(fd: BorrowedFd<'_>) -> io::Result<()> {
+    let mut sockaddr = encode_sockaddr_v4(&SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0));
+    sockaddr.sin_family = c::AF_UNSPEC as _;
+    _connect_v4(fd, &sockaddr)
+}
+
+#[inline]
+fn _connect_v4(fd: BorrowedFd<'_>, addr: &sockaddr_in) -> io::Result<()> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         ret(syscall_readonly!(
             __NR_connect,
             fd,
-            by_ref(&encode_sockaddr_v4(addr)),
+            by_ref(addr),
             size_of::<sockaddr_in, _>()
         ))
     }
@@ -847,7 +860,7 @@ pub(crate) fn connect_v4(fd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<
             x86_sys(SYS_CONNECT),
             slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
                 fd.into(),
-                by_ref(&encode_sockaddr_v4(addr)),
+                by_ref(addr),
                 size_of::<sockaddr_in, _>(),
             ])
         ))
@@ -856,12 +869,24 @@ pub(crate) fn connect_v4(fd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<
 
 #[inline]
 pub(crate) fn connect_v6(fd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
+    _connect_v6(fd, &encode_sockaddr_v6(addr))
+}
+
+#[inline]
+pub(crate) fn disconnect_v6(fd: BorrowedFd<'_>) -> io::Result<()> {
+    let mut sockaddr = encode_sockaddr_v6(&SocketAddrV6::new(Ipv6Addr::UNSPECIFIED, 0, 0, 0));
+    sockaddr.sin6_family = c::AF_UNSPEC as _;
+    _connect_v6(fd, &sockaddr)
+}
+
+#[inline]
+fn _connect_v6(fd: BorrowedFd<'_>, addr: &sockaddr_in6) -> io::Result<()> {
     #[cfg(not(target_arch = "x86"))]
     unsafe {
         ret(syscall_readonly!(
             __NR_connect,
             fd,
-            by_ref(&encode_sockaddr_v6(addr)),
+            by_ref(addr),
             size_of::<sockaddr_in6, _>()
         ))
     }
@@ -872,7 +897,7 @@ pub(crate) fn connect_v6(fd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<
             x86_sys(SYS_CONNECT),
             slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
                 fd.into(),
-                by_ref(&encode_sockaddr_v6(addr)),
+                by_ref(addr),
                 size_of::<sockaddr_in6, _>(),
             ])
         ))

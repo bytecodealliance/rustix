@@ -6,7 +6,7 @@ use crate::backend::c;
 use crate::backend::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
-use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
+use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::utils::as_ptr;
 use core::mem::{size_of, MaybeUninit};
 #[cfg(not(any(
@@ -217,10 +217,23 @@ pub(crate) fn bind_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Re
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn connect_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
+    _connect_v4(sockfd, &encode_sockaddr_v4(addr))
+}
+
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub(crate) fn disconnect_v4(sockfd: BorrowedFd<'_>) -> io::Result<()> {
+    #[allow(unused_mut)]
+    let mut sockaddr = encode_sockaddr_v4(&SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0));
+    sockaddr.sin_family = c::AF_UNSPEC as _;
+    _connect_v4(sockfd, &sockaddr)
+}
+
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+fn _connect_v4(sockfd: BorrowedFd<'_>, addr: &c::sockaddr_in) -> io::Result<()> {
     unsafe {
         ret(c::connect(
             borrowed_fd(sockfd),
-            as_ptr(&encode_sockaddr_v4(addr)).cast(),
+            as_ptr(addr).cast(),
             size_of::<c::sockaddr_in>() as c::socklen_t,
         ))
     }
@@ -228,10 +241,23 @@ pub(crate) fn connect_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Res
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn connect_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
+    _connect_v6(sockfd, &encode_sockaddr_v6(addr))
+}
+
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+pub(crate) fn disconnect_v6(sockfd: BorrowedFd<'_>) -> io::Result<()> {
+    #[allow(unused_mut)]
+    let mut sockaddr = encode_sockaddr_v6(&SocketAddrV6::new(Ipv6Addr::UNSPECIFIED, 0, 0, 0));
+    sockaddr.sin6_family = c::AF_UNSPEC as _;
+    _connect_v6(sockfd, &sockaddr)
+}
+
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+fn _connect_v6(sockfd: BorrowedFd<'_>, addr: &c::sockaddr_in6) -> io::Result<()> {
     unsafe {
         ret(c::connect(
             borrowed_fd(sockfd),
-            as_ptr(&encode_sockaddr_v6(addr)).cast(),
+            as_ptr(addr).cast(),
             size_of::<c::sockaddr_in6>() as c::socklen_t,
         ))
     }
