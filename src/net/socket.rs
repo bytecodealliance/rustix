@@ -456,7 +456,8 @@ pub fn connect_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<(
 /// `connect(sockfd, {.sa_family = AF_UNSPEC}, sizeof(struct sockaddr))`
 /// — Dissolve the socket's association.
 ///
-/// On UDP sockets, BSD platforms report AFNOSUPPORT or INVAL even if the disconnect was successful.
+/// On UDP sockets, BSD platforms report [`Errno::AFNOSUPPORT`] or
+/// [`Errno::INVAL`] even if the disconnect was successful.
 ///
 /// # References
 ///  - [Beej's Guide to Network Programming]
@@ -482,6 +483,8 @@ pub fn connect_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<(
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=connect&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/connect
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Connecting.html
+/// [`Errno::AFNOSUPPORT`]: io::Errno::AFNOSUPPORT
+/// [`Errno::INVAL`]: io::Errno::INVAL
 #[inline]
 #[doc(alias = "connect")]
 pub fn connect_unspec<Fd: AsFd>(sockfd: Fd) -> io::Result<()> {
