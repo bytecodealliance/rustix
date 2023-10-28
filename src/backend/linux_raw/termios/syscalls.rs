@@ -166,7 +166,7 @@ pub(crate) fn tcgetsid(fd: BorrowedFd<'_>) -> io::Result<Pid> {
 #[inline]
 pub(crate) fn tcsetwinsize(fd: BorrowedFd<'_>, winsize: Winsize) -> io::Result<()> {
     unsafe {
-        ret(syscall!(
+        ret(syscall_readonly!(
             __NR_ioctl,
             fd,
             c_uint(TIOCSWINSZ),
