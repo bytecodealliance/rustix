@@ -187,6 +187,7 @@ pub mod fd {
 }
 
 // The public API modules.
+pub mod buffer;
 #[cfg(feature = "event")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "event")))]
 pub mod event;
