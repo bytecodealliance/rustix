@@ -9,6 +9,8 @@ use crate::io;
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::utils::as_ptr;
 use core::mem::{size_of, MaybeUninit};
+#[cfg(windows)]
+use windows_sys::Win32::Networking::WinSock;
 #[cfg(not(any(
     windows,
     target_os = "espidf",
@@ -29,8 +31,6 @@ use {
     crate::net::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType},
     core::ptr::null_mut,
 };
-#[cfg(windows)]
-use windows_sys::Win32::Networking::WinSock;
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
@@ -203,7 +203,7 @@ pub(crate) fn socket_with(
             raw_protocol as c::c_int,
             core::ptr::null_mut(),
             0,
-            flags.bits() as c::c_uint
+            flags.bits() as c::c_uint,
         ))
     }
 }

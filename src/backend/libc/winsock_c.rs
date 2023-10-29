@@ -60,4 +60,3 @@ pub(crate) use WinSock::{
     WSAEWOULDBLOCK as EWOULDBLOCK, WSAEWOULDBLOCK as EAGAIN, WSAPOLLFD as pollfd,
     WSA_E_CANCELLED as ECANCELED, *,
 };
-
