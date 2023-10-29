@@ -9,8 +9,9 @@
 use crate::backend::c;
 use crate::backend::conv::fs::oflags_for_open_how;
 use crate::backend::conv::{
-    by_ref, c_int, c_uint, dev_t, opt_mut, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint,
-    ret_infallible, ret_owned_fd, ret_usize, size_of, slice, slice_mut, zero,
+    by_ref, c_int, c_uint, dev_t, opt_mut, raw_fd, ret, ret_c_int, ret_c_uint,
+    ret_infallible, ret_owned_fd, ret_usize, size_of, slice, pass_usize, zero,
+    slice_mut
 };
 #[cfg(target_pointer_width = "64")]
 use crate::backend::conv::{loff_t, loff_t_from_u64, ret_u64};
@@ -1518,43 +1519,40 @@ pub(crate) fn inotify_rm_watch(infd: BorrowedFd<'_>, wfd: i32) -> io::Result<()>
 }
 
 #[inline]
-pub(crate) fn getxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
-    let (value_addr_mut, value_len) = slice_mut(value);
+pub(crate) unsafe fn getxattr(path: &CStr, name: &CStr, value: *mut u8, cap: usize) -> io::Result<usize> {
     unsafe {
         ret_usize(syscall!(
             __NR_getxattr,
             path,
             name,
-            value_addr_mut,
-            value_len
+            value,
+            pass_usize(cap)
         ))
     }
 }
 
 #[inline]
-pub(crate) fn lgetxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
-    let (value_addr_mut, value_len) = slice_mut(value);
+pub(crate) unsafe fn lgetxattr(path: &CStr, name: &CStr, value: *mut u8, cap: usize) -> io::Result<usize> {
     unsafe {
         ret_usize(syscall!(
             __NR_lgetxattr,
             path,
             name,
-            value_addr_mut,
-            value_len
+            value,
+            pass_usize(cap)
         ))
     }
 }
 
 #[inline]
-pub(crate) fn fgetxattr(fd: BorrowedFd<'_>, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
-    let (value_addr_mut, value_len) = slice_mut(value);
+pub(crate) unsafe fn fgetxattr(fd: BorrowedFd<'_>, name: &CStr, value: *mut u8, cap: usize) -> io::Result<usize> {
     unsafe {
         ret_usize(syscall!(
             __NR_fgetxattr,
             fd,
             name,
-            value_addr_mut,
-            value_len
+            value,
+            pass_usize(cap)
         ))
     }
 }

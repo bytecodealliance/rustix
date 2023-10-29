@@ -1,6 +1,9 @@
-use crate::{backend, io, path};
+#![allow(unsafe_code)]
+
+use crate::{backend, buffer, io, path};
 use backend::c;
 use backend::fd::AsFd;
+use buffer::{Buffer, with_buffer};
 use bitflags::bitflags;
 
 bitflags! {
@@ -28,13 +31,15 @@ bitflags! {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/getxattr.2.html
 #[inline]
-pub fn getxattr<P: path::Arg, Name: path::Arg>(
+pub fn getxattr<P: path::Arg, Name: path::Arg, Buf: Buffer<u8>>(
     path: P,
     name: Name,
-    value: &mut [u8],
-) -> io::Result<usize> {
+    value: Buf,
+) -> io::Result<Buf::Result> {
     path.into_with_c_str(|path| {
-        name.into_with_c_str(|name| backend::fs::syscalls::getxattr(path, name, value))
+        name.into_with_c_str(|name| unsafe {
+            with_buffer(value, |ptr, cap| backend::fs::syscalls::getxattr(path, name, ptr, cap))
+        })
     })
 }
 
@@ -47,13 +52,15 @@ pub fn getxattr<P: path::Arg, Name: path::Arg>(
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/lgetxattr.2.html
 #[inline]
-pub fn lgetxattr<P: path::Arg, Name: path::Arg>(
+pub fn lgetxattr<P: path::Arg, Name: path::Arg, Buf: Buffer<u8>>(
     path: P,
     name: Name,
-    value: &mut [u8],
-) -> io::Result<usize> {
+    value: Buf,
+) -> io::Result<Buf::Result> {
     path.into_with_c_str(|path| {
-        name.into_with_c_str(|name| backend::fs::syscalls::lgetxattr(path, name, value))
+        name.into_with_c_str(|name| unsafe {
+            with_buffer(value, |ptr, cap| backend::fs::syscalls::lgetxattr(path, name, ptr, cap))
+        })
     })
 }
 
@@ -65,12 +72,14 @@ pub fn lgetxattr<P: path::Arg, Name: path::Arg>(
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/fgetxattr.2.html
 #[inline]
-pub fn fgetxattr<Fd: AsFd, Name: path::Arg>(
+pub fn fgetxattr<Fd: AsFd, Name: path::Arg, Buf: Buffer<u8>>(
     fd: Fd,
     name: Name,
-    value: &mut [u8],
-) -> io::Result<usize> {
-    name.into_with_c_str(|name| backend::fs::syscalls::fgetxattr(fd.as_fd(), name, value))
+    value: Buf,
+) -> io::Result<Buf::Result> {
+    name.into_with_c_str(|name| unsafe {
+        with_buffer(value, |ptr, cap| backend::fs::syscalls::fgetxattr(fd.as_fd(), name, ptr, cap))
+    })
 }
 
 /// `setxattr(path, name, value.as_ptr(), value.len(), flags)`—Set extended

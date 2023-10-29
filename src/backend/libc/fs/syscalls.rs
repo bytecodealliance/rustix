@@ -2213,16 +2213,14 @@ struct Attrlist {
 }
 
 #[cfg(any(apple, linux_kernel))]
-pub(crate) fn getxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
-    let value_ptr = value.as_mut_ptr();
-
+pub(crate) unsafe fn getxattr(path: &CStr, name: &CStr, value_ptr: *mut u8, cap: usize) -> io::Result<usize> {
     #[cfg(not(apple))]
     unsafe {
         ret_usize(c::getxattr(
             path.as_ptr(),
             name.as_ptr(),
             value_ptr.cast::<c::c_void>(),
-            value.len(),
+            cap,
         ))
     }
 
@@ -2232,7 +2230,7 @@ pub(crate) fn getxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result
             path.as_ptr(),
             name.as_ptr(),
             value_ptr.cast::<c::c_void>(),
-            value.len(),
+            cap,
             0,
             0,
         ))
@@ -2240,16 +2238,14 @@ pub(crate) fn getxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result
 }
 
 #[cfg(any(apple, linux_kernel))]
-pub(crate) fn lgetxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
-    let value_ptr = value.as_mut_ptr();
-
+pub(crate) unsafe fn lgetxattr(path: &CStr, name: &CStr, value_ptr: *mut u8, cap: usize) -> io::Result<usize> {
     #[cfg(not(apple))]
     unsafe {
         ret_usize(c::lgetxattr(
             path.as_ptr(),
             name.as_ptr(),
             value_ptr.cast::<c::c_void>(),
-            value.len(),
+            cap,
         ))
     }
 
@@ -2259,7 +2255,7 @@ pub(crate) fn lgetxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Resul
             path.as_ptr(),
             name.as_ptr(),
             value_ptr.cast::<c::c_void>(),
-            value.len(),
+            cap,
             0,
             c::XATTR_NOFOLLOW,
         ))
@@ -2267,16 +2263,14 @@ pub(crate) fn lgetxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Resul
 }
 
 #[cfg(any(apple, linux_kernel))]
-pub(crate) fn fgetxattr(fd: BorrowedFd<'_>, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
-    let value_ptr = value.as_mut_ptr();
-
+pub(crate) unsafe fn fgetxattr(fd: BorrowedFd<'_>, name: &CStr, value_ptr: *mut u8, cap: usize) -> io::Result<usize> {
     #[cfg(not(apple))]
     unsafe {
         ret_usize(c::fgetxattr(
             borrowed_fd(fd),
             name.as_ptr(),
             value_ptr.cast::<c::c_void>(),
-            value.len(),
+            cap,
         ))
     }
 
@@ -2286,7 +2280,7 @@ pub(crate) fn fgetxattr(fd: BorrowedFd<'_>, name: &CStr, value: &mut [u8]) -> io
             borrowed_fd(fd),
             name.as_ptr(),
             value_ptr.cast::<c::c_void>(),
-            value.len(),
+            cap,
             0,
             0,
         ))
