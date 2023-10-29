@@ -29,6 +29,8 @@ use {
     crate::net::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType},
     core::ptr::null_mut,
 };
+#[cfg(windows)]
+use windows_sys::Win32::Networking::WinSock;
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
@@ -162,7 +164,7 @@ pub(crate) fn socket(
     }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub(crate) fn socket_with(
     domain: AddressFamily,
     type_: SocketType,
@@ -178,6 +180,30 @@ pub(crate) fn socket_with(
             domain.0 as c::c_int,
             (type_.0 | flags.bits()) as c::c_int,
             raw_protocol as c::c_int,
+        ))
+    }
+}
+
+#[cfg(windows)]
+pub(crate) fn socket_with(
+    domain: AddressFamily,
+    type_: SocketType,
+    flags: SocketFlags,
+    protocol: Option<Protocol>,
+) -> io::Result<OwnedFd> {
+    let raw_protocol = match protocol {
+        Some(p) => p.0.get(),
+        None => 0,
+    };
+
+    unsafe {
+        ret_owned_fd(WinSock::WSASocketW(
+            domain.0 as c::c_int,
+            type_.0 as c::c_int,
+            raw_protocol as c::c_int,
+            core::ptr::null_mut(),
+            0,
+            flags.bits() as c::c_uint
         ))
     }
 }
@@ -421,6 +447,11 @@ pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, flags: SocketFlags) -> io::Res
         ))?;
         Ok(owned_fd)
     }
+}
+
+#[cfg(windows)]
+pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, flags: SocketFlags) -> io::Result<OwnedFd> {
+    // Create a new socket with the socket flags and run AcceptEx on it.
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]

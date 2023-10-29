@@ -27,6 +27,9 @@ pub(crate) const AF_INET: i32 = WinSock::AF_INET as _;
 pub(crate) const AF_INET6: i32 = WinSock::AF_INET6 as _;
 pub(crate) const AF_UNSPEC: i32 = WinSock::AF_UNSPEC as _;
 
+// WSA_FLAG_NO_HANDLE_INHERIT is the Windows equivalent of CLOEXEC.
+pub(crate) const SOCK_CLOEXEC: u32 = WinSock::WSA_FLAG_NO_HANDLE_INHERIT;
+
 // Include the contents of `WinSock`, renaming as needed to match POSIX.
 //
 // Use `WSA_E_CANCELLED` for `ECANCELED` instead of `WSAECANCELLED`, because
@@ -57,3 +60,4 @@ pub(crate) use WinSock::{
     WSAEWOULDBLOCK as EWOULDBLOCK, WSAEWOULDBLOCK as EAGAIN, WSAPOLLFD as pollfd,
     WSA_E_CANCELLED as ECANCELED, *,
 };
+

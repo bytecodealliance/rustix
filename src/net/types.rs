@@ -1436,7 +1436,7 @@ bitflags! {
         const NONBLOCK = bitcast!(c::SOCK_NONBLOCK);
 
         /// `SOCK_CLOEXEC`
-        #[cfg(not(any(apple, windows, target_os = "aix", target_os = "haiku")))]
+        #[cfg(not(any(apple, target_os = "aix", target_os = "haiku")))]
         const CLOEXEC = bitcast!(c::SOCK_CLOEXEC);
 
         // This deliberately lacks a `const _ = !0`, so that users can use
