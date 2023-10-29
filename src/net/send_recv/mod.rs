@@ -1,10 +1,13 @@
 //! `recv`, `send`, and variants.
 
+#![allow(unsafe_code)]
+
 #[cfg(unix)]
 use crate::net::SocketAddrUnix;
 use crate::net::{SocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
-use crate::{backend, io};
+use crate::{backend, buffer, io};
 use backend::fd::{AsFd, BorrowedFd};
+use buffer::{Buffer, with_buffer};
 
 pub use backend::net::send_recv::{RecvFlags, SendFlags};
 
@@ -53,8 +56,11 @@ pub use msg::*;
 /// [illumos]: https://illumos.org/man/3SOCKET/recv
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Receiving-Data.html
 #[inline]
-pub fn recv<Fd: AsFd>(fd: Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
-    backend::net::syscalls::recv(fd.as_fd(), buf, flags)
+pub fn recv<Fd: AsFd, Buf: Buffer<u8>>(fd: Fd, buf: Buf, flags: RecvFlags) -> io::Result<Buf::Result> {
+    let fd = fd.as_fd();
+    unsafe {
+        with_buffer(buf, |ptr, cap| backend::net::syscalls::recv(fd.as_fd(), ptr, cap, flags))
+    }
 }
 
 /// `send(fd, buf, flags)`—Writes data to a socket.
@@ -116,12 +122,17 @@ pub fn send<Fd: AsFd>(fd: Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize>
 /// [illumos]: https://illumos.org/man/3SOCKET/recvfrom
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Receiving-Datagrams.html
 #[inline]
-pub fn recvfrom<Fd: AsFd>(
+pub fn recvfrom<Fd: AsFd, Buf: Buffer<u8>>(
     fd: Fd,
-    buf: &mut [u8],
+    mut buf: Buf,
     flags: RecvFlags,
-) -> io::Result<(usize, Option<SocketAddrAny>)> {
-    backend::net::syscalls::recvfrom(fd.as_fd(), buf, flags)
+) -> io::Result<(Buf::Result, Option<SocketAddrAny>)> {
+    let fd = fd.as_fd();
+    unsafe {
+        let (ptr, cap) = buf.as_buffer();
+        let (len, addr) = backend::net::syscalls::recvfrom(fd.as_fd(), ptr, cap, flags)?;
+        Ok((buf.finish(len), addr))
+    }
 }
 
 /// `sendto(fd, buf, flags, addr)`—Writes data to a socket to a specific IP

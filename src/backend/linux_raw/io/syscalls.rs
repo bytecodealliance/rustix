@@ -302,25 +302,26 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // Do a `recv` with `PEEK` and `DONTWAIT` for 1 byte. A 0 indicates
         // the read side is shut down; an `EWOULDBLOCK` indicates the read
         // side is still open.
-        //
-        // TODO: This code would benefit from having a better way to read into
-        // uninitialized memory.
-        let mut buf = [0];
-        match crate::backend::net::syscalls::recv(
-            fd,
-            &mut buf,
-            RecvFlags::PEEK | RecvFlags::DONTWAIT,
-        ) {
-            Ok(0) => read = false,
-            Err(err) => {
-                #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
-                match err {
-                    io::Errno::AGAIN | io::Errno::WOULDBLOCK => (),
-                    io::Errno::NOTSOCK => not_socket = true,
-                    _ => return Err(err),
+        let mut buf = core::mem::MaybeUninit::<u8>::uninit();
+
+        unsafe {
+            match crate::backend::net::syscalls::recv(
+                fd,
+                buf.as_mut_ptr(),
+                1,
+                RecvFlags::PEEK | RecvFlags::DONTWAIT,
+            ) {
+                Ok(0) => read = false,
+                Err(err) => {
+                    #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
+                    match err {
+                        io::Errno::AGAIN | io::Errno::WOULDBLOCK => (),
+                        io::Errno::NOTSOCK => not_socket = true,
+                        _ => return Err(err),
+                    }
                 }
+                Ok(_) => (),
             }
-            Ok(_) => (),
         }
     }
     if write && !not_socket {
