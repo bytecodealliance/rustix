@@ -5,6 +5,25 @@
 use core::mem::MaybeUninit;
 use core::slice;
 
+use crate::io::Result;
+
+/// Wrap around a buffer and do something with the pointer and length.
+///
+/// # Safety
+///
+/// The callback `f` must actually write the return value's worth of instances of `T` to the
+/// buffer.
+#[inline]
+pub(crate) unsafe fn with_buffer<
+    T: AnyBitPattern,
+    Buf: Buffer<T>,
+    F: FnOnce(*mut T, usize) -> Result<usize>
+>(mut buffer: Buf, f: F) -> Result<Buf::Result> {
+    let (ptr, cap) = buffer.as_buffer();
+    let len = f(ptr, cap)?;
+    Ok(buffer.finish(len))
+}
+
 /// A buffer that the system can write into.
 pub unsafe trait Buffer<T: AnyBitPattern>: Sized {
     /// The result of the process operation.

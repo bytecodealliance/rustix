@@ -1,7 +1,10 @@
 //! `read` and `write`, optionally positioned, optionally vectored
 
-use crate::{backend, io};
+#![allow(unsafe_code)]
+
+use crate::{backend, buffer, io};
 use backend::fd::AsFd;
+use buffer::{Buffer, with_buffer};
 
 // Declare `IoSlice` and `IoSliceMut`.
 #[cfg(not(windows))]
@@ -33,8 +36,11 @@ pub use backend::io::types::ReadWriteFlags;
 /// [illumos]: https://illumos.org/man/2/read
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/I_002fO-Primitives.html#index-reading-from-a-file-descriptor
 #[inline]
-pub fn read<Fd: AsFd>(fd: Fd, buf: &mut [u8]) -> io::Result<usize> {
-    backend::io::syscalls::read(fd.as_fd(), buf)
+pub fn read<Fd: AsFd, Buf: Buffer<u8>>(fd: Fd, buf: Buf) -> io::Result<Buf::Result> {
+    let fd = fd.as_fd();
+    unsafe {
+        with_buffer(buf, |ptr, cap| backend::io::syscalls::read(fd, ptr, cap))
+    }
 }
 
 /// `write(fd, buf)`—Writes to a stream.
@@ -85,8 +91,11 @@ pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=pread&section=2
 /// [illumos]: https://illumos.org/man/2/pread
 #[inline]
-pub fn pread<Fd: AsFd>(fd: Fd, buf: &mut [u8], offset: u64) -> io::Result<usize> {
-    backend::io::syscalls::pread(fd.as_fd(), buf, offset)
+pub fn pread<Fd: AsFd, Buf: Buffer<u8>>(fd: Fd, buf: Buf, offset: u64) -> io::Result<Buf::Result> {
+    let fd = fd.as_fd();
+    unsafe {
+        with_buffer(buf, |ptr, cap| backend::io::syscalls::pread(fd.as_fd(), ptr, cap, offset))
+    }
 }
 
 /// `pwrite(fd, bufs)`—Writes to a file at a given position.

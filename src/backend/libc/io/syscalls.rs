@@ -26,12 +26,12 @@ use {
     crate::io::{IoSlice, IoSliceMut},
 };
 
-pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
+pub(crate) unsafe fn read(fd: BorrowedFd<'_>, buf: *mut u8, cap: usize) -> io::Result<usize> {
     unsafe {
         ret_usize(c::read(
             borrowed_fd(fd),
-            buf.as_mut_ptr().cast(),
-            min(buf.len(), READ_LIMIT),
+            buf.cast(),
+            min(cap, READ_LIMIT),
         ))
     }
 }
@@ -46,8 +46,8 @@ pub(crate) fn write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     }
 }
 
-pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Result<usize> {
-    let len = min(buf.len(), READ_LIMIT);
+pub(crate) fn pread(fd: BorrowedFd<'_>, buf: *mut u8, cap: usize, offset: u64) -> io::Result<usize> {
+    let len = min(cap, READ_LIMIT);
 
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
@@ -59,7 +59,7 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: u64) -> io::Resu
     unsafe {
         ret_usize(c::pread(
             borrowed_fd(fd),
-            buf.as_mut_ptr().cast(),
+            buf.cast(),
             len,
             offset,
         ))
