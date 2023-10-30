@@ -86,6 +86,14 @@ pub(crate) fn tcgetpgrp(fd: BorrowedFd<'_>) -> io::Result<Pid> {
         let mut result = MaybeUninit::<c::pid_t>::uninit();
         ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGPGRP), &mut result))?;
         let pid = result.assume_init();
+
+        // This doesn't appear to be documented, but it appears `tcsetpgrp` can
+        // succceed and set the pid to 0 if we pass it a pseudo-terminal device
+        // fd. For now, fail with `OPNOTSUPP`.
+        if pid == 0 {
+            return Err(io::Errno::OPNOTSUPP);
+        }
+
         Ok(Pid::from_raw_unchecked(pid))
     }
 }
@@ -177,7 +185,15 @@ pub(crate) fn tcsetwinsize(fd: BorrowedFd<'_>, winsize: Winsize) -> io::Result<(
 
 #[inline]
 pub(crate) fn tcsetpgrp(fd: BorrowedFd<'_>, pid: Pid) -> io::Result<()> {
-    unsafe { ret(syscall!(__NR_ioctl, fd, c_uint(TIOCSPGRP), pid)) }
+    let raw_pid: c::c_int = pid.as_raw_nonzero().get();
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_ioctl,
+            fd,
+            c_uint(TIOCSPGRP),
+            by_ref(&raw_pid)
+        ))
+    }
 }
 
 /// A wrapper around a conceptual `cfsetspeed` which handles an arbitrary
