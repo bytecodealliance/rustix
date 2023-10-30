@@ -66,8 +66,10 @@ pub enum ClockId {
     Tai = bitcast!(c::CLOCK_TAI),
 
     /// `CLOCK_BOOTTIME`, available on Linux >= 2.6.39
+    ///
+    /// On FreeBSD, use [`Self::Uptime`], as `CLOCK_BOOTTIME` is an alias for
+    /// `CLOCK_UPTIME`.
     #[cfg(any(
-        freebsdlike,
         all(linux_kernel, feature = "linux_4_11"),
         target_os = "fuchsia",
         target_os = "openbsd"

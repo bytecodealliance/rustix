@@ -58,12 +58,7 @@ fn test_boottime_clock() {
 
 /// Attempt to test that the boot alarm clock is monotonic. Time may or may not
 /// advance, but it shouldn't regress.
-#[cfg(any(
-    freebsdlike,
-    linux_kernel,
-    target_os = "fuchsia",
-    target_os = "openbsd"
-))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[test]
 fn test_boottime_alarm_clock() {
     use rustix::time::{clock_gettime_dynamic, DynamicClockId};
