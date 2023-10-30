@@ -8,9 +8,11 @@
 
 use crate::backend::c;
 use crate::backend::conv::fs::oflags_for_open_how;
+#[cfg(not(feature = "linux_4_11"))]
+use crate::backend::conv::zero;
 use crate::backend::conv::{
     by_ref, c_int, c_uint, dev_t, opt_mut, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint,
-    ret_infallible, ret_owned_fd, ret_usize, size_of, slice, slice_mut, zero,
+    ret_infallible, ret_owned_fd, ret_usize, size_of, slice, slice_mut,
 };
 #[cfg(target_pointer_width = "64")]
 use crate::backend::conv::{loff_t, loff_t_from_u64, ret_u64};
@@ -839,6 +841,7 @@ pub(crate) fn statx(
     }
 }
 
+#[cfg(not(feature = "linux_4_11"))]
 #[inline]
 pub(crate) fn is_statx_available() -> bool {
     unsafe {

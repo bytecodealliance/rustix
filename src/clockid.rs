@@ -54,6 +54,31 @@ pub enum ClockId {
     /// `CLOCK_MONOTONIC_RAW`
     #[cfg(linux_kernel)]
     MonotonicRaw = c::CLOCK_MONOTONIC_RAW,
+
+    /// `CLOCK_REALTIME_ALARM`, available on Linux >= 3.0
+    #[cfg(all(linux_kernel, feature = "linux_4_11"))]
+    #[doc(alias = "CLOCK_REALTIME_ALARM")]
+    RealtimeAlarm = bitcast!(c::CLOCK_REALTIME_ALARM),
+
+    /// `CLOCK_TAI`, available on Linux >= 3.10
+    #[cfg(all(linux_kernel, feature = "linux_4_11"))]
+    #[doc(alias = "CLOCK_TAI")]
+    Tai = bitcast!(c::CLOCK_TAI),
+
+    /// `CLOCK_BOOTTIME`, available on Linux >= 2.6.39
+    #[cfg(any(
+        freebsdlike,
+        all(linux_kernel, feature = "linux_4_11"),
+        target_os = "fuchsia",
+        target_os = "openbsd"
+    ))]
+    #[doc(alias = "CLOCK_BOOTTIME")]
+    Boottime = bitcast!(c::CLOCK_BOOTTIME),
+
+    /// `CLOCK_BOOTTIME_ALARM`, available on Linux >= 2.6.39
+    #[cfg(any(all(linux_kernel, feature = "linux_4_11"), target_os = "fuchsia"))]
+    #[doc(alias = "CLOCK_BOOTTIME_ALARM")]
+    BoottimeAlarm = bitcast!(c::CLOCK_BOOTTIME_ALARM),
 }
 
 /// `CLOCK_*` constants for use with [`clock_gettime`].
