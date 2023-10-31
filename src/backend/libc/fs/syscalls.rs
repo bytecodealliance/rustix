@@ -613,7 +613,10 @@ pub(crate) fn stat(path: &CStr) -> io::Result<Stat> {
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
         ret(c::stat(c_str(path), stat.as_mut_ptr()))?;
-        Ok(stat.assume_init())
+        let stat = stat.assume_init();
+        #[cfg(apple)]
+        let stat = fix_negative_stat_nsecs(stat);
+        Ok(stat)
     }
 }
 
@@ -653,7 +656,10 @@ pub(crate) fn lstat(path: &CStr) -> io::Result<Stat> {
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
         ret(c::lstat(c_str(path), stat.as_mut_ptr()))?;
-        Ok(stat.assume_init())
+        let stat = stat.assume_init();
+        #[cfg(apple)]
+        let stat = fix_negative_stat_nsecs(stat);
+        Ok(stat)
     }
 }
 
@@ -694,7 +700,10 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
             stat.as_mut_ptr(),
             bitflags_bits!(flags),
         ))?;
-        Ok(stat.assume_init())
+        let stat = stat.assume_init();
+        #[cfg(apple)]
+        let stat = fix_negative_stat_nsecs(stat);
+        Ok(stat)
     }
 }
 
@@ -1445,7 +1454,10 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
         ret(c::fstat(borrowed_fd(fd), stat.as_mut_ptr()))?;
-        Ok(stat.assume_init())
+        let stat = stat.assume_init();
+        #[cfg(apple)]
+        let stat = fix_negative_stat_nsecs(stat);
+        Ok(stat)
     }
 }
 
@@ -2551,6 +2563,15 @@ pub(crate) fn fremovexattr(fd: BorrowedFd<'_>, name: &CStr) -> io::Result<()> {
     unsafe {
         ret(c::fremovexattr(fd, name.as_ptr(), 0))
     }
+}
+
+/// See [`crate::timespec::fix_negative_nsec`] for details.
+#[cfg(apple)]
+fn fix_negative_stat_nsecs(mut stat: Stat) -> Stat {
+    crate::timespec::fix_negative_nsecs(&mut stat.st_atime, &mut stat.st_atime_nsec);
+    crate::timespec::fix_negative_nsecs(&mut stat.st_mtime, &mut stat.st_mtime_nsec);
+    crate::timespec::fix_negative_nsecs(&mut stat.st_ctime, &mut stat.st_ctime_nsec);
+    stat
 }
 
 #[test]

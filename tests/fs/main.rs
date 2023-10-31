@@ -31,6 +31,7 @@ mod long_paths;
 mod makedev;
 mod mkdirat;
 mod mknodat;
+mod negative_timestamp;
 #[cfg(linux_kernel)]
 mod openat;
 #[cfg(linux_kernel)]
