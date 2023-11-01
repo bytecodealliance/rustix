@@ -582,11 +582,65 @@ fn test_unix_msg_with_scm_rights() {
 
 #[cfg(all(feature = "process", linux_kernel))]
 #[test]
-fn test_unix_peercred() {
+fn test_unix_peercred_explicit() {
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{
         recvmsg, sendmsg, sockopt, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags,
         SendAncillaryBuffer, SendAncillaryMessage, SendFlags, SocketFlags,
+    };
+
+    let (send_sock, recv_sock) = rustix::net::socketpair(
+        AddressFamily::UNIX,
+        SocketType::STREAM,
+        SocketFlags::CLOEXEC,
+        None,
+    )
+    .unwrap();
+
+    sockopt::set_socket_passcred(&recv_sock, true).unwrap();
+
+    let ucred = sockopt::get_socket_peercred(&send_sock).unwrap();
+    let msg = SendAncillaryMessage::ScmCredentials(ucred);
+    let mut space = [0; rustix::cmsg_space!(ScmCredentials(1))];
+    let mut cmsg_buffer = SendAncillaryBuffer::new(&mut space);
+    assert!(cmsg_buffer.push(msg));
+
+    sendmsg(
+        &send_sock,
+        &[IoSlice::new(b"cred")],
+        &mut cmsg_buffer,
+        SendFlags::empty(),
+    )
+    .unwrap();
+
+    let mut cmsg_space = [0; rustix::cmsg_space!(ScmCredentials(1))];
+    let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut cmsg_space);
+
+    let mut buffer = [0; BUFFER_SIZE];
+    recvmsg(
+        &recv_sock,
+        &mut [IoSliceMut::new(&mut buffer)],
+        &mut cmsg_buffer,
+        RecvFlags::empty(),
+    )
+    .unwrap();
+
+    match cmsg_buffer.drain().next().unwrap() {
+        RecvAncillaryMessage::ScmCredentials(ucred2) => assert_eq!(ucred2, ucred),
+        _ => panic!("Unexpected ancilliary message"),
+    };
+}
+
+/// Like `test_unix_peercred_explicit`, but relies on the fact that
+/// `set_socket_passcred` enables passing of the credentials implicitly
+/// instead of passing an explicit message to `sendmsg`.
+#[cfg(all(feature = "process", linux_kernel))]
+#[test]
+fn test_unix_peercred_implicit() {
+    use rustix::io::{IoSlice, IoSliceMut};
+    use rustix::net::{
+        recvmsg, sendmsg, sockopt, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags,
+        SendAncillaryBuffer, SendFlags, SocketFlags,
     };
     use rustix::process::{getgid, getpid, getuid};
 
@@ -605,10 +659,7 @@ fn test_unix_peercred() {
     assert_eq!(ucred.uid, getuid());
     assert_eq!(ucred.gid, getgid());
 
-    let msg = SendAncillaryMessage::ScmCredentials(ucred);
-    let mut space = [0; rustix::cmsg_space!(ScmCredentials(1))];
-    let mut cmsg_buffer = SendAncillaryBuffer::new(&mut space);
-    assert!(cmsg_buffer.push(msg));
+    let mut cmsg_buffer = SendAncillaryBuffer::default();
 
     sendmsg(
         &send_sock,
