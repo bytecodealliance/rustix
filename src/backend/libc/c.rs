@@ -130,8 +130,8 @@ pub(super) use libc::{
     blksize64_t as blksize_t, fstat64 as fstat, fstatfs64 as fstatfs, fstatvfs64 as fstatvfs,
     ftruncate64 as ftruncate, getrlimit64 as getrlimit, ino_t, lseek64 as lseek, mmap,
     off64_t as off_t, openat, posix_fadvise64 as posix_fadvise, preadv, pwritev,
-    rlimit64 as rlimit, setrlimit64 as setrlimit, statfs64 as statfs, statvfs64 as statvfs,
-    RLIM_INFINITY,
+    rlimit64 as rlimit, setrlimit64 as setrlimit, stat64at as fstatat, statfs64 as statfs,
+    statvfs64 as statvfs, RLIM_INFINITY,
 };
 #[cfg(any(linux_like, target_os = "hurd"))]
 pub(super) use libc::{
