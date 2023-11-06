@@ -846,9 +846,10 @@ pub(crate) fn statx(
 pub(crate) fn is_statx_available() -> bool {
     unsafe {
         // Call `statx` with null pointers so that if it fails for any reason
-        // other than `EFAULT`, we know it's not supported.
+        // other than `EFAULT`, we know it's not supported. This can use
+        // "readonly" because we don't pass it a buffer to mutate.
         matches!(
-            ret(syscall!(
+            ret(syscall_readonly!(
                 __NR_statx,
                 raw_fd(AT_FDCWD),
                 zero(),
