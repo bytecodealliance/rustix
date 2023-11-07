@@ -18,8 +18,8 @@ use crate::ffi::CStr;
 #[cfg(feature = "fs")]
 use crate::fs::AtFlags;
 use crate::io;
-use crate::pid::Pid;
-use crate::runtime::{How, Sigaction, Siginfo, Sigset, Stack};
+use crate::pid::{Pid, RawPid};
+use crate::runtime::{Fork, How, Sigaction, Siginfo, Sigset, Stack};
 use crate::signal::Signal;
 use crate::timespec::Timespec;
 use crate::utils::option_as_ptr;
@@ -33,16 +33,48 @@ use linux_raw_sys::prctl::PR_SET_NAME;
 use {crate::backend::conv::ret_infallible, linux_raw_sys::general::ARCH_SET_FS};
 
 #[inline]
-pub(crate) unsafe fn fork() -> io::Result<Option<Pid>> {
+pub(crate) unsafe fn fork() -> io::Result<Fork> {
+    let mut child_pid = MaybeUninit::<RawPid>::uninit();
+
+    // Unix `fork` only returns the child PID in the parent; we'd like it in
+    // the child too, so set `CLONE_CHILD_SETTID` and pass in the address of
+    // a memory location to store it to in the child.
+    //
+    // Architectures differ on the order of the parameters.
+    #[cfg(target_arch = "x86_64")]
     let pid = ret_c_int(syscall_readonly!(
         __NR_clone,
-        c_int(c::SIGCHLD),
+        c_int(c::SIGCHLD | c::CLONE_CHILD_SETTID),
         zero(),
         zero(),
-        zero(),
+        &mut child_pid,
         zero()
     ))?;
-    Ok(Pid::from_raw(pid))
+    #[cfg(any(
+        target_arch = "aarch64",
+        target_arch = "arm",
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6",
+        target_arch = "powerpc64",
+        target_arch = "riscv64",
+        target_arch = "x86"
+    ))]
+    let pid = ret_c_int(syscall_readonly!(
+        __NR_clone,
+        c_int(c::SIGCHLD | c::CLONE_CHILD_SETTID),
+        zero(),
+        zero(),
+        zero(),
+        &mut child_pid
+    ))?;
+
+    Ok(if let Some(pid) = Pid::from_raw(pid) {
+        Fork::Parent(pid)
+    } else {
+        Fork::Child(Pid::from_raw_unchecked(child_pid.assume_init()))
+    })
 }
 
 #[cfg(feature = "fs")]
