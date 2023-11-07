@@ -19,7 +19,7 @@ mod priority;
 mod procctl;
 #[cfg(not(any(target_os = "fuchsia", target_os = "redox", target_os = "wasi")))]
 mod rlimit;
-mod sched_yield;
+mod sched;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have umask.
 mod umask;
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))] // WASI doesn't have waitpid.
