@@ -23,6 +23,8 @@ use crate::fs::{Gid, Uid};
 use crate::fs::{Mode, OFlags};
 use crate::{backend, io, path};
 use backend::fd::AsFd;
+use core::mem::MaybeUninit;
+use core::slice;
 #[cfg(feature = "alloc")]
 use {
     crate::ffi::{CStr, CString},
@@ -131,6 +133,48 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::R
 
         // Use `Vec` reallocation strategy to grow capacity exponentially.
         buffer.reserve(buffer.capacity() + 1);
+    }
+}
+
+/// `readlinkat(fd, path)`—Reads the contents of a symlink, without
+/// allocating.
+///
+/// This is the "raw" version which avoids allocating, but which is
+/// significantly trickier to use; most users should use plain [`readlinkat`].
+///
+/// This version writes bytes into the buffer and returns two slices, one
+/// containing the written bytes, and one containint the remaining
+/// uninitialized space. If the number of written bytes is equal to the length
+/// of the buffer, it means the buffer wasn't big enough to hold the full
+/// string, and callers should try again with a bigger buffer.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/readlinkat.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/readlinkat.2.html
+#[inline]
+pub fn readlinkat_raw<P: path::Arg, Fd: AsFd>(
+    dirfd: Fd,
+    path: P,
+    buf: &mut [MaybeUninit<u8>],
+) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>])> {
+    path.into_with_c_str(|path| _readlinkat_raw(dirfd.as_fd(), path, buf))
+}
+
+#[allow(unsafe_code)]
+fn _readlinkat_raw<'a>(
+    dirfd: BorrowedFd<'_>,
+    path: &CStr,
+    buf: &'a mut [MaybeUninit<u8>],
+) -> io::Result<(&'a mut [u8], &'a mut [MaybeUninit<u8>])> {
+    let n = backend::fs::syscalls::readlinkat(dirfd.as_fd(), path, buf)?;
+    unsafe {
+        Ok((
+            slice::from_raw_parts_mut(buf.as_mut_ptr().cast::<u8>(), n),
+            &mut buf[n..],
+        ))
     }
 }
 
