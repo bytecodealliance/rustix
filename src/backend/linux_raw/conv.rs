@@ -622,7 +622,6 @@ impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MlockFlags> for ArgReg<
 }
 
 #[cfg(feature = "mm")]
-#[cfg(any(linux_kernel, freebsdlike, netbsdlike))]
 impl<'a, Num: ArgNumber> From<crate::backend::mm::types::MlockAllFlags> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::backend::mm::types::MlockAllFlags) -> Self {

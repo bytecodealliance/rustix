@@ -961,7 +961,7 @@ pub(crate) fn readlink(path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
     }
 }
 
-#[cfg(any(feature = "alloc", all(linux_kernel, feature = "procfs")))]
+#[cfg(any(feature = "alloc", feature = "procfs"))]
 #[inline]
 pub(crate) fn readlinkat(
     dirfd: BorrowedFd<'_>,

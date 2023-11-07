@@ -6,7 +6,6 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-#[cfg(any(linux_kernel, freebsdlike, netbsdlike))]
 use super::types::MlockAllFlags;
 use super::types::{
     Advice, MapFlags, MlockFlags, MprotectFlags, MremapFlags, MsyncFlags, ProtFlags,
@@ -221,7 +220,6 @@ pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd>
 /// returns successfully; the pages are guaranteed to stay in RAM until later
 /// unlocked.
 #[inline]
-#[cfg(any(linux_kernel, freebsdlike, netbsdlike))]
 pub(crate) fn mlockall(flags: MlockAllFlags) -> io::Result<()> {
     // When `mlockall` is used with `MCL_ONFAULT | MCL_FUTURE`, the ordering
     // of `mlockall` with respect to arbitrary loads may be significant,
@@ -235,7 +233,6 @@ pub(crate) fn mlockall(flags: MlockAllFlags) -> io::Result<()> {
 
 /// Unlocks all pages mapped into the address space of the calling process.
 #[inline]
-#[cfg(any(linux_kernel, freebsdlike, netbsdlike))]
 pub(crate) fn munlockall() -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_munlockall)) }
 }

@@ -263,7 +263,6 @@ bitflags! {
     }
 }
 
-#[cfg(any(linux_kernel, freebsdlike, netbsdlike))]
 bitflags! {
     /// `MCL_*` flags for use with [`mlockall`].
     ///
