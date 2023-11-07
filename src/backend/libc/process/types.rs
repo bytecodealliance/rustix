@@ -155,10 +155,12 @@ pub type RawCpuid = u32;
 #[cfg(freebsdlike)]
 pub type RawId = c::id_t;
 
-#[cfg(any(linux_kernel, target_os = "dragonfly", target_os = "fuchsia"))]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 pub(crate) type RawCpuSet = c::cpu_set_t;
+#[cfg(freebsdlike)]
+pub(crate) type RawCpuSet = c::cpuset_t;
 
-#[cfg(any(linux_kernel, target_os = "dragonfly", target_os = "fuchsia"))]
+#[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
 #[inline]
 pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
     let mut set = unsafe { core::mem::zeroed() };
@@ -166,7 +168,5 @@ pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
     set
 }
 
-#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
 pub(crate) const CPU_SETSIZE: usize = c::CPU_SETSIZE as usize;
-#[cfg(target_os = "dragonfly")]
-pub(crate) const CPU_SETSIZE: usize = 256;

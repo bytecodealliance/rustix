@@ -36,6 +36,32 @@ use {crate::backend::conv::ret_c_uint_infallible, crate::fs::Mode};
 #[cfg(feature = "alloc")]
 use {crate::backend::conv::slice_just_addr_mut, crate::process::Gid};
 
+// `sched_getcpu` has special optimizations via the vDSO on some architectures.
+#[cfg(any(
+    target_arch = "x86_64",
+    target_arch = "x86",
+    target_arch = "riscv64",
+    target_arch = "powerpc64"
+))]
+pub(crate) use crate::backend::vdso_wrappers::sched_getcpu;
+
+// `sched_getcpu` on platforms without a vDSO entry for it.
+#[cfg(not(any(
+    target_arch = "x86_64",
+    target_arch = "x86",
+    target_arch = "riscv64",
+    target_arch = "powerpc64"
+)))]
+#[inline]
+pub(crate) fn sched_getcpu() -> usize {
+    let mut cpu = MaybeUninit::<u32>::uninit();
+    unsafe {
+        let r = ret(syscall!(__NR_getcpu, &mut cpu, zero(), zero()));
+        debug_assert!(r.is_ok());
+        cpu.assume_init() as usize
+    }
+}
+
 #[cfg(feature = "fs")]
 #[inline]
 pub(crate) fn chdir(filename: &CStr) -> io::Result<()> {

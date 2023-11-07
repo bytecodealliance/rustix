@@ -32,7 +32,7 @@ mod procctl;
     target_os = "wasi"
 )))]
 mod rlimit;
-#[cfg(any(linux_kernel, target_os = "dragonfly", target_os = "fuchsia"))]
+#[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
 mod sched;
 mod sched_yield;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have umask.
@@ -71,7 +71,7 @@ pub use procctl::*;
     target_os = "wasi"
 )))]
 pub use rlimit::*;
-#[cfg(any(linux_kernel, target_os = "dragonfly", target_os = "fuchsia"))]
+#[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
 pub use sched::*;
 pub use sched_yield::sched_yield;
 #[cfg(not(target_os = "wasi"))]
