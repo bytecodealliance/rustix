@@ -1,7 +1,11 @@
 //! libc syscalls supporting `rustix::fs`.
 
 use crate::backend::c;
-#[cfg(any(not(target_os = "redox"), all(linux_kernel, feature = "procfs")))]
+#[cfg(any(
+    not(target_os = "redox"),
+    feature = "alloc",
+    all(linux_kernel, feature = "procfs")
+))]
 use crate::backend::conv::ret_usize;
 use crate::backend::conv::{borrowed_fd, c_str, ret, ret_c_int, ret_off_t, ret_owned_fd};
 use crate::fd::{BorrowedFd, OwnedFd};
