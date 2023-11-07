@@ -6,6 +6,7 @@
 //! [`cwd`]: crate::fs::CWD
 
 use crate::fd::OwnedFd;
+use crate::ffi::CStr;
 #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 use crate::fs::Access;
 #[cfg(not(target_os = "espidf"))]
@@ -22,16 +23,11 @@ use crate::fs::{Dev, FileType};
 use crate::fs::{Gid, Uid};
 use crate::fs::{Mode, OFlags};
 use crate::{backend, io, path};
-use backend::fd::AsFd;
+use backend::fd::{AsFd, BorrowedFd};
 use core::mem::MaybeUninit;
 use core::slice;
 #[cfg(feature = "alloc")]
-use {
-    crate::ffi::{CStr, CString},
-    crate::path::SMALL_PATH_BUFFER_SIZE,
-    alloc::vec::Vec,
-    backend::fd::BorrowedFd,
-};
+use {crate::ffi::CString, crate::path::SMALL_PATH_BUFFER_SIZE, alloc::vec::Vec};
 #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 use {crate::fs::Timestamps, crate::timespec::Nsecs};
 
