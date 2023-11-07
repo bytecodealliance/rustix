@@ -2,8 +2,7 @@
 
 use crate::backend::c;
 #[cfg(any(
-    apple,
-    linux_kernel,
+    not(target_os = "redox"),
     feature = "alloc",
     all(linux_kernel, feature = "procfs")
 ))]
@@ -275,10 +274,7 @@ pub(crate) fn readlink(path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
     }
 }
 
-#[cfg(all(
-    any(feature = "alloc", all(linux_kernel, feature = "procfs")),
-    not(target_os = "redox")
-))]
+#[cfg(not(target_os = "redox"))]
 #[inline]
 pub(crate) fn readlinkat(
     dirfd: BorrowedFd<'_>,
