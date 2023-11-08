@@ -36,7 +36,7 @@ once_cell = { version = "1.5.2", optional = true }
 # libc backend can be selected via adding `--cfg=rustix_use_libc` to
 # `RUSTFLAGS` or enabling the `use-libc` cargo feature.
 [target.'cfg(all(not(rustix_use_libc), not(miri), target_os = "linux", target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "riscv64", all(rustix_use_experimental_asm, target_arch = "powerpc64"), all(rustix_use_experimental_asm, target_arch = "mips"), all(rustix_use_experimental_asm, target_arch = "mips32r6"), all(rustix_use_experimental_asm, target_arch = "mips64"), all(rustix_use_experimental_asm, target_arch = "mips64r6"), target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"))))'.dependencies]
-linux-raw-sys = { version = "0.4.8", default-features = false, features = ["general", "errno", "ioctl", "no_std", "elf"] }
+linux-raw-sys = { version = "0.4.11", default-features = false, features = ["general", "errno", "ioctl", "no_std", "elf"] }
 libc_errno = { package = "errno", version = "0.3.1", default-features = false, optional = true }
 libc = { version = "0.2.150", default-features = false, features = ["extra_traits"], optional = true }
 
@@ -53,7 +53,7 @@ libc = { version = "0.2.150", default-features = false, features = ["extra_trait
 # Some syscalls do not have libc wrappers, such as in `io_uring`. For these,
 # the libc backend uses the linux-raw-sys ABI and `libc::syscall`.
 [target.'cfg(all(any(target_os = "android", target_os = "linux"), any(rustix_use_libc, miri, not(all(target_os = "linux", target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "riscv64", all(rustix_use_experimental_asm, target_arch = "powerpc64"), all(rustix_use_experimental_asm, target_arch = "mips"), all(rustix_use_experimental_asm, target_arch = "mips32r6"), all(rustix_use_experimental_asm, target_arch = "mips64"), all(rustix_use_experimental_asm, target_arch = "mips64r6"), target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64")))))))'.dependencies]
-linux-raw-sys = { version = "0.4.8", default-features = false, features = ["general", "ioctl", "no_std"] }
+linux-raw-sys = { version = "0.4.11", default-features = false, features = ["general", "ioctl", "no_std"] }
 
 # For the libc backend on Windows, use the Winsock2 API in windows-sys.
 [target.'cfg(windows)'.dependencies.windows-sys]

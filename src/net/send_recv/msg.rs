@@ -17,7 +17,34 @@ use core::{ptr, slice};
 
 use super::{RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 
-/// Macro for defining the amount of space used by CMSGs.
+/// Macro for defining the amount of space to allocate in a buffer for use with
+/// [`RecvAncillaryBuffer::new`] and [`SendAncillaryBuffer::new`].
+///
+/// # Examples
+///
+/// Allocate a buffer for a single file descriptor:
+/// ```
+/// # use rustix::cmsg_space;
+/// let mut space = [0; rustix::cmsg_space!(ScmRights(1))];
+/// ```
+///
+/// Allocate a buffer for credentials:
+/// ```
+/// # #[cfg(linux_kernel)]
+/// # {
+/// # use rustix::cmsg_space;
+/// let mut space = [0; rustix::cmsg_space!(ScmCredentials(1))];
+/// # }
+/// ```
+///
+/// Allocate a buffer for two file descriptors and credentials:
+/// ```
+/// # #[cfg(linux_kernel)]
+/// # {
+/// # use rustix::cmsg_space;
+/// let mut space = [0; rustix::cmsg_space!(ScmRights(2), ScmCredentials(1))];
+/// # }
+/// ```
 #[macro_export]
 macro_rules! cmsg_space {
     // Base Rules
@@ -33,12 +60,41 @@ macro_rules! cmsg_space {
     };
 
     // Combo Rules
-    (($($($x:tt)*),+)) => {
+    ($firstid:ident($firstex:expr), $($restid:ident($restex:expr)),*) => {{
+        // We only have to add `cmsghdr` alignment once; all other times we can
+        // use `cmsg_aligned_space`.
+        let sum = $crate::cmsg_space!($firstid($firstex));
         $(
-            cmsg_space!($($x)*) +
-        )+
-        0
+            let sum = sum + $crate::cmsg_aligned_space!($restid($restex));
+        )*
+        sum
+    }};
+}
+
+/// Like `cmsg_space`, but doesn't add padding for `cmsghdr` alignment.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! cmsg_aligned_space {
+    // Base Rules
+    (ScmRights($len:expr)) => {
+        $crate::net::__cmsg_aligned_space(
+            $len * ::core::mem::size_of::<$crate::fd::BorrowedFd<'static>>(),
+        )
     };
+    (ScmCredentials($len:expr)) => {
+        $crate::net::__cmsg_aligned_space(
+            $len * ::core::mem::size_of::<$crate::net::UCred>(),
+        )
+    };
+
+    // Combo Rules
+    ($firstid:ident($firstex:expr), $($restid:ident($restex:expr)),*) => {{
+        let sum = cmsg_aligned_space!($firstid($firstex));
+        $(
+            let sum = sum + cmsg_aligned_space!($restid($restex));
+        )*
+        sum
+    }};
 }
 
 #[doc(hidden)]
@@ -47,6 +103,11 @@ pub const fn __cmsg_space(len: usize) -> usize {
     // `&[u8]` to the required alignment boundary.
     let len = len + align_of::<c::cmsghdr>();
 
+    __cmsg_aligned_space(len)
+}
+
+#[doc(hidden)]
+pub const fn __cmsg_aligned_space(len: usize) -> usize {
     // Convert `len` to `u32` for `CMSG_SPACE`. This would be `try_into()` if
     // we could call that in a `const fn`.
     let converted_len = len as u32;
@@ -97,6 +158,10 @@ pub enum RecvAncillaryMessage<'a> {
 
 /// Buffer for sending ancillary messages with [`sendmsg`], [`sendmsg_v4`],
 /// [`sendmsg_v6`], [`sendmsg_unix`], and [`sendmsg_any`].
+///
+/// Use the [`push`] function to add messages to send.
+///
+/// [`push`]: SendAncillaryBuffer::push
 pub struct SendAncillaryBuffer<'buf, 'slice, 'fd> {
     /// Raw byte buffer for messages.
     buffer: &'buf mut [u8],
@@ -126,6 +191,44 @@ impl Default for SendAncillaryBuffer<'_, '_, '_> {
 
 impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
     /// Create a new, empty `SendAncillaryBuffer` from a raw byte buffer.
+    ///
+    /// The buffer size may be computed with [`cmsg_space`], or it may be
+    /// zero for an empty buffer, however in that case, consider `default()`
+    /// instead, or even using [`send`] instead of `sendmsg`.
+    ///
+    /// # Examples
+    ///
+    /// Allocate a buffer for a single file descriptor:
+    /// ```
+    /// # use rustix::cmsg_space;
+    /// # use rustix::net::SendAncillaryBuffer;
+    /// let mut space = [0; rustix::cmsg_space!(ScmRights(1))];
+    /// let mut cmsg_buffer = SendAncillaryBuffer::new(&mut space);
+    /// ```
+    ///
+    /// Allocate a buffer for credentials:
+    /// ```
+    /// # #[cfg(linux_kernel)]
+    /// # {
+    /// # use rustix::cmsg_space;
+    /// # use rustix::net::SendAncillaryBuffer;
+    /// let mut space = [0; rustix::cmsg_space!(ScmCredentials(1))];
+    /// let mut cmsg_buffer = SendAncillaryBuffer::new(&mut space);
+    /// # }
+    /// ```
+    ///
+    /// Allocate a buffer for two file descriptors and credentials:
+    /// ```
+    /// # #[cfg(linux_kernel)]
+    /// # {
+    /// # use rustix::cmsg_space;
+    /// # use rustix::net::SendAncillaryBuffer;
+    /// let mut space = [0; rustix::cmsg_space!(ScmRights(2), ScmCredentials(1))];
+    /// let mut cmsg_buffer = SendAncillaryBuffer::new(&mut space);
+    /// # }
+    /// ```
+    ///
+    /// [`send`]: crate::net::send
     #[inline]
     pub fn new(buffer: &'buf mut [u8]) -> Self {
         Self {
@@ -229,6 +332,10 @@ impl<'slice, 'fd> Extend<SendAncillaryMessage<'slice, 'fd>>
 }
 
 /// Buffer for receiving ancillary messages with [`recvmsg`].
+///
+/// Use the [`drain`] function to iterate over the received messages.
+///
+/// [`drain`]: RecvAncillaryBuffer::drain
 #[derive(Default)]
 pub struct RecvAncillaryBuffer<'buf> {
     /// Raw byte buffer for messages.
@@ -249,6 +356,44 @@ impl<'buf> From<&'buf mut [u8]> for RecvAncillaryBuffer<'buf> {
 
 impl<'buf> RecvAncillaryBuffer<'buf> {
     /// Create a new, empty `RecvAncillaryBuffer` from a raw byte buffer.
+    ///
+    /// The buffer size may be computed with [`cmsg_space`], or it may be
+    /// zero for an empty buffer, however in that case, consider `default()`
+    /// instead, or even using [`recv`] instead of `recvmsg`.
+    ///
+    /// # Examples
+    ///
+    /// Allocate a buffer for a single file descriptor:
+    /// ```
+    /// # use rustix::cmsg_space;
+    /// # use rustix::net::RecvAncillaryBuffer;
+    /// let mut space = [0; rustix::cmsg_space!(ScmRights(1))];
+    /// let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut space);
+    /// ```
+    ///
+    /// Allocate a buffer for credentials:
+    /// ```
+    /// # #[cfg(linux_kernel)]
+    /// # {
+    /// # use rustix::cmsg_space;
+    /// # use rustix::net::RecvAncillaryBuffer;
+    /// let mut space = [0; rustix::cmsg_space!(ScmCredentials(1))];
+    /// let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut space);
+    /// # }
+    /// ```
+    ///
+    /// Allocate a buffer for two file descriptors and credentials:
+    /// ```
+    /// # #[cfg(linux_kernel)]
+    /// # {
+    /// # use rustix::cmsg_space;
+    /// # use rustix::net::RecvAncillaryBuffer;
+    /// let mut space = [0; rustix::cmsg_space!(ScmRights(2), ScmCredentials(1))];
+    /// let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut space);
+    /// # }
+    /// ```
+    ///
+    /// [`recv`]: crate::net::recv
     #[inline]
     pub fn new(buffer: &'buf mut [u8]) -> Self {
         Self {
@@ -311,6 +456,12 @@ impl Drop for RecvAncillaryBuffer<'_> {
 /// boundary.
 #[inline]
 fn align_for_cmsghdr(buffer: &mut [u8]) -> &mut [u8] {
+    // If the buffer is empty, we won't be writing anything into it, so it
+    // doesn't need to be aligned.
+    if buffer.is_empty() {
+        return buffer;
+    }
+
     let align = align_of::<c::cmsghdr>();
     let addr = buffer.as_ptr() as usize;
     let adjusted = (addr + (align - 1)) & align.wrapping_neg();

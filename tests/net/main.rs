@@ -6,6 +6,8 @@
 #![cfg_attr(core_c_str, feature(core_c_str))]
 
 mod addr;
+#[cfg(unix)]
+mod cmsg;
 mod connect_bind_send;
 #[cfg(feature = "event")]
 mod poll;

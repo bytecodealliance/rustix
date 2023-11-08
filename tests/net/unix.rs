@@ -686,3 +686,213 @@ fn test_unix_peercred_implicit() {
         _ => panic!("Unexpected ancilliary message"),
     };
 }
+
+/// Like `test_unix_msg_with_scm_rights`, but with multiple file descriptors
+/// over multiple control messages.
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[test]
+fn test_unix_msg_with_combo() {
+    use rustix::fd::AsFd;
+    use rustix::io::{IoSlice, IoSliceMut};
+    use rustix::net::{
+        recvmsg, sendmsg, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags,
+        SendAncillaryBuffer, SendAncillaryMessage, SendFlags,
+    };
+    use rustix::pipe::pipe;
+    use std::string::ToString;
+
+    let tmpdir = tempfile::tempdir().unwrap();
+    let path = tmpdir.path().join("scp_4804");
+
+    let server = {
+        let path = path.clone();
+
+        let connection_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
+
+        let name = SocketAddrUnix::new(&path).unwrap();
+        bind_unix(&connection_socket, &name).unwrap();
+        listen(&connection_socket, 1).unwrap();
+
+        move || {
+            let mut pipe_end = None;
+            let mut another_pipe_end = None;
+            let mut yet_another_pipe_end = None;
+
+            let mut buffer = [0; BUFFER_SIZE];
+            let mut cmsg_space = [0; rustix::cmsg_space!(ScmRights(2), ScmRights(1))];
+
+            'exit: loop {
+                let data_socket = accept(&connection_socket).unwrap();
+                let mut sum = 0;
+                loop {
+                    let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut cmsg_space);
+                    let nread = recvmsg(
+                        &data_socket,
+                        &mut [IoSliceMut::new(&mut buffer)],
+                        &mut cmsg_buffer,
+                        RecvFlags::empty(),
+                    )
+                    .unwrap()
+                    .bytes;
+
+                    // Read out the pipe if we got it.
+                    for cmsg in cmsg_buffer.drain() {
+                        match cmsg {
+                            RecvAncillaryMessage::ScmRights(rights) => {
+                                for right in rights {
+                                    if pipe_end.is_none() {
+                                        pipe_end = Some(right);
+                                    } else if another_pipe_end.is_none() {
+                                        another_pipe_end = Some(right);
+                                    } else if yet_another_pipe_end.is_none() {
+                                        yet_another_pipe_end = Some(right);
+                                    } else {
+                                        unreachable!();
+                                    }
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+
+                    if &buffer[..nread] == b"exit" {
+                        break 'exit;
+                    }
+                    if &buffer[..nread] == b"sum" {
+                        break;
+                    }
+
+                    sum += i32::from_str(&String::from_utf8_lossy(&buffer[..nread])).unwrap();
+                }
+
+                let data = sum.to_string();
+                sendmsg(
+                    &data_socket,
+                    &[IoSlice::new(data.as_bytes())],
+                    &mut Default::default(),
+                    SendFlags::empty(),
+                )
+                .unwrap();
+            }
+
+            unlinkat(CWD, path, AtFlags::empty()).unwrap();
+
+            // Once we're done, send a message along the pipe.
+            let pipe = pipe_end.unwrap();
+            write(&pipe, b"pipe message!").unwrap();
+
+            // Once we're done, send a message along the other pipe.
+            let another_pipe = another_pipe_end.unwrap();
+            write(&another_pipe, b"and another message!").unwrap();
+
+            // Once we're done, send a message along the other pipe.
+            let yet_another_pipe = yet_another_pipe_end.unwrap();
+            write(&yet_another_pipe, b"yet another message!").unwrap();
+        }
+    };
+
+    let client = move || {
+        let addr = SocketAddrUnix::new(path).unwrap();
+        let (read_end, write_end) = pipe().unwrap();
+        let (another_read_end, another_write_end) = pipe().unwrap();
+        let (yet_another_read_end, yet_another_write_end) = pipe().unwrap();
+        let mut buffer = [0; BUFFER_SIZE];
+        let runs: &[(&[&str], i32)] = &[
+            (&["1", "2"], 3),
+            (&["4", "77", "103"], 184),
+            (&["5", "78", "104"], 187),
+            (&[], 0),
+        ];
+
+        for (args, sum) in runs {
+            let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
+            connect_unix(&data_socket, &addr).unwrap();
+
+            for arg in *args {
+                sendmsg(
+                    &data_socket,
+                    &[IoSlice::new(arg.as_bytes())],
+                    &mut Default::default(),
+                    SendFlags::empty(),
+                )
+                .unwrap();
+            }
+            sendmsg(
+                &data_socket,
+                &[IoSlice::new(b"sum")],
+                &mut Default::default(),
+                SendFlags::empty(),
+            )
+            .unwrap();
+
+            let nread = recvmsg(
+                &data_socket,
+                &mut [IoSliceMut::new(&mut buffer)],
+                &mut Default::default(),
+                RecvFlags::empty(),
+            )
+            .unwrap()
+            .bytes;
+            assert_eq!(
+                i32::from_str(&String::from_utf8_lossy(&buffer[..nread])).unwrap(),
+                *sum
+            );
+        }
+
+        let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
+
+        let mut space = [0; rustix::cmsg_space!(ScmRights(2), ScmRights(1))];
+        let mut cmsg_buffer = SendAncillaryBuffer::new(&mut space);
+
+        // Format a CMSG.
+        let we = [write_end.as_fd(), another_write_end.as_fd()];
+        let msg = SendAncillaryMessage::ScmRights(&we);
+        assert!(cmsg_buffer.push(msg));
+
+        // Format another CMSG.
+        let we = [yet_another_write_end.as_fd()];
+        let msg = SendAncillaryMessage::ScmRights(&we);
+        assert!(cmsg_buffer.push(msg));
+
+        connect_unix(&data_socket, &addr).unwrap();
+        sendmsg(
+            &data_socket,
+            &[IoSlice::new(b"exit")],
+            &mut cmsg_buffer,
+            SendFlags::empty(),
+        )
+        .unwrap();
+
+        // Read a value from the pipe.
+        let mut buffer = [0u8; 13];
+        read(&read_end, &mut buffer).unwrap();
+        assert_eq!(&buffer, b"pipe message!".as_ref());
+
+        // Read a value from the other pipe.
+        let mut buffer = [0u8; 20];
+        read(&another_read_end, &mut buffer).unwrap();
+        assert_eq!(&buffer, b"and another message!".as_ref());
+
+        // Read a value from the other pipe.
+        let mut buffer = [0u8; 20];
+        read(&yet_another_read_end, &mut buffer).unwrap();
+        assert_eq!(&buffer, b"yet another message!".as_ref());
+    };
+
+    let server = thread::Builder::new()
+        .name("server".to_string())
+        .spawn(move || {
+            server();
+        })
+        .unwrap();
+
+    let client = thread::Builder::new()
+        .name("client".to_string())
+        .spawn(move || {
+            client();
+        })
+        .unwrap();
+
+    client.join().unwrap();
+    server.join().unwrap();
+}
