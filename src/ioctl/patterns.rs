@@ -153,6 +153,49 @@ unsafe impl<Opcode: CompileTimeOpcode, Input> Ioctl for Setter<Opcode, Input> {
     }
 }
 
+/// Implements an “updater” pattern for `ioctl`s.
+///
+/// The ioctl takes a reference to a struct that it reads its input from,
+/// then writes output to the same struct.
+pub struct Updater<'a, Opcode, Value> {
+    /// Reference to input/output data.
+    value: &'a mut Value,
+
+    /// The opcode.
+    _opcode: PhantomData<Opcode>,
+}
+
+impl<'a, Opcode: CompileTimeOpcode, Value> Updater<'a, Opcode, Value> {
+    /// Create a new pointer updater-style `ioctl` object.
+    ///
+    /// # Safety
+    ///
+    /// - `Opcode` must provide a valid opcode.
+    /// - For this opcode, `Value` must be the type that the kernel expects to
+    ///   get.
+    #[inline]
+    pub unsafe fn new(value: &'a mut Value) -> Self {
+        Self {
+            value,
+            _opcode: PhantomData,
+        }
+    }
+}
+
+unsafe impl<'a, Opcode: CompileTimeOpcode, T> Ioctl for Updater<'a, Opcode, T> {
+    type Output = ();
+    const IS_MUTATING: bool = true;
+    const OPCODE: self::Opcode = Opcode::OPCODE;
+
+    fn as_ptr(&mut self) -> *mut c::c_void {
+        (self.value as *mut T).cast()
+    }
+
+    unsafe fn output_from_ptr(_output: IoctlOutput, _ptr: *mut c::c_void) -> Result<()> {
+        Ok(())
+    }
+}
+
 /// Trait for something that provides an `ioctl` opcode at compile time.
 pub trait CompileTimeOpcode {
     /// The opcode.
