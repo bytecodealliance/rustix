@@ -315,8 +315,16 @@ pub use backend::runtime::tls::StartupTlsInfo;
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fork.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fork.2.html
 /// [async-signal-safe]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_04_03
-pub unsafe fn fork() -> io::Result<Option<Pid>> {
+pub unsafe fn fork() -> io::Result<Fork> {
     backend::runtime::syscalls::fork()
+}
+
+/// Regular Unix `fork` doesn't tell the child its own PID because it assumes
+/// the child can just do `getpid`. That's true, but it's more fun if it
+/// doesn't have to.
+pub enum Fork {
+    Child(Pid),
+    Parent(Pid),
 }
 
 /// `execveat(dirfd, path.as_c_str(), argv, envp, flags)`—Execute a new

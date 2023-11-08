@@ -142,6 +142,8 @@ pub(crate) const EXIT_SUCCESS: c_int = 0;
 pub(crate) const EXIT_FAILURE: c_int = 1;
 #[cfg(feature = "process")]
 pub(crate) const EXIT_SIGNALED_SIGABRT: c_int = 128 + linux_raw_sys::general::SIGABRT as c_int;
+#[cfg(feature = "runtime")]
+pub(crate) const CLONE_CHILD_SETTID: c_int = linux_raw_sys::general::CLONE_CHILD_SETTID as c_int;
 
 #[cfg(feature = "process")]
 pub(crate) use linux_raw_sys::{
