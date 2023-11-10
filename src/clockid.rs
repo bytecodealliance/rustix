@@ -56,8 +56,8 @@ pub enum ClockId {
     #[cfg(linux_kernel)]
     MonotonicRaw = c::CLOCK_MONOTONIC_RAW,
 
-    /// `CLOCK_REALTIME_ALARM`, available on Linux >= 3.0
-    #[cfg(all(linux_kernel, feature = "linux_4_11"))]
+    /// `CLOCK_REALTIME_ALARM`
+    #[cfg(linux_kernel)]
     #[doc(alias = "CLOCK_REALTIME_ALARM")]
     RealtimeAlarm = bitcast!(c::CLOCK_REALTIME_ALARM),
 
@@ -66,20 +66,16 @@ pub enum ClockId {
     #[doc(alias = "CLOCK_TAI")]
     Tai = bitcast!(c::CLOCK_TAI),
 
-    /// `CLOCK_BOOTTIME`, available on Linux >= 2.6.39
+    /// `CLOCK_BOOTTIME`
     ///
     /// On FreeBSD, use [`Self::Uptime`], as `CLOCK_BOOTTIME` is an alias for
     /// `CLOCK_UPTIME`.
-    #[cfg(any(
-        all(linux_kernel, feature = "linux_4_11"),
-        target_os = "fuchsia",
-        target_os = "openbsd"
-    ))]
+    #[cfg(any(linux_kernel, target_os = "fuchsia", target_os = "openbsd"))]
     #[doc(alias = "CLOCK_BOOTTIME")]
     Boottime = bitcast!(c::CLOCK_BOOTTIME),
 
-    /// `CLOCK_BOOTTIME_ALARM`, available on Linux >= 2.6.39
-    #[cfg(any(all(linux_kernel, feature = "linux_4_11"), target_os = "fuchsia"))]
+    /// `CLOCK_BOOTTIME_ALARM`
+    #[cfg(any(linux_kernel, target_os = "fuchsia"))]
     #[doc(alias = "CLOCK_BOOTTIME_ALARM")]
     BoottimeAlarm = bitcast!(c::CLOCK_BOOTTIME_ALARM),
 }
@@ -127,7 +123,7 @@ pub enum DynamicClockId<'a> {
     /// Linux dynamic clocks.
     Dynamic(BorrowedFd<'a>),
 
-    /// `CLOCK_REALTIME_ALARM`, available on Linux >= 3.0
+    /// `CLOCK_REALTIME_ALARM`
     #[cfg(linux_kernel)]
     RealtimeAlarm,
 
@@ -135,7 +131,7 @@ pub enum DynamicClockId<'a> {
     #[cfg(linux_kernel)]
     Tai,
 
-    /// `CLOCK_BOOTTIME`, available on Linux >= 2.6.39
+    /// `CLOCK_BOOTTIME`
     #[cfg(any(
         freebsdlike,
         linux_kernel,
@@ -144,7 +140,7 @@ pub enum DynamicClockId<'a> {
     ))]
     Boottime,
 
-    /// `CLOCK_BOOTTIME_ALARM`, available on Linux >= 2.6.39
+    /// `CLOCK_BOOTTIME_ALARM`
     #[cfg(any(linux_kernel, target_os = "fuchsia"))]
     BoottimeAlarm,
 }

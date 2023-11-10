@@ -212,9 +212,9 @@ pub enum Advice {
     LinuxMergeable = linux_raw_sys::general::MADV_MERGEABLE,
     /// `MADV_UNMERGEABLE`
     LinuxUnmergeable = linux_raw_sys::general::MADV_UNMERGEABLE,
-    /// `MADV_HUGEPAGE` (since Linux 2.6.38)
+    /// `MADV_HUGEPAGE`
     LinuxHugepage = linux_raw_sys::general::MADV_HUGEPAGE,
-    /// `MADV_NOHUGEPAGE` (since Linux 2.6.38)
+    /// `MADV_NOHUGEPAGE`
     LinuxNoHugepage = linux_raw_sys::general::MADV_NOHUGEPAGE,
     /// `MADV_DONTDUMP` (since Linux 3.4)
     LinuxDontDump = linux_raw_sys::general::MADV_DONTDUMP,

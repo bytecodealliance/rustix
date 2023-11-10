@@ -383,10 +383,10 @@ pub enum Advice {
     /// `MADV_UNMERGEABLE`
     #[cfg(linux_kernel)]
     LinuxUnmergeable = bitcast!(c::MADV_UNMERGEABLE),
-    /// `MADV_HUGEPAGE` (since Linux 2.6.38)
+    /// `MADV_HUGEPAGE`
     #[cfg(linux_kernel)]
     LinuxHugepage = bitcast!(c::MADV_HUGEPAGE),
-    /// `MADV_NOHUGEPAGE` (since Linux 2.6.38)
+    /// `MADV_NOHUGEPAGE`
     #[cfg(linux_kernel)]
     LinuxNoHugepage = bitcast!(c::MADV_NOHUGEPAGE),
     /// `MADV_DONTDUMP` (since Linux 3.4)

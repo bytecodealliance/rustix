@@ -226,8 +226,8 @@ fn is_mountpoint(file: BorrowedFd<'_>) -> bool {
 
 /// Open a directory in `/proc`, mapping all errors to `io::Errno::NOTSUP`.
 fn proc_opendirat<P: crate::path::Arg, Fd: AsFd>(dirfd: Fd, path: P) -> io::Result<OwnedFd> {
-    // We could add `PATH`|`NOATIME` here but Linux 2.6.32 doesn't support it.
-    // Also for `NOATIME` see the comment in `open_and_check_file`.
+    // We don't add `PATH` here because that disables `DIRECTORY`. And we don't
+    // add `NOATIME` for the same reason as the comment in `open_and_check_file`.
     let oflags = OFlags::NOFOLLOW | OFlags::DIRECTORY | OFlags::CLOEXEC | OFlags::NOCTTY;
     openat(dirfd, path, oflags, Mode::empty()).map_err(|_err| io::Errno::NOTSUP)
 }

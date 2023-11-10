@@ -197,13 +197,13 @@ bitflags! {
         /// `O_DIRECTORY`
         const DIRECTORY = linux_raw_sys::general::O_DIRECTORY;
 
-        /// `O_DSYNC`. Linux 2.6.32 only supports `O_SYNC`.
+        /// `O_DSYNC`.
         const DSYNC = linux_raw_sys::general::O_SYNC;
 
         /// `O_EXCL`
         const EXCL = linux_raw_sys::general::O_EXCL;
 
-        /// `O_FSYNC`. Linux 2.6.32 only supports `O_SYNC`.
+        /// `O_FSYNC`.
         const FSYNC = linux_raw_sys::general::O_SYNC;
 
         /// `O_NOFOLLOW`
@@ -226,7 +226,7 @@ bitflags! {
         /// `O_NOCTTY`
         const NOCTTY = linux_raw_sys::general::O_NOCTTY;
 
-        /// `O_RSYNC`. Linux 2.6.32 only supports `O_SYNC`.
+        /// `O_RSYNC`.
         const RSYNC = linux_raw_sys::general::O_SYNC;
 
         /// `O_SYNC`

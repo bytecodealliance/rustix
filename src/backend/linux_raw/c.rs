@@ -268,13 +268,13 @@ pub(crate) const CLOCK_THREAD_CPUTIME_ID: c_int =
     linux_raw_sys::general::CLOCK_THREAD_CPUTIME_ID as _;
 pub(crate) const CLOCK_PROCESS_CPUTIME_ID: c_int =
     linux_raw_sys::general::CLOCK_PROCESS_CPUTIME_ID as _;
-#[cfg(all(feature = "time", feature = "linux_4_11"))]
+#[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
 pub(crate) const CLOCK_BOOTTIME: c_int = linux_raw_sys::general::CLOCK_BOOTTIME as _;
-#[cfg(all(feature = "time", feature = "linux_4_11"))]
+#[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
 pub(crate) const CLOCK_BOOTTIME_ALARM: c_int = linux_raw_sys::general::CLOCK_BOOTTIME_ALARM as _;
-#[cfg(all(feature = "time", feature = "linux_4_11"))]
+#[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
 pub(crate) const CLOCK_TAI: c_int = linux_raw_sys::general::CLOCK_TAI as _;
-#[cfg(all(feature = "time", feature = "linux_4_11"))]
+#[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
 pub(crate) const CLOCK_REALTIME_ALARM: c_int = linux_raw_sys::general::CLOCK_REALTIME_ALARM as _;
 
 #[cfg(feature = "system")]
