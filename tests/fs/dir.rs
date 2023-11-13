@@ -82,7 +82,7 @@ fn dir_iterator_handles_dir_removal() {
     drop(tmp);
 
     let mut dir = rustix::fs::Dir::read_from(&fd).unwrap();
-    assert!(matches!(dir.next(), None));
+    assert!(dir.next().is_none());
 }
 
 // Like `dir_iterator_handles_dir_removal`, but close the directory after
@@ -105,5 +105,5 @@ fn dir_iterator_handles_dir_removal_after_open() {
     // Drop the `TempDir`, which deletes the directory.
     drop(tmp);
 
-    assert!(matches!(dir.next(), None));
+    assert!(dir.next().is_none());
 }

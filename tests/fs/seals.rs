@@ -9,7 +9,7 @@ fn test_seals() {
     let fd = match memfd_create("test", MemfdFlags::CLOEXEC | MemfdFlags::ALLOW_SEALING) {
         Ok(fd) => fd,
         Err(rustix::io::Errno::NOSYS) => return,
-        Err(err) => Err(err).unwrap(),
+        Err(err) => panic!("{:?}", err),
     };
     let mut file = File::from(fd);
 

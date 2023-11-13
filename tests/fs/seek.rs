@@ -7,23 +7,23 @@ fn test_seek_holes() {
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
-    let foo = openat(
+    let file = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::RDWR | OFlags::CREATE | OFlags::TRUNC,
         Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
-    let mut foo = std::fs::File::from(foo);
+    let mut file = std::fs::File::from(file);
 
-    let stat = fstat(&foo).unwrap();
+    let stat = fstat(&file).unwrap();
     let hole_size = stat.st_blksize as u64;
 
     #[cfg(any(solarish, freebsdlike, netbsdlike))]
     let hole_size = unsafe {
         use std::os::unix::io::AsRawFd;
 
-        let r = libc::fpathconf(foo.as_raw_fd(), libc::_PC_MIN_HOLE_SIZE);
+        let r = libc::fpathconf(file.as_raw_fd(), libc::_PC_MIN_HOLE_SIZE);
 
         if r < 0 {
             // Holes not supported.
@@ -34,27 +34,27 @@ fn test_seek_holes() {
         core::cmp::max(hole_size, r as u64)
     };
 
-    foo.write_all(b"prefix").unwrap();
+    file.write_all(b"prefix").unwrap();
     assert_eq!(
-        seek(&foo, SeekFrom::Start(hole_size * 2)),
+        seek(&file, SeekFrom::Start(hole_size * 2)),
         Ok(hole_size * 2)
     );
-    foo.write_all(b"suffix").unwrap();
-    assert_eq!(seek(&foo, SeekFrom::Start(0)), Ok(0));
-    assert_eq!(seek(&foo, SeekFrom::Current(0)), Ok(0));
-    assert_eq!(seek(&foo, SeekFrom::Hole(0)), Ok(hole_size));
-    assert_eq!(seek(&foo, SeekFrom::Hole(hole_size as i64)), Ok(hole_size));
+    file.write_all(b"suffix").unwrap();
+    assert_eq!(seek(&file, SeekFrom::Start(0)), Ok(0));
+    assert_eq!(seek(&file, SeekFrom::Current(0)), Ok(0));
+    assert_eq!(seek(&file, SeekFrom::Hole(0)), Ok(hole_size));
+    assert_eq!(seek(&file, SeekFrom::Hole(hole_size as i64)), Ok(hole_size));
     assert_eq!(
-        seek(&foo, SeekFrom::Hole(hole_size as i64 * 2)),
+        seek(&file, SeekFrom::Hole(hole_size as i64 * 2)),
         Ok(hole_size * 2 + 6)
     );
-    assert_eq!(seek(&foo, SeekFrom::Data(0)), Ok(0));
+    assert_eq!(seek(&file, SeekFrom::Data(0)), Ok(0));
     assert_eq!(
-        seek(&foo, SeekFrom::Data(hole_size as i64)),
+        seek(&file, SeekFrom::Data(hole_size as i64)),
         Ok(hole_size * 2)
     );
     assert_eq!(
-        seek(&foo, SeekFrom::Data(hole_size as i64 * 2)),
+        seek(&file, SeekFrom::Data(hole_size as i64 * 2)),
         Ok(hole_size * 2)
     );
 }
@@ -69,7 +69,7 @@ fn test_seek_offsets() {
         Ok(_) => {}
         Err(e) => panic!("seek failed with an unexpected error: {:?}", e),
     }
-    for invalid_offset in [i32::MIN as u64, !1 as u64, i64::MIN as u64] {
+    for invalid_offset in [i32::MIN as u64, !1, i64::MIN as u64] {
         match seek(&f, SeekFrom::Start(invalid_offset)) {
             Err(rustix::io::Errno::INVAL) => {}
             Ok(_) => panic!("seek unexpectedly succeeded"),

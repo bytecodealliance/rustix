@@ -6,9 +6,9 @@ fn test_futimens() {
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
-    let foo = openat(
+    let file = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::CREATE | OFlags::WRONLY | OFlags::CLOEXEC,
         Mode::empty(),
     )
@@ -24,9 +24,9 @@ fn test_futimens() {
             tv_nsec: 47000,
         },
     };
-    futimens(&foo, &times).unwrap();
+    futimens(&file, &times).unwrap();
 
-    let after = fstat(&foo).unwrap();
+    let after = fstat(&file).unwrap();
 
     assert_eq!(times.last_modification.tv_sec as u64, after.st_mtime as u64);
     #[cfg(not(target_os = "netbsd"))]

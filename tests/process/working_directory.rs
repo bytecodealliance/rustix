@@ -15,7 +15,7 @@ fn test_changing_working_directory() {
     let tmpdir = tmpdir();
 
     let orig_cwd = rustix::process::getcwd(Vec::new()).expect("get the cwd");
-    assert!(orig_cwd.to_str().unwrap().starts_with("/"));
+    assert!(orig_cwd.to_str().unwrap().starts_with('/'));
 
     assert_eq!(
         orig_cwd.to_str().unwrap(),

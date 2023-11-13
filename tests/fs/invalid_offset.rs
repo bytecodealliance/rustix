@@ -18,7 +18,7 @@ fn invalid_offset_seek() {
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::WRONLY | OFlags::TRUNC | OFlags::CREATE,
         Mode::RUSR | Mode::WUSR,
     )
@@ -46,7 +46,7 @@ fn invalid_offset_fallocate() {
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::WRONLY | OFlags::TRUNC | OFlags::CREATE,
         Mode::RUSR | Mode::WUSR,
     )
@@ -73,7 +73,7 @@ fn invalid_offset_fadvise() {
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::WRONLY | OFlags::TRUNC | OFlags::CREATE,
         Mode::RUSR | Mode::WUSR,
     )
@@ -105,7 +105,7 @@ fn invalid_offset_pread() {
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::RDWR | OFlags::TRUNC | OFlags::CREATE,
         Mode::RUSR | Mode::WUSR,
     )
@@ -125,7 +125,7 @@ fn invalid_offset_pwrite() {
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::WRONLY | OFlags::TRUNC | OFlags::CREATE,
         Mode::RUSR | Mode::WUSR,
     )
@@ -143,39 +143,39 @@ fn invalid_offset_copy_file_range() {
     use rustix::io::write;
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
-    let foo = openat(
+    let src = openat(
         &dir,
-        "foo",
+        "src",
         OFlags::RDWR | OFlags::TRUNC | OFlags::CREATE,
         Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
-    let bar = openat(
+    let dst = openat(
         &dir,
-        "bar",
+        "dst",
         OFlags::WRONLY | OFlags::TRUNC | OFlags::CREATE,
         Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
-    write(&foo, b"a").unwrap();
+    write(&src, b"a").unwrap();
 
     let mut off_in = u64::MAX;
     let mut off_out = 0;
-    copy_file_range(&foo, Some(&mut off_in), &bar, Some(&mut off_out), 1).unwrap_err();
+    copy_file_range(&src, Some(&mut off_in), &dst, Some(&mut off_out), 1).unwrap_err();
 
     let mut off_in = i64::MAX as u64 + 1;
     let mut off_out = 0;
-    copy_file_range(&foo, Some(&mut off_in), &bar, Some(&mut off_out), 1).unwrap_err();
+    copy_file_range(&src, Some(&mut off_in), &dst, Some(&mut off_out), 1).unwrap_err();
 
     let mut off_in = 0;
     let mut off_out = u64::MAX;
-    copy_file_range(&foo, Some(&mut off_in), &bar, Some(&mut off_out), 1).unwrap_err();
+    copy_file_range(&src, Some(&mut off_in), &dst, Some(&mut off_out), 1).unwrap_err();
 
     let mut off_in = 0;
     let mut off_out = i64::MAX as u64;
-    copy_file_range(&foo, Some(&mut off_in), &bar, Some(&mut off_out), 1).unwrap_err();
+    copy_file_range(&src, Some(&mut off_in), &dst, Some(&mut off_out), 1).unwrap_err();
 
     let mut off_in = 0;
     let mut off_out = i64::MAX as u64 + 1;
-    copy_file_range(&foo, Some(&mut off_in), &bar, Some(&mut off_out), 1).unwrap_err();
+    copy_file_range(&src, Some(&mut off_in), &dst, Some(&mut off_out), 1).unwrap_err();
 }

@@ -35,7 +35,7 @@ fn test_setrlimit() {
         let old = match rustix::process::prlimit(None, Resource::Core, new.clone()) {
             Ok(rlimit) => rlimit,
             Err(rustix::io::Errno::NOSYS) => return,
-            Err(err) => Err(err).unwrap(),
+            Err(err) => panic!("{:?}", err),
         };
 
         assert_eq!(first, old);

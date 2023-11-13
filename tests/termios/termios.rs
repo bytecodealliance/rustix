@@ -6,14 +6,14 @@ fn test_termios_flush() {
     let pty = match openpt(OpenptFlags::empty()) {
         Ok(pty) => pty,
         Err(rustix::io::Errno::NOSYS) => return,
-        Err(e) => Err(e).unwrap(),
+        Err(err) => panic!("{:?}", err),
     };
     let tio = match tcgetattr(&pty) {
         Ok(tio) => tio,
         Err(rustix::io::Errno::NOSYS) => return,
         #[cfg(apple)]
         Err(rustix::io::Errno::NOTTY) => return,
-        Err(e) => Err(e).unwrap(),
+        Err(err) => panic!("{:?}", err),
     };
     tcsetattr(&pty, OptionalActions::Now, &tio).unwrap();
 
@@ -28,14 +28,14 @@ fn test_termios_drain() {
     let pty = match openpt(OpenptFlags::empty()) {
         Ok(pty) => pty,
         Err(rustix::io::Errno::NOSYS) => return,
-        Err(e) => Err(e).unwrap(),
+        Err(err) => panic!("{:?}", err),
     };
     let tio = match tcgetattr(&pty) {
         Ok(tio) => tio,
         Err(rustix::io::Errno::NOSYS) => return,
         #[cfg(apple)]
         Err(rustix::io::Errno::NOTTY) => return,
-        Err(e) => Err(e).unwrap(),
+        Err(err) => panic!("{:?}", err),
     };
     tcsetattr(&pty, OptionalActions::Now, &tio).unwrap();
 
@@ -50,7 +50,7 @@ fn test_termios_winsize() {
     let pty = match openpt(OpenptFlags::empty()) {
         Ok(pty) => pty,
         Err(rustix::io::Errno::NOSYS) => return,
-        Err(e) => Err(e).unwrap(),
+        Err(err) => panic!("{:?}", err),
     };
 
     // Sizes for a pseudoterminal start out 0.
@@ -59,7 +59,7 @@ fn test_termios_winsize() {
         // Apple doesn't appear to support `tcgetwinsize` on a pty.
         #[cfg(apple)]
         Err(rustix::io::Errno::NOTTY) => return,
-        Err(err) => Err(err).unwrap(),
+        Err(err) => panic!("{:?}", err),
     };
     assert_eq!(sizes.ws_row, 0);
     assert_eq!(sizes.ws_col, 0);
@@ -92,14 +92,14 @@ fn test_termios_speeds() {
     let pty = match openpt(OpenptFlags::empty()) {
         Ok(pty) => pty,
         Err(rustix::io::Errno::NOSYS) => return,
-        Err(e) => Err(e).unwrap(),
+        Err(err) => panic!("{:?}", err),
     };
     let mut tio = match tcgetattr(&pty) {
         Ok(tio) => tio,
         Err(rustix::io::Errno::NOSYS) => return,
         #[cfg(apple)]
         Err(rustix::io::Errno::NOTTY) => return,
-        Err(e) => Err(e).unwrap(),
+        Err(err) => panic!("{:?}", err),
     };
 
     // Assume it doesn't default to 50, and then set it to 50.

@@ -33,7 +33,7 @@ fn test_file() {
                 )
             }
         }
-        Err(err) => Err(err).unwrap(),
+        Err(err) => panic!("{:?}", err),
     }
 
     // Check that `SYMLINK_FOLLOW` is rejected. Except on NetBSD which seems

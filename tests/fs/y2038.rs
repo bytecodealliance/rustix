@@ -30,9 +30,9 @@ fn test_y2038_with_utimensat() {
             tv_nsec: a_nsec as _,
         },
     };
-    let _ = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::RUSR).unwrap();
+    let _ = openat(&dir, "file", OFlags::CREATE | OFlags::WRONLY, Mode::RUSR).unwrap();
 
-    match utimensat(&dir, "foo", &timestamps, AtFlags::empty()) {
+    match utimensat(&dir, "file", &timestamps, AtFlags::empty()) {
         Ok(()) => (),
 
         // On 32-bit platforms, accept `EOVERFLOW`, meaning that y2038 support
@@ -44,7 +44,7 @@ fn test_y2038_with_utimensat() {
     }
 
     // Use `statat` to read back the timestamp.
-    let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
+    let stat = statat(&dir, "file", AtFlags::empty()).unwrap();
 
     assert_eq!(TryInto::<u64>::try_into(stat.st_mtime).unwrap(), m_sec);
 
@@ -67,7 +67,7 @@ fn test_y2038_with_utimensat() {
     );
 
     // Now test the same thing, but with `fstat`.
-    let file = openat(&dir, "foo", OFlags::RDONLY, Mode::empty()).unwrap();
+    let file = openat(&dir, "file", OFlags::RDONLY, Mode::empty()).unwrap();
     let stat = fstat(&file).unwrap();
 
     assert_eq!(TryInto::<u64>::try_into(stat.st_mtime).unwrap(), m_sec);
@@ -123,7 +123,7 @@ fn test_y2038_with_futimens() {
             tv_nsec: a_nsec as _,
         },
     };
-    let file = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::RUSR).unwrap();
+    let file = openat(&dir, "file", OFlags::CREATE | OFlags::WRONLY, Mode::RUSR).unwrap();
 
     match futimens(&file, &timestamps) {
         Ok(()) => (),
@@ -137,7 +137,7 @@ fn test_y2038_with_futimens() {
     }
 
     // Use `statat` to read back the timestamp.
-    let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
+    let stat = statat(&dir, "file", AtFlags::empty()).unwrap();
 
     assert_eq!(TryInto::<u64>::try_into(stat.st_mtime).unwrap(), m_sec);
 
@@ -160,7 +160,7 @@ fn test_y2038_with_futimens() {
     );
 
     // Now test the same thing, but with `fstat`.
-    let file = openat(&dir, "foo", OFlags::RDONLY, Mode::empty()).unwrap();
+    let file = openat(&dir, "file", OFlags::RDONLY, Mode::empty()).unwrap();
     let stat = fstat(&file).unwrap();
 
     assert_eq!(TryInto::<u64>::try_into(stat.st_mtime).unwrap(), m_sec);
@@ -213,7 +213,7 @@ fn test_y2038_with_futimens_and_stat() {
         },
     };
     let file = open(
-        tmp.path().join("foo"),
+        tmp.path().join("file"),
         OFlags::CREATE | OFlags::WRONLY,
         Mode::RUSR,
     )
@@ -231,7 +231,7 @@ fn test_y2038_with_futimens_and_stat() {
     }
 
     // Use `statat` to read back the timestamp.
-    let stat = stat(tmp.path().join("foo")).unwrap();
+    let stat = stat(tmp.path().join("file")).unwrap();
 
     assert_eq!(TryInto::<u64>::try_into(stat.st_mtime).unwrap(), m_sec);
 
@@ -254,7 +254,7 @@ fn test_y2038_with_futimens_and_stat() {
     );
 
     // Now test the same thing, but with `fstat`.
-    let file = open(tmp.path().join("foo"), OFlags::RDONLY, Mode::empty()).unwrap();
+    let file = open(tmp.path().join("file"), OFlags::RDONLY, Mode::empty()).unwrap();
     let stat = fstat(&file).unwrap();
 
     assert_eq!(TryInto::<u64>::try_into(stat.st_mtime).unwrap(), m_sec);
