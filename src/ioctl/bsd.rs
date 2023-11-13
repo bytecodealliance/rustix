@@ -1,4 +1,4 @@
-//! `ioctl` opcode behavior for Linux platforms.
+//! `ioctl` opcode behavior for BSD platforms.
 
 use super::{Direction, RawOpcode};
 

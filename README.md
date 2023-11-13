@@ -158,7 +158,7 @@ version of this crate.
 [`simple_libc`]: https://crates.io/crates/simple_libc
 [`uapi`]: https://crates.io/crates/uapi
 [`rusl`]: https://lib.rs/crates/rusl
-[`relibc`]: https://github.com/redox-os/relibc
+[`relibc`]: https://gitlab.redox-os.org/redox-os/relibc
 [`syscall`]: https://crates.io/crates/syscall
 [`sc`]: https://crates.io/crates/sc
 [`scall`]: https://crates.io/crates/scall

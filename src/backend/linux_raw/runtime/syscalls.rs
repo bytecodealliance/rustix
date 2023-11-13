@@ -300,6 +300,6 @@ pub(crate) fn exit_group(code: c::c_int) -> ! {
 
 #[inline]
 pub(crate) unsafe fn brk(addr: *mut c::c_void) -> io::Result<*mut c_void> {
-    // Don't mark this `readonly`, so that loads don't get reordered past it.
+    // This is non-`readonly`, to prevent loads from being reordered past it.
     ret_void_star(syscall!(__NR_brk, addr))
 }

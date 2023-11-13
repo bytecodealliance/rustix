@@ -292,9 +292,9 @@ bitflags! {
 }
 
 bitflags! {
-    /// `MS_*` constants for use with [`change_mount`].
+    /// `MS_*` constants for use with [`mount_change`].
     ///
-    /// [`change_mount`]: crate::mount::change_mount
+    /// [`mount_change`]: crate::mount::mount_change
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MountPropagationFlags: c::c_uint {
