@@ -20,6 +20,6 @@ fn test_ioctl_ficlone() {
     match rustix::fs::ioctl_ficlone(&dest, &src) {
         Ok(()) | Err(io::Errno::OPNOTSUPP) => (),
         Err(e) if e == io::Errno::from_raw_os_error(0x12) => (),
-        Err(err) => Err(err).unwrap(),
+        Err(err) => panic!("{:?}", err),
     }
 }

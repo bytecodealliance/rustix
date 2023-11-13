@@ -15,10 +15,10 @@ use std::time::Duration;
 // Test `socket` socket options.
 fn test_sockopts_socket(s: &OwnedFd) {
     // On a new socket we shouldn't have a timeout yet.
-    assert!(sockopt::get_socket_timeout(&s, sockopt::Timeout::Recv)
+    assert!(sockopt::get_socket_timeout(s, sockopt::Timeout::Recv)
         .unwrap()
         .is_none());
-    assert_eq!(sockopt::get_socket_type(&s).unwrap(), SocketType::STREAM);
+    assert_eq!(sockopt::get_socket_type(s).unwrap(), SocketType::STREAM);
     #[cfg(any(
         linux_kernel,
         target_os = "freebsd",
@@ -28,35 +28,32 @@ fn test_sockopts_socket(s: &OwnedFd) {
         target_env = "newlib"
     ))]
     {
-        assert_eq!(
-            sockopt::get_socket_protocol(&s).unwrap(),
-            Some(ipproto::TCP)
-        );
+        assert_eq!(sockopt::get_socket_protocol(s).unwrap(), Some(ipproto::TCP));
     }
-    assert!(!sockopt::get_socket_reuseaddr(&s).unwrap());
+    assert!(!sockopt::get_socket_reuseaddr(s).unwrap());
     #[cfg(not(windows))]
-    assert!(!sockopt::get_socket_broadcast(&s).unwrap());
+    assert!(!sockopt::get_socket_broadcast(s).unwrap());
     // On a new socket we shouldn't have a linger yet.
-    assert!(sockopt::get_socket_linger(&s).unwrap().is_none());
+    assert!(sockopt::get_socket_linger(s).unwrap().is_none());
     #[cfg(linux_kernel)]
-    assert!(!sockopt::get_socket_passcred(&s).unwrap());
+    assert!(!sockopt::get_socket_passcred(s).unwrap());
 
     // On a new socket we shouldn't have an error yet.
-    assert_eq!(sockopt::get_socket_error(&s).unwrap(), Ok(()));
-    assert!(!sockopt::get_socket_keepalive(&s).unwrap());
-    assert_ne!(sockopt::get_socket_recv_buffer_size(&s).unwrap(), 0);
-    assert_ne!(sockopt::get_socket_send_buffer_size(&s).unwrap(), 0);
+    assert_eq!(sockopt::get_socket_error(s).unwrap(), Ok(()));
+    assert!(!sockopt::get_socket_keepalive(s).unwrap());
+    assert_ne!(sockopt::get_socket_recv_buffer_size(s).unwrap(), 0);
+    assert_ne!(sockopt::get_socket_send_buffer_size(s).unwrap(), 0);
 
     #[cfg(not(apple))]
-    assert!(!sockopt::get_socket_acceptconn(&s).unwrap());
+    assert!(!sockopt::get_socket_acceptconn(s).unwrap());
 
     // Set a timeout.
-    sockopt::set_socket_timeout(&s, sockopt::Timeout::Recv, Some(Duration::new(1, 1))).unwrap();
+    sockopt::set_socket_timeout(s, sockopt::Timeout::Recv, Some(Duration::new(1, 1))).unwrap();
 
     // Check that we have a timeout of at least the time we set.
     if cfg!(not(any(target_os = "freebsd", target_os = "netbsd"))) {
         assert!(
-            sockopt::get_socket_timeout(&s, sockopt::Timeout::Recv)
+            sockopt::get_socket_timeout(s, sockopt::Timeout::Recv)
                 .unwrap()
                 .unwrap()
                 >= Duration::new(1, 1)
@@ -64,7 +61,7 @@ fn test_sockopts_socket(s: &OwnedFd) {
     } else {
         // On FreeBSD <= 12 and NetBSD, it appears the system rounds the timeout down.
         assert!(
-            sockopt::get_socket_timeout(&s, sockopt::Timeout::Recv)
+            sockopt::get_socket_timeout(s, sockopt::Timeout::Recv)
                 .unwrap()
                 .unwrap()
                 >= Duration::new(1, 0)
@@ -72,92 +69,92 @@ fn test_sockopts_socket(s: &OwnedFd) {
     }
 
     // Set a timeout with more than a million nanoseconds.
-    sockopt::set_socket_timeout(&s, sockopt::Timeout::Recv, Some(Duration::new(1, 10000000)))
+    sockopt::set_socket_timeout(s, sockopt::Timeout::Recv, Some(Duration::new(1, 10000000)))
         .unwrap();
 
     // Check that we have a timeout of at least the time we set.
     assert!(
-        sockopt::get_socket_timeout(&s, sockopt::Timeout::Recv)
+        sockopt::get_socket_timeout(s, sockopt::Timeout::Recv)
             .unwrap()
             .unwrap()
             >= Duration::new(1, 10000000)
     );
 
     // Set the reuse address flag
-    sockopt::set_socket_reuseaddr(&s, true).unwrap();
+    sockopt::set_socket_reuseaddr(s, true).unwrap();
 
     // Check that the reuse address flag is set.
-    assert!(sockopt::get_socket_reuseaddr(&s).unwrap());
+    assert!(sockopt::get_socket_reuseaddr(s).unwrap());
 
     #[cfg(not(windows))]
     {
         // Set the broadcast flag;
-        sockopt::set_socket_broadcast(&s, true).unwrap();
+        sockopt::set_socket_broadcast(s, true).unwrap();
 
         // Check that the broadcast flag is set. This has no effect on stream
         // sockets, and not all platforms even remember the value.
         #[cfg(not(bsd))]
-        assert!(sockopt::get_socket_broadcast(&s).unwrap());
+        assert!(sockopt::get_socket_broadcast(s).unwrap());
     }
 
     // Set the keepalive flag;
-    sockopt::set_socket_keepalive(&s, true).unwrap();
+    sockopt::set_socket_keepalive(s, true).unwrap();
 
     // Check that the keepalive flag is set.
-    assert!(sockopt::get_socket_keepalive(&s).unwrap());
+    assert!(sockopt::get_socket_keepalive(s).unwrap());
 
     // Set a linger.
-    sockopt::set_socket_linger(&s, Some(Duration::new(1, 1))).unwrap();
+    sockopt::set_socket_linger(s, Some(Duration::new(1, 1))).unwrap();
 
     // Check that we have a linger of at least the time we set.
-    assert!(sockopt::get_socket_linger(&s).unwrap().unwrap() >= Duration::new(1, 1));
+    assert!(sockopt::get_socket_linger(s).unwrap().unwrap() >= Duration::new(1, 1));
 
     #[cfg(linux_kernel)]
     {
         // Set the passcred flag;
-        sockopt::set_socket_passcred(&s, true).unwrap();
+        sockopt::set_socket_passcred(s, true).unwrap();
 
         // Check that the passcred flag is set.
-        assert!(sockopt::get_socket_passcred(&s).unwrap());
+        assert!(sockopt::get_socket_passcred(s).unwrap());
     }
 
     // Set the receive buffer size.
-    let size = sockopt::get_socket_recv_buffer_size(&s).unwrap();
-    sockopt::set_socket_recv_buffer_size(&s, size * 2).unwrap();
+    let size = sockopt::get_socket_recv_buffer_size(s).unwrap();
+    sockopt::set_socket_recv_buffer_size(s, size * 2).unwrap();
 
     // Check that the receive buffer size is set.
-    assert!(sockopt::get_socket_recv_buffer_size(&s).unwrap() >= size * 2);
+    assert!(sockopt::get_socket_recv_buffer_size(s).unwrap() >= size * 2);
 
     // Set the send buffer size.
-    let size = sockopt::get_socket_send_buffer_size(&s).unwrap();
-    sockopt::set_socket_send_buffer_size(&s, size * 4).unwrap();
+    let size = sockopt::get_socket_send_buffer_size(s).unwrap();
+    sockopt::set_socket_send_buffer_size(s, size * 4).unwrap();
 
     // Check that the send buffer size is set.
-    assert!(sockopt::get_socket_send_buffer_size(&s).unwrap() >= size * 4);
+    assert!(sockopt::get_socket_send_buffer_size(s).unwrap() >= size * 4);
 
     // Check that the oobinline flag is not initially set.
-    assert!(!sockopt::get_socket_oobinline(&s).unwrap());
+    assert!(!sockopt::get_socket_oobinline(s).unwrap());
 
     // Set the oobinline flag;
-    sockopt::set_socket_oobinline(&s, true).unwrap();
+    sockopt::set_socket_oobinline(s, true).unwrap();
 
     // Check that the oobinline flag is set.
-    assert!(sockopt::get_socket_oobinline(&s).unwrap());
+    assert!(sockopt::get_socket_oobinline(s).unwrap());
 
     // Check the initial value of SO_REUSEPORT, set it, and check it.
     #[cfg(not(any(solarish, windows)))]
     {
-        assert!(!sockopt::get_socket_reuseport(&s).unwrap());
-        sockopt::set_socket_reuseport(&s, true).unwrap();
-        assert!(sockopt::get_socket_reuseport(&s).unwrap());
+        assert!(!sockopt::get_socket_reuseport(s).unwrap());
+        sockopt::set_socket_reuseport(s, true).unwrap();
+        assert!(sockopt::get_socket_reuseport(s).unwrap());
     }
 
     // Check the initial value of SO_REUSEPORT_LB, set it, and check it.
     #[cfg(target_os = "freebsd")]
     {
-        assert!(!sockopt::get_socket_reuseport_lb(&s).unwrap());
-        sockopt::set_socket_reuseport_lb(&s, true).unwrap();
-        assert!(sockopt::get_socket_reuseport_lb(&s).unwrap());
+        assert!(!sockopt::get_socket_reuseport_lb(s).unwrap());
+        sockopt::set_socket_reuseport_lb(s, true).unwrap();
+        assert!(sockopt::get_socket_reuseport_lb(s).unwrap());
     }
 
     // Not much we can check with `get_socket_cookie`, but make sure we can
@@ -165,25 +162,25 @@ fn test_sockopts_socket(s: &OwnedFd) {
     #[cfg(target_os = "linux")]
     {
         assert_eq!(
-            sockopt::get_socket_cookie(&s).unwrap(),
-            sockopt::get_socket_cookie(&s).unwrap()
+            sockopt::get_socket_cookie(s).unwrap(),
+            sockopt::get_socket_cookie(s).unwrap()
         );
     }
 
     // Check the initial value of SO_INCOMING_CPU, set it, and check it.
     #[cfg(target_os = "linux")]
     {
-        assert_eq!(sockopt::get_socket_incoming_cpu(&s).unwrap(), u32::MAX);
-        sockopt::set_socket_incoming_cpu(&s, 3).unwrap();
-        assert_eq!(sockopt::get_socket_incoming_cpu(&s).unwrap(), 3);
+        assert_eq!(sockopt::get_socket_incoming_cpu(s).unwrap(), u32::MAX);
+        sockopt::set_socket_incoming_cpu(s, 3).unwrap();
+        assert_eq!(sockopt::get_socket_incoming_cpu(s).unwrap(), 3);
     }
 
     // Check the initial value of SO_NOSIGPIPE, set it, and check it.
     #[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
     {
-        assert_eq!(sockopt::get_socket_nosigpipe(&s).unwrap(), false);
-        sockopt::set_socket_nosigpipe(&s, true).unwrap();
-        assert_eq!(sockopt::get_socket_nosigpipe(&s).unwrap(), true);
+        assert_eq!(sockopt::get_socket_nosigpipe(s).unwrap(), false);
+        sockopt::set_socket_nosigpipe(s, true).unwrap();
+        assert_eq!(sockopt::get_socket_nosigpipe(s).unwrap(), true);
     }
 }
 
@@ -191,55 +188,55 @@ fn test_sockopts_socket(s: &OwnedFd) {
 fn test_sockopts_tcp(s: &OwnedFd) {
     #[cfg(any(linux_like, taraget_os = "fuchsia"))]
     {
-        assert_eq!(sockopt::get_tcp_user_timeout(&s).unwrap(), 0);
-        sockopt::set_tcp_user_timeout(&s, 7).unwrap();
-        assert_eq!(sockopt::get_tcp_user_timeout(&s).unwrap(), 7);
+        assert_eq!(sockopt::get_tcp_user_timeout(s).unwrap(), 0);
+        sockopt::set_tcp_user_timeout(s, 7).unwrap();
+        assert_eq!(sockopt::get_tcp_user_timeout(s).unwrap(), 7);
     }
 
-    assert!(!sockopt::get_tcp_nodelay(&s).unwrap());
+    assert!(!sockopt::get_tcp_nodelay(s).unwrap());
 
     #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
     {
-        assert!(sockopt::get_tcp_keepcnt(&s).is_ok());
-        assert!(sockopt::get_tcp_keepidle(&s).is_ok());
-        assert!(sockopt::get_tcp_keepintvl(&s).is_ok());
+        assert!(sockopt::get_tcp_keepcnt(s).is_ok());
+        assert!(sockopt::get_tcp_keepidle(s).is_ok());
+        assert!(sockopt::get_tcp_keepintvl(s).is_ok());
     }
 
     // Set the nodelay flag.
-    sockopt::set_tcp_nodelay(&s, true).unwrap();
+    sockopt::set_tcp_nodelay(s, true).unwrap();
 
     // Check that the nodelay flag is set.
-    assert!(sockopt::get_tcp_nodelay(&s).unwrap());
+    assert!(sockopt::get_tcp_nodelay(s).unwrap());
 
     // Clear the nodelay flag.
-    sockopt::set_tcp_nodelay(&s, false).unwrap();
+    sockopt::set_tcp_nodelay(s, false).unwrap();
 
     // Check that the nodelay flag is cleared.
-    assert!(!sockopt::get_tcp_nodelay(&s).unwrap());
+    assert!(!sockopt::get_tcp_nodelay(s).unwrap());
 
     #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
     {
         // Set keepalive values:
-        sockopt::set_tcp_keepcnt(&s, 42).unwrap();
-        sockopt::set_tcp_keepidle(&s, Duration::from_secs(3601)).unwrap();
-        sockopt::set_tcp_keepintvl(&s, Duration::from_secs(60)).unwrap();
+        sockopt::set_tcp_keepcnt(s, 42).unwrap();
+        sockopt::set_tcp_keepidle(s, Duration::from_secs(3601)).unwrap();
+        sockopt::set_tcp_keepintvl(s, Duration::from_secs(60)).unwrap();
 
         // Check keepalive values:
-        assert_eq!(sockopt::get_tcp_keepcnt(&s).unwrap(), 42);
+        assert_eq!(sockopt::get_tcp_keepcnt(s).unwrap(), 42);
         assert_eq!(
-            sockopt::get_tcp_keepidle(&s).unwrap(),
+            sockopt::get_tcp_keepidle(s).unwrap(),
             Duration::from_secs(3601)
         );
         assert_eq!(
-            sockopt::get_tcp_keepintvl(&s).unwrap(),
+            sockopt::get_tcp_keepintvl(s).unwrap(),
             Duration::from_secs(60)
         );
 
         #[cfg(not(target_os = "illumos"))]
         {
-            sockopt::set_tcp_keepintvl(&s, Duration::from_secs(61)).unwrap();
+            sockopt::set_tcp_keepintvl(s, Duration::from_secs(61)).unwrap();
             assert_eq!(
-                sockopt::get_tcp_keepintvl(&s).unwrap(),
+                sockopt::get_tcp_keepintvl(s).unwrap(),
                 Duration::from_secs(61)
             );
         }
@@ -248,9 +245,9 @@ fn test_sockopts_tcp(s: &OwnedFd) {
     // Check the initial value of TCP_QUICKACK, set it, and check it.
     #[cfg(any(linux_like, target_os = "fuchsia"))]
     {
-        assert!(sockopt::get_tcp_quickack(&s).unwrap());
-        sockopt::set_tcp_quickack(&s, false).unwrap();
-        assert!(!sockopt::get_tcp_quickack(&s).unwrap());
+        assert!(sockopt::get_tcp_quickack(s).unwrap());
+        sockopt::set_tcp_quickack(s, false).unwrap();
+        assert!(!sockopt::get_tcp_quickack(s).unwrap());
     }
 
     // Check the initial value of TCP_CONGESTION, set it, and check it.
@@ -266,12 +263,12 @@ fn test_sockopts_tcp(s: &OwnedFd) {
     ))]
     #[cfg(feature = "alloc")]
     {
-        let algo = sockopt::get_tcp_congestion(&s).unwrap();
+        let algo = sockopt::get_tcp_congestion(s).unwrap();
         assert!(!algo.is_empty());
         #[cfg(linux_like)]
         {
-            sockopt::set_tcp_congestion(&s, "reno").unwrap();
-            assert_eq!(sockopt::get_tcp_congestion(&s).unwrap(), "reno");
+            sockopt::set_tcp_congestion(s, "reno").unwrap();
+            assert_eq!(sockopt::get_tcp_congestion(s).unwrap(), "reno");
         }
     }
 
@@ -279,17 +276,17 @@ fn test_sockopts_tcp(s: &OwnedFd) {
     // it.
     #[cfg(any(linux_like, target_os = "fuchsia"))]
     {
-        assert!(!sockopt::get_tcp_thin_linear_timeouts(&s).unwrap());
-        sockopt::set_tcp_thin_linear_timeouts(&s, true).unwrap();
-        assert!(sockopt::get_tcp_thin_linear_timeouts(&s).unwrap());
+        assert!(!sockopt::get_tcp_thin_linear_timeouts(s).unwrap());
+        sockopt::set_tcp_thin_linear_timeouts(s, true).unwrap();
+        assert!(sockopt::get_tcp_thin_linear_timeouts(s).unwrap());
     }
 
     // Check the initial value of TCP_CORK, set it, and check it.
     #[cfg(any(linux_like, solarish, target_os = "fuchsia"))]
     {
-        assert!(!sockopt::get_tcp_cork(&s).unwrap());
-        sockopt::set_tcp_cork(&s, true).unwrap();
-        assert!(sockopt::get_tcp_cork(&s).unwrap());
+        assert!(!sockopt::get_tcp_cork(s).unwrap());
+        sockopt::set_tcp_cork(s, true).unwrap();
+        assert!(sockopt::get_tcp_cork(s).unwrap());
     }
 }
 
@@ -407,7 +404,7 @@ fn test_sockopts_ipv6() {
         Err(io::Errno::OPNOTSUPP) => (),
         Err(io::Errno::INVAL) => (),
         Err(io::Errno::NOPROTOOPT) => (),
-        Err(err) => Err(err).unwrap(),
+        Err(err) => panic!("{:?}", err),
     }
     assert_ne!(sockopt::get_ipv6_unicast_hops(&s).unwrap(), 0);
 
@@ -418,7 +415,7 @@ fn test_sockopts_ipv6() {
         Ok(hops) => assert_eq!(hops, 0),
         Err(io::Errno::NOPROTOOPT) => (),
         Err(io::Errno::INVAL) => (),
-        Err(err) => Err(err).unwrap(),
+        Err(err) => panic!("{:?}", err),
     };
 
     // Set the IPV4 V6OONLY value.
@@ -434,13 +431,13 @@ fn test_sockopts_ipv6() {
             // Check that the IPV6 multicast loop value is set.
             match sockopt::get_ipv6_multicast_loop(&s) {
                 Ok(multicast_loop) => assert!(!multicast_loop),
-                Err(err) => Err(err).unwrap(),
+                Err(err) => panic!("{:?}", err),
             }
         }
         Err(io::Errno::OPNOTSUPP) => (),
         Err(io::Errno::INVAL) => (),
         Err(io::Errno::NOPROTOOPT) => (),
-        Err(err) => Err(err).unwrap(),
+        Err(err) => panic!("{:?}", err),
     }
 
     // Set the IPV6 unicast hops value to the default value.

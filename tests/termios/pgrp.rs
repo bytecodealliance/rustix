@@ -30,7 +30,7 @@ fn pgrp_pseudoterminal() {
     let pty = match openpt(OpenptFlags::NOCTTY) {
         Ok(pty) => pty,
         Err(rustix::io::Errno::NOSYS) => return,
-        Err(e) => Err(e).unwrap(),
+        Err(err) => panic!("{:?}", err),
     };
 
     // Linux's `tcgetpgrp` returns 0 here, which is not documented, so rustix
@@ -50,6 +50,6 @@ fn pgrp_pseudoterminal() {
         rustix::io::Errno::PERM => {}
         #[cfg(any(apple, linux_kernel))]
         rustix::io::Errno::NOTTY => {}
-        err => Err(err).unwrap(),
+        err => panic!("{:?}", err),
     }
 }

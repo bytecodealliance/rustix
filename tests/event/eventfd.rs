@@ -10,7 +10,7 @@ fn test_eventfd() {
         Ok(efd) => efd,
         #[cfg(target_os = "freebsd")]
         Err(rustix::io::Errno::NOSYS) => return, // FreeBSD 12 lacks `eventfd`
-        Err(e) => Err(e).unwrap(),
+        Err(err) => panic!("{:?}", err),
     };
 
     let child = thread::spawn(move || {

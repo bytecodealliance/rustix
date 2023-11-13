@@ -20,7 +20,7 @@ fn openpty_basic() {
         Ok(name) => name,
         #[cfg(target_os = "freebsd")]
         Err(rustix::io::Errno::NOSYS) => return, // FreeBSD 12 doesn't support this
-        Err(err) => Err(err).unwrap(),
+        Err(err) => panic!("{:?}", err),
     };
     let user = openat(
         CWD,

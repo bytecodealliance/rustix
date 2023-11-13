@@ -23,9 +23,9 @@ fn test_fcntl_apple() {
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
-    let foo = openat(
+    let file = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::RDWR | OFlags::CREATE | OFlags::TRUNC,
         Mode::RUSR | Mode::WUSR,
     )
@@ -34,13 +34,13 @@ fn test_fcntl_apple() {
     // It appears `fsync_rdadvise` at offset 0 length 0 doesn't work if the
     // file has size zero, so write in some bytes.
     assert_eq!(
-        rustix::io::write(&foo, b"data").expect("write"),
+        rustix::io::write(&file, b"data").expect("write"),
         4,
         "write failed"
     );
 
-    rustix::fs::fcntl_rdadvise(&foo, 0, 0).unwrap();
-    rustix::fs::fcntl_fullfsync(&foo).unwrap();
-    rustix::fs::fcntl_nocache(&foo, true).unwrap();
-    rustix::fs::fcntl_global_nocache(&foo, true).unwrap();
+    rustix::fs::fcntl_rdadvise(&file, 0, 0).unwrap();
+    rustix::fs::fcntl_fullfsync(&file).unwrap();
+    rustix::fs::fcntl_nocache(&file, true).unwrap();
+    rustix::fs::fcntl_global_nocache(&file, true).unwrap();
 }

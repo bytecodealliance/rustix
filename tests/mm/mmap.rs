@@ -13,7 +13,7 @@ fn test_mmap() {
 
     let file = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::CREATE | OFlags::WRONLY | OFlags::TRUNC,
         Mode::RUSR,
     )
@@ -21,7 +21,7 @@ fn test_mmap() {
     write(&file, &[b'a'; 8192]).unwrap();
     drop(file);
 
-    let file = openat(&dir, "foo", OFlags::RDONLY, Mode::empty()).unwrap();
+    let file = openat(&dir, "file", OFlags::RDONLY, Mode::empty()).unwrap();
     unsafe {
         let addr = mmap(
             null_mut(),
@@ -38,7 +38,7 @@ fn test_mmap() {
         munmap(addr, 8192).unwrap();
     }
 
-    let file = openat(&dir, "foo", OFlags::RDONLY, Mode::empty()).unwrap();
+    let file = openat(&dir, "file", OFlags::RDONLY, Mode::empty()).unwrap();
     unsafe {
         assert_eq!(
             mmap(
@@ -105,14 +105,14 @@ fn test_mlock() {
             // Tests won't always have enough memory or permissions, and that's ok.
             Err(rustix::io::Errno::PERM | rustix::io::Errno::NOMEM) => (),
             // But they shouldn't fail otherwise.
-            Err(other) => Err(other).unwrap(),
+            Err(other) => panic!("{:?}", other),
         }
 
         #[cfg(linux_kernel)]
         {
             match mlock_with(addr, 8192, MlockFlags::empty()) {
                 Err(rustix::io::Errno::NOSYS) => (),
-                Err(err) => Err(err).unwrap(),
+                Err(err) => panic!("{:?}", err),
                 Ok(()) => munlock(addr, 8192).unwrap(),
             }
 
@@ -121,7 +121,7 @@ fn test_mlock() {
                 Err(rustix::io::Errno::NOSYS) => (),
                 // Linux versions that don't recognize `ONFAULT` return this.
                 Err(rustix::io::Errno::INVAL) => (),
-                Err(err) => Err(err).unwrap(),
+                Err(err) => panic!("{:?}", err),
                 Ok(()) => munlock(addr, 8192).unwrap(),
             }
 

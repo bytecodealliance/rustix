@@ -12,9 +12,9 @@ fn test_readwrite_pv() {
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
-    let foo = openat(
+    let file = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::RDWR | OFlags::CREATE | OFlags::TRUNC,
         Mode::RUSR | Mode::WUSR,
     )
@@ -23,23 +23,23 @@ fn test_readwrite_pv() {
     // For most targets, just call `pwritev`.
     #[cfg(not(apple))]
     {
-        pwritev(&foo, &[IoSlice::new(b"hello")], 200).unwrap();
+        pwritev(&file, &[IoSlice::new(b"hello")], 200).unwrap();
     }
     // macOS only has `pwritev` in newer versions; allow it to fail with
     // `Errno::NOSYS`.
     #[cfg(apple)]
     {
-        match pwritev(&foo, &[IoSlice::new(b"hello")], 200) {
+        match pwritev(&file, &[IoSlice::new(b"hello")], 200) {
             Ok(_) => (),
             Err(rustix::io::Errno::NOSYS) => return,
-            Err(err) => Err(err).unwrap(),
+            Err(err) => panic!("{:?}", err),
         }
     }
-    pwritev(&foo, &[IoSlice::new(b"world")], 300).unwrap();
+    pwritev(&file, &[IoSlice::new(b"world")], 300).unwrap();
     let mut buf = [0_u8; 5];
-    preadv(&foo, &mut [IoSliceMut::new(&mut buf)], 200).unwrap();
+    preadv(&file, &mut [IoSliceMut::new(&mut buf)], 200).unwrap();
     assert_eq!(&buf, b"hello");
-    preadv(&foo, &mut [IoSliceMut::new(&mut buf)], 300).unwrap();
+    preadv(&file, &mut [IoSliceMut::new(&mut buf)], 300).unwrap();
     assert_eq!(&buf, b"world");
 }
 
@@ -51,20 +51,20 @@ fn test_readwrite_p() {
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
-    let foo = openat(
+    let file = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::RDWR | OFlags::CREATE | OFlags::TRUNC,
         Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
 
-    pwrite(&foo, b"hello", 200).unwrap();
-    pwrite(&foo, b"world", 300).unwrap();
+    pwrite(&file, b"hello", 200).unwrap();
+    pwrite(&file, b"world", 300).unwrap();
     let mut buf = [0_u8; 5];
-    pread(&foo, &mut buf, 200).unwrap();
+    pread(&file, &mut buf, 200).unwrap();
     assert_eq!(&buf, b"hello");
-    pread(&foo, &mut buf, 300).unwrap();
+    pread(&file, &mut buf, 300).unwrap();
     assert_eq!(&buf, b"world");
 }
 
@@ -77,21 +77,21 @@ fn test_readwrite_v() {
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
-    let foo = openat(
+    let file = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::RDWR | OFlags::CREATE | OFlags::TRUNC,
         Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
 
-    writev(&foo, &[IoSlice::new(b"hello")]).unwrap();
-    writev(&foo, &[IoSlice::new(b"world")]).unwrap();
-    seek(&foo, SeekFrom::Start(0)).unwrap();
+    writev(&file, &[IoSlice::new(b"hello")]).unwrap();
+    writev(&file, &[IoSlice::new(b"world")]).unwrap();
+    seek(&file, SeekFrom::Start(0)).unwrap();
     let mut buf = [0_u8; 5];
-    readv(&foo, &mut [IoSliceMut::new(&mut buf)]).unwrap();
+    readv(&file, &mut [IoSliceMut::new(&mut buf)]).unwrap();
     assert_eq!(&buf, b"hello");
-    readv(&foo, &mut [IoSliceMut::new(&mut buf)]).unwrap();
+    readv(&file, &mut [IoSliceMut::new(&mut buf)]).unwrap();
     assert_eq!(&buf, b"world");
 }
 
@@ -103,21 +103,21 @@ fn test_readwrite() {
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
-    let foo = openat(
+    let file = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::RDWR | OFlags::CREATE | OFlags::TRUNC,
         Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
 
-    write(&foo, b"hello").unwrap();
-    write(&foo, b"world").unwrap();
-    seek(&foo, SeekFrom::Start(0)).unwrap();
+    write(&file, b"hello").unwrap();
+    write(&file, b"world").unwrap();
+    seek(&file, SeekFrom::Start(0)).unwrap();
     let mut buf = [0_u8; 5];
-    read(&foo, &mut buf).unwrap();
+    read(&file, &mut buf).unwrap();
     assert_eq!(&buf, b"hello");
-    read(&foo, &mut buf).unwrap();
+    read(&file, &mut buf).unwrap();
     assert_eq!(&buf, b"world");
 }
 
@@ -157,35 +157,35 @@ fn test_pwritev2() {
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
-    let foo = openat(
+    let file = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::RDWR | OFlags::CREATE | OFlags::TRUNC,
         Mode::RUSR | Mode::WUSR,
     )
     .unwrap();
 
-    writev(&foo, &[IoSlice::new(b"hello")]).unwrap();
-    seek(&foo, SeekFrom::Start(0)).unwrap();
+    writev(&file, &[IoSlice::new(b"hello")]).unwrap();
+    seek(&file, SeekFrom::Start(0)).unwrap();
 
     // pwritev2 to append with a 0 offset: don't update the current position.
-    match pwritev2(&foo, &[IoSlice::new(b"world")], 0, ReadWriteFlags::APPEND) {
+    match pwritev2(&file, &[IoSlice::new(b"world")], 0, ReadWriteFlags::APPEND) {
         Ok(_) => {}
         // Skip the rest of the test if we don't have `pwritev2` and
         // `RWF_APPEND`.
         Err(rustix::io::Errno::NOSYS | rustix::io::Errno::NOTSUP) => return,
-        Err(err) => Err(err).unwrap(),
+        Err(err) => panic!("{:?}", err),
     }
-    assert_eq!(seek(&foo, SeekFrom::Current(0)).unwrap(), 0);
+    assert_eq!(seek(&file, SeekFrom::Current(0)).unwrap(), 0);
 
     // pwritev2 to append with a !0 offset: do update the current position.
-    pwritev2(&foo, &[IoSlice::new(b"world")], !0, ReadWriteFlags::APPEND).unwrap();
-    assert_eq!(seek(&foo, SeekFrom::Current(0)).unwrap(), 15);
+    pwritev2(&file, &[IoSlice::new(b"world")], !0, ReadWriteFlags::APPEND).unwrap();
+    assert_eq!(seek(&file, SeekFrom::Current(0)).unwrap(), 15);
 
-    seek(&foo, SeekFrom::Start(0)).unwrap();
+    seek(&file, SeekFrom::Start(0)).unwrap();
     let mut buf = [0_u8; 5];
     preadv2(
-        &foo,
+        &file,
         &mut [IoSliceMut::new(&mut buf)],
         0,
         ReadWriteFlags::empty(),
@@ -193,7 +193,7 @@ fn test_pwritev2() {
     .unwrap();
     assert_eq!(&buf, b"hello");
     preadv2(
-        &foo,
+        &file,
         &mut [IoSliceMut::new(&mut buf)],
         5,
         ReadWriteFlags::empty(),
@@ -308,7 +308,7 @@ fn test_p_offsets() {
     }
 
     // Test that negative offsets fail with `INVAL`.
-    for invalid_offset in [i32::MIN as u64, !1 as u64, i64::MIN as u64] {
+    for invalid_offset in [i32::MIN as u64, !1, i64::MIN as u64] {
         match pread(&f, &mut buf, invalid_offset) {
             Err(rustix::io::Errno::OPNOTSUPP | rustix::io::Errno::NOSYS) => {}
             Err(rustix::io::Errno::INVAL) => {}

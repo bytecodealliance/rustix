@@ -21,7 +21,7 @@ fn test_mlock() {
             // Tests won't always have enough memory or permissions, and that's ok.
             Err(rustix::io::Errno::PERM | rustix::io::Errno::NOMEM) => {}
             // But they shouldn't fail otherwise.
-            Err(other) => Err(other).unwrap(),
+            Err(other) => panic!("{:?}", other),
         }
     }
 }
@@ -41,7 +41,7 @@ fn test_mlock_with() {
             // Tests won't always have enough memory or permissions, and that's ok.
             Err(rustix::io::Errno::PERM | rustix::io::Errno::NOMEM | rustix::io::Errno::NOSYS) => {}
             // But they shouldn't fail otherwise.
-            Err(other) => Err(other).unwrap(),
+            Err(other) => panic!("{:?}", other),
         }
     }
 }
@@ -75,7 +75,7 @@ fn test_mlock_with_onfault() {
             // Tests won't always have enough memory or permissions, and that's ok.
             Err(rustix::io::Errno::PERM | rustix::io::Errno::NOMEM | rustix::io::Errno::NOSYS) => {}
             // But they shouldn't fail otherwise.
-            Err(other) => Err(other).unwrap(),
+            Err(other) => panic!("{:?}", other),
         }
     }
 }

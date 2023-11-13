@@ -16,7 +16,7 @@ fn test_reaper_status() {
     match set_reaper_status(false).unwrap_err() {
         io::Errno::INVAL => (),
         io::Errno::PERM => return, // FreeBSD 12 doesn't support this
-        err => Err(err).unwrap(),
+        err => panic!("{:?}", err),
     };
     set_reaper_status(true).unwrap();
     let status_while_acq = dbg!(get_reaper_status(None).unwrap());
@@ -45,7 +45,7 @@ fn test_no_new_privs() {
     match no_new_privs(None) {
         Ok(flag) => assert!(!flag),
         Err(io::Errno::INVAL) => return, // FreeBSD 12 doesn't support this
-        Err(err) => Err(err).unwrap(),
+        Err(err) => panic!("{:?}", err),
     };
     set_no_new_privs(None).unwrap();
     assert!(no_new_privs(None).unwrap());

@@ -14,7 +14,7 @@ fn test_utimensat() {
 
     let _ = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::CREATE | OFlags::WRONLY | OFlags::CLOEXEC,
         Mode::empty(),
     )
@@ -30,9 +30,9 @@ fn test_utimensat() {
             tv_nsec: 47000,
         },
     };
-    utimensat(&dir, "foo", &times, AtFlags::empty()).unwrap();
+    utimensat(&dir, "file", &times, AtFlags::empty()).unwrap();
 
-    let after = statat(&dir, "foo", AtFlags::empty()).unwrap();
+    let after = statat(&dir, "file", AtFlags::empty()).unwrap();
 
     assert_eq!(times.last_modification.tv_sec as u64, after.st_mtime as u64);
     #[cfg(not(target_os = "netbsd"))]
@@ -83,7 +83,7 @@ fn test_utimensat_noent() {
         },
     };
     assert_eq!(
-        utimensat(&dir, "foo", &times, AtFlags::empty()).unwrap_err(),
+        utimensat(&dir, "file", &times, AtFlags::empty()).unwrap_err(),
         rustix::io::Errno::NOENT
     );
 }
@@ -102,9 +102,9 @@ fn test_utimensat_notdir() {
     )
     .unwrap();
 
-    let foo = openat(
+    let file = openat(
         &dir,
-        "foo",
+        "file",
         OFlags::CREATE | OFlags::WRONLY | OFlags::CLOEXEC,
         Mode::empty(),
     )
@@ -121,7 +121,7 @@ fn test_utimensat_notdir() {
         },
     };
     assert_eq!(
-        utimensat(&foo, "bar", &times, AtFlags::empty()).unwrap_err(),
+        utimensat(&file, "bar", &times, AtFlags::empty()).unwrap_err(),
         rustix::io::Errno::NOTDIR
     );
 }

@@ -4,15 +4,15 @@ fn test_mkdir() {
 
     let tmp = tempfile::tempdir().unwrap();
 
-    mkdir(tmp.path().join("foo"), Mode::RWXU).unwrap();
-    let stat = stat(tmp.path().join("foo")).unwrap();
+    mkdir(tmp.path().join("file"), Mode::RWXU).unwrap();
+    let stat = stat(tmp.path().join("file")).unwrap();
     assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::Directory);
-    access(tmp.path().join("foo"), Access::READ_OK).unwrap();
-    access(tmp.path().join("foo"), Access::WRITE_OK).unwrap();
-    access(tmp.path().join("foo"), Access::EXEC_OK).unwrap();
-    access(tmp.path().join("foo"), Access::EXISTS).unwrap();
-    unlink(tmp.path().join("foo")).unwrap_err();
-    rmdir(tmp.path().join("foo")).unwrap();
+    access(tmp.path().join("file"), Access::READ_OK).unwrap();
+    access(tmp.path().join("file"), Access::WRITE_OK).unwrap();
+    access(tmp.path().join("file"), Access::EXEC_OK).unwrap();
+    access(tmp.path().join("file"), Access::EXISTS).unwrap();
+    unlink(tmp.path().join("file")).unwrap_err();
+    rmdir(tmp.path().join("file")).unwrap();
 }
 
 #[cfg(not(target_os = "redox"))]
@@ -25,15 +25,15 @@ fn test_mkdirat() {
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
 
-    mkdirat(&dir, "foo", Mode::RWXU).unwrap();
-    let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
+    mkdirat(&dir, "file", Mode::RWXU).unwrap();
+    let stat = statat(&dir, "file", AtFlags::empty()).unwrap();
     assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::Directory);
-    accessat(&dir, "foo", Access::READ_OK, AtFlags::empty()).unwrap();
-    accessat(&dir, "foo", Access::WRITE_OK, AtFlags::empty()).unwrap();
-    accessat(&dir, "foo", Access::EXEC_OK, AtFlags::empty()).unwrap();
-    accessat(&dir, "foo", Access::EXISTS, AtFlags::empty()).unwrap();
-    unlinkat(&dir, "foo", AtFlags::empty()).unwrap_err();
-    unlinkat(&dir, "foo", AtFlags::REMOVEDIR).unwrap();
+    accessat(&dir, "file", Access::READ_OK, AtFlags::empty()).unwrap();
+    accessat(&dir, "file", Access::WRITE_OK, AtFlags::empty()).unwrap();
+    accessat(&dir, "file", Access::EXEC_OK, AtFlags::empty()).unwrap();
+    accessat(&dir, "file", Access::EXISTS, AtFlags::empty()).unwrap();
+    unlinkat(&dir, "file", AtFlags::empty()).unwrap_err();
+    unlinkat(&dir, "file", AtFlags::REMOVEDIR).unwrap();
 }
 
 #[cfg(linux_kernel)]
@@ -52,10 +52,10 @@ fn test_mkdirat_with_o_path() {
     )
     .unwrap();
 
-    mkdirat(&dir, "foo", Mode::RWXU).unwrap();
-    let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
+    mkdirat(&dir, "file", Mode::RWXU).unwrap();
+    let stat = statat(&dir, "file", AtFlags::empty()).unwrap();
     assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::Directory);
-    accessat(&dir, "foo", Access::EXISTS, AtFlags::empty()).unwrap();
-    unlinkat(&dir, "foo", AtFlags::empty()).unwrap_err();
-    unlinkat(&dir, "foo", AtFlags::REMOVEDIR).unwrap();
+    accessat(&dir, "file", Access::EXISTS, AtFlags::empty()).unwrap();
+    unlinkat(&dir, "file", AtFlags::empty()).unwrap_err();
+    unlinkat(&dir, "file", AtFlags::REMOVEDIR).unwrap();
 }

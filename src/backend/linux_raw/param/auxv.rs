@@ -471,7 +471,7 @@ impl Iterator for AuxFile {
                 Ok(0) => panic!("unexpected end of auxv file"),
                 Ok(n) => slice = &mut slice[n..],
                 Err(crate::io::Errno::INTR) => continue,
-                Err(err) => Err(err).unwrap(),
+                Err(err) => panic!("{:?}", err),
             }
         }
         Some(unsafe { read_unaligned(buf.as_ptr().cast()) })

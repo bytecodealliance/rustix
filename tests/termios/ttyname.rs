@@ -8,12 +8,12 @@ fn test_ttyname_ok() {
     let file = match File::open("/dev/stdin") {
         Ok(file) => file,
         Err(err) if err.kind() == std::io::ErrorKind::PermissionDenied => return,
-        Err(err) => Err(err).unwrap(),
+        Err(err) => panic!("{:?}", err),
     };
     if isatty(&file) {
         let name = ttyname(&file, Vec::new()).unwrap().into_string().unwrap();
         assert!(name.starts_with("/dev/"));
-        assert!(!name.ends_with("/"));
+        assert!(!name.ends_with('/'));
         assert!(std::fs::metadata(&name)
             .unwrap()
             .file_type()

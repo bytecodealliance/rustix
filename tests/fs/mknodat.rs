@@ -12,15 +12,15 @@ fn test_mknodat() {
     // or NetBSD.
     #[cfg(not(any(solarish, netbsdlike, target_os = "freebsd")))]
     {
-        mknodat(&dir, "foo", FileType::RegularFile, Mode::empty(), 0).unwrap();
-        let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
+        mknodat(&dir, "file", FileType::RegularFile, Mode::empty(), 0).unwrap();
+        let stat = statat(&dir, "file", AtFlags::empty()).unwrap();
         assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::RegularFile);
-        unlinkat(&dir, "foo", AtFlags::empty()).unwrap();
+        unlinkat(&dir, "file", AtFlags::empty()).unwrap();
     }
 
-    mknodat(&dir, "foo", FileType::Fifo, Mode::empty(), 0).unwrap();
-    let stat = statat(&dir, "foo", AtFlags::empty()).unwrap();
+    mknodat(&dir, "file", FileType::Fifo, Mode::empty(), 0).unwrap();
+    let stat = statat(&dir, "file", AtFlags::empty()).unwrap();
     assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::Fifo);
-    accessat(&dir, "foo", Access::EXISTS, AtFlags::empty()).unwrap();
-    unlinkat(&dir, "foo", AtFlags::empty()).unwrap();
+    accessat(&dir, "file", Access::EXISTS, AtFlags::empty()).unwrap();
+    unlinkat(&dir, "file", AtFlags::empty()).unwrap();
 }

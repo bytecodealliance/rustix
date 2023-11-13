@@ -11,21 +11,21 @@ fn test_rename() {
     let tmp = tempfile::tempdir().unwrap();
 
     let _ = open(
-        tmp.path().join("foo"),
+        tmp.path().join("file"),
         OFlags::CREATE | OFlags::WRONLY,
         Mode::empty(),
     )
     .unwrap();
-    let before = stat(tmp.path().join("foo")).unwrap();
+    let before = stat(tmp.path().join("file")).unwrap();
 
-    access(tmp.path().join("foo"), Access::EXISTS).unwrap();
+    access(tmp.path().join("file"), Access::EXISTS).unwrap();
     access(tmp.path().join("bar"), Access::EXISTS).unwrap_err();
 
-    rename(tmp.path().join("foo"), tmp.path().join("bar")).unwrap();
+    rename(tmp.path().join("file"), tmp.path().join("bar")).unwrap();
     let renamed = stat(tmp.path().join("bar")).unwrap();
     assert!(same(&before, &renamed));
 
-    access(tmp.path().join("foo"), Access::EXISTS).unwrap_err();
+    access(tmp.path().join("file"), Access::EXISTS).unwrap_err();
     access(tmp.path().join("bar"), Access::EXISTS).unwrap();
 }
 
@@ -43,17 +43,17 @@ fn test_renameat() {
     )
     .unwrap();
 
-    let _ = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
-    let before = statat(&dir, "foo", AtFlags::empty()).unwrap();
+    let _ = openat(&dir, "file", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
+    let before = statat(&dir, "file", AtFlags::empty()).unwrap();
 
-    accessat(&dir, "foo", Access::EXISTS, AtFlags::empty()).unwrap();
+    accessat(&dir, "file", Access::EXISTS, AtFlags::empty()).unwrap();
     accessat(&dir, "bar", Access::EXISTS, AtFlags::empty()).unwrap_err();
 
-    renameat(&dir, "foo", &dir, "bar").unwrap();
+    renameat(&dir, "file", &dir, "bar").unwrap();
     let renamed = statat(&dir, "bar", AtFlags::empty()).unwrap();
     assert!(same(&before, &renamed));
 
-    accessat(&dir, "foo", Access::EXISTS, AtFlags::empty()).unwrap_err();
+    accessat(&dir, "file", Access::EXISTS, AtFlags::empty()).unwrap_err();
     accessat(&dir, "bar", Access::EXISTS, AtFlags::empty()).unwrap();
 }
 
@@ -73,10 +73,10 @@ fn test_renameat_overwrite() {
     )
     .unwrap();
 
-    let _ = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
+    let _ = openat(&dir, "file", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
     let _ = openat(&dir, "bar", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
-    let before = statat(&dir, "foo", AtFlags::empty()).unwrap();
-    renameat(&dir, "foo", &dir, "bar").unwrap();
+    let before = statat(&dir, "file", AtFlags::empty()).unwrap();
+    renameat(&dir, "file", &dir, "bar").unwrap();
     let renamed = statat(&dir, "bar", AtFlags::empty()).unwrap();
     assert!(same(&before, &renamed));
 }
@@ -95,10 +95,10 @@ fn test_renameat_with() {
     )
     .unwrap();
 
-    let _ = openat(&dir, "foo", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
-    let before = statat(&dir, "foo", AtFlags::empty()).unwrap();
+    let _ = openat(&dir, "file", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
+    let before = statat(&dir, "file", AtFlags::empty()).unwrap();
 
-    match renameat_with(&dir, "foo", &dir, "red", RenameFlags::empty()) {
+    match renameat_with(&dir, "file", &dir, "red", RenameFlags::empty()) {
         Ok(()) => (),
         Err(err) if err == rustix::io::Errno::NOSYS => return,
         Err(err) => unreachable!("unexpected error from renameat_with: {:?}", err),

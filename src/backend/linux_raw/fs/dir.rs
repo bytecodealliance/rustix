@@ -292,5 +292,5 @@ fn dir_iterator_handles_io_errors() {
     crate::io::dup2(&file_fd, &mut dir.fd).unwrap();
 
     assert!(matches!(dir.next(), Some(Err(_))));
-    assert!(matches!(dir.next(), None));
+    assert!(dir.next().is_none());
 }

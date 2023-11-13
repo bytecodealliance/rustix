@@ -393,5 +393,5 @@ fn dir_iterator_handles_io_errors() {
     }
 
     assert!(matches!(dir.next(), Some(Err(_))));
-    assert!(matches!(dir.next(), None));
+    assert!(dir.next().is_none());
 }
