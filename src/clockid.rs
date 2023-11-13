@@ -17,13 +17,16 @@ use crate::fd::BorrowedFd;
 #[non_exhaustive]
 pub enum ClockId {
     /// `CLOCK_REALTIME`
+    #[doc(alias = "CLOCK_REALTIME")]
     Realtime = bitcast!(c::CLOCK_REALTIME),
 
     /// `CLOCK_MONOTONIC`
+    #[doc(alias = "CLOCK_MONOTONIC")]
     Monotonic = bitcast!(c::CLOCK_MONOTONIC),
 
     /// `CLOCK_UPTIME`
     #[cfg(any(freebsdlike, target_os = "openbsd"))]
+    #[doc(alias = "CLOCK_UPTIME")]
     Uptime = c::CLOCK_UPTIME,
 
     /// `CLOCK_PROCESS_CPUTIME_ID`
@@ -33,6 +36,7 @@ pub enum ClockId {
         target_os = "redox",
         target_os = "vita"
     )))]
+    #[doc(alias = "CLOCK_PROCESS_CPUTIME_ID")]
     ProcessCPUTime = c::CLOCK_PROCESS_CPUTIME_ID,
 
     /// `CLOCK_THREAD_CPUTIME_ID`
@@ -42,18 +46,22 @@ pub enum ClockId {
         target_os = "redox",
         target_os = "vita"
     )))]
+    #[doc(alias = "CLOCK_THREAD_CPUTIME_ID")]
     ThreadCPUTime = c::CLOCK_THREAD_CPUTIME_ID,
 
     /// `CLOCK_REALTIME_COARSE`
     #[cfg(any(linux_kernel, target_os = "freebsd"))]
+    #[doc(alias = "CLOCK_REALTIME_COARSE")]
     RealtimeCoarse = c::CLOCK_REALTIME_COARSE,
 
     /// `CLOCK_MONOTONIC_COARSE`
     #[cfg(any(linux_kernel, target_os = "freebsd"))]
+    #[doc(alias = "CLOCK_MONOTONIC_COARSE")]
     MonotonicCoarse = c::CLOCK_MONOTONIC_COARSE,
 
     /// `CLOCK_MONOTONIC_RAW`
     #[cfg(linux_kernel)]
+    #[doc(alias = "CLOCK_MONOTONIC_RAW")]
     MonotonicRaw = c::CLOCK_MONOTONIC_RAW,
 
     /// `CLOCK_REALTIME_ALARM`, available on Linux >= 3.0
@@ -98,15 +106,19 @@ pub enum ClockId {
 #[non_exhaustive]
 pub enum ClockId {
     /// `CLOCK_REALTIME`
+    #[doc(alias = "CLOCK_REALTIME")]
     Realtime = c::CLOCK_REALTIME,
 
     /// `CLOCK_MONOTONIC`
+    #[doc(alias = "CLOCK_MONOTONIC")]
     Monotonic = c::CLOCK_MONOTONIC,
 
     /// `CLOCK_PROCESS_CPUTIME_ID`
+    #[doc(alias = "CLOCK_PROCESS_CPUTIME_ID")]
     ProcessCPUTime = c::CLOCK_PROCESS_CPUTIME_ID,
 
     /// `CLOCK_THREAD_CPUTIME_ID`
+    #[doc(alias = "CLOCK_THREAD_CPUTIME_ID")]
     ThreadCPUTime = c::CLOCK_THREAD_CPUTIME_ID,
 }
 
@@ -129,10 +141,12 @@ pub enum DynamicClockId<'a> {
 
     /// `CLOCK_REALTIME_ALARM`, available on Linux >= 3.0
     #[cfg(linux_kernel)]
+    #[doc(alias = "CLOCK_REALTIME_ALARM")]
     RealtimeAlarm,
 
     /// `CLOCK_TAI`, available on Linux >= 3.10
     #[cfg(linux_kernel)]
+    #[doc(alias = "CLOCK_TAI")]
     Tai,
 
     /// `CLOCK_BOOTTIME`, available on Linux >= 2.6.39
@@ -142,9 +156,11 @@ pub enum DynamicClockId<'a> {
         target_os = "fuchsia",
         target_os = "openbsd"
     ))]
+    #[doc(alias = "CLOCK_BOOTTIME")]
     Boottime,
 
     /// `CLOCK_BOOTTIME_ALARM`, available on Linux >= 2.6.39
     #[cfg(any(linux_kernel, target_os = "fuchsia"))]
+    #[doc(alias = "CLOCK_BOOTTIME_ALARM")]
     BoottimeAlarm,
 }
