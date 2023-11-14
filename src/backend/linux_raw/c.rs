@@ -29,6 +29,7 @@ pub(crate) use linux_raw_sys::general::epoll_event;
         not(feature = "use-explicitly-provided-auxv"),
         any(
             feature = "param",
+            feature = "process",
             feature = "runtime",
             feature = "time",
             target_arch = "x86",

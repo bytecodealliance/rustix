@@ -303,6 +303,7 @@ pub(super) fn socklen_t<'a, Num: ArgNumber>(i: socklen_t) -> ArgReg<'a, Num> {
         not(feature = "use-explicitly-provided-auxv"),
         any(
             feature = "param",
+            feature = "process",
             feature = "runtime",
             feature = "time",
             target_arch = "x86",

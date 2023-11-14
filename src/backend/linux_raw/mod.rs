@@ -32,6 +32,7 @@ pub(crate) mod event;
         not(feature = "use-explicitly-provided-auxv"),
         any(
             feature = "param",
+            feature = "process",
             feature = "runtime",
             feature = "time",
             target_arch = "x86",
@@ -52,6 +53,7 @@ pub(crate) mod mount; // for deprecated mount functions in "fs"
 pub(crate) mod net;
 #[cfg(any(
     feature = "param",
+    feature = "process",
     feature = "runtime",
     feature = "time",
     target_arch = "x86",
