@@ -29,7 +29,7 @@ use core::sync::atomic::Ordering::Relaxed;
 #[cfg(target_pointer_width = "32")]
 #[cfg(feature = "time")]
 use linux_raw_sys::general::timespec as __kernel_old_timespec;
-#[cfg(feature = "time")]
+#[cfg(any(feature = "time", feature = "process"))]
 use {
     super::c,
     super::conv::{c_int, ret},
