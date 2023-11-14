@@ -29,14 +29,25 @@ use core::sync::atomic::Ordering::Relaxed;
 #[cfg(target_pointer_width = "32")]
 #[cfg(feature = "time")]
 use linux_raw_sys::general::timespec as __kernel_old_timespec;
-#[cfg(any(feature = "time", feature = "process"))]
+#[cfg(any(
+    all(
+        feature = "process",
+        any(
+            target_arch = "x86_64",
+            target_arch = "x86",
+            target_arch = "riscv64",
+            target_arch = "powerpc64"
+        )
+    ),
+    feature = "time"
+))]
+use {super::c, super::conv::ret, core::mem::MaybeUninit};
+#[cfg(any(feature = "time"))]
 use {
-    super::c,
-    super::conv::{c_int, ret},
+    super::conv::c_int,
     crate::clockid::{ClockId, DynamicClockId},
     crate::io,
     crate::timespec::Timespec,
-    core::mem::MaybeUninit,
     linux_raw_sys::general::{__kernel_clockid_t, __kernel_timespec},
 };
 

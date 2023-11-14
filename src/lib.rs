@@ -305,6 +305,7 @@ pub(crate) mod mount;
     not(feature = "use-explicitly-provided-auxv"),
     any(
         feature = "param",
+        feature = "process",
         feature = "runtime",
         feature = "time",
         target_arch = "x86",
@@ -322,6 +323,7 @@ pub(crate) mod fs;
     not(feature = "use-explicitly-provided-auxv"),
     any(
         feature = "param",
+        feature = "process",
         feature = "runtime",
         feature = "time",
         target_arch = "x86",
@@ -353,6 +355,7 @@ mod signal;
 #[cfg(not(windows))]
 #[cfg(any(
     feature = "fs",
+    feature = "process",
     feature = "runtime",
     feature = "thread",
     feature = "time",
@@ -362,6 +365,7 @@ mod signal;
         not(feature = "use-explicitly-provided-auxv"),
         any(
             feature = "param",
+            feature = "process",
             feature = "runtime",
             feature = "time",
             target_arch = "x86",
