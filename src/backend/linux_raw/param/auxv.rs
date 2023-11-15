@@ -307,7 +307,11 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
             AT_SYSINFO_EHDR => sysinfo_ehdr = check_elf_base(a_val as *mut _)?.as_ptr(),
 
             AT_BASE => {
-                let _ = check_elf_base(a_val.cast())?;
+                // The `AT_BASE` value can be NULL in a static executable that
+                // doesn't use a dynamic linker. If so, ignore it.
+                if !a_val.is_null() {
+                    let _ = check_elf_base(a_val.cast())?;
+                }
             }
 
             #[cfg(feature = "runtime")]
