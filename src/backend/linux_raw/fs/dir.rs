@@ -157,6 +157,7 @@ impl Dir {
         }))
     }
 
+    #[must_use]
     fn read_more(&mut self) -> Option<io::Result<()>> {
         // The first few times we're called, we allocate a relatively small
         // buffer, because many directories are small. If we're called more,

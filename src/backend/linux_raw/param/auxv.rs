@@ -207,7 +207,7 @@ fn init_auxv() {
             Ok(buffer) => {
                 // SAFETY: We assume the kernel returns a valid auxv.
                 unsafe {
-                    init_from_aux_iter(AuxPointer(buffer.as_ptr().cast()));
+                    init_from_aux_iter(AuxPointer(buffer.as_ptr().cast())).unwrap();
                 }
                 return;
             }
@@ -235,6 +235,7 @@ fn init_auxv() {
 /// Process auxv entries from the open file `auxv`.
 #[cfg(feature = "alloc")]
 #[cold]
+#[must_use]
 fn init_from_auxv_file(auxv: OwnedFd) -> Option<()> {
     let mut buffer = Vec::<u8>::with_capacity(512);
     loop {
@@ -271,6 +272,7 @@ fn init_from_auxv_file(auxv: OwnedFd) -> Option<()> {
 /// The buffer contains `Elf_aux_t` elements, though it need not be aligned;
 /// function uses `read_unaligned` to read from it.
 #[cold]
+#[must_use]
 unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Option<()> {
     let mut pagesz = 0;
     let mut clktck = 0;
@@ -375,6 +377,7 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
 /// which hopefully holds the value of the kernel-provided vDSO in memory. Do a
 /// series of checks to be as sure as we can that it's safe to use.
 #[cold]
+#[must_use]
 unsafe fn check_elf_base(base: *const Elf_Ehdr) -> Option<NonNull<Elf_Ehdr>> {
     // If we're reading a 64-bit auxv on a 32-bit platform, we'll see a zero
     // `a_val` because `AT_*` values are never greater than `u32::MAX`. Zero is
