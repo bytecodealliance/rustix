@@ -57,7 +57,7 @@ linux-raw-sys = { version = "0.4.11", default-features = false, features = ["gen
 
 # For the libc backend on Windows, use the Winsock2 API in windows-sys.
 [target.'cfg(windows)'.dependencies.windows-sys]
-version = "0.48.0"
+version = "0.52.0"
 features = [
     "Win32_Foundation",
     "Win32_Networking_WinSock",
