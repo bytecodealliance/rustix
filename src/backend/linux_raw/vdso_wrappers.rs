@@ -86,14 +86,10 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Resu
             ((!fd.as_raw_fd() << 3) | CLOCKFD) as __kernel_clockid_t
         }
 
-        DynamicClockId::RealtimeAlarm => {
-            linux_raw_sys::general::CLOCK_REALTIME_ALARM as __kernel_clockid_t
-        }
-        DynamicClockId::Tai => linux_raw_sys::general::CLOCK_TAI as __kernel_clockid_t,
-        DynamicClockId::Boottime => linux_raw_sys::general::CLOCK_BOOTTIME as __kernel_clockid_t,
-        DynamicClockId::BoottimeAlarm => {
-            linux_raw_sys::general::CLOCK_BOOTTIME_ALARM as __kernel_clockid_t
-        }
+        DynamicClockId::RealtimeAlarm => c::CLOCK_REALTIME_ALARM as __kernel_clockid_t,
+        DynamicClockId::Tai => c::CLOCK_TAI as __kernel_clockid_t,
+        DynamicClockId::Boottime => c::CLOCK_BOOTTIME as __kernel_clockid_t,
+        DynamicClockId::BoottimeAlarm => c::CLOCK_BOOTTIME_ALARM as __kernel_clockid_t,
     };
 
     // SAFETY: `CLOCK_GETTIME` contains either null or the address of a
