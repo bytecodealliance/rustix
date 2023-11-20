@@ -51,6 +51,8 @@ pub(crate) mod mount;
 pub(crate) mod mount; // for deprecated mount functions in "fs"
 #[cfg(feature = "net")]
 pub(crate) mod net;
+#[cfg(feature = "numa")]
+pub(crate) mod numa;
 #[cfg(any(
     feature = "param",
     feature = "process",
