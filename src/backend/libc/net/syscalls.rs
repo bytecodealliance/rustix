@@ -100,7 +100,7 @@ pub(crate) fn sendto_v4(
             send_recv_len(buf.len()),
             bitflags_bits!(flags),
             as_ptr(&encode_sockaddr_v4(addr)).cast::<c::sockaddr>(),
-            size_of::<SocketAddrV4>() as _,
+            size_of::<c::sockaddr_in> as _,
         ))
     }
 }
@@ -119,7 +119,7 @@ pub(crate) fn sendto_v6(
             send_recv_len(buf.len()),
             bitflags_bits!(flags),
             as_ptr(&encode_sockaddr_v6(addr)).cast::<c::sockaddr>(),
-            size_of::<SocketAddrV6>() as _,
+            size_of::<c::sockaddr_in6> as  c::socklen_t,
         ))
     }
 }
