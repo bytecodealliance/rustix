@@ -31,12 +31,17 @@ use {
 };
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
+pub(crate) unsafe fn recv(
+    fd: BorrowedFd<'_>,
+    buf: *mut u8,
+    len: usize,
+    flags: RecvFlags,
+) -> io::Result<usize> {
     unsafe {
         ret_send_recv(c::recv(
             borrowed_fd(fd),
-            buf.as_mut_ptr().cast(),
-            send_recv_len(buf.len()),
+            buf.cast(),
+            send_recv_len(len),
             bitflags_bits!(flags),
         ))
     }
@@ -55,9 +60,10 @@ pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Resu
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn recvfrom(
+pub(crate) unsafe fn recvfrom(
     fd: BorrowedFd<'_>,
-    buf: &mut [u8],
+    buf: *mut u8,
+    buf_len: usize,
     flags: RecvFlags,
 ) -> io::Result<(usize, Option<SocketAddrAny>)> {
     unsafe {
@@ -71,8 +77,8 @@ pub(crate) fn recvfrom(
 
         ret_send_recv(c::recvfrom(
             borrowed_fd(fd),
-            buf.as_mut_ptr().cast(),
-            send_recv_len(buf.len()),
+            buf.cast(),
+            send_recv_len(buf_len),
             bitflags_bits!(flags),
             storage.as_mut_ptr().cast(),
             &mut len,
