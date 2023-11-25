@@ -621,7 +621,7 @@ pub(crate) unsafe fn recv(
         ))
     }
     #[cfg(target_arch = "x86")]
-    unsafe {
+    {
         ret_usize(syscall!(
             __NR_socketcall,
             x86_sys(SYS_RECV),
