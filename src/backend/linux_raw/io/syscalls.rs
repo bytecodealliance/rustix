@@ -30,7 +30,7 @@ use linux_raw_sys::general::{F_DUPFD_CLOEXEC, F_GETFD, F_SETFD};
 
 #[inline]
 pub(crate) unsafe fn read(fd: BorrowedFd<'_>, buf: *mut u8, len: usize) -> io::Result<usize> {
-    unsafe { ret_usize(syscall!(__NR_read, fd, buf, pass_usize(len))) }
+    ret_usize(syscall!(__NR_read, fd, buf, pass_usize(len)))
 }
 
 #[inline]
@@ -71,15 +71,13 @@ pub(crate) unsafe fn pread(
         ))
     }
     #[cfg(target_pointer_width = "64")]
-    unsafe {
-        ret_usize(syscall!(
-            __NR_pread64,
-            fd,
-            buf,
-            pass_usize(len),
-            loff_t_from_u64(pos)
-        ))
-    }
+    ret_usize(syscall!(
+        __NR_pread64,
+        fd,
+        buf,
+        pass_usize(len),
+        loff_t_from_u64(pos)
+    ))
 }
 
 #[inline]
