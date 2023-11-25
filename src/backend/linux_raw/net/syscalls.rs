@@ -627,7 +627,7 @@ pub(crate) unsafe fn recv(
             x86_sys(SYS_RECV),
             slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
                 fd.into(),
-                buf,
+                buf.into(),
                 pass_usize(len),
                 flags.into(),
             ])
@@ -667,7 +667,7 @@ pub(crate) unsafe fn recvfrom(
             x86_sys(SYS_RECVFROM),
             slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
                 fd.into(),
-                buf,
+                buf.into(),
                 pass_usize(len),
                 flags.into(),
                 (&mut storage).into(),
