@@ -14,5 +14,5 @@ pub(crate) unsafe fn getrandom(
         fn getrandom(buf: *mut c::c_void, buflen: c::size_t, flags: c::c_uint) via SYS_getrandom -> c::ssize_t
     }
 
-    unsafe { ret_usize(getrandom(buf.cast(), cap, flags.bits())) }
+    ret_usize(getrandom(buf.cast(), cap, flags.bits()))
 }

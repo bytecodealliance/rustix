@@ -27,7 +27,7 @@ use {
 };
 
 pub(crate) unsafe fn read(fd: BorrowedFd<'_>, buf: *mut u8, len: usize) -> io::Result<usize> {
-    unsafe { ret_usize(c::read(borrowed_fd(fd), buf.cast(), min(len, READ_LIMIT))) }
+    ret_usize(c::read(borrowed_fd(fd), buf.cast(), min(len, READ_LIMIT)))
 }
 
 pub(crate) fn write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
@@ -55,7 +55,7 @@ pub(crate) unsafe fn pread(
     #[cfg(any(target_os = "espidf", target_os = "vita"))]
     let offset: i32 = offset.try_into().map_err(|_| io::Errno::OVERFLOW)?;
 
-    unsafe { ret_usize(c::pread(borrowed_fd(fd), buf.cast(), len, offset)) }
+    ret_usize(c::pread(borrowed_fd(fd), buf.cast(), len, offset))
 }
 
 pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<usize> {
