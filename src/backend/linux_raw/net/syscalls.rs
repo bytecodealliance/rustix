@@ -599,7 +599,7 @@ pub(crate) unsafe fn recv(
         target_arch = "x86",
         target_arch = "x86_64",
     )))]
-    unsafe {
+    {
         ret_usize(syscall!(__NR_recv, fd, buf, pass_usize(len), flags))
     }
     #[cfg(any(

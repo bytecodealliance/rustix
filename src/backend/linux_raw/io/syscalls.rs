@@ -45,7 +45,7 @@ pub(crate) unsafe fn pread(
         target_pointer_width = "32",
         any(target_arch = "arm", target_arch = "mips", target_arch = "mips32r6"),
     ))]
-    unsafe {
+    {
         ret_usize(syscall!(
             __NR_pread64,
             fd,
@@ -60,7 +60,7 @@ pub(crate) unsafe fn pread(
         target_pointer_width = "32",
         not(any(target_arch = "arm", target_arch = "mips", target_arch = "mips32r6")),
     ))]
-    unsafe {
+    {
         ret_usize(syscall!(
             __NR_pread64,
             fd,
