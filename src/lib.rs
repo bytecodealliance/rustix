@@ -141,6 +141,7 @@ extern crate static_assertions;
 mod static_assertions;
 
 // Internal utilities.
+mod buffer;
 #[cfg(not(windows))]
 #[macro_use]
 pub(crate) mod cstr;

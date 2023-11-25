@@ -1,8 +1,8 @@
 #![allow(unsafe_code)]
 
+use crate::buffer::split_init;
 use crate::{backend, io};
 use core::mem::MaybeUninit;
-use core::slice;
 
 pub use backend::rand::types::GetRandomFlags;
 
@@ -28,7 +28,9 @@ pub fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
 /// This is a very low-level API which may be difficult to use correctly. Most
 /// users should prefer to use [`getrandom`] or [`rand`] APIs instead.
 ///
-/// This is identical to [`getn`]
+/// This is identical to [`getrandom`], except that it can read into uninitialized
+/// memory. It returns the slice that was initialized by this function and the
+/// slice that remains uninitialized.
 ///
 /// [`getrandom`]: https://crates.io/crates/getrandom
 /// [`rand`]: https://crates.io/crates/rand
@@ -48,8 +50,5 @@ pub fn getrandom_uninit(
     };
 
     // Split into the initialized and uninitialized portions.
-    let (init, uninit) = buf.split_at_mut(length?);
-    let init = unsafe { slice::from_raw_parts_mut(init.as_mut_ptr() as *mut u8, init.len()) };
-
-    Ok((init, uninit))
+    Ok(unsafe { split_init(buf, length?) })
 }

@@ -15,7 +15,7 @@ use crate::backend::conv::loff_t_from_u64;
 use crate::backend::conv::zero;
 use crate::backend::conv::{
     c_uint, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd,
-    ret_usize, slice, slice_mut,
+    ret_usize, slice,
 };
 #[cfg(target_pointer_width = "32")]
 use crate::backend::conv::{hi, lo};
@@ -29,16 +29,17 @@ use core::cmp;
 use linux_raw_sys::general::{F_DUPFD_CLOEXEC, F_GETFD, F_SETFD};
 
 #[inline]
-pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
-    let (buf_addr_mut, buf_len) = slice_mut(buf);
-
-    unsafe { ret_usize(syscall!(__NR_read, fd, buf_addr_mut, buf_len)) }
+pub(crate) unsafe fn read(fd: BorrowedFd<'_>, buf: *mut u8, len: usize) -> io::Result<usize> {
+    unsafe { ret_usize(syscall!(__NR_read, fd, buf, pass_usize(len))) }
 }
 
 #[inline]
-pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], pos: u64) -> io::Result<usize> {
-    let (buf_addr_mut, buf_len) = slice_mut(buf);
-
+pub(crate) unsafe fn pread(
+    fd: BorrowedFd<'_>,
+    buf: *mut u8,
+    len: usize,
+    pos: u64,
+) -> io::Result<usize> {
     // <https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L75>
     #[cfg(all(
         target_pointer_width = "32",
@@ -48,8 +49,8 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], pos: u64) -> io::Result<
         ret_usize(syscall!(
             __NR_pread64,
             fd,
-            buf_addr_mut,
-            buf_len,
+            buf,
+            pass_usize(len),
             zero(),
             hi(pos),
             lo(pos)
@@ -63,8 +64,8 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], pos: u64) -> io::Result<
         ret_usize(syscall!(
             __NR_pread64,
             fd,
-            buf_addr_mut,
-            buf_len,
+            buf,
+            pass_usize(len),
             hi(pos),
             lo(pos)
         ))
@@ -74,8 +75,8 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], pos: u64) -> io::Result<
         ret_usize(syscall!(
             __NR_pread64,
             fd,
-            buf_addr_mut,
-            buf_len,
+            buf,
+            pass_usize(len),
             loff_t_from_u64(pos)
         ))
     }

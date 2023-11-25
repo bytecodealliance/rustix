@@ -1,7 +1,11 @@
 //! `read` and `write`, optionally positioned, optionally vectored
 
+#![allow(unsafe_code)]
+
+use crate::buffer::split_init;
 use crate::{backend, io};
 use backend::fd::AsFd;
+use core::mem::MaybeUninit;
 
 // Declare `IoSlice` and `IoSliceMut`.
 #[cfg(not(windows))]
@@ -34,7 +38,46 @@ pub use backend::io::types::ReadWriteFlags;
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/I_002fO-Primitives.html#index-reading-from-a-file-descriptor
 #[inline]
 pub fn read<Fd: AsFd>(fd: Fd, buf: &mut [u8]) -> io::Result<usize> {
-    backend::io::syscalls::read(fd.as_fd(), buf)
+    unsafe { backend::io::syscalls::read(fd.as_fd(), buf.as_mut_ptr(), buf.len()) }
+}
+
+/// `read(fd, buf)`—Reads from a stream.
+///
+/// This is equivalent to [`read`], except that it can read into uninitialized
+/// memory. It returns the slice that was initialized by this function and the
+/// slice that remains uninitialized.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///  - [glibc]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/read.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/read.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/read.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=read&sektion=2
+/// [NetBSD]: https://man.netbsd.org/read.2
+/// [OpenBSD]: https://man.openbsd.org/read.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=read&section=2
+/// [illumos]: https://illumos.org/man/2/read
+/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/I_002fO-Primitives.html#index-reading-from-a-file-descriptor
+#[inline]
+pub fn read_uninit<Fd: AsFd>(
+    fd: Fd,
+    buf: &mut [MaybeUninit<u8>],
+) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>])> {
+    // Get number of initialized bytes.
+    let length =
+        unsafe { backend::io::syscalls::read(fd.as_fd(), buf.as_mut_ptr() as *mut u8, buf.len()) };
+
+    // Split into the initialized and uninitialized portions.
+    Ok(unsafe { split_init(buf, length?) })
 }
 
 /// `write(fd, buf)`—Writes to a stream.
@@ -86,7 +129,43 @@ pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
 /// [illumos]: https://illumos.org/man/2/pread
 #[inline]
 pub fn pread<Fd: AsFd>(fd: Fd, buf: &mut [u8], offset: u64) -> io::Result<usize> {
-    backend::io::syscalls::pread(fd.as_fd(), buf, offset)
+    unsafe { backend::io::syscalls::pread(fd.as_fd(), buf.as_mut_ptr(), buf.len(), offset) }
+}
+
+/// `pread(fd, buf, offset)`—Reads from a file at a given position.
+///
+/// This is equivalent to [`pread`], except that it can read into uninitialized
+/// memory. It returns the slice that was initialized by this function and the
+/// slice that remains uninitialized.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/pread.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/pread.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/pread.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=pread&sektion=2
+/// [NetBSD]: https://man.netbsd.org/pread.2
+/// [OpenBSD]: https://man.openbsd.org/pread.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=pread&section=2
+/// [illumos]: https://illumos.org/man/2/pread
+#[inline]
+pub fn pread_uninit<Fd: AsFd>(
+    fd: Fd,
+    buf: &mut [MaybeUninit<u8>],
+    offset: u64,
+) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>])> {
+    let length = unsafe {
+        backend::io::syscalls::pread(fd.as_fd(), buf.as_mut_ptr() as *mut u8, buf.len(), offset)
+    };
+    Ok(unsafe { split_init(buf, length?) })
 }
 
 /// `pwrite(fd, bufs)`—Writes to a file at a given position.
