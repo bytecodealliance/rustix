@@ -15,5 +15,5 @@ pub(crate) unsafe fn getrandom(
     cap: usize,
     flags: GetRandomFlags,
 ) -> io::Result<usize> {
-    unsafe { ret_usize(syscall!(__NR_getrandom, buf, pass_usize(cap), flags)) }
+    ret_usize(syscall!(__NR_getrandom, buf, pass_usize(cap), flags))
 }

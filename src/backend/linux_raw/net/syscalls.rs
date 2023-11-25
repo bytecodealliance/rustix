@@ -609,7 +609,7 @@ pub(crate) unsafe fn recv(
         target_arch = "riscv64",
         target_arch = "x86_64",
     ))]
-    unsafe {
+    {
         ret_usize(syscall!(
             __NR_recvfrom,
             fd,
@@ -645,41 +645,39 @@ pub(crate) unsafe fn recvfrom(
     let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
     let mut storage = MaybeUninit::<sockaddr>::uninit();
 
-    unsafe {
-        // `recvfrom` does not write to the storage if the socket is
-        // connection-oriented sockets, so we initialize the family field to
-        // `AF_UNSPEC` so that we can detect this case.
-        initialize_family_to_unspec(storage.as_mut_ptr());
+    // `recvfrom` does not write to the storage if the socket is
+    // connection-oriented sockets, so we initialize the family field to
+    // `AF_UNSPEC` so that we can detect this case.
+    initialize_family_to_unspec(storage.as_mut_ptr());
 
-        #[cfg(not(target_arch = "x86"))]
-        let nread = ret_usize(syscall!(
-            __NR_recvfrom,
-            fd,
-            buf,
+    #[cfg(not(target_arch = "x86"))]
+    let nread = ret_usize(syscall!(
+        __NR_recvfrom,
+        fd,
+        buf,
+        pass_usize(len),
+        flags,
+        &mut storage,
+        by_mut(&mut addrlen)
+    ))?;
+    #[cfg(target_arch = "x86")]
+    let nread = ret_usize(syscall!(
+        __NR_socketcall,
+        x86_sys(SYS_RECVFROM),
+        slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
+            fd.into(),
+            buf.into(),
             pass_usize(len),
-            flags,
-            &mut storage,
-            by_mut(&mut addrlen)
-        ))?;
-        #[cfg(target_arch = "x86")]
-        let nread = ret_usize(syscall!(
-            __NR_socketcall,
-            x86_sys(SYS_RECVFROM),
-            slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
-                fd.into(),
-                buf.into(),
-                pass_usize(len),
-                flags.into(),
-                (&mut storage).into(),
-                by_mut(&mut addrlen),
-            ])
-        ))?;
+            flags.into(),
+            (&mut storage).into(),
+            by_mut(&mut addrlen),
+        ])
+    ))?;
 
-        Ok((
-            nread,
-            maybe_read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
-        ))
-    }
+    Ok((
+        nread,
+        maybe_read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
+    ))
 }
 
 #[inline]
