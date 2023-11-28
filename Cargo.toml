@@ -37,7 +37,7 @@ once_cell = { version = "1.5.2", optional = true }
 # `RUSTFLAGS` or enabling the `use-libc` cargo feature.
 [target.'cfg(all(not(rustix_use_libc), not(miri), target_os = "linux", target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "riscv64", all(rustix_use_experimental_asm, target_arch = "powerpc64"), all(rustix_use_experimental_asm, target_arch = "mips"), all(rustix_use_experimental_asm, target_arch = "mips32r6"), all(rustix_use_experimental_asm, target_arch = "mips64"), all(rustix_use_experimental_asm, target_arch = "mips64r6"), target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"))))'.dependencies]
 linux-raw-sys = { version = "0.4.11", default-features = false, features = ["general", "errno", "ioctl", "no_std", "elf"] }
-libc_errno = { package = "errno", version = "0.3.1", default-features = false, optional = true }
+libc_errno = { package = "errno", version = "0.3.8", default-features = false, optional = true }
 libc = { version = "0.2.150", default-features = false, features = ["extra_traits"], optional = true }
 
 # Dependencies for platforms where only libc is supported:
@@ -45,7 +45,7 @@ libc = { version = "0.2.150", default-features = false, features = ["extra_trait
 # On all other Unix-family platforms, and under Miri, we always use the libc
 # backend, so enable its dependencies unconditionally.
 [target.'cfg(all(not(windows), any(rustix_use_libc, miri, not(all(target_os = "linux", target_endian = "little", any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "riscv64", all(rustix_use_experimental_asm, target_arch = "powerpc64"), all(rustix_use_experimental_asm, target_arch = "mips"), all(rustix_use_experimental_asm, target_arch = "mips32r6"), all(rustix_use_experimental_asm, target_arch = "mips64"), all(rustix_use_experimental_asm, target_arch = "mips64r6"), target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64")))))))'.dependencies]
-libc_errno = { package = "errno", version = "0.3.1", default-features = false }
+libc_errno = { package = "errno", version = "0.3.8", default-features = false }
 libc = { version = "0.2.150", default-features = false, features = ["extra_traits"] }
 
 # Additional dependencies for Linux with the libc backend:
@@ -68,14 +68,14 @@ features = [
 # For the libc backend on Windows, also use the errno crate, which has Windows
 # support.
 [target.'cfg(windows)'.dependencies.libc_errno]
-version = "0.3.1"
+version = "0.3.8"
 package = "errno"
 default-features = false
 
 [dev-dependencies]
 tempfile = "3.5.0"
 libc = "0.2.150"
-libc_errno = { package = "errno", version = "0.3.1", default-features = false }
+libc_errno = { package = "errno", version = "0.3.8", default-features = false }
 serial_test = "2.0.0"
 memoffset = "0.9.0"
 flate2 = "1.0"
