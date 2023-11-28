@@ -42,7 +42,7 @@ use linux_raw_sys::general::timespec as __kernel_old_timespec;
     feature = "time"
 ))]
 use {super::c, super::conv::ret, core::mem::MaybeUninit};
-#[cfg(any(feature = "time"))]
+#[cfg(feature = "time")]
 use {
     super::conv::c_int,
     crate::clockid::{ClockId, DynamicClockId},

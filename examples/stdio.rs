@@ -1,5 +1,5 @@
-//! A command which prints out information about the standard input,
-//! output, and error streams provided to it.
+//! A command which prints out information about the standard input, output,
+//! and error streams provided to it.
 
 #[cfg(feature = "termios")]
 #[cfg(all(not(windows), feature = "stdio"))]

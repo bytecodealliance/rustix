@@ -65,15 +65,14 @@ use bsd as platform;
 /// `ioctl` call is safe to make.
 ///
 /// # References
-///
-/// - [Linux]
-/// - [WinSock2]
-/// - [FreeBSD]
-/// - [NetBSD]
-/// - [OpenBSD]
-/// - [Apple]
-/// - [Solaris]
-/// - [illumos]
+///  - [Linux]
+///  - [WinSock2]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [Apple]
+///  - [Solaris]
+///  - [illumos]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/ioctl.2.html
 /// [Winsock2]: https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-ioctlsocket

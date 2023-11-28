@@ -184,6 +184,7 @@ impl<'a, Opcode: CompileTimeOpcode, Value> Updater<'a, Opcode, Value> {
 
 unsafe impl<'a, Opcode: CompileTimeOpcode, T> Ioctl for Updater<'a, Opcode, T> {
     type Output = ();
+
     const IS_MUTATING: bool = true;
     const OPCODE: self::Opcode = Opcode::OPCODE;
 

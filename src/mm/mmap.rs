@@ -157,8 +157,8 @@ pub unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
     backend::mm::syscalls::munmap(ptr, len)
 }
 
-/// `mremap(old_address, old_size, new_size, flags)`—Resize, modify,
-/// and/or move a memory mapping.
+/// `mremap(old_address, old_size, new_size, flags)`—Resize, modify, and/or
+/// move a memory mapping.
 ///
 /// For moving a mapping to a fixed address (`MREMAP_FIXED`), see
 /// [`mremap_fixed`].

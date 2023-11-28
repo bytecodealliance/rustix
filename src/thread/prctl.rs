@@ -86,6 +86,9 @@ const PR_SET_NAME: c_int = 15;
 
 /// Set the name of the calling thread.
 ///
+/// Unlike `pthread_setname_np`, this function silently truncates the name to
+/// 16 bytes, as the Linux syscall does.
+///
 /// # References
 ///  - [`prctl(PR_SET_NAME,...)`]
 ///

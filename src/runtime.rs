@@ -495,7 +495,7 @@ pub unsafe fn sigwait(set: &Sigset) -> io::Result<Signal> {
     backend::runtime::syscalls::sigwait(set)
 }
 
-/// `sigwait(set)`—Wait for signals, returning a [`Siginfo`].
+/// `sigwaitinfo(set)`—Wait for signals, returning a [`Siginfo`].
 ///
 /// # Safety
 ///
@@ -536,7 +536,8 @@ pub unsafe fn sigtimedwait(set: &Sigset, timeout: Option<Timespec>) -> io::Resul
 /// whether the `AT_SECURE` AUX value is set, and whether the initial real UID
 /// and GID differ from the initial effective UID and GID.
 ///
-/// The meaning of “secure execution” mode is beyond the scope of this comment.
+/// The meaning of “secure execution” mode is beyond the scope of this
+/// comment.
 ///
 /// # References
 ///  - [Linux]
@@ -569,16 +570,16 @@ pub unsafe fn brk(addr: *mut c_void) -> io::Result<*mut c_void> {
 
 /// `__SIGRTMIN`—The start of the realtime signal range.
 ///
-/// This is the raw `SIGRTMIN` value from the OS, which is not the same as
-/// the `SIGRTMIN` macro provided by libc. Don't use this unless you are
+/// This is the raw `SIGRTMIN` value from the OS, which is not the same as the
+/// `SIGRTMIN` macro provided by libc. Don't use this unless you are
 /// implementing libc.
 #[cfg(linux_raw)]
 pub const SIGRTMIN: u32 = linux_raw_sys::general::SIGRTMIN;
 
 /// `__SIGRTMAX`—The last of the realtime signal range.
 ///
-/// This is the raw `SIGRTMAX` value from the OS, which is not the same as
-/// the `SIGRTMAX` macro provided by libc. Don't use this unless you are
+/// This is the raw `SIGRTMAX` value from the OS, which is not the same as the
+/// `SIGRTMAX` macro provided by libc. Don't use this unless you are
 /// implementing libc.
 #[cfg(linux_raw)]
 pub const SIGRTMAX: u32 = {
