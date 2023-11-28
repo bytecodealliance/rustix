@@ -1,15 +1,9 @@
 //! `Timespec` and related types, which are used by multiple public API
 //! modules.
 
-#[cfg(not(fix_y2038))]
-use crate::backend::c;
+use crate::ffi;
 
 /// `struct timespec`
-#[cfg(not(fix_y2038))]
-pub type Timespec = c::timespec;
-
-/// `struct timespec`
-#[cfg(fix_y2038)]
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct Timespec {
@@ -23,7 +17,7 @@ pub struct Timespec {
 /// A type for the `tv_sec` field of [`Timespec`].
 #[cfg(not(fix_y2038))]
 #[allow(deprecated)]
-pub type Secs = c::time_t;
+pub type Secs = ffi::c_long;
 
 /// A type for the `tv_sec` field of [`Timespec`].
 #[cfg(fix_y2038)]
@@ -43,7 +37,7 @@ pub type Nsecs = i64;
     libc,
     not(all(target_arch = "x86_64", target_pointer_width = "32"))
 ))]
-pub type Nsecs = c::c_long;
+pub type Nsecs = ffi::c_long;
 
 /// On 32-bit glibc platforms, `timespec` has anonymous padding fields, which
 /// Rust doesn't support yet (see `unnamed_fields`), so we define our own

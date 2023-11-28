@@ -1,6 +1,8 @@
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 use crate::backend::c;
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
+use crate::time::Itimerspec;
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(fix_y2038)]
 use crate::timespec::LibcTimespec;
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
@@ -8,31 +10,6 @@ use crate::timespec::LibcTimespec;
 use crate::timespec::Timespec;
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 use bitflags::bitflags;
-
-/// `struct itimerspec` for use with [`timerfd_gettime`] and
-/// [`timerfd_settime`].
-///
-/// [`timerfd_gettime`]: crate::time::timerfd_gettime
-/// [`timerfd_settime`]: crate::time::timerfd_settime
-#[cfg(any(linux_kernel, target_os = "fuchsia"))]
-#[cfg(not(fix_y2038))]
-pub type Itimerspec = c::itimerspec;
-
-/// `struct itimerspec` for use with [`timerfd_gettime`] and
-/// [`timerfd_settime`].
-///
-/// [`timerfd_gettime`]: crate::time::timerfd_gettime
-/// [`timerfd_settime`]: crate::time::timerfd_settime
-#[cfg(any(linux_kernel, target_os = "fuchsia"))]
-#[cfg(fix_y2038)]
-#[repr(C)]
-#[derive(Debug, Clone)]
-pub struct Itimerspec {
-    /// The interval of an interval timer.
-    pub it_interval: Timespec,
-    /// Time remaining in the current interval.
-    pub it_value: Timespec,
-}
 
 /// On most platforms, `LibcItimerspec` is just `Itimerspec`.
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
