@@ -9,7 +9,7 @@ use crate::backend::c;
 #[cfg(feature = "alloc")]
 use crate::backend::conv::pass_usize;
 use crate::backend::conv::{
-    by_ref, c_int, c_uint, raw_fd, ret, ret_owned_fd, ret_usize, slice_mut, zero,
+    by_ref, c_int, c_uint, raw_fd, ret, ret_error, ret_owned_fd, ret_usize, slice_mut, zero,
 };
 use crate::event::{epoll, EventfdFlags, PollFd};
 use crate::fd::{BorrowedFd, OwnedFd};
@@ -130,4 +130,23 @@ pub(crate) fn epoll_wait(
 #[inline]
 pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(syscall_readonly!(__NR_eventfd2, c_uint(initval), flags)) }
+}
+
+#[inline]
+pub(crate) fn pause() {
+    unsafe {
+        #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+        let error = ret_error(syscall_readonly!(
+            __NR_ppoll,
+            zero(),
+            zero(),
+            zero(),
+            zero()
+        ));
+
+        #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+        let error = ret_error(syscall_readonly!(__NR_pause));
+
+        debug_assert_eq!(error, io::Errno::INTR);
+    }
 }
