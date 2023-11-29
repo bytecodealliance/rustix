@@ -14,6 +14,8 @@ use core::ptr::{null_mut, read, NonNull};
 use core::sync::atomic::AtomicBool;
 use core::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
 use linux_raw_sys::elf::*;
+#[cfg(target_arch = "x86")]
+use linux_raw_sys::general::AT_SYSINFO;
 use linux_raw_sys::general::{
     AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_MINSIGSTKSZ, AT_NULL, AT_PAGESZ, AT_SYSINFO_EHDR,
 };
@@ -96,6 +98,12 @@ pub(crate) fn random() -> *const [u8; 16] {
     unsafe { RANDOM.load(Ordering::Relaxed) }
 }
 
+#[cfg(target_arch = "x86")]
+#[inline]
+pub(crate) fn vsyscall() -> *const c_void {
+    unsafe { VSYSCALL.load(Ordering::Relaxed) }
+}
+
 static mut PAGE_SIZE: AtomicUsize = AtomicUsize::new(0);
 static mut CLOCK_TICKS_PER_SECOND: AtomicUsize = AtomicUsize::new(0);
 static mut HWCAP: AtomicUsize = AtomicUsize::new(0);
@@ -118,6 +126,8 @@ static mut PHNUM: AtomicUsize = AtomicUsize::new(0);
 static mut ENTRY: AtomicUsize = AtomicUsize::new(0);
 #[cfg(feature = "runtime")]
 static mut RANDOM: AtomicPtr<[u8; 16]> = AtomicPtr::new(NonNull::dangling().as_ptr());
+#[cfg(target_arch = "x86")]
+static mut VSYSCALL: AtomicPtr<c_void> = AtomicPtr::new(NonNull::dangling().as_ptr());
 
 /// When "use-explicitly-provided-auxv" is enabled, we export a function to be
 /// called during initialization, and passed a pointer to the original
@@ -170,6 +180,8 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) {
             AT_ENTRY => ENTRY.store(a_val as usize, Ordering::Relaxed),
             #[cfg(feature = "runtime")]
             AT_RANDOM => RANDOM.store(a_val.cast::<[u8; 16]>(), Ordering::Relaxed),
+            #[cfg(feature = "x86")]
+            AT_SYSINFO => VSYSCALL.store(a_val.cast::<c_void>(), Ordering::Relaxed),
 
             AT_NULL => break,
             _ => (),

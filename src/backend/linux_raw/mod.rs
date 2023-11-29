@@ -18,10 +18,12 @@
 mod arch;
 mod conv;
 mod reg;
-#[cfg(any(feature = "time", feature = "process", target_arch = "x86"))]
+#[cfg(any(feature = "time", feature = "process"))]
 mod vdso;
-#[cfg(any(feature = "time", feature = "process", target_arch = "x86"))]
+#[cfg(any(feature = "time", feature = "process"))]
 mod vdso_wrappers;
+#[cfg(target_arch = "x86")]
+mod x86_vsyscall;
 
 #[cfg(feature = "event")]
 pub(crate) mod event;
