@@ -9,8 +9,8 @@ use crate::backend::c;
 #[cfg(target_arch = "x86")]
 use crate::backend::conv::by_mut;
 use crate::backend::conv::{
-    by_ref, c_int, c_uint, ret, ret_c_int, ret_c_int_infallible, ret_error, ret_void_star, size_of,
-    zero,
+    by_ref, c_int, c_uint, ret, ret_c_int, ret_c_int_infallible, ret_error, ret_infallible,
+    ret_void_star, size_of, zero,
 };
 #[cfg(feature = "fs")]
 use crate::fd::BorrowedFd;
@@ -28,9 +28,9 @@ use core::mem::MaybeUninit;
 #[cfg(target_pointer_width = "32")]
 use linux_raw_sys::general::__kernel_old_timespec;
 use linux_raw_sys::general::kernel_sigset_t;
-use linux_raw_sys::prctl::PR_SET_NAME;
 #[cfg(target_arch = "x86_64")]
-use {crate::backend::conv::ret_infallible, linux_raw_sys::general::ARCH_SET_FS};
+use linux_raw_sys::general::ARCH_SET_FS;
+use linux_raw_sys::prctl::PR_SET_NAME;
 
 #[inline]
 pub(crate) unsafe fn fork() -> io::Result<Fork> {
@@ -196,6 +196,30 @@ pub(crate) unsafe fn sigprocmask(how: How, new: Option<&Sigset>) -> io::Result<S
         size_of::<kernel_sigset_t, _>()
     ))?;
     Ok(old.assume_init())
+}
+
+#[inline]
+pub(crate) fn sigpending() -> Sigset {
+    let mut pending = MaybeUninit::<Sigset>::uninit();
+    unsafe {
+        ret_infallible(syscall!(
+            __NR_rt_sigpending,
+            &mut pending,
+            size_of::<kernel_sigset_t, _>()
+        ));
+        pending.assume_init()
+    }
+}
+
+#[inline]
+pub(crate) fn sigsuspend(set: &Sigset) -> io::Result<()> {
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_rt_sigsuspend,
+            by_ref(set),
+            size_of::<kernel_sigset_t, _>()
+        ))
+    }
 }
 
 #[inline]

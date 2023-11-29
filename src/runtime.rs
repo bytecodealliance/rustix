@@ -443,6 +443,28 @@ pub unsafe fn sigprocmask(how: How, set: Option<&Sigset>) -> io::Result<Sigset> 
     backend::runtime::syscalls::sigprocmask(how, set)
 }
 
+/// `sigpending()`—Query the pending signals.
+///
+/// # References
+///  - [Linux `sigpending`]
+///
+/// [Linux `sigpending`]: https://man7.org/linux/man-pages/man2/sigpending.2.html
+#[inline]
+pub fn sigpending() -> Sigset {
+    backend::runtime::syscalls::sigpending()
+}
+
+/// `sigsuspend(set)`—Suspend the calling thread and wait for signals.
+///
+/// # References
+///  - [Linux `sigsuspend`]
+///
+/// [Linux `sigsuspend`]: https://man7.org/linux/man-pages/man2/sigsuspend.2.html
+#[inline]
+pub fn sigsuspend(set: &Sigset) -> io::Result<()> {
+    backend::runtime::syscalls::sigsuspend(set)
+}
+
 /// `sigwait(set)`—Wait for signals.
 ///
 /// # Safety
@@ -531,3 +553,31 @@ pub fn linux_secure() -> bool {
 pub unsafe fn brk(addr: *mut c_void) -> io::Result<*mut c_void> {
     backend::runtime::syscalls::brk(addr)
 }
+
+/// `__SIGRTMIN`—The start of the realtime signal range.
+///
+/// This is the raw `SIGRTMIN` value from the OS, which is not the same as
+/// the `SIGRTMIN` macro provided by libc. Don't use this unless you are
+/// implementing libc.
+#[cfg(linux_raw)]
+pub const SIGRTMIN: u32 = linux_raw_sys::general::SIGRTMIN;
+
+/// `__SIGRTMAX`—The last of the realtime signal range.
+///
+/// This is the raw `SIGRTMAX` value from the OS, which is not the same as
+/// the `SIGRTMAX` macro provided by libc. Don't use this unless you are
+/// implementing libc.
+#[cfg(linux_raw)]
+pub const SIGRTMAX: u32 = {
+    // Use the actual `SIGRTMAX` value on platforms which define it.
+    #[cfg(not(any(target_arch = "arm", target_arch = "x86", target_arch = "x86_64")))]
+    {
+        linux_raw_sys::general::SIGRTMAX
+    }
+
+    // On platfoms that don't, derive it from `_NSIG`.
+    #[cfg(any(target_arch = "arm", target_arch = "x86", target_arch = "x86_64"))]
+    {
+        linux_raw_sys::general::_NSIG - 1
+    }
+};
