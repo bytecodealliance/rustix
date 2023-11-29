@@ -229,6 +229,19 @@ pub fn entry() -> usize {
     backend::param::auxv::entry()
 }
 
+/// `getauxval(AT_RANDOM)`—Returns the address of 16 pseudorandom bytes.
+///
+/// These bytes are for use by libc. For anything else, use the `rand` crate.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man3/getauxval.3.html
+#[inline]
+pub fn random() -> *const [u8; 16] {
+    backend::param::auxv::random()
+}
+
 #[cfg(linux_raw)]
 pub use backend::runtime::tls::StartupTlsInfo;
 

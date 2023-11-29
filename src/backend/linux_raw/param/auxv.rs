@@ -25,7 +25,7 @@ use linux_raw_sys::general::{
 };
 #[cfg(feature = "runtime")]
 use linux_raw_sys::general::{
-    AT_EGID, AT_ENTRY, AT_EUID, AT_GID, AT_PHDR, AT_PHENT, AT_PHNUM, AT_SECURE, AT_UID,
+    AT_EGID, AT_ENTRY, AT_EUID, AT_GID, AT_PHDR, AT_PHENT, AT_PHNUM, AT_RANDOM, AT_SECURE, AT_UID,
 };
 
 #[cfg(feature = "param")]
@@ -145,6 +145,19 @@ pub(crate) fn entry() -> usize {
     entry
 }
 
+#[cfg(feature = "runtime")]
+#[inline]
+pub(crate) fn random() -> *const [u8; 16] {
+    let mut random = RANDOM.load(Relaxed);
+
+    if random.is_null() {
+        init_auxv();
+        random = RANDOM.load(Relaxed);
+    }
+
+    random
+}
+
 static PAGE_SIZE: AtomicUsize = AtomicUsize::new(0);
 static CLOCK_TICKS_PER_SECOND: AtomicUsize = AtomicUsize::new(0);
 static HWCAP: AtomicUsize = AtomicUsize::new(0);
@@ -161,6 +174,8 @@ static PHENT: AtomicUsize = AtomicUsize::new(0);
 static PHNUM: AtomicUsize = AtomicUsize::new(0);
 #[cfg(feature = "runtime")]
 static ENTRY: AtomicUsize = AtomicUsize::new(0);
+#[cfg(feature = "runtime")]
+static RANDOM: AtomicPtr<[u8; 16]> = AtomicPtr::new(null_mut());
 
 #[cfg(feature = "alloc")]
 fn pr_get_auxv() -> crate::io::Result<Vec<u8>> {
@@ -296,6 +311,8 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
     let mut gid = None;
     #[cfg(feature = "runtime")]
     let mut egid = None;
+    #[cfg(feature = "runtime")]
+    let mut random = null_mut();
 
     for Elf_auxv_t { a_type, a_val } in aux_iter {
         match a_type as _ {
@@ -332,6 +349,8 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
             AT_PHENT => phent = a_val as usize,
             #[cfg(feature = "runtime")]
             AT_ENTRY => entry = a_val as usize,
+            #[cfg(feature = "runtime")]
+            AT_RANDOM => random = check_raw_pointer::<[u8; 16]>(a_val as *mut _)?.as_ptr(),
 
             AT_NULL => break,
             _ => (),
@@ -365,6 +384,8 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
     PHNUM.store(phnum, Relaxed);
     #[cfg(feature = "runtime")]
     ENTRY.store(entry, Relaxed);
+    #[cfg(feature = "runtime")]
+    RANDOM.store(random, Relaxed);
 
     Some(())
 }

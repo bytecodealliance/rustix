@@ -18,7 +18,7 @@ use linux_raw_sys::general::{
     AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_SYSINFO_EHDR,
 };
 #[cfg(feature = "runtime")]
-use linux_raw_sys::general::{AT_ENTRY, AT_PHDR, AT_PHENT, AT_PHNUM, AT_SECURE};
+use linux_raw_sys::general::{AT_ENTRY, AT_PHDR, AT_PHENT, AT_PHNUM, AT_RANDOM, AT_SECURE};
 
 #[cfg(feature = "param")]
 #[inline]
@@ -84,6 +84,12 @@ pub(crate) fn entry() -> usize {
     unsafe { ENTRY.load(Ordering::Relaxed) }
 }
 
+#[cfg(feature = "runtime")]
+#[inline]
+pub(crate) fn random() -> *const [u8; 16] {
+    unsafe { RANDOM.load(Ordering::Relaxed) }
+}
+
 static mut PAGE_SIZE: AtomicUsize = AtomicUsize::new(0);
 static mut CLOCK_TICKS_PER_SECOND: AtomicUsize = AtomicUsize::new(0);
 static mut HWCAP: AtomicUsize = AtomicUsize::new(0);
@@ -103,6 +109,8 @@ static mut PHENT: AtomicUsize = AtomicUsize::new(0);
 static mut PHNUM: AtomicUsize = AtomicUsize::new(0);
 #[cfg(feature = "runtime")]
 static mut ENTRY: AtomicUsize = AtomicUsize::new(0);
+#[cfg(feature = "runtime")]
+static mut RANDOM: AtomicPtr<[u8; 16]> = AtomicPtr::new(NonNull::dangling().as_ptr());
 
 /// When "use-explicitly-provided-auxv" is enabled, we export a function to be
 /// called during initialization, and passed a pointer to the original
@@ -152,6 +160,8 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) {
             AT_PHENT => PHENT.store(a_val as usize, Ordering::Relaxed),
             #[cfg(feature = "runtime")]
             AT_ENTRY => ENTRY.store(a_val as usize, Ordering::Relaxed),
+            #[cfg(feature = "runtime")]
+            AT_RANDOM => RANDOM.store(a_val.cast::<[u8; 16]>(), Ordering::Relaxed),
 
             AT_NULL => break,
             _ => (),
