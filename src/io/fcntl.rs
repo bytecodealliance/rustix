@@ -105,8 +105,8 @@ pub fn fcntl_dupfd_cloexec<Fd: AsFd>(fd: Fd, min: RawFd) -> io::Result<OwnedFd> 
     backend::io::syscalls::fcntl_dupfd_cloexec(fd.as_fd(), min)
 }
 
-/// `fcntl(fd, F_DUPFD)`—Creates a new `OwnedFd` instance, with value at least
-/// `min`, that shares the same underlying [file description] as `fd`.
+/// `fcntl(fd, F_DUPFD)`—Creates a new `OwnedFd` instance, with value at
+/// least `min`, that shares the same underlying [file description] as `fd`.
 ///
 /// POSIX guarantees that `F_DUPFD` will use the lowest unused file descriptor
 /// which is at least `min`, however it is not safe in general to rely on this,

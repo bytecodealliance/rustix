@@ -78,6 +78,8 @@ pub enum ClockId {
     ///
     /// On FreeBSD, use [`Self::Uptime`], as `CLOCK_BOOTTIME` is an alias for
     /// `CLOCK_UPTIME`.
+    ///
+    /// [`Self::Uptime`]: https://docs.rs/rustix/*/x86_64-unknown-freebsd/rustix/time/enum.ClockId.html#variant.Uptime
     #[cfg(any(linux_kernel, target_os = "fuchsia", target_os = "openbsd"))]
     #[doc(alias = "CLOCK_BOOTTIME")]
     Boottime = bitcast!(c::CLOCK_BOOTTIME),

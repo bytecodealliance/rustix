@@ -5,7 +5,7 @@ use core::marker::PhantomData;
 bitflags! {
     /// `O_*` constants for use with [`pipe_with`].
     ///
-    /// [`pipe_with`]: crate::io::pipe_with
+    /// [`pipe_with`]: crate::pipe::pipe_with
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct PipeFlags: c::c_uint {

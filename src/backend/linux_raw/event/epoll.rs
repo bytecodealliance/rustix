@@ -262,8 +262,8 @@ pub fn wait(epoll: impl AsFd, event_list: &mut EventVec, timeout: c::c_int) -> i
 /// An iterator over the `Event`s in an `EventVec`.
 pub struct Iter<'a> {
     /// Use `Copied` to copy the struct, since `Event` is `packed` on some
-    /// platforms, and it's common for users to directly destructure it,
-    /// which would lead to errors about forming references to packed fields.
+    /// platforms, and it's common for users to directly destructure it, which
+    /// would lead to errors about forming references to packed fields.
     iter: core::iter::Copied<slice::Iter<'a, Event>>,
 }
 

@@ -37,7 +37,7 @@ bitflags! {
         /// Return immediately if no child has exited.
         const NOHANG = bitcast!(backend::process::wait::WNOHANG);
         /// Return if a stopped child has been resumed by delivery of
-        /// [`Signal::Cont`]
+        /// [`Signal::Cont`].
         const CONTINUED = bitcast!(backend::process::wait::WCONTINUED);
         /// Wait for processed that have exited.
         const EXITED = bitcast!(backend::process::wait::WEXITED);

@@ -6,9 +6,8 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use super::types::MlockAllFlags;
 use super::types::{
-    Advice, MapFlags, MlockFlags, MprotectFlags, MremapFlags, MsyncFlags, ProtFlags,
+    Advice, MapFlags, MlockAllFlags, MlockFlags, MprotectFlags, MremapFlags, MsyncFlags, ProtFlags,
     UserfaultfdFlags,
 };
 use crate::backend::c;

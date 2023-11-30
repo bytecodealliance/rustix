@@ -116,10 +116,10 @@ pub fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
 /// `fd_in` to the file descriptor `fd_out`, where one of the file descriptors
 /// must refer to a pipe.
 ///
-/// `off_*` must be `None` if the corresponding fd refers to a pipe.
-/// Otherwise its value points to the starting offset to the file, from which
-/// the data is read/written. On success, the number of bytes read/written is
-/// added to the offset.
+/// `off_*` must be `None` if the corresponding fd refers to a pipe. Otherwise
+/// its value points to the starting offset to the file, from which the data is
+/// read/written. On success, the number of bytes read/written is added to the
+/// offset.
 ///
 /// Passing `None` causes the read/write to start from the file offset, and the
 /// file offset is adjusted appropriately.
@@ -143,11 +143,11 @@ pub fn splice<FdIn: AsFd, FdOut: AsFd>(
 
 /// `vmsplice(fd, bufs, flags)`—Transfer data between memory and a pipe.
 ///
-/// If `fd` is the write end of the pipe,
-/// the function maps the memory pointer at by `bufs` to the pipe.
+/// If `fd` is the write end of the pipe, the function maps the memory pointer
+/// at by `bufs` to the pipe.
 ///
-/// If `fd` is the read end of the pipe,
-/// the function writes data from the pipe to said memory.
+/// If `fd` is the read end of the pipe, the function writes data from the pipe
+/// to said memory.
 ///
 /// # Safety
 ///
