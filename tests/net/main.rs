@@ -9,6 +9,7 @@ mod addr;
 #[cfg(unix)]
 mod cmsg;
 mod connect_bind_send;
+mod dgram;
 #[cfg(feature = "event")]
 mod poll;
 mod sockopt;
