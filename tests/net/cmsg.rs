@@ -1,3 +1,4 @@
+#[cfg(feature = "pipe")]
 #[test]
 fn test_empty_buffers() {
     use rustix::fd::AsFd;
