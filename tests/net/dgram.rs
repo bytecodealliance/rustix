@@ -324,7 +324,8 @@ fn net_dgram_v6_bind_any() {
     assert_eq!(request, &response[..n]);
 }
 
-/// Test `sendto` with calling `connect`.
+/// Test `sendto` with calling `connect`, on platforms which support that.
+#[cfg(not(any(target_os = "freebsd", target_os = "illumos")))]
 #[test]
 fn net_dgram_v4_connect_sendto() {
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
@@ -414,6 +415,7 @@ fn net_dgram_v4_sendto() {
 }
 
 /// Similar, but with V6.
+#[cfg(not(any(target_os = "freebsd", target_os = "illumos")))]
 #[test]
 fn net_dgram_v6_connect_sendto() {
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
@@ -502,7 +504,8 @@ fn net_dgram_v6_sendto() {
     assert_eq!(peer_addr.ip(), local_addr.ip());
 }
 
-/// Test `sendto_any` with calling connect.
+/// Test `sendto_any` with calling connect, on platforms which support that.
+#[cfg(not(any(target_os = "freebsd", target_os = "illumos")))]
 #[test]
 fn net_dgram_v4_connect_sendto_any() {
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
@@ -586,6 +589,7 @@ fn net_dgram_v4_sendto_any() {
 }
 
 /// Similar, but with V6.
+#[cfg(not(any(target_os = "freebsd", target_os = "illumos")))]
 #[test]
 fn net_dgram_v6_connect_sendto_any() {
     let localhost = IpAddr::V6(Ipv6Addr::LOCALHOST);
