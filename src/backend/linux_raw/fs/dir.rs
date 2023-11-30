@@ -32,8 +32,26 @@ pub struct Dir {
 }
 
 impl Dir {
-    /// Construct a `Dir` that reads entries from the given directory
-    /// file descriptor.
+    /// Take ownership of `fd` and construct a `Dir` that reads entries from
+    /// the given directory file descriptor.
+    #[inline]
+    pub fn new<Fd: Into<OwnedFd>>(fd: Fd) -> io::Result<Self> {
+        Self::_new(fd.into())
+    }
+
+    #[inline]
+    fn _new(fd: OwnedFd) -> io::Result<Self> {
+        Ok(Self {
+            fd,
+            any_errors: false,
+            rewind: false,
+            buf: Vec::new(),
+            pos: 0,
+        })
+    }
+
+    /// Borrow `fd` and construct a `Dir` that reads entries from the given
+    /// directory file descriptor.
     #[inline]
     pub fn read_from<Fd: AsFd>(fd: Fd) -> io::Result<Self> {
         Self::_read_from(fd.as_fd())
@@ -157,6 +175,7 @@ impl Dir {
         }))
     }
 
+    #[must_use]
     fn read_more(&mut self) -> Option<io::Result<()>> {
         // The first few times we're called, we allocate a relatively small
         // buffer, because many directories are small. If we're called more,

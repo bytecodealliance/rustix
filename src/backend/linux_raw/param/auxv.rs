@@ -25,7 +25,7 @@ use linux_raw_sys::general::{
 };
 #[cfg(feature = "runtime")]
 use linux_raw_sys::general::{
-    AT_EGID, AT_ENTRY, AT_EUID, AT_GID, AT_PHDR, AT_PHENT, AT_PHNUM, AT_SECURE, AT_UID,
+    AT_EGID, AT_ENTRY, AT_EUID, AT_GID, AT_PHDR, AT_PHENT, AT_PHNUM, AT_RANDOM, AT_SECURE, AT_UID,
 };
 
 #[cfg(feature = "param")]
@@ -145,6 +145,19 @@ pub(crate) fn entry() -> usize {
     entry
 }
 
+#[cfg(feature = "runtime")]
+#[inline]
+pub(crate) fn random() -> *const [u8; 16] {
+    let mut random = RANDOM.load(Relaxed);
+
+    if random.is_null() {
+        init_auxv();
+        random = RANDOM.load(Relaxed);
+    }
+
+    random
+}
+
 static PAGE_SIZE: AtomicUsize = AtomicUsize::new(0);
 static CLOCK_TICKS_PER_SECOND: AtomicUsize = AtomicUsize::new(0);
 static HWCAP: AtomicUsize = AtomicUsize::new(0);
@@ -161,6 +174,8 @@ static PHENT: AtomicUsize = AtomicUsize::new(0);
 static PHNUM: AtomicUsize = AtomicUsize::new(0);
 #[cfg(feature = "runtime")]
 static ENTRY: AtomicUsize = AtomicUsize::new(0);
+#[cfg(feature = "runtime")]
+static RANDOM: AtomicPtr<[u8; 16]> = AtomicPtr::new(null_mut());
 
 #[cfg(feature = "alloc")]
 fn pr_get_auxv() -> crate::io::Result<Vec<u8>> {
@@ -207,7 +222,7 @@ fn init_auxv() {
             Ok(buffer) => {
                 // SAFETY: We assume the kernel returns a valid auxv.
                 unsafe {
-                    init_from_aux_iter(AuxPointer(buffer.as_ptr().cast()));
+                    init_from_aux_iter(AuxPointer(buffer.as_ptr().cast())).unwrap();
                 }
                 return;
             }
@@ -235,6 +250,7 @@ fn init_auxv() {
 /// Process auxv entries from the open file `auxv`.
 #[cfg(feature = "alloc")]
 #[cold]
+#[must_use]
 fn init_from_auxv_file(auxv: OwnedFd) -> Option<()> {
     let mut buffer = Vec::<u8>::with_capacity(512);
     loop {
@@ -271,6 +287,7 @@ fn init_from_auxv_file(auxv: OwnedFd) -> Option<()> {
 /// The buffer contains `Elf_aux_t` elements, though it need not be aligned;
 /// function uses `read_unaligned` to read from it.
 #[cold]
+#[must_use]
 unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Option<()> {
     let mut pagesz = 0;
     let mut clktck = 0;
@@ -296,6 +313,8 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
     let mut gid = None;
     #[cfg(feature = "runtime")]
     let mut egid = None;
+    #[cfg(feature = "runtime")]
+    let mut random = null_mut();
 
     for Elf_auxv_t { a_type, a_val } in aux_iter {
         match a_type as _ {
@@ -332,6 +351,8 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
             AT_PHENT => phent = a_val as usize,
             #[cfg(feature = "runtime")]
             AT_ENTRY => entry = a_val as usize,
+            #[cfg(feature = "runtime")]
+            AT_RANDOM => random = check_raw_pointer::<[u8; 16]>(a_val as *mut _)?.as_ptr(),
 
             AT_NULL => break,
             _ => (),
@@ -365,6 +386,8 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
     PHNUM.store(phnum, Relaxed);
     #[cfg(feature = "runtime")]
     ENTRY.store(entry, Relaxed);
+    #[cfg(feature = "runtime")]
+    RANDOM.store(random, Relaxed);
 
     Some(())
 }
@@ -375,6 +398,7 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
 /// which hopefully holds the value of the kernel-provided vDSO in memory. Do a
 /// series of checks to be as sure as we can that it's safe to use.
 #[cold]
+#[must_use]
 unsafe fn check_elf_base(base: *const Elf_Ehdr) -> Option<NonNull<Elf_Ehdr>> {
     // If we're reading a 64-bit auxv on a 32-bit platform, we'll see a zero
     // `a_val` because `AT_*` values are never greater than `u32::MAX`. Zero is

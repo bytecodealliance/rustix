@@ -69,7 +69,7 @@ impl AddressFamily {
     /// # References
     ///  - [Linux]
     ///
-    /// [Linux]: https://man7.org/linux/man-pages/man7/ip.7.html>
+    /// [Linux]: https://man7.org/linux/man-pages/man7/ip.7.html
     pub const INET: Self = Self(c::AF_INET as _);
     /// `AF_INET6`
     ///
