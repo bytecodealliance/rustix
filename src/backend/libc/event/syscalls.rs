@@ -9,7 +9,11 @@ use crate::event::PollFd;
 use crate::fd::OwnedFd;
 use crate::io;
 #[cfg(any(bsd, solarish))]
-use {crate::backend::conv::borrowed_fd, crate::fd::BorrowedFd, core::mem::MaybeUninit};
+use {
+    crate::backend::conv::borrowed_fd,
+    crate::fd::{BorrowedFd, RawFd},
+    core::mem::MaybeUninit,
+};
 #[cfg(solarish)]
 use {
     crate::backend::conv::ret, crate::event::port::Event, crate::utils::as_mut_ptr,
@@ -69,8 +73,8 @@ pub(crate) fn kqueue() -> io::Result<OwnedFd> {
 #[cfg(all(feature = "alloc", bsd))]
 pub(crate) unsafe fn kevent(
     kq: BorrowedFd<'_>,
-    changelist: &[Event],
-    eventlist: &mut [MaybeUninit<Event>],
+    changelist: &[Event<BorrowedFd>],
+    eventlist: &mut [MaybeUninit<Event<RawFd>>],
     timeout: Option<&c::timespec>,
 ) -> io::Result<c::c_int> {
     ret_c_int(c::kevent(

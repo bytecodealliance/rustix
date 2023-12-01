@@ -1,6 +1,6 @@
 //! An API for interfacing with `kqueue`.
 
-use crate::fd::{AsFd, OwnedFd, RawFd};
+use crate::fd::{AsFd, AsRawFd, BorrowedFd, OwnedFd, RawFd};
 use crate::pid::Pid;
 use crate::signal::Signal;
 use crate::{backend, io};
@@ -9,28 +9,33 @@ use backend::c::{self, intptr_t, kevent as kevent_t, uintptr_t};
 use backend::event::syscalls;
 
 use alloc::vec::Vec;
+use core::marker::PhantomData;
 use core::mem::zeroed;
 use core::ptr::slice_from_raw_parts_mut;
 use core::time::Duration;
 
+// TODO avoid fd leak on drop?
 /// A `kqueue` event.
 #[repr(transparent)]
 #[derive(Copy, Clone)]
-pub struct Event {
+pub struct Event<Fd> {
     // The layout varies between BSDs and macOS.
     inner: kevent_t,
+    _marker: PhantomData<Fd>,
 }
 
-impl Event {
+impl<Fd: AsRawFd> Event<Fd> {
     /// Create a new `Event`.
     #[allow(clippy::needless_update)]
-    pub fn new(filter: EventFilter, flags: EventFlags, udata: isize) -> Event {
+    pub fn new(filter: EventFilter<Fd>, flags: EventFlags, udata: isize) -> Event<Fd> {
         let (ident, data, filter, fflags) = match filter {
-            EventFilter::Read(fd) => (fd as uintptr_t, 0, c::EVFILT_READ, 0),
-            EventFilter::Write(fd) => (fd as _, 0, c::EVFILT_WRITE, 0),
+            EventFilter::Read(fd) => (fd.as_raw_fd() as uintptr_t, 0, c::EVFILT_READ, 0),
+            EventFilter::Write(fd) => (fd.as_raw_fd() as _, 0, c::EVFILT_WRITE, 0),
             #[cfg(target_os = "freebsd")]
-            EventFilter::Empty(fd) => (fd as _, 0, c::EVFILT_EMPTY, 0),
-            EventFilter::Vnode { vnode, flags } => (vnode as _, 0, c::EVFILT_VNODE, flags.bits()),
+            EventFilter::Empty(fd) => (fd.as_raw_fd() as _, 0, c::EVFILT_EMPTY, 0),
+            EventFilter::Vnode { vnode, flags } => {
+                (vnode.as_raw_fd() as _, 0, c::EVFILT_VNODE, flags.bits())
+            }
             EventFilter::Proc { pid, flags } => {
                 (Pid::as_raw(Some(pid)) as _, 0, c::EVFILT_PROC, flags.bits())
             }
@@ -83,6 +88,7 @@ impl Event {
                 },
                 ..unsafe { zeroed() }
             },
+            _marker: PhantomData,
         }
     }
 
@@ -106,7 +112,7 @@ impl Event {
     }
 
     /// Get the filter of this event.
-    pub fn filter(&self) -> EventFilter {
+    pub fn filter(&self) -> EventFilter<RawFd> {
         match self.inner.filter as _ {
             c::EVFILT_READ => EventFilter::Read(self.inner.ident as _),
             c::EVFILT_WRITE => EventFilter::Write(self.inner.ident as _),
@@ -162,21 +168,21 @@ const EVFILT_USER_FLAGS: u32 = 0x00ff_ffff;
 /// The possible filters for a `kqueue`.
 #[repr(i16)]
 #[non_exhaustive]
-pub enum EventFilter {
+pub enum EventFilter<Fd: AsRawFd> {
     /// A read filter.
-    Read(RawFd),
+    Read(Fd),
 
     /// A write filter.
-    Write(RawFd),
+    Write(Fd),
 
     /// An empty filter.
     #[cfg(target_os = "freebsd")]
-    Empty(RawFd),
+    Empty(Fd),
 
     /// A VNode filter.
     Vnode {
         /// The file descriptor we looked for events in.
-        vnode: RawFd,
+        vnode: Fd,
 
         /// The flags for this event.
         flags: VnodeEvents,
@@ -401,11 +407,6 @@ pub fn kqueue() -> io::Result<OwnedFd> {
 /// Note: in order to receive events, make sure to allocate capacity in the
 /// eventlist! Otherwise, the function will return immediately.
 ///
-/// # Safety
-///
-/// The file descriptors referred to by the `Event` structs must be valid for
-/// the lifetime of the `kqueue` file descriptor.
-///
 /// # References
 ///  - [Apple]
 ///  - [FreeBSD]
@@ -418,10 +419,10 @@ pub fn kqueue() -> io::Result<OwnedFd> {
 /// [OpenBSD]: https://man.openbsd.org/kevent.2
 /// [NetBSD]: https://man.netbsd.org/kevent.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=kevent&section=2
-pub unsafe fn kevent(
+pub fn kevent(
     kqueue: impl AsFd,
-    changelist: &[Event],
-    eventlist: &mut Vec<Event>,
+    changelist: &[Event<BorrowedFd>],
+    eventlist: &mut Vec<Event<RawFd>>,
     timeout: Option<Duration>,
 ) -> io::Result<usize> {
     let timeout = timeout.map(|timeout| backend::c::timespec {
@@ -429,21 +430,24 @@ pub unsafe fn kevent(
         tv_nsec: timeout.subsec_nanos() as _,
     });
 
-    // Populate the event list with events.
-    eventlist.set_len(0);
-    let out_slice = slice_from_raw_parts_mut(eventlist.as_mut_ptr().cast(), eventlist.capacity());
-    let res = syscalls::kevent(
-        kqueue.as_fd(),
-        changelist,
-        &mut *out_slice,
-        timeout.as_ref(),
-    )
-    .map(|res| res as _);
+    unsafe {
+        // Populate the event list with events.
+        eventlist.set_len(0);
+        let out_slice =
+            slice_from_raw_parts_mut(eventlist.as_mut_ptr().cast(), eventlist.capacity());
+        let res = syscalls::kevent(
+            kqueue.as_fd(),
+            changelist,
+            &mut *out_slice,
+            timeout.as_ref(),
+        )
+        .map(|res| res as _);
 
-    // Update the event list.
-    if let Ok(len) = res {
-        eventlist.set_len(len);
+        // Update the event list.
+        if let Ok(len) = res {
+            eventlist.set_len(len);
+        }
+
+        res
     }
-
-    res
 }
