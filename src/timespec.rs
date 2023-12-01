@@ -1,6 +1,7 @@
 //! `Timespec` and related types, which are used by multiple public API
 //! modules.
 
+#[allow(unused)]
 use crate::ffi;
 
 /// `struct timespec`
@@ -15,12 +16,12 @@ pub struct Timespec {
 }
 
 /// A type for the `tv_sec` field of [`Timespec`].
-#[cfg(not(fix_y2038))]
+#[cfg(target_pointer_width = "64")]
 #[allow(deprecated)]
 pub type Secs = ffi::c_long;
 
 /// A type for the `tv_sec` field of [`Timespec`].
-#[cfg(fix_y2038)]
+#[cfg(not(target_pointer_width = "64"))]
 pub type Secs = i64;
 
 /// A type for the `tv_sec` field of [`Timespec`].
@@ -106,4 +107,10 @@ fn test_sizes() {
 #[allow(deprecated)]
 fn test_fix_y2038() {
     assert_eq_size!(libc::time_t, u32);
+}
+
+#[test]
+fn timespec_layouts() {
+    use crate::backend::c;
+    check_renamed_type!(Timespec, timespec);
 }
