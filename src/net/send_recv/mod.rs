@@ -66,31 +66,6 @@ pub fn recv<Fd: AsFd>(fd: Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<us
 /// This is equivalent to [`recv`], except that it can read into uninitialized
 /// memory. It returns the slice that was initialized by this function and the
 /// slice that remains uninitialized.
-///
-/// # References
-///  - [Beej's Guide to Network Programming]
-///  - [POSIX]
-///  - [Linux]
-///  - [Apple]
-///  - [Winsock2]
-///  - [FreeBSD]
-///  - [NetBSD]
-///  - [OpenBSD]
-///  - [DragonFly BSD]
-///  - [illumos]
-///  - [glibc]
-///
-/// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html#sendrecv
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/recv.html
-/// [Linux]: https://man7.org/linux/man-pages/man2/recv.2.html
-/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/recv.2.html
-/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recv
-/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=recv&sektion=2
-/// [NetBSD]: https://man.netbsd.org/recv.2
-/// [OpenBSD]: https://man.openbsd.org/recv.2
-/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=recv&section=2
-/// [illumos]: https://illumos.org/man/3SOCKET/recv
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Receiving-Data.html
 #[inline]
 pub fn recv_uninit<Fd: AsFd>(
     fd: Fd,
@@ -177,31 +152,6 @@ pub fn recvfrom<Fd: AsFd>(
 /// This is equivalent to [`recvfrom`], except that it can read into uninitialized
 /// memory. It returns the slice that was initialized by this function and the
 /// slice that remains uninitialized.
-///
-/// # References
-///  - [Beej's Guide to Network Programming]
-///  - [POSIX]
-///  - [Linux]
-///  - [Apple]
-///  - [Winsock2]
-///  - [FreeBSD]
-///  - [NetBSD]
-///  - [OpenBSD]
-///  - [DragonFly BSD]
-///  - [illumos]
-///  - [glibc]
-///
-/// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html#sendtorecv
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/recvfrom.html
-/// [Linux]: https://man7.org/linux/man-pages/man2/recvfrom.2.html
-/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/recvfrom.2.html
-/// [Winsock2]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recvfrom
-/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=recvfrom&sektion=2
-/// [NetBSD]: https://man.netbsd.org/recvfrom.2
-/// [OpenBSD]: https://man.openbsd.org/recvfrom.2
-/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=recvfrom&section=2
-/// [illumos]: https://illumos.org/man/3SOCKET/recvfrom
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Receiving-Datagrams.html
 #[allow(clippy::type_complexity)]
 #[inline]
 pub fn recvfrom_uninit<Fd: AsFd>(

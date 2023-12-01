@@ -25,20 +25,9 @@ pub fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
 
 /// `getrandom(buf, flags)`—Reads a sequence of random bytes.
 ///
-/// This is a very low-level API which may be difficult to use correctly. Most
-/// users should prefer to use [`getrandom`] or [`rand`] APIs instead.
-///
 /// This is identical to [`getrandom`], except that it can read into uninitialized
 /// memory. It returns the slice that was initialized by this function and the
 /// slice that remains uninitialized.
-///
-/// [`getrandom`]: https://crates.io/crates/getrandom
-/// [`rand`]: https://crates.io/crates/rand
-///
-/// # References
-///  - [Linux]
-///
-/// [Linux]: https://man7.org/linux/man-pages/man2/getrandom.2.html
 #[inline]
 pub fn getrandom_uninit(
     buf: &mut [MaybeUninit<u8>],

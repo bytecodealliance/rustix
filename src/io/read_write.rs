@@ -46,27 +46,6 @@ pub fn read<Fd: AsFd>(fd: Fd, buf: &mut [u8]) -> io::Result<usize> {
 /// This is equivalent to [`read`], except that it can read into uninitialized
 /// memory. It returns the slice that was initialized by this function and the
 /// slice that remains uninitialized.
-///
-/// # References
-///  - [POSIX]
-///  - [Linux]
-///  - [Apple]
-///  - [FreeBSD]
-///  - [NetBSD]
-///  - [OpenBSD]
-///  - [DragonFly BSD]
-///  - [illumos]
-///  - [glibc]
-///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/read.html
-/// [Linux]: https://man7.org/linux/man-pages/man2/read.2.html
-/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/read.2.html
-/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=read&sektion=2
-/// [NetBSD]: https://man.netbsd.org/read.2
-/// [OpenBSD]: https://man.openbsd.org/read.2
-/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=read&section=2
-/// [illumos]: https://illumos.org/man/2/read
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/I_002fO-Primitives.html#index-reading-from-a-file-descriptor
 #[inline]
 pub fn read_uninit<Fd: AsFd>(
     fd: Fd,
@@ -137,25 +116,6 @@ pub fn pread<Fd: AsFd>(fd: Fd, buf: &mut [u8], offset: u64) -> io::Result<usize>
 /// This is equivalent to [`pread`], except that it can read into uninitialized
 /// memory. It returns the slice that was initialized by this function and the
 /// slice that remains uninitialized.
-///
-/// # References
-///  - [POSIX]
-///  - [Linux]
-///  - [Apple]
-///  - [FreeBSD]
-///  - [NetBSD]
-///  - [OpenBSD]
-///  - [DragonFly BSD]
-///  - [illumos]
-///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/pread.html
-/// [Linux]: https://man7.org/linux/man-pages/man2/pread.2.html
-/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/pread.2.html
-/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=pread&sektion=2
-/// [NetBSD]: https://man.netbsd.org/pread.2
-/// [OpenBSD]: https://man.openbsd.org/pread.2
-/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=pread&section=2
-/// [illumos]: https://illumos.org/man/2/pread
 #[inline]
 pub fn pread_uninit<Fd: AsFd>(
     fd: Fd,
