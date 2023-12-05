@@ -8,9 +8,11 @@
 use crate::backend::c;
 #[cfg(target_arch = "x86")]
 use crate::backend::conv::by_mut;
+#[cfg(target_arch = "x86_64")]
+use crate::backend::conv::c_uint;
 use crate::backend::conv::{
-    by_ref, c_int, c_uint, ret, ret_c_int, ret_c_int_infallible, ret_error, ret_infallible,
-    ret_void_star, size_of, zero,
+    by_ref, c_int, ret, ret_c_int, ret_c_int_infallible, ret_error, ret_infallible, ret_void_star,
+    size_of, zero,
 };
 #[cfg(feature = "fs")]
 use crate::fd::BorrowedFd;
@@ -30,7 +32,6 @@ use linux_raw_sys::general::__kernel_old_timespec;
 use linux_raw_sys::general::kernel_sigset_t;
 #[cfg(target_arch = "x86_64")]
 use linux_raw_sys::general::ARCH_SET_FS;
-use linux_raw_sys::prctl::PR_SET_NAME;
 
 #[inline]
 pub(crate) unsafe fn fork() -> io::Result<Fork> {
@@ -137,18 +138,6 @@ pub(crate) mod tls {
     pub(crate) unsafe fn set_tid_address(data: *mut c::c_void) -> Pid {
         let tid: i32 = ret_c_int_infallible(syscall_readonly!(__NR_set_tid_address, data));
         Pid::from_raw_unchecked(tid)
-    }
-
-    #[inline]
-    pub(crate) unsafe fn set_thread_name(name: &CStr) -> io::Result<()> {
-        ret(syscall_readonly!(
-            __NR_prctl,
-            c_uint(PR_SET_NAME),
-            name,
-            zero(),
-            zero(),
-            zero()
-        ))
     }
 
     #[inline]

@@ -112,22 +112,6 @@ pub unsafe fn set_tid_address(data: *mut c_void) -> Pid {
     backend::runtime::syscalls::tls::set_tid_address(data)
 }
 
-/// `prctl(PR_SET_NAME, name)`
-///
-/// # References
-///  - [Linux]
-///
-/// # Safety
-///
-/// This is a very low-level feature for implementing threading libraries.
-/// See the references links above.
-///
-/// [Linux]: https://man7.org/linux/man-pages/man2/prctl.2.html
-#[inline]
-pub unsafe fn set_thread_name(name: &CStr) -> io::Result<()> {
-    backend::runtime::syscalls::tls::set_thread_name(name)
-}
-
 #[cfg(linux_raw)]
 #[cfg(target_arch = "x86")]
 pub use backend::runtime::tls::UserDesc;
