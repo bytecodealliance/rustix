@@ -1063,10 +1063,12 @@ where
 
     #[cfg(not(feature = "alloc"))]
     {
-        #[cfg(libc)]
+        #[cfg(all(libc, not(target_os = "wasi")))]
         const LARGE_PATH_BUFFER_SIZE: usize = libc::PATH_MAX as usize;
         #[cfg(linux_raw)]
         const LARGE_PATH_BUFFER_SIZE: usize = linux_raw_sys::general::PATH_MAX as usize;
+        #[cfg(target_os = "wasi")]
+        const LARGE_PATH_BUFFER_SIZE: usize = 4096 as usize; // TODO: upstream this
 
         // Taken from
         // <https://github.com/rust-lang/rust/blob/a00f8ba7fcac1b27341679c51bf5a3271fa82df3/library/std/src/sys/common/small_c_string.rs>
