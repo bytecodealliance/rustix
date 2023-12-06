@@ -17,14 +17,6 @@ use {
     core::sync::atomic::Ordering::Relaxed,
 };
 
-// `getauxval` wasn't supported in glibc until 2.16. Also this lets us use
-// `*mut` as the return type to preserve strict provenance.
-#[cfg(not(feature = "runtime"))]
-weak!(fn getauxval(c::c_ulong) -> *mut c::c_void);
-
-// With the "runtime" feature, go ahead and depend on `getauxval` existing so
-// that we never fail.
-#[cfg(feature = "runtime")]
 extern "C" {
     fn getauxval(type_: c::c_ulong) -> *mut c::c_void;
 }
@@ -99,18 +91,6 @@ pub(crate) fn clock_ticks_per_second() -> u64 {
 #[cfg(feature = "param")]
 #[inline]
 pub(crate) fn linux_hwcap() -> (usize, usize) {
-    #[cfg(not(feature = "runtime"))]
-    unsafe {
-        if let Some(libc_getauxval) = getauxval.get() {
-            let hwcap = libc_getauxval(AT_HWCAP) as usize;
-            let hwcap2 = libc_getauxval(AT_HWCAP2) as usize;
-            (hwcap, hwcap2)
-        } else {
-            (0, 0)
-        }
-    }
-
-    #[cfg(feature = "runtime")]
     unsafe {
         let hwcap = getauxval(AT_HWCAP) as usize;
         let hwcap2 = getauxval(AT_HWCAP2) as usize;
@@ -140,19 +120,7 @@ pub(crate) fn linux_minsigstksz() -> usize {
 #[cfg(feature = "param")]
 #[inline]
 pub(crate) fn linux_execfn() -> &'static CStr {
-    #[cfg(not(feature = "runtime"))]
-    unsafe {
-        if let Some(libc_getauxval) = getauxval.get() {
-            CStr::from_ptr(libc_getauxval(AT_EXECFN).cast())
-        } else {
-            cstr!("")
-        }
-    }
-
-    #[cfg(feature = "runtime")]
-    unsafe {
-        CStr::from_ptr(getauxval(AT_EXECFN).cast())
-    }
+    unsafe { CStr::from_ptr(getauxval(AT_EXECFN).cast()) }
 }
 
 #[cfg(feature = "runtime")]
@@ -176,19 +144,7 @@ pub(crate) fn exe_phdrs() -> (*const c::c_void, usize, usize) {
 /// if we don't see it, this function returns a null pointer.
 #[inline]
 pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
-    #[cfg(not(feature = "runtime"))]
-    unsafe {
-        if let Some(libc_getauxval) = getauxval.get() {
-            libc_getauxval(AT_SYSINFO_EHDR) as *const Elf_Ehdr
-        } else {
-            null()
-        }
-    }
-
-    #[cfg(feature = "runtime")]
-    unsafe {
-        getauxval(AT_SYSINFO_EHDR) as *const Elf_Ehdr
-    }
+    unsafe { getauxval(AT_SYSINFO_EHDR) as *const Elf_Ehdr }
 }
 
 #[cfg(feature = "runtime")]
@@ -214,7 +170,7 @@ pub(crate) fn vsyscall() -> *const c_void {
     if vsyscall.is_null() {
         #[cold]
         fn compute_vsyscall() -> *mut c_void {
-            let vsyscall = unsafe { getauxval(AT_SYSINFO) } as *mut c_void;
+            let vsyscall = unsafe { getauxval(AT_SYSINFO) as *mut c_void };
             VSYSCALL.store(vsyscall, Relaxed);
             vsyscall
         }

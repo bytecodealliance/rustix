@@ -224,7 +224,7 @@ pub(crate) fn vsyscall() -> *const c::c_void {
 
     if vsyscall.is_null() {
         #[cold]
-        fn compute_vsyscall() -> *const c::c_void {
+        fn compute_vsyscall() -> *mut c::c_void {
             init_auxv();
             VSYSCALL.load(Relaxed)
         }
@@ -253,7 +253,7 @@ static PHNUM: AtomicUsize = AtomicUsize::new(0);
 static ENTRY: AtomicUsize = AtomicUsize::new(0);
 #[cfg(feature = "runtime")]
 static RANDOM: AtomicPtr<[u8; 16]> = AtomicPtr::new(null_mut());
-#[cfg(feature = "x86")]
+#[cfg(target_arch = "x86")]
 static VSYSCALL: AtomicPtr<c::c_void> = AtomicPtr::new(null_mut());
 
 const PR_GET_AUXV: c::c_int = 0x4155_5856;
