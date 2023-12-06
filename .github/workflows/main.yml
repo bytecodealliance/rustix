@@ -87,6 +87,7 @@ jobs:
     - run: cargo check --workspace --release -vv --all-targets
     - run: cargo check --workspace --release -vv --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --features=use-libc,all-apis --all-targets
+    - run: cargo check --workspace --release -vv --features=linux_latest,all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=aarch64-linux-android --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl --features=use-libc,all-apis --all-targets
@@ -106,7 +107,9 @@ jobs:
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-musl --features=use-libc,all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=wasm32-unknown-emscripten --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=riscv64gc-unknown-linux-gnu --features=all-apis --all-targets
+    - run: cargo check --workspace --release -vv --target=riscv64gc-unknown-linux-gnu --features=linux_latest,all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-gnu --features=all-apis --all-targets
+    - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-gnu --features=linux_latest,all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl --features=use-libc,all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=powerpc64le-unknown-linux-gnu --features=all-apis --all-targets
