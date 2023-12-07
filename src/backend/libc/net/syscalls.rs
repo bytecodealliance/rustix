@@ -31,15 +31,18 @@ use {
 };
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
-    unsafe {
-        ret_send_recv(c::recv(
-            borrowed_fd(fd),
-            buf.as_mut_ptr().cast(),
-            send_recv_len(buf.len()),
-            bitflags_bits!(flags),
-        ))
-    }
+pub(crate) unsafe fn recv(
+    fd: BorrowedFd<'_>,
+    buf: *mut u8,
+    len: usize,
+    flags: RecvFlags,
+) -> io::Result<usize> {
+    ret_send_recv(c::recv(
+        borrowed_fd(fd),
+        buf.cast(),
+        send_recv_len(len),
+        bitflags_bits!(flags),
+    ))
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
@@ -55,35 +58,34 @@ pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Resu
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn recvfrom(
+pub(crate) unsafe fn recvfrom(
     fd: BorrowedFd<'_>,
-    buf: &mut [u8],
+    buf: *mut u8,
+    buf_len: usize,
     flags: RecvFlags,
 ) -> io::Result<(usize, Option<SocketAddrAny>)> {
-    unsafe {
-        let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
-        let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
+    let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
+    let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
 
-        // `recvfrom` does not write to the storage if the socket is
-        // connection-oriented sockets, so we initialize the family field to
-        // `AF_UNSPEC` so that we can detect this case.
-        initialize_family_to_unspec(storage.as_mut_ptr());
+    // `recvfrom` does not write to the storage if the socket is
+    // connection-oriented sockets, so we initialize the family field to
+    // `AF_UNSPEC` so that we can detect this case.
+    initialize_family_to_unspec(storage.as_mut_ptr());
 
-        ret_send_recv(c::recvfrom(
-            borrowed_fd(fd),
-            buf.as_mut_ptr().cast(),
-            send_recv_len(buf.len()),
-            bitflags_bits!(flags),
-            storage.as_mut_ptr().cast(),
-            &mut len,
-        ))
-        .map(|nread| {
-            (
-                nread,
-                maybe_read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()),
-            )
-        })
-    }
+    ret_send_recv(c::recvfrom(
+        borrowed_fd(fd),
+        buf.cast(),
+        send_recv_len(buf_len),
+        bitflags_bits!(flags),
+        storage.as_mut_ptr().cast(),
+        &mut len,
+    ))
+    .map(|nread| {
+        (
+            nread,
+            maybe_read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()),
+        )
+    })
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]

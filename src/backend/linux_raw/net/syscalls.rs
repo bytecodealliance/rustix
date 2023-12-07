@@ -13,7 +13,7 @@ use super::send_recv::{RecvFlags, SendFlags};
 use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 use crate::backend::c;
 use crate::backend::conv::{
-    by_mut, by_ref, c_int, c_uint, ret, ret_owned_fd, ret_usize, size_of, slice, slice_mut,
+    by_mut, by_ref, c_int, c_uint, pass_usize, ret, ret_owned_fd, ret_usize, size_of, slice,
     socklen_t, zero,
 };
 use crate::fd::{BorrowedFd, OwnedFd};
@@ -585,9 +585,12 @@ pub(crate) fn sendto_unix(
 }
 
 #[inline]
-pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
-    let (buf_addr_mut, buf_len) = slice_mut(buf);
-
+pub(crate) unsafe fn recv(
+    fd: BorrowedFd<'_>,
+    buf: *mut u8,
+    len: usize,
+    flags: RecvFlags,
+) -> io::Result<usize> {
     #[cfg(not(any(
         target_arch = "aarch64",
         target_arch = "mips64",
@@ -596,8 +599,8 @@ pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::
         target_arch = "x86",
         target_arch = "x86_64",
     )))]
-    unsafe {
-        ret_usize(syscall!(__NR_recv, fd, buf_addr_mut, buf_len, flags))
+    {
+        ret_usize(syscall!(__NR_recv, fd, buf, pass_usize(len), flags))
     }
     #[cfg(any(
         target_arch = "aarch64",
@@ -606,26 +609,26 @@ pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::
         target_arch = "riscv64",
         target_arch = "x86_64",
     ))]
-    unsafe {
+    {
         ret_usize(syscall!(
             __NR_recvfrom,
             fd,
-            buf_addr_mut,
-            buf_len,
+            buf,
+            pass_usize(len),
             flags,
             zero(),
             zero()
         ))
     }
     #[cfg(target_arch = "x86")]
-    unsafe {
+    {
         ret_usize(syscall!(
             __NR_socketcall,
             x86_sys(SYS_RECV),
             slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
                 fd.into(),
-                buf_addr_mut,
-                buf_len,
+                buf.into(),
+                pass_usize(len),
                 flags.into(),
             ])
         ))
@@ -633,51 +636,48 @@ pub(crate) fn recv(fd: BorrowedFd<'_>, buf: &mut [u8], flags: RecvFlags) -> io::
 }
 
 #[inline]
-pub(crate) fn recvfrom(
+pub(crate) unsafe fn recvfrom(
     fd: BorrowedFd<'_>,
-    buf: &mut [u8],
+    buf: *mut u8,
+    len: usize,
     flags: RecvFlags,
 ) -> io::Result<(usize, Option<SocketAddrAny>)> {
-    let (buf_addr_mut, buf_len) = slice_mut(buf);
-
     let mut addrlen = core::mem::size_of::<sockaddr>() as socklen_t;
     let mut storage = MaybeUninit::<sockaddr>::uninit();
 
-    unsafe {
-        // `recvfrom` does not write to the storage if the socket is
-        // connection-oriented sockets, so we initialize the family field to
-        // `AF_UNSPEC` so that we can detect this case.
-        initialize_family_to_unspec(storage.as_mut_ptr());
+    // `recvfrom` does not write to the storage if the socket is
+    // connection-oriented sockets, so we initialize the family field to
+    // `AF_UNSPEC` so that we can detect this case.
+    initialize_family_to_unspec(storage.as_mut_ptr());
 
-        #[cfg(not(target_arch = "x86"))]
-        let nread = ret_usize(syscall!(
-            __NR_recvfrom,
-            fd,
-            buf_addr_mut,
-            buf_len,
-            flags,
-            &mut storage,
-            by_mut(&mut addrlen)
-        ))?;
-        #[cfg(target_arch = "x86")]
-        let nread = ret_usize(syscall!(
-            __NR_socketcall,
-            x86_sys(SYS_RECVFROM),
-            slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
-                fd.into(),
-                buf_addr_mut,
-                buf_len,
-                flags.into(),
-                (&mut storage).into(),
-                by_mut(&mut addrlen),
-            ])
-        ))?;
+    #[cfg(not(target_arch = "x86"))]
+    let nread = ret_usize(syscall!(
+        __NR_recvfrom,
+        fd,
+        buf,
+        pass_usize(len),
+        flags,
+        &mut storage,
+        by_mut(&mut addrlen)
+    ))?;
+    #[cfg(target_arch = "x86")]
+    let nread = ret_usize(syscall!(
+        __NR_socketcall,
+        x86_sys(SYS_RECVFROM),
+        slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
+            fd.into(),
+            buf.into(),
+            pass_usize(len),
+            flags.into(),
+            (&mut storage).into(),
+            by_mut(&mut addrlen),
+        ])
+    ))?;
 
-        Ok((
-            nread,
-            maybe_read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
-        ))
-    }
+    Ok((
+        nread,
+        maybe_read_sockaddr_os(&storage.assume_init(), addrlen.try_into().unwrap()),
+    ))
 }
 
 #[inline]

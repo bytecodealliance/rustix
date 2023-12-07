@@ -1,10 +1,14 @@
 //! `recv`, `send`, and variants.
 
+#![allow(unsafe_code)]
+
+use crate::buffer::split_init;
 #[cfg(unix)]
 use crate::net::SocketAddrUnix;
 use crate::net::{SocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::{backend, io};
 use backend::fd::{AsFd, BorrowedFd};
+use core::mem::MaybeUninit;
 
 pub use backend::net::send_recv::{RecvFlags, SendFlags};
 
@@ -54,7 +58,25 @@ pub use msg::*;
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Receiving-Data.html
 #[inline]
 pub fn recv<Fd: AsFd>(fd: Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
-    backend::net::syscalls::recv(fd.as_fd(), buf, flags)
+    unsafe { backend::net::syscalls::recv(fd.as_fd(), buf.as_mut_ptr(), buf.len(), flags) }
+}
+
+/// `recv(fd, buf, flags)`—Reads data from a socket.
+///
+/// This is equivalent to [`recv`], except that it can read into uninitialized
+/// memory. It returns the slice that was initialized by this function and the
+/// slice that remains uninitialized.
+#[inline]
+pub fn recv_uninit<Fd: AsFd>(
+    fd: Fd,
+    buf: &mut [MaybeUninit<u8>],
+    flags: RecvFlags,
+) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>])> {
+    let length = unsafe {
+        backend::net::syscalls::recv(fd.as_fd(), buf.as_mut_ptr() as *mut u8, buf.len(), flags)
+    };
+
+    Ok(unsafe { split_init(buf, length?) })
 }
 
 /// `send(fd, buf, flags)`—Writes data to a socket.
@@ -121,7 +143,27 @@ pub fn recvfrom<Fd: AsFd>(
     buf: &mut [u8],
     flags: RecvFlags,
 ) -> io::Result<(usize, Option<SocketAddrAny>)> {
-    backend::net::syscalls::recvfrom(fd.as_fd(), buf, flags)
+    unsafe { backend::net::syscalls::recvfrom(fd.as_fd(), buf.as_mut_ptr(), buf.len(), flags) }
+}
+
+/// `recvfrom(fd, buf, flags, addr, len)`—Reads data from a socket and
+/// returns the sender address.
+///
+/// This is equivalent to [`recvfrom`], except that it can read into uninitialized
+/// memory. It returns the slice that was initialized by this function and the
+/// slice that remains uninitialized.
+#[allow(clippy::type_complexity)]
+#[inline]
+pub fn recvfrom_uninit<Fd: AsFd>(
+    fd: Fd,
+    buf: &mut [MaybeUninit<u8>],
+    flags: RecvFlags,
+) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>], Option<SocketAddrAny>)> {
+    let (length, addr) = unsafe {
+        backend::net::syscalls::recvfrom(fd.as_fd(), buf.as_mut_ptr() as *mut u8, buf.len(), flags)?
+    };
+    let (init, uninit) = unsafe { split_init(buf, length) };
+    Ok((init, uninit, addr))
 }
 
 /// `sendto(fd, buf, flags, addr)`—Writes data to a socket to a specific IP

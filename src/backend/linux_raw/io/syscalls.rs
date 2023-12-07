@@ -15,7 +15,7 @@ use crate::backend::conv::loff_t_from_u64;
 use crate::backend::conv::zero;
 use crate::backend::conv::{
     c_uint, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd,
-    ret_usize, slice, slice_mut,
+    ret_usize, slice,
 };
 #[cfg(target_pointer_width = "32")]
 use crate::backend::conv::{hi, lo};
@@ -29,27 +29,28 @@ use core::cmp;
 use linux_raw_sys::general::{F_DUPFD_CLOEXEC, F_GETFD, F_SETFD};
 
 #[inline]
-pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
-    let (buf_addr_mut, buf_len) = slice_mut(buf);
-
-    unsafe { ret_usize(syscall!(__NR_read, fd, buf_addr_mut, buf_len)) }
+pub(crate) unsafe fn read(fd: BorrowedFd<'_>, buf: *mut u8, len: usize) -> io::Result<usize> {
+    ret_usize(syscall!(__NR_read, fd, buf, pass_usize(len)))
 }
 
 #[inline]
-pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], pos: u64) -> io::Result<usize> {
-    let (buf_addr_mut, buf_len) = slice_mut(buf);
-
+pub(crate) unsafe fn pread(
+    fd: BorrowedFd<'_>,
+    buf: *mut u8,
+    len: usize,
+    pos: u64,
+) -> io::Result<usize> {
     // <https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L75>
     #[cfg(all(
         target_pointer_width = "32",
         any(target_arch = "arm", target_arch = "mips", target_arch = "mips32r6"),
     ))]
-    unsafe {
+    {
         ret_usize(syscall!(
             __NR_pread64,
             fd,
-            buf_addr_mut,
-            buf_len,
+            buf,
+            pass_usize(len),
             zero(),
             hi(pos),
             lo(pos)
@@ -59,26 +60,24 @@ pub(crate) fn pread(fd: BorrowedFd<'_>, buf: &mut [u8], pos: u64) -> io::Result<
         target_pointer_width = "32",
         not(any(target_arch = "arm", target_arch = "mips", target_arch = "mips32r6")),
     ))]
-    unsafe {
+    {
         ret_usize(syscall!(
             __NR_pread64,
             fd,
-            buf_addr_mut,
-            buf_len,
+            buf,
+            pass_usize(len),
             hi(pos),
             lo(pos)
         ))
     }
     #[cfg(target_pointer_width = "64")]
-    unsafe {
-        ret_usize(syscall!(
-            __NR_pread64,
-            fd,
-            buf_addr_mut,
-            buf_len,
-            loff_t_from_u64(pos)
-        ))
-    }
+    ret_usize(syscall!(
+        __NR_pread64,
+        fd,
+        buf,
+        pass_usize(len),
+        loff_t_from_u64(pos)
+    ))
 }
 
 #[inline]
@@ -268,15 +267,15 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         // Do a `recv` with `PEEK` and `DONTWAIT` for 1 byte. A 0 indicates
         // the read side is shut down; an `EWOULDBLOCK` indicates the read
         // side is still open.
-        //
-        // TODO: This code would benefit from having a better way to read into
-        // uninitialized memory.
-        let mut buf = [0];
-        match crate::backend::net::syscalls::recv(
-            fd,
-            &mut buf,
-            RecvFlags::PEEK | RecvFlags::DONTWAIT,
-        ) {
+        let mut buf = [core::mem::MaybeUninit::<u8>::uninit()];
+        match unsafe {
+            crate::backend::net::syscalls::recv(
+                fd,
+                buf.as_mut_ptr() as *mut u8,
+                1,
+                RecvFlags::PEEK | RecvFlags::DONTWAIT,
+            )
+        } {
             Ok(0) => read = false,
             Err(err) => {
                 #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
