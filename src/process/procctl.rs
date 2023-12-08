@@ -5,8 +5,8 @@
 
 #![allow(unsafe_code)]
 
-use alloc::vec;
-use alloc::vec::Vec;
+#[cfg(feature = "alloc")]
+use alloc::{vec, vec::Vec};
 use core::mem::MaybeUninit;
 use core::ptr;
 
@@ -342,6 +342,7 @@ pub struct PidInfo {
 ///  - [FreeBSD: `procctl(PROC_REAP_GETPIDS,...)`]
 ///
 /// [FreeBSD: `procctl(PROC_REAP_GETPIDS,...)`]: https://man.freebsd.org/cgi/man.cgi?query=procctl&sektion=2
+#[cfg(feature = "alloc")]
 pub fn get_reaper_pids(process: ProcSelector) -> io::Result<Vec<PidInfo>> {
     // Sadly no better way to guarantee that we get all the results than to
     // allocate ~8MB of memory..
