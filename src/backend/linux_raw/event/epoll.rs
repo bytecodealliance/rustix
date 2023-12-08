@@ -1,4 +1,4 @@
-//! Linx `epoll` support.
+//! Linux `epoll` support.
 //!
 //! # Examples
 //!
@@ -160,8 +160,8 @@ pub fn create(flags: CreateFlags) -> io::Result<OwnedFd> {
     syscalls::epoll_create(flags)
 }
 
-/// `epoll_ctl(self, EPOLL_CTL_ADD, data, event)`—Adds an element to an
-/// epoll object.
+/// `epoll_ctl(self, EPOLL_CTL_ADD, data, event)`—Adds an element to an epoll
+/// object.
 ///
 /// This registers interest in any of the events set in `events` occurring on
 /// the file descriptor associated with `data`.

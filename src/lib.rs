@@ -1,5 +1,5 @@
 //! `rustix` provides efficient memory-safe and [I/O-safe] wrappers to
-//! POSIX-like, Unix-like, Linux, and Winsock2 syscall-like APIs, with
+//! POSIX-like, Unix-like, Linux, and Winsock syscall-like APIs, with
 //! configurable backends.
 //!
 //! With rustix, you can write code like this:
