@@ -14,7 +14,7 @@ use libc_errno::errno;
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
-///  - [Winsock2]
+///  - [Winsock]
 ///  - [FreeBSD]
 ///  - [NetBSD]
 ///  - [OpenBSD]
@@ -24,7 +24,7 @@ use libc_errno::errno;
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/errno.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/errno.3.html
-/// [Winsock2]: https://learn.microsoft.com/en-us/windows/win32/winsock/windows-sockets-error-codes-2
+/// [Winsock]: https://learn.microsoft.com/en-us/windows/win32/winsock/windows-sockets-error-codes-2
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?errno
 /// [NetBSD]: https://man.netbsd.org/errno.2
 /// [OpenBSD]: https://man.openbsd.org/errno.2

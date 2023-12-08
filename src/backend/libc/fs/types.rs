@@ -159,13 +159,13 @@ bitflags! {
 #[cfg(not(target_os = "espidf"))]
 impl Mode {
     /// Construct a `Mode` from the mode bits of the `st_mode` field of a
-    /// `Stat`.
+    /// `Mode`.
     #[inline]
     pub const fn from_raw_mode(st_mode: RawMode) -> Self {
         Self::from_bits_truncate(st_mode)
     }
 
-    /// Construct an `st_mode` value from `Stat`.
+    /// Construct an `st_mode` value from a `Mode`.
     #[inline]
     pub const fn as_raw_mode(self) -> RawMode {
         self.bits()
@@ -503,7 +503,7 @@ impl FileType {
         }
     }
 
-    /// Construct an `st_mode` value from `Stat`.
+    /// Construct an `st_mode` value from a `FileType`.
     #[inline]
     pub const fn as_raw_mode(self) -> RawMode {
         match self {

@@ -1,7 +1,7 @@
 //! The libc backend.
 //!
 //! On most platforms, this uses the `libc` crate to make system calls. On
-//! Windows, this uses the Winsock2 API in `windows-sys`, which can be adapted
+//! Windows, this uses the Winsock API in `windows-sys`, which can be adapted
 //! to have a very `libc`-like interface.
 
 // Every FFI call requires an unsafe block, and there are a lot of FFI
@@ -21,11 +21,11 @@ pub(crate) mod fd {
     };
     pub(crate) use windows_sys::Win32::Networking::WinSock::SOCKET as LibcFd;
 
-    /// A version of [`AsRawFd`] for use with Winsock2 API.
+    /// A version of [`AsRawFd`] for use with Winsock API.
     ///
     /// [`AsRawFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.AsRawFd.html
     pub trait AsRawFd {
-        /// A version of [`as_raw_fd`] for use with Winsock2 API.
+        /// A version of [`as_raw_fd`] for use with Winsock API.
         ///
         /// [`as_raw_fd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html#tymethod.as_raw_fd
         fn as_raw_fd(&self) -> RawFd;
@@ -37,11 +37,11 @@ pub(crate) mod fd {
         }
     }
 
-    /// A version of [`IntoRawFd`] for use with Winsock2 API.
+    /// A version of [`IntoRawFd`] for use with Winsock API.
     ///
     /// [`IntoRawFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.IntoRawFd.html
     pub trait IntoRawFd {
-        /// A version of [`into_raw_fd`] for use with Winsock2 API.
+        /// A version of [`into_raw_fd`] for use with Winsock API.
         ///
         /// [`into_raw_fd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html#tymethod.into_raw_fd
         fn into_raw_fd(self) -> RawFd;
@@ -53,11 +53,11 @@ pub(crate) mod fd {
         }
     }
 
-    /// A version of [`FromRawFd`] for use with Winsock2 API.
+    /// A version of [`FromRawFd`] for use with Winsock API.
     ///
     /// [`FromRawFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html
     pub trait FromRawFd {
-        /// A version of [`from_raw_fd`] for use with Winsock2 API.
+        /// A version of [`from_raw_fd`] for use with Winsock API.
         ///
         /// # Safety
         ///
@@ -74,11 +74,11 @@ pub(crate) mod fd {
         }
     }
 
-    /// A version of [`AsFd`] for use with Winsock2 API.
+    /// A version of [`AsFd`] for use with Winsock API.
     ///
     /// [`AsFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.AsFd.html
     pub trait AsFd {
-        /// An `as_fd` function for Winsock2, where a `Fd` is a `Socket`.
+        /// An `as_fd` function for Winsock, where a `Fd` is a `Socket`.
         fn as_fd(&self) -> BorrowedFd;
     }
     impl<T: AsSocket> AsFd for T {

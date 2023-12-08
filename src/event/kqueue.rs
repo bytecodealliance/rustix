@@ -13,7 +13,7 @@ use core::mem::zeroed;
 use core::ptr::slice_from_raw_parts_mut;
 use core::time::Duration;
 
-/// A `kqueue` event.
+/// A `kqueue` event for use with [`kevent`].
 #[repr(transparent)]
 #[derive(Copy, Clone)]
 pub struct Event {

@@ -85,7 +85,7 @@ impl Termios {
 
     /// Return the input communication speed.
     ///
-    /// Unlike the `c_ispeed` field in GLIBC and others, this returns the
+    /// Unlike the `c_ispeed` field in glibc and others, this returns the
     /// integer value of the speed, rather than the `B*` encoded constant
     /// value.
     #[doc(alias = "c_ispeed")]
@@ -121,7 +121,7 @@ impl Termios {
 
     /// Return the output communication speed.
     ///
-    /// Unlike the `c_ospeed` field in GLIBC and others, this returns the
+    /// Unlike the `c_ospeed` field in glibc and others, this returns the
     /// arbitrary integer value of the speed, rather than the `B*` encoded
     /// constant value.
     #[inline]
@@ -154,7 +154,7 @@ impl Termios {
 
     /// Set the input and output communication speeds.
     ///
-    /// Unlike the `c_ispeed` and `c_ospeed` fields in GLIBC and others, this
+    /// Unlike the `c_ispeed` and `c_ospeed` fields in glibc and others, this
     /// takes the arbitrary integer value of the speed, rather than the `B*`
     /// encoded constant value. Not all implementations support all integer
     /// values; use the constants in the [`speed`] module for likely-supported
@@ -172,7 +172,7 @@ impl Termios {
 
     /// Set the input communication speed.
     ///
-    /// Unlike the `c_ispeed` field in GLIBC and others, this takes the
+    /// Unlike the `c_ispeed` field in glibc and others, this takes the
     /// arbitrary integer value of the speed, rather than the `B*` encoded
     /// constant value. Not all implementations support all integer values; use
     /// the constants in the [`speed`] module for known-supported speeds.
@@ -190,7 +190,7 @@ impl Termios {
 
     /// Set the output communication speed.
     ///
-    /// Unlike the `c_ospeed` field in GLIBC and others, this takes the
+    /// Unlike the `c_ospeed` field in glibc and others, this takes the
     /// arbitrary integer value of the speed, rather than the `B*` encoded
     /// constant value. Not all implementations support all integer values; use
     /// the constants in the [`speed`] module for known-supported speeds.

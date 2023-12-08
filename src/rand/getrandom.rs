@@ -25,9 +25,9 @@ pub fn getrandom(buf: &mut [u8], flags: GetRandomFlags) -> io::Result<usize> {
 
 /// `getrandom(buf, flags)`—Reads a sequence of random bytes.
 ///
-/// This is identical to [`getrandom`], except that it can read into uninitialized
-/// memory. It returns the slice that was initialized by this function and the
-/// slice that remains uninitialized.
+/// This is identical to [`getrandom`], except that it can read into
+/// uninitialized memory. It returns the slice that was initialized by this
+/// function and the slice that remains uninitialized.
 #[inline]
 pub fn getrandom_uninit(
     buf: &mut [MaybeUninit<u8>],

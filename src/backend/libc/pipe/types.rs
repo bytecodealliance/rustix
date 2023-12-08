@@ -53,12 +53,14 @@ bitflags! {
     }
 }
 
-/// A buffer type used with `vmsplice`.
+/// A buffer type for use with [`vmsplice`].
 ///
 /// It is guaranteed to be ABI compatible with the iovec type on Unix platforms
 /// and `WSABUF` on Windows. Unlike `IoSlice` and `IoSliceMut` it is
 /// semantically like a raw pointer, and therefore can be shared or mutated as
 /// needed.
+///
+/// [`vmsplice`]: crate::pipe::vmsplice
 #[cfg(linux_kernel)]
 #[repr(transparent)]
 pub struct IoSliceRaw<'a> {

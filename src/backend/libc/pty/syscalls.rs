@@ -58,7 +58,7 @@ pub(crate) fn ptsname(fd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<CSt
             }
         };
 
-        // MacOS 10.13.4 has `ptsname_r`; use it if we have it, otherwise fall
+        // macOS 10.13.4 has `ptsname_r`; use it if we have it, otherwise fall
         // back to calling the underlying ioctl directly.
         #[cfg(apple)]
         let r = unsafe {
