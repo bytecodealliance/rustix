@@ -97,8 +97,7 @@ pub(crate) unsafe fn read_sockaddr(
                     let bytes = &decode.sun_path[1..len - offsetof_sun_path];
 
                     // SAFETY: Convert `&[c_char]` to `&[u8]`.
-                    let bytes =
-                        unsafe { slice::from_raw_parts(bytes.as_ptr().cast::<u8>(), bytes.len()) };
+                    let bytes = slice::from_raw_parts(bytes.as_ptr().cast::<u8>(), bytes.len());
 
                     return SocketAddrUnix::new_abstract_name(bytes).map(SocketAddrAny::Unix);
                 }
@@ -107,8 +106,7 @@ pub(crate) unsafe fn read_sockaddr(
                 let bytes = &decode.sun_path[..len - 1 - offsetof_sun_path];
 
                 // SAFETY: Convert `&[c_char]` to `&[u8]`.
-                let bytes =
-                    unsafe { slice::from_raw_parts(bytes.as_ptr().cast::<u8>(), bytes.len()) };
+                let bytes = slice::from_raw_parts(bytes.as_ptr().cast::<u8>(), bytes.len());
 
                 assert_eq!(decode.sun_path[len - 1 - offsetof_sun_path], 0);
                 Ok(SocketAddrAny::Unix(SocketAddrUnix::new(bytes)?))
@@ -176,8 +174,7 @@ pub(crate) unsafe fn read_sockaddr_os(storage: *const c::sockaddr, len: usize) -
                     let bytes = &decode.sun_path[1..len - offsetof_sun_path];
 
                     // SAFETY: Convert `&[c_char]` to `&[u8]`.
-                    let bytes =
-                        unsafe { slice::from_raw_parts(bytes.as_ptr().cast::<u8>(), bytes.len()) };
+                    let bytes = slice::from_raw_parts(bytes.as_ptr().cast::<u8>(), bytes.len());
 
                     return SocketAddrAny::Unix(SocketAddrUnix::new_abstract_name(bytes).unwrap());
                 }
@@ -188,8 +185,7 @@ pub(crate) unsafe fn read_sockaddr_os(storage: *const c::sockaddr, len: usize) -
                 let bytes = &decode.sun_path[..len - 1 - offsetof_sun_path];
 
                 // SAFETY: Convert `&[c_char]` to `&[u8]`.
-                let bytes =
-                    unsafe { slice::from_raw_parts(bytes.as_ptr().cast::<u8>(), bytes.len()) };
+                let bytes = slice::from_raw_parts(bytes.as_ptr().cast::<u8>(), bytes.len());
 
                 SocketAddrAny::Unix(SocketAddrUnix::new(bytes).unwrap())
             }
