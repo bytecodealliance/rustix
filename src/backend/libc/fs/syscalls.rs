@@ -2274,7 +2274,6 @@ pub(crate) fn lgetxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Resul
     #[cfg(apple)]
     {
         // Passing an empty to slice to getxattr leads to ERANGE on macOS. Pass null instead.
-        // Fixes https://github.com/bytecodealliance/rustix/issues/957
         let ptr = if value.is_empty() {
             core::ptr::null_mut()
         } else {
