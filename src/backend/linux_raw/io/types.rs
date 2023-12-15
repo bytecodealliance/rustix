@@ -55,3 +55,37 @@ bitflags! {
         const _ = !0;
     }
 }
+
+bitflags! {
+    /// `FS_*` constants for use with [`ioctl_getflags`][crate::io::ioctl::ioctl_getflags].
+    pub struct IFlags: c::c_uint {
+        /// `FS_APPEND_FL`
+        const APPEND = linux_raw_sys::general::FS_APPEND_FL;
+        /// `FS_COMPR_FL`
+        const COMPRESSED = linux_raw_sys::general::FS_COMPR_FL;
+        /// `FS_DIRSYNC_FL`
+        const DIRSYNC = linux_raw_sys::general::FS_DIRSYNC_FL;
+        /// `FS_IMMUTABLE_FL`
+        const IMMUTABLE = linux_raw_sys::general::FS_IMMUTABLE_FL;
+        /// `FS_JOURNAL_DATA_FL`
+        const JOURNALING = linux_raw_sys::general::FS_JOURNAL_DATA_FL;
+        /// `FS_NOATIME_FL`
+        const NOATIME = linux_raw_sys::general::FS_NOATIME_FL;
+        /// `FS_NOCOW_FL`
+        const NOCOW = linux_raw_sys::general::FS_NOCOW_FL;
+        /// `FS_NODUMP_FL`
+        const NODUMP = linux_raw_sys::general::FS_NODUMP_FL;
+        /// `FS_NOTAIL_FL`
+        const NOTAIL = linux_raw_sys::general::FS_NOTAIL_FL;
+        /// `FS_PROJINHERIT_FL`
+        const PROJECT_INHERIT = linux_raw_sys::general::FS_PROJINHERIT_FL;
+        /// `FS_SECRM_FL`
+        const SECURE_REMOVAL = linux_raw_sys::general::FS_SECRM_FL;
+        /// `FS_SYNC_FL`
+        const SYNC = linux_raw_sys::general::FS_SYNC_FL;
+        /// `FS_TOPDIR_FL`
+        const TOPDIR = linux_raw_sys::general::FS_TOPDIR_FL;
+        /// `FS_UNRM_FL`
+        const UNRM = linux_raw_sys::general::FS_UNRM_FL;
+    }
+}

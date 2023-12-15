@@ -14,11 +14,13 @@ use crate::backend::conv::loff_t_from_u64;
 ))]
 use crate::backend::conv::zero;
 use crate::backend::conv::{
-    c_uint, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd,
+    by_ref, c_uint, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd,
     ret_usize, slice,
 };
 #[cfg(target_pointer_width = "32")]
 use crate::backend::conv::{hi, lo};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use crate::backend::io::types::IFlags;
 use crate::backend::{c, MAX_IOV};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 use crate::io::{self, DupFlags, FdFlags, IoSlice, IoSliceMut, ReadWriteFlags};
@@ -27,6 +29,10 @@ use crate::ioctl::{IoctlOutput, RawOpcode};
 use crate::net::{RecvFlags, SendFlags};
 use core::cmp;
 use linux_raw_sys::general::{F_DUPFD_CLOEXEC, F_GETFD, F_SETFD};
+#[cfg(target_pointer_width = "32")]
+use linux_raw_sys::ioctl::{FS_IOC32_GETFLAGS, FS_IOC32_SETFLAGS};
+#[cfg(target_pointer_width = "64")]
+use linux_raw_sys::ioctl::{FS_IOC_GETFLAGS, FS_IOC_SETFLAGS};
 
 #[inline]
 pub(crate) unsafe fn read(fd: BorrowedFd<'_>, buf: *mut u8, len: usize) -> io::Result<usize> {
@@ -257,6 +263,34 @@ pub(crate) unsafe fn ioctl_readonly(
     arg: *mut c::c_void,
 ) -> io::Result<IoctlOutput> {
     ret_c_int(syscall_readonly!(__NR_ioctl, fd, c_uint(request), arg))
+}
+
+#[inline]
+pub(crate) fn ioctl_get_flags(fd: BorrowedFd<'_>) -> io::Result<IFlags> {
+    let mut result = core::mem::MaybeUninit::<IFlags>::uninit();
+
+    #[cfg(target_pointer_width = "32")]
+    let get_flags = c_uint(FS_IOC32_GETFLAGS);
+    #[cfg(target_pointer_width = "64")]
+    let get_flags = c_uint(FS_IOC_GETFLAGS);
+
+    unsafe {
+        ret(syscall!(__NR_ioctl, fd, get_flags, &mut result))?;
+        Ok(result.assume_init() as IFlags)
+    }
+}
+
+#[inline]
+pub(crate) fn ioctl_set_flags(fd: BorrowedFd<'_>, flags: IFlags) -> io::Result<()> {
+    // ioctl expect a *const c_uint, we thus need to convert it and pass it by reference
+    let attr = flags.bits();
+
+    #[cfg(target_pointer_width = "32")]
+    let set_flags = c_uint(FS_IOC32_SETFLAGS);
+    #[cfg(target_pointer_width = "64")]
+    let set_flags = c_uint(FS_IOC_SETFLAGS);
+
+    unsafe { ret(syscall_readonly!(__NR_ioctl, fd, set_flags, by_ref(&attr))) }
 }
 
 #[cfg(all(feature = "fs", feature = "net"))]
