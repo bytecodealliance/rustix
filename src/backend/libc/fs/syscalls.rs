@@ -2272,15 +2272,24 @@ pub(crate) fn lgetxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Resul
     }
 
     #[cfg(apple)]
-    unsafe {
-        ret_usize(c::getxattr(
-            path.as_ptr(),
-            name.as_ptr(),
-            value_ptr.cast::<c::c_void>(),
-            value.len(),
-            0,
-            c::XATTR_NOFOLLOW,
-        ))
+    {
+        // Passing an empty to slice to getxattr leads to ERANGE on macOS. Pass null instead.
+        let ptr = if value.is_empty() {
+            core::ptr::null_mut()
+        } else {
+            value_ptr.cast::<c::c_void>()
+        };
+
+        unsafe {
+            ret_usize(c::getxattr(
+                path.as_ptr(),
+                name.as_ptr(),
+                ptr,
+                value.len(),
+                0,
+                c::XATTR_NOFOLLOW,
+            ))
+        }
     }
 }
 
