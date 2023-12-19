@@ -4,7 +4,7 @@ use crate::backend::c;
 #[cfg(not(target_os = "wasi"))]
 use crate::backend::conv::ret_discarded_fd;
 use crate::backend::conv::{borrowed_fd, ret, ret_c_int, ret_owned_fd, ret_usize};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use crate::backend::io::types::IFlags;
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(any(
@@ -219,7 +219,7 @@ pub(crate) unsafe fn ioctl_readonly(
     ioctl(fd, request, arg)
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn ioctl_get_flags(fd: BorrowedFd<'_>) -> io::Result<IFlags> {
     let mut result = core::mem::MaybeUninit::<IFlags>::uninit();
@@ -235,7 +235,7 @@ pub(crate) fn ioctl_get_flags(fd: BorrowedFd<'_>) -> io::Result<IFlags> {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn ioctl_set_flags(fd: BorrowedFd<'_>, flags: IFlags) -> io::Result<()> {
     #[cfg(target_pointer_width = "32")]

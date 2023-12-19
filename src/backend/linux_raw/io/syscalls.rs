@@ -19,7 +19,7 @@ use crate::backend::conv::{
 };
 #[cfg(target_pointer_width = "32")]
 use crate::backend::conv::{hi, lo};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 use crate::backend::io::types::IFlags;
 use crate::backend::{c, MAX_IOV};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};

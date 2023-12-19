@@ -12,7 +12,7 @@ use crate::{backend, io, ioctl};
 use backend::c;
 use backend::fd::AsFd;
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 pub use backend::io::types::IFlags;
 
 /// `ioctl(fd, FIOCLEX, NULL)`—Set the close-on-exec flag.
@@ -82,7 +82,7 @@ pub fn ioctl_fionread<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
 /// `ioctl(fd, FS_IOC_GETFLAGS)`—Returns the [inode flags] attributes
 ///
 /// [inode flags]: https://man7.org/linux/man-pages/man2/ioctl_iflags.2.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 #[doc(alias = "FS_IOC_GETFLAGS")]
 pub fn ioctl_getflags<Fd: AsFd>(fd: Fd) -> io::Result<IFlags> {
@@ -92,7 +92,7 @@ pub fn ioctl_getflags<Fd: AsFd>(fd: Fd) -> io::Result<IFlags> {
 /// `ioctl(fd, FS_IOC_SETFLAGS)`—Modify the [inode flags] attributes
 ///
 /// [inode flags]: https://man7.org/linux/man-pages/man2/ioctl_iflags.2.html
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(linux_kernel)]
 #[inline]
 #[doc(alias = "FS_IOC_GETFLAGS")]
 pub fn ioctl_setflags<Fd: AsFd>(fd: Fd, flags: IFlags) -> io::Result<()> {
