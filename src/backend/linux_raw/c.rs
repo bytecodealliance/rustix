@@ -42,6 +42,10 @@ pub(crate) use linux_raw_sys::general::{
 };
 
 pub(crate) use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET, FICLONE};
+#[cfg(target_pointer_width = "32")]
+pub(crate) use linux_raw_sys::ioctl::{FS_IOC32_GETFLAGS, FS_IOC32_SETFLAGS};
+#[cfg(target_pointer_width = "64")]
+pub(crate) use linux_raw_sys::ioctl::{FS_IOC_GETFLAGS, FS_IOC_SETFLAGS};
 
 #[cfg(feature = "io_uring")]
 pub(crate) use linux_raw_sys::{general::open_how, io_uring::*};

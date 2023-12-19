@@ -4,8 +4,6 @@ use crate::backend::c;
 #[cfg(not(target_os = "wasi"))]
 use crate::backend::conv::ret_discarded_fd;
 use crate::backend::conv::{borrowed_fd, ret, ret_c_int, ret_owned_fd, ret_usize};
-#[cfg(linux_kernel)]
-use crate::backend::io::types::IFlags;
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(any(
     target_os = "aix",
@@ -217,33 +215,6 @@ pub(crate) unsafe fn ioctl_readonly(
     arg: *mut c::c_void,
 ) -> io::Result<IoctlOutput> {
     ioctl(fd, request, arg)
-}
-
-#[cfg(linux_kernel)]
-#[inline]
-pub(crate) fn ioctl_get_flags(fd: BorrowedFd<'_>) -> io::Result<IFlags> {
-    let mut result = core::mem::MaybeUninit::<IFlags>::uninit();
-
-    #[cfg(target_pointer_width = "32")]
-    let get_flags = c::FS_IOC32_GETFLAGS;
-    #[cfg(target_pointer_width = "64")]
-    let get_flags = c::FS_IOC_GETFLAGS;
-
-    unsafe {
-        ret(c::ioctl(borrowed_fd(fd), get_flags, result.as_mut_ptr()))?;
-        Ok(result.assume_init() as IFlags)
-    }
-}
-
-#[cfg(linux_kernel)]
-#[inline]
-pub(crate) fn ioctl_set_flags(fd: BorrowedFd<'_>, flags: IFlags) -> io::Result<()> {
-    #[cfg(target_pointer_width = "32")]
-    let set_flags = c::FS_IOC32_SETFLAGS;
-    #[cfg(target_pointer_width = "64")]
-    let set_flags = c::FS_IOC_SETFLAGS;
-
-    unsafe { ret(c::ioctl(borrowed_fd(fd), set_flags, flags.bits())) }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]

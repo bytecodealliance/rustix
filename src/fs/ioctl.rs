@@ -6,7 +6,7 @@
 use {
     crate::fd::AsFd,
     crate::{backend, io, ioctl},
-    backend::c,
+    backend::{c, io::types::IFlags},
 };
 
 #[cfg(all(linux_kernel, not(any(target_arch = "sparc", target_arch = "sparc64"))))]
@@ -88,5 +88,41 @@ unsafe impl ioctl::Ioctl for Ficlone<'_> {
         _: *mut c::c_void,
     ) -> io::Result<Self::Output> {
         Ok(())
+    }
+}
+
+/// `ioctl(fd, FS_IOC_GETFLAGS)`—Returns the [inode flags] attributes
+///
+/// [inode flags]: https://man7.org/linux/man-pages/man2/ioctl_iflags.2.html
+#[cfg(linux_kernel)]
+#[inline]
+#[doc(alias = "FS_IOC_GETFLAGS")]
+pub fn ioctl_getflags<Fd: AsFd>(fd: Fd) -> io::Result<IFlags> {
+    unsafe {
+        #[cfg(target_pointer_width = "32")]
+        let ctl = ioctl::Getter::<ioctl::BadOpcode<{ c::FS_IOC32_GETFLAGS }>, u32>::new();
+        #[cfg(target_pointer_width = "64")]
+        let ctl = ioctl::Getter::<ioctl::BadOpcode<{ c::FS_IOC_GETFLAGS }>, u32>::new();
+
+        ioctl::ioctl(fd, ctl).map(IFlags::from_bits_retain)
+    }
+}
+
+/// `ioctl(fd, FS_IOC_SETFLAGS)`—Modify the [inode flags] attributes
+///
+/// [inode flags]: https://man7.org/linux/man-pages/man2/ioctl_iflags.2.html
+#[cfg(linux_kernel)]
+#[inline]
+#[doc(alias = "FS_IOC_GETFLAGS")]
+pub fn ioctl_setflags<Fd: AsFd>(fd: Fd, flags: IFlags) -> io::Result<()> {
+    unsafe {
+        #[cfg(target_pointer_width = "32")]
+        let ctl =
+            ioctl::Setter::<ioctl::BadOpcode<{ c::FS_IOC32_SETFLAGS }>, u32>::new(flags.bits());
+
+        #[cfg(target_pointer_width = "64")]
+        let ctl = ioctl::Setter::<ioctl::BadOpcode<{ c::FS_IOC_SETFLAGS }>, u32>::new(flags.bits());
+
+        ioctl::ioctl(fd, ctl)
     }
 }
