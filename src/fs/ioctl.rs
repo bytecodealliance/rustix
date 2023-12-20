@@ -150,7 +150,7 @@ pub fn ioctl_getflags<Fd: AsFd>(fd: Fd) -> io::Result<IFlags> {
 /// [inode flags]: https://man7.org/linux/man-pages/man2/ioctl_iflags.2.html
 #[cfg(linux_kernel)]
 #[inline]
-#[doc(alias = "FS_IOC_GETFLAGS")]
+#[doc(alias = "FS_IOC_SETFLAGS")]
 pub fn ioctl_setflags<Fd: AsFd>(fd: Fd, flags: IFlags) -> io::Result<()> {
     unsafe {
         #[cfg(target_pointer_width = "32")]
