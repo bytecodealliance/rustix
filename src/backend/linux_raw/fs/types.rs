@@ -428,6 +428,11 @@ bitflags! {
         /// `MFD_HUGETLB` (since Linux 4.14)
         const HUGETLB = linux_raw_sys::general::MFD_HUGETLB;
 
+        /// `MFD_NOEXEC_SEAL` (since Linux 6.3)
+        const NOEXEC_SEAL = linux_raw_sys::general::MFD_NOEXEC_SEAL;
+        /// `MFD_EXEC` (since Linux 6.3)
+        const EXEC = linux_raw_sys::general::MFD_EXEC;
+
         /// `MFD_HUGE_64KB`
         const HUGE_64KB = linux_raw_sys::general::MFD_HUGE_64KB;
         /// `MFD_HUGE_512JB`
