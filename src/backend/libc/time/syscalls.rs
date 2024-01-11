@@ -167,8 +167,8 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
         DynamicClockId::Tai => c::CLOCK_TAI,
 
         #[cfg(any(
-            target_os = "freebsd",
             linux_kernel,
+            target_os = "freebsd",
             target_os = "fuchsia",
             target_os = "openbsd"
         ))]
