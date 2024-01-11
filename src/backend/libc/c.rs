@@ -166,7 +166,7 @@ pub(super) use libc::{pread64 as pread, pwrite64 as pwrite};
 #[cfg(any(target_os = "linux", target_os = "hurd", target_os = "emscripten"))]
 pub(super) use libc::{preadv64 as preadv, pwritev64 as pwritev};
 
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
+#[cfg(all(target_os = "linux", any(target_env = "gnu", target_env = "uclibc")))]
 pub(super) unsafe fn prlimit(
     pid: libc::pid_t,
     resource: libc::__rlimit_resource_t,

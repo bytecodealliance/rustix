@@ -182,7 +182,11 @@ pub(super) fn ret_send_recv(len: i32) -> io::Result<usize> {
     not(any(windows, target_os = "espidf", target_os = "redox", target_os = "wasi")),
     any(
         target_os = "android",
-        all(target_os = "linux", not(target_env = "musl"))
+        all(
+            target_os = "linux",
+            not(target_env = "musl"),
+            not(all(target_env = "uclibc", any(target_arch = "arm", target_arch = "mips")))
+        )
     )
 ))]
 #[inline]
@@ -201,7 +205,11 @@ pub(super) fn msg_iov_len(len: usize) -> c::size_t {
     )),
     not(any(
         target_os = "android",
-        all(target_os = "linux", not(target_env = "musl"))
+        all(
+            target_os = "linux",
+            not(target_env = "musl"),
+            not(all(target_env = "uclibc", any(target_arch = "arm", target_arch = "mips")))
+        )
     ))
 ))]
 #[inline]
