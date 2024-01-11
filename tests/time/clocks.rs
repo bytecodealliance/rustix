@@ -8,8 +8,8 @@ use rustix::time::{clock_gettime, ClockId};
 /// Attempt to test that the boot clock is monotonic. Time may or may not
 /// advance, but it shouldn't regress.
 #[cfg(any(
-    freebsdlike,
     linux_kernel,
+    target_os = "freebsd",
     target_os = "fuchsia",
     target_os = "openbsd"
 ))]
