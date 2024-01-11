@@ -219,6 +219,10 @@ pub mod mount;
 #[cfg(feature = "net")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "net")))]
 pub mod net;
+#[cfg(linux_kernel)]
+#[cfg(feature = "numa")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "numa")))]
+pub mod numa;
 #[cfg(not(any(windows, target_os = "espidf")))]
 #[cfg(feature = "param")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "param")))]

@@ -818,6 +818,22 @@ impl<'a, Num: ArgNumber> From<Option<crate::net::Protocol>> for ArgReg<'a, Num> 
     }
 }
 
+#[cfg(feature = "numa")]
+impl<'a, Num: ArgNumber> From<crate::numa::Mode> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::numa::Mode) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(feature = "numa")]
+impl<'a, Num: ArgNumber> From<crate::numa::ModeFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::numa::ModeFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
 impl<'a, Num: ArgNumber, T> From<&'a mut MaybeUninit<T>> for ArgReg<'a, Num> {
     #[inline]
     fn from(t: &'a mut MaybeUninit<T>) -> Self {
