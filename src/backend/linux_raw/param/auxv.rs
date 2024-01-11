@@ -5,6 +5,7 @@
 //! This uses raw pointers to locate and read the kernel-provided auxv array.
 #![allow(unsafe_code)]
 
+use super::super::conv::{c_int, pass_usize, ret_usize};
 use crate::backend::c;
 use crate::fd::OwnedFd;
 #[cfg(feature = "param")]
@@ -27,6 +28,8 @@ use linux_raw_sys::general::{
 use linux_raw_sys::general::{
     AT_EGID, AT_ENTRY, AT_EUID, AT_GID, AT_PHDR, AT_PHENT, AT_PHNUM, AT_RANDOM, AT_SECURE, AT_UID,
 };
+#[cfg(feature = "alloc")]
+use {alloc::borrow::Cow, alloc::vec};
 
 #[cfg(feature = "param")]
 #[inline]
@@ -120,12 +123,19 @@ pub(crate) fn exe_phdrs() -> (*const c::c_void, usize, usize) {
 
 /// `AT_SYSINFO_EHDR` isn't present on all platforms in all configurations, so
 /// if we don't see it, this function returns a null pointer.
+///
+/// And, this function returns a null pointer, rather than panicking, if the
+/// auxv records can't be read.
 #[inline]
 pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
     let mut ehdr = SYSINFO_EHDR.load(Relaxed);
 
     if ehdr.is_null() {
-        init_auxv();
+        // Use `maybe_init_auxv` to to read the aux vectors if it can, but do
+        // nothing if it can't. If it can't, then we'll get a null pointer
+        // here, which our callers are prepared to deal with.
+        maybe_init_auxv();
+
         ehdr = SYSINFO_EHDR.load(Relaxed);
     }
 
@@ -177,74 +187,122 @@ static ENTRY: AtomicUsize = AtomicUsize::new(0);
 #[cfg(feature = "runtime")]
 static RANDOM: AtomicPtr<[u8; 16]> = AtomicPtr::new(null_mut());
 
-#[cfg(feature = "alloc")]
-fn pr_get_auxv() -> crate::io::Result<Vec<u8>> {
-    use super::super::conv::{c_int, pass_usize, ret_usize};
-    const PR_GET_AUXV: c::c_int = 0x4155_5856;
-    let mut buffer = alloc::vec![0u8; 512];
+const PR_GET_AUXV: c::c_int = 0x4155_5856;
+
+/// Use Linux >= 6.4's `PR_GET_AUXV` to read the aux records, into a provided
+/// statically-sized buffer. Return:
+///  - `Ok(...)` if the buffer is big enough.
+///  - `Err(Ok(len))` if we need a buffer of length `len`.
+///  - `Err(Err(err))` if we failed with `err`.
+#[cold]
+fn pr_get_auxv_static(buffer: &mut [u8; 512]) -> Result<&mut [u8], crate::io::Result<usize>> {
     let len = unsafe {
         ret_usize(syscall_always_asm!(
             __NR_prctl,
             c_int(PR_GET_AUXV),
-            buffer.as_ptr(),
+            buffer.as_mut_ptr(),
             pass_usize(buffer.len()),
             pass_usize(0),
             pass_usize(0)
-        ))?
+        ))
+        .map_err(Err)?
     };
     if len <= buffer.len() {
-        buffer.truncate(len);
-        return Ok(buffer);
+        return Ok(&mut buffer[..len]);
     }
-    buffer.resize(len, 0);
+    Err(Ok(len))
+}
+
+/// Use Linux >= 6.4's `PR_GET_AUXV` to read the aux records, using a provided
+/// statically-sized buffer if possible, or a dynamically allocated buffer
+/// otherwise. Return:
+///  - Ok(...) on success.
+///  - Err(err) on failure.
+#[cfg(feature = "alloc")]
+#[cold]
+fn pr_get_auxv_dynamic(buffer: &mut [u8; 512]) -> crate::io::Result<Cow<'_, [u8]>> {
+    // First try use the static buffer.
+    let len = match pr_get_auxv_static(buffer) {
+        Ok(buffer) => return Ok(Cow::Borrowed(buffer)),
+        Err(Ok(len)) => len,
+        Err(Err(err)) => return Err(err),
+    };
+
+    // If that indicates it needs a bigger buffer, allocate one.
+    let mut buffer = vec![0u8; len];
     let len = unsafe {
         ret_usize(syscall_always_asm!(
             __NR_prctl,
             c_int(PR_GET_AUXV),
-            buffer.as_ptr(),
+            buffer.as_mut_ptr(),
             pass_usize(buffer.len()),
             pass_usize(0),
             pass_usize(0)
         ))?
     };
     assert_eq!(len, buffer.len());
-    return Ok(buffer);
+    Ok(Cow::Owned(buffer))
+}
+
+/// Read the auxv records and initialize the various static variables. Panic
+/// if an error is encountered.
+#[cold]
+fn init_auxv() {
+    init_auxv_impl().unwrap();
+}
+
+/// Like `init_auxv`, but don't panic if an error is encountered. The caller
+/// must be prepared for initialization to be skipped.
+#[cold]
+fn maybe_init_auxv() {
+    if let Ok(()) = init_auxv_impl() {
+        return;
+    }
 }
 
 /// If we don't have "use-explicitly-provided-auxv" or "use-libc-auxv", we
 /// read the aux vector via the `prctl` `PR_GET_AUXV`, with a fallback to
 /// /proc/self/auxv for kernels that don't support `PR_GET_AUXV`.
 #[cold]
-fn init_auxv() {
-    #[cfg(feature = "alloc")]
-    {
-        match pr_get_auxv() {
-            Ok(buffer) => {
-                // SAFETY: We assume the kernel returns a valid auxv.
-                unsafe {
-                    init_from_aux_iter(AuxPointer(buffer.as_ptr().cast())).unwrap();
-                }
-                return;
-            }
-            Err(_) => {
-                // Fall back to /proc/self/auxv on error.
-            }
-        }
-    }
+fn init_auxv_impl() -> Result<(), ()> {
+    let mut buffer = [0u8; 512];
 
-    // Open "/proc/self/auxv", either because we trust "/proc", or because
-    // we're running inside QEMU and `proc_self_auxv`'s extra checking foils
-    // QEMU's emulation so we need to do a plain open to get the right
-    // auxv records.
-    let file = crate::fs::open("/proc/self/auxv", OFlags::RDONLY, Mode::empty()).unwrap();
-
-    #[cfg(feature = "alloc")]
-    init_from_auxv_file(file).unwrap();
-
+    // If we don't have "alloc", just try to read into our statically-sized
+    // buffer. This might fail due to the buffer being insufficient; we're
+    // prepared to cope, though we may do suboptimal things.
     #[cfg(not(feature = "alloc"))]
-    unsafe {
-        init_from_aux_iter(AuxFile(file)).unwrap();
+    let result = pr_get_auxv_static(&mut buffer);
+
+    // If we do have "alloc" then read into our statically-sized buffer if
+    // it fits, or fall back to a dynamically-allocated buffer.
+    #[cfg(feature = "alloc")]
+    let result = pr_get_auxv_dynamic(&mut buffer);
+
+    if let Ok(buffer) = result {
+        // SAFETY: We assume the kernel returns a valid auxv.
+        unsafe {
+            init_from_aux_iter(AuxPointer(buffer.as_ptr().cast())).unwrap();
+        }
+        return Ok(());
     }
+
+    // If `PR_GET_AUXV` is unavailable, or if we don't have "alloc" and
+    // the aux records don't fit in our static buffer, then fall back to trying
+    // to open "/proc/self/auxv". We don't use `proc_self_fd` because its extra
+    // checking breaks on QEMU.
+    if let Ok(file) = crate::fs::open("/proc/self/auxv", OFlags::RDONLY, Mode::empty()) {
+        #[cfg(feature = "alloc")]
+        init_from_auxv_file(file).unwrap();
+
+        #[cfg(not(feature = "alloc"))]
+        unsafe {
+            init_from_aux_iter(AuxFile(file)).unwrap();
+        }
+
+        return Ok(());
+    }
+
+    Err(())
 }
 
 /// Process auxv entries from the open file `auxv`.
