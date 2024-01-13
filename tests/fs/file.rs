@@ -174,7 +174,7 @@ fn test_setfl_append() {
     .unwrap();
     assert_eq!(rustix::io::write(&file, b"abcdefghijklmnop"), Ok(16));
 
-    // Overwite the first few bytes.
+    // Overwrite the first few bytes.
     let file =
         rustix::fs::open(tmp.path().join("test.file"), OFlags::WRONLY, Mode::empty()).unwrap();
     assert_eq!(rustix::io::write(&file, b"uvw"), Ok(3));

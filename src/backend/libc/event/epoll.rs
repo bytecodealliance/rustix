@@ -187,7 +187,7 @@ pub fn add(
     // SAFETY: We're calling `epoll_ctl` via FFI and we know how it
     // behaves. We use our own `Event` struct instead of libc's because
     // ours preserves pointer provenance instead of just using a `u64`,
-    // and we have tests elsehwere for layout equivalence.
+    // and we have tests elsewhere for layout equivalence.
     unsafe {
         let raw_fd = source.as_fd().as_raw_fd();
         ret(c::epoll_ctl(
@@ -219,7 +219,7 @@ pub fn modify(
     // SAFETY: We're calling `epoll_ctl` via FFI and we know how it
     // behaves. We use our own `Event` struct instead of libc's because
     // ours preserves pointer provenance instead of just using a `u64`,
-    // and we have tests elsehwere for layout equivalence.
+    // and we have tests elsewhere for layout equivalence.
     unsafe {
         ret(c::epoll_ctl(
             epoll.as_fd().as_raw_fd(),
