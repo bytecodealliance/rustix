@@ -2,14 +2,14 @@
 
 #![allow(unsafe_code)]
 
-use crate::backend::c;
+use crate::ffi;
 
 /// A group identifier as a raw integer.
 #[cfg(not(target_os = "wasi"))]
-pub type RawGid = c::gid_t;
+pub type RawGid = ffi::c_uint;
 /// A user identifier as a raw integer.
 #[cfg(not(target_os = "wasi"))]
-pub type RawUid = c::uid_t;
+pub type RawUid = ffi::c_uint;
 
 /// `uid_t`—A Unix user ID.
 #[repr(transparent)]

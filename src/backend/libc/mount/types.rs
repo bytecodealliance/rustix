@@ -1,4 +1,5 @@
 use crate::backend::c;
+use crate::ffi;
 use bitflags::bitflags;
 
 #[cfg(linux_kernel)]
@@ -8,7 +9,7 @@ bitflags! {
     /// [`mount`]: crate::mount::mount
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct MountFlags: c::c_ulong {
+    pub struct MountFlags: ffi::c_ulong {
         /// `MS_BIND`
         const BIND = c::MS_BIND;
 
@@ -90,7 +91,7 @@ bitflags! {
     /// [`fsopen`]: crate::mount::fsopen
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct FsOpenFlags: c::c_uint {
+    pub struct FsOpenFlags: ffi::c_uint {
         /// `FSOPEN_CLOEXEC`
         const FSOPEN_CLOEXEC = 0x0000_0001;
 
@@ -107,7 +108,7 @@ bitflags! {
     /// [`fsmount`]: crate::mount::fsmount
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct FsMountFlags: c::c_uint {
+    pub struct FsMountFlags: ffi::c_uint {
         /// `FSMOUNT_CLOEXEC`
         const FSMOUNT_CLOEXEC = 0x0000_0001;
 
@@ -155,7 +156,7 @@ bitflags! {
     /// [`fsmount`]: crate::mount::fsmount
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct MountAttrFlags: c::c_uint {
+    pub struct MountAttrFlags: ffi::c_uint {
         /// `MOUNT_ATTR_RDONLY`
         const MOUNT_ATTR_RDONLY = 0x0000_0001;
 
@@ -205,7 +206,7 @@ bitflags! {
     /// [`move_mount`]: crate::mount::move_mount
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct MoveMountFlags: c::c_uint {
+    pub struct MoveMountFlags: ffi::c_uint {
         /// `MOVE_MOUNT_F_EMPTY_PATH`
         const MOVE_MOUNT_F_SYMLINKS = 0x0000_0001;
 
@@ -246,7 +247,7 @@ bitflags! {
     /// [`open_tree`]: crate::mount::open_tree
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct OpenTreeFlags: c::c_uint {
+    pub struct OpenTreeFlags: ffi::c_uint {
         /// `OPENTREE_CLONE`
         const OPEN_TREE_CLONE = 1;
 
@@ -278,7 +279,7 @@ bitflags! {
     /// [`fspick`]: crate::mount::fspick
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct FsPickFlags: c::c_uint {
+    pub struct FsPickFlags: ffi::c_uint {
         /// `FSPICK_CLOEXEC`
         const FSPICK_CLOEXEC = 0x0000_0001;
 
@@ -303,7 +304,7 @@ bitflags! {
     /// [`mount_change`]: crate::mount::mount_change
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct MountPropagationFlags: c::c_ulong {
+    pub struct MountPropagationFlags: ffi::c_ulong {
         /// `MS_SILENT`
         const SILENT = c::MS_SILENT;
         /// `MS_SHARED`
