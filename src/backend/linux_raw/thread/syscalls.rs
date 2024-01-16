@@ -17,16 +17,13 @@ use crate::thread::{ClockId, FutexFlags, FutexOperation, NanosleepRelativeResult
 use core::mem::MaybeUninit;
 #[cfg(target_pointer_width = "32")]
 use linux_raw_sys::general::timespec as __kernel_old_timespec;
-use linux_raw_sys::general::{__kernel_timespec, TIMER_ABSTIME};
+use linux_raw_sys::general::TIMER_ABSTIME;
 
 #[inline]
-pub(crate) fn clock_nanosleep_relative(
-    id: ClockId,
-    req: &__kernel_timespec,
-) -> NanosleepRelativeResult {
+pub(crate) fn clock_nanosleep_relative(id: ClockId, req: &Timespec) -> NanosleepRelativeResult {
     #[cfg(target_pointer_width = "32")]
     unsafe {
-        let mut rem = MaybeUninit::<__kernel_timespec>::uninit();
+        let mut rem = MaybeUninit::<Timespec>::uninit();
         match ret(syscall!(
             __NR_clock_nanosleep_time64,
             id,
@@ -50,7 +47,7 @@ pub(crate) fn clock_nanosleep_relative(
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
-        let mut rem = MaybeUninit::<__kernel_timespec>::uninit();
+        let mut rem = MaybeUninit::<Timespec>::uninit();
         match ret(syscall!(
             __NR_clock_nanosleep,
             id,
@@ -68,8 +65,8 @@ pub(crate) fn clock_nanosleep_relative(
 #[cfg(target_pointer_width = "32")]
 unsafe fn clock_nanosleep_relative_old(
     id: ClockId,
-    req: &__kernel_timespec,
-    rem: &mut MaybeUninit<__kernel_timespec>,
+    req: &Timespec,
+    rem: &mut MaybeUninit<Timespec>,
 ) -> io::Result<()> {
     let old_req = __kernel_old_timespec {
         tv_sec: req.tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
@@ -84,7 +81,7 @@ unsafe fn clock_nanosleep_relative_old(
         &mut old_rem
     ))?;
     let old_rem = old_rem.assume_init();
-    rem.write(__kernel_timespec {
+    rem.write(Timespec {
         tv_sec: old_rem.tv_sec.into(),
         tv_nsec: old_rem.tv_nsec.into(),
     });
@@ -92,7 +89,7 @@ unsafe fn clock_nanosleep_relative_old(
 }
 
 #[inline]
-pub(crate) fn clock_nanosleep_absolute(id: ClockId, req: &__kernel_timespec) -> io::Result<()> {
+pub(crate) fn clock_nanosleep_absolute(id: ClockId, req: &Timespec) -> io::Result<()> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         ret(syscall_readonly!(
@@ -125,7 +122,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, req: &__kernel_timespec) -> 
 }
 
 #[cfg(target_pointer_width = "32")]
-unsafe fn clock_nanosleep_absolute_old(id: ClockId, req: &__kernel_timespec) -> io::Result<()> {
+unsafe fn clock_nanosleep_absolute_old(id: ClockId, req: &Timespec) -> io::Result<()> {
     let old_req = __kernel_old_timespec {
         tv_sec: req.tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
         tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Errno::INVAL)?,
@@ -140,10 +137,10 @@ unsafe fn clock_nanosleep_absolute_old(id: ClockId, req: &__kernel_timespec) -> 
 }
 
 #[inline]
-pub(crate) fn nanosleep(req: &__kernel_timespec) -> NanosleepRelativeResult {
+pub(crate) fn nanosleep(req: &Timespec) -> NanosleepRelativeResult {
     #[cfg(target_pointer_width = "32")]
     unsafe {
-        let mut rem = MaybeUninit::<__kernel_timespec>::uninit();
+        let mut rem = MaybeUninit::<Timespec>::uninit();
         match ret(syscall!(
             __NR_clock_nanosleep_time64,
             ClockId::Realtime,
@@ -167,7 +164,7 @@ pub(crate) fn nanosleep(req: &__kernel_timespec) -> NanosleepRelativeResult {
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
-        let mut rem = MaybeUninit::<__kernel_timespec>::uninit();
+        let mut rem = MaybeUninit::<Timespec>::uninit();
         match ret(syscall!(__NR_nanosleep, by_ref(req), &mut rem)) {
             Ok(()) => NanosleepRelativeResult::Ok,
             Err(io::Errno::INTR) => NanosleepRelativeResult::Interrupted(rem.assume_init()),
@@ -177,10 +174,7 @@ pub(crate) fn nanosleep(req: &__kernel_timespec) -> NanosleepRelativeResult {
 }
 
 #[cfg(target_pointer_width = "32")]
-unsafe fn nanosleep_old(
-    req: &__kernel_timespec,
-    rem: &mut MaybeUninit<__kernel_timespec>,
-) -> io::Result<()> {
+unsafe fn nanosleep_old(req: &Timespec, rem: &mut MaybeUninit<Timespec>) -> io::Result<()> {
     let old_req = __kernel_old_timespec {
         tv_sec: req.tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
         tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Errno::INVAL)?,
@@ -188,7 +182,7 @@ unsafe fn nanosleep_old(
     let mut old_rem = MaybeUninit::<__kernel_old_timespec>::uninit();
     ret(syscall!(__NR_nanosleep, by_ref(&old_req), &mut old_rem))?;
     let old_rem = old_rem.assume_init();
-    rem.write(__kernel_timespec {
+    rem.write(Timespec {
         tv_sec: old_rem.tv_sec.into(),
         tv_nsec: old_rem.tv_nsec.into(),
     });

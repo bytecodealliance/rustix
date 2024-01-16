@@ -2,11 +2,10 @@
 
 #![allow(unsafe_code)]
 
-use crate::backend::c;
 use core::num::NonZeroI32;
 
 /// A process identifier as a raw integer.
-pub type RawPid = c::pid_t;
+pub type RawPid = i32;
 
 /// `pid_t`—A non-zero Unix process ID.
 ///
