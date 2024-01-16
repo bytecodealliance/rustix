@@ -35,6 +35,7 @@ use linux_raw_sys::net;
 pub use crate::event::epoll::{
     Event as EpollEvent, EventData as EpollEventData, EventFlags as EpollEventFlags,
 };
+pub use crate::ffi::c_char;
 pub use crate::fs::{
     Advice, AtFlags, Mode, OFlags, RenameFlags, ResolveFlags, Statx, StatxFlags, XattrFlags,
 };
@@ -44,37 +45,6 @@ pub use crate::timespec::{Nsecs, Secs, Timespec};
 pub use linux_raw_sys::general::sigset_t;
 
 pub use net::{__kernel_sockaddr_storage as sockaddr_storage, msghdr, sockaddr, socklen_t};
-
-// Declare the `c_char` type for use with entries that take pointers
-// to C strings. Define it as unsigned or signed according to the platform
-// so that we match what Rust's `CStr` uses.
-//
-// When we can update to linux-raw-sys 0.5, we can remove this, as its
-// `c_char` type will declare this.
-/// The C `char` type.
-#[cfg(any(
-    target_arch = "aarch64",
-    target_arch = "arm",
-    target_arch = "msp430",
-    target_arch = "powerpc",
-    target_arch = "powerpc64",
-    target_arch = "riscv32",
-    target_arch = "riscv64",
-    target_arch = "s390x",
-))]
-#[allow(non_camel_case_types)]
-pub type c_char = u8;
-/// The C `char` type.
-#[cfg(any(
-    target_arch = "mips",
-    target_arch = "mips64",
-    target_arch = "sparc64",
-    target_arch = "x86",
-    target_arch = "x86_64",
-    target_arch = "xtensa",
-))]
-#[allow(non_camel_case_types)]
-pub type c_char = i8;
 
 mod sys {
     pub(super) use linux_raw_sys::io_uring::*;

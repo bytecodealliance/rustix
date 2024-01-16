@@ -35,7 +35,7 @@ pub struct Termios {
         target_os = "haiku",
         target_os = "redox"
     ))]
-    pub line_discipline: c::cc_t,
+    pub line_discipline: u8,
 
     /// How are various special control codes handled?
     #[doc(alias = "c_cc")]
@@ -1101,7 +1101,7 @@ pub mod speed {
 pub struct SpecialCodes(pub(crate) [c::cc_t; c::NCCS as usize]);
 
 impl core::ops::Index<SpecialCodeIndex> for SpecialCodes {
-    type Output = c::cc_t;
+    type Output = u8;
 
     fn index(&self, index: SpecialCodeIndex) -> &Self::Output {
         &self.0[index.0]

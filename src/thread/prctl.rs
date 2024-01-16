@@ -16,11 +16,10 @@ use core::sync::atomic::AtomicU8;
 
 use bitflags::bitflags;
 
-use crate::backend::c::{c_int, c_uint, c_void};
 use crate::backend::prctl::syscalls;
-use crate::ffi::CStr;
 #[cfg(feature = "alloc")]
 use crate::ffi::CString;
+use crate::ffi::{c_int, c_uint, c_void, CStr};
 use crate::io;
 use crate::pid::Pid;
 use crate::prctl::{
