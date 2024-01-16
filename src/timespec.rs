@@ -1,15 +1,10 @@
 //! `Timespec` and related types, which are used by multiple public API
 //! modules.
 
-#[cfg(not(fix_y2038))]
-use crate::backend::c;
+#[allow(unused)]
+use crate::ffi;
 
 /// `struct timespec`
-#[cfg(not(fix_y2038))]
-pub type Timespec = c::timespec;
-
-/// `struct timespec`
-#[cfg(fix_y2038)]
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct Timespec {
@@ -21,12 +16,12 @@ pub struct Timespec {
 }
 
 /// A type for the `tv_sec` field of [`Timespec`].
-#[cfg(not(fix_y2038))]
+#[cfg(target_pointer_width = "64")]
 #[allow(deprecated)]
-pub type Secs = c::time_t;
+pub type Secs = ffi::c_long;
 
 /// A type for the `tv_sec` field of [`Timespec`].
-#[cfg(fix_y2038)]
+#[cfg(not(target_pointer_width = "64"))]
 pub type Secs = i64;
 
 /// A type for the `tv_sec` field of [`Timespec`].
@@ -43,7 +38,7 @@ pub type Nsecs = i64;
     libc,
     not(all(target_arch = "x86_64", target_pointer_width = "32"))
 ))]
-pub type Nsecs = c::c_long;
+pub type Nsecs = ffi::c_long;
 
 /// On 32-bit glibc platforms, `timespec` has anonymous padding fields, which
 /// Rust doesn't support yet (see `unnamed_fields`), so we define our own
@@ -112,4 +107,10 @@ fn test_sizes() {
 #[allow(deprecated)]
 fn test_fix_y2038() {
     assert_eq_size!(libc::time_t, u32);
+}
+
+#[test]
+fn timespec_layouts() {
+    use crate::backend::c;
+    check_renamed_type!(Timespec, timespec);
 }

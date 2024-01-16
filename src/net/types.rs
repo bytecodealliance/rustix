@@ -47,7 +47,7 @@ impl SocketType {
 }
 
 /// A type for holding raw integer address families.
-pub type RawAddressFamily = c::sa_family_t;
+pub type RawAddressFamily = crate::ffi::c_ushort;
 
 /// `AF_*` constants for use with [`socket`], [`socket_with`], and
 /// [`socketpair`].
