@@ -1,7 +1,9 @@
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_utimensat() {
-    use rustix::fs::{openat, statat, utimensat, AtFlags, Mode, OFlags, Timespec, Timestamps, CWD};
+    use rustix::fs::{
+        openat, statat, utimensat, AtFlags, Mode, OFlags, StatExt, Timespec, Timestamps, CWD,
+    };
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(
@@ -34,7 +36,7 @@ fn test_utimensat() {
 
     let after = statat(&dir, "file", AtFlags::empty()).unwrap();
 
-    assert_eq!(times.last_modification.tv_sec as u64, after.st_mtime as u64);
+    assert_eq!(times.last_modification.tv_sec as u64, after.mtime() as u64);
     #[cfg(not(target_os = "netbsd"))]
     assert_eq!(
         times.last_modification.tv_nsec as u64,
@@ -45,15 +47,15 @@ fn test_utimensat() {
         times.last_modification.tv_nsec as u64,
         after.st_mtimensec as u64
     );
-    assert!(times.last_access.tv_sec as u64 >= after.st_atime as u64);
+    assert!(times.last_access.tv_sec as u64 >= after.atime() as u64);
     #[cfg(not(target_os = "netbsd"))]
     assert!(
-        times.last_access.tv_sec as u64 > after.st_atime as u64
+        times.last_access.tv_sec as u64 > after.atime() as u64
             || times.last_access.tv_nsec as u64 >= after.st_atime_nsec as u64
     );
     #[cfg(target_os = "netbsd")]
     assert!(
-        times.last_access.tv_sec as u64 > after.st_atime as u64
+        times.last_access.tv_sec as u64 > after.atime() as u64
             || times.last_access.tv_nsec as u64 >= after.st_atimensec as u64
     );
 }
