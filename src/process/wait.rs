@@ -306,8 +306,8 @@ pub enum WaitId<'a> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/waitpid.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<WaitStatus>> {
-    Ok(backend::process::syscalls::waitpid(pid, waitopts)?.map(|(_, status)| status))
+pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+    backend::process::syscalls::waitpid(pid, waitopts)
 }
 
 /// `waitpid(-pgid, waitopts)`—Wait for a process in a specific process group
@@ -328,8 +328,8 @@ pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<Wai
 /// [Linux]: https://man7.org/linux/man-pages/man2/waitpid.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn waitpgid(pgid: Pid, waitopts: WaitOptions) -> io::Result<Option<WaitStatus>> {
-    Ok(backend::process::syscalls::waitpgid(pgid, waitopts)?.map(|(_, status)| status))
+pub fn waitpgid(pgid: Pid, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+    backend::process::syscalls::waitpgid(pgid, waitopts)
 }
 
 /// `wait(waitopts)`—Wait for any of the children of calling process to

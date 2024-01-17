@@ -18,9 +18,10 @@ fn test_waitpid_none() {
         .expect("failed to execute child");
     unsafe { kill(child.id() as _, SIGSTOP) };
 
-    let status = process::waitpid(None, process::WaitOptions::UNTRACED)
+    let (pid, status) = process::waitpid(None, process::WaitOptions::UNTRACED)
         .expect("failed to wait")
         .unwrap();
+    assert_eq!(pid, process::Pid::from_child(&child));
     assert!(status.stopped());
 }
 
@@ -35,9 +36,10 @@ fn test_waitpid_some() {
     unsafe { kill(child.id() as _, SIGSTOP) };
 
     let pid = process::Pid::from_child(&child);
-    let status = process::waitpid(Some(pid), process::WaitOptions::UNTRACED)
+    let (rpid, status) = process::waitpid(Some(pid), process::WaitOptions::UNTRACED)
         .expect("failed to wait")
         .unwrap();
+    assert_eq!(rpid, pid);
     assert!(status.stopped());
 }
 
@@ -52,9 +54,10 @@ fn test_waitpgid() {
     unsafe { kill(child.id() as _, SIGSTOP) };
 
     let pgid = process::getpgrp();
-    let status = process::waitpgid(pgid, process::WaitOptions::UNTRACED)
+    let (pid, status) = process::waitpgid(pgid, process::WaitOptions::UNTRACED)
         .expect("failed to wait")
         .unwrap();
+    assert_eq!(pid, process::Pid::from_child(&child));
     assert!(status.stopped());
 }
 
