@@ -1015,8 +1015,8 @@ impl core::fmt::Debug for io_uring_user_data {
 /// An io_uring Submission Queue Entry.
 #[allow(missing_docs)]
 #[repr(C)]
-#[derive(Copy, Clone, Default)]
-pub struct io_uring_sqe {
+#[derive(Copy, Clone)]
+pub struct io_uring_sqe<T: Copy> {
     pub opcode: IoringOp,
     pub flags: IoringSqeFlags,
     pub ioprio: ioprio_union,
@@ -1029,8 +1029,14 @@ pub struct io_uring_sqe {
     pub buf: buf_union,
     pub personality: u16,
     pub splice_fd_in_or_file_index: splice_fd_in_or_file_index_union,
-    pub addr3_or_cmd: addr3_or_cmd_union,
+    pub addr3_or_cmd: addr3_or_cmd_union<T>,
 }
+
+#[allow(missing_docs)]
+pub type io_uring_sqe64 = io_uring_cqe<()>;
+
+#[allow(missing_docs)]
+pub type io_uring_sqe128 = io_uring_cqe<[u8; 80]>;
 
 #[allow(missing_docs)]
 #[repr(C)]
@@ -1053,9 +1059,9 @@ pub union len_union {
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub union addr3_or_cmd_union {
+pub union addr3_or_cmd_union<T: Copy> {
     pub addr3: addr3_struct,
-    pub cmd: [u8; 0],
+    pub cmd: T,
 }
 
 #[allow(missing_docs)]
@@ -1165,13 +1171,19 @@ pub struct io_uring_sync_cancel_reg {
 /// automatically copyable.
 #[allow(missing_docs)]
 #[repr(C)]
-#[derive(Debug, Default)]
-pub struct io_uring_cqe {
+#[derive(Clone, Copy)]
+pub struct io_uring_cqe<T: Copy> {
     pub user_data: io_uring_user_data,
     pub res: i32,
     pub flags: IoringCqeFlags,
-    pub big_cqe: sys::__IncompleteArrayField<u64>,
+    pub big_cqe: T,
 }
+
+#[allow(missing_docs)]
+pub type io_uring_cqe16 = io_uring_cqe<()>;
+
+#[allow(missing_docs)]
+pub type io_uring_cqe32 = io_uring_cqe<[u64; 2]>;
 
 #[allow(missing_docs)]
 #[repr(C)]
@@ -1387,13 +1399,6 @@ impl Default for addr_or_splice_off_in_union {
     #[inline]
     fn default() -> Self {
         default_union!(addr_or_splice_off_in_union, splice_off_in)
-    }
-}
-
-impl Default for addr3_or_cmd_union {
-    #[inline]
-    fn default() -> Self {
-        default_union!(addr3_or_cmd_union, addr3)
     }
 }
 
