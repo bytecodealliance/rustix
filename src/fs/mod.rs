@@ -142,7 +142,7 @@ pub use std::os::unix::fs::{DirEntryExt, FileExt, FileTypeExt, MetadataExt, Open
 #[cfg(all(wasi_ext, target_os = "wasi"))]
 pub use std::os::wasi::fs::{DirEntryExt, FileExt, FileTypeExt, MetadataExt, OpenOptionsExt};
 
-/// Extension trait for accessing.
+/// Extension trait for accessing timestamp fields of `Stat`.
 ///
 /// Rustix's `Stat` type on some platforms has unsigned `st_mtime`,
 /// `st_atime`, and `st_ctime` fields. This is incorrect, as Unix defines
@@ -150,6 +150,7 @@ pub use std::os::wasi::fs::{DirEntryExt, FileExt, FileTypeExt, MetadataExt, Open
 /// the Unix epoch. Until the next semver bump, these unsigned fields are
 /// deprecated, and this trait provides accessors which return their values
 /// as signed integers.
+#[cfg(unix)]
 pub trait StatExt {
     /// Return the value of the `st_atime` field, casted to the correct type.
     fn atime(&self) -> i64;
@@ -159,14 +160,18 @@ pub trait StatExt {
     fn ctime(&self) -> i64;
 }
 
+#[cfg(unix)]
 #[allow(deprecated)]
 impl StatExt for Stat {
+    #[inline]
     fn atime(&self) -> i64 {
         self.st_atime as i64
     }
+    #[inline]
     fn mtime(&self) -> i64 {
         self.st_mtime as i64
     }
+    #[inline]
     fn ctime(&self) -> i64 {
         self.st_ctime as i64
     }
