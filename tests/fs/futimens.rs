@@ -1,7 +1,7 @@
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_futimens() {
-    use rustix::fs::{fstat, futimens, openat, Mode, OFlags, Timespec, Timestamps, CWD};
+    use rustix::fs::{fstat, futimens, openat, Mode, OFlags, StatExt, Timespec, Timestamps, CWD};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -28,7 +28,7 @@ fn test_futimens() {
 
     let after = fstat(&file).unwrap();
 
-    assert_eq!(times.last_modification.tv_sec as u64, after.st_mtime as u64);
+    assert_eq!(times.last_modification.tv_sec as u64, after.mtime() as u64);
     #[cfg(not(target_os = "netbsd"))]
     assert_eq!(
         times.last_modification.tv_nsec as u64,

@@ -1778,6 +1778,7 @@ pub(crate) fn sendfile(
 
 /// Convert from a Linux `statx` value to rustix's `Stat`.
 #[cfg(all(linux_kernel, target_pointer_width = "32"))]
+#[allow(deprecated)] // for `st_[amc]time` u64->i64 transition
 fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
     Ok(Stat {
         st_dev: crate::fs::makedev(x.stx_dev_major, x.stx_dev_minor).into(),
@@ -1789,23 +1790,11 @@ fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
         st_size: x.stx_size.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         st_blksize: x.stx_blksize.into(),
         st_blocks: x.stx_blocks.into(),
-        st_atime: x
-            .stx_atime
-            .tv_sec
-            .try_into()
-            .map_err(|_| io::Errno::OVERFLOW)?,
+        st_atime: bitcast!(i64::from(x.stx_atime.tv_sec)),
         st_atime_nsec: x.stx_atime.tv_nsec as _,
-        st_mtime: x
-            .stx_mtime
-            .tv_sec
-            .try_into()
-            .map_err(|_| io::Errno::OVERFLOW)?,
+        st_mtime: bitcast!(i64::from(x.stx_mtime.tv_sec)),
         st_mtime_nsec: x.stx_mtime.tv_nsec as _,
-        st_ctime: x
-            .stx_ctime
-            .tv_sec
-            .try_into()
-            .map_err(|_| io::Errno::OVERFLOW)?,
+        st_ctime: bitcast!(i64::from(x.stx_ctime.tv_sec)),
         st_ctime_nsec: x.stx_ctime.tv_nsec as _,
         st_ino: x.stx_ino.into(),
     })
@@ -1827,23 +1816,11 @@ fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
     result.st_size = x.stx_size.try_into().map_err(|_| io::Errno::OVERFLOW)?;
     result.st_blksize = x.stx_blksize.into();
     result.st_blocks = x.stx_blocks.try_into().map_err(|_e| io::Errno::OVERFLOW)?;
-    result.st_atime = x
-        .stx_atime
-        .tv_sec
-        .try_into()
-        .map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_atime = bitcast!(i64::from(x.stx_atime.tv_sec));
     result.st_atime_nsec = x.stx_atime.tv_nsec as _;
-    result.st_mtime = x
-        .stx_mtime
-        .tv_sec
-        .try_into()
-        .map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_mtime = bitcast!(i64::from(x.stx_mtime.tv_sec));
     result.st_mtime_nsec = x.stx_mtime.tv_nsec as _;
-    result.st_ctime = x
-        .stx_ctime
-        .tv_sec
-        .try_into()
-        .map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_ctime = bitcast!(i64::from(x.stx_ctime.tv_sec));
     result.st_ctime_nsec = x.stx_ctime.tv_nsec as _;
     result.st_ino = x.stx_ino.into();
 
@@ -1852,6 +1829,7 @@ fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
 
 /// Convert from a Linux `stat64` value to rustix's `Stat`.
 #[cfg(all(linux_kernel, target_pointer_width = "32"))]
+#[allow(deprecated)] // for `st_[amc]time` u64->i64 transition
 fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
     Ok(Stat {
         st_dev: s64.st_dev.try_into().map_err(|_| io::Errno::OVERFLOW)?,
@@ -1863,17 +1841,17 @@ fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
         st_size: s64.st_size.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         st_blksize: s64.st_blksize.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         st_blocks: s64.st_blocks.try_into().map_err(|_| io::Errno::OVERFLOW)?,
-        st_atime: s64.st_atime.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+        st_atime: bitcast!(i64::from(s64.st_atime)),
         st_atime_nsec: s64
             .st_atime_nsec
             .try_into()
             .map_err(|_| io::Errno::OVERFLOW)?,
-        st_mtime: s64.st_mtime.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+        st_mtime: bitcast!(i64::from(s64.st_mtime)),
         st_mtime_nsec: s64
             .st_mtime_nsec
             .try_into()
             .map_err(|_| io::Errno::OVERFLOW)?,
-        st_ctime: s64.st_ctime.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+        st_ctime: bitcast!(i64::from(s64.st_ctime)),
         st_ctime_nsec: s64
             .st_ctime_nsec
             .try_into()
@@ -1899,17 +1877,17 @@ fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
     result.st_size = s64.st_size.try_into().map_err(|_| io::Errno::OVERFLOW)?;
     result.st_blksize = s64.st_blksize.try_into().map_err(|_| io::Errno::OVERFLOW)?;
     result.st_blocks = s64.st_blocks.try_into().map_err(|_| io::Errno::OVERFLOW)?;
-    result.st_atime = s64.st_atime.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_atime = i64::from(s64.st_atime) as _;
     result.st_atime_nsec = s64
         .st_atime_nsec
         .try_into()
         .map_err(|_| io::Errno::OVERFLOW)?;
-    result.st_mtime = s64.st_mtime.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_mtime = i64::from(s64.st_mtime) as _;
     result.st_mtime_nsec = s64
         .st_mtime_nsec
         .try_into()
         .map_err(|_| io::Errno::OVERFLOW)?;
-    result.st_ctime = s64.st_ctime.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    result.st_ctime = i64::from(s64.st_ctime) as _;
     result.st_ctime_nsec = s64
         .st_ctime_nsec
         .try_into()

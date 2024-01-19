@@ -9,7 +9,7 @@
 #[test]
 fn test_y2038_with_utimensat() {
     use rustix::fs::{
-        fstat, openat, statat, utimensat, AtFlags, Mode, OFlags, Timespec, Timestamps, CWD,
+        fstat, openat, statat, utimensat, AtFlags, Mode, OFlags, StatExt, Timespec, Timestamps, CWD,
     };
 
     let tmp = tempfile::tempdir().unwrap();
@@ -46,23 +46,23 @@ fn test_y2038_with_utimensat() {
     // Use `statat` to read back the timestamp.
     let stat = statat(&dir, "file", AtFlags::empty()).unwrap();
 
-    assert_eq!(TryInto::<u64>::try_into(stat.st_mtime).unwrap(), m_sec);
+    assert_eq!(TryInto::<u64>::try_into(stat.mtime()).unwrap(), m_sec);
 
     #[cfg(not(target_os = "netbsd"))]
     assert_eq!(stat.st_mtime_nsec as u32, m_nsec);
     #[cfg(target_os = "netbsd")]
     assert_eq!(stat.st_mtimensec as u32, m_nsec);
 
-    assert!(TryInto::<u64>::try_into(stat.st_atime).unwrap() >= a_sec);
+    assert!(TryInto::<u64>::try_into(stat.atime()).unwrap() >= a_sec);
 
     #[cfg(not(target_os = "netbsd"))]
     assert!(
-        TryInto::<u64>::try_into(stat.st_atime).unwrap() > a_sec
+        TryInto::<u64>::try_into(stat.atime()).unwrap() > a_sec
             || stat.st_atime_nsec as u32 >= a_nsec
     );
     #[cfg(target_os = "netbsd")]
     assert!(
-        TryInto::<u64>::try_into(stat.st_atime).unwrap() > a_sec
+        TryInto::<u64>::try_into(stat.atime()).unwrap() > a_sec
             || stat.st_atimensec as u32 >= a_nsec
     );
 
@@ -70,23 +70,23 @@ fn test_y2038_with_utimensat() {
     let file = openat(&dir, "file", OFlags::RDONLY, Mode::empty()).unwrap();
     let stat = fstat(&file).unwrap();
 
-    assert_eq!(TryInto::<u64>::try_into(stat.st_mtime).unwrap(), m_sec);
+    assert_eq!(TryInto::<u64>::try_into(stat.mtime()).unwrap(), m_sec);
 
     #[cfg(not(target_os = "netbsd"))]
     assert_eq!(stat.st_mtime_nsec as u32, m_nsec);
     #[cfg(target_os = "netbsd")]
     assert_eq!(stat.st_mtimensec as u32, m_nsec);
 
-    assert!(TryInto::<u64>::try_into(stat.st_atime).unwrap() >= a_sec);
+    assert!(TryInto::<u64>::try_into(stat.atime()).unwrap() >= a_sec);
 
     #[cfg(not(target_os = "netbsd"))]
     assert!(
-        TryInto::<u64>::try_into(stat.st_atime).unwrap() > a_sec
+        TryInto::<u64>::try_into(stat.atime()).unwrap() > a_sec
             || stat.st_atime_nsec as u32 >= a_nsec
     );
     #[cfg(target_os = "netbsd")]
     assert!(
-        TryInto::<u64>::try_into(stat.st_atime).unwrap() > a_sec
+        TryInto::<u64>::try_into(stat.atime()).unwrap() > a_sec
             || stat.st_atimensec as u32 >= a_nsec
     );
 }
@@ -102,7 +102,7 @@ fn test_y2038_with_utimensat() {
 #[test]
 fn test_y2038_with_futimens() {
     use rustix::fs::{
-        fstat, futimens, openat, statat, AtFlags, Mode, OFlags, Timespec, Timestamps, CWD,
+        fstat, futimens, openat, statat, AtFlags, Mode, OFlags, StatExt, Timespec, Timestamps, CWD,
     };
 
     let tmp = tempfile::tempdir().unwrap();
@@ -139,23 +139,23 @@ fn test_y2038_with_futimens() {
     // Use `statat` to read back the timestamp.
     let stat = statat(&dir, "file", AtFlags::empty()).unwrap();
 
-    assert_eq!(TryInto::<u64>::try_into(stat.st_mtime).unwrap(), m_sec);
+    assert_eq!(TryInto::<u64>::try_into(stat.mtime()).unwrap(), m_sec);
 
     #[cfg(not(target_os = "netbsd"))]
     assert_eq!(stat.st_mtime_nsec as u32, m_nsec);
     #[cfg(target_os = "netbsd")]
     assert_eq!(stat.st_mtimensec as u32, m_nsec);
 
-    assert!(TryInto::<u64>::try_into(stat.st_atime).unwrap() >= a_sec);
+    assert!(TryInto::<u64>::try_into(stat.atime()).unwrap() >= a_sec);
 
     #[cfg(not(target_os = "netbsd"))]
     assert!(
-        TryInto::<u64>::try_into(stat.st_atime).unwrap() > a_sec
+        TryInto::<u64>::try_into(stat.atime()).unwrap() > a_sec
             || stat.st_atime_nsec as u32 >= a_nsec
     );
     #[cfg(target_os = "netbsd")]
     assert!(
-        TryInto::<u64>::try_into(stat.st_atime).unwrap() > a_sec
+        TryInto::<u64>::try_into(stat.atime()).unwrap() > a_sec
             || stat.st_atimensec as u32 >= a_nsec
     );
 
@@ -163,23 +163,23 @@ fn test_y2038_with_futimens() {
     let file = openat(&dir, "file", OFlags::RDONLY, Mode::empty()).unwrap();
     let stat = fstat(&file).unwrap();
 
-    assert_eq!(TryInto::<u64>::try_into(stat.st_mtime).unwrap(), m_sec);
+    assert_eq!(TryInto::<u64>::try_into(stat.mtime()).unwrap(), m_sec);
 
     #[cfg(not(target_os = "netbsd"))]
     assert_eq!(stat.st_mtime_nsec as u32, m_nsec);
     #[cfg(target_os = "netbsd")]
     assert_eq!(stat.st_mtimensec as u32, m_nsec);
 
-    assert!(TryInto::<u64>::try_into(stat.st_atime).unwrap() >= a_sec);
+    assert!(TryInto::<u64>::try_into(stat.atime()).unwrap() >= a_sec);
 
     #[cfg(not(target_os = "netbsd"))]
     assert!(
-        TryInto::<u64>::try_into(stat.st_atime).unwrap() > a_sec
+        TryInto::<u64>::try_into(stat.atime()).unwrap() > a_sec
             || stat.st_atime_nsec as u32 >= a_nsec
     );
     #[cfg(target_os = "netbsd")]
     assert!(
-        TryInto::<u64>::try_into(stat.st_atime).unwrap() > a_sec
+        TryInto::<u64>::try_into(stat.atime()).unwrap() > a_sec
             || stat.st_atimensec as u32 >= a_nsec
     );
 }
@@ -193,7 +193,7 @@ fn test_y2038_with_futimens() {
 #[cfg(not(all(target_os = "emscripten", target_pointer_width = "32")))]
 #[test]
 fn test_y2038_with_futimens_and_stat() {
-    use rustix::fs::{fstat, futimens, open, stat, Mode, OFlags, Timespec, Timestamps};
+    use rustix::fs::{fstat, futimens, open, stat, Mode, OFlags, StatExt, Timespec, Timestamps};
 
     let tmp = tempfile::tempdir().unwrap();
 
@@ -233,23 +233,23 @@ fn test_y2038_with_futimens_and_stat() {
     // Use `statat` to read back the timestamp.
     let stat = stat(tmp.path().join("file")).unwrap();
 
-    assert_eq!(TryInto::<u64>::try_into(stat.st_mtime).unwrap(), m_sec);
+    assert_eq!(TryInto::<u64>::try_into(stat.mtime()).unwrap(), m_sec);
 
     #[cfg(not(target_os = "netbsd"))]
     assert_eq!(stat.st_mtime_nsec as u32, m_nsec);
     #[cfg(target_os = "netbsd")]
     assert_eq!(stat.st_mtimensec as u32, m_nsec);
 
-    assert!(TryInto::<u64>::try_into(stat.st_atime).unwrap() >= a_sec);
+    assert!(TryInto::<u64>::try_into(stat.atime()).unwrap() >= a_sec);
 
     #[cfg(not(target_os = "netbsd"))]
     assert!(
-        TryInto::<u64>::try_into(stat.st_atime).unwrap() > a_sec
+        TryInto::<u64>::try_into(stat.atime()).unwrap() > a_sec
             || stat.st_atime_nsec as u32 >= a_nsec
     );
     #[cfg(target_os = "netbsd")]
     assert!(
-        TryInto::<u64>::try_into(stat.st_atime).unwrap() > a_sec
+        TryInto::<u64>::try_into(stat.atime()).unwrap() > a_sec
             || stat.st_atimensec as u32 >= a_nsec
     );
 
@@ -257,23 +257,23 @@ fn test_y2038_with_futimens_and_stat() {
     let file = open(tmp.path().join("file"), OFlags::RDONLY, Mode::empty()).unwrap();
     let stat = fstat(&file).unwrap();
 
-    assert_eq!(TryInto::<u64>::try_into(stat.st_mtime).unwrap(), m_sec);
+    assert_eq!(TryInto::<u64>::try_into(stat.mtime()).unwrap(), m_sec);
 
     #[cfg(not(target_os = "netbsd"))]
     assert_eq!(stat.st_mtime_nsec as u32, m_nsec);
     #[cfg(target_os = "netbsd")]
     assert_eq!(stat.st_mtimensec as u32, m_nsec);
 
-    assert!(TryInto::<u64>::try_into(stat.st_atime).unwrap() >= a_sec);
+    assert!(TryInto::<u64>::try_into(stat.atime()).unwrap() >= a_sec);
 
     #[cfg(not(target_os = "netbsd"))]
     assert!(
-        TryInto::<u64>::try_into(stat.st_atime).unwrap() > a_sec
+        TryInto::<u64>::try_into(stat.atime()).unwrap() > a_sec
             || stat.st_atime_nsec as u32 >= a_nsec
     );
     #[cfg(target_os = "netbsd")]
     assert!(
-        TryInto::<u64>::try_into(stat.st_atime).unwrap() > a_sec
+        TryInto::<u64>::try_into(stat.atime()).unwrap() > a_sec
             || stat.st_atimensec as u32 >= a_nsec
     );
 }
