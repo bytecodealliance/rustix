@@ -10,10 +10,12 @@
 
 #[cfg(feature = "mount")]
 mod fsopen;
+mod misc;
 mod mount_unmount;
 mod types;
 
 #[cfg(feature = "mount")]
 pub use fsopen::*;
+pub use misc::*;
 pub use mount_unmount::*;
 pub use types::*;

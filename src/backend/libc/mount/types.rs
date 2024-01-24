@@ -1,4 +1,5 @@
 use crate::backend::c;
+use crate::fd::BorrowedFd;
 use bitflags::bitflags;
 
 #[cfg(linux_kernel)]
@@ -150,9 +151,10 @@ pub(crate) enum FsConfigCmd {
 #[cfg(feature = "mount")]
 #[cfg(linux_kernel)]
 bitflags! {
-    /// `MOUNT_ATTR_*` constants for use with [`fsmount`].
+    /// `MOUNT_ATTR_*` constants for use with [`fsmount`, `mount_setattr`].
     ///
     /// [`fsmount`]: crate::mount::fsmount
+    /// [`mount_setattr`]: crate::mount::mount_setattr
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MountAttrFlags: c::c_uint {
@@ -338,3 +340,13 @@ bitflags! {
 
 #[cfg(linux_kernel)]
 pub(crate) struct MountFlagsArg(pub(crate) c::c_ulong);
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+#[allow(missing_docs)]
+pub struct MountAttr<'a> {
+    pub attr_set: MountAttrFlags,
+    pub attr_clr: MountAttrFlags,
+    pub propagation: MountPropagationFlags,
+    pub userns_fd: BorrowedFd<'a>,
+}
