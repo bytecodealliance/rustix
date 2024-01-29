@@ -10,10 +10,10 @@
 #![allow(unsafe_code)]
 
 use crate::backend::c;
-#[cfg(target_os = "linux")]
-use crate::net::xdp::SocketAddrXdp;
 #[cfg(unix)]
 use crate::net::SocketAddrUnix;
+#[cfg(target_os = "linux")]
+use crate::net::{netlink::SocketAddrNetlink, xdp::SocketAddrXdp};
 use crate::net::{AddressFamily, SocketAddr, SocketAddrV4, SocketAddrV6};
 use crate::{backend, io};
 #[cfg(feature = "std")]
@@ -39,6 +39,9 @@ pub enum SocketAddrAny {
     /// `struct sockaddr_xdp`
     #[cfg(target_os = "linux")]
     Xdp(SocketAddrXdp),
+    /// `struct sockaddr_nl`
+    #[cfg(target_os = "linux")]
+    Netlink(SocketAddrNetlink),
 }
 
 impl From<SocketAddr> for SocketAddrAny {
@@ -84,6 +87,8 @@ impl SocketAddrAny {
             Self::Unix(_) => AddressFamily::UNIX,
             #[cfg(target_os = "linux")]
             Self::Xdp(_) => AddressFamily::XDP,
+            #[cfg(target_os = "linux")]
+            Self::Netlink(_) => AddressFamily::NETLINK,
         }
     }
 
@@ -103,6 +108,8 @@ impl SocketAddrAny {
             SocketAddrAny::Unix(a) => a.write_sockaddr(storage),
             #[cfg(target_os = "linux")]
             SocketAddrAny::Xdp(a) => a.write_sockaddr(storage),
+            #[cfg(target_os = "linux")]
+            SocketAddrAny::Netlink(a) => a.write_sockaddr(storage),
         }
     }
 
@@ -128,6 +135,8 @@ impl fmt::Debug for SocketAddrAny {
             Self::Unix(unix) => unix.fmt(fmt),
             #[cfg(target_os = "linux")]
             Self::Xdp(xdp) => xdp.fmt(fmt),
+            #[cfg(target_os = "linux")]
+            Self::Netlink(nl) => nl.fmt(fmt),
         }
     }
 }
@@ -158,6 +167,8 @@ unsafe impl SocketAddress for SocketAddrAny {
             Self::Unix(a) => a.with_sockaddr(f),
             #[cfg(target_os = "linux")]
             Self::Xdp(a) => a.with_sockaddr(f),
+            #[cfg(target_os = "linux")]
+            Self::Netlink(a) => a.with_sockaddr(f),
         }
     }
 }
