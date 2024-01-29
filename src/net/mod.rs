@@ -7,6 +7,7 @@
 //! [`wsa_startup`]: https://docs.rs/rustix/*/x86_64-pc-windows-msvc/rustix/net/fn.wsa_startup.html
 //! [`wsa_cleanup`]: https://docs.rs/rustix/*/x86_64-pc-windows-msvc/rustix/net/fn.wsa_cleanup.html
 
+pub mod addr;
 mod send_recv;
 mod socket;
 mod socket_addr_any;

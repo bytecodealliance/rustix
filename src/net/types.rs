@@ -1539,6 +1539,8 @@ bitflags! {
 /// `AF_XDP` related types and constants.
 #[cfg(target_os = "linux")]
 pub mod xdp {
+    use crate::net::addr::{call_with_sockaddr, SocketAddrArg, SocketAddrOpaque};
+
     use super::{bitflags, c};
 
     bitflags! {
@@ -1675,6 +1677,21 @@ pub mod xdp {
         #[inline]
         pub fn set_shared_umem_fd(&mut self, shared_umem_fd: u32) {
             self.sxdp_shared_umem_fd = shared_umem_fd;
+        }
+    }
+
+    #[allow(unsafe_code)]
+    unsafe impl SocketAddrArg for SocketAddrXdp {
+        fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, usize) -> R) -> R {
+            let addr = c::sockaddr_xdp {
+                sxdp_family: c::AF_XDP as _,
+                sxdp_flags: self.flags().bits(),
+                sxdp_ifindex: self.interface_index(),
+                sxdp_queue_id: self.queue_id(),
+                sxdp_shared_umem_fd: self.shared_umem_fd(),
+            };
+
+            call_with_sockaddr(&addr, f)
         }
     }
 

@@ -5,6 +5,7 @@
 use crate::backend::{self, c};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
+use crate::net::addr::SocketAddrArg;
 #[cfg(linux_kernel)]
 use crate::net::UCred;
 #[cfg(feature = "std")]
@@ -627,6 +628,37 @@ pub fn sendmsg<Fd: AsFd>(
     backend::net::syscalls::sendmsg(socket.as_fd(), iov, control, flags)
 }
 
+/// `sendmsg(msghdr)`—Sends a message on a socket to a specific address.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
+/// [NetBSD]: https://man.netbsd.org/sendmsg.2
+/// [OpenBSD]: https://man.openbsd.org/sendmsg.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
+#[inline]
+pub fn sendmsg_addr(
+    socket: impl AsFd,
+    addr: &impl SocketAddrArg,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
+    flags: SendFlags,
+) -> io::Result<usize> {
+    backend::net::syscalls::sendmsg_addr(socket.as_fd(), addr, iov, control, flags)
+}
+
 /// `sendmsg(msghdr)`—Sends a message on a socket to a specific IPv4 address.
 ///
 /// # References
@@ -655,7 +687,7 @@ pub fn sendmsg_v4<Fd: AsFd>(
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     flags: SendFlags,
 ) -> io::Result<usize> {
-    backend::net::syscalls::sendmsg_v4(socket.as_fd(), addr, iov, control, flags)
+    backend::net::syscalls::sendmsg_addr(socket.as_fd(), addr, iov, control, flags)
 }
 
 /// `sendmsg(msghdr)`—Sends a message on a socket to a specific IPv6 address.
@@ -686,7 +718,7 @@ pub fn sendmsg_v6<Fd: AsFd>(
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     flags: SendFlags,
 ) -> io::Result<usize> {
-    backend::net::syscalls::sendmsg_v6(socket.as_fd(), addr, iov, control, flags)
+    backend::net::syscalls::sendmsg_addr(socket.as_fd(), addr, iov, control, flags)
 }
 
 /// `sendmsg(msghdr)`—Sends a message on a socket to a specific Unix-domain
@@ -719,7 +751,7 @@ pub fn sendmsg_unix<Fd: AsFd>(
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     flags: SendFlags,
 ) -> io::Result<usize> {
-    backend::net::syscalls::sendmsg_unix(socket.as_fd(), addr, iov, control, flags)
+    backend::net::syscalls::sendmsg_addr(socket.as_fd(), addr, iov, control, flags)
 }
 
 /// `sendmsg(msghdr)`—Sends a message on a socket to a specific XDP address.
@@ -737,7 +769,7 @@ pub fn sendmsg_xdp<Fd: AsFd>(
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     flags: SendFlags,
 ) -> io::Result<usize> {
-    backend::net::syscalls::sendmsg_xdp(socket.as_fd(), addr, iov, control, flags)
+    backend::net::syscalls::sendmsg_addr(socket.as_fd(), addr, iov, control, flags)
 }
 
 /// `sendmsg(msghdr)`—Sends a message on a socket to a specific address.
@@ -770,19 +802,8 @@ pub fn sendmsg_any<Fd: AsFd>(
 ) -> io::Result<usize> {
     match addr {
         None => backend::net::syscalls::sendmsg(socket.as_fd(), iov, control, flags),
-        Some(SocketAddrAny::V4(addr)) => {
-            backend::net::syscalls::sendmsg_v4(socket.as_fd(), addr, iov, control, flags)
-        }
-        Some(SocketAddrAny::V6(addr)) => {
-            backend::net::syscalls::sendmsg_v6(socket.as_fd(), addr, iov, control, flags)
-        }
-        #[cfg(unix)]
-        Some(SocketAddrAny::Unix(addr)) => {
-            backend::net::syscalls::sendmsg_unix(socket.as_fd(), addr, iov, control, flags)
-        }
-        #[cfg(target_os = "linux")]
-        Some(SocketAddrAny::Xdp(addr)) => {
-            backend::net::syscalls::sendmsg_xdp(socket.as_fd(), addr, iov, control, flags)
+        Some(addr) => {
+            backend::net::syscalls::sendmsg_addr(socket.as_fd(), addr, iov, control, flags)
         }
     }
 }
