@@ -12,6 +12,25 @@ use {
     core::slice,
 };
 
+use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
+use crate::net::{SocketAddrV4, SocketAddrV6, SocketAddress};
+
+unsafe impl SocketAddress for SocketAddrV4 {
+    type CSockAddr = c::sockaddr_in;
+
+    fn encode(&self) -> Self::CSockAddr {
+        encode_sockaddr_v4(self)
+    }
+}
+
+unsafe impl SocketAddress for SocketAddrV6 {
+    type CSockAddr = c::sockaddr_in6;
+
+    fn encode(&self) -> Self::CSockAddr {
+        encode_sockaddr_v6(self)
+    }
+}
+
 /// `struct sockaddr_un`
 #[cfg(unix)]
 #[derive(Clone)]
@@ -199,6 +218,27 @@ impl fmt::Debug for SocketAddrUnix {
 
             "(unnamed)".fmt(fmt)
         }
+    }
+}
+
+#[cfg(unix)]
+unsafe impl SocketAddress for SocketAddrUnix {
+    type CSockAddr = c::sockaddr_un;
+
+    fn encode(&self) -> Self::CSockAddr {
+        self.unix
+    }
+
+    unsafe fn write_sockaddr(&self, storage: *mut SocketAddrStorage) -> usize {
+        core::ptr::write(storage.cast(), self.unix);
+        self.len()
+    }
+
+    fn with_sockaddr<R>(&self, f: impl FnOnce(*const c::sockaddr, c::socklen_t) -> R) -> R {
+        f(
+            (&self.unix as *const c::sockaddr_un).cast(),
+            self.addr_len(),
+        )
     }
 }
 

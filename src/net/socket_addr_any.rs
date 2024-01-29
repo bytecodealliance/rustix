@@ -9,6 +9,7 @@
 //! OS-specific socket address representations in memory.
 #![allow(unsafe_code)]
 
+use crate::backend::c;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::SocketAddrXdp;
 #[cfg(unix)]
@@ -17,8 +18,11 @@ use crate::net::{AddressFamily, SocketAddr, SocketAddrV4, SocketAddrV6};
 use crate::{backend, io};
 #[cfg(feature = "std")]
 use core::fmt;
+use core::mem;
 
 pub use backend::net::addr::SocketAddrStorage;
+
+use super::SocketAddress;
 
 /// `struct sockaddr_storage` as a Rust enum.
 #[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
@@ -92,7 +96,14 @@ impl SocketAddrAny {
     /// `storage` must point to valid memory for encoding the socket
     /// address.
     pub unsafe fn write(&self, storage: *mut SocketAddrStorage) -> usize {
-        backend::net::write_sockaddr::write_sockaddr(self, storage)
+        match self {
+            SocketAddrAny::V4(a) => a.write_sockaddr(storage),
+            SocketAddrAny::V6(a) => a.write_sockaddr(storage),
+            #[cfg(unix)]
+            SocketAddrAny::Unix(a) => a.write_sockaddr(storage),
+            #[cfg(target_os = "linux")]
+            SocketAddrAny::Xdp(a) => a.write_sockaddr(storage),
+        }
     }
 
     /// Reads a platform-specific encoding of a socket address from
@@ -117,6 +128,36 @@ impl fmt::Debug for SocketAddrAny {
             Self::Unix(unix) => unix.fmt(fmt),
             #[cfg(target_os = "linux")]
             Self::Xdp(xdp) => xdp.fmt(fmt),
+        }
+    }
+}
+
+unsafe impl SocketAddress for SocketAddrAny {
+    type CSockAddr = c::sockaddr_storage;
+
+    fn encode(&self) -> Self::CSockAddr {
+        unsafe {
+            let mut storage: c::sockaddr_storage = mem::zeroed();
+            self.write((&mut storage as *mut c::sockaddr_storage).cast());
+            storage
+        }
+    }
+
+    unsafe fn write_sockaddr(&self, storage: *mut SocketAddrStorage) -> usize {
+        self.write(storage)
+    }
+
+    fn with_sockaddr<R>(
+        &self,
+        f: impl FnOnce(*const backend::c::sockaddr, backend::c::socklen_t) -> R,
+    ) -> R {
+        match self {
+            Self::V4(a) => a.with_sockaddr(f),
+            Self::V6(a) => a.with_sockaddr(f),
+            #[cfg(unix)]
+            Self::Unix(a) => a.with_sockaddr(f),
+            #[cfg(target_os = "linux")]
+            Self::Xdp(a) => a.with_sockaddr(f),
         }
     }
 }

@@ -1,18 +1,10 @@
 //! libc syscalls supporting `rustix::net`.
 
-#[cfg(unix)]
-use super::addr::SocketAddrUnix;
-#[cfg(target_os = "linux")]
-use super::msghdr::with_xdp_msghdr;
-#[cfg(target_os = "linux")]
-use super::write_sockaddr::encode_sockaddr_xdp;
 use crate::backend::c;
 use crate::backend::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
-#[cfg(target_os = "linux")]
-use crate::net::xdp::SocketAddrXdp;
-use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
+use crate::net::{SocketAddrAny, SocketAddress};
 use crate::utils::as_ptr;
 use core::mem::{size_of, MaybeUninit};
 #[cfg(not(any(
@@ -23,7 +15,7 @@ use core::mem::{size_of, MaybeUninit};
     target_os = "wasi"
 )))]
 use {
-    super::msghdr::{with_noaddr_msghdr, with_recv_msghdr, with_v4_msghdr, with_v6_msghdr},
+    super::msghdr::{with_msghdr, with_noaddr_msghdr, with_recv_msghdr},
     crate::io::{IoSlice, IoSliceMut},
     crate::net::{RecvAncillaryBuffer, RecvMsgReturn, SendAncillaryBuffer},
 };
@@ -31,7 +23,6 @@ use {
 use {
     super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr_os},
     super::send_recv::{RecvFlags, SendFlags},
-    super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6},
     crate::net::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType},
     core::ptr::null_mut,
 };
@@ -95,78 +86,23 @@ pub(crate) unsafe fn recvfrom(
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn sendto_v4(
+pub(crate) fn sendto<A: SocketAddress>(
     fd: BorrowedFd<'_>,
     buf: &[u8],
     flags: SendFlags,
-    addr: &SocketAddrV4,
+    addr: &A,
 ) -> io::Result<usize> {
     unsafe {
-        ret_send_recv(c::sendto(
-            borrowed_fd(fd),
-            buf.as_ptr().cast(),
-            send_recv_len(buf.len()),
-            bitflags_bits!(flags),
-            as_ptr(&encode_sockaddr_v4(addr)).cast::<c::sockaddr>(),
-            size_of::<c::sockaddr_in>() as c::socklen_t,
-        ))
-    }
-}
-
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn sendto_v6(
-    fd: BorrowedFd<'_>,
-    buf: &[u8],
-    flags: SendFlags,
-    addr: &SocketAddrV6,
-) -> io::Result<usize> {
-    unsafe {
-        ret_send_recv(c::sendto(
-            borrowed_fd(fd),
-            buf.as_ptr().cast(),
-            send_recv_len(buf.len()),
-            bitflags_bits!(flags),
-            as_ptr(&encode_sockaddr_v6(addr)).cast::<c::sockaddr>(),
-            size_of::<c::sockaddr_in6>() as c::socklen_t,
-        ))
-    }
-}
-
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
-pub(crate) fn sendto_unix(
-    fd: BorrowedFd<'_>,
-    buf: &[u8],
-    flags: SendFlags,
-    addr: &SocketAddrUnix,
-) -> io::Result<usize> {
-    unsafe {
-        ret_send_recv(c::sendto(
-            borrowed_fd(fd),
-            buf.as_ptr().cast(),
-            send_recv_len(buf.len()),
-            bitflags_bits!(flags),
-            as_ptr(&addr.unix).cast(),
-            addr.addr_len(),
-        ))
-    }
-}
-
-#[cfg(target_os = "linux")]
-pub(crate) fn sendto_xdp(
-    fd: BorrowedFd<'_>,
-    buf: &[u8],
-    flags: SendFlags,
-    addr: &SocketAddrXdp,
-) -> io::Result<usize> {
-    unsafe {
-        ret_send_recv(c::sendto(
-            borrowed_fd(fd),
-            buf.as_ptr().cast(),
-            send_recv_len(buf.len()),
-            bitflags_bits!(flags),
-            as_ptr(&encode_sockaddr_xdp(addr)).cast::<c::sockaddr>(),
-            size_of::<c::sockaddr_xdp>() as _,
-        ))
+        addr.with_sockaddr(|addr_ptr, addr_len| {
+            ret_send_recv(c::sendto(
+                borrowed_fd(fd),
+                buf.as_ptr().cast(),
+                send_recv_len(buf.len()),
+                bitflags_bits!(flags),
+                addr_ptr,
+                addr_len,
+            ))
+        })
     }
 }
 
@@ -210,79 +146,20 @@ pub(crate) fn socket_with(
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn bind_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
+pub(crate) fn bind<A: SocketAddress>(sockfd: BorrowedFd<'_>, addr: &A) -> io::Result<()> {
     unsafe {
-        ret(c::bind(
-            borrowed_fd(sockfd),
-            as_ptr(&encode_sockaddr_v4(addr)).cast(),
-            size_of::<c::sockaddr_in>() as c::socklen_t,
-        ))
+        addr.with_sockaddr(|addr_ptr, addr_len| {
+            ret(c::bind(borrowed_fd(sockfd), addr_ptr, addr_len))
+        })
     }
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn bind_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
+pub(crate) fn connect<A: SocketAddress>(sockfd: BorrowedFd<'_>, addr: &A) -> io::Result<()> {
     unsafe {
-        ret(c::bind(
-            borrowed_fd(sockfd),
-            as_ptr(&encode_sockaddr_v6(addr)).cast(),
-            size_of::<c::sockaddr_in6>() as c::socklen_t,
-        ))
-    }
-}
-
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
-pub(crate) fn bind_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
-    unsafe {
-        ret(c::bind(
-            borrowed_fd(sockfd),
-            as_ptr(&addr.unix).cast(),
-            addr.addr_len(),
-        ))
-    }
-}
-
-#[cfg(target_os = "linux")]
-pub(crate) fn bind_xdp(sockfd: BorrowedFd<'_>, addr: &SocketAddrXdp) -> io::Result<()> {
-    unsafe {
-        ret(c::bind(
-            borrowed_fd(sockfd),
-            as_ptr(&encode_sockaddr_xdp(addr)).cast(),
-            size_of::<c::sockaddr_xdp>() as c::socklen_t,
-        ))
-    }
-}
-
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn connect_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
-    unsafe {
-        ret(c::connect(
-            borrowed_fd(sockfd),
-            as_ptr(&encode_sockaddr_v4(addr)).cast(),
-            size_of::<c::sockaddr_in>() as c::socklen_t,
-        ))
-    }
-}
-
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-pub(crate) fn connect_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
-    unsafe {
-        ret(c::connect(
-            borrowed_fd(sockfd),
-            as_ptr(&encode_sockaddr_v6(addr)).cast(),
-            size_of::<c::sockaddr_in6>() as c::socklen_t,
-        ))
-    }
-}
-
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
-pub(crate) fn connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
-    unsafe {
-        ret(c::connect(
-            borrowed_fd(sockfd),
-            as_ptr(&addr.unix).cast(),
-            addr.addr_len(),
-        ))
+        addr.with_sockaddr(|addr_ptr, addr_len| {
+            ret(c::connect(borrowed_fd(sockfd), addr_ptr, addr_len))
+        })
     }
 }
 
@@ -379,74 +256,14 @@ pub(crate) fn sendmsg(
     target_os = "vita",
     target_os = "wasi"
 )))]
-pub(crate) fn sendmsg_v4(
+pub(crate) fn sendmsg_addr<A: SocketAddress>(
     sockfd: BorrowedFd<'_>,
-    addr: &SocketAddrV4,
+    addr: &A,
     iov: &[IoSlice<'_>],
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
-    with_v4_msghdr(addr, iov, control, |msghdr| unsafe {
-        ret_send_recv(c::sendmsg(
-            borrowed_fd(sockfd),
-            &msghdr,
-            bitflags_bits!(msg_flags),
-        ))
-    })
-}
-
-#[cfg(not(any(
-    windows,
-    target_os = "espidf",
-    target_os = "redox",
-    target_os = "vita",
-    target_os = "wasi"
-)))]
-pub(crate) fn sendmsg_v6(
-    sockfd: BorrowedFd<'_>,
-    addr: &SocketAddrV6,
-    iov: &[IoSlice<'_>],
-    control: &mut SendAncillaryBuffer<'_, '_, '_>,
-    msg_flags: SendFlags,
-) -> io::Result<usize> {
-    with_v6_msghdr(addr, iov, control, |msghdr| unsafe {
-        ret_send_recv(c::sendmsg(
-            borrowed_fd(sockfd),
-            &msghdr,
-            bitflags_bits!(msg_flags),
-        ))
-    })
-}
-
-#[cfg(all(
-    unix,
-    not(any(target_os = "espidf", target_os = "redox", target_os = "vita"))
-))]
-pub(crate) fn sendmsg_unix(
-    sockfd: BorrowedFd<'_>,
-    addr: &SocketAddrUnix,
-    iov: &[IoSlice<'_>],
-    control: &mut SendAncillaryBuffer<'_, '_, '_>,
-    msg_flags: SendFlags,
-) -> io::Result<usize> {
-    super::msghdr::with_unix_msghdr(addr, iov, control, |msghdr| unsafe {
-        ret_send_recv(c::sendmsg(
-            borrowed_fd(sockfd),
-            &msghdr,
-            bitflags_bits!(msg_flags),
-        ))
-    })
-}
-
-#[cfg(target_os = "linux")]
-pub(crate) fn sendmsg_xdp(
-    sockfd: BorrowedFd<'_>,
-    addr: &SocketAddrXdp,
-    iov: &[IoSlice<'_>],
-    control: &mut SendAncillaryBuffer<'_, '_, '_>,
-    msg_flags: SendFlags,
-) -> io::Result<usize> {
-    with_xdp_msghdr(addr, iov, control, |msghdr| unsafe {
+    with_msghdr(addr, iov, control, |msghdr| unsafe {
         ret_send_recv(c::sendmsg(
             borrowed_fd(sockfd),
             &msghdr,
