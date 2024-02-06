@@ -4,7 +4,7 @@ use crate::backend::c;
 use crate::backend::conv::{borrowed_fd, ret_owned_fd, ret_u32};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
-use crate::io_uring::{io_uring_params, IoringEnterFlags, IoringRegisterOp};
+use crate::io_uring::{io_uring_params, IoringEnterFlags, IoringRegisterFlags, IoringRegisterOp};
 
 #[inline]
 pub(crate) fn io_uring_setup(entries: u32, params: &mut io_uring_params) -> io::Result<OwnedFd> {
@@ -21,6 +21,7 @@ pub(crate) fn io_uring_setup(entries: u32, params: &mut io_uring_params) -> io::
 pub(crate) unsafe fn io_uring_register(
     fd: BorrowedFd<'_>,
     opcode: IoringRegisterOp,
+    flags: IoringRegisterFlags,
     arg: *const c::c_void,
     nr_args: u32,
 ) -> io::Result<u32> {
@@ -34,7 +35,7 @@ pub(crate) unsafe fn io_uring_register(
     }
     ret_u32(io_uring_register(
         borrowed_fd(fd) as _,
-        opcode as u32,
+        opcode as u32 | flags.bits(),
         arg,
         nr_args,
     ))
