@@ -4,6 +4,8 @@ use crate::{backend, io};
 use backend::fd::{AsFd, BorrowedFd};
 
 #[cfg(target_os = "linux")]
+use crate::net::packet::SocketAddrLink;
+#[cfg(target_os = "linux")]
 use crate::net::xdp::SocketAddrXdp;
 pub use crate::net::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 #[cfg(unix)]
@@ -172,6 +174,8 @@ fn _bind_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> {
         SocketAddrAny::Unix(unix) => backend::net::syscalls::bind_unix(sockfd, unix),
         #[cfg(target_os = "linux")]
         SocketAddrAny::Xdp(xdp) => backend::net::syscalls::bind_xdp(sockfd, xdp),
+        #[cfg(target_os = "linux")]
+        SocketAddrAny::Link(link) => backend::net::syscalls::bind_link(sockfd, link),
     }
 }
 
@@ -289,6 +293,19 @@ pub fn bind_xdp<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrXdp) -> io::Result<()> {
     backend::net::syscalls::bind_xdp(sockfd.as_fd(), addr)
 }
 
+/// `bind(sockfd, addr, sizeof(struct sockaddr_ll))`—Binds a socket to a link-layer address.
+///
+/// # References
+/// - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man2/bind.2.html
+#[cfg(target_os = "linux")]
+#[inline]
+#[doc(alias = "bind")]
+pub fn bind_link<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrLink) -> io::Result<()> {
+    backend::net::syscalls::bind_link(sockfd.as_fd(), addr)
+}
+
 /// `connect(sockfd, addr)`—Initiates a connection to an IP address.
 ///
 /// On Windows, a non-blocking socket returns [`Errno::WOULDBLOCK`] if the
@@ -370,6 +387,8 @@ fn _connect_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> 
         SocketAddrAny::Unix(unix) => backend::net::syscalls::connect_unix(sockfd, unix),
         #[cfg(target_os = "linux")]
         SocketAddrAny::Xdp(_) => Err(io::Errno::OPNOTSUPP),
+        #[cfg(target_os = "linux")]
+        SocketAddrAny::Link(_) => Err(io::Errno::OPNOTSUPP),
     }
 }
 
