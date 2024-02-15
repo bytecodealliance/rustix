@@ -7,7 +7,7 @@
 #![allow(unsafe_code)]
 
 use crate::backend;
-#[cfg(target_os = "linux")]
+#[cfg(any(linux_raw, target_os = "linux"))]
 use crate::backend::c;
 use crate::ffi::CStr;
 #[cfg(not(any(target_os = "espidf", target_os = "emscripten", target_os = "vita")))]
@@ -20,7 +20,7 @@ pub use backend::system::types::Sysinfo;
 #[cfg(linux_raw)]
 use crate::fd::AsFd;
 #[cfg(linux_raw)]
-use core::ffi::c_int;
+use c::c_int;
 
 /// `uname()`—Returns high-level information about the runtime OS and
 /// hardware.
