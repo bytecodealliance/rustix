@@ -7,7 +7,7 @@
 #![allow(unsafe_code)]
 
 use crate::backend;
-#[cfg(any(linux_raw, target_os = "linux"))]
+#[cfg(linux_kernel)]
 use crate::backend::c;
 use crate::ffi::CStr;
 #[cfg(not(any(target_os = "espidf", target_os = "emscripten", target_os = "vita")))]
@@ -17,9 +17,9 @@ use core::fmt;
 #[cfg(linux_kernel)]
 pub use backend::system::types::Sysinfo;
 
-#[cfg(linux_raw)]
+#[cfg(linux_kernel)]
 use crate::fd::AsFd;
-#[cfg(linux_raw)]
+#[cfg(linux_kernel)]
 use c::c_int;
 
 /// `uname()`—Returns high-level information about the runtime OS and
@@ -231,8 +231,8 @@ pub fn reboot(cmd: RebootCommand) -> io::Result<()> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/init_module.2.html
 #[inline]
-#[cfg(linux_raw)]
-pub fn init_module(image: &[u8], param_values: &CStr) -> io::Errno {
+#[cfg(linux_kernel)]
+pub fn init_module(image: &[u8], param_values: &CStr) -> io::Result<()> {
     backend::system::syscalls::init_module(image, param_values)
 }
 
@@ -243,9 +243,8 @@ pub fn init_module(image: &[u8], param_values: &CStr) -> io::Errno {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/finit_module.2.html
 #[inline]
-#[cfg(linux_raw)]
-#[cfg(feature = "fs")]
-pub fn finit_module<Fd: AsFd>(fd: Fd, param_values: &CStr, flags: c_int) -> io::Errno {
+#[cfg(linux_kernel)]
+pub fn finit_module<Fd: AsFd>(fd: Fd, param_values: &CStr, flags: c_int) -> io::Result<()> {
     backend::system::syscalls::finit_module(fd.as_fd(), param_values, flags)
 }
 
@@ -256,7 +255,7 @@ pub fn finit_module<Fd: AsFd>(fd: Fd, param_values: &CStr, flags: c_int) -> io::
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/delete_module.2.html
 #[inline]
-#[cfg(linux_raw)]
-pub fn delete_module(name: &CStr, flags: c_int) -> io::Errno {
+#[cfg(linux_kernel)]
+pub fn delete_module(name: &CStr, flags: c_int) -> io::Result<()> {
     backend::system::syscalls::delete_module(name, flags)
 }

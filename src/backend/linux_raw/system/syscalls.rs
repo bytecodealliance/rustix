@@ -7,8 +7,8 @@
 
 use super::types::RawUname;
 use crate::backend::c;
-use crate::backend::conv::{c_int, ret, ret_error, ret_infallible, slice};
-#[cfg(feature = "fs")]
+use crate::backend::conv::{c_int, ret, ret_infallible, slice};
+#[cfg(any(target_os = "linux", target_os = "android"))]
 use crate::fd::BorrowedFd;
 use crate::ffi::CStr;
 use crate::io;
@@ -51,12 +51,11 @@ pub(crate) fn reboot(cmd: RebootCommand) -> io::Result<()> {
     }
 }
 
-#[cfg(any(target_os = "linux", target_os = "android"))]
 #[inline]
-pub(crate) fn init_module(image: &[u8], param_values: &CStr) -> io::Errno {
+pub(crate) fn init_module(image: &[u8], param_values: &CStr) -> io::Result<()> {
     let (image, len) = slice(image);
     unsafe {
-        ret_error(syscall_readonly!(
+        ret(syscall_readonly!(
             __NR_init_module,
             image,
             len,
@@ -65,12 +64,14 @@ pub(crate) fn init_module(image: &[u8], param_values: &CStr) -> io::Errno {
     }
 }
 
-#[cfg(any(target_os = "linux", target_os = "android"))]
-#[cfg(feature = "fs")]
 #[inline]
-pub(crate) fn finit_module(fd: BorrowedFd<'_>, param_values: &CStr, flags: c::c_int) -> io::Errno {
+pub(crate) fn finit_module(
+    fd: BorrowedFd<'_>,
+    param_values: &CStr,
+    flags: c::c_int,
+) -> io::Result<()> {
     unsafe {
-        ret_error(syscall_readonly!(
+        ret(syscall_readonly!(
             __NR_finit_module,
             fd,
             param_values,
@@ -79,9 +80,7 @@ pub(crate) fn finit_module(fd: BorrowedFd<'_>, param_values: &CStr, flags: c::c_
     }
 }
 
-#[cfg(any(target_os = "linux", target_os = "android"))]
-#[cfg(feature = "fs")]
 #[inline]
-pub(crate) fn delete_module(name: &CStr, flags: c::c_int) -> io::Errno {
-    unsafe { ret_error(syscall_readonly!(__NR_delete_module, name, c_int(flags))) }
+pub(crate) fn delete_module(name: &CStr, flags: c::c_int) -> io::Result<()> {
+    unsafe { ret(syscall_readonly!(__NR_delete_module, name, c_int(flags))) }
 }

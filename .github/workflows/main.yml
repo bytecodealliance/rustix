@@ -437,7 +437,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -573,7 +573,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -665,7 +665,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched

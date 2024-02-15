@@ -1,6 +1,5 @@
 pub(crate) mod addr;
 pub(crate) mod msghdr;
-#[cfg(linux_kernel)]
 pub(crate) mod netdevice;
 pub(crate) mod read_sockaddr;
 pub(crate) mod send_recv;
