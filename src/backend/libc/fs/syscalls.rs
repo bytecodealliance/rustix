@@ -1662,7 +1662,7 @@ pub(crate) fn fallocate(
 
     let new_len = offset.checked_add(len).ok_or(io::Errno::FBIG)?;
     let mut store = c::fstore_t {
-        fst_flags: c::F_ALLOCATECONTIG,
+        fst_flags: c::F_ALLOCATECONTIG | c::F_ALLOCATEALL,
         fst_posmode: c::F_PEOFPOSMODE,
         fst_offset: 0,
         fst_length: new_len,
