@@ -45,7 +45,7 @@ pub fn mount<Source: path::Arg, Target: path::Arg, Fs: path::Arg, Data: path::Ar
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mount.2.html
 #[inline]
-pub fn mount2<Source: path::Arg, Target: path::Arg, Fs: path::Arg, Data: path::Arg>(
+pub fn mount2<Target: path::Arg>(
     source: Option<&CStr>,
     target: Target,
     file_system_type: Option<&CStr>,
