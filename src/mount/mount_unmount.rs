@@ -1,5 +1,7 @@
 //! Linux `mount`.
 
+use std::ffi::CStr;
+
 use crate::backend::mount::types::{
     InternalMountFlags, MountFlags, MountFlagsArg, MountPropagationFlags, UnmountFlags,
 };
@@ -33,6 +35,31 @@ pub fn mount<Source: path::Arg, Target: path::Arg, Fs: path::Arg, Data: path::Ar
                 })
             })
         })
+    })
+}
+
+/// `mount2(source, target, filesystemtype, mountflags, data)`
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/mount.2.html
+#[inline]
+pub fn mount2<Source: path::Arg, Target: path::Arg, Fs: path::Arg, Data: path::Arg>(
+    source: Option<&CStr>,
+    target: Target,
+    file_system_type: Option<&CStr>,
+    flags: MountFlags,
+    data: Option<&CStr>,
+) -> io::Result<()> {
+    target.into_with_c_str(|target| {
+        backend::mount::syscalls::mount(
+            source,
+            target,
+            file_system_type,
+            MountFlagsArg(flags.bits()),
+            data,
+        )
     })
 }
 
