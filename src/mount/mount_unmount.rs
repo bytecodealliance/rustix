@@ -1,6 +1,6 @@
 //! Linux `mount`.
 
-use std::ffi::CStr;
+use core::ffi::CStr;
 
 use crate::backend::mount::types::{
     InternalMountFlags, MountFlags, MountFlagsArg, MountPropagationFlags, UnmountFlags,
