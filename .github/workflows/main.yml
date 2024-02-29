@@ -210,7 +210,9 @@ jobs:
     - run: cargo check -Z build-std --target mips64-openwrt-linux-musl --all-targets --features=all-apis
     - run: cargo check -Z build-std --target x86_64-unknown-dragonfly --all-targets --features=all-apis
     - run: cargo check -Z build-std --target sparc-unknown-linux-gnu --all-targets --features=all-apis
-    - run: cargo check -Z build-std --target armv7-unknown-freebsd --all-targets --features=all-apis
+    # Temporarily disable this because the target appears to have changed and needs
+    # fixes and we transitively dev-depend on what can be an older version of rustix.
+    #- run: cargo check -Z build-std --target armv7-unknown-freebsd --all-targets --features=all-apis
     # Omit --all-targets on gnu_ilp32 because dev-dependency tempfile depends on an older rustix
     - run: cargo check -Z build-std --target aarch64-unknown-linux-gnu_ilp32 --features=all-apis
     # Omit --all-targets on haiku because not all the tests build yet.
