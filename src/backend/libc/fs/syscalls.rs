@@ -140,7 +140,12 @@ fn open_via_syscall(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<Owned
 pub(crate) fn open(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
     // Work around <https://sourceware.org/bugzilla/show_bug.cgi?id=17523>.
     // glibc versions before 2.25 don't handle `O_TMPFILE` correctly.
-    #[cfg(all(unix, target_env = "gnu", not(target_os = "hurd")))]
+    #[cfg(all(
+        unix,
+        target_env = "gnu",
+        not(target_os = "hurd"),
+        not(target_os = "freebsd")
+    ))]
     if oflags.contains(OFlags::TMPFILE) && crate::backend::if_glibc_is_less_than_2_25() {
         return open_via_syscall(path, oflags, mode);
     }
@@ -203,7 +208,12 @@ pub(crate) fn openat(
 ) -> io::Result<OwnedFd> {
     // Work around <https://sourceware.org/bugzilla/show_bug.cgi?id=17523>.
     // glibc versions before 2.25 don't handle `O_TMPFILE` correctly.
-    #[cfg(all(unix, target_env = "gnu", not(target_os = "hurd")))]
+    #[cfg(all(
+        unix,
+        target_env = "gnu",
+        not(target_os = "hurd"),
+        not(target_os = "freebsd")
+    ))]
     if oflags.contains(OFlags::TMPFILE) && crate::backend::if_glibc_is_less_than_2_25() {
         return openat_via_syscall(dirfd, path, oflags, mode);
     }
