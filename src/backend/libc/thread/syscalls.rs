@@ -101,7 +101,10 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
         target_os = "vita"
     ))
 ))]
-fn clock_nanosleep_relative_old(id: ClockId, request: &Timespec) -> NanosleepRelativeResult {
+fn clock_nanosleep_relative_old(
+    id: crate::clockid::ClockId,
+    request: &Timespec,
+) -> NanosleepRelativeResult {
     let tv_sec = match request.tv_sec.try_into() {
         Ok(tv_sec) => tv_sec,
         Err(_) => return NanosleepRelativeResult::Err(io::Errno::OVERFLOW),
@@ -195,14 +198,21 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
         target_os = "vita"
     ))
 ))]
-fn clock_nanosleep_absolute_old(id: ClockId, request: &Timespec) -> io::Result<()> {
+fn clock_nanosleep_absolute_old(id: crate::clockid::ClockId, request: &Timespec) -> io::Result<()> {
     let flags = c::TIMER_ABSTIME;
 
     let old_request = c::timespec {
         tv_sec: request.tv_sec.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         tv_nsec: request.tv_nsec.try_into().map_err(|_| io::Errno::INVAL)?,
     };
-    match unsafe { c::clock_nanosleep(id as c::clockid_t, flags, &old_request, null_mut()) } {
+    match unsafe {
+        c::clock_nanosleep(
+            id as c::clockid_t,
+            flags,
+            &old_request,
+            core::ptr::null_mut(),
+        )
+    } {
         0 => Ok(()),
         err => Err(io::Errno(err)),
     }
