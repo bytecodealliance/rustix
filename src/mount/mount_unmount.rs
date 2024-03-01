@@ -4,7 +4,9 @@ use crate::backend::mount::types::{
     InternalMountFlags, MountFlags, MountFlagsArg, MountPropagationFlags, UnmountFlags,
 };
 use crate::{
-    backend, io,
+    backend,
+    ffi::CStr,
+    io,
     path::{self, option_into_with_c_str},
 };
 
@@ -46,25 +48,23 @@ pub fn mount<Source: path::Arg, Target: path::Arg, Fs: path::Arg, Data: path::Ar
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mount.2.html
 #[inline]
-pub fn mount2<Source: path::Arg, Target: path::Arg, Fs: path::Arg, Data: path::Arg>(
+pub fn mount2<Source: path::Arg, Target: path::Arg, Fs: path::Arg>(
     source: Option<Source>,
     target: Target,
     file_system_type: Option<Fs>,
     flags: MountFlags,
-    data: Option<Data>,
+    data: Option<&CStr>,
 ) -> io::Result<()> {
     option_into_with_c_str(source, |source| {
         target.into_with_c_str(|target| {
             option_into_with_c_str(file_system_type, |file_system_type| {
-                option_into_with_c_str(data, |data| {
-                    backend::mount::syscalls::mount(
-                        source,
-                        target,
-                        file_system_type,
-                        MountFlagsArg(flags.bits()),
-                        data,
-                    )
-                })
+                backend::mount::syscalls::mount(
+                    source,
+                    target,
+                    file_system_type,
+                    MountFlagsArg(flags.bits()),
+                    data,
+                )
             })
         })
     })
