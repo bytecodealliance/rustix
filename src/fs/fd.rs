@@ -10,7 +10,6 @@ use backend::fd::{AsFd, BorrowedFd};
 #[cfg(not(any(
     netbsdlike,
     solarish,
-    target_os = "aix",
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "nto",
@@ -231,7 +230,6 @@ pub fn futimens<Fd: AsFd>(fd: Fd, times: &Timestamps) -> io::Result<()> {
 #[cfg(not(any(
     netbsdlike,
     solarish,
-    target_os = "aix",
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "nto",
