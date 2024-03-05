@@ -789,7 +789,6 @@ bitflags! {
 #[cfg(not(any(
     netbsdlike,
     solarish,
-    target_os = "aix",
     target_os = "espidf",
     target_os = "nto",
     target_os = "redox",
