@@ -10,6 +10,7 @@
 mod send_recv;
 mod socket;
 mod socket_addr_any;
+mod socket_address;
 #[cfg(not(any(windows, target_os = "wasi")))]
 mod socketpair;
 mod types;
@@ -26,6 +27,7 @@ pub use crate::maybe_polyfill::net::{
 pub use send_recv::*;
 pub use socket::*;
 pub use socket_addr_any::{SocketAddrAny, SocketAddrStorage};
+pub use socket_address::SocketAddress;
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub use socketpair::socketpair;
 pub use types::*;
