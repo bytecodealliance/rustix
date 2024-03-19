@@ -275,7 +275,8 @@ pub fn bind_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> 
     backend::net::syscalls::bind_unix(sockfd.as_fd(), addr)
 }
 
-/// `bind(sockfd, addr, sizeof(struct sockaddr_un))`—Binds a socket to a XDP address.
+/// `bind(sockfd, addr, sizeof(struct sockaddr_un))`—Binds a socket to a XDP
+/// address.
 ///
 /// # References
 ///  - [Linux]

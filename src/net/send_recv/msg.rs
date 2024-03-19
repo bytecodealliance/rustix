@@ -478,7 +478,8 @@ pub struct AncillaryDrain<'buf> {
 }
 
 impl<'buf> AncillaryDrain<'buf> {
-    /// Create an iterator for control messages that were received without [`RecvAncillaryBuffer`].
+    /// Create an iterator for control messages that were received without
+    /// [`RecvAncillaryBuffer`].
     ///
     /// # Safety
     ///

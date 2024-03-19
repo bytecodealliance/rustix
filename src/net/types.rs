@@ -1465,8 +1465,8 @@ pub mod xdp {
         }
     }
 
-    // Constant needs to be cast because bindgen does generate a u32 but the struct expects a u16.
-    // https://github.com/torvalds/linux/blob/v6.6/include/uapi/linux/if_xdp.h#L15-L44
+    // Constant needs to be cast because bindgen does generate a u32 but the struct
+    // expects a u16. https://github.com/torvalds/linux/blob/v6.6/include/uapi/linux/if_xdp.h#L15-L44
     bitflags! {
         /// `XDP_*` constants for use in [`SockaddrXdp`].
         #[repr(transparent)]
@@ -1722,11 +1722,12 @@ pub mod xdp {
     /// Offset for mmapping completion ring.
     pub const XDP_UMEM_PGOFF_COMPLETION_RING: u64 = c::XDP_UMEM_PGOFF_COMPLETION_RING;
 
-    /// Offset used to shift the [`XdpDesc`] addr to the right to extract the address offset in
-    /// unaligned mode.
+    /// Offset used to shift the [`XdpDesc`] addr to the right to extract the
+    /// address offset in unaligned mode.
     pub const XSK_UNALIGNED_BUF_OFFSET_SHIFT: u64 = c::XSK_UNALIGNED_BUF_OFFSET_SHIFT as u64;
-    /// Mask used to binary `and` the [`XdpDesc`] addr to extract the address without the offset
-    /// carried in the upper 16 bits of the address in unaligned mode.
+    /// Mask used to binary `and` the [`XdpDesc`] addr to extract the address
+    /// without the offset carried in the upper 16 bits of the address in
+    /// unaligned mode.
     pub const XSK_UNALIGNED_BUF_ADDR_MASK: u64 = c::XSK_UNALIGNED_BUF_ADDR_MASK;
 }
 

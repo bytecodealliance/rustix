@@ -2282,7 +2282,8 @@ pub(crate) fn lgetxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Resul
 
     #[cfg(apple)]
     {
-        // Passing an empty to slice to getxattr leads to ERANGE on macOS. Pass null instead.
+        // Passing an empty to slice to getxattr leads to ERANGE on macOS. Pass null
+        // instead.
         let ptr = if value.is_empty() {
             core::ptr::null_mut()
         } else {

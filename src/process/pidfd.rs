@@ -30,8 +30,8 @@ pub fn pidfd_open(pid: Pid, flags: PidfdFlags) -> io::Result<OwnedFd> {
     backend::process::syscalls::pidfd_open(pid, flags)
 }
 
-/// `syscall(SYS_pidfd_send_signal, pidfd, sig, NULL, 0)`—Send a signal to a process
-/// specified by a file descriptor.
+/// `syscall(SYS_pidfd_send_signal, pidfd, sig, NULL, 0)`—Send a signal to a
+/// process specified by a file descriptor.
 ///
 /// # References
 ///  - [Linux]
