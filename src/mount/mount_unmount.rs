@@ -43,6 +43,10 @@ pub fn mount<Source: path::Arg, Target: path::Arg, Fs: path::Arg, Data: path::Ar
 
 /// `mount2(source, target, filesystemtype, mountflags, data)`
 ///
+/// This is same as the [`mount`], except it adds support for
+/// the source, target, and data being omitted, and the data
+/// is passed as a `CStr` rather than a `path::Arg`.
+///
 /// # References
 ///  - [Linux]
 ///
