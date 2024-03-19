@@ -208,7 +208,8 @@ jobs:
     - run: rustup component add rust-src
     - run: cargo check -Z build-std --target x86_64-unknown-openbsd --all-targets --features=all-apis
     - run: cargo check -Z build-std --target mips64-openwrt-linux-musl --all-targets --features=all-apis
-    - run: cargo check -Z build-std --target x86_64-unknown-dragonfly --all-targets --features=all-apis
+    # Temporarily disable this because the target appears to have breakage on nightly.
+    # - run: cargo check -Z build-std --target x86_64-unknown-dragonfly --all-targets --features=all-apis
     - run: cargo check -Z build-std --target sparc-unknown-linux-gnu --all-targets --features=all-apis
     # Temporarily disable this because the target appears to have changed and needs
     # fixes and we transitively dev-depend on what can be an older version of rustix.
