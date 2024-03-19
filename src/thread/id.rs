@@ -114,12 +114,25 @@ pub fn set_thread_res_gid(rgid: Gid, egid: Gid, sgid: Gid) -> io::Result<()> {
     backend::thread::syscalls::setresgid_thread(rgid, egid, sgid)
 }
 
-/// `setgroups(groups)`-Sets the supplementary group IDs for the calling thread.
+/// `setgroups(groups)`-Sets the supplementary group IDs for the calling
+/// thread.
+///
+/// # Warning
+///
+/// This is not the `setgroups` you are looking for… POSIX requires gids to be
+/// process granular, but on Linux they are per-thread. Thus, this call only
+/// changes the gids for the current *thread*, not the entire process even
+/// though that is in violation of the POSIX standard.
+///
+/// For details on this distinction, see the C library vs. kernel differences
+/// in the [manual page][linux_notes]. This call implements the kernel
+/// behavior.
 ///
 /// # References
 /// - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/setgroups.2.html
+/// [linux_notes]: https://man7.org/linux/man-pages/man2/setgroups.2.html#NOTES
 #[cfg(linux_kernel)]
 #[inline]
 pub fn set_thread_groups(groups: &[Gid]) -> io::Result<()> {
