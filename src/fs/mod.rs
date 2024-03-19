@@ -167,10 +167,12 @@ impl StatExt for Stat {
     fn atime(&self) -> i64 {
         self.st_atime as i64
     }
+
     #[inline]
     fn mtime(&self) -> i64 {
         self.st_mtime as i64
     }
+
     #[inline]
     fn ctime(&self) -> i64 {
         self.st_ctime as i64

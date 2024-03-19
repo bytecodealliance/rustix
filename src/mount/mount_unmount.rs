@@ -3,12 +3,9 @@
 use crate::backend::mount::types::{
     InternalMountFlags, MountFlags, MountFlagsArg, MountPropagationFlags, UnmountFlags,
 };
-use crate::{
-    backend,
-    ffi::CStr,
-    io,
-    path::{self, option_into_with_c_str},
-};
+use crate::ffi::CStr;
+use crate::path::{self, option_into_with_c_str};
+use crate::{backend, io};
 
 /// `mount(source, target, filesystemtype, mountflags, data)`
 ///
