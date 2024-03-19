@@ -113,3 +113,15 @@ pub fn set_thread_gid(gid: Gid) -> io::Result<()> {
 pub fn set_thread_res_gid(rgid: Gid, egid: Gid, sgid: Gid) -> io::Result<()> {
     backend::thread::syscalls::setresgid_thread(rgid, egid, sgid)
 }
+
+/// `setgroups(groups)`-Sets the supplementary group IDs for the calling thread.
+///
+/// # References
+/// - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/setgroups.2.html
+#[cfg(linux_kernel)]
+#[inline]
+pub fn set_thread_groups(groups: &[Gid]) -> io::Result<()> {
+    backend::thread::syscalls::setgroups_thread(groups)
+}

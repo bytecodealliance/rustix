@@ -531,3 +531,12 @@ unsafe fn futex_old(
         val3,
     ) as isize)
 }
+
+#[cfg(linux_kernel)]
+#[inline]
+pub(crate) fn setgroups_thread(groups: &[crate::ugid::Gid]) -> io::Result<()> {
+    syscall! {
+        fn setgroups(size: c::size_t, list: *const c::gid_t) via SYS_setgroups -> c::c_int
+    }
+    ret(unsafe { setgroups(groups.len(), groups.as_ptr().cast()) })
+}
