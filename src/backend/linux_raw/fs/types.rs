@@ -435,7 +435,7 @@ bitflags! {
 
         /// `MFD_HUGE_64KB`
         const HUGE_64KB = linux_raw_sys::general::MFD_HUGE_64KB;
-        /// `MFD_HUGE_512JB`
+        /// `MFD_HUGE_512KB`
         const HUGE_512KB = linux_raw_sys::general::MFD_HUGE_512KB;
         /// `MFD_HUGE_1MB`
         const HUGE_1MB = linux_raw_sys::general::MFD_HUGE_1MB;
