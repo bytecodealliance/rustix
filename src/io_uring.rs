@@ -109,10 +109,11 @@ pub fn io_uring_setup(entries: u32, params: &mut io_uring_params) -> io::Result<
 pub unsafe fn io_uring_register<Fd: AsFd>(
     fd: Fd,
     opcode: IoringRegisterOp,
+    flags: IoringRegisterFlags,
     arg: *const c_void,
     nr_args: u32,
 ) -> io::Result<u32> {
-    backend::io_uring::syscalls::io_uring_register(fd.as_fd(), opcode, arg, nr_args)
+    backend::io_uring::syscalls::io_uring_register(fd.as_fd(), opcode, flags, arg, nr_args)
 }
 
 /// `io_uring_enter(fd, to_submit, min_complete, flags, arg, size)`—Initiate
@@ -258,6 +259,19 @@ pub enum IoringRegisterOp {
 
     /// `IORING_REGISTER_FILE_ALLOC_RANGE`
     RegisterFileAllocRange = sys::IORING_REGISTER_FILE_ALLOC_RANGE as _,
+}
+
+bitflags::bitflags! {
+    /// `IORING_REGISTER*` flags for use with [`io_uring_register`].
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringRegisterFlags: u32 {
+        /// `IORING_REGISTER_USE_REGISTERED_RING`
+        const USE_REGISTERED_RING = sys::IORING_REGISTER_USE_REGISTERED_RING as _;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
 }
 
 /// `IORING_OP_*` constants for use with [`io_uring_sqe`].
