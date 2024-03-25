@@ -6,6 +6,8 @@ use crate::backend::c;
 use crate::io;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{SockaddrXdpFlags, SocketAddrXdp};
+#[cfg(target_os = "linux")]
+use crate::net::packet::SocketAddrLink;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
 use core::mem::size_of;
 use core::slice;
@@ -127,6 +129,10 @@ pub(crate) unsafe fn read_sockaddr(
                 u32::from_be(decode.sxdp_shared_umem_fd),
             )))
         }
+        #[cfg(target_os = "linux")]
+        c::AF_PACKET => {
+            todo!();
+        }
         _ => Err(io::Errno::NOTSUP),
     }
 }
@@ -215,6 +221,13 @@ pub(crate) unsafe fn read_sockaddr_os(storage: *const c::sockaddr, len: usize) -
                 u32::from_be(decode.sxdp_queue_id),
                 u32::from_be(decode.sxdp_shared_umem_fd),
             ))
+        }
+        #[cfg(target_os = "linux")]
+        c::AF_PACKET => {
+            assert!(len >= size_of::<c::sockaddr_ll>());
+            // SocketAddrLink and sockaddr_ll have the same layout.
+            let addr = &*storage.cast::<SocketAddrLink>();
+            SocketAddrAny::Link(*addr)
         }
         other => unimplemented!("{:?}", other),
     }

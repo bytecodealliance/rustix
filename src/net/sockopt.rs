@@ -143,6 +143,8 @@
 #![doc(alias = "getsockopt")]
 #![doc(alias = "setsockopt")]
 
+#[cfg(linux_kernel)]
+use crate::net::packet::{PacketReqAny, PacketStatsAny};
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpStatistics, XdpUmemReg};
 #[cfg(not(any(
@@ -1472,6 +1474,79 @@ pub fn get_xdp_options<Fd: AsFd>(fd: Fd) -> io::Result<XdpOptionsFlags> {
     backend::net::sockopt::get_xdp_options(fd.as_fd())
 }
 
+/// `setsockopt(fd, SOL_SOCKET, PACKET_RX_RING, value)`
+///
+/// # References
+///  - [Linux]
+///
+///  [Linux]: https://www.kernel.org/doc/html/next/networking/packet_mmap.html#packet-mmap-settings
+#[cfg(linux_kernel)]
+#[doc(alias = "PACKET_RX_RING")]
+pub fn set_packet_rx_ring<Fd: AsFd>(fd: Fd, value: &PacketReqAny) -> io::Result<()> {
+    backend::net::sockopt::set_packet_rx_ring(fd.as_fd(), value)
+}
+
+/// `setsockopt(fd, SOL_SOCKET, PACKET_TX_RING, value)`
+///
+/// # References
+/// - [Linux]
+///
+/// [Linux]: https://www.kernel.org/doc/html/next/networking/packet_mmap.html#packet-mmap-settings
+#[cfg(linux_kernel)]
+#[doc(alias = "PACKET_TX_RING")]
+pub fn set_packet_tx_ring<Fd: AsFd>(fd: Fd, value: &PacketReqAny) -> io::Result<()> {
+    backend::net::sockopt::set_packet_tx_ring(fd.as_fd(), value)
+}
+
+/// Packet MMAP versions for use with [`set_packet_version`].
+#[repr(u32)]
+#[non_exhaustive]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum PacketVersion {
+    /// `TPACKET_V1`
+    V1 = c::tpacket_versions::TPACKET_V1 as _,
+    /// `TPACKET_V2`
+    V2 = c::tpacket_versions::TPACKET_V2 as _,
+    /// `TPACKET_V3`
+    V3 = c::tpacket_versions::TPACKET_V3 as _,
+}
+
+/// `setsockopt(fd, SOL_PACKET, PACKET_VERSION, value)`
+///
+/// # References
+///  - [Linux]
+///
+///  [Linux]: https://www.kernel.org/doc/html/next/networking/packet_mmap.html#what-tpacket-versions-are-available-and-when-to-use-them
+#[cfg(linux_kernel)]
+#[doc(alias = "PACKET_VERSION")]
+pub fn set_packet_version<Fd: AsFd>(fd: Fd, value: PacketVersion) -> io::Result<()> {
+    backend::net::sockopt::set_packet_version(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_PACKET, PACKET_VERSION)`
+///
+/// # References
+/// - [Linux]
+///
+/// [Linux]: https://www.kernel.org/doc/html/next/networking/packet_mmap.html#what-tpacket-versions-are-available-and-when-to-use-them
+#[cfg(linux_kernel)]
+#[doc(alias = "PACKET_VERSION")]
+pub fn get_packet_version<Fd: AsFd>(fd: Fd) -> io::Result<PacketVersion> {
+    backend::net::sockopt::get_packet_version(fd.as_fd())
+}
+
+/// `getsockopt(fd, SOL_PACKET, PACKET_STATISTICS)`
+///
+/// # References
+/// - [Linux]
+///
+/// [Linux]: https://www.kernel.org/doc/html/next/networking/packet_mmap.html
+#[cfg(linux_kernel)]
+#[doc(alias = "PACKET_STATISTICS")]
+pub fn get_packet_stats<Fd: AsFd>(fd: Fd, version: PacketVersion) -> io::Result<PacketStatsAny> {
+    backend::net::sockopt::get_packet_stats(fd.as_fd(), version)
+}
+
 #[test]
 fn test_sizes() {
     use c::c_int;
@@ -1479,4 +1554,5 @@ fn test_sizes() {
     // Backend code needs to cast these to `c_int` so make sure that cast
     // isn't lossy.
     assert_eq_size!(Timeout, c_int);
+    assert_eq_size!(PacketVersion, c_int);
 }
