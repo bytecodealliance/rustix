@@ -112,15 +112,10 @@ fn test_file() {
     // Test `fcntl_getfl`.
     let fl = rustix::fs::fcntl_getfl(&file).unwrap();
 
-    // On Linux, rustix automatically sets `O_LARGEFILE`, so clear it here so
-    // that we can test that no other bits are present.
-    #[cfg(linux_kernel)]
-    let fl = fl - rustix::fs::OFlags::from_bits_retain(linux_raw_sys::general::O_LARGEFILE);
-
-    // On illumos, the system automatically sets `O_LARGEFILE`, so clear it
-    // here so that we can test that no other bits are present.
-    #[cfg(target_os = "illumos")]
-    let fl = fl - rustix::fs::OFlags::from_bits_retain(0x2000);
+    // Clear O_LARGEFILE, which may be set by rustix on 32-bit Linux or automatically by some
+    // kernel on 64-bit (Linux and illumos).
+    #[cfg(any(linux_kernel, target_os = "illumos"))]
+    let fl = fl - rustix::fs::OFlags::LARGEFILE;
 
     assert_eq!(fl, rustix::fs::OFlags::empty());
 
