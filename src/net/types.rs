@@ -1754,7 +1754,7 @@ pub struct UCred {
 /// [`the source IP address for an outgoing packet`] and
 /// [`the outgoing interface for a packet`].
 #[cfg(linux_kernel)]
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(C)]
 pub struct Ipv6PktInfo {
     /// Source address
