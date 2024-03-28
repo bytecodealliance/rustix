@@ -85,7 +85,7 @@ use bsd as platform;
 #[inline]
 pub unsafe fn ioctl<F: AsFd, I: Ioctl>(fd: F, mut ioctl: I) -> Result<I::Output> {
     let fd = fd.as_fd();
-    let request = I::OPCODE.raw();
+    let request = ioctl.opcode().raw();
     let arg = ioctl.as_ptr();
 
     // SAFETY: The variant of `Ioctl` asserts that this is a valid IOCTL call
@@ -154,7 +154,8 @@ pub unsafe trait Ioctl {
     ///
     /// There are different types of opcode depending on the operation. See
     /// documentation for the [`Opcode`] struct for more information.
-    const OPCODE: Opcode;
+    //const OPCODE: Opcode;
+    fn opcode(&self) -> Opcode;
 
     /// Does the `ioctl` mutate any data in the userspace?
     ///
