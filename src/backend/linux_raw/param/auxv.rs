@@ -22,7 +22,7 @@ use core::sync::atomic::Ordering::Relaxed;
 use core::sync::atomic::{AtomicPtr, AtomicUsize};
 use linux_raw_sys::elf::*;
 use linux_raw_sys::general::{
-    AT_BASE, AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_NULL, AT_PAGESZ, AT_SYSINFO_EHDR,
+    AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_MINSIGSTKSZ, AT_NULL, AT_PAGESZ, AT_SYSINFO_EHDR,
 };
 #[cfg(feature = "runtime")]
 use linux_raw_sys::general::{
@@ -70,6 +70,19 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
     }
 
     (hwcap, hwcap2)
+}
+
+#[cfg(feature = "param")]
+#[inline]
+pub(crate) fn linux_minsigstksz() -> usize {
+    let mut minsigstksz = MINSIGSTKSZ.load(Relaxed);
+
+    if minsigstksz == 0 {
+        init_auxv();
+        minsigstksz = MINSIGSTKSZ.load(Relaxed);
+    }
+
+    minsigstksz
 }
 
 #[cfg(feature = "param")]
@@ -172,6 +185,7 @@ static PAGE_SIZE: AtomicUsize = AtomicUsize::new(0);
 static CLOCK_TICKS_PER_SECOND: AtomicUsize = AtomicUsize::new(0);
 static HWCAP: AtomicUsize = AtomicUsize::new(0);
 static HWCAP2: AtomicUsize = AtomicUsize::new(0);
+static MINSIGSTKSZ: AtomicUsize = AtomicUsize::new(0);
 static EXECFN: AtomicPtr<c::c_char> = AtomicPtr::new(null_mut());
 static SYSINFO_EHDR: AtomicPtr<Elf_Ehdr> = AtomicPtr::new(null_mut());
 #[cfg(feature = "runtime")]
@@ -351,6 +365,7 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
     let mut clktck = 0;
     let mut hwcap = 0;
     let mut hwcap2 = 0;
+    let mut minsigstksz = 0;
     let mut execfn = null_mut();
     let mut sysinfo_ehdr = null_mut();
     #[cfg(feature = "runtime")]
@@ -380,6 +395,7 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
             AT_CLKTCK => clktck = a_val as usize,
             AT_HWCAP => hwcap = a_val as usize,
             AT_HWCAP2 => hwcap2 = a_val as usize,
+            AT_MINSIGSTKSZ => minsigstksz = a_val as usize,
             AT_EXECFN => execfn = check_raw_pointer::<c::c_char>(a_val as *mut _)?.as_ptr(),
             AT_SYSINFO_EHDR => sysinfo_ehdr = check_elf_base(a_val as *mut _)?.as_ptr(),
 
@@ -434,6 +450,7 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
     CLOCK_TICKS_PER_SECOND.store(clktck, Relaxed);
     HWCAP.store(hwcap, Relaxed);
     HWCAP2.store(hwcap2, Relaxed);
+    MINSIGSTKSZ.store(minsigstksz, Relaxed);
     EXECFN.store(execfn, Relaxed);
     SYSINFO_EHDR.store(sysinfo_ehdr, Relaxed);
     #[cfg(feature = "runtime")]

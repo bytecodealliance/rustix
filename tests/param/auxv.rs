@@ -1,9 +1,9 @@
+use rustix::param::{clock_ticks_per_second, page_size};
 #[cfg(any(
     all(target_os = "android", target_pointer_width = "64"),
     target_os = "linux",
 ))]
-use rustix::param::linux_hwcap;
-use rustix::param::{clock_ticks_per_second, page_size};
+use rustix::param::{linux_hwcap, linux_minsigstksz};
 
 #[test]
 fn test_page_size() {
@@ -37,5 +37,23 @@ fn test_linux_hwcap() {
         assert_eq!(_hwcap, unsafe { libc_getauxval(libc::AT_HWCAP) } as usize);
 
         assert_eq!(hwcap2, unsafe { libc_getauxval(libc::AT_HWCAP2) } as usize);
+    }
+}
+
+#[cfg(any(
+    all(target_os = "android", target_pointer_width = "64"),
+    target_os = "linux",
+))]
+#[test]
+fn test_linux_minsigstksz() {
+    weak!(fn getauxval(libc::c_ulong) -> libc::c_ulong);
+
+    if let Some(libc_getauxval) = getauxval.get() {
+        // FIXME: reuse const from libc when available?
+        const AT_MINSIGSTKSZ: libc::c_ulong = 51;
+        assert_eq!(
+            linux_minsigstksz(),
+            unsafe { libc_getauxval(AT_MINSIGSTKSZ) } as usize
+        );
     }
 }
