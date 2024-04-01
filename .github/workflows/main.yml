@@ -217,7 +217,8 @@ jobs:
     # Omit --all-targets on gnu_ilp32 because dev-dependency tempfile depends on an older rustix
     - run: cargo check -Z build-std --target aarch64-unknown-linux-gnu_ilp32 --features=all-apis
     # Omit --all-targets on haiku because not all the tests build yet.
-    - run: cargo check -Z build-std --target x86_64-unknown-haiku --features=all-apis
+    # Temporarily disable this because the target appears to have breakage on nightly.
+    #- run: cargo check -Z build-std --target x86_64-unknown-haiku --features=all-apis
     - run: cargo check -Z build-std --target x86_64-uwp-windows-msvc --all-targets --features=all-apis
     # Temporarily disable riscv32imc-esp-espidf due to std using SOMAXCONN.
     #- run: cargo check -Z build-std --target=riscv32imc-esp-espidf --features=all-apis

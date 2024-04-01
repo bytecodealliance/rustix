@@ -17,10 +17,10 @@
 //! [man-pages]: https://man7.org/linux/man-pages/man7/netdevice.7.html
 //! [Linux]: https://man7.org/linux/man-pages/man7/netdevice.7.html
 
-#[cfg(feature = "alloc")]
-use crate::alloc::string::String;
 use crate::fd::AsFd;
 use crate::io;
+#[cfg(feature = "alloc")]
+use alloc::string::String;
 
 /// `ioctl(fd, SIOCGIFINDEX, ifreq)`—Returns the interface index for a given
 /// name.
