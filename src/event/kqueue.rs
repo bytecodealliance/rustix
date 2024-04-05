@@ -9,8 +9,8 @@ use backend::c::{self, intptr_t, kevent as kevent_t, uintptr_t};
 use backend::event::syscalls;
 
 use alloc::vec::Vec;
-use core::mem::zeroed;
-use core::ptr::slice_from_raw_parts_mut;
+use core::mem::{zeroed, MaybeUninit};
+use core::slice::from_raw_parts;
 use core::time::Duration;
 
 /// A `kqueue` event for use with [`kevent`].
@@ -419,24 +419,18 @@ pub fn kqueue() -> io::Result<OwnedFd> {
 /// [OpenBSD]: https://man.openbsd.org/kevent.2
 /// [NetBSD]: https://man.netbsd.org/kevent.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=kevent&section=2
-pub unsafe fn kevent(
+pub unsafe fn kevent<'a, const N: usize>(
     kqueue: impl AsFd,
-    changelist: &[Event],
-    eventlist: &mut [Event],
+    changes: &[Event],
     timeout: Option<Duration>,
-) -> io::Result<usize> {
+) -> io::Result<&'a [Event]> {
     let timeout = timeout.map(|timeout| backend::c::timespec {
         tv_sec: timeout.as_secs() as _,
         tv_nsec: timeout.subsec_nanos() as _,
     });
 
-    let out_slice = slice_from_raw_parts_mut(eventlist.as_mut_ptr().cast(), eventlist.len());
+    let mut out_slice: [MaybeUninit<Event>; N] = unsafe { MaybeUninit::uninit().assume_init() };
 
-    syscalls::kevent(
-        kqueue.as_fd(),
-        changelist,
-        &mut *out_slice,
-        timeout.as_ref(),
-    )
-    .map(|res| res as _)
+    syscalls::kevent(kqueue.as_fd(), changes, &mut out_slice, timeout.as_ref())
+        .map(|res| from_raw_parts(out_slice.as_ptr().cast(), res as usize))
 }
