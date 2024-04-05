@@ -398,8 +398,9 @@ pub fn kqueue() -> io::Result<OwnedFd> {
 /// `kevent(kqueue, changelist, eventlist, timeout)`—Wait for events on a
 /// `kqueue`.
 ///
-/// Note: in order to receive events, make sure to allocate capacity in the
-/// eventlist! Otherwise, the function will return immediately.
+/// In order to receive one or more events, the slice passed to the `eventlist`
+/// argument must have a length of at least one. If the slice is empty, this
+/// function returns immediately _even if_ a timeout is specified.
 ///
 /// # Safety
 ///
@@ -421,7 +422,7 @@ pub fn kqueue() -> io::Result<OwnedFd> {
 pub unsafe fn kevent(
     kqueue: impl AsFd,
     changelist: &[Event],
-    eventlist: &mut Vec<Event>,
+    eventlist: &mut [Event],
     timeout: Option<Duration>,
 ) -> io::Result<usize> {
     let timeout = timeout.map(|timeout| backend::c::timespec {
@@ -429,21 +430,13 @@ pub unsafe fn kevent(
         tv_nsec: timeout.subsec_nanos() as _,
     });
 
-    // Populate the event list with events.
-    eventlist.set_len(0);
-    let out_slice = slice_from_raw_parts_mut(eventlist.as_mut_ptr().cast(), eventlist.capacity());
-    let res = syscalls::kevent(
+    let out_slice = slice_from_raw_parts_mut(eventlist.as_mut_ptr().cast(), eventlist.len());
+
+    syscalls::kevent(
         kqueue.as_fd(),
         changelist,
         &mut *out_slice,
         timeout.as_ref(),
     )
-    .map(|res| res as _);
-
-    // Update the event list.
-    if let Ok(len) = res {
-        eventlist.set_len(len);
-    }
-
-    res
+    .map(|res| res as _)
 }
