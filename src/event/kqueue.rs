@@ -10,7 +10,7 @@ use backend::event::syscalls;
 
 use alloc::vec::Vec;
 use core::mem::{zeroed, MaybeUninit};
-use core::slice::from_raw_parts;
+use core::ptr::slice_from_raw_parts_mut;
 use core::time::Duration;
 
 /// A `kqueue` event for use with [`kevent`].
@@ -151,6 +151,39 @@ impl Event {
                 user_flags: UserDefinedFlags(self.inner.fflags & EVFILT_USER_FLAGS),
             },
             _ => EventFilter::Unknown,
+        }
+    }
+}
+
+impl Default for Event {
+    fn default() -> Self {
+        Event {
+            inner: kevent_t {
+                ..unsafe { zeroed() }
+            },
+        }
+    }
+}
+
+/// A buffer for storing [`Event`] values _produced_ by the [`kevent`] function.
+pub struct Events<const N: usize> {
+    inner: [Event; N],
+}
+
+impl<const N: usize> Events<N> {
+    /// Returns a new buffer with enough space for `N` events.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use rustix::event::kqueue::Events;
+    ///
+    /// // Create a buffer that can hold up to 10 events.
+    /// let events: Events<10> = Events::new();
+    /// ```
+    pub fn new() -> Events<N> {
+        Events {
+            inner: [Event::default(); N],
         }
     }
 }
@@ -421,7 +454,8 @@ pub fn kqueue() -> io::Result<OwnedFd> {
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=kevent&section=2
 pub unsafe fn kevent<'a, const N: usize>(
     kqueue: impl AsFd,
-    changes: &[Event],
+    changelist: &[Event],
+    eventlist: &'a mut Events<N>,
     timeout: Option<Duration>,
 ) -> io::Result<&'a [Event]> {
     let timeout = timeout.map(|timeout| backend::c::timespec {
@@ -429,8 +463,14 @@ pub unsafe fn kevent<'a, const N: usize>(
         tv_nsec: timeout.subsec_nanos() as _,
     });
 
-    let mut out_slice: [MaybeUninit<Event>; N] = unsafe { MaybeUninit::uninit().assume_init() };
+    let out_slice =
+        slice_from_raw_parts_mut(eventlist.inner.as_mut_ptr().cast(), eventlist.inner.len());
 
-    syscalls::kevent(kqueue.as_fd(), changes, &mut out_slice, timeout.as_ref())
-        .map(|res| from_raw_parts(out_slice.as_ptr().cast(), res as usize))
+    syscalls::kevent(
+        kqueue.as_fd(),
+        changelist,
+        &mut *out_slice,
+        timeout.as_ref(),
+    )
+    .map(|res| &eventlist.inner[0..(res as usize)])
 }

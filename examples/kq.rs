@@ -7,7 +7,7 @@ fn main() -> std::io::Result<()> {
     use rustix::{fd::AsRawFd, fs};
 
     let kq = kqueue()?;
-    let mut out = Vec::with_capacity(10);
+    let mut buf: Events<10> = Events::new();
 
     #[cfg(feature = "fs")]
     let dir = fs::openat(
@@ -59,10 +59,11 @@ fn main() -> std::io::Result<()> {
     eprintln!("Run with --features process to enable more!");
     #[cfg(not(feature = "fs"))]
     eprintln!("Run with --features fs to enable more!");
-    unsafe { kevent(&kq, &subs, &mut out, None) }?;
 
     loop {
-        while let Some(e) = out.pop() {
+        let events = unsafe { kevent(&kq, &subs, &mut buf, None) }?;
+
+        for e in events {
             match e.filter() {
                 #[cfg(feature = "process")]
                 EventFilter::Signal { signal, times } => {
@@ -79,7 +80,6 @@ fn main() -> std::io::Result<()> {
                 _ => eprintln!("Unknown event"),
             }
         }
-        unsafe { kevent(&kq, &[], &mut out, None) }?;
     }
 }
 
