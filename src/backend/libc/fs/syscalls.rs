@@ -2254,15 +2254,24 @@ pub(crate) fn getxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result
     }
 
     #[cfg(apple)]
-    unsafe {
-        ret_usize(c::getxattr(
-            path.as_ptr(),
-            name.as_ptr(),
-            value_ptr.cast::<c::c_void>(),
-            value.len(),
-            0,
-            0,
-        ))
+    {
+        // Passing an empty to slice to getxattr leads to ERANGE on macOS. Pass null
+        // instead.
+        let ptr = if value.is_empty() {
+            core::ptr::null_mut()
+        } else {
+            value_ptr.cast::<c::c_void>()
+        };
+        unsafe {
+            ret_usize(c::getxattr(
+                path.as_ptr(),
+                name.as_ptr(),
+                ptr,
+                value.len(),
+                0,
+                0,
+            ))
+        }
     }
 }
 
@@ -2318,15 +2327,24 @@ pub(crate) fn fgetxattr(fd: BorrowedFd<'_>, name: &CStr, value: &mut [u8]) -> io
     }
 
     #[cfg(apple)]
-    unsafe {
-        ret_usize(c::fgetxattr(
-            borrowed_fd(fd),
-            name.as_ptr(),
-            value_ptr.cast::<c::c_void>(),
-            value.len(),
-            0,
-            0,
-        ))
+    {
+        // Passing an empty to slice to getxattr leads to ERANGE on macOS. Pass null
+        // instead.
+        let ptr = if value.is_empty() {
+            core::ptr::null_mut()
+        } else {
+            value_ptr.cast::<c::c_void>()
+        };
+        unsafe {
+            ret_usize(c::fgetxattr(
+                borrowed_fd(fd),
+                name.as_ptr(),
+                ptr,
+                value.len(),
+                0,
+                0,
+            ))
+        }
     }
 }
 
