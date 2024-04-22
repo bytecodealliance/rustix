@@ -48,3 +48,8 @@ pub(crate) fn CPU_ISSET(cpu: usize, cpuset: &RawCpuSet) -> bool {
 pub(crate) fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
     unsafe { c::CPU_COUNT(cpuset).try_into().unwrap() }
 }
+
+#[inline]
+pub(crate) fn CPU_EQUAL(this: &RawCpuSet, that: &RawCpuSet) -> bool {
+    unsafe { c::CPU_EQUAL(this, that) }
+}
