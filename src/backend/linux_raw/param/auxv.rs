@@ -22,7 +22,8 @@ use core::sync::atomic::Ordering::Relaxed;
 use core::sync::atomic::{AtomicPtr, AtomicUsize};
 use linux_raw_sys::elf::*;
 use linux_raw_sys::general::{
-    AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_MINSIGSTKSZ, AT_NULL, AT_PAGESZ, AT_SYSINFO_EHDR,
+    AT_BASE, AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_MINSIGSTKSZ, AT_NULL, AT_PAGESZ,
+    AT_SYSINFO_EHDR,
 };
 #[cfg(feature = "runtime")]
 use linux_raw_sys::general::{
