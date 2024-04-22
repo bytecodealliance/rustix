@@ -51,5 +51,18 @@ pub(crate) fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
 
 #[inline]
 pub(crate) fn CPU_EQUAL(this: &RawCpuSet, that: &RawCpuSet) -> bool {
-    unsafe { c::CPU_EQUAL(this, that) }
+    #[cfg(any(linux_like, target_os = "fuchsia", target_os = "hurd"))]
+    unsafe {
+        c::CPU_EQUAL(this, that)
+    }
+
+    #[cfg(not(any(linux_like, target_os = "fuchsia", target_os = "hurd")))]
+    unsafe {
+        for i in 0..c::CPU_SETSIZE as usize {
+            if c::CPU_ISSET(i, this) != c::CPU_ISSET(i, that) {
+                return false;
+            }
+        }
+        true
+    }
 }
