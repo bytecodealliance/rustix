@@ -119,18 +119,18 @@ targets = [
 # It turns out to be bizarrely awkward to obtain the aux values reliably and
 # efficiently on Linux from anywhere other than libc. We can do it, but most
 # users are better served by just using libc for this.
-default = ["std", "use-libc-auxv", "libc-extra-traits"]
+default = ["std", "use-libc-auxv"]
+
+# This enables use of std. Disabling this enables `#![no_std]`, and requires
+# Rust 1.64 or newer.
+std = ["bitflags/std", "alloc", "libc?/std", "libc_errno?/std", "libc-extra-traits"]
+
+# Enable this to request the libc backend.
+use-libc = ["libc_errno", "libc", "libc-extra-traits"]
 
 # Enable `extra_traits` in libc types, to provide `Debug`, `Hash`, and other
 # trait impls for libc types.
 libc-extra-traits = ["libc?/extra_traits"]
-
-# This enables use of std. Disabling this enables `#![no_std]`, and requires
-# Rust 1.64 or newer.
-std = ["bitflags/std", "alloc", "libc?/std", "libc_errno?/std"]
-
-# Enable this to request the libc backend.
-use-libc = ["libc_errno", "libc", "libc-extra-traits"]
 
 # Enable `rustix::event::*`.
 event = []
