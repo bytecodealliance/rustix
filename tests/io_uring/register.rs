@@ -157,7 +157,7 @@ fn io_uring_buf_ring_can_be_registered() {
         ring_addr: br_ptr as u64,
         ring_entries: ENTRIES as u32,
         bgid: BGID,
-        pad: 0,
+        flags: 0,
         resv: [0u64; 3],
     };
 
