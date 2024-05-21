@@ -1,6 +1,7 @@
 //! Types and constants for `rustix::net`.
 
 use crate::backend::c;
+use crate::ffi;
 use bitflags::bitflags;
 
 /// A type for holding raw integer socket types.
@@ -1425,7 +1426,7 @@ bitflags! {
     /// [`acceptfrom_with`]: crate::net::acceptfrom_with
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct SocketFlags: c::c_uint {
+    pub struct SocketFlags: ffi::c_uint {
         /// `SOCK_NONBLOCK`
         #[cfg(not(any(
             apple,
@@ -1752,7 +1753,7 @@ pub struct UCred {
 #[test]
 fn test_sizes() {
     use crate::backend::c;
-    use c::c_int;
+    use crate::ffi::c_int;
     use core::mem::transmute;
 
     // Backend code needs to cast these to `c_int` so make sure that cast isn't

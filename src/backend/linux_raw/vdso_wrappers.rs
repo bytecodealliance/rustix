@@ -26,6 +26,9 @@ use core::mem::transmute;
 use core::ptr::null_mut;
 use core::sync::atomic::AtomicPtr;
 use core::sync::atomic::Ordering::Relaxed;
+#[cfg(target_pointer_width = "32")]
+#[cfg(feature = "time")]
+use linux_raw_sys::general::timespec as __kernel_old_timespec;
 #[cfg(any(
     all(
         feature = "process",
@@ -47,9 +50,6 @@ use {
     crate::timespec::Timespec,
     linux_raw_sys::general::__kernel_clockid_t,
 };
-#[cfg(target_pointer_width = "32")]
-#[cfg(feature = "time")]
-use linux_raw_sys::general::timespec as __kernel_old_timespec;
 
 #[cfg(feature = "time")]
 #[inline]

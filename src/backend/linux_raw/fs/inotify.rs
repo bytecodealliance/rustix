@@ -1,8 +1,8 @@
 //! inotify support for working with inotifies
 
-use crate::backend::c;
 use crate::backend::fs::syscalls;
 use crate::fd::{BorrowedFd, OwnedFd};
+use crate::ffi;
 use crate::io;
 use bitflags::bitflags;
 
@@ -12,7 +12,7 @@ bitflags! {
     /// [`inotify_init`]: crate::fs::inotify::inotify_init
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct CreateFlags: c::c_uint {
+    pub struct CreateFlags: ffi::c_uint {
         /// `IN_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::IN_CLOEXEC;
         /// `IN_NONBLOCK`
@@ -29,7 +29,7 @@ bitflags! {
     /// [`inotify_add_watch`]: crate::fs::inotify::inotify_add_watch
     #[repr(transparent)]
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct WatchFlags: c::c_uint {
+    pub struct WatchFlags: ffi::c_uint {
         /// `IN_ACCESS`
         const ACCESS = linux_raw_sys::general::IN_ACCESS;
         /// `IN_ATTRIB`

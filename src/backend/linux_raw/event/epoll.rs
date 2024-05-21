@@ -71,9 +71,9 @@
 
 #![allow(unsafe_code)]
 
-use crate::backend::c;
 use crate::backend::event::syscalls;
 use crate::fd::{AsFd, AsRawFd, OwnedFd};
+use crate::ffi;
 use crate::io;
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
@@ -86,7 +86,7 @@ bitflags! {
     /// `EPOLL_*` for use with [`new`].
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct CreateFlags: c::c_uint {
+    pub struct CreateFlags: ffi::c_uint {
         /// `EPOLL_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::EPOLL_CLOEXEC;
 
@@ -242,7 +242,7 @@ pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
 #[cfg(feature = "alloc")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
 #[inline]
-pub fn wait(epoll: impl AsFd, event_list: &mut EventVec, timeout: c::c_int) -> io::Result<()> {
+pub fn wait(epoll: impl AsFd, event_list: &mut EventVec, timeout: ffi::c_int) -> io::Result<()> {
     // SAFETY: We're calling `epoll_wait` via FFI and we know how it
     // behaves.
     unsafe {
@@ -463,6 +463,8 @@ impl<'a> IntoIterator for &'a EventVec {
 
 #[test]
 fn test_epoll_layouts() {
+    use crate::backend::c;
+
     check_renamed_type!(Event, epoll_event);
     check_renamed_type!(Event, epoll_event);
     check_renamed_struct_renamed_field!(Event, epoll_event, flags, events);

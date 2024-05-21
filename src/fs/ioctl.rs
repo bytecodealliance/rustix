@@ -4,9 +4,9 @@
 
 #[cfg(linux_kernel)]
 use {
+    crate::backend::c,
     crate::fd::AsFd,
-    crate::{backend, io, ioctl},
-    backend::c,
+    crate::{backend, ffi, io, ioctl},
 };
 
 use bitflags::bitflags;
@@ -96,7 +96,7 @@ unsafe impl ioctl::Ioctl for Ficlone<'_> {
 #[cfg(linux_kernel)]
 bitflags! {
     /// `FS_*` constants for use with [`ioctl_getflags`][crate::io::ioctl::ioctl_getflags].
-    pub struct IFlags: c::c_uint {
+    pub struct IFlags: ffi::c_uint {
         /// `FS_APPEND_FL`
         const APPEND = linux_raw_sys::general::FS_APPEND_FL;
         /// `FS_COMPR_FL`

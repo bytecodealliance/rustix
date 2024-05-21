@@ -1,4 +1,4 @@
-use crate::backend::c;
+use crate::ffi;
 use bitflags::bitflags;
 
 bitflags! {
@@ -7,7 +7,7 @@ bitflags! {
     /// [`accessat`]: fn.accessat.html
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct Access: c::c_uint {
+    pub struct Access: ffi::c_uint {
         /// `R_OK`
         const READ_OK = linux_raw_sys::general::R_OK;
 
@@ -33,7 +33,7 @@ bitflags! {
     /// [`statat`]: crate::fs::statat
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct AtFlags: c::c_uint {
+    pub struct AtFlags: ffi::c_uint {
         /// `AT_SYMLINK_NOFOLLOW`
         const SYMLINK_NOFOLLOW = linux_raw_sys::general::AT_SYMLINK_NOFOLLOW;
 
@@ -172,7 +172,7 @@ bitflags! {
     /// [`openat`]: crate::fs::openat
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct OFlags: c::c_uint {
+    pub struct OFlags: ffi::c_uint {
         /// `O_ACCMODE`
         const ACCMODE = linux_raw_sys::general::O_ACCMODE;
 
@@ -291,7 +291,7 @@ bitflags! {
     /// [`renameat_with`]: crate::fs::renameat_with
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct RenameFlags: c::c_uint {
+    pub struct RenameFlags: ffi::c_uint {
         /// `RENAME_EXCHANGE`
         const EXCHANGE = linux_raw_sys::general::RENAME_EXCHANGE;
 
@@ -418,7 +418,7 @@ bitflags! {
     /// [`memfd_create`]: crate::fs::memfd_create
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct MemfdFlags: c::c_uint {
+    pub struct MemfdFlags: ffi::c_uint {
         /// `MFD_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::MFD_CLOEXEC;
 
@@ -724,7 +724,7 @@ pub type RawMode = linux_raw_sys::general::__kernel_mode_t;
     target_arch = "arm",
 ))]
 // Don't use `__kernel_mode_t` since it's `u16` which differs from `st_size`.
-pub type RawMode = c::c_uint;
+pub type RawMode = ffi::c_uint;
 
 /// `dev_t`
 // Within the kernel the dev_t is 32-bit, but userspace uses a 64-bit field.

@@ -1,6 +1,6 @@
 use crate::fd::OwnedFd;
 use crate::process::Pid;
-use crate::{backend, io};
+use crate::{backend, ffi, io};
 
 bitflags::bitflags! {
     /// `PIDFD_*` flags for use with [`pidfd_open`].
@@ -8,7 +8,7 @@ bitflags::bitflags! {
     /// [`pidfd_open`]: crate::process::pidfd_open
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct PidfdFlags: backend::c::c_uint {
+    pub struct PidfdFlags: ffi::c_uint {
         /// `PIDFD_NONBLOCK`.
         const NONBLOCK = backend::c::PIDFD_NONBLOCK;
 

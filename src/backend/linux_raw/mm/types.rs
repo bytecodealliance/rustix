@@ -1,4 +1,4 @@
-use crate::backend::c;
+use crate::ffi;
 use bitflags::bitflags;
 
 bitflags! {
@@ -252,7 +252,7 @@ bitflags! {
     /// [`userfaultfd`]: crate::mm::userfaultfd
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct UserfaultfdFlags: c::c_uint {
+    pub struct UserfaultfdFlags: ffi::c_uint {
         /// `O_CLOEXEC`
         const CLOEXEC = linux_raw_sys::general::O_CLOEXEC;
         /// `O_NONBLOCK`
