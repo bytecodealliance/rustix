@@ -1,4 +1,4 @@
-use crate::backend::c;
+use crate::ffi;
 use bitflags::bitflags;
 
 bitflags! {
@@ -7,7 +7,7 @@ bitflags! {
     /// [`timerfd_create`]: crate::time::timerfd_create
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct TimerfdFlags: c::c_uint {
+    pub struct TimerfdFlags: ffi::c_uint {
         /// `TFD_NONBLOCK`
         #[doc(alias = "TFD_NONBLOCK")]
         const NONBLOCK = linux_raw_sys::general::TFD_NONBLOCK;
@@ -27,7 +27,7 @@ bitflags! {
     /// [`timerfd_settime`]: crate::time::timerfd_settime
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct TimerfdTimerFlags: c::c_uint {
+    pub struct TimerfdTimerFlags: ffi::c_uint {
         /// `TFD_TIMER_ABSTIME`
         #[doc(alias = "TFD_TIMER_ABSTIME")]
         const ABSTIME = linux_raw_sys::general::TFD_TIMER_ABSTIME;
