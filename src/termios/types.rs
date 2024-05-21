@@ -1,4 +1,4 @@
-use crate::backend::c;
+use crate::backend::{c, termios::types};
 use crate::{backend, io};
 use bitflags::bitflags;
 
@@ -43,7 +43,7 @@ pub struct Termios {
     pub special_codes: SpecialCodes,
 
     #[cfg(target_os = "nto")]
-    pub(crate) __reserved: [c::c_uint; 3],
+    pub(crate) __reserved: [ffi::c_uint; 3],
 
     /// Line discipline.
     // On PowerPC, this field comes after `c_cc`.
@@ -235,7 +235,7 @@ bitflags! {
     /// Flags controlling terminal input.
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct InputModes: c::tcflag_t {
+    pub struct InputModes: types::tcflag_t {
         /// `IGNBRK`
         const IGNBRK = c::IGNBRK;
 
@@ -303,7 +303,7 @@ bitflags! {
     /// Flags controlling terminal output.
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct OutputModes: c::tcflag_t {
+    pub struct OutputModes: types::tcflag_t {
         /// `OPOST`
         const OPOST = c::OPOST;
 
@@ -522,7 +522,7 @@ bitflags! {
     /// related functions.
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct ControlModes: c::tcflag_t {
+    pub struct ControlModes: types::tcflag_t {
         /// `CSIZE`
         const CSIZE = c::CSIZE;
 
@@ -582,7 +582,7 @@ bitflags! {
     /// Flags controlling “local” terminal modes.
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct LocalModes: c::tcflag_t {
+    pub struct LocalModes: types::tcflag_t {
         /// `XCASE`
         #[cfg(any(linux_kernel, target_arch = "s390x", target_os = "haiku"))]
         const XCASE = c::XCASE;

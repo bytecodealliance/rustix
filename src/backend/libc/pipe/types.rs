@@ -1,7 +1,7 @@
 #[cfg(linux_kernel)]
 use core::marker::PhantomData;
 #[cfg(not(any(apple, target_os = "wasi")))]
-use {crate::backend::c, bitflags::bitflags};
+use {crate::backend::c, crate::ffi, bitflags::bitflags};
 
 #[cfg(not(any(apple, target_os = "wasi")))]
 bitflags! {
@@ -43,7 +43,7 @@ bitflags! {
     /// [`tee`]: crate::pipe::tee
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct SpliceFlags: c::c_uint {
+    pub struct SpliceFlags: ffi::c_uint {
         /// `SPLICE_F_MOVE`
         const MOVE = c::SPLICE_F_MOVE;
         /// `SPLICE_F_NONBLOCK`
