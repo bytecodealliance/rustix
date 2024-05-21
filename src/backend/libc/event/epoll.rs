@@ -74,6 +74,7 @@ use crate::backend::c;
 use crate::backend::conv::ret_u32;
 use crate::backend::conv::{ret, ret_owned_fd};
 use crate::fd::{AsFd, AsRawFd, OwnedFd};
+use crate::ffi;
 use crate::io;
 use crate::utils::as_mut_ptr;
 #[cfg(feature = "alloc")]
@@ -262,7 +263,7 @@ pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
 /// success, this returns the number of written elements.
 #[cfg(feature = "alloc")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
-pub fn wait(epoll: impl AsFd, event_list: &mut EventVec, timeout: c::c_int) -> io::Result<()> {
+pub fn wait(epoll: impl AsFd, event_list: &mut EventVec, timeout: ffi::c_int) -> io::Result<()> {
     // SAFETY: We're calling `epoll_wait` via FFI and we know how it
     // behaves.
     unsafe {
