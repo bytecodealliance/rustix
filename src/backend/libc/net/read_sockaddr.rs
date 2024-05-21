@@ -185,7 +185,9 @@ pub(crate) unsafe fn read_sockaddr(
                         return Err(io::Errno::INVAL);
                     }
                     debug_assert_eq!(
-                        CStr::from_ptr(decode.sun_path.as_ptr()).to_bytes().len(),
+                        CStr::from_ptr(decode.sun_path.as_ptr().cast())
+                            .to_bytes()
+                            .len(),
                         provided_len
                     );
                     &decode.sun_path[..provided_len]
