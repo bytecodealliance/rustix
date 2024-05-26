@@ -160,7 +160,10 @@ pub trait StatExt {
     fn ctime(&self) -> i64;
 }
 
-#[cfg(all(unix, not(any(target_os = "aix", target_os = "nto"))))]
+#[cfg(all(
+    unix,
+    not(any(target_os = "aix", target_os = "hurd", target_os = "nto"))
+))]
 #[allow(deprecated)]
 impl StatExt for Stat {
     #[inline]
