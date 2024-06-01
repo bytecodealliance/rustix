@@ -10,6 +10,8 @@ mod addr;
 mod cmsg;
 mod connect_bind_send;
 mod dgram;
+#[cfg(linux_kernel)]
+mod netlink;
 #[cfg(feature = "event")]
 mod poll;
 #[cfg(unix)]

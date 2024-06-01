@@ -4,6 +4,7 @@
 
 use crate::backend::c;
 use crate::io::Errno;
+use crate::net::netlink::SocketAddrNetlink;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{SockaddrXdpFlags, SocketAddrXdp};
 use crate::net::{AddressFamily, SocketAddrAny};
@@ -132,4 +133,14 @@ pub(crate) fn read_sockaddr_xdp(addr: &SocketAddrAny) -> Result<SocketAddrXdp, E
         u32::from_be(decode.sxdp_queue_id),
         u32::from_be(decode.sxdp_shared_umem_fd),
     ))
+}
+
+#[inline]
+pub(crate) fn read_sockaddr_netlink(addr: &SocketAddrAny) -> Result<SocketAddrNetlink, Errno> {
+    if addr.address_family() != AddressFamily::NETLINK {
+        return Err(Errno::AFNOSUPPORT);
+    }
+    assert!(addr.len() >= size_of::<c::sockaddr_nl>());
+    let decode = unsafe { &*addr.as_ptr().cast::<c::sockaddr_nl>() };
+    Ok(SocketAddrNetlink::new(decode.nl_pid, decode.nl_groups))
 }

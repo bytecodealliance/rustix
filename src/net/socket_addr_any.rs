@@ -191,6 +191,12 @@ impl fmt::Debug for SocketAddrAny {
                     return addr.fmt(f);
                 }
             }
+            #[cfg(linux_kernel)]
+            AddressFamily::NETLINK => {
+                if let Ok(addr) = crate::net::netlink::SocketAddrNetlink::try_from(self.clone()) {
+                    return addr.fmt(f);
+                }
+            }
             _ => {}
         }
 
