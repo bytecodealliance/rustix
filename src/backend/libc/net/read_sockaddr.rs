@@ -59,6 +59,7 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
             target_os = "aix",
             target_os = "espidf",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "nto",
             target_os = "vita"
         ))]
@@ -68,6 +69,7 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
             target_os = "aix",
             target_os = "espidf",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "nto",
             target_os = "vita"
         ))]
@@ -77,6 +79,7 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
             target_os = "aix",
             target_os = "espidf",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "nto",
             target_os = "vita"
         )))]

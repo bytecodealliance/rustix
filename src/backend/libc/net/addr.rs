@@ -76,7 +76,13 @@ impl SocketAddrUnix {
 
     fn init() -> c::sockaddr_un {
         c::sockaddr_un {
-            #[cfg(any(bsd, target_os = "aix", target_os = "haiku", target_os = "nto"))]
+            #[cfg(any(
+                bsd,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "nto",
+                target_os = "hurd",
+            ))]
             sun_len: 0,
             #[cfg(target_os = "vita")]
             ss_len: 0,
@@ -210,7 +216,13 @@ pub type SocketAddrStorage = c::sockaddr_storage;
 #[inline]
 pub(crate) fn offsetof_sun_path() -> usize {
     let z = c::sockaddr_un {
-        #[cfg(any(bsd, target_os = "aix", target_os = "haiku", target_os = "nto"))]
+        #[cfg(any(
+            bsd,
+            target_os = "aix",
+            target_os = "haiku",
+            target_os = "hurd",
+            target_os = "nto",
+        ))]
         sun_len: 0_u8,
         #[cfg(target_os = "vita")]
         ss_len: 0,
@@ -219,6 +231,7 @@ pub(crate) fn offsetof_sun_path() -> usize {
             target_os = "aix",
             target_os = "espidf",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "nto",
             target_os = "vita"
         ))]
@@ -228,6 +241,7 @@ pub(crate) fn offsetof_sun_path() -> usize {
             target_os = "aix",
             target_os = "espidf",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "nto",
             target_os = "vita"
         )))]

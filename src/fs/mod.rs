@@ -63,7 +63,7 @@ mod statx;
     target_os = "wasi"
 )))]
 mod sync;
-#[cfg(any(apple, linux_kernel))]
+#[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 mod xattr;
 
 #[cfg(linux_kernel)]
@@ -131,7 +131,7 @@ pub use statx::statx;
     target_os = "wasi"
 )))]
 pub use sync::sync;
-#[cfg(any(apple, linux_kernel))]
+#[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 pub use xattr::*;
 
 /// Re-export types common to POSIX-ish platforms.
