@@ -369,6 +369,7 @@ pub(crate) fn get_socket_send_buffer_size(fd: BorrowedFd<'_>) -> io::Result<usiz
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "hurd",
     target_os = "netbsd",
     target_os = "nto",
     target_os = "vita",

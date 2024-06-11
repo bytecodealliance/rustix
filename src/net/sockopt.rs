@@ -442,6 +442,7 @@ pub fn get_socket_send_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "hurd",
     target_os = "netbsd",
     target_os = "nto",
     target_os = "vita",

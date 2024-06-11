@@ -91,6 +91,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -106,6 +107,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -128,6 +130,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -140,6 +143,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -152,6 +156,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -163,6 +168,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -175,6 +181,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -190,6 +197,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -202,6 +210,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -213,6 +222,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -229,6 +239,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -241,6 +252,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -253,6 +265,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -265,6 +278,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -277,6 +291,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -291,6 +306,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -303,6 +319,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -315,6 +332,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -327,6 +345,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -339,6 +358,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -351,6 +371,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -362,6 +383,7 @@ impl AddressFamily {
         windows,
         target_os = "aix",
         target_os = "espidf",
+        target_os = "hurd",
         target_os = "vita",
     )))]
     pub const BLUETOOTH: Self = Self(c::AF_BLUETOOTH as _);
@@ -373,6 +395,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -385,6 +408,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -396,6 +420,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "vita",
     )))]
     pub const ISDN: Self = Self(c::AF_ISDN as _);
@@ -407,6 +432,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]
@@ -419,6 +445,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
     )))]

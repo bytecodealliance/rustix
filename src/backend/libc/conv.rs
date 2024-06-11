@@ -226,6 +226,7 @@ pub(crate) fn msg_iov_len(len: usize) -> c::c_int {
     target_os = "emscripten",
     target_os = "fuchsia",
     target_os = "haiku",
+    target_os = "hurd",
     target_os = "nto",
 ))]
 #[inline]
@@ -244,6 +245,7 @@ pub(crate) fn msg_control_len(len: usize) -> c::socklen_t {
     target_os = "espidf",
     target_os = "fuchsia",
     target_os = "haiku",
+    target_os = "hurd",
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",

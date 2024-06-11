@@ -80,7 +80,7 @@ use {
     crate::backend::conv::nonnegative_ret,
     crate::fs::{copyfile_state_t, CloneFlags, CopyfileFlags},
 };
-#[cfg(any(apple, linux_kernel))]
+#[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 use {crate::fs::XattrFlags, core::mem::size_of, core::ptr::null_mut};
 #[cfg(linux_kernel)]
 use {
@@ -2239,7 +2239,7 @@ struct Attrlist {
     forkattr: Attrgroup,
 }
 
-#[cfg(any(apple, linux_kernel))]
+#[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 pub(crate) fn getxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
     let value_ptr = value.as_mut_ptr();
 
@@ -2275,7 +2275,7 @@ pub(crate) fn getxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result
     }
 }
 
-#[cfg(any(apple, linux_kernel))]
+#[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 pub(crate) fn lgetxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
     let value_ptr = value.as_mut_ptr();
 
@@ -2312,7 +2312,7 @@ pub(crate) fn lgetxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Resul
     }
 }
 
-#[cfg(any(apple, linux_kernel))]
+#[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 pub(crate) fn fgetxattr(fd: BorrowedFd<'_>, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
     let value_ptr = value.as_mut_ptr();
 
@@ -2348,7 +2348,7 @@ pub(crate) fn fgetxattr(fd: BorrowedFd<'_>, name: &CStr, value: &mut [u8]) -> io
     }
 }
 
-#[cfg(any(apple, linux_kernel))]
+#[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 pub(crate) fn setxattr(
     path: &CStr,
     name: &CStr,
@@ -2379,7 +2379,7 @@ pub(crate) fn setxattr(
     }
 }
 
-#[cfg(any(apple, linux_kernel))]
+#[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 pub(crate) fn lsetxattr(
     path: &CStr,
     name: &CStr,
@@ -2410,7 +2410,7 @@ pub(crate) fn lsetxattr(
     }
 }
 
-#[cfg(any(apple, linux_kernel))]
+#[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 pub(crate) fn fsetxattr(
     fd: BorrowedFd<'_>,
     name: &CStr,
@@ -2441,7 +2441,7 @@ pub(crate) fn fsetxattr(
     }
 }
 
-#[cfg(any(apple, linux_kernel))]
+#[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 pub(crate) fn listxattr(path: &CStr, list: &mut [c::c_char]) -> io::Result<usize> {
     #[cfg(not(apple))]
     unsafe {
@@ -2459,7 +2459,7 @@ pub(crate) fn listxattr(path: &CStr, list: &mut [c::c_char]) -> io::Result<usize
     }
 }
 
-#[cfg(any(apple, linux_kernel))]
+#[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 pub(crate) fn llistxattr(path: &CStr, list: &mut [c::c_char]) -> io::Result<usize> {
     #[cfg(not(apple))]
     unsafe {
@@ -2477,7 +2477,7 @@ pub(crate) fn llistxattr(path: &CStr, list: &mut [c::c_char]) -> io::Result<usiz
     }
 }
 
-#[cfg(any(apple, linux_kernel))]
+#[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 pub(crate) fn flistxattr(fd: BorrowedFd<'_>, list: &mut [c::c_char]) -> io::Result<usize> {
     let fd = borrowed_fd(fd);
 
@@ -2492,7 +2492,7 @@ pub(crate) fn flistxattr(fd: BorrowedFd<'_>, list: &mut [c::c_char]) -> io::Resu
     }
 }
 
-#[cfg(any(apple, linux_kernel))]
+#[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 pub(crate) fn removexattr(path: &CStr, name: &CStr) -> io::Result<()> {
     #[cfg(not(apple))]
     unsafe {
@@ -2505,7 +2505,7 @@ pub(crate) fn removexattr(path: &CStr, name: &CStr) -> io::Result<()> {
     }
 }
 
-#[cfg(any(apple, linux_kernel))]
+#[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 pub(crate) fn lremovexattr(path: &CStr, name: &CStr) -> io::Result<()> {
     #[cfg(not(apple))]
     unsafe {
@@ -2522,7 +2522,7 @@ pub(crate) fn lremovexattr(path: &CStr, name: &CStr) -> io::Result<()> {
     }
 }
 
-#[cfg(any(apple, linux_kernel))]
+#[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 pub(crate) fn fremovexattr(fd: BorrowedFd<'_>, name: &CStr) -> io::Result<()> {
     let fd = borrowed_fd(fd);
 

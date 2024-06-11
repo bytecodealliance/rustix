@@ -19,6 +19,7 @@ bitflags! {
             target_os = "espidf",
             target_os = "nto",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "vita",
         )))]
         const CONFIRM = bitcast!(c::MSG_CONFIRM);
@@ -41,6 +42,7 @@ bitflags! {
             windows,
             target_os = "aix",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "nto",
             target_os = "vita",
         )))]
@@ -88,6 +90,7 @@ bitflags! {
             target_os = "aix",
             target_os = "espidf",
             target_os = "haiku",
+            target_os = "hurd",
             target_os = "nto",
             target_os = "vita",
         )))]
