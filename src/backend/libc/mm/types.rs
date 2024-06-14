@@ -211,10 +211,8 @@ bitflags! {
             apple,
             solarish,
             target_os = "aix",
-            target_os = "dragonfly",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "netbsd",
             target_os = "redox",
         )))]
         const STACK = bitcast!(c::MAP_STACK);
