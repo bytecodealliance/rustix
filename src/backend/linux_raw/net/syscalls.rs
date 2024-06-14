@@ -13,6 +13,8 @@ use super::msghdr::{
 use super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr_os};
 use super::send_recv::{RecvFlags, SendFlags};
 #[cfg(target_os = "linux")]
+use super::write_sockaddr::encode_sockaddr_link;
+#[cfg(target_os = "linux")]
 use super::write_sockaddr::encode_sockaddr_xdp;
 use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 use crate::backend::c;
@@ -22,6 +24,8 @@ use crate::backend::conv::{
 };
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
+#[cfg(target_os = "linux")]
+use crate::net::packet::SocketAddrLink;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::SocketAddrXdp;
 use crate::net::{
@@ -439,6 +443,18 @@ pub(crate) fn sendmsg_xdp(
     })
 }
 
+#[cfg(target_os = "linux")]
+#[inline]
+pub(crate) fn sendmsg_link(
+    _sockfd: BorrowedFd<'_>,
+    _addr: &SocketAddrLink,
+    _iov: &[IoSlice<'_>],
+    _control: &mut SendAncillaryBuffer<'_, '_, '_>,
+    _msg_flags: SendFlags,
+) -> io::Result<usize> {
+    todo!()
+}
+
 #[inline]
 pub(crate) fn shutdown(fd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> {
     #[cfg(not(target_arch = "x86"))]
@@ -655,6 +671,45 @@ pub(crate) fn sendto_xdp(
                 flags.into(),
                 by_ref(&encode_sockaddr_xdp(addr)),
                 size_of::<c::sockaddr_xdp, _>(),
+            ])
+        ))
+    }
+}
+
+#[cfg(target_os = "linux")]
+#[inline]
+pub(crate) fn sendto_link(
+    fd: BorrowedFd<'_>,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddrLink,
+) -> io::Result<usize> {
+    let (buf_addr, buf_len) = slice(buf);
+
+    #[cfg(not(target_arch = "x86"))]
+    unsafe {
+        ret_usize(syscall_readonly!(
+            __NR_sendto,
+            fd,
+            buf_addr,
+            buf_len,
+            flags,
+            by_ref(&encode_sockaddr_link(addr)),
+            size_of::<c::sockaddr_ll, _>()
+        ))
+    }
+    #[cfg(target_arch = "x86")]
+    unsafe {
+        ret_usize(syscall_readonly!(
+            __NR_socketcall,
+            x86_sys(SYS_SENDTO),
+            slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
+                fd.into(),
+                buf_addr,
+                buf_len,
+                flags.into(),
+                by_ref(&encode_sockaddr_link(addr)),
+                size_of::<c::sockaddr_ll, _>(),
             ])
         ))
     }
@@ -926,6 +981,32 @@ pub(crate) fn bind_xdp(fd: BorrowedFd<'_>, addr: &SocketAddrXdp) -> io::Result<(
                 fd.into(),
                 by_ref(&encode_sockaddr_xdp(addr)),
                 size_of::<c::sockaddr_xdp, _>(),
+            ])
+        ))
+    }
+}
+
+#[cfg(target_os = "linux")]
+#[inline]
+pub(crate) fn bind_link(fd: BorrowedFd<'_>, addr: &SocketAddrLink) -> io::Result<()> {
+    #[cfg(not(target_arch = "x86"))]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_bind,
+            fd,
+            by_ref(&encode_sockaddr_link(addr)),
+            size_of::<c::sockaddr_ll, _>()
+        ))
+    }
+    #[cfg(target_arch = "x86")]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_socketcall,
+            x86_sys(SYS_BIND),
+            slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
+                fd.into(),
+                by_ref(&encode_sockaddr_link(addr)),
+                size_of::<c::sockaddr_ll, _>(),
             ])
         ))
     }

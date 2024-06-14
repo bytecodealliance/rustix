@@ -18,6 +18,8 @@ mod wsa;
 
 #[cfg(linux_kernel)]
 pub mod netdevice;
+#[cfg(linux_kernel)]
+pub mod packet;
 pub mod sockopt;
 
 pub use crate::maybe_polyfill::net::{

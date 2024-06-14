@@ -11,7 +11,9 @@ use crate::fd::BorrowedFd;
 #[cfg(feature = "alloc")]
 use crate::ffi::CStr;
 use crate::io;
-use crate::net::sockopt::Timeout;
+#[cfg(target_os = "linux")]
+use crate::net::packet::{PacketReqAny, PacketStats, PacketStats3, PacketStatsAny};
+use crate::net::sockopt::{PacketVersion, Timeout};
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpRingOffset, XdpStatistics, XdpUmemReg};
 use crate::net::{
@@ -967,6 +969,62 @@ pub(crate) fn get_xdp_statistics(fd: BorrowedFd<'_>) -> io::Result<XdpStatistics
 #[inline]
 pub(crate) fn get_xdp_options(fd: BorrowedFd<'_>) -> io::Result<XdpOptionsFlags> {
     getsockopt(fd, c::SOL_XDP, c::XDP_OPTIONS)
+}
+
+#[cfg(target_os = "linux")]
+#[inline]
+pub(crate) fn set_packet_rx_ring(fd: BorrowedFd<'_>, value: &PacketReqAny) -> io::Result<()> {
+    match *value {
+        PacketReqAny::V1(value) | PacketReqAny::V2(value) => {
+            setsockopt(fd, c::SOL_PACKET, c::PACKET_RX_RING, value)
+        }
+        PacketReqAny::V3(value) => setsockopt(fd, c::SOL_PACKET, c::PACKET_RX_RING, value),
+    }
+}
+
+#[cfg(target_os = "linux")]
+#[inline]
+pub(crate) fn set_packet_tx_ring(fd: BorrowedFd<'_>, value: &PacketReqAny) -> io::Result<()> {
+    match *value {
+        PacketReqAny::V1(value) | PacketReqAny::V2(value) => {
+            setsockopt(fd, c::SOL_PACKET, c::PACKET_TX_RING, value)
+        }
+        PacketReqAny::V3(value) => setsockopt(fd, c::SOL_PACKET, c::PACKET_TX_RING, value),
+    }
+}
+
+#[cfg(target_os = "linux")]
+#[inline]
+pub(crate) fn set_packet_version(fd: BorrowedFd<'_>, value: PacketVersion) -> io::Result<()> {
+    setsockopt(fd, c::SOL_PACKET, c::PACKET_VERSION, value)
+}
+
+#[cfg(target_os = "linux")]
+#[inline]
+pub(crate) fn get_packet_version(fd: BorrowedFd<'_>) -> io::Result<PacketVersion> {
+    getsockopt(fd, c::SOL_PACKET, c::PACKET_VERSION)
+}
+
+#[cfg(target_os = "linux")]
+#[inline]
+pub(crate) fn get_packet_stats(
+    fd: BorrowedFd<'_>,
+    version: PacketVersion,
+) -> io::Result<PacketStatsAny> {
+    match version {
+        PacketVersion::V1 => {
+            let stats: PacketStats = getsockopt(fd, c::SOL_PACKET, c::PACKET_STATISTICS)?;
+            Ok(PacketStatsAny::V1(stats))
+        }
+        PacketVersion::V2 => {
+            let stats: PacketStats = getsockopt(fd, c::SOL_PACKET, c::PACKET_STATISTICS)?;
+            Ok(PacketStatsAny::V2(stats))
+        }
+        PacketVersion::V3 => {
+            let stats: PacketStats3 = getsockopt(fd, c::SOL_PACKET, c::PACKET_STATISTICS)?;
+            Ok(PacketStatsAny::V3(stats))
+        }
+    }
 }
 
 #[inline]
