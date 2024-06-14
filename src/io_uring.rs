@@ -505,6 +505,12 @@ bitflags::bitflags! {
         /// `IORING_SETUP_DEFER_TASKRUN`
         const DEFER_TASKRUN = sys::IORING_SETUP_DEFER_TASKRUN;
 
+        /// `IORING_SETUP_NO_MMAP`
+        const NO_MMAP = sys::IORING_SETUP_NO_MMAP;
+
+        /// `IORING_SETUP_REGISTERED_FD_ONLY`
+        const REGISTERED_FD_ONLY = sys::IORING_SETUP_REGISTERED_FD_ONLY;
+
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
