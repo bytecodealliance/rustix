@@ -221,12 +221,6 @@ impl WaitidStatus {
         }
     }
 
-    /// Returns a reference to the raw platform-specific `siginfo_t` struct.
-    #[inline]
-    pub const fn as_raw(&self) -> &backend::c::siginfo_t {
-        &self.0
-    }
-
     #[cfg(linux_raw)]
     fn si_code(&self) -> u32 {
         self.0.si_code() as u32 // CLD_ consts are unsigned
