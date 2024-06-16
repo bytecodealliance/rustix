@@ -1,6 +1,38 @@
 use crate::backend::c;
 use bitflags::bitflags;
 
+// We define fsword_t here so linux-raw-sys isn't a public dependency.
+// fsword_t is a c_long on the following platforms:
+// - x86_64
+// - sparc64
+// - aarch64
+// - riscv64
+// - powerpc64
+// - loongarch64
+// On other platforms it is u32
+#[cfg(any(
+    target_arch = "x86_64",
+    target_arch = "sparc64",
+    target_arch = "aarch64",
+    target_arch = "riscv64",
+    target_arch = "powerpc64",
+    target_arch = "loongarch64"
+))]
+#[allow(non_camel_case_types)]
+type __fsword_t = ffi::c_long;
+#[cfg(not(any(
+    target_arch = "x86_64",
+    target_arch = "sparc64",
+    target_arch = "aarch64",
+    target_arch = "riscv64",
+    target_arch = "powerpc64",
+    target_arch = "loongarch64",
+    target_arch = "mips64",
+    target_arch = "mips64r6"
+)))]
+#[allow(non_camel_case_types)]
+type __fsword_t = u32;
+
 bitflags! {
     /// `*_OK` constants for use with [`accessat`].
     ///
@@ -723,23 +755,7 @@ pub type Statx = linux_raw_sys::general::statx;
 pub type StatxTimestamp = linux_raw_sys::general::statx_timestamp;
 
 /// `mode_t`
-#[cfg(not(any(
-    target_arch = "x86",
-    target_arch = "sparc",
-    target_arch = "avr",
-    target_arch = "arm",
-)))]
-pub type RawMode = linux_raw_sys::general::__kernel_mode_t;
-
-/// `mode_t`
-#[cfg(any(
-    target_arch = "x86",
-    target_arch = "sparc",
-    target_arch = "avr",
-    target_arch = "arm",
-))]
-// Don't use `__kernel_mode_t` since it's `u16` which differs from `st_size`.
-pub type RawMode = c::c_uint;
+pub type RawMode = ffi::c_uint;
 
 /// `dev_t`
 // Within the kernel the dev_t is 32-bit, but userspace uses a 64-bit field.

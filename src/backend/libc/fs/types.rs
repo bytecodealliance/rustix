@@ -1122,28 +1122,93 @@ pub struct StatxTimestamp {
 }
 
 /// `mode_t`
-#[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
-pub type RawMode = c::mode_t;
+#[cfg(any(
+    target_os = "fuchsia",
+    target_os = "wasi",
+    target_os = "haiku",
+    target_os = "linux",
+    all(target_os = "android", target_pointer_width = "64"),
+    target_os = "emscripten",
+    netbsdlike,
+    target_os = "nto"
+))]
+pub type RawMode = u32;
 
 /// `mode_t`
-#[cfg(all(target_os = "android", target_pointer_width = "32"))]
-pub type RawMode = c::c_uint;
+#[cfg(any(
+    all(target_os = "android", target_pointer_width = "32"),
+    target_os = "redox",
+    target_os = "aix",
+    target_os = "vxworks",
+    target_env = "newlib"
+))]
+pub type RawMode = ffi::c_uint;
+
+/// `mode_t`
+#[cfg(any(apple, freebsdlike))]
+pub type RawMode = u16;
 
 /// `dev_t`
-#[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
-pub type Dev = c::dev_t;
+#[cfg(any(
+    windows,
+    all(
+        target_env = "newlib",
+        not(any(target_os = "espidf", target_os = "vita"))
+    ),
+    target_os = "emscripten",
+    target_os = "dragonfly",
+    target_os = "nto"
+))]
+pub type Dev = u32;
+
+/// `dev_t`
+#[cfg(any(
+    target_os = "fuchsia",
+    target_os = "wasi",
+    target_os = "linux",
+    target_os = "freebsd",
+    target_os = "netbsd"
+))]
+pub type Dev = u64;
+
+/// `dev_t`
+#[cfg(all(target_env = "newlib", any(target_os = "espidf", target_os = "vita")))]
+pub type Dev = ffi::c_short;
+
+/// `dev_t`
+#[cfg(any(
+    target_os = "vxworks",
+    all(target_os = "android", target_pointer_width = "64"),
+    target_os = "aix",
+    solarish
+))]
+pub type Dev = ffi::c_ulong;
+
+/// `dev_t`
+#[cfg(target_os = "redox")]
+pub type Dev = ffi::c_long;
 
 /// `dev_t`
 #[cfg(all(target_os = "android", target_pointer_width = "32"))]
-pub type Dev = c::c_ulonglong;
+pub type Dev = ffi::c_ulonglong;
 
 /// `__fsword_t`
 #[cfg(all(
     target_os = "linux",
     not(target_env = "musl"),
     not(target_arch = "s390x"),
+    target_pointer_width = "32"
 ))]
-pub type FsWord = c::__fsword_t;
+pub type FsWord = i32;
+
+/// `__fsword_t`
+#[cfg(all(
+    target_os = "linux",
+    not(target_env = "musl"),
+    not(target_arch = "s390x"),
+    target_pointer_width = "32"
+))]
+pub type FsWord = i64;
 
 /// `__fsword_t`
 #[cfg(all(
