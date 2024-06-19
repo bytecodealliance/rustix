@@ -627,7 +627,7 @@ fn test_unix_peercred_explicit() {
 
     match cmsg_buffer.drain().next().unwrap() {
         RecvAncillaryMessage::ScmCredentials(ucred2) => assert_eq!(ucred2, ucred),
-        _ => panic!("Unexpected ancilliary message"),
+        _ => panic!("Unexpected ancillary message"),
     };
 }
 
@@ -683,7 +683,7 @@ fn test_unix_peercred_implicit() {
 
     match cmsg_buffer.drain().next().unwrap() {
         RecvAncillaryMessage::ScmCredentials(ucred2) => assert_eq!(ucred2, ucred),
-        _ => panic!("Unexpected ancilliary message"),
+        _ => panic!("Unexpected ancillary message"),
     };
 }
 

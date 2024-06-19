@@ -573,7 +573,7 @@ pub const SIGRTMAX: u32 = {
         linux_raw_sys::general::SIGRTMAX
     }
 
-    // On platfoms that don't, derive it from `_NSIG`.
+    // On platforms that don't, derive it from `_NSIG`.
     #[cfg(any(target_arch = "arm", target_arch = "x86", target_arch = "x86_64"))]
     {
         linux_raw_sys::general::_NSIG - 1

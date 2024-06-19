@@ -17,7 +17,7 @@ fn test_dup() {
     let mut buf = [0_u8; 4];
     assert_eq!(rustix::io::read(&file, &mut buf), Ok(4));
 
-    // Both postitions updated.
+    // Both positions updated.
     assert_eq!(
         rustix::fs::seek(&file, rustix::fs::SeekFrom::Current(0)),
         Ok(4)
@@ -29,7 +29,7 @@ fn test_dup() {
 
     assert_eq!(rustix::io::read(&alt, &mut buf), Ok(4));
 
-    // Both postitions updated.
+    // Both positions updated.
     assert_eq!(
         rustix::fs::seek(&file, rustix::fs::SeekFrom::Current(0)),
         Ok(8)
