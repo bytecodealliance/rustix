@@ -7,7 +7,7 @@ use super::addr::SocketAddrUnix;
 use super::ext::{in6_addr_new, in_addr_new, sockaddr_in6_new};
 use crate::backend::c;
 #[cfg(target_os = "linux")]
-use crate::net::xdp::SocketAddrXdp;
+use crate::net::{netlink::SocketAddrNl, xdp::SocketAddrXdp};
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use core::mem::size_of;
 
@@ -22,6 +22,8 @@ pub(crate) unsafe fn write_sockaddr(
         SocketAddrAny::Unix(unix) => write_sockaddr_unix(unix, storage),
         #[cfg(target_os = "linux")]
         SocketAddrAny::Xdp(xdp) => write_sockaddr_xdp(xdp, storage),
+        #[cfg(target_os = "linux")]
+        SocketAddrAny::Nl(nl) => write_sockaddr_nl(nl, storage),
     }
 }
 
@@ -125,4 +127,20 @@ unsafe fn write_sockaddr_xdp(xdp: &SocketAddrXdp, storage: *mut SocketAddrStorag
     let encoded = encode_sockaddr_xdp(xdp);
     core::ptr::write(storage.cast(), encoded);
     size_of::<c::sockaddr_xdp>()
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn encode_sockaddr_nl(nl: &SocketAddrNl) -> c::sockaddr_nl {
+    let mut addr: c::sockaddr_nl = unsafe { std::mem::zeroed() };
+    addr.nl_family = c::AF_NETLINK as _;
+    addr.nl_pid = nl.pid();
+    addr.nl_groups = nl.groups();
+    addr
+}
+
+#[cfg(target_os = "linux")]
+unsafe fn write_sockaddr_nl(nl: &SocketAddrNl, storage: *mut SocketAddrStorage) -> usize {
+    let encoded = encode_sockaddr_nl(nl);
+    core::ptr::write(storage.cast(), encoded);
+    size_of::<c::sockaddr_nl>()
 }

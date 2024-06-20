@@ -6,12 +6,12 @@
 use crate::backend::c;
 use crate::backend::conv::{msg_control_len, msg_iov_len};
 #[cfg(target_os = "linux")]
-use crate::backend::net::write_sockaddr::encode_sockaddr_xdp;
+use crate::backend::net::write_sockaddr::{encode_sockaddr_nl, encode_sockaddr_xdp};
 use crate::backend::net::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 
 use crate::io::{self, IoSlice, IoSliceMut};
 #[cfg(target_os = "linux")]
-use crate::net::xdp::SocketAddrXdp;
+use crate::net::{netlink::SocketAddrNl, xdp::SocketAddrXdp};
 use crate::net::{RecvAncillaryBuffer, SendAncillaryBuffer, SocketAddrV4, SocketAddrV6};
 use crate::utils::as_ptr;
 
@@ -128,7 +128,7 @@ pub(crate) fn with_unix_msghdr<R>(
     })
 }
 
-/// Create a message header intended to send with an IPv6 address.
+/// Create a message header intended to send with an XDP address.
 #[cfg(target_os = "linux")]
 pub(crate) fn with_xdp_msghdr<R>(
     addr: &SocketAddrXdp,
@@ -142,6 +142,28 @@ pub(crate) fn with_xdp_msghdr<R>(
         let mut h = zero_msghdr();
         h.msg_name = as_ptr(&encoded) as _;
         h.msg_namelen = size_of::<c::sockaddr_xdp>() as _;
+        h.msg_iov = iov.as_ptr() as _;
+        h.msg_iovlen = msg_iov_len(iov.len());
+        h.msg_control = control.as_control_ptr().cast();
+        h.msg_controllen = msg_control_len(control.control_len());
+        h
+    })
+}
+
+/// Create a message header intended to send with an Netlink address.
+#[cfg(target_os = "linux")]
+pub(crate) fn with_nl_msghdr<R>(
+    addr: &SocketAddrNl,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
+    f: impl FnOnce(c::msghdr) -> R,
+) -> R {
+    let encoded = encode_sockaddr_nl(addr);
+
+    f({
+        let mut h = zero_msghdr();
+        h.msg_name = as_ptr(&encoded) as _;
+        h.msg_namelen = size_of::<c::sockaddr_nl>() as _;
         h.msg_iov = iov.as_ptr() as _;
         h.msg_iovlen = msg_iov_len(iov.len());
         h.msg_control = control.as_control_ptr().cast();

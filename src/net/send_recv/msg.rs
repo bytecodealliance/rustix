@@ -776,6 +776,10 @@ pub fn sendmsg_any(
         Some(SocketAddrAny::Xdp(addr)) => {
             backend::net::syscalls::sendmsg_xdp(socket.as_fd(), addr, iov, control, flags)
         }
+        #[cfg(target_os = "linux")]
+        Some(SocketAddrAny::Nl(addr)) => {
+            backend::net::syscalls::sendmsg_nl(socket.as_fd(), addr, iov, control, flags)
+        }
     }
 }
 
