@@ -89,7 +89,7 @@ pub(crate) fn with_v4_msghdr<R>(
 
     f(c::msghdr {
         msg_name: as_ptr(&encoded) as _,
-        msg_namelen: size_of::<SocketAddrV4>() as _,
+        msg_namelen: size_of::<c::sockaddr_in>() as _,
         msg_iov: iov.as_ptr() as _,
         msg_iovlen: msg_iov_len(iov.len()),
         msg_control: control.as_control_ptr().cast(),
@@ -109,7 +109,7 @@ pub(crate) fn with_v6_msghdr<R>(
 
     f(c::msghdr {
         msg_name: as_ptr(&encoded) as _,
-        msg_namelen: size_of::<SocketAddrV6>() as _,
+        msg_namelen: size_of::<c::sockaddr_in6>() as _,
         msg_iov: iov.as_ptr() as _,
         msg_iovlen: msg_iov_len(iov.len()),
         msg_control: control.as_control_ptr().cast(),
@@ -148,7 +148,7 @@ pub(crate) fn with_xdp_msghdr<R>(
 
     f(c::msghdr {
         msg_name: as_ptr(&encoded) as _,
-        msg_namelen: size_of::<SocketAddrXdp>() as _,
+        msg_namelen: size_of::<c::sockaddr_xdp>() as _,
         msg_iov: iov.as_ptr() as _,
         msg_iovlen: msg_iov_len(iov.len()),
         msg_control: control.as_control_ptr().cast(),
