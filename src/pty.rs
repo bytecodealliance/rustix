@@ -141,7 +141,7 @@ pub fn unlockpt<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 /// `grantpt(fd)`—Grant access to the user side of a pseudoterminal.
 ///
 /// On Linux, calling this function has no effect, as the kernel is expected to
-/// grant the appropriate access. On all other platorms, this function has
+/// grant the appropriate access. On all other platforms, this function has
 /// unspecified behavior if the calling process has a [`Signal::Child`] signal
 /// handler installed.
 ///
