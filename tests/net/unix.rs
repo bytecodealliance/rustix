@@ -93,6 +93,8 @@ fn client(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path, runs: &[(&[&str], i32
 
 #[test]
 fn test_unix() {
+    crate::init();
+
     let ready = Arc::new((Mutex::new(false), Condvar::new()));
     let ready_clone = Arc::clone(&ready);
 
@@ -360,6 +362,8 @@ fn do_test_unix_msg_unconnected(addr: SocketAddrUnix) {
 #[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_unix_msg() {
+    crate::init();
+
     let tmpdir = tempfile::tempdir().unwrap();
     let path = tmpdir.path().join("scp_4804");
 
@@ -373,6 +377,8 @@ fn test_unix_msg() {
 #[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_unix_msg_unconnected() {
+    crate::init();
+
     let tmpdir = tempfile::tempdir().unwrap();
     let path = tmpdir.path().join("scp_4804");
 
@@ -385,6 +391,8 @@ fn test_unix_msg_unconnected() {
 #[cfg(linux_kernel)]
 #[test]
 fn test_abstract_unix_msg() {
+    crate::init();
+
     use std::os::unix::ffi::OsStrExt;
 
     let tmpdir = tempfile::tempdir().unwrap();
@@ -398,6 +406,8 @@ fn test_abstract_unix_msg() {
 #[cfg(linux_kernel)]
 #[test]
 fn test_abstract_unix_msg_unconnected() {
+    crate::init();
+
     use std::os::unix::ffi::OsStrExt;
 
     let tmpdir = tempfile::tempdir().unwrap();
@@ -410,6 +420,8 @@ fn test_abstract_unix_msg_unconnected() {
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_unix_msg_with_scm_rights() {
+    crate::init();
+
     use rustix::fd::AsFd;
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{
@@ -583,6 +595,8 @@ fn test_unix_msg_with_scm_rights() {
 #[cfg(all(feature = "process", linux_kernel))]
 #[test]
 fn test_unix_peercred_explicit() {
+    crate::init();
+
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{
         recvmsg, sendmsg, sockopt, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags,
@@ -637,6 +651,8 @@ fn test_unix_peercred_explicit() {
 #[cfg(all(feature = "process", linux_kernel))]
 #[test]
 fn test_unix_peercred_implicit() {
+    crate::init();
+
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{
         recvmsg, sendmsg, sockopt, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags,
@@ -692,6 +708,8 @@ fn test_unix_peercred_implicit() {
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_unix_msg_with_combo() {
+    crate::init();
+
     use rustix::fd::AsFd;
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{

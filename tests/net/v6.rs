@@ -65,6 +65,8 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
 
 #[test]
 fn test_v6() {
+    crate::init();
+
     let ready = Arc::new((Mutex::new(0_u16), Condvar::new()));
     let ready_clone = Arc::clone(&ready);
 
@@ -87,6 +89,8 @@ fn test_v6() {
 #[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_v6_msg() {
+    crate::init();
+
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{recvmsg, sendmsg};
 
