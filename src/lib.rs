@@ -127,6 +127,9 @@
     allow(unused_imports)
 )]
 
+#[cfg(all(feature = "rustc-dep-of-std", feature = "alloc"))]
+extern crate rustc_std_workspace_alloc as alloc;
+
 #[cfg(all(feature = "alloc", not(feature = "rustc-dep-of-std")))]
 extern crate alloc;
 
