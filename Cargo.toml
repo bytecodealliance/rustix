@@ -84,9 +84,6 @@ static_assertions = "1.1.0"
 [target.'cfg(all(criterion, not(any(target_os = "emscripten", target_os = "wasi"))))'.dev-dependencies]
 criterion = "0.4"
 
-[target.'cfg(windows)'.dev-dependencies]
-ctor = "0.2.0"
-
 # Add Criterion configuration, as described here:
 # <https://bheisler.github.io/criterion.rs/book/getting_started.html#step-1---add-dependency-to-cargotoml>
 [[bench]]

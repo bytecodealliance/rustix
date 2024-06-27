@@ -20,18 +20,31 @@ mod unix_alloc;
 mod v4;
 mod v6;
 
-/// Windows requires us to call a setup function before using any of the
-/// socket APIs.
 #[cfg(windows)]
-#[ctor::ctor]
-fn windows_startup() {
-    let _ = rustix::net::wsa_startup().unwrap();
+mod windows {
+    use std::sync::OnceLock;
+
+    pub struct Thing;
+
+    impl Thing {
+        pub fn new() -> Self {
+            let _ = rustix::net::wsa_startup().unwrap();
+            Self
+        }
+    }
+
+    impl Drop for Thing {
+        fn drop(&mut self) {
+            rustix::net::wsa_cleanup().unwrap();
+        }
+    }
+
+    pub static CLEANUP: OnceLock<Thing> = OnceLock::new();
 }
 
-/// Windows requires us to call a cleanup function after using any of the
-/// socket APIs.
-#[cfg(windows)]
-#[ctor::dtor]
-fn windows_shutdown() {
-    rustix::net::wsa_cleanup().unwrap();
+/// Checks whether the Windows socket interface has been started already, and
+/// if not, starts it.
+pub fn init() {
+    #[cfg(windows)]
+    let _ = windows::CLEANUP.get_or_init(|| windows::Thing::new());
 }

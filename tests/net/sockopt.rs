@@ -292,6 +292,8 @@ fn test_sockopts_tcp(s: &OwnedFd) {
 
 #[test]
 fn test_sockopts_ipv4() {
+    crate::init();
+
     let s = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
 
     test_sockopts_socket(&s);
@@ -379,6 +381,8 @@ fn test_sockopts_ipv4() {
 
 #[test]
 fn test_sockopts_ipv6() {
+    crate::init();
+
     let s = rustix::net::socket(AddressFamily::INET6, SocketType::STREAM, None).unwrap();
 
     test_sockopts_socket(&s);

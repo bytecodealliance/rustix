@@ -95,6 +95,8 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
 
 #[test]
 fn test_poll() {
+    crate::init();
+
     let ready = Arc::new((Mutex::new(0_u16), Condvar::new()));
     let ready_clone = Arc::clone(&ready);
 
