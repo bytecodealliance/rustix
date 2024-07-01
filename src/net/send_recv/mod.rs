@@ -3,10 +3,10 @@
 #![allow(unsafe_code)]
 
 use crate::buffer::split_init;
-#[cfg(target_os = "linux")]
-use crate::net::xdp::SocketAddrXdp;
 #[cfg(unix)]
 use crate::net::SocketAddrUnix;
+#[cfg(target_os = "linux")]
+use crate::net::{netlink::SocketAddrNl, xdp::SocketAddrXdp};
 use crate::net::{SocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::{backend, io};
 use backend::fd::{AsFd, BorrowedFd};
@@ -265,6 +265,8 @@ fn _sendto_any(
         SocketAddrAny::Unix(unix) => backend::net::syscalls::sendto_unix(fd, buf, flags, unix),
         #[cfg(target_os = "linux")]
         SocketAddrAny::Xdp(xdp) => backend::net::syscalls::sendto_xdp(fd, buf, flags, xdp),
+        #[cfg(target_os = "linux")]
+        SocketAddrAny::Nl(nl) => backend::net::syscalls::sendto_nl(fd, buf, flags, nl),
     }
 }
 
@@ -400,4 +402,23 @@ pub fn sendto_xdp<Fd: AsFd>(
     addr: &SocketAddrXdp,
 ) -> io::Result<usize> {
     backend::net::syscalls::sendto_xdp(fd.as_fd(), buf, flags, addr)
+}
+
+/// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_nl))`—Writes data
+/// to a socket to a specific Netlink address.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
+#[cfg(target_os = "linux")]
+#[inline]
+#[doc(alias = "sendto")]
+pub fn sendto_nl<Fd: AsFd>(
+    fd: Fd,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddrNl,
+) -> io::Result<usize> {
+    backend::net::syscalls::sendto_nl(fd.as_fd(), buf, flags, addr)
 }

@@ -3,15 +3,15 @@
 #[cfg(unix)]
 use super::addr::SocketAddrUnix;
 #[cfg(target_os = "linux")]
-use super::msghdr::with_xdp_msghdr;
+use super::msghdr::{with_nl_msghdr, with_xdp_msghdr};
 #[cfg(target_os = "linux")]
-use super::write_sockaddr::encode_sockaddr_xdp;
+use super::write_sockaddr::{encode_sockaddr_nl, encode_sockaddr_xdp};
 use crate::backend::c;
 use crate::backend::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
 #[cfg(target_os = "linux")]
-use crate::net::xdp::SocketAddrXdp;
+use crate::net::{netlink::SocketAddrNl, xdp::SocketAddrXdp};
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::utils::as_ptr;
 use core::mem::{size_of, MaybeUninit};
@@ -170,6 +170,25 @@ pub(crate) fn sendto_xdp(
     }
 }
 
+#[cfg(target_os = "linux")]
+pub(crate) fn sendto_nl(
+    fd: BorrowedFd<'_>,
+    buf: &[u8],
+    flags: SendFlags,
+    addr: &SocketAddrNl,
+) -> io::Result<usize> {
+    unsafe {
+        ret_send_recv(c::sendto(
+            borrowed_fd(fd),
+            buf.as_ptr().cast(),
+            send_recv_len(buf.len()),
+            bitflags_bits!(flags),
+            as_ptr(&encode_sockaddr_nl(addr)).cast::<c::sockaddr>(),
+            size_of::<c::sockaddr_nl>() as _,
+        ))
+    }
+}
+
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn socket(
     domain: AddressFamily,
@@ -249,6 +268,17 @@ pub(crate) fn bind_xdp(sockfd: BorrowedFd<'_>, addr: &SocketAddrXdp) -> io::Resu
             borrowed_fd(sockfd),
             as_ptr(&encode_sockaddr_xdp(addr)).cast(),
             size_of::<c::sockaddr_xdp>() as c::socklen_t,
+        ))
+    }
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn bind_nl(sockfd: BorrowedFd<'_>, addr: &SocketAddrNl) -> io::Result<()> {
+    unsafe {
+        ret(c::bind(
+            borrowed_fd(sockfd),
+            as_ptr(&encode_sockaddr_nl(addr)).cast(),
+            size_of::<c::sockaddr_nl>() as c::socklen_t,
         ))
     }
 }
@@ -447,6 +477,23 @@ pub(crate) fn sendmsg_xdp(
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
     with_xdp_msghdr(addr, iov, control, |msghdr| unsafe {
+        ret_send_recv(c::sendmsg(
+            borrowed_fd(sockfd),
+            &msghdr,
+            bitflags_bits!(msg_flags),
+        ))
+    })
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn sendmsg_nl(
+    sockfd: BorrowedFd<'_>,
+    addr: &SocketAddrNl,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
+    msg_flags: SendFlags,
+) -> io::Result<usize> {
+    with_nl_msghdr(addr, iov, control, |msghdr| unsafe {
         ret_send_recv(c::sendmsg(
             borrowed_fd(sockfd),
             &msghdr,
