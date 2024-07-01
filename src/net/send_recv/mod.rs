@@ -7,9 +7,9 @@ use crate::buffer::split_init;
 use crate::net::xdp::SocketAddrXdp;
 #[cfg(unix)]
 use crate::net::SocketAddrUnix;
-use crate::net::{SocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
+use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::{backend, io};
-use backend::fd::{AsFd, BorrowedFd};
+use backend::fd::AsFd;
 use core::mem::MaybeUninit;
 
 pub use backend::net::send_recv::{RecvFlags, SendFlags};
@@ -31,6 +31,8 @@ mod msg;
     target_os = "wasi"
 )))]
 pub use msg::*;
+
+use super::SockAddr;
 
 /// `recv(fd, buf, flags)`—Reads data from a socket.
 ///
@@ -199,21 +201,9 @@ pub fn sendto<Fd: AsFd>(
     fd: Fd,
     buf: &[u8],
     flags: SendFlags,
-    addr: &SocketAddr,
+    addr: &impl SockAddr,
 ) -> io::Result<usize> {
-    _sendto(fd.as_fd(), buf, flags, addr)
-}
-
-fn _sendto(
-    fd: BorrowedFd<'_>,
-    buf: &[u8],
-    flags: SendFlags,
-    addr: &SocketAddr,
-) -> io::Result<usize> {
-    match addr {
-        SocketAddr::V4(v4) => backend::net::syscalls::sendto_v4(fd, buf, flags, v4),
-        SocketAddr::V6(v6) => backend::net::syscalls::sendto_v6(fd, buf, flags, v6),
-    }
+    backend::net::syscalls::sendto(fd.as_fd(), buf, flags, addr)
 }
 
 /// `sendto(fd, buf, flags, addr)`—Writes data to a socket to a specific
@@ -249,23 +239,7 @@ pub fn sendto_any<Fd: AsFd>(
     flags: SendFlags,
     addr: &SocketAddrAny,
 ) -> io::Result<usize> {
-    _sendto_any(fd.as_fd(), buf, flags, addr)
-}
-
-fn _sendto_any(
-    fd: BorrowedFd<'_>,
-    buf: &[u8],
-    flags: SendFlags,
-    addr: &SocketAddrAny,
-) -> io::Result<usize> {
-    match addr {
-        SocketAddrAny::V4(v4) => backend::net::syscalls::sendto_v4(fd, buf, flags, v4),
-        SocketAddrAny::V6(v6) => backend::net::syscalls::sendto_v6(fd, buf, flags, v6),
-        #[cfg(unix)]
-        SocketAddrAny::Unix(unix) => backend::net::syscalls::sendto_unix(fd, buf, flags, unix),
-        #[cfg(target_os = "linux")]
-        SocketAddrAny::Xdp(xdp) => backend::net::syscalls::sendto_xdp(fd, buf, flags, xdp),
-    }
+    backend::net::syscalls::sendto(fd.as_fd(), buf, flags, addr)
 }
 
 /// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_in))`—Writes data to
@@ -303,7 +277,7 @@ pub fn sendto_v4<Fd: AsFd>(
     flags: SendFlags,
     addr: &SocketAddrV4,
 ) -> io::Result<usize> {
-    backend::net::syscalls::sendto_v4(fd.as_fd(), buf, flags, addr)
+    backend::net::syscalls::sendto(fd.as_fd(), buf, flags, addr)
 }
 
 /// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_in6))`—Writes data
@@ -341,7 +315,7 @@ pub fn sendto_v6<Fd: AsFd>(
     flags: SendFlags,
     addr: &SocketAddrV6,
 ) -> io::Result<usize> {
-    backend::net::syscalls::sendto_v6(fd.as_fd(), buf, flags, addr)
+    backend::net::syscalls::sendto(fd.as_fd(), buf, flags, addr)
 }
 
 /// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_un))`—Writes data to
@@ -380,7 +354,7 @@ pub fn sendto_unix<Fd: AsFd>(
     flags: SendFlags,
     addr: &SocketAddrUnix,
 ) -> io::Result<usize> {
-    backend::net::syscalls::sendto_unix(fd.as_fd(), buf, flags, addr)
+    backend::net::syscalls::sendto(fd.as_fd(), buf, flags, addr)
 }
 
 /// `sendto(fd, buf, flags, addr, sizeof(struct sockaddr_xdp))`—Writes data
@@ -399,5 +373,5 @@ pub fn sendto_xdp<Fd: AsFd>(
     flags: SendFlags,
     addr: &SocketAddrXdp,
 ) -> io::Result<usize> {
-    backend::net::syscalls::sendto_xdp(fd.as_fd(), buf, flags, addr)
+    backend::net::syscalls::sendto(fd.as_fd(), buf, flags, addr)
 }

@@ -1,13 +1,15 @@
 use crate::fd::OwnedFd;
-use crate::net::{SocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
+use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::{backend, io};
-use backend::fd::{AsFd, BorrowedFd};
+use backend::fd::AsFd;
 
 #[cfg(target_os = "linux")]
 use crate::net::xdp::SocketAddrXdp;
 pub use crate::net::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType};
 #[cfg(unix)]
 pub use backend::net::addr::SocketAddrUnix;
+
+use super::SockAddr;
 
 /// `socket(domain, type_, protocol)`—Creates a socket.
 ///
@@ -122,15 +124,8 @@ pub fn socket_with(
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=bind&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/bind
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Setting-Address.html
-pub fn bind<Fd: AsFd>(sockfd: Fd, addr: &SocketAddr) -> io::Result<()> {
-    _bind(sockfd.as_fd(), addr)
-}
-
-fn _bind(sockfd: BorrowedFd<'_>, addr: &SocketAddr) -> io::Result<()> {
-    match addr {
-        SocketAddr::V4(v4) => backend::net::syscalls::bind_v4(sockfd, v4),
-        SocketAddr::V6(v6) => backend::net::syscalls::bind_v6(sockfd, v6),
-    }
+pub fn bind<Fd: AsFd>(sockfd: Fd, addr: &impl SockAddr) -> io::Result<()> {
+    backend::net::syscalls::bind(sockfd.as_fd(), addr)
 }
 
 /// `bind(sockfd, addr)`—Binds a socket to an address.
@@ -161,18 +156,7 @@ fn _bind(sockfd: BorrowedFd<'_>, addr: &SocketAddr) -> io::Result<()> {
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Setting-Address.html
 #[doc(alias = "bind")]
 pub fn bind_any<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrAny) -> io::Result<()> {
-    _bind_any(sockfd.as_fd(), addr)
-}
-
-fn _bind_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> {
-    match addr {
-        SocketAddrAny::V4(v4) => backend::net::syscalls::bind_v4(sockfd, v4),
-        SocketAddrAny::V6(v6) => backend::net::syscalls::bind_v6(sockfd, v6),
-        #[cfg(unix)]
-        SocketAddrAny::Unix(unix) => backend::net::syscalls::bind_unix(sockfd, unix),
-        #[cfg(target_os = "linux")]
-        SocketAddrAny::Xdp(xdp) => backend::net::syscalls::bind_xdp(sockfd, xdp),
-    }
+    backend::net::syscalls::bind(sockfd.as_fd(), addr)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in))`—Binds a socket to an
@@ -205,7 +189,7 @@ fn _bind_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> {
 #[inline]
 #[doc(alias = "bind")]
 pub fn bind_v4<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
-    backend::net::syscalls::bind_v4(sockfd.as_fd(), addr)
+    backend::net::syscalls::bind(sockfd.as_fd(), addr)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_in6))`—Binds a socket to an
@@ -238,7 +222,7 @@ pub fn bind_v4<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
 #[inline]
 #[doc(alias = "bind")]
 pub fn bind_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
-    backend::net::syscalls::bind_v6(sockfd.as_fd(), addr)
+    backend::net::syscalls::bind(sockfd.as_fd(), addr)
 }
 
 /// `bind(sockfd, addr, sizeof(struct sockaddr_un))`—Binds a socket to a
@@ -272,11 +256,10 @@ pub fn bind_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
 #[inline]
 #[doc(alias = "bind")]
 pub fn bind_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
-    backend::net::syscalls::bind_unix(sockfd.as_fd(), addr)
+    backend::net::syscalls::bind(sockfd.as_fd(), addr)
 }
 
-/// `bind(sockfd, addr, sizeof(struct sockaddr_un))`—Binds a socket to a XDP
-/// address.
+/// `bind(sockfd, addr, sizeof(struct sockaddr_xdp))`—Binds a socket to a XDP address.
 ///
 /// # References
 ///  - [Linux]
@@ -286,7 +269,7 @@ pub fn bind_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> 
 #[inline]
 #[doc(alias = "bind")]
 pub fn bind_xdp<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrXdp) -> io::Result<()> {
-    backend::net::syscalls::bind_xdp(sockfd.as_fd(), addr)
+    backend::net::syscalls::bind(sockfd.as_fd(), addr)
 }
 
 /// `connect(sockfd, addr)`—Initiates a connection to an IP address.
@@ -320,15 +303,8 @@ pub fn bind_xdp<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrXdp) -> io::Result<()> {
 /// [illumos]: https://illumos.org/man/3SOCKET/connect
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Connecting.html
 /// [`Errno::WOULDBLOCK`]: io::Errno::WOULDBLOCK
-pub fn connect<Fd: AsFd>(sockfd: Fd, addr: &SocketAddr) -> io::Result<()> {
-    _connect(sockfd.as_fd(), addr)
-}
-
-fn _connect(sockfd: BorrowedFd<'_>, addr: &SocketAddr) -> io::Result<()> {
-    match addr {
-        SocketAddr::V4(v4) => backend::net::syscalls::connect_v4(sockfd, v4),
-        SocketAddr::V6(v6) => backend::net::syscalls::connect_v6(sockfd, v6),
-    }
+pub fn connect<Fd: AsFd>(sockfd: Fd, addr: &impl SockAddr) -> io::Result<()> {
+    backend::net::syscalls::connect(sockfd.as_fd(), addr)
 }
 
 /// `connect(sockfd, addr)`—Initiates a connection.
@@ -359,18 +335,7 @@ fn _connect(sockfd: BorrowedFd<'_>, addr: &SocketAddr) -> io::Result<()> {
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Connecting.html
 #[doc(alias = "connect")]
 pub fn connect_any<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrAny) -> io::Result<()> {
-    _connect_any(sockfd.as_fd(), addr)
-}
-
-fn _connect_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> {
-    match addr {
-        SocketAddrAny::V4(v4) => backend::net::syscalls::connect_v4(sockfd, v4),
-        SocketAddrAny::V6(v6) => backend::net::syscalls::connect_v6(sockfd, v6),
-        #[cfg(unix)]
-        SocketAddrAny::Unix(unix) => backend::net::syscalls::connect_unix(sockfd, unix),
-        #[cfg(target_os = "linux")]
-        SocketAddrAny::Xdp(_) => Err(io::Errno::OPNOTSUPP),
-    }
+    backend::net::syscalls::connect(sockfd.as_fd(), addr)
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_in))`—Initiates a
@@ -403,7 +368,7 @@ fn _connect_any(sockfd: BorrowedFd<'_>, addr: &SocketAddrAny) -> io::Result<()> 
 #[inline]
 #[doc(alias = "connect")]
 pub fn connect_v4<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
-    backend::net::syscalls::connect_v4(sockfd.as_fd(), addr)
+    backend::net::syscalls::connect(sockfd.as_fd(), addr)
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_in6))`—Initiates a
@@ -436,7 +401,7 @@ pub fn connect_v4<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV4) -> io::Result<()> {
 #[inline]
 #[doc(alias = "connect")]
 pub fn connect_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
-    backend::net::syscalls::connect_v6(sockfd.as_fd(), addr)
+    backend::net::syscalls::connect(sockfd.as_fd(), addr)
 }
 
 /// `connect(sockfd, addr, sizeof(struct sockaddr_un))`—Initiates a
@@ -470,7 +435,7 @@ pub fn connect_v6<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrV6) -> io::Result<()> {
 #[inline]
 #[doc(alias = "connect")]
 pub fn connect_unix<Fd: AsFd>(sockfd: Fd, addr: &SocketAddrUnix) -> io::Result<()> {
-    backend::net::syscalls::connect_unix(sockfd.as_fd(), addr)
+    backend::net::syscalls::connect(sockfd.as_fd(), addr)
 }
 
 /// `connect(sockfd, {.sa_family = AF_UNSPEC}, sizeof(struct sockaddr))`
