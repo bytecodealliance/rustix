@@ -17,7 +17,7 @@ use backend::fd::{BorrowedFd, FromRawFd, RawFd};
 use {
     crate::io,
     backend::fd::{AsFd, AsRawFd},
-    core::mem::forget,
+    core::mem::ManuallyDrop,
 };
 
 /// `STDIN_FILENO`—Standard input, borrowed.
@@ -477,45 +477,42 @@ pub const fn raw_stderr() -> RawFd {
 
 /// Utility function to safely `dup2` over stdin (fd 0).
 #[cfg(not(any(windows, target_os = "wasi")))]
-#[allow(clippy::mem_forget)]
 #[inline]
 pub fn dup2_stdin<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    if fd.as_fd().as_raw_fd() != c::STDIN_FILENO {
-        // SAFETY: We pass the returned `OwnedFd` to `forget` so that it isn't
-        // dropped.
-        let mut target = unsafe { take_stdin() };
-        backend::io::syscalls::dup2(fd.as_fd(), &mut target)?;
-        forget(target);
+    let fd = fd.as_fd();
+    if fd.as_raw_fd() != c::STDIN_FILENO {
+        // SAFETY: We wrap the returned `OwnedFd` to `ManuallyDrop` so that it
+        // isn't dropped.
+        let mut target = ManuallyDrop::new(unsafe { take_stdin() });
+        backend::io::syscalls::dup2(fd, &mut target)?;
     }
     Ok(())
 }
 
 /// Utility function to safely `dup2` over stdout (fd 1).
 #[cfg(not(any(windows, target_os = "wasi")))]
-#[allow(clippy::mem_forget)]
 #[inline]
 pub fn dup2_stdout<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    if fd.as_fd().as_raw_fd() != c::STDOUT_FILENO {
-        // SAFETY: We pass the returned `OwnedFd` to `forget` so that it isn't
-        // dropped.
-        let mut target = unsafe { take_stdout() };
-        backend::io::syscalls::dup2(fd.as_fd(), &mut target)?;
-        forget(target);
+    let fd = fd.as_fd();
+    if fd.as_raw_fd() != c::STDOUT_FILENO {
+        // SAFETY: We wrap the returned `OwnedFd` to `ManuallyDrop` so that it
+        // isn't dropped.
+        let mut target = ManuallyDrop::new(unsafe { take_stdout() });
+        backend::io::syscalls::dup2(fd, &mut target)?;
     }
     Ok(())
 }
 
 /// Utility function to safely `dup2` over stderr (fd 2).
 #[cfg(not(any(windows, target_os = "wasi")))]
-#[allow(clippy::mem_forget)]
 #[inline]
 pub fn dup2_stderr<Fd: AsFd>(fd: Fd) -> io::Result<()> {
-    if fd.as_fd().as_raw_fd() != c::STDERR_FILENO {
-        // SAFETY: We pass the returned `OwnedFd` to `forget` so that it isn't
-        // dropped.
-        let mut target = unsafe { take_stderr() };
-        backend::io::syscalls::dup2(fd.as_fd(), &mut target)?;
-        forget(target);
+    let fd = fd.as_fd();
+    if fd.as_raw_fd() != c::STDERR_FILENO {
+        // SAFETY: We wrap the returned `OwnedFd` to `ManuallyDrop` so that it
+        // isn't dropped.
+        let mut target = ManuallyDrop::new(unsafe { take_stderr() });
+        backend::io::syscalls::dup2(fd, &mut target)?;
     }
     Ok(())
 }
