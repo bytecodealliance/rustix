@@ -241,6 +241,12 @@ pub(crate) unsafe fn close(fd: RawFd) {
     syscall_readonly!(__NR_close, raw_fd(fd)).decode_void();
 }
 
+#[cfg(feature = "try_close")]
+#[inline]
+pub(crate) unsafe fn try_close(fd: RawFd) -> io::Result<()> {
+    ret(syscall_readonly!(__NR_close, raw_fd(fd)))
+}
+
 #[inline]
 pub(crate) unsafe fn ioctl(
     fd: BorrowedFd<'_>,

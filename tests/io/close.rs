@@ -18,3 +18,13 @@ fn test_close_socket() {
         rustix::io::close(raw);
     }
 }
+
+#[cfg(all(feature = "try_close", any(unix, target_os = "wasi")))]
+#[test]
+fn test_try_close() {
+    let file = std::fs::File::open("Cargo.toml").unwrap();
+    let raw = file.into_raw_fd();
+    unsafe {
+        rustix::io::try_close(raw).unwrap();
+    }
+}
