@@ -15,7 +15,7 @@ use crate::fs::AtFlags;
 use crate::fs::CloneFlags;
 #[cfg(linux_kernel)]
 use crate::fs::RenameFlags;
-#[cfg(not(target_os = "espidf"))]
+#[cfg(not(any(target_os = "espidf", target_arch = "loongarch64")))]
 use crate::fs::Stat;
 #[cfg(not(any(apple, target_os = "espidf", target_os = "vita", target_os = "wasi")))]
 use crate::fs::{Dev, FileType};

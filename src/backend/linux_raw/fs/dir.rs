@@ -1,8 +1,8 @@
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::ffi::{CStr, CString};
-use crate::fs::{
-    fcntl_getfl, fstat, fstatfs, fstatvfs, openat, FileType, Mode, OFlags, Stat, StatFs, StatVfs,
-};
+use crate::fs::{fcntl_getfl, fstatfs, fstatvfs, openat, FileType, Mode, OFlags, StatFs, StatVfs};
+#[cfg(not(target_arch = "loongarch64"))]
+use crate::fs::{fstat, Stat};
 use crate::io;
 #[cfg(feature = "process")]
 use crate::process::fchdir;
@@ -215,6 +215,7 @@ impl Dir {
     }
 
     /// `fstat(self)`
+    #[cfg(not(target_arch = "loongarch64"))]
     #[inline]
     pub fn stat(&self) -> io::Result<Stat> {
         fstat(&self.fd)
