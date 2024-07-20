@@ -13,9 +13,9 @@ mod ioctl;
 mod kill;
 #[cfg(linux_kernel)]
 mod membarrier;
-#[cfg(target_os = "linux")]
+#[cfg(linux_kernel)]
 mod pidfd;
-#[cfg(target_os = "linux")]
+#[cfg(linux_kernel)]
 mod pidfd_getfd;
 #[cfg(linux_kernel)]
 mod prctl;
@@ -53,9 +53,9 @@ pub use ioctl::*;
 pub use kill::*;
 #[cfg(linux_kernel)]
 pub use membarrier::*;
-#[cfg(target_os = "linux")]
+#[cfg(linux_kernel)]
 pub use pidfd::*;
-#[cfg(target_os = "linux")]
+#[cfg(linux_kernel)]
 pub use pidfd_getfd::*;
 #[cfg(linux_kernel)]
 pub use prctl::*;

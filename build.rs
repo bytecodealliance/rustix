@@ -84,13 +84,9 @@ fn main() {
 
     // If the libc backend is requested, or if we're not on a platform for
     // which we have linux_raw support, use the libc backend.
-    //
-    // For now Android uses the libc backend; in theory it could use the
-    // linux_raw backend, but to do that we'll need to figure out how to
-    // install the toolchain for it.
     let libc = feature_use_libc
         || cfg_use_libc
-        || os != "linux"
+        || (os != "linux" && os != "android")
         || !inline_asm_name_present
         || is_unsupported_abi
         || miri

@@ -69,7 +69,7 @@ pub(crate) mod pty;
 pub(crate) mod rand;
 #[cfg(feature = "runtime")]
 pub(crate) mod runtime;
-#[cfg(feature = "shm")]
+#[cfg(all(not(target_os = "android"), feature = "shm"))]
 pub(crate) mod shm;
 #[cfg(feature = "system")]
 pub(crate) mod system;

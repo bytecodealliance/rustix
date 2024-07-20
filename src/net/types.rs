@@ -463,7 +463,7 @@ impl AddressFamily {
     #[cfg(freebsdlike)]
     pub const ATM: Self = Self(c::AF_ATM as _);
     /// `AF_CAIF`
-    #[cfg(any(target_os = "android", target_os = "emscripten", target_os = "fuchsia"))]
+    #[cfg(any(target_os = "emscripten", target_os = "fuchsia"))]
     pub const CAIF: Self = Self(c::AF_CAIF as _);
     /// `AF_CCITT`
     #[cfg(any(bsd, solarish, target_os = "aix", target_os = "nto"))]
@@ -589,7 +589,7 @@ impl AddressFamily {
     #[cfg(target_os = "aix")]
     pub const RIF: Self = Self(c::AF_RIF as _);
     /// `AF_ROUTE`
-    #[cfg(any(bsd, solarish, target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "haiku", target_os = "nto"))]
+    #[cfg(any(bsd, solarish, target_os = "emscripten", target_os = "fuchsia", target_os = "haiku", target_os = "nto"))]
     pub const ROUTE: Self = Self(c::AF_ROUTE as _);
     /// `AF_SCLUSTER`
     #[cfg(target_os = "freebsd")]
