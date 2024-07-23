@@ -24,6 +24,7 @@ jobs:
     name: Check
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         build: [stable, nightly, 1.63]
         include:
@@ -128,6 +129,7 @@ jobs:
     name: Check --no-default-features
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         build: [nightly]
         include:
@@ -161,6 +163,7 @@ jobs:
     name: Check nightly-only targets
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         build: [nightly]
         include:
@@ -188,6 +191,7 @@ jobs:
     name: Check selected Tier 3 platforms
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         build: [nightly]
         include:
@@ -245,6 +249,7 @@ jobs:
       # Enabling testing of experimental features.
       RUSTFLAGS: --cfg rustix_use_experimental_features
     strategy:
+      fail-fast: false
       matrix:
         build: [ubuntu, ubuntu-20.04, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, powerpc64le-linux-stable, arm-linux-stable, ubuntu-1.63, i686-linux-1.63, aarch64-linux-1.63, riscv64-linux-1.63, s390x-linux-1.63, powerpc64le-linux-1.63, arm-linux-1.63, macos-latest, macos-12, windows, windows-2019, musl]
         include:
@@ -515,6 +520,7 @@ jobs:
     name: Test use-libc
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux]
         include:
@@ -643,6 +649,7 @@ jobs:
     name: Test rustix_use_experimental_asm
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         build: [powerpc64le-linux]
         include:
