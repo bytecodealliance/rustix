@@ -1051,6 +1051,52 @@ pub mod netlink {
     /// `NETLINK_GET_STRICT_CHK`
     #[cfg(linux_kernel)]
     pub const GET_STRICT_CHK: Protocol = Protocol(new_raw_protocol(c::NETLINK_GET_STRICT_CHK as _));
+
+    /// A Netlink socket address.
+    ///
+    /// Used to bind to Netlink socket.
+    ///
+    /// Not ABI compatible with `struct sockaddr_nl`
+    #[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Debug)]
+    pub struct SocketAddrNl {
+        nl_pid: u32,
+        nl_groups: u32,
+    }
+
+    impl SocketAddrNl {
+        /// Construct a new NETLINK address.
+        #[inline]
+        pub fn new(pid: u32, groups: u32) -> Self {
+            Self {
+                nl_pid: pid,
+                nl_groups: groups,
+            }
+        }
+
+        /// Return port ID.
+        #[inline]
+        pub fn pid(&self) -> u32 {
+            self.nl_pid
+        }
+
+        /// Set port ID.
+        #[inline]
+        pub fn set_pid(&mut self, pid: u32) {
+            self.nl_pid = pid;
+        }
+
+        /// Return multicast group mask.
+        #[inline]
+        pub fn groups(&self) -> u32 {
+            self.nl_groups
+        }
+
+        /// Set multicast group mask.
+        #[inline]
+        pub fn set_groups(&mut self, groups: u32) {
+            self.nl_groups = groups;
+        }
+    }
 }
 
 /// `ETH_P_*` constants.
