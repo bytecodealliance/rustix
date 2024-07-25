@@ -49,11 +49,9 @@ fn test_linux_minsigstksz() {
     weak!(fn getauxval(libc::c_ulong) -> libc::c_ulong);
 
     if let Some(libc_getauxval) = getauxval.get() {
-        // FIXME: reuse const from libc when available?
-        const AT_MINSIGSTKSZ: libc::c_ulong = 51;
         assert_eq!(
             linux_minsigstksz(),
-            unsafe { libc_getauxval(AT_MINSIGSTKSZ) } as usize
+            unsafe { libc_getauxval(libc::AT_MINSIGSTKSZ) } as usize
         );
     }
 }
