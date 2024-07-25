@@ -219,7 +219,8 @@ jobs:
     # Omit --all-targets on haiku because not all the tests build yet.
     # Temporarily disable this because the target appears to have breakage on nightly.
     #- run: cargo check -Z build-std --target x86_64-unknown-haiku --features=all-apis
-    - run: cargo check -Z build-std --target x86_64-uwp-windows-msvc --all-targets --features=all-apis
+    # Temporarily disable this because the target appears to have breakage on nightly.
+    #- run: cargo check -Z build-std --target x86_64-uwp-windows-msvc --all-targets --features=all-apis
     # Temporarily disable riscv32imc-esp-espidf due to std using SOMAXCONN.
     #- run: cargo check -Z build-std --target=riscv32imc-esp-espidf --features=all-apis
     - run: cargo check -Z build-std --target=aarch64-unknown-nto-qnx710 --features=all-apis
