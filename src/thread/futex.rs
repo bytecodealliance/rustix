@@ -11,6 +11,11 @@ use crate::{backend, io};
 
 pub use backend::thread::futex::{FutexFlags, FutexOperation};
 
+/// `FUTEX_WAITERS`
+pub const FUTEX_WAITERS: u32 = backend::thread::futex::FUTEX_WAITERS;
+/// `FUTEX_OWNER_DIED`
+pub const FUTEX_OWNER_DIED: u32 = backend::thread::futex::FUTEX_OWNER_DIED;
+
 /// `futex(uaddr, op, val, utime, uaddr2, val3)`
 ///
 /// # References
