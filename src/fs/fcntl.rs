@@ -110,3 +110,30 @@ pub fn fcntl_add_seals<Fd: AsFd>(fd: Fd, seals: SealFlags) -> io::Result<()> {
 pub fn fcntl_lock<Fd: AsFd>(fd: Fd, operation: FlockOperation) -> io::Result<()> {
     backend::fs::syscalls::fcntl_lock(fd.as_fd(), operation)
 }
+
+/// `fcntl(fd, F_GETLK)`—Check if the fd is locked or not.
+///
+/// This function doesn't currently have an offset or len; it currently always
+/// sets the `l_len` field to 0, which is a special case that means the entire
+/// file should be locked.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
+#[cfg(not(any(
+    target_os = "emscripten",
+    target_os = "espidf",
+    target_os = "fuchsia",
+    target_os = "redox",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
+#[inline]
+#[doc(alias = "F_SETLK")]
+#[doc(alias = "F_SETLKW")]
+pub fn fcntl_getlk<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::fs::syscalls::fcntl_getlk(fd.as_fd())
+}
