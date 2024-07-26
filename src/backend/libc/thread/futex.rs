@@ -40,4 +40,18 @@ pub enum FutexOperation {
     TrylockPi = bitcast!(c::FUTEX_TRYLOCK_PI),
     /// `FUTEX_WAIT_BITSET`
     WaitBitset = bitcast!(c::FUTEX_WAIT_BITSET),
+    /// `FUTEX_WAKE_BITSET`
+    WakeBitset = bitcast!(c::FUTEX_WAKE_BITSET),
+    /// `FUTEX_WAIT_REQUEUE_PI`
+    WaitRequeuePi = bitcast!(c::FUTEX_WAIT_REQUEUE_PI),
+    /// `FUTEX_CMP_REQUEUE_PI`
+    CmpRequeuePi = bitcast!(c::FUTEX_CMP_REQUEUE_PI),
+    /// `FUTEX_LOCK_PI2`
+    LockPi2 = bitcast!(c::FUTEX_LOCK_PI2),
 }
+
+/// `FUTEX_WAITERS`
+pub const FUTEX_WAITERS: u32 = 0x80000000;
+
+/// `FUTEX_OWNER_DIED`
+pub const FUTEX_OWNER_DIED: u32 = 0x40000000;
