@@ -16,7 +16,12 @@ mod setns;
 #[cfg(not(target_os = "redox"))]
 pub use clock::*;
 #[cfg(linux_kernel)]
-pub use futex::{futex, FutexFlags, FutexOperation, FUTEX_OWNER_DIED, FUTEX_WAITERS};
+pub use futex::{
+    futex_cmp_requeue, futex_cmp_requeue_pi, futex_fd, futex_lock_pi, futex_lock_pi2,
+    futex_requeue, futex_trylock_pi, futex_unlock_pi, futex_wait, futex_wait_bitset,
+    futex_wait_requeue_pi, futex_wake, futex_wake_bitset, futex_wake_op, FutexFlags,
+    FUTEX_OWNER_DIED, FUTEX_WAITERS,
+};
 #[cfg(linux_kernel)]
 pub use id::{
     gettid, set_thread_gid, set_thread_groups, set_thread_res_gid, set_thread_res_uid,

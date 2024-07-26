@@ -5,6 +5,7 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
+use super::futex::FutexOperation;
 use crate::backend::c;
 use crate::backend::conv::{
     by_mut, by_ref, c_int, c_uint, ret, ret_c_int, ret_c_int_infallible, ret_usize, slice,
@@ -13,8 +14,9 @@ use crate::backend::conv::{
 use crate::fd::BorrowedFd;
 use crate::io;
 use crate::pid::Pid;
-use crate::thread::{ClockId, FutexFlags, FutexOperation, NanosleepRelativeResult, Timespec};
+use crate::thread::{ClockId, FutexFlags, NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
+use core::sync::atomic::AtomicU32;
 #[cfg(target_pointer_width = "32")]
 use linux_raw_sys::general::timespec as __kernel_old_timespec;
 use linux_raw_sys::general::{__kernel_timespec, TIMER_ABSTIME};
@@ -206,12 +208,12 @@ pub(crate) fn gettid() -> Pid {
 // TODO: This could be de-multiplexed.
 #[inline]
 pub(crate) unsafe fn futex(
-    uaddr: *mut u32,
+    uaddr: *const AtomicU32,
     op: FutexOperation,
     flags: FutexFlags,
     val: u32,
     utime: *const Timespec,
-    uaddr2: *mut u32,
+    uaddr2: *const AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
     #[cfg(target_pointer_width = "32")]
@@ -249,12 +251,12 @@ pub(crate) unsafe fn futex(
 
 #[cfg(target_pointer_width = "32")]
 unsafe fn futex_old(
-    uaddr: *mut u32,
+    uaddr: *const AtomicU32,
     op: FutexOperation,
     flags: FutexFlags,
     val: u32,
     utime: *const Timespec,
-    uaddr2: *mut u32,
+    uaddr2: *const AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
     let old_utime = __kernel_old_timespec {
