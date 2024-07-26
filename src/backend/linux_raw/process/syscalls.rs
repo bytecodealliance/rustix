@@ -148,7 +148,11 @@ pub(crate) fn setpgid(pid: Option<Pid>, pgid: Option<Pid>) -> io::Result<()> {
 #[inline]
 pub(crate) fn getpgrp() -> Pid {
     // Use the `getpgrp` syscall if available.
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
+    #[cfg(not(any(
+        target_arch = "aarch64",
+        target_arch = "loongarch64",
+        target_arch = "riscv64"
+    )))]
     unsafe {
         let pgid = ret_c_int_infallible(syscall_readonly!(__NR_getpgrp));
         debug_assert!(pgid > 0);
@@ -156,7 +160,11 @@ pub(crate) fn getpgrp() -> Pid {
     }
 
     // Otherwise use `getpgrp` and pass it zero.
-    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
+    #[cfg(any(
+        target_arch = "aarch64",
+        target_arch = "loongarch64",
+        target_arch = "riscv64"
+    ))]
     unsafe {
         let pgid = ret_c_int_infallible(syscall_readonly!(__NR_getpgid, c_uint(0)));
         debug_assert!(pgid > 0);
@@ -295,6 +303,7 @@ pub(crate) fn setpriority_process(pid: Option<Pid>, priority: i32) -> io::Result
     }
 }
 
+#[cfg(not(target_arch = "loongarch64"))]
 #[inline]
 pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
     let mut result = MaybeUninit::<rlimit64>::uninit();
@@ -310,6 +319,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
     }
 }
 
+#[cfg(not(target_arch = "loongarch64"))]
 #[inline]
 pub(crate) fn setrlimit(limit: Resource, new: Rlimit) -> io::Result<()> {
     unsafe {

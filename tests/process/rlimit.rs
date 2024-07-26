@@ -2,6 +2,7 @@ use rustix::process::Resource;
 #[cfg(not(target_os = "haiku"))] // No `Core` on Haiku.
 use rustix::process::Rlimit;
 
+#[cfg(not(target_arch = "loongarch64"))] // No `getrlimit` on LoongArch64.
 #[test]
 fn test_getrlimit() {
     let lim = rustix::process::getrlimit(Resource::Stack);
@@ -9,7 +10,8 @@ fn test_getrlimit() {
     assert_ne!(lim.maximum, Some(0));
 }
 
-#[cfg(not(target_os = "haiku"))] // No `Core` on Haiku.
+/// No 'Core' on HaiKu. No setrlimit on LoongArch64
+#[cfg(not(any(target_os = "haiku", target_arch = "loongarch64")))]
 #[test]
 fn test_setrlimit() {
     let old = rustix::process::getrlimit(Resource::Core);

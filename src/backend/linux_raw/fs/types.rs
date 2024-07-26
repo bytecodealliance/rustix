@@ -684,7 +684,8 @@ pub struct Stat {
 #[cfg(all(
     target_pointer_width = "64",
     not(target_arch = "mips64"),
-    not(target_arch = "mips64r6")
+    not(target_arch = "mips64r6"),
+    not(target_arch = "loongarch64")
 ))]
 pub type Stat = linux_raw_sys::general::stat;
 

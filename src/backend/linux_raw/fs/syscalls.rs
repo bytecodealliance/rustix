@@ -14,6 +14,7 @@ use crate::backend::conv::fs::oflags_for_open_how;
     target_arch = "riscv64",
     target_arch = "mips",
     target_arch = "mips32r6",
+    target_arch = "loongarch64",
 ))]
 use crate::backend::conv::zero;
 use crate::backend::conv::{
@@ -27,6 +28,7 @@ use crate::backend::conv::{loff_t, loff_t_from_u64, ret_u64};
     target_arch = "riscv64",
     target_arch = "mips64",
     target_arch = "mips64r6",
+    target_arch = "loongarch64",
     target_pointer_width = "32",
 ))]
 use crate::fd::AsFd;
@@ -34,9 +36,12 @@ use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use crate::fs::CWD;
+
+#[cfg(not(target_arch = "loongarch64"))]
+use crate::fs::Stat;
 use crate::fs::{
     inotify, Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, Gid, MemfdFlags,
-    Mode, OFlags, RenameFlags, ResolveFlags, SealFlags, SeekFrom, Stat, StatFs, StatVfs,
+    Mode, OFlags, RenameFlags, ResolveFlags, SealFlags, SeekFrom, StatFs, StatVfs,
     StatVfsMountFlags, StatxFlags, Timestamps, Uid, XattrFlags,
 };
 use crate::io;
@@ -470,6 +475,7 @@ pub(crate) fn sync() {
     unsafe { ret_infallible(syscall_readonly!(__NR_sync)) }
 }
 
+#[cfg(not(target_arch = "loongarch64"))]
 #[inline]
 pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     // 32-bit and mips64 Linux: `struct stat64` is not y2038 compatible; use
@@ -524,6 +530,7 @@ fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     }
 }
 
+#[cfg(not(target_arch = "loongarch64"))]
 #[inline]
 pub(crate) fn stat(path: &CStr) -> io::Result<Stat> {
     // See the comments in `fstat` about using `crate::fs::statx` here.
@@ -596,6 +603,7 @@ fn stat_old(path: &CStr) -> io::Result<Stat> {
     }
 }
 
+#[cfg(not(target_arch = "loongarch64"))]
 #[inline]
 pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
     // See the comments in `fstat` about using `crate::fs::statx` here.
@@ -645,6 +653,7 @@ fn statat_old(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<
     }
 }
 
+#[cfg(not(target_arch = "loongarch64"))]
 #[inline]
 pub(crate) fn lstat(path: &CStr) -> io::Result<Stat> {
     // See the comments in `fstat` about using `crate::fs::statx` here.
@@ -1092,7 +1101,7 @@ pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::R
 
 #[inline]
 pub(crate) fn rename(old_path: &CStr, new_path: &CStr) -> io::Result<()> {
-    #[cfg(target_arch = "riscv64")]
+    #[cfg(any(target_arch = "riscv64", target_arch = "loongarch64"))]
     unsafe {
         ret(syscall_readonly!(
             __NR_renameat2,
@@ -1103,7 +1112,7 @@ pub(crate) fn rename(old_path: &CStr, new_path: &CStr) -> io::Result<()> {
             c_uint(0)
         ))
     }
-    #[cfg(not(target_arch = "riscv64"))]
+    #[cfg(not(any(target_arch = "riscv64", target_arch = "loongarch64")))]
     unsafe {
         ret(syscall_readonly!(
             __NR_renameat,
@@ -1122,7 +1131,7 @@ pub(crate) fn renameat(
     new_dirfd: BorrowedFd<'_>,
     new_path: &CStr,
 ) -> io::Result<()> {
-    #[cfg(target_arch = "riscv64")]
+    #[cfg(any(target_arch = "loongarch64", target_arch = "riscv64"))]
     unsafe {
         ret(syscall_readonly!(
             __NR_renameat2,
@@ -1133,7 +1142,7 @@ pub(crate) fn renameat(
             c_uint(0)
         ))
     }
-    #[cfg(not(target_arch = "riscv64"))]
+    #[cfg(not(any(target_arch = "loongarch64", target_arch = "riscv64")))]
     unsafe {
         ret(syscall_readonly!(
             __NR_renameat,
