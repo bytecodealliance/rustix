@@ -8,12 +8,14 @@ use crate::thread::{NanosleepRelativeResult, Timespec};
 #[cfg(all(target_env = "gnu", fix_y2038))]
 use crate::timespec::LibcTimespec;
 use core::mem::MaybeUninit;
+use core::sync::atomic::AtomicU32;
 #[cfg(linux_kernel)]
 use {
+    super::futex::FutexOperation,
     crate::backend::conv::{borrowed_fd, ret_c_int, ret_usize},
     crate::fd::BorrowedFd,
     crate::pid::Pid,
-    crate::thread::{FutexFlags, FutexOperation},
+    crate::thread::FutexFlags,
     crate::utils::as_mut_ptr,
 };
 #[cfg(not(any(
@@ -418,12 +420,12 @@ pub(crate) fn setresgid_thread(
 // TODO: This could be de-multiplexed.
 #[cfg(linux_kernel)]
 pub(crate) unsafe fn futex(
-    uaddr: *mut u32,
+    uaddr: *const AtomicU32,
     op: FutexOperation,
     flags: FutexFlags,
     val: u32,
     utime: *const Timespec,
-    uaddr2: *mut u32,
+    uaddr2: *const AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
     #[cfg(all(
@@ -437,11 +439,11 @@ pub(crate) unsafe fn futex(
 
         syscall! {
             fn futex_time64(
-                uaddr: *mut u32,
+                uaddr: *const AtomicU32,
                 futex_op: c::c_int,
                 val: u32,
                 timeout: *const Timespec,
-                uaddr2: *mut u32,
+                uaddr2: *const AtomicU32,
                 val3: u32
             ) via SYS_futex_time64 -> c::ssize_t
         }
@@ -473,11 +475,11 @@ pub(crate) unsafe fn futex(
     {
         syscall! {
             fn futex(
-                uaddr: *mut u32,
+                uaddr: *const AtomicU32,
                 futex_op: c::c_int,
                 val: u32,
                 timeout: *const linux_raw_sys::general::__kernel_timespec,
-                uaddr2: *mut u32,
+                uaddr2: *const AtomicU32,
                 val3: u32
             ) via SYS_futex -> c::c_long
         }
@@ -499,21 +501,21 @@ pub(crate) unsafe fn futex(
     not(any(target_arch = "aarch64", target_arch = "x86_64"))
 ))]
 unsafe fn futex_old(
-    uaddr: *mut u32,
+    uaddr: *const AtomicU32,
     op: FutexOperation,
     flags: FutexFlags,
     val: u32,
     utime: *const Timespec,
-    uaddr2: *mut u32,
+    uaddr2: *const AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
     syscall! {
         fn futex(
-            uaddr: *mut u32,
+            uaddr: *const AtomicU32,
             futex_op: c::c_int,
             val: u32,
             timeout: *const linux_raw_sys::general::__kernel_old_timespec,
-            uaddr2: *mut u32,
+            uaddr2: *const AtomicU32,
             val3: u32
         ) via SYS_futex -> c::c_long
     }
