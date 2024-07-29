@@ -10,7 +10,7 @@ use core::num::NonZeroU32;
 use core::ptr;
 use core::sync::atomic::AtomicU32;
 
-use crate::backend::thread::syscalls::{futex_timespec, futex_val2};
+use crate::backend::thread::syscalls::{futex_timeout, futex_val2};
 use crate::fd::{FromRawFd, OwnedFd};
 use crate::thread::Timespec;
 use crate::{backend, io};
@@ -55,7 +55,7 @@ pub unsafe fn futex(
     use FutexOperation::*;
 
     match op {
-        Wait | LockPi | WaitBitset | WaitRequeuePi | LockPi2 => futex_timespec(
+        Wait | LockPi | WaitBitset | WaitRequeuePi | LockPi2 => futex_timeout(
             uaddr as *const AtomicU32,
             op,
             flags,
@@ -97,7 +97,7 @@ pub unsafe fn wait(
     val: u32,
     timeout: Option<Timespec>,
 ) -> io::Result<()> {
-    backend::thread::syscalls::futex_timespec(
+    backend::thread::syscalls::futex_timeout(
         uaddr,
         FutexOperation::Wait,
         flags,
@@ -328,7 +328,7 @@ pub unsafe fn lock_pi(
     flags: FutexFlags,
     timeout: Option<Timespec>,
 ) -> io::Result<()> {
-    backend::thread::syscalls::futex_timespec(
+    backend::thread::syscalls::futex_timeout(
         uaddr,
         FutexOperation::LockPi,
         flags,
@@ -418,7 +418,7 @@ pub unsafe fn wait_bitset(
     timeout: Option<Timespec>,
     val3: NonZeroU32,
 ) -> io::Result<()> {
-    backend::thread::syscalls::futex_timespec(
+    backend::thread::syscalls::futex_timeout(
         uaddr,
         FutexOperation::WaitBitset,
         flags,
@@ -485,7 +485,7 @@ pub unsafe fn wait_requeue_pi(
     timeout: Option<Timespec>,
     uaddr2: &AtomicU32,
 ) -> io::Result<()> {
-    backend::thread::syscalls::futex_timespec(
+    backend::thread::syscalls::futex_timeout(
         uaddr,
         FutexOperation::WaitRequeuePi,
         flags,
@@ -547,7 +547,7 @@ pub unsafe fn cmp_requeue_pi(
 /// [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
 #[inline]
 pub unsafe fn lock_pi2(uaddr: &AtomicU32, flags: FutexFlags, timeout: &Timespec) -> io::Result<()> {
-    backend::thread::syscalls::futex_timespec(
+    backend::thread::syscalls::futex_timeout(
         uaddr,
         FutexOperation::LockPi2,
         flags,
