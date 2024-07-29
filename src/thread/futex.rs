@@ -103,7 +103,8 @@ pub unsafe fn wait(
         flags,
         val,
         timeout
-            .map(|timeout| &timeout as *const Timespec)
+            .as_ref()
+            .map(|timeout| timeout as *const Timespec)
             .unwrap_or(ptr::null()),
         ptr::null(),
         0,
@@ -333,7 +334,8 @@ pub unsafe fn lock_pi(
         flags,
         0,
         timeout
-            .map(|timeout| &timeout as *const Timespec)
+            .as_ref()
+            .map(|timeout| timeout as *const Timespec)
             .unwrap_or(ptr::null()),
         ptr::null(),
         0,
@@ -422,7 +424,8 @@ pub unsafe fn wait_bitset(
         flags,
         val,
         timeout
-            .map(|timeout| &timeout as *const Timespec)
+            .as_ref()
+            .map(|timeout| timeout as *const Timespec)
             .unwrap_or(ptr::null()),
         ptr::null(),
         val3.get(),
@@ -488,7 +491,8 @@ pub unsafe fn wait_requeue_pi(
         flags,
         val,
         timeout
-            .map(|timeout| &timeout as *const Timespec)
+            .as_ref()
+            .map(|timeout| timeout as *const Timespec)
             .unwrap_or(ptr::null()),
         uaddr2,
         0,
