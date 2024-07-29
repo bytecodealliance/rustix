@@ -430,7 +430,7 @@ pub(crate) unsafe fn futex_val2(
     // the least significant four bytes of the timeout pointer are used as `val2`.
     // ["the kernel casts the timeout value first to unsigned long, then to uint32_t"](https://man7.org/linux/man-pages/man2/futex.2.html),
     // so we perform that exact conversion in reverse to create the pointer.
-    let utime = val2 as usize as *const Timespec;
+    let timeout = val2 as usize as *const Timespec;
 
     #[cfg(all(
         target_pointer_width = "32",
@@ -456,7 +456,7 @@ pub(crate) unsafe fn futex_val2(
             uaddr,
             op as i32 | flags.bits() as i32,
             val,
-            utime,
+            timeout,
             uaddr2,
             val3,
         ))
@@ -483,7 +483,7 @@ pub(crate) unsafe fn futex_val2(
             uaddr,
             op as i32 | flags.bits() as i32,
             val,
-            utime.cast(),
+            timeout.cast(),
             uaddr2,
             val3,
         ) as isize)
@@ -491,12 +491,12 @@ pub(crate) unsafe fn futex_val2(
 }
 
 #[cfg(linux_kernel)]
-pub(crate) unsafe fn futex_timespec(
+pub(crate) unsafe fn futex_timeout(
     uaddr: *const AtomicU32,
     op: FutexOperation,
     flags: FutexFlags,
     val: u32,
-    utime: *const Timespec,
+    timeout: *const Timespec,
     uaddr2: *const AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
@@ -524,7 +524,7 @@ pub(crate) unsafe fn futex_timespec(
             uaddr,
             op as i32 | flags.bits() as i32,
             val,
-            utime,
+            timeout,
             uaddr2,
             val3,
         ))
@@ -532,7 +532,7 @@ pub(crate) unsafe fn futex_timespec(
             // See the comments in `rustix_clock_gettime_via_syscall` about
             // emulation.
             if err == io::Errno::NOSYS {
-                futex_old_timespec(uaddr, op, flags, val, utime, uaddr2, val3)
+                futex_old_timespec(uaddr, op, flags, val, timeout, uaddr2, val3)
             } else {
                 Err(err)
             }
@@ -560,7 +560,7 @@ pub(crate) unsafe fn futex_timespec(
             uaddr,
             op as i32 | flags.bits() as i32,
             val,
-            utime.cast(),
+            timeout.cast(),
             uaddr2,
             val3,
         ) as isize)
@@ -577,7 +577,7 @@ unsafe fn futex_old_timespec(
     op: FutexOperation,
     flags: FutexFlags,
     val: u32,
-    utime: *const Timespec,
+    timeout: *const Timespec,
     uaddr2: *const AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
@@ -592,21 +592,21 @@ unsafe fn futex_old_timespec(
         ) via SYS_futex -> c::c_long
     }
 
-    let old_utime = if utime.is_null() {
+    let old_timeout = if timeout.is_null() {
         None
     } else {
         Some(linux_raw_sys::general::__kernel_old_timespec {
-            tv_sec: (*utime).tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
-            tv_nsec: (*utime).tv_nsec.try_into().map_err(|_| io::Errno::INVAL)?,
+            tv_sec: (*timeout).tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
+            tv_nsec: (*timeout).tv_nsec.try_into().map_err(|_| io::Errno::INVAL)?,
         })
     };
     ret_usize(futex(
         uaddr,
         op as i32 | flags.bits() as i32,
         val,
-        old_utime
+        old_timeout
             .as_ref()
-            .map(|r| r as *const linux_raw_sys::general::__kernel_old_timespec)
+            .map(|timeout| timeout as *const linux_raw_sys::general::__kernel_old_timespec)
             .unwrap_or(core::ptr::null()),
         uaddr2,
         val3,
