@@ -30,26 +30,30 @@ fn test_wait_wake() {
     let lock = std::sync::Arc::new(AtomicU32::new(0));
 
     match unsafe { futex::wait(&lock, FutexFlags::empty(), 1, None) } {
-			Ok(()) => panic!("Nobody should be waking us!"),
-			Err(Errno::AGAIN) => assert_eq!(lock.load(Ordering::SeqCst), 0, "the lock should still be 0"),
-			Err(err) => panic!("{err}"),
-	}
+        Ok(()) => panic!("Nobody should be waking us!"),
+        Err(Errno::AGAIN) => {
+            assert_eq!(lock.load(Ordering::SeqCst), 0, "the lock should still be 0")
+        }
+        Err(err) => panic!("{err}"),
+    }
 
     let other = std::thread::spawn({
         let lock = lock.clone();
         move || {
             std::thread::sleep(std::time::Duration::from_millis(1));
-						lock.store(1, Ordering::SeqCst);
+            lock.store(1, Ordering::SeqCst);
             unsafe {
                 futex::wake(&lock, FutexFlags::empty(), 1);
             }
 
             std::thread::sleep(std::time::Duration::from_millis(50));
-						match unsafe { futex::wait(&lock, FutexFlags::empty(), 1, None) } {
-								Ok(()) => (),
-								Err(Errno::AGAIN) => assert_eq!(lock.load(Ordering::SeqCst), 2, "the lock should now be 2"),
-								Err(err) => panic!("{err}"),
-						}
+            match unsafe { futex::wait(&lock, FutexFlags::empty(), 1, None) } {
+                Ok(()) => (),
+                Err(Errno::AGAIN) => {
+                    assert_eq!(lock.load(Ordering::SeqCst), 2, "the lock should now be 2")
+                }
+                Err(err) => panic!("{err}"),
+            }
         }
     });
 
@@ -59,12 +63,12 @@ fn test_wait_wake() {
         Err(err) => panic!("{err}"),
     }
 
-		lock.store(2, Ordering::SeqCst);
-		unsafe {
-				futex::wake(&lock, FutexFlags::empty(), 1);
-		}
+    lock.store(2, Ordering::SeqCst);
+    unsafe {
+        futex::wake(&lock, FutexFlags::empty(), 1);
+    }
 
-		other.join().unwrap();
+    other.join().unwrap();
 }
 
 #[cfg(feature = "std")]
@@ -73,19 +77,46 @@ fn test_timeout() {
     use rustix::fs::Timespec;
 
     let lock = AtomicU32::new(0);
-		
+
     let err = unsafe {
-			futex::wait(&lock, FutexFlags::empty(), 0, Some(Timespec{tv_sec: 1, tv_nsec: 13})).unwrap_err()
-		};
-		assert_eq!(err, Errno::TIMEDOUT);
-		
+        futex::wait(
+            &lock,
+            FutexFlags::empty(),
+            0,
+            Some(Timespec {
+                tv_sec: 1,
+                tv_nsec: 13,
+            }),
+        )
+        .unwrap_err()
+    };
+    assert_eq!(err, Errno::TIMEDOUT);
+
     let err = unsafe {
-			futex::wait(&lock, FutexFlags::empty(), 0, Some(Timespec{tv_sec: 0, tv_nsec: 1_000_000_000})).unwrap_err()
-		};
-		assert_eq!(err, Errno::INVAL);
-		
+        futex::wait(
+            &lock,
+            FutexFlags::empty(),
+            0,
+            Some(Timespec {
+                tv_sec: 0,
+                tv_nsec: 1_000_000_000,
+            }),
+        )
+        .unwrap_err()
+    };
+    assert_eq!(err, Errno::INVAL);
+
     let err = unsafe {
-			futex::wait(&lock, FutexFlags::empty(), 0, Some(Timespec{tv_sec: -1, tv_nsec: 0})).unwrap_err()
-		};
-		assert_eq!(err, Errno::INVAL);
+        futex::wait(
+            &lock,
+            FutexFlags::empty(),
+            0,
+            Some(Timespec {
+                tv_sec: -1,
+                tv_nsec: 0,
+            }),
+        )
+        .unwrap_err()
+    };
+    assert_eq!(err, Errno::INVAL);
 }
