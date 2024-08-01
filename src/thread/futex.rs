@@ -546,13 +546,20 @@ pub unsafe fn cmp_requeue_pi(
 /// [Linux `futex` system call]: https://man7.org/linux/man-pages/man2/futex.2.html
 /// [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
 #[inline]
-pub unsafe fn lock_pi2(uaddr: &AtomicU32, flags: FutexFlags, timeout: &Timespec) -> io::Result<()> {
+pub unsafe fn lock_pi2(
+    uaddr: &AtomicU32,
+    flags: FutexFlags,
+    timeout: Option<Timespec>,
+) -> io::Result<()> {
     backend::thread::syscalls::futex_timeout(
         uaddr,
         FutexOperation::LockPi2,
         flags,
         0,
-        timeout,
+        timeout
+            .as_ref()
+            .map(|timeout| timeout as *const Timespec)
+            .unwrap_or(ptr::null()),
         ptr::null(),
         0,
     )?;
