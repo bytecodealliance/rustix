@@ -9,11 +9,7 @@
 //! functions.
 #![allow(unsafe_code)]
 
-#[cfg(target_arch = "x86")]
-use super::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
 use super::vdso;
-#[cfg(target_arch = "x86")]
-use core::arch::global_asm;
 #[cfg(feature = "process")]
 #[cfg(any(
     target_arch = "x86_64",
@@ -135,130 +131,6 @@ pub(crate) fn sched_getcpu() -> usize {
     }
 }
 
-#[cfg(target_arch = "x86")]
-pub(super) mod x86_via_vdso {
-    use super::{transmute, ArgReg, Relaxed, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
-    use crate::backend::arch::asm;
-
-    #[inline]
-    pub(in crate::backend) unsafe fn syscall0(nr: SyscallNumber<'_>) -> RetReg<R0> {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
-        asm::indirect_syscall0(callee, nr)
-    }
-
-    #[inline]
-    pub(in crate::backend) unsafe fn syscall1<'a>(
-        nr: SyscallNumber<'a>,
-        a0: ArgReg<'a, A0>,
-    ) -> RetReg<R0> {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
-        asm::indirect_syscall1(callee, nr, a0)
-    }
-
-    #[inline]
-    pub(in crate::backend) unsafe fn syscall1_noreturn<'a>(
-        nr: SyscallNumber<'a>,
-        a0: ArgReg<'a, A0>,
-    ) -> ! {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
-        asm::indirect_syscall1_noreturn(callee, nr, a0)
-    }
-
-    #[inline]
-    pub(in crate::backend) unsafe fn syscall2<'a>(
-        nr: SyscallNumber<'a>,
-        a0: ArgReg<'a, A0>,
-        a1: ArgReg<'a, A1>,
-    ) -> RetReg<R0> {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
-        asm::indirect_syscall2(callee, nr, a0, a1)
-    }
-
-    #[inline]
-    pub(in crate::backend) unsafe fn syscall3<'a>(
-        nr: SyscallNumber<'a>,
-        a0: ArgReg<'a, A0>,
-        a1: ArgReg<'a, A1>,
-        a2: ArgReg<'a, A2>,
-    ) -> RetReg<R0> {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
-        asm::indirect_syscall3(callee, nr, a0, a1, a2)
-    }
-
-    #[inline]
-    pub(in crate::backend) unsafe fn syscall4<'a>(
-        nr: SyscallNumber<'a>,
-        a0: ArgReg<'a, A0>,
-        a1: ArgReg<'a, A1>,
-        a2: ArgReg<'a, A2>,
-        a3: ArgReg<'a, A3>,
-    ) -> RetReg<R0> {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
-        asm::indirect_syscall4(callee, nr, a0, a1, a2, a3)
-    }
-
-    #[inline]
-    pub(in crate::backend) unsafe fn syscall5<'a>(
-        nr: SyscallNumber<'a>,
-        a0: ArgReg<'a, A0>,
-        a1: ArgReg<'a, A1>,
-        a2: ArgReg<'a, A2>,
-        a3: ArgReg<'a, A3>,
-        a4: ArgReg<'a, A4>,
-    ) -> RetReg<R0> {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
-        asm::indirect_syscall5(callee, nr, a0, a1, a2, a3, a4)
-    }
-
-    #[inline]
-    pub(in crate::backend) unsafe fn syscall6<'a>(
-        nr: SyscallNumber<'a>,
-        a0: ArgReg<'a, A0>,
-        a1: ArgReg<'a, A1>,
-        a2: ArgReg<'a, A2>,
-        a3: ArgReg<'a, A3>,
-        a4: ArgReg<'a, A4>,
-        a5: ArgReg<'a, A5>,
-    ) -> RetReg<R0> {
-        let callee = match transmute(super::SYSCALL.load(Relaxed)) {
-            Some(callee) => callee,
-            None => super::init_syscall(),
-        };
-        asm::indirect_syscall6(callee, nr, a0, a1, a2, a3, a4, a5)
-    }
-
-    // With the indirect call, it isn't meaningful to do a separate
-    // `_readonly` optimization.
-    #[allow(unused_imports)]
-    pub(in crate::backend) use {
-        syscall0 as syscall0_readonly, syscall1 as syscall1_readonly,
-        syscall2 as syscall2_readonly, syscall3 as syscall3_readonly,
-        syscall4 as syscall4_readonly, syscall5 as syscall5_readonly,
-        syscall6 as syscall6_readonly,
-    };
-}
-
 #[cfg(feature = "time")]
 type ClockGettimeType = unsafe extern "C" fn(c::c_int, *mut Timespec) -> c::c_int;
 
@@ -270,12 +142,6 @@ type ClockGettimeType = unsafe extern "C" fn(c::c_int, *mut Timespec) -> c::c_in
     target_arch = "powerpc64"
 ))]
 type GetcpuType = unsafe extern "C" fn(*mut u32, *mut u32, *mut c_void) -> c::c_int;
-
-/// The underlying syscall functions are only called from asm, using the
-/// special syscall calling convention to pass arguments and return values,
-/// which the signature here doesn't reflect.
-#[cfg(target_arch = "x86")]
-pub(super) type SyscallType = unsafe extern "C" fn();
 
 /// Initialize `CLOCK_GETTIME` and return its value.
 #[cfg(feature = "time")]
@@ -303,16 +169,6 @@ fn init_getcpu() -> GetcpuType {
     unsafe { transmute(GETCPU.load(Relaxed)) }
 }
 
-/// Initialize `SYSCALL` and return its value.
-#[cfg(target_arch = "x86")]
-#[cold]
-fn init_syscall() -> SyscallType {
-    init();
-    // SAFETY: Load the function address from static storage that we just
-    // initialized.
-    unsafe { transmute(SYSCALL.load(Relaxed)) }
-}
-
 /// `AtomicPtr` can't hold a `fn` pointer, so we use a `*` pointer to this
 /// placeholder type, and cast it as needed.
 struct Function;
@@ -326,8 +182,6 @@ static mut CLOCK_GETTIME: AtomicPtr<Function> = AtomicPtr::new(null_mut());
     target_arch = "powerpc64"
 ))]
 static mut GETCPU: AtomicPtr<Function> = AtomicPtr::new(null_mut());
-#[cfg(target_arch = "x86")]
-static mut SYSCALL: AtomicPtr<Function> = AtomicPtr::new(null_mut());
 
 #[cfg(feature = "time")]
 unsafe extern "C" fn rustix_clock_gettime_via_syscall(
@@ -405,34 +259,6 @@ unsafe extern "C" fn rustix_getcpu_via_syscall(
     }
 }
 
-#[cfg(target_arch = "x86")]
-extern "C" {
-    /// A symbol pointing to an `int 0x80` instruction. This “function” is only
-    /// called from assembly, and only with the x86 syscall calling convention,
-    /// so its signature here is not its true signature.
-    ///
-    /// This extern block and the `global_asm!` below can be replaced with
-    /// `#[naked]` if it's stabilized.
-    fn rustix_int_0x80();
-}
-
-#[cfg(target_arch = "x86")]
-global_asm!(
-    r#"
-    .section    .text.rustix_int_0x80,"ax",@progbits
-    .p2align    4
-    .weak       rustix_int_0x80
-    .hidden     rustix_int_0x80
-    .type       rustix_int_0x80, @function
-rustix_int_0x80:
-    .cfi_startproc
-    int    0x80
-    ret
-    .cfi_endproc
-    .size rustix_int_0x80, .-rustix_int_0x80
-"#
-);
-
 fn minimal_init() {
     // SAFETY: Store default function addresses in static storage so that if we
     // end up making any system calls while we read the vDSO, they'll work. If
@@ -463,18 +289,6 @@ fn minimal_init() {
                 .compare_exchange(
                     null_mut(),
                     rustix_getcpu_via_syscall as *mut Function,
-                    Relaxed,
-                    Relaxed,
-                )
-                .ok();
-        }
-
-        #[cfg(target_arch = "x86")]
-        {
-            SYSCALL
-                .compare_exchange(
-                    null_mut(),
-                    rustix_int_0x80 as *mut Function,
                     Relaxed,
                     Relaxed,
                 )
@@ -589,19 +403,6 @@ fn init() {
                 unsafe {
                     GETCPU.store(ptr.cast(), Relaxed);
                 }
-            }
-        }
-
-        // On x86, also look up the vsyscall entry point.
-        #[cfg(target_arch = "x86")]
-        {
-            let ptr = vdso.sym(cstr!("LINUX_2.5"), cstr!("__kernel_vsyscall"));
-            assert!(!ptr.is_null());
-
-            // SAFETY: As above, store the computed function addresses in
-            // static storage.
-            unsafe {
-                SYSCALL.store(ptr.cast(), Relaxed);
             }
         }
     }
