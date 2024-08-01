@@ -172,6 +172,12 @@ pub fn create(flags: CreateFlags) -> io::Result<OwnedFd> {
 /// returned from [`wait`]. If a file descriptor is an
 /// `Arc<dyn SystemResource>`, then `epoll` can be thought to maintain a
 /// `Weak<dyn SystemResource>` to the file descriptor.
+///
+/// # References
+///
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/epoll_create.2.html
 #[doc(alias = "epoll_ctl")]
 #[inline]
 pub fn add(
@@ -198,6 +204,12 @@ pub fn add(
 /// given epoll object.
 ///
 /// This sets the events of interest with `target` to `events`.
+///
+/// # References
+///
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/epoll_ctl.2.html
 #[doc(alias = "epoll_ctl")]
 #[inline]
 pub fn modify(
@@ -223,6 +235,12 @@ pub fn modify(
 
 /// `epoll_ctl(self, EPOLL_CTL_DEL, target, NULL)`—Removes an element in a
 /// given epoll object.
+///
+/// # References
+///
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/epoll_ctl.2.html
 #[doc(alias = "epoll_ctl")]
 #[inline]
 pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
@@ -239,8 +257,14 @@ pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
 ///
 /// For each event of interest, an element is written to `events`. On
 /// success, this returns the number of written elements.
+///
+/// # References
+///
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/epoll_wait.2.html
 #[cfg(feature = "alloc")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "alloc"), alias = "epoll_wait"))]
 #[inline]
 pub fn wait(epoll: impl AsFd, event_list: &mut EventVec, timeout: c::c_int) -> io::Result<()> {
     // SAFETY: We're calling `epoll_wait` via FFI and we know how it
