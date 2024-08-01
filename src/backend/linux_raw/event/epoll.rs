@@ -166,13 +166,6 @@ pub fn create(flags: CreateFlags) -> io::Result<OwnedFd> {
 /// This registers interest in any of the events set in `events` occurring on
 /// the file descriptor associated with `data`.
 ///
-/// If [`delete`] is not called on the I/O source passed into this function
-/// before the I/O source is `close`d, then the `epoll` will act as if the I/O
-/// source is still registered with it. This can lead to spurious events being
-/// returned from [`wait`]. If a file descriptor is an
-/// `Arc<dyn SystemResource>`, then `epoll` can be thought to maintain a
-/// `Weak<dyn SystemResource>` to the file descriptor.
-///
 /// # References
 ///
 ///  - [Linux]
