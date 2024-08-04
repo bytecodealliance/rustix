@@ -1,7 +1,7 @@
 bitflags::bitflags! {
     /// `FUTEX_*` flags for use with [`futex`].
     ///
-    /// [`futex`]: crate::thread::futex
+    /// [`futex`]: mod@crate::thread::futex
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct FutexFlags: u32 {
@@ -18,7 +18,7 @@ bitflags::bitflags! {
 
 /// `FUTEX_*` operations for use with [`futex`].
 ///
-/// [`futex`]: crate::thread::futex
+/// [`futex`]: mod@crate::thread::futex
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
 pub enum FutexOperation {
@@ -42,4 +42,18 @@ pub enum FutexOperation {
     TrylockPi = linux_raw_sys::general::FUTEX_TRYLOCK_PI,
     /// `FUTEX_WAIT_BITSET`
     WaitBitset = linux_raw_sys::general::FUTEX_WAIT_BITSET,
+    /// `FUTEX_WAKE_BITSET`
+    WakeBitset = linux_raw_sys::general::FUTEX_WAKE_BITSET,
+    /// `FUTEX_WAIT_REQUEUE_PI`
+    WaitRequeuePi = linux_raw_sys::general::FUTEX_WAIT_REQUEUE_PI,
+    /// `FUTEX_CMP_REQUEUE_PI`
+    CmpRequeuePi = linux_raw_sys::general::FUTEX_CMP_REQUEUE_PI,
+    /// `FUTEX_LOCK_PI2`
+    LockPi2 = linux_raw_sys::general::FUTEX_LOCK_PI2,
 }
+
+/// `FUTEX_WAITERS`
+pub const FUTEX_WAITERS: u32 = linux_raw_sys::general::FUTEX_WAITERS;
+
+/// `FUTEX_OWNER_DIED`
+pub const FUTEX_OWNER_DIED: u32 = linux_raw_sys::general::FUTEX_OWNER_DIED;
