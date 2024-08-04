@@ -384,7 +384,7 @@ pub unsafe fn unlock_pi(uaddr: &AtomicU32, flags: FutexFlags) -> io::Result<()> 
 /// [Linux `futex` system call]: https://man7.org/linux/man-pages/man2/futex.2.html
 /// [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
 #[inline]
-pub unsafe fn trylock_pi(uaddr: &AtomicU32, flags: FutexFlags) -> io::Result<()> {
+pub unsafe fn trylock_pi(uaddr: &AtomicU32, flags: FutexFlags) -> io::Result<bool> {
     backend::thread::syscalls::futex_val2(
         uaddr,
         FutexOperation::TrylockPi,
@@ -393,8 +393,8 @@ pub unsafe fn trylock_pi(uaddr: &AtomicU32, flags: FutexFlags) -> io::Result<()>
         0,
         ptr::null(),
         0,
-    )?;
-    Ok(())
+    )
+    .map(|ret| ret == 0)
 }
 
 /// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_WAIT_BITSET, val, timeout/val2, NULL, val3)`
