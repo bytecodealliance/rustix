@@ -2,7 +2,7 @@
 
 pub use crate::backend::fs::inotify::{CreateFlags, WatchFlags};
 use crate::backend::fs::syscalls;
-use crate::fd::{BorrowedFd, OwnedFd};
+use crate::fd::{AsFd, OwnedFd};
 use crate::io;
 
 /// `inotify_init1(flags)`—Creates a new inotify object.
@@ -24,12 +24,12 @@ pub fn inotify_init(flags: CreateFlags) -> io::Result<OwnedFd> {
 /// this method may result in it returning the same watch descriptor. An
 /// application should keep track of this externally to avoid logic errors.
 #[inline]
-pub fn inotify_add_watch<P: crate::path::Arg>(
-    inot: BorrowedFd<'_>,
+pub fn inotify_add_watch<Fd: AsFd, P: crate::path::Arg>(
+    inot: Fd,
     path: P,
     flags: WatchFlags,
 ) -> io::Result<i32> {
-    path.into_with_c_str(|path| syscalls::inotify_add_watch(inot, path, flags))
+    path.into_with_c_str(|path| syscalls::inotify_add_watch(inot.as_fd(), path, flags))
 }
 
 /// `inotify_rm_watch(self, wd)`—Removes a watch from this inotify.
@@ -38,6 +38,6 @@ pub fn inotify_add_watch<P: crate::path::Arg>(
 /// [`inotify_add_watch`] and not previously have been removed.
 #[doc(alias = "inotify_rm_watch")]
 #[inline]
-pub fn inotify_remove_watch(inot: BorrowedFd<'_>, wd: i32) -> io::Result<()> {
-    syscalls::inotify_rm_watch(inot, wd)
+pub fn inotify_remove_watch<Fd: AsFd>(inot: Fd, wd: i32) -> io::Result<()> {
+    syscalls::inotify_rm_watch(inot.as_fd(), wd)
 }
