@@ -2549,3 +2549,35 @@ fn test_sizes() {
     #[cfg(fix_y2038)]
     assert!(core::mem::size_of::<[c::timespec; 2]>() < core::mem::size_of::<Timestamps>());
 }
+
+#[inline]
+#[cfg(linux_kernel)]
+pub(crate) fn inotify_init1(flags: super::inotify::CreateFlags) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(c::inotify_init1(bitflags_bits!(flags))) }
+}
+
+#[inline]
+#[cfg(linux_kernel)]
+pub(crate) fn inotify_add_watch(
+    inot: BorrowedFd<'_>,
+    path: &CStr,
+    flags: super::inotify::WatchFlags,
+) -> io::Result<i32> {
+    unsafe {
+        ret_c_int(c::inotify_add_watch(
+            borrowed_fd(inot),
+            c_str(path),
+            flags.bits(),
+        ))
+    }
+}
+
+#[inline]
+#[cfg(linux_kernel)]
+pub(crate) fn inotify_rm_watch(inot: BorrowedFd<'_>, wd: i32) -> io::Result<()> {
+    // Android's `inotify_rm_watch` takes `u32` despite that
+    // `inotify_add_watch` expects a `i32`.
+    #[cfg(target_os = "android")]
+    let wd = wd as u32;
+    unsafe { ret(c::inotify_rm_watch(borrowed_fd(inot), wd)) }
+}
