@@ -20,8 +20,8 @@ bitflags = { version = "2.4.0", default-features = false }
 itoa = { version = "1.0.1", default-features = false, optional = true }
 
 # Special dependencies used in rustc-dep-of-std mode.
-core = { version = "1.0.0", optional = true, package = "rustc-std-workspace-core"}
-rustc-std-workspace-alloc = { version = "1.0.0", optional = true} # not aliased here but in lib.rs casuse of name collision with the alloc feature
+core = { version = "1.0.0", optional = true, package = "rustc-std-workspace-core" }
+rustc-std-workspace-alloc = { version = "1.0.0", optional = true } # not aliased here but in lib.rs casuse of name collision with the alloc feature
 compiler_builtins = { version = '0.1.49', optional = true }
 
 # The procfs feature needs once_cell.
@@ -249,3 +249,32 @@ cc = []
 # Enable `rustix::io::try_close`. The rustix developers do not intend the
 # existence of this feature to imply that anyone should use it.
 try_close = []
+
+[lints.rust.unexpected_cfgs]
+level = "warn"
+check-cfg = [
+    'cfg(alloc_c_string)',
+    'cfg(alloc_ffi)',
+    'cfg(apple)',
+    'cfg(asm_experimental_arch)',
+    'cfg(bsd)',
+    'cfg(core_c_str)',
+    'cfg(core_ffi_c)',
+    'cfg(core_intrinsics)',
+    'cfg(doc_cfg)',
+    'cfg(document_experimental_runtime_api)',
+    'cfg(fix_y2038)',
+    'cfg(freebsdlike)',
+    'cfg(libc)',
+    'cfg(linux_kernel)',
+    'cfg(linux_like)',
+    'cfg(linux_raw)',
+    'cfg(netbsdlike)',
+    'cfg(rustc_attrs)',
+    'cfg(solarish)',
+    'cfg(staged_api)',
+    'cfg(static_assertions)',
+    'cfg(thumb_mode)',
+    'cfg(wasi)',
+    'cfg(wasi_ext)',
+]
