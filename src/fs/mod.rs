@@ -33,6 +33,8 @@ mod getpath;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;
 #[cfg(linux_kernel)]
+pub mod inotify;
+#[cfg(linux_kernel)]
 mod ioctl;
 #[cfg(not(any(
     target_os = "espidf",
@@ -66,8 +68,6 @@ mod sync;
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 mod xattr;
 
-#[cfg(linux_kernel)]
-pub use crate::backend::fs::inotify;
 pub use abs::*;
 #[cfg(not(target_os = "redox"))]
 pub use at::*;
