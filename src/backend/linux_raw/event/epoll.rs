@@ -154,6 +154,12 @@ bitflags! {
 ///
 /// Use the [`CreateFlags::CLOEXEC`] flag to prevent the resulting file
 /// descriptor from being implicitly passed across `exec` boundaries.
+///
+/// # References
+///
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/epoll_create.2.html
 #[inline]
 #[doc(alias = "epoll_create1")]
 pub fn create(flags: CreateFlags) -> io::Result<OwnedFd> {
@@ -166,12 +172,17 @@ pub fn create(flags: CreateFlags) -> io::Result<OwnedFd> {
 /// This registers interest in any of the events set in `events` occurring on
 /// the file descriptor associated with `data`.
 ///
-/// If [`delete`] is not called on the I/O source passed into this function
-/// before the I/O source is `close`d, then the `epoll` will act as if the I/O
-/// source is still registered with it. This can lead to spurious events being
-/// returned from [`wait`]. If a file descriptor is an
-/// `Arc<dyn SystemResource>`, then `epoll` can be thought to maintain a
-/// `Weak<dyn SystemResource>` to the file descriptor.
+/// Note that `close`ing a file descriptor does not necessarily unregister interest
+/// which can lead to spurious events being returned from [`wait`]. If a file descriptor
+/// is an `Arc<dyn SystemResource>`, then `epoll` can be thought to maintain a
+/// `Weak<dyn SystemResource>` to the file descriptor. Check the [faq] for details.
+///
+/// # References
+///
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/epoll_ctl.2.html
+/// [faq]: https://man7.org/linux/man-pages/man7/epoll.7.html#:~:text=Will%20closing%20a%20file%20descriptor%20cause%20it%20to%20be%20removed%20from%20all%0A%20%20%20%20%20%20%20%20%20%20epoll%20interest%20lists%3F
 #[doc(alias = "epoll_ctl")]
 #[inline]
 pub fn add(
@@ -198,6 +209,12 @@ pub fn add(
 /// given epoll object.
 ///
 /// This sets the events of interest with `target` to `events`.
+///
+/// # References
+///
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/epoll_ctl.2.html
 #[doc(alias = "epoll_ctl")]
 #[inline]
 pub fn modify(
@@ -223,6 +240,12 @@ pub fn modify(
 
 /// `epoll_ctl(self, EPOLL_CTL_DEL, target, NULL)`—Removes an element in a
 /// given epoll object.
+///
+/// # References
+///
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/epoll_ctl.2.html
 #[doc(alias = "epoll_ctl")]
 #[inline]
 pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
@@ -239,8 +262,14 @@ pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
 ///
 /// For each event of interest, an element is written to `events`. On
 /// success, this returns the number of written elements.
+///
+/// # References
+///
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/epoll_wait.2.html
 #[cfg(feature = "alloc")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "alloc"), alias = "epoll_wait"))]
 #[inline]
 pub fn wait(epoll: impl AsFd, event_list: &mut EventVec, timeout: c::c_int) -> io::Result<()> {
     // SAFETY: We're calling `epoll_wait` via FFI and we know how it
