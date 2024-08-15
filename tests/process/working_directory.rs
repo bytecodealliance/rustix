@@ -40,7 +40,7 @@ fn test_changing_working_directory() {
     #[cfg(not(target_os = "fuchsia"))]
     rustix::process::fchdir(orig_fd_cwd).expect("changing dir to the original");
     #[cfg(target_os = "fuchsia")]
-    rustix::process::chdir(orig_cwd).expect("changing dir to the original");
+    rustix::process::chdir(&orig_cwd).expect("changing dir to the original");
     let ch2_cwd = rustix::process::getcwd(ch1_cwd).expect("get the cwd");
 
     assert_eq!(
