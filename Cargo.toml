@@ -261,6 +261,7 @@ check-cfg = [
     'cfg(core_c_str)',
     'cfg(core_ffi_c)',
     'cfg(core_intrinsics)',
+    'cfg(criterion)',
     'cfg(doc_cfg)',
     'cfg(document_experimental_runtime_api)',
     'cfg(fix_y2038)',

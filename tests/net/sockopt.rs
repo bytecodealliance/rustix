@@ -186,7 +186,7 @@ fn test_sockopts_socket(s: &OwnedFd) {
 
 // Test `tcp` socket options.
 fn test_sockopts_tcp(s: &OwnedFd) {
-    #[cfg(any(linux_like, taraget_os = "fuchsia"))]
+    #[cfg(any(linux_like, target_os = "fuchsia"))]
     {
         assert_eq!(sockopt::get_tcp_user_timeout(s).unwrap(), 0);
         sockopt::set_tcp_user_timeout(s, 7).unwrap();
