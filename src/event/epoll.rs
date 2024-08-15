@@ -71,6 +71,7 @@
 
 #![allow(unsafe_code)]
 #![allow(unused_qualifications)]
+#![allow(deprecated)]
 
 use super::epoll;
 use crate::backend::c;
@@ -80,6 +81,7 @@ use crate::fd::{AsFd, OwnedFd};
 use crate::io;
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
+pub use buf::EventBuffer;
 use core::ffi::c_void;
 use core::hash::{Hash, Hasher};
 use core::slice;
@@ -191,20 +193,15 @@ pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
 #[cfg(feature = "alloc")]
 #[cfg_attr(docsrs, doc(cfg(feature = "alloc"), alias = "epoll_wait"))]
 #[inline]
-pub fn wait(epoll: impl AsFd, event_list: &mut EventVec, timeout: c::c_int) -> io::Result<()> {
-    // SAFETY: We're calling `epoll_wait` via FFI and we know how it
-    // behaves.
+pub fn wait<B: EventBuffer>(
+    epoll: impl AsFd,
+    mut events: B,
+    timeout: c::c_int,
+) -> io::Result<B::Out> {
     unsafe {
-        event_list.events.clear();
-        let nfds = syscalls::epoll_wait(
-            epoll.as_fd(),
-            event_list.events.spare_capacity_mut(),
-            timeout,
-        )?;
-        event_list.events.set_len(nfds);
+        let nfds = syscalls::epoll_wait(epoll.as_fd(), events.convert(buf::Internal), timeout)?;
+        Ok(events.filled(nfds, buf::Internal))
     }
-
-    Ok(())
 }
 
 /// An iterator over the `Event`s in an `EventVec`.
@@ -342,6 +339,7 @@ struct SixtyFourBitPointer {
 
 /// A vector of `Event`s, plus context for interpreting them.
 #[cfg(feature = "alloc")]
+#[deprecated(note = "Use an array or vec directly instead.")]
 pub struct EventVec {
     events: Vec<Event>,
 }
@@ -441,4 +439,84 @@ fn test_epoll_layouts() {
     check_renamed_struct_renamed_field!(Event, epoll_event, data, u64);
     #[cfg(not(libc))]
     check_renamed_struct_renamed_field!(Event, epoll_event, data, data);
+}
+
+mod buf {
+    use super::Event;
+    use crate::buffer::split_init;
+    #[cfg(feature = "alloc")]
+    use alloc::vec::Vec;
+    use core::mem::MaybeUninit;
+
+    pub struct Internal;
+
+    /// Implementation detail trait to support different return types.
+    ///
+    /// Check the [`Self::Out`] type for each implementation.
+    pub trait EventBuffer {
+        /// The return type of this input.
+        type Out;
+
+        #[doc(hidden)]
+        fn convert(&mut self, _: Internal) -> &mut [MaybeUninit<Event>];
+
+        #[doc(hidden)]
+        unsafe fn filled(self, count: usize, _: Internal) -> Self::Out;
+    }
+
+    #[cfg(feature = "alloc")]
+    impl EventBuffer for &mut super::EventVec {
+        type Out = ();
+
+        fn convert(&mut self, _: Internal) -> &mut [MaybeUninit<Event>] {
+            self.events.clear();
+            self.events.spare_capacity_mut()
+        }
+
+        unsafe fn filled(self, count: usize, _: Internal) -> Self::Out {
+            unsafe {
+                self.events.set_len(count);
+            }
+        }
+    }
+
+    #[cfg(feature = "alloc")]
+    impl EventBuffer for &mut Vec<Event> {
+        type Out = ();
+
+        fn convert(&mut self, _: Internal) -> &mut [MaybeUninit<Event>] {
+            self.spare_capacity_mut()
+        }
+
+        unsafe fn filled(self, count: usize, _: Internal) -> Self::Out {
+            unsafe {
+                self.set_len(count);
+            }
+        }
+    }
+
+    impl<'a> EventBuffer for &'a mut [Event] {
+        type Out = &'a mut [Event];
+
+        fn convert(&mut self, _: Internal) -> &mut [MaybeUninit<Event>] {
+            // SAFETY: we (and the kernel) never uninitialize any values
+            unsafe { core::mem::transmute::<&mut [Event], &mut [MaybeUninit<Event>]>(self) }
+        }
+
+        unsafe fn filled(self, count: usize, _: Internal) -> Self::Out {
+            &mut self[..count]
+        }
+    }
+
+    impl<'a> EventBuffer for &'a mut [MaybeUninit<Event>] {
+        type Out = &'a mut [Event];
+
+        fn convert(&mut self, _: Internal) -> &mut [MaybeUninit<Event>] {
+            self
+        }
+
+        unsafe fn filled(self, count: usize, _: Internal) -> Self::Out {
+            unsafe { split_init(self, count) }.0
+        }
+    }
 }

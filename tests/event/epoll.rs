@@ -41,10 +41,10 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     let mut next_data = epoll::EventData::new_u64(2);
     let mut targets = HashMap::new();
 
-    let mut event_list = epoll::EventVec::with_capacity(4);
+    let mut event_list = Vec::with_capacity(4);
     loop {
         epoll::wait(&epoll, &mut event_list, -1).unwrap();
-        for event in &event_list {
+        for event in event_list.drain(..) {
             let target = event.data;
             if target.u64() == 1 {
                 let conn_sock = accept(&listen_sock).unwrap();
