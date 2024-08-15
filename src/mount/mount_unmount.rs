@@ -19,18 +19,18 @@ pub fn mount<Source: path::Arg, Target: path::Arg, Fs: path::Arg, Data: path::Ar
     target: Target,
     file_system_type: Fs,
     flags: MountFlags,
-    data: Data,
+    data: impl Into<Option<Data>>,
 ) -> io::Result<()> {
     source.into_with_c_str(|source| {
         target.into_with_c_str(|target| {
             file_system_type.into_with_c_str(|file_system_type| {
-                data.into_with_c_str(|data| {
+                option_into_with_c_str(data.into(), |data| {
                     backend::mount::syscalls::mount(
                         Some(source),
                         target,
                         Some(file_system_type),
                         MountFlagsArg(flags.bits()),
-                        Some(data),
+                        data,
                     )
                 })
             })
@@ -49,6 +49,8 @@ pub fn mount<Source: path::Arg, Target: path::Arg, Fs: path::Arg, Data: path::Ar
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mount.2.html
 #[inline]
+#[deprecated(note = "This API was added in error, use the expressive mount APIs instead.")]
+#[doc(hidden)]
 pub fn mount2<Source: path::Arg, Target: path::Arg, Fs: path::Arg>(
     source: Option<Source>,
     target: Target,
