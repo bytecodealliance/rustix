@@ -14,7 +14,7 @@ use crate::net::UCred;
 use core::fmt;
 use core::iter::FusedIterator;
 use core::marker::PhantomData;
-use core::mem::{align_of, size_of, size_of_val, take};
+use core::mem::{align_of, size_of, size_of_val, take, MaybeUninit};
 #[cfg(linux_kernel)]
 use core::ptr::addr_of;
 use core::{ptr, slice};
@@ -28,16 +28,20 @@ use super::{RecvFlags, ReturnFlags, SendFlags, SocketAddrAny};
 ///
 /// Allocate a buffer for a single file descriptor:
 /// ```
+/// # use core::mem::MaybeUninit;
 /// # use rustix::cmsg_space;
-/// let mut space = [0; rustix::cmsg_space!(ScmRights(1))];
+/// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmRights(1))];
+/// # let _: &[MaybeUninit<u8>] = space.as_slice();
 /// ```
 ///
 /// Allocate a buffer for credentials:
 /// ```
 /// # #[cfg(linux_kernel)]
 /// # {
+/// # use core::mem::MaybeUninit;
 /// # use rustix::cmsg_space;
-/// let mut space = [0; rustix::cmsg_space!(ScmCredentials(1))];
+/// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmCredentials(1))];
+/// # let _: &[MaybeUninit<u8>] = space.as_slice();
 /// # }
 /// ```
 ///
@@ -45,8 +49,10 @@ use super::{RecvFlags, ReturnFlags, SendFlags, SocketAddrAny};
 /// ```
 /// # #[cfg(linux_kernel)]
 /// # {
+/// # use core::mem::MaybeUninit;
 /// # use rustix::cmsg_space;
-/// let mut space = [0; rustix::cmsg_space!(ScmRights(2), ScmCredentials(1))];
+/// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmRights(2), ScmCredentials(1))];
+/// # let _: &[MaybeUninit<u8>] = space.as_slice();
 /// # }
 /// ```
 #[macro_export]
@@ -169,7 +175,7 @@ pub enum RecvAncillaryMessage<'a> {
 /// [`push`]: SendAncillaryBuffer::push
 pub struct SendAncillaryBuffer<'buf, 'slice, 'fd> {
     /// Raw byte buffer for messages.
-    buffer: &'buf mut [u8],
+    buffer: &'buf mut [MaybeUninit<u8>],
 
     /// The amount of the buffer that is used.
     length: usize,
@@ -181,6 +187,12 @@ pub struct SendAncillaryBuffer<'buf, 'slice, 'fd> {
 impl<'buf> From<&'buf mut [u8]> for SendAncillaryBuffer<'buf, '_, '_> {
     fn from(buffer: &'buf mut [u8]) -> Self {
         Self::new(buffer)
+    }
+}
+
+impl<'buf> From<&'buf mut [MaybeUninit<u8>]> for SendAncillaryBuffer<'buf, '_, '_> {
+    fn from(buffer: &'buf mut [MaybeUninit<u8>]) -> Self {
+        Self::new_(buffer)
     }
 }
 
@@ -236,6 +248,11 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
     /// [`send`]: crate::net::send
     #[inline]
     pub fn new(buffer: &'buf mut [u8]) -> Self {
+        // SAFETY: T -> MaybeUninit<T> is always safe and we never uninitialize any bytes.
+        Self::new_(unsafe { core::mem::transmute::<&mut [u8], &mut [MaybeUninit<u8>]>(buffer) })
+    }
+
+    fn new_(buffer: &'buf mut [MaybeUninit<u8>]) -> Self {
         Self {
             buffer: align_for_cmsghdr(buffer),
             length: 0,
@@ -253,7 +270,7 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
             return core::ptr::null_mut();
         }
 
-        self.buffer.as_mut_ptr()
+        self.buffer.as_mut_ptr().cast()
     }
 
     /// Returns the length of the message data.
@@ -306,7 +323,7 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
         let buffer = leap!(self.buffer.get_mut(..new_length));
 
         // Fill the new part of the buffer with zeroes.
-        buffer[self.length..new_length].fill(0);
+        buffer[self.length..new_length].fill(MaybeUninit::new(0));
         self.length = new_length;
 
         // Get the last header in the buffer.
@@ -344,7 +361,7 @@ impl<'slice, 'fd> Extend<SendAncillaryMessage<'slice, 'fd>>
 #[derive(Default)]
 pub struct RecvAncillaryBuffer<'buf> {
     /// Raw byte buffer for messages.
-    buffer: &'buf mut [u8],
+    buffer: &'buf mut [MaybeUninit<u8>],
 
     /// The portion of the buffer we've read from already.
     read: usize,
@@ -356,6 +373,12 @@ pub struct RecvAncillaryBuffer<'buf> {
 impl<'buf> From<&'buf mut [u8]> for RecvAncillaryBuffer<'buf> {
     fn from(buffer: &'buf mut [u8]) -> Self {
         Self::new(buffer)
+    }
+}
+
+impl<'buf> From<&'buf mut [MaybeUninit<u8>]> for RecvAncillaryBuffer<'buf> {
+    fn from(buffer: &'buf mut [MaybeUninit<u8>]) -> Self {
+        Self::new_(buffer)
     }
 }
 
@@ -401,6 +424,11 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
     /// [`recv`]: crate::net::recv
     #[inline]
     pub fn new(buffer: &'buf mut [u8]) -> Self {
+        // SAFETY: T -> MaybeUninit<T> is always safe and we never uninitialize any bytes.
+        Self::new_(unsafe { core::mem::transmute::<&mut [u8], &mut [MaybeUninit<u8>]>(buffer) })
+    }
+
+    fn new_(buffer: &'buf mut [MaybeUninit<u8>]) -> Self {
         Self {
             buffer: align_for_cmsghdr(buffer),
             read: 0,
@@ -418,7 +446,7 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
             return core::ptr::null_mut();
         }
 
-        self.buffer.as_mut_ptr()
+        self.buffer.as_mut_ptr().cast()
     }
 
     /// Returns the length of the message data.
@@ -459,7 +487,7 @@ impl Drop for RecvAncillaryBuffer<'_> {
 /// Return a slice of `buffer` starting at the first `cmsghdr` alignment
 /// boundary.
 #[inline]
-fn align_for_cmsghdr(buffer: &mut [u8]) -> &mut [u8] {
+fn align_for_cmsghdr(buffer: &mut [MaybeUninit<u8>]) -> &mut [MaybeUninit<u8>] {
     // If the buffer is empty, we won't be writing anything into it, so it
     // doesn't need to be aligned.
     if buffer.is_empty() {
@@ -884,6 +912,7 @@ mod messages {
     use crate::backend::net::msghdr;
     use core::iter::FusedIterator;
     use core::marker::PhantomData;
+    use core::mem::MaybeUninit;
     use core::ptr::NonNull;
 
     /// An iterator over the messages in an ancillary buffer.
@@ -897,15 +926,19 @@ mod messages {
         header: Option<NonNull<c::cmsghdr>>,
 
         /// Capture the original lifetime of the buffer.
-        _buffer: PhantomData<&'buf mut [u8]>,
+        _buffer: PhantomData<&'buf mut [MaybeUninit<u8>]>,
     }
+
+    pub(super) trait AllowedMsgBufType {}
+    impl AllowedMsgBufType for u8 {}
+    impl AllowedMsgBufType for MaybeUninit<u8> {}
 
     impl<'buf> Messages<'buf> {
         /// Create a new iterator over messages from a byte buffer.
-        pub(super) fn new(buf: &'buf mut [u8]) -> Self {
+        pub(super) fn new(buf: &'buf mut [impl AllowedMsgBufType]) -> Self {
             let mut msghdr = msghdr::zero_msghdr();
             msghdr.msg_control = buf.as_mut_ptr().cast();
-            msghdr.msg_controllen = buf.len().try_into().unwrap();
+            msghdr.msg_controllen = buf.len().try_into().expect("buffer too large for msghdr");
 
             // Get the first header.
             let header = NonNull::new(unsafe { c::CMSG_FIRSTHDR(&msghdr) });
