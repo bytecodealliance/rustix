@@ -160,15 +160,9 @@ pub(crate) mod check_types;
 #[macro_use]
 pub(crate) mod bitcast;
 
-// linux_raw: Weak symbols are used by the use-libc-auxv feature for
-// glibc 2.15 support.
-//
-// libc: Weak symbols are used to call various functions available in some
-// versions of libc and not others.
-#[cfg(any(
-    all(linux_raw, feature = "use-libc-auxv"),
-    all(libc, not(any(windows, target_os = "espidf", target_os = "wasi")))
-))]
+// Weak symbols are used to call various functions available in some versions
+// of libc and not others.
+#[cfg(all(libc, not(any(windows, target_os = "espidf", target_os = "wasi"))))]
 #[macro_use]
 mod weak;
 

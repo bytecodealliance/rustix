@@ -11,15 +11,12 @@ use crate::ffi::CStr;
 #[cfg(not(feature = "runtime"))]
 use core::ptr::null;
 use linux_raw_sys::elf::*;
+#[cfg(target_arch = "x86")]
+use {
+    core::ffi::c_void, core::ptr::null_mut, core::sync::atomic::AtomicPtr,
+    core::sync::atomic::Ordering::Relaxed,
+};
 
-// `getauxval` wasn't supported in glibc until 2.16. Also this lets us use
-// `*mut` as the return type to preserve strict provenance.
-#[cfg(not(feature = "runtime"))]
-weak!(fn getauxval(c::c_ulong) -> *mut c::c_void);
-
-// With the "runtime" feature, go ahead and depend on `getauxval` existing so
-// that we never fail.
-#[cfg(feature = "runtime")]
 extern "C" {
     fn getauxval(type_: c::c_ulong) -> *mut c::c_void;
 }
@@ -38,6 +35,8 @@ const AT_RANDOM: c::c_ulong = 25;
 const AT_HWCAP2: c::c_ulong = 26;
 const AT_SECURE: c::c_ulong = 23;
 const AT_EXECFN: c::c_ulong = 31;
+#[cfg(target_arch = "x86")]
+const AT_SYSINFO: c::c_ulong = 32;
 const AT_SYSINFO_EHDR: c::c_ulong = 33;
 
 // Declare `sysconf` ourselves so that we don't depend on all of libc just for
@@ -72,6 +71,9 @@ fn test_abi() {
     const_assert_eq!(self::AT_ENTRY, ::libc::AT_ENTRY);
     #[cfg(feature = "runtime")]
     const_assert_eq!(self::AT_RANDOM, ::libc::AT_RANDOM);
+    // TODO: Upstream x86's `AT_SYSINFO` to libc.
+    #[cfg(target_arch = "x86")]
+    const_assert_eq!(self::AT_SYSINFO, ::linux_raw_sys::general::AT_SYSINFO);
 }
 
 #[cfg(feature = "param")]
@@ -89,18 +91,6 @@ pub(crate) fn clock_ticks_per_second() -> u64 {
 #[cfg(feature = "param")]
 #[inline]
 pub(crate) fn linux_hwcap() -> (usize, usize) {
-    #[cfg(not(feature = "runtime"))]
-    unsafe {
-        if let Some(libc_getauxval) = getauxval.get() {
-            let hwcap = libc_getauxval(AT_HWCAP) as usize;
-            let hwcap2 = libc_getauxval(AT_HWCAP2) as usize;
-            (hwcap, hwcap2)
-        } else {
-            (0, 0)
-        }
-    }
-
-    #[cfg(feature = "runtime")]
     unsafe {
         let hwcap = getauxval(AT_HWCAP) as usize;
         let hwcap2 = getauxval(AT_HWCAP2) as usize;
@@ -130,19 +120,7 @@ pub(crate) fn linux_minsigstksz() -> usize {
 #[cfg(feature = "param")]
 #[inline]
 pub(crate) fn linux_execfn() -> &'static CStr {
-    #[cfg(not(feature = "runtime"))]
-    unsafe {
-        if let Some(libc_getauxval) = getauxval.get() {
-            CStr::from_ptr(libc_getauxval(AT_EXECFN).cast())
-        } else {
-            cstr!("")
-        }
-    }
-
-    #[cfg(feature = "runtime")]
-    unsafe {
-        CStr::from_ptr(getauxval(AT_EXECFN).cast())
-    }
+    unsafe { CStr::from_ptr(getauxval(AT_EXECFN).cast()) }
 }
 
 #[cfg(feature = "runtime")]
@@ -166,19 +144,7 @@ pub(crate) fn exe_phdrs() -> (*const c::c_void, usize, usize) {
 /// if we don't see it, this function returns a null pointer.
 #[inline]
 pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
-    #[cfg(not(feature = "runtime"))]
-    unsafe {
-        if let Some(libc_getauxval) = getauxval.get() {
-            libc_getauxval(AT_SYSINFO_EHDR) as *const Elf_Ehdr
-        } else {
-            null()
-        }
-    }
-
-    #[cfg(feature = "runtime")]
-    unsafe {
-        getauxval(AT_SYSINFO_EHDR) as *const Elf_Ehdr
-    }
+    unsafe { getauxval(AT_SYSINFO_EHDR) as *const Elf_Ehdr }
 }
 
 #[cfg(feature = "runtime")]
@@ -191,4 +157,26 @@ pub(crate) fn entry() -> usize {
 #[inline]
 pub(crate) fn random() -> *const [u8; 16] {
     unsafe { getauxval(AT_RANDOM) as *const [u8; 16] }
+}
+
+#[cfg(target_arch = "x86")]
+#[inline]
+pub(crate) fn vsyscall() -> *const c_void {
+    // We call this for every system call, so memoize the value.
+    static VSYSCALL: AtomicPtr<c_void> = AtomicPtr::new(null_mut());
+
+    let mut vsyscall = VSYSCALL.load(Relaxed);
+
+    if vsyscall.is_null() {
+        #[cold]
+        fn compute_vsyscall() -> *mut c_void {
+            let vsyscall = unsafe { getauxval(AT_SYSINFO) as *mut c_void };
+            VSYSCALL.store(vsyscall, Relaxed);
+            vsyscall
+        }
+
+        vsyscall = compute_vsyscall();
+    }
+
+    vsyscall
 }

@@ -21,6 +21,8 @@ use core::sync::atomic::AtomicU8;
 use core::sync::atomic::Ordering::Relaxed;
 use core::sync::atomic::{AtomicPtr, AtomicUsize};
 use linux_raw_sys::elf::*;
+#[cfg(target_arch = "x86")]
+use linux_raw_sys::general::AT_SYSINFO;
 use linux_raw_sys::general::{
     AT_BASE, AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_MINSIGSTKSZ, AT_NULL, AT_PAGESZ,
     AT_SYSINFO_EHDR,
@@ -38,8 +40,12 @@ pub(crate) fn page_size() -> usize {
     let mut page_size = PAGE_SIZE.load(Relaxed);
 
     if page_size == 0 {
-        init_auxv();
-        page_size = PAGE_SIZE.load(Relaxed);
+        #[cold]
+        fn compute_page_size() -> usize {
+            init_auxv();
+            PAGE_SIZE.load(Relaxed)
+        }
+        page_size = compute_page_size();
     }
 
     page_size
@@ -51,8 +57,12 @@ pub(crate) fn clock_ticks_per_second() -> u64 {
     let mut ticks = CLOCK_TICKS_PER_SECOND.load(Relaxed);
 
     if ticks == 0 {
-        init_auxv();
-        ticks = CLOCK_TICKS_PER_SECOND.load(Relaxed);
+        #[cold]
+        fn compute_clock_ticks_per_second() -> usize {
+            init_auxv();
+            CLOCK_TICKS_PER_SECOND.load(Relaxed)
+        }
+        ticks = compute_clock_ticks_per_second();
     }
 
     ticks as u64
@@ -65,9 +75,12 @@ pub(crate) fn linux_hwcap() -> (usize, usize) {
     let mut hwcap2 = HWCAP2.load(Relaxed);
 
     if hwcap == 0 || hwcap2 == 0 {
-        init_auxv();
-        hwcap = HWCAP.load(Relaxed);
-        hwcap2 = HWCAP2.load(Relaxed);
+        #[cold]
+        fn compute_linux_hwcap() -> (usize, usize) {
+            init_auxv();
+            (HWCAP.load(Relaxed), HWCAP2.load(Relaxed))
+        }
+        (hwcap, hwcap2) = compute_linux_hwcap();
     }
 
     (hwcap, hwcap2)
@@ -92,8 +105,12 @@ pub(crate) fn linux_execfn() -> &'static CStr {
     let mut execfn = EXECFN.load(Relaxed);
 
     if execfn.is_null() {
-        init_auxv();
-        execfn = EXECFN.load(Relaxed);
+        #[cold]
+        fn compute_linux_execfn() -> *mut c::c_char {
+            init_auxv();
+            EXECFN.load(Relaxed)
+        }
+        execfn = compute_linux_execfn();
     }
 
     // SAFETY: We assume the `AT_EXECFN` value provided by the kernel is a
@@ -108,8 +125,12 @@ pub(crate) fn linux_secure() -> bool {
 
     // 0 means not initialized yet.
     if secure == 0 {
-        init_auxv();
-        secure = SECURE.load(Relaxed);
+        #[cold]
+        fn compute_linux_secure() -> u8 {
+            init_auxv();
+            SECURE.load(Relaxed)
+        }
+        secure = compute_linux_secure();
     }
 
     // 0 means not present. Libc `getauxval(AT_SECURE)` would return 0.
@@ -125,11 +146,13 @@ pub(crate) fn exe_phdrs() -> (*const c::c_void, usize, usize) {
     let mut phent = PHENT.load(Relaxed);
     let mut phnum = PHNUM.load(Relaxed);
 
-    if phdr.is_null() || phnum == 0 {
-        init_auxv();
-        phdr = PHDR.load(Relaxed);
-        phent = PHENT.load(Relaxed);
-        phnum = PHNUM.load(Relaxed);
+    if phdr.is_null() || phent == 0 || phnum == 0 {
+        #[cold]
+        fn compute_exe_phdrs() -> (*mut Elf_Phdr, usize, usize) {
+            init_auxv();
+            (PHDR.load(Relaxed), PHENT.load(Relaxed), PHNUM.load(Relaxed))
+        }
+        (phdr, phent, phnum) = compute_exe_phdrs();
     }
 
     (phdr.cast(), phent, phnum)
@@ -145,12 +168,16 @@ pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
     let mut ehdr = SYSINFO_EHDR.load(Relaxed);
 
     if ehdr.is_null() {
-        // Use `maybe_init_auxv` to to read the aux vectors if it can, but do
-        // nothing if it can't. If it can't, then we'll get a null pointer
-        // here, which our callers are prepared to deal with.
-        maybe_init_auxv();
+        #[cold]
+        fn compute_sysinfo_ehdr() -> *mut Elf_Ehdr {
+            // Use `maybe_init_auxv` to to read the aux vectors if it can, but do
+            // nothing if it can't. If it can't, then we'll get a null pointer
+            // here, which our callers are prepared to deal with.
+            maybe_init_auxv();
+            SYSINFO_EHDR.load(Relaxed)
+        }
 
-        ehdr = SYSINFO_EHDR.load(Relaxed);
+        ehdr = compute_sysinfo_ehdr();
     }
 
     ehdr
@@ -162,8 +189,12 @@ pub(crate) fn entry() -> usize {
     let mut entry = ENTRY.load(Relaxed);
 
     if entry == 0 {
-        init_auxv();
-        entry = ENTRY.load(Relaxed);
+        #[cold]
+        fn compute_entry() -> usize {
+            init_auxv();
+            ENTRY.load(Relaxed)
+        }
+        entry = compute_entry();
     }
 
     entry
@@ -175,11 +206,32 @@ pub(crate) fn random() -> *const [u8; 16] {
     let mut random = RANDOM.load(Relaxed);
 
     if random.is_null() {
-        init_auxv();
-        random = RANDOM.load(Relaxed);
+        #[cold]
+        fn compute_random() -> *mut [u8; 16] {
+            init_auxv();
+            RANDOM.load(Relaxed)
+        }
+        random = compute_random();
     }
 
     random
+}
+
+#[cfg(target_arch = "x86")]
+#[inline]
+pub(crate) fn vsyscall() -> *const c::c_void {
+    let mut vsyscall = VSYSCALL.load(Relaxed);
+
+    if vsyscall.is_null() {
+        #[cold]
+        fn compute_vsyscall() -> *mut c::c_void {
+            init_auxv();
+            VSYSCALL.load(Relaxed)
+        }
+        vsyscall = compute_vsyscall();
+    }
+
+    vsyscall
 }
 
 static PAGE_SIZE: AtomicUsize = AtomicUsize::new(0);
@@ -201,6 +253,8 @@ static PHNUM: AtomicUsize = AtomicUsize::new(0);
 static ENTRY: AtomicUsize = AtomicUsize::new(0);
 #[cfg(feature = "runtime")]
 static RANDOM: AtomicPtr<[u8; 16]> = AtomicPtr::new(null_mut());
+#[cfg(target_arch = "x86")]
+static VSYSCALL: AtomicPtr<c::c_void> = AtomicPtr::new(null_mut());
 
 const PR_GET_AUXV: c::c_int = 0x4155_5856;
 
@@ -389,6 +443,8 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
     let mut egid = None;
     #[cfg(feature = "runtime")]
     let mut random = null_mut();
+    #[cfg(target_arch = "x86")]
+    let mut vsyscall = null_mut();
 
     for Elf_auxv_t { a_type, a_val } in aux_iter {
         match a_type as _ {
@@ -428,6 +484,8 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
             AT_ENTRY => entry = a_val as usize,
             #[cfg(feature = "runtime")]
             AT_RANDOM => random = check_raw_pointer::<[u8; 16]>(a_val as *mut _)?.as_ptr(),
+            #[cfg(target_arch = "x86")]
+            AT_SYSINFO => vsyscall = a_val.cast(),
 
             AT_NULL => break,
             _ => (),
@@ -464,6 +522,8 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
     ENTRY.store(entry, Relaxed);
     #[cfg(feature = "runtime")]
     RANDOM.store(random, Relaxed);
+    #[cfg(target_arch = "x86")]
+    VSYSCALL.store(vsyscall, Relaxed);
 
     Some(())
 }

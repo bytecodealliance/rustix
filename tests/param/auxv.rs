@@ -27,17 +27,17 @@ fn test_clock_ticks_per_second() {
 ))]
 #[test]
 fn test_linux_hwcap() {
-    weak!(fn getauxval(libc::c_ulong) -> libc::c_ulong);
-
-    if let Some(libc_getauxval) = getauxval.get() {
-        let (_hwcap, hwcap2) = linux_hwcap();
-
-        // glibc seems to return a different value than `LD_SHOW_AUXV=1` reports.
-        #[cfg(not(target_env = "gnu"))]
-        assert_eq!(_hwcap, unsafe { libc_getauxval(libc::AT_HWCAP) } as usize);
-
-        assert_eq!(hwcap2, unsafe { libc_getauxval(libc::AT_HWCAP2) } as usize);
+    extern "C" {
+        fn getauxval(type_: c::c_ulong) -> *mut c::c_void;
     }
+
+    let (_hwcap, hwcap2) = linux_hwcap();
+
+    // glibc seems to return a different value than `LD_SHOW_AUXV=1` reports.
+    #[cfg(not(target_env = "gnu"))]
+    assert_eq!(_hwcap, unsafe { getauxval(libc::AT_HWCAP) } as usize);
+
+    assert_eq!(hwcap2, unsafe { getauxval(libc::AT_HWCAP2) } as usize);
 }
 
 #[cfg(any(

@@ -160,6 +160,14 @@ oldest Linux version supported by:
 The specifics of this policy may change in the future, but we intend it to
 always reflect “very old” Linux versions.
 
+## Minimum glibc Version
+
+On glibc platforms, rustix requires at least glibc 2.17. This is at most the
+oldest glibc version supported by:
+ - [any current Rust target]
+The specifics of this policy may change in the future, but we intend it to
+always reflect “very old” glibc versions.
+
 [MSRV]: #minimum-supported-rust-version-msrv
 [Rust 1.63]: https://blog.rust-lang.org/2022/08/11/Rust-1.63.0.html
 [any current Rust target]: https://doc.rust-lang.org/nightly/rustc/platform-support.html
