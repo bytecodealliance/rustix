@@ -76,3 +76,49 @@ bitflags! {
         const _ = !0;
     }
 }
+
+bitflags! {
+    /// `IN*` for use with [`InotifyReader`].
+    ///
+    /// [`InotifyReader`]: crate::fs::inotify::InotifyReader
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct ReadFlags: c::c_uint {
+        /// `IN_ACCESS`
+        const ACCESS = linux_raw_sys::general::IN_ACCESS;
+        /// `IN_ATTRIB`
+        const ATTRIB = linux_raw_sys::general::IN_ATTRIB;
+        /// `IN_CLOSE_NOWRITE`
+        const CLOSE_NOWRITE = linux_raw_sys::general::IN_CLOSE_NOWRITE;
+        /// `IN_CLOSE_WRITE`
+        const CLOSE_WRITE = linux_raw_sys::general::IN_CLOSE_WRITE;
+        /// `IN_CREATE`
+        const CREATE = linux_raw_sys::general::IN_CREATE;
+        /// `IN_DELETE`
+        const DELETE = linux_raw_sys::general::IN_DELETE;
+        /// `IN_DELETE_SELF`
+        const DELETE_SELF = linux_raw_sys::general::IN_DELETE_SELF;
+        /// `IN_MODIFY`
+        const MODIFY = linux_raw_sys::general::IN_MODIFY;
+        /// `IN_MOVE_SELF`
+        const MOVE_SELF = linux_raw_sys::general::IN_MOVE_SELF;
+        /// `IN_MOVED_FROM`
+        const MOVED_FROM = linux_raw_sys::general::IN_MOVED_FROM;
+        /// `IN_MOVED_TO`
+        const MOVED_TO = linux_raw_sys::general::IN_MOVED_TO;
+        /// `IN_OPEN`
+        const OPEN = linux_raw_sys::general::IN_OPEN;
+
+        /// `IN_IGNORED`
+        const IGNORED = linux_raw_sys::general::IN_IGNORED;
+        /// `IN_ISDIR`
+        const ISDIR = linux_raw_sys::general::IN_ISDIR;
+        /// `IN_Q_OVERFLOW`
+        const QUEUE_OVERFLOW = linux_raw_sys::general::IN_Q_OVERFLOW;
+        /// `IN_UNMOUNT`
+        const UNMOUNT = linux_raw_sys::general::IN_UNMOUNT;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
