@@ -16,6 +16,9 @@ pub use backend::io::types::ReadWriteFlags;
 
 /// `read(fd, buf)`—Reads from a stream.
 ///
+/// This takes a `&mut [u8]` which Rust requires to contain initialized memory.
+/// To use an uninitialized buffer, use [`read_uninit`].
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
@@ -87,6 +90,9 @@ pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
 }
 
 /// `pread(fd, buf, offset)`—Reads from a file at a given position.
+///
+/// This takes a `&mut [u8]` which Rust requires to contain initialized memory.
+/// To use an uninitialized buffer, use [`pread_uninit`].
 ///
 /// # References
 ///  - [POSIX]
