@@ -11,6 +11,9 @@ pub use backend::rand::types::GetRandomFlags;
 /// This is a very low-level API which may be difficult to use correctly. Most
 /// users should prefer to use [`getrandom`] or [`rand`] APIs instead.
 ///
+/// This takes a `&mut [u8]` which Rust requires to contain initialized memory.
+/// To use an uninitialized buffer, use [`getrandom_uninit`].
+///
 /// [`getrandom`]: https://crates.io/crates/getrandom
 /// [`rand`]: https://crates.io/crates/rand
 ///

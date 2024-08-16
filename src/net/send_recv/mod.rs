@@ -34,6 +34,9 @@ pub use msg::*;
 
 /// `recv(fd, buf, flags)`—Reads data from a socket.
 ///
+/// This takes a `&mut [u8]` which Rust requires to contain initialized memory.
+/// To use an uninitialized buffer, use [`recv_uninit`].
+///
 /// # References
 ///  - [Beej's Guide to Network Programming]
 ///  - [POSIX]
@@ -114,6 +117,9 @@ pub fn send<Fd: AsFd>(fd: Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize>
 
 /// `recvfrom(fd, buf, flags, addr, len)`—Reads data from a socket and
 /// returns the sender address.
+///
+/// This takes a `&mut [u8]` which Rust requires to contain initialized memory.
+/// To use an uninitialized buffer, use [`recvfrom_uninit`].
 ///
 /// # References
 ///  - [Beej's Guide to Network Programming]
