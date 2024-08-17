@@ -35,7 +35,9 @@ use linux_raw_sys::net;
 pub use crate::event::epoll::{
     Event as EpollEvent, EventData as EpollEventData, EventFlags as EpollEventFlags,
 };
-pub use crate::fs::{Advice, AtFlags, Mode, OFlags, RenameFlags, ResolveFlags, Statx, StatxFlags};
+pub use crate::fs::{
+    Advice, AtFlags, Mode, OFlags, RenameFlags, ResolveFlags, Statx, StatxFlags, XattrFlags,
+};
 pub use crate::io::ReadWriteFlags;
 pub use crate::net::{RecvFlags, SendFlags, SocketFlags};
 pub use crate::timespec::Timespec;
@@ -258,6 +260,9 @@ pub enum IoringRegisterOp {
 
     /// `IORING_REGISTER_FILE_ALLOC_RANGE`
     RegisterFileAllocRange = sys::IORING_REGISTER_FILE_ALLOC_RANGE as _,
+
+    /// `IORING_REGISTER_USE_REGISTERED_RING`
+    RegisterUseRegisteredRing = sys::IORING_REGISTER_USE_REGISTERED_RING as _,
 }
 
 /// `IORING_OP_*` constants for use with [`io_uring_sqe`].
@@ -511,6 +516,9 @@ bitflags::bitflags! {
         /// `IORING_SETUP_REGISTERED_FD_ONLY`
         const REGISTERED_FD_ONLY = sys::IORING_SETUP_REGISTERED_FD_ONLY;
 
+        /// `IORING_SETUP_NO_SQARRAY`
+        const NO_SQARRAY = sys::IORING_SETUP_NO_SQARRAY;
+
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
@@ -711,6 +719,9 @@ bitflags::bitflags! {
 
         /// `IORING_FEAT_LINKED_FILE`
         const LINKED_FILE = sys::IORING_FEAT_LINKED_FILE;
+
+        /// `IORING_FEAT_REG_REG_RING`
+        const REG_REG_RING = sys::IORING_FEAT_REG_REG_RING;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -1128,6 +1139,7 @@ pub union op_flags_union {
     pub rename_flags: RenameFlags,
     pub unlink_flags: AtFlags,
     pub hardlink_flags: AtFlags,
+    pub xattr_flags: XattrFlags,
     pub msg_ring_flags: IoringMsgringFlags,
 }
 
