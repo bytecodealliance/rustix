@@ -260,9 +260,6 @@ pub enum IoringRegisterOp {
 
     /// `IORING_REGISTER_FILE_ALLOC_RANGE`
     RegisterFileAllocRange = sys::IORING_REGISTER_FILE_ALLOC_RANGE as _,
-
-    /// `IORING_REGISTER_USE_REGISTERED_RING`
-    RegisterUseRegisteredRing = sys::IORING_REGISTER_USE_REGISTERED_RING as _,
 }
 
 /// `IORING_OP_*` constants for use with [`io_uring_sqe`].
@@ -904,6 +901,9 @@ pub const IORING_OFF_SQ_RING: u64 = sys::IORING_OFF_SQ_RING as _;
 pub const IORING_OFF_CQ_RING: u64 = sys::IORING_OFF_CQ_RING as _;
 #[allow(missing_docs)]
 pub const IORING_OFF_SQES: u64 = sys::IORING_OFF_SQES as _;
+
+/// Indicate that the fd passed to [`io_uring_register`] is the index of a registered ring fd.
+pub const IORING_REGISTER_USE_REGISTERED_RING: u32 = sys::IORING_REGISTER_USE_REGISTERED_RING as _;
 
 /// `IORING_REGISTER_FILES_SKIP`
 #[inline]
