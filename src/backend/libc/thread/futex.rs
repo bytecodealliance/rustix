@@ -51,7 +51,7 @@ pub enum FutexOperation {
 }
 
 /// `FUTEX_WAITERS`
-pub const FUTEX_WAITERS: u32 = 0x80000000;
+pub const FUTEX_WAITERS: u32 = linux_raw_sys::general::FUTEX_WAITERS;
 
 /// `FUTEX_OWNER_DIED`
-pub const FUTEX_OWNER_DIED: u32 = 0x40000000;
+pub const FUTEX_OWNER_DIED: u32 = linux_raw_sys::general::FUTEX_OWNER_DIED;
