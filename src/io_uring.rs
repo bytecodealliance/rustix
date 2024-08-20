@@ -117,6 +117,30 @@ pub unsafe fn io_uring_register<Fd: AsFd>(
     backend::io_uring::syscalls::io_uring_register(fd.as_fd(), opcode, arg, nr_args)
 }
 
+/// `io_uring_register_with(fd, opcode, flags, arg, nr_args)`—Register files or
+/// user buffers for asynchronous I/O.
+///
+/// # Safety
+///
+/// io_uring operates on raw pointers and raw file descriptors. Users are
+/// responsible for ensuring that memory and resources are only accessed in
+/// valid ways.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man.archlinux.org/man/io_uring_register.2.en
+#[inline]
+pub unsafe fn io_uring_register_with<Fd: AsFd>(
+    fd: Fd,
+    opcode: IoringRegisterOp,
+    flags: IoringRegisterFlags,
+    arg: *const c_void,
+    nr_args: u32,
+) -> io::Result<u32> {
+    backend::io_uring::syscalls::io_uring_register_with(fd.as_fd(), opcode, flags, arg, nr_args)
+}
+
 /// `io_uring_enter(fd, to_submit, min_complete, flags, arg, size)`—Initiate
 /// and/or complete asynchronous I/O.
 ///
@@ -260,6 +284,19 @@ pub enum IoringRegisterOp {
 
     /// `IORING_REGISTER_FILE_ALLOC_RANGE`
     RegisterFileAllocRange = sys::IORING_REGISTER_FILE_ALLOC_RANGE as _,
+}
+
+bitflags::bitflags! {
+    /// `IORING_REGISTER_*` flags for use with [`io_uring_register_with`].
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringRegisterFlags: u32 {
+        /// `IORING_REGISTER_USE_REGISTERED_RING`
+        const USE_REGISTERED_RING = sys::IORING_REGISTER_USE_REGISTERED_RING as u32;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
 }
 
 /// `IORING_OP_*` constants for use with [`io_uring_sqe`].
@@ -901,9 +938,6 @@ pub const IORING_OFF_SQ_RING: u64 = sys::IORING_OFF_SQ_RING as _;
 pub const IORING_OFF_CQ_RING: u64 = sys::IORING_OFF_CQ_RING as _;
 #[allow(missing_docs)]
 pub const IORING_OFF_SQES: u64 = sys::IORING_OFF_SQES as _;
-
-/// Indicate that the fd passed to [`io_uring_register`] is the index of a registered ring fd.
-pub const IORING_REGISTER_USE_REGISTERED_RING: u32 = sys::IORING_REGISTER_USE_REGISTERED_RING as _;
 
 /// `IORING_REGISTER_FILES_SKIP`
 #[inline]
