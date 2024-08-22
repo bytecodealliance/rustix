@@ -601,6 +601,12 @@ pub(crate) fn pidfd_send_signal(fd: BorrowedFd<'_>, sig: Signal) -> io::Result<(
     }
 }
 
+#[cfg(feature = "fs")]
+#[inline]
+pub(crate) fn pivot_root(new_root: &CStr, put_old: &CStr) -> io::Result<()> {
+    unsafe { ret(syscall_readonly!(__NR_pivot_root, new_root, put_old)) }
+}
+
 #[cfg(feature = "alloc")]
 #[inline]
 pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {

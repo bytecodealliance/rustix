@@ -725,6 +725,17 @@ pub(crate) fn pidfd_getfd(
     }
 }
 
+#[cfg(target_os = "linux")]
+pub(crate) fn pivot_root(new_root: &CStr, put_old: &CStr) -> io::Result<()> {
+    syscall! {
+        fn pivot_root(
+            new_root: *const c::c_char,
+            put_old: *const c::c_char
+        ) via SYS_pivot_root -> c::c_int
+    }
+    unsafe { ret(pivot_root(c_str(new_root), c_str(put_old))) }
+}
+
 #[cfg(all(feature = "alloc", not(target_os = "wasi")))]
 pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
     let len = buf.len().try_into().map_err(|_| io::Errno::NOMEM)?;
