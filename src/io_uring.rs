@@ -35,7 +35,9 @@ use linux_raw_sys::net;
 pub use crate::event::epoll::{
     Event as EpollEvent, EventData as EpollEventData, EventFlags as EpollEventFlags,
 };
-pub use crate::fs::{Advice, AtFlags, Mode, OFlags, RenameFlags, ResolveFlags, Statx, StatxFlags};
+pub use crate::fs::{
+    Advice, AtFlags, Mode, OFlags, RenameFlags, ResolveFlags, Statx, StatxFlags, XattrFlags,
+};
 pub use crate::io::ReadWriteFlags;
 pub use crate::net::{RecvFlags, SendFlags, SocketFlags};
 pub use crate::timespec::Timespec;
@@ -113,6 +115,30 @@ pub unsafe fn io_uring_register<Fd: AsFd>(
     nr_args: u32,
 ) -> io::Result<u32> {
     backend::io_uring::syscalls::io_uring_register(fd.as_fd(), opcode, arg, nr_args)
+}
+
+/// `io_uring_register_with(fd, opcode, flags, arg, nr_args)`—Register files or
+/// user buffers for asynchronous I/O.
+///
+/// # Safety
+///
+/// io_uring operates on raw pointers and raw file descriptors. Users are
+/// responsible for ensuring that memory and resources are only accessed in
+/// valid ways.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man.archlinux.org/man/io_uring_register.2.en
+#[inline]
+pub unsafe fn io_uring_register_with<Fd: AsFd>(
+    fd: Fd,
+    opcode: IoringRegisterOp,
+    flags: IoringRegisterFlags,
+    arg: *const c_void,
+    nr_args: u32,
+) -> io::Result<u32> {
+    backend::io_uring::syscalls::io_uring_register_with(fd.as_fd(), opcode, flags, arg, nr_args)
 }
 
 /// `io_uring_enter(fd, to_submit, min_complete, flags, arg, size)`—Initiate
@@ -258,6 +284,19 @@ pub enum IoringRegisterOp {
 
     /// `IORING_REGISTER_FILE_ALLOC_RANGE`
     RegisterFileAllocRange = sys::IORING_REGISTER_FILE_ALLOC_RANGE as _,
+}
+
+bitflags::bitflags! {
+    /// `IORING_REGISTER_*` flags for use with [`io_uring_register_with`].
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringRegisterFlags: u32 {
+        /// `IORING_REGISTER_USE_REGISTERED_RING`
+        const USE_REGISTERED_RING = sys::IORING_REGISTER_USE_REGISTERED_RING as u32;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
 }
 
 /// `IORING_OP_*` constants for use with [`io_uring_sqe`].
@@ -511,6 +550,9 @@ bitflags::bitflags! {
         /// `IORING_SETUP_REGISTERED_FD_ONLY`
         const REGISTERED_FD_ONLY = sys::IORING_SETUP_REGISTERED_FD_ONLY;
 
+        /// `IORING_SETUP_NO_SQARRAY`
+        const NO_SQARRAY = sys::IORING_SETUP_NO_SQARRAY;
+
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
@@ -711,6 +753,9 @@ bitflags::bitflags! {
 
         /// `IORING_FEAT_LINKED_FILE`
         const LINKED_FILE = sys::IORING_FEAT_LINKED_FILE;
+
+        /// `IORING_FEAT_REG_REG_RING`
+        const REG_REG_RING = sys::IORING_FEAT_REG_REG_RING;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -1128,6 +1173,7 @@ pub union op_flags_union {
     pub rename_flags: RenameFlags,
     pub unlink_flags: AtFlags,
     pub hardlink_flags: AtFlags,
+    pub xattr_flags: XattrFlags,
     pub msg_ring_flags: IoringMsgringFlags,
 }
 
