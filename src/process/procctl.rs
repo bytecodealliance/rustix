@@ -284,6 +284,7 @@ pub fn get_reaper_status(process: ProcSelector) -> io::Result<ReaperStatus> {
     })
 }
 
+#[cfg(feature = "alloc")]
 const PROC_REAP_GETPIDS: c_int = 5;
 
 bitflags! {

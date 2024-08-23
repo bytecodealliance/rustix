@@ -1,11 +1,9 @@
 use libc::c_void;
-use rustix::{
-    fd::{AsFd, AsRawFd, BorrowedFd},
-    io::Result,
-    io_uring::{
-        io_uring_params, io_uring_register_with, io_uring_rsrc_update, io_uring_setup,
-        IoringFeatureFlags, IoringRegisterFlags, IoringRegisterOp,
-    },
+use rustix::fd::{AsFd, AsRawFd, BorrowedFd};
+use rustix::io::Result;
+use rustix::io_uring::{
+    io_uring_params, io_uring_register_with, io_uring_rsrc_update, io_uring_setup,
+    IoringFeatureFlags, IoringRegisterFlags, IoringRegisterOp,
 };
 
 fn do_register<FD>(
@@ -71,8 +69,8 @@ where
     Ok(())
 }
 
-/// Set bounded and unbounded async kernel worker counts to 0, to test registering with registered
-/// ring fd.
+/// Set bounded and unbounded async kernel worker counts to 0, to test
+/// registering with registered ring fd.
 fn register_iowq_max_workers<FD>(fd: FD) -> Result<()>
 where
     FD: AsFd,

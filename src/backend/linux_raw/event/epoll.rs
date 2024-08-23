@@ -172,10 +172,11 @@ pub fn create(flags: CreateFlags) -> io::Result<OwnedFd> {
 /// This registers interest in any of the events set in `events` occurring on
 /// the file descriptor associated with `data`.
 ///
-/// Note that `close`ing a file descriptor does not necessarily unregister interest
-/// which can lead to spurious events being returned from [`wait`]. If a file descriptor
-/// is an `Arc<dyn SystemResource>`, then `epoll` can be thought to maintain a
-/// `Weak<dyn SystemResource>` to the file descriptor. Check the [faq] for details.
+/// Note that `close`ing a file descriptor does not necessarily unregister
+/// interest which can lead to spurious events being returned from [`wait`]. If
+/// a file descriptor is an `Arc<dyn SystemResource>`, then `epoll` can be
+/// thought to maintain a `Weak<dyn SystemResource>` to the file descriptor.
+/// Check the [faq] for details.
 ///
 /// # References
 ///

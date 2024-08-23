@@ -8,7 +8,7 @@ use crate::event::PollFd;
 #[cfg(any(linux_kernel, bsd, solarish, target_os = "espidf"))]
 use crate::fd::OwnedFd;
 use crate::io;
-#[cfg(any(bsd, solarish))]
+#[cfg(any(all(feature = "alloc", bsd), solarish))]
 use {crate::backend::conv::borrowed_fd, crate::fd::BorrowedFd, core::mem::MaybeUninit};
 #[cfg(solarish)]
 use {
