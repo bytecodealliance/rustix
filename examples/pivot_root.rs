@@ -17,7 +17,11 @@ fn main() -> rustix::io::Result<()> {
     Ok(())
 }
 
-#[cfg(any(not(target_os = "linux"), not(feature = "fs"), not(feature = "process")))]
+#[cfg(any(
+    not(target_os = "linux"),
+    not(feature = "fs"),
+    not(feature = "process")
+))]
 fn main() -> Result<(), &'static str> {
     Err("This example requires --features=fs,process and is only supported on Linux.")
 }
