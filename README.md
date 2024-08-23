@@ -59,6 +59,7 @@ by default. The rest of the API is conditional with cargo feature flags:
 | ---------- | -------------------------------------------------------------- |
 | `event`    | [`rustix::event`]—Polling and event operations.                |
 | `fs`       | [`rustix::fs`]—Filesystem operations.                          |
+| `futex`    | [`rustix::futex`]—Linux futex operations.                      |
 | `io_uring` | [`rustix::io_uring`]—Linux io_uring.                           |
 | `mm`       | [`rustix::mm`]—Memory map operations.                          |
 | `mount`    | [`rustix::mount`]—Linux mount API.                             |
@@ -80,6 +81,7 @@ by default. The rest of the API is conditional with cargo feature flags:
 
 [`rustix::event`]: https://docs.rs/rustix/*/rustix/event/index.html
 [`rustix::fs`]: https://docs.rs/rustix/*/rustix/fs/index.html
+[`rustix::futex`]: https://docs.rs/rustix/*/rustix/futex/index.html
 [`rustix::io_uring`]: https://docs.rs/rustix/*/rustix/io_uring/index.html
 [`rustix::mm`]: https://docs.rs/rustix/*/rustix/mm/index.html
 [`rustix::mount`]: https://docs.rs/rustix/*/rustix/mount/index.html

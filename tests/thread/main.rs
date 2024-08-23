@@ -6,8 +6,6 @@
 #[cfg(not(target_os = "redox"))]
 mod clocks;
 #[cfg(linux_kernel)]
-mod futex;
-#[cfg(linux_kernel)]
 mod id;
 #[cfg(linux_kernel)]
 mod libcap;

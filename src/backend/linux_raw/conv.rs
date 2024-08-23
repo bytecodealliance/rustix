@@ -789,20 +789,12 @@ impl<'a, Num: ArgNumber> From<(crate::net::SocketType, crate::net::SocketFlags)>
     }
 }
 
-#[cfg(feature = "thread")]
-impl<'a, Num: ArgNumber>
-    From<(
-        crate::backend::thread::futex::FutexOperation,
-        crate::thread::FutexFlags,
-    )> for ArgReg<'a, Num>
+#[cfg(feature = "futex")]
+impl<'a, Num: ArgNumber> From<(crate::backend::futex::types::Operation, crate::futex::Flags)>
+    for ArgReg<'a, Num>
 {
     #[inline]
-    fn from(
-        pair: (
-            crate::backend::thread::futex::FutexOperation,
-            crate::thread::FutexFlags,
-        ),
-    ) -> Self {
+    fn from(pair: (crate::backend::futex::types::Operation, crate::futex::Flags)) -> Self {
         c_uint(pair.0 as u32 | pair.1.bits())
     }
 }

@@ -107,6 +107,9 @@ pub(crate) mod event;
 #[cfg(not(windows))]
 #[cfg(feature = "fs")]
 pub(crate) mod fs;
+#[cfg(linux_kernel)]
+#[cfg(feature = "futex")]
+pub(crate) mod futex;
 pub(crate) mod io;
 #[cfg(linux_kernel)]
 #[cfg(feature = "io_uring")]

@@ -134,6 +134,9 @@ event = []
 # Enable `rustix::fs::*`.
 fs = []
 
+# Enable `rustix::futex::*`.
+futex = []
+
 # Enable `rustix::io_uring::*` (on platforms that support it).
 io_uring = ["event", "fs", "net", "linux-raw-sys/io_uring"]
 
@@ -144,7 +147,7 @@ mount = []
 net = ["linux-raw-sys/net", "linux-raw-sys/netlink", "linux-raw-sys/if_ether", "linux-raw-sys/xdp"]
 
 # Enable `rustix::thread::*`.
-thread = ["linux-raw-sys/prctl"]
+thread = ["linux-raw-sys/prctl", "futex"]
 
 # Enable `rustix::process::*`.
 process = ["linux-raw-sys/prctl"]
@@ -190,6 +193,7 @@ runtime = ["linux-raw-sys/prctl"]
 all-apis = [
     "event",
     "fs",
+    "futex",
     "io_uring",
     "mm",
     "mount",

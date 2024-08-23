@@ -204,6 +204,10 @@ pub mod ffi;
 #[cfg(feature = "fs")]
 #[cfg_attr(docsrs, doc(cfg(feature = "fs")))]
 pub mod fs;
+#[cfg(linux_kernel)]
+#[cfg(feature = "futex")]
+#[cfg_attr(docsrs, doc(cfg(feature = "futex")))]
+pub mod futex;
 pub mod io;
 #[cfg(linux_kernel)]
 #[cfg(feature = "io_uring")]
@@ -359,6 +363,7 @@ mod signal;
 #[cfg(not(windows))]
 #[cfg(any(
     feature = "fs",
+    feature = "futex",
     feature = "process",
     feature = "runtime",
     feature = "thread",
