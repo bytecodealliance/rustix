@@ -151,7 +151,7 @@ pub fn sched_getaffinity(pid: Option<Pid>) -> io::Result<CpuSet> {
 ///  - [Linux]
 ///  - [DragonFly BSD]
 ///
-/// [Linux]: https://man7.org/linux/man-pages/man2/sched_getcpu.2.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/sched_getcpu.3.html
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sched_getcpu&section=2
 // FreeBSD added `sched_getcpu` in 13.0.
 #[cfg(any(linux_kernel, target_os = "dragonfly"))]

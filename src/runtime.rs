@@ -408,8 +408,8 @@ pub unsafe fn sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
 /// # Safety
 ///
 /// You're on your own. And on top of all the troubles with signal handlers,
-/// this implementation is highly experimental. The warning about the hazard
-/// of recycled thread ID's applies.
+/// this implementation is highly experimental. Also, this is not `tgkill`, so
+/// the warning about the hazard of recycled thread ID's applies.
 ///
 /// # References
 ///  - [Linux]
@@ -420,7 +420,7 @@ pub unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
     backend::runtime::syscalls::tkill(tid, sig)
 }
 
-/// `sigprocmask(how, set, oldset)`—Adjust the process signal mask.
+/// `rt_sigprocmask(how, set, oldset)`—Adjust the process signal mask.
 ///
 /// # Safety
 ///
@@ -429,10 +429,10 @@ pub unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
 /// the libc `sigprocmask` in several non-obvious and unsafe ways.
 ///
 /// # References
-///  - [Linux `sigprocmask`]
+///  - [Linux `rt_sigprocmask`]
 ///  - [Linux `pthread_sigmask`]
 ///
-/// [Linux `sigprocmask`]: https://man7.org/linux/man-pages/man2/sigprocmask.2.html
+/// [Linux `rt_sigprocmask`]: https://man7.org/linux/man-pages/man2/rt_sigprocmask.2.html
 /// [Linux `pthread_sigmask`]: https://man7.org/linux/man-pages/man3/pthread_sigmask.3.html
 #[inline]
 #[doc(alias = "pthread_sigmask")]

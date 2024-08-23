@@ -7,7 +7,8 @@ mod constants;
 #[cfg(linux_kernel)]
 mod copy_file_range;
 #[cfg(not(any(target_os = "espidf", target_os = "redox")))]
-#[cfg(not(target_os = "haiku"))] // Haiku needs <https://github.com/rust-lang/rust/pull/112371>
+#[cfg(not(target_os = "haiku"))]
+// Haiku needs <https://git.haiku-os.org/haiku/commit/?id=b8caef69155fbe87def579305622b9718d7779dc>
 mod cwd;
 #[cfg(all(feature = "alloc", not(any(target_os = "espidf", target_os = "redox"))))]
 mod dir;
@@ -75,7 +76,8 @@ pub use constants::*;
 #[cfg(linux_kernel)]
 pub use copy_file_range::copy_file_range;
 #[cfg(not(any(target_os = "espidf", target_os = "redox")))]
-#[cfg(not(target_os = "haiku"))] // Haiku needs <https://github.com/rust-lang/rust/pull/112371>
+#[cfg(not(target_os = "haiku"))]
+// Haiku needs <https://git.haiku-os.org/haiku/commit/?id=b8caef69155fbe87def579305622b9718d7779dc>
 pub use cwd::*;
 #[cfg(all(feature = "alloc", not(any(target_os = "espidf", target_os = "redox"))))]
 pub use dir::{Dir, DirEntry};
