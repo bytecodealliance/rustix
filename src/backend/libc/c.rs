@@ -96,6 +96,10 @@ pub(crate) const O_LARGEFILE: c_int = linux_raw_sys::general::O_LARGEFILE as _;
 #[cfg(target_os = "illumos")]
 pub(crate) const O_LARGEFILE: c_int = 0x2000;
 
+// TODO: This is new in Linux 6.11; remove when linux-raw-sys is updated.
+#[cfg(linux_kernel)]
+pub(crate) const MAP_DROPPABLE: u32 = 0x8;
+
 // On PowerPC, the regular `termios` has the `termios2` fields and there is no
 // `termios2`. linux-raw-sys has aliases `termios2` to `termios` to cover this
 // difference, but we still need to manually import it since `libc` doesn't
