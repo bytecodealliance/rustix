@@ -185,3 +185,16 @@ fn test_setfl_append() {
     assert_eq!(rustix::io::read(&file, &mut buf), Ok(19));
     assert_eq!(&buf, b"uvwdefghijklmnopxyz\0\0\0\0\0\0\0\0\0\0\0\0\0");
 }
+
+#[test]
+fn test_mode() {
+    use rustix::fs::Mode;
+
+    let mode = Mode::from_raw_mode(libc::S_IFSOCK | libc::S_IRUSR);
+    assert_eq!(mode, Mode::RUSR);
+    assert_eq!(mode.bits(), libc::S_IRUSR);
+
+    let mode = Mode::from_raw_mode(libc::S_IFSOCK | libc::S_IRWXU);
+    assert_eq!(mode, Mode::RWXU);
+    assert_eq!(mode.bits(), libc::S_IRWXU);
+}
