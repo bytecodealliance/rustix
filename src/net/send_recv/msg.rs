@@ -942,7 +942,7 @@ mod messages {
             let msghdr = {
                 let mut h = msghdr::zero_msghdr();
                 h.msg_control = buf.as_mut_ptr().cast();
-                h.msg_controllen = buf.len().try_into().expect("buffer too large for msghdr");
+                h.msg_controllen = buf.len().try_into().unwrap();
                 h
             };
 

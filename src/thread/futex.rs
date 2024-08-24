@@ -11,7 +11,7 @@ use core::ptr;
 use core::sync::atomic::AtomicU32;
 
 use crate::backend::thread::syscalls::{futex_timeout, futex_val2};
-use crate::fd::{FromRawFd, OwnedFd};
+use crate::fd::{FromRawFd, OwnedFd, RawFd};
 use crate::thread::Timespec;
 use crate::{backend, io};
 
@@ -172,7 +172,11 @@ pub fn fd(uaddr: &AtomicU32, flags: FutexFlags, val: u32) -> io::Result<OwnedFd>
             ptr::null(),
             0,
         )
-        .map(|fd| OwnedFd::from_raw_fd(fd.try_into().expect("return value should be a valid fd")))
+        .map(|val| {
+            let fd = val as RawFd;
+            debug_assert_eq!(fd as usize, val, "return value should be a valid fd");
+            OwnedFd::from_raw_fd(fd)
+        })
     }
 }
 
