@@ -240,6 +240,9 @@ bitflags! {
         /// `MAP_UNINITIALIZED`
         #[cfg(any())]
         const UNINITIALIZED = bitcast!(c::MAP_UNINITIALIZED);
+        /// `MAP_DROPPABLE`
+        #[cfg(linux_kernel)]
+        const DROPPABLE = bitcast!(c::MAP_DROPPABLE);
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;

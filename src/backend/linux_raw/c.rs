@@ -317,3 +317,6 @@ mod reboot_symbols {
 }
 #[cfg(feature = "system")]
 pub(crate) use reboot_symbols::*;
+
+// TODO: This is new in Linux 6.11; remove when linux-raw-sys is updated.
+pub(crate) const MAP_DROPPABLE: u32 = 0x8;
