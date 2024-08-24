@@ -145,7 +145,7 @@ pub(in super::super) fn sysinfo_ehdr() -> *const Elf_Ehdr {
     let mut ehdr = SYSINFO_EHDR.load(Relaxed);
 
     if ehdr.is_null() {
-        // Use `maybe_init_auxv` to to read the aux vectors if it can, but do
+        // Use `maybe_init_auxv` to read the aux vectors if it can, but do
         // nothing if it can't. If it can't, then we'll get a null pointer
         // here, which our callers are prepared to deal with.
         maybe_init_auxv();

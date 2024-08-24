@@ -380,7 +380,7 @@ pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Res
     }
 }
 
-/// Convert a Rust [`Rlimit`] to a C `c::rlimit`.
+/// Convert a C `c::rlimit` to a Rust `Rlimit`.
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "fuchsia",
@@ -402,7 +402,7 @@ fn rlimit_from_libc(lim: c::rlimit) -> Rlimit {
     Rlimit { current, maximum }
 }
 
-/// Convert a C `c::rlimit` to a Rust `Rlimit`.
+/// Convert a Rust [`Rlimit`] to a C `c::rlimit`.
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "fuchsia",

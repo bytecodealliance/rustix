@@ -345,7 +345,7 @@ pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Res
     }
 }
 
-/// Convert a Rust [`Rlimit`] to a C `rlimit64`.
+/// Convert a C `rlimit64` to a Rust `Rlimit`.
 #[inline]
 fn rlimit_from_linux(lim: rlimit64) -> Rlimit {
     let current = if lim.rlim_cur == RLIM64_INFINITY as _ {
@@ -361,7 +361,7 @@ fn rlimit_from_linux(lim: rlimit64) -> Rlimit {
     Rlimit { current, maximum }
 }
 
-/// Convert a C `rlimit64` to a Rust `Rlimit`.
+/// Convert a Rust [`Rlimit`] to a C `rlimit64`.
 #[inline]
 fn rlimit_to_linux(lim: Rlimit) -> rlimit64 {
     let rlim_cur = match lim.current {

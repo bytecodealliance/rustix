@@ -82,7 +82,7 @@ pub fn tcsetpgrp<Fd: AsFd>(fd: Fd, pid: Pid) -> io::Result<()> {
 
 /// `tcsetattr(fd)`—Set terminal attributes.
 ///
-/// Also known as the `TCSETS` (or `TCSETS2 on Linux) operation with `ioctl`.
+/// Also known as the `TCSETS` (or `TCSETS2` on Linux) operation with `ioctl`.
 ///
 /// # References
 ///  - [POSIX `tcsetattr`]
