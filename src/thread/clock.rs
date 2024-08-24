@@ -103,13 +103,13 @@ pub enum NanosleepRelativeResult {
 impl fmt::Debug for NanosleepRelativeResult {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            NanosleepRelativeResult::Ok => fmt.write_str("Ok"),
-            NanosleepRelativeResult::Interrupted(remaining) => write!(
+            Self::Ok => fmt.write_str("Ok"),
+            Self::Interrupted(remaining) => write!(
                 fmt,
                 "Interrupted(Timespec {{ tv_sec: {:?}, tv_nsec: {:?} }})",
                 remaining.tv_sec, remaining.tv_nsec
             ),
-            NanosleepRelativeResult::Err(err) => write!(fmt, "Err({:?})", err),
+            Self::Err(err) => write!(fmt, "Err({:?})", err),
         }
     }
 }
