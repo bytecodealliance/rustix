@@ -6,10 +6,15 @@
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
 use crate::backend::c;
+#[cfg(any(
+    feature = "alloc",
+    not(any(target_arch = "aarch64", target_arch = "riscv64"))
+))]
+use crate::backend::conv::c_int;
 #[cfg(feature = "alloc")]
 use crate::backend::conv::pass_usize;
 use crate::backend::conv::{
-    by_ref, c_int, c_uint, raw_fd, ret, ret_error, ret_owned_fd, ret_usize, slice_mut, zero,
+    by_ref, c_uint, raw_fd, ret, ret_error, ret_owned_fd, ret_usize, slice_mut, zero,
 };
 use crate::event::{epoll, EventfdFlags, PollFd};
 use crate::fd::{BorrowedFd, OwnedFd};

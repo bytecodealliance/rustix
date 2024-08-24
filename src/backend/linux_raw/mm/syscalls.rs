@@ -16,8 +16,7 @@ use crate::backend::conv::loff_t_from_u64;
 use crate::backend::conv::{c_uint, no_fd, pass_usize, ret, ret_owned_fd, ret_void_star};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
-use linux_raw_sys::general::MAP_ANONYMOUS;
-use linux_raw_sys::general::MREMAP_FIXED;
+use linux_raw_sys::general::{MAP_ANONYMOUS, MREMAP_FIXED};
 
 #[inline]
 pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: Advice) -> io::Result<()> {

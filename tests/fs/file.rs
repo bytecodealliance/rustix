@@ -112,8 +112,8 @@ fn test_file() {
     // Test `fcntl_getfl`.
     let fl = rustix::fs::fcntl_getfl(&file).unwrap();
 
-    // Clear O_LARGEFILE, which may be set by rustix on 32-bit Linux or automatically by some
-    // kernel on 64-bit (Linux and illumos).
+    // Clear `O_LARGEFILE`, which may be set by rustix on 32-bit Linux or
+    // automatically by some kernel on 64-bit (Linux and illumos).
     #[cfg(any(linux_kernel, target_os = "illumos"))]
     let fl = fl - rustix::fs::OFlags::LARGEFILE;
 

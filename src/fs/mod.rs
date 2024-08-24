@@ -150,7 +150,7 @@ pub use std::os::wasi::fs::{DirEntryExt, FileExt, FileTypeExt, MetadataExt, Open
 /// the Unix epoch. Until the next semver bump, these unsigned fields are
 /// deprecated, and this trait provides accessors which return their values
 /// as signed integers.
-#[cfg(all(unix))]
+#[cfg(unix)]
 pub trait StatExt {
     /// Return the value of the `st_atime` field, casted to the correct type.
     fn atime(&self) -> i64;

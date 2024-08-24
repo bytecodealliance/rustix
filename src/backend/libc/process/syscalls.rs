@@ -5,7 +5,7 @@ use super::types::RawCpuSet;
 use crate::backend::c;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use crate::backend::conv::borrowed_fd;
-#[cfg(feature = "fs")]
+#[cfg(any(target_os = "linux", feature = "fs"))]
 use crate::backend::conv::c_str;
 #[cfg(all(feature = "alloc", feature = "fs", not(target_os = "wasi")))]
 use crate::backend::conv::ret_discarded_char_ptr;
@@ -28,7 +28,7 @@ use crate::backend::conv::{ret, ret_c_int};
 use crate::fd::BorrowedFd;
 #[cfg(target_os = "linux")]
 use crate::fd::{AsRawFd, OwnedFd, RawFd};
-#[cfg(feature = "fs")]
+#[cfg(any(target_os = "linux", feature = "fs"))]
 use crate::ffi::CStr;
 #[cfg(feature = "fs")]
 use crate::fs::Mode;
