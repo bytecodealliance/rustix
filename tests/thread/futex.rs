@@ -38,7 +38,7 @@ fn test_wait_wake() {
         move || {
             std::thread::sleep(std::time::Duration::from_millis(1));
             lock.store(1, Ordering::SeqCst);
-            futex::wake(&lock, FutexFlags::empty(), 1);
+            futex::wake(&lock, FutexFlags::empty(), 1).unwrap();
 
             std::thread::sleep(std::time::Duration::from_millis(50));
             match futex::wait(&lock, FutexFlags::empty(), 1, None) {
@@ -58,7 +58,7 @@ fn test_wait_wake() {
     }
 
     lock.store(2, Ordering::SeqCst);
-    futex::wake(&lock, FutexFlags::empty(), 1);
+    futex::wake(&lock, FutexFlags::empty(), 1).unwrap();
 
     other.join().unwrap();
 }

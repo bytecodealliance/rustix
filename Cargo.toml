@@ -278,4 +278,5 @@ check-cfg = [
     'cfg(thumb_mode)',
     'cfg(wasi)',
     'cfg(wasi_ext)',
+    'cfg(target_arch, values("xtensa"))',
 ]

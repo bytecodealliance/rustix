@@ -80,7 +80,7 @@ impl fmt::Debug for CpuSet {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "CpuSet {{")?;
         let mut first = true;
-        for i in 0..CpuSet::MAX_CPU {
+        for i in 0..Self::MAX_CPU {
             if self.is_set(i) {
                 if first {
                     write!(fmt, " ")?;
@@ -97,7 +97,7 @@ impl fmt::Debug for CpuSet {
 
 impl hash::Hash for CpuSet {
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
-        for i in 0..CpuSet::MAX_CPU {
+        for i in 0..Self::MAX_CPU {
             self.is_set(i).hash(state);
         }
     }

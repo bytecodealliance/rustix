@@ -270,9 +270,7 @@ fn init_auxv() {
 /// must be prepared for initialization to be skipped.
 #[cold]
 fn maybe_init_auxv() {
-    if let Ok(()) = init_auxv_impl() {
-        return;
-    }
+    let _ = init_auxv_impl();
 }
 
 /// If we don't have "use-explicitly-provided-auxv" or "use-libc-auxv", we

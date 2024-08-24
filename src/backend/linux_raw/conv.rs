@@ -107,14 +107,14 @@ pub(super) fn pass_usize<'a, Num: ArgNumber>(t: usize) -> ArgReg<'a, Num> {
 
 impl<'a, Num: ArgNumber, T> From<*mut T> for ArgReg<'a, Num> {
     #[inline]
-    fn from(c: *mut T) -> ArgReg<'a, Num> {
+    fn from(c: *mut T) -> Self {
         raw_arg(c.cast())
     }
 }
 
 impl<'a, Num: ArgNumber, T> From<*const T> for ArgReg<'a, Num> {
     #[inline]
-    fn from(c: *const T) -> ArgReg<'a, Num> {
+    fn from(c: *const T) -> Self {
         let mut_ptr = c as *mut T;
         raw_arg(mut_ptr.cast())
     }
