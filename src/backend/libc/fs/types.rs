@@ -162,7 +162,7 @@ impl Mode {
     /// `Mode`.
     #[inline]
     pub const fn from_raw_mode(st_mode: RawMode) -> Self {
-        Self::from_bits_truncate(st_mode & !c::S_IFMT)
+        Self::from_bits_truncate(st_mode & !c::S_IFMT as RawMode)
     }
 
     /// Construct an `st_mode` value from a `Mode`.
