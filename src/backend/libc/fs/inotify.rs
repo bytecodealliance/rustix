@@ -4,9 +4,9 @@ use crate::backend::c;
 use bitflags::bitflags;
 
 bitflags! {
-    /// `IN_*` for use with [`init`].
+    /// `IN_*` for use with [`inotify::init`].
     ///
-    /// [`init`]: crate::fs::inotify::init
+    /// [`inotify::init`]: crate::fs::inotify::init
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct CreateFlags: u32 {
@@ -21,9 +21,9 @@ bitflags! {
 }
 
 bitflags! {
-    /// `IN*` for use with [`add_watch`].
+    /// `IN*` for use with [`inotify::add_watch`].
     ///
-    /// [`add_watch`]: crate::fs::inotify::add_watch
+    /// [`inotify::add_watch`]: crate::fs::inotify::add_watch
     #[repr(transparent)]
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct WatchFlags: u32 {

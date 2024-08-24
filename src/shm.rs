@@ -1,8 +1,11 @@
 //! POSIX shared memory
 
+#![allow(unused_qualifications)]
+
 use crate::fd::OwnedFd;
 use crate::{backend, io, path};
 
+use super::shm;
 pub use crate::backend::fs::types::Mode;
 pub use crate::backend::shm::types::ShmOFlags as OFlags;
 #[deprecated(note = "Use OFlags.")]
@@ -21,7 +24,7 @@ pub use unlink as shm_unlink;
 /// slashes, and be no longer than an implementation-defined limit (255 on
 /// Linux).
 ///
-/// Exactly one of [`OFlags::RDONLY`] and [`OFlags::RDWR`] should be
+/// Exactly one of [`shm::OFlags::RDONLY`] and [`shm::OFlags::RDWR`] should be
 /// passed. The file descriptor will be opened with `FD_CLOEXEC` set.
 ///
 /// # References
@@ -32,7 +35,7 @@ pub use unlink as shm_unlink;
 /// [Linux]: https://man7.org/linux/man-pages/man3/shm_open.3.html
 #[doc(alias = "shm_open")]
 #[inline]
-pub fn open<P: path::Arg>(name: P, flags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
+pub fn open<P: path::Arg>(name: P, flags: shm::OFlags, mode: Mode) -> io::Result<OwnedFd> {
     name.into_with_c_str(|name| backend::shm::syscalls::shm_open(name, flags, mode))
 }
 

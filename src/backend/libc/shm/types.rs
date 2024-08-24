@@ -2,9 +2,9 @@ use crate::backend::c;
 use bitflags::bitflags;
 
 bitflags! {
-    /// `O_*` constants for use with [`open`].
+    /// `O_*` constants for use with [`shm::open`].
     ///
-    /// [`open`]: crate:shm::open
+    /// [`shm::open`]: crate:shm::open
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct ShmOFlags: u32 {

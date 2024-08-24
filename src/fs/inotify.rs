@@ -1,5 +1,8 @@
 //! inotify support for working with inotifies
 
+#![allow(unused_qualifications)]
+
+use super::inotify;
 pub use crate::backend::fs::inotify::{CreateFlags, ReadFlags, WatchFlags};
 use crate::backend::fs::syscalls;
 use crate::fd::{AsFd, OwnedFd};
@@ -8,6 +11,7 @@ use crate::io;
 use crate::io::{read_uninit, Errno};
 use core::mem::{align_of, size_of, MaybeUninit};
 use linux_raw_sys::general::inotify_event;
+
 #[deprecated(note = "Use add_watch.")]
 #[doc(hidden)]
 pub use add_watch as inotify_add_watch;
@@ -24,7 +28,7 @@ pub use remove_watch as inotify_remove_watch;
 /// descriptor from being implicitly passed across `exec` boundaries.
 #[doc(alias = "inotify_init1")]
 #[inline]
-pub fn init(flags: CreateFlags) -> io::Result<OwnedFd> {
+pub fn init(flags: inotify::CreateFlags) -> io::Result<OwnedFd> {
     syscalls::inotify_init1(flags)
 }
 
@@ -41,7 +45,7 @@ pub fn init(flags: CreateFlags) -> io::Result<OwnedFd> {
 pub fn add_watch<P: crate::path::Arg>(
     inot: impl AsFd,
     path: P,
-    flags: WatchFlags,
+    flags: inotify::WatchFlags,
 ) -> io::Result<i32> {
     path.into_with_c_str(|path| syscalls::inotify_add_watch(inot.as_fd(), path, flags))
 }
@@ -49,7 +53,7 @@ pub fn add_watch<P: crate::path::Arg>(
 /// `inotify_rm_watch(self, wd)`—Removes a watch from this inotify.
 ///
 /// The watch descriptor provided should have previously been returned by
-/// [`add_watch`] and not previously have been removed.
+/// [`inotify::add_watch`] and not previously have been removed.
 #[doc(alias = "inotify_rm_watch")]
 #[inline]
 pub fn remove_watch(inot: impl AsFd, wd: i32) -> io::Result<()> {
