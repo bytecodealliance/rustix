@@ -92,7 +92,6 @@ harness = false
 
 [package.metadata.docs.rs]
 features = ["all-apis"]
-rustdoc-args = ["--cfg", "doc_cfg"]
 targets = [
     "x86_64-unknown-linux-gnu",
     "i686-unknown-linux-gnu",
@@ -262,7 +261,6 @@ check-cfg = [
     'cfg(core_ffi_c)',
     'cfg(core_intrinsics)',
     'cfg(criterion)',
-    'cfg(doc_cfg)',
     'cfg(document_experimental_runtime_api)',
     'cfg(fix_y2038)',
     'cfg(freebsdlike)',

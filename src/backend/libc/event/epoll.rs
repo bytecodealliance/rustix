@@ -261,7 +261,7 @@ pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
 /// For each event of interest, an element is written to `events`. On
 /// success, this returns the number of written elements.
 #[cfg(feature = "alloc")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 pub fn wait(epoll: impl AsFd, event_list: &mut EventVec, timeout: c::c_int) -> io::Result<()> {
     // SAFETY: We're calling `epoll_wait` via FFI and we know how it
     // behaves.
