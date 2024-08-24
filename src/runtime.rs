@@ -338,7 +338,7 @@ pub enum Fork {
 /// [Linux]: https://man7.org/linux/man-pages/man2/execveat.2.html
 #[inline]
 #[cfg(feature = "fs")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "fs")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "fs")))]
 pub unsafe fn execveat<Fd: AsFd>(
     dirfd: Fd,
     path: &CStr,

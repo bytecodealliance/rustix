@@ -21,7 +21,7 @@ use {
 /// [Linux]: https://man7.org/linux/man-pages/man2/chdir.2.html
 #[inline]
 #[cfg(feature = "fs")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "fs")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "fs")))]
 pub fn chdir<P: path::Arg>(path: P) -> io::Result<()> {
     path.into_with_c_str(backend::process::syscalls::chdir)
 }
@@ -52,7 +52,7 @@ pub fn fchdir<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man3/getcwd.3.html
 #[cfg(all(feature = "alloc", feature = "fs"))]
 #[cfg(not(target_os = "wasi"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "fs")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "fs")))]
 #[inline]
 pub fn getcwd<B: Into<Vec<u8>>>(reuse: B) -> io::Result<CString> {
     _getcwd(reuse.into())
