@@ -33,7 +33,7 @@ pub use prctl::*;
 #[cfg(linux_kernel)]
 pub use setns::*;
 
-/// DEPRECATED: There are now individual functions available to perform futex operations with improved type safety. See the [futex module](`self`).
+/// DEPRECATED: There are now individual functions available to perform futex operations with improved type safety. See the [futex module].
 ///
 /// `futex(uaddr, op, val, utime, uaddr2, val3)`
 ///
@@ -48,6 +48,7 @@ pub use setns::*;
 ///
 /// [Linux `futex` system call]: https://man7.org/linux/man-pages/man2/futex.2.html
 /// [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
+/// [futex module]: mod@crate::thread::futex
 #[cfg(linux_kernel)]
 #[allow(unsafe_code)]
 #[inline]

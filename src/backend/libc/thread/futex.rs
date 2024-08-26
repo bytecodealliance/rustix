@@ -14,9 +14,9 @@ bitflags::bitflags! {
     }
 }
 
-/// `FUTEX_*` operations for use with functions in [`futex`].
+/// `FUTEX_*` operations for use with functions in the [`futex`] function.
 ///
-/// [`futex`]: mod@crate::thread::futex
+/// [`futex`]: fn@crate::thread::futex
 #[deprecated(
     since = "0.38.35",
     note = "
