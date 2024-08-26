@@ -19,8 +19,8 @@ fn pgrp_notty() {
 }
 
 // Disable on illumos where `tcgetattr` doesn't appear to support
-// pseudoterminals.
-#[cfg(not(target_os = "illumos"))]
+// pseudoterminals. And on Redox which lacks `NOCTTY`.
+#[cfg(not(any(target_os = "illumos", target_os = "redox")))]
 #[cfg(feature = "pty")]
 #[test]
 fn pgrp_pseudoterminal() {

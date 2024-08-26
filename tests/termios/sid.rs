@@ -17,6 +17,8 @@ fn sid_notty() {
     assert_eq!(tcgetsid(&fd), Err(Errno::NOTTY));
 }
 
+// Disable on Redox which lacks `getsid`.
+#[cfg(not(target_os = "redox"))]
 #[cfg(all(feature = "stdio", feature = "process"))]
 #[test]
 fn sid_match() {
